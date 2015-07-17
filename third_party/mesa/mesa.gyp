@@ -46,15 +46,17 @@
       "_GLAPI_NO_EXPORTS",
     ],
     'conditions': [
-      ['OS=="android"', {
+      ['OS=="android" or OS=="linux"', {
         'defines': [
-          '__GLIBC__',
           '_GNU_SOURCE',
         ],
       }],
-      ['OS=="linux"', {
+      ['OS=="win"', {
         'defines': [
-          '_GNU_SOURCE',
+          # Generated files use const only if __cplusplus or __STDC__ is
+          # defined. On Windows, neither is defined, so define YY_USE_CONST
+          # to explicitly enable const.
+          'YY_USE_CONST',
         ],
       }],
       ['os_posix == 1', {

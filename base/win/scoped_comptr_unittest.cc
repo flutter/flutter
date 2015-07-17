@@ -25,8 +25,10 @@ struct Dummy {
 };
 
 extern const IID dummy_iid;
-const IID dummy_iid = { 0x12345678u, 0x1234u, 0x5678u, 01, 23, 45, 67, 89,
-                        01, 23, 45 };
+const IID dummy_iid = {0x12345678u,
+                       0x1234u,
+                       0x5678u,
+                       {01, 23, 45, 67, 89, 01, 23, 45}};
 
 }  // namespace
 

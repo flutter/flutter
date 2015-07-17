@@ -74,7 +74,7 @@ source_set("ots") {
     "src/woff2.h",
   ]
 
-  direct_dependent_configs = [ ":ots_config" ]
+  public_configs = [ ":ots_config" ]
 
   deps = [
     "//third_party/brotli",

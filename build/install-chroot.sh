@@ -223,7 +223,8 @@ target="${distname}${arch}"
       d|D) sudo rm -rf "/var/lib/chroot/${target}"      \
                        "/usr/local/bin/${target%bit}"   \
                        "/etc/schroot/mount-${target}"   \
-                       "/etc/schroot/script-${target}"
+                       "/etc/schroot/script-${target}"  \
+                       "/etc/schroot/${target}"
            sudo sed -ni '/^[[]'"${target%bit}"']$/,${
                          :1;n;/^[[]/b2;b1;:2;p;n;b2};p' \
                        "/etc/schroot/schroot.conf"
@@ -349,13 +350,41 @@ grep -qs ubuntu.com /usr/share/debootstrap/scripts/"${distname}" &&
 if [ -z "${chroot_groups}" ]; then
   chroot_groups="${admin},$(id -gn)"
 fi
-# Older versions of schroot wanted a "priority=" line, whereas recent
-# versions deprecate "priority=" and warn if they see it. We don't have
-# a good feature test, but scanning for the string "priority=" in the
-# existing "schroot.conf" file is a good indication of what to do.
-priority=$(grep -qs 'priority=' /etc/schroot/schroot.conf &&
+
+if [ -d '/etc/schroot/default' ]; then
+  new_version=1
+  fstab="/etc/schroot/${target}/fstab"
+else
+  new_version=0
+  fstab="/etc/schroot/mount-${target}"
+fi
+
+if [ "$new_version" = "1" ]; then
+  sudo cp -ar /etc/schroot/default /etc/schroot/${target}
+
+  sudo sh -c 'cat >>/etc/schroot/schroot.conf' <<EOF
+[${target%bit}]
+description=${brand} ${distname} ${arch}
+type=directory
+directory=/var/lib/chroot/${target}
+users=root
+groups=${chroot_groups}
+root-groups=${chroot_groups}
+personality=linux$([ "${arch}" != 64bit ] && echo 32)
+profile=${target}
+
+EOF
+  [ -n "${bind_mounts}" -a "${bind_mounts}" != "NONE" ] &&
+    printf "${bind_mounts}" |
+      sudo sh -c "cat >>${fstab}"
+else
+  # Older versions of schroot wanted a "priority=" line, whereas recent
+  # versions deprecate "priority=" and warn if they see it. We don't have
+  # a good feature test, but scanning for the string "priority=" in the
+  # existing "schroot.conf" file is a good indication of what to do.
+  priority=$(grep -qs 'priority=' /etc/schroot/schroot.conf &&
            echo 'priority=3' || :)
-sudo sh -c 'cat >>/etc/schroot/schroot.conf' <<EOF
+  sudo sh -c 'cat >>/etc/schroot/schroot.conf' <<EOF
 [${target%bit}]
 description=${brand} ${distname} ${arch}
 type=directory
@@ -369,42 +398,43 @@ ${priority}
 
 EOF
 
-# Set up a list of mount points that is specific to this
-# chroot environment.
-sed '/^FSTAB=/s,"[^"]*","/etc/schroot/mount-'"${target}"'",' \
-         /etc/schroot/script-defaults |
-  sudo sh -c 'cat >/etc/schroot/script-'"${target}"
-sed '\,^/home[/[:space:]],s/\([,[:space:]]\)bind[[:space:]]/\1rbind /' \
-  /etc/schroot/mount-defaults |
-  sudo sh -c 'cat > /etc/schroot/mount-'"${target}"
+  # Set up a list of mount points that is specific to this
+  # chroot environment.
+  sed '/^FSTAB=/s,"[^"]*","'"${fstab}"'",' \
+           /etc/schroot/script-defaults |
+    sudo sh -c 'cat >/etc/schroot/script-'"${target}"
+  sed '\,^/home[/[:space:]],s/\([,[:space:]]\)bind[[:space:]]/\1rbind /' \
+    /etc/schroot/mount-defaults |
+    sudo sh -c "cat > ${fstab}"
+fi
 
 # Add the extra mount points that the user told us about
 [ -n "${bind_mounts}" -a "${bind_mounts}" != "NONE" ] &&
   printf "${bind_mounts}" |
-    sudo sh -c 'cat >>/etc/schroot/mount-'"${target}"
+    sudo sh -c 'cat >>'"${fstab}"
 
 # If this system has a "/media" mountpoint, import it into the chroot
 # environment. Most modern distributions use this mount point to
 # automatically mount devices such as CDROMs, USB sticks, etc...
 if [ -d /media ] &&
-   ! grep -qs '^/media' /etc/schroot/mount-"${target}"; then
+   ! grep -qs '^/media' "${fstab}"; then
   echo '/media /media none rw,rbind 0 0' |
-    sudo sh -c 'cat >>/etc/schroot/mount-'"${target}"
+    sudo sh -c 'cat >>'"${fstab}"
 fi
 
 # Share /dev/shm, /run and /run/shm.
-grep -qs '^/dev/shm' /etc/schroot/mount-"${target}" ||
+grep -qs '^/dev/shm' "${fstab}" ||
   echo '/dev/shm /dev/shm none rw,bind 0 0' |
-    sudo sh -c 'cat >>/etc/schroot/mount-'"${target}"
+    sudo sh -c 'cat >>'"${fstab}"
 if [ ! -d "/var/lib/chroot/${target}/run" ] &&
-   ! grep -qs '^/run' /etc/schroot/mount-"${target}"; then
+   ! grep -qs '^/run' "${fstab}"; then
   echo '/run /run none rw,bind 0 0' |
-    sudo sh -c 'cat >>/etc/schroot/mount-'"${target}"
+    sudo sh -c 'cat >>'"${fstab}"
 fi
-if ! grep -qs '^/run/shm' /etc/schroot/mount-"${target}"; then
+if ! grep -qs '^/run/shm' "${fstab}"; then
   { [ -d /run ] && echo '/run/shm /run/shm none rw,bind 0 0' ||
                    echo '/dev/shm /run/shm none rw,bind 0 0'; } |
-    sudo sh -c 'cat >>/etc/schroot/mount-'"${target}"
+    sudo sh -c 'cat >>'"${fstab}"
 fi
 
 # Set up a special directory that changes contents depending on the target
@@ -412,7 +442,7 @@ fi
 d="$(readlink -f "${HOME}/chroot" 2>/dev/null || echo "${HOME}/chroot")"
 s="${d}/.${target}"
 echo "${s} ${d} none rw,bind 0 0" |
-  sudo sh -c 'cat >>/etc/schroot/mount-'"${target}"
+  sudo sh -c 'cat >>'"${target}"
 mkdir -p "${s}"
 
 # Install a helper script to launch commands in the chroot
@@ -717,7 +747,7 @@ if [ -x "${script}" ]; then
         # installing the Chrome build depencies. This prevents the chroot
         # session from being closed.  So, we always try to shut down any running
         # instance of dbus and rsyslog.
-        sudo /usr/local/bin/"${target%bit}" sh -c "${script} --no-lib32;
+        sudo /usr/local/bin/"${target%bit}" sh -c "${script};
               rc=$?;
               /etc/init.d/cron stop >/dev/null 2>&1 || :;
               /etc/init.d/rsyslog stop >/dev/null 2>&1 || :;

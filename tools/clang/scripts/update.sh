@@ -8,7 +8,7 @@
 # Do NOT CHANGE this if you don't know what you're doing -- see
 # https://code.google.com/p/chromium/wiki/UpdatingClang
 # Reverting problematic clang rolls is safe, though.
-CLANG_REVISION=238013
+CLANG_REVISION=241602
 
 # This is incremented when pushing a new build of Clang at the same revision.
 CLANG_SUB_REVISION=3
@@ -48,6 +48,9 @@ if [[ -z "$GYP_DEFINES" ]]; then
 fi
 if [[ -z "$GYP_GENERATORS" ]]; then
   GYP_GENERATORS=
+fi
+if [[ -z "$LLVM_DOWNLOAD_GOLD_PLUGIN" ]]; then
+  LLVM_DOWNLOAD_GOLD_PLUGIN=
 fi
 
 
@@ -267,6 +270,11 @@ if [[ -z "$force_local_build" ]]; then
     echo clang "${PACKAGE_VERSION}" unpacked
     echo "${PACKAGE_VERSION}" > "${STAMP_FILE}"
     rm -rf "${CDS_OUT_DIR}"
+    # Download the gold plugin if requested to by an environment variable.
+    # This is used by the CFI ClusterFuzz bot.
+    if [[ -n "${LLVM_DOWNLOAD_GOLD_PLUGIN}" ]]; then
+      ${THIS_DIR}/../../../build/download_gold_plugin.py
+    fi
     exit 0
   else
     echo Did not find prebuilt clang "${PACKAGE_VERSION}", building
@@ -317,6 +325,7 @@ for i in \
       "${COMPILER_RT_DIR}/test/tsan/signal_segv_handler.cc" \
       "${COMPILER_RT_DIR}/lib/sanitizer_common/sanitizer_coverage_libcdep.cc" \
       "${COMPILER_RT_DIR}/cmake/config-ix.cmake" \
+      "${COMPILER_RT_DIR}/CMakeLists.txt" \
       "${COMPILER_RT_DIR}/lib/ubsan/ubsan_platform.h" \
       ; do
   if [[ -e "${i}" ]]; then
@@ -369,8 +378,8 @@ if [[ -n "$with_patches" ]]; then
   # Apply patch for tests failing with --disable-pthreads (llvm.org/PR11974)
   pushd "${CLANG_DIR}"
   cat << 'EOF' |
---- third_party/llvm/tools/clang/test/Index/crash-recovery-modules.m	(revision 202554)
-+++ third_party/llvm/tools/clang/test/Index/crash-recovery-modules.m	(working copy)
+--- test/Index/crash-recovery-modules.m	(revision 202554)
++++ test/Index/crash-recovery-modules.m	(working copy)
 @@ -12,6 +12,8 @@
  
  // REQUIRES: crash-recovery
@@ -380,7 +389,7 @@ if [[ -n "$with_patches" ]]; then
  
  @import Crash;
 EOF
-patch -p4
+patch -p0
 popd
 
 pushd "${CLANG_DIR}"
@@ -403,8 +412,6 @@ EOF
   # This Go bindings test doesn't work after the bootstrap build on Linux. (PR21552)
   pushd "${LLVM_DIR}"
   cat << 'EOF' |
-Index: test/Bindings/Go/go.test
-===================================================================
 --- test/Bindings/Go/go.test    (revision 223109)
 +++ test/Bindings/Go/go.test    (working copy)
 @@ -1,3 +1,3 @@
@@ -420,32 +427,20 @@ EOF
   # on Mac OS X 10.8 (PR23539).
   pushd "${COMPILER_RT_DIR}"
   cat << 'EOF' |
---- a/cmake/config-ix.cmake
-+++ b/cmake/config-ix.cmake
-@@ -319,7 +319,7 @@ else()
- endif()
- 
- if (COMPILER_RT_HAS_SANITIZER_COMMON AND UBSAN_SUPPORTED_ARCH AND
--    OS_NAME MATCHES "Darwin|Linux|FreeBSD")
-+    OS_NAME MATCHES "Linux|FreeBSD")
-   set(COMPILER_RT_HAS_UBSAN TRUE)
- else()
-   set(COMPILER_RT_HAS_UBSAN FALSE)
-diff --git a/lib/ubsan/ubsan_platform.h b/lib/ubsan/ubsan_platform.h
-index 8ba253b..d5dce8d 100644
---- a/lib/ubsan/ubsan_platform.h
-+++ b/lib/ubsan/ubsan_platform.h
-@@ -14,7 +14,7 @@
- #define UBSAN_PLATFORM_H
- 
- // Other platforms should be easy to add, and probably work as-is.
--#if (defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)) && \
-+#if (defined(__linux__) || defined(__FreeBSD__)) && \
-     (defined(__x86_64__) || defined(__i386__) || defined(__arm__) || \
-      defined(__aarch64__) || defined(__mips__) || defined(__powerpc64__))
- # define CAN_SANITIZE_UB 1
+Index: CMakeLists.txt
+===================================================================
+--- CMakeLists.txt	(revision 241602)
++++ CMakeLists.txt	(working copy)
+@@ -305,6 +305,7 @@
+       list(APPEND SANITIZER_COMMON_SUPPORTED_OS iossim)
+     endif()
+   endif()
++  set(SANITIZER_MIN_OSX_VERSION "10.7")
+   if(SANITIZER_MIN_OSX_VERSION VERSION_LESS "10.7")
+     message(FATAL_ERROR "Too old OS X version: ${SANITIZER_MIN_OSX_VERSION}")
+   endif()
 EOF
-  patch -p1
+  patch -p0
   popd
 
 fi
@@ -474,16 +469,15 @@ LDFLAGS=""
 # needed, on OS X it requires libc++. clang only automatically links to libc++
 # when targeting OS X 10.9+, so add stdlib=libc++ explicitly so clang can run on
 # OS X versions as old as 10.7.
-# TODO(thakis): Some bots are still on 10.6, so for now bundle libc++.dylib.
-# Remove this once all bots are on 10.7+, then use --enable-libcpp=yes and
-# change deployment_target to 10.7.
+# TODO(thakis): Some bots are still on 10.6 (nacl...), so for now bundle
+# libc++.dylib.  Remove this once all bots are on 10.7+, then use
+# -DLLVM_ENABLE_LIBCXX=ON and change deployment_target to 10.7.
 deployment_target=""
 
 if [ "${OS}" = "Darwin" ]; then
   # When building on 10.9, /usr/include usually doesn't exist, and while
   # Xcode's clang automatically sets a sysroot, self-built clangs don't.
   CFLAGS="-isysroot $(xcrun --show-sdk-path)"
-  CPPFLAGS="${CFLAGS}"
   CXXFLAGS="-stdlib=libc++ -nostdinc++ -I${ABS_LIBCXX_DIR}/include ${CFLAGS}"
 
   if [[ -n "${bootstrap}" ]]; then
@@ -570,6 +564,16 @@ if [ "${OS}" = "Darwin" ]; then
   ln -sf libc++.1.dylib libc++.dylib
   popd
   LDFLAGS+="-stdlib=libc++ -L${PWD}/libcxxbuild"
+
+  if [[ -n "${bootstrap}" ]]; then
+    # Now that the libc++ headers have been installed and libc++.dylib is built,
+    # delete the libc++ checkout again so that it's not part of the main
+    # build below -- the libc++(abi) tests don't pass on OS X in bootstrap
+    # builds (http://llvm.org/PR24068)
+    rm -rf "${ABS_LIBCXX_DIR}"
+    rm -rf "${ABS_LIBCXXABI_DIR}"
+    CXXFLAGS="-stdlib=libc++ -nostdinc++ -I${ABS_INSTALL_DIR}/include/c++/v1 ${CFLAGS}"
+  fi
 fi
 
 # Find the binutils include dir for the gold plugin.

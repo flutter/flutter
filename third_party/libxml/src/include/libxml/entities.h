@@ -57,8 +57,9 @@ struct _xmlEntity {
     const xmlChar           *URI;	/* the full URI as computed */
     int                    owner;	/* does the entity own the childrens */
     int			 checked;	/* was the entity content checked */
-					/* this is also used to count entites
-					 * references done from that entity */
+					/* this is also used to count entities
+					 * references done from that entity
+					 * and if it contains '<' */
 };
 
 /*
@@ -102,7 +103,7 @@ XMLPUBFUN xmlEntityPtr XMLCALL
 XMLPUBFUN xmlEntityPtr XMLCALL
 			xmlGetPredefinedEntity	(const xmlChar *name);
 XMLPUBFUN xmlEntityPtr XMLCALL
-			xmlGetDocEntity		(xmlDocPtr doc,
+			xmlGetDocEntity		(const xmlDoc *doc,
 						 const xmlChar *name);
 XMLPUBFUN xmlEntityPtr XMLCALL
 			xmlGetDtdEntity		(xmlDocPtr doc,
@@ -119,7 +120,7 @@ XMLPUBFUN xmlChar * XMLCALL
 			xmlEncodeEntitiesReentrant(xmlDocPtr doc,
 						 const xmlChar *input);
 XMLPUBFUN xmlChar * XMLCALL
-			xmlEncodeSpecialChars	(xmlDocPtr doc,
+			xmlEncodeSpecialChars	(const xmlDoc *doc,
 						 const xmlChar *input);
 XMLPUBFUN xmlEntitiesTablePtr XMLCALL
 			xmlCreateEntitiesTable	(void);

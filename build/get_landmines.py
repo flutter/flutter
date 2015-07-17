@@ -34,7 +34,8 @@ def print_landmines():
       builder() == 'ninja'):
     print 'Need to clobber winja goma due to backend cwd cache fix.'
   if platform() == 'android':
-    print 'Clobber because of unions.'
+    print 'Clobber: to handle new way of suppressing findbugs failures.'
+    print 'Clobber to fix gyp not rename package name (crbug.com/457038)'
   if platform() == 'win' and builder() == 'ninja':
     print 'Compile on cc_unittests fails due to symbols removed in r185063.'
   if platform() == 'linux' and builder() == 'ninja':
@@ -72,7 +73,8 @@ def print_landmines():
   print 'Remove NaCl toolchains from the output dir (crbug.com/456902)'
   if platform() == 'ios':
     print 'Clobber iOS to workaround Xcode deps bug (crbug.com/485435)'
-  print 'Clobber: https://github.com/domokit/mojo/issues/269'
+  if platform() == 'win':
+    print 'Clobber to delete stale generated files (crbug.com/510086)'
 
 
 def main():

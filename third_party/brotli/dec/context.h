@@ -11,8 +11,9 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+*/
 
-   Lookup table to map the previous two bytes to a context id.
+/* Lookup table to map the previous two bytes to a context id.
 
    There are four different context modeling modes defined here:
      CONTEXT_LSB6: context id is the least significant 6 bits of the last byte,

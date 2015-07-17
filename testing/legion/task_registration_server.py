@@ -11,11 +11,10 @@ is based on an OTP passed to the run_task binary on startup.
 
 import logging
 import threading
-import xmlrpclib
-import SimpleXMLRPCServer
 
 #pylint: disable=relative-import
 import common_lib
+import ssl_util
 
 
 class TaskRegistrationServer(object):
@@ -40,7 +39,7 @@ class TaskRegistrationServer(object):
   def Start(self):
     """Starts the registration server."""
     logging.info('Starting task registration server')
-    self._rpc_server = SimpleXMLRPCServer.SimpleXMLRPCServer(
+    self._rpc_server = ssl_util.SslRpcServer(
         (common_lib.SERVER_ADDRESS, common_lib.SERVER_PORT),
         allow_none=True, logRequests=False)
     self._rpc_server.register_function(

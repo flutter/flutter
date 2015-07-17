@@ -43,7 +43,7 @@ class BASE_EXPORT TraceMemoryController
                         HeapProfilerStartFunction heap_profiler_start_function,
                         HeapProfilerStopFunction heap_profiler_stop_function,
                         GetHeapProfileFunction get_heap_profile_function);
-  virtual ~TraceMemoryController();
+  ~TraceMemoryController() override;
 
   // base::trace_event::TraceLog::EnabledStateChangedObserver overrides:
   void OnTraceLogEnabled() override;

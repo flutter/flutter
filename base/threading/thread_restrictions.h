@@ -58,6 +58,7 @@ class WatcherThreadManager;
 }
 }
 namespace net {
+class NetworkChangeNotifierMac;
 namespace internal {
 class AddressTrackerLinux;
 }
@@ -206,6 +207,7 @@ class BASE_EXPORT ThreadRestrictions {
   friend class disk_cache::BackendImpl;           // http://crbug.com/74623
   friend class disk_cache::InFlightIO;            // http://crbug.com/74623
   friend class net::internal::AddressTrackerLinux;  // http://crbug.com/125097
+  friend class net::NetworkChangeNotifierMac;     // http://crbug.com/125097
   friend class ::BrowserProcessImpl;              // http://crbug.com/125207
   friend class ::NativeBackendKWallet;            // http://crbug.com/125331
   // END USAGE THAT NEEDS TO BE FIXED.

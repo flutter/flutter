@@ -73,6 +73,19 @@ void HistogramTester::ExpectTotalCount(const std::string& name,
   }
 }
 
+std::vector<Bucket> HistogramTester::GetAllSamples(const std::string& name) {
+  std::vector<Bucket> samples;
+  scoped_ptr<HistogramSamples> snapshot =
+      GetHistogramSamplesSinceCreation(name);
+  for (auto it = snapshot->Iterator(); !it->Done(); it->Next()) {
+    HistogramBase::Sample sample;
+    HistogramBase::Count count;
+    it->Get(&sample, nullptr, &count);
+    samples.push_back(Bucket(sample, count));
+  }
+  return samples;
+}
+
 scoped_ptr<HistogramSamples> HistogramTester::GetHistogramSamplesSinceCreation(
     const std::string& histogram_name) {
   HistogramBase* histogram = StatisticsRecorder::FindHistogram(histogram_name);
@@ -118,6 +131,14 @@ void HistogramTester::CheckTotalCount(
       << "Histogram \"" << name
       << "\" does not have the right total number of samples ("
       << expected_count << "). It has (" << actual_count << ").";
+}
+
+bool Bucket::operator==(const Bucket& other) const {
+  return min == other.min && count == other.count;
+}
+
+void PrintTo(const Bucket& bucket, std::ostream* os) {
+  *os << "Bucket " << bucket.min << ": " << bucket.count;
 }
 
 }  // namespace base

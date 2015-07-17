@@ -25,7 +25,7 @@ gypi_values =
 
 # Windows' assembly is built with Yasm. The other platforms use the platform
 # assembler.
-if (is_win) {
+if (is_win && !is_msan) {
   import("//third_party/yasm/yasm_assemble.gni")
   yasm_assemble("boringssl_asm") {
     if (current_cpu == "x64") {
@@ -37,7 +37,8 @@ if (is_win) {
 }
 
 component("boringssl") {
-  sources = gypi_values.boringssl_lib_sources
+  sources = gypi_values.boringssl_crypto_sources
+  sources += gypi_values.boringssl_ssl_sources
 
   public_configs = [ ":openssl_config" ]
 
@@ -70,8 +71,10 @@ component("boringssl") {
     "src/crypto",
   ]
 
-  if (current_cpu == "x64") {
-    if (is_mac) {
+  if (is_msan) {
+    defines += [ "OPENSSL_NO_ASM" ]
+  } else if (current_cpu == "x64") {
+    if (is_mac || is_ios) {
       sources += gypi_values.boringssl_mac_x86_64_sources
     } else if (is_linux || is_android) {
       sources += gypi_values.boringssl_linux_x86_64_sources
@@ -81,7 +84,7 @@ component("boringssl") {
       defines += [ "OPENSSL_NO_ASM" ]
     }
   } else if (current_cpu == "x86") {
-    if (is_mac) {
+    if (is_mac || is_ios) {
       sources += gypi_values.boringssl_mac_x86_sources
     } else if (is_linux || is_android) {
       sources += gypi_values.boringssl_linux_x86_sources
@@ -90,9 +93,9 @@ component("boringssl") {
     } else {
       defines += [ "OPENSSL_NO_ASM" ]
     }
-  } else if (current_cpu == "arm") {
+  } else if (current_cpu == "arm" && (is_linux || is_android)) {
     sources += gypi_values.boringssl_linux_arm_sources
-  } else if (current_cpu == "arm64") {
+  } else if (current_cpu == "arm64" && (is_linux || is_android)) {
     sources += gypi_values.boringssl_linux_aarch64_sources
   } else {
     defines += [ "OPENSSL_NO_ASM" ]

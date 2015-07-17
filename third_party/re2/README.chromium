@@ -18,7 +18,6 @@ Local Modifications (to be applied in this order):
 - Support for Windows (patches/re2-msvc9-chrome.patch)
 - Support Android (patches/re2-android.patch)
 - Remove static initializers (patches/remove-static-initializers.patch)
-- Rename POSIX configuration (patches/rename-posix-option.patch)
 - Support libcxx (patches/re2-libcxx.patch)
   https://code.google.com/p/re2/issues/detail?id=76
 - Memory optimization for filtered trees
@@ -30,3 +29,4 @@ Local Modifications (to be applied in this order):
 - Remove comparisons of this with NULL, merges upstream b92ce81f1e25
 - Let COMPILE_ASSERT use static_assert if available, merges upstream
   2225f94df8ec
+- Merge upstream cc56ba02d9d2bdafa614ad5ebf564dde287625bb.

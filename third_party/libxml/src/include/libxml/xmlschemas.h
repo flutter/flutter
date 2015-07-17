@@ -92,7 +92,8 @@ typedef xmlSchema *xmlSchemaPtr;
  *
  * Signature of an error callback from an XSD validation
  */
-typedef void (XMLCDECL *xmlSchemaValidityErrorFunc) (void *ctx, const char *msg, ...) LIBXML_ATTR_FORMAT(2,3);
+typedef void (XMLCDECL *xmlSchemaValidityErrorFunc)
+                 (void *ctx, const char *msg, ...) LIBXML_ATTR_FORMAT(2,3);
 
 /**
  * xmlSchemaValidityWarningFunc:
@@ -102,7 +103,8 @@ typedef void (XMLCDECL *xmlSchemaValidityErrorFunc) (void *ctx, const char *msg,
  *
  * Signature of a warning callback from an XSD validation
  */
-typedef void (XMLCDECL *xmlSchemaValidityWarningFunc) (void *ctx, const char *msg, ...) LIBXML_ATTR_FORMAT(2,3);
+typedef void (XMLCDECL *xmlSchemaValidityWarningFunc)
+                 (void *ctx, const char *msg, ...) LIBXML_ATTR_FORMAT(2,3);
 
 /**
  * A schemas validation context
@@ -112,6 +114,22 @@ typedef xmlSchemaParserCtxt *xmlSchemaParserCtxtPtr;
 
 typedef struct _xmlSchemaValidCtxt xmlSchemaValidCtxt;
 typedef xmlSchemaValidCtxt *xmlSchemaValidCtxtPtr;
+
+/**
+ * xmlSchemaValidityLocatorFunc:
+ * @ctx: user provided context
+ * @file: returned file information
+ * @line: returned line information
+ *
+ * A schemas validation locator, a callback called by the validator.
+ * This is used when file or node informations are not available
+ * to find out what file and line number are affected
+ *
+ * Returns: 0 in case of success and -1 in case of error
+ */
+
+typedef int (XMLCDECL *xmlSchemaValidityLocatorFunc) (void *ctx,
+                           const char **file, unsigned long *line);
 
 /*
  * Interfaces for parsing.
@@ -171,6 +189,9 @@ XMLPUBFUN int XMLCALL
 XMLPUBFUN int XMLCALL
 	    xmlSchemaSetValidOptions	(xmlSchemaValidCtxtPtr ctxt,
 					 int options);
+XMLPUBFUN void XMLCALL
+            xmlSchemaValidateSetFilename(xmlSchemaValidCtxtPtr vctxt,
+	                                 const char *filename);
 XMLPUBFUN int XMLCALL
 	    xmlSchemaValidCtxtGetOptions(xmlSchemaValidCtxtPtr ctxt);
 
@@ -210,6 +231,13 @@ XMLPUBFUN xmlSchemaSAXPlugPtr XMLCALL
 					 void **user_data);
 XMLPUBFUN int XMLCALL
             xmlSchemaSAXUnplug		(xmlSchemaSAXPlugPtr plug);
+
+
+XMLPUBFUN void XMLCALL
+            xmlSchemaValidateSetLocator	(xmlSchemaValidCtxtPtr vctxt,
+					 xmlSchemaValidityLocatorFunc f,
+					 void *ctxt);
+
 #ifdef __cplusplus
 }
 #endif

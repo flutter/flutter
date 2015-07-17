@@ -17,7 +17,6 @@
 
 #include "base/basictypes.h"
 #include "base/logging.h"
-#include "base/port.h"
 #include "build/build_config.h"
 
 #if defined(OS_ANDROID)

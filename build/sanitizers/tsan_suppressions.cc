@@ -270,9 +270,6 @@ char kTSanDefaultSuppressions[] =
 "race:g_next_user_script_id\n"
 
 // http://crbug.com/389098
-"race:webrtc::RtpToNtpMs\n"
-"race:webrtc::UpdateRtcpList\n"
-"race:webrtc::RemoteNtpTimeEstimator::Estimate\n"
 "race:webrtc::voe::TransmitMixer::EnableStereoChannelSwapping\n"
 
 // http://crbug.com/397022
@@ -306,6 +303,8 @@ char kTSanDefaultSuppressions[] =
 
 // https://crbug.com/455665
 "race:mojo::common::*::tick_clock\n"
+"race:mojo::common::internal::NowTicks\n"
+"race:tracked_objects::ThreadData::InitializeThreadContext\n"
 
 // https://crbug.com/459429
 "race:randomnessPid\n"

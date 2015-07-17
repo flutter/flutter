@@ -8,5 +8,5 @@ Name: libXML
 Version: @VERSION@
 Description: libXML library version2.
 Requires:
-Libs: -L${libdir} -lxml2 @THREAD_LIBS@ @Z_LIBS@ @ICONV_LIBS@ @M_LIBS@ @LIBS@
+Libs: -L${libdir} -lxml2 @ICU_LIBS@ @THREAD_LIBS@ @Z_LIBS@ @LZMA_LIBS@ @ICONV_LIBS@ @M_LIBS@ @LIBS@
 Cflags: -I${includedir} @XML_INCLUDEDIR@ @XML_CFLAGS@

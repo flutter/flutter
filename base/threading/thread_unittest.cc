@@ -234,3 +234,8 @@ TEST_F(ThreadTest, CleanUp) {
   EXPECT_EQ(THREAD_EVENT_CLEANUP, captured_events[1]);
   EXPECT_EQ(THREAD_EVENT_MESSAGE_LOOP_DESTROYED, captured_events[2]);
 }
+
+TEST_F(ThreadTest, ThreadNotStarted) {
+  Thread a("Inert");
+  EXPECT_EQ(nullptr, a.task_runner());
+}

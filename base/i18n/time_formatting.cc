@@ -45,6 +45,26 @@ string16 TimeFormatWithoutAmPm(const icu::DateFormat* formatter,
                   static_cast<size_t>(time_string.length()));
 }
 
+icu::SimpleDateFormat CreateSimpleDateFormatter(const char* pattern) {
+  // Generate a locale-dependent format pattern. The generator will take
+  // care of locale-dependent formatting issues like which separator to
+  // use (some locales use '.' instead of ':'), and where to put the am/pm
+  // marker.
+  UErrorCode status = U_ZERO_ERROR;
+  scoped_ptr<icu::DateTimePatternGenerator> generator(
+      icu::DateTimePatternGenerator::createInstance(status));
+  DCHECK(U_SUCCESS(status));
+  icu::UnicodeString generated_pattern =
+      generator->getBestPattern(icu::UnicodeString(pattern), status);
+  DCHECK(U_SUCCESS(status));
+
+  // Then, format the time using the generated pattern.
+  icu::SimpleDateFormat formatter(generated_pattern, status);
+  DCHECK(U_SUCCESS(status));
+
+  return formatter;
+}
+
 }  // namespace
 
 string16 TimeFormatTimeOfDay(const Time& time) {
@@ -53,6 +73,11 @@ string16 TimeFormatTimeOfDay(const Time& time) {
   scoped_ptr<icu::DateFormat> formatter(
       icu::DateFormat::createTimeInstance(icu::DateFormat::kShort));
   return TimeFormat(formatter.get(), time);
+}
+
+string16 TimeFormatTimeOfDayWithMilliseconds(const Time& time) {
+  icu::SimpleDateFormat formatter = CreateSimpleDateFormatter("HmsSSS");
+  return TimeFormatWithoutAmPm(&formatter, time);
 }
 
 string16 TimeFormatTimeOfDayWithHourClockType(const Time& time,
@@ -65,22 +90,9 @@ string16 TimeFormatTimeOfDayWithHourClockType(const Time& time,
     return TimeFormatTimeOfDay(time);
   }
 
-  // Generate a locale-dependent format pattern. The generator will take
-  // care of locale-dependent formatting issues like which separator to
-  // use (some locales use '.' instead of ':'), and where to put the am/pm
-  // marker.
-  UErrorCode status = U_ZERO_ERROR;
-  scoped_ptr<icu::DateTimePatternGenerator> generator(
-      icu::DateTimePatternGenerator::createInstance(status));
-  DCHECK(U_SUCCESS(status));
   const char* base_pattern = (type == k12HourClock ? "ahm" : "Hm");
-  icu::UnicodeString generated_pattern =
-      generator->getBestPattern(icu::UnicodeString(base_pattern), status);
-  DCHECK(U_SUCCESS(status));
+  icu::SimpleDateFormat formatter = CreateSimpleDateFormatter(base_pattern);
 
-  // Then, format the time using the generated pattern.
-  icu::SimpleDateFormat formatter(generated_pattern, status);
-  DCHECK(U_SUCCESS(status));
   if (ampm == kKeepAmPm) {
     return TimeFormat(&formatter, time);
   } else {

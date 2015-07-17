@@ -10,12 +10,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Process;
 
 import org.chromium.base.CommandLine;
 import org.chromium.base.JNINamespace;
 import org.chromium.base.Log;
+import org.chromium.test.reporter.TestStatusReporter;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *  Android's NativeActivity is mostly useful for pure-native code.
@@ -28,16 +32,17 @@ public class NativeTestActivity extends Activity {
             "org.chromium.native_test.NativeTestActivity.CommandLineFile";
     public static final String EXTRA_COMMAND_LINE_FLAGS =
             "org.chromium.native_test.NativeTestActivity.CommandLineFlags";
+    public static final String EXTRA_SHARD =
+            "org.chromium.native_test.NativeTestActivity.Shard";
     public static final String EXTRA_STDOUT_FILE =
             "org.chromium.native_test.NativeTestActivity.StdoutFile";
 
     private static final String TAG = "cr.native_test";
     private static final String EXTRA_RUN_IN_SUB_THREAD = "RunInSubThread";
-    // We post a delayed task to run tests so that we do not block onCreate().
-    private static final long RUN_TESTS_DELAY_IN_MS = 300;
 
     private String mCommandLineFilePath;
     private StringBuilder mCommandLineFlags = new StringBuilder();
+    private TestStatusReporter mReporter;
     private boolean mRunInSubThread = false;
     private boolean mStdoutFifo = false;
     private String mStdoutFilePath;
@@ -48,6 +53,7 @@ public class NativeTestActivity extends Activity {
         CommandLine.init(new String[]{});
 
         parseArgumentsFromIntent(getIntent());
+        mReporter = new TestStatusReporter(this);
     }
 
     private void parseArgumentsFromIntent(Intent intent) {
@@ -67,6 +73,19 @@ public class NativeTestActivity extends Activity {
         if (commandLineFlags != null) mCommandLineFlags.append(commandLineFlags);
 
         mRunInSubThread = intent.hasExtra(EXTRA_RUN_IN_SUB_THREAD);
+
+        ArrayList<String> shard = intent.getStringArrayListExtra(EXTRA_SHARD);
+        if (shard != null) {
+            StringBuilder filterFlag = new StringBuilder();
+            filterFlag.append("--gtest_filter=");
+            for (Iterator<String> test_iter = shard.iterator(); test_iter.hasNext();) {
+                filterFlag.append(test_iter.next());
+                if (test_iter.hasNext()) {
+                    filterFlag.append(":");
+                }
+            }
+            appendCommandLineFlags(filterFlag.toString());
+        }
 
         mStdoutFilePath = intent.getStringExtra(EXTRA_STDOUT_FILE);
         if (mStdoutFilePath == null) {
@@ -94,19 +113,21 @@ public class NativeTestActivity extends Activity {
         } else {
             // Post a task to run the tests. This allows us to not block
             // onCreate and still run tests on the main thread.
-            new Handler().postDelayed(new Runnable() {
+            new Handler().post(new Runnable() {
                 @Override
                 public void run() {
                     runTests();
                 }
-            }, RUN_TESTS_DELAY_IN_MS);
+            });
         }
     }
 
     private void runTests() {
+        mReporter.testRunStarted(Process.myPid());
         nativeRunTests(mCommandLineFlags.toString(), mCommandLineFilePath, mStdoutFilePath,
                 mStdoutFifo, getApplicationContext());
         finish();
+        mReporter.testRunFinished(Process.myPid());
     }
 
     // Signal a failure of the native test loader to python scripts

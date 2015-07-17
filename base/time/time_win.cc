@@ -428,7 +428,7 @@ bool IsBuggyAthlon(const base::CPU& cpu) {
 }
 
 void InitializeNowFunctionPointers() {
-  LARGE_INTEGER ticks_per_sec = {0};
+  LARGE_INTEGER ticks_per_sec = {};
   if (!QueryPerformanceFrequency(&ticks_per_sec))
     ticks_per_sec.QuadPart = 0;
 

@@ -32,14 +32,16 @@ bool PathProviderWin(int key, FilePath* result) {
   FilePath cur;
   switch (key) {
     case base::FILE_EXE:
-      GetModuleFileName(NULL, system_buffer, MAX_PATH);
+      if (GetModuleFileName(NULL, system_buffer, MAX_PATH) == 0)
+        return false;
       cur = FilePath(system_buffer);
       break;
     case base::FILE_MODULE: {
       // the resource containing module is assumed to be the one that
       // this code lives in, whether that's a dll or exe
       HMODULE this_module = reinterpret_cast<HMODULE>(&__ImageBase);
-      GetModuleFileName(this_module, system_buffer, MAX_PATH);
+      if (GetModuleFileName(this_module, system_buffer, MAX_PATH) == 0)
+        return false;
       cur = FilePath(system_buffer);
       break;
     }

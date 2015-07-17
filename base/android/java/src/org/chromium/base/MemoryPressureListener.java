@@ -72,10 +72,10 @@ public class MemoryPressureListener {
         } else if (ACTION_TRIM_MEMORY.equals(action)) {
             simulateTrimMemoryPressureSignal(activity, ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
         } else if (ACTION_TRIM_MEMORY_RUNNING_CRITICAL.equals(action)) {
-            simulateTrimMemoryPressureSignal(activity, ComponentCallbacks2.TRIM_MEMORY_MODERATE);
-        } else if (ACTION_TRIM_MEMORY_MODERATE.equals(action)) {
             simulateTrimMemoryPressureSignal(activity,
                     ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL);
+        } else if (ACTION_TRIM_MEMORY_MODERATE.equals(action)) {
+            simulateTrimMemoryPressureSignal(activity, ComponentCallbacks2.TRIM_MEMORY_MODERATE);
         } else {
             return false;
         }

@@ -32,7 +32,7 @@
     '<(strip_stamp)',
     '<(strip_additional_stamp)',
     '<(build_device_config_path)',
-    '<(pack_arm_relocations_stamp)',
+    '<(pack_relocations_stamp)',
   ],
   'outputs': [
     '<(push_stamp)',

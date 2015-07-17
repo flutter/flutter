@@ -106,6 +106,10 @@ class ScopedVector {
     return v_.insert(position, x);
   }
 
+  iterator insert(iterator position, scoped_ptr<T> x) {
+    return v_.insert(position, x.release());
+  }
+
   // Lets the ScopedVector take ownership of elements in [first,last).
   template<typename InputIterator>
   void insert(iterator position, InputIterator first, InputIterator last) {

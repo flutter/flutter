@@ -36,6 +36,7 @@
     '--product-dir=<(PRODUCT_DIR)',
     '--src-dirs=>(src_dirs)',
     '--jar-path=<(lint_jar_path)',
+    '--can-fail-build',
     '--stamp=<(stamp_path)',
     '<(is_enabled)',
   ],

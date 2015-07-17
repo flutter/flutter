@@ -28,7 +28,9 @@ def DoDex(options, paths):
       input_paths=paths,
       input_strings=dex_cmd,
       force=not os.path.exists(options.dex_path))
-  build_utils.WriteJson(paths, options.dex_path + '.inputs')
+  build_utils.WriteJson(
+      [os.path.relpath(p, options.output_directory) for p in paths],
+      options.dex_path + '.inputs')
 
 
 def main():
@@ -39,6 +41,9 @@ def main():
 
   parser.add_option('--android-sdk-tools',
                     help='Android sdk build tools directory.')
+  parser.add_option('--output-directory',
+                    default=os.getcwd(),
+                    help='Path to the output build directory.')
   parser.add_option('--dex-path', help='Dex output path.')
   parser.add_option('--configuration-name',
                     help='The build CONFIGURATION_NAME.')
@@ -66,8 +71,10 @@ def main():
     paths += build_utils.ParseGypList(options.inputs)
 
   if options.excluded_paths:
+    # Excluded paths are relative to the output directory.
     exclude_paths = build_utils.ParseGypList(options.excluded_paths)
-    paths = [p for p in paths if not p in exclude_paths]
+    paths = [p for p in paths if not
+             os.path.relpath(p, options.output_directory) in exclude_paths]
 
   DoDex(options, paths)
 

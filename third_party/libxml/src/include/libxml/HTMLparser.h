@@ -83,87 +83,87 @@ struct _htmlEntityDesc {
 /*
  * There is only few public functions.
  */
-XMLPUBFUN const htmlElemDesc * XMLCALL 	
+XMLPUBFUN const htmlElemDesc * XMLCALL
 			htmlTagLookup	(const xmlChar *tag);
-XMLPUBFUN const htmlEntityDesc * XMLCALL 	
+XMLPUBFUN const htmlEntityDesc * XMLCALL
 			htmlEntityLookup(const xmlChar *name);
-XMLPUBFUN const htmlEntityDesc * XMLCALL 	
+XMLPUBFUN const htmlEntityDesc * XMLCALL
 			htmlEntityValueLookup(unsigned int value);
 
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			htmlIsAutoClosed(htmlDocPtr doc,
 					 htmlNodePtr elem);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			htmlAutoCloseTag(htmlDocPtr doc,
 					 const xmlChar *name,
 					 htmlNodePtr elem);
-XMLPUBFUN const htmlEntityDesc * XMLCALL	
+XMLPUBFUN const htmlEntityDesc * XMLCALL
 			htmlParseEntityRef(htmlParserCtxtPtr ctxt,
 					 const xmlChar **str);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			htmlParseCharRef(htmlParserCtxtPtr ctxt);
-XMLPUBFUN void XMLCALL			
+XMLPUBFUN void XMLCALL
 			htmlParseElement(htmlParserCtxtPtr ctxt);
 
-XMLPUBFUN htmlParserCtxtPtr XMLCALL	
+XMLPUBFUN htmlParserCtxtPtr XMLCALL
 			htmlNewParserCtxt(void);
 
-XMLPUBFUN htmlParserCtxtPtr XMLCALL	
+XMLPUBFUN htmlParserCtxtPtr XMLCALL
 			htmlCreateMemoryParserCtxt(const char *buffer,
 						   int size);
 
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			htmlParseDocument(htmlParserCtxtPtr ctxt);
-XMLPUBFUN htmlDocPtr XMLCALL		
+XMLPUBFUN htmlDocPtr XMLCALL
 			htmlSAXParseDoc	(xmlChar *cur,
 					 const char *encoding,
 					 htmlSAXHandlerPtr sax,
 					 void *userData);
-XMLPUBFUN htmlDocPtr XMLCALL		
+XMLPUBFUN htmlDocPtr XMLCALL
 			htmlParseDoc	(xmlChar *cur,
 					 const char *encoding);
-XMLPUBFUN htmlDocPtr XMLCALL		
+XMLPUBFUN htmlDocPtr XMLCALL
 			htmlSAXParseFile(const char *filename,
 					 const char *encoding,
 					 htmlSAXHandlerPtr sax,
 					 void *userData);
-XMLPUBFUN htmlDocPtr XMLCALL		
+XMLPUBFUN htmlDocPtr XMLCALL
 			htmlParseFile	(const char *filename,
 					 const char *encoding);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			UTF8ToHtml	(unsigned char *out,
 					 int *outlen,
 					 const unsigned char *in,
 					 int *inlen);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			htmlEncodeEntities(unsigned char *out,
 					 int *outlen,
 					 const unsigned char *in,
 					 int *inlen, int quoteChar);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			htmlIsScriptAttribute(const xmlChar *name);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			htmlHandleOmittedElem(int val);
 
 #ifdef LIBXML_PUSH_ENABLED
 /**
  * Interfaces for the Push mode.
  */
-XMLPUBFUN htmlParserCtxtPtr XMLCALL	
+XMLPUBFUN htmlParserCtxtPtr XMLCALL
 			htmlCreatePushParserCtxt(htmlSAXHandlerPtr sax,
 						 void *user_data,
 						 const char *chunk,
 						 int size,
 						 const char *filename,
 						 xmlCharEncoding enc);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			htmlParseChunk		(htmlParserCtxtPtr ctxt,
 						 const char *chunk,
 						 int size,
 						 int terminate);
 #endif /* LIBXML_PUSH_ENABLED */
 
-XMLPUBFUN void XMLCALL			
+XMLPUBFUN void XMLCALL
 			htmlFreeParserCtxt	(htmlParserCtxtPtr ctxt);
 
 /*
@@ -177,13 +177,15 @@ XMLPUBFUN void XMLCALL
  */
 typedef enum {
     HTML_PARSE_RECOVER  = 1<<0, /* Relaxed parsing */
+    HTML_PARSE_NODEFDTD = 1<<2, /* do not default a doctype if not found */
     HTML_PARSE_NOERROR	= 1<<5,	/* suppress error reports */
     HTML_PARSE_NOWARNING= 1<<6,	/* suppress warning reports */
     HTML_PARSE_PEDANTIC	= 1<<7,	/* pedantic error reporting */
     HTML_PARSE_NOBLANKS	= 1<<8,	/* remove blank nodes */
     HTML_PARSE_NONET	= 1<<11,/* Forbid network access */
     HTML_PARSE_NOIMPLIED= 1<<13,/* Do not add implied html/body... elements */
-    HTML_PARSE_COMPACT  = 1<<16 /* compact small text nodes */
+    HTML_PARSE_COMPACT  = 1<<16,/* compact small text nodes */
+    HTML_PARSE_IGNORE_ENC=1<<21 /* ignore internal document encoding hint */
 } htmlParserOption;
 
 XMLPUBFUN void XMLCALL

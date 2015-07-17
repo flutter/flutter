@@ -30,7 +30,7 @@ static int xmlModulePlatformSymbol(void *handle, const char *name, void **result
 
 /************************************************************************
  *									*
- * 		module memory error handler				*
+ *		module memory error handler				*
  *									*
  ************************************************************************/
 
@@ -61,6 +61,10 @@ xmlModuleErrMemory(xmlModulePtr module, const char *extra)
  * @options: a set of xmlModuleOption
  *
  * Opens a module/shared library given its name or path
+ * NOTE: that due to portability issues, behaviour can only be
+ * guaranteed with @name using ASCII. We canot guarantee that
+ * an UTF-8 string would work, which is why name is a const char *
+ * and not a const xmlChar * .
  * TODO: options are not yet implemented.
  *
  * Returns a handle for the module or NULL in case of error
@@ -99,6 +103,10 @@ xmlModuleOpen(const char *name, int options ATTRIBUTE_UNUSED)
  * @symbol: the resulting symbol address
  *
  * Lookup for a symbol address in the given module
+ * NOTE: that due to portability issues, behaviour can only be
+ * guaranteed with @name using ASCII. We canot guarantee that
+ * an UTF-8 string would work, which is why name is a const char *
+ * and not a const xmlChar * .
  *
  * Returns 0 if the symbol was found, or -1 in case of error
  */
@@ -106,8 +114,8 @@ int
 xmlModuleSymbol(xmlModulePtr module, const char *name, void **symbol)
 {
     int rc = -1;
-	
-    if ((NULL == module) || (symbol == NULL)) {
+
+    if ((NULL == module) || (symbol == NULL) || (name == NULL)) {
         __xmlRaiseError(NULL, NULL, NULL, NULL, NULL, XML_FROM_MODULE,
                         XML_MODULE_OPEN, XML_ERR_FATAL, NULL, 0, 0,
                         NULL, NULL, 0, 0, "null parameter\n");
@@ -326,7 +334,14 @@ xmlModulePlatformClose(void *handle)
 static int
 xmlModulePlatformSymbol(void *handle, const char *name, void **symbol)
 {
+#ifdef _WIN32_WCE
+    /*
+     * GetProcAddressA seems only available on WinCE
+     */
+    *symbol = GetProcAddressA(handle, name);
+#else
     *symbol = GetProcAddress(handle, name);
+#endif
     return (NULL == *symbol) ? -1 : 0;
 }
 

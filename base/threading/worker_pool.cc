@@ -21,6 +21,7 @@ class PostTaskAndReplyWorkerPool : public internal::PostTaskAndReplyImpl {
   explicit PostTaskAndReplyWorkerPool(bool task_is_slow)
       : task_is_slow_(task_is_slow) {
   }
+  ~PostTaskAndReplyWorkerPool() override = default;
 
  private:
   bool PostTask(const tracked_objects::Location& from_here,

@@ -1,0 +1,2 @@
+# http://crbug.com/367509
+fun:g_utf8_to_ucs4_fast

@@ -133,6 +133,8 @@ def GetSwarmingCommandLine(args):
 
   cmd.append('--')
 
+  # Specify the output dir
+  cmd.extend(['--output-dir', '${ISOLATED_OUTDIR}'])
   # Task name/hash values
   for name, isolated in args.tasks:
     cmd.extend(['--' + name, Archive(isolated, args.isolate_server)])

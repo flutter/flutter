@@ -189,6 +189,9 @@
 #define UMA_HISTOGRAM_COUNTS_100(name, sample) UMA_HISTOGRAM_CUSTOM_COUNTS( \
     name, sample, 1, 100, 50)
 
+#define UMA_HISTOGRAM_COUNTS_1000(name, sample) UMA_HISTOGRAM_CUSTOM_COUNTS( \
+    name, sample, 1, 1000, 50)
+
 #define UMA_HISTOGRAM_COUNTS_10000(name, sample) UMA_HISTOGRAM_CUSTOM_COUNTS( \
     name, sample, 1, 10000, 50)
 

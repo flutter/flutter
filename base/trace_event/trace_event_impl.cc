@@ -33,6 +33,9 @@
 #include "base/threading/thread_id_name_manager.h"
 #include "base/threading/worker_pool.h"
 #include "base/time/time.h"
+#include "base/trace_event/memory_dump_manager.h"
+#include "base/trace_event/memory_dump_provider.h"
+#include "base/trace_event/process_memory_dump.h"
 #include "base/trace_event/trace_event.h"
 #include "base/trace_event/trace_event_synthetic_delay.h"
 
@@ -214,6 +217,18 @@ class TraceBufferRingBuffer : public TraceBuffer {
     return cloned_buffer.Pass();
   }
 
+  void EstimateTraceMemoryOverhead(
+      TraceEventMemoryOverhead* overhead) override {
+    overhead->Add("TraceBufferRingBuffer", sizeof(*this));
+    for (size_t queue_index = queue_head_; queue_index != queue_tail_;
+         queue_index = NextQueueIndex(queue_index)) {
+      size_t chunk_index = recyclable_chunks_queue_[queue_index];
+      if (chunk_index >= chunks_.size())  // Skip uninitialized chunks.
+        continue;
+      chunks_[chunk_index]->EstimateTraceMemoryOverhead(overhead);
+    }
+  }
+
  private:
   class ClonedTraceBuffer : public TraceBuffer {
    public:
@@ -241,6 +256,10 @@ class TraceBufferRingBuffer : public TraceBuffer {
     scoped_ptr<TraceBuffer> CloneForIteration() const override {
       NOTIMPLEMENTED();
       return scoped_ptr<TraceBuffer>();
+    }
+    void EstimateTraceMemoryOverhead(
+        TraceEventMemoryOverhead* overhead) override {
+      NOTIMPLEMENTED();
     }
 
     size_t current_iteration_index_;
@@ -350,6 +369,23 @@ class TraceBufferVector : public TraceBuffer {
     return scoped_ptr<TraceBuffer>();
   }
 
+  void EstimateTraceMemoryOverhead(
+      TraceEventMemoryOverhead* overhead) override {
+    const size_t chunks_ptr_vector_allocated_size =
+        sizeof(*this) + max_chunks_ * sizeof(decltype(chunks_)::value_type);
+    const size_t chunks_ptr_vector_resident_size =
+        sizeof(*this) + chunks_.size() * sizeof(decltype(chunks_)::value_type);
+    overhead->Add("TraceBufferVector", chunks_ptr_vector_allocated_size,
+                  chunks_ptr_vector_resident_size);
+    for (size_t i = 0; i < chunks_.size(); ++i) {
+      TraceBufferChunk* chunk = chunks_[i];
+      // Skip the in-flight (nullptr) chunks. They will be accounted by the
+      // per-thread-local dumpers, see ThreadLocalEventBuffer::OnMemoryDump.
+      if (chunk)
+        chunk->EstimateTraceMemoryOverhead(overhead);
+    }
+  }
+
  private:
   size_t in_flight_chunk_count_;
   size_t current_iteration_index_;
@@ -398,11 +434,18 @@ class AutoThreadLocalBoolean {
 
 }  // namespace
 
+TraceBufferChunk::TraceBufferChunk(uint32 seq) : next_free_(0), seq_(seq) {
+}
+
+TraceBufferChunk::~TraceBufferChunk() {
+}
+
 void TraceBufferChunk::Reset(uint32 new_seq) {
   for (size_t i = 0; i < next_free_; ++i)
     chunk_[i].Reset();
   next_free_ = 0;
   seq_ = new_seq;
+  cached_overhead_estimate_when_full_.reset();
 }
 
 TraceEvent* TraceBufferChunk::AddTraceEvent(size_t* event_index) {
@@ -417,6 +460,31 @@ scoped_ptr<TraceBufferChunk> TraceBufferChunk::Clone() const {
   for (size_t i = 0; i < next_free_; ++i)
     cloned_chunk->chunk_[i].CopyFrom(chunk_[i]);
   return cloned_chunk.Pass();
+}
+
+void TraceBufferChunk::EstimateTraceMemoryOverhead(
+    TraceEventMemoryOverhead* overhead) {
+  if (cached_overhead_estimate_when_full_) {
+    DCHECK(IsFull());
+    overhead->Update(*cached_overhead_estimate_when_full_);
+    return;
+  }
+
+  // Cache the memory overhead estimate only if the chunk is full.
+  TraceEventMemoryOverhead* estimate = overhead;
+  if (IsFull()) {
+    cached_overhead_estimate_when_full_.reset(new TraceEventMemoryOverhead);
+    estimate = cached_overhead_estimate_when_full_.get();
+  }
+
+  estimate->Add("TraceBufferChunk", sizeof(*this));
+  for (size_t i = 0; i < next_free_; ++i)
+    chunk_[i].EstimateTraceMemoryOverhead(estimate);
+
+  if (IsFull()) {
+    estimate->AddSelf();
+    overhead->Update(*estimate);
+  }
 }
 
 // A helper class that allows the lock to be acquired in the middle of the scope
@@ -529,7 +597,7 @@ void TraceEvent::Initialize(
     const unsigned char* arg_types,
     const unsigned long long* arg_values,
     const scoped_refptr<ConvertableToTraceFormat>* convertable_values,
-    unsigned char flags) {
+    unsigned int flags) {
   timestamp_ = timestamp;
   thread_timestamp_ = thread_timestamp;
   duration_ = TimeDelta::FromInternalValue(-1);
@@ -610,6 +678,7 @@ void TraceEvent::Reset() {
   parameter_copy_storage_ = NULL;
   for (int i = 0; i < kTraceMaxNumArgs; ++i)
     convertable_values_[i] = NULL;
+  cached_memory_overhead_estimate_.reset();
 }
 
 void TraceEvent::UpdateDuration(const TraceTicks& now,
@@ -617,6 +686,29 @@ void TraceEvent::UpdateDuration(const TraceTicks& now,
   DCHECK_EQ(duration_.ToInternalValue(), -1);
   duration_ = now - timestamp_;
   thread_duration_ = thread_now - thread_timestamp_;
+}
+
+void TraceEvent::EstimateTraceMemoryOverhead(
+    TraceEventMemoryOverhead* overhead) {
+  if (!cached_memory_overhead_estimate_) {
+    cached_memory_overhead_estimate_.reset(new TraceEventMemoryOverhead);
+    cached_memory_overhead_estimate_->Add("TraceEvent", sizeof(*this));
+    // TODO(primiano): parameter_copy_storage_ is refcounted and, in theory,
+    // could be shared by several events and we might overcount. In practice
+    // this is unlikely but it's worth checking.
+    if (parameter_copy_storage_) {
+      cached_memory_overhead_estimate_->AddRefCountedString(
+          *parameter_copy_storage_.get());
+    }
+    for (size_t i = 0; i < kTraceMaxNumArgs; ++i) {
+      if (arg_types_[i] == TRACE_VALUE_TYPE_CONVERTABLE) {
+        convertable_values_[i]->EstimateTraceMemoryOverhead(
+            cached_memory_overhead_estimate_.get());
+      }
+    }
+    cached_memory_overhead_estimate_->AddSelf();
+  }
+  overhead->Update(*cached_memory_overhead_estimate_);
 }
 
 // static
@@ -697,34 +789,34 @@ void TraceEvent::AppendAsJSON(
   DCHECK(!strchr(name_, '"'));
   StringAppendF(out, "{\"pid\":%i,\"tid\":%i,\"ts\":%" PRId64
                      ","
-                     "\"ph\":\"%c\",\"cat\":\"%s\",\"name\":\"%s\",\"args\":{",
+                     "\"ph\":\"%c\",\"cat\":\"%s\",\"name\":\"%s\",\"args\":",
                 process_id, thread_id_, time_int64, phase_, category_group_name,
                 name_);
 
   // Output argument names and values, stop at first NULL argument name.
-  if (arg_names_[0]) {
-    bool allow_args = argument_filter_predicate.is_null() ||
-                      argument_filter_predicate.Run(category_group_name, name_);
+  bool strip_args = arg_names_[0] && !argument_filter_predicate.is_null() &&
+                    !argument_filter_predicate.Run(category_group_name, name_);
 
-    if (allow_args) {
-      for (int i = 0; i < kTraceMaxNumArgs && arg_names_[i]; ++i) {
-        if (i > 0)
-          *out += ",";
-        *out += "\"";
-        *out += arg_names_[i];
-        *out += "\":";
+  if (strip_args) {
+    *out += "\"__stripped__\"";
+  } else {
+    *out += "{";
 
-        if (arg_types_[i] == TRACE_VALUE_TYPE_CONVERTABLE)
-          convertable_values_[i]->AppendAsTraceFormat(out);
-        else
-          AppendValueAsJSON(arg_types_[i], arg_values_[i], out);
-      }
-    } else {
-      *out += "\"stripped\":1";
+    for (int i = 0; i < kTraceMaxNumArgs && arg_names_[i]; ++i) {
+      if (i > 0)
+        *out += ",";
+      *out += "\"";
+      *out += arg_names_[i];
+      *out += "\":";
+
+      if (arg_types_[i] == TRACE_VALUE_TYPE_CONVERTABLE)
+        convertable_values_[i]->AppendAsTraceFormat(out);
+      else
+        AppendValueAsJSON(arg_types_[i], arg_values_[i], out);
     }
-  }
 
-  *out += "}";
+    *out += "}";
+  }
 
   if (phase_ == TRACE_EVENT_PHASE_COMPLETE) {
     int64 duration = duration_.ToInternalValue();
@@ -752,6 +844,9 @@ void TraceEvent::AppendAsJSON(
   // bits (it might be a 64-bit pointer).
   if (flags_ & TRACE_EVENT_FLAG_HAS_ID)
     StringAppendF(out, ",\"id\":\"0x%" PRIx64 "\"", static_cast<uint64>(id_));
+
+  if (flags_ & TRACE_EVENT_FLAG_BIND_TO_ENCLOSING)
+    StringAppendF(out, ",\"bp\":\"e\"");
 
   // Instant events also output their scope.
   if (phase_ == TRACE_EVENT_PHASE_INSTANT) {
@@ -984,7 +1079,8 @@ TraceBucketData::~TraceBucketData() {
 ////////////////////////////////////////////////////////////////////////////////
 
 class TraceLog::ThreadLocalEventBuffer
-    : public MessageLoop::DestructionObserver {
+    : public MessageLoop::DestructionObserver,
+      public MemoryDumpProvider {
  public:
   ThreadLocalEventBuffer(TraceLog* trace_log);
   ~ThreadLocalEventBuffer() override;
@@ -1007,6 +1103,9 @@ class TraceLog::ThreadLocalEventBuffer
  private:
   // MessageLoop::DestructionObserver
   void WillDestroyCurrentMessageLoop() override;
+
+  // MemoryDumpProvider implementation.
+  bool OnMemoryDump(ProcessMemoryDump* pmd) override;
 
   void FlushWhileLocked();
 
@@ -1036,6 +1135,10 @@ TraceLog::ThreadLocalEventBuffer::ThreadLocalEventBuffer(TraceLog* trace_log)
   MessageLoop* message_loop = MessageLoop::current();
   message_loop->AddDestructionObserver(this);
 
+  // This is to report the local memory usage when memory-infra is enabled.
+  MemoryDumpManager::GetInstance()->RegisterDumpProvider(
+      this, ThreadTaskRunnerHandle::Get());
+
   AutoLock lock(trace_log->lock_);
   trace_log->thread_message_loops_.insert(message_loop);
 }
@@ -1043,6 +1146,7 @@ TraceLog::ThreadLocalEventBuffer::ThreadLocalEventBuffer(TraceLog* trace_log)
 TraceLog::ThreadLocalEventBuffer::~ThreadLocalEventBuffer() {
   CheckThisIsCurrentBuffer();
   MessageLoop::current()->RemoveDestructionObserver(this);
+  MemoryDumpManager::GetInstance()->UnregisterDumpProvider(this);
 
   // Zero event_count_ happens in either of the following cases:
   // - no event generated for the thread;
@@ -1117,6 +1221,17 @@ void TraceLog::ThreadLocalEventBuffer::ReportOverhead(
 
 void TraceLog::ThreadLocalEventBuffer::WillDestroyCurrentMessageLoop() {
   delete this;
+}
+
+bool TraceLog::ThreadLocalEventBuffer::OnMemoryDump(ProcessMemoryDump* pmd) {
+  if (!chunk_)
+    return true;
+  std::string dump_base_name = StringPrintf(
+      "tracing/thread_%d", static_cast<int>(PlatformThread::CurrentId()));
+  TraceEventMemoryOverhead overhead;
+  chunk_->EstimateTraceMemoryOverhead(&overhead);
+  overhead.DumpInto(dump_base_name.c_str(), pmd);
+  return true;
 }
 
 void TraceLog::ThreadLocalEventBuffer::FlushWhileLocked() {
@@ -1195,9 +1310,44 @@ TraceLog::TraceLog()
 #endif
 
   logged_events_.reset(CreateTraceBuffer());
+
+  MemoryDumpManager::GetInstance()->RegisterDumpProvider(this);
 }
 
 TraceLog::~TraceLog() {
+}
+
+void TraceLog::InitializeThreadLocalEventBufferIfSupported() {
+  // A ThreadLocalEventBuffer needs the message loop
+  // - to know when the thread exits;
+  // - to handle the final flush.
+  // For a thread without a message loop or the message loop may be blocked, the
+  // trace events will be added into the main buffer directly.
+  if (thread_blocks_message_loop_.Get() || !MessageLoop::current())
+    return;
+  auto thread_local_event_buffer = thread_local_event_buffer_.Get();
+  if (thread_local_event_buffer &&
+      !CheckGeneration(thread_local_event_buffer->generation())) {
+    delete thread_local_event_buffer;
+    thread_local_event_buffer = NULL;
+  }
+  if (!thread_local_event_buffer) {
+    thread_local_event_buffer = new ThreadLocalEventBuffer(this);
+    thread_local_event_buffer_.Set(thread_local_event_buffer);
+  }
+}
+
+bool TraceLog::OnMemoryDump(ProcessMemoryDump* pmd) {
+  TraceEventMemoryOverhead overhead;
+  overhead.Add("TraceLog", sizeof(*this));
+  {
+    AutoLock lock(lock_);
+    if (logged_events_)
+      logged_events_->EstimateTraceMemoryOverhead(&overhead);
+  }
+  overhead.AddSelf();
+  overhead.DumpInto("tracing/main_trace_log", pmd);
+  return true;
 }
 
 const unsigned char* TraceLog::GetCategoryGroupEnabled(
@@ -1239,8 +1389,10 @@ void TraceLog::UpdateCategoryGroupEnabledFlag(size_t category_index) {
       event_callback_trace_config_.IsCategoryGroupEnabled(category_group))
     enabled_flag |= ENABLED_FOR_EVENT_CALLBACK;
 #if defined(OS_WIN)
-  if (base::trace_event::TraceEventETWExport::isETWExportEnabled())
+  if (base::trace_event::TraceEventETWExport::IsCategoryGroupEnabled(
+          category_group)) {
     enabled_flag |= ENABLED_FOR_ETW_EXPORT;
+  }
 #endif
 
   g_category_group_enabled[category_index] = enabled_flag;
@@ -1627,6 +1779,17 @@ void TraceLog::SetEventCallbackDisabled() {
 // 4. If any thread hasn't finish its flush in time, finish the flush.
 void TraceLog::Flush(const TraceLog::OutputCallback& cb,
                      bool use_worker_thread) {
+  FlushInternal(cb, use_worker_thread, false);
+}
+
+void TraceLog::CancelTracing(const OutputCallback& cb) {
+  SetDisabled();
+  FlushInternal(cb, false, true);
+}
+
+void TraceLog::FlushInternal(const TraceLog::OutputCallback& cb,
+                             bool use_worker_thread,
+                             bool discard_events) {
   use_worker_thread_ = use_worker_thread;
   if (IsEnabled()) {
     // Can't flush when tracing is enabled because otherwise PostTask would
@@ -1670,17 +1833,17 @@ void TraceLog::Flush(const TraceLog::OutputCallback& cb,
   if (thread_message_loop_task_runners.size()) {
     for (size_t i = 0; i < thread_message_loop_task_runners.size(); ++i) {
       thread_message_loop_task_runners[i]->PostTask(
-          FROM_HERE,
-          Bind(&TraceLog::FlushCurrentThread, Unretained(this), generation));
+          FROM_HERE, Bind(&TraceLog::FlushCurrentThread, Unretained(this),
+                          generation, discard_events));
     }
     flush_task_runner_->PostDelayedTask(
-        FROM_HERE,
-        Bind(&TraceLog::OnFlushTimeout, Unretained(this), generation),
+        FROM_HERE, Bind(&TraceLog::OnFlushTimeout, Unretained(this), generation,
+                        discard_events),
         TimeDelta::FromMilliseconds(kThreadFlushTimeoutMs));
     return;
   }
 
-  FinishFlush(generation);
+  FinishFlush(generation, discard_events);
 }
 
 // Usually it runs on a different thread.
@@ -1693,28 +1856,24 @@ void TraceLog::ConvertTraceEventsToTraceFormat(
 
   // The callback need to be called at least once even if there is no events
   // to let the caller know the completion of flush.
-  bool has_more_events = true;
-  do {
-    scoped_refptr<RefCountedString> json_events_str_ptr =
-        new RefCountedString();
-
-    while (json_events_str_ptr->size() < kTraceEventBufferSizeInBytes) {
-      const TraceBufferChunk* chunk = logged_events->NextChunk();
-      has_more_events = chunk != NULL;
-      if (!chunk)
-        break;
-      for (size_t j = 0; j < chunk->size(); ++j) {
-        if (json_events_str_ptr->size())
-          json_events_str_ptr->data().append(",\n");
-        chunk->GetEventAt(j)->AppendAsJSON(&(json_events_str_ptr->data()),
-                                           argument_filter_predicate);
+  scoped_refptr<RefCountedString> json_events_str_ptr = new RefCountedString();
+  while (const TraceBufferChunk* chunk = logged_events->NextChunk()) {
+    for (size_t j = 0; j < chunk->size(); ++j) {
+      size_t size = json_events_str_ptr->size();
+      if (size > kTraceEventBufferSizeInBytes) {
+        flush_output_callback.Run(json_events_str_ptr, true);
+        json_events_str_ptr = new RefCountedString();
+      } else if (size) {
+        json_events_str_ptr->data().append(",\n");
       }
+      chunk->GetEventAt(j)->AppendAsJSON(&(json_events_str_ptr->data()),
+                                         argument_filter_predicate);
     }
-    flush_output_callback.Run(json_events_str_ptr, has_more_events);
-  } while (has_more_events);
+  }
+  flush_output_callback.Run(json_events_str_ptr, false);
 }
 
-void TraceLog::FinishFlush(int generation) {
+void TraceLog::FinishFlush(int generation, bool discard_events) {
   scoped_ptr<TraceBuffer> previous_logged_events;
   OutputCallback flush_output_callback;
   TraceEvent::ArgumentFilterPredicate argument_filter_predicate;
@@ -1739,6 +1898,14 @@ void TraceLog::FinishFlush(int generation) {
     }
   }
 
+  if (discard_events) {
+    if (!flush_output_callback.is_null()) {
+      scoped_refptr<RefCountedString> empty_result = new RefCountedString;
+      flush_output_callback.Run(empty_result, false);
+    }
+    return;
+  }
+
   if (use_worker_thread_ &&
       WorkerPool::PostTask(
           FROM_HERE, Bind(&TraceLog::ConvertTraceEventsToTraceFormat,
@@ -1754,7 +1921,7 @@ void TraceLog::FinishFlush(int generation) {
 }
 
 // Run in each thread holding a local event buffer.
-void TraceLog::FlushCurrentThread(int generation) {
+void TraceLog::FlushCurrentThread(int generation, bool discard_events) {
   {
     AutoLock lock(lock_);
     if (!CheckGeneration(generation) || !flush_task_runner_) {
@@ -1772,10 +1939,11 @@ void TraceLog::FlushCurrentThread(int generation) {
     return;
 
   flush_task_runner_->PostTask(
-      FROM_HERE, Bind(&TraceLog::FinishFlush, Unretained(this), generation));
+      FROM_HERE, Bind(&TraceLog::FinishFlush, Unretained(this), generation,
+                      discard_events));
 }
 
-void TraceLog::OnFlushTimeout(int generation) {
+void TraceLog::OnFlushTimeout(int generation, bool discard_events) {
   {
     AutoLock lock(lock_);
     if (!CheckGeneration(generation) || !flush_task_runner_) {
@@ -1794,7 +1962,7 @@ void TraceLog::OnFlushTimeout(int generation) {
       LOG(WARNING) << "Thread: " << (*it)->thread_name();
     }
   }
-  FinishFlush(generation);
+  FinishFlush(generation, discard_events);
 }
 
 void TraceLog::FlushButLeaveBufferIntact(
@@ -1839,7 +2007,7 @@ TraceEventHandle TraceLog::AddTraceEvent(
     const unsigned char* arg_types,
     const unsigned long long* arg_values,
     const scoped_refptr<ConvertableToTraceFormat>* convertable_values,
-    unsigned char flags) {
+    unsigned int flags) {
   int thread_id = static_cast<int>(base::PlatformThread::CurrentId());
   base::TraceTicks now = base::TraceTicks::Now();
   return AddTraceEventWithThreadIdAndTimestamp(phase, category_group_enabled,
@@ -1861,7 +2029,7 @@ TraceEventHandle TraceLog::AddTraceEventWithThreadIdAndTimestamp(
     const unsigned char* arg_types,
     const unsigned long long* arg_values,
     const scoped_refptr<ConvertableToTraceFormat>* convertable_values,
-    unsigned char flags) {
+    unsigned int flags) {
   TraceEventHandle handle = { 0, 0, 0 };
   if (!*category_group_enabled)
     return handle;
@@ -1885,24 +2053,10 @@ TraceEventHandle TraceLog::AddTraceEventWithThreadIdAndTimestamp(
       OffsetNow() : offset_event_timestamp;
   ThreadTicks thread_now = ThreadNow();
 
-  ThreadLocalEventBuffer* thread_local_event_buffer = NULL;
-  // A ThreadLocalEventBuffer needs the message loop
-  // - to know when the thread exits;
-  // - to handle the final flush.
-  // For a thread without a message loop or the message loop may be blocked, the
-  // trace events will be added into the main buffer directly.
-  if (!thread_blocks_message_loop_.Get() && MessageLoop::current()) {
-    thread_local_event_buffer = thread_local_event_buffer_.Get();
-    if (thread_local_event_buffer &&
-        !CheckGeneration(thread_local_event_buffer->generation())) {
-      delete thread_local_event_buffer;
-      thread_local_event_buffer = NULL;
-    }
-    if (!thread_local_event_buffer) {
-      thread_local_event_buffer = new ThreadLocalEventBuffer(this);
-      thread_local_event_buffer_.Set(thread_local_event_buffer);
-    }
-  }
+  // |thread_local_event_buffer_| can be null if the current thread doesn't have
+  // a message loop or the message loop is blocked.
+  InitializeThreadLocalEventBufferIfSupported();
+  auto thread_local_event_buffer = thread_local_event_buffer_.Get();
 
   // Check and update the current thread name only if the event is for the
   // current thread to avoid locks in most cases.
@@ -1927,8 +2081,10 @@ TraceEventHandle TraceLog::AddTraceEventWithThreadIdAndTimestamp(
       } else {
         // This is a thread id that we've seen before, but potentially with a
         // new name.
-        std::vector<StringPiece> existing_names;
-        Tokenize(existing_name->second, ",", &existing_names);
+        std::vector<StringPiece> existing_names =
+            base::SplitStringPiece(existing_name->second, ",",
+                                   base::KEEP_WHITESPACE,
+                                   base::SPLIT_WANT_NONEMPTY);
         bool found = std::find(existing_names.begin(),
                                existing_names.end(),
                                new_name) != existing_names.end();
@@ -2196,7 +2352,7 @@ void TraceLog::AddMetadataEventsWhileLocked() {
     InitializeMetadataEvent(AddEventToThreadSharedChunkWhileLocked(NULL, false),
                             current_thread_id,
                             "process_labels", "labels",
-                            JoinString(labels, ','));
+                            base::JoinString(labels, ","));
   }
 
   // Thread sort indices.
@@ -2332,6 +2488,11 @@ void TraceLog::SetCurrentThreadBlocksMessageLoop() {
     // This will flush the thread local buffer.
     delete thread_local_event_buffer_.Get();
   }
+}
+
+void ConvertableToTraceFormat::EstimateTraceMemoryOverhead(
+    TraceEventMemoryOverhead* overhead) {
+  overhead->Add("ConvertableToTraceFormat(Unknown)", sizeof(*this));
 }
 
 }  // namespace trace_event

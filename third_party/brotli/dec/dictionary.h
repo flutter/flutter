@@ -11,9 +11,9 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
-   Collection of static dictionary words.
 */
+
+/* Collection of static dictionary words. */
 
 #ifndef BROTLI_DEC_DICTIONARY_H_
 #define BROTLI_DEC_DICTIONARY_H_

@@ -30,6 +30,10 @@ enum AmPmClockType {
 // Returns the time of day, e.g., "3:07 PM".
 BASE_I18N_EXPORT string16 TimeFormatTimeOfDay(const Time& time);
 
+// Returns the time of day in 24-hour clock format with millisecond accuracy,
+// e.g., "15:07:30.568"
+BASE_I18N_EXPORT string16 TimeFormatTimeOfDayWithMilliseconds(const Time& time);
+
 // Returns the time of day in the specified hour clock type. e.g.
 // "3:07 PM" (type == k12HourClock, ampm == kKeepAmPm).
 // "3:07"    (type == k12HourClock, ampm == kDropAmPm).

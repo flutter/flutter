@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/atomicops.h"
 #include "base/basictypes.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/shared_memory.h"
@@ -33,7 +34,7 @@
 #endif
 
 static const int kNumThreads = 5;
-#if !defined(OS_IOS)  // iOS does not allow multiple processes.
+#if !defined(OS_IOS) && !defined(OS_ANDROID)
 static const int kNumTasks = 5;
 #endif
 
@@ -89,56 +90,6 @@ class MultipleThreadMain : public PlatformThread::Delegate {
 
 const char* const MultipleThreadMain::s_test_name_ =
     "SharedMemoryOpenThreadTest";
-
-// TODO(port):
-// This test requires the ability to pass file descriptors between processes.
-// We haven't done that yet in Chrome for POSIX.
-#if defined(OS_WIN)
-// Each thread will open the shared memory.  Each thread will take the memory,
-// and keep changing it while trying to lock it, with some small pauses in
-// between. Verify that each thread's value in the shared memory is always
-// correct.
-class MultipleLockThread : public PlatformThread::Delegate {
- public:
-  explicit MultipleLockThread(int id) : id_(id) {}
-  ~MultipleLockThread() override {}
-
-  // PlatformThread::Delegate interface.
-  void ThreadMain() override {
-    const uint32 kDataSize = sizeof(int);
-    SharedMemoryHandle handle = NULL;
-    {
-      SharedMemory memory1;
-      EXPECT_TRUE(memory1.CreateNamedDeprecated(
-          "SharedMemoryMultipleLockThreadTest", true, kDataSize));
-      EXPECT_TRUE(memory1.ShareToProcess(GetCurrentProcess(), &handle));
-      // TODO(paulg): Implement this once we have a posix version of
-      // SharedMemory::ShareToProcess.
-      EXPECT_TRUE(true);
-    }
-
-    SharedMemory memory2(handle, false);
-    EXPECT_TRUE(memory2.Map(kDataSize));
-    volatile int* const ptr = static_cast<int*>(memory2.memory());
-
-    for (int idx = 0; idx < 20; idx++) {
-      memory2.LockDeprecated();
-      int i = (id_ << 16) + idx;
-      *ptr = i;
-      PlatformThread::Sleep(TimeDelta::FromMilliseconds(1));
-      EXPECT_EQ(*ptr, i);
-      memory2.UnlockDeprecated();
-    }
-
-    memory2.Close();
-  }
-
- private:
-  int id_;
-
-  DISALLOW_COPY_AND_ASSIGN(MultipleLockThread);
-};
-#endif
 
 }  // namespace
 
@@ -320,34 +271,6 @@ TEST(SharedMemoryTest, MultipleThreads) {
   MultipleThreadMain::CleanUp();
 }
 
-// TODO(port): this test requires the MultipleLockThread class
-// (defined above), which requires the ability to pass file
-// descriptors between processes.  We haven't done that yet in Chrome
-// for POSIX.
-#if defined(OS_WIN)
-// Create a set of threads to each open a shared memory segment and write to it
-// with the lock held. Verify that they are always reading/writing consistent
-// data.
-TEST(SharedMemoryTest, Lock) {
-  PlatformThreadHandle thread_handles[kNumThreads];
-  MultipleLockThread* thread_delegates[kNumThreads];
-
-  // Spawn the threads.
-  for (int index = 0; index < kNumThreads; ++index) {
-    PlatformThreadHandle pth;
-    thread_delegates[index] = new MultipleLockThread(index);
-    EXPECT_TRUE(PlatformThread::Create(0, thread_delegates[index], &pth));
-    thread_handles[index] = pth;
-  }
-
-  // Wait for the threads to finish.
-  for (int index = 0; index < kNumThreads; ++index) {
-    PlatformThread::Join(thread_handles[index]);
-    delete thread_delegates[index];
-  }
-}
-#endif
-
 // Allocate private (unique) shared memory with an empty string for a
 // name.  Make sure several of them don't point to the same thing as
 // we might expect if the names are equal.
@@ -437,12 +360,13 @@ TEST(SharedMemoryTest, ShareReadOnly) {
   // http://crbug.com/320865
   (void)handle;
 #elif defined(OS_POSIX)
-  EXPECT_EQ(O_RDONLY, fcntl(handle.fd, F_GETFL) & O_ACCMODE)
+  int handle_fd = SharedMemory::GetFdFromSharedMemoryHandle(handle);
+  EXPECT_EQ(O_RDONLY, fcntl(handle_fd, F_GETFL) & O_ACCMODE)
       << "The descriptor itself should be read-only.";
 
   errno = 0;
-  void* writable = mmap(
-      NULL, contents.size(), PROT_READ | PROT_WRITE, MAP_SHARED, handle.fd, 0);
+  void* writable = mmap(NULL, contents.size(), PROT_READ | PROT_WRITE,
+                        MAP_SHARED, handle_fd, 0);
   int mmap_errno = errno;
   EXPECT_EQ(MAP_FAILED, writable)
       << "It shouldn't be possible to re-mmap the descriptor writable.";
@@ -596,7 +520,8 @@ TEST(SharedMemoryTest, FilePermissionsAnonymous) {
 
   EXPECT_TRUE(shared_memory.Create(options));
 
-  int shm_fd = shared_memory.handle().fd;
+  int shm_fd =
+      SharedMemory::GetFdFromSharedMemoryHandle(shared_memory.handle());
   struct stat shm_stat;
   EXPECT_EQ(0, fstat(shm_fd, &shm_stat));
   // Neither the group, nor others should be able to read the shared memory
@@ -622,7 +547,8 @@ TEST(SharedMemoryTest, FilePermissionsNamed) {
   // Clean-up the backing file name immediately, we don't need it.
   EXPECT_TRUE(shared_memory.Delete(shared_mem_name));
 
-  int shm_fd = shared_memory.handle().fd;
+  int shm_fd =
+      SharedMemory::GetFdFromSharedMemoryHandle(shared_memory.handle());
   struct stat shm_stat;
   EXPECT_EQ(0, fstat(shm_fd, &shm_stat));
   // Neither the group, nor others should have been able to open the shared
@@ -647,7 +573,9 @@ TEST(SharedMemoryTest, MapMinimumAlignment) {
   shared_memory.Close();
 }
 
-#if !defined(OS_IOS)  // iOS does not allow multiple processes.
+// iOS does not allow multiple processes.
+// Android ashmem doesn't support named shared memory.
+#if !defined(OS_IOS) && !defined(OS_ANDROID)
 
 // On POSIX it is especially important we test shmem across processes,
 // not just across threads.  But the test is enabled on all platforms.
@@ -664,53 +592,61 @@ class SharedMemoryProcessTest : public MultiProcessTest {
 #if defined(OS_MACOSX)
     mac::ScopedNSAutoreleasePool pool;
 #endif
-    const uint32 kDataSize = 1024;
     SharedMemory memory;
-    bool rv = memory.CreateNamedDeprecated(s_test_name_, true, kDataSize);
+    bool rv = memory.CreateNamedDeprecated(s_test_name_, true, s_data_size_);
     EXPECT_TRUE(rv);
     if (rv != true)
       errors++;
-    rv = memory.Map(kDataSize);
+    rv = memory.Map(s_data_size_);
     EXPECT_TRUE(rv);
     if (rv != true)
       errors++;
     int *ptr = static_cast<int*>(memory.memory());
 
-    for (int idx = 0; idx < 20; idx++) {
-      memory.LockDeprecated();
-      int i = (1 << 16) + idx;
-      *ptr = i;
-      PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
-      if (*ptr != i)
-        errors++;
-      memory.UnlockDeprecated();
-    }
-
+    // This runs concurrently in multiple processes. Writes need to be atomic.
+    base::subtle::Barrier_AtomicIncrement(ptr, 1);
     memory.Close();
     return errors;
   }
 
- private:
   static const char* const s_test_name_;
+  static const uint32 s_data_size_;
 };
 
 const char* const SharedMemoryProcessTest::s_test_name_ = "MPMem";
+const uint32 SharedMemoryProcessTest::s_data_size_ = 1024;
 
-TEST_F(SharedMemoryProcessTest, Tasks) {
+TEST_F(SharedMemoryProcessTest, SharedMemoryAcrossProcesses) {
   SharedMemoryProcessTest::CleanUp();
 
+  // Create a shared memory region. Set the first word to 0.
+  SharedMemory memory;
+  bool rv = memory.CreateNamedDeprecated(s_test_name_, true, s_data_size_);
+  ASSERT_TRUE(rv);
+  rv = memory.Map(s_data_size_);
+  ASSERT_TRUE(rv);
+  int* ptr = static_cast<int*>(memory.memory());
+  *ptr = 0;
+
+  // Start |kNumTasks| processes, each of which atomically increments the first
+  // word by 1.
   Process processes[kNumTasks];
   for (int index = 0; index < kNumTasks; ++index) {
     processes[index] = SpawnChild("SharedMemoryTestMain");
     ASSERT_TRUE(processes[index].IsValid());
   }
 
+  // Check that each process exited correctly.
   int exit_code = 0;
   for (int index = 0; index < kNumTasks; ++index) {
     EXPECT_TRUE(processes[index].WaitForExit(&exit_code));
     EXPECT_EQ(0, exit_code);
   }
 
+  // Check that the shared memory region reflects |kNumTasks| increments.
+  ASSERT_EQ(kNumTasks, *ptr);
+
+  memory.Close();
   SharedMemoryProcessTest::CleanUp();
 }
 
@@ -718,6 +654,6 @@ MULTIPROCESS_TEST_MAIN(SharedMemoryTestMain) {
   return SharedMemoryProcessTest::TaskTestMain();
 }
 
-#endif  // !OS_IOS
+#endif  // !defined(OS_IOS) && !defined(OS_ANDROID)
 
 }  // namespace base

@@ -54,7 +54,7 @@ extern "C" {
 
 /*
  * xmlC14NMode:
- * 
+ *
  * Predefined values for C14N modes
  *
  */

@@ -36,6 +36,7 @@ if os.getcwd() != self_dir:
 java_args = [
   "java",
   "-classpath", ":".join(classpath),
+  "-enableassertions",
   \"{main_class}\"] + sys.argv[1:]
 os.execvp("java", java_args)
 """

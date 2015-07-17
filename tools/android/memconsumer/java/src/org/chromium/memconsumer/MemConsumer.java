@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -74,7 +75,7 @@ public class MemConsumer extends Activity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (intent.getAction() == NOTIFICATION_ACTION) {
+        if (TextUtils.equals(intent.getAction(), NOTIFICATION_ACTION)) {
             updateMemoryConsumption(0);
             return;
         }

@@ -63,7 +63,10 @@ def run_test(test_base_name, cmd, reset_results):
 
   if expected != actual:
     open(result_file, 'w').write(actual)
-    return 'expected and actual differed'
+    error = 'expected and actual differed\n'
+    error += 'Actual:\n' + actual
+    error += 'Expected:\n' + expected
+    return error
 
 
 def run_tests(clang_path, plugin_path, reset_results):

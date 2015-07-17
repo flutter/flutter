@@ -15,6 +15,7 @@ https://android.googlesource.com/platform/sdk/+/master/files/ant/build.xml
 
 import optparse
 import os
+import re
 import shutil
 import zipfile
 
@@ -53,6 +54,14 @@ DENSITY_SPLITS = {
         'ldrtl-xxhdpi-v17',
         'ldrtl-sw600dp-xxhdpi-v17',
         'xxhdpi-v21',
+    ),
+    'xxxhdpi': (
+        'xxxhdpi-v4',
+        'ldrtl-xxxhdpi-v4',
+        'sw600dp-xxxhdpi-v13',
+        'ldrtl-xxxhdpi-v17',
+        'ldrtl-sw600dp-xxxhdpi-v17',
+        'xxxhdpi-v21',
     ),
     'tvdpi': (
         'tvdpi-v4',
@@ -95,6 +104,8 @@ def ParseArgs():
       '--create-density-splits',
       action='store_true',
       help='Enables density splits')
+  parser.add_option('--language-splits',
+                    help='GYP list of languages to create splits for')
 
   parser.add_option('--apk-path',
                     help='Path to output (partial) apk.')
@@ -165,23 +176,28 @@ def RenameDensitySplits(apk_path):
   """Renames all density splits to have shorter / predictable names."""
   for density, config in DENSITY_SPLITS.iteritems():
     src_path = '%s_%s' % (apk_path, '_'.join(config))
-    dst_path = '%s-%s' % (apk_path, density)
-    if os.path.exists(dst_path):
-      os.unlink(dst_path)
-    os.rename(src_path, dst_path)
+    dst_path = '%s_%s' % (apk_path, density)
+    if src_path != dst_path:
+      if os.path.exists(dst_path):
+        os.unlink(dst_path)
+      os.rename(src_path, dst_path)
 
 
-def CheckDensityMissedConfigs(apk_path):
-  """Raises an exception if apk_path contains any density-specifc files."""
-  triggers = ['-%s' % density for density in DENSITY_SPLITS]
+def CheckForMissedConfigs(apk_path, check_density, languages):
+  """Raises an exception if apk_path contains any unexpected configs."""
+  triggers = []
+  if check_density:
+    triggers.extend(re.compile('-%s' % density) for density in DENSITY_SPLITS)
+  if languages:
+    triggers.extend(re.compile(r'-%s\b' % lang) for lang in languages)
   with zipfile.ZipFile(apk_path) as main_apk_zip:
     for name in main_apk_zip.namelist():
       for trigger in triggers:
-        if trigger in name and not 'mipmap-' in name:
-          raise Exception(('Found density in main apk that should have been ' +
+        if trigger.search(name) and not 'mipmap-' in name:
+          raise Exception(('Found config in main apk that should have been ' +
                            'put into a split: %s\nYou need to update ' +
                            'package_resources.py to include this new ' +
-                           'config.') % name)
+                           'config (trigger=%s)') % (name, trigger.pattern))
 
 
 def main():
@@ -225,14 +241,23 @@ def main():
       for config in DENSITY_SPLITS.itervalues():
         package_command.extend(('--split', ','.join(config)))
 
+    language_splits = None
+    if options.language_splits:
+      language_splits = build_utils.ParseGypList(options.language_splits)
+      for lang in language_splits:
+        package_command.extend(('--split', lang))
+
     if 'Debug' in options.configuration_name:
       package_command += ['--debug-mode']
 
     build_utils.CheckOutput(
         package_command, print_stdout=False, print_stderr=False)
 
+    if options.create_density_splits or language_splits:
+      CheckForMissedConfigs(
+          options.apk_path, options.create_density_splits, language_splits)
+
     if options.create_density_splits:
-      CheckDensityMissedConfigs(options.apk_path)
       RenameDensitySplits(options.apk_path)
 
     if options.depfile:

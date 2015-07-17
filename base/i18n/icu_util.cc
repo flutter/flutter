@@ -23,6 +23,10 @@
 #include "third_party/icu/source/i18n/unicode/timezone.h"
 #endif
 
+#if defined(OS_ANDROID)
+#include "base/android/apk_assets.h"
+#endif
+
 #if defined(OS_MACOSX)
 #include "base/mac/foundation_util.h"
 #endif
@@ -34,11 +38,6 @@
 namespace base {
 namespace i18n {
 
-// Use an unversioned file name to simplify a icu version update down the road.
-// No need to change the filename in multiple places (gyp files, windows
-// build pkg configurations, etc). 'l' stands for Little Endian.
-// This variable is exported through the header file.
-const char kIcuDataFileName[] = "icudtl.dat";
 #if ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_SHARED
 #define ICU_UTIL_DATA_SYMBOL "icudt" U_ICU_VERSION_SHORT "_dat"
 #if defined(OS_WIN)
@@ -47,44 +46,140 @@ const char kIcuDataFileName[] = "icudtl.dat";
 #endif
 
 namespace {
-
+#if !defined(OS_NACL)
 #if !defined(NDEBUG)
 // Assert that we are not called more than once.  Even though calling this
 // function isn't harmful (ICU can handle it), being called twice probably
 // indicates a programming error.
-#if !defined(OS_NACL)
-bool g_called_once = false;
-#endif
 bool g_check_called_once = true;
+bool g_called_once = false;
+#endif  // !defined(NDEBUG)
+
+#if ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE
+// Use an unversioned file name to simplify a icu version update down the road.
+// No need to change the filename in multiple places (gyp files, windows
+// build pkg configurations, etc). 'l' stands for Little Endian.
+// This variable is exported through the header file.
+const char kIcuDataFileName[] = "icudtl.dat";
+#if defined(OS_ANDROID)
+const char kAndroidAssetsIcuDataFileName[] = "assets/icudtl.dat";
 #endif
+
+// File handle intentionally never closed. Not using File here because its
+// Windows implementation guards against two instances owning the same
+// PlatformFile (which we allow since we know it is never freed).
+const PlatformFile kInvalidPlatformFile =
+#if defined(OS_WIN)
+    INVALID_HANDLE_VALUE;
+#else
+    -1;
+#endif
+PlatformFile g_icudtl_pf = kInvalidPlatformFile;
+MemoryMappedFile* g_icudtl_mapped_file = nullptr;
+MemoryMappedFile::Region g_icudtl_region;
+
+void LazyInitIcuDataFile() {
+  if (g_icudtl_pf != kInvalidPlatformFile) {
+    return;
+  }
+#if defined(OS_ANDROID)
+  int fd = base::android::OpenApkAsset(kAndroidAssetsIcuDataFileName,
+                                       &g_icudtl_region);
+  g_icudtl_pf = fd;
+  if (fd != -1) {
+    return;
+  }
+// For unit tests, data file is located on disk, so try there as a fallback.
+#endif  // defined(OS_ANDROID)
+#if !defined(OS_MACOSX)
+  FilePath data_path;
+#if defined(OS_WIN)
+  // The data file will be in the same directory as the current module.
+  bool path_ok = PathService::Get(DIR_MODULE, &data_path);
+  wchar_t tmp_buffer[_MAX_PATH] = {0};
+  wcscpy_s(tmp_buffer, data_path.value().c_str());
+  debug::Alias(tmp_buffer);
+  CHECK(path_ok);  // TODO(scottmg): http://crbug.com/445616
+#elif defined(OS_ANDROID)
+  bool path_ok = PathService::Get(DIR_ANDROID_APP_DATA, &data_path);
+#else
+  // For now, expect the data file to be alongside the executable.
+  // This is sufficient while we work on unit tests, but will eventually
+  // likely live in a data directory.
+  bool path_ok = PathService::Get(DIR_EXE, &data_path);
+#endif
+  DCHECK(path_ok);
+  data_path = data_path.AppendASCII(kIcuDataFileName);
+
+#if defined(OS_WIN)
+  // TODO(scottmg): http://crbug.com/445616
+  wchar_t tmp_buffer2[_MAX_PATH] = {0};
+  wcscpy_s(tmp_buffer2, data_path.value().c_str());
+  debug::Alias(tmp_buffer2);
+#endif
+
+#else
+  // Assume it is in the framework bundle's Resources directory.
+  ScopedCFTypeRef<CFStringRef> data_file_name(
+      SysUTF8ToCFStringRef(kIcuDataFileName));
+  FilePath data_path = mac::PathForFrameworkBundleResource(data_file_name);
+  if (data_path.empty()) {
+    LOG(ERROR) << kIcuDataFileName << " not found in bundle";
+    return;
+  }
+#endif  // !defined(OS_MACOSX)
+  File file(data_path, File::FLAG_OPEN | File::FLAG_READ);
+  if (file.IsValid()) {
+    g_icudtl_pf = file.TakePlatformFile();
+    g_icudtl_region = MemoryMappedFile::Region::kWholeFile;
+  }
 }
 
+bool InitializeICUWithFileDescriptorInternal(
+    PlatformFile data_fd,
+    const MemoryMappedFile::Region& data_region) {
+  // This can be called multiple times in tests.
+  if (g_icudtl_mapped_file) {
+    return true;
+  }
+  if (data_fd == kInvalidPlatformFile) {
+    return false;
+  }
+
+  scoped_ptr<MemoryMappedFile> icudtl_mapped_file(new MemoryMappedFile());
+  if (!icudtl_mapped_file->Initialize(File(data_fd), data_region)) {
+    LOG(ERROR) << "Couldn't mmap icu data file";
+    return false;
+  }
+  g_icudtl_mapped_file = icudtl_mapped_file.release();
+
+  UErrorCode err = U_ZERO_ERROR;
+  udata_setCommonData(const_cast<uint8*>(g_icudtl_mapped_file->data()), &err);
+  return err == U_ZERO_ERROR;
+}
+#endif  // ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE
+#endif  // !defined(OS_NACL)
+
+}  // namespace
+
 #if !defined(OS_NACL)
+#if ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE
 bool InitializeICUWithFileDescriptor(
     PlatformFile data_fd,
-    MemoryMappedFile::Region data_region) {
+    const MemoryMappedFile::Region& data_region) {
 #if !defined(NDEBUG)
   DCHECK(!g_check_called_once || !g_called_once);
   g_called_once = true;
 #endif
-
-#if (ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_STATIC)
-  // The ICU data is statically linked.
-  return true;
-#elif (ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE)
-  CR_DEFINE_STATIC_LOCAL(MemoryMappedFile, mapped_file, ());
-  if (!mapped_file.IsValid()) {
-    if (!mapped_file.Initialize(File(data_fd), data_region)) {
-      LOG(ERROR) << "Couldn't mmap icu data file";
-      return false;
-    }
-  }
-  UErrorCode err = U_ZERO_ERROR;
-  udata_setCommonData(const_cast<uint8*>(mapped_file.data()), &err);
-  return err == U_ZERO_ERROR;
-#endif // ICU_UTIL_DATA_FILE
+  return InitializeICUWithFileDescriptorInternal(data_fd, data_region);
 }
 
+PlatformFile GetIcuDataFileHandle(MemoryMappedFile::Region* out_region) {
+  CHECK_NE(g_icudtl_pf, kInvalidPlatformFile);
+  *out_region = g_icudtl_region;
+  return g_icudtl_pf;
+}
+#endif  // ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE
 
 bool InitializeICU() {
 #if !defined(NDEBUG)
@@ -123,60 +218,9 @@ bool InitializeICU() {
   // it is needed.  This can fail if the process is sandboxed at that time.
   // Instead, we map the file in and hand off the data so the sandbox won't
   // cause any problems.
-
-  // Chrome doesn't normally shut down ICU, so the mapped data shouldn't ever
-  // be released.
-  CR_DEFINE_STATIC_LOCAL(MemoryMappedFile, mapped_file, ());
-  if (!mapped_file.IsValid()) {
-#if !defined(OS_MACOSX)
-    FilePath data_path;
-#if defined(OS_WIN)
-    // The data file will be in the same directory as the current module.
-    bool path_ok = PathService::Get(DIR_MODULE, &data_path);
-    wchar_t tmp_buffer[_MAX_PATH] = {0};
-    wcscpy_s(tmp_buffer, data_path.value().c_str());
-    debug::Alias(tmp_buffer);
-    CHECK(path_ok);  // TODO(scottmg): http://crbug.com/445616
-#elif defined(OS_ANDROID)
-    bool path_ok = PathService::Get(DIR_ANDROID_APP_DATA, &data_path);
-#else
-    // For now, expect the data file to be alongside the executable.
-    // This is sufficient while we work on unit tests, but will eventually
-    // likely live in a data directory.
-    bool path_ok = PathService::Get(DIR_EXE, &data_path);
-#endif
-    DCHECK(path_ok);
-    data_path = data_path.AppendASCII(kIcuDataFileName);
-
-#if defined(OS_WIN)
-    // TODO(scottmg): http://crbug.com/445616
-    wchar_t tmp_buffer2[_MAX_PATH] = {0};
-    wcscpy_s(tmp_buffer2, data_path.value().c_str());
-    debug::Alias(tmp_buffer2);
-#endif
-
-#else
-    // Assume it is in the framework bundle's Resources directory.
-    ScopedCFTypeRef<CFStringRef> data_file_name(
-        SysUTF8ToCFStringRef(kIcuDataFileName));
-    FilePath data_path =
-      mac::PathForFrameworkBundleResource(data_file_name);
-    if (data_path.empty()) {
-      LOG(ERROR) << kIcuDataFileName << " not found in bundle";
-      return false;
-    }
-#endif  // OS check
-    if (!mapped_file.Initialize(data_path)) {
-#if defined(OS_WIN)
-      CHECK(false);  // TODO(scottmg): http://crbug.com/445616
-#endif
-      LOG(ERROR) << "Couldn't mmap " << data_path.AsUTF8Unsafe();
-      return false;
-    }
-  }
-  UErrorCode err = U_ZERO_ERROR;
-  udata_setCommonData(const_cast<uint8*>(mapped_file.data()), &err);
-  result = (err == U_ZERO_ERROR);
+  LazyInitIcuDataFile();
+  result =
+      InitializeICUWithFileDescriptorInternal(g_icudtl_pf, g_icudtl_region);
 #if defined(OS_WIN)
   CHECK(result);  // TODO(scottmg): http://crbug.com/445616
 #endif
@@ -193,10 +237,10 @@ bool InitializeICU() {
 #endif
   return result;
 }
-#endif
+#endif  // !defined(OS_NACL)
 
 void AllowMultipleInitializeCallsForTesting() {
-#if !defined(NDEBUG)
+#if !defined(NDEBUG) && !defined(OS_NACL)
   g_check_called_once = false;
 #endif
 }

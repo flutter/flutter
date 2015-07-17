@@ -80,6 +80,10 @@ static char** g_argv;
   label.textAlignment = NSTextAlignmentCenter;
   [window_ addSubview:label];
 
+  // An NSInternalInconsistencyException is thrown if the app doesn't have a
+  // root view controller. Set an empty one here.
+  [window_ setRootViewController:[[[UIViewController alloc] init] autorelease]];
+
   if ([self shouldRedirectOutputToFile])
     [self redirectOutput];
 

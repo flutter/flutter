@@ -127,6 +127,18 @@ DISABLE_LOCATION_SETTINGS = [
   ]),
 ]
 
+ENABLE_MOCK_LOCATION_SETTINGS = [
+  ('settings/secure', [
+    ('mock_location', 1),
+  ]),
+]
+
+DISABLE_MOCK_LOCATION_SETTINGS = [
+  ('settings/secure', [
+    ('mock_location', 0),
+  ]),
+]
+
 DETERMINISTIC_DEVICE_SETTINGS = [
   ('settings/global', [
     ('assisted_gps_enabled', 0),

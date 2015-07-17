@@ -29,7 +29,7 @@ bool DefaultPrefStore::HasObservers() const {
 void DefaultPrefStore::SetDefaultValue(const std::string& key,
                                        scoped_ptr<Value> value) {
   DCHECK(!GetValue(key, NULL));
-  prefs_.SetValue(key, value.release());
+  prefs_.SetValue(key, value.Pass());
 }
 
 void DefaultPrefStore::ReplaceDefaultValue(const std::string& key,
@@ -37,7 +37,7 @@ void DefaultPrefStore::ReplaceDefaultValue(const std::string& key,
   const Value* old_value = NULL;
   GetValue(key, &old_value);
   bool notify = !old_value->Equals(value.get());
-  prefs_.SetValue(key, value.release());
+  prefs_.SetValue(key, value.Pass());
   if (notify)
     FOR_EACH_OBSERVER(Observer, observers_, OnPrefValueChanged(key));
 }

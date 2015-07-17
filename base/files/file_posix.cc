@@ -466,7 +466,7 @@ void File::MemoryCheckingScopedFD::UpdateChecksum() {
 // NaCl doesn't implement system calls to open files directly.
 #if !defined(OS_NACL)
 // TODO(erikkay): does it make sense to support FLAG_EXCLUSIVE_* here?
-void File::DoInitialize(uint32 flags) {
+void File::DoInitialize(const FilePath& path, uint32 flags) {
   ThreadRestrictions::AssertIOAllowed();
   DCHECK(!IsValid());
 
@@ -521,7 +521,7 @@ void File::DoInitialize(uint32 flags) {
   mode |= S_IRGRP | S_IROTH;
 #endif
 
-  int descriptor = HANDLE_EINTR(open(path_.value().c_str(), open_flags, mode));
+  int descriptor = HANDLE_EINTR(open(path.value().c_str(), open_flags, mode));
 
   if (flags & FLAG_OPEN_ALWAYS) {
     if (descriptor < 0) {
@@ -529,7 +529,7 @@ void File::DoInitialize(uint32 flags) {
       if (flags & FLAG_EXCLUSIVE_READ || flags & FLAG_EXCLUSIVE_WRITE)
         open_flags |= O_EXCL;   // together with O_CREAT implies O_NOFOLLOW
 
-      descriptor = HANDLE_EINTR(open(path_.value().c_str(), open_flags, mode));
+      descriptor = HANDLE_EINTR(open(path.value().c_str(), open_flags, mode));
       if (descriptor >= 0)
         created_ = true;
     }
@@ -544,7 +544,7 @@ void File::DoInitialize(uint32 flags) {
     created_ = true;
 
   if (flags & FLAG_DELETE_ON_CLOSE)
-    unlink(path_.value().c_str());
+    unlink(path.value().c_str());
 
   async_ = ((flags & FLAG_ASYNC) == FLAG_ASYNC);
   error_details_ = FILE_OK;

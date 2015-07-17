@@ -47,7 +47,8 @@
       ],
       'sources': [
         'gurl_unittest.cc',
-        'origin_unittest.cc',
+        'deprecated_serialized_origin_unittest.cc',
+        'scheme_host_port_unittest.cc',
         'url_canon_icu_unittest.cc',
         'url_canon_unittest.cc',
         'url_parse_unittest.cc',
@@ -119,6 +120,23 @@
           'defines': [
             'URL_IMPLEMENTATION',
             'USE_ICU_ALTERNATIVES_ON_ANDROID=1',
+          ],
+        },
+      ],
+    }],
+    ['test_isolation_mode != "noop"', {
+      'targets': [
+        {
+          'target_name': 'url_unittests_run',
+          'type': 'none',
+          'dependencies': [
+            'url_unittests',
+          ],
+          'includes': [
+            '../build/isolate.gypi',
+          ],
+          'sources': [
+            'url_unittests.isolate',
           ],
         },
       ],

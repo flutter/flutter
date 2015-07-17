@@ -77,8 +77,8 @@ class StupidWatcher : public MessagePumpLibevent::Watcher {
 
 // Test to make sure that we catch calling WatchFileDescriptor off of the
 // wrong thread.
-#if defined(OS_CHROMEOS)
-// Flaky on Chrome OS: crbug.com/138845.
+#if defined(OS_CHROMEOS) || defined(OS_LINUX)
+// Flaky on Chrome OS and Linux: crbug.com/138845.
 #define MAYBE_TestWatchingFromBadThread DISABLED_TestWatchingFromBadThread
 #else
 #define MAYBE_TestWatchingFromBadThread TestWatchingFromBadThread
@@ -246,7 +246,7 @@ TEST_F(MessagePumpLibeventTest, QuitWatcher) {
   MessagePumpLibevent::FileDescriptorWatcher controller;
   QuitWatcher delegate(&controller, &run_loop);
   WaitableEvent event(false /* manual_reset */, false /* initially_signaled */);
-  WaitableEventWatcher watcher;
+  scoped_ptr<WaitableEventWatcher> watcher(new WaitableEventWatcher);
 
   // Tell the pump to watch the pipe.
   pump->WatchFileDescriptor(pipefds_[0], false, MessagePumpLibevent::WATCH_READ,
@@ -258,13 +258,17 @@ TEST_F(MessagePumpLibeventTest, QuitWatcher) {
       Bind(&WriteFDWrapper, pipefds_[1], &buf, 1);
   io_loop()->PostTask(FROM_HERE,
                       Bind(IgnoreResult(&WaitableEventWatcher::StartWatching),
-                           Unretained(&watcher), &event, write_fd_task));
+                           Unretained(watcher.get()), &event, write_fd_task));
 
   // Queue |event| to signal on |loop|.
   loop.PostTask(FROM_HERE, Bind(&WaitableEvent::Signal, Unretained(&event)));
 
   // Now run the MessageLoop.
   run_loop.Run();
+
+  // StartWatching can move |watcher| to IO thread. Release on IO thread.
+  io_loop()->PostTask(FROM_HERE, Bind(&WaitableEventWatcher::StopWatching,
+                                      Owned(watcher.release())));
 }
 
 }  // namespace

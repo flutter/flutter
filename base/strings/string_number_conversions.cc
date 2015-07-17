@@ -42,7 +42,12 @@ struct IntToStringT {
   template <typename INT2, typename UINT2>
   struct ToUnsignedT<INT2, UINT2, true> {
     static UINT2 ToUnsigned(INT2 value) {
-      return static_cast<UINT2>(value < 0 ? -value : value);
+      if (value >= 0) {
+        return value;
+      } else {
+        // Avoid integer overflow when negating INT_MIN.
+        return static_cast<UINT2>(-(value + 1)) + 1;
+      }
     }
   };
 
@@ -131,10 +136,10 @@ template<int BASE, typename CHAR> bool CharToDigit(CHAR c, uint8* digit) {
   return BaseCharToDigit<CHAR, BASE, BASE <= 10>::Convert(c, digit);
 }
 
-// There is an IsWhitespace for wchars defined in string_util.h, but it is
-// locale independent, whereas the functions we are replacing were
-// locale-dependent. TBD what is desired, but for the moment let's not introduce
-// a change in behaviour.
+// There is an IsUnicodeWhitespace for wchars defined in string_util.h, but it
+// is locale independent, whereas the functions we are replacing were
+// locale-dependent. TBD what is desired, but for the moment let's not
+// introduce a change in behaviour.
 template<typename CHAR> class WhitespaceHelper {
 };
 

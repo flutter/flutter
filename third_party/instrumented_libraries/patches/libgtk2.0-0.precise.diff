@@ -1,0 +1,28 @@
+diff -rupN ./gtk/gtkmain.c ../gtk+2.0-2.24.10-patched/gtk/gtkmain.c
+--- ./gtk/gtkmain.c	2014-05-29 19:39:07.000000000 +0400
++++ ../gtk+2.0-2.24.10-patched/gtk/gtkmain.c	2015-02-09 21:52:59.213636172 +0300
+@@ -751,6 +751,10 @@ _overlay_scrollbar_init (void)
+   GModule *module = NULL;
+   gpointer symbol = NULL;
+ 
++  /* Chrome doesn't use overlay-scrollbar anyway. By disabling it here, we avoid
++   * having to build it. */
++  return;
++
+   gchar *flag = (gchar*) g_getenv ("LIBOVERLAY_SCROLLBAR");
+ 
+   /* check if LIBOVERLAY_SCROLLBAR is set to 0 or an empty value
+diff -rupN ./gtk/gtkmenushell.h ../gtk+2.0-2.24.10-patched/gtk/gtkmenushell.h
+--- ./gtk/gtkmenushell.h	2011-08-16 06:30:52.000000000 +0400
++++ ../gtk+2.0-2.24.10-patched/gtk/gtkmenushell.h	2015-02-09 21:49:49.052032041 +0300
+@@ -135,7 +135,9 @@ void     _gtk_menu_shell_update_mnemonic
+ void     _gtk_menu_shell_set_keyboard_mode (GtkMenuShell *menu_shell,
+                                             gboolean      keyboard_mode);
+ gboolean _gtk_menu_shell_get_keyboard_mode (GtkMenuShell *menu_shell);
+-
++// https://bugs.launchpad.net/bugs/945135
++gboolean ubuntu_gtk_menu_shell_activate_mnemonic (GtkMenuShell *shell, GtkWidget *item);
++gboolean ubuntu_gtk_menu_shell_activate_first (GtkMenuShell *menu_shell, gboolean search_sensitive);
+ G_END_DECLS
+ 
+ #endif /* __GTK_MENU_SHELL_H__ */

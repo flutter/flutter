@@ -11,6 +11,7 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/single_thread_task_runner.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/threading/thread_local_storage.h"
 #include "base/trace_event/trace_event.h"
@@ -318,9 +319,9 @@ void AppendHeapProfileAsTraceFormat(const char* input, std::string* output) {
     input_string.assign(input);
   }
 
-  std::vector<std::string> lines;
-  size_t line_count = Tokenize(input_string, "\n", &lines);
-  if (line_count == 0) {
+  std::vector<std::string> lines = base::SplitString(
+      input_string, "\n", base::KEEP_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
+  if (lines.empty()) {
     DLOG(WARNING) << "No lines found";
     return;
   }
@@ -330,10 +331,8 @@ void AppendHeapProfileAsTraceFormat(const char* input, std::string* output) {
   AppendHeapProfileTotalsAsTraceFormat(lines[0], output);
 
   // Handle the following stack trace lines.
-  for (size_t i = 1; i < line_count; ++i) {
-    const std::string& line = lines[i];
-    AppendHeapProfileLineAsTraceFormat(line, output);
-  }
+  for (size_t i = 1; i < lines.size(); i++)
+    AppendHeapProfileLineAsTraceFormat(lines[i], output);
   output->append("]\n");
 }
 
@@ -348,8 +347,8 @@ void AppendHeapProfileTotalsAsTraceFormat(const std::string& line,
   //   55227 = Outstanding bytes (malloc bytes - free bytes)
   //   14653 = Total allocations (mallocs)
   // 2624014 = Total bytes (malloc bytes)
-  std::vector<std::string> tokens;
-  Tokenize(line, " :[]@", &tokens);
+  std::vector<std::string> tokens = base::SplitString(
+      line, " :[]@", base::KEEP_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
   if (tokens.size() < 4) {
     DLOG(WARNING) << "Invalid totals line " << line;
     return;
@@ -378,8 +377,8 @@ bool AppendHeapProfileLineAsTraceFormat(const std::string& line,
   // 0x7fa7fa9b9ba0 0x7fa7f4b3be13 = Stack trace represented as pointers to
   //                                 static strings from trace event categories
   //                                 and names.
-  std::vector<std::string> tokens;
-  Tokenize(line, " :[]@", &tokens);
+  std::vector<std::string> tokens = base::SplitString(
+      line, " :[]@", base::KEEP_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
   // It's valid to have no stack addresses, so only require 4 tokens.
   if (tokens.size() < 4) {
     DLOG(WARNING) << "Invalid line " << line;

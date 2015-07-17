@@ -8139,7 +8139,7 @@ Wed Dec 10 11:16:29 CET 2003 Daniel Veillard <daniel@veillard.com>
 
 Tue Dec  9 23:50:23 CET 2003 Daniel Veillard <daniel@veillard.com>
 
-	* entities.c: fixed an XML entites content serialization 
+	* entities.c: fixed an XML entities content serialization
 	  potentially triggered by XInclude, see #126817
 
 Tue Dec  9 16:12:50 CET 2003 Daniel Veillard <daniel@veillard.com>

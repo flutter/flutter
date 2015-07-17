@@ -5,9 +5,6 @@
 #ifndef URL_THIRD_PARTY_MOZILLA_URL_PARSE_H_
 #define URL_THIRD_PARTY_MOZILLA_URL_PARSE_H_
 
-#include <string>
-
-#include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "url/url_export.h"
 

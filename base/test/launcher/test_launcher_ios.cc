@@ -121,7 +121,7 @@ class IOSUnitTestPlatformDelegate : public base::UnitTestPlatformDelegate {
     base::CommandLine cmd_line(dir_exe_.AppendASCII(test_name_ + ".app"));
     cmd_line.AppendSwitchPath(switches::kTestLauncherOutput, output_file);
     cmd_line.AppendSwitchASCII(base::kGTestFilterFlag,
-                               JoinString(test_names, ":"));
+                               base::JoinString(test_names, ":"));
     return cmd_line;
   }
 

@@ -11,9 +11,9 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
-   Utilities for building Huffman decoding tables.
 */
+
+/* Utilities for building Huffman decoding tables. */
 
 #include <assert.h>
 #include <stdlib.h>
@@ -157,6 +157,24 @@ int BrotliBuildHuffmanTable(HuffmanCode* root_table,
 
   free(sorted);
   return total_size;
+}
+
+void BrotliHuffmanTreeGroupInit(HuffmanTreeGroup* group, int alphabet_size,
+                                int ntrees) {
+  group->alphabet_size = alphabet_size;
+  group->num_htrees = ntrees;
+  group->codes = (HuffmanCode*)malloc(
+      sizeof(HuffmanCode) * (size_t)(ntrees * BROTLI_HUFFMAN_MAX_TABLE_SIZE));
+  group->htrees = (HuffmanCode**)malloc(sizeof(HuffmanCode*) * (size_t)ntrees);
+}
+
+void BrotliHuffmanTreeGroupRelease(HuffmanTreeGroup* group) {
+  if (group->codes) {
+    free(group->codes);
+  }
+  if (group->htrees) {
+    free(group->htrees);
+  }
 }
 
 #if defined(__cplusplus) || defined(c_plusplus)

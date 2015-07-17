@@ -1,0 +1,31 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("config.gni")
+
+gypi_values = exec_script("//build/gypi_to_gn.py",
+                          [ rebase_path("relocation_packer.gyp") ],
+                          "scope",
+                          [ "relocation_packer.gyp" ])
+
+if (current_toolchain == host_toolchain) {
+  # GYP: //third_party/android_platform/relocation_packer.gyp:android_lib_relocation_packer
+  source_set("android_lib_relocation_packer") {
+    deps = [
+      "//third_party/elfutils:libelf",
+    ]
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+    sources = gypi_values.relocation_packer_sources
+  }
+
+  # GYP: //third_party/android_platform/relocation_packer.gyp:android_relocation_packer
+  executable("android_relocation_packer") {
+    deps = [
+      ":android_lib_relocation_packer",
+      "//third_party/elfutils:libelf",
+    ]
+    sources = gypi_values.relocation_packer_main_source
+  }
+}

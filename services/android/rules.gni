@@ -44,6 +44,10 @@ template("mojo_android_java_application") {
   action(android_with_manifest_name) {
     script = "${servicess_android_path}/add_manifest_entry.py"
 
+    deps = [
+      ":$android_standalone_name",
+    ]
+
     input = dex_output_path
     inputs = [
       input,
@@ -73,6 +77,10 @@ template("mojo_android_java_application") {
 
   action(target_name) {
     script = rebase_path("mojo/public/tools/prepend.py", ".", mojo_root)
+
+    deps = [
+      ":$android_with_manifest_name",
+    ]
 
     input = dex_with_manifest_output_path
     inputs = [

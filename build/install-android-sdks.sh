@@ -12,14 +12,9 @@ echo 'checking for sdk packages install'
 cwd=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # Get the SDK extras packages to install from the DEPS file 'sdkextras' hook.
 packages="$(python ${cwd}/get_sdk_extras_packages.py)"
-for package in "${packages}"; do
-  pkg_id=$(${cwd}/../third_party/android_tools/sdk/tools/android list sdk | \
-                grep -i "$package," | \
-                awk '/^[ ]*[0-9]*- / {gsub("-",""); print $1}')
-  if [[ -n ${pkg_id} ]]; then
-    ${cwd}/../third_party/android_tools/sdk/tools/android update sdk --no-ui \
-       --filter ${pkg_id}
-  fi
-done
+if [[ -n "${packages}" ]]; then
+  ${cwd}/../third_party/android_tools/sdk/tools/android update sdk --no-ui \
+      --filter ${packages}
+fi
 
 echo "install-android-sdks.sh complete."

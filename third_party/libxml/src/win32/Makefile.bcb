@@ -43,14 +43,14 @@ UTILS_INTDIR = int.utils.bcb
 
 # The preprocessor and its options.
 CPP = cpp32.exe -P- -DWIN32
-CPPFLAGS = -I"$(XML_SRCDIR)\include"
+CPPFLAGS = -I"$(XML_SRCDIR)\include" -DNOLIBTOOL 
 !if "$(WITH_THREADS)" != "no"
 CPPFLAGS = $(CPPFLAGS) -D_REENTRANT -D__MT__
 !endif
 
 # The compiler and its options.
 CC = bcc32.exe
-CFLAGS = -q -DWIN32 -D_NO_VCL -D_WINDOWS -D_MBCS -DEILSEQ=2 -w-
+CFLAGS = -q -DWIN32 -D_NO_VCL -D_WINDOWS -D_MBCS -DEILSEQ=2 -DNOLIBTOOL -w-
 CFLAGS = $(CFLAGS) -I"$(XML_SRCDIR)" -I"$(XML_SRCDIR)\include" -I"$(INCPREFIX)" -I"$(INCLUDE)"
 !if "$(WITH_THREADS)" != "no"
 CFLAGS = $(CFLAGS) -D_REENTRANT -tWM
@@ -67,6 +67,9 @@ CFLAGS = $(CFLAGS) -DHAVE_PTHREAD_H
 !endif
 !if "$(WITH_ZLIB)" == "1"
 CFLAGS = $(CFLAGS) -DHAVE_ZLIB_H
+!endif
+!if "$(WITH_LZMA)" == "1"
+CFLAGS = $(CFLAGS) -DHAVE_LZMA_H
 !endif
 
 # The linker and its options.
@@ -92,6 +95,9 @@ LIBS = $(LIBS) iconvomf.lib
 !if "$(WITH_ZLIB)" == "1"
 LIBS = $(LIBS) zlibomf.lib
 !endif
+!if "$(WITH_LZMA)" == "1"
+LIBS = $(LIBS) liblzma.lib
+!endif
 !if "$(WITH_THREADS)" == "posix"
 LIBS = $(LIBS) pthreadVC.lib
 !endif
@@ -113,7 +119,8 @@ LDFLAGS = $(LDFLAGS)
 !endif
 
 # Libxml object files.
-XML_OBJS = $(XML_INTDIR)\c14n.obj\
+XML_OBJS = $(XML_INTDIR)\buf.obj\
+	$(XML_INTDIR)\c14n.obj\
 	$(XML_INTDIR)\catalog.obj\
 	$(XML_INTDIR)\chvalid.obj\
 	$(XML_INTDIR)\debugXML.obj\
@@ -158,7 +165,8 @@ XML_OBJS = $(XML_INTDIR)\c14n.obj\
 	$(XML_INTDIR)\xmlstring.obj
 
 # Static libxml object files.
-XML_OBJS_A = $(XML_INTDIR_A)\c14n.obj\
+XML_OBJS_A = $(XML_INTDIR_A)\buf.obj\
+	$(XML_INTDIR_A)\c14n.obj\
 	$(XML_INTDIR_A)\catalog.obj\
 	$(XML_INTDIR_A)\chvalid.obj\
 	$(XML_INTDIR_A)\debugXML.obj\
@@ -219,7 +227,8 @@ UTILS = $(BINDIR)\xmllint.exe\
 	$(BINDIR)\testXPath.exe\
 	$(BINDIR)\runtest.exe\
 	$(BINDIR)\runsuite.exe\
-	$(BINDIR)\testapi.exe
+	$(BINDIR)\testapi.exe\
+	$(BINDIR)\testlimits.exe
 
 
 !if "$(WITH_THREADS)" == "yes" || "$(WITH_THREADS)" == "ctls" || "$(WITH_THREADS)" == "native"
@@ -250,10 +259,11 @@ distclean : clean
 rebuild : clean all
 
 install-libs : all
-	if not exist "$(INCPREFIX)\libxml" mkdir "$(INCPREFIX)\libxml"
+	if not exist "$(INCPREFIX)\libxml2" mkdir "$(INCPREFIX)\libxml2"
+	if not exist "$(INCPREFIX)\libxml2\libxml" mkdir "$(INCPREFIX)\libxml2\libxml"
 	if not exist "$(BINPREFIX)" mkdir "$(BINPREFIX)"
 	if not exist "$(LIBPREFIX)" mkdir "$(LIBPREFIX)"
-	copy $(XML_SRCDIR)\include\libxml\*.h "$(INCPREFIX)\libxml"
+	copy $(XML_SRCDIR)\include\libxml\*.h "$(INCPREFIX)\libxml2\libxml"
 	copy $(BINDIR)\$(XML_SO) "$(SOPREFIX)"
 	copy $(BINDIR)\$(XML_A) "$(LIBPREFIX)"
 	copy $(BINDIR)\$(XML_IMP) "$(LIBPREFIX)"

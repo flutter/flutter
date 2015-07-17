@@ -16,7 +16,7 @@
 #include <stdint.h>  // For intptr_t.
 
 #include "base/macros.h"
-#include "base/port.h"  // Types that only need exist on certain systems.
+#include "build/build_config.h"
 
 // DEPRECATED: Please use (u)int{8,16,32,64}_t instead (and include <stdint.h>).
 typedef int8_t int8;

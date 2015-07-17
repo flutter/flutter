@@ -16,6 +16,7 @@
 
 """stack symbolizes native crash dumps."""
 
+import logging
 import re
 
 import symbol
@@ -74,7 +75,7 @@ def ConvertTrace(lines, more_info):
   dalvik_native_thread_line = re.compile("(\".*\" sysTid=[0-9]+ nice=[0-9]+.*)")
 
   width = "{8}"
-  if symbol.ARCH == "arm64" or symbol.ARCH == "x86_64":
+  if symbol.ARCH == "arm64" or symbol.ARCH == "x86_64" or symbol.ARCH == "x64":
     width = "{16}"
 
   # Matches LOG(FATAL) lines, like the following example:
@@ -192,6 +193,7 @@ def ConvertTrace(lines, more_info):
     if match:
       frame, code_addr, area, symbol_present, symbol_name = match.group(
           'frame', 'address', 'lib', 'symbol_present', 'symbol_name')
+      logging.debug('Found trace line: %s' % line.strip())
 
       if frame <= last_frame and (trace_lines or value_lines):
         PrintOutput(trace_lines, value_lines, more_info)
@@ -203,9 +205,11 @@ def ConvertTrace(lines, more_info):
       if area == UNKNOWN or area == HEAP or area == STACK:
         trace_lines.append((code_addr, "", area))
       else:
+        logging.debug('Identified lib: %s' % area)
         # If a calls b which further calls c and c is inlined to b, we want to
         # display "a -> b -> c" in the stack trace instead of just "a -> c"
         info = symbol.SymbolInformation(area, code_addr, more_info)
+        logging.debug('symbol information: %s' % info)
         nest_count = len(info) - 1
         for (source_symbol, source_location, object_symbol_with_offset) in info:
           if not source_symbol:

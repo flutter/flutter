@@ -36,6 +36,13 @@ class TestCase(unittest.TestCase):
       # Install the _RunTest method
       self._TestMethod = method
       setattr(self, test_name, self._RunTest)
+    self._output_dir = None
+
+  @property
+  def output_dir(self):
+    if not self._output_dir:
+      self._output_dir = self.rpc.GetOutputDir()
+    return self._output_dir
 
   def _RunTest(self):
     """Runs the test method and provides banner info and error reporting."""

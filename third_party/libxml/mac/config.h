@@ -1,21 +1,8 @@
 /* config.h.  Generated from config.h.in by configure.  */
-/* config.h.in.  Generated from configure.in by autoheader.  */
-#define PACKAGE "libxml2"
-#define VERSION "2.7.7"
-#define HAVE_LIBZ 1
-/* #undef HAVE_LIBM */
-#define HAVE_ISINF /**/
-#define HAVE_ISNAN /**/
-/* #undef HAVE_LIBHISTORY */
-/* #undef HAVE_LIBREADLINE */
-#define HAVE_LIBPTHREAD /**/
-#define HAVE_PTHREAD_H /**/
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define if IPV6 support is there */
-#define SUPPORT_IP6 /**/
-
-/* Define if getaddrinfo is there */
-#define HAVE_GETADDRINFO /**/
+/* Type cast for the gethostbyname() argument */
+#define GETHOSTBYNAME_ARG_CAST /**/
 
 /* Define to 1 if you have the <ansidecl.h> header file. */
 /* #undef HAVE_ANSIDECL_H */
@@ -86,8 +73,8 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* Define to 1 if you have the <inttypes.h.h> header file. */
-/* #undef HAVE_INTTYPES_H_H */
+/* Define to 1 if you have the `isascii' function. */
+#define HAVE_ISASCII 1
 
 /* Define if isinf is there */
 #define HAVE_ISINF /**/
@@ -100,6 +87,9 @@
 
 /* Define if history library is there (-lhistory) */
 /* #undef HAVE_LIBHISTORY */
+
+/* Have compression library */
+/* #undef HAVE_LIBLZMA */
 
 /* Define if pthread library is there (-lpthread) */
 #define HAVE_LIBPTHREAD /**/
@@ -116,6 +106,9 @@
 /* Define to 1 if you have the `localtime' function. */
 #define HAVE_LOCALTIME 1
 
+/* Define to 1 if you have the <lzma.h> header file. */
+/* #undef HAVE_LZMA_H */
+
 /* Define to 1 if you have the <malloc.h> header file. */
 /* #undef HAVE_MALLOC_H */
 
@@ -124,6 +117,17 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
+
+/* Define to 1 if you have the `mmap' function. */
+#define HAVE_MMAP 1
+
+/* Define to 1 if you have the `munmap' function. */
+#define HAVE_MUNMAP 1
+
+/* mmap() is no good without munmap() */
+#if defined(HAVE_MMAP) && !defined(HAVE_MUNMAP)
+#  undef /**/ HAVE_MMAP
+#endif
 
 /* Define to 1 if you have the <nan.h> header file. */
 /* #undef HAVE_NAN_H */
@@ -146,6 +150,15 @@
 /* Define if <pthread.h> is there */
 #define HAVE_PTHREAD_H /**/
 
+/* Define to 1 if you have the `putenv' function. */
+#define HAVE_PUTENV 1
+
+/* Define to 1 if you have the `rand' function. */
+#define HAVE_RAND 1
+
+/* Define to 1 if you have the `rand_r' function. */
+#define HAVE_RAND_R 1
+
 /* Define to 1 if you have the <resolv.h> header file. */
 #define HAVE_RESOLV_H 1
 
@@ -163,6 +176,9 @@
 
 /* Define to 1 if you have the `sprintf' function. */
 #define HAVE_SPRINTF 1
+
+/* Define to 1 if you have the `srand' function. */
+#define HAVE_SRAND 1
 
 /* Define to 1 if you have the `sscanf' function. */
 #define HAVE_SSCANF 1
@@ -195,7 +211,7 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strndup' function. */
-/* #undef HAVE_STRNDUP */
+#define HAVE_STRNDUP 1
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -225,6 +241,9 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
+
+/* Define to 1 if you have the `time' function. */
+#define HAVE_TIME 1
 
 /* Define to 1 if you have the <time.h> header file. */
 #define HAVE_TIME_H 1
@@ -281,8 +300,8 @@
 /* Define to the version of this package. */
 #define PACKAGE_VERSION ""
 
-/* Define to 1 if the C compiler supports function prototypes. */
-#define PROTOTYPES 1
+/* Type cast for the send() function 2nd arg */
+#define SEND_ARG2_CAST /**/
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
@@ -290,23 +309,26 @@
 /* Support for IPv6 */
 #define SUPPORT_IP6 /**/
 
+/* Define if va_list is an array type */
+#define VA_LIST_IS_ARRAY 1
+
 /* Version number of package */
-#define VERSION "2.7.7"
+#define VERSION "2.9.2"
 
 /* Determine what socket length (socklen_t) data type is */
 #define XML_SOCKLEN_T socklen_t
 
+/* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
+   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
+   #define below would cause a syntax error. */
+/* #undef _UINT32_T */
+
 /* Using the Win32 Socket implementation */
 /* #undef _WINSOCKAPI_ */
-
-/* Define like PROTOTYPES; this can be used by system headers. */
-#define __PROTOTYPES 1
-
-/* Win32 Std C name mangling work-around */
-/* #undef snprintf */
 
 /* ss_family is not defined here, use __ss_family instead */
 /* #undef ss_family */
 
-/* Win32 Std C name mangling work-around */
-/* #undef vsnprintf */
+/* Define to the type of an unsigned integer type of width exactly 32 bits if
+   such a type exists and the standard includes do not define it. */
+/* #undef uint32_t */

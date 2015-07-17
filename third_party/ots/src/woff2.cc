@@ -43,76 +43,72 @@ const size_t kCheckSumAdjustmentOffset = 8;
 const size_t kEndPtsOfContoursOffset = 10;
 const size_t kCompositeGlyphBegin = 10;
 
-// Note that the byte order is big-endian, not the same as ots.cc
-#define TAG(a, b, c, d) ((a << 24) | (b << 16) | (c << 8) | d)
-#define CHR(t)           (t >> 24),  (t >> 16),  (t >> 8), (t >> 0)
-
 const unsigned int kWoff2FlagsTransform = 1 << 5;
 
 const uint32_t kKnownTags[] = {
-  TAG('c', 'm', 'a', 'p'),  // 0
-  TAG('h', 'e', 'a', 'd'),  // 1
-  TAG('h', 'h', 'e', 'a'),  // 2
-  TAG('h', 'm', 't', 'x'),  // 3
-  TAG('m', 'a', 'x', 'p'),  // 4
-  TAG('n', 'a', 'm', 'e'),  // 5
-  TAG('O', 'S', '/', '2'),  // 6
-  TAG('p', 'o', 's', 't'),  // 7
-  TAG('c', 'v', 't', ' '),  // 8
-  TAG('f', 'p', 'g', 'm'),  // 9
-  TAG('g', 'l', 'y', 'f'),  // 10
-  TAG('l', 'o', 'c', 'a'),  // 11
-  TAG('p', 'r', 'e', 'p'),  // 12
-  TAG('C', 'F', 'F', ' '),  // 13
-  TAG('V', 'O', 'R', 'G'),  // 14
-  TAG('E', 'B', 'D', 'T'),  // 15
-  TAG('E', 'B', 'L', 'C'),  // 16
-  TAG('g', 'a', 's', 'p'),  // 17
-  TAG('h', 'd', 'm', 'x'),  // 18
-  TAG('k', 'e', 'r', 'n'),  // 19
-  TAG('L', 'T', 'S', 'H'),  // 20
-  TAG('P', 'C', 'L', 'T'),  // 21
-  TAG('V', 'D', 'M', 'X'),  // 22
-  TAG('v', 'h', 'e', 'a'),  // 23
-  TAG('v', 'm', 't', 'x'),  // 24
-  TAG('B', 'A', 'S', 'E'),  // 25
-  TAG('G', 'D', 'E', 'F'),  // 26
-  TAG('G', 'P', 'O', 'S'),  // 27
-  TAG('G', 'S', 'U', 'B'),  // 28
-  TAG('E', 'B', 'S', 'C'),  // 29
-  TAG('J', 'S', 'T', 'F'),  // 30
-  TAG('M', 'A', 'T', 'H'),  // 31
-  TAG('C', 'B', 'D', 'T'),  // 32
-  TAG('C', 'B', 'L', 'C'),  // 33
-  TAG('C', 'O', 'L', 'R'),  // 34
-  TAG('C', 'P', 'A', 'L'),  // 35
-  TAG('S', 'V', 'G', ' '),  // 36
-  TAG('s', 'b', 'i', 'x'),  // 37
-  TAG('a', 'c', 'n', 't'),  // 38
-  TAG('a', 'v', 'a', 'r'),  // 39
-  TAG('b', 'd', 'a', 't'),  // 40
-  TAG('b', 'l', 'o', 'c'),  // 41
-  TAG('b', 's', 'l', 'n'),  // 42
-  TAG('c', 'v', 'a', 'r'),  // 43
-  TAG('f', 'd', 's', 'c'),  // 44
-  TAG('f', 'e', 'a', 't'),  // 45
-  TAG('f', 'm', 't', 'x'),  // 46
-  TAG('f', 'v', 'a', 'r'),  // 47
-  TAG('g', 'v', 'a', 'r'),  // 48
-  TAG('h', 's', 't', 'y'),  // 49
-  TAG('j', 'u', 's', 't'),  // 50
-  TAG('l', 'c', 'a', 'r'),  // 51
-  TAG('m', 'o', 'r', 't'),  // 52
-  TAG('m', 'o', 'r', 'x'),  // 53
-  TAG('o', 'p', 'b', 'd'),  // 54
-  TAG('p', 'r', 'o', 'p'),  // 55
-  TAG('t', 'r', 'a', 'k'),  // 56
-  TAG('Z', 'a', 'p', 'f'),  // 57
-  TAG('S', 'i', 'l', 'f'),  // 58
-  TAG('G', 'l', 'a', 't'),  // 59
-  TAG('G', 'l', 'o', 'c'),  // 60
-  TAG('F', 'e', 'a', 't'),  // 61
-  TAG('S', 'i', 'l', 'l'),  // 62
+  OTS_TAG('c','m','a','p'),  // 0
+  OTS_TAG('h','e','a','d'),  // 1
+  OTS_TAG('h','h','e','a'),  // 2
+  OTS_TAG('h','m','t','x'),  // 3
+  OTS_TAG('m','a','x','p'),  // 4
+  OTS_TAG('n','a','m','e'),  // 5
+  OTS_TAG('O','S','/','2'),  // 6
+  OTS_TAG('p','o','s','t'),  // 7
+  OTS_TAG('c','v','t',' '),  // 8
+  OTS_TAG('f','p','g','m'),  // 9
+  OTS_TAG('g','l','y','f'),  // 10
+  OTS_TAG('l','o','c','a'),  // 11
+  OTS_TAG('p','r','e','p'),  // 12
+  OTS_TAG('C','F','F',' '),  // 13
+  OTS_TAG('V','O','R','G'),  // 14
+  OTS_TAG('E','B','D','T'),  // 15
+  OTS_TAG('E','B','L','C'),  // 16
+  OTS_TAG('g','a','s','p'),  // 17
+  OTS_TAG('h','d','m','x'),  // 18
+  OTS_TAG('k','e','r','n'),  // 19
+  OTS_TAG('L','T','S','H'),  // 20
+  OTS_TAG('P','C','L','T'),  // 21
+  OTS_TAG('V','D','M','X'),  // 22
+  OTS_TAG('v','h','e','a'),  // 23
+  OTS_TAG('v','m','t','x'),  // 24
+  OTS_TAG('B','A','S','E'),  // 25
+  OTS_TAG('G','D','E','F'),  // 26
+  OTS_TAG('G','P','O','S'),  // 27
+  OTS_TAG('G','S','U','B'),  // 28
+  OTS_TAG('E','B','S','C'),  // 29
+  OTS_TAG('J','S','T','F'),  // 30
+  OTS_TAG('M','A','T','H'),  // 31
+  OTS_TAG('C','B','D','T'),  // 32
+  OTS_TAG('C','B','L','C'),  // 33
+  OTS_TAG('C','O','L','R'),  // 34
+  OTS_TAG('C','P','A','L'),  // 35
+  OTS_TAG('S','V','G',' '),  // 36
+  OTS_TAG('s','b','i','x'),  // 37
+  OTS_TAG('a','c','n','t'),  // 38
+  OTS_TAG('a','v','a','r'),  // 39
+  OTS_TAG('b','d','a','t'),  // 40
+  OTS_TAG('b','l','o','c'),  // 41
+  OTS_TAG('b','s','l','n'),  // 42
+  OTS_TAG('c','v','a','r'),  // 43
+  OTS_TAG('f','d','s','c'),  // 44
+  OTS_TAG('f','e','a','t'),  // 45
+  OTS_TAG('f','m','t','x'),  // 46
+  OTS_TAG('f','v','a','r'),  // 47
+  OTS_TAG('g','v','a','r'),  // 48
+  OTS_TAG('h','s','t','y'),  // 49
+  OTS_TAG('j','u','s','t'),  // 50
+  OTS_TAG('l','c','a','r'),  // 51
+  OTS_TAG('m','o','r','t'),  // 52
+  OTS_TAG('m','o','r','x'),  // 53
+  OTS_TAG('o','p','b','d'),  // 54
+  OTS_TAG('p','r','o','p'),  // 55
+  OTS_TAG('t','r','a','k'),  // 56
+  OTS_TAG('Z','a','p','f'),  // 57
+  OTS_TAG('S','i','l','f'),  // 58
+  OTS_TAG('G','l','a','t'),  // 59
+  OTS_TAG('G','l','o','c'),  // 60
+  OTS_TAG('F','e','a','t'),  // 61
+  OTS_TAG('S','i','l','l'),  // 62
 };
 
 struct Point {
@@ -705,9 +701,9 @@ bool ReconstructTransformed(ots::OpenTypeFile* file,
     const std::vector<Table>& tables, uint32_t tag,
     const uint8_t* transformed_buf, size_t transformed_size,
     uint8_t* dst, size_t dst_length) {
-  if (tag == TAG('g', 'l', 'y', 'f')) {
+  if (tag == OTS_TAG('g','l','y','f')) {
     const Table* glyf_table = FindTable(tables, tag);
-    const Table* loca_table = FindTable(tables, TAG('l', 'o', 'c', 'a'));
+    const Table* loca_table = FindTable(tables, OTS_TAG('l','o','c','a'));
     if (glyf_table == NULL || loca_table == NULL) {
       return OTS_FAILURE();
     }
@@ -722,9 +718,9 @@ bool ReconstructTransformed(ots::OpenTypeFile* file,
     return ReconstructGlyf(file, transformed_buf, transformed_size,
         dst + glyf_table->dst_offset, glyf_table->dst_length,
         dst + loca_table->dst_offset, loca_table->dst_length);
-  } else if (tag == TAG('l', 'o', 'c', 'a')) {
+  } else if (tag == OTS_TAG('l','o','c','a')) {
     // processing was already done by glyf table, but validate
-    if (!FindTable(tables, TAG('g', 'l', 'y', 'f'))) {
+    if (!FindTable(tables, OTS_TAG('g','l','y','f'))) {
       return OTS_FAILURE();
     }
   } else {
@@ -745,7 +741,7 @@ uint32_t ComputeChecksum(const uint8_t* buf, size_t size) {
 }
 
 bool FixChecksums(const std::vector<Table>& tables, uint8_t* dst) {
-  const Table* head_table = FindTable(tables, TAG('h', 'e', 'a', 'd'));
+  const Table* head_table = FindTable(tables, OTS_TAG('h','e','a','d'));
   if (head_table == NULL ||
       head_table->dst_length < kCheckSumAdjustmentOffset + 4) {
     return OTS_FAILURE();
@@ -772,17 +768,6 @@ bool FixChecksums(const std::vector<Table>& tables, uint8_t* dst) {
   return true;
 }
 
-bool Woff2Uncompress(uint8_t* dst_buf, size_t dst_size,
-    const uint8_t* src_buf, size_t src_size) {
-  size_t uncompressed_size = dst_size;
-  int ok = BrotliDecompressBuffer(src_size, src_buf,
-                                  &uncompressed_size, dst_buf);
-  if (!ok || uncompressed_size != dst_size) {
-    return OTS_FAILURE();
-  }
-  return true;
-}
-
 bool ReadTableDirectory(ots::OpenTypeFile* file,
     ots::Buffer* buffer, std::vector<Table>* tables,
     size_t num_tables) {
@@ -806,18 +791,22 @@ bool ReadTableDirectory(ots::OpenTypeFile* file,
     }
     uint32_t flags = 0;
     // Always transform the glyf and loca tables
-    if (tag == TAG('g', 'l', 'y', 'f') ||
-        tag == TAG('l', 'o', 'c', 'a')) {
+    if (tag == OTS_TAG('g','l','y','f') ||
+        tag == OTS_TAG('l','o','c','a')) {
       flags |= kWoff2FlagsTransform;
     }
     uint32_t dst_length;
     if (!ReadBase128(buffer, &dst_length)) {
-      return OTS_FAILURE_MSG("Failed to read 'origLength' for table '%c%c%c%c'", CHR(tag));
+      return OTS_FAILURE_MSG("Failed to read 'origLength' for table '%c%c%c%c'", OTS_UNTAG(tag));
     }
     uint32_t transform_length = dst_length;
     if ((flags & kWoff2FlagsTransform) != 0) {
       if (!ReadBase128(buffer, &transform_length)) {
-        return OTS_FAILURE_MSG("Failed to read 'transformLength' for table '%c%c%c%c'", CHR(tag));
+        return OTS_FAILURE_MSG("Failed to read 'transformLength' for table '%c%c%c%c'", OTS_UNTAG(tag));
+      }
+
+      if (tag == OTS_TAG('l','o','c','a') && transform_length != 0) {
+        return OTS_FAILURE_MSG("The 'transformLength' of 'loca' table must be zero: %d", transform_length);
       }
     }
     // Disallow huge numbers (> 1GB) for sanity.
@@ -1020,12 +1009,15 @@ bool ConvertWOFF2ToSFNT(ots::OpenTypeFile* file,
   if (total_size > 30 * 1024 * 1024) {
     return OTS_FAILURE();
   }
-  const size_t total_size_size_t = static_cast<size_t>(total_size);
-  uncompressed_buf.resize(total_size_size_t);
-  const uint8_t* src_buf = data + compressed_offset;
-  if (!Woff2Uncompress(&uncompressed_buf[0], total_size_size_t,
-      src_buf, compressed_length)) {
+  size_t uncompressed_size = static_cast<size_t>(total_size);
+  uncompressed_buf.resize(uncompressed_size);
+  const uint8_t* compressed_buf = data + compressed_offset;
+  if (!BrotliDecompressBuffer(compressed_length, compressed_buf,
+                              &uncompressed_size, &uncompressed_buf[0])) {
     return OTS_FAILURE_MSG("Failed to uncompress font data");
+  }
+  if (uncompressed_size != static_cast<size_t>(total_size)) {
+    return OTS_FAILURE_MSG("Decompressed font data size does not match the sum of 'origLength' and 'transformLength'");
   }
   transform_buf = &uncompressed_buf[0];
 
@@ -1047,7 +1039,7 @@ bool ConvertWOFF2ToSFNT(ots::OpenTypeFile* file,
     } else {
       if (!ReconstructTransformed(file, tables, table->tag,
             transform_buf, transform_length, result, result_length)) {
-        return OTS_FAILURE_MSG("Failed to reconstruct '%c%c%c%c' table", CHR(table->tag));
+        return OTS_FAILURE_MSG("Failed to reconstruct '%c%c%c%c' table", OTS_UNTAG(table->tag));
       }
     }
 

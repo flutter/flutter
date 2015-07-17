@@ -788,6 +788,17 @@ retry:
     buffer->len = 0;
     uint32_t status_and = ~0, status_or = 0;
     double advances_so_far = 0;
+    /* For right-to-left runs, CoreText returns the glyphs positioned such that
+     * any trailing whitespace is to the left of (0,0).  Adjust coordinate system
+     * to fix for that.  Test with any RTL string with trailing spaces.
+     * https://code.google.com/p/chromium/issues/detail?id=476913
+     */
+    if (HB_DIRECTION_IS_BACKWARD (buffer->props.direction))
+    {
+      advances_so_far -= CTLineGetTrailingWhitespaceWidth (line);
+      if (HB_DIRECTION_IS_VERTICAL (buffer->props.direction))
+	  advances_so_far = -advances_so_far;
+    }
 
     const CFRange range_all = CFRangeMake (0, 0);
 

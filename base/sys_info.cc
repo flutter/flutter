@@ -41,14 +41,14 @@ bool SysInfo::IsLowEndDevice() {
 
   // Low End Device Mode will be enabled if this client is assigned to
   // one of those EnabledXXX groups.
-  if (StartsWithASCII(group_name, "Enabled", true))
+  if (StartsWith(group_name, "Enabled", CompareCase::SENSITIVE))
     return true;
 
   return g_lazy_low_end_device.Get().value();
 }
 #endif
 
-#if !defined(OS_MACOSX) || defined(OS_IOS)
+#if (!defined(OS_MACOSX) || defined(OS_IOS)) && !defined(OS_ANDROID)
 std::string SysInfo::HardwareModelName() {
   return std::string();
 }

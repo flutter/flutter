@@ -24,15 +24,17 @@ namespace {
 // parsed successfully, false otherwise.
 bool ParseVersionNumbers(const std::string& version_str,
                          std::vector<uint32_t>* parsed) {
-  std::vector<std::string> numbers;
-  SplitString(version_str, '.', &numbers);
+  std::vector<StringPiece> numbers =
+      SplitStringPiece(version_str, ".", KEEP_WHITESPACE, SPLIT_WANT_ALL);
   if (numbers.empty())
     return false;
 
-  for (std::vector<std::string>::const_iterator it = numbers.begin();
-       it != numbers.end(); ++it) {
-    if (StartsWithASCII(*it, "+", false))
+  for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+    if (StartsWith(*it, "+", CompareCase::SENSITIVE))
       return false;
+
+    // TODO(brettw) when we have a StringPiece version of StringToUint, delete
+    // this string conversion.
     unsigned int num;
     if (!StringToUint(*it, &num))
       return false;
@@ -98,8 +100,8 @@ bool Version::IsValid() const {
 // static
 bool Version::IsValidWildcardString(const std::string& wildcard_string) {
   std::string version_string = wildcard_string;
-  if (EndsWith(wildcard_string.c_str(), ".*", false))
-    version_string = wildcard_string.substr(0, wildcard_string.size() - 2);
+  if (EndsWith(version_string, ".*", CompareCase::SENSITIVE))
+    version_string.resize(version_string.size() - 2);
 
   Version version(version_string);
   return version.IsValid();
@@ -117,7 +119,7 @@ int Version::CompareToWildcardString(const std::string& wildcard_string) const {
   DCHECK(Version::IsValidWildcardString(wildcard_string));
 
   // Default behavior if the string doesn't end with a wildcard.
-  if (!EndsWith(wildcard_string.c_str(), ".*", false)) {
+  if (!EndsWith(wildcard_string, ".*", CompareCase::SENSITIVE)) {
     Version version(wildcard_string);
     DCHECK(version.IsValid());
     return CompareTo(version);

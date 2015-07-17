@@ -29,9 +29,9 @@ bool ValueMapPrefStore::HasObservers() const {
 }
 
 void ValueMapPrefStore::SetValue(const std::string& key,
-                                 base::Value* value,
+                                 scoped_ptr<base::Value> value,
                                  uint32 flags) {
-  if (prefs_.SetValue(key, value))
+  if (prefs_.SetValue(key, value.Pass()))
     FOR_EACH_OBSERVER(Observer, observers_, OnPrefValueChanged(key));
 }
 
@@ -51,9 +51,9 @@ void ValueMapPrefStore::ReportValueChanged(const std::string& key,
 }
 
 void ValueMapPrefStore::SetValueSilently(const std::string& key,
-                                         base::Value* value,
+                                         scoped_ptr<base::Value> value,
                                          uint32 flags) {
-  prefs_.SetValue(key, value);
+  prefs_.SetValue(key, value.Pass());
 }
 
 ValueMapPrefStore::~ValueMapPrefStore() {}

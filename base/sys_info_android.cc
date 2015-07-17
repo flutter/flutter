@@ -155,26 +155,14 @@ int GetDalvikHeapGrowthLimitMB() {
 
 namespace base {
 
-std::string SysInfo::OperatingSystemName() {
-  return "Android";
-}
-
-std::string SysInfo::GetAndroidBuildCodename() {
-  char os_version_codename_str[PROP_VALUE_MAX];
-  __system_property_get("ro.build.version.codename", os_version_codename_str);
-  return std::string(os_version_codename_str);
-}
-
-std::string SysInfo::GetAndroidBuildID() {
-  char os_build_id_str[PROP_VALUE_MAX];
-  __system_property_get("ro.build.id", os_build_id_str);
-  return std::string(os_build_id_str);
-}
-
-std::string SysInfo::GetDeviceName() {
+std::string SysInfo::HardwareModelName() {
   char device_model_str[PROP_VALUE_MAX];
   __system_property_get("ro.product.model", device_model_str);
   return std::string(device_model_str);
+}
+
+std::string SysInfo::OperatingSystemName() {
+  return "Android";
 }
 
 std::string SysInfo::OperatingSystemVersion() {
@@ -193,6 +181,18 @@ void SysInfo::OperatingSystemVersionNumbers(int32* major_version,
   // Parse out the numbers.
   ParseOSVersionNumbers(os_version_str, major_version, minor_version,
                         bugfix_version);
+}
+
+std::string SysInfo::GetAndroidBuildCodename() {
+  char os_version_codename_str[PROP_VALUE_MAX];
+  __system_property_get("ro.build.version.codename", os_version_codename_str);
+  return std::string(os_version_codename_str);
+}
+
+std::string SysInfo::GetAndroidBuildID() {
+  char os_build_id_str[PROP_VALUE_MAX];
+  __system_property_get("ro.build.id", os_build_id_str);
+  return std::string(os_build_id_str);
 }
 
 int SysInfo::DalvikHeapSizeMB() {

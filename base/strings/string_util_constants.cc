@@ -52,6 +52,16 @@ const char kWhitespaceASCII[] = {
   0
 };
 
+const char16 kWhitespaceASCIIAs16[] = {
+  0x09,    // CHARACTER TABULATION
+  0x0A,    // LINE FEED (LF)
+  0x0B,    // LINE TABULATION
+  0x0C,    // FORM FEED (FF)
+  0x0D,    // CARRIAGE RETURN (CR)
+  0x20,    // SPACE
+  0
+};
+
 const char kUtf8ByteOrderMark[] = "\xEF\xBB\xBF";
 
 }  // namespace base

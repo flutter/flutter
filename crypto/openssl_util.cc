@@ -9,10 +9,8 @@
 #include <openssl/cpu.h>
 
 #include "base/logging.h"
-#include "base/memory/scoped_vector.h"
 #include "base/memory/singleton.h"
 #include "base/strings/string_piece.h"
-#include "base/synchronization/lock.h"
 #include "build/build_config.h"
 
 #if defined(OS_ANDROID) && defined(ARCH_CPU_ARMEL)
@@ -23,11 +21,6 @@
 namespace crypto {
 
 namespace {
-
-void CurrentThreadId(CRYPTO_THREADID* id) {
-  CRYPTO_THREADID_set_numeric(
-      id, static_cast<unsigned long>(base::PlatformThread::CurrentId()));
-}
 
 // Singleton for initializing and cleaning up the OpenSSL library.
 class OpenSSLInitSingleton {
@@ -60,36 +53,10 @@ class OpenSSLInitSingleton {
     CRYPTO_set_NEON_functional(!cpu.has_broken_neon());
 #endif
 
-    SSL_load_error_strings();
     SSL_library_init();
-    int num_locks = CRYPTO_num_locks();
-    locks_.reserve(num_locks);
-    for (int i = 0; i < num_locks; ++i)
-      locks_.push_back(new base::Lock());
-    CRYPTO_set_locking_callback(LockingCallback);
-    CRYPTO_THREADID_set_callback(CurrentThreadId);
   }
 
-  ~OpenSSLInitSingleton() {
-    CRYPTO_set_locking_callback(NULL);
-    EVP_cleanup();
-    ERR_free_strings();
-  }
-
-  static void LockingCallback(int mode, int n, const char* file, int line) {
-    OpenSSLInitSingleton::GetInstance()->OnLockingCallback(mode, n, file, line);
-  }
-
-  void OnLockingCallback(int mode, int n, const char* file, int line) {
-    CHECK_LT(static_cast<size_t>(n), locks_.size());
-    if (mode & CRYPTO_LOCK)
-      locks_[n]->Acquire();
-    else
-      locks_[n]->Release();
-  }
-
-  // These locks are used and managed by OpenSSL via LockingCallback().
-  ScopedVector<base::Lock> locks_;
+  ~OpenSSLInitSingleton() {}
 
   DISALLOW_COPY_AND_ASSIGN(OpenSSLInitSingleton);
 };
@@ -116,7 +83,7 @@ void EnsureOpenSSLInit() {
 
 void ClearOpenSSLERRStack(const tracked_objects::Location& location) {
   if (logging::DEBUG_MODE && VLOG_IS_ON(1)) {
-    int error_num = ERR_peek_error();
+    uint32_t error_num = ERR_peek_error();
     if (error_num == 0)
       return;
 

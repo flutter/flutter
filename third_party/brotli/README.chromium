@@ -1,6 +1,6 @@
 Name: Brotli
 URL: https://github.com/google/brotli
-Version: 35cd3db9c1728ad26a2e46cb401e7a14424cb481
+Version: ec03509d6d5d18a57afe1254e713b6787ef1c516
 License: Apache 2.0
 License File: LICENSE
 Security Critical: yes

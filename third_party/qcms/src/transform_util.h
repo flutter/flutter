@@ -31,14 +31,14 @@
 //XXX: could use a bettername
 typedef uint16_t uint16_fract_t;
 
-float lut_interp_linear(double value, uint16_t *table, size_t length);
-float lut_interp_linear_float(float value, float *table, size_t length);
+float lut_interp_linear(double input_value, uint16_t *table, size_t length);
+float lut_interp_linear_float(float input_value, float *table, size_t length);
 uint16_t lut_interp_linear16(uint16_t input_value, uint16_t *table, size_t length);
 
 
 static inline float lerp(float a, float b, float t)
 {
-        return a*(1.f-t) + b*t;
+	return a*(1.f-t) + b*t;
 }
 
 unsigned char clamp_u8(float v);
@@ -54,6 +54,5 @@ void build_output_lut(struct curveType *trc,
 
 struct matrix matrix_invert(struct matrix mat);
 qcms_bool compute_precache(struct curveType *trc, uint8_t *output);
-
 
 #endif

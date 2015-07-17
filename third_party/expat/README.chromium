@@ -4,7 +4,7 @@ URL: http://sourceforge.net/projects/expat/
 Version: 2.1.0
 License: MIT
 License File: files/COPYING
-Security Critical: no
+Security Critical: yes
 
 Description:
   This is Expat XML parser - very lightweight C library for parsing XML.
@@ -38,5 +38,8 @@ Local Modifications:
     lib/xmltok_impl.c (see xmltok_imp.c.original for unmodified version)
       * Prevent a compiler warning when compiling with
         WIN32_LEAN_AND_MEAN predefined.
+    lib/xmlparse.c (see xmlparse.c.original for unmodified version)
+      * Apply https://hg.mozilla.org/releases/mozilla-esr31/rev/2f3e78643f5c
+        to prevent an integer overflow.
   Added files:
     lib/expat_config.h (a generated config file)

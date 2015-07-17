@@ -105,10 +105,8 @@ main(void)
     for (repeat = 0;repeat < 500;repeat++) {
 	xmlLoadCatalog(catalog);
 
-	for (i = 0; i < num_threads; i++) {
-	    results[i] = NULL;
-	    tid[i] = (pthread_t) -1;
-	}
+        memset(results, 0, sizeof(*results)*num_threads);
+        memset(tid, 0xff, sizeof(*tid)*num_threads);
 
 	for (i = 0; i < num_threads; i++) {
 	    ret = pthread_create(&tid[i], NULL, thread_specific_data,

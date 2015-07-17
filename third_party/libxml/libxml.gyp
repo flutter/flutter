@@ -68,9 +68,11 @@
                 ],
               },
               'link_settings': {
-                'libraries': [
-                  '$(SDKROOT)/usr/lib/libxml2.dylib',
-                ],
+                'xcode_settings': {
+                  'OTHER_LDFLAGS': [
+                    '-lxml2',
+                  ],
+                },
               },
             }],
           ],
@@ -129,7 +131,8 @@
             'src/include/libxml/xpointer.h',
             'src/include/win32config.h',
             'src/include/wsockcompat.h',
-            'src/acconfig.h',
+            'src/buf.c',
+            'src/buf.h',
             'src/c14n.c',
             'src/catalog.c',
             'src/chvalid.c',
@@ -137,6 +140,7 @@
             'src/dict.c',
             'src/DOCBparser.c',
             'src/elfgcchack.h',
+            'src/enc.h',
             'src/encoding.c',
             'src/entities.c',
             'src/error.c',
@@ -151,10 +155,12 @@
             'src/parserInternals.c',
             'src/pattern.c',
             'src/relaxng.c',
+            'src/save.h',
             'src/SAX.c',
             'src/SAX2.c',
             'src/schematron.c',
             'src/threads.c',
+            'src/timsort.h',
             'src/tree.c',
             #'src/trio.c',
             #'src/trio.h',
@@ -181,6 +187,8 @@
             'src/xmlwriter.c',
             'src/xpath.c',
             'src/xpointer.c',
+            #'src/xzlib.c',
+            'src/xzlib.h',
             'win32/config.h',
             'win32/include/libxml/xmlversion.h',
           ],
@@ -204,6 +212,11 @@
               '-Wno-tautological-pointer-compare',
               # See http://crbug.com/138571#c8
               '-Wno-ignored-attributes',
+              # libxml casts from int to long to void*.
+              '-Wno-int-to-void-pointer-cast',
+              # libxml passes a volatile LPCRITICAL_SECTION* to a function
+              # expecting a void* volatile*.
+              '-Wno-incompatible-pointer-types',
             ],
           },
           'include_dirs': [

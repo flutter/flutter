@@ -265,12 +265,14 @@ if (current_toolchain == host_toolchain) {
   }
 }
 
+google_python_dir = "$root_out_dir/pyproto/google"
+
 copy("copy_google") {
   sources = [
     "__init__.py",
   ]
   outputs = [
-    "$root_gen_dir/google/{{source_file_part}}",
+    "$google_python_dir/{{source_file_part}}",
   ]
 }
 
@@ -298,7 +300,7 @@ copy("copy_google_protobuf") {
     "descriptor_pb2.py",
   ]
   outputs = [
-    "$root_gen_dir/google/protobuf/{{source_file_part}}",
+    "$google_python_dir/protobuf/{{source_file_part}}",
   ]
 }
 
@@ -318,7 +320,7 @@ copy("copy_google_protobuf_internal") {
     "python/google/protobuf/internal/wire_format.py",
   ]
   outputs = [
-    "$root_gen_dir/google/protobuf/internal/{{source_file_part}}",
+    "$google_python_dir/protobuf/internal/{{source_file_part}}",
   ]
 }
 
@@ -328,4 +330,9 @@ group("py_proto") {
     ":copy_google_protobuf",
     ":copy_google_protobuf_internal",
   ]
+
+  # Targets that depend on this should depend on the copied data files.
+  data = get_target_outputs(":copy_google")
+  data += get_target_outputs(":copy_google_protobuf")
+  data += get_target_outputs(":copy_google_protobuf_internal")
 }

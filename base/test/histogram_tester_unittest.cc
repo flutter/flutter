@@ -5,16 +5,20 @@
 #include "base/test/histogram_tester.h"
 
 #include "base/memory/scoped_ptr.h"
-#include "base/metrics/histogram.h"
+#include "base/metrics/histogram_macros.h"
 #include "base/metrics/histogram_samples.h"
+#include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {
+
+using ::testing::ElementsAre;
 
 const std::string kHistogram1 = "Test1";
 const std::string kHistogram2 = "Test2";
 const std::string kHistogram3 = "Test3";
 const std::string kHistogram4 = "Test4";
+const std::string kHistogram5 = "Test5";
 
 typedef testing::Test HistogramTesterTest;
 
@@ -76,6 +80,17 @@ TEST_F(HistogramTesterTest, TestBucketsSampleWithScope) {
   tester.ExpectBucketCount(kHistogram4, 3, 1);
 
   tester.ExpectTotalCount(kHistogram4, 1);
+}
+
+TEST_F(HistogramTesterTest, TestGetAllSamples) {
+  HistogramTester tester;
+  UMA_HISTOGRAM_ENUMERATION(kHistogram5, 2, 5);
+  UMA_HISTOGRAM_ENUMERATION(kHistogram5, 3, 5);
+  UMA_HISTOGRAM_ENUMERATION(kHistogram5, 3, 5);
+  UMA_HISTOGRAM_ENUMERATION(kHistogram5, 5, 5);
+
+  EXPECT_THAT(tester.GetAllSamples(kHistogram5),
+              ElementsAre(Bucket(2, 1), Bucket(3, 2), Bucket(5, 1)));
 }
 
 }  // namespace base

@@ -179,8 +179,9 @@ void Engine::RunFromNetwork(const mojo::String& url) {
 
 void Engine::RunFromFile(const mojo::String& main,
                          const mojo::String& package_root) {
+  std::string package_root_str = package_root;
   dart_library_provider_.reset(
-      new DartLibraryProviderFiles(base::FilePath(package_root)));
+      new DartLibraryProviderFiles(base::FilePath(package_root_str)));
   RunFromLibrary(main);
 }
 

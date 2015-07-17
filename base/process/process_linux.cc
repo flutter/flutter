@@ -10,6 +10,7 @@
 #include "base/files/file_util.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
+#include "base/strings/string_number_conversions.h"
 #include "base/strings/string_split.h"
 #include "base/strings/stringprintf.h"
 #include "base/synchronization/lock.h"
@@ -119,7 +120,7 @@ bool Process::SetProcessBackgrounded(bool background) {
 
 #if defined(OS_CHROMEOS)
   if (cgroups.Get().enabled) {
-    std::string pid = StringPrintf("%d", process_);
+    std::string pid = IntToString(process_);
     const base::FilePath file =
         background ?
             cgroups.Get().background_file : cgroups.Get().foreground_file;

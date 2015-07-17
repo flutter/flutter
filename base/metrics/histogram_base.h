@@ -31,7 +31,7 @@ class PickleIterator;
 // processes into the browser. If you create another class that inherits from
 // HistogramBase, add new histogram types and names below.
 
-enum BASE_EXPORT HistogramType {
+enum HistogramType {
   HISTOGRAM,
   LINEAR_HISTOGRAM,
   BOOLEAN_HISTOGRAM,
@@ -74,6 +74,12 @@ class BASE_EXPORT HistogramBase {
     // the source histogram!).
     kIPCSerializationSourceFlag = 0x10,
 
+    // Indicates that a callback exists for when a new sample is recorded on
+    // this histogram. We store this as a flag with the histogram since
+    // histograms can be in performance critical code, and this allows us
+    // to shortcut looking up the callback if it doesn't exist.
+    kCallbackExists = 0x20,
+
     // Only for Histogram and its sub classes: fancy bucket-naming support.
     kHexRangePrintingFlag = 0x8000,
   };
@@ -92,7 +98,7 @@ class BASE_EXPORT HistogramBase {
   explicit HistogramBase(const std::string& name);
   virtual ~HistogramBase();
 
-  std::string histogram_name() const { return histogram_name_; }
+  const std::string& histogram_name() const { return histogram_name_; }
 
   // Comapres |name| to the histogram name and triggers a DCHECK if they do not
   // match. This is a helper function used by histogram macros, which results in
@@ -171,6 +177,10 @@ class BASE_EXPORT HistogramBase {
   void WriteAsciiBucketValue(Count current,
                              double scaled_sum,
                              std::string* output) const;
+
+  // Retrieves the callback for this histogram, if one exists, and runs it
+  // passing |sample| as the parameter.
+  void FindAndRunCallback(Sample sample) const;
 
  private:
   const std::string histogram_name_;

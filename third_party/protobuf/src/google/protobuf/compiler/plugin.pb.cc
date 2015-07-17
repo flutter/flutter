@@ -2,7 +2,7 @@
 // source: google/protobuf/compiler/plugin.proto
 
 #define INTERNAL_SUPPRESS_PROTOBUF_FIELD_DEPRECATION
-#include "google/protobuf/compiler/plugin.pb.h"
+#include <google/protobuf/compiler/plugin.pb.h>
 
 #include <algorithm>
 

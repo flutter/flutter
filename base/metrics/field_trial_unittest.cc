@@ -1021,9 +1021,9 @@ TEST_F(FieldTrialTest, FloatBoundariesGiveEqualGroupSizes) {
     scoped_refptr<base::FieldTrial> trial(
         new base::FieldTrial("test", kBucketCount, "default", entropy));
     for (int j = 0; j < kBucketCount; ++j)
-      trial->AppendGroup(base::StringPrintf("%d", j), 1);
+      trial->AppendGroup(base::IntToString(j), 1);
 
-    EXPECT_EQ(base::StringPrintf("%d", i), trial->group_name());
+    EXPECT_EQ(base::IntToString(i), trial->group_name());
   }
 }
 

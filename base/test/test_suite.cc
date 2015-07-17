@@ -338,7 +338,7 @@ void TestSuite::Initialize() {
   i18n::SetICUDefaultLocale("en_US");
 #else
   std::string default_locale(uloc_getDefault());
-  if (EndsWith(default_locale, "POSIX", false))
+  if (EndsWith(default_locale, "POSIX", CompareCase::INSENSITIVE_ASCII))
     i18n::SetICUDefaultLocale("en_US");
 #endif
 #endif

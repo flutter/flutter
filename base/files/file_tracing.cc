@@ -13,6 +13,11 @@ FileTracing::Provider* g_provider = nullptr;
 }
 
 // static
+bool FileTracing::IsCategoryEnabled() {
+  return g_provider && g_provider->FileTracingCategoryIsEnabled();
+}
+
+// static
 void FileTracing::SetProvider(FileTracing::Provider* provider) {
   g_provider = provider;
 }
@@ -34,19 +39,11 @@ FileTracing::ScopedTrace::~ScopedTrace() {
     g_provider->FileTracingEventEnd(name_, id_);
 }
 
-bool FileTracing::ScopedTrace::ShouldInitialize() const {
-  return g_provider && g_provider->FileTracingCategoryIsEnabled();
-}
-
 void FileTracing::ScopedTrace::Initialize(
     const char* name, File* file, int64 size) {
-  if (!g_provider)
-    return;
-
   id_ = &file->trace_enabler_;
   name_ = name;
-
-  g_provider->FileTracingEventBegin(name_, id_, file->path_, size);
+  g_provider->FileTracingEventBegin(name_, id_, file->tracing_path_, size);
 }
 
 }  // namespace base

@@ -179,7 +179,7 @@ resolveEntityDebug(void *ctx ATTRIBUTE_UNUSED, const xmlChar *publicId, const xm
 {
     /* xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr) ctx; */
 
-    
+
     fprintf(stdout, "SAX.resolveEntity(");
     if (publicId != NULL)
 	fprintf(stdout, "%s", (char *)publicId);
@@ -233,8 +233,8 @@ getParameterEntityDebug(void *ctx ATTRIBUTE_UNUSED, const xmlChar *name)
 /**
  * entityDeclDebug:
  * @ctxt:  An XML parser context
- * @name:  the entity name 
- * @type:  the entity type 
+ * @name:  the entity name
+ * @type:  the entity type
  * @publicId: The public ID of the entity
  * @systemId: The system ID of the entity
  * @content: the entity value (without processing).
@@ -252,8 +252,8 @@ entityDeclDebug(void *ctx ATTRIBUTE_UNUSED, const xmlChar *name, int type,
 /**
  * attributeDeclDebug:
  * @ctxt:  An XML parser context
- * @name:  the attribute name 
- * @type:  the attribute type 
+ * @name:  the attribute name
+ * @type:  the attribute type
  *
  * An attribute definition has been parsed
  */
@@ -269,8 +269,8 @@ attributeDeclDebug(void *ctx ATTRIBUTE_UNUSED, const xmlChar *elem, const xmlCha
 /**
  * elementDeclDebug:
  * @ctxt:  An XML parser context
- * @name:  the element name 
- * @type:  the element type 
+ * @name:  the element name
+ * @type:  the element type
  * @content: the element value (without processing).
  *
  * An element definition has been parsed
@@ -453,7 +453,7 @@ cdataDebug(void *ctx ATTRIBUTE_UNUSED, const xmlChar *ch, int len)
  * @ctxt:  An XML parser context
  * @name:  The entity name
  *
- * called when an entity reference is detected. 
+ * called when an entity reference is detected.
  */
 static void
 referenceDebug(void *ctx ATTRIBUTE_UNUSED, const xmlChar *name)
@@ -687,7 +687,7 @@ parseSAXFile(char *filename) {
 		fclose(f);
 	    }
 	}
-    } else {	
+    } else {
 #endif /* LIBXML_PUSH_ENABLED */
 	doc = htmlSAXParseFile(filename, NULL, emptySAXHandler, NULL);
 	if (doc != NULL) {
@@ -746,7 +746,7 @@ parseAndPrintFile(char *filename) {
 	    }
 	    fclose(f);
 	}
-    } else {	
+    } else {
 	doc = htmlReadFile(filename, NULL, options);
     }
 #else
@@ -774,7 +774,7 @@ parseAndPrintFile(char *filename) {
     /*
      * print it.
      */
-    if (!noout) { 
+    if (!noout) {
 #ifdef LIBXML_DEBUG_ENABLED
 	if (!debug) {
 	    if (encoding)
@@ -789,7 +789,7 @@ parseAndPrintFile(char *filename) {
 	else
 	    htmlDocDump(stdout, doc);
 #endif
-    }	
+    }
 #endif /* LIBXML_OUTPUT_ENABLED */
 
     /*
@@ -838,13 +838,13 @@ int main(int argc, char **argv) {
 		for (count = 0;count < 100 * repeat;count++) {
 		    if (sax)
 			parseSAXFile(argv[i]);
-		    else   
+		    else
 			parseAndPrintFile(argv[i]);
-		}    
+		}
 	    } else {
 		if (sax)
 		    parseSAXFile(argv[i]);
-		else   
+		else
 		    parseAndPrintFile(argv[i]);
 	    }
 	    files ++;

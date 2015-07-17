@@ -317,13 +317,17 @@ void Pickle::Reserve(size_t length) {
 }
 
 void Pickle::Resize(size_t new_capacity) {
-  new_capacity = AlignInt(new_capacity, kPayloadUnit);
-
   CHECK_NE(capacity_after_header_, kCapacityReadOnly);
-  void* p = realloc(header_, header_size_ + new_capacity);
+  capacity_after_header_ = AlignInt(new_capacity, kPayloadUnit);
+  void* p = realloc(header_, GetTotalAllocatedSize());
   CHECK(p);
   header_ = reinterpret_cast<Header*>(p);
-  capacity_after_header_ = new_capacity;
+}
+
+size_t Pickle::GetTotalAllocatedSize() const {
+  if (capacity_after_header_ == kCapacityReadOnly)
+    return 0;
+  return header_size_ + capacity_after_header_;
 }
 
 // static

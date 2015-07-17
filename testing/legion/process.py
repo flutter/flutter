@@ -9,6 +9,7 @@ process wrapper for easier access and usage of the task-side process.
 """
 
 import logging
+import os
 import subprocess
 import sys
 import threading
@@ -29,30 +30,37 @@ class ControllerProcessWrapper(object):
   than calling the methods directly using the RPC object.
   """
 
-  def __init__(self, rpc, cmd, verbose=False, detached=False, cwd=None):
+  def __init__(self, rpc, cmd, verbose=False, detached=False, cwd=None,
+               key=None):
+    logging.info('Creating a process with cmd=%s', cmd)
     self._rpc = rpc
-    self._id = rpc.subprocess.Process(cmd)
+    self._key = rpc.subprocess.Process(cmd, key)
+    logging.info('Process created with key=%s', self._key)
     if verbose:
-      self._rpc.subprocess.SetVerbose(self._id)
+      self._rpc.subprocess.SetVerbose(self._key)
     if detached:
-      self._rpc.subprocess.SetDetached(self._id)
+      self._rpc.subprocess.SetDetached(self._key)
     if cwd:
       self._rpc.subprocess.SetCwd(self._rpc, cwd)
-    self._rpc.subprocess.Start(self._id)
+    self._rpc.subprocess.Start(self._key)
+
+  @property
+  def key(self):
+    return self._key
 
   def Terminate(self):
-    logging.debug('Terminating process %s', self._id)
-    return self._rpc.subprocess.Terminate(self._id)
+    logging.debug('Terminating process %s', self._key)
+    return self._rpc.subprocess.Terminate(self._key)
 
   def Kill(self):
-    logging.debug('Killing process %s', self._id)
-    self._rpc.subprocess.Kill(self._id)
+    logging.debug('Killing process %s', self._key)
+    self._rpc.subprocess.Kill(self._key)
 
   def Delete(self):
-    return self._rpc.subprocess.Delete(self._id)
+    return self._rpc.subprocess.Delete(self._key)
 
   def GetReturncode(self):
-    return self._rpc.subprocess.GetReturncode(self._id)
+    return self._rpc.subprocess.GetReturncode(self._key)
 
   def ReadStdout(self):
     """Returns all stdout since the last call to ReadStdout.
@@ -62,30 +70,30 @@ class ControllerProcessWrapper(object):
     multiple calls to ReadStdout and to retain the entire output the results
     of this call will need to be buffered in the calling code.
     """
-    return self._rpc.subprocess.ReadStdout(self._id)
+    return self._rpc.subprocess.ReadStdout(self._key)
 
   def ReadStderr(self):
     """Returns all stderr read since the last call to ReadStderr.
 
     See ReadStdout for additional details.
     """
-    return self._rpc.subprocess.ReadStderr(self._id)
+    return self._rpc.subprocess.ReadStderr(self._key)
 
   def ReadOutput(self):
     """Returns the (stdout, stderr) since the last Read* call.
 
     See ReadStdout for additional details.
     """
-    return self._rpc.subprocess.ReadOutput(self._id)
+    return self._rpc.subprocess.ReadOutput(self._key)
 
   def Wait(self):
-    return self._rpc.subprocess.Wait(self._id)
+    return self._rpc.subprocess.Wait(self._key)
 
   def Poll(self):
-    return self._rpc.subprocess.Poll(self._id)
+    return self._rpc.subprocess.Poll(self._key)
 
   def GetPid(self):
-    return self._rpc.subprocess.GetPid(self._id)
+    return self._rpc.subprocess.GetPid(self._key)
 
 
 
@@ -105,15 +113,21 @@ class Process(object):
   _process_next_id = 0
   _creation_lock = threading.Lock()
 
-  def __init__(self, cmd):
+  def __init__(self, cmd, key):
     self.stdout = ''
     self.stderr = ''
+    self.key = key
     self.cmd = cmd
     self.proc = None
     self.cwd = None
     self.verbose = False
     self.detached = False
     self.data_lock = threading.Lock()
+    self.stdout_file = open(self._CreateOutputFilename('stdout'), 'wb+')
+    self.stderr_file = open(self._CreateOutputFilename('stderr'), 'wb+')
+
+  def _CreateOutputFilename(self, fname):
+    return os.path.join(common_lib.GetOutputDir(), '%s.%s' % (self.key, fname))
 
   def __str__(self):
     return '%r, cwd=%r, verbose=%r, detached=%r' % (
@@ -124,10 +138,14 @@ class Process(object):
       with self.data_lock:
         if pipe == 'stdout':
           self.stdout += data
+          self.stdout_file.write(data)
+          self.stdout_file.flush()
           if self.verbose:
             sys.stdout.write(data)
         else:
           self.stderr += data
+          self.stderr_file.write(data)
+          self.stderr_file.flush()
           if self.verbose:
             sys.stderr.write(data)
 
@@ -137,13 +155,15 @@ class Process(object):
       cls.Kill(key)
 
   @classmethod
-  def Process(cls, cmd):
+  def Process(cls, cmd, key=None):
     with cls._creation_lock:
-      key = 'Process%d' % cls._process_next_id
-      cls._process_next_id += 1
-    logging.debug('Creating process %s with cmd %r', key, cmd)
-    process = cls(cmd)
-    cls._processes[key] = process
+      if not key:
+        key = 'Process%d' % cls._process_next_id
+        cls._process_next_id += 1
+      if key in cls._processes:
+        raise KeyError('Key %s already in use' % key)
+      logging.debug('Creating process %s with cmd %r', key, cmd)
+      cls._processes[key] = cls(cmd, key)
     return key
 
   def _Start(self):

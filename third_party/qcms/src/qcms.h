@@ -1,3 +1,25 @@
+/* vim: set ts=8 sw=8 noexpandtab: */
+//  qcms
+//  Copyright (C) 2009 Mozilla Foundation
+//
+// Permission is hereby granted, free of charge, to any person obtaining 
+// a copy of this software and associated documentation files (the "Software"), 
+// to deal in the Software without restriction, including without limitation 
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+// and/or sell copies of the Software, and to permit persons to whom the Software 
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in 
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION 
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 #ifndef QCMS_H
 #define QCMS_H
 
@@ -5,93 +27,32 @@
 extern "C" {
 #endif
 
-/* if we've already got an ICC_H header we can ignore the following */
-#ifndef ICC_H
-/* icc34 defines */
-
-/***************************************************************** 
- Copyright (c) 1994-1996 SunSoft, Inc.
-
-                    Rights Reserved
-
-Permission is hereby granted, free of charge, to any person 
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without restrict- 
-ion, including without limitation the rights to use, copy, modify, 
-merge, publish distribute, sublicense, and/or sell copies of the 
-Software, and to permit persons to whom the Software is furnished 
-to do so, subject to the following conditions: 
- 
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software. 
- 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-
-INFRINGEMENT.  IN NO EVENT SHALL SUNSOFT, INC. OR ITS PARENT 
-COMPANY BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
-OTHER DEALINGS IN THE SOFTWARE. 
- 
-Except as contained in this notice, the name of SunSoft, Inc. 
-shall not be used in advertising or otherwise to promote the 
-sale, use or other dealings in this Software without written 
-authorization from SunSoft Inc. 
-******************************************************************/
-
-/*
- * QCMS, in general, is not threadsafe. However, it should be safe to create
- * profile and transformation objects on different threads, so long as you
- * don't use the same objects on different threads at the same time.
- */
-
-/* 
- * Color Space Signatures
- * Note that only icSigXYZData and icSigLabData are valid
- * Profile Connection Spaces (PCSs)
- */ 
-typedef enum {
-    icSigXYZData                        = 0x58595A20L,  /* 'XYZ ' */
-    icSigLabData                        = 0x4C616220L,  /* 'Lab ' */
-    icSigLuvData                        = 0x4C757620L,  /* 'Luv ' */
-    icSigYCbCrData                      = 0x59436272L,  /* 'YCbr' */
-    icSigYxyData                        = 0x59787920L,  /* 'Yxy ' */
-    icSigRgbData                        = 0x52474220L,  /* 'RGB ' */
-    icSigGrayData                       = 0x47524159L,  /* 'GRAY' */
-    icSigHsvData                        = 0x48535620L,  /* 'HSV ' */
-    icSigHlsData                        = 0x484C5320L,  /* 'HLS ' */
-    icSigCmykData                       = 0x434D594BL,  /* 'CMYK' */
-    icSigCmyData                        = 0x434D5920L,  /* 'CMY ' */
-    icSig2colorData                     = 0x32434C52L,  /* '2CLR' */
-    icSig3colorData                     = 0x33434C52L,  /* '3CLR' */
-    icSig4colorData                     = 0x34434C52L,  /* '4CLR' */
-    icSig5colorData                     = 0x35434C52L,  /* '5CLR' */
-    icSig6colorData                     = 0x36434C52L,  /* '6CLR' */
-    icSig7colorData                     = 0x37434C52L,  /* '7CLR' */
-    icSig8colorData                     = 0x38434C52L,  /* '8CLR' */
-    icSig9colorData                     = 0x39434C52L,  /* '9CLR' */
-    icSig10colorData                    = 0x41434C52L,  /* 'ACLR' */
-    icSig11colorData                    = 0x42434C52L,  /* 'BCLR' */
-    icSig12colorData                    = 0x43434C52L,  /* 'CCLR' */
-    icSig13colorData                    = 0x44434C52L,  /* 'DCLR' */
-    icSig14colorData                    = 0x45434C52L,  /* 'ECLR' */
-    icSig15colorData                    = 0x46434C52L,  /* 'FCLR' */
-    icMaxEnumData                       = 0xFFFFFFFFL   
-} icColorSpaceSignature;
-#endif
-
 #include <stdio.h>
-
-typedef int qcms_bool;
-
-struct _qcms_transform;
-typedef struct _qcms_transform qcms_transform;
 
 struct _qcms_profile;
 typedef struct _qcms_profile qcms_profile;
 
-/* these values match the Rendering Intent values from the ICC spec */
+struct _qcms_transform;
+typedef struct _qcms_transform qcms_transform;
+
+typedef int qcms_bool;
+
+/* ICC Section 6.1.5 Color Space Signatures (abridged) */
+typedef enum {
+	XYZData		/* ‘XYZ ’ */ = 0x58595A20,
+	labData		/* ‘Lab ’ */ = 0x4C616220,
+	luvData		/* ‘Luv ’ */ = 0x4C757620,
+	YCbCrData	/* ‘YCbr' */ = 0x59436272,
+	YxyData		/* ‘Yxy ’ */ = 0x59787920,
+	rgbData		/* ‘RGB ’ */ = 0x52474220,
+	grayData	/* ‘GRAY’ */ = 0x47524159,
+	hsvData		/* ‘HSV ’ */ = 0x48535620,
+	hlsData		/* ‘HLS ’ */ = 0x484C5320,
+	cmykData	/* ‘CMYK’ */ = 0x434D594B,
+	cmyData		/* ‘CMY ’ */ = 0x434D5920,
+} qcms_color_space;
+
+/* ICC Section 6.1.11 Rendering Intents */
 typedef enum {
 	QCMS_INTENT_DEFAULT = 0,
 	QCMS_INTENT_PERCEPTUAL = 0,
@@ -100,7 +61,7 @@ typedef enum {
 	QCMS_INTENT_ABSOLUTE_COLORIMETRIC = 3
 } qcms_intent;
 
-//XXX: I don't really like the _DATA_ prefix
+/* Input data formats */
 typedef enum {
 	QCMS_DATA_RGB_8,
 	QCMS_DATA_RGBA_8,
@@ -108,22 +69,27 @@ typedef enum {
 	QCMS_DATA_GRAYA_8
 } qcms_data_type;
 
-/* Format of the output data for qcms_transform_data_type() */
+/* Output data format for qcms_transform_data_type() */
 typedef enum {
 	QCMS_OUTPUT_RGBX,
 	QCMS_OUTPUT_BGRX
 } qcms_output_type;
 
-/* the names for the following two types are sort of ugly */
-typedef struct
-{
+/* Output data format for qcms_transform_get_input|output_trc_rgba() */
+typedef enum {
+	QCMS_TRC_PARAMETRIC,
+	QCMS_TRC_FLOAT,
+	QCMS_TRC_HALF_FLOAT, // XXX: only type implemented.
+	QCMS_TRC_USHORT,
+} qcms_trc_type;
+
+typedef struct {
 	double x;
 	double y;
 	double Y;
 } qcms_CIE_xyY;
 
-typedef struct
-{
+typedef struct {
 	qcms_CIE_xyY red;
 	qcms_CIE_xyY green;
 	qcms_CIE_xyY blue;
@@ -146,20 +112,31 @@ void qcms_profile_release(qcms_profile *profile);
 
 qcms_bool qcms_profile_is_bogus(qcms_profile *profile);
 qcms_intent qcms_profile_get_rendering_intent(qcms_profile *profile);
-icColorSpaceSignature qcms_profile_get_color_space(qcms_profile *profile);
+qcms_color_space qcms_profile_get_color_space(qcms_profile *profile);
 
 qcms_bool qcms_profile_match(qcms_profile *p1, qcms_profile *p2);
 const char* qcms_profile_get_description(qcms_profile *profile);
 
 void qcms_profile_precache_output_transform(qcms_profile *profile);
 
+size_t qcms_profile_get_vcgt_channel_length(qcms_profile *profile);
+qcms_bool qcms_profile_get_vcgt_rgb_channels(qcms_profile *profile, unsigned short *data);
+
 qcms_transform* qcms_transform_create(
 		qcms_profile *in, qcms_data_type in_type,
-		qcms_profile* out, qcms_data_type out_type,
+		qcms_profile *out, qcms_data_type out_type,
 		qcms_intent intent);
 
+size_t qcms_transform_get_input_trc_rgba(
+		qcms_transform *transform, qcms_profile *in, qcms_trc_type type, unsigned short *data);
+size_t qcms_transform_get_output_trc_rgba(
+		qcms_transform *transform, qcms_profile *out, qcms_trc_type type, unsigned short *data);
+
+qcms_bool qcms_transform_is_matrix(qcms_transform *transform);
+float qcms_transform_get_matrix(qcms_transform *transform, unsigned i, unsigned j);
+
 qcms_bool qcms_transform_create_LUT_zyx_bgra(
-		qcms_profile *in, qcms_profile* out, qcms_intent intent,
+		qcms_profile *in, qcms_profile *out, qcms_intent intent,
 		int samples, unsigned char* lut);
 
 void qcms_transform_data(qcms_transform *transform, void *src, void *dest, size_t length);
@@ -172,5 +149,11 @@ void qcms_enable_iccv4();
 #ifdef  __cplusplus
 }
 #endif
+
+/*
+ * In general, QCMS is not threadsafe. However, it should be safe to create
+ * profile and transformation objects on different threads, so long as you
+ * don't use the same objects on different threads at the same time.
+ */
 
 #endif

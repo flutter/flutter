@@ -29,6 +29,7 @@ public class ThreadUtils {
         }
     }
 
+    @VisibleForTesting
     public static void setUiThread(Looper looper) {
         synchronized (sLock) {
             if (sUiThreadHandler != null && sUiThreadHandler.getLooper() != looper) {

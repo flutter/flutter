@@ -8,7 +8,6 @@
     'VCCLCompilerTool': {
       'InlineFunctionExpansion': '2',
       'EnableIntrinsicFunctions': 'true',
-      'EnableFiberSafeOptimizations': 'true',
       'OmitFramePointers': 'false',
       # The above is not sufficient (http://crbug.com/106711): it
       # simply eliminates an explicit "/Oy", but both /O2 and /Ox

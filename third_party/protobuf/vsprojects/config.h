@@ -1,28 +1,19 @@
 /* protobuf config.h for MSVC.  On other platforms, this is generated
  * automatically by autoheader / autoconf / configure. */
 
-/* the location of <hash_map> */
-#define HASH_MAP_H <hash_map>
+#include <google/protobuf/stubs/pbconfig.h>
 
-/* the namespace of hash_map/hash_set */
-// Apparently Microsoft decided to move hash_map *back* to the std namespace
-// in MSVC 2010:
-//   http://blogs.msdn.com/vcblog/archive/2009/05/25/stl-breaking-changes-in-visual-studio-2010-beta-1.aspx
-// TODO(kenton):  Use unordered_map instead, which is available in MSVC 2010.
-#if _MSC_VER < 1310 || _MSC_VER >= 1600
-#define HASH_NAMESPACE std
-#else
-#define HASH_NAMESPACE stdext
+#define HASH_MAP_H GOOGLE_PROTOBUF_HASH_MAP_H
+#define HASH_NAMESPACE GOOGLE_PROTOBUF_HASH_NAMESPACE
+#define HASH_SET_H GOOGLE_PROTOBUF_HASH_SET_H
+
+#ifdef GOOGLE_PROTOBUF_HAVE_HASH_MAP
+#define HAVE_HASH_MAP GOOGLE_PROTOBUF_HAVE_HASH_MAP
 #endif
 
-/* the location of <hash_set> */
-#define HASH_SET_H <hash_set>
-
-/* define if the compiler has hash_map */
-#define HAVE_HASH_MAP 1
-
-/* define if the compiler has hash_set */
-#define HAVE_HASH_SET 1
+#ifdef GOOGLE_PROTOBUF_HAVE_HASH_SET
+#define HAVE_HASH_SET GOOGLE_PROTOBUF_HAVE_HASH_SET
+#endif
 
 /* define if you want to use zlib.  See readme.txt for additional
  * requirements. */

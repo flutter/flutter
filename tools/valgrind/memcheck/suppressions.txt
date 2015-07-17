@@ -101,11 +101,19 @@
    fun:FcConfigValues
 }
 {
-   dlopen leak on error. Chromium issues 268368,273385. See http://sourceware.org/bugzilla/show_bug.cgi?id=12878.
+   # dlopen leak on error. Chromium issues 268368,273385. See http://sourceware.org/bugzilla/show_bug.cgi?id=12878.
+   bug_268368_273385a
    Memcheck:Leak
    fun:calloc
    fun:_dlerror_run
    fun:dlopen@@GLIBC_2.2.5
+}
+{
+   bug_268368_273385b
+   Memcheck:Leak
+   fun:calloc
+   fun:_dlerror_run
+   fun:dlsym
 }
 {
    bug_58730_libc.so_value8 (Third Party)
@@ -294,7 +302,7 @@
    fun:_Znw*
    fun:_ZN4base8internal20PostTaskAndReplyImpl16PostTaskAndReplyERKN15tracked_objects8LocationERKNS_8CallbackIFvvEEESA_
    fun:_ZN4base10TaskRunner16PostTaskAndReplyERKN15tracked_objects8LocationERKNS_8CallbackIFvvEEES9_
-   fun:_ZN4base12_GLOBAL__N_169MessageLoopProxyTest_PostTaskAndReply_DeadReplyLoopDoesNotDelete_Test8TestBodyEv
+   fun:_ZN4base74MessageLoopTaskRunnerTest_PostTaskAndReply_DeadReplyLoopDoesNotDelete_Test8TestBodyEv
 }
 {
    # Non-joinable thread doesn't clean up all state on program exit
@@ -434,6 +442,16 @@
    Memcheck:Leak
    fun:malloc
    fun:_ZN3WTF10StringImpl19createUninitializedEjRPh
+}
+{
+   bug_364821 (WontFix)
+   Memcheck:Leak
+   fun:malloc
+   fun:_ZN3WTF10fastMallocEm
+   fun:_ZN3WTF10RefCountedIN5blink11ScriptStateEEnwEm
+   fun:_ZN5blink11ScriptState6createEN2v85LocalINS1_7ContextEEEN3WTF10PassRefPtrINS_15DOMWrapperWorldEEE
+   ...
+   fun:_ZN3WTF15FunctionWrapperIMN5blink12WorkerThread*
 }
 {
    bug_383956
@@ -596,7 +614,7 @@
    fun:_ZN3IPC11SyncChannel*Channel4Mode*Listener*
 }
 {
-   bug_17540
+   bug_17540_16661
    Memcheck:Leak
    fun:_Znw*
    fun:_ZN4base19MessagePumpLibevent19WatchFileDescriptor*FileDescriptorWatcherEPNS0_7WatcherE
@@ -604,6 +622,13 @@
    ...
    fun:_ZN3IPC*Channel*ConnectEv
    fun:_ZN3IPC12ChannelProxy7Context15OnChannelOpenedEv
+}
+{
+   bug_16661
+   Memcheck:Leak
+   fun:_Znw*
+   fun:_ZN4base19MessagePumpLibevent3RunEPNS_11MessagePump8DelegateE
+   fun:_ZN4base11MessageLoop10RunHandlerEv
 }
 {
    # slight variant of the above
@@ -1145,19 +1170,6 @@
    fun:_Znw*
    fun:_Z17NewRunnableMethodIN21ServiceProcessControl8LauncherEMS1_FvvEEP14CancelableTaskPT_T0_
    fun:_ZN21ServiceProcessControl8Launcher5DoRunEv
-}
-{
-   bug_93730_d
-   Memcheck:Leak
-   fun:_Znw*
-   fun:_ZN3IPC11SyncChannelC1ERKNS_13ChannelHandleENS_7Channel4ModeEPNS4_8ListenerEPN4base16MessageLoopProxyEbPNS8_13WaitableEventE
-   fun:_ZN16ServiceIPCServer13CreateChannelEv
-   fun:_ZN16ServiceIPCServer4InitEv
-   fun:_ZN14ServiceProcess10InitializeEP16MessageLoopForUIRK11CommandLineP19ServiceProcessState
-   fun:_Z18ServiceProcessMainRK18MainFunctionParams
-   ...
-   fun:ChromeMain
-   fun:main
 }
 {
    bug_94764
@@ -2573,16 +2585,6 @@
    fun:_ZN3IPC12ChannelProxy7Context13OnSendMessageE10scoped_ptrINS_7MessageEN4base14DefaultDeleterIS3_EEE
 }
 {
-   bug_364821
-   Memcheck:Leak
-   fun:malloc
-   fun:_ZN3WTF10fastMallocEm
-   fun:_ZN3WTF10RefCountedIN5blink11ScriptStateEEnwEm
-   fun:_ZN5blink11ScriptState6createEN2v85LocalINS1_7ContextEEEN3WTF10PassRefPtrINS_15DOMWrapperWorldEEE
-   ...
-   fun:_ZN3WTF15FunctionWrapperIMN5blink12WorkerThreadEFvvEEclEPS2_
-}
-{
    bug_365258
    Memcheck:Leak
    fun:malloc
@@ -2917,9 +2919,6 @@
    fun:_ZNK8SkStroke10strokePathERK6SkPathPS0_
    fun:_ZNK11SkStrokeRec11applyToPathEP6SkPathRKS0_
    fun:_ZNK7SkPaint11getFillPathERK6SkPathPS0_PK6SkRectf
-   fun:_ZNK6SkDraw8drawPathERK6SkPathRK7SkPaintPK8SkMatrixbbP9SkBlitter
-   fun:_ZNK6SkDraw8drawPathERK6SkPathRK7SkPaintPK8SkMatrixb
-   fun:_ZN14SkBitmapDevice8drawPathERK6SkDrawRK6SkPathRK7SkPaintPK8SkMatrixb
 }
 {
    bug_394558
@@ -3181,14 +3180,6 @@
    fun:_ZN16sync_file_system13drive_backend14SyncEngineTest5SetUpEv
 }
 {
-   bug_422485
-   Memcheck:Overlap
-   fun:memcpy@@GLIBC_2.14
-   fun:_ZNK8SkBitmap12copyPixelsToEPvmmb
-   fun:_ZN5blink19ImageFrameGenerator14decodeAndScaleERK11SkImageInfomPvm
-   fun:_ZN5blink22DecodingImageGenerator11onGetPixelsERK11SkImageInfoPvmPjPi
-}
-{
    bug_424056a
    Memcheck:Leak
    fun:malloc
@@ -3326,7 +3317,7 @@
    bug_436172_b
    Memcheck:Leak
    fun:_Znw*
-   fun:_ZN3IPC7Channel6CreateERKNS_13ChannelHandleENS0_4ModeEPNS_8ListenerE
+   fun:_ZN3IPC7Channel6CreateERKNS_13ChannelHandleENS0_4ModeEPNS_8ListenerE*
    fun:_ZN3IPC12_GLOBAL__N_122PlatformChannelFactory12BuildChannelEPNS_8ListenerE
    fun:_ZN3IPC12ChannelProxy7Context13CreateChannelE10scoped_ptrINS_14ChannelFactoryEN4base14DefaultDeleterIS3_EEE
    ...
@@ -3522,26 +3513,32 @@
    fun:_ZN5blink14LayoutSVGShape22updateShapeFromElementEv
 }
 {
-  bug_487706
-  Memcheck:Leak
-  fun:calloc
-  ...
-  fun:ssl3_HandleClientHello
-  fun:ssl3_HandleHandshakeMessage
-  fun:ssl3_HandleHandshake
-  fun:ssl3_HandleRecord
-  fun:ssl3_GatherCompleteHandshake
-  fun:SSL_ForceHandshake
-  fun:_ZN3net18SSLServerSocketNSS11DoHandshakeEv
+   bug_487706
+   Memcheck:Leak
+   fun:calloc
+   ...
+   fun:ssl3_HandleClientHello
+   fun:ssl3_HandleHandshakeMessage
+   fun:ssl3_HandleHandshake
+   fun:ssl3_HandleRecord
+   fun:ssl3_GatherCompleteHandshake
+   fun:SSL_ForceHandshake
+   fun:_ZN3net18SSLServerSocketNSS11DoHandshakeEv
 }
 {
-  buf_492821
-  Memcheck:Uninitialized
-  fun:_ZN5blink17CSSPropertyParser9validUnitEPNS_14CSSParserValueENS0_5UnitsENS_13CSSParserModeENS0_31ReleaseParsedCalcValueConditionE
-  fun:_ZN5blink17CSSPropertyParser9validUnitEPNS_14CSSParserValueENS0_5UnitsENS0_31ReleaseParsedCalcValueConditionE
-    fun:_ZN5blink17CSSPropertyParser18validWidthOrHeightEPNS_14CSSParserValueENS0_5UnitsE
-    fun:_ZN5blink17CSSPropertyParser10parseValueENS_13CSSPropertyIDEb
-    fun:_ZN5blink17CSSPropertyParser10parseValueENS_13CSSPropertyIDEbPNS_18CSSParserValueListERKNS_16CSSParserContextERN3WTF6VectorINS_11CSSPropertyELm256ENS7_16DefaultAllocatorEEENS_13StyleRuleBase4TypeE
-    fun:_ZN5blink13CSSParserImpl23consumeDeclarationValueENS_19CSSParserTokenRangeENS_13CSSPropertyIDEbNS_13StyleRuleBase4TypeE
-fun:_ZN5blink13CSSParserImpl18consumeDeclarationENS_19CSSParserTokenRangeENS_13StyleRuleBase4TypeE
+   bug_492821
+   Memcheck:Uninitialized
+   fun:_ZN5blink17CSSPropertyParser9validUnitEPNS_14CSSParserValueENS0_5UnitsENS_13CSSParserModeENS0_31ReleaseParsedCalcValueConditionE
+   fun:_ZN5blink17CSSPropertyParser9validUnitEPNS_14CSSParserValueENS0_5UnitsENS0_31ReleaseParsedCalcValueConditionE
+   fun:_ZN5blink17CSSPropertyParser18validWidthOrHeightEPNS_14CSSParserValueENS0_5UnitsE
+   fun:_ZN5blink17CSSPropertyParser10parseValueENS_13CSSPropertyIDEb
+   fun:_ZN5blink17CSSPropertyParser10parseValueENS_13CSSPropertyIDEbPNS_18CSSParserValueListERKNS_16CSSParserContextERN3WTF6VectorINS_11CSSPropertyELm256ENS7_16DefaultAllocatorEEENS_13StyleRuleBase4TypeE
+   fun:_ZN5blink13CSSParserImpl23consumeDeclarationValueENS_19CSSParserTokenRangeENS_13CSSPropertyIDEbNS_13StyleRuleBase4TypeE
+   fun:_ZN5blink13CSSParserImpl18consumeDeclarationENS_19CSSParserTokenRangeENS_13StyleRuleBase4TypeE
+}
+{
+   bug_509513
+   Memcheck:Uninitialized
+   fun:_ZNK5blink9FillLayer31computeCachedPropertiesIfNeededEv
+   fun:_ZNK5blink9FillLayer29thisOrNextLayersUseContentBoxEv
 }

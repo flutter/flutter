@@ -16,13 +16,11 @@
     </module>
     <module name="RedundantImport">
       <message key="import.redundant" value="Redundant import: {0}. Use :JavaImportOrganize (ECLIM) or Ctrl+Shift+O (Eclipse) to sort imports"/>
-      <!-- This check is set to a warning because JNI generator sometimes requires to leave an unused import -->
-      <property name="severity" value="warning"/>
+      <property name="severity" value="error"/>
     </module>
     <module name="UnusedImports">
       <message key="import.unused" value="Unused import: {0}. Use :JavaImportOrganize (ECLIM) or Ctrl+Shift+O (Eclipse) to sort imports"/>
-      <!-- This check is set to a warning because JNI generator sometimes requires to leave an unused import -->
-      <property name="severity" value="warning"/>
+      <property name="severity" value="error"/>
       <property name="processJavadoc" value="true"/>
     </module>
     <module name="JavadocType">

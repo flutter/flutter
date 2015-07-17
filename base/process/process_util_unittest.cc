@@ -64,6 +64,12 @@ using base::FilePath;
 
 namespace {
 
+const char kSignalFileSlow[] = "SlowChildProcess.die";
+const char kSignalFileKill[] = "KilledChildProcess.die";
+
+#if defined(OS_POSIX)
+const char kSignalFileTerm[] = "TerminatedChildProcess.die";
+
 #if defined(OS_ANDROID)
 const char kShellPath[] = "/system/bin/sh";
 const char kPosixShell[] = "sh";
@@ -71,13 +77,7 @@ const char kPosixShell[] = "sh";
 const char kShellPath[] = "/bin/sh";
 const char kPosixShell[] = "bash";
 #endif
-
-const char kSignalFileSlow[] = "SlowChildProcess.die";
-const char kSignalFileKill[] = "KilledChildProcess.die";
-
-#if defined(OS_POSIX)
-const char kSignalFileTerm[] = "TerminatedChildProcess.die";
-#endif
+#endif  // defined(OS_POSIX)
 
 #if defined(OS_WIN)
 const int kExpectedStillRunningExitCode = 0x102;
@@ -1025,6 +1025,7 @@ MULTIPROCESS_TEST_MAIN(CheckPidProcess) {
   return kSuccess;
 }
 
+#if defined(CLONE_NEWUSER) && defined(CLONE_NEWPID)
 TEST_F(ProcessUtilTest, CloneFlags) {
   if (RunningOnValgrind() ||
       !base::PathExists(FilePath("/proc/self/ns/user")) ||
@@ -1043,6 +1044,7 @@ TEST_F(ProcessUtilTest, CloneFlags) {
   EXPECT_TRUE(process.WaitForExit(&exit_code));
   EXPECT_EQ(kSuccess, exit_code);
 }
+#endif
 
 TEST(ForkWithFlagsTest, UpdatesPidCache) {
   // The libc clone function, which allows ForkWithFlags to keep the pid cache

@@ -4,9 +4,11 @@
 
 #include <vector>
 
+#include "base/bind.h"
 #include "base/json/json_reader.h"
 #include "base/memory/scoped_ptr.h"
-#include "base/metrics/histogram.h"
+#include "base/metrics/histogram_macros.h"
+#include "base/metrics/sparse_histogram.h"
 #include "base/metrics/statistics_recorder.h"
 #include "base/values.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -310,6 +312,180 @@ TEST_F(StatisticsRecorderTest, ToJSON) {
   // No data should be returned.
   json = StatisticsRecorder::ToJSON(query);
   EXPECT_TRUE(json.empty());
+}
+
+namespace {
+
+// CallbackCheckWrapper is simply a convenient way to check and store that
+// a callback was actually run.
+struct CallbackCheckWrapper {
+  CallbackCheckWrapper() : called(false), last_histogram_value(0) {}
+
+  void OnHistogramChanged(base::HistogramBase::Sample histogram_value) {
+    called = true;
+    last_histogram_value = histogram_value;
+  }
+
+  bool called;
+  base::HistogramBase::Sample last_histogram_value;
+};
+
+}  // namespace
+
+// Check that you can't overwrite the callback with another.
+TEST_F(StatisticsRecorderTest, SetCallbackFailsWithoutHistogramTest) {
+  CallbackCheckWrapper callback_wrapper;
+
+  bool result = base::StatisticsRecorder::SetCallback(
+      "TestHistogram", base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                                  base::Unretained(&callback_wrapper)));
+  EXPECT_TRUE(result);
+
+  result = base::StatisticsRecorder::SetCallback(
+      "TestHistogram", base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                                  base::Unretained(&callback_wrapper)));
+  EXPECT_FALSE(result);
+}
+
+// Check that you can't overwrite the callback with another.
+TEST_F(StatisticsRecorderTest, SetCallbackFailsWithHistogramTest) {
+  HistogramBase* histogram = Histogram::FactoryGet("TestHistogram", 1, 1000, 10,
+                                                   HistogramBase::kNoFlags);
+  EXPECT_TRUE(histogram);
+
+  CallbackCheckWrapper callback_wrapper;
+
+  bool result = base::StatisticsRecorder::SetCallback(
+      "TestHistogram", base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                                  base::Unretained(&callback_wrapper)));
+  EXPECT_TRUE(result);
+  EXPECT_EQ(histogram->flags() & base::HistogramBase::kCallbackExists,
+            base::HistogramBase::kCallbackExists);
+
+  result = base::StatisticsRecorder::SetCallback(
+      "TestHistogram", base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                                  base::Unretained(&callback_wrapper)));
+  EXPECT_FALSE(result);
+  EXPECT_EQ(histogram->flags() & base::HistogramBase::kCallbackExists,
+            base::HistogramBase::kCallbackExists);
+
+  histogram->Add(1);
+
+  EXPECT_TRUE(callback_wrapper.called);
+}
+
+// Check that you can't overwrite the callback with another.
+TEST_F(StatisticsRecorderTest, ClearCallbackSuceedsWithHistogramTest) {
+  HistogramBase* histogram = Histogram::FactoryGet("TestHistogram", 1, 1000, 10,
+                                                   HistogramBase::kNoFlags);
+  EXPECT_TRUE(histogram);
+
+  CallbackCheckWrapper callback_wrapper;
+
+  bool result = base::StatisticsRecorder::SetCallback(
+      "TestHistogram", base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                                  base::Unretained(&callback_wrapper)));
+  EXPECT_TRUE(result);
+  EXPECT_EQ(histogram->flags() & base::HistogramBase::kCallbackExists,
+            base::HistogramBase::kCallbackExists);
+
+  base::StatisticsRecorder::ClearCallback("TestHistogram");
+  EXPECT_EQ(histogram->flags() & base::HistogramBase::kCallbackExists, 0);
+
+  histogram->Add(1);
+
+  EXPECT_FALSE(callback_wrapper.called);
+}
+
+// Check that callback is used.
+TEST_F(StatisticsRecorderTest, CallbackUsedTest) {
+  {
+    HistogramBase* histogram = Histogram::FactoryGet(
+        "TestHistogram", 1, 1000, 10, HistogramBase::kNoFlags);
+    EXPECT_TRUE(histogram);
+
+    CallbackCheckWrapper callback_wrapper;
+
+    base::StatisticsRecorder::SetCallback(
+        "TestHistogram", base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                                    base::Unretained(&callback_wrapper)));
+
+    histogram->Add(1);
+
+    EXPECT_TRUE(callback_wrapper.called);
+    EXPECT_EQ(callback_wrapper.last_histogram_value, 1);
+  }
+
+  {
+    HistogramBase* linear_histogram = LinearHistogram::FactoryGet(
+        "TestLinearHistogram", 1, 1000, 10, HistogramBase::kNoFlags);
+
+    CallbackCheckWrapper callback_wrapper;
+
+    base::StatisticsRecorder::SetCallback(
+        "TestLinearHistogram",
+        base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                   base::Unretained(&callback_wrapper)));
+
+    linear_histogram->Add(1);
+
+    EXPECT_TRUE(callback_wrapper.called);
+    EXPECT_EQ(callback_wrapper.last_histogram_value, 1);
+  }
+
+  {
+    std::vector<int> custom_ranges;
+    custom_ranges.push_back(1);
+    custom_ranges.push_back(5);
+    HistogramBase* custom_histogram = CustomHistogram::FactoryGet(
+        "TestCustomHistogram", custom_ranges, HistogramBase::kNoFlags);
+
+    CallbackCheckWrapper callback_wrapper;
+
+    base::StatisticsRecorder::SetCallback(
+        "TestCustomHistogram",
+        base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                   base::Unretained(&callback_wrapper)));
+
+    custom_histogram->Add(1);
+
+    EXPECT_TRUE(callback_wrapper.called);
+    EXPECT_EQ(callback_wrapper.last_histogram_value, 1);
+  }
+
+  {
+    HistogramBase* custom_histogram = SparseHistogram::FactoryGet(
+        "TestSparseHistogram", HistogramBase::kNoFlags);
+
+    CallbackCheckWrapper callback_wrapper;
+
+    base::StatisticsRecorder::SetCallback(
+        "TestSparseHistogram",
+        base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                   base::Unretained(&callback_wrapper)));
+
+    custom_histogram->Add(1);
+
+    EXPECT_TRUE(callback_wrapper.called);
+    EXPECT_EQ(callback_wrapper.last_histogram_value, 1);
+  }
+}
+
+// Check that setting a callback before the histogram exists works.
+TEST_F(StatisticsRecorderTest, CallbackUsedBeforeHistogramCreatedTest) {
+  CallbackCheckWrapper callback_wrapper;
+
+  base::StatisticsRecorder::SetCallback(
+      "TestHistogram", base::Bind(&CallbackCheckWrapper::OnHistogramChanged,
+                                  base::Unretained(&callback_wrapper)));
+
+  HistogramBase* histogram = Histogram::FactoryGet("TestHistogram", 1, 1000, 10,
+                                                   HistogramBase::kNoFlags);
+  EXPECT_TRUE(histogram);
+  histogram->Add(1);
+
+  EXPECT_TRUE(callback_wrapper.called);
+  EXPECT_EQ(callback_wrapper.last_histogram_value, 1);
 }
 
 }  // namespace base

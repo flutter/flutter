@@ -29,6 +29,7 @@
 #define SKY_ENGINE_WTF_DTOA_UTILS_H_
 
 #include <string.h>
+#include "base/macros.h"
 #include "sky/engine/wtf/Assertions.h"
 
 #define UNIMPLEMENTED ASSERT_NOT_REACHED
@@ -69,22 +70,6 @@ defined(__MIPSEL__)
 #define ARRAY_SIZE(a)                                   \
 ((sizeof(a) / sizeof(*(a))) /                         \
 static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
-
-// A macro to disallow the evil copy constructor and operator= functions
-// This should be used in the private: declarations for a class
-#define DISALLOW_COPY_AND_ASSIGN(TypeName)      \
-TypeName(const TypeName&);                    \
-void operator=(const TypeName&)
-
-// A macro to disallow all the implicit constructors, namely the
-// default constructor, copy constructor and operator= functions.
-//
-// This should be used in the private: declarations for a class
-// that wants to prevent anyone from instantiating it. This is
-// especially useful for classes containing only static methods.
-#define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
-TypeName();                                    \
-DISALLOW_COPY_AND_ASSIGN(TypeName)
 
 namespace WTF {
 

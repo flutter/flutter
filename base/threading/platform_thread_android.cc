@@ -23,29 +23,21 @@ namespace base {
 
 namespace internal {
 
-// These nice values are taken from Android, which uses nice values like linux,
-// but defines some preset nice values.
-//   Process.THREAD_PRIORITY_AUDIO = -16
-//   Process.THREAD_PRIORITY_BACKGROUND = 10
-//   Process.THREAD_PRIORITY_DEFAULT = 0;
-//   Process.THREAD_PRIORITY_DISPLAY = -4;
-//   Process.THREAD_PRIORITY_FOREGROUND = -2;
-//   Process.THREAD_PRIORITY_LESS_FAVORABLE = 1;
-//   Process.THREAD_PRIORITY_LOWEST = 19;
-//   Process.THREAD_PRIORITY_MORE_FAVORABLE = -1;
-//   Process.THREAD_PRIORITY_URGENT_AUDIO = -19;
-//   Process.THREAD_PRIORITY_URGENT_DISPLAY = -8;
-// We use -6 for display, but we may want to split this into urgent (-8) and
-// non-urgent (-4).
+// - BACKGROUND is 9 due to it being the nicest value we can use that's still
+// above an Android system threshold that enables heavy throttling starting at
+// 10; we want to be lower-priority than Chrome's other threads without
+// incurring this behavior.
+// - DISPLAY is -6 due to being midway between Android's DISPLAY (-4) and
+// URGENT_DISPLAY (-8).
+// - REALTIME_AUDIO corresponds to Android's THREAD_PRIORITY_AUDIO = -16 value.
 const ThreadPriorityToNiceValuePair kThreadPriorityToNiceValueMap[4] = {
-    {ThreadPriority::BACKGROUND, 10},
+    {ThreadPriority::BACKGROUND, 9},
     {ThreadPriority::NORMAL, 0},
     {ThreadPriority::DISPLAY, -6},
     {ThreadPriority::REALTIME_AUDIO, -16},
 };
 
-bool SetThreadPriorityForPlatform(PlatformThreadHandle handle,
-                                  ThreadPriority priority) {
+bool SetCurrentThreadPriorityForPlatform(ThreadPriority priority) {
   // On Android, we set the Audio priority through JNI as Audio priority
   // will also allow the process to run while it is backgrounded.
   if (priority == ThreadPriority::REALTIME_AUDIO) {
@@ -56,8 +48,8 @@ bool SetThreadPriorityForPlatform(PlatformThreadHandle handle,
   return false;
 }
 
-bool GetThreadPriorityForPlatform(PlatformThreadHandle handle,
-                                  ThreadPriority* priority) {
+bool GetCurrentThreadPriorityForPlatform(ThreadPriority* priority) {
+  // See http://crbug.com/505474.
   NOTIMPLEMENTED();
   return false;
 }
@@ -88,8 +80,7 @@ void InitThreading() {
 void InitOnThread() {
   // Threads on linux/android may inherit their priority from the thread
   // where they were created. This sets all new threads to the default.
-  PlatformThread::SetThreadPriority(PlatformThread::CurrentHandle(),
-                                    ThreadPriority::NORMAL);
+  PlatformThread::SetCurrentThreadPriority(ThreadPriority::NORMAL);
 }
 
 void TerminateOnThread() {

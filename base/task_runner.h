@@ -104,7 +104,7 @@ class BASE_EXPORT TaskRunner
   //  public:
   //    void GetData() {
   //      scoped_refptr<DataBuffer> buffer = new DataBuffer();
-  //      target_thread_.message_loop_proxy()->PostTaskAndReply(
+  //      target_thread_.task_runner()->PostTaskAndReply(
   //          FROM_HERE,
   //          base::Bind(&DataBuffer::AddData, buffer),
   //          base::Bind(&DataLoader::OnDataReceived, AsWeakPtr(), buffer));

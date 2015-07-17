@@ -128,6 +128,12 @@ source_set("test_support") {
     "values_test_util.h",
   ]
 
+  data = [
+    # The isolate needs this script for setting up the test. It's not actually
+    # needed to run this target locally.
+    "//testing/test_env.py",
+  ]
+
   public_deps = [
     ":test_config",
     "//base",

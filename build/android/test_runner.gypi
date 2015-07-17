@@ -33,6 +33,7 @@
   'variables': {
     'variables': {
       'isolate_file%': '',
+      'support_apk_path%': '',
     },
     'test_runner_args': ['--output-directory', '<(PRODUCT_DIR)'],
     'conditions': [
@@ -43,6 +44,14 @@
       ['test_type == "instrumentation"', {
         'test_runner_args': ['--test-apk', '<(apk_name)'],
         'script_name': 'run_<(_target_name)',
+        'conditions': [
+          ['support_apk_path != ""', {
+            'test_runner_args': [
+              '--support-apk',
+              '<(support_apk_path)'
+            ],
+          }],
+        ],
       }],
       ['isolate_file != ""', {
         'test_runner_args': ['--isolate-file-path', '<(isolate_file)']

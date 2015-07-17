@@ -31,7 +31,9 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPESANITIZER_H_
 #define SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPESANITIZER_H_
 
+#include "opentype-sanitiser.h"
 #include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 
@@ -41,17 +43,36 @@ class OpenTypeSanitizer {
 public:
     explicit OpenTypeSanitizer(SharedBuffer* buffer)
         : m_buffer(buffer)
+        , m_otsErrorString("")
     {
     }
 
     PassRefPtr<SharedBuffer> sanitize();
 
     static bool supportsFormat(const String&);
+    String getErrorString() const { return static_cast<String>(m_otsErrorString); }
+
+    void setErrorString(const String& errorString) { m_otsErrorString = errorString; }
 
 private:
     SharedBuffer* const m_buffer;
+    String m_otsErrorString;
+};
+
+class BlinkOTSContext: public ots::OTSContext {
+public:
+        BlinkOTSContext()
+            : m_errorString("")
+        {
+        }
+
+        virtual void Message(int level, const char *format, ...);
+        virtual ots::TableAction GetTableAction(uint32_t tag);
+        String getErrorString() const { return static_cast<String>(m_errorString); }
+private:
+        String m_errorString;
 };
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPESANITIZER_H_
+#endif // SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPESANITIZER_H_

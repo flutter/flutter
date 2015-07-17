@@ -48,6 +48,7 @@
     'python', '<(DEPTH)/build/android/gyp/dex.py',
     '--dex-path=<(output_path)',
     '--android-sdk-tools=<(android_sdk_tools)',
+    '--output-directory=<(PRODUCT_DIR)',
     '--configuration-name=<(CONFIGURATION_NAME)',
     '--proguard-enabled=>(proguard_enabled)',
     '--proguard-enabled-input-path=<(proguard_enabled_input_path)',

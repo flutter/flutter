@@ -41,7 +41,7 @@
 void
 initxmlDefaultSAXHandler(xmlSAXHandlerV1 *hdlr, int warning)
 {
-    
+
     if(hdlr->initialized == 1)
 	return;
 

@@ -125,7 +125,7 @@ class SampleForTests {
     // This is triggered by the @CalledByNative annotation; the methods may be named as you wish.
 
     // Exported to C++ as:
-    // Java_Example_javaMethod(JNIEnv* env, jobject obj, jint foo, jint bar)
+    // Java_Example_javaMethod(JNIEnv* env, jobject caller, jint foo, jint bar)
     // Typically the C++ code would have obtained the jobject via the Init() call described above.
     @CalledByNative
     public int javaMethod(int foo, int bar) {
@@ -177,7 +177,7 @@ class SampleForTests {
     // signatures. Besides these constraints the methods can be freely named.
 
     // This declares a C++ function which the application code must implement:
-    // static jint Init(JNIEnv* env, jobject obj);
+    // static jint Init(JNIEnv* env, jobject caller);
     // The jobject parameter refers back to this java side object instance.
     // The implementation must return the pointer to the C++ object cast to jint.
     // The caller of this method should store it, and supply it as a the nativeCPPClass param to
@@ -195,7 +195,7 @@ class SampleForTests {
     private native void nativeDestroy(long nativeCPPClass);
 
     // This declares a C++ function which the application code must implement:
-    // static jdouble GetDoubleFunction(JNIEnv* env, jobject obj);
+    // static jdouble GetDoubleFunction(JNIEnv* env, jobject caller);
     // The jobject parameter refers back to this java side object instance.
     private native double nativeGetDoubleFunction();
 
@@ -209,7 +209,7 @@ class SampleForTests {
     private native void nativeSetNonPODDatatype(Rect rect);
 
     // This declares a C++ function which the application code must implement:
-    // static ScopedJavaLocalRef<jobject> GetNonPODDatatype(JNIEnv* env, jobject obj);
+    // static ScopedJavaLocalRef<jobject> GetNonPODDatatype(JNIEnv* env, jobject caller);
     // The jobject parameter refers back to this java side object instance.
     // Note that it returns a ScopedJavaLocalRef<jobject> so that you don' have to worry about
     // deleting the JNI local reference. This is similar with Strings and arrays.

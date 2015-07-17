@@ -50,7 +50,7 @@ XMLPUBFUN int XMLCALL xmlModuleFree		(xmlModulePtr module);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* LIBXML_MODULES_ENABLED */
 

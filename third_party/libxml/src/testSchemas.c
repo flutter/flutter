@@ -49,7 +49,7 @@
 static int debug = 0;
 #endif
 static int noout = 0;
-#ifdef HAVE_SYS_MMAN_H
+#ifdef HAVE_MMAP
 static int memory = 0;
 #endif
 
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 	    debug++;
 	else
 #endif
-#ifdef HAVE_SYS_MMAN_H
+#ifdef HAVE_MMAP
 	if ((!strcmp(argv[i], "-memory")) || (!strcmp(argv[i], "--memory"))) {
 	    memory++;
         } else
@@ -80,12 +80,12 @@ int main(int argc, char **argv) {
 	    if (schema == NULL) {
 		xmlSchemaParserCtxtPtr ctxt;
 
-#ifdef HAVE_SYS_MMAN_H
+#ifdef HAVE_MMAP
 		if (memory) {
 		    int fd;
 		    struct stat info;
 		    const char *base;
-		    if (stat(argv[i], &info) < 0) 
+		    if (stat(argv[i], &info) < 0)
 			break;
 		    if ((fd = open(argv[i], O_RDONLY)) < 0)
 			break;
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
 	printf("\t--debug : dump a debug tree of the in-memory document\n");
 #endif
 	printf("\t--noout : do not print the result\n");
-#ifdef HAVE_SYS_MMAN_H
+#ifdef HAVE_MMAP
 	printf("\t--memory : test the schemas in memory parsing\n");
 #endif
     }

@@ -33,7 +33,7 @@ class BASE_EXPORT TraceEventSystemStatsMonitor
   explicit TraceEventSystemStatsMonitor(
       scoped_refptr<SingleThreadTaskRunner> task_runner);
 
-  virtual ~TraceEventSystemStatsMonitor();
+  ~TraceEventSystemStatsMonitor() override;
 
   // base::trace_event::TraceLog::EnabledStateChangedObserver overrides:
   void OnTraceLogEnabled() override;

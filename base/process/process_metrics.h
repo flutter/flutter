@@ -140,7 +140,8 @@ class BASE_EXPORT ProcessMetrics {
   // memory usage as per definition of CommittedBytes.
   void GetCommittedKBytes(CommittedKBytes* usage) const;
   // Fills a WorkingSetKBytes containing resident private and shared memory
-  // usage in bytes, as per definition of WorkingSetBytes.
+  // usage in bytes, as per definition of WorkingSetBytes. Note that this
+  // function is somewhat expensive on Windows (a few ms per process).
   bool GetWorkingSetKBytes(WorkingSetKBytes* ws_usage) const;
 
 #if defined(OS_MACOSX)

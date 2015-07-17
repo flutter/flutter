@@ -136,7 +136,7 @@ if (is_android) {
       "$root_build_dir/icudtl.dat",
     ]
     deps = [
-      "//third_party/icu",
+      "//third_party/icu:icudata",
     ]
   }
 } else if (is_ios) {

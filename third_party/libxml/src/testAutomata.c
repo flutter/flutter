@@ -70,10 +70,10 @@ testRegexpFile(const char *filename) {
 	    continue;
 	len = strlen(expr);
 	len--;
-	while ((len >= 0) && 
+	while ((len >= 0) &&
 	       ((expr[len] == '\n') || (expr[len] == '\t') ||
 		(expr[len] == '\r') || (expr[len] == ' '))) len--;
-	expr[len + 1] = 0;      
+	expr[len + 1] = 0;
 	if (len >= 0) {
 	    if ((am != NULL) && (expr[0] == 't') && (expr[1] == ' ')) {
 		char *ptr = &expr[2];

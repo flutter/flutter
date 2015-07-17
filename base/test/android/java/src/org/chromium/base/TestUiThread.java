@@ -19,7 +19,7 @@ import javax.annotation.concurrent.ThreadSafe;
 @ThreadSafe
 public class TestUiThread {
     private static final AtomicBoolean sStarted = new AtomicBoolean(false);
-    private static final String TAG = Log.makeTag("TestUiThread");
+    private static final String TAG = "cr.TestUiThread";
 
     @CalledByNative
     private static void loop() {

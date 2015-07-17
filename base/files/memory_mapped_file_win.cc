@@ -32,7 +32,7 @@ bool MemoryMappedFile::MapFileRegionToMemory(
   if (!file_mapping_.IsValid())
     return false;
 
-  LARGE_INTEGER map_start = {0};
+  LARGE_INTEGER map_start = {};
   SIZE_T map_size = 0;
   int32 data_offset = 0;
 

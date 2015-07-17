@@ -56,8 +56,8 @@ RE2::Options::Options()
 
 RE2::Options::Options(RE2::CannedOptions opt)
   : encoding_(opt == RE2::Latin1 ? EncodingLatin1 : EncodingUTF8),
-    posix_syntax_(opt == RE2::POSIX_SYNTAX),
-    longest_match_(opt == RE2::POSIX_SYNTAX),
+    posix_syntax_(opt == RE2::POSIX),
+    longest_match_(opt == RE2::POSIX),
     log_errors_(opt != RE2::Quiet),
     max_mem_(kDefaultMaxMem),
     literal_(false),

@@ -613,7 +613,7 @@ public:
         if (!inputProfile)
             return;
         // We currently only support color profiles for RGB profiled images.
-        ASSERT(icSigRgbData == qcms_profile_get_color_space(inputProfile));
+        ASSERT(rgbData == qcms_profile_get_color_space(inputProfile));
         qcms_data_type dataFormat = hasAlpha ? QCMS_DATA_RGBA_8 : QCMS_DATA_RGB_8;
         // FIXME: Don't force perceptual intent if the image profile contains an intent.
         m_transform = qcms_transform_create(inputProfile, dataFormat, deviceProfile, dataFormat, QCMS_INTENT_PERCEPTUAL);

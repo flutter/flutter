@@ -11,11 +11,8 @@
  * daniel@veillard.com
  */
 
-#ifdef HAVE_CONFIG_H
 #include "libxml.h"
-#else
 #include <stdio.h>
-#endif
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #include <unistd.h>
@@ -194,8 +191,7 @@ static void globfree(glob_t *pglob) {
              free(pglob->gl_pathv[i]);
     }
 }
-#define vsnprintf _vsnprintf
-#define snprintf _snprintf
+
 #else
 #include <glob.h>
 #endif
@@ -1683,7 +1679,8 @@ saxParseTest(const char *filename, const char *result,
     }
     if (ret != 0) {
         fprintf(stderr, "Failed to parse %s\n", filename);
-	return(1);
+	ret = 1;
+	goto done;
     }
 #ifdef LIBXML_HTML_ENABLED
     if (options & XML_PARSE_HTML) {
@@ -1705,6 +1702,8 @@ saxParseTest(const char *filename, const char *result,
         fprintf(stderr, "Got a difference for %s\n", filename);
         ret = 1;
     }
+
+done:
     if (temp != NULL) {
         unlink(temp);
         free(temp);
@@ -2097,7 +2096,7 @@ static void processNode(FILE *out, xmlTextReaderPtr reader) {
 }
 static int
 streamProcessTest(const char *filename, const char *result, const char *err,
-                  xmlTextReaderPtr reader, const char *rng) {
+                  xmlTextReaderPtr reader, const char *rng, int options) {
     int ret;
     char *temp = NULL;
     FILE *t = NULL;
@@ -2193,7 +2192,7 @@ streamParseTest(const char *filename, const char *result, const char *err,
     int ret;
 
     reader = xmlReaderForFile(filename, NULL, options);
-    ret = streamProcessTest(filename, result, err, reader, NULL);
+    ret = streamProcessTest(filename, result, err, reader, NULL, options);
     xmlFreeTextReader(reader);
     return(ret);
 }
@@ -2221,7 +2220,7 @@ walkerParseTest(const char *filename, const char *result, const char *err,
 	return(-1);
     }
     reader = xmlReaderWalker(doc);
-    ret = streamProcessTest(filename, result, err, reader, NULL);
+    ret = streamProcessTest(filename, result, err, reader, NULL, options);
     xmlFreeTextReader(reader);
     xmlFreeDoc(doc);
     return(ret);
@@ -2253,7 +2252,7 @@ streamMemParseTest(const char *filename, const char *result, const char *err,
 	return(-1);
     }
     reader = xmlReaderForMemory(base, size, filename, NULL, options);
-    ret = streamProcessTest(filename, result, err, reader, NULL);
+    ret = streamProcessTest(filename, result, err, reader, NULL, options);
     free((char *)base);
     xmlFreeTextReader(reader);
     return(ret);
@@ -2728,7 +2727,7 @@ static const char *urip_testURLs[] = {
     "file:///path/to/a%20b.html",
     "/path/to/a b.html",
     "/path/to/a%20b.html",
-    "urip://example.com/résumé.html",
+    "urip://example.com/r" "\xe9" "sum" "\xe9" ".html",
     "urip://example.com/test?a=1&b=2%263&c=4#foo",
     NULL
 };
@@ -3312,9 +3311,11 @@ rngStreamTest(const char *filename,
 	    fprintf(stderr, "Failed to build reder for %s\n", instance);
 	}
 	if (disable_err == 1)
-	    ret = streamProcessTest(instance, result, NULL, reader, filename);
+	    ret = streamProcessTest(instance, result, NULL, reader, filename,
+	                            options);
 	else
-	    ret = streamProcessTest(instance, result, err, reader, filename);
+	    ret = streamProcessTest(instance, result, err, reader, filename,
+	                            options);
 	xmlFreeTextReader(reader);
 	if (ret != 0) {
 	    fprintf(stderr, "instance %s failed\n", instance);
@@ -3936,60 +3937,7 @@ thread_specific_data(void *private_data)
     return ((void *) Okay);
 }
 
-#if defined(linux) || defined(__sun) || defined(__APPLE_CC__)
-
-#include <pthread.h>
-
-static pthread_t tid[MAX_ARGC];
-
-static int
-testThread(void)
-{
-    unsigned int i, repeat;
-    unsigned int num_threads = sizeof(testfiles) / sizeof(testfiles[0]);
-    void *results[MAX_ARGC];
-    int ret;
-    int res = 0;
-
-    xmlInitParser();
-
-    for (repeat = 0; repeat < 500; repeat++) {
-        xmlLoadCatalog(catalog);
-        nb_tests++;
-
-        for (i = 0; i < num_threads; i++) {
-            results[i] = NULL;
-            tid[i] = (pthread_t) - 1;
-        }
-
-        for (i = 0; i < num_threads; i++) {
-            ret = pthread_create(&tid[i], 0, thread_specific_data,
-                                 (void *) testfiles[i]);
-            if (ret != 0) {
-                fprintf(stderr, "pthread_create failed\n");
-                return (1);
-            }
-        }
-        for (i = 0; i < num_threads; i++) {
-            ret = pthread_join(tid[i], &results[i]);
-            if (ret != 0) {
-                fprintf(stderr, "pthread_join failed\n");
-                return (1);
-            }
-        }
-
-        xmlCatalogCleanup();
-        for (i = 0; i < num_threads; i++)
-            if (results[i] != (void *) Okay) {
-                fprintf(stderr, "Thread %d handling %s failed\n",
-                        i, testfiles[i]);
-                res = 1;
-            }
-    }
-    return (res);
-}
-
-#elif defined WIN32
+#if defined WIN32
 #include <windows.h>
 #include <string.h>
 
@@ -4115,6 +4063,59 @@ testThread(void)
         return(1);
     return (0);
 }
+
+#elif defined HAVE_PTHREAD_H
+#include <pthread.h>
+
+static pthread_t tid[MAX_ARGC];
+
+static int
+testThread(void)
+{
+    unsigned int i, repeat;
+    unsigned int num_threads = sizeof(testfiles) / sizeof(testfiles[0]);
+    void *results[MAX_ARGC];
+    int ret;
+    int res = 0;
+
+    xmlInitParser();
+
+    for (repeat = 0; repeat < 500; repeat++) {
+        xmlLoadCatalog(catalog);
+        nb_tests++;
+
+        for (i = 0; i < num_threads; i++) {
+            results[i] = NULL;
+            tid[i] = (pthread_t) - 1;
+        }
+
+        for (i = 0; i < num_threads; i++) {
+            ret = pthread_create(&tid[i], 0, thread_specific_data,
+                                 (void *) testfiles[i]);
+            if (ret != 0) {
+                fprintf(stderr, "pthread_create failed\n");
+                return (1);
+            }
+        }
+        for (i = 0; i < num_threads; i++) {
+            ret = pthread_join(tid[i], &results[i]);
+            if (ret != 0) {
+                fprintf(stderr, "pthread_join failed\n");
+                return (1);
+            }
+        }
+
+        xmlCatalogCleanup();
+        for (i = 0; i < num_threads; i++)
+            if (results[i] != (void *) Okay) {
+                fprintf(stderr, "Thread %d handling %s failed\n",
+                        i, testfiles[i]);
+                res = 1;
+            }
+    }
+    return (res);
+}
+
 #else
 static int
 testThread(void)
@@ -4207,6 +4208,14 @@ testDesc testDescriptions[] = {
     { "Validity checking regression tests" ,
       errParseTest, "./test/VC/*", "result/VC/", NULL, "",
       XML_PARSE_DTDVALID },
+#ifdef LIBXML_READER_ENABLED
+    { "Streaming validity checking regression tests" ,
+      streamParseTest, "./test/valid/*.xml", "result/valid/", NULL, ".err.rdr",
+      XML_PARSE_DTDVALID },
+    { "Streaming validity error checking regression tests" ,
+      streamParseTest, "./test/VC/*", "result/VC/", NULL, ".rdr",
+      XML_PARSE_DTDVALID },
+#endif
     { "General documents valid regression tests" ,
       errParseTest, "./test/valid/*", "result/valid/", "", ".err",
       XML_PARSE_DTDVALID },

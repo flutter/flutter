@@ -46,6 +46,7 @@ void SetNameInternal(PlatformThreadId thread_id, const char* name) {
 struct ThreadParams {
   PlatformThread::Delegate* delegate;
   bool joinable;
+  ThreadPriority priority;
 };
 
 DWORD __stdcall ThreadFunc(void* params) {
@@ -53,6 +54,9 @@ DWORD __stdcall ThreadFunc(void* params) {
   PlatformThread::Delegate* delegate = thread_params->delegate;
   if (!thread_params->joinable)
     base::ThreadRestrictions::SetSingletonAllowed(false);
+
+  if (thread_params->priority != ThreadPriority::NORMAL)
+    PlatformThread::SetCurrentThreadPriority(thread_params->priority);
 
   // Retrieve a copy of the thread handle to use as the key in the
   // thread name mapping.
@@ -86,12 +90,13 @@ DWORD __stdcall ThreadFunc(void* params) {
   return NULL;
 }
 
-// CreateThreadInternal() matches PlatformThread::Create(), except that
-// |out_thread_handle| may be NULL, in which case a non-joinable thread is
+// CreateThreadInternal() matches PlatformThread::CreateWithPriority(), except
+// that |out_thread_handle| may be NULL, in which case a non-joinable thread is
 // created.
 bool CreateThreadInternal(size_t stack_size,
                           PlatformThread::Delegate* delegate,
-                          PlatformThreadHandle* out_thread_handle) {
+                          PlatformThreadHandle* out_thread_handle,
+                          ThreadPriority priority) {
   unsigned int flags = 0;
   if (stack_size > 0 && base::win::GetVersion() >= base::win::VERSION_XP) {
     flags = STACK_SIZE_PARAM_IS_A_RESERVATION;
@@ -102,6 +107,7 @@ bool CreateThreadInternal(size_t stack_size,
   ThreadParams* params = new ThreadParams;
   params->delegate = delegate;
   params->joinable = out_thread_handle != NULL;
+  params->priority = priority;
 
   // Using CreateThread here vs _beginthreadex makes thread creation a bit
   // faster and doesn't require the loader lock to be available.  Our code will
@@ -185,23 +191,22 @@ const char* PlatformThread::GetName() {
 // static
 bool PlatformThread::Create(size_t stack_size, Delegate* delegate,
                             PlatformThreadHandle* thread_handle) {
-  DCHECK(thread_handle);
-  return CreateThreadInternal(stack_size, delegate, thread_handle);
+  return CreateWithPriority(
+      stack_size, delegate, thread_handle, ThreadPriority::NORMAL);
 }
 
 // static
 bool PlatformThread::CreateWithPriority(size_t stack_size, Delegate* delegate,
                                         PlatformThreadHandle* thread_handle,
                                         ThreadPriority priority) {
-  bool result = Create(stack_size, delegate, thread_handle);
-  if (result)
-    SetThreadPriority(*thread_handle, priority);
-  return result;
+  DCHECK(thread_handle);
+  return CreateThreadInternal(stack_size, delegate, thread_handle, priority);
 }
 
 // static
 bool PlatformThread::CreateNonJoinable(size_t stack_size, Delegate* delegate) {
-  return CreateThreadInternal(stack_size, delegate, NULL);
+  return CreateThreadInternal(
+      stack_size, delegate, NULL, ThreadPriority::NORMAL);
 }
 
 // static
@@ -231,10 +236,7 @@ void PlatformThread::Join(PlatformThreadHandle thread_handle) {
 }
 
 // static
-void PlatformThread::SetThreadPriority(PlatformThreadHandle handle,
-                                       ThreadPriority priority) {
-  DCHECK(!handle.is_null());
-
+void PlatformThread::SetCurrentThreadPriority(ThreadPriority priority) {
   int desired_priority = THREAD_PRIORITY_ERROR_RETURN;
   switch (priority) {
     case ThreadPriority::BACKGROUND:
@@ -258,16 +260,16 @@ void PlatformThread::SetThreadPriority(PlatformThreadHandle handle,
 #ifndef NDEBUG
   const BOOL success =
 #endif
-      ::SetThreadPriority(handle.platform_handle(), desired_priority);
+      ::SetThreadPriority(PlatformThread::CurrentHandle().platform_handle(),
+                          desired_priority);
   DPLOG_IF(ERROR, !success) << "Failed to set thread priority to "
                             << desired_priority;
 }
 
 // static
-ThreadPriority PlatformThread::GetThreadPriority(PlatformThreadHandle handle) {
-  DCHECK(!handle.is_null());
-
-  int priority = ::GetThreadPriority(handle.platform_handle());
+ThreadPriority PlatformThread::GetCurrentThreadPriority() {
+  int priority =
+      ::GetThreadPriority(PlatformThread::CurrentHandle().platform_handle());
   switch (priority) {
     case THREAD_PRIORITY_LOWEST:
       return ThreadPriority::BACKGROUND;

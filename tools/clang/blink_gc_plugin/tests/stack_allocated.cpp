@@ -6,6 +6,16 @@
 
 namespace blink {
 
+// Verify that anon namespaces are checked.
+namespace {
+
+class AnonStackObject : public StackObject {
+public:
+    HeapObject* m_obj;
+};
+
+}
+
 void HeapObject::trace(Visitor* visitor)
 {
 }

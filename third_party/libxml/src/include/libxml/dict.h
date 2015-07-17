@@ -11,6 +11,7 @@
 #ifndef __XML_DICT_H__
 #define __XML_DICT_H__
 
+#include <limits.h>
 #include <libxml/xmlversion.h>
 #include <libxml/tree.h>
 
@@ -25,36 +26,46 @@ typedef struct _xmlDict xmlDict;
 typedef xmlDict *xmlDictPtr;
 
 /*
+ * Initializer
+ */
+XMLPUBFUN int XMLCALL  xmlInitializeDict(void);
+
+/*
  * Constructor and destructor.
  */
 XMLPUBFUN xmlDictPtr XMLCALL
 			xmlDictCreate	(void);
+XMLPUBFUN size_t XMLCALL
+			xmlDictSetLimit	(xmlDictPtr dict,
+                                         size_t limit);
+XMLPUBFUN size_t XMLCALL
+			xmlDictGetUsage (xmlDictPtr dict);
 XMLPUBFUN xmlDictPtr XMLCALL
 			xmlDictCreateSub(xmlDictPtr sub);
 XMLPUBFUN int XMLCALL
 			xmlDictReference(xmlDictPtr dict);
-XMLPUBFUN void XMLCALL			
+XMLPUBFUN void XMLCALL
 			xmlDictFree	(xmlDictPtr dict);
 
 /*
  * Lookup of entry in the dictionnary.
  */
-XMLPUBFUN const xmlChar * XMLCALL		
+XMLPUBFUN const xmlChar * XMLCALL
 			xmlDictLookup	(xmlDictPtr dict,
 		                         const xmlChar *name,
 		                         int len);
-XMLPUBFUN const xmlChar * XMLCALL		
+XMLPUBFUN const xmlChar * XMLCALL
 			xmlDictExists	(xmlDictPtr dict,
 		                         const xmlChar *name,
 		                         int len);
-XMLPUBFUN const xmlChar * XMLCALL		
+XMLPUBFUN const xmlChar * XMLCALL
 			xmlDictQLookup	(xmlDictPtr dict,
 		                         const xmlChar *prefix,
 		                         const xmlChar *name);
 XMLPUBFUN int XMLCALL
 			xmlDictOwns	(xmlDictPtr dict,
 					 const xmlChar *str);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 			xmlDictSize	(xmlDictPtr dict);
 
 /*

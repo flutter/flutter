@@ -26,17 +26,15 @@ int ThreadPriorityToNiceValue(ThreadPriority priority);
 ThreadPriority NiceValueToThreadPriority(int nice_value);
 
 // Allows platform specific tweaks to the generic POSIX solution for
-// SetThreadPriority. Returns true if the platform-specific implementation
-// handled this |priority| change, false if the generic implementation should
-// instead proceed.
-bool SetThreadPriorityForPlatform(PlatformThreadHandle handle,
-                                  ThreadPriority priority);
+// SetCurrentThreadPriority. Returns true if the platform-specific
+// implementation handled this |priority| change, false if the generic
+// implementation should instead proceed.
+bool SetCurrentThreadPriorityForPlatform(ThreadPriority priority);
 
-// Returns true if there is a platform-specific ThreadPriority set on |handle|
-// (and returns the actual ThreadPriority via |priority|). Returns false
-// otherwise, leaving |priority| untouched.
-bool GetThreadPriorityForPlatform(PlatformThreadHandle handle,
-                                  ThreadPriority* priority);
+// Returns true if there is a platform-specific ThreadPriority set on the
+// current thread (and returns the actual ThreadPriority via |priority|).
+// Returns false otherwise, leaving |priority| untouched.
+bool GetCurrentThreadPriorityForPlatform(ThreadPriority* priority);
 
 }  // namespace internal
 

@@ -66,7 +66,7 @@ bool IsTouchscreenInternal(XDisplay* dpy, int device_id) {
   XCloseDevice(dpy, dev);
 
   std::string event_node = dev_node_path.BaseName().value();
-  if (event_node.empty() || !StartsWithASCII(event_node, "event", false))
+  if (event_node.empty() || !base::StartsWithASCII(event_node, "event", false))
     return false;
 
   // Extract id "XXX" from "eventXXX"

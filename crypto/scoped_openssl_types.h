@@ -11,6 +11,7 @@
 #include <openssl/ec.h>
 #include <openssl/ecdsa.h>
 #include <openssl/evp.h>
+#include <openssl/mem.h>
 #include <openssl/rsa.h>
 
 #include "base/memory/scoped_ptr.h"
@@ -22,15 +23,13 @@ namespace crypto {
 // base::internal::RunnableAdapter<>, but that's far too heavy weight.
 template <typename Type, void (*Destroyer)(Type*)>
 struct OpenSSLDestroyer {
-  typedef void AllowSelfReset;
+  using AllowSelfReset = void;
   void operator()(Type* ptr) const { Destroyer(ptr); }
 };
 
 template <typename PointerType, void (*Destroyer)(PointerType*)>
-struct ScopedOpenSSL {
-  typedef scoped_ptr<PointerType, OpenSSLDestroyer<PointerType, Destroyer> >
-      Type;
-};
+using ScopedOpenSSL =
+    scoped_ptr<PointerType, OpenSSLDestroyer<PointerType, Destroyer>>;
 
 struct OpenSSLFree {
   void operator()(uint8_t* ptr) const { OPENSSL_free(ptr); }
@@ -40,19 +39,21 @@ struct OpenSSLFree {
 // short-hand and prevalence. Note that OpenSSL types related to X.509 are
 // intentionally not included, as crypto/ does not generally deal with
 // certificates or PKI.
-typedef ScopedOpenSSL<BIGNUM, BN_free>::Type ScopedBIGNUM;
-typedef ScopedOpenSSL<EC_KEY, EC_KEY_free>::Type ScopedEC_KEY;
-typedef ScopedOpenSSL<BIO, BIO_free_all>::Type ScopedBIO;
-typedef ScopedOpenSSL<DSA, DSA_free>::Type ScopedDSA;
-typedef ScopedOpenSSL<ECDSA_SIG, ECDSA_SIG_free>::Type ScopedECDSA_SIG;
-typedef ScopedOpenSSL<EC_KEY, EC_KEY_free>::Type ScopedEC_KEY;
-typedef ScopedOpenSSL<EVP_MD_CTX, EVP_MD_CTX_destroy>::Type ScopedEVP_MD_CTX;
-typedef ScopedOpenSSL<EVP_PKEY, EVP_PKEY_free>::Type ScopedEVP_PKEY;
-typedef ScopedOpenSSL<EVP_PKEY_CTX, EVP_PKEY_CTX_free>::Type ScopedEVP_PKEY_CTX;
-typedef ScopedOpenSSL<RSA, RSA_free>::Type ScopedRSA;
+using ScopedBIGNUM = ScopedOpenSSL<BIGNUM, BN_free>;
+using ScopedEC_Key = ScopedOpenSSL<EC_KEY, EC_KEY_free>;
+using ScopedBIO = ScopedOpenSSL<BIO, BIO_free_all>;
+using ScopedDSA = ScopedOpenSSL<DSA, DSA_free>;
+using ScopedECDSA_SIG = ScopedOpenSSL<ECDSA_SIG, ECDSA_SIG_free>;
+using ScopedEC_GROUP = ScopedOpenSSL<EC_GROUP, EC_GROUP_free>;
+using ScopedEC_KEY = ScopedOpenSSL<EC_KEY, EC_KEY_free>;
+using ScopedEC_POINT = ScopedOpenSSL<EC_POINT, EC_POINT_free>;
+using ScopedEVP_MD_CTX = ScopedOpenSSL<EVP_MD_CTX, EVP_MD_CTX_destroy>;
+using ScopedEVP_PKEY = ScopedOpenSSL<EVP_PKEY, EVP_PKEY_free>;
+using ScopedEVP_PKEY_CTX = ScopedOpenSSL<EVP_PKEY_CTX, EVP_PKEY_CTX_free>;
+using ScopedRSA = ScopedOpenSSL<RSA, RSA_free>;
 
 // The bytes must have been allocated with OPENSSL_malloc.
-typedef scoped_ptr<uint8_t, OpenSSLFree> ScopedOpenSSLBytes;
+using ScopedOpenSSLBytes = scoped_ptr<uint8_t, OpenSSLFree>;
 
 }  // namespace crypto
 

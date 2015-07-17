@@ -17,13 +17,14 @@
 
 #include "base/base_export.h"
 #include "base/basictypes.h"
+#include "base/callback.h"
 #include "base/gtest_prod_util.h"
 #include "base/lazy_instance.h"
+#include "base/metrics/histogram_base.h"
 
 namespace base {
 
 class BucketRanges;
-class HistogramBase;
 class Lock;
 
 class BASE_EXPORT StatisticsRecorder {
@@ -75,9 +76,47 @@ class BASE_EXPORT StatisticsRecorder {
   // histograms).
   static void GetSnapshot(const std::string& query, Histograms* snapshot);
 
+  typedef base::Callback<void(HistogramBase::Sample)> OnSampleCallback;
+
+  // SetCallback sets the callback to notify when a new sample is recorded on
+  // the histogram referred to by |histogram_name|. The call to this method can
+  // be be done before or after the histogram is created. This method is thread
+  // safe. The return value is whether or not the callback was successfully set.
+  static bool SetCallback(const std::string& histogram_name,
+                          const OnSampleCallback& callback);
+
+  // ClearCallback clears any callback set on the histogram referred to by
+  // |histogram_name|. This method is thread safe.
+  static void ClearCallback(const std::string& histogram_name);
+
+  // FindCallback retrieves the callback for the histogram referred to by
+  // |histogram_name|, or a null callback if no callback exists for this
+  // histogram. This method is thread safe.
+  static OnSampleCallback FindCallback(const std::string& histogram_name);
+
  private:
+  // HistogramNameRef holds a weak const ref to the name field of the associated
+  // Histogram object, allowing re-use of the underlying string storage for the
+  // map keys. The wrapper is required as using "const std::string&" as the key
+  // results in compile errors.
+  struct HistogramNameRef {
+    explicit HistogramNameRef(const std::string& name) : name_(name) {};
+
+    // Operator < is necessary to use this type as a std::map key.
+    bool operator<(const HistogramNameRef& other) const {
+      return name_ < other.name_;
+    }
+
+    // Weak, owned by the associated Histogram object.
+    const std::string& name_;
+  };
+
   // We keep all registered histograms in a map, from name to histogram.
-  typedef std::map<std::string, HistogramBase*> HistogramMap;
+  typedef std::map<HistogramNameRef, HistogramBase*> HistogramMap;
+
+  // We keep a map of callbacks to histograms, so that as histograms are
+  // created, we can set the callback properly.
+  typedef std::map<std::string, OnSampleCallback> CallbackMap;
 
   // We keep all |bucket_ranges_| in a map, from checksum to a list of
   // |bucket_ranges_|.  Checksum is calculated from the |ranges_| in
@@ -103,6 +142,7 @@ class BASE_EXPORT StatisticsRecorder {
   static void DumpHistogramsToVlog(void* instance);
 
   static HistogramMap* histograms_;
+  static CallbackMap* callbacks_;
   static RangesMap* ranges_;
 
   // Lock protects access to above maps.

@@ -95,7 +95,7 @@ template("gcc_toolchain") {
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -105,7 +105,7 @@ template("gcc_toolchain") {
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -116,7 +116,7 @@ template("gcc_toolchain") {
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -160,6 +160,9 @@ template("gcc_toolchain") {
       # overrides it (in which case {{output_extension}} will be what the target
       # specifies).
       default_output_extension = ".so"
+      if (defined(invoker.default_output_extension)) {
+        default_output_extension = invoker.default_output_extension
+      }
 
       output_prefix = "lib"
 

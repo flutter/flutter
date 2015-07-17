@@ -35,7 +35,12 @@
 #ifndef ARM_INSTRUCTION_SET_SELECT_H_
 #define ARM_INSTRUCTION_SET_SELECT_H_
 
-#if defined(__ARM_ARCH_7__) || \
+#if defined(__ARM_ARCH_8A__)
+# define ARMV8 1
+#endif
+
+#if defined(ARMV8) || \
+    defined(__ARM_ARCH_7__) || \
     defined(__ARM_ARCH_7R__) || \
     defined(__ARM_ARCH_7A__)
 # define ARMV7 1

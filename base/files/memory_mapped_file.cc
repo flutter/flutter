@@ -10,18 +10,7 @@
 
 namespace base {
 
-const MemoryMappedFile::Region MemoryMappedFile::Region::kWholeFile(
-    base::LINKER_INITIALIZED);
-
-MemoryMappedFile::Region::Region(base::LinkerInitialized) : offset(0), size(0) {
-}
-
-MemoryMappedFile::Region::Region() : offset(-1), size(-1) {
-}
-
-MemoryMappedFile::Region::Region(int64 offset, int64 size)
-    : offset(offset), size(size) {
-}
+const MemoryMappedFile::Region MemoryMappedFile::Region::kWholeFile = {0, 0};
 
 bool MemoryMappedFile::Region::operator==(
     const MemoryMappedFile::Region& other) const {

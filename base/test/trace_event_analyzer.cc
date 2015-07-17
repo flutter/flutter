@@ -10,6 +10,7 @@
 
 #include "base/json/json_reader.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/strings/pattern.h"
 #include "base/values.h"
 
 namespace trace_analyzer {
@@ -321,17 +322,17 @@ bool Query::CompareAsString(const TraceEvent& event, bool* result) const {
   switch (operator_) {
     case OP_EQ:
       if (right().is_pattern_)
-        *result = MatchPattern(lhs, rhs);
+        *result = base::MatchPattern(lhs, rhs);
       else if (left().is_pattern_)
-        *result = MatchPattern(rhs, lhs);
+        *result = base::MatchPattern(rhs, lhs);
       else
         *result = (lhs == rhs);
       return true;
     case OP_NE:
       if (right().is_pattern_)
-        *result = !MatchPattern(lhs, rhs);
+        *result = !base::MatchPattern(lhs, rhs);
       else if (left().is_pattern_)
-        *result = !MatchPattern(rhs, lhs);
+        *result = !base::MatchPattern(rhs, lhs);
       else
         *result = (lhs != rhs);
       return true;

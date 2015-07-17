@@ -107,7 +107,8 @@ TEST_F(MemoryMappedFileTest, MapPartialRegionAtBeginning) {
   MemoryMappedFile map;
 
   File file(temp_file_path(), File::FLAG_OPEN | File::FLAG_READ);
-  map.Initialize(file.Pass(), MemoryMappedFile::Region(0, kPartialSize));
+  MemoryMappedFile::Region region = {0, kPartialSize};
+  map.Initialize(file.Pass(), region);
   ASSERT_EQ(kPartialSize, map.length());
   ASSERT_TRUE(map.data() != NULL);
   EXPECT_TRUE(map.IsValid());
@@ -122,7 +123,8 @@ TEST_F(MemoryMappedFileTest, MapPartialRegionAtEnd) {
   MemoryMappedFile map;
 
   File file(temp_file_path(), File::FLAG_OPEN | File::FLAG_READ);
-  map.Initialize(file.Pass(), MemoryMappedFile::Region(kOffset, kPartialSize));
+  MemoryMappedFile::Region region = {kOffset, kPartialSize};
+  map.Initialize(file.Pass(), region);
   ASSERT_EQ(kPartialSize, map.length());
   ASSERT_TRUE(map.data() != NULL);
   EXPECT_TRUE(map.IsValid());
@@ -138,7 +140,8 @@ TEST_F(MemoryMappedFileTest, MapSmallPartialRegionInTheMiddle) {
   MemoryMappedFile map;
 
   File file(temp_file_path(), File::FLAG_OPEN | File::FLAG_READ);
-  map.Initialize(file.Pass(), MemoryMappedFile::Region(kOffset, kPartialSize));
+  MemoryMappedFile::Region region = {kOffset, kPartialSize};
+  map.Initialize(file.Pass(), region);
   ASSERT_EQ(kPartialSize, map.length());
   ASSERT_TRUE(map.data() != NULL);
   EXPECT_TRUE(map.IsValid());
@@ -154,7 +157,8 @@ TEST_F(MemoryMappedFileTest, MapLargePartialRegionInTheMiddle) {
   MemoryMappedFile map;
 
   File file(temp_file_path(), File::FLAG_OPEN | File::FLAG_READ);
-  map.Initialize(file.Pass(), MemoryMappedFile::Region(kOffset, kPartialSize));
+  MemoryMappedFile::Region region = {kOffset, kPartialSize};
+  map.Initialize(file.Pass(), region);
   ASSERT_EQ(kPartialSize, map.length());
   ASSERT_TRUE(map.data() != NULL);
   EXPECT_TRUE(map.IsValid());

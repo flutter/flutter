@@ -1,0 +1,14 @@
+Name: instrumented_libbraries
+URL: n/a
+Version: 0
+Security Critical: no
+License: n/a
+License File: NOT_SHIPPED
+
+Description:
+Scripts which can download and build several third party libraries
+using different instrumentation tools (AddressSanitizer, etc.).
+
+Flag "use_instrumented_libraries=1" in GYP_DEFINES enables usage of
+instrumented libraries and final binary will use them instead of standard
+system shared libraries.

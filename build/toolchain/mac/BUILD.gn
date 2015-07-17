@@ -54,7 +54,7 @@ template("mac_toolchain") {
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -64,7 +64,7 @@ template("mac_toolchain") {
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -75,7 +75,7 @@ template("mac_toolchain") {
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -85,7 +85,7 @@ template("mac_toolchain") {
       depsformat = "gcc"
       description = "OBJC {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -95,7 +95,7 @@ template("mac_toolchain") {
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 

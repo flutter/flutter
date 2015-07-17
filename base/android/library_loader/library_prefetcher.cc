@@ -36,7 +36,7 @@ bool IsReadableAndPrivate(const base::debug::MappedMemoryRegion& region) {
 
 bool PathMatchesSuffix(const std::string& path) {
   for (size_t i = 0; i < arraysize(kSuffixesToMatch); i++) {
-    if (EndsWith(path, kSuffixesToMatch[i], true)) {
+    if (EndsWith(path, kSuffixesToMatch[i], CompareCase::SENSITIVE)) {
       return true;
     }
   }
@@ -82,14 +82,14 @@ void NativeLibraryPrefetcher::FilterLibchromeRangesOnlyIfPossible(
     std::vector<AddressRange>* ranges) {
   bool has_libchrome_region = false;
   for (const base::debug::MappedMemoryRegion& region : regions) {
-    if (EndsWith(region.path, kLibchromeSuffix, true)) {
+    if (EndsWith(region.path, kLibchromeSuffix, CompareCase::SENSITIVE)) {
       has_libchrome_region = true;
       break;
     }
   }
   for (const base::debug::MappedMemoryRegion& region : regions) {
     if (has_libchrome_region &&
-        !EndsWith(region.path, kLibchromeSuffix, true)) {
+        !EndsWith(region.path, kLibchromeSuffix, CompareCase::SENSITIVE)) {
       continue;
     }
     ranges->push_back(std::make_pair(region.start, region.end));

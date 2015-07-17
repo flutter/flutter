@@ -94,12 +94,19 @@ public class BaseInstrumentationTestRunner extends InstrumentationTestRunner {
             @Override
             protected TestResult createTestResult() {
                 SkippingTestResult r = new SkippingTestResult();
-                r.addSkipCheck(new MinAndroidSdkLevelSkipCheck());
+                addSkipChecks(r);
                 return r;
             }
         };
         runner.addTestListener(new TestStatusListener(getContext()));
         return runner;
+    }
+
+    /**
+     * Adds the desired SkipChecks to result. Subclasses can add additional SkipChecks.
+     */
+    protected void addSkipChecks(SkippingTestResult result) {
+        result.addSkipCheck(new MinAndroidSdkLevelSkipCheck());
     }
 
     /**

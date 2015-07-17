@@ -107,9 +107,9 @@ PR_ImplodeTime(const PRExplodedTime *exploded)
     static const PRTime kSecondsToMicroseconds = static_cast<PRTime>(1000000);
 #if defined(OS_WIN)
    // Create the system struct representing our exploded time.
-    SYSTEMTIME st = {0};
-    FILETIME ft = {0};
-    ULARGE_INTEGER uli = {0};
+    SYSTEMTIME st = {};
+    FILETIME ft = {};
+    ULARGE_INTEGER uli = {};
 
     st.wYear = exploded->tm_year;
     st.wMonth = static_cast<WORD>(exploded->tm_month + 1);

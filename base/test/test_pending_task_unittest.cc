@@ -10,7 +10,7 @@
 #include "testing/gtest/include/gtest/gtest-spi.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
-namespace {
+namespace base {
 
 TEST(TestPendingTaskTest, TraceSupport) {
   base::TestPendingTask task;
@@ -52,4 +52,4 @@ TEST(TestPendingTaskTest, ShouldRunBefore) {
       << task_first << ".ShouldRunBefore(" << task_after << ")\n";
 }
 
-}  // namespace
+}  // namespace base

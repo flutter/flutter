@@ -9,6 +9,7 @@
 
 #include "base/debug/leak_annotations.h"
 #include "base/logging.h"
+#include "base/strings/string_util.h"
 #include "url/url_canon_internal.h"
 #include "url/url_file.h"
 #include "url/url_util_internal.h"
@@ -16,23 +17,6 @@
 namespace url {
 
 namespace {
-
-// ASCII-specific tolower.  The standard library's tolower is locale sensitive,
-// so we don't want to use it here.
-template<class Char>
-inline Char ToLowerASCII(Char c) {
-  return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
-}
-
-// Backend for LowerCaseEqualsASCII.
-template<typename Iter>
-inline bool DoLowerCaseEqualsASCII(Iter a_begin, Iter a_end, const char* b) {
-  for (Iter it = a_begin; it != a_end; ++it, ++b) {
-    if (!*b || ToLowerASCII(*it) != *b)
-      return false;
-  }
-  return *b == 0;
-}
 
 const int kNumStandardURLSchemes = 8;
 const char* kStandardURLSchemes[kNumStandardURLSchemes] = {
@@ -72,9 +56,9 @@ inline bool DoCompareSchemeComponent(const CHAR* spec,
                                      const char* compare_to) {
   if (!component.is_nonempty())
     return compare_to[0] == 0;  // When component is empty, match empty scheme.
-  return LowerCaseEqualsASCII(&spec[component.begin],
-                              &spec[component.end()],
-                              compare_to);
+  return base::LowerCaseEqualsASCII(&spec[component.begin],
+                                    &spec[component.end()],
+                                    compare_to);
 }
 
 // Returns true if the given scheme identified by |scheme| within |spec| is one
@@ -86,8 +70,8 @@ bool DoIsStandard(const CHAR* spec, const Component& scheme) {
 
   InitStandardSchemes();
   for (size_t i = 0; i < standard_schemes->size(); i++) {
-    if (LowerCaseEqualsASCII(&spec[scheme.begin], &spec[scheme.end()],
-                             standard_schemes->at(i)))
+    if (base::LowerCaseEqualsASCII(&spec[scheme.begin], &spec[scheme.end()],
+                                   standard_schemes->at(i)))
       return true;
   }
   return false;
@@ -484,31 +468,6 @@ bool ReplaceComponents(const char* spec,
                        Parsed* out_parsed) {
   return DoReplaceComponents(spec, spec_len, parsed, replacements,
                              charset_converter, output, out_parsed);
-}
-
-// Front-ends for LowerCaseEqualsASCII.
-bool LowerCaseEqualsASCII(const char* a_begin,
-                          const char* a_end,
-                          const char* b) {
-  return DoLowerCaseEqualsASCII(a_begin, a_end, b);
-}
-
-bool LowerCaseEqualsASCII(const char* a_begin,
-                          const char* a_end,
-                          const char* b_begin,
-                          const char* b_end) {
-  while (a_begin != a_end && b_begin != b_end &&
-         ToLowerASCII(*a_begin) == *b_begin) {
-    a_begin++;
-    b_begin++;
-  }
-  return a_begin == a_end && b_begin == b_end;
-}
-
-bool LowerCaseEqualsASCII(const base::char16* a_begin,
-                          const base::char16* a_end,
-                          const char* b) {
-  return DoLowerCaseEqualsASCII(a_begin, a_end, b);
 }
 
 void DecodeURLEscapeSequences(const char* input,

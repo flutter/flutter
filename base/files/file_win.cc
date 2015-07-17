@@ -308,7 +308,7 @@ File::Error File::OSErrorToFileError(DWORD last_error) {
   }
 }
 
-void File::DoInitialize(uint32 flags) {
+void File::DoInitialize(const FilePath& path, uint32 flags) {
   ThreadRestrictions::AssertIOAllowed();
   DCHECK(!IsValid());
 
@@ -376,7 +376,7 @@ void File::DoInitialize(uint32 flags) {
   if (flags & FLAG_BACKUP_SEMANTICS)
     create_flags |= FILE_FLAG_BACKUP_SEMANTICS;
 
-  file_.Set(CreateFile(path_.value().c_str(), access, sharing, NULL,
+  file_.Set(CreateFile(path.value().c_str(), access, sharing, NULL,
                        disposition, create_flags, NULL));
 
   if (file_.IsValid()) {

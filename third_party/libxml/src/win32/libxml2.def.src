@@ -553,6 +553,12 @@ xmlAutomataSetFinalState
 #ifdef LIBXML_DEBUG_ENABLED
 xmlBoolToText
 #endif
+xmlBufContent
+xmlBufEnd
+xmlBufGetNodeContent
+xmlBufNodeDump
+xmlBufShrink
+xmlBufUse
 xmlBufferAdd
 xmlBufferAddHead
 xmlBufferCCat
@@ -561,6 +567,7 @@ xmlBufferContent
 xmlBufferCreate
 xmlBufferCreateSize
 xmlBufferCreateStatic
+xmlBufferDetach
 xmlBufferDump
 xmlBufferEmpty
 xmlBufferFree
@@ -765,10 +772,12 @@ xmlDictCreate
 xmlDictCreateSub
 xmlDictExists
 xmlDictFree
+xmlDictGetUsage
 xmlDictLookup
 xmlDictOwns
 xmlDictQLookup
 xmlDictReference
+xmlDictSetLimit
 xmlDictSize
 xmlDllMain
 xmlDocCopyNode
@@ -992,6 +1001,7 @@ xmlInitThreads
 #ifdef LIBXML_CATALOG_ENABLED
 xmlInitializeCatalog
 #endif
+xmlInitializeDict
 xmlInitializeGlobalState
 xmlInitializePredefinedEntities
 xmlIsBaseChar
@@ -1292,6 +1302,8 @@ xmlOutputBufferCreateFilename
 xmlOutputBufferCreateFilenameDefault
 xmlOutputBufferCreateIO
 xmlOutputBufferFlush
+xmlOutputBufferGetContent
+xmlOutputBufferGetSize
 xmlOutputBufferWrite
 xmlOutputBufferWriteEscape
 xmlOutputBufferWriteString
@@ -1770,6 +1782,12 @@ xmlSchemaValidateOneElement
 xmlSchemaValidatePredefinedType
 #endif
 #ifdef LIBXML_SCHEMAS_ENABLED
+xmlSchemaValidateSetFilename
+#endif
+#ifdef LIBXML_SCHEMAS_ENABLED
+xmlSchemaValidateSetLocator
+#endif
+#ifdef LIBXML_SCHEMAS_ENABLED
 xmlSchemaValidateStream
 #endif
 #ifdef LIBXML_SCHEMAS_ENABLED
@@ -1960,6 +1978,7 @@ xmlTextReaderRelaxNGSetSchema
 #ifdef LIBXML_SCHEMAS_ENABLED
 xmlTextReaderRelaxNGValidate
 #endif
+xmlTextReaderRelaxNGValidateCtxt
 xmlTextReaderSchemaValidate
 xmlTextReaderSchemaValidateCtxt
 xmlTextReaderSetErrorHandler
@@ -1984,6 +2003,7 @@ xmlTextWriterFlush
 xmlTextWriterFullEndElement
 xmlTextWriterSetIndent
 xmlTextWriterSetIndentString
+xmlTextWriterSetQuoteChar
 xmlTextWriterStartAttribute
 xmlTextWriterStartAttributeNS
 xmlTextWriterStartCDATA
@@ -2911,6 +2931,9 @@ xmlXPathNextPrecedingSibling
 xmlXPathNextSelf
 #endif
 #ifdef LIBXML_XPATH_ENABLED
+xmlXPathNodeEval
+#endif
+#ifdef LIBXML_XPATH_ENABLED
 xmlXPathNodeLeading
 #endif
 #ifdef LIBXML_XPATH_ENABLED
@@ -3035,6 +3058,9 @@ xmlXPathRoot
 #endif
 #ifdef LIBXML_XPATH_ENABLED
 xmlXPathRoundFunction
+#endif
+#ifdef LIBXML_XPATH_ENABLED
+xmlXPathSetContextNode
 #endif
 #ifdef LIBXML_XPATH_ENABLED
 xmlXPathStartsWithFunction

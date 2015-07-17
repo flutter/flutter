@@ -10,6 +10,7 @@
       'type': 'none',
       'variables': {
         'jar_path': 'src/lib/repackaged/cglib-and-asm-1.0.jar',
+        'enable_errorprone': '0',
       },
       'includes': [
         '../../build/host_prebuilt_jar.gypi',
@@ -21,6 +22,7 @@
       'type': 'none',
       'variables': {
         'jar_path': 'src/lib/run/objenesis-2.1.jar',
+        'enable_errorprone': '0',
       },
       'includes': [
         '../../build/host_prebuilt_jar.gypi',
@@ -37,6 +39,7 @@
       ],
       'variables': {
         'src_paths': [ 'src/src' ],
+        'enable_errorprone': '0',
       },
       'includes': [
         '../../build/host_jar.gypi',

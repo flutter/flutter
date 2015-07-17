@@ -25,7 +25,6 @@ def main_run(args):
   with common.temporary_file() as tempfile_path:
     test_args += ['--write-full-results-to', tempfile_path]
     rc = common.run_runtest(args, [
-        '--annotate', 'gtest',
         '--test-type', 'telemetry_perf_unittests',
         '--run-python-script',
         os.path.join(common.SRC_DIR, 'tools', 'perf', 'run_tests')

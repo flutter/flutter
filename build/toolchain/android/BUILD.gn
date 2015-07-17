@@ -64,20 +64,18 @@ template("android_gcc_toolchain") {
 
     android_strip = "${tool_prefix}strip"
 
-    mkdir_command = "mkdir -p lib.stripped"
     strip_command =
         "$android_strip --strip-unneeded -o $temp_stripped_soname $soname"
     replace_command = "if ! cmp -s $temp_stripped_soname $stripped_soname; then mv $temp_stripped_soname $stripped_soname; fi"
-    postsolink = "$mkdir_command && $strip_command && $replace_command"
+    postsolink = "$strip_command && $replace_command"
     solink_outputs = [ stripped_soname ]
+    default_output_extension = android_product_extension
 
     # We make the assumption that the gcc_toolchain will produce an exe with
     # the following definition.
     exe = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
     stripped_exe = "exe.stripped/$exe"
-    mkdir_command = "mkdir -p exe.stripped"
-    strip_command = "$android_strip --strip-unneeded -o $stripped_exe $exe"
-    postlink = "$mkdir_command && $strip_command"
+    postlink = "$android_strip --strip-unneeded -o $stripped_exe $exe"
     link_outputs = [ stripped_exe ]
   }
 }

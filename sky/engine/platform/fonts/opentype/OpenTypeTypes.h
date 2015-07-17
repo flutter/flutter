@@ -98,4 +98,5 @@ protected:
 
 } // namespace OpenType
 } // namespace blink
-#endif  // SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPETYPES_H_
+
+#endif // SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPETYPES_H_

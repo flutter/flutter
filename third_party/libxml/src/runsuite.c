@@ -1,16 +1,13 @@
 /*
- * runsuite.c: C program to run libxml2 againts published testsuites 
+ * runsuite.c: C program to run libxml2 againts published testsuites
  *
  * See Copyright for the status of this software.
  *
  * daniel@veillard.com
  */
 
-#ifdef HAVE_CONFIG_H
 #include "libxml.h"
-#else
 #include <stdio.h>
-#endif
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #include <unistd.h>
@@ -38,15 +35,6 @@
 static FILE *logfile = NULL;
 static int verbose = 0;
 
-
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-
-#define vsnprintf _vsnprintf
-
-#define snprintf _snprintf
-
-#endif
 
 /************************************************************************
  *									*
@@ -135,7 +123,7 @@ static int addEntity(char *name, char *content) {
  * which is shared to the current running test. We also don't want to have
  * network downloads modifying tests.
  */
-static xmlParserInputPtr 
+static xmlParserInputPtr
 testExternalEntityLoader(const char *URL, const char *ID,
 			 xmlParserCtxtPtr ctxt) {
     xmlParserInputPtr ret;
@@ -164,7 +152,7 @@ testExternalEntityLoader(const char *URL, const char *ID,
         fprintf(stderr, "Failed to find resource %s\n", URL);
     }
 #endif
-      
+
     return(ret);
 }
 
@@ -427,7 +415,7 @@ installDirs(xmlNodePtr tst, const xmlChar *base) {
     xmlFree(res);
 }
 
-static int 
+static int
 xsdTestCase(xmlNodePtr tst) {
     xmlNodePtr test, tmp, cur;
     xmlBufferPtr buf;
@@ -454,7 +442,7 @@ xsdTestCase(xmlNodePtr tst) {
     if (cur == NULL) {
         return(xsdIncorectTestCase(tst));
     }
-    
+
     test = getNext(cur, "./*");
     if (test == NULL) {
         fprintf(stderr, "Failed to find test in correct line %ld\n",
@@ -500,7 +488,7 @@ xsdTestCase(xmlNodePtr tst) {
 	if (test == NULL) {
 	    fprintf(stderr, "Failed to find test in <valid> line %ld\n",
 		    xmlGetLineNo(tmp));
-	    
+
 	} else {
 	    xmlBufferEmpty(buf);
 	    if (dtd != NULL)
@@ -559,7 +547,7 @@ xsdTestCase(xmlNodePtr tst) {
 	if (test == NULL) {
 	    fprintf(stderr, "Failed to find test in <invalid> line %ld\n",
 		    xmlGetLineNo(tmp));
-	    
+
 	} else {
 	    xmlBufferEmpty(buf);
 	    xmlNodeDump(buf, test->doc, test, 0, 0);
@@ -620,7 +608,7 @@ done:
     return(ret);
 }
 
-static int 
+static int
 xsdTestSuite(xmlNodePtr cur) {
     if (verbose) {
 	xmlChar *doc = getString(cur, "string(documentation)");
@@ -635,11 +623,11 @@ xsdTestSuite(xmlNodePtr cur) {
         xsdTestCase(cur);
 	cur = getNext(cur, "following-sibling::testCase[1]");
     }
-        
+
     return(0);
 }
 
-static int 
+static int
 xsdTest(void) {
     xmlDocPtr doc;
     xmlNodePtr cur;
@@ -677,7 +665,7 @@ done:
     return(ret);
 }
 
-static int 
+static int
 rngTestSuite(xmlNodePtr cur) {
     if (verbose) {
 	xmlChar *doc = getString(cur, "string(documentation)");
@@ -698,11 +686,11 @@ rngTestSuite(xmlNodePtr cur) {
         xsdTestSuite(cur);
 	cur = getNext(cur, "following-sibling::testSuite[1]");
     }
-        
+
     return(0);
 }
 
-static int 
+static int
 rngTest1(void) {
     xmlDocPtr doc;
     xmlNodePtr cur;
@@ -740,7 +728,7 @@ done:
     return(ret);
 }
 
-static int 
+static int
 rngTest2(void) {
     xmlDocPtr doc;
     xmlNodePtr cur;
@@ -950,7 +938,7 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
 	instance = getNext(cur, "./ts:instanceTest[1]");
 	while (instance != NULL) {
 	    if (schemas != NULL) {
-		xstcTestInstance(instance, schemas, path, base);		
+		xstcTestInstance(instance, schemas, path, base);
 	    } else {
 		/*
 		* We'll automatically mark the instances as failed

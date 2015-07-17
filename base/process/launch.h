@@ -297,7 +297,7 @@ void ReplaceBootstrapPort(const std::string& replacement_bootstrap_name);
 // binary. This should not be called in production/released code.
 BASE_EXPORT LaunchOptions LaunchOptionsForTest();
 
-#if defined(OS_LINUX)
+#if defined(OS_LINUX) || defined(OS_NACL_NONSFI)
 // A wrapper for clone with fork-like behavior, meaning that it returns the
 // child's pid in the parent and 0 in the child. |flags|, |ptid|, and |ctid| are
 // as in the clone system call (the CLONE_VM flag is not supported).

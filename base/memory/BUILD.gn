@@ -35,6 +35,9 @@ source_set("memory") {
     "scoped_vector.h",
     "shared_memory.h",
     "shared_memory_android.cc",
+    "shared_memory_handle.h",
+    "shared_memory_handle_mac.cc",
+    "shared_memory_mac.cc",
     "shared_memory_nacl.cc",
     "shared_memory_posix.cc",
     "shared_memory_win.cc",
@@ -56,6 +59,10 @@ source_set("memory") {
     ]
   } else {
     sources -= [ "shared_memory_nacl.cc" ]
+  }
+
+  if (is_mac) {
+    sources -= [ "shared_memory_posix.cc" ]
   }
 
   if (is_android) {

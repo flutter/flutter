@@ -191,6 +191,14 @@
         ],
         'msvs_disabled_warnings': [4800],
       },
+      'variables': {
+        'clang_warning_flags': [
+          # The Mutex constructor initializer list in gtest-port.cc is
+          # incorrectly ordered. See
+          # https://groups.google.com/d/msg/googletestframework/S5uSV8L2TX8/U1FaTDa6J6sJ.
+          '-Wno-reorder',
+        ]
+      },
     },
     {
       'target_name': 'gtest_main',

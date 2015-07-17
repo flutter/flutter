@@ -176,6 +176,9 @@ class BASE_EXPORT File {
 
   ~File();
 
+  // Takes ownership of |platform_file|.
+  static File CreateForAsyncHandle(PlatformFile platform_file);
+
   // Move operator= for C++03 move emulation of this type.
   File& operator=(RValue other);
 
@@ -352,9 +355,9 @@ class BASE_EXPORT File {
   };
 #endif
 
-  // Creates or opens the given file. Only called if |path_| has no
+  // Creates or opens the given file. Only called if |path| has no
   // traversal ('..') components.
-  void DoInitialize(uint32 flags);
+  void DoInitialize(const FilePath& path, uint32 flags);
 
   // TODO(tnagel): Reintegrate into Flush() once histogram isn't needed anymore,
   // cf. issue 473337.
@@ -368,8 +371,9 @@ class BASE_EXPORT File {
   MemoryCheckingScopedFD file_;
 #endif
 
-  // Path that |Initialize()| was called with. Only set if safe (i.e. no '..').
-  FilePath path_;
+  // A path to use for tracing purposes. Set if file tracing is enabled during
+  // |Initialize()|.
+  FilePath tracing_path_;
 
   // Object tied to the lifetime of |this| that enables/disables tracing.
   FileTracing::ScopedEnabler trace_enabler_;

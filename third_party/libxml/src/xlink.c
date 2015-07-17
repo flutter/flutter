@@ -47,7 +47,7 @@
  *           Default setting and related functions		*
  *								*
  ****************************************************************/
- 
+
 static xlinkHandlerPtr xlinkDefaultHandler = NULL;
 static xlinkNodeDetectFunc	xlinkDefaultDetect = NULL;
 
@@ -93,7 +93,7 @@ xlinkGetDefaultDetect	(void) {
  *
  * Set the default xlink detection routine
  */
-void 
+void
 xlinkSetDefaultDetect	(xlinkNodeDetectFunc func) {
     xlinkDefaultDetect = func;
 }
@@ -104,7 +104,7 @@ xlinkSetDefaultDetect	(xlinkNodeDetectFunc func) {
  *								*
  ****************************************************************/
 
- 
+
 /**
  * xlinkIsLink:
  * @doc:  the document containing the node
@@ -119,7 +119,7 @@ xlinkSetDefaultDetect	(xlinkNodeDetectFunc func) {
  * Returns the xlinkType of the node (XLINK_TYPE_NONE if there is no
  *         link detected.
  */
-xlinkType 
+xlinkType
 xlinkIsLink	(xmlDocPtr doc, xmlNodePtr node) {
     xmlChar *type = NULL, *role = NULL;
     xlinkType ret = XLINK_TYPE_NONE;
@@ -150,14 +150,14 @@ xlinkIsLink	(xmlDocPtr doc, xmlNodePtr node) {
     if (type != NULL) {
 	if (xmlStrEqual(type, BAD_CAST "simple")) {
             ret = XLINK_TYPE_SIMPLE;
-	} if (xmlStrEqual(type, BAD_CAST "extended")) {
+	} else if (xmlStrEqual(type, BAD_CAST "extended")) {
 	    role = xmlGetNsProp(node, BAD_CAST "role", XLINK_NAMESPACE);
 	    if (role != NULL) {
 		xmlNsPtr xlink;
 		xlink = xmlSearchNs(doc, node, XLINK_NAMESPACE);
 		if (xlink == NULL) {
 		    /* Humm, fallback method */
-		    if (xmlStrEqual(role, BAD_CAST"xlink:external-linkset")) 
+		    if (xmlStrEqual(role, BAD_CAST"xlink:external-linkset"))
 			ret = XLINK_TYPE_EXTENDED_SET;
 		} else {
 		    xmlChar buf[200];

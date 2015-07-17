@@ -251,7 +251,7 @@ class RE2 {
   enum CannedOptions {
     DefaultOptions = 0,
     Latin1, // treat input as Latin-1 (default UTF-8)
-    POSIX_SYNTAX, // POSIX syntax, leftmost-longest match
+    POSIX, // POSIX syntax, leftmost-longest match
     Quiet // do not log about regexp parse errors
   };
 

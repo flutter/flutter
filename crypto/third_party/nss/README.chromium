@@ -1,0 +1,18 @@
+Name: Network Security Services (NSS)
+URL: http://www.mozilla.org/projects/security/pki/nss/
+License: MPL 1.1/GPL 2.0/LGPL 2.1
+
+We extracted the SHA-256 source files, eliminated unneeded dependencies,
+deleted or commented out unused code, and tweaked them for Chrome's source
+tree.  sha512.c is renamed sha512.cc so that it can include Chrome's C++
+header "base/basictypes.h".  We define NOUNROLL256 to reduce the object code
+size.
+
+In blapi.h and sha512.cc, replaced uint32 by unsigned int so that they can
+be compiled with -DNO_NSPR_10_SUPPORT.  NO_NSPR_10_SUPPORT turns off the
+definition of the NSPR 1.0 types int8 - int64 and uint8 - uint64 to avoid
+conflict with the same-named types defined in "base/basictypes.h".
+
+rsawrapr.c is copied from nss/lib/softoken/rsawrapr.c, with
+HASH_GetRawHashObject changed to HASH_GetHashObject. It contains the
+emsa_pss_verify function for verifying RSA-PSS signatures.
