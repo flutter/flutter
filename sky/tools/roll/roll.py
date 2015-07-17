@@ -93,6 +93,7 @@ dirs_from_mojo = [
 # The contents of these files before the roll will be preserved after the roll,
 # even though they live in directories rolled in from Chromium.
 files_not_to_roll = [
+    'build/config/crypto.gni',
     'build/config/ui.gni',
     'build/ls.py',
     'build/module_args/mojo.gni',
@@ -145,7 +146,7 @@ def main():
 
   if args.chromium_dir:
       rev(args.chromium_dir, args.dest_dir, dirs_from_chromium, 'chromium')
-    
+
       try:
           patch.patch_and_filter(args.dest_dir)
       except subprocess.CalledProcessError:

@@ -6,4 +6,5 @@ before_script:
   - ./travis/setup.sh
   - export PATH=$PWD/depot_tools:$PATH
   - export BOTO_CONFIG=$PWD/boto
+  - cd src
 script: ./travis/build.sh
