@@ -63,9 +63,11 @@ class Transition extends AnimatedComponent {
   AnimationPerformance _performance;
 
   void initState() {
-    _position = new AnimatedType<Point>(_kTransitionStartPoint)
-      ..end = Point.origin
-      ..curve = easeOut;
+    _position = new AnimatedType<Point>(
+      _kTransitionStartPoint,
+      end: Point.origin,
+      curve: easeOut
+    );
     _opacity = new AnimatedType<double>(0.0, end: 1.0)
       ..curve = easeOut;
     _performance = new AnimationPerformance()
@@ -96,6 +98,7 @@ class Transition extends AnimatedComponent {
       direction = source.direction;
       _start();
     }
+    interactive = source.interactive;
     onDismissed = source.onDismissed;
     super.syncFields(source);
   }
@@ -222,14 +225,17 @@ class Navigator extends StatefulComponent {
       if (content == null)
         continue;
       String key = historyEntry.route.key;
-      Transition transition = new Transition(content: content, key: key)
-        ..direction = (i <= state.historyIndex) ? TransitionDirection.forward : TransitionDirection.reverse
-        ..interactive = (i == state.historyIndex)
-        ..onDismissed = () {
-        setState(() {
-          state.history.remove(historyEntry);
-        });
-      };
+      Transition transition = new Transition(
+        key: key,
+        content: content,
+        direction: (i <= state.historyIndex) ? TransitionDirection.forward : TransitionDirection.reverse,
+        interactive: (i == state.historyIndex),
+        onDismissed: () {
+          setState(() {
+            state.history.remove(historyEntry);
+          });
+        }
+      );
       visibleRoutes.add(transition);
     }
     return new Stack(visibleRoutes);
