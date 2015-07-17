@@ -30,22 +30,26 @@
 
 #include "sky/engine/platform/fonts/opentype/OpenTypeSanitizer.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "opentype-sanitiser.h"
 #include "ots-memory-stream.h"
 #include "sky/engine/platform/SharedBuffer.h"
+
+#include <stdarg.h>
 
 namespace blink {
 
 PassRefPtr<SharedBuffer> OpenTypeSanitizer::sanitize()
 {
-    if (!m_buffer)
+    if (!m_buffer) {
+        setErrorString("Empty Buffer");
         return nullptr;
+    }
 
     // This is the largest web font size which we'll try to transcode.
     static const size_t maxWebFontSize = 30 * 1024 * 1024; // 30 MB
-    if (m_buffer->size() > maxWebFontSize)
+    if (m_buffer->size() > maxWebFontSize) {
+        setErrorString("Web font size more than 30MB");
         return nullptr;
+    }
 
     // A transcoded font is usually smaller than an original font.
     // However, it can be slightly bigger than the original one due to
@@ -55,8 +59,12 @@ PassRefPtr<SharedBuffer> OpenTypeSanitizer::sanitize()
     // much larger than the original.
 
     ots::ExpandingMemoryStream output(m_buffer->size(), maxWebFontSize);
-    if (!ots::Process(&output, reinterpret_cast<const uint8_t*>(m_buffer->data()), m_buffer->size()))
+    BlinkOTSContext otsContext;
+
+    if (!otsContext.Process(&output, reinterpret_cast<const uint8_t*>(m_buffer->data()), m_buffer->size())) {
+        setErrorString(otsContext.getErrorString());
         return nullptr;
+    }
 
     const size_t transcodeLen = output.Tell();
     return SharedBuffer::create(static_cast<unsigned char*>(output.get()), transcodeLen);
@@ -64,8 +72,57 @@ PassRefPtr<SharedBuffer> OpenTypeSanitizer::sanitize()
 
 bool OpenTypeSanitizer::supportsFormat(const String& format)
 {
-    return equalIgnoringCase(format, "woff")
-        || (RuntimeEnabledFeatures::woff2Enabled() && equalIgnoringCase(format, "woff2"));
+    return equalIgnoringCase(format, "woff") || equalIgnoringCase(format, "woff2");
+}
+
+void BlinkOTSContext::Message(int level, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+
+#if COMPILER(MSVC)
+    int result = _vscprintf(format, args);
+#else
+    char ch;
+    int result = vsnprintf(&ch, 1, format, args);
+#endif
+    va_end(args);
+
+    if (result <= 0) {
+        m_errorString = String("OTS Error");
+    } else {
+        Vector<char, 256> buffer;
+        unsigned len = result;
+        buffer.grow(len + 1);
+
+        va_start(args, format);
+        vsnprintf(buffer.data(), buffer.size(), format, args);
+        va_end(args);
+        m_errorString = StringImpl::create(reinterpret_cast<const LChar*>(buffer.data()), len);
+    }
+}
+
+ots::TableAction BlinkOTSContext::GetTableAction(uint32_t tag)
+{
+#define TABLE_TAG(c1, c2, c3, c4) ((uint32_t)((((uint8_t)(c1)) << 24) | (((uint8_t)(c2)) << 16) | (((uint8_t)(c3)) << 8) | ((uint8_t)(c4))))
+
+    const uint32_t cbdtTag = TABLE_TAG('C', 'B', 'D', 'T');
+    const uint32_t cblcTag = TABLE_TAG('C', 'B', 'L', 'C');
+    const uint32_t colrTag = TABLE_TAG('C', 'O', 'L', 'R');
+    const uint32_t cpalTag = TABLE_TAG('C', 'P', 'A', 'L');
+
+    switch (tag) {
+    // Google Color Emoji Tables
+    case cbdtTag:
+    case cblcTag:
+    // Windows Color Emoji Tables
+    case colrTag:
+    case cpalTag:
+        return ots::TABLE_ACTION_PASSTHRU;
+    default:
+        return ots::TABLE_ACTION_DEFAULT;
+    }
+#undef TABLE_TAG
 }
 
 } // namespace blink

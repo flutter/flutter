@@ -35,7 +35,7 @@ GLVersionInfo::GLVersionInfo(const char* version_str, const char* renderer_str)
       is_es3 = true;
   }
   if (renderer_str) {
-    is_angle = StartsWithASCII(renderer_str, "ANGLE", true);
+    is_angle = base::StartsWithASCII(renderer_str, "ANGLE", true);
   }
 }
 

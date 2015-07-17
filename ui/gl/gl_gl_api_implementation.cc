@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "base/command_line.h"
+#include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "ui/gl/gl_context.h"
 #include "ui/gl/gl_implementation.h"
@@ -437,8 +438,8 @@ void VirtualGLApi::Initialize(DriverGL* driver, GLContext* real_context) {
   DCHECK(real_context->IsCurrent(NULL));
   std::string ext_string(
       reinterpret_cast<const char*>(driver_->fn.glGetStringFn(GL_EXTENSIONS)));
-  std::vector<std::string> ext;
-  Tokenize(ext_string, " ", &ext);
+  std::vector<std::string> ext = base::SplitString(
+      ext_string, " ", base::KEEP_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
 
   std::vector<std::string>::iterator it;
   // We can't support GL_EXT_occlusion_query_boolean which is
@@ -448,7 +449,7 @@ void VirtualGLApi::Initialize(DriverGL* driver, GLContext* real_context) {
   if (it != ext.end())
     ext.erase(it);
 
-  extensions_ = JoinString(ext, " ");
+  extensions_ = base::JoinString(ext, " ");
 }
 
 bool VirtualGLApi::MakeCurrent(GLContext* virtual_context, GLSurface* surface) {

@@ -97,7 +97,7 @@ public class SkyApplication extends BaseChromiumApplication {
 
     private void initNative() {
         try {
-            LibraryLoader.get(LibraryProcessType.PROCESS_BROWSER).ensureInitialized();
+            LibraryLoader.get(LibraryProcessType.PROCESS_BROWSER).ensureInitialized(this);
         } catch (ProcessInitException e) {
             Log.e(TAG, "Unable to load Sky Engine binary.", e);
             throw new RuntimeException(e);

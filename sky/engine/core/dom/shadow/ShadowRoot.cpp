@@ -87,7 +87,7 @@ PassRefPtr<Node> ShadowRoot::cloneNode(bool, ExceptionState& exceptionState)
 
 PassRefPtr<Node> ShadowRoot::cloneNode(ExceptionState& exceptionState)
 {
-    return cloneNode(exceptionState);
+    return nullptr;
 }
 
 PassRefPtr<Node> ShadowRoot::cloneNode(bool deep)

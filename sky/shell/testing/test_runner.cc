@@ -124,8 +124,8 @@ void TestRunner::Run() {
   std::cout << "#BEGIN\n";
   std::cout.flush();
 
-  if (StartsWithASCII(data.url, kFileUrlPrefix, true))
-    ReplaceFirstSubstringAfterOffset(&data.url, 0, kFileUrlPrefix, "");
+  if (base::StartsWithASCII(data.url, kFileUrlPrefix, true))
+    base::ReplaceFirstSubstringAfterOffset(&data.url, 0, kFileUrlPrefix, "");
 
   if (data.is_snapshot)
     sky_engine_->RunFromSnapshot(data.url);

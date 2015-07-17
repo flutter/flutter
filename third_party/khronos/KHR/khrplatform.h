@@ -124,7 +124,7 @@
 
 #undef KHRONOS_APICALL
 #if defined(GLES2_USE_MOJO)
-#include "third_party/mojo/src/mojo/public/c/gles2/gles2_export.h"
+#include "mojo/public/c/gles2/gles2_export.h"
 #define KHRONOS_APICALL MOJO_GLES2_EXPORT
 #else
 #include "gpu/command_buffer/client/gles2_c_lib_export.h"
