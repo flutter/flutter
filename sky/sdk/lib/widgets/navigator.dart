@@ -130,8 +130,9 @@ class Transition extends AnimatedComponent {
 }
 
 class HistoryEntry {
-  HistoryEntry(this.route);
+  HistoryEntry({ this.route, this.key });
   final RouteBase route;
+  final int key;
   // TODO(jackson): Keep track of the requested transition
 }
 
@@ -142,11 +143,12 @@ class NavigationState {
       if (route.name != null)
         namedRoutes[route.name] = route;
     }
-    history.add(new HistoryEntry(routes[0]));
+    history.add(new HistoryEntry(route: routes[0], key: _lastKey++));
   }
 
   List<HistoryEntry> history = new List<HistoryEntry>();
   int historyIndex = 0;
+  int _lastKey = 0;
   Map<String, RouteBase> namedRoutes = new Map<String, RouteBase>();
 
   RouteBase get currentRoute => history[historyIndex].route;
@@ -159,7 +161,7 @@ class NavigationState {
   }
 
   void push(RouteBase route) {
-    HistoryEntry historyEntry = new HistoryEntry(route);
+    HistoryEntry historyEntry = new HistoryEntry(route: route, key: _lastKey++);
     history.insert(historyIndex + 1, historyEntry);
     historyIndex++;
   }
@@ -224,9 +226,8 @@ class Navigator extends StatefulComponent {
       }
       if (content == null)
         continue;
-      String key = historyEntry.route.key;
       Transition transition = new Transition(
-        key: key,
+        key: historyEntry.key.toString(),
         content: content,
         direction: (i <= state.historyIndex) ? TransitionDirection.forward : TransitionDirection.reverse,
         interactive: (i == state.historyIndex),
