@@ -1699,7 +1699,7 @@
             'android_host_arch%': '<!(uname -m)',
             # Android API-level of the SDK used for compilation.
             'android_sdk_version%': '22',
-            'android_sdk_build_tools_version%': '22.0.0',
+            'android_sdk_build_tools_version%': '22.0.1',
             'host_os%': "<!(uname -s | sed -e 's/Linux/linux/;s/Darwin/mac/')",
           },
           # Copy conditionally-set variables out one scope.
