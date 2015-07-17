@@ -171,9 +171,13 @@ if (is_android) {
     android_libcpp_library = "c++_static"
   }
 
-  # By appending .cr, we prevent name collisions with libraries already
-  # loaded by the Android zygote.
-  android_product_extension = ".cr.so"
+  if (component_mode == "shared_library") {
+    # By appending .cr, we prevent name collisions with libraries already
+    # loaded by the Android zygote.
+    android_product_extension = ".cr.so"
+  } else {
+    android_product_extension = ".so"
+  }
 
   # ABI ------------------------------------------------------------------------
 
