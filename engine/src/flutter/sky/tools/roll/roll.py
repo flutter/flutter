@@ -29,12 +29,12 @@ _build_deps = [
     'build',
     'third_party/android_testrunner',
     'third_party/binutils',
+    'third_party/instrumented_libraries',
     'third_party/pymock',
     'tools/android',
     'tools/clang',
     'tools/generate_library_loader',
     'tools/gritsettings',
-    'tools/relocation_packer',
     'tools/valgrind',
 ]
 
@@ -147,7 +147,7 @@ def main():
       rev(args.chromium_dir, args.dest_dir, dirs_from_chromium, 'chromium')
     
       try:
-          patch.patch_and_filter()
+          patch.patch_and_filter(args.dest_dir)
       except subprocess.CalledProcessError:
           print "ERROR: Roll failed due to a patch not applying"
           print "Fix the patch to apply, commit the result, and re-run this script"
