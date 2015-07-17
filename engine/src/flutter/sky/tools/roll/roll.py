@@ -97,7 +97,6 @@ files_not_to_roll = [
     'build/config/ui.gni',
     'build/ls.py',
     'build/module_args/mojo.gni',
-    'build/symlink.py',
     'tools/android/VERSION_LINUX_NDK',
     'tools/android/VERSION_LINUX_SDK',
     'tools/android/VERSION_MACOSX_NDK',
