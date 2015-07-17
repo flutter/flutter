@@ -1662,7 +1662,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
       assert(child.parentData is ParentDataType);
       double candidate = child.getDistanceToActualBaseline(baseline);
       if (candidate != null) {
-        candidate += child.parentData.position.x;
+        candidate += child.parentData.position.y;
         if (result != null)
           result = math.min(result, candidate);
         else
