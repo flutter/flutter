@@ -51,8 +51,8 @@ class StockHome extends StatefulComponent {
   bool _isSearching = false;
   String _searchQuery;
 
-  SnackBarStatus _snackBarStatus;
-  bool _isSnackBarShowing = false; // Should it be showing?
+  SnackBarStatus _snackBarStatus = SnackBarStatus.inactive;
+  bool _isSnackBarShowing = false;
 
   void _handleSearchBegin() {
     navigator.pushState(this, (_) {
