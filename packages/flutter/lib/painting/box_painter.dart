@@ -70,14 +70,46 @@ class BoxShadow {
   final Offset offset;
   final double blur;
 
+  BoxShadow scale(double factor) {
+    return new BoxShadow(
+      color: color,
+      offset: offset * factor,
+      blur: blur * factor
+    );
+  }
+
   String toString() => 'BoxShadow($color, $offset, $blur)';
 }
 
 BoxShadow lerpBoxShadow(BoxShadow a, BoxShadow b, double t) {
+  if (a == null && b == null)
+    return null;
+  if (a == null)
+    return b.scale(t);
+  if (b == null)
+    return a.scale(1.0 - t);
   return new BoxShadow(
       color: lerpColor(a.color, b.color, t),
       offset: lerpOffset(a.offset, b.offset, t),
       blur: lerpNum(a.blur, b.blur, t));
+}
+
+List<BoxShadow> lerpListBoxShadow(List<BoxShadow> a, List<BoxShadow> b, double t) {
+  if (a == null && b == null)
+    return null;
+  if (a == null)
+    a = new List<BoxShadow>();
+  if (b == null)
+    b = new List<BoxShadow>();
+  List<BoxShadow> result = new List<BoxShadow>();
+  int commonLength = math.min(a.length, b.length);
+  for (int i = 0; i < commonLength; ++i)
+    result.add(lerpBoxShadow(a[i], b[i], t));
+  for (int i = commonLength; i < a.length; ++i)
+    result.add(a[i].scale(1.0 - t));
+  for (int i = commonLength; i < b.length; ++i)
+    result.add(b[i].scale(t));
+  return result;
 }
 
 abstract class Gradient {
@@ -198,6 +230,19 @@ class BoxDecoration {
   final Gradient gradient;
   final Shape shape;
 
+  BoxDecoration scale(double factor) {
+    // TODO(abarth): Scale ALL the things.
+    return new BoxDecoration(
+      backgroundColor: lerpColor(null, backgroundColor, factor),
+      backgroundImage: backgroundImage,
+      border: border,
+      borderRadius: lerpNum(null, borderRadius, factor),
+      boxShadow: lerpListBoxShadow(null, boxShadow, factor),
+      gradient: gradient,
+      shape: shape
+    );
+  }
+
   String toString([String prefix = '']) {
     List<String> result = [];
     if (backgroundColor != null)
@@ -218,6 +263,25 @@ class BoxDecoration {
       return '${prefix}<no decorations specified>';
     return result.join('\n');
   }
+}
+
+BoxDecoration lerpBoxDecoration(BoxDecoration a, BoxDecoration b, double t) {
+  if (a == null && b == null)
+    return null;
+  if (a == null)
+    return b.scale(t);
+  if (b == null)
+    return a.scale(1.0 - t);
+  // TODO(abarth): lerp ALL the fields.
+  return new BoxDecoration(
+    backgroundColor: lerpColor(a.backgroundColor, b.backgroundColor, t),
+    backgroundImage: b.backgroundImage,
+    border: b.border,
+    borderRadius: lerpNum(a.borderRadius, b.borderRadius, t),
+    boxShadow: lerpListBoxShadow(a.boxShadow, b.boxShadow, t),
+    gradient: b.gradient,
+    shape: b.shape
+  );
 }
 
 class BoxPainter {

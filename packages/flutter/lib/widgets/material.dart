@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/painting/box_painter.dart';
-import 'package:sky/widgets/animated_component.dart';
-import 'package:sky/widgets/animation_builder.dart';
+import 'package:sky/theme/shadows.dart';
+import 'package:sky/widgets/animated_container.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/theme.dart';
@@ -19,11 +18,7 @@ const Map<MaterialType, double> edges = const {
   MaterialType.button: 2.0,
 };
 
-const Duration _kAnimateShadowDuration = const Duration(milliseconds: 100);
-const Duration _kAnimateColorDuration = const Duration(milliseconds: 100);
-
-class Material extends AnimatedComponent {
-
+class Material extends Component {
   Material({
     String key,
     this.child,
@@ -34,64 +29,37 @@ class Material extends AnimatedComponent {
     assert(level != null);
   }
 
-  Widget child;
-  MaterialType type;
-  int level;
-  Color color;
+  final Widget child;
+  final MaterialType type;
+  final int level;
+  final Color color;
 
-  final AnimationBuilder _builder = new AnimationBuilder();
-
-  void initState() {
-    _builder
-      ..shadow = new AnimatedType<double>(level.toDouble())
-      ..backgroundColor = _getBackgroundColor(type, color)
-      ..borderRadius = edges[type]
-      ..shape = type == MaterialType.circle ? Shape.circle : Shape.rectangle;
-    watch(_builder.createPerformance(
-        [_builder.shadow],
-        duration: _kAnimateShadowDuration
-    ));
-    watch(_builder.createPerformance(
-        [_builder.backgroundColor],
-        duration: _kAnimateColorDuration
-    ));
-    super.initState();
-  }
-
-  void syncFields(Material source) {
-    child = source.child;
-    type = source.type;
-    level = source.level;
-    color = source.color;
-    _builder.updateFields(
-      shadow: new AnimatedType<double>(level.toDouble()),
-      backgroundColor: _getBackgroundColor(type, color),
-      borderRadius: edges[type],
-      shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
-    );
-    super.syncFields(source);
-  }
-
-  AnimatedColor _getBackgroundColor(MaterialType type, Color color) {
-    if (color == null) {
-      switch (type) {
-        case MaterialType.canvas:
-          color = Theme.of(this).canvasColor;
-          break;
-        case MaterialType.card:
-          color = Theme.of(this).cardColor;
-          break;
-        default:
-          break;
-      }
+  Color get _backgroundColor {
+    if (color != null)
+      return color;
+    switch (type) {
+      case MaterialType.canvas:
+        return Theme.of(this).canvasColor;
+      case MaterialType.card:
+        return Theme.of(this).cardColor;
+      default:
+        return null;
     }
-    return color == null ? null : new AnimatedColor(color);
   }
 
   Widget build() {
-    return _builder.build(
-      new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
+    return new AnimatedContainer(
+      duration: const Duration(milliseconds: 1000),
+      decoration: new BoxDecoration(
+        backgroundColor: _backgroundColor,
+        borderRadius: edges[type],
+        boxShadow: level == 0 ? null : shadows[level],
+        shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
+      ),
+      child: new DefaultTextStyle(
+        style: Theme.of(this).text.body1,
+        child: child
+      )
     );
   }
-
 }
