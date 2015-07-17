@@ -1,6 +1,8 @@
 Sky
 ===
 
+[![Build Status](https://travis-ci.org/domokit/sky_engine.svg)](https://travis-ci.org/domokit/sky_engine)
+
 Sky is a new way to build high performance, cross platform mobile apps.
 More specifically, Sky is a rendering engine, a scripting engine, an
 (optional) framework, and a (optional) set of Material Design widgets.
