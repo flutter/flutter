@@ -1,5 +1,7 @@
-Contributing to Sky Engine
-==========================
+Contributing to Sky
+===================
+
+[![Build Status](https://travis-ci.org/domokit/sky_engine.svg)](https://travis-ci.org/domokit/sky_engine)
 
 Getting the code
 ----------------

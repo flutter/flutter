@@ -84,7 +84,6 @@ def main():
     run(sky_engine_root, [
         'sky/tools/deploy_sdk.py',
         '--non-interactive',
-        '--commit',
         sky_sdk_root
     ])
     # tag for version?
