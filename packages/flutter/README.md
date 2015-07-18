@@ -7,8 +7,8 @@ Sky apps are written in Dart. To get started, we need to set up Dart SDK:
  - Ensure that `$DART_SDK` is set to the path of your Dart SDK and that the
    `dart` and `pub` executables are on your `$PATH`.
 
-Once we have the Dart SDK, we can creating a new directory and
-adding a [pubspec.yaml](https://www.dartlang.org/tools/pub/pubspec.html):
+Once you have instealled Dart SDK, create a new directory and adding a
+[pubspec.yaml](https://www.dartlang.org/tools/pub/pubspec.html):
 
 ```yaml
 name: your_app_name
@@ -16,9 +16,8 @@ dependencies:
   sky: any
 ```
 
-Once the `pubspec.yaml` is in place, create a `lib` directory (where your Dart\
-code will go) and use the `pub` tool to fetch the Sky package and its
-dependencies:
+Next, create a `lib` directory (where your Dart code will go) and use the `pub`
+tool to fetch the Sky package and its dependencies:
 
  - `mkdir lib`
  - `pub get && pub run sky:init`
