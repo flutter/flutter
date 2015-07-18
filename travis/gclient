@@ -5,4 +5,4 @@ solutions = [{
   "managed"     : False,
   "safesync_url": "",
 }]
-target_os = ['linux']
+target_os = ['linux', 'android']
