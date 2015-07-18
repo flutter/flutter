@@ -81,6 +81,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  bool _overflowOccurredDuringLayout = false;
+
   void setupParentData(RenderBox child) {
     if (child.parentData is! FlexBoxParentData)
       child.parentData = new FlexBoxParentData();
@@ -376,16 +378,20 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         break;
     }
 
+    Size desiredSize;
     switch (_direction) {
       case FlexDirection.horizontal:
-        size = constraints.constrain(new Size(mainSize, crossSize));
+        desiredSize = new Size(mainSize, crossSize);
+        size = constraints.constrain(desiredSize);
         crossSize = size.height;
         break;
       case FlexDirection.vertical:
+        desiredSize = new Size(crossSize, mainSize);
         size = constraints.constrain(new Size(crossSize, mainSize));
         crossSize = size.width;
         break;
     }
+    _overflowOccurredDuringLayout = desiredSize != size;
 
     // Position elements
     double childMainPosition = leadingSpace;
@@ -433,6 +439,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
-    defaultPaint(canvas, offset);
+    if (_overflowOccurredDuringLayout) {
+      canvas.save();
+      canvas.clipRect(offset & size);
+      defaultPaint(canvas, offset);
+      canvas.restore();
+    } else {
+      defaultPaint(canvas, offset);
+    }
   }
 }
