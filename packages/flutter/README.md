@@ -1,10 +1,11 @@
-Getting Started with Sky
+Getting started with Sky
 ========================
 
 Sky apps are written in Dart. To get started, we need to set up Dart SDK:
 
  - Install the [Dart SDK](https://www.dartlang.org/downloads/).
- - Ensure that `$DART_SDK` is set to the path of your Dart SDK.
+ - Ensure that `$DART_SDK` is set to the path of your Dart SDK and that the
+   `dart` and `pub` executables are on your `$PATH`.
 
 Once we have the Dart SDK, we can creating a new directory and
 adding a [pubspec.yaml](https://www.dartlang.org/tools/pub/pubspec.html):
@@ -15,24 +16,22 @@ dependencies:
   sky: any
 ```
 
-Once the pubspec is in place, create a `lib` directory (where your dart code
-will go) ensure that the 'dart' and 'pub' executables are on your $PATH and
-run the following:
+Once the `pubspec.yaml` is in place, create a `lib` directory (where your Dart\
+code will go) and use the `pub` tool to fetch the Sky package and its
+dependencies:
 
  - `mkdir lib`
  - `pub get && pub run sky:init`
 
-Currently the Sky Engine assumes the entry point for your application is a
-`main` function in `lib/main.dart`:
+Currently Sky assumes the entry point for your application is a `main` function
+in `lib/main.dart`:
 
 ```dart
 import 'package:sky/widgets/basic.dart';
 
 class HelloWorldApp extends App {
   Widget build() {
-    return new Center(
-      child: new Text('Hello, world!')
-    );
+    return new Center(child: new Text('Hello, world!'));
   }
 }
 
@@ -41,11 +40,9 @@ void main() {
 }
 ```
 
-Execution starts in `main`, which instructs the framework to run a new
-instance of the `HelloWorldApp`. The framework then calls the `build()`
-function on `HelloWorldApp` to create a tree of widgets, some of which might
-be other `Components`, which in turn have `build()` functions that generate
-more widgets iteratively to create the widget hierarchy. To learn more about
+Execution starts in `main`, which runs a new instance of the `HelloWorldApp`.
+The `HelloWorldApp` builds a `Text` widget containing the famous _Hello, world!_
+string and centers it on the screen using a `Center` widget. To learn more about
 the widget system, please see the [widgets tutorial](lib/widgets/README.md).
 
 Setup your Android device
@@ -84,15 +81,6 @@ follow these instructions:
    `adb logcat -s sky` can be used to filter only adb messages from
    `SkyDemo.apk`.
 
- Building a standalone APK
- -------------------------
-
- Although it is possible to build a standalone APK containing your application,
- doing so right now is difficult. If you're feeling brave, you can see how we
- build the `Stocks.apk` in [example/stocks](example/stocks). Eventually we plan
- to make this much easier and support platforms other than Android, but that work
- still in progress.
-
 Debugging
 ---------
 
@@ -100,3 +88,12 @@ Sky uses [Observatory](https://www.dartlang.org/tools/observatory/) for
 debugging and profiling. While running your Sky app using `sky_tool`, you can
 access Observatory by navigating your web browser to
 [http://localhost:8181/](http://localhost:8181/).
+
+Building a standalone APK
+-------------------------
+
+Although it is possible to build a standalone APK containing your application,
+doing so right now is difficult. If you're feeling brave, you can see how we
+build the `Stocks.apk` in [example/stocks](example/stocks). Eventually we plan
+to make this much easier and support platforms other than Android, but that work
+still in progress.
