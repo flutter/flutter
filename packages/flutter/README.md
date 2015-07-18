@@ -7,7 +7,7 @@ Sky apps are written in Dart. To get started, we need to set up Dart SDK:
  - Ensure that `$DART_SDK` is set to the path of your Dart SDK and that the
    `dart` and `pub` executables are on your `$PATH`.
 
-Once you have instealled Dart SDK, create a new directory and adding a
+Once you have installed Dart SDK, create a new directory and adding a
 [pubspec.yaml](https://www.dartlang.org/tools/pub/pubspec.html):
 
 ```yaml
