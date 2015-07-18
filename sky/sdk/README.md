@@ -7,7 +7,7 @@ Sky apps are written in Dart. To get started, we need to set up Dart SDK:
  - Ensure that `$DART_SDK` is set to the path of your Dart SDK and that the
    `dart` and `pub` executables are on your `$PATH`.
 
-Once you have installed Dart SDK, create a new directory and adding a
+Once you have installed Dart SDK, create a new directory and add a
 [pubspec.yaml](https://www.dartlang.org/tools/pub/pubspec.html):
 
 ```yaml
@@ -16,14 +16,14 @@ dependencies:
   sky: any
 ```
 
-Next, create a `lib` directory (where your Dart code will go) and use the `pub`
-tool to fetch the Sky package and its dependencies:
+Next, create a `lib` directory (which is where your Dart code will go) and use
+the `pub` tool to fetch the Sky package and its dependencies:
 
  - `mkdir lib`
  - `pub get && pub run sky:init`
 
-Currently Sky assumes the entry point for your application is a `main` function
-in `lib/main.dart`:
+Sky assumes the entry point for your application is a `main` function in
+`lib/main.dart`:
 
 ```dart
 import 'package:sky/widgets/basic.dart';
@@ -40,7 +40,7 @@ void main() {
 ```
 
 Execution starts in `main`, which runs a new instance of the `HelloWorldApp`.
-The `HelloWorldApp` builds a `Text` widget containing the famous _Hello, world!_
+The `HelloWorldApp` builds a `Text` widget containing the famous `Hello, world!`
 string and centers it on the screen using a `Center` widget. To learn more about
 the widget system, please see the [widgets tutorial](lib/widgets/README.md).
 
@@ -51,7 +51,7 @@ Currently Sky requires an Android device running the Lollipop (or newer) version
 of the Android operating system.
 
  - Install the `adb` tool from the [Android SDK](https://developer.android.com/sdk/installing/index.html)
-   and ensure that `adb (inside `platform-tools` in the Android SDK) is in your
+   and ensure that `adb` (inside `platform-tools` in the Android SDK) is in your
    `$PATH`.
 
  - Enable developer mode on your device by visiting `Settings > About phone`
