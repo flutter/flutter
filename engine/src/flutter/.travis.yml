@@ -1,4 +1,4 @@
-language: dart
+language: cpp
 sudo: required
 before_install:
   - ./travis/before_install.sh
