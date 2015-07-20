@@ -106,8 +106,6 @@ class Range final : public RefCounted<Range>, public DartWrappable {
     Node* firstNode() const;
     Node* pastLastNode() const;
 
-    ShadowRoot* shadowRoot() const;
-
     // Not transform-friendly
     void textRects(Vector<IntRect>&, bool useSelectionHeight = false) const;
     IntRect boundingBox() const;

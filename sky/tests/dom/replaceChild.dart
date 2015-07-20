@@ -47,21 +47,6 @@ void main() {
     expect(parent.lastChild, equals(lastChild));
   });
 
-  // test("should throw when inserting a tree scope", () {
-  //   var parent = document.createElement("div");
-  //   var doc = new Document();
-  //   var shadowRoot = document.createElement("span").ensureShadowRoot();
-  //   expect(() {
-  //     parent.replaceChild(doc);
-  //   }, throws);
-  //   expect(() {
-  //     parent.replaceChild(shadowRoot);
-  //   }, throws);
-  //   expect(() {
-  //     doc.replaceChild(fragment);
-  //   }, throws);
-  // });
-
   // test("should throw when appending to a text", () {
   //   var parent = new Text();
   //   expect(() {

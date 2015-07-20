@@ -14,11 +14,11 @@ interface Node {
   readonly attribute Element nextElementSibling;
   readonly attribute Element previousElementSibling;
 
-  [CustomElementCallbacks, RaisesException, ImplementedAs=newInsertBefore] void insertBefore(sequence<Node> nodes);
-  [CustomElementCallbacks, RaisesException, ImplementedAs=newInsertAfter] void insertAfter(sequence<Node> nodes);
-  [CustomElementCallbacks, RaisesException] void replaceWith(sequence<Node> nodes);
+  [RaisesException, ImplementedAs=newInsertBefore] void insertBefore(sequence<Node> nodes);
+  [RaisesException, ImplementedAs=newInsertAfter] void insertAfter(sequence<Node> nodes);
+  [RaisesException] void replaceWith(sequence<Node> nodes);
 
-  [CustomElementCallbacks, RaisesException] void remove();
+  [RaisesException] void remove();
 
   [TreatReturnedNullStringAs=Null, TreatNullAs=NullString] attribute DOMString textContent;
 };

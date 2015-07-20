@@ -99,9 +99,6 @@ def method_context(interface, method):
     is_call_with_script_state = has_extended_attribute_value(method, 'CallWith', 'ScriptState')
     if is_call_with_script_state:
         includes.add('bindings/core/v8/ScriptState.h')
-    is_custom_element_callbacks = 'CustomElementCallbacks' in extended_attributes
-    if is_custom_element_callbacks:
-        includes.add('sky/engine/core/dom/custom/custom_element_callback_scope.h')
 
     is_raises_exception = 'RaisesException' in extended_attributes
 
@@ -135,7 +132,6 @@ def method_context(interface, method):
         'is_call_with_script_arguments': is_call_with_script_arguments,
         'is_call_with_script_state': is_call_with_script_state,
         'is_custom': 'Custom' in extended_attributes,
-        'is_custom_element_callbacks': is_custom_element_callbacks,
         'is_explicit_nullable': idl_type.is_explicit_nullable,
         'is_partial_interface_member':
             'PartialInterfaceImplementedAs' in extended_attributes,

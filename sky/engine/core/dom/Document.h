@@ -60,7 +60,6 @@ class Comment;
 class ConsoleMessage;
 class CSSStyleDeclaration;
 class CSSStyleSheet;
-class CustomElementRegistry;
 class DocumentFragment;
 class DocumentLoadTiming;
 class DocumentMarkerController;
@@ -385,9 +384,6 @@ public:
 
     IntSize initialViewportSize() const;
 
-    void registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState&);
-    CustomElementRegistry& elementRegistry() const { return *m_elementRegistry; }
-
     unsigned activeParserCount() { return m_activeParserCount; }
     void incrementActiveParserCount() { ++m_activeParserCount; }
     void decrementActiveParserCount();
@@ -397,11 +393,6 @@ public:
     void didLoadAllParserBlockingResources();
 
     bool inStyleRecalc() const { return m_inStyleRecalc; }
-
-    // A non-null m_templateDocumentHost implies that |this| was created by ensureTemplateDocument().
-    bool isTemplateDocument() const { return !!m_templateDocumentHost; }
-    Document& ensureTemplateDocument();
-    Document* templateDocumentHost() { return m_templateDocumentHost; }
 
     LocalFrame* executingFrame();
 
@@ -546,15 +537,7 @@ private:
 
     RefPtr<ScriptedAnimationController> m_scriptedAnimationController;
 
-    RefPtr<CustomElementRegistry> m_elementRegistry;
-
     OwnPtr<ElementDataCache> m_elementDataCache;
-
-    RefPtr<Document> m_templateDocument;
-    // With Oilpan the templateDocument and the templateDocumentHost
-    // live and die together. Without Oilpan, the templateDocumentHost
-    // is a manually managed backpointer from m_templateDocument.
-    RawPtr<Document> m_templateDocumentHost;
 
     bool m_hasViewportUnits;
 

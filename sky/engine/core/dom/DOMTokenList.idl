@@ -28,9 +28,9 @@
     readonly attribute unsigned long length;
     [TreatReturnedNullStringAs=Null] getter DOMString item(unsigned long index);
     [RaisesException] boolean contains(DOMString token);
-    [RaisesException, CustomElementCallbacks] void add(DOMString tokens);
-    [RaisesException, CustomElementCallbacks] void remove(DOMString tokens);
-    [RaisesException, CustomElementCallbacks] boolean toggle(DOMString token);
+    [RaisesException] void add(DOMString tokens);
+    [RaisesException] void remove(DOMString tokens);
+    [RaisesException] boolean toggle(DOMString token);
 
     void clear();
 

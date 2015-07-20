@@ -33,8 +33,6 @@
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/Range.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -47,7 +45,8 @@
 #include "sky/engine/core/rendering/RenderLayer.h"
 
 // This file is no longer needed now that nothing can be focused and
-// events can't be targetted at nodes.
+// events can't be targetted at nodes. Parts of it have been gutted,
+// in fact, such that it no longer makes sense.
 // TODO(ianh): We should remove it.
 
 namespace blink {
@@ -67,11 +66,6 @@ Node* FocusNavigationScope::rootNode() const
 
 Element* FocusNavigationScope::owner() const
 {
-    Node* root = rootNode();
-    if (root->isShadowRoot()) {
-        ShadowRoot* shadowRoot = toShadowRoot(root);
-        return shadowRoot->host();
-    }
     return 0;
 }
 
@@ -81,56 +75,15 @@ FocusNavigationScope FocusNavigationScope::focusNavigationScopeOf(Node* node)
     Node* root = node;
     for (Node* n = node; n; n = n->parentNode())
         root = n;
-    // The result is not always a ShadowRoot nor a DocumentNode since
+    // The result is not always a DocumentNode since
     // a starting node is in an orphaned tree in composed shadow tree.
     return FocusNavigationScope(&root->treeScope());
-}
-
-FocusNavigationScope FocusNavigationScope::ownedByNonFocusableFocusScopeOwner(Node* node)
-{
-    ASSERT(node);
-    return FocusNavigationScope::ownedByShadowHost(node);
-}
-
-FocusNavigationScope FocusNavigationScope::ownedByShadowHost(Node* node)
-{
-    ASSERT(isShadowHost(node));
-    return FocusNavigationScope(toElement(node)->shadow()->shadowRoot());
-}
-
-#if ENABLE(ASSERT)
-static inline bool isNonFocusableShadowHost(Node* node)
-{
-    ASSERT(node);
-    if (!node->isElementNode())
-        return false;
-    Element* element = toElement(node);
-    return !element->isFocusable() && isShadowHost(element);
-}
-#endif
-
-static inline bool isNonKeyboardFocusableShadowHost(Node* node)
-{
-    ASSERT(node);
-    if (!node->isElementNode())
-        return false;
-    Element* element = toElement(node);
-    return !element->isKeyboardFocusable() && isShadowHost(element);
-}
-
-static inline bool isKeyboardFocusableShadowHost(Node* node)
-{
-    ASSERT(node);
-    if (!node->isElementNode())
-        return false;
-    Element* element = toElement(node);
-    return element->isKeyboardFocusable() && isShadowHost(element);
 }
 
 static inline bool isNonFocusableFocusScopeOwner(Node* node)
 {
     ASSERT(node);
-    return isNonKeyboardFocusableShadowHost(node);
+    return false;
 }
 
 static inline int adjustedTabIndex(Node* node)
@@ -290,11 +243,10 @@ bool FocusController::advanceFocusInDocumentOrder(FocusType type, bool initialFo
 
 Node* FocusController::findFocusableNodeAcrossFocusScope(FocusType type, FocusNavigationScope scope, Node* currentNode)
 {
-    ASSERT(!currentNode || !isNonFocusableShadowHost(currentNode));
+    ASSERT(!currentNode);
     Node* found;
-    if (currentNode && type == FocusTypeForward && isKeyboardFocusableShadowHost(currentNode)) {
-        Node* foundInInnerFocusScope = findFocusableNodeRecursively(type, FocusNavigationScope::ownedByShadowHost(currentNode), 0);
-        found = foundInInnerFocusScope ? foundInInnerFocusScope : findFocusableNodeRecursively(type, scope, currentNode);
+    if (currentNode && type == FocusTypeForward) {
+        found = nullptr;
     } else {
         found = findFocusableNodeRecursively(type, scope, currentNode);
     }
@@ -305,7 +257,7 @@ Node* FocusController::findFocusableNodeAcrossFocusScope(FocusType type, FocusNa
         if (!owner)
             break;
         scope = FocusNavigationScope::focusNavigationScopeOf(owner);
-        if (type == FocusTypeBackward && isKeyboardFocusableShadowHost(owner)) {
+        if (type == FocusTypeBackward) {
             found = owner;
             break;
         }
@@ -317,26 +269,7 @@ Node* FocusController::findFocusableNodeAcrossFocusScope(FocusType type, FocusNa
 
 Node* FocusController::findFocusableNodeRecursively(FocusType type, FocusNavigationScope scope, Node* start)
 {
-    // Starting node is exclusive.
-    Node* found = findFocusableNode(type, scope, start);
-    if (!found)
-        return 0;
-    if (type == FocusTypeForward) {
-        if (!isNonFocusableFocusScopeOwner(found))
-            return found;
-        Node* foundInInnerFocusScope = findFocusableNodeRecursively(type, FocusNavigationScope::ownedByNonFocusableFocusScopeOwner(found), 0);
-        return foundInInnerFocusScope ? foundInInnerFocusScope : findFocusableNodeRecursively(type, scope, found);
-    }
-    ASSERT(type == FocusTypeBackward);
-    if (isKeyboardFocusableShadowHost(found)) {
-        Node* foundInInnerFocusScope = findFocusableNodeRecursively(type, FocusNavigationScope::ownedByShadowHost(found), 0);
-        return foundInInnerFocusScope ? foundInInnerFocusScope : found;
-    }
-    if (isNonFocusableFocusScopeOwner(found)) {
-        Node* foundInInnerFocusScope = findFocusableNodeRecursively(type, FocusNavigationScope::ownedByNonFocusableFocusScopeOwner(found), 0);
-        return foundInInnerFocusScope ? foundInInnerFocusScope :findFocusableNodeRecursively(type, scope, found);
-    }
-    return found;
+    return nullptr;
 }
 
 Node* FocusController::findFocusableNode(FocusType type, FocusNavigationScope scope, Node* node)
@@ -376,7 +309,7 @@ static Node* previousNodeWithLowerTabIndex(Node* start, int tabIndex)
     Node* winner = 0;
     for (Node* node = start; node; node = NodeTraversal::previous(*node)) {
         int currentTabIndex = adjustedTabIndex(node);
-        if ((shouldVisit(node) || isNonKeyboardFocusableShadowHost(node)) && currentTabIndex < tabIndex && currentTabIndex > winningTabIndex) {
+        if ((shouldVisit(node)) && currentTabIndex < tabIndex && currentTabIndex > winningTabIndex) {
             winner = node;
             winningTabIndex = currentTabIndex;
         }

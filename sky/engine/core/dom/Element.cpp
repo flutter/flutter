@@ -53,9 +53,6 @@
 #include "sky/engine/core/dom/SelectorQuery.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/custom/custom_element.h"
-#include "sky/engine/core/dom/shadow/InsertionPoint.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -98,11 +95,6 @@ Element::Element(const QualifiedName& tagName, Document* document, ConstructionT
 Element::~Element()
 {
     ASSERT(needsAttach());
-
-#if !ENABLE(OILPAN)
-    if (hasRareData())
-        elementRareData()->clearShadow();
-#endif
 }
 
 inline ElementRareData* Element::elementRareData() const
@@ -451,11 +443,6 @@ ALWAYS_INLINE void Element::setAttributeInternal(size_t index, const QualifiedNa
 
 void Element::attributeChanged(const QualifiedName& name, const AtomicString& newValue, AttributeModificationReason reason)
 {
-    if (ElementShadow* parentElementShadow = shadowWhereNodeCanBeDistributed(*this)) {
-        if (shouldInvalidateDistributionWhenAttributeChanged(parentElementShadow, name, newValue))
-            parentElementShadow->setNeedsDistributionRecalc();
-    }
-
     parseAttribute(name, newValue);
 
     bool testShouldInvalidateStyle = inActiveDocument() && styleChangeType() < SubtreeStyleChange;
@@ -528,32 +515,6 @@ bool Element::classChangeNeedsStyleRecalc(const SpaceSplitString& oldClasses, co
     return false;
 }
 
-bool Element::shouldInvalidateDistributionWhenAttributeChanged(ElementShadow* elementShadow, const QualifiedName& name, const AtomicString& newValue)
-{
-    ASSERT(elementShadow);
-    const SelectRuleFeatureSet& featureSet = elementShadow->ensureSelectFeatureSet();
-
-    if (name == HTMLNames::idAttr) {
-        AtomicString oldId = elementData()->idForStyleResolution();
-        AtomicString newId = newValue;
-        if (newId != oldId) {
-            if (!oldId.isEmpty() && featureSet.hasSelectorForId(oldId))
-                return true;
-            if (!newId.isEmpty() && featureSet.hasSelectorForId(newId))
-                return true;
-        }
-    }
-
-    if (name == HTMLNames::classAttr) {
-        const SpaceSplitString& oldClasses = elementData()->classNames();
-        const SpaceSplitString newClasses(newValue, false);
-        if (featureSet.checkSelectorsForClassChange(oldClasses, newClasses))
-            return true;
-    }
-
-    return featureSet.hasSelectorForAttribute(name.localName());
-}
-
 void Element::parserSetAttributes(const Vector<Attribute>& attributeVector)
 {
     ASSERT(!inDocument());
@@ -612,9 +573,6 @@ void Element::insertedInto(ContainerNode* insertionPoint)
     if (!insertionPoint->isInTreeScope())
         return;
 
-    if (isUpgradedCustomElement() && inDocument())
-        CustomElement::DidAttach(this, document());
-
     TreeScope& scope = insertionPoint->treeScope();
     if (scope != treeScope())
         return;
@@ -626,8 +584,6 @@ void Element::insertedInto(ContainerNode* insertionPoint)
 
 void Element::removedFrom(ContainerNode* insertionPoint)
 {
-    bool wasInDocument = insertionPoint->inDocument();
-
     if (insertionPoint->isInTreeScope() && treeScope() == document()) {
         const AtomicString& idValue = getIdAttribute();
         if (!idValue.isNull())
@@ -635,18 +591,11 @@ void Element::removedFrom(ContainerNode* insertionPoint)
     }
 
     ContainerNode::removedFrom(insertionPoint);
-    if (wasInDocument) {
-        if (isUpgradedCustomElement())
-            CustomElement::DidDetach(this, insertionPoint->document());
-    }
 }
 
 void Element::attach(const AttachContext& context)
 {
     ASSERT(document().inStyleRecalc());
-
-    if (isInsertionPoint())
-        toInsertionPoint(this)->attachDistribution(context);
 
     // We've already been through detach when doing an attach, but we might
     // need to clear any state that's been added since then.
@@ -657,18 +606,11 @@ void Element::attach(const AttachContext& context)
 
     RenderTreeBuilder(this, context.resolvedStyle).createRendererForElementIfNeeded();
 
-    // When a shadow root exists, it does the work of attaching the children.
-    if (ElementShadow* shadow = this->shadow())
-        shadow->attach(context);
-
     ContainerNode::attach(context);
 }
 
 void Element::detach(const AttachContext& context)
 {
-    if (isInsertionPoint())
-        toInsertionPoint(this)->detachDistribution(context);
-
     if (hasRareData()) {
         ElementRareData* data = elementRareData();
 
@@ -677,8 +619,6 @@ void Element::detach(const AttachContext& context)
             data->clearComputedStyle();
         }
 
-        if (ElementShadow* shadow = data->shadow())
-            shadow->detach(context);
     }
     ContainerNode::detach(context);
 }
@@ -700,10 +640,7 @@ PassRefPtr<RenderStyle> Element::styleForRenderer()
 void Element::recalcStyle(StyleRecalcChange change)
 {
     ASSERT(document().inStyleRecalc());
-    ASSERT(!parentOrShadowHostNode()->needsStyleRecalc());
-
-    if (isInsertionPoint())
-        toInsertionPoint(this)->willRecalcStyle(change);
+    ASSERT(!parentNode()->needsStyleRecalc());
 
     if (change >= Inherit || needsStyleRecalc()) {
         if (hasRareData()) {
@@ -725,7 +662,7 @@ void Element::recalcStyle(StyleRecalcChange change)
 StyleRecalcChange Element::recalcOwnStyle(StyleRecalcChange change)
 {
     ASSERT(document().inStyleRecalc());
-    ASSERT(!parentOrShadowHostNode()->needsStyleRecalc());
+    ASSERT(!parentNode()->needsStyleRecalc());
     ASSERT(change >= Inherit || needsStyleRecalc());
     ASSERT(parentRenderStyle());
 
@@ -765,10 +702,6 @@ void Element::recalcChildStyle(StyleRecalcChange change)
     ASSERT(!needsStyleRecalc());
 
     if (change > Inherit || childNeedsStyleRecalc()) {
-        if (ShadowRoot* root = shadowRoot()) {
-            if (root->shouldCallRecalcStyle(change))
-                root->recalcStyle(change);
-        }
 
         // This loop is deliberately backwards because we use insertBefore in the rendering tree, and want to avoid
         // a potentially n^2 loop to find the insertion point while resolving style. Having us start from the last
@@ -787,33 +720,6 @@ void Element::recalcChildStyle(StyleRecalcChange change)
             }
         }
     }
-}
-
-ElementShadow* Element::shadow() const
-{
-    return hasRareData() ? elementRareData()->shadow() : 0;
-}
-
-ElementShadow& Element::ensureShadow()
-{
-    return ensureElementRareData().ensureShadow();
-}
-
-// TODO(esprehn): Implement the sky spec where shadow roots are a custom
-// element registration feature.
-PassRefPtr<ShadowRoot> Element::ensureShadowRoot(ExceptionState& exceptionState)
-{
-    if (ShadowRoot* root = shadowRoot())
-        return root;
-    return PassRefPtr<ShadowRoot>(ensureShadow().addShadowRoot(*this));
-}
-
-ShadowRoot* Element::shadowRoot() const
-{
-    ElementShadow* elementShadow = shadow();
-    if (!elementShadow)
-        return 0;
-    return elementShadow->shadowRoot();
 }
 
 double Element::x() const
@@ -953,9 +859,6 @@ void Element::setLayoutManager(PassOwnPtr<LayoutCallback> layoutManager,
 void Element::childrenChanged(const ChildrenChange& change)
 {
     ContainerNode::childrenChanged(change);
-
-    if (ElementShadow* shadow = this->shadow())
-        shadow->setNeedsDistributionRecalc();
 }
 
 #ifndef NDEBUG
@@ -1269,7 +1172,7 @@ SpellcheckAttributeState Element::spellcheckAttributeState() const
 
 bool Element::isSpellCheckingEnabled() const
 {
-    for (const Element* element = this; element; element = element->parentOrShadowHostElement()) {
+    for (const Element* element = this; element; element = element->parentElement()) {
         switch (element->spellcheckAttributeState()) {
         case SpellcheckAttributeTrue:
             return true;
@@ -1312,9 +1215,6 @@ void Element::willModifyAttribute(const QualifiedName& name, const AtomicString&
 
     if (inActiveDocument() && styleChangeType() < SubtreeStyleChange && affectedByAttributeSelector(name.localName()))
         setNeedsStyleRecalc(LocalStyleChange);
-
-    if (isUpgradedCustomElement())
-        CustomElement::AttributeDidChange(this, name.localName(), oldValue, newValue);
 
     if (OwnPtr<MutationObserverInterestGroup> recipients = MutationObserverInterestGroup::createForAttributesMutation(*this, name))
         recipients->enqueueMutationRecord(MutationRecord::createAttributes(this, name, oldValue));
@@ -1500,7 +1400,7 @@ void Element::removeAllInlineStyleProperties()
 
 bool Element::supportsStyleSharing() const
 {
-    if (!isStyledElement() || !parentOrShadowHostElement())
+    if (!isStyledElement() || !parentElement())
         return false;
     // If the element has inline style it is probably unique.
     if (inlineStyle())
@@ -1522,9 +1422,6 @@ bool Element::affectedByAttributeSelector(const AtomicString& attributeName) con
         return false;
     if (treeScope().scopedStyleResolver().hasSelectorForAttribute(attributeName))
         return true;
-    // Host rules could also have effects.
-    if (ShadowRoot* shadowRoot = this->shadowRoot())
-        return shadowRoot->scopedStyleResolver().hasSelectorForAttribute(attributeName);
     return false;
 }
 
@@ -1534,9 +1431,6 @@ bool Element::affectedByClassSelector(const AtomicString& classValue) const
         return false;
     if (treeScope().scopedStyleResolver().hasSelectorForClass(classValue))
         return true;
-    // Host rules could also have effects.
-    if (ShadowRoot* shadowRoot = this->shadowRoot())
-        return shadowRoot->scopedStyleResolver().hasSelectorForClass(classValue);
     return false;
 }
 
@@ -1546,9 +1440,6 @@ bool Element::affectedByIdSelector(const AtomicString& idValue) const
         return false;
     if (treeScope().scopedStyleResolver().hasSelectorForId(idValue))
         return true;
-    // Host rules could also have effects.
-    if (ShadowRoot* shadowRoot = this->shadowRoot())
-        return shadowRoot->scopedStyleResolver().hasSelectorForId(idValue);
     return false;
 }
 

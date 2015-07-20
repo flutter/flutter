@@ -42,12 +42,10 @@ public:
 
     Element* element() const { return m_element; }
     const ContainerNode* parentNode() const { return m_parentNode; }
-    bool distributedToInsertionPoint() const { return m_distributedToInsertionPoint; }
 
 private:
     RawPtr<Element> m_element;
     RawPtr<ContainerNode> m_parentNode;
-    bool m_distributedToInsertionPoint;
 };
 
 } // namespace blink

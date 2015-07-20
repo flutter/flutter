@@ -46,7 +46,6 @@ class ClientRectList;
 class DOMTokenList;
 class Document;
 class ElementRareData;
-class ElementShadow;
 class ExceptionState;
 class Image;
 class IntSize;
@@ -55,7 +54,6 @@ class MutableStylePropertySet;
 class PaintingCallback;
 class PropertySetCSSStyleDeclaration;
 class PseudoElement;
-class ShadowRoot;
 class StylePropertySet;
 
 enum SpellcheckAttributeState {
@@ -195,12 +193,6 @@ public:
 
     bool supportsStyleSharing() const;
 
-    ElementShadow* shadow() const;
-    ElementShadow& ensureShadow();
-    PassRefPtr<ShadowRoot> ensureShadowRoot(ExceptionState&);
-    ShadowRoot* shadowRoot() const;
-    bool hasAuthorShadowRoot() const { return shadowRoot(); }
-
     double x() const;
     void setX(double);
 
@@ -231,9 +223,6 @@ public:
         PassOwnPtr<LayoutCallback> intrinsicWidthsComputer);
 
     RenderStyle* computedStyle();
-
-    bool isUpgradedCustomElement() const { return customElementState() == Upgraded; }
-    bool isUnresolvedCustomElement() const { return customElementState() == WaitingForUpgrade; }
 
     AtomicString computeInheritedLanguage() const;
 
@@ -370,8 +359,6 @@ private:
     SpellcheckAttributeState spellcheckAttributeState() const;
 
     void createUniqueElementData();
-
-    bool shouldInvalidateDistributionWhenAttributeChanged(ElementShadow*, const QualifiedName&, const AtomicString&);
 
     ElementRareData* elementRareData() const;
     ElementRareData& ensureElementRareData();
@@ -524,10 +511,6 @@ inline void Node::insertedInto(ContainerNode* insertionPoint)
     ASSERT(insertionPoint->inDocument() || isContainerNode());
     if (insertionPoint->inDocument())
         setFlag(InDocumentFlag);
-    if (parentOrShadowHostNode()->isInShadowTree())
-        setFlag(IsInShadowTreeFlag);
-    if (childNeedsDistributionRecalc() && !insertionPoint->childNeedsDistributionRecalc())
-        insertionPoint->markAncestorsWithChildNeedsDistributionRecalc();
 }
 
 inline void Node::removedFrom(ContainerNode* insertionPoint)
@@ -535,39 +518,12 @@ inline void Node::removedFrom(ContainerNode* insertionPoint)
     ASSERT(insertionPoint->inDocument() || isContainerNode());
     if (insertionPoint->inDocument())
         clearFlag(InDocumentFlag);
-    if (isInShadowTree() && !treeScope().rootNode().isShadowRoot())
-        clearFlag(IsInShadowTreeFlag);
-}
-
-inline ShadowRoot* Node::shadowRoot() const
-{
-    if (!isElementNode())
-        return 0;
-    return toElement(this)->shadowRoot();
 }
 
 inline void Element::invalidateStyleAttribute()
 {
     ASSERT(elementData());
     elementData()->m_styleAttributeIsDirty = true;
-}
-
-inline bool isShadowHost(const Node* node)
-{
-    return node && node->isElementNode() && toElement(node)->shadow();
-}
-
-inline bool isShadowHost(const Element* element)
-{
-    return element && element->shadow();
-}
-
-inline bool isAtShadowBoundary(const Element* element)
-{
-    if (!element)
-        return false;
-    ContainerNode* parentNode = element->parentNode();
-    return parentNode && parentNode->isShadowRoot();
 }
 
 // These macros do the same as their NODE equivalents but additionally provide a template specialization

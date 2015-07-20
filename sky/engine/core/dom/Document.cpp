@@ -27,7 +27,6 @@
 
 #include "sky/engine/core/dom/Document.h"
 
-#include "gen/sky/core/HTMLElementFactory.h"
 #include "gen/sky/core/EventNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/bindings/exception_messages.h"
@@ -53,7 +52,6 @@
 #include "sky/engine/core/dom/MutationObserver.h"
 #include "sky/engine/core/dom/NodeRareData.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
-#include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/NodeWithIndex.h"
 #include "sky/engine/core/dom/Range.h"
@@ -63,9 +61,6 @@
 #include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/custom/custom_element_registry.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/PositionWithAffinity.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
@@ -213,15 +208,10 @@ Document::Document(const DocumentInit& initializer)
 #endif
     , m_didSetReferrerPolicy(false)
     , m_referrerPolicy(ReferrerPolicyDefault)
-    , m_elementRegistry(initializer.elementRegistry())
-    , m_templateDocumentHost(nullptr)
     , m_hasViewportUnits(false)
     , m_styleRecalcElementCounter(0)
     , m_frameView(nullptr)
 {
-    if (!m_elementRegistry)
-        m_elementRegistry = CustomElementRegistry::Create();
-
     // We depend on the url getting immediately set in subframes, but we
     // also depend on the url NOT getting immediately set in opened windows.
     // See fast/dom/early-frame-url.html
@@ -243,9 +233,6 @@ Document::~Document()
     ASSERT(!parentTreeScope());
     ASSERT(m_ranges.isEmpty());
     ASSERT(!hasGuardRefCount());
-
-    if (m_templateDocument)
-        m_templateDocument->m_templateDocumentHost = nullptr; // balanced in ensureTemplateDocument().
 
     if (m_elemSheet)
         m_elemSheet->clearOwnerNode();
@@ -275,8 +262,6 @@ void Document::dispose()
     m_userActionElements.documentDidRemoveLastRef();
 
     detachParser();
-
-    m_elementRegistry.clear();
 
     // removeDetachedChildren() doesn't always unregister IDs,
     // so tear down scope information upfront to avoid having stale references in the map.
@@ -327,17 +312,12 @@ PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionS
         return nullptr;
     }
 
-    return HTMLElementFactory::createElement(name, *this, false);
+    return HTMLElement::create(QualifiedName(name), *this);
 }
 
 PassRefPtr<Text> Document::createText(const String& text)
 {
     return Text::create(*this, text);
-}
-
-void Document::registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState& es)
-{
-    m_elementRegistry->RegisterElement(name, type);
 }
 
 PassRefPtr<DocumentFragment> Document::createDocumentFragment()
@@ -383,12 +363,6 @@ PassRefPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionSt
         return newElement.release();
     }
     case DOCUMENT_FRAGMENT_NODE: {
-        if (importedNode->isShadowRoot()) {
-            // ShadowRoot nodes should not be explicitly importable.
-            // Either they are imported along with their host node, or created implicitly.
-            exceptionState.ThrowDOMException(NotSupportedError, "The node provided is a shadow root, which may not be imported.");
-            return nullptr;
-        }
         DocumentFragment* oldFragment = toDocumentFragment(importedNode);
         RefPtr<DocumentFragment> newFragment = createDocumentFragment();
         if (deep && !importContainerNodeChildren(oldFragment, newFragment, exceptionState))
@@ -412,12 +386,6 @@ PassRefPtr<Node> Document::adoptNode(PassRefPtr<Node> source, ExceptionState& ex
         exceptionState.ThrowDOMException(NotSupportedError, "The node provided is of type '" + source->nodeName() + "', which may not be adopted.");
         return nullptr;
     default:
-        if (source->isShadowRoot()) {
-            // ShadowRoot cannot disconnect itself from the host node.
-            exceptionState.ThrowDOMException(HierarchyRequestError, "The node provided is a shadow root, which may not be adopted.");
-            return nullptr;
-        }
-
         if (source->parentNode()) {
             source->parentNode()->removeChild(source.get(), exceptionState);
             if (exceptionState.had_exception())
@@ -430,11 +398,9 @@ PassRefPtr<Node> Document::adoptNode(PassRefPtr<Node> source, ExceptionState& ex
     return source;
 }
 
-// FIXME: This should really be in a possible ElementFactory class
 PassRefPtr<Element> Document::createElement(const QualifiedName& qName, bool createdByParser)
 {
-    // FIXME(sky): This should only take a local name.
-    return HTMLElementFactory::createElement(qName.localName(), *this, createdByParser);
+    return HTMLElement::create(qName, *this);
 }
 
 String Document::readyState() const
@@ -512,14 +478,6 @@ PassRefPtr<Range> Document::caretRangeFromPoint(int x, int y)
     RenderObject* renderer = result.renderer();
     if (!renderer)
         return nullptr;
-
-    Node* node = renderer->node();
-    Node* shadowAncestorNode = ancestorInThisScope(node);
-    if (shadowAncestorNode != node) {
-        unsigned offset = shadowAncestorNode->nodeIndex();
-        ContainerNode* container = shadowAncestorNode->parentNode();
-        return Range::create(*this, container, offset, container, offset);
-    }
 
     PositionWithAffinity positionWithAffinity = result.position();
     if (positionWithAffinity.position().isNull())
@@ -652,9 +610,6 @@ bool Document::needsFullRenderTreeUpdate() const
         return false;
     if (needsStyleRecalc())
         return true;
-    // FIXME: The childNeedsDistributionRecalc bit means either self or children, we should fix that.
-    if (childNeedsDistributionRecalc())
-        return true;
     return false;
 }
 
@@ -679,33 +634,6 @@ void Document::scheduleRenderTreeUpdate()
 
 void Document::scheduleVisualUpdate()
 {
-}
-
-void Document::updateDistributionIfNeeded()
-{
-    ScriptForbiddenScope forbidScript;
-
-    if (!childNeedsDistributionRecalc())
-        return;
-    TRACE_EVENT0("blink", "Document::updateDistributionIfNeeded");
-    recalcDistribution();
-}
-
-void Document::updateDistributionForNodeIfNeeded(Node* node)
-{
-    ScriptForbiddenScope forbidScript;
-
-    if (node->inDocument()) {
-        updateDistributionIfNeeded();
-        return;
-    }
-    Node* root = node;
-    while (Node* host = root->shadowHost())
-        root = host;
-    while (Node* ancestor = root->parentOrShadowHostNode())
-        root = ancestor;
-    if (root->childNeedsDistributionRecalc())
-        root->recalcDistribution();
 }
 
 void Document::setupFontBuilder(RenderStyle* documentStyle)
@@ -747,7 +675,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
     m_styleRecalcElementCounter = 0;
 
     evaluateMediaQueryListIfNeeded();
-    updateDistributionIfNeeded();
 
     // FIXME: We should update style on our ancestor chain before proceeding
     // however doing so currently causes several tests to crash, as LocalFrame::setDocument calls Document::attach
@@ -815,7 +742,7 @@ void Document::updateRenderTreeForNodeIfNeeded(Node* node)
 {
     bool needsRecalc = needsFullRenderTreeUpdate();
 
-    for (const Node* ancestor = node; ancestor && !needsRecalc; ancestor = NodeRenderingTraversal::parent(ancestor))
+    for (const Node* ancestor = node; ancestor && !needsRecalc; ancestor = ancestor->parentNode())
         needsRecalc = ancestor->needsStyleRecalc();
 
     if (needsRecalc)
@@ -1072,7 +999,7 @@ PassRefPtr<Node> Document::cloneNode(bool deep)
 
 PassRefPtr<Document> Document::cloneDocumentWithoutChildren()
 {
-    return create(DocumentInit(url()).withElementRegistry(elementRegistry()));
+    return create(DocumentInit(url()));
 }
 
 void Document::evaluateMediaQueryListIfNeeded()
@@ -1127,7 +1054,7 @@ void Document::removeFocusedElementOfSubtree(Node* node, bool amongChildrenOnly)
     // We can't be focused if we're not in the document.
     if (!node->inDocument())
         return;
-    bool contains = node->containsIncludingShadowDOM(m_focusedElement.get());
+    bool contains = node->contains(m_focusedElement.get());
     if (contains && (m_focusedElement != node || !amongChildrenOnly))
         setFocusedElement(nullptr);
 }
@@ -1137,12 +1064,12 @@ void Document::hoveredNodeDetached(Node* node)
     if (!m_hoverNode)
         return;
 
-    if (node != m_hoverNode && (!m_hoverNode->isTextNode() || node != NodeRenderingTraversal::parent(m_hoverNode.get())))
+    if (node != m_hoverNode && (!m_hoverNode->isTextNode() || node != m_hoverNode.get()->parentNode()))
         return;
 
-    m_hoverNode = NodeRenderingTraversal::parent(node);
+    m_hoverNode = node->parentNode();
     while (m_hoverNode && !m_hoverNode->renderer())
-        m_hoverNode = NodeRenderingTraversal::parent(m_hoverNode.get());
+        m_hoverNode = m_hoverNode.get()->parentNode();
 }
 
 void Document::activeChainNodeDetached(Node* node)
@@ -1153,9 +1080,9 @@ void Document::activeChainNodeDetached(Node* node)
     if (node != m_activeHoverElement)
         return;
 
-    Node* activeNode = NodeRenderingTraversal::parent(node);
+    Node* activeNode = node->parentNode();
     while (activeNode && activeNode->isElementNode() && !activeNode->renderer())
-        activeNode = NodeRenderingTraversal::parent(activeNode);
+        activeNode = activeNode->parentNode();
 
     m_activeHoverElement = activeNode && activeNode->isElementNode() ? toElement(activeNode) : 0;
 }
@@ -1520,22 +1447,6 @@ IntSize Document::initialViewportSize() const
 void Document::decrementActiveParserCount()
 {
     --m_activeParserCount;
-}
-
-Document& Document::ensureTemplateDocument()
-{
-    if (isTemplateDocument())
-        return *this;
-
-    if (m_templateDocument)
-        return *m_templateDocument;
-
-    DocumentInit init = DocumentInit::fromContext(contextDocument(), blankURL());
-    m_templateDocument = Document::create(init);
-
-    m_templateDocument->m_templateDocumentHost = this; // balanced in dtor.
-
-    return *m_templateDocument.get();
 }
 
 float Document::devicePixelRatio() const

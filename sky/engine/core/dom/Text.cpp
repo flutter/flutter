@@ -26,10 +26,8 @@
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
-#include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/RenderTreeBuilder.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/wtf/text/CString.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
@@ -113,7 +111,11 @@ bool Text::textRendererIsNeeded(const RenderStyle& style, const RenderObject& pa
     if (style.preserveNewline()) // pre/pre-wrap/pre-line always make renderers.
         return true;
 
-    const RenderObject* prev = NodeRenderingTraversal::previousSiblingRenderer(this);
+    RenderObject* prev;
+    for (Node* sibling = this->previousSibling(); sibling; sibling = sibling->previousSibling()) {
+        if ((prev = sibling->renderer()))
+            break;
+    }
 
     if (parent.isRenderInline()) {
         // <span><div/> <div/></span>
@@ -130,10 +132,23 @@ bool Text::textRendererIsNeeded(const RenderStyle& style, const RenderObject& pa
         RenderObject* first = parent.slowFirstChild();
         while (first && first->isFloatingOrOutOfFlowPositioned() && maxSiblingsToVisit--)
             first = first->nextSibling();
-        if (!first || NodeRenderingTraversal::nextSiblingRenderer(this) == first)
-            // Whitespace at the start of a block just goes away.  Don't even
-            // make a render object for this text.
+
+        if (!first) {
+            // If the block has nothing but white-space we ignore it
             return false;
+        }
+
+        for (Node* sibling = this->nextSibling(); sibling; sibling = sibling->nextSibling()) {
+            if (RenderObject* nextRenderer = sibling->renderer()) {
+                if (nextRenderer == first) {
+                    // Whitespace at the start of a block just goes away.  Don't even
+                    // make a render object for this text.
+                    return false;
+                }
+                break;
+            }
+        }
+
     }
     return true;
 }

@@ -53,8 +53,6 @@ public:
     Element* element() const { return m_elementContext.element(); }
     const ContainerNode* parentNode() const { return m_elementContext.parentNode(); }
 
-    bool distributedToInsertionPoint() const { return m_elementContext.distributedToInsertionPoint(); }
-
     const ElementResolveContext& elementContext() const { return m_elementContext; }
 
     void setStyle(PassRefPtr<RenderStyle> style) { m_style = style; m_cssToLengthConversionData.setStyle(m_style.get()); }

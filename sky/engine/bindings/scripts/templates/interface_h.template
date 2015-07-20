@@ -36,9 +36,6 @@ namespace {{dart_class}}Internal {
   {% if has_event_constructor %}
   void initialize{{interface_name}}ForDart({{interface_name}}Init&, const String&, const HashMap<String, Dart_Handle>&, Dart_Handle&);
   {% endif %}
-  {% for method in methods if method.is_custom_element_callbacks and not method.suppressed %}
-  void {{method.name}}_{{method.number_of_arguments}}(Dart_NativeArguments);
-  {% endfor %}
   {% for method in methods if method.is_custom or method.custom_dart_new %}
   void {{static_method_name(method.name)}}(Dart_NativeArguments args);
     {% if method.overload_index == 1 %}

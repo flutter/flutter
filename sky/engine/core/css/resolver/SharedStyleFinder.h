@@ -58,7 +58,6 @@ private:
     bool canShareStyleWithElement(Element& candidate) const;
     bool sharingCandidateHasIdenticalStyleAffectingAttributes(Element& candidate) const;
     bool sharingCandidateCanShareHostStyles(Element& candidate) const;
-    bool sharingCandidateDistributedToSameInsertionPoint(Element& candidate) const;
 
     Element& element() const { return *m_context.element(); }
     Document& document() const { return element().document(); }

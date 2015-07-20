@@ -66,6 +66,4 @@ inline HTMLElement::HTMLElement(const QualifiedName& tagName, Document& document
 
 } // namespace blink
 
-#include "gen/sky/core/HTMLElementTypeHelpers.h"
-
 #endif  // SKY_ENGINE_CORE_HTML_HTMLELEMENT_H_

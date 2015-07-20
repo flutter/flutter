@@ -38,7 +38,6 @@ namespace blink {
 
 class Document;
 class LocalFrame;
-class CustomElementRegistry;
 class Settings;
 
 class DocumentInit final {
@@ -59,12 +58,7 @@ public:
     LocalFrame* ownerFrame() const;
     Settings* settings() const;
 
-    DocumentInit& withElementRegistry(CustomElementRegistry&);
     WeakPtr<Document> contextDocument() const;
-
-    CustomElementRegistry* elementRegistry() const {
-        return m_elementRegistry.get();
-    }
 
     static DocumentInit fromContext(WeakPtr<Document> contextDocument, const KURL& = KURL());
 
@@ -76,7 +70,6 @@ private:
     RefPtr<Document> m_parent;
     RefPtr<Document> m_owner;
     WeakPtr<Document> m_contextDocument;
-    RefPtr<CustomElementRegistry> m_elementRegistry;
 };
 
 } // namespace blink

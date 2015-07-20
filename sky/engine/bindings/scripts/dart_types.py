@@ -500,15 +500,6 @@ def preprocess_idl_type_and_value(idl_type, cpp_value, extended_attributes):
     # FIXME(vsm): V8 maps 'long long' and 'unsigned long long' to double
     # as they are not representable in ECMAScript.  Should we do the same?
 
-    # HTML5 says that unsigned reflected attributes should be in the range
-    # [0, 2^31). When a value isn't in this range, a default value (or 0)
-    # should be returned instead.
-    extended_attributes = extended_attributes or {}
-    if ('Reflect' in extended_attributes and
-        idl_type.base_type in ['unsigned long', 'unsigned short']):
-        cpp_value = cpp_value.replace('getUnsignedIntegralAttribute',
-                                      'getIntegralAttribute')
-        cpp_value = 'std::max(0, %s)' % cpp_value
     return idl_type, cpp_value
 
 
@@ -645,8 +636,8 @@ DART_SET_RETURN_VALUE = {
     # TODO(terry): Remove ForMainWorld stuff.
     'DOMWrapperForMainWorld': DART_FIX_ME,
     # FIXME(vsm): V8 has a fast path. Do we?
-    'DOMWrapperFast': 'DartConverter<{implemented_as}*>::SetReturnValue(args, WTF::getPtr({cpp_value}), {auto_scope})',
-    'DOMWrapperDefault': 'DartConverter<{implemented_as}*>::SetReturnValue(args, WTF::getPtr({cpp_value}), {auto_scope})',
+    'DOMWrapperFast': '/*DOMWrapperFast*/ DartConverter<{implemented_as}*>::SetReturnValue(args, WTF::getPtr({cpp_value}), {auto_scope})',
+    'DOMWrapperDefault': '/*DOMWrapperDefault*/ DartConverter<{implemented_as}*>::SetReturnValue(args, WTF::getPtr({cpp_value}), {auto_scope})',
     # Typed arrays don't have special Dart* classes for Dart.
     'ArrayBuffer': 'Dart_SetReturnValue(args, DartUtilities::arrayBufferToDart({cpp_value}))',
     'TypedList': 'Dart_SetReturnValue(args, DartUtilities::arrayBufferViewToDart({cpp_value}))',

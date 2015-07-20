@@ -282,7 +282,7 @@ def interface_context(interface):
     return context
 
 
-# [DeprecateAs], [Reflect]
+# [DeprecateAs]
 def constant_context(constant):
     # (Blink-only) string literals are unquoted in tokenizer, must be re-quoted
     # in C++.
@@ -296,8 +296,6 @@ def constant_context(constant):
         'cpp_class': extended_attributes.get('PartialInterfaceImplementedAs'),
         'idl_type': constant.idl_type.name,
         'name': constant.name,
-        # FIXME: use 'reflected_name' as correct 'name'
-        'reflected_name': extended_attributes.get('Reflect', constant.name),
         'value': value,
     }
 

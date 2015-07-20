@@ -319,15 +319,6 @@ def preprocess_idl_type_and_value(idl_type, cpp_value, extended_attributes):
         if is_nullable:
             idl_type = IdlNullableType(idl_type)
         cpp_value = 'static_cast<double>(%s)' % cpp_value
-    # HTML5 says that unsigned reflected attributes should be in the range
-    # [0, 2^31). When a value isn't in this range, a default value (or 0)
-    # should be returned instead.
-    extended_attributes = extended_attributes or {}
-    if ('Reflect' in extended_attributes and
-        idl_type.base_type in ['unsigned long', 'unsigned short']):
-        cpp_value = cpp_value.replace('getUnsignedIntegralAttribute',
-                                      'getIntegralAttribute')
-        cpp_value = 'std::max(0, static_cast<int>(%s))' % cpp_value
     return idl_type, cpp_value
 
 

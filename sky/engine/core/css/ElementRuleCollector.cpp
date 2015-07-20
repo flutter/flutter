@@ -32,7 +32,6 @@
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 

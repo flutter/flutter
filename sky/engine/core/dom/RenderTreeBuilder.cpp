@@ -28,7 +28,6 @@
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -38,12 +37,17 @@ namespace blink {
 RenderObject* RenderTreeBuilder::nextRenderer() const
 {
     ASSERT(m_renderingParent);
+    ASSERT(m_node);
 
     // Avoid an O(N^2) walk over the children when reattaching all children of a node.
     if (m_renderingParent->needsAttach())
         return 0;
 
-    return NodeRenderingTraversal::nextSiblingRenderer(m_node);
+    for (Node* sibling = m_node->nextSibling(); sibling; sibling = sibling->nextSibling()) {
+        if (RenderObject* next = sibling->renderer())
+            return next;
+    }
+    return nullptr;
 }
 
 RenderObject* RenderTreeBuilder::parentRenderer() const
@@ -60,8 +64,6 @@ bool RenderTreeBuilder::shouldCreateRenderer() const
     if (!parentRenderer)
         return false;
     if (!parentRenderer->canHaveChildren())
-        return false;
-    if (isActiveInsertionPoint(*m_node))
         return false;
     return true;
 }

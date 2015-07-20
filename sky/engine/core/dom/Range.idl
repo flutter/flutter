@@ -49,11 +49,11 @@
     // TODO(eseidel): Generate a dart enum for above.
     // [RaisesException, TypeChecking=Interface] short compareBoundaryPoints(CompareHow how, Range sourceRange);
 
-    [RaisesException, CustomElementCallbacks] void deleteContents();
-    [RaisesException, CustomElementCallbacks] DocumentFragment extractContents();
-    [RaisesException, CustomElementCallbacks] DocumentFragment cloneContents();
-    [RaisesException, CustomElementCallbacks] void insertNode(Node newNode);
-    [RaisesException, CustomElementCallbacks] void surroundContents(Node newParent);
+    [RaisesException] void deleteContents();
+    [RaisesException] DocumentFragment extractContents();
+    [RaisesException] DocumentFragment cloneContents();
+    [RaisesException] void insertNode(Node newNode);
+    [RaisesException] void surroundContents(Node newParent);
     Range cloneRange();
 
     stringifier;

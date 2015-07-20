@@ -36,14 +36,6 @@
             'templates/MakeQualifiedNames.cpp.tmpl',
             'templates/MakeQualifiedNames.h.tmpl',
         ],
-        'make_element_factory_files': [
-            '<@(make_qualified_names_files)',
-            'make_element_factory.py',
-            'templates/ElementFactory.cpp.tmpl',
-            'templates/ElementFactory.h.tmpl',
-            'templates/ElementWrapperFactory.cpp.tmpl',
-            'templates/ElementWrapperFactory.h.tmpl',
-        ],
         'make_element_type_helpers_files': [
             '<@(make_qualified_names_files)',
             'make_element_type_helpers.py',

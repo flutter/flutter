@@ -53,22 +53,6 @@ void main() {
   });
 
   // TODO(dart): These might be real bugs too.
-  // test("should throw when inserting a tree scope", () {
-  //   var parent = document.createElement("div");
-  //   var doc = new Document();
-  //   var shadowRoot = document.createElement("span").ensureShadowRoot();
-  //   expect(() {
-  //     parent.appendChild(doc);
-  //   }, throws);
-  //   expect(() {
-  //     parent.appendChild(shadowRoot);
-  //   }, throws);
-  //   expect(() {
-  //     doc.appendChild(fragment);
-  //   }, throws);
-  // });
-
-  // TODO(dart): These might be real bugs too.
   // test("should throw when appending to a text", () {
   //   var parent = new Text();
   //   expect(() {

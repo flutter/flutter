@@ -39,18 +39,13 @@
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/NodeRareData.h"
-#include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/StaticNodeList.h"
-#include "sky/engine/core/dom/TemplateContentDocumentFragment.h"
 #include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/dom/TreeScopeAdopter.h"
 #include "sky/engine/core/dom/UserActionElementSet.h"
 #include "sky/engine/core/dom/WeakNodeMap.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/InsertionPoint.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -101,7 +96,6 @@ void Node::dumpStatistics()
     size_t documentNodes = 0;
     size_t docTypeNodes = 0;
     size_t fragmentNodes = 0;
-    size_t shadowRootNodes = 0;
 
     HashMap<String, size_t> perTagCount;
 
@@ -144,10 +138,7 @@ void Node::dumpStatistics()
                 break;
             }
             case DOCUMENT_FRAGMENT_NODE: {
-                if (node->isShadowRoot())
-                    ++shadowRootNodes;
-                else
-                    ++fragmentNodes;
+                ++fragmentNodes;
                 break;
             }
         }
@@ -162,7 +153,6 @@ void Node::dumpStatistics()
     printf("  Number of Document nodes: %zu\n", documentNodes);
     printf("  Number of DocumentType nodes: %zu\n", docTypeNodes);
     printf("  Number of DocumentFragment nodes: %zu\n", fragmentNodes);
-    printf("  Number of ShadowRoot nodes: %zu\n", shadowRootNodes);
 
     printf("Element tag name distibution:\n");
     for (HashMap<String, size_t>::iterator it = perTagCount.begin(); it != perTagCount.end(); ++it)
@@ -190,12 +180,12 @@ void Node::trackForDebugging()
 
 Node::Node(TreeScope* treeScope, ConstructionType type)
     : m_nodeFlags(type)
-    , m_parentOrShadowHostNode(nullptr)
+    , m_parentNode(nullptr)
     , m_treeScope(treeScope)
     , m_previous(nullptr)
     , m_next(nullptr)
 {
-    ASSERT(m_treeScope || type == CreateDocument || type == CreateShadowRoot);
+    ASSERT(m_treeScope || type == CreateDocument);
 #if !ENABLE(OILPAN)
     if (m_treeScope)
         m_treeScope->guardRef();
@@ -298,7 +288,7 @@ static const Node* rootForGC(const Node* node)
 {
     if (node->inDocument())
         return &node->document();
-    while (Node* parent = node->parentOrShadowHostOrTemplateHostNode())
+    while (Node* parent = node->parentNode())
         node = parent;
     return node;
 }
@@ -469,36 +459,9 @@ LayoutRect Node::boundingBox() const
     return LayoutRect();
 }
 
-void Node::recalcDistribution()
-{
-    if (isElementNode()) {
-        if (ElementShadow* shadow = toElement(this)->shadow())
-            shadow->distributeIfNeeded();
-    }
-
-    for (Node* child = firstChild(); child; child = child->nextSibling()) {
-        if (child->childNeedsDistributionRecalc())
-            child->recalcDistribution();
-    }
-
-    if (ShadowRoot* root = shadowRoot()) {
-        if (root->childNeedsDistributionRecalc())
-            root->recalcDistribution();
-    }
-
-    clearChildNeedsDistributionRecalc();
-}
-
 void Node::setIsLink(bool isLink)
 {
     setFlag(isLink, IsLinkFlag);
-}
-
-void Node::markAncestorsWithChildNeedsDistributionRecalc()
-{
-    for (Node* node = this; node && !node->childNeedsDistributionRecalc(); node = node->parentOrShadowHostNode())
-        node->setChildNeedsDistributionRecalc();
-    document().scheduleRenderTreeUpdateIfNeeded();
 }
 
 namespace {
@@ -526,8 +489,6 @@ unsigned Node::styledSubtreeSize() const
     for (const Node* node = this; node; node = NodeTraversal::next(*node, this)) {
         if (node->isTextNode() || node->isElementNode())
             nodeCount++;
-        if (ShadowRoot* root = node->shadowRoot())
-            nodeCount += root->styledSubtreeSize();
     }
 
     return nodeCount;
@@ -561,7 +522,7 @@ inline void Node::setStyleChange(StyleChangeType changeType)
 
 void Node::markAncestorsWithChildNeedsStyleRecalc()
 {
-    for (ContainerNode* p = parentOrShadowHostNode(); p && !p->childNeedsStyleRecalc(); p = p->parentOrShadowHostNode())
+    for (ContainerNode* p = parentNode(); p && !p->childNeedsStyleRecalc(); p = p->parentNode())
         p->setChildNeedsStyleRecalc();
     document().scheduleRenderTreeUpdateIfNeeded();
 }
@@ -623,47 +584,6 @@ bool Node::contains(const Node* node) const
     if (!node)
         return false;
     return this == node || node->isDescendantOf(this);
-}
-
-bool Node::containsIncludingShadowDOM(const Node* node) const
-{
-    if (!node)
-        return false;
-
-    if (this == node)
-        return true;
-
-    if (document() != node->document())
-        return false;
-
-    if (inDocument() != node->inDocument())
-        return false;
-
-    bool hasChildren = isContainerNode() && toContainerNode(this)->hasChildren();
-    bool hasShadow = isElementNode() && toElement(this)->shadow();
-    if (!hasChildren && !hasShadow)
-        return false;
-
-    for (; node; node = node->shadowHost()) {
-        if (treeScope() == node->treeScope())
-            return contains(node);
-    }
-
-    return false;
-}
-
-bool Node::containsIncludingHostElements(const Node& node) const
-{
-    const Node* current = &node;
-    do {
-        if (current == this)
-            return true;
-        if (current->isDocumentFragment() && toDocumentFragment(current)->isTemplateContent())
-            current = static_cast<const TemplateContentDocumentFragment*>(current)->host();
-        else
-            current = current->parentOrShadowHostNode();
-    } while (current);
-    return false;
 }
 
 void Node::reattach(const AttachContext& context)
@@ -764,7 +684,7 @@ Node *Node::nextLeafNode() const
 
 RenderStyle* Node::virtualComputedStyle()
 {
-    return parentOrShadowHostNode() ? parentOrShadowHostNode()->computedStyle() : 0;
+    return parentNode() ? parentNode()->computedStyle() : 0;
 }
 
 int Node::maxCharacterOffset() const
@@ -780,63 +700,7 @@ bool Node::canStartSelection() const
     if (hasEditableStyle())
         return true;
 
-    return parentOrShadowHostNode() ? parentOrShadowHostNode()->canStartSelection() : true;
-}
-
-Element* Node::shadowHost() const
-{
-    if (ShadowRoot* root = containingShadowRoot())
-        return root->host();
-    return 0;
-}
-
-ShadowRoot* Node::containingShadowRoot() const
-{
-    Node& root = treeScope().rootNode();
-    return root.isShadowRoot() ? toShadowRoot(&root) : 0;
-}
-
-Node* Node::nonBoundaryShadowTreeRootNode()
-{
-    ASSERT(!isShadowRoot());
-    Node* root = this;
-    while (root) {
-        if (root->isShadowRoot())
-            return root;
-        Node* parent = root->parentOrShadowHostNode();
-        if (parent && parent->isShadowRoot())
-            return root;
-        root = parent;
-    }
-    return 0;
-}
-
-ContainerNode* Node::nonShadowBoundaryParentNode() const
-{
-    ContainerNode* parent = parentNode();
-    return parent && !parent->isShadowRoot() ? parent : 0;
-}
-
-Element* Node::parentOrShadowHostElement() const
-{
-    ContainerNode* parent = parentOrShadowHostNode();
-    if (!parent)
-        return 0;
-
-    if (parent->isShadowRoot())
-        return toShadowRoot(parent)->host();
-
-    if (!parent->isElementNode())
-        return 0;
-
-    return toElement(parent);
-}
-
-ContainerNode* Node::parentOrShadowHostOrTemplateHostNode() const
-{
-    if (isDocumentFragment() && toDocumentFragment(this)->isTemplateContent())
-        return static_cast<const TemplateContentDocumentFragment*>(this)->host();
-    return parentOrShadowHostNode();
+    return parentNode() ? parentNode()->canStartSelection() : true;
 }
 
 bool Node::isRootEditableElement() const
@@ -872,8 +736,6 @@ ContainerNode* Node::owner() const
 {
     if (inDocument())
         return &treeScope().rootNode();
-    if (ShadowRoot* root = containingShadowRoot())
-        return root;
     return 0;
 }
 
@@ -926,7 +788,7 @@ bool Node::offsetInCharacters() const
     return false;
 }
 
-unsigned short Node::compareDocumentPosition(const Node* otherNode, ShadowTreesTreatment treatment) const
+unsigned short Node::compareDocumentPosition(const Node* otherNode) const
 {
     // It is not clear what should be done if |otherNode| is 0.
     if (!otherNode)
@@ -951,16 +813,16 @@ unsigned short Node::compareDocumentPosition(const Node* otherNode, ShadowTreesT
     // If one node is in the document and the other is not, we must be disconnected.
     // If the nodes have different owning documents, they must be disconnected.  Note that we avoid
     // comparing Attr nodes here, since they return false from inDocument() all the time (which seems like a bug).
-    if (start1->inDocument() != start2->inDocument() || (treatment == TreatShadowTreesAsDisconnected && start1->treeScope() != start2->treeScope())) {
+    if (start1->inDocument() != start2->inDocument() || (start1->treeScope() != start2->treeScope())) {
         unsigned short direction = (this > otherNode) ? DOCUMENT_POSITION_PRECEDING : DOCUMENT_POSITION_FOLLOWING;
         return DOCUMENT_POSITION_DISCONNECTED | DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | direction;
     }
 
     // We need to find a common ancestor container, and then compare the indices of the two immediate children.
     const Node* current;
-    for (current = start1; current; current = current->parentOrShadowHostNode())
+    for (current = start1; current; current = current->parentNode())
         chain1.append(current);
-    for (current = start2; current; current = current->parentOrShadowHostNode())
+    for (current = start2; current; current = current->parentNode())
         chain2.append(current);
 
     unsigned index1 = chain1.size();
@@ -979,16 +841,6 @@ unsigned short Node::compareDocumentPosition(const Node* otherNode, ShadowTreesT
         const Node* child1 = chain1[--index1];
         const Node* child2 = chain2[--index2];
         if (child1 != child2) {
-            // If one of the children is a shadow root,
-            if (child1->isShadowRoot() || child2->isShadowRoot()) {
-                if (!child2->isShadowRoot())
-                    return Node::DOCUMENT_POSITION_FOLLOWING | connection;
-                if (!child1->isShadowRoot())
-                    return Node::DOCUMENT_POSITION_PRECEDING | connection;
-
-                return Node::DOCUMENT_POSITION_PRECEDING | connection;
-            }
-
             if (!child2->nextSibling())
                 return DOCUMENT_POSITION_FOLLOWING | connection;
             if (!child1->nextSibling())
@@ -1081,17 +933,12 @@ void Node::showNodePathForThis() const
 {
     Vector<const Node*, 16> chain;
     const Node* node = this;
-    while (node->parentOrShadowHostNode()) {
+    while (node->parentNode()) {
         chain.append(node);
-        node = node->parentOrShadowHostNode();
+        node = node->parentNode();
     }
     for (unsigned index = chain.size(); index > 0; --index) {
         const Node* node = chain[index - 1];
-        if (node->isShadowRoot()) {
-            fprintf(stderr, "/#shadow-root");
-            continue;
-        }
-
         switch (node->nodeType()) {
         case ELEMENT_NODE: {
             fprintf(stderr, "/%s", node->nodeName().utf8().data());
@@ -1133,13 +980,11 @@ static void traverseTreeAndMark(const String& baseIndent, const Node* rootNode, 
 
         StringBuilder indent;
         indent.append(baseIndent);
-        for (const Node* tmpNode = node; tmpNode && tmpNode != rootNode; tmpNode = tmpNode->parentOrShadowHostNode())
+        for (const Node* tmpNode = node; tmpNode && tmpNode != rootNode; tmpNode = tmpNode->parentNode())
             indent.append('\t');
         fprintf(stderr, "%s", indent.toString().utf8().data());
         node->showNode();
         indent.append('\t');
-        if (ShadowRoot* shadowRoot = node->shadowRoot())
-            traverseTreeAndMark(indent.toString(), shadowRoot, markedNode1, markedLabel1, markedNode2, markedLabel2);
     }
 }
 
@@ -1147,8 +992,8 @@ void Node::showTreeAndMark(const Node* markedNode1, const char* markedLabel1, co
 {
     const Node* rootNode;
     const Node* node = this;
-    while (node->parentOrShadowHostNode())
-        node = node->parentOrShadowHostNode();
+    while (node->parentNode())
+        node = node->parentNode();
     rootNode = node;
 
     String startingIndent;
@@ -1175,8 +1020,6 @@ static void showSubTreeAcrossFrame(const Node* node, const Node* markedNode, con
         fputs("*", stderr);
     fputs(indent.utf8().data(), stderr);
     node->showNode();
-    if (ShadowRoot* shadowRoot = node->shadowRoot())
-        showSubTreeAcrossFrame(shadowRoot, markedNode, indent + "\t");
     for (Node* child = node->firstChild(); child; child = child->nextSibling())
         showSubTreeAcrossFrame(child, markedNode, indent + "\t");
 }
@@ -1372,17 +1215,6 @@ void Node::removedLastRef()
 }
 #endif
 
-Vector<RefPtr<Node>> Node::getDestinationInsertionPoints()
-{
-    document().updateDistributionForNodeIfNeeded(this);
-    Vector<RawPtr<InsertionPoint>, 8> insertionPoints;
-    collectDestinationInsertionPoints(*this, insertionPoints);
-    // FIXME(sky): Is there an easier way to get this into a Vector<Node>?
-    Vector<RefPtr<Node>> result(insertionPoints.size());
-    copyToVector(insertionPoints, result);
-    return result;
-}
-
 void Node::setFocus(bool flag)
 {
     document().userActionElements().setFocused(this, flag);
@@ -1420,27 +1252,6 @@ bool Node::isUserActionElementFocused() const
 {
     ASSERT(isUserActionElement());
     return document().userActionElements().isFocused(this);
-}
-
-void Node::setCustomElementState(CustomElementState newState)
-{
-    switch (newState) {
-    case NotCustomElement:
-        ASSERT_NOT_REACHED(); // Everything starts in this state
-        return;
-
-    case WaitingForUpgrade:
-        ASSERT(NotCustomElement == customElementState());
-        break;
-
-    case Upgraded:
-        ASSERT(WaitingForUpgrade == customElementState());
-        break;
-    }
-
-    ASSERT(isElementNode());
-    setFlag(CustomElementFlag);
-    setFlag(newState == Upgraded, CustomElementUpgradedFlag);
 }
 
 unsigned Node::lengthOfContents() const

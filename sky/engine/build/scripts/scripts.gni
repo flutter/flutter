@@ -45,16 +45,6 @@ make_qualified_names_files =
 make_element_factory_files =
     make_qualified_names_files + [
       "$_scripts_dir/make_element_factory.py",
-      "$_scripts_dir/templates/ElementFactory.cpp.tmpl",
-      "$_scripts_dir/templates/ElementFactory.h.tmpl",
-      "$_scripts_dir/templates/ElementWrapperFactory.cpp.tmpl",
-      "$_scripts_dir/templates/ElementWrapperFactory.h.tmpl",
-    ]
-
-make_element_type_helpers_files =
-    make_qualified_names_files + [
-      "$_scripts_dir/make_element_type_helpers.py",
-      "$_scripts_dir/templates/ElementTypeHelpers.h.tmpl",
     ]
 
 # The executables are relative to the build directory. Don't rebase it because

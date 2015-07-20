@@ -412,21 +412,15 @@ String nodePositionAsStringForTesting(Node* node)
 
     Node* parent;
     for (Node* n = node; n; n = parent) {
-        parent = n->parentOrShadowHostNode();
+        parent = n->parentNode();
         if (n != node)
             result.appendLiteral(" of ");
         if (parent) {
-            if (n->isShadowRoot()) {
-                result.append('{');
-                result.append(n->nodeName());
-                result.append('}');
-            } else {
-                result.appendLiteral("child ");
-                result.appendNumber(n->nodeIndex());
-                result.appendLiteral(" {");
-                result.append(n->nodeName());
-                result.append('}');
-            }
+            result.appendLiteral("child ");
+            result.appendNumber(n->nodeIndex());
+            result.appendLiteral(" {");
+            result.append(n->nodeName());
+            result.append('}');
         } else
             result.appendLiteral("document");
     }
