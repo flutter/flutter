@@ -120,7 +120,7 @@ dart_pkg("sky") {
   sdk_ext_mappings = [
     "dart:sky,dart_sky.dart",
     "dart:sky.internals,sky_internals.dart",
-    "dart:sky_builtin_natvies,builtin_natives.dart",
+    "dart:sky_builtin_natives,builtin_natives.dart",
   ]
 }
 

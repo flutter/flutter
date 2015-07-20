@@ -20,7 +20,7 @@ SDK_EXT = os.path.join(SKY_SDK_DIR, 'lib', '_sdkext')
 SDK_EXT_TEMPLATE = '''{
   "dart:sky": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/dart_sky.dart",
   "dart:sky.internals": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/sky_internals.dart",
-  "dart:sky_builtin_natvies": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/builtin_natives.dart"
+  "dart:sky_builtin_natives": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/builtin_natives.dart"
 }'''
 
 def version_for_pubspec(pubspec_path):
