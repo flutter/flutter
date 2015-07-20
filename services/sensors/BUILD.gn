@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 if (is_android) {
-  import("//services/android/rules.gni")
   import("//build/config/android/config.gni")
+  import("//mojo/android/rules.gni")
 
   mojo_android_java_application("sensors") {
     sources = [

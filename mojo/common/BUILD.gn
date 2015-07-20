@@ -19,6 +19,7 @@ component("common") {
     "data_pipe_utils_internal.h",
     "handle_watcher.cc",
     "handle_watcher.h",
+    "interface_ptr_set.h",
     "message_pump_mojo.cc",
     "message_pump_mojo.h",
     "message_pump_mojo_handler.h",
@@ -48,9 +49,10 @@ test("mojo_common_unittests") {
     "common_type_converters_unittest.cc",
     "data_pipe_utils_unittest.cc",
     "handle_watcher_unittest.cc",
+    "interface_ptr_set_unittest.cc",
     "message_pump_mojo_unittest.cc",
     "task_tracker_unittest.cc",
-    "weak_interface_ptr_set_unittest.cc",
+    "weak_binding_set_unittest.cc",
   ]
 
   deps = [

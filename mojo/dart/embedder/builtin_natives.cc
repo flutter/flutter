@@ -12,7 +12,7 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
-#include "crypto/random.h"
+#include "base/rand_util.h"
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/dart/embedder/builtin.h"
 #include "mojo/dart/embedder/mojo_natives.h"
@@ -324,7 +324,7 @@ void Crypto_GetRandomBytes(Dart_NativeArguments args) {
   intptr_t count = static_cast<intptr_t>(count64);
   scoped_ptr<uint8_t[]> buffer(new uint8_t[count]);
 
-  crypto::RandBytes(reinterpret_cast<void*>(buffer.get()), count);
+  base::RandBytes(reinterpret_cast<void*>(buffer.get()), count);
 
   Dart_Handle result = Dart_NewTypedData(Dart_TypedData_kUint8, count);
   if (Dart_IsError(result)) {

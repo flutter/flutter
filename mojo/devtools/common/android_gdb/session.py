@@ -25,6 +25,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
+import urllib2
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import android_gdb.config as config
@@ -128,22 +129,35 @@ class DebugSession(object):
       text_address = mapping[0].start + s['sh_offset']
       _gdb_execute("add-symbol-file %s 0x%x" % (local_file, text_address))
 
-  def _download_file(self, remote):
-    """Downloads a remote file through GDB connection.
+  def _download_file(self, signature, remote):
+    """Downloads a remote file either from the cloud or through GDB connection.
 
     Returns:
       The filename of the downloaded file
     """
     temp_file = tempfile.NamedTemporaryFile()
+    logging.info("Trying to download symbols from the cloud.")
+    symbols_url = "http://storage.googleapis.com/mojo/symbols/%s" % signature
+    try:
+      symbol_file = urllib2.urlopen(symbols_url)
+      try:
+        with open(temp_file.name, "w") as dst:
+          shutil.copyfileobj(symbol_file, dst)
+          logging.info("Getting symbols for %s at %s." % (remote, symbols_url))
+          # This allows the deletion of temporary files on disk when the
+          # debugging session terminates.
+          self._downloaded_files.append(temp_file)
+          return temp_file.name
+      finally:
+        symbol_file.close()
+    except urllib2.HTTPError:
+      pass
     logging.info("Downloading file %s" % remote)
     _gdb_execute("remote get %s %s" % (remote, temp_file.name))
     # This allows the deletion of temporary files on disk when the debugging
     # session terminates.
     self._downloaded_files.append(temp_file)
     return temp_file.name
-
-  def _download_and_associate_symbol(self, mapping):
-    self._associate_symbols(mapping, self._download_file(mapping[0].filename))
 
   def _find_mapping_for_address(self, mappings, address):
     """Returns the list of all mappings of the file occupying the |address|
@@ -166,11 +180,11 @@ class DebugSession(object):
       if signature in self._libraries:
         self._associate_symbols(mapping, self._libraries[signature])
       else:
-        # This library file is not known locally. Download it from the device
-        # and put it in cache so, if it got symbols, we can see them.
+        # This library file is not known locally. Download it from the device or
+        # the cloud and put it in cache so, if it got symbols, we can see them.
         local_file = os.path.join(self._remote_file_cache, signature)
         if not os.path.exists(local_file):
-          tmp_output = self._download_file(remote_file)
+          tmp_output = self._download_file(signature, remote_file)
           shutil.move(tmp_output, local_file)
         self._associate_symbols(mapping, local_file)
       return True

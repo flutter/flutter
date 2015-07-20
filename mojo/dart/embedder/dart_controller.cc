@@ -6,8 +6,8 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/path_service.h"
+#include "base/rand_util.h"
 #include "base/sys_info.h"
-#include "crypto/random.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
 #include "mojo/dart/embedder/builtin.h"
@@ -658,7 +658,7 @@ bool DartController::RunSingleDartScript(const DartControllerConfig& config) {
 }
 
 static bool generateEntropy(uint8_t* buffer, intptr_t length) {
-  crypto::RandBytes(reinterpret_cast<void*>(buffer), length);
+  base::RandBytes(reinterpret_cast<void*>(buffer), length);
   return true;
 }
 

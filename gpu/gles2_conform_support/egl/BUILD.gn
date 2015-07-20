@@ -1,0 +1,35 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# GYP version: gpu/gles2_conform_support/gles_conform_support.gyp:egl_native
+source_set("egl") {
+  output_name = "egl_native"
+  sources = [
+    "config.cc",
+    "config.h",
+    "display.cc",
+    "display.h",
+    "egl.cc",
+    "surface.cc",
+    "surface.h",
+  ]
+
+  configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
+
+  defines = [
+    "EGLAPI=",
+    "EGLAPIENTRY=",
+  ]
+
+  deps = [
+    "//base",
+    "//gpu/command_buffer/client:gles2_implementation_no_check",
+    "//gpu/command_buffer/service",
+    "//gpu",
+    "//ui/base",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+    "//ui/gl",
+  ]
+}

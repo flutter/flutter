@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/common/weak_interface_ptr_set.h"
+#include "mojo/common/interface_ptr_set.h"
 
 #include "base/message_loop/message_loop.h"
 #include "mojo/common/message_pump_mojo.h"
@@ -32,8 +32,8 @@ class DummyImpl : public tests::Dummy {
   DISALLOW_COPY_AND_ASSIGN(DummyImpl);
 };
 
-// Tests all of the functionality of WeakInterfacePtrSet.
-TEST(WeakInterfacePtr, FullLifeCycleTest) {
+// Tests all of the functionality of InterfacePtrSet.
+TEST(InterfacePtrSetTest, FullLifeCycle) {
   base::MessageLoop loop(MessagePumpMojo::Create());
 
   // Create 10 InterfacePtrs.
@@ -47,7 +47,7 @@ TEST(WeakInterfacePtr, FullLifeCycleTest) {
   }
 
   // Move all 10 InterfacePtrs into the set.
-  WeakInterfacePtrSet<tests::Dummy> intrfc_ptr_set;
+  InterfacePtrSet<tests::Dummy> intrfc_ptr_set;
   EXPECT_EQ(0u, intrfc_ptr_set.size());
   for (InterfacePtr<tests::Dummy>& ptr : intrfc_ptrs) {
     intrfc_ptr_set.AddInterfacePtr(ptr.Pass());
@@ -73,21 +73,19 @@ TEST(WeakInterfacePtr, FullLifeCycleTest) {
     EXPECT_EQ(1, impl->call_count());
   }
 
-  // Close the first 5 message pipes.
+  // Close the first 5 message pipes. This will (after RunUntilIdle) cause
+  // connection errors on the closed pipes which will cause the first five
+  // objects to be removed.
   for (size_t i = 0; i < kNumObjects / 2; i++) {
     impls[i]->CloseMessagePipe();
   }
-
-  // Invoke ForAllPtrs() again. This will cause connection errors on the
-  // closed pipes which will cause the first five objects to be removed.
   EXPECT_EQ(kNumObjects, intrfc_ptr_set.size());
-  // TODO(rudominer) It should not be necessary to invoke ForAllPtrs in order
-  // to see the effect of the error handlers. The error handlers are invoked
-  // just after PumpMessages() is invoked. Fix this test after we fix the
-  // implementation of WeakInterfacePtrSet.
-  intrfc_ptr_set.ForAllPtrs([](tests::Dummy* dummy) { dummy->Foo(); });
   loop.RunUntilIdle();
   EXPECT_EQ(kNumObjects / 2, intrfc_ptr_set.size());
+
+  // Invoke ForAllPtrs again on the remaining five pointers
+  intrfc_ptr_set.ForAllPtrs([](tests::Dummy* dummy) { dummy->Foo(); });
+  loop.RunUntilIdle();
 
   // Check that now the first five counts are still 1 but the second five
   // counts are two.
