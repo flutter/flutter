@@ -20,7 +20,7 @@ void main() {
     TextStyle style = const TextStyle(color: const Color(0xFF000000));
     RenderParagraph paragraph = new RenderParagraph(new InlineStyle(style, [new InlineText("${alignItems}")]));
     table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
-    var row = new RenderFlex(alignItems: alignItems);
+    var row = new RenderFlex(alignItems: alignItems, baseline: TextBaseline.alphabetic);
 
     style = new TextStyle(fontSize: 15.0, color: const Color(0xFF000000));
     row.add(new RenderDecoratedBox(
@@ -32,7 +32,7 @@ void main() {
       decoration: new BoxDecoration(backgroundColor: const Color(0x7FCCFFCC)),
       child: new RenderParagraph(new InlineStyle(style, [new InlineText('foo foo foo')]))
     ));
-    var subrow = new RenderFlex(alignItems: alignItems);
+    var subrow = new RenderFlex(alignItems: alignItems, baseline: TextBaseline.alphabetic);
     style = new TextStyle(fontSize: 25.0, color: const Color(0xFF000000));
     subrow.add(new RenderDecoratedBox(
       decoration: new BoxDecoration(backgroundColor: const Color(0x7FCCCCFF)),
