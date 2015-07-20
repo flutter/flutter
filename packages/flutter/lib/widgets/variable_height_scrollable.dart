@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
@@ -14,18 +12,39 @@ class VariableHeightScrollable extends Scrollable {
   VariableHeightScrollable({
     String key,
     this.builder,
-    this.token
+    this.token,
+    this.layoutState
   }) : super(key: key);
 
   IndexedBuilder builder;
   Object token;
+  BlockViewportLayoutState layoutState;
+
+  // When the token changes the scrollable's contents may have
+  // changed. Remember as much so that after the new contents
+  // have been laid out we can adjust the scrollOffset so that
+  // the last page of content is still visible.
   bool _contentsChanged = true;
+
+  void initState() {
+    assert(layoutState != null);
+    layoutState.removeListener(_handleLayoutChanged);
+    layoutState.addListener(_handleLayoutChanged);
+    super.initState();
+  }
 
   void syncFields(VariableHeightScrollable source) {
     builder = source.builder;
     if (token != source.token)
       _contentsChanged = true;
     token = source.token;
+    if (layoutState != source.layoutState) {
+      // Warning: this is unlikely to be what you intended.
+      assert(source.layoutState != null);
+      layoutState == source.layoutState;
+      layoutState.removeListener(_handleLayoutChanged);
+      layoutState.addListener(_handleLayoutChanged);
+    }
     super.syncFields(source);
   }
 
@@ -36,15 +55,9 @@ class VariableHeightScrollable extends Scrollable {
     scrollBehavior.containerSize = newSize.height;
   }
 
-  void _handleLayoutChanged(
-    int firstVisibleChildIndex,
-    int visibleChildCount,
-    UnmodifiableListView<double> childOffsets,
-    bool didReachLastChild
-  ) {
-    assert(childOffsets.length > 0);
-    if (didReachLastChild) {
-      scrollBehavior.contentsSize = childOffsets.last;
+  void _handleLayoutChanged() {
+    if (layoutState.didReachLastChild) {
+      scrollBehavior.contentsSize = layoutState.contentsSize;
       if (_contentsChanged && scrollOffset > scrollBehavior.maxScrollOffset) {
         _contentsChanged = false;
         settleScrollOffset();
@@ -59,7 +72,7 @@ class VariableHeightScrollable extends Scrollable {
       callback: _handleSizeChanged,
       child: new BlockViewport(
         builder: builder,
-        onLayoutChanged: _handleLayoutChanged,
+        layoutState: layoutState,
         startOffset: scrollOffset,
         token: token
       )

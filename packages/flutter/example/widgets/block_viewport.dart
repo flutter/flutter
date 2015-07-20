@@ -15,6 +15,7 @@ import 'package:sky/widgets/widget.dart';
 
 class BlockViewportApp extends App {
 
+  BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
   List<double> lengths = <double>[];
   double offset = 0.0;
 
@@ -96,7 +97,8 @@ class BlockViewportApp extends App {
                   child: new BlockViewport(
                     builder: builder,
                     startOffset: offset,
-                    token: lengths.length
+                    token: lengths.length,
+                    layoutState: layoutState
                   )
                 )
               ),

@@ -2,62 +2,145 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/curves.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart';
+import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/card.dart';
 import 'package:sky/widgets/dismissable.dart';
-import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/variable_height_scrollable.dart';
+import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/widget.dart';
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/task_description.dart';
 
+class CardModel {
+  CardModel(this.value, this.height, this.color);
+  int value;
+  double height;
+  Color color;
+  AnimationPerformance performance;
+  String get label => "Item $value";
+  String get key => value.toString();
+  bool operator ==(other) => other is CardModel && other.value == value;
+  int get hashCode => 373 * 37 * value.hashCode;
+}
+
+class ShrinkingCard extends AnimatedComponent {
+
+  ShrinkingCard({
+    String key,
+    CardModel this.card,
+    Function this.onUpdated,
+    Function this.onCompleted
+  }) : super(key: key);
+
+  CardModel card;
+  Function onUpdated;
+  Function onCompleted;
+
+  double get currentHeight => card.performance.variable.value;
+
+  void initState() {
+    assert(card.performance != null);
+    card.performance.addListener(handleAnimationProgress);
+    watch(card.performance);
+  }
+
+  void handleAnimationProgress() {
+    if (card.performance.isCompleted) {
+      if (onCompleted != null)
+        onCompleted();
+    } else if (onUpdated != null) {
+      onUpdated();
+    }
+  }
+
+  void syncFields(ShrinkingCard source) {
+    card = source.card;
+    onCompleted = source.onCompleted;
+    onUpdated = source.onUpdated;
+    super.syncFields(source);
+  }
+
+  Widget build() => new Container(height: currentHeight);
+}
 
 class CardCollectionApp extends App {
 
   final TextStyle cardLabelStyle =
     new TextStyle(color: white, fontSize: 18.0, fontWeight: bold);
 
-  final List<double> cardHeights = [
-    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0
-  ];
-
-  List<int> visibleCardIndices;
+  BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
+  List<CardModel> cardModels;
 
   void initState() {
-    visibleCardIndices = new List.generate(cardHeights.length, (i) => i);
+    List<double> cardHeights = <double>[
+      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
+    ];
+    cardModels = new List.generate(cardHeights.length, (i) {
+      Color color = lerpColor(Red[300], Blue[900], i / cardHeights.length);
+      return new CardModel(i, cardHeights[i], color);
+    });
     super.initState();
   }
 
-  void dismissCard(int cardIndex) {
+  void shrinkCard(CardModel card, int index) {
+    if (card.performance != null)
+      return;
+    layoutState.invalidate([index]);
     setState(() {
-      visibleCardIndices.remove(cardIndex);
+      assert(card.performance == null);
+      card.performance = new AnimationPerformance()
+        ..duration = const Duration(milliseconds: 300)
+        ..variable = new AnimatedType<double>(
+          card.height + kCardMargins.top + kCardMargins.bottom,
+          end: 0.0,
+          curve: ease,
+          interval: new Interval(0.5, 1.0)
+        )
+        ..play();
     });
   }
 
-  Widget _builder(int index) {
-    if (index >= visibleCardIndices.length)
-      return null;
+  void dismissCard(CardModel card) {
+    if (cardModels.contains(card)) {
+      setState(() {
+        cardModels.remove(card);
+      });
+    }
+  }
 
-    int cardIndex = visibleCardIndices[index];
-    Color color = lerpColor(Red[500], Blue[500], cardIndex / cardHeights.length);
-    Widget label = new Text("Item ${cardIndex}", style: cardLabelStyle);
+  Widget builder(int index) {
+    if (index >= cardModels.length)
+      return null;
+    CardModel card = cardModels[index];
+
+    if (card.performance != null) {
+      return new ShrinkingCard(
+          key: card.key,
+          card: card,
+          onUpdated: () { layoutState.invalidate([index]); },
+          onCompleted: () { dismissCard(card); }
+      );
+    }
+
     return new Dismissable(
-      key: cardIndex.toString(),
-      onDismissed: () { dismissCard(cardIndex); },
+      key: card.key,
+      onDismissed: () { shrinkCard(card, index); },
       child: new Card(
-        color: color,
+        color: card.color,
         child: new Container(
-          height: cardHeights[cardIndex],
+          height: card.height,
           padding: const EdgeDims.all(8.0),
-          child: new Center(child: label)
+          child: new Center(child: new Text(card.label, style: cardLabelStyle))
         )
       )
     );
@@ -68,16 +151,17 @@ class CardCollectionApp extends App {
       padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
       decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50]),
       child: new VariableHeightScrollable(
-        builder: _builder,
-        token: visibleCardIndices.length
+        builder: builder,
+        token: cardModels.length,
+        layoutState: layoutState
       )
     );
 
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,
-        primarySwatch: colors.Blue,
-        accentColor: colors.RedAccent[200]
+        primarySwatch: Blue,
+        accentColor: RedAccent[200]
       ),
       child: new TaskDescription(
         label: 'Cards',
