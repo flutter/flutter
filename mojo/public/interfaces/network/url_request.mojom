@@ -7,6 +7,22 @@ module mojo;
 import "mojo/public/interfaces/network/http_header.mojom";
 
 struct URLRequest {
+  // Specify the cache behavior of the request.
+  enum CacheMode {
+    // Default behavior.
+    DEFAULT,
+
+    // The HTTP request will bypass the local cache and will have a
+    // 'Cache-Control: nocache' header added in that causes any proxy servers
+    // to also not satisfy the request from their cache.  This has the effect
+    // of forcing a full end-to-end fetch.
+    BYPASS_CACHE,
+
+    // The HTTP request will fail if it cannot serve the requested resource
+    // from the cache (or some equivalent local store).
+    ONLY_FROM_CACHE,
+  };
+
   // The URL to load.
   string url;
 
@@ -29,13 +45,6 @@ struct URLRequest {
   // when a redirect is encounterd, FollowRedirect must be called to proceed.
   bool auto_follow_redirects = false;
 
-  // If set to true, then the HTTP request will bypass the local cache and will
-  // have a 'Cache-Control: nocache' header added in that causes any proxy
-  // servers to also not satisfy the request from their cache.  This has the
-  // effect of forcing a full end-to-end fetch.
-  bool bypass_cache = false;
-
-  // If set to true, then the HTTP request will fail if it cannot serve the
-  // requested resource from the cache (or some equivalent local store).
-  bool only_from_cache = false;
+  // The cache behavior for the request.
+  CacheMode cache_mode = DEFAULT;
 };
