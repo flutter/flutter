@@ -63,7 +63,6 @@ _third_party_deps = [
     'third_party/mockito',
     'third_party/ots',
     'third_party/ply',
-    'third_party/protobuf',
     'third_party/qcms',
     'third_party/re2',
     'third_party/robolectric',
