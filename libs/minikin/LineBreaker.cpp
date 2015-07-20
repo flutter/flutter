@@ -214,8 +214,8 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
                 // Skip hyphenating the next word if and only if the present word ends in a hyphen
                 temporarilySkipHyphenation = wordEndsInHyphen;
 
-                // Skip break for zero-width characters.
-                if (current == mTextBuf.size() || mCharWidths[current] > 0) {
+                // Skip break for zero-width characters inside replacement span
+                if (paint != nullptr || current == end || mCharWidths[current] > 0) {
                     addWordBreak(current, mWidth, postBreak, 0.0, 0);
                 }
                 lastBreak = current;
