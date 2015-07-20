@@ -53,7 +53,9 @@ class SnackBar extends Component {
           )
         )
       )
-    ]..addAll(actions);
+    ];
+    if (actions != null)
+      children.addAll(actions);
     return new Material(
       level: 2,
       color: const Color(0xFF323232),
