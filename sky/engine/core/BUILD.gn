@@ -23,7 +23,6 @@ source_set("libraries") {
     "//skia",
     "//sky/engine/tonic:tonic",
     "//sky/engine/wtf",
-    "//third_party/angle:translator",
     "//third_party/iccjpeg",
     "//third_party/libpng",
     "//third_party/ots",

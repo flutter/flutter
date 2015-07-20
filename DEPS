@@ -20,10 +20,8 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'skia_revision': '2ced78866fcadd98895777c8dffe92e229775181',
-  'angle_revision': '02df796f466cee47f42130bd8c7dbad6c72a1662',
   'dart_revision': 'e5e3d161e70d862608e6597facdf5ac8ae9ab2c3',
   'dart_observatory_packages_revision': 'cdc4b3d4c15b9c0c8e7702dff127b440afbb7485',
-  'boringssl_revision': '7f15ff53d82a1991d6732d2303eb652b1cf7e023',
 
   'buildtools_revision': '5215ee866bc3e8eb4a7f124212845abf4029e60b',
 
@@ -58,9 +56,6 @@ deps = {
   'src/testing/gmock':
    Var('chromium_git') + '/external/googlemock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271',
 
-  'src/third_party/angle':
-   Var('chromium_git') + '/angle/angle.git' + '@' +  Var('angle_revision'),
-
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'c3f79166089e5360c09e3053fce50e6e296c3204',
 
@@ -81,17 +76,8 @@ deps = {
   'src/third_party/libjpeg_turbo':
    Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + 'f4631b6ee8b1dbb05e51ae335a7886f9ac598ab6',
 
-  'src/third_party/smhasher/src':
-    Var('chromium_git') + '/external/smhasher.git' + '@' + 'e87738e57558e0ec472b2fc3a643b838e5b6e88f',
-
   'src/third_party/mesa/src':
    Var('chromium_git') + '/chromium/deps/mesa.git' + '@' + '071d25db04c23821a12a8b260ab9d96a097402f0',
-
-  'src/third_party/boringssl/src':
-   'https://boringssl.googlesource.com/boringssl.git' + '@' +  Var('boringssl_revision'),
-
-  'src/third_party/requests/src':
-    Var('chromium_git') + '/external/github.com/kennethreitz/requests.git' + '@' + 'f172b30356d821d180fa4ecfa3e71c7274a32de4',
 
   'src/third_party/dart-pkg/archive':
     Var('chromium_git') + '/external/github.com/brendan-duncan/archive.git' + '@' + Var('archive_dart_revision'),
@@ -149,9 +135,6 @@ deps_os = {
 
     'src/third_party/robolectric/lib':
       Var('chromium_git') + '/chromium/third_party/robolectric.git' + '@' + '6b63c99a8b6967acdb42cbed0adb067c80efc810',
-
-    'src/third_party/appurify-python/src':
-     Var('chromium_git') + '/external/github.com/appurify/appurify-python.git' + '@' + 'ee7abd5c5ae3106f72b2a0b9d2cb55094688e867',
 
     'src/third_party/freetype-android/src':
        Var('chromium_git') + '/chromium/src/third_party/freetype2.git' + '@' + 'e186230678ee8e4ea4ac4797ece8125761e3225a',
