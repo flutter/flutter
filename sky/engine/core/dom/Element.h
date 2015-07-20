@@ -32,7 +32,6 @@
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/ElementData.h"
 #include "sky/engine/core/dom/SpaceSplitString.h"
-#include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
@@ -170,8 +169,6 @@ public:
         ModifiedByCloning
     };
 
-    virtual void parseAttribute(const QualifiedName&, const AtomicString&);
-
     // Only called by the parser immediately after element construction.
     void parserSetAttributes(const Vector<Attribute>&);
 
@@ -236,22 +233,6 @@ public:
 
     virtual const AtomicString imageSourceURL() const;
 
-    void focus(bool restorePreviousSelection = true, FocusType = FocusTypeNone);
-    void updateFocusAppearance(bool restorePreviousSelection);
-    void blur();
-    // Whether this element can receive focus at all. Most elements are not
-    // focusable but some elements, such as form controls and links, are. Unlike
-    // rendererIsFocusable(), this method may be called when layout is not up to
-    // date, so it must not use the renderer to determine focusability.
-    virtual bool supportsFocus() const;
-    // Whether the node can actually be focused.
-    bool isFocusable() const;
-    bool isKeyboardFocusable() const;
-    void dispatchFocusEvent(Element* oldFocusedElement, FocusType);
-    void dispatchBlurEvent(Element* newFocusedElement);
-    void dispatchFocusInEvent(const AtomicString& eventType, Element* oldFocusedElement);
-    void dispatchFocusOutEvent(const AtomicString& eventType, Element* newFocusedElement);
-
     bool matches(const String& selectors, ExceptionState&);
 
     DOMTokenList& classList();
@@ -271,9 +252,6 @@ public:
 
     MutableStylePropertySet& ensureMutableInlineStyle();
     void clearMutableInlineStyleIfEmpty();
-
-    void setTabIndex(int);
-    virtual short tabIndex() const override;
 
     String contentEditable() const;
     void setContentEditable(const String&, ExceptionState&);
@@ -296,13 +274,6 @@ protected:
     virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
     virtual void childrenChanged(const ChildrenChange&) override;
-
-    // Subclasses may override this method to affect focusability. Unlike
-    // supportsFocus, this method must be called on an up-to-date layout, so it
-    // may use the renderer to reason about focusability. This method cannot be
-    // moved to RenderObject because some focusable nodes don't have renderers,
-    // e.g., HTMLOptionElement.
-    virtual bool rendererIsFocusable() const;
 
     // classAttributeChanged() exists to share code between
     // parseAttribute (called via setAttribute()) and

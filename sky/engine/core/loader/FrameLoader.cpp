@@ -90,7 +90,6 @@ void FrameLoader::clear()
 {
     m_frame->document()->cancelParsing();
     m_frame->document()->prepareForDestruction();
-    m_frame->document()->removeFocusedElementOfSubtree(m_frame->document());
 
     if (m_frame->view())
         m_frame->view()->clear();

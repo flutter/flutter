@@ -38,7 +38,6 @@
 #include "sky/engine/core/dom/UserActionElementSet.h"
 #include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/core/loader/DocumentLoadTiming.h"
-#include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -125,10 +124,6 @@ public:
     virtual bool canContainRangeEndPoint() const override { return true; }
 
     SelectorQueryCache& selectorQueryCache();
-
-    // Focus Management.
-    Element* activeElement() const;
-    bool hasFocus() const;
 
     AbstractModule* module() const { return m_module; }
     void setModule(AbstractModule* module) { m_module = module; }
@@ -263,16 +258,12 @@ public:
 
     TextLinkColors& textLinkColors() { return m_textLinkColors; }
 
-    bool setFocusedElement(PassRefPtr<Element>, FocusType = FocusTypeNone);
-    Element* focusedElement() const { return m_focusedElement.get(); }
     UserActionElementSet& userActionElements()  { return m_userActionElements; }
     const UserActionElementSet& userActionElements() const { return m_userActionElements; }
-    void setNeedsFocusedElementCheck();
 
     void setActiveHoverElement(PassRefPtr<Element>);
     Element* activeHoverElement() const { return m_activeHoverElement.get(); }
 
-    void removeFocusedElementOfSubtree(Node*, bool amongChildrenOnly = false);
     void hoveredNodeDetached(Node*);
     void activeChainNodeDetached(Node*);
 
@@ -493,7 +484,6 @@ private:
 
     RefPtr<CSSStyleSheet> m_elemSheet;
 
-    RefPtr<Element> m_focusedElement;
     RefPtr<Node> m_hoverNode;
     RefPtr<Element> m_activeHoverElement;
     UserActionElementSet m_userActionElements;

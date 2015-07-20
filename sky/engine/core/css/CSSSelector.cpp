@@ -69,7 +69,6 @@ struct NameToPseudoStruct {
 // This table should be kept sorted.
 const static NameToPseudoStruct pseudoTypeMap[] = {
 {"active",                        CSSSelector::PseudoActive},
-{"focus",                         CSSSelector::PseudoFocus},
 {"host",                          CSSSelector::PseudoHost},
 {"host(",                         CSSSelector::PseudoHost},
 {"hover",                         CSSSelector::PseudoHover},

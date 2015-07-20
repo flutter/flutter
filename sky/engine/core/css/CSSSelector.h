@@ -101,7 +101,7 @@ namespace blink {
             Tag, // Example: div
             Id, // Example: #id
             Class, // example: .class
-            PseudoClass, // Example:  :focus
+            PseudoClass, // Example:  :hover
             PseudoElement, // Example: ::first-line
             Exact, // Example: E[foo="bar"]
             Set, // Example: E[foo]
@@ -112,7 +112,6 @@ namespace blink {
             PseudoNotParsed = 0,
             PseudoUnknown,
             PseudoHover,
-            PseudoFocus,
             PseudoActive,
             PseudoLang,
             PseudoHost,

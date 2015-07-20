@@ -44,7 +44,6 @@ public:
     bool match(const CSSSelector&);
 
     bool matchedAttributeSelector() const { return m_matchedAttributeSelector; }
-    bool matchedFocusSelector() const { return m_matchedFocusSelector; }
     bool matchedHoverSelector() const { return m_matchedHoverSelector; }
     bool matchedActiveSelector() const { return m_matchedActiveSelector; }
 
@@ -54,7 +53,6 @@ private:
 
     const Element& m_element;
     bool m_matchedAttributeSelector;
-    bool m_matchedFocusSelector;
     bool m_matchedHoverSelector;
     bool m_matchedActiveSelector;
 };

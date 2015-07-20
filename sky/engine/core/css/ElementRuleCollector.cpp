@@ -124,9 +124,6 @@ inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData)
     if (checker.matchedAttributeSelector())
         m_style->setUnique();
 
-    if (checker.matchedFocusSelector())
-        m_style->setAffectedByFocus();
-
     if (checker.matchedHoverSelector())
         m_style->setAffectedByHover();
 

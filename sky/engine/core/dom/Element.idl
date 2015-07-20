@@ -21,9 +21,6 @@ interface Element : ParentNode {
 
   // TODO(abarth): Remove these when we implement more of the system.
   [RaisesException] boolean matches(DOMString selectors);
-  void focus();
-  void blur();
-  attribute long tabIndex;
   readonly attribute DOMTokenList classList;
 
   ClientRect getBoundingClientRect();

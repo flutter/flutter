@@ -34,7 +34,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -551,8 +550,7 @@ IntRect FrameView::windowClipRect() const
 
 bool FrameView::isActive() const
 {
-    Page* page = frame().page();
-    return page && page->focusController().isActive();
+    return false;
 }
 
 void FrameView::setVisibleContentScaleFactor(float visibleContentScaleFactor)
