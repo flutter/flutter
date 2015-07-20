@@ -7,7 +7,7 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/path_service.h"
-#include "crypto/random.h"
+#include "base/rand_util.h"
 #include "mojo/dart/embedder/dart_controller.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/environment/environment.h"
@@ -20,7 +20,7 @@ namespace dart {
 namespace {
 
 static bool generateEntropy(uint8_t* buffer, intptr_t length) {
-  crypto::RandBytes(reinterpret_cast<void*>(buffer), length);
+  base::RandBytes(reinterpret_cast<void*>(buffer), length);
   return true;
 }
 

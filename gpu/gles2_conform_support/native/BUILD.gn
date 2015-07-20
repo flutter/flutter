@@ -1,0 +1,58 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# GYP version: gpu/gles2_conform_support/gles2_conform_support.gyp:egl_main_native
+source_set("native") {
+  output_name = "egl_main_native"
+  sources = [
+    "egl_native.cc",
+    "egl_native_win.cc",
+    "main.cc",
+  ]
+  defines = [
+    "GLES2_CONFORM_SUPPORT_ONLY",
+    "GTF_GLES20",
+    "EGLAPI=",
+    "EGLAPIENTRY=",
+  ]
+  deps = [
+    "//base",
+    "//gpu/gles2_conform_support/egl",
+    "//ui/gl",
+  ]
+  if (is_linux) {
+    sources += [
+      "egl_native_aura.cc",
+      "egl_native_x11.cc",
+    ]
+  }
+}
+
+# GYP version: gpu/gles2_conform_support/gles2_conform_support.gyp:egl_main_windowless
+source_set("windowless") {
+  output_name = "egl_main_windowless"
+  sources = [
+    "egl_native.cc",
+    "egl_native_win.cc",
+    "egl_native_windowless.cc",
+    "main.cc",
+  ]
+  defines = [
+    "GLES2_CONFORM_SUPPORT_ONLY",
+    "GTF_GLES20",
+    "EGLAPI=",
+    "EGLAPIENTRY=",
+  ]
+  deps = [
+    "//base",
+    "//gpu/gles2_conform_support/egl",
+    "//ui/gl",
+  ]
+  if (is_linux) {
+    sources += [
+      "egl_native_aura.cc",
+      "egl_native_x11.cc",
+    ]
+  }
+}

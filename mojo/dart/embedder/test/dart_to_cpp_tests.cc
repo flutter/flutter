@@ -9,10 +9,10 @@
 #include "base/macros.h"
 #include "base/message_loop/message_loop.h"
 #include "base/path_service.h"
+#include "base/rand_util.h"
 #include "base/run_loop.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread.h"
-#include "crypto/random.h"
 #include "mojo/dart/embedder/dart_controller.h"
 #include "mojo/dart/embedder/test/dart_to_cpp.mojom.h"
 #include "mojo/edk/test/test_utils.h"
@@ -277,7 +277,7 @@ class DartToCppTest : public testing::Test {
   }
 
   static bool GenerateEntropy(uint8_t* buffer, intptr_t length) {
-    crypto::RandBytes(reinterpret_cast<void*>(buffer), length);
+    base::RandBytes(reinterpret_cast<void*>(buffer), length);
     return true;
   }
 

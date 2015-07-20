@@ -87,7 +87,6 @@ mojo_edk_source_set("platform") {
 
   deps = [
     "//base",
-    "//crypto",
   ]
 
   if (is_android) {

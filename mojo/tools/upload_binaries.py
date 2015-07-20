@@ -133,50 +133,6 @@ def upload_shell(config, dry_run, verbose):
   write_file_to_gs(version, latest_file, config, dry_run)
 
 
-def upload_sky_shell_linux(config, dry_run, verbose, dest_prefix):
-  paths = Paths(config)
-  dest = '%(prefix)s/sky_shell.zip' % { 'prefix': dest_prefix }
-  with tempfile.NamedTemporaryFile() as zip_file:
-    with zipfile.ZipFile(zip_file, 'w') as z:
-      shell_path = paths.target_sky_shell_path
-      shell_filename = os.path.basename(shell_path)
-      if verbose:
-        print 'zipping %s' % shell_path
-      z.write(shell_path, shell_filename, zipfile.ZIP_DEFLATED)
-      icu_filename = 'icudtl.dat'
-      icu_path = os.path.join(os.path.dirname(shell_path), icu_filename)
-      if verbose:
-        print 'zipping %s' % icu_path
-      z.write(icu_path, icu_filename, zipfile.ZIP_DEFLATED)
-    upload(config, zip_file.name, dest, dry_run)
-
-
-def upload_sky_shell_android(config, dry_run, _, dest_prefix):
-  paths = Paths(config)
-  shell_path = paths.target_sky_shell_path
-  shell_filename = os.path.basename(shell_path)
-  dest = '%(prefix)s/%(filename)s' % {
-    'prefix': dest_prefix,
-    'filename': shell_filename,
-  }
-  upload(config, shell_path, dest, dry_run)
-
-
-def upload_sky_shell(config, dry_run, verbose):
-  target_name = target(config)
-  version = Version().version
-  template_data = { 'target': target_name, 'version': version }
-  dest_prefix = 'gs://mojo/sky/shell/%(target)s/%(version)s' % template_data
-  latest_file = 'gs://mojo/sky/shell/%(target)s/LATEST' % template_data
-  if config.target_os == Config.OS_LINUX:
-    upload_sky_shell_linux(config, dry_run, verbose, dest_prefix)
-  elif config.target_os == Config.OS_ANDROID:
-    upload_sky_shell_android(config, dry_run, verbose, dest_prefix)
-  else:
-    return
-  write_file_to_gs(version, latest_file, config, dry_run)
-
-
 def upload_app(app_binary_path, config, dry_run):
   app_binary_name = os.path.basename(app_binary_path)
   version = Version().version
@@ -231,7 +187,6 @@ def main():
                   is_official_build=is_official_build)
 
   upload_shell(config, args.dry_run, args.verbose)
-  upload_sky_shell(config, args.dry_run, args.verbose)
 
   if is_official_build:
     print "Skipping uploading apps (official apk build)."
