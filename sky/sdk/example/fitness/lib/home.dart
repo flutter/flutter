@@ -4,6 +4,9 @@
 
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/card.dart';
+import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/dismissable.dart';
 import 'package:sky/widgets/drawer.dart';
 import 'package:sky/widgets/drawer_divider.dart';
 import 'package:sky/widgets/drawer_header.dart';
@@ -11,9 +14,11 @@ import 'package:sky/widgets/drawer_item.dart';
 import 'package:sky/widgets/floating_action_button.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/icon.dart';
+import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/scrollable_list.dart';
 import 'package:sky/widgets/snack_bar.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
@@ -22,12 +27,79 @@ import 'package:sky/widgets/widget.dart';
 import 'fitness_types.dart';
 import 'measurement.dart';
 
+class MeasurementList extends Component {
+  MeasurementList({ String key, this.measurements, this.onDismissed }) : super(key: key);
+
+  final List<Measurement> measurements;
+  final MeasurementHandler onDismissed;
+
+  Widget build() {
+    return new Material(
+      type: MaterialType.canvas,
+      child: new ScrollableList<Measurement>(
+        items: measurements,
+        itemHeight: MeasurementRow.kHeight,
+        itemBuilder: (measurement) => new MeasurementRow(
+          measurement: measurement,
+          onDismissed: onDismissed
+        )
+      )
+    );
+  }
+}
+
+class MeasurementRow extends Component {
+
+  MeasurementRow({ Measurement measurement, this.onDismissed }) : this.measurement = measurement, super(key: measurement.when.toString());
+
+  final Measurement measurement;
+  final MeasurementHandler onDismissed;
+
+  static const double kHeight = 79.0;
+
+  Widget build() {
+
+    List<Widget> children = [
+      new Flexible(
+        child: new Text(
+          measurement.displayWeight,
+          style: const TextStyle(textAlign: TextAlign.right)
+        )
+      ),
+      new Flexible(
+        child: new Text(
+          measurement.displayDate,
+          style: Theme.of(this).text.caption.copyWith(textAlign: TextAlign.right)
+        )
+      )
+    ];
+
+    return new Dismissable(
+      key: measurement.when.toString(),
+      onDismissed: () => onDismissed(measurement),
+      child: new Card(
+        child: new Container(
+          height: kHeight,
+          padding: const EdgeDims.all(8.0),
+          child: new Flex(
+            children,
+            alignItems: FlexAlignItems.baseline,
+            textBaseline: DefaultTextStyle.of(this).textBaseline
+          )
+        )
+      )
+    );
+  }
+}
+
 class HomeFragment extends StatefulComponent {
 
-  HomeFragment(this.navigator, this.userData);
+  HomeFragment({ this.navigator, this.userData, this.onMeasurementCreated, this.onMeasurementDeleted });
 
   Navigator navigator;
   List<Measurement> userData;
+  MeasurementHandler onMeasurementCreated;
+  MeasurementHandler onMeasurementDeleted;
 
   FitnessMode _fitnessMode = FitnessMode.measure;
 
@@ -40,6 +112,8 @@ class HomeFragment extends StatefulComponent {
   void syncFields(HomeFragment source) {
     navigator = source.navigator;
     userData = source.userData;
+    onMeasurementCreated = source.onMeasurementCreated;
+    onMeasurementDeleted = source.onMeasurementDeleted;
   }
 
   bool _isShowingSnackBar = false;
@@ -121,10 +195,26 @@ class HomeFragment extends StatefulComponent {
     );
   }
 
+  // TODO(jackson): Pull from file
+  Measurement _undoMeasurement;
+
+  void _handleMeasurementDismissed(Measurement measurement) {
+    onMeasurementDeleted(measurement);
+    setState(() {
+      _undoMeasurement = measurement;
+      _isShowingSnackBar = true;
+    });
+  }
+
   Widget buildBody() {
     TextStyle style = Theme.of(this).text.title;
     switch (_fitnessMode) {
       case FitnessMode.measure:
+        if (userData.length > 0)
+          return new MeasurementList(
+            measurements: userData,
+            onDismissed: _handleMeasurementDismissed
+          );
         return new Material(
           type: MaterialType.canvas,
           child: new Flex(
@@ -143,7 +233,9 @@ class HomeFragment extends StatefulComponent {
   }
 
   void _handleUndo() {
+    onMeasurementCreated(_undoMeasurement);
     setState(() {
+      _undoMeasurement = null;
       _isShowingSnackBar = false;
     });
   }
@@ -152,15 +244,9 @@ class HomeFragment extends StatefulComponent {
     if (!_isShowingSnackBar)
       return null;
     return new SnackBar(
-      content: new Text("Measurement added!"),
+      content: new Text("Measurement deleted."),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)]
     );
-  }
-
-  void _handleMeasurementAdded() {
-    setState(() {
-      _isShowingSnackBar = true;
-    });
   }
 
   void _handleRunStarted() {
@@ -180,7 +266,7 @@ class HomeFragment extends StatefulComponent {
       case FitnessMode.measure:
         return new FloatingActionButton(
           child: new Icon(type: 'content/add', size: 24),
-          onPressed: _handleMeasurementAdded
+          onPressed: () => navigator.pushNamed("/measurements/new")
         );
       case FitnessMode.run:
         return new FloatingActionButton(
