@@ -29,7 +29,6 @@ solutions = [
 target_os = ["android"]
 ```
 
- * If you're on a Mac then: `svn ls https://dart.googlecode.com/` and accept the certificate permanently.
  * `gclient sync`
  * `cd src`
  * `git remote add upstream git@github.com:domokit/sky_engine.git`
@@ -53,6 +52,11 @@ target.
 * (Only the first time) `sudo ./build/install-build-deps.sh`
 * `./sky/tools/gn`
 * `ninja -C out/Debug`
+
+Running the code
+----------------
+
+* `./sky/tools/test_sky --debug` runs the tests on the host machine using `out/Debug`.
 * `./out/Debug/sky_shell --package-root=out/Debug/gen/dart-pkg/packages sky/sdk/example/hello_world/lib/main.dart`
   Note: Because Linux is headless, you won't see any UI. You can use `print` to generate console output or you can interact with the DartVM via observatory at [http://localhost:8181/](http://localhost:8181/).
 
