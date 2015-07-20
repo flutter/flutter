@@ -805,7 +805,7 @@ struct CurveAlongY {
  * was doing everything along the X axis; CurveAlongY just flips the
  * coordinates around.
  */
-template <class Curve> static void strokeWavyTextDecorationInternal(GraphicsContext* context, FloatPoint p1, FloatPoint p2, float strokeThickness) 
+template <class Curve> static void strokeWavyTextDecorationInternal(GraphicsContext* context, FloatPoint p1, FloatPoint p2, float strokeThickness)
 {
     ASSERT(Curve::y(p1) == Curve::y(p2)); // verify that this is indeed axis-aligned
 
@@ -1054,8 +1054,8 @@ void InlineTextBox::paintCompositionBackgrounds(GraphicsContext* pt, const Float
         }
 
     } else {
-        unsigned start; // TODO(ianh): if we expose this function, provide a way to let authors set this
-        unsigned end; // TODO(ianh): if we expose this function, provide a way to let authors set this
+        unsigned start = 0; // TODO(ianh): if we expose this function, provide a way to let authors set this
+        unsigned end = 0; // TODO(ianh): if we expose this function, provide a way to let authors set this
         paintSingleCompositionBackgroundRun(pt, boxOrigin, style, font, RenderTheme::theme().platformDefaultCompositionBackgroundColor(), start, end);
     }
 }
