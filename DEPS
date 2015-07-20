@@ -19,11 +19,10 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'dart_svn': 'https://dart.googlecode.com',
   'skia_revision': '2ced78866fcadd98895777c8dffe92e229775181',
   'angle_revision': '02df796f466cee47f42130bd8c7dbad6c72a1662',
   'dart_revision': 'e5e3d161e70d862608e6597facdf5ac8ae9ab2c3',
-  'dart_observatory_packages_revision': '45565',
+  'dart_observatory_packages_revision': 'cdc4b3d4c15b9c0c8e7702dff127b440afbb7485',
   'boringssl_revision': '7f15ff53d82a1991d6732d2303eb652b1cf7e023',
 
   'buildtools_revision': '5215ee866bc3e8eb4a7f124212845abf4029e60b',
@@ -47,7 +46,6 @@ vars = {
 # If you need to add a new host, contact chrome infrastructure team.
 allowed_hosts = [
   'chromium.googlesource.com',
-  'dart.googlecode.com',
 ]
 
 deps = {
@@ -70,8 +68,9 @@ deps = {
     Var('chromium_git') + '/external/github.com/dart-lang/sdk.git' + '@' + Var('dart_revision'),
 
   'src/dart/third_party/observatory_pub_packages':
-    Var('dart_svn') + '/svn/third_party/observatory_pub_packages' + '@' +
-    Var('dart_observatory_packages_revision'),
+   Var('chromium_git') +
+   '/external/github.com/dart-lang/observatory_pub_packages' + '@' +
+   Var('dart_observatory_packages_revision'),
 
   'src/third_party/skia':
    Var('chromium_git') + '/skia.git' + '@' +  Var('skia_revision'),
