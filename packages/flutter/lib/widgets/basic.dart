@@ -401,12 +401,14 @@ class Flex extends MultiChildRenderObjectWrapper {
     String key,
     this.direction: FlexDirection.horizontal,
     this.justifyContent: FlexJustifyContent.start,
-    this.alignItems: FlexAlignItems.center
+    this.alignItems: FlexAlignItems.center,
+    this.textBaseline
   }) : super(key: key, children: children);
 
   final FlexDirection direction;
   final FlexJustifyContent justifyContent;
   final FlexAlignItems alignItems;
+  final TextBaseline textBaseline;
 
   RenderFlex createNode() => new RenderFlex(direction: this.direction);
   RenderFlex get root => super.root;
@@ -416,6 +418,7 @@ class Flex extends MultiChildRenderObjectWrapper {
     root.direction = direction;
     root.justifyContent = justifyContent;
     root.alignItems = alignItems;
+    root.textBaseline = textBaseline;
   }
 
 }

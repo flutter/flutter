@@ -7,10 +7,12 @@ import 'dart:sky' as sky;
 
 import 'package:sky/base/debug.dart';
 import 'package:sky/painting/box_painter.dart';
+import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/painting/box_painter.dart';
+export 'package:sky/painting/text_style.dart' show TextBaseline;
 
 // GENERIC BOX RENDERING
 // Anything that has a concept of x, y, width, height is going to derive from this
@@ -252,8 +254,6 @@ class BoxParentData extends ParentData {
   }
   String toString() => 'position=$position';
 }
-
-enum TextBaseline { alphabetic, ideographic }
 
 abstract class RenderBox extends RenderObject {
 
