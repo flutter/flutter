@@ -6,6 +6,7 @@ import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/theme.dart';
 
 import 'stock_arrow.dart';
@@ -60,7 +61,11 @@ class StockRow extends Component {
             margin: const EdgeDims.only(right: 5.0)
           ),
           new Flexible(
-            child: new Flex(children, alignItems: FlexAlignItems.baseline)
+            child: new Flex(
+              children,
+              alignItems: FlexAlignItems.baseline,
+              textBaseline: DefaultTextStyle.of(this).textBaseline
+            )
           )
         ])
       )

@@ -12,14 +12,14 @@ in the underlying render tree to transition from one state to the next.
 Hello World
 -----------
 
-To build an application, create a subclass of App and instantiate it:
+To build an application, create a subclass of `App` and instantiate it:
 
 ```dart
 import 'package:sky/widgets/basic.dart';
 
 class HelloWorldApp extends App {
   Widget build() {
-    return new Text('Hello, world!');
+    return new Center(child: new Text('Hello, world!'));
   }
 }
 
@@ -403,7 +403,7 @@ an existing stateful component) you'll avoid unnecessary work. Also, some
 operations that involve interacting with the widget hierarchy cannot be
 done in a component's constructor.
 
-When overriding `initState`, a component should call its superclass's 
+When overriding `initState`, a component should call its superclass's
 `initState` function.
 
 Keys
