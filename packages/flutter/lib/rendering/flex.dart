@@ -439,24 +439,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   void paint(PaintingCanvas canvas, Offset offset) {
     if (_overflow > 0) {
-      assert(() {
-        // Draw a red rectangle over the overflow area in debug mode
-        // You should be using a Clip if you want to clip your children
-        Paint paint = new Paint()..color = const Color(0x7FFF0000);
-        Rect overflowRect;
-        switch(direction) {
-          case FlexDirection.horizontal:
-            overflowRect = offset + new Offset(size.width, 0.0) &
-                           new Size(_overflow, size.height);
-            break;
-          case FlexDirection.vertical:
-            overflowRect = offset + new Offset(0.0, size.height) &
-                           new Size(size.width, _overflow);
-            break;
-        }
-        canvas.drawRect(overflowRect, paint);
-        return true;
-      });
       canvas.save();
       canvas.clipRect(offset & size);
       defaultPaint(canvas, offset);
@@ -464,5 +446,27 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     } else {
       defaultPaint(canvas, offset);
     }
+  }
+
+  void debugPaintSize(PaintingCanvas canvas, Offset offset) {
+    super.debugPaintSize(canvas, offset);
+    if (_overflow <= 0)
+      return;
+
+    // Draw a red rectangle over the overflow area in debug mode
+    // You should be using a Clip if you want to clip your children
+    Paint paint = new Paint()..color = const Color(0x7FFF0000);
+    Rect overflowRect;
+    switch(direction) {
+      case FlexDirection.horizontal:
+        overflowRect = offset + new Offset(size.width, 0.0) &
+                       new Size(_overflow, size.height);
+        break;
+      case FlexDirection.vertical:
+        overflowRect = offset + new Offset(0.0, size.height) &
+                       new Size(size.width, _overflow);
+        break;
+    }
+    canvas.drawRect(overflowRect, paint);
   }
 }
