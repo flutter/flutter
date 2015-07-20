@@ -92,7 +92,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  bool _overflowOccurredDuringLayout = false;
+  // Set during layout if overflow occurred on the main axis
+  double _overflow;
 
   void setupParentData(RenderBox child) {
     if (child.parentData is! FlexBoxParentData)
@@ -325,6 +326,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
       child = child.parentData.nextSibling;
     }
+    _overflow = math.max(0.0, -freeSpace);
+    freeSpace = math.max(0.0, freeSpace);
 
     // Steps 4-5. Distribute remaining space to flexible children.
     double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
@@ -362,7 +365,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       child = child.parentData.nextSibling;
     }
 
-    // Section 8.2: Axis Alignment using the justify-content property
+    // Section 8.2: Main Axis Alignment using the justify-content property
     double remainingSpace = math.max(0.0, freeSpace - usedSpace);
     double leadingSpace;
     double betweenSpace;
@@ -389,20 +392,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         break;
     }
 
-    Size desiredSize;
     switch (_direction) {
       case FlexDirection.horizontal:
-        desiredSize = new Size(mainSize, crossSize);
-        size = constraints.constrain(desiredSize);
+        size = constraints.constrain(new Size(mainSize, crossSize));
         crossSize = size.height;
         break;
       case FlexDirection.vertical:
-        desiredSize = new Size(crossSize, mainSize);
         size = constraints.constrain(new Size(crossSize, mainSize));
         crossSize = size.width;
         break;
     }
-    _overflowOccurredDuringLayout = desiredSize != size;
 
     // Position elements
     double childMainPosition = leadingSpace;
@@ -449,7 +448,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
-    if (_overflowOccurredDuringLayout) {
+    if (_overflow > 0) {
       canvas.save();
       canvas.clipRect(offset & size);
       defaultPaint(canvas, offset);
@@ -457,5 +456,27 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     } else {
       defaultPaint(canvas, offset);
     }
+  }
+
+  void debugPaintSize(PaintingCanvas canvas, Offset offset) {
+    super.debugPaintSize(canvas, offset);
+    if (_overflow <= 0)
+      return;
+
+    // Draw a red rectangle over the overflow area in debug mode
+    // You should be using a Clip if you want to clip your children
+    Paint paint = new Paint()..color = const Color(0x7FFF0000);
+    Rect overflowRect;
+    switch(direction) {
+      case FlexDirection.horizontal:
+        overflowRect = offset + new Offset(size.width, 0.0) &
+                       new Size(_overflow, size.height);
+        break;
+      case FlexDirection.vertical:
+        overflowRect = offset + new Offset(0.0, size.height) &
+                       new Size(size.width, _overflow);
+        break;
+    }
+    canvas.drawRect(overflowRect, paint);
   }
 }
