@@ -80,7 +80,7 @@ List<SkyDemo> demos = [
     name: 'Asteroids',
     href: '../../game/main.dart',
     bundle: 'game.skyx',
-    description: '2D game using sprite sheets to achieve high performance',
+    description: '2D game using sprite sheets',
     textTheme: typography.white,
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
@@ -93,20 +93,20 @@ List<SkyDemo> demos = [
     name: 'Fitness',
     href: '../../fitness/lib/main.dart',
     bundle: 'fitness.skyx',
-    description: 'Collin should write a nice description',
+    description: 'Track progress towards healthy goals',
     textTheme: typography.white,
     decoration: new BoxDecoration(
-      backgroundColor: const Color(0xFF0081C6)
+      backgroundColor: colors.Indigo[500]
     )
   ),
   new SkyDemo(
-    name: 'Cards',
+    name: 'Swipe Away',
     href: '../../widgets/card_collection.dart',
     bundle: 'cards.skyx',
-    description: 'Demo of interactive Cards',
+    description: 'Infinite list of swipeable cards',
     textTheme: typography.white,
     decoration: new BoxDecoration(
-      backgroundColor: const Color(0xFF0081C6)
+      backgroundColor: colors.RedAccent[200]
     )
   ),
   new SkyDemo(
@@ -127,7 +127,10 @@ List<SkyDemo> demos = [
     href: '../../mine_digger/lib/main.dart',
     bundle: 'mine_digger.skyx',
     description: 'Clone of the classic Minesweeper game',
-    textTheme: typography.white
+    textTheme: typography.white,
+    decoration: new BoxDecoration(
+      backgroundColor: colors.black
+    )
   ),
 
   // TODO(jackson): This doesn't seem to be working
@@ -143,7 +146,7 @@ class DemoList extends Component {
         decoration: demo.decoration,
         child: new InkWell(
           child: new Container(
-            margin: const EdgeDims.all(24.0),
+            margin: const EdgeDims.only(top: 24.0, left: 24.0),
             child: new Flex([
               new Text(demo.name, style: demo.textTheme.title),
               new Flexible(
