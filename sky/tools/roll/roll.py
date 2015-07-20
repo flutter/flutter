@@ -39,7 +39,6 @@ _build_deps = [
 ]
 
 _chromium_libs = [
-    'crypto',
     'url',
 ]
 
@@ -74,8 +73,6 @@ dirs_from_chromium = _base_deps + _build_deps + _chromium_libs + _third_party_de
 dirs_from_mojo = [
     'gpu',
     'mojo',
-    'mojom',
-    'services/android',
     'services/asset_bundle',
     'services/keyboard',
     'services/sensors',
@@ -84,11 +81,9 @@ dirs_from_mojo = [
 # The contents of these files before the roll will be preserved after the roll,
 # even though they live in directories rolled in from Chromium.
 files_not_to_roll = [
-    'build/config/crypto.gni',
     'build/config/ui.gni',
     'build/ls.py',
     'build/module_args/mojo.gni',
-    'crypto/BUILD.gn',
     'gpu/BUILD.gn',
     'tools/android/download_android_tools.py',
     'tools/android/VERSION_LINUX_NDK',
