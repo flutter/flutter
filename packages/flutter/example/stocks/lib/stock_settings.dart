@@ -61,7 +61,7 @@ class StockSettings extends StatefulComponent {
         break;
       case StockMode.pessimistic:
         showModeDialog = true;
-        navigator.pushState("/settings/confirm", (_) {
+        navigator.pushState(this, (_) {
           showModeDialog = false;
         });
         break;

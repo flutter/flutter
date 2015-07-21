@@ -4,6 +4,7 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
@@ -13,7 +14,7 @@ import 'package:vector_math/vector_math.dart';
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
-const double _kFlingVelocityScale = 1.0/300.0;
+const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissCardThreshold = 0.6;
 
 typedef void DismissedCallback();
@@ -30,8 +31,8 @@ class Dismissable extends AnimatedComponent {
   Widget child;
   DismissedCallback onDismissed;
 
-  AnimatedType<Point> _position;
-  AnimatedType<double> _opacity;
+  AnimatedValue<Point> _position;
+  AnimatedValue<double> _opacity;
   AnimationPerformance _performance;
 
   double _width;
@@ -39,8 +40,8 @@ class Dismissable extends AnimatedComponent {
   bool _dragUnderway = false;
 
   void initState() {
-    _position = new AnimatedType<Point>(Point.origin);
-    _opacity = new AnimatedType<double>(1.0, end: 0.0);
+    _position = new AnimatedValue<Point>(Point.origin);
+    _opacity = new AnimatedValue<double>(1.0, end: 0.0);
     _performance = new AnimationPerformance()
       ..duration = _kCardDismissFadeout
       ..variable = new AnimatedList([_position, _opacity])

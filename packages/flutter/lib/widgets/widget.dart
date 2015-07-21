@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:sky' as sky;
 
-import 'package:sky/base/debug.dart';
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/rendering/box.dart';
@@ -600,17 +599,20 @@ int _inLayoutCallbackBuilder = 0;
 
 class LayoutCallbackBuilderHandle { bool _active = true; }
 LayoutCallbackBuilderHandle enterLayoutCallbackBuilder() {
-  if (!inDebugBuild)
-    return null;
-  _inLayoutCallbackBuilder += 1;
+  assert(() {
+    _inLayoutCallbackBuilder += 1;
+    return true;
+  });
   return new LayoutCallbackBuilderHandle();
 }
 void exitLayoutCallbackBuilder(LayoutCallbackBuilderHandle handle) {
-  if (!inDebugBuild)
-    return;
-  assert(handle._active);
-  handle._active = false;
-  _inLayoutCallbackBuilder -= 1;
+  assert(() {
+    assert(handle._active);
+    handle._active = false;
+    _inLayoutCallbackBuilder -= 1;
+    return true;
+  });
+  Widget._notifyMountStatusChanged();
 }
 
 List<int> _debugFrameTimes = <int>[];

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/base/lerp.dart';
@@ -27,8 +28,6 @@ class CardModel {
   AnimationPerformance performance;
   String get label => "Item $value";
   String get key => value.toString();
-  bool operator ==(other) => other is CardModel && other.value == value;
-  int get hashCode => 373 * 37 * value.hashCode;
 }
 
 class ShrinkingCard extends AnimatedComponent {
@@ -44,7 +43,7 @@ class ShrinkingCard extends AnimatedComponent {
   Function onUpdated;
   Function onCompleted;
 
-  double get currentHeight => card.performance.variable.value;
+  double get currentHeight => (card.performance.variable as AnimatedValue).value;
 
   void initState() {
     assert(card.performance != null);
@@ -100,7 +99,7 @@ class CardCollectionApp extends App {
       assert(card.performance == null);
       card.performance = new AnimationPerformance()
         ..duration = const Duration(milliseconds: 300)
-        ..variable = new AnimatedType<double>(
+        ..variable = new AnimatedValue<double>(
           card.height + kCardMargins.top + kCardMargins.bottom,
           end: 0.0,
           curve: ease,
