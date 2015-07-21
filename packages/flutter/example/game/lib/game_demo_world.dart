@@ -27,6 +27,7 @@ class GameDemoWorld extends NodeWithSize {
   sky.Image _imgNebula;
 
   SpriteSheet _spriteSheet;
+  Navigator _navigator;
 
   // Inputs
   double _joystickX = 0.0;
@@ -45,7 +46,7 @@ class GameDemoWorld extends NodeWithSize {
   int _numFrames = 0;
   bool _isGameOver = false;
 
-  GameDemoWorld(App app, ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
+  GameDemoWorld(App app, this._navigator, ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
 
     // Fetch images
     _imgNebula = images["assets/nebula.png"];
@@ -317,6 +318,8 @@ class GameDemoWorld extends NodeWithSize {
 
     // Add an explosion
     addExplosion(AsteroidSize.large, _ship.position);
+
+    _navigator.pop();
   }
 
   // Handling controls
@@ -588,6 +591,7 @@ class Nebula extends Node {
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         Sprite sprt = new Sprite.fromImage(img);
+        sprt.transferMode = sky.TransferMode.plus;
         sprt.pivot = Point.origin;
         sprt.position = new Point(i * _gameSizeWidth - _gameSizeWidth, j * _gameSizeHeight - _gameSizeHeight);
         addChild(sprt);
