@@ -2,26 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_PLATFORM_VIEW_IOS_H_
-#define SKY_SHELL_PLATFORM_VIEW_IOS_H_
+#ifndef SKY_SHELL_PLATFORM_VIEW_MAC_H_
+#define SKY_SHELL_PLATFORM_VIEW_MAC_H_
 
 #include "sky/shell/platform_view.h"
 
 namespace sky {
 namespace shell {
 
-class PlatformViewIOS : public PlatformView {
+class PlatformViewMac : public PlatformView {
  public:
-  explicit PlatformViewIOS(const Config& config);
-  ~PlatformViewIOS() override;
+  explicit PlatformViewMac(const Config& config);
+  ~PlatformViewMac() override;
   void SurfaceCreated(gfx::AcceleratedWidget widget);
   void SurfaceDestroyed(void);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
+  DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
 };
 
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_PLATFORM_VIEW_IOS_H_
+#endif  // SKY_SHELL_PLATFORM_VIEW_MAC_H_

@@ -158,9 +158,6 @@ if (is_android) {
     source_set(scaffolding_target) {
       sources = [
         "ios/main_ios.mm",
-        "ios/platform_service_provider_ios.cc",
-        "ios/platform_view_ios.h",
-        "ios/platform_view_ios.mm",
         "ios/sky_app_delegate.h",
         "ios/sky_app_delegate.mm",
         "ios/sky_surface.h",
@@ -169,10 +166,20 @@ if (is_android) {
         "ios/sky_view_controller.mm",
       ]
 
+      set_sources_assignment_filter([])
+      sources += [
+        "mac/platform_mac.h",
+        "mac/platform_mac.mm",
+        "mac/platform_service_provider_mac.cc",
+        "mac/platform_view_mac.h",
+        "mac/platform_view_mac.mm",
+      ]
+      set_sources_assignment_filter(sources_assignment_filter)
+
       deps = common_deps + [
-               ":common",
-               "//sky/services/ns_net",
-             ]
+        ":common",
+        "//sky/services/ns_net",
+      ]
     }
 
     deps = [
@@ -193,9 +200,57 @@ if (is_android) {
     ]
 
     deps = common_deps + [
-             ":common",
-             "//sky/services/testing:interfaces",
-           ]
+      ":common",
+      "//sky/services/testing:interfaces",
+    ]
+  }
+} else if (is_mac) {
+  import("//build/config/mac/rules.gni")
+
+  mac_app("shell") {
+    app_name = "Sky"
+    info_plist = "mac/Info.plist"
+    scaffolding_target = "mac_scaffolding"
+
+    # entitlements_path = ""
+    # code_signing_identity = ""
+
+    xibs = [
+      "mac/sky_mac.xib"
+    ]
+
+    resource_copy_mac("sky_resources") {
+      resources = [ "//third_party/icu/android/icudtl.dat" ]
+      bundle_directory = "."
+    }
+
+    source_set(scaffolding_target) {
+      sources = [
+        "mac/main_mac.mm",
+        "mac/platform_mac.h",
+        "mac/platform_mac.mm",
+        "mac/platform_service_provider_mac.cc",
+        "mac/platform_view_mac.h",
+        "mac/platform_view_mac.mm",
+        "mac/sky_app_delegate.h",
+        "mac/sky_app_delegate.m",
+        "mac/sky_window.h",
+        "mac/sky_window.mm",
+        "testing/test_runner.cc",
+        "testing/test_runner.h",
+      ]
+
+      deps = common_deps + [
+        ":common",
+        "//sky/services/ns_net",
+        "//sky/services/testing:interfaces",
+      ]
+    }
+
+    deps = [
+      ":$scaffolding_target",
+      ":sky_resources",
+    ]
   }
 } else {
   assert(false, "Unsupported platform")
