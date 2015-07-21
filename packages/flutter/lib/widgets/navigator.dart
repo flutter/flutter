@@ -12,25 +12,24 @@ import 'package:vector_math/vector_math.dart';
 typedef Widget Builder(Navigator navigator, RouteBase route);
 
 abstract class RouteBase {
-  RouteBase({ this.key });
-  final Object key;
   Widget build(Navigator navigator, RouteBase route);
   void popState() { }
 }
 
 class Route extends RouteBase {
-  Route({ String name, this.builder }) : super(key: name);
-  String get name => key;
+  Route({ this.name, this.builder });
+  final String name;
   final Builder builder;
   Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
 }
 
 class RouteState extends RouteBase {
 
-  RouteState({ this.callback, this.route, Object key }) : super(key: key);
+  RouteState({ this.callback, this.route, this.owner });
 
-  RouteBase route;
   Function callback;
+  RouteBase route;
+  StatefulComponent owner;
 
   Widget build(Navigator navigator, RouteBase route) => null;
 
@@ -144,9 +143,8 @@ class Transition extends AnimatedComponent {
 }
 
 class HistoryEntry {
-  HistoryEntry({ this.route, this.key });
+  HistoryEntry({ this.route });
   final RouteBase route;
-  final int key;
   bool transitionFinished = false;
   // TODO(jackson): Keep track of the requested transition
 }
@@ -158,12 +156,11 @@ class NavigationState {
       if (route.name != null)
         namedRoutes[route.name] = route;
     }
-    history.add(new HistoryEntry(route: routes[0], key: _lastKey++));
+    history.add(new HistoryEntry(route: routes[0]));
   }
 
   List<HistoryEntry> history = new List<HistoryEntry>();
   int historyIndex = 0;
-  int _lastKey = 0;
   Map<String, RouteBase> namedRoutes = new Map<String, RouteBase>();
 
   RouteBase get currentRoute => history[historyIndex].route;
@@ -176,7 +173,7 @@ class NavigationState {
   }
 
   void push(RouteBase route) {
-    HistoryEntry historyEntry = new HistoryEntry(route: route, key: _lastKey++);
+    HistoryEntry historyEntry = new HistoryEntry(route: route);
     history.insert(historyIndex + 1, historyEntry);
     historyIndex++;
   }
@@ -203,9 +200,9 @@ class Navigator extends StatefulComponent {
 
   RouteBase get currentRoute => state.currentRoute;
 
-  void pushState(Object key, Function callback) {
+  void pushState(StatefulComponent owner, Function callback) {
     RouteBase route = new RouteState(
-      key: key,
+      owner: owner,
       callback: callback,
       route: state.currentRoute
     );
@@ -245,7 +242,7 @@ class Navigator extends StatefulComponent {
       if (content == null)
         continue;
       Transition transition = new Transition(
-        key: historyEntry.key.toString(),
+        key: historyEntry.hashCode.toString(), // TODO(ianh): make it not collide
         content: content,
         direction: (i <= state.historyIndex) ? TransitionDirection.forward : TransitionDirection.reverse,
         interactive: (i == state.historyIndex),
