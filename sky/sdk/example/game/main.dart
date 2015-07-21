@@ -5,6 +5,8 @@
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/raised_button.dart';
+import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
@@ -22,6 +24,7 @@ final AssetBundle _bundle = _initBundle();
 
 ImageMap _loader;
 SpriteSheet _spriteSheet;
+SpriteSheet _spriteSheetUI;
 GameDemoApp _app;
 
 main() async {
@@ -31,16 +34,37 @@ main() async {
     'assets/nebula.png',
     'assets/sprites.png',
     'assets/starfield.png',
+    'assets/game_ui.png',
   ]);
 
   String json = await _bundle.loadString('assets/sprites.json');
   _spriteSheet = new SpriteSheet(_loader['assets/sprites.png'], json);
+
+  json = await _bundle.loadString('assets/game_ui.json');
+  _spriteSheetUI = new SpriteSheet(_loader["assets/game_ui.png"], json);
+
   _app = new GameDemoApp();
 
   runApp(_app);
 }
 
 class GameDemoApp extends App {
+
+  NavigationState _navigationState;
+
+  void initState() {
+    _navigationState = new NavigationState([
+      new Route(
+        name: '/',
+        builder: _buildMainScene
+      ),
+      new Route(
+        name: '/game',
+        builder: _buildGameScene
+      ),
+    ]);
+    super.initState();
+  }
 
   Widget build() {
     // TODO(viktork): The task bar purple is the wrong purple, we may need
@@ -54,9 +78,22 @@ class GameDemoApp extends App {
       data: theme,
       child: new TaskDescription(
         label: 'Asteroids',
-        child: new SpriteWidget(
-          new GameDemoWorld(_app, _loader, _spriteSheet)
-        )
+        child: new Navigator(_navigationState)
+      )
+    );
+  }
+
+  Widget _buildGameScene(navigator, route) {
+    return new SpriteWidget(
+      new GameDemoWorld(_app, navigator, _loader, _spriteSheet)
+    );
+  }
+
+  Widget _buildMainScene(navigator, route) {
+    return new Center(
+      child: new RaisedButton(
+        child: new Text("Play"),
+        onPressed: () => navigator.pushNamed('/game')
       )
     );
   }
