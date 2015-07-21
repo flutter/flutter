@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/base/lerp.dart';
@@ -100,7 +101,7 @@ class CardCollectionApp extends App {
       assert(card.performance == null);
       card.performance = new AnimationPerformance()
         ..duration = const Duration(milliseconds: 300)
-        ..variable = new AnimatedType<double>(
+        ..variable = new AnimatedValue<double>(
           card.height + kCardMargins.top + kCardMargins.bottom,
           end: 0.0,
           curve: ease,

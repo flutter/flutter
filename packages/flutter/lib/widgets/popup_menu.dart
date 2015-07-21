@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/colors.dart';
@@ -48,10 +49,10 @@ class PopupMenu extends AnimatedComponent {
   int level;
   Navigator navigator;
 
-  AnimatedType<double> _opacity;
-  AnimatedType<double> _width;
-  AnimatedType<double> _height;
-  List<AnimatedType<double>> _itemOpacities;
+  AnimatedValue<double> _opacity;
+  AnimatedValue<double> _width;
+  AnimatedValue<double> _height;
+  List<AnimatedValue<double>> _itemOpacities;
   AnimatedList _animationList;
   AnimationPerformance _performance;
 
@@ -88,14 +89,14 @@ class PopupMenu extends AnimatedComponent {
 
   void _updateAnimationVariables() {
     double unit = 1.0 / (items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    _opacity = new AnimatedType<double>(0.0, end: 1.0);
-    _width = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, unit));
-    _height = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, unit * items.length));
-    _itemOpacities = new List<AnimatedType<double>>();
+    _opacity = new AnimatedValue<double>(0.0, end: 1.0);
+    _width = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit));
+    _height = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit * items.length));
+    _itemOpacities = new List<AnimatedValue<double>>();
     for (int i = 0; i < items.length; ++i) {
       double start = (i + 1) * unit;
       double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-      _itemOpacities.add(new AnimatedType<double>(
+      _itemOpacities.add(new AnimatedValue<double>(
           0.0, end: 1.0, interval: new Interval(start, end)));
     }
     List<AnimatedVariable> variables = new List<AnimatedVariable>()
@@ -121,7 +122,7 @@ class PopupMenu extends AnimatedComponent {
     PopupMenuStatus status = _status;
     if (_lastStatus != null && status != _lastStatus) {
       if (status == PopupMenuStatus.inactive &&
-          navigator != null && 
+          navigator != null &&
           navigator.currentRoute.key == this)
         navigator.pop();
       if (onStatusChanged != null)

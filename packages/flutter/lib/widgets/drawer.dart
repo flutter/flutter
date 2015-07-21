@@ -4,11 +4,11 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/animated_component.dart';
-import 'package:sky/widgets/animation_builder.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
@@ -30,7 +30,7 @@ import 'package:vector_math/vector_math.dart';
 
 const double _kWidth = 304.0;
 const double _kMinFlingVelocity = 365.0;
-const double _kFlingVelocityScale = 1.0/300.0;
+const double _kFlingVelocityScale = 1.0 / 300.0;
 const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 const Point _kOpenPosition = Point.origin;
 const Point _kClosedPosition = const Point(-_kWidth, 0.0);
@@ -60,12 +60,12 @@ class Drawer extends AnimatedComponent {
   DrawerStatusChangedCallback onStatusChanged;
   Navigator navigator;
 
-  AnimatedType<Point> _position;
+  AnimatedValue<Point> _position;
   AnimatedColor _maskColor;
   AnimationPerformance _performance;
 
   void initState() {
-    _position = new AnimatedType<Point>(_kClosedPosition, end: _kOpenPosition);
+    _position = new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition);
     _maskColor = new AnimatedColor(colors.transparent, end: const Color(0x7F000000));
     _performance = new AnimationPerformance()
       ..duration = _kBaseSettleDuration
