@@ -83,7 +83,7 @@ void LayoutRoot::layout()
 
 void LayoutRoot::paint(Canvas* canvas)
 {
-    if (m_document && canvas && canvas->skCanvas())
+    if (m_document && rootElement() && canvas && canvas->skCanvas())
         rootElement()->paint(canvas);
 }
 
