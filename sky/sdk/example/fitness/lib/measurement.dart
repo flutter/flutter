@@ -4,7 +4,6 @@
 
 import 'package:sky/editing/input.dart';
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/material.dart';

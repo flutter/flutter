@@ -148,26 +148,27 @@ void doFrame(double timeStamp) {
         break;
       }
     } else {
-      assert(node is sky.Text); // 
+      assert(node is sky.Text); //
+      final sky.Text text = node;
       if (pickThis(0.1)) {
         report("appending a new text node (ASCII)");
-        node.appendData(generateCharacter(0x20, 0x7F));
+        text.appendData(generateCharacter(0x20, 0x7F));
         break;
       } else if (pickThis(0.05)) {
         report("appending a new text node (Latin1)");
-        node.appendData(generateCharacter(0x20, 0xFF));
+        text.appendData(generateCharacter(0x20, 0xFF));
         break;
       } else if (pickThis(0.025)) {
         report("appending a new text node (BMP)");
-        node.appendData(generateCharacter(0x20, 0xFFFF));
+        text.appendData(generateCharacter(0x20, 0xFFFF));
         break;
       } else if (pickThis(0.0125)) {
         report("appending a new text node (Unicode)");
-        node.appendData(generateCharacter(0x20, 0x10FFFF));
+        text.appendData(generateCharacter(0x20, 0x10FFFF));
         break;
-      } else if (node.length > 1 && pickThis(0.1)) {
+      } else if (text.length > 1 && pickThis(0.1)) {
         report("deleting character from Text node");
-        node.deleteData(random.nextInt(node.length), 1);
+        text.deleteData(random.nextInt(text.length), 1);
         break;
       }
     }
@@ -178,7 +179,7 @@ void doFrame(double timeStamp) {
   int count = 1;
   while (node != null) {
     if (node is sky.Element && node.firstChild != null) {
-      node = node.firstChild;
+      node = (node as sky.Element).firstChild;
       count += 1;
     } else {
       while (node != null && node.nextSibling == null)

@@ -8,6 +8,8 @@ import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/widget.dart';
 
+export 'package:sky/widgets/block_viewport.dart' show BlockViewportLayoutState;
+
 class VariableHeightScrollable extends Scrollable {
   VariableHeightScrollable({
     String key,

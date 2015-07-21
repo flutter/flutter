@@ -4,6 +4,7 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/widgets/animated_component.dart';
@@ -24,14 +25,14 @@ abstract class Toggleable extends AnimatedComponent {
   bool value;
   ValueChanged onChanged;
 
-  AnimatedType<double> _position;
-  AnimatedType<double> get position => _position;
+  AnimatedValue<double> _position;
+  AnimatedValue<double> get position => _position;
 
   AnimationPerformance _performance;
   AnimationPerformance get performance => _performance;
 
   void initState() {
-    _position = new AnimatedType<double>(0.0, end: 1.0);
+    _position = new AnimatedValue<double>(0.0, end: 1.0);
     _performance = new AnimationPerformance()
       ..variable = position
       ..duration = _kCheckDuration

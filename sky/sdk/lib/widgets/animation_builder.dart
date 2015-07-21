@@ -4,9 +4,8 @@
 
 import 'package:vector_math/vector_math.dart';
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
-import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/widgets/basic.dart';
@@ -18,9 +17,9 @@ class AnimationBuilder {
 
   AnimationBuilder();
 
-  AnimatedType<double> opacity;
-  AnimatedType<Point> position;
-  AnimatedType<double> shadow;
+  AnimatedValue<double> opacity;
+  AnimatedValue<Point> position;
+  AnimatedValue<double> shadow;
   AnimatedColor backgroundColor;
 
   // These don't animate, but are used to build the AnimationBuilder anyway.
@@ -30,7 +29,7 @@ class AnimationBuilder {
   Map<AnimatedVariable, AnimationPerformance> _variableToPerformance =
       new Map<AnimatedVariable, AnimationPerformance>();
 
-  AnimationPerformance createPerformance(List<AnimatedType> variables,
+  AnimationPerformance createPerformance(List<AnimatedValue> variables,
                                          { Duration duration }) {
     AnimationPerformance performance = new AnimationPerformance()
       ..duration = duration
@@ -67,7 +66,7 @@ class AnimationBuilder {
   }
 
   void updateFields({
-    AnimatedType<double> shadow,
+    AnimatedValue<double> shadow,
     AnimatedColor backgroundColor,
     double borderRadius,
     Shape shape
@@ -78,7 +77,7 @@ class AnimationBuilder {
     this.shape = shape;
   }
 
-  void _updateField(AnimatedType variable, AnimatedType sourceVariable) {
+  void _updateField(AnimatedValue variable, AnimatedValue sourceVariable) {
     if (variable == null)
       return; // TODO(mpcomplete): Should we handle transition from null?
 
@@ -98,15 +97,6 @@ class AnimationBuilder {
         ..progress = 0.0
         ..play();
     }
-  }
-}
-
-class AnimatedColor extends AnimatedType<Color> {
-  AnimatedColor(Color begin, { Color end, Curve curve: linear })
-    : super(begin, end: end, curve: curve);
-
-  void setFraction(double t) {
-    value = lerpColor(begin, end, t);
   }
 }
 

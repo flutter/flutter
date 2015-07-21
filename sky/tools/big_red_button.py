@@ -3,14 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Prepare release script.
-#
-# 1) Bump versions using sky/tools/roll_versions.py
-# 2) Add any additional information to touched CHANGELOG.md files.
-# 3) Add any release_notes/version.txt files for updated apks.
-# 4) Make a commit, upload it, land it.
-# 5) Run this script.
-# 6) Publish updated apks using sky/tools/publish_apk.py
+# See https://github.com/domokit/sky_engine/wiki/Release-process
 
 import argparse
 import os
@@ -19,9 +12,6 @@ import sys
 import distutils.util
 
 
-DEFAULT_SKY_ENGINE_ROOT = '/src/sky_engine/src'
-DEFAULT_SKY_SDK_ROOT = '/src/sky_sdk'
-DEFAULT_DEMO_SITE_ROOT = '/src/domokit.github.io'
 CONFIRM_MESSAGE = """This tool is destructive and will revert your current branch to
 origin/master among other things.  Are you sure you wish to continue?"""
 DRY_RUN = False
@@ -44,12 +34,9 @@ def confirm(prompt):
 
 def main():
     parser = argparse.ArgumentParser(description='Deploy!')
-    parser.add_argument('--sky-engine-root', help='Path to sky_engine/src',
-        default=DEFAULT_SKY_ENGINE_ROOT)
-    parser.add_argument('--sky-sdk-root', help='Path to sky_sdk',
-        default=DEFAULT_SKY_SDK_ROOT)
-    parser.add_argument('--demo-site-root', help='Path to domokit.github.io',
-        default=DEFAULT_DEMO_SITE_ROOT)
+    parser.add_argument('sky_engine_root', help='Path to sky_engine/src')
+    parser.add_argument('sky_sdk_root', help='Path to sky_sdk')
+    parser.add_argument('demo_site_root', help='Path to domokit.github.io')
     parser.add_argument('--dry-run', action='store_true', default=False,
         help='Just print commands w/o executing.')
     parser.add_argument('--no-pub-publish', dest='publish',
@@ -80,7 +67,7 @@ def main():
     # Run tests?
 
     run(sky_sdk_root, ['git', 'fetch'])
-    run(sky_sdk_root, ['git', 'reset', '--hard', 'origin/master'])
+    run(sky_sdk_root, ['git', 'reset', '--hard', 'upstream/master'])
     run(sky_engine_root, [
         'sky/tools/deploy_sdk.py',
         '--non-interactive',
@@ -89,7 +76,7 @@ def main():
     # tag for version?
 
     run(demo_site_root, ['git', 'fetch'])
-    run(demo_site_root, ['git', 'reset', '--hard', 'origin/master'])
+    run(demo_site_root, ['git', 'reset', '--hard', 'upstream/master'])
     # TODO(eseidel): We should move this script back into sky/tools.
     run(sky_engine_root, ['mojo/tools/deploy_domokit_site.py', demo_site_root])
     # tag for version?
