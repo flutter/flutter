@@ -1,4 +1,4 @@
-# Copyright 2014 The Chromium Authors. All rights reserved.
+# Copyright 2015 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -15,6 +15,9 @@ declare_args() {
 
   # Version of iOS that we're targeting.
   ios_deployment_target = "6.0"
+
+  # The iOS Code signing identity to use
+  ios_code_signing_identity = ""
 }
 
 if (ios_sdk_path == "") {
@@ -27,4 +30,23 @@ if (ios_sdk_path == "") {
   _ios_sdk_result =
       exec_script("ios_sdk.py", [ _ios_sdk_to_query ], "list lines")
   ios_sdk_path = _ios_sdk_result[0]
+}
+
+if (use_ios_simulator) {
+  # Always disable code signing on the simulator
+  ios_code_signing_identity = ""
+} else {
+  # If an identity is not provided, look for one on the host
+  if (ios_code_signing_identity == "") {
+    _ios_identities = exec_script("find_signing_identity.py", 
+                                  [], "list lines")
+    ios_code_signing_identity = _ios_identities[0]
+  }
+
+  if (ios_code_signing_identity == "") {
+    print("Tried to prepare a device build without specifying a code signing")
+    print("identity and could not detect one automatically either.")
+    print("TIP: Simulator builds dont require code signing...")
+    assert(false)
+  }
 }
