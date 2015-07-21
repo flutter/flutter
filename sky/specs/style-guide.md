@@ -81,7 +81,7 @@ arguments two characters from the previous line.
 
 When breaking a parameter list into multiple lines, do the same.
 
-Use // and ///, not /* */ and /** */.
+Use `//` and `///`, not `/* */` and `/** */`.
 
 Don't put the statement part of an "if" statement on the same line as
 the expression, even if it is short. (Doing so makes it unobvious that
