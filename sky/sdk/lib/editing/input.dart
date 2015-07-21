@@ -7,6 +7,7 @@ import 'package:sky/editing/editable_text.dart';
 import 'package:sky/mojo/keyboard.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/theme.dart';
 
 typedef void ValueChanged(value);
@@ -17,23 +18,18 @@ const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
 
 class Input extends StatefulComponent {
 
-  // Current thinking is that Widget will have an optional globalKey
-  // or heroKey and it will ask Focus.from(this).isFocused which will
-  // check using its globalKey.
-  // Only one element can use a globalKey at a time and its' up to
-  // Widget.sync to maintain the mapping.
-  // Never makes sense to have both a localKey and a globalKey.
-  // Possibly a class HeroKey who functions as a UUID.
-
-  Input({Key key,
-         this.placeholder,
-         this.onChanged,
-         this.focused})
-      : super(key: key);
+  Input({
+    Key key,
+    this.placeholder,
+    this.onChanged
+  }): super(key: key);
 
   String placeholder;
   ValueChanged onChanged;
-  bool focused = false;
+
+  String _value = '';
+  EditableString _editableValue;
+  KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
 
   void initState() {
     _editableValue = new EditableString(
@@ -46,17 +42,13 @@ class Input extends StatefulComponent {
   void syncFields(Input source) {
     placeholder = source.placeholder;
     onChanged = source.onChanged;
-    focused = source.focused;
   }
 
-  String _value = '';
-  bool _isAttachedToKeyboard = false;
-  EditableString _editableValue;
-
   void _handleTextUpdated() {
-    scheduleBuild();
     if (_value != _editableValue.text) {
-      _value = _editableValue.text;
+      setState(() {
+        _value = _editableValue.text;
+      });
       if (onChanged != null)
         onChanged(_value);
     }
@@ -64,10 +56,12 @@ class Input extends StatefulComponent {
 
   Widget build() {
     ThemeData themeData = Theme.of(this);
+    bool focused = Focus.at(this);
 
-    if (focused && !_isAttachedToKeyboard) {
-      keyboard.show(_editableValue.stub);
-      _isAttachedToKeyboard = true;
+    if (focused && !_keyboardHandle.attached) {
+      _keyboardHandle = keyboard.show(_editableValue.stub);
+    } else if (!focused && _keyboardHandle.attached) {
+      _keyboardHandle.release();
     }
 
     TextStyle textStyle = themeData.text.subhead;
@@ -109,13 +103,23 @@ class Input extends StatefulComponent {
 
     return new Listener(
       child: input,
-      onPointerDown: (_) => keyboard.showByRequest()
+      onPointerDown: focus
     );
   }
 
+  void focus(_) {
+    if (Focus.at(this)) {
+      assert(_keyboardHandle.attached);
+      _keyboardHandle.showByRequest();
+    } else {
+      Focus.moveTo(this);
+      // we'll get told to rebuild and we'll take care of the keyboard then
+    }
+  }
+
   void didUnmount() {
-    if (_isAttachedToKeyboard)
-      keyboard.hide();
+    if (_keyboardHandle.attached)
+      _keyboardHandle.release();
     super.didUnmount();
   }
 }

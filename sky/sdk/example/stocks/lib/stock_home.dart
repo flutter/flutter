@@ -10,6 +10,7 @@ import 'package:sky/widgets/drawer_divider.dart';
 import 'package:sky/widgets/drawer_header.dart';
 import 'package:sky/widgets/drawer_item.dart';
 import 'package:sky/widgets/floating_action_button.dart';
+import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/modal_overlay.dart';
@@ -244,6 +245,8 @@ class StockHome extends StatefulComponent {
     );
   }
 
+  static GlobalKey searchFieldKey = new GlobalKey();
+
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
   Widget buildSearchBar() {
     return new ToolBar(
@@ -253,7 +256,7 @@ class StockHome extends StatefulComponent {
         onPressed: _handleSearchEnd
       ),
       center: new Input(
-        focused: true,
+        key: searchFieldKey,
         placeholder: 'Search stocks',
         onChanged: _handleSearchQueryChanged
       ),
@@ -318,6 +321,9 @@ class StockHome extends StatefulComponent {
       ),
     ];
     addMenuToOverlays(overlays);
-    return new Stack(overlays);
+    return new Focus(
+      defaultFocus: searchFieldKey,
+      child: new Stack(overlays)
+    );
   }
 }
