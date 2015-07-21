@@ -8,7 +8,8 @@ config("sdk") {
   common_flags = [
     "-isysroot",
     sysroot,
-    "-mmacosx-version-min=10.6",
+    "-mmacosx-version-min=$mac_sdk_min",
+    "-stdlib=libc++",
   ]
 
   cflags = common_flags

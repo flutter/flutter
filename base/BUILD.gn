@@ -11,6 +11,11 @@ if (is_android) {
 
 config("base_implementation") {
   defines = [ "BASE_IMPLEMENTATION" ]
+
+  if (is_ios) {
+    # base uses routines deprecated in iOS 8
+    cflags = [ "-Wno-deprecated-declarations" ]
+  }
 }
 
 if (is_win) {
@@ -798,11 +803,6 @@ component("base") {
       "strings/sys_string_conversions_posix.cc",
       "threading/platform_thread_internal_posix.cc",
     ]
-
-    if (is_asan) {
-      # TODO(GYP) hook up asan on Mac. GYP has this extra dylib:
-      #data += [ "$root_out_dir/libclang_rt.asan_osx_dynamic.dylib" ]
-    }
 
     if (is_ios) {
       sources -= [
