@@ -24,7 +24,6 @@
 
 #include "sky/engine/core/frame/ConsoleTypes.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
-#include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/wtf/Forward.h"
 
@@ -43,12 +42,6 @@ class ChromeClient {
 public:
     virtual void setWindowRect(const FloatRect&) = 0;
     virtual FloatRect windowRect() = 0;
-
-    virtual void focus() = 0;
-    virtual bool canTakeFocus(FocusType) = 0;
-    virtual void takeFocus(FocusType) = 0;
-    virtual void focusedNodeChanged(Node*) = 0;
-    virtual void focusedFrameChanged(LocalFrame*) = 0;
 
     virtual bool shouldReportDetailedMessageForSource(const String& source) = 0;
     virtual void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String& message, unsigned lineNumber, const String& sourceID, const String& stackTrace) = 0;

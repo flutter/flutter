@@ -417,12 +417,11 @@ Node* Position::parentEditingBoundary() const
     if (!m_anchorNode)
         return 0;
 
-    // FIXME: Why does this look at parentNode?
     Node* boundary = m_anchorNode.get();
-    while (boundary->nonShadowBoundaryParentNode()
-           && boundary->nonShadowBoundaryParentNode()->isElementNode()
+    while (boundary->parentNode()
+           && boundary->parentNode()->isElementNode()
            && m_anchorNode->hasEditableStyle() == boundary->parentNode()->hasEditableStyle())
-        boundary = boundary->nonShadowBoundaryParentNode();
+        boundary = boundary->parentNode();
 
     return boundary;
 }

@@ -7,11 +7,13 @@
 # Linux.
 
 import("../goma.gni")
+import("//build/config/ios/ios_sdk.gni")
 
 assert(host_os == "mac")
 
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/goma.gni")
+import("//build/config/sysroot.gni")
 
 if (use_goma) {
   goma_prefix = "$goma_dir/gomacc "
@@ -36,6 +38,8 @@ template("mac_toolchain") {
            "mac_toolchain() must specify a \"toolchain_cpu\"")
     assert(defined(invoker.toolchain_os),
            "mac_toolchain() must specify a \"toolchain_os\"")
+    assert(defined(invoker.switch_sysroot),
+           "mac_toolchain() must specify a \"switch_sysroot\"")
 
     # We can't do string interpolation ($ in strings) on things with dots in
     # them. To allow us to use $cc below, for example, we create copies of
@@ -48,9 +52,23 @@ template("mac_toolchain") {
     lib_switch = "-l"
     lib_dir_switch = "-L"
 
+    sysroot_flags = ""
+
+    if (invoker.switch_sysroot) {
+      version_flags = ""
+
+      if (use_ios_simulator) {
+        version_flags = "-mios-simulator-version-min=$ios_deployment_target"
+      } else {
+        version_flags = "-miphoneos-version-min=$ios_deployment_target"
+      }
+
+      sysroot_flags = "-isysroot $sysroot $version_flags"
+    }
+
     tool("cc") {
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs = [
@@ -60,7 +78,7 @@ template("mac_toolchain") {
 
     tool("cxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs = [
@@ -71,7 +89,7 @@ template("mac_toolchain") {
     tool("asm") {
       # For GCC we can just use the C compiler to compile assembly.
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
@@ -81,7 +99,7 @@ template("mac_toolchain") {
 
     tool("objc") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} {{cflags_objc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_c}} {{cflags_objc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJC {{output}}"
       outputs = [
@@ -91,7 +109,7 @@ template("mac_toolchain") {
 
     tool("objcxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} {{cflags_objcc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_cc}} {{cflags_objcc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
       outputs = [
@@ -125,7 +143,7 @@ template("mac_toolchain") {
       temporary_tocname = dylib + ".tmp"
 
       does_reexport_command = "[ ! -e $dylib -o ! -e $tocname ] || otool -l $dylib | grep -q LC_REEXPORT_DYLIB"
-      link_command = "$ld -shared {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      link_command = "$ld -shared $sysroot_flags {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
       replace_command = "if ! cmp -s $temporary_tocname $tocname; then mv $temporary_tocname $tocname"
       extract_toc_command = "{ otool -l $dylib | grep LC_ID_DYLIB -A 5; nm -gP $dylib | cut -f1-2 -d' ' | grep -v U\$\$; true; }"
 
@@ -160,7 +178,7 @@ template("mac_toolchain") {
     tool("link") {
       outfile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = "$outfile.rsp"
-      command = "$ld {{ldflags}} -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      command = "$ld $sysroot_flags {{ldflags}} -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
       description = "LINK $outfile"
       rspfile_content = "{{inputs_newline}}"
       outputs = [
@@ -202,6 +220,19 @@ mac_toolchain("clang_arm") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
+  switch_sysroot = false
+}
+
+mac_toolchain("ios_clang_arm") {
+  toolchain_cpu = "arm"
+  toolchain_os = "mac"
+  prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
+                       root_build_dir)
+  cc = "${goma_prefix}$prefix/clang"
+  cxx = "${goma_prefix}$prefix/clang++"
+  ld = cxx
+  is_clang = true
+  switch_sysroot = true
 }
 
 mac_toolchain("arm") {
@@ -211,6 +242,7 @@ mac_toolchain("arm") {
   cxx = "${goma_prefix}/g++"
   ld = cxx
   is_clang = false
+  switch_sysroot = false
 }
 
 mac_toolchain("clang_x64") {
@@ -222,6 +254,7 @@ mac_toolchain("clang_x64") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
+  switch_sysroot = false
 }
 
 mac_toolchain("x64") {
@@ -231,4 +264,5 @@ mac_toolchain("x64") {
   cxx = "${goma_prefix}/g++"
   ld = cxx
   is_clang = false
+  switch_sysroot = false
 }

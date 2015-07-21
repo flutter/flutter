@@ -2,5 +2,5 @@
 set -ex
 
 # Linux Debug
-./sky/tools/gn --debug
-ninja -j 1 -C out/Debug
+./sky/tools/gn --release
+ninja -j 4 -C out/Release

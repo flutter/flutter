@@ -125,7 +125,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 }
 
 - (NSString*)skyInitialLoadURL {
-  return [NSBundle mainBundle].infoDictionary[@"com.google.sky.load_url"];
+  return [NSBundle mainBundle].infoDictionary[@"org.domokit.sky.load_url"];
 }
 
 - (void)connectToEngineAndLoad {

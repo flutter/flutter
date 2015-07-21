@@ -38,7 +38,6 @@
 #include "sky/engine/core/dom/UserActionElementSet.h"
 #include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/core/loader/DocumentLoadTiming.h"
-#include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -60,7 +59,6 @@ class Comment;
 class ConsoleMessage;
 class CSSStyleDeclaration;
 class CSSStyleSheet;
-class CustomElementRegistry;
 class DocumentFragment;
 class DocumentLoadTiming;
 class DocumentMarkerController;
@@ -126,10 +124,6 @@ public:
     virtual bool canContainRangeEndPoint() const override { return true; }
 
     SelectorQueryCache& selectorQueryCache();
-
-    // Focus Management.
-    Element* activeElement() const;
-    bool hasFocus() const;
 
     AbstractModule* module() const { return m_module; }
     void setModule(AbstractModule* module) { m_module = module; }
@@ -264,16 +258,12 @@ public:
 
     TextLinkColors& textLinkColors() { return m_textLinkColors; }
 
-    bool setFocusedElement(PassRefPtr<Element>, FocusType = FocusTypeNone);
-    Element* focusedElement() const { return m_focusedElement.get(); }
     UserActionElementSet& userActionElements()  { return m_userActionElements; }
     const UserActionElementSet& userActionElements() const { return m_userActionElements; }
-    void setNeedsFocusedElementCheck();
 
     void setActiveHoverElement(PassRefPtr<Element>);
     Element* activeHoverElement() const { return m_activeHoverElement.get(); }
 
-    void removeFocusedElementOfSubtree(Node*, bool amongChildrenOnly = false);
     void hoveredNodeDetached(Node*);
     void activeChainNodeDetached(Node*);
 
@@ -385,9 +375,6 @@ public:
 
     IntSize initialViewportSize() const;
 
-    void registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState&);
-    CustomElementRegistry& elementRegistry() const { return *m_elementRegistry; }
-
     unsigned activeParserCount() { return m_activeParserCount; }
     void incrementActiveParserCount() { ++m_activeParserCount; }
     void decrementActiveParserCount();
@@ -397,11 +384,6 @@ public:
     void didLoadAllParserBlockingResources();
 
     bool inStyleRecalc() const { return m_inStyleRecalc; }
-
-    // A non-null m_templateDocumentHost implies that |this| was created by ensureTemplateDocument().
-    bool isTemplateDocument() const { return !!m_templateDocumentHost; }
-    Document& ensureTemplateDocument();
-    Document* templateDocumentHost() { return m_templateDocumentHost; }
 
     LocalFrame* executingFrame();
 
@@ -502,7 +484,6 @@ private:
 
     RefPtr<CSSStyleSheet> m_elemSheet;
 
-    RefPtr<Element> m_focusedElement;
     RefPtr<Node> m_hoverNode;
     RefPtr<Element> m_activeHoverElement;
     UserActionElementSet m_userActionElements;
@@ -546,15 +527,7 @@ private:
 
     RefPtr<ScriptedAnimationController> m_scriptedAnimationController;
 
-    RefPtr<CustomElementRegistry> m_elementRegistry;
-
     OwnPtr<ElementDataCache> m_elementDataCache;
-
-    RefPtr<Document> m_templateDocument;
-    // With Oilpan the templateDocument and the templateDocumentHost
-    // live and die together. Without Oilpan, the templateDocumentHost
-    // is a manually managed backpointer from m_templateDocument.
-    RawPtr<Document> m_templateDocumentHost;
 
     bool m_hasViewportUnits;
 

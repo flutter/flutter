@@ -75,8 +75,6 @@ static void extractValuesforSelector(const CSSSelector* selector, AtomicString& 
     default:
         break;
     }
-    if (selector->isCustomPseudoElement())
-        customPseudoElementName = selector->value();
 }
 
 bool RuleSet::findBestRuleSetAndAdd(const CSSSelector& component, RuleData& ruleData)

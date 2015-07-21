@@ -35,7 +35,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -87,8 +86,6 @@ void StyleEngine::resolverChanged()
 
 void StyleEngine::updateDocumentFonts()
 {
-    // TODO(esprehn): We should really support @font-face in ShadowRoot too.
-
     const auto& sheets = m_document->scopedStyleResolver().authorStyleSheets();
 
     for (const auto& sheet : sheets) {

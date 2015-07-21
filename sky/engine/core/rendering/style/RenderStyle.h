@@ -257,12 +257,7 @@ public:
 
     StyleDifference visualInvalidationDiff(const RenderStyle&) const;
 
-    enum IsAtShadowBoundary {
-        AtShadowBoundary,
-        NotAtShadowBoundary,
-    };
-
-    void inheritFrom(const RenderStyle* inheritParent, IsAtShadowBoundary = NotAtShadowBoundary);
+    void inheritFrom(const RenderStyle* inheritParent);
     void copyNonInheritedFrom(const RenderStyle*);
 
     void setHasViewportUnits(bool hasViewportUnits = true) const { noninherited_flags.hasViewportUnits = hasViewportUnits; }

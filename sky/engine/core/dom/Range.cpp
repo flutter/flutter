@@ -813,7 +813,7 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
 
     Node::NodeType newNodeType = newNode->nodeType();
     int numNewChildren;
-    if (newNodeType == Node::DOCUMENT_FRAGMENT_NODE && !newNode->isShadowRoot()) {
+    if (newNodeType == Node::DOCUMENT_FRAGMENT_NODE) {
         // check each child node, not the DocumentFragment itself
         numNewChildren = 0;
         for (Node* c = toDocumentFragment(newNode)->firstChild(); c; c = c->nextSibling()) {
@@ -830,16 +830,12 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
         }
     }
 
-    // InvalidNodeTypeError: Raised if newNode is an Attr, Entity, Notation, ShadowRoot or Document node.
+    // InvalidNodeTypeError: Raised if newNode is an Attr, Entity, Notation, or Document node.
     switch (newNodeType) {
     case Node::DOCUMENT_NODE:
         exceptionState.ThrowDOMException(InvalidNodeTypeError, "The node to be inserted is a '" + newNode->nodeName() + "' node, which may not be inserted here.");
         return;
     default:
-        if (newNode->isShadowRoot()) {
-            exceptionState.ThrowDOMException(InvalidNodeTypeError, "The node to be inserted is a shadow root, which may not be inserted here.");
-            return;
-        }
         break;
     }
 
@@ -947,8 +943,8 @@ void Range::checkNodeBA(Node* n, ExceptionState& exceptionState) const
     }
 
     // InvalidNodeTypeError: Raised if the root container of refNode is not an
-    // Attr, Document, DocumentFragment or ShadowRoot node, or part of a SVG shadow DOM tree,
-    // or if refNode is a Document, DocumentFragment, ShadowRoot, Attr, Entity, or Notation node.
+    // Attr, Document, DocumentFragment node,
+    // or if refNode is a Document, DocumentFragment, Attr, Entity, or Notation node.
 
     if (!n->parentNode()) {
         exceptionState.ThrowDOMException(InvalidNodeTypeError, "the given Node has no parent.");
@@ -1025,7 +1021,7 @@ void Range::selectNode(Node* refNode, ExceptionState& exceptionState)
     }
 
     // InvalidNodeTypeError: Raised if an ancestor of refNode is an Entity, Notation or
-    // DocumentType node or if refNode is a Document, DocumentFragment, ShadowRoot, Attr, Entity, or Notation
+    // DocumentType node or if refNode is a Document, DocumentFragment, Attr, Entity, or Notation
     // node.
     switch (refNode->nodeType()) {
         case Node::ELEMENT_NODE:
@@ -1152,11 +1148,6 @@ Node* Range::firstNode() const
     if (!m_start.offset())
         return m_start.container();
     return NodeTraversal::nextSkippingChildren(*m_start.container());
-}
-
-ShadowRoot* Range::shadowRoot() const
-{
-    return startContainer() ? startContainer()->containingShadowRoot() : 0;
 }
 
 Node* Range::pastLastNode() const

@@ -25,7 +25,6 @@
 #include "sky/engine/core/css/PropertySetCSSStyleDeclaration.h"
 #include "sky/engine/core/dom/DOMTokenList.h"
 #include "sky/engine/core/dom/NodeRareData.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/wtf/OwnPtr.h"
 
@@ -40,33 +39,7 @@ public:
         return new ElementRareData(renderer);
     }
 
-    ~ElementRareData();
-
-    short tabIndex() const { return m_tabindex; }
-    bool hasTabIndex() const { return m_hasTabIndex; }
-
-    void setTabIndex(short index)
-    {
-        m_tabindex = index;
-        m_hasTabIndex = true;
-    }
-
-    void clearTabIndex()
-    {
-        m_tabindex = 0;
-        m_hasTabIndex = false;
-    }
-
     CSSStyleDeclaration& ensureInlineCSSStyleDeclaration(Element* ownerElement);
-
-    void clearShadow() { m_shadow = nullptr; }
-    ElementShadow* shadow() const { return m_shadow.get(); }
-    ElementShadow& ensureShadow()
-    {
-        if (!m_shadow)
-            m_shadow = ElementShadow::create();
-        return *m_shadow;
-    }
 
     RenderStyle* computedStyle() const { return m_computedStyle.get(); }
     void setComputedStyle(PassRefPtr<RenderStyle> computedStyle) { m_computedStyle = computedStyle; }
@@ -76,11 +49,7 @@ public:
     void setClassList(PassOwnPtr<DOMTokenList> classList) { m_classList = classList; }
 
 private:
-    unsigned m_tabindex : 16;
-    unsigned m_hasTabIndex : 1;
-
     OwnPtr<DOMTokenList> m_classList;
-    OwnPtr<ElementShadow> m_shadow;
     OwnPtr<InlineCSSStyleDeclaration> m_cssomWrapper;
 
     RefPtr<RenderStyle> m_computedStyle;
@@ -90,17 +59,8 @@ private:
 
 inline ElementRareData::ElementRareData(RenderObject* renderer)
     : NodeRareData(renderer)
-    , m_tabindex(0)
-    , m_hasTabIndex(false)
 {
     m_isElementRareData = true;
-}
-
-inline ElementRareData::~ElementRareData()
-{
-#if !ENABLE(OILPAN)
-    ASSERT(!m_shadow);
-#endif
 }
 
 } // namespace

@@ -48,8 +48,7 @@ ExceptionState es;
   {% endif %}
   {% if attribute.cached_attribute_validation_method or
         attribute.is_getter_raises_exception or
-        attribute.is_nullable or
-        attribute.idl_type == 'EventHandler' %}
+        attribute.is_nullable %}
 {{attribute.cpp_type}} {{attribute.cpp_value}} = {{attribute.cpp_value_original}};
   {% endif %}
   {% if attribute.is_nullable %}
@@ -74,7 +73,7 @@ DART_UNIMPLEMENTED();
 {% macro attribute_setter(cpp_class, attribute) %}
 static void {{static_attribute_name(attribute, 'Setter')}}(Dart_NativeArguments args)
 {
-{% if attribute.idl_type == "EventHandler" or not attribute.cpp_setter %}
+{% if not attribute.cpp_setter %}
 {# TODO(terry): Need to fix properly. #}
     // FIXME: proper implementation.
     DART_UNIMPLEMENTED();
@@ -82,9 +81,6 @@ static void {{static_attribute_name(attribute, 'Setter')}}(Dart_NativeArguments 
     Dart_Handle exception = nullptr;
     {
         {{cpp_class}}* receiver = GetReceiver<{{cpp_class}}>(args);
-{% if attribute.is_custom_element_callbacks %}
-        CustomElementCallbackScope deliveryScope;
-{% endif %}
 {% set attribute_name = attribute.name if not attribute.put_forwards else 'value' %}
 
         {{attribute.local_cpp_type}} {{attribute.setter_lvalue}} = {{attribute.dart_value_to_local_cpp_value}};
@@ -151,7 +147,6 @@ if (result.isNull()) {
     result = "{{reflect_empty}}";
 {% else %}
 if (result.isEmpty()) {
-{# FIXME: should use [ReflectEmpty] instead; need to change IDL files #}
 {% if reflect_missing %}
     result = "{{reflect_missing}}";
 {% else %}

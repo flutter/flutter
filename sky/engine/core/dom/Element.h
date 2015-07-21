@@ -32,7 +32,6 @@
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/ElementData.h"
 #include "sky/engine/core/dom/SpaceSplitString.h"
-#include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
@@ -46,7 +45,6 @@ class ClientRectList;
 class DOMTokenList;
 class Document;
 class ElementRareData;
-class ElementShadow;
 class ExceptionState;
 class Image;
 class IntSize;
@@ -55,7 +53,6 @@ class MutableStylePropertySet;
 class PaintingCallback;
 class PropertySetCSSStyleDeclaration;
 class PseudoElement;
-class ShadowRoot;
 class StylePropertySet;
 
 enum SpellcheckAttributeState {
@@ -172,8 +169,6 @@ public:
         ModifiedByCloning
     };
 
-    virtual void parseAttribute(const QualifiedName&, const AtomicString&);
-
     // Only called by the parser immediately after element construction.
     void parserSetAttributes(const Vector<Attribute>&);
 
@@ -194,12 +189,6 @@ public:
     void recalcStyle(StyleRecalcChange);
 
     bool supportsStyleSharing() const;
-
-    ElementShadow* shadow() const;
-    ElementShadow& ensureShadow();
-    PassRefPtr<ShadowRoot> ensureShadowRoot(ExceptionState&);
-    ShadowRoot* shadowRoot() const;
-    bool hasAuthorShadowRoot() const { return shadowRoot(); }
 
     double x() const;
     void setX(double);
@@ -232,9 +221,6 @@ public:
 
     RenderStyle* computedStyle();
 
-    bool isUpgradedCustomElement() const { return customElementState() == Upgraded; }
-    bool isUnresolvedCustomElement() const { return customElementState() == WaitingForUpgrade; }
-
     AtomicString computeInheritedLanguage() const;
 
     virtual bool isURLAttribute(const Attribute&) const { return false; }
@@ -246,22 +232,6 @@ public:
     KURL getNonEmptyURLAttribute(const QualifiedName&) const;
 
     virtual const AtomicString imageSourceURL() const;
-
-    void focus(bool restorePreviousSelection = true, FocusType = FocusTypeNone);
-    void updateFocusAppearance(bool restorePreviousSelection);
-    void blur();
-    // Whether this element can receive focus at all. Most elements are not
-    // focusable but some elements, such as form controls and links, are. Unlike
-    // rendererIsFocusable(), this method may be called when layout is not up to
-    // date, so it must not use the renderer to determine focusability.
-    virtual bool supportsFocus() const;
-    // Whether the node can actually be focused.
-    bool isFocusable() const;
-    bool isKeyboardFocusable() const;
-    void dispatchFocusEvent(Element* oldFocusedElement, FocusType);
-    void dispatchBlurEvent(Element* newFocusedElement);
-    void dispatchFocusInEvent(const AtomicString& eventType, Element* oldFocusedElement);
-    void dispatchFocusOutEvent(const AtomicString& eventType, Element* newFocusedElement);
 
     bool matches(const String& selectors, ExceptionState&);
 
@@ -282,9 +252,6 @@ public:
 
     MutableStylePropertySet& ensureMutableInlineStyle();
     void clearMutableInlineStyleIfEmpty();
-
-    void setTabIndex(int);
-    virtual short tabIndex() const override;
 
     String contentEditable() const;
     void setContentEditable(const String&, ExceptionState&);
@@ -307,13 +274,6 @@ protected:
     virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
     virtual void childrenChanged(const ChildrenChange&) override;
-
-    // Subclasses may override this method to affect focusability. Unlike
-    // supportsFocus, this method must be called on an up-to-date layout, so it
-    // may use the renderer to reason about focusability. This method cannot be
-    // moved to RenderObject because some focusable nodes don't have renderers,
-    // e.g., HTMLOptionElement.
-    virtual bool rendererIsFocusable() const;
 
     // classAttributeChanged() exists to share code between
     // parseAttribute (called via setAttribute()) and
@@ -370,8 +330,6 @@ private:
     SpellcheckAttributeState spellcheckAttributeState() const;
 
     void createUniqueElementData();
-
-    bool shouldInvalidateDistributionWhenAttributeChanged(ElementShadow*, const QualifiedName&, const AtomicString&);
 
     ElementRareData* elementRareData() const;
     ElementRareData& ensureElementRareData();
@@ -524,10 +482,6 @@ inline void Node::insertedInto(ContainerNode* insertionPoint)
     ASSERT(insertionPoint->inDocument() || isContainerNode());
     if (insertionPoint->inDocument())
         setFlag(InDocumentFlag);
-    if (parentOrShadowHostNode()->isInShadowTree())
-        setFlag(IsInShadowTreeFlag);
-    if (childNeedsDistributionRecalc() && !insertionPoint->childNeedsDistributionRecalc())
-        insertionPoint->markAncestorsWithChildNeedsDistributionRecalc();
 }
 
 inline void Node::removedFrom(ContainerNode* insertionPoint)
@@ -535,39 +489,12 @@ inline void Node::removedFrom(ContainerNode* insertionPoint)
     ASSERT(insertionPoint->inDocument() || isContainerNode());
     if (insertionPoint->inDocument())
         clearFlag(InDocumentFlag);
-    if (isInShadowTree() && !treeScope().rootNode().isShadowRoot())
-        clearFlag(IsInShadowTreeFlag);
-}
-
-inline ShadowRoot* Node::shadowRoot() const
-{
-    if (!isElementNode())
-        return 0;
-    return toElement(this)->shadowRoot();
 }
 
 inline void Element::invalidateStyleAttribute()
 {
     ASSERT(elementData());
     elementData()->m_styleAttributeIsDirty = true;
-}
-
-inline bool isShadowHost(const Node* node)
-{
-    return node && node->isElementNode() && toElement(node)->shadow();
-}
-
-inline bool isShadowHost(const Element* element)
-{
-    return element && element->shadow();
-}
-
-inline bool isAtShadowBoundary(const Element* element)
-{
-    if (!element)
-        return false;
-    ContainerNode* parentNode = element->parentNode();
-    return parentNode && parentNode->isShadowRoot();
 }
 
 // These macros do the same as their NODE equivalents but additionally provide a template specialization

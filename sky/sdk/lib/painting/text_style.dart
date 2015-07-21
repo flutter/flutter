@@ -10,6 +10,8 @@ const bold = FontWeight.w700;
 
 enum TextAlign { left, right, center }
 
+enum TextBaseline { alphabetic, ideographic }
+
 enum TextDecoration { none, underline, overline, lineThrough }
 const underline = const <TextDecoration>[TextDecoration.underline];
 const overline = const <TextDecoration>[TextDecoration.overline];
@@ -24,6 +26,7 @@ class TextStyle {
     this.fontSize,
     this.fontWeight,
     this.textAlign,
+    this.textBaseline,
     this.height,
     this.decoration,
     this.decorationColor,
@@ -35,6 +38,7 @@ class TextStyle {
   final double fontSize; // in pixels
   final FontWeight fontWeight;
   final TextAlign textAlign;
+  final TextBaseline textBaseline;
   final double height; // multiple of fontSize
   final List<TextDecoration> decoration; // TODO(ianh): Switch this to a Set<> once Dart supports constant Sets
   final Color decorationColor;
@@ -46,6 +50,7 @@ class TextStyle {
     double fontSize,
     FontWeight fontWeight,
     TextAlign textAlign,
+    TextBaseline textBaseline,
     double height,
     List<TextDecoration> decoration,
     Color decorationColor,
@@ -57,6 +62,7 @@ class TextStyle {
       fontSize: fontSize != null ? fontSize : this.fontSize,
       fontWeight: fontWeight != null ? fontWeight : this.fontWeight,
       textAlign: textAlign != null ? textAlign : this.textAlign,
+      textBaseline: textBaseline != null ? textBaseline : this.textBaseline,
       height: height != null ? height : this.height,
       decoration: decoration != null ? decoration : this.decoration,
       decorationColor: decorationColor != null ? decorationColor : this.decorationColor,
@@ -71,6 +77,7 @@ class TextStyle {
       fontSize: other.fontSize,
       fontWeight: other.fontWeight,
       textAlign: other.textAlign,
+      textBaseline: other.textBaseline,
       height: other.height,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
@@ -157,10 +164,11 @@ class TextStyle {
       return true;
     return other is TextStyle &&
       color == other.color &&
-      fontFamily == other.fontFamily && 
+      fontFamily == other.fontFamily &&
       fontSize == other.fontSize &&
       fontWeight == other.fontWeight &&
-      textAlign == other.textAlign && 
+      textAlign == other.textAlign &&
+      textBaseline == other.textBaseline &&
       decoration == other.decoration &&
       decorationColor == other.decorationColor &&
       decorationStyle == other.decorationStyle;
@@ -174,6 +182,7 @@ class TextStyle {
     value = 37 * value + fontSize.hashCode;
     value = 37 * value + fontWeight.hashCode;
     value = 37 * value + textAlign.hashCode;
+    value = 37 * value + textBaseline.hashCode;
     value = 37 * value + decoration.hashCode;
     value = 37 * value + decorationColor.hashCode;
     value = 37 * value + decorationStyle.hashCode;
@@ -193,6 +202,8 @@ class TextStyle {
       result.add('${prefix}fontWeight: $fontWeight');
     if (textAlign != null)
       result.add('${prefix}textAlign: $textAlign');
+    if (textBaseline != null)
+      result.add('${prefix}textBaseline: $textBaseline');
     if (decoration != null)
       result.add('${prefix}decoration: $decoration');
     if (decorationColor != null)

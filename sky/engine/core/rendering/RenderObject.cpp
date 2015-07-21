@@ -32,7 +32,6 @@
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/EditingBoundary.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/frame/FrameView.h"

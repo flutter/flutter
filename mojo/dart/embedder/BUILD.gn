@@ -43,7 +43,6 @@ source_set("dart_controller_no_snapshot") {
     ":generate_dart_embedder_service_isolate_resources_cc",
     "//base",
     "//base:i18n",
-    "//crypto",
     "//dart/runtime:libdart",
     "//dart/runtime/bin:libdart_embedder_noio",
     "//third_party/dart-pkg",

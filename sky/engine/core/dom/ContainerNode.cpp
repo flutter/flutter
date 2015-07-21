@@ -24,6 +24,7 @@
 
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/ChildListMutationScope.h"
+#include "sky/engine/core/dom/DocumentFragment.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/NodeRareData.h"
@@ -32,8 +33,6 @@
 #include "sky/engine/core/dom/SelectorQuery.h"
 #include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -72,13 +71,6 @@ ContainerNode::~ContainerNode()
     removeDetachedChildren();
 }
 
-bool ContainerNode::containsConsideringHostElements(const Node& newChild) const
-{
-    if (isInShadowTree() || document().isTemplateDocument())
-        return newChild.containsIncludingHostElements(*this);
-    return newChild.contains(this);
-}
-
 void ContainerNode::checkAcceptChildType(const Node* newChild, ExceptionState& exceptionState) const
 {
     if (!newChild) {
@@ -94,7 +86,7 @@ void ContainerNode::checkAcceptChildType(const Node* newChild, ExceptionState& e
 
 void ContainerNode::checkAcceptChildHierarchy(const Node& newChild, const Node* oldChild, ExceptionState& exceptionState) const
 {
-    if (containsConsideringHostElements(newChild)) {
+    if (newChild.contains(this)) {
         exceptionState.ThrowDOMException(HierarchyRequestError, "The new child element contains the parent.");
         return;
     }
@@ -104,7 +96,7 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
 {
     // Check that this node is not "floating".
     // If it is, it can be deleted as a side effect of sending mutation events.
-    ASSERT(refCount() || parentOrShadowHostNode());
+    ASSERT(refCount() || parentNode());
 
     RefPtr<Node> protect(this);
 
@@ -142,8 +134,6 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
     if (targets.isEmpty())
         return newChild;
 
-    // Must check this again beacuse focus events might run synchronously when
-    // removing children.
     checkAcceptChildHierarchy(*newChild, 0, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
@@ -180,7 +170,6 @@ void ContainerNode::insertBeforeCommon(Node& nextChild, Node& newChild)
     ASSERT(!newChild.parentNode()); // Use insertBefore if you need to handle reparenting (and want DOM mutation events).
     ASSERT(!newChild.nextSibling());
     ASSERT(!newChild.previousSibling());
-    ASSERT(!newChild.isShadowRoot());
 
     Node* prev = nextChild.previousSibling();
     ASSERT(m_lastChild != prev);
@@ -193,14 +182,14 @@ void ContainerNode::insertBeforeCommon(Node& nextChild, Node& newChild)
         ASSERT(firstChild() == nextChild);
         m_firstChild = &newChild;
     }
-    newChild.setParentOrShadowHostNode(this);
+    newChild.setParentNode(this);
     newChild.setPreviousSibling(prev);
     newChild.setNextSibling(&nextChild);
 }
 
 void ContainerNode::appendChildCommon(Node& child)
 {
-    child.setParentOrShadowHostNode(this);
+    child.setParentNode(this);
 
     if (m_lastChild) {
         child.setPreviousSibling(m_lastChild);
@@ -216,7 +205,7 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
 {
     // Check that this node is not "floating".
     // If it is, it can be deleted as a side effect of sending mutation events.
-    ASSERT(refCount() || parentOrShadowHostNode());
+    ASSERT(refCount() || parentNode());
 
     RefPtr<Node> protect(this);
 
@@ -261,8 +250,6 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
     if (exceptionState.had_exception())
         return nullptr;
 
-    // Must check this again beacuse focus events might run synchronously when
-    // removing children.
     checkAcceptChildHierarchy(*newChild, child.get(),exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
@@ -356,7 +343,7 @@ void ContainerNode::addChildNodesToDeletionQueue(Node*& head, Node*& tail, Conta
 
         next = n->nextSibling();
         n->setNextSibling(0);
-        n->setParentOrShadowHostNode(0);
+        n->setParentNode(0);
         container.setFirstChild(next);
         if (next)
             next->setPreviousSibling(0);
@@ -388,15 +375,11 @@ PassRefPtr<Node> ContainerNode::removeChild(PassRefPtr<Node> oldChild, Exception
 {
     // Check that this node is not "floating".
     // If it is, it can be deleted as a side effect of sending mutation events.
-    ASSERT(refCount() || parentOrShadowHostNode());
+    ASSERT(refCount() || parentNode());
 
     RefPtr<Node> protect(this);
     RefPtr<Node> child = oldChild;
 
-    document().removeFocusedElementOfSubtree(child.get());
-
-    // Events fired when blurring currently focused node might have moved this
-    // child into a different parent.
     if (child->parentNode() != this) {
         exceptionState.ThrowDOMException(NotFoundError, "The node to be removed is no longer a child of this node. Perhaps it was moved in a 'blur' event handler?");
         return nullptr;
@@ -439,7 +422,7 @@ void ContainerNode::removeBetween(Node* previousChild, Node* nextChild, Node& ol
 
     oldChild.setPreviousSibling(0);
     oldChild.setNextSibling(0);
-    oldChild.setParentOrShadowHostNode(0);
+    oldChild.setParentNode(0);
 
     document().adoptIfNeeded(oldChild);
 }
@@ -459,12 +442,6 @@ void ContainerNode::removeChildren()
     willRemoveChildren();
 
     {
-        // Exclude this node when looking for removed focusedElement since only
-        // children will be removed.
-        // This must be later than willRemoveChildren, which might change focus
-        // state of a child.
-        document().removeFocusedElementOfSubtree(this, true);
-
         // Removing a node from a selection can cause widget updates.
         document().nodeChildrenWillBeRemoved(*this);
     }
@@ -498,7 +475,7 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
 
     // Check that this node is not "floating".
     // If it is, it can be deleted as a side effect of sending mutation events.
-    ASSERT(refCount() || parentOrShadowHostNode());
+    ASSERT(refCount() || parentNode());
 
     checkAcceptChildType(newChild.get(), exceptionState);
     if (exceptionState.had_exception())
@@ -521,8 +498,6 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
     if (targets.isEmpty())
         return newChild;
 
-    // Must check this again beacuse focus events might run synchronously when
-    // removing children.
     checkAcceptChildHierarchy(*newChild, 0, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
@@ -579,7 +554,6 @@ void ContainerNode::parserAppendChild(PassRefPtr<Node> newChild)
 void ContainerNode::notifyNodeInserted(Node& root, ChildrenChangeSource source)
 {
     ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
-    ASSERT(!root.isShadowRoot());
 
     RefPtr<Node> protect(this);
     RefPtr<Node> protectNode(root);
@@ -600,8 +574,6 @@ void ContainerNode::notifyNodeInsertedInternal(Node& root)
         if (!inDocument() && !node->isContainerNode())
             continue;
         node->insertedInto(this);
-        if (ShadowRoot* shadowRoot = node->shadowRoot())
-            notifyNodeInsertedInternal(*shadowRoot);
     }
 }
 
@@ -617,8 +589,6 @@ void ContainerNode::notifyNodeRemoved(Node& root)
         if (!node->inDocument() && !node->isContainerNode())
             continue;
         node->removedFrom(this);
-        if (ShadowRoot* shadowRoot = node->shadowRoot())
-            notifyNodeRemoved(*shadowRoot);
     }
 }
 
@@ -783,36 +753,6 @@ LayoutRect ContainerNode::boundingBox() const
     }
 
     return enclosingLayoutRect(FloatRect(upperLeft, lowerRight.expandedTo(upperLeft) - upperLeft));
-}
-
-// This is used by FrameSelection to denote when the active-state of the page has changed
-// independent of the focused element changing.
-void ContainerNode::focusStateChanged()
-{
-    // If we're just changing the window's active state and the focused node has no
-    // renderer we can just ignore the state change.
-    if (!renderer())
-        return;
-
-    if (styleChangeType() < SubtreeStyleChange) {
-        if (renderStyle()->affectedByFocus())
-            setNeedsStyleRecalc(LocalStyleChange);
-    }
-}
-
-void ContainerNode::setFocus(bool received)
-{
-    if (focused() == received)
-        return;
-
-    Node::setFocus(received);
-
-    focusStateChanged();
-
-    if (renderer() || received)
-        return;
-
-    setNeedsStyleRecalc(LocalStyleChange);
 }
 
 void ContainerNode::setActive(bool down)
@@ -985,21 +925,5 @@ Element* ContainerNode::getElementById(const AtomicString& id) const
     }
     return 0;
 }
-
-#if ENABLE(ASSERT)
-bool childAttachedAllowedWhenAttachingChildren(ContainerNode* node)
-{
-    if (node->isShadowRoot())
-        return true;
-
-    if (node->isInsertionPoint())
-        return true;
-
-    if (node->isElementNode() && toElement(node)->shadow())
-        return true;
-
-    return false;
-}
-#endif
 
 } // namespace blink

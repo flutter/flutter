@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
   <key>application-identifier</key>
-  <string>F5T262WGN6.com.google.sky</string>
+  <string>F5T262WGN6.org.domokit.sky</string>
   <key>com.apple.developer.team-identifier</key>
   <string>F5T262WGN6</string>
   <key>get-task-allow</key>
   <true/>
   <key>keychain-access-groups</key>
   <array>
-    <string>F5T262WGN6.com.google.sky</string>
+    <string>F5T262WGN6.org.domokit.sky</string>
   </array>
 </dict>
 </plist>

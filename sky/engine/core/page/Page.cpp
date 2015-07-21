@@ -30,7 +30,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/public/platform/WebScreenInfo.h"
@@ -58,7 +57,6 @@ float deviceScaleFactor(LocalFrame* frame)
 Page::Page(PageClients& pageClients, ServiceProvider* services)
     : SettingsDelegate(Settings::create())
     , m_chromeClient(pageClients.chromeClient)
-    , m_focusController(FocusController::create(this))
     , m_mainFrame(0)
     , m_deviceScaleFactor(1)
 #if ENABLE(ASSERT)
@@ -208,31 +206,6 @@ void Page::setWindowRect(const FloatRect& rect) const
 FloatRect Page::windowRect() const
 {
     return m_chromeClient->windowRect();
-}
-
-void Page::focus() const
-{
-    m_chromeClient->focus();
-}
-
-bool Page::canTakeFocus(FocusType type) const
-{
-    return m_chromeClient->canTakeFocus(type);
-}
-
-void Page::takeFocus(FocusType type) const
-{
-    m_chromeClient->takeFocus(type);
-}
-
-void Page::focusedNodeChanged(Node* node) const
-{
-    m_chromeClient->focusedNodeChanged(node);
-}
-
-void Page::focusedFrameChanged(LocalFrame* frame) const
-{
-    m_chromeClient->focusedFrameChanged(frame);
 }
 
 void Page::scheduleVisualUpdate()

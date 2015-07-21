@@ -6,8 +6,14 @@
 group("default") {
   testonly = true
 
-  deps = [
-    "//sky",
-    "//services/sky",
-  ]
+  if (is_ios || is_mac) {
+    deps = [
+      "//sky/shell",
+    ]
+  } else {
+    deps = [
+      "//sky",
+      "//services/sky",
+    ]
+  }
 }

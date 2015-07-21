@@ -75,11 +75,6 @@ namespace blink {
     //
     // Attribute selectors return the attribute name in the attribute() method. The value() method returns the value matched against
     // in case of selectors like [attr="value"].
-    //
-    // ** isCustomPseudoElement():
-    //
-    // It appears this is used only for pseudo elements that appear in user-agent shadow DOM. They are not exposed to author-created
-    // shadow DOM.
 
     class CSSSelector {
         WTF_MAKE_FAST_ALLOCATED;
@@ -106,7 +101,7 @@ namespace blink {
             Tag, // Example: div
             Id, // Example: #id
             Class, // example: .class
-            PseudoClass, // Example:  :focus
+            PseudoClass, // Example:  :hover
             PseudoElement, // Example: ::first-line
             Exact, // Example: E[foo="bar"]
             Set, // Example: E[foo]
@@ -117,10 +112,8 @@ namespace blink {
             PseudoNotParsed = 0,
             PseudoUnknown,
             PseudoHover,
-            PseudoFocus,
             PseudoActive,
             PseudoLang,
-            PseudoUserAgentCustomElement,
             PseudoHost,
         };
 
@@ -167,7 +160,6 @@ namespace blink {
         void setSelectorList(PassOwnPtr<CSSSelectorList>);
 
         bool matchesPseudoElement() const;
-        bool isCustomPseudoElement() const;
         bool isAttributeSelector() const;
         bool isHostPseudoClass() const;
 
@@ -243,11 +235,6 @@ inline bool CSSSelector::matchesPseudoElement() const
     if (m_pseudoType == PseudoUnknown)
         extractPseudoType();
     return m_match == PseudoElement;
-}
-
-inline bool CSSSelector::isCustomPseudoElement() const
-{
-    return m_match == PseudoElement && (m_pseudoType == PseudoUserAgentCustomElement);
 }
 
 inline bool CSSSelector::isHostPseudoClass() const

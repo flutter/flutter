@@ -23,24 +23,19 @@
 
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
-#include "sky/engine/core/dom/NodeRenderingTraversal.h"
 
 namespace blink {
 
 ElementResolveContext::ElementResolveContext(const Document& document)
     : m_element(nullptr)
     , m_parentNode(nullptr)
-    , m_distributedToInsertionPoint(false)
 {
 }
 
 ElementResolveContext::ElementResolveContext(Element& element)
     : m_element(&element)
-    , m_distributedToInsertionPoint(false)
 {
-    NodeRenderingTraversal::ParentDetails parentDetails;
-    m_parentNode = NodeRenderingTraversal::parent(&element, &parentDetails);
-    m_distributedToInsertionPoint = parentDetails.insertionPoint();
+    m_parentNode = element.parentNode();
 }
 
 } // namespace blink

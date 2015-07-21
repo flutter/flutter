@@ -18,5 +18,4 @@
  */
 interface Text : CharacterData {
     [RaisesException] Text splitText(unsigned long offset);
-    sequence<Node> getDestinationInsertionPoints();
 };

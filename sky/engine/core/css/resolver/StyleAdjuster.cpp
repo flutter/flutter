@@ -88,7 +88,7 @@ static EDisplay equivalentBlockDisplay(EDisplay display)
 // and absolute or relatively positioned elements.
 static bool doesNotInheritTextDecoration(const RenderStyle* style, const Element& e)
 {
-    return isAtShadowBoundary(&e) || style->hasOutOfFlowPosition();
+    return style->hasOutOfFlowPosition();
 }
 
 static bool parentStyleForcesZIndexToCreateStackingContext(const RenderStyle* parentStyle)

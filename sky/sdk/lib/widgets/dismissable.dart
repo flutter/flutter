@@ -10,7 +10,7 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:vector_math/vector_math.dart';
 
-const Duration _kCardDismissFadeout = const Duration(milliseconds: 300);
+const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0/300.0;
@@ -64,6 +64,8 @@ class Dismissable extends AnimatedComponent {
   }
 
   void _maybeCallOnDismissed() {
+    _performance.stop();
+    _performance.removeListener(_handleAnimationProgressChanged);
     if (onDismissed != null)
       onDismissed();
   }
@@ -112,7 +114,7 @@ class Dismissable extends AnimatedComponent {
       if (_performance.isCompleted)
         _maybeCallOnDismissed();
       else if (!_performance.isAnimating)
-        _performance.progress = 0.0;
+        _performance.reverse();
     });
   }
 

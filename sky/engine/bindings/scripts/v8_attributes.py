@@ -50,21 +50,11 @@ def attribute_context(interface, attribute):
 
     idl_type.add_includes_for_type()
 
-    # [CustomElementCallbacks], [Reflect]
-    is_custom_element_callbacks = 'CustomElementCallbacks' in extended_attributes
-    is_reflect = 'Reflect' in extended_attributes
-    if is_custom_element_callbacks or is_reflect:
-        includes.add('sky/engine/core/dom/custom/custom_element_callback_scope.h')
     # [TypeChecking]
     has_type_checking_unrestricted = (
         (has_extended_attribute_value(interface, 'TypeChecking', 'Unrestricted') or
          has_extended_attribute_value(attribute, 'TypeChecking', 'Unrestricted')) and
          idl_type.name in ('Float', 'Double'))
-
-    if (base_idl_type == 'EventHandler' and
-        interface.name in ['Window'] and
-        attribute.name == 'onerror'):
-        includes.add('bindings/core/v8/V8ErrorHandler.h')
 
     context = {
         'argument_cpp_type': idl_type.cpp_type_args(used_as_rvalue_type=True),
@@ -82,7 +72,6 @@ def attribute_context(interface, attribute):
         'idl_type': str(idl_type),  # need trailing [] on array for Dictionary::ConversionContext::setConversionType
         'is_call_with_execution_context': v8_utilities.has_extended_attribute_value(attribute, 'CallWith', 'ExecutionContext'),
         'is_call_with_script_state': v8_utilities.has_extended_attribute_value(attribute, 'CallWith', 'ScriptState'),
-        'is_custom_element_callbacks': is_custom_element_callbacks,
         'is_getter_raises_exception':  # [RaisesException]
             'RaisesException' in extended_attributes and
             extended_attributes['RaisesException'] in (None, 'Getter'),
@@ -94,16 +83,11 @@ def attribute_context(interface, attribute):
         'is_partial_interface_member':
             'PartialInterfaceImplementedAs' in extended_attributes,
         'is_read_only': attribute.is_read_only,
-        'is_reflect': is_reflect,
         'is_replaceable': 'Replaceable' in attribute.extended_attributes,
         'is_static': attribute.is_static,
         'is_url': 'URL' in extended_attributes,
         'name': attribute.name,
         'put_forwards': 'PutForwards' in extended_attributes,
-        'reflect_empty': extended_attributes.get('ReflectEmpty'),
-        'reflect_invalid': extended_attributes.get('ReflectInvalid', ''),
-        'reflect_missing': extended_attributes.get('ReflectMissing'),
-        'reflect_only': extended_attribute_value_as_list(attribute, 'ReflectOnly'),
         'setter_callback': setter_callback_name(interface, attribute),
     }
 
@@ -161,10 +145,9 @@ CONTENT_ATTRIBUTE_GETTER_NAMES = {
 def getter_base_name(interface, attribute, arguments):
     extended_attributes = attribute.extended_attributes
 
-    if 'Reflect' not in extended_attributes:
-        return uncapitalize(cpp_name(attribute))
+    return uncapitalize(cpp_name(attribute))
 
-    content_attribute_name = extended_attributes['Reflect'] or attribute.name.lower()
+    content_attribute_name = attribute.name.lower()
     if content_attribute_name in ['class', 'id']:
         # Special-case for performance optimization.
         return 'get%sAttribute' % content_attribute_name.capitalize()
@@ -254,18 +237,11 @@ CONTENT_ATTRIBUTE_SETTER_NAMES = {
 
 
 def setter_base_name(interface, attribute, arguments):
-    if 'Reflect' not in attribute.extended_attributes:
-        return 'set%s' % capitalize(cpp_name(attribute))
-    arguments.append(scoped_content_attribute_name(interface, attribute))
-
-    base_idl_type = attribute.idl_type.base_type
-    if base_idl_type in CONTENT_ATTRIBUTE_SETTER_NAMES:
-        return CONTENT_ATTRIBUTE_SETTER_NAMES[base_idl_type]
-    return 'setAttribute'
+    return 'set%s' % capitalize(cpp_name(attribute))
 
 
 def scoped_content_attribute_name(interface, attribute):
-    content_attribute_name = attribute.extended_attributes['Reflect'] or attribute.name.lower()
+    content_attribute_name = attribute.name.lower()
     namespace = 'HTMLNames'
     includes.add('gen/sky/core/%s.h' % namespace)
     return '%s::%sAttr' % (namespace, content_attribute_name)

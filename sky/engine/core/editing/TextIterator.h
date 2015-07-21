@@ -41,8 +41,7 @@ enum TextIteratorBehavior {
     TextIteratorEmitsCharactersBetweenAllVisiblePositions = 1 << 0,
     TextIteratorIgnoresStyleVisibility = 1 << 2,
     TextIteratorEmitsOriginalText = 1 << 3,
-    TextIteratorEntersAuthorShadowRoots = 1 << 5,
-    TextIteratorEmitsObjectReplacementCharacter = 1 << 6
+    TextIteratorEmitsObjectReplacementCharacter = 1 << 5
 };
 typedef unsigned TextIteratorBehaviorFlags;
 
@@ -117,8 +116,6 @@ public:
 private:
     enum IterationProgress {
         HandledNone,
-        HandledAuthorShadowRoots,
-        HandledUserAgentShadowRoot,
         HandledNode,
         HandledChildren
     };
@@ -145,7 +142,6 @@ private:
     int m_offset;
     IterationProgress m_iterationProgress;
     BitStack m_fullyClippedStack;
-    int m_shadowDepth;
 
     // The range.
     RawPtr<Node> m_startContainer;
@@ -194,8 +190,6 @@ private:
 
     // Used when the visibility of the style should not affect text gathering.
     bool m_ignoresStyleVisibility;
-
-    bool m_entersAuthorShadowRoots;
 
     bool m_emitsObjectReplacementCharacter;
 };

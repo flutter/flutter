@@ -26,7 +26,6 @@
 #define SKY_ENGINE_CORE_DOM_NODERENDERSTYLE_H_
 
 #include "sky/engine/core/dom/Node.h"
-#include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 
@@ -41,7 +40,7 @@ inline RenderStyle* Node::renderStyle() const
 
 inline RenderStyle* Node::parentRenderStyle() const
 {
-    ContainerNode* parent = NodeRenderingTraversal::parent(this);
+    ContainerNode* parent = parentNode();
     return parent ? parent->renderStyle() : 0;
 }
 

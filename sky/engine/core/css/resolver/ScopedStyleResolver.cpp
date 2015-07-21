@@ -33,7 +33,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/TreeScope.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
 namespace blink {
 
@@ -53,11 +52,6 @@ void ScopedStyleResolver::updateActiveStyleSheets()
     // TODO(esprehn): We should avoid subtree recalcs in sky when rules change
     // and only recalc specific tree scopes.
     root.setNeedsStyleRecalc(SubtreeStyleChange);
-
-    // TODO(esprehn): We should use LocalStyleChange, :host rule changes
-    // can only impact the host directly as Sky has no descendant selectors.
-    if (root.isShadowRoot())
-        toShadowRoot(root).host()->setNeedsStyleRecalc(SubtreeStyleChange);
 }
 
 bool ScopedStyleResolver::hasSelectorForId(const AtomicString& id) const

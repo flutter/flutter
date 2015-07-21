@@ -6,4 +6,4 @@ dependencies:
 description: Developer tool for packaging Sky applications
 homepage: https://github.com/domokit/mojo/tree/master/sky/tools/skyx
 name: skyx
-version: 0.0.1
+version: 0.0.2

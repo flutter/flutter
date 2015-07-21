@@ -32,8 +32,6 @@
     readonly attribute Screen screen;
     [Replaceable, PutForwards=href] readonly attribute Location location;
 
-    void focus();
-
     [Replaceable] readonly attribute long outerHeight;
     [Replaceable] readonly attribute long outerWidth;
     [Replaceable] readonly attribute long innerHeight;

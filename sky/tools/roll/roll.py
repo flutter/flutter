@@ -38,20 +38,13 @@ _build_deps = [
     'tools/valgrind',
 ]
 
-# things used from //mojo/public
-_mojo_sdk_deps = [
-    'third_party/cython',
-]
-
 _chromium_libs = [
-    'crypto',
     'url',
 ]
 
 _third_party_deps = [
     'third_party/android_platform',
     'third_party/apple_apsl',
-    'third_party/boringssl',
     'third_party/brotli',
     'third_party/expat',
     'third_party/freetype-android',
@@ -69,22 +62,17 @@ _third_party_deps = [
     'third_party/mockito',
     'third_party/ots',
     'third_party/ply',
-    'third_party/protobuf',
     'third_party/qcms',
     'third_party/re2',
     'third_party/robolectric',
-    'third_party/smhasher',
-    'third_party/yasm',
     'third_party/zlib',
 ]
 
-dirs_from_chromium = _base_deps + _build_deps + _mojo_sdk_deps + _chromium_libs + _third_party_deps
+dirs_from_chromium = _base_deps + _build_deps + _chromium_libs + _third_party_deps
 
 dirs_from_mojo = [
     'gpu',
     'mojo',
-    'mojom',
-    'services/android',
     'services/asset_bundle',
     'services/keyboard',
     'services/sensors',
@@ -93,15 +81,15 @@ dirs_from_mojo = [
 # The contents of these files before the roll will be preserved after the roll,
 # even though they live in directories rolled in from Chromium.
 files_not_to_roll = [
-    'build/config/crypto.gni',
     'build/config/ui.gni',
     'build/ls.py',
     'build/module_args/mojo.gni',
+    'gpu/BUILD.gn',
+    'tools/android/download_android_tools.py',
     'tools/android/VERSION_LINUX_NDK',
     'tools/android/VERSION_LINUX_SDK',
     'tools/android/VERSION_MACOSX_NDK',
     'tools/android/VERSION_MACOSX_SDK',
-    'tools/android/download_android_tools.py',
 ]
 
 

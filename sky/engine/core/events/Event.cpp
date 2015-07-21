@@ -105,11 +105,6 @@ bool Event::isUIEvent() const
     return false;
 }
 
-bool Event::isFocusEvent() const
-{
-    return false;
-}
-
 bool Event::isKeyboardEvent() const
 {
     return false;

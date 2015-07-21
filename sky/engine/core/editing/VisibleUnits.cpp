@@ -83,7 +83,7 @@ static Position previousRootInlineBoxCandidatePosition(Node* node, const Visible
     while (previousNode && (!previousNode->renderer() || inSameLine(VisiblePosition(firstPositionInOrBeforeNode(previousNode)), visiblePosition)))
         previousNode = previousLeafWithSameEditability(previousNode, editableType);
 
-    while (previousNode && !previousNode->isShadowRoot()) {
+    while (previousNode) {
         if (highestEditableRoot(firstPositionInOrBeforeNode(previousNode), editableType) != highestRoot)
             break;
 
@@ -104,7 +104,7 @@ static Position nextRootInlineBoxCandidatePosition(Node* node, const VisiblePosi
     while (nextNode && (!nextNode->renderer() || inSameLine(VisiblePosition(firstPositionInOrBeforeNode(nextNode)), visiblePosition)))
         nextNode = nextLeafWithSameEditability(nextNode, ContentIsEditable);
 
-    while (nextNode && !nextNode->isShadowRoot()) {
+    while (nextNode) {
         if (highestEditableRoot(firstPositionInOrBeforeNode(nextNode), editableType) != highestRoot)
             break;
 
@@ -510,7 +510,6 @@ static VisiblePosition previousBoundary(const VisiblePosition& c, BoundarySearch
     // Use the character iterator to translate the next value into a DOM position.
     BackwardsCharacterIterator charIt(searchRange.get());
     charIt.advance(string.size() - suffixLength - next);
-    // FIXME: charIt can get out of shadow host.
     return VisiblePosition(charIt.range()->endPosition(), DOWNSTREAM);
 }
 

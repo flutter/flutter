@@ -41,7 +41,6 @@
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
@@ -164,12 +163,6 @@ void LocalFrame::willDetachFrameHost()
     HashSet<FrameDestructionObserver*>::iterator stop = m_destructionObservers.end();
     for (HashSet<FrameDestructionObserver*>::iterator it = m_destructionObservers.begin(); it != stop; ++it)
         (*it)->willDetachFrameHost();
-
-    // FIXME: Page should take care of updating focus/scrolling instead of Frame.
-    // FIXME: It's unclear as to why this is called more than once, but it is,
-    // so page() could be null.
-    if (page() && page()->focusController().focusedFrame() == this)
-        page()->focusController().setFocusedFrame(nullptr);
 }
 
 void LocalFrame::detachFromFrameHost()

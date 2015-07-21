@@ -25,7 +25,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/SettingsDelegate.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
-#include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/platform/HostWindow.h"
 #include "sky/engine/platform/Supplementable.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
@@ -42,7 +41,6 @@ class ChromeClient;
 class ClientRectList;
 class Document;
 class FloatRect;
-class FocusController;
 class Frame;
 class FrameHost;
 class IntRect;
@@ -84,8 +82,6 @@ public:
 
     void documentDetached(Document*);
 
-    FocusController& focusController() const { return *m_focusController; }
-
     Settings& settings() const { return *m_settings; }
 
     void unmarkAllTextMatches();
@@ -118,14 +114,6 @@ public:
     void setWindowRect(const FloatRect&) const;
     FloatRect windowRect() const;
 
-    void focus() const;
-
-    bool canTakeFocus(FocusType) const;
-    void takeFocus(FocusType) const;
-
-    void focusedNodeChanged(Node*) const;
-    void focusedFrameChanged(LocalFrame*) const;
-
     bool shouldReportDetailedMessageForSource(const String& source);
     void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String& message, unsigned lineNumber, const String& sourceID, const String& stackTrace);
 
@@ -140,7 +128,6 @@ private:
     virtual void settingsChanged(SettingsDelegate::ChangeType) override;
 
     ChromeClient* m_chromeClient;
-    const OwnPtr<FocusController> m_focusController;
 
     // Typically, the main frame and Page should both be owned by the embedder,
     // which must call Page::willBeDestroyed() prior to destroying Page. This

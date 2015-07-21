@@ -80,7 +80,7 @@ static const char* kDartArgs[] = {
     "--enable_type_checks",
     "--error_on_bad_type",
     "--error_on_bad_override",
-#if WTF_OS_IOS
+#if WTF_OS_IOS || WTF_OS_MACOSX
     "--no-profile"
 #endif
 #endif

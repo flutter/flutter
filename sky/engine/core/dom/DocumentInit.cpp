@@ -29,7 +29,6 @@
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/custom/custom_element_registry.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 
 namespace blink {
@@ -45,7 +44,6 @@ DocumentInit::DocumentInit(const DocumentInit& other)
     : m_url(other.m_url)
     , m_frame(other.m_frame)
     , m_contextDocument(other.m_contextDocument)
-    , m_elementRegistry(other.m_elementRegistry)
 {
 }
 
@@ -67,13 +65,6 @@ Settings* DocumentInit::settings() const
 {
     ASSERT(frameForSecurityContext());
     return frameForSecurityContext()->settings();
-}
-
-DocumentInit& DocumentInit::withElementRegistry(CustomElementRegistry& elementregistry)
-{
-    ASSERT(!m_elementRegistry);
-    m_elementRegistry = &elementregistry;
-    return *this;
 }
 
 WeakPtr<Document> DocumentInit::contextDocument() const
