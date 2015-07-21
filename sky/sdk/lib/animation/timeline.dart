@@ -54,11 +54,12 @@ class Timeline {
     double end: 1.0
   }) {
     assert(!_animation.isAnimating);
-
+    assert(duration > Duration.ZERO);
     return _animation.start(new TweenSimulation(duration, begin, end));
   }
 
   Future animateTo(double target, { Duration duration }) {
+    assert(duration > Duration.ZERO);
     return _start(duration: duration, begin: value, end: target);
   }
 
