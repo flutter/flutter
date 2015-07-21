@@ -39,6 +39,7 @@ class SpriteBox extends RenderBox {
 
     // Add new references
     _addSpriteBoxReference(_rootNode);
+    markNeedsLayout();
   }
 
   // Tracking of frame rate and updates
@@ -55,7 +56,7 @@ class SpriteBox extends RenderBox {
     _transformMode = value;
 
     // Invalidate stuff
-    if (attached) performLayout();
+    markNeedsLayout();
   }
 
   /// The transform mode used by the [SpriteBox].
@@ -68,7 +69,10 @@ class SpriteBox extends RenderBox {
 
   Rect _visibleArea;
 
-  Rect get visibleArea => _visibleArea;
+  Rect get visibleArea {
+    if (_visibleArea == null) _calcTransformMatrix();
+    return _visibleArea;
+  }
 
   // Setup
 
@@ -150,6 +154,8 @@ class SpriteBox extends RenderBox {
   }
 
   void handleEvent(Event event, _SpriteBoxHitTestEntry entry) {
+    if (!attached) return;
+
     if (event is PointerEvent) {
 
       if (event.type == 'pointerdown') {
@@ -212,10 +218,13 @@ class SpriteBox extends RenderBox {
   ///     var matrix = mySpriteBox.transformMatrix;
   Matrix4 get transformMatrix {
     // Get cached matrix if available
-    if (_transformMatrix != null) {
-      return _transformMatrix;
+    if (_transformMatrix == null) {
+      _calcTransformMatrix();
     }
+    return _transformMatrix;
+  }
 
+  void _calcTransformMatrix() {
     _transformMatrix = new Matrix4.identity();
 
     // Calculate matrix
@@ -273,13 +282,17 @@ class SpriteBox extends RenderBox {
         break;
     }
 
+    _visibleArea = new Rect.fromLTRB(-offsetX / scaleX,
+                                     -offsetY / scaleY,
+                                     systemWidth + offsetX / scaleX,
+                                     systemHeight + offsetY / scaleY);
+
     _transformMatrix.translate(offsetX, offsetY);
     _transformMatrix.scale(scaleX, scaleY);
-
-    return _transformMatrix;
   }
 
   void _invalidateTransformMatrix() {
+    _visibleArea = null;
     _transformMatrix = null;
     _rootNode._invalidateToBoxTransformMatrix();
   }
