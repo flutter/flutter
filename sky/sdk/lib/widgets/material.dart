@@ -20,7 +20,7 @@ const Map<MaterialType, double> edges = const {
 
 class Material extends Component {
   Material({
-    String key,
+    Key key,
     this.child,
     this.type: MaterialType.card,
     this.level: 0,

@@ -46,7 +46,7 @@ const Point _kTransitionStartPoint = const Point(0.0, 75.0);
 enum TransitionDirection { forward, reverse }
 class Transition extends AnimatedComponent {
   Transition({
-    String key,
+    Key key,
     this.content,
     this.direction,
     this.onDismissed,
@@ -190,7 +190,7 @@ class NavigationState {
 
 class Navigator extends StatefulComponent {
 
-  Navigator(this.state, { String key }) : super(key: key);
+  Navigator(this.state, { Key key }) : super(key: key);
 
   NavigationState state;
 
@@ -242,7 +242,7 @@ class Navigator extends StatefulComponent {
       if (content == null)
         continue;
       Transition transition = new Transition(
-        key: historyEntry.hashCode.toString(), // TODO(ianh): make it not collide
+        key: new Key.fromObjectIdentity(historyEntry),
         content: content,
         direction: (i <= state.historyIndex) ? TransitionDirection.forward : TransitionDirection.reverse,
         interactive: (i == state.historyIndex),

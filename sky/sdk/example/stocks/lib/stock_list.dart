@@ -10,7 +10,7 @@ import 'stock_data.dart';
 import 'stock_row.dart';
 
 class Stocklist extends Component {
-  Stocklist({ String key, this.stocks }) : super(key: key);
+  Stocklist({ Key key, this.stocks }) : super(key: key);
 
   final List<Stock> stocks;
 

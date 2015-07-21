@@ -16,7 +16,7 @@ const double _kSize = 56.0;
 class FloatingActionButton extends ButtonBase {
 
   FloatingActionButton({
-    String key,
+    Key key,
     this.child,
     this.backgroundColor,
     this.onPressed

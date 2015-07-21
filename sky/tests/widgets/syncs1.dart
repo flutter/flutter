@@ -31,7 +31,7 @@ class FiddleApp extends App {
   Widget buildFlex2() {
     return new Flex([
       new Flexible(child: new Container(
-        key: 'something-else',
+        key: new Key('something-else'),
         decoration: new BoxDecoration(
           backgroundColor: const Color(0xEFFF9F00)
         )
@@ -54,7 +54,7 @@ class FiddleApp extends App {
   Widget buildStack2() {
     return new Stack([
       new Positioned(child: new Container(
-        key: 'something-else',
+        key: new Key('something-else'),
         decoration: new BoxDecoration(
           backgroundColor: const Color(0xEFFF9F00)
         )
@@ -66,12 +66,12 @@ class FiddleApp extends App {
   Widget build() {
     return new Flex([
         new SizedBox(
-          key: 'flex-example',
+          key: new Key('flex-example'),
           height: 250.0,
           child: arbitrarySetting ? buildFlex1() : buildFlex2()
         ),
         new SizedBox(
-          key: 'stack-example',
+          key: new Key('stack-example'),
           height: 250.0,
           child: arbitrarySetting ? buildStack1() : buildStack2()
         )

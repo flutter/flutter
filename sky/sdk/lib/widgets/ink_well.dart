@@ -126,7 +126,7 @@ class RenderInkWell extends RenderProxyBox {
 }
 
 class InkWell extends OneChildRenderObjectWrapper {
-  InkWell({ String key, Widget child })
+  InkWell({ Key key, Widget child })
     : super(key: key, child: child);
 
   RenderInkWell get root => super.root;

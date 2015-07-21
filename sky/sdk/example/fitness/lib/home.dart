@@ -27,7 +27,7 @@ import 'fitness_types.dart';
 import 'measurement.dart';
 
 class MeasurementList extends Component {
-  MeasurementList({ String key, this.measurements, this.onDismissed }) : super(key: key);
+  MeasurementList({ Key key, this.measurements, this.onDismissed }) : super(key: key);
 
   final List<Measurement> measurements;
   final MeasurementHandler onDismissed;
@@ -49,7 +49,7 @@ class MeasurementList extends Component {
 
 class MeasurementRow extends Component {
 
-  MeasurementRow({ Measurement measurement, this.onDismissed }) : this.measurement = measurement, super(key: measurement.when.toString());
+  MeasurementRow({ Measurement measurement, this.onDismissed }) : this.measurement = measurement, super(key: new Key.stringify(measurement.when));
 
   final Measurement measurement;
   final MeasurementHandler onDismissed;
@@ -74,7 +74,7 @@ class MeasurementRow extends Component {
     ];
 
     return new Dismissable(
-      key: measurement.when.toString(),
+      key: new Key.stringify(measurement.when),
       onDismissed: () => onDismissed(measurement),
       child: new Card(
         child: new Container(

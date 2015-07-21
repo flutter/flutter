@@ -16,7 +16,7 @@ class _Key {
   const _Key(this.type, this.key);
   factory _Key.fromWidget(Widget widget) => new _Key(widget.runtimeType, widget.key);
   final Type type;
-  final String key;
+  final Key key;
   bool operator ==(other) => other is _Key && other.type == type && other.key == key;
   int get hashCode => 373 * 37 * type.hashCode + key.hashCode;
   String toString() => "_Key(type: $type, key: $key)";
@@ -78,7 +78,7 @@ class BlockViewportLayoutState {
 }
 
 class BlockViewport extends RenderObjectWrapper {
-  BlockViewport({ this.builder, this.startOffset, this.token, this.layoutState, String key })
+  BlockViewport({ this.builder, this.startOffset, this.token, this.layoutState, Key key })
     : super(key: key) {
     assert(this.layoutState != null);
   }

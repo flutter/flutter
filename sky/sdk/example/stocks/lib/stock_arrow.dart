@@ -12,7 +12,7 @@ import 'package:sky/widgets/basic.dart';
 
 class StockArrow extends Component {
 
-  StockArrow({ String key, this.percentChange }) : super(key: key);
+  StockArrow({ Key key, this.percentChange }) : super(key: key);
 
   final double percentChange;
 

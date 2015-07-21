@@ -46,7 +46,7 @@ typedef void DrawerStatusChangedCallback(DrawerStatus status);
 
 class Drawer extends AnimatedComponent {
   Drawer({
-    String key,
+    Key key,
     this.children,
     this.showing: false,
     this.level: 0,

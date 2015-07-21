@@ -19,7 +19,7 @@ class IconThemeData {
 class IconTheme extends Inherited {
 
   IconTheme({
-    String key,
+    Key key,
     this.data,
     Widget child
   }) : super(key: key, child: child) {
@@ -49,7 +49,7 @@ final AssetBundle _iconBundle = _initIconBundle();
 
 class Icon extends Component {
   Icon({
-    String key,
+    Key key,
     this.size,
     this.type: '',
     this.color,
