@@ -9,7 +9,7 @@ import sys
 import os
 
 def main():
-    parser = argparse.ArgumentParser(description='Sky Packager')
+    parser = argparse.ArgumentParser(description='Snapshots Sky applications')
     parser.add_argument('executable', type=str)
     parser.add_argument('main', type=str)
     parser.add_argument('--package-root', type=str)

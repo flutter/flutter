@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_TOOLS_PACKAGER_LOGGING_H_
-#define SKY_TOOLS_PACKAGER_LOGGING_H_
+#ifndef SKY_TOOLS_SKY_SNAPSHOT_LOGGING_H_
+#define SKY_TOOLS_SKY_SNAPSHOT_LOGGING_H_
 
 #include <string>
 
@@ -13,4 +13,4 @@ bool LogIfError(Dart_Handle handle);
 std::string StringFromDart(Dart_Handle string);
 Dart_Handle StringToDart(const std::string& string);
 
-#endif  // SKY_TOOLS_PACKAGER_LOGGING_H_
+#endif  // SKY_TOOLS_SKY_SNAPSHOT_LOGGING_H_

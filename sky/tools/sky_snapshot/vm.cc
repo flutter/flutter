@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/tools/packager/vm.h"
+#include "sky/tools/sky_snapshot/vm.h"
 
 #include "base/logging.h"
-#include "sky/tools/packager/loader.h"
-#include "sky/tools/packager/logging.h"
+#include "sky/tools/sky_snapshot/loader.h"
+#include "sky/tools/sky_snapshot/logging.h"
 
 namespace blink {
 extern const uint8_t* kDartVmIsolateSnapshotBuffer;

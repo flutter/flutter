@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/tools/packager/loader.h"
+#include "sky/tools/sky_snapshot/loader.h"
 
 #include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/strings/string_util.h"
-#include "sky/tools/packager/logging.h"
-#include "sky/tools/packager/scope.h"
-#include "sky/tools/packager/switches.h"
+#include "sky/tools/sky_snapshot/logging.h"
+#include "sky/tools/sky_snapshot/scope.h"
+#include "sky/tools/sky_snapshot/switches.h"
 
 namespace {
 
