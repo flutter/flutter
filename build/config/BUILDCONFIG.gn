@@ -579,7 +579,7 @@ if (is_win) {
   set_default_toolchain(host_toolchain)
 } else if (is_ios) {
   host_toolchain = "//build/toolchain/mac:clang_x64"
-  set_default_toolchain("//build/toolchain/mac:clang_$current_cpu")
+  set_default_toolchain("//build/toolchain/mac:ios_clang_arm")
 } else if (is_nacl) {
   # TODO(GYP): This will need to change when we get NaCl working
   # on multiple platforms, but this whole block of code (how we define

@@ -386,14 +386,16 @@ config("default_libs") {
       "Foundation.framework",
       "IOKit.framework",
       "Security.framework",
+      "OpenGL.framework",
     ]
   } else if (is_ios) {
+    # The libraries listed here will be specified for both the target and the
+    # host. Only the common ones should be listed here.
     libs = [
       "CoreFoundation.framework",
       "CoreGraphics.framework",
       "CoreText.framework",
       "Foundation.framework",
-      "UIKit.framework",
     ]
   } else if (is_linux) {
     libs = [ "dl" ]
