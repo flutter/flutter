@@ -53,13 +53,21 @@ void launch(String relativeUrl, String bundle) {
 }
 
 class SkyDemo {
-  String name;
-  String href;
-  String bundle;
-  String description;
-  typography.TextTheme textTheme;
-  BoxDecoration decoration;
-  SkyDemo({ this.name, this.href, this.bundle, this.description, this.textTheme, this.decoration });
+  SkyDemo({
+    name,
+    this.href,
+    this.bundle,
+    this.description,
+    this.textTheme,
+    this.decoration
+  }) : name = name, key = name;
+  final String name;
+  final String key;
+  final String href;
+  final String bundle;
+  final String description;
+  final typography.TextTheme textTheme;
+  final BoxDecoration decoration;
 }
 
 List<SkyDemo> demos = [
@@ -162,7 +170,7 @@ class DemoList extends Component {
 
   Widget buildDemo(SkyDemo demo) {
     return new Listener(
-      key: demo.name,
+      key: demo.key,
       onGestureTap: (_) => launch(demo.href, demo.bundle),
       child: new Container(
         height: kCardHeight,
