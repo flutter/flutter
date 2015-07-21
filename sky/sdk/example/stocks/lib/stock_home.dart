@@ -69,7 +69,8 @@ class StockHome extends AnimatedComponent {
   }
 
   void _handleSearchEnd() {
-    assert(navigator.currentRoute.key == this);
+    assert(navigator.currentRoute is RouteState);
+    assert((navigator.currentRoute as RouteState).owner == this); // TODO(ianh): remove cast once analyzer is cleverer
     navigator.pop();
     setState(() {
       _isSearching = false;
