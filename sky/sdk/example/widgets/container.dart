@@ -16,7 +16,8 @@ class ContainerApp extends App {
           decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
           child: new NetworkImage(
             src: "https://www.dartlang.org/logos/dart-logo.png",
-            size: new Size(300.0, 300.0)
+            width: 300.0,
+            height: 300.0
           )
         ),
         new Container(

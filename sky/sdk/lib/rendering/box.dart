@@ -1249,9 +1249,10 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
 class RenderImage extends RenderBox {
 
-  RenderImage(sky.Image image, Size requestedSize, { sky.ColorFilter colorFilter })
+  RenderImage({ sky.Image image, double width, double height, sky.ColorFilter colorFilter })
     : _image = image,
-      _requestedSize = requestedSize,
+      _width = width,
+      _height = height,
       _colorFilter = colorFilter;
 
   sky.Image _image;
@@ -1261,18 +1262,25 @@ class RenderImage extends RenderBox {
       return;
     _image = value;
     markNeedsPaint();
-    if (_requestedSize.width == null || _requestedSize.height == null)
+    if (_width == null || _height == null)
       markNeedsLayout();
   }
 
-  Size _requestedSize;
-  Size get requestedSize => _requestedSize;
-  void set requestedSize (Size value) {
-    if (value == null)
-      value = const Size(null, null);
-    if (value == _requestedSize)
+  double _width;
+  double get width => _width;
+  void set width (double value) {
+    if (value == _width)
       return;
-    _requestedSize = value;
+    _width = value;
+    markNeedsLayout();
+  }
+
+  double _height;
+  double get height => _height;
+  void set height (double value) {
+    if (value == _height)
+      return;
+    _height = value;
     markNeedsLayout();
   }
 
@@ -1299,8 +1307,8 @@ class RenderImage extends RenderBox {
   Size _sizeForConstraints(BoxConstraints constraints) {
     // If there's no image, we can't size ourselves automatically
     if (_image == null) {
-      double width = requestedSize.width == null ? 0.0 : requestedSize.width;
-      double height = requestedSize.height == null ? 0.0 : requestedSize.height;
+      double width = _width == null ? 0.0 : _width;
+      double height = _height == null ? 0.0 : _height;
       return constraints.constrain(new Size(width, height));
     }
 
@@ -1310,8 +1318,8 @@ class RenderImage extends RenderBox {
       // other dimension to maintain the aspect ratio. In both cases,
       // constrain dimensions first, otherwise we end up losing the
       // ratio after constraining.
-      if (requestedSize.width == null) {
-        if (requestedSize.height == null) {
+      if (_width == null) {
+        if (_height == null) {
           // autosize
           double width = constraints.constrainWidth(_image.width.toDouble());
           double maxHeight = constraints.constrainHeight(_image.height.toDouble());
@@ -1323,21 +1331,21 @@ class RenderImage extends RenderBox {
           }
           return constraints.constrain(new Size(width, height));
         }
-        // determine width from height
-        double width = requestedSize.height * _image.width / _image.height;
-        return constraints.constrain(new Size(width, requestedSize.height));
+        // Determine width from height
+        double width = _height * _image.width / _image.height;
+        return constraints.constrain(new Size(width, height));
       }
-      if (requestedSize.height == null) {
-        // determine height from width
-        double height = requestedSize.width * _image.height / _image.width;
-        return constraints.constrain(new Size(requestedSize.width, height));
+      if (_height == null) {
+        // Determine height from width
+        double height = _width * _image.height / _image.width;
+        return constraints.constrain(new Size(width, height));
       }
     }
-    return constraints.constrain(requestedSize);
+    return constraints.constrain(new Size(width, height));
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    if (requestedSize.width == null && requestedSize.height == null)
+    if (_width == null && _height == null)
       return constraints.constrainWidth(0.0);
     return _sizeForConstraints(constraints).width;
   }
@@ -1347,7 +1355,7 @@ class RenderImage extends RenderBox {
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    if (requestedSize.width == null && requestedSize.height == null)
+    if (_width == null && _height == null)
       return constraints.constrainHeight(0.0);
     return _sizeForConstraints(constraints).height;
   }
@@ -1377,7 +1385,7 @@ class RenderImage extends RenderBox {
       canvas.restore();
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}dimensions: ${requestedSize}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}width: ${width}\n${prefix}height: ${height}\n';
 }
 
 class RenderDecoratedBox extends RenderProxyBox {
