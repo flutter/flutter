@@ -122,8 +122,9 @@ class PopupMenu extends AnimatedComponent {
     PopupMenuStatus status = _status;
     if (_lastStatus != null && status != _lastStatus) {
       if (status == PopupMenuStatus.inactive &&
-          navigator != null &&
-          navigator.currentRoute.key == this)
+          navigator != null && 
+          navigator.currentRoute is RouteState &&
+          (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
         navigator.pop();
       if (onStatusChanged != null)
         onStatusChanged(status);
