@@ -28,6 +28,19 @@ class SpriteBox extends RenderBox {
   // Root node for drawing
   NodeWithSize _rootNode;
 
+  void set rootNode (NodeWithSize value) {
+    if (value == _rootNode) return;
+
+    // Remove sprite box references
+    if (_rootNode != null) _removeSpriteBoxReference(_rootNode);
+
+    // Update the value
+    _rootNode = value;
+
+    // Add new references
+    _addSpriteBoxReference(_rootNode);
+  }
+
   // Tracking of frame rate and updates
   double _lastTimeStamp;
   int _numFrames = 0;
@@ -36,6 +49,15 @@ class SpriteBox extends RenderBox {
   // Transformation mode
   SpriteBoxTransformMode _transformMode;
 
+  void set transformMode (SpriteBoxTransformMode value) {
+    if (value == _transformMode)
+      return;
+    _transformMode = value;
+
+    // Invalidate stuff
+    if (attached) performLayout();
+  }
+
   /// The transform mode used by the [SpriteBox].
   SpriteBoxTransformMode get transformMode => _transformMode;
 
@@ -43,6 +65,10 @@ class SpriteBox extends RenderBox {
   Matrix4 _transformMatrix;
 
   List<Node> _eventTargets;
+
+  Rect _visibleArea;
+
+  Rect get visibleArea => _visibleArea;
 
   // Setup
 
@@ -58,15 +84,17 @@ class SpriteBox extends RenderBox {
     assert(rootNode._spriteBox == null);
 
     // Setup root node
-    _rootNode = rootNode;
-
-    // Assign SpriteBox reference to all the nodes
-    _addSpriteBoxReference(_rootNode);
+    this.rootNode = rootNode;
 
     // Setup transform mode
-    _transformMode = mode;
+    this.transformMode = mode;
+  }
 
-    _scheduleTick();
+  void _removeSpriteBoxReference(Node node) {
+    node._spriteBox = null;
+    for (Node child in node._children) {
+      _removeSpriteBoxReference(child);
+    }
   }
 
   void _addSpriteBoxReference(Node node) {
@@ -74,6 +102,11 @@ class SpriteBox extends RenderBox {
     for (Node child in node._children) {
       _addSpriteBoxReference(child);
     }
+  }
+
+  void attach() {
+    super.attach();
+    _scheduleTick();
   }
 
   // Properties
@@ -271,6 +304,7 @@ class SpriteBox extends RenderBox {
   }
 
   void _tick(double timeStamp) {
+    if (!attached) return;
 
       // Calculate the time between frames in seconds
     if (_lastTimeStamp == null) _lastTimeStamp = timeStamp;

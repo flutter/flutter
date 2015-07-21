@@ -3,3 +3,5 @@ assets:
   - assets/sprites.json
   - assets/sprites.png
   - assets/starfield.png
+  - assets/game_ui.png
+  - assets/game_ui.json
