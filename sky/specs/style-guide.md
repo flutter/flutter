@@ -42,8 +42,8 @@ constructors.
 Fields should come before the methods that manipulate them, if they
 are specific to a particular group of methods.
 
-> For example, RenderObject groups all the layout methods and layout
-> fields together, then all the paint methods and paint fields.
+> For example, RenderObject groups all the layout fields and layout
+> methods together, then all the paint fields and paint methods.
 
 Fields that aren't specific to a particular group of methods should
 come immediately after the constructors.
@@ -64,8 +64,9 @@ line would make it less readable.
 Only use => when the result fits on a single line.
 
 When using ```{ }``` braces, put a space or a newline after the open
-brace and before the closing brace. (If the black is empty, the same
-space will suffice for both.)
+brace and before the closing brace. (If the block is empty, the same
+space will suffice for both.) Use spaces if the whole block fits on
+one line, and newlines if you need to break it over multiple lines.
 
 When breaking an argument list into multiple lines, indent the
 arguments two characters from the previous line.
