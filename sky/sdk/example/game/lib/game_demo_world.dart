@@ -27,6 +27,7 @@ class GameDemoWorld extends NodeWithSize {
   sky.Image _imgNebula;
 
   SpriteSheet _spriteSheet;
+  SpriteSheet _spriteSheetUI;
   Navigator _navigator;
 
   // Inputs
@@ -46,8 +47,10 @@ class GameDemoWorld extends NodeWithSize {
   int _numFrames = 0;
   bool _isGameOver = false;
 
-  GameDemoWorld(App app, this._navigator, ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
+  // Heads up display
+  Hud _hud;
 
+  GameDemoWorld(App app, this._navigator, ImageMap images, this._spriteSheet, this._spriteSheetUI) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
     // Fetch images
     _imgNebula = images["assets/nebula.png"];
 
@@ -81,6 +84,10 @@ class GameDemoWorld extends NodeWithSize {
 
     userInteractionEnabled = true;
     handleMultiplePointers = true;
+
+    _hud = new Hud(_spriteSheetUI);
+    _hud.zPosition = 1000.0;
+    addChild(_hud);
   }
 
   // Methods for adding game objects
@@ -582,6 +589,49 @@ class StarField extends Node {
 
       _starPositions[i] = new Point(xPos, yPos);
     }
+  }
+}
+
+class Hud extends NodeWithSize {
+  SpriteSheet spriteSheetUI;
+  Sprite sprtBgScore;
+  Sprite sprtBgShield;
+
+  int _score = 0;
+
+  int get score => _score;
+
+  set score(int score) {
+    _score = score;
+    _updateHud();
+  }
+
+  Hud(this.spriteSheetUI) {
+    pivot = Point.origin;
+
+    sprtBgScore = new Sprite(spriteSheetUI["scoreboard.png"]);
+    sprtBgScore.pivot = Point.origin;
+    sprtBgScore.scale = 0.6;
+    addChild(sprtBgScore);
+
+    sprtBgShield = new Sprite(spriteSheetUI["bar_shield.png"]);
+    sprtBgShield.pivot = new Point(1.0, 0.0);
+    sprtBgShield.scale = 0.6;
+    addChild(sprtBgShield);
+  }
+
+  void spriteBoxPerformedLayout() {
+    // Set the size and position of HUD display
+    position = spriteBox.visibleArea.topLeft;
+    size = spriteBox.visibleArea.size;
+
+    // Position hud objects
+    sprtBgScore.position = new Point(20.0, 20.0);
+    sprtBgShield.position = new Point(size.width - 20.0, 20.0);
+  }
+
+  void _updateHud() {
+
   }
 }
 
