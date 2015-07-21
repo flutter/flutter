@@ -48,9 +48,12 @@ void doFrame(double timeStamp) {
       node = root;
     } else if (node != root && other != null && pickThis(0.1)) {
       report("insertBefore()");
-      node.insertBefore([other]);
+      try {
+        node.insertBefore([other]);
+      } catch (_) {
+      }
       break;
-    } else if (pickThis(0.001)) {
+    } else if (node != root && pickThis(0.001)) {
       report("remove()");
       node.remove();
     } else if (node is sky.Element) {
@@ -148,7 +151,7 @@ void doFrame(double timeStamp) {
         break;
       }
     } else {
-      assert(node is sky.Text); //
+      assert(node is sky.Text);
       final sky.Text text = node;
       if (pickThis(0.1)) {
         report("appending a new text node (ASCII)");
