@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart';
-import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/card.dart';
@@ -25,49 +21,8 @@ class CardModel {
   int value;
   double height;
   Color color;
-  AnimationPerformance performance;
   String get label => "Item $value";
   Key get key => new Key.fromObjectIdentity(this);
-}
-
-class ShrinkingCard extends AnimatedComponent {
-
-  ShrinkingCard({
-    Key key,
-    CardModel this.card,
-    Function this.onUpdated,
-    Function this.onCompleted
-  }) : super(key: key);
-
-  CardModel card;
-  Function onUpdated;
-  Function onCompleted;
-
-  double get currentHeight => (card.performance.variable as AnimatedValue).value;
-
-  void initState() {
-    assert(card.performance != null);
-    card.performance.addListener(handleAnimationProgress);
-    watch(card.performance);
-  }
-
-  void handleAnimationProgress() {
-    if (card.performance.isCompleted) {
-      if (onCompleted != null)
-        onCompleted();
-    } else if (onUpdated != null) {
-      onUpdated();
-    }
-  }
-
-  void syncFields(ShrinkingCard source) {
-    card = source.card;
-    onCompleted = source.onCompleted;
-    onUpdated = source.onUpdated;
-    super.syncFields(source);
-  }
-
-  Widget build() => new Container(height: currentHeight);
 }
 
 class CardCollectionApp extends App {
@@ -91,24 +46,6 @@ class CardCollectionApp extends App {
     super.initState();
   }
 
-  void shrinkCard(CardModel card, int index) {
-    if (card.performance != null)
-      return;
-    layoutState.invalidate([index]);
-    setState(() {
-      assert(card.performance == null);
-      card.performance = new AnimationPerformance()
-        ..duration = const Duration(milliseconds: 300)
-        ..variable = new AnimatedValue<double>(
-          card.height + kCardMargins.top + kCardMargins.bottom,
-          end: 0.0,
-          curve: ease,
-          interval: new Interval(0.5, 1.0)
-        )
-        ..play();
-    });
-  }
-
   void dismissCard(CardModel card) {
     if (cardModels.contains(card)) {
       setState(() {
@@ -122,18 +59,10 @@ class CardCollectionApp extends App {
       return null;
     CardModel card = cardModels[index];
 
-    if (card.performance != null) {
-      return new ShrinkingCard(
-          key: card.key,
-          card: card,
-          onUpdated: () { layoutState.invalidate([index]); },
-          onCompleted: () { dismissCard(card); }
-      );
-    }
-
     return new Dismissable(
       key: card.key,
-      onDismissed: () { shrinkCard(card, index); },
+      onResized: () { layoutState.invalidate([index]); },
+      onDismissed: () { dismissCard(card); },
       child: new Card(
         color: card.color,
         child: new Container(
