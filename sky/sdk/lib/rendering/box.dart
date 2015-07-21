@@ -1296,7 +1296,7 @@ class RenderImage extends RenderBox {
     return _cachedPaint;
   }
 
-  Size _sizeForConstraints(BoxConstraints innerConstraints) {
+  Size _sizeForConstraints(BoxConstraints constraints) {
     // If there's no image, we can't size ourselves automatically
     if (_image == null) {
       double width = requestedSize.width == null ? 0.0 : requestedSize.width;
@@ -1304,7 +1304,7 @@ class RenderImage extends RenderBox {
       return constraints.constrain(new Size(width, height));
     }
 
-    if (!innerConstraints.isTight) {
+    if (!constraints.isTight) {
       // If neither height nor width are specified, use inherent image
       // dimensions. If only one dimension is specified, adjust the
       // other dimension to maintain the aspect ratio. In both cases,
