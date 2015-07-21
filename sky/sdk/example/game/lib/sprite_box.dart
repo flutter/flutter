@@ -29,8 +29,7 @@ class SpriteBox extends RenderBox {
   NodeWithSize _rootNode;
 
   void set rootNode (NodeWithSize value) {
-    if (value == _rootNode)
-      return;
+    if (value == _rootNode) return;
 
     // Remove sprite box references
     if (_rootNode != null) _removeSpriteBoxReference(_rootNode);
@@ -108,11 +107,6 @@ class SpriteBox extends RenderBox {
   void attach() {
     super.attach();
     _scheduleTick();
-  }
-
-  void detach() {
-    super.detach();
-
   }
 
   // Properties

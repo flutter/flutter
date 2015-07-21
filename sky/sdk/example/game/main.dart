@@ -93,7 +93,7 @@ class GameDemoApp extends App {
     return new Center(
       child: new RaisedButton(
         child: new Text("Play"),
-        onPressed:() => navigator.pushNamed('/game')
+        onPressed: () => navigator.pushNamed('/game')
       )
     );
   }
