@@ -64,6 +64,10 @@ GLvoid StubGLBindVertexArray(GLuint array) {
   glBindVertexArrayOES(array);
 }
 
+GLvoid StubGLBlendBarrier(void) {
+  glBlendBarrierKHR();
+}
+
 GLvoid StubGLBlendColor(GLclampf red, GLclampf green, GLclampf blue,
                         GLclampf alpha) {
   glBlendColor(red, green, blue, alpha);
@@ -657,6 +661,44 @@ GLint StubGLGetProgramResourceLocation(GLuint program,
   return glGetProgramResourceLocation(program, programInterface, name);
 }
 
+GLvoid StubGLDebugMessageControl(GLenum source, GLenum type, GLenum severity,
+                                 GLsizei count, const GLuint *ids,
+                                 GLboolean enabled) {
+  glDebugMessageControlKHR(source, type, severity, count, ids, enabled);
+}
+
+GLvoid StubGLDebugMessageInsert(GLenum source, GLenum type, GLuint id,
+                                GLenum severity, GLsizei length,
+                                const GLchar *buf) {
+  glDebugMessageInsertKHR(source, type, id, severity, length, buf);
+}
+
+GLvoid StubGLDebugMessageCallback(GLDEBUGPROCKHR callback,
+                                  const void *userParam) {
+  glDebugMessageCallbackKHR(callback, userParam);
+}
+
+GLuint StubGLGetDebugMessageLog(GLuint count, GLsizei bufSize, GLenum *sources,
+                                GLenum *types, GLuint *ids, GLenum *severities,
+                                GLsizei *lengths, GLchar *messageLog) {
+  return glGetDebugMessageLogKHR(count, bufSize, sources, types, ids,
+                                 severities, lengths, messageLog);
+}
+
+GLvoid StubGLPushDebugGroup(GLenum source, GLuint id, GLsizei length,
+                            const GLchar *message) {
+  glPushDebugGroupKHR(source, id, length, message);
+}
+
+GLvoid StubGLPopDebugGroup(void) {
+  glPopDebugGroupKHR();
+}
+
+GLvoid StubGLObjectLabel(GLenum identifier, GLuint name, GLsizei length,
+                         const GLchar *label) {
+  glObjectLabelKHR(identifier, name, length, label);
+}
+
 }  // extern "C"
 }  // namespace
 
@@ -706,6 +748,7 @@ GrGLInterface* CreateInProcessSkiaGLBinding() {
   functions->fBindFragDataLocation = StubGLBindFragDataLocation;
   functions->fBindTexture = StubGLBindTexture;
   functions->fBindVertexArray = StubGLBindVertexArray;
+  functions->fBlendBarrier = StubGLBlendBarrier;
   functions->fBlendColor = StubGLBlendColor;
   functions->fBlendEquation = StubGLBlendEquation;
   functions->fBlendFunc = StubGLBlendFunc;
@@ -847,6 +890,14 @@ GrGLInterface* CreateInProcessSkiaGLBinding() {
   functions->fBindFragDataLocationIndexed =
     StubGLBindFragDataLocationIndexed;
   functions->fGetProgramResourceLocation = StubGLGetProgramResourceLocation;
+  functions->fDebugMessageControl = StubGLDebugMessageControl;
+  functions->fDebugMessageInsert = StubGLDebugMessageInsert;
+  functions->fDebugMessageCallback =
+    reinterpret_cast<GrGLDebugMessageCallbackProc>(StubGLDebugMessageCallback);
+  functions->fGetDebugMessageLog = StubGLGetDebugMessageLog;
+  functions->fPushDebugGroup = StubGLPushDebugGroup;
+  functions->fPopDebugGroup = StubGLPopDebugGroup;
+  functions->fObjectLabel = StubGLObjectLabel;
 
   return interface;
 }

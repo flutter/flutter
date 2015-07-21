@@ -300,6 +300,10 @@ typedef void (*OSMESAproc)();
 // Forward declare EGL types.
 typedef uint64 EGLuint64CHROMIUM;
 
+typedef void (*GLDEBUGPROCKHR)(GLenum source, GLenum type, GLuint id,
+                               GLenum severity, GLsizei length,
+                               const GLchar *message, void *userParam);
+
 #include "gl_bindings_autogen_gl.h"
 #include "gl_bindings_autogen_osmesa.h"
 

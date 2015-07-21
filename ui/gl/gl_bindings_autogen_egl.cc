@@ -229,8 +229,9 @@ static EGLBoolean GL_BINDING_CALL Debug_eglBindAPI(EGLenum api) {
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglBindTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer) {
+static EGLBoolean GL_BINDING_CALL Debug_eglBindTexImage(EGLDisplay dpy,
+                                                        EGLSurface surface,
+                                                        EGLint buffer) {
   GL_SERVICE_LOG("eglBindTexImage"
                  << "(" << dpy << ", " << surface << ", " << buffer << ")");
   EGLBoolean result =
@@ -381,8 +382,8 @@ Debug_eglCreateWindowSurface(EGLDisplay dpy,
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglDestroyContext(EGLDisplay dpy, EGLContext ctx) {
+static EGLBoolean GL_BINDING_CALL Debug_eglDestroyContext(EGLDisplay dpy,
+                                                          EGLContext ctx) {
   GL_SERVICE_LOG("eglDestroyContext"
                  << "(" << dpy << ", " << ctx << ")");
   EGLBoolean result = g_driver_egl.debug_fn.eglDestroyContextFn(dpy, ctx);
@@ -390,8 +391,8 @@ Debug_eglDestroyContext(EGLDisplay dpy, EGLContext ctx) {
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image) {
+static EGLBoolean GL_BINDING_CALL Debug_eglDestroyImageKHR(EGLDisplay dpy,
+                                                           EGLImageKHR image) {
   GL_SERVICE_LOG("eglDestroyImageKHR"
                  << "(" << dpy << ", " << image << ")");
   EGLBoolean result = g_driver_egl.debug_fn.eglDestroyImageKHRFn(dpy, image);
@@ -399,8 +400,8 @@ Debug_eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image) {
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglDestroySurface(EGLDisplay dpy, EGLSurface surface) {
+static EGLBoolean GL_BINDING_CALL Debug_eglDestroySurface(EGLDisplay dpy,
+                                                          EGLSurface surface) {
   GL_SERVICE_LOG("eglDestroySurface"
                  << "(" << dpy << ", " << surface << ")");
   EGLBoolean result = g_driver_egl.debug_fn.eglDestroySurfaceFn(dpy, surface);
@@ -408,8 +409,8 @@ Debug_eglDestroySurface(EGLDisplay dpy, EGLSurface surface) {
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
+static EGLBoolean GL_BINDING_CALL Debug_eglDestroySyncKHR(EGLDisplay dpy,
+                                                          EGLSyncKHR sync) {
   GL_SERVICE_LOG("eglDestroySyncKHR"
                  << "(" << dpy << ", " << sync << ")");
   EGLBoolean result = g_driver_egl.debug_fn.eglDestroySyncKHRFn(dpy, sync);
@@ -542,8 +543,9 @@ Debug_eglGetSyncValuesCHROMIUM(EGLDisplay dpy,
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglInitialize(EGLDisplay dpy, EGLint* major, EGLint* minor) {
+static EGLBoolean GL_BINDING_CALL Debug_eglInitialize(EGLDisplay dpy,
+                                                      EGLint* major,
+                                                      EGLint* minor) {
   GL_SERVICE_LOG("eglInitialize"
                  << "(" << dpy << ", " << static_cast<const void*>(major)
                  << ", " << static_cast<const void*>(minor) << ")");
@@ -602,8 +604,8 @@ static EGLBoolean GL_BINDING_CALL Debug_eglQueryContext(EGLDisplay dpy,
   return result;
 }
 
-static const char* GL_BINDING_CALL
-Debug_eglQueryString(EGLDisplay dpy, EGLint name) {
+static const char* GL_BINDING_CALL Debug_eglQueryString(EGLDisplay dpy,
+                                                        EGLint name) {
   GL_SERVICE_LOG("eglQueryString"
                  << "(" << dpy << ", " << name << ")");
   const char* result = g_driver_egl.debug_fn.eglQueryStringFn(dpy, name);
@@ -638,8 +640,9 @@ Debug_eglQuerySurfacePointerANGLE(EGLDisplay dpy,
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglReleaseTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer) {
+static EGLBoolean GL_BINDING_CALL Debug_eglReleaseTexImage(EGLDisplay dpy,
+                                                           EGLSurface surface,
+                                                           EGLint buffer) {
   GL_SERVICE_LOG("eglReleaseTexImage"
                  << "(" << dpy << ", " << surface << ", " << buffer << ")");
   EGLBoolean result =
@@ -670,8 +673,8 @@ static EGLBoolean GL_BINDING_CALL Debug_eglSurfaceAttrib(EGLDisplay dpy,
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
+static EGLBoolean GL_BINDING_CALL Debug_eglSwapBuffers(EGLDisplay dpy,
+                                                       EGLSurface surface) {
   GL_SERVICE_LOG("eglSwapBuffers"
                  << "(" << dpy << ", " << surface << ")");
   EGLBoolean result = g_driver_egl.debug_fn.eglSwapBuffersFn(dpy, surface);
@@ -679,8 +682,8 @@ Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
   return result;
 }
 
-static EGLBoolean GL_BINDING_CALL
-Debug_eglSwapInterval(EGLDisplay dpy, EGLint interval) {
+static EGLBoolean GL_BINDING_CALL Debug_eglSwapInterval(EGLDisplay dpy,
+                                                        EGLint interval) {
   GL_SERVICE_LOG("eglSwapInterval"
                  << "(" << dpy << ", " << interval << ")");
   EGLBoolean result = g_driver_egl.debug_fn.eglSwapIntervalFn(dpy, interval);
@@ -722,8 +725,9 @@ static EGLBoolean GL_BINDING_CALL Debug_eglWaitNative(EGLint engine) {
   return result;
 }
 
-static EGLint GL_BINDING_CALL
-Debug_eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
+static EGLint GL_BINDING_CALL Debug_eglWaitSyncKHR(EGLDisplay dpy,
+                                                   EGLSyncKHR sync,
+                                                   EGLint flags) {
   GL_SERVICE_LOG("eglWaitSyncKHR"
                  << "(" << dpy << ", " << sync << ", " << flags << ")");
   EGLint result = g_driver_egl.debug_fn.eglWaitSyncKHRFn(dpy, sync, flags);
