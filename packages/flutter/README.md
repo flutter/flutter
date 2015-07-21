@@ -40,7 +40,7 @@ void main() {
 ```
 
 Execution starts in `main`, which in this example runs a new instance of the `HelloWorldApp`.
-The `HelloWorldApp` builds a `Text` widget containing the famous `Hello, world!`
+The `HelloWorldApp` builds a `Text` widget containing the traditional `Hello, world!`
 string and centers it on the screen using a `Center` widget. To learn more about
 the widget system, please see the [widgets tutorial](lib/widgets/README.md).
 
