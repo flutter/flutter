@@ -22,7 +22,19 @@ class FitnessApp extends App {
     _navigationState = new NavigationState([
       new Route(
         name: '/',
-        builder: (navigator, route) => new HomeFragment(navigator, _userData)
+        builder: (navigator, route) => new HomeFragment(
+          navigator: navigator,
+          userData: _userData,
+          onMeasurementCreated: _handleMeasurementCreated,
+          onMeasurementDeleted: _handleMeasurementDeleted
+        )
+      ),
+      new Route(
+        name: '/measurements/new',
+        builder: (navigator, route) => new MeasurementFragment(
+          navigator: navigator,
+          onCreated: _handleMeasurementCreated
+        )
       ),
       new Route(
         name: '/settings',
@@ -42,6 +54,19 @@ class FitnessApp extends App {
     }
   }
 
+  void _handleMeasurementCreated(Measurement measurement) {
+    setState(() {
+      _userData.add(measurement);
+      _userData.sort((a, b) => a.when.compareTo(b.when));
+    });
+  }
+
+  void _handleMeasurementDeleted(Measurement measurement) {
+    setState(() {
+      _userData.remove(measurement);
+    });
+  }
+
   BackupMode backupSetting = BackupMode.disabled;
 
   void settingsUpdater({ BackupMode backup }) {
@@ -52,7 +77,8 @@ class FitnessApp extends App {
   }
 
   final List<Measurement> _userData = [
-    new Measurement(when: new DateTime.now(), weight: 400.0)
+    new Measurement(weight: 180.0, when: new DateTime.now().add(const Duration(days: -1))),
+    new Measurement(weight: 160.0, when: new DateTime.now()),
   ];
 
   Widget build() {

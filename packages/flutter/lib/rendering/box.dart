@@ -7,10 +7,12 @@ import 'dart:sky' as sky;
 
 import 'package:sky/base/debug.dart';
 import 'package:sky/painting/box_painter.dart';
+import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/painting/box_painter.dart';
+export 'package:sky/painting/text_style.dart' show TextBaseline;
 
 // GENERIC BOX RENDERING
 // Anything that has a concept of x, y, width, height is going to derive from this
@@ -252,8 +254,6 @@ class BoxParentData extends ParentData {
   }
   String toString() => 'position=$position';
 }
-
-enum TextBaseline { alphabetic, ideographic }
 
 abstract class RenderBox extends RenderObject {
 
@@ -1296,7 +1296,7 @@ class RenderImage extends RenderBox {
     return _cachedPaint;
   }
 
-  Size _sizeForConstraints(BoxConstraints innerConstraints) {
+  Size _sizeForConstraints(BoxConstraints constraints) {
     // If there's no image, we can't size ourselves automatically
     if (_image == null) {
       double width = requestedSize.width == null ? 0.0 : requestedSize.width;
@@ -1304,7 +1304,7 @@ class RenderImage extends RenderBox {
       return constraints.constrain(new Size(width, height));
     }
 
-    if (!innerConstraints.isTight) {
+    if (!constraints.isTight) {
       // If neither height nor width are specified, use inherent image
       // dimensions. If only one dimension is specified, adjust the
       // other dimension to maintain the aspect ratio. In both cases,
