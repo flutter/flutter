@@ -28,9 +28,17 @@ class VariableHeightScrollable extends Scrollable {
 
   void initState() {
     assert(layoutState != null);
-    layoutState.removeListener(_handleLayoutChanged);
-    layoutState.addListener(_handleLayoutChanged);
     super.initState();
+  }
+
+  void didMount() {
+    layoutState.addListener(_handleLayoutChanged);
+    super.didMount();
+  }
+
+  void didUnmount() {
+    layoutState.removeListener(_handleLayoutChanged);
+    super.didUnmount();
   }
 
   void syncFields(VariableHeightScrollable source) {
@@ -41,8 +49,8 @@ class VariableHeightScrollable extends Scrollable {
     if (layoutState != source.layoutState) {
       // Warning: this is unlikely to be what you intended.
       assert(source.layoutState != null);
-      layoutState == source.layoutState;
       layoutState.removeListener(_handleLayoutChanged);
+      layoutState = source.layoutState;
       layoutState.addListener(_handleLayoutChanged);
     }
     super.syncFields(source);
