@@ -48,8 +48,9 @@ def mojom_filter(path):
 
 
 def ensure_dir_exists(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+    abspath = os.path.abspath(path)
+    if not os.path.exists(abspath):
+        os.makedirs(abspath)
 
 
 def has_pubspec_yaml(paths):
