@@ -21,10 +21,7 @@ final bool _shouldLogRenderDuration = false;
 typedef Widget Builder();
 typedef void WidgetTreeWalker(Widget);
 
-abstract class KeyBase {
-}
-
-abstract class Key extends KeyBase {
+abstract class Key {
   Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
   factory Key(String value) => new StringKey(value);
   factory Key.stringify(Object value) => new StringKey(value.toString());
@@ -43,7 +40,7 @@ class StringKey extends Key {
 class ObjectKey extends Key {
   ObjectKey(this.value) : super.constructor();
   final Object value;
-  String toString() => '[Instance of ${value.runtimeType}]';
+  String toString() => '[${value.runtimeType}(${value.hashCode})]';
   bool operator==(other) => other is ObjectKey && identical(other.value, value);
   int get hashCode => identityHashCode(value);
 }
@@ -51,6 +48,11 @@ class ObjectKey extends Key {
 class UniqueKey extends Key {
   UniqueKey() : super.constructor();
   String toString() => '[$hashCode]';
+}
+
+class GlobalKey extends Key {
+  GlobalKey() : super.constructor();
+  String toString() => '[Global Key $hashCode]';
 }
 
 /// A base class for elements of the widget tree
@@ -326,22 +328,29 @@ abstract class Inherited extends TagNode {
   Inherited({ Key key, Widget child }) : super._withKey(child, key);
 
   void _sync(Widget old, dynamic slot) {
-    if (old != null && syncShouldNotify(old)) {
-      final Type ourRuntimeType = runtimeType;
-      void notifyChildren(Widget child) {
-        if (child is Component &&
-            child._dependencies != null &&
-            child._dependencies.contains(ourRuntimeType))
-          child._dependenciesChanged();
-        if (child.runtimeType != ourRuntimeType)
-          child.walkChildren(notifyChildren);
-      }
-      walkChildren(notifyChildren);
+    if (old != null) {
+      syncState(old);
+      if (syncShouldNotify(old))
+        notifyDescendants();
     }
     super._sync(old, slot);
   }
 
-  bool syncShouldNotify(Inherited old);
+  void notifyDescendants() {
+    final Type ourRuntimeType = runtimeType;
+    void notifyChildren(Widget child) {
+      if (child is Component &&
+          child._dependencies != null &&
+          child._dependencies.contains(ourRuntimeType))
+        child._dependenciesChanged();
+      if (child.runtimeType != ourRuntimeType)
+        child.walkChildren(notifyChildren);
+    }
+    walkChildren(notifyChildren);
+  }
+
+  void syncState(Inherited old) { }
+  bool syncShouldNotify(Inherited old) => false;
 
 }
 
