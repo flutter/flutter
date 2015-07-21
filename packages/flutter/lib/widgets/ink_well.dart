@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/rendering/box.dart';
@@ -29,7 +30,7 @@ double _getSplashTargetSize(Size bounds, Point position) {
 class InkSplash {
   InkSplash(this.pointer, this.position, this.well) {
     _targetRadius = _getSplashTargetSize(well.size, position);
-    _radius = new AnimatedType<double>(
+    _radius = new AnimatedValue<double>(
         _kSplashInitialSize, end: _targetRadius, curve: easeOut);
 
     _performance = new AnimationPerformance()
@@ -45,7 +46,7 @@ class InkSplash {
 
   double _targetRadius;
   double _pinnedRadius;
-  AnimatedType<double> _radius;
+  AnimatedValue<double> _radius;
   AnimationPerformance _performance;
 
   void _updateVelocity(double velocity) {

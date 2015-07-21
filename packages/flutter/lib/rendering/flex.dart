@@ -83,6 +83,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  // Set during layout if overflow occurred on the main axis
   TextBaseline _textBaseline;
   TextBaseline get textBaseline => _textBaseline;
   void set textBaseline (TextBaseline value) {
@@ -92,8 +93,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  // Set during layout if overflow occurred on the main axis
-  double _overflow;
 
   void setupParentData(RenderBox child) {
     if (child.parentData is! FlexBoxParentData)

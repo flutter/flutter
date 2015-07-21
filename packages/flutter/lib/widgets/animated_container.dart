@@ -4,6 +4,7 @@
 
 import 'package:vector_math/vector_math.dart';
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/base/lerp.dart';
@@ -11,21 +12,21 @@ import 'package:sky/painting/box_painter.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/animated_component.dart';
 
-class AnimatedBoxConstraintsValue extends AnimatedType<BoxConstraints> {
+class AnimatedBoxConstraintsValue extends AnimatedValue<BoxConstraints> {
   AnimatedBoxConstraintsValue(BoxConstraints begin, { BoxConstraints end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
-  void setFraction(double t) {
+  void setProgress(double t) {
     // TODO(abarth): We should lerp the BoxConstraints.
     value = end;
   }
 }
 
-class AnimatedBoxDecorationValue extends AnimatedType<BoxDecoration> {
+class AnimatedBoxDecorationValue extends AnimatedValue<BoxDecoration> {
   AnimatedBoxDecorationValue(BoxDecoration begin, { BoxDecoration end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
-  void setFraction(double t) {
+  void setProgress(double t) {
     if (t == 1.0) {
       value = end;
       return;
@@ -34,11 +35,11 @@ class AnimatedBoxDecorationValue extends AnimatedType<BoxDecoration> {
   }
 }
 
-class AnimatedEdgeDimsValue extends AnimatedType<EdgeDims> {
+class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
   AnimatedEdgeDimsValue(EdgeDims begin, { EdgeDims end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
-  void setFraction(double t) {
+  void setProgress(double t) {
     if (t == 1.0) {
       value = end;
       return;
@@ -54,7 +55,7 @@ class AnimatedEdgeDimsValue extends AnimatedType<EdgeDims> {
 
 class ImplicitlyAnimatedValue<T> {
   final AnimationPerformance performance = new AnimationPerformance();
-  final AnimatedType<T> _variable;
+  final AnimatedValue<T> _variable;
 
   ImplicitlyAnimatedValue(this._variable, Duration duration) {
     performance
@@ -168,21 +169,21 @@ class AnimatedContainer extends AnimatedComponent {
 
   void _updateTransform() {
     _updateField(transform, _transform, () {
-      _transform = new ImplicitlyAnimatedValue<Matrix4>(new AnimatedType<Matrix4>(transform), duration);
+      _transform = new ImplicitlyAnimatedValue<Matrix4>(new AnimatedValue<Matrix4>(transform), duration);
       watch(_transform.performance);
     });
   }
 
   void _updateWidth() {
     _updateField(width, _width, () {
-      _width = new ImplicitlyAnimatedValue<double>(new AnimatedType<double>(width), duration);
+      _width = new ImplicitlyAnimatedValue<double>(new AnimatedValue<double>(width), duration);
       watch(_width.performance);
     });
   }
 
   void _updateHeight() {
     _updateField(height, _height, () {
-      _height = new ImplicitlyAnimatedValue<double>( new AnimatedType<double>(height), duration);
+      _height = new ImplicitlyAnimatedValue<double>( new AnimatedValue<double>(height), duration);
       watch(_height.performance);
     });
   }
