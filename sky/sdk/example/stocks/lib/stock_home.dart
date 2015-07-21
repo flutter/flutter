@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/editing/input.dart';
-import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/animation_builder.dart';
 import 'package:sky/theme/colors.dart' as colors;
@@ -280,10 +280,10 @@ class StockHome extends AnimatedComponent {
   void _handleStockPurchased() {
     setState(() {
       _snackbarTransform = new AnimationBuilder()
-        ..position = new AnimatedType<Point>(const Point(0.0, 45.0), end: Point.origin);
+        ..position = new AnimatedValue<Point>(const Point(0.0, 45.0), end: Point.origin);
       var performance = _snackbarTransform.createPerformance(
           [_snackbarTransform.position], duration: _kSnackbarSlideDuration);
-      watch(performance);
+      watch(performance); // TODO(mpcomplete): need to unwatch
       performance.play();
     });
   }

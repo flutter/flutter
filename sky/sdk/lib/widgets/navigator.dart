@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/widgets/animated_component.dart';
@@ -59,17 +60,17 @@ class Transition extends AnimatedComponent {
   Function onDismissed;
   Function onCompleted;
 
-  AnimatedType<Point> _position;
-  AnimatedType<double> _opacity;
+  AnimatedValue<Point> _position;
+  AnimatedValue<double> _opacity;
   AnimationPerformance _performance;
 
   void initState() {
-    _position = new AnimatedType<Point>(
+    _position = new AnimatedValue<Point>(
       _kTransitionStartPoint,
       end: Point.origin,
       curve: easeOut
     );
-    _opacity = new AnimatedType<double>(0.0, end: 1.0)
+    _opacity = new AnimatedValue<double>(0.0, end: 1.0)
       ..curve = easeOut;
     _performance = new AnimationPerformance()
       ..duration = _kTransitionDuration
