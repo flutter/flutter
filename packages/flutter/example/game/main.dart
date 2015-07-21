@@ -51,6 +51,7 @@ main() async {
 class GameDemoApp extends App {
 
   NavigationState _navigationState;
+  GameDemoWorld _game;
 
   void initState() {
     _navigationState = new NavigationState([
@@ -84,16 +85,18 @@ class GameDemoApp extends App {
   }
 
   Widget _buildGameScene(navigator, route) {
-    return new SpriteWidget(
-      new GameDemoWorld(_app, navigator, _loader, _spriteSheet)
-    );
+    if (_game == null) _game = new GameDemoWorld(_app, navigator, _loader, _spriteSheet);
+    return new SpriteWidget(_game);
   }
 
   Widget _buildMainScene(navigator, route) {
     return new Center(
       child: new RaisedButton(
         child: new Text("Play"),
-        onPressed: () => navigator.pushNamed('/game')
+        onPressed: () {
+          _game = new GameDemoWorld(_app, navigator, _loader, _spriteSheet, _spriteSheetUI);
+          navigator.pushNamed('/game');
+        }
       )
     );
   }
