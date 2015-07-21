@@ -488,31 +488,34 @@ class Text extends Component {
 }
 
 class Image extends LeafRenderObjectWrapper {
-  Image({ sky.Image image, this.size, this.colorFilter })
+  Image({ sky.Image image, this.width, this.height, this.colorFilter })
     : image = image,
       super(key: image.hashCode.toString()); // TODO(ianh): Find a way to uniquely identify the sky.Image rather than using hashCode, which could collide
 
   final sky.Image image;
-  final Size size;
+  final double width;
+  final double height;
   final sky.ColorFilter colorFilter;
 
-  RenderImage createNode() => new RenderImage(image, size, colorFilter: colorFilter);
+  RenderImage createNode() => new RenderImage(image: image, width: width, height: height, colorFilter: colorFilter);
   RenderImage get root => super.root;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     root.image = image;
-    root.requestedSize = size;
+    root.width = width;
+    root.height = height;
     root.colorFilter = colorFilter;
   }
 }
 
 class FutureImage extends StatefulComponent {
-  FutureImage({ String key, this.image, this.size, this.colorFilter })
+  FutureImage({ String key, this.image, this.width, this.height, this.colorFilter })
     : super(key: key);
 
   Future<sky.Image> image;
-  Size size;
+  double width;
+  double height;
   sky.ColorFilter colorFilter;
 
   sky.Image _resolvedImage;
@@ -535,48 +538,57 @@ class FutureImage extends StatefulComponent {
   void syncFields(FutureImage source) {
     bool needToResolveImage = (image != source.image);
     image = source.image;
-    size = source.size;
+    width = source.width;
+    height = source.height;
     if (needToResolveImage)
       _resolveImage();
   }
 
   Widget build() {
-    return new Image(image: _resolvedImage, size: size, colorFilter: colorFilter);
+    return new Image(
+      image: _resolvedImage,
+      width: width,
+      height: height,
+      colorFilter: colorFilter
+    );
   }
 }
 
 class NetworkImage extends Component {
-  NetworkImage({ String src, this.size, this.colorFilter })
-    : src = src,
-      super(key: src);
+  NetworkImage({ String src, this.width, this.height, this.colorFilter })
+    : src = src, super(key: src);
 
   final String src;
-  final Size size;
+  final double width;
+  final double height;
   final sky.ColorFilter colorFilter;
 
   Widget build() {
     return new FutureImage(
       image: image_cache.load(src),
-      size: size,
+      width: width,
+      height: height,
       colorFilter: colorFilter
     );
   }
 }
 
 class AssetImage extends Component {
-  AssetImage({ String name, this.bundle, this.size, this.colorFilter })
+  AssetImage({ String name, this.bundle, this.width, this.height, this.colorFilter })
     : name = name,
       super(key: name);
 
   final String name;
   final AssetBundle bundle;
-  final Size size;
+  final double width;
+  final double height;
   final sky.ColorFilter colorFilter;
 
   Widget build() {
     return new FutureImage(
       image: bundle.loadImage(name),
-      size: size,
+      width: width,
+      height: height,
       colorFilter: colorFilter
     );
   }

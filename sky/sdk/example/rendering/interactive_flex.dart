@@ -25,15 +25,15 @@ class Touch {
 class RenderImageGrow extends RenderImage {
   final Size _startingSize;
 
-  RenderImageGrow(Image image, Size size) : _startingSize = size, super(image, size);
+  RenderImageGrow(Image image, Size size)
+    : _startingSize = size, super(image: image, width: size.width, height: size.height);
 
   double _growth = 0.0;
   double get growth => _growth;
   void set growth(double value) {
     _growth = value;
-    double newWidth = _startingSize.width == null ? null : _startingSize.width + growth;
-    double newHeight = _startingSize.height == null ? null : _startingSize.height + growth;
-    requestedSize = new Size(newWidth, newHeight);
+    width = _startingSize.width == null ? null : _startingSize.width + growth;
+    height = _startingSize.height == null ? null : _startingSize.height + growth;
   }
 }
 

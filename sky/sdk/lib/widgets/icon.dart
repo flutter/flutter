@@ -93,7 +93,8 @@ class Icon extends Component {
     return new AssetImage(
       bundle: _iconBundle,
       name: '${category}/${density}/ic_${subtype}_${colorSuffix}_${size}dp.png',
-      size: new Size(size.toDouble(), size.toDouble()),
+      width: size.toDouble(),
+      height: size.toDouble(),
       colorFilter: colorFilter
     );
   }
