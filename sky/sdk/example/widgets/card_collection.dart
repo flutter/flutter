@@ -28,8 +28,6 @@ class CardModel {
   AnimationPerformance performance;
   String get label => "Item $value";
   String get key => value.toString();
-  bool operator ==(other) => other is CardModel && other.value == value;
-  int get hashCode => 373 * 37 * value.hashCode;
 }
 
 class ShrinkingCard extends AnimatedComponent {
