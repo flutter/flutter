@@ -11,7 +11,7 @@
 #include "base/time/time.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
-#include "sky/shell/ios/platform_view_ios.h"
+#include "sky/shell/mac/platform_view_mac.h"
 #include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui_delegate.h"
@@ -114,8 +114,8 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   [self connectToEngineAndLoad];
 }
 
-- (sky::shell::PlatformViewIOS*)platformView {
-  auto view = static_cast<sky::shell::PlatformViewIOS*>(_shell_view->view());
+- (sky::shell::PlatformViewMac*)platformView {
+  auto view = static_cast<sky::shell::PlatformViewMac*>(_shell_view->view());
   DCHECK(view);
   return view;
 }
