@@ -10,7 +10,7 @@ import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/theme.dart';
 
 class SnackBarAction extends Component {
-  SnackBarAction({String key, this.label, this.onPressed }) : super(key: key) {
+  SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);
   }
 
@@ -32,7 +32,7 @@ class SnackBarAction extends Component {
 class SnackBar extends Component {
 
   SnackBar({
-    String key,
+    Key key,
     this.content,
     this.actions
   }) : super(key: key) {

@@ -8,7 +8,7 @@ import 'package:sky/widgets/scrollable.dart';
 
 class ScrollableViewport extends Scrollable {
 
-  ScrollableViewport({ String key, this.child }) : super(key: key);
+  ScrollableViewport({ Key key, this.child }) : super(key: key);
 
   Widget child;
 
@@ -54,7 +54,7 @@ class ScrollableViewport extends Scrollable {
 
 class ScrollableBlock extends Component {
 
-  ScrollableBlock(this.children, { String key }) : super(key: key);
+  ScrollableBlock(this.children, { Key key }) : super(key: key);
 
   final List<Widget> children;
 

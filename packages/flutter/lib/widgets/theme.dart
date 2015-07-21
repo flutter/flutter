@@ -11,7 +11,7 @@ export 'package:sky/theme/theme_data.dart' show ThemeData, ThemeBrightness;
 class Theme extends Inherited {
 
   Theme({
-    String key,
+    Key key,
     this.data,
     Widget child
   }) : super(key: key, child: child) {

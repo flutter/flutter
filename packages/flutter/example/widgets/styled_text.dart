@@ -52,7 +52,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
   Component toStyledText(String name, String text) {
     TextStyle lineStyle = (name == "Dave") ? daveStyle : halStyle;
     return new StyledText(
-      key: text,
+      key: new Key(text),
       elements: [lineStyle, [boldStyle, [underlineStyle, name], ":"], text]
     );
   }

@@ -14,7 +14,7 @@ export 'package:sky/widgets/popup_menu.dart' show PopupMenuStatus;
 
 class StockMenu extends Component {
   StockMenu({
-    String key,
+    Key key,
     this.showing,
     this.onStatusChanged,
     this.navigator,

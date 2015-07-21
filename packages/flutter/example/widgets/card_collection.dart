@@ -27,13 +27,13 @@ class CardModel {
   Color color;
   AnimationPerformance performance;
   String get label => "Item $value";
-  String get key => value.toString();
+  Key get key => new Key.fromObjectIdentity(this);
 }
 
 class ShrinkingCard extends AnimatedComponent {
 
   ShrinkingCard({
-    String key,
+    Key key,
     CardModel this.card,
     Function this.onUpdated,
     Function this.onCompleted

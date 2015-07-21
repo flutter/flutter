@@ -10,7 +10,7 @@ import 'package:sky/widgets/theme.dart';
 class RaisedButton extends MaterialButton {
 
   RaisedButton({
-    String key,
+    Key key,
     Widget child,
     bool enabled: true,
     Function onPressed

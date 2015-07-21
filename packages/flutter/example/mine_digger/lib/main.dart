@@ -1,4 +1,3 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -56,6 +55,20 @@ class MineDiggerApp extends App {
   List<List<bool>> cells;
   // |uiState| keeps track of the visible player progess.
   List<List<CellState>> uiState;
+
+  Game(this.app) {
+    randomSeed = 22;
+    // Colors for each mine count:
+    // 0 - none, 1 - blue, 2-green, 3-red, 4-black, 5-dark red .. etc.
+    textStyles.add(new TextStyle(color: const Color(0xFF555555), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF0094FF), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF13A023), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFFDA1414), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF1E2347), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF7F0037), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFFE93BE9), fontWeight: bold));
+    initialize();
+  }
 
   void resetGame() {
     alive = true;
@@ -148,13 +161,14 @@ class MineDiggerApp extends App {
         } else if (state == CellState.flagged) {
           row.add(new CoveredMineNode(
             flagged: true,
-            posX: ix, posY: iy)
-          );
+            posX: ix,
+            posY: iy
+          ));
         } else {
           row.add(new ExposedMineNode(
             state: state,
-            count: count)
-          );
+            count: count
+          ));
         }
       }
       flexRows.add(
@@ -162,8 +176,9 @@ class MineDiggerApp extends App {
           row,
           direction: FlexDirection.horizontal,
           justifyContent: FlexJustifyContent.center,
-          key: 'flex_row($iy)'
-        ));
+          key: new Key.stringify(iy)
+        )
+      );
     }
 
     if (!hasCoveredCell) {

@@ -7,7 +7,7 @@ import 'package:sky/widgets/basic.dart';
 
 abstract class AnimatedComponent extends StatefulComponent {
 
-  AnimatedComponent({ String key }) : super(key: key);
+  AnimatedComponent({ Key key }) : super(key: key);
 
   void syncFields(AnimatedComponent source) { }
 

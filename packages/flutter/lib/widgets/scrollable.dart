@@ -27,7 +27,7 @@ enum ScrollDirection { vertical, horizontal }
 abstract class Scrollable extends StatefulComponent {
 
   Scrollable({
-    String key,
+    Key key,
     this.direction: ScrollDirection.vertical
   }) : super(key: key);
 
