@@ -12,11 +12,11 @@
 #include "base/logging.h"
 #include "base/process/memory.h"
 #include "dart/runtime/include/dart_api.h"
-#include "sky/tools/packager/loader.h"
-#include "sky/tools/packager/logging.h"
-#include "sky/tools/packager/scope.h"
-#include "sky/tools/packager/switches.h"
-#include "sky/tools/packager/vm.h"
+#include "sky/tools/sky_snapshot/loader.h"
+#include "sky/tools/sky_snapshot/logging.h"
+#include "sky/tools/sky_snapshot/scope.h"
+#include "sky/tools/sky_snapshot/switches.h"
+#include "sky/tools/sky_snapshot/vm.h"
 
 void Usage() {
   std::cerr << "Usage: sky_packager"

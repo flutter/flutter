@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_TOOLS_PACKAGER_SCOPE_H_
-#define SKY_TOOLS_PACKAGER_SCOPE_H_
+#ifndef SKY_TOOLS_SKY_SNAPSHOT_SCOPE_H_
+#define SKY_TOOLS_SKY_SNAPSHOT_SCOPE_H_
 
 #include "base/basictypes.h"
 #include "base/logging.h"
@@ -30,4 +30,4 @@ class DartApiScope {
   DISALLOW_COPY_AND_ASSIGN(DartApiScope);
 };
 
-#endif  // SKY_TOOLS_PACKAGER_SCOPE_H_
+#endif  // SKY_TOOLS_SKY_SNAPSHOT_SCOPE_H_

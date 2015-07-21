@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/tools/packager/logging.h"
+#include "sky/tools/sky_snapshot/logging.h"
 
 #include "base/logging.h"
 
