@@ -41,7 +41,6 @@ class VariableHeightScrollable extends Scrollable {
     super.didUnmount();
   }
 
-
   void syncFields(VariableHeightScrollable source) {
     builder = source.builder;
     if (token != source.token)
