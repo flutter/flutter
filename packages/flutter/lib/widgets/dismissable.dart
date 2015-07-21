@@ -6,17 +6,21 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/curves.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:vector_math/vector_math.dart';
 
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
+const Duration _kCardDismissResize = const Duration(milliseconds: 300);
+const double _kCardDismissResizeDelay = 0.4;
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissCardThreshold = 0.6;
 
+typedef void ResizedCallback();
 typedef void DismissedCallback();
 
 class Dismissable extends AnimatedComponent {
@@ -24,70 +28,106 @@ class Dismissable extends AnimatedComponent {
   Dismissable({
     Key key,
     this.child,
+    this.onResized,
     this.onDismissed
     // TODO(hansmuller): direction
   }) : super(key: key);
 
   Widget child;
+  ResizedCallback onResized;
   DismissedCallback onDismissed;
 
   AnimatedValue<Point> _position;
   AnimatedValue<double> _opacity;
-  AnimationPerformance _performance;
+  AnimationPerformance _fadePerformance;
+  AnimationPerformance _resizePerformance;
 
-  double _width;
+  Size _size;
   double _dragX = 0.0;
   bool _dragUnderway = false;
 
   void initState() {
     _position = new AnimatedValue<Point>(Point.origin);
     _opacity = new AnimatedValue<double>(1.0, end: 0.0);
-    _performance = new AnimationPerformance()
+    _fadePerformance = new AnimationPerformance()
       ..duration = _kCardDismissFadeout
       ..variable = new AnimatedList([_position, _opacity])
-      ..addListener(_handleAnimationProgressChanged);
-    watch(_performance);
+      ..addListener(_handleFadeProgressChanged);
+    watch(_fadePerformance);
+  }
+
+  void _handleFadeProgressChanged() {
+    setState(() {
+      if (_fadePerformance.isCompleted && !_dragUnderway)
+        _startResizePerformance();
+    });
   }
 
   void syncFields(Dismissable source) {
     child = source.child;
+    onResized = source.onResized;
     onDismissed = source.onDismissed;
     super.syncFields(source);
   }
 
   Point get _activeCardDragEndPoint {
-    assert(_width != null);
-    return new Point(_dragX.sign * _width * _kDismissCardThreshold, 0.0);
+    assert(_size != null);
+    return new Point(_dragX.sign * _size.width * _kDismissCardThreshold, 0.0);
   }
 
   bool get _isActive {
-    return _width != null && (_dragUnderway || _performance.isAnimating);
+    return _size != null && (_dragUnderway || _fadePerformance.isAnimating);
+  }
+
+  void _maybeCallOnResized() {
+    if (onResized != null)
+      onResized();
   }
 
   void _maybeCallOnDismissed() {
-    _performance.stop();
-    _performance.removeListener(_handleAnimationProgressChanged);
+    _resizePerformance.stop();
+    _resizePerformance.removeListener(_handleResizeProgressChanged);
     if (onDismissed != null)
       onDismissed();
   }
 
-  void _handleAnimationProgressChanged() {
-    setState(() {
-      if (_performance.isCompleted && !_dragUnderway)
-        _maybeCallOnDismissed();
-    });
+  void _startResizePerformance() {
+    assert(_size != null);
+    assert(_fadePerformance != null);
+    assert(_resizePerformance == null);
+
+    _fadePerformance.stop();
+    _fadePerformance.removeListener(_handleFadeProgressChanged);
+
+    _maybeCallOnResized();
+
+    AnimatedValue<double> dismissHeight = new AnimatedValue<double>(_size.height,
+        end: 0.0,
+        curve: ease,
+        interval: new Interval(_kCardDismissResizeDelay, 1.0)
+    );
+    _resizePerformance = new AnimationPerformance()
+      ..variable = dismissHeight
+      ..duration = _kCardDismissResize
+      ..addListener(_handleResizeProgressChanged)
+      ..play();
+    watch(_resizePerformance);
   }
 
-  void _handleSizeChanged(Size newSize) {
-    _width = newSize.width;
-    _position.end = _activeCardDragEndPoint;
+  void _handleResizeProgressChanged() {
+    setState(() {
+      if (_resizePerformance.isCompleted)
+        _maybeCallOnDismissed();
+      else
+        _maybeCallOnResized();
+    });
   }
 
   void _handlePointerDown(sky.PointerEvent event) {
     setState(() {
       _dragUnderway = true;
       _dragX = 0.0;
-      _performance.progress = 0.0;
+      _fadePerformance.progress = 0.0;
     });
   }
 
@@ -98,10 +138,10 @@ class Dismissable extends AnimatedComponent {
     double oldDragX = _dragX;
     _dragX += event.dx;
     setState(() {
-      if (!_performance.isAnimating) {
+      if (!_fadePerformance.isAnimating) {
         if (oldDragX.sign != _dragX.sign)
           _position.end = _activeCardDragEndPoint;
-        _performance.progress = _dragX.abs() / (_width * _kDismissCardThreshold);
+        _fadePerformance.progress = _dragX.abs() / (_size.width * _kDismissCardThreshold);
       }
     });
   }
@@ -112,10 +152,10 @@ class Dismissable extends AnimatedComponent {
 
     setState(() {
       _dragUnderway = false;
-      if (_performance.isCompleted)
-        _maybeCallOnDismissed();
-      else if (!_performance.isAnimating)
-        _performance.reverse();
+      if (_fadePerformance.isCompleted)
+        _startResizePerformance();
+      else if (!_fadePerformance.isAnimating)
+        _fadePerformance.reverse();
     });
   }
 
@@ -133,11 +173,19 @@ class Dismissable extends AnimatedComponent {
       _dragUnderway = false;
       _dragX = event.velocityX.sign;
       _position.end = _activeCardDragEndPoint;
-      _performance.fling(velocity: event.velocityX.abs() * _kFlingVelocityScale);
+      _fadePerformance.fling(velocity: event.velocityX.abs() * _kFlingVelocityScale);
     }
   }
 
+  void _handleSizeChanged(Size newSize) {
+    _size = new Size.copy(newSize);
+    _position.end = _activeCardDragEndPoint;
+  }
+
   Widget build() {
+    if (_resizePerformance != null)
+      return new Container(height: _resizePerformance.variable.value);
+
     Matrix4 transform = new Matrix4.identity();
     transform.translate(_position.value.x, _position.value.y);
     return new Listener(
