@@ -45,7 +45,7 @@ class ShrinkingCard extends AnimatedComponent {
   Function onUpdated;
   Function onCompleted;
 
-  double get currentHeight => (card.performance.variable as AnimatedType).value;
+  double get currentHeight => (card.performance.variable as AnimatedValue).value;
 
   void initState() {
     assert(card.performance != null);

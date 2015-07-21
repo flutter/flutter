@@ -93,6 +93,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  double _overflow;
 
   void setupParentData(RenderBox child) {
     if (child.parentData is! FlexBoxParentData)
