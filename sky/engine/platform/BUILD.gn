@@ -242,8 +242,6 @@ source_set("platform") {
     "fonts/opentype/OpenTypeSanitizer.cpp",
     "fonts/opentype/OpenTypeSanitizer.h",
     "fonts/opentype/OpenTypeTypes.h",
-    "fonts/opentype/OpenTypeVerticalData.cpp",
-    "fonts/opentype/OpenTypeVerticalData.h",
     "fonts/skia/FontCacheSkia.cpp",
     "fonts/skia/FontCustomPlatformDataSkia.cpp",
     "fonts/skia/FontPlatformDataSkia.cpp",
@@ -513,6 +511,13 @@ source_set("platform") {
     "weborigin/SecurityPolicy.cpp",
     "weborigin/SecurityPolicy.h",
   ]
+
+  if (!is_mac) {
+    sources += [
+      "fonts/opentype/OpenTypeVerticalData.cpp",
+      "fonts/opentype/OpenTypeVerticalData.h",
+    ]
+  }
 
   if (is_ios || is_mac) {
     sources += [ "fonts/apple/FontPlatformDataApple.cpp" ]

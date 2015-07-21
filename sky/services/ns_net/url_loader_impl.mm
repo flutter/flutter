@@ -11,6 +11,7 @@
 @interface URLLoaderConnectionDelegate : NSObject<NSURLConnectionDataDelegate>
 
 @property(nonatomic) mojo::URLLoaderImpl::StartCallback startCallback;
+@property(nonatomic, retain) NSURLRequest *originalRequest;
 
 @end
 
@@ -20,13 +21,14 @@
 }
 
 @synthesize startCallback = _startCallback;
+@synthesize originalRequest = _originalRequest;
 
 - (void)connection:(NSURLConnection*)connection
     didReceiveResponse:(NSHTTPURLResponse*)response {
   _response = mojo::URLResponse::New();
   _response->status_code = response.statusCode;
   _response->url =
-      mojo::String(connection.originalRequest.URL.absoluteString.UTF8String);
+      mojo::String(self.originalRequest.URL.absoluteString.UTF8String);
   mojo::DataPipe pipe;
   _response->body = pipe.consumer_handle.Pass();
   _producer = pipe.producer_handle.Pass();
@@ -61,7 +63,7 @@
     if (_response.is_null()) {
       _response = mojo::URLResponse::New();
       _response->url = mojo::String(
-          connection.originalRequest.URL.absoluteString.UTF8String);
+          self.originalRequest.URL.absoluteString.UTF8String);
     }
 
     _response->error = mojo::NetworkError::New();
@@ -95,6 +97,7 @@
 }
 
 - (void)dealloc {
+  [_originalRequest release];
   DCHECK(_response.is_null());
   DCHECK(_startCallback.is_null());
   _producer.reset();
@@ -128,10 +131,6 @@ void URLLoaderImpl::Start(URLRequestPtr request,
 
   req.HTTPMethod = @(request->method.data());
 
-  if (request->bypass_cache) {
-    req.cachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
-  }
-
   URLLoaderConnectionDelegate* delegate =
       (URLLoaderConnectionDelegate*)connection_delegate_;
 
@@ -139,6 +138,7 @@ void URLLoaderImpl::Start(URLRequestPtr request,
       [NSURLConnection connectionWithRequest:req delegate:delegate];
 
   delegate.startCallback = callback;
+  delegate.originalRequest = req;
 
   [connection start];
 
