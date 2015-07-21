@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_TOOLS_PACKAGER_SWITCHES_H_
-#define SKY_TOOLS_PACKAGER_SWITCHES_H_
+#include "sky/tools/sky_snapshot/switches.h"
 
 namespace switches {
 
-extern const char kHelp[];
-extern const char kPackageRoot[];
-extern const char kSnapshot[];
+const char kHelp[] = "help";
+const char kPackageRoot[] = "package-root";
+const char kSnapshot[] = "snapshot";
 
 }  // namespace switches
-
-#endif  // SKY_TOOLS_PACKAGER_SWITCHES_H_

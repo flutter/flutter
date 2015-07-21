@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_TOOLS_PACKAGER_LOADER_H_
-#define SKY_TOOLS_PACKAGER_LOADER_H_
+#ifndef SKY_TOOLS_SKY_SNAPSHOT_LOADER_H_
+#define SKY_TOOLS_SKY_SNAPSHOT_LOADER_H_
 
 #include <string>
 
@@ -14,4 +14,4 @@ Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
                              Dart_Handle url);
 void LoadScript(const std::string& url);
 
-#endif  // SKY_TOOLS_PACKAGER_LOADER_H_
+#endif  // SKY_TOOLS_SKY_SNAPSHOT_LOADER_H_
