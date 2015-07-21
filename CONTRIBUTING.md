@@ -73,6 +73,11 @@ The Sky engine repository gladly accepts contributions via GitHub pull requests:
  * `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or go to `https://github.com/<your_name_here>/sky_engine` and click the
    "Compare & pull request" button
 
+Please make sure all your checkins have detailed commit messages explaining the patch.
+If you made multiple commits for a single pull request, either make sure each one has a detailed
+message explaining that specific commit, or squash your commits into one single checkin with a
+detailed message before sending the pull request.
+
 You must complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).
 You can do this online, and it only takes a minute.
