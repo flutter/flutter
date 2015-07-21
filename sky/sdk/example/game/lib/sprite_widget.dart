@@ -31,8 +31,7 @@ class SpriteWidget extends OneChildRenderObjectWrapper {
   void syncRenderObject(SpriteWidget old) {
     super.syncRenderObject(old);
 
-    // SpriteBox doesn't allow mutation of these properties
-    assert(rootNode == root.rootNode);
-    assert(transformMode == root._transformMode);
+    root.rootNode = rootNode;
+    root.transformMode = transformMode;
   }
 }
