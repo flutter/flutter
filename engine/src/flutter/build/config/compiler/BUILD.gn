@@ -260,7 +260,7 @@ config("compiler") {
     } else if (current_cpu == "arm") {
       common_mac_flags += [
         "-arch",
-        "armv7",
+        "arm64",
       ]
     }
 
