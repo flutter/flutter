@@ -16,8 +16,8 @@ class ThemeData {
     Map<int, Color> primarySwatch,
     Color accentColor,
     this.accentColorBrightness: ThemeBrightness.dark,
-    typography.TextTheme text })
-    : this.brightness = brightness,
+    typography.TextTheme text
+  }): this.brightness = brightness,
       this.primarySwatch = primarySwatch,
       primaryColorBrightness = primarySwatch == null ? brightness : ThemeBrightness.dark,
       canvasColor = brightness == ThemeBrightness.dark ? colors.Grey[850] : colors.Grey[50],
