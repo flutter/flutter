@@ -13,7 +13,7 @@ import distutils.util
 
 
 CONFIRM_MESSAGE = """This tool is destructive and will revert your current branch to
-origin/master among other things.  Are you sure you wish to continue?"""
+upstream/master among other things.  Are you sure you wish to continue?"""
 DRY_RUN = False
 
 
@@ -32,11 +32,50 @@ def confirm(prompt):
         return False
 
 
+def git_revision(cwd):
+    return subprocess.check_output([
+        'git', 'rev-parse', 'HEAD',
+    ], cwd=cwd).strip()
+
+
+class Artifact(object):
+    def __init__(self, category, name):
+        self.category = category
+        self.name = name
+
+
+GS_URL = 'gs://mojo/sky/%(category)s/%(config)s/%(commit_hash)s/%(name)s'
+
+
+ARTIFACTS = {
+    'android-arm': [
+        Artifact('shell', 'SkyDemo.apk'),
+        Artifact('viewer', 'sky_viewer.mojo'),
+    ],
+    'linux-x64': [
+        Artifact('shell', 'icudtl.dat'),
+        Artifact('shell', 'sky_shell'),
+        Artifact('viewer', 'sky_viewer.mojo'),
+    ]
+}
+
+
+def upload_artifacts(dist_root, config, commit_hash):
+    for artifact in ARTIFACTS[config]:
+        src = os.path.join(artifact.category, artifact.name)
+        dst = GS_URL % {
+            'category': artifact.category,
+            'config': config,
+            'commit_hash': commit_hash,
+            'name': artifact.name,
+        }
+        z = ','.join([ 'mojo', 'dat' ])
+        run(dist_root, ['gsutil', 'cp', '-z', z, src, dst])
+
+
 def main():
     parser = argparse.ArgumentParser(description='Deploy!')
     parser.add_argument('sky_engine_root', help='Path to sky_engine/src')
-    parser.add_argument('sky_sdk_root', help='Path to sky_sdk')
-    parser.add_argument('demo_site_root', help='Path to domokit.github.io')
     parser.add_argument('--dry-run', action='store_true', default=False,
         help='Just print commands w/o executing.')
     parser.add_argument('--no-pub-publish', dest='publish',
@@ -51,39 +90,31 @@ def main():
         return 1
 
     sky_engine_root = os.path.abspath(os.path.expanduser(args.sky_engine_root))
-    sky_sdk_root = os.path.abspath(os.path.expanduser(args.sky_sdk_root))
-    demo_site_root = os.path.abspath(os.path.expanduser(args.demo_site_root))
 
     # Derived paths:
     dart_sdk_root = os.path.join(sky_engine_root, 'third_party/dart-sdk/dart-sdk')
     pub_path = os.path.join(dart_sdk_root, 'bin/pub')
-    packages_root = os.path.join(sky_sdk_root, 'packages')
+    android_dist_root = os.path.join(sky_engine_root, 'out/android_Release/dist')
+    linux_dist_root = os.path.join(sky_engine_root, 'out/Release/dist')
+    sky_package_root = os.path.join(linux_dist_root, 'sdk/sky')
 
-    run(sky_engine_root, ['git', 'pull', '--rebase'])
+    run(sky_engine_root, ['git', 'fetch', 'upstream'])
+    run(sky_engine_root, ['git', 'reset', 'upstream/master', '--hard'])
     run(sky_engine_root, ['gclient', 'sync'])
+
+    commit_hash = git_revision(sky_engine_root)
+
     run(sky_engine_root, ['sky/tools/gn', '--android', '--release'])
-    # TODO(eseidel): We shouldn't use mojob anymore, it likely will break.
-    run(sky_engine_root, ['mojo/tools/mojob.py', 'build', '--android', '--release'])
-    # Run tests?
+    run(sky_engine_root, ['ninja', '-C', 'out/android_Release', ':dist'])
 
-    run(sky_engine_root, [
-        'sky/tools/deploy_sdk.py',
-        '--non-interactive',
-        sky_sdk_root
-    ])
-    # tag for version?
+    run(sky_engine_root, ['sky/tools/gn', '--release'])
+    run(sky_engine_root, ['ninja', '-C', 'out/Release', ':dist'])
 
-    run(demo_site_root, ['git', 'fetch'])
-    run(demo_site_root, ['git', 'reset', '--hard', 'origin/master'])
-    # TODO(eseidel): We should move this script back into sky/tools.
-    run(sky_engine_root, ['mojo/tools/deploy_domokit_site.py', demo_site_root])
-    # tag for version?
+    upload_artifacts(android_dist_root, 'android-arm', commit_hash)
+    upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
 
     if args.publish:
-        package_path = os.path.join(packages_root, 'sky')
-        run(package_path, [pub_path, 'publish', '--force'])
-
-    run(demo_site_root, ['git', 'push'])
+        run(sky_package_root, [pub_path, 'publish', '--force'])
 
 
 if __name__ == '__main__':
