@@ -6,8 +6,6 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
-import 'package:sky/base/lerp.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/animated_component.dart';
