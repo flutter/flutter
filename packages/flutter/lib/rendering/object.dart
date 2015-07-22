@@ -158,6 +158,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(parent == null);
     assert(_relayoutSubtreeRoot == null);
     _relayoutSubtreeRoot = this;
+    assert(() {
+      _debugCanParentUseSize = false;
+      return true;
+    });
     _nodesNeedingLayout.add(this);
     _nodesNeedingPaint.add(this);
     scheduler.ensureVisualUpdate();
@@ -183,9 +187,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       RenderObject debugPreviousActiveLayout;
       assert(!_debugMutationsLocked);
       assert(!_debugDoingThisLayoutWithCallback);
+      assert(_debugCanParentUseSize != null);
       assert(() {
         _debugMutationsLocked = true;
-        _debugCanParentUseSize = false;
         _debugDoingThisLayout = true;
         debugPreviousActiveLayout = _debugActiveLayout;
         _debugActiveLayout = this;
@@ -195,7 +199,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(() {
         _debugActiveLayout = debugPreviousActiveLayout;
         _debugDoingThisLayout = false;
-        _debugCanParentUseSize = null;
         _debugMutationsLocked = false;
         return true;
       });
@@ -243,7 +246,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(() {
       _debugActiveLayout = debugPreviousActiveLayout;
       _debugDoingThisLayout = false;
-      _debugCanParentUseSize = null;
       _debugMutationsLocked = false;
       return true;
     });
