@@ -4,8 +4,9 @@
 
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/rendering/object.dart';
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/raised_button.dart';
+import 'package:sky/widgets/button_base.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:sky/widgets/task_description.dart';
@@ -90,13 +91,106 @@ class GameDemoApp extends App {
 
   Widget _buildMainScene(navigator, route) {
     return new Center(
-      child: new RaisedButton(
-        child: new Text("Play"),
+      child: new TextureButton(
         onPressed: () {
           _game = new GameDemoWorld(_app, navigator, _loader, _spriteSheet, _spriteSheetUI);
           navigator.pushNamed('/game');
-        }
+        },
+        texture: _spriteSheetUI["btn_play_up.png"],
+        textureDown: _spriteSheetUI["btn_play_down.png"],
+        width: 128.0,
+        height: 128.0
       )
     );
+  }
+}
+
+class TextureButton extends ButtonBase {
+  TextureButton({
+    Key key,
+    this.onPressed,
+    this.texture,
+    this.textureDown,
+    this.width: 128.0,
+    this.height: 128.0
+  }) : super(key: key);
+
+  final Function onPressed;
+  final Texture texture;
+  final Texture textureDown;
+  final double width;
+  final double height;
+
+  Widget buildContent() {
+    return new Listener(
+      child: new Container(
+        width: width,
+        height: height,
+        child: new CustomPaint(
+          callback: paintCallback,
+          token: new _TextureButtonToken(
+            highlight,
+            texture,
+            textureDown,
+            width,
+            height
+          )
+        )
+      ),
+      onPointerUp: (_) {
+        if (onPressed != null) onPressed();
+      }
+    );
+  }
+
+  void paintCallback(PaintingCanvas canvas, Size size) {
+    if (texture == null)
+      return;
+
+    if (highlight && textureDown != null) {
+      // Draw down state
+      canvas.scale(size.width / textureDown.size.width, size.height / textureDown.size.height);
+      textureDown.drawTexture(canvas, Point.origin, new Paint());
+    } else {
+      // Draw up state
+      canvas.scale(size.width / texture.size.width, size.height / texture.size.height);
+      texture.drawTexture(canvas, Point.origin, new Paint());
+    }
+  }
+}
+
+class _TextureButtonToken {
+  _TextureButtonToken(
+    this._highlight,
+    this._texture,
+    this._textureDown,
+    this._width,
+    this._height
+  );
+
+  final bool _highlight;
+  final Texture _texture;
+  final Texture _textureDown;
+  final double _width;
+  final double _height;
+
+  bool operator== (other) {
+    return
+      other is _TextureButtonToken &&
+      _highlight == other._highlight &&
+      _texture == other._texture &&
+      _textureDown == other._textureDown &&
+      _width == other._width &&
+      _height == other._height;
+  }
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value * _highlight.hashCode;
+    value = 37 * value * _texture.hashCode;
+    value = 37 * value * _textureDown.hashCode;
+    value = 37 * value * _width.hashCode;
+    value = 37 * value * _height.hashCode;
+    return value;
   }
 }
