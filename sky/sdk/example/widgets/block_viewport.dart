@@ -115,7 +115,7 @@ class BlockViewportApp extends App {
     if (index >= lengths.length)
       return null;
     return new Listener(
-      key: lengths[index].toString(),
+      key: new Key.stringify(lengths[index]),
       child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: new Color((0xFF000000 + 0xFFFFFF * lengths[index] / kMaxLength).round())

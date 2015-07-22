@@ -11,7 +11,7 @@ const EdgeDims kCardMargins = const EdgeDims.all(4.0);
 ///
 /// <https://www.google.com/design/spec/components/cards.html>
 class Card extends Component {
-  Card({ String key, this.child, this.color }) : super(key: key);
+  Card({ Key key, this.child, this.color }) : super(key: key);
 
   final Widget child;
   final Color color;

@@ -35,7 +35,7 @@ typedef void PopupMenuStatusChangedCallback(PopupMenuStatus status);
 class PopupMenu extends AnimatedComponent {
 
   PopupMenu({
-    String key,
+    Key key,
     this.showing,
     this.onStatusChanged,
     this.items,

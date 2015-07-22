@@ -27,8 +27,6 @@ class SettingsFragment extends Component {
   final BackupMode backup;
   final SettingsUpdater updater;
 
-  bool showModeDialog = false;
-
   void _handleBackupChanged(bool value) {
     if (updater != null)
       updater(backup: value ? BackupMode.enabled : BackupMode.disabled);

@@ -32,7 +32,7 @@ class Checkbox extends Toggleable {
   /// * `value` determines whether the checkbox is checked.
   /// * `onChanged` is called whenever the state of the checkbox should change.
   Checkbox({
-    String key,
+    Key key,
     bool value,
     ValueChanged onChanged
   }) : super(key: key, value: value, onChanged: onChanged);
