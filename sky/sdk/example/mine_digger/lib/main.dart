@@ -1,4 +1,3 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,125 +8,167 @@ import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/widget.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
-// Classic minesweeper-inspired game. The mouse controls are standard except
-// for left + right combo which is not implemented. For touch, the duration of
-// the pointer determines probing versus flagging.
+// Classic minesweeper-inspired game. The mouse controls are standard
+// except for left + right combo which is not implemented. For touch,
+// the duration of the pointer determines probing versus flagging.
 //
-// There are only 3 classes to understand. Game, which is contains all the
-// logic and two UI classes: CoveredMineNode and ExposedMineNode, none of them
-// holding state.
+// There are only 3 classes to understand. MineDiggerApp, which is
+// contains all the logic and two classes that describe the mines:
+// CoveredMineNode and ExposedMineNode, none of them holding state.
 
-class Game {
+// Colors for each mine count (0-8):
+const List<TextStyle> textStyles = const <TextStyle>[
+  const TextStyle(color: const Color(0xFF555555), fontWeight: bold),
+  const TextStyle(color: const Color(0xFF0094FF), fontWeight: bold), // blue
+  const TextStyle(color: const Color(0xFF13A023), fontWeight: bold), // green
+  const TextStyle(color: const Color(0xFFDA1414), fontWeight: bold), // red
+  const TextStyle(color: const Color(0xFF1E2347), fontWeight: bold), // black
+  const TextStyle(color: const Color(0xFF7F0037), fontWeight: bold), // dark red
+  const TextStyle(color: const Color(0xFF000000), fontWeight: bold),
+  const TextStyle(color: const Color(0xFF000000), fontWeight: bold),
+  const TextStyle(color: const Color(0xFF000000), fontWeight: bold),
+];
+
+enum CellState { covered, exploded, cleared, flagged, shown }
+
+class MineDiggerApp extends App {
+
+  void initState() {
+    resetGame();
+  }
+
   static const int rows = 9;
   static const int cols = 9;
   static const int totalMineCount = 11;
 
-  static const int coveredCell = 0;
-  static const int explodedCell = 1;
-  static const int clearedCell = 2;
-  static const int flaggedCell = 3;
-  static const int shownCell = 4;
-
-  static final List<TextStyle> textStyles = new List<TextStyle>();
-
-  final App app;
-
   bool alive;
   bool hasWon;
   int detectedCount;
-  int randomSeed;
 
   // |cells| keeps track of the positions of the mines.
   List<List<bool>> cells;
   // |uiState| keeps track of the visible player progess.
-  List<List<int>> uiState;
+  List<List<CellState>> uiState;
 
   Game(this.app) {
     randomSeed = 22;
     // Colors for each mine count:
     // 0 - none, 1 - blue, 2-green, 3-red, 4-black, 5-dark red .. etc.
-    textStyles.add(
-      new TextStyle(color: const Color(0xFF555555), fontWeight: bold));
-    textStyles.add(
-      new TextStyle(color: const Color(0xFF0094FF), fontWeight: bold));
-    textStyles.add(
-      new TextStyle(color: const Color(0xFF13A023), fontWeight: bold));
-    textStyles.add(
-      new TextStyle(color: const Color(0xFFDA1414), fontWeight: bold));
-    textStyles.add(
-      new TextStyle(color: const Color(0xFF1E2347), fontWeight: bold));
-    textStyles.add(
-      new TextStyle(color: const Color(0xFF7F0037), fontWeight: bold));
-    textStyles.add(
-      new TextStyle(color: const Color(0xFFE93BE9), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF555555), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF0094FF), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF13A023), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFFDA1414), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF1E2347), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFF7F0037), fontWeight: bold));
+    textStyles.add(new TextStyle(color: const Color(0xFFE93BE9), fontWeight: bold));
     initialize();
   }
 
-  void initialize() {
+  void resetGame() {
     alive = true;
     hasWon = false;
     detectedCount = 0;
     // Build the arrays.
     cells = new List<List<bool>>();
-    uiState = new List<List<int>>();
+    uiState = new List<List<CellState>>();
     for (int iy = 0; iy != rows; iy++) {
       cells.add(new List<bool>());
-      uiState.add(new List<int>());
+      uiState.add(new List<CellState>());
       for (int ix = 0; ix != cols; ix++) {
         cells[iy].add(false);
-        uiState[iy].add(coveredCell);
+        uiState[iy].add(CellState.covered);
       }
     }
     // Place the mines.
-    Random random = new Random(++randomSeed);
-    for (int mc = 0; mc != totalMineCount; mc++) {
-      int rx = random.nextInt(rows);
-      int ry = random.nextInt(cols);
-      if (cells[ry][rx]) {
-        // Mine already there. Try again.
-        --mc;
-      } else {
-        cells[ry][rx] = true;
+    Random random = new Random();
+    int cellsRemaining = rows * cols;
+    int minesRemaining = totalMineCount;
+    for (int x = 0; x < cols; x += 1) {
+      for (int y = 0; y < rows; y += 1) {
+        if (random.nextInt(cellsRemaining) < minesRemaining) {
+          cells[y][x] = true;
+          minesRemaining -= 1;
+          if (minesRemaining <= 0)
+            return;
+        }
+        cellsRemaining -= 1;
       }
     }
+    assert(false);
+  }
+
+  Stopwatch longPressStopwatch;
+
+  PointerEventListener _pointerDownHandlerFor(int posX, int posY) {
+    return (sky.PointerEvent event) {
+      if (event.buttons == 1) {
+        probe(posX, posY);
+      } else if (event.buttons == 2) {
+        flag(posX, posY);
+      } else {
+        // Touch event.
+        longPressStopwatch = new Stopwatch()..start();
+      }
+    };
+  }
+
+  PointerEventListener _pointerUpHandlerFor(int posX, int posY) {
+    return (sky.PointerEvent event) {
+      if (longPressStopwatch == null)
+        return;
+      // Pointer down was a touch event.
+      if (longPressStopwatch.elapsedMilliseconds < 250) {
+        probe(posX, posY);
+      } else {
+        // Long press flags.
+        flag(posX, posY);
+      }
+      longPressStopwatch = null;
+    };
   }
 
   Widget buildBoard() {
     bool hasCoveredCell = false;
-    List<Flex> flexRows = new List<Flex>();
+    List<Flex> flexRows = <Flex>[];
     for (int iy = 0; iy != 9; iy++) {
-      List<Component> row = new List<Component>();
+      List<Widget> row = <Widget>[];
       for (int ix = 0; ix != 9; ix++) {
-        int state = uiState[iy][ix];
+        CellState state = uiState[iy][ix];
         int count = mineCount(ix, iy);
-
         if (!alive) {
-          if (state != explodedCell)
-            state = cells[iy][ix] ? shownCell : state;
+          if (state != CellState.exploded)
+            state = cells[iy][ix] ? CellState.shown : state;
         }
-
-        if (state == coveredCell) {
+        if (state == CellState.covered) {
+          row.add(new Listener(
+            onPointerDown: _pointerDownHandlerFor(ix, iy),
+            onPointerUp: _pointerUpHandlerFor(ix, iy),
+            child: new CoveredMineNode(
+              flagged: false,
+              posX: ix,
+              posY: iy
+            )
+          ));
+          // Mutating |hasCoveredCell| here is hacky, but convenient, same
+          // goes for mutating |hasWon| below.
+          hasCoveredCell = true;
+        } else if (state == CellState.flagged) {
           row.add(new CoveredMineNode(
-            this,
-            flagged: false,
-            posX: ix, posY: iy));
-            // Mutating |hasCoveredCell| here is hacky, but convenient, same
-            // goes for mutating |hasWon| below.
-            hasCoveredCell = true;
-        } else if (state == flaggedCell) {
-          row.add(new CoveredMineNode(
-            this,
             flagged: true,
-            posX: ix, posY: iy));
+            posX: ix,
+            posY: iy
+          ));
         } else {
           row.add(new ExposedMineNode(
             state: state,
-            count: count));
+            count: count
+          ));
         }
       }
       flexRows.add(
@@ -135,8 +176,9 @@ class Game {
           row,
           direction: FlexDirection.horizontal,
           justifyContent: FlexJustifyContent.center,
-          key: 'flex_row($iy)'
-        ));
+          key: new Key.stringify(iy)
+        )
+      );
     }
 
     if (!hasCoveredCell) {
@@ -147,33 +189,32 @@ class Game {
     }
 
     return new Container(
-      key: 'minefield',
       padding: new EdgeDims.all(10.0),
       margin: new EdgeDims.all(10.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFF6B6B6B)),
       child: new Flex(
         flexRows,
-        direction: FlexDirection.vertical,
-        key: 'flxv'));
+        direction: FlexDirection.vertical
+      )
+    );
   }
 
   Widget buildToolBar() {
-    String banner = hasWon ?
+    String toolbarCaption = hasWon ?
       'Awesome!!' : alive ?
         'Mine Digger [$detectedCount-$totalMineCount]': 'Kaboom! [press here]';
 
     return new ToolBar(
       // FIXME: Strange to have the toolbar be tapable.
       center: new Listener(
-        onPointerDown: handleBannerPointerDown,
-        child: new Text(banner, style: Theme.of(this.app).text.title)
+        onPointerDown: handleToolbarPointerDown,
+        child: new Text(toolbarCaption, style: Theme.of(this).text.title)
       )
     );
   }
 
-  Widget buildUI() {
-    // FIXME: We need to build the board before we build the toolbar because
-    // we compute the win state during build step.
+  Widget build() {
+    // We build the board before we build the toolbar because we compute the win state during build step.
     Widget board = buildBoard();
     return new TaskDescription(
       label: 'Mine Digger',
@@ -187,39 +228,42 @@ class Game {
     );
   }
 
-  void handleBannerPointerDown(sky.PointerEvent event) {
-    initialize();
-    app.scheduleBuild();
+  void handleToolbarPointerDown(sky.PointerEvent event) {
+    setState(() {
+      resetGame();
+    });
   }
 
   // User action. The user uncovers the cell which can cause losing the game.
   void probe(int x, int y) {
     if (!alive)
       return;
-    if (uiState[y][x] == flaggedCell)
+    if (uiState[y][x] == CellState.flagged)
       return;
-    // Allowed to probe.
-    if (cells[y][x]) {
-      // Probed on a mine --> dead!!
-      uiState[y][x] = explodedCell;
-      alive = false;
-    } else {
-      // No mine, uncover nearby if possible.
-      cull(x, y);
-    }
-    app.scheduleBuild();
+    setState(() {
+      // Allowed to probe.
+      if (cells[y][x]) {
+        // Probed on a mine --> dead!!
+        uiState[y][x] = CellState.exploded;
+        alive = false;
+      } else {
+        // No mine, uncover nearby if possible.
+        cull(x, y);
+      }
+    });
   }
 
   // User action. The user is sure a mine is at this location.
   void flag(int x, int y) {
-    if (uiState[y][x] == flaggedCell) {
-      uiState[y][x] = coveredCell;
-      --detectedCount;
-    } else {
-      uiState[y][x] = flaggedCell;
-      ++detectedCount;
-    }
-    app.scheduleBuild();
+    setState(() {
+      if (uiState[y][x] == CellState.flagged) {
+        uiState[y][x] = CellState.covered;
+        --detectedCount;
+      } else {
+        uiState[y][x] = CellState.flagged;
+        ++detectedCount;
+      }
+    });
   }
 
   // Recursively uncovers cells whose totalMineCount is zero.
@@ -229,9 +273,9 @@ class Game {
     if ((y < 0) || (y > cols - 1))
       return;
 
-    if (uiState[y][x] == clearedCell)
+    if (uiState[y][x] == CellState.cleared)
       return;
-    uiState[y][x] = clearedCell;
+    uiState[y][x] = CellState.cleared;
 
     if (mineCount(x, y) > 0)
       return;
@@ -269,106 +313,70 @@ class Game {
   }
 }
 
-Widget makeCell(Widget widget) {
+Widget buildCell(Widget child) {
   return new Container(
     padding: new EdgeDims.all(1.0),
     height: 27.0, width: 27.0,
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFC0C0C0)),
     margin: new EdgeDims.all(2.0),
-    child: widget);
+    child: child
+  );
 }
 
-Widget makeInnerCell(Widget widget) {
+Widget buildInnerCell(Widget child) {
   return new Container(
     padding: new EdgeDims.all(1.0),
     margin: new EdgeDims.all(3.0),
     height: 17.0, width: 17.0,
-    child: widget);
+    child: child
+  );
 }
 
 class CoveredMineNode extends Component {
-  final Game game;
+
+  CoveredMineNode({ this.flagged, this.posX, this.posY });
+
   final bool flagged;
   final int posX;
   final int posY;
-  Stopwatch stopwatch;
-
-  CoveredMineNode(this.game, {this.flagged, this.posX, this.posY});
-
-  void _handlePointerDown(sky.PointerEvent event) {
-    if (event.buttons == 1) {
-      game.probe(posX, posY);
-    } else if (event.buttons == 2) {
-      game.flag(posX, posY);
-    } else {
-      // Touch event.
-      stopwatch = new Stopwatch()..start();
-    }
-  }
-
-  void _handlePointerUp(sky.PointerEvent event) {
-    if (stopwatch == null)
-      return;
-    // Pointer down was a touch event.
-    if (stopwatch.elapsedMilliseconds < 250) {
-      game.probe(posX, posY);
-    } else {
-      // Long press flags.
-      game.flag(posX, posY);
-    }
-    stopwatch = null;
-  }
 
   Widget build() {
-    Widget text = flagged ?
-      makeInnerCell(new StyledText(elements : [Game.textStyles[5], '\u2691'])) :
-      null;
+    Widget text;
+    if (flagged)
+      text = buildInnerCell(new StyledText(elements : [textStyles[5], '\u2691']));
 
     Container inner = new Container(
       margin: new EdgeDims.all(2.0),
       height: 17.0, width: 17.0,
       decoration: new BoxDecoration(backgroundColor: const Color(0xFFD9D9D9)),
-      child: text);
+      child: text
+    );
 
-    return makeCell(new Listener(
-      child: inner,
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUp));
+    return buildCell(inner);
   }
 }
 
 class ExposedMineNode extends Component {
-  final int state;
-  final int count;
 
-  ExposedMineNode({this.state, this.count});
+  ExposedMineNode({ this.state, this.count });
+
+  final CellState state;
+  final int count;
 
   Widget build() {
     StyledText text;
-    if (state == Game.clearedCell) {
+    if (state == CellState.cleared) {
       // Uncovered cell with nearby mine count.
       if (count != 0)
-        text = new StyledText(elements : [Game.textStyles[count], '$count']);
+        text = new StyledText(elements : [textStyles[count], '$count']);
     } else {
       // Exploded mine or shown mine for 'game over'.
-      int color = state == Game.explodedCell ? 3 : 0;
-      text = new StyledText(elements : [Game.textStyles[color], '\u2600']);
+      int color = state == CellState.exploded ? 3 : 0;
+      text = new StyledText(elements : [textStyles[color], '\u2600']);
     }
-
-    return makeCell(makeInnerCell(text));
-  }
-}
-
-class MineDiggerApp extends App {
-  Game game;
-
-  MineDiggerApp() {
-    game = new Game(this);
+    return buildCell(buildInnerCell(text));
   }
 
-  Widget build() {
-    return game.buildUI();
-  }
 }
 
 void main() {

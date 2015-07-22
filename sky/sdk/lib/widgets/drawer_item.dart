@@ -15,7 +15,7 @@ import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
 
 class DrawerItem extends ButtonBase {
-  DrawerItem({ String key, this.icon, this.children, this.onPressed, this.selected: false })
+  DrawerItem({ Key key, this.icon, this.children, this.onPressed, this.selected: false })
     : super(key: key);
 
   String icon;

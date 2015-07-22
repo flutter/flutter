@@ -3,7 +3,9 @@ Getting started with Sky
 
 Sky apps are written in Dart. To get started, we need to set up Dart SDK:
 
- - Install the [Dart SDK](https://www.dartlang.org/downloads/).
+ - Install the [Dart SDK](https://www.dartlang.org/downloads/):
+   - Mac: `brew tap dart-lang/dart && brew install dart`
+   - Linux: See [https://www.dartlang.org/downloads/linux.html](https://www.dartlang.org/downloads/linux.html)
  - Ensure that `$DART_SDK` is set to the path of your Dart SDK and that the
    `dart` and `pub` executables are on your `$PATH`.
 
@@ -44,20 +46,20 @@ The `HelloWorldApp` builds a `Text` widget containing the traditional `Hello, wo
 string and centers it on the screen using a `Center` widget. To learn more about
 the widget system, please see the [widgets tutorial](lib/widgets/README.md).
 
-Setup your Android device
+Setting up your Android device
 -------------------------
 
 Currently Sky requires an Android device running the Lollipop (or newer) version
 of the Android operating system.
 
- - Install the `adb` tool from the [Android SDK](https://developer.android.com/sdk/installing/index.html)
-   and ensure that `adb` (inside `platform-tools` in the Android SDK) is in your
-   `$PATH`.
+ - Install the `adb` tool from the [Android SDK](https://developer.android.com/sdk/installing/index.html?pkg=tools):
+  - Mac: `brew install android-platform-tools`
+  - Linux: `sudo apt-get install android-tools-adb`
 
  - Enable developer mode on your device by visiting `Settings > About phone`
    and tapping the `Build number` field five times.
 
- - Enable `USB debugging` in `Settings > Developer options`.
+ - Enable `Android debugging` in `Settings > Developer options`.
 
  - Using a USB cable, plug your phone into your computer. If prompted on your
    device, authorize your computer to access your device.

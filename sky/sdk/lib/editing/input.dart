@@ -25,7 +25,7 @@ class Input extends StatefulComponent {
   // Never makes sense to have both a localKey and a globalKey.
   // Possibly a class HeroKey who functions as a UUID.
 
-  Input({String key,
+  Input({Key key,
          this.placeholder,
          this.onChanged,
          this.focused})
@@ -75,7 +75,7 @@ class Input extends StatefulComponent {
 
     if (placeholder != null && _value.isEmpty) {
       Widget child = new Opacity(
-        key: "placeholder",
+        key: new Key('placeholder'),
         child: new Text(placeholder, style: textStyle),
         opacity: themeData.hintOpacity
       );

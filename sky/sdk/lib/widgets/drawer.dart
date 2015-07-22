@@ -46,7 +46,7 @@ typedef void DrawerStatusChangedCallback(DrawerStatus status);
 
 class Drawer extends AnimatedComponent {
   Drawer({
-    String key,
+    Key key,
     this.children,
     this.showing: false,
     this.level: 0,
@@ -143,7 +143,8 @@ class Drawer extends AnimatedComponent {
     if (_lastStatus != null && status != _lastStatus) {
       if (status == DrawerStatus.inactive &&
           navigator != null &&
-          navigator.currentRoute.key == this)
+          navigator.currentRoute is RouteState &&
+          (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
         navigator.pop();
       if (onStatusChanged != null)
         onStatusChanged(status);

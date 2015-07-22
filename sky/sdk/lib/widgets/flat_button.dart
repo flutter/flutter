@@ -9,7 +9,7 @@ import 'package:sky/widgets/theme.dart';
 
 class FlatButton extends MaterialButton {
   FlatButton({
-    String key,
+    Key key,
     Widget child,
     bool enabled: true,
     Function onPressed

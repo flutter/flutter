@@ -84,7 +84,7 @@ void ContainerNode::checkAcceptChildType(const Node* newChild, ExceptionState& e
     }
 }
 
-void ContainerNode::checkAcceptChildHierarchy(const Node& newChild, const Node* oldChild, ExceptionState& exceptionState) const
+void ContainerNode::checkAcceptChildHierarchy(const Node& newChild, ExceptionState& exceptionState) const
 {
     if (newChild.contains(this)) {
         exceptionState.ThrowDOMException(HierarchyRequestError, "The new child element contains the parent.");
@@ -109,7 +109,7 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
     if (exceptionState.had_exception())
         return nullptr;
 
-    checkAcceptChildHierarchy(*newChild, 0, exceptionState);
+    checkAcceptChildHierarchy(*newChild, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
 
@@ -134,7 +134,8 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
     if (targets.isEmpty())
         return newChild;
 
-    checkAcceptChildHierarchy(*newChild, 0, exceptionState);
+    // Guard against mutation events changing hierarchy.
+    checkAcceptChildHierarchy(*newChild, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
 
@@ -223,7 +224,7 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
     if (exceptionState.had_exception())
         return nullptr;
 
-    checkAcceptChildHierarchy(*newChild, child.get(), exceptionState);
+    checkAcceptChildHierarchy(*newChild, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
 
@@ -250,7 +251,7 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
     if (exceptionState.had_exception())
         return nullptr;
 
-    checkAcceptChildHierarchy(*newChild, child.get(),exceptionState);
+    checkAcceptChildHierarchy(*newChild, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
 
@@ -481,7 +482,7 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
     if (exceptionState.had_exception())
         return nullptr;
 
-    checkAcceptChildHierarchy(*newChild, 0, exceptionState);
+    checkAcceptChildHierarchy(*newChild, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
 
@@ -498,7 +499,7 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
     if (targets.isEmpty())
         return newChild;
 
-    checkAcceptChildHierarchy(*newChild, 0, exceptionState);
+    checkAcceptChildHierarchy(*newChild, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
 

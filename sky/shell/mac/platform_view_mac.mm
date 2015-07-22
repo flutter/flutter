@@ -2,29 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "platform_view_ios.h"
+#include "sky/shell/mac/platform_view_mac.h"
 
 namespace sky {
 namespace shell {
 
 PlatformView* PlatformView::Create(const Config& config) {
-  return new PlatformViewIOS(config);
+  return new PlatformViewMac(config);
 }
 
-PlatformViewIOS::PlatformViewIOS(const Config& config)
+PlatformViewMac::PlatformViewMac(const Config& config)
   : PlatformView(config) {
 }
 
-PlatformViewIOS::~PlatformViewIOS() {
+PlatformViewMac::~PlatformViewMac() {
 }
 
-void PlatformViewIOS::SurfaceCreated(gfx::AcceleratedWidget widget) {
+void PlatformViewMac::SurfaceCreated(gfx::AcceleratedWidget widget) {
   DCHECK(window_ == 0);
   window_ = widget;
   SurfaceWasCreated();
 }
 
-void PlatformViewIOS::SurfaceDestroyed() {
+void PlatformViewMac::SurfaceDestroyed() {
   DCHECK(window_);
   window_ = 0;
   SurfaceWasDestroyed();
