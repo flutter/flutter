@@ -5,7 +5,7 @@ Sky apps are written in Dart. To get started, we need to set up Dart SDK:
 
  - Install the [Dart SDK](https://www.dartlang.org/downloads/):
    - Mac: `brew tap dart-lang/dart && brew install dart`
-   - Linux, see [https://www.dartlang.org/downloads/linux.html](https://www.dartlang.org/downloads/linux.html)
+   - Linux: See [https://www.dartlang.org/downloads/linux.html](https://www.dartlang.org/downloads/linux.html)
  - Ensure that `$DART_SDK` is set to the path of your Dart SDK and that the
    `dart` and `pub` executables are on your `$PATH`.
 
