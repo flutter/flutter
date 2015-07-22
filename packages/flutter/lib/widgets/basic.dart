@@ -22,13 +22,13 @@ import 'package:sky/widgets/widget.dart';
 export 'package:sky/rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'package:sky/widgets/widget.dart' show Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
+export 'package:sky/widgets/widget.dart' show Key, Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
 
 
 // PAINTING NODES
 
 class Opacity extends OneChildRenderObjectWrapper {
-  Opacity({ String key, this.opacity, Widget child })
+  Opacity({ Key key, this.opacity, Widget child })
     : super(key: key, child: child);
 
   final double opacity;
@@ -43,7 +43,7 @@ class Opacity extends OneChildRenderObjectWrapper {
 }
 
 class ColorFilter extends OneChildRenderObjectWrapper {
-  ColorFilter({ String key, this.color, this.transferMode, Widget child })
+  ColorFilter({ Key key, this.color, this.transferMode, Widget child })
     : super(key: key, child: child);
 
   final Color color;
@@ -60,7 +60,7 @@ class ColorFilter extends OneChildRenderObjectWrapper {
 }
 
 class DecoratedBox extends OneChildRenderObjectWrapper {
-  DecoratedBox({ String key, this.decoration, Widget child })
+  DecoratedBox({ Key key, this.decoration, Widget child })
     : super(key: key, child: child);
 
   final BoxDecoration decoration;
@@ -75,7 +75,7 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
 }
 
 class CustomPaint extends OneChildRenderObjectWrapper {
-  CustomPaint({ String key, this.callback, this.token, Widget child })
+  CustomPaint({ Key key, this.callback, this.token, Widget child })
     : super(key: key, child: child);
 
   final CustomPaintCallback callback;
@@ -98,7 +98,7 @@ class CustomPaint extends OneChildRenderObjectWrapper {
 }
 
 class ClipRect extends OneChildRenderObjectWrapper {
-  ClipRect({ String key, Widget child })
+  ClipRect({ Key key, Widget child })
     : super(key: key, child: child);
 
   RenderClipRect createNode() => new RenderClipRect();
@@ -108,7 +108,7 @@ class ClipRect extends OneChildRenderObjectWrapper {
 }
 
 class ClipRRect extends OneChildRenderObjectWrapper {
-  ClipRRect({ String key, this.xRadius, this.yRadius, Widget child })
+  ClipRRect({ Key key, this.xRadius, this.yRadius, Widget child })
     : super(key: key, child: child);
 
   final double xRadius;
@@ -125,7 +125,7 @@ class ClipRRect extends OneChildRenderObjectWrapper {
 }
 
 class ClipOval extends OneChildRenderObjectWrapper {
-  ClipOval({ String key, Widget child })
+  ClipOval({ Key key, Widget child })
     : super(key: key, child: child);
 
   RenderClipOval createNode() => new RenderClipOval();
@@ -138,7 +138,7 @@ class ClipOval extends OneChildRenderObjectWrapper {
 // POSITIONING AND SIZING NODES
 
 class Transform extends OneChildRenderObjectWrapper {
-  Transform({ String key, this.transform, Widget child })
+  Transform({ Key key, this.transform, Widget child })
     : super(key: key, child: child);
 
   final Matrix4 transform;
@@ -153,7 +153,7 @@ class Transform extends OneChildRenderObjectWrapper {
 }
 
 class Padding extends OneChildRenderObjectWrapper {
-  Padding({ String key, this.padding, Widget child })
+  Padding({ Key key, this.padding, Widget child })
     : super(key: key, child: child);
 
   final EdgeDims padding;
@@ -168,7 +168,7 @@ class Padding extends OneChildRenderObjectWrapper {
 }
 
 class Center extends OneChildRenderObjectWrapper {
-  Center({ String key, Widget child })
+  Center({ Key key, Widget child })
     : super(key: key, child: child);
 
   RenderPositionedBox createNode() => new RenderPositionedBox();
@@ -178,7 +178,7 @@ class Center extends OneChildRenderObjectWrapper {
 }
 
 class SizedBox extends OneChildRenderObjectWrapper {
-  SizedBox({ String key, this.width, this.height, Widget child })
+  SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
 
   final double width;
@@ -203,7 +203,7 @@ class SizedBox extends OneChildRenderObjectWrapper {
 }
 
 class ConstrainedBox extends OneChildRenderObjectWrapper {
-  ConstrainedBox({ String key, this.constraints, Widget child })
+  ConstrainedBox({ Key key, this.constraints, Widget child })
     : super(key: key, child: child);
 
   final BoxConstraints constraints;
@@ -218,7 +218,7 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
 }
 
 class AspectRatio extends OneChildRenderObjectWrapper {
-  AspectRatio({ String key, this.aspectRatio, Widget child })
+  AspectRatio({ Key key, this.aspectRatio, Widget child })
     : super(key: key, child: child);
 
   final double aspectRatio;
@@ -233,7 +233,7 @@ class AspectRatio extends OneChildRenderObjectWrapper {
 }
 
 class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
-  ShrinkWrapWidth({ String key, this.stepWidth, this.stepHeight, Widget child })
+  ShrinkWrapWidth({ Key key, this.stepWidth, this.stepHeight, Widget child })
     : super(key: key, child: child);
 
   final double stepWidth;
@@ -250,7 +250,7 @@ class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
 }
 
 class Baseline extends OneChildRenderObjectWrapper {
-  Baseline({ String key, this.baseline, this.baselineType: TextBaseline.alphabetic, Widget child })
+  Baseline({ Key key, this.baseline, this.baselineType: TextBaseline.alphabetic, Widget child })
     : super(key: key, child: child);
 
   final double baseline; // in pixels
@@ -267,7 +267,7 @@ class Baseline extends OneChildRenderObjectWrapper {
 }
 
 class Viewport extends OneChildRenderObjectWrapper {
-  Viewport({ String key, this.offset: 0.0, Widget child })
+  Viewport({ Key key, this.offset: 0.0, Widget child })
     : super(key: key, child: child);
 
   final double offset;
@@ -282,7 +282,7 @@ class Viewport extends OneChildRenderObjectWrapper {
 }
 
 class SizeObserver extends OneChildRenderObjectWrapper {
-  SizeObserver({ String key, this.callback, Widget child })
+  SizeObserver({ Key key, this.callback, Widget child })
     : super(key: key, child: child);
 
   final SizeChangedCallback callback;
@@ -307,7 +307,7 @@ class SizeObserver extends OneChildRenderObjectWrapper {
 class Container extends Component {
 
   Container({
-    String key,
+    Key key,
     this.child,
     this.constraints,
     this.decoration,
@@ -364,7 +364,7 @@ class Container extends Component {
 // LAYOUT NODES
 
 class Block extends MultiChildRenderObjectWrapper {
-  Block(List<Widget> children, { String key })
+  Block(List<Widget> children, { Key key })
     : super(key: key, children: children);
 
   RenderBlock createNode() => new RenderBlock();
@@ -372,7 +372,7 @@ class Block extends MultiChildRenderObjectWrapper {
 }
 
 class Stack extends MultiChildRenderObjectWrapper {
-  Stack(List<Widget> children, { String key })
+  Stack(List<Widget> children, { Key key })
     : super(key: key, children: children);
 
   RenderStack createNode() => new RenderStack();
@@ -381,7 +381,7 @@ class Stack extends MultiChildRenderObjectWrapper {
 
 class Positioned extends ParentDataNode {
   Positioned({
-    String key,
+    Key key,
     Widget child,
     double top,
     double right,
@@ -398,7 +398,7 @@ class Positioned extends ParentDataNode {
 class Flex extends MultiChildRenderObjectWrapper {
 
   Flex(List<Widget> children, {
-    String key,
+    Key key,
     this.direction: FlexDirection.horizontal,
     this.justifyContent: FlexJustifyContent.start,
     this.alignItems: FlexAlignItems.center,
@@ -424,12 +424,12 @@ class Flex extends MultiChildRenderObjectWrapper {
 }
 
 class Flexible extends ParentDataNode {
-  Flexible({ String key, int flex: 1, Widget child })
+  Flexible({ Key key, int flex: 1, Widget child })
     : super(child, new FlexBoxParentData()..flex = flex, key: key);
 }
 
 class Inline extends LeafRenderObjectWrapper {
-  Inline({ String key, this.text }) : super(key: key);
+  Inline({ Key key, this.text }) : super(key: key);
 
   final InlineBase text;
 
@@ -446,7 +446,7 @@ class StyledText extends Component {
   // elements ::= "string" | [<text-style> <elements>*]
   // Where "string" is text to display and text-style is an instance of
   // TextStyle. The text-style applies to all of the elements that follow.
-  StyledText({ this.elements, String key }) : super(key: key);
+  StyledText({ this.elements, Key key }) : super(key: key);
 
   final dynamic elements;
 
@@ -464,7 +464,7 @@ class StyledText extends Component {
 }
 
 class Text extends Component {
-  Text(this.data, { String key, TextStyle this.style }) : super(key: key);
+  Text(this.data, { Key key, TextStyle this.style }) : super(key: key);
 
   final String data;
   final TextStyle style;
@@ -488,9 +488,7 @@ class Text extends Component {
 }
 
 class Image extends LeafRenderObjectWrapper {
-  Image({ sky.Image image, this.width, this.height, this.colorFilter })
-    : image = image,
-      super(key: image.hashCode.toString()); // TODO(ianh): Find a way to uniquely identify the sky.Image rather than using hashCode, which could collide
+  Image({ Key key, this.image, this.width, this.height, this.colorFilter }) : super(key: key);
 
   final sky.Image image;
   final double width;
@@ -510,8 +508,7 @@ class Image extends LeafRenderObjectWrapper {
 }
 
 class FutureImage extends StatefulComponent {
-  FutureImage({ String key, this.image, this.width, this.height, this.colorFilter })
-    : super(key: key);
+  FutureImage({ Key key, this.image, this.width, this.height, this.colorFilter }) : super(key: key);
 
   Future<sky.Image> image;
   double width;
@@ -555,8 +552,7 @@ class FutureImage extends StatefulComponent {
 }
 
 class NetworkImage extends Component {
-  NetworkImage({ String src, this.width, this.height, this.colorFilter })
-    : src = src, super(key: src);
+  NetworkImage({ Key key, this.src, this.width, this.height, this.colorFilter }) : super(key: key);
 
   final String src;
   final double width;
@@ -574,9 +570,7 @@ class NetworkImage extends Component {
 }
 
 class AssetImage extends Component {
-  AssetImage({ String name, this.bundle, this.width, this.height, this.colorFilter })
-    : name = name,
-      super(key: name);
+  AssetImage({ Key key, this.name, this.bundle, this.width, this.height, this.colorFilter }) : super(key: key);
 
   final String name;
   final AssetBundle bundle;
@@ -597,7 +591,7 @@ class AssetImage extends Component {
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
   WidgetToRenderBoxAdapter(RenderBox renderBox)
     : renderBox = renderBox,
-      super(key: renderBox.hashCode.toString()); // TODO(ianh): Find a way to uniquely identify the RenderBox rather than using hashCode, which could collide
+      super(key: new Key.fromObjectIdentity(renderBox));
 
   final RenderBox renderBox;
 

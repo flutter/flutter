@@ -14,7 +14,7 @@ import 'package:sky/widgets/theme.dart';
 /// <https://www.google.com/design/spec/components/dialogs.html>
 class Dialog extends Component {
   Dialog({
-    String key,
+    Key key,
     this.title,
     this.content,
     this.actions,

@@ -11,8 +11,7 @@ import 'package:sky/widgets/widget.dart';
 
 class IconButton extends Component {
 
-  IconButton({ String icon: '', this.onPressed, this.color })
-    : super(key: icon), icon = icon;
+  IconButton({ Key key, this.icon, this.onPressed, this.color }) : super(key: key);
 
   final String icon;
   final Function onPressed;

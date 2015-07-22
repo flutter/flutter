@@ -249,14 +249,14 @@ class RenderTabBar extends RenderBox with
 
 class TabBarWrapper extends MultiChildRenderObjectWrapper {
   TabBarWrapper({
+    Key key,
     List<Widget> children,
     this.selectedIndex,
     this.backgroundColor,
     this.indicatorColor,
     this.textAndIcons,
     this.scrollable: false,
-    this.onLayoutChanged,
-    String key
+    this.onLayoutChanged
   }) : super(key: key, children: children);
 
   final int selectedIndex;
@@ -289,7 +289,7 @@ class TabLabel {
 
 class Tab extends Component {
   Tab({
-    String key,
+    Key key,
     this.label,
     this.selected: false
   }) : super(key: key) {
@@ -347,7 +347,7 @@ class Tab extends Component {
 
 class TabBar extends Scrollable {
   TabBar({
-    String key,
+    Key key,
     this.labels,
     this.selectedIndex: 0,
     this.onChanged,
@@ -378,13 +378,11 @@ class TabBar extends Scrollable {
   }
 
   Widget _toTab(TabLabel label, int tabIndex) {
-    Tab tab = new Tab(
-      label: label,
-      selected: tabIndex == selectedIndex,
-      key: label.text == null ? label.icon : label.text
-    );
     return new Listener(
-      child: tab,
+      child: new Tab(
+        label: label,
+        selected: tabIndex == selectedIndex
+      ),
       onGestureTap: (_) => _handleTap(tabIndex)
     );
   }
@@ -472,7 +470,7 @@ class TabNavigatorView {
 
 class TabNavigator extends Component {
   TabNavigator({
-    String key,
+    Key key,
     this.views,
     this.selectedIndex: 0,
     this.onChanged,

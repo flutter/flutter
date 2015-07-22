@@ -22,7 +22,7 @@ typedef void DismissedCallback();
 class Dismissable extends AnimatedComponent {
 
   Dismissable({
-    String key,
+    Key key,
     this.child,
     this.onDismissed
     // TODO(hansmuller): direction

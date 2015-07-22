@@ -12,7 +12,7 @@ export 'package:sky/widgets/block_viewport.dart' show BlockViewportLayoutState;
 
 class VariableHeightScrollable extends Scrollable {
   VariableHeightScrollable({
-    String key,
+    Key key,
     this.builder,
     this.token,
     this.layoutState

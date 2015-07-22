@@ -9,7 +9,7 @@ import 'package:sky/widgets/widget.dart';
 class DefaultTextStyle extends Inherited {
 
   DefaultTextStyle({
-    String key,
+    Key key,
     this.style,
     Widget child
   }) : super(key: key, child: child) {
