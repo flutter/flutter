@@ -32,6 +32,7 @@ copy("sky_shell") {
 
     deps = [
       "//sky/shell",
+      "//third_party/icu:icudata",
     ]
   }
 
