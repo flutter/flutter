@@ -585,7 +585,7 @@ abstract class StatefulComponent extends Component {
     return super.syncChild(node, oldNode, slot);
   }
 
-  void setState(Function fn()) {
+  void setState(void fn()) {
     assert(!_disqualifiedFromEverAppearingAgain);
     fn();
     scheduleBuild();
