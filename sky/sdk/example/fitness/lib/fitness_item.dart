@@ -24,7 +24,7 @@ abstract class FitnessItemRow extends Component {
 
   FitnessItemRow({ FitnessItem item, this.onDismissed })
    : this.item = item,
-     super(key: item.when.toString());
+     super(key: new Key(item.when.toString()));
 
   final FitnessItem item;
   final FitnessItemHandler onDismissed;

@@ -49,56 +49,7 @@ class FitnessItemList extends Component {
 }
 
 class FeedFragment extends StatefulComponent {
-
-<<<<<<< HEAD:sky/sdk/example/fitness/lib/feed.dart
   FeedFragment({ this.navigator, this.userData, this.onItemCreated, this.onItemDeleted });
-=======
-  MeasurementRow({ Measurement measurement, this.onDismissed }) : this.measurement = measurement, super(key: new Key.stringify(measurement.when));
-
-  final Measurement measurement;
-  final MeasurementHandler onDismissed;
-
-  static const double kHeight = 79.0;
-
-  Widget build() {
-
-    List<Widget> children = [
-      new Flexible(
-        child: new Text(
-          measurement.displayWeight,
-          style: const TextStyle(textAlign: TextAlign.right)
-        )
-      ),
-      new Flexible(
-        child: new Text(
-          measurement.displayDate,
-          style: Theme.of(this).text.caption.copyWith(textAlign: TextAlign.right)
-        )
-      )
-    ];
-
-    return new Dismissable(
-      key: new Key.stringify(measurement.when),
-      onDismissed: () => onDismissed(measurement),
-      child: new Card(
-        child: new Container(
-          height: kHeight,
-          padding: const EdgeDims.all(8.0),
-          child: new Flex(
-            children,
-            alignItems: FlexAlignItems.baseline,
-            textBaseline: DefaultTextStyle.of(this).textBaseline
-          )
-        )
-      )
-    );
-  }
-}
-
-class HomeFragment extends StatefulComponent {
-
-  HomeFragment({ this.navigator, this.userData, this.onMeasurementCreated, this.onMeasurementDeleted });
->>>>>>> dk/master:sky/sdk/example/fitness/lib/home.dart
 
   Navigator navigator;
   List<FitnessItem> userData;
@@ -247,6 +198,7 @@ class HomeFragment extends StatefulComponent {
     if (!_isShowingSnackBar)
       return null;
     return new SnackBar(
+      showing: _isShowingSnackBar,
       content: new Text("Item deleted."),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)]
     );
