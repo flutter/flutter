@@ -9,31 +9,44 @@ import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:sky/widgets/task_description.dart';
 
+import 'meal.dart';
 import 'measurement.dart';
-import 'home.dart';
+import 'feed.dart';
 import 'settings.dart';
+import 'fitness_item.dart';
 import 'fitness_types.dart';
 
 class FitnessApp extends App {
 
   NavigationState _navigationState;
+  final List<FitnessItem> _userData = [
+    new Measurement(weight: 180.0, when: new DateTime.now().add(const Duration(days: -1))),
+    new Measurement(weight: 160.0, when: new DateTime.now()),
+  ];
 
   void initState() {
     _navigationState = new NavigationState([
       new Route(
         name: '/',
-        builder: (navigator, route) => new HomeFragment(
+        builder: (navigator, route) => new FeedFragment(
           navigator: navigator,
           userData: _userData,
-          onMeasurementCreated: _handleMeasurementCreated,
-          onMeasurementDeleted: _handleMeasurementDeleted
+          onItemCreated: _handleItemCreated,
+          onItemDeleted: _handleItemDeleted
+        )
+      ),
+      new Route(
+        name: '/meals/new',
+        builder: (navigator, route) => new MealFragment(
+          navigator: navigator,
+          onCreated: _handleItemCreated
         )
       ),
       new Route(
         name: '/measurements/new',
         builder: (navigator, route) => new MeasurementFragment(
           navigator: navigator,
-          onCreated: _handleMeasurementCreated
+          onCreated: _handleItemCreated
         )
       ),
       new Route(
@@ -54,16 +67,16 @@ class FitnessApp extends App {
     }
   }
 
-  void _handleMeasurementCreated(Measurement measurement) {
+  void _handleItemCreated(FitnessItem item) {
     setState(() {
-      _userData.add(measurement);
+      _userData.add(item);
       _userData.sort((a, b) => a.when.compareTo(b.when));
     });
   }
 
-  void _handleMeasurementDeleted(Measurement measurement) {
+  void _handleItemDeleted(FitnessItem item) {
     setState(() {
-      _userData.remove(measurement);
+      _userData.remove(item);
     });
   }
 
@@ -75,11 +88,6 @@ class FitnessApp extends App {
         backupSetting = backup;
     });
   }
-
-  final List<Measurement> _userData = [
-    new Measurement(weight: 180.0, when: new DateTime.now().add(const Duration(days: -1))),
-    new Measurement(weight: 160.0, when: new DateTime.now()),
-  ];
 
   Widget build() {
     return new Theme(
