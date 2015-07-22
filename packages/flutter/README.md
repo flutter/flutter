@@ -46,7 +46,7 @@ The `HelloWorldApp` builds a `Text` widget containing the traditional `Hello, wo
 string and centers it on the screen using a `Center` widget. To learn more about
 the widget system, please see the [widgets tutorial](lib/widgets/README.md).
 
-Setup your Android device
+Setting up your Android device
 -------------------------
 
 Currently Sky requires an Android device running the Lollipop (or newer) version
