@@ -24,6 +24,14 @@ copy("sky_shell") {
     deps = [
       "//sky/sdk/example/demo_launcher",
     ]
+  } else if (is_ios) {
+    sources = [
+      "$root_build_dir/Sky.app",
+    ]
+
+    deps = [
+      "//sky/shell:shell_struct",
+    ]
   } else {
     sources = [
       "$root_build_dir/sky_shell",
@@ -102,9 +110,11 @@ if (is_android) {
 
 group("dist") {
   deps = [
-    ":sky_shell",
     ":sky_viewer",
   ]
+  if (!is_ios) {
+    deps += [ ":sky_shell" ]
+  }
 
   if (is_android) {
     deps += [ ":sky_sdk" ]
