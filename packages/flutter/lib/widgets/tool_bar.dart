@@ -52,7 +52,7 @@ class ToolBar extends Component {
     children.add(
       new Flexible(
         child: new Padding(
-          child: new DefaultTextStyle(child: center, style: centerStyle),
+          child: center != null ? new DefaultTextStyle(child: center, style: centerStyle) : null,
           padding: new EdgeDims.only(left: 24.0)
         )
       )
