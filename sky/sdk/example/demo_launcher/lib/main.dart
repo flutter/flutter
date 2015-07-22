@@ -60,9 +60,9 @@ class SkyDemo {
     this.description,
     this.textTheme,
     this.decoration
-  }) : name = name, key = name;
+  }) : name = name, key = new Key(name);
   final String name;
-  final String key;
+  final Key key;
   final String href;
   final String bundle;
   final String description;

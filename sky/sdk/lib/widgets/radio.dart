@@ -17,7 +17,7 @@ typedef void ValueChanged(value);
 class Radio extends ButtonBase {
 
   Radio({
-    String key,
+    Key key,
     this.value,
     this.groupValue,
     this.onChanged

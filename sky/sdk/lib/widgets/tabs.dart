@@ -256,7 +256,7 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
     this.textAndIcons,
     this.scrollable: false,
     this.onLayoutChanged,
-    String key
+    Key key
   }) : super(key: key, children: children);
 
   final int selectedIndex;
@@ -289,7 +289,7 @@ class TabLabel {
 
 class Tab extends Component {
   Tab({
-    String key,
+    Key key,
     this.label,
     this.selected: false
   }) : super(key: key) {
@@ -347,7 +347,7 @@ class Tab extends Component {
 
 class TabBar extends Scrollable {
   TabBar({
-    String key,
+    Key key,
     this.labels,
     this.selectedIndex: 0,
     this.onChanged,
@@ -381,7 +381,7 @@ class TabBar extends Scrollable {
     Tab tab = new Tab(
       label: label,
       selected: tabIndex == selectedIndex,
-      key: label.text == null ? label.icon : label.text
+      key: new Key(label.text == null ? label.icon : label.text)
     );
     return new Listener(
       child: tab,
@@ -472,7 +472,7 @@ class TabNavigatorView {
 
 class TabNavigator extends Component {
   TabNavigator({
-    String key,
+    Key key,
     this.views,
     this.selectedIndex: 0,
     this.onChanged,

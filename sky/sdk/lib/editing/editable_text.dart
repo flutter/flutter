@@ -18,7 +18,7 @@ const _kCursorWidth = 1.0;
 class EditableText extends StatefulComponent {
 
   EditableText({
-    String key,
+    Key key,
     this.value,
     this.focused: false,
     this.style,

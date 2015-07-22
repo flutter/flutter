@@ -6,7 +6,7 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/theme.dart';
 
 class DrawerDivider extends Component {
-  DrawerDivider({ String key }) : super(key: key);
+  DrawerDivider({ Key key }) : super(key: key);
 
   Widget build() {
     return new Container(

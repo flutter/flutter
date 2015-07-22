@@ -7,7 +7,7 @@ import 'package:sky/widgets/widget.dart';
 
 class ModalOverlay extends Component {
 
-  ModalOverlay({ String key, this.children, this.onDismiss }) : super(key: key);
+  ModalOverlay({ Key key, this.children, this.onDismiss }) : super(key: key);
 
   final List<Widget> children;
   final Function onDismiss;

@@ -17,7 +17,7 @@ const Duration _kCheckDuration = const Duration(milliseconds: 200);
 abstract class Toggleable extends AnimatedComponent {
 
   Toggleable({
-    String key,
+    Key key,
     this.value,
     this.onChanged
   }) : super(key: key);
