@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:sky/editing/input.dart';
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/widgets/animated_component.dart';
-import 'package:sky/widgets/animation_builder.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/drawer.dart';
@@ -35,7 +32,7 @@ typedef void ModeUpdater(StockMode mode);
 
 const Duration _kSnackbarSlideDuration = const Duration(milliseconds: 200);
 
-class StockHome extends AnimatedComponent {
+class StockHome extends StatefulComponent {
 
   StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater);
 
@@ -54,7 +51,8 @@ class StockHome extends AnimatedComponent {
   bool _isSearching = false;
   String _searchQuery;
 
-  AnimationBuilder _snackbarTransform;
+  SnackBarStatus _snackBarStatus = SnackBarStatus.inactive;
+  bool _isSnackBarShowing = false;
 
   void _handleSearchBegin() {
     navigator.pushState(this, (_) {
@@ -140,6 +138,7 @@ class StockHome extends AnimatedComponent {
   Drawer buildDrawer() {
     if (_drawerStatus == DrawerStatus.inactive)
       return null;
+    assert(_drawerShowing); // TODO(mpcomplete): this is always true
     return new Drawer(
       level: 3,
       showing: _drawerShowing,
@@ -264,40 +263,34 @@ class StockHome extends AnimatedComponent {
 
   void _handleUndo() {
     setState(() {
-      _snackbarTransform = null;
+      _isSnackBarShowing = false;
     });
   }
 
   Widget buildSnackBar() {
-    if (_snackbarTransform == null)
+    if (_snackBarStatus == SnackBarStatus.inactive)
       return null;
-    return _snackbarTransform.build(
-      new SnackBar(
-        content: new Text("Stock purchased!"),
-        actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)]
-      ));
+    return new SnackBar(
+      showing: _isSnackBarShowing,
+      content: new Text("Stock purchased!"),
+      actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
+      onStatusChanged: (status) { setState(() { _snackBarStatus = status; }); }
+    );
   }
 
   void _handleStockPurchased() {
     setState(() {
-      _snackbarTransform = new AnimationBuilder()
-        ..position = new AnimatedValue<Point>(const Point(0.0, 45.0), end: Point.origin);
-      var performance = _snackbarTransform.createPerformance(
-          [_snackbarTransform.position], duration: _kSnackbarSlideDuration);
-      watch(performance); // TODO(mpcomplete): need to unwatch
-      performance.play();
+      _isSnackBarShowing = true;
+      _snackBarStatus = SnackBarStatus.active;
     });
   }
 
   Widget buildFloatingActionButton() {
-    var widget = new FloatingActionButton(
+    return new FloatingActionButton(
       child: new Icon(type: 'content/add', size: 24),
       backgroundColor: colors.RedAccent[200],
       onPressed: _handleStockPurchased
     );
-    if (_snackbarTransform != null)
-      widget = _snackbarTransform.build(widget);
-    return widget;
   }
 
   void addMenuToOverlays(List<Widget> overlays) {
