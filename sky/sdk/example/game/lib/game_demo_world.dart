@@ -46,6 +46,7 @@ class GameDemoWorld extends NodeWithSize {
   // Game state
   int _numFrames = 0;
   bool _isGameOver = false;
+  int _currentLevel = 0;
 
   // Heads up display
   Hud _hud;
@@ -56,15 +57,6 @@ class GameDemoWorld extends NodeWithSize {
 
     _gameLayer = new Node();
     this.addChild(_gameLayer);
-
-    // Add some asteroids to the game world
-    for (int i = 0; i < 5; i++) {
-      addAsteroid(AsteroidSize.large);
-    }
-    for (int i = 0; i < 5; i++) {
-      addAsteroid(AsteroidSize.medium);
-    }
-
     // Add ship
     addShip();
 
@@ -88,6 +80,25 @@ class GameDemoWorld extends NodeWithSize {
     _hud = new Hud(_spriteSheetUI);
     _hud.zPosition = 1000.0;
     addChild(_hud);
+
+    // Setup level
+    setupLevel(0);
+  }
+
+  void setupLevel(int level) {
+    int numLargeAsteroids = 5 + level * 2;
+    int numMediumAsteroids = 5 + level * 2;
+
+    // Add some asteroids to the game world
+    for (int i = 0; i < numLargeAsteroids; i++) {
+      addAsteroid(AsteroidSize.large);
+    }
+    for (int i = 0; i < numMediumAsteroids; i++) {
+      addAsteroid(AsteroidSize.medium);
+    }
+
+    _numFrames = 0;
+    _shield.visible = true;
   }
 
   // Methods for adding game objects
@@ -98,6 +109,10 @@ class GameDemoWorld extends NodeWithSize {
     if (pos != null) asteroid.position = pos;
     _gameLayer.addChild(asteroid);
     _asteroids.add(asteroid);
+
+    // Animate asteroid into the scene
+    Action action = new ActionTween((a) => asteroid.scale = a, 0.0, 1.0, 1.0, bounceOut);
+    _gameLayer.actions.run(action);
   }
 
   void addShip() {
@@ -262,6 +277,14 @@ class GameDemoWorld extends NodeWithSize {
           // Remove asteroid
           asteroid.removeFromParent();
           _asteroids.removeAt(j);
+
+          // Scoring
+          if (asteroid._asteroidSize == AsteroidSize.large)
+            addScore(100);
+          else if (asteroid._asteroidSize == AsteroidSize.medium)
+            addScore(50);
+          else
+            addScore(10);
           break;
         }
       }
@@ -284,6 +307,12 @@ class GameDemoWorld extends NodeWithSize {
     // Move objects to center camera and warp objects around the edges
     centerCamera();
     warpObjects();
+
+    // Check for level up
+    if (_asteroids.length == 0) {
+      _currentLevel++;
+      setupLevel(_currentLevel);
+    }
 
     // Update shield
     if (_numFrames > _numFramesShieldActive) _shield.visible = false;
@@ -414,6 +443,11 @@ class GameDemoWorld extends NodeWithSize {
         break;
     }
     return true;
+  }
+
+  // Scoring and HUD
+  void addScore(int score) {
+    _hud.score += score;
   }
 }
 
@@ -596,6 +630,7 @@ class Hud extends NodeWithSize {
   SpriteSheet spriteSheetUI;
   Sprite sprtBgScore;
   Sprite sprtBgShield;
+  bool _dirtyScore = true;
 
   int _score = 0;
 
@@ -603,21 +638,22 @@ class Hud extends NodeWithSize {
 
   set score(int score) {
     _score = score;
-    _updateHud();
+    _dirtyScore = true;
   }
 
   Hud(this.spriteSheetUI) {
     pivot = Point.origin;
 
     sprtBgScore = new Sprite(spriteSheetUI["scoreboard.png"]);
-    sprtBgScore.pivot = Point.origin;
+    sprtBgScore.pivot = new Point(1.0, 0.0);
     sprtBgScore.scale = 0.6;
     addChild(sprtBgScore);
 
     sprtBgShield = new Sprite(spriteSheetUI["bar_shield.png"]);
-    sprtBgShield.pivot = new Point(1.0, 0.0);
+    sprtBgShield.pivot = Point.origin;
     sprtBgShield.scale = 0.6;
-    addChild(sprtBgShield);
+    // TODO: Add shield
+    //addChild(sprtBgShield);
   }
 
   void spriteBoxPerformedLayout() {
@@ -626,15 +662,28 @@ class Hud extends NodeWithSize {
     size = spriteBox.visibleArea.size;
 
     // Position hud objects
-    sprtBgScore.position = new Point(20.0, 20.0);
-    sprtBgShield.position = new Point(size.width - 20.0, 20.0);
+    sprtBgShield.position = new Point(20.0, 20.0);
+    sprtBgScore.position = new Point(size.width - 20.0, 20.0);
   }
 
-  void _updateHud() {
-    sprtBgScore.removeAllChildren();
+  void update(double dt) {
+    // Update score
+    if (_dirtyScore) {
 
-    String scoreStr = _score.toString();
-    
+      sprtBgScore.removeAllChildren();
+
+      String scoreStr = _score.toString();
+      double xPos = -50.0;
+      for (int i = scoreStr.length - 1; i >= 0; i--) {
+        String numStr = scoreStr.substring(i, i + 1);
+        Sprite numSprt = new Sprite(spriteSheetUI["number_$numStr.png"]);
+        numSprt.position = new Point(xPos, 49.0);
+        sprtBgScore.addChild(numSprt);
+        xPos -= 37.0;
+      }
+      _dirtyScore = false;
+    }
+    // Update power bar
   }
 }
 
