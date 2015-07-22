@@ -16,7 +16,7 @@ import 'package:sky/widgets/icon.dart';
 class ToolBar extends Component {
 
   ToolBar({
-    String key,
+    Key key,
     this.left,
     this.center,
     this.right,

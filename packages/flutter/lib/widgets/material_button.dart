@@ -11,7 +11,7 @@ import 'package:sky/widgets/material.dart';
 abstract class MaterialButton extends ButtonBase {
 
   MaterialButton({
-    String key,
+    Key key,
     this.child,
     this.enabled: true,
     this.onPressed

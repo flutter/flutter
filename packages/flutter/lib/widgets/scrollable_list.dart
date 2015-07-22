@@ -11,7 +11,7 @@ typedef Widget ItemBuilder<T>(T item);
 
 class ScrollableList<T> extends FixedHeightScrollable {
   ScrollableList({
-    String key,
+    Key key,
     this.items,
     this.itemBuilder,
     double itemHeight,

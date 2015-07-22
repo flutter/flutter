@@ -20,7 +20,7 @@ const Map<MaterialType, double> edges = const {
 
 class Material extends Component {
   Material({
-    String key,
+    Key key,
     this.child,
     this.type: MaterialType.card,
     this.level: 0,
@@ -49,7 +49,7 @@ class Material extends Component {
 
   Widget build() {
     return new AnimatedContainer(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 200),
       decoration: new BoxDecoration(
         backgroundColor: _backgroundColor,
         borderRadius: edges[type],

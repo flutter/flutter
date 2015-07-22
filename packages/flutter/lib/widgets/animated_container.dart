@@ -77,7 +77,7 @@ class ImplicitlyAnimatedValue<T> {
 
 class AnimatedContainer extends AnimatedComponent {
   AnimatedContainer({
-    String key,
+    Key key,
     this.child,
     this.duration,
     this.constraints,

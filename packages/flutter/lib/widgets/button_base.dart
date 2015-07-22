@@ -6,7 +6,7 @@ import 'package:sky/widgets/basic.dart';
 
 abstract class ButtonBase extends StatefulComponent {
 
-  ButtonBase({ String key, this.highlight: false }) : super(key: key);
+  ButtonBase({ Key key, this.highlight: false }) : super(key: key);
 
   bool highlight;
 

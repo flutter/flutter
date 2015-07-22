@@ -12,7 +12,7 @@ import 'package:sky/widgets/theme.dart';
 
 class DrawerHeader extends Component {
 
-  DrawerHeader({ String key, this.children }) : super(key: key);
+  DrawerHeader({ Key key, this.children }) : super(key: key);
 
   final List<Widget> children;
 

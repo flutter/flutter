@@ -14,7 +14,7 @@ import 'stock_data.dart';
 
 class StockRow extends Component {
 
-  StockRow({ Stock stock }) : this.stock = stock, super(key: stock.symbol);
+  StockRow({ Stock stock }) : this.stock = stock, super(key: new Key(stock.symbol));
 
   final Stock stock;
 

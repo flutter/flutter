@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:sky' as sky;
 
-import 'package:sky/base/debug.dart';
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/rendering/box.dart';
@@ -22,22 +21,54 @@ final bool _shouldLogRenderDuration = false;
 typedef Widget Builder();
 typedef void WidgetTreeWalker(Widget);
 
+abstract class KeyBase {
+}
+
+abstract class Key extends KeyBase {
+  Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+  factory Key(String value) => new StringKey(value);
+  factory Key.stringify(Object value) => new StringKey(value.toString());
+  factory Key.fromObjectIdentity(Object value) => new ObjectKey(value);
+  factory Key.unique() => new UniqueKey();
+}
+
+class StringKey extends Key {
+  StringKey(this.value) : super.constructor();
+  final String value;
+  String toString() => value;
+  bool operator==(other) => other is StringKey && other.value == value;
+  int get hashCode => value.hashCode;
+}
+
+class ObjectKey extends Key {
+  ObjectKey(this.value) : super.constructor();
+  final Object value;
+  String toString() => '[Instance of ${value.runtimeType}]';
+  bool operator==(other) => other is ObjectKey && identical(other.value, value);
+  int get hashCode => identityHashCode(value);
+}
+
+class UniqueKey extends Key {
+  UniqueKey() : super.constructor();
+  String toString() => '[$hashCode]';
+}
+
 /// A base class for elements of the widget tree
 abstract class Widget {
 
-  Widget({ String key }) : _key = key {
+  Widget({ Key key }) : _key = key {
     assert(_isConstructedDuringBuild());
   }
 
   // TODO(jackson): Remove this workaround for limitation of Dart mixins
-  Widget._withKey(String key) : _key = key {
+  Widget._withKey(Key key) : _key = key {
     assert(_isConstructedDuringBuild());
   }
 
   // you should not build the UI tree ahead of time, build it only during build()
   bool _isConstructedDuringBuild() => this is AbstractWidgetRoot || this is App || _inRenderDirtyComponents || _inLayoutCallbackBuilder > 0;
 
-  String _key;
+  Key _key;
 
   /// A semantic identifer for this widget
   ///
@@ -47,7 +78,7 @@ abstract class Widget {
   /// Assigning a key to a widget can improve performance by causing the
   /// framework to sync widgets that share a lot of common structure and can
   /// help match stateful components semantically rather than positionally.
-  String get key => _key;
+  Key get key => _key;
 
   Widget _parent;
 
@@ -244,11 +275,11 @@ abstract class Widget {
 // stylistic information, etc.
 abstract class TagNode extends Widget {
 
-  TagNode(Widget child, { String key })
+  TagNode(Widget child, { Key key })
     : this.child = child, super(key: key);
 
   // TODO(jackson): Remove this workaround for limitation of Dart mixins
-  TagNode._withKey(Widget child, String key)
+  TagNode._withKey(Widget child, Key key)
     : this.child = child, super._withKey(key);
 
   Widget child;
@@ -285,14 +316,14 @@ abstract class TagNode extends Widget {
 }
 
 class ParentDataNode extends TagNode {
-  ParentDataNode(Widget child, this.parentData, { String key })
+  ParentDataNode(Widget child, this.parentData, { Key key })
     : super(child, key: key);
   final ParentData parentData;
 }
 
 abstract class Inherited extends TagNode {
 
-  Inherited({ String key, Widget child }) : super._withKey(child, key);
+  Inherited({ Key key, Widget child }) : super._withKey(child, key);
 
   void _sync(Widget old, dynamic slot) {
     if (old != null && syncShouldNotify(old)) {
@@ -321,7 +352,7 @@ typedef void EventListener(sky.Event e);
 class Listener extends TagNode  {
 
   Listener({
-    String key,
+    Key key,
     Widget child,
     EventListener onWheel,
     GestureEventListener onGestureFlingCancel,
@@ -408,7 +439,7 @@ class Listener extends TagNode  {
 
 abstract class Component extends Widget {
 
-  Component({ String key })
+  Component({ Key key })
       : _order = _currentOrder + 1,
         super._withKey(key);
 
@@ -525,7 +556,7 @@ abstract class Component extends Widget {
 
 abstract class StatefulComponent extends Component {
 
-  StatefulComponent({ String key }) : super(key: key);
+  StatefulComponent({ Key key }) : super(key: key);
 
   bool _disqualifiedFromEverAppearingAgain = false;
   bool _isStateInitialized = false;
@@ -586,7 +617,7 @@ abstract class StatefulComponent extends Component {
     return super.syncChild(node, oldNode, slot);
   }
 
-  void setState(Function fn()) {
+  void setState(void fn()) {
     assert(!_disqualifiedFromEverAppearingAgain);
     fn();
     scheduleBuild();
@@ -600,17 +631,22 @@ int _inLayoutCallbackBuilder = 0;
 
 class LayoutCallbackBuilderHandle { bool _active = true; }
 LayoutCallbackBuilderHandle enterLayoutCallbackBuilder() {
-  if (!inDebugBuild)
-    return null;
-  _inLayoutCallbackBuilder += 1;
-  return new LayoutCallbackBuilderHandle();
+  LayoutCallbackBuilderHandle result;
+  assert(() {
+    _inLayoutCallbackBuilder += 1;
+    result = new LayoutCallbackBuilderHandle();
+    return true;
+  });
+  return result;
 }
 void exitLayoutCallbackBuilder(LayoutCallbackBuilderHandle handle) {
-  if (!inDebugBuild)
-    return;
-  assert(handle._active);
-  handle._active = false;
-  _inLayoutCallbackBuilder -= 1;
+  assert(() {
+    assert(handle._active);
+    handle._active = false;
+    _inLayoutCallbackBuilder -= 1;
+    return true;
+  });
+  Widget._notifyMountStatusChanged();
 }
 
 List<int> _debugFrameTimes = <int>[];
@@ -680,7 +716,7 @@ void _scheduleComponentForRender(Component c) {
 // become stateful.
 abstract class RenderObjectWrapper extends Widget {
 
-  RenderObjectWrapper({ String key }) : super(key: key);
+  RenderObjectWrapper({ Key key }) : super(key: key);
 
   RenderObject createNode();
 
@@ -764,7 +800,7 @@ abstract class RenderObjectWrapper extends Widget {
 
 abstract class LeafRenderObjectWrapper extends RenderObjectWrapper {
 
-  LeafRenderObjectWrapper({ String key }) : super(key: key);
+  LeafRenderObjectWrapper({ Key key }) : super(key: key);
 
   void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
     assert(false);
@@ -778,7 +814,7 @@ abstract class LeafRenderObjectWrapper extends RenderObjectWrapper {
 
 abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
-  OneChildRenderObjectWrapper({ String key, Widget child })
+  OneChildRenderObjectWrapper({ Key key, Widget child })
     : _child = child, super(key: key);
 
   Widget _child;
@@ -826,7 +862,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   // In MultiChildRenderObjectWrapper subclasses, slots are RenderObject nodes
   // to use as the "insert before" sibling in ContainerRenderObjectMixin.add() calls
 
-  MultiChildRenderObjectWrapper({ String key, List<Widget> children })
+  MultiChildRenderObjectWrapper({ Key key, List<Widget> children })
     : this.children = children == null ? const [] : children,
       super(key: key) {
     assert(!_debugHasDuplicateIds());
@@ -865,7 +901,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   }
 
   bool _debugHasDuplicateIds() {
-    var idSet = new HashSet<String>();
+    var idSet = new HashSet<Key>();
     for (var child in children) {
       assert(child != null);
       if (child.key == null)
@@ -920,9 +956,9 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       nextSibling = children[endIndex].root;
     }
 
-    HashMap<String, Widget> oldNodeIdMap = null;
+    HashMap<Key, Widget> oldNodeIdMap = null;
 
-    bool oldNodeReordered(String key) {
+    bool oldNodeReordered(Key key) {
       return oldNodeIdMap != null &&
              oldNodeIdMap.containsKey(key) &&
              oldNodeIdMap[key] == null;
@@ -940,7 +976,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       if (oldNodeIdMap != null)
         return;
 
-      oldNodeIdMap = new HashMap<String, Widget>();
+      oldNodeIdMap = new HashMap<Key, Widget>();
       for (int i = oldStartIndex; i < oldEndIndex; i++) {
         var node = oldChildren[i];
         if (node.key != null)
@@ -1045,7 +1081,7 @@ class WidgetSkyBinding extends SkyBinding {
 
 abstract class App extends StatefulComponent {
 
-  App({ String key }) : super(key: key);
+  App({ Key key }) : super(key: key);
 
   void _handleEvent(sky.Event event) {
     if (event.type == 'back')
@@ -1093,7 +1129,7 @@ abstract class AbstractWidgetRoot extends StatefulComponent {
 }
 
 class RenderViewWrapper extends OneChildRenderObjectWrapper {
-  RenderViewWrapper({ String key, Widget child }) : super(key: key, child: child);
+  RenderViewWrapper({ Key key, Widget child }) : super(key: key, child: child);
   RenderView get root => super.root;
   RenderView createNode() => SkyBinding.instance.renderView;
 }

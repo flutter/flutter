@@ -173,7 +173,7 @@ class RenderScaffold extends RenderBox {
 class Scaffold extends RenderObjectWrapper {
 
   Scaffold({
-    String key,
+    Key key,
     Widget body,
     Widget statusBar,
     Widget toolbar,

@@ -13,7 +13,7 @@ const double kBaselineOffsetFromBottom = 20.0;
 
 class PopupMenuItem extends Component {
   PopupMenuItem({
-    String key,
+    Key key,
     this.onPressed,
     this.child
   }) : super(key: key);
