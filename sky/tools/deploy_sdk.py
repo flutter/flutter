@@ -117,7 +117,7 @@ def main():
         subprocess.check_call([src_path('tools/licenses.py'), 'credits'],
             stdout=license_file)
 
-    material_design_icons = sdk_path('packages/sky/packages/sky/lib/assets/material-design-icons')
+    material_design_icons = sdk_path('packages/sky/lib/assets/material-design-icons')
     if os.path.exists(material_design_icons):
         shutil.rmtree(material_design_icons)
 
