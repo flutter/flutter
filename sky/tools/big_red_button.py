@@ -66,8 +66,6 @@ def main():
     run(sky_engine_root, ['mojo/tools/mojob.py', 'build', '--android', '--release'])
     # Run tests?
 
-    run(sky_sdk_root, ['git', 'fetch'])
-    run(sky_sdk_root, ['git', 'reset', '--hard', 'upstream/master'])
     run(sky_engine_root, [
         'sky/tools/deploy_sdk.py',
         '--non-interactive',
