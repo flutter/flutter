@@ -249,6 +249,7 @@ template("dart_pkg") {
   pkg_directory = rebase_path("$root_gen_dir/dart-pkg")
   package_root = rebase_path("$root_gen_dir/dart-pkg/packages")
   stamp_file = "$root_gen_dir/dart-pkg/${package_name}.stamp"
+  output_dir = "$root_gen_dir/dart-pkg/${package_name}"
 
   assert(defined(invoker.sources) || defined(invoker.pkg_dir))
 
@@ -294,6 +295,7 @@ template("dart_pkg") {
 
     script = rebase_path("mojo/public/tools/dart_pkg.py", ".", mojo_sdk_root)
     outputs = [
+      output_dir,
       stamp_file,
     ]
 

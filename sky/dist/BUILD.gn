@@ -1,0 +1,111 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+root_dist_dir = "$root_build_dir/dist"
+
+copy("sky_viewer") {
+  sources = [
+    "$root_build_dir/sky_viewer.mojo",
+  ]
+  outputs = [ "$root_dist_dir/viewer/{{source_file_part}}" ]
+
+  deps = [
+    "//services/sky",
+  ]
+}
+
+copy("sky_shell") {
+  if (is_android) {
+    sources = [
+      "$root_build_dir/apks/SkyDemo.apk",
+    ]
+
+    deps = [
+      "//sky/sdk/example/demo_launcher",
+    ]
+  } else {
+    sources = [
+      "$root_build_dir/sky_shell",
+      "$root_build_dir/icudtl.dat",
+    ]
+
+    deps = [
+      "//sky/shell",
+    ]
+  }
+
+  outputs = [ "$root_dist_dir/shell/{{source_file_part}}" ]
+}
+
+if (is_android) {
+  import("//build/config/android/rules.gni")
+
+  sky_sdk_dir = "$root_dist_dir/sdk/sky"
+
+  copy_ex("create_sky_sdk") {
+    clear_dir = true
+    dest = "$root_dist_dir/sdk"
+    sources = [
+      "$root_gen_dir/dart-pkg/sky",
+    ]
+    deps = [
+      "//sky/sdk:sky",
+    ]
+  }
+
+  copy("copy_sky_sdk_license") {
+    sources = [
+      "//AUTHORS",
+      "//LICENSE",
+    ]
+    outputs = [ "$sky_sdk_dir/{{source_file_part}}" ]
+    deps = [
+      ":create_sky_sdk"
+    ]
+  }
+
+  copy("copy_sky_sdk_apks") {
+    sources = [
+      "$root_dist_dir/shell/SkyDemo.apk",
+    ]
+    outputs = [ "$sky_sdk_dir/apks/{{source_file_part}}" ]
+    deps = [
+      ":create_sky_sdk",
+      ":sky_shell",
+    ]
+  }
+
+  action("sky_sdk") {
+    stamp_file = "$target_gen_dir/sky_sdk_cleaned.stamp"
+
+    script = "//sky/build/clean_sky_package.py"
+
+    inputs = [ "$root_gen_dir/dart-pkg/sky.stamp" ]
+    outputs = [ stamp_file ]
+
+    args = [
+      rebase_path(sky_sdk_dir, root_build_dir),
+      "--touch",
+      rebase_path(stamp_file, root_build_dir),
+    ]
+
+    deps = [
+      ":copy_sky_sdk_apks",
+      ":copy_sky_sdk_license",
+      ":create_sky_sdk",
+      "//sky/sdk:sky",
+    ]
+  }
+}
+
+group("dist") {
+  deps = [
+    ":sky_shell",
+    ":sky_viewer",
+  ]
+
+  if (is_android) {
+    deps += [ ":sky_sdk" ]
+  }
+}

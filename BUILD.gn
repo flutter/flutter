@@ -17,3 +17,11 @@ group("default") {
     ]
   }
 }
+
+group("dist") {
+  testonly = true
+
+  deps = [
+    "//sky/dist",
+  ]
+}
