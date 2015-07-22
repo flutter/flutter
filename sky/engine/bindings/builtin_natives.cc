@@ -30,6 +30,10 @@
 #include <android/log.h>
 #endif
 
+#if __APPLE__
+#include <syslog.h>
+#endif
+
 namespace blink {
 
 #define REGISTER_FUNCTION(name, count)                                         \
@@ -170,6 +174,8 @@ void Logger_PrintString(Dart_NativeArguments args) {
     // In addition to writing to the stdout, write to the logcat so that the
     // message is discoverable when running on an unrooted device.
     __android_log_print(ANDROID_LOG_INFO, "sky", "%.*s", length, chars);
+#elif __APPLE__
+    syslog(LOG_WARNING, "sky: %.*s", (int)length, chars);
 #endif
   }
 }
