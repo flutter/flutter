@@ -70,7 +70,8 @@ class SpriteBox extends RenderBox {
   Rect _visibleArea;
 
   Rect get visibleArea {
-    if (_visibleArea == null) _calcTransformMatrix();
+    if (_visibleArea == null)
+      _calcTransformMatrix();
     return _visibleArea;
   }
 
@@ -135,7 +136,8 @@ class SpriteBox extends RenderBox {
     // Add childrens that are behind this node
     while (i < children.length) {
       Node child = children[i];
-      if (child.zPosition >= 0.0) break;
+      if (child.zPosition >= 0.0)
+        break;
       _addEventTargets(child, eventTargets);
       i++;
     }
@@ -154,7 +156,8 @@ class SpriteBox extends RenderBox {
   }
 
   void handleEvent(Event event, _SpriteBoxHitTestEntry entry) {
-    if (!attached) return;
+    if (!attached)
+      return;
 
     if (event is PointerEvent) {
 
@@ -191,7 +194,8 @@ class SpriteBox extends RenderBox {
         if (node.handleMultiplePointers || event.pointer == node._handlingPointer) {
           // Dispatch event
           bool consumedEvent = node.handleEvent(new SpriteBoxEvent(new Point(event.x, event.y), event.type, event.pointer));
-          if (consumedEvent == null || consumedEvent) break;
+          if (consumedEvent == null || consumedEvent)
+            break;
         }
       }
 
@@ -317,7 +321,8 @@ class SpriteBox extends RenderBox {
   }
 
   void _tick(double timeStamp) {
-    if (!attached) return;
+    if (!attached)
+      return;
 
       // Calculate the time between frames in seconds
     if (_lastTimeStamp == null) _lastTimeStamp = timeStamp;
@@ -330,7 +335,8 @@ class SpriteBox extends RenderBox {
     _frameRate = 1.0/delta;
 
     // Print frame rate
-    if (_numFrames % 60 == 0) print("delta: $delta fps: $_frameRate");
+    if (_numFrames % 60 == 0)
+      print("delta: $delta fps: $_frameRate");
 
     _runActions(_rootNode, delta);
     _callUpdate(_rootNode, delta);

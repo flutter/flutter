@@ -631,7 +631,10 @@ class Hud extends NodeWithSize {
   }
 
   void _updateHud() {
+    sprtBgScore.removeAllChildren();
 
+    String scoreStr = _score.toString();
+    
   }
 }
 
