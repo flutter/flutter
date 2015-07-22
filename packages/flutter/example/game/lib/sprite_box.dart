@@ -39,6 +39,7 @@ class SpriteBox extends RenderBox {
 
     // Add new references
     _addSpriteBoxReference(_rootNode);
+    markNeedsLayout();
   }
 
   // Tracking of frame rate and updates
@@ -55,7 +56,7 @@ class SpriteBox extends RenderBox {
     _transformMode = value;
 
     // Invalidate stuff
-    if (attached) performLayout();
+    markNeedsLayout();
   }
 
   /// The transform mode used by the [SpriteBox].
@@ -68,7 +69,11 @@ class SpriteBox extends RenderBox {
 
   Rect _visibleArea;
 
-  Rect get visibleArea => _visibleArea;
+  Rect get visibleArea {
+    if (_visibleArea == null)
+      _calcTransformMatrix();
+    return _visibleArea;
+  }
 
   // Setup
 
@@ -131,7 +136,8 @@ class SpriteBox extends RenderBox {
     // Add childrens that are behind this node
     while (i < children.length) {
       Node child = children[i];
-      if (child.zPosition >= 0.0) break;
+      if (child.zPosition >= 0.0)
+        break;
       _addEventTargets(child, eventTargets);
       i++;
     }
@@ -150,6 +156,9 @@ class SpriteBox extends RenderBox {
   }
 
   void handleEvent(Event event, _SpriteBoxHitTestEntry entry) {
+    if (!attached)
+      return;
+
     if (event is PointerEvent) {
 
       if (event.type == 'pointerdown') {
@@ -185,7 +194,8 @@ class SpriteBox extends RenderBox {
         if (node.handleMultiplePointers || event.pointer == node._handlingPointer) {
           // Dispatch event
           bool consumedEvent = node.handleEvent(new SpriteBoxEvent(new Point(event.x, event.y), event.type, event.pointer));
-          if (consumedEvent == null || consumedEvent) break;
+          if (consumedEvent == null || consumedEvent)
+            break;
         }
       }
 
@@ -212,10 +222,13 @@ class SpriteBox extends RenderBox {
   ///     var matrix = mySpriteBox.transformMatrix;
   Matrix4 get transformMatrix {
     // Get cached matrix if available
-    if (_transformMatrix != null) {
-      return _transformMatrix;
+    if (_transformMatrix == null) {
+      _calcTransformMatrix();
     }
+    return _transformMatrix;
+  }
 
+  void _calcTransformMatrix() {
     _transformMatrix = new Matrix4.identity();
 
     // Calculate matrix
@@ -273,13 +286,17 @@ class SpriteBox extends RenderBox {
         break;
     }
 
+    _visibleArea = new Rect.fromLTRB(-offsetX / scaleX,
+                                     -offsetY / scaleY,
+                                     systemWidth + offsetX / scaleX,
+                                     systemHeight + offsetY / scaleY);
+
     _transformMatrix.translate(offsetX, offsetY);
     _transformMatrix.scale(scaleX, scaleY);
-
-    return _transformMatrix;
   }
 
   void _invalidateTransformMatrix() {
+    _visibleArea = null;
     _transformMatrix = null;
     _rootNode._invalidateToBoxTransformMatrix();
   }
@@ -304,7 +321,8 @@ class SpriteBox extends RenderBox {
   }
 
   void _tick(double timeStamp) {
-    if (!attached) return;
+    if (!attached)
+      return;
 
       // Calculate the time between frames in seconds
     if (_lastTimeStamp == null) _lastTimeStamp = timeStamp;
@@ -317,7 +335,8 @@ class SpriteBox extends RenderBox {
     _frameRate = 1.0/delta;
 
     // Print frame rate
-    if (_numFrames % 60 == 0) print("delta: $delta fps: $_frameRate");
+    if (_numFrames % 60 == 0)
+      print("delta: $delta fps: $_frameRate");
 
     _runActions(_rootNode, delta);
     _callUpdate(_rootNode, delta);
