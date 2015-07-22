@@ -85,7 +85,6 @@ class GameDemoApp extends App {
   }
 
   Widget _buildGameScene(navigator, route) {
-    if (_game == null) _game = new GameDemoWorld(_app, navigator, _loader, _spriteSheet);
     return new SpriteWidget(_game);
   }
 
@@ -100,8 +99,4 @@ class GameDemoApp extends App {
       )
     );
   }
-}
-
-void resetGame() {
-  _app.scheduleBuild();
 }
