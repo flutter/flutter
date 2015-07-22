@@ -488,9 +488,7 @@ class Text extends Component {
 }
 
 class Image extends LeafRenderObjectWrapper {
-  Image({ sky.Image image, this.width, this.height, this.colorFilter })
-    : image = image,
-      super(key: new Key.fromObjectIdentity(image));
+  Image({ Key key, this.image, this.width, this.height, this.colorFilter }) : super(key: key);
 
   final sky.Image image;
   final double width;
@@ -510,8 +508,7 @@ class Image extends LeafRenderObjectWrapper {
 }
 
 class FutureImage extends StatefulComponent {
-  FutureImage({ Key key, this.image, this.width, this.height, this.colorFilter })
-    : super(key: key);
+  FutureImage({ Key key, this.image, this.width, this.height, this.colorFilter }) : super(key: key);
 
   Future<sky.Image> image;
   double width;
@@ -555,9 +552,7 @@ class FutureImage extends StatefulComponent {
 }
 
 class NetworkImage extends Component {
-  NetworkImage({ String src, this.width, this.height, this.colorFilter })
-    : src = src,
-      super(key: new Key(src));
+  NetworkImage({ Key key, this.src, this.width, this.height, this.colorFilter }) : super(key: key);
 
   final String src;
   final double width;
@@ -575,9 +570,7 @@ class NetworkImage extends Component {
 }
 
 class AssetImage extends Component {
-  AssetImage({ String name, this.bundle, this.width, this.height, this.colorFilter })
-    : name = name,
-      super(key: new Key(name));
+  AssetImage({ Key key, this.name, this.bundle, this.width, this.height, this.colorFilter }) : super(key: key);
 
   final String name;
   final AssetBundle bundle;

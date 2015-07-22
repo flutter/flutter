@@ -249,14 +249,14 @@ class RenderTabBar extends RenderBox with
 
 class TabBarWrapper extends MultiChildRenderObjectWrapper {
   TabBarWrapper({
+    Key key,
     List<Widget> children,
     this.selectedIndex,
     this.backgroundColor,
     this.indicatorColor,
     this.textAndIcons,
     this.scrollable: false,
-    this.onLayoutChanged,
-    Key key
+    this.onLayoutChanged
   }) : super(key: key, children: children);
 
   final int selectedIndex;
@@ -378,13 +378,11 @@ class TabBar extends Scrollable {
   }
 
   Widget _toTab(TabLabel label, int tabIndex) {
-    Tab tab = new Tab(
-      label: label,
-      selected: tabIndex == selectedIndex,
-      key: new Key(label.text == null ? label.icon : label.text)
-    );
     return new Listener(
-      child: tab,
+      child: new Tab(
+        label: label,
+        selected: tabIndex == selectedIndex
+      ),
       onGestureTap: (_) => _handleTap(tabIndex)
     );
   }
