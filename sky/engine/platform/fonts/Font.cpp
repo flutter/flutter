@@ -149,27 +149,30 @@ void Font::drawText(GraphicsContext* context, const TextRunPaintInfo& runInfo,
         return;
     }
 
-    GlyphBuffer glyphBuffer;
-    float initialAdvance = buildGlyphBuffer(runInfo, glyphBuffer);
+    {
+        FontCachePurgePreventer preventer;
+        GlyphBuffer glyphBuffer;
+        float initialAdvance = buildGlyphBuffer(runInfo, glyphBuffer);
 
-    if (glyphBuffer.isEmpty())
-        return;
-
-    if (RuntimeEnabledFeatures::textBlobEnabled()) {
-        // Enabling text-blobs forces the blob rendering path even for uncacheable blobs.
-        TextBlobPtr uncacheableTextBlob;
-        TextBlobPtr& textBlob = runInfo.cachedTextBlob ? *runInfo.cachedTextBlob : uncacheableTextBlob;
-        FloatRect blobBounds = runInfo.bounds;
-        blobBounds.moveBy(-point);
-
-        textBlob = buildTextBlob(glyphBuffer, initialAdvance, blobBounds);
-        if (textBlob) {
-            drawTextBlob(context, textBlob.get(), point.data());
+        if (glyphBuffer.isEmpty())
             return;
-        }
-    }
 
-    drawGlyphBuffer(context, runInfo, glyphBuffer, FloatPoint(point.x() + initialAdvance, point.y()));
+        if (RuntimeEnabledFeatures::textBlobEnabled()) {
+            // Enabling text-blobs forces the blob rendering path even for uncacheable blobs.
+            TextBlobPtr uncacheableTextBlob;
+            TextBlobPtr& textBlob = runInfo.cachedTextBlob ? *runInfo.cachedTextBlob : uncacheableTextBlob;
+            FloatRect blobBounds = runInfo.bounds;
+            blobBounds.moveBy(-point);
+
+            textBlob = buildTextBlob(glyphBuffer, initialAdvance, blobBounds);
+            if (textBlob) {
+                drawTextBlob(context, textBlob.get(), point.data());
+                return;
+            }
+        }
+
+        drawGlyphBuffer(context, runInfo, glyphBuffer, FloatPoint(point.x() + initialAdvance, point.y()));
+    }
 }
 
 float Font::drawUncachedText(GraphicsContext* context, const TextRunPaintInfo& runInfo,

@@ -155,7 +155,7 @@ private:
     void notifyNodeRemoved(Node&);
 
     inline void checkAcceptChildType(const Node* newChild, ExceptionState&) const;
-    inline void checkAcceptChildHierarchy(const Node& newChild, const Node* oldChild, ExceptionState&) const;
+    inline void checkAcceptChildHierarchy(const Node& newChild, ExceptionState&) const;
 
     void attachChildren(const AttachContext& = AttachContext());
     void detachChildren(const AttachContext& = AttachContext());

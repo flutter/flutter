@@ -23,12 +23,15 @@ ExceptionState::~ExceptionState() {
 // TODO(iansf): Implement exceptions.
 void ExceptionState::ThrowDOMException(const ExceptionCode&,
                                        const String& message) {
+    had_exception_ = true;
 }
 
 void ExceptionState::ThrowTypeError(const String& message) {
+    had_exception_ = true;
 }
 
 void ExceptionState::ThrowRangeError(const String& message) {
+    had_exception_ = true;
 }
 
 bool ExceptionState::ThrowIfNeeded() {
@@ -36,13 +39,15 @@ bool ExceptionState::ThrowIfNeeded() {
 }
 
 void ExceptionState::ClearException() {
+    had_exception_ = false;
 }
 
 Dart_Handle ExceptionState::GetDartException(Dart_NativeArguments args,
                                              bool auto_scope) {
   // TODO(abarth): Still don't understand autoscope.
   DCHECK(auto_scope);
-  return exception_.Release();
+  // TODO(eseidel): This should be a real exception object!
+  return Dart_NewStringFromCString("Exception support missing. See exception_state.cc");
 }
 
 }  // namespace blink
