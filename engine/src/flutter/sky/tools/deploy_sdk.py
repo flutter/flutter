@@ -117,6 +117,10 @@ def main():
         subprocess.check_call([src_path('tools/licenses.py'), 'credits'],
             stdout=license_file)
 
+    material_design_icons = sdk_path('packages/sky/packages/sky/lib/assets/material-design-icons')
+    if os.path.exists(material_design_icons):
+        shutil.rmtree(material_design_icons)
+
     time_delta = datetime.now() - start_time
     print 'SDK built at %s in %ss' % (sdk_root, time_delta.total_seconds())
 

@@ -74,7 +74,7 @@ def main():
     # tag for version?
 
     run(demo_site_root, ['git', 'fetch'])
-    run(demo_site_root, ['git', 'reset', '--hard', 'upstream/master'])
+    run(demo_site_root, ['git', 'reset', '--hard', 'origin/master'])
     # TODO(eseidel): We should move this script back into sky/tools.
     run(sky_engine_root, ['mojo/tools/deploy_domokit_site.py', demo_site_root])
     # tag for version?
@@ -83,7 +83,6 @@ def main():
         package_path = os.path.join(packages_root, 'sky')
         run(package_path, [pub_path, 'publish', '--force'])
 
-    run(sky_sdk_root, ['git', 'push'])
     run(demo_site_root, ['git', 'push'])
 
 
