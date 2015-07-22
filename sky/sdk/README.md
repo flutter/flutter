@@ -57,7 +57,7 @@ of the Android operating system.
  - Enable developer mode on your device by visiting `Settings > About phone`
    and tapping the `Build number` field five times.
 
- - Enable `USB debugging` in `Settings > Developer options`.
+ - Enable `Android debugging` in `Settings > Developer options`.
 
  - Using a USB cable, plug your phone into your computer. If prompted on your
    device, authorize your computer to access your device.
