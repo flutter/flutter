@@ -631,11 +631,13 @@ int _inLayoutCallbackBuilder = 0;
 
 class LayoutCallbackBuilderHandle { bool _active = true; }
 LayoutCallbackBuilderHandle enterLayoutCallbackBuilder() {
+  LayoutCallbackBuilderHandle result;
   assert(() {
     _inLayoutCallbackBuilder += 1;
+    result = new LayoutCallbackBuilderHandle();
     return true;
   });
-  return new LayoutCallbackBuilderHandle();
+  return result;
 }
 void exitLayoutCallbackBuilder(LayoutCallbackBuilderHandle handle) {
   assert(() {
