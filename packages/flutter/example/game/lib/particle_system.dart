@@ -272,16 +272,22 @@ class ParticleSystem extends Node {
       colors.add(particleColor);
     }
 
-    drawAtlas(canvas, texture.image, transforms, rects, colors, TransferMode.modulate,
-              new Paint()..setTransferMode(transferMode));
+    // TODO(viktork): Verify that the C++ version looks right and is faster!
+    Paint paint = new Paint()..setTransferMode(transferMode)
+        ..setFilterQuality(FilterQuality.low) // All Skia examples do this.
+        ..isAntiAlias = false; // Antialiasing breaks SkCanvas.drawAtlas?
+    // return canvas.drawAtlas(texture.image, transforms, rects, colors,
+    //   TransferMode.modulate, null, paint);
+
+    dartDrawAtlas(canvas, texture.image, transforms, rects, colors,
+      TransferMode.modulate, paint);
   }
 
   double randMinus1To1() => _rand.nextDouble() * 2.0 - 1.0;
 }
 
-// TODO: Needs bindings to Skia method in SkCanvas (exclude canvas parameter)
-void drawAtlas(Canvas canvas, Image image, List<RSTransform> transforms, List<Rect> rects, List<Color> colors,
-               TransferMode transferMode, Paint paint) {
+void dartDrawAtlas(Canvas canvas, Image image, List<RSTransform> transforms,
+    List<Rect> rects, List<Color> colors, TransferMode transferMode, Paint paint) {
   assert(transforms.length == rects.length && transforms.length == colors.length);
 
   Texture mainTexture = new Texture(image);
@@ -307,14 +313,4 @@ void drawAtlas(Canvas canvas, Image image, List<RSTransform> transforms, List<Re
 
     canvas.restore();
   }
-}
-
-// TODO: Needs bindings to Skia SkRSXform
-class RSTransform {
-  double scos;
-  double ssin;
-  double tx;
-  double ty;
-
-  RSTransform(this.scos, this.ssin, this.tx, this.ty);
 }
