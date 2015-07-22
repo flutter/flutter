@@ -47,6 +47,10 @@ Dart_Handle ExceptionState::GetDartException(Dart_NativeArguments args,
   // TODO(abarth): Still don't understand autoscope.
   DCHECK(auto_scope);
   // TODO(eseidel): This should be a real exception object!
+  if (!message_.isEmpty()) {
+    CString utf8 = message_.utf8();
+    return Dart_NewStringFromUTF8(reinterpret_cast<const unsigned char*>(utf8.data()), utf8.length());
+  }
   return Dart_NewStringFromCString("Exception support missing. See exception_state.cc");
 }
 

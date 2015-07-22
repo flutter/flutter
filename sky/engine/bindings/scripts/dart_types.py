@@ -113,6 +113,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'unrestricted float': 'float',
     # Pass these by value, not pointer.
     'Color': 'SkColor',
+    'RSTransform': 'RSTransform',
     # These direct conversions appear to be working around
     # dart_value_to_cpp_value using CPP_SPECIAL_CONVERSION_RULES directly
     # instead of calling cpp_type.
@@ -124,6 +125,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'MojoDataPipeConsumer': 'mojo::ScopedDataPipeConsumerHandle',
     'TileMode': 'SkShader::TileMode',
     'TransferMode': 'SkXfermode::Mode',
+    'FilterQuality': 'SkFilterQuality',
     'PaintingStyle': 'SkPaint::Style',
 }
 
@@ -370,10 +372,12 @@ DART_TO_CPP_VALUE = {
     'Float32List': pass_by_value_format('Float32List'),
     'Offset': pass_by_value_format('Offset'),
     'Point': pass_by_value_format('Point'),
+    'RSTransform': pass_by_value_format('RSTransform'),
     'Rect': pass_by_value_format('Rect'),
     'Size': pass_by_value_format('Size'),
     'TileMode': pass_by_value_format('TileMode', ''),
     'TransferMode': pass_by_value_format('TransferMode', ''),
+    'FilterQuality': pass_by_value_format('FilterQuality', ''),
     'PaintingStyle': pass_by_value_format('PaintingStyle', ''),
     'MojoDataPipeConsumer': pass_by_value_format('mojo::ScopedDataPipeConsumerHandle'),
 }

@@ -17,6 +17,7 @@
 #include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/painting/Size.h"
+#include "sky/engine/core/painting/RSTransform.h"
 #include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float32_list.h"
@@ -85,6 +86,11 @@ public:
     void drawPicture(Picture* picture);
     void drawDrawable(Drawable* drawable);
     void drawPaintingNode(PaintingNode* paintingNode, const Point& p);
+
+    void drawAtlas(CanvasImage* atlas,
+        const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
+        const Vector<SkColor>& colors, SkXfermode::Mode mode,
+        const Rect& cullRect, Paint* paint, ExceptionState&);
 
     SkCanvas* skCanvas() { return m_canvas; }
     void clearSkCanvas() { m_canvas = nullptr; }

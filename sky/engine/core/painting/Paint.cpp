@@ -64,6 +64,10 @@ void Paint::setTransferMode(SkXfermode::Mode transfer_mode) {
   paint_.setXfermodeMode(transfer_mode);
 }
 
+void Paint::setFilterQuality(SkFilterQuality filter_quality) {
+  paint_.setFilterQuality(filter_quality);
+}
+
 String Paint::toString() const {
   StringBuilder result;
 

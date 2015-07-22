@@ -217,4 +217,46 @@ void Canvas::drawPaintingNode(PaintingNode* paintingNode, const Point& p)
     translate(-p.sk_point.x(), -p.sk_point.y());
 }
 
+void Canvas::drawAtlas(CanvasImage* atlas,
+    const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
+    const Vector<SkColor>& colors, SkXfermode::Mode mode,
+    const Rect& cullRect, Paint* paint, ExceptionState& es)
+{
+    if (!m_canvas)
+        return;
+    RefPtr<SkImage> skImage = adoptRef(SkImage::NewFromBitmap(atlas->bitmap()));
+    if (transforms.size() != rects.size())
+        return es.ThrowRangeError("transforms and rects lengths must match");
+    if (colors.size() && colors.size() != rects.size())
+        return es.ThrowRangeError("if supplied, colors length must match that of transforms and rects");
+
+    Vector<SkRSXform> skXForms;
+    for (size_t x = 0; x < transforms.size(); x++) {
+        const RSTransform& transform = transforms[x];
+        if (transform.is_null)
+            return es.ThrowRangeError("transforms contained a null");
+        skXForms.append(transform.sk_xform);
+    }
+
+    Vector<SkRect> skRects;
+    for (size_t x = 0; x < rects.size(); x++) {
+        const Rect& rect = rects[x];
+        if (rect.is_null)
+            return es.ThrowRangeError("rects contained a null");
+        skRects.append(rect.sk_rect);
+    }
+
+    m_canvas->drawAtlas(
+        skImage.get(),
+        skXForms.data(),
+        skRects.data(),
+        colors.isEmpty() ? nullptr : colors.data(),
+        skXForms.size(),
+        mode,
+        cullRect.is_null ? nullptr : &cullRect.sk_rect,
+        paint ? &paint->paint() : nullptr
+    );
+}
+
+
 } // namespace blink
