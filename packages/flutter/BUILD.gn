@@ -15,14 +15,11 @@ dart_pkg("sky") {
     "lib/animation/forces.dart",
     "lib/animation/scroll_behavior.dart",
     "lib/animation/timeline.dart",
-    "lib/assets/.gitignore",
-    "lib/assets/material-design-icons.sha1",
     "lib/base/debug.dart",
     "lib/base/hit_test.dart",
     "lib/base/lerp.dart",
     "lib/base/node.dart",
     "lib/base/scheduler.dart",
-    "lib/download_material_design_icons",
     "lib/editing/editable_string.dart",
     "lib/editing/editable_text.dart",
     "lib/editing/input.dart",
@@ -115,34 +112,8 @@ dart_pkg("sky") {
   ]
 }
 
-action("material_design_icons") {
-  source_file = "lib/assets/material-design-icons"
-  target_file = "$root_gen_dir/dart-pkg/sky/lib/assets/material-design-icons"
-  stamp = "$target_gen_dir/material_design_icons_linked"
-
-  sources = [
-    "lib/assets/material-design-icons.sha1",
-  ]
-  outputs = [
-    stamp,
-  ]
-
-  script = "//sky/build/symlink.py"
-  args = [
-    rebase_path(source_file, root_build_dir),
-    rebase_path(target_file, root_build_dir),
-    "--touch",
-    rebase_path(stamp, root_build_dir),
-  ]
-
-  deps = [
-    ":sky",
-  ]
-}
-
 group("sdk") {
   deps = [
     ":sky",
-    ":material_design_icons",
   ]
 }
