@@ -77,6 +77,7 @@ static_library("core") {
     "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
+    "//mojo/services/navigation/public/interfaces",
   ]
 
   sources = sky_core_files
