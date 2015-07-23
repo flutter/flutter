@@ -1,6 +1,7 @@
 author: Chromium Authors <sky-dev@googlegroups.com>
 dependencies:
-  args: '>=0.13.0 <1.0.0'
+  args: ^0.13.0
+  http_server: ^0.9.5
 description: Tools for building Sky applications
 homepage: https://github.com/domokit/sky_tools
 name: sky_tools
