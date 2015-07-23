@@ -68,19 +68,19 @@ Running a Sky application
 -------------------------
 
 The `sky` pub package includes a `sky_tool` script to assist in running
-Sky applications inside the `SkyDemo.apk` harness.  The `sky_tool` script
+Sky applications inside the `SkyShell.apk` harness.  The `sky_tool` script
 expects to be run from the root directory of your application's package (i.e.,
 the same directory that contains the `pubspec.yaml` file). To run your app,
 follow these instructions:
 
  - `./packages/sky/sky_tool start` to start the dev server and upload your
    app to the device.
-   (NOTE: add a `--install` flag to install `SkyDemo.apk` if it is not already
+   (NOTE: add a `--install` flag to install `SkyShell.apk` if it is not already
    installed on the device.)
 
  - Use `adb logcat` to view any errors or Dart `print()` output from the app.
    `adb logcat -s sky` can be used to filter only adb messages from
-   `SkyDemo.apk`.
+   `SkyShell.apk`.
 
 Debugging
 ---------

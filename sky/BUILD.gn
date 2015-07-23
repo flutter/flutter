@@ -25,13 +25,10 @@ group("sky_dev") {
   deps = [
     "//sky/sdk",
     "//sky/sdk/example/demo_launcher",
+    "//sky/shell",
   ]
 
   if (is_android) {
     deps += [ "//sky/services/activity" ]
-  }
-
-  if (is_linux || is_ios) {
-    deps += [ "//sky/shell" ]
   }
 }

@@ -5,6 +5,7 @@
 package org.domokit.sky.shell;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -96,6 +97,9 @@ public class SkyActivity extends Activity {
       * Override this function to customize startup behavior.
       */
     protected void onSkyReady() {
+        if (loadIntent(getIntent())) {
+            return;
+        }
         File dataDir = new File(PathUtils.getDataDirectory(this));
         File snapshot = new File(dataDir, SkyApplication.SNAPSHOT);
         if (snapshot.exists()) {
@@ -107,6 +111,21 @@ public class SkyActivity extends Activity {
             mView.getEngine().runFromBundle(appBundle.getPath());
             return;
         }
+    }
+
+    protected void onNewIntent(Intent intent) {
+        loadIntent(intent);
+    }
+
+    public boolean loadIntent(Intent intent) {
+        String action = intent.getAction();
+
+        if (Intent.ACTION_VIEW.equals(action)) {
+            loadUrl(intent.getDataString());
+            return true;
+        }
+
+        return false;
     }
 
     public void loadUrl(String url) {
