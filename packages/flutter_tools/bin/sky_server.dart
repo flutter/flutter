@@ -24,6 +24,8 @@ main(List<String> argv) async {
   }
 
   VirtualDirectory currentDirectory = new VirtualDirectory('.')
+    ..followLinks = true
+    ..jailRoot = false
     ..allowDirectoryListing = true;
 
   HttpServer server;
@@ -43,6 +45,4 @@ main(List<String> argv) async {
   server
     ..autoCompress = true
     ..listen(currentDirectory.serveRequest);
-
-  print('Sky server running on port $port');
 }
