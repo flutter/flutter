@@ -62,11 +62,15 @@ class StockDataFetcher {
   int _nextChunk = 0;
   final StockDataCallback callback;
 
+  static bool actuallyFetchData = true;
+
   StockDataFetcher(this.callback) {
     _fetchNextChunk();
   }
 
   void _fetchNextChunk() {
+    if (!actuallyFetchData)
+      return;
     fetchBody(_urlToFetch(_nextChunk++)).then((Response response) {
       String json = response.bodyAsString();
       if (json == null) {
