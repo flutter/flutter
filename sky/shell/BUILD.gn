@@ -121,10 +121,14 @@ if (is_android) {
       "//mojo/public/java:system",
       "//mojo/services/keyboard/public/interfaces:interfaces_java",
       "//mojo/services/network/public/interfaces:interfaces_java",
+      "//mojo/services/sensors/public/interfaces:interfaces_java",
       "//services/keyboard",
+      "//services/sensors:sensors_lib",
       "//sky/services/activity:activity_lib",
       "//sky/services/activity:interfaces_java",
       "//sky/services/engine:interfaces_java",
+      "//sky/services/media:interfaces_java",
+      "//sky/services/media:media_lib",
       "//sky/services/oknet",
     ]
   }
@@ -139,6 +143,23 @@ if (is_android) {
       "//third_party/icu:icudata",
     ]
   }
+
+  android_apk("shell") {
+    apk_name = "SkyShell"
+    android_manifest = "android/AndroidManifest.xml"
+
+    native_libs = [ "libsky_shell.so" ]
+    asset_location = "$root_build_dir/sky_shell/assets"
+
+    deps = [
+      ":assets",
+      ":assets",
+      ":java",
+      ":sky_shell",
+      "//base:base_java",
+    ]
+  }
+
 } else if (is_ios) {
   import("//build/config/ios/rules.gni")
   import("//build/config/ios/ios_sdk.gni")

@@ -21,9 +21,9 @@ SKY_PACKAGE_ROOT = os.path.realpath(os.path.dirname(LIB_DIR))
 
 SKY_SERVER_PORT = 9888
 OBSERVATORY_PORT = 8181
-APK_NAME = 'SkyDemo.apk'
-ANDROID_PACKAGE = "org.domokit.sky.demo"
-ANDROID_COMPONENT = '%s/%s.SkyDemoActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
+APK_NAME = 'SkyShell.apk'
+ANDROID_PACKAGE = "org.domokit.sky.shell"
+ANDROID_COMPONENT = '%s/%s.SkyActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
 # FIXME: This assumes adb is in $PATH, we could look for ANDROID_HOME, etc?
 ADB_PATH = 'adb'
 # FIXME: Do we need to look in $DART_SDK?
@@ -243,7 +243,7 @@ class StartTracing(object):
     def run(self, args, pids):
         subprocess.check_output([ADB_PATH, 'shell',
             'am', 'broadcast',
-            '-a', 'org.domokit.sky.demo.TRACING_START'])
+            '-a', 'org.domokit.sky.shell.TRACING_START'])
 
 
 TRACE_COMPLETE_REGEXP = re.compile('Trace complete')
@@ -260,7 +260,7 @@ class StopTracing(object):
         subprocess.check_output([ADB_PATH, 'logcat', '-c'])
         subprocess.check_output([ADB_PATH, 'shell',
             'am', 'broadcast',
-            '-a', 'org.domokit.sky.demo.TRACING_STOP'])
+            '-a', 'org.domokit.sky.shell.TRACING_STOP'])
         device_path = None
         is_complete = False
         while not is_complete:
