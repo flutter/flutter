@@ -38,11 +38,6 @@ const List<TextStyle> textStyles = const <TextStyle>[
 enum CellState { covered, exploded, cleared, flagged, shown }
 
 class MineDiggerApp extends App {
-
-  void initState() {
-    resetGame();
-  }
-
   static const int rows = 9;
   static const int cols = 9;
   static const int totalMineCount = 11;
@@ -56,18 +51,8 @@ class MineDiggerApp extends App {
   // |uiState| keeps track of the visible player progess.
   List<List<CellState>> uiState;
 
-  Game(this.app) {
-    randomSeed = 22;
-    // Colors for each mine count:
-    // 0 - none, 1 - blue, 2-green, 3-red, 4-black, 5-dark red .. etc.
-    textStyles.add(new TextStyle(color: const Color(0xFF555555), fontWeight: bold));
-    textStyles.add(new TextStyle(color: const Color(0xFF0094FF), fontWeight: bold));
-    textStyles.add(new TextStyle(color: const Color(0xFF13A023), fontWeight: bold));
-    textStyles.add(new TextStyle(color: const Color(0xFFDA1414), fontWeight: bold));
-    textStyles.add(new TextStyle(color: const Color(0xFF1E2347), fontWeight: bold));
-    textStyles.add(new TextStyle(color: const Color(0xFF7F0037), fontWeight: bold));
-    textStyles.add(new TextStyle(color: const Color(0xFFE93BE9), fontWeight: bold));
-    initialize();
+  void initState() {
+    resetGame();
   }
 
   void resetGame() {

@@ -12,7 +12,6 @@ import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
-import 'package:sky/widgets/snack_bar.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 

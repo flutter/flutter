@@ -25,7 +25,6 @@ import 'package:sky/widgets/widget.dart';
 import 'fitness_types.dart';
 import 'fitness_item.dart';
 import 'measurement.dart';
-import 'meal.dart';
 
 class FitnessItemList extends Component {
   FitnessItemList({ Key key, this.items, this.onDismissed }) : super(key: key);
