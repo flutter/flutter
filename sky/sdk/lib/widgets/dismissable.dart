@@ -183,8 +183,10 @@ class Dismissable extends AnimatedComponent {
   }
 
   Widget build() {
-    if (_resizePerformance != null)
-      return new Container(height: _resizePerformance.variable.value);
+    if (_resizePerformance != null) {
+      AnimatedValue<double> height = _resizePerformance.variable;
+      return new Container(height: height.value);
+    }
 
     Matrix4 transform = new Matrix4.identity();
     transform.translate(_position.value.x, _position.value.y);
