@@ -49,7 +49,7 @@ GS_URL = 'gs://mojo/sky/%(category)s/%(config)s/%(commit_hash)s/%(name)s'
 
 ARTIFACTS = {
     'android-arm': [
-        Artifact('shell', 'SkyDemo.apk'),
+        Artifact('shell', 'SkyShell.apk'),
         Artifact('viewer', 'sky_viewer.mojo'),
     ],
     'linux-x64': [
