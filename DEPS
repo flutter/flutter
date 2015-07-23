@@ -269,7 +269,7 @@ hooks = [
     'pattern': '.',
     'action': [
         'python',
-        'src/sky/sdk/lib/download_material_design_icons',
+        'src/sky/tools/download_material_design_icons',
     ],
   },
   # Pull binutils for linux, enabled debug fission for faster linking /
