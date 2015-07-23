@@ -5,16 +5,12 @@
 # This target will be built if no target is specified when invoking ninja.
 group("default") {
   testonly = true
-
-  if (is_ios || is_mac) {
-    deps = [
-      "//sky/shell",
-    ]
-  } else {
-    deps = [
-      "//sky",
-      "//services/sky",
-    ]
+  deps = [
+    "//sky",
+  ]
+  if (!is_ios) {
+    # Mojo shell does not exist on ios
+    deps += [ "//services/sky" ]
   }
 }
 
