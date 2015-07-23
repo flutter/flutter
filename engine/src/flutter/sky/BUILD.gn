@@ -23,6 +23,7 @@ group("sky_dev") {
   testonly = true
 
   deps = [
+    "//sky/packages",
     "//sky/sdk",
     "//sky/sdk/example/demo_launcher",
   ]
