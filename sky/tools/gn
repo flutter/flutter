@@ -9,46 +9,53 @@ import sys
 import os
 
 def get_out_dir(args):
-    target_dir = 'Release'
-    if args.debug:
-        target_dir = 'Debug'
+    target_dir = ''
     if args.target_os == 'android':
-        target_dir = 'android_' + target_dir
+        target_dir += 'android_'
     elif args.target_os == 'ios':
-        target_dir = 'ios_' + target_dir
+        target_dir += 'ios_'
+
+    if args.simulator:
+        target_dir += 'sim_'
+
+    if args.debug:
+        target_dir += 'Debug'
+    else:
+        target_dir += 'Release'
+
     return os.path.join('out', target_dir)
 
 def to_command_line(gn_args):
     def merge(key, value):
         if type(value) is bool:
-            return "%s=%s" % (key, "true" if value else "false")
-        return "%s=\"%s\"" % (key, value)
+            return '%s=%s' % (key, 'true' if value else 'false')
+        return '%s="%s"' % (key, value)
     return [merge(x, y) for x, y in gn_args.iteritems()]
 
 def to_gn_args(args):
     gn_args = {}
 
-    gn_args["is_debug"] = args.debug
-    gn_args["is_clang"] = args.clang and args.target_os not in ['android']
+    gn_args['is_debug'] = args.debug
+    gn_args['is_clang'] = args.clang and args.target_os not in ['android']
 
     if args.target_os == 'android':
-        gn_args["target_os"] = "android"
+        gn_args['target_os'] = 'android'
     elif args.target_os == 'ios':
-        gn_args["target_os"] = "ios"
-        gn_args["ios_deployment_target"] = "7.0"
-        gn_args["clang_use_chrome_plugins"] = False
+        gn_args['target_os'] = 'ios'
+        gn_args['ios_deployment_target'] = '7.0'
+        gn_args['clang_use_chrome_plugins'] = False
         if args.simulator:
-            gn_args["use_libjpeg_turbo"] = False
-        gn_args["use_ios_simulator"] = args.simulator
+            gn_args['use_libjpeg_turbo'] = False
+        gn_args['use_ios_simulator'] = args.simulator
     else:
-        gn_args["use_aura"] = False
-        gn_args["use_glib"] = False
-        gn_args["use_system_harfbuzz"] = False
+        gn_args['use_aura'] = False
+        gn_args['use_glib'] = False
+        gn_args['use_system_harfbuzz'] = False
 
     if args.target_os in ['android', 'ios']:
-        gn_args["target_cpu"] = 'arm'
+        gn_args['target_cpu'] = 'arm'
     else:
-        gn_args["target_cpu"] = 'x64'
+        gn_args['target_cpu'] = 'x64'
 
     goma_dir = os.environ.get('GOMA_DIR')
     goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
@@ -64,14 +71,13 @@ def to_gn_args(args):
 
     return gn_args
 
-
-def main():
+def parse_args(args):
   parser = argparse.ArgumentParser(description='A script run` gn gen`.')
 
   parser.add_argument('--debug', default=True, action='store_true')
   parser.add_argument('--release', default=False, dest='debug', action='store_false')
 
-  parser.add_argument('--target-os', type=str)
+  parser.add_argument('--target-os', type=str, choices=['android', 'ios'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--simulator', action='store_true', default=False)
@@ -82,8 +88,10 @@ def main():
   parser.add_argument('--clang', default=True, action='store_true')
   parser.add_argument('--no-clang', dest='clang', action='store_false')
 
-  args = parser.parse_args()
+  return parser.parse_args(args)
 
+def main(argv):
+  args = parse_args(argv)
   command = ['gn', 'gen', '--check']
   gn_args = to_command_line(to_gn_args(args))
   out_dir = get_out_dir(args)
@@ -93,4 +101,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(sys.argv))
