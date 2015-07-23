@@ -140,13 +140,46 @@ abstract class Widget {
       _notifyingMountStatus = false;
       sky.tracing.end("Widget._notifyMountStatusChanged");
     }
+    assert(_debugDuplicateGlobalKeys.isEmpty);
   }
 
+  static final Map<GlobalKey, Widget> _globalKeys = new Map<GlobalKey, Widget>();
+  static final Map<GlobalKey, int> _debugDuplicateGlobalKeys = new Map<GlobalKey, int>();
+
   /// Override this function to learn when this [Widget] enters the widget tree.
-  void didMount() { }
+  void didMount() {
+    if (key is GlobalKey) {
+      assert(() {
+        if (_globalKeys.containsKey(key)) {
+          int oldCount = _debugDuplicateGlobalKeys.putIfAbsent(key, () => 1);
+          assert(oldCount >= 1);
+          _debugDuplicateGlobalKeys[key] = oldCount + 1;
+        }
+        return true;
+      });
+      _globalKeys[key] = this;
+    }
+  }
 
   /// Override this function to learn when this [Widget] leaves the widget tree.
-  void didUnmount() { }
+  void didUnmount() {
+    if (key is GlobalKey) {
+      assert(() {
+        if (_globalKeys.containsKey(key) && _debugDuplicateGlobalKeys.containsKey(key)) {
+          int oldCount = _debugDuplicateGlobalKeys[key];
+          assert(oldCount >= 2);
+          if (oldCount == 2) {
+            _debugDuplicateGlobalKeys.remove(key);
+          } else {
+            _debugDuplicateGlobalKeys[key] = oldCount - 1;
+          }
+        }
+        return true;
+      });
+      if (_globalKeys[key] == this)
+        _globalKeys.remove(key);
+    }
+  }
 
   RenderObject _root;
 
