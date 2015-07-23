@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/widgets/animated_container.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
@@ -43,7 +46,58 @@ class SnackBarAction extends Component {
   }
 }
 
-class SnackBar extends AnimatedComponent {
+// TODO(mpcomplete): generalize this to a SlideIn class.
+class SnackBarSlideInIntention extends AnimationIntention {
+  SnackBarSlideInIntention(this.duration, this.onStatusChanged);
+
+  Duration duration;
+  SnackBarStatusChangedCallback onStatusChanged;
+  AnimatedValue<Point> _position;
+  AnimationPerformance _performance;
+
+  void initFields(AnimatedContainer container) {
+    _position = new AnimatedValue<Point>(new Point(0.0, 50.0), end: Point.origin);
+    _performance = new AnimationPerformance()
+      ..duration = _kSlideInDuration
+      ..variable = _position
+      ..addListener(() { _updateProgress(container); });
+    _performance.progress = 0.0;
+    if (container.tag)
+      _show();
+  }
+
+  void syncFields(AnimatedContainer original, AnimatedContainer updated) {
+    if (original.tag != updated.tag) {
+      original.tag = updated.tag;
+      original.tag ? _show() : _hide();
+    }
+  }
+
+  void _show() {
+    _performance.play();
+  }
+
+  void _hide() {
+    _performance.reverse();
+  }
+
+  SnackBarStatus _lastStatus;
+  void _updateProgress(AnimatedContainer container) {
+    container.setState(() {
+      container.transform = new Matrix4.identity()
+        ..translate(_position.value.x, _position.value.y);
+    });
+
+    SnackBarStatus status = _status;
+    if (_lastStatus != null && status != _lastStatus && onStatusChanged != null)
+      scheduleMicrotask(() { onStatusChanged(status); });
+    _lastStatus = status;
+  }
+
+  SnackBarStatus get _status => _performance.isDismissed ? SnackBarStatus.inactive : SnackBarStatus.active;
+}
+
+class SnackBar extends StatefulComponent {
 
   SnackBar({
     Key key,
@@ -60,47 +114,18 @@ class SnackBar extends AnimatedComponent {
   bool showing;
   SnackBarStatusChangedCallback onStatusChanged;
 
+  SnackBarSlideInIntention _intention;
+
+  void initState() {
+    _intention = new SnackBarSlideInIntention(_kSlideInDuration, onStatusChanged);
+  }
+
   void syncFields(SnackBar source) {
     content = source.content;
     actions = source.actions;
     onStatusChanged = source.onStatusChanged;
-    if (showing != source.showing) {
-      showing = source.showing;
-      showing ? _show() : _hide();
-    }
+    showing = source.showing;
   }
-
-  AnimatedValue<Point> _position;
-  AnimationPerformance _performance;
-
-  void initState() {
-    _position = new AnimatedValue<Point>(new Point(0.0, 50.0), end: Point.origin);
-    _performance = new AnimationPerformance()
-      ..duration = _kSlideInDuration
-      ..variable = _position
-      ..addListener(_checkStatusChanged);
-    watch(_performance);
-    if (showing)
-      _show();
-  }
-
-  void _show() {
-    _performance.play();
-  }
-
-  void _hide() {
-    _performance.reverse();
-  }
-
-  SnackBarStatus _lastStatus;
-  void _checkStatusChanged() {
-    SnackBarStatus status = _status;
-    if (_lastStatus != null && status != _lastStatus && onStatusChanged != null)
-      onStatusChanged(status);
-    _lastStatus = status;
-  }
-
-  SnackBarStatus get _status => _performance.isDismissed ? SnackBarStatus.inactive : SnackBarStatus.active;
 
   Widget build() {
     List<Widget> children = [
@@ -115,11 +140,10 @@ class SnackBar extends AnimatedComponent {
       )
     ]..addAll(actions);
 
-    Matrix4 transform = new Matrix4.identity();
-    transform.translate(_position.value.x, _position.value.y);
-    return new Transform(
-       transform: transform,
-       child: new Material(
+    return new AnimatedContainer(
+      intentions: [_intention],
+      tag: showing,
+      child: new Material(
         level: 2,
         color: const Color(0xFF323232),
         type: MaterialType.canvas,
