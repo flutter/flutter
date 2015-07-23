@@ -13,7 +13,8 @@ To get the code:
    and make sure it is in your path.
  * If you haven't configured your machine with an SSH key that's shared by github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
- * Create a `.gclient` file in an empty directory with the following contents:
+ * Create a `.gclient` file in an empty directory with the following contents, replacing
+   `<your_name_here`> with your GitHub account name:
 
 ```
 solutions = [
