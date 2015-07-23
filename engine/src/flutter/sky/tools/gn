@@ -72,6 +72,7 @@ def to_gn_args(args):
     return gn_args
 
 def parse_args(args):
+  args = args[1:]
   parser = argparse.ArgumentParser(description='A script run` gn gen`.')
 
   parser.add_argument('--debug', default=True, action='store_true')
@@ -95,6 +96,7 @@ def main(argv):
   command = ['gn', 'gen', '--check']
   gn_args = to_command_line(to_gn_args(args))
   out_dir = get_out_dir(args)
+  print "gn gen --check in %s" % out_dir
   command.append(out_dir)
   command.append('--args=%s' % ' '.join(gn_args))
   return subprocess.call(command)
