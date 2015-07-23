@@ -108,20 +108,10 @@ dart_pkg("sky") {
     "//mojo/dart/mojom",
     "//mojo/public/dart:mojo",
     "//sky/engine/bindings",
-    "//sky/services/testing:interfaces",
+    "//sky/packages/sky_engine",
     "//sky/services/media:interfaces",
+    "//sky/services/testing:interfaces",
     "//third_party/dart-pkg",
-  ]
-
-  sdk_ext_directory = "$root_gen_dir/sky/bindings"
-  sdk_ext_files = [
-    "//sky/engine/bindings/sky_internals.dart",
-    "//sky/engine/bindings/builtin_natives.dart",
-  ]
-  sdk_ext_mappings = [
-    "dart:sky,dart_sky.dart",
-    "dart:sky.internals,sky_internals.dart",
-    "dart:sky_builtin_natives,builtin_natives.dart",
   ]
 }
 
