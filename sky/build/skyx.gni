@@ -53,7 +53,7 @@ template("skyx") {
   }
 
   action("gen_${bundle_prefix}_bundle") {
-    asset_base = "$package_root/sky/assets/material-design-icons"
+    asset_base = "//sky/packages/material_design_icons/icons"
 
     sources = [
       "//sky/tools/skyx/bin/skyx.dart",
