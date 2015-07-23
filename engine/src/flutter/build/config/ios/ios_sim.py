@@ -57,6 +57,10 @@ def InstallLaunchAndWait(args, wait):
   launch_args += [
     'booted',
     identifier,
+    '-target',
+    args.target,
+    '-server',
+    args.server
   ]
 
   return subprocess.check_output( SIMCTL_PATH + launch_args ).strip()
@@ -83,10 +87,18 @@ def Debug(args):
 def Main():
   parser = argparse.ArgumentParser(description='A script that launches an'
                                    ' application in the simulator and attaches'
-                                   ' the debugger to the same')
+                                   ' the debugger to it.')
 
   parser.add_argument('-p', dest='path', required=True,
-                      help='Path the the simulator application')
+                      help='Path to the simulator application.')
+
+  parser.add_argument('-t', dest='target', required=False,
+                      default='sky/sdk/example/demo_launcher/lib/main.dart',
+                      help='Sky server-relative path to the Sky app to run.')
+
+  parser.add_argument('-s', dest='server', required=False,
+                      default='localhost:8080',
+                      help='Sky server address.')
 
   subparsers = parser.add_subparsers()
 
