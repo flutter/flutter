@@ -7,4 +7,4 @@ environment:
   sdk: ">=1.8.0 <2.0.0"
 homepage: https://github.com/domokit/sky_tools
 name: sky_tools
-version: 0.0.1
+version: 0.0.2
