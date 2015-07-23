@@ -43,4 +43,10 @@ Float32List DartConverter<Float32List>::FromArgumentsWithNullCheck(
   return result;
 }
 
+void DartConverter<Float32List>::SetReturnValue(Dart_NativeArguments args,
+                                                Float32List val) {
+  Dart_SetReturnValue(args, val.dart_handle());
+}
+
+
 } // namespace blink

@@ -21,8 +21,23 @@ class Float32List {
   Float32List(Float32List&& other);
   ~Float32List();
 
+  float& at(intptr_t i)
+  {
+      CHECK(i < num_elements_);
+      return data_[i];
+  }
+  const float& at(intptr_t i) const
+  {
+      CHECK(i < num_elements_);
+      return data_[i];
+  }
+
+  float& operator[](intptr_t i) { return at(i); }
+  const float& operator[](intptr_t i) const { return at(i); }
+
   const float* data() const { return data_; }
   intptr_t num_elements() const { return num_elements_; }
+  Dart_Handle dart_handle() const { return dart_handle_; }
 
  private:
   float* data_;
@@ -34,6 +49,8 @@ class Float32List {
 
 template <>
 struct DartConverter<Float32List> {
+  static void SetReturnValue(Dart_NativeArguments args, Float32List val);
+
   static Float32List FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                                 int index,
                                                 Dart_Handle& exception);
