@@ -7,5 +7,6 @@ group("packages") {
 
   deps = [
     "//sky/packages/sky_engine",
+    "//sky/packages/sky_services",
   ]
 }

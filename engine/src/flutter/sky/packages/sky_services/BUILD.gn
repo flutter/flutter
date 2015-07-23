@@ -1,0 +1,20 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/dart/rules.gni")
+
+dart_pkg("sky_services") {
+  sources = [
+    "README.md",
+    "pubspec.yaml",
+  ]
+
+  deps = [
+    "//mojo/services/asset_bundle/public/interfaces",
+    "//mojo/services/keyboard/public/interfaces",
+    "//sky/services/activity:interfaces",
+    "//sky/services/media:interfaces",
+    "//sky/services/testing:interfaces",
+  ]
+}
