@@ -75,27 +75,65 @@ void Canvas::skew(float sx, float sy)
     m_canvas->skew(sx, sy);
 }
 
-void Canvas::concat(const Float32List& matrix4)
+// Mappings from SkMatrix-index to input-index.
+static const int kSkMatrixIndexToMatrix4Index[] = {
+    0, 4, 12,
+    1, 5, 13,
+    3, 7, 15,
+};
+
+SkMatrix toSkMatrix(const Float32List& matrix4, ExceptionState& es)
+{
+    ASSERT(matrix4.data());
+    SkMatrix sk_matrix;
+    if (matrix4.num_elements() != 16) {
+        es.ThrowTypeError("Incorrect number of elements in matrix.");
+        return sk_matrix;
+    }
+
+    for (intptr_t i = 0; i < 9; ++i)
+        sk_matrix[i] = matrix4[kSkMatrixIndexToMatrix4Index[i]];
+    return sk_matrix;
+}
+
+Float32List toMatrix4(const SkMatrix& sk_matrix)
+{
+    Float32List matrix4(Dart_NewTypedData(Dart_TypedData_kFloat32, 16));
+    for (intptr_t i = 0; i < 9; ++i)
+        matrix4[kSkMatrixIndexToMatrix4Index[i]] = sk_matrix[i];
+    matrix4[10] = 1.0; // Identity along the z axis.
+    return matrix4;
+}
+
+void Canvas::concat(const Float32List& matrix4, ExceptionState& es)
 {
     if (!m_canvas)
+        return es.ThrowTypeError("No canvas");
+
+    SkMatrix sk_matrix = toSkMatrix(matrix4, es);
+    if (es.had_exception())
         return;
-    ASSERT(matrix4.data());
-
-    // TODO(mpcomplete): how can we raise an error in this case?
-    if (matrix4.num_elements() != 16)
-      return;
-
-    SkMatrix sk_matrix;
-    // Mappings from SkMatrix-index to input-index.
-    static const int kMappings[] = {
-      0, 4, 12,
-      1, 5, 13,
-      3, 7, 15,
-    };
-    for (intptr_t i = 0; i < 9; ++i)
-      sk_matrix[i] = matrix4.data()[kMappings[i]];
-
     m_canvas->concat(sk_matrix);
+}
+
+void Canvas::setMatrix(const Float32List& matrix4, ExceptionState& es)
+{
+    if (!m_canvas)
+        return es.ThrowTypeError("No canvas");
+
+    SkMatrix sk_matrix = toSkMatrix(matrix4, es);
+    if (es.had_exception())
+        return;
+    m_canvas->setMatrix(sk_matrix);
+}
+
+Float32List Canvas::getTotalMatrix() const
+{
+    // Maybe we should throw an exception instead of returning an empty matrix?
+    SkMatrix sk_matrix;
+    if (m_canvas)
+        sk_matrix = m_canvas->getTotalMatrix();
+    return toMatrix4(sk_matrix);
 }
 
 void Canvas::clipRect(const Rect& rect)

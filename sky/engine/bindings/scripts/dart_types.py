@@ -646,6 +646,7 @@ DART_SET_RETURN_VALUE = {
     'ArrayBuffer': 'Dart_SetReturnValue(args, DartUtilities::arrayBufferToDart({cpp_value}))',
     'TypedList': 'Dart_SetReturnValue(args, DartUtilities::arrayBufferViewToDart({cpp_value}))',
     'Color': 'DartConverter<CanvasColor>::SetReturnValue(args, {cpp_value})',
+    'Float32List': 'DartConverter<Float32List>::SetReturnValue(args, {cpp_value})',
 }
 
 

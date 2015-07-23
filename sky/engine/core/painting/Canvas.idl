@@ -16,7 +16,10 @@
   void scale(float sx, float sy);
   void rotate(float radians);
   void skew(float sx, float sy);
-  void concat(Float32List matrix4);
+  [RaisesException] void concat(Float32List matrix4);
+
+  [RaisesException] void setMatrix(Float32List matrix4);
+  Float32List getTotalMatrix();
 
   void clipRect(Rect rect);
   void clipRRect(RRect rrect);
