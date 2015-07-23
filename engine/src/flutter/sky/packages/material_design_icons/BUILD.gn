@@ -11,7 +11,7 @@ action("material_design_icons") {
   outputs = [ stamp_file ]
 
   args = [
-    rebase_path(".", root_build_dir),
+    rebase_path("lib", root_build_dir),
     rebase_path("$root_gen_dir/dart-pkg/packages/material_design_icons", root_build_dir),
     "--touch",
     rebase_path(stamp_file, root_build_dir)
