@@ -14,17 +14,17 @@ class Focus extends Inherited {
 
   Focus({
     GlobalKey key,
-    GlobalKey defaultFocus,
+    GlobalKey initialFocus,
     Widget child
   }) : super(key: key, child: child);
 
-  GlobalKey defaultFocus;
+  GlobalKey initialFocus;
 
   GlobalKey _currentlyFocusedKey;
   GlobalKey get currentlyFocusedKey {
     if (_currentlyFocusedKey != null)
       return _currentlyFocusedKey;
-    return defaultFocus;
+    return initialFocus;
   }
   void set currentlyFocusedKey(GlobalKey value) {
     if (value != _currentlyFocusedKey) {

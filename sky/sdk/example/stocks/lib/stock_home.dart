@@ -322,7 +322,7 @@ class StockHome extends StatefulComponent {
     ];
     addMenuToOverlays(overlays);
     return new Focus(
-      defaultFocus: searchFieldKey,
+      initialFocus: searchFieldKey,
       child: new Stack(overlays)
     );
   }
