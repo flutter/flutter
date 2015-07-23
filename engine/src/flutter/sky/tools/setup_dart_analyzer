@@ -15,13 +15,6 @@ SRC_ROOT = os.path.dirname(os.path.dirname(SKY_TOOLS_DIR))
 SKY_SDK_DIR = os.path.join(SRC_ROOT, 'sky', 'sdk')
 SKY_PUBSPEC = os.path.join(SKY_SDK_DIR, 'pubspec.yaml')
 SKY_PUBSPEC_LOCK = os.path.join(SKY_SDK_DIR, 'pubspec.lock')
-SDK_EXT = os.path.join(SKY_SDK_DIR, 'lib', '_sdkext')
-
-SDK_EXT_TEMPLATE = '''{
-  "dart:sky": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/dart_sky.dart",
-  "dart:sky.internals": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/sky_internals.dart",
-  "dart:sky_builtin_natives": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/builtin_natives.dart"
-}'''
 
 def version_for_pubspec(pubspec_path):
     with open(pubspec_path, 'r') as stream:
@@ -31,7 +24,10 @@ def version_for_pubspec(pubspec_path):
 
 def entry_for_dependency(dart_pkg_dir, dependency):
     dependency_path = os.path.join(dart_pkg_dir, dependency)
-    version = version_for_pubspec(os.path.join(dependency_path, 'pubspec.yaml'))
+    pubspec_path = os.path.join(dependency_path, 'pubspec.yaml')
+    if not os.path.exists(pubspec_path):
+        return
+    version = version_for_pubspec(pubspec_path)
     return {
         'description': {
             'path': os.path.relpath(dependency_path, SKY_SDK_DIR),
@@ -59,15 +55,14 @@ def main():
     with open(SKY_PUBSPEC, 'r') as stream:
         spec = yaml.load(stream)
         for dependency in spec['dependencies'].keys():
-            packages[dependency] = entry_for_dependency(dart_pkg_dir, dependency)
+            entry = entry_for_dependency(dart_pkg_dir, dependency)
+            if not entry:
+                continue
+            packages[dependency] = entry
 
     lock = { 'packages': packages }
     with open(SKY_PUBSPEC_LOCK, 'w') as stream:
         yaml.dump(lock, stream=stream, default_flow_style=False)
-
-    with open(SDK_EXT, 'w') as stream:
-        rebased_build_dir = os.path.relpath(args.build_dir, os.path.dirname(SDK_EXT))
-        stream.write(SDK_EXT_TEMPLATE % { 'build_dir': rebased_build_dir })
 
 
 if __name__ == '__main__':
