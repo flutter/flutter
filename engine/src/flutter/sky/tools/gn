@@ -74,7 +74,7 @@ def main():
   parser.add_argument('--target-os', type=str)
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
-  parser.add_argument('--simulator', default=False)
+  parser.add_argument('--simulator', action='store_true', default=False)
 
   parser.add_argument('--goma', default=True, action='store_true')
   parser.add_argument('--no-goma', dest='goma', action='store_false')
