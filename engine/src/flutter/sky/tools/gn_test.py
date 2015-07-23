@@ -22,6 +22,15 @@ class GNTestCase(unittest.TestCase):
         self._expect_build_dir(['--android'], 'out/android_Debug')
         self._expect_build_dir(['--android', '--release'], 'out/android_Release')
 
+    def _gn_args(self, arg_list):
+        args = gn.parse_args(['gn'] + arg_list)
+        return gn.to_gn_args(args)
+
+    def test_to_gn_args(self):
+        # This would not necesarily be true on a 32-bit machine?
+        self.assertEquals(self._gn_args(['--ios', '--simulator'])['target_cpu'], 'x64')
+        self.assertEquals(self._gn_args(['--ios'])['target_cpu'], 'arm')
+
 
 if __name__ == '__main__':
     unittest.main()

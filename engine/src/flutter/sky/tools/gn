@@ -52,7 +52,7 @@ def to_gn_args(args):
         gn_args['use_glib'] = False
         gn_args['use_system_harfbuzz'] = False
 
-    if args.target_os in ['android', 'ios']:
+    if args.target_os in ['android', 'ios'] and not args.simulator:
         gn_args['target_cpu'] = 'arm'
     else:
         gn_args['target_cpu'] = 'x64'
