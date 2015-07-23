@@ -18,11 +18,11 @@ copy("sky_viewer") {
 copy("sky_shell") {
   if (is_android) {
     sources = [
-      "$root_build_dir/apks/SkyDemo.apk",
+      "$root_build_dir/apks/SkyShell.apk",
     ]
 
     deps = [
-      "//sky/sdk/example/demo_launcher",
+      "//sky/shell",
     ]
   } else if (is_ios) {
     sources = [
@@ -76,7 +76,7 @@ if (is_android) {
 
   copy("copy_sky_sdk_apks") {
     sources = [
-      "$root_dist_dir/shell/SkyDemo.apk",
+      "$root_dist_dir/shell/SkyShell.apk",
     ]
     outputs = [ "$sky_sdk_dir/apks/{{source_file_part}}" ]
     deps = [

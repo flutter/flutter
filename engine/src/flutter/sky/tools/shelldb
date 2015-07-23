@@ -27,14 +27,14 @@ GDB_PORT = 8888
 SKY_SERVER_PORT = 9888
 OBSERVATORY_PORT = 8181
 DEFAULT_URL = "https://domokit.github.io/home.dart"
-APK_NAME = 'SkyDemo.apk'
+APK_NAME = 'SkyShell.apk'
 ADB_PATH = os.path.join(SRC_ROOT,
     'third_party/android_tools/sdk/platform-tools/adb')
-ANDROID_PACKAGE = "org.domokit.sky.demo"
-ANDROID_COMPONENT = '%s/%s.SkyDemoActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
+ANDROID_PACKAGE = "org.domokit.sky.shell"
+ANDROID_COMPONENT = '%s/%s.SkyActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
 SHA1_PATH = '/sdcard/%s/%s.sha1' % (ANDROID_PACKAGE, APK_NAME)
 
-PID_FILE_PATH = "/tmp/skydemo.pids"
+PID_FILE_PATH = "/tmp/shelldb.pids"
 PID_FILE_KEYS = frozenset([
     'remote_sky_server_port',
     'sky_server_pid',
@@ -141,7 +141,7 @@ class StartSky(object):
             default=DEFAULT_URL)
         start_parser.add_argument('--no_install', action="store_false",
             default=True, dest="install",
-            help="Don't install SkyDemo.apk before starting")
+            help="Don't install SkyShell.apk before starting")
         start_parser.set_defaults(func=self.run)
 
     def _server_root_for_url(self, url_or_path):
@@ -435,7 +435,7 @@ class StartTracing(object):
     def run(self, args, pids):
         subprocess.check_output([ADB_PATH, 'shell',
             'am', 'broadcast',
-            '-a', 'org.domokit.sky.demo.TRACING_START'])
+            '-a', 'org.domokit.sky.shell.TRACING_START'])
 
 
 TRACE_COMPLETE_REGEXP = re.compile('Trace complete')
@@ -451,7 +451,7 @@ class StopTracing(object):
         subprocess.check_output([ADB_PATH, 'logcat', '-c'])
         subprocess.check_output([ADB_PATH, 'shell',
             'am', 'broadcast',
-            '-a', 'org.domokit.sky.demo.TRACING_STOP'])
+            '-a', 'org.domokit.sky.shell.TRACING_STOP'])
         device_path = None
         is_complete = False
         while not is_complete:
