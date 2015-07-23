@@ -28,6 +28,7 @@ ANDROID_COMPONENT = '%s/%s.SkyDemoActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
 ADB_PATH = 'adb'
 # FIXME: Do we need to look in $DART_SDK?
 DART_PATH = 'dart'
+PUB_PATH = 'pub'
 
 PID_FILE_PATH = "/tmp/sky_tool.pids"
 PID_FILE_KEYS = frozenset([
@@ -44,10 +45,9 @@ def _port_in_use(port):
     return sock.connect_ex(('localhost', port)) == 0
 
 
-# We need something to serve dart files, python's httpserver is sufficient.
 def _start_http_server(port, root):
     server_command = [
-        'python', '-m', 'SimpleHTTPServer', str(port),
+        PUB_PATH, 'run', 'sky_tools:sky_server', str(port),
     ]
     return subprocess.Popen(server_command, cwd=root).pid
 
