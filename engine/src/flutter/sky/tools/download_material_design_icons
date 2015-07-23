@@ -35,7 +35,7 @@ def main():
     tgz_path = os.path.join(package_dir, 'material-design-icons.tgz')
     untar_path = os.path.join(package_dir, 'material-design-icons')
 
-    url = 'https://storage.googleapis.com/mojo/material-design-icons/%s' % sha1
+    url = 'https://storage.googleapis.com/mojo/material-design-icons/%s' % desired_sha1
     response = urllib2.urlopen(url)
 
     with open(tgz_path, 'wb') as f:
@@ -45,7 +45,7 @@ def main():
 
     subprocess.call([ 'tar', '-xzf', tgz_path, '-C', package_dir ])
     subprocess.call([ 'mv', untar_path, icons_dir ])
-    subprocess.call([ 'cp', sha1_path, icons_dir ])
+    subprocess.call([ 'cp', desired_sha1_path, icons_dir ])
 
     os.unlink(tgz_path)
 
