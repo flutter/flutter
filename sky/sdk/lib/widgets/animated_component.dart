@@ -13,22 +13,29 @@ abstract class AnimatedComponent extends StatefulComponent {
 
   final List<AnimationPerformance> _watchedPerformances = new List<AnimationPerformance>();
 
+  void _performanceChanged() {
+    setState(() {
+      // We don't actually have any state to change, per se,
+      // we just know that we have in fact changed state.
+    });
+  }
+
   void watch(AnimationPerformance performance) {
     assert(!_watchedPerformances.contains(performance));
     _watchedPerformances.add(performance);
     if (mounted)
-      performance.addListener(scheduleBuild);
+      performance.addListener(_performanceChanged);
   }
 
   void didMount() {
     for (AnimationPerformance performance in _watchedPerformances)
-      performance.addListener(scheduleBuild);
+      performance.addListener(_performanceChanged);
     super.didMount();
   }
 
   void didUnmount() {
     for (AnimationPerformance performance in _watchedPerformances)
-      performance.removeListener(scheduleBuild);
+      performance.removeListener(_performanceChanged);
     super.didUnmount();
   }
 
