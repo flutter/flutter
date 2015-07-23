@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/Rect.h"
+#include "sky/engine/core/painting/RSTransform.h"
 
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
@@ -11,15 +11,15 @@
 
 namespace blink {
 
-// Convert dart_rect._value[0...3] ==> SkRect
-Rect DartConverter<Rect>::FromDart(Dart_Handle dart_rect) {
-  Rect result;
+// Convert dart_xform._value[0...3] ==> RSTransform
+RSTransform DartConverter<RSTransform>::FromDart(Dart_Handle dart_xform) {
+  RSTransform result;
   result.is_null = true;
-  if (Dart_IsNull(dart_rect))
+  if (Dart_IsNull(dart_xform))
     return result;
 
   Dart_Handle value =
-      Dart_GetField(dart_rect, DOMDartState::Current()->value_handle());
+      Dart_GetField(dart_xform, DOMDartState::Current()->value_handle());
   if (Dart_IsNull(value))
     return result;
 
@@ -32,10 +32,10 @@ Rect DartConverter<Rect>::FromDart(Dart_Handle dart_rect) {
   ASSERT(type == Dart_TypedData_kFloat32 && num_elements == 4);
 
   SkScalar* dest[] = {
-    &result.sk_rect.fLeft,
-    &result.sk_rect.fTop,
-    &result.sk_rect.fRight,
-    &result.sk_rect.fBottom
+    &result.sk_xform.fSCos,
+    &result.sk_xform.fSSin,
+    &result.sk_xform.fTx,
+    &result.sk_xform.fTy
   };
   for (intptr_t i = 0; i < 4; ++i)
     *dest[i] = data[i];
@@ -46,12 +46,12 @@ Rect DartConverter<Rect>::FromDart(Dart_Handle dart_rect) {
   return result;
 }
 
-Rect DartConverter<Rect>::FromArgumentsWithNullCheck(Dart_NativeArguments args,
+RSTransform DartConverter<RSTransform>::FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                                      int index,
                                                      Dart_Handle& exception) {
-  Dart_Handle dart_rect = Dart_GetNativeArgument(args, index);
-  DCHECK(!LogIfError(dart_rect));
-  return FromDart(dart_rect);
+  Dart_Handle dart_xform = Dart_GetNativeArgument(args, index);
+  DCHECK(!LogIfError(dart_xform));
+  return FromDart(dart_xform);
 }
 
 } // namespace blink

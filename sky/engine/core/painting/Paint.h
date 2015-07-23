@@ -8,6 +8,7 @@
 #include "sky/engine/core/painting/CanvasColor.h"
 #include "sky/engine/core/painting/PaintingStyle.h"
 #include "sky/engine/core/painting/TransferMode.h"
+#include "sky/engine/core/painting/FilterQuality.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -44,6 +45,7 @@ class Paint : public RefCounted<Paint>, public DartWrappable {
   void setShader(Shader* shader);
   void setStyle(SkPaint::Style style);
   void setTransferMode(SkXfermode::Mode transfer_mode);
+  void setFilterQuality(SkFilterQuality filter_quality);
 
   const SkPaint& paint() const { return paint_; }
   void setPaint(const SkPaint& paint) { paint_ = paint; }

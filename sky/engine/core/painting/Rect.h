@@ -19,6 +19,7 @@ class Rect {
 
 template <>
 struct DartConverter<Rect> {
+  static Rect FromDart(Dart_Handle handle);
   static Rect FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                          int index,
                                          Dart_Handle& exception);
