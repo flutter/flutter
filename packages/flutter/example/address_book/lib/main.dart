@@ -112,7 +112,7 @@ class AddressBookApp extends App {
         child: new TaskDescription(
           label: 'Address Book',
           child: new Focus(
-            defaultFocus: nameKey,
+            initialFocus: nameKey,
             child: buildMain()
           )
         )
