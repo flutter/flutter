@@ -11,7 +11,7 @@ gn = imp.load_source('gn', os.path.join(SKY_TOOLS, 'gn'))
 
 class GNTestCase(unittest.TestCase):
     def _expect_build_dir(self, arg_list, expected_build_dir):
-        args = gn.parse_args(arg_list)
+        args = gn.parse_args(['gn'] + arg_list)
         self.assertEquals(gn.get_out_dir(args), expected_build_dir)
 
     def test_get_out_dir(self):
