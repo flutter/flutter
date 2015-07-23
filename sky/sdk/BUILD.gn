@@ -2,102 +2,22 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//mojo/public/dart/rules.gni")
+action("sky") {
+  script = "//sky/build/symlink.py"
 
-dart_pkg("sky") {
-  sources = [
-    "CHANGELOG.md",
-    "bin/init.dart",
-    "lib/animation/animated_simulation.dart",
-    "lib/animation/animated_value.dart",
-    "lib/animation/animation_performance.dart",
-    "lib/animation/curves.dart",
-    "lib/animation/forces.dart",
-    "lib/animation/scroll_behavior.dart",
-    "lib/animation/timeline.dart",
-    "lib/base/debug.dart",
-    "lib/base/hit_test.dart",
-    "lib/base/lerp.dart",
-    "lib/base/node.dart",
-    "lib/base/scheduler.dart",
-    "lib/editing/editable_string.dart",
-    "lib/editing/editable_text.dart",
-    "lib/editing/input.dart",
-    "lib/mojo/activity.dart",
-    "lib/mojo/asset_bundle.dart",
-    "lib/mojo/embedder.dart",
-    "lib/mojo/keyboard.dart",
-    "lib/mojo/net/fetch.dart",
-    "lib/mojo/net/image_cache.dart",
-    "lib/mojo/shell.dart",
-    "lib/painting/box_painter.dart",
-    "lib/painting/shadows.dart",
-    "lib/painting/text_style.dart",
-    "lib/rendering/auto_layout.dart",
-    "lib/rendering/block.dart",
-    "lib/rendering/box.dart",
-    "lib/rendering/flex.dart",
-    "lib/rendering/object.dart",
-    "lib/rendering/paragraph.dart",
-    "lib/rendering/sky_binding.dart",
-    "lib/rendering/stack.dart",
-    "lib/sky_tool",
-    "lib/theme/colors.dart",
-    "lib/theme/shadows.dart",
-    "lib/theme/theme_data.dart",
-    "lib/theme/typography.dart",
-    "lib/theme/view_configuration.dart",
-    "lib/widgets/animated_component.dart",
-    "lib/widgets/animated_container.dart",
-    "lib/widgets/basic.dart",
-    "lib/widgets/block_viewport.dart",
-    "lib/widgets/button_base.dart",
-    "lib/widgets/card.dart",
-    "lib/widgets/checkbox.dart",
-    "lib/widgets/default_text_style.dart",
-    "lib/widgets/dialog.dart",
-    "lib/widgets/dismissable.dart",
-    "lib/widgets/drawer.dart",
-    "lib/widgets/drawer_divider.dart",
-    "lib/widgets/drawer_header.dart",
-    "lib/widgets/drawer_item.dart",
-    "lib/widgets/fixed_height_scrollable.dart",
-    "lib/widgets/flat_button.dart",
-    "lib/widgets/floating_action_button.dart",
-    "lib/widgets/focus.dart",
-    "lib/widgets/icon.dart",
-    "lib/widgets/icon_button.dart",
-    "lib/widgets/ink_well.dart",
-    "lib/widgets/material.dart",
-    "lib/widgets/material_button.dart",
-    "lib/widgets/modal_overlay.dart",
-    "lib/widgets/navigator.dart",
-    "lib/widgets/popup_menu.dart",
-    "lib/widgets/popup_menu_item.dart",
-    "lib/widgets/radio.dart",
-    "lib/widgets/raised_button.dart",
-    "lib/widgets/scaffold.dart",
-    "lib/widgets/scrollable.dart",
-    "lib/widgets/scrollable_list.dart",
-    "lib/widgets/scrollable_viewport.dart",
-    "lib/widgets/snack_bar.dart",
-    "lib/widgets/switch.dart",
-    "lib/widgets/tabs.dart",
-    "lib/widgets/task_description.dart",
-    "lib/widgets/theme.dart",
-    "lib/widgets/toggleable.dart",
-    "lib/widgets/tool_bar.dart",
-    "lib/widgets/variable_height_scrollable.dart",
-    "lib/widgets/widget.dart",
-    "pubspec.yaml",
+  stamp_file = "$target_gen_dir/symlink.stamp"
+
+  sources = [ "pubspec.yaml" ]
+  outputs = [ stamp_file ]
+
+  args = [
+    rebase_path("lib", root_build_dir),
+    rebase_path("$root_gen_dir/dart-pkg/packages/sky", root_build_dir),
+    "--touch",
+    rebase_path(stamp_file, root_build_dir)
   ]
 
-  datadeps = [
-    "//mojo/dart/mojo_services",
-    "//mojo/dart/mojom",
-    "//mojo/public/dart:mojo",
-    "//sky/packages/sky_engine",
-    "//sky/packages/sky_services",
+  deps = [
     "//third_party/dart-pkg",
   ]
 }
