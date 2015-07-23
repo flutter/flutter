@@ -14,11 +14,11 @@ class Focus extends Inherited {
 
   Focus({
     GlobalKey key,
-    GlobalKey initialFocus,
+    this.initialFocus,
     Widget child
   }) : super(key: key, child: child);
 
-  GlobalKey initialFocus;
+  final GlobalKey initialFocus;
 
   GlobalKey _currentlyFocusedKey;
   GlobalKey get currentlyFocusedKey {

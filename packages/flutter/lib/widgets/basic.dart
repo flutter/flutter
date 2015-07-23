@@ -22,7 +22,7 @@ import 'package:sky/widgets/widget.dart';
 export 'package:sky/rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'package:sky/widgets/widget.dart' show Key, Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
+export 'package:sky/widgets/widget.dart' show Key, GlobalKey, Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
 
 
 // PAINTING NODES
