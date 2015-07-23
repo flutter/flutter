@@ -19,7 +19,7 @@ const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
 class Input extends StatefulComponent {
 
   Input({
-    Key key,
+    GlobalKey key,
     this.placeholder,
     this.onChanged
   }): super(key: key);
