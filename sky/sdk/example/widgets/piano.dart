@@ -68,7 +68,6 @@ class PianoApp extends App {
     }
     mediaService.close();
     // Are we leaking all the player connections?
-    scheduleBuild();
   }
 
   Widget build() {

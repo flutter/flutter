@@ -530,7 +530,7 @@ abstract class Component extends Widget {
   }
   void _dependenciesChanged() {
     // called by Inherited.sync()
-    scheduleBuild();
+    _scheduleBuild();
   }
 
   // order corresponds to _build_ order, not depth in the tree.
@@ -585,7 +585,7 @@ abstract class Component extends Widget {
     _sync(null, _slot);
   }
 
-  void scheduleBuild() {
+  void _scheduleBuild() {
     if (_isBuilding || _dirty || !_mounted)
       return;
     _dirty = true;
@@ -662,7 +662,7 @@ abstract class StatefulComponent extends Component {
   void setState(void fn()) {
     assert(!_disqualifiedFromEverAppearingAgain);
     fn();
-    scheduleBuild();
+    _scheduleBuild();
   }
 }
 
@@ -1190,7 +1190,7 @@ void runApp(App app, { RenderView renderViewOverride, bool enableProfilingLoop: 
   _container = new AppContainer(app);
   if (enableProfilingLoop) {
     new Timer.periodic(const Duration(milliseconds: 20), (_) {
-      app.scheduleBuild();
+      app._scheduleBuild();
     });
   }
 }
