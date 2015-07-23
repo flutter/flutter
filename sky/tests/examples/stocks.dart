@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:sky/widgets/widget.dart';
 
 import '../../sdk/example/stocks/lib/main.dart';
+import '../../sdk/example/stocks/lib/stock_data.dart';
 import '../resources/display_list.dart';
 
 class TestStocksApp extends StocksApp {
@@ -21,6 +22,8 @@ class TestStocksApp extends StocksApp {
 }
 
 main() async {
+  StockDataFetcher.actuallyFetchData = false;
+
   TestRenderView testRenderView = new TestRenderView();
   TestStocksApp app = new TestStocksApp();
   runApp(app, renderViewOverride: testRenderView);
