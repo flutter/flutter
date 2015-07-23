@@ -558,25 +558,25 @@ class RenderConstrainedBox extends RenderProxyBox {
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
       return child.getMinIntrinsicWidth(_additionalConstraints.apply(constraints));
-    return constraints.constrainWidth(0.0);
+    return _additionalConstraints.apply(constraints).constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
       return child.getMaxIntrinsicWidth(_additionalConstraints.apply(constraints));
-    return constraints.constrainWidth(0.0);
+    return _additionalConstraints.apply(constraints).constrainWidth(0.0);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
       return child.getMinIntrinsicHeight(_additionalConstraints.apply(constraints));
-    return constraints.constrainHeight(0.0);
+    return _additionalConstraints.apply(constraints).constrainHeight(0.0);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
       return child.getMaxIntrinsicHeight(_additionalConstraints.apply(constraints));
-    return constraints.constrainHeight(0.0);
+    return _additionalConstraints.apply(constraints).constrainHeight(0.0);
   }
 
   void performLayout() {
