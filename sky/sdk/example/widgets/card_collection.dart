@@ -9,10 +9,12 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/card.dart';
 import 'package:sky/widgets/dismissable.dart';
+import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/variable_height_scrollable.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
+import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/widget.dart';
 import 'package:sky/widgets/task_description.dart';
 
@@ -27,8 +29,11 @@ class CardModel {
 
 class CardCollectionApp extends App {
 
-  final TextStyle cardLabelStyle =
-    new TextStyle(color: white, fontSize: 18.0, fontWeight: bold);
+  static const TextStyle cardLabelStyle =
+    const TextStyle(color: white, fontSize: 18.0, fontWeight: bold);
+
+  final TextStyle backgroundTextStyle =
+    typography.white.title.copyWith(textAlign: TextAlign.center);
 
   BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
   List<CardModel> cardModels;
@@ -57,21 +62,50 @@ class CardCollectionApp extends App {
   Widget builder(int index) {
     if (index >= cardModels.length)
       return null;
-    CardModel card = cardModels[index];
 
-    return new Dismissable(
-      key: card.key,
+    CardModel cardModel = cardModels[index];
+    Widget card = new Dismissable(
       onResized: () { layoutState.invalidate([index]); },
-      onDismissed: () { dismissCard(card); },
+      onDismissed: () { dismissCard(cardModel); },
       child: new Card(
-        color: card.color,
+        color: cardModel.color,
         child: new Container(
-          height: card.height,
+          height: cardModel.height,
           padding: const EdgeDims.all(8.0),
-          child: new Center(child: new Text(card.label, style: cardLabelStyle))
+          child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
         )
       )
     );
+
+    Widget backgroundText = new Center(
+        child: new Text("Swipe in either direction", style: backgroundTextStyle)
+    );
+
+    // The background Widget appears behind the Dismissable card when the card
+    // moves to the left or right. The Positioned widget ensures that the
+    // size of the background,card Stack will be based only on the card. The
+    // Viewport ensures that when the card's resize animation occurs, the
+    // background (text and icons) will just be clipped, not resized.
+    Widget background = new Positioned(
+      top: 0.0,
+      left: 0.0,
+      child: new Container(
+        margin: const EdgeDims.all(4.0),
+        child: new Viewport(
+          child: new Container(
+            height: cardModel.height,
+            decoration: new BoxDecoration(backgroundColor: Theme.of(this).primaryColor),
+            child: new Flex([
+              new Icon(type: 'navigation/arrow_back', size: 36),
+              new Flexible(child: backgroundText),
+              new Icon(type: 'navigation/arrow_forward', size: 36)
+            ])
+          )
+        )
+      )
+    );
+
+    return new Stack([background, card], key: cardModel.key);
   }
 
   Widget build() {
@@ -85,17 +119,20 @@ class CardCollectionApp extends App {
       )
     );
 
-    return new Theme(
-      data: new ThemeData(
-        brightness: ThemeBrightness.light,
-        primarySwatch: Blue,
-        accentColor: RedAccent[200]
-      ),
-      child: new TaskDescription(
-        label: 'Cards',
-        child: new Scaffold(
-          toolbar: new ToolBar(center: new Text('Swipe Away')),
-          body: cardCollection
+    return new IconTheme(
+      data: const IconThemeData(color: IconThemeColor.white),
+      child: new Theme(
+        data: new ThemeData(
+          brightness: ThemeBrightness.light,
+          primarySwatch: Blue,
+          accentColor: RedAccent[200]
+        ),
+        child: new TaskDescription(
+          label: 'Cards',
+          child: new Scaffold(
+            toolbar: new ToolBar(center: new Text('Swipe Away')),
+            body: cardCollection
+          )
         )
       )
     );
