@@ -37,10 +37,10 @@ target_os = ["android"]
 Building the code
 -----------------
 
-Currently we support building for an Android target and for a headless Linux
-target.
+Currently we support building on Linux only, for an Android target and for a headless Linux
+target. Building on MacOS for Android, iOS, and a head-less MacOS target is coming soon.
 
-### Android
+### Android (cross-compiling from Linux)
 
 * (Only the first time) `sudo ./build/install-build-deps-android.sh`
 * (Only the first time) `./tools/android/download_android_tools.py`
@@ -48,7 +48,7 @@ target.
 * `ninja -C out/android_Debug`
 * `./sky/tools/shelldb start out/android_Debug/ sky/sdk/example/hello_world/lib/main.dart`
 
-### Linux
+### Linux (on Linux)
 
 * (Only the first time) `sudo ./build/install-build-deps.sh`
 * `./sky/tools/gn`
