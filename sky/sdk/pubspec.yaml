@@ -12,7 +12,7 @@ dependencies:
   newton: ^0.1.0
   sky_engine: ^0.0.1
   sky_services: ^0.0.1
-  sky_tools: ^0.0.2
+  sky_tools: ^0.0.3
   vector_math: ^1.4.3
 environment:
   sdk: '>=1.8.0 <2.0.0'
