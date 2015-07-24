@@ -18,11 +18,12 @@ class ScrollSimulation extends SimulationGroup {
   double _offset = 0.0;
 
   ScrollSimulation(double position, double velocity, double leading,
-      double trailing, SpringDescription spring, double drag)
+      double trailing, [SpringDescription spring, double drag])
       : _leadingExtent = leading,
         _trailingExtent = trailing,
         _springDesc = spring,
         _drag = drag {
+    assert((spring != null && drag != null) || (spring == null && drag == null));
     _chooseSimulation(position, velocity, 0.0);
   }
 
@@ -39,6 +40,10 @@ class ScrollSimulation extends SimulationGroup {
 
   bool _chooseSimulation(
       double position, double velocity, double intervalOffset) {
+
+    if (_springDesc == null &&
+        (position > _trailingExtent || position < _leadingExtent))
+      return false;
 
     /// This simulation can only step forward.
     if (!_isSpringing) {
