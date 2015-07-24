@@ -53,7 +53,6 @@ class Dismissable extends AnimatedComponent {
       ..duration = _kCardDismissFadeout
       ..variable = new AnimatedList([_position, _opacity])
       ..addListener(_handleFadeProgressChanged);
-    watch(_fadePerformance);
   }
 
   void _handleFadeProgressChanged() {
@@ -85,8 +84,6 @@ class Dismissable extends AnimatedComponent {
   }
 
   void _maybeCallOnDismissed() {
-    _resizePerformance.stop();
-    _resizePerformance.removeListener(_handleResizeProgressChanged);
     if (onDismissed != null)
       onDismissed();
   }
@@ -96,22 +93,19 @@ class Dismissable extends AnimatedComponent {
     assert(_fadePerformance != null);
     assert(_resizePerformance == null);
 
+    // TODO(hansmuller): _fadePerformance is completed; stop shouldn't be needed.
     _fadePerformance.stop();
-    _fadePerformance.removeListener(_handleFadeProgressChanged);
-
-    _maybeCallOnResized();
 
     AnimatedValue<double> dismissHeight = new AnimatedValue<double>(_size.height,
-        end: 0.0,
-        curve: ease,
-        interval: new Interval(_kCardDismissResizeDelay, 1.0)
+      end: 0.0,
+      curve: ease,
+      interval: new Interval(_kCardDismissResizeDelay, 1.0)
     );
     _resizePerformance = new AnimationPerformance()
       ..variable = dismissHeight
       ..duration = _kCardDismissResize
       ..addListener(_handleResizeProgressChanged)
       ..play();
-    watch(_resizePerformance);
   }
 
   void _handleResizeProgressChanged() {

@@ -25,6 +25,10 @@ class Measurement extends FitnessItem {
 
   // TODO(jackson): Internationalize
   String get displayWeight => "${weight.toStringAsFixed(2)} lbs";
+
+  FitnessItemRow toRow({ FitnessItemHandler onDismissed }) {
+    return new MeasurementRow(measurement: this, onDismissed: onDismissed);
+  }
 }
 
 class MeasurementRow extends FitnessItemRow {
@@ -105,6 +109,8 @@ class MeasurementFragment extends StatefulComponent {
     });
   }
 
+  static final GlobalKey weightKey = new GlobalKey();
+
   Widget buildBody() {
     Measurement measurement = new Measurement(when: new DateTime.now());
     return new Material(
@@ -115,7 +121,7 @@ class MeasurementFragment extends StatefulComponent {
           child: new Block([
             new Text(measurement.displayDate),
             new Input(
-              focused: false,
+              key: weightKey,
               placeholder: 'Enter weight',
               onChanged: _handleWeightChanged
             ),
