@@ -9,22 +9,40 @@ import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:vector_math/vector_math.dart';
 
-typedef Widget Builder(Navigator navigator, RouteBase route);
+typedef Widget RouteBuilder(Navigator navigator, RouteBase route);
 
 abstract class RouteBase {
   Widget build(Navigator navigator, RouteBase route);
+  bool get isOpaque;
   void popState() { }
 }
 
 class Route extends RouteBase {
   Route({ this.name, this.builder });
+
   final String name;
-  final Builder builder;
+  final RouteBuilder builder;
+
   Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
+  bool get isOpaque => true;
+}
+
+class DialogRoute extends RouteBase {
+  DialogRoute({ this.builder, this.callback });
+
+  final RouteBuilder builder;
+  Function callback;
+
+  Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
+  bool get isOpaque => false;
+
+  void popState() {
+    if (callback != null)
+      callback(this);
+  }
 }
 
 class RouteState extends RouteBase {
-
   RouteState({ this.callback, this.route, this.owner });
 
   Function callback;
@@ -32,6 +50,7 @@ class RouteState extends RouteBase {
   StatefulComponent owner;
 
   Widget build(Navigator navigator, RouteBase route) => null;
+  bool get isOpaque => false;
 
   void popState() {
     if (callback != null)
@@ -52,7 +71,7 @@ class Transition extends AnimatedComponent {
     this.onDismissed,
     this.onCompleted,
     this.interactive
-  }) : super(key: key);
+  }): super(key: key);
   Widget content;
   TransitionDirection direction;
   bool interactive;
@@ -145,7 +164,7 @@ class Transition extends AnimatedComponent {
 class HistoryEntry {
   HistoryEntry({ this.route });
   final RouteBase route;
-  bool transitionFinished = false;
+  bool fullyOpaque = false;
   // TODO(jackson): Keep track of the requested transition
 }
 
@@ -182,7 +201,7 @@ class NavigationState {
     if (historyIndex > 0) {
       HistoryEntry entry = history[historyIndex];
       entry.route.popState();
-      entry.transitionFinished = false;
+      entry.fullyOpaque = false;
       historyIndex--;
     }
   }
@@ -231,7 +250,7 @@ class Navigator extends StatefulComponent {
     List<Widget> visibleRoutes = new List<Widget>();
     for (int i = 0; i < state.history.length; i++) {
       // Avoid building routes that are not visible
-      if (i + 1 < state.history.length && state.history[i + 1].transitionFinished)
+      if (i + 1 < state.history.length && state.history[i + 1].fullyOpaque)
         continue;
       HistoryEntry historyEntry = state.history[i];
       Widget content = historyEntry.route.build(this, historyEntry.route);
@@ -253,7 +272,7 @@ class Navigator extends StatefulComponent {
         },
         onCompleted: () {
           setState(() {
-            historyEntry.transitionFinished = true;
+            historyEntry.fullyOpaque = historyEntry.route.isOpaque;
           });
         }
       );

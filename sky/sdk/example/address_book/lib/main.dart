@@ -68,10 +68,30 @@ class AddressBookApp extends App {
       child: new Icon(type: 'image/photo_camera', size: 24),
       backgroundColor: Theme.of(this).accentColor,
       onPressed: () {
-        showDialog = true;
-        navigator.pushState(this, (_) {
-          showDialog = false;
-        });
+        navigator.push(new DialogRoute(builder: (navigator, route) {
+          return new Dialog(
+            title: new Text("Describe your picture"),
+            content: new ScrollableBlock([
+              new Field(inputKey: fillKey, icon: "editor/format_color_fill", placeholder: "Color"),
+              new Field(inputKey: emoticonKey, icon: "editor/insert_emoticon", placeholder: "Emotion"),
+            ]),
+            onDismiss: navigator.pop,
+            actions: [
+              new FlatButton(
+                child: new Text('DISCARD'),
+                onPressed: () {
+                  navigator.pop();
+                }
+              ),
+              new FlatButton(
+                child: new Text('SAVE'),
+                onPressed: () {
+                  navigator.pop();
+                }
+              ),
+            ]
+          );
+        }));
       }
     );
   }
@@ -104,47 +124,15 @@ class AddressBookApp extends App {
     );
   }
 
-  bool showDialog = false;
-
   Widget buildMain(Navigator navigator) {
-    List<Widget> layers = [
-      new Focus(
-        initialFocus: nameKey,
-        child: new Scaffold(
-          toolbar: buildToolBar(navigator),
-          body: buildBody(navigator),
-          floatingActionButton: buildFloatingActionButton(navigator)
-        )
+    return new Focus(
+      initialFocus: nameKey,
+      child: new Scaffold(
+        toolbar: buildToolBar(navigator),
+        body: buildBody(navigator),
+        floatingActionButton: buildFloatingActionButton(navigator)
       )
-    ];
-    if (showDialog) {
-      layers.add(new Focus(
-        initialFocus: fillKey,
-        child: new Dialog(
-          title: new Text("Describe your picture"),
-          content: new ScrollableBlock([
-            new Field(inputKey: fillKey, icon: "editor/format_color_fill", placeholder: "Color"),
-            new Field(inputKey: emoticonKey, icon: "editor/insert_emoticon", placeholder: "Emotion"),
-          ]),
-          onDismiss: navigator.pop,
-          actions: [
-            new FlatButton(
-              child: new Text('DISCARD'),
-              onPressed: () {
-                navigator.pop();
-              }
-            ),
-            new FlatButton(
-              child: new Text('SAVE'),
-              onPressed: () {
-                navigator.pop();
-              }
-            ),
-          ]
-        )
-      ));
-    }
-    return new Stack(layers);
+    );
   }
 
   NavigationState _navigationState;
