@@ -19,6 +19,7 @@ tags
 Thumbs.db
 v8.log
 /build/util/LASTCHANGE*
+.idea
 
 # directories pulled in via deps or hooks
 /build/linux/bin/eu-strip
