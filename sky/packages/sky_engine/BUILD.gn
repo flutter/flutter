@@ -1,0 +1,27 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/dart/rules.gni")
+
+dart_pkg("sky_engine") {
+  sources = [
+    "README.md",
+    "pubspec.yaml",
+  ]
+
+  deps = [
+    "//sky/engine/bindings",
+  ]
+
+  sdk_ext_directory = "$root_gen_dir/sky/bindings"
+  sdk_ext_files = [
+    "//sky/engine/bindings/sky_internals.dart",
+    "//sky/engine/bindings/builtin_natives.dart",
+  ]
+  sdk_ext_mappings = [
+    "dart:sky,dart_sky.dart",
+    "dart:sky.internals,sky_internals.dart",
+    "dart:sky_builtin_natives,builtin_natives.dart",
+  ]
+}

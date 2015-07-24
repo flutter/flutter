@@ -271,43 +271,10 @@ class ParticleSystem extends Node {
       colors.add(particleColor);
     }
 
-    // TODO(viktork): Verify that the C++ version looks right and is faster!
     Paint paint = new Paint()..setTransferMode(transferMode)
         ..setFilterQuality(FilterQuality.low) // All Skia examples do this.
         ..isAntiAlias = false; // Antialiasing breaks SkCanvas.drawAtlas?
-    return canvas.drawAtlas(texture.image, transforms, rects, colors,
+    canvas.drawAtlas(texture.image, transforms, rects, colors,
       TransferMode.modulate, null, paint);
-
-    dartDrawAtlas(canvas, texture.image, transforms, rects, colors,
-      TransferMode.modulate, paint);
-  }
-}
-
-void dartDrawAtlas(Canvas canvas, Image image, List<RSTransform> transforms,
-    List<Rect> rects, List<Color> colors, TransferMode transferMode, Paint paint) {
-  assert(transforms.length == rects.length && transforms.length == colors.length);
-
-  Texture mainTexture = new Texture(image);
-
-  for (int i = 0; i < transforms.length; i++) {
-    RSTransform transform = transforms[i];
-    Rect rect = rects[i];
-    Color color = colors[i];
-
-    canvas.save();
-
-    Matrix4 matrix = new Matrix4(transform.scos, transform.ssin, 0.0, 0.0,
-                                -transform.ssin, transform.scos, 0.0, 0.0,
-                                0.0, 0.0, 1.0, 0.0,
-                                transform.tx, transform.ty, 0.0, 1.0);
-    canvas.concat(matrix.storage);
-
-    paint.setColorFilter(new ColorFilter.mode(color, transferMode));
-    paint.color = color;
-
-    Texture texture = mainTexture.textureFromRect(rect);
-    texture.drawTexture(canvas, new Point(-texture.size.width/2.0, -texture.size.height/2.0), paint);
-
-    canvas.restore();
   }
 }

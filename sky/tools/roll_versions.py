@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 
 
 PUBSPECS = [
+    'sky/packages/sky_engine/pubspec.yaml',
     'sky/sdk/pubspec.yaml',
 ]
 

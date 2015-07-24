@@ -702,7 +702,7 @@ void BenchmarkingCanvas::onDrawBitmapRect(const SkBitmap& bitmap,
                                           const SkRect* src,
                                           const SkRect& dst,
                                           const SkPaint* paint,
-                                          DrawBitmapRectFlags flags) {
+                                          SrcRectConstraint flags) {
   AutoOp op(this, "DrawBitmapRect", paint);
   op.addParam("bitmap", AsValue(bitmap));
   if (src)
@@ -726,7 +726,8 @@ void BenchmarkingCanvas::onDrawImage(const SkImage* image,
 }
 
 void BenchmarkingCanvas::onDrawImageRect(const SkImage* image, const SkRect* src,
-                                         const SkRect& dst, const SkPaint* paint) {
+                                         const SkRect& dst, const SkPaint* paint,
+                                         SrcRectConstraint flags) {
   DCHECK(image);
   AutoOp op(this, "DrawImageRect", paint);
   op.addParam("image", AsValue(*image));
@@ -734,7 +735,7 @@ void BenchmarkingCanvas::onDrawImageRect(const SkImage* image, const SkRect* src
     op.addParam("src", AsValue(*src));
   op.addParam("dst", AsValue(dst));
 
-  INHERITED::onDrawImageRect(image, src, dst, op.paint());
+  INHERITED::onDrawImageRect(image, src, dst, op.paint(), flags);
 }
 
 void BenchmarkingCanvas::onDrawBitmapNine(const SkBitmap& bitmap,

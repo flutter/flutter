@@ -7,11 +7,14 @@ import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/dialog.dart';
 import 'package:sky/widgets/floating_action_button.dart';
+import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/material.dart';
+import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
 import 'package:sky/widgets/task_description.dart';
@@ -51,17 +54,23 @@ class Field extends Component {
 
 class AddressBookApp extends App {
 
-  Widget buildToolBar() {
+  Widget buildToolBar(Navigator navigator) {
     return new ToolBar(
         left: new IconButton(icon: "navigation/arrow_back"),
         right: [new IconButton(icon: "navigation/check")]
       );
   }
 
-  Widget buildFloatingActionButton() {
+  Widget buildFloatingActionButton(Navigator navigator) {
     return new FloatingActionButton(
       child: new Icon(type: 'image/photo_camera', size: 24),
-      backgroundColor: Theme.of(this).accentColor
+      backgroundColor: Theme.of(this).accentColor,
+      onPressed: () {
+        showDialog = true;
+        navigator.pushState(this, (_) {
+          showDialog = false;
+        });
+      }
     );
   }
 
@@ -71,8 +80,10 @@ class AddressBookApp extends App {
   static final GlobalKey addressKey = new GlobalKey();
   static final GlobalKey ringtoneKey = new GlobalKey();
   static final GlobalKey noteKey = new GlobalKey();
+  static final GlobalKey fillKey = new GlobalKey();
+  static final GlobalKey emoticonKey = new GlobalKey();
 
-  Widget buildBody() {
+  Widget buildBody(Navigator navigator) {
     return new Material(
       child: new ScrollableBlock([
         new AspectRatio(
@@ -91,12 +102,59 @@ class AddressBookApp extends App {
     );
   }
 
-  Widget buildMain() {
-    return new Scaffold(
-      toolbar: buildToolBar(),
-      body: buildBody(),
-      floatingActionButton: buildFloatingActionButton()
-    );
+  bool showDialog = false;
+
+  Widget buildMain(Navigator navigator) {
+    List<Widget> layers = [
+      new Focus(
+        initialFocus: nameKey,
+        child: new Scaffold(
+          toolbar: buildToolBar(navigator),
+          body: buildBody(navigator),
+          floatingActionButton: buildFloatingActionButton(navigator)
+        )
+      )
+    ];
+    if (showDialog) {
+      layers.add(new Focus(
+        initialFocus: fillKey,
+        child: new Dialog(
+          title: new Text("Describe your picture"),
+          content: new ScrollableBlock([
+            new Field(inputKey: fillKey, icon: "editor/format_color_fill", placeholder: "Color"),
+            new Field(inputKey: emoticonKey, icon: "editor/insert_emoticon", placeholder: "Emotion"),
+          ]),
+          onDismiss: navigator.pop,
+          actions: [
+            new FlatButton(
+              child: new Text('DISCARD'),
+              onPressed: () {
+                navigator.pop();
+              }
+            ),
+            new FlatButton(
+              child: new Text('SAVE'),
+              onPressed: () {
+                navigator.pop();
+              }
+            ),
+          ]
+        )
+      ));
+    }
+    return new Stack(layers);
+  }
+
+  NavigationState _navigationState;
+
+  void initState() {
+    _navigationState = new NavigationState([
+      new Route(
+        name: '/',
+        builder: (navigator, route) => buildMain(navigator)
+      ),
+    ]);
+    super.initState();
   }
 
   Widget build() {
@@ -111,10 +169,7 @@ class AddressBookApp extends App {
         style: typography.error, // if you see this, you've forgotten to correctly configure the text style!
         child: new TaskDescription(
           label: 'Address Book',
-          child: new Focus(
-            initialFocus: nameKey,
-            child: buildMain()
-          )
+          child: new Navigator(_navigationState)
         )
       )
     );
