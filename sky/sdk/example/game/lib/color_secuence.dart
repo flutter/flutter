@@ -24,13 +24,11 @@ class ColorSequence {
     colors = new List<Color>();
     colorStops = new List<double>.from(sequence.colorStops);
 
-    math.Random rand = new math.Random();
-
     for (Color color in sequence.colors) {
-      int aDelta = ((rand.nextDouble() * 2.0 - 1.0) * alphaVar).toInt();
-      int rDelta = ((rand.nextDouble() * 2.0 - 1.0) * redVar).toInt();
-      int gDelta = ((rand.nextDouble() * 2.0 - 1.0) * greenVar).toInt();
-      int bDelta = ((rand.nextDouble() * 2.0 - 1.0) * blueVar).toInt();
+      int aDelta = ((randomDouble() * 2.0 - 1.0) * alphaVar).toInt();
+      int rDelta = ((randomDouble() * 2.0 - 1.0) * redVar).toInt();
+      int gDelta = ((randomDouble() * 2.0 - 1.0) * greenVar).toInt();
+      int bDelta = ((randomDouble() * 2.0 - 1.0) * blueVar).toInt();
 
       int aNew = (color.alpha + aDelta).clamp(0, 255);
       int rNew = (color.red + rDelta).clamp(0, 255);
