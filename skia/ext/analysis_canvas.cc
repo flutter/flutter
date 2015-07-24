@@ -191,7 +191,7 @@ void AnalysisCanvas::onDrawBitmapRect(const SkBitmap&,
                                       const SkRect* src,
                                       const SkRect& dst,
                                       const SkPaint* paint,
-                                      DrawBitmapRectFlags flags) {
+                                      SrcRectConstraint flags) {
   // Call drawRect to determine transparency,
   // but reset solid color to false.
   SkPaint tmpPaint;

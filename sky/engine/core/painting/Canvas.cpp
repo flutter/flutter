@@ -226,7 +226,7 @@ void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawBitmapRectToRect(image->bitmap(), &src.sk_rect, dst.sk_rect, &paint->paint());
+    m_canvas->drawBitmapRect(image->bitmap(), &src.sk_rect, dst.sk_rect, &paint->paint());
 }
 
 void Canvas::drawPicture(Picture* picture)

@@ -48,7 +48,7 @@ class SK_API AnalysisCanvas : public SkCanvas,
                         const SkRect* src,
                         const SkRect& dst,
                         const SkPaint* paint,
-                        DrawBitmapRectFlags flags) override;
+                        SrcRectConstraint flags) override;
   void onDrawBitmapNine(const SkBitmap& bitmap,
                         const SkIRect& center,
                         const SkRect& dst,

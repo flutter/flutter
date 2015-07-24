@@ -556,20 +556,20 @@ SkImageFilter::CropRect FilterEffect::getCropRect(const FloatSize& cropOffset) c
     if (hasX()) {
         rect.setX(boundaries.x());
         flags |= SkImageFilter::CropRect::kHasLeft_CropEdge;
-        flags |= SkImageFilter::CropRect::kHasRight_CropEdge;
+        flags |= SkImageFilter::CropRect::kHasWidth_CropEdge;
     }
     if (hasY()) {
         rect.setY(boundaries.y());
         flags |= SkImageFilter::CropRect::kHasTop_CropEdge;
-        flags |= SkImageFilter::CropRect::kHasBottom_CropEdge;
+        flags |= SkImageFilter::CropRect::kHasHeight_CropEdge;
     }
     if (hasWidth()) {
         rect.setWidth(boundaries.width());
-        flags |= SkImageFilter::CropRect::kHasRight_CropEdge;
+        flags |= SkImageFilter::CropRect::kHasWidth_CropEdge;
     }
     if (hasHeight()) {
         rect.setHeight(boundaries.height());
-        flags |= SkImageFilter::CropRect::kHasBottom_CropEdge;
+        flags |= SkImageFilter::CropRect::kHasHeight_CropEdge;
     }
     rect.scale(filter()->absoluteTransform().a(), filter()->absoluteTransform().d());
     return SkImageFilter::CropRect(rect, flags);
