@@ -46,14 +46,11 @@ class Dialog extends Component {
   }
 
   Widget build() {
-    Container mask = new Container(
-      decoration: const BoxDecoration(
-        backgroundColor: const Color(0x7F000000)));
 
-    List<Widget> children = new List<Widget>();
+    List<Widget> dialogBody = new List<Widget>();
 
     if (title != null) {
-      children.add(new Padding(
+      dialogBody.add(new Padding(
         padding: new EdgeDims(24.0, 24.0, content == null ? 20.0 : 0.0, 24.0),
         child: new DefaultTextStyle(
           style: Theme.of(this).text.title,
@@ -63,7 +60,7 @@ class Dialog extends Component {
     }
 
     if (content != null) {
-      children.add(new Padding(
+      dialogBody.add(new Padding(
         padding: const EdgeDims(20.0, 24.0, 24.0, 24.0),
         child: new DefaultTextStyle(
           style: Theme.of(this).text.subhead,
@@ -73,11 +70,15 @@ class Dialog extends Component {
     }
 
     if (actions != null)
-      children.add(new Flex(actions, justifyContent: FlexJustifyContent.end));
+      dialogBody.add(new Flex(actions, justifyContent: FlexJustifyContent.end));
 
     return new Stack([
       new Listener(
-        child: mask,
+        child: new Container(
+          decoration: const BoxDecoration(
+            backgroundColor: const Color(0x7F000000)
+          )
+        ),
         onGestureTap: (_) => onDismiss()
       ),
       new Center(
@@ -89,12 +90,13 @@ class Dialog extends Component {
               level: 4,
               color: _color,
               child: new ShrinkWrapWidth(
-                child: new ScrollableBlock(children)
+                child: new ScrollableBlock(dialogBody)
               )
             )
           )
         )
       )
     ]);
+
   }
 }
