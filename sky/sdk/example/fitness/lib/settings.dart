@@ -2,18 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/drawer_item.dart';
-import 'package:sky/widgets/switch.dart';
-import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/scrollable_viewport.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/theme.dart';
-
-import 'fitness_types.dart';
+part of fitness;
 
 typedef void SettingsUpdater({
   BackupMode backup

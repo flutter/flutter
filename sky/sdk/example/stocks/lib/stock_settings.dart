@@ -2,20 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/checkbox.dart';
-import 'package:sky/widgets/dialog.dart';
-import 'package:sky/widgets/drawer_item.dart';
-import 'package:sky/widgets/flat_button.dart';
-import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/scrollable_viewport.dart';
-import 'package:sky/widgets/switch.dart';
-import 'package:sky/widgets/tool_bar.dart';
-
-import 'stock_types.dart';
+part of stocks;
 
 typedef void SettingsUpdater({
   StockMode optimism,
