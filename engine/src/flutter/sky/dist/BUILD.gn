@@ -24,7 +24,7 @@ copy("sky_shell") {
     deps = [
       "//sky/shell",
     ]
-  } else if (is_ios) {
+  } else if (is_ios || is_mac) {
     sources = [
       "$root_build_dir/Sky.app",
     ]
@@ -99,7 +99,7 @@ group("dist") {
     ":sky_viewer",
   ]
 
-  if (!is_ios) {
+  if (!is_ios && !is_mac) {
     deps += [ ":sky_shell" ]
   }
 
