@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
-import 'package:http_server/http_server.dart';
+import 'package:shelf_static/shelf_static.dart';
+import 'package:shelf/shelf_io.dart' as io;
+import 'package:shelf/shelf.dart';
 
 const String usage = 'Usage: sky_server PORT';
 
@@ -23,26 +24,21 @@ main(List<String> argv) async {
     return;
   }
 
-  VirtualDirectory currentDirectory = new VirtualDirectory('.')
-    ..followLinks = true
-    ..jailRoot = false
-    ..allowDirectoryListing = true;
+  Handler handler = createStaticHandler(Directory.current.path,
+      serveFilesOutsidePath: true);
 
   HttpServer server;
   try {
-    server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, port);
+    server = await io.serve(handler, InternetAddress.LOOPBACK_IP_V4, port);
   } catch(e) {
     print(e);
     return;
   }
 
+  server.autoCompress = true;
   server.defaultResponseHeaders
     ..removeAll('x-content-type-options')
     ..removeAll('x-frame-options')
     ..removeAll('x-xss-protection')
     ..add('cache-control', 'no-cache');
-
-  server
-    ..autoCompress = true
-    ..listen(currentDirectory.serveRequest);
 }
