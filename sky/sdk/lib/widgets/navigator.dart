@@ -9,6 +9,7 @@ import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/focus.dart';
 import 'package:vector_math/vector_math.dart';
 
 typedef Widget RouteBuilder(Navigator navigator, RouteBase route);
@@ -280,6 +281,6 @@ class Navigator extends StatefulComponent {
       );
       visibleRoutes.add(transition);
     }
-    return new Stack(visibleRoutes);
+    return new Focus(child: new Stack(visibleRoutes));
   }
 }
