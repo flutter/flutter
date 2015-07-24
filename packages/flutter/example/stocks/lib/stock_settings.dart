@@ -18,8 +18,6 @@ class StockSettings extends StatefulComponent {
   BackupMode backup;
   SettingsUpdater updater;
 
-  bool _showModeDialog = false;
-
   void syncFields(StockSettings source) {
     navigator = source.navigator;
     optimism = source.optimism;
@@ -47,10 +45,26 @@ class StockSettings extends StatefulComponent {
         _handleOptimismChanged(false);
         break;
       case StockMode.pessimistic:
-        _showModeDialog = true;
-        navigator.pushState(this, (_) {
-          _showModeDialog = false;
-        });
+        navigator.push(new DialogRoute(builder: (navigator, route) {
+          return new Dialog(
+            title: new Text("Change mode?"),
+            content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
+            onDismiss: navigator.pop,
+            actions: [
+              new FlatButton(
+                child: new Text('NO THANKS'),
+                onPressed: navigator.pop
+              ),
+              new FlatButton(
+                child: new Text('AGREE'),
+                onPressed: () {
+                  _handleOptimismChanged(true);
+                  navigator.pop();
+                }
+              ),
+            ]
+          );
+        }));
         break;
     }
   }
@@ -104,32 +118,9 @@ class StockSettings extends StatefulComponent {
   }
 
   Widget build() {
-    List<Widget> layers = [
-      new Scaffold(
-        toolbar: buildToolBar(),
-        body: buildSettingsPane()
-      )
-    ];
-    if (_showModeDialog) {
-      layers.add(new Dialog(
-        title: new Text("Change mode?"),
-        content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
-        onDismiss: navigator.pop,
-        actions: [
-          new FlatButton(
-            child: new Text('NO THANKS'),
-            onPressed: navigator.pop
-          ),
-          new FlatButton(
-            child: new Text('AGREE'),
-            onPressed: () {
-              _handleOptimismChanged(true);
-              navigator.pop();
-            }
-          ),
-        ]
-      ));
-    }
-    return new Stack(layers);
+    return new Scaffold(
+      toolbar: buildToolBar(),
+      body: buildSettingsPane()
+    );
   }
 }
