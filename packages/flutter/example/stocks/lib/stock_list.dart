@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets/scrollable_list.dart';
-import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/basic.dart';
-
-import 'stock_data.dart';
-import 'stock_row.dart';
+part of stocks;
 
 class Stocklist extends Component {
   Stocklist({ Key key, this.stocks }) : super(key: key);

@@ -2,32 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/editing/input.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/drawer.dart';
-import 'package:sky/widgets/drawer_divider.dart';
-import 'package:sky/widgets/drawer_header.dart';
-import 'package:sky/widgets/drawer_item.dart';
-import 'package:sky/widgets/floating_action_button.dart';
-import 'package:sky/widgets/focus.dart';
-import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/modal_overlay.dart';
-import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/popup_menu.dart';
-import 'package:sky/widgets/radio.dart';
-import 'package:sky/widgets/snack_bar.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/tabs.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/widget.dart';
-
-import 'stock_data.dart';
-import 'stock_list.dart';
-import 'stock_menu.dart';
-import 'stock_types.dart';
+part of stocks;
 
 typedef void ModeUpdater(StockMode mode);
 

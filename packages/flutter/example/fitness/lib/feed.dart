@@ -2,33 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting/text_style.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/button_base.dart';
-import 'package:sky/widgets/dialog.dart';
-import 'package:sky/widgets/drawer.dart';
-import 'package:sky/widgets/drawer_divider.dart';
-import 'package:sky/widgets/drawer_header.dart';
-import 'package:sky/widgets/drawer_item.dart';
-import 'package:sky/widgets/flat_button.dart';
-import 'package:sky/widgets/floating_action_button.dart';
-import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/ink_well.dart';
-import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/radio.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/scrollable_list.dart';
-import 'package:sky/widgets/scrollable_viewport.dart';
-import 'package:sky/widgets/snack_bar.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/widget.dart';
-
-import 'fitness_types.dart';
-import 'fitness_item.dart';
-import 'measurement.dart';
+part of fitness;
 
 class FitnessItemList extends Component {
   FitnessItemList({ Key key, this.items, this.onDismissed }) : super(key: key) {

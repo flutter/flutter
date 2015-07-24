@@ -2,20 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting/text_style.dart';
-import 'package:sky/editing/input.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/default_text_style.dart';
-import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/ink_well.dart';
-import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/scrollable_viewport.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-
-import 'fitness_item.dart';
+part of fitness;
 
 class Meal extends FitnessItem {
   Meal({ DateTime when, this.description }) : super(when: when);

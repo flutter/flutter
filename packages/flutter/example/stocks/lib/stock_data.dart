@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:math';
-
-import 'package:sky/mojo/net/fetch.dart';
-import 'package:sky/mojo/asset_bundle.dart';
+part of stocks;
 
 // Snapshot from http://www.nasdaq.com/screening/company-list.aspx
 // Fetched 2/23/2014.
