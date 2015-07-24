@@ -31,7 +31,7 @@ class StockSettings extends StatefulComponent {
   BackupMode backup;
   SettingsUpdater updater;
 
-  bool showModeDialog = false;
+  bool _showModeDialog = false;
 
   void syncFields(StockSettings source) {
     navigator = source.navigator;
@@ -60,9 +60,9 @@ class StockSettings extends StatefulComponent {
         _handleOptimismChanged(false);
         break;
       case StockMode.pessimistic:
-        showModeDialog = true;
+        _showModeDialog = true;
         navigator.pushState(this, (_) {
-          showModeDialog = false;
+          _showModeDialog = false;
         });
         break;
     }
@@ -123,7 +123,7 @@ class StockSettings extends StatefulComponent {
         body: buildSettingsPane()
       )
     ];
-    if (showModeDialog) {
+    if (_showModeDialog) {
       layers.add(new Dialog(
         title: new Text("Change mode?"),
         content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),

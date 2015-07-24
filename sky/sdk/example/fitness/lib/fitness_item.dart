@@ -10,7 +10,7 @@ typedef void FitnessItemHandler(FitnessItem item);
 
 const double kFitnessItemHeight = 79.0;
 
-class FitnessItem {
+abstract class FitnessItem {
   FitnessItem({ this.when }) {
     assert(when != null);
   }
@@ -18,13 +18,17 @@ class FitnessItem {
 
   // TODO(jackson): Internationalize
   String get displayDate => "${when.year.toString()}-${when.month.toString().padLeft(2,'0')}-${when.day.toString().padLeft(2,'0')}";
+
+  FitnessItemRow toRow({ FitnessItemHandler onDismissed });
 }
 
 abstract class FitnessItemRow extends Component {
 
   FitnessItemRow({ FitnessItem item, this.onDismissed })
    : this.item = item,
-     super(key: new Key(item.when.toString()));
+     super(key: new Key(item.when.toString())) {
+    assert(onDismissed != null);
+  }
 
   final FitnessItem item;
   final FitnessItemHandler onDismissed;
