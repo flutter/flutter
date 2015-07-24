@@ -18,6 +18,11 @@ action("sky") {
   ]
 
   deps = [
+    "//mojo/dart/mojo_services",
+    "//mojo/dart/mojom",
+    "//mojo/public/dart:mojo",
+    "//sky/packages/sky_engine",
+    "//sky/packages/sky_services",
     "//third_party/dart-pkg",
   ]
 }
