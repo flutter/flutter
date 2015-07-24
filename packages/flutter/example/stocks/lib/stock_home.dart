@@ -296,9 +296,6 @@ class StockHome extends StatefulComponent {
       ),
     ];
     addMenuToOverlays(overlays);
-    return new Focus(
-      initialFocus: searchFieldKey,
-      child: new Stack(overlays)
-    );
+    return new Stack(overlays);
   }
 }
