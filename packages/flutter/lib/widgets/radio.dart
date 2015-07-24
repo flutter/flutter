@@ -12,7 +12,7 @@ import 'package:sky/widgets/theme.dart';
 const sky.Color _kLightOffColor = const sky.Color(0x8A000000);
 const sky.Color _kDarkOffColor = const sky.Color(0xB2FFFFFF);
 
-typedef void ValueChanged(value);
+typedef RadioValueChanged(Object value);
 
 class Radio extends ButtonBase {
 
@@ -25,7 +25,7 @@ class Radio extends ButtonBase {
 
   Object value;
   Object groupValue;
-  ValueChanged onChanged;
+  RadioValueChanged onChanged;
 
   void syncFields(Radio source) {
     value = source.value;

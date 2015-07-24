@@ -10,7 +10,7 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/theme.dart';
 
-typedef void ValueChanged(value);
+typedef void StringValueChanged(String value);
 
 // TODO(eseidel): This isn't right, it's 16px on the bottom:
 // http://www.google.com/design/spec/components/text-fields.html#text-fields-single-line-text-field
@@ -25,7 +25,7 @@ class Input extends StatefulComponent {
   }): super(key: key);
 
   String placeholder;
-  ValueChanged onChanged;
+  StringValueChanged onChanged;
 
   String _value = '';
   EditableString _editableValue;

@@ -10,7 +10,7 @@ import 'package:sky/animation/curves.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 
-typedef void ValueChanged(value);
+typedef void ValueChanged(bool value);
 
 const Duration _kCheckDuration = const Duration(milliseconds: 200);
 

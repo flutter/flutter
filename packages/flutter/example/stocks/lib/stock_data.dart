@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of stocks;
-
 // Snapshot from http://www.nasdaq.com/screening/company-list.aspx
 // Fetched 2/23/2014.
 // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote",
 // Data in stock_data.json
 
-final Random _rng = new Random();
+import 'dart:convert';
+import 'dart:math' as math;
+
+import 'package:sky/mojo/asset_bundle.dart';
+import 'package:sky/mojo/net/fetch.dart';
+
+final math.Random _rng = new math.Random();
 
 class Stock {
   String symbol;
