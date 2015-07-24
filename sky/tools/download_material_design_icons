@@ -13,7 +13,7 @@ SRC_ROOT = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir, os.pardi
 VERSION_FILE = '.version.sha1'
 
 def main():
-    package_dir = os.path.join(SRC_ROOT, 'sky/packages/material_design_icons')
+    package_dir = os.path.join(SRC_ROOT, 'sky/packages/material_design_icons/lib')
     icons_dir = os.path.join(package_dir, 'icons')
     existing_sha1_path = os.path.join(icons_dir, VERSION_FILE)
 

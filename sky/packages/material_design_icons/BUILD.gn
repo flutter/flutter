@@ -7,7 +7,7 @@ action("material_design_icons") {
 
   stamp_file = "$target_gen_dir/symlink.stamp"
 
-  sources = [ ".version.sha1" ]
+  sources = [ "lib/.version.sha1" ]
   outputs = [ stamp_file ]
 
   args = [
