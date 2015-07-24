@@ -80,8 +80,6 @@ class ParticleSystem extends Node {
   // double _elapsedTime;
   int _numEmittedParticles = 0;
 
-  math.Random _rand;
-
   ParticleSystem(this.texture,
                  {this.life: 1.5,
                   this.lifeVar: 1.0,
@@ -116,7 +114,6 @@ class ParticleSystem extends Node {
                   this.numParticlesToEmit: 0,
                   this.autoRemoveOnFinish: true}) {
     _particles = new List<_Particle>();
-    _rand = new math.Random();
     _emitCounter = 0.0;
     // _elapsedTime = 0.0;
     if (gravity == null) gravity = new Vector2.zero();
@@ -124,6 +121,8 @@ class ParticleSystem extends Node {
   }
 
   void update(double dt) {
+    // TODO: Fix this (it's a temp fix for low framerates)
+    if (dt > 0.1) dt = 0.1;
 
     // Create new particles
     double rate = 1.0 / emissionRate;
@@ -196,34 +195,34 @@ class ParticleSystem extends Node {
     _Particle particle = new _Particle();
 
     // Time to live
-    particle.timeToLive = math.max(life + lifeVar * randMinus1To1(), 0.0);
+    particle.timeToLive = math.max(life + lifeVar * randomSignedDouble(), 0.0);
 
     // Position
     Point srcPos = Point.origin;
-    particle.pos = new Vector2(srcPos.x + posVar.x * randMinus1To1(),
-                               srcPos.y + posVar.y * randMinus1To1());
+    particle.pos = new Vector2(srcPos.x + posVar.x * randomSignedDouble(),
+                               srcPos.y + posVar.y * randomSignedDouble());
 
     // Size
-    particle.size = math.max(startSize + startSizeVar * randMinus1To1(), 0.0);
-    double endSizeFinal = math.max(endSize + endSizeVar * randMinus1To1(), 0.0);
+    particle.size = math.max(startSize + startSizeVar * randomSignedDouble(), 0.0);
+    double endSizeFinal = math.max(endSize + endSizeVar * randomSignedDouble(), 0.0);
     particle.deltaSize = (endSizeFinal - particle.size) / particle.timeToLive;
 
     // Rotation
-    particle.rotation = startRotation + startRotationVar * randMinus1To1();
-    double endRotationFinal = endRotation + endRotationVar * randMinus1To1();
+    particle.rotation = startRotation + startRotationVar * randomSignedDouble();
+    double endRotationFinal = endRotation + endRotationVar * randomSignedDouble();
     particle.deltaRotation = (endRotationFinal - particle.rotation) / particle.timeToLive;
 
     // Direction
-    double dirRadians = convertDegrees2Radians(direction + directionVar * randMinus1To1());
+    double dirRadians = convertDegrees2Radians(direction + directionVar * randomSignedDouble());
     Vector2 dirVector = new Vector2(math.cos(dirRadians), math.sin(dirRadians));
-    double speedFinal = speed + speedVar * randMinus1To1();
+    double speedFinal = speed + speedVar * randomSignedDouble();
     particle.dir = dirVector.scale(speedFinal);
 
     // Radial acceleration
-    particle.radialAccel = radialAcceleration + radialAccelerationVar * randMinus1To1();
+    particle.radialAccel = radialAcceleration + radialAccelerationVar * randomSignedDouble();
 
     // Tangential acceleration
-    particle.tangentialAccel = tangentialAcceleration + tangentialAccelerationVar * randMinus1To1();
+    particle.tangentialAccel = tangentialAcceleration + tangentialAccelerationVar * randomSignedDouble();
 
     // Color
     particle.colorPos = 0.0;
@@ -248,7 +247,7 @@ class ParticleSystem extends Node {
       double scos;
       double ssin;
       if (rotateToMovement) {
-        double extraRotation = math.atan2(particle.dir[1], particle.dir[0]);
+        double extraRotation = GameMath.atan2(particle.dir[1], particle.dir[0]);
         scos = math.cos(convertDegrees2Radians(particle.rotation) + extraRotation) * particle.size;
         ssin = math.sin(convertDegrees2Radians(particle.rotation) + extraRotation) * particle.size;
       } else {
@@ -275,10 +274,7 @@ class ParticleSystem extends Node {
     Paint paint = new Paint()..setTransferMode(transferMode)
         ..setFilterQuality(FilterQuality.low) // All Skia examples do this.
         ..isAntiAlias = false; // Antialiasing breaks SkCanvas.drawAtlas?
-    return canvas.drawAtlas(texture.image, transforms, rects, colors,
+    canvas.drawAtlas(texture.image, transforms, rects, colors,
       TransferMode.modulate, null, paint);
   }
-
-  double randMinus1To1() => _rand.nextDouble() * 2.0 - 1.0;
 }
-
