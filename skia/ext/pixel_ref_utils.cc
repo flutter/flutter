@@ -146,7 +146,7 @@ class GatherPixelRefDevice : public SkBitmapDevice {
                       const SkRect* src_or_null,
                       const SkRect& dst,
                       const SkPaint& paint,
-                      SkCanvas::DrawBitmapRectFlags flags) override {
+                      SkCanvas::SrcRectConstraint flags) override {
     SkRect bitmap_rect = SkRect::MakeWH(bitmap.width(), bitmap.height());
     SkMatrix matrix;
     matrix.setRectToRect(bitmap_rect, dst, SkMatrix::kFill_ScaleToFit);
