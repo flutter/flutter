@@ -4,7 +4,6 @@
 
 library stocks;
 
-import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
@@ -17,8 +16,6 @@ import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:sky/widgets/task_description.dart';
 import 'package:sky/rendering/box.dart';
-import 'package:sky/mojo/net/fetch.dart';
-import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/editing/input.dart';
 import 'package:sky/widgets/drawer.dart';
 import 'package:sky/widgets/drawer_divider.dart';
@@ -49,8 +46,9 @@ import 'package:sky/widgets/switch.dart';
 //TODO(jimsimon): Is this needed?
 export 'package:sky/widgets/popup_menu.dart' show PopupMenuStatus;
 
+import 'stock_data.dart';
+
 part 'stock_arrow.dart';
-part 'stock_data.dart';
 part 'stock_home.dart';
 part 'stock_list.dart';
 part 'stock_menu.dart';
