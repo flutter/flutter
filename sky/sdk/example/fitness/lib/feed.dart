@@ -4,6 +4,7 @@
 
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/button_base.dart';
 import 'package:sky/widgets/dialog.dart';
 import 'package:sky/widgets/drawer.dart';
 import 'package:sky/widgets/drawer_divider.dart';
@@ -13,10 +14,13 @@ import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/floating_action_button.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/icon.dart';
+import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/navigator.dart';
+import 'package:sky/widgets/radio.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/scrollable_list.dart';
+import 'package:sky/widgets/scrollable_viewport.dart';
 import 'package:sky/widgets/snack_bar.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
@@ -27,7 +31,10 @@ import 'fitness_item.dart';
 import 'measurement.dart';
 
 class FitnessItemList extends Component {
-  FitnessItemList({ Key key, this.items, this.onDismissed }) : super(key: key);
+  FitnessItemList({ Key key, this.items, this.onDismissed }) : super(key: key) {
+    assert(items != null);
+    assert(onDismissed != null);
+  }
 
   final List<FitnessItem> items;
   final FitnessItemHandler onDismissed;
@@ -36,11 +43,40 @@ class FitnessItemList extends Component {
     return new Material(
       type: MaterialType.canvas,
       child: new ScrollableList<FitnessItem>(
+        padding: const EdgeDims.all(4.0),
         items: items,
         itemHeight: kFitnessItemHeight,
-        itemBuilder: (item) => new MeasurementRow(
-          measurement: item as Measurement,
-          onDismissed: onDismissed
+        itemBuilder: (item) => item.toRow(onDismissed: onDismissed)
+      )
+    );
+  }
+}
+
+class DialogMenuItem extends ButtonBase {
+  DialogMenuItem(this.children, { Key key, this.onPressed }) : super(key: key);
+
+  List<Widget> children;
+  Function onPressed;
+
+  void syncFields(DialogMenuItem source) {
+    children = source.children;
+    onPressed = source.onPressed;
+    super.syncFields(source);
+  }
+
+  Widget buildContent() {
+    return new Listener(
+      onGestureTap: (_) {
+        if (onPressed != null)
+          onPressed();
+      },
+      child: new Container(
+        height: 48.0,
+        child: new InkWell(
+          child: new Padding(
+            padding: const EdgeDims.symmetric(horizontal: 16.0),
+            child: new Flex(children)
+          )
         )
       )
     );
@@ -204,11 +240,30 @@ class FeedFragment extends StatefulComponent {
   }
 
   bool _isShowingDialog = false;
+  String _addItemRoute;
+
+  void _handleAddItemRouteChanged(String routeName) {
+    setState(() {
+        _addItemRoute = routeName;
+    });
+  }
 
   Widget buildDialog() {
+    // TODO(jackson): Internationalize
+    Map<String, String> labels = {
+      '/meals/new': 'Eat',
+      '/measurements/new': 'Measure',
+    };
+    List<Widget> menuItems = [];
+    for(String routeName in labels.keys) {
+      menuItems.add(new DialogMenuItem([
+        new Flexible(child: new Text(labels[routeName])),
+        new Radio(value: routeName, groupValue: _addItemRoute, onChanged: _handleAddItemRouteChanged),
+      ], onPressed: () => _handleAddItemRouteChanged(routeName)));
+    }
     return new Dialog(
-      title: new Text("New item"),
-      content: new Text("What are you trying to do?"),
+      title: new Text("What are you doing?"),
+      content: new ScrollableBlock(menuItems),
       onDismiss: navigator.pop,
       actions: [
         new FlatButton(
@@ -216,17 +271,10 @@ class FeedFragment extends StatefulComponent {
           onPressed: navigator.pop
         ),
         new FlatButton(
-          child: new Text('EAT'),
+          child: new Text('ADD'),
           onPressed: () {
             navigator.pop();
-            navigator.pushNamed("/meals/new");
-          }
-        ),
-        new FlatButton(
-          child: new Text('MEASURE'),
-          onPressed: () {
-            navigator.pop();
-            navigator.pushNamed("/measurements/new");
+            navigator.pushNamed(_addItemRoute);
           }
         ),
       ]
@@ -236,6 +284,9 @@ class FeedFragment extends StatefulComponent {
   void _handleActionButtonPressed() {
     setState(() {
       _isShowingDialog = true;
+      navigator.pushState(this, (_) {
+        _isShowingDialog = false;
+      });
     });
   }
 

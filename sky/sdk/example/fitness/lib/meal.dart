@@ -21,6 +21,10 @@ class Meal extends FitnessItem {
   Meal({ DateTime when, this.description }) : super(when: when);
 
   final String description;
+
+  FitnessItemRow toRow({ FitnessItemHandler onDismissed }) {
+    return new MealRow(meal: this, onDismissed: onDismissed);
+  }
 }
 
 class MealRow extends FitnessItemRow {
@@ -91,6 +95,8 @@ class MealFragment extends StatefulComponent {
     });
   }
 
+  static final GlobalKey descriptionKey = new GlobalKey();
+
   Widget buildBody() {
     Meal meal = new Meal(when: new DateTime.now());
     return new Material(
@@ -101,7 +107,7 @@ class MealFragment extends StatefulComponent {
           child: new Block([
             new Text(meal.displayDate),
             new Input(
-              focused: false,
+              key: descriptionKey,
               placeholder: 'Describe meal',
               onChanged: _handleDescriptionChanged
             ),
