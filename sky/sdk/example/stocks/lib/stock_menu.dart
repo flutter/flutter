@@ -2,15 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/checkbox.dart';
-import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/popup_menu_item.dart';
-import 'package:sky/widgets/popup_menu.dart';
-
-export 'package:sky/widgets/popup_menu.dart' show PopupMenuStatus;
+part of stocks;
 
 class StockMenu extends Component {
   StockMenu({

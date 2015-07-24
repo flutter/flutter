@@ -2,15 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/box.dart';
-import 'package:sky/widgets/ink_well.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/default_text_style.dart';
-import 'package:sky/widgets/theme.dart';
-
-import 'stock_arrow.dart';
-import 'stock_data.dart';
+part of stocks;
 
 class StockRow extends Component {
 

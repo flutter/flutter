@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/card.dart';
-import 'package:sky/widgets/dismissable.dart';
+part of fitness;
 
 typedef void FitnessItemHandler(FitnessItem item);
 
