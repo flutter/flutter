@@ -213,7 +213,46 @@ class FeedFragment extends StatefulComponent {
     );
   }
 
-  bool _isShowingDialog = false;
+  void _handleActionButtonPressed() {
+    setState(() {
+      navigator.push(new DialogRoute(builder: (navigator, route) {
+        return new AddItemDialog(navigator);
+      }));
+    });
+  }
+
+  Widget buildFloatingActionButton() {
+    switch (_fitnessMode) {
+      case FitnessMode.feed:
+        return new FloatingActionButton(
+          child: new Icon(type: 'content/add', size: 24),
+          onPressed: _handleActionButtonPressed
+        );
+      case FitnessMode.chart:
+        return null;
+    }
+  }
+
+  Widget build() {
+    return new Scaffold(
+      toolbar: buildToolBar(),
+      body: buildBody(),
+      snackBar: buildSnackBar(),
+      floatingActionButton: buildFloatingActionButton(),
+      drawer: buildDrawer()
+    );
+  }
+}
+
+class AddItemDialog extends StatefulComponent {
+  AddItemDialog(this.navigator);
+
+  Navigator navigator;
+
+  void syncFields(AddItemDialog source) {
+    this.navigator = source.navigator;
+  }
+
   String _addItemRoute;
 
   void _handleAddItemRouteChanged(String routeName) {
@@ -222,7 +261,7 @@ class FeedFragment extends StatefulComponent {
     });
   }
 
-  Widget buildDialog() {
+  Widget build() {
     // TODO(jackson): Internationalize
     Map<String, String> labels = {
       '/meals/new': 'Eat',
@@ -253,41 +292,5 @@ class FeedFragment extends StatefulComponent {
         ),
       ]
     );
-  }
-
-  void _handleActionButtonPressed() {
-    setState(() {
-      _isShowingDialog = true;
-      navigator.pushState(this, (_) {
-        _isShowingDialog = false;
-      });
-    });
-  }
-
-  Widget buildFloatingActionButton() {
-    switch (_fitnessMode) {
-      case FitnessMode.feed:
-        return new FloatingActionButton(
-          child: new Icon(type: 'content/add', size: 24),
-          onPressed: _handleActionButtonPressed
-        );
-      case FitnessMode.chart:
-        return null;
-    }
-  }
-
-  Widget build() {
-    List<Widget> layers = [
-      new Scaffold(
-        toolbar: buildToolBar(),
-        body: buildBody(),
-        snackBar: buildSnackBar(),
-        floatingActionButton: buildFloatingActionButton(),
-        drawer: buildDrawer()
-      )
-    ];
-    if (_isShowingDialog)
-      layers.add(buildDialog());
-    return new Stack(layers);
   }
 }
