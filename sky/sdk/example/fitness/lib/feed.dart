@@ -214,10 +214,8 @@ class FeedFragment extends StatefulComponent {
   }
 
   void _handleActionButtonPressed() {
-    setState(() {
-      navigator.push(new DialogRoute(builder: (navigator, route) {
-        return new AddItemDialog(navigator);
-      }));
+    showDialog(navigator, (navigator) => new AddItemDialog(navigator)).then((route) {
+      navigator.pushNamed(route);
     });
   }
 
@@ -286,8 +284,7 @@ class AddItemDialog extends StatefulComponent {
         new FlatButton(
           child: new Text('ADD'),
           onPressed: () {
-            navigator.pop();
-            navigator.pushNamed(_addItemRoute);
+            navigator.pop(_addItemRoute);
           }
         ),
       ]
