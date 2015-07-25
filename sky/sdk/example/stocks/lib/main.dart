@@ -22,7 +22,6 @@ import 'package:sky/widgets/drawer_divider.dart';
 import 'package:sky/widgets/drawer_header.dart';
 import 'package:sky/widgets/drawer_item.dart';
 import 'package:sky/widgets/floating_action_button.dart';
-import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/modal_overlay.dart';

@@ -12,7 +12,6 @@ import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/dialog.dart';
 import 'package:sky/widgets/floating_action_button.dart';
 import 'package:sky/widgets/flat_button.dart';
-import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/material.dart';
@@ -123,13 +122,10 @@ class AddressBookApp extends App {
   }
 
   Widget buildMain(Navigator navigator) {
-    return new Focus(
-      initialFocus: nameKey,
-      child: new Scaffold(
-        toolbar: buildToolBar(navigator),
-        body: buildBody(navigator),
-        floatingActionButton: buildFloatingActionButton(navigator)
-      )
+    return new Scaffold(
+      toolbar: buildToolBar(navigator),
+      body: buildBody(navigator),
+      floatingActionButton: buildFloatingActionButton(navigator)
     );
   }
 
