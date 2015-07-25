@@ -249,7 +249,6 @@ public:
     virtual bool isImage() const { return false; }
     virtual bool isInlineBlock() const { return false; }
     virtual bool isRenderBlock() const { return false; }
-    virtual bool isRenderCustomLayout() const { return false; }
     virtual bool isRenderParagraph() const { return false; }
     virtual bool isRenderInline() const { return false; }
     virtual bool isRenderView() const { return false; }

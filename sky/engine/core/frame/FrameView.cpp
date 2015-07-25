@@ -106,7 +106,6 @@ void FrameView::reset()
     m_nestedLayoutCount = 0;
     m_postLayoutTasksTimer.stop();
     m_firstLayout = true;
-    m_firstLayoutCallbackPending = false;
     m_lastViewportSize = IntSize();
     m_lastPaintTime = 0;
     m_isPainting = false;
@@ -298,7 +297,6 @@ void FrameView::layout(bool allowSubtree)
         if (!inSubtreeLayout) {
             if (m_firstLayout) {
                 m_firstLayout = false;
-                m_firstLayoutCallbackPending = true;
                 m_lastViewportSize = layoutSize();
             }
 
@@ -514,11 +512,6 @@ void FrameView::performPostLayoutTasks()
     m_postLayoutTasksTimer.stop();
 
     ASSERT(m_frame->document());
-    if (m_nestedLayoutCount <= 1) {
-        if (m_firstLayoutCallbackPending)
-            m_firstLayoutCallbackPending = false;
-    }
-
     sendResizeEventIfNeeded();
 }
 

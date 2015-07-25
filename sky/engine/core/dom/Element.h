@@ -214,11 +214,6 @@ public:
     void setNeedsLayout();
     void layout();
 
-    LayoutCallback* intrinsicWidthsComputer() const;
-    LayoutCallback* layoutManager() const;
-    void setLayoutManager(PassOwnPtr<LayoutCallback> layoutManager,
-        PassOwnPtr<LayoutCallback> intrinsicWidthsComputer);
-
     RenderStyle* computedStyle();
 
     AtomicString computeInheritedLanguage() const;
@@ -335,8 +330,6 @@ private:
     ElementRareData& ensureElementRareData();
 
     RefPtr<ElementData> m_elementData;
-    OwnPtr<LayoutCallback> m_layoutManager;
-    OwnPtr<LayoutCallback> m_intrinsicWidthsComputer;
 };
 
 DEFINE_NODE_TYPE_CASTS(Element, isElementNode());

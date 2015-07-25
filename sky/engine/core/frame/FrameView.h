@@ -205,7 +205,6 @@ private:
     int m_layoutCount;
     unsigned m_nestedLayoutCount;
     Timer<FrameView> m_postLayoutTasksTimer;
-    bool m_firstLayoutCallbackPending;
 
     bool m_firstLayout;
     bool m_isTransparent;
