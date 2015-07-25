@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/material.dart';
+import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
 import 'package:sky/widgets/theme.dart';
+
+typedef Widget DialogBuilder(Navigator navigator);
 
 /// A material design dialog
 ///
@@ -99,4 +104,15 @@ class Dialog extends Component {
     ]);
 
   }
+}
+
+Future<dynamic> showDialog(Navigator navigator, DialogBuilder builder) {
+  Completer completer = new Completer();
+  navigator.push(new DialogRoute(
+    completer: completer,
+    builder: (navigator, route) {
+      return builder(navigator);
+    }
+  ));
+  return completer.future;
 }

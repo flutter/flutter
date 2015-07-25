@@ -68,7 +68,7 @@ class AddressBookApp extends App {
       child: new Icon(type: 'image/photo_camera', size: 24),
       backgroundColor: Theme.of(this).accentColor,
       onPressed: () {
-        navigator.push(new DialogRoute(builder: (navigator, route) {
+        showDialog(navigator, (navigator) {
           return new Dialog(
             title: new Text("Describe your picture"),
             content: new ScrollableBlock([
@@ -79,9 +79,7 @@ class AddressBookApp extends App {
             actions: [
               new FlatButton(
                 child: new Text('DISCARD'),
-                onPressed: () {
-                  navigator.pop();
-                }
+                onPressed: navigator.pop
               ),
               new FlatButton(
                 child: new Text('SAVE'),
@@ -91,7 +89,7 @@ class AddressBookApp extends App {
               ),
             ]
           );
-        }));
+        });
       }
     );
   }

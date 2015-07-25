@@ -45,26 +45,29 @@ class StockSettings extends StatefulComponent {
         _handleOptimismChanged(false);
         break;
       case StockMode.pessimistic:
-        navigator.push(new DialogRoute(builder: (navigator, route) {
+        showDialog(navigator, (navigator) {
           return new Dialog(
             title: new Text("Change mode?"),
             content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
-            onDismiss: navigator.pop,
+            onDismiss: () {
+              navigator.pop(false);
+            },
             actions: [
               new FlatButton(
                 child: new Text('NO THANKS'),
-                onPressed: navigator.pop
+                onPressed: () {
+                  navigator.pop(false);
+                }
               ),
               new FlatButton(
                 child: new Text('AGREE'),
                 onPressed: () {
-                  _handleOptimismChanged(true);
-                  navigator.pop();
+                  navigator.pop(true);
                 }
               ),
             ]
           );
-        }));
+        }).then(_handleOptimismChanged);
         break;
     }
   }
