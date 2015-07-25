@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
@@ -14,7 +16,7 @@ typedef Widget RouteBuilder(Navigator navigator, RouteBase route);
 abstract class RouteBase {
   Widget build(Navigator navigator, RouteBase route);
   bool get isOpaque;
-  void popState() { }
+  void popState([dynamic result]) { assert(result == null); }
 }
 
 class Route extends RouteBase {
@@ -28,17 +30,16 @@ class Route extends RouteBase {
 }
 
 class DialogRoute extends RouteBase {
-  DialogRoute({ this.builder, this.callback });
+  DialogRoute({ this.completer, this.builder });
 
+  final Completer completer;
   final RouteBuilder builder;
-  Function callback;
 
   Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
   bool get isOpaque => false;
 
-  void popState() {
-    if (callback != null)
-      callback(this);
+  void popState([dynamic result]) {
+    completer.complete(result);
   }
 }
 
@@ -52,7 +53,8 @@ class RouteState extends RouteBase {
   Widget build(Navigator navigator, RouteBase route) => null;
   bool get isOpaque => false;
 
-  void popState() {
+  void popState([dynamic result]) {
+    assert(result == null);
     if (callback != null)
       callback(this);
   }
@@ -197,10 +199,10 @@ class NavigationState {
     historyIndex++;
   }
 
-  void pop() {
+  void pop([dynamic result]) {
     if (historyIndex > 0) {
       HistoryEntry entry = history[historyIndex];
-      entry.route.popState();
+      entry.route.popState(result);
       entry.fullyOpaque = false;
       historyIndex--;
     }
@@ -240,9 +242,9 @@ class Navigator extends StatefulComponent {
     });
   }
 
-  void pop() {
+  void pop([dynamic result]) {
     setState(() {
-      state.pop();
+      state.pop(result);
     });
   }
 

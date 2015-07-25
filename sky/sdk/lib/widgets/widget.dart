@@ -26,7 +26,6 @@ abstract class Key {
   factory Key(String value) => new StringKey(value);
   factory Key.stringify(Object value) => new StringKey(value.toString());
   factory Key.fromObjectIdentity(Object value) => new ObjectKey(value);
-  factory Key.unique() => new UniqueKey();
 }
 
 class StringKey extends Key {
@@ -45,14 +44,25 @@ class ObjectKey extends Key {
   int get hashCode => identityHashCode(value);
 }
 
-class UniqueKey extends Key {
-  UniqueKey() : super.constructor();
-  String toString() => '[$hashCode]';
+abstract class GlobalKey extends Key {
+  GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+  factory GlobalKey({ String label }) => new LabeledGlobalKey(label);
+  factory GlobalKey.fromObjectIdentity(Object value) => new GlobalObjectKey(value);
 }
 
-class GlobalKey extends Key {
-  GlobalKey() : super.constructor();
-  String toString() => '[Global Key $hashCode]';
+class LabeledGlobalKey extends GlobalKey {
+  // the label is purely for documentary purposes and does not affect the key
+  LabeledGlobalKey(this._label) : super.constructor();
+  final String _label;
+  String toString() => '[GlobalKey ${_label != null ? _label : hashCode}]';
+}
+
+class GlobalObjectKey extends GlobalKey {
+  GlobalObjectKey(this.value) : super.constructor();
+  final Object value;
+  String toString() => '[GlobalKey ${value.runtimeType}(${value.hashCode})]';
+  bool operator==(other) => other is GlobalObjectKey && identical(other.value, value);
+  int get hashCode => identityHashCode(value);
 }
 
 /// A base class for elements of the widget tree
