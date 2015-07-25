@@ -60,14 +60,12 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
-#include "sky/engine/core/layout/LayoutCallback.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/painting/PaintingCallback.h"
 #include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
-#include "sky/engine/core/rendering/RenderCustomLayout.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
@@ -524,8 +522,6 @@ const AtomicString Element::imageSourceURL() const
 
 RenderObject* Element::createRenderer(RenderStyle* style)
 {
-    if (m_layoutManager)
-        return new RenderCustomLayout(this);
     return RenderObject::createObject(this, style);
 }
 
@@ -792,33 +788,6 @@ void Element::layout()
 {
     if (RenderBox* box = renderBox())
         box->layoutIfNeeded();
-}
-
-LayoutCallback* Element::layoutManager() const
-{
-    return m_layoutManager.get();
-}
-
-LayoutCallback* Element::intrinsicWidthsComputer() const
-{
-    return m_intrinsicWidthsComputer.get();
-}
-
-void Element::setLayoutManager(PassOwnPtr<LayoutCallback> layoutManager,
-    PassOwnPtr<LayoutCallback> intrinsicWidthsComputer)
-{
-    bool isAlreadyCustomLayout = renderer() && renderer()->isRenderCustomLayout();
-    bool requiresCustomLayout = layoutManager;
-    if (requiresCustomLayout != isAlreadyCustomLayout) {
-        // We don't go through the normal reattach codepaths because
-        // those are all tied to changes to the RenderStyle.
-        markAncestorsWithChildNeedsStyleRecalc();
-        detach();
-    } else if (layoutManager.get() != m_layoutManager) {
-        setNeedsLayout();
-    }
-    m_layoutManager = layoutManager;
-    m_intrinsicWidthsComputer = intrinsicWidthsComputer;
 }
 
 void Element::childrenChanged(const ChildrenChange& change)

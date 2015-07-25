@@ -14,7 +14,6 @@ interface Element : ParentNode {
 
   void setNeedsLayout();
   void layout();
-  void setLayoutManager(LayoutCallback layout, LayoutCallback computeIntrinsicWidths);
 
   // TODO(abarth): Move to Node.
   readonly attribute CSSStyleDeclaration style;
