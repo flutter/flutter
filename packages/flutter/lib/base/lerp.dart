@@ -22,9 +22,9 @@ Color lerpColor(Color a, Color b, double t) {
   if (a == null && b == null)
     return null;
   if (a == null)
-    return _scaleAlpha(a, t);
+    return _scaleAlpha(b, t);
   if (b == null)
-    return _scaleAlpha(b, 1.0 - t);
+    return _scaleAlpha(a, 1.0 - t);
   return new Color.fromARGB(
       lerpNum(a.alpha, b.alpha, t).toInt(),
       lerpNum(a.red, b.red, t).toInt(),
