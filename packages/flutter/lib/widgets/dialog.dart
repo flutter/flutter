@@ -106,7 +106,7 @@ class Dialog extends Component {
   }
 }
 
-Future<dynamic> showDialog(Navigator navigator, DialogBuilder builder) {
+Future showDialog(Navigator navigator, DialogBuilder builder) {
   Completer completer = new Completer();
   navigator.push(new DialogRoute(
     completer: completer,
