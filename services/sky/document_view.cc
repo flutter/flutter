@@ -28,7 +28,6 @@
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
-#include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/public/web/Sky.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"

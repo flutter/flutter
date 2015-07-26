@@ -130,8 +130,6 @@ source_set("platform") {
     "Partitions.cpp",
     "Partitions.h",
     "PlatformExport.h",
-    "PlatformScreen.cpp",
-    "PlatformScreen.h",
     "PlatformThreadData.cpp",
     "PlatformThreadData.h",
     "PurgeableVector.cpp",

@@ -24,7 +24,6 @@
 
 #include "sky/engine/core/frame/ConsoleTypes.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
-#include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/wtf/Forward.h"
 
 namespace blink {
@@ -50,7 +49,6 @@ public:
 
     // Methods used by HostWindow.
     virtual IntRect rootViewToScreen(const IntRect&) const = 0;
-    virtual blink::WebScreenInfo screenInfo() const = 0;
     virtual void scheduleVisualUpdate() = 0;
     // End methods used by HostWindow.
 

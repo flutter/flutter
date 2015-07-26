@@ -112,11 +112,6 @@ void WebRuntimeFeatures::enableRequestAutocomplete(bool enable)
     RuntimeEnabledFeatures::setRequestAutocompleteEnabled(enable);
 }
 
-void WebRuntimeFeatures::enableScreenOrientation(bool enable)
-{
-    RuntimeEnabledFeatures::setScreenOrientationEnabled(enable);
-}
-
 void WebRuntimeFeatures::enableServiceWorker(bool enable)
 {
 }

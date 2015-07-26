@@ -108,7 +108,6 @@ public:
 
     // HostWindow methods.
     virtual IntRect rootViewToScreen(const IntRect&) const override;
-    virtual blink::WebScreenInfo screenInfo() const override;
     virtual void scheduleVisualUpdate() override;
 
     void setWindowRect(const FloatRect&) const;

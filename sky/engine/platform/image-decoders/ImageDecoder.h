@@ -29,7 +29,6 @@
 
 #include "platform/image-decoders/ImageFrame.h"
 #include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/PlatformScreen.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/graphics/ImageSource.h"
 #include "sky/engine/public/platform/Platform.h"
@@ -46,6 +45,8 @@
 #endif
 
 namespace blink {
+
+typedef WTF::Vector<char> ColorProfile;
 
 // ImagePlanes can be used to decode color components into provided buffers instead of using an ImageFrame.
 class PLATFORM_EXPORT ImagePlanes {
@@ -194,20 +195,8 @@ public:
     class OutputDeviceProfile {
     public:
         OutputDeviceProfile()
-            : m_outputDeviceProfile(0)
+            : m_outputDeviceProfile(qcms_profile_sRGB())
         {
-            // FIXME: Add optional ICCv4 support.
-            // FIXME: add support for multiple monitors.
-            ColorProfile profile;
-            screenColorProfile(profile);
-            if (!profile.isEmpty())
-                m_outputDeviceProfile = qcms_profile_from_memory(profile.data(), profile.size());
-            if (m_outputDeviceProfile && qcms_profile_is_bogus(m_outputDeviceProfile)) {
-                qcms_profile_release(m_outputDeviceProfile);
-                m_outputDeviceProfile = 0;
-            }
-            if (!m_outputDeviceProfile)
-                m_outputDeviceProfile = qcms_profile_sRGB();
             if (m_outputDeviceProfile)
                 qcms_profile_precache_output_transform(m_outputDeviceProfile);
         }

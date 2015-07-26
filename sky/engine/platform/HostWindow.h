@@ -32,7 +32,6 @@
 
 namespace blink {
 class IntRect;
-struct WebScreenInfo;
 
 class PLATFORM_EXPORT HostWindow {
     WTF_MAKE_NONCOPYABLE(HostWindow); WTF_MAKE_FAST_ALLOCATED;
@@ -42,8 +41,6 @@ public:
 
     // Methods for doing coordinate conversions to screen coordinates.
     virtual IntRect rootViewToScreen(const IntRect&) const = 0;
-
-    virtual WebScreenInfo screenInfo() const = 0;
 
     virtual void scheduleVisualUpdate() = 0;
 };

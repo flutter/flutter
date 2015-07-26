@@ -17,7 +17,6 @@
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
-#include "sky/engine/platform/PlatformScreen.h"
 
 namespace blink {
 
@@ -30,55 +29,42 @@ PassRefPtr<MediaValues> MediaValues::createDynamicIfFrameExists(LocalFrame* fram
 
 int MediaValues::calculateViewportWidth(LocalFrame* frame) const
 {
-    ASSERT(frame && frame->view() && frame->document());
-    return frame->view()->layoutSize().width();
+    return 0;
 }
 
 int MediaValues::calculateViewportHeight(LocalFrame* frame) const
 {
-    ASSERT(frame && frame->view() && frame->document());
-    return frame->view()->layoutSize().height();
+    return 0;
 }
 
 int MediaValues::calculateDeviceWidth(LocalFrame* frame) const
 {
-    ASSERT(frame && frame->view() && frame->settings() && frame->host());
-    int deviceWidth = static_cast<int>(screenRect(frame->view()).width());
-    return deviceWidth;
+    return 0;
 }
 
 int MediaValues::calculateDeviceHeight(LocalFrame* frame) const
 {
-    ASSERT(frame && frame->view() && frame->settings() && frame->host());
-    int deviceHeight = static_cast<int>(screenRect(frame->view()).height());
-    return deviceHeight;
+    return 0;
 }
 
 bool MediaValues::calculateStrictMode(LocalFrame* frame) const
 {
-    ASSERT(frame && frame->document());
     return true;
 }
 
 float MediaValues::calculateDevicePixelRatio(LocalFrame* frame) const
 {
-    return frame->devicePixelRatio();
+    return 1.0f;
 }
 
 int MediaValues::calculateColorBitsPerComponent(LocalFrame* frame) const
 {
-    ASSERT(frame);
-    if (screenIsMonochrome(frame->view()))
-        return 0;
-    return screenDepthPerComponent(frame->view());
+    return 8;
 }
 
 int MediaValues::calculateMonochromeBitsPerComponent(LocalFrame* frame) const
 {
-    ASSERT(frame);
-    if (!screenIsMonochrome(frame->view()))
-        return 0;
-    return screenDepthPerComponent(frame->view());
+    return 0;
 }
 
 int MediaValues::calculateDefaultFontSize(LocalFrame* frame) const
@@ -96,7 +82,6 @@ const String MediaValues::calculateMediaType(LocalFrame* frame) const
 
 bool MediaValues::calculateThreeDEnabled(LocalFrame* frame) const
 {
-    // FIXME(sky): Remove
     return false;
 }
 
