@@ -29,8 +29,6 @@
 [
     ImplementedAs=LocalDOMWindow,
 ] interface Window {
-    [Replaceable, PutForwards=href] readonly attribute Location location;
-
     [Replaceable] readonly attribute long outerHeight;
     [Replaceable] readonly attribute long outerWidth;
     [Replaceable] readonly attribute long innerHeight;

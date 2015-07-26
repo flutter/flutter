@@ -77,7 +77,6 @@ class HTMLElement;
 class LayoutPoint;
 class LocalDOMWindow;
 class LocalFrame;
-class Location;
 class MediaQueryListListener;
 class MediaQueryMatcher;
 class Page;
@@ -135,8 +134,6 @@ public:
     ReferrerPolicy referrerPolicy() const { return m_referrerPolicy; }
 
     String outgoingReferrer();
-
-    Location* location() const;
 
     PassRefPtr<Element> createElement(const AtomicString& name, ExceptionState&);
     PassRefPtr<Text> createText(const String& text);
