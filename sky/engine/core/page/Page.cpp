@@ -32,7 +32,6 @@
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"
@@ -191,11 +190,6 @@ void Page::willBeDestroyed()
 IntRect Page::rootViewToScreen(const IntRect& rect) const
 {
     return m_chromeClient->rootViewToScreen(rect);
-}
-
-blink::WebScreenInfo Page::screenInfo() const
-{
-    return m_chromeClient->screenInfo();
 }
 
 void Page::setWindowRect(const FloatRect& rect) const

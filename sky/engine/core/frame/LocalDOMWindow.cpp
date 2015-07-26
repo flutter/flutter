@@ -47,7 +47,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Location.h"
-#include "sky/engine/core/frame/Screen.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/frame/Tracing.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
@@ -58,7 +57,6 @@
 #include "sky/engine/core/script/dart_controller.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
-#include "sky/engine/platform/PlatformScreen.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"
@@ -76,56 +74,6 @@ using std::max;
 namespace blink {
 
 typedef HashCountedSet<LocalDOMWindow*> DOMWindowSet;
-
-
-// This function:
-// 1) Validates the pending changes are not changing any value to NaN; in that case keep original value.
-// 2) Constrains the window rect to the minimum window size and no bigger than the float rect's dimensions.
-// 3) Constrains the window rect to within the top and left boundaries of the available screen rect.
-// 4) Constrains the window rect to within the bottom and right boundaries of the available screen rect.
-// 5) Translate the window rect coordinates to be within the coordinate space of the screen.
-FloatRect LocalDOMWindow::adjustWindowRect(LocalFrame& frame, const FloatRect& pendingChanges)
-{
-    FrameHost* host = frame.host();
-    ASSERT(host);
-
-    FloatRect screen = screenAvailableRect(frame.view());
-    FloatRect window = host->page().windowRect();
-
-    // Make sure we're in a valid state before adjusting dimensions.
-    ASSERT(std::isfinite(screen.x()));
-    ASSERT(std::isfinite(screen.y()));
-    ASSERT(std::isfinite(screen.width()));
-    ASSERT(std::isfinite(screen.height()));
-    ASSERT(std::isfinite(window.x()));
-    ASSERT(std::isfinite(window.y()));
-    ASSERT(std::isfinite(window.width()));
-    ASSERT(std::isfinite(window.height()));
-
-    // Update window values if new requested values are not NaN.
-    if (!std::isnan(pendingChanges.x()))
-        window.setX(pendingChanges.x());
-    if (!std::isnan(pendingChanges.y()))
-        window.setY(pendingChanges.y());
-    if (!std::isnan(pendingChanges.width()))
-        window.setWidth(pendingChanges.width());
-    if (!std::isnan(pendingChanges.height()))
-        window.setHeight(pendingChanges.height());
-
-    // TODO(esprehn): What?
-    FloatSize minimumSize = FloatSize(100, 100);
-    // Let size 0 pass through, since that indicates default size, not minimum size.
-    if (window.width())
-        window.setWidth(min(max(minimumSize.width(), window.width()), screen.width()));
-    if (window.height())
-        window.setHeight(min(max(minimumSize.height(), window.height()), screen.height()));
-
-    // Constrain the window position within the valid screen area.
-    window.setX(max(screen.x(), min(window.x(), screen.maxX() - window.width())));
-    window.setY(max(screen.y(), min(window.y(), screen.maxY() - window.height())));
-
-    return window;
-}
 
 LocalDOMWindow::LocalDOMWindow(LocalFrame& frame)
     : FrameDestructionObserver(&frame)
@@ -230,7 +178,6 @@ void LocalDOMWindow::resetDOMWindowProperties()
 {
     m_properties.clear();
 
-    m_screen = nullptr;
     m_location = nullptr;
 #if ENABLE(ASSERT)
     m_hasBeenReset = true;
@@ -239,22 +186,7 @@ void LocalDOMWindow::resetDOMWindowProperties()
 
 int LocalDOMWindow::orientation() const
 {
-    ASSERT(RuntimeEnabledFeatures::orientationEventEnabled());
-
-    int orientation = screenOrientationAngle(m_frame->view());
-    // For backward compatibility, we want to return a value in the range of
-    // [-90; 180] instead of [0; 360[ because window.orientation used to behave
-    // like that in WebKit (this is a WebKit proprietary API).
-    if (orientation == 270)
-        return -90;
-    return orientation;
-}
-
-Screen& LocalDOMWindow::screen() const
-{
-    if (!m_screen)
-        m_screen = Screen::create(m_frame);
-    return *m_screen;
+    return 0;
 }
 
 Location& LocalDOMWindow::location() const
@@ -319,30 +251,6 @@ int LocalDOMWindow::innerWidth() const
     return view->visibleContentRect().width();
 }
 
-int LocalDOMWindow::screenX() const
-{
-    if (!m_frame)
-        return 0;
-
-    FrameHost* host = m_frame->host();
-    if (!host)
-        return 0;
-
-    return static_cast<int>(host->page().windowRect().x());
-}
-
-int LocalDOMWindow::screenY() const
-{
-    if (!m_frame)
-        return 0;
-
-    FrameHost* host = m_frame->host();
-    if (!host)
-        return 0;
-
-    return static_cast<int>(host->page().windowRect().y());
-}
-
 LocalDOMWindow* LocalDOMWindow::window() const
 {
     if (!m_frame)
@@ -374,62 +282,18 @@ double LocalDOMWindow::devicePixelRatio() const
 
 void LocalDOMWindow::moveBy(float x, float y) const
 {
-    if (!m_frame)
-        return;
-
-    FrameHost* host = m_frame->host();
-    if (!host)
-        return;
-
-    FloatRect windowRect = host->page().windowRect();
-    windowRect.move(x, y);
-    // Security check (the spec talks about UniversalBrowserWrite to disable this check...)
-    host->page().setWindowRect(adjustWindowRect(*m_frame, windowRect));
 }
 
 void LocalDOMWindow::moveTo(float x, float y) const
 {
-    if (!m_frame)
-        return;
-
-    FrameHost* host = m_frame->host();
-    if (!host)
-        return;
-
-    FloatRect windowRect = host->page().windowRect();
-    windowRect.setLocation(FloatPoint(x, y));
-    // Security check (the spec talks about UniversalBrowserWrite to disable this check...)
-    host->page().setWindowRect(adjustWindowRect(*m_frame, windowRect));
 }
 
 void LocalDOMWindow::resizeBy(float x, float y) const
 {
-    if (!m_frame)
-        return;
-
-    FrameHost* host = m_frame->host();
-    if (!host)
-        return;
-
-    FloatRect fr = host->page().windowRect();
-    FloatSize dest = fr.size() + FloatSize(x, y);
-    FloatRect update(fr.location(), dest);
-    host->page().setWindowRect(adjustWindowRect(*m_frame, update));
 }
 
 void LocalDOMWindow::resizeTo(float width, float height) const
 {
-    if (!m_frame)
-        return;
-
-    FrameHost* host = m_frame->host();
-    if (!host)
-        return;
-
-    FloatRect fr = host->page().windowRect();
-    FloatSize dest = FloatSize(width, height);
-    FloatRect update(fr.location(), dest);
-    host->page().setWindowRect(adjustWindowRect(*m_frame, update));
 }
 
 int LocalDOMWindow::requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback> callback)

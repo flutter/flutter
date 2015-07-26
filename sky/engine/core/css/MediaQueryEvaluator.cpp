@@ -50,7 +50,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
-#include "sky/engine/platform/PlatformScreen.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/wtf/HashMap.h"
 

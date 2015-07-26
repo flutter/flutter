@@ -68,8 +68,6 @@ public:
 
     BLINK_EXPORT static void enableRequestAutocomplete(bool);
 
-    BLINK_EXPORT static void enableScreenOrientation(bool);
-
     BLINK_EXPORT static void enableServiceWorker(bool);
 
     BLINK_EXPORT static void enableSessionStorage(bool);

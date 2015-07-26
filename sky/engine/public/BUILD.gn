@@ -50,8 +50,6 @@ source_set("platform_headers") {
     "platform/WebRect.h",
     "platform/WebReferrerPolicy.h",
     "platform/WebRenderingStats.h",
-    "platform/WebScreenInfo.h",
-    "platform/WebScreenOrientationType.h",
     "platform/WebSelectionBound.h",
     "platform/WebSize.h",
     "platform/WebString.h",

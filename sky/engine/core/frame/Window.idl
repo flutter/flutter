@@ -29,17 +29,12 @@
 [
     ImplementedAs=LocalDOMWindow,
 ] interface Window {
-    readonly attribute Screen screen;
     [Replaceable, PutForwards=href] readonly attribute Location location;
 
     [Replaceable] readonly attribute long outerHeight;
     [Replaceable] readonly attribute long outerWidth;
     [Replaceable] readonly attribute long innerHeight;
     [Replaceable] readonly attribute long innerWidth;
-    [Replaceable] readonly attribute long screenX;
-    [Replaceable] readonly attribute long screenY;
-    [Replaceable] readonly attribute long screenLeft;
-    [Replaceable] readonly attribute long screenTop;
 
     void moveBy([Default=Undefined] optional float x, [Default=Undefined] optional float y); // FIXME: this should take longs not floats.
     void moveTo([Default=Undefined] optional float x, [Default=Undefined] optional float y); // FIXME: this should take longs not floats.
@@ -74,4 +69,3 @@
 };
 
 Window implements WindowBase64;
-
