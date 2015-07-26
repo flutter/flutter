@@ -12,3 +12,9 @@ on low-latency input, high frame rates, and we are purely mobile first.
 
  - For information about contributing to Sky, please see
    [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Community
+---------
+
+Join us on IRC at `#sky` on Freenode or join our mailing list,
+[sky-dev@googlegroups.com](https://groups.google.com/forum/#!forum/sky-dev).
