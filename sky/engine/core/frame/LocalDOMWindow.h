@@ -52,7 +52,6 @@ class ExceptionState;
 class FloatRect;
 class IDBFactory;
 class LocalFrame;
-class Location;
 class MediaQueryList;
 class Node;
 class Page;
@@ -66,8 +65,6 @@ enum PageshowEventPersistence {
     PageshowEventNotPersisted = 0,
     PageshowEventPersisted = 1
 };
-
-enum SetLocationLocking { LockHistoryBasedOnGestureState, LockHistoryAndBackForwardList };
 
 class LocalDOMWindow final : public DartWrappable, public RefCounted<LocalDOMWindow>, public DOMWindowBase64, public FrameDestructionObserver, public Supplementable<LocalDOMWindow> {
     DEFINE_WRAPPERTYPEINFO();
@@ -90,9 +87,6 @@ public:
     PassRefPtr<MediaQueryList> matchMedia(const String&);
 
     // DOM Level 0
-
-    Location& location() const;
-    void setLocation(const String& location, SetLocationLocking = LockHistoryBasedOnGestureState);
 
     int outerHeight() const;
     int outerWidth() const;
@@ -163,7 +157,6 @@ private:
 
     HashSet<DOMWindowProperty*> m_properties;
 
-    mutable RefPtr<Location> m_location;
     mutable RefPtr<Tracing> m_tracing;
     mutable RefPtr<DOMWindowCSS> m_css;
 };

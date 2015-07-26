@@ -295,14 +295,6 @@ void Document::mediaQueryAffectingValueChanged()
     // FIXME(sky): Actually update media queries from <style media>.
 }
 
-Location* Document::location() const
-{
-    if (!frame())
-        return 0;
-
-    return &domWindow()->location();
-}
-
 PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionState& exceptionState)
 {
     if (!isValidName(name)) {

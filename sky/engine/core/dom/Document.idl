@@ -42,8 +42,6 @@
     readonly attribute DOMString referrer;
     readonly attribute DOMString URL;
 
-    [PutForwards=href] readonly attribute Location location;
-
     [TreatReturnedNullStringAs=Undefined] readonly attribute DOMString readyState;
 
     Element            elementFromPoint([Default=Undefined] optional long x,

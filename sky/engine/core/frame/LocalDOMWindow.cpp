@@ -43,10 +43,10 @@
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/RequestAnimationFrameCallback.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
+#include "sky/engine/core/frame/DOMWindowProperty.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/Location.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/frame/Tracing.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
@@ -178,7 +178,6 @@ void LocalDOMWindow::resetDOMWindowProperties()
 {
     m_properties.clear();
 
-    m_location = nullptr;
 #if ENABLE(ASSERT)
     m_hasBeenReset = true;
 #endif
@@ -187,13 +186,6 @@ void LocalDOMWindow::resetDOMWindowProperties()
 int LocalDOMWindow::orientation() const
 {
     return 0;
-}
-
-Location& LocalDOMWindow::location() const
-{
-    if (!m_location)
-        m_location = Location::create(m_frame);
-    return *m_location;
 }
 
 Tracing& LocalDOMWindow::tracing() const
@@ -316,25 +308,11 @@ DOMWindowCSS& LocalDOMWindow::css() const
     return *m_css;
 }
 
-void LocalDOMWindow::setLocation(const String& urlString, SetLocationLocking locking)
-{
-    if (!m_frame)
-        return;
-    FrameHost* host = m_frame->host();
-    if (!host)
-        return;
-    mojo::URLRequestPtr request = mojo::URLRequest::New();
-    request->url = document()->completeURL(urlString).string().toUTF8();
-    host->services()->NavigatorHost()->RequestNavigate(
-        mojo::TARGET_SOURCE_NODE, request.Pass());
-}
-
 void LocalDOMWindow::printErrorMessage(const String& message)
 {
     if (message.isEmpty())
         return;
 }
-
 
 bool LocalDOMWindow::isInsecureScriptAccess(LocalDOMWindow& callingWindow, const String& urlString)
 {
