@@ -35,7 +35,6 @@ main(List<String> argv) async {
     return;
   }
 
-  server.autoCompress = true;
   server.defaultResponseHeaders
     ..removeAll('x-content-type-options')
     ..removeAll('x-frame-options')
