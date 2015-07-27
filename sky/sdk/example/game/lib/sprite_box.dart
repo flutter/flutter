@@ -31,6 +31,10 @@ class SpriteBox extends RenderBox {
   void set rootNode (NodeWithSize value) {
     if (value == _rootNode) return;
 
+    // Ensure that the root node has a size
+    assert(value.size.width > 0);
+    assert(value.size.height > 0);
+
     // Remove sprite box references
     if (_rootNode != null) _removeSpriteBoxReference(_rootNode);
 
@@ -334,9 +338,9 @@ class SpriteBox extends RenderBox {
 
     _frameRate = 1.0/delta;
 
-    // Print frame rate
-    if (_numFrames % 60 == 0)
-      print("delta: $delta fps: $_frameRate");
+    // // Print frame rate
+    // if (_numFrames % 60 == 0)
+    //   print("delta: $delta fps: $_frameRate");
 
     _runActions(_rootNode, delta);
     _callUpdate(_rootNode, delta);

@@ -20,25 +20,6 @@ class ColorSequence {
     colorStops = new List<double>.from(sequence.colorStops);
   }
 
-  ColorSequence.copyWithVariance(ColorSequence sequence, int alphaVar, int redVar, int greenVar, int blueVar) {
-    colors = new List<Color>();
-    colorStops = new List<double>.from(sequence.colorStops);
-
-    for (Color color in sequence.colors) {
-      int aDelta = ((randomDouble() * 2.0 - 1.0) * alphaVar).toInt();
-      int rDelta = ((randomDouble() * 2.0 - 1.0) * redVar).toInt();
-      int gDelta = ((randomDouble() * 2.0 - 1.0) * greenVar).toInt();
-      int bDelta = ((randomDouble() * 2.0 - 1.0) * blueVar).toInt();
-
-      int aNew = (color.alpha + aDelta).clamp(0, 255);
-      int rNew = (color.red + rDelta).clamp(0, 255);
-      int gNew = (color.green + gDelta).clamp(0, 255);
-      int bNew = (color.blue + bDelta).clamp(0, 255);
-
-      colors.add(new Color.fromARGB(aNew, rNew, gNew, bNew));
-    }
-  }
-
   Color colorAtPosition(double pos) {
     assert(pos >= 0.0 && pos <= 1.0);
 
