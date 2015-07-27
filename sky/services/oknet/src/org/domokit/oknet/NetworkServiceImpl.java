@@ -13,7 +13,6 @@ import com.squareup.okhttp.OkHttpClient;
 import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.DataPipe;
-import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.mojo.CookieStore;
 import org.chromium.mojom.mojo.HostResolver;
@@ -41,7 +40,7 @@ public class NetworkServiceImpl implements NetworkService {
     private static OkHttpClient sClient;
     private Core mCore;
 
-    public NetworkServiceImpl(Context context, Core core, MessagePipeHandle pipe) {
+    public NetworkServiceImpl(Context context, Core core) {
         assert core != null;
         mCore = core;
 
@@ -61,8 +60,6 @@ public class NetworkServiceImpl implements NetworkService {
                 Log.e(TAG, "Unable to create HTTP cache", e);
             }
         }
-
-        NetworkService.MANAGER.bind(this, pipe);
     }
 
     @Override

@@ -87,8 +87,7 @@ public class SkyApplication extends BaseChromiumApplication {
         registry.register(NetworkService.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                // TODO(eseidel): Refactor ownership to match other services.
-                new NetworkServiceImpl(context, core, pipe);
+                NetworkService.MANAGER.bind(new NetworkServiceImpl(context, core), pipe);
             }
         });
 

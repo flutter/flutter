@@ -12,6 +12,14 @@ import 'package:mojom/mojo/url_request.mojom.dart';
 import 'package:mojom/mojo/url_response.mojom.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 
+NetworkServiceProxy _initNetworkService() {
+  NetworkServiceProxy networkService = new NetworkServiceProxy.unbound();
+  shell.requestService("mojo:authenticated_network_service", networkService);
+  return networkService;
+}
+
+final NetworkServiceProxy _networkService = _initNetworkService();
+
 class Response {
   ByteData body;
 
@@ -26,16 +34,10 @@ class Response {
 
 Future<UrlResponse> fetch(UrlRequest request) async {
   try {
-    NetworkServiceProxy net = new NetworkServiceProxy.unbound();
-    shell.requestService("mojo:authenticated_network_service", net);
-
     UrlLoaderProxy loader = new UrlLoaderProxy.unbound();
-    net.ptr.createUrlLoader(loader);
-
+    _networkService.ptr.createUrlLoader(loader);
     UrlResponse response = (await loader.ptr.start(request)).response;
-
     loader.close();
-    net.close();
     return response;
   } catch (e) {
     return new UrlResponse()..statusCode = 500;
