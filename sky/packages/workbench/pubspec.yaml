@@ -5,16 +5,11 @@ description: A workspace to host pub packages
 homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/workbench
 dependencies:
   sky: any
-dev_dependencies:
-  sky_tools: ^0.0.4
+  sky_tools: any
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
   sky:
     path: ../../sdk
-  sky_engine:
-    path: ../../../out/Debug/gen/dart-pkg/sky_engine
-  sky_services:
-    path: ../../../out/Debug/gen/dart-pkg/sky_services
 environment:
   sdk: '>=1.8.0 <2.0.0'
