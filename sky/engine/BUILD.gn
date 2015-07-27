@@ -32,8 +32,7 @@ config("inside_blink") {
 config("config") {
   include_dirs = [
     ".",
-    "$root_build_dir",
-    "$root_gen_dir/sky",  # Deprecated, remove.
+    "$root_out_dir",
   ]
 
   cflags = []

@@ -13,7 +13,7 @@ namespace gfx {
 
 // The GPU back-end for skia requires pointers to GL functions. This function
 // creates a binding for skia-gpu to the in-process GL
-GL_EXPORT GrGLInterface* CreateInProcessSkiaGLBinding();
+GL_EXPORT const GrGLInterface* CreateInProcessSkiaGLBinding();
 
 }  // namespace gfx
 

@@ -96,6 +96,10 @@ if (is_android) {
              ":jni_headers",
              ":common",
            ]
+    ldflags = [
+      "-lGLESv2",
+      "-lEGL",
+    ]
   }
 
   android_library("java") {
@@ -159,7 +163,6 @@ if (is_android) {
       "//base:base_java",
     ]
   }
-
 } else if (is_ios) {
   import("//build/config/ios/rules.gni")
   import("//build/config/ios/ios_sdk.gni")
@@ -198,9 +201,9 @@ if (is_android) {
       set_sources_assignment_filter(sources_assignment_filter)
 
       deps = common_deps + [
-        ":common",
-        "//sky/services/ns_net",
-      ]
+               ":common",
+               "//sky/services/ns_net",
+             ]
     }
 
     deps = [
@@ -221,9 +224,9 @@ if (is_android) {
     ]
 
     deps = common_deps + [
-      ":common",
-      "//sky/services/testing:interfaces",
-    ]
+             ":common",
+             "//sky/services/testing:interfaces",
+           ]
   }
 } else if (is_mac) {
   import("//build/config/mac/rules.gni")
@@ -236,9 +239,7 @@ if (is_android) {
     # entitlements_path = ""
     # code_signing_identity = ""
 
-    xibs = [
-      "mac/sky_mac.xib"
-    ]
+    xibs = [ "mac/sky_mac.xib" ]
 
     resource_copy_mac("sky_resources") {
       resources = [ "//third_party/icu/android/icudtl.dat" ]
@@ -264,10 +265,10 @@ if (is_android) {
       ]
 
       deps = common_deps + [
-        ":common",
-        "//sky/services/ns_net",
-        "//sky/services/testing:interfaces",
-      ]
+               ":common",
+               "//sky/services/ns_net",
+               "//sky/services/testing:interfaces",
+             ]
     }
 
     deps = [

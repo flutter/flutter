@@ -5,7 +5,7 @@
 #include "sky/engine/core/css/parser/MediaQueryTokenizer.h"
 
 namespace blink {
-#include "core/MediaQueryTokenizerCodepoints.cpp"
+#include "gen/sky/core/MediaQueryTokenizerCodepoints.cpp"
 }
 
 #include "sky/engine/core/css/parser/MediaQueryInputStream.h"
