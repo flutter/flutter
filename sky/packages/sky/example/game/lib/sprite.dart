@@ -65,7 +65,8 @@ class Sprite extends NodeWithSize {
   }
 
   void paint(PaintingCanvas canvas) {
-    canvas.save();
+    // Store old matrix
+    Matrix4 savedMatrix = canvas.getTotalMatrix();
 
     // Account for pivot point
     applyTransformForPivot(canvas);
@@ -75,10 +76,10 @@ class Sprite extends NodeWithSize {
       double h = texture.size.height;
 
       if (w <= 0 || h <= 0) return;
-      
+
       double scaleX = size.width / w;
       double scaleY = size.height / h;
-      
+
       if (constrainProportions) {
         // Constrain proportions, using the smallest scale and by centering the image
         if (scaleX < scaleY) {
@@ -89,7 +90,7 @@ class Sprite extends NodeWithSize {
           scaleX = scaleY;
         }
       }
-      
+
       canvas.scale(scaleX, scaleY);
 
       // Setup paint object for opacity and transfer mode
@@ -107,8 +108,10 @@ class Sprite extends NodeWithSize {
     } else {
       // Paint a red square for missing texture
       canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),
-      new Paint()..color = const Color.fromARGB(255, 255, 0, 0));
+      new Paint()..color = new Color.fromARGB(255, 255, 0, 0));
     }
-    canvas.restore();
+
+    // Restore matrix
+    canvas.setMatrix(savedMatrix);
   }
 }
