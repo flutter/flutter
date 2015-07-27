@@ -255,6 +255,8 @@ if (is_android) {
         "mac/platform_view_mac.mm",
         "mac/sky_app_delegate.h",
         "mac/sky_app_delegate.m",
+        "mac/sky_application.h",
+        "mac/sky_application.mm",
         "mac/sky_window.h",
         "mac/sky_window.mm",
         "testing/test_runner.cc",

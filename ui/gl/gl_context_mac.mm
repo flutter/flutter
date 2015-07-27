@@ -6,15 +6,97 @@
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/trace_event/trace_event.h"
-#include "ui/gl/gl_context_cgl.h"
+#include "ui/gl/gl_context_mac.h"
 #include "ui/gl/gl_context_stub.h"
 #include "ui/gl/gl_implementation.h"
 #include "ui/gl/gl_surface.h"
 #include "ui/gl/gl_switches.h"
 
+#import <AppKit/AppKit.h>
+#import <OpenGL/gl.h>
+
+#define CAST_CONTEXT (reinterpret_cast<NSOpenGLContext*>(context_))
+
 namespace gfx {
 
 class GLShareGroup;
+
+GLContextMac::GLContextMac(GLShareGroup* share_group)
+    : GLContextReal(share_group),
+      context_(0) {
+  // Instead of creating a context here, we steal one from the NSOpenGLView
+  // that is passed to us in the initialize call.
+}
+
+bool GLContextMac::Initialize(GLSurface* compatible_surface,
+                              GpuPreference gpu_preference) {
+  if (compatible_surface == nullptr) {
+    return false;
+  }
+
+  auto view = reinterpret_cast<NSOpenGLView *>(compatible_surface->GetHandle());
+  context_ = reinterpret_cast<uintptr_t>(view.openGLContext);
+  [CAST_CONTEXT retain];
+
+  return CAST_CONTEXT != nullptr;
+}
+
+void GLContextMac::Destroy() {
+  [CAST_CONTEXT release];
+  context_ = 0;
+}
+
+bool GLContextMac::MakeCurrent(GLSurface* surface) {
+  [CAST_CONTEXT makeCurrentContext];
+
+  SetRealGLApi();
+
+  if (!InitializeDynamicBindings()) {
+    return false;
+  }
+
+  if (!surface->OnMakeCurrent(this)) {
+    return false;
+  }
+
+  return true;
+}
+
+void GLContextMac::ReleaseCurrent(GLSurface* surface) {
+  [NSOpenGLContext clearCurrentContext];
+}
+
+bool GLContextMac::IsCurrent(GLSurface* surface) {
+  return [NSOpenGLContext currentContext] == CAST_CONTEXT;
+}
+
+void* GLContextMac::GetHandle() {
+  return reinterpret_cast<void *>(context_);
+}
+
+void GLContextMac::OnSetSwapInterval(int interval) {
+}
+
+std::string GLContextMac::GetExtensions() {
+  return reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+}
+
+bool GLContextMac::WasAllocatedUsingRobustnessExtension() {
+  return false;
+}
+
+bool GLContextMac::GetTotalGpuMemory(size_t* bytes) {
+  DCHECK(false);
+  return false;
+}
+
+void GLContextMac::SetUnbindFboOnMakeCurrent() {
+  DCHECK(false);
+}
+
+GLContextMac::~GLContextMac() {
+  Destroy();
+}
 
 scoped_refptr<GLContext> GLContext::CreateGLContext(
     GLShareGroup* share_group,
@@ -25,11 +107,7 @@ scoped_refptr<GLContext> GLContext::CreateGLContext(
     case kGLImplementationDesktopGL:
     case kGLImplementationAppleGL: {
       scoped_refptr<GLContext> context;
-      // Note that with virtualization we might still be able to make current
-      // a different onscreen surface with this context later. But we should
-      // always be creating the context with an offscreen surface first.
-      DCHECK(compatible_surface->IsOffscreen());
-      context = new GLContextCGL(share_group);
+      context = new GLContextMac(share_group);
       if (!context->Initialize(compatible_surface, gpu_preference))
         return NULL;
 

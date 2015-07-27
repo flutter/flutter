@@ -29,6 +29,13 @@
 	<key>NSMainNibFile</key>
 	<string>sky_mac</string>
 	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+	<string>SkyApplication</string>
+
+	<!--
+		Sky Load URL
+	-->
+	<key>org.domokit.sky.load_url</key>
+	<string>https://domokit.github.io/home.dart</string>
+
 </dict>
 </plist>

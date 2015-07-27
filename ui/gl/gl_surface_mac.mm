@@ -9,6 +9,11 @@
 #include "ui/gl/gl_enums.h"
 #include "base/logging.h"
 
+#import <AppKit/AppKit.h>
+#import <OpenGL/gl.h>
+
+#define WIDGET_AS_VIEW (reinterpret_cast<NSOpenGLView*>(widget_))
+
 namespace gfx {
 
 GLSurfaceMac::GLSurfaceMac(gfx::AcceleratedWidget widget,
@@ -22,13 +27,12 @@ GLSurfaceMac::~GLSurfaceMac() {
 }
 
 bool GLSurfaceMac::OnMakeCurrent(GLContext* context) {
-  DCHECK(false);
-  return false;
+  return true;
 }
 
 bool GLSurfaceMac::SwapBuffers() {
-  DCHECK(false);
-  return false;
+  [[NSOpenGLContext currentContext] flushBuffer];
+  return true;
 }
 
 void GLSurfaceMac::Destroy() {
@@ -36,13 +40,12 @@ void GLSurfaceMac::Destroy() {
 }
 
 bool GLSurfaceMac::IsOffscreen() {
-  DCHECK(false);
   return false;
 }
 
 gfx::Size GLSurfaceMac::GetSize() {
-  DCHECK(false);
-  return Size(0.0, 0.0);
+  auto size = WIDGET_AS_VIEW.bounds.size;
+  return Size(size.width, size.height);
 }
 
 void* GLSurfaceMac::GetHandle() {

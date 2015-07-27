@@ -4,7 +4,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface SkyAppDelegate : NSObject <NSApplicationDelegate>
+@interface SkyAppDelegate : NSObject<NSApplicationDelegate>
 
 @end
-
