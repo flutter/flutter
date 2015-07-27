@@ -6,7 +6,7 @@ homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/workben
 dependencies:
   sky: any
 dev_dependencies:
-  sky_tools: ^0.0.3
+  sky_tools: ^0.0.4
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
