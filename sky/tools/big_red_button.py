@@ -96,7 +96,9 @@ def main():
     pub_path = os.path.join(dart_sdk_root, 'bin/pub')
     android_dist_root = os.path.join(sky_engine_root, 'out/android_Release/dist')
     linux_dist_root = os.path.join(sky_engine_root, 'out/Release/dist')
-    sky_package_root = os.path.join(linux_dist_root, 'sdk/sky')
+    sky_package_root = os.path.join(sky_engine_root, 'sky/sdk')
+    sky_engine_package_root = os.path.join(android_dist_root, 'packages/sky_engine/sky_engine')
+    sky_services_package_root = os.path.join(android_dist_root, 'packages/sky_services/sky_services')
 
     run(sky_engine_root, ['git', 'fetch', 'upstream'])
     run(sky_engine_root, ['git', 'reset', 'upstream/master', '--hard'])
@@ -110,10 +112,14 @@ def main():
     run(sky_engine_root, ['sky/tools/gn', '--release'])
     run(sky_engine_root, ['ninja', '-C', 'out/Release', ':dist'])
 
+    run(sky_engine_root, ['cp', 'AUTHORS', 'LICENSE', 'sky/sdk'])
+
     upload_artifacts(android_dist_root, 'android-arm', commit_hash)
     upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
 
     if args.publish:
+        run(sky_engine_package_root, [pub_path, 'publish', '--force'])
+        run(sky_services_package_root, [pub_path, 'publish', '--force'])
         run(sky_package_root, [pub_path, 'publish', '--force'])
 
 
