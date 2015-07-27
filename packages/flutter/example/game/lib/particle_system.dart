@@ -16,12 +16,18 @@ class _Particle {
   double timeToLive;
 
   Vector2 dir;
-  double radialAccel;
-  double tangentialAccel;
+
+  _ParticleAccelerations accelerations;
+
+  Float64List simpleColorSequence;
 
   ColorSequence colorSequence;
 }
 
+class _ParticleAccelerations {
+  double radialAccel;
+  double tangentialAccel;
+}
 
 class ParticleSystem extends Node {
 
@@ -76,9 +82,11 @@ class ParticleSystem extends Node {
   List<_Particle> _particles;
 
   double _emitCounter;
-  // Not yet used:
-  // double _elapsedTime;
   int _numEmittedParticles = 0;
+
+  static Paint _paint = new Paint()
+    ..setFilterQuality(FilterQuality.low)
+    ..isAntiAlias = false;
 
   ParticleSystem(this.texture,
                  {this.life: 1.5,
@@ -154,26 +162,35 @@ class ParticleSystem extends Node {
 
       // Update the particle
 
+      if (particle.accelerations != null) {
       // Radial acceleration
       Vector2 radial;
-      if (particle.pos[0] != 0 || particle.pos[1] != 0) {
-        radial = new Vector2.copy(particle.pos).normalize();
-      } else {
-        radial = new Vector2.zero();
+        if (particle.pos[0] != 0 || particle.pos[1] != 0) {
+          radial = new Vector2.copy(particle.pos).normalize();
+        } else {
+          radial = new Vector2.zero();
+        }
+        Vector2 tangential = new Vector2.copy(radial);
+        radial.scale(particle.accelerations.radialAccel);
+
+        // Tangential acceleration
+        double newY = tangential.x;
+        tangential.x = -tangential.y;
+        tangential.y = newY;
+        tangential.scale(particle.accelerations.tangentialAccel);
+
+        // (gravity + radial + tangential) * dt
+        Vector2 accel = (gravity + radial + tangential).scale(dt);
+        particle.dir += accel;
+      } else if (gravity[0] != 0.0 || gravity[1] != 0) {
+        // gravity
+        Vector2 accel = gravity.scale(dt);
+        particle.dir += accel;
       }
-      Vector2 tangential = new Vector2.copy(radial);
-      radial.scale(particle.radialAccel);
 
-      // Tangential acceleration
-      double newY = tangential.x;
-      tangential.x = -tangential.y;
-      tangential.y = newY;
-      tangential.scale(particle.tangentialAccel);
-
-      // (gravity + radial + tangential) * dt
-      Vector2 accel = (gravity + radial + tangential).scale(dt);
-      particle.dir += accel;
-      particle.pos += new Vector2.copy(particle.dir).scale(dt);
+      // Update particle position
+      particle.pos[0] += particle.dir[0] * dt;
+      particle.pos[1] += particle.dir[1] * dt;
 
       // Size
       particle.size = math.max(particle.size + particle.deltaSize * dt, 0.0);
@@ -182,7 +199,13 @@ class ParticleSystem extends Node {
       particle.rotation += particle.deltaRotation * dt;
 
       // Color
-      particle.colorPos = math.min(particle.colorPos + particle.deltaColorPos * dt, 1.0);
+      if (particle.simpleColorSequence != null) {
+        for (int i = 0; i < 4; i++) {
+          particle.simpleColorSequence[i] += particle.simpleColorSequence[i + 4] * dt;
+        }
+      } else {
+        particle.colorPos = math.min(particle.colorPos + particle.deltaColorPos * dt, 1.0);
+      }
     }
 
     if (autoRemoveOnFinish && _particles.length == 0 && _numEmittedParticles > 0) {
@@ -218,18 +241,50 @@ class ParticleSystem extends Node {
     double speedFinal = speed + speedVar * randomSignedDouble();
     particle.dir = dirVector.scale(speedFinal);
 
-    // Radial acceleration
-    particle.radialAccel = radialAcceleration + radialAccelerationVar * randomSignedDouble();
+    // Accelerations
+    if (radialAcceleration != 0.0 || radialAccelerationVar != 0.0 ||
+        tangentialAcceleration != 0.0 || tangentialAccelerationVar != 0.0) {
+      particle.accelerations = new _ParticleAccelerations();
 
-    // Tangential acceleration
-    particle.tangentialAccel = tangentialAcceleration + tangentialAccelerationVar * randomSignedDouble();
+      // Radial acceleration
+      particle.accelerations.radialAccel = radialAcceleration + radialAccelerationVar * randomSignedDouble();
+
+      // Tangential acceleration
+      particle.accelerations.tangentialAccel = tangentialAcceleration + tangentialAccelerationVar * randomSignedDouble();
+    }
 
     // Color
     particle.colorPos = 0.0;
     particle.deltaColorPos = 1.0 / particle.timeToLive;
 
     if (alphaVar != 0 || redVar != 0 || greenVar != 0 || blueVar != 0) {
-      particle.colorSequence = new ColorSequence.copyWithVariance(colorSequence, alphaVar, redVar, greenVar, blueVar);
+      particle.colorSequence = _ColorSequenceUtil.copyWithVariance(colorSequence, alphaVar, redVar, greenVar, blueVar);
+    }
+
+    // Optimizes the case where there are only two colors in the sequence
+    if (colorSequence.colors.length == 2) {
+      Color startColor;
+      Color endColor;
+
+      if (particle.colorSequence != null) {
+        startColor = particle.colorSequence.colors[0];
+        endColor = particle.colorSequence.colors[1];
+      } else {
+        startColor = colorSequence.colors[0];
+        endColor = colorSequence.colors[1];
+      }
+
+      // First 4 elements are start ARGB, last 4 are delta ARGB
+      particle.simpleColorSequence = new Float64List(8);
+      particle.simpleColorSequence[0] = startColor.alpha.toDouble();
+      particle.simpleColorSequence[1] = startColor.red.toDouble();
+      particle.simpleColorSequence[2] = startColor.green.toDouble();
+      particle.simpleColorSequence[3] = startColor.blue.toDouble();
+
+      particle.simpleColorSequence[4] = (endColor.alpha.toDouble() - startColor.alpha.toDouble()) / particle.timeToLive;
+      particle.simpleColorSequence[5] = (endColor.red.toDouble() - startColor.red.toDouble()) / particle.timeToLive;
+      particle.simpleColorSequence[6] = (endColor.green.toDouble() - startColor.green.toDouble()) / particle.timeToLive;
+      particle.simpleColorSequence[7] = (endColor.blue.toDouble() - startColor.blue.toDouble()) / particle.timeToLive;
     }
 
     _particles.add(particle);
@@ -242,6 +297,8 @@ class ParticleSystem extends Node {
     List<Rect> rects = [];
     List<Color> colors = [];
 
+    _paint.setTransferMode(transferMode);
+
     for (_Particle particle in _particles) {
       // Transform
       double scos;
@@ -250,9 +307,12 @@ class ParticleSystem extends Node {
         double extraRotation = GameMath.atan2(particle.dir[1], particle.dir[0]);
         scos = math.cos(convertDegrees2Radians(particle.rotation) + extraRotation) * particle.size;
         ssin = math.sin(convertDegrees2Radians(particle.rotation) + extraRotation) * particle.size;
-      } else {
+      } else if (particle.rotation != 0.0) {
         scos = math.cos(convertDegrees2Radians(particle.rotation)) * particle.size;
         ssin = math.sin(convertDegrees2Radians(particle.rotation)) * particle.size;
+      } else {
+        scos = particle.size;
+        ssin = 0.0;
       }
       RSTransform transform = new RSTransform(scos, ssin, particle.pos[0], particle.pos[1]);
       transforms.add(transform);
@@ -262,19 +322,55 @@ class ParticleSystem extends Node {
       rects.add(rect);
 
       // Color
-      Color particleColor;
-      if (particle.colorSequence != null) {
-        particleColor = particle.colorSequence.colorAtPosition(particle.colorPos);
+      if (particle.simpleColorSequence != null) {
+        Color particleColor = new Color.fromARGB(
+          particle.simpleColorSequence[0].toInt().clamp(0, 255),
+          particle.simpleColorSequence[1].toInt().clamp(0, 255),
+          particle.simpleColorSequence[2].toInt().clamp(0, 255),
+          particle.simpleColorSequence[3].toInt().clamp(0, 255));
+        colors.add(particleColor);
       } else {
-        particleColor = colorSequence.colorAtPosition(particle.colorPos);
+        Color particleColor;
+        if (particle.colorSequence != null) {
+          particleColor = particle.colorSequence.colorAtPosition(particle.colorPos);
+        } else {
+          particleColor = colorSequence.colorAtPosition(particle.colorPos);
+        }
+        colors.add(particleColor);
       }
-      colors.add(particleColor);
     }
 
-    Paint paint = new Paint()..setTransferMode(transferMode)
-        ..setFilterQuality(FilterQuality.low) // All Skia examples do this.
-        ..isAntiAlias = false; // Antialiasing breaks SkCanvas.drawAtlas?
     canvas.drawAtlas(texture.image, transforms, rects, colors,
-      TransferMode.modulate, null, paint);
+      TransferMode.modulate, null, _paint);
+  }
+}
+
+class _ColorSequenceUtil {
+  static ColorSequence copyWithVariance(
+    ColorSequence sequence,
+    int alphaVar,
+    int redVar,
+    int greenVar,
+    int blueVar
+  ) {
+    ColorSequence copy = new ColorSequence.copy(sequence);
+
+    int i = 0;
+    for (Color color in sequence.colors) {
+      int aDelta = ((randomDouble() * 2.0 - 1.0) * alphaVar).toInt();
+      int rDelta = ((randomDouble() * 2.0 - 1.0) * redVar).toInt();
+      int gDelta = ((randomDouble() * 2.0 - 1.0) * greenVar).toInt();
+      int bDelta = ((randomDouble() * 2.0 - 1.0) * blueVar).toInt();
+
+      int aNew = (color.alpha + aDelta).clamp(0, 255);
+      int rNew = (color.red + rDelta).clamp(0, 255);
+      int gNew = (color.green + gDelta).clamp(0, 255);
+      int bNew = (color.blue + bDelta).clamp(0, 255);
+
+      copy.colors[i] = new Color.fromARGB(aNew, rNew, gNew, bNew);
+      i++;
+    }
+
+    return copy;
   }
 }
