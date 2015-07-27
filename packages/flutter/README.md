@@ -16,6 +16,7 @@ Once you have installed Dart SDK, create a new directory and add a
 name: your_app_name
 dependencies:
   sky: any
+  sky_tools: any
 ```
 
 Next, create a `lib` directory (which is where your Dart code will go) and use
