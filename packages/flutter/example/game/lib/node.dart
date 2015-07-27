@@ -37,6 +37,7 @@ class Node {
   int _addedOrder;
   int _childrenLastAddedOrder = 0;
   bool _childrenNeedSorting = false;
+  Matrix4 _savedTotalMatrix;
 
   /// Decides if the node and its children is currently paused.
   ///
@@ -96,7 +97,7 @@ class Node {
   ///
   ///     myNode.rotation = 45.0;
   double get rotation => _rotation;
-  
+
   void set rotation(double rotation) {
     assert(rotation != null);
     _rotation = rotation;
@@ -107,7 +108,7 @@ class Node {
   ///
   ///     myNode.position = new Point(42.0, 42.0);
   Point get position => _position;
-  
+
   void set position(Point position) {
     assert(position != null);
     _position = position;
@@ -265,9 +266,9 @@ class Node {
     if (_transformMatrix != null) {
       return _transformMatrix;
     }
-    
+
     double cx, sx, cy, sy;
-    
+
     if (_rotation == 0.0) {
       cx = 1.0;
       sx = 0.0;
@@ -277,7 +278,7 @@ class Node {
     else {
       double radiansX = convertDegrees2Radians(_rotation);
       double radiansY = convertDegrees2Radians(_rotation);
-      
+
       cx = math.cos(radiansX);
       sx = math.sin(radiansX);
       cy = math.cos(radiansY);
@@ -289,7 +290,7 @@ class Node {
                -sx * _scaleY, cx * _scaleY, 0.0, 0.0,
                0.0, 0.0, 1.0, 0.0,
               _position.x, _position.y, 0.0, 1.0);
-    
+
     return _transformMatrix;
   }
 
@@ -403,7 +404,7 @@ class Node {
   }
 
   // Rendering
-  
+
   void _visit(PaintingCanvas canvas) {
     assert(canvas != null);
     if (!visible) return;
@@ -412,9 +413,9 @@ class Node {
     _visitChildren(canvas);
     _postPaint(canvas);
   }
-  
+
   void _prePaint(PaintingCanvas canvas) {
-    canvas.save();
+    _savedTotalMatrix = canvas.getTotalMatrix();
 
     // Get the transformation matrix and apply transform
     canvas.concat(transformMatrix.storage);
@@ -438,7 +439,7 @@ class Node {
   ///     }
   void paint(PaintingCanvas canvas) {
   }
- 
+
   void _visitChildren(PaintingCanvas canvas) {
     // Sort children if needed
     _sortChildren();
@@ -463,9 +464,9 @@ class Node {
       i++;
     }
   }
-  
+
   void _postPaint(PaintingCanvas canvas) {
-    canvas.restore();
+    canvas.setMatrix(_savedTotalMatrix);
   }
 
   // Receiving update calls
