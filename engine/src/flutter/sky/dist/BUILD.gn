@@ -50,10 +50,9 @@ copy("sky_shell") {
 if (is_android) {
   import("//build/config/android/rules.gni")
 
-  sky_engine_package_dir = "$root_dist_dir/packages/sky_engine"
-
-  copy_ex("copy_sky_engine_package") {
+  copy_ex("sky_engine") {
     clear_dir = true
+    # Note: The package actually ends up in $root_dist_dir/packages/sky_engine/sky_engine
     dest = "$root_dist_dir/packages"
     sources = [
       "$root_gen_dir/dart-pkg/sky_engine",
@@ -63,35 +62,18 @@ if (is_android) {
     ]
   }
 
-  copy("copy_sky_engine_license") {
+  copy_ex("sky_services") {
+    clear_dir = true
+    # Note: The package actually ends up in $root_dist_dir/packages/sky_services/sky_services
+    dest = "$root_dist_dir/packages/sky_services"
     sources = [
-      "//AUTHORS",
-      "//LICENSE",
+      "$root_gen_dir/dart-pkg/sky_services",
     ]
-    outputs = [ "$sky_engine_package_dir/{{source_file_part}}" ]
     deps = [
-      ":copy_sky_engine_package"
+      "//sky/packages/sky_services",
     ]
   }
 
-  copy("copy_sky_engine_apks") {
-    sources = [
-      "$root_dist_dir/shell/SkyShell.apk",
-    ]
-    outputs = [ "$sky_engine_package_dir/apks/{{source_file_part}}" ]
-    deps = [
-      ":copy_sky_engine_package",
-      ":sky_shell",
-    ]
-  }
-
-  group("sky_engine") {
-    deps = [
-      ":copy_sky_engine_package",
-      ":copy_sky_engine_license",
-      ":copy_sky_engine_apks",
-    ]
-  }
 }
 
 group("dist") {
