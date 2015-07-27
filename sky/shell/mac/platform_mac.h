@@ -9,10 +9,11 @@
 extern "C" {
 #endif
 
-typedef int(^PlatformMacMainCallback)(void);
+typedef int (^PlatformMacMainCallback)(void);
 
-int PlatformMacMain(int argc, const char *argv[],
-    PlatformMacMainCallback callback);
+int PlatformMacMain(int argc,
+                    const char* argv[],
+                    PlatformMacMainCallback callback);
 
 #ifdef __cplusplus
 }

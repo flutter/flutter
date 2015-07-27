@@ -35,10 +35,10 @@ static void RedirectIOConnectionsToSyslog() {
                      ASL_LOG_DESCRIPTOR_WRITE);
 #endif
 }
-  
-int PlatformMacMain(int argc, const char *argv[],
-    PlatformMacMainCallback callback) {
 
+int PlatformMacMain(int argc,
+                    const char* argv[],
+                    PlatformMacMainCallback callback) {
   base::mac::ScopedNSAutoreleasePool pool;
 
   base::AtExitManager exit_manager;
@@ -59,7 +59,7 @@ int PlatformMacMain(int argc, const char *argv[],
   DLOG_ASSERT(result);
 
   scoped_ptr<base::MessageLoopForUI> main_message_loop(
-    new base::MessageLoopForUI());
+      new base::MessageLoopForUI());
 
 #if TARGET_OS_IPHONE
   // One cannot start the message loop on the platform main thread. Instead,
@@ -67,9 +67,8 @@ int PlatformMacMain(int argc, const char *argv[],
   main_message_loop->Attach();
 #endif
 
-  auto service_provider_context =
-    make_scoped_ptr(new sky::shell::ServiceProviderContext(
-        main_message_loop->task_runner()));
+  auto service_provider_context = make_scoped_ptr(
+      new sky::shell::ServiceProviderContext(main_message_loop->task_runner()));
 
   sky::shell::Shell::Init(service_provider_context.Pass());
 

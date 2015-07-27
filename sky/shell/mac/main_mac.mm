@@ -11,6 +11,7 @@
 #include "base/command_line.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/testing/test_runner.h"
+#include "sky/shell/mac/sky_application.h"
 
 namespace sky {
 namespace shell {
@@ -30,8 +31,8 @@ bool FlagsValid() {
 
 void Usage() {
   std::cerr << "(For Test Shell) Usage: sky_shell"
-            << " --" << switches::kNonInteractive
-            << " --" << switches::kPackageRoot << "=PACKAGE_ROOT"
+            << " --" << switches::kNonInteractive << " --"
+            << switches::kPackageRoot << "=PACKAGE_ROOT"
             << " --" << switches::kSnapshot << "=SNAPSHOT"
             << " [ MAIN_DART ]" << std::endl;
 }
@@ -64,14 +65,26 @@ void Init() {
   runner.Start(single_test.Pass());
 }
 
+void AttachMessageLoopToMainRunLoop(void) {
+  // We want to call Run() on the MessageLoopForUI but after NSApplicationMain.
+  // If called before this point, the call is blocking and will prevent the
+  // NSApplicationMain invocation.
+  dispatch_async(dispatch_get_main_queue(), ^() {
+    base::MessageLoopForUI::current()->Run();
+  });
+}
+
 }  // namespace
 }  // namespace shell
 }  // namespace sky
 
-int main(int argc, const char * argv[]) {
-  return PlatformMacMain(argc, argv, ^(){
+int main(int argc, const char* argv[]) {
+  [SkyApplication sharedApplication];
+
+  return PlatformMacMain(argc, argv, ^() {
     if (!sky::shell::FlagsValid()) {
       sky::shell::Usage();
+      sky::shell::AttachMessageLoopToMainRunLoop();
       return NSApplicationMain(argc, argv);
     } else {
       auto loop = base::MessageLoop::current();

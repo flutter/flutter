@@ -11,22 +11,43 @@
 #include "sky/shell/shell.h"
 #include "sky/shell/ui_delegate.h"
 
-@interface SkyWindow () <NSWindowDelegate>
+@interface SkyWindow ()<NSWindowDelegate>
 
-@property (assign) IBOutlet NSOpenGLView *renderSurface;
-@property (getter=isSurfaceSetup) BOOL surfaceSetup;
+@property(assign) IBOutlet NSOpenGLView* renderSurface;
+@property(getter=isSurfaceSetup) BOOL surfaceSetup;
 
 @end
+
+static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
+  switch (phase) {
+    case NSEventPhaseNone:
+      return sky::EVENT_TYPE_UNKNOWN;
+    case NSEventPhaseBegan:
+      return sky::EVENT_TYPE_POINTER_DOWN;
+    case NSEventPhaseStationary:
+    // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
+    // with the same coordinates
+    case NSEventPhaseChanged:
+      return sky::EVENT_TYPE_POINTER_MOVE;
+    case NSEventPhaseEnded:
+      return sky::EVENT_TYPE_POINTER_UP;
+    case NSEventPhaseCancelled:
+      return sky::EVENT_TYPE_POINTER_CANCEL;
+    case NSEventPhaseMayBegin:
+      return sky::EVENT_TYPE_UNKNOWN;
+  }
+  return sky::EVENT_TYPE_UNKNOWN;
+}
 
 @implementation SkyWindow {
   sky::SkyEnginePtr _sky_engine;
   scoped_ptr<sky::shell::ShellView> _shell_view;
 }
 
-@synthesize renderSurface=_renderSurface;
-@synthesize surfaceSetup=_surfaceSetup;
+@synthesize renderSurface = _renderSurface;
+@synthesize surfaceSetup = _surfaceSetup;
 
--(void) awakeFromNib {
+- (void)awakeFromNib {
   [super awakeFromNib];
 
   self.delegate = self;
@@ -34,7 +55,7 @@
   [self windowDidResize:nil];
 }
 
--(void) setupShell {
+- (void)setupShell {
   NSAssert(_shell_view == nullptr, @"The shell view must not already be set");
   auto shell_view = new sky::shell::ShellView(sky::shell::Shell::Shared());
   _shell_view.reset(shell_view);
@@ -43,11 +64,13 @@
   self.platformView->SurfaceCreated(widget);
 }
 
--(NSString *) skyInitialLoadURL {
-  return @"http://localhost:8080/sky/sdk/example/rendering/simple_autolayout.dart";
+- (NSString*)skyInitialLoadURL {
+  // TODO(csg): There should be a way to specify this in the UI
+  return [[NSBundle mainBundle]
+              .infoDictionary objectForKey:@"org.domokit.sky.load_url"];
 }
 
--(void) setupAndLoadDart {
+- (void)setupAndLoadDart {
   auto interface_request = mojo::GetProxy(&_sky_engine);
   self.platformView->ConnectToEngine(interface_request.Pass());
 
@@ -55,19 +78,20 @@
   _sky_engine->RunFromNetwork(string);
 }
 
--(void) windowDidResize:(NSNotification *)notification {
+- (void)windowDidResize:(NSNotification*)notification {
   [self setupSurfaceIfNecessary];
 
   // Resize
 
-  // sky::ViewportMetricsPtr metrics = sky::ViewportMetrics::New();
-  // metrics->physical_width = size.width * scale;
-  // metrics->physical_height = size.height * scale;
-  // metrics->device_pixel_ratio = scale;
-  // _sky_engine->OnViewportMetricsChanged(metrics.Pass());
+  auto metrics = sky::ViewportMetrics::New();
+  auto size = self.renderSurface.frame.size;
+  metrics->physical_width = size.width;
+  metrics->physical_height = size.height;
+  metrics->device_pixel_ratio = 1.0;
+  _sky_engine->OnViewportMetricsChanged(metrics.Pass());
 }
 
--(void) setupSurfaceIfNecessary {
+- (void)setupSurfaceIfNecessary {
   if (self.isSurfaceSetup) {
     return;
   }
@@ -86,26 +110,39 @@
 
 #pragma mark - Responder overrides
 
-- (void)dispatchEvent:(NSEvent *)event phase:(NSEventPhase) phase {
-  NSPoint location = [_renderSurface convertPoint:event.locationInWindow
-                                         fromView:nil];
+- (void)dispatchEvent:(NSEvent*)event phase:(NSEventPhase)phase {
+  NSPoint location =
+      [_renderSurface convertPoint:event.locationInWindow fromView:nil];
 
   location.y = _renderSurface.frame.size.height - location.y;
+
+  auto input = sky::InputEvent::New();
+  input->type = EventTypeFromNSEventPhase(phase);
+  input->time_stamp =
+      base::TimeDelta::FromSecondsD(event.timestamp).InMilliseconds();
+
+  input->pointer_data = sky::PointerData::New();
+  input->pointer_data->kind = sky::POINTER_KIND_TOUCH;
+
+  input->pointer_data->x = location.x;
+  input->pointer_data->y = location.y;
+
+  _sky_engine->OnInputEvent(input.Pass());
 }
 
-- (void)mouseDown:(NSEvent *)event {
+- (void)mouseDown:(NSEvent*)event {
   [self dispatchEvent:event phase:NSEventPhaseBegan];
 }
 
-- (void)mouseDragged:(NSEvent *)event {
+- (void)mouseDragged:(NSEvent*)event {
   [self dispatchEvent:event phase:NSEventPhaseChanged];
 }
 
-- (void)mouseUp:(NSEvent *)event {
+- (void)mouseUp:(NSEvent*)event {
   [self dispatchEvent:event phase:NSEventPhaseEnded];
 }
 
-- (void) dealloc {
+- (void)dealloc {
   self.platformView->SurfaceDestroyed();
   [super dealloc];
 }
