@@ -1,5 +1,6 @@
 .idea
 .pub/
-lib/_sdkext
+AUTHORS
+LICENSE
 packages
 pubspec.lock
