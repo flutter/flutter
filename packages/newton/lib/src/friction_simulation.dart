@@ -24,3 +24,25 @@ class FrictionSimulation extends Simulation {
   @override
   bool isDone(double time) => dx(time).abs() < this.tolerance.velocity;
 }
+
+class BoundedFrictionSimulation extends FrictionSimulation {
+  BoundedFrictionSimulation(
+    double drag,
+    double position,
+    double velocity,
+    double this._minX,
+    double this._maxX) : super(drag, position, velocity);
+
+  final double _minX;
+  final double _maxX;
+
+  double x(double time) {
+    return super.x(time).clamp(_minX, _maxX);
+  }
+
+  bool isDone(double time) {
+    return super.isDone(time) ||
+      (x(time) - _minX).abs() < tolerance.distance ||
+      (x(time) - _maxX).abs() < tolerance.distance;
+  }
+}
