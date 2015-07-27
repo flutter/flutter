@@ -998,6 +998,10 @@ GL_FUNCTIONS = [
 #       'GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, '
 #       'GLenum format, GLenum type, const void* pixels', },
 { 'return_type': 'void',
+  'versions': [{ 'name': 'glTextureBarrierNV',
+                 'extensions': ['GL_NV_texture_barrier'] }],
+  'arguments': 'void' },
+{ 'return_type': 'void',
   'versions': [{ 'name': 'glTransformFeedbackVaryings' }],
   'arguments': 'GLuint program, GLsizei count, const char* const* varyings, '
                'GLenum bufferMode', },

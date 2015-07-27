@@ -625,6 +625,7 @@ MOCK_METHOD9(TexSubImage2D,
                   GLenum format,
                   GLenum type,
                   const void* pixels));
+MOCK_METHOD0(TextureBarrierNV, void());
 MOCK_METHOD4(TransformFeedbackVaryings,
              void(GLuint program,
                   GLsizei count,

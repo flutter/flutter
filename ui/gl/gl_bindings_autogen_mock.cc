@@ -2202,6 +2202,11 @@ void GL_BINDING_CALL MockGLInterface::Mock_glTexSubImage2D(GLenum target,
                             format, type, pixels);
 }
 
+void GL_BINDING_CALL MockGLInterface::Mock_glTextureBarrierNV(void) {
+  MakeFunctionUnique("glTextureBarrierNV");
+  interface_->TextureBarrierNV();
+}
+
 void GL_BINDING_CALL
 MockGLInterface::Mock_glTransformFeedbackVaryings(GLuint program,
                                                   GLsizei count,
@@ -3230,6 +3235,8 @@ void* GL_BINDING_CALL MockGLInterface::GetGLProcAddress(const char* name) {
     return reinterpret_cast<void*>(Mock_glTexStorage3D);
   if (strcmp(name, "glTexSubImage2D") == 0)
     return reinterpret_cast<void*>(Mock_glTexSubImage2D);
+  if (strcmp(name, "glTextureBarrierNV") == 0)
+    return reinterpret_cast<void*>(Mock_glTextureBarrierNV);
   if (strcmp(name, "glTransformFeedbackVaryings") == 0)
     return reinterpret_cast<void*>(Mock_glTransformFeedbackVaryings);
   if (strcmp(name, "glUniform1f") == 0)
