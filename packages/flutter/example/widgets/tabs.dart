@@ -16,11 +16,12 @@ class TabbedNavigatorApp extends App {
   // The index of the selected tab for each of the TabNavigators constructed below.
   List<int> selectedIndices = new List<int>.filled(5, 0);
 
-  TabNavigator _buildTabNavigator(int n, List<TabNavigatorView> views, {scrollable: false}) {
+  TabNavigator _buildTabNavigator(int n, List<TabNavigatorView> views, Key key, {isScrollable: false}) {
     return new TabNavigator(
+      key: key,
       views: views,
       selectedIndex: selectedIndices[n],
-      scrollable: scrollable,
+      isScrollable: isScrollable,
       onChanged: (tabIndex) {
         setState(() { selectedIndices[n] = tabIndex; } );
       }
@@ -41,7 +42,7 @@ class TabbedNavigatorApp extends App {
           builder: () => _buildContent(text)
         );
       });
-    return _buildTabNavigator(n, views.toList());
+    return _buildTabNavigator(n, views.toList(), new Key('textLabelsTabNavigator'));
   }
 
   TabNavigator _buildIconLabelsTabNavigator(int n) {
@@ -52,7 +53,7 @@ class TabbedNavigatorApp extends App {
           builder: () => _buildContent(icon_name)
         );
       });
-    return _buildTabNavigator(n, views.toList());
+    return _buildTabNavigator(n, views.toList(), new Key('iconLabelsTabNavigator'));
   }
 
   TabNavigator _buildTextAndIconLabelsTabNavigator(int n) {
@@ -70,7 +71,7 @@ class TabbedNavigatorApp extends App {
         builder: () => _buildContent("Summary")
       )
     ];
-    return _buildTabNavigator(n, views);
+    return _buildTabNavigator(n, views, new Key('textAndIconLabelsTabNavigator'));
   }
 
   TabNavigator _buildScrollableTabNavigator(int n) {
@@ -80,7 +81,7 @@ class TabbedNavigatorApp extends App {
       "THIS TAB IS PRETTY WIDE TOO",
       "MORE",
       "TABS",
-      "TO", 
+      "TO",
       "STRETCH",
       "OUT",
       "THE",
@@ -92,7 +93,7 @@ class TabbedNavigatorApp extends App {
           builder: () => _buildContent(text)
         );
       });
-    return _buildTabNavigator(n, views.toList(), scrollable: true);
+    return _buildTabNavigator(n, views.toList(), new Key('scrollableTabNavigator'), isScrollable: true);
   }
 
 
@@ -124,7 +125,7 @@ class TabbedNavigatorApp extends App {
       )
     ];
 
-    TabNavigator tabNavigator = _buildTabNavigator(4, views);
+    TabNavigator tabNavigator = _buildTabNavigator(4, views, new Key('tabs'));
     assert(selectedIndices.length == 5);
 
     ToolBar toolbar = new ToolBar(

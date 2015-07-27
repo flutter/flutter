@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:newton/newton.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
@@ -32,7 +33,7 @@ const double _kRelativeMaxTabWidth = 56.0;
 const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
 const TextStyle _kTabTextStyle = const TextStyle(textAlign: TextAlign.center);
 const int _kTabIconSize = 24;
-const double _kTabBarScrollFriction = 0.005;
+const double _kTabBarScrollDrag = 0.025;
 
 class TabBarParentData extends BoxParentData with
     ContainerParentDataMixin<RenderBox> { }
@@ -79,11 +80,11 @@ class RenderTabBar extends RenderBox with
     }
   }
 
-  bool _scrollable;
-  bool get scrollable => _scrollable;
-  void set scrollable(bool value) {
-    if (_scrollable != value) {
-      _scrollable = value;
+  bool _isScrollable;
+  bool get isScrollable => _isScrollable;
+  void set isScrollable(bool value) {
+    if (_isScrollable != value) {
+      _isScrollable = value;
       markNeedsLayout();
     }
   }
@@ -104,7 +105,7 @@ class RenderTabBar extends RenderBox with
       assert(child.parentData is TabBarParentData);
       child = child.parentData.nextSibling;
     }
-    double width = scrollable ? maxWidth : maxWidth * childCount;
+    double width = isScrollable ? maxWidth : maxWidth * childCount;
     return constraints.constrainWidth(width);
   }
 
@@ -119,7 +120,7 @@ class RenderTabBar extends RenderBox with
       assert(child.parentData is TabBarParentData);
       child = child.parentData.nextSibling;
     }
-    double width = scrollable ? maxWidth : maxWidth * childCount;
+    double width = isScrollable ? maxWidth : maxWidth * childCount;
     return constraints.constrainWidth(width);
   }
 
@@ -172,10 +173,10 @@ class RenderTabBar extends RenderBox with
   void reportLayoutChangedIfNeeded() {
     assert(onLayoutChanged != null);
     List<double> widths = new List<double>(childCount);
-    if (!scrollable && childCount > 0) {
+    if (!isScrollable && childCount > 0) {
       double tabWidth = size.width / childCount;
       widths.fillRange(0, widths.length - 1, tabWidth);
-    } else if (scrollable) {
+    } else if (isScrollable) {
       RenderBox child = firstChild;
       int childIndex = 0;
       while (child != null) {
@@ -200,7 +201,7 @@ class RenderTabBar extends RenderBox with
     if (childCount == 0)
       return;
 
-    if (scrollable)
+    if (isScrollable)
       layoutScrollableTabs();
     else
       layoutFixedWidthTabs();
@@ -255,7 +256,7 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
     this.backgroundColor,
     this.indicatorColor,
     this.textAndIcons,
-    this.scrollable: false,
+    this.isScrollable: false,
     this.onLayoutChanged
   }) : super(key: key, children: children);
 
@@ -263,7 +264,7 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
   final Color backgroundColor;
   final Color indicatorColor;
   final bool textAndIcons;
-  final bool scrollable;
+  final bool isScrollable;
   final LayoutChanged onLayoutChanged;
 
   RenderTabBar get root => super.root;
@@ -275,7 +276,7 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
     root.backgroundColor = backgroundColor;
     root.indicatorColor = indicatorColor;
     root.textAndIcons = textAndIcons;
-    root.scrollable = scrollable;
+    root.isScrollable = isScrollable;
     root.onLayoutChanged = onLayoutChanged;
   }
 }
@@ -345,32 +346,54 @@ class Tab extends Component {
   }
 }
 
+class _TabsScrollBehavior extends BoundedBehavior {
+  _TabsScrollBehavior({ double contentsSize: 0.0, double containerSize: 0.0 })
+    : super(contentsSize: contentsSize, containerSize: containerSize);
+
+  bool isScrollable = true;
+
+  Simulation release(double position, double velocity) {
+    if (!isScrollable)
+      return null;
+
+    double velocityPerSecond = velocity * 1000.0;
+    return new BoundedFrictionSimulation(
+      _kTabBarScrollDrag, position, velocityPerSecond, minScrollOffset, maxScrollOffset
+    );
+  }
+
+  double applyCurve(double scrollOffset, double scrollDelta) {
+    return (isScrollable) ? super.applyCurve(scrollOffset, scrollDelta) : 0.0;
+  }
+}
+
 class TabBar extends Scrollable {
   TabBar({
     Key key,
     this.labels,
     this.selectedIndex: 0,
     this.onChanged,
-    this.scrollable: false
+    this.isScrollable: false
   }) : super(key: key, direction: ScrollDirection.horizontal);
 
   Iterable<TabLabel> labels;
   int selectedIndex;
   SelectedIndexChanged onChanged;
-  bool scrollable;
+  bool isScrollable;
 
   void syncFields(TabBar source) {
     super.syncFields(source);
     labels = source.labels;
     selectedIndex = source.selectedIndex;
     onChanged = source.onChanged;
-    scrollable = source.scrollable;
-    if (!scrollable)
+    isScrollable = source.isScrollable;
+    if (!isScrollable)
       scrollTo(0.0);
+    scrollBehavior.isScrollable = source.isScrollable;
   }
 
-  ScrollBehavior createScrollBehavior() => new FlingBehavior();
-  FlingBehavior get scrollBehavior => super.scrollBehavior;
+  ScrollBehavior createScrollBehavior() => new _TabsScrollBehavior();
+  _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleTap(int tabIndex) {
     if (tabIndex != selectedIndex && onChanged != null)
@@ -445,8 +468,8 @@ class TabBar extends Scrollable {
             backgroundColor: backgroundColor,
             indicatorColor: indicatorColor,
             textAndIcons: textAndIcons,
-            scrollable: scrollable,
-            onLayoutChanged: scrollable ? _layoutChanged : null
+            isScrollable: isScrollable,
+            onLayoutChanged: isScrollable ? _layoutChanged : null
           )
         )
       )
@@ -474,13 +497,13 @@ class TabNavigator extends Component {
     this.views,
     this.selectedIndex: 0,
     this.onChanged,
-    this.scrollable: false
+    this.isScrollable: false
   }) : super(key: key);
 
   final List<TabNavigatorView> views;
   final int selectedIndex;
   final SelectedIndexChanged onChanged;
-  final bool scrollable;
+  final bool isScrollable;
 
   void _handleSelectedIndexChanged(int tabIndex) {
     if (onChanged != null)
@@ -495,7 +518,7 @@ class TabNavigator extends Component {
       labels: views.map((view) => view.label),
       onChanged: _handleSelectedIndexChanged,
       selectedIndex: selectedIndex,
-      scrollable: scrollable
+      isScrollable: isScrollable
     );
 
     Widget content = views[selectedIndex].buildContent();
