@@ -60,7 +60,7 @@ class FlingBehavior extends BoundedBehavior {
     : super(contentsSize: contentsSize, containerSize: containerSize);
 
   Simulation release(double position, double velocity) {
-    return createDefaultScrollSimulation(position, 0.0, minScrollOffset, maxScrollOffset);
+    return createDefaultScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
   }
 }
 

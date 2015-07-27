@@ -9,7 +9,7 @@ dependencies:
   mojo_services: ^0.0.15
   mojo: ^0.0.17
   mojom: ^0.0.17
-  newton: ^0.1.0
+  newton: ^0.1.2
   sky_engine: ^0.0.1
   sky_services: ^0.0.1
   sky_tools: ^0.0.4
