@@ -6,3 +6,5 @@ homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/sky_ser
 dependencies:
   mojo: ^0.0.17
   mojom: ^0.0.17
+environment:
+  sdk: '>=1.8.0 <2.0.0'
