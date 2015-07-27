@@ -24,7 +24,7 @@ const size_t kMaxGaneshResourceCacheBytes = 96 * 1024 * 1024;
 
 GaneshContext::GaneshContext(scoped_refptr<gfx::GLContext> gl_context)
     : gl_context_(gl_context) {
-  skia::RefPtr<GrGLInterface> interface =
+  skia::RefPtr<const GrGLInterface> interface =
       skia::AdoptRef(gfx::CreateInProcessSkiaGLBinding());
   DCHECK(interface);
 
