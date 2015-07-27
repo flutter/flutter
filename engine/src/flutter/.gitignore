@@ -17,7 +17,6 @@ cscope.*
 Session.vim
 tags
 Thumbs.db
-v8.log
 /build/util/LASTCHANGE*
 .idea
 
@@ -75,7 +74,6 @@ v8.log
 /third_party/yasm/binaries/
 /third_party/yasm/source/patched-yasm/
 /tools/grit/
-/v8/
 
 # dart packages directories and related.
 /mojo/dart/apptest/packages
@@ -84,16 +82,4 @@ v8.log
 /mojo/dart/mojom/bin/packages
 /mojo/dart/mojom/packages
 /mojo/dart/mojom/test/packages
-/sky/examples/hello_world/packages
-/sky/examples/stocks/packages
-/sky/sdk/packages/mojo/packages
-/sky/sdk/packages/mojo/pubspec.lock
-/sky/sdk/packages/sky/packages
-/sky/sdk/packages/sky/pubspec.lock
 
-# sky tools
-/sky/tools/skygo/linux64/sky_server
-/sky/tools/skygo/mac/sky_server
-
-# downloaded keyboard_native resources.
-/services/keyboard_native/res/*.png
