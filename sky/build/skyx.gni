@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-package_root = "$root_gen_dir/dart-pkg/packages"
-
 template("skyx") {
   bundle_prefix = target_name
   bundle = "$target_gen_dir/${bundle_prefix}.skyx"
@@ -35,7 +33,7 @@ template("skyx") {
       rebase_path("$sky_snapshot_dir/sky_snapshot", src_dir),
       rebase_path(main_dart, src_dir),
       "--package-root",
-      rebase_path(package_root, src_dir),
+      rebase_path("//sky/packages/workbench/packages", src_dir),
       "--snapshot",
       rebase_path(snapshot, src_dir),
       "-C",
@@ -67,7 +65,7 @@ template("skyx") {
     script = "//sky/tools/skyx.py"
     args = [
       "--package-root",
-      rebase_path(package_root, root_build_dir),
+      rebase_path("//sky/tools/skyx/packages", root_build_dir),
       "--asset-base",
       rebase_path(asset_base, root_build_dir),
       "--snapshot",
@@ -86,7 +84,6 @@ template("skyx") {
 
     deps = [
       ":gen_${bundle_prefix}_snapshot",
-      "//third_party/dart-pkg",
     ]
   }
 
