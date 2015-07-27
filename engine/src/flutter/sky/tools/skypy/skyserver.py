@@ -6,14 +6,13 @@ import socket
 import subprocess
 import logging
 import os.path
-import stat
-import platform
 
 SKYPY_PATH = os.path.dirname(os.path.abspath(__file__))
-SKY_TOOLS_PATH = os.path.dirname(SKYPY_PATH)
-SKYGO_PATH = os.path.join(SKY_TOOLS_PATH, 'skygo')
-SKY_ROOT = os.path.dirname(SKY_TOOLS_PATH)
-SRC_ROOT = os.path.dirname(SKY_ROOT)
+SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SKYPY_PATH)))
+
+WORKBENCH_ROOT = os.path.join(SRC_ROOT, 'sky', 'packages', 'workbench')
+DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
+PUB = os.path.join(DART_SDK, 'pub')
 
 class SkyServer(object):
     def __init__(self, port, root, package_root):
@@ -27,18 +26,6 @@ class SkyServer(object):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         return sock.connect_ex(('localhost', port)) == 0
 
-    @staticmethod
-    def sky_server_path():
-
-        if platform.system() == 'Linux':
-            platform_dir = 'linux64'
-        elif platform.system() == 'Darwin':
-            platform_dir = 'mac'
-        else:
-            assert False, 'No sky_server binary for this platform: ' + platform.system()
-
-        return os.path.join(SKYGO_PATH, platform_dir, 'sky_server')
-
     def start(self):
         if self._port_in_use(self.port):
             logging.warn(
@@ -46,18 +33,9 @@ class SkyServer(object):
                 self.port)
             return
 
-        server_path = self.sky_server_path()
-        st = os.stat(self.sky_server_path())
-        if not (stat.S_IXUSR & st[stat.ST_MODE]):
-            logging.warn('Changing the permissions of %s to be executable.', self.sky_server_path())
-            os.chmod(self.sky_server_path(), st[stat.ST_MODE] | stat.S_IEXEC)
-        server_command = [
-            server_path,
-            '-p', str(self.port),
-            self.root,
-            self.package_root,
-        ]
-        self.server = subprocess.Popen(server_command)
+        subprocess.check_call([PUB, 'run', 'sky:init'], cwd=WORKBENCH_ROOT)
+        args = [PUB, 'run', 'sky_tools:sky_server', str(self.port)]
+        self.server = subprocess.Popen(args, cwd=WORKBENCH_ROOT)
         return self.server.pid
 
     def stop(self):
