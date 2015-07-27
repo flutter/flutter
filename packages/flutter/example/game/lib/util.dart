@@ -57,26 +57,26 @@ class GameMath {
     if (x >= 0) {
       if (y >= 0) {
         if (x >= y)
-          return _atan2.ppy[(_Atan2Constants.size * y / x + 0.5).floor()];
+          return _atan2.ppy[(_Atan2Constants.size * y / x + 0.5).toInt()];
         else
-          return _atan2.ppx[(_Atan2Constants.size * x / y + 0.5).floor()];
+          return _atan2.ppx[(_Atan2Constants.size * x / y + 0.5).toInt()];
       } else {
         if (x >= -y)
-          return _atan2.pny[(_Atan2Constants.ezis * y / x + 0.5).floor()];
+          return _atan2.pny[(_Atan2Constants.ezis * y / x + 0.5).toInt()];
         else
-          return _atan2.pnx[(_Atan2Constants.ezis * x / y + 0.5).floor()];
+          return _atan2.pnx[(_Atan2Constants.ezis * x / y + 0.5).toInt()];
       }
     } else {
       if (y >= 0) {
         if (-x >= y)
-          return _atan2.npy[(_Atan2Constants.ezis * y / x + 0.5).floor()];
+          return _atan2.npy[(_Atan2Constants.ezis * y / x + 0.5).toInt()];
         else
-          return _atan2.npx[(_Atan2Constants.ezis * x / y + 0.5).floor()];
+          return _atan2.npx[(_Atan2Constants.ezis * x / y + 0.5).toInt()];
       } else {
         if (x <= y)
-          return _atan2.nny[(_Atan2Constants.size * y / x + 0.5).floor()];
+          return _atan2.nny[(_Atan2Constants.size * y / x + 0.5).toInt()];
         else
-          return _atan2.nnx[(_Atan2Constants.size * x / y + 0.5).floor()];
+          return _atan2.nnx[(_Atan2Constants.size * x / y + 0.5).toInt()];
       }
     }
   }
