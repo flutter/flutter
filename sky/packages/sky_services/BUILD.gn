@@ -4,6 +4,17 @@
 
 import("//mojo/public/dart/rules.gni")
 
+copy("copy_sky_services_license") {
+  sources = [
+    "//AUTHORS",
+    "//LICENSE",
+  ]
+
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_services/{{source_file_part}}",
+  ]
+}
+
 dart_pkg("sky_services") {
   sources = [
     "README.md",
@@ -11,6 +22,7 @@ dart_pkg("sky_services") {
   ]
 
   deps = [
+    ":copy_sky_services_license",
     "//mojo/services/asset_bundle/public/interfaces",
     "//mojo/services/keyboard/public/interfaces",
     "//sky/services/activity:interfaces",
