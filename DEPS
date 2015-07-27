@@ -283,6 +283,7 @@ hooks = [
                 '--repository-root', '../../../..',
                 '--dart-sdk-directory',
                 '../../../../third_party/dart-sdk/dart-sdk',
+                '--dirs-to-ignore', 'sky/sdk',
     ],
   },
   {
