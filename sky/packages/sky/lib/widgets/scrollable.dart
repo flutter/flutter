@@ -5,7 +5,10 @@
 import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
+import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/animated_simulation.dart';
+import 'package:sky/animation/animated_value.dart';
+import 'package:sky/animation/curves.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/theme/view_configuration.dart' as config;
 import 'package:sky/widgets/basic.dart';
@@ -33,8 +36,15 @@ abstract class Scrollable extends StatefulComponent {
 
   ScrollDirection direction;
 
+  AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
+  AnimationPerformance _toOffsetAnimation; // Started by scrollTo(offset, duration: d)
+
   void initState() {
-    _animation = new AnimatedSimulation(_tickScrollOffset);
+    _toEndAnimation = new AnimatedSimulation(_tickScrollOffset);
+    _toOffsetAnimation = new AnimationPerformance()
+      ..addListener(() {
+        scrollTo(_toOffsetAnimation.variable.value);
+      });
   }
 
   void syncFields(Scrollable source) {
@@ -51,8 +61,6 @@ abstract class Scrollable extends StatefulComponent {
       _scrollBehavior = createScrollBehavior();
     return _scrollBehavior;
   }
-
-  AnimatedSimulation _animation;
 
   Widget buildContent();
 
@@ -87,12 +95,54 @@ abstract class Scrollable extends StatefulComponent {
     });
   }
 
-  bool scrollTo(double newScrollOffset) {
+  void _startToOffsetAnimation(double newScrollOffset, Duration duration) {
+      _stopToEndAnimation();
+      _stopToOffsetAnimation();
+      _toOffsetAnimation
+        ..variable = new AnimatedValue<double>(scrollOffset,
+          end: newScrollOffset,
+          curve: ease
+        )
+        ..progress = 0.0
+        ..duration = duration
+        ..play();
+  }
+
+  void _stopToOffsetAnimation() {
+    if (_toOffsetAnimation.isAnimating)
+      _toOffsetAnimation.stop();
+  }
+
+  void _startToEndAnimation({ double velocity: 0.0 }) {
+    _stopToEndAnimation();
+    _stopToOffsetAnimation();
+    Simulation simulation = scrollBehavior.release(scrollOffset, velocity);
+    if (simulation != null)
+      _toEndAnimation.start(simulation);
+  }
+
+  void _stopToEndAnimation() {
+    _toEndAnimation.stop();
+  }
+
+  void didUnmount() {
+    _stopToEndAnimation();
+    _stopToOffsetAnimation();
+    super.didUnmount();
+  }
+
+  bool scrollTo(double newScrollOffset, { Duration duration }) {
     if (newScrollOffset == _scrollOffset)
       return false;
-    setState(() {
-      _scrollOffset = newScrollOffset;
-    });
+
+    if (duration == null) {
+      setState(() {
+        _scrollOffset = newScrollOffset;
+      });
+    } else {
+      _startToOffsetAnimation(newScrollOffset, duration);
+    }
+
     if (_registeredScrollClients != null) {
       var newList = null;
       _registeredScrollClients.forEach((target) {
@@ -114,24 +164,8 @@ abstract class Scrollable extends StatefulComponent {
     return scrollTo(newScrollOffset);
   }
 
-  void didUnmount() {
-    _stopSimulation();
-    super.didUnmount();
-  }
-
   void settleScrollOffset() {
-    _startSimulation();
-  }
-
-  void _stopSimulation() {
-    _animation.stop();
-  }
-
-  void _startSimulation({ double velocity: 0.0 }) {
-    _stopSimulation();
-    Simulation simulation = scrollBehavior.release(scrollOffset, velocity);
-    if (simulation != null)
-      _animation.start(simulation);
+    _startToEndAnimation();
   }
 
   void _tickScrollOffset(double value) {
@@ -139,12 +173,8 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void _handlePointerDown(_) {
-    _stopSimulation();
-  }
-
-  void _handlePointerUpOrCancel(_) {
-    if (!_animation.isAnimating)
-      settleScrollOffset();
+    _stopToEndAnimation();
+    _stopToOffsetAnimation();
   }
 
   void _handleScrollUpdate(sky.GestureEvent event) {
@@ -155,15 +185,20 @@ abstract class Scrollable extends StatefulComponent {
     double eventVelocity = direction == ScrollDirection.horizontal
       ? -event.velocityX
       : -event.velocityY;
-    _startSimulation(velocity: _velocityForFlingGesture(eventVelocity));
+    _startToEndAnimation(velocity: _velocityForFlingGesture(eventVelocity));
   }
 
-  void _handleFlingCancel(sky.GestureEvent event) {
-    settleScrollOffset();
+  void _maybeSettleScrollOffset() {
+    if (!_toEndAnimation.isAnimating && !_toOffsetAnimation.isAnimating)
+      settleScrollOffset();
   }
+
+  void _handlePointerUpOrCancel(_) { _maybeSettleScrollOffset(); }
+
+  void _handleFlingCancel(sky.GestureEvent event) { _maybeSettleScrollOffset(); }
+
 
   void _handleWheel(sky.WheelEvent event) {
     scrollBy(-event.offsetY);
   }
-
 }
