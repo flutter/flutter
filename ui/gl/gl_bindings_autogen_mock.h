@@ -842,6 +842,7 @@ static void GL_BINDING_CALL Mock_glTexSubImage2D(GLenum target,
                                                  GLenum format,
                                                  GLenum type,
                                                  const void* pixels);
+static void GL_BINDING_CALL Mock_glTextureBarrierNV(void);
 static void GL_BINDING_CALL
 Mock_glTransformFeedbackVaryings(GLuint program,
                                  GLsizei count,

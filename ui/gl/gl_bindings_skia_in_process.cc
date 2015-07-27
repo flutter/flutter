@@ -699,6 +699,10 @@ GLvoid StubGLObjectLabel(GLenum identifier, GLuint name, GLsizei length,
   glObjectLabelKHR(identifier, name, length, label);
 }
 
+GLvoid StubTextureBarrier(void) {
+  glTextureBarrierNV();
+}
+
 }  // extern "C"
 }  // namespace
 
@@ -898,6 +902,7 @@ GrGLInterface* CreateInProcessSkiaGLBinding() {
   functions->fPushDebugGroup = StubGLPushDebugGroup;
   functions->fPopDebugGroup = StubGLPopDebugGroup;
   functions->fObjectLabel = StubGLObjectLabel;
+  functions->fTextureBarrier = StubTextureBarrier;
 
   return interface;
 }

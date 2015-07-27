@@ -619,6 +619,7 @@ void glTexSubImage2DFn(GLenum target,
                        GLenum format,
                        GLenum type,
                        const void* pixels) override;
+void glTextureBarrierNVFn(void) override;
 void glTransformFeedbackVaryingsFn(GLuint program,
                                    GLsizei count,
                                    const char* const* varyings,

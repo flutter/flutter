@@ -354,6 +354,7 @@ void DriverGL::InitializeStaticBindings() {
   fn.glTexStorage3DFn = 0;
   fn.glTexSubImage2DFn = reinterpret_cast<glTexSubImage2DProc>(
       GetGLProcAddress("glTexSubImage2D"));
+  fn.glTextureBarrierNVFn = 0;
   fn.glTransformFeedbackVaryingsFn = 0;
   fn.glUniform1fFn =
       reinterpret_cast<glUniform1fProc>(GetGLProcAddress("glUniform1f"));
@@ -530,6 +531,8 @@ void DriverGL::InitializeDynamicBindings(GLContext* context) {
   ext.b_GL_NV_fence = extensions.find("GL_NV_fence ") != std::string::npos;
   ext.b_GL_NV_path_rendering =
       extensions.find("GL_NV_path_rendering ") != std::string::npos;
+  ext.b_GL_NV_texture_barrier =
+      extensions.find("GL_NV_texture_barrier ") != std::string::npos;
   ext.b_GL_OES_EGL_image =
       extensions.find("GL_OES_EGL_image ") != std::string::npos;
   ext.b_GL_OES_get_program_binary =
@@ -1877,6 +1880,13 @@ void DriverGL::InitializeDynamicBindings(GLContext* context) {
     fn.glTexStorage3DFn = reinterpret_cast<glTexStorage3DProc>(
         GetGLProcAddress("glTexStorage3D"));
     DCHECK(fn.glTexStorage3DFn);
+  }
+
+  debug_fn.glTextureBarrierNVFn = 0;
+  if (ext.b_GL_NV_texture_barrier) {
+    fn.glTextureBarrierNVFn = reinterpret_cast<glTextureBarrierNVProc>(
+        GetGLProcAddress("glTextureBarrierNV"));
+    DCHECK(fn.glTextureBarrierNVFn);
   }
 
   debug_fn.glTransformFeedbackVaryingsFn = 0;
@@ -4403,6 +4413,13 @@ static void GL_BINDING_CALL Debug_glTexSubImage2D(GLenum target,
                                          height, format, type, pixels);
 }
 
+static void GL_BINDING_CALL Debug_glTextureBarrierNV(void) {
+  GL_SERVICE_LOG("glTextureBarrierNV"
+                 << "("
+                 << ")");
+  g_driver_gl.debug_fn.glTextureBarrierNVFn();
+}
+
 static void GL_BINDING_CALL
 Debug_glTransformFeedbackVaryings(GLuint program,
                                   GLsizei count,
@@ -5887,6 +5904,10 @@ void DriverGL::InitializeDebugBindings() {
   if (!debug_fn.glTexSubImage2DFn) {
     debug_fn.glTexSubImage2DFn = fn.glTexSubImage2DFn;
     fn.glTexSubImage2DFn = Debug_glTexSubImage2D;
+  }
+  if (!debug_fn.glTextureBarrierNVFn) {
+    debug_fn.glTextureBarrierNVFn = fn.glTextureBarrierNVFn;
+    fn.glTextureBarrierNVFn = Debug_glTextureBarrierNV;
   }
   if (!debug_fn.glTransformFeedbackVaryingsFn) {
     debug_fn.glTransformFeedbackVaryingsFn = fn.glTransformFeedbackVaryingsFn;
@@ -7499,6 +7520,10 @@ void GLApiBase::glTexSubImage2DFn(GLenum target,
                                   const void* pixels) {
   driver_->fn.glTexSubImage2DFn(target, level, xoffset, yoffset, width, height,
                                 format, type, pixels);
+}
+
+void GLApiBase::glTextureBarrierNVFn(void) {
+  driver_->fn.glTextureBarrierNVFn();
 }
 
 void GLApiBase::glTransformFeedbackVaryingsFn(GLuint program,
@@ -9455,6 +9480,11 @@ void TraceGLApi::glTexSubImage2DFn(GLenum target,
   TRACE_EVENT_BINARY_EFFICIENT0("gpu", "TraceGLAPI::glTexSubImage2D")
   gl_api_->glTexSubImage2DFn(target, level, xoffset, yoffset, width, height,
                              format, type, pixels);
+}
+
+void TraceGLApi::glTextureBarrierNVFn(void) {
+  TRACE_EVENT_BINARY_EFFICIENT0("gpu", "TraceGLAPI::glTextureBarrierNV")
+  gl_api_->glTextureBarrierNVFn();
 }
 
 void TraceGLApi::glTransformFeedbackVaryingsFn(GLuint program,
@@ -11727,6 +11757,13 @@ void NoContextGLApi::glTexSubImage2DFn(GLenum target,
                                        const void* pixels) {
   NOTREACHED() << "Trying to call glTexSubImage2D() without current GL context";
   LOG(ERROR) << "Trying to call glTexSubImage2D() without current GL context";
+}
+
+void NoContextGLApi::glTextureBarrierNVFn(void) {
+  NOTREACHED()
+      << "Trying to call glTextureBarrierNV() without current GL context";
+  LOG(ERROR)
+      << "Trying to call glTextureBarrierNV() without current GL context";
 }
 
 void NoContextGLApi::glTransformFeedbackVaryingsFn(GLuint program,
