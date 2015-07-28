@@ -408,7 +408,6 @@ class Analyze(object):
         analyzer_path = os.path.join(SRC_ROOT, 'sky/tools/skyanalyzer')
         analyzer_args = [
             analyzer_path,
-            build_dir,
             args.app_path
         ]
         if args.congratulate:

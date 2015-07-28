@@ -9,11 +9,13 @@ import re
 import subprocess
 import sys
 
-from skypy.url_mappings import URLMappings
-
 SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
 SRC_ROOT = os.path.dirname(SKY_ROOT)
+
+WORKBENCH = os.path.join(SRC_ROOT, 'sky', 'packages', 'workbench')
+DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
+DARTANALYZER = os.path.join(DART_SDK, 'dartanalyzer')
 
 _IGNORED_PATTERNS = [
   # Ignored because they're not indicative of specific errors.
@@ -49,24 +51,13 @@ _IGNORED_PATTERNS = [
 def main():
     parser = argparse.ArgumentParser(description='Sky Analyzer')
     parser.add_argument('--congratulate', action="store_true")
-    parser.add_argument('build_dir', type=str)
     parser.add_argument('app_path', type=str)
-
     args = parser.parse_args()
-    build_dir = os.path.abspath(args.build_dir)
-
-    url_mappings = URLMappings(SRC_ROOT, build_dir)
-    analyzer_path = os.path.join(SRC_ROOT, 'third_party/dart-sdk/dart-sdk/bin/dartanalyzer')
-    packages_root = os.path.join(build_dir, 'gen/dart-pkg/packages')
-
-    analyzer_args = [
-        analyzer_path,
-        "--package-root", packages_root,
-        "--package-warnings", args.app_path
-    ] + url_mappings.as_args
 
     try:
-      subprocess.check_output(analyzer_args, stderr=subprocess.STDOUT)
+      subprocess.check_output([
+          DARTANALYZER, "--package-warnings", args.app_path
+      ], stderr=subprocess.STDOUT, cwd=WORKBENCH)
     except subprocess.CalledProcessError as e:
       errors = [l for l in e.output.split('\n')
                 if not any(p.match(l) for p in _IGNORED_PATTERNS)]
