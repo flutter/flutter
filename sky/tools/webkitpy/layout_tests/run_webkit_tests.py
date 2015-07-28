@@ -392,7 +392,6 @@ def run_tests(port, options, args, logging_stream):
         printer.cleanup()
 
 def run_analyzer(port, options, args, logging_stream):
-    build_dir = port.analyzer_build_directory()
     test_dir = os.path.dirname(os.path.abspath(__file__))
     sky_tools_dir = os.path.dirname(os.path.dirname(test_dir))
     analyzer_path = os.path.join(sky_tools_dir, 'skyanalyzer')
@@ -400,7 +399,6 @@ def run_analyzer(port, options, args, logging_stream):
     analyzer_target_path = os.path.join(src_dir, 'sky/sdk/example/stocks/lib/main.dart')
     analyzer_args = [
         analyzer_path,
-        build_dir,
         analyzer_target_path
     ]
     try:
