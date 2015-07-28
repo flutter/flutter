@@ -56,7 +56,8 @@ def main():
 
     try:
       subprocess.check_output([
-          DARTANALYZER, "--package-warnings", args.app_path
+          DARTANALYZER, "--package-warnings", args.app_path,
+          "--package-root", os.path.join(WORKBENCH, "packages")
       ], stderr=subprocess.STDOUT, cwd=WORKBENCH)
     except subprocess.CalledProcessError as e:
       errors = [l for l in e.output.split('\n')
