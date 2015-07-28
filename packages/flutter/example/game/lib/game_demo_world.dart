@@ -562,49 +562,43 @@ class Laser extends Sprite {
 // Background starfield
 
 class StarField extends Node {
+  Image _image;
   int _numStars;
   List<Point> _starPositions;
   List<double> _starScales;
-  List<double> _opacity;
-  List<Texture> _textures;
+  List<Rect> _rects;
+  List<Color> _colors;
+  Paint _paint = new Paint()
+    ..setFilterQuality(sky.FilterQuality.low)
+    ..isAntiAlias = false
+    ..setTransferMode(sky.TransferMode.plus);
 
   StarField(SpriteSheet spriteSheet, this._numStars) {
     _starPositions = [];
     _starScales = [];
-    _opacity = [];
-    _textures = [];
+    _colors = [];
+    _rects = [];
 
     for (int i  = 0; i < _numStars; i++) {
       _starPositions.add(new Point(_rand.nextDouble() * _gameSizeWidth, _rand.nextDouble() * _gameSizeHeight));
       _starScales.add(_rand.nextDouble());
-      _opacity.add(_rand.nextDouble() * 0.5 + 0.5);
-      _textures.add(spriteSheet["star_${_rand.nextInt(2)}.png"]);
+      _colors.add(new Color.fromARGB((255.0 * (_rand.nextDouble() * 0.5 + 0.5)).toInt(), 255, 255, 255));
+      _rects.add(spriteSheet["star_${_rand.nextInt(2)}.png"].frame);
     }
+
+    _image = spriteSheet.image;
   }
 
   void paint(PaintingCanvas canvas) {
-    // Setup paint object for opacity and transfer mode
-    Paint paint = new Paint();
-    paint.setTransferMode(sky.TransferMode.plus);
-
-    double baseScaleX = 64.0 / _textures[0].size.width;
-    double baseScaleY = 64.0 / _textures[0].size.height;
-
-    // Draw each star
+    // Create a transform for each star
+    List<sky.RSTransform> transforms = [];
     for (int i = 0; i < _numStars; i++) {
-      Point pos = _starPositions[i];
-      double scale = _starScales[i];
-      paint.color = new Color.fromARGB((255.0*_opacity[i]).toInt(), 255, 255, 255);
-
-      canvas.save();
-
-      canvas.translate(pos.x, pos.y);
-      canvas.scale(baseScaleX * scale, baseScaleY * scale);
-
-      canvas.drawImageRect(_textures[i].image, _textures[i].frame, _textures[i].spriteSourceSize, paint);
-
-      canvas.restore();
+      sky.RSTransform transform = new sky.RSTransform(_starScales[i], 0.0, _starPositions[i].x, _starPositions[i].y);
+      transforms.add(transform);
     }
+
+    // Draw the stars
+    canvas.drawAtlas(_image, transforms, _rects, _colors, sky.TransferMode.modulate, null, _paint);
   }
 
   void move(double dx, double dy) {
