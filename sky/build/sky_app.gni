@@ -75,6 +75,8 @@ template("sky_app") {
       native_libs = [ "libsky_shell.so" ]
       asset_location = "$target_gen_dir/assets"
 
+      extensions_to_not_compress = ".skyx"
+
       deps = [
         "//base:base_java",
         "//sky/shell:assets",
