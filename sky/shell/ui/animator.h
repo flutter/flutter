@@ -27,8 +27,9 @@ class Animator {
 
   Engine::Config config_;
   Engine* engine_;
+  int outstanding_draw_requests_;
+  bool did_defer_frame_request_;
   bool engine_requested_frame_;
-  bool frame_in_progress_;
   bool paused_;
 
   base::WeakPtrFactory<Animator> weak_factory_;
