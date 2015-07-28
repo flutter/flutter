@@ -26,7 +26,7 @@ copy("sky_shell") {
     ]
   } else if (is_ios || is_mac) {
     sources = [
-      "$root_build_dir/Sky.app",
+      "$root_build_dir/SkyShell.app",
     ]
 
     deps = [
