@@ -14,5 +14,7 @@ sky_app("game") {
     deps = [
       "//sky/packages/sky/example/game/apk:resources",
     ]
+  } else if (is_ios) {
+    info_plist = "ios/Info.plist"
   }
 }

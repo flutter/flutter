@@ -56,6 +56,10 @@ template("resource_copy_ios") {
     set_sources_assignment_filter([])
     sources = _resources
     outputs = [ "$root_build_dir/$_app_name.app/$_bundle_directory/{{source_file_part}}" ]
+
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
   }
 }
 
@@ -115,14 +119,14 @@ template("ios_app") {
     script = ios_app_script
 
     sources = [ invoker.info_plist ]
-    outputs = [ "$root_build_dir/Info.plist" ]
+    outputs = [ "$root_build_dir/plist/$app_name/Info.plist" ]
 
     args = [
       "plist",
       "-i",
       rebase_path(invoker.info_plist, root_build_dir),
       "-o",
-      rebase_path(root_build_dir),
+      rebase_path("$root_build_dir/plist/$app_name"),
     ]
   }
 
@@ -131,7 +135,7 @@ template("ios_app") {
   copy_gen_target_name = target_name + "_copy"
   copy(copy_gen_target_name) {
     sources = [
-      "$root_build_dir/Info.plist",
+      "$root_build_dir/plist/$app_name/Info.plist",
       "$root_build_dir/$app_name",
     ]
 
