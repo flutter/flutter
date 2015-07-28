@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'dart:sky' as sky;
 
 import 'package:sky/base/hit_test.dart';
+import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
@@ -651,6 +652,11 @@ abstract class Component extends Widget {
     _scheduleComponentForRender(this);
   }
 
+  static void flushBuild() {
+    if (!_dirtyComponents.isEmpty)
+      _buildDirtyComponents();
+  }
+
   Widget build();
 
 }
@@ -759,13 +765,15 @@ void _absorbDirtyComponents(List<Component> list) {
 }
 
 void _buildDirtyComponents() {
+  assert(!_dirtyComponents.isEmpty);
+
   Stopwatch sw;
   if (_shouldLogRenderDuration)
     sw = new Stopwatch()..start();
 
   _inRenderDirtyComponents = true;
   try {
-    sky.tracing.begin('Widgets._buildDirtyComponents');
+    sky.tracing.begin('Component.flushBuild');
     List<Component> sortedDirtyComponents = new List<Component>();
     _absorbDirtyComponents(sortedDirtyComponents);
     int index = 0;
@@ -784,7 +792,7 @@ void _buildDirtyComponents() {
   } finally {
     _buildScheduled = false;
     _inRenderDirtyComponents = false;
-    sky.tracing.end('Widgets._buildDirtyComponents');
+    sky.tracing.end('Component.flushBuild');
   }
 
   Widget._notifyMountStatusChanged();
@@ -795,20 +803,19 @@ void _buildDirtyComponents() {
     if (_debugFrameTimes.length >= 1000) {
       _debugFrameTimes.sort();
       const int i = 99;
-      print('_buildDirtyComponents: ${i+1}th fastest frame out of the last ${_debugFrameTimes.length}: ${_debugFrameTimes[i]} microseconds');
+      print('Component.flushBuild: ${i+1}th fastest frame out of the last ${_debugFrameTimes.length}: ${_debugFrameTimes[i]} microseconds');
       _debugFrameTimes.clear();
     }
   }
 }
 
-void _scheduleComponentForRender(Component c) {
-  _dirtyComponents.add(c);
+void _scheduleComponentForRender(Component component) {
+  _dirtyComponents.add(component);
   if (!_buildScheduled) {
     _buildScheduled = true;
-    new Future.microtask(_buildDirtyComponents);
+    scheduler.ensureVisualUpdate();
   }
 }
-
 
 // RenderObjectWrappers correspond to a desired state of a RenderObject.
 // They are fully immutable, with one exception: A Widget which is a
@@ -1176,6 +1183,11 @@ class WidgetSkyBinding extends SkyBinding {
         target = target._parent;
       }
     }
+  }
+
+  void beginFrame(double timeStamp) {
+    Component.flushBuild();
+    super.beginFrame(timeStamp);
   }
 
 }
