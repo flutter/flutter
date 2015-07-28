@@ -53,6 +53,24 @@ class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
   }
 }
 
+class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
+  AnimatedMatrix4Value(Matrix4 begin, { Matrix4 end, Curve curve: linear })
+    : super(begin, end: end, curve: curve);
+
+  void setProgress(double t) {
+    if (t == 1.0) {
+      value = end;
+      return;
+    }
+    // TODO(mpcomplete): Animate the full matrix. Will animating the cells
+    // separately work?
+    Vector3 beginT = begin.getTranslation();
+    Vector3 endT = end.getTranslation();
+    Vector3 lerpT = beginT*(1.0-t) + endT*t;
+    value = new Matrix4.identity()..translate(lerpT);
+  }
+}
+
 class ImplicitlyAnimatedValue<T> {
   final AnimationPerformance performance = new AnimationPerformance();
   final AnimatedValue<T> _variable;
@@ -64,7 +82,7 @@ class ImplicitlyAnimatedValue<T> {
   }
 
   T get value => _variable.value;
-  void set value(T newValue) {
+  void animateTo(T newValue) {
     _variable.begin = _variable.value;
     _variable.end = newValue;
     if (_variable.value != _variable.end) {
@@ -75,11 +93,118 @@ class ImplicitlyAnimatedValue<T> {
   }
 }
 
+abstract class AnimationIntention {
+  void initFields(AnimatedContainer original);
+  void syncFields(AnimatedContainer original, AnimatedContainer updated);
+}
+
+abstract class ImplicitlySyncFieldIntention<T> extends AnimationIntention {
+  ImplicitlySyncFieldIntention(this.duration);
+
+  Duration duration;
+  ImplicitlyAnimatedValue<T> field;
+
+  // Overrides.
+  T getter(AnimatedContainer container);
+  void setter(AnimatedContainer container, T value);
+  AnimatedValue<T> initField(T value);
+
+  void initFields(AnimatedContainer original) {
+    _updateField(original, getter(original));
+  }
+
+  void syncFields(AnimatedContainer original, AnimatedContainer updated) {
+    _updateField(original, getter(updated));
+  }
+
+  void _updateField(AnimatedContainer original, T newValue) {
+    if (field != null) {
+      // Animate to newValue (possibly null).
+      field.animateTo(newValue);
+    } else if (newValue != null) {
+      // Set the value and prepare it for future animations.
+      field = new ImplicitlyAnimatedValue<T>(initField(newValue), duration);
+      field.performance.addListener(() {
+        original.setState(() { setter(original, field.value); });
+      });
+    }
+  }
+}
+
+class ImplicitlySyncConstraintsIntention extends ImplicitlySyncFieldIntention<BoxConstraints> {
+  ImplicitlySyncConstraintsIntention(Duration duration) : super(duration);
+
+  BoxConstraints getter(AnimatedContainer container) => container.constraints;
+  void setter(AnimatedContainer container, BoxConstraints val) { container.constraints = val; }
+  AnimatedValue initField(BoxConstraints val) => new AnimatedBoxConstraintsValue(val);
+}
+
+class ImplicitlySyncDecorationIntention extends ImplicitlySyncFieldIntention<BoxDecoration> {
+  ImplicitlySyncDecorationIntention(Duration duration) : super(duration);
+
+  BoxDecoration getter(AnimatedContainer container) => container.decoration;
+  void setter(AnimatedContainer container, BoxDecoration val) { container.decoration = val; }
+  AnimatedValue initField(BoxDecoration val) => new AnimatedBoxDecorationValue(val);
+}
+
+class ImplicitlySyncMarginIntention extends ImplicitlySyncFieldIntention<EdgeDims> {
+  ImplicitlySyncMarginIntention(Duration duration) : super(duration);
+
+  EdgeDims getter(AnimatedContainer container) => container.margin;
+  void setter(AnimatedContainer container, EdgeDims val) { container.margin = val; }
+  AnimatedValue initField(EdgeDims val) => new AnimatedEdgeDimsValue(val);
+}
+
+class ImplicitlySyncPaddingIntention extends ImplicitlySyncFieldIntention<EdgeDims> {
+  ImplicitlySyncPaddingIntention(Duration duration) : super(duration);
+
+  EdgeDims getter(AnimatedContainer container) => container.padding;
+  void setter(AnimatedContainer container, EdgeDims val) { container.padding = val; }
+  AnimatedValue initField(EdgeDims val) => new AnimatedEdgeDimsValue(val);
+}
+
+class ImplicitlySyncTransformIntention extends ImplicitlySyncFieldIntention<Matrix4> {
+  ImplicitlySyncTransformIntention(Duration duration) : super(duration);
+
+  Matrix4 getter(AnimatedContainer container) => container.transform;
+  void setter(AnimatedContainer container, Matrix4 val) { container.transform = val; }
+  AnimatedValue initField(Matrix4 val) => new AnimatedMatrix4Value(val);
+}
+
+class ImplicitlySyncWidthIntention extends ImplicitlySyncFieldIntention<double> {
+  ImplicitlySyncWidthIntention(Duration duration) : super(duration);
+
+  double getter(AnimatedContainer container) => container.width;
+  void setter(AnimatedContainer container, double val) { container.width = val; }
+  AnimatedValue initField(double val) => new AnimatedValue<double>(val);
+}
+
+class ImplicitlySyncHeightIntention extends ImplicitlySyncFieldIntention<double> {
+  ImplicitlySyncHeightIntention(Duration duration) : super(duration);
+
+  double getter(AnimatedContainer container) => container.height;
+  void setter(AnimatedContainer container, double val) { container.height = val; }
+  AnimatedValue initField(double val) => new AnimatedValue<double>(val);
+}
+
+List<AnimationIntention> implicitlySyncFieldsIntention(Duration duration) {
+  return [
+    new ImplicitlySyncConstraintsIntention(duration),
+    new ImplicitlySyncDecorationIntention(duration),
+    new ImplicitlySyncMarginIntention(duration),
+    new ImplicitlySyncPaddingIntention(duration),
+    new ImplicitlySyncTransformIntention(duration),
+    new ImplicitlySyncWidthIntention(duration),
+    new ImplicitlySyncHeightIntention(duration)
+  ];
+}
+
 class AnimatedContainer extends AnimatedComponent {
   AnimatedContainer({
     Key key,
     this.child,
-    this.duration,
+    this.intentions,
+    this.tag,
     this.constraints,
     this.decoration,
     this.width,
@@ -90,7 +215,6 @@ class AnimatedContainer extends AnimatedComponent {
   }) : super(key: key);
 
   Widget child;
-  Duration duration; // TODO(abarth): Support separate durations for each value.
   BoxConstraints constraints;
   BoxDecoration decoration;
   EdgeDims margin;
@@ -99,109 +223,30 @@ class AnimatedContainer extends AnimatedComponent {
   double width;
   double height;
 
-  ImplicitlyAnimatedValue<BoxConstraints> _constraints;
-  ImplicitlyAnimatedValue<BoxDecoration> _decoration;
-  ImplicitlyAnimatedValue<EdgeDims> _margin;
-  ImplicitlyAnimatedValue<EdgeDims> _padding;
-  ImplicitlyAnimatedValue<Matrix4> _transform;
-  ImplicitlyAnimatedValue<double> _width;
-  ImplicitlyAnimatedValue<double> _height;
+  List<AnimationIntention> intentions;
+  dynamic tag; // Used by intentions to determine desired state.
 
   void initState() {
-    _updateFields();
+    for (AnimationIntention i in intentions)
+      i.initFields(this);
   }
 
-  void syncFields(AnimatedContainer source) {
-    child = source.child;
-    constraints = source.constraints;
-    decoration = source.decoration;
-    margin = source.margin;
-    padding = source.padding;
-    width = source.width;
-    height = source.height;
-    _updateFields();
-  }
-
-  void _updateFields() {
-    _updateConstraints();
-    _updateDecoration();
-    _updateMargin();
-    _updatePadding();
-    _updateTransform();
-    _updateWidth();
-    _updateHeight();
-  }
-
-  void _updateField(dynamic value, ImplicitlyAnimatedValue animatedValue, Function initField) {
-    if (animatedValue != null)
-      animatedValue.value = value;
-    else if (value != null)
-      initField();
-  }
-
-  void _updateConstraints() {
-    _updateField(constraints, _constraints, () {
-      _constraints = new ImplicitlyAnimatedValue<BoxConstraints>(new AnimatedBoxConstraintsValue(constraints), duration);
-      watch(_constraints.performance);
-    });
-  }
-
-  void _updateDecoration() {
-    _updateField(decoration, _decoration, () {
-      _decoration = new ImplicitlyAnimatedValue<BoxDecoration>(new AnimatedBoxDecorationValue(decoration), duration);
-      watch(_decoration.performance);
-    });
-  }
-
-  void _updateMargin() {
-    _updateField(margin, _margin, () {
-      _margin = new ImplicitlyAnimatedValue<EdgeDims>(new AnimatedEdgeDimsValue(margin), duration);
-      watch(_margin.performance);
-    });
-  }
-
-  void _updatePadding() {
-    _updateField(padding, _padding, () {
-      _padding = new ImplicitlyAnimatedValue<EdgeDims>(new AnimatedEdgeDimsValue(padding), duration);
-      watch(_padding.performance);
-    });
-  }
-
-  void _updateTransform() {
-    _updateField(transform, _transform, () {
-      _transform = new ImplicitlyAnimatedValue<Matrix4>(new AnimatedValue<Matrix4>(transform), duration);
-      watch(_transform.performance);
-    });
-  }
-
-  void _updateWidth() {
-    _updateField(width, _width, () {
-      _width = new ImplicitlyAnimatedValue<double>(new AnimatedValue<double>(width), duration);
-      watch(_width.performance);
-    });
-  }
-
-  void _updateHeight() {
-    _updateField(height, _height, () {
-      _height = new ImplicitlyAnimatedValue<double>( new AnimatedValue<double>(height), duration);
-      watch(_height.performance);
-    });
-  }
-
-  dynamic _getValue(dynamic value, ImplicitlyAnimatedValue animatedValue) {
-    return animatedValue == null ? value : animatedValue.value;
+  void syncFields(AnimatedContainer updated) {
+    child = updated.child;
+    for (AnimationIntention i in intentions)
+      i.syncFields(this, updated);
   }
 
   Widget build() {
     return new Container(
       child: child,
-      constraints:  _getValue(constraints, _constraints),
-      decoration: _getValue(decoration, _decoration),
-      margin: _getValue(margin, _margin),
-      padding: _getValue(padding, _padding),
-      transform: _getValue(transform, _transform),
-      width: _getValue(width, _width),
-      height: _getValue(height, _height)
+      constraints: constraints,
+      decoration: decoration,
+      margin: margin,
+      padding: padding,
+      transform: transform,
+      width: width,
+      height: height
     );
   }
 }
