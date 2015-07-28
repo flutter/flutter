@@ -29,6 +29,8 @@ class Sprite extends NodeWithSize {
   ///     mySprite.transferMode = TransferMode.plusMode;
   TransferMode transferMode;
 
+  Paint _cachedPaint = new Paint();
+
   /// Creates a new sprite from the provided [texture].
   ///
   ///     var mySprite = new Sprite(myTexture)
@@ -94,17 +96,16 @@ class Sprite extends NodeWithSize {
       canvas.scale(scaleX, scaleY);
 
       // Setup paint object for opacity and transfer mode
-      Paint paint = new Paint();
-      paint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
+      _cachedPaint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
       if (colorOverlay != null) {
-        paint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATop));
+        _cachedPaint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATop));
       }
       if (transferMode != null) {
-        paint.setTransferMode(transferMode);
+        _cachedPaint.setTransferMode(transferMode);
       }
 
       // Do actual drawing of the sprite
-      texture.drawTexture(canvas, Point.origin, paint);
+      texture.drawTexture(canvas, Point.origin, _cachedPaint);
     } else {
       // Paint a red square for missing texture
       canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),
