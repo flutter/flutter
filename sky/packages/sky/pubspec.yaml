@@ -2,7 +2,7 @@ name: sky
 version: 0.0.23
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: A framework for writing Sky applications
-homepage: https://github.com/domokit/sky_engine/tree/master/sky/sdk
+homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/sky
 dependencies:
   cassowary: ^0.1.7
   material_design_icons: ^0.0.2

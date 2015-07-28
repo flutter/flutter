@@ -46,7 +46,7 @@ target. Building on MacOS for Android, iOS, and a head-less MacOS target is comi
 * (Only the first time) `./tools/android/download_android_tools.py`
 * `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
-* `./sky/tools/shelldb start out/android_Debug/ sky/sdk/example/hello_world/lib/main.dart`
+* `./sky/tools/shelldb start out/android_Debug/ sky/packages/sky/example/hello_world/lib/main.dart`
 
 ### Linux (on Linux)
 
@@ -58,7 +58,7 @@ Running the code
 ----------------
 
 * `./sky/tools/test_sky --debug` runs the tests on the host machine using `out/Debug`.
-* `./out/Debug/sky_shell --package-root=out/Debug/gen/dart-pkg/packages sky/sdk/example/hello_world/lib/main.dart`
+* `./out/Debug/sky_shell --package-root=sky/packages/workbench/packages sky/packages/sky/example/hello_world/lib/main.dart`
   Note: Because Linux is headless, you won't see any UI. You can use `print` to generate console output or you can interact with the DartVM via observatory at [http://localhost:8181/](http://localhost:8181/).
 
 Contributing code
