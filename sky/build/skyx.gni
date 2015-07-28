@@ -41,8 +41,9 @@ template("skyx") {
     ]
 
     deps = [
-      "//sky/tools/sky_snapshot($host_toolchain)",
+      "//sky/packages/workbench:init",
       "//sky/sdk",
+      "//sky/tools/sky_snapshot($host_toolchain)",
     ]
 
     if (defined(invoker.deps)) {
