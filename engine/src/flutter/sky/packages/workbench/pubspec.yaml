@@ -10,6 +10,6 @@ dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
   sky:
-    path: ../../sdk
+    path: ../sky
 environment:
   sdk: '>=1.8.0 <2.0.0'
