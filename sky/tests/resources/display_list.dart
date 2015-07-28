@@ -149,6 +149,7 @@ class TestRenderView extends RenderView {
   // TEST API:
 
   void syncCheckFrame() {
+    Component.flushBuild();
     RenderObject.flushLayout();
     paintFrame();
     print(lastPaint); // TODO(ianh): figure out how to make this fit the unit testing framework better

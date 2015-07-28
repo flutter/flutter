@@ -47,7 +47,7 @@ class SkyBinding {
       _renderView = renderViewOverride;
     }
     assert(_renderView != null);
-    scheduler.addPersistentFrameCallback(_beginFrame);
+    scheduler.addPersistentFrameCallback(beginFrame);
 
     assert(_instance == this);
   }
@@ -69,7 +69,7 @@ class SkyBinding {
   void set root(RenderBox value) {
     _renderView.child = value;
   }
-  void _beginFrame(double timeStamp) {
+  void beginFrame(double timeStamp) {
     RenderObject.flushLayout();
     RenderObject.flushPaint();
     _renderView.paintFrame();
