@@ -27,7 +27,7 @@ class Animator {
 
   Engine::Config config_;
   Engine* engine_;
-  int outstanding_draw_requests_;
+  int outstanding_requests_;
   bool did_defer_frame_request_;
   bool engine_requested_frame_;
   bool paused_;

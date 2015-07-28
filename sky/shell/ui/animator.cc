@@ -16,7 +16,7 @@ const int kPipelineDepth = 2;
 Animator::Animator(const Engine::Config& config, Engine* engine)
     : config_(config),
       engine_(engine),
-      outstanding_draw_requests_(0),
+      outstanding_requests_(0),
       did_defer_frame_request_(false),
       engine_requested_frame_(false),
       paused_(false),
@@ -29,13 +29,12 @@ Animator::~Animator() {
 void Animator::RequestFrame() {
   if (engine_requested_frame_)
     return;
-
-  DCHECK(!did_defer_frame_request_);
-
   TRACE_EVENT_ASYNC_BEGIN0("sky", "Frame request pending", this);
   engine_requested_frame_ = true;
 
-  if (outstanding_draw_requests_ >= kPipelineDepth) {
+  DCHECK(!did_defer_frame_request_);
+  outstanding_requests_++;
+  if (outstanding_requests_ >= kPipelineDepth) {
     did_defer_frame_request_ = true;
     return;
   }
@@ -56,15 +55,16 @@ void Animator::Start() {
 }
 
 void Animator::BeginFrame() {
-  if (!engine_requested_frame_)
-    return;
-  engine_requested_frame_ = false;
   TRACE_EVENT_ASYNC_END0("sky", "Frame request pending", this);
+  DCHECK(engine_requested_frame_);
+  engine_requested_frame_ = false;
+
+  DCHECK(outstanding_requests_ > 0);
+  DCHECK(outstanding_requests_ <= kPipelineDepth) << outstanding_requests_;
 
   engine_->BeginFrame(base::TimeTicks::Now());
   skia::RefPtr<SkPicture> picture = engine_->Paint();
 
-  outstanding_draw_requests_++;
   config_.gpu_task_runner->PostTaskAndReply(
       FROM_HERE,
       base::Bind(&GPUDelegate::Draw, config_.gpu_delegate, picture),
@@ -72,12 +72,12 @@ void Animator::BeginFrame() {
 }
 
 void Animator::OnFrameComplete() {
-  DCHECK(outstanding_draw_requests_ > 0);
-  --outstanding_draw_requests_;
+  DCHECK(outstanding_requests_ > 0);
+  --outstanding_requests_;
   if (paused_)
     return;
 
-  if (engine_requested_frame_ && did_defer_frame_request_) {
+  if (did_defer_frame_request_) {
     did_defer_frame_request_ = false;
     BeginFrame();
   }
