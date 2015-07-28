@@ -16,8 +16,4 @@ action("material_design_icons") {
     "--touch",
     rebase_path(stamp_file, root_build_dir)
   ]
-
-  deps = [
-    "//third_party/dart-pkg",
-  ]
 }
