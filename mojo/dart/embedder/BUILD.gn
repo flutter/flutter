@@ -45,7 +45,6 @@ source_set("dart_controller_no_snapshot") {
     "//mojo/common",
     "//mojo/public/c/system",
     "//mojo/public/cpp/system",
-    "//tonic",
   ]
 
   defines = []
