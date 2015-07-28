@@ -91,6 +91,9 @@ class MacPort(base.Port):
     def operating_system(self):
         return 'mac'
 
+    def driver_name(self):
+        return 'SkyShell'
+
     #
     # PROTECTED METHODS
     #
@@ -108,9 +111,5 @@ class MacPort(base.Port):
         # FIXME: make |configuration| happy with case-sensitive file systems.
         return self._build_path_with_configuration(configuration, self.driver_name() + '.app', 'Contents', 'MacOS', self.driver_name())
 
-    def _path_to_helper(self):
-        binary_name = 'layout_test_helper'
-        return self._build_path(binary_name)
-
     def _path_to_wdiff(self):
-        return 'wdiff'
+        return None

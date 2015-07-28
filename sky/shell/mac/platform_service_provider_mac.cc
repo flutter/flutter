@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/shell/service_provider.h"
-#include "base/single_thread_task_runner.h"
 #include "base/bind.h"
 #include "base/bind_helpers.h"
 #include "base/lazy_instance.h"
 #include "base/location.h"
+#include "base/single_thread_task_runner.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
+#include "sky/engine/wtf/Assertions.h"
 #include "sky/services/ns_net/network_service_impl.h"
+#include "sky/shell/service_provider.h"
+#include "sky/shell/testing/test_runner.h"
 
 namespace sky {
 namespace shell {
@@ -26,6 +27,7 @@ static void CreatePlatformServiceProvider(
   g_service_provider.Get().reset(new mojo::ServiceProviderImpl(request.Pass()));
   g_network_service_factory.Get().reset(new mojo::NetworkServiceFactory());
   g_service_provider.Get()->AddService(g_network_service_factory.Get().get());
+  g_service_provider.Get()->AddService(&TestRunner::Shared());
 }
 
 mojo::ServiceProviderPtr CreateServiceProvider(
