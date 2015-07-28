@@ -65,7 +65,6 @@ void Animator::BeginFrame() {
   skia::RefPtr<SkPicture> picture = engine_->Paint();
 
   outstanding_draw_requests_++;
-  DCHECK(outstanding_draw_requests_ <= kPipelineDepth);
   config_.gpu_task_runner->PostTaskAndReply(
       FROM_HERE,
       base::Bind(&GPUDelegate::Draw, config_.gpu_delegate, picture),
