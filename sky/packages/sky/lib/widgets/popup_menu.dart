@@ -16,6 +16,8 @@ import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/popup_menu_item.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
 
+export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
+
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
 double _kMenuCloseIntervalEnd = 2.0 / 3.0;
 const double _kMenuWidthStep = 56.0;
@@ -25,12 +27,7 @@ const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
-enum PopupMenuStatus {
-  active,
-  inactive,
-}
-
-typedef void PopupMenuStatusChangedCallback(PopupMenuStatus status);
+typedef void PopupMenuStatusChangedCallback(AnimationStatus status);
 
 class PopupMenu extends AnimatedComponent {
 
@@ -59,7 +56,7 @@ class PopupMenu extends AnimatedComponent {
   void initState() {
     _performance = new AnimationPerformance()
       ..duration = _kMenuDuration
-      ..addListener(_checkForStateChanged);
+      ..addStatusListener(_onStatusChanged);
     _updateAnimationVariables();
     watch(_performance);
     _updateBoxPainter();
@@ -115,21 +112,14 @@ class PopupMenu extends AnimatedComponent {
       boxShadow: shadows[level]));
   }
 
-  PopupMenuStatus get _status => _opacity.value != 0.0 ? PopupMenuStatus.active : PopupMenuStatus.inactive;
-
-  PopupMenuStatus _lastStatus;
-  void _checkForStateChanged() {
-    PopupMenuStatus status = _status;
-    if (_lastStatus != null && status != _lastStatus) {
-      if (status == PopupMenuStatus.inactive &&
-          navigator != null && 
-          navigator.currentRoute is RouteState &&
-          (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
-        navigator.pop();
-      if (onStatusChanged != null)
-        onStatusChanged(status);
-    }
-    _lastStatus = status;
+  void _onStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed &&
+        navigator != null &&
+        navigator.currentRoute is RouteState &&
+        (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
+      navigator.pop();
+    if (onStatusChanged != null)
+      onStatusChanged(status);
   }
 
 
