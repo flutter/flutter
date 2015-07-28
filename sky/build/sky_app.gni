@@ -126,7 +126,8 @@ template("sky_app") {
         deps += invoker.deps
       }
     }
-  } else {
+  } else if(is_ios) {
+    # No Info.plist specified. But we still need an empty target
     group(target_name) {
     }
   }
