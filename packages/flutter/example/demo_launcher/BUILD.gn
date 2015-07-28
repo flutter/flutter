@@ -12,17 +12,17 @@ sky_app("demo_launcher") {
     apk_name = "SkyDemo"
 
     bundles = [
-      "//sky/sdk/example/fitness",
-      "//sky/sdk/example/game",
-      "//sky/sdk/example/mine_digger",
-      "//sky/sdk/example/rendering:interactive_flex",
-      "//sky/sdk/example/stocks",
-      "//sky/sdk/example/widgets:cards",
+      "//sky/packages/sky/example/fitness",
+      "//sky/packages/sky/example/game",
+      "//sky/packages/sky/example/mine_digger",
+      "//sky/packages/sky/example/rendering:interactive_flex",
+      "//sky/packages/sky/example/stocks",
+      "//sky/packages/sky/example/widgets:cards",
     ]
 
     deps = [
-      "//sky/sdk/example/demo_launcher/apk:java",
-      "//sky/sdk/example/demo_launcher/apk:resources",
+      "//sky/packages/sky/example/demo_launcher/apk:java",
+      "//sky/packages/sky/example/demo_launcher/apk:resources",
     ]
   }
 }

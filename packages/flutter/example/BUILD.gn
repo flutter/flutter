@@ -6,11 +6,11 @@ group("example") {
   testonly = true
 
   deps = [
-    "//sky/sdk/example/demo_launcher",
-    "//sky/sdk/example/game",
-    "//sky/sdk/example/mine_digger",
-    "//sky/sdk/example/rendering",
-    "//sky/sdk/example/stocks",
-    "//sky/sdk/example/widgets",
+    "//sky/packages/sky/example/demo_launcher",
+    "//sky/packages/sky/example/game",
+    "//sky/packages/sky/example/mine_digger",
+    "//sky/packages/sky/example/rendering",
+    "//sky/packages/sky/example/stocks",
+    "//sky/packages/sky/example/widgets",
   ]
 }
