@@ -12,9 +12,11 @@ import yaml
 
 SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_ROOT = os.path.dirname(os.path.dirname(SKY_TOOLS_DIR))
-SKY_SDK_DIR = os.path.join(SRC_ROOT, 'sky', 'sdk')
-SKY_PUBSPEC = os.path.join(SKY_SDK_DIR, 'pubspec.yaml')
-SKY_PUBSPEC_LOCK = os.path.join(SKY_SDK_DIR, 'pubspec.lock')
+SKY_PACKAGE_DIR = os.path.join(SRC_ROOT, 'sky', 'packages', 'sky')
+SKY_PUBSPEC = os.path.join(SKY_PACKAGE_DIR, 'pubspec.yaml')
+SKY_PUBSPEC_LOCK = os.path.join(SKY_PACKAGE_DIR, 'pubspec.lock')
+
+WORKBENCH = os.path.join(SRC_ROOT, 'sky', 'packages', 'workbench')
 
 def version_for_pubspec(pubspec_path):
     with open(pubspec_path, 'r') as stream:
@@ -26,11 +28,14 @@ def entry_for_dependency(dart_pkg_dir, dependency):
     dependency_path = os.path.join(dart_pkg_dir, dependency)
     pubspec_path = os.path.join(dependency_path, 'pubspec.yaml')
     if not os.path.exists(pubspec_path):
+        dependency_path = os.path.dirname(os.path.realpath(os.path.join(WORKBENCH, 'packages', dependency)))
+        pubspec_path = os.path.join(dependency_path, 'pubspec.yaml')
+    if not os.path.exists(pubspec_path):
         return
     version = version_for_pubspec(pubspec_path)
     return {
         'description': {
-            'path': os.path.relpath(dependency_path, SKY_SDK_DIR),
+            'path': os.path.relpath(dependency_path, SKY_PACKAGE_DIR),
             'relative': True,
         },
         'source': 'path',
@@ -47,7 +52,7 @@ def main():
 
     if not os.path.exists(dart_pkg_dir):
         print 'Cannot find Dart pacakges at "%s".' % dart_pkg_dir
-        print 'Did you run `ninja -C %s sky` ?' % os.path.relpath(args.build_dir, os.getcwd())
+        print 'Did you run `ninja -C %s` ?' % os.path.relpath(args.build_dir, os.getcwd())
         return 1
 
     packages = {}
