@@ -1073,7 +1073,7 @@ class Port(object):
         return True
 
     def _dart_packages_root(self):
-        return self._build_path('gen/dart-pkg/packages')
+        return self.path_from_chromium_base('sky', 'packages', 'workbench', 'packages')
 
     def start_sky_server(self, additional_dirs, number_of_drivers):
         """Start a web server. Raise an error if it can't start or is already running.
