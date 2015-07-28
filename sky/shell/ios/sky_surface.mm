@@ -26,11 +26,9 @@ static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
       // with the same coordinates
       return sky::EVENT_TYPE_POINTER_MOVE;
     case UITouchPhaseEnded:
-    case UITouchPhaseCancelled:
-      // We treat all cancels for raw touches as ups.
-      // All pointers hit UITouchPhaseCancelled as soon as a
-      // gesture is recognized.
       return sky::EVENT_TYPE_POINTER_UP;
+    case UITouchPhaseCancelled:
+      return sky::EVENT_TYPE_POINTER_CANCEL;
   }
 
   return sky::EVENT_TYPE_UNKNOWN;
@@ -179,6 +177,10 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
     input->pointer_data = sky::PointerData::New();
     input->pointer_data->kind = sky::POINTER_KIND_TOUCH;
 
+    #define LOWER_32(x) (*((int32_t *) &x))
+    input->pointer_data->pointer = LOWER_32(touch);
+    #undef LOWER_32
+
     CGPoint windowCoordinates = [touch locationInView:nil];
 
     input->pointer_data->x = windowCoordinates.x * scale;
@@ -212,6 +214,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   //   GESTURE_FLING_START
   UISwipeGestureRecognizer *swipe = [[UISwipeGestureRecognizer alloc]
     initWithTarget:self action:@selector(onFling:)];
+  swipe.cancelsTouchesInView = NO;
   [self addGestureRecognizer: swipe];
   [swipe release];
 
@@ -221,6 +224,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   UILongPressGestureRecognizer *longPress =
     [[UILongPressGestureRecognizer alloc]
       initWithTarget:self action:@selector(onLongPress:)];
+  longPress.cancelsTouchesInView = NO;
   [self addGestureRecognizer: longPress];
   [longPress release];
 
@@ -230,6 +234,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   //   GESTURE_SCROLL_UPDATE
   UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc]
     initWithTarget:self action:@selector(onScroll:)];
+  pan.cancelsTouchesInView = NO;
   [self addGestureRecognizer: pan];
   [pan release];
 
@@ -238,6 +243,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   //   GESTURE_TAP_DOWN
   UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]
     initWithTarget:self action:@selector(onTap:)];
+  tap.cancelsTouchesInView = NO;
   [self addGestureRecognizer: tap];
   [tap release];
 }
