@@ -326,11 +326,6 @@ class Port(object):
         else:
             _log.error('')
 
-        helper_path = self._path_to_helper()
-        if helper_path:
-            result = self._check_file_exists(helper_path,
-                                             'layout test helper') and result
-
         if self.get_option('pixel_tests'):
             result = self.check_image_diff(
                 'To override, invoke with --no-pixel-tests') and result
@@ -1405,14 +1400,6 @@ class Port(object):
 
     def _path_to_webcore_library(self):
         """Returns the full path to a built copy of WebCore."""
-        return None
-
-    def _path_to_helper(self):
-        """Returns the full path to the layout_test_helper binary, which
-        is used to help configure the system for the test run, or None
-        if no helper is needed.
-
-        This is likely only used by start/stop_helper()."""
         return None
 
     def _path_to_image_diff(self):

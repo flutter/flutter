@@ -168,7 +168,7 @@ if (is_android) {
   import("//build/config/ios/ios_sdk.gni")
 
   ios_app("shell") {
-    app_name = "Sky"
+    app_name = "SkyShell"
     info_plist = "ios/Info.plist"
     scaffolding_target = "ios_scaffolding"
     entitlements_path = "ios/Entitlements.xcent"
@@ -232,7 +232,7 @@ if (is_android) {
   import("//build/config/mac/rules.gni")
 
   mac_app("shell") {
-    app_name = "Sky"
+    app_name = "SkyShell"
     info_plist = "mac/Info.plist"
     scaffolding_target = "mac_scaffolding"
 

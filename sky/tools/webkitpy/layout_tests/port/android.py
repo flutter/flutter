@@ -634,9 +634,6 @@ class AndroidPort(base.Port):
     def _path_to_driver(self, configuration=None):
         return self._build_path_with_configuration(configuration, self._driver_details.apk_name())
 
-    def _path_to_helper(self):
-        return None
-
     def _path_to_image_diff(self):
         return self._host_port._path_to_image_diff()
 
