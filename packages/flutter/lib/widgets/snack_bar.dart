@@ -14,15 +14,11 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/theme.dart';
-
 import 'package:vector_math/vector_math.dart';
 
-enum SnackBarStatus {
-  active,
-  inactive,
-}
+export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
-typedef void SnackBarStatusChangedCallback(SnackBarStatus status);
+typedef void SnackBarStatusChangedCallback(AnimationStatus status);
 
 const Duration _kSlideInDuration = const Duration(milliseconds: 200);
 
@@ -48,53 +44,35 @@ class SnackBarAction extends Component {
 
 // TODO(mpcomplete): generalize this to a SlideIn class.
 class SnackBarSlideInIntention extends AnimationIntention {
-  SnackBarSlideInIntention(this.duration, this.onStatusChanged);
+  SnackBarSlideInIntention(Duration duration) {
+    _position = new AnimatedValue<Point>(const Point(0.0, 50.0), end: Point.origin);
+    performance = new AnimationPerformance(duration: duration, variable: _position);
+  }
 
-  Duration duration;
   SnackBarStatusChangedCallback onStatusChanged;
   AnimatedValue<Point> _position;
-  AnimationPerformance _performance;
+  AnimationPerformance performance;
 
   void initFields(AnimatedContainer container) {
-    _position = new AnimatedValue<Point>(new Point(0.0, 50.0), end: Point.origin);
-    _performance = new AnimationPerformance()
-      ..duration = _kSlideInDuration
-      ..variable = _position
-      ..addListener(() { _updateProgress(container); });
-    _performance.progress = 0.0;
+    performance.addListener(() { _updateProgress(container); });
+    performance.progress = 0.0;
     if (container.tag)
-      _show();
+      performance.play();
   }
 
   void syncFields(AnimatedContainer original, AnimatedContainer updated) {
     if (original.tag != updated.tag) {
       original.tag = updated.tag;
-      original.tag ? _show() : _hide();
+      performance.play(original.tag ? AnimationDirection.forward : AnimationDirection.reverse);
     }
   }
 
-  void _show() {
-    _performance.play();
-  }
-
-  void _hide() {
-    _performance.reverse();
-  }
-
-  SnackBarStatus _lastStatus;
   void _updateProgress(AnimatedContainer container) {
     container.setState(() {
       container.transform = new Matrix4.identity()
         ..translate(_position.value.x, _position.value.y);
     });
-
-    SnackBarStatus status = _status;
-    if (_lastStatus != null && status != _lastStatus && onStatusChanged != null)
-      scheduleMicrotask(() { onStatusChanged(status); });
-    _lastStatus = status;
   }
-
-  SnackBarStatus get _status => _performance.isDismissed ? SnackBarStatus.inactive : SnackBarStatus.active;
 }
 
 class SnackBar extends StatefulComponent {
@@ -117,7 +95,8 @@ class SnackBar extends StatefulComponent {
   SnackBarSlideInIntention _intention;
 
   void initState() {
-    _intention = new SnackBarSlideInIntention(_kSlideInDuration, onStatusChanged);
+    _intention = new SnackBarSlideInIntention(_kSlideInDuration);
+    _intention.performance.addStatusListener(_onStatusChanged);
   }
 
   void syncFields(SnackBar source) {
@@ -125,6 +104,11 @@ class SnackBar extends StatefulComponent {
     actions = source.actions;
     onStatusChanged = source.onStatusChanged;
     showing = source.showing;
+  }
+
+  void _onStatusChanged(AnimationStatus status) {
+    if (onStatusChanged != null)
+      scheduleMicrotask(() { onStatusChanged(status); });
   }
 
   Widget build() {

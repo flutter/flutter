@@ -27,7 +27,7 @@ class StockHome extends StatefulComponent {
   bool _isSearching = false;
   String _searchQuery;
 
-  SnackBarStatus _snackBarStatus = SnackBarStatus.inactive;
+  AnimationStatus _snackBarStatus = AnimationStatus.dismissed;
   bool _isSnackBarShowing = false;
 
   void _handleSearchBegin() {
@@ -59,28 +59,28 @@ class StockHome extends StatefulComponent {
   }
 
   bool _drawerShowing = false;
-  DrawerStatus _drawerStatus = DrawerStatus.inactive;
+  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
 
   void _handleOpenDrawer() {
     setState(() {
       _drawerShowing = true;
-      _drawerStatus = DrawerStatus.active;
+      _drawerStatus = AnimationStatus.forward;
     });
   }
 
-  void _handleDrawerStatusChange(DrawerStatus status) {
+  void _handleDrawerStatusChange(AnimationStatus status) {
     setState(() {
       _drawerStatus = status;
     });
   }
 
   bool _menuShowing = false;
-  PopupMenuStatus _menuStatus = PopupMenuStatus.inactive;
+  AnimationStatus _menuStatus = AnimationStatus.dismissed;
 
   void _handleMenuShow() {
     setState(() {
       _menuShowing = true;
-      _menuStatus = PopupMenuStatus.active;
+      _menuStatus = AnimationStatus.forward;
     });
   }
 
@@ -90,7 +90,7 @@ class StockHome extends StatefulComponent {
     });
   }
 
-  void _handleMenuStatusChanged(PopupMenuStatus status) {
+  void _handleMenuStatusChanged(AnimationStatus status) {
     setState(() {
       _menuStatus = status;
     });
@@ -112,7 +112,7 @@ class StockHome extends StatefulComponent {
   }
 
   Drawer buildDrawer() {
-    if (_drawerStatus == DrawerStatus.inactive)
+    if (_drawerStatus == AnimationStatus.dismissed)
       return null;
     assert(_drawerShowing); // TODO(mpcomplete): this is always true
     return new Drawer(
@@ -246,7 +246,7 @@ class StockHome extends StatefulComponent {
   }
 
   Widget buildSnackBar() {
-    if (_snackBarStatus == SnackBarStatus.inactive)
+    if (_snackBarStatus == AnimationStatus.dismissed)
       return null;
     return new SnackBar(
       showing: _isSnackBarShowing,
@@ -259,7 +259,7 @@ class StockHome extends StatefulComponent {
   void _handleStockPurchased() {
     setState(() {
       _isSnackBarShowing = true;
-      _snackBarStatus = SnackBarStatus.active;
+      _snackBarStatus = AnimationStatus.forward;
     });
   }
 
@@ -272,7 +272,7 @@ class StockHome extends StatefulComponent {
   }
 
   void addMenuToOverlays(List<Widget> overlays) {
-    if (_menuStatus == PopupMenuStatus.inactive)
+    if (_menuStatus == AnimationStatus.dismissed)
       return;
     overlays.add(new ModalOverlay(
       children: [new StockMenu(
