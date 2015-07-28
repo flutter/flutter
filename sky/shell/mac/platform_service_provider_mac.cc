@@ -11,7 +11,9 @@
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/services/ns_net/network_service_impl.h"
 #include "sky/shell/service_provider.h"
+#if !TARGET_OS_IPHONE
 #include "sky/shell/testing/test_runner.h"
+#endif
 
 namespace sky {
 namespace shell {
@@ -27,7 +29,9 @@ static void CreatePlatformServiceProvider(
   g_service_provider.Get().reset(new mojo::ServiceProviderImpl(request.Pass()));
   g_network_service_factory.Get().reset(new mojo::NetworkServiceFactory());
   g_service_provider.Get()->AddService(g_network_service_factory.Get().get());
+#if !TARGET_OS_IPHONE
   g_service_provider.Get()->AddService(&TestRunner::Shared());
+#endif
 }
 
 mojo::ServiceProviderPtr CreateServiceProvider(
