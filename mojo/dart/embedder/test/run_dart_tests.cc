@@ -29,7 +29,6 @@ static void exceptionCallback(bool* exception, Dart_Handle error) {
 }
 
 static void RunTest(const std::string& test,
-                    bool compile_all,
                     const char** extra_args,
                     int num_extra_args) {
   base::FilePath path;
@@ -38,10 +37,6 @@ static void RunTest(const std::string& test,
              .AppendASCII("dart")
              .AppendASCII("test")
              .AppendASCII(test);
-
-  // Read in the source.
-  std::string source;
-  EXPECT_TRUE(ReadFileToString(path, &source)) << "Failed to read test file";
 
   // Setup the package root.
   base::FilePath package_root;
@@ -56,17 +51,12 @@ static void RunTest(const std::string& test,
   // Run with strict compilation even in Release mode so that ASAN testing gets
   // coverage of Dart asserts, type-checking, etc.
   config.strict_compilation = true;
-  config.script = source;
   config.script_uri = path.AsUTF8Unsafe();
   config.package_root = package_root.AsUTF8Unsafe();
-  config.application_data = nullptr;
   config.callbacks.exception =
       base::Bind(&exceptionCallback, &unhandled_exception);
   config.entropy = generateEntropy;
-  config.arguments = extra_args;
-  config.arguments_count = num_extra_args;
-  config.handle = MOJO_HANDLE_INVALID;
-  config.compile_all = compile_all;
+  config.SetVmFlags(extra_args, num_extra_args);
   config.error = &error;
 
   bool success = DartController::RunSingleDartScript(config);
@@ -78,71 +68,72 @@ static void RunTest(const std::string& test,
 // _test.dart files.
 
 TEST(DartTest, hello_mojo) {
-  RunTest("hello_mojo.dart", false, nullptr, 0);
+  RunTest("hello_mojo.dart", nullptr, 0);
 }
 
 TEST(DartTest, core_types_test) {
-  RunTest("core_types_test.dart", false, nullptr, 0);
+  RunTest("core_types_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, async_test) {
-  RunTest("async_test.dart", false, nullptr, 0);
+  RunTest("async_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, isolate_test) {
-  RunTest("isolate_test.dart", false, nullptr, 0);
+  RunTest("isolate_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, import_mojo) {
-  RunTest("import_mojo.dart", false, nullptr, 0);
+  RunTest("import_mojo.dart", nullptr, 0);
 }
 
 TEST(DartTest, simple_handle_watcher_test) {
-  RunTest("simple_handle_watcher_test.dart", false, nullptr, 0);
+  RunTest("simple_handle_watcher_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, ping_pong_test) {
-  RunTest("ping_pong_test.dart", false, nullptr, 0);
+  RunTest("ping_pong_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, timer_test) {
-  RunTest("timer_test.dart", false, nullptr, 0);
+  RunTest("timer_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, async_await_test) {
-  RunTest("async_await_test.dart", false, nullptr, 0);
+  RunTest("async_await_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, core_test) {
-  RunTest("core_test.dart", false, nullptr, 0);
+  RunTest("core_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, codec_test) {
-  RunTest("codec_test.dart", false, nullptr, 0);
+  RunTest("codec_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, handle_watcher_test) {
-  RunTest("handle_watcher_test.dart", false, nullptr, 0);
+  RunTest("handle_watcher_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, bindings_generation_test) {
-  RunTest("bindings_generation_test.dart", false, nullptr, 0);
+  RunTest("bindings_generation_test.dart",  nullptr, 0);
 }
 
 TEST(DartTest, compile_all_interfaces_test) {
-  RunTest("compile_all_interfaces_test.dart", true, nullptr, 0);
+  const char* args[] = { "--compile_all" };
+  RunTest("compile_all_interfaces_test.dart", &args[0], 1);
 }
 
 TEST(DartTest, uri_base_test) {
-  RunTest("uri_base_test.dart", false, nullptr, 0);
+  RunTest("uri_base_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, exception_test) {
-  RunTest("exception_test.dart", false, nullptr, 0);
+  RunTest("exception_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, control_messages_test) {
-  RunTest("control_messages_test.dart", false, nullptr, 0);
+  RunTest("control_messages_test.dart", nullptr, 0);
 }
 
 TEST(DartTest, handle_finalizer_test) {
@@ -150,7 +141,7 @@ TEST(DartTest, handle_finalizer_test) {
   const char* args[kNumArgs];
   args[0] = "--new-gen-semi-max-size=1";
   args[1] = "--old_gen_growth_rate=1";
-  RunTest("handle_finalizer_test.dart", false, args, kNumArgs);
+  RunTest("handle_finalizer_test.dart", args, kNumArgs);
 }
 
 }  // namespace

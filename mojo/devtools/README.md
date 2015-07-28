@@ -1,19 +1,11 @@
 # Devtools packages
 
-Unopinionated tools for **running**, **debugging** and **testing** Mojo apps
-available to Mojo consumers.
+The `common` subdirectory contains what we currently expose as "devtools",
+mirroring it as a [separate repository](https://github.com/domokit/devtools) for
+consumption without a Mojo checkout.
 
-Individual subdirectories are mirrored as separate repositories.
-
- - **common** is the main toolset supporting mostly language-independent needs
-   on all Mojo platforms
- - further subdirectories TBD might contain heavy language-specific tooling
-
-## Principles
+Further subdirectories TBD might be added in the future, to contain heavy
+language-specific tooling which we will mirror / expose separately.
 
 The toolsets are intended for consumption by Mojo consumers as **separate
 checkouts**. No dependencies on files outside of devtools are allowed.
-
-The toolsets should make no assumptions about particular **build system** or
-**file layout** in any checkout where it is consumed. Consumers can add thin
-wrappers adding a layer of convenience on top of them.

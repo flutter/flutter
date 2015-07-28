@@ -10,8 +10,9 @@
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/dart/embedder/builtin.h"
 #include "mojo/dart/embedder/common.h"
+#include "mojo/dart/embedder/dart_state.h"
 #include "mojo/dart/embedder/io/internet_address.h"
-#include "mojo/dart/embedder/isolate_data.h"
+
 
 namespace mojo {
 namespace dart {
@@ -157,15 +158,11 @@ void Platform_ExecutableArguments(Dart_NativeArguments arguments) {
 }
 
 void Platform_PackageRoot(Dart_NativeArguments arguments) {
-  const char* package_root = "";
-  Dart_Isolate isolate = Dart_CurrentIsolate();
-  DCHECK(isolate != nullptr);
-  void* data = Dart_IsolateData(isolate);
-  IsolateData* isolate_data = reinterpret_cast<IsolateData*>(data);
-  if (isolate_data != nullptr) {
-    package_root = isolate_data->package_root.c_str();
-  }
-  Dart_SetReturnValue(arguments, Dart_NewStringFromCString(package_root));
+  auto isolate_data = MojoDartState::Current();
+  DCHECK(isolate_data != nullptr);
+  Dart_SetReturnValue(
+      arguments,
+      Dart_NewStringFromCString(isolate_data->package_root().c_str()));
 }
 
 void Platform_GetVersion(Dart_NativeArguments arguments) {

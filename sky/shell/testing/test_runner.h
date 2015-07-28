@@ -9,7 +9,7 @@
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
-#include "mojo/common/weak_binding_set.h"
+#include "mojo/common/binding_set.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/testing/test_harness.mojom.h"
@@ -54,7 +54,7 @@ class TestRunner : public mojo::InterfaceFactory<TestHarness>,
   SkyEnginePtr sky_engine_;
 
   scoped_ptr<SingleTest> single_test_;
-  mojo::WeakBindingSet<TestHarness> bindings_;
+  mojo::BindingSet<TestHarness> bindings_;
 
   base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
 

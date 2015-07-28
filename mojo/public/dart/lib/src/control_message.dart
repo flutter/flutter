@@ -44,18 +44,17 @@ class ControlMessageHandler {
                                  MessageHeader.kMessageIsResponse));
   }
 
-  static Future<Message> _handleRunOrClose(Stub stub,
-                                           int interface_version,
-                                           ServiceMessage message) {
+  static Future _handleRunOrClose(Stub stub,
+                                  int interface_version,
+                                  ServiceMessage message) {
     // Deserialize message.
     var params = icm.RunOrClosePipeMessageParams.deserialize(message.payload);
     // Grab required version.
     var requiredVersion = params.requireVersion.version;
-    if (interface_version >= requiredVersion) {
-      // Stub meets the requirements.
-      return;
+    if (interface_version < requiredVersion) {
+      // Stub does not implement required version. Close the pipe immediately.
+      stub.close(immediate: true);
     }
-    // Stub does not implement required version. Close the pipe immediately.
-    stub.close(immediate: true);
+    return null;
   }
 }

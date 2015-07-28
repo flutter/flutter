@@ -6,7 +6,9 @@
 # Rules to generate dart-pkg and dart-pkg/packages.
 
 import("//build/module_args/mojo.gni")
+import("//build/module_args/dart.gni")
 
+# Creates a dartzip package.
 template("dartzip_package") {
   package_target_name = "$target_name"
   package_output = "$target_out_dir/$target_name.dartzip"
@@ -113,7 +115,11 @@ template("dartzip_package") {
     ]
 
     args = [
+      "--dart-sdk",
+      rebase_path(dart_sdk_root),
+      "--dartzip-file",
       rebase_path(package_output),
+      "--stamp-file",
       rebase_path("$target_gen_dir/${package_target_name}_analyze.stamp"),
       "--no-hints",
     ]
@@ -211,13 +217,19 @@ template("dartzip_packaged_application") {
 # sources. Also copies any mojom dependencies into lib/mojom.
 #
 #   sources
-#       List of sources to include in the package.
+#       List of non-entrypoint sources to include in the package.
+#
+#   entrypoints (optional)
+#       List of package entrypoints to pass to the analyzer. If no entry points
+#       are defined, the analyzer is not run.
 #
 #   pkg_dir (optional)
-#       Directory containing the package sources. This overrides sources.
+#       Directory containing the package sources. This overrides sources and
+#       entrypoints. The analyzer will not be run.
 #
 #   deps (optional)
-#       Note: this can only contain mojom targets.
+#       List of other dart_pkg targets for Dart packages imported by this
+#       dart_pkg, as well as the mojom targets needed by this dart_pkg.
 #
 #   datadeps (optional)
 #
@@ -299,17 +311,23 @@ template("dart_pkg") {
       stamp_file,
     ]
 
+    entrypoints = []
+    if (defined(invoker.entrypoints)) {
+      entrypoints += invoker.entrypoints
+    }
+
+    sources = []
     if (defined(invoker.sources)) {
-      sources = invoker.sources
+      sources += invoker.sources
     } else {
       assert(defined(invoker.pkg_dir))
       list_script = rebase_path("build/ls.py", ".", mojo_sdk_root)
-      sources = exec_script(list_script,
-                            [
-                              "--target-directory",
-                              rebase_path(invoker.pkg_dir),
-                            ],
-                            "list lines")
+      sources += exec_script(list_script,
+                             [
+                               "--target-directory",
+                               rebase_path(invoker.pkg_dir),
+                             ],
+                             "list lines")
     }
 
     inputs = [
@@ -320,6 +338,8 @@ template("dart_pkg") {
     args = [
              "--package-name",
              package_name,
+             "--dart-sdk",
+             rebase_path(dart_sdk_root),
              "--gen-directory",
              rebase_path("$root_gen_dir/dart-gen"),
              "--pkg-directory",
@@ -329,7 +349,8 @@ template("dart_pkg") {
              "--stamp-file",
              rebase_path(stamp_file),
              "--package-sources",
-           ] + rebase_path(sources) + [ "--mojom-sources" ] +
+           ] + rebase_path(sources) + [ "--package-entrypoints" ] +
+           rebase_path(entrypoints) + [ "--mojom-sources" ] +
            rebase_path(mojom_sources, "", mojo_sdk_root) +
            [ "--sdk-ext-directories" ] + rebase_path(sdk_ext_directory) +
            [ "--sdk-ext-files" ] + rebase_path(sdk_ext_files) +

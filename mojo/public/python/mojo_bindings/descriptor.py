@@ -34,6 +34,13 @@ class Type(object):
     """
     return self.Convert(value)
 
+  def IsUnion(self):
+    """
+    Returns true if the type is a union. This is necessary to be able to
+    identify a union when descriptor.py cannot be imported.
+    """
+    return False
+
 
 class SerializableType(Type):
   """Describe a type that can be serialized by itself."""
@@ -151,6 +158,47 @@ class FloatType(NumericType):
     if not isinstance(value, (int, long, float)):
       raise TypeError('%r is not a numeric type' % value)
     return float(value)
+
+
+class UnionType(SerializableType):
+  """Base Type object for union."""
+
+  def __init__(self, union_type_getter, nullable=False):
+    SerializableType.__init__(self, 'IIQ')
+    self.nullable = nullable
+    self._union_type_getter = union_type_getter
+    self._union_type = None
+
+  def IsUnion(self):
+    return True
+
+  @property
+  def union_type(self):
+    if not self._union_type:
+      self._union_type = self._union_type_getter()
+    return self._union_type
+
+  def Serialize(self, value, data_offset, data, handle_offset):
+    if not value:
+      if not self.nullable:
+        raise serialization.SerializationException(
+            'Trying to serialize null for non nullable type.')
+      return ((0, 0, 0), [])
+
+    ((size, tag, entry, new_data), new_handles) = (
+        value.SerializeInline(handle_offset))
+    if len(new_data) > 0:
+      data.extend(new_data)
+      entry = data_offset - 8
+
+    return ((size, tag, entry), new_handles)
+
+  def Deserialize(self, value, context):
+    result = self.union_type.Deserialize(context)
+    if not result and not self.nullable:
+      raise serialization.DeserializationException(
+          'Trying to deserialize null for non nullable type.')
+    return result
 
 
 class PointerType(SerializableType):
@@ -434,16 +482,19 @@ class GenericArrayType(BaseArrayType):
       to_pack.extend(serialization.Flatten(new_data))
       returned_handles.extend(new_handles)
       position = position + self.sub_type.GetByteSize()
+
     serialization.HEADER_STRUCT.pack_into(data, data_end, size, len(value))
-    struct.pack_into('%d%s' % (len(value), self.sub_type.GetTypeCode()),
+    # TODO(azani): Refactor so we don't have to create big formatting strings.
+    struct.pack_into(('%s' % self.sub_type.GetTypeCode()) * len(value),
                      data,
                      data_end + serialization.HEADER_STRUCT.size,
                      *to_pack)
     return (data_offset, returned_handles)
 
   def DeserializeArray(self, size, nb_elements, context):
+    # TODO(azani): Refactor so the format string isn't so big.
     values = struct.unpack_from(
-        '%d%s' % (nb_elements, self.sub_type.GetTypeCode()),
+        nb_elements * self.sub_type.GetTypeCode(),
         buffer(context.data, serialization.HEADER_STRUCT.size))
     values_per_element = len(self.sub_type.GetTypeCode())
     assert nb_elements * values_per_element == len(values)

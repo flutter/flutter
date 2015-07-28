@@ -58,20 +58,20 @@ class MOJO_SYSTEM_IMPL_EXPORT SlaveConnectionManager final
   void Shutdown() override;
   bool AllowConnect(const ConnectionIdentifier& connection_id) override;
   bool CancelConnect(const ConnectionIdentifier& connection_id) override;
-  bool Connect(const ConnectionIdentifier& connection_id,
-               ProcessIdentifier* peer_process_identifier,
-               embedder::ScopedPlatformHandle* platform_handle) override;
+  Result Connect(const ConnectionIdentifier& connection_id,
+                 ProcessIdentifier* peer_process_identifier,
+                 embedder::ScopedPlatformHandle* platform_handle) override;
 
  private:
   // These should only be called on |private_thread_|:
   void InitOnPrivateThread(embedder::ScopedPlatformHandle platform_handle);
   void ShutdownOnPrivateThread();
   void AllowConnectOnPrivateThread(const ConnectionIdentifier& connection_id,
-                                   bool* result);
+                                   Result* result);
   void CancelConnectOnPrivateThread(const ConnectionIdentifier& connection_id,
-                                    bool* result);
+                                    Result* result);
   void ConnectOnPrivateThread(const ConnectionIdentifier& connection_id,
-                              bool* result,
+                              Result* result,
                               ProcessIdentifier* peer_process_identifier,
                               embedder::ScopedPlatformHandle* platform_handle);
 
@@ -112,7 +112,7 @@ class MOJO_SYSTEM_IMPL_EXPORT SlaveConnectionManager final
     AWAITING_CONNECT_ACK
   };
   AwaitingAckType awaiting_ack_type_;
-  bool* ack_result_;
+  Result* ack_result_;
   // Used only when waiting for the ack to "connect":
   ProcessIdentifier* ack_peer_process_identifier_;
   embedder::ScopedPlatformHandle* ack_platform_handle_;

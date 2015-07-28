@@ -6,14 +6,16 @@
 /mojo/dart/apptests, built on top of the general apptest runner."""
 
 import logging
+import re
 
 _logging = logging.getLogger()
 
 from devtoolslib.apptest import run_apptest
 
+SUCCESS_PATTERN = re.compile('^.+ .+: All tests passed!', re.MULTILINE)
 
 def _dart_apptest_output_test(output):
-  return '\nDART APPTESTS RESULT: PASSED' in output
+  return SUCCESS_PATTERN.search(output) != None
 
 
 # TODO(erg): Support android, launched services and fixture isolation.

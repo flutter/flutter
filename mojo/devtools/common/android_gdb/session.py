@@ -71,8 +71,7 @@ def _get_mapped_files():
 
 
 class DebugSession(object):
-  def __init__(self, build_directory, package_name, pyelftools_dir=None,
-               adb='adb'):
+  def __init__(self, build_directory, package_name, pyelftools_dir, adb):
     self._build_directory = build_directory
     if not os.path.exists(self._build_directory):
       logging.fatal("Please pass a valid build directory")
@@ -86,8 +85,9 @@ class DebugSession(object):
     try:
       import elftools.elf.elffile as elffile
     except ImportError:
-      logging.fatal("Unable to find elftools module; please install it "
-                    "(for exmple, using 'pip install elftools')")
+      logging.fatal("Unable to find elftools module; please install pyelftools "
+                    "and specify its path on the command line using "
+                    "--pyelftools-dir.")
       sys.exit(1)
 
     self._elffile_module = elffile
@@ -190,13 +190,33 @@ class DebugSession(object):
       return True
     return False
 
-  def _update_symbols(self):
+  def _map_symbols_on_current_thread(self, mapped_files):
+    """Updates the symbols for the current thread using files from mapped_files.
+    """
+    frame = gdb.newest_frame()
+    while frame and frame.is_valid():
+      if frame.name() is None:
+        m = self._find_mapping_for_address(mapped_files, frame.pc())
+        if m is not None and self._try_to_map(m):
+          # Force gdb to recompute its frames.
+          _gdb_execute("info threads")
+          frame = gdb.newest_frame()
+          assert frame.is_valid()
+      if (frame.older() is not None and
+          frame.older().is_valid() and
+          frame.older().pc() != frame.pc()):
+        frame = frame.older()
+      else:
+        frame = None
+
+  def update_symbols(self, current_thread_only):
     """Updates the mapping between symbols as seen from GDB and local library
-    files."""
+    files.
+
+    If current_thread_only is True, only update symbols for the current thread.
+    """
     logging.info("Updating symbols")
     mapped_files = _get_mapped_files()
-    _gdb_execute("info threads")
-    nb_threads = len(_gdb_execute("info threads").split("\n")) - 2
     # Map all symbols from native libraries packages with the APK.
     for file_mappings in mapped_files:
       filename = file_mappings[0].filename
@@ -206,26 +226,20 @@ class DebugSession(object):
           not filename.endswith('.dex')):
         logging.info('Pre-mapping: %s' % file_mappings[0].filename)
         self._try_to_map(file_mappings)
-    for i in xrange(nb_threads):
-      try:
-        _gdb_execute("thread %d" % (i + 1))
-        frame = gdb.newest_frame()
-        while frame and frame.is_valid():
-          if frame.name() is None:
-            m = self._find_mapping_for_address(mapped_files, frame.pc())
-            if m is not None and self._try_to_map(m):
-              # Force gdb to recompute its frames.
-              _gdb_execute("info threads")
-              frame = gdb.newest_frame()
-              assert frame.is_valid()
-          if (frame.older() is not None and
-              frame.older().is_valid() and
-              frame.older().pc() != frame.pc()):
-            frame = frame.older()
-          else:
-            frame = None
-      except gdb.error:
-        traceback.print_exc()
+
+    if current_thread_only:
+      self._map_symbols_on_current_thread(mapped_files)
+    else:
+      logging.info('Updating all threads\' symbols')
+      current_thread = gdb.selected_thread()
+      nb_threads = len(_gdb_execute("info threads").split("\n")) - 2
+      for i in xrange(nb_threads):
+        try:
+          _gdb_execute("thread %d" % (i + 1))
+          self._map_symbols_on_current_thread(mapped_files)
+        except gdb.error:
+          traceback.print_exc()
+      current_thread.switch()
 
   def _get_device_application_pid(self, application):
     """Gets the PID of an application running on a device."""
@@ -266,8 +280,38 @@ class DebugSession(object):
 
     _gdb_execute('target remote localhost:9999')
 
-    self._update_symbols()
+    self.update_symbols(current_thread_only=False)
     def on_stop(_):
-      self._update_symbols()
+      self.update_symbols(current_thread_only=True)
     gdb.events.stop.connect(on_stop)
     gdb.events.exited.connect(self.stop)
+
+    # Register the update-symbols command.
+    UpdateSymbols(self)
+
+class UpdateSymbols(gdb.Command):
+  """Command to update symbols loaded into GDB.
+
+  GDB usage: update-symbols [all|current]
+  """
+  _UPDATE_COMMAND = "update-symbols"
+
+  def __init__(self, session):
+    super(UpdateSymbols, self).__init__(self._UPDATE_COMMAND, gdb.COMMAND_STACK)
+    self._session = session
+
+  def invoke(self, arg, _unused_from_tty):
+    if arg == 'current':
+      self._session.update_symbols(current_thread_only=True)
+    else:
+      self._session.update_symbols(current_thread_only=False)
+
+  def complete(self, text, _unused_word):
+    if text == self._UPDATE_COMMAND:
+      return ('all', 'current')
+    elif text in self._UPDATE_COMMAND + ' all':
+      return ['all']
+    elif text in self._UPDATE_COMMAND + ' current':
+      return ['current']
+    else:
+      return []

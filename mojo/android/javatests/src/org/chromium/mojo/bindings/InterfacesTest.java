@@ -9,6 +9,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 import org.chromium.mojo.MojoTestCase;
 import org.chromium.mojo.bindings.BindingsTestUtils.CapturingErrorHandler;
 import org.chromium.mojo.bindings.test.mojom.imported.ImportedInterface;
+import org.chromium.mojo.bindings.test.mojom.ping.PingService;
+import org.chromium.mojo.bindings.test.mojom.ping.PingService.PingResponse;
 import org.chromium.mojo.bindings.test.mojom.sample.Factory;
 import org.chromium.mojo.bindings.test.mojom.sample.NamedObject;
 import org.chromium.mojo.bindings.test.mojom.sample.NamedObject.GetNameResponse;
@@ -162,6 +164,37 @@ public class InterfacesTest extends MojoTestCase {
     }
 
     /**
+    * Implementation of PingService.
+    */
+    public class PingServiceImpl extends CapturingErrorHandler implements PingService {
+        public void ping(PingResponse callback) {
+            callback.call();
+        }
+
+        /**
+         * @see org.chromium.mojo.bindings.Interface#close()
+         */
+        @Override
+        public void close() {}
+    }
+
+    /**
+     * Implementation of {@link PingResponse} keeping track of usage.
+     */
+    public static class RecordingPingResponse implements PingResponse {
+        private boolean mCalled;
+
+        @Override
+        public void call() {
+            mCalled = true;
+        }
+
+        public boolean wasCalled() {
+            return mCalled;
+        }
+    }
+
+    /**
      * @see MojoTestCase#tearDown()
      */
     @Override
@@ -280,5 +313,44 @@ public class InterfacesTest extends MojoTestCase {
         runLoopUntilIdle();
 
         assertTrue(response.wasResponseCalled());
+    }
+
+    @SmallTest
+    public void testPingProxyAndStub() {
+        PingServiceImpl impl = new PingServiceImpl();
+        PingService.Proxy proxy =
+                PingService.MANAGER.buildProxy(null, PingService.MANAGER.buildStub(null, impl));
+
+        RecordingPingResponse callback = new RecordingPingResponse();
+
+        CapturingErrorHandler errorHandler = new CapturingErrorHandler();
+        proxy.getProxyHandler().setErrorHandler(errorHandler);
+
+        assertNull(impl.getLastMojoException());
+
+        proxy.ping(callback);
+
+        assertNull(errorHandler.getLastMojoException());
+        assertTrue(callback.wasCalled());
+    }
+
+    @SmallTest
+    public void testPingProxyAndStubOverPipe() {
+        PingServiceImpl impl = new PingServiceImpl();
+        PingService.Proxy proxy =
+                BindingsTestUtils.newProxyOverPipe(PingService.MANAGER, impl, mCloseablesToClose);
+
+        RecordingPingResponse callback = new RecordingPingResponse();
+
+        CapturingErrorHandler errorHandler = new CapturingErrorHandler();
+        proxy.getProxyHandler().setErrorHandler(errorHandler);
+
+        assertNull(impl.getLastMojoException());
+
+        proxy.ping(callback);
+        runLoopUntilIdle();
+
+        assertNull(errorHandler.getLastMojoException());
+        assertTrue(callback.wasCalled());
     }
 }

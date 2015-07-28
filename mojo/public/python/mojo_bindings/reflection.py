@@ -135,6 +135,103 @@ class MojoStructType(type):
     raise AttributeError('can\'t delete attribute')
 
 
+class MojoUnionType(type):
+
+  def __new__(mcs, name, bases, dictionary):
+    dictionary['__slots__'] = ('_cur_field', '_data')
+    descriptor = dictionary.pop('DESCRIPTOR', {})
+
+    fields = descriptor.get('fields', [])
+    def _BuildUnionProperty(field):
+
+      # pylint: disable=W0212
+      def Get(self):
+        if self._cur_field != field:
+          raise AttributeError('%s is not currently set' % field.name,
+              field.name, self._cur_field.name)
+        return self._data
+
+      # pylint: disable=W0212
+      def Set(self, value):
+        self._cur_field = field
+        self._data = field.field_type.Convert(value)
+
+      return property(Get, Set)
+
+    for field in fields:
+      dictionary[field.name] = _BuildUnionProperty(field)
+
+    def UnionInit(self, **kwargs):
+      self.SetInternals(None, None)
+      items = kwargs.items()
+      if len(items) == 0:
+        return
+
+      if len(items) > 1:
+        raise TypeError('only 1 member may be set on a union.')
+
+      setattr(self, items[0][0], items[0][1])
+    dictionary['__init__'] = UnionInit
+
+    serializer = serialization.UnionSerializer(fields)
+    def SerializeUnionInline(self, handle_offset=0):
+      return serializer.SerializeInline(self, handle_offset)
+    dictionary['SerializeInline'] = SerializeUnionInline
+
+    def SerializeUnion(self, handle_offset=0):
+      return serializer.Serialize(self, handle_offset)
+    dictionary['Serialize'] = SerializeUnion
+
+    def DeserializeUnion(cls, context):
+      return serializer.Deserialize(context, cls)
+    dictionary['Deserialize'] = classmethod(DeserializeUnion)
+
+    class Tags(object):
+      __metaclass__ = MojoEnumType
+      VALUES = [(field.name, field.index) for field in fields]
+    dictionary['Tags'] = Tags
+
+    def GetTag(self):
+      return self._cur_field.index
+    dictionary['tag'] = property(GetTag, None)
+
+    def GetData(self):
+      return self._data
+    dictionary['data'] = property(GetData, None)
+
+    def IsUnknown(self):
+      return not self._cur_field
+    dictionary['IsUnknown'] = IsUnknown
+
+    def UnionEq(self, other):
+      return (
+          (type(self) is type(other))
+          and (self.tag == other.tag)
+          and (self.data == other.data))
+    dictionary['__eq__'] = UnionEq
+
+    def UnionNe(self, other):
+      return not self.__eq__(other)
+    dictionary['__ne__'] = UnionNe
+
+    def UnionStr(self):
+      return '<%s.%s(%s): %s>' % (
+          self.__class__.__name__,
+          self._cur_field.name,
+          self.tag,
+          self.data)
+    dictionary['__str__'] = UnionStr
+    dictionary['__repr__'] = UnionStr
+
+    def SetInternals(self, field, data):
+      self._cur_field = field
+      self._data = data
+    dictionary['SetInternals'] = SetInternals
+
+
+    return type.__new__(mcs, name, bases, dictionary)
+
+
 class InterfaceRequest(object):
   """
   An interface request allows to send a request for an interface to a remote

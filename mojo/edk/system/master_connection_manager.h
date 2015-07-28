@@ -79,9 +79,9 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
   void Shutdown() override MOJO_NOT_THREAD_SAFE;
   bool AllowConnect(const ConnectionIdentifier& connection_id) override;
   bool CancelConnect(const ConnectionIdentifier& connection_id) override;
-  bool Connect(const ConnectionIdentifier& connection_id,
-               ProcessIdentifier* peer_process_identifier,
-               embedder::ScopedPlatformHandle* platform_handle) override;
+  Result Connect(const ConnectionIdentifier& connection_id,
+                 ProcessIdentifier* peer_process_identifier,
+                 embedder::ScopedPlatformHandle* platform_handle) override;
 
  private:
   class Helper;
@@ -92,10 +92,10 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
                         const ConnectionIdentifier& connection_id);
   bool CancelConnectImpl(ProcessIdentifier process_identifier,
                          const ConnectionIdentifier& connection_id);
-  bool ConnectImpl(ProcessIdentifier process_identifier,
-                   const ConnectionIdentifier& connection_id,
-                   ProcessIdentifier* peer_process_identifier,
-                   embedder::ScopedPlatformHandle* platform_handle);
+  Result ConnectImpl(ProcessIdentifier process_identifier,
+                     const ConnectionIdentifier& connection_id,
+                     ProcessIdentifier* peer_process_identifier,
+                     embedder::ScopedPlatformHandle* platform_handle);
 
   // These should only be called on |private_thread_|:
   void ShutdownOnPrivateThread() MOJO_NOT_THREAD_SAFE;

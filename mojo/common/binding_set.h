@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MOJO_COMMON_WEAK_BINDING_SET_H_
-#define MOJO_COMMON_WEAK_BINDING_SET_H_
+#ifndef MOJO_COMMON_BINDING_SET_H_
+#define MOJO_COMMON_BINDING_SET_H_
 
 #include <algorithm>
 #include <vector>
@@ -16,10 +16,10 @@ namespace mojo {
 // Use this class to manage a set of bindings each of which is
 // owned by the pipe it is bound to.
 template <typename Interface>
-class WeakBindingSet {
+class BindingSet {
  public:
-  WeakBindingSet() {}
-  ~WeakBindingSet() { CloseAllBindings(); }
+  BindingSet() {}
+  ~BindingSet() { CloseAllBindings(); }
 
   void AddBinding(Interface* impl, InterfaceRequest<Interface> request) {
     bindings_.emplace_back(new Binding<Interface>(impl, request.Pass()));
@@ -37,18 +37,16 @@ class WeakBindingSet {
     });
   }
 
-  void CloseAllBindings() {
-    bindings_.clear();
-  }
+  void CloseAllBindings() { bindings_.clear(); }
 
   size_t size() const { return bindings_.size(); }
 
  private:
   std::vector<std::unique_ptr<Binding<Interface>>> bindings_;
 
-  DISALLOW_COPY_AND_ASSIGN(WeakBindingSet);
+  DISALLOW_COPY_AND_ASSIGN(BindingSet);
 };
 
 }  // namespace mojo
 
-#endif  // MOJO_COMMON_WEAK_BINDING_SET_H_
+#endif  // MOJO_COMMON_BINDING_SET_H_

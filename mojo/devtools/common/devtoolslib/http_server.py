@@ -6,10 +6,12 @@ import atexit
 import datetime
 import email.utils
 import errno
+import gzip
 import hashlib
 import logging
 import math
 import os.path
+import shutil
 import socket
 import threading
 
@@ -120,6 +122,7 @@ def _GetHandlerClassForPath(mappings):
       path = self.translate_path(self.path)
 
       if os.path.isfile(path):
+        self.send_header('Content-Encoding', 'gzip')
         etag = self.get_etag()
         if etag:
           self.send_header('ETag', etag)
@@ -136,21 +139,28 @@ def _GetHandlerClassForPath(mappings):
 
       for prefix, local_base_path in mappings:
         if normalized_path.startswith(prefix):
-          return os.path.join(local_base_path, normalized_path[len(prefix):])
+          result = os.path.join(local_base_path, normalized_path[len(prefix):])
+          if os.path.isfile(result):
+            gz_result = result + '.gz'
+            if (not os.path.isfile(gz_result) or
+                os.path.getmtime(gz_result) <= os.path.getmtime(result)):
+              with open(result, 'rb') as f:
+                with gzip.open(gz_result, 'wb') as zf:
+                  shutil.copyfileobj(f, zf)
+            result = gz_result
+          return result
 
       # This class is only used internally, and we're adding a catch-all ''
       # prefix at the end of |mappings|.
       assert False
 
     def guess_type(self, path):
-      # This is needed so that Sky files without shebang can still run thanks to
-      # content-type mappings.
+      # This is needed so that exploded Sky apps without shebang can still run
+      # thanks to content-type mappings.
       # TODO(ppi): drop this part once we can rely on the Sky files declaring
       # correct shebang.
-      if path.endswith('.dart'):
+      if path.endswith('.dart') or path.endswith('.dart.gz'):
         return 'application/dart'
-      elif path.endswith('.sky'):
-        return 'text/sky'
       return SimpleHTTPServer.SimpleHTTPRequestHandler.guess_type(self, path)
 
     def log_message(self, *_):

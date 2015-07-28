@@ -4,27 +4,8 @@
 
 """High-level apptest runner that runs all tests specified in a list.
 
-The list of tests has to contain one dictionary per test to be run, in the
-following form:
-
- {
-   # Required URL for apptest.
-   "test": "mojo:test_app_url",
-   # Optional display name (otherwise the entry for "test" above is used).
-   "name": "mojo:test_app_url (more details)",
-   # Optional test type. Valid values:
-   #   * "gtest" (default)
-   #   * "gtest_isolated": like "gtest", but run with fixture isolation,
-   #      i.e., each test in a fresh mojo_shell)
-   #   * "dart".
-   "type": "gtest",
-   # Optional arguments for the apptest.
-   "test-args": ["--an_arg", "another_arg"],
-   # Optional arguments for the shell.
-   "shell-args": ["--some-flag-for-the-shell", "--another-flag"],
- }
-
-TODO(vtl|msw): Add a way of specifying data dependencies.
+TODO(ppi): merge this into `mojo_test` once all clients are switched to use
+`mojo_test` instead of calling run_apptests() directly.
 """
 
 import sys
@@ -44,7 +25,7 @@ def run_apptests(shell, common_shell_args, test_list):
     common_shell_args: Arguments that will be passed to the shell on each run.
         These will be appended to the shell-args specified for individual tests.
     test_list: List of tests to be run in the format described in the
-        docstring of this module.
+        docstring of `mojo_test`.
 
   Returns:
     True iff all tests succeeded, False otherwise.

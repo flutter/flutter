@@ -1,5 +1,6 @@
 {% from "module_macros.tmpl" import enum_values %}
 {% from "module_macros.tmpl" import struct_descriptor %}
+{% from "module_macros.tmpl" import union_descriptor %}
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -34,6 +35,13 @@ class {{struct|name}}(object):
   __metaclass__ = _reflection.MojoStructType
   DESCRIPTOR = {{struct_descriptor(struct)|indent(2)}}
 {% endfor %}
+{% for union in unions %}
+
+class {{union|name}}(object):
+  __metaclass__ = _reflection.MojoUnionType
+  DESCRIPTOR = {{union_descriptor(union)|indent(2)}}
+{% endfor %}
+
 {% for interface in interfaces %}
 
 class {{interface|name}}(object):

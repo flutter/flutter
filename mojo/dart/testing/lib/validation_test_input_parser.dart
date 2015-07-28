@@ -27,6 +27,7 @@ class ValidationParseError {
 
 abstract class _Entry {
   final int size;
+  _Entry(this.size);
   void write(ByteData buffer, int offset, Map pointers);
 }
 

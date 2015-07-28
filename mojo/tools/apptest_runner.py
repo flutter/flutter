@@ -7,14 +7,9 @@
 
 import argparse
 import logging
+import os.path
+import subprocess
 import sys
-
-import devtools
-devtools.add_lib_to_path()
-from devtoolslib.android_shell import AndroidShell
-from devtoolslib.linux_shell import LinuxShell
-from devtoolslib.apptest_runner import run_apptests
-from devtoolslib import shell_arguments
 
 from mopy import gtest
 from mopy.config import Config
@@ -32,7 +27,7 @@ def main():
 
   parser.add_argument("--verbose", help="be verbose (multiple times for more)",
                       default=0, dest="verbose_count", action="count")
-  parser.add_argument("test_list_file", type=file,
+  parser.add_argument("test_list_file", type=str,
                       help="a file listing apptests to run")
   parser.add_argument("build_dir", type=str,
                       help="the build output directory")
@@ -41,25 +36,23 @@ def main():
   InitLogging(args.verbose_count)
   config = ConfigForGNArgs(ParseGNConfig(args.build_dir))
   paths = Paths(config)
-  extra_args = []
-  if config.target_os == Config.OS_ANDROID:
-    shell = AndroidShell(paths.adb_path)
-    device_status, error = shell.CheckDevice()
-    if not device_status:
-      print 'Device check failed: ' + error
-      return 1
-    shell.InstallApk(paths.target_mojo_shell_path)
-    extra_args.extend(shell_arguments.ConfigureLocalOrigin(
-        shell, paths.build_dir, fixed_port=True))
+  command_line = [os.path.join(os.path.dirname(__file__), os.path.pardir,
+                               "devtools", "common", "mojo_test"),
+                  str(args.test_list_file)]
+  if config.is_debug:
+    command_line.append("--debug")
   else:
-    shell = LinuxShell(paths.mojo_shell_path)
+    command_line.append("--release")
+  if config.target_os == Config.OS_ANDROID:
+    command_line.append("--android")
+    command_line.append("--adb-path=" + paths.adb_path)
+  command_line.append("--shell-path=" + paths.target_mojo_shell_path)
+  command_line.append("--origin-path=" + paths.build_dir)
 
   gtest.set_color()
-
-  test_list_globals = {"config": config}
-  exec args.test_list_file in test_list_globals
-  apptests_result = run_apptests(shell, extra_args, test_list_globals["tests"])
-  return 0 if apptests_result else 1
+  print "Running " + str(command_line)
+  ret = subprocess.call(command_line)
+  return ret
 
 
 if __name__ == '__main__':

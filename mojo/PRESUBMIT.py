@@ -14,6 +14,7 @@ import re
 # NOTE: The EDK allows all external paths, so doesn't need a whitelist.
 _PACKAGE_WHITELISTED_EXTERNAL_PATHS = {
     "SDK": ["//build/module_args/mojo.gni",
+            "//build/module_args/dart.gni",
             "//testing/gtest",
             "//third_party/cython",
             "//third_party/khronos"],

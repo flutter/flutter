@@ -74,7 +74,7 @@ def find_architecture_independent_files(build_dir):
   return existing_files
 
 
-def upload(config, source, dest, dry_run):
+def upload(config, source, dest, dry_run, gzip=False):
   paths = Paths(config)
   sys.path.insert(0, os.path.join(paths.src_root, "tools"))
   # pylint: disable=F0401
@@ -83,10 +83,16 @@ def upload(config, source, dest, dry_run):
   depot_tools_path = find_depot_tools.add_depot_tools_to_path()
   gsutil_exe = os.path.join(depot_tools_path, "third_party", "gsutil", "gsutil")
 
+  command_line = [gsutil_exe, "cp"]
+  if gzip and "." in source:
+    extension = source.split(".")[-1]
+    command_line.extend(["-z", extension])
+  command_line.extend([source, dest])
+
   if dry_run:
-    print str([gsutil_exe, "cp", source, dest])
+    print command_line
   else:
-    subprocess.check_call([gsutil_exe, "cp", source, dest])
+    subprocess.check_call(command_line)
 
 
 def upload_symbols(config, build_dir, dry_run):
@@ -126,7 +132,7 @@ def upload_shell(config, dry_run, verbose):
         if verbose:
           print "zipping %s" % shell_path
         z.writestr(zipinfo, shell_binary.read())
-    upload(config, zip_file.name, dest, dry_run)
+    upload(config, zip_file.name, dest, dry_run, gzip=False)
 
   # Update the LATEST file to contain the version of the new binary.
   latest_file = "gs://mojo/shell/%s/LATEST" % target(config)

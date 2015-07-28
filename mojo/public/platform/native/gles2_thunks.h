@@ -26,10 +26,9 @@ struct MojoGLES2ControlThunks {
   void (*GLES2MakeCurrent)(MojoGLES2Context context);
   void (*GLES2SwapBuffers)();
 
-  // TODO(piman): We shouldn't have to leak these 2 interfaces, especially in a
+  // TODO(piman): We shouldn't have to leak this interface, especially in a
   // type-unsafe way.
   void* (*GLES2GetGLES2Interface)(MojoGLES2Context context);
-  void* (*GLES2GetContextSupport)(MojoGLES2Context context);
 
   void (*GLES2SignalSyncPoint)(MojoGLES2Context context,
                                uint32_t sync_point,
@@ -48,7 +47,6 @@ inline MojoGLES2ControlThunks MojoMakeGLES2ControlThunks() {
       MojoGLES2MakeCurrent,
       MojoGLES2SwapBuffers,
       MojoGLES2GetGLES2Interface,
-      MojoGLES2GetContextSupport,
       MojoGLES2SignalSyncPoint,
   };
 

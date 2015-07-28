@@ -1,11 +1,5 @@
-# This file contains a list of Mojo gtest unit tests.
-#
-# This must be valid Python. It may use the |config| global that will be a
-# mopy.config.Config object, and must set a |tests| global that will contain the
-# list of tests to run.
-#
-# The entries in |tests| are dictionaries of the form described in
-# devtoolslib/apptest_runner.py.
+# This file contains a list of Mojo apptests. For description of the file
+# format, see `mojo_test` in devtools.
 
 tests = [
   {
@@ -73,7 +67,7 @@ tests = [
   },
 ]
 
-if config.target_os == config.OS_LINUX:
+if target_os == 'linux':
   tests += [
     {
       "test": "mojo:example_apptests",
@@ -92,7 +86,7 @@ if config.target_os == config.OS_LINUX:
     }
   ]
 
-if config.target_os == config.OS_ANDROID:
+if target_os == 'android':
   tests += [
     {
       "test": "mojo:example_apptests",
@@ -111,7 +105,7 @@ if config.target_os == config.OS_ANDROID:
     },
   ]
 
-if config.target_os != config.OS_ANDROID:
+if target_os != 'android':
   tests += [
     {
       "test": "mojo:js_apptests",

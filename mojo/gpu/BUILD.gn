@@ -14,6 +14,8 @@ source_set("gpu") {
     "gl_texture.h",
     "mojo_context_support.cc",
     "mojo_context_support.h",
+    "mojo_gles2_impl_autogen.cc",
+    "mojo_gles2_impl_autogen.h",
     "texture_cache.cc",
     "texture_cache.h",
     "texture_uploader.cc",

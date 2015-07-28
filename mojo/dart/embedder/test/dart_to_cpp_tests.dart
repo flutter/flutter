@@ -108,7 +108,7 @@ class DartSideImpl implements DartSide {
 }
 
 main(List args) {
-  assert(args.length == 2);
+  assert(args.length == 3);
   int mojoHandle = args[0];
   var rawHandle = new core.MojoHandle(mojoHandle);
   var endpoint = new core.MojoMessagePipeEndpoint(rawHandle);

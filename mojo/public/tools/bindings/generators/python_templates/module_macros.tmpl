@@ -37,3 +37,13 @@
 {% endif %}
 }
 {%- endmacro -%}
+
+{%- macro union_descriptor(union) -%}
+{
+  'fields': [
+{% for field in union.fields %}
+    {{field|union_field_descriptor}},
+{% endfor %}
+  ],
+ }
+{%- endmacro -%}

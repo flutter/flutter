@@ -5,10 +5,12 @@
 import("//mojo/public/dart/rules.gni")
 
 dart_pkg("testing") {
-  sources = [
+  entrypoints = [
     "lib/async_helper.dart",
     "lib/expect.dart",
     "lib/validation_test_input_parser.dart",
+  ]
+  sources = [
     "pubspec.yaml",
   ]
 }

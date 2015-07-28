@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""Test runner for Mojo application tests.
+
+The file describing the list of tests has to be a valid Python program that sets
+a |tests| global variable, containing entries of the following form:
+
+ {
+   # Required URL for apptest.
+   "test": "mojo:test_app_url",
+   # Optional display name (otherwise the entry for "test" above is used).
+   "name": "mojo:test_app_url (more details)",
+   # Optional test type. Valid values:
+   #   * "gtest" (default)
+   #   * "gtest_isolated": like "gtest", but run with fixture isolation,
+   #      i.e., each test in a fresh mojo_shell)
+   #   * "dart".
+   "type": "gtest",
+   # Optional arguments for the apptest.
+   "test-args": ["--an_arg", "another_arg"],
+   # Optional arguments for the shell.
+   "shell-args": ["--some-flag-for-the-shell", "--another-flag"],
+ }
+
+The program may use the |target_os| global that will be any of ['android',
+'linux'], indicating the system on which the tests are to be run.
+
+TODO(vtl|msw): Add a way of specifying data dependencies.
+"""
+
+import argparse
+import sys
+
+from devtoolslib.android_shell import AndroidShell
+from devtoolslib.linux_shell import LinuxShell
+from devtoolslib.apptest_runner import run_apptests
+from devtoolslib import shell_arguments
+
+
+def main():
+  parser = argparse.ArgumentParser(description="Test runner for Mojo "
+                                   "application tests.")
+  parser.add_argument("test_list_file", type=file,
+                      help="a file listing apptests to run")
+
+  # Arguments indicating the configuration we are targeting.
+  parser.add_argument('--android', help='Run on Android',
+                      action='store_true')
+  debug_group = parser.add_mutually_exclusive_group()
+  debug_group.add_argument('--debug', help='Debug build (default)',
+                           default=True, action='store_true')
+  debug_group.add_argument('--release', help='Release build', default=False,
+                           dest='debug', action='store_false')
+  parser.add_argument('--target-cpu', help='CPU architecture to run for.',
+                      choices=['x64', 'x86', 'arm'])
+
+  # Arguments indicating paths to binaries and tools.
+  parser.add_argument('--adb-path', help='Path of the adb binary.')
+  parser.add_argument('--shell-path', help='Path of the Mojo shell binary.')
+  parser.add_argument('--origin-path', help='Path of a directory to be set as '
+                      'the origin for mojo: urls')
+  args = parser.parse_args()
+
+  extra_shell_args = []
+  if args.android:
+    if not args.adb_path:
+      print 'Indicate path to adb in --adb-path.'
+      return 1
+    shell = AndroidShell(args.adb_path)
+
+    device_status, error = shell.CheckDevice()
+    if not device_status:
+      print 'Device check failed: ' + error
+      return 1
+
+    if not args.shell_path:
+      print 'Indicate path to the shell binary in --shell-path'
+      return 1
+    shell.InstallApk(args.shell_path)
+
+    if args.origin_path:
+      extra_shell_args.extend(shell_arguments.ConfigureLocalOrigin(
+          shell, args.origin_path, fixed_port=True))
+  else:
+    if not args.shell_path:
+      print 'Indicate path to the shell binary in --shell-path'
+      return 1
+    shell = LinuxShell(args.shell_path)
+
+  target_os = 'android' if args.android else 'linux'
+  test_list_globals = {"target_os": target_os}
+  exec args.test_list_file in test_list_globals
+  apptests_result = run_apptests(shell, extra_shell_args,
+                                 test_list_globals["tests"])
+  return 0 if apptests_result else 1
+
+if __name__ == '__main__':
+  sys.exit(main())
