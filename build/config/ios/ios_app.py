@@ -15,9 +15,25 @@ PLUTIL = [
   'plutil'
 ]
 
+def MakeDirectories(path):
+  try:
+    os.makedirs(path)
+  except OSError as exc:
+    if exc.errno == errno.EEXIST and os.path.isdir(path):
+      return 0
+    else:
+      return -1
+
+  return 0
+
 
 def ProcessInfoPlist(args):
   output_plist_file = os.path.abspath(os.path.join(args.output, 'Info.plist'))
+
+  print os.path.dirname(output_plist_file)
+  if MakeDirectories(os.path.dirname(output_plist_file)) == -1:
+    return -1
+
   return subprocess.check_call( PLUTIL + [
     '-convert',
     'binary1',
@@ -40,18 +56,6 @@ def PerformCodeSigning(args):
     '-f',
     args.application_path,
   ])
-
-
-def MakeDirectories(path):
-  try:
-    os.makedirs(path)
-  except OSError as exc:
-    if exc.errno == errno.EEXIST and os.path.isdir(path):
-      return 0
-    else:
-      return -1
-
-  return 0
 
 
 def GenerateProjectStructure(args):

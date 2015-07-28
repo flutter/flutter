@@ -169,10 +169,40 @@ if (is_android) {
   import("//build/config/ios/rules.gni")
   import("//build/config/ios/ios_sdk.gni")
 
+  group("ios_shell_scaffolding") {
+
+  }
+
+  source_set("ios_scaffolding") {
+    sources = [
+      "ios/main_ios.mm",
+      "ios/sky_app_delegate.h",
+      "ios/sky_app_delegate.mm",
+      "ios/sky_surface.h",
+      "ios/sky_surface.mm",
+      "ios/sky_view_controller.h",
+      "ios/sky_view_controller.mm",
+    ]
+
+    set_sources_assignment_filter([])
+    sources += [
+      "mac/platform_mac.h",
+      "mac/platform_mac.mm",
+      "mac/platform_service_provider_mac.cc",
+      "mac/platform_view_mac.h",
+      "mac/platform_view_mac.mm",
+    ]
+    set_sources_assignment_filter(sources_assignment_filter)
+
+    deps = common_deps + [
+             ":common",
+             "//sky/services/ns_net",
+           ]
+  }
+
   ios_app("shell") {
     app_name = "SkyShell"
     info_plist = "ios/Info.plist"
-    scaffolding_target = "ios_scaffolding"
     entitlements_path = "ios/Entitlements.xcent"
     code_signing_identity = ios_code_signing_identity
 
@@ -181,35 +211,8 @@ if (is_android) {
       bundle_directory = "."
     }
 
-    source_set(scaffolding_target) {
-      sources = [
-        "ios/main_ios.mm",
-        "ios/sky_app_delegate.h",
-        "ios/sky_app_delegate.mm",
-        "ios/sky_surface.h",
-        "ios/sky_surface.mm",
-        "ios/sky_view_controller.h",
-        "ios/sky_view_controller.mm",
-      ]
-
-      set_sources_assignment_filter([])
-      sources += [
-        "mac/platform_mac.h",
-        "mac/platform_mac.mm",
-        "mac/platform_service_provider_mac.cc",
-        "mac/platform_view_mac.h",
-        "mac/platform_view_mac.mm",
-      ]
-      set_sources_assignment_filter(sources_assignment_filter)
-
-      deps = common_deps + [
-               ":common",
-               "//sky/services/ns_net",
-             ]
-    }
-
     deps = [
-      ":$scaffolding_target",
+      ":ios_scaffolding",
       ":sky_resources",
     ]
   }
