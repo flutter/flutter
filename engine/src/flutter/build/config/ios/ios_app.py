@@ -30,7 +30,6 @@ def MakeDirectories(path):
 def ProcessInfoPlist(args):
   output_plist_file = os.path.abspath(os.path.join(args.output, 'Info.plist'))
 
-  print os.path.dirname(output_plist_file)
   if MakeDirectories(os.path.dirname(output_plist_file)) == -1:
     return -1
 
