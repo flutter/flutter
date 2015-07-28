@@ -34,6 +34,7 @@ const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
 const TextStyle _kTabTextStyle = const TextStyle(textAlign: TextAlign.center);
 const int _kTabIconSize = 24;
 const double _kTabBarScrollDrag = 0.025;
+const Duration _kTabBarScroll = const Duration(milliseconds: 200);
 
 class TabBarParentData extends BoxParentData with
     ContainerParentDataMixin<RenderBox> { }
@@ -381,6 +382,9 @@ class TabBar extends Scrollable {
   SelectedIndexChanged onChanged;
   bool isScrollable;
 
+  Size _tabBarSize;
+  List<double> _tabWidths;
+
   void syncFields(TabBar source) {
     super.syncFields(source);
     labels = source.labels;
@@ -396,8 +400,13 @@ class TabBar extends Scrollable {
   _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleTap(int tabIndex) {
-    if (tabIndex != selectedIndex && onChanged != null)
-      onChanged(tabIndex);
+    if (tabIndex != selectedIndex) {
+      if (_tabWidths != null) {
+        scrollTo(_centeredTabScrollOffset(tabIndex), duration: _kTabBarScroll);
+      }
+      if (onChanged != null)
+        onChanged(tabIndex);
+    }
   }
 
   Widget _toTab(TabLabel label, int tabIndex) {
@@ -410,8 +419,16 @@ class TabBar extends Scrollable {
     );
   }
 
-  Size _tabBarSize;
-  List<double> _tabWidths;
+  double _centeredTabScrollOffset(int tabIndex) {
+    assert(_tabWidths != null);
+    assert(tabIndex >= 0 && tabIndex < _tabWidths.length);
+    double viewportWidth = scrollBehavior.containerSize;
+    double tabOffset = 0.0;
+    if (tabIndex > 0)
+      tabOffset = _tabWidths.take(tabIndex).reduce((sum, width) => sum + width);
+    return (tabOffset + _tabWidths[tabIndex] / 2.0 - viewportWidth / 2.0)
+      .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
+  }
 
   void _layoutChanged(Size tabBarSize, List<double> tabWidths) {
     setState(() {
