@@ -77,3 +77,12 @@ class AnimatedColor extends AnimatedValue<Color> {
     value = lerpColor(begin, end, t);
   }
 }
+
+class AnimatedRect extends AnimatedValue<Rect> {
+  AnimatedRect(Rect begin, { Rect end, Curve curve: linear })
+    : super(begin, end: end, curve: curve);
+
+  void setProgress(double t) {
+    value = lerpRect(begin, end, t);
+  }
+}

@@ -101,7 +101,7 @@ class TabbedNavigatorApp extends App {
     return new Container(
      child: new Card(child: new Padding(child: tabNavigator, padding: const EdgeDims.all(8.0))),
      padding: const EdgeDims.all(12.0),
-     decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50])
+     decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[100])
     );
   }
 

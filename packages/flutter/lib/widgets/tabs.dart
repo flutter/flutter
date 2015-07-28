@@ -5,6 +5,9 @@
 import 'dart:math' as math;
 
 import 'package:newton/newton.dart';
+import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/animated_value.dart';
+import 'package:sky/animation/curves.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
@@ -68,6 +71,15 @@ class RenderTabBar extends RenderBox with
   void set indicatorColor(Color value) {
     if (_indicatorColor != value) {
       _indicatorColor = value;
+      markNeedsPaint();
+    }
+  }
+
+  Rect _indicatorRect;
+  Rect get indicatorRect => _indicatorRect;
+  void set indicatorRect(Rect value) {
+    if (_indicatorRect != value) {
+      _indicatorRect = value;
       markNeedsPaint();
     }
   }
@@ -176,7 +188,7 @@ class RenderTabBar extends RenderBox with
     List<double> widths = new List<double>(childCount);
     if (!isScrollable && childCount > 0) {
       double tabWidth = size.width / childCount;
-      widths.fillRange(0, widths.length - 1, tabWidth);
+      widths.fillRange(0, widths.length, tabWidth);
     } else if (isScrollable) {
       RenderBox child = firstChild;
       int childIndex = 0;
@@ -219,6 +231,11 @@ class RenderTabBar extends RenderBox with
     if (indicatorColor == null)
       return;
 
+    if (indicatorRect != null) {
+      canvas.drawRect(indicatorRect, new Paint()..color = indicatorColor);
+      return;
+    }
+
     var size = new Size(selectedTab.size.width, _kTabIndicatorHeight);
     var point = new Point(
       selectedTab.parentData.position.x,
@@ -236,7 +253,6 @@ class RenderTabBar extends RenderBox with
       Rect rect = offset & new Size(width, size.height);
       canvas.drawRect(rect, new Paint()..color = backgroundColor);
     }
-
     int index = 0;
     RenderBox child = firstChild;
     while (child != null) {
@@ -256,6 +272,7 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
     this.selectedIndex,
     this.backgroundColor,
     this.indicatorColor,
+    this.indicatorRect,
     this.textAndIcons,
     this.isScrollable: false,
     this.onLayoutChanged
@@ -264,6 +281,7 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
   final int selectedIndex;
   final Color backgroundColor;
   final Color indicatorColor;
+  final Rect indicatorRect;
   final bool textAndIcons;
   final bool isScrollable;
   final LayoutChanged onLayoutChanged;
@@ -276,6 +294,7 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
     root.selectedIndex = selectedIndex;
     root.backgroundColor = backgroundColor;
     root.indicatorColor = indicatorColor;
+    root.indicatorRect = indicatorRect;
     root.textAndIcons = textAndIcons;
     root.isScrollable = isScrollable;
     root.onLayoutChanged = onLayoutChanged;
@@ -384,6 +403,14 @@ class TabBar extends Scrollable {
 
   Size _tabBarSize;
   List<double> _tabWidths;
+  AnimationPerformance _indicatorAnimation;
+
+  void initState() {
+    super.initState();
+    _indicatorAnimation = new AnimationPerformance()
+      ..duration = _kTabBarScroll
+      ..variable = new AnimatedRect(null, curve: ease);
+  }
 
   void syncFields(TabBar source) {
     super.syncFields(source);
@@ -396,13 +423,65 @@ class TabBar extends Scrollable {
     scrollBehavior.isScrollable = source.isScrollable;
   }
 
+  void didMount() {
+    _indicatorAnimation.addListener(_indicatorAnimationUpdated);
+    super.didMount();
+  }
+
+  void didUnmount() {
+    _indicatorAnimation.removeListener(_indicatorAnimationUpdated);
+    super.didUnmount();
+  }
+
+  void _indicatorAnimationUpdated() {
+    setState(() {
+    });
+  }
+
+  AnimatedRect get _indicatorRect => _indicatorAnimation.variable as AnimatedRect;
+
+  void _startIndicatorAnimation(int fromTabIndex, int toTabIndex) {
+    _indicatorRect
+      ..begin = _tabIndicatorRect(fromTabIndex)
+      ..end = _tabIndicatorRect(toTabIndex);
+    _indicatorAnimation
+      ..progress = 0.0
+      ..play();
+  }
+
   ScrollBehavior createScrollBehavior() => new _TabsScrollBehavior();
   _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
+
+  Rect _tabRect(int tabIndex) {
+    assert(_tabBarSize != null);
+    assert(_tabWidths != null);
+    assert(tabIndex >= 0 && tabIndex < _tabWidths.length);
+    double tabLeft = 0.0;
+    if (tabIndex > 0)
+      tabLeft = _tabWidths.take(tabIndex).reduce((sum, width) => sum + width);
+    double tabTop = 0.0;
+    double tabBottom = _tabBarSize.height -_kTabIndicatorHeight;
+    double tabRight = tabLeft + _tabWidths[tabIndex];
+    return new Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+  }
+
+  Rect _tabIndicatorRect(int tabIndex) {
+    Rect r = _tabRect(tabIndex);
+    return new Rect.fromLTRB(r.left, r.bottom, r.right, r.bottom + _kTabIndicatorHeight);
+  }
+
+  double _centeredTabScrollOffset(int tabIndex) {
+    double viewportWidth = scrollBehavior.containerSize;
+    return (_tabRect(tabIndex).left + _tabWidths[tabIndex] / 2.0 - viewportWidth / 2.0)
+      .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
+  }
 
   void _handleTap(int tabIndex) {
     if (tabIndex != selectedIndex) {
       if (_tabWidths != null) {
-        scrollTo(_centeredTabScrollOffset(tabIndex), duration: _kTabBarScroll);
+        if (isScrollable)
+          scrollTo(_centeredTabScrollOffset(tabIndex), duration: _kTabBarScroll);
+        _startIndicatorAnimation(selectedIndex, tabIndex);
       }
       if (onChanged != null)
         onChanged(tabIndex);
@@ -417,17 +496,6 @@ class TabBar extends Scrollable {
       ),
       onGestureTap: (_) => _handleTap(tabIndex)
     );
-  }
-
-  double _centeredTabScrollOffset(int tabIndex) {
-    assert(_tabWidths != null);
-    assert(tabIndex >= 0 && tabIndex < _tabWidths.length);
-    double viewportWidth = scrollBehavior.containerSize;
-    double tabOffset = 0.0;
-    if (tabIndex > 0)
-      tabOffset = _tabWidths.take(tabIndex).reduce((sum, width) => sum + width);
-    return (tabOffset + _tabWidths[tabIndex] / 2.0 - viewportWidth / 2.0)
-      .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
   void _layoutChanged(Size tabBarSize, List<double> tabWidths) {
@@ -484,9 +552,10 @@ class TabBar extends Scrollable {
             selectedIndex: selectedIndex,
             backgroundColor: backgroundColor,
             indicatorColor: indicatorColor,
+            indicatorRect: _indicatorRect.value,
             textAndIcons: textAndIcons,
             isScrollable: isScrollable,
-            onLayoutChanged: isScrollable ? _layoutChanged : null
+            onLayoutChanged: _layoutChanged
           )
         )
       )

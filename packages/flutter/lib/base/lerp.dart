@@ -41,3 +41,19 @@ Offset lerpOffset(Offset a, Offset b, double t) {
     return a * (1.0 - t);
   return new Offset(lerpNum(a.dx, b.dx, t), lerpNum(a.dy, b.dy, t));
 }
+
+Rect lerpRect(Rect a, Rect b, double t) {
+  if (a == null && b == null)
+    return null;
+  if (a == null)
+    return new Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
+  if (b == null) {
+    double k = 1.0 - t;
+    return new Rect.fromLTRB(b.left * k, b.top * k, b.right * k, b.bottom * k);
+  }
+  return new Rect.fromLTRB(
+    lerpNum(a.left, b.left, t),
+    lerpNum(a.top, b.top, t),
+    lerpNum(a.right, b.right, t),
+    lerpNum(a.bottom, b.bottom, t));
+}
