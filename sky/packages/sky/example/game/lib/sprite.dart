@@ -29,6 +29,8 @@ class Sprite extends NodeWithSize {
   ///     mySprite.transferMode = TransferMode.plusMode;
   TransferMode transferMode;
 
+  Paint _cachedPaint = new Paint();
+
   /// Creates a new sprite from the provided [texture].
   ///
   ///     var mySprite = new Sprite(myTexture)
@@ -65,7 +67,8 @@ class Sprite extends NodeWithSize {
   }
 
   void paint(PaintingCanvas canvas) {
-    canvas.save();
+    // Store old matrix
+    Matrix4 savedMatrix = canvas.getTotalMatrix();
 
     // Account for pivot point
     applyTransformForPivot(canvas);
@@ -75,10 +78,10 @@ class Sprite extends NodeWithSize {
       double h = texture.size.height;
 
       if (w <= 0 || h <= 0) return;
-      
+
       double scaleX = size.width / w;
       double scaleY = size.height / h;
-      
+
       if (constrainProportions) {
         // Constrain proportions, using the smallest scale and by centering the image
         if (scaleX < scaleY) {
@@ -89,26 +92,27 @@ class Sprite extends NodeWithSize {
           scaleX = scaleY;
         }
       }
-      
+
       canvas.scale(scaleX, scaleY);
 
       // Setup paint object for opacity and transfer mode
-      Paint paint = new Paint();
-      paint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
+      _cachedPaint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
       if (colorOverlay != null) {
-        paint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATop));
+        _cachedPaint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATop));
       }
       if (transferMode != null) {
-        paint.setTransferMode(transferMode);
+        _cachedPaint.setTransferMode(transferMode);
       }
 
       // Do actual drawing of the sprite
-      texture.drawTexture(canvas, Point.origin, paint);
+      texture.drawTexture(canvas, Point.origin, _cachedPaint);
     } else {
       // Paint a red square for missing texture
       canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),
-      new Paint()..color = const Color.fromARGB(255, 255, 0, 0));
+      new Paint()..color = new Color.fromARGB(255, 255, 0, 0));
     }
-    canvas.restore();
+
+    // Restore matrix
+    canvas.setMatrix(savedMatrix);
   }
 }

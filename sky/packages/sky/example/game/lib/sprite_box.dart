@@ -71,6 +71,8 @@ class SpriteBox extends RenderBox {
 
   List<Node> _eventTargets;
 
+  List<ActionController> _actionControllers;
+
   Rect _visibleArea;
 
   Rect get visibleArea {
@@ -129,6 +131,18 @@ class SpriteBox extends RenderBox {
     size = constraints.biggest;
     _invalidateTransformMatrix();
     _callSpriteBoxPerformedLayout(_rootNode);
+  }
+
+  // Adding and removing nodes
+
+  _registerNode(Node node) {
+    _actionControllers = null;
+    _eventTargets = null;
+  }
+
+  _deregisterNode(Node node) {
+    _actionControllers = null;
+    _eventTargets = null;
   }
 
   // Event handling
@@ -342,19 +356,32 @@ class SpriteBox extends RenderBox {
     // if (_numFrames % 60 == 0)
     //   print("delta: $delta fps: $_frameRate");
 
-    _runActions(_rootNode, delta);
+    _runActions(delta);
     _callUpdate(_rootNode, delta);
+
+    // Schedule next update
     _scheduleTick();
+
+    // Make sure the node graph is redrawn
     markNeedsPaint();
   }
 
-  void _runActions(Node node, double dt) {
-    if (node._actions != null) {
-      node._actions.step(dt);
+  void _runActions(double dt) {
+    if (_actionControllers == null) {
+      _actionControllers = [];
+      _addActionControllers(_rootNode, _actionControllers);
     }
+    for (ActionController actions in _actionControllers) {
+      actions.step(dt);
+    }
+  }
+
+  void _addActionControllers(Node node, List<ActionController> controllers) {
+    if (node._actions != null) controllers.add(node._actions);
+
     for (int i = node.children.length - 1; i >= 0; i--) {
       Node child = node.children[i];
-      _runActions(child, dt);
+      _addActionControllers(child, controllers);
     }
   }
 
