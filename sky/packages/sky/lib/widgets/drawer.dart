@@ -15,6 +15,8 @@ import 'package:sky/widgets/scrollable_viewport.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:vector_math/vector_math.dart';
 
+export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
+
 // TODO(eseidel): Draw width should vary based on device size:
 // http://www.google.com/design/spec/layout/structure.html#structure-side-nav
 
@@ -35,14 +37,7 @@ const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 const Point _kOpenPosition = Point.origin;
 const Point _kClosedPosition = const Point(-_kWidth, 0.0);
 
-typedef void DrawerStatusChangeHandler (bool showing);
-
-enum DrawerStatus {
-  active,
-  inactive,
-}
-
-typedef void DrawerStatusChangedCallback(DrawerStatus status);
+typedef void DrawerStatusChangedCallback(AnimationStatus status);
 
 class Drawer extends AnimatedComponent {
   Drawer({
@@ -70,7 +65,7 @@ class Drawer extends AnimatedComponent {
     _performance = new AnimationPerformance()
       ..duration = _kBaseSettleDuration
       ..variable = new AnimatedList([_position, _maskColor])
-      ..addListener(_checkForStateChanged);
+      ..addStatusListener(_onStatusChanged);
     watch(_performance);
     if (showing)
       _show();
@@ -137,22 +132,16 @@ class Drawer extends AnimatedComponent {
 
   double get xPosition => _position.value.x;
 
-  DrawerStatus _lastStatus;
-  void _checkForStateChanged() {
-    DrawerStatus status = _status;
-    if (_lastStatus != null && status != _lastStatus) {
-      if (status == DrawerStatus.inactive &&
-          navigator != null &&
-          navigator.currentRoute is RouteState &&
-          (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
-        navigator.pop();
-      if (onStatusChanged != null)
-        onStatusChanged(status);
-    }
-    _lastStatus = status;
+  void _onStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed &&
+        navigator != null &&
+        navigator.currentRoute is RouteState &&
+        (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
+      navigator.pop();
+    if (onStatusChanged != null)
+      onStatusChanged(status);
   }
 
-  DrawerStatus get _status => _performance.isDismissed ? DrawerStatus.inactive : DrawerStatus.active;
   bool get _isMostlyClosed => xPosition <= -_kWidth/2;
 
   void _settle() => _fling(_isMostlyClosed ? -1.0 : 1.0);
