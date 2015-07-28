@@ -10,11 +10,11 @@
 		ios_app GN template
 	-->
 	<key>CFBundleExecutable</key>
-	<string>Sky</string>
+	<string>SkyShell</string>
 
 	<key>CFBundleIdentifier</key>
-	<string>org.domokit.sky</string>
-	
+	<string>org.domokit.SkyShell</string>
+
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
