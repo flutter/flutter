@@ -24,20 +24,6 @@ vars = {
   'dart_observatory_packages_revision': 'cdc4b3d4c15b9c0c8e7702dff127b440afbb7485',
 
   'buildtools_revision': '5215ee866bc3e8eb4a7f124212845abf4029e60b',
-
-  'archive_dart_revision': '07ffd98c5403b7f9ae067b57dc9487611be420f5',
-  'args_dart_revision': 'e0e8377412ee6cd6a5a4a8632848181c1db91f44',
-  'box2d_dart_revision': 'c5e65d9546275e78ad2a1d51b459e7638f6e4323',
-  'cassowary_dart_revision': '7e5afc5b3956a18636d5b37b1dcba1705865564b',
-  'collection_dart_revision': '79ebc6fc2dae581cb23ad50a5c600c1b7dd132f8',
-  'crypto_dart_revision': 'd4558dea1639e5ad2a41d045265b8ece270c2d90',
-  'newton_dart_revision': '11cd659e1650591402b69f91b9c4d2a0841fd5bd',
-  'path_dart_revision': '2f3dcdec32011f1bc41194ae3640d6d9292a7096',
-  'quiver_dart_revision': '6bab7dec34189eee579178eb16d3063c8ae69031',
-  'source_span_dart_revision': '5c6c13f62fc111adaace3aeb4a38853d64481d06',
-  'string_scanner_dart_revision': '9f00056b32f41efc376adecfb696a01bc7c593d7',
-  'vector_math_dart_revision': '65915583f7aa606cb47ed265f853c18c60102b81',
-  'yaml_dart_revision': 'd8c1ce75edf051ea1d5583b24474f8656abb4920',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -78,45 +64,6 @@ deps = {
 
   'src/third_party/mesa/src':
    Var('chromium_git') + '/chromium/deps/mesa.git' + '@' + '071d25db04c23821a12a8b260ab9d96a097402f0',
-
-  'src/third_party/dart-pkg/archive':
-    Var('chromium_git') + '/external/github.com/brendan-duncan/archive.git' + '@' + Var('archive_dart_revision'),
-
-  'src/third_party/dart-pkg/args':
-    Var('chromium_git') + '/external/github.com/dart-lang/args.git' + '@' + Var('args_dart_revision'),
-
-  'src/third_party/dart-pkg/box2d':
-    Var('chromium_git') + '/external/github.com/google/box2d.dart.git' + '@' + Var('box2d_dart_revision'),
-
-  'src/third_party/dart-pkg/cassowary':
-    Var('chromium_git') + '/external/github.com/domokit/cassowary.git' + '@' + Var('cassowary_dart_revision'),
-
-  'src/third_party/dart-pkg/collection':
-    Var('chromium_git') + '/external/github.com/dart-lang/collection.git' + '@' + Var('collection_dart_revision'),
-
-  'src/third_party/dart-pkg/crypto':
-    Var('chromium_git') + '/external/github.com/dart-lang/crypto.git' + '@' + Var('crypto_dart_revision'),
-
-  'src/third_party/dart-pkg/newton':
-    Var('chromium_git') + '/external/github.com/domokit/newton.git' + '@' + Var('newton_dart_revision'),
-
-  'src/third_party/dart-pkg/path':
-    Var('chromium_git') + '/external/github.com/dart-lang/path.git' + '@' + Var('path_dart_revision'),
-
-  'src/third_party/dart-pkg/quiver':
-    Var('chromium_git') + '/external/github.com/google/quiver-dart.git' + '@' + Var('quiver_dart_revision'),
-
-  'src/third_party/dart-pkg/source_span':
-    Var('chromium_git') + '/external/github.com/dart-lang/source_span.git' + '@' + Var('source_span_dart_revision'),
-
-  'src/third_party/dart-pkg/string_scanner':
-    Var('chromium_git') + '/external/github.com/dart-lang/string_scanner.git' + '@' + Var('string_scanner_dart_revision'),
-
-  'src/third_party/dart-pkg/vector_math':
-    Var('chromium_git') + '/external/github.com/google/vector_math.dart.git' + '@' + Var('vector_math_dart_revision'),
-
-  'src/third_party/dart-pkg/yaml':
-    Var('chromium_git') + '/external/github.com/dart-lang/yaml.git' + '@' + Var('yaml_dart_revision'),
 }
 
 deps_os = {
