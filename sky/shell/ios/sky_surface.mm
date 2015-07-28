@@ -125,6 +125,12 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 }
 
 - (NSString*)skyInitialLoadURL {
+  NSUserDefaults *standardDefaults = [NSUserDefaults standardUserDefaults];
+  NSString *target = [standardDefaults stringForKey:@"target"];
+  NSString *server = [standardDefaults stringForKey:@"server"];
+  if (server && target) {
+    return [NSString stringWithFormat:@"http://%@/%@", server, target];
+  }
   return [NSBundle mainBundle].infoDictionary[@"org.domokit.sky.load_url"];
 }
 
