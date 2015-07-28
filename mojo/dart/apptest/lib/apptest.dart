@@ -10,17 +10,17 @@ import 'package:mojo/application.dart';
 import 'package:mojo/bindings.dart';
 import 'package:mojo/core.dart';
 
-// Import and reexport the unittest package. We are a *.dartzip file designed to
+// Import and reexport the test package. We are a *.dartzip file designed to
 // be linked into your_apptest.mojo file and are your main entrypoint.
-import 'package:unittest/unittest.dart';
-export 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
+export 'package:test/test.dart';
 
-final Completer exitCodeCompleter = new Completer();
+typedef AppTestFunction(Application app, String url);
 
 // This class is an application that does nothing but tears down the connections
 // between each test.
 class _ConnectionToShellApplication extends Application {
-  final List<Function> _testFunctions;
+  final List<AppTestFunction> _testFunctions;
 
   _ConnectionToShellApplication.fromHandle(
       MojoHandle handle, this._testFunctions)
@@ -30,53 +30,39 @@ class _ConnectionToShellApplication extends Application {
   // call from the shell. We need to first have a valid connection to the shell
   // so that apptests can connect to other applications.
   void initialize(List<String> args, String url) {
-    _testFunctions.forEach((f) => f(this, url));
+    group('dart_apptests', () {
+      setUp(testSetUp);
+      tearDown(testTearDown);
+      for (var testFunction in _testFunctions) {
+        testFunction(this, url);
+      }
+    });
+    // Append a final test to terminate shell connection.
+    // TODO(johnmccutchan): Remove this once package 'test' supports a global
+    // tearDown callback.
+    test('TERMINATE SHELL CONNECTION', () async {
+      await close();
+      assert(MojoHandle.reportLeakedHandles());
+    });
+  }
+
+  void testSetUp() {
+  }
+
+  void testTearDown() {
+    // Reset any connections between tests.
+    resetConnections();
   }
 }
 
-// A configuration which properly shuts down our application at the end.
-class _CleanShutdownConfiguration extends SimpleConfiguration {
-  final _ConnectionToShellApplication _application;
-
-  _CleanShutdownConfiguration(this._application) : super() {}
-
-  Duration timeout = const Duration(seconds: 10);
-
-  void onTestResult(TestCase externalTestCase) {
-    super.onTestResult(externalTestCase);
-    _application.resetConnections();
-  }
-
-  void onDone(bool success) {
-    exitCodeCompleter.complete(success ? 0 : 255);
-    closeApplication();
-    super.onDone(success);
-  }
-
-  Future closeApplication() async {
-    await _application.close();
-    assert(MojoHandle.reportLeakedHandles());
-  }
-
-  void onSummary(int passed, int failed, int errors,
-                 List<TestCase> results, String uncaughtError) {
-    String status = ((failed > 0) || (errors > 0)) ? "FAILED" : "PASSED";
-    print('DART APPTESTS RESULT: $status');
-    super.onSummary(passed, failed, errors, results, uncaughtError);
-  }
-}
-
-// The public interface to apptests.
-//
-// In a dart mojo application, |incoming_handle| is args[0]. |testFunction| is a
-// list of functions that actually contains your testing code, and will pass
-// back an application to each of them.
-Future<int> runAppTests(var incomingHandle, List<Function> testFunction) async {
+/// The public interface to apptests.
+///
+/// In a dart mojo application, [incomingHandle] is `args[0]`. [testFunctions]
+/// is list of [AppTestFunction]. Each function will be passed the application
+/// and url.
+runAppTests(var incomingHandle, List<AppTestFunction> testFunctions) {
   var appHandle = new MojoHandle(incomingHandle);
   var application =
-      new _ConnectionToShellApplication.fromHandle(appHandle, testFunction);
-  unittestConfiguration = new _CleanShutdownConfiguration(application);
-
-  var exitCode = await exitCodeCompleter.future;
-  return exitCode;
+      new _ConnectionToShellApplication.fromHandle(appHandle, testFunctions);
+  /// [Application]'s [initialize] will be called.
 }

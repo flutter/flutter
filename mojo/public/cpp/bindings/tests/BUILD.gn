@@ -23,6 +23,8 @@ mojo_sdk_source_set("tests") {
     "handle_passing_unittest.cc",
     "interface_ptr_unittest.cc",
     "map_unittest.cc",
+    "message_queue.cc",
+    "message_queue.h",
     "request_response_unittest.cc",
     "router_unittest.cc",
     "sample_service_unittest.cc",

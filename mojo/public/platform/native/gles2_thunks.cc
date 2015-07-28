@@ -41,11 +41,6 @@ void* MojoGLES2GetGLES2Interface(MojoGLES2Context context) {
   return g_control_thunks.GLES2GetGLES2Interface(context);
 }
 
-void* MojoGLES2GetContextSupport(MojoGLES2Context context) {
-  assert(g_control_thunks.GLES2GetContextSupport);
-  return g_control_thunks.GLES2GetContextSupport(context);
-}
-
 void MojoGLES2SignalSyncPoint(MojoGLES2Context context,
                               uint32_t sync_point,
                               MojoGLES2SignalSyncPointCallback callback,

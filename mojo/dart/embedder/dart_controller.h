@@ -5,27 +5,70 @@
 #ifndef MOJO_DART_EMBEDDER_DART_CONTROLLER_H_
 #define MOJO_DART_EMBEDDER_DART_CONTROLLER_H_
 
+#include <unordered_set>
+
+#include "base/synchronization/lock.h"
 #include "dart/runtime/include/dart_api.h"
-#include "mojo/dart/embedder/isolate_data.h"
+#include "mojo/dart/embedder/dart_state.h"
 #include "mojo/public/c/system/types.h"
+
+namespace tonic {
+class DartDependency;
+class DartLibraryLoader;
+}
 
 namespace mojo {
 namespace dart {
 
 struct DartControllerConfig {
+  DartControllerConfig()
+      : application_data(nullptr),
+        strict_compilation(false),
+        entropy(nullptr),
+        vm_flags(nullptr),
+        vm_flags_count(0),
+        script_flags(nullptr),
+        script_flags_count(0),
+        handle(MOJO_HANDLE_INVALID),
+        compile_all(false),
+        error(nullptr),
+        use_network_loader(false) {
+  }
+
+  void SetVmFlags(const char** vm_flags, intptr_t vm_flags_count) {
+    this->vm_flags = vm_flags;
+    this->vm_flags_count = vm_flags_count;
+
+    // See if compile_all is one of the vm flags.
+    compile_all = false;
+    const char* kCompileAllFlag = "--compile_all";
+    const intptr_t kCompileAllFlagLen = strlen(kCompileAllFlag);
+    for (intptr_t i = 0; i < vm_flags_count; i++) {
+      if (strncmp(vm_flags[i], kCompileAllFlag, kCompileAllFlagLen) == 0) {
+        compile_all = true;
+      }
+    }
+  }
+
+  void SetScriptFlags(const char** script_flags, intptr_t script_flags_count) {
+    this->script_flags = script_flags;
+    this->script_flags_count = script_flags_count;
+  }
+
   void* application_data;
   bool strict_compilation;
-  std::string script;
   std::string script_uri;
   std::string package_root;
   IsolateCallbacks callbacks;
   Dart_EntropySource entropy;
-  const char** arguments;
-  int arguments_count;
+  const char** vm_flags;
+  int vm_flags_count;
+  const char** script_flags;
+  int script_flags_count;
   MojoHandle handle;
-  // TODO(zra): search for the --compile_all flag in arguments where needed.
   bool compile_all;
   char** error;
+  bool use_network_loader;
 };
 
 // The DartController may need to request for services to be connected
@@ -104,14 +147,26 @@ class DartController {
   static Dart_Isolate CreateIsolateHelper(void* dart_app,
                                           bool strict_compilation,
                                           IsolateCallbacks callbacks,
-                                          const std::string& script,
                                           const std::string& script_uri,
                                           const std::string& package_root,
-                                          char** error);
+                                          char** error,
+                                          bool use_network_loader);
 
   static void InitVmIfNeeded(Dart_EntropySource entropy,
                              const char** arguments,
                              int arguments_count);
+
+  static void BlockWaitingForDependencies(
+      tonic::DartLibraryLoader* loader,
+      const std::unordered_set<tonic::DartDependency*>& dependencies);
+  static void LoadEmptyScript(const std::string& script_uri);
+  static void InnerLoadScript(const std::string& script_uri,
+                              tonic::DartLibraryProvider* library_provider);
+  static void LoadScript(const std::string& script_uri,
+                         tonic::DartLibraryProvider* library_provider);
+
+  static tonic::DartLibraryProvider* library_provider_;
+  static base::Lock lock_;
   static bool initialized_;
   static bool strict_compilation_;
   static bool service_isolate_running_;

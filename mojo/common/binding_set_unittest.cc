@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/common/weak_binding_set.h"
+#include "mojo/common/binding_set.h"
 
 #include "base/message_loop/message_loop.h"
 #include "mojo/common/message_pump_mojo.h"
@@ -29,8 +29,8 @@ class DummyImpl : public tests::Dummy {
   DISALLOW_COPY_AND_ASSIGN(DummyImpl);
 };
 
-// Tests all of the functionality of WeakBindingSet.
-TEST(WeakBindingSet, FullLifeCycleTest) {
+// Tests all of the functionality of BindingSet.
+TEST(BindingSetTest, FullLifeCycle) {
   base::MessageLoop loop(MessagePumpMojo::Create());
 
   // Create 10 InterfacePtrs and DummyImpls.
@@ -40,7 +40,7 @@ TEST(WeakBindingSet, FullLifeCycleTest) {
 
   // Create 10 message pipes, bind everything together, and add the
   // bindings to binding_set.
-  WeakBindingSet<tests::Dummy> binding_set;
+  BindingSet<tests::Dummy> binding_set;
   EXPECT_EQ(0u, binding_set.size());
   for (size_t i = 0; i < kNumObjects; i++) {
     binding_set.AddBinding(&impls[i], GetProxy(&intrfc_ptrs[i]));

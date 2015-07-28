@@ -56,10 +56,6 @@ void* MojoGLES2GetGLES2Interface(MojoGLES2Context context) {
   return static_cast<GLES2Context*>(context)->interface();
 }
 
-void* MojoGLES2GetContextSupport(MojoGLES2Context context) {
-  return static_cast<GLES2Context*>(context)->context_support();
-}
-
 void MojoGLES2SignalSyncPoint(MojoGLES2Context context,
                               uint32_t sync_point,
                               MojoGLES2SignalSyncPointCallback callback,

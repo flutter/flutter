@@ -36,14 +36,14 @@ interface {{method|interface_response_name}} extends org.chromium.mojo.bindings.
 {%-   endif -%}
 {%- endmacro -%}
 
-{%- macro flags_for_method(method, is_parameter) -%}
-{{flags(method.response_parameters, is_parameter)}}
+{%- macro flags_for_method(method, is_request) -%}
+{{flags(method.response_parameters != None, is_request)}}
 {%- endmacro -%}
 
-{%- macro flags(has_response_parameters, is_parameter) -%}
-{%-  if not has_response_parameters -%}
+{%- macro flags(use_response_flag, is_request) -%}
+{%-  if not use_response_flag -%}
 org.chromium.mojo.bindings.MessageHeader.NO_FLAG
-{%-   elif is_parameter: -%}
+{%-   elif is_request: -%}
 org.chromium.mojo.bindings.MessageHeader.MESSAGE_EXPECTS_RESPONSE_FLAG
 {%-   else -%}
 org.chromium.mojo.bindings.MessageHeader.MESSAGE_IS_RESPONSE_FLAG

@@ -9,6 +9,7 @@ component("common") {
   output_name = "mojo_common_lib"
 
   sources = [
+    "binding_set.h",
     "common_type_converters.cc",
     "common_type_converters.h",
     "data_pipe_drainer.cc",
@@ -27,7 +28,6 @@ component("common") {
     "task_tracker.h",
     "time_helper.cc",
     "time_helper.h",
-    "weak_binding_set.h",
   ]
 
   if (is_nacl) {
@@ -46,13 +46,13 @@ component("common") {
 
 test("mojo_common_unittests") {
   sources = [
+    "binding_set_unittest.cc",
     "common_type_converters_unittest.cc",
     "data_pipe_utils_unittest.cc",
     "handle_watcher_unittest.cc",
     "interface_ptr_set_unittest.cc",
     "message_pump_mojo_unittest.cc",
     "task_tracker_unittest.cc",
-    "weak_binding_set_unittest.cc",
   ]
 
   deps = [

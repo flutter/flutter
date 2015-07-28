@@ -80,11 +80,18 @@ class MOJO_SYSTEM_IMPL_EXPORT MessageInTransit {
     CONNECTION_MANAGER_ALLOW_CONNECT = 0,
     CONNECTION_MANAGER_CANCEL_CONNECT = 1,
     CONNECTION_MANAGER_CONNECT = 2,
-    // Subtypes for type |Type::CONNECTION_MANAGER_ACK| (failure acks never have
-    // any message contents; success acks for "connect" always have a
-    // |ProcessIdentifier| as data and *may* have a platform handle attached):
+    // Subtypes for type |Type::CONNECTION_MANAGER_ACK|, corresponding to
+    // |ConnectionManager::Result| values (failure and non-"connect" acks never
+    // have any message contents; success acks for "connect" always have a
+    // |ProcessIdentifier| as data and also a platform handle attached for "new
+    // connection"):
+    // TODO(vtl): FIXME -- probably, in the "connect, reuse connection" case,
+    // we'll have to send more information.
     CONNECTION_MANAGER_ACK_FAILURE = 0,
     CONNECTION_MANAGER_ACK_SUCCESS = 1,
+    CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_SAME_PROCESS = 2,
+    CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_NEW_CONNECTION = 3,
+    CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_REUSE_CONNECTION = 4,
   };
 
   // Messages (the header and data) must always be aligned to a multiple of this

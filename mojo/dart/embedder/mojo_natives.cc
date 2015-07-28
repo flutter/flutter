@@ -12,7 +12,7 @@
 #include "base/memory/scoped_ptr.h"
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/dart/embedder/builtin.h"
-#include "mojo/dart/embedder/isolate_data.h"
+#include "mojo/dart/embedder/dart_state.h"
 #include "mojo/public/c/system/core.h"
 #include "mojo/public/cpp/system/core.h"
 
@@ -149,10 +149,9 @@ void MojoHandle_Register(Dart_NativeArguments arguments) {
 
   // Add the handle to this isolate's set.
   MojoHandle handle = static_cast<MojoHandle>(raw_handle);
-  Dart_Isolate isolate = Dart_CurrentIsolate();
-  void* data = Dart_IsolateData(isolate);
-  IsolateData* isolate_data = reinterpret_cast<IsolateData*>(data);
-  isolate_data->unclosed_handles.insert(handle);
+  auto isolate_data = MojoDartState::Current();
+  DCHECK(isolate_data != nullptr);
+  isolate_data->unclosed_handles().insert(handle);
 
   // Set up a finalizer.
   CloserCallbackPeer* callback_peer = new CloserCallbackPeer();
@@ -170,10 +169,9 @@ void MojoHandle_Close(Dart_NativeArguments arguments) {
 
   // Remove the handle from this isolate's set.
   MojoHandle handle = static_cast<MojoHandle>(raw_handle);
-  Dart_Isolate isolate = Dart_CurrentIsolate();
-  void* data = Dart_IsolateData(isolate);
-  IsolateData* isolate_data = reinterpret_cast<IsolateData*>(data);
-  isolate_data->unclosed_handles.erase(handle);
+  auto isolate_data = MojoDartState::Current();
+  DCHECK(isolate_data != nullptr);
+  isolate_data->unclosed_handles().erase(handle);
 
   MojoResult res = MojoClose(handle);
 

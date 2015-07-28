@@ -16,8 +16,12 @@ dartzip_package("apptest") {
 }
 
 dart_pkg("apptest_pkg") {
+  entrypoints = [ "lib/apptest.dart" ]
   sources = [
-    "lib/apptest.dart",
     "pubspec.yaml",
+  ]
+  deps = [
+    "//mojo/public/dart:mojo",
+    "//third_party/dart-pkg",
   ]
 }

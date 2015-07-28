@@ -6,8 +6,8 @@
 #include <string.h>
 
 #include "mojo/public/cpp/bindings/lib/message_builder.h"
-#include "mojo/public/cpp/bindings/lib/message_queue.h"
 #include "mojo/public/cpp/bindings/lib/router.h"
+#include "mojo/public/cpp/bindings/tests/message_queue.h"
 #include "mojo/public/cpp/environment/environment.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "mojo/public/cpp/utility/run_loop.h"
@@ -36,7 +36,7 @@ void AllocResponseMessage(uint32_t name,
 
 class MessageAccumulator : public MessageReceiver {
  public:
-  explicit MessageAccumulator(internal::MessageQueue* queue) : queue_(queue) {}
+  explicit MessageAccumulator(MessageQueue* queue) : queue_(queue) {}
 
   bool Accept(Message* message) override {
     queue_->Push(message);
@@ -44,7 +44,7 @@ class MessageAccumulator : public MessageReceiver {
   }
 
  private:
-  internal::MessageQueue* queue_;
+  MessageQueue* queue_;
 };
 
 class ResponseGenerator : public MessageReceiverWithResponderStatus {
@@ -152,7 +152,7 @@ TEST_F(RouterTest, BasicRequestResponse) {
   Message request;
   AllocRequestMessage(1, "hello", &request);
 
-  internal::MessageQueue message_queue;
+  MessageQueue message_queue;
   router0.AcceptWithResponder(&request, new MessageAccumulator(&message_queue));
 
   PumpMessages();
@@ -192,7 +192,7 @@ TEST_F(RouterTest, BasicRequestResponse_Synchronous) {
   Message request;
   AllocRequestMessage(1, "hello", &request);
 
-  internal::MessageQueue message_queue;
+  MessageQueue message_queue;
   router0.AcceptWithResponder(&request, new MessageAccumulator(&message_queue));
 
   router1.WaitForIncomingMessage(MOJO_DEADLINE_INDEFINITE);
@@ -234,7 +234,7 @@ TEST_F(RouterTest, RequestWithNoReceiver) {
   Message request;
   AllocRequestMessage(1, "hello", &request);
 
-  internal::MessageQueue message_queue;
+  MessageQueue message_queue;
   router0.AcceptWithResponder(&request, new MessageAccumulator(&message_queue));
 
   PumpMessages();
@@ -256,7 +256,7 @@ TEST_F(RouterTest, LazyResponses) {
   Message request;
   AllocRequestMessage(1, "hello", &request);
 
-  internal::MessageQueue message_queue;
+  MessageQueue message_queue;
   router0.AcceptWithResponder(&request, new MessageAccumulator(&message_queue));
   PumpMessages();
 
@@ -311,7 +311,7 @@ TEST_F(RouterTest, MissingResponses) {
   Message request;
   AllocRequestMessage(1, "hello", &request);
 
-  internal::MessageQueue message_queue;
+  MessageQueue message_queue;
   router0.AcceptWithResponder(&request, new MessageAccumulator(&message_queue));
   PumpMessages();
 
@@ -354,7 +354,7 @@ TEST_F(RouterTest, LateResponse) {
     Message request;
     AllocRequestMessage(1, "hello", &request);
 
-    internal::MessageQueue message_queue;
+    MessageQueue message_queue;
     router0.AcceptWithResponder(&request,
                                 new MessageAccumulator(&message_queue));
 

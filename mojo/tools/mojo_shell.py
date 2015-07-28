@@ -9,7 +9,7 @@ import sys
 def main():
   print 'Good news, the shell runner has moved! Please use: '
   print ''
-  print '  mojo/devtools/common/mojo_shell'
+  print '  mojo/devtools/common/mojo_run'
   print ''
   print 'as you would use mojo_shell.py before.'
   return -1

@@ -41,8 +41,6 @@ mojo_sdk_source_set("bindings") {
     "lib/message_header_validator.cc",
     "lib/message_header_validator.h",
     "lib/message_internal.h",
-    "lib/message_queue.cc",
-    "lib/message_queue.h",
     "lib/no_interface.cc",
     "lib/router.cc",
     "lib/router.h",

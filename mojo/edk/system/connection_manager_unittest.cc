@@ -226,12 +226,14 @@ TEST_F(ConnectionManagerTest, BasicConnectSlaves) {
 
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h1;
-  EXPECT_TRUE(slave1.Connect(connection_id, &peer1, &h1));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave1.Connect(connection_id, &peer1, &h1));
   EXPECT_EQ(slave2_id, peer1);
   EXPECT_TRUE(h1.is_valid());
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h2;
-  EXPECT_TRUE(slave2.Connect(connection_id, &peer2, &h2));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave2.Connect(connection_id, &peer2, &h2));
   EXPECT_EQ(slave1_id, peer2);
   EXPECT_TRUE(h2.is_valid());
 
@@ -319,7 +321,8 @@ TEST_F(ConnectionManagerTest, SlaveCancelConnect) {
   EXPECT_TRUE(slave1.CancelConnect(connection_id));
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h2;
-  EXPECT_FALSE(slave2.Connect(connection_id, &peer2, &h2));
+  EXPECT_EQ(ConnectionManager::Result::FAILURE,
+            slave2.Connect(connection_id, &peer2, &h2));
   EXPECT_EQ(kInvalidProcessIdentifier, peer2);
   EXPECT_FALSE(h2.is_valid());
 
@@ -361,7 +364,8 @@ TEST_F(ConnectionManagerTest, ErrorRemovePending) {
 
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h2;
-  EXPECT_FALSE(slave2.Connect(connection_id, &peer2, &h2));
+  EXPECT_EQ(ConnectionManager::Result::FAILURE,
+            slave2.Connect(connection_id, &peer2, &h2));
   EXPECT_EQ(kInvalidProcessIdentifier, peer2);
   EXPECT_FALSE(h2.is_valid());
 
@@ -384,16 +388,16 @@ TEST_F(ConnectionManagerTest, ConnectSlaveToSelf) {
   EXPECT_TRUE(slave.AllowConnect(connection_id));
   EXPECT_TRUE(slave.AllowConnect(connection_id));
 
-  // Currently, the connect-to-self case is signalled by the master not sending
-  // back a handle.
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h1;
-  EXPECT_TRUE(slave.Connect(connection_id, &peer1, &h1));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS,
+            slave.Connect(connection_id, &peer1, &h1));
   EXPECT_EQ(slave_id, peer1);
   EXPECT_FALSE(h1.is_valid());
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h2;
-  EXPECT_TRUE(slave.Connect(connection_id, &peer2, &h2));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS,
+            slave.Connect(connection_id, &peer2, &h2));
   EXPECT_EQ(slave_id, peer2);
   EXPECT_FALSE(h2.is_valid());
 
@@ -425,30 +429,36 @@ TEST_F(ConnectionManagerTest, ConnectSlavesTwice) {
 
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h1;
-  EXPECT_TRUE(slave1.Connect(connection_id, &peer1, &h1));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave1.Connect(connection_id, &peer1, &h1));
   EXPECT_EQ(slave2_id, peer1);
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h2;
-  EXPECT_TRUE(slave2.Connect(connection_id, &peer2, &h2));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave2.Connect(connection_id, &peer2, &h2));
   EXPECT_EQ(slave1_id, peer2);
 
   EXPECT_TRUE(ArePlatformHandlesConnected(h1.get(), h2.get()));
 
-  // Currently, the master doesn't detect the case of connecting a pair of
-  // slaves that are already connected. (Doing so would require more careful
-  // tracking and is prone to races -- especially if we want slaves to be able
-  // to tear down no-longer-needed connections.) But the slaves should be able
-  // to do the tracking themselves (using the peer process identifiers).
+  // TODO(vtl): Currently, the master doesn't detect the case of connecting a
+  // pair of slaves that are already connected. (Doing so would require more
+  // careful tracking and is prone to races -- especially if we want slaves to
+  // be able to tear down no-longer-needed connections.) But the slaves should
+  // be able to do the tracking themselves (using the peer process identifiers).
   connection_id = master.GenerateConnectionIdentifier();
   EXPECT_TRUE(slave1.AllowConnect(connection_id));
   EXPECT_TRUE(slave2.AllowConnect(connection_id));
 
   h1.reset();
   h2.reset();
+  // TODO(vtl): FIXME -- this will break when I implemented
+  // SUCCESS_CONNECT_REUSE_CONNECTION.
   ProcessIdentifier second_peer2 = kInvalidProcessIdentifier;
-  EXPECT_TRUE(slave2.Connect(connection_id, &second_peer2, &h2));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave2.Connect(connection_id, &second_peer2, &h2));
   ProcessIdentifier second_peer1 = kInvalidProcessIdentifier;
-  EXPECT_TRUE(slave1.Connect(connection_id, &second_peer1, &h1));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave1.Connect(connection_id, &second_peer1, &h1));
 
   EXPECT_EQ(peer1, second_peer1);
   EXPECT_EQ(peer2, second_peer2);
@@ -476,12 +486,14 @@ TEST_F(ConnectionManagerTest, ConnectMasterToSlave) {
 
   ProcessIdentifier master_peer = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle master_h;
-  EXPECT_TRUE(master.Connect(connection_id, &master_peer, &master_h));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            master.Connect(connection_id, &master_peer, &master_h));
   EXPECT_EQ(slave_id, master_peer);
   EXPECT_TRUE(master_h.is_valid());
   ProcessIdentifier slave_peer = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle slave_h;
-  EXPECT_TRUE(slave.Connect(connection_id, &slave_peer, &slave_h));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave.Connect(connection_id, &slave_peer, &slave_h));
   EXPECT_EQ(kMasterProcessIdentifier, slave_peer);
   EXPECT_TRUE(slave_h.is_valid());
 
@@ -500,16 +512,16 @@ TEST_F(ConnectionManagerTest, ConnectMasterToSelf) {
   EXPECT_TRUE(master.AllowConnect(connection_id));
   EXPECT_TRUE(master.AllowConnect(connection_id));
 
-  // Currently, the connect-to-self case is signalled by the master not sending
-  // back a handle.
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h1;
-  EXPECT_TRUE(master.Connect(connection_id, &peer1, &h1));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS,
+            master.Connect(connection_id, &peer1, &h1));
   EXPECT_EQ(kMasterProcessIdentifier, peer1);
   EXPECT_FALSE(h1.is_valid());
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h2;
-  EXPECT_TRUE(master.Connect(connection_id, &peer2, &h2));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS,
+            master.Connect(connection_id, &peer2, &h2));
   EXPECT_EQ(kMasterProcessIdentifier, peer2);
   EXPECT_FALSE(h2.is_valid());
 
@@ -536,7 +548,8 @@ TEST_F(ConnectionManagerTest, MasterCancelConnect) {
   EXPECT_TRUE(master.CancelConnect(connection_id));
   ProcessIdentifier peer = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h;
-  EXPECT_FALSE(slave.Connect(connection_id, &peer, &h));
+  EXPECT_EQ(ConnectionManager::Result::FAILURE,
+            slave.Connect(connection_id, &peer, &h));
   EXPECT_EQ(kInvalidProcessIdentifier, peer);
   EXPECT_FALSE(h.is_valid());
 
@@ -573,7 +586,8 @@ TEST_F(ConnectionManagerTest, AddSlaveAndBootstrap) {
 
   embedder::ScopedPlatformHandle h1;
   ProcessIdentifier master_peer = kInvalidProcessIdentifier;
-  EXPECT_TRUE(master.Connect(connection_id, &master_peer, &h1));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            master.Connect(connection_id, &master_peer, &h1));
   EXPECT_EQ(slave_id, master_peer);
   EXPECT_TRUE(h1.is_valid());
 
@@ -585,7 +599,8 @@ TEST_F(ConnectionManagerTest, AddSlaveAndBootstrap) {
 
   ProcessIdentifier slave_peer = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle h2;
-  EXPECT_TRUE(slave.Connect(connection_id, &slave_peer, &h2));
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave.Connect(connection_id, &slave_peer, &h2));
   EXPECT_EQ(kMasterProcessIdentifier, slave_peer);
 
   EXPECT_TRUE(ArePlatformHandlesConnected(h1.get(), h2.get()));

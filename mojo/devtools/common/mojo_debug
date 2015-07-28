@@ -15,6 +15,7 @@ import tempfile
 
 
 from android_gdb.install_remote_file_reader import install
+from devtoolslib import paths
 
 
 _MOJO_DEBUGGER_PORT = 7777
@@ -29,40 +30,10 @@ class DirectoryNotFoundException(Exception):
 
 def _get_dir_above(dirname):
   """Returns the directory "above" this file containing |dirname|."""
-  path = os.path.abspath(__file__)
-  while True:
-    path, tail = os.path.split(path)
-    if not tail:
-      raise DirectoryNotFoundException(dirname)
-    if dirname in os.listdir(path):
-      return path
-
-
-# The two methods below are taken from //tools/find_depot_tools.py.
-def _is_real_depot_tools(path):
-  return os.path.isfile(os.path.join(path, 'gclient.py'))
-
-
-def _get_depot_tools_path():
-  """Searches for depot_tools."""
-  # First look if depot_tools is already in PYTHONPATH.
-  for i in sys.path:
-    if i.rstrip(os.sep).endswith('depot_tools') and _is_real_depot_tools(i):
-      return i
-  # Then look if depot_tools is in PATH, common case.
-  for i in os.environ['PATH'].split(os.pathsep):
-    if _is_real_depot_tools(i):
-      return i
-  # Rare case, it's not even in PATH, look upward up to root.
-  root_dir = os.path.dirname(os.path.abspath(__file__))
-  previous_dir = os.path.abspath(__file__)
-  while root_dir and root_dir != previous_dir:
-    i = os.path.join(root_dir, 'depot_tools')
-    if _is_real_depot_tools(i):
-      return i
-    previous_dir = root_dir
-    root_dir = os.path.dirname(root_dir)
-  return None
+  path = paths.find_ancestor_with(dirname)
+  if not path:
+    raise DirectoryNotFoundException(dirname)
+  return path
 
 
 def _send_request(request, payload=None):
@@ -205,18 +176,33 @@ def _gdb_attach(args):
     install_args['gsutil'] = os.path.join(args.gsutil_dir, 'gsutil')
   else:
     try:
-      install_args['gsutil'] = os.path.join(
-          _get_depot_tools_path(), 'third_party', 'gsutil',
-          'gsutil')
+      depot_tools_path = paths.find_depot_tools()
+      if not depot_tools_path:
+        raise DirectoryNotFoundException()
+      install_args['gsutil'] = os.path.join(depot_tools_path, 'third_party',
+                                            'gsutil', 'gsutil')
       if not os.path.exists(install_args['gsutil']):
         raise DirectoryNotFoundException()
     except DirectoryNotFoundException:
-      logging.fatal("Unable to find gsutil, please specify its path with " "--gsutil-dir.")
+      logging.fatal("Unable to find gsutil, please specify its path with "
+                    "--gsutil-dir.")
       return
 
   if args.adb_path:
     install_args['adb'] = args.adb_path
-  install(**install_args)
+  else:
+    install_args['adb'] = 'adb'
+
+  try:
+    install(**install_args)
+  except OSError as e:
+    if e.errno == 2:
+      # ADB not found in path, print an error message
+      logging.fatal("Unable to find ADB, please specify its path with "
+                    "--adb-path.")
+      return
+    else:
+      raise
 
   gdb_path = os.path.join(
       ndk_dir,
@@ -248,11 +234,19 @@ def _gdb_attach(args):
     debug_session_arguments["package_name"] = args.package_name
   else:
     debug_session_arguments["package_name"] = _DEFAULT_PACKAGE_NAME
+  debug_session_arguments['adb'] = install_args['adb']
   if args.pyelftools_dir:
     debug_session_arguments["pyelftools_dir"] = args.pyelftools_dir
   else:
-    debug_session_arguments["pyelftools_dir"] = os.path.join(
-        _get_dir_above('third_party'), 'third_party', 'pyelftools')
+    try:
+      debug_session_arguments["pyelftools_dir"] = os.path.join(
+          _get_dir_above('third_party'), 'third_party', 'pyelftools')
+      if not os.path.exists(debug_session_arguments["pyelftools_dir"]):
+        raise DirectoryNotFoundException()
+    except DirectoryNotFoundException:
+      logging.fatal("Unable to find pyelftools python module, please specify "
+          "its path using --pyelftools-dir.")
+      return
 
   debug_session_arguments_str = ', '.join(
       [k + '="' + codecs.encode(v, 'string_escape') + '"'

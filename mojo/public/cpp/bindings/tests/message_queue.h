@@ -12,7 +12,7 @@
 namespace mojo {
 class Message;
 
-namespace internal {
+namespace test {
 
 // A queue for Message objects.
 class MessageQueue {
@@ -21,27 +21,23 @@ class MessageQueue {
   ~MessageQueue();
 
   bool IsEmpty() const;
-  Message* Peek();
 
-  // This method transfers ownership of |message->data| and |message->handles|
-  // to the message queue, resetting |message| in the process.
+  // This method copies the message data and steals ownership of its handles.
   void Push(Message* message);
 
-  // Removes the next message from the queue, transferring ownership of its
-  // data and handles to the given |message|.
+  // Removes the next message from the queue, copying its data and transferring
+  // ownership of its handles to the given |message|.
   void Pop(Message* message);
 
-  // Removes the next message from the queue, discarding its data and handles.
-  // This is meant to be used in conjunction with |Peek|.
+ private:
   void Pop();
 
- private:
   std::queue<Message*> queue_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MessageQueue);
 };
 
-}  // namespace internal
+}  // namespace test
 }  // namespace mojo
 
 #endif  // MOJO_PUBLIC_CPP_BINDINGS_LIB_MESSAGE_QUEUE_H_

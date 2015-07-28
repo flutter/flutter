@@ -17,7 +17,34 @@ struct Transform {
 };
 ''';
 
-void main() {
+final dldMojomContents1 = '''
+module downloaded;
+
+struct Downloaded1 {
+  int32 status;
+};
+''';
+
+final dldMojomContents2 = '''
+module downloaded;
+
+struct Downloaded2 {
+  int32 status;
+};
+''';
+
+main() async {
+  String mojoSdk;
+  if (Platform.environment['MOJO_SDK'] != null) {
+    mojoSdk = Platform.environment['MOJO_SDK'];
+  } else {
+    mojoSdk = path.normalize(path.join(
+        path.dirname(Platform.script.path), '..', '..', '..', 'public'));
+  }
+  if (!await new Directory(mojoSdk).exists()) {
+    fail("Could not find the Mojo SDK");
+  }
+
   final scriptPath = path.dirname(Platform.script.path);
   final testPackagePath = path.join(scriptPath, 'test_packages');
   final testMojomPath = path.join(testPackagePath, 'mojom');
@@ -30,6 +57,9 @@ void main() {
   final additionalPath = path.join(
       additionalRootPath, 'additional', 'additional.mojom.dart');
 
+  final downloadedPackagePath = path.join(testPackagePath, 'downloaded');
+  final dotMojomsPath = path.join(downloadedPackagePath, '.mojoms');
+
   setUp(() async {
     await new Directory(testMojomPath).create(recursive: true);
     await new File(pregenFilePath).create(recursive: true);
@@ -39,6 +69,8 @@ void main() {
         'mojom', 'generated', 'public', 'interfaces', 'generated.mojom'));
     await generatedMojomFile.create(recursive: true);
     await generatedMojomFile.writeAsString(mojomContents);
+
+    await new Directory(downloadedPackagePath).create(recursive: true);
   });
 
   tearDown(() async {
@@ -46,47 +78,148 @@ void main() {
     await new Directory(testPackagePath).delete(recursive: true);
   });
 
-  group('end-to-end', () {
+  group('No Download', () {
     test('Copy', () async {
-      await generate.main(['-p', testPackagePath]);
+      await generate.main(['-p', testPackagePath, '-m', mojoSdk]);
       final pregenFile = new File(
           path.join(testMojomPath, 'pregen', 'pregen.mojom.dart'));
       expect(await pregenFile.exists(), isTrue);
     });
 
     test('Copy and Additional', () async {
-      await generate.main(['-p', testPackagePath, '-a', additionalRootPath]);
+      await generate.main(['-p', testPackagePath, '-m', mojoSdk,
+          '-a', additionalRootPath]);
       final additionalFile = new File(
           path.join(testMojomPath, 'additional', 'additional.mojom.dart'));
       expect(await additionalFile.exists(), isTrue);
     });
 
     test('Copy and Generate', () async {
-      if (Platform.environment['MOJO_SDK'] != null) {
-        await generate.main(['-g', '-p', testPackagePath]);
-        final generatedFile = new File(
-            path.join(testMojomPath, 'generated', 'generated.mojom.dart'));
-        expect(await generatedFile.exists(), isTrue);
-      }
+      await generate.main(['-g', '-p', testPackagePath, '-m', mojoSdk]);
+      final generatedFile = new File(
+          path.join(testMojomPath, 'generated', 'generated.mojom.dart'));
+      expect(await generatedFile.exists(), isTrue);
     });
 
     test('All', () async {
-      if (Platform.environment['MOJO_SDK'] != null) {
-        await generate.main([
-            '-g', '-p', testPackagePath, '-a', additionalRootPath]);
+      await generate.main([
+          '-g', '-p', testPackagePath, '-m', mojoSdk,
+          '-a', additionalRootPath]);
 
-        final pregenFile = new File(
-            path.join(testMojomPath, 'pregen', 'pregen.mojom.dart'));
-        expect(await pregenFile.exists(), isTrue);
+      final pregenFile = new File(
+          path.join(testMojomPath, 'pregen', 'pregen.mojom.dart'));
+      expect(await pregenFile.exists(), isTrue);
 
-        final additionalFile = new File(
-            path.join(testMojomPath, 'additional', 'additional.mojom.dart'));
-        expect(await additionalFile.exists(), isTrue);
+      final additionalFile = new File(
+          path.join(testMojomPath, 'additional', 'additional.mojom.dart'));
+      expect(await additionalFile.exists(), isTrue);
 
-        final generatedFile = new File(
-            path.join(testMojomPath, 'generated', 'generated.mojom.dart'));
-        expect(await generatedFile.exists(), isTrue);
+      final generatedFile = new File(
+          path.join(testMojomPath, 'generated', 'generated.mojom.dart'));
+      expect(await generatedFile.exists(), isTrue);
+    });
+  });
+
+  group('Download', () {
+    var httpServer;
+    setUp(() async {
+      httpServer = await HttpServer.bind("localhost", 0);
+      httpServer.listen((HttpRequest request) {
+        String path = request.uri.path;
+        if (path.endsWith('path/to/mojom/download_one.mojom')) {
+          request.response.write(dldMojomContents1);
+        } else if (path.endsWith('path/to/mojom/download_two.mojom')) {
+          request.response.write(dldMojomContents2);
+        } else {
+          request.response.statusCode = HttpStatus.NOT_FOUND;
+        }
+        request.response.close();
+      });
+    });
+
+    tearDown(() async {
+      await httpServer.close();
+      httpServer = null;
+    });
+
+    test('simple', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "root: http://localhost:${httpServer.port}\n"
+          "path/to/mojom/download_one.mojom\n");
+      await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      final downloadedFile = new File(
+          path.join(testMojomPath, 'downloaded', 'download_one.mojom.dart'));
+      expect(await downloadedFile.exists(), isTrue);
+      await mojomsFile.delete();
+    });
+
+    test('two files', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "root: http://localhost:${httpServer.port}\n"
+          "path/to/mojom/download_one.mojom\n"
+          "path/to/mojom/download_two.mojom\n");
+      await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      final downloaded1File = new File(
+          path.join(testMojomPath, 'downloaded', 'download_one.mojom.dart'));
+      expect(await downloaded1File.exists(), isTrue);
+      final downloaded2File = new File(
+          path.join(testMojomPath, 'downloaded', 'download_two.mojom.dart'));
+      expect(await downloaded2File.exists(), isTrue);
+      await mojomsFile.delete();
+    });
+
+    test('two roots', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "root: http://localhost:${httpServer.port}\n"
+          "path/to/mojom/download_one.mojom\n"
+          "root: http://localhost:${httpServer.port}\n"
+          "path/to/mojom/download_two.mojom\n");
+      await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      final downloaded1File = new File(
+          path.join(testMojomPath, 'downloaded', 'download_one.mojom.dart'));
+      expect(await downloaded1File.exists(), isTrue);
+      final downloaded2File = new File(
+          path.join(testMojomPath, 'downloaded', 'download_two.mojom.dart'));
+      expect(await downloaded2File.exists(), isTrue);
+      await mojomsFile.delete();
+    });
+
+    test('simple-comment', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "# Comments are allowed\n"
+          " root: http://localhost:${httpServer.port}\n\n\n\n"
+          "          # Here too\n"
+          " path/to/mojom/download_one.mojom\n"
+          "# And here\n");
+      await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      final downloadedFile = new File(
+          path.join(testMojomPath, 'downloaded', 'download_one.mojom.dart'));
+      expect(await downloadedFile.exists(), isTrue);
+      await mojomsFile.delete();
+    });
+
+    test('404', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "root: http://localhost:${httpServer.port}\n"
+          "blah\n");
+      var fail = false;
+      try {
+        await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      } on generate.DownloadError {
+        fail = true;
       }
+      expect(fail, isTrue);
+      await mojomsFile.delete();
     });
   });
 
@@ -95,7 +228,7 @@ void main() {
       final dummyPackageRoot = path.join(scriptPath, 'dummyPackageRoot');
       var fail = false;
       try {
-        await generate.main(['-p', dummyPackageRoot]);
+        await generate.main(['-p', dummyPackageRoot, '-m', mojoSdk]);
       } on generate.CommandLineError {
         fail = true;
       }
@@ -106,7 +239,7 @@ void main() {
       final dummyPackageRoot = 'dummyPackageRoot';
       var fail = false;
       try {
-        await generate.main(['-p', dummyPackageRoot]);
+        await generate.main(['-p', dummyPackageRoot, '-m', mojoSdk]);
       } on generate.CommandLineError {
         fail = true;
       }
@@ -117,7 +250,8 @@ void main() {
       final dummyAdditional = path.join(scriptPath, 'dummyAdditional');
       var fail = false;
       try {
-        await generate.main(['-a', dummyAdditional, '-p', testPackagePath]);
+        await generate.main(['-a', dummyAdditional, '-p', testPackagePath,
+            '-m', mojoSdk]);
       } on generate.CommandLineError {
         fail = true;
       }
@@ -128,7 +262,8 @@ void main() {
       final dummyAdditional = 'dummyAdditional';
       var fail = false;
       try {
-        await generate.main(['-a', dummyAdditional, '-p', testPackagePath]);
+        await generate.main(['-a', dummyAdditional, '-p', testPackagePath,
+            '-m', mojoSdk]);
       } on generate.CommandLineError {
         fail = true;
       }
@@ -142,7 +277,7 @@ void main() {
 
       var fail = false;
       try {
-        await generate.main(['-p', dummyPackageRoot]);
+        await generate.main(['-p', dummyPackageRoot, '-m', mojoSdk]);
       } on generate.CommandLineError {
         fail = true;
       }
@@ -159,6 +294,86 @@ void main() {
         fail = true;
       }
       expect(fail, isTrue);
+    });
+
+    test('Download No Server', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "root: http://localhots\n"
+          "path/to/mojom/download_one.mojom\n");
+      var fail = false;
+      try {
+        await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      } on generate.DownloadError {
+        fail = true;
+      }
+      expect(fail, isTrue);
+      await mojomsFile.delete();
+    });
+
+    test('.mojoms no root', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "path/to/mojom/download_one.mojom\n");
+      var fail = false;
+      try {
+        await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      } on generate.DownloadError {
+        fail = true;
+      }
+      expect(fail, isTrue);
+      await mojomsFile.delete();
+    });
+
+    test('.mojoms blank root', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "root:\n"
+          "path/to/mojom/download_one.mojom\n");
+      var fail = false;
+      try {
+        await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      } on generate.DownloadError {
+        fail = true;
+      }
+      expect(fail, isTrue);
+      await mojomsFile.delete();
+    });
+
+    test('.mojoms root malformed', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "root: gobledygook\n"
+          "path/to/mojom/download_one.mojom\n");
+      var fail = false;
+      try {
+        await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      } on generate.DownloadError {
+        fail = true;
+      }
+      expect(fail, isTrue);
+      await mojomsFile.delete();
+    });
+
+    test('.mojoms root without mojom', () async {
+      final mojomsFile = new File(dotMojomsPath);
+      await mojomsFile.create(recursive: true);
+      await mojomsFile.writeAsString(
+          "root: http://localhost\n"
+          "root: http://localhost\n"
+          "path/to/mojom/download_one.mojom\n");
+      var fail = false;
+      try {
+        await generate.main(['-p', testPackagePath, '-m', mojoSdk, '-d', '-g']);
+      } on generate.DownloadError {
+        fail = true;
+      }
+      expect(fail, isTrue);
+      await mojomsFile.delete();
     });
   });
 }

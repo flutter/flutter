@@ -10151,7 +10151,7 @@ extern const NameToFunc g_gles2_function_table[] = {
 
     code = """
 #include "gpu/command_buffer/client/gles2_interface.h"
-#include "third_party/mojo/src/mojo/public/c/gles2/gles2.h"
+#include "mojo/public/c/gles2/gles2.h"
 
 namespace mojo {
 
@@ -10186,9 +10186,9 @@ class MojoGLES2Impl : public gpu::gles2::GLES2Interface {
 #include "mojo/gpu/mojo_gles2_impl_autogen.h"
 
 #include "base/logging.h"
-#include "third_party/mojo/src/mojo/public/c/gles2/chromium_sync_point.h"
-#include "third_party/mojo/src/mojo/public/c/gles2/chromium_texture_mailbox.h"
-#include "third_party/mojo/src/mojo/public/c/gles2/gles2.h"
+#include "mojo/public/c/gles2/chromium_sync_point.h"
+#include "mojo/public/c/gles2/chromium_texture_mailbox.h"
+#include "mojo/public/c/gles2/gles2.h"
 
 namespace mojo {
 
@@ -10504,128 +10504,6 @@ const size_t GLES2Util::enum_to_string_table_len_ =
 
     file.Close()
 
-  def WritePepperGLES2Implementation(self, filename):
-    """Writes the Pepper OpenGLES interface implementation."""
-
-    file = CWriter(filename)
-    file.Write(_LICENSE)
-    file.Write(_DO_NOT_EDIT_WARNING)
-
-    file.Write("#include \"ppapi/shared_impl/ppb_opengles2_shared.h\"\n\n")
-    file.Write("#include \"base/logging.h\"\n")
-    file.Write("#include \"gpu/command_buffer/client/gles2_implementation.h\"\n")
-    file.Write("#include \"ppapi/shared_impl/ppb_graphics_3d_shared.h\"\n")
-    file.Write("#include \"ppapi/thunk/enter.h\"\n\n")
-
-    file.Write("namespace ppapi {\n\n")
-    file.Write("namespace {\n\n")
-
-    file.Write("typedef thunk::EnterResource<thunk::PPB_Graphics3D_API>"
-               " Enter3D;\n\n")
-
-    file.Write("gpu::gles2::GLES2Implementation* ToGles2Impl(Enter3D*"
-               " enter) {\n")
-    file.Write("  DCHECK(enter);\n")
-    file.Write("  DCHECK(enter->succeeded());\n")
-    file.Write("  return static_cast<PPB_Graphics3D_Shared*>(enter->object())->"
-               "gles2_impl();\n");
-    file.Write("}\n\n");
-
-    for func in self.original_functions:
-      if not func.InAnyPepperExtension():
-        continue
-
-      original_arg = func.MakeTypedPepperArgString("")
-      context_arg = "PP_Resource context_id"
-      if len(original_arg):
-        arg = context_arg + ", " + original_arg
-      else:
-        arg = context_arg
-      file.Write("%s %s(%s) {\n" %
-                 (func.return_type, func.GetPepperName(), arg))
-      file.Write("  Enter3D enter(context_id, true);\n")
-      file.Write("  if (enter.succeeded()) {\n")
-
-      return_str = "" if func.return_type == "void" else "return "
-      file.Write("    %sToGles2Impl(&enter)->%s(%s);\n" %
-                 (return_str, func.original_name,
-                  func.MakeOriginalArgString("")))
-      file.Write("  }")
-      if func.return_type == "void":
-        file.Write("\n")
-      else:
-        file.Write(" else {\n")
-        file.Write("    return %s;\n" % func.GetErrorReturnString())
-        file.Write("  }\n")
-      file.Write("}\n\n")
-
-    file.Write("}  // namespace\n")
-
-    for interface in self.pepper_interfaces:
-      file.Write("const %s* PPB_OpenGLES2_Shared::Get%sInterface() {\n" %
-                 (interface.GetStructName(), interface.GetName()))
-      file.Write("  static const struct %s "
-                 "ppb_opengles2 = {\n" % interface.GetStructName())
-      file.Write("    &")
-      file.Write(",\n    &".join(
-        f.GetPepperName() for f in self.original_functions
-          if f.InPepperInterface(interface)))
-      file.Write("\n")
-
-      file.Write("  };\n")
-      file.Write("  return &ppb_opengles2;\n")
-      file.Write("}\n")
-
-    file.Write("}  // namespace ppapi\n")
-    file.Close()
-    self.generated_cpp_filenames.append(file.filename)
-
-  def WriteGLES2ToPPAPIBridge(self, filename):
-    """Connects GLES2 helper library to PPB_OpenGLES2 interface"""
-
-    file = CWriter(filename)
-    file.Write(_LICENSE)
-    file.Write(_DO_NOT_EDIT_WARNING)
-
-    file.Write("#ifndef GL_GLEXT_PROTOTYPES\n")
-    file.Write("#define GL_GLEXT_PROTOTYPES\n")
-    file.Write("#endif\n")
-    file.Write("#include <GLES2/gl2.h>\n")
-    file.Write("#include <GLES2/gl2ext.h>\n")
-    file.Write("#include \"ppapi/lib/gl/gles2/gl2ext_ppapi.h\"\n\n")
-
-    for func in self.original_functions:
-      if not func.InAnyPepperExtension():
-        continue
-
-      interface = self.interface_info[func.GetInfo('pepper_interface') or '']
-
-      file.Write("%s GL_APIENTRY gl%s(%s) {\n" %
-                 (func.return_type, func.GetPepperName(),
-                  func.MakeTypedPepperArgString("")))
-      return_str = "" if func.return_type == "void" else "return "
-      interface_str = "glGet%sInterfacePPAPI()" % interface.GetName()
-      original_arg = func.MakeOriginalArgString("")
-      context_arg = "glGetCurrentContextPPAPI()"
-      if len(original_arg):
-        arg = context_arg + ", " + original_arg
-      else:
-        arg = context_arg
-      if interface.GetName():
-        file.Write("  const struct %s* ext = %s;\n" %
-                   (interface.GetStructName(), interface_str))
-        file.Write("  if (ext)\n")
-        file.Write("    %sext->%s(%s);\n" %
-                   (return_str, func.GetPepperName(), arg))
-        if return_str:
-          file.Write("  %s0;\n" % return_str)
-      else:
-        file.Write("  %s%s->%s(%s);\n" %
-                   (return_str, interface_str, func.GetPepperName(), arg))
-      file.Write("}\n\n")
-    file.Close()
-    self.generated_cpp_filenames.append(file.filename)
-
   def WriteMojoGLCallVisitor(self, filename):
     """Provides the GL implementation for mojo"""
     file = CWriter(filename)
@@ -10671,10 +10549,6 @@ def main(argv):
   """This is the main function."""
   parser = OptionParser()
   parser.add_option(
-      "--output-dir",
-      help="base directory for resulting files, under chrome/src. default is "
-      "empty. Use this if you want the result stored under gen.")
-  parser.add_option(
       "-v", "--verbose", action="store_true",
       help="prints more output.")
 
@@ -10702,20 +10576,9 @@ def main(argv):
 
   # This script lives under gpu/command_buffer, cd to base directory.
   os.chdir(os.path.dirname(__file__) + "/../..")
-  base_dir = os.getcwd()
   gen = GLGenerator(options.verbose)
   gen.ParseGLH("gpu/command_buffer/cmd_buffer_functions.txt")
 
-  # Support generating files under gen/
-  if options.output_dir != None:
-    os.chdir(options.output_dir)
-
-  gen.WritePepperGLES2Interface("ppapi/api/ppb_opengles2.idl", False)
-  gen.WritePepperGLES2Interface("ppapi/api/dev/ppb_opengles2ext_dev.idl", True)
-  gen.WriteGLES2ToPPAPIBridge("ppapi/lib/gl/gles2/gles2.c")
-  gen.WritePepperGLES2Implementation(
-      "ppapi/shared_impl/ppb_opengles2_shared.cc")
-  os.chdir(base_dir)
   gen.WriteCommandIds("gpu/command_buffer/common/gles2_cmd_ids_autogen.h")
   gen.WriteFormat("gpu/command_buffer/common/gles2_cmd_format_autogen.h")
   gen.WriteFormatTest(
@@ -10769,8 +10632,7 @@ def main(argv):
   gen.WriteCommonUtilsImpl(
     "gpu/command_buffer/common/gles2_cmd_utils_implementation_autogen.h")
   gen.WriteGLES2Header("gpu/GLES2/gl2chromium_autogen.h")
-  mojo_gles2_prefix = ("third_party/mojo/src/mojo/public/c/gles2/"
-                       "gles2_call_visitor")
+  mojo_gles2_prefix = ("mojo/public/c/gles2/gles2_call_visitor")
   gen.WriteMojoGLCallVisitor(mojo_gles2_prefix + "_autogen.h")
   gen.WriteMojoGLCallVisitorForExtension(
       mojo_gles2_prefix + "_chromium_texture_mailbox_autogen.h",

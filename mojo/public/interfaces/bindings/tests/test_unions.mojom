@@ -69,6 +69,7 @@ struct SmallStructNonNullableUnion {
 
 struct SmallObjStruct {
   ObjectUnion obj_union;
+  int8 f_int8;
 };
 
 interface SmallCache {
@@ -83,4 +84,13 @@ interface UnionInterface {
 struct TryNonNullStruct {
   DummyStruct? nullable;
   DummyStruct non_nullable;
+};
+
+union OldUnion {
+  int8 f_int8;
+};
+
+union NewUnion {
+  int8 f_int8;
+  int16 f_int16;
 };

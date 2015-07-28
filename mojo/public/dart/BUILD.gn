@@ -1,10 +1,13 @@
 import("../mojo_sdk.gni")
 import("rules.gni")
 
-dart_mojo_sdk_sources = [
+dart_mojo_sdk_entrypoints = [
   "lib/application.dart",
   "lib/bindings.dart",
   "lib/core.dart",
+]
+
+dart_mojo_sdk_sources = [
   "lib/src/application_connection.dart",
   "lib/src/application.dart",
   "lib/src/buffer.dart",
@@ -24,7 +27,7 @@ dart_mojo_sdk_sources = [
 ]
 
 dartzip_package("dart") {
-  sources = dart_mojo_sdk_sources + [
+  sources = dart_mojo_sdk_entrypoints + dart_mojo_sdk_sources + [
               "pubspec.yaml",
               "CHANGELOG.md",
               "README.md",
@@ -39,6 +42,7 @@ dartzip_package("dart") {
 }
 
 dart_pkg("mojo") {
+  entrypoints = dart_mojo_sdk_entrypoints
   sources = dart_mojo_sdk_sources + [
               "pubspec.yaml",
               "CHANGELOG.md",

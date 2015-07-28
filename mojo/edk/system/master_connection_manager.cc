@@ -21,6 +21,8 @@
 namespace mojo {
 namespace system {
 
+namespace {
+
 const ProcessIdentifier kFirstSlaveProcessIdentifier = 2;
 
 static_assert(kMasterProcessIdentifier != kInvalidProcessIdentifier,
@@ -29,6 +31,29 @@ static_assert(kFirstSlaveProcessIdentifier != kInvalidProcessIdentifier,
               "Bad first slave process identifier");
 static_assert(kMasterProcessIdentifier != kFirstSlaveProcessIdentifier,
               "Master and first slave process identifiers are the same");
+
+MessageInTransit::Subtype ConnectionManagerResultToMessageInTransitSubtype(
+    ConnectionManager::Result result) {
+  switch (result) {
+    case ConnectionManager::Result::FAILURE:
+      return MessageInTransit::Subtype::CONNECTION_MANAGER_ACK_FAILURE;
+    case ConnectionManager::Result::SUCCESS:
+      return MessageInTransit::Subtype::CONNECTION_MANAGER_ACK_SUCCESS;
+    case ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS:
+      return MessageInTransit::Subtype::
+          CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_SAME_PROCESS;
+    case ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION:
+      return MessageInTransit::Subtype::
+          CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_NEW_CONNECTION;
+    case ConnectionManager::Result::SUCCESS_CONNECT_REUSE_CONNECTION:
+      return MessageInTransit::Subtype::
+          CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_REUSE_CONNECTION;
+  }
+  NOTREACHED();
+  return MessageInTransit::Subtype::CONNECTION_MANAGER_ACK_FAILURE;
+}
+
+}  // namespace
 
 // MasterConnectionManager::Helper ---------------------------------------------
 
@@ -115,28 +140,38 @@ void MasterConnectionManager::Helper::OnReadMessage(
 
   const ConnectionIdentifier* connection_id =
       reinterpret_cast<const ConnectionIdentifier*>(message_view.bytes());
-  bool result;
+  Result result = Result::FAILURE;
   ProcessIdentifier peer_process_identifier = kInvalidProcessIdentifier;
   embedder::ScopedPlatformHandle platform_handle;
   uint32_t num_bytes = 0;
   const void* bytes = nullptr;
   switch (message_view.subtype()) {
     case MessageInTransit::Subtype::CONNECTION_MANAGER_ALLOW_CONNECT:
-      result = owner_->AllowConnectImpl(process_identifier_, *connection_id);
+      result = owner_->AllowConnectImpl(process_identifier_, *connection_id)
+                   ? Result::SUCCESS
+                   : Result::FAILURE;
       break;
     case MessageInTransit::Subtype::CONNECTION_MANAGER_CANCEL_CONNECT:
-      result = owner_->CancelConnectImpl(process_identifier_, *connection_id);
+      result = owner_->CancelConnectImpl(process_identifier_, *connection_id)
+                   ? Result::SUCCESS
+                   : Result::FAILURE;
       break;
-    case MessageInTransit::Subtype::CONNECTION_MANAGER_CONNECT:
+    case MessageInTransit::Subtype::CONNECTION_MANAGER_CONNECT: {
       result = owner_->ConnectImpl(process_identifier_, *connection_id,
                                    &peer_process_identifier, &platform_handle);
+      DCHECK_NE(result, Result::SUCCESS);
+      // TODO(vtl): FIXME -- currently, nothing should generate
+      // SUCCESS_CONNECT_REUSE_CONNECTION.
+      CHECK_NE(result, Result::SUCCESS_CONNECT_REUSE_CONNECTION);
       // Success acks for "connect" have the peer process identifier as data
-      // (and maybe also a platform handle).
-      if (result) {
+      // (and also a platform handle in the case of "new connection" -- handled
+      // further below).
+      if (result != Result::FAILURE) {
         num_bytes = static_cast<uint32_t>(sizeof(peer_process_identifier));
         bytes = &peer_process_identifier;
       }
       break;
+    }
     default:
       LOG(ERROR) << "Invalid message subtype " << message_view.subtype();
       FatalError();  // WARNING: This destroys us.
@@ -145,22 +180,21 @@ void MasterConnectionManager::Helper::OnReadMessage(
 
   scoped_ptr<MessageInTransit> response(new MessageInTransit(
       MessageInTransit::Type::CONNECTION_MANAGER_ACK,
-      result ? MessageInTransit::Subtype::CONNECTION_MANAGER_ACK_SUCCESS
-             : MessageInTransit::Subtype::CONNECTION_MANAGER_ACK_FAILURE,
-      num_bytes, bytes));
+      ConnectionManagerResultToMessageInTransitSubtype(result), num_bytes,
+      bytes));
 
-  if (platform_handle.is_valid()) {
-    // Only success acks for "connect" *may* have a platform handle attached.
-    DCHECK(result);
+  if (result == Result::SUCCESS_CONNECT_NEW_CONNECTION) {
     DCHECK_EQ(message_view.subtype(),
               MessageInTransit::Subtype::CONNECTION_MANAGER_CONNECT);
-
+    DCHECK(platform_handle.is_valid());
     embedder::ScopedPlatformHandleVectorPtr platform_handles(
         new embedder::PlatformHandleVector());
     platform_handles->push_back(platform_handle.release());
     response->SetTransportData(make_scoped_ptr(
         new TransportData(platform_handles.Pass(),
                           raw_channel_->GetSerializedPlatformHandleSize())));
+  } else {
+    DCHECK(!platform_handle.is_valid());
   }
 
   if (!raw_channel_->WriteMessage(response.Pass())) {
@@ -328,11 +362,10 @@ bool MasterConnectionManager::CancelConnect(
   return CancelConnectImpl(kMasterProcessIdentifier, connection_id);
 }
 
-bool MasterConnectionManager::Connect(
+ConnectionManager::Result MasterConnectionManager::Connect(
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
     embedder::ScopedPlatformHandle* platform_handle) {
-  AssertNotOnPrivateThread();
   return ConnectImpl(kMasterProcessIdentifier, connection_id,
                      peer_process_identifier, platform_handle);
 }
@@ -408,7 +441,7 @@ bool MasterConnectionManager::CancelConnectImpl(
   return true;
 }
 
-bool MasterConnectionManager::ConnectImpl(
+ConnectionManager::Result MasterConnectionManager::ConnectImpl(
     ProcessIdentifier process_identifier,
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
@@ -426,7 +459,7 @@ bool MasterConnectionManager::ConnectImpl(
     LOG(ERROR) << "Connect() from process " << process_identifier
                << " for connection ID " << connection_id.ToString()
                << " which is not pending";
-    return false;
+    return Result::FAILURE;
   }
 
   PendingConnectionInfo* info = it->second;
@@ -443,23 +476,27 @@ bool MasterConnectionManager::ConnectImpl(
       LOG(ERROR) << "Connect() from process " << process_identifier
                  << " for connection ID " << connection_id.ToString()
                  << " which is neither connectee";
-      return false;
+      return Result::FAILURE;
     }
 
+    // TODO(vtl): FIXME -- add stuff for SUCCESS_CONNECT_REUSE_CONNECTION here.
+    Result result = Result::FAILURE;
     if (info->first == info->second) {
       platform_handle->reset();
       DCHECK(!info->remaining_handle.is_valid());
+      result = Result::SUCCESS_CONNECT_SAME_PROCESS;
     } else {
       embedder::PlatformChannelPair platform_channel_pair;
       *platform_handle = platform_channel_pair.PassServerHandle();
       DCHECK(platform_handle->is_valid());
       info->remaining_handle = platform_channel_pair.PassClientHandle();
       DCHECK(info->remaining_handle.is_valid());
+      result = Result::SUCCESS_CONNECT_NEW_CONNECTION;
     }
     DVLOG(1) << "Connection ID " << connection_id.ToString()
              << ": first Connect() from process identifier "
              << process_identifier;
-    return true;
+    return result;
   }
 
   ProcessIdentifier remaining_connectee;
@@ -479,7 +516,7 @@ bool MasterConnectionManager::ConnectImpl(
                << " in state " << info->state;
     pending_connections_.erase(it);
     delete info;
-    return false;
+    return Result::FAILURE;
   }
 
   if (process_identifier != remaining_connectee) {
@@ -488,18 +525,28 @@ bool MasterConnectionManager::ConnectImpl(
                << " which is not the remaining connectee";
     pending_connections_.erase(it);
     delete info;
-    return false;
+    return Result::FAILURE;
   }
 
   *peer_process_identifier = peer;
-  *platform_handle = info->remaining_handle.Pass();
-  DCHECK((info->first == info->second) ^ platform_handle->is_valid());
+
+  // TODO(vtl): FIXME -- add stuff for SUCCESS_CONNECT_REUSE_CONNECTION here.
+  Result result = Result::FAILURE;
+  if (info->first == info->second) {
+    platform_handle->reset();
+    DCHECK(!info->remaining_handle.is_valid());
+    result = Result::SUCCESS_CONNECT_SAME_PROCESS;
+  } else {
+    *platform_handle = info->remaining_handle.Pass();
+    DCHECK(platform_handle->is_valid());
+    result = Result::SUCCESS_CONNECT_NEW_CONNECTION;
+  }
   pending_connections_.erase(it);
   delete info;
   DVLOG(1) << "Connection ID " << connection_id.ToString()
            << ": second Connect() from process identifier "
            << process_identifier;
-  return true;
+  return result;
 }
 
 void MasterConnectionManager::ShutdownOnPrivateThread() {

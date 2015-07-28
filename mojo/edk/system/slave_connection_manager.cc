@@ -22,9 +22,9 @@ SlaveConnectionManager::SlaveConnectionManager(
       slave_process_delegate_(),
       private_thread_("SlaveConnectionManagerPrivateThread"),
       awaiting_ack_type_(NOT_AWAITING_ACK),
-      ack_result_(),
-      ack_peer_process_identifier_(),
-      ack_platform_handle_(),
+      ack_result_(nullptr),
+      ack_peer_process_identifier_(nullptr),
+      ack_platform_handle_(nullptr),
       event_(false, false) {  // Auto-reset, not initially signalled.
 }
 
@@ -79,13 +79,14 @@ bool SlaveConnectionManager::AllowConnect(
   AssertNotOnPrivateThread();
 
   MutexLocker locker(&mutex_);
-  bool result = false;
+  Result result = Result::FAILURE;
   private_thread_.message_loop()->PostTask(
       FROM_HERE,
       base::Bind(&SlaveConnectionManager::AllowConnectOnPrivateThread,
                  base::Unretained(this), connection_id, &result));
   event_.Wait();
-  return result;
+  DCHECK(result == Result::FAILURE || result == Result::SUCCESS);
+  return result == Result::SUCCESS;
 }
 
 bool SlaveConnectionManager::CancelConnect(
@@ -93,23 +94,24 @@ bool SlaveConnectionManager::CancelConnect(
   AssertNotOnPrivateThread();
 
   MutexLocker locker(&mutex_);
-  bool result = false;
+  Result result = Result::FAILURE;
   private_thread_.message_loop()->PostTask(
       FROM_HERE,
       base::Bind(&SlaveConnectionManager::CancelConnectOnPrivateThread,
                  base::Unretained(this), connection_id, &result));
   event_.Wait();
-  return result;
+  DCHECK(result == Result::FAILURE || result == Result::SUCCESS);
+  return result == Result::SUCCESS;
 }
 
-bool SlaveConnectionManager::Connect(
+ConnectionManager::Result SlaveConnectionManager::Connect(
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
     embedder::ScopedPlatformHandle* platform_handle) {
   AssertNotOnPrivateThread();
 
   MutexLocker locker(&mutex_);
-  bool result = false;
+  Result result = Result::FAILURE;
   private_thread_.message_loop()->PostTask(
       FROM_HERE, base::Bind(&SlaveConnectionManager::ConnectOnPrivateThread,
                             base::Unretained(this), connection_id, &result,
@@ -139,7 +141,7 @@ void SlaveConnectionManager::ShutdownOnPrivateThread() {
 
 void SlaveConnectionManager::AllowConnectOnPrivateThread(
     const ConnectionIdentifier& connection_id,
-    bool* result) {
+    Result* result) {
   DCHECK(result);
   AssertOnPrivateThread();
   // This should only posted (from another thread, to |private_thread_|) with
@@ -154,7 +156,7 @@ void SlaveConnectionManager::AllowConnectOnPrivateThread(
           MessageInTransit::Subtype::CONNECTION_MANAGER_ALLOW_CONNECT,
           sizeof(connection_id), &connection_id)))) {
     // Don't tear things down; possibly we'll still read some messages.
-    *result = false;
+    *result = Result::FAILURE;
     event_.Signal();
     return;
   }
@@ -164,7 +166,7 @@ void SlaveConnectionManager::AllowConnectOnPrivateThread(
 
 void SlaveConnectionManager::CancelConnectOnPrivateThread(
     const ConnectionIdentifier& connection_id,
-    bool* result) {
+    Result* result) {
   DCHECK(result);
   AssertOnPrivateThread();
   // This should only posted (from another thread, to |private_thread_|) with
@@ -179,7 +181,7 @@ void SlaveConnectionManager::CancelConnectOnPrivateThread(
           MessageInTransit::Subtype::CONNECTION_MANAGER_CANCEL_CONNECT,
           sizeof(connection_id), &connection_id)))) {
     // Don't tear things down; possibly we'll still read some messages.
-    *result = false;
+    *result = Result::FAILURE;
     event_.Signal();
     return;
   }
@@ -189,7 +191,7 @@ void SlaveConnectionManager::CancelConnectOnPrivateThread(
 
 void SlaveConnectionManager::ConnectOnPrivateThread(
     const ConnectionIdentifier& connection_id,
-    bool* result,
+    Result* result,
     ProcessIdentifier* peer_process_identifier,
     embedder::ScopedPlatformHandle* platform_handle) {
   DCHECK(result);
@@ -207,7 +209,7 @@ void SlaveConnectionManager::ConnectOnPrivateThread(
           MessageInTransit::Subtype::CONNECTION_MANAGER_CONNECT,
           sizeof(connection_id), &connection_id)))) {
     // Don't tear things down; possibly we'll still read some messages.
-    *result = false;
+    *result = Result::FAILURE;
     platform_handle->reset();
     event_.Signal();
     return;
@@ -223,8 +225,8 @@ void SlaveConnectionManager::OnReadMessage(
     embedder::ScopedPlatformHandleVectorPtr platform_handles) {
   AssertOnPrivateThread();
 
-  // Set |*ack_result_| to false by default.
-  *ack_result_ = false;
+  // Set |*ack_result_| to failure by default.
+  *ack_result_ = Result::FAILURE;
 
   // Note: Since we should be able to trust the master, simply crash (i.e.,
   // |CHECK()|-fail) if it sends us something invalid.
@@ -240,38 +242,53 @@ void SlaveConnectionManager::OnReadMessage(
   if (message_view.subtype() ==
       MessageInTransit::Subtype::CONNECTION_MANAGER_ACK_FAILURE) {
     // Failure acks never have any contents.
-    CHECK_EQ(num_bytes, 0u);
-    CHECK_EQ(num_platform_handles, 0u);
-    // Leave |*ack_result_| false.
-  } else if (message_view.subtype() ==
-             MessageInTransit::Subtype::CONNECTION_MANAGER_ACK_SUCCESS) {
-    if (awaiting_ack_type_ == AWAITING_ACCEPT_CONNECT_ACK ||
-        awaiting_ack_type_ == AWAITING_CANCEL_CONNECT_ACK) {
-      // Success acks for "accept/cancel connect" have no contents.
-      CHECK_EQ(num_bytes, 0u);
-      CHECK_EQ(num_platform_handles, 0u);
-      *ack_result_ = true;
+    DCHECK_EQ(num_bytes, 0u);
+    DCHECK_EQ(num_platform_handles, 0u);
+    // Leave |*ack_result_| as failure.
+  } else {
+    if (awaiting_ack_type_ != AWAITING_CONNECT_ACK) {
+      // In the non-"connect" case, there's only one type of success ack, which
+      // never has any contents.
+      CHECK_EQ(message_view.subtype(),
+               MessageInTransit::Subtype::CONNECTION_MANAGER_ACK_SUCCESS);
+      DCHECK_EQ(num_bytes, 0u);
+      DCHECK_EQ(num_platform_handles, 0u);
+      *ack_result_ = Result::SUCCESS;
       DCHECK(!ack_peer_process_identifier_);
       DCHECK(!ack_platform_handle_);
     } else {
-      DCHECK_EQ(awaiting_ack_type_, AWAITING_CONNECT_ACK);
-      // Success acks for "connect" always have a |ProcessIdentifier| as data,
-      // and *maybe* one platform handle.
+      // Success acks for "connect" always have a |ProcessIdentifier| as data.
       CHECK_EQ(num_bytes, sizeof(ProcessIdentifier));
-      CHECK_LE(num_platform_handles, 1u);
-      *ack_result_ = true;
       *ack_peer_process_identifier_ =
           *reinterpret_cast<const ProcessIdentifier*>(message_view.bytes());
-      if (num_platform_handles > 0) {
-        ack_platform_handle_->reset(platform_handles->at(0));
-        platform_handles->at(0) = embedder::PlatformHandle();
-      } else {
-        ack_platform_handle_->reset();
+
+      switch (message_view.subtype()) {
+        case MessageInTransit::Subtype::
+            CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_SAME_PROCESS:
+          DCHECK_EQ(num_platform_handles, 0u);
+          *ack_result_ = Result::SUCCESS_CONNECT_SAME_PROCESS;
+          ack_platform_handle_->reset();
+          break;
+        case MessageInTransit::Subtype::
+            CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_NEW_CONNECTION:
+          CHECK_EQ(num_platform_handles, 1u);
+          *ack_result_ = Result::SUCCESS_CONNECT_NEW_CONNECTION;
+          ack_platform_handle_->reset(platform_handles->at(0));
+          platform_handles->at(0) = embedder::PlatformHandle();
+          break;
+        case MessageInTransit::Subtype::
+            CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_REUSE_CONNECTION:
+          DCHECK_EQ(num_platform_handles, 0u);
+          *ack_result_ = Result::SUCCESS_CONNECT_REUSE_CONNECTION;
+          ack_platform_handle_->reset();
+          // TODO(vtl): FIXME -- currently, nothing should generate
+          // SUCCESS_CONNECT_REUSE_CONNECTION.
+          CHECK(false);
+          break;
+        default:
+          CHECK(false);
       }
     }
-  } else {
-    // Bad message subtype.
-    CHECK(false);
   }
 
   awaiting_ack_type_ = NOT_AWAITING_ACK;

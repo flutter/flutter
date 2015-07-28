@@ -64,17 +64,6 @@ class ConformanceTestInterfaceImpl implements ConformanceTestInterface {
   Future close({bool immediate: false}) => _stub.close(immediate: immediate);
 }
 
-parser.ValidationParseResult readAndParseTest(String test) {
-  List<int> data = builtin.readSync("${test}.data");
-  String input = new Utf8Decoder().convert(data).trim();
-  return parser.parse(input);
-}
-
-String expectedResult(String test) {
-  List<int> data = builtin.readSync("${test}.expected");
-  return new Utf8Decoder().convert(data).trim();
-}
-
 Future runTest(
     String name, parser.ValidationParseResult test, String expected) {
   var handles = new List.generate(
@@ -112,26 +101,26 @@ Future runTest(
   });
 }
 
-Iterable<String> getTestFiles(String path, String prefix) => builtin
-    .enumerateFiles(path)
-    .where((s) => s.startsWith(prefix) && s.endsWith(".data"))
-    .map((s) => s.replaceFirst('.data', ''));
-
-main(List args) {
-  int handle = args[0];
-  String path = args[1];
+main(List args) async {
+  assert(args.length == 3);
+  List<String> testData = args[2];
 
   // First test the parser.
   parser.parserTests();
 
-  // Then run the conformance tests.
-  var futures = getTestFiles(path, "$path/conformance_").map((test) {
-    return runTest(test, readAndParseTest(test), expectedResult(test));
-  });
-  Future.wait(futures).then((_) {
-    assert(MojoHandle.reportLeakedHandles());
-  }, onError: (e) {
-    assert(MojoHandle.reportLeakedHandles());
-  });
-  // TODO(zra): Add integration tests when they no longer rely on Client=.
+  // See CollectTests in validation_unittest.cc for information on testData
+  // format.
+  for (var i = 0; i < testData.length; i += 3) {
+    var name = testData[i + 0];
+    var data = testData[i + 1].trim();
+    var expected = testData[i + 2].trim();
+    try {
+      await runTest(name, parser.parse(data), expected);
+      print('$name PASSED.');
+    } catch (e) {
+      print('$name FAILED: $e');
+    }
+  }
+  // TODO(zra): Add integration tests when they no longer rely on Client=
+  assert(MojoHandle.reportLeakedHandles());
 }

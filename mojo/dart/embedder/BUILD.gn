@@ -16,15 +16,11 @@ source_set("dart_controller_no_snapshot") {
     "common.h",
     "dart_controller.cc",
     "dart_controller.h",
-    "dart_debugger.cc",
-    "dart_debugger.h",
     "io/internet_address.h",
-    "isolate_data.h",
     "mojo_io_natives.cc",
     "mojo_io_natives.h",
     "mojo_natives.cc",
     "mojo_natives.h",
-    "monitor.h",
     "vmservice.cc",
     "vmservice.h",
   ]
@@ -46,8 +42,10 @@ source_set("dart_controller_no_snapshot") {
     "//dart/runtime:libdart",
     "//dart/runtime/bin:libdart_embedder_noio",
     "//third_party/dart-pkg",
+    "//mojo/common",
     "//mojo/public/c/system",
     "//mojo/public/cpp/system",
+    "//tonic",
   ]
 
   defines = []
@@ -56,8 +54,6 @@ source_set("dart_controller_no_snapshot") {
   } else {
     defines += [ "NDEBUG" ]
   }
-
-  include_dirs = [ "//dart/runtime" ]
 }
 
 dart_embedder_resources("generate_dart_embedder_patch_resources_cc") {

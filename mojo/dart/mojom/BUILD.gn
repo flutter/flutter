@@ -5,10 +5,14 @@
 import("//mojo/public/dart/rules.gni")
 
 dart_pkg("mojom") {
+  entrypoints = [ "lib/generate.dart" ]
   sources = [
     "CHANGELOG.md",
     "README.md",
-    "lib/generate.dart",
+    "lib/src/utils.dart",
     "pubspec.yaml",
+  ]
+  deps = [
+    "//third_party/dart-pkg",
   ]
 }

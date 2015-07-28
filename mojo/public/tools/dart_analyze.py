@@ -5,11 +5,15 @@
 
 # To integrate dartanalyze with out build system, we take an input file, run
 # the analyzer on it, and write a stamp file if it passed.
-#
-# The first argument to this script is a reference to this build's gen
-# directory, which we treat as the package root. The second is the stamp file
-# to touch if we succeed. The rest are passed to the analyzer verbatim.
 
+# This script can either analyze a dartzip package, specified with the
+# --dartzip-file flag, or a set of entrypoints specified with the --entrypoints
+# flag. The location of the Dart SDK must be specified with the --dart-sdk
+# flag. A stamp file can optionally be written with the location given by the
+# --stamp-file flag. Any command line arguments not recognized by this script
+# are passed on to the Dart analyzer.
+
+import argparse
 import glob
 import os
 import re
@@ -36,20 +40,30 @@ _IGNORED_PATTERNS = [
   re.compile(r'.*cannot both be unnamed'),
 ]
 
+
 def _success(stamp_file):
   # We passed cleanly, so touch the stamp file so that we don't run again.
   with open(stamp_file, 'a'):
     os.utime(stamp_file, None)
   return 0
 
-def main(args):
-  dartzip_file = args.pop(0)
-  stamp_file = args.pop(0)
 
-  # Do not run dart analyzer on third_party sources.
-  if "/third_party/" in dartzip_file:
-    return _success(stamp_file)
+def analyze_and_filter(cmd, temp_dir=None, dirname=None):
+  errors = None
+  try:
+    subprocess.check_output(cmd, shell=False, stderr=subprocess.STDOUT)
+  except subprocess.CalledProcessError as e:
+    errors = set(l for l in e.output.split('\n')
+                 if not any(p.match(l) for p in _IGNORED_PATTERNS))
+    for error in sorted(errors):
+      if dirname is None:
+        print >> sys.stderr, error
+      else:
+        print >> sys.stderr, error.replace(temp_dir + "/", dirname)
+  return errors
 
+
+def analyze_dartzip(dart_sdk, dartzip_file, stamp_file, args):
   dartzip_basename = os.path.basename(dartzip_file) + ":"
 
   # Unzip |dartzip_file| to a temporary directory.
@@ -57,9 +71,7 @@ def main(args):
     temp_dir = tempfile.mkdtemp()
     zipfile.ZipFile(dartzip_file).extractall(temp_dir)
 
-    cmd = [
-      "../../third_party/dart-sdk/dart-sdk/bin/dartanalyzer",
-    ]
+    cmd = [ os.path.join(dart_sdk, 'bin', 'dartanalyzer') ]
 
     # Grab all the toplevel dart files in the archive.
     dart_files = glob.glob(os.path.join(temp_dir, "*.dart"))
@@ -72,20 +84,65 @@ def main(args):
     cmd.append("--package-root=%s/packages" % temp_dir)
     cmd.append("--fatal-warnings")
 
-    errors = 0
-    try:
-      subprocess.check_output(cmd, shell=False, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-      errors = set(l for l in e.output.split('\n')
-                   if not any(p.match(l) for p in _IGNORED_PATTERNS))
-      for error in sorted(errors):
-        print >> sys.stderr, error.replace(temp_dir + "/", dartzip_basename)
+    errors = analyze_and_filter(cmd, temp_dir, dartzip_basename)
 
-    if not errors:
+    if errors is None:
       return _success(stamp_file)
     return min(255, len(errors))
   finally:
     shutil.rmtree(temp_dir)
 
+
+def analyze_entrypoints(dart_sdk, entrypoints, args):
+  cmd = [ os.path.join(dart_sdk, 'bin', 'dartanalyzer') ]
+  cmd.extend(entrypoints)
+  cmd.extend(args)
+  cmd.append("--fatal-warnings")
+  errors = analyze_and_filter(cmd)
+  if errors is None:
+    return 0
+  return min(255, len(errors))
+
+
+def main():
+  parser = argparse.ArgumentParser(description='Run the Dart analyzer.')
+  parser.add_argument('--dart-sdk',
+                      action='store',
+                      type=str,
+                      metavar='dart_sdk',
+                      help='Path to the Dart SDK',
+                      required=True)
+  parser.add_argument('--dartzip-file',
+                      action='store',
+                      type=str,
+                      metavar='dartzip_file',
+                      help='dartzip file whose contents to analyze',
+                      default=None)
+  parser.add_argument('--stamp-file',
+                      action='store',
+                      type=str,
+                      metavar='stamp_file',
+                      help='Stamp file to write on success.',
+                      default=None)
+  parser.add_argument('--entrypoints',
+                      help='Entry points to analyze',
+                      nargs='*',
+                      default=[])
+  args, remainder = parser.parse_known_args()
+
+  if args.dartzip_file is None and args.entrypoints == []:
+    parser.print_help()
+    return 1
+
+  if args.dartzip_file is not None:
+    # Do not run dart analyzer on third_party sources.
+    if "/third_party/" in args.dartzip_file:
+      return _success(args.stamp_file)
+    return analyze_dartzip(args.dart_sdk, args.dartzip_file, args.stamp_file,
+                           remainder)
+
+  if args.entrypoints != []:
+    return analyze_entrypoints(args.dart_sdk, args.entrypoints, remainder)
+
 if __name__ == '__main__':
-  sys.exit(main(sys.argv[1:]))
+  sys.exit(main())

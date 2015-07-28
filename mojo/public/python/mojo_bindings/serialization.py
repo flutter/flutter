@@ -7,8 +7,11 @@
 import struct
 
 
-# Format of a header for a struct or an array.
+# Format of a header for a struct, array or union.
 HEADER_STRUCT = struct.Struct("<II")
+
+# Format for a pointer.
+POINTER_STRUCT = struct.Struct("<Q")
 
 
 def Flatten(value):
@@ -218,3 +221,89 @@ def _GetStruct(groups):
   if alignment_needed:
     codes.append('x' * alignment_needed)
   return struct.Struct(''.join(codes))
+
+
+class UnionSerializer(object):
+  """
+  Helper class to serialize/deserialize a union.
+  """
+  def __init__(self, fields):
+    self._fields = {field.index: field for field in fields}
+
+  def SerializeInline(self, union, handle_offset):
+    data = bytearray()
+    field = self._fields[union.tag]
+
+    # If the union value is a simple type or a nested union, it is returned as
+    # entry.
+    # Otherwise, the serialized value is appended to data and the value of entry
+    # is -1. The caller will need to set entry to the location where the
+    # caller will append data.
+    (entry, handles) = field.field_type.Serialize(
+        union.data, -1, data, handle_offset)
+
+    # If the value contained in the union is itself a union, we append its
+    # serialized value to data and set entry to -1. The caller will need to set
+    # entry to the location where the caller will append data.
+    if field.field_type.IsUnion():
+      nested_union = bytearray(16)
+      HEADER_STRUCT.pack_into(nested_union, 0, entry[0], entry[1])
+      POINTER_STRUCT.pack_into(nested_union, 8, entry[2])
+
+      data = nested_union + data
+
+      # Since we do not know where the caller will append the nested union,
+      # we set entry to an invalid value and let the caller figure out the right
+      # value.
+      entry = -1
+
+    return (16, union.tag, entry, data), handles
+
+  def Serialize(self, union, handle_offset):
+    (size, tag, entry, extra_data), handles = self.SerializeInline(
+        union, handle_offset)
+    data = bytearray(16)
+    if extra_data:
+      entry = 8
+    data.extend(extra_data)
+
+    field = self._fields[union.tag]
+
+    HEADER_STRUCT.pack_into(data, 0, size, tag)
+    typecode = field.GetTypeCode()
+
+    # If the value is a nested union, we store a 64 bits pointer to it.
+    if field.field_type.IsUnion():
+      typecode = 'Q'
+
+    struct.pack_into('<%s' % typecode, data, 8, entry)
+    return data, handles
+
+  def Deserialize(self, context, union_class):
+    if len(context.data) < HEADER_STRUCT.size:
+      raise DeserializationException(
+          'Available data too short to contain header.')
+    (size, tag) = HEADER_STRUCT.unpack_from(context.data)
+
+    if size == 0:
+      return None
+
+    if size != 16:
+      raise DeserializationException('Invalid union size %s' % size)
+
+    union = union_class.__new__(union_class)
+    if tag not in self._fields:
+      union.SetInternals(None, None)
+      return union
+
+    field = self._fields[tag]
+    if field.field_type.IsUnion():
+      ptr = POINTER_STRUCT.unpack_from(context.data, 8)[0]
+      value = field.field_type.Deserialize(ptr, context.GetSubContext(ptr+8))
+    else:
+      raw_value = struct.unpack_from(
+          field.GetTypeCode(), context.data, 8)[0]
+      value = field.field_type.Deserialize(raw_value, context.GetSubContext(8))
+
+    union.SetInternals(field, value)
+    return union
