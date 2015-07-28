@@ -65,6 +65,7 @@ class Node {
   ActionController get actions {
     if (_actions == null) {
       _actions = new ActionController();
+      if (_spriteBox != null) _spriteBox._actionControllers = null;
     }
     return _actions;
   }
@@ -201,7 +202,7 @@ class Node {
     child._spriteBox = this._spriteBox;
     _childrenLastAddedOrder += 1;
     child._addedOrder = _childrenLastAddedOrder;
-    if (_spriteBox != null) _spriteBox._eventTargets = null;
+    if (_spriteBox != null) _spriteBox._registerNode(child);
   }
 
   /// Removes a child from this node.
@@ -212,7 +213,7 @@ class Node {
     if (_children.remove(child)) {
       child._parent = null;
       child._spriteBox = null;
-      if (_spriteBox != null) _spriteBox._eventTargets = null;
+      if (_spriteBox != null) _spriteBox._deregisterNode(child);
     }
   }
 
@@ -234,7 +235,7 @@ class Node {
     }
     _children = [];
     _childrenNeedSorting = false;
-    if (_spriteBox != null) _spriteBox._eventTargets = null;
+    if (_spriteBox != null) _spriteBox._deregisterNode(null);
   }
 
   void _sortChildren() {
