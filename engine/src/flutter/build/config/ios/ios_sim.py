@@ -4,11 +4,16 @@
 # found in the LICENSE file.
 
 import argparse
-import os
 import errno
+import os
+import re
 import subprocess
 import sys
-import re
+import time
+
+IOS_SIM_PATH = [
+  '/Applications/iOS Simulator.app/Contents/MacOS/iOS Simulator'
+]
 
 SIMCTL_PATH = [
   '/usr/bin/env',
@@ -32,8 +37,30 @@ def ApplicationIdentifier(path):
 
   return identifier.strip()
 
+def IsDeviceBooted():
+  devices = subprocess.check_output( SIMCTL_PATH + [ 'list', 'devices' ]).strip().split('\n')
+  for device in devices:
+    if re.search(r'\(Booted\)', device):
+      return True
+  return False
+
+# Launch whatever simulator the user last used, rather than try to guess which of their simulators they might want to use
+def Boot(args):
+  if IsDeviceBooted():
+    return
+
+  # Use Popen here because launching the simulator from the command line in this manner doesn't return, so we can't check the result.
+  if args.ios_sim_path:
+    subprocess.Popen( args.ios_sim_path )
+  else:
+    subprocess.Popen( IOS_SIM_PATH )
+
+  while not IsDeviceBooted():
+    print('Waiting for iOS Simulator to boot...')
+    time.sleep(0.5)
 
 def Install(args):
+  Boot(args)
   return subprocess.check_call( SIMCTL_PATH + [
     'install',
     'booted',
@@ -99,6 +126,10 @@ def Main():
   parser.add_argument('-s', dest='server', required=False,
                       default='localhost:8080',
                       help='Sky server address.')
+
+  parser.add_argument('--ios_sim_path', dest='ios_sim_path',
+                      help='Path to your iOS Simulator executable. '
+                      'Not normally required.')
 
   subparsers = parser.add_subparsers()
 
