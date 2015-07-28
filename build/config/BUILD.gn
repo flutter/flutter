@@ -136,7 +136,7 @@ config("feature_flags") {
   if (use_allocator != "tcmalloc") {
     defines += [ "NO_TCMALLOC" ]
   }
-  if (is_asan || is_lsan || is_tsan || is_msan) {
+  if (is_asan || is_lsan || is_tsan || is_msan || is_ios) {
     defines += [
       "MEMORY_TOOL_REPLACES_ALLOCATOR",
       "MEMORY_SANITIZER_INITIAL_SIZE",
