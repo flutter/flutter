@@ -6,7 +6,7 @@ action("init") {
   stamp = "$target_gen_dir/sky_init.stamp"
 
   script = "//sky/build/sky_init.py"
-  sources = [ "//sky/sdk/pubspec.yaml" ]
+  sources = [ "//sky/packages/sky/pubspec.yaml" ]
   outputs = [ stamp ]
 
   args = [

@@ -12,7 +12,7 @@ sky_app("game") {
     apk_name = "Asteroids"
 
     deps = [
-      "//sky/sdk/example/game/apk:resources",
+      "//sky/packages/sky/example/game/apk:resources",
     ]
   }
 }

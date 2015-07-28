@@ -10,12 +10,12 @@ import xml.etree.ElementTree as ET
 
 
 PUBSPECS = [
+    'sky/packages/sky/pubspec.yaml',
     'sky/packages/sky_engine/pubspec.yaml',
-    'sky/sdk/pubspec.yaml',
 ]
 
 MANIFESTS = [
-    'sky/sdk/example/demo_launcher/apk/AndroidManifest.xml',
+    'sky/packages/sky/example/demo_launcher/apk/AndroidManifest.xml',
 ]
 
 MANIFEST_PREFACE = '''<?xml version="1.0" encoding="utf-8"?>
