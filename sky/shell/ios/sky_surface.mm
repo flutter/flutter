@@ -26,9 +26,11 @@ static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
       // with the same coordinates
       return sky::EVENT_TYPE_POINTER_MOVE;
     case UITouchPhaseEnded:
-      return sky::EVENT_TYPE_POINTER_UP;
     case UITouchPhaseCancelled:
-      return sky::EVENT_TYPE_POINTER_CANCEL;
+      // We treat all cancels for raw touches as ups.
+      // All pointers hit UITouchPhaseCancelled as soon as a
+      // gesture is recognized.
+      return sky::EVENT_TYPE_POINTER_UP;
   }
 
   return sky::EVENT_TYPE_UNKNOWN;
