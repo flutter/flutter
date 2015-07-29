@@ -416,7 +416,7 @@ class Node {
   }
 
   void _prePaint(PaintingCanvas canvas) {
-    _savedTotalMatrix = canvas.getTotalMatrix();
+    _savedTotalMatrix = new Matrix4.fromFloat32List(canvas.getTotalMatrix());;
 
     // Get the transformation matrix and apply transform
     canvas.concat(transformMatrix.storage);
@@ -467,7 +467,7 @@ class Node {
   }
 
   void _postPaint(PaintingCanvas canvas) {
-    canvas.setMatrix(_savedTotalMatrix);
+    canvas.setMatrix(_savedTotalMatrix.storage);
   }
 
   // Receiving update calls

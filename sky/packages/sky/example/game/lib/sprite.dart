@@ -68,7 +68,7 @@ class Sprite extends NodeWithSize {
 
   void paint(PaintingCanvas canvas) {
     // Store old matrix
-    Matrix4 savedMatrix = canvas.getTotalMatrix();
+    Matrix4 savedMatrix = new Matrix4.fromFloat32List(canvas.getTotalMatrix());
 
     // Account for pivot point
     applyTransformForPivot(canvas);
@@ -113,6 +113,6 @@ class Sprite extends NodeWithSize {
     }
 
     // Restore matrix
-    canvas.setMatrix(savedMatrix);
+    canvas.setMatrix(savedMatrix.storage);
   }
 }
