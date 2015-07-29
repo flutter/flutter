@@ -48,8 +48,9 @@ class SpriteBox extends RenderBox {
 
   // Tracking of frame rate and updates
   double _lastTimeStamp;
-  int _numFrames = 0;
   double _frameRate = 0.0;
+
+  double get frameRate => _frameRate;
 
   // Transformation mode
   SpriteBoxTransformMode _transformMode;
@@ -342,19 +343,12 @@ class SpriteBox extends RenderBox {
     if (!attached)
       return;
 
-      // Calculate the time between frames in seconds
+    // Calculate delta and frame rate
     if (_lastTimeStamp == null) _lastTimeStamp = timeStamp;
     double delta = (timeStamp - _lastTimeStamp) / 1000;
     _lastTimeStamp = timeStamp;
 
-    // Count the number of frames we've been running
-    _numFrames += 1;
-
     _frameRate = 1.0/delta;
-
-    // // Print frame rate
-    // if (_numFrames % 60 == 0)
-    //   print("delta: $delta fps: $_frameRate");
 
     _runActions(delta);
     _callUpdate(_rootNode, delta);
