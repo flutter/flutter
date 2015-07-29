@@ -122,7 +122,7 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch,
                 return family;
             }
             int score = lang.match(family->lang()) * 2;
-            if (variant != 0 && variant == family->variant()) {
+            if (family->variant() == 0 || family->variant() == variant) {
                 score++;
             }
             if (score > bestScore) {
@@ -152,10 +152,13 @@ const uint32_t NBSP = 0xa0;
 const uint32_t ZWJ = 0x200c;
 const uint32_t ZWNJ = 0x200d;
 const uint32_t KEYCAP = 0x20e3;
+const uint32_t HYPHEN = 0x2010;
+const uint32_t NB_HYPHEN = 0x2011;
 
 // Characters where we want to continue using existing font run instead of
 // recomputing the best match in the fallback list.
-static const uint32_t stickyWhitelist[] = { '!', ',', '.', ':', ';', '?', NBSP, ZWJ, ZWNJ, KEYCAP };
+static const uint32_t stickyWhitelist[] = { '!', ',', '-', '.', ':', ';', '?', NBSP, ZWJ, ZWNJ,
+        KEYCAP, HYPHEN, NB_HYPHEN };
 
 static bool isStickyWhitelisted(uint32_t c) {
     for (size_t i = 0; i < sizeof(stickyWhitelist) / sizeof(stickyWhitelist[0]); i++) {
