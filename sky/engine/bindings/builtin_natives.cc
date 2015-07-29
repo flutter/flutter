@@ -31,7 +31,10 @@
 #endif
 
 #if __APPLE__
-#include <syslog.h>
+extern "C" {
+// Cannot import the syslog.h header directly because of macro collision
+extern void syslog(int, const char *, ...);
+}
 #endif
 
 namespace blink {
@@ -175,7 +178,7 @@ void Logger_PrintString(Dart_NativeArguments args) {
     // message is discoverable when running on an unrooted device.
     __android_log_print(ANDROID_LOG_INFO, "sky", "%.*s", length, chars);
 #elif __APPLE__
-    syslog(LOG_INFO, "%.*s", (int)length, chars);
+    syslog(6 /* Informational */, "%.*s", (int)length, chars);
 #endif
   }
 }
