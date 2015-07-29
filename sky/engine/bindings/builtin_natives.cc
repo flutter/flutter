@@ -178,7 +178,7 @@ void Logger_PrintString(Dart_NativeArguments args) {
     // message is discoverable when running on an unrooted device.
     __android_log_print(ANDROID_LOG_INFO, "sky", "%.*s", length, chars);
 #elif __APPLE__
-    syslog(6 /* Informational */, "%.*s", (int)length, chars);
+    syslog(1 /* LOG_ALERT */, "%.*s", (int)length, chars);
 #endif
   }
 }
