@@ -90,18 +90,27 @@ class GameDemoApp extends App {
   }
 
   Widget _buildMainScene(navigator, route) {
-    return new Center(
-      child: new TextureButton(
-        onPressed: () {
-          _game = new GameDemoWorld(_app, navigator, _loader, _spriteSheet, _spriteSheetUI);
-          navigator.pushNamed('/game');
-        },
-        texture: _spriteSheetUI["btn_play_up.png"],
-        textureDown: _spriteSheetUI["btn_play_down.png"],
-        width: 128.0,
-        height: 128.0
+    return new Stack([
+      new SpriteWidget(new MainScreenBackground()),
+      new Center(
+        child: new TextureButton(
+          onPressed: () {
+            _game = new GameDemoWorld(
+              _app,
+              navigator,
+              _loader,
+              _spriteSheet,
+              _spriteSheetUI
+            );
+            navigator.pushNamed('/game');
+          },
+          texture: _spriteSheetUI["btn_play_up.png"],
+          textureDown: _spriteSheetUI["btn_play_down.png"],
+          width: 128.0,
+          height: 128.0
+        )
       )
-    );
+    ]);
   }
 }
 
@@ -192,5 +201,16 @@ class _TextureButtonToken {
     value = 37 * value * _width.hashCode;
     value = 37 * value * _height.hashCode;
     return value;
+  }
+}
+
+class MainScreenBackground extends NodeWithSize {
+  MainScreenBackground() : super(new Size(1024.0, 1024.0)) {
+    Sprite sprtBackground = new Sprite.fromImage(_loader["assets/starfield.png"]);
+    sprtBackground.position = new Point(512.0, 512.0);
+    addChild(sprtBackground);
+
+    StarField starField = new StarField(_spriteSheet, 200, true);
+    addChild(starField);
   }
 }
