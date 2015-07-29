@@ -67,6 +67,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   self = [super init];
   if (self) {
     _shell_view.reset(shellView);
+    self.multipleTouchEnabled = YES;
     [self installGestureRecognizers];
   }
   return self;
