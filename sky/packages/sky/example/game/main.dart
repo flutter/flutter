@@ -5,6 +5,7 @@
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/rendering/object.dart';
+import 'package:sky/painting/text_style.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/button_base.dart';
 import 'package:sky/widgets/navigator.dart';
@@ -53,6 +54,7 @@ class GameDemoApp extends App {
 
   NavigationState _navigationState;
   GameDemoWorld _game;
+  int _lastScore = 0;
 
   void initState() {
     _navigationState = new NavigationState([
@@ -92,15 +94,18 @@ class GameDemoApp extends App {
   Widget _buildMainScene(navigator, route) {
     return new Stack([
       new SpriteWidget(new MainScreenBackground()),
-      new Center(
-        child: new TextureButton(
+      new Flex([
+        new TextureButton(
           onPressed: () {
             _game = new GameDemoWorld(
               _app,
               navigator,
               _loader,
               _spriteSheet,
-              _spriteSheetUI
+              _spriteSheetUI,
+              (lastScore) {
+                setState(() {_lastScore = lastScore;});
+              }
             );
             navigator.pushNamed('/game');
           },
@@ -108,8 +113,14 @@ class GameDemoApp extends App {
           textureDown: _spriteSheetUI["btn_play_down.png"],
           width: 128.0,
           height: 128.0
+        ),
+        new Text(
+          "Last Score: $_lastScore",
+          style: new TextStyle(fontSize:20.0)
         )
-      )
+      ],
+      direction: FlexDirection.vertical,
+      justifyContent: FlexJustifyContent.center)
     ]);
   }
 }
@@ -156,6 +167,7 @@ class TextureButton extends ButtonBase {
     if (texture == null)
       return;
 
+    canvas.save();
     if (highlight && textureDown != null) {
       // Draw down state
       canvas.scale(size.width / textureDown.size.width, size.height / textureDown.size.height);
@@ -165,6 +177,7 @@ class TextureButton extends ButtonBase {
       canvas.scale(size.width / texture.size.width, size.height / texture.size.height);
       texture.drawTexture(canvas, Point.origin, new Paint());
     }
+    canvas.restore();
   }
 }
 
