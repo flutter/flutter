@@ -27,7 +27,7 @@ if (is_android) {
   import("//build/config/android/rules.gni")
 
   android_library("vsync_lib") {
-    java_files = [ "src/org/domokit/vsync/VsyncProviderImpl.java" ]
+    java_files = [ "src/org/domokit/vsync/VSyncProviderImpl.java" ]
 
     deps = [
       "//base:base_java",

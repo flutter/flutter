@@ -22,17 +22,18 @@ class Animator {
   void Start();
   void Stop();
 
-  void set_vsync_provider(vsync::VsyncProviderPtr vsync_provider) {
+  void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider) {
     vsync_provider_ = vsync_provider.Pass();
   }
 
  private:
   void BeginFrame(int64_t time_stamp);
   void OnFrameComplete();
+  bool AwaitVSync();
 
   Engine::Config config_;
   Engine* engine_;
-  vsync::VsyncProviderPtr vsync_provider_;
+  vsync::VSyncProviderPtr vsync_provider_;
   int outstanding_requests_;
   bool did_defer_frame_request_;
   bool engine_requested_frame_;

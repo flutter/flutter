@@ -11,7 +11,7 @@
 namespace sky {
 namespace shell {
 
-const int kPipelineDepth = 2;
+const int kPipelineDepth = 3;
 
 Animator::Animator(const Engine::Config& config, Engine* engine)
     : config_(config),
@@ -39,10 +39,7 @@ void Animator::RequestFrame() {
     return;
   }
 
-  if (vsync_provider_) {
-    vsync_provider_->AwaitVsync(
-        base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr()));
-  } else {
+  if (!AwaitVSync()) {
     base::MessageLoop::current()->PostTask(
         FROM_HERE,
         base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr(), 0));
@@ -87,8 +84,18 @@ void Animator::OnFrameComplete() {
 
   if (did_defer_frame_request_) {
     did_defer_frame_request_ = false;
-    BeginFrame(0);
+
+    if (!AwaitVSync())
+      BeginFrame(0);
   }
+}
+
+bool Animator::AwaitVSync() {
+  if (!vsync_provider_)
+    return false;
+  vsync_provider_->AwaitVSync(
+      base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr()));
+  return true;
 }
 
 }  // namespace shell
