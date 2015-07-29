@@ -12,6 +12,9 @@
   <key>CFBundleExecutable</key>
   <string>game_app</string>
 
+  <key>CFBundleDisplayName</key>
+  <string>Asteroids</string>
+
   <key>CFBundleIdentifier</key>
   <string>org.domokit.sky.game</string>
   
