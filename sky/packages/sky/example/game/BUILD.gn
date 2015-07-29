@@ -16,5 +16,9 @@ sky_app("game") {
     ]
   } else if (is_ios) {
     info_plist = "ios/Info.plist"
+    launcher_icons = [
+      "assets/Icon.png",
+      "assets/Icon@2x.png",
+    ]
   }
 }
