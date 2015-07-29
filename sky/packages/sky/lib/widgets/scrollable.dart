@@ -43,7 +43,8 @@ abstract class Scrollable extends StatefulComponent {
     _toEndAnimation = new AnimatedSimulation(_tickScrollOffset);
     _toOffsetAnimation = new AnimationPerformance()
       ..addListener(() {
-        scrollTo(_toOffsetAnimation.variable.value);
+        AnimatedValue<double> offset = _toOffsetAnimation.variable;
+        scrollTo(offset.value);
       });
   }
 
