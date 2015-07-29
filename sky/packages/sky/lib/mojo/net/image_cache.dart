@@ -17,7 +17,7 @@ Future<sky.Image> load(String url) {
     Completer<sky.Image> completer = new Completer<sky.Image>();
     fetchUrl(url).then((UrlResponse response) {
       if (response.statusCode >= 400) {
-        print("Failed to load image ${url}");
+        print("Failed (${response.statusCode}) to load image ${url}");
         completer.complete(null);
       } else {
         new sky.ImageDecoder(response.body.handle.h, completer.complete);
