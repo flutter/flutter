@@ -28,5 +28,6 @@ dart_pkg("sky_services") {
     "//sky/services/activity:interfaces",
     "//sky/services/media:interfaces",
     "//sky/services/testing:interfaces",
+    "//sky/services/vsync:interfaces",
   ]
 }
