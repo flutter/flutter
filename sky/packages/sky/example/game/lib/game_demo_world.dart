@@ -348,6 +348,7 @@ class GameDemoWorld extends NodeWithSize {
 
     // Set game over
     _isGameOver = true;
+    lastScore = _hud.score;
 
     // Remove the ship
     _ship.visible = false;
