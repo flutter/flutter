@@ -51,7 +51,9 @@ class GameDemoWorld extends NodeWithSize {
   // Heads up display
   Hud _hud;
 
-  GameDemoWorld(App app, this._navigator, ImageMap images, this._spriteSheet, this._spriteSheetUI) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
+  Function _gameOverCallback;
+
+  GameDemoWorld(App app, this._navigator, ImageMap images, this._spriteSheet, this._spriteSheetUI, this._gameOverCallback) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
     // Fetch images
     _imgNebula = images["assets/nebula.png"];
 
@@ -348,7 +350,7 @@ class GameDemoWorld extends NodeWithSize {
 
     // Set game over
     _isGameOver = true;
-    lastScore = _hud.score;
+    _gameOverCallback(_hud.score);
 
     // Remove the ship
     _ship.visible = false;
