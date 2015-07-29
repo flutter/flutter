@@ -4,28 +4,43 @@
 
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf/shelf.dart';
 
-const String usage = 'Usage: sky_server PORT';
+void printUsage(parser) {
+  print('Usage: sky_server [-v] PORT');
+  print(parser.usage);
+}
 
 main(List<String> argv) async {
-  if (argv.length != 1) {
-    print(usage);
+  ArgParser parser = new ArgParser();
+  parser.addFlag('help', abbr: 'h', negatable: false,
+                 help: 'Display this help message.');
+  parser.addFlag('verbose', abbr: 'v', negatable: false,
+                 help: 'Log requests to stdout.');
+
+  ArgResults args = parser.parse(argv);
+
+  if (args['help'] || args.rest.length != 1) {
+    printUsage(parser);
     return;
   }
 
   int port;
   try {
-    port = int.parse(argv[0]);
+    port = int.parse(args.rest[0]);
   } catch(e) {
-    print(usage);
+    printUsage(parser);
     return;
   }
 
   Handler handler = createStaticHandler(Directory.current.path,
       serveFilesOutsidePath: true);
+
+  if (args['verbose'])
+    handler = const Pipeline().addMiddleware(logRequests()).addHandler(handler);
 
   HttpServer server;
   try {
