@@ -46,6 +46,7 @@ class GameDemoWorld extends NodeWithSize {
   // Game state
   int _numFrames = 0;
   bool _isGameOver = false;
+  int _gameOverFrame;
   int _currentLevel = 0;
 
   // Heads up display
@@ -320,6 +321,11 @@ class GameDemoWorld extends NodeWithSize {
     if (_numFrames > _numFramesShieldActive) _shield.visible = false;
     else if (_numFrames > _numFramesShieldActive - _numFramesShieldFlickers) _shield.visible = !_shield.visible;
 
+    // Check for exit back to main screen
+    if (_isGameOver && _numFrames - _gameOverFrame == 60) {
+      _navigator.pop();
+    }
+
     _numFrames++;
   }
 
@@ -350,6 +356,7 @@ class GameDemoWorld extends NodeWithSize {
 
     // Set game over
     _isGameOver = true;
+    _gameOverFrame = _numFrames;
     _gameOverCallback(_hud.score);
 
     // Remove the ship
@@ -357,8 +364,6 @@ class GameDemoWorld extends NodeWithSize {
 
     // Add an explosion
     addExplosion(AsteroidSize.large, _ship.position);
-
-    _navigator.pop();
   }
 
   // Handling controls
