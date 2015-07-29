@@ -21,9 +21,11 @@ import org.chromium.mojom.keyboard.KeyboardService;
 import org.chromium.mojom.media.MediaService;
 import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.sensors.SensorService;
+import org.chromium.mojom.vsync.VsyncProvider;
 import org.domokit.activity.ActivityImpl;
 import org.domokit.media.MediaServiceImpl;
 import org.domokit.oknet.NetworkServiceImpl;
+import org.domokit.vsync.VsyncProviderImpl;
 
 /**
  * Sky implementation of {@link android.app.Application}, managing application-level global
@@ -95,6 +97,13 @@ public class SkyApplication extends BaseChromiumApplication {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 SensorService.MANAGER.bind(new SensorServiceImpl(context), pipe);
+            }
+        });
+
+        registry.register(VsyncProvider.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                VsyncProvider.MANAGER.bind(new VsyncProviderImpl(), pipe);
             }
         });
     }
