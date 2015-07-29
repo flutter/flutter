@@ -561,9 +561,10 @@ class Laser extends Sprite {
 
 // Background starfield
 
-class StarField extends Node {
-  Image _image;
+class StarField extends NodeWithSize {
+  sky.Image _image;
   int _numStars;
+  bool _autoScroll;
   List<Point> _starPositions;
   List<double> _starScales;
   List<Rect> _rects;
@@ -573,7 +574,7 @@ class StarField extends Node {
     ..isAntiAlias = false
     ..setTransferMode(sky.TransferMode.plus);
 
-  StarField(SpriteSheet spriteSheet, this._numStars) {
+  StarField(SpriteSheet spriteSheet, this._numStars, [this._autoScroll = false]) : super(new Size(1024.0, 1024.0)) {
     _starPositions = [];
     _starScales = [];
     _colors = [];
@@ -616,6 +617,12 @@ class StarField extends Node {
       if (yPos < 0) yPos += _gameSizeHeight;
 
       _starPositions[i] = new Point(xPos, yPos);
+    }
+  }
+
+  void update(double dt) {
+    if (_autoScroll) {
+      move(dt * 100.0, 0.0);
     }
   }
 }
