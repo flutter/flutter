@@ -40,6 +40,7 @@ Future<UrlResponse> fetch(UrlRequest request) async {
     loader.close();
     return response;
   } catch (e) {
+    print("NetworkService unavailable $e");
     return new UrlResponse()..statusCode = 500;
   }
 }
