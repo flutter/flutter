@@ -65,6 +65,13 @@ Engine::Engine(const Config& config)
   mojo::ServiceProviderPtr service_provider =
       CreateServiceProvider(config.service_provider_context);
   mojo::ConnectToService(service_provider.get(), &network_service_);
+
+#if defined(OS_ANDROID)
+  // TODO(abarth): Implement VsyncProvider on other platforms.
+  vsync::VsyncProviderPtr vsync_provider;
+  mojo::ConnectToService(service_provider.get(), &vsync_provider);
+  animator_->set_vsync_provider(vsync_provider.Pass());
+#endif
 }
 
 Engine::~Engine() {

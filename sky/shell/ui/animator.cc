@@ -39,9 +39,14 @@ void Animator::RequestFrame() {
     return;
   }
 
-  base::MessageLoop::current()->PostTask(
-      FROM_HERE,
-      base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr()));
+  if (vsync_provider_) {
+    vsync_provider_->AwaitVsync(
+        base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr()));
+  } else {
+    base::MessageLoop::current()->PostTask(
+        FROM_HERE,
+        base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr(), 0));
+  }
 }
 
 void Animator::Stop() {
@@ -54,7 +59,7 @@ void Animator::Start() {
   RequestFrame();
 }
 
-void Animator::BeginFrame() {
+void Animator::BeginFrame(int64_t time_stamp) {
   TRACE_EVENT_ASYNC_END0("sky", "Frame request pending", this);
   DCHECK(engine_requested_frame_);
   engine_requested_frame_ = false;
@@ -62,7 +67,10 @@ void Animator::BeginFrame() {
   DCHECK(outstanding_requests_ > 0);
   DCHECK(outstanding_requests_ <= kPipelineDepth) << outstanding_requests_;
 
-  engine_->BeginFrame(base::TimeTicks::Now());
+  base::TimeTicks frame_time = time_stamp ?
+      base::TimeTicks::FromInternalValue(time_stamp) : base::TimeTicks::Now();
+
+  engine_->BeginFrame(frame_time);
   skia::RefPtr<SkPicture> picture = engine_->Paint();
 
   config_.gpu_task_runner->PostTaskAndReply(
@@ -79,7 +87,7 @@ void Animator::OnFrameComplete() {
 
   if (did_defer_frame_request_) {
     did_defer_frame_request_ = false;
-    BeginFrame();
+    BeginFrame(0);
   }
 }
 
