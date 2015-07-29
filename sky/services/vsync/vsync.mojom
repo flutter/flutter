@@ -4,6 +4,8 @@
 
 module vsync;
 
-interface VsyncProvider {
-  AwaitVsync() => (int64 time_stamp);
+interface VSyncProvider {
+  // Timebase is in MojoGetTimeTicksNow.
+  // Only one callback can be parked at a given time.
+  AwaitVSync() => (int64 time_stamp);
 };
