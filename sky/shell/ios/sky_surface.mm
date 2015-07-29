@@ -58,6 +58,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 
 @implementation SkySurface {
   BOOL _platformViewInitialized;
+  CGPoint _lastScrollTranslation;
 
   sky::SkyEnginePtr _sky_engine;
   scoped_ptr<sky::shell::ShellView> _shell_view;
@@ -274,6 +275,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   sky::EventType type = sky::EVENT_TYPE_UNKNOWN;
   switch (recognizer.state) {
     case UIGestureRecognizerStateBegan:
+      _lastScrollTranslation = CGPointZero;
       type = sky::EVENT_TYPE_GESTURE_SCROLL_BEGIN;
       break;
     case UIGestureRecognizerStateChanged:
@@ -297,8 +299,11 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   auto translation = [recognizer translationInView: self];
   auto velocity = [recognizer velocityInView: self];
 
-  input->gesture_data->dx = translation.x * scale;
-  input->gesture_data->dy =  translation.y * scale;
+  input->gesture_data->dx = (translation.x - _lastScrollTranslation.x) * scale;
+  input->gesture_data->dy =  (translation.y - _lastScrollTranslation.y) * scale;
+
+  _lastScrollTranslation = translation;
+
   input->gesture_data->velocityX = velocity.x * scale;
   input->gesture_data->velocityY =  velocity.y * scale;
 

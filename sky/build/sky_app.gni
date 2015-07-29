@@ -113,7 +113,7 @@ template("sky_app") {
           "$target_gen_dir/app.skyx",
         ]
 
-        resources += invoker.launcher_icons
+        resources += invoker.launcher_resources
 
         bundle_directory = "."
         deps = [ ":app" ]
