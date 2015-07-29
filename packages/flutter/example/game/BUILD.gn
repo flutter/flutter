@@ -16,9 +16,10 @@ sky_app("game") {
     ]
   } else if (is_ios) {
     info_plist = "ios/Info.plist"
-    launcher_icons = [
+    launcher_resources = [
       "assets/Icon.png",
       "assets/Icon@2x.png",
+      "ios/LaunchScreen.storyboardc",
     ]
   }
 }
