@@ -90,7 +90,7 @@ class FeedFragment extends StatefulComponent {
   }
 
   Drawer buildDrawer() {
-    if (_drawerStatus == DrawerStatus.inactive)
+    if (_drawerStatus == AnimationStatus.dismissed)
       return null;
     return new Drawer(
       showing: _drawerShowing,
@@ -122,16 +122,16 @@ class FeedFragment extends StatefulComponent {
   }
 
   bool _drawerShowing = false;
-  DrawerStatus _drawerStatus = DrawerStatus.inactive;
+  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
 
   void _handleOpenDrawer() {
     setState(() {
       _drawerShowing = true;
-      _drawerStatus = DrawerStatus.active;
+      _drawerStatus = AnimationStatus.forward;
     });
   }
 
-  void _handleDrawerStatusChange(DrawerStatus status) {
+  void _handleDrawerStatusChange(AnimationStatus status) {
     setState(() {
       _drawerStatus = status;
     });

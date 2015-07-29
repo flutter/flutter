@@ -9,7 +9,6 @@ import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/animated_container.dart';
-import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/material.dart';
