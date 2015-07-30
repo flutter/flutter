@@ -6,6 +6,9 @@
 
 #include "base/bind.h"
 #include "base/i18n/icu_util.h"
+#include "base/lazy_instance.h"
+#include "base/memory/discardable_memory.h"
+#include "base/memory/discardable_memory_allocator.h"
 #include "base/single_thread_task_runner.h"
 #include "mojo/common/message_pump_mojo.h"
 #include "mojo/edk/embedder/embedder.h"
@@ -22,6 +25,27 @@ static Shell* g_shell = nullptr;
 scoped_ptr<base::MessagePump> CreateMessagePumpMojo() {
   return make_scoped_ptr(new mojo::common::MessagePumpMojo);
 }
+
+class NonDiscardableMemory : public base::DiscardableMemory {
+ public:
+  explicit NonDiscardableMemory(size_t size) : data_(new uint8_t[size]) {}
+  bool Lock() override { return false; }
+  void Unlock() override {}
+  void* data() const override { return data_.get(); }
+
+ private:
+  scoped_ptr<uint8_t[]> data_;
+};
+
+class NonDiscardableMemoryAllocator : public base::DiscardableMemoryAllocator {
+ public:
+  scoped_ptr<base::DiscardableMemory> AllocateLockedDiscardableMemory(
+      size_t size) override {
+    return make_scoped_ptr(new NonDiscardableMemory(size));
+  }
+};
+
+base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 
 }  // namespace
 
@@ -51,6 +75,8 @@ void Shell::Init(scoped_ptr<ServiceProviderContext> service_provider_context) {
 #if !defined(OS_LINUX)
   CHECK(gfx::GLSurface::InitializeOneOff());
 #endif
+  base::DiscardableMemoryAllocator::SetInstance(&g_discardable.Get());
+
   g_shell = new Shell(service_provider_context.Pass());
 }
 
