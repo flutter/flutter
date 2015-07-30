@@ -4,7 +4,6 @@ author: Chromium Authors <sky-dev@googlegroups.com>
 description: Mojom interfaces associated with Sky
 homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/sky_services
 dependencies:
-  mojo: 0.0.20
-  mojom: 0.0.20
+  mojo: 0.0.21
 environment:
   sdk: '>=1.8.0 <2.0.0'
