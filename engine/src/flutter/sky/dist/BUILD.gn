@@ -53,7 +53,7 @@ if (is_android) {
   copy_ex("sky_engine") {
     clear_dir = true
     # Note: The package actually ends up in $root_dist_dir/packages/sky_engine/sky_engine
-    dest = "$root_dist_dir/packages"
+    dest = "$root_dist_dir/packages/sky_engine"
     sources = [
       "$root_gen_dir/dart-pkg/sky_engine",
     ]
@@ -86,6 +86,9 @@ group("dist") {
   }
 
   if (is_android) {
-    deps += [ ":sky_engine" ]
+    deps += [
+      ":sky_engine",
+      ":sky_services",
+    ]
   }
 }
