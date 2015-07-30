@@ -36,6 +36,8 @@ variable, containing entries of the following form:
    "test-args": ["--an_arg", "another_arg"],
    # Optional shell arguments.
    "shell-args": ["--some-flag-for-the-shell", "--another-flag"],
+   # Optional timeout in seconds, 60 by default.
+   "timeout": 120,
  }
 
 |test_list_file| may reference the |target_os| global that will be any of
@@ -77,6 +79,7 @@ def main():
     test_type = test_dict.get("type", "gtest")
     test_args = test_dict.get("test-args", [])
     shell_args = test_dict.get("shell-args", []) + common_shell_args
+    timeout = test_dict.get("timeout", 60)
 
     _logger.info("Will start: %s" % test_name)
     print "Running %s...." % test_name,
@@ -84,13 +87,15 @@ def main():
 
     if test_type == "dart":
       apptest_result = apptest_dart.run_dart_apptest(shell, shell_args, test,
-                                                     test_args)
+                                                     test_args, timeout)
     elif test_type == "gtest":
       apptest_result = apptest_gtest.run_gtest_apptest(shell, shell_args, test,
-                                                       test_args, False)
+                                                       test_args, timeout,
+                                                       False)
     elif test_type == "gtest_isolated":
       apptest_result = apptest_gtest.run_gtest_apptest(shell, shell_args, test,
-                                                       test_args, True)
+                                                       test_args, timeout,
+                                                       True)
     else:
       apptest_result = False
       print "Unrecognized test type in %r" % test_dict

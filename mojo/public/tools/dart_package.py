@@ -111,6 +111,13 @@ def DoZip(inputs, zip_inputs, output, base_dir):
               files.append(mojom_dep_copy)
               with zf.open(f) as zff:
                 outfile.writestr(mojom_dep_copy, zff.read())
+            # Copy under lib/ as well.
+            mojom_dep_copy = os.path.join("lib/",
+                                          MojomDartRelativePath(f))
+            if mojom_dep_copy not in files:
+              files.append(mojom_dep_copy)
+              with zf.open(f) as zff:
+                outfile.writestr(mojom_dep_copy, zff.read())
 
           # Rewrite output file name, if it isn't a packages/ path.
           output_name = None

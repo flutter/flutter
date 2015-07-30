@@ -421,20 +421,40 @@ class AndroidShell(Shell):
     p.wait()
     return None
 
-  def RunAndGetOutput(self, arguments):
-    """Runs the shell with given arguments until shell exits.
+  def RunAndGetOutput(self, arguments, timeout=None):
+    """Runs the shell with given arguments until shell exits and returns the
+    output.
 
     Args:
       arguments: list of arguments for the shell
+      timeout: maximum running time in seconds, after which the shell will be
+          terminated
 
     Returns:
-      A tuple of (return_code, output). |return_code| is the exit code returned
-      by the shell or None if the exit code cannot be retrieved. |output| is the
-      stdout mingled with the stderr produced by the shell.
+      A tuple of (return_code, output, did_time_out). |return_code| is the exit
+      code returned by the shell or None if the exit code cannot be retrieved.
+      |output| is the stdout mingled with the stderr produced by the shell.
+      |did_time_out| is True iff the shell was terminated because it exceeded
+      the |timeout| and False otherwise.
     """
-    (r, w) = os.pipe()
-    with os.fdopen(r, "r") as rf:
-      with os.fdopen(w, "w") as wf:
-        self.StartShell(arguments, wf, wf.close)
-        output = rf.read()
-        return None, output
+    class Results:
+      """Workaround for Python scoping rules that prevent assigning to variables
+      from the outer scope.
+      """
+      output = None
+
+    def do_run():
+      (r, w) = os.pipe()
+      with os.fdopen(r, "r") as rf:
+        with os.fdopen(w, "w") as wf:
+          self.StartShell(arguments, wf, wf.close)
+          Results.output = rf.read()
+
+    run_thread = threading.Thread(target=do_run)
+    run_thread.start()
+    run_thread.join(timeout)
+
+    if run_thread.is_alive():
+      self.StopShell()
+      return None, Results.output, True
+    return None, Results.output, False

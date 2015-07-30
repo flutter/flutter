@@ -14,12 +14,13 @@ from devtoolslib.apptest import run_apptest
 
 SUCCESS_PATTERN = re.compile('^.+ .+: All tests passed!', re.MULTILINE)
 
+
 def _dart_apptest_output_test(output):
-  return SUCCESS_PATTERN.search(output) != None
+  return SUCCESS_PATTERN.search(output) is not None
 
 
 # TODO(erg): Support android, launched services and fixture isolation.
-def run_dart_apptest(shell, shell_args, apptest_url, apptest_args):
+def run_dart_apptest(shell, shell_args, apptest_url, apptest_args, timeout):
   """Runs a dart apptest.
 
   Args:
@@ -30,5 +31,5 @@ def run_dart_apptest(shell, shell_args, apptest_url, apptest_args):
   Returns:
     True iff the test succeeded, False otherwise.
   """
-  return run_apptest(shell, shell_args, apptest_url, apptest_args,
+  return run_apptest(shell, shell_args, apptest_url, apptest_args, timeout,
                      _dart_apptest_output_test)

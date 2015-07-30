@@ -47,6 +47,7 @@ source_set("dart_controller_no_snapshot") {
     "//mojo/public/c/system",
     "//mojo/public/cpp/system",
     "//mojo/services/network/public/interfaces",
+    "//tonic",
   ]
 
   defines = []
@@ -84,22 +85,22 @@ group("dart_embedder_packages") {
 
 dart_embedder_package("dart_embedder_package_application") {
   package = "mojo/public/interfaces/application"
-  destination = "mojom/mojo"
+  destination = "mojo/mojo"
 }
 
 dart_embedder_package("dart_embedder_package_bindings") {
   package = "mojo/public/interfaces/bindings"
-  destination = "mojom/mojo"
+  destination = "mojo/mojo"
 }
 
 dart_embedder_package("dart_embedder_package_network") {
   package = "mojo/public/interfaces/network"
-  destination = "mojom/mojo"
+  destination = "mojo/mojo"
 }
 
 dart_embedder_package("dart_embedder_package_network_service") {
   package = "mojo/services/network/public/interfaces"
-  destination = "mojom/mojo"
+  destination = "mojo_services/mojo"
 }
 
 action_foreach("dart_embedder_package_sdk") {
@@ -351,10 +352,10 @@ action("generate_snapshot_bin") {
                     rebase_path("$root_gen_dir/dart_embedder_packages"),
 
                     # Embedder package directories.
-                    "$application_mojoms,mojom/mojo",
-                    "$bindings_mojoms,mojom/mojo",
-                    "$network_mojoms,mojom/mojo",
-                    "$network_service_mojoms,mojom/mojo",
+                    "$application_mojoms,mojo/mojo",
+                    "$bindings_mojoms,mojo/mojo",
+                    "$network_mojoms,mojo/mojo",
+                    "$network_service_mojoms,mojo_services/mojo",
                   ],
                   "list lines")
 

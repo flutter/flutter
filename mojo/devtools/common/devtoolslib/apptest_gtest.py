@@ -25,7 +25,8 @@ def _gtest_apptest_output_test(output):
   return True
 
 
-def run_gtest_apptest(shell, shell_args, apptest_url, apptest_args, isolate):
+def run_gtest_apptest(shell, shell_args, apptest_url, apptest_args, timeout,
+                      isolate):
   """Runs a gtest apptest.
 
   Args:
@@ -41,7 +42,7 @@ def run_gtest_apptest(shell, shell_args, apptest_url, apptest_args, isolate):
   """
 
   if not isolate:
-    return run_apptest(shell, shell_args, apptest_url, apptest_args,
+    return run_apptest(shell, shell_args, apptest_url, apptest_args, timeout,
                        _gtest_apptest_output_test)
 
   # List the apptest fixtures so they can be run independently for isolation.
@@ -54,7 +55,7 @@ def run_gtest_apptest(shell, shell_args, apptest_url, apptest_args, isolate):
   for fixture in fixtures:
     isolated_apptest_args = apptest_args + ["--gtest_filter=%s" % fixture]
     success = run_apptest(shell, shell_args, apptest_url, isolated_apptest_args,
-                          _gtest_apptest_output_test)
+                          timeout, _gtest_apptest_output_test)
 
     if not success:
       apptest_result = False
@@ -78,8 +79,8 @@ def get_fixtures(shell, shell_args, apptest):
   arguments.append("--args-for=%s %s" % (apptest, "--gtest_list_tests"))
   arguments.append(apptest)
 
-  (exit_code, output) = shell.RunAndGetOutput(arguments)
-  if exit_code:
+  (exit_code, output, did_time_out) = shell.RunAndGetOutput(arguments)
+  if exit_code or did_time_out:
     command_line = "mojo_shell " + " ".join(["%r" % x for x in arguments])
     print "Failed to get test fixtures: %r" % command_line
     print 72 * '-'
