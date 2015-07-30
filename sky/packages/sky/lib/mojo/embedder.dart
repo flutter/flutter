@@ -7,9 +7,9 @@ import "dart:sky.internals" as internals;
 import "package:mojo/application.dart";
 import "package:mojo/bindings.dart" as bindings;
 import "package:mojo/core.dart" as core;
-import "package:mojom/mojo/service_provider.mojom.dart";
+import "package:mojo/mojom/mojo/service_provider.mojom.dart";
+import "package:mojo/mojom/mojo/shell.mojom.dart";
 import "package:mojom/mojo/service_registry.mojom.dart";
-import "package:mojom/mojo/shell.mojom.dart";
 
 final _EmbedderImpl embedder = new _EmbedderImpl();
 
