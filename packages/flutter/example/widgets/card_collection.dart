@@ -10,7 +10,7 @@ import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/card.dart';
 import 'package:sky/widgets/dismissable.dart';
 import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/variable_height_scrollable.dart';
+import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';

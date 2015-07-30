@@ -13,7 +13,7 @@ import 'package:sky/widgets/animated_container.dart';
 import 'package:sky/widgets/animation_intentions.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/scrollable_viewport.dart';
+import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
 
 export 'package:sky/animation/animation_performance.dart' show AnimationStatus;

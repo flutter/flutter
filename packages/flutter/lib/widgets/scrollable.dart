@@ -2,16 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
-import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/animated_simulation.dart';
 import 'package:sky/animation/animated_value.dart';
+import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/theme/view_configuration.dart' as config;
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/block_viewport.dart';
+import 'package:sky/widgets/scrollable.dart';
+import 'package:sky/widgets/widget.dart';
+
+export 'package:sky/widgets/block_viewport.dart' show BlockViewportLayoutState;
 
 const double _kMillisecondsPerSecond = 1000.0;
 
@@ -27,6 +33,8 @@ abstract class ScrollClient {
 
 enum ScrollDirection { vertical, horizontal }
 
+/// A base class for scrollable widgets that reacts to user input and generates
+/// a scrollOffset.
 abstract class Scrollable extends StatefulComponent {
 
   Scrollable({
@@ -201,5 +209,284 @@ abstract class Scrollable extends StatefulComponent {
 
   void _handleWheel(sky.WheelEvent event) {
     scrollBy(-event.offsetY);
+  }
+}
+
+/// A simple scrollable widget that has a single child. Use this component if
+/// you are not worried about offscreen widgets consuming resources.
+class ScrollableViewport extends Scrollable {
+  ScrollableViewport({ Key key, this.child }) : super(key: key);
+
+  Widget child;
+
+  void syncFields(ScrollableViewport source) {
+    child = source.child;
+    super.syncFields(source);
+  }
+
+  ScrollBehavior createScrollBehavior() => new FlingBehavior();
+  FlingBehavior get scrollBehavior => super.scrollBehavior;
+
+  double _viewportHeight = 0.0;
+  double _childHeight = 0.0;
+  void _handleViewportSizeChanged(Size newSize) {
+    _viewportHeight = newSize.height;
+    _updateScrollBehaviour();
+  }
+  void _handleChildSizeChanged(Size newSize) {
+    _childHeight = newSize.height;
+    _updateScrollBehaviour();
+  }
+  void _updateScrollBehaviour() {
+    scrollBehavior.contentsSize = _childHeight;
+    scrollBehavior.containerSize = _viewportHeight;
+    if (scrollOffset > scrollBehavior.maxScrollOffset)
+      settleScrollOffset();
+  }
+
+  Widget buildContent() {
+    return new SizeObserver(
+      callback: _handleViewportSizeChanged,
+      child: new Viewport(
+        offset: scrollOffset,
+        child: new SizeObserver(
+          callback: _handleChildSizeChanged,
+          child: child
+        )
+      )
+    );
+  }
+}
+
+/// A mashup of [ScrollableViewport] and [Block]. Useful when you have a small,
+/// fixed number of children that you wish to arrange in a block layout and that
+/// might exceed the height of its container (and therefore need to scroll).
+class ScrollableBlock extends Component {
+  ScrollableBlock(this.children, { Key key }) : super(key: key);
+
+  final List<Widget> children;
+
+  Widget build() {
+    return new ScrollableViewport(
+      child: new Block(children)
+    );
+  }
+}
+
+/// An optimized scrollable widget for a large number of children that are all
+/// of the same height. Use this widget when you have a large number of children
+/// or when you are concerned about offscreen widgets consuming resources.
+abstract class FixedHeightScrollable extends Scrollable {
+
+  FixedHeightScrollable({ Key key, this.itemHeight, this.padding })
+      : super(key: key) {
+    assert(itemHeight != null);
+  }
+
+  EdgeDims padding;
+  double itemHeight;
+
+  /// Subclasses must implement `get itemCount` to tell FixedHeightScrollable
+  /// how many items there are in the list.
+  int get itemCount;
+  int _previousItemCount;
+
+  void syncFields(FixedHeightScrollable source) {
+    padding = source.padding;
+    itemHeight = source.itemHeight;
+    super.syncFields(source);
+  }
+
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
+  OverscrollBehavior get scrollBehavior => super.scrollBehavior;
+
+  double _height;
+  void _handleSizeChanged(Size newSize) {
+    setState(() {
+      _height = newSize.height;
+      scrollBehavior.containerSize = _height;
+    });
+  }
+
+  void _updateContentsHeight() {
+    double contentsHeight = itemHeight * itemCount;
+    if (padding != null)
+      contentsHeight += padding.top + padding.bottom;
+    scrollBehavior.contentsSize = contentsHeight;
+  }
+
+  void _updateScrollOffset() {
+    if (scrollOffset > scrollBehavior.maxScrollOffset)
+      settleScrollOffset();
+  }
+
+  Widget buildContent() {
+    if (itemCount != _previousItemCount) {
+      _previousItemCount = itemCount;
+      _updateContentsHeight();
+      _updateScrollOffset();
+    }
+
+    int itemShowIndex = 0;
+    int itemShowCount = 0;
+    double offsetY = 0.0;
+    if (_height != null && _height > 0.0) {
+      if (scrollOffset < 0.0) {
+        double visibleHeight = _height + scrollOffset;
+        itemShowCount = (visibleHeight / itemHeight).round() + 1;
+        offsetY = scrollOffset;
+      } else {
+        itemShowCount = (_height / itemHeight).ceil();
+        double alignmentDelta = -scrollOffset % itemHeight;
+        double drawStart;
+        if (alignmentDelta != 0.0) {
+          alignmentDelta -= itemHeight;
+          itemShowCount += 1;
+          drawStart = scrollOffset + alignmentDelta;
+          offsetY = -alignmentDelta;
+        } else {
+          drawStart = scrollOffset;
+        }
+        itemShowIndex = math.max(0, (drawStart / itemHeight).floor());
+      }
+    }
+
+    List<Widget> items = buildItems(itemShowIndex, itemShowCount);
+    assert(items.every((item) => item.key != null));
+
+    // TODO(ianh): Refactor this so that it does the building in the
+    // same frame as the size observing, similar to BlockViewport, but
+    // keeping the fixed-height optimisations.
+    return new SizeObserver(
+      callback: _handleSizeChanged,
+      child: new Viewport(
+        offset: offsetY,
+        child: new Container(
+          padding: padding,
+          child: new Block(items)
+        )
+      )
+    );
+  }
+
+  List<Widget> buildItems(int start, int count);
+
+}
+
+typedef Widget ItemBuilder<T>(T item);
+
+/// A wrapper around [FixedHeightScrollable] that helps you translate a list of
+/// model objects into a scrollable list of widgets. Assumes all the widgets
+/// have the same height.
+class ScrollableList<T> extends FixedHeightScrollable {
+  ScrollableList({
+    Key key,
+    this.items,
+    this.itemBuilder,
+    double itemHeight,
+    EdgeDims padding
+  }) : super(key: key, itemHeight: itemHeight, padding: padding);
+
+  List<T> items;
+  ItemBuilder<T> itemBuilder;
+
+  void syncFields(ScrollableList<T> source) {
+    items = source.items;
+    itemBuilder = source.itemBuilder;
+    super.syncFields(source);
+  }
+
+  int get itemCount => items.length;
+
+  List<Widget> buildItems(int start, int count) {
+    List<Widget> result = new List<Widget>();
+    int end = math.min(start + count, items.length);
+    for (int i = start; i < end; ++i)
+      result.add(itemBuilder(items[i]));
+    return result;
+  }
+}
+
+/// A general scrollable list for a large number of children that might not all
+/// have the same height. Prefer [FixedHeightScrollable] when all the children
+/// have the same height because it can use that property to be more efficient.
+/// Prefer [ScrollableViewport] with a single child.
+class VariableHeightScrollable extends Scrollable {
+  VariableHeightScrollable({
+    Key key,
+    this.builder,
+    this.token,
+    this.layoutState
+  }) : super(key: key);
+
+  IndexedBuilder builder;
+  Object token;
+  BlockViewportLayoutState layoutState;
+
+  // When the token changes the scrollable's contents may have
+  // changed. Remember as much so that after the new contents
+  // have been laid out we can adjust the scrollOffset so that
+  // the last page of content is still visible.
+  bool _contentsChanged = true;
+
+  void initState() {
+    assert(layoutState != null);
+    super.initState();
+  }
+
+  void didMount() {
+    layoutState.addListener(_handleLayoutChanged);
+    super.didMount();
+  }
+
+  void didUnmount() {
+    layoutState.removeListener(_handleLayoutChanged);
+    super.didUnmount();
+  }
+
+  void syncFields(VariableHeightScrollable source) {
+    builder = source.builder;
+    if (token != source.token)
+      _contentsChanged = true;
+    token = source.token;
+    if (layoutState != source.layoutState) {
+      // Warning: this is unlikely to be what you intended.
+      assert(source.layoutState != null);
+      layoutState.removeListener(_handleLayoutChanged);
+      layoutState = source.layoutState;
+      layoutState.addListener(_handleLayoutChanged);
+    }
+    super.syncFields(source);
+  }
+
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
+  OverscrollBehavior get scrollBehavior => super.scrollBehavior;
+
+  void _handleSizeChanged(Size newSize) {
+    scrollBehavior.containerSize = newSize.height;
+  }
+
+  void _handleLayoutChanged() {
+    if (layoutState.didReachLastChild) {
+      scrollBehavior.contentsSize = layoutState.contentsSize;
+      if (_contentsChanged && scrollOffset > scrollBehavior.maxScrollOffset) {
+        _contentsChanged = false;
+        settleScrollOffset();
+      }
+    } else {
+      scrollBehavior.contentsSize = double.INFINITY;
+    }
+  }
+
+  Widget buildContent() {
+    return new SizeObserver(
+      callback: _handleSizeChanged,
+      child: new BlockViewport(
+        builder: builder,
+        layoutState: layoutState,
+        startOffset: scrollOffset,
+        token: token
+      )
+    );
   }
 }
