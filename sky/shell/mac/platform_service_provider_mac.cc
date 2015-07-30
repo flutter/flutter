@@ -21,9 +21,7 @@ namespace shell {
 class PlatformServiceProvider : public mojo::ServiceProvider {
  public:
   PlatformServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider> request)
-    : binding_(this, request.Pass())
-  {
-  }
+    : binding_(this, request.Pass()) {}
 
   void ConnectToService(const mojo::String& service_name,
                         mojo::ScopedMessagePipeHandle client_handle) override {
