@@ -21,5 +21,8 @@ sky_app("game") {
       "assets/Icon@2x.png",
       "ios/LaunchScreen.storyboardc",
     ]
+  } else if (is_mac) {
+    info_plist = "mac/Info.plist"
+    xibs = [ "mac/sky_mac.xib" ]
   }
 }

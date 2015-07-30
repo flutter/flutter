@@ -235,10 +235,34 @@ if (is_android) {
 } else if (is_mac) {
   import("//build/config/mac/rules.gni")
 
+  source_set("mac_scaffolding") {
+    sources = [
+      "mac/main_mac.mm",
+      "mac/platform_mac.h",
+      "mac/platform_mac.mm",
+      "mac/platform_service_provider_mac.cc",
+      "mac/platform_view_mac.h",
+      "mac/platform_view_mac.mm",
+      "mac/sky_app_delegate.h",
+      "mac/sky_app_delegate.m",
+      "mac/sky_application.h",
+      "mac/sky_application.mm",
+      "mac/sky_window.h",
+      "mac/sky_window.mm",
+      "testing/test_runner.cc",
+      "testing/test_runner.h",
+    ]
+
+    deps = common_deps + [
+             ":common",
+             "//sky/services/ns_net",
+             "//sky/services/testing:interfaces",
+           ]
+  }
+
   mac_app("shell") {
     app_name = "SkyShell"
     info_plist = "mac/Info.plist"
-    scaffolding_target = "mac_scaffolding"
 
     # entitlements_path = ""
     # code_signing_identity = ""
@@ -250,33 +274,8 @@ if (is_android) {
       bundle_directory = "."
     }
 
-    source_set(scaffolding_target) {
-      sources = [
-        "mac/main_mac.mm",
-        "mac/platform_mac.h",
-        "mac/platform_mac.mm",
-        "mac/platform_service_provider_mac.cc",
-        "mac/platform_view_mac.h",
-        "mac/platform_view_mac.mm",
-        "mac/sky_app_delegate.h",
-        "mac/sky_app_delegate.m",
-        "mac/sky_application.h",
-        "mac/sky_application.mm",
-        "mac/sky_window.h",
-        "mac/sky_window.mm",
-        "testing/test_runner.cc",
-        "testing/test_runner.h",
-      ]
-
-      deps = common_deps + [
-               ":common",
-               "//sky/services/ns_net",
-               "//sky/services/testing:interfaces",
-             ]
-    }
-
     deps = [
-      ":$scaffolding_target",
+      ":mac_scaffolding",
       ":sky_resources",
     ]
   }

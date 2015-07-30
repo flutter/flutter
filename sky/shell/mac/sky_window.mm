@@ -70,12 +70,29 @@ static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
               .infoDictionary objectForKey:@"org.domokit.sky.load_url"];
 }
 
+- (NSString*)skyInitialBundleURL {
+  return [[NSBundle mainBundle] pathForResource:@"app" ofType:@"skyx"];
+}
+
 - (void)setupAndLoadDart {
   auto interface_request = mojo::GetProxy(&_sky_engine);
   self.platformView->ConnectToEngine(interface_request.Pass());
 
-  mojo::String string(self.skyInitialLoadURL.UTF8String);
-  _sky_engine->RunFromNetwork(string);
+  NSString *endpoint = self.skyInitialBundleURL;
+  if (endpoint.length > 0) {
+    // Load from bundle
+    mojo::String string(endpoint.UTF8String);
+    _sky_engine->RunFromBundle(string);
+    return;
+  }
+
+  endpoint = self.skyInitialLoadURL;
+  if (endpoint.length > 0) {
+    // Load from URL
+    mojo::String string(endpoint.UTF8String);
+    _sky_engine->RunFromNetwork(string);
+    return;
+  }
 }
 
 - (void)windowDidResize:(NSNotification*)notification {

@@ -7,7 +7,7 @@ import("//sky/build/skyx.gni")
 template("sky_app") {
   skyx_target_name = target_name
 
-  if (is_android || is_ios) {
+  if (is_android || is_ios || is_mac) {
     skyx_target_name = "app"
   }
 
@@ -113,7 +113,9 @@ template("sky_app") {
           "$target_gen_dir/app.skyx",
         ]
 
-        resources += invoker.launcher_resources
+        if (defined(invoker.launcher_resources)) {
+          resources += invoker.launcher_resources
+        }
 
         bundle_directory = "."
         deps = [ ":app" ]
@@ -129,7 +131,41 @@ template("sky_app") {
         deps += invoker.deps
       }
     }
-  } else if(is_ios) {
+  } else if(is_mac && defined(invoker.info_plist)) {
+    import("//build/config/mac/rules.gni")
+
+    mac_app(target_name) {
+
+      app_name = target_name + "_app"
+      info_plist = invoker.info_plist
+      xibs = invoker.xibs
+
+      resources_gen_target_name = target_name + "_res"
+      resource_copy_mac(resources_gen_target_name) {
+        resources = [
+          "//third_party/icu/android/icudtl.dat",
+          "$target_gen_dir/app.skyx",
+        ]
+
+        if (defined(invoker.launcher_resources)) {
+          resources += invoker.launcher_resources
+        }
+
+        bundle_directory = "."
+        deps = [ ":app" ]
+      }
+
+      deps = [
+        ":$resources_gen_target_name",
+        "//sky/shell:mac_scaffolding",
+      ]
+
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
+    }
+
+  } else if(is_ios || is_mac) {
     # No Info.plist specified. But we still need an empty target
     group(target_name) {
     }
