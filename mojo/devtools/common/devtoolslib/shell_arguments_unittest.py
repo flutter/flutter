@@ -11,7 +11,7 @@ try:
   imp.find_module("devtoolslib")
 except ImportError:
   sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from devtoolslib.shell_arguments import AppendToArgument
+from devtoolslib import shell_arguments
 
 
 class AppendToArgumentTest(unittest.TestCase):
@@ -22,21 +22,24 @@ class AppendToArgumentTest(unittest.TestCase):
     key = '--something='
     value = 'val'
     expected_result = ['--something=val']
-    self.assertEquals(expected_result, AppendToArgument(arguments, key, value))
+    self.assertEquals(expected_result, shell_arguments.append_to_argument(
+        arguments, key, value))
 
   def testAppendToNonEmpty(self):
     arguments = ['--other']
     key = '--something='
     value = 'val'
     expected_result = ['--other', '--something=val']
-    self.assertEquals(expected_result, AppendToArgument(arguments, key, value))
+    self.assertEquals(expected_result, shell_arguments.append_to_argument(
+        arguments, key, value))
 
   def testAppendToExisting(self):
     arguments = ['--something=old_val']
     key = '--something='
     value = 'val'
     expected_result = ['--something=old_val,val']
-    self.assertEquals(expected_result, AppendToArgument(arguments, key, value))
+    self.assertEquals(expected_result, shell_arguments.append_to_argument(
+        arguments, key, value))
 
 
 if __name__ == "__main__":

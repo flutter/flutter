@@ -6,6 +6,12 @@ source_set("chromium") {
   output_name = "mojo_environment_chromium"
 
   sources = [
+    "default_async_waiter.cc",
+    "default_async_waiter.h",
+    "default_logger.cc",
+    "default_logger.h",
+    "default_task_tracker.cc",
+    "default_task_tracker.h",
     "environment.cc",
 
     # TODO(vtl): This is kind of ugly. (See TODO in logging.h.)
@@ -17,38 +23,13 @@ source_set("chromium") {
     "../public/cpp/environment/logging.h",
   ]
 
-  public_deps = [
-    ":chromium_impl",
-  ]
-
-  deps = [
-    "//mojo/public/c/environment",
-    "//mojo/public/cpp/bindings:callback",
-    "//mojo/public/cpp/environment",
-    "//mojo/public/cpp/system",
-  ]
-}
-
-component("chromium_impl") {
-  output_name = "mojo_environment_impl"
-  visibility = [ "//mojo/*" ]
-
-  sources = [
-    "default_async_waiter_impl.cc",
-    "default_async_waiter_impl.h",
-    "default_logger_impl.cc",
-    "default_logger_impl.h",
-    "default_run_loop_impl.cc",
-    "default_run_loop_impl.h",
-    "default_task_tracker_impl.cc",
-    "default_task_tracker_impl.h",
-  ]
-
   deps = [
     "//base",
     "//base/third_party/dynamic_annotations",
     "//mojo/common",
     "//mojo/public/c/environment",
+    "//mojo/public/cpp/bindings:callback",
     "//mojo/public/cpp/environment",
+    "//mojo/public/cpp/system",
   ]
 }

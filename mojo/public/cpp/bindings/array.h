@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include <algorithm>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -202,6 +203,34 @@ struct TypeConverter<std::vector<E>, Array<T>> {
       result.resize(input.size());
       for (size_t i = 0; i < input.size(); ++i)
         result[i] = TypeConverter<E, T>::Convert(input[i]);
+    }
+    return result;
+  }
+};
+
+// A |TypeConverter| that will create an |Array<T>| containing a copy of the
+// contents of an |std::set<E>|, using |TypeConverter<T, E>| to copy each
+// element. The returned array will always be non-null.
+template <typename T, typename E>
+struct TypeConverter<Array<T>, std::set<E>> {
+  static Array<T> Convert(const std::set<E>& input) {
+    Array<T> result(0u);
+    for (auto i : input)
+      result.push_back(TypeConverter<T, E>::Convert(i));
+    return result.Pass();
+  }
+};
+
+// A |TypeConverter| that will create an |std::set<E>| containing a copy of
+// the contents of an |Array<T>|, using |TypeConverter<E, T>| to copy each
+// element. If the input array is null, the output set will be empty.
+template <typename E, typename T>
+struct TypeConverter<std::set<E>, Array<T>> {
+  static std::set<E> Convert(const Array<T>& input) {
+    std::set<E> result;
+    if (!input.is_null()) {
+      for (size_t i = 0; i < input.size(); ++i)
+        result.insert(TypeConverter<E, T>::Convert(input[i]));
     }
     return result;
   }

@@ -347,6 +347,33 @@ def EnumFieldFromData(module, enum, data, parent_kind):
   module.values[value.GetSpec()] = value
   return field
 
+def ResolveNumericEnumValues(enum_fields):
+  """
+  Given a reference to a list of mojom.EnumField, resolves and assigns their
+  values to EnumField.numeric_value.
+  """
+
+  # map of <name> -> integral value
+  resolved_enum_values = {}
+  prev_value = -1
+  for field in enum_fields:
+    # This enum value is +1 the previous enum value (e.g: BEGIN).
+    if field.value is None:
+      prev_value += 1
+
+    # Integral value (e.g: BEGIN = -0x1).
+    elif type(field.value) is str:
+      prev_value = int(field.value, 0)
+
+    # Reference to a previous enum value (e.g: INIT = BEGIN).
+    elif type(field.value) is mojom.EnumValue:
+      prev_value = resolved_enum_values[field.value.name]
+    else:
+      raise Exception("Unresolved enum value.")
+
+    resolved_enum_values[field.name] = prev_value
+    field.numeric_value = prev_value
+
 def EnumFromData(module, data, parent_kind):
   enum = mojom.Enum(module=module)
   enum.name = data['name']
@@ -359,6 +386,7 @@ def EnumFromData(module, data, parent_kind):
       lambda field: EnumFieldFromData(module, enum, field, parent_kind),
       data['fields'])
   enum.attributes = data.get('attributes')
+  ResolveNumericEnumValues(enum.fields)
 
   module.kinds[enum.spec] = enum
   return enum

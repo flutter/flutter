@@ -16,7 +16,7 @@ import tempfile
 import threading
 import time
 
-from devtoolslib.http_server import StartHttpServer
+from devtoolslib.http_server import start_http_server
 from devtoolslib.shell import Shell
 
 
@@ -41,13 +41,13 @@ _MOJO_SHELL_PACKAGE_NAME = 'org.chromium.mojo.shell'
 _logger = logging.getLogger()
 
 
-def _ExitIfNeeded(process):
+def _exit_if_needed(process):
   """Exits |process| if it is still alive."""
   if process.poll() is None:
     process.kill()
 
 
-def _FindAvailablePort(netstat_output, max_attempts=10000):
+def _find_available_port(netstat_output, max_attempts=10000):
   opened = [int(x.strip().split()[3].split(':')[1])
             for x in netstat_output if x.startswith(' tcp')]
   for _ in xrange(max_attempts):
@@ -58,9 +58,9 @@ def _FindAvailablePort(netstat_output, max_attempts=10000):
     raise Exception('Failed to identify an available port.')
 
 
-def _FindAvailableHostPort():
+def _find_available_host_port():
   netstat_output = subprocess.check_output(['netstat'])
-  return _FindAvailablePort(netstat_output)
+  return _find_available_port(netstat_output)
 
 
 class AndroidShell(Shell):
@@ -113,7 +113,7 @@ class AndroidShell(Shell):
       _WaitForFifo()
       stdout_cat = subprocess.Popen(
           self._AdbCommand(['shell', 'cat', fifo_path]), stdout=pipe)
-      atexit.register(_ExitIfNeeded, stdout_cat)
+      atexit.register(_exit_if_needed, stdout_cat)
       stdout_cat.wait()
       if on_fifo_closed:
         on_fifo_closed()
@@ -124,7 +124,7 @@ class AndroidShell(Shell):
   def _FindAvailableDevicePort(self):
     netstat_output = subprocess.check_output(
         self._AdbCommand(['shell', 'netstat']))
-    return _FindAvailablePort(netstat_output)
+    return _find_available_port(netstat_output)
 
   def _ForwardDevicePortToHost(self, device_port, host_port):
     """Maps the device port to the host port. If |device_port| is 0, a random
@@ -165,7 +165,7 @@ class AndroidShell(Shell):
 
     if host_port == 0:
       # TODO(ppi): Should we have a retry loop to handle the unlikely races?
-      host_port = _FindAvailableHostPort()
+      host_port = _find_available_host_port()
     subprocess.check_call(self._AdbCommand([
         "forward", 'tcp:%d' % host_port, 'tcp:%d' % device_port]))
 
@@ -279,7 +279,7 @@ class AndroidShell(Shell):
 
     Args:
       arguments: List of arguments for the shell. It must contain the
-          "--origin=" arg.  shell_arguments.ConfigureLocalOrigin() can be used
+          "--origin=" arg. shell_arguments.configure_local_origin() can be used
           to set up a local directory on the host machine as origin.
       stdout: Valid argument for subprocess.Popen() or None.
     """
@@ -344,7 +344,7 @@ class AndroidShell(Shell):
     logcat = subprocess.Popen(
         self._AdbCommand(['logcat', '-s', ' '.join(tags)]),
         stdout=sys.stdout)
-    atexit.register(_ExitIfNeeded, logcat)
+    atexit.register(_exit_if_needed, logcat)
     return logcat
 
   def ForwardObservatoryPorts(self):
@@ -352,7 +352,7 @@ class AndroidShell(Shell):
     """
     logcat = subprocess.Popen(self._AdbCommand(['logcat']),
                               stdout=subprocess.PIPE)
-    atexit.register(_ExitIfNeeded, logcat)
+    atexit.register(_exit_if_needed, logcat)
 
     def _ForwardObservatoriesAsNeeded():
       while True:
@@ -389,8 +389,8 @@ class AndroidShell(Shell):
       The url that the shell can use to access the content of |local_dir_path|.
     """
     assert local_dir_path
-    server_address = StartHttpServer(local_dir_path, host_port=port,
-                                     additional_mappings=additional_mappings)
+    server_address = start_http_server(local_dir_path, host_port=port,
+                                       additional_mappings=additional_mappings)
 
     return 'http://127.0.0.1:%d/' % self._ForwardDevicePortToHost(
         port, server_address[1])

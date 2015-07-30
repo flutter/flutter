@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/environment/default_logger_impl.h"
+#include "mojo/environment/default_logger.h"
 
 #include "base/logging.h"
 #include "base/macros.h"
+#include "mojo/public/c/environment/logger.h"
 
 namespace mojo {
 namespace internal {
@@ -61,17 +62,11 @@ void SetMinimumLogLevel(MojoLogLevel log_level) {
   logging::SetMinLogLevel(MojoToChromiumLogLevel(log_level));
 }
 
-const MojoLogger kDefaultLogger = {
-  LogMessage,
-  GetMinimumLogLevel,
-  SetMinimumLogLevel
-};
-
 }  // namespace
 
-const MojoLogger* GetDefaultLoggerImpl() {
-  return &kDefaultLogger;
-}
+const MojoLogger kDefaultLogger = {LogMessage,
+                                   GetMinimumLogLevel,
+                                   SetMinimumLogLevel};
 
 }  // namespace internal
 }  // namespace mojo

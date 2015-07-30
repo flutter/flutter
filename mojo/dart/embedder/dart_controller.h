@@ -9,7 +9,7 @@
 
 #include "base/synchronization/lock.h"
 #include "dart/runtime/include/dart_api.h"
-#include "mojo/dart/embedder/dart_state.h"
+#include "mojo/dart/embedder/mojo_dart_state.h"
 #include "mojo/public/c/system/types.h"
 
 namespace tonic {

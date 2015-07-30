@@ -17,6 +17,7 @@ mojom("test_interfaces") {
     "sample_import2.mojom",
     "sample_interfaces.mojom",
     "sample_service.mojom",
+    "scoping.mojom",
     "serialization_test_structs.mojom",
     "test_constants.mojom",
     "test_structs.mojom",

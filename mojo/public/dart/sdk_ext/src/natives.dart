@@ -4,6 +4,10 @@
 
 part of internal;
 
+class MojoCoreNatives {
+  static int getTimeTicksNow() native "Mojo_GetTimeTicksNow";
+}
+
 class MojoHandleNatives {
   static int register(
       Object eventStream, int handle) native "MojoHandle_Register";

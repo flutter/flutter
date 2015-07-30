@@ -373,10 +373,21 @@ def IsPointerArrayKind(kind):
   sub_kind = kind.kind
   return mojom.IsObjectKind(sub_kind)
 
+def ParseStringAttribute(attribute):
+  assert isinstance(attribute, basestring)
+  return attribute
+
+def GetPackage(module):
+  if module.attributes and 'DartPackage' in module.attributes:
+    return ParseStringAttribute(module.attributes['DartPackage'])
+  # Default package.
+  return 'mojom'
+
 def GetImportUri(module):
+  package = GetPackage(module);
   elements = module.namespace.split('.')
   elements.append("%s" % module.name)
-  return os.path.join("mojom", *elements)
+  return os.path.join(package, *elements)
 
 class Generator(generator.Generator):
 
@@ -423,8 +434,9 @@ class Generator(generator.Generator):
     elements = self.module.namespace.split('.')
     elements.append("%s.dart" % self.module.name)
 
+    package_name = GetPackage(self.module)
     lib_module = self.GenerateLibModule(args)
-    pkg_path = os.path.join("dart-pkg", "mojom/lib", *elements)
+    pkg_path = os.path.join("dart-pkg", package_name, "lib", *elements)
     self.Write(lib_module, pkg_path)
 
     gen_path = os.path.join("dart-gen", "mojom/lib", *elements)

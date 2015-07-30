@@ -4,6 +4,8 @@
 
 #include "mojo/public/cpp/environment/lib/default_task_tracker.h"
 
+#include "mojo/public/cpp/environment/task_tracker.h"
+
 namespace mojo {
 
 namespace {

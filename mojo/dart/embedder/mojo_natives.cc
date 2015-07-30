@@ -12,7 +12,7 @@
 #include "base/memory/scoped_ptr.h"
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/dart/embedder/builtin.h"
-#include "mojo/dart/embedder/dart_state.h"
+#include "mojo/dart/embedder/mojo_dart_state.h"
 #include "mojo/public/c/system/core.h"
 #include "mojo/public/cpp/system/core.h"
 
@@ -34,6 +34,7 @@ namespace dart {
   V(MojoMessagePipe_Create, 1)             \
   V(MojoMessagePipe_Write, 5)              \
   V(MojoMessagePipe_Read, 5)               \
+  V(Mojo_GetTimeTicksNow, 0)               \
   V(MojoHandle_Close, 1)                   \
   V(MojoHandle_Wait, 3)                    \
   V(MojoHandle_Register, 2)                \
@@ -161,6 +162,11 @@ void MojoHandle_Register(Dart_NativeArguments arguments) {
                                sizeof(CloserCallbackPeer),
                                MojoHandleCloserCallback);
   Dart_SetIntegerReturnValue(arguments, static_cast<int64_t>(MOJO_RESULT_OK));
+}
+
+void Mojo_GetTimeTicksNow(Dart_NativeArguments arguments) {
+  MojoTimeTicks ticks = MojoGetTimeTicksNow();
+  Dart_SetIntegerReturnValue(arguments, static_cast<int64_t>(ticks));
 }
 
 void MojoHandle_Close(Dart_NativeArguments arguments) {

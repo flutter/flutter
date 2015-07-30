@@ -1,3 +1,10 @@
+{%- from "enum_macros.tmpl" import is_valid_enum_def %}
+
+{#--- Enums #}
+{%- for enum in struct.enums -%}
+  {{is_valid_enum_def(enum, class_name=struct.name)}}
+{%- endfor %}
+
 // static
 {{struct.name}}Ptr {{struct.name}}::New() {
   {{struct.name}}Ptr rv;

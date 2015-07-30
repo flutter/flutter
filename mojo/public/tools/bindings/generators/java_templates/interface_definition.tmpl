@@ -122,6 +122,7 @@ try {
             return false;
     }
 } catch (org.chromium.mojo.bindings.DeserializationException e) {
+    System.err.println(e.toString());
     return false;
 }
 {%- endmacro -%}

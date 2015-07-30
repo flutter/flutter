@@ -7,12 +7,10 @@ import argparse
 import logging
 import sys
 
-from devtoolslib.android_shell import AndroidShell
-from devtoolslib.linux_shell import LinuxShell
 from devtoolslib import paths
 from devtoolslib import shell_arguments
 
-USAGE = ("mojo_run "
+_USAGE = ("mojo_run "
          "[--args-for=<mojo-app>] "
          "[--content-handlers=<handlers>] "
          "[--enable-external-applications] "
@@ -28,149 +26,114 @@ The value of <handlers> is a comma separated list like:
 text/html,mojo:html_viewer,application/javascript,mojo:js_content_handler
 """)
 
+_DESCRIPTION = """Runner for Mojo applications.
+
+Any arguments not recognized by the script will be passed on as shell arguments.
+"""
+
+
+# Port on which the mojo:debugger http server will be available on the host
+# machine.
+_MOJO_DEBUGGER_PORT = 7777
 _DEFAULT_WINDOW_MANAGER = "mojo:kiosk_wm"
+
+
+def _configure_debugger(shell):
+  """Configures mojo:debugger to run and sets up port forwarding for its http
+  server if the shell is running on a device.
+
+  Returns:
+    Arguments that need to be appended to the shell argument list in order to
+    run with the debugger.
+  """
+  shell.ForwardHostPortToShell(_MOJO_DEBUGGER_PORT)
+  return ['mojo:debugger %d' % _MOJO_DEBUGGER_PORT]
 
 
 def main():
   logging.basicConfig()
 
-  parser = argparse.ArgumentParser(usage=USAGE)
+  parser = argparse.ArgumentParser(usage=_USAGE, description=_DESCRIPTION)
 
-  # Arguments indicating the configuration we are targeting.
-  parser.add_argument('--android', help='Run on Android',
-                      action='store_true')
-  debug_group = parser.add_mutually_exclusive_group()
+  # Arguments allowing to indicate the configuration we are targeting when
+  # running within a Chromium-like checkout. These will go away once we have
+  # devtools config files, see https://github.com/domokit/devtools/issues/28.
+  chromium_config_group = parser.add_argument_group('Chromium configuration',
+      'These arguments allow to infer paths to tools and build results '
+      'when running withing a Chromium-like checkout')
+  debug_group = chromium_config_group.add_mutually_exclusive_group()
   debug_group.add_argument('--debug', help='Debug build (default)',
                            default=True, action='store_true')
   debug_group.add_argument('--release', help='Release build', default=False,
                            dest='debug', action='store_false')
-  parser.add_argument('--target-cpu', help='CPU architecture to run for.',
-                      choices=['x64', 'x86', 'arm'])
+  chromium_config_group.add_argument('--target-cpu',
+                                     help='CPU architecture to run for.',
+                                     choices=['x64', 'x86', 'arm'])
 
-  # Arguments indicating paths to binaries and tools.
-  parser.add_argument('--adb-path', help='Path of the adb binary.')
-  parser.add_argument('--shell-path', help='Path of the Mojo shell binary.')
-  parser.add_argument('--origin-path', help='Path of a directory to be set as '
-                      'the origin for mojo: urls')
-
-  # Arguments configuring the shell run.
-  parser.add_argument('--origin', help='Origin for mojo: URLs.')
-  parser.add_argument('--map-url', action='append',
-                      help='Define a mapping for a url in the format '
-                      '<url>=<url-or-local-file-path>')
-  parser.add_argument('--map-origin', action='append',
-                      help='Define a mapping for a url origin in the format '
-                      '<origin>=<url-or-local-file-path>')
+  shell_arguments.add_shell_arguments(parser)
+  parser.add_argument('--no-debugger', action="store_true",
+                      help='Do not spawn mojo:debugger.')
   parser.add_argument('--window-manager', default=_DEFAULT_WINDOW_MANAGER,
                       help='Window manager app to be mapped as '
                       'mojo:window_manager. By default it is ' +
                       _DEFAULT_WINDOW_MANAGER)
-  parser.add_argument('--no-debugger', action="store_true",
-                      help='Do not spawn mojo:debugger.')
   parser.add_argument('--sky',
                       help='Loads the given Sky file.')
-  parser.add_argument('-v', '--verbose', action="store_true",
-                      help="Increase output verbosity")
 
-  # Android-only arguments.
-  parser.add_argument('--target-device',
-                      help='(android-only) Device to run on.')
-  parser.add_argument('--logcat-tags',
-                      help='(android-only) Comma-separated list of additional '
-                      'logcat tags to display on the console.')
+  script_args, shell_args = parser.parse_known_args()
 
-  # Desktop-only arguments.
-  parser.add_argument('--use-osmesa', action='store_true',
-                      help='(linux-only) Configure the native viewport service '
-                      'for off-screen rendering.')
-
-  launcher_args, args = parser.parse_known_args()
-
-  # |mojo_paths| is a hack that allows to automagically get the correct
-  # configuration when running within the Mojo repository. This will go away
-  # once we have devtools config files, see
-  # https://github.com/domokit/devtools/issues/28.
-  mojo_paths, _ = paths.infer_mojo_paths(launcher_args.android,
-                                         launcher_args.debug,
-                                         launcher_args.target_cpu)
+  # Infer paths based on the config if running within a Chromium-like checkout.
+  mojo_paths, _ = paths.infer_mojo_paths(script_args.android,
+                                         script_args.debug,
+                                         script_args.target_cpu)
   if mojo_paths:
-    if launcher_args.android:
-      adb_path = mojo_paths['adb']
-    shell_binary_path = mojo_paths['shell']
-    local_origin_path = mojo_paths['build']
-    if launcher_args.verbose:
+    if script_args.android and not script_args.adb_path:
+      script_args.adb_path = mojo_paths['adb']
+    if script_args.android and not script_args.origin:
+      script_args.origin = mojo_paths['build']
+    if not script_args.shell_path:
+      script_args.shell_path = mojo_paths['shell']
+
+    if script_args.verbose:
       print 'Running within a Chromium-style checkout.'
-  else:
-    if launcher_args.android:
-      adb_path = 'adb'
-      shell_binary_path = None
-      local_origin_path = '.'
-      if launcher_args.verbose:
-        print 'Running outside a Chromium-style checkout:'
-    else:
-      print 'Running outside a Mojo checkout is not supported on Linux yet.'
-      return 1
+      print ' - using the locally built shell at: ' + script_args.shell_path
+      if script_args.origin:
+        print ' - using the origin:  ' + script_args.origin
+      if script_args.android:
+        print ' - using the adb path: ' + script_args.adb_path
+  elif script_args.verbose:
+    print 'Running outside a Chromium-style checkout.'
 
-  if launcher_args.adb_path:
-    adb_path = launcher_args.adb_path
-  if launcher_args.shell_path:
-    shell_binary_path = launcher_args.shell_path
-  if launcher_args.origin_path:
-    local_origin_path = launcher_args.origin_path
+  try:
+    shell, shell_args = shell_arguments.configure_shell(script_args, shell_args)
+  except shell_arguments.ShellConfigurationException as e:
+    print e
+    return 1
 
-  if launcher_args.verbose:
-    if shell_binary_path:
-      print 'Using the locally built shell at ' + shell_binary_path
-    if local_origin_path:
-      print 'Using the local origin of ' + local_origin_path
+  if not script_args.no_debugger:
+    if script_args.verbose:
+      print 'Spawning mojo:debugger, use `mojo_debug` to inspect the shell.'
+      print 'Note that mojo:debugger will prevent the shell from terminating,'
+      print '  pass --no-debugger to skip spawning mojo:debugger.'
+    shell_args.extend(_configure_debugger(shell))
 
-  if launcher_args.android:
-    verbose_pipe = sys.stdout if launcher_args.verbose else None
+  shell_args = shell_arguments.append_to_argument(shell_args, '--url-mappings=',
+                                                  'mojo:window_manager=%s' %
+                                                  script_args.window_manager)
 
-    shell = AndroidShell(adb_path, launcher_args.target_device,
-                         logcat_tags=launcher_args.logcat_tags,
-                         verbose_pipe=verbose_pipe)
-    device_status, error = shell.CheckDevice()
-    if not device_status:
-      print 'Device check failed: ' + error
-      return 1
-    if shell_binary_path:
-      shell.InstallApk(shell_binary_path)
-
-    args = shell_arguments.ApplyMappings(shell, args, launcher_args.map_url,
-                                         launcher_args.map_origin)
-    if not launcher_args.origin:
-      args.extend(shell_arguments.ConfigureLocalOrigin(shell,
-                                                       local_origin_path))
-  else:
-    if not shell_binary_path:
-      print 'Can not run without a shell binary. Please pass --shell-path.'
-      return 1
-    shell = LinuxShell(shell_binary_path)
-    if launcher_args.use_osmesa:
-      args.append('--args-for=mojo:native_viewport_service --use-osmesa')
-
-  if launcher_args.origin:
-    args.append('--origin=' + launcher_args.origin)
-  args = shell_arguments.AppendToArgument(args, '--url-mappings=',
-                                          'mojo:window_manager=%s' %
-                                          launcher_args.window_manager)
-  if not launcher_args.no_debugger:
-    args.extend(shell_arguments.ConfigureDebugger(shell))
-
-  if launcher_args.sky:
+  if script_args.sky:
     if not mojo_paths:
       print 'Running with --sky is not supported outside of the Mojo checkout.'
       # See https://github.com/domokit/devtools/issues/27.
       return 1
-    args.extend(shell_arguments.ConfigureSky(shell, mojo_paths['root'],
-                                             mojo_paths['sky_packages'],
-                                             launcher_args.sky))
+    shell_args.extend(shell_arguments._configure_sky(shell, mojo_paths['root'],
+                                                     mojo_paths['sky_packages'],
+                                                     script_args.sky))
 
-  if launcher_args.verbose:
-    print "Shell arguments: " + str(args)
+  if script_args.verbose:
+    print "Shell arguments: " + str(shell_args)
 
-  shell.Run(args)
+  shell.Run(shell_args)
   return 0
 
 

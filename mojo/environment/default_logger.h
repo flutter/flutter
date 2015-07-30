@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MOJO_ENVIRONMENT_DEFAULT_RUN_LOOP_IMPL_H_
-#define MOJO_ENVIRONMENT_DEFAULT_RUN_LOOP_IMPL_H_
+#ifndef MOJO_ENVIRONMENT_DEFAULT_LOGGER_H_
+#define MOJO_ENVIRONMENT_DEFAULT_LOGGER_H_
+
+struct MojoLogger;
 
 namespace mojo {
 namespace internal {
 
-void InstantiateDefaultRunLoopImpl();
-void DestroyDefaultRunLoopImpl();
+extern const MojoLogger kDefaultLogger;
 
 }  // namespace internal
 }  // namespace mojo
 
-#endif  // MOJO_ENVIRONMENT_DEFAULT_RUN_LOOP_IMPL_H_
+#endif  // MOJO_ENVIRONMENT_DEFAULT_LOGGER_H_

@@ -16,7 +16,7 @@
 #include "mojo/common/message_pump_mojo.h"
 #include "mojo/dart/embedder/builtin.h"
 #include "mojo/dart/embedder/dart_controller.h"
-#include "mojo/dart/embedder/dart_state.h"
+#include "mojo/dart/embedder/mojo_dart_state.h"
 #include "mojo/dart/embedder/vmservice.h"
 #include "mojo/public/c/system/core.h"
 #include "tonic/dart_converter.h"

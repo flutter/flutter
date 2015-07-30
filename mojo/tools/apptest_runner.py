@@ -39,15 +39,15 @@ def main():
   command_line = [os.path.join(os.path.dirname(__file__), os.path.pardir,
                                "devtools", "common", "mojo_test"),
                   str(args.test_list_file)]
-  if config.is_debug:
-    command_line.append("--debug")
-  else:
-    command_line.append("--release")
+
   if config.target_os == Config.OS_ANDROID:
     command_line.append("--android")
     command_line.append("--adb-path=" + paths.adb_path)
+    command_line.append("--origin=" + paths.build_dir)
+
   command_line.append("--shell-path=" + paths.target_mojo_shell_path)
-  command_line.append("--origin-path=" + paths.build_dir)
+  if args.verbose_count:
+    command_line.append("--verbose")
 
   gtest.set_color()
   print "Running " + str(command_line)

@@ -5,8 +5,21 @@
 
 """Test runner for Mojo application tests.
 
-The file describing the list of tests has to be a valid Python program that sets
-a |tests| global variable, containing entries of the following form:
+TODO(vtl|msw): Add a way of specifying data dependencies.
+"""
+
+import argparse
+import logging
+import sys
+
+from devtoolslib import apptest_dart
+from devtoolslib import apptest_gtest
+from devtoolslib import shell_arguments
+
+_DESCRIPTION = """Runner for Mojo application tests.
+
+|test_list_file| has to be a valid Python program that sets a |tests| global
+variable, containing entries of the following form:
 
  {
    # Required URL for apptest.
@@ -16,86 +29,77 @@ a |tests| global variable, containing entries of the following form:
    # Optional test type. Valid values:
    #   * "gtest" (default)
    #   * "gtest_isolated": like "gtest", but run with fixture isolation,
-   #      i.e., each test in a fresh mojo_shell)
-   #   * "dart".
+   #      i.e., each test in a fresh mojo_shell
+   #   * "dart"
    "type": "gtest",
-   # Optional arguments for the apptest.
+   # Optional arguments to be passed to the apptest.
    "test-args": ["--an_arg", "another_arg"],
-   # Optional arguments for the shell.
+   # Optional shell arguments.
    "shell-args": ["--some-flag-for-the-shell", "--another-flag"],
  }
 
-The program may use the |target_os| global that will be any of ['android',
-'linux'], indicating the system on which the tests are to be run.
+|test_list_file| may reference the |target_os| global that will be any of
+['android', 'linux'], indicating the system on which the tests are to be run.
 
-TODO(vtl|msw): Add a way of specifying data dependencies.
+Any arguments not recognized by the script will be passed on as shell arguments.
 """
 
-import argparse
-import sys
-
-from devtoolslib.android_shell import AndroidShell
-from devtoolslib.linux_shell import LinuxShell
-from devtoolslib.apptest_runner import run_apptests
-from devtoolslib import shell_arguments
+_logger = logging.getLogger()
 
 
 def main():
-  parser = argparse.ArgumentParser(description="Test runner for Mojo "
-                                   "application tests.")
+  parser = argparse.ArgumentParser(
+      formatter_class=argparse.RawDescriptionHelpFormatter,
+      description=_DESCRIPTION)
   parser.add_argument("test_list_file", type=file,
                       help="a file listing apptests to run")
 
-  # Arguments indicating the configuration we are targeting.
-  parser.add_argument('--android', help='Run on Android',
-                      action='store_true')
-  debug_group = parser.add_mutually_exclusive_group()
-  debug_group.add_argument('--debug', help='Debug build (default)',
-                           default=True, action='store_true')
-  debug_group.add_argument('--release', help='Release build', default=False,
-                           dest='debug', action='store_false')
-  parser.add_argument('--target-cpu', help='CPU architecture to run for.',
-                      choices=['x64', 'x86', 'arm'])
+  # Common shell configuration arguments.
+  shell_arguments.add_shell_arguments(parser)
+  script_args, common_shell_args = parser.parse_known_args()
 
-  # Arguments indicating paths to binaries and tools.
-  parser.add_argument('--adb-path', help='Path of the adb binary.')
-  parser.add_argument('--shell-path', help='Path of the Mojo shell binary.')
-  parser.add_argument('--origin-path', help='Path of a directory to be set as '
-                      'the origin for mojo: urls')
-  args = parser.parse_args()
+  try:
+    shell, common_shell_args = shell_arguments.configure_shell(
+        script_args, common_shell_args)
+  except shell_arguments.ShellConfigurationException as e:
+    print e
+    return 1
 
-  extra_shell_args = []
-  if args.android:
-    if not args.adb_path:
-      print 'Indicate path to adb in --adb-path.'
-      return 1
-    shell = AndroidShell(args.adb_path)
-
-    device_status, error = shell.CheckDevice()
-    if not device_status:
-      print 'Device check failed: ' + error
-      return 1
-
-    if not args.shell_path:
-      print 'Indicate path to the shell binary in --shell-path'
-      return 1
-    shell.InstallApk(args.shell_path)
-
-    if args.origin_path:
-      extra_shell_args.extend(shell_arguments.ConfigureLocalOrigin(
-          shell, args.origin_path, fixed_port=True))
-  else:
-    if not args.shell_path:
-      print 'Indicate path to the shell binary in --shell-path'
-      return 1
-    shell = LinuxShell(args.shell_path)
-
-  target_os = 'android' if args.android else 'linux'
+  target_os = "android" if script_args.android else "linux"
   test_list_globals = {"target_os": target_os}
-  exec args.test_list_file in test_list_globals
-  apptests_result = run_apptests(shell, extra_shell_args,
-                                 test_list_globals["tests"])
-  return 0 if apptests_result else 1
+  exec script_args.test_list_file in test_list_globals
+  test_list = test_list_globals["tests"]
+
+  succeeded = True
+  for test_dict in test_list:
+    test = test_dict["test"]
+    test_name = test_dict.get("name", test)
+    test_type = test_dict.get("type", "gtest")
+    test_args = test_dict.get("test-args", [])
+    shell_args = test_dict.get("shell-args", []) + common_shell_args
+
+    _logger.info("Will start: %s" % test_name)
+    print "Running %s...." % test_name,
+    sys.stdout.flush()
+
+    if test_type == "dart":
+      apptest_result = apptest_dart.run_dart_apptest(shell, shell_args, test,
+                                                     test_args)
+    elif test_type == "gtest":
+      apptest_result = apptest_gtest.run_gtest_apptest(shell, shell_args, test,
+                                                       test_args, False)
+    elif test_type == "gtest_isolated":
+      apptest_result = apptest_gtest.run_gtest_apptest(shell, shell_args, test,
+                                                       test_args, True)
+    else:
+      apptest_result = False
+      print "Unrecognized test type in %r" % test_dict
+
+    print "Succeeded" if apptest_result else "Failed"
+    _logger.info("Completed: %s" % test_name)
+    if not apptest_result:
+      succeeded = False
+  return 0 if succeeded else 1
 
 if __name__ == '__main__':
   sys.exit(main())

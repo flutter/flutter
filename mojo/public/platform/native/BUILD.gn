@@ -70,6 +70,8 @@ mojo_sdk_source_set("gles2") {
     "gles2_impl_chromium_miscellaneous_thunks.h",
     "gles2_impl_chromium_pixel_transfer_buffer_object_thunks.cc",
     "gles2_impl_chromium_pixel_transfer_buffer_object_thunks.h",
+    "gles2_impl_chromium_resize_thunks.cc",
+    "gles2_impl_chromium_resize_thunks.h",
     "gles2_impl_chromium_sub_image_thunks.cc",
     "gles2_impl_chromium_sub_image_thunks.h",
     "gles2_impl_chromium_sync_point_thunks.cc",

@@ -55,7 +55,7 @@ template("mojom") {
     generator_script = "$generator_root/mojom_bindings_generator.py"
     generator_sources = [
       generator_script,
-      "$generator_root/generators/cpp_templates/enum_declaration.tmpl",
+      "$generator_root/generators/cpp_templates/enum_macros.tmpl",
       "$generator_root/generators/cpp_templates/interface_declaration.tmpl",
       "$generator_root/generators/cpp_templates/interface_definition.tmpl",
       "$generator_root/generators/cpp_templates/interface_macros.tmpl",

@@ -42,12 +42,13 @@ const char* Builtin::mojo_core_patch_resource_names_[] = {
 };
 
 const char* Builtin::mojo_io_patch_resource_names_[] = {
-  "/io/internet_address_patch.dart",
-  "/io/mojo_patch.dart",
-  "/io/platform_patch.dart",
-  "/io/socket_patch.dart",
-  "/io/server_socket_patch.dart",
-  NULL,
+    "/io/internet_address_patch.dart",
+    "/io/mojo_patch.dart",
+    "/io/platform_patch.dart",
+    "/io/process_patch.dart",
+    "/io/socket_patch.dart",
+    "/io/server_socket_patch.dart",
+    NULL,
 };
 
 Builtin::builtin_lib_props Builtin::builtin_libraries_[] = {

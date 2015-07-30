@@ -31,8 +31,9 @@ namespace {{namespace}} {
 {%- endfor %}
 
 {#--- Enums #}
+{% from "enum_macros.tmpl" import enum_decl -%}
 {%  for enum in enums %}
-{%    include "enum_declaration.tmpl" %}
+  {{enum_decl(enum)}}
 {%- endfor %}
 
 {#--- Constants #}

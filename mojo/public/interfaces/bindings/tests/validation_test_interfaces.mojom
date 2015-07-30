@@ -77,3 +77,21 @@ struct BasicStruct {
 interface IntegrationTestInterface {
   Method0(BasicStruct param0) => (array<uint8> param0);
 };
+
+// An enum generates a enum-value validation function, so we want to test it.
+// E.g., valid enum values for this enum should be:  -3, 0, 1, 10
+enum BasicEnum {
+  A,
+  B,
+  C = A,
+  D = -3,
+  E = 0xA
+};
+
+// The enum validation function should be generated within the scope of this
+// struct.
+struct StructWithEnum {
+  enum EnumWithin {
+    A, B, C, D
+  };
+};

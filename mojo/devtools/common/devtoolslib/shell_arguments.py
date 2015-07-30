@@ -7,21 +7,24 @@ list.
 """
 
 import os.path
+import sys
 import urlparse
+
+from devtoolslib.android_shell import AndroidShell
+from devtoolslib.linux_shell import LinuxShell
 
 # When spinning up servers for local origins, we want to use predictable ports
 # so that caching works between subsequent runs with the same command line.
 _LOCAL_ORIGIN_PORT = 31840
 _MAPPINGS_BASE_PORT = 31841
-
-# Port on which the mojo:debugger http server will be available on the host
-# machine.
-_MOJO_DEBUGGER_PORT = 7777
-
 _SKY_SERVER_PORT = 9998
 
 
-def _HostLocalUrlDestination(shell, dest_file, port):
+def _is_web_url(dest):
+  return True if urlparse.urlparse(dest).scheme else False
+
+
+def _host_local_url_destination(shell, dest_file, port):
   """Starts a local server to host |dest_file|.
 
   Returns:
@@ -35,7 +38,7 @@ def _HostLocalUrlDestination(shell, dest_file, port):
   return server_url + os.path.relpath(dest_file, directory)
 
 
-def _HostLocalOriginDestination(shell, dest_dir, port):
+def _host_local_origin_destination(shell, dest_dir, port):
   """Starts a local server to host |dest_dir|.
 
   Returns:
@@ -44,7 +47,7 @@ def _HostLocalOriginDestination(shell, dest_dir, port):
   return shell.ServeLocalDirectory(dest_dir, port)
 
 
-def _Rewrite(mapping, host_destination_functon, shell, port):
+def _rewrite(mapping, host_destination_functon, shell, port):
   """Takes a mapping given as <src>=<dest> and rewrites the <dest> part to be
   hosted locally using the given function if <dest> is not a web url.
   """
@@ -52,7 +55,7 @@ def _Rewrite(mapping, host_destination_functon, shell, port):
   if len(parts) != 2:
     raise ValueError('each mapping value should be in format '
                      '"<url>=<url-or-local-path>"')
-  if urlparse.urlparse(parts[1])[0]:
+  if _is_web_url(parts[1]):
     # The destination is a web url, do nothing.
     return mapping
 
@@ -61,8 +64,7 @@ def _Rewrite(mapping, host_destination_functon, shell, port):
   return src + '=' + dest
 
 
-
-def ApplyMappings(shell, original_arguments, map_urls, map_origins):
+def _apply_appings(shell, original_arguments, map_urls, map_origins):
   """Applies mappings for specified urls and origins. For each local path
   specified as destination a local server will be spawned and the mapping will
   be rewritten accordingly.
@@ -83,14 +85,14 @@ def ApplyMappings(shell, original_arguments, map_urls, map_origins):
   if map_urls:
     # Sort the mappings to preserve caching regardless of argument order.
     for map_url in sorted(map_urls):
-      mapping = _Rewrite(map_url, _HostLocalUrlDestination, shell, next_port)
+      mapping = _rewrite(map_url, _host_local_url_destination, shell, next_port)
       next_port += 1
       # All url mappings need to be coalesced into one shell argument.
-      args = AppendToArgument(args, '--url-mappings=', mapping)
+      args = append_to_argument(args, '--url-mappings=', mapping)
 
   if map_origins:
     for map_origin in sorted(map_origins):
-      mapping = _Rewrite(map_origin, _HostLocalOriginDestination, shell,
+      mapping = _rewrite(map_origin, _host_local_origin_destination, shell,
                          next_port)
       next_port += 1
       # Origin mappings are specified as separate, repeated shell arguments.
@@ -98,19 +100,7 @@ def ApplyMappings(shell, original_arguments, map_urls, map_origins):
   return args
 
 
-def ConfigureDebugger(shell):
-  """Configures mojo:debugger to run and sets up port forwarding for its http
-  server if the shell is running on a device.
-
-  Returns:
-    Arguments that need to be appended to the shell argument list in order to
-    run with the debugger.
-  """
-  shell.ForwardHostPortToShell(_MOJO_DEBUGGER_PORT)
-  return ['mojo:debugger %d' % _MOJO_DEBUGGER_PORT]
-
-
-def ConfigureSky(shell, root_path, sky_packages_path, sky_target):
+def _configure_sky(shell, root_path, sky_packages_path, sky_target):
   """Configures additional mappings and a server needed to run the given Sky
   app.
 
@@ -140,10 +130,10 @@ def ConfigureSky(shell, root_path, sky_packages_path, sky_target):
   # application/dart content-type as Sky apps.
   # TODO(ppi): drop this part once we can rely on the Sky files declaring
   # correct shebang.
-  args = AppendToArgument(args, '--content-handlers=',
-                          'text/sky,mojo:sky_viewer')
-  args = AppendToArgument(args, '--content-handlers=',
-                          'application/dart,mojo:sky_viewer')
+  args = append_to_argument(args, '--content-handlers=',
+                                            'text/sky,mojo:sky_viewer')
+  args = append_to_argument(args, '--content-handlers=',
+                                            'application/dart,mojo:sky_viewer')
 
   # Configure the window manager to embed the sky_viewer.
   sky_url = server_url + sky_target
@@ -151,7 +141,7 @@ def ConfigureSky(shell, root_path, sky_packages_path, sky_target):
   return args
 
 
-def ConfigureLocalOrigin(shell, local_dir, fixed_port=True):
+def configure_local_origin(shell, local_dir, fixed_port=True):
   """Sets up a local http server to serve files in |local_dir| along with
   device port forwarding if needed.
 
@@ -164,7 +154,7 @@ def ConfigureLocalOrigin(shell, local_dir, fixed_port=True):
   return ["--origin=" + origin_url]
 
 
-def AppendToArgument(arguments, key, value, delimiter=","):
+def append_to_argument(arguments, key, value, delimiter=","):
   """Looks for an argument of the form "key=val1,val2" within |arguments| and
   appends |value| to it.
 
@@ -192,3 +182,95 @@ def AppendToArgument(arguments, key, value, delimiter=","):
     arguments.append(key + value)
 
   return arguments
+
+
+def add_shell_arguments(parser):
+  """Adds argparse arguments allowing to configure shell abstraction using
+  configure_shell() below.
+  """
+  # Arguments indicating paths to binaries and tools.
+  parser.add_argument('--adb-path', help='Path of the adb binary.')
+  parser.add_argument('--shell-path', help='Path of the Mojo shell binary.')
+
+  # Arguments configuring the shell run.
+  parser.add_argument('--android', help='Run on Android',
+                      action='store_true')
+  parser.add_argument('--origin', help='Origin for mojo: URLs. This can be a '
+                      'web url or a local directory path.')
+  parser.add_argument('--map-url', action='append',
+                      help='Define a mapping for a url in the format '
+                      '<url>=<url-or-local-file-path>')
+  parser.add_argument('--map-origin', action='append',
+                      help='Define a mapping for a url origin in the format '
+                      '<origin>=<url-or-local-file-path>')
+
+  # Android-only arguments.
+  parser.add_argument('--target-device',
+                      help='(android-only) Device to run on.')
+  parser.add_argument('--logcat-tags',
+                      help='(android-only) Comma-separated list of additional '
+                      'logcat tags to display on the console.')
+
+  # Desktop-only arguments.
+  parser.add_argument('--use-osmesa', action='store_true',
+                      help='(linux-only) Configure the native viewport service '
+                      'for off-screen rendering.')
+
+  # Other configuration.
+  parser.add_argument('-v', '--verbose', action="store_true",
+                      help="Increase output verbosity")
+
+
+class ShellConfigurationException(Exception):
+  """Represents an error preventing creating a functional shell abstraction."""
+  pass
+
+
+def configure_shell(config_args, shell_args):
+  """
+  Produces a shell abstraction configured using the parsed arguments defined in
+  add_shell_arguments().
+
+  Args:
+    config_args: Parsed arguments added using add_shell_arguments().
+    shell_args: Additional raw shell arguments to be passed to the shell. We
+        need to take these into account as some parameters need to appear only
+        once on the argument list (e.g. url-mappings) so we need to coalesce any
+        overrides and the existing value into just one argument.
+
+  Returns:
+    A tuple of (shell, shell_args).
+
+  Throws:
+    ShellConfigurationException if shell abstraction could not be configured.
+  """
+  if config_args.android:
+    verbose_pipe = sys.stdout if config_args.verbose else None
+
+    shell = AndroidShell(config_args.adb_path, config_args.target_device,
+                         logcat_tags=config_args.logcat_tags,
+                         verbose_pipe=verbose_pipe)
+    device_status, error = shell.CheckDevice()
+    if not device_status:
+      raise ShellConfigurationException('Device check failed: ' + error)
+    if config_args.shell_path:
+      shell.InstallApk(config_args.shell_path)
+
+    shell_args = _apply_appings(shell, shell_args, config_args.map_url,
+                                config_args.map_origin)
+  else:
+    if not config_args.shell_path:
+      raise ShellConfigurationException('Can not run without a shell binary. '
+                                        'Please pass --shell-path.')
+    shell = LinuxShell(config_args.shell_path)
+    if config_args.use_osmesa:
+      shell_args.append('--args-for=mojo:native_viewport_service --use-osmesa')
+
+  if config_args.origin:
+    if _is_web_url(config_args.origin):
+      shell_args.append('--origin=' + config_args.origin)
+    else:
+      shell_args.extend(configure_local_origin(shell, config_args.origin,
+                                             fixed_port=True))
+
+  return shell, shell_args

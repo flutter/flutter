@@ -39,8 +39,8 @@ class LinuxShell(Shell):
     Returns:
       The url that the shell can use to access the content of |local_dir_path|.
     """
-    return 'http://%s:%d/' % http_server.StartHttpServer(local_dir_path, port,
-                                                         additional_mappings)
+    return 'http://%s:%d/' % http_server.start_http_server(local_dir_path, port,
+                                                           additional_mappings)
 
   def ForwardHostPortToShell(self, host_port):
     """Forwards a port on the host machine to the same port wherever the shell

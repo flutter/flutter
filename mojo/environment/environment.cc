@@ -4,10 +4,10 @@
 
 #include "mojo/public/cpp/environment/environment.h"
 
-#include "mojo/environment/default_async_waiter_impl.h"
-#include "mojo/environment/default_logger_impl.h"
-#include "mojo/environment/default_run_loop_impl.h"
-#include "mojo/environment/default_task_tracker_impl.h"
+#include "base/message_loop/message_loop.h"
+#include "mojo/environment/default_async_waiter.h"
+#include "mojo/environment/default_logger.h"
+#include "mojo/environment/default_task_tracker.h"
 
 namespace mojo {
 
@@ -27,27 +27,32 @@ Environment::~Environment() {
 
 // static
 const MojoAsyncWaiter* Environment::GetDefaultAsyncWaiter() {
-  return internal::GetDefaultAsyncWaiterImpl();
+  return &internal::kDefaultAsyncWaiter;
 }
 
 // static
 const MojoLogger* Environment::GetDefaultLogger() {
-  return internal::GetDefaultLoggerImpl();
+  return &internal::kDefaultLogger;
 }
 
 // static
 const TaskTracker* Environment::GetDefaultTaskTracker() {
-  return internal::GetDefaultTaskTrackerImpl();
+  return &internal::kDefaultTaskTracker;
 }
 
 // static
 void Environment::InstantiateDefaultRunLoop() {
-  internal::InstantiateDefaultRunLoopImpl();
+  CHECK(!base::MessageLoop::current());
+  // Not leaked: accessible from |base::MessageLoop::current()|.
+  base::MessageLoop* message_loop = new base::MessageLoop();
+  CHECK_EQ(message_loop, base::MessageLoop::current());
 }
 
 // static
 void Environment::DestroyDefaultRunLoop() {
-  internal::DestroyDefaultRunLoopImpl();
+  CHECK(base::MessageLoop::current());
+  delete base::MessageLoop::current();
+  CHECK(!base::MessageLoop::current());
 }
 
 }  // namespace mojo

@@ -81,6 +81,7 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
   bool CancelConnect(const ConnectionIdentifier& connection_id) override;
   Result Connect(const ConnectionIdentifier& connection_id,
                  ProcessIdentifier* peer_process_identifier,
+                 bool* is_first,
                  embedder::ScopedPlatformHandle* platform_handle) override;
 
  private:
@@ -95,6 +96,7 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
   Result ConnectImpl(ProcessIdentifier process_identifier,
                      const ConnectionIdentifier& connection_id,
                      ProcessIdentifier* peer_process_identifier,
+                     bool* is_first,
                      embedder::ScopedPlatformHandle* platform_handle);
 
   // These should only be called on |private_thread_|:

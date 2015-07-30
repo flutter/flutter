@@ -60,6 +60,7 @@ class MOJO_SYSTEM_IMPL_EXPORT SlaveConnectionManager final
   bool CancelConnect(const ConnectionIdentifier& connection_id) override;
   Result Connect(const ConnectionIdentifier& connection_id,
                  ProcessIdentifier* peer_process_identifier,
+                 bool* is_first,
                  embedder::ScopedPlatformHandle* platform_handle) override;
 
  private:
@@ -73,6 +74,7 @@ class MOJO_SYSTEM_IMPL_EXPORT SlaveConnectionManager final
   void ConnectOnPrivateThread(const ConnectionIdentifier& connection_id,
                               Result* result,
                               ProcessIdentifier* peer_process_identifier,
+                              bool* is_first,
                               embedder::ScopedPlatformHandle* platform_handle);
 
   // |RawChannel::Delegate| methods (only called on |private_thread_|):
@@ -115,6 +117,7 @@ class MOJO_SYSTEM_IMPL_EXPORT SlaveConnectionManager final
   Result* ack_result_;
   // Used only when waiting for the ack to "connect":
   ProcessIdentifier* ack_peer_process_identifier_;
+  bool* ack_is_first_;
   embedder::ScopedPlatformHandle* ack_platform_handle_;
 
   // The (synchronous) |ConnectionManager| methods are implemented in the
