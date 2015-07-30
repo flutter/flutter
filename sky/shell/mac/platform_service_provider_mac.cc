@@ -7,7 +7,7 @@
 #include "base/lazy_instance.h"
 #include "base/location.h"
 #include "base/single_thread_task_runner.h"
-#include "mojo/public/cpp/application/service_provider_impl.h"
+#include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/services/ns_net/network_service_impl.h"
 #include "sky/shell/service_provider.h"
@@ -18,20 +18,35 @@
 namespace sky {
 namespace shell {
 
-// FIXME(csg): Put this in an application owned context
-base::LazyInstance<scoped_ptr<mojo::ServiceProviderImpl>> g_service_provider =
-    LAZY_INSTANCE_INITIALIZER;
-base::LazyInstance<scoped_ptr<mojo::NetworkServiceFactory>>
-    g_network_service_factory = LAZY_INSTANCE_INITIALIZER;
+class PlatformServiceProvider : public mojo::ServiceProvider {
+ public:
+  PlatformServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider> request)
+    : binding_(this, request.Pass())
+  {
+  }
+
+  void ConnectToService(const mojo::String& service_name,
+                        mojo::ScopedMessagePipeHandle client_handle) override {
+    if (service_name == mojo::NetworkService::Name_) {
+      network_.Create(nullptr,
+        mojo::MakeRequest<mojo::NetworkService>(client_handle.Pass()));
+    }
+#if !TARGET_OS_IPHONE
+    if (service_name == TestHarness::Name_) {
+      TestRunner::Shared().Create(nullptr,
+        mojo::MakeRequest<TestHarness>(client_handle.Pass()));
+    }
+#endif
+  }
+
+ private:
+  mojo::StrongBinding<mojo::ServiceProvider> binding_;
+  mojo::NetworkServiceFactory network_;
+};
 
 static void CreatePlatformServiceProvider(
     mojo::InterfaceRequest<mojo::ServiceProvider> request) {
-  g_service_provider.Get().reset(new mojo::ServiceProviderImpl(request.Pass()));
-  g_network_service_factory.Get().reset(new mojo::NetworkServiceFactory());
-  g_service_provider.Get()->AddService(g_network_service_factory.Get().get());
-#if !TARGET_OS_IPHONE
-  g_service_provider.Get()->AddService(&TestRunner::Shared());
-#endif
+  new PlatformServiceProvider(request.Pass());
 }
 
 mojo::ServiceProviderPtr CreateServiceProvider(
