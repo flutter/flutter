@@ -24,6 +24,7 @@ export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent,
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/widgets/widget.dart' show Key, GlobalKey, Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
 
+typedef void ValueChanged(bool);
 
 // PAINTING NODES
 
