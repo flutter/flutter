@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MOJO_PUBLIC_CPP_ENVIRONMENT_LIB_DEFAULT_TASK_TRACKER_H_
-#define MOJO_PUBLIC_CPP_ENVIRONMENT_LIB_DEFAULT_TASK_TRACKER_H_
+#ifndef MOJO_ENVIRONMENT_DEFAULT_TASK_TRACKER_H_
+#define MOJO_ENVIRONMENT_DEFAULT_TASK_TRACKER_H_
 
 namespace mojo {
 
@@ -16,4 +16,4 @@ extern const TaskTracker kDefaultTaskTracker;
 }  // namespace internal
 }  // namespace mojo
 
-#endif  // MOJO_PUBLIC_CPP_ENVIRONMENT_LIB_DEFAULT_TASK_TRACKER_H_
+#endif  // MOJO_ENVIRONMENT_DEFAULT_TASK_TRACKER_H_

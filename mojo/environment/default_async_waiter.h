@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MOJO_ENVIRONMENT_DEFAULT_LOGGER_IMPL_H_
-#define MOJO_ENVIRONMENT_DEFAULT_LOGGER_IMPL_H_
+#ifndef MOJO_ENVIRONMENT_DEFAULT_ASYNC_WAITER_H_
+#define MOJO_ENVIRONMENT_DEFAULT_ASYNC_WAITER_H_
 
-#include "mojo/public/c/environment/logger.h"
+struct MojoAsyncWaiter;
 
 namespace mojo {
 namespace internal {
 
-const MojoLogger* GetDefaultLoggerImpl();
+extern const MojoAsyncWaiter kDefaultAsyncWaiter;
 
 }  // namespace internal
 }  // namespace mojo
 
-#endif  // MOJO_ENVIRONMENT_DEFAULT_LOGGER_IMPL_H_
+#endif  // MOJO_ENVIRONMENT_DEFAULT_ASYNC_WAITER_H_

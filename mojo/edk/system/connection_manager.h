@@ -99,12 +99,14 @@ class MOJO_SYSTEM_IMPL_EXPORT ConnectionManager {
 
   // Connects a pending connection; to be called only after both parties have
   // called |AllowConnect()|. On success, |Result::SUCCESS_CONNECT_...| is
-  // returned and |peer_process_identifier| is set to an unique identifier for
-  // the peer process. In the case of |SUCCESS_CONNECT_SAME_PROCESS|,
+  // returned, |peer_process_identifier| is set to an unique identifier for the
+  // peer process, and |is_first| is set to true if this is the first party to
+  // call |Connect()|. In the case of |SUCCESS_CONNECT_SAME_PROCESS|,
   // |*platform_handle| is set to a suitable native handle connecting the two
   // parties.
   virtual Result Connect(const ConnectionIdentifier& connection_id,
                          ProcessIdentifier* peer_process_identifier,
+                         bool* is_first,
                          embedder::ScopedPlatformHandle* platform_handle) = 0;
 
  protected:

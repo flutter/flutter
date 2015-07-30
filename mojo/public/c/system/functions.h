@@ -26,7 +26,7 @@ extern "C" {
 // Returns the time, in microseconds, since some undefined point in the past.
 // The values are only meaningful relative to other values that were obtained
 // from the same device without an intervening system restart. Such values are
-// guaranteed to be monotonically-increasing with the passage of real time.
+// guaranteed to be monotonically non-decreasing with the passage of real time.
 // Although the units are microseconds, the resolution of the clock may vary and
 // is typically in the range of ~1-15 ms.
 MOJO_SYSTEM_EXPORT MojoTimeTicks MojoGetTimeTicksNow(void);

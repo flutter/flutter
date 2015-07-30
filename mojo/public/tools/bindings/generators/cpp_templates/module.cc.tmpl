@@ -78,6 +78,12 @@ const uint32_t {{method_name}} = {{method.ordinal}};
 
 }  // namespace internal
 
+{#--- Enums #}
+{%- from "enum_macros.tmpl" import is_valid_enum_def -%}
+{%- for enum in enums -%}
+  {{is_valid_enum_def(enum, class_name='')}}
+{%- endfor %}
+
 {#--- Struct Constants #}
 {%- for struct in structs %}
 {%-   for constant in struct.constants %}

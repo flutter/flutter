@@ -17,6 +17,7 @@ source_set("dart_controller_no_snapshot") {
     "dart_controller.cc",
     "dart_controller.h",
     "io/internet_address.h",
+    "mojo_dart_state.h",
     "mojo_io_natives.cc",
     "mojo_io_natives.h",
     "mojo_natives.cc",
@@ -45,6 +46,8 @@ source_set("dart_controller_no_snapshot") {
     "//mojo/common",
     "//mojo/public/c/system",
     "//mojo/public/cpp/system",
+    "//mojo/services/network/public/interfaces",
+    "//tonic",
   ]
 
   defines = []
@@ -61,6 +64,7 @@ dart_embedder_resources("generate_dart_embedder_patch_resources_cc") {
     "//mojo/dart/embedder/io/internet_address_patch.dart",
     "//mojo/dart/embedder/io/mojo_patch.dart",
     "//mojo/dart/embedder/io/platform_patch.dart",
+    "//mojo/dart/embedder/io/process_patch.dart",
     "//mojo/dart/embedder/io/socket_patch.dart",
     "//mojo/dart/embedder/io/server_socket_patch.dart",
   ]
@@ -120,6 +124,7 @@ action_foreach("dart_embedder_package_sdk") {
     "//mojo/public/dart/lib/src/stub.dart",
     "//mojo/public/dart/lib/src/types.dart",
     "//mojo/public/dart/lib/src/union.dart",
+    "//mojo/public/dart/lib/src/utils.dart",
     "//mojo/public/dart/sdk_ext/internal.dart",
     "//mojo/public/dart/sdk_ext/src/handle_watcher.dart",
     "//mojo/public/dart/sdk_ext/src/natives.dart",

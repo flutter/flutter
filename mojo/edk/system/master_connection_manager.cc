@@ -13,6 +13,7 @@
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
+#include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/raw_channel.h"
 #include "mojo/edk/system/transport_data.h"
@@ -141,7 +142,9 @@ void MasterConnectionManager::Helper::OnReadMessage(
   const ConnectionIdentifier* connection_id =
       reinterpret_cast<const ConnectionIdentifier*>(message_view.bytes());
   Result result = Result::FAILURE;
-  ProcessIdentifier peer_process_identifier = kInvalidProcessIdentifier;
+  // Note: It's important to fully zero-initialize |data|, including padding,
+  // since it'll be sent to another process.
+  ConnectionManagerAckSuccessConnectData data = {};
   embedder::ScopedPlatformHandle platform_handle;
   uint32_t num_bytes = 0;
   const void* bytes = nullptr;
@@ -158,7 +161,8 @@ void MasterConnectionManager::Helper::OnReadMessage(
       break;
     case MessageInTransit::Subtype::CONNECTION_MANAGER_CONNECT: {
       result = owner_->ConnectImpl(process_identifier_, *connection_id,
-                                   &peer_process_identifier, &platform_handle);
+                                   &data.peer_process_identifier,
+                                   &data.is_first, &platform_handle);
       DCHECK_NE(result, Result::SUCCESS);
       // TODO(vtl): FIXME -- currently, nothing should generate
       // SUCCESS_CONNECT_REUSE_CONNECTION.
@@ -167,8 +171,8 @@ void MasterConnectionManager::Helper::OnReadMessage(
       // (and also a platform handle in the case of "new connection" -- handled
       // further below).
       if (result != Result::FAILURE) {
-        num_bytes = static_cast<uint32_t>(sizeof(peer_process_identifier));
-        bytes = &peer_process_identifier;
+        num_bytes = static_cast<uint32_t>(sizeof(data));
+        bytes = &data;
       }
       break;
     }
@@ -365,9 +369,10 @@ bool MasterConnectionManager::CancelConnect(
 ConnectionManager::Result MasterConnectionManager::Connect(
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
+    bool* is_first,
     embedder::ScopedPlatformHandle* platform_handle) {
   return ConnectImpl(kMasterProcessIdentifier, connection_id,
-                     peer_process_identifier, platform_handle);
+                     peer_process_identifier, is_first, platform_handle);
 }
 
 bool MasterConnectionManager::AllowConnectImpl(
@@ -445,9 +450,11 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
     ProcessIdentifier process_identifier,
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
+    bool* is_first,
     embedder::ScopedPlatformHandle* platform_handle) {
   DCHECK_NE(process_identifier, kInvalidProcessIdentifier);
   DCHECK(peer_process_identifier);
+  DCHECK(is_first);
   DCHECK(platform_handle);
   DCHECK(!platform_handle->is_valid());  // Not technically wrong, but unlikely.
 
@@ -478,6 +485,8 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
                  << " which is neither connectee";
       return Result::FAILURE;
     }
+
+    *is_first = true;
 
     // TODO(vtl): FIXME -- add stuff for SUCCESS_CONNECT_REUSE_CONNECTION here.
     Result result = Result::FAILURE;
@@ -529,6 +538,7 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
   }
 
   *peer_process_identifier = peer;
+  *is_first = false;
 
   // TODO(vtl): FIXME -- add stuff for SUCCESS_CONNECT_REUSE_CONNECTION here.
   Result result = Result::FAILURE;

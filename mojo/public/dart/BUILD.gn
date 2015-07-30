@@ -22,8 +22,9 @@ dart_mojo_sdk_sources = [
   "lib/src/proxy.dart",
   "lib/src/struct.dart",
   "lib/src/stub.dart",
-  "lib/src/union.dart",
   "lib/src/types.dart",
+  "lib/src/union.dart",
+  "lib/src/utils.dart",
 ]
 
 dartzip_package("dart") {

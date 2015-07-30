@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:_testing/expect.dart';
@@ -19,9 +20,8 @@ invalidHandleTest() {
       invalidHandle.wait(MojoHandleSignals.kReadWrite, 1000000);
   Expect.isTrue(mwr.result.isInvalidArgument);
 
-  MojoWaitManyResult mwmr = MojoHandle.waitMany([invalidHandle.h], [
-    MojoHandleSignals.kReadWrite
-  ], MojoHandle.DEADLINE_INDEFINITE);
+  MojoWaitManyResult mwmr = MojoHandle.waitMany([invalidHandle.h],
+      [MojoHandleSignals.kReadWrite], MojoHandle.DEADLINE_INDEFINITE);
   Expect.isTrue(mwmr.result.isInvalidArgument);
 
   // Message pipe.
@@ -106,9 +106,8 @@ basicMessagePipeTest() {
   Expect.isTrue(result.isOk);
 
   // end0 should now be readable.
-  MojoWaitManyResult mwmr = MojoHandle.waitMany([end0.handle.h], [
-    MojoHandleSignals.kReadable
-  ], MojoHandle.DEADLINE_INDEFINITE);
+  MojoWaitManyResult mwmr = MojoHandle.waitMany([end0.handle.h],
+      [MojoHandleSignals.kReadable], MojoHandle.DEADLINE_INDEFINITE);
   Expect.isTrue(mwmr.result.isOk);
 
   // Read from end0.
@@ -178,9 +177,8 @@ basicDataPipeTest() {
   Expect.equals(written, helloData.lengthInBytes);
 
   // Now that we have written, the consumer should be readable.
-  MojoWaitManyResult mwmr = MojoHandle.waitMany([consumer.handle.h], [
-    MojoHandleSignals.kReadable
-  ], MojoHandle.DEADLINE_INDEFINITE);
+  MojoWaitManyResult mwmr = MojoHandle.waitMany([consumer.handle.h],
+      [MojoHandleSignals.kReadable], MojoHandle.DEADLINE_INDEFINITE);
   Expect.isTrue(mwr.result.isOk);
 
   // Do a two-phase write to the producer.
@@ -293,9 +291,28 @@ basicSharedBufferTest() {
   duplicate = null;
 }
 
+utilsTest() {
+  int ticksa = getTimeTicksNow();
+  Expect.isTrue(1000 < ticksa);
+
+  // Wait for the clock to advance.
+  MojoWaitResult mwr = (new MojoMessagePipe()).endpoints[0].handle.wait(
+      MojoHandleSignals.kReadable, 1);
+  Expect.isTrue(mwr.result.isDeadlineExceeded);
+
+  int ticksb = getTimeTicksNow();
+  Expect.isTrue(ticksa < ticksb);
+}
+// TODO(rudominer) This probably belongs in a different file.
+processTest() {
+  Expect.isTrue(pid > 0);
+}
+
 main() {
   invalidHandleTest();
   basicMessagePipeTest();
   basicDataPipeTest();
   basicSharedBufferTest();
+  utilsTest();
+  processTest();
 }

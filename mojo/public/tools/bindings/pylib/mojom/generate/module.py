@@ -386,10 +386,12 @@ class Interface(ReferenceKind):
 
 
 class EnumField(object):
-  def __init__(self, name=None, value=None, attributes=None):
+  def __init__(self, name=None, value=None, attributes=None,
+               numeric_value=None):
     self.name = name
     self.value = value
     self.attributes = attributes
+    self.numeric_value = numeric_value
 
   @property
   def min_version(self):
@@ -572,4 +574,3 @@ def HasCallbacks(interface):
     if method.response_parameters != None:
       return True
   return False
-

@@ -41,6 +41,7 @@ component("system") {
     "connection_identifier.h",
     "connection_manager.cc",
     "connection_manager.h",
+    "connection_manager_messages.h",
     "core.cc",
     "core.h",
     "data_pipe.cc",

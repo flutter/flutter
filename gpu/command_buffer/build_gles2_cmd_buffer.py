@@ -3300,7 +3300,7 @@ _FUNCTION_INFO = {
     'type': 'Custom',
     'impl_func': False,
     'unit_test': False,
-    'extension': True,
+    'extension': 'CHROMIUM_resize',
     'chromium': True,
   },
   'GetRequestableExtensionsCHROMIUM': {
@@ -10646,6 +10646,9 @@ def main(argv):
   gen.WriteMojoGLCallVisitorForExtension(
       mojo_gles2_prefix + "_chromium_miscellaneous_autogen.h",
       "CHROMIUM_miscellaneous")
+  gen.WriteMojoGLCallVisitorForExtension(
+      mojo_gles2_prefix + "_chromium_resize_autogen.h",
+      "CHROMIUM_resize")
   gen.WriteMojoGLCallVisitorForExtension(
       mojo_gles2_prefix + "_occlusion_query_ext_autogen.h",
       "occlusion_query_EXT")

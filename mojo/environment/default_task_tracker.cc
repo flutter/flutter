@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/environment/default_task_tracker_impl.h"
+#include "mojo/environment/default_task_tracker.h"
 
 #include "base/logging.h"
 #include "mojo/common/task_tracker.h"
+#include "mojo/public/cpp/environment/task_tracker.h"
 
 namespace mojo {
 namespace internal {
@@ -21,7 +22,7 @@ TaskTrackingId StartTracking(const char* function_name,
     return TaskTrackingId(0);
 
   return common::TaskTracker::StartTracking(function_name, file_name,
-                                              line_number, program_counter);
+                                            line_number, program_counter);
 }
 
 void EndTracking(const TaskTrackingId id) {
@@ -37,15 +38,11 @@ void SetEnabled(bool enabled) {
   g_enabled = enabled;
 }
 
+}  // namespace
+
 const TaskTracker kDefaultTaskTracker = {&StartTracking,
                                          &EndTracking,
                                          &SetEnabled};
-
-}  // namespace
-
-const TaskTracker* GetDefaultTaskTrackerImpl() {
-  return &kDefaultTaskTracker;
-}
 
 }  // namespace internal
 }  // namespace mojo

@@ -1,5 +1,7 @@
 {%- import "interface_macros.tmpl" as interface_macros %}
 {%- import "struct_macros.tmpl" as struct_macros %}
+{%- from "enum_macros.tmpl" import is_valid_enum_def %}
+
 {%- set class_name = interface.name %}
 {%- set proxy_name = interface.name ~ "Proxy" %}
 {%- set namespace_as_string = "%s"|format(namespace|replace(".","::")) %}
@@ -40,6 +42,11 @@ MOJO_STATIC_CONST_MEMBER_DEFINITION const {{constant.kind|cpp_pod_type}} {{inter
 {%-   else %}
 MOJO_STATIC_CONST_MEMBER_DEFINITION const {{constant.kind|cpp_pod_type}} {{interface.name}}::{{constant.name}} = {{constant|constant_value}};
 {%-   endif %}
+{%- endfor %}
+
+{#--- Enums #}
+{%- for enum in interface.enums %}
+  {{is_valid_enum_def(enum, class_name=interface.name)|indent(2)}}
 {%- endfor %}
 
 {#--- ForwardToCallback definition #}

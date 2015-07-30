@@ -17,3 +17,4 @@ part 'src/event_stream.dart';
 part 'src/handle.dart';
 part 'src/message_pipe.dart';
 part 'src/types.dart';
+part 'src/utils.dart';

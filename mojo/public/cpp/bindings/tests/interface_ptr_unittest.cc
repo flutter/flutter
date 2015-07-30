@@ -9,6 +9,7 @@
 #include "mojo/public/interfaces/bindings/tests/math_calculator.mojom.h"
 #include "mojo/public/interfaces/bindings/tests/sample_interfaces.mojom.h"
 #include "mojo/public/interfaces/bindings/tests/sample_service.mojom.h"
+#include "mojo/public/interfaces/bindings/tests/scoping.mojom.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
@@ -570,6 +571,77 @@ TEST(WeakConnectorTest, Math) {
   loop.RunUntilIdle();
   EXPECT_TRUE(error_received);
   EXPECT_FALSE(destroyed);
+}
+
+class CImpl : public C {
+ public:
+  CImpl(bool* d_called, InterfaceRequest<C> request)
+      : d_called_(d_called),
+        binding_(this, request.Pass()) {}
+  ~CImpl() override {}
+
+ private:
+  void D() override {
+    *d_called_ = true;
+  }
+
+  bool* d_called_;
+  StrongBinding<C> binding_;
+};
+
+class BImpl : public B {
+ public:
+  BImpl(bool* d_called, InterfaceRequest<B> request)
+      : d_called_(d_called),
+        binding_(this, request.Pass()) {}
+  ~BImpl() override {}
+
+ private:
+  void GetC(InterfaceRequest<C> c) override {
+    new CImpl(d_called_, c.Pass());
+  }
+
+  bool* d_called_;
+  StrongBinding<B> binding_;
+};
+
+class AImpl : public A {
+ public:
+  explicit AImpl(InterfaceRequest<A> request)
+      : d_called_(false),
+        binding_(this, request.Pass()) {}
+  ~AImpl() override {}
+
+  bool d_called() const { return d_called_; }
+
+ private:
+  void GetB(InterfaceRequest<B> b) override {
+    new BImpl(&d_called_, b.Pass());
+  }
+
+  bool d_called_;
+  Binding<A> binding_;
+};
+
+TEST_F(InterfacePtrTest, Scoping) {
+  APtr a;
+  AImpl a_impl(GetProxy(&a));
+
+  EXPECT_FALSE(a_impl.d_called());
+
+  {
+    BPtr b;
+    a->GetB(GetProxy(&b));
+    CPtr c;
+    b->GetC(GetProxy(&c));
+    c->D();
+  }
+
+  // While B & C have fallen out of scope, the pipes will remain until they are
+  // flushed.
+  EXPECT_FALSE(a_impl.d_called());
+  PumpMessages();
+  EXPECT_TRUE(a_impl.d_called());
 }
 
 }  // namespace

@@ -10,8 +10,8 @@
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/dart/embedder/builtin.h"
 #include "mojo/dart/embedder/common.h"
-#include "mojo/dart/embedder/dart_state.h"
 #include "mojo/dart/embedder/io/internet_address.h"
+#include "mojo/dart/embedder/mojo_dart_state.h"
 
 
 namespace mojo {
@@ -29,6 +29,7 @@ namespace dart {
   V(Platform_ExecutableArguments, 0)                                           \
   V(Platform_PackageRoot, 0)                                                   \
   V(Platform_GetVersion, 0)                                                    \
+  V(Process_Pid, 0)                                                            \
 
 MOJO_IO_NATIVE_LIST(DECLARE_FUNCTION);
 
@@ -169,6 +170,14 @@ void Platform_GetVersion(Dart_NativeArguments arguments) {
   // TODO(johnmccutchan): Consider incorporating Mojo version.
   Dart_SetReturnValue(arguments,
                       Dart_NewStringFromCString(Dart_VersionString()));
+}
+
+void Process_Pid(Dart_NativeArguments arguments) {
+  // TODO(rudominer) After sandboxing is implemented getpid() will not return
+  // the real pid. Most likely it will return the value 1. We need to decide
+  // what behavior we want Dart's pid getter to have when sandboxed.
+  pid_t pid = getpid();
+  Dart_SetIntegerReturnValue(arguments, static_cast<int64_t>(pid));
 }
 
 }  // namespace dart

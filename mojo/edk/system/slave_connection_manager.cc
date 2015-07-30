@@ -9,6 +9,7 @@
 #include "base/location.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
+#include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
 
 namespace mojo {
@@ -24,6 +25,7 @@ SlaveConnectionManager::SlaveConnectionManager(
       awaiting_ack_type_(NOT_AWAITING_ACK),
       ack_result_(nullptr),
       ack_peer_process_identifier_(nullptr),
+      ack_is_first_(nullptr),
       ack_platform_handle_(nullptr),
       event_(false, false) {  // Auto-reset, not initially signalled.
 }
@@ -35,6 +37,7 @@ SlaveConnectionManager::~SlaveConnectionManager() {
   DCHECK_EQ(awaiting_ack_type_, NOT_AWAITING_ACK);
   DCHECK(!ack_result_);
   DCHECK(!ack_peer_process_identifier_);
+  DCHECK(!ack_is_first_);
   DCHECK(!ack_platform_handle_);
 }
 
@@ -107,15 +110,21 @@ bool SlaveConnectionManager::CancelConnect(
 ConnectionManager::Result SlaveConnectionManager::Connect(
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
+    bool* is_first,
     embedder::ScopedPlatformHandle* platform_handle) {
   AssertNotOnPrivateThread();
+  DCHECK(peer_process_identifier);
+  DCHECK(is_first);
+  DCHECK(platform_handle);
+  DCHECK(!platform_handle->is_valid());  // Not technically wrong, but unlikely.
 
   MutexLocker locker(&mutex_);
   Result result = Result::FAILURE;
   private_thread_.message_loop()->PostTask(
-      FROM_HERE, base::Bind(&SlaveConnectionManager::ConnectOnPrivateThread,
-                            base::Unretained(this), connection_id, &result,
-                            peer_process_identifier, platform_handle));
+      FROM_HERE,
+      base::Bind(&SlaveConnectionManager::ConnectOnPrivateThread,
+                 base::Unretained(this), connection_id, &result,
+                 peer_process_identifier, is_first, platform_handle));
   event_.Wait();
   return result;
 }
@@ -193,10 +202,9 @@ void SlaveConnectionManager::ConnectOnPrivateThread(
     const ConnectionIdentifier& connection_id,
     Result* result,
     ProcessIdentifier* peer_process_identifier,
+    bool* is_first,
     embedder::ScopedPlatformHandle* platform_handle) {
   DCHECK(result);
-  DCHECK(platform_handle);
-  DCHECK(!platform_handle->is_valid());  // Not technically wrong, but unlikely.
   AssertOnPrivateThread();
   // This should only posted (from another thread, to |private_thread_|) with
   // the lock held (until this thread triggers |event_|).
@@ -217,6 +225,7 @@ void SlaveConnectionManager::ConnectOnPrivateThread(
   awaiting_ack_type_ = AWAITING_CONNECT_ACK;
   ack_result_ = result;
   ack_peer_process_identifier_ = peer_process_identifier;
+  ack_is_first_ = is_first;
   ack_platform_handle_ = platform_handle;
 }
 
@@ -255,12 +264,17 @@ void SlaveConnectionManager::OnReadMessage(
       DCHECK_EQ(num_platform_handles, 0u);
       *ack_result_ = Result::SUCCESS;
       DCHECK(!ack_peer_process_identifier_);
+      DCHECK(!ack_is_first_);
       DCHECK(!ack_platform_handle_);
     } else {
-      // Success acks for "connect" always have a |ProcessIdentifier| as data.
-      CHECK_EQ(num_bytes, sizeof(ProcessIdentifier));
-      *ack_peer_process_identifier_ =
-          *reinterpret_cast<const ProcessIdentifier*>(message_view.bytes());
+      // Success acks for "connect" always have a
+      // |ConnectionManagerAckSuccessConnectData| as data.
+      CHECK_EQ(num_bytes, sizeof(ConnectionManagerAckSuccessConnectData));
+      const ConnectionManagerAckSuccessConnectData& data =
+          *static_cast<const ConnectionManagerAckSuccessConnectData*>(
+              message_view.bytes());
+      *ack_peer_process_identifier_ = data.peer_process_identifier;
+      *ack_is_first_ = data.is_first;
 
       switch (message_view.subtype()) {
         case MessageInTransit::Subtype::
@@ -294,6 +308,7 @@ void SlaveConnectionManager::OnReadMessage(
   awaiting_ack_type_ = NOT_AWAITING_ACK;
   ack_result_ = nullptr;
   ack_peer_process_identifier_ = nullptr;
+  ack_is_first_ = nullptr;
   ack_platform_handle_ = nullptr;
   event_.Signal();
 }

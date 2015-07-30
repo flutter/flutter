@@ -1,12 +1,11 @@
-
+{% from "enum_macros.tmpl" import enum_decl -%}
 class {{struct.name}} {
  public:
   using Data_ = internal::{{struct.name}}_Data;
 
 {#--- Enums #}
 {%- for enum in struct.enums -%}
-{%    macro enum_def() %}{% include "enum_declaration.tmpl" %}{% endmacro %}
-  {{enum_def()|indent(2)}}
+  {{enum_decl(enum, is_static=true)|indent(2)}}
 {%- endfor %}
 
 {#--- Constants #}

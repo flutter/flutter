@@ -29,6 +29,7 @@ part 'src/utils.dart';
 
 bool verbose;
 bool dryRun;
+Map<String, String> duplicateDetection = new Map<String, String>();
 
 /// Searches for .mojom.dart files under [mojomDirectory] and copies them to
 /// the 'mojom' packages.
@@ -41,6 +42,12 @@ copyAction(PackageIterData data, Directory mojomDirectory) async {
     final relative = path.relative(mojom.path, from: mojomDirectory.path);
     final dest = path.join(data.mojomPackage.path, relative);
     final destDirectory = new Directory(path.dirname(dest));
+
+    if (duplicateDetection.containsKey(dest)) {
+      String original = duplicateDetection[dest];
+      throw new GenerationError('Conflict: Both ${original} and ${mojom.path} supply ${dest}');
+    }
+    duplicateDetection[dest] = mojom.path;
 
     if (verbose || dryRun) {
       print('Copying $mojom to $dest');

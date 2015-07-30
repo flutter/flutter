@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/environment/default_async_waiter_impl.h"
+#include "mojo/environment/default_async_waiter.h"
 
 #include "base/bind.h"
 #include "mojo/common/handle_watcher.h"
+#include "mojo/public/c/environment/async_waiter.h"
 
 namespace mojo {
 namespace internal {
@@ -35,16 +36,9 @@ void CancelWait(MojoAsyncWaitID wait_id) {
   delete reinterpret_cast<common::HandleWatcher*>(wait_id);
 }
 
-const MojoAsyncWaiter kDefaultAsyncWaiter = {
-  AsyncWait,
-  CancelWait
-};
-
 }  // namespace
 
-const MojoAsyncWaiter* GetDefaultAsyncWaiterImpl() {
-  return &kDefaultAsyncWaiter;
-}
+const MojoAsyncWaiter kDefaultAsyncWaiter = {AsyncWait, CancelWait};
 
 }  // namespace internal
 }  // namespace mojo

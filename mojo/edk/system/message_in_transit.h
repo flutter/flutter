@@ -83,10 +83,8 @@ class MOJO_SYSTEM_IMPL_EXPORT MessageInTransit {
     // Subtypes for type |Type::CONNECTION_MANAGER_ACK|, corresponding to
     // |ConnectionManager::Result| values (failure and non-"connect" acks never
     // have any message contents; success acks for "connect" always have a
-    // |ProcessIdentifier| as data and also a platform handle attached for "new
-    // connection"):
-    // TODO(vtl): FIXME -- probably, in the "connect, reuse connection" case,
-    // we'll have to send more information.
+    // |ConnectionManagerAckSuccessConnectData| as data and also a platform
+    // handle attached for "new connection"):
     CONNECTION_MANAGER_ACK_FAILURE = 0,
     CONNECTION_MANAGER_ACK_SUCCESS = 1,
     CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_SAME_PROCESS = 2,
