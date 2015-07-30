@@ -37,6 +37,8 @@ class Viewer : public mojo::ApplicationDelegate,
 
     blink::WebRuntimeFeatures::enableObservatory(
         !RuntimeFlags::Get().testing());
+    blink::WebRuntimeFeatures::enableDartCheckedMode(
+        RuntimeFlags::Get().enable_checked_mode());
 
     platform_impl_.reset(new PlatformImpl());
     blink::initialize(platform_impl_.get());

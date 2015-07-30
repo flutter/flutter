@@ -120,3 +120,4 @@ PseudoClassesInMatchingCriteriaInAuthorShadowTrees status=test
 CredentialManager status=test
 
 Observatory status=stable
+DartCheckedMode

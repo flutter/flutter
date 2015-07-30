@@ -17,9 +17,11 @@ class RuntimeFlags {
   static const RuntimeFlags& Get();
 
   bool testing() const { return testing_; }
+  bool enable_checked_mode() const { return enable_checked_mode_; }
 
  private:
-  bool testing_;
+  bool testing_ = false;
+  bool enable_checked_mode_ = false;
 };
 
 }  // namespace sky
