@@ -10,7 +10,6 @@
 #include "base/at_exit.h"
 #include "base/bind.h"
 #include "base/command_line.h"
-#include "base/i18n/icu_util.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/macros.h"
@@ -20,7 +19,6 @@
 #include "jni/SkyMain_jni.h"
 #include "sky/shell/service_provider.h"
 #include "sky/shell/shell.h"
-#include "ui/gl/gl_surface_egl.h"
 
 using base::LazyInstance;
 
@@ -54,9 +52,6 @@ static void Init(JNIEnv* env, jclass clazz, jobject context) {
 
   g_java_message_loop.Get().reset(new base::MessageLoopForUI);
   base::MessageLoopForUI::current()->Start();
-
-  base::i18n::InitializeICU();
-  gfx::GLSurface::InitializeOneOff();
 
   Shell::Init(make_scoped_ptr(new ServiceProviderContext(
       g_java_message_loop.Get()->task_runner())));

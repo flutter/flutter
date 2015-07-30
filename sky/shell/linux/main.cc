@@ -36,8 +36,6 @@ void Init() {
   blink::WebRuntimeFeatures::enableObservatory(
       !command_line.HasSwitch(switches::kNonInteractive));
 
-  Shell::Init(make_scoped_ptr(new ServiceProviderContext(
-      base::MessageLoop::current()->task_runner())));
   // Explicitly boot the shared test runner.
   TestRunner& runner = TestRunner::Shared();
 
@@ -80,7 +78,8 @@ int main(int argc, const char* argv[]) {
 
   base::MessageLoop message_loop;
 
-  base::i18n::InitializeICU();
+  sky::shell::Shell::Init(make_scoped_ptr(
+      new sky::shell::ServiceProviderContext(message_loop.task_runner())));
 
   message_loop.PostTask(FROM_HERE, base::Bind(&sky::shell::Init));
   message_loop.Run();

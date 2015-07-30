@@ -5,11 +5,13 @@
 #include "sky/shell/shell.h"
 
 #include "base/bind.h"
+#include "base/i18n/icu_util.h"
 #include "base/single_thread_task_runner.h"
 #include "mojo/common/message_pump_mojo.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/ui/engine.h"
+#include "ui/gl/gl_surface.h"
 
 namespace sky {
 namespace shell {
@@ -45,6 +47,10 @@ Shell::~Shell() {
 }
 
 void Shell::Init(scoped_ptr<ServiceProviderContext> service_provider_context) {
+  CHECK(base::i18n::InitializeICU());
+#if !defined(OS_LINUX)
+  CHECK(gfx::GLSurface::InitializeOneOff());
+#endif
   g_shell = new Shell(service_provider_context.Pass());
 }
 
