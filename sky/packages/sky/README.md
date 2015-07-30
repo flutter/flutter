@@ -23,7 +23,7 @@ Next, create a `lib` directory (which is where your Dart code will go) and use
 the `pub` tool to fetch the Sky package and its dependencies:
 
  - `mkdir lib`
- - `pub get && pub run sky:init`
+ - `pub upgrade && pub run sky:init`
 
 Sky assumes the entry point for your application is a `main` function in
 `lib/main.dart`:
