@@ -155,14 +155,14 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
         BoxConstraints childConstraints = innerConstraints;
 
         if (childData.left != null && childData.right != null)
-          childConstraints = childConstraints.applyWidth(childData.right - childData.left);
+          childConstraints = childConstraints.applyWidth(size.width - childData.right - childData.left);
         else if (childData.left != null)
           childConstraints = childConstraints.applyMaxWidth(size.width - childData.left);
         else if (childData.right != null)
           childConstraints = childConstraints.applyMaxWidth(size.width - childData.right);
 
         if (childData.top != null && childData.bottom != null)
-          childConstraints = childConstraints.applyHeight(childData.bottom - childData.top);
+          childConstraints = childConstraints.applyHeight(size.height - childData.bottom - childData.top);
         else if (childData.top != null)
           childConstraints = childConstraints.applyMaxHeight(size.height - childData.top);
         else if (childData.bottom != null)
