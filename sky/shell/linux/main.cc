@@ -23,14 +23,6 @@ namespace sky {
 namespace shell {
 namespace {
 
-void Usage() {
-  std::cerr << "Usage: sky_shell"
-            << " --" << switches::kNonInteractive
-            << " --" << switches::kPackageRoot << "=PACKAGE_ROOT"
-            << " --" << switches::kSnapshot << "=SNAPSHOT"
-            << " [ MAIN_DART ]" << std::endl;
-}
-
 void Init() {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   blink::WebRuntimeFeatures::enableObservatory(
@@ -72,7 +64,7 @@ int main(int argc, const char* argv[]) {
   if (command_line.HasSwitch(sky::shell::switches::kHelp) ||
       (!command_line.HasSwitch(sky::shell::switches::kPackageRoot) &&
        !command_line.HasSwitch(sky::shell::switches::kSnapshot))) {
-    sky::shell::Usage();
+    sky::shell::switches::PrintUsage("sky_shell");
     return 0;
   }
 
