@@ -45,38 +45,29 @@ int PlatformMacMain(int argc,
 
   RedirectIOConnectionsToSyslog();
 
-  auto result = false;
+  bool result = false;
 
   result = base::CommandLine::Init(argc, argv);
   DLOG_ASSERT(result);
 
   InitializeLogging();
 
-  result = base::i18n::InitializeICU();
-  DLOG_ASSERT(result);
-
-  result = gfx::GLSurface::InitializeOneOff();
-  DLOG_ASSERT(result);
-
-  scoped_ptr<base::MessageLoopForUI> main_message_loop(
-      new base::MessageLoopForUI());
+  scoped_ptr<base::MessageLoopForUI> message_loop(new base::MessageLoopForUI());
 
 #if TARGET_OS_IPHONE
   // One cannot start the message loop on the platform main thread. Instead,
   // we attach to the CFRunLoop
-  main_message_loop->Attach();
+  message_loop->Attach();
 #endif
 
-  auto service_provider_context = make_scoped_ptr(
-      new sky::shell::ServiceProviderContext(main_message_loop->task_runner()));
-
-  sky::shell::Shell::Init(service_provider_context.Pass());
+  sky::shell::Shell::Init(make_scoped_ptr(
+      new sky::shell::ServiceProviderContext(message_loop->task_runner()));
 
   result = callback();
 
 #if !TARGET_OS_IPHONE
   if (result == EXIT_SUCCESS) {
-    main_message_loop->QuitNow();
+    message_loop->QuitNow();
   }
 #endif
 
