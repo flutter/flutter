@@ -8,10 +8,7 @@ import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/forces.dart';
 import 'package:sky/animation/timeline.dart';
 
-enum AnimationDirection {
-  forward,
-  reverse
-}
+export 'package:sky/animation/forces.dart' show Direction;
 
 enum AnimationStatus {
   dismissed, // stoped at 0
@@ -39,8 +36,21 @@ class AnimationPerformance {
   Timeline _timeline;
   Timeline get timeline => _timeline;
 
-  AnimationDirection _direction;
-  AnimationDirection get direction => _direction;
+  Direction _direction;
+  Direction get direction => _direction;
+
+  // If non-null, animate with this force instead of a tween animation.
+  Force attachedForce;
+
+  void addVariable(AnimatedVariable newVariable) {
+    if (variable == null) {
+      variable = newVariable;
+    } else if (variable is AnimatedList) {
+      (variable as AnimatedList).variables.add(newVariable);
+    } else {
+      variable = new AnimatedList([variable, newVariable]);
+    }
+  }
 
   double get progress => timeline.value;
   void set progress(double t) {
@@ -59,33 +69,34 @@ class AnimationPerformance {
       return AnimationStatus.completed;
     if (!isAnimating && progress == 0.0)
       return AnimationStatus.dismissed;
-    return direction == AnimationDirection.forward ?
+    return direction == Direction.forward ?
         AnimationStatus.forward :
         AnimationStatus.reverse;
   }
 
-  Future play([AnimationDirection direction = AnimationDirection.forward]) {
+  Future play([Direction direction = Direction.forward]) {
     _direction = direction;
     return resume();
   }
-  Future forward() => play(AnimationDirection.forward);
-  Future reverse() => play(AnimationDirection.reverse);
-  Future resume() => _animateTo(direction == AnimationDirection.forward ? 1.0 : 0.0);
+  Future forward() => play(Direction.forward);
+  Future reverse() => play(Direction.reverse);
+  Future resume() {
+    if (attachedForce != null)
+      return fling(_direction, force: attachedForce);
+    return _animateTo(direction == Direction.forward ? 1.0 : 0.0);
+  }
 
   void stop() {
     timeline.stop();
   }
 
-  // Flings the timeline with an optional force (defaults to a critically damped
-  // spring) and initial velocity. Negative velocity causes the timeline to go
-  // in reverse.
-  Future fling({double velocity: 1.0, Force force}) {
+  // Flings the timeline in the given direction with an optional force
+  // (defaults to a critically damped spring) and initial velocity.
+  Future fling(Direction direction, {double velocity: 0.0, Force force}) {
     if (force == null)
       force = kDefaultSpringForce;
-    // This is an approximation - the force may not necessarily result in
-    // animating the same direction as the initial velocity.
-    _direction = velocity >= 0.0 ? AnimationDirection.forward : AnimationDirection.reverse;
-    return timeline.fling(force.release(progress, velocity));
+    _direction = direction;
+    return timeline.fling(force.release(progress, velocity, _direction));
   }
 
   final List<Function> _listeners = new List<Function>();

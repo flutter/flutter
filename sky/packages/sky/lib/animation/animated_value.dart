@@ -69,8 +69,8 @@ class AnimatedList extends AnimatedVariable {
   String toString() => 'AnimatedList([$variables])';
 }
 
-class AnimatedColor extends AnimatedValue<Color> {
-  AnimatedColor(Color begin, { Color end, Curve curve: linear })
+class AnimatedColorValue extends AnimatedValue<Color> {
+  AnimatedColorValue(Color begin, { Color end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
   void setProgress(double t) {
