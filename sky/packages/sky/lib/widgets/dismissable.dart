@@ -167,7 +167,7 @@ class Dismissable extends AnimatedComponent {
       _dragUnderway = false;
       _dragX = event.velocityX.sign;
       _position.end = _activeCardDragEndPoint;
-      _fadePerformance.fling(velocity: event.velocityX.abs() * _kFlingVelocityScale);
+      _fadePerformance.fling(Direction.forward, velocity: event.velocityX.abs() * _kFlingVelocityScale);
     }
   }
 
