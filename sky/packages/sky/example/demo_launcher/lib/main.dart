@@ -16,7 +16,7 @@ import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/scrollable_list.dart';
+import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/ink_well.dart';
 
 AssetBundle _initBundle() {
