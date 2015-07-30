@@ -48,7 +48,6 @@ void Animator::RequestFrame() {
 
 void Animator::Stop() {
   paused_ = true;
-  engine_requested_frame_ = false;
 }
 
 void Animator::Start() {
@@ -59,10 +58,15 @@ void Animator::Start() {
 void Animator::BeginFrame(int64_t time_stamp) {
   TRACE_EVENT_ASYNC_END0("sky", "Frame request pending", this);
   DCHECK(engine_requested_frame_);
-  engine_requested_frame_ = false;
-
   DCHECK(outstanding_requests_ > 0);
   DCHECK(outstanding_requests_ <= kPipelineDepth) << outstanding_requests_;
+
+  engine_requested_frame_ = false;
+
+  if (paused_) {
+    OnFrameComplete();
+    return;
+  }
 
   base::TimeTicks frame_time = time_stamp ?
       base::TimeTicks::FromInternalValue(time_stamp) : base::TimeTicks::Now();

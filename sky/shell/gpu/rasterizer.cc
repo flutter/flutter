@@ -71,10 +71,15 @@ void Rasterizer::DrawPicture(SkPicture* picture) {
 }
 
 void Rasterizer::OnOutputSurfaceDestroyed() {
-  CHECK(context_->MakeCurrent(surface_.get()));
-  ganesh_surface_.reset();
-  ganesh_context_.reset();
-  context_ = nullptr;
+  if (context_) {
+    CHECK(context_->MakeCurrent(surface_.get()));
+    ganesh_surface_.reset();
+    ganesh_context_.reset();
+    context_ = nullptr;
+  }
+  CHECK(!ganesh_surface_);
+  CHECK(!ganesh_context_);
+  CHECK(!context_);
   surface_ = nullptr;
 }
 
