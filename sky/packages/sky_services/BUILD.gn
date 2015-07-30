@@ -23,8 +23,6 @@ dart_pkg("sky_services") {
 
   deps = [
     ":copy_sky_services_license",
-    "//mojo/services/asset_bundle/public/interfaces",
-    "//mojo/services/keyboard/public/interfaces",
     "//sky/services/activity:interfaces",
     "//sky/services/media:interfaces",
     "//sky/services/testing:interfaces",
