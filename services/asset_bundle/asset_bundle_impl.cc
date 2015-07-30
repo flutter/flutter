@@ -40,7 +40,8 @@ void AssetBundleImpl::GetAsStream(
   base::FilePath asset_path =
       base::MakeAbsoluteFilePath(asset_dir_->path().Append(asset_string));
 
-  if (!asset_dir_->path().IsParent(asset_path)) {
+  auto asset_dir_abs = base::MakeAbsoluteFilePath(asset_dir_->path());
+  if (!asset_dir_abs.IsParent(asset_path)) {
     LOG(WARNING) << "Requested asset '" << asset_string << "' does not exist.";
     return;
   }
