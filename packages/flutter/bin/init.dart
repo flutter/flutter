@@ -10,7 +10,4 @@
 import 'dart:io';
 
 main(List<String> arguments) {
-  ProcessResult result = Process.runSync(Platform.executable, ['-p', 'packages', 'packages/mojom/generate.dart']);
-  stdout.write(result.stdout);
-  stderr.write(result.stderr);
 }
