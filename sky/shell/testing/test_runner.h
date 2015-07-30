@@ -34,11 +34,11 @@ class TestRunner : public mojo::InterfaceFactory<TestHarness>,
 
   void Start(scoped_ptr<SingleTest> single_test);
 
- private:
   // mojo::InterfaceFactory<TestHarness> implementation:
   void Create(mojo::ApplicationConnection* app,
               mojo::InterfaceRequest<TestHarness> request) override;
 
+ private:
   // TestHarness implementation:
   void OnTestComplete(const mojo::String& test_result,
                       const mojo::Array<uint8_t> pixels) override;
