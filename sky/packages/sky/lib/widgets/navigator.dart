@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
+import 'package:sky/animation/forces.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/focus.dart';
@@ -65,7 +66,6 @@ class RouteState extends RouteBase {
 // and support multiple transition types
 const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 const Point _kTransitionStartPoint = const Point(0.0, 75.0);
-enum TransitionDirection { forward, reverse }
 class Transition extends AnimatedComponent {
   Transition({
     Key key,
@@ -76,7 +76,7 @@ class Transition extends AnimatedComponent {
     this.interactive
   }): super(key: key);
   Widget content;
-  TransitionDirection direction;
+  Direction direction;
   bool interactive;
   Function onDismissed;
   Function onCompleted;
@@ -91,61 +91,38 @@ class Transition extends AnimatedComponent {
       end: Point.origin,
       curve: easeOut
     );
-    _opacity = new AnimatedValue<double>(0.0, end: 1.0)
-      ..curve = easeOut;
-    _performance = new AnimationPerformance()
-      ..duration = _kTransitionDuration
-      ..variable = new AnimatedList([_position, _opacity])
-      ..addListener(_checkDismissed)
-      ..addListener(_checkCompleted);
-    if (direction == TransitionDirection.reverse)
+    _opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut);
+    _performance = new AnimationPerformance(duration: _kTransitionDuration)
+      ..variable = new AnimatedList([_position, _opacity]);
+    if (direction == Direction.reverse)
       _performance.progress = 1.0;
+    _performance.addStatusListener(_checkStatusChanged);
     watch(_performance);
     _start();
   }
 
   void _start() {
-    _dismissed = false;
-    switch (direction) {
-      case TransitionDirection.forward:
-      _performance.play();
-      break;
-      case TransitionDirection.reverse:
-      _performance.reverse();
-      break;
-    }
+    _performance.play(direction);
   }
 
   void syncFields(Transition source) {
     content = source.content;
+    interactive = source.interactive;
+    onDismissed = source.onDismissed;
     if (direction != source.direction) {
       direction = source.direction;
       _start();
     }
-    interactive = source.interactive;
-    onDismissed = source.onDismissed;
     super.syncFields(source);
   }
 
-  bool _dismissed = false;
-  void _checkDismissed() {
-    if (!_dismissed &&
-        direction == TransitionDirection.reverse &&
-        _performance.isDismissed) {
+  void _checkStatusChanged(AnimationStatus status) {
+    if (_performance.isDismissed) {
       if (onDismissed != null)
         onDismissed();
-      _dismissed = true;
-    }
-  }
-
-  bool _completed = false;
-  void _checkCompleted() {
-    if (!_completed &&
-        direction == TransitionDirection.forward &&
-        _performance.isCompleted) {
+    } else if (_performance.isCompleted) {
       if (onCompleted != null)
         onCompleted();
-      _completed = true;
     }
   }
 
@@ -266,7 +243,7 @@ class Navigator extends StatefulComponent {
       Transition transition = new Transition(
         key: new Key.fromObjectIdentity(historyEntry),
         content: content,
-        direction: (i <= state.historyIndex) ? TransitionDirection.forward : TransitionDirection.reverse,
+        direction: (i <= state.historyIndex) ? Direction.forward : Direction.reverse,
         interactive: (i == state.historyIndex),
         onDismissed: () {
           setState(() {
