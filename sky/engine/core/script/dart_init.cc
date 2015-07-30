@@ -75,15 +75,16 @@ void CreateEmptyRootLibraryIfNeeded() {
 
 static const char* kDartArgs[] = {
     "--enable_mirrors=false",
-#if ENABLE(DART_STRICT)
-    "--enable_asserts",
-    "--enable_type_checks",
-    "--error_on_bad_type",
-    "--error_on_bad_override",
 #if WTF_OS_IOS || WTF_OS_MACOSX
     "--no-profile"
 #endif
-#endif
+};
+
+static const char* kDartCheckedModeArgs[] = {
+  "--enable_asserts",
+  "--enable_type_checks",
+  "--error_on_bad_type",
+  "--error_on_bad_override",
 };
 
 void UnhandledExceptionCallback(Dart_Handle error) {
@@ -172,7 +173,17 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 void InitDartVM() {
   dart::bin::BootstrapDartIo();
 
-  CHECK(Dart_SetVMFlags(arraysize(kDartArgs), kDartArgs));
+  bool enable_checked_mode = RuntimeEnabledFeatures::dartCheckedModeEnabled();
+#if ENABLE(DART_STRICT)
+  enable_checked_mode = true;
+#endif
+
+  Vector<const char*> args;
+  args.append(kDartArgs, arraysize(kDartArgs));
+  if (enable_checked_mode)
+    args.append(kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
+
+  CHECK(Dart_SetVMFlags(args.size(), args.data()));
   // This should be called before calling Dart_Initialize.
   DartDebugger::InitDebugger();
   CHECK(Dart_Initialize(kDartVmIsolateSnapshotBuffer,

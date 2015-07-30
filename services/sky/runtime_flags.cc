@@ -16,11 +16,15 @@ RuntimeFlags flags;
 // Load the viewer in testing mode so we can dump pixels.
 const char kTesting[] = "--testing";
 
+// Instruct the DartVM to report type errors.
+const char kEnableCheckedMode[] = "--enable-checked-mode";
+
 }  // namespace
 
 void RuntimeFlags::Initialize(mojo::ApplicationImpl* app) {
   DCHECK(!initialized);
   flags.testing_ = app->HasArg(kTesting);
+  flags.enable_checked_mode_ = app->HasArg(kEnableCheckedMode);
   initialized = true;
 }
 

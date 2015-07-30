@@ -175,4 +175,9 @@ void WebRuntimeFeatures::enableObservatory(bool enable)
     RuntimeEnabledFeatures::setObservatoryEnabled(enable);
 }
 
+void WebRuntimeFeatures::enableDartCheckedMode(bool enable)
+{
+    RuntimeEnabledFeatures::setDartCheckedModeEnabled(enable);
+}
+
 } // namespace blink

@@ -94,6 +94,8 @@ public:
 
     BLINK_EXPORT static void enableObservatory(bool);
 
+    BLINK_EXPORT static void enableDartCheckedMode(bool);
+
 private:
     WebRuntimeFeatures();
 };
