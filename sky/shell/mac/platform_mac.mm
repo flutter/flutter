@@ -61,7 +61,7 @@ int PlatformMacMain(int argc,
 #endif
 
   sky::shell::Shell::Init(make_scoped_ptr(
-      new sky::shell::ServiceProviderContext(message_loop->task_runner()));
+      new sky::shell::ServiceProviderContext(message_loop->task_runner())));
 
   result = callback();
 
