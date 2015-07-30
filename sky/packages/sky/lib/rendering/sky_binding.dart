@@ -102,27 +102,23 @@ class SkyBinding {
     return state;
   }
 
+  PointerState _getOrCreateStateForPointer(event, position) {
+    PointerState state = _stateForPointer[event.pointer];
+    if (state == null)
+      state = _createStateForPointer(event, position);
+    return state;
+  }
+
   void _handlePointerEvent(sky.PointerEvent event) {
     Point position = new Point(event.x, event.y);
 
-    PointerState state;
-    switch(event.type) {
-      case 'pointerdown':
-        state = _createStateForPointer(event, position);
-        break;
-      case 'pointerup':
-      case 'pointercancel':
-        state = _stateForPointer[event.pointer];
-        if (_hammingWeight(event.buttons) <= 1)
-          _stateForPointer.remove(event.pointer);
-        break;
-      case 'pointermove':
-        state = _stateForPointer[event.pointer];
-        // In the case of mouse hover we won't already have a cached down.
-        if (state == null)
-          state = _createStateForPointer(event, position);
-        break;
+    PointerState state = _getOrCreateStateForPointer(event, position);
+
+    if (event.type == 'pointerup' || event.type == 'pointercancel') {
+      if (_hammingWeight(event.buttons) <= 1)
+        _stateForPointer.remove(event.pointer);
     }
+
     event.dx = position.x - state.lastPosition.x;
     event.dy = position.y - state.lastPosition.y;
     state.lastPosition = position;
