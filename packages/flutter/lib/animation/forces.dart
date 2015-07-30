@@ -4,9 +4,15 @@
 
 import 'package:newton/newton.dart';
 
+// TODO(mpcomplete): This doesn't belong here.
+enum Direction {
+  forward,
+  reverse
+}
+
 // Base class for creating Simulations for the animation Timeline.
 abstract class Force {
-  Simulation release(double position, double velocity);
+  Simulation release(double position, double velocity, Direction direction);
 }
 
 class SpringForce extends Force {
@@ -17,18 +23,17 @@ class SpringForce extends Force {
   // respectively.
   final double left, right;
 
-  Simulation release(double position, double velocity) {
+  Simulation release(double position, double velocity, Direction direction) {
     // Target just past the endpoint, because the animation will stop once the
     // Spring gets within the epsilon, and we want to stop at the endpoint.
-    double target = velocity < 0.0 ?
+    double target = direction == Direction.reverse ?
         this.left - _kEpsilon : this.right + _kEpsilon;
     return new SpringSimulation(spring, position, target, velocity);
   }
 }
 
 final SpringDescription _kDefaultSpringDesc =
-    new SpringDescription.withDampingRatio(
-        mass: 1.0, springConstant: 500.0, ratio: 1.0);
+    new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 500.0, ratio: 1.0);
 final SpringForce kDefaultSpringForce = new SpringForce(_kDefaultSpringDesc);
 
 const double _kEpsilon = 0.001;

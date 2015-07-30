@@ -5,11 +5,10 @@
 import 'dart:math' as math;
 
 import 'package:newton/newton.dart';
-import 'package:sky/animation/forces.dart';
 
 const double _kSecondsPerMillisecond = 1000.0;
 
-abstract class ScrollBehavior extends Force {
+abstract class ScrollBehavior {
   Simulation release(double position, double velocity) => null;
 
   // Returns the new scroll offset.

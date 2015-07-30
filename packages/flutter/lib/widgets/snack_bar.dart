@@ -4,16 +4,15 @@
 
 import 'dart:async';
 
-import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/animated_container.dart';
+import 'package:sky/widgets/animation_intentions.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/theme.dart';
-import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
@@ -41,39 +40,6 @@ class SnackBarAction extends Component {
   }
 }
 
-// TODO(mpcomplete): generalize this to a SlideIn class.
-class SnackBarSlideInIntention extends AnimationIntention {
-  SnackBarSlideInIntention(Duration duration) {
-    _position = new AnimatedValue<Point>(const Point(0.0, 50.0), end: Point.origin);
-    performance = new AnimationPerformance(duration: duration, variable: _position);
-  }
-
-  SnackBarStatusChangedCallback onStatusChanged;
-  AnimatedValue<Point> _position;
-  AnimationPerformance performance;
-
-  void initFields(AnimatedContainer container) {
-    performance.addListener(() { _updateProgress(container); });
-    performance.progress = 0.0;
-    if (container.tag)
-      performance.play();
-  }
-
-  void syncFields(AnimatedContainer original, AnimatedContainer updated) {
-    if (original.tag != updated.tag) {
-      original.tag = updated.tag;
-      performance.play(original.tag ? AnimationDirection.forward : AnimationDirection.reverse);
-    }
-  }
-
-  void _updateProgress(AnimatedContainer container) {
-    container.setState(() {
-      container.transform = new Matrix4.identity()
-        ..translate(_position.value.x, _position.value.y);
-    });
-  }
-}
-
 class SnackBar extends StatefulComponent {
 
   SnackBar({
@@ -91,10 +57,12 @@ class SnackBar extends StatefulComponent {
   bool showing;
   SnackBarStatusChangedCallback onStatusChanged;
 
-  SnackBarSlideInIntention _intention;
+  SlideInIntention _intention;
 
   void initState() {
-    _intention = new SnackBarSlideInIntention(_kSlideInDuration);
+    _intention = new SlideInIntention(duration: _kSlideInDuration,
+                                      start: const Point(0.0, 50.0),
+                                      end: Point.origin);
     _intention.performance.addStatusListener(_onStatusChanged);
   }
 
