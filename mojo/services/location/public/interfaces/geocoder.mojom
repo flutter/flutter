@@ -6,6 +6,7 @@
 // "Google Maps JavaScript API v3" defined here:
 // https://developers.google.com/maps/documentation/javascript/geocoding
 
+[DartPackage="mojo_services"]
 module mojo;
 
 import "location/public/interfaces/location.mojom";

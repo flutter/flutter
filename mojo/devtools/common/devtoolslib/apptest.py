@@ -31,7 +31,8 @@ def _build_shell_arguments(shell_args, apptest_url, apptest_args):
   return result
 
 
-def run_apptest(shell, shell_args, apptest_url, apptest_args, output_test):
+def run_apptest(shell, shell_args, apptest_url, apptest_args, timeout,
+                output_test):
   """Runs shell with the given arguments, retrieves the output and applies
   |output_test| to determine if the run was successful.
 
@@ -52,7 +53,7 @@ def run_apptest(shell, shell_args, apptest_url, apptest_args, output_test):
 
   _logger.debug("Starting: " + command_line)
   start_time = time.time()
-  (exit_code, output) = shell.RunAndGetOutput(arguments)
+  (exit_code, output, did_time_out) = shell.RunAndGetOutput(arguments, timeout)
   run_time = time.time() - start_time
   _logger.debug("Completed: " + command_line)
 
@@ -60,10 +61,12 @@ def run_apptest(shell, shell_args, apptest_url, apptest_args, output_test):
   if run_time >= 3:
     _logger.info("Test took %.3f seconds: %s" % (run_time, command_line))
 
-  if exit_code or not output_test(output):
+  if exit_code or did_time_out or not output_test(output):
     print 'Failed test: %r' % command_line
     if exit_code:
       print '  due to shell exit code %d' % exit_code
+    elif did_time_out:
+      print '  due to exceeded timeout of %fs' % timeout
     else:
       print '  due to test results'
     print 72 * '-'

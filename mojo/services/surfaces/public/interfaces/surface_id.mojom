@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+[DartPackage="mojo_services"]
 module mojo;
 
 // A surface ID is composed of two parts, a local part and a namespace. The

@@ -128,13 +128,12 @@ def main():
 
   args = parser.parse_args()
 
-  patches_dir = os.path.join(args.dest_dir, 'sky', 'tools', 'roll', 'patches')
-
   if args.mojo_dir:
       rev(args.mojo_dir, args.dest_dir, dirs_from_mojo, 'mojo')
 
       try:
-          patch.patch_and_filter(os.path.join(patches_dir, 'mojo'))
+          patch.patch_and_filter(args.dest_dir,
+                                 os.path.join('patches', 'mojo'))
       except subprocess.CalledProcessError:
           print "ERROR: Roll failed due to a patch not applying"
           print "Fix the patch to apply, commit the result, and re-run this script"
@@ -144,7 +143,8 @@ def main():
       rev(args.chromium_dir, args.dest_dir, dirs_from_chromium, 'chromium')
 
       try:
-          patch.patch_and_filter(os.path.join(patches_dir, 'chromium'))
+          patch.patch_and_filter(args.dest_dir,
+                                 os.path.join('patches', 'chromium'))
       except subprocess.CalledProcessError:
           print "ERROR: Roll failed due to a patch not applying"
           print "Fix the patch to apply, commit the result, and re-run this script"

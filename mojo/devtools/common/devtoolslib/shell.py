@@ -44,16 +44,20 @@ class Shell(object):
     """
     raise NotImplementedError()
 
-  def RunAndGetOutput(self, arguments):
+  def RunAndGetOutput(self, arguments, timeout=None):
     """Runs the shell with given arguments until shell exits and returns the
     output.
 
     Args:
       arguments: list of arguments for the shell
+      timeout: maximum running time in seconds, after which the shell will be
+          terminated
 
     Returns:
-      A tuple of (return_code, output). |return_code| is the exit code returned
-      by the shell or None if the exit code cannot be retrieved. |output| is the
-      stdout mingled with the stderr produced by the shell.
+      A tuple of (return_code, output, did_time_out). |return_code| is the exit
+      code returned by the shell or None if the exit code cannot be retrieved.
+      |output| is the stdout mingled with the stderr produced by the shell.
+      |did_time_out| is True iff the shell was terminated because it exceeded
+      the |timeout| and False otherwise.
     """
     raise NotImplementedError()

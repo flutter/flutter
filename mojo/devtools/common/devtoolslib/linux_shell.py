@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import subprocess
+import threading
 
 from devtoolslib.shell import Shell
 from devtoolslib import http_server
@@ -61,19 +62,40 @@ class LinuxShell(Shell):
     command = self.command_prefix + [self.executable_path] + arguments
     return subprocess.call(command, stderr=subprocess.STDOUT)
 
-  def RunAndGetOutput(self, arguments):
-    """Runs the shell with given arguments until shell exits.
+  def RunAndGetOutput(self, arguments, timeout=None):
+    """Runs the shell with given arguments until shell exits and returns the
+    output.
 
     Args:
       arguments: list of arguments for the shell
+      timeout: maximum running time in seconds, after which the shell will be
+          terminated
 
     Returns:
-      A tuple of (return_code, output). |return_code| is the exit code returned
-      by the shell or None if the exit code cannot be retrieved. |output| is the
-      stdout mingled with the stderr produced by the shell.
+      A tuple of (return_code, output, did_time_out). |return_code| is the exit
+      code returned by the shell or None if the exit code cannot be retrieved.
+      |output| is the stdout mingled with the stderr produced by the shell.
+      |did_time_out| is True iff the shell was terminated because it exceeded
+      the |timeout| and False otherwise.
     """
     command = self.command_prefix + [self.executable_path] + arguments
     p = subprocess.Popen(command, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
-    (output, _) = p.communicate()
-    return p.returncode, output
+
+    class Results:
+      """Workaround for Python scoping rules that prevent assigning to variables
+      from the outer scope.
+      """
+      output = None
+
+    def do_run():
+      (Results.output, _) = p.communicate()
+
+    run_thread = threading.Thread(target=do_run)
+    run_thread.start()
+    run_thread.join(timeout)
+
+    if run_thread.is_alive():
+      p.terminate()
+      return p.returncode, Results.output, True
+    return p.returncode, Results.output, False

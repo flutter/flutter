@@ -64,7 +64,7 @@ def _rewrite(mapping, host_destination_functon, shell, port):
   return src + '=' + dest
 
 
-def _apply_appings(shell, original_arguments, map_urls, map_origins):
+def _apply_mappings(shell, original_arguments, map_urls, map_origins):
   """Applies mappings for specified urls and origins. For each local path
   specified as destination a local server will be spawned and the mapping will
   be rewritten accordingly.
@@ -188,11 +188,8 @@ def add_shell_arguments(parser):
   """Adds argparse arguments allowing to configure shell abstraction using
   configure_shell() below.
   """
-  # Arguments indicating paths to binaries and tools.
-  parser.add_argument('--adb-path', help='Path of the adb binary.')
-  parser.add_argument('--shell-path', help='Path of the Mojo shell binary.')
-
   # Arguments configuring the shell run.
+  parser.add_argument('--shell-path', help='Path of the Mojo shell binary.')
   parser.add_argument('--android', help='Run on Android',
                       action='store_true')
   parser.add_argument('--origin', help='Origin for mojo: URLs. This can be a '
@@ -203,22 +200,21 @@ def add_shell_arguments(parser):
   parser.add_argument('--map-origin', action='append',
                       help='Define a mapping for a url origin in the format '
                       '<origin>=<url-or-local-file-path>')
-
-  # Android-only arguments.
-  parser.add_argument('--target-device',
-                      help='(android-only) Device to run on.')
-  parser.add_argument('--logcat-tags',
-                      help='(android-only) Comma-separated list of additional '
-                      'logcat tags to display on the console.')
-
-  # Desktop-only arguments.
-  parser.add_argument('--use-osmesa', action='store_true',
-                      help='(linux-only) Configure the native viewport service '
-                      'for off-screen rendering.')
-
-  # Other configuration.
   parser.add_argument('-v', '--verbose', action="store_true",
                       help="Increase output verbosity")
+
+  android_group = parser.add_argument_group('Android-only',
+      'These arguments apply only when --android is passed.')
+  android_group.add_argument('--adb-path', help='Path of the adb binary.')
+  android_group.add_argument('--target-device', help='Device to run on.')
+  android_group.add_argument('--logcat-tags', help='Comma-separated list of '
+                             'additional logcat tags to display.')
+
+  desktop_group = parser.add_argument_group('Desktop-only',
+      'These arguments apply only when running on desktop.')
+  desktop_group.add_argument('--use-osmesa', action='store_true',
+                             help='Configure the native viewport service '
+                             'for off-screen rendering.')
 
 
 class ShellConfigurationException(Exception):
@@ -255,9 +251,6 @@ def configure_shell(config_args, shell_args):
       raise ShellConfigurationException('Device check failed: ' + error)
     if config_args.shell_path:
       shell.InstallApk(config_args.shell_path)
-
-    shell_args = _apply_appings(shell, shell_args, config_args.map_url,
-                                config_args.map_origin)
   else:
     if not config_args.shell_path:
       raise ShellConfigurationException('Can not run without a shell binary. '
@@ -265,6 +258,9 @@ def configure_shell(config_args, shell_args):
     shell = LinuxShell(config_args.shell_path)
     if config_args.use_osmesa:
       shell_args.append('--args-for=mojo:native_viewport_service --use-osmesa')
+
+  shell_args = _apply_mappings(shell, shell_args, config_args.map_url,
+                               config_args.map_origin)
 
   if config_args.origin:
     if _is_web_url(config_args.origin):

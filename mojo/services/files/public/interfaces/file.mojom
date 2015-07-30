@@ -7,6 +7,7 @@
 //    and sizes must always be non-negative)
 //  - buffer size parameters (for read/write) are uint32
 
+[DartPackage="mojo_services"]
 module mojo.files;
 
 import "files/public/interfaces/types.mojom";

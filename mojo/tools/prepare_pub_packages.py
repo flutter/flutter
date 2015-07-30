@@ -30,9 +30,9 @@ def copy_package(src_dir, dst_dir, ignore=None):
     shutil.copytree(src_dir, dst_dir, symlinks=False, ignore=ignore)
 
 
-def install_mojo_license_and_authors_files(sdk_root, dst_dir):
-    shutil.copy(os.path.join(sdk_root, 'LICENSE'), dst_dir)
-    shutil.copy(os.path.join(sdk_root, 'AUTHORS'), dst_dir)
+def install_mojo_license_and_authors_files(src_root, dst_dir):
+    shutil.copy(os.path.join(src_root, 'LICENSE'), dst_dir)
+    shutil.copy(os.path.join(src_root, 'AUTHORS'), dst_dir)
 
 
 def main():
@@ -54,7 +54,7 @@ def main():
 
     rel_build_dir = os.path.join(args.build_dir, args.config)
     build_dir = os.path.abspath(rel_build_dir)
-    sdk_dir = os.path.abspath(args.sdk_root)
+    sdk_dir = os.path.abspath(args.src_root)
     print('Using SDK in %s' % sdk_dir)
     print('Using build in %s' % build_dir)
 
