@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
-import 'package:mojom/mojo/network_service.mojom.dart';
-import 'package:mojom/mojo/url_loader.mojom.dart';
-import 'package:mojom/mojo/url_request.mojom.dart';
-import 'package:mojom/mojo/url_response.mojom.dart';
+import 'package:mojo/mojo/url_request.mojom.dart';
+import 'package:mojo/mojo/url_response.mojom.dart';
+import 'package:mojo_services/mojo/network_service.mojom.dart';
+import 'package:mojo_services/mojo/url_loader.mojom.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 
 NetworkServiceProxy _initNetworkService() {
