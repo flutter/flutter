@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import "dart:sky.internals" as internals;
+import 'dart:sky.internals' as internals;
 
-import "package:mojo/application.dart";
-import "package:mojom/mojo/service_provider.mojom.dart";
+import 'package:mojo/application.dart';
 import 'package:mojo/core.dart' as core;
-import "package:sky/mojo/embedder.dart";
+import 'package:mojo/mojom/mojo/service_provider.mojom.dart';
+import 'package:sky/mojo/embedder.dart';
 
 ApplicationConnection _initConnection() {
   int rawHandle = internals.takeServicesProvidedByEmbedder();
