@@ -1,0 +1,12 @@
+diff --git a/mojo/dart/embedder/BUILD.gn b/mojo/dart/embedder/BUILD.gn
+index 97a4ee2..6764873 100644
+--- a/mojo/dart/embedder/BUILD.gn
++++ b/mojo/dart/embedder/BUILD.gn
+@@ -47,7 +47,6 @@ source_set("dart_controller_no_snapshot") {
+     "//mojo/public/c/system",
+     "//mojo/public/cpp/system",
+     "//mojo/services/network/public/interfaces",
+-    "//tonic",
+   ]
+ 
+   defines = []
