@@ -1,7 +1,7 @@
 import "dart:sky.internals" as internals;
 
 import 'package:sky/mojo/shell.dart' as shell;
-import 'package:mojom/sky/test_harness.mojom.dart';
+import 'package:sky_services/sky/test_harness.mojom.dart';
 
 void notifyTestComplete(String result) {
   TestHarnessProxy test_harness = new TestHarnessProxy.unbound();
