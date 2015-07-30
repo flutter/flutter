@@ -5,6 +5,8 @@
 #ifndef SKY_SHELL_SWITCHES_H_
 #define SKY_SHELL_SWITCHES_H_
 
+#include <string>
+
 namespace sky {
 namespace shell {
 namespace switches {
@@ -13,6 +15,9 @@ extern const char kHelp[];
 extern const char kPackageRoot[];
 extern const char kNonInteractive[];
 extern const char kSnapshot[];
+extern const char kEnableCheckedMode[];
+
+void PrintUsage(const std::string& executable_name);
 
 }  // namespace switches
 }  // namespace shell

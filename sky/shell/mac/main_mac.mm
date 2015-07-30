@@ -29,14 +29,6 @@ bool FlagsValid() {
   return true;
 }
 
-void Usage() {
-  std::cerr << "(For Test Shell) Usage: sky_shell"
-            << " --" << switches::kNonInteractive << " --"
-            << switches::kPackageRoot << "=PACKAGE_ROOT"
-            << " --" << switches::kSnapshot << "=SNAPSHOT"
-            << " [ MAIN_DART ]" << std::endl;
-}
-
 void Init() {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   blink::WebRuntimeFeatures::enableObservatory(
@@ -83,7 +75,7 @@ int main(int argc, const char* argv[]) {
 
   return PlatformMacMain(argc, argv, ^() {
     if (!sky::shell::FlagsValid()) {
-      sky::shell::Usage();
+      sky::shell::switches::PrintUsage("SkyShell");
       sky::shell::AttachMessageLoopToMainRunLoop();
       return NSApplicationMain(argc, argv);
     } else {
