@@ -10,7 +10,7 @@ import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/scrollable_viewport.dart';
+import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
 
 typedef Widget DialogBuilder(Navigator navigator);

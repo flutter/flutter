@@ -14,7 +14,7 @@ import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/popup_menu_item.dart';
-import 'package:sky/widgets/scrollable_viewport.dart';
+import 'package:sky/widgets/scrollable.dart';
 
 export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
