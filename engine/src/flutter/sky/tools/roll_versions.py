@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 PUBSPECS = [
     'sky/packages/sky/pubspec.yaml',
     'sky/packages/sky_engine/pubspec.yaml',
+    'sky/packages/sky_services/pubspec.yaml',
 ]
 
 MANIFESTS = [
