@@ -8,7 +8,7 @@ import 'dart:sky.internals' as internals;
 import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
-import 'package:mojom/mojo/asset_bundle/asset_bundle.mojom.dart';
+import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
 import 'package:sky/mojo/net/fetch.dart';
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/mojo/shell.dart' as shell;
