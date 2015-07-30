@@ -36,18 +36,20 @@ namespace blink {
 
 void FontPlatformData::setupPaint(SkPaint* paint,
                                   GraphicsContext* context) const {
-  paint->setAntiAlias(m_style.useAntiAlias);
-  paint->setHinting(static_cast<SkPaint::Hinting>(m_style.hintStyle));
-  paint->setEmbeddedBitmapText(m_style.useBitmaps);
-  paint->setAutohinted(m_style.useAutoHint);
-  if (m_style.useAntiAlias)
-    paint->setLCDRenderText(m_style.useSubpixelRendering);
-  paint->setSubpixelText(m_style.useSubpixelPositioning);
+  bool shouldSmoothFonts = true;
+  bool shouldAntialias = true;
+  bool useSubpixelText = true;
+  paint->setAntiAlias(shouldAntialias);
+  paint->setEmbeddedBitmapText(false);
   const float ts = m_textSize >= 0 ? m_textSize : 12;
   paint->setTextSize(SkFloatToScalar(ts));
-  paint->setTypeface(m_typeface.get());
+  paint->setTypeface(typeface());
   paint->setFakeBoldText(m_syntheticBold);
   paint->setTextSkewX(m_syntheticItalic ? -SK_Scalar1 / 4 : 0);
+  paint->setAutohinted(false); // freetype specific
+  paint->setLCDRenderText(shouldSmoothFonts);
+  paint->setSubpixelText(useSubpixelText);
+  paint->setHinting(SkPaint::kNo_Hinting);
 }
 
 void FontPlatformData::querySystemForRenderStyle(
