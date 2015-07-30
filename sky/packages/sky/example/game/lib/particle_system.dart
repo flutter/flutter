@@ -300,6 +300,10 @@ class ParticleSystem extends Node {
     _paint.setTransferMode(transferMode);
 
     for (_Particle particle in _particles) {
+      // Rect
+      Rect rect = texture.frame;
+      rects.add(rect);
+
       // Transform
       double scos;
       double ssin;
@@ -314,12 +318,12 @@ class ParticleSystem extends Node {
         scos = particle.size;
         ssin = 0.0;
       }
-      RSTransform transform = new RSTransform(scos, ssin, particle.pos[0], particle.pos[1]);
+      double ax = rect.width / 2;
+      double ay = rect.height / 2;
+      double tx = particle.pos[0] + -scos * ax + ssin * ay;
+      double ty = particle.pos[1] + -ssin * ax - scos * ay;
+      RSTransform transform = new RSTransform(scos, ssin, tx, ty);
       transforms.add(transform);
-
-      // Rect
-      Rect rect = texture.frame;
-      rects.add(rect);
 
       // Color
       if (particle.simpleColorSequence != null) {
