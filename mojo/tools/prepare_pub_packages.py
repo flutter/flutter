@@ -41,11 +41,11 @@ def main():
     parser.add_argument('--config',
                         type=str,
                         default='android_Release')
-    parser.add_argument('--sdk-root',
+    parser.add_argument('--src-root',
                         type=str,
                         default='.')
     parser.add_argument('--packages',
-                        default=['mojo', 'mojom', 'mojo_services', 'sky'])
+                        default=['mojo', 'mojom', 'mojo_services'])
     parser.add_argument('--out-dir',
                         default=None)
     parser.add_argument('build_dir',
@@ -57,15 +57,6 @@ def main():
     sdk_dir = os.path.abspath(args.sdk_root)
     print('Using SDK in %s' % sdk_dir)
     print('Using build in %s' % build_dir)
-
-    preparing_sky_package = 'sky' in args.packages
-
-    apks_dir = os.path.join(build_dir, 'apks')
-    sky_apk_filename = 'SkyDemo.apk'
-    sky_apk = os.path.join(apks_dir, sky_apk_filename)
-    if preparing_sky_package and (not os.path.exists(sky_apk)):
-        print('Required file %s not found.' % sky_apk)
-        return -1
 
     temp_dir = args.out_dir
     if temp_dir:
@@ -95,13 +86,6 @@ def main():
         if package == 'mojom':
             remove_empty_dirs(dst_dir)
         install_mojo_license_and_authors_files(sdk_dir, dst_dir)
-
-    # Copy Sky apk.
-    if preparing_sky_package:
-        prepared_apks_dir = os.path.join(temp_dir, 'sky', 'apks')
-        os.makedirs(prepared_apks_dir)
-        shutil.copyfile(sky_apk,
-                        os.path.join(prepared_apks_dir, sky_apk_filename))
 
 
 if __name__ == '__main__':
