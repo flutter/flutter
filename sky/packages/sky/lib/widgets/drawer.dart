@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:sky' as sky;
 
-import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/forces.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/widgets/animated_component.dart';
+import 'package:sky/widgets/animated_container.dart';
+import 'package:sky/widgets/animation_intentions.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
 import 'package:sky/widgets/theme.dart';
-import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
@@ -34,12 +35,13 @@ const double _kWidth = 304.0;
 const double _kMinFlingVelocity = 365.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
+const Duration _kThemeChangeDuration = const Duration(milliseconds: 200);
 const Point _kOpenPosition = Point.origin;
 const Point _kClosedPosition = const Point(-_kWidth, 0.0);
 
 typedef void DrawerStatusChangedCallback(AnimationStatus status);
 
-class Drawer extends AnimatedComponent {
+class Drawer extends StatefulComponent {
   Drawer({
     Key key,
     this.children,
@@ -55,70 +57,58 @@ class Drawer extends AnimatedComponent {
   DrawerStatusChangedCallback onStatusChanged;
   Navigator navigator;
 
-  AnimatedValue<Point> _position;
-  AnimatedColor _maskColor;
-  AnimationPerformance _performance;
+  SlideInIntention _intention;
+  ColorTransitionIntention _maskColorIntention;
+  AnimationPerformance get _performance => _intention.performance;
 
   void initState() {
-    _position = new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition);
-    _maskColor = new AnimatedColor(colors.transparent, end: const Color(0x7F000000));
-    _performance = new AnimationPerformance()
-      ..duration = _kBaseSettleDuration
-      ..variable = new AnimatedList([_position, _maskColor])
-      ..addStatusListener(_onStatusChanged);
-    watch(_performance);
-    if (showing)
-      _show();
+    _intention = new SlideInIntention(
+        duration: _kBaseSettleDuration, start: _kClosedPosition, end: _kOpenPosition);
+    _maskColorIntention = new ColorTransitionIntention(
+        performance: _intention.performance, start: colors.transparent, end: const Color(0x7F000000));
+
+    _performance.addStatusListener(_onStatusChanged);
+    // Use a spring force for animating the drawer. We can't use curves for
+    // this because we need a linear curve in order to track the user's finger
+    // while dragging.
+    _performance.attachedForce = kDefaultSpringForce;
+
+    if (navigator != null)
+      navigator.pushState(this, (_) => _performance.reverse());
   }
 
   void syncFields(Drawer source) {
     children = source.children;
     level = source.level;
     navigator = source.navigator;
-    if (showing != source.showing) {
-      showing = source.showing;
-      showing ? _show() : _hide();
-    }
+    showing = source.showing;
     onStatusChanged = source.onStatusChanged;
-    super.syncFields(source);
-  }
-
-  void _show() {
-    if (navigator != null)
-      navigator.pushState(this, (_) => _performance.reverse());
-    _fling(1.0);
-  }
-
-  void _hide() {
-    _fling(-1.0);
-  }
-
-  // We fling the performance timeline instead of animating it to give it a
-  // nice spring effect. We can't use curves for this because we need a linear
-  // curve in order to track the user's finger while dragging.
-  void _fling(double direction) {
-    _performance.fling(velocity: direction.sign);
   }
 
   Widget build() {
     var mask = new Listener(
-      child: new Container(
-        decoration: new BoxDecoration(backgroundColor: _maskColor.value)
+      child: new AnimatedContainer(
+        intentions: [_maskColorIntention],
+        tag: showing
       ),
       onGestureTap: handleMaskTap
     );
 
-    Matrix4 transform = new Matrix4.identity();
-    transform.translate(_position.value.x, _position.value.y);
-    Widget content = new Transform(
-      transform: transform,
-      child: new Container(
-        decoration: new BoxDecoration(
-          backgroundColor: Theme.of(this).canvasColor,
-          boxShadow: shadows[level]),
-        width: _kWidth,
-        child: new ScrollableBlock(children)
-      ));
+    Widget content = new AnimatedContainer(
+      intentions: [
+        _intention,
+        // TODO(mpcomplete): it should be easier to override some intentions,
+        // and have those you don't care about revert to a sensible default.
+        new ImplicitlySyncDecorationIntention(_kThemeChangeDuration),
+        new ImplicitlySyncWidthIntention(_kThemeChangeDuration),
+      ],
+      tag: showing,
+      decoration: new BoxDecoration(
+        backgroundColor: Theme.of(this).canvasColor,
+        boxShadow: shadows[level]),
+      width: _kWidth,
+      child: new ScrollableBlock(children)
+    );
 
     return new Listener(
       child: new Stack([ mask, content ]),
@@ -130,27 +120,27 @@ class Drawer extends AnimatedComponent {
     );
   }
 
-  double get xPosition => _position.value.x;
-
   void _onStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed &&
-        navigator != null &&
-        navigator.currentRoute is RouteState &&
-        (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
-      navigator.pop();
-    if (onStatusChanged != null)
-      onStatusChanged(status);
+    scheduleMicrotask(() {
+      if (status == AnimationStatus.dismissed &&
+          navigator != null &&
+          navigator.currentRoute is RouteState &&
+          (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
+        navigator.pop();
+      if (onStatusChanged != null)
+        onStatusChanged(status);
+    });
   }
 
-  bool get _isMostlyClosed => xPosition <= -_kWidth/2;
+  bool get _isMostlyClosed => _performance.progress < 0.5;
 
-  void _settle() => _fling(_isMostlyClosed ? -1.0 : 1.0);
+  void _settle() { _isMostlyClosed ? _performance.reverse() : _performance.play(); }
 
-  void handleMaskTap(_) => _fling(-1.0);
+  void handleMaskTap(_) { _performance.reverse(); }
 
   // TODO(mpcomplete): Figure out how to generalize these handlers on a
   // "PannableThingy" interface.
-  void handlePointerDown(_) => _performance.stop();
+  void handlePointerDown(_) { _performance.stop(); }
 
   void handlePointerMove(sky.PointerEvent event) {
     if (_performance.isAnimating)
@@ -169,7 +159,10 @@ class Drawer extends AnimatedComponent {
   }
 
   void handleFlingStart(event) {
-    if (event.velocityX.abs() >= _kMinFlingVelocity)
-      _performance.fling(velocity: event.velocityX * _kFlingVelocityScale);
+    if (event.velocityX.abs() >= _kMinFlingVelocity) {
+      _performance.fling(
+          event.velocityX < 0.0 ? Direction.reverse : Direction.forward,
+          velocity: event.velocityX.abs() * _kFlingVelocityScale);
+    }
   }
 }
