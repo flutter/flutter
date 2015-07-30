@@ -1,0 +1,3 @@
+Huge speed improvements in Asteroids.
+Fixed startup crash on many devices.
+Lots of various other widget fixes.
