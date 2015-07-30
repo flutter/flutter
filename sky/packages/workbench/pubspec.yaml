@@ -11,5 +11,7 @@ dependency_overrides:
     path: ../material_design_icons
   sky:
     path: ../sky
+  sky_services:
+    path: ../../../out/Debug/gen/dart-pkg/sky_services
 environment:
   sdk: '>=1.8.0 <2.0.0'
