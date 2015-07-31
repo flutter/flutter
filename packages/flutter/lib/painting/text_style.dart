@@ -140,6 +140,16 @@ class TextStyle {
         FontWeight.w900: '900'
       }[fontWeight];
     }
+    if (decoration != null) {
+      cssStyle['text-decoration'] = _decorationToCSSString(decoration);
+      if (decorationColor != null)
+        cssStyle['text-decoration-color'] = _colorToCSSString(decorationColor);
+      if (decorationStyle != null)
+        cssStyle['text-decoration-style'] = _decorationStyleToCSSString(decorationStyle);
+    }
+  }
+
+  void applyToContainerCSSStyle(CSSStyleDeclaration cssStyle) {
     if (textAlign != null) {
       cssStyle['text-align'] = const {
         TextAlign.left: 'left',
@@ -149,13 +159,6 @@ class TextStyle {
     }
     if (height != null) {
       cssStyle['line-height'] = '${height}';
-    }
-    if (decoration != null) {
-      cssStyle['text-decoration'] = _decorationToCSSString(decoration);
-      if (decorationColor != null)
-        cssStyle['text-decoration-color'] = _colorToCSSString(decorationColor);
-      if (decorationStyle != null)
-        cssStyle['text-decoration-style'] = _decorationStyleToCSSString(decorationStyle);
     }
   }
 
