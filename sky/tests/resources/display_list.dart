@@ -90,6 +90,10 @@ class TestPaintingCanvas extends PaintingCanvas {
     log("drawRRect($rrect, $paint)");
   }
 
+  void drawDRRect(sky.RRect outer, sky.RRect inner, Paint paint) {
+    log("drawDRRect($outer, $inner, $paint)");
+  }
+
   void drawOval(Rect rect, Paint paint) {
     log("drawOval($rect, $paint)");
   }

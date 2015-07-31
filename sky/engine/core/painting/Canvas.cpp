@@ -190,6 +190,16 @@ void Canvas::drawRRect(const RRect* rrect, const Paint* paint)
     m_canvas->drawRRect(rrect->rrect(), paint->paint());
 }
 
+void Canvas::drawDRRect(const RRect* outer, const RRect* inner, const Paint* paint)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(outer);
+    ASSERT(inner);
+    ASSERT(paint);
+    m_canvas->drawDRRect(outer->rrect(), inner->rrect(), paint->paint());
+}
+
 void Canvas::drawOval(const Rect& rect, const Paint* paint)
 {
     if (!m_canvas)

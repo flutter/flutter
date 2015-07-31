@@ -36,6 +36,9 @@ class Rect {
   Rect inflate(double delta) {
     return new Rect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
   }
+  Rect deflate(double delta) {
+    return inflate(-delta);
+  }
 
   double get width => right - left;
   double get height => bottom - top;
