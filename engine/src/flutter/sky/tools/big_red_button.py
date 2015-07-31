@@ -76,6 +76,8 @@ def upload_artifacts(dist_root, config, commit_hash):
 def main():
     parser = argparse.ArgumentParser(description='Deploy!')
     parser.add_argument('sky_engine_root', help='Path to sky_engine/src')
+    parser.add_argument('--stage-two', action='store_true', default=False,
+        help='Publish the sky package')
     parser.add_argument('--dry-run', action='store_true', default=False,
         help='Just print commands w/o executing.')
     parser.add_argument('--no-pub-publish', dest='publish',
@@ -120,7 +122,8 @@ def main():
     if args.publish:
         run(sky_engine_package_root, [pub_path, 'publish', '--force'])
         run(sky_services_package_root, [pub_path, 'publish', '--force'])
-        run(sky_package_root, [pub_path, 'publish', '--force'])
+        if args.stage_two:
+            run(sky_package_root, [pub_path, 'publish', '--force'])
 
 
 if __name__ == '__main__':
