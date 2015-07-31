@@ -178,9 +178,11 @@ class TestApp extends App {
 class WidgetTester {
   TestRenderView renderView = new TestRenderView();
 
-  Future test(Function builder) {
+  Future test(Function builder, { int frameCount: 1 }) async {
     runApp(new TestApp(builder: builder), renderViewOverride: renderView);
-    return renderView.checkFrame();
+    while (--frameCount != 0)
+      await renderView.checkFrame();
+    return await renderView.checkFrame();
   }
 
   void endTest() {
