@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/forces.dart';
 import 'package:sky/theme/shadows.dart';
@@ -15,6 +16,7 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets/transitions.dart';
 
 export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
@@ -57,17 +59,11 @@ class Drawer extends StatefulComponent {
   DrawerStatusChangedCallback onStatusChanged;
   Navigator navigator;
 
-  SlideInIntention _intention;
-  ColorTransitionIntention _maskColorIntention;
-  AnimationPerformance get _performance => _intention.performance;
+  AnimationPerformance _performance;
 
   void initState() {
-    _intention = new SlideInIntention(
-        duration: _kBaseSettleDuration, start: _kClosedPosition, end: _kOpenPosition);
-    _maskColorIntention = new ColorTransitionIntention(
-        performance: _intention.performance, start: colors.transparent, end: const Color(0x7F000000));
+    _performance = new AnimationPerformance(duration: _kBaseSettleDuration);
 
-    _performance.addStatusListener(_onStatusChanged);
     // Use a spring force for animating the drawer. We can't use curves for
     // this because we need a linear curve in order to track the user's finger
     // while dragging.
@@ -87,27 +83,27 @@ class Drawer extends StatefulComponent {
 
   Widget build() {
     var mask = new Listener(
-      child: new AnimatedContainer(
-        intentions: [_maskColorIntention],
-        tag: showing
+      child: new ColorTransition(
+        performance: _performance,
+        direction: showing ? Direction.forward : Direction.reverse,
+        color: new AnimatedColorValue(colors.transparent, end: const Color(0x7F000000))
       ),
       onGestureTap: handleMaskTap
     );
 
-    Widget content = new AnimatedContainer(
-      intentions: [
-        _intention,
-        // TODO(mpcomplete): it should be easier to override some intentions,
-        // and have those you don't care about revert to a sensible default.
-        new ImplicitlySyncDecorationIntention(_kThemeChangeDuration),
-        new ImplicitlySyncWidthIntention(_kThemeChangeDuration),
-      ],
-      tag: showing,
-      decoration: new BoxDecoration(
-        backgroundColor: Theme.of(this).canvasColor,
-        boxShadow: shadows[level]),
-      width: _kWidth,
-      child: new ScrollableBlock(children)
+    Widget content = new SlideIn(
+      performance: _performance,
+      direction: showing ? Direction.forward : Direction.reverse,
+      position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
+      onDismissed: _onDismissed,
+      child: new AnimatedContainer(
+        intentions: implicitlySyncFieldsIntention(const Duration(milliseconds: 200)),
+        decoration: new BoxDecoration(
+          backgroundColor: Theme.of(this).canvasColor,
+          boxShadow: shadows[level]),
+        width: _kWidth,
+        child: new ScrollableBlock(children)
+      )
     );
 
     return new Listener(
@@ -118,6 +114,10 @@ class Drawer extends StatefulComponent {
       onPointerCancel: handlePointerCancel,
       onGestureFlingStart: handleFlingStart
     );
+  }
+
+  void _onDismissed() {
+    _onStatusChanged(AnimationStatus.dismissed);
   }
 
   void _onStatusChanged(AnimationStatus status) {
