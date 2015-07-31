@@ -11,6 +11,9 @@ import 'package:sky/rendering/object.dart';
 abstract class InlineBase {
   sky.Node _toDOM(sky.Document owner);
   String toString([String prefix = '']);
+
+  void _applyStyleToContainer(sky.Element container) {
+  }
 }
 
 class InlineText extends InlineBase {
@@ -46,6 +49,10 @@ class InlineStyle extends InlineBase {
       parent.appendChild(child._toDOM(owner));
     }
     return parent;
+  }
+
+  void _applyStyleToContainer(sky.Element container) {
+    style.applyToContainerCSSStyle(container.style);
   }
 
   bool operator ==(other) {
@@ -112,6 +119,8 @@ class RenderParagraph extends RenderBox {
       return;
     _inline = value;
     _layoutRoot.rootElement.setChild(_inline._toDOM(_document));
+    _layoutRoot.rootElement.removeAttribute('style');
+    _inline._applyStyleToContainer(_layoutRoot.rootElement);
     _constraintsForCurrentLayout = null;
     markNeedsLayout();
   }
