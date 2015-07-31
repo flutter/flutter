@@ -91,7 +91,7 @@ class BlockViewportApp extends App {
                 child: new Container(
                   margin: new EdgeDims.all(8.0),
                   decoration: new BoxDecoration(
-                    border: new Border.all(new BorderSide(color: new Color(0xFF000000)))
+                    border: new Border.all(color: new Color(0xFF000000))
                   ),
                   padding: new EdgeDims.all(16.0),
                   child: new BlockViewport(

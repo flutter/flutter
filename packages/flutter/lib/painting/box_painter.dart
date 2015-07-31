@@ -37,11 +37,13 @@ class Border {
     this.left: BorderSide.none
   });
 
-  const Border.all(BorderSide side) :
-    top = side,
-    right = side,
-    bottom = side,
-    left = side;
+  factory Border.all({
+    Color color: const Color(0xFF000000),
+    double width: 1.0
+  }) {
+    BorderSide side = new BorderSide(color: color, width: width);
+    return new Border(top: side, right: side, bottom: side, left: side);
+  }
 
   final BorderSide top;
   final BorderSide right;
@@ -323,6 +325,25 @@ class BoxPainter {
     return _cachedBackgroundPaint;
   }
 
+  bool get _hasUniformBorder {
+    Color color = _decoration.border.top.color;
+    bool hasUniformColor =
+      _decoration.border.right.color == color &&
+      _decoration.border.bottom.color == color &&
+      _decoration.border.left.color == color;
+
+    if (!hasUniformColor)
+      return false;
+
+    double width = _decoration.border.top.width;
+    bool hasUniformWidth =
+      _decoration.border.right.width == width &&
+      _decoration.border.bottom.width == width &&
+      _decoration.border.left.width == width;
+
+    return hasUniformWidth;
+  }
+
   void _paintBackgroundColor(sky.Canvas canvas, Rect rect) {
     if (_decoration.backgroundColor != null || _decoration.boxShadow != null ||
         _decoration.gradient != null) {
@@ -397,8 +418,13 @@ class BoxPainter {
     if (_decoration.border == null)
       return;
 
-    assert(_decoration.borderRadius == null); // TODO(abarth): Implement borders with border radius.
-    assert(_decoration.shape == Shape.rectangle); // TODO(ianh): Implement borders on circles.
+    if (_hasUniformBorder && _decoration.borderRadius != null) {
+      _paintBorderWithRadius(canvas, rect);
+      return;
+    }
+
+    assert(_decoration.borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
+    assert(_decoration.shape == Shape.rectangle); // TODO(ianh): Support borders on circles.
 
     assert(_decoration.border.top != null);
     assert(_decoration.border.right != null);
@@ -443,6 +469,17 @@ class BoxPainter {
     path.lineTo(rect.left, rect.top);
     path.close();
     canvas.drawPath(path, paint);
+  }
+
+  void _paintBorderWithRadius(sky.Canvas canvas, Rect rect) {
+    assert(_hasUniformBorder);
+    Color color = _decoration.border.top.color;
+    double width = _decoration.border.top.width;
+    double radius = _decoration.borderRadius;
+
+    sky.RRect outer = new sky.RRect()..setRectXY(rect, radius, radius);
+    sky.RRect inner = new sky.RRect()..setRectXY(rect.deflate(width), radius - width, radius - width);
+    canvas.drawDRRect(outer, inner, new Paint()..color = color);
   }
 
   void paint(sky.Canvas canvas, Rect rect) {
