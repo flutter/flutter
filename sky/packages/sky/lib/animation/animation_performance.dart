@@ -145,7 +145,8 @@ class AnimationPerformance {
   }
 
   void _tick(double t) {
-    variable.setProgress(t);
+    if (variable != null)
+      variable.setProgress(t);
     _notifyListeners();
     _checkStatusChanged();
   }

@@ -4,15 +4,16 @@
 
 import 'dart:async';
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/animated_container.dart';
-import 'package:sky/widgets/animation_intentions.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets/transitions.dart';
 
 export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
@@ -39,8 +40,7 @@ class SnackBarAction extends Component {
     );
   }
 }
-
-class SnackBar extends StatefulComponent {
+class SnackBar extends Component {
 
   SnackBar({
     Key key,
@@ -57,25 +57,9 @@ class SnackBar extends StatefulComponent {
   bool showing;
   SnackBarStatusChangedCallback onStatusChanged;
 
-  SlideInIntention _intention;
-
-  void initState() {
-    _intention = new SlideInIntention(duration: _kSlideInDuration,
-                                      start: const Point(0.0, 50.0),
-                                      end: Point.origin);
-    _intention.performance.addStatusListener(_onStatusChanged);
-  }
-
-  void syncFields(SnackBar source) {
-    content = source.content;
-    actions = source.actions;
-    onStatusChanged = source.onStatusChanged;
-    showing = source.showing;
-  }
-
-  void _onStatusChanged(AnimationStatus status) {
+  void _onDismissed() {
     if (onStatusChanged != null)
-      scheduleMicrotask(() { onStatusChanged(status); });
+      scheduleMicrotask(() { onStatusChanged(AnimationStatus.dismissed); });
   }
 
   Widget build() {
@@ -91,9 +75,12 @@ class SnackBar extends StatefulComponent {
       )
     ]..addAll(actions);
 
-    return new AnimatedContainer(
-      intentions: [_intention],
-      tag: showing,
+    return new SlideIn(
+      duration: _kSlideInDuration,
+      direction: showing ? Direction.forward : Direction.reverse,
+      position: new AnimatedValue<Point>(const Point(0.0, 50.0),
+                                         end: Point.origin),
+      onDismissed: _onDismissed,
       child: new Material(
         level: 2,
         color: const Color(0xFF323232),
