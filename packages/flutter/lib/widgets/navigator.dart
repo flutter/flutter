@@ -11,6 +11,7 @@ import 'package:sky/animation/forces.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/focus.dart';
+import 'package:sky/widgets/transitions.dart';
 import 'package:vector_math/vector_math.dart';
 
 typedef Widget RouteBuilder(Navigator navigator, RouteBase route);
@@ -66,76 +67,39 @@ class RouteState extends RouteBase {
 // and support multiple transition types
 const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 const Point _kTransitionStartPoint = const Point(0.0, 75.0);
-class Transition extends AnimatedComponent {
+class Transition extends TransitionBase {
   Transition({
     Key key,
-    this.content,
-    this.direction,
-    this.onDismissed,
-    this.onCompleted,
+    Widget child,
+    Direction direction,
+    Function onDismissed,
+    Function onCompleted,
     this.interactive
-  }): super(key: key);
-  Widget content;
-  Direction direction;
+  }): super(key: key,
+            child: child,
+            duration: _kTransitionDuration,
+            direction: direction,
+            onDismissed: onDismissed,
+            onCompleted: onCompleted);
   bool interactive;
-  Function onDismissed;
-  Function onCompleted;
-
-  AnimatedValue<Point> _position;
-  AnimatedValue<double> _opacity;
-  AnimationPerformance _performance;
-
-  void initState() {
-    _position = new AnimatedValue<Point>(
-      _kTransitionStartPoint,
-      end: Point.origin,
-      curve: easeOut
-    );
-    _opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut);
-    _performance = new AnimationPerformance(duration: _kTransitionDuration)
-      ..variable = new AnimatedList([_position, _opacity]);
-    if (direction == Direction.reverse)
-      _performance.progress = 1.0;
-    _performance.addStatusListener(_checkStatusChanged);
-    watch(_performance);
-    _start();
-  }
-
-  void _start() {
-    _performance.play(direction);
-  }
 
   void syncFields(Transition source) {
-    content = source.content;
     interactive = source.interactive;
-    onDismissed = source.onDismissed;
-    if (direction != source.direction) {
-      direction = source.direction;
-      _start();
-    }
     super.syncFields(source);
   }
 
-  void _checkStatusChanged(AnimationStatus status) {
-    if (_performance.isDismissed) {
-      if (onDismissed != null)
-        onDismissed();
-    } else if (_performance.isCompleted) {
-      if (onCompleted != null)
-        onCompleted();
-    }
-  }
-
   Widget build() {
-    Matrix4 transform = new Matrix4.identity()
-      ..translate(_position.value.x, _position.value.y);
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
-    return new Transform(
-      transform: transform,
-      child: new Opacity(
-        opacity: _opacity.value,
-        child: content
+    return new SlideIn(
+      performance: performance,
+      direction: direction,
+      position: new AnimatedValue<Point>(_kTransitionStartPoint, end: Point.origin, curve: easeOut),
+      child: new FadeIn(
+        performance: performance,
+        direction: direction,
+        opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
+        child: child
       )
     );
   }
@@ -233,16 +197,16 @@ class Navigator extends StatefulComponent {
       if (i + 1 < state.history.length && state.history[i + 1].fullyOpaque)
         continue;
       HistoryEntry historyEntry = state.history[i];
-      Widget content = historyEntry.route.build(this, historyEntry.route);
+      Widget child = historyEntry.route.build(this, historyEntry.route);
       if (i == 0) {
-        visibleRoutes.add(content);
+        visibleRoutes.add(child);
         continue;
       }
-      if (content == null)
+      if (child == null)
         continue;
       Transition transition = new Transition(
         key: new Key.fromObjectIdentity(historyEntry),
-        content: content,
+        child: child,
         direction: (i <= state.historyIndex) ? Direction.forward : Direction.reverse,
         interactive: (i == state.historyIndex),
         onDismissed: () {
