@@ -887,8 +887,8 @@ abstract class RenderObjectWrapper extends Widget {
     if (parentData != null) {
       assert(root.parentData != null);
       root.parentData.merge(parentData); // this will throw if the types aren't appropriate
-      if (parent.root != null)
-        parent.root.markNeedsLayout();
+      if (ancestor != null && ancestor.root != null)
+        ancestor.root.markNeedsLayout();
     }
   }
 
