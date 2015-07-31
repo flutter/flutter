@@ -154,12 +154,6 @@ class StartSky(object):
             print "%s is not a valid packages path." % package_root
             return 2
 
-        subprocess.check_call([
-            DART_PATH,
-            '--package-root=%s' % package_root,
-            'packages/mojom/generate.dart'
-        ])
-
         if not self._is_package_installed(ANDROID_PACKAGE):
             print '%s is not installed, installing.' % APK_NAME
             args.install = True
