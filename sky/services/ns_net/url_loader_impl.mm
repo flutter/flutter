@@ -43,6 +43,8 @@
     _response.reset();
   }
   uint32_t length = data.length;
+  // TODO(eseidel): This can't work. The data pipe could be full, we need to
+  // write an async writter for filling the pipe and use it here.
   MojoResult result = WriteDataRaw(_producer.get(), data.bytes, &length,
                                    MOJO_WRITE_DATA_FLAG_ALL_OR_NONE);
   // FIXME(csg): Handle buffers in case of failures
