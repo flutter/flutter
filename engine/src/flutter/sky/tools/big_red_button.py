@@ -116,14 +116,17 @@ def main():
 
     run(sky_engine_root, ['cp', 'AUTHORS', 'LICENSE', sky_package_root])
 
-    upload_artifacts(android_dist_root, 'android-arm', commit_hash)
-    upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
+    if not args.stage_two:
+        upload_artifacts(android_dist_root, 'android-arm', commit_hash)
+        upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
 
     if args.publish:
-        run(sky_engine_package_root, [pub_path, 'publish', '--force'])
-        run(sky_services_package_root, [pub_path, 'publish', '--force'])
         if args.stage_two:
             run(sky_package_root, [pub_path, 'publish', '--force'])
+        else:
+            run(sky_engine_package_root, [pub_path, 'publish', '--force'])
+            run(sky_services_package_root, [pub_path, 'publish', '--force'])
+
 
 
 if __name__ == '__main__':
