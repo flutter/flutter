@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 #import "sky_window.h"
+#include "base/command_line.h"
 #include "base/time/time.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/shell/mac/platform_view_mac.h"
-#include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
+#include "sky/shell/shell_view.h"
 #include "sky/shell/ui_delegate.h"
+
 
 @interface SkyWindow ()<NSWindowDelegate>
 
@@ -74,9 +76,22 @@ static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
   return [[NSBundle mainBundle] pathForResource:@"app" ofType:@"skyx"];
 }
 
+// TODO(eseidel): This does not belong in sky_window!
+// Probably belongs in NSApplicationDelegate didFinishLaunching.
+// We also want a separate setup for normal apps vs SkyShell
+// normal apps only use a skyx vs. SkyShell which always pulls from network.
 - (void)setupAndLoadDart {
   auto interface_request = mojo::GetProxy(&_sky_engine);
   self.platformView->ConnectToEngine(interface_request.Pass());
+
+  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+  base::CommandLine::StringVector args = command_line.GetArgs();
+  if (args.size() > 0) {
+    LOG(INFO) << "Loading " << args[0];
+    mojo::String string(args[0]);
+    _sky_engine->RunFromNetwork(string);
+    return;
+  }
 
   NSString *endpoint = self.skyInitialBundleURL;
   if (endpoint.length > 0) {
