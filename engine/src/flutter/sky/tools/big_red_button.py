@@ -77,7 +77,7 @@ def main():
     parser = argparse.ArgumentParser(description='Deploy!')
     parser.add_argument('sky_engine_root', help='Path to sky_engine/src')
     parser.add_argument('--stage-two', action='store_true', default=False,
-        help='Publish the sky package and upload the binaries')
+        help='Publish the sky package')
     parser.add_argument('--dry-run', action='store_true', default=False,
         help='Just print commands w/o executing.')
     parser.add_argument('--no-pub-publish', dest='publish',
@@ -116,9 +116,8 @@ def main():
 
     run(sky_engine_root, ['cp', 'AUTHORS', 'LICENSE', sky_package_root])
 
-    if args.stage_two:
-        upload_artifacts(android_dist_root, 'android-arm', commit_hash)
-        upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
+    upload_artifacts(android_dist_root, 'android-arm', commit_hash)
+    upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
 
     if args.publish:
         run(sky_engine_package_root, [pub_path, 'publish', '--force'])
