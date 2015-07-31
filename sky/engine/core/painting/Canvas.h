@@ -81,6 +81,7 @@ public:
     void drawPaint(const Paint* paint);
     void drawRect(const Rect& rect, const Paint* paint);
     void drawRRect(const RRect* rrect, const Paint* paint);
+    void drawDRRect(const RRect* outer, const RRect* inner, const Paint* paint);
     void drawOval(const Rect& rect, const Paint* paint);
     void drawCircle(const Point& c, float radius, const Paint* paint);
     void drawPath(const CanvasPath* path, const Paint* paint);

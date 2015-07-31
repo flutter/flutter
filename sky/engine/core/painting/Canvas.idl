@@ -29,6 +29,7 @@
   void drawPaint(Paint paint);
   void drawRect(Rect rect, Paint paint);
   void drawRRect(RRect rrect, Paint paint);
+  void drawDRRect(RRect outer, RRect inner, Paint paint);
   void drawOval(Rect rect, Paint paint);
   void drawCircle(Point c, float radius, Paint paint);
   void drawPath(Path path, Paint paint);
