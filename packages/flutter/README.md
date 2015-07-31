@@ -45,7 +45,8 @@ void main() {
 Execution starts in `main`, which in this example runs a new instance of the `HelloWorldApp`.
 The `HelloWorldApp` builds a `Text` widget containing the traditional `Hello, world!`
 string and centers it on the screen using a `Center` widget. To learn more about
-the widget system, please see the [widgets tutorial](lib/widgets/README.md).
+the widget system, please see the
+[widgets tutorial](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/widgets/README.md).
 
 Setting up your Android device
 -------------------------
@@ -96,6 +97,7 @@ Building a standalone APK
 
 Although it is possible to build a standalone APK containing your application,
 doing so right now is difficult. If you're feeling brave, you can see how we
-build the `Stocks.apk` in [example/stocks](example/stocks). Eventually we plan
-to make this much easier and support platforms other than Android, but that work
-still in progress.
+build the `Stocks.apk` in
+[example/stocks](https://github.com/domokit/sky_engine/tree/master/sky/packages/sky/example/stocks).
+Eventually we plan to make this much easier and support platforms other than
+Android, but that work still in progress.
