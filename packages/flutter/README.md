@@ -1,4 +1,4 @@
-Getting started with Sky
+Getting Started with Sky
 ========================
 
 Sky apps are written in Dart. To get started, we need to set up Dart SDK:
@@ -23,7 +23,7 @@ Next, create a `lib` directory (which is where your Dart code will go) and use
 the `pub` tool to fetch the Sky package and its dependencies:
 
  - `mkdir lib`
- - `pub upgrade && pub run sky:init`
+ - `pub upgrade`
 
 Sky assumes the entry point for your application is a `main` function in
 `lib/main.dart`:
