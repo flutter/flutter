@@ -37,7 +37,7 @@ main(List<String> argv) async {
   }
 
   Handler handler = createStaticHandler(Directory.current.path,
-      serveFilesOutsidePath: true);
+      serveFilesOutsidePath: true, listDirectories: true);
 
   if (args['verbose'])
     handler = const Pipeline().addMiddleware(logRequests()).addHandler(handler);
