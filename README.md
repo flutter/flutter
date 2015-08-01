@@ -8,7 +8,7 @@ Sky is optimized for today's, and tomorrow's, mobile devices. We are focused
 on low-latency input, high frame rates, and we are purely mobile first.
 
  - For information about using Sky to build apps, please see
-   [Getting started with Sky](sky/packages/sky/README.md).
+   [Getting Started with Sky](sky/packages/sky/README.md).
 
  - For information about contributing to Sky, please see
    [CONTRIBUTING.md](CONTRIBUTING.md).
