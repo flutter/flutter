@@ -26,13 +26,38 @@ order to make them easier to use.
 Layout models
 -------------
 
- - `Flex` Layout a list of child widgets along either a horizontal or vertical
-   axis.
-    - `Flexible` Mark this child of a `Flex` layout as being flexible.
+ - `Flex` Layout a list of child widgets in either the horizontal or vertical
+   `direction`. The direction along which the widgets are laid out is called the
+   *main* direction and the other axis is called the *cross* direction. A `Flex`
+   widget sizes itself to the maximum size permitted by its parent.
+
+   Each child of a `Flex` widget is either *flexible* or *inflexible*. The flex
+   first lays out its inflexible children and subtracts their total length along
+   the main direction to determine how much free space is available. The flex
+   then divides this free space among the flexible children in a ratio
+   determined by their `flex` properties.
+
+   The `alignItems` property determines how children are positioned in the cross
+   direction. The `justifyContent` property determines how the remaining free
+   space (if any) in the main direction is allocated.
+
+   - `Flexible` Mark this child as being flexible with the given `flex` ratio.
 
  - `Stack` Layout a list of child widgets on top of each other from back to
-   front.
-    - `Positioned`
+   front. Each child of a `Stack` widget is either *positioned* or
+   *non-positioned*. The stack sizes itself to the contain all the
+   non-positioned children, which are located at the top-left corner of the
+   stack. The *positioned* children are then located relative to the stack
+   according to their `top`, `right`, `bottom`, and `left` properties.
+
+    - `Positioned` Mark this child as *positioned*. If the `top` property is
+      non-null, the top edge of this child will be positioned `top` layout units
+      from the top of the stack widget. The `right`, `bottom`, and `right`
+      properties work analogously. Note that if the both the `top` and `bottom`
+      properties are non-null, then the child will be forced to have exactly the
+      height required to satisfy both constraints. Similarly, setting the
+      `right` and `left` properties to non-null values will force the child to
+      have a particular width.
 
  - `Block` Layout a list of child widgets in a vertical line. Each child's width
    is set to the widget of the block, and each child is positioned directly
@@ -105,7 +130,15 @@ Painting effects
 
  - `DecoratedBox` Draw the given `BoxDecoration` surrounding the child widget.
 
- - `CustomPaint` TODO(abarth): Document this widget.
-
  - `ColorFilter` Applies a color filter to the child widget, for example to
    tint the child a given color.
+
+ - `CustomPaint` Calls `callback` during the paint phase with the current
+   `Canvas` and `Size`. The widget occupies the region of the canvas starting at
+   the origin (i.e., `x = 0.0` and `y = 0.0`) and of the given size (i.e.,
+   `x = size.width` and `y = size.height`).
+
+   Use the `token` to invalidate the painting. As long as the any new `token`
+   is `operator==` the current `token`, the `CustomPaint` widget is permitted
+   to retain a recording of the painting produced by the previous `callback`
+   call.
