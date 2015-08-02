@@ -11,7 +11,6 @@ import 'package:sky/animation/forces.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/animated_container.dart';
-import 'package:sky/widgets/animation_intentions.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable.dart';
