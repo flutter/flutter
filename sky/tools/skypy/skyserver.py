@@ -36,7 +36,6 @@ class SkyServer(object):
 
         env = os.environ.copy()
         env["PUB_CACHE"] = PUB_CACHE
-        subprocess.check_call([PUB, 'run', 'sky:init'], cwd=WORKBENCH_ROOT, env=env)
         args = [PUB, 'run', 'sky_tools:sky_server', str(self.port)]
         self.server = subprocess.Popen(args, cwd=WORKBENCH_ROOT, env=env)
         return self.server.pid
