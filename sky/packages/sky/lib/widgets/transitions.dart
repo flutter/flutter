@@ -5,7 +5,6 @@
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/animated_value.dart';
-import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:vector_math/vector_math.dart';
 
