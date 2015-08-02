@@ -41,7 +41,6 @@ template("skyx") {
     ]
 
     deps = [
-      "//sky/packages/workbench:init",
       "//sky/tools/sky_snapshot($host_toolchain)",
     ]
 
