@@ -35,7 +35,7 @@ _IGNORED_PATTERNS = [
   re.compile(r'^\[error\] Native functions can only be declared in'),
 
   # TODO: Fix all the warnings in the mojo packages
-  re.compile(r'.*dart-pub-cache.*/mojom-'),
+  re.compile(r'.*dart-pub-cache.*\.mojom\.dart'),
   re.compile(r'.*dart-pub-cache.*/mojo-'),
   re.compile(r'.*/mojo/public/dart/'),
 
