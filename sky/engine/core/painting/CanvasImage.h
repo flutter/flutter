@@ -9,7 +9,7 @@
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/text/AtomicString.h"
-#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace blink {
 
@@ -23,13 +23,13 @@ class CanvasImage final : public RefCounted<CanvasImage>,
   int width() const;
   int height() const;
 
-  const SkBitmap& bitmap() const { return bitmap_; }
-  void setBitmap(const SkBitmap& bitmap) { bitmap_ = bitmap; }
+  SkImage* image() const { return image_.get(); }
+  void setImage(PassRefPtr<SkImage> image) { image_ = image; }
 
  private:
   CanvasImage();
 
-  SkBitmap bitmap_;
+  RefPtr<SkImage> image_;
 };
 
 }  // namespace blink
