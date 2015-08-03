@@ -34,7 +34,6 @@ const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
 const double _kRelativeMaxTabWidth = 56.0;
 const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
-const TextStyle _kTabTextStyle = const TextStyle(textAlign: TextAlign.center);
 const int _kTabIconSize = 24;
 const double _kTabBarScrollDrag = 0.025;
 const Duration _kTabBarScroll = const Duration(milliseconds: 200);
@@ -322,7 +321,7 @@ class Tab extends Component {
 
   Widget _buildLabelText() {
     assert(label.text != null);
-    return new Text(label.text, style: _kTabTextStyle);
+    return new Text(label.text);
   }
 
   Widget _buildLabelIcon() {
