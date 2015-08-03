@@ -74,7 +74,7 @@ class SnackBar extends Component {
       )
     ]..addAll(actions);
 
-    return new SlideIn(
+    return new SlideTransition(
       duration: _kSlideInDuration,
       direction: showing ? Direction.forward : Direction.reverse,
       position: new AnimatedValue<Point>(const Point(0.0, 50.0),

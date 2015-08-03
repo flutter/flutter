@@ -71,6 +71,11 @@ class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
   }
 }
 
+abstract class AnimationBehavior {
+  void initFields(AnimatedContainer original);
+  void syncFields(AnimatedContainer original, AnimatedContainer updated);
+}
+
 class ImplicitlyAnimatedValue<T> {
   final AnimationPerformance performance = new AnimationPerformance();
   final AnimatedValue<T> _variable;
@@ -93,13 +98,8 @@ class ImplicitlyAnimatedValue<T> {
   }
 }
 
-abstract class AnimationIntention {
-  void initFields(AnimatedContainer original);
-  void syncFields(AnimatedContainer original, AnimatedContainer updated);
-}
-
-abstract class ImplicitlySyncFieldIntention<T> extends AnimationIntention {
-  ImplicitlySyncFieldIntention(this.duration);
+abstract class ImplicitlyAnimatedFieldBehavior<T> extends AnimationBehavior {
+  ImplicitlyAnimatedFieldBehavior(this.duration);
 
   Duration duration;
   ImplicitlyAnimatedValue<T> field;
@@ -131,71 +131,71 @@ abstract class ImplicitlySyncFieldIntention<T> extends AnimationIntention {
   }
 }
 
-class ImplicitlySyncConstraintsIntention extends ImplicitlySyncFieldIntention<BoxConstraints> {
-  ImplicitlySyncConstraintsIntention(Duration duration) : super(duration);
+class ImplicitlyAnimatedConstraintsBehavior extends ImplicitlyAnimatedFieldBehavior<BoxConstraints> {
+  ImplicitlyAnimatedConstraintsBehavior(Duration duration) : super(duration);
 
   BoxConstraints getter(AnimatedContainer container) => container.constraints;
   void setter(AnimatedContainer container, BoxConstraints val) { container.constraints = val; }
   AnimatedValue initField(BoxConstraints val) => new AnimatedBoxConstraintsValue(val);
 }
 
-class ImplicitlySyncDecorationIntention extends ImplicitlySyncFieldIntention<BoxDecoration> {
-  ImplicitlySyncDecorationIntention(Duration duration) : super(duration);
+class ImplicitlyAnimatedDecorationBehavior extends ImplicitlyAnimatedFieldBehavior<BoxDecoration> {
+  ImplicitlyAnimatedDecorationBehavior(Duration duration) : super(duration);
 
   BoxDecoration getter(AnimatedContainer container) => container.decoration;
   void setter(AnimatedContainer container, BoxDecoration val) { container.decoration = val; }
   AnimatedValue initField(BoxDecoration val) => new AnimatedBoxDecorationValue(val);
 }
 
-class ImplicitlySyncMarginIntention extends ImplicitlySyncFieldIntention<EdgeDims> {
-  ImplicitlySyncMarginIntention(Duration duration) : super(duration);
+class ImplicitlyAnimatedMarginBehavior extends ImplicitlyAnimatedFieldBehavior<EdgeDims> {
+  ImplicitlyAnimatedMarginBehavior(Duration duration) : super(duration);
 
   EdgeDims getter(AnimatedContainer container) => container.margin;
   void setter(AnimatedContainer container, EdgeDims val) { container.margin = val; }
   AnimatedValue initField(EdgeDims val) => new AnimatedEdgeDimsValue(val);
 }
 
-class ImplicitlySyncPaddingIntention extends ImplicitlySyncFieldIntention<EdgeDims> {
-  ImplicitlySyncPaddingIntention(Duration duration) : super(duration);
+class ImplicitlyAnimatedPaddingBehavior extends ImplicitlyAnimatedFieldBehavior<EdgeDims> {
+  ImplicitlyAnimatedPaddingBehavior(Duration duration) : super(duration);
 
   EdgeDims getter(AnimatedContainer container) => container.padding;
   void setter(AnimatedContainer container, EdgeDims val) { container.padding = val; }
   AnimatedValue initField(EdgeDims val) => new AnimatedEdgeDimsValue(val);
 }
 
-class ImplicitlySyncTransformIntention extends ImplicitlySyncFieldIntention<Matrix4> {
-  ImplicitlySyncTransformIntention(Duration duration) : super(duration);
+class ImplicitlyAnimatedTransformBehavior extends ImplicitlyAnimatedFieldBehavior<Matrix4> {
+  ImplicitlyAnimatedTransformBehavior(Duration duration) : super(duration);
 
   Matrix4 getter(AnimatedContainer container) => container.transform;
   void setter(AnimatedContainer container, Matrix4 val) { container.transform = val; }
   AnimatedValue initField(Matrix4 val) => new AnimatedMatrix4Value(val);
 }
 
-class ImplicitlySyncWidthIntention extends ImplicitlySyncFieldIntention<double> {
-  ImplicitlySyncWidthIntention(Duration duration) : super(duration);
+class ImplicitlyAnimatedWidthBehavior extends ImplicitlyAnimatedFieldBehavior<double> {
+  ImplicitlyAnimatedWidthBehavior(Duration duration) : super(duration);
 
   double getter(AnimatedContainer container) => container.width;
   void setter(AnimatedContainer container, double val) { container.width = val; }
   AnimatedValue initField(double val) => new AnimatedValue<double>(val);
 }
 
-class ImplicitlySyncHeightIntention extends ImplicitlySyncFieldIntention<double> {
-  ImplicitlySyncHeightIntention(Duration duration) : super(duration);
+class ImplicitlyAnimatedHeightBehavior extends ImplicitlyAnimatedFieldBehavior<double> {
+  ImplicitlyAnimatedHeightBehavior(Duration duration) : super(duration);
 
   double getter(AnimatedContainer container) => container.height;
   void setter(AnimatedContainer container, double val) { container.height = val; }
   AnimatedValue initField(double val) => new AnimatedValue<double>(val);
 }
 
-List<AnimationIntention> implicitlySyncFieldsIntention(Duration duration) {
+List<AnimationBehavior> implicitlyAnimate(Duration duration) {
   return [
-    new ImplicitlySyncConstraintsIntention(duration),
-    new ImplicitlySyncDecorationIntention(duration),
-    new ImplicitlySyncMarginIntention(duration),
-    new ImplicitlySyncPaddingIntention(duration),
-    new ImplicitlySyncTransformIntention(duration),
-    new ImplicitlySyncWidthIntention(duration),
-    new ImplicitlySyncHeightIntention(duration)
+    new ImplicitlyAnimatedConstraintsBehavior(duration),
+    new ImplicitlyAnimatedDecorationBehavior(duration),
+    new ImplicitlyAnimatedMarginBehavior(duration),
+    new ImplicitlyAnimatedPaddingBehavior(duration),
+    new ImplicitlyAnimatedTransformBehavior(duration),
+    new ImplicitlyAnimatedWidthBehavior(duration),
+    new ImplicitlyAnimatedHeightBehavior(duration)
   ];
 }
 
@@ -203,8 +203,7 @@ class AnimatedContainer extends AnimatedComponent {
   AnimatedContainer({
     Key key,
     this.child,
-    this.intentions,
-    this.tag,
+    this.behavior,
     this.constraints,
     this.decoration,
     this.width,
@@ -223,17 +222,16 @@ class AnimatedContainer extends AnimatedComponent {
   double width;
   double height;
 
-  List<AnimationIntention> intentions;
-  dynamic tag; // Used by intentions to determine desired state.
+  List<AnimationBehavior> behavior;
 
   void initState() {
-    for (AnimationIntention i in intentions)
+    for (AnimationBehavior i in behavior)
       i.initFields(this);
   }
 
   void syncFields(AnimatedContainer updated) {
     child = updated.child;
-    for (AnimationIntention i in intentions)
+    for (AnimationBehavior i in behavior)
       i.syncFields(this, updated);
   }
 

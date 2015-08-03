@@ -175,10 +175,10 @@ class Dismissable extends StatefulComponent {
       onGestureFlingStart: _handleFlingStart,
       child: new SizeObserver(
         callback: _handleSizeChanged,
-        child: new SlideIn(
+        child: new SlideTransition(
           performance: _fadePerformance,
           position: new AnimatedValue<Point>(Point.origin, end: _activeCardDragEndPoint),
-          child: new FadeIn(
+          child: new FadeTransition(
             performance: _fadePerformance,
             onCompleted: _handleFadeCompleted,
             opacity: new AnimatedValue<double>(1.0, end: 0.0),
