@@ -54,15 +54,6 @@ Simulation createDefaultScrollSimulation(double position, double velocity, doubl
   return new ScrollSimulation(position, velocityPerSecond, minScrollOffset, maxScrollOffset, spring, drag);
 }
 
-class FlingBehavior extends BoundedBehavior {
-  FlingBehavior({ double contentsSize: 0.0, double containerSize: 0.0 })
-    : super(contentsSize: contentsSize, containerSize: containerSize);
-
-  Simulation release(double position, double velocity) {
-    return createDefaultScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
-  }
-}
-
 class OverscrollBehavior extends BoundedBehavior {
   OverscrollBehavior({ double contentsSize: 0.0, double containerSize: 0.0 })
     : super(contentsSize: contentsSize, containerSize: containerSize);
@@ -79,11 +70,27 @@ class OverscrollBehavior extends BoundedBehavior {
     // Notice that we clamp the "old" value to 0.0 so that we only
     // reduce the portion of scrollDelta that's applied beyond 0.0. We
     // do similar things for overscroll in the other direction.
-    if (newScrollOffset < 0.0) {
-      newScrollOffset -= (newScrollOffset - math.min(0.0, scrollOffset)) / 2.0;
+    if (newScrollOffset < minScrollOffset) {
+      newScrollOffset -= (newScrollOffset - math.min(minScrollOffset, scrollOffset)) / 2.0;
     } else if (newScrollOffset > maxScrollOffset) {
       newScrollOffset -= (newScrollOffset - math.max(maxScrollOffset, scrollOffset)) / 2.0;
     }
     return newScrollOffset;
+  }
+}
+
+class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
+  bool get isScrollable => contentsSize > containerSize;
+
+  Simulation release(double position, double velocity) {
+    if (isScrollable || position < minScrollOffset || position > maxScrollOffset)
+      return super.release(position, velocity);
+    return null;
+  }
+
+  double applyCurve(double scrollOffset, double scrollDelta) {
+    if (isScrollable)
+      return super.applyCurve(scrollOffset, scrollDelta);
+    return minScrollOffset;
   }
 }
