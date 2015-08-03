@@ -8,6 +8,8 @@ import 'package:sky/animation/animated_value.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:vector_math/vector_math.dart';
 
+dynamic _maybe(AnimatedValue x) => x != null ? x.value : null;
+
 abstract class TransitionBase extends AnimatedComponent {
   TransitionBase({
     Key key,
@@ -68,6 +70,7 @@ abstract class TransitionBase extends AnimatedComponent {
   Widget build();
 }
 
+// TODO(mpcomplete): rename SlideTransition
 class SlideIn extends TransitionBase {
   // TODO(mpcomplete): this constructor is mostly boilerplate, passing values
   // to super. Is there a simpler way?
@@ -103,6 +106,7 @@ class SlideIn extends TransitionBase {
   }
 }
 
+// TODO(mpcomplete): rename FadeTransition
 class FadeIn extends TransitionBase {
   FadeIn({
     Key key,
@@ -165,5 +169,42 @@ class ColorTransition extends TransitionBase {
       decoration: new BoxDecoration(backgroundColor: color.value),
       child: child
     );
+  }
+}
+
+class SquashTransition extends TransitionBase {
+  SquashTransition({
+    Key key,
+    this.width,
+    this.height,
+    Duration duration,
+    AnimationPerformance performance,
+    Direction direction,
+    Function onDismissed,
+    Function onCompleted,
+    Widget child
+  }) : super(key: key,
+             duration: duration,
+             performance: performance,
+             direction: direction,
+             onDismissed: onDismissed,
+             onCompleted: onCompleted,
+             child: child);
+
+  AnimatedValue<double> width;
+  AnimatedValue<double> height;
+
+  void syncFields(SquashTransition updated) {
+    width = updated.width;
+    height = updated.height;
+    super.syncFields(updated);
+  }
+
+  Widget build() {
+    if (width != null)
+      width.setProgress(performance.progress);
+    if (height != null)
+      height.setProgress(performance.progress);
+    return new SizedBox(width: _maybe(width), height: _maybe(height), child: child);
   }
 }
