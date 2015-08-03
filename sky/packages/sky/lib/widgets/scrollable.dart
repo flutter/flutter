@@ -181,20 +181,23 @@ abstract class Scrollable extends StatefulComponent {
     scrollTo(value);
   }
 
-  void _handlePointerDown(_) {
+  EventDisposition _handlePointerDown(_) {
     _stopToEndAnimation();
     _stopToOffsetAnimation();
+    return EventDisposition.processed;
   }
 
-  void _handleScrollUpdate(sky.GestureEvent event) {
+  EventDisposition _handleScrollUpdate(sky.GestureEvent event) {
     scrollBy(direction == ScrollDirection.horizontal ? event.dx : -event.dy);
+    return EventDisposition.processed;
   }
 
-  void _handleFlingStart(sky.GestureEvent event) {
+  EventDisposition _handleFlingStart(sky.GestureEvent event) {
     double eventVelocity = direction == ScrollDirection.horizontal
       ? -event.velocityX
       : -event.velocityY;
     _startToEndAnimation(velocity: _velocityForFlingGesture(eventVelocity));
+    return EventDisposition.processed;
   }
 
   void _maybeSettleScrollOffset() {
@@ -202,13 +205,20 @@ abstract class Scrollable extends StatefulComponent {
       settleScrollOffset();
   }
 
-  void _handlePointerUpOrCancel(_) { _maybeSettleScrollOffset(); }
+  EventDisposition _handlePointerUpOrCancel(_) {
+    _maybeSettleScrollOffset();
+    return EventDisposition.processed;
+  }
 
-  void _handleFlingCancel(sky.GestureEvent event) { _maybeSettleScrollOffset(); }
+  EventDisposition _handleFlingCancel(sky.GestureEvent event) {
+    _maybeSettleScrollOffset();
+    return EventDisposition.processed;
+  }
 
 
-  void _handleWheel(sky.WheelEvent event) {
+  EventDisposition _handleWheel(sky.WheelEvent event) {
     scrollBy(-event.offsetY);
+    return EventDisposition.processed;
   }
 }
 

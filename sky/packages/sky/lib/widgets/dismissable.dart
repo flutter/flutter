@@ -99,15 +99,16 @@ class Dismissable extends StatefulComponent {
       _maybeCallOnResized();
   }
 
-  void _handlePointerDown(sky.PointerEvent event) {
+  EventDisposition _handlePointerDown(sky.PointerEvent event) {
     _dragUnderway = true;
     _dragX = 0.0;
     _fadePerformance.progress = 0.0;
+    return EventDisposition.processed;
   }
 
-  void _handlePointerMove(sky.PointerEvent event) {
+  EventDisposition _handlePointerMove(sky.PointerEvent event) {
     if (!_isActive)
-      return;
+      return EventDisposition.ignored;
 
     double oldDragX = _dragX;
     _dragX += event.dx;
@@ -115,17 +116,19 @@ class Dismissable extends StatefulComponent {
       setState(() {}); // Rebuild to update the new drag endpoint.
     if (!_fadePerformance.isAnimating)
       _fadePerformance.progress = _dragX.abs() / (_size.width * _kDismissCardThreshold);
+    return EventDisposition.processed;
   }
 
-  void _handlePointerUpOrCancel(_) {
+  EventDisposition _handlePointerUpOrCancel(_) {
     if (!_isActive)
-      return;
+      return EventDisposition.ignored;
 
     _dragUnderway = false;
     if (_fadePerformance.isCompleted)
       _startResizePerformance();
     else if (!_fadePerformance.isAnimating)
       _fadePerformance.reverse();
+    return EventDisposition.processed;
   }
 
   bool _isHorizontalFlingGesture(sky.GestureEvent event) {
@@ -134,15 +137,16 @@ class Dismissable extends StatefulComponent {
     return vx - vy > _kMinFlingVelocityDelta && vx > _kMinFlingVelocity;
   }
 
-  void _handleFlingStart(sky.GestureEvent event) {
+  EventDisposition _handleFlingStart(sky.GestureEvent event) {
     if (!_isActive)
-      return;
+      return EventDisposition.ignored;
 
     if (_isHorizontalFlingGesture(event)) {
       _dragUnderway = false;
       _dragX = event.velocityX.sign;
       _fadePerformance.fling(Direction.forward, velocity: event.velocityX.abs() * _kFlingVelocityScale);
     }
+    return EventDisposition.processed;
   }
 
   void _handleSizeChanged(Size newSize) {

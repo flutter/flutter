@@ -174,9 +174,9 @@ class SpriteBox extends RenderBox {
     }
   }
 
-  void handleEvent(Event event, _SpriteBoxHitTestEntry entry) {
+  EventDisposition handleEvent(Event event, _SpriteBoxHitTestEntry entry) {
     if (!attached)
-      return;
+      return EventDisposition.ignored;
 
     if (event is PointerEvent) {
 
@@ -225,6 +225,7 @@ class SpriteBox extends RenderBox {
         }
       }
     }
+    return EventDisposition.ignored;
   }
 
   bool hitTest(HitTestResult result, { Point position }) {
