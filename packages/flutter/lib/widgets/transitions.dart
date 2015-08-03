@@ -70,11 +70,10 @@ abstract class TransitionBase extends AnimatedComponent {
   Widget build();
 }
 
-// TODO(mpcomplete): rename SlideTransition
-class SlideIn extends TransitionBase {
+class SlideTransition extends TransitionBase {
   // TODO(mpcomplete): this constructor is mostly boilerplate, passing values
   // to super. Is there a simpler way?
-  SlideIn({
+  SlideTransition({
     Key key,
     this.position,
     Duration duration,
@@ -93,7 +92,7 @@ class SlideIn extends TransitionBase {
 
   AnimatedValue<Point> position;
 
-  void syncFields(SlideIn updated) {
+  void syncFields(SlideTransition updated) {
     position = updated.position;
     super.syncFields(updated);
   }
@@ -106,9 +105,8 @@ class SlideIn extends TransitionBase {
   }
 }
 
-// TODO(mpcomplete): rename FadeTransition
-class FadeIn extends TransitionBase {
-  FadeIn({
+class FadeTransition extends TransitionBase {
+  FadeTransition({
     Key key,
     this.opacity,
     Duration duration,
@@ -127,7 +125,7 @@ class FadeIn extends TransitionBase {
 
   AnimatedValue<double> opacity;
 
-  void syncFields(FadeIn updated) {
+  void syncFields(FadeTransition updated) {
     opacity = updated.opacity;
     super.syncFields(updated);
   }

@@ -94,13 +94,13 @@ class Drawer extends StatefulComponent {
       onGestureTap: handleMaskTap
     );
 
-    Widget content = new SlideIn(
+    Widget content = new SlideTransition(
       performance: _performance,
       direction: showing ? Direction.forward : Direction.reverse,
       position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
       onDismissed: _onDismissed,
       child: new AnimatedContainer(
-        intentions: implicitlySyncFieldsIntention(const Duration(milliseconds: 200)),
+        behavior: implicitlyAnimate(const Duration(milliseconds: 200)),
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(this).canvasColor,
           boxShadow: shadows[level]),

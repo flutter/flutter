@@ -49,7 +49,7 @@ class Material extends Component {
 
   Widget build() {
     return new AnimatedContainer(
-      intentions: implicitlySyncFieldsIntention(const Duration(milliseconds: 200)),
+      behavior: implicitlyAnimate(const Duration(milliseconds: 200)),
       decoration: new BoxDecoration(
         backgroundColor: _backgroundColor,
         borderRadius: edges[type],
