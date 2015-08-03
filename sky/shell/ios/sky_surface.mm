@@ -16,6 +16,10 @@
 #include "sky/shell/shell.h"
 #include "sky/shell/ui_delegate.h"
 
+#ifndef NDEBUG
+#include "document_watcher.h"
+#endif
+
 static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
   switch (phase) {
     case UITouchPhaseBegan:
@@ -62,6 +66,10 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 
   sky::SkyEnginePtr _sky_engine;
   scoped_ptr<sky::shell::ShellView> _shell_view;
+
+#ifndef NDEBUG
+  DocumentWatcher *_document_watcher;
+#endif
 }
 
 -(instancetype) initWithShellView:(sky::shell::ShellView *) shellView {
@@ -137,7 +145,24 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 }
 
 - (NSString*)skyInitialBundleURL {
-  return [[NSBundle mainBundle] pathForResource:@"app" ofType:@"skyx"];
+  NSString *skyxBundlePath = [[NSBundle mainBundle] pathForResource:@"app" ofType:@"skyx"];
+#ifndef NDEBUG
+  NSFileManager *fileManager = [NSFileManager defaultManager];
+  NSError *error = nil;
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  NSString *documentsDirectory = [paths objectAtIndex:0];
+  NSString *skyxDocsPath = [documentsDirectory stringByAppendingPathComponent:@"app.skyx"];
+
+  if ([fileManager fileExistsAtPath:skyxDocsPath] == NO) {
+    if ([fileManager copyItemAtPath:skyxBundlePath toPath:skyxDocsPath error:&error]) {
+      return skyxDocsPath;
+    }
+    NSLog(@"Error encountered copying app.skyx from the Bundle to the Documents directory. Dynamic reloading will not be possible. %@", error);
+    return skyxBundlePath;
+  }
+  return skyxDocsPath;
+#endif
+  return skyxBundlePath;
 }
 
 - (void)connectToEngineAndLoad {
@@ -146,6 +171,12 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 
   NSString *endpoint = self.skyInitialBundleURL;
   if (endpoint.length > 0) {
+#ifndef NDEBUG
+    _document_watcher = [[DocumentWatcher alloc] initWithDocumentPath:endpoint callbackBlock:^{
+      mojo::String string(endpoint.UTF8String);
+      _sky_engine->RunFromBundle(string);
+    }];
+#endif
     // Load from bundle
     mojo::String string(endpoint.UTF8String);
     _sky_engine->RunFromBundle(string);
@@ -164,6 +195,16 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 - (void)notifySurfaceDestruction {
   self.platformView->SurfaceDestroyed();
 }
+
+#ifndef NDEBUG
+- (void)didMoveToWindow {
+  if (self.window == nil) {
+    [_document_watcher cancel];
+    [_document_watcher release];
+    _document_watcher = nil;
+  }
+}
+#endif
 
 #pragma mark - UIResponder overrides for raw touches
 
