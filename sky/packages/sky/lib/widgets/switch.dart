@@ -4,9 +4,6 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
 import 'package:sky/painting/shadows.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
@@ -14,8 +11,9 @@ import 'package:sky/theme/shadows.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
+import 'package:sky/rendering/toggleable.dart';
 
-export 'package:sky/widgets/basic.dart' show ValueChanged;
+export 'package:sky/rendering/toggleable.dart' show ValueChanged;
 
 const sky.Color _kThumbOffColor = const sky.Color(0xFFFAFAFA);
 const sky.Color _kTrackOffColor = const sky.Color(0x42000000);
@@ -66,47 +64,14 @@ class _SwitchWrapper extends LeafRenderObjectWrapper {
   }
 }
 
-class _RenderSwitch extends RenderConstrainedBox {
+class _RenderSwitch extends RenderToggleable {
   _RenderSwitch(
       {bool value, Color thumbColor: _kThumbOffColor, ValueChanged onChanged})
-      : _value = value,
-        _thumbColor = thumbColor,
-        _onChanged = onChanged,
-        super(additionalConstraints: new BoxConstraints.tight(_kSwitchSize)) {
-    _performance = new AnimationPerformance()
-      ..variable = _position
-      ..duration = _kCheckDuration
-      ..progress = _value ? 1.0 : 0.0
-      ..addListener(markNeedsPaint);
-  }
-
-  EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event is sky.GestureEvent && event.type == 'gesturetap') {
-      _onChanged(!_value);
-      return EventDisposition.consumed;
-    }
-    return EventDisposition.ignored;
-  }
-
-  bool _value;
-  bool get value => _value;
-
-  void set value(bool value) {
-    if (value == _value) return;
-    _value = value;
-    // TODO(abarth): Setting the curve on the position means there's a
-    // discontinuity when we reverse the timeline.
-    if (value) {
-      _position.curve = easeIn;
-      _performance.play();
-    } else {
-      _position.curve = easeOut;
-      _performance.reverse();
-    }
-  }
+      : _thumbColor = thumbColor,
+        super(value: value, onChanged: onChanged, size: _kSwitchSize) {}
 
   Color _thumbColor;
-  Color get thumbColor  => _thumbColor;
+  Color get thumbColor => _thumbColor;
 
   void set thumbColor(Color value) {
     if (value == _thumbColor) return;
@@ -114,22 +79,10 @@ class _RenderSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  ValueChanged _onChanged;
-  ValueChanged get onChanged => _onChanged;
-
-  void set onChanged(ValueChanged onChanged) {
-    _onChanged = onChanged;
-  }
-
-  final AnimatedValue<double> _position =
-      new AnimatedValue<double>(0.0, end: 1.0);
-
-  AnimationPerformance _performance;
-
   void paint(PaintingCanvas canvas, Offset offset) {
     sky.Color thumbColor = _kThumbOffColor;
     sky.Color trackColor = _kTrackOffColor;
-    if (_value) {
+    if (value) {
       thumbColor = _thumbColor;
       trackColor = new sky.Color(_thumbColor.value & 0x80FFFFFF);
     }
@@ -152,10 +105,10 @@ class _RenderSwitch extends RenderConstrainedBox {
     paint.setDrawLooper(builder.build());
 
     // The thumb contracts slightly during the animation
-    double inset = 2.0 - (_position.value - 0.5).abs() * 2.0;
+    double inset = 2.0 - (position.value - 0.5).abs() * 2.0;
     Point thumbPos = new Point(offset.dx +
             _kTrackRadius +
-            _position.value * (_kTrackWidth - _kTrackRadius * 2),
+            position.value * (_kTrackWidth - _kTrackRadius * 2),
         offset.dy + _kSwitchHeight / 2.0);
     canvas.drawCircle(thumbPos, _kThumbRadius - inset, paint);
   }

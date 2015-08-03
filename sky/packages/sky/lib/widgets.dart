@@ -37,7 +37,6 @@ export 'widgets/switch.dart';
 export 'widgets/tabs.dart';
 export 'widgets/task_description.dart';
 export 'widgets/theme.dart';
-export 'widgets/toggleable.dart';
 export 'widgets/tool_bar.dart';
 export 'widgets/transitions.dart';
 export 'widgets/widget.dart';
