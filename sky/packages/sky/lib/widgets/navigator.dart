@@ -89,11 +89,11 @@ class Transition extends TransitionBase {
   Widget build() {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
-    return new SlideIn(
+    return new SlideTransition(
       performance: performance,
       direction: direction,
       position: new AnimatedValue<Point>(_kTransitionStartPoint, end: Point.origin, curve: easeOut),
-      child: new FadeIn(
+      child: new FadeTransition(
         performance: performance,
         direction: direction,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
