@@ -4,7 +4,6 @@
 
 export 'widgets/animated_component.dart';
 export 'widgets/animated_container.dart';
-export 'widgets/animation_intentions.dart';
 export 'widgets/basic.dart';
 export 'widgets/block_viewport.dart';
 export 'widgets/button_base.dart';
