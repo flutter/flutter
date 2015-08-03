@@ -2,26 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library address_book;
-
 import 'package:sky/editing/input.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/default_text_style.dart';
-import 'package:sky/widgets/dialog.dart';
-import 'package:sky/widgets/floating_action_button.dart';
-import 'package:sky/widgets/flat_button.dart';
-import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/scrollable.dart';
-import 'package:sky/widgets/task_description.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets.dart';
 
 class Field extends Component {
   Field({
