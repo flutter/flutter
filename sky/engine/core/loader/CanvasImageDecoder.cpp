@@ -57,7 +57,9 @@ void CanvasImageDecoder::OnDataComplete() {
   }
 
   RefPtr<CanvasImage> resultImage = CanvasImage::create();
-  resultImage->setBitmap(decoder->frameBufferAtIndex(0)->getSkBitmap());
+  ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
+  RefPtr<SkImage> skImage = adoptRef(SkImage::NewFromBitmap(imageFrame->getSkBitmap()));
+  resultImage->setImage(skImage.release());
   callback_->handleEvent(resultImage.get());
 }
 

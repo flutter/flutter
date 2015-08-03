@@ -229,14 +229,14 @@ void Canvas::drawImage(const CanvasImage* image, const Point& p, const Paint* pa
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawBitmap(image->bitmap(), p.sk_point.x(), p.sk_point.y(), &paint->paint());
+    m_canvas->drawImage(image->image(), p.sk_point.x(), p.sk_point.y(), &paint->paint());
 }
 
 void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint) {
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawBitmapRect(image->bitmap(), &src.sk_rect, dst.sk_rect, &paint->paint());
+    m_canvas->drawImageRect(image->image(), &src.sk_rect, dst.sk_rect, &paint->paint());
 }
 
 void Canvas::drawPicture(Picture* picture)
@@ -272,7 +272,7 @@ void Canvas::drawAtlas(CanvasImage* atlas,
 {
     if (!m_canvas)
         return;
-    RefPtr<SkImage> skImage = adoptRef(SkImage::NewFromBitmap(atlas->bitmap()));
+    RefPtr<SkImage> skImage = atlas->image();
     if (transforms.size() != rects.size())
         return es.ThrowRangeError("transforms and rects lengths must match");
     if (colors.size() && colors.size() != rects.size())

@@ -13,11 +13,11 @@ CanvasImage::~CanvasImage() {
 }
 
 int CanvasImage::width() const {
-  return bitmap_.width();
+  return image_->width();
 }
 
 int CanvasImage::height() const {
-  return bitmap_.height();
+  return image_->height();
 }
 
 }  // namespace blink
