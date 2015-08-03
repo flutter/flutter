@@ -4,8 +4,14 @@
 
 import 'dart:sky' as sky;
 
+enum EventDisposition {
+  ignored,
+  processed,
+  consumed,
+}
+
 abstract class HitTestTarget {
-  void handleEvent(sky.Event event, HitTestEntry entry);
+  EventDisposition handleEvent(sky.Event event, HitTestEntry entry);
 }
 
 class HitTestEntry {

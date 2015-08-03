@@ -39,7 +39,7 @@ class StockSettings extends StatefulComponent {
     sendUpdates();
   }
 
-  void _confirmOptimismChange() {
+  EventDisposition _confirmOptimismChange() {
     switch (optimism) {
       case StockMode.optimistic:
         _handleOptimismChanged(false);
@@ -70,6 +70,7 @@ class StockSettings extends StatefulComponent {
         }).then(_handleOptimismChanged);
         break;
     }
+    return EventDisposition.processed;
   }
 
   void sendUpdates() {

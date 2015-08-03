@@ -80,9 +80,12 @@ class _RenderSwitch extends RenderConstrainedBox {
       ..addListener(markNeedsPaint);
   }
 
-  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event is sky.GestureEvent &&
-        event.type == 'gesturetap') _onChanged(!_value);
+  EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
+    if (event is sky.GestureEvent && event.type == 'gesturetap') {
+      _onChanged(!_value);
+      return EventDisposition.consumed;
+    }
+    return EventDisposition.ignored;
   }
 
   bool _value;
