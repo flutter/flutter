@@ -68,8 +68,11 @@ class Drawer extends StatefulComponent {
     // while dragging.
     _performance.attachedForce = kDefaultSpringForce;
 
-    if (navigator != null)
-      navigator.pushState(this, (_) => _performance.reverse());
+    if (navigator != null) {
+      scheduleMicrotask(() {
+        navigator.pushState(this, (_) => _performance.reverse());
+      });
+    }
   }
 
   void syncFields(Drawer source) {
@@ -85,7 +88,8 @@ class Drawer extends StatefulComponent {
       child: new ColorTransition(
         performance: _performance,
         direction: showing ? Direction.forward : Direction.reverse,
-        color: new AnimatedColorValue(colors.transparent, end: const Color(0x7F000000))
+        color: new AnimatedColorValue(colors.transparent, end: const Color(0x7F000000)),
+        child: new Container()
       ),
       onGestureTap: handleMaskTap
     );
