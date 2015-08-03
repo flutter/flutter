@@ -137,11 +137,11 @@ class AnimationPerformance {
   }
 
   Future _animateTo(double target) {
-    double remainingDistance = (target - timeline.value).abs();
+    Duration remainingDuration = duration * (target - timeline.value).abs();
     timeline.stop();
-    if (remainingDistance == 0.0)
+    if (remainingDuration == Duration.ZERO)
       return new Future.value();
-    return timeline.animateTo(target, duration: duration * remainingDistance);
+    return timeline.animateTo(target, duration: remainingDuration);
   }
 
   void _tick(double t) {
