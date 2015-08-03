@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 import argparse
+import atexit
 import json
 import logging
 import os
@@ -16,17 +17,18 @@ import urlparse
 import time
 
 # TODO(eseidel): This should be BIN_DIR.
-PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKY_ENGINE_PACKAGE = os.path.join(PACKAGE_ROOT, 'sky_engine')
-APK_DIR = os.path.join(os.path.realpath(SKY_ENGINE_PACKAGE), os.pardir, 'apks')
+PACKAGES_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SKY_ENGINE_DIR = os.path.join(PACKAGES_DIR, 'sky_engine')
+APK_DIR = os.path.join(os.path.realpath(SKY_ENGINE_DIR), os.pardir, 'apks')
 
 SKY_SERVER_PORT = 9888
 OBSERVATORY_PORT = 8181
+ADB_PATH = 'adb'
 APK_NAME = 'SkyShell.apk'
 ANDROID_PACKAGE = "org.domokit.sky.shell"
 ANDROID_COMPONENT = '%s/%s.SkyActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
-# FIXME: This assumes adb is in $PATH, we could look for ANDROID_HOME, etc?
-ADB_PATH = 'adb'
+ANDROID_HOME_DIR = ""
+
 # FIXME: Do we need to look in $DART_SDK?
 DART_PATH = 'dart'
 PUB_PATH = 'pub'
@@ -37,7 +39,6 @@ PID_FILE_KEYS = frozenset([
     'sky_server_pid',
     'sky_server_port',
     'sky_server_root',
-    'build_dir',
 ])
 
 
@@ -104,6 +105,10 @@ class Pids(object):
         return cls(known_keys, contents)
 
     def write_to(self, path):
+        # These keys are required to write a valid file.
+        if not self._dict.viewkeys() >= { 'sky_server_pid', 'sky_server_port' }:
+            return
+
         try:
             with open(path, 'w') as pid_file:
                 json.dump(self._dict, pid_file, indent=2, sort_keys=True)
@@ -129,6 +134,11 @@ class StartSky(object):
         pm_path_cmd = [ADB_PATH, 'shell', 'pm', 'path', package_name]
         return subprocess.check_output(pm_path_cmd).strip() != ''
 
+    def _is_valid_script_path(self):
+        script_path = os.path.dirname(os.path.abspath(__file__))
+        script_dirs = script_path.split('/')
+        return len(script_dirs) > 1 and script_dirs[-2] == 'packages'
+
     def run(self, args, pids):
         StopSky().run(args, pids)
 
@@ -146,22 +156,28 @@ class StartSky(object):
             missing_msg = "%s does not exist." % main_dart
 
         if not os.path.isfile(main_dart):
-            print missing_msg
+            logging.error(missing_msg)
             return 2
 
         package_root = os.path.join(sky_server_root, 'packages')
         if not os.path.isdir(package_root):
-            print "%s is not a valid packages path." % package_root
+            logging.error("%s is not a valid packages path." % package_root)
             return 2
 
         if not self._is_package_installed(ANDROID_PACKAGE):
-            print '%s is not installed, installing.' % APK_NAME
+            logging.info('%s is not on the device. Installing now...' % APK_NAME)
             args.install = True
 
         if args.install:
+            if not self._is_valid_script_path():
+                logging.error("'%s' must be located in packages/sky. " \
+                              "The directory packages/sky_engine must also " \
+                              "exist to locate %s." \
+                              % (os.path.basename(__file__), APK_NAME))
+                return 2
             apk_path = os.path.join(APK_DIR, APK_NAME)
             if not os.path.exists(apk_path):
-                print "'%s' does not exist?" % apk_path
+                logging.error("'%s' does not exist?" % apk_path)
                 return 2
 
             subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
@@ -175,7 +191,7 @@ class StartSky(object):
         sky_server_port = SKY_SERVER_PORT
         pids['sky_server_port'] = sky_server_port
         if _port_in_use(sky_server_port):
-            logging.warn(('Port %s already in use. '
+            logging.info(('Port %s already in use. '
             ' Not starting server for %s') % (sky_server_port, sky_server_root))
         else:
             sky_server_pid = _start_http_server(sky_server_port, sky_server_root)
@@ -208,13 +224,13 @@ class StopSky(object):
     def _kill_if_exists(self, pids, key, name):
         pid = pids.pop(key, None)
         if not pid:
-            logging.info('No pid for %s, nothing to do.' % name)
+            logging.debug('No pid for %s, nothing to do.' % name)
             return
-        logging.info('Killing %s (%d).' % (name, pid))
+        logging.debug('Killing %s (%d).' % (name, pid))
         try:
             os.kill(pid, signal.SIGTERM)
         except OSError:
-            logging.info('%s (%d) already gone.' % (name, pid))
+            logging.debug('%s (%d) already gone.' % (name, pid))
 
     def run(self, args, pids):
         self._kill_if_exists(pids, 'sky_server_pid', 'sky_server')
@@ -267,7 +283,7 @@ class StopTracing(object):
                     device_path = result.group('path')
             is_complete = TRACE_COMPLETE_REGEXP.search(log) is not None
 
-        print 'Downloading trace %s ...' % os.path.basename(device_path)
+        logger.info('Downloading trace %s ...' % os.path.basename(device_path))
 
         if device_path:
             subprocess.check_output([ADB_PATH, 'pull', device_path])
@@ -275,25 +291,73 @@ class StopTracing(object):
 
 
 class SkyShellRunner(object):
+    def _update_paths(self):
+        global ADB_PATH
+        if 'ANDROID_HOME' in os.environ:
+            android_home_dir = os.environ['ANDROID_HOME']
+            ADB_PATH = os.path.join(android_home_dir, 'sdk/platform-tools/adb')
+
     def _check_for_adb(self):
         try:
-            subprocess.check_output([ADB_PATH, 'devices'])
+            adb_version = subprocess.check_output([ADB_PATH, 'version'])
+            # Sample output: "Android Debug Bridge version 1.0.31"
+            version_fields = adb_version.rstrip().split('.')
+            # If the string doesn't match the expected format, then skip the
+            # version check.
+            if len(version_fields) == 3 and version_fields[-1].isdigit():
+                minor_version = int(version_fields[-1])
+                if minor_version < 32:
+                    adb_path = subprocess.check_output(
+                        ['which', ADB_PATH]).rstrip()
+                    logging.error("'%s' is too old. Need 1.0.32 or later. " \
+                        "Try setting ANDROID_HOME." % adb_path)
+                    return False
+
         except OSError:
-            print "'adb' (from the Android SDK) not in $PATH, can't continue."
+            logging.error("'adb' (from the Android SDK) not in $PATH, can't continue.")
+            return False
+        return True
+
+    def _check_for_lollipop_or_later(self):
+        try:
+            # If the server is automatically restarted, then we get irrelevant
+            # output lines like this, which we want to ignore:
+            #   ERROR:Unexpected response from getprop: 'adb server is out of date.  killing..
+            #   * daemon started successfully *
+
+            subprocess.call([ADB_PATH, 'start-server'])
+            sdk_version = subprocess.check_output([ADB_PATH, 'shell', 'getprop',
+                                                   'ro.build.version.sdk']).rstrip()
+            # Sample output: "22"
+            if not sdk_version.isdigit():
+                logging.error("Unexpected response from getprop: '%s'." % sdk_version)
+                return False
+ 
+            if int(sdk_version) < 22:
+                logging.error("Version '%s' of the Android SDK is too old. " \
+                              "Need Lollipop (22) or later. " % sdk_version)
+                return False
+
+        except subprocess.CalledProcessError as e:
+            # adb printed the error, so we print nothing.
             return False
         return True
 
     def _check_for_dart(self):
         try:
-            subprocess.check_output([DART_PATH, '--version'])
+            subprocess.check_output([DART_PATH, '--version'], stderr=subprocess.STDOUT)
         except OSError:
-            print "'dart' (from the Dart SDK) not in $PATH, can't continue."
+            logging.error("'dart' (from the Dart SDK) not in $PATH, can't continue.")
             return False
         return True
 
     def main(self):
-        logging.basicConfig(level=logging.WARNING)
-        if not self._check_for_adb() or not self._check_for_dart():
+        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+
+        self._update_paths()
+        if not self._check_for_adb() or not self._check_for_lollipop_or_later():
+            sys.exit(2)
+        if not self._check_for_dart():
             sys.exit(2)
 
         parser = argparse.ArgumentParser(description='Sky Demo Runner')
@@ -304,9 +368,14 @@ class SkyShellRunner(object):
 
         args = parser.parse_args()
         pids = Pids.read_from(PID_FILE_PATH, PID_FILE_KEYS)
-        exit_code = args.func(args, pids)
-        # We could do this with an at-exit handler instead?
-        pids.write_to(PID_FILE_PATH)
+        atexit.register(pids.write_to, PID_FILE_PATH)
+        exit_code = 0
+        try:
+          exit_code = args.func(args, pids)
+        except subprocess.CalledProcessError as e:
+          # Don't print a stack trace if the adb command fails.
+          logger.error(e)
+          exit_code = 2
         sys.exit(exit_code)
 
 
