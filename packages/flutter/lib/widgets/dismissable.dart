@@ -7,14 +7,14 @@ import 'dart:sky' as sky;
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
-import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/transitions.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:vector_math/vector_math.dart';
 
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const Duration _kCardDismissResize = const Duration(milliseconds: 300);
-const double _kCardDismissResizeDelay = 0.4;
+final Interval _kCardDismissResizeInterval = new Interval(0.4, 1.0);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
@@ -23,7 +23,7 @@ const double _kDismissCardThreshold = 0.6;
 typedef void ResizedCallback();
 typedef void DismissedCallback();
 
-class Dismissable extends AnimatedComponent {
+class Dismissable extends StatefulComponent {
 
   Dismissable({
     Key key,
@@ -37,8 +37,6 @@ class Dismissable extends AnimatedComponent {
   ResizedCallback onResized;
   DismissedCallback onDismissed;
 
-  AnimatedValue<Point> _position;
-  AnimatedValue<double> _opacity;
   AnimationPerformance _fadePerformance;
   AnimationPerformance _resizePerformance;
 
@@ -47,29 +45,23 @@ class Dismissable extends AnimatedComponent {
   bool _dragUnderway = false;
 
   void initState() {
-    _position = new AnimatedValue<Point>(Point.origin);
-    _opacity = new AnimatedValue<double>(1.0, end: 0.0);
-    _fadePerformance = new AnimationPerformance()
-      ..duration = _kCardDismissFadeout
-      ..variable = new AnimatedList([_position, _opacity])
-      ..addListener(_handleFadeProgressChanged);
+    _fadePerformance = new AnimationPerformance(duration: _kCardDismissFadeout);
   }
 
-  void _handleFadeProgressChanged() {
-    setState(() {
-      if (_fadePerformance.isCompleted && !_dragUnderway)
-        _startResizePerformance();
-    });
+  void _handleFadeCompleted() {
+    if (!_dragUnderway)
+      _startResizePerformance();
   }
 
   void syncFields(Dismissable source) {
     child = source.child;
     onResized = source.onResized;
     onDismissed = source.onDismissed;
-    super.syncFields(source);
   }
 
   Point get _activeCardDragEndPoint {
+    if (!_isActive)
+      return Point.origin;
     assert(_size != null);
     return new Point(_dragX.sign * _size.width * _kDismissCardThreshold, 0.0);
   }
@@ -91,38 +83,27 @@ class Dismissable extends AnimatedComponent {
   void _startResizePerformance() {
     assert(_size != null);
     assert(_fadePerformance != null);
+    assert(_fadePerformance.isCompleted);
     assert(_resizePerformance == null);
 
-    // TODO(hansmuller): _fadePerformance is completed; stop shouldn't be needed.
-    _fadePerformance.stop();
-
-    AnimatedValue<double> dismissHeight = new AnimatedValue<double>(_size.height,
-      end: 0.0,
-      curve: ease,
-      interval: new Interval(_kCardDismissResizeDelay, 1.0)
-    );
-    _resizePerformance = new AnimationPerformance()
-      ..variable = dismissHeight
-      ..duration = _kCardDismissResize
-      ..addListener(_handleResizeProgressChanged)
-      ..play();
+    setState(() {
+      _resizePerformance = new AnimationPerformance()
+        ..duration = _kCardDismissResize
+        ..addListener(_handleResizeProgressChanged);
+    });
   }
 
   void _handleResizeProgressChanged() {
-    setState(() {
-      if (_resizePerformance.isCompleted)
-        _maybeCallOnDismissed();
-      else
-        _maybeCallOnResized();
-    });
+    if (_resizePerformance.isCompleted)
+      _maybeCallOnDismissed();
+    else
+      _maybeCallOnResized();
   }
 
   void _handlePointerDown(sky.PointerEvent event) {
-    setState(() {
-      _dragUnderway = true;
-      _dragX = 0.0;
-      _fadePerformance.progress = 0.0;
-    });
+    _dragUnderway = true;
+    _dragX = 0.0;
+    _fadePerformance.progress = 0.0;
   }
 
   void _handlePointerMove(sky.PointerEvent event) {
@@ -131,26 +112,21 @@ class Dismissable extends AnimatedComponent {
 
     double oldDragX = _dragX;
     _dragX += event.dx;
-    setState(() {
-      if (!_fadePerformance.isAnimating) {
-        if (oldDragX.sign != _dragX.sign)
-          _position.end = _activeCardDragEndPoint;
-        _fadePerformance.progress = _dragX.abs() / (_size.width * _kDismissCardThreshold);
-      }
-    });
+    if (oldDragX.sign != _dragX.sign)
+      setState(() {}); // Rebuild to update the new drag endpoint.
+    if (!_fadePerformance.isAnimating)
+      _fadePerformance.progress = _dragX.abs() / (_size.width * _kDismissCardThreshold);
   }
 
   void _handlePointerUpOrCancel(_) {
     if (!_isActive)
       return;
 
-    setState(() {
-      _dragUnderway = false;
-      if (_fadePerformance.isCompleted)
-        _startResizePerformance();
-      else if (!_fadePerformance.isAnimating)
-        _fadePerformance.reverse();
-    });
+    _dragUnderway = false;
+    if (_fadePerformance.isCompleted)
+      _startResizePerformance();
+    else if (!_fadePerformance.isAnimating)
+      _fadePerformance.reverse();
   }
 
   bool _isHorizontalFlingGesture(sky.GestureEvent event) {
@@ -166,24 +142,31 @@ class Dismissable extends AnimatedComponent {
     if (_isHorizontalFlingGesture(event)) {
       _dragUnderway = false;
       _dragX = event.velocityX.sign;
-      _position.end = _activeCardDragEndPoint;
       _fadePerformance.fling(Direction.forward, velocity: event.velocityX.abs() * _kFlingVelocityScale);
     }
   }
 
   void _handleSizeChanged(Size newSize) {
-    _size = new Size.copy(newSize);
-    _position.end = _activeCardDragEndPoint;
+    setState(() {
+      _size = new Size.copy(newSize);
+    });
   }
 
   Widget build() {
     if (_resizePerformance != null) {
-      AnimatedValue<double> height = _resizePerformance.variable;
-      return new Container(height: height.value);
+      AnimatedValue<double> dismissHeight = new AnimatedValue<double>(
+        _size.height,
+        end: 0.0,
+        curve: ease,
+        interval: _kCardDismissResizeInterval
+      );
+
+      return new SquashTransition(
+        performance: _resizePerformance,
+        direction: Direction.forward,
+        height: dismissHeight);
     }
 
-    Matrix4 transform = new Matrix4.identity();
-    transform.translate(_position.value.x, _position.value.y);
     return new Listener(
       onPointerDown: _handlePointerDown,
       onPointerMove: _handlePointerMove,
@@ -192,10 +175,13 @@ class Dismissable extends AnimatedComponent {
       onGestureFlingStart: _handleFlingStart,
       child: new SizeObserver(
         callback: _handleSizeChanged,
-        child: new Opacity(
-          opacity: _opacity.value,
-          child: new Transform(
-            transform: transform,
+        child: new SlideIn(
+          performance: _fadePerformance,
+          position: new AnimatedValue<Point>(Point.origin, end: _activeCardDragEndPoint),
+          child: new FadeIn(
+            performance: _fadePerformance,
+            onCompleted: _handleFadeCompleted,
+            opacity: new AnimatedValue<double>(1.0, end: 0.0),
             child: child
           )
         )
