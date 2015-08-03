@@ -8,6 +8,8 @@ enum FontWeight { w100, w200, w300, w400, w500, w600, w700, w800, w900 }
 const normal = FontWeight.w400;
 const bold = FontWeight.w700;
 
+enum FontStyle { normal, italic, oblique }
+
 enum TextAlign { left, right, center }
 
 enum TextBaseline { alphabetic, ideographic }
@@ -25,6 +27,7 @@ class TextStyle {
     this.fontFamily,
     this.fontSize,
     this.fontWeight,
+    this.fontStyle,
     this.textAlign,
     this.textBaseline,
     this.height,
@@ -37,6 +40,7 @@ class TextStyle {
   final String fontFamily;
   final double fontSize; // in pixels
   final FontWeight fontWeight;
+  final FontStyle fontStyle;
   final TextAlign textAlign;
   final TextBaseline textBaseline;
   final double height; // multiple of fontSize
@@ -49,6 +53,7 @@ class TextStyle {
     String fontFamily,
     double fontSize,
     FontWeight fontWeight,
+    FontStyle fontStyle,
     TextAlign textAlign,
     TextBaseline textBaseline,
     double height,
@@ -61,6 +66,7 @@ class TextStyle {
       fontFamily: fontFamily != null ? fontFamily : this.fontFamily,
       fontSize: fontSize != null ? fontSize : this.fontSize,
       fontWeight: fontWeight != null ? fontWeight : this.fontWeight,
+      fontStyle: fontStyle != null ? fontStyle : this.fontStyle,
       textAlign: textAlign != null ? textAlign : this.textAlign,
       textBaseline: textBaseline != null ? textBaseline : this.textBaseline,
       height: height != null ? height : this.height,
@@ -76,6 +82,7 @@ class TextStyle {
       fontFamily: other.fontFamily,
       fontSize: other.fontSize,
       fontWeight: other.fontWeight,
+      fontStyle: other.fontStyle,
       textAlign: other.textAlign,
       textBaseline: other.textBaseline,
       height: other.height,
@@ -140,6 +147,13 @@ class TextStyle {
         FontWeight.w900: '900'
       }[fontWeight];
     }
+    if (fontStyle != null) {
+      cssStyle['font-style'] = const {
+        FontStyle.normal: 'normal',
+        FontStyle.italic: 'italic',
+        FontStyle.oblique: 'oblique',
+      }[fontStyle];
+    }
     if (decoration != null) {
       cssStyle['text-decoration'] = _decorationToCSSString(decoration);
       if (decorationColor != null)
@@ -170,6 +184,7 @@ class TextStyle {
       fontFamily == other.fontFamily &&
       fontSize == other.fontSize &&
       fontWeight == other.fontWeight &&
+      fontStyle == other.fontStyle &&
       textAlign == other.textAlign &&
       textBaseline == other.textBaseline &&
       decoration == other.decoration &&
@@ -184,6 +199,7 @@ class TextStyle {
     value = 37 * value + fontFamily.hashCode;
     value = 37 * value + fontSize.hashCode;
     value = 37 * value + fontWeight.hashCode;
+    value = 37 * value + fontStyle.hashCode;
     value = 37 * value + textAlign.hashCode;
     value = 37 * value + textBaseline.hashCode;
     value = 37 * value + decoration.hashCode;
@@ -203,6 +219,8 @@ class TextStyle {
       result.add('${prefix}fontSize: $fontSize');
     if (fontWeight != null)
       result.add('${prefix}fontWeight: $fontWeight');
+    if (fontStyle != null)
+      result.add('${prefix}fontStyle: $fontStyle');
     if (textAlign != null)
       result.add('${prefix}textAlign: $textAlign');
     if (textBaseline != null)
