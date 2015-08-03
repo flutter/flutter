@@ -224,8 +224,8 @@ class ScrollableViewport extends Scrollable {
     super.syncFields(source);
   }
 
-  ScrollBehavior createScrollBehavior() => new FlingBehavior();
-  FlingBehavior get scrollBehavior => super.scrollBehavior;
+  ScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+  OverscrollWhenScrollableBehavior get scrollBehavior => super.scrollBehavior;
 
   double _viewportHeight = 0.0;
   double _childHeight = 0.0;
