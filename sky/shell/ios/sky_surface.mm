@@ -153,7 +153,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   NSString *documentsDirectory = [paths objectAtIndex:0];
   NSString *skyxDocsPath = [documentsDirectory stringByAppendingPathComponent:@"app.skyx"];
 
-  if ([fileManager fileExistsAtPath:skyxDocsPath] == NO) {
+  if (skyxBundlePath != nil && [fileManager fileExistsAtPath:skyxDocsPath] == NO) {
     if ([fileManager copyItemAtPath:skyxBundlePath toPath:skyxDocsPath error:&error]) {
       return skyxDocsPath;
     }
