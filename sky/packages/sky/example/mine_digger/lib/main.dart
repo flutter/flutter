@@ -1,20 +1,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library mine_digger;
-
 import 'dart:sky' as sky;
 import 'dart:math';
 
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/widget.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/task_description.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
+import 'package:sky/widgets.dart';
 
 // Classic minesweeper-inspired game. The mouse controls are standard
 // except for left + right combo which is not implemented. For touch,
