@@ -102,7 +102,7 @@ class Node {
   void set rotation(double rotation) {
     assert(rotation != null);
     _rotation = rotation;
-    _invalidateTransformMatrix();
+    invalidateTransformMatrix();
   }
 
   /// The position of this node relative to its parent.
@@ -113,7 +113,7 @@ class Node {
   void set position(Point position) {
     assert(position != null);
     _position = position;
-    _invalidateTransformMatrix();
+    invalidateTransformMatrix();
   }
 
   /// The draw order of this node compared to its parent and its siblings.
@@ -147,7 +147,7 @@ class Node {
   void set scale(double scale) {
     assert(scale != null);
     _scaleX = _scaleY = scale;
-    _invalidateTransformMatrix();
+    invalidateTransformMatrix();
   }
 
   /// The horizontal scale of this node relative its parent.
@@ -158,7 +158,7 @@ class Node {
   void set scaleX(double scaleX) {
     assert(scaleX != null);
     _scaleX = scaleX;
-    _invalidateTransformMatrix();
+    invalidateTransformMatrix();
   }
 
   /// The vertical scale of this node relative its parent.
@@ -169,7 +169,7 @@ class Node {
   void set scaleY(double scaleY) {
     assert(scaleY != null);
     _scaleY = scaleY;
-    _invalidateTransformMatrix();
+    invalidateTransformMatrix();
   }
 
   /// A list of the children of this node.
@@ -264,10 +264,13 @@ class Node {
   ///
   ///     Matrix4 matrix = myNode.transformMatrix;
   Matrix4 get transformMatrix {
-    if (_transformMatrix != null) {
-      return _transformMatrix;
+    if (_transformMatrix == null) {
+      _transformMatrix = computeTransformMatrix();
     }
+    return _transformMatrix;
+  }
 
+  Matrix4 computeTransformMatrix() {
     double cx, sx, cy, sy;
 
     if (_rotation == 0.0) {
@@ -287,15 +290,15 @@ class Node {
     }
 
     // Create transformation matrix for scale, position and rotation
-    _transformMatrix = new Matrix4(cy * _scaleX, sy * _scaleX, 0.0, 0.0,
+    Matrix4 matrix = new Matrix4(cy * _scaleX, sy * _scaleX, 0.0, 0.0,
                -sx * _scaleY, cx * _scaleY, 0.0, 0.0,
                0.0, 0.0, 1.0, 0.0,
               _position.x, _position.y, 0.0, 1.0);
 
-    return _transformMatrix;
+    return matrix;
   }
 
-  void _invalidateTransformMatrix() {
+  void invalidateTransformMatrix() {
     _transformMatrix = null;
     _invalidateToBoxTransformMatrix();
   }
