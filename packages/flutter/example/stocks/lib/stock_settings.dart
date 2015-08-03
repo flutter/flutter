@@ -104,7 +104,7 @@ class StockSettings extends StatefulComponent {
               onPressed: () => _confirmOptimismChange(),
               children: [
                 new Flexible(child: new Text('Everything is awesome')),
-                new Checkbox(value: optimism == StockMode.optimistic, onChanged: _handleOptimismChanged)
+                new Checkbox(value: optimism == StockMode.optimistic, onChanged: (_) => _confirmOptimismChange())
               ]
             ),
             new DrawerItem(
