@@ -10,7 +10,6 @@ import 'package:sky/animation/curves.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/transitions.dart';
 import 'package:sky/widgets/widget.dart';
-import 'package:vector_math/vector_math.dart';
 
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const Duration _kCardDismissResize = const Duration(milliseconds: 300);
