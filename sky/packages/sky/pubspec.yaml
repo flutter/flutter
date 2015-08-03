@@ -1,5 +1,5 @@
 name: sky
-version: 0.0.26
+version: 0.0.27
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: A framework for writing Sky applications
 homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/sky
