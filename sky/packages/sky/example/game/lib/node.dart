@@ -409,20 +409,20 @@ class Node {
 
   // Rendering
 
-  void _visit(PaintingCanvas canvas) {
+  void _visit(PaintingCanvas canvas, Matrix4 totalMatrix) {
     assert(canvas != null);
     if (!visible) return;
 
-    _prePaint(canvas);
-    _visitChildren(canvas);
-    _postPaint(canvas);
+    _prePaint(canvas, totalMatrix);
+    _visitChildren(canvas, totalMatrix);
+    _postPaint(canvas, totalMatrix);
   }
 
-  void _prePaint(PaintingCanvas canvas) {
-    _savedTotalMatrix = new Matrix4.fromFloat32List(canvas.getTotalMatrix());;
+  void _prePaint(PaintingCanvas canvas, Matrix4 matrix) {
+    _savedTotalMatrix = new Matrix4.copy(matrix);
 
     // Get the transformation matrix and apply transform
-    canvas.concat(transformMatrix.storage);
+    matrix.multiply(transformMatrix);
   }
 
   /// Paints this node to the canvas.
@@ -444,7 +444,7 @@ class Node {
   void paint(PaintingCanvas canvas) {
   }
 
-  void _visitChildren(PaintingCanvas canvas) {
+  void _visitChildren(PaintingCanvas canvas, Matrix4 totalMatrix) {
     // Sort children if needed
     _sortChildren();
 
@@ -454,23 +454,24 @@ class Node {
     while (i < _children.length) {
       Node child = _children[i];
       if (child.zPosition >= 0.0) break;
-      child._visit(canvas);
+      child._visit(canvas, totalMatrix);
       i++;
     }
 
     // Paint this node
+    canvas.setMatrix(totalMatrix.storage);
     paint(canvas);
 
     // Visit children in front of this node
     while (i < _children.length) {
       Node child = _children[i];
-      child._visit(canvas);
+      child._visit(canvas, totalMatrix);
       i++;
     }
   }
 
-  void _postPaint(PaintingCanvas canvas) {
-    canvas.setMatrix(_savedTotalMatrix.storage);
+  void _postPaint(PaintingCanvas canvas, Matrix4 totalMatrix) {
+    totalMatrix.setFrom(_savedTotalMatrix);
   }
 
   // Receiving update calls
