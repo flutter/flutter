@@ -67,9 +67,6 @@ class Sprite extends NodeWithSize {
   }
 
   void paint(PaintingCanvas canvas) {
-    // Store old matrix
-    Matrix4 savedMatrix = new Matrix4.fromFloat32List(canvas.getTotalMatrix());
-
     // Account for pivot point
     applyTransformForPivot(canvas);
 
@@ -111,8 +108,5 @@ class Sprite extends NodeWithSize {
       canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),
       new Paint()..color = new Color.fromARGB(255, 255, 0, 0));
     }
-
-    // Restore matrix
-    canvas.setMatrix(savedMatrix.storage);
   }
 }
