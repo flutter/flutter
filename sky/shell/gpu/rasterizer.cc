@@ -60,7 +60,7 @@ void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
   DrawPicture(picture.get());
   surface_->SwapBuffers();
 
-  // SerializePicture("/data/data/org.domokit.sky.demo/cache/layer0.skp", picture.get());
+  // SerializePicture("/data/data/org.domokit.sky.shell/cache/layer0.skp", picture.get());
 }
 
 void Rasterizer::DrawPicture(SkPicture* picture) {
