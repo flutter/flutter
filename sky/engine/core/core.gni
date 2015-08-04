@@ -47,8 +47,6 @@ sky_core_files = [
   "css/CSSLineBoxContainValue.h",
   "css/CSSMarkup.cpp",
   "css/CSSMarkup.h",
-  "css/CSSMatrix.cpp",
-  "css/CSSMatrix.h",
   "css/CSSOMUtils.cpp",
   "css/CSSOMUtils.h",
   "css/CSSPrimitiveValue.cpp",
@@ -631,7 +629,6 @@ sky_core_files = [
 
 core_idl_files = get_path_info([
                                  "css/CSS.idl",
-                                 "css/CSSMatrix.idl",
                                  "css/CSSStyleDeclaration.idl",
                                  "css/MediaQueryList.idl",
                                  "css/MediaQueryListEvent.idl",
