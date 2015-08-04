@@ -16,35 +16,23 @@ class AnimatedBoxConstraintsValue extends AnimatedValue<BoxConstraints> {
   AnimatedBoxConstraintsValue(BoxConstraints begin, { BoxConstraints end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
-  void setProgress(double t) {
-    // TODO(abarth): We should lerp the BoxConstraints.
-    value = end;
-  }
+  // TODO(abarth): We should lerp the BoxConstraints.
+  BoxConstraints lerp(double t) => end;
 }
 
 class AnimatedBoxDecorationValue extends AnimatedValue<BoxDecoration> {
   AnimatedBoxDecorationValue(BoxDecoration begin, { BoxDecoration end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
-  void setProgress(double t) {
-    if (t == 1.0) {
-      value = end;
-      return;
-    }
-    value = lerpBoxDecoration(begin, end, t);
-  }
+  BoxDecoration lerp(double t) => lerpBoxDecoration(begin, end, t);
 }
 
 class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
   AnimatedEdgeDimsValue(EdgeDims begin, { EdgeDims end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
-  void setProgress(double t) {
-    if (t == 1.0) {
-      value = end;
-      return;
-    }
-    value = new EdgeDims(
+  EdgeDims lerp(double t) {
+    return new EdgeDims(
       lerpNum(begin.top, end.top, t),
       lerpNum(begin.right, end.right, t),
       lerpNum(begin.bottom, end.bottom, t),
@@ -57,17 +45,13 @@ class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
   AnimatedMatrix4Value(Matrix4 begin, { Matrix4 end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
-  void setProgress(double t) {
-    if (t == 1.0) {
-      value = end;
-      return;
-    }
+  Matrix4 lerp(double t) {
     // TODO(mpcomplete): Animate the full matrix. Will animating the cells
     // separately work?
     Vector3 beginT = begin.getTranslation();
     Vector3 endT = end.getTranslation();
     Vector3 lerpT = beginT*(1.0-t) + endT*t;
-    value = new Matrix4.identity()..translate(lerpT);
+    return new Matrix4.identity()..translate(lerpT);
   }
 }
 

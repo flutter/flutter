@@ -5,84 +5,96 @@
 import "dart:sky";
 
 import 'package:sky/animation/curves.dart';
+import 'package:sky/animation/direction.dart';
 import 'package:sky/base/lerp.dart';
 
+export 'package:sky/animation/curves.dart' show Interval;
+
 abstract class AnimatedVariable {
-  void setProgress(double t);
+  void setProgress(double t, Direction direction);
   String toString();
 }
 
-class Interval {
-  final double start;
-  final double end;
+abstract class CurvedVariable implements AnimatedVariable {
+  CurvedVariable({this.interval, this.reverseInterval, this.curve, this.reverseCurve});
 
-  double adjustTime(double t) {
-    return ((t - start) / (end - start)).clamp(0.0, 1.0);
+  Interval interval;
+  Interval reverseInterval;
+  Curve curve;
+  Curve reverseCurve;
+
+  double _transform(double t, Direction direction) {
+    Interval interval = _getInterval(direction);
+    if (interval != null)
+      t = interval.transform(t);
+    if (t == 1.0) // Or should we support inverse curves?
+      return t;
+    Curve curve = _getCurve(direction);
+    if (curve != null)
+      t = curve.transform(t);
+    return t;
   }
 
-  Interval(this.start, this.end) {
-    assert(start >= 0.0);
-    assert(start <= 1.0);
-    assert(end >= 0.0);
-    assert(end <= 1.0);
+  Interval _getInterval(Direction direction) {
+    if (direction == Direction.forward || reverseInterval == null)
+      return interval;
+    return reverseInterval;
+  }
+
+  Curve _getCurve(Direction direction) {
+    if (direction == Direction.forward || reverseCurve == null)
+      return curve;
+    return reverseCurve;
   }
 }
 
-class AnimatedValue<T extends dynamic> extends AnimatedVariable {
-  AnimatedValue(this.begin, { this.end, this.interval, this.curve: linear }) {
+class AnimatedValue<T extends dynamic> extends CurvedVariable {
+  AnimatedValue(this.begin, { this.end, Interval interval, Curve curve, Curve reverseCurve })
+    : super(interval: interval, curve: curve, reverseCurve: reverseCurve) {
     value = begin;
   }
 
   T value;
   T begin;
   T end;
-  Interval interval;
-  Curve curve;
 
-  void setProgress(double t) {
+  T lerp(double t) => begin + (end - begin) * t;
+
+  void setProgress(double t, Direction direction) {
     if (end != null) {
-      double adjustedTime = interval == null ? t : interval.adjustTime(t);
-      if (adjustedTime == 1.0) {
-        value = end;
-      } else {
-        // TODO(mpcomplete): Reverse the timeline and curve.
-        value = begin + (end - begin) * curve.transform(adjustedTime);
-      }
+      t = _transform(t, direction);
+      value = (t == 1.0) ? end : lerp(t);
     }
   }
 
   String toString() => 'AnimatedValue(begin=$begin, end=$end, value=$value)';
 }
 
-class AnimatedList extends AnimatedVariable {
+class AnimatedList extends CurvedVariable {
   List<AnimatedVariable> variables;
-  Interval interval;
 
-  AnimatedList(this.variables, { this.interval });
+  AnimatedList(this.variables, { Interval interval, Curve curve, Curve reverseCurve })
+    : super(interval: interval, curve: curve, reverseCurve: reverseCurve);
 
-  void setProgress(double t) {
-    double adjustedTime = interval == null ? t : interval.adjustTime(t);
+  void setProgress(double t, Direction direction) {
+    double adjustedTime = _transform(t, direction);
     for (AnimatedVariable variable in variables)
-      variable.setProgress(adjustedTime);
+      variable.setProgress(adjustedTime, direction);
   }
 
   String toString() => 'AnimatedList([$variables])';
 }
 
 class AnimatedColorValue extends AnimatedValue<Color> {
-  AnimatedColorValue(Color begin, { Color end, Curve curve: linear })
+  AnimatedColorValue(Color begin, { Color end, Curve curve })
     : super(begin, end: end, curve: curve);
 
-  void setProgress(double t) {
-    value = lerpColor(begin, end, t);
-  }
+  Color lerp(double t) => lerpColor(begin, end, t);
 }
 
 class AnimatedRect extends AnimatedValue<Rect> {
-  AnimatedRect(Rect begin, { Rect end, Curve curve: linear })
+  AnimatedRect(Rect begin, { Rect end, Curve curve })
     : super(begin, end: end, curve: curve);
 
-  void setProgress(double t) {
-    value = lerpRect(begin, end, t);
-  }
+  Rect lerp(double t) => lerpRect(begin, end, t);
 }

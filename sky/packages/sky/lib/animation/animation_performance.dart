@@ -5,10 +5,11 @@
 import 'dart:async';
 
 import 'package:sky/animation/animated_value.dart';
+import 'package:sky/animation/direction.dart';
 import 'package:sky/animation/forces.dart';
 import 'package:sky/animation/timeline.dart';
 
-export 'package:sky/animation/forces.dart' show Direction;
+export 'package:sky/animation/direction.dart' show Direction;
 
 enum AnimationStatus {
   dismissed, // stoped at 0
@@ -38,6 +39,12 @@ class AnimationPerformance {
 
   Direction _direction;
   Direction get direction => _direction;
+
+  // This controls which curve we use for variables with different curves in
+  // the forward/reverse directions. Curve direction is only reset when we hit
+  // 0 or 1, to avoid discontinuities.
+  Direction _curveDirection;
+  Direction get curveDirection => _curveDirection;
 
   // If non-null, animate with this force instead of a tween animation.
   Force attachedForce;
@@ -72,6 +79,10 @@ class AnimationPerformance {
     return direction == Direction.forward ?
         AnimationStatus.forward :
         AnimationStatus.reverse;
+  }
+
+  void updateVariable(AnimatedVariable variable) {
+    variable.setProgress(progress, curveDirection);
   }
 
   Future play([Direction direction = Direction.forward]) {
@@ -136,6 +147,13 @@ class AnimationPerformance {
     _lastStatus = currentStatus;
   }
 
+  void _updateCurveDirection() {
+    if (status != _lastStatus) {
+      if (_lastStatus == AnimationStatus.dismissed || _lastStatus == AnimationStatus.completed)
+        _curveDirection = direction;
+    }
+  }
+
   Future _animateTo(double target) {
     Duration remainingDuration = duration * (target - timeline.value).abs();
     timeline.stop();
@@ -145,8 +163,9 @@ class AnimationPerformance {
   }
 
   void _tick(double t) {
+    _updateCurveDirection();
     if (variable != null)
-      variable.setProgress(t);
+      variable.setProgress(t, curveDirection);
     _notifyListeners();
     _checkStatusChanged();
   }
