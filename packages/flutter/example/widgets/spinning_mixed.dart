@@ -10,7 +10,7 @@ import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/raised_button.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 import 'package:vector_math/vector_math.dart';
 
 import '../rendering/solid_color_box.dart';

@@ -4,7 +4,7 @@
 
 import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 class TaskDescription extends Component {
 
