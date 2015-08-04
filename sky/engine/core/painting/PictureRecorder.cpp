@@ -10,7 +10,6 @@
 namespace blink {
 
 PictureRecorder::PictureRecorder()
-    : m_pictureRecorder(adoptPtr(new SkPictureRecorder()))
 {
 }
 
@@ -24,7 +23,8 @@ bool PictureRecorder::isRecording() {
 
 SkCanvas* PictureRecorder::beginRecording(Rect bounds)
 {
-    return m_pictureRecorder->beginRecording(bounds.sk_rect);
+    return m_pictureRecorder.beginRecording(bounds.sk_rect,
+        &m_rtreeFactory, SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag);
 }
 
 PassRefPtr<Picture> PictureRecorder::endRecording()
@@ -32,7 +32,7 @@ PassRefPtr<Picture> PictureRecorder::endRecording()
     if (!isRecording())
         return nullptr;
     RefPtr<Picture> picture = Picture::create(
-        adoptRef(m_pictureRecorder->endRecording()));
+        adoptRef(m_pictureRecorder.endRecording()));
     m_canvas->clearSkCanvas();
     m_canvas = nullptr;
     return picture.release();
@@ -43,12 +43,15 @@ PassRefPtr<Drawable> PictureRecorder::endRecordingAsDrawable()
     if (!isRecording())
         return nullptr;
     RefPtr<Drawable> drawable = Drawable::create(
-        adoptRef(m_pictureRecorder->endRecordingAsDrawable()));
+        adoptRef(m_pictureRecorder.endRecordingAsDrawable()));
     m_canvas->clearSkCanvas();
     m_canvas = nullptr;
     return drawable.release();
 }
 
-void PictureRecorder::set_canvas(PassRefPtr<Canvas> canvas) { m_canvas = canvas; }
+void PictureRecorder::set_canvas(PassRefPtr<Canvas> canvas)
+{
+    m_canvas = canvas;
+}
 
 } // namespace blink
