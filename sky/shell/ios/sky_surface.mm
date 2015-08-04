@@ -100,6 +100,10 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   metrics->physical_width = size.width * scale;
   metrics->physical_height = size.height * scale;
   metrics->device_pixel_ratio = scale;
+  metrics->padding_top =
+      [UIApplication sharedApplication].statusBarFrame.size.height;
+
+  [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
   _sky_engine->OnViewportMetricsChanged(metrics.Pass());
 }
 
