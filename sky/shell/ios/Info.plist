@@ -35,6 +35,9 @@
 		<string>armv7</string>
 	</array>
 
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false />
+
 	<!--
 		Sky Load URL
 	-->
