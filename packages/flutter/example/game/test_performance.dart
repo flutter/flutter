@@ -1,0 +1,208 @@
+import 'dart:sky' as sky;
+import 'dart:math' as math;
+
+import 'package:sky/mojo/asset_bundle.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/task_description.dart';
+import 'package:sky/widgets/theme.dart';
+
+import 'lib/sprites.dart';
+
+AssetBundle _initBundle() {
+  if (rootBundle != null)
+    return rootBundle;
+  return new NetworkAssetBundle(Uri.base);
+}
+
+final AssetBundle _bundle = _initBundle();
+
+ImageMap _images;
+SpriteSheet _spriteSheet;
+TestApp _app;
+
+main() async {
+  _images = new ImageMap(_bundle);
+
+  await _images.load([
+    'assets/sprites.png'
+  ]);
+
+  String json = await _bundle.loadString('assets/sprites.json');
+  _spriteSheet = new SpriteSheet(_images['assets/sprites.png'], json);
+
+  _app = new TestApp();
+  runApp(_app);
+}
+
+class TestApp extends App {
+
+  Widget build() {
+    ThemeData theme = new ThemeData(
+      brightness: ThemeBrightness.light,
+      primarySwatch: colors.Purple
+    );
+
+    return new Theme(
+      data: theme,
+      child: new TaskDescription(
+        label: 'Test Sprite Performance',
+        child: new SpriteWidget(new TestPerformance())
+      )
+    );
+  }
+}
+
+class TestPerformance extends NodeWithSize {
+  final int numFramesPerTest = 100;
+  final int numTests = 3;
+
+  TestPerformance() : super(new Size(1024.0, 1024.0)) {
+  }
+
+  int test = 0;
+  int frame = 0;
+  int testStartTime;
+
+  void update(double dt) {
+    if (frame % numFramesPerTest == 0) {
+      if (test > 0 && test <= numTests) {
+        // End last test
+        int currentTime = new DateTime.now().millisecondsSinceEpoch;
+        int totalTestTime = currentTime - testStartTime;
+        double millisPerFrame =
+          totalTestTime.toDouble() / numFramesPerTest.toDouble();
+        print("TEST ${test - 1} fps: ${1.0 / (millisPerFrame / 1000)}");
+
+        // Clear test
+        removeAllChildren();
+      }
+
+      if (test < numTests) {
+        // Start new test
+        print("TEST $test STARTING");
+        setupTest(test);
+        testStartTime = new DateTime.now().millisecondsSinceEpoch;
+      }
+      test++;
+    }
+    frame++;
+  }
+
+  void setupTest(int n) {
+    if (test == 0) {
+      // Test atlas performance
+      addChild(new TestPerformanceAtlas());
+    } else if (test == 1) {
+      // Test sprite performance
+      addChild(new TestPerformanceSprites());
+    } else if (test == 2) {
+      // Test particle performance
+      addChild(new TestPerformanceParticles());
+    }
+  }
+}
+
+class TestPerformanceParticles extends Node {
+  final grid = 8;
+  TestPerformanceParticles() {
+    for (int x = 0; x < grid; x++) {
+      for (int y = 0; y < grid; y++) {
+        ParticleSystem particles = new ParticleSystem(
+            _spriteSheet["explosion_particle.png"],
+            rotateToMovement: true,
+            startRotation:90.0,
+            startRotationVar: 0.0,
+            endRotation: 90.0,
+            startSize: 0.3,
+            startSizeVar: 0.1,
+            endSize: 0.3,
+            endSizeVar: 0.1,
+            emissionRate:100.0,
+            greenVar: 127,
+            redVar: 127
+        );
+        particles.position = new Point(x * 1024.0 / (grid - 1), y * 1024.0 / (grid - 1));
+        addChild(particles);
+      }
+    }
+  }
+}
+
+class TestPerformanceSprites extends Node {
+  final int grid = 100;
+
+  TestPerformanceSprites() {
+    for (int x = 0; x < grid; x++) {
+      for (int y = 0; y < grid; y++) {
+        Sprite sprt = new Sprite(_spriteSheet["asteroid_big_1.png"]);
+        sprt.scale = 1.0;
+        sprt.position = new Point(x * 1024.0 / (grid - 1), y * 1024.0 / (grid - 1));
+        addChild(sprt);
+
+        //sprt.actions.run(new ActionRepeatForever(new ActionTween((a) => sprt.rotation = a, 0.0, 360.0, 1.0)));
+      }
+    }
+
+    Sprite sprt = new Sprite(_spriteSheet["asteroid_big_1.png"]);
+    sprt.position = new Point(512.0, 512.0);
+    addChild(sprt);
+  }
+
+  void update(double dt) {
+    for (Sprite sprt in children) {
+      sprt.rotation += 1;
+    }
+  }
+}
+
+class TestPerformanceAtlas extends Node {
+  final int grid = 100;
+
+  double rotation = 0.0;
+  List<Rect> rects = [];
+  Paint cachedPaint = new Paint()
+    ..setFilterQuality(sky.FilterQuality.low)
+    ..isAntiAlias = false;
+
+  TestPerformanceAtlas() {
+    for (int x = 0; x < grid; x++) {
+      for (int y = 0; y < grid; y++) {
+        rects.add(_spriteSheet["asteroid_big_1.png"].frame);
+      }
+    }
+    rects.add(_spriteSheet["asteroid_big_1.png"].frame);
+  }
+
+  void paint(PaintingCanvas canvas) {
+    // Setup transforms
+    List<sky.RSTransform> transforms = [];
+
+    for (int x = 0; x < grid; x++) {
+      for (int y = 0; y < grid; y++) {
+        double xPos = x * 1024.0 / (grid - 1);
+        double yPos = y * 1024.0 / (grid - 1);
+
+        transforms.add(createTransform(xPos, yPos, rects[0].size.width / 2.0, rects[0].size.height / 2.0, rotation, 1.0));
+      }
+    }
+
+    transforms.add(createTransform(512.0, 512.0, rects[0].size.width / 2.0, rects[0].size.height / 2.0, rotation, 1.0));
+
+    // Draw atlas
+    canvas.drawAtlas(_spriteSheet.image, transforms, rects, null, null, null, cachedPaint);
+  }
+
+  void update(double dt) {
+    rotation += 1.0;
+  }
+
+  sky.RSTransform createTransform(double x, double y, double ax, double ay, double rot, double scale) {
+    double scos = math.cos(convertDegrees2Radians(rot)) * scale;
+    double ssin = math.sin(convertDegrees2Radians(rot)) * scale;
+    double tx = x + -scos * ax + ssin * ay;
+    double ty = y + -ssin * ax - scos * ay;
+    return new sky.RSTransform(scos, ssin, tx, ty);
+  }
+}
