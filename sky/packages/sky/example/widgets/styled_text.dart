@@ -11,7 +11,7 @@ import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 
 class StyledTextApp extends App {

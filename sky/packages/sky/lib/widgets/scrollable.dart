@@ -15,7 +15,7 @@ import 'package:sky/theme/view_configuration.dart' as config;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/scrollable.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 export 'package:sky/widgets/block_viewport.dart' show BlockViewportLayoutState;
 

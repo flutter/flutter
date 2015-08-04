@@ -15,7 +15,7 @@ import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/theme/typography.dart' as typography;
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 import 'package:sky/widgets/task_description.dart';
 
 class CardModel {

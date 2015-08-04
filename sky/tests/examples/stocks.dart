@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 import '../../packages/sky/example/stocks/lib/main.dart';
 import '../../packages/sky/example/stocks/lib/stock_data.dart';

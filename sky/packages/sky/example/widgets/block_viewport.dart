@@ -11,7 +11,7 @@ import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 class BlockViewportApp extends App {
 

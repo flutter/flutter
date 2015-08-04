@@ -11,7 +11,7 @@ import 'package:sky/animation/curves.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 const int _kSplashInitialOpacity = 0x80;
 const double _kSplashCancelledVelocity = 0.3;
