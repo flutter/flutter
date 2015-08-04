@@ -27,7 +27,6 @@ ADB_PATH = 'adb'
 APK_NAME = 'SkyShell.apk'
 ANDROID_PACKAGE = "org.domokit.sky.shell"
 ANDROID_COMPONENT = '%s/%s.SkyActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
-ANDROID_HOME_DIR = ""
 
 # FIXME: Do we need to look in $DART_SDK?
 DART_PATH = 'dart'
@@ -297,21 +296,34 @@ class SkyShellRunner(object):
             android_home_dir = os.environ['ANDROID_HOME']
             ADB_PATH = os.path.join(android_home_dir, 'sdk/platform-tools/adb')
 
+    def _is_valid_adb_version(self, adb_version):
+        # Sample output: "Android Debug Bridge version 1.0.31"
+        version_fields = re.search('(\d+)\.(\d+)\.(\d+)', adb_version)
+        if version_fields:
+            major_version = int(version_fields.group(1))
+            minor_version = int(version_fields.group(2))
+            patch_version = int(version_fields.group(3))
+            if major_version > 1:
+                return True
+            if major_version == 1 and minor_version > 0:
+                return True
+            if major_version == 1 and minor_version == 0 and patch_version >= 32:
+                return True
+            return False
+        else:
+            logging.warn('Unrecognized adb version string. Skipping version check.')
+            return True
+
     def _check_for_adb(self):
         try:
             adb_version = subprocess.check_output([ADB_PATH, 'version'])
-            # Sample output: "Android Debug Bridge version 1.0.31"
-            version_fields = adb_version.rstrip().split('.')
-            # If the string doesn't match the expected format, then skip the
-            # version check.
-            if len(version_fields) == 3 and version_fields[-1].isdigit():
-                minor_version = int(version_fields[-1])
-                if minor_version < 32:
-                    adb_path = subprocess.check_output(
-                        ['which', ADB_PATH]).rstrip()
-                    logging.error("'%s' is too old. Need 1.0.32 or later. " \
-                        "Try setting ANDROID_HOME." % adb_path)
-                    return False
+            if self._is_valid_adb_version(adb_version):
+                return True
+
+            adb_path = subprocess.check_output( ['which', ADB_PATH]).rstrip()
+            logging.error("'%s' is too old. Need 1.0.32 or later. " \
+                "Try setting ANDROID_HOME." % adb_path)
+            return False
 
         except OSError:
             logging.error("'adb' (from the Android SDK) not in $PATH, can't continue.")
@@ -322,12 +334,12 @@ class SkyShellRunner(object):
         try:
             # If the server is automatically restarted, then we get irrelevant
             # output lines like this, which we want to ignore:
-            #   ERROR:Unexpected response from getprop: 'adb server is out of date.  killing..
+            #   adb server is out of date.  killing..
             #   * daemon started successfully *
 
             subprocess.call([ADB_PATH, 'start-server'])
-            sdk_version = subprocess.check_output([ADB_PATH, 'shell', 'getprop',
-                                                   'ro.build.version.sdk']).rstrip()
+            sdk_version = subprocess.check_output(
+                    [ADB_PATH, 'shell', 'getprop', 'ro.build.version.sdk']).rstrip()
             # Sample output: "22"
             if not sdk_version.isdigit():
                 logging.error("Unexpected response from getprop: '%s'." % sdk_version)
