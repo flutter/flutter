@@ -328,7 +328,8 @@ class SpriteBox extends RenderBox {
     canvas.concat(transformMatrix.storage);
 
     // Draw the sprite tree
-    _rootNode._visit(canvas);
+    Matrix4 totalMatrix = new Matrix4.fromFloat32List(canvas.getTotalMatrix());
+    _rootNode._visit(canvas, totalMatrix);
 
     canvas.restore();
   }
