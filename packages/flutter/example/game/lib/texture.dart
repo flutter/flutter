@@ -74,17 +74,18 @@ class Texture {
   }
 
   void drawTexture(PaintingCanvas canvas, Point position, Paint paint) {
-
-    // Account for position
+    // Get drawing position
     double x = position.x;
     double y = position.y;
-    bool translate = (x != 0 || y != 0);
-    if (translate) {
-      canvas.translate(x, y);
-    }
 
     // Draw the texture
     if (rotated) {
+      // Account for position
+      bool translate = (x != 0 || y != 0);
+      if (translate) {
+        canvas.translate(x, y);
+      }
+
       // Calculate the rotated frame and spriteSourceSize
       Size originalFrameSize = frame.size;
       Rect rotatedFrame = frame.topLeft & new Size(originalFrameSize.height, originalFrameSize.width);
@@ -97,14 +98,15 @@ class Texture {
       canvas.rotate(-math.PI/2.0);
       canvas.drawImageRect(image, rotatedFrame, rotatedSpriteSourceSize, paint);
       canvas.rotate(math.PI/2.0);
+
+      // Translate back
+      if (translate) {
+        canvas.translate(-x, -y);
+      }
     } else {
       // Draw the sprite
-      canvas.drawImageRect(image, frame, spriteSourceSize, paint);
-    }
-
-    // Translate back
-    if (translate) {
-      canvas.translate(-x, -y);
+      Rect dstRect = new Rect.fromLTWH(x + spriteSourceSize.left, y + spriteSourceSize.top, spriteSourceSize.width, spriteSourceSize.height);
+      canvas.drawImageRect(image, frame, dstRect, paint);
     }
   }
 }
