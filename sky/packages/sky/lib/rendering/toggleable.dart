@@ -44,15 +44,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   void set value(bool value) {
     if (value == _value) return;
     _value = value;
-    // TODO(abarth): Setting the curve on the position means there's a
-    // discontinuity when we reverse the timeline.
-    if (value) {
-      _position.curve = easeIn;
-      _performance.play();
-    } else {
-      _position.curve = easeOut;
-      _performance.reverse();
-    }
+    performance.play(value ? Direction.forward : Direction.reverse);
   }
 
   ValueChanged _onChanged;
@@ -63,7 +55,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   }
 
   final AnimatedValue<double> _position =
-      new AnimatedValue<double>(0.0, end: 1.0);
+      new AnimatedValue<double>(0.0, end: 1.0, curve: easeIn, reverseCurve: easeOut);
   AnimatedValue<double> get position => _position;
 
   AnimationPerformance _performance;

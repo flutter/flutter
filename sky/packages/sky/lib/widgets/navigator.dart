@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
-import 'package:sky/animation/forces.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/transitions.dart';
