@@ -517,11 +517,15 @@ class RenderSolidColor extends RenderDecoratedSector {
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
   }
 
-  void handleEvent(sky.Event event, HitTestEntry entry) {
-    if (event.type == 'pointerdown')
+  EventDisposition handleEvent(sky.Event event, HitTestEntry entry) {
+    if (event.type == 'pointerdown') {
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
-    else if (event.type == 'pointerup')
+      return EventDisposition.processed;
+    } else if (event.type == 'pointerup') {
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
+      return EventDisposition.processed;
+    }
+    return EventDisposition.ignored;
   }
 }
 

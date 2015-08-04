@@ -103,12 +103,13 @@ class StockHome extends StatefulComponent {
     });
   }
 
-  void _handleStockModeChange(StockMode value) {
+  EventDisposition _handleStockModeChange(StockMode value) {
     setState(() {
       stockMode = value;
     });
     if (modeUpdater != null)
       modeUpdater(value);
+    return EventDisposition.processed;
   }
 
   Drawer buildDrawer() {
@@ -156,9 +157,10 @@ class StockHome extends StatefulComponent {
     );
   }
 
-  void _handleShowSettings() {
+  EventDisposition _handleShowSettings() {
     navigator.pop();
     navigator.pushNamed('/settings');
+    return EventDisposition.processed;
   }
 
   Widget buildToolBar() {

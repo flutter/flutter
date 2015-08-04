@@ -60,7 +60,7 @@ class MeasurementFragment extends StatefulComponent {
   String _weight = "";
   String _errorMessage = null;
 
-  void _handleSave() {
+  EventDisposition _handleSave() {
     double parsedWeight;
     try {
       parsedWeight = double.parse(_weight);
@@ -68,10 +68,11 @@ class MeasurementFragment extends StatefulComponent {
       setState(() {
         _errorMessage = "Save failed";
       });
-      return;
+      return EventDisposition.processed;
     }
     onCreated(new Measurement(when: new DateTime.now(), weight: parsedWeight));
     navigator.pop();
+    return EventDisposition.processed;
   }
 
   Widget buildToolBar() {

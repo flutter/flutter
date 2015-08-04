@@ -56,9 +56,10 @@ class MealFragment extends StatefulComponent {
 
   String _description = "";
 
-  void _handleSave() {
+  EventDisposition _handleSave() {
     onCreated(new Meal(when: new DateTime.now(), description: _description));
     navigator.pop();
+    return EventDisposition.processed;
   }
 
   Widget buildToolBar() {

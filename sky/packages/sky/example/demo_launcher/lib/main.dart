@@ -18,7 +18,7 @@ AssetBundle _initBundle() {
 
 final AssetBundle _bundle = _initBundle();
 
-void launch(String relativeUrl, String bundle) {
+EventDisposition launch(String relativeUrl, String bundle) {
   // TODO(eseidel): This is a hack to keep non-skyx examples working for now:
   Uri productionBase = Uri.parse(
     'https://domokit.github.io/example/demo_launcher/lib/main.dart');
@@ -42,6 +42,7 @@ void launch(String relativeUrl, String bundle) {
   }
 
   activity.startActivity(intent);
+  return EventDisposition.processed;
 }
 
 class SkyDemo {

@@ -14,13 +14,15 @@ import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
 
+typedef EventDisposition OnPressedFunction();
+
 class DrawerItem extends ButtonBase {
   DrawerItem({ Key key, this.icon, this.children, this.onPressed, this.selected: false })
     : super(key: key);
 
   String icon;
   List<Widget> children;
-  Function onPressed;
+  OnPressedFunction onPressed;
   bool selected;
 
   void syncFields(DrawerItem source) {
@@ -82,7 +84,8 @@ class DrawerItem extends ButtonBase {
     return new Listener(
       onGestureTap: (_) {
         if (onPressed != null)
-          onPressed();
+          return onPressed();
+        return EventDisposition.ignored;
       },
       child: new Container(
         height: 48.0,

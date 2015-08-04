@@ -26,17 +26,19 @@ class Key {
   final String soundUrl;
   MediaPlayerProxy player;
 
-  void down() {
+  EventDisposition down() {
     if (player == null)
-      return;
+      return EventDisposition.ignored;
     player.ptr.seekTo(0);
     player.ptr.start();
+    return EventDisposition.processed;
   }
 
-  void up() {
+  EventDisposition up() {
     if (player == null)
-      return;
+      return EventDisposition.ignored;
     player.ptr.pause();
+    return EventDisposition.processed;
   }
 }
 

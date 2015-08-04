@@ -475,7 +475,7 @@ class TabBar extends Scrollable {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  void _handleTap(int tabIndex) {
+  EventDisposition _handleTap(int tabIndex) {
     if (tabIndex != selectedIndex) {
       if (_tabWidths != null) {
         if (isScrollable)
@@ -484,7 +484,9 @@ class TabBar extends Scrollable {
       }
       if (onChanged != null)
         onChanged(tabIndex);
+      return EventDisposition.processed;
     }
+    return EventDisposition.ignored;
   }
 
   Widget _toTab(TabLabel label, int tabIndex) {

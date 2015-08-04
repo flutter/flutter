@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 
+export 'package:sky/rendering/object.dart' show EventDisposition;
+
 class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
   int flex;
 

@@ -82,11 +82,12 @@ class FeedFragment extends StatefulComponent {
 
   bool _isShowingSnackBar = false;
 
-  void _handleFitnessModeChange(FitnessMode value) {
+  EventDisposition _handleFitnessModeChange(FitnessMode value) {
     setState(() {
       _fitnessMode = value;
       _drawerShowing = false;
     });
+    return EventDisposition.processed;
   }
 
   Drawer buildDrawer() {
@@ -137,9 +138,10 @@ class FeedFragment extends StatefulComponent {
     });
   }
 
-  void _handleShowSettings() {
+  EventDisposition _handleShowSettings() {
     navigator.pop();
     navigator.pushNamed('/settings');
+    return EventDisposition.processed;
   }
 
   // TODO(jackson): We should be localizing

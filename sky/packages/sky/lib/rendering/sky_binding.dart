@@ -109,7 +109,7 @@ class SkyBinding {
     return state;
   }
 
-  void _handlePointerEvent(sky.PointerEvent event) {
+  EventDisposition _handlePointerEvent(sky.PointerEvent event) {
     Point position = new Point(event.x, event.y);
 
     PointerState state = _getOrCreateStateForPointer(event, position);
@@ -123,13 +123,20 @@ class SkyBinding {
     event.dy = position.y - state.lastPosition.y;
     state.lastPosition = position;
 
-    dispatchEvent(event, state.result);
+    return dispatchEvent(event, state.result);
   }
 
-  void dispatchEvent(sky.Event event, HitTestResult result) {
+  EventDisposition dispatchEvent(sky.Event event, HitTestResult result) {
     assert(result != null);
-    for (HitTestEntry entry in result.path.reversed)
-      entry.target.handleEvent(event, entry);
+    EventDisposition disposition = EventDisposition.ignored;
+    for (HitTestEntry entry in result.path.reversed) {
+      EventDisposition entryDisposition = entry.target.handleEvent(event, entry);
+      if (entryDisposition == EventDisposition.consumed)
+        return EventDisposition.consumed;
+      else if (entryDisposition == EventDisposition.processed)
+        disposition = EventDisposition.processed;
+    }
+    return disposition;
   }
 
   String toString() => 'Render Tree:\n${_renderView}';

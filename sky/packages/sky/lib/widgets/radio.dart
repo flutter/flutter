@@ -68,12 +68,13 @@ class Radio extends ButtonBase {
           }
         )
       ),
-      onGestureTap: _handleClick
+      onGestureTap: _handleTap
     );
   }
 
-  void _handleClick(_) {
+  EventDisposition _handleTap(_) {
     onChanged(value);
+    return EventDisposition.consumed;
   }
 
 }

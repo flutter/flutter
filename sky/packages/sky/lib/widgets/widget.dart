@@ -13,6 +13,7 @@ import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/sky_binding.dart';
 
+export 'package:sky/base/hit_test.dart' show EventDisposition;
 export 'package:sky/rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export 'package:sky/rendering/flex.dart' show FlexDirection;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
@@ -446,9 +447,9 @@ abstract class Inherited extends TagNode {
 
 }
 
-typedef void GestureEventListener(sky.GestureEvent e);
-typedef void PointerEventListener(sky.PointerEvent e);
-typedef void EventListener(sky.Event e);
+typedef EventDisposition GestureEventListener(sky.GestureEvent e);
+typedef EventDisposition PointerEventListener(sky.PointerEvent e);
+typedef EventDisposition EventListener(sky.Event e);
 
 class Listener extends TagNode  {
 
@@ -529,11 +530,12 @@ class Listener extends TagNode  {
     return listeners;
   }
 
-  void _handleEvent(sky.Event e) {
+  EventDisposition _handleEvent(sky.Event e) {
     EventListener listener = listeners[e.type];
     if (listener != null) {
-      listener(e);
+      return listener(e);
     }
+    return EventDisposition.ignored;
   }
 
 }
@@ -1169,20 +1171,29 @@ class WidgetSkyBinding extends SkyBinding {
     assert(SkyBinding.instance is WidgetSkyBinding);
   }
 
-  void dispatchEvent(sky.Event event, HitTestResult result) {
+  EventDisposition dispatchEvent(sky.Event event, HitTestResult result) {
     assert(SkyBinding.instance == this);
-    super.dispatchEvent(event, result);
+    EventDisposition disposition = super.dispatchEvent(event, result);
+    if (disposition == EventDisposition.consumed)
+      return EventDisposition.consumed;
     for (HitTestEntry entry in result.path.reversed) {
       Widget target = RenderObjectWrapper._getMounted(entry.target);
       if (target == null)
         continue;
       RenderObject targetRoot = target.root;
       while (target != null && target.root == targetRoot) {
-        if (target is Listener)
-          target._handleEvent(event);
+        if (target is Listener) {
+          EventDisposition targetDisposition = target._handleEvent(event);
+          if (targetDisposition == EventDisposition.consumed) {
+            return targetDisposition;
+          } else if (targetDisposition == EventDisposition.processed) {
+            disposition = EventDisposition.processed;
+          }
+        }
         target = target._parent;
       }
     }
+    return disposition;
   }
 
   void beginFrame(double timeStamp) {

@@ -12,7 +12,7 @@ import 'package:sky/base/node.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
 
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'package:sky/base/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
+export 'package:sky/base/hit_test.dart' show EventDisposition, HitTestTarget, HitTestEntry, HitTestResult;
 
 class ParentData {
   void detach() {
@@ -415,9 +415,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // EVENTS
 
-  void handleEvent(sky.Event event, HitTestEntry entry) {
+  EventDisposition handleEvent(sky.Event event, HitTestEntry entry) {
     // override this if you have a client, to hand it to the client
     // override this if you want to do anything with the event
+    return EventDisposition.ignored;
   }
 
 
