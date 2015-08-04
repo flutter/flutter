@@ -37,10 +37,11 @@ public:
     void set_canvas(PassRefPtr<Canvas> canvas);
 
 private:
-	PictureRecorder();
+    PictureRecorder();
 
-	OwnPtr<SkPictureRecorder> m_pictureRecorder;
-	RefPtr<Canvas> m_canvas;
+    SkRTreeFactory m_rtreeFactory;
+    SkPictureRecorder m_pictureRecorder;
+    RefPtr<Canvas> m_canvas;
 };
 
 } // namespace blink
