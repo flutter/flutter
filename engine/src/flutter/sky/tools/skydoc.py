@@ -8,11 +8,13 @@ import os
 import subprocess
 import sys
 
-from skypy.url_mappings import URLMappings
-
 SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
 SRC_ROOT = os.path.dirname(SKY_ROOT)
+WORKBENCH_ROOT = os.path.join(SRC_ROOT, 'sky', 'packages', 'workbench')
+
+from skypy.url_mappings import URLMappings
+
 
 DARTDOC = 'dartdoc'
 
@@ -28,20 +30,13 @@ def main():
     args = parser.parse_args()
 
     build_dir = os.path.abspath(args.build_dir)
-    url_mappings = URLMappings(SRC_ROOT, build_dir)
 
-    packages_root = os.path.join(build_dir, 'gen/dart-pkg/packages')
-    sky_package = os.path.join(build_dir, 'gen/dart-pkg/sky')
+    sky_package = os.path.join(SRC_ROOT, 'sky/packages/sky')
     doc_dir = os.path.join(build_dir, 'gen/dart-pkg/sky/doc')
-
-    if not os.path.exists(packages_root):
-        print 'Cannot find Dart pacakges at "%s".' % packages_root
-        print 'Did you run `ninja -C %s sky` ?' % os.path.relpath(build_dir, os.getcwd())
-        return 1
+    url_mappings = URLMappings(SRC_ROOT, build_dir)
 
     analyzer_args = [
         DARTDOC,
-        '--package-root', packages_root,
         '--input', sky_package,
         '--output', doc_dir,
     ] + url_mappings.as_args
