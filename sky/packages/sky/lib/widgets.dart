@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Includes and re-exports all Sky widgets classes.
+
 export 'widgets/animated_component.dart';
 export 'widgets/animated_container.dart';
 export 'widgets/basic.dart';
