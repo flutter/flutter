@@ -538,6 +538,7 @@ class FutureImage extends StatefulComponent {
     image = source.image;
     width = source.width;
     height = source.height;
+    colorFilter = source.colorFilter;
     if (needToResolveImage)
       _resolveImage();
   }
