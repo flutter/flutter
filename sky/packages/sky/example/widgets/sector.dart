@@ -13,7 +13,7 @@ import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 import '../rendering/sector_layout.dart';
 

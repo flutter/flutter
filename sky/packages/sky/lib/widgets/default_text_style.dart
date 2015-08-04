@@ -4,7 +4,7 @@
 
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 class DefaultTextStyle extends Inherited {
 

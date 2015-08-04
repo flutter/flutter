@@ -7,7 +7,7 @@ import 'dart:collection';
 import 'package:sky/rendering/block.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 // return null if index is greater than index of last entry
 typedef Widget IndexedBuilder(int index);

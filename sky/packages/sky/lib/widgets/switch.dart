@@ -10,7 +10,7 @@ import 'package:sky/rendering/object.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 import 'package:sky/rendering/toggleable.dart';
 
 export 'package:sky/rendering/toggleable.dart' show ValueChanged;

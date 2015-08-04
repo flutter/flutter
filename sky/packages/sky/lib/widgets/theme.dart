@@ -4,7 +4,7 @@
 
 import 'package:sky/theme/theme_data.dart';
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/framework.dart';
 
 export 'package:sky/theme/theme_data.dart' show ThemeData, ThemeBrightness;
 
