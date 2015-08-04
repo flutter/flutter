@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/switch.dart';
+import 'package:sky/widgets.dart';
 import 'package:sky/theme/colors.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -21,7 +20,7 @@ class BigSwitchApp extends App {
     scale.scale(5.0, 5.0);
     return new Container(
         child: new Switch(value: _value, onChanged: _handleOnChanged),
-        padding: new EdgeDims.all(5.0),
+        padding: new EdgeDims.all(20.0),
         transform: scale,
         decoration: new BoxDecoration(
           backgroundColor: Teal[600]

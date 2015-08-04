@@ -10,6 +10,14 @@ enum EventDisposition {
   consumed,
 }
 
+EventDisposition combineEventDispositions(EventDisposition left, EventDisposition right) {
+  if (left == EventDisposition.consumed || right == EventDisposition.consumed)
+    return EventDisposition.consumed;
+  if (left == EventDisposition.processed || right == EventDisposition.processed)
+    return EventDisposition.processed;
+  return EventDisposition.ignored;
+}
+
 abstract class HitTestTarget {
   EventDisposition handleEvent(sky.Event event, HitTestEntry entry);
 }
