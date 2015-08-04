@@ -21,6 +21,22 @@ class Linear implements Curve {
   }
 }
 
+class Interval implements Curve {
+  final double start;
+  final double end;
+
+  Interval(this.start, this.end) {
+    assert(start >= 0.0);
+    assert(start <= 1.0);
+    assert(end >= 0.0);
+    assert(end <= 1.0);
+  }
+
+  double transform(double t) {
+    return ((t - start) / (end - start)).clamp(0.0, 1.0);
+  }
+}
+
 class ParabolicFall implements Curve {
   const ParabolicFall();
 

@@ -98,7 +98,7 @@ class SlideTransition extends TransitionBase {
   }
 
   Widget build() {
-    position.setProgress(performance.progress);
+    performance.updateVariable(position);
     Matrix4 transform = new Matrix4.identity()
       ..translate(position.value.x, position.value.y);
     return new Transform(transform: transform, child: child);
@@ -131,7 +131,7 @@ class FadeTransition extends TransitionBase {
   }
 
   Widget build() {
-    opacity.setProgress(performance.progress);
+    performance.updateVariable(opacity);
     return new Opacity(opacity: opacity.value, child: child);
   }
 }
@@ -162,7 +162,7 @@ class ColorTransition extends TransitionBase {
   }
 
   Widget build() {
-    color.setProgress(performance.progress);
+    performance.updateVariable(color);
     return new DecoratedBox(
       decoration: new BoxDecoration(backgroundColor: color.value),
       child: child
@@ -200,9 +200,9 @@ class SquashTransition extends TransitionBase {
 
   Widget build() {
     if (width != null)
-      width.setProgress(performance.progress);
+      performance.updateVariable(width);
     if (height != null)
-      height.setProgress(performance.progress);
+      performance.updateVariable(height);
     return new SizedBox(width: _maybe(width), height: _maybe(height), child: child);
   }
 }

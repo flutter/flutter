@@ -50,7 +50,6 @@ class PopupMenu extends AnimatedComponent {
   AnimatedValue<double> _width;
   AnimatedValue<double> _height;
   List<AnimatedValue<double>> _itemOpacities;
-  AnimatedList _animationList;
   AnimationPerformance _performance;
 
   void initState() {
@@ -101,8 +100,9 @@ class PopupMenu extends AnimatedComponent {
       ..add(_width)
       ..add(_height)
       ..addAll(_itemOpacities);
-    _animationList = new AnimatedList(variables);
-    _performance.variable = _animationList;
+    AnimatedList list = new AnimatedList(variables)
+      ..reverseInterval = new Interval(0.0, _kMenuCloseIntervalEnd);
+    _performance.variable = list;
   }
 
   void _updateBoxPainter() {
@@ -124,14 +124,12 @@ class PopupMenu extends AnimatedComponent {
 
 
   void _open() {
-    _animationList.interval = null;
     _performance.play();
     if (navigator != null)
       navigator.pushState(this, (_) => _close());
   }
 
   void _close() {
-    _animationList.interval = new Interval(0.0, _kMenuCloseIntervalEnd);
     _performance.reverse();
   }
 

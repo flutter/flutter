@@ -3,12 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:newton/newton.dart';
-
-// TODO(mpcomplete): This doesn't belong here.
-enum Direction {
-  forward,
-  reverse
-}
+import 'package:sky/animation/direction.dart';
 
 // Base class for creating Simulations for the animation Timeline.
 abstract class Force {
