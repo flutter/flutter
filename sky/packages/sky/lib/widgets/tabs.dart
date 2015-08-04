@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
 import 'package:sky/animation/animation_performance.dart';
@@ -311,22 +312,29 @@ class Tab extends Component {
   Tab({
     Key key,
     this.label,
-    this.selected: false
+    this.color,
+    this.selected: false,
+    this.selectedColor
   }) : super(key: key) {
     assert(label.text != null || label.icon != null);
   }
 
   final TabLabel label;
+  final Color color;
   final bool selected;
+  final Color selectedColor;
 
   Widget _buildLabelText() {
     assert(label.text != null);
-    return new Text(label.text);
+    TextStyle style = new TextStyle(color: selected ? selectedColor : color);
+    return new Text(label.text, style: style);
   }
 
   Widget _buildLabelIcon() {
     assert(label.icon != null);
-    return new Icon(type: label.icon, size: _kTabIconSize);
+    Color iconColor = selected ? selectedColor : color;
+    sky.ColorFilter filter = new sky.ColorFilter.mode(iconColor, sky.TransferMode.srcATop);
+    return new Icon(type: label.icon, size: _kTabIconSize, colorFilter: filter);
   }
 
   Widget build() {
@@ -350,13 +358,8 @@ class Tab extends Component {
       );
     }
 
-    Widget highlightedLabel = new Opacity(
-      child: labelContents,
-      opacity: selected ? 1.0 : 0.7
-    );
-
     Container centeredLabel = new Container(
-      child: new Center(child: highlightedLabel),
+      child: new Center(child: labelContents),
       constraints: new BoxConstraints(minWidth: _kMinTabWidth),
       padding: _kTabLabelPadding
     );
@@ -489,11 +492,13 @@ class TabBar extends Scrollable {
     return EventDisposition.ignored;
   }
 
-  Widget _toTab(TabLabel label, int tabIndex) {
+  Widget _toTab(TabLabel label, int tabIndex, Color color, Color selectedColor) {
     return new Listener(
       child: new Tab(
         label: label,
-        selected: tabIndex == selectedIndex
+        color: color,
+        selected: tabIndex == selectedIndex,
+        selectedColor: selectedColor
       ),
       onGestureTap: (_) => _handleTap(tabIndex)
     );
@@ -510,14 +515,6 @@ class TabBar extends Scrollable {
 
   Widget buildContent() {
     assert(labels != null && labels.isNotEmpty);
-    List<Widget> tabs = <Widget>[];
-    bool textAndIcons = false;
-    int tabIndex = 0;
-    for (TabLabel label in labels) {
-      tabs.add(_toTab(label, tabIndex++));
-      if (label.text != null && label.icon != null)
-        textAndIcons = true;
-    }
 
     ThemeData themeData = Theme.of(this);
     Color backgroundColor = themeData.primaryColor;
@@ -537,6 +534,15 @@ class TabBar extends Scrollable {
         textStyle = typography.white.body1;
         iconThemeColor = IconThemeColor.white;
         break;
+    }
+
+    List<Widget> tabs = <Widget>[];
+    bool textAndIcons = false;
+    int tabIndex = 0;
+    for (TabLabel label in labels) {
+      tabs.add(_toTab(label, tabIndex++, textStyle.color, indicatorColor));
+      if (label.text != null && label.icon != null)
+        textAndIcons = true;
     }
 
     Matrix4 transform = new Matrix4.identity();
