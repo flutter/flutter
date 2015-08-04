@@ -71,10 +71,11 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
     );
   }
 
-  void toggleToTextFunction(_) {
+  EventDisposition toggleToTextFunction(_) {
     setState(() {
       toText = (toText == toPlainText) ? toStyledText : toPlainText;
     });
+    return EventDisposition.processed;
   }
 
   Widget build() {

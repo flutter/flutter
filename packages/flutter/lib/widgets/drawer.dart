@@ -139,33 +139,48 @@ class Drawer extends StatefulComponent {
 
   void _settle() { _isMostlyClosed ? _performance.reverse() : _performance.play(); }
 
-  void handleMaskTap(_) { _performance.reverse(); }
+  EventDisposition handleMaskTap(_) {
+    _performance.reverse();
+    return EventDisposition.consumed;
+  }
 
   // TODO(mpcomplete): Figure out how to generalize these handlers on a
   // "PannableThingy" interface.
-  void handlePointerDown(_) { _performance.stop(); }
+  EventDisposition handlePointerDown(_) {
+    _performance.stop();
+    return EventDisposition.processed;
+ }
 
-  void handlePointerMove(sky.PointerEvent event) {
+  EventDisposition handlePointerMove(sky.PointerEvent event) {
     if (_performance.isAnimating)
-      return;
+      return EventDisposition.ignored;
     _performance.progress += event.dx / _kWidth;
+    return EventDisposition.processed;
   }
 
-  void handlePointerUp(_) {
-    if (!_performance.isAnimating)
+  EventDisposition handlePointerUp(_) {
+    if (!_performance.isAnimating) {
       _settle();
+      return EventDisposition.processed;
+    }
+    return EventDisposition.ignored;
   }
 
-  void handlePointerCancel(_) {
-    if (!_performance.isAnimating)
+  EventDisposition handlePointerCancel(_) {
+    if (!_performance.isAnimating) {
       _settle();
+      return EventDisposition.processed;
+    }
+    return EventDisposition.ignored;
   }
 
-  void handleFlingStart(event) {
+  EventDisposition handleFlingStart(event) {
     if (event.velocityX.abs() >= _kMinFlingVelocity) {
       _performance.fling(
           event.velocityX < 0.0 ? Direction.reverse : Direction.forward,
           velocity: event.velocityX.abs() * _kFlingVelocityScale);
+      return EventDisposition.processed;
     }
+    return EventDisposition.ignored;
   }
 }

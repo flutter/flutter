@@ -57,8 +57,9 @@ abstract class Toggleable extends AnimatedComponent {
     super.syncFields(source);
   }
 
-  void _handleClick(sky.Event e) {
+  EventDisposition _handleClick(sky.Event e) {
     onChanged(!value);
+    return EventDisposition.consumed;
   }
 
   // Override these to draw yourself
