@@ -1240,11 +1240,11 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     if (child != null) {
       assert(child.parentData is BoxParentData);
       Rect childBounds = child.parentData.position & child.size;
-      if (childBounds.contains(position + -scrollOffset))
-        child.hitTest(result, position: position + scrollOffset);
+      Point transformedPosition = position + scrollOffset;
+      if (childBounds.contains(transformedPosition))
+        child.hitTest(result, position: transformedPosition);
     }
   }
-
 }
 
 class RenderImage extends RenderBox {
