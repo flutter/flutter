@@ -29,7 +29,9 @@ class Sprite extends NodeWithSize {
   ///     mySprite.transferMode = TransferMode.plusMode;
   TransferMode transferMode;
 
-  Paint _cachedPaint = new Paint();
+  Paint _cachedPaint = new Paint()
+    ..setFilterQuality(FilterQuality.low)
+    ..isAntiAlias = false;
 
   /// Creates a new sprite from the provided [texture].
   ///
