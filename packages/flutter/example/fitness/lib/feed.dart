@@ -216,8 +216,9 @@ class FeedFragment extends StatefulComponent {
   }
 
   void _handleActionButtonPressed() {
-    showDialog(navigator, (navigator) => new AddItemDialog(navigator)).then((route) {
-      navigator.pushNamed(route);
+    showDialog(navigator, (navigator) => new AddItemDialog(navigator)).then((routeName) {
+      if (routeName != null)
+        navigator.pushNamed(routeName);
     });
   }
 
