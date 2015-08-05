@@ -7,6 +7,7 @@ group("example") {
 
   deps = [
     "//sky/packages/sky/example/demo_launcher",
+    "//sky/packages/sky/example/fitness",
     "//sky/packages/sky/example/game",
     "//sky/packages/sky/example/mine_digger",
     "//sky/packages/sky/example/rendering",
