@@ -1128,10 +1128,10 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   RenderViewport({
     RenderBox child,
     Offset scrollOffset,
-    ViewportScrollDirection direction: ViewportScrollDirection.vertical
+    ViewportScrollDirection scrollDirection: ViewportScrollDirection.vertical
   }) : _scrollOffset = scrollOffset,
-       _scrollDirection = direction {
-    assert(_offsetIsSane(scrollOffset, direction));
+       _scrollDirection = scrollDirection {
+    assert(_offsetIsSane(scrollOffset, scrollDirection));
     this.child = child;
   }
 
