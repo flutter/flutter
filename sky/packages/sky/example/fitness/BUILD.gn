@@ -2,12 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-assert(is_android)
-
 import("//sky/build/sky_app.gni")
 
 sky_app("fitness") {
-  apk_name = "Fitness"
   main_dart = "lib/main.dart"
   manifest = "sky.yaml"
+
+  if (is_android) {
+    apk_name = "Fitness"
+
+    deps = [
+      "//sky/packages/sky/example/fitness/apk:resources",
+    ]
+  }
 }
