@@ -9,6 +9,11 @@ import 'package:sky_services/activity/activity.mojom.dart';
 
 export 'package:sky_services/activity/activity.mojom.dart' show Intent, ComponentName, StringExtra;
 
+/// Dart wrapper around Activity mojo service available in Sky on Android.
+///
+/// Most clients will want to use these methods instead of the activity service
+/// directly.
+
 const int NEW_DOCUMENT = 0x00080000;
 const int NEW_TASK = 0x10000000;
 const int MULTIPLE_TASK = 0x08000000;
@@ -24,15 +29,17 @@ final ActivityProxy _activity = _initActivity();
 Color _cachedPrimaryColor;
 String _cachedLabel;
 
-
+/// Ends the current activity.
 void finishCurrentActivity() {
   _activity.ptr.finishCurrentActivity();
 }
 
+/// Asks the Android ActivityManager to start a new Intent-based Activity.
 void startActivity(Intent intent) {
   _activity.ptr.startActivity(intent);
 }
 
+/// Sets the TaskDescription for the current Activity
 void updateTaskDescription(String label, Color color) {
   if (_cachedPrimaryColor == color && _cachedLabel == label)
     return;
