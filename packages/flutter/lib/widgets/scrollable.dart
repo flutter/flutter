@@ -31,18 +31,19 @@ abstract class ScrollClient {
   bool ancestorScrolled(Scrollable ancestor);
 }
 
-enum ScrollDirection { vertical, horizontal }
-
 /// A base class for scrollable widgets that reacts to user input and generates
 /// a scrollOffset.
 abstract class Scrollable extends StatefulComponent {
 
   Scrollable({
     Key key,
-    this.direction: ScrollDirection.vertical
-  }) : super(key: key);
+    this.scrollDirection: ViewportScrollDirection.vertical
+  }) : super(key: key) {
+    assert(scrollDirection == ViewportScrollDirection.vertical ||
+        scrollDirection == ViewportScrollDirection.horizontal);
+  }
 
-  ScrollDirection direction;
+  ViewportScrollDirection scrollDirection;
 
   AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
   AnimationPerformance _toOffsetAnimation; // Started by scrollTo(offset, duration: d)
@@ -57,11 +58,17 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void syncFields(Scrollable source) {
-    direction == source.direction;
+    scrollDirection == source.scrollDirection;
   }
 
   double _scrollOffset = 0.0;
   double get scrollOffset => _scrollOffset;
+
+  Offset get scrollOffsetVector {
+    if (scrollDirection == ViewportScrollDirection.horizontal)
+      return new Offset(scrollOffset, 0.0);
+    return new Offset(0.0, scrollOffset);
+  }
 
   ScrollBehavior _scrollBehavior;
   ScrollBehavior createScrollBehavior();
@@ -188,12 +195,12 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   EventDisposition _handleScrollUpdate(sky.GestureEvent event) {
-    scrollBy(direction == ScrollDirection.horizontal ? event.dx : -event.dy);
+    scrollBy(scrollDirection == ViewportScrollDirection.horizontal ? event.dx : -event.dy);
     return EventDisposition.processed;
   }
 
   EventDisposition _handleFlingStart(sky.GestureEvent event) {
-    double eventVelocity = direction == ScrollDirection.horizontal
+    double eventVelocity = scrollDirection == ViewportScrollDirection.horizontal
       ? -event.velocityX
       : -event.velocityY;
     _startToEndAnimation(velocity: _velocityForFlingGesture(eventVelocity));
@@ -225,7 +232,11 @@ abstract class Scrollable extends StatefulComponent {
 /// A simple scrollable widget that has a single child. Use this component if
 /// you are not worried about offscreen widgets consuming resources.
 class ScrollableViewport extends Scrollable {
-  ScrollableViewport({ Key key, this.child }) : super(key: key);
+  ScrollableViewport({
+    Key key,
+    this.child,
+    ViewportScrollDirection scrollDirection: ViewportScrollDirection.vertical
+  }) : super(key: key, scrollDirection: scrollDirection);
 
   Widget child;
 
@@ -258,7 +269,8 @@ class ScrollableViewport extends Scrollable {
     return new SizeObserver(
       callback: _handleViewportSizeChanged,
       child: new Viewport(
-        offset: scrollOffset,
+        scrollOffset: scrollOffsetVector,
+        scrollDirection: scrollDirection,
         child: new SizeObserver(
           callback: _handleChildSizeChanged,
           child: child
@@ -370,7 +382,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     return new SizeObserver(
       callback: _handleSizeChanged,
       child: new Viewport(
-        offset: offsetY,
+        scrollOffset: new Offset(0.0, offsetY),
         child: new Container(
           padding: padding,
           child: new Block(items)
