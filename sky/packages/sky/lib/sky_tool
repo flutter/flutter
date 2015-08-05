@@ -8,13 +8,14 @@ import atexit
 import json
 import logging
 import os
+import random
 import re
 import signal
 import socket
 import subprocess
 import sys
-import urlparse
 import time
+import urlparse
 
 # TODO(eseidel): This should be BIN_DIR.
 PACKAGES_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -125,6 +126,7 @@ class StartSky(object):
         start_parser = subparsers.add_parser('start',
             help='launch %s on the device' % APK_NAME)
         start_parser.add_argument('--install', action='store_true')
+        start_parser.add_argument('--poke', action='store_true')
         start_parser.add_argument('project_or_path', nargs='?', type=str,
             default='.')
         start_parser.set_defaults(func=self.run)
@@ -139,7 +141,8 @@ class StartSky(object):
         return len(script_dirs) > 1 and script_dirs[-2] == 'packages'
 
     def run(self, args, pids):
-        StopSky().run(args, pids)
+        if not args.poke:
+            StopSky().run(args, pids)
 
         project_or_path = os.path.abspath(args.project_or_path)
 
@@ -206,6 +209,8 @@ class StartSky(object):
         # The load happens on the remote device, use the remote port.
         url = _url_for_path(pids['remote_sky_server_port'], sky_server_root,
             main_dart)
+        if args.poke:
+            url += '?rand=%s' % random.random()
 
         subprocess.check_call([ADB_PATH, 'shell',
             'am', 'start',
@@ -282,7 +287,7 @@ class StopTracing(object):
                     device_path = result.group('path')
             is_complete = TRACE_COMPLETE_REGEXP.search(log) is not None
 
-        logger.info('Downloading trace %s ...' % os.path.basename(device_path))
+        logging.info('Downloading trace %s ...' % os.path.basename(device_path))
 
         if device_path:
             subprocess.check_output([ADB_PATH, 'pull', device_path])
@@ -386,7 +391,7 @@ class SkyShellRunner(object):
           exit_code = args.func(args, pids)
         except subprocess.CalledProcessError as e:
           # Don't print a stack trace if the adb command fails.
-          logger.error(e)
+          logging.error(e)
           exit_code = 2
         sys.exit(exit_code)
 
