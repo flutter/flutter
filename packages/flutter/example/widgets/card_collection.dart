@@ -77,9 +77,8 @@ class CardCollectionApp extends App {
       )
     );
 
-    Widget backgroundText = new Center(
-        child: new Text("Swipe in either direction", style: backgroundTextStyle)
-    );
+    Widget backgroundText =
+      new Text("Swipe in either direction", style: backgroundTextStyle);
 
     // The background Widget appears behind the Dismissable card when the card
     // moves to the left or right. The Positioned widget ensures that the
