@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:sky' as sky;
 
+import 'package:sky/painting/radial_reaction.dart';
 import 'package:sky/painting/shadows.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
@@ -26,6 +28,7 @@ const double _kTrackWidth =
     _kSwitchWidth - (_kThumbRadius - _kTrackRadius) * 2.0;
 const Duration _kCheckDuration = const Duration(milliseconds: 200);
 const Size _kSwitchSize = const Size(_kSwitchWidth + 2.0, _kSwitchHeight + 2.0);
+const double _kReactionRadius = _kSwitchWidth / 2.0;
 
 class Switch extends Component {
   Switch({Key key, this.value, this.onChanged}) : super(key: key);
@@ -72,11 +75,46 @@ class _RenderSwitch extends RenderToggleable {
 
   Color _thumbColor;
   Color get thumbColor => _thumbColor;
-
   void set thumbColor(Color value) {
     if (value == _thumbColor) return;
     _thumbColor = value;
     markNeedsPaint();
+  }
+
+  RadialReaction _radialReaction;
+
+  EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
+    if (event is sky.PointerEvent) {
+      if (event.type == 'pointerdown') {
+        _showRadialReaction(entry.localPosition);
+        return combineEventDispositions(EventDisposition.processed,
+                                        super.handleEvent(event, entry));
+      }
+      if (event.type == 'pointerup') {
+        _hideRadialReaction();
+        return combineEventDispositions(EventDisposition.processed,
+                                        super.handleEvent(event, entry));
+      }
+    }
+    return super.handleEvent(event, entry);
+  }
+
+  void _showRadialReaction(Point startLocation) {
+    if (_radialReaction != null)
+      return;
+    _radialReaction = new RadialReaction(
+      center: new Point(_kSwitchSize.width / 2.0, _kSwitchSize.height / 2.0),
+      radius: _kReactionRadius,
+      startPosition: startLocation)
+      ..addListener(markNeedsPaint)
+      ..show();
+  }
+
+  Future _hideRadialReaction() async {
+    if (_radialReaction == null)
+      return;
+    await _radialReaction.hide();
+    _radialReaction = null;
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
@@ -96,6 +134,9 @@ class _RenderSwitch extends RenderToggleable {
     sky.RRect rrect = new sky.RRect()
       ..setRectXY(rect, _kTrackRadius, _kTrackRadius);
     canvas.drawRRect(rrect, paint);
+
+    if (_radialReaction != null)
+      _radialReaction.paint(canvas, offset);
 
     // Draw the raised thumb with a shadow
     paint.color = thumbColor;

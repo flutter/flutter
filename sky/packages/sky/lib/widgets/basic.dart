@@ -19,7 +19,7 @@ import 'package:sky/rendering/stack.dart';
 import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/framework.dart';
 
-export 'package:sky/base/hit_test.dart' show EventDisposition;
+export 'package:sky/base/hit_test.dart' show EventDisposition, combineEventDispositions;
 export 'package:sky/rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;

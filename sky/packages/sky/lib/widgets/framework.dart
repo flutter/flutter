@@ -13,7 +13,7 @@ import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/sky_binding.dart';
 
-export 'package:sky/base/hit_test.dart' show EventDisposition;
+export 'package:sky/base/hit_test.dart' show EventDisposition, combineEventDispositions;
 export 'package:sky/rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export 'package:sky/rendering/flex.dart' show FlexDirection;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
