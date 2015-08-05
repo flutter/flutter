@@ -191,7 +191,8 @@ class TestPerformanceAtlas extends Node {
     transforms.add(createTransform(512.0, 512.0, rects[0].size.width / 2.0, rects[0].size.height / 2.0, rotation, 1.0));
 
     // Draw atlas
-    canvas.drawAtlas(_spriteSheet.image, transforms, rects, null, null, null, cachedPaint);
+    Rect cullRect = spriteBox.visibleArea;
+    canvas.drawAtlas(_spriteSheet.image, transforms, rects, null, null, cullRect, cachedPaint);
   }
 
   void update(double dt) {
