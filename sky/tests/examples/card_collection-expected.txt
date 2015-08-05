@@ -36,12 +36,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(12.0, 78.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(48.0, 82.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(48.0, 82.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(278.0, 82.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(278.0, 82.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-278.0, -82.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(48.0, 82.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-48.0, -82.0)
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(752.0, 78.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  | restore
@@ -92,12 +90,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(12.0, 141.5)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(48.0, 145.5)
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(48.0, 145.5)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(278.0, 145.5)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(278.0, 145.5)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-278.0, -145.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(48.0, 145.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-48.0, -145.5)
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(752.0, 141.5)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  | restore
@@ -148,12 +144,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(12.0, 222.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(48.0, 226.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(48.0, 226.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(278.0, 226.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(278.0, 226.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-278.0, -226.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(48.0, 226.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-48.0, -226.0)
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(752.0, 222.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  | restore
@@ -204,12 +198,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(12.0, 344.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(48.0, 348.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(48.0, 348.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(278.0, 348.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(278.0, 348.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-278.0, -348.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(48.0, 348.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-48.0, -348.0)
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(752.0, 344.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  | restore
@@ -260,12 +252,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(12.0, 455.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(48.0, 459.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(48.0, 459.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(278.0, 459.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(278.0, 459.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-278.0, -459.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(48.0, 459.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-48.0, -459.0)
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(752.0, 455.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  | restore
@@ -316,12 +306,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(12.0, 520.5)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(48.0, 524.5)
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(48.0, 524.5)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(278.0, 524.5)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(278.0, 524.5)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-278.0, -524.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(48.0, 524.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-48.0, -524.5)
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(752.0, 520.5)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  | restore
@@ -372,12 +360,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(12.0, 598.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(48.0, 602.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(48.0, 602.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(278.0, 602.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(278.0, 602.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-278.0, -602.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(48.0, 602.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-48.0, -602.0)
 2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(752.0, 598.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  | restore
