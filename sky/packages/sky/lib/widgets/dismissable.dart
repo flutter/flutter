@@ -100,6 +100,9 @@ class Dismissable extends StatefulComponent {
   }
 
   EventDisposition _handlePointerDown(sky.PointerEvent event) {
+    if (_fadePerformance.isAnimating)
+      return EventDisposition.processed;
+
     _dragUnderway = true;
     _dragX = 0.0;
     _fadePerformance.progress = 0.0;
@@ -109,6 +112,9 @@ class Dismissable extends StatefulComponent {
   EventDisposition _handlePointerMove(sky.PointerEvent event) {
     if (!_isActive)
       return EventDisposition.ignored;
+
+    if (_fadePerformance.isAnimating)
+      return EventDisposition.processed;
 
     double oldDragX = _dragX;
     _dragX += event.dx;
@@ -122,6 +128,9 @@ class Dismissable extends StatefulComponent {
   EventDisposition _handlePointerUpOrCancel(_) {
     if (!_isActive)
       return EventDisposition.ignored;
+
+    if (_fadePerformance.isAnimating)
+      return EventDisposition.processed;
 
     _dragUnderway = false;
     if (_fadePerformance.isCompleted)
