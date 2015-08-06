@@ -46,6 +46,8 @@ class AnimationPerformance {
   Direction _curveDirection;
   Direction get curveDirection => _curveDirection;
 
+  AnimationTiming timing;
+
   // If non-null, animate with this force instead of a tween animation.
   Force attachedForce;
 
@@ -67,6 +69,10 @@ class AnimationPerformance {
     _checkStatusChanged();
   }
 
+  double get curvedProgress {
+    return timing != null ? timing.transform(progress, curveDirection) : progress;
+  }
+
   bool get isDismissed => status == AnimationStatus.dismissed;
   bool get isCompleted => status == AnimationStatus.completed;
   bool get isAnimating => timeline.isAnimating;
@@ -82,7 +88,7 @@ class AnimationPerformance {
   }
 
   void updateVariable(AnimatedVariable variable) {
-    variable.setProgress(progress, curveDirection);
+    variable.setProgress(curvedProgress, curveDirection);
   }
 
   Future play([Direction direction = Direction.forward]) {
@@ -165,7 +171,7 @@ class AnimationPerformance {
   void _tick(double t) {
     _updateCurveDirection();
     if (variable != null)
-      variable.setProgress(t, curveDirection);
+      variable.setProgress(curvedProgress, curveDirection);
     _notifyListeners();
     _checkStatusChanged();
   }

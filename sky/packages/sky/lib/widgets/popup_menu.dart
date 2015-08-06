@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
+import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:sky/animation/animated_value.dart';
@@ -10,11 +10,11 @@ import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/colors.dart';
 import 'package:sky/theme/shadows.dart';
-import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/popup_menu_item.dart';
 import 'package:sky/widgets/scrollable.dart';
+import 'package:sky/widgets/transitions.dart';
 
 export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
@@ -29,7 +29,7 @@ const double _kMenuVerticalPadding = 8.0;
 
 typedef void PopupMenuStatusChangedCallback(AnimationStatus status);
 
-class PopupMenu extends AnimatedComponent {
+class PopupMenu extends StatefulComponent {
 
   PopupMenu({
     Key key,
@@ -46,63 +46,42 @@ class PopupMenu extends AnimatedComponent {
   int level;
   Navigator navigator;
 
-  AnimatedValue<double> _opacity;
-  AnimatedValue<double> _width;
-  AnimatedValue<double> _height;
-  List<AnimatedValue<double>> _itemOpacities;
   AnimationPerformance _performance;
 
   void initState() {
     _performance = new AnimationPerformance()
-      ..duration = _kMenuDuration
-      ..addStatusListener(_onStatusChanged);
-    _updateAnimationVariables();
-    watch(_performance);
+      ..duration = _kMenuDuration;
+    _performance.timing = new AnimationTiming()
+      ..reverseInterval = new Interval(0.0, _kMenuCloseIntervalEnd);
     _updateBoxPainter();
+
     if (showing)
       _open();
   }
 
   void syncFields(PopupMenu source) {
-    if (showing != source.showing) {
-      showing = source.showing;
-      if (showing)
-        _open();
-      else
-        _close();
-    }
+    if (!showing && source.showing)
+      _open();
+    showing = source.showing;
     onStatusChanged = source.onStatusChanged;
     if (level != source.level) {
       level = source.level;
       _updateBoxPainter();
     }
-    if (items.length != source.items.length)
-      _updateAnimationVariables();
     items = source.items;
     navigator = source.navigator;
-    super.syncFields(source);
   }
 
-  void _updateAnimationVariables() {
-    double unit = 1.0 / (items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    _opacity = new AnimatedValue<double>(0.0, end: 1.0);
-    _width = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit));
-    _height = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit * items.length));
-    _itemOpacities = new List<AnimatedValue<double>>();
-    for (int i = 0; i < items.length; ++i) {
-      double start = (i + 1) * unit;
-      double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-      _itemOpacities.add(new AnimatedValue<double>(
-          0.0, end: 1.0, interval: new Interval(start, end)));
+  void _open() {
+    if (navigator != null) {
+      scheduleMicrotask(() {
+        navigator.pushState(this, (_) => _close());
+      });
     }
-    List<AnimatedVariable> variables = new List<AnimatedVariable>()
-      ..add(_opacity)
-      ..add(_width)
-      ..add(_height)
-      ..addAll(_itemOpacities);
-    AnimatedList list = new AnimatedList(variables)
-      ..reverseInterval = new Interval(0.0, _kMenuCloseIntervalEnd);
-    _performance.variable = list;
+  }
+
+  void _close() {
+    _performance.reverse();
   }
 
   void _updateBoxPainter() {
@@ -112,63 +91,70 @@ class PopupMenu extends AnimatedComponent {
       boxShadow: shadows[level]));
   }
 
-  void _onStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed &&
-        navigator != null &&
+  void _onDismissed() {
+    if (navigator != null &&
         navigator.currentRoute is RouteState &&
         (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
       navigator.pop();
     if (onStatusChanged != null)
-      onStatusChanged(status);
-  }
-
-
-  void _open() {
-    _performance.play();
-    if (navigator != null)
-      navigator.pushState(this, (_) => _close());
-  }
-
-  void _close() {
-    _performance.reverse();
+      onStatusChanged(AnimationStatus.dismissed);
   }
 
   BoxPainter _painter;
 
   Widget build() {
-    int i = 0;
-    List<Widget> children = new List.from(items.map((Widget item) {
-      return new Opacity(opacity: _itemOpacities[i++].value, child: item);
-    }));
+    double unit = 1.0 / (items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+    List<Widget> children = [];
+    for (int i = 0; i < items.length; ++i) {
+      double start = (i + 1) * unit;
+      double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      children.add(new FadeTransition(
+        direction: showing ? Direction.forward : Direction.reverse,
+        performance: _performance,
+        opacity: new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(start, end)),
+        child: items[i]));
+    }
 
-    return new Opacity(
-      opacity: math.min(1.0, _opacity.value * 3.0),
+    final width = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit));
+    final height = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit * items.length));
+    return new FadeTransition(
+      direction: showing ? Direction.forward : Direction.reverse,
+      performance: _performance,
+      onDismissed: _onDismissed,
+      opacity: new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, 1.0 / 3.0)),
       child: new Container(
         margin: new EdgeDims.all(_kMenuMargin),
-        child: new CustomPaint(
-          callback: (sky.Canvas canvas, Size size) {
-            double width = _width.value * size.width;
-            double height = _height.value * size.height;
-            _painter.paint(canvas, new Rect.fromLTWH(size.width - width, 0.0, width, height));
-          },
-          child: new ConstrainedBox(
-            constraints: new BoxConstraints(
-              minWidth: _kMenuMinWidth,
-              maxWidth: _kMenuMaxWidth
-            ),
-            child: new ShrinkWrapWidth(
-              stepWidth: _kMenuWidthStep,
-              child: new ScrollableViewport(
-                child: new Container(
-                  padding: const EdgeDims.symmetric(
-                    horizontal: _kMenuHorizontalPadding,
-                    vertical: _kMenuVerticalPadding
-                  ),
-                  child: new Block(children)
+        child: new BuilderTransition(
+          direction: showing ? Direction.forward : Direction.reverse,
+          performance: _performance,
+          variables: [width, height],
+          builder: () {
+            return new CustomPaint(
+              callback: (sky.Canvas canvas, Size size) {
+                double widthValue = width.value * size.width;
+                double heightValue = height.value * size.height;
+                _painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
+              },
+              child: new ConstrainedBox(
+                constraints: new BoxConstraints(
+                  minWidth: _kMenuMinWidth,
+                  maxWidth: _kMenuMaxWidth
+                ),
+                child: new ShrinkWrapWidth(
+                  stepWidth: _kMenuWidthStep,
+                  child: new ScrollableViewport(
+                    child: new Container(
+                      padding: const EdgeDims.symmetric(
+                        horizontal: _kMenuHorizontalPadding,
+                        vertical: _kMenuVerticalPadding
+                      ),
+                      child: new Block(children)
+                    )
+                  )
                 )
               )
-            )
-          )
+            );
+          }
         )
       )
     );
