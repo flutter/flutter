@@ -137,11 +137,8 @@ template("go_mojo_application") {
       "-I" + rebase_path("//"),
       "-L" + rebase_path(target_out_dir) + " -l" + static_library_name + "",
       "build",
-      "-ldflags=-shared",
     ]
-    if (is_linux) {
-      args += [ "-buildmode=c-shared" ]
-    }
+    args += [ "-buildmode=c-shared" ]
     args += rebase_path(invoker.sources, build_dir)
   }
 

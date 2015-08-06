@@ -5,19 +5,16 @@
 [DartPackage="mojo_services"]
 module prediction;
 
-struct Settings {
-  bool correction_enabled;
-  bool block_potentially_offensive;
-  bool space_aware_gesture_enabled;
+struct PrevWordInfo {
+	string word;
+	bool is_beginning_of_sentence;
 };
 
 struct PredictionInfo {
-  array<string> previous_words;
-  string current_word;
+	array<PrevWordInfo> previous_words;
+	string current_word;
 };
 
 interface PredictionService {
-  SetSettings(Settings settings);
-
   GetPredictionList(PredictionInfo prediction_info) => (array<string>? prediction_list);
 };

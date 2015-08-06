@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# To integrate dartanalyze with out build system, we take an input file, run
+# To integrate dartanalyze with our build system, we take an input file, run
 # the analyzer on it, and write a stamp file if it passed.
 
 # This script can either analyze a dartzip package, specified with the

@@ -1,0 +1,17 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/dart/rules.gni")
+
+dartzip_package("dart") {
+  sources = [
+    "lib/trace_controller_impl.dart",
+    "lib/tracing_helper.dart",
+    "pubspec.yaml",
+  ]
+  deps = [
+    "//mojo/public/dart",
+    "//mojo/services/tracing/public/interfaces",
+  ]
+}

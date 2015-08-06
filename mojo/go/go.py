@@ -78,6 +78,8 @@ def main():
       ndk_cc = os.path.join(ndk_path, 'toolchains', NDK_TOOLCHAIN,
           'prebuilt', arch, 'bin', 'arm-linux-androideabi-gcc')
       sysroot = os.path.join(ndk_path, 'platforms', NDK_PLATFORM, 'arch-arm')
+      env['CGO_CFLAGS'] += ' --sysroot %s' % sysroot
+      env['CGO_LDFLAGS'] += ' --sysroot %s' % sysroot
       env['CC'] = '%s --sysroot %s' % (ndk_cc, sysroot)
 
   call_result = subprocess.call([go_tool] + go_options, env=env)

@@ -56,6 +56,9 @@ tests = [
     "test": "mojo_shell_tests",
     "cacheable": False,
   },
+  {
+    "test": "crash_unittests",
+  },
 ]
 
 if config.target_os != config.OS_ANDROID:

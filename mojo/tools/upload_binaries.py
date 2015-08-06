@@ -74,6 +74,13 @@ def find_architecture_independent_files(build_dir):
   return existing_files
 
 
+def check_call(command_line, dry_run, **kwargs):
+  if dry_run:
+    print command_line
+  else:
+    subprocess.check_call(command_line, **kwargs)
+
+
 def upload(config, source, dest, dry_run, gzip=False):
   paths = Paths(config)
   sys.path.insert(0, os.path.join(paths.src_root, "tools"))
@@ -89,23 +96,31 @@ def upload(config, source, dest, dry_run, gzip=False):
     command_line.extend(["-z", extension])
   command_line.extend([source, dest])
 
-  if dry_run:
-    print command_line
-  else:
-    subprocess.check_call(command_line)
+  check_call(command_line, dry_run)
 
 
-def upload_symbols(config, build_dir, dry_run):
+def upload_symbols(config, build_dir, breakpad_upload_urls, dry_run):
+  dump_syms_exe = os.path.join(Paths().src_root,
+                               "mojo", "tools", "linux64", "dump_syms")
+  symupload_exe = os.path.join(Paths().src_root,
+                               "mojo", "tools", "linux64", "symupload")
   dest_dir = "gs://mojo/symbols/"
   symbols_dir = os.path.join(build_dir, "symbols")
-  for name in os.listdir(symbols_dir):
-    path = os.path.join(symbols_dir, name)
-    with open(path) as f:
-      signature = signatures.get_signature(f, elffile)
-      if signature is not None:
-        dest = dest_dir + signature
-        upload(config, path, dest, dry_run)
-
+  with open(os.devnull, "w") as devnull:
+    for name in os.listdir(symbols_dir):
+      path = os.path.join(symbols_dir, name)
+      with open(path) as f:
+        signature = signatures.get_signature(f, elffile)
+        if signature is not None:
+          dest = dest_dir + signature
+          upload(config, path, dest, dry_run)
+      if breakpad_upload_urls:
+        with tempfile.NamedTemporaryFile() as temp:
+          check_call([dump_syms_exe, path], dry_run,
+                     stdout=temp, stderr=devnull)
+          temp.flush()
+          for upload_url in breakpad_upload_urls:
+            check_call([symupload_exe, temp.name, upload_url], dry_run)
 
 def upload_shell(config, dry_run, verbose):
   paths = Paths(config)
@@ -179,6 +194,9 @@ def main():
   parser.add_argument("--official",
                       action="store_true",
                       help="Upload the official build of the Android shell")
+  parser.add_argument("--symbols-upload-url",
+                      action="append", default=[],
+                      help="URL of the server to upload breakpad symbols to")
   args = parser.parse_args()
 
   is_official_build = args.official
@@ -207,7 +225,8 @@ def main():
   for file_to_upload in files_to_upload:
     upload_file(file_to_upload, config, args.dry_run)
 
-  upload_symbols(config, build_directory, args.dry_run)
+  upload_symbols(config, build_directory,
+                 args.symbols_upload_url, args.dry_run)
 
   return 0
 

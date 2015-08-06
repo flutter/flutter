@@ -167,6 +167,7 @@ public class InterfacesTest extends MojoTestCase {
     * Implementation of PingService.
     */
     public class PingServiceImpl extends CapturingErrorHandler implements PingService {
+        @Override
         public void ping(PingResponse callback) {
             callback.call();
         }

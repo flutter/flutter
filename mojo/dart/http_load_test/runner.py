@@ -12,6 +12,7 @@ import sys
 
 MOJO_SHELL = 'mojo_shell'
 
+
 def main(build_dir, dart_exe, tester_script, tester_dir):
   shell_exe = os.path.join(build_dir, MOJO_SHELL)
   subprocess.check_call([
@@ -38,6 +39,7 @@ if __name__ == '__main__':
                       required=True,
                       help="Path to dart executable.")
   args = parser.parse_args()
-  tester_dir = os.path.dirname(os.path.realpath(__file__))
-  tester_dart_script = os.path.join(tester_dir, 'tester.dart');
-  sys.exit(main(args.build_dir, args.dart_exe, tester_dart_script, tester_dir))
+  tester_directory = os.path.dirname(os.path.realpath(__file__))
+  tester_dart_script = os.path.join(tester_directory, 'tester.dart')
+  sys.exit(main(args.build_dir, args.dart_exe, tester_dart_script,
+                tester_directory))

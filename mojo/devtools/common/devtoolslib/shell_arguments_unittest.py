@@ -17,7 +17,7 @@ from devtoolslib import shell_arguments
 class AppendToArgumentTest(unittest.TestCase):
   """Tests AppendToArgument()."""
 
-  def testAppendToEmpty(self):
+  def test_append_to_empty(self):
     arguments = []
     key = '--something='
     value = 'val'
@@ -25,7 +25,7 @@ class AppendToArgumentTest(unittest.TestCase):
     self.assertEquals(expected_result, shell_arguments.append_to_argument(
         arguments, key, value))
 
-  def testAppendToNonEmpty(self):
+  def test_append_to_non_empty(self):
     arguments = ['--other']
     key = '--something='
     value = 'val'
@@ -33,7 +33,7 @@ class AppendToArgumentTest(unittest.TestCase):
     self.assertEquals(expected_result, shell_arguments.append_to_argument(
         arguments, key, value))
 
-  def testAppendToExisting(self):
+  def test_append_to_existing(self):
     arguments = ['--something=old_val']
     key = '--something='
     value = 'val'

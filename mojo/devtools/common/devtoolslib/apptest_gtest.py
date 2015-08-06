@@ -79,7 +79,7 @@ def get_fixtures(shell, shell_args, apptest):
   arguments.append("--args-for=%s %s" % (apptest, "--gtest_list_tests"))
   arguments.append(apptest)
 
-  (exit_code, output, did_time_out) = shell.RunAndGetOutput(arguments)
+  (exit_code, output, did_time_out) = shell.run_and_get_output(arguments)
   if exit_code or did_time_out:
     command_line = "mojo_shell " + " ".join(["%r" % x for x in arguments])
     print "Failed to get test fixtures: %r" % command_line

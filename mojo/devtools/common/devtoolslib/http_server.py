@@ -14,6 +14,7 @@ import os.path
 import shutil
 import socket
 import threading
+import tempfile
 
 import SimpleHTTPServer
 import SocketServer
@@ -49,13 +50,15 @@ class _SilentTCPServer(SocketServer.TCPServer):
       SocketServer.TCPServer.handle_error(self, request, client_address)
 
 
-def _GetHandlerClassForPath(mappings):
+def _get_handler_class_for_path(mappings):
   """Creates a handler override for SimpleHTTPServer.
 
   Args:
-    mappings: List of tuples (prefix, local_base_path), mapping path prefixes
-        without the leading slash to local filesystem directory paths. The first
-        matching prefix will be used each time.
+    mappings: List of tuples (prefix, local_base_path_list) mapping URLs that
+        start with |prefix| to one or more local directories enumerated in
+        |local_base_path_list|. The prefixes should skip the leading slash.
+        The first matching prefix and the first location that contains the
+        requested file will be used each time.
   """
   for prefix, _ in mappings:
     assert not prefix.startswith('/'), ('Prefixes for the http server mappings '
@@ -64,17 +67,20 @@ def _GetHandlerClassForPath(mappings):
   class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     """Handler for SocketServer.TCPServer that will serve the files from
     local directiories over http.
+
+    A new instance is created for each request.
     """
 
     def __init__(self, *args, **kwargs):
       self.etag = None
+      self.gzipped_file = None
       SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, *args, **kwargs)
 
     def get_etag(self):
       if self.etag:
         return self.etag
 
-      path = self.translate_path(self.path)
+      path = self.translate_path(self.path, False)
       if not os.path.isfile(path):
         return None
 
@@ -130,29 +136,34 @@ def _GetHandlerClassForPath(mappings):
 
       return SimpleHTTPServer.SimpleHTTPRequestHandler.end_headers(self)
 
-    def translate_path(self, path):
+    # pylint: disable=W0221
+    def translate_path(self, path, gzipped=True):
       # Parent translate_path() will strip away the query string and fragment
       # identifier, but also will prepend the cwd to the path. relpath() gives
       # us the relative path back.
       normalized_path = os.path.relpath(
           SimpleHTTPServer.SimpleHTTPRequestHandler.translate_path(self, path))
 
-      for prefix, local_base_path in mappings:
+      for prefix, local_base_path_list in mappings:
         if normalized_path.startswith(prefix):
-          result = os.path.join(local_base_path, normalized_path[len(prefix):])
-          if os.path.isfile(result):
-            gz_result = result + '.gz'
-            if (not os.path.isfile(gz_result) or
-                os.path.getmtime(gz_result) <= os.path.getmtime(result)):
-              with open(result, 'rb') as f:
-                with gzip.open(gz_result, 'wb') as zf:
-                  shutil.copyfileobj(f, zf)
-            result = gz_result
-          return result
-
-      # This class is only used internally, and we're adding a catch-all ''
-      # prefix at the end of |mappings|.
-      assert False
+          for local_base_path in local_base_path_list:
+            candidate = os.path.join(local_base_path,
+                                     normalized_path[len(prefix):])
+            if os.path.isfile(candidate):
+              if gzipped:
+                if not self.gzipped_file:
+                  self.gzipped_file = tempfile.NamedTemporaryFile(delete=False)
+                  with open(candidate, 'rb') as source:
+                    with gzip.GzipFile(fileobj=self.gzipped_file) as target:
+                      shutil.copyfileobj(source, target)
+                  self.gzipped_file.close()
+                return self.gzipped_file.name
+              return candidate
+          else:
+            self.send_response(404)
+            return None
+      self.send_response(404)
+      return None
 
     def guess_type(self, path):
       # This is needed so that exploded Sky apps without shebang can still run
@@ -167,29 +178,31 @@ def _GetHandlerClassForPath(mappings):
       """Override the base class method to disable logging."""
       pass
 
+    def __del__(self):
+      if self.gzipped_file:
+        os.remove(self.gzipped_file.name)
+
   RequestHandler.protocol_version = 'HTTP/1.1'
   return RequestHandler
 
 
-def start_http_server(local_dir_path, host_port=0, additional_mappings=None):
+def start_http_server(mappings, host_port=0):
   """Starts an http server serving files from |local_dir_path| on |host_port|.
 
   Args:
-    local_dir_path: Path to the local filesystem directory to be served over
-        http under.
+    mappings: List of tuples (prefix, local_base_path_list) mapping URLs that
+        start with |prefix| to one or more local directories enumerated in
+        |local_base_path_list|. The prefixes should skip the leading slash.
+        The first matching prefix and the first location that contains the
+        requested file will be used each time.
     host_port: Port on the host machine to run the server on. Pass 0 to use a
         system-assigned port.
-    additional_mappings: List of tuples (prefix, local_base_path) mapping
-        URLs that start with |prefix| to local directory at |local_base_path|.
-        The prefixes should skip the leading slash.
 
   Returns:
     Tuple of the server address and the port on which it runs.
   """
-  assert local_dir_path
-  mappings = additional_mappings if additional_mappings else []
-  mappings.append(('', local_dir_path))
-  handler_class = _GetHandlerClassForPath(mappings)
+  assert mappings
+  handler_class = _get_handler_class_for_path(mappings)
 
   try:
     httpd = _SilentTCPServer(('127.0.0.1', host_port), handler_class)
@@ -198,14 +211,11 @@ def start_http_server(local_dir_path, host_port=0, additional_mappings=None):
     http_thread = threading.Thread(target=httpd.serve_forever)
     http_thread.daemon = True
     http_thread.start()
-    print 'Started http://%s:%d to host %s.' % (httpd.server_address[0],
-                                                httpd.server_address[1],
-                                                local_dir_path)
     return httpd.server_address
   except socket.error as v:
     error_code = v[0]
     print 'Failed to start http server for %s on port %d: %s.' % (
-        local_dir_path, host_port, os.strerror(error_code))
+        str(mappings), host_port, os.strerror(error_code))
     if error_code == errno.EADDRINUSE:
       print ('  Run `fuser %d/tcp` to find out which process is using the port.'
              % host_port)
