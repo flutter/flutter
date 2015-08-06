@@ -9,6 +9,10 @@ import 'package:sky/rendering/object.dart';
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
+enum BlockDirection { horizontal, vertical }
+
+typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints);
+
 abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
                                                       RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
 
@@ -16,8 +20,9 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
   // uses the maximum width provided by the parent
 
   RenderBlockBase({
-    List<RenderBox> children
-  }) {
+    List<RenderBox> children,
+    BlockDirection direction: BlockDirection.vertical
+  }) : _direction = direction {
     addAll(children);
   }
 
@@ -26,93 +31,127 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
       child.parentData = new BlockParentData();
   }
 
-  double _childrenHeight;
-  double get childrenHeight => _childrenHeight;
+  BlockDirection _direction;
+  BlockDirection get direction => _direction;
+  void set direction (BlockDirection value) {
+    if (_direction != value) {
+      _direction = value;
+      markNeedsLayout();
+    }
+  }
 
-  void markNeedsLayout() {
-    _childrenHeight = null;
-    super.markNeedsLayout();
+  bool get _isVertical => _direction == BlockDirection.vertical;
+
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    if (_isVertical)
+      return new BoxConstraints.tightFor(width: constraints.constrainWidth(constraints.maxWidth));
+    return new BoxConstraints.tightFor(height: constraints.constrainHeight(constraints.maxHeight));
   }
 
   void performLayout() {
-    assert(constraints is BoxConstraints);
-    double width = constraints.constrainWidth(constraints.maxWidth);
-    BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: width);
-    double y = 0.0;
+    BoxConstraints innerConstraints = _getInnerConstraints(constraints);
+    double position = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(innerConstraints, parentUsesSize: true);
       assert(child.parentData is BlockParentData);
-      child.parentData.position = new Point(0.0, y);
-      y += child.size.height;
+      child.parentData.position = _isVertical ? new Point(0.0, position) : new Point(position, 0.0);
+      position += _isVertical ? child.size.height : child.size.width;
       child = child.parentData.nextSibling;
     }
-    _childrenHeight = y;
   }
 
 }
 
 class RenderBlock extends RenderBlockBase {
 
-  // sizes itself to the height of its child stack
+  RenderBlock({
+    List<RenderBox> children,
+    BlockDirection direction: BlockDirection.vertical
+  }) : super(children: children, direction: direction);
 
-  RenderBlock({ List<RenderBox> children }) : super(children: children);
-
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    double width = 0.0;
-    BoxConstraints innerConstraints = constraints.widthConstraints();
+  double _getIntrinsicCrossAxis(BoxConstraints constraints, _ChildSizingFunction childSize) {
+    double extent = 0.0;
+    BoxConstraints innerConstraints = _isVertical ? constraints.widthConstraints() : constraints.heightConstraints();
     RenderBox child = firstChild;
     while (child != null) {
-      width = math.max(width, child.getMinIntrinsicWidth(innerConstraints));
+      extent = math.max(extent, childSize(child, innerConstraints));
       assert(child.parentData is BlockParentData);
       child = child.parentData.nextSibling;
     }
-    return width;
+    return extent;
+  }
+
+  double _getIntrinsicMainAxis(BoxConstraints constraints) {
+    double extent = 0.0;
+    BoxConstraints innerConstraints = _getInnerConstraints(constraints);
+    RenderBox child = firstChild;
+    while (child != null) {
+      double childExtent = _isVertical ?
+        child.getMinIntrinsicHeight(innerConstraints) :
+        child.getMinIntrinsicWidth(innerConstraints);
+      assert(() {
+        if (_isVertical)
+          return childExtent == child.getMaxIntrinsicHeight(innerConstraints);
+        return childExtent == child.getMaxIntrinsicWidth(innerConstraints);
+      });
+      extent += childExtent;
+      assert(child.parentData is BlockParentData);
+      child = child.parentData.nextSibling;
+    }
+    return extent;
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    if (_isVertical) {
+      return _getIntrinsicCrossAxis(constraints,
+        (c, innerConstraints) => c.getMinIntrinsicWidth(innerConstraints));
+    }
+    return _getIntrinsicMainAxis(constraints);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    double width = 0.0;
-    BoxConstraints innerConstraints = constraints.widthConstraints();
-    RenderBox child = firstChild;
-    while (child != null) {
-      width = math.max(width, child.getMaxIntrinsicWidth(innerConstraints));
-      assert(child.parentData is BlockParentData);
-      child = child.parentData.nextSibling;
+    if (_isVertical) {
+      return _getIntrinsicCrossAxis(constraints,
+          (c, innerConstraints) => c.getMaxIntrinsicWidth(innerConstraints));
     }
-    return width;
-  }
-
-  double _getIntrinsicHeight(BoxConstraints constraints) {
-    double height = 0.0;
-    double width = constraints.constrainWidth(constraints.maxWidth);
-    BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: width);
-    RenderBox child = firstChild;
-    while (child != null) {
-      double childHeight = child.getMinIntrinsicHeight(innerConstraints);
-      assert(childHeight == child.getMaxIntrinsicHeight(innerConstraints));
-      height += childHeight;
-      assert(child.parentData is BlockParentData);
-      child = child.parentData.nextSibling;
-    }
-    return height;
+    return _getIntrinsicMainAxis(constraints);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return _getIntrinsicHeight(constraints);
+    if (_isVertical)
+      return _getIntrinsicMainAxis(constraints);
+    return _getIntrinsicCrossAxis(constraints,
+        (c, innerConstraints) => c.getMinIntrinsicWidth(innerConstraints));
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return _getIntrinsicHeight(constraints);
+    if (_isVertical)
+      return _getIntrinsicMainAxis(constraints);
+    return _getIntrinsicCrossAxis(constraints,
+        (c, innerConstraints) => c.getMaxIntrinsicWidth(innerConstraints));
   }
 
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
+  double get _mainAxisExtent {
+    RenderBox child = lastChild;
+    if (child == null)
+      return 0.0;
+    BoxParentData parentData = child.parentData;
+    return _isVertical ?
+        parentData.position.y + child.size.height :
+        parentData.position.x + child.size.width;
+  }
+
   void performLayout() {
-    assert(constraints.maxHeight >= double.INFINITY);
+    assert(_isVertical ? constraints.maxHeight >= double.INFINITY : constraints.maxWidth >= double.INFINITY);
     super.performLayout();
-    size = constraints.constrain(new Size(constraints.maxWidth, childrenHeight));
+    size = _isVertical ?
+        constraints.constrain(new Size(constraints.maxWidth, _mainAxisExtent)) :
+        constraints.constrain(new Size(_mainAxisExtent, constraints.maxHeight));
     assert(!size.isInfinite);
   }
 
