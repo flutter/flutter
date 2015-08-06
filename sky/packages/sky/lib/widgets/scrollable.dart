@@ -37,13 +37,13 @@ abstract class Scrollable extends StatefulComponent {
 
   Scrollable({
     Key key,
-    this.scrollDirection: ViewportScrollDirection.vertical
+    this.scrollDirection: ScrollDirection.vertical
   }) : super(key: key) {
-    assert(scrollDirection == ViewportScrollDirection.vertical ||
-        scrollDirection == ViewportScrollDirection.horizontal);
+    assert(scrollDirection == ScrollDirection.vertical ||
+        scrollDirection == ScrollDirection.horizontal);
   }
 
-  ViewportScrollDirection scrollDirection;
+  ScrollDirection scrollDirection;
 
   AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
   AnimationPerformance _toOffsetAnimation; // Started by scrollTo(offset, duration: d)
@@ -65,7 +65,7 @@ abstract class Scrollable extends StatefulComponent {
   double get scrollOffset => _scrollOffset;
 
   Offset get scrollOffsetVector {
-    if (scrollDirection == ViewportScrollDirection.horizontal)
+    if (scrollDirection == ScrollDirection.horizontal)
       return new Offset(scrollOffset, 0.0);
     return new Offset(0.0, scrollOffset);
   }
@@ -176,7 +176,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   bool scrollBy(double scrollDelta) {
-    var newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
+    double newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
     return scrollTo(newScrollOffset);
   }
 
@@ -195,12 +195,12 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   EventDisposition _handleScrollUpdate(sky.GestureEvent event) {
-    scrollBy(scrollDirection == ViewportScrollDirection.horizontal ? event.dx : -event.dy);
+    scrollBy(scrollDirection == ScrollDirection.horizontal ? event.dx : -event.dy);
     return EventDisposition.processed;
   }
 
   EventDisposition _handleFlingStart(sky.GestureEvent event) {
-    double eventVelocity = scrollDirection == ViewportScrollDirection.horizontal
+    double eventVelocity = scrollDirection == ScrollDirection.horizontal
       ? -event.velocityX
       : -event.velocityY;
     _startToEndAnimation(velocity: _velocityForFlingGesture(eventVelocity));
@@ -235,7 +235,7 @@ class ScrollableViewport extends Scrollable {
   ScrollableViewport({
     Key key,
     this.child,
-    ViewportScrollDirection scrollDirection: ViewportScrollDirection.vertical
+    ScrollDirection scrollDirection: ScrollDirection.vertical
   }) : super(key: key, scrollDirection: scrollDirection);
 
   Widget child;
@@ -248,19 +248,19 @@ class ScrollableViewport extends Scrollable {
   ScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
   OverscrollWhenScrollableBehavior get scrollBehavior => super.scrollBehavior;
 
-  double _viewportHeight = 0.0;
-  double _childHeight = 0.0;
+  double _viewportSize = 0.0;
+  double _childSize = 0.0;
   void _handleViewportSizeChanged(Size newSize) {
-    _viewportHeight = newSize.height;
+    _viewportSize = scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
     _updateScrollBehaviour();
   }
   void _handleChildSizeChanged(Size newSize) {
-    _childHeight = newSize.height;
+    _childSize = scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
     _updateScrollBehaviour();
   }
   void _updateScrollBehaviour() {
-    scrollBehavior.contentsSize = _childHeight;
-    scrollBehavior.containerSize = _viewportHeight;
+    scrollBehavior.contentsSize = _childSize;
+    scrollBehavior.containerSize = _viewportSize;
     if (scrollOffset > scrollBehavior.maxScrollOffset)
       settleScrollOffset();
   }
@@ -284,13 +284,24 @@ class ScrollableViewport extends Scrollable {
 /// fixed number of children that you wish to arrange in a block layout and that
 /// might exceed the height of its container (and therefore need to scroll).
 class ScrollableBlock extends Component {
-  ScrollableBlock(this.children, { Key key }) : super(key: key);
+  ScrollableBlock(this.children, {
+    Key key,
+    this.scrollDirection: ScrollDirection.vertical
+  }) : super(key: key);
 
   final List<Widget> children;
+  final ScrollDirection scrollDirection;
+
+  BlockDirection get _direction {
+    if (scrollDirection == ScrollDirection.vertical)
+      return BlockDirection.vertical;
+    return BlockDirection.horizontal;
+  }
 
   Widget build() {
     return new ScrollableViewport(
-      child: new Block(children)
+      scrollDirection: scrollDirection,
+      child: new Block(children, direction: _direction)
     );
   }
 }

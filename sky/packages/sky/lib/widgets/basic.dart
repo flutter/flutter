@@ -20,7 +20,8 @@ import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/framework.dart';
 
 export 'package:sky/base/hit_test.dart' show EventDisposition, combineEventDispositions;
-export 'package:sky/rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims, ViewportScrollDirection;
+export 'package:sky/rendering/block.dart' show BlockDirection;
+export 'package:sky/rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims, ScrollDirection;
 export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/rendering/toggleable.dart' show ValueChanged;
@@ -271,12 +272,12 @@ class Viewport extends OneChildRenderObjectWrapper {
   Viewport({
     Key key,
     this.scrollOffset: Offset.zero,
-    this.scrollDirection: ViewportScrollDirection.vertical,
+    this.scrollDirection: ScrollDirection.vertical,
     Widget child
   }) : super(key: key, child: child);
 
   final Offset scrollOffset;
-  final ViewportScrollDirection scrollDirection;
+  final ScrollDirection scrollDirection;
 
   RenderViewport createNode() => new RenderViewport(scrollOffset: scrollOffset, scrollDirection: scrollDirection);
   RenderViewport get root => super.root;
@@ -371,11 +372,20 @@ class Container extends Component {
 // LAYOUT NODES
 
 class Block extends MultiChildRenderObjectWrapper {
-  Block(List<Widget> children, { Key key })
-    : super(key: key, children: children);
+  Block(List<Widget> children, {
+    Key key,
+    this.direction: BlockDirection.vertical
+  }) : super(key: key, children: children);
 
-  RenderBlock createNode() => new RenderBlock();
+  final BlockDirection direction;
+
+  RenderBlock createNode() => new RenderBlock(direction: direction);
   RenderBlock get root => super.root;
+
+  void syncRenderObject(Widget old) {
+    super.syncRenderObject(old);
+    root.direction = direction;
+  }
 }
 
 class Stack extends MultiChildRenderObjectWrapper {
@@ -417,7 +427,7 @@ class Flex extends MultiChildRenderObjectWrapper {
   final FlexAlignItems alignItems;
   final TextBaseline textBaseline;
 
-  RenderFlex createNode() => new RenderFlex(direction: this.direction);
+  RenderFlex createNode() => new RenderFlex(direction: direction);
   RenderFlex get root => super.root;
 
   void syncRenderObject(Widget old) {

@@ -396,7 +396,7 @@ class TabBar extends Scrollable {
     this.selectedIndex: 0,
     this.onChanged,
     this.isScrollable: false
-  }) : super(key: key, scrollDirection: ViewportScrollDirection.horizontal);
+  }) : super(key: key, scrollDirection: ScrollDirection.horizontal);
 
   Iterable<TabLabel> labels;
   int selectedIndex;
