@@ -52,6 +52,22 @@ class EdgeDims {
         && left == other.left;
   }
 
+  EdgeDims operator+(EdgeDims other) {
+    return new EdgeDims(top + other.top,
+                        right + other.right,
+                        bottom + other.bottom,
+                        left + other.left);
+  }
+
+  EdgeDims operator-(EdgeDims other) {
+    return new EdgeDims(top - other.top,
+                        right - other.right,
+                        bottom - other.bottom,
+                        left - other.left);
+  }
+
+  static const EdgeDims zero = const EdgeDims(0.0, 0.0, 0.0, 0.0);
+
   int get hashCode {
     int value = 373;
     value = 37 * value + top.hashCode;
