@@ -68,9 +68,9 @@ class StockHome extends StatefulComponent {
     });
   }
 
-  void _handleDrawerStatusChange(AnimationStatus status) {
+  void _handleDrawerDismissed() {
     setState(() {
-      _drawerStatus = status;
+      _drawerStatus = AnimationStatus.dismissed;
     });
   }
 
@@ -90,9 +90,9 @@ class StockHome extends StatefulComponent {
     });
   }
 
-  void _handleMenuStatusChanged(AnimationStatus status) {
+  void _handleMenuDismissed() {
     setState(() {
-      _menuStatus = status;
+      _menuStatus = AnimationStatus.dismissed;
     });
   }
 
@@ -119,7 +119,7 @@ class StockHome extends StatefulComponent {
     return new Drawer(
       level: 3,
       showing: _drawerShowing,
-      onStatusChanged: _handleDrawerStatusChange,
+      onDismissed: _handleDrawerDismissed,
       navigator: navigator,
       children: [
         new DrawerHeader(children: [new Text('Stocks')]),
@@ -254,7 +254,7 @@ class StockHome extends StatefulComponent {
       showing: _isSnackBarShowing,
       content: new Text("Stock purchased!"),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
-      onStatusChanged: (status) { setState(() { _snackBarStatus = status; }); }
+      onDismissed: () { setState(() { _snackBarStatus = AnimationStatus.dismissed; }); }
     );
   }
 
@@ -279,7 +279,7 @@ class StockHome extends StatefulComponent {
     overlays.add(new ModalOverlay(
       children: [new StockMenu(
         showing: _menuShowing,
-        onStatusChanged: _handleMenuStatusChanged,
+        onDismissed: _handleMenuDismissed,
         navigator: navigator,
         autorefresh: _autorefresh,
         onAutorefreshChanged: _handleAutorefreshChanged
