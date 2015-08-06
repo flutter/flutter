@@ -8,14 +8,14 @@ class StockMenu extends Component {
   StockMenu({
     Key key,
     this.showing,
-    this.onStatusChanged,
+    this.onDismissed,
     this.navigator,
     this.autorefresh: false,
     this.onAutorefreshChanged
   }) : super(key: key);
 
   final bool showing;
-  final PopupMenuStatusChangedCallback onStatusChanged;
+  final PopupMenuDismissedCallback onDismissed;
   final Navigator navigator;
   final bool autorefresh;
   final ValueChanged onAutorefreshChanged;
@@ -38,7 +38,7 @@ class StockMenu extends Component {
         ],
         level: 4,
         showing: showing,
-        onStatusChanged: onStatusChanged,
+        onDismissed: onDismissed,
         navigator: navigator
       ),
       right: sky.view.paddingRight,

@@ -40,7 +40,7 @@ const Duration _kThemeChangeDuration = const Duration(milliseconds: 200);
 const Point _kOpenPosition = Point.origin;
 const Point _kClosedPosition = const Point(-_kWidth, 0.0);
 
-typedef void DrawerStatusChangedCallback(AnimationStatus status);
+typedef void DrawerDismissedCallback();
 
 class Drawer extends StatefulComponent {
   Drawer({
@@ -48,14 +48,14 @@ class Drawer extends StatefulComponent {
     this.children,
     this.showing: false,
     this.level: 0,
-    this.onStatusChanged,
+    this.onDismissed,
     this.navigator
   }) : super(key: key);
 
   List<Widget> children;
   bool showing;
   int level;
-  DrawerStatusChangedCallback onStatusChanged;
+  DrawerDismissedCallback onDismissed;
   Navigator navigator;
 
   AnimationPerformance _performance;
@@ -80,7 +80,7 @@ class Drawer extends StatefulComponent {
     level = source.level;
     navigator = source.navigator;
     showing = source.showing;
-    onStatusChanged = source.onStatusChanged;
+    onDismissed = source.onDismissed;
   }
 
   Widget build() {
@@ -120,18 +120,13 @@ class Drawer extends StatefulComponent {
   }
 
   void _onDismissed() {
-    _onStatusChanged(AnimationStatus.dismissed);
-  }
-
-  void _onStatusChanged(AnimationStatus status) {
     scheduleMicrotask(() {
-      if (status == AnimationStatus.dismissed &&
-          navigator != null &&
+      if (navigator != null &&
           navigator.currentRoute is RouteState &&
           (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
         navigator.pop();
-      if (onStatusChanged != null)
-        onStatusChanged(status);
+      if (onDismissed != null)
+        onDismissed();
     });
   }
 

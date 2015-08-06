@@ -96,7 +96,7 @@ class FeedFragment extends StatefulComponent {
     return new Drawer(
       showing: _drawerShowing,
       level: 3,
-      onStatusChanged: _handleDrawerStatusChange,
+      onDismissed: _handleDrawerDismissed,
       navigator: navigator,
       children: [
         new DrawerHeader(children: [new Text('Fitness')]),
@@ -132,9 +132,9 @@ class FeedFragment extends StatefulComponent {
     });
   }
 
-  void _handleDrawerStatusChange(AnimationStatus status) {
+  void _handleDrawerDismissed() {
     setState(() {
-      _drawerStatus = status;
+      _drawerStatus = AnimationStatus.dismissed;
     });
   }
 
