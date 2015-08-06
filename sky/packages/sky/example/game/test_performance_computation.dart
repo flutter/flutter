@@ -8,7 +8,7 @@ main() {
 }
 
 const int numSystems = 1000;
-const int numFrames = 100;
+const int numFrames = 1000;
 
 void runTest() {
   int timeStart;
