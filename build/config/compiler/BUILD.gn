@@ -274,27 +274,6 @@ config("compiler") {
 
     ldflags += common_mac_flags
   } else if (is_posix) {
-    # Non-Mac Posix compiler flags setup.
-    # -----------------------------------
-    if (enable_profiling && !is_debug) {
-      # The GYP build spams this define into every compilation unit, as we do
-      # here, but it only appears to be used in base and a couple other places.
-      # TODO(abarth): Should we move this define closer to where it's used?
-      defines += [ "ENABLE_PROFILING" ]
-
-      cflags += [
-        "-fno-omit-frame-pointer",
-        "-g",
-      ]
-
-      if (enable_full_stack_frames_for_profiling) {
-        cflags += [
-          "-fno-inline",
-          "-fno-optimize-sibling-calls",
-        ]
-      }
-    }
-
     # CPU architecture. We may or may not be doing a cross compile now, so for
     # simplicity we always explicitly set the architecture.
     if (current_cpu == "x64") {
@@ -415,6 +394,25 @@ config("compiler") {
       defines += [ "NO_UNWIND_TABLES" ]
     } else {
       cflags += [ "-funwind-tables" ]
+    }
+  }
+
+  if (enable_profiling && !is_debug) {
+    # The GYP build spams this define into every compilation unit, as we do
+    # here, but it only appears to be used in base and a couple other places.
+    # TODO(abarth): Should we move this define closer to where it's used?
+    defines += [ "ENABLE_PROFILING" ]
+
+    cflags += [
+      "-fno-omit-frame-pointer",
+      "-g",
+    ]
+
+    if (enable_full_stack_frames_for_profiling) {
+      cflags += [
+        "-fno-inline",
+        "-fno-optimize-sibling-calls",
+      ]
     }
   }
 
