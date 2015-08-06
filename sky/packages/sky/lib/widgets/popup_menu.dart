@@ -27,21 +27,21 @@ const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
-typedef void PopupMenuStatusChangedCallback(AnimationStatus status);
+typedef void PopupMenuDismissedCallback();
 
 class PopupMenu extends StatefulComponent {
 
   PopupMenu({
     Key key,
     this.showing,
-    this.onStatusChanged,
+    this.onDismissed,
     this.items,
     this.level,
     this.navigator
   }) : super(key: key);
 
   bool showing;
-  PopupMenuStatusChangedCallback onStatusChanged;
+  PopupMenuDismissedCallback onDismissed;
   List<PopupMenuItem> items;
   int level;
   Navigator navigator;
@@ -63,7 +63,6 @@ class PopupMenu extends StatefulComponent {
     if (!showing && source.showing)
       _open();
     showing = source.showing;
-    onStatusChanged = source.onStatusChanged;
     if (level != source.level) {
       level = source.level;
       _updateBoxPainter();
@@ -96,8 +95,8 @@ class PopupMenu extends StatefulComponent {
         navigator.currentRoute is RouteState &&
         (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
       navigator.pop();
-    if (onStatusChanged != null)
-      onStatusChanged(AnimationStatus.dismissed);
+    if (onDismissed != null)
+      onDismissed();
   }
 
   BoxPainter _painter;

@@ -16,7 +16,7 @@ import 'package:sky/widgets/transitions.dart';
 
 export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
-typedef void SnackBarStatusChangedCallback(AnimationStatus status);
+typedef void SnackBarDismissedCallback();
 
 const Duration _kSlideInDuration = const Duration(milliseconds: 200);
 
@@ -46,7 +46,7 @@ class SnackBar extends Component {
     this.content,
     this.actions,
     this.showing,
-    this.onStatusChanged
+    this.onDismissed
   }) : super(key: key) {
     assert(content != null);
   }
@@ -54,11 +54,11 @@ class SnackBar extends Component {
   Widget content;
   List<SnackBarAction> actions;
   bool showing;
-  SnackBarStatusChangedCallback onStatusChanged;
+  SnackBarDismissedCallback onDismissed;
 
   void _onDismissed() {
-    if (onStatusChanged != null)
-      scheduleMicrotask(() { onStatusChanged(AnimationStatus.dismissed); });
+    if (onDismissed != null)
+      scheduleMicrotask(() { onDismissed(); });
   }
 
   Widget build() {
