@@ -1121,27 +1121,27 @@ class RenderBaseline extends RenderShiftedBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}baseline: ${baseline}\nbaselineType: ${baselineType}';
 }
 
-enum ViewportScrollDirection { horizontal, vertical, both }
+enum ScrollDirection { horizontal, vertical, both }
 
 class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
 
   RenderViewport({
     RenderBox child,
     Offset scrollOffset,
-    ViewportScrollDirection scrollDirection: ViewportScrollDirection.vertical
+    ScrollDirection scrollDirection: ScrollDirection.vertical
   }) : _scrollOffset = scrollOffset,
        _scrollDirection = scrollDirection {
     assert(_offsetIsSane(scrollOffset, scrollDirection));
     this.child = child;
   }
 
-  bool _offsetIsSane(Offset offset, ViewportScrollDirection direction) {
+  bool _offsetIsSane(Offset offset, ScrollDirection direction) {
     switch (direction) {
-      case ViewportScrollDirection.both:
+      case ScrollDirection.both:
         return true;
-      case ViewportScrollDirection.horizontal:
+      case ScrollDirection.horizontal:
         return offset.dy == 0.0;
-      case ViewportScrollDirection.vertical:
+      case ScrollDirection.vertical:
         return offset.dx == 0.0;
     }
   }
@@ -1156,9 +1156,9 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     markNeedsPaint();
   }
 
-  ViewportScrollDirection _scrollDirection;
-  ViewportScrollDirection get scrollDirection => _scrollDirection;
-  void set scrollDirection(ViewportScrollDirection value) {
+  ScrollDirection _scrollDirection;
+  ScrollDirection get scrollDirection => _scrollDirection;
+  void set scrollDirection(ScrollDirection value) {
     if (value == _scrollDirection)
       return;
     assert(_offsetIsSane(scrollOffset, value));
@@ -1169,13 +1169,13 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     BoxConstraints innerConstraints;
     switch (scrollDirection) {
-      case ViewportScrollDirection.both:
+      case ScrollDirection.both:
         innerConstraints = new BoxConstraints();
         break;
-      case ViewportScrollDirection.horizontal:
+      case ScrollDirection.horizontal:
         innerConstraints = constraints.heightConstraints();
         break;
-      case ViewportScrollDirection.vertical:
+      case ScrollDirection.vertical:
         innerConstraints = constraints.widthConstraints();
         break;
     }
