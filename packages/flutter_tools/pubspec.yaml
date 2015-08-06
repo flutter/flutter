@@ -1,11 +1,13 @@
+name: sky_tools
+version: 0.0.6
+description: Tools for building Sky applications
+homepage: https://github.com/domokit/sky_tools
 author: Chromium Authors <sky-dev@googlegroups.com>
+
+environment:
+  sdk: ">=1.8.0 <2.0.0"
+
 dependencies:
   args: ^0.13.0
   shelf: ^0.6.2
   shelf_static: ^0.2.3
-description: Tools for building Sky applications
-environment:
-  sdk: ">=1.8.0 <2.0.0"
-homepage: https://github.com/domokit/sky_tools
-name: sky_tools
-version: 0.0.6
