@@ -92,9 +92,9 @@ class SlideTransition extends TransitionBase {
 
   AnimatedValue<Point> position;
 
-  void syncFields(SlideTransition updated) {
-    position = updated.position;
-    super.syncFields(updated);
+  void syncFields(SlideTransition source) {
+    position = source.position;
+    super.syncFields(source);
   }
 
   Widget build() {
@@ -125,9 +125,9 @@ class FadeTransition extends TransitionBase {
 
   AnimatedValue<double> opacity;
 
-  void syncFields(FadeTransition updated) {
-    opacity = updated.opacity;
-    super.syncFields(updated);
+  void syncFields(FadeTransition source) {
+    opacity = source.opacity;
+    super.syncFields(source);
   }
 
   Widget build() {
@@ -156,9 +156,9 @@ class ColorTransition extends TransitionBase {
 
   AnimatedColorValue color;
 
-  void syncFields(ColorTransition updated) {
-    color = updated.color;
-    super.syncFields(updated);
+  void syncFields(ColorTransition source) {
+    color = source.color;
+    super.syncFields(source);
   }
 
   Widget build() {
@@ -192,10 +192,10 @@ class SquashTransition extends TransitionBase {
   AnimatedValue<double> width;
   AnimatedValue<double> height;
 
-  void syncFields(SquashTransition updated) {
-    width = updated.width;
-    height = updated.height;
-    super.syncFields(updated);
+  void syncFields(SquashTransition source) {
+    width = source.width;
+    height = source.height;
+    super.syncFields(source);
   }
 
   Widget build() {
@@ -204,5 +204,42 @@ class SquashTransition extends TransitionBase {
     if (height != null)
       performance.updateVariable(height);
     return new SizedBox(width: _maybe(width), height: _maybe(height), child: child);
+  }
+}
+
+typedef Widget BuilderFunction();
+
+class BuilderTransition extends TransitionBase {
+  BuilderTransition({
+    Key key,
+    this.variables,
+    this.builder,
+    Duration duration,
+    AnimationPerformance performance,
+    Direction direction,
+    Function onDismissed,
+    Function onCompleted,
+    Widget child
+  }) : super(key: key,
+             duration: duration,
+             performance: performance,
+             direction: direction,
+             onDismissed: onDismissed,
+             onCompleted: onCompleted,
+             child: child);
+
+  List<AnimatedValue> variables;
+  BuilderFunction builder;
+
+  void syncFields(BuilderTransition source) {
+    variables = source.variables;
+    builder = source.builder;
+    super.syncFields(source);
+  }
+
+  Widget build() {
+    for (int i = 0; i < variables.length; ++i)
+      performance.updateVariable(variables[i]);
+    return builder();
   }
 }
