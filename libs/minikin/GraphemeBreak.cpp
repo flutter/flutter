@@ -22,6 +22,48 @@
 
 namespace android {
 
+int32_t tailoredGraphemeClusterBreak(uint32_t c) {
+    // Characters defined as Control that we want to treat them as Extend.
+    // These are curated manually.
+    if (c == 0x00AD                         // SHY
+            || c == 0x061C                  // ALM
+            || c == 0x180E                  // MONGOLIAN VOWEL SEPARATOR
+            || c == 0x200B                  // ZWSP
+            || c == 0x200E                  // LRM
+            || c == 0x200F                  // RLM
+            || (0x202A <= c && c <= 0x202E) // LRE, RLE, PDF, LRO, RLO
+            || ((c | 0xF) == 0x206F)        // WJ, invisible math operators, LRI, RLI, FSI, PDI,
+                                            // and the deprecated invisible format controls
+            || c == 0xFEFF                  // BOM
+            || ((c | 0x7F) == 0xE007F))     // recently undeprecated tag characters in Plane 14
+        return U_GCB_EXTEND;
+    // UTC-approved characters for the Prepend class, per
+    // http://www.unicode.org/L2/L2015/15183r-graph-cluster-brk.txt
+    // These should be removed when our copy of ICU gets updated to Unicode 9.0 (~2016 or 2017).
+    else if ((0x0600 <= c && c <= 0x0605) // Arabic subtending marks
+            || c == 0x06DD                // ARABIC SUBTENDING MARK
+            || c == 0x070F                // SYRIAC ABBREVIATION MARK
+            || c == 0x0D4E                // MALAYALAM LETTER DOT REPH
+            || c == 0x110BD               // KAITHI NUMBER SIGN
+            || c == 0x111C2               // SHARADA SIGN JIHVAMULIYA
+            || c == 0x111C3)              // SHARADA SIGN UPADHMANIYA
+        return U_GCB_PREPEND;
+    // THAI CHARACTER SARA AM is treated as a normal letter by most other implementations: they
+    // allow a grapheme break before it.
+    else if (c == 0x0E33)
+        return U_GCB_OTHER;
+    else
+        return u_getIntPropertyValue(c, UCHAR_GRAPHEME_CLUSTER_BREAK);
+}
+
+// Returns true for all characters whose IndicSyllabicCategory is Pure_Killer.
+// From http://www.unicode.org/Public/8.0.0/ucd/IndicSyllabicCategory.txt
+bool isPureKiller(uint32_t c) {
+    return (c == 0x0E3A || c == 0x0E4E || c == 0x0F84 || c == 0x103A || c == 0x1714 || c == 0x1734
+            || c == 0x17D1 || c == 0x1BAA || c == 0x1BF2 || c == 0x1BF3 || c == 0xA806
+            || c == 0xA953 || c == 0xABED || c == 0x11134 || c == 0x112EA || c == 0x1172B);
+}
+
 bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t count,
         size_t offset) {
     // This implementation closely follows Unicode Standard Annex #29 on
@@ -42,8 +84,8 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     size_t offset_back = offset;
     U16_PREV(buf, start, offset_back, c1);
     U16_NEXT(buf, offset, start + count, c2);
-    int32_t p1 = u_getIntPropertyValue(c1, UCHAR_GRAPHEME_CLUSTER_BREAK);
-    int32_t p2 = u_getIntPropertyValue(c2, UCHAR_GRAPHEME_CLUSTER_BREAK);
+    int32_t p1 = tailoredGraphemeClusterBreak(c1);
+    int32_t p2 = tailoredGraphemeClusterBreak(c2);
     // Rule GB3, CR x LF
     if (p1 == U_GCB_CR && p2 == U_GCB_LF) {
         return false;
@@ -54,13 +96,6 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     }
     // Rule GB5, / (Control | CR | LF)
     if (p2 == U_GCB_CONTROL || p2 == U_GCB_CR || p2 == U_GCB_LF) {
-        // exclude zero-width control characters from breaking (tailoring of UAX #29)
-        if (c2 == 0x00ad
-                || (c2 >= 0x200b && c2 <= 0x200f)
-                || (c2 >= 0x2028 && c2 <= 0x202e)
-                || (c2 >= 0x2060 && c2 <= 0x206f)) {
-            return false;
-        }
         return true;
     }
     // Rule GB6, L x ( L | V | LV | LVT )
@@ -76,20 +111,31 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
         return false;
     }
     // Rule GB8a, Regional_Indicator x Regional_Indicator
+    //
+    // Known limitation: This is overly conservative, and returns no grapheme breaks between two
+    // flags, such as in the character sequence "U+1F1FA U+1F1F8 [potential break] U+1F1FA U+1F1F8".
+    // Also, it assumes that all combinations of Regional Indicators produce a flag, where they
+    // don't.
+    //
+    // There is no easy solution for doing this correctly, except for querying the font and doing
+    // some lookback.
     if (p1 == U_GCB_REGIONAL_INDICATOR && p2 == U_GCB_REGIONAL_INDICATOR) {
         return false;
     }
-    // Rule GB9, x Extend; Rule GB9a, x SpacingMark
-    if (p2 == U_GCB_EXTEND || p2 == U_GCB_SPACING_MARK) {
-        if (c2 == 0xe33) {
-            // most other implementations break THAI CHARACTER SARA AM
-            // (tailoring of UAX #29)
-            return true;
-        }
+    // Rule GB9, x Extend; Rule GB9a, x SpacingMark; Rule GB9b, Prepend x
+    if (p2 == U_GCB_EXTEND || p2 == U_GCB_SPACING_MARK || p1 == U_GCB_PREPEND) {
         return false;
     }
     // Cluster indic syllables together (tailoring of UAX #29)
+    // Known limitation: this is overly conservative, and assumes that the virama may form a
+    // conjunct with the following letter, which doesn't always happen.
+    //
+    // There is no easy solution to do this correctly. Even querying the font does not help (with
+    // the current font technoloies), since the font may be creating the conjunct using multiple
+    // glyphs, while the user may be perceiving that sequence of glyphs as one conjunct or one
+    // letter.
     if (u_getIntPropertyValue(c1, UCHAR_CANONICAL_COMBINING_CLASS) == 9  // virama
+            && !isPureKiller(c1)
             && u_getIntPropertyValue(c2, UCHAR_GENERAL_CATEGORY) == U_OTHER_LETTER) {
         return false;
     }
