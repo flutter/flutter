@@ -4,6 +4,7 @@
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 import 'package:sky/mojo/shell.dart' as shell;
+export 'package:mojo_services/keyboard/keyboard.mojom.dart';
 
 class _KeyboardConnection {
 
@@ -29,14 +30,14 @@ class Keyboard {
 
   KeyboardHandle _currentHandle;
 
-  KeyboardHandle show(KeyboardClientStub stub) {
+  KeyboardHandle show(KeyboardClientStub stub, int keyboardType) {
     assert(stub != null);
     if (_currentHandle != null) {
       if (_currentHandle.stub == stub)
         return _currentHandle;
       _currentHandle.release();
     }
-    _currentHandle = new KeyboardHandle._show(this, stub);
+    _currentHandle = new KeyboardHandle._show(this, stub, keyboardType);
     return _currentHandle;
   }
 
@@ -44,8 +45,8 @@ class Keyboard {
 
 class KeyboardHandle {
 
-  KeyboardHandle._show(Keyboard keyboard, this.stub) : _keyboard = keyboard {
-    _keyboard.service.show(stub);
+  KeyboardHandle._show(Keyboard keyboard, this.stub, int keyboardType) : _keyboard = keyboard {
+    _keyboard.service.show(stub, keyboardType);
     _attached = true;
   }
 

@@ -6,8 +6,8 @@ homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/sky
 dependencies:
   cassowary: ^0.1.7
   material_design_icons: ^0.0.2
-  mojo_services: 0.0.21
-  mojo: 0.0.21
+  mojo_services: 0.0.22
+  mojo: 0.0.22
   newton: ^0.1.2
   sky_engine: ^0.0.6
   sky_services: ^0.0.6
