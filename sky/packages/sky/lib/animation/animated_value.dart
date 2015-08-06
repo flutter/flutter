@@ -15,15 +15,15 @@ abstract class AnimatedVariable {
   String toString();
 }
 
-abstract class CurvedVariable implements AnimatedVariable {
-  CurvedVariable({this.interval, this.reverseInterval, this.curve, this.reverseCurve});
+class AnimationTiming {
+  AnimationTiming({this.interval, this.reverseInterval, this.curve, this.reverseCurve});
 
   Interval interval;
   Interval reverseInterval;
   Curve curve;
   Curve reverseCurve;
 
-  double _transform(double t, Direction direction) {
+  double transform(double t, Direction direction) {
     Interval interval = _getInterval(direction);
     if (interval != null)
       t = interval.transform(t);
@@ -48,7 +48,7 @@ abstract class CurvedVariable implements AnimatedVariable {
   }
 }
 
-class AnimatedValue<T extends dynamic> extends CurvedVariable {
+class AnimatedValue<T extends dynamic> extends AnimationTiming implements AnimatedVariable {
   AnimatedValue(this.begin, { this.end, Interval interval, Curve curve, Curve reverseCurve })
     : super(interval: interval, curve: curve, reverseCurve: reverseCurve) {
     value = begin;
@@ -62,7 +62,7 @@ class AnimatedValue<T extends dynamic> extends CurvedVariable {
 
   void setProgress(double t, Direction direction) {
     if (end != null) {
-      t = _transform(t, direction);
+      t = transform(t, direction);
       value = (t == 1.0) ? end : lerp(t);
     }
   }
@@ -70,14 +70,14 @@ class AnimatedValue<T extends dynamic> extends CurvedVariable {
   String toString() => 'AnimatedValue(begin=$begin, end=$end, value=$value)';
 }
 
-class AnimatedList extends CurvedVariable {
+class AnimatedList extends AnimationTiming implements AnimatedVariable {
   List<AnimatedVariable> variables;
 
   AnimatedList(this.variables, { Interval interval, Curve curve, Curve reverseCurve })
     : super(interval: interval, curve: curve, reverseCurve: reverseCurve);
 
   void setProgress(double t, Direction direction) {
-    double adjustedTime = _transform(t, direction);
+    double adjustedTime = transform(t, direction);
     for (AnimatedVariable variable in variables)
       variable.setProgress(adjustedTime, direction);
   }
