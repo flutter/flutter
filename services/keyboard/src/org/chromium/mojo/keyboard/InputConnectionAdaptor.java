@@ -4,7 +4,6 @@
 
 package org.chromium.mojo.keyboard;
 
-import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
@@ -25,7 +24,6 @@ public class InputConnectionAdaptor extends BaseInputConnection {
         super(view, true);
         assert client != null;
         mClient = client;
-        outAttrs.inputType = InputType.TYPE_CLASS_TEXT;
         outAttrs.initialSelStart = -1;
         outAttrs.initialSelEnd = -1;
     }

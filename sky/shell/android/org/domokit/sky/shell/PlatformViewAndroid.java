@@ -17,6 +17,7 @@ import android.view.inputmethod.InputConnection;
 import org.chromium.base.JNINamespace;
 import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.keyboard.KeyboardServiceImpl;
+import org.chromium.mojo.keyboard.KeyboardServiceState;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
@@ -40,6 +41,7 @@ public class PlatformViewAndroid extends SurfaceView
     private final SurfaceHolder.Callback mSurfaceCallback;
     private GestureProvider mGestureProvider;
     private final EdgeDims mPadding;
+    private final KeyboardServiceState mKeyboardState;
 
     /**
      * Dimensions in each of the four cardinal directions.
@@ -95,7 +97,10 @@ public class PlatformViewAndroid extends SurfaceView
         getHolder().addCallback(mSurfaceCallback);
 
         mGestureProvider = new GestureProvider(context, this);
-        KeyboardServiceImpl.setActiveView(this);
+
+        // TODO(eseidel): We need per-view services!
+        mKeyboardState = new KeyboardServiceState(this);
+        KeyboardServiceImpl.setViewState(mKeyboardState);
     }
 
     SkyEngine getEngine() {
@@ -125,7 +130,7 @@ public class PlatformViewAndroid extends SurfaceView
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        return KeyboardServiceImpl.createInputConnection(outAttrs);
+        return mKeyboardState.createInputConnection(outAttrs);
     }
 
     private int getTypeForAction(int maskedAction) {

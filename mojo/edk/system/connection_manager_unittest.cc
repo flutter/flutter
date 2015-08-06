@@ -464,19 +464,80 @@ TEST_F(ConnectionManagerTest, ConnectSlavesTwice) {
 
   h1.reset();
   h2.reset();
-  // TODO(vtl): FIXME -- this will break when I implemented
-  // SUCCESS_CONNECT_REUSE_CONNECTION.
   ProcessIdentifier second_peer2 = kInvalidProcessIdentifier;
-  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_REUSE_CONNECTION,
             slave2.Connect(connection_id, &second_peer2, &is_first, &h2));
   EXPECT_EQ(peer2, second_peer2);
   EXPECT_TRUE(is_first);
+  EXPECT_FALSE(h2.is_valid());
   ProcessIdentifier second_peer1 = kInvalidProcessIdentifier;
-  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_REUSE_CONNECTION,
             slave1.Connect(connection_id, &second_peer1, &is_first, &h1));
   EXPECT_EQ(peer1, second_peer1);
   EXPECT_FALSE(is_first);
+  EXPECT_FALSE(h1.is_valid());
+
+  slave2.Shutdown();
+  slave1.Shutdown();
+  master.Shutdown();
+}
+
+TEST_F(ConnectionManagerTest, OverlappingSlaveConnects) {
+  MasterConnectionManager master(platform_support());
+  master.Init(base::MessageLoop::current()->task_runner(),
+              &master_process_delegate());
+
+  MockSlaveProcessDelegate slave1_process_delegate;
+  SlaveConnectionManager slave1(platform_support());
+  ProcessIdentifier slave1_id =
+      ConnectSlave(&master, &slave1_process_delegate, &slave1, "slave1");
+  EXPECT_TRUE(IsValidSlaveProcessIdentifier(slave1_id));
+
+  MockSlaveProcessDelegate slave2_process_delegate;
+  SlaveConnectionManager slave2(platform_support());
+  ProcessIdentifier slave2_id =
+      ConnectSlave(&master, &slave2_process_delegate, &slave2, "slave2");
+  EXPECT_TRUE(IsValidSlaveProcessIdentifier(slave2_id));
+  EXPECT_NE(slave1_id, slave2_id);
+
+  ConnectionIdentifier connection_id1 = master.GenerateConnectionIdentifier();
+  EXPECT_TRUE(slave1.AllowConnect(connection_id1));
+  EXPECT_TRUE(slave2.AllowConnect(connection_id1));
+
+  ConnectionIdentifier connection_id2 = master.GenerateConnectionIdentifier();
+  EXPECT_TRUE(slave1.AllowConnect(connection_id2));
+  EXPECT_TRUE(slave2.AllowConnect(connection_id2));
+
+  ProcessIdentifier peer1 = kInvalidProcessIdentifier;
+  bool is_first = false;
+  embedder::ScopedPlatformHandle h1;
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave1.Connect(connection_id1, &peer1, &is_first, &h1));
+  EXPECT_EQ(slave2_id, peer1);
+  EXPECT_TRUE(is_first);
+  ProcessIdentifier peer2 = kInvalidProcessIdentifier;
+  embedder::ScopedPlatformHandle h2;
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
+            slave2.Connect(connection_id2, &peer2, &is_first, &h2));
+  EXPECT_EQ(slave1_id, peer2);
+  EXPECT_TRUE(is_first);
+
   EXPECT_TRUE(ArePlatformHandlesConnected(h1.get(), h2.get()));
+
+  h1.reset();
+  h2.reset();
+  ProcessIdentifier second_peer1 = kInvalidProcessIdentifier;
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_REUSE_CONNECTION,
+            slave1.Connect(connection_id2, &second_peer1, &is_first, &h1));
+  EXPECT_EQ(peer1, second_peer1);
+  EXPECT_FALSE(is_first);
+  EXPECT_FALSE(h1.is_valid());
+  ProcessIdentifier second_peer2 = kInvalidProcessIdentifier;
+  EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_REUSE_CONNECTION,
+            slave2.Connect(connection_id1, &second_peer2, &is_first, &h2));
+  EXPECT_EQ(peer2, second_peer2);
+  EXPECT_FALSE(is_first);
+  EXPECT_FALSE(h2.is_valid());
 
   slave2.Shutdown();
   slave1.Shutdown();

@@ -53,7 +53,8 @@ def run_apptest(shell, shell_args, apptest_url, apptest_args, timeout,
 
   _logger.debug("Starting: " + command_line)
   start_time = time.time()
-  (exit_code, output, did_time_out) = shell.RunAndGetOutput(arguments, timeout)
+  (exit_code, output, did_time_out) = shell.run_and_get_output(arguments,
+                                                               timeout)
   run_time = time.time() - start_time
   _logger.debug("Completed: " + command_line)
 

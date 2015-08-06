@@ -18,6 +18,7 @@ import time
 
 from devtoolslib.http_server import start_http_server
 from devtoolslib.shell import Shell
+from devtoolslib.utils import overrides
 
 
 # Tags used by mojo shell Java logging.
@@ -81,7 +82,7 @@ class AndroidShell(Shell):
     self.additional_logcat_tags = logcat_tags
     self.verbose_pipe = verbose_pipe if verbose_pipe else open(os.devnull, 'w')
 
-  def _AdbCommand(self, args):
+  def _adb_command(self, args):
     """Forms an adb command from the given arguments, prepending the adb path
     and adding a target device specifier, if needed.
     """
@@ -91,18 +92,18 @@ class AndroidShell(Shell):
     adb_command.extend(args)
     return adb_command
 
-  def _ReadFifo(self, fifo_path, pipe, on_fifo_closed, max_attempts=5):
+  def _read_fifo(self, fifo_path, pipe, on_fifo_closed, max_attempts=5):
     """Reads |fifo_path| on the device and write the contents to |pipe|.
 
     Calls |on_fifo_closed| when the fifo is closed. This method will try to find
     the path up to |max_attempts|, waiting 1 second between each attempt. If it
     cannot find |fifo_path|, a exception will be raised.
     """
-    fifo_command = self._AdbCommand(
+    fifo_command = self._adb_command(
         ['shell', 'test -e "%s"; echo $?' % fifo_path])
 
-    def Run():
-      def _WaitForFifo():
+    def _run():
+      def _wait_for_fifo():
         for _ in xrange(max_attempts):
           if subprocess.check_output(fifo_command)[0] == '0':
             return
@@ -110,23 +111,23 @@ class AndroidShell(Shell):
         if on_fifo_closed:
           on_fifo_closed()
         raise Exception("Unable to find fifo.")
-      _WaitForFifo()
+      _wait_for_fifo()
       stdout_cat = subprocess.Popen(
-          self._AdbCommand(['shell', 'cat', fifo_path]), stdout=pipe)
+          self._adb_command(['shell', 'cat', fifo_path]), stdout=pipe)
       atexit.register(_exit_if_needed, stdout_cat)
       stdout_cat.wait()
       if on_fifo_closed:
         on_fifo_closed()
 
-    thread = threading.Thread(target=Run, name="StdoutRedirector")
+    thread = threading.Thread(target=_run, name="StdoutRedirector")
     thread.start()
 
-  def _FindAvailableDevicePort(self):
+  def _find_available_device_port(self):
     netstat_output = subprocess.check_output(
-        self._AdbCommand(['shell', 'netstat']))
+        self._adb_command(['shell', 'netstat']))
     return _find_available_port(netstat_output)
 
-  def _ForwardDevicePortToHost(self, device_port, host_port):
+  def _forward_device_port_to_host(self, device_port, host_port):
     """Maps the device port to the host port. If |device_port| is 0, a random
     available port is chosen.
 
@@ -138,22 +139,22 @@ class AndroidShell(Shell):
     # value), but if we can run adb as root, we have to do it now, because
     # restarting adbd as root clears any port mappings. See
     # https://github.com/domokit/devtools/issues/20.
-    self._RunAdbAsRoot()
+    self._run_adb_as_root()
 
     if device_port == 0:
       # TODO(ppi): Should we have a retry loop to handle the unlikely races?
-      device_port = self._FindAvailableDevicePort()
-    subprocess.check_call(self._AdbCommand([
+      device_port = self._find_available_device_port()
+    subprocess.check_call(self._adb_command([
         "reverse", "tcp:%d" % device_port, "tcp:%d" % host_port]))
 
-    def _UnmapPort():
-      unmap_command = self._AdbCommand([
+    def _unmap_port():
+      unmap_command = self._adb_command([
           "reverse", "--remove", "tcp:%d" % device_port])
       subprocess.Popen(unmap_command)
-    atexit.register(_UnmapPort)
+    atexit.register(_unmap_port)
     return device_port
 
-  def _ForwardHostPortToDevice(self, host_port, device_port):
+  def _forward_host_port_to_device(self, host_port, device_port):
     """Maps the host port to the device port. If |host_port| is 0, a random
     available port is chosen.
 
@@ -161,30 +162,30 @@ class AndroidShell(Shell):
       The host port.
     """
     assert device_port
-    self._RunAdbAsRoot()
+    self._run_adb_as_root()
 
     if host_port == 0:
       # TODO(ppi): Should we have a retry loop to handle the unlikely races?
       host_port = _find_available_host_port()
-    subprocess.check_call(self._AdbCommand([
+    subprocess.check_call(self._adb_command([
         "forward", 'tcp:%d' % host_port, 'tcp:%d' % device_port]))
 
-    def _UnmapPort():
-      unmap_command = self._AdbCommand([
+    def _unmap_port():
+      unmap_command = self._adb_command([
           "forward", "--remove", "tcp:%d" % device_port])
       subprocess.Popen(unmap_command)
-    atexit.register(_UnmapPort)
+    atexit.register(_unmap_port)
     return host_port
 
-  def _RunAdbAsRoot(self):
+  def _run_adb_as_root(self):
     if self.adb_running_as_root is not None:
       return self.adb_running_as_root
 
     if ('cannot run as root' not in subprocess.check_output(
-        self._AdbCommand(['root']))):
+        self._adb_command(['root']))):
       # Wait for adbd to restart.
       subprocess.check_call(
-          self._AdbCommand(['wait-for-device']),
+          self._adb_command(['wait-for-device']),
           stdout=self.verbose_pipe)
       self.adb_running_as_root = True
     else:
@@ -192,13 +193,13 @@ class AndroidShell(Shell):
 
     return self.adb_running_as_root
 
-  def _IsShellPackageInstalled(self):
+  def _is_shell_package_installed(self):
     # Adb should print one line if the package is installed and return empty
     # string otherwise.
-    return len(subprocess.check_output(self._AdbCommand([
+    return len(subprocess.check_output(self._adb_command([
         'shell', 'pm', 'list', 'packages', _MOJO_SHELL_PACKAGE_NAME]))) > 0
 
-  def CheckDevice(self):
+  def check_device(self):
     """Verifies if the device configuration allows adb to run.
 
     If a target device was indicated in the constructor, it checks that the
@@ -211,7 +212,7 @@ class AndroidShell(Shell):
       |result| is False and None otherwise.
     """
     adb_devices_output = subprocess.check_output(
-        self._AdbCommand(['devices']))
+        self._adb_command(['devices']))
     # Skip the header line, strip empty lines at the end.
     device_list = [line.strip() for line in adb_devices_output.split('\n')[1:]
                    if line.strip()]
@@ -235,7 +236,7 @@ class AndroidShell(Shell):
 
     return True, None
 
-  def InstallApk(self, shell_apk_path):
+  def install_apk(self, shell_apk_path):
     """Installs the apk on the device.
 
     This method computes checksum of the APK and skips the installation if the
@@ -248,14 +249,14 @@ class AndroidShell(Shell):
     device_sha1_path = '/sdcard/%s/%s.sha1' % (_MOJO_SHELL_PACKAGE_NAME,
                                                'MojoShell')
     apk_sha1 = hashlib.sha1(open(shell_apk_path, 'rb').read()).hexdigest()
-    device_apk_sha1 = subprocess.check_output(self._AdbCommand([
+    device_apk_sha1 = subprocess.check_output(self._adb_command([
         'shell', 'cat', device_sha1_path]))
     do_install = (apk_sha1 != device_apk_sha1 or
-                  not self._IsShellPackageInstalled())
+                  not self._is_shell_package_installed())
 
     if do_install:
       subprocess.check_call(
-          self._AdbCommand(['install', '-r', shell_apk_path, '-i',
+          self._adb_command(['install', '-r', shell_apk_path, '-i',
                             _MOJO_SHELL_PACKAGE_NAME]),
           stdout=self.verbose_pipe)
 
@@ -263,15 +264,15 @@ class AndroidShell(Shell):
       with tempfile.NamedTemporaryFile() as fp:
         fp.write(apk_sha1)
         fp.flush()
-        subprocess.check_call(self._AdbCommand(['push', fp.name,
+        subprocess.check_call(self._adb_command(['push', fp.name,
                                                 device_sha1_path]),
                               stdout=self.verbose_pipe)
     else:
-      # To ensure predictable state after running InstallApk(), we need to stop
+      # To ensure predictable state after running install_apk(), we need to stop
       # the shell here, as this is what "adb install" implicitly does.
-      self.StopShell()
+      self.stop_shell()
 
-  def StartShell(self,
+  def start_shell(self,
                  arguments,
                  stdout=None,
                  on_application_stop=None):
@@ -284,12 +285,12 @@ class AndroidShell(Shell):
       stdout: Valid argument for subprocess.Popen() or None.
     """
     if not self.stop_shell_registered:
-      atexit.register(self.StopShell)
+      atexit.register(self.stop_shell)
       self.stop_shell_registered = True
 
     STDOUT_PIPE = "/data/data/%s/stdout.fifo" % _MOJO_SHELL_PACKAGE_NAME
 
-    cmd = self._AdbCommand(['shell', 'am', 'start',
+    cmd = self._adb_command(['shell', 'am', 'start',
                             '-S',
                             '-a', 'android.intent.action.VIEW',
                             '-n', '%s/.MojoShellActivity' %
@@ -299,13 +300,13 @@ class AndroidShell(Shell):
     if stdout or on_application_stop:
       # We need to run as root to access the fifo file we use for stdout
       # redirection.
-      if self._RunAdbAsRoot():
+      if self._run_adb_as_root():
         # Remove any leftover fifo file after the previous run.
-        subprocess.check_call(self._AdbCommand(
+        subprocess.check_call(self._adb_command(
             ['shell', 'rm', '-f', STDOUT_PIPE]))
 
         parameters.append('--fifo-path=%s' % STDOUT_PIPE)
-        self._ReadFifo(STDOUT_PIPE, stdout, on_application_stop)
+        self._read_fifo(STDOUT_PIPE, stdout, on_application_stop)
       else:
         _logger.warning("Running without root access, full stdout of the "
                         "shell won't be available.")
@@ -319,18 +320,18 @@ class AndroidShell(Shell):
 
     subprocess.check_call(cmd, stdout=self.verbose_pipe)
 
-  def StopShell(self):
+  def stop_shell(self):
     """Stops the mojo shell."""
-    subprocess.check_call(self._AdbCommand(['shell',
+    subprocess.check_call(self._adb_command(['shell',
                                             'am',
                                             'force-stop',
                                             _MOJO_SHELL_PACKAGE_NAME]))
 
-  def CleanLogs(self):
+  def clean_logs(self):
     """Cleans the logs on the device."""
-    subprocess.check_call(self._AdbCommand(['logcat', '-c']))
+    subprocess.check_call(self._adb_command(['logcat', '-c']))
 
-  def ShowLogs(self, include_native_logs=True):
+  def show_logs(self, include_native_logs=True):
     """Displays the log for the mojo shell.
 
     Returns:
@@ -342,19 +343,19 @@ class AndroidShell(Shell):
     if self.additional_logcat_tags is not None:
       tags.extend(self.additional_logcat_tags.split(","))
     logcat = subprocess.Popen(
-        self._AdbCommand(['logcat', '-s', ' '.join(tags)]),
+        self._adb_command(['logcat', '-s', ' '.join(tags)]),
         stdout=sys.stdout)
     atexit.register(_exit_if_needed, logcat)
     return logcat
 
-  def ForwardObservatoryPorts(self):
+  def forward_observatory_ports(self):
     """Forwards the ports used by the dart observatories to the host machine.
     """
-    logcat = subprocess.Popen(self._AdbCommand(['logcat']),
+    logcat = subprocess.Popen(self._adb_command(['logcat']),
                               stdout=subprocess.PIPE)
     atexit.register(_exit_if_needed, logcat)
 
-    def _ForwardObservatoriesAsNeeded():
+    def _forward_observatories_as_needed():
       while True:
         line = logcat.stdout.readline()
         if not line:
@@ -363,80 +364,49 @@ class AndroidShell(Shell):
                           line)
         if match:
           device_port = int(match.group(1))
-          host_port = self._ForwardHostPortToDevice(0, device_port)
+          host_port = self._forward_host_port_to_device(0, device_port)
           print ("Dart observatory available at the host at http://127.0.0.1:%d"
                  % host_port)
 
-    logcat_watch_thread = threading.Thread(target=_ForwardObservatoriesAsNeeded)
+    logcat_watch_thread = threading.Thread(
+        target=_forward_observatories_as_needed)
     logcat_watch_thread.start()
 
-  def ServeLocalDirectory(self, local_dir_path, port=0,
-                          additional_mappings=None):
-    """Serves the content of the local (host) directory, making it available to
-    the shell under the url returned by the function.
-
-    The server will run on a separate thread until the program terminates. The
-    call returns immediately.
-
-    Args:
-      local_dir_path: path to the directory to be served
-      port: port at which the server will be available to the shell
-      additional_mappings: List of tuples (prefix, local_base_path) mapping
-          URLs that start with |prefix| to local directory at |local_base_path|.
-          The prefixes should skip the leading slash.
-
-    Returns:
-      The url that the shell can use to access the content of |local_dir_path|.
-    """
+  @overrides(Shell)
+  def serve_local_directory(self, local_dir_path, port=0):
     assert local_dir_path
-    server_address = start_http_server(local_dir_path, host_port=port,
-                                       additional_mappings=additional_mappings)
+    mappings = [('', [local_dir_path])]
+    server_address = start_http_server(mappings, host_port=port)
 
-    return 'http://127.0.0.1:%d/' % self._ForwardDevicePortToHost(
+    return 'http://127.0.0.1:%d/' % self._forward_device_port_to_host(
         port, server_address[1])
 
-  def ForwardHostPortToShell(self, host_port):
-    """Forwards a port on the host machine to the same port wherever the shell
-    is running.
+  @overrides(Shell)
+  def serve_local_directories(self, mappings, port=0):
+    assert mappings
+    server_address = start_http_server(mappings, host_port=port)
 
-    This is a no-op if the shell is running locally.
-    """
-    self._ForwardHostPortToDevice(host_port, host_port)
+    return 'http://127.0.0.1:%d/' % self._forward_device_port_to_host(
+        port, server_address[1])
 
-  def Run(self, arguments):
-    """Runs the shell with given arguments until shell exits, passing the stdout
-    mingled with stderr produced by the shell onto the stdout.
+  @overrides(Shell)
+  def forward_host_port_to_shell(self, host_port):
+    self._forward_host_port_to_device(host_port, host_port)
 
-    Returns:
-      Exit code retured by the shell or None if the exit code cannot be
-      retrieved.
-    """
-    self.CleanLogs()
-    self.ForwardObservatoryPorts()
+  @overrides(Shell)
+  def run(self, arguments):
+    self.clean_logs()
+    self.forward_observatory_ports()
 
     # If we are running as root, don't carry over the native logs from logcat -
     # we will have these in the stdout.
-    p = self.ShowLogs(include_native_logs=(not self._RunAdbAsRoot()))
-    self.StartShell(arguments, sys.stdout, p.terminate)
+    p = self.show_logs(include_native_logs=(not self._run_adb_as_root()))
+    self.start_shell(arguments, sys.stdout, p.terminate)
     p.wait()
     return None
 
-  def RunAndGetOutput(self, arguments, timeout=None):
-    """Runs the shell with given arguments until shell exits and returns the
-    output.
-
-    Args:
-      arguments: list of arguments for the shell
-      timeout: maximum running time in seconds, after which the shell will be
-          terminated
-
-    Returns:
-      A tuple of (return_code, output, did_time_out). |return_code| is the exit
-      code returned by the shell or None if the exit code cannot be retrieved.
-      |output| is the stdout mingled with the stderr produced by the shell.
-      |did_time_out| is True iff the shell was terminated because it exceeded
-      the |timeout| and False otherwise.
-    """
+  @overrides(Shell)
+  def run_and_get_output(self, arguments, timeout=None):
     class Results:
       """Workaround for Python scoping rules that prevent assigning to variables
       from the outer scope.
@@ -447,7 +417,7 @@ class AndroidShell(Shell):
       (r, w) = os.pipe()
       with os.fdopen(r, "r") as rf:
         with os.fdopen(w, "w") as wf:
-          self.StartShell(arguments, wf, wf.close)
+          self.start_shell(arguments, wf, wf.close)
           Results.output = rf.read()
 
     run_thread = threading.Thread(target=do_run)
@@ -455,6 +425,6 @@ class AndroidShell(Shell):
     run_thread.join(timeout)
 
     if run_thread.is_alive():
-      self.StopShell()
+      self.stop_shell()
       return None, Results.output, True
     return None, Results.output, False

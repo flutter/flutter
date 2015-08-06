@@ -124,11 +124,11 @@ template("dartzip_package") {
       "--no-hints",
     ]
 
-    deps = [
+    public_deps = [
       ":${package_target_name}_package",
     ]
     if (defined(invoker.deps)) {
-      deps += invoker.deps
+      deps = invoker.deps
     }
 
     if (defined(invoker.datadeps)) {

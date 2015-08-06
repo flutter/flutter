@@ -9,6 +9,7 @@ dart_pkg("mojom") {
   sources = [
     "CHANGELOG.md",
     "README.md",
+    "lib/src/options.dart",
     "lib/src/utils.dart",
     "pubspec.yaml",
   ]

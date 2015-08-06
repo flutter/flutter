@@ -7,8 +7,8 @@ import argparse
 import logging
 import sys
 
-from devtoolslib import paths
 from devtoolslib import shell_arguments
+from devtoolslib import shell_config
 
 _USAGE = ("mojo_run "
          "[--args-for=<mojo-app>] "
@@ -16,7 +16,8 @@ _USAGE = ("mojo_run "
          "[--enable-external-applications] "
          "[--disable-cache] "
          "[--enable-multiprocess] "
-         "[<mojo-app>] "
+         "[--wait-for-debugger] "
+         "[--sky <mojo-app>|<mojo-app>] "
          """
 
 A <mojo-app> is a Mojo URL or a Mojo URL and arguments within quotes.
@@ -46,7 +47,7 @@ def _configure_debugger(shell):
     Arguments that need to be appended to the shell argument list in order to
     run with the debugger.
   """
-  shell.ForwardHostPortToShell(_MOJO_DEBUGGER_PORT)
+  shell.forward_host_port_to_shell(_MOJO_DEBUGGER_PORT)
   return ['mojo:debugger %d' % _MOJO_DEBUGGER_PORT]
 
 
@@ -54,59 +55,21 @@ def main():
   logging.basicConfig()
 
   parser = argparse.ArgumentParser(usage=_USAGE, description=_DESCRIPTION)
+  shell_config.add_shell_arguments(parser)
 
-  # Arguments allowing to indicate the configuration we are targeting when
-  # running within a Chromium-like checkout. These will go away once we have
-  # devtools config files, see https://github.com/domokit/devtools/issues/28.
-  chromium_config_group = parser.add_argument_group('Chromium configuration',
-      'These arguments allow to infer paths to tools and build results '
-      'when running withing a Chromium-like checkout')
-  debug_group = chromium_config_group.add_mutually_exclusive_group()
-  debug_group.add_argument('--debug', help='Debug build (default)',
-                           default=True, action='store_true')
-  debug_group.add_argument('--release', help='Release build', default=False,
-                           dest='debug', action='store_false')
-  chromium_config_group.add_argument('--target-cpu',
-                                     help='CPU architecture to run for.',
-                                     choices=['x64', 'x86', 'arm'])
-
-  shell_arguments.add_shell_arguments(parser)
   parser.add_argument('--no-debugger', action="store_true",
                       help='Do not spawn mojo:debugger.')
   parser.add_argument('--window-manager', default=_DEFAULT_WINDOW_MANAGER,
                       help='Window manager app to be mapped as '
                       'mojo:window_manager. By default it is ' +
                       _DEFAULT_WINDOW_MANAGER)
-  parser.add_argument('--sky',
-                      help='Loads the given Sky file.')
 
   script_args, shell_args = parser.parse_known_args()
 
-  # Infer paths based on the config if running within a Chromium-like checkout.
-  mojo_paths, _ = paths.infer_mojo_paths(script_args.android,
-                                         script_args.debug,
-                                         script_args.target_cpu)
-  if mojo_paths:
-    if script_args.android and not script_args.adb_path:
-      script_args.adb_path = mojo_paths['adb']
-    if script_args.android and not script_args.origin:
-      script_args.origin = mojo_paths['build']
-    if not script_args.shell_path:
-      script_args.shell_path = mojo_paths['shell']
-
-    if script_args.verbose:
-      print 'Running within a Chromium-style checkout.'
-      print ' - using the locally built shell at: ' + script_args.shell_path
-      if script_args.origin:
-        print ' - using the origin:  ' + script_args.origin
-      if script_args.android:
-        print ' - using the adb path: ' + script_args.adb_path
-  elif script_args.verbose:
-    print 'Running outside a Chromium-style checkout.'
-
   try:
-    shell, shell_args = shell_arguments.configure_shell(script_args, shell_args)
-  except shell_arguments.ShellConfigurationException as e:
+    config = shell_config.get_shell_config(script_args)
+    shell, shell_args = shell_arguments.get_shell(config, shell_args)
+  except shell_config.ShellConfigurationException as e:
     print e
     return 1
 
@@ -121,19 +84,10 @@ def main():
                                                   'mojo:window_manager=%s' %
                                                   script_args.window_manager)
 
-  if script_args.sky:
-    if not mojo_paths:
-      print 'Running with --sky is not supported outside of the Mojo checkout.'
-      # See https://github.com/domokit/devtools/issues/27.
-      return 1
-    shell_args.extend(shell_arguments._configure_sky(shell, mojo_paths['root'],
-                                                     mojo_paths['sky_packages'],
-                                                     script_args.sky))
-
   if script_args.verbose:
     print "Shell arguments: " + str(shell_args)
 
-  shell.Run(shell_args)
+  shell.run(shell_args)
   return 0
 
 

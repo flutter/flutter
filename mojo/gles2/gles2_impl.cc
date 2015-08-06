@@ -71,12 +71,14 @@ void MojoGLES2SignalSyncPoint(MojoGLES2Context context,
     return g_gpu_interface.Get().Get()->Function ARGUMENTS;        \
   }
 #include "mojo/public/c/gles2/gles2_call_visitor_autogen.h"
-#include "mojo/public/c/gles2/gles2_call_visitor_occlusion_query_ext_autogen.h"
 #include "mojo/public/c/gles2/gles2_call_visitor_chromium_miscellaneous_autogen.h"
 #include "mojo/public/c/gles2/gles2_call_visitor_chromium_resize_autogen.h"
 #include "mojo/public/c/gles2/gles2_call_visitor_chromium_sub_image_autogen.h"
 #include "mojo/public/c/gles2/gles2_call_visitor_chromium_sync_point_autogen.h"
 #include "mojo/public/c/gles2/gles2_call_visitor_chromium_texture_mailbox_autogen.h"
+#include "mojo/public/c/gles2/gles2_call_visitor_ext_debug_marker_autogen.h"
+#include "mojo/public/c/gles2/gles2_call_visitor_occlusion_query_ext_autogen.h"
+#include "mojo/public/c/gles2/gles2_call_visitor_oes_vertex_array_object_autogen.h"
 #undef VISIT_GL_CALL
 
 }  // extern "C"

@@ -99,6 +99,16 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
                      bool* is_first,
                      embedder::ScopedPlatformHandle* platform_handle);
 
+  // Helper for |ConnectImpl()|. This is called when the two process identifiers
+  // are known (and known to be valid), and all that remains is to determine the
+  // |Result| and provide a platform handle if appropriate. (This will never
+  // return |Result::FAILURE|.)
+  Result ConnectImplHelperNoLock(
+      ProcessIdentifier process_identifier,
+      ProcessIdentifier peer_process_identifier,
+      embedder::ScopedPlatformHandle* platform_handle)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+
   // These should only be called on |private_thread_|:
   void ShutdownOnPrivateThread() MOJO_NOT_THREAD_SAFE;
   // Signals |*event| on completion.
@@ -141,9 +151,23 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
 
   ProcessIdentifier next_process_identifier_ MOJO_GUARDED_BY(mutex_);
 
-  struct PendingConnectionInfo;
-  base::hash_map<ConnectionIdentifier, PendingConnectionInfo*>
-      pending_connections_ MOJO_GUARDED_BY(mutex_);  // Owns its values.
+  // Stores information on pending calls to |AllowConnect()|/|Connect()| (or
+  // |CancelConnect()|, namely those for which at least one party has called
+  // |AllowConnect()| but both have not yet called |Connect()| (or
+  // |CancelConnect()|).
+  struct PendingConnectInfo;
+  base::hash_map<ConnectionIdentifier, PendingConnectInfo*> pending_connects_
+      MOJO_GUARDED_BY(mutex_);  // Owns its values.
+
+  // A |ProcessConnections| stores information about connections "from" a given
+  // (fixed, implied) process "to" other processes. A connection may be not
+  // present, running (meaning that both sides have connected and been given
+  // platform handles to a connected "pipe"), or pending (meaning that the
+  // "from" side must still be given a platform handle).
+  class ProcessConnections;
+  // This is a map from "from" processes to its |ProcessConnections| (above).
+  base::hash_map<ProcessIdentifier, ProcessConnections*> connections_
+      MOJO_GUARDED_BY(mutex_);  // Owns its values.
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MasterConnectionManager);
 };

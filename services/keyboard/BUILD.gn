@@ -9,6 +9,7 @@ android_library("keyboard") {
   java_files = [
     "src/org/chromium/mojo/keyboard/InputConnectionAdaptor.java",
     "src/org/chromium/mojo/keyboard/KeyboardServiceImpl.java",
+    "src/org/chromium/mojo/keyboard/KeyboardServiceState.java",
   ]
 
   deps = [

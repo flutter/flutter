@@ -2,19 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// This script should be run by every project that consumes Mojom IDL
-/// interfaces. It populates the 'mojom' package with the generated Dart
-/// bindings for the Mojom IDL files.
-///
-/// From a consuming project, it should be invoked as follows:
-///
-/// $ dart packages/mojom/generate.dart [-p package-root]
-///                                     [-a additional-dirs]
-///                                     [-m mojo-sdk]
-///                                     [-g]  # Generate from .mojom files
-///                                     [-d]  # Download from .mojoms files
-///                                     [-v]  # verbose
-///                                     [-f]  # Fake (dry) run
+/// This script generates Mojo bindings for a Dart package. See README.md for
+/// details.
 
 library generate;
 
@@ -25,14 +14,16 @@ import 'dart:io';
 import 'package:args/args.dart' as args;
 import 'package:path/path.dart' as path;
 
+part 'src/options.dart';
 part 'src/utils.dart';
 
+bool errorOnDuplicate;
 bool verbose;
 bool dryRun;
-Map<String, String> duplicateDetection = new Map<String, String>();
+Map<String, String> duplicateDetection;
 
 /// Searches for .mojom.dart files under [mojomDirectory] and copies them to
-/// the 'mojom' packages.
+/// [data.currentPackage].
 copyAction(PackageIterData data, Directory mojomDirectory) async {
   await for (var mojom in mojomDirectory.list(recursive: true)) {
     if (mojom is! File) continue;
@@ -40,12 +31,13 @@ copyAction(PackageIterData data, Directory mojomDirectory) async {
     if (verbose) print("Found $mojom");
 
     final relative = path.relative(mojom.path, from: mojomDirectory.path);
-    final dest = path.join(data.mojomPackage.path, relative);
+    final dest = path.join(data.currentPackage.path, relative);
     final destDirectory = new Directory(path.dirname(dest));
 
-    if (duplicateDetection.containsKey(dest)) {
+    if (errorOnDuplicate && duplicateDetection.containsKey(dest)) {
       String original = duplicateDetection[dest];
-      throw new GenerationError('Conflict: Both ${original} and ${mojom.path} supply ${dest}');
+      throw new GenerationError(
+          'Conflict: Both ${original} and ${mojom.path} supply ${dest}');
     }
     duplicateDetection[dest] = mojom.path;
 
@@ -65,24 +57,30 @@ copyAction(PackageIterData data, Directory mojomDirectory) async {
 /// Searches for .mojom files under [mojomDirectory], generates .mojom.dart
 /// files for them, and copies them to the 'mojom' package.
 generateAction(GenerateIterData data, Directory mojomDirectory) async {
+  final packageRoot = data.currentPackage.parent;
   await for (var mojom in mojomDirectory.list(recursive: true)) {
     if (mojom is! File) continue;
     if (!isMojom(mojom.path)) continue;
     if (verbose) print("Found $mojom");
 
-    final script = path.join(data.mojoSdk.path,
-        'tools', 'bindings', 'mojom_bindings_generator.py');
+    final script = path.join(
+        data.mojoSdk.path, 'tools', 'bindings', 'mojom_bindings_generator.py');
     final sdkInc = path.normalize(path.join(data.mojoSdk.path, '..', '..'));
-    final outputDir = await data.mojomPackage.createTemp();
+    final outputDir = await data.currentPackage.createTemp();
     final output = outputDir.path;
     final arguments = [
-        '--use_bundled_pylibs',
-        '-g', 'dart',
-        '-o', output,
-        // TODO(zra): Are other include paths needed?
-        '-I', sdkInc,
-        '-I', mojomDirectory.path,
-        mojom.path];
+      '--use_bundled_pylibs',
+      '-g',
+      'dart',
+      '-o',
+      output,
+      // TODO(zra): Are other include paths needed?
+      '-I',
+      sdkInc,
+      '-I',
+      mojomDirectory.path,
+      mojom.path
+    ];
 
     if (verbose || dryRun) {
       print('Generating $mojom');
@@ -93,12 +91,20 @@ generateAction(GenerateIterData data, Directory mojomDirectory) async {
       if (result.exitCode != 0) {
         throw new GenerationError("$script failed:\n${result.stderr}");
       }
-      // Generated .mojom.dart is under $output/dart-gen/mojom/lib/X
-      // Move X to $mojomPackage. Then rm -rf $output
-      final generatedDirName = path.join(output, 'dart-gen', 'mojom', 'lib');
-      final generatedDir = new Directory(generatedDirName);
 
-      await copyAction(data, generatedDir);
+      // Generated .mojom.dart is under $output/dart-pkg/$PACKAGE/lib/$X
+      // Move $X to $PACKAGE_ROOT/$PACKAGE/$X
+      final generatedDirName = path.join(output, 'dart-pkg');
+      final generatedDir = new Directory(generatedDirName);
+      await for (var genpack in generatedDir.list()) {
+        if (genpack is! Directory) continue;
+        var libDir = new Directory(path.join(genpack.path, 'lib'));
+        var name = path.relative(genpack.path, from: generatedDirName);
+        var copyData = new GenerateIterData(data.mojoSdk);
+        copyData.currentPackage =
+            new Directory(path.join(packageRoot.path, name));
+        await copyAction(copyData, libDir);
+      }
 
       await outputDir.delete(recursive: true);
     }
@@ -118,7 +124,7 @@ generateAction(GenerateIterData data, Directory mojomDirectory) async {
 /// ...
 ///
 /// Lines beginning with '#' are ignored.
-downloadAction(GenerateIterData data, Directory packageDirectory) async {
+downloadAction(GenerateIterData _, Directory packageDirectory) async {
   var mojomsPath = path.join(packageDirectory.path, '.mojoms');
   var mojomsFile = new File(mojomsPath);
   if (!await mojomsFile.exists()) return;
@@ -144,8 +150,7 @@ downloadAction(GenerateIterData data, Directory packageDirectory) async {
       }
       repoRoot = rootWords[1];
       if (verbose) print("Found repo root: $repoRoot");
-      if (!repoRoot.startsWith('http://') &&
-          !repoRoot.startsWith('https://')) {
+      if (!repoRoot.startsWith('http://') && !repoRoot.startsWith('https://')) {
         throw new DownloadError(
             'Mojom repo "root" should be an http or https URL: $line');
       }
@@ -173,124 +178,50 @@ downloadAction(GenerateIterData data, Directory packageDirectory) async {
   }
 }
 
-/// Ensures that the directories in [additionalPaths] are absolute and exist,
-/// and creates Directories for them, which are returned.
-Future<List<Directory>> validateAdditionalDirs(Iterable additionalPaths) async {
-  var additionalDirs = [];
-  for (var mojomPath in additionalPaths) {
-    final mojomDir = new Directory(mojomPath);
-    if (!mojomDir.isAbsolute) {
-      throw new CommandLineError(
-          "All --additional-mojom-dir parameters must be absolute paths.");
-    }
-    if (!(await mojomDir.exists())) {
-      throw new CommandLineError(
-          "The additional mojom directory $mojomDir must exist");
-    }
-    additionalDirs.add(mojomDir);
-  }
-  if (verbose) print("additional_mojom_dirs = $additionalDirs");
-  return additionalDirs;
-}
-
-class GenerateOptions {
-  final Directory packages;
-  final Directory mojomPackage;
-  final Directory mojoSdk;
-  final List<Directory> additionalDirs;
-  final bool download;
-  final bool generate;
-  GenerateOptions(
-      this.packages, this.mojomPackage, this.mojoSdk, this.additionalDirs,
-      this.download, this.generate);
-}
-
-Future<GenerateOptions> parseArguments(List<String> arguments) async {
-  final parser = new args.ArgParser()
-    ..addOption('additional-mojom-dir',
-        abbr: 'a',
-        allowMultiple: true,
-        help: 'Absolute path to an additional directory containing mojom.dart'
-        'files to put in the mojom package. May be specified multiple times.')
-    ..addFlag('download',
-        abbr: 'd',
-        defaultsTo: false,
-        help: 'Searches packages for a .mojoms file, and downloads .mojom files'
-        'as speficied in that file. Implies -g.')
-    ..addFlag('fake',
-        abbr: 'f',
-        defaultsTo: false,
-        help: 'Print the operations that would have been run, but'
-        'do not run anything.')
-    ..addFlag('generate',
-        abbr: 'g',
-        defaultsTo: false,
-        help: 'Generate Dart bindings for .mojom files.')
-    ..addOption('mojo-sdk',
-        abbr: 'm',
-        defaultsTo: Platform.environment['MOJO_SDK'],
-        help: 'Absolute path to the Mojo SDK, which can also be specified '
-              'with the environment variable MOJO_SDK.')
-    ..addOption('package-root',
-        abbr: 'p',
-        defaultsTo: path.join(Directory.current.path, 'packages'),
-        help: 'An absolute path to an application\'s package root')
-    ..addFlag('verbose', abbr: 'v', defaultsTo: false);
-  final result = parser.parse(arguments);
-  verbose = result['verbose'];
-  dryRun = result['fake'];
-
-  final packages = new Directory(result['package-root']);
-  if (!packages.isAbsolute) {
-    throw new CommandLineError(
-        "The --package-root parameter must be an absolute path.");
-  }
-  if (verbose) print("packages = $packages");
-  if (!(await packages.exists())) {
-    throw new CommandLineError(
-        "The packages directory $packages must exist");
+/// The "mojom" entry in [packages] is a symbolic link to the mojom package in
+/// the global pub cache directory. Because we might need to write package
+/// specific .mojom.dart files into the mojom package, we need to make a local
+/// copy of it.
+copyMojomPackage(Directory packages) async {
+  var link = new Link(path.join(packages.path, "mojom"));
+  if (!await link.exists()) {
+    // If the "mojom" entry in packages is not a symbolic link, then do nothing.
+    return;
   }
 
-  final mojomPackage = new Directory(path.join(packages.path, 'mojom'));
-  if (verbose) print("mojom package = $mojomPackage");
-  if (!(await mojomPackage.exists())) {
-    throw new CommandLineError(
-        "The mojom package directory $mojomPackage must exist");
-  }
+  var realpath = await link.resolveSymbolicLinks();
+  var realDir = new Directory(realpath);
+  var mojomDir = new Directory(path.join(packages.path, "mojom"));
 
-  final download = result['download'];
-  final generate = result['generate'] || download;
-  var mojoSdk = null;
-  if (generate) {
-    final mojoSdkPath = result['mojo-sdk'];
-    if (mojoSdkPath == null) {
-      throw new CommandLineError(
-          "The Mojo SDK directory must be specified with the --mojo-sdk flag or"
-          "the MOJO_SDK environment variable.");
-    }
-    mojoSdk = new Directory(mojoSdkPath);
-    if (verbose) print("Mojo SDK = $mojoSdk");
-    if (!(await mojoSdk.exists())) {
-      throw new CommandLineError(
-          "The specified Mojo SDK directory $mojoSdk must exist.");
+  await link.delete();
+  await mojomDir.create();
+  await for (var file in realDir.list(recursive: true)) {
+    if (file is File) {
+      var relative = path.relative(file.path, from: realDir.path);
+      var destPath = path.join(mojomDir.path, relative);
+      var destDir = new Directory(path.dirname(destPath));
+      await destDir.create(recursive: true);
+      await file.copy(path.join(mojomDir.path, relative));
     }
   }
-
-  final additionalDirs =
-      await validateAdditionalDirs(result['additional-mojom-dir']);
-
-  return new GenerateOptions(
-      packages, mojomPackage, mojoSdk, additionalDirs, download, generate);
 }
 
 main(List<String> arguments) async {
   var options = await parseArguments(arguments);
+  duplicateDetection = new Map<String, String>();
+  errorOnDuplicate = options.errorOnDuplicate;
+  verbose = options.verbose;
+  dryRun = options.dryRun;
 
-  // Copy any pregenerated files form packages.
-  await mojomDirIter(
-      options.packages,
-      new PackageIterData(options.mojomPackage),
-      copyAction);
+  // mojoms without a DartPackage annotation, and pregenerated mojoms from
+  // [options.additionalDirs] will go into the mojom package, so we make a local
+  // copy of it so we don't pollute the global pub cache.
+  //
+  // TODO(zra): Fail if a mojom has no DartPackage annotation, and remove the
+  // need for [options.additionalDirs].
+  if (!dryRun) {
+    await copyMojomPackage(options.packages);
+  }
 
   // Download .mojom files. These will be picked up by the generation step
   // below.
@@ -300,14 +231,15 @@ main(List<String> arguments) async {
 
   // Generate mojom files.
   if (options.generate) {
-    await mojomDirIter(
-        options.packages,
-        new GenerateIterData(options.mojoSdk, options.mojomPackage),
+    await mojomDirIter(options.packages, new GenerateIterData(options.mojoSdk),
         generateAction);
   }
 
-  // Copy pregenerated files from specified external directories.
-  final data = new GenerateIterData(options.mojoSdk, options.mojomPackage);
+  // TODO(zra): As mentioned above, this should go away.
+  // Copy pregenerated files from specified external directories into the
+  // mojom package.
+  final data = new GenerateIterData(options.mojoSdk);
+  data.currentPackage = options.mojomPackage;
   for (var mojomDir in options.additionalDirs) {
     await copyAction(data, mojomDir);
     if (options.generate) {

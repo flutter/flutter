@@ -15,6 +15,7 @@ import sys
 from devtoolslib import apptest_dart
 from devtoolslib import apptest_gtest
 from devtoolslib import shell_arguments
+from devtoolslib import shell_config
 
 _DESCRIPTION = """Runner for Mojo application tests.
 
@@ -55,15 +56,14 @@ def main():
       description=_DESCRIPTION)
   parser.add_argument("test_list_file", type=file,
                       help="a file listing apptests to run")
+  shell_config.add_shell_arguments(parser)
 
-  # Common shell configuration arguments.
-  shell_arguments.add_shell_arguments(parser)
-  script_args, common_shell_args = parser.parse_known_args()
+  script_args, shell_args = parser.parse_known_args()
 
   try:
-    shell, common_shell_args = shell_arguments.configure_shell(
-        script_args, common_shell_args)
-  except shell_arguments.ShellConfigurationException as e:
+    config = shell_config.get_shell_config(script_args)
+    shell, common_shell_args = shell_arguments.get_shell(config, shell_args)
+  except shell_config.ShellConfigurationException as e:
     print e
     return 1
 

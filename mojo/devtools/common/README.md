@@ -21,10 +21,60 @@ Additionally, `remote_adb_setup` script helps to configure adb on a remote
 machine to communicate with a device attached to a local machine, forwarding the
 ports used by `mojo_run`.
 
+### Runner
+
+`mojo_run` allows you to run a Mojo shell either on the host, or on an attached
+Android device.
+
+```sh
+mojo_run APP_URL  # Run on the host.
+mojo_run APP_URL --android  # Run on Android device.
+mojo_run "APP_URL APP_ARGUMENTS"  # Run an app with startup arguments
+```
+
+Unless running within a Mojo checkout, we need to indicate the path to the shell
+binary:
+
+```sh
+mojo_run --shell-path path/to/shell/binary APP_URL
+```
+
+Some applications are running embedded inside a window manager. To start such an
+app, you have to first start the window manager app, then have it embed the app
+you are interested in. It is done as follows using the default window manager:
+
+```sh
+mojo_run "mojo:window_manager APP_URL"
+```
+
+By default, `mojo_run` uses `mojo:kiosk_wm` as the default window manager. It
+can be changed using the `--window-manager` flag.
+
+#### Sky apps
+
+To run a [Sky](https://github.com/domokit/sky_engine) app, you need to build
+`sky_viewer.mojo` in a Sky checkout, and indicate the path to the binary using
+the `--map-url` parameter:
+
+```sh
+mojo_run --map-url mojo:sky_viewer=/path/to/sky/viewer "mojo:window_manager APP_URL"
+```
+
+If the app does not declare a shebang indicating that it needs to be run in
+`sky_viewer`, pass `--sky` to map `sky_viewer` as a default content handler for
+dart apps:
+
+```sh
+mojo_run --map-url mojo:sky_viewer=/path/to/sky/viewer "mojo:window_manager APP_URL" --sky
+```
+
+Note that Sky apps will need the --use-osmesa flag to run
+over [chromoting](https://support.google.com/chrome/answer/1649523?hl=en):
+
 ### Debugger
 
-The `mojo_debug` script allows you to interactively inspect a running shell,
-collect performance traces and attach a gdb debugger.
+`mojo_debug` allows you to interactively inspect a running shell, collect
+performance traces and attach a gdb debugger.
 
 #### Tracing
 To collect [performance
@@ -65,6 +115,10 @@ after changing threads), use the `current` option:
 (gdb) update-symbols current
 ```
 
+If you want to debug the startup of your application, you can pass
+`--wait-for-debugger` to `mojo_run` to have the Mojo Shell stop and wait to be
+attached by `gdb` before continuing.
+
 #### Android crash stacks
 When Mojo shell crashes on Android ("Unfortunately, Mojo shell has stopped.")
 due to a crash in native code, `mojo_debug` can be used to find and symbolize
@@ -73,14 +127,6 @@ the stack trace present in the device log:
 ```sh
 mojo_debug device stack
 ```
-
-### devtoolslib
-
-**devtoolslib** is a Python module containing the core scripting functionality
-for running Mojo apps: shell abstraction with implementations for Android and
-Linux and support for apptest frameworks. The executable scripts in devtools are
-based on this module. One can also choose to embed the functionality provided by
-**devtoolslib** in their own wrapper.
 
 ## Development
 

@@ -12,6 +12,7 @@
 #include "base/synchronization/waitable_event.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
+#include "mojo/edk/embedder/platform_handle.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
@@ -60,7 +61,8 @@ MessageInTransit::Subtype ConnectionManagerResultToMessageInTransitSubtype(
 
 // |MasterConnectionManager::Helper| is not thread-safe, and must only be used
 // on its |owner_|'s private thread.
-class MasterConnectionManager::Helper final : public RawChannel::Delegate {
+class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager::Helper final
+    : public RawChannel::Delegate {
  public:
   Helper(MasterConnectionManager* owner,
          ProcessIdentifier process_identifier,
@@ -164,9 +166,6 @@ void MasterConnectionManager::Helper::OnReadMessage(
                                    &data.peer_process_identifier,
                                    &data.is_first, &platform_handle);
       DCHECK_NE(result, Result::SUCCESS);
-      // TODO(vtl): FIXME -- currently, nothing should generate
-      // SUCCESS_CONNECT_REUSE_CONNECTION.
-      CHECK_NE(result, Result::SUCCESS_CONNECT_REUSE_CONNECTION);
       // Success acks for "connect" have the peer process identifier as data
       // (and also a platform handle in the case of "new connection" -- handled
       // further below).
@@ -220,9 +219,9 @@ void MasterConnectionManager::Helper::FatalError() {
   owner_->OnError(process_identifier_);  // WARNING: This destroys us.
 }
 
-// MasterConnectionManager::PendingConnectionInfo ------------------------------
+// MasterConnectionManager::PendingConnectInfo ---------------------------------
 
-struct MasterConnectionManager::PendingConnectionInfo {
+struct MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager::PendingConnectInfo {
   // States:
   //   - This is created upon a first "allow connect" (with |first| set
   //     immediately). We then wait for a second "allow connect".
@@ -233,28 +232,86 @@ struct MasterConnectionManager::PendingConnectionInfo {
   // I.e., the valid state transitions are:
   //   AWAITING_SECOND_ALLOW_CONNECT -> AWAITING_CONNECTS_FROM_BOTH
   //       -> {AWAITING_CONNECT_FROM_FIRST,AWAITING_CONNECT_FROM_SECOND}
-  enum State {
+  enum class State {
     AWAITING_SECOND_ALLOW_CONNECT,
     AWAITING_CONNECTS_FROM_BOTH,
     AWAITING_CONNECT_FROM_FIRST,
     AWAITING_CONNECT_FROM_SECOND
   };
 
-  explicit PendingConnectionInfo(ProcessIdentifier first)
-      : state(AWAITING_SECOND_ALLOW_CONNECT),
+  explicit PendingConnectInfo(ProcessIdentifier first)
+      : state(State::AWAITING_SECOND_ALLOW_CONNECT),
         first(first),
         second(kInvalidProcessIdentifier) {
     DCHECK_NE(first, kInvalidProcessIdentifier);
   }
-  ~PendingConnectionInfo() {}
+  ~PendingConnectInfo() {}
 
   State state;
 
   ProcessIdentifier first;
   ProcessIdentifier second;
+};
 
-  // Valid in AWAITING_CONNECT_FROM_{FIRST, SECOND} states.
-  embedder::ScopedPlatformHandle remaining_handle;
+// MasterConnectionManager::ProcessConnections ---------------------------------
+
+class MasterConnectionManager::ProcessConnections {
+ public:
+  enum class ConnectionStatus { NONE, PENDING, RUNNING };
+
+  ProcessConnections() {}
+  ~ProcessConnections() {
+    // TODO(vtl): Log a warning if there are connections pending? (This might be
+    // very spammy, since the |MasterConnectionManager| may have many
+    // |ProcessConnections|.
+    for (auto& p : process_connections_)
+      p.second.CloseIfNecessary();
+  }
+
+  // If |pending_platform_handle| is non-null and the status is |PENDING| this
+  // will "return"/pass the stored pending platform handle. Warning: In that
+  // case, this has the side effect of changing the state to |RUNNING|.
+  ConnectionStatus GetConnectionStatus(
+      ProcessIdentifier to_process_identifier,
+      embedder::ScopedPlatformHandle* pending_platform_handle) {
+    DCHECK(!pending_platform_handle || !pending_platform_handle->is_valid());
+
+    auto it = process_connections_.find(to_process_identifier);
+    if (it == process_connections_.end())
+      return ConnectionStatus::NONE;
+    if (!it->second.is_valid())
+      return ConnectionStatus::RUNNING;
+    // Pending:
+    if (pending_platform_handle) {
+      pending_platform_handle->reset(it->second);
+      it->second = embedder::PlatformHandle();
+    }
+    return ConnectionStatus::PENDING;
+  }
+
+  void AddConnection(ProcessIdentifier to_process_identifier,
+                     ConnectionStatus status,
+                     embedder::ScopedPlatformHandle pending_platform_handle) {
+    DCHECK(process_connections_.find(to_process_identifier) ==
+           process_connections_.end());
+
+    if (status == ConnectionStatus::RUNNING) {
+      DCHECK(!pending_platform_handle.is_valid());
+      process_connections_[to_process_identifier] = embedder::PlatformHandle();
+    } else if (status == ConnectionStatus::PENDING) {
+      DCHECK(pending_platform_handle.is_valid());
+      process_connections_[to_process_identifier] =
+          pending_platform_handle.release();
+    } else {
+      NOTREACHED();
+    }
+  }
+
+ private:
+  base::hash_map<ProcessIdentifier, embedder::PlatformHandle>
+      process_connections_;  // "Owns" any valid platform handles.
+
+  MOJO_DISALLOW_COPY_AND_ASSIGN(ProcessConnections);
 };
 
 // MasterConnectionManager -----------------------------------------------------
@@ -265,6 +322,7 @@ MasterConnectionManager::MasterConnectionManager(
       master_process_delegate_(),
       private_thread_("MasterConnectionManagerPrivateThread"),
       next_process_identifier_(kFirstSlaveProcessIdentifier) {
+  connections_[kMasterProcessIdentifier] = new ProcessConnections();
 }
 
 MasterConnectionManager::~MasterConnectionManager() {
@@ -272,7 +330,7 @@ MasterConnectionManager::~MasterConnectionManager() {
   DCHECK(!master_process_delegate_);
   DCHECK(!private_thread_.message_loop());
   DCHECK(helpers_.empty());
-  DCHECK(pending_connections_.empty());
+  DCHECK(pending_connects_.empty());
 }
 
 void MasterConnectionManager::Init(
@@ -303,6 +361,8 @@ ProcessIdentifier MasterConnectionManager::AddSlave(
     CHECK_NE(next_process_identifier_, kMasterProcessIdentifier);
     slave_process_identifier = next_process_identifier_;
     next_process_identifier_++;
+    DCHECK(connections_.find(slave_process_identifier) == connections_.end());
+    connections_[slave_process_identifier] = new ProcessConnections();
   }
 
   // We have to wait for the task to be executed, in case someone calls
@@ -327,13 +387,11 @@ ProcessIdentifier MasterConnectionManager::AddSlaveAndBootstrap(
       AddSlave(slave_info, platform_handle.Pass());
 
   MutexLocker locker(&mutex_);
-  DCHECK(pending_connections_.find(connection_id) ==
-         pending_connections_.end());
-  PendingConnectionInfo* info =
-      new PendingConnectionInfo(kMasterProcessIdentifier);
-  info->state = PendingConnectionInfo::AWAITING_CONNECTS_FROM_BOTH;
+  DCHECK(pending_connects_.find(connection_id) == pending_connects_.end());
+  PendingConnectInfo* info = new PendingConnectInfo(kMasterProcessIdentifier);
+  info->state = PendingConnectInfo::State::AWAITING_CONNECTS_FROM_BOTH;
   info->second = slave_process_identifier;
-  pending_connections_[connection_id] = info;
+  pending_connects_[connection_id] = info;
 
   return slave_process_identifier;
 }
@@ -349,7 +407,7 @@ void MasterConnectionManager::Shutdown() {
                             base::Unretained(this)));
   private_thread_.Stop();
   DCHECK(helpers_.empty());
-  DCHECK(pending_connections_.empty());
+  DCHECK(pending_connects_.empty());
   master_process_delegate_ = nullptr;
   delegate_thread_task_runner_ = nullptr;
 }
@@ -382,10 +440,10 @@ bool MasterConnectionManager::AllowConnectImpl(
 
   MutexLocker locker(&mutex_);
 
-  auto it = pending_connections_.find(connection_id);
-  if (it == pending_connections_.end()) {
-    pending_connections_[connection_id] =
-        new PendingConnectionInfo(process_identifier);
+  auto it = pending_connects_.find(connection_id);
+  if (it == pending_connects_.end()) {
+    pending_connects_[connection_id] =
+        new PendingConnectInfo(process_identifier);
     // TODO(vtl): Track process identifier -> pending connections also (so these
     // can be removed efficiently if that process disconnects).
     DVLOG(1) << "New pending connection ID " << connection_id.ToString()
@@ -394,9 +452,9 @@ bool MasterConnectionManager::AllowConnectImpl(
     return true;
   }
 
-  PendingConnectionInfo* info = it->second;
-  if (info->state == PendingConnectionInfo::AWAITING_SECOND_ALLOW_CONNECT) {
-    info->state = PendingConnectionInfo::AWAITING_CONNECTS_FROM_BOTH;
+  PendingConnectInfo* info = it->second;
+  if (info->state == PendingConnectInfo::State::AWAITING_SECOND_ALLOW_CONNECT) {
+    info->state = PendingConnectInfo::State::AWAITING_CONNECTS_FROM_BOTH;
     info->second = process_identifier;
     DVLOG(1) << "Pending connection ID " << connection_id.ToString()
              << ": AllowConnect() from second process identifier "
@@ -408,8 +466,8 @@ bool MasterConnectionManager::AllowConnectImpl(
   // caller).
   LOG(ERROR) << "AllowConnect() from process " << process_identifier
              << " for connection ID " << connection_id.ToString()
-             << " already in state " << info->state;
-  pending_connections_.erase(it);
+             << " already in state " << static_cast<int>(info->state);
+  pending_connects_.erase(it);
   delete info;
   return false;
 }
@@ -421,8 +479,8 @@ bool MasterConnectionManager::CancelConnectImpl(
 
   MutexLocker locker(&mutex_);
 
-  auto it = pending_connections_.find(connection_id);
-  if (it == pending_connections_.end()) {
+  auto it = pending_connects_.find(connection_id);
+  if (it == pending_connects_.end()) {
     // Not necessarily the caller's fault, and not necessarily an error.
     DVLOG(1) << "CancelConnect() from process " << process_identifier
              << " for connection ID " << connection_id.ToString()
@@ -430,7 +488,7 @@ bool MasterConnectionManager::CancelConnectImpl(
     return true;
   }
 
-  PendingConnectionInfo* info = it->second;
+  PendingConnectInfo* info = it->second;
   if (process_identifier != info->first && process_identifier != info->second) {
     LOG(ERROR) << "CancelConnect() from process " << process_identifier
                << " for connection ID " << connection_id.ToString()
@@ -441,7 +499,7 @@ bool MasterConnectionManager::CancelConnectImpl(
   // Just erase it. The other side may also try to cancel, in which case it'll
   // "fail" in the first if statement above (we assume that connection IDs never
   // collide, so there's no need to carefully track both sides).
-  pending_connections_.erase(it);
+  pending_connects_.erase(it);
   delete info;
   return true;
 }
@@ -460,8 +518,8 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
 
   MutexLocker locker(&mutex_);
 
-  auto it = pending_connections_.find(connection_id);
-  if (it == pending_connections_.end()) {
+  auto it = pending_connects_.find(connection_id);
+  if (it == pending_connects_.end()) {
     // Not necessarily the caller's fault.
     LOG(ERROR) << "Connect() from process " << process_identifier
                << " for connection ID " << connection_id.ToString()
@@ -469,16 +527,15 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
     return Result::FAILURE;
   }
 
-  PendingConnectionInfo* info = it->second;
-  if (info->state == PendingConnectionInfo::AWAITING_CONNECTS_FROM_BOTH) {
-    DCHECK(!info->remaining_handle.is_valid());
-
+  PendingConnectInfo* info = it->second;
+  ProcessIdentifier peer;
+  if (info->state == PendingConnectInfo::State::AWAITING_CONNECTS_FROM_BOTH) {
     if (process_identifier == info->first) {
-      info->state = PendingConnectionInfo::AWAITING_CONNECT_FROM_SECOND;
-      *peer_process_identifier = info->second;
+      info->state = PendingConnectInfo::State::AWAITING_CONNECT_FROM_SECOND;
+      peer = info->second;
     } else if (process_identifier == info->second) {
-      info->state = PendingConnectionInfo::AWAITING_CONNECT_FROM_FIRST;
-      *peer_process_identifier = info->first;
+      info->state = PendingConnectInfo::State::AWAITING_CONNECT_FROM_FIRST;
+      peer = info->first;
     } else {
       LOG(ERROR) << "Connect() from process " << process_identifier
                  << " for connection ID " << connection_id.ToString()
@@ -486,35 +543,26 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
       return Result::FAILURE;
     }
 
-    *is_first = true;
-
-    // TODO(vtl): FIXME -- add stuff for SUCCESS_CONNECT_REUSE_CONNECTION here.
-    Result result = Result::FAILURE;
-    if (info->first == info->second) {
-      platform_handle->reset();
-      DCHECK(!info->remaining_handle.is_valid());
-      result = Result::SUCCESS_CONNECT_SAME_PROCESS;
-    } else {
-      embedder::PlatformChannelPair platform_channel_pair;
-      *platform_handle = platform_channel_pair.PassServerHandle();
-      DCHECK(platform_handle->is_valid());
-      info->remaining_handle = platform_channel_pair.PassClientHandle();
-      DCHECK(info->remaining_handle.is_valid());
-      result = Result::SUCCESS_CONNECT_NEW_CONNECTION;
-    }
     DVLOG(1) << "Connection ID " << connection_id.ToString()
              << ": first Connect() from process identifier "
              << process_identifier;
-    return result;
+    *peer_process_identifier = peer;
+    *is_first = true;
+    return ConnectImplHelperNoLock(process_identifier, peer, platform_handle);
   }
 
+  // The remaining cases all result in |it| being removed from
+  // |pending_connects_| and deleting |info|.
+  pending_connects_.erase(it);
+  scoped_ptr<PendingConnectInfo> info_deleter(info);
+
+  // |remaining_connectee| should be the same as |process_identifier|.
   ProcessIdentifier remaining_connectee;
-  ProcessIdentifier peer;
-  if (info->state == PendingConnectionInfo::AWAITING_CONNECT_FROM_FIRST) {
+  if (info->state == PendingConnectInfo::State::AWAITING_CONNECT_FROM_FIRST) {
     remaining_connectee = info->first;
     peer = info->second;
   } else if (info->state ==
-             PendingConnectionInfo::AWAITING_CONNECT_FROM_SECOND) {
+             PendingConnectInfo::State::AWAITING_CONNECT_FROM_SECOND) {
     remaining_connectee = info->second;
     peer = info->first;
   } else {
@@ -522,9 +570,7 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
     // caller).
     LOG(ERROR) << "Connect() from process " << process_identifier
                << " for connection ID " << connection_id.ToString()
-               << " in state " << info->state;
-    pending_connections_.erase(it);
-    delete info;
+               << " in state " << static_cast<int>(info->state);
     return Result::FAILURE;
   }
 
@@ -532,42 +578,79 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
     LOG(ERROR) << "Connect() from process " << process_identifier
                << " for connection ID " << connection_id.ToString()
                << " which is not the remaining connectee";
-    pending_connections_.erase(it);
-    delete info;
     return Result::FAILURE;
   }
 
-  *peer_process_identifier = peer;
-  *is_first = false;
-
-  // TODO(vtl): FIXME -- add stuff for SUCCESS_CONNECT_REUSE_CONNECTION here.
-  Result result = Result::FAILURE;
-  if (info->first == info->second) {
-    platform_handle->reset();
-    DCHECK(!info->remaining_handle.is_valid());
-    result = Result::SUCCESS_CONNECT_SAME_PROCESS;
-  } else {
-    *platform_handle = info->remaining_handle.Pass();
-    DCHECK(platform_handle->is_valid());
-    result = Result::SUCCESS_CONNECT_NEW_CONNECTION;
-  }
-  pending_connections_.erase(it);
-  delete info;
   DVLOG(1) << "Connection ID " << connection_id.ToString()
            << ": second Connect() from process identifier "
            << process_identifier;
-  return result;
+  *peer_process_identifier = peer;
+  *is_first = false;
+  return ConnectImplHelperNoLock(process_identifier, peer, platform_handle);
+}
+
+ConnectionManager::Result MasterConnectionManager::ConnectImplHelperNoLock(
+    ProcessIdentifier process_identifier,
+    ProcessIdentifier peer_process_identifier,
+    embedder::ScopedPlatformHandle* platform_handle) {
+  if (process_identifier == peer_process_identifier) {
+    platform_handle->reset();
+    DVLOG(1) << "Connect: same process";
+    return Result::SUCCESS_CONNECT_SAME_PROCESS;
+  }
+
+  // We should know about the process identified by |process_identifier|.
+  DCHECK(connections_.find(process_identifier) != connections_.end());
+  ProcessConnections* process_connections = connections_[process_identifier];
+  // We should also know about the peer.
+  DCHECK(connections_.find(peer_process_identifier) != connections_.end());
+  switch (process_connections->GetConnectionStatus(peer_process_identifier,
+                                                   platform_handle)) {
+    case ProcessConnections::ConnectionStatus::NONE: {
+      // TODO(vtl): In the "second connect" case, this should never be reached
+      // (but it's not easy to DCHECK this invariant here).
+      process_connections->AddConnection(
+          peer_process_identifier,
+          ProcessConnections::ConnectionStatus::RUNNING,
+          embedder::ScopedPlatformHandle());
+      embedder::PlatformChannelPair platform_channel_pair;
+      *platform_handle = platform_channel_pair.PassServerHandle();
+
+      connections_[peer_process_identifier]->AddConnection(
+          process_identifier, ProcessConnections::ConnectionStatus::PENDING,
+          platform_channel_pair.PassClientHandle());
+      break;
+    }
+    case ProcessConnections::ConnectionStatus::PENDING:
+      DCHECK(connections_[peer_process_identifier]->GetConnectionStatus(
+                 process_identifier, nullptr) ==
+             ProcessConnections::ConnectionStatus::RUNNING);
+      break;
+    case ProcessConnections::ConnectionStatus::RUNNING:
+      // |process_identifier| already has a connection to
+      // |peer_process_identifier|, so it should reuse that.
+      platform_handle->reset();
+      DVLOG(1) << "Connect: reuse connection";
+      return Result::SUCCESS_CONNECT_REUSE_CONNECTION;
+  }
+  DCHECK(platform_handle->is_valid());
+  DVLOG(1) << "Connect: new connection";
+  return Result::SUCCESS_CONNECT_NEW_CONNECTION;
 }
 
 void MasterConnectionManager::ShutdownOnPrivateThread() {
   AssertOnPrivateThread();
 
-  if (!pending_connections_.empty()) {
+  if (!pending_connects_.empty()) {
     DVLOG(1) << "Shutting down with connections pending";
-    for (auto& p : pending_connections_)
+    for (auto& p : pending_connects_)
       delete p.second;
-    pending_connections_.clear();
+    pending_connects_.clear();
   }
+
+  for (auto& p : connections_)
+    delete p.second;
+  connections_.clear();
 
   if (!helpers_.empty()) {
     DVLOG(1) << "Shutting down with slaves still connected";
@@ -615,14 +698,13 @@ void MasterConnectionManager::OnError(ProcessIdentifier process_identifier) {
     MutexLocker locker(&mutex_);
 
     // TODO(vtl): This isn't very efficient.
-    for (auto it = pending_connections_.begin();
-         it != pending_connections_.end();) {
+    for (auto it = pending_connects_.begin(); it != pending_connects_.end();) {
       if (it->second->first == process_identifier ||
           it->second->second == process_identifier) {
         auto it_to_erase = it;
         ++it;
         delete it_to_erase->second;
-        pending_connections_.erase(it_to_erase);
+        pending_connects_.erase(it_to_erase);
       } else {
         ++it;
       }

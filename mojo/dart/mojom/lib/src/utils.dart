@@ -30,17 +30,15 @@ class DownloadError extends Error {
 
 /// The base type of data passed to actions for [mojomDirIter].
 class PackageIterData {
-  final Directory _mojomPackage;
-  PackageIterData(this._mojomPackage);
-  Directory get mojomPackage => _mojomPackage;
+  Directory currentPackage;
+  PackageIterData(this.currentPackage);
 }
 
 /// Data for [mojomDirIter] that includes the path to the Mojo SDK for bindings
 /// generation.
 class GenerateIterData extends PackageIterData {
   final Directory _mojoSdk;
-  GenerateIterData(this._mojoSdk, Directory mojomPackage)
-      : super(mojomPackage);
+  GenerateIterData(this._mojoSdk) : super(null);
   Directory get mojoSdk => _mojoSdk;
 }
 
@@ -51,6 +49,9 @@ packageDirIter(
     Directory packages, PackageIterData data, MojomAction action) async {
   await for (var package in packages.list()) {
     if (package is Directory) {
+      if (data != null) {
+        data.currentPackage = package;
+      }
       await action(data, package);
     }
   }
@@ -64,7 +65,6 @@ packageDirIter(
 mojomDirIter(
     Directory packages, PackageIterData data, MojomAction action) async {
   await packageDirIter(packages, data, (d, p) async {
-    if (p.path == d.mojomPackage.path) return;
     if (verbose) print("package = $p");
     final mojomDirectory = new Directory(path.join(p.path, 'mojom'));
     if (verbose) print("looking for = $mojomDirectory");
@@ -94,7 +94,7 @@ Future<String> getUrl(HttpClient httpClient, String url) async {
       fileString.write(contents);
     }
     return fileString.toString();
-  } catch(e) {
+  } catch (e) {
     throw new DownloadError("$e");
   }
 }

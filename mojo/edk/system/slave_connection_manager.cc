@@ -295,9 +295,6 @@ void SlaveConnectionManager::OnReadMessage(
           DCHECK_EQ(num_platform_handles, 0u);
           *ack_result_ = Result::SUCCESS_CONNECT_REUSE_CONNECTION;
           ack_platform_handle_->reset();
-          // TODO(vtl): FIXME -- currently, nothing should generate
-          // SUCCESS_CONNECT_REUSE_CONNECTION.
-          CHECK(false);
           break;
         default:
           CHECK(false);

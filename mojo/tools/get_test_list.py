@@ -159,11 +159,11 @@ def GetTestList(config, verbose_count=0):
               "--build-dir=" + build_dir,
               "--dart-exe=third_party/dart-sdk/dart-sdk/bin/dart"])
 
-  AddEntry("Dart HTTP Load test",
-         ["python",
-          os.path.join("mojo", "dart", "http_load_test", "runner.py"),
-          "--build-dir=" + build_dir,
-          "--dart-exe=third_party/dart-sdk/dart-sdk/bin/dart"])
+    AddEntry("Dart HTTP Load test",
+           ["python",
+            os.path.join("mojo", "dart", "http_load_test", "runner.py"),
+            "--build-dir=" + build_dir,
+            "--dart-exe=third_party/dart-sdk/dart-sdk/bin/dart"])
 
   # mojo tools unit tests:
   if ShouldRunTest(Config.TEST_TYPE_DEFAULT, Config.TEST_TYPE_UNIT, "tools"):
@@ -171,6 +171,14 @@ def GetTestList(config, verbose_count=0):
              ["python", os.path.join("mojo", "tools", "testing",
                                      "mojom_fetcher",
                                      "mojom_fetcher_tests.py")])
+
+  # Dart mojom package generate.dart script tests:
+  if target_os == Config.OS_LINUX:
+    AddEntry("Dart mojom package generate tests",
+        [os.path.join("third_party", "dart-sdk", "dart-sdk", "bin", "dart"),
+         "--checked",
+         "-p", os.path.join("mojo", "dart", "mojom", "packages"),
+         os.path.join("mojo", "dart", "mojom", "test", "generate_test.dart")])
 
   # Perf tests -----------------------------------------------------------------
 

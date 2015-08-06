@@ -430,8 +430,13 @@ if (is_android) {
         "--output=${rebase_output}",
       ]
 
+      deps = [
+        ":${android_standalone_library_name}",
+        ":${shared_library_name}",
+      ]
+
       if (defined(invoker.deps)) {
-        deps = invoker.deps
+        deps += invoker.deps
       }
       if (defined(invoker.public_deps)) {
         public_deps = invoker.public_deps

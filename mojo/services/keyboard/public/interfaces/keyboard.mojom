@@ -28,8 +28,17 @@ interface KeyboardClient {
   SetSelection(int32 start, int32 end);
 };
 
+// Loosely modeled on Android InputType:
+// http://developer.android.com/reference/android/text/InputType.html
+enum KeyboardType {
+  TEXT,
+  NUMBER,
+  PHONE,
+  DATETIME,
+};
+
 interface KeyboardService {
-  Show(KeyboardClient client);
+  Show(KeyboardClient client, KeyboardType type);
   ShowByRequest();
   Hide();
 };

@@ -11,6 +11,7 @@
 #include "base/memory/weak_ptr.h"
 #include "base/thread_task_runner_handle.h"
 #include "base/threading/platform_thread.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/application/application_runner_chromium.h"
 #include "mojo/common/message_pump_mojo.h"
 #include "mojo/public/cpp/application/application_connection.h"
@@ -40,6 +41,8 @@ class ApplicationThread : public base::PlatformThread::Delegate {
 
  private:
   void ThreadMain() override {
+    TRACE_EVENT_INSTANT1("content_handler", "ThreadMain()",
+                         TRACE_EVENT_SCOPE_THREAD, "url", response_->url.get());
     base::PlatformThread::SetName(response_->url);
     handler_delegate_->RunApplication(application_request_.Pass(),
                                       response_.Pass());
@@ -79,6 +82,8 @@ class ContentHandlerImpl : public ContentHandler {
   // Overridden from ContentHandler:
   void StartApplication(InterfaceRequest<Application> application_request,
                         URLResponsePtr response) override {
+    TRACE_EVENT_INSTANT1("content_handler", "StartApplication()",
+                         TRACE_EVENT_SCOPE_THREAD, "url", response->url.get());
     ApplicationThread* thread = new ApplicationThread(
         base::ThreadTaskRunnerHandle::Get(),
         base::Bind(&ContentHandlerImpl::OnThreadEnd,

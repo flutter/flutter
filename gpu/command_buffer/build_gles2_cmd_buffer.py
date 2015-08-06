@@ -3300,7 +3300,7 @@ _FUNCTION_INFO = {
     'type': 'Custom',
     'impl_func': False,
     'unit_test': False,
-    'extension': 'CHROMIUM_resize',
+    'extension': "CHROMIUM_resize",
     'chromium': True,
   },
   'GetRequestableExtensionsCHROMIUM': {
@@ -3463,24 +3463,24 @@ _FUNCTION_INFO = {
     'type': 'GLcharN',
     'decoder_func': 'DoInsertEventMarkerEXT',
     'expectation': False,
-    'extension': True,
+    'extension': "EXT_debug_marker",
   },
   'PushGroupMarkerEXT': {
     'type': 'GLcharN',
     'decoder_func': 'DoPushGroupMarkerEXT',
     'expectation': False,
-    'extension': True,
+    'extension': "EXT_debug_marker",
   },
   'PopGroupMarkerEXT': {
     'decoder_func': 'DoPopGroupMarkerEXT',
     'expectation': False,
-    'extension': True,
+    'extension': "EXT_debug_marker",
     'impl_func': False,
   },
 
   'GenVertexArraysOES': {
     'type': 'GENn',
-    'extension': True,
+    'extension': "OES_vertex_array_object",
     'gl_test_func': 'glGenVertexArraysOES',
     'resource_type': 'VertexArray',
     'resource_types': 'VertexArrays',
@@ -3489,7 +3489,7 @@ _FUNCTION_INFO = {
   },
   'BindVertexArrayOES': {
     'type': 'Bind',
-    'extension': True,
+    'extension': "OES_vertex_array_object",
     'gl_test_func': 'glBindVertexArrayOES',
     'decoder_func': 'DoBindVertexArrayOES',
     'gen_func': 'GenVertexArraysOES',
@@ -3499,7 +3499,7 @@ _FUNCTION_INFO = {
   },
   'DeleteVertexArraysOES': {
     'type': 'DELn',
-    'extension': True,
+    'extension': "OES_vertex_array_object",
     'gl_test_func': 'glDeleteVertexArraysOES',
     'resource_type': 'VertexArray',
     'resource_types': 'VertexArrays',
@@ -3508,7 +3508,7 @@ _FUNCTION_INFO = {
   },
   'IsVertexArrayOES': {
     'type': 'Is',
-    'extension': True,
+    'extension': "OES_vertex_array_object",
     'gl_test_func': 'glIsVertexArrayOES',
     'decoder_func': 'DoIsVertexArrayOES',
     'expectation': False,
@@ -10634,24 +10634,13 @@ def main(argv):
   gen.WriteGLES2Header("gpu/GLES2/gl2chromium_autogen.h")
   mojo_gles2_prefix = ("mojo/public/c/gles2/gles2_call_visitor")
   gen.WriteMojoGLCallVisitor(mojo_gles2_prefix + "_autogen.h")
-  gen.WriteMojoGLCallVisitorForExtension(
-      mojo_gles2_prefix + "_chromium_texture_mailbox_autogen.h",
-      "CHROMIUM_texture_mailbox")
-  gen.WriteMojoGLCallVisitorForExtension(
-      mojo_gles2_prefix + "_chromium_sync_point_autogen.h",
-      "CHROMIUM_sync_point")
-  gen.WriteMojoGLCallVisitorForExtension(
-      mojo_gles2_prefix + "_chromium_sub_image_autogen.h",
-      "CHROMIUM_sub_image")
-  gen.WriteMojoGLCallVisitorForExtension(
-      mojo_gles2_prefix + "_chromium_miscellaneous_autogen.h",
-      "CHROMIUM_miscellaneous")
-  gen.WriteMojoGLCallVisitorForExtension(
-      mojo_gles2_prefix + "_chromium_resize_autogen.h",
-      "CHROMIUM_resize")
-  gen.WriteMojoGLCallVisitorForExtension(
-      mojo_gles2_prefix + "_occlusion_query_ext_autogen.h",
-      "occlusion_query_EXT")
+  mojo_extensions = ["CHROMIUM_texture_mailbox", "CHROMIUM_sync_point",
+                     "CHROMIUM_sub_image", "CHROMIUM_miscellaneous",
+                     "CHROMIUM_resize", "EXT_debug_marker",
+                     "OES_vertex_array_object", "occlusion_query_EXT"]
+  for extension in mojo_extensions:
+    gen.WriteMojoGLCallVisitorForExtension(
+        mojo_gles2_prefix + "_" + extension.lower() + "_autogen.h", extension)
 
   Format(gen.generated_cpp_filenames)
 
