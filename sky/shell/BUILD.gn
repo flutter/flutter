@@ -191,6 +191,8 @@ if (is_android) {
       "mac/platform_service_provider_mac.cc",
       "mac/platform_view_mac.h",
       "mac/platform_view_mac.mm",
+      "mac/tracing_controller.h",
+      "mac/tracing_controller.mm",
     ]
     set_sources_assignment_filter(sources_assignment_filter)
 
