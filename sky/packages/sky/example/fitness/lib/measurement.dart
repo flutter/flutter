@@ -110,6 +110,7 @@ class MeasurementFragment extends StatefulComponent {
             new Input(
               key: weightKey,
               placeholder: 'Enter weight',
+              keyboardType: KeyboardType_NUMBER,
               onChanged: _handleWeightChanged
             ),
           ])

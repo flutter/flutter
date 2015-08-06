@@ -10,6 +10,8 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/focus.dart';
 import 'package:sky/widgets/theme.dart';
 
+export 'package:sky/mojo/keyboard.dart' show KeyboardType_TEXT, KeyboardType_NUMBER, KeyboardType_PHONE, KeyboardType_DATETIME;
+
 typedef void StringValueChanged(String value);
 
 // TODO(eseidel): This isn't right, it's 16px on the bottom:
@@ -21,9 +23,11 @@ class Input extends StatefulComponent {
   Input({
     GlobalKey key,
     this.placeholder,
-    this.onChanged
+    this.onChanged,
+    this.keyboardType : KeyboardType_TEXT
   }): super(key: key);
 
+  int keyboardType;
   String placeholder;
   StringValueChanged onChanged;
 
@@ -42,6 +46,7 @@ class Input extends StatefulComponent {
   void syncFields(Input source) {
     placeholder = source.placeholder;
     onChanged = source.onChanged;
+    keyboardType = source.keyboardType;
   }
 
   void _handleTextUpdated() {
@@ -59,7 +64,7 @@ class Input extends StatefulComponent {
     bool focused = Focus.at(this);
 
     if (focused && !_keyboardHandle.attached) {
-      _keyboardHandle = keyboard.show(_editableValue.stub, KeyboardType_TEXT);
+      _keyboardHandle = keyboard.show(_editableValue.stub, keyboardType);
     } else if (!focused && _keyboardHandle.attached) {
       _keyboardHandle.release();
     }
