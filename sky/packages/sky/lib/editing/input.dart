@@ -59,7 +59,7 @@ class Input extends StatefulComponent {
     bool focused = Focus.at(this);
 
     if (focused && !_keyboardHandle.attached) {
-      _keyboardHandle = keyboard.show(_editableValue.stub);
+      _keyboardHandle = keyboard.show(_editableValue.stub, KeyboardType_TEXT);
     } else if (!focused && _keyboardHandle.attached) {
       _keyboardHandle.release();
     }
