@@ -110,6 +110,11 @@ abstract class GlobalKey extends Key {
     assert(removed);
   }
 
+  static Widget getWidget(GlobalKey key) {
+    assert(key != null);
+    return _registry[key];
+  }
+
   static void _notifyListeners() {
     assert(!_inRenderDirtyComponents);
     assert(!Widget._notifyingMountStatus);
