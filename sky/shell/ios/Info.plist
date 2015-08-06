@@ -13,7 +13,7 @@
 	<string>SkyShell</string>
 
 	<key>CFBundleIdentifier</key>
-	<string>org.domokit.SkyShell</string>
+	<string>com.google.SkyShell</string>
 
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
