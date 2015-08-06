@@ -19,7 +19,7 @@
   <string>LaunchScreen</string>
 
   <key>CFBundleIdentifier</key>
-  <string>org.domokit.sky.game</string>
+  <string>com.google.sky.game</string>
   
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
