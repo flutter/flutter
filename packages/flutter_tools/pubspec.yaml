@@ -11,3 +11,4 @@ dependencies:
   args: ^0.13.0
   shelf: ^0.6.2
   shelf_static: ^0.2.3
+  shelf_route: ^0.13.4
