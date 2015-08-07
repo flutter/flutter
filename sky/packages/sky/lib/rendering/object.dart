@@ -10,6 +10,7 @@ import 'package:sky/base/debug.dart';
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/node.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:vector_math/vector_math.dart';
 
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/base/hit_test.dart' show EventDisposition, HitTestTarget, HitTestEntry, HitTestResult;
@@ -411,6 +412,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   Rect get paintBounds;
   void debugPaint(PaintingCanvas canvas, Offset offset) { }
   void paint(PaintingCanvas canvas, Offset offset) { }
+
+  void applyPaintTransform(Matrix4 transform) { }
 
 
   // EVENTS
