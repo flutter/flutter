@@ -128,7 +128,7 @@ class StartSky(object):
         start_parser.add_argument('--install', action='store_true')
         start_parser.add_argument('--poke', action='store_true')
         start_parser.add_argument('--checked', action='store_true')
-        start_parser.add_argument('--build_path', type=str)
+        start_parser.add_argument('--build-path', type=str)
         start_parser.add_argument('project_or_path', nargs='?', type=str,
             default='.')
         start_parser.set_defaults(func=self.run)
