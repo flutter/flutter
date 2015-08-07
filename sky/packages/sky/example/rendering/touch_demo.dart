@@ -80,7 +80,7 @@ class RenderTouchDemo extends RenderBox {
 }
 
 void main() {
-  var paragraph = new RenderParagraph(new InlineText("Touch me!"));
+  var paragraph = new RenderParagraph(new RenderText("Touch me!"));
   var stack = new RenderStack(children: [
     new RenderTouchDemo(),
     paragraph,
