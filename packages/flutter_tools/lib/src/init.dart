@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
@@ -16,12 +17,10 @@ class InitCommandHandler extends CommandHandler {
   InitCommandHandler() : super('init', 'Create a new sky project.');
 
   ArgParser get parser {
+    // TODO: Add a --template option for template selection when we have more than one.
     ArgParser parser = new ArgParser();
     parser.addFlag('help',
         abbr: 'h', negatable: false, help: 'Display this help message.');
-    // parser.addOption('template',
-    //     abbr: 't',
-    //     help: "The template to generate; either sky-simple or sky-full.");
     parser.addOption('out', abbr: 'o', help: 'The output directory.');
     parser.addFlag('pub', defaultsTo: true,
         help: 'Whether to run pub after the project has been created.');
@@ -39,10 +38,8 @@ class InitCommandHandler extends CommandHandler {
       return new Future.value();
     }
 
+    // TODO: Confirm overwrite of an existing directory with the user.
     Directory out = new Directory(results['out']);
-
-    // TODO: confirm overwrite with user
-    //if (out.existsSync())
 
     new SkySimpleTemplate().generateInto(out);
 
@@ -81,9 +78,11 @@ abstract class Template {
     dir.createSync(recursive: true);
 
     files.forEach((String path, String contents) {
-      contents = contents
-          .replaceAll('{{projectName}}', projectName)
-          .replaceAll('{{description}}', description);
+      Map m = {
+        'projectName': projectName,
+        'description': description
+      };
+      contents = mustache.render(contents, m);
       File file = new File(p.join(dir.path, path));
       file.parent.createSync();
       file.writeAsStringSync(contents);
@@ -147,12 +146,10 @@ import 'package:sky/widgets.dart';
 class HelloWorldApp extends App {
   Widget build() {
     return new Scaffold(
-      toolbar: new ToolBar(center: new Text("Demo")),
-      body: new Material(child: new Center(child: new Text("Hello world!"))),
-      floatingActionButton: new FloatingActionButton(
-        child: new Icon(type: 'content/add', size: 24)
-      )
-    );
+        toolbar: new ToolBar(center: new Text("Demo")),
+        body: new Material(child: new Center(child: new Text("Hello world!"))),
+        floatingActionButton: new FloatingActionButton(
+            child: new Icon(type: 'content/add', size: 24)));
   }
 }
 
