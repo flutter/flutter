@@ -1,5 +1,5 @@
 name: sky
-version: 0.0.28
+version: 0.0.29
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: A framework for writing Sky applications
 homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/sky
@@ -9,8 +9,8 @@ dependencies:
   mojo_services: 0.0.22
   mojo: 0.0.22
   newton: ^0.1.2
-  sky_engine: ^0.0.6
-  sky_services: ^0.0.6
+  sky_engine: ^0.0.7
+  sky_services: ^0.0.7
   sky_tools: ^0.0.7
   vector_math: ^1.4.3
 environment:
