@@ -1238,15 +1238,24 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     }
   }
 
+  Offset get _scrollOffsetRoundedToIntegerDevicePixels {
+    double devicePixelRatio = sky.view.devicePixelRatio;
+    int dxInDevicePixels = (scrollOffset.dx * devicePixelRatio).round();
+    int dyInDevicePixels = (scrollOffset.dy * devicePixelRatio).round();
+    return new Offset(dxInDevicePixels / devicePixelRatio,
+                      dyInDevicePixels / devicePixelRatio);
+  }
+
   void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
+      Offset roundedScrollOffset = _scrollOffsetRoundedToIntegerDevicePixels;
       bool _needsClip = offset < Offset.zero ||
-                        !(offset & size).contains(((offset - scrollOffset) & child.size).bottomRight);
+                        !(offset & size).contains(((offset - roundedScrollOffset) & child.size).bottomRight);
       if (_needsClip) {
         canvas.save();
         canvas.clipRect(offset & size);
       }
-      canvas.paintChild(child, (offset - scrollOffset).toPoint());
+      canvas.paintChild(child, (offset - roundedScrollOffset).toPoint());
       if (_needsClip)
         canvas.restore();
     }
@@ -1256,7 +1265,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     if (child != null) {
       assert(child.parentData is BoxParentData);
       Rect childBounds = child.parentData.position & child.size;
-      Point transformedPosition = position + scrollOffset;
+      Point transformedPosition = position + _scrollOffsetRoundedToIntegerDevicePixels;
       if (childBounds.contains(transformedPosition))
         child.hitTest(result, position: transformedPosition);
     }
