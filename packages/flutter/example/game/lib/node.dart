@@ -30,6 +30,9 @@ class Node {
   double _scaleX = 1.0;
   double _scaleY = 1.0;
 
+  double _skewX = 0.0;
+  double _skewY = 0.0;
+
   /// The visibility of this node and its children.
   bool visible = true;
 
@@ -113,6 +116,22 @@ class Node {
   void set position(Point position) {
     assert(position != null);
     _position = position;
+    invalidateTransformMatrix();
+  }
+
+  double get skewX => _skewX;
+
+  void set skewX (double skewX) {
+    assert(skewX != null);
+    _skewX = skewX;
+    invalidateTransformMatrix();
+  }
+
+  double get skewY => _skewY;
+
+  void set skewY (double skewY) {
+    assert(skewY != null);
+    _skewY = skewY;
     invalidateTransformMatrix();
   }
 
@@ -294,6 +313,15 @@ class Node {
                -sx * _scaleY, cx * _scaleY, 0.0, 0.0,
                0.0, 0.0, 1.0, 0.0,
               _position.x, _position.y, 0.0, 1.0);
+
+    if (_skewX != 0.0 || _skewY != 0.0) {
+      // Needs skew transform
+      Matrix4 skew = new Matrix4(1.0, math.tan(radians(_skewX)), 0.0, 0.0,
+                                 math.tan(radians(_skewY)), 1.0, 0.0, 0.0,
+                                 0.0, 0.0, 1.0, 0.0,
+                                 0.0, 0.0, 0.0, 1.0);
+      matrix.multiply(skew);
+    }
 
     return matrix;
   }
