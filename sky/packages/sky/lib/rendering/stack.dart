@@ -38,11 +38,12 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     addAll(children);
   }
 
+  bool _hasVisualOverflow = false;
+
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData)
       child.parentData = new StackParentData();
   }
-
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     double width = constraints.minWidth;
@@ -111,6 +112,7 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
   }
 
   void performLayout() {
+    _hasVisualOverflow = false;
     bool hasNonPositionedChildren = false;
 
     double width = 0.0;
@@ -175,14 +177,18 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
           x = childData.left;
         else if (childData.right != null)
           x = size.width - childData.right - child.size.width;
-        assert(x >= 0.0 && x + child.size.width <= size.width);
+
+        if (x < 0.0 || x + child.size.width > size.width)
+          _hasVisualOverflow = true;
 
         double y = 0.0;
         if (childData.top != null)
           y = childData.top;
         else if (childData.bottom != null)
           y = size.height - childData.bottom - child.size.height;
-        assert(y >= 0.0 && y + child.size.height <= size.height);
+
+        if (y < 0.0 || y + child.size.height > size.height)
+          _hasVisualOverflow = true;
 
         childData.position = new Point(x, y);
       }
@@ -196,6 +202,13 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
-    defaultPaint(canvas, offset);
+    if (_hasVisualOverflow) {
+      canvas.save();
+      canvas.clipRect(offset & size);
+      defaultPaint(canvas, offset);
+      canvas.restore();
+    } else {
+      defaultPaint(canvas, offset);
+    }
   }
 }
