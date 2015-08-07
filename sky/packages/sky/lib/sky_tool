@@ -127,6 +127,7 @@ class StartSky(object):
             help='launch %s on the device' % APK_NAME)
         start_parser.add_argument('--install', action='store_true')
         start_parser.add_argument('--poke', action='store_true')
+        start_parser.add_argument('--checked', action='store_true')
         start_parser.add_argument('project_or_path', nargs='?', type=str,
             default='.')
         start_parser.set_defaults(func=self.run)
@@ -212,11 +213,19 @@ class StartSky(object):
         if args.poke:
             url += '?rand=%s' % random.random()
 
-        subprocess.check_call([ADB_PATH, 'shell',
+        cmd = [
+            ADB_PATH, 'shell',
             'am', 'start',
             '-a', 'android.intent.action.VIEW',
             '-d', url,
-            ANDROID_COMPONENT])
+        ]
+
+        if args.checked:
+            cmd += [ '--ez', 'enable-checked-mode', 'true' ]
+
+        cmd += [ ANDROID_COMPONENT ]
+        print cmd
+        subprocess.check_call(cmd)
 
 
 class StopSky(object):

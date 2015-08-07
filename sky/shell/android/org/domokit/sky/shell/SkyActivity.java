@@ -26,6 +26,17 @@ public class SkyActivity extends Activity {
     private TracingController mTracingController;
     private PlatformViewAndroid mView;
 
+    private String[] getArgsFromIntent(Intent intent) {
+        // Before adding more entries to this list, consider that arbitrary
+        // Android applications can generate intents with extra data and that
+        // there are many security-sensitive args in the binary.
+        if (intent.getBooleanExtra("enable-checked-mode", false)) {
+            String[] args = { "--enable-checked-mode"};
+            return args;
+        }
+        return null;
+    }
+
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */
@@ -47,7 +58,8 @@ public class SkyActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
-        SkyMain.ensureInitialized(getApplicationContext());
+        String[] args = getArgsFromIntent(getIntent());
+        SkyMain.ensureInitialized(getApplicationContext(), args);
         mView = new PlatformViewAndroid(this, edgeDims);
         ActivityImpl.setCurrentActivity(this);
         setContentView(mView);
