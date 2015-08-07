@@ -20,12 +20,25 @@ class Node3D extends Node {
     invalidateTransformMatrix();
   }
 
+  double _projectionDepth = 500.0;
+
+  double get projectionDepth => _projectionDepth;
+
+  set projectionDepth(double projectionDepth) {
+    _projectionDepth = projectionDepth;
+    invalidateTransformMatrix();
+  }
+
   Matrix4 computeTransformMatrix() {
     // Apply normal 2d transforms
     Matrix4 matrix = super.computeTransformMatrix();
 
-
-    matrix.translate(0.0, 0.0, 500.0);
+    // Apply perspective projection
+    Matrix4 projection = new Matrix4(1.0, 0.0, 0.0, 0.0,
+                                     0.0, 1.0, 0.0, 0.0,
+                                     0.0, 0.0, 1.0, -1.0/_projectionDepth,
+                                     0.0, 0.0, 0.0, 1.0);
+    matrix = matrix.multiply(projection);
 
     // Rotate around x and y axis
     matrix.rotateY(radians(_rotationY));
