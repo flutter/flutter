@@ -76,9 +76,9 @@ class MyToolBar extends Component {
       height: 56.0,
       padding: const EdgeDims.symmetric(horizontal: 8.0),
       child: new Flex([
-        new NetworkImage(src: 'menu.png', size: const Size(25.0, 25.0)),
+        new NetworkImage(src: 'menu.png', width: 25.0, height: 25.0),
         new Flexible(child: new Text('My awesome toolbar')),
-        new NetworkImage(src: 'search.png', size: const Size(25.0, 25.0)),
+        new NetworkImage(src: 'search.png', width 25.0, height: 25.0),
       ])
     );
   }
@@ -208,7 +208,7 @@ button:
     return new MyButton(
       child: new ShrinkWrapWidth(
         child: new Flex([
-          new NetworkImage(src: 'thumbs-up.png', size: const Size(25.0, 25.0)),
+          new NetworkImage(src: 'thumbs-up.png', width: 25.0, height: 25.0),
           new Container(
             padding: const EdgeDims.only(left: 10.0),
             child: new Text('Thumbs up')
