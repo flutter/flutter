@@ -4,7 +4,10 @@
 
 package org.chromium.mojo.keyboard;
 
+import java.lang.StringBuilder;
+
 import android.view.View;
+import android.view.KeyEvent;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -70,5 +73,15 @@ public class InputConnectionAdaptor extends BaseInputConnection {
     public boolean setSelection(int start, int end) {
         mClient.setSelection(start, end);
         return super.setSelection(start, end);
+    }
+
+    // Number keys come through as key events instead of commitText!?
+    @Override
+    public boolean sendKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            // 1 appears to always be the value for newCursorPosition?
+            mClient.commitText(String.valueOf(event.getNumber()), 1);
+        }
+        return super.sendKeyEvent(event);
     }
 }
