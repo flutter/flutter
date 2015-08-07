@@ -62,10 +62,11 @@ Thumbs.db
 /tools/grit/
 
 # dart packages directories and related.
+/examples/**/packages
+/examples/**/pubspec.lock
 /mojo/dart/apptest/packages
 /mojo/dart/mojo_services/packages
 /mojo/dart/mojo_services/pubspec.lock
 /mojo/dart/mojom/bin/packages
 /mojo/dart/mojom/packages
 /mojo/dart/mojom/test/packages
-

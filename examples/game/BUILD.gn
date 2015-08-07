@@ -12,7 +12,7 @@ sky_app("game") {
     apk_name = "Asteroids"
 
     deps = [
-      "//sky/packages/sky/example/game/apk:resources",
+      "//examples/game/apk:resources",
     ]
   } else if (is_ios) {
     info_plist = "ios/Info.plist"

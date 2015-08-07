@@ -16,7 +16,7 @@ PUBSPECS = [
 ]
 
 MANIFESTS = [
-    'sky/packages/sky/example/demo_launcher/apk/AndroidManifest.xml',
+    'examples/demo_launcher/apk/AndroidManifest.xml',
 ]
 
 MANIFEST_PREFACE = '''<?xml version="1.0" encoding="utf-8"?>

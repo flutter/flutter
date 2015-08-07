@@ -396,7 +396,7 @@ def run_analyzer(port, options, args, logging_stream):
     sky_tools_dir = os.path.dirname(os.path.dirname(test_dir))
     analyzer_path = os.path.join(sky_tools_dir, 'skyanalyzer')
     src_dir = os.path.dirname(os.path.dirname(sky_tools_dir))
-    analyzer_target_path = os.path.join(src_dir, 'sky/packages/sky/example/stocks/lib/main.dart')
+    analyzer_target_path = os.path.join(src_dir, 'examples/stocks/lib/main.dart')
     analyzer_args = [
         analyzer_path,
         analyzer_target_path
