@@ -69,7 +69,7 @@ class MimicOverlay extends AnimatedComponent {
   void _handleMimicCallback(Rect globalBounds) {
     setState(() {
       // TODO(abarth): We need to convert global bounds into local coordinates.
-      _mimicBounds.begin = globalBounds;
+      _mimicBounds.begin = globalToLocal(globalBounds.topLeft) & globalBounds.size;
       _expandPerformance.forward();
     });
   }

@@ -120,8 +120,7 @@ class Mimicable extends StatefulComponent {
     if (_didStartMimic)
       return;
     assert(_mimic != null);
-    // TODO(abarth): We'll need to convert Point.origin to global coordinates.
-    Point globalPosition = Point.origin;
+    Point globalPosition = localToGlobal(Point.origin);
     _mimic._startMimic(key, globalPosition & _size);
     _didStartMimic = true;
   }
