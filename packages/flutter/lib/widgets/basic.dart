@@ -445,17 +445,17 @@ class Flexible extends ParentDataNode {
     : super(child, new FlexBoxParentData()..flex = flex, key: key);
 }
 
-class Inline extends LeafRenderObjectWrapper {
-  Inline({ Key key, this.text }) : super(key: key);
+class Paragraph extends LeafRenderObjectWrapper {
+  Paragraph({ Key key, this.inline }) : super(key: key);
 
-  final InlineBase text;
+  final RenderInline inline;
 
-  RenderParagraph createNode() => new RenderParagraph(text);
+  RenderParagraph createNode() => new RenderParagraph(inline);
   RenderParagraph get root => super.root;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.inline = text;
+    root.inline = inline;
   }
 }
 
@@ -463,20 +463,26 @@ class StyledText extends Component {
   // elements ::= "string" | [<text-style> <elements>*]
   // Where "string" is text to display and text-style is an instance of
   // TextStyle. The text-style applies to all of the elements that follow.
-  StyledText({ this.elements, Key key }) : super(key: key);
+  StyledText({ this.elements, Key key }) : super(key: key) {
+    assert(_toInline(elements) != null);
+  }
 
   final dynamic elements;
 
-  InlineBase _toInline(dynamic element) {
+  RenderInline _toInline(dynamic element) {
     if (element is String)
-      return new InlineText(element);
-    if (element is Iterable && element.first is TextStyle)
-      return new InlineStyle(element.first, element.skip(1).map(_toInline).toList());
-    throw new ArgumentError("invalid elements");
+      return new RenderText(element);
+    if (element is Iterable) {
+      dynamic first = element.first;
+      if (first is! TextStyle)
+        throw new ArgumentError("First element of Iterable is a ${first.runtimeType} not a TextStyle");
+      return new RenderStyled(first, element.skip(1).map(_toInline).toList());
+    }
+    throw new ArgumentError("Element is ${element.runtimeType} not a String or an Iterable");
   }
 
   Widget build() {
-    return new Inline(text: _toInline(elements));
+    return new Paragraph(inline: _toInline(elements));
   }
 }
 
@@ -487,7 +493,7 @@ class Text extends Component {
   final TextStyle style;
 
   Widget build() {
-    InlineBase text = new InlineText(data);
+    RenderInline inline = new RenderText(data);
     TextStyle defaultStyle = DefaultTextStyle.of(this);
     TextStyle combinedStyle;
     if (defaultStyle != null) {
@@ -499,8 +505,8 @@ class Text extends Component {
       combinedStyle = style;
     }
     if (combinedStyle != null)
-      text = new InlineStyle(combinedStyle, [text]);
-    return new Inline(text: text);
+      inline = new RenderStyled(combinedStyle, [inline]);
+    return new Paragraph(inline: inline);
   }
 }
 

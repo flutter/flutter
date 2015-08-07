@@ -13,19 +13,19 @@ import 'package:sky/rendering/sky_binding.dart';
 
 RenderBox getBox(double lh) {
   RenderParagraph paragraph = new RenderParagraph(
-    new InlineStyle(
+    new RenderStyled(
       new TextStyle(
         color: const Color(0xFF0000A0)
       ),
       [
-        new InlineText('test'),
-        new InlineStyle(
+        new RenderText('test'),
+        new RenderStyled(
           new TextStyle(
             fontFamily: 'serif',
             fontSize: 50.0,
             height: lh
           ),
-          [new InlineText('مرحبا Hello')]
+          [new RenderText('مرحبا Hello')]
         )
       ]
     )
@@ -57,7 +57,7 @@ RenderBox getBox(double lh) {
               paint.color = const Color(0xFFFF9000);
               paint.setStyle(sky.PaintingStyle.stroke);
               paint.strokeWidth = 3.0;
-              canvas.drawPath(path, paint);  
+              canvas.drawPath(path, paint);
             }
           )
         )
