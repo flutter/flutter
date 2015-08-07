@@ -33,7 +33,16 @@ struct TaskDescription {
 //               of services that only work on specific platforms? We need to
 //               figure out how to rationalize this interface across platforms.
 interface Activity {
-  startActivity(Intent intent);
-  finishCurrentActivity();
-  setTaskDescription(TaskDescription description);
+  StartActivity(Intent intent);
+  FinishCurrentActivity();
+  SetTaskDescription(TaskDescription description);
+
+  // These are stored off the Activity on Android, but probably belong in a
+  // separate FileSystem service.
+
+  // Where to store long-term files.
+  GetFilesDir() => (string path);
+
+  // Where to store short-term files.
+  GetCacheDir() => (string path);
 };

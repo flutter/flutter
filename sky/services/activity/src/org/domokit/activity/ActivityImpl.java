@@ -95,4 +95,20 @@ public class ActivityImpl implements Activity {
                 )
         );
     }
+
+    @Override
+    public void getFilesDir(GetFilesDirResponse callback) {
+        String path = null;
+        if (sCurrentActivity != null)
+            path = sCurrentActivity.getFilesDir().getPath();
+        callback.call(path);
+    }
+
+    @Override
+    public void getCacheDir(GetCacheDirResponse callback) {
+        String path = null;
+        if (sCurrentActivity != null)
+            path = sCurrentActivity.getCacheDir().getPath();
+        callback.call(path);
+    }
 }
