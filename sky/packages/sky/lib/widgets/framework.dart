@@ -369,6 +369,21 @@ abstract class Widget {
     return '$runtimeType($key; hashCode=$hashCode)';
   }
 
+  // This function can be safely called when the layout is valid.
+  // For example Listener or SizeObserver callbacks can safely call
+  // globalToLocal().
+  Point globalToLocal(Point point) {
+    assert(mounted);
+    assert(root is RenderBox);
+    return (root as RenderBox).globalToLocal(point);
+  }
+
+  // See globalToLocal().
+  Point localToGlobal(Point point) {
+    assert(mounted);
+    assert(root is RenderBox);
+    return (root as RenderBox).localToGlobal(point);
+  }
 }
 
 
