@@ -450,6 +450,42 @@ abstract class RenderBox extends RenderObject {
     _size = inDebugBuild ? new _DebugSize(value, this, debugCanParentUseSize) : value;
   }
 
+  void applyPaintTransform(Matrix4 transform) {
+    if (parentData is BoxParentData) {
+      Point position = (parentData as BoxParentData).position;
+      transform.translate(position.x, position.y);
+    }
+  }
+
+  static Point _transformPoint(Matrix4 transform, Point point) {
+    Vector3 position3 = new Vector3(point.x, point.y, 0.0);
+    Vector3 transformed3 = transform.transform3(position3);
+    return new Point(transformed3.x, transformed3.y);
+  }
+
+  Point globalToLocal(Point point) {
+    assert(attached);
+    Matrix4 transform = new Matrix4.identity();
+    RenderObject renderer = this;
+    while(renderer != null) {
+      renderer.applyPaintTransform(transform);
+      renderer = renderer.parent;
+    }
+    /* double det = */ transform.invert();
+    // TODO(abarth): Check the determinant for degeneracy.
+    return _transformPoint(transform, point);
+  }
+
+  Point localToGlobal(Point point) {
+    List <RenderObject> renderers = <RenderObject>[];
+    for (RenderObject renderer = this; renderer != null; renderer = renderer.parent)
+      renderers.add(renderer);
+    Matrix4 transform = new Matrix4.identity();
+    for (RenderObject renderer in renderers.reversed)
+      renderer.applyPaintTransform(transform);
+    return _transformPoint(transform, point);
+  }
+
   Rect get paintBounds => Point.origin & size;
   void debugPaint(PaintingCanvas canvas, Offset offset) {
     if (debugPaintSizeEnabled)
@@ -550,7 +586,6 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     if (child != null)
       canvas.paintChild(child, offset.toPoint());
   }
-
 }
 
 class RenderConstrainedBox extends RenderProxyBox {
@@ -1261,6 +1296,11 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     }
   }
 
+  void applyPaintTransform(Matrix4 transform) {
+    super.applyPaintTransform(transform);
+    transform.translate(-scrollOffset.dx, -scrollOffset.dy);
+  }
+
   void hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
@@ -1510,6 +1550,11 @@ class RenderTransform extends RenderProxyBox {
     canvas.concat(_transform.storage);
     super.paint(canvas, Offset.zero);
     canvas.restore();
+  }
+
+  void applyPaintTransform(Matrix4 transform) {
+    super.applyPaintTransform(transform);
+    transform.multiply(_transform);
   }
 
   String debugDescribeSettings(String prefix) {

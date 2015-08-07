@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
+import 'package:vector_math/vector_math.dart';
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
@@ -246,6 +247,11 @@ class RenderBlockViewport extends RenderBlockBase {
     canvas.clipRect(offset & size);
     defaultPaint(canvas, offset.translate(0.0, startOffset));
     canvas.restore();
+  }
+
+  void applyPaintTransform(Matrix4 transform) {
+    super.applyPaintTransform(transform);
+    transform.translate(0.0, startOffset);
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
