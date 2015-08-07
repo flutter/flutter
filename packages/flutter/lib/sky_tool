@@ -128,6 +128,7 @@ class StartSky(object):
         start_parser.add_argument('--install', action='store_true')
         start_parser.add_argument('--poke', action='store_true')
         start_parser.add_argument('--checked', action='store_true')
+        start_parser.add_argument('--build_path', type=str)
         start_parser.add_argument('project_or_path', nargs='?', type=str,
             default='.')
         start_parser.set_defaults(func=self.run)
@@ -178,7 +179,10 @@ class StartSky(object):
                               "exist to locate %s." \
                               % (os.path.basename(__file__), APK_NAME))
                 return 2
-            apk_path = os.path.join(APK_DIR, APK_NAME)
+            if args.build_path is not None:
+                apk_path = os.path.join(args.build_path, 'apks', APK_NAME)
+            else:
+                apk_path = os.path.join(APK_DIR, APK_NAME)
             if not os.path.exists(apk_path):
                 logging.error("'%s' does not exist?" % apk_path)
                 return 2
