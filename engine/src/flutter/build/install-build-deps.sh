@@ -72,12 +72,14 @@ if ! which lsb_release > /dev/null; then
   exit 1;
 fi
 
-lsb_release=$(lsb_release --codename --short)
+distro=$(lsb_release --id --short)
+codename=$(lsb_release --codename --short)
 ubuntu_codenames="(precise|trusty|utopic|vivid)"
+debian_codenames="(stretch)"
 if [ 0 -eq "${do_unsupported-0}" ] && [ 0 -eq "${do_quick_check-0}" ] ; then
-  if [[ ! $lsb_release =~ $ubuntu_codenames ]]; then
+  if [[ ! $codename =~ $ubuntu_codenames && ! $codename =~ $debian_codenames ]]; then
     echo "ERROR: Only Ubuntu 12.04 (precise), 14.04 (trusty), " \
-      "14.10 (utopic) and 15.04 (vivid) are currently supported" >&2
+      "14.10 (utopic) and 15.04 (vivid), and Debian Testing (stretch) are currently supported" >&2
     exit 1
   fi
 
@@ -97,10 +99,17 @@ fi
 chromeos_dev_list="libbluetooth-dev libxkbcommon-dev realpath"
 
 # Packages needed for development
-dev_list="apache2.2-bin bison cdbs curl dpkg-dev elfutils devscripts fakeroot
-          flex fonts-thai-tlwg g++ git-core git-svn gperf language-pack-da
-          language-pack-fr language-pack-he language-pack-zh-hant
-          libapache2-mod-php5 libasound2-dev libbrlapi-dev libav-tools
+if [[ $distro = Debian ]] ; then
+  # Debian-specific package names
+  dev_list="apache2-bin fonts-indic fonts-lyx"
+else
+  # Ubuntu-specific package names
+  dev_list="apache2.2-bin ttf-indic-fonts xfonts-mathml language-pack-da
+            language-pack-fr language-pack-he language-pack-zh-hant"
+fi
+dev_list="$dev_list bison cdbs curl dpkg-dev elfutils devscripts fakeroot
+          flex fonts-thai-tlwg g++ git-core git-svn gperf libapache2-mod-php5
+          libasound2-dev libbrlapi-dev libav-tools
           libbz2-dev libcairo2-dev libcap-dev libcups2-dev libcurl4-gnutls-dev
           libdrm-dev libelf-dev libexif-dev libgconf2-dev libglib2.0-dev
           libglu1-mesa-dev libgnome-keyring-dev libgtk2.0-dev libkrb5-dev
@@ -109,8 +118,8 @@ dev_list="apache2.2-bin bison cdbs curl dpkg-dev elfutils devscripts fakeroot
           libwww-perl libxslt1-dev libxss-dev libxt-dev libxtst-dev openbox
           patch perl php5-cgi pkg-config python python-cherrypy3 python-crypto
           python-dev python-numpy python-opencv python-openssl python-psutil
-          python-yaml rpm ruby subversion ttf-dejavu-core ttf-indic-fonts
-          ttf-kochi-gothic ttf-kochi-mincho wdiff xfonts-mathml zip
+          python-yaml rpm ruby subversion ttf-dejavu-core
+          ttf-kochi-gothic ttf-kochi-mincho wdiff zip
           $chromeos_dev_list"
 
 # 64-bit systems need a minimum set of 32-bit compat packages for the pre-built
@@ -140,9 +149,9 @@ dbg_list="libatk1.0-dbg libc6-dbg libcairo2-dbg libfontconfig1-dbg
           libxrandr2-dbg libxrender1-dbg libxtst6-dbg zlib1g-dbg"
 
 # Find the proper version of libstdc++6-4.x-dbg.
-if [ "x$lsb_release" = "xprecise" ]; then
+if [ "x$codename" = "xprecise" ]; then
   dbg_list="${dbg_list} libstdc++6-4.6-dbg"
-elif [ "x$lsb_release" = "xtrusty" ]; then
+elif [ "x$codename" = "xtrusty" ]; then
   dbg_list="${dbg_list} libstdc++6-4.8-dbg"
 else
   dbg_list="${dbg_list} libstdc++6-4.9-dbg"
@@ -153,11 +162,17 @@ lib32_list="linux-libc-dev:i386"
 
 # arm cross toolchain packages needed to build chrome on armhf
 arm_list="libc6-dev-armhf-cross
-          linux-libc-dev-armhf-cross
-          g++-arm-linux-gnueabihf"
+          linux-libc-dev-armhf-cross"
+
+# Work around for dependency issue Debian/Stretch
+if [ "x$codename" = "xstretch" ]; then
+  arm_list+=" g++-5-arm-linux-gnueabihf"
+else
+  arm_list+=" g++-arm-linux-gnueabihf"
+fi
 
 # Work around for dependency issue Ubuntu/Trusty: http://crbug.com/435056
-if [ "x$lsb_release" = "xtrusty" ]; then
+if [ "x$codename" = "xtrusty" ]; then
   arm_list+=" g++-4.8-multilib-arm-linux-gnueabihf
               gcc-4.8-multilib-arm-linux-gnueabihf"
 fi
@@ -363,7 +378,7 @@ if [ 1 -eq "${do_quick_check-0}" ] ; then
 fi
 
 if test "$do_inst_lib32" = "1" || test "$do_inst_nacl" = "1"; then
-  if [[ ! $lsb_release =~ (precise) ]]; then
+  if [[ ! $codename =~ (precise) ]]; then
     sudo dpkg --add-architecture i386
   fi
 fi
