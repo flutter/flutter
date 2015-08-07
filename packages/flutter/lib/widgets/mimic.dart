@@ -4,16 +4,24 @@
 
 import 'package:sky/widgets/basic.dart';
 
+typedef MimicCallback(Rect globalBounds);
+
 class Mimic extends StatefulComponent {
-  Mimic({ Key key, this.original }) : super(key: key);
+  Mimic({
+    Key key,
+    this.original,
+    this.callback
+  }) : super(key: key);
 
   GlobalKey original;
+  MimicCallback callback;
 
   void initState() {
     _requestToStartMimic();
   }
 
   void syncFields(Mimic source) {
+    callback = source.callback;
     if (original != source.original) {
       _stopMimic();
       original = source.original;
@@ -34,11 +42,11 @@ class Mimic extends StatefulComponent {
   }
 
   Mimicable _mimicable;
-  Size _size;
+  bool _mimicking = false;
 
   void _requestToStartMimic() {
     assert(_mimicable == null);
-    assert(_size == null);
+    assert(!_mimicking);
     if (original == null)
       return;
     _mimicable = GlobalKey.getWidget(original) as Mimicable;
@@ -46,27 +54,25 @@ class Mimic extends StatefulComponent {
     _mimicable._requestToStartMimic(this);
   }
 
-  void _startMimic(GlobalKey key, Size size) {
+  void _startMimic(GlobalKey key, Rect globalBounds) {
     assert(key == original);
     setState(() {
-      _size = size;
+      _mimicking = true;
     });
+    callback(globalBounds);
   }
 
   void _stopMimic() {
     if (_mimicable != null)
       _mimicable._didStopMimic(this);
     _mimicable = null;
-    _size = null;
+    _mimicking = false;
   }
 
   Widget build() {
-    if (_size == null || !_mimicable.mounted)
+    if (!_mimicking || !_mimicable.mounted)
       return new Container();
-    return new ConstrainedBox(
-      constraints: new BoxConstraints.tight(_size),
-      child: _mimicable.child
-    );
+    return _mimicable.child;
   }
 }
 
@@ -114,7 +120,9 @@ class Mimicable extends StatefulComponent {
     if (_didStartMimic)
       return;
     assert(_mimic != null);
-    _mimic._startMimic(key, _size);
+    // TODO(abarth): We'll need to convert Point.origin to global coordinates.
+    Point globalPosition = Point.origin;
+    _mimic._startMimic(key, globalPosition & _size);
     _didStartMimic = true;
   }
 
