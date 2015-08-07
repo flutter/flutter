@@ -57,9 +57,10 @@ very commonly used:
    padding, and constraints applied to its size. In addition, a `Container` can
    be transformed in three dimensional space using a matrix.
 
- * `Image`: The `Image` widget lets you display an image, referenced using a
-   URL. The underlying image is cached, which means if several `Image` widgets
-   refer to the same URL, they'll share the underlying image resource.
+ * `NetworkImage`: The `NetworkImage` widget lets you display an image, referenced
+   using a URL. The underlying image is cached, which means if several
+   `NetworkImage` widgets refer to the same URL, they'll share the underlying image
+   resource.
 
 Below is a simple toolbar example that shows how to combine these widgets:
 
@@ -75,9 +76,9 @@ class MyToolBar extends Component {
       height: 56.0,
       padding: const EdgeDims.symmetric(horizontal: 8.0),
       child: new Flex([
-        new Image(src: 'menu.png', size: const Size(25.0, 25.0)),
+        new NetworkImage(src: 'menu.png', size: const Size(25.0, 25.0)),
         new Flexible(child: new Text('My awesome toolbar')),
-        new Image(src: 'search.png', size: const Size(25.0, 25.0)),
+        new NetworkImage(src: 'search.png', size: const Size(25.0, 25.0)),
       ])
     );
   }
@@ -207,7 +208,7 @@ button:
     return new MyButton(
       child: new ShrinkWrapWidth(
         child: new Flex([
-          new Image(src: 'thumbs-up.png', size: const Size(25.0, 25.0)),
+          new NetworkImage(src: 'thumbs-up.png', size: const Size(25.0, 25.0)),
           new Container(
             padding: const EdgeDims.only(left: 10.0),
             child: new Text('Thumbs up')
