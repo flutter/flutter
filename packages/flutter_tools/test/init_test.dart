@@ -23,7 +23,7 @@ defineTests() {
       temp.deleteSync(recursive: true);
     });
 
-    // Verify that we create a project that os well-formed.
+    // Verify that we create a project that is well-formed.
     test('init sky-simple', () async {
       InitCommandHandler handler = new InitCommandHandler();
       _MockArgResults results = new _MockArgResults();
