@@ -55,7 +55,7 @@ const _kChunkCount = 30;
 String _urlToFetch(int chunk) {
   if (rootBundle == null)
     return '../data/stock_data_${chunk}.json';
-  return 'https://domokit.github.io/example/stocks/data/stock_data_${chunk}.json';
+  return 'https://domokit.github.io/examples/stocks/data/stock_data_${chunk}.json';
 }
 
 class StockDataFetcher {
