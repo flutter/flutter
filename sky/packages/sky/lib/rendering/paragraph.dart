@@ -8,7 +8,7 @@ import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 
-abstract class InlineBase {
+abstract class RenderInline {
   sky.Node _toDOM(sky.Document owner);
   String toString([String prefix = '']);
 
@@ -16,8 +16,8 @@ abstract class InlineBase {
   }
 }
 
-class InlineText extends InlineBase {
-  InlineText(this.text) {
+class RenderText extends RenderInline {
+  RenderText(this.text) {
     assert(text != null);
   }
 
@@ -27,25 +27,25 @@ class InlineText extends InlineBase {
     return owner.createText(text);
   }
 
-  bool operator ==(other) => other is InlineText && text == other.text;
+  bool operator ==(other) => other is RenderText && text == other.text;
   int get hashCode => text.hashCode;
 
   String toString([String prefix = '']) => '${prefix}InlineText: "${text}"';
 }
 
-class InlineStyle extends InlineBase {
-  InlineStyle(this.style, this.children) {
+class RenderStyled extends RenderInline {
+  RenderStyled(this.style, this.children) {
     assert(style != null);
     assert(children != null);
   }
 
   final TextStyle style;
-  final List<InlineBase> children;
+  final List<RenderInline> children;
 
   sky.Node _toDOM(sky.Document owner) {
     sky.Element parent = owner.createElement('t');
     style.applyToCSSStyle(parent.style);
-    for (InlineBase child in children) {
+    for (RenderInline child in children) {
       parent.appendChild(child._toDOM(owner));
     }
     return parent;
@@ -58,7 +58,7 @@ class InlineStyle extends InlineBase {
   bool operator ==(other) {
     if (identical(this, other))
       return true;
-    if (other is! InlineStyle
+    if (other is! RenderStyled
         || style != other.style
         || children.length != other.children.length)
       return false;
@@ -72,7 +72,7 @@ class InlineStyle extends InlineBase {
   int get hashCode {
     int value = 373;
     value = 37 * value + style.hashCode;
-    for (InlineBase child in children)
+    for (RenderInline child in children)
       value = 37 * value + child.hashCode;
     return value;
   }
@@ -82,7 +82,7 @@ class InlineStyle extends InlineBase {
     result.add('${prefix}InlineStyle:');
     var indent = '${prefix}  ';
     result.add('${style.toString(indent)}');
-    for (InlineBase child in children) {
+    for (RenderInline child in children) {
       result.add(child.toString(indent));
     }
     return result.join('\n');
@@ -102,9 +102,8 @@ double _applyFloatingPointHack(double layoutValue) {
 
 class RenderParagraph extends RenderBox {
 
-  RenderParagraph(InlineBase inlineValue) {
+  RenderParagraph(this._inline) {
     _layoutRoot.rootElement = _document.createElement('p');
-    inline = inlineValue;
   }
 
   final sky.Document _document = new sky.Document();
@@ -112,9 +111,9 @@ class RenderParagraph extends RenderBox {
 
   BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
 
-  InlineBase _inline;
-  InlineBase get inline => _inline;
-  void set inline (InlineBase value) {
+  RenderInline _inline;
+  RenderInline get inline => _inline;
+  void set inline (RenderInline value) {
     if (_inline == value)
       return;
     _inline = value;

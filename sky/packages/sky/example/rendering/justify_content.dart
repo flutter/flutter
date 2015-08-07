@@ -21,7 +21,7 @@ void main() {
   var table = new RenderFlex(direction: FlexDirection.vertical);
 
   void addRow(FlexJustifyContent justify) {
-    RenderParagraph paragraph = new RenderParagraph(new InlineStyle(style, [new InlineText("${justify}")]));
+    RenderParagraph paragraph = new RenderParagraph(new RenderStyled(style, [new RenderText("${justify}")]));
     table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
     var row = new RenderFlex(direction: FlexDirection.horizontal);
     row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: new Size(80.0, 60.0)));

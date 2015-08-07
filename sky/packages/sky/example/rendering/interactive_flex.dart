@@ -84,9 +84,9 @@ porchetta bacon kevin meatball meatloaf pig beef ribs chicken. Brisket ribeye
 andouille leberkas capicola meatloaf. Chicken pig ball tip pork picanha bresaola
 alcatra. Pork pork belly alcatra, flank chuck drumstick biltong doner jowl.
 Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
-  var text = new InlineStyle(
+  var text = new RenderStyled(
       new TextStyle(color:  const Color(0xFF009900)),
-      [new InlineText(meatyString)]);
+      [new RenderText(meatyString)]);
   padding = new RenderPadding(
       padding: const EdgeDims.all(10.0),
       child: new RenderParagraph(text));
