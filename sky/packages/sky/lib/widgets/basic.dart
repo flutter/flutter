@@ -463,16 +463,22 @@ class StyledText extends Component {
   // elements ::= "string" | [<text-style> <elements>*]
   // Where "string" is text to display and text-style is an instance of
   // TextStyle. The text-style applies to all of the elements that follow.
-  StyledText({ this.elements, Key key }) : super(key: key);
+  StyledText({ this.elements, Key key }) : super(key: key) {
+    assert(_toInline(elements) != null);
+  }
 
   final dynamic elements;
 
   RenderInline _toInline(dynamic element) {
     if (element is String)
       return new RenderText(element);
-    if (element is Iterable && element.first is TextStyle)
-      return new RenderStyled(element.first, element.skip(1).map(_toInline).toList());
-    throw new ArgumentError("invalid elements");
+    if (element is Iterable) {
+      dynamic first = element.first;
+      if (first is! TextStyle)
+        throw new ArgumentError("First element of Iterable is a ${first.runtimeType} not a TextStyle");
+      return new RenderStyled(first, element.skip(1).map(_toInline).toList());
+    }
+    throw new ArgumentError("Element is ${element.runtimeType} not a String or an Iterable");
   }
 
   Widget build() {
