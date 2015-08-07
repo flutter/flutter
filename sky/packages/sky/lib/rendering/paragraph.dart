@@ -102,8 +102,9 @@ double _applyFloatingPointHack(double layoutValue) {
 
 class RenderParagraph extends RenderBox {
 
-  RenderParagraph(this._inline) {
+  RenderParagraph(RenderInline inline) {
     _layoutRoot.rootElement = _document.createElement('p');
+    this.inline = inline;
   }
 
   final sky.Document _document = new sky.Document();
