@@ -3,85 +3,100 @@
 // found in the LICENSE file.
 
 import 'package:sky/painting/box_painter.dart';
+import 'package:sky/theme/colors.dart';
 import 'package:sky/widgets.dart';
 
-class Circle extends Component {
-  Circle({ this.child });
+class GreenCard extends Component {
+  GreenCard({ this.child });
 
   Widget child;
 
   Widget build() {
     return new Container(
-      height: 100.0,
-      margin: new EdgeDims.symmetric(horizontal: 20.0, vertical: 4.0),
       decoration: new BoxDecoration(
-        backgroundColor: const Color(0xFF0000FF)
+        backgroundColor: const Color(0xFF0000FF),
+        border: new Border.all(
+          color: const Color(0xFF00FF00),
+          width: 10.0
+        )
       ),
-      child: new Center(
-        child: child
-      )
+      child: new Center(child: child)
     );
   }
 }
 
-class CircleData {
+class CardData {
   final GlobalKey key;
   final String content;
 
-  CircleData({ this.key, this.content });
+  CardData({ this.key, this.content });
 }
 
 class ExampleApp extends App {
   ExampleApp() {
     for (int i = 0; i < 20; ++i) {
-      _data.add(new CircleData(
+      _data.add(new CardData(
         key: new GlobalKey(),
         content: '$i'
       ));
     }
   }
 
-  final List<CircleData> _data = new List<CircleData>();
+  final List<CardData> _data = new List<CardData>();
 
-  GlobalKey _keyToMimic;
+  GlobalKey _overlay;
 
-  Widget _buildCircle(CircleData circleData) {
-    return new Mimicable(
-      key: circleData.key,
-      child: new Listener(
-        child: new Circle(
-          child: new Text(circleData.content)
-        ),
-        onGestureTap: (_) {
-          setState(() {
-            _keyToMimic = circleData.key;
-          });
-        }
+  Widget _buildCard(CardData cardData) {
+    return new Listener(
+      onGestureTap: (_) {
+        setState(() {
+          _overlay = cardData.key;
+        });
+      },
+      child: new Container(
+        height: 100.0,
+        margin: new EdgeDims.symmetric(horizontal: 20.0, vertical: 4.0),
+        child: new Mimicable(
+          key: cardData.key,
+          child: new GreenCard(child: new Text(cardData.content))
+        )
       )
     );
   }
 
   Widget build() {
-    List<Widget> circles = new List<Widget>();
-    for (int i = 0; i < 20; ++i) {
-      circles.add(_buildCircle(_data[i]));
+    List<Widget> cards = new List<Widget>();
+    for (int i = 0; i < _data.length; ++i) {
+      cards.add(_buildCard(_data[i]));
     }
 
-    List<Widget> layers = new List<Widget>();
-    layers.add(new ScrollableBlock(circles));
-
-    if (_keyToMimic != null) {
-      layers.add(
-        new Positioned(
-          top: 50.0,
-          left: 50.0,
-          child: new Mimic(
-            original: _keyToMimic)
+    return new IconTheme(
+      data: const IconThemeData(color: IconThemeColor.white),
+      child: new Theme(
+        data: new ThemeData(
+          brightness: ThemeBrightness.light,
+          primarySwatch: Blue,
+          accentColor: RedAccent[200]
+        ),
+        child: new Scaffold(
+          toolbar: new ToolBar(
+            left: new IconButton(
+              icon: "navigation/arrow_back",
+              onPressed: () {
+                setState(() {
+                  _overlay = null;
+                });
+              }
+            )
+          ),
+          body: new MimicOverlay(
+            overlay: _overlay,
+            duration: const Duration(milliseconds: 500),
+            children: [ new ScrollableBlock(cards) ]
+          )
         )
-      );
-    }
-
-    return new Stack(layers);
+      )
+    );
   }
 }
 
