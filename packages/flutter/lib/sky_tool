@@ -224,7 +224,7 @@ class StartSky(object):
             cmd += [ '--ez', 'enable-checked-mode', 'true' ]
 
         cmd += [ ANDROID_COMPONENT ]
-        print cmd
+
         subprocess.check_call(cmd)
 
 
