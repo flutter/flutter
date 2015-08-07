@@ -101,6 +101,7 @@ def main():
     sky_package_root = os.path.join(sky_engine_root, 'sky/packages/sky')
     sky_engine_package_root = os.path.join(android_dist_root, 'packages/sky_engine/sky_engine')
     sky_services_package_root = os.path.join(android_dist_root, 'packages/sky_services/sky_services')
+    sky_engine_revision_file = os.path.join(sky_engine_package_root, 'lib', 'REVISION')
 
     run(sky_engine_root, ['git', 'fetch', 'upstream'])
     run(sky_engine_root, ['git', 'reset', 'upstream/master', '--hard'])
@@ -116,6 +117,9 @@ def main():
 
     run(sky_engine_root, ['cp', 'AUTHORS', 'LICENSE', sky_package_root])
 
+    with open(sky_engine_revision_file, 'w') as stream:
+        stream.write(commit_hash)
+
     if not args.stage_two:
         upload_artifacts(android_dist_root, 'android-arm', commit_hash)
         upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
@@ -126,7 +130,6 @@ def main():
         else:
             run(sky_engine_package_root, [pub_path, 'publish', '--force'])
             run(sky_services_package_root, [pub_path, 'publish', '--force'])
-
 
 
 if __name__ == '__main__':
