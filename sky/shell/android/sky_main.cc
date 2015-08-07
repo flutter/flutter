@@ -43,11 +43,20 @@ void InitializeLogging() {
 
 }  // namespace
 
-static void Init(JNIEnv* env, jclass clazz, jobject context) {
+static void Init(JNIEnv* env,
+                 jclass clazz,
+                 jobject context,
+                 jobjectArray jargs) {
   base::android::ScopedJavaLocalRef<jobject> scoped_context(env, context);
   base::android::InitApplicationContext(env, scoped_context);
 
+  std::vector<std::string> args;
+  args.push_back("sky_shell");
+  base::android::AppendJavaStringArrayToStringVector(env, jargs, &args);
+
   base::CommandLine::Init(0, nullptr);
+  base::CommandLine::ForCurrentProcess()->InitFromArgv(args);
+
   InitializeLogging();
 
   g_java_message_loop.Get().reset(new base::MessageLoopForUI);

@@ -25,14 +25,14 @@ public class SkyMain {
     /**
      * Initializes the native system.
      **/
-    public static void ensureInitialized(Context applicationContext) {
+    public static void ensureInitialized(Context applicationContext, String[] args) {
         if (sInitialized) {
             return;
         }
         try {
             SkyApplication app = (SkyApplication) applicationContext;
             app.getResourceExtractor().waitForCompletion();
-            nativeInit(applicationContext);
+            nativeInit(applicationContext, args);
             // Create the mojo run loop.
             CoreImpl.getInstance().createDefaultRunLoop();
             sInitialized = true;
@@ -42,5 +42,5 @@ public class SkyMain {
         }
     }
 
-    private static native void nativeInit(Context context);
+    private static native void nativeInit(Context context, String[] args);
 }

@@ -87,13 +87,13 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
 void Engine::Init() {
   TRACE_EVENT0("sky", "Engine::Init");
 
-  DCHECK(!g_platform_impl);
-  g_platform_impl = new PlatformImpl();
-  blink::initialize(g_platform_impl);
-
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   blink::WebRuntimeFeatures::enableDartCheckedMode(
       command_line.HasSwitch(switches::kEnableCheckedMode));
+
+  DCHECK(!g_platform_impl);
+  g_platform_impl = new PlatformImpl();
+  blink::initialize(g_platform_impl);
 }
 
 void Engine::BeginFrame(base::TimeTicks frame_time) {
