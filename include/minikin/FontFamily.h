@@ -40,7 +40,9 @@ public:
     // Parse from string
     FontLanguage(const char* buf, size_t size);
 
-    bool operator==(const FontLanguage other) const { return mBits == other.mBits; }
+    bool operator==(const FontLanguage other) const {
+        return mBits != kUnsupportedLanguage && mBits == other.mBits;
+    }
     operator bool() const { return mBits != 0; }
 
     std::string getString() const;
@@ -53,10 +55,11 @@ private:
 
     uint32_t bits() const { return mBits; }
 
-    static const uint32_t kBaseLangMask = 0xffff;
-    static const uint32_t kScriptMask = (1 << 18) - (1 << 16);
-    static const uint32_t kHansFlag = 1 << 16;
-    static const uint32_t kHantFlag = 1 << 17;
+    static const uint32_t kUnsupportedLanguage = 0xFFFFFFFFu;
+    static const uint32_t kBaseLangMask = 0xFFFFFFu;
+    static const uint32_t kScriptMask = (1u << 26) - (1u << 24);
+    static const uint32_t kHansFlag = 1u << 24;
+    static const uint32_t kHantFlag = 1u << 25;
     uint32_t mBits;
 };
 
