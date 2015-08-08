@@ -12,3 +12,6 @@ dartanalyzer --fatal-warnings \
   bin/build_sky_apk.dart \
   bin/sky_server.dart \
   bin/sky_tools.dart
+
+# And run our tests.
+pub run test
