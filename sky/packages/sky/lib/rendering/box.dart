@@ -1406,7 +1406,7 @@ class RenderImage extends RenderBox {
         return constraints.constrain(new Size(width, height));
       }
     }
-    return constraints.constrain(new Size(width, height));
+    return constraints.constrain(new Size(_image.width.toDouble(), _image.height.toDouble()));
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
