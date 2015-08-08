@@ -40,7 +40,14 @@ FontLanguage::FontLanguage(const char* buf, size_t size) {
         if (c == '-' || c == '_') break;
     }
     if (i == 2) {
-        bits = (uint8_t(buf[0]) << 8) | uint8_t(buf[1]);
+        bits = uint8_t(buf[0]) | (uint8_t(buf[1]) << 8);
+    } else if (i == 3) {
+        bits = uint8_t(buf[0]) | (uint8_t(buf[1]) << 8) | (uint8_t(buf[2]) << 16);
+    } else {
+        mBits = kUnsupportedLanguage;
+        // We don't understand anything other than two-letter or three-letter
+        // language codes, so we skip parsing the rest of the string.
+        return;
     }
     size_t next;
     for (i++; i < size; i = next + 1) {
@@ -62,28 +69,38 @@ FontLanguage::FontLanguage(const char* buf, size_t size) {
 }
 
 std::string FontLanguage::getString() const {
-  char buf[16];
-  size_t i = 0;
-  if (mBits & kBaseLangMask) {
-    buf[i++] = (mBits >> 8) & 0xFFu;
-    buf[i++] = mBits & 0xFFu;
-  }
-  if (mBits & kScriptMask) {
-    if (!i)
-      buf[i++] = 'x';
-    buf[i++] = '-';
-    buf[i++] = 'H';
-    buf[i++] = 'a';
-    buf[i++] = 'n';
-    if (mBits & kHansFlag)
-      buf[i++] = 's';
-    else
-      buf[i++] = 't';
-  }
-  return std::string(buf, i);
+    if (mBits == kUnsupportedLanguage) {
+        return "und";
+    }
+    char buf[16];
+    size_t i = 0;
+    if (mBits & kBaseLangMask) {
+        buf[i++] = mBits & 0xFFu;
+        buf[i++] = (mBits >> 8) & 0xFFu;
+        char third_letter = (mBits >> 16) & 0xFFu;
+        if (third_letter != 0) buf[i++] = third_letter;
+    }
+    if (mBits & kScriptMask) {
+        if (!i) {
+            // This should not happen, but as it apparently has, we fill the language code part
+            // with "und".
+            buf[i++] = 'u';
+            buf[i++] = 'n';
+            buf[i++] = 'd';
+        }
+        buf[i++] = '-';
+        buf[i++] = 'H';
+        buf[i++] = 'a';
+        buf[i++] = 'n';
+        buf[i++] = (mBits & kHansFlag) ? 's' : 't';
+    }
+    return std::string(buf, i);
 }
 
 int FontLanguage::match(const FontLanguage other) const {
+    if (mBits == kUnsupportedLanguage || other.mBits == kUnsupportedLanguage)
+        return 0;
+
     int result = 0;
     if ((mBits & kBaseLangMask) == (other.mBits & kBaseLangMask)) {
         result++;
