@@ -98,6 +98,6 @@ Building a standalone APK
 Although it is possible to build a standalone APK containing your application,
 doing so right now is difficult. If you're feeling brave, you can see how we
 build the `Stocks.apk` in
-[example/stocks](https://github.com/domokit/sky_engine/tree/master/sky/packages/sky/example/stocks).
+[examples/stocks](https://github.com/domokit/sky_engine/tree/master/examples/stocks).
 Eventually we plan to make this much easier and support platforms other than
 Android, but that work still in progress.

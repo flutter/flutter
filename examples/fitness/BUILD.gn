@@ -12,7 +12,7 @@ sky_app("fitness") {
     apk_name = "Fitness"
 
     deps = [
-      "//sky/packages/sky/example/fitness/apk:resources",
+      "//examples/fitness/apk:resources",
     ]
   }
 }
