@@ -1,0 +1,13 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/build/sky_app.gni")
+
+sky_app("mine_digger") {
+  main_dart = "lib/main.dart"
+
+  if (is_android) {
+    apk_name = "MineDigger"
+  }
+}
