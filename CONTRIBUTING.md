@@ -46,7 +46,7 @@ target. Building on MacOS for Android, iOS, and a head-less MacOS target is comi
 * (Only the first time) `sudo ./build/install-build-deps-android.sh`
 * `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
-* `./sky/tools/shelldb start out/android_Debug/ sky/packages/sky/example/hello_world/lib/main.dart`
+* `./sky/tools/shelldb start out/android_Debug/ examples/hello_world/lib/main.dart`
 
 ### Desktop (Mac and Linux)
 

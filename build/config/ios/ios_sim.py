@@ -120,7 +120,7 @@ def Main():
                       help='Path to the simulator application.')
 
   parser.add_argument('-t', dest='target', required=False,
-                      default='sky/packages/sky/example/demo_launcher/lib/main.dart',
+                      default='examples/demo_launcher/lib/main.dart',
                       help='Sky server-relative path to the Sky app to run.')
 
   parser.add_argument('-s', dest='server', required=False,

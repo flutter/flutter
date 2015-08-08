@@ -4,6 +4,6 @@ dependencies:
   sky_tools: any
 dependency_overrides:
   material_design_icons:
-    path: ../../../material_design_icons
+    path: ../../sky/packages/material_design_icons
   sky:
-    path: ../../../sky
+    path: ../../sky/packages/sky

@@ -8,7 +8,7 @@ group("sky") {
   deps = [
     "//sky/engine/platform:platform_unittests($host_toolchain)",
     "//sky/engine/wtf:unittests($host_toolchain)",
-    "//sky/packages/sky/example",
+    "//examples",
     "//sky/tools/imagediff($host_toolchain)",
     "//sky/tools/sky_snapshot($host_toolchain)",
     ":sky_dev",
@@ -24,7 +24,7 @@ group("sky_dev") {
 
   deps = [
     "//sky/packages",
-    "//sky/packages/sky/example/demo_launcher",
+    "//examples/demo_launcher",
     "//sky/shell",
   ]
 
