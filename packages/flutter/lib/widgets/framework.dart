@@ -116,7 +116,7 @@ abstract class GlobalKey extends Key {
   }
 
   static void _notifyListeners() {
-    assert(!_inRenderDirtyComponents);
+    assert(!_inBuildDirtyComponents);
     assert(!Widget._notifyingMountStatus);
     assert(_debugDuplicates.isEmpty);
     _notifyingListeners = true;
@@ -161,7 +161,7 @@ abstract class Widget {
   }
 
   // you should not build the UI tree ahead of time, build it only during build()
-  bool _isConstructedDuringBuild() => this is AbstractWidgetRoot || this is App || _inRenderDirtyComponents || _inLayoutCallbackBuilder > 0;
+  bool _isConstructedDuringBuild() => this is AbstractWidgetRoot || this is App || _inBuildDirtyComponents || _inLayoutCallbackBuilder > 0;
 
   Key _key;
 
@@ -755,7 +755,7 @@ abstract class StatefulComponent extends Component {
 
 Set<Component> _dirtyComponents = new Set<Component>();
 bool _buildScheduled = false;
-bool _inRenderDirtyComponents = false;
+bool _inBuildDirtyComponents = false;
 int _inLayoutCallbackBuilder = 0;
 
 class LayoutCallbackBuilderHandle { bool _active = true; }
@@ -793,31 +793,33 @@ void _buildDirtyComponents() {
   if (_shouldLogRenderDuration)
     sw = new Stopwatch()..start();
 
-  _inRenderDirtyComponents = true;
-  try {
-    sky.tracing.begin('Component.flushBuild');
-    List<Component> sortedDirtyComponents = new List<Component>();
-    _absorbDirtyComponents(sortedDirtyComponents);
-    int index = 0;
-    while (index < sortedDirtyComponents.length) {
-      Component component = sortedDirtyComponents[index];
-      component._buildIfDirty();
-      if (_dirtyComponents.length > 0) {
-        // the following assert verifies that we're not rebuilding anyone twice in one frame
-        assert(_dirtyComponents.every((Component component) => !sortedDirtyComponents.contains(component)));
-        _absorbDirtyComponents(sortedDirtyComponents);
-        index = 0;
-      } else {
-        index += 1;
+  while (!_dirtyComponents.isEmpty) {
+    _inBuildDirtyComponents = true;
+    try {
+      sky.tracing.begin('Component.flushBuild');
+      List<Component> sortedDirtyComponents = new List<Component>();
+      _absorbDirtyComponents(sortedDirtyComponents);
+      int index = 0;
+      while (index < sortedDirtyComponents.length) {
+        Component component = sortedDirtyComponents[index];
+        component._buildIfDirty();
+        if (_dirtyComponents.length > 0) {
+          // the following assert verifies that we're not rebuilding anyone twice in one frame
+          assert(_dirtyComponents.every((Component component) => !sortedDirtyComponents.contains(component)));
+          _absorbDirtyComponents(sortedDirtyComponents);
+          index = 0;
+        } else {
+          index += 1;
+        }
       }
+    } finally {
+      _buildScheduled = false;
+      _inBuildDirtyComponents = false;
+      sky.tracing.end('Component.flushBuild');
     }
-  } finally {
-    _buildScheduled = false;
-    _inRenderDirtyComponents = false;
-    sky.tracing.end('Component.flushBuild');
-  }
 
-  Widget._notifyMountStatusChanged();
+    Widget._notifyMountStatusChanged();
+  }
 
   if (_shouldLogRenderDuration) {
     sw.stop();
