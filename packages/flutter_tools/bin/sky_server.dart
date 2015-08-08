@@ -70,9 +70,11 @@ main(List<String> argv) async {
   HttpServer server;
   try {
     server = await io.serve(handler, InternetAddress.LOOPBACK_IP_V4, port);
+    print('Serving ${Directory.current.absolute.path} from '
+        'http://${server.address.address}:${server.port}.');
   } catch(e) {
     print(e);
-    return;
+    exit(1);
   }
 
   server.defaultResponseHeaders
