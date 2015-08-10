@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:newton/newton.dart';
-import 'package:sky/animation/direction.dart';
 
 // Base class for creating Simulations for the animation Timeline.
 abstract class Force {
-  Simulation release(double position, double velocity, Direction direction);
+  Simulation release(double position, double velocity);
 }
 
 class SpringForce extends Force {
@@ -24,8 +23,8 @@ class SpringForce extends Force {
   // respectively.
   final double left, right;
 
-  Simulation release(double position, double velocity, Direction direction) {
-    double target = direction == Direction.reverse ?
+  Simulation release(double position, double velocity) {
+    double target = velocity < 0.0 ?
         this.left - tolerance.distance : this.right + tolerance.distance;
     return new SpringSimulation(spring, position, target, velocity)
       ..tolerance = tolerance;

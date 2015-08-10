@@ -171,9 +171,7 @@ class Drawer extends StatefulComponent {
 
   EventDisposition handleFlingStart(event) {
     if (event.velocityX.abs() >= _kMinFlingVelocity) {
-      _performance.fling(
-          event.velocityX < 0.0 ? Direction.reverse : Direction.forward,
-          velocity: event.velocityX.abs() * _kFlingVelocityScale);
+      _performance.fling(velocity: event.velocityX * _kFlingVelocityScale);
       return EventDisposition.processed;
     }
     return EventDisposition.ignored;
