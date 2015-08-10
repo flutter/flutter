@@ -77,6 +77,7 @@ public:
     void clipRRect(const RRect* rrect);
     void clipPath(const CanvasPath* path);
 
+    void drawColor(SkColor color, SkXfermode::Mode transferMode);
     void drawLine(const Point& p1, const Point& p2, const Paint* paint);
     void drawPaint(const Paint* paint);
     void drawRect(const Rect& rect, const Paint* paint);

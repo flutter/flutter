@@ -106,21 +106,16 @@ void Engine::BeginFrame(base::TimeTicks frame_time) {
 PassRefPtr<SkPicture> Engine::Paint() {
   TRACE_EVENT0("sky", "Engine::Paint");
 
-  SkRTreeFactory factory;
-  SkPictureRecorder recorder;
-  SkCanvas* canvas = recorder.beginRecording(
-      physical_size_.width(), physical_size_.height(), &factory,
-      SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag);
-
   if (sky_view_) {
     RefPtr<SkPicture> picture = sky_view_->Paint();
-    canvas->clear(SK_ColorBLACK);
-    canvas->scale(display_metrics_.device_pixel_ratio,
-                  display_metrics_.device_pixel_ratio);
     if (picture)
-      canvas->drawPicture(picture.get());
+      return picture.release();
   }
 
+  SkPictureRecorder recorder;
+  SkCanvas* canvas = recorder.beginRecording(
+      physical_size_.width(), physical_size_.height());
+  canvas->clear(SK_ColorBLACK);
   return adoptRef(recorder.endRecordingAsPicture());
 }
 

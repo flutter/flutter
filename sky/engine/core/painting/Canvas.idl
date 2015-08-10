@@ -25,6 +25,7 @@
   void clipRRect(RRect rrect);
   void clipPath(Path path);
 
+  void drawColor(Color color, TransferMode transferMode);
   void drawLine(Point p1, Point p2, Paint paint);
   void drawPaint(Paint paint);
   void drawRect(Rect rect, Paint paint);

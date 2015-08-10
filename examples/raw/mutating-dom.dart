@@ -202,7 +202,9 @@ void doFrame(double timeStamp) {
   // draw the result
   report("recording...");
   sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height));
+  final double devicePixelRatio = sky.view.devicePixelRatio;
+  sky.Canvas canvas = new sky.Canvas(recorder, new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio));
+  canvas.scale(devicePixelRatio, devicePixelRatio);
   layoutRoot.maxWidth = sky.view.width;
   layoutRoot.layout();
   layoutRoot.paint(canvas);

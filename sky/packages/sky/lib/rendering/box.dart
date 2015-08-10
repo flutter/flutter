@@ -1716,9 +1716,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void paintFrame() {
     sky.tracing.begin('RenderView.paintFrame');
     try {
+      double devicePixelRatio = sky.view.devicePixelRatio;
       sky.PictureRecorder recorder = new sky.PictureRecorder();
-      PaintingCanvas canvas = new PaintingCanvas(recorder, paintBounds);
-      canvas.drawPaintingNode(paintingNode, Point.origin);
+      Rect cullRect = Point.origin & (size * devicePixelRatio);
+      PaintingCanvas canvas = new PaintingCanvas(recorder, cullRect);
+      canvas.drawColor(const Color(0xFF000000), sky.TransferMode.src);
+      canvas.scale(devicePixelRatio, devicePixelRatio);
+      canvas.paintChild(child, Point.origin);
       sky.view.picture = recorder.endRecording();
     } finally {
       sky.tracing.end('RenderView.paintFrame');

@@ -6,11 +6,12 @@ import 'dart:sky';
 
 PaintingNode paintingNode = null;
 Picture draw(int a, int r, int g, int b) {
-  Rect bounds = new Rect.fromLTRB(0.0, 0.0, view.width, view.height);
+  final double devicePixelRatio = view.devicePixelRatio;
   Size size = new Size(view.width, view.height);
 
   PictureRecorder recorder = new PictureRecorder();
-  Canvas canvas = new Canvas(recorder, bounds);
+  Canvas canvas = new Canvas(recorder, new Rect.fromLTRB(0.0, 0.0, view.width * devicePixelRatio, view.height * devicePixelRatio));
+  canvas.scale(devicePixelRatio, devicePixelRatio);
   double radius = size.shortestSide * 0.45;
 
   Paint paint = new Paint()..color = new Color.fromARGB(a, r, g, b);
@@ -20,7 +21,7 @@ Picture draw(int a, int r, int g, int b) {
     paintingNode = new PaintingNode();
     Paint innerPaint = new Paint()..color = new Color.fromARGB(a, 255 - r, 255 - g, 255 - b);
     PictureRecorder innerRecorder = new PictureRecorder();
-    Canvas innerCanvas = new Canvas(innerRecorder, bounds);
+    Canvas innerCanvas = new Canvas(innerRecorder, Point.origin & bounds);
     innerCanvas.drawCircle(size.center(Point.origin), radius * 0.5, innerPaint);
 
     paintingNode.setBackingDrawable(innerRecorder.endRecordingAsDrawable());
