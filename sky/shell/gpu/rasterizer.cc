@@ -43,7 +43,7 @@ void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   CHECK(surface_) << "GLSurface required.";
 }
 
-void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
+void Rasterizer::Draw(PassRefPtr<SkPicture> picture) {
   TRACE_EVENT0("sky", "Rasterizer::Draw");
 
   if (!surface_)

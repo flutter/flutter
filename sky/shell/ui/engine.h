@@ -54,7 +54,7 @@ class Engine : public UIDelegate,
   static void Init();
 
   void BeginFrame(base::TimeTicks frame_time);
-  skia::RefPtr<SkPicture> Paint();
+  PassRefPtr<SkPicture> Paint();
 
  private:
   // UIDelegate implementation:

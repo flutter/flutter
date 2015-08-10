@@ -195,9 +195,7 @@ void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {
   blink::WebRect rect(clip.x(), clip.y(), clip.width(), clip.height());
 
   if (sky_view_) {
-    skia::RefPtr<SkPicture> picture = sky_view_->Paint();
-    canvas->clear(SK_ColorBLACK);
-    canvas->scale(GetDevicePixelRatio(), GetDevicePixelRatio());
+    RefPtr<SkPicture> picture = sky_view_->Paint();
     if (picture)
       canvas->drawPicture(picture.get());
   }

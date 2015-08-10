@@ -52,10 +52,10 @@ void SkyView::BeginFrame(base::TimeTicks frame_time) {
   view_->beginFrame(frame_time);
 }
 
-skia::RefPtr<SkPicture> SkyView::Paint() {
+PassRefPtr<SkPicture> SkyView::Paint() {
   if (Picture* picture = view_->picture())
-    return skia::SharePtr(picture->toSkia());
-  return skia::RefPtr<SkPicture>();
+    return picture->toSkia();
+  return nullptr;
 }
 
 void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
