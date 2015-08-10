@@ -1,7 +1,7 @@
 part of sprites;
 
 /// A Sprite is a [Node] that renders a bitmap image to the screen.
-class Sprite extends NodeWithSize {
+class Sprite extends NodeWithSize with SpritePaint {
 
   /// The texture that the sprite will render to screen.
   ///
@@ -15,19 +15,6 @@ class Sprite extends NodeWithSize {
   ///
   ///     mySprite.constrainProportions = true;
   bool constrainProportions = false;
-  double _opacity = 1.0;
-
-  /// The color to draw on top of the sprite, null if no color overlay is used.
-  ///
-  ///     // Color the sprite red
-  ///     mySprite.colorOverlay = new Color(0x77ff0000);
-  Color colorOverlay;
-
-  /// The transfer mode used when drawing the sprite to screen.
-  ///
-  ///     // Add the colors of the sprite with the colors of the background
-  ///     mySprite.transferMode = TransferMode.plusMode;
-  TransferMode transferMode;
 
   Paint _cachedPaint = new Paint()
     ..setFilterQuality(FilterQuality.low)
@@ -36,7 +23,7 @@ class Sprite extends NodeWithSize {
   /// Creates a new sprite from the provided [texture].
   ///
   ///     var mySprite = new Sprite(myTexture)
-  Sprite([this.texture]) {
+  Sprite([this.texture]) : super(Size.zero) {
     if (texture != null) {
       size = texture.size;
       pivot = texture.pivot;
@@ -48,24 +35,13 @@ class Sprite extends NodeWithSize {
   /// Creates a new sprite from the provided [image].
   ///
   /// var mySprite = new Sprite.fromImage(myImage);
-  Sprite.fromImage(Image image) {
+  Sprite.fromImage(Image image) : super(Size.zero) {
     assert(image != null);
 
     texture = new Texture(image);
     size = texture.size;
 
     pivot = new Point(0.5, 0.5);
-  }
-
-  /// The opacity of the sprite in the range 0.0 to 1.0.
-  ///
-  ///     mySprite.opacity = 0.5;
-  double get opacity => _opacity;
-
-  void set opacity(double opacity) {
-    assert(opacity != null);
-    assert(opacity >= 0.0 && opacity <= 1.0);
-    _opacity = opacity;
   }
 
   void paint(PaintingCanvas canvas) {
@@ -95,13 +71,7 @@ class Sprite extends NodeWithSize {
       canvas.scale(scaleX, scaleY);
 
       // Setup paint object for opacity and transfer mode
-      _cachedPaint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
-      if (colorOverlay != null) {
-        _cachedPaint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATop));
-      }
-      if (transferMode != null) {
-        _cachedPaint.setTransferMode(transferMode);
-      }
+      _updatePaint(_cachedPaint);
 
       // Do actual drawing of the sprite
       texture.drawTexture(canvas, Point.origin, _cachedPaint);
@@ -109,6 +79,45 @@ class Sprite extends NodeWithSize {
       // Paint a red square for missing texture
       canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),
       new Paint()..color = new Color.fromARGB(255, 255, 0, 0));
+    }
+  }
+}
+
+abstract class SpritePaint {
+  double _opacity = 1.0;
+
+  /// The opacity of the sprite in the range 0.0 to 1.0.
+  ///
+  ///     mySprite.opacity = 0.5;
+  double get opacity => _opacity;
+
+  void set opacity(double opacity) {
+    assert(opacity != null);
+    assert(opacity >= 0.0 && opacity <= 1.0);
+    _opacity = opacity;
+  }
+
+  /// The color to draw on top of the sprite, null if no color overlay is used.
+  ///
+  ///     // Color the sprite red
+  ///     mySprite.colorOverlay = new Color(0x77ff0000);
+  Color colorOverlay;
+
+  /// The transfer mode used when drawing the sprite to screen.
+  ///
+  ///     // Add the colors of the sprite with the colors of the background
+  ///     mySprite.transferMode = TransferMode.plusMode;
+  TransferMode transferMode;
+
+  void _updatePaint(Paint paint) {
+    paint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
+
+    if (colorOverlay != null) {
+      _cachedPaint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATop));
+    }
+
+    if (transferMode != null) {
+      _cachedPaint.setTransferMode(transferMode);
     }
   }
 }
