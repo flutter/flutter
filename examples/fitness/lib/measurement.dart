@@ -6,11 +6,19 @@ part of fitness;
 
 class Measurement extends FitnessItem {
   Measurement({ DateTime when, this.weight }) : super(when: when);
+  Measurement.fromJson(Map json) : super.fromJson(json), weight = json['weight'];
 
   final double weight;
 
   // TODO(jackson): Internationalize
   String get displayWeight => "${weight.toStringAsFixed(2)} lbs";
+
+  @override
+  Map toJson() {
+    Map json = super.toJson();
+    json['weight'] = weight;
+    return json;
+  }
 
   FitnessItemRow toRow({ FitnessItemHandler onDismissed }) {
     return new MeasurementRow(measurement: this, onDismissed: onDismissed);

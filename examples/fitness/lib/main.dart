@@ -8,6 +8,7 @@ import 'package:sky/editing/input.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
+import 'user_data.dart';
 
 part 'feed.dart';
 part 'fitness_item.dart';
@@ -19,10 +20,21 @@ part 'settings.dart';
 class FitnessApp extends App {
 
   NavigationState _navigationState;
-  final List<FitnessItem> _userData = [
-    new Measurement(weight: 180.0, when: new DateTime.now().add(const Duration(days: -1))),
-    new Measurement(weight: 160.0, when: new DateTime.now()),
-  ];
+  final List<FitnessItem> _userData = [];
+
+  void didMount() {
+    super.didMount();
+    loadFitnessData().then((List<Measurement> list) {
+      setState(() {
+        _userData.addAll(list);
+      });
+    }).catchError((e) => print("Failed to load data: $e"));
+  }
+
+  void save() {
+    saveFitnessData(_userData)
+      .catchError((e) => print("Failed to load data: $e"));
+  }
 
   void initState() {
     _navigationState = new NavigationState([
@@ -71,12 +83,14 @@ class FitnessApp extends App {
     setState(() {
       _userData.add(item);
       _userData.sort((a, b) => a.when.compareTo(b.when));
+      save();
     });
   }
 
   void _handleItemDeleted(FitnessItem item) {
     setState(() {
       _userData.remove(item);
+      saveFitnessData(_userData);
     });
   }
 

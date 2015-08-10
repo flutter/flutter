@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:sky';
+import 'dart:async';
 
 import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky_services/activity/activity.mojom.dart';
@@ -53,3 +54,7 @@ void updateTaskDescription(String label, Color color) {
 
   _activity.ptr.setTaskDescription(description);
 }
+
+Future<String> getFilesDir() async => (await _activity.ptr.getFilesDir()).path;
+
+Future<String> getCacheDir() async => (await _activity.ptr.getCacheDir()).path;
