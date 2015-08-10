@@ -1732,6 +1732,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   Rect get paintBounds => Point.origin & size;
 }
 
+class RenderIgnorePointer extends RenderProxyBox {
+  RenderIgnorePointer({ RenderBox child }) : super(child);
+  bool hitTest(HitTestResult result, { Point position }) {
+    return false;
+  }
+}
+
 // HELPER METHODS FOR RENDERBOX CONTAINERS
 abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
 
