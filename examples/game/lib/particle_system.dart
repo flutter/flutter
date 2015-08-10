@@ -4,16 +4,16 @@ class _Particle {
   Vector2 pos;
   Vector2 startPos;
 
-  double colorPos;
-  double deltaColorPos;
+  double colorPos = 0.0;
+  double deltaColorPos = 0.0;
 
-  double size;
-  double deltaSize;
+  double size = 0.0;
+  double deltaSize = 0.0;
 
-  double rotation;
-  double deltaRotation;
+  double rotation = 0.0;
+  double deltaRotation = 0.0;
 
-  double timeToLive;
+  double timeToLive = 0.0;
 
   Vector2 dir;
 
@@ -25,8 +25,8 @@ class _Particle {
 }
 
 class _ParticleAccelerations {
-  double radialAccel;
-  double tangentialAccel;
+  double radialAccel = 0.0;
+  double tangentialAccel = 0.0;
 }
 
 class ParticleSystem extends Node {
