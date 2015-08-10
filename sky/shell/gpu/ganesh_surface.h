@@ -6,7 +6,7 @@
 #define SKY_SHELL_GPU_GANESH_SURFACE_H_
 
 #include "base/memory/scoped_ptr.h"
-#include "skia/ext/refptr.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "sky/shell/gpu/ganesh_context.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "ui/gfx/geometry/size.h"

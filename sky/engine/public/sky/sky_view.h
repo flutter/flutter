@@ -11,7 +11,6 @@
 #include "base/time/time.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/services/network/public/interfaces/url_loader.mojom.h"
-#include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebURL.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
@@ -41,7 +40,7 @@ class SkyView {
   void RunFromSnapshot(const WebString& name,
                        mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  skia::RefPtr<SkPicture> Paint();
+  PassRefPtr<SkPicture> Paint();
   void HandleInputEvent(const WebInputEvent& event);
 
  private:

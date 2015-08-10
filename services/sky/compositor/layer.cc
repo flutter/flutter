@@ -8,7 +8,9 @@
 #include "services/sky/compositor/layer_host.h"
 #include "services/sky/compositor/picture_serializer.h"
 #include "services/sky/compositor/rasterizer.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace sky {
@@ -26,7 +28,7 @@ void Layer::SetSize(const gfx::Size& size) {
 void Layer::Display() {
   TRACE_EVENT0("sky", "Layer::Display");
   DCHECK(rasterizer_);
-  auto picture = RecordPicture();
+  RefPtr<SkPicture> picture = RecordPicture();
 
 #if 0
   SerializePicture(
@@ -36,18 +38,18 @@ void Layer::Display() {
   texture_ = rasterizer_->Rasterize(picture.get());
 }
 
-skia::RefPtr<SkPicture> Layer::RecordPicture() {
+PassRefPtr<SkPicture> Layer::RecordPicture() {
   TRACE_EVENT0("sky", "Layer::RecordPicture");
 
   SkRTreeFactory factory;
   SkPictureRecorder recorder;
 
-  auto canvas = skia::SharePtr(recorder.beginRecording(
+  SkCanvas* canvas = recorder.beginRecording(
       size_.width(), size_.height(), &factory,
-      SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag));
+      SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag);
 
-  client_->PaintContents(canvas.get(), gfx::Rect(size_));
-  return skia::AdoptRef(recorder.endRecordingAsPicture());
+  client_->PaintContents(canvas, gfx::Rect(size_));
+  return adoptRef(recorder.endRecordingAsPicture());
 }
 
 scoped_ptr<mojo::GLTexture> Layer::GetTexture() {

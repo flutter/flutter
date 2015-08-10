@@ -72,7 +72,7 @@ void Animator::BeginFrame(int64_t time_stamp) {
       base::TimeTicks::FromInternalValue(time_stamp) : base::TimeTicks::Now();
 
   engine_->BeginFrame(frame_time);
-  skia::RefPtr<SkPicture> picture = engine_->Paint();
+  RefPtr<SkPicture> picture = engine_->Paint();
 
   config_.gpu_task_runner->PostTaskAndReply(
       FROM_HERE,

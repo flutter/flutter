@@ -9,7 +9,7 @@
 #include "mojo/gpu/gl_texture.h"
 #include "services/sky/compositor/layer_client.h"
 #include "services/sky/compositor/rasterizer.h"
-#include "skia/ext/refptr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gfx/geometry/rect.h"
 
@@ -36,7 +36,7 @@ class Layer : public base::RefCounted<Layer> {
   friend class base::RefCounted<Layer>;
   ~Layer();
 
-  skia::RefPtr<SkPicture> RecordPicture();
+  PassRefPtr<SkPicture> RecordPicture();
 
   LayerClient* client_;
   gfx::Size size_;
