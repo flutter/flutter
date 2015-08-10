@@ -21,9 +21,9 @@ class NodeWithSize extends Node {
   /// The default [size] is zero and the default [pivot] point is the origin. Subclasses may change the default values.
   ///
   ///     var myNodeWithSize = new NodeWithSize(new Size(1024.0, 1024.0));
-  NodeWithSize([Size this.size, Point this.pivot]) {
+  NodeWithSize(Size this.size) {
     if (size == null) size = Size.zero;
-    if (pivot == null) pivot = Point.origin;
+    pivot = Point.origin;
   }
 
   /// Call this method in your [paint] method if you want the origin of your drawing to be the top left corner of the
