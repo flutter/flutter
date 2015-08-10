@@ -5,7 +5,7 @@
 import("//sky/build/sky_app.gni")
 
 sky_app("game") {
-  main_dart = "main.dart"
+  main_dart = "lib/main.dart"
   manifest = "sky.yaml"
 
   if (is_android) {
