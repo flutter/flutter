@@ -157,6 +157,13 @@ void Canvas::clipPath(const CanvasPath* path)
     m_canvas->clipPath(path->path(), SkRegion::kIntersect_Op, true);
 }
 
+void Canvas::drawColor(SkColor color, SkXfermode::Mode transferMode)
+{
+    if (!m_canvas)
+        return;
+    m_canvas->drawColor(color, transferMode);
+}
+
 void Canvas::drawLine(const Point& p1, const Point& p2, const Paint* paint)
 {
     if (!m_canvas)

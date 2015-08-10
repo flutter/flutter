@@ -7,7 +7,9 @@ import 'dart:sky';
 void beginFrame(double timeStamp) {
   double size = 100.0;
   PictureRecorder recorder = new PictureRecorder();
-  Canvas canvas = new Canvas(recorder, new Rect.fromLTWH(0.0, 0.0, view.width, view.height));
+  final double devicePixelRatio = view.devicePixelRatio;
+  Canvas canvas = new Canvas(recorder, new Rect.fromLTWH(0.0, 0.0, view.width * devicePixelRatio, view.height * devicePixelRatio));
+  canvas.scale(devicePixelRatio, devicePixelRatio);
   canvas.translate(size + 10.0, size + 10.0);
 
   Paint paint = new Paint();
