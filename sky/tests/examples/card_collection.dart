@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:sky/widgets/framework.dart';
 
-import '../../packages/sky/example/widgets/card_collection.dart';
+import '../../../examples/widgets/card_collection.dart';
 import '../resources/display_list.dart';
 
 main() async {
