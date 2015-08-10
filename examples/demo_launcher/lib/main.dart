@@ -79,7 +79,7 @@ List<SkyDemo> demos = [
   ),
   new SkyDemo(
     name: 'Asteroids',
-    href: '../../game/main.dart',
+    href: '../../game/lib/main.dart',
     bundle: 'game.skyx',
     description: '2D game using sprite sheets',
     textTheme: typography.white,
