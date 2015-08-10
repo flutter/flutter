@@ -98,8 +98,10 @@ class AnimationPerformance {
   Future forward() => play(Direction.forward);
   Future reverse() => play(Direction.reverse);
   Future resume() {
-    if (attachedForce != null)
-      return fling(_direction, force: attachedForce);
+    if (attachedForce != null) {
+      return fling(velocity: _direction == Direction.forward ? 1.0 : -1.0,
+                   force: attachedForce);
+    }
     return _animateTo(direction == Direction.forward ? 1.0 : 0.0);
   }
 
@@ -107,13 +109,14 @@ class AnimationPerformance {
     timeline.stop();
   }
 
-  // Flings the timeline in the given direction with an optional force
-  // (defaults to a critically damped spring) and initial velocity.
-  Future fling(Direction direction, {double velocity: 0.0, Force force}) {
+  // Flings the timeline with an optional force (defaults to a critically
+  // damped spring) and initial velocity. If velocity is positive, the
+  // animation will complete, otherwise it will dismiss.
+  Future fling({double velocity: 1.0, Force force}) {
     if (force == null)
       force = kDefaultSpringForce;
-    _direction = direction;
-    return timeline.fling(force.release(progress, velocity, _direction));
+    _direction = velocity < 0.0 ? Direction.reverse : Direction.forward;
+    return timeline.fling(force.release(progress, velocity));
   }
 
   final List<Function> _listeners = new List<Function>();
