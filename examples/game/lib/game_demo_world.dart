@@ -650,7 +650,7 @@ class Hud extends NodeWithSize {
     _dirtyScore = true;
   }
 
-  Hud(this.spriteSheetUI) {
+  Hud(this.spriteSheetUI) : super(Size.zero) {
     pivot = Point.origin;
 
     sprtBgScore = new Sprite(spriteSheetUI["scoreboard.png"]);
