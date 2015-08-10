@@ -21,6 +21,7 @@ import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets/transitions.dart';
 import 'package:sky/widgets/framework.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -425,26 +426,11 @@ class TabBar extends Scrollable {
     scrollBehavior.isScrollable = source.isScrollable;
   }
 
-  void didMount() {
-    _indicatorAnimation.addListener(_indicatorAnimationUpdated);
-    super.didMount();
-  }
-
-  void didUnmount() {
-    _indicatorAnimation.removeListener(_indicatorAnimationUpdated);
-    super.didUnmount();
-  }
-
-  void _indicatorAnimationUpdated() {
-    setState(() {
-    });
-  }
-
   AnimatedRect get _indicatorRect => _indicatorAnimation.variable as AnimatedRect;
 
   void _startIndicatorAnimation(int fromTabIndex, int toTabIndex) {
     _indicatorRect
-      ..begin = _tabIndicatorRect(fromTabIndex)
+      ..begin = (_indicatorRect.value == null ? _tabIndicatorRect(fromTabIndex) : _indicatorRect.value)
       ..end = _tabIndicatorRect(toTabIndex);
     _indicatorAnimation
       ..progress = 0.0
@@ -554,15 +540,22 @@ class TabBar extends Scrollable {
         data: new IconThemeData(color: iconThemeColor),
         child: new DefaultTextStyle(
           style: textStyle,
-          child: new TabBarWrapper(
-            children: tabs,
-            selectedIndex: selectedIndex,
-            backgroundColor: backgroundColor,
-            indicatorColor: indicatorColor,
-            indicatorRect: _indicatorRect.value,
-            textAndIcons: textAndIcons,
-            isScrollable: isScrollable,
-            onLayoutChanged: _layoutChanged
+          child: new BuilderTransition(
+            variables: [_indicatorRect],
+            direction: Direction.forward,
+            performance: _indicatorAnimation,
+            builder: () {
+              return new TabBarWrapper(
+                children: tabs,
+                selectedIndex: selectedIndex,
+                backgroundColor: backgroundColor,
+                indicatorColor: indicatorColor,
+                indicatorRect: _indicatorRect.value,
+                textAndIcons: textAndIcons,
+                isScrollable: isScrollable,
+                onLayoutChanged: _layoutChanged
+              );
+            }
           )
         )
       )
