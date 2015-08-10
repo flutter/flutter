@@ -32,9 +32,9 @@ defineTests() {
       results.values['out'] = temp.path;
       await handler.processArgResults(results);
       String path = p.join(temp.path, 'lib/main.dart');
-      print(path);
       expect(new File(path).existsSync(), true);
-      ProcessResult exec = Process.runSync('dartanalyzer', [path],
+      ProcessResult exec = Process.runSync(
+          'dartanalyzer', ['--fatal-warnings', path],
           workingDirectory: temp.path);
       expect(exec.exitCode, 0);
     });

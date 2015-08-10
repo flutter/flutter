@@ -45,9 +45,16 @@ class InitCommandHandler extends CommandHandler {
 
     print('');
 
-    String message = 'All done! To run your application:\n'
-        'cd ${out.path}\n'
-        './packages/sky/sky_tool start';
+    String message = '''All done! To run your application:
+
+  cd ${out.path}
+  ./packages/sky/sky_tool start
+
+Or if the Sky APK is not already on your device, run:
+
+  ./packages/sky/sky_tool start --install
+
+  ''';
 
     if (results['pub']) {
       print("Running pub get...");
@@ -128,8 +135,8 @@ const _readme = r'''
 
 ## Getting Started
 
-For help getting started, view our online
-[readme](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/README.md).
+For help getting started with Sky, view our online
+[documentation](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/README.md).
 ''';
 
 const _pubspec = r'''
@@ -137,23 +144,20 @@ name: {{projectName}}
 description: {{description}}
 dependencies:
   sky: any
-  sky_tools: any
 ''';
 
 const _libMain = r'''
 import 'package:sky/widgets.dart';
 
+void main() => runApp(new HelloWorldApp());
+
 class HelloWorldApp extends App {
   Widget build() {
     return new Scaffold(
-        toolbar: new ToolBar(center: new Text("Demo")),
+        toolbar: new ToolBar(center: new Text("Sky Demo")),
         body: new Material(child: new Center(child: new Text("Hello world!"))),
         floatingActionButton: new FloatingActionButton(
             child: new Icon(type: 'content/add', size: 24)));
   }
-}
-
-void main() {
-  runApp(new HelloWorldApp());
 }
 ''';

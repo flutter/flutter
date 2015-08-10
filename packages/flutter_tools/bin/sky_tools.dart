@@ -21,7 +21,14 @@ void main(List<String> args) {
   parser.addCommand(handler.name, handler.parser);
   handlers[handler.name] = handler;
 
-  ArgResults results = parser.parse(args);
+  ArgResults results;
+
+  try {
+    results = parser.parse(args);
+  } catch (e) {
+    _printUsage(parser, handlers, e is FormatException ? e.message : '${e}');
+    exit(1);
+  }
 
   if (results['help']) {
     _printUsage(parser, handlers);

@@ -20,11 +20,11 @@ dependencies:
 ## Running sky_tools
 
 Run `sky_tools` (or `pub global run sky_tools`) to see a list of available
-commands.
+commands:
 
-- *init*: create a new project
+- `init` to create a new project
 
-Then run a sky_tools command, like `init`:
+Then, run a `sky_tools` command:
 
     sky_tools init --out my_sky_project
 
