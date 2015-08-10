@@ -13,7 +13,9 @@ void beginFrame(double timeStamp) {
     timeBase = timeStamp;
   double delta = timeStamp - timeBase;
   PictureRecorder recorder = new PictureRecorder();
-  Canvas canvas = new Canvas(recorder, new Rect.fromLTWH(0.0, 0.0, view.width, view.height));
+  final double devicePixelRatio = view.devicePixelRatio;
+  Canvas canvas = new Canvas(recorder, new Rect.fromLTWH(0.0, 0.0, view.width * devicePixelRatio, view.height * devicePixelRatio));
+  canvas.scale(devicePixelRatio, devicePixelRatio);
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
   canvas.drawRect(new Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),

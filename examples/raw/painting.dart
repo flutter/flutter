@@ -9,7 +9,9 @@ import 'dart:typed_data';
 void beginFrame(double timeStamp) {
   sky.Size size = new sky.Size(sky.view.width, sky.view.height);
   sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, sky.Point.origin & size);
+  final double devicePixelRatio = sky.view.devicePixelRatio;
+  sky.Canvas canvas = new sky.Canvas(recorder, sky.Point.origin & (size * devicePixelRatio));
+  canvas.scale(devicePixelRatio, devicePixelRatio);
 
   sky.Paint paint = new sky.Paint();
   sky.Point mid = size.center(sky.Point.origin);
