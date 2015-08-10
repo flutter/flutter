@@ -176,10 +176,13 @@ enum BackgroundRepeat { repeat, repeatX, repeatY, noRepeat }
 class BackgroundImage {
   final BackgroundFit fit;
   final BackgroundRepeat repeat;
+  final sky.ColorFilter colorFilter;
+
   BackgroundImage({
     Future<sky.Image> image,
     this.fit: BackgroundFit.scaleDown,
-    this.repeat: BackgroundRepeat.noRepeat
+    this.repeat: BackgroundRepeat.noRepeat,
+    this.colorFilter
   }) {
     image.then((resolvedImage) {
       if (resolvedImage == null)
@@ -365,15 +368,16 @@ class BoxPainter {
   }
 
   void _paintBackgroundImage(sky.Canvas canvas, Rect rect) {
-    if (_decoration.backgroundImage == null)
+    final BackgroundImage backgroundImage = _decoration.backgroundImage;
+    if (backgroundImage == null)
       return;
-    sky.Image image = _decoration.backgroundImage.image;
+    sky.Image image = backgroundImage.image;
     if (image != null) {
       Size bounds = rect.size;
-      Size imageSize = _decoration.backgroundImage._size;
+      Size imageSize = backgroundImage._size;
       Size src;
       Size dst;
-      switch(_decoration.backgroundImage.fit) {
+      switch(backgroundImage.fit) {
         case BackgroundFit.fill:
           src = imageSize;
           dst = bounds;
@@ -410,7 +414,10 @@ class BoxPainter {
           }
           break;
       }
-      canvas.drawImageRect(image, Point.origin & src, rect.topLeft & dst, new Paint());
+      Paint paint = new Paint();
+      if (backgroundImage.colorFilter != null)
+        paint.setColorFilter(backgroundImage.colorFilter);
+      canvas.drawImageRect(image, Point.origin & src, rect.topLeft & dst, paint);
     }
   }
 
