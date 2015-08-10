@@ -802,7 +802,8 @@ class RenderOpacity extends RenderProxyBox {
     if (_cachedPaint == null) {
       _cachedPaint =  new Paint()
         ..color = new Color.fromARGB(_alpha, 0, 0, 0)
-        ..setTransferMode(sky.TransferMode.srcOver);
+        ..setTransferMode(sky.TransferMode.srcOver)
+        ..isAntiAlias = false;
     }
     return _cachedPaint;
   }
@@ -857,7 +858,8 @@ class RenderColorFilter extends RenderProxyBox {
   Paint get _paint {
     if (_cachedPaint == null) {
       _cachedPaint = new Paint()
-        ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode));
+        ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode))
+        ..isAntiAlias = false;
     }
     return _cachedPaint;
   }
@@ -911,10 +913,12 @@ class RenderClipRRect extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  final Paint _paint = new Paint()..isAntiAlias = false;
+
   void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      canvas.saveLayer(rect, new Paint());
+      canvas.saveLayer(rect, _paint);
       sky.RRect rrect = new sky.RRect()..setRectXY(rect, xRadius, yRadius);
       canvas.clipRRect(rrect);
       canvas.paintChild(child, offset.toPoint());
@@ -926,13 +930,24 @@ class RenderClipRRect extends RenderProxyBox {
 class RenderClipOval extends RenderProxyBox {
   RenderClipOval({ RenderBox child }) : super(child);
 
+  final Paint _paint = new Paint()..isAntiAlias = false;
+
+  Rect _cachedRect;
+  Path _cachedPath;
+
+  Path _getPath(Rect rect) {
+    if (rect != _cachedRect) {
+      _cachedRect = rect;
+      _cachedPath = new Path()..addOval(_cachedRect);
+    }
+    return _cachedPath;
+  }
+
   void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      canvas.saveLayer(rect, new Paint());
-      Path path = new Path();
-      path.addOval(rect);
-      canvas.clipPath(path);
+      canvas.saveLayer(rect, _paint);
+      canvas.clipPath(_getPath(rect));
       canvas.paintChild(child, offset.toPoint());
       canvas.restore();
     }
