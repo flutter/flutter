@@ -27,9 +27,7 @@ double _velocityForFlingGesture(double eventVelocity) {
     _kMillisecondsPerSecond;
 }
 
-abstract class ScrollClient {
-  bool ancestorScrolled(Scrollable ancestor);
-}
+typedef void ScrollListener();
 
 /// A base class for scrollable widgets that reacts to user input and generates
 /// a scrollOffset.
@@ -93,24 +91,6 @@ abstract class Scrollable extends StatefulComponent {
     );
   }
 
-  List<ScrollClient> _registeredScrollClients;
-
-  void registerScrollClient(ScrollClient notifiee) {
-    if (_registeredScrollClients == null)
-      _registeredScrollClients = new List<ScrollClient>();
-    setState(() {
-      _registeredScrollClients.add(notifiee);
-    });
-  }
-
-  void unregisterScrollClient(ScrollClient notifiee) {
-    if (_registeredScrollClients == null)
-      return;
-    setState(() {
-      _registeredScrollClients.remove(notifiee);
-    });
-  }
-
   void _startToOffsetAnimation(double newScrollOffset, Duration duration) {
       _stopToEndAnimation();
       _stopToOffsetAnimation();
@@ -159,19 +139,9 @@ abstract class Scrollable extends StatefulComponent {
       _startToOffsetAnimation(newScrollOffset, duration);
     }
 
-    if (_registeredScrollClients != null) {
-      var newList = null;
-      _registeredScrollClients.forEach((target) {
-        if (target.ancestorScrolled(this)) {
-          if (newList == null)
-            newList = new List<ScrollClient>();
-          newList.add(target);
-        }
-      });
-      setState(() {
-        _registeredScrollClients = newList;
-      });
-    }
+    if (_listeners.length > 0)
+      _notifyListeners();
+
     return true;
   }
 
@@ -222,11 +192,32 @@ abstract class Scrollable extends StatefulComponent {
     return EventDisposition.processed;
   }
 
-
   EventDisposition _handleWheel(sky.WheelEvent event) {
     scrollBy(-event.offsetY);
     return EventDisposition.processed;
   }
+
+  final List<ScrollListener> _listeners = new List<ScrollListener>();
+  void addListener(ScrollListener listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(ScrollListener listener) {
+    _listeners.remove(listener);
+  }
+
+  void _notifyListeners() {
+    List<ScrollListener> localListeners = new List<ScrollListener>.from(_listeners);
+    for (ScrollListener listener in localListeners)
+      listener();
+  }
+}
+
+Scrollable findScrollableAncestor({ Widget target }) {
+  Widget ancestor = target;
+  while (ancestor != null && ancestor is! Scrollable)
+    ancestor = ancestor.parent;
+  return ancestor;
 }
 
 /// A simple scrollable widget that has a single child. Use this component if
