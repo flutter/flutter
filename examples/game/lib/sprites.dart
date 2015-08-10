@@ -21,6 +21,7 @@ import 'package:vector_math/vector_math.dart';
 part 'action.dart';
 part 'color_secuence.dart';
 part 'image_map.dart';
+part 'layer.dart';
 part 'node.dart';
 part 'node3d.dart';
 part 'node_with_size.dart';
