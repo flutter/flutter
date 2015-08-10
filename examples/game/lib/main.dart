@@ -13,13 +13,13 @@ import 'package:sky/widgets/framework.dart';
 import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
 
-import 'lib/game_demo.dart';
-import 'lib/sprites.dart';
+import 'game_demo.dart';
+import 'sprites.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)
     return rootBundle;
-  return new NetworkAssetBundle(Uri.base);
+  return new NetworkAssetBundle(new Uri.directory(Uri.base.origin));
 }
 
 final AssetBundle _bundle = _initBundle();
