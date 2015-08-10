@@ -9,10 +9,14 @@ typedef void FitnessItemHandler(FitnessItem item);
 const double kFitnessItemHeight = 79.0;
 
 abstract class FitnessItem {
+  FitnessItem.fromJson(Map json) : when = DateTime.parse(json['when']);
+
   FitnessItem({ this.when }) {
     assert(when != null);
   }
   final DateTime when;
+
+  Map toJson() => { 'when' : when.toIso8601String() };
 
   // TODO(jackson): Internationalize
   String get displayDate => "${when.year.toString()}-${when.month.toString().padLeft(2,'0')}-${when.day.toString().padLeft(2,'0')}";

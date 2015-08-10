@@ -1,0 +1,10 @@
+name: fitness
+dependencies:
+  sky: any
+  sky_tools: any
+dependency_overrides:
+  path: "^1.3.6"
+  material_design_icons:
+    path: ../../sky/packages/material_design_icons
+  sky:
+    path: ../../sky/packages/sky
