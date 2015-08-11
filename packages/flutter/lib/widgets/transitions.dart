@@ -10,9 +10,57 @@ import 'package:vector_math/vector_math.dart';
 
 dynamic _maybe(AnimatedValue x) => x != null ? x.value : null;
 
+// A helper class to anchor widgets to one another. Pass an instance of this to
+// a Transition, then use the build() method to create a child with the same
+// transition applied.
+class Anchor {
+  Anchor();
+
+  TransitionBase transition;
+
+  Widget build(Widget child) {
+    return new _AnchorTransition(anchoredTo: this, child: child);
+  }
+}
+
+// Used with the Anchor class to apply a transition to multiple children.
+class _AnchorTransition extends AnimatedComponent {
+  _AnchorTransition({
+    Key key,
+    this.anchoredTo,
+    this.child
+  }) : super(key: key);
+
+  Anchor anchoredTo;
+  Widget child;
+  TransitionBase get transition => anchoredTo.transition;
+
+  void initState() {
+    if (transition != null)
+      watch(transition.performance);
+  }
+
+  void syncFields(_AnchorTransition source) {
+    if (transition != null && isWatching(transition.performance))
+      unwatch(transition.performance);
+    anchoredTo = source.anchoredTo;
+    if (transition != null)
+      watch(transition.performance);
+    child = source.child;
+    super.syncFields(source);
+  }
+
+  Widget build() {
+    if (transition == null)
+      return child;
+    return transition.buildWithChild(child);
+  }
+}
+
 abstract class TransitionBase extends AnimatedComponent {
   TransitionBase({
     Key key,
+    this.anchor,
     this.child,
     this.direction,
     this.duration,
@@ -22,6 +70,7 @@ abstract class TransitionBase extends AnimatedComponent {
   }) : super(key: key);
 
   Widget child;
+  Anchor anchor;
   Direction direction;
   Duration duration;
   AnimationPerformance performance;
@@ -29,6 +78,9 @@ abstract class TransitionBase extends AnimatedComponent {
   Function onCompleted;
 
   void initState() {
+    if (anchor != null)
+      anchor.transition = this;
+
     if (performance == null) {
       assert(duration != null);
       performance = new AnimationPerformance(duration: duration);
@@ -67,7 +119,11 @@ abstract class TransitionBase extends AnimatedComponent {
     }
   }
 
-  Widget build();
+  Widget build() {
+    return buildWithChild(child);
+  }
+
+  Widget buildWithChild(Widget child);
 }
 
 class SlideTransition extends TransitionBase {
@@ -75,6 +131,7 @@ class SlideTransition extends TransitionBase {
   // to super. Is there a simpler way?
   SlideTransition({
     Key key,
+    Anchor anchor,
     this.position,
     Duration duration,
     AnimationPerformance performance,
@@ -83,6 +140,7 @@ class SlideTransition extends TransitionBase {
     Function onCompleted,
     Widget child
   }) : super(key: key,
+             anchor: anchor,
              duration: duration,
              performance: performance,
              direction: direction,
@@ -97,7 +155,7 @@ class SlideTransition extends TransitionBase {
     super.syncFields(source);
   }
 
-  Widget build() {
+  Widget buildWithChild(Widget child) {
     performance.updateVariable(position);
     Matrix4 transform = new Matrix4.identity()
       ..translate(position.value.x, position.value.y);
@@ -108,6 +166,7 @@ class SlideTransition extends TransitionBase {
 class FadeTransition extends TransitionBase {
   FadeTransition({
     Key key,
+    Anchor anchor,
     this.opacity,
     Duration duration,
     AnimationPerformance performance,
@@ -116,6 +175,7 @@ class FadeTransition extends TransitionBase {
     Function onCompleted,
     Widget child
   }) : super(key: key,
+             anchor: anchor,
              duration: duration,
              performance: performance,
              direction: direction,
@@ -130,7 +190,7 @@ class FadeTransition extends TransitionBase {
     super.syncFields(source);
   }
 
-  Widget build() {
+  Widget buildWithChild(Widget child) {
     performance.updateVariable(opacity);
     return new Opacity(opacity: opacity.value, child: child);
   }
@@ -139,6 +199,7 @@ class FadeTransition extends TransitionBase {
 class ColorTransition extends TransitionBase {
   ColorTransition({
     Key key,
+    Anchor anchor,
     this.color,
     Duration duration,
     AnimationPerformance performance,
@@ -147,6 +208,7 @@ class ColorTransition extends TransitionBase {
     Function onCompleted,
     Widget child
   }) : super(key: key,
+             anchor: anchor,
              duration: duration,
              performance: performance,
              direction: direction,
@@ -161,7 +223,7 @@ class ColorTransition extends TransitionBase {
     super.syncFields(source);
   }
 
-  Widget build() {
+  Widget buildWithChild(Widget child) {
     performance.updateVariable(color);
     return new DecoratedBox(
       decoration: new BoxDecoration(backgroundColor: color.value),
@@ -173,6 +235,7 @@ class ColorTransition extends TransitionBase {
 class SquashTransition extends TransitionBase {
   SquashTransition({
     Key key,
+    Anchor anchor,
     this.width,
     this.height,
     Duration duration,
@@ -182,6 +245,7 @@ class SquashTransition extends TransitionBase {
     Function onCompleted,
     Widget child
   }) : super(key: key,
+             anchor: anchor,
              duration: duration,
              performance: performance,
              direction: direction,
@@ -198,7 +262,7 @@ class SquashTransition extends TransitionBase {
     super.syncFields(source);
   }
 
-  Widget build() {
+  Widget buildWithChild(Widget child) {
     if (width != null)
       performance.updateVariable(width);
     if (height != null)
@@ -212,6 +276,7 @@ typedef Widget BuilderFunction();
 class BuilderTransition extends TransitionBase {
   BuilderTransition({
     Key key,
+    Anchor anchor,
     this.variables,
     this.builder,
     Duration duration,
@@ -221,6 +286,7 @@ class BuilderTransition extends TransitionBase {
     Function onCompleted,
     Widget child
   }) : super(key: key,
+             anchor: anchor,
              duration: duration,
              performance: performance,
              direction: direction,
@@ -237,7 +303,7 @@ class BuilderTransition extends TransitionBase {
     super.syncFields(source);
   }
 
-  Widget build() {
+  Widget buildWithChild(Widget child) {
     for (int i = 0; i < variables.length; ++i)
       performance.updateVariable(variables[i]);
     return builder();

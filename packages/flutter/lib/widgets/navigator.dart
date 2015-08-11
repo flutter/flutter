@@ -85,7 +85,7 @@ class Transition extends TransitionBase {
     super.syncFields(source);
   }
 
-  Widget build() {
+  Widget buildWithChild(Widget child) {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
     return new SlideTransition(
