@@ -164,7 +164,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     _nodesNeedingLayout.add(this);
-    _nodesNeedingPaint.add(this);
     scheduler.ensureVisualUpdate();
   }
   static void flushLayout() {
@@ -330,6 +329,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (createNewDisplayList) {
       _needsPaint = true;
       _nodesNeedingPaint.add(this);
+      scheduler.ensureVisualUpdate();
+    } else if (parent == null) {
+      _needsPaint = true;
       scheduler.ensureVisualUpdate();
     } else {
       assert(parent != null); // parent always exists on this path because the root node is a RenderView, which sets createNewDisplayList.
