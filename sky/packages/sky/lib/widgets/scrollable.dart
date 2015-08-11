@@ -9,8 +9,8 @@ import 'package:newton/newton.dart';
 import 'package:sky/animation/animated_simulation.dart';
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
 import 'package:sky/animation/scroll_behavior.dart';
+import 'package:sky/rendering/box.dart';
 import 'package:sky/theme/view_configuration.dart' as config;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
@@ -44,15 +44,10 @@ abstract class Scrollable extends StatefulComponent {
   ScrollDirection scrollDirection;
 
   AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
-  AnimationPerformance _toOffsetAnimation; // Started by scrollTo(offset, duration: d)
+  AnimationPerformance _toOffsetAnimation; // Started by scrollTo()
 
   void initState() {
     _toEndAnimation = new AnimatedSimulation(_tickScrollOffset);
-    _toOffsetAnimation = new AnimationPerformance()
-      ..addListener(() {
-        AnimatedValue<double> offset = _toOffsetAnimation.variable;
-        scrollTo(offset.value);
-      });
   }
 
   void syncFields(Scrollable source) {
@@ -91,22 +86,39 @@ abstract class Scrollable extends StatefulComponent {
     );
   }
 
-  void _startToOffsetAnimation(double newScrollOffset, Duration duration) {
-      _stopToEndAnimation();
+  void _startToOffsetAnimation(double newScrollOffset, AnimationPerformance animation) {
+    _stopToEndAnimation();
+    _stopToOffsetAnimation();
+
+    (animation.variable as AnimatedValue<double>)
+      ..begin = scrollOffset
+      ..end = newScrollOffset;
+
+    _toOffsetAnimation = animation
+      ..progress = 0.0
+      ..addListener(_updateToOffsetAnimation)
+      ..addStatusListener(_updateToOffsetAnimationStatus)
+      ..play();
+  }
+
+  void _updateToOffsetAnimation() {
+    AnimatedValue<double> offset = _toOffsetAnimation.variable;
+    scrollTo(offset.value);
+  }
+
+  void _updateToOffsetAnimationStatus(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed || status == AnimationStatus.completed)
       _stopToOffsetAnimation();
-      _toOffsetAnimation
-        ..variable = new AnimatedValue<double>(scrollOffset,
-          end: newScrollOffset,
-          curve: ease
-        )
-        ..progress = 0.0
-        ..duration = duration
-        ..play();
   }
 
   void _stopToOffsetAnimation() {
-    if (_toOffsetAnimation.isAnimating)
-      _toOffsetAnimation.stop();
+    if (_toOffsetAnimation != null) {
+      _toOffsetAnimation
+        ..removeStatusListener(_updateToOffsetAnimationStatus)
+        ..removeListener(_updateToOffsetAnimation)
+        ..stop();
+      _toOffsetAnimation = null;
+    }
   }
 
   void _startToEndAnimation({ double velocity: 0.0 }) {
@@ -127,16 +139,16 @@ abstract class Scrollable extends StatefulComponent {
     super.didUnmount();
   }
 
-  bool scrollTo(double newScrollOffset, { Duration duration }) {
+  bool scrollTo(double newScrollOffset, { AnimationPerformance animation }) {
     if (newScrollOffset == _scrollOffset)
       return false;
 
-    if (duration == null) {
+    if (animation == null) {
       setState(() {
         _scrollOffset = newScrollOffset;
       });
     } else {
-      _startToOffsetAnimation(newScrollOffset, duration);
+      _startToOffsetAnimation(newScrollOffset, animation);
     }
 
     if (_listeners.length > 0)
@@ -178,7 +190,8 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void _maybeSettleScrollOffset() {
-    if (!_toEndAnimation.isAnimating && !_toOffsetAnimation.isAnimating)
+    if (!_toEndAnimation.isAnimating &&
+        (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating))
       settleScrollOffset();
   }
 
@@ -218,6 +231,42 @@ Scrollable findScrollableAncestor({ Widget target }) {
   while (ancestor != null && ancestor is! Scrollable)
     ancestor = ancestor.parent;
   return ancestor;
+}
+
+bool ensureWidgetIsVisible(Widget target, { AnimationPerformance animation }) {
+  assert(target.mounted);
+  assert(target.root is RenderBox);
+
+  Scrollable scrollable = findScrollableAncestor(target: target);
+  if (scrollable == null)
+    return false;
+
+  Size targetSize = (target.root as RenderBox).size;
+  Point targetCenter = target.localToGlobal(
+    scrollable.scrollDirection == ScrollDirection.vertical
+      ? new Point(0.0, targetSize.height / 2.0)
+      : new Point(targetSize.width / 2.0, 0.0)
+  );
+
+  Size scrollableSize = (scrollable.root as RenderBox).size;
+  Point scrollableCenter = scrollable.localToGlobal(
+    scrollable.scrollDirection == ScrollDirection.vertical
+      ? new Point(0.0, scrollableSize.height / 2.0)
+      : new Point(scrollableSize.width / 2.0, 0.0)
+  );
+  double scrollOffsetDelta = scrollable.scrollDirection == ScrollDirection.vertical
+    ? targetCenter.y - scrollableCenter.y
+    : targetCenter.x - scrollableCenter.x;
+  BoundedBehavior scrollBehavior = scrollable.scrollBehavior;
+  double scrollOffset = (scrollable.scrollOffset + scrollOffsetDelta)
+    .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
+
+  if (scrollOffset != scrollable.scrollOffset) {
+    scrollable.scrollTo(scrollOffset, animation: animation);
+    return true;
+  }
+
+  return false;
 }
 
 /// A simple scrollable widget that has a single child. Use this component if
