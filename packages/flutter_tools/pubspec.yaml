@@ -1,5 +1,5 @@
 name: sky_tools
-version: 0.0.8+1
+version: 0.0.8+2
 description: Tools for building Sky applications
 homepage: https://github.com/domokit/sky_tools
 author: Chromium Authors <sky-dev@googlegroups.com>
@@ -18,5 +18,6 @@ dependencies:
 dev_dependencies:
   test: ^0.12.0
 
-executable:
+# Add the bin/sky_tools.dart script to the scripts pub installs.
+executables:
   sky_tools:
