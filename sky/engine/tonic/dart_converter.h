@@ -166,9 +166,12 @@ struct DartConverterEnum {
   static T FromArguments(Dart_NativeArguments args,
                          int index,
                          Dart_Handle& exception) {
-    Dart_Handle enum_handle = Dart_GetNativeArgument(args, index);
+    return FromDart(Dart_GetNativeArgument(args, index));
+  }
+
+  static T FromDart(Dart_Handle handle) {
     Dart_Handle index_handle =
-        Dart_GetField(enum_handle, DartState::Current()->index_handle());
+        Dart_GetField(handle, DartState::Current()->index_handle());
 
     uint64_t enum_index = 0;
     Dart_IntegerToUint64(index_handle, &enum_index);

@@ -5,7 +5,6 @@
 #include "sky/engine/core/painting/LayerDrawLooperBuilder.h"
 
 #include "sky/engine/core/painting/DrawLooper.h"
-#include "sky/engine/core/painting/DrawLooperAddLayerCallback.h"
 #include "sky/engine/core/painting/DrawLooperLayerInfo.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
@@ -23,15 +22,11 @@ PassRefPtr<DrawLooper> LayerDrawLooperBuilder::build() {
 }
 
 void LayerDrawLooperBuilder::addLayerOnTop(
-    DrawLooperLayerInfo* layer_info,
-    PassOwnPtr<DrawLooperAddLayerCallback> callback) {
+    DrawLooperLayerInfo* layer_info, const Paint& paint) {
   SkPaint* sk_paint =
       draw_looper_builder_.addLayerOnTop(layer_info->layer_info());
-  RefPtr<Paint> paint = Paint::create();
-
-  paint->setPaint(*sk_paint);
-  callback->handleEvent(paint.get());
-  *sk_paint = paint->paint();
+  if (!paint.is_null)
+    *sk_paint = paint.sk_paint;
 }
 
 } // namespace blink

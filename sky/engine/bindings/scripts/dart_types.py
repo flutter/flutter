@@ -119,6 +119,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     # instead of calling cpp_type.
     'Float32List': 'Float32List',
     'Offset': 'Offset',
+    'Paint': 'Paint',
     'Point': 'Point',
     'Rect': 'Rect',
     'Size': 'Size',
@@ -371,6 +372,7 @@ DART_TO_CPP_VALUE = {
     'Color': pass_by_value_format('CanvasColor'),
     'Float32List': pass_by_value_format('Float32List'),
     'Offset': pass_by_value_format('Offset'),
+    'Paint': pass_by_value_format('Paint'),
     'Point': pass_by_value_format('Point'),
     'RSTransform': pass_by_value_format('RSTransform'),
     'Rect': pass_by_value_format('Rect'),

@@ -4,88 +4,95 @@
 
 #include "sky/engine/core/painting/Paint.h"
 
+#include "sky/engine/core/painting/CanvasColor.h"
 #include "sky/engine/core/painting/ColorFilter.h"
 #include "sky/engine/core/painting/DrawLooper.h"
+#include "sky/engine/core/painting/FilterQuality.h"
 #include "sky/engine/core/painting/MaskFilter.h"
+#include "sky/engine/core/painting/PaintingStyle.h"
 #include "sky/engine/core/painting/Shader.h"
+#include "sky/engine/core/painting/TransferMode.h"
+#include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkString.h"
 
-namespace blink {
+#include <iostream>
 
+namespace blink {
 namespace {
 
-template <typename T>
-void SkToString(const char* title, const T* sk_object, StringBuilder* result) {
-  if (!sk_object)
-    return;
-  SkString string;
-  sk_object->toString(&string);
-  result->append(String::format(", %s: %s", title, string.c_str()));
-}
+enum PaintFields {
+  kStrokeWidth,
+  kIsAntiAlias,
+  kColor,
+  kColorFilter,
+  kDrawLooper,
+  kFilterQuality,
+  kMaskFilter,
+  kShader,
+  kStyle,
+  kTransferMode,
+
+  // kNumberOfPaintFields must be last.
+  kNumberOfPaintFields,
+};
 
 }
 
-Paint::Paint() {
-  setIsAntiAlias(true);
+Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
+  Paint result;
+  result.is_null = true;
+  if (Dart_IsNull(dart_paint))
+    return result;
+
+  Dart_Handle value_handle = DOMDartState::Current()->value_handle();
+  Dart_Handle data = Dart_GetField(dart_paint, value_handle);
+
+  DCHECK(Dart_IsList(data));
+
+  intptr_t length;
+  Dart_ListLength(data, &length);
+
+  CHECK_EQ(length, kNumberOfPaintFields);
+  Dart_Handle values[kNumberOfPaintFields];
+  for (int i = 0; i < kNumberOfPaintFields; ++i)
+    values[i] = Dart_ListGetAt(data, i);
+
+  SkPaint& paint = result.sk_paint;
+  if (!Dart_IsNull(values[kStrokeWidth]))
+    paint.setStrokeWidth(DartConverter<SkScalar>::FromDart(values[kStrokeWidth]));
+  if (!Dart_IsNull(values[kIsAntiAlias]))
+    paint.setAntiAlias(DartConverter<bool>::FromDart(values[kIsAntiAlias]));
+  if (!Dart_IsNull(values[kColor]))
+    paint.setColor(DartConverter<CanvasColor>::FromDart(values[kColor]));
+  if (!Dart_IsNull(values[kColorFilter]))
+    paint.setColorFilter(DartConverter<ColorFilter*>::FromDart(values[kColorFilter])->filter());
+  if (!Dart_IsNull(values[kDrawLooper]))
+    paint.setLooper(DartConverter<DrawLooper*>::FromDart(values[kDrawLooper])->looper());
+  if (!Dart_IsNull(values[kFilterQuality]))
+    paint.setFilterQuality(DartConverter<FilterQuality>::FromDart(values[kFilterQuality]));
+  if (!Dart_IsNull(values[kMaskFilter]))
+    paint.setMaskFilter(DartConverter<MaskFilter*>::FromDart(values[kMaskFilter])->filter());
+  if (!Dart_IsNull(values[kShader]))
+    paint.setShader(DartConverter<Shader*>::FromDart(values[kShader])->shader());
+  if (!Dart_IsNull(values[kStyle]))
+    paint.setStyle(DartConverter<PaintingStyle>::FromDart(values[kStyle]));
+  if (!Dart_IsNull(values[kTransferMode]))
+    paint.setXfermodeMode(DartConverter<TransferMode>::FromDart(values[kTransferMode]));
+
+  result.is_null = false;
+  return result;
 }
 
-Paint::~Paint() {
-}
-
-void Paint::setDrawLooper(DrawLooper* looper) {
-  ASSERT(looper);
-  paint_.setLooper(looper->looper());
-}
-
-void Paint::setColorFilter(ColorFilter* filter) {
-  ASSERT(filter);
-  paint_.setColorFilter(filter->filter());
-}
-
-void Paint::setMaskFilter(MaskFilter* filter) {
-  ASSERT(filter);
-  paint_.setMaskFilter(filter->filter());
-}
-
-void Paint::setShader(Shader* shader) {
-  ASSERT(shader);
-  paint_.setShader(shader->shader());
-}
-
-void Paint::setStyle(SkPaint::Style style) {
-  paint_.setStyle(style);
-}
-
-void Paint::setTransferMode(SkXfermode::Mode transfer_mode) {
-  paint_.setXfermodeMode(transfer_mode);
-}
-
-void Paint::setFilterQuality(SkFilterQuality filter_quality) {
-  paint_.setFilterQuality(filter_quality);
-}
-
-String Paint::toString() const {
-  StringBuilder result;
-
-  result.append("Paint(");
-
-  result.append(String::format("color:Color(0x%.8x)", paint_.getColor()));
-
-  SkToString("shader", paint_.getShader(), &result);
-  SkToString("colorFilter", paint_.getColorFilter(), &result);
-  SkToString("maskFilter", paint_.getMaskFilter(), &result);
-
-  if (paint_.getLooper()) {
-    // TODO(mpcomplete): Figure out how to show a drawLooper.
-    result.append(", drawLooper:true");
-  }
-  result.append(")");
-
-  return result.toString();
+Paint DartConverter<Paint>::FromArgumentsWithNullCheck(Dart_NativeArguments args,
+                                                       int index,
+                                                       Dart_Handle& exception) {
+  Dart_Handle dart_rect = Dart_GetNativeArgument(args, index);
+  DCHECK(!LogIfError(dart_rect));
+  return FromDart(dart_rect);
 }
 
 }  // namespace blink

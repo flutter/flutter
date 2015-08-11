@@ -32,12 +32,12 @@ void Canvas::save()
     m_canvas->save();
 }
 
-void Canvas::saveLayer(const Rect& bounds, const Paint* paint)
+void Canvas::saveLayer(const Rect& bounds, const Paint& paint)
 {
     if (!m_canvas)
         return;
     m_canvas->saveLayer(!bounds.is_null ? &bounds.sk_rect : nullptr,
-                        paint ? &paint->paint() : nullptr);
+                        paint.paint());
 }
 
 void Canvas::restore()
@@ -164,86 +164,78 @@ void Canvas::drawColor(SkColor color, SkXfermode::Mode transferMode)
     m_canvas->drawColor(color, transferMode);
 }
 
-void Canvas::drawLine(const Point& p1, const Point& p2, const Paint* paint)
+void Canvas::drawLine(const Point& p1, const Point& p2, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(paint);
-    m_canvas->drawLine(p1.sk_point.x(), p1.sk_point.y(), p2.sk_point.x(), p2.sk_point.y(), paint->paint());
+    m_canvas->drawLine(p1.sk_point.x(), p1.sk_point.y(), p2.sk_point.x(), p2.sk_point.y(), paint.sk_paint);
 }
 
-void Canvas::drawPaint(const Paint* paint)
+void Canvas::drawPaint(const Paint& paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(paint);
-    m_canvas->drawPaint(paint->paint());
+    m_canvas->drawPaint(paint.sk_paint);
 }
 
-void Canvas::drawRect(const Rect& rect, const Paint* paint)
+void Canvas::drawRect(const Rect& rect, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(paint);
-    m_canvas->drawRect(rect.sk_rect, paint->paint());
+    m_canvas->drawRect(rect.sk_rect, paint.sk_paint);
 }
 
-void Canvas::drawRRect(const RRect* rrect, const Paint* paint)
+void Canvas::drawRRect(const RRect* rrect, const Paint& paint)
 {
     if (!m_canvas)
         return;
     ASSERT(rrect);
-    ASSERT(paint);
-    m_canvas->drawRRect(rrect->rrect(), paint->paint());
+    m_canvas->drawRRect(rrect->rrect(), paint.sk_paint);
 }
 
-void Canvas::drawDRRect(const RRect* outer, const RRect* inner, const Paint* paint)
+void Canvas::drawDRRect(const RRect* outer, const RRect* inner, const Paint& paint)
 {
     if (!m_canvas)
         return;
     ASSERT(outer);
     ASSERT(inner);
-    ASSERT(paint);
-    m_canvas->drawDRRect(outer->rrect(), inner->rrect(), paint->paint());
+    m_canvas->drawDRRect(outer->rrect(), inner->rrect(), paint.sk_paint);
 }
 
-void Canvas::drawOval(const Rect& rect, const Paint* paint)
+void Canvas::drawOval(const Rect& rect, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(paint);
-    m_canvas->drawOval(rect.sk_rect, paint->paint());
+    m_canvas->drawOval(rect.sk_rect, paint.sk_paint);
 }
 
-void Canvas::drawCircle(const Point& c, float radius, const Paint* paint)
+void Canvas::drawCircle(const Point& c, float radius, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(paint);
-    m_canvas->drawCircle(c.sk_point.x(), c.sk_point.y(), radius, paint->paint());
+    m_canvas->drawCircle(c.sk_point.x(), c.sk_point.y(), radius, paint.sk_paint);
 }
 
-void Canvas::drawPath(const CanvasPath* path, const Paint* paint)
+void Canvas::drawPath(const CanvasPath* path, const Paint& paint)
 {
     if (!m_canvas)
         return;
     ASSERT(path);
-    ASSERT(paint);
-    m_canvas->drawPath(path->path(), paint->paint());
+    m_canvas->drawPath(path->path(), paint.sk_paint);
 }
 
-void Canvas::drawImage(const CanvasImage* image, const Point& p, const Paint* paint) {
+void Canvas::drawImage(const CanvasImage* image, const Point& p, const Paint& paint) {
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawImage(image->image(), p.sk_point.x(), p.sk_point.y(), &paint->paint());
+    m_canvas->drawImage(image->image(), p.sk_point.x(), p.sk_point.y(), paint.paint());
 }
 
-void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint) {
+void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint) {
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawImageRect(image->image(), &src.sk_rect, dst.sk_rect, &paint->paint());
+    m_canvas->drawImageRect(image->image(), &src.sk_rect, dst.sk_rect, paint.paint());
 }
 
 void Canvas::drawPicture(Picture* picture)
@@ -275,7 +267,7 @@ void Canvas::drawPaintingNode(PaintingNode* paintingNode, const Point& p)
 void Canvas::drawAtlas(CanvasImage* atlas,
     const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
     const Vector<SkColor>& colors, SkXfermode::Mode mode,
-    const Rect& cullRect, Paint* paint, ExceptionState& es)
+    const Rect& cullRect, const Paint& paint, ExceptionState& es)
 {
     if (!m_canvas)
         return;
@@ -309,7 +301,7 @@ void Canvas::drawAtlas(CanvasImage* atlas,
         skXForms.size(),
         mode,
         cullRect.is_null ? nullptr : &cullRect.sk_rect,
-        paint ? &paint->paint() : nullptr
+        paint.paint()
     );
 }
 

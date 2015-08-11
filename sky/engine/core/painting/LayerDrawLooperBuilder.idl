@@ -8,5 +8,5 @@
   // builder back to a default state.
   DrawLooper build();
 
-  void addLayerOnTop(DrawLooperLayerInfo info, DrawLooperAddLayerCallback callback);
+  void addLayerOnTop(DrawLooperLayerInfo info, Paint paint);
 };
