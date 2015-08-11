@@ -2,12 +2,31 @@ part of sprites;
 
 typedef void ActionCallback();
 
+/// Actions are used to animate properties of nodes or any other type of
+/// objects. The actions are powered by an [ActionController], typically
+/// associated with a [Node]. The most commonly used action is the
+/// [ActionTween] which interpolates a property between two values over time.
+///
+/// Actions can be nested in different ways; played in sequence using the
+/// [ActionSequence], or looped using the [ActionRepeat].
+///
+/// You should typically not override this class directly, instead override
+/// [ActionInterval] or [ActionInstant] if you need to create a new action
+/// class.
 abstract class Action {
   Object _tag;
   bool _finished = false;
   bool _added = false;
 
+  /// Moves to the next time step in an action, [dt] is the delta time since
+  /// the last time step in seconds. Typically this method is called from the
+  /// [ActionController].
   void step(double dt);
+
+  /// Sets the action to a specific point in time. The [t] value that is passed
+  /// in is a normalized value 0.0 to 1.0 of the duration of the action. Every
+  /// action will always recieve a callback with the end time point (1.0),
+  /// unless it is cancelled.
   void update(double t) {
   }
 
@@ -18,13 +37,22 @@ abstract class Action {
   double get duration => 0.0;
 }
 
+/// The abstract class for an action that changes properties over a time
+/// interval, optionally using an easing curve.
 abstract class ActionInterval extends Action {
   double _duration;
 
   bool _firstTick = true;
   double _elapsed = 0.0;
 
+  /// The duration, in seconds, of the action.
+  ///
+  ///     double myTime = myAction.duration;
   double get duration => _duration;
+
+  /// The animation curve used to ease the animation.
+  ///
+  ///     myAction.curve = bounceOut;
   Curve curve;
 
   ActionInterval([this._duration = 0.0, this.curve]);
@@ -53,11 +81,16 @@ abstract class ActionInterval extends Action {
   }
 }
 
+/// An action that repeats an action a fixed number of times.
 class ActionRepeat extends ActionInterval {
   final int numRepeats;
   final ActionInterval action;
   int _lastFinishedRepeat = -1;
 
+  /// Creates a new action that is repeats the passed in action a fixed number
+  /// of times.
+  ///
+  ///     var myLoop = new ActionRepeat(myAction);
   ActionRepeat(this.action, this.numRepeats) {
     _duration = action.duration * numRepeats;
   }
@@ -80,10 +113,14 @@ class ActionRepeat extends ActionInterval {
   }
 }
 
+/// An action that repeats an action an indefinite number of times.
 class ActionRepeatForever extends Action {
   final ActionInterval action;
   double _elapsedInAction = 0.0;
 
+  /// Creates a new action with the action that is passed in.
+  ///
+  ///     var myInifiniteLoop = new ActionRepeatForever(myAction);
   ActionRepeatForever(this.action);
 
   step(double dt) {
@@ -106,11 +143,17 @@ class ActionRepeatForever extends Action {
   }
 }
 
+/// An action that plays a number of supplied actions in sequence. The duration
+/// of the [ActionSequence] with be the sum of the durations of the actions
+/// passed in to the constructor.
 class ActionSequence extends ActionInterval {
   Action _a;
   Action _b;
   double _split;
 
+  /// Creates a new action with the list of actions passed in.
+  ///
+  ///     var mySequence = new ActionSequence([myAction0, myAction1, myAction2]);
   ActionSequence(List<Action> actions) {
     assert(actions.length >= 2);
 
@@ -188,9 +231,15 @@ class ActionSequence extends ActionInterval {
   }
 }
 
+/// An action that plays the supplied actions in parallell. The duration of the
+/// [ActionGroup] will be the maximum of the durations of the actions used to
+/// compose this action.
 class ActionGroup extends ActionInterval {
   List<Action> _actions;
 
+  /// Creates a new action with the list of actions passed in.
+  ///
+  ///     var myGroup = new ActionGroup([myAction0, myAction1, myAction2]);
   ActionGroup(this._actions) {
     for (Action action in _actions) {
       if (action.duration > _duration) {
@@ -246,6 +295,8 @@ class ActionGroup extends ActionInterval {
   }
 }
 
+/// An action that doesn't have a duration. If this class is overridden to
+/// create custom instant actions, only the [fire] method should be overriden.
 abstract class ActionInstant extends Action {
 
   void step(double dt) {
@@ -259,9 +310,13 @@ abstract class ActionInstant extends Action {
   void fire();
 }
 
+/// An action that calls a custom function when it is fired.
 class ActionCallFunction extends ActionInstant {
   ActionCallback _function;
 
+  /// Creates a new callback action with the supplied callback.
+  ///
+  ///     var myAction = new ActionCallFunction(() { print("Hello!";) });
   ActionCallFunction(this._function);
 
   void fire() {
@@ -269,9 +324,13 @@ class ActionCallFunction extends ActionInstant {
   }
 }
 
+/// An action that removes the supplied node from its parent when it's fired.
 class ActionRemoveNode extends ActionInstant {
   Node _node;
 
+  /// Creates a new action with the node to remove as its argument.
+  ///
+  ///     var myAction = new ActionRemoveNode(myNode);
   ActionRemoveNode(this._node);
 
   void fire() {
@@ -279,13 +338,38 @@ class ActionRemoveNode extends ActionInstant {
   }
 }
 
+/// An action that tweens a property between two values, optionally using an
+/// animation curve. This is one of the most common building blocks when
+/// creating actions. The tween class can be used to animate properties of the
+/// type [Point], [Size], [Rect], [double], or [Color].
 class ActionTween extends ActionInterval {
+
+  /// The setter method used to set the property being animated.
   final Function setter;
+
+  /// The start value of the animation.
   final startVal;
+
+  /// The end value of the animation.
   final endVal;
 
   var _delta;
 
+  /// Creates a new tween action. The [setter] will be called to update the
+  /// animated property from [startVal] to [endVal] over the [duration] time in
+  /// seconds. Optionally an animation [curve] can be passed in for easing the
+  /// animation.
+  ///
+  ///     // Animate myNode from its current position to 100.0, 100.0 during
+  ///     // 1.0 second and a bounceOut easing
+  ///     var myTween = new ActionTween(
+  ///       (a) => myNode.position = a,
+  ///       myNode.position,
+  ///       new Point(100.0, 100.0,
+  ///       1.0,
+  ///       bounceOut
+  ///     );
+  ///     myNode.actions.run(myTween);
   ActionTween(this.setter, this.startVal, this.endVal, double duration, [Curve curve]) : super(duration, curve) {
     _computeDelta();
   }
@@ -378,12 +462,21 @@ class ActionTween extends ActionInterval {
   }
 }
 
+/// A class the controls the playback of actions. To play back an action it is
+/// passed to the [ActionController]'s [run] method. The [ActionController]
+/// itself is typically a property of a [Node] and powered by the [SpriteBox].
 class ActionController {
 
   List<Action> _actions = [];
 
+  /// Creates a new [ActionController]. However, for most uses a reference to
+  /// an [ActionController] is acquired through the [Node.actions] property.
   ActionController();
 
+  /// Runs an [action], can optionally be passed a [tag]. The [tag] can be used
+  /// to reference the action or a set of actions with the same tag.
+  ///
+  ///     myNode.actions.run(myAction, "myActionGroup");
   void run(Action action, [Object tag]) {
     assert(!action._added);
 
@@ -393,6 +486,9 @@ class ActionController {
     _actions.add(action);
   }
 
+  /// Stops an [action] and removes it from the controller.
+  ///
+  ///     myNode.actions.stop(myAction);
   void stop(Action action) {
     if (_actions.remove(action)) {
       action._added = false;
@@ -407,6 +503,10 @@ class ActionController {
     _actions.removeAt(i);
   }
 
+  /// Stops all actions with the specified tag and removes them from the
+  /// controller.
+  ///
+  ///     myNode.actions.stopWithTag("myActionGroup");
   void stopWithTag(Object tag) {
     for (int i = _actions.length - 1; i >= 0; i--) {
       Action action = _actions[i];
@@ -416,6 +516,9 @@ class ActionController {
     }
   }
 
+  /// Stops all actions currently being run by the controller and removes them.
+  ///
+  ///     myNode.actions.stopAll();
   void stopAll() {
     for (int i = _actions.length - 1; i >= 0; i--) {
       _stopAtIndex(i);
