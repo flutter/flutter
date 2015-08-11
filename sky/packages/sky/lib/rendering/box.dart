@@ -1678,8 +1678,6 @@ class ViewConstraints {
 }
 
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
-  bool get createNewDisplayList => true;
-
   RenderView({
     RenderBox child,
     this.timeForRotation: const Duration(microseconds: 83333)
