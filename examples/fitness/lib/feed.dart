@@ -173,28 +173,59 @@ class FeedFragment extends StatefulComponent {
     });
   }
 
+  Widget buildChart() {
+    double startX;
+    double endX;
+    double startY;
+    double endY;
+    List<Point> dataSet = new List<Point>();
+    for (FitnessItem item in userData) {
+      if (item is Measurement) {
+          double x = item.when.millisecondsSinceEpoch.toDouble();
+          double y = item.weight;
+          if (startX == null)
+            startX = x;
+          endX = x;
+          if (startY == null || startY > y)
+            startY = y;
+          if (endY == null || endY < y)
+            endY = y;
+          dataSet.add(new Point(x, y));
+      }
+    }
+    playfair.ChartData data = new playfair.ChartData(
+      startX: startX,
+      startY: startY,
+      endX: endX,
+      endY: endY,
+      dataSet: dataSet
+    );
+    return new playfair.Chart(data: data);
+  }
+
   Widget buildBody() {
     TextStyle style = Theme.of(this).text.title;
+    if (userData.length == 0)
+      return new Material(
+        type: MaterialType.canvas,
+        child: new Flex(
+          [new Text("No data yet.\nAdd some!", style: style)],
+          justifyContent: FlexJustifyContent.center
+        )
+      );
     switch (_fitnessMode) {
       case FitnessMode.feed:
-        if (userData.length > 0)
-          return new FitnessItemList(
-            items: userData,
-            onDismissed: _handleItemDismissed
-          );
-        return new Material(
-          type: MaterialType.canvas,
-          child: new Flex(
-            [new Text("No data yet.\nAdd some!", style: style)],
-            justifyContent: FlexJustifyContent.center
-          )
+        return new FitnessItemList(
+          items: userData,
+          onDismissed: _handleItemDismissed
         );
       case FitnessMode.chart:
         return new Material(
           type: MaterialType.canvas,
-          child: new Flex([
-            new Text("Charts are coming soon!", style: style)
-          ], justifyContent: FlexJustifyContent.center)
+          child: new Container(
+            padding: const EdgeDims.all(20.0),
+            child: buildChart()
+          )
         );
     }
   }

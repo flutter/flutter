@@ -12,6 +12,7 @@
 #include "sky/engine/core/painting/PaintingStyle.h"
 #include "sky/engine/core/painting/Shader.h"
 #include "sky/engine/core/painting/TransferMode.h"
+#include "sky/engine/core/painting/Typeface.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
@@ -35,6 +36,7 @@ enum PaintFields {
   kShader,
   kStyle,
   kTransferMode,
+  kTypeface,
 
   // kNumberOfPaintFields must be last.
   kNumberOfPaintFields,
@@ -82,6 +84,8 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
     paint.setStyle(DartConverter<PaintingStyle>::FromDart(values[kStyle]));
   if (!Dart_IsNull(values[kTransferMode]))
     paint.setXfermodeMode(DartConverter<TransferMode>::FromDart(values[kTransferMode]));
+  if (!Dart_IsNull(values[kTypeface]))
+    paint.setTypeface(DartConverter<Typeface*>::FromDart(values[kTypeface])->typeface());
 
   result.is_null = false;
   return result;
