@@ -11,7 +11,7 @@ class Measurement extends FitnessItem {
   final double weight;
 
   // TODO(jackson): Internationalize
-  String get displayWeight => "${weight.toStringAsFixed(2)} lbs";
+  String get displayWeight => "${weight.toStringAsFixed(1)} lbs";
 
   @override
   Map toJson() {
