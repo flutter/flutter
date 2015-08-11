@@ -15,7 +15,7 @@ class ImageMap {
   }
 
   Future<Image> _loadImage(String url) async {
-    Image image = await _bundle.loadImage(url);
+    Image image = await _bundle.loadImage(url).first;
     _images[url] = image;
     return image;
   }

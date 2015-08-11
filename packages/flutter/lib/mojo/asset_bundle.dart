@@ -9,13 +9,14 @@ import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
+import 'package:sky/base/image_resource.dart';
 import 'package:sky/mojo/net/fetch.dart';
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/mojo/shell.dart' as shell;
 
 abstract class AssetBundle {
   void close();
-  Future<sky.Image> loadImage(String key);
+  ImageResource loadImage(String key);
   Future<String> loadString(String key);
 }
 
@@ -26,7 +27,7 @@ class NetworkAssetBundle extends AssetBundle {
 
   void close() { }
 
-  Future<sky.Image> loadImage(String key) {
+  ImageResource loadImage(String key) {
     return image_cache.load(_baseUrl.resolve(key).toString());
   }
 
@@ -53,7 +54,7 @@ class MojoAssetBundle extends AssetBundle {
   }
 
   AssetBundleProxy _bundle;
-  Map<String, Future<sky.Image>> _imageCache = new Map<String, Future<sky.Image>>();
+  Map<String, ImageResource> _imageCache = new Map<String, ImageResource>();
   Map<String, Future<String>> _stringCache = new Map<String, Future<String>>();
 
   void close() {
@@ -62,13 +63,13 @@ class MojoAssetBundle extends AssetBundle {
     _imageCache = null;
   }
 
-  Future<sky.Image> loadImage(String key) {
+  ImageResource loadImage(String key) {
     return _imageCache.putIfAbsent(key, () {
       Completer<sky.Image> completer = new Completer<sky.Image>();
       _bundle.ptr.getAsStream(key).then((response) {
         new sky.ImageDecoder(response.assetData.handle.h, completer.complete);
       });
-      return completer.future;
+      return new ImageResource(completer.future);
     });
   }
 
