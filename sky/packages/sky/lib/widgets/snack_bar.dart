@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/curves.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
@@ -43,6 +44,7 @@ class SnackBar extends Component {
 
   SnackBar({
     Key key,
+    this.anchor,
     this.content,
     this.actions,
     this.showing,
@@ -51,6 +53,7 @@ class SnackBar extends Component {
     assert(content != null);
   }
 
+  Anchor anchor;
   Widget content;
   List<SnackBarAction> actions;
   bool showing;
@@ -79,9 +82,11 @@ class SnackBar extends Component {
     return new SlideTransition(
       duration: _kSlideInDuration,
       direction: showing ? Direction.forward : Direction.reverse,
-      position: new AnimatedValue<Point>(const Point(0.0, 50.0),
-                                         end: Point.origin),
+      position: new AnimatedValue<Point>(Point.origin,
+                                         end: const Point(0.0, -52.0),
+                                         curve: easeIn, reverseCurve: easeOut),
       onDismissed: _onDismissed,
+      anchor: anchor,
       child: new Material(
         level: 2,
         color: const Color(0xFF323232),

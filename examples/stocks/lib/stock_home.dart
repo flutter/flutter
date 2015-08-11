@@ -247,11 +247,13 @@ class StockHome extends StatefulComponent {
     });
   }
 
+  Anchor _snackBarAnchor = new Anchor();
   Widget buildSnackBar() {
     if (_snackBarStatus == AnimationStatus.dismissed)
       return null;
     return new SnackBar(
       showing: _isSnackBarShowing,
+      anchor: _snackBarAnchor,
       content: new Text("Stock purchased!"),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
       onDismissed: () { setState(() { _snackBarStatus = AnimationStatus.dismissed; }); }
@@ -266,11 +268,12 @@ class StockHome extends StatefulComponent {
   }
 
   Widget buildFloatingActionButton() {
-    return new FloatingActionButton(
-      child: new Icon(type: 'content/add', size: 24),
-      backgroundColor: colors.RedAccent[200],
-      onPressed: _handleStockPurchased
-    );
+    return _snackBarAnchor.build(
+      new FloatingActionButton(
+        child: new Icon(type: 'content/add', size: 24),
+        backgroundColor: colors.RedAccent[200],
+        onPressed: _handleStockPurchased
+      ));
   }
 
   void addMenuToOverlays(List<Widget> overlays) {
