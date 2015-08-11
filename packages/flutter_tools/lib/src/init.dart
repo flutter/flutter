@@ -144,6 +144,7 @@ name: {{projectName}}
 description: {{description}}
 dependencies:
   sky: any
+  sky_tools: any
 ''';
 
 const _libMain = r'''
