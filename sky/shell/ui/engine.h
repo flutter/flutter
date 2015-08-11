@@ -11,6 +11,7 @@
 #include "base/single_thread_task_runner.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/system/core.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
@@ -55,6 +56,9 @@ class Engine : public UIDelegate,
 
   void BeginFrame(base::TimeTicks frame_time);
   skia::RefPtr<SkPicture> Paint();
+
+  void StartDartTracing();
+  void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
 
  private:
   // UIDelegate implementation:

@@ -7,6 +7,7 @@
 
 #include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 
 namespace sky {
 namespace shell {
@@ -21,6 +22,9 @@ class ShellView {
   ~ShellView();
 
   PlatformView* view() const { return view_.get(); }
+
+  void StartDartTracing();
+  void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
 
  private:
   void CreateEngine();

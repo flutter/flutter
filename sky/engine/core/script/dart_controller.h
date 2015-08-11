@@ -41,6 +41,9 @@ class DartController {
 
   DOMDartState* dart_state() const { return dom_dart_state_.get(); }
 
+  void StartTracing();
+  void StopTracing(mojo::ScopedDataPipeProducerHandle producer);
+
  private:
   void DidLoadMainLibrary(String url);
   void DidLoadSnapshot();

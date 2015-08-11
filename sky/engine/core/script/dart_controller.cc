@@ -8,6 +8,9 @@
 #include "base/logging.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
+#include "dart/runtime/include/dart_tools_api.h"
+#include "mojo/common/data_pipe_utils.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/bindings/builtin_natives.h"
 #include "sky/engine/bindings/builtin_sky.h"
@@ -154,6 +157,44 @@ void DartController::InstallView(View* view) {
   DartApiScope dart_api_scope;
 
   builtin_sky_->InstallView(view);
+}
+
+static void DartController_DartStreamConsumer(
+    Dart_StreamConsumer_State state,
+    const char* stream_name,
+    uint8_t* buffer,
+    intptr_t buffer_length,
+    mojo::ScopedDataPipeProducerHandle *handle) {
+
+  if (!handle->is_valid()) {
+    // Simple flush. Nothing to do.
+    return;
+  }
+
+  if (state == Dart_StreamConsumer_kData) {
+    const std::string data(reinterpret_cast<const char*>(buffer),
+                           buffer_length);
+    mojo::common::BlockingCopyFromString(data, *handle);
+  }
+}
+
+void DartController::StartTracing() {
+  DartIsolateScope isolate_scope(dart_state()->isolate());
+  DartApiScope dart_api_scope;
+
+  Dart_TimelineSetRecordedStreams(DART_TIMELINE_STREAM_ALL);
+}
+
+void DartController::StopTracing(
+    mojo::ScopedDataPipeProducerHandle producer) {
+  DartIsolateScope isolate_scope(dart_state()->isolate());
+  DartApiScope dart_api_scope;
+
+  Dart_TimelineSetRecordedStreams(DART_TIMELINE_STREAM_DISABLE);
+
+  auto callback =
+      reinterpret_cast<Dart_StreamConsumer>(&DartController_DartStreamConsumer);
+  Dart_TimelineGetTrace(callback, &producer);
 }
 
 } // namespace blink

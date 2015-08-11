@@ -11,6 +11,7 @@
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread.h"
 #include "sky/shell/service_provider.h"
+#include "sky/shell/tracing_controller.h"
 
 namespace sky {
 namespace shell {
@@ -36,6 +37,8 @@ class Shell {
     return service_provider_context_.get();
   }
 
+  TracingController& tracing_controller();
+
  private:
   explicit Shell(scoped_ptr<ServiceProviderContext> service_provider_context);
 
@@ -45,6 +48,7 @@ class Shell {
   scoped_ptr<base::Thread> gpu_thread_;
   scoped_ptr<base::Thread> ui_thread_;
   scoped_ptr<ServiceProviderContext> service_provider_context_;
+  TracingController tracing_controller_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);
 };
