@@ -78,7 +78,7 @@ class MyToolBar extends Component {
       child: new Flex([
         new NetworkImage(src: 'menu.png', width: 25.0, height: 25.0),
         new Flexible(child: new Text('My awesome toolbar')),
-        new NetworkImage(src: 'search.png', width 25.0, height: 25.0),
+        new NetworkImage(src: 'search.png', width: 25.0, height: 25.0),
       ])
     );
   }
