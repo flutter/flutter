@@ -72,7 +72,9 @@ class SnackBar extends Component {
           )
         )
       )
-    ]..addAll(actions);
+    ];
+    if (actions != null)
+      children.addAll(actions);
 
     return new SlideTransition(
       duration: _kSlideInDuration,

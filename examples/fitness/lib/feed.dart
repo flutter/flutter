@@ -254,7 +254,13 @@ class AddItemDialog extends StatefulComponent {
     this.navigator = source.navigator;
   }
 
-  String _addItemRoute;
+  // TODO(jackson): Internationalize
+  static final Map<String, String> _labels = {
+    '/measurements/new': 'Measure',
+    '/meals/new': 'Eat',
+  };
+
+  String _addItemRoute = _labels.keys.first;
 
   void _handleAddItemRouteChanged(String routeName) {
     setState(() {
@@ -263,15 +269,10 @@ class AddItemDialog extends StatefulComponent {
   }
 
   Widget build() {
-    // TODO(jackson): Internationalize
-    Map<String, String> labels = {
-      '/meals/new': 'Eat',
-      '/measurements/new': 'Measure',
-    };
     List<Widget> menuItems = [];
-    for(String routeName in labels.keys) {
+    for(String routeName in _labels.keys) {
       menuItems.add(new DialogMenuItem([
-        new Flexible(child: new Text(labels[routeName])),
+        new Flexible(child: new Text(_labels[routeName])),
         new Radio(value: routeName, groupValue: _addItemRoute, onChanged: _handleAddItemRouteChanged),
       ], onPressed: () => _handleAddItemRouteChanged(routeName)));
     }
