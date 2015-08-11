@@ -43,15 +43,7 @@ class SettingsFragment extends Component {
                 new Flexible(child: new Text('Back up data to the cloud')),
                 new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged)
               ]
-            ),
-            new DrawerItem(
-              children: [
-                new Flex([
-                  new Text('Height'),
-                  new Text("6'2\"", style: Theme.of(this).text.caption),
-                ], direction: FlexDirection.vertical, alignItems: FlexAlignItems.start)
-              ]
-            ),
+            )
           ])
         )
       )
