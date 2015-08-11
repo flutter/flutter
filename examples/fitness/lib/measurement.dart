@@ -35,7 +35,7 @@ class MeasurementRow extends FitnessItemRow {
       new Flexible(
         child: new Text(
           measurement.displayWeight,
-          style: const TextStyle(textAlign: TextAlign.right)
+          style: Theme.of(this).text.subhead
         )
       ),
       new Flexible(
