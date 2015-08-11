@@ -18,7 +18,6 @@
 #include <cutils/log.h>
 
 #include <math.h>
-#include <stdio.h>  // for debugging
 
 #include <algorithm>
 #include <fstream>
@@ -302,8 +301,10 @@ hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData)  {
         return 0;
     }
     ok = font->GetTable(tag, reinterpret_cast<uint8_t*>(buffer), &length);
-    printf("referenceTable %c%c%c%c length=%d %d\n",
+#ifdef VERBOSE_DEBUG
+    ALOGD("referenceTable %c%c%c%c length=%d %d",
         (tag >>24) & 0xff, (tag>>16)&0xff, (tag>>8)&0xff, tag&0xff, length, ok);
+#endif
     if (!ok) {
         free(buffer);
         return 0;
@@ -717,9 +718,8 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
         ctx->paint.font = mFaces[font_ix].font;
         ctx->paint.fakery = mFaces[font_ix].fakery;
         hb_font_t* hbFont = ctx->hbFonts[font_ix];
-#ifdef VERBOSE
-        std::cout << "Run " << run_ix << ", font " << font_ix <<
-            " [" << run.start << ":" << run.end << "]" << std::endl;
+#ifdef VERBOSE_DEBUG
+        ALOGD("Run %u, font %d [%d:%d]", run_ix, font_ix, run.start, run.end);
 #endif
 
         hb_font_set_ppem(hbFont, size * scaleX, size);
@@ -783,10 +783,14 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 x += letterSpaceHalfLeft;
             }
             for (unsigned int i = 0; i < numGlyphs; i++) {
-    #ifdef VERBOSE
-                std::cout << positions[i].x_advance << " " << positions[i].y_advance << " " << positions[i].x_offset << " " << positions[i].y_offset << std::endl;            std::cout << "DoLayout " << info[i].codepoint <<
-                ": " << HBFixedToFloat(positions[i].x_advance) << "; " << positions[i].x_offset << ", " << positions[i].y_offset << std::endl;
-    #endif
+#ifdef VERBOSE_DEBUG
+                ALOGD("%d %d %d %d",
+                        positions[i].x_advance, positions[i].y_advance,
+                        positions[i].x_offset, positions[i].y_offset);
+                ALOGD("DoLayout %u: %f; %d, %d",
+                        info[i].codepoint, HBFixedToFloat(positions[i].x_advance),
+                        positions[i].x_offset, positions[i].y_offset);
+#endif
                 if (i > 0 && info[i - 1].cluster != info[i].cluster) {
                     mAdvances[info[i - 1].cluster - start] += letterSpaceHalfRight;
                     mAdvances[info[i].cluster - start] += letterSpaceHalfLeft;
@@ -877,8 +881,10 @@ void Layout::draw(minikin::Bitmap* surface, int x0, int y0, float size) const {
         MinikinPaint paint;
         paint.size = size;
         bool ok = face->Render(glyph.glyph_id, paint, &glyphBitmap);
-        printf("glyphBitmap.width=%d, glyphBitmap.height=%d (%d, %d) x=%f, y=%f, ok=%d\n",
+#ifdef VERBOSE_DEBUG
+        ALOGD("glyphBitmap.width=%d, glyphBitmap.height=%d (%d, %d) x=%f, y=%f, ok=%d",
             glyphBitmap.width, glyphBitmap.height, glyphBitmap.left, glyphBitmap.top, glyph.x, glyph.y, ok);
+#endif
         if (ok) {
             surface->drawGlyph(glyphBitmap,
                 x0 + int(floor(glyph.x + 0.5)), y0 + int(floor(glyph.y + 0.5)));
