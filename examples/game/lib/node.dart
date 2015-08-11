@@ -65,6 +65,9 @@ class Node {
 
   ActionController _actions;
 
+  /// The [ActionController] associated with this node.
+  ///
+  ///     myNode.actions.run(myAction);
   ActionController get actions {
     if (_actions == null) {
       _actions = new ActionController();
@@ -119,6 +122,9 @@ class Node {
     invalidateTransformMatrix();
   }
 
+  /// The skew along the x-axis of this node in degrees.
+  ///
+  ///     myNode.skewX = 45.0;
   double get skewX => _skewX;
 
   void set skewX (double skewX) {
@@ -127,6 +133,9 @@ class Node {
     invalidateTransformMatrix();
   }
 
+  /// The skew along the y-axis of this node in degrees.
+  ///
+  ///     myNode.skewY = 45.0;
   double get skewY => _skewY;
 
   void set skewY (double skewY) {
@@ -289,6 +298,9 @@ class Node {
     return _transformMatrix;
   }
 
+  /// Computes the transformation matrix of this node. This method can be
+  /// overriden if a custom matrix is required. There is usually no reason to
+  /// call this method directly.
   Matrix4 computeTransformMatrix() {
     double cx, sx, cy, sy;
 
@@ -326,6 +338,9 @@ class Node {
     return matrix;
   }
 
+  /// Invalidates the current transform matrix. If the [computeTransformMatrix]
+  /// method is overidden, this method should be called whenever a property
+  /// changes that affects the matrix.
   void invalidateTransformMatrix() {
     _transformMatrix = null;
     _invalidateToBoxTransformMatrix();
