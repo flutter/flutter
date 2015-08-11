@@ -26,8 +26,15 @@ class ThemeData {
       // Some users want the pre-multiplied color, others just want the opacity.
       hintColor = brightness == ThemeBrightness.dark ? const Color(0x42FFFFFF) : const Color(0x4C000000),
       hintOpacity = brightness == ThemeBrightness.dark ? 0.26 : 0.30,
-      highlightColor = const Color(0x66999999),
-      selectedColor = const Color(0x33999999),
+      // TODO(eseidel): Where are highlight and selected colors documented?
+      // I flipped highlight/selected to match the News app (which is clearly not quite Material)
+      // Gmail has an interesting behavior of showing selected darker until
+      // you click on a different drawer item when the first one loses its
+      // selected color and becomes lighter, the ink then fills to make the new
+      // click dark to match the previous (resting) selected state.  States
+      // revert when you cancel the tap.
+      highlightColor = const Color(0x33999999),
+      selectedColor = const Color(0x66999999),
       text = brightness == ThemeBrightness.dark ? typography.white : typography.black {
     assert(brightness != null);
 
