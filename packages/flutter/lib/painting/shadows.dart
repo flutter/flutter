@@ -15,15 +15,13 @@ class ShadowDrawLooperBuilder {
             ..setPaintBits(sky.PaintBits.all)
             ..setOffset(offset)
             ..setColorMode(sky.TransferMode.src),
-          (sky.Paint layerPaint) {
-        layerPaint.color = color;
-        layerPaint.setMaskFilter(
-          new sky.MaskFilter.blur(sky.BlurStyle.normal, blur));
-      });
+          new sky.Paint()
+            ..color = color
+            ..setMaskFilter(new sky.MaskFilter.blur(sky.BlurStyle.normal, blur)));
   }
 
   sky.DrawLooper build() {
-    builder_.addLayerOnTop(new sky.DrawLooperLayerInfo(), (_) {});
+    builder_.addLayerOnTop(new sky.DrawLooperLayerInfo(), new sky.Paint());
     return builder_.build();
   }
 }
