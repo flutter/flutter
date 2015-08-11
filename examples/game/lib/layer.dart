@@ -1,6 +1,10 @@
 part of sprites;
 
 class Layer extends Node with SpritePaint {
+  Rect layerRect;
+
+  Layer([Rect this.layerRect = null]);
+
   Paint _cachedPaint = new Paint()
     ..setFilterQuality(FilterQuality.low)
     ..isAntiAlias = false;
@@ -9,7 +13,7 @@ class Layer extends Node with SpritePaint {
     super._prePaint(canvas, matrix);
 
     _updatePaint(_cachedPaint);
-    canvas.saveLayer(null, _cachedPaint);
+    canvas.saveLayer(layerRect, _cachedPaint);
   }
 
   void _postPaint(PaintingCanvas canvas, Matrix4 totalMatrix) {
