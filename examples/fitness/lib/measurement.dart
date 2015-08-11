@@ -72,7 +72,8 @@ class MeasurementFragment extends StatefulComponent {
     double parsedWeight;
     try {
       parsedWeight = double.parse(_weight);
-    } on FormatException {
+    } on FormatException catch(e) {
+      print("Exception $e");
       setState(() {
         _errorMessage = "Save failed";
       });
@@ -130,6 +131,7 @@ class MeasurementFragment extends StatefulComponent {
   Widget buildSnackBar() {
     if (_errorMessage == null)
       return null;
+    // TODO(jackson): This doesn't show up, unclear why.
     return new SnackBar(content: new Text(_errorMessage));
   }
 
