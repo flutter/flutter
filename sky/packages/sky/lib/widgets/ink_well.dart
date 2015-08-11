@@ -13,11 +13,11 @@ import 'package:sky/rendering/object.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/framework.dart';
 
-const int _kSplashInitialOpacity = 0x80;
-const double _kSplashCancelledVelocity = 0.3;
-const double _kSplashConfirmedVelocity = 0.3;
+const int _kSplashInitialOpacity = 0x30;
+const double _kSplashCancelledVelocity = 0.7;
+const double _kSplashConfirmedVelocity = 0.7;
 const double _kSplashInitialSize = 0.0;
-const double _kSplashUnconfirmedVelocity = 0.1;
+const double _kSplashUnconfirmedVelocity = 0.2;
 
 double _getSplashTargetSize(Size bounds, Point position) {
   double d1 = (position - bounds.topLeft(Point.origin)).distance;
@@ -72,7 +72,7 @@ class InkSplash {
   }
 
   void paint(PaintingCanvas canvas) {
-    int opacity = (_kSplashInitialOpacity * (1.0 - (_radius.value / _targetRadius))).floor();
+    int opacity = (_kSplashInitialOpacity * (1.1 - (_radius.value / _targetRadius))).floor();
     sky.Paint paint = new sky.Paint()..color = new sky.Color(opacity << 24);
     double radius = _pinnedRadius == null ? _radius.value : _pinnedRadius;
     canvas.drawCircle(position, radius, paint);
