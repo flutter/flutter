@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky_services/activity/activity.mojom.dart';
 
-export 'package:sky_services/activity/activity.mojom.dart' show Intent, ComponentName, StringExtra;
+export 'package:sky_services/activity/activity.mojom.dart' show Intent, ComponentName, StringExtra, SystemUIVisibility_STANDARD, SystemUIVisibility_FULLSCREEN, SystemUIVisibility_IMMERSIVE;
 
 /// Dart wrapper around Activity mojo service available in Sky on Android.
 ///
@@ -53,6 +53,15 @@ void updateTaskDescription(String label, Color color) {
     ..primaryColor = (color != null ? color.value : null);
 
   _activity.ptr.setTaskDescription(description);
+}
+
+int _cachedSystemUiVisibility = SystemUIVisibility_STANDARD;
+
+void setSystemUiVisibility(int visibility) {
+  if (_cachedSystemUiVisibility == visibility)
+    return;
+  _cachedSystemUiVisibility = visibility;
+  _activity.ptr.setSystemUiVisibility(visibility);
 }
 
 Future<String> getFilesDir() async => (await _activity.ptr.getFilesDir()).path;
