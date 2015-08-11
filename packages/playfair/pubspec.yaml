@@ -6,5 +6,7 @@ homepage: https://github.com/domokit/playfair
 dependencies:
   sky: any
   sky_tools: any
+dev_dependencies:
+  test: ^0.12.0
 environment:
-  sdk: '>=1.0.0 <2.0.0'
+  sdk: '>=1.8.0 <2.0.0'
