@@ -1475,18 +1475,43 @@ class RenderDecoratedBox extends RenderProxyBox {
     RenderBox child
   }) : _painter = new BoxPainter(decoration), super(child);
 
-  BoxPainter _painter;
+  final BoxPainter _painter;
+
   BoxDecoration get decoration => _painter.decoration;
   void set decoration (BoxDecoration value) {
     assert(value != null);
-    if (_painter.decoration.backgroundImage != null)
-      _painter.decoration.backgroundImage.removeChangeListener(markNeedsPaint);
-    if (value.backgroundImage != null)
-      value.backgroundImage.addChangeListener(markNeedsPaint);
     if (value == _painter.decoration)
       return;
+    _removeBackgroundImageListenerIfNeeded();
     _painter.decoration = value;
+    _addBackgroundImageListenerIfNeeded();
     markNeedsPaint();
+  }
+
+  bool get _needsBackgroundImageListener {
+    return attached &&
+        _painter.decoration != null &&
+        _painter.decoration.backgroundImage != null;
+  }
+
+  void _addBackgroundImageListenerIfNeeded() {
+    if (_needsBackgroundImageListener)
+      _painter.decoration.backgroundImage.addChangeListener(markNeedsPaint);
+  }
+
+  void _removeBackgroundImageListenerIfNeeded() {
+    if (_needsBackgroundImageListener)
+      _painter.decoration.backgroundImage.removeChangeListener(markNeedsPaint);
+  }
+
+  void attach() {
+    super.attach();
+    _addBackgroundImageListenerIfNeeded();
+  }
+
+  void detach() {
+    _removeBackgroundImageListenerIfNeeded();
+    super.detach();
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
