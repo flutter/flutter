@@ -1,0 +1,3 @@
+Still barely works
+Fixed crash when entering an invalid number
+Made date list look less-awful.
