@@ -15,13 +15,15 @@ class MimicOverlay extends AnimatedComponent {
     this.children,
     this.overlay,
     this.duration: const Duration(milliseconds: 200),
-    this.curve: linear
+    this.curve: linear,
+    this.targetRect
   }) : super(key: key);
 
   List<Widget> children;
   GlobalKey overlay;
   Duration duration;
   Curve curve;
+  Rect targetRect;
 
   void syncFields(MimicOverlay source) {
     children = source.children;
@@ -29,20 +31,28 @@ class MimicOverlay extends AnimatedComponent {
     duration = source.duration;
     _expandPerformance.duration = duration;
 
+    targetRect = source.targetRect;
+    _mimicBounds.end = targetRect;
+    if (_expandPerformance.isCompleted) {
+      _mimicBounds.value = _mimicBounds.end;
+    }
+
     curve = source.curve;
     _mimicBounds.curve = curve;
 
     if (overlay != source.overlay) {
       overlay = source.overlay;
-      if (_expandPerformance.isDismissed)
+      if (_expandPerformance.isDismissed) {
         _activeOverlay = overlay;
-      else
+      } else {
         _expandPerformance.reverse();
+      }
     }
   }
 
   void initState() {
     _mimicBounds = new AnimatedRect(new Rect(), curve: curve);
+    _mimicBounds.end = targetRect;
     _expandPerformance = new AnimationPerformance()
       ..duration = duration
       ..addVariable(_mimicBounds)
@@ -62,14 +72,11 @@ class MimicOverlay extends AnimatedComponent {
     }
   }
 
-  void _handleStackSizeChanged(Size size) {
-    _mimicBounds.end = Point.origin & size;
-  }
-
   void _handleMimicCallback(Rect globalBounds) {
     setState(() {
       // TODO(abarth): We need to convert global bounds into local coordinates.
-      _mimicBounds.begin = globalToLocal(globalBounds.topLeft) & globalBounds.size;
+      _mimicBounds.begin =
+          globalToLocal(globalBounds.topLeft) & globalBounds.size;
       _mimicBounds.value = _mimicBounds.begin;
     });
     _expandPerformance.forward();
@@ -78,8 +85,9 @@ class MimicOverlay extends AnimatedComponent {
   Widget build() {
     List<Widget> layers = new List<Widget>();
 
-    if (children != null)
+    if (children != null) {
       layers.addAll(children);
+    }
 
     if (_activeOverlay != null) {
       layers.add(
@@ -98,9 +106,6 @@ class MimicOverlay extends AnimatedComponent {
       );
     }
 
-    return new SizeObserver(
-      callback: _handleStackSizeChanged,
-      child: new Stack(layers)
-    );
+    return new Stack(layers);
   }
 }
