@@ -638,3 +638,13 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
     super.remove();
   }
 }
+
+
+// EVENT HANDLING
+
+class IgnorePointer extends OneChildRenderObjectWrapper {
+  IgnorePointer({ Key key, Widget child })
+    : super(key: key, child: child);
+  RenderIgnorePointer createNode() => new RenderIgnorePointer();
+  RenderIgnorePointer get root => super.root;
+}
