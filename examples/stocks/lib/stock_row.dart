@@ -38,29 +38,27 @@ class StockRow extends Component {
     ];
 
     // TODO(hansmuller): An explicit |height| shouldn't be needed
-    return new InkWell(
-      child: new Container(
-        padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
-        height: kHeight,
-        decoration: new BoxDecoration(
-          border: new Border(
-            bottom: new BorderSide(color: Theme.of(this).dividerColor)
-          )
+    return new Container(
+      padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
+      height: kHeight,
+      decoration: new BoxDecoration(
+        border: new Border(
+          bottom: new BorderSide(color: Theme.of(this).dividerColor)
+        )
+      ),
+      child: new Flex([
+        new Container(
+          child: new StockArrow(percentChange: stock.percentChange),
+          margin: const EdgeDims.only(right: 5.0)
         ),
-        child: new Flex([
-          new Container(
-            child: new StockArrow(percentChange: stock.percentChange),
-            margin: const EdgeDims.only(right: 5.0)
-          ),
-          new Flexible(
-            child: new Flex(
-              children,
-              alignItems: FlexAlignItems.baseline,
-              textBaseline: DefaultTextStyle.of(this).textBaseline
-            )
+        new Flexible(
+          child: new Flex(
+            children,
+            alignItems: FlexAlignItems.baseline,
+            textBaseline: DefaultTextStyle.of(this).textBaseline
           )
-        ])
-      )
+        )
+      ])
     );
   }
 }
