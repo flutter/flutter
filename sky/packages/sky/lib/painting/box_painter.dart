@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
+import 'package:sky/base/image_resource.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/shadows.dart';
 
@@ -168,10 +168,7 @@ enum BackgroundFit { fill, contain, cover, none, scaleDown }
 
 enum BackgroundRepeat { repeat, repeatX, repeatY, noRepeat }
 
-// TODO(jackson): We should abstract this out into a separate class
-// that handles the image caching and so forth, which has callbacks
-// for "size changed" and "image changed". This would also enable us
-// to do animated images.
+typedef void BackgroundImageChangeListener();
 
 class BackgroundImage {
   final BackgroundFit fit;
@@ -179,35 +176,48 @@ class BackgroundImage {
   final sky.ColorFilter colorFilter;
 
   BackgroundImage({
-    Future<sky.Image> image,
+    ImageResource image,
     this.fit: BackgroundFit.scaleDown,
     this.repeat: BackgroundRepeat.noRepeat,
     this.colorFilter
-  }) {
-    image.then((resolvedImage) {
-      if (resolvedImage == null)
-        return;
-      _image = resolvedImage;
-      _size = new Size(resolvedImage.width.toDouble(), resolvedImage.height.toDouble());
-      for (Function listener in _listeners) {
-        listener();
-      }
-    });
-  }
+  }) : _imageResource = image;
 
   sky.Image _image;
   sky.Image get image => _image;
 
+  ImageResource _imageResource;
   Size _size;
 
-  final List<Function> _listeners = new List<Function>();
+  final List<BackgroundImageChangeListener> _listeners =
+      new List<BackgroundImageChangeListener>();
 
-  void addChangeListener(Function listener) {
+  void addChangeListener(BackgroundImageChangeListener listener) {
+    // We add the listener to the _imageResource first so that the first change
+    // listener doesn't get callback synchronously if the image resource is
+    // already resolved.
+    if (_listeners.isEmpty)
+      _imageResource.addListener(_handleImageChanged);
     _listeners.add(listener);
   }
 
-  void removeChangeListener(Function listener) {
+  void removeChangeListener(BackgroundImageChangeListener listener) {
     _listeners.remove(listener);
+    // We need to remove ourselves as listeners from the _imageResource so that
+    // we're not kept alive by the image_cache.
+    if (_listeners.isEmpty)
+      _imageResource.removeListener(_handleImageChanged);
+  }
+
+  void _handleImageChanged(sky.Image resolvedImage) {
+    if (resolvedImage == null)
+      return;
+    _image = resolvedImage;
+    _size = new Size(resolvedImage.width.toDouble(), resolvedImage.height.toDouble());
+    final List<BackgroundImageChangeListener> localListeners =
+        new List<BackgroundImageChangeListener>.from(_listeners);
+    for (BackgroundImageChangeListener listener in localListeners) {
+      listener();
+    }
   }
 
   String toString() => 'BackgroundImage($fit, $repeat)';

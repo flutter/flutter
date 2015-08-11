@@ -7,12 +7,12 @@ import 'dart:collection';
 import 'dart:sky' as sky;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
+import 'package:sky/base/image_resource.dart';
 import 'package:sky/mojo/net/fetch.dart';
 
-final HashMap<String, Future<sky.Image>> _cache =
-    new HashMap<String, Future<sky.Image>>();
+final HashMap<String, ImageResource> _cache = new Map<String, ImageResource>();
 
-Future<sky.Image> load(String url) {
+ImageResource load(String url) {
   return _cache.putIfAbsent(url, () {
     Completer<sky.Image> completer = new Completer<sky.Image>();
     fetchUrl(url).then((UrlResponse response) {
@@ -23,6 +23,6 @@ Future<sky.Image> load(String url) {
         new sky.ImageDecoder(response.body.handle.h, completer.complete);
       }
     });
-    return completer.future;
+    return new ImageResource(completer.future);
   });
 }
