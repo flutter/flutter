@@ -1,25 +1,39 @@
 part of sprites;
 
+/// A sequence of colors representing a gradient or a color transition over
+/// time. The sequence is represented by a list of [colors] and a list of
+/// [colorStops], the stops are normalized values (0.0 to 1.0) and ordered in
+/// the list. Both lists have the same number of elements.
 class ColorSequence {
+  /// List of colors.
   List<Color> colors;
+
+  /// List of color stops, normalized values (0.0 to 1.0) and ordered.
   List<double> colorStops;
 
+  /// Creates a new color sequence from a list of [colors] and a list of
+  /// [colorStops].
   ColorSequence(this.colors, this.colorStops) {
     assert(colors != null);
     assert(colorStops != null);
     assert(colors.length == colorStops.length);
   }
 
+  /// Creates a new color sequence from a start and an end color.
   ColorSequence.fromStartAndEndColor(Color start, Color end) {
     colors = [start, end];
     colorStops = [0.0, 1.0];
   }
 
+  /// Creates a new color sequence by copying an existing sequence.
   ColorSequence.copy(ColorSequence sequence) {
     colors = new List<Color>.from(sequence.colors);
     colorStops = new List<double>.from(sequence.colorStops);
   }
 
+  /// Returns the color at a normalized (0.0 to 1.0) position in the color
+  /// sequence. If a color stop isn't hit, the returned color will be an
+  /// interpolation of a color between two color stops.
   Color colorAtPosition(double pos) {
     assert(pos >= 0.0 && pos <= 1.0);
 
