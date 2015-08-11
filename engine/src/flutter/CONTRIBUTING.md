@@ -54,8 +54,8 @@ target. Building on MacOS for Android, iOS, and a head-less MacOS target is comi
 * `./sky/tools/gn`
 * `ninja -C out/Debug`
 
-Running the code
-----------------
+Running the tests
+-----------------
 
 * `./sky/tools/test_sky --debug` runs the tests on the host machine using `out/Debug`.
 * If you want to run the run a test directly:
@@ -63,6 +63,18 @@ Running the code
   - (Mac) `./out/Debug/SkyShell.app/Contents/MacOS/SkyShell --package-root=sky/packages/workbench/packages sky/tests/lowlevel/trivial.dart`
 
 Note: The tests are headless, you won't see any UI. You can use `print` to generate console output or you can interact with the DartVM via observatory at [http://localhost:8181/](http://localhost:8181/).
+
+Running the examples
+--------------------
+
+* You can find example code in subdirectories of the `examples` directory, for example `examples/stocks`.
+* Once you have a local build, run `pub get` from the example folder of your choice to make sure that you have all of the Dart dependencies.
+* Then, to run the current example locally, you can run:
+ - `$ ./packages/sky/sky_tool start --build-path ../../out/Debug/`
+* The `--build-path` parameter is the path to your build directory for the build you want to run.  To run on a connected Android device, you could set it to `../../out/android_Debug/`, assuming your output directory is set up normally.
+* You can also specify a particular Dart file to run if you want to run an example that doesn't have a `lib/main.dart` file.  For example, to run the `tabs.dart` example in the `examples/widgets` directory on a connected Android device, from that directory you would run:
+ - `$ ./packages/sky/sky_tool start tabs.dart --build-path ../../out/android_Debug/`
+* When running code from the `examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `sky` directory and subdirectories will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
 
 Contributing code
 -----------------
@@ -87,12 +99,3 @@ You must complete the
 You can do this online, and it only takes a minute.
 If you've never submitted code before, you must add your (or your
 organization's) name and contact info to the [AUTHORS](AUTHORS) file.
-
-Running tests
--------------
-
-Tests are only supported on Linux currently.
-
- * ``sky/tools/test_sky --debug``
-   * This runs the tests against ``//out/Debug``. If you want to run against
-     ``//out/Release``, omit the ``--debug`` flag.
