@@ -1,9 +1,16 @@
 part of sprites;
 
+/// An node that transforms its children using a 3D perspective projection. This
+/// node type can be used to create 3D flips and other similar effects.
+///
+///     var myNode3D = new Node3D();
+///     myNode3D.rotationY = 45.0;
+///     myNode3D.addChild(new Sprite(myTexture));
 class Node3D extends Node {
 
   double _rotationX = 0.0;
 
+  /// The node's rotation around the x axis in degrees.
   double get rotationX => _rotationX;
 
   set rotationX(double rotationX) {
@@ -13,6 +20,7 @@ class Node3D extends Node {
 
   double _rotationY = 0.0;
 
+  /// The node's rotation around the y axis in degrees.
   double get rotationY => _rotationY;
 
   set rotationY(double rotationY) {
@@ -22,6 +30,7 @@ class Node3D extends Node {
 
   double _projectionDepth = 500.0;
 
+  /// The projection depth. Default value is 500.0.
   double get projectionDepth => _projectionDepth;
 
   set projectionDepth(double projectionDepth) {
