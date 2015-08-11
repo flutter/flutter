@@ -9,6 +9,8 @@ import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
 import 'user_data.dart';
+import 'date_utils.dart';
+import 'dart:async';
 
 part 'feed.dart';
 part 'fitness_item.dart';
@@ -17,23 +19,47 @@ part 'meal.dart';
 part 'measurement.dart';
 part 'settings.dart';
 
-class FitnessApp extends App {
+class UserData {
+  List<FitnessItem> _items = [];
 
+  List<FitnessItem> get items => _items;
+  void set items(List<FitnessItem> newItems) {
+    _items = [];
+    _items.addAll(newItems);
+    sort();
+  }
+
+  void sort() {
+    _items.sort((a, b) => -a.when.compareTo(b.when));
+  }
+
+  void addAndSave(FitnessItem item) {
+    _items.add(item);
+    sort();
+    save();
+  }
+
+  void removeAndSave(FitnessItem item) {
+    _items.remove(item);
+    save();
+  }
+
+  Future save() => saveFitnessData(_items);
+}
+
+class FitnessApp extends App {
   NavigationState _navigationState;
-  final List<FitnessItem> _userData = [];
+  final UserData _userData = new UserData();
 
   void didMount() {
     super.didMount();
     loadFitnessData().then((List<Measurement> list) {
-      setState(() {
-        _userData.addAll(list);
-      });
+      setState(() => _userData.items = list);
     }).catchError((e) => print("Failed to load data: $e"));
   }
 
   void save() {
-    saveFitnessData(_userData)
-      .catchError((e) => print("Failed to load data: $e"));
+    _userData.save().catchError((e) => print("Failed to load data: $e"));
   }
 
   void initState() {
@@ -42,7 +68,7 @@ class FitnessApp extends App {
         name: '/',
         builder: (navigator, route) => new FeedFragment(
           navigator: navigator,
-          userData: _userData,
+          userData: _userData.items,
           onItemCreated: _handleItemCreated,
           onItemDeleted: _handleItemDeleted
         )
@@ -71,27 +97,18 @@ class FitnessApp extends App {
 
   void onBack() {
     if (_navigationState.hasPrevious()) {
-      setState(() {
-        _navigationState.pop();
-      });
+      setState(() => _navigationState.pop());
     } else {
       super.onBack();
     }
   }
 
   void _handleItemCreated(FitnessItem item) {
-    setState(() {
-      _userData.add(item);
-      _userData.sort((a, b) => a.when.compareTo(b.when));
-      save();
-    });
+    setState(() => _userData.addAndSave(item));
   }
 
   void _handleItemDeleted(FitnessItem item) {
-    setState(() {
-      _userData.remove(item);
-      saveFitnessData(_userData);
-    });
+    setState(() => _userData.removeAndSave(item));
   }
 
   BackupMode backupSetting = BackupMode.disabled;

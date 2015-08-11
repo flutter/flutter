@@ -6,7 +6,9 @@ part of fitness;
 
 typedef void FitnessItemHandler(FitnessItem item);
 
-const double kFitnessItemHeight = 79.0;
+// TODO(eseidel): This should be a constant on a SingleLineTile class
+// https://www.google.com/design/spec/components/lists.html#lists-specs
+const double kFitnessItemHeight = 48.0;
 
 abstract class FitnessItem {
   FitnessItem.fromJson(Map json) : when = DateTime.parse(json['when']);
@@ -19,7 +21,7 @@ abstract class FitnessItem {
   Map toJson() => { 'when' : when.toIso8601String() };
 
   // TODO(jackson): Internationalize
-  String get displayDate => "${when.year.toString()}-${when.month.toString().padLeft(2,'0')}-${when.day.toString().padLeft(2,'0')}";
+  String get displayDate => DateUtils.toRecentTimeString(when);
 
   FitnessItemRow toRow({ FitnessItemHandler onDismissed });
 }
@@ -40,12 +42,19 @@ abstract class FitnessItemRow extends Component {
   Widget build() {
     return new Dismissable(
       onDismissed: () => onDismissed(item),
-      child: new Card(
-        child: new Container(
-          height: kFitnessItemHeight,
-          padding: const EdgeDims.all(8.0),
-          child: buildContent()
-        )
+      child: new Container(
+        height: kFitnessItemHeight,
+        // TODO(eseidel): Padding top should be 16px for a single-line tile:
+        // https://www.google.com/design/spec/components/lists.html#lists-specs
+        padding: const EdgeDims.all(10.0),
+        // TODO(eseidel): This line should be drawn by the list as it should
+        // stay put even when the tile is dismissed!
+        decoration: new BoxDecoration(
+          border: new Border(
+            bottom: new BorderSide(color: Theme.of(this).dividerColor)
+          )
+        ),
+        child: buildContent()
       )
     );
   }
