@@ -29,54 +29,121 @@ class _ParticleAccelerations {
   double tangentialAccel = 0.0;
 }
 
+/// A particle system uses a large number of sprites to draw complex effects
+/// such as explosions, smoke, rain, or fire. There are a number of properties
+/// that can be set to control the look of the particle system. Most of the
+/// properties have a base value and a variance, these values are used when
+/// creating each individual particle. For instance, by setting the [life] to
+/// 1.0 and the [lifeVar] to 0.5, each particle will get a life time in the
+/// range of 0.5 to 1.5.
+///
+/// Particles are created and added to the system at [emissionRate], but the
+/// number of particles can never exceed the [maxParticles] limit.
 class ParticleSystem extends Node {
 
+  /// The texture used to draw each individual sprite.
   Texture texture;
 
+  /// The time in seconds each particle will be alive.
   double life;
+
+  /// Variance of the [life] property.
   double lifeVar;
 
+  /// The variance of a particles initial position.
   Point posVar;
 
+  /// The start scale of each individual particle.
   double startSize;
+
+  /// Variance of the [startSize] property.
   double startSizeVar;
 
+  /// The end scale of each individual particle.
   double endSize;
+
+  /// Variance of the [endSize] property.
   double endSizeVar;
 
+  /// The start rotation of each individual particle.
   double startRotation;
+
+  /// Variance of the [startRotation] property.
   double startRotationVar;
 
+  /// The end rotation of each individual particle.
   double endRotation;
+
+  /// Variance of the [endRotation] property.
   double endRotationVar;
 
+  /// If true, each particle will be rotated to the direction of the movement
+  /// of the particle. The calculated rotation will be added to the current
+  /// rotation as calculated by the [startRotation] and [endRotation]
+  /// properties.
   bool rotateToMovement;
 
+  /// The direction in which each particle will be emitted in degrees.
   double direction;
+
+  /// Variance of the [direction] property.
   double directionVar;
 
+  /// The speed at which each particle will be emitted.
   double speed;
+
+  /// Variance of the [direction] property.
   double speedVar;
 
+  /// The radial acceleration of each induvidual particle.
   double radialAcceleration;
+
+  /// Variance of the [radialAcceleration] property.
   double radialAccelerationVar;
 
+  /// The tangential acceleration of each individual particle.
   double tangentialAcceleration;
+
+  /// Variance of the [tangentialAcceleration] property.
   double tangentialAccelerationVar;
 
+  /// The gravity vector of the particle system.
   Vector2 gravity;
 
+  /// The maximum number of particles the system can display at a single time.
   int maxParticles;
+
+  /// Total number of particles to emit, if the value is set to 0 the system
+  /// will continue to emit particles for an indifinte period of time.
   int numParticlesToEmit;
+
+  /// The rate at which particles are emitted, defined in particles per second.
   double emissionRate;
+
+  /// If set to true, the particle system will be automatically removed as soon
+  /// as there are no more particles left to draw.
   bool autoRemoveOnFinish;
 
+  /// The [ColorSequence] used to animate the color of each individual particle
+  /// over the duration of its [life]. When applied to a particle the sequence's
+  /// color stops modified in accordance with the [alphaVar], [redVar],
+  /// [greenVar], and [blueVar] properties.
   ColorSequence colorSequence;
+
+  /// Alpha varience of the [colorSequence] property.
   int alphaVar;
+
+  /// Red varience of the [colorSequence] property.
   int redVar;
+
+  /// Green varience of the [colorSequence] property.
   int greenVar;
+
+  /// Blue varience of the [colorSequence] property.
   int blueVar;
-  TransferMode colorTransferMode;
+
+  /// The transfer mode used to draw the particle system. Default is
+  /// [TransferMode.plus].
   TransferMode transferMode;
 
   List<_Particle> _particles;
@@ -117,7 +184,6 @@ class ParticleSystem extends Node {
                   this.redVar: 0,
                   this.greenVar: 0,
                   this.blueVar: 0,
-                  this.colorTransferMode: TransferMode.multiply,
                   this.transferMode: TransferMode.plus,
                   this.numParticlesToEmit: 0,
                   this.autoRemoveOnFinish: true}) {
