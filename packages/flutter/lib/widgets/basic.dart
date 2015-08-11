@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 
+import 'package:sky/base/image_resource.dart';
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/painting/text_style.dart';
@@ -530,39 +530,44 @@ class Image extends LeafRenderObjectWrapper {
   }
 }
 
-class FutureImage extends StatefulComponent {
-  FutureImage({ Key key, this.image, this.width, this.height, this.colorFilter }) : super(key: key);
+class ImageListener extends StatefulComponent {
+  ImageListener({ Key key, this.image, this.width, this.height, this.colorFilter }) : super(key: key);
 
-  Future<sky.Image> image;
+  ImageResource image;
   double width;
   double height;
   sky.ColorFilter colorFilter;
 
   sky.Image _resolvedImage;
 
-  void _resolveImage() {
-    image.then((sky.Image resolvedImage) {
-      if (!mounted)
-        return;
-      setState(() {
-        _resolvedImage = resolvedImage;
-      });
+  void _handleImageChanged(sky.Image resolvedImage) {
+    if (!mounted)
+      return;
+    setState(() {
+      _resolvedImage = resolvedImage;
     });
   }
 
   void didMount() {
     super.didMount();
-    _resolveImage();
+    image.addListener(_handleImageChanged);
   }
 
-  void syncFields(FutureImage source) {
-    bool needToResolveImage = (image != source.image);
+  void didUnmount() {
+    super.didUnmount();
+    image.removeListener(_handleImageChanged);
+  }
+
+  void syncFields(ImageListener source) {
+    final bool needToUpdateListeners = (image != source.image) && mounted;
+    if (needToUpdateListeners)
+      image.removeListener(_handleImageChanged);
     image = source.image;
     width = source.width;
     height = source.height;
     colorFilter = source.colorFilter;
-    if (needToResolveImage)
-      _resolveImage();
+    if (needToUpdateListeners)
+      image.addListener(_handleImageChanged);
   }
 
   Widget build() {
@@ -584,7 +589,7 @@ class NetworkImage extends Component {
   final sky.ColorFilter colorFilter;
 
   Widget build() {
-    return new FutureImage(
+    return new ImageListener(
       image: image_cache.load(src),
       width: width,
       height: height,
@@ -603,7 +608,7 @@ class AssetImage extends Component {
   final sky.ColorFilter colorFilter;
 
   Widget build() {
-    return new FutureImage(
+    return new ImageListener(
       image: bundle.loadImage(name),
       width: width,
       height: height,
