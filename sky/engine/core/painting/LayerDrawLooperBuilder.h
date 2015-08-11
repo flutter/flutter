@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_LAYERDRAWLOOPERBUILDER_H_
 #define SKY_ENGINE_CORE_PAINTING_LAYERDRAWLOOPERBUILDER_H_
 
+#include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -13,7 +14,6 @@
 namespace blink {
 
 class DrawLooper;
-class DrawLooperAddLayerCallback;
 class DrawLooperLayerInfo;
 
 class LayerDrawLooperBuilder : public RefCounted<LayerDrawLooperBuilder>,
@@ -26,8 +26,7 @@ class LayerDrawLooperBuilder : public RefCounted<LayerDrawLooperBuilder>,
   }
 
   PassRefPtr<DrawLooper> build();
-  void addLayerOnTop(DrawLooperLayerInfo* layer_info,
-                     PassOwnPtr<DrawLooperAddLayerCallback>);
+  void addLayerOnTop(DrawLooperLayerInfo* layer_info, const Paint& paint);
 
  private:
   LayerDrawLooperBuilder();

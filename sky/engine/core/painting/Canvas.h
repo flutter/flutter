@@ -61,7 +61,7 @@ public:
     ~Canvas() override;
 
     void save();
-    void saveLayer(const Rect& bounds, const Paint* paint = nullptr);
+    void saveLayer(const Rect& bounds, const Paint& paint);
     void restore();
 
     void translate(float dx, float dy);
@@ -78,16 +78,16 @@ public:
     void clipPath(const CanvasPath* path);
 
     void drawColor(SkColor color, SkXfermode::Mode transferMode);
-    void drawLine(const Point& p1, const Point& p2, const Paint* paint);
-    void drawPaint(const Paint* paint);
-    void drawRect(const Rect& rect, const Paint* paint);
-    void drawRRect(const RRect* rrect, const Paint* paint);
-    void drawDRRect(const RRect* outer, const RRect* inner, const Paint* paint);
-    void drawOval(const Rect& rect, const Paint* paint);
-    void drawCircle(const Point& c, float radius, const Paint* paint);
-    void drawPath(const CanvasPath* path, const Paint* paint);
-    void drawImage(const CanvasImage* image, const Point& p, const Paint* paint);
-    void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint);
+    void drawLine(const Point& p1, const Point& p2, const Paint& paint);
+    void drawPaint(const Paint& paint);
+    void drawRect(const Rect& rect, const Paint& paint);
+    void drawRRect(const RRect* rrect, const Paint& paint);
+    void drawDRRect(const RRect* outer, const RRect* inner, const Paint& paint);
+    void drawOval(const Rect& rect, const Paint& paint);
+    void drawCircle(const Point& c, float radius, const Paint& paint);
+    void drawPath(const CanvasPath* path, const Paint& paint);
+    void drawImage(const CanvasImage* image, const Point& p, const Paint& paint);
+    void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint);
     void drawPicture(Picture* picture);
     void drawDrawable(Drawable* drawable);
     void drawPaintingNode(PaintingNode* paintingNode, const Point& p);
@@ -95,7 +95,7 @@ public:
     void drawAtlas(CanvasImage* atlas,
         const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
         const Vector<SkColor>& colors, SkXfermode::Mode mode,
-        const Rect& cullRect, Paint* paint, ExceptionState&);
+        const Rect& cullRect, const Paint& paint, ExceptionState&);
 
     SkCanvas* skCanvas() { return m_canvas; }
     void clearSkCanvas() { m_canvas = nullptr; }

@@ -55,34 +55,29 @@ void beginFrame(double timeStamp) {
             ..setOffset(const sky.Offset(150.0, 0.0))
             ..setColorMode(sky.TransferMode.src)
             ..setPaintBits(sky.PaintBits.all),
-          (sky.Paint layerPaint) {
-        layerPaint.color = const sky.Color.fromARGB(128, 255, 255, 0);
-        layerPaint.setColorFilter(new sky.ColorFilter.mode(
-            const sky.Color.fromARGB(128, 0, 0, 255), sky.TransferMode.srcIn));
-        layerPaint.setMaskFilter(new sky.MaskFilter.blur(
-            sky.BlurStyle.normal, 3.0, highQuality: true));
-      })
+          new sky.Paint()
+            ..color = const sky.Color.fromARGB(128, 255, 255, 0)
+            ..setColorFilter(new sky.ColorFilter.mode(
+              const sky.Color.fromARGB(128, 0, 0, 255), sky.TransferMode.srcIn))
+            ..setMaskFilter(new sky.MaskFilter.blur(
+              sky.BlurStyle.normal, 3.0, highQuality: true)))
       ..addLayerOnTop(
           new sky.DrawLooperLayerInfo()
             ..setOffset(const sky.Offset(75.0, 75.0))
             ..setColorMode(sky.TransferMode.src)
             ..setPaintBits(sky.PaintBits.shader),
-          (sky.Paint layerPaint) {
-        sky.Gradient redYellow = new sky.Gradient.radial(
-            new sky.Point(0.0, 0.0), radius/3.0,
-            [const sky.Color(0xFFFFFF00), const sky.Color(0xFFFF0000)],
-            null, sky.TileMode.mirror);
-        layerPaint.setShader(redYellow);
-        // Since we're don't set sky.PaintBits.maskFilter, this has no effect.
-        layerPaint.setMaskFilter(new sky.MaskFilter.blur(
-            sky.BlurStyle.normal, 50.0, highQuality: true));
-      })
+          new sky.Paint()
+            ..setShader(new sky.Gradient.radial(
+                new sky.Point(0.0, 0.0), radius/3.0,
+                [const sky.Color(0xFFFFFF00), const sky.Color(0xFFFF0000)],
+                null, sky.TileMode.mirror))
+            // Since we're don't set sky.PaintBits.maskFilter, this has no effect.
+            ..setMaskFilter(new sky.MaskFilter.blur(
+              sky.BlurStyle.normal, 50.0, highQuality: true)))
       ..addLayerOnTop(
           new sky.DrawLooperLayerInfo()..setOffset(const sky.Offset(225.0, 75.0)),
-          (sky.Paint layerPaint) {
-        // Since this layer uses a DST color mode, this has no effect.
-        layerPaint.color = const sky.Color.fromARGB(128, 255, 0, 0);
-      });
+          // Since this layer uses a DST color mode, this has no effect.
+          new sky.Paint()..color = const sky.Color.fromARGB(128, 255, 0, 0));
   paint.setDrawLooper(builder.build());
   canvas.drawCircle(sky.Point.origin, radius, paint);
 

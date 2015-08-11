@@ -27,7 +27,7 @@ void beginFrame(double timeStamp) {
           new MaskFilter.blur(BlurStyle.normal, 5.0, highQuality: true));
     })
     // Main layer.
-    ..addLayerOnTop(new DrawLooperLayerInfo(), (Paint) {});
+    ..addLayerOnTop(new DrawLooperLayerInfo(), new Paint());
   paint.setDrawLooper(builder.build());
 
   canvas.drawPaint(

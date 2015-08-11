@@ -22,40 +22,20 @@ class ColorFilter;
 class MaskFilter;
 class Shader;
 
-class Paint : public RefCounted<Paint>, public DartWrappable {
-  DEFINE_WRAPPERTYPEINFO();
+class Paint {
  public:
-  ~Paint() override;
-  static PassRefPtr<Paint> create() { return adoptRef(new Paint); }
+  SkPaint sk_paint;
+  bool is_null;
 
-  bool isAntiAlias() const { return paint_.isAntiAlias(); }
-  void setIsAntiAlias(bool value) { paint_.setAntiAlias(value); }
+  const SkPaint* paint() const { return is_null ? nullptr : &sk_paint; }
+};
 
-  SkColor color() const { return paint_.getColor(); }
-  void setColor(SkColor color) { paint_.setColor(color); }
-
-  SkScalar strokeWidth() const { return paint_.getStrokeWidth(); }
-  void setStrokeWidth(SkScalar strokeWidth) {
-    paint_.setStrokeWidth(strokeWidth);
-  }
-
-  void setDrawLooper(DrawLooper* looper);
-  void setColorFilter(ColorFilter* filter);
-  void setMaskFilter(MaskFilter* filter);
-  void setShader(Shader* shader);
-  void setStyle(SkPaint::Style style);
-  void setTransferMode(SkXfermode::Mode transfer_mode);
-  void setFilterQuality(SkFilterQuality filter_quality);
-
-  const SkPaint& paint() const { return paint_; }
-  void setPaint(const SkPaint& paint) { paint_ = paint; }
-
-  String toString() const;
-
- private:
-  Paint();
-
-  SkPaint paint_;
+template <>
+struct DartConverter<Paint> {
+  static Paint FromDart(Dart_Handle handle);
+  static Paint FromArgumentsWithNullCheck(Dart_NativeArguments args,
+                                          int index,
+                                          Dart_Handle& exception);
 };
 
 }  // namespace blink
