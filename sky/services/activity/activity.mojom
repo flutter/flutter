@@ -28,6 +28,12 @@ struct TaskDescription {
   uint32 primaryColor;
 };
 
+enum SystemUIVisibility {
+  STANDARD,
+  FULLSCREEN,
+  IMMERSIVE,
+};
+
 // TODO(abarth): This interface seems very specific to Android. Do we want to
 //               have a higher-level abstraction here? Do we want a collection
 //               of services that only work on specific platforms? We need to
@@ -36,6 +42,7 @@ interface Activity {
   StartActivity(Intent intent);
   FinishCurrentActivity();
   SetTaskDescription(TaskDescription description);
+  SetSystemUIVisibility(SystemUIVisibility visibility);
 
   // These are stored off the Activity on Android, but probably belong in a
   // separate FileSystem service.
