@@ -10,7 +10,7 @@ class ChartData {
   final double endX;
   final double startY;
   final double endY;
-  final List<sky.Point> dataSet;
+  final List<Point> dataSet;
 }
 
 class Chart extends LeafRenderObjectWrapper {
@@ -58,7 +58,7 @@ class ChartPainter {
 
   ChartData data;
 
-  Point _convertPointToRectSpace(sky.Point point, Rect rect) {
+  Point _convertPointToRectSpace(Point point, Rect rect) {
     double x = rect.left + ((point.x - data.startX) / (data.endX - data.startX)) * rect.width;
     double y = rect.bottom - ((point.y - data.startY) / (data.endY - data.startY)) * rect.height;
     return new Point(x, y);
@@ -68,13 +68,13 @@ class ChartPainter {
     Paint paint = new Paint()
       ..strokeWidth = 2.0
       ..color = const Color(0xFF000000);
-    List<sky.Point> dataSet = data.dataSet;
+    List<Point> dataSet = data.dataSet;
     assert(dataSet != null);
     assert(dataSet.length > 0);
     Path path = new Path();
     Point start = _convertPointToRectSpace(data.dataSet[0], rect);
     path.moveTo(start.x, start.y);
-    for(sky.Point point in data.dataSet) {
+    for(Point point in data.dataSet) {
       Point current = _convertPointToRectSpace(point, rect);
       canvas.drawCircle(current, 3.0, paint);
       path.lineTo(current.x, current.y);
@@ -85,8 +85,8 @@ class ChartPainter {
 
   void _paintScale(sky.Canvas canvas, Rect rect) {
     Paint paint = new Paint()..color = const Color(0xFF000000);
-    canvas.drawText("${data.startY}", rect.bottomRight, paint);
-    canvas.drawText("${data.endY}", rect.topRight, paint);
+    canvas.drawText("${data.startY}", rect.bottomLeft, paint);
+    canvas.drawText("${data.endY}", rect.topLeft, paint);
   }
 
   void paint(sky.Canvas canvas, Rect rect) {
