@@ -15,7 +15,7 @@ Hello World
 To build an application, create a subclass of `App` and instantiate it:
 
 ```dart
-import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets.dart';
 
 class HelloWorldApp extends App {
   Widget build() {
@@ -65,7 +65,7 @@ very commonly used:
 Below is a simple toolbar example that shows how to combine these widgets:
 
 ```dart
-import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets.dart';
 
 class MyToolBar extends Component {
   Widget build() {
@@ -98,7 +98,7 @@ To use this component, we simply create an instance of `MyToolBar` in a `build`
 function:
 
 ```dart
-import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets.dart';
 
 import 'my_tool_bar.dart';
 
@@ -126,7 +126,7 @@ input. The first step in building an interactive application is to listen for
 input events. Let's see how that works by creating a simple button:
 
 ```dart
-import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets.dart';
 
 final BoxDecoration _decoration = new BoxDecoration(
   borderRadius: 5.0,
@@ -441,8 +441,6 @@ working with the widgets system. For this to work, you have to have
 launched your app with `runApp()`.
 
 ```dart
-import 'package:sky/widget/widget.dart';
-
 debugDumpApp();
 ```
 
