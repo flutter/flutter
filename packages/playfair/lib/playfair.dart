@@ -4,5 +4,10 @@
 
 library playfair;
 
-import 'dart:math' as math;
+import 'dart:sky' as sky;
 
+import 'package:sky/widgets/framework.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
+
+part 'src/base.dart';
