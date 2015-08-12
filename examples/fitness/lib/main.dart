@@ -4,6 +4,7 @@
 
 library fitness;
 
+import 'package:playfair/playfair.dart' as playfair;
 import 'package:sky/editing/input.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart' as colors;
