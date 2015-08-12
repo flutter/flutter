@@ -16,7 +16,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := \
+minikin_src_files := \
     AnalyzeStyle.cpp \
     CmapCoverage.cpp \
     FontCollection.cpp \
@@ -31,20 +31,34 @@ LOCAL_SRC_FILES := \
     MinikinFontFreeType.cpp \
     SparseBitSet.cpp
 
-LOCAL_MODULE := libminikin
-
-LOCAL_C_INCLUDES += \
+minikin_c_includes := \
     external/harfbuzz_ng/src \
     external/freetype/include \
     frameworks/minikin/include
 
-LOCAL_SHARED_LIBRARIES := \
+minikin_shared_libraries := \
     libharfbuzz_ng \
     libft2 \
     liblog \
-    libpng \
     libz \
     libicuuc \
     libutils
 
+LOCAL_MODULE := libminikin
+LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
+LOCAL_SRC_FILES := $(minikin_src_files)
+LOCAL_C_INCLUDES := $(minikin_c_includes)
+LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
+
 include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libminikin
+LOCAL_MODULE_TAGS := optional
+LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
+LOCAL_SRC_FILES := $(minikin_src_files)
+LOCAL_C_INCLUDES := $(minikin_c_includes)
+LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
+
+include $(BUILD_STATIC_LIBRARY)

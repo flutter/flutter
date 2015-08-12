@@ -71,13 +71,13 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     // implementing a tailored version of extended grapheme clusters.
     // The GB rules refer to section 3.1.1, Grapheme Cluster Boundary Rules.
 
-    // Rule GB1, sot /; Rule GB2, / eot
+    // Rule GB1, sot ÷; Rule GB2, ÷ eot
     if (offset <= start || offset >= start + count) {
         return true;
     }
     if (U16_IS_TRAIL(buf[offset])) {
-        // Don't break a surrogate pair
-        return false;
+        // Don't break a surrogate pair, but a lonely trailing surrogate pair is a break
+        return !U16_IS_LEAD(buf[offset - 1]);
     }
     uint32_t c1 = 0;
     uint32_t c2 = 0;
@@ -90,11 +90,11 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     if (p1 == U_GCB_CR && p2 == U_GCB_LF) {
         return false;
     }
-    // Rule GB4, (Control | CR | LF) /
+    // Rule GB4, (Control | CR | LF) ÷
     if (p1 == U_GCB_CONTROL || p1 == U_GCB_CR || p1 == U_GCB_LF) {
         return true;
     }
-    // Rule GB5, / (Control | CR | LF)
+    // Rule GB5, ÷ (Control | CR | LF)
     if (p2 == U_GCB_CONTROL || p2 == U_GCB_CR || p2 == U_GCB_LF) {
         return true;
     }
@@ -107,7 +107,7 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
         return false;
     }
     // Rule GB8, ( LVT | T ) x T
-    if ((p1 == U_GCB_L || p1 == U_GCB_T) && p2 == U_GCB_T) {
+    if ((p1 == U_GCB_LVT || p1 == U_GCB_T) && p2 == U_GCB_T) {
         return false;
     }
     // Rule GB8a, Regional_Indicator x Regional_Indicator
@@ -139,7 +139,7 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
             && u_getIntPropertyValue(c2, UCHAR_GENERAL_CATEGORY) == U_OTHER_LETTER) {
         return false;
     }
-    // Rule GB10, Any / Any
+    // Rule GB10, Any ÷ Any
     return true;
 }
 
