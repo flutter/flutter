@@ -81,5 +81,5 @@ main(List<String> argv) async {
     ..removeAll('x-content-type-options')
     ..removeAll('x-frame-options')
     ..removeAll('x-xss-protection')
-    ..add('cache-control', 'no-cache');
+    ..add('cache-control', 'no-store');
 }
