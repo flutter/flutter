@@ -64,6 +64,7 @@ Thumbs.db
 # dart packages directories and related.
 /examples/**/packages
 /examples/**/pubspec.lock
+/mojo/common/dart/packages
 /mojo/dart/apptest/packages
 /mojo/dart/mojo_services/packages
 /mojo/dart/mojo_services/pubspec.lock
