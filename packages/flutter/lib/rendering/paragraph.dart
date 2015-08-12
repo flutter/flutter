@@ -2,92 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
-import 'package:sky/painting/text_style.dart';
+import 'package:sky/painting/paragraph_painter.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 
-abstract class RenderInline {
-  sky.Node _toDOM(sky.Document owner);
-  String toString([String prefix = '']);
-
-  void _applyStyleToContainer(sky.Element container) {
-  }
-}
-
-class RenderText extends RenderInline {
-  RenderText(this.text) {
-    assert(text != null);
-  }
-
-  final String text;
-
-  sky.Node _toDOM(sky.Document owner) {
-    return owner.createText(text);
-  }
-
-  bool operator ==(other) => other is RenderText && text == other.text;
-  int get hashCode => text.hashCode;
-
-  String toString([String prefix = '']) => '${prefix}InlineText: "${text}"';
-}
-
-class RenderStyled extends RenderInline {
-  RenderStyled(this.style, this.children) {
-    assert(style != null);
-    assert(children != null);
-  }
-
-  final TextStyle style;
-  final List<RenderInline> children;
-
-  sky.Node _toDOM(sky.Document owner) {
-    sky.Element parent = owner.createElement('t');
-    style.applyToCSSStyle(parent.style);
-    for (RenderInline child in children) {
-      parent.appendChild(child._toDOM(owner));
-    }
-    return parent;
-  }
-
-  void _applyStyleToContainer(sky.Element container) {
-    style.applyToContainerCSSStyle(container.style);
-  }
-
-  bool operator ==(other) {
-    if (identical(this, other))
-      return true;
-    if (other is! RenderStyled
-        || style != other.style
-        || children.length != other.children.length)
-      return false;
-    for (int i = 0; i < children.length; ++i) {
-      if (children[i] != other.children[i])
-        return false;
-    }
-    return true;
-  }
-
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + style.hashCode;
-    for (RenderInline child in children)
-      value = 37 * value + child.hashCode;
-    return value;
-  }
-
-  String toString([String prefix = '']) {
-    List<String> result = [];
-    result.add('${prefix}InlineStyle:');
-    var indent = '${prefix}  ';
-    result.add('${style.toString(indent)}');
-    for (RenderInline child in children) {
-      result.add(child.toString(indent));
-    }
-    return result.join('\n');
-  }
-}
+export 'package:sky/painting/paragraph_painter.dart' show TextSpan, PlainTextSpan, StyledTextSpan;
 
 // Unfortunately, using full precision floating point here causes bad layouts
 // because floating point math isn't associative. If we add and subtract
@@ -102,25 +21,20 @@ double _applyFloatingPointHack(double layoutValue) {
 
 class RenderParagraph extends RenderBox {
 
-  RenderParagraph(RenderInline inline) {
-    _layoutRoot.rootElement = _document.createElement('p');
-    this.inline = inline;
+  RenderParagraph(TextSpan text)
+   : _paragraphPainter = new ParagraphPainter(text) {
+    assert(text != null);
   }
 
-  final sky.Document _document = new sky.Document();
-  final sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
+  ParagraphPainter _paragraphPainter;
 
   BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
 
-  RenderInline _inline;
-  RenderInline get inline => _inline;
-  void set inline (RenderInline value) {
-    if (_inline == value)
+  TextSpan get text => _paragraphPainter.text;
+  void set text(TextSpan value) {
+    if (_paragraphPainter.text == value)
       return;
-    _inline = value;
-    _layoutRoot.rootElement.setChild(_inline._toDOM(_document));
-    _layoutRoot.rootElement.removeAttribute('style');
-    _inline._applyStyleToContainer(_layoutRoot.rootElement);
+    _paragraphPainter.text = value;
     _constraintsForCurrentLayout = null;
     markNeedsLayout();
   }
@@ -129,30 +43,30 @@ class RenderParagraph extends RenderBox {
     assert(constraints != null);
     if (_constraintsForCurrentLayout == constraints)
       return; // already cached this layout
-    _layoutRoot.maxWidth = constraints.maxWidth;
-    _layoutRoot.minWidth = constraints.minWidth;
-    _layoutRoot.minHeight = constraints.minHeight;
-    _layoutRoot.maxHeight = constraints.maxHeight;
-    _layoutRoot.layout();
+    _paragraphPainter.maxWidth = constraints.maxWidth;
+    _paragraphPainter.minWidth = constraints.minWidth;
+    _paragraphPainter.minHeight = constraints.minHeight;
+    _paragraphPainter.maxHeight = constraints.maxHeight;
+    _paragraphPainter.layout();
     _constraintsForCurrentLayout = constraints;
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     _layout(constraints);
     return constraints.constrainWidth(
-        _applyFloatingPointHack(_layoutRoot.rootElement.minContentWidth));
+        _applyFloatingPointHack(_paragraphPainter.minContentWidth));
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     _layout(constraints);
     return constraints.constrainWidth(
-        _applyFloatingPointHack(_layoutRoot.rootElement.maxContentWidth));
+        _applyFloatingPointHack(_paragraphPainter.maxContentWidth));
   }
 
   double _getIntrinsicHeight(BoxConstraints constraints) {
     _layout(constraints);
     return constraints.constrainHeight(
-        _applyFloatingPointHack(_layoutRoot.rootElement.height));
+        _applyFloatingPointHack(_paragraphPainter.height));
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
@@ -166,42 +80,33 @@ class RenderParagraph extends RenderBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     _layout(constraints);
-    sky.Element root = _layoutRoot.rootElement;
-    switch (baseline) {
-      case TextBaseline.alphabetic: return root.alphabeticBaseline;
-      case TextBaseline.ideographic: return root.ideographicBaseline;
-    }
+    return _paragraphPainter.computeDistanceToActualBaseline(baseline);
   }
 
   void performLayout() {
     _layout(constraints);
-    sky.Element root = _layoutRoot.rootElement;
-    // rootElement.width always expands to fill, use maxContentWidth instead.
-    size = constraints.constrain(new Size(_applyFloatingPointHack(root.maxContentWidth),
-                                          _applyFloatingPointHack(root.height)));
+    // _paragraphPainter.width always expands to fill, use maxContentWidth instead.
+    size = constraints.constrain(new Size(_applyFloatingPointHack(_paragraphPainter.maxContentWidth),
+                                          _applyFloatingPointHack(_paragraphPainter.height)));
   }
 
   void paint(PaintingContext context, Offset offset) {
     // Ideally we could compute the min/max intrinsic width/height with a
     // non-destructive operation. However, currently, computing these values
-    // will destroy state inside the layout root. If that happens, we need to
+    // will destroy state inside the painter. If that happens, we need to
     // get back the correct state by calling _layout again.
     //
     // TODO(abarth): Make computing the min/max intrinsic width/height
     // a non-destructive operation.
-    // TODO(ianh): Make LayoutRoot support a paint offset so we don't
-    // need to translate for each span of text.
     _layout(constraints);
-    context.canvas.translate(offset.dx, offset.dy);
-    _layoutRoot.paint(context.canvas);
-    context.canvas.translate(-offset.dx, -offset.dy);
+    _paragraphPainter.paint(context.canvas, offset);
   }
 
   // we should probably expose a way to do precise (inter-glpyh) hit testing
 
   String debugDescribeSettings(String prefix) {
     String result = '${super.debugDescribeSettings(prefix)}';
-    result += '${prefix}inline:\n${inline.toString("$prefix  ")}\n';
+    result += '${prefix}text:\n${text.toString("$prefix  ")}\n';
     return result;
   }
 }
