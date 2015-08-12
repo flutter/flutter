@@ -264,6 +264,14 @@ void Canvas::drawPaintingNode(PaintingNode* paintingNode, const Point& p)
     translate(-p.sk_point.x(), -p.sk_point.y());
 }
 
+void Canvas::drawText(const String& text, const Point& p, const Paint& paint)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(text);
+    m_canvas->drawText(text.utf8().data(), text.length(), p.sk_point.x(), p.sk_point.y(), paint.sk_paint);
+}
+
 void Canvas::drawAtlas(CanvasImage* atlas,
     const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
     const Vector<SkColor>& colors, SkXfermode::Mode mode,

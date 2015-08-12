@@ -2,6 +2,7 @@ name: fitness
 dependencies:
   sky: any
   sky_tools: any
+  playfair: any
   path: "^1.3.6"
 dependency_overrides:
   material_design_icons:
