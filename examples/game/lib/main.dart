@@ -28,6 +28,7 @@ ImageMap _loader;
 SpriteSheet _spriteSheet;
 SpriteSheet _spriteSheetUI;
 GameDemoApp _app;
+Map<String,SoundEffect> _sounds = {};
 
 main() async {
   _loader = new ImageMap(_bundle);
@@ -46,6 +47,12 @@ main() async {
   _spriteSheetUI = new SpriteSheet(_loader["assets/game_ui.png"], json);
 
   _app = new GameDemoApp();
+
+  _sounds["explosion"] = new SoundEffect('https://github.com/slembcke/GalacticGuardian.spritebuilder/raw/GDC/Packages/SpriteBuilder%20Resources.sbpack/TempSounds/Explosion.wav');
+  _sounds["laser"] = new SoundEffect('https://github.com/slembcke/GalacticGuardian.spritebuilder/raw/GDC/Packages/SpriteBuilder%20Resources.sbpack/TempSounds/Laser.wav');
+
+  await _sounds["explosion"].load();
+  await _sounds["laser"].load();
 
   runApp(_app);
 }
@@ -103,6 +110,7 @@ class GameDemoApp extends App {
               _loader,
               _spriteSheet,
               _spriteSheetUI,
+              _sounds,
               (lastScore) {
                 setState(() {_lastScore = lastScore;});
               }
