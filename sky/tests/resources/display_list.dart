@@ -113,10 +113,15 @@ class TestPaintingCanvas extends PaintingCanvas {
   void drawImageRect(sky.Image image, sky.Rect src, sky.Rect dst, Paint paint) {
     log("drawImageRect($image, $src, $dst, paint)");
   }
+}
+
+class TestPaintingContext extends PaintingContext {
+  TestPaintingContext(TestPaintingCanvas canvas) : super(canvas);
 
   void paintChild(RenderObject child, Point position) {
-    log("paintChild ${child.runtimeType} at $position");
-    child.paint(new TestPaintingCanvas(new sky.PictureRecorder(), size, logger, indent: "$indent  |"), position.toOffset());
+    canvas.log("paintChild ${child.runtimeType} at $position");
+    TestPaintingCanvas childCanvas = new TestPaintingCanvas(new sky.PictureRecorder(), canvas.size, canvas.logger, indent: "${canvas.indent}  |");
+    child.paint(new TestPaintingContext(childCanvas), position.toOffset());
   }
 }
 
@@ -142,9 +147,11 @@ class TestRenderView extends RenderView {
     frame += 1;
     lastPaint = '';
     log("PAINT FOR FRAME #${frame} ----------------------------------------------");
-    var recorder = new sky.PictureRecorder();
-    var canvas = new TestPaintingCanvas(recorder, rootConstraints.size, log, indent: "${frame} |");
-    paint(canvas, Offset.zero);
+    sky.PictureRecorder recorder = new sky.PictureRecorder();
+    TestPaintingCanvas canvas = new TestPaintingCanvas(recorder, rootConstraints.size, log, indent: "${frame} |");
+    TestPaintingContext context = new TestPaintingContext(canvas);
+
+    paint(context, Offset.zero);
     recorder.endRecording();
     log("------------------------------------------------------------------------");
     RenderObject.debugDoingPaint = false;

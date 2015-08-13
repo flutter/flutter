@@ -156,8 +156,8 @@ class RenderBlock extends RenderBlockBase {
     assert(!size.isInfinite);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
-    defaultPaint(canvas, offset);
+  void paint(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
@@ -242,11 +242,11 @@ class RenderBlockViewport extends RenderBlockBase {
     super.performLayout();
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
-    canvas.save();
-    canvas.clipRect(offset & size);
-    defaultPaint(canvas, offset.translate(0.0, startOffset));
-    canvas.restore();
+  void paint(PaintingContext context, Offset offset) {
+    context.canvas.save();
+    context.canvas.clipRect(offset & size);
+    defaultPaint(context, offset.translate(0.0, startOffset));
+    context.canvas.restore();
   }
 
   void applyPaintTransform(Matrix4 transform) {

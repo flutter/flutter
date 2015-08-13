@@ -246,21 +246,21 @@ class RenderTabBar extends RenderBox with
     canvas.drawRect(rect, new Paint()..color = indicatorColor);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (backgroundColor != null) {
       double width = layoutWidths != null
         ? layoutWidths.reduce((sum, width) => sum + width)
         : size.width;
       Rect rect = offset & new Size(width, size.height);
-      canvas.drawRect(rect, new Paint()..color = backgroundColor);
+      context.canvas.drawRect(rect, new Paint()..color = backgroundColor);
     }
     int index = 0;
     RenderBox child = firstChild;
     while (child != null) {
       assert(child.parentData is TabBarParentData);
-      canvas.paintChild(child, child.parentData.position + offset);
+      context.paintChild(child, child.parentData.position + offset);
       if (index++ == selectedIndex)
-        _paintIndicator(canvas, child, offset);
+        _paintIndicator(context.canvas, child, offset);
       child = child.parentData.nextSibling;
     }
   }
