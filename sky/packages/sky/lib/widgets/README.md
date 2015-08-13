@@ -381,7 +381,7 @@ non-trivial internal state. Initializing internal state in `didMount` is more
 efficient (and less error-prone) than initializing that state during the
 component's constructor because parent executes the component's constructor each
 time the parent rebuilds even though the framework mounts only the first
-instance into the widget heiarchy. (Instead of mounting later instances, the
+instance into the widget hierarchy. (Instead of mounting later instances, the
 framework passes them to the original instance in `syncFields` so that the first
 instance of the component can incorporate the values passed by the parent to the
 component's constructor.)
