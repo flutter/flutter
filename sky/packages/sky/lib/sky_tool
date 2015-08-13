@@ -229,7 +229,7 @@ class StartSky(object):
 
         cmd += [ ANDROID_COMPONENT ]
 
-        subprocess.check_call(cmd)
+        subprocess.check_output(cmd)
 
 
 class StopSky(object):
@@ -238,26 +238,18 @@ class StopSky(object):
             help=('kill all running SkyShell.apk processes'))
         stop_parser.set_defaults(func=self.run)
 
-    def _kill_if_exists(self, pids, key, name):
-        pid = pids.pop(key, None)
-        if not pid:
-            logging.debug('No pid for %s, nothing to do.' % name)
-            return
-        logging.debug('Killing %s (%d).' % (name, pid))
-        try:
-            os.kill(pid, signal.SIGTERM)
-        except OSError:
-            logging.debug('%s (%d) already gone.' % (name, pid))
+    def _run(self, args):
+        with open('/dev/null', 'w') as dev_null:
+            subprocess.call(args, stdout=dev_null, stderr=dev_null)
 
     def run(self, args, pids):
-        self._kill_if_exists(pids, 'sky_server_pid', 'sky_server')
+        self._run(['fuser', '-k', '%s/tcp' % SKY_SERVER_PORT])
 
         if 'remote_sky_server_port' in pids:
             port_string = 'tcp:%s' % pids['remote_sky_server_port']
-            subprocess.call([ADB_PATH, 'reverse', '--remove', port_string])
+            self._run([ADB_PATH, 'reverse', '--remove', port_string])
 
-        subprocess.call([
-            ADB_PATH, 'shell', 'am', 'force-stop', ANDROID_PACKAGE])
+        self._run([ADB_PATH, 'shell', 'am', 'force-stop', ANDROID_PACKAGE])
 
         pids.clear()
 
@@ -362,7 +354,7 @@ class SkyShellRunner(object):
             if not sdk_version.isdigit():
                 logging.error("Unexpected response from getprop: '%s'." % sdk_version)
                 return False
- 
+
             if int(sdk_version) < 22:
                 logging.error("Version '%s' of the Android SDK is too old. " \
                               "Need Lollipop (22) or later. " % sdk_version)
