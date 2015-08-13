@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:sky/animation/animated_value.dart';
@@ -69,9 +68,7 @@ class Drawer extends StatefulComponent {
     _performance.attachedForce = kDefaultSpringForce;
 
     if (navigator != null) {
-      scheduleMicrotask(() {
-        navigator.pushState(this, (_) => _performance.reverse());
-      });
+      navigator.pushState(this, (_) => _performance.reverse());
     }
   }
 
@@ -120,14 +117,12 @@ class Drawer extends StatefulComponent {
   }
 
   void _onDismissed() {
-    scheduleMicrotask(() {
-      if (navigator != null &&
-          navigator.currentRoute is RouteState &&
-          (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
-        navigator.pop();
-      if (onDismissed != null)
-        onDismissed();
-    });
+    if (navigator != null &&
+        navigator.currentRoute is RouteState &&
+        (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
+      navigator.pop();
+    if (onDismissed != null)
+      onDismissed();
   }
 
   bool get _isMostlyClosed => _performance.progress < 0.5;

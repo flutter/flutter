@@ -14,7 +14,7 @@ class TweenSimulation extends Simulation {
   final double end;
 
   TweenSimulation(Duration duration, this.begin, this.end) :
-      _durationInSeconds = duration.inMilliseconds / 1000.0 {
+      _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
     assert(_durationInSeconds > 0.0);
     assert(begin != null && begin >= 0.0 && begin <= 1.0);
     assert(end != null && end >= 0.0 && end <= 1.0);

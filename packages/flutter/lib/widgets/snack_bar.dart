@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
@@ -61,7 +60,7 @@ class SnackBar extends Component {
 
   void _onDismissed() {
     if (onDismissed != null)
-      scheduleMicrotask(() { onDismissed(); });
+      onDismissed();
   }
 
   Widget build() {
