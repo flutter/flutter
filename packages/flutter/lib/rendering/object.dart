@@ -36,15 +36,10 @@ class PaintingContext {
 
   PaintingContext(this.canvas);
 
-  List<RenderObject> _descendentsWithPaintingCanvases = new List<RenderObject>(); // used by RenderObject._updatePaintingCanvas() to find out which RenderObjects to ask to paint
   void paintChild(RenderObject child, Point point) {
-    if (child.createNewDisplayList) {
-      assert(!_descendentsWithPaintingCanvases.contains(child));
-      _descendentsWithPaintingCanvases.add(child);
-      canvas.drawPaintingNode(child._paintingNode, point);
-    } else {
-      child._paintWithContext(this, point.toOffset());
-    }
+    // TODO(abarth): Support compositing.
+    assert(!child.requiresCompositing);
+    child._paintWithContext(this, point.toOffset());
   }
 }
 
@@ -320,11 +315,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
 
-  final sky.PaintingNode _paintingNode = new sky.PaintingNode();
-  sky.PaintingNode get paintingNode {
-    assert(createNewDisplayList);
-    return _paintingNode;
-  }
   bool _needsPaint = true;
   bool get needsPaint => _needsPaint;
 
@@ -332,7 +322,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!debugDoingPaint);
     if (!attached) return; // Don't try painting things that aren't in the hierarchy
     if (_needsPaint) return;
-    if (createNewDisplayList) {
+    if (requiresCompositing) {
       _needsPaint = true;
       _nodesNeedingPaint.add(this);
       scheduler.ensureVisualUpdate();
@@ -355,7 +345,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _nodesNeedingPaint = new List<RenderObject>();
       for (RenderObject node in dirtyNodes..sort((a, b) => a.depth - b.depth)) {
         if (node._needsPaint && node.attached)
-          node._updatePaintingCanvas();
+          node._repaint();
       };
       assert(_nodesNeedingPaint.length == 0);
     } finally {
@@ -364,9 +354,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  void _updatePaintingCanvas() {
+  void _repaint() {
     assert(!_needsLayout);
-    assert(createNewDisplayList);
+    assert(requiresCompositing);
     sky.PictureRecorder recorder = new sky.PictureRecorder();
     sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
     PaintingContext context = new PaintingContext(canvas);
@@ -374,21 +364,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     try {
       _paintWithContext(context, Offset.zero);
     } catch (e) {
-      print('Exception raised during _updatePaintingCanvas:\n${e}\nContext:\n${this}');
+      print('Exception raised during _repaint:\n${e}\nContext:\n${this}');
       if (inDebugBuild)
         rethrow;
       return;
     }
     assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
     assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
-    _paintingNode.setBackingDrawable(recorder.endRecordingAsDrawable());
-    if (context._descendentsWithPaintingCanvases != null) {
-      for (RenderObject node in context._descendentsWithPaintingCanvases) {
-        assert(node.attached == attached);
-        if (node._needsPaint)
-          node._updatePaintingCanvas();
-      };
-    }
   }
 
   void _paintWithContext(PaintingContext context, Offset offset) {
@@ -417,7 +399,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_needsPaint);
   }
 
-  bool get createNewDisplayList => false;
+  bool get requiresCompositing => false;
   Rect get paintBounds;
   void debugPaint(PaintingContext context, Offset offset) { }
   void paint(PaintingContext context, Offset offset) { }
