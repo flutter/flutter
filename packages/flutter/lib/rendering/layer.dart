@@ -7,7 +7,7 @@ import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:vector_math/vector_math.dart';
 
-class Layer {
+abstract class Layer {
   Layer({ this.bounds });
 
   Rect bounds;
@@ -25,6 +25,8 @@ class Layer {
     if (_parent != null)
       _parent.remove(this);
   }
+
+  void paint(sky.Canvas canvas);
 }
 
 class PictureLayer extends Layer {
@@ -32,10 +34,22 @@ class PictureLayer extends Layer {
     : super(bounds: bounds);
 
   sky.Picture picture;
+
+  void paint(sky.Canvas canvas) {
+    canvas.drawPicture(picture);
+  }
 }
 
 class ContainerLayer extends Layer {
   ContainerLayer({ Rect bounds }) : super(bounds: bounds);
+
+  void paint(sky.Canvas canvas) {
+    Layer child = firstChild;
+    while (child != null) {
+      child.paint(canvas);
+      child = child.nextSibling;
+    }
+  }
 
   Layer _firstChild;
   Layer get firstChild => _firstChild;
@@ -122,10 +136,24 @@ class TransformLayer extends ContainerLayer {
   TransformLayer({ this.transform, Rect bounds }) : super(bounds: bounds);
 
   Matrix4 transform;
+
+  void paint(sky.Canvas canvas) {
+    canvas.save();
+    canvas.concat(transform.storage);
+    super.paint(canvas);
+    canvas.restore();
+  }
 }
 
 class ClipLayer extends ContainerLayer {
   ClipLayer({ Rect bounds }) : super(bounds: bounds);
+
+  void paint(sky.Canvas canvas) {
+    canvas.save();
+    canvas.clipRect(bounds);
+    super.paint(canvas);
+    canvas.restore();
+  }
 }
 
 class ColorFilterLayer extends ContainerLayer {
@@ -137,4 +165,14 @@ class ColorFilterLayer extends ContainerLayer {
 
   Color color;
   sky.TransferMode transferMode;
+
+  void paint(sky.Canvas canvas) {
+    Paint paint = new Paint()
+      ..color = color
+      ..setTransferMode(transferMode);
+
+    canvas.saveLayer(bounds, paint);
+    super.paint(canvas);
+    canvas.restore();
+  }
 }

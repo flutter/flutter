@@ -73,6 +73,7 @@ class SkyBinding {
     RenderObject.flushLayout();
     RenderObject.flushPaint();
     _renderView.paintFrame();
+    _renderView.compositeFrame();
   }
 
   final List<EventListener> _eventListeners = new List<EventListener>();
