@@ -3,7 +3,7 @@ part of sprites;
 // TODO: The sound effects should probably use Android's SoundPool instead of
 // MediaPlayer as it is more efficient and flexible for playing back sound effects
 
-typedef void SoundCompleteCallback();
+typedef void SoundEffectStreamCallback(SoundEffectStream);
 
 class SoundEffect {
   SoundEffect(this._url);
@@ -18,58 +18,54 @@ class SoundEffect {
   Object _data;
 }
 
-class SoundStream {
-  SoundStream(
+class SoundEffectStream {
+  SoundEffectStream(
     this.sound,
-    this.tag,
     this.loop,
-    this.time,
     this.volume,
     this.pitch,
     this.pan,
-    this.callback
+    this.onSoundComplete
   );
 
   // TODO: Make these properties work
   SoundEffect sound;
   bool playing = false;
   bool loop = false;
-  double time = 0.0;
   double volume = 1.0;
   double pitch = 1.0;
   double pan = 0.0;
-  Object tag;
 
   // TODO: Implement completion callback. On completion, sounds should
   // also be removed from the list of playing sounds.
-  SoundCompleteCallback callback;
+  SoundEffectStreamCallback onSoundComplete;
 
   MediaPlayerProxy _player;
 }
 
-SoundPool _sharedSoundPool;
+SoundEffectPlayer _sharedSoundEffectPlayer;
 
-class SoundPool {
+class SoundEffectPlayer {
 
-  static SoundPool sharedInstance() {
-    if (_sharedSoundPool == null) {
-      _sharedSoundPool = new SoundPool();
+  static SoundEffectPlayer sharedInstance() {
+    if (_sharedSoundEffectPlayer == null) {
+      _sharedSoundEffectPlayer = new SoundEffectPlayer();
     }
-    return _sharedSoundPool;
+    return _sharedSoundEffectPlayer;
   }
 
-  SoundPool() {
+  SoundEffectPlayer() {
     _mediaService = new MediaServiceProxy.unbound();
     shell.requestService(null, _mediaService);
   }
 
   MediaServiceProxy _mediaService;
-  List<SoundStream> _playingSounds = [];
+  List<SoundEffectStream> _soundEffectStreams = [];
 
   // TODO: This should no longer be needed when moving to SoundPool backing
   Map<SoundEffect,MediaPlayerProxy> _mediaPlayers = {};
 
-  Future _prepare(SoundStream playingSound) async {
+  Future _prepare(SoundEffectStream playingSound) async {
     await playingSound._player.ptr.prepare(playingSound.sound._data);
   }
 
@@ -87,22 +83,18 @@ class SoundPool {
   // TODO: Add paused property (should pause playback of all sounds)
   bool paused;
 
-  SoundStream play(
+  SoundEffectStream play(
     SoundEffect sound,
-    [Object tag,
-      bool loop = false,
+    [bool loop = false,
       double volume = 1.0,
       double pitch = 1.0,
       double pan = 0.0,
-      double startTime = 0.0,
-      SoundCompleteCallback callback = null]) {
+      SoundEffectStreamCallback callback = null]) {
 
     // Create new PlayingSound object
-    SoundStream playingSound = new SoundStream(
+    SoundEffectStream playingSound = new SoundEffectStream(
       sound,
-      tag,
       loop,
-      startTime,
       volume,
       pitch,
       pan,
@@ -117,46 +109,104 @@ class SoundPool {
 
       // Prepare sound, then play it
       _prepare(playingSound).then((_) {
-        playingSound._player.ptr.seekTo((startTime * 1000.0).toInt());
+        playingSound._player.ptr.seekTo(0);
         playingSound._player.ptr.start();
       });
 
-      _playingSounds.add(playingSound);
+      _soundEffectStreams.add(playingSound);
       _mediaPlayers[sound] = playingSound._player;
     } else {
       // Reuse player
       playingSound._player = _mediaPlayers[sound];
-      playingSound._player.ptr.seekTo((startTime * 1000.0).toInt());
+      playingSound._player.ptr.seekTo(0);
       playingSound._player.ptr.start();
     }
 
     return playingSound;
   }
 
-  void stop(Object tag) {
-    for (int i = _playingSounds.length; i >= 0; i--) {
-      SoundStream playingSound = _playingSounds[i];
-      if (playingSound.tag == tag) {
-        playingSound._player.ptr.pause();
-        _playingSounds.removeAt(i);
-      }
-    }
-  }
-
-  List<SoundStream> playingSoundsForTag(Object tag) {
-    List<SoundStream> list = [];
-    for (SoundStream playingSound in _playingSounds) {
-      if (playingSound.tag == tag) {
-        list.add(playingSound);
-      }
-    }
-    return list;
+  void stop(SoundEffectStream stream) {
+    stream._player.ptr.pause();
+    _soundEffectStreams.remove(stream);
   }
 
   void stopAll() {
-    for (SoundStream playingSound in _playingSounds) {
+    for (SoundEffectStream playingSound in _soundEffectStreams) {
       playingSound._player.ptr.pause();
     }
-    _playingSounds = [];
+    _soundEffectStreams = [];
+  }
+}
+
+typedef void SoundTrackCallback(SoundTrack);
+typedef void SoundTrackBufferingCallback(SoundTrack, int);
+
+class SoundTrack {
+  MediaPlayerProxy _player;
+
+  SoundTrackCallback onSoundComplete;
+  SoundTrackCallback onSeekComplete;
+  SoundTrackBufferingCallback onBufferingUpdate;
+  bool loop;
+  double time;
+}
+
+SoundTrackPlayer _sharedSoundTrackPlayer;
+
+class SoundTrackPlayer {
+  List<SoundTrack> _soundTracks = [];
+
+  static sharedInstance() {
+    if (_sharedSoundTrackPlayer == null) {
+      _sharedSoundTrackPlayer = new SoundTrackPlayer();
+    }
+    return _sharedSoundTrackPlayer;
+  }
+
+  SoundTrackPlayer() {
+    _mediaService = new MediaServiceProxy.unbound();
+    shell.requestService(null, _mediaService);
+  }
+
+  MediaServiceProxy _mediaService;
+
+  Future<SoundTrack> load(String url) async {
+    // Create media player
+    SoundTrack soundTrack = new SoundTrack();
+    soundTrack._player = new MediaPlayerProxy.unbound();
+    _mediaService.ptr.createPlayer(soundTrack._player);
+
+    // Load and prepare
+    UrlResponse response = await fetchUrl(url);
+    await soundTrack._player.ptr.prepare(response.body);
+
+    return soundTrack;
+  }
+
+  void unload(SoundTrack soundTrack) {
+    stop(soundTrack);
+    _soundTracks.remove(soundTrack);
+  }
+
+  void play(
+    SoundTrack soundTrack,
+    [bool loop = false,
+      double volume,
+      double startTime = 0.0]) {
+    // TODO: Implement looping & volume
+    // soundTrack._player.ptr.setLooping(loop);
+    // soundTrack._player.ptr.setVolume(volume);
+    soundTrack._player.ptr.seekTo((startTime * 1000.0).toInt());
+    soundTrack._player.ptr.start();
+  }
+
+  void stop(SoundTrack track) {
+    track._player.ptr.pause();
+  }
+
+  void stopAll() {
+    for (SoundTrack soundTrack in _soundTracks) {
+      soundTrack._player.ptr.pause();
+    }
   }
 }
