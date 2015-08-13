@@ -25,8 +25,10 @@ std::string Fetch(const std::string& url) {
 base::FilePath SimplifyPath(const base::FilePath& path) {
   std::vector<base::FilePath::StringType> components;
   path.GetComponents(&components);
-  base::FilePath result;
-  for (const auto& component : components) {
+  auto it = components.begin();
+  base::FilePath result(*it++);
+  for (; it != components.end(); it++) {
+    auto& component = *it;
     if (component == base::FilePath::kCurrentDirectory)
       continue;
     if (component == base::FilePath::kParentDirectory)
