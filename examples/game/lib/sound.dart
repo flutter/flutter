@@ -3,7 +3,7 @@ part of sprites;
 // TODO: The sound effects should probably use Android's SoundPool instead of
 // MediaPlayer as it is more efficient and flexible for playing back sound effects
 
-typedef void SoundCompleteCallback();
+typedef void SoundEffectStreamCallback(SoundEffectStream);
 
 class SoundEffect {
   SoundEffect(this._url);
@@ -26,7 +26,7 @@ class SoundEffectStream {
     this.volume,
     this.pitch,
     this.pan,
-    this.callback
+    this.onSoundComplete
   );
 
   // TODO: Make these properties work
@@ -40,20 +40,20 @@ class SoundEffectStream {
 
   // TODO: Implement completion callback. On completion, sounds should
   // also be removed from the list of playing sounds.
-  SoundCompleteCallback callback;
+  SoundEffectStreamCallback onSoundComplete;
 
   MediaPlayerProxy _player;
 }
 
-SoundEffectPlayer _sharedSoundPool;
+SoundEffectPlayer _sharedSoundEffectPlayer;
 
 class SoundEffectPlayer {
 
   static SoundEffectPlayer sharedInstance() {
-    if (_sharedSoundPool == null) {
-      _sharedSoundPool = new SoundEffectPlayer();
+    if (_sharedSoundEffectPlayer == null) {
+      _sharedSoundEffectPlayer = new SoundEffectPlayer();
     }
-    return _sharedSoundPool;
+    return _sharedSoundEffectPlayer;
   }
 
   SoundEffectPlayer() {
@@ -92,7 +92,7 @@ class SoundEffectPlayer {
       double volume = 1.0,
       double pitch = 1.0,
       double pan = 0.0,
-      SoundCompleteCallback callback = null]) {
+      SoundEffectStreamCallback callback = null]) {
 
     // Create new PlayingSound object
     SoundEffectStream playingSound = new SoundEffectStream(
