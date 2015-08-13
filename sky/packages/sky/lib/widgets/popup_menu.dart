@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:sky/animation/animated_value.dart';
@@ -72,11 +71,7 @@ class PopupMenu extends StatefulComponent {
   }
 
   void _open() {
-    if (navigator != null) {
-      scheduleMicrotask(() {
-        navigator.pushState(this, (_) => _close());
-      });
-    }
+    navigator.pushState(this, (_) => _close());
   }
 
   void _close() {
