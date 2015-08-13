@@ -50,6 +50,7 @@ mojo::TransferableResourcePtr ResourceManager::CreateTransferableResource(
   glGenMailboxCHROMIUM(mailbox);
   glProduceTextureCHROMIUM(GL_TEXTURE_2D, mailbox);
   GLuint sync_point = glInsertSyncPointCHROMIUM();
+  glFlush();
 
   mojo::TransferableResourcePtr resource = mojo::TransferableResource::New();
   resource->id = next_resource_id_++;
