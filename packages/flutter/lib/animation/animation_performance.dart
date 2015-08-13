@@ -26,12 +26,16 @@ enum AnimationStatus {
 // manipulating |progress|, or |fling| the timeline causing a physics-based
 // simulation to take over the progression.
 class AnimationPerformance {
-  AnimationPerformance({this.variable, this.duration}) {
+  AnimationPerformance({AnimatedVariable variable, this.duration}) :
+    _variable = variable {
     _timeline = new Timeline(_tick);
   }
 
-  AnimatedVariable variable;
+  AnimatedVariable _variable;
   Duration duration;
+
+  AnimatedVariable get variable => _variable;
+  void set variable(AnimatedVariable v) { _variable = v; }
 
   // Advances from 0 to 1. On each tick, we'll update our variable's values.
   Timeline _timeline;
@@ -178,4 +182,15 @@ class AnimationPerformance {
     _notifyListeners();
     _checkStatusChanged();
   }
+}
+
+// Simple helper class for an animation with a single value.
+class ValueAnimation<T> extends AnimationPerformance {
+  ValueAnimation({AnimatedValue<T> variable, Duration duration}) :
+    super(variable: variable, duration: duration);
+
+  AnimatedValue<T> get variable => _variable as AnimatedValue<T>;
+  void set variable(AnimatedValue<T> v) { _variable = v; }
+
+  T get value => variable.value;
 }

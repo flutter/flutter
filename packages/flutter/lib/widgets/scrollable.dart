@@ -7,7 +7,6 @@ import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
 import 'package:sky/animation/animated_simulation.dart';
-import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/rendering/box.dart';
@@ -44,7 +43,7 @@ abstract class Scrollable extends StatefulComponent {
   ScrollDirection scrollDirection;
 
   AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
-  AnimationPerformance _toOffsetAnimation; // Started by scrollTo()
+  ValueAnimation<double> _toOffsetAnimation; // Started by scrollTo()
 
   void initState() {
     _toEndAnimation = new AnimatedSimulation(_tickScrollOffset);
@@ -86,11 +85,11 @@ abstract class Scrollable extends StatefulComponent {
     );
   }
 
-  void _startToOffsetAnimation(double newScrollOffset, AnimationPerformance animation) {
+  void _startToOffsetAnimation(double newScrollOffset, ValueAnimation<double> animation) {
     _stopToEndAnimation();
     _stopToOffsetAnimation();
 
-    (animation.variable as AnimatedValue<double>)
+    animation.variable
       ..begin = scrollOffset
       ..end = newScrollOffset;
 
@@ -102,8 +101,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void _updateToOffsetAnimation() {
-    AnimatedValue<double> offset = _toOffsetAnimation.variable;
-    scrollTo(offset.value);
+    scrollTo(_toOffsetAnimation.value);
   }
 
   void _updateToOffsetAnimationStatus(AnimationStatus status) {
@@ -139,7 +137,7 @@ abstract class Scrollable extends StatefulComponent {
     super.didUnmount();
   }
 
-  bool scrollTo(double newScrollOffset, { AnimationPerformance animation }) {
+  bool scrollTo(double newScrollOffset, { ValueAnimation<double> animation }) {
     if (newScrollOffset == _scrollOffset)
       return false;
 
@@ -233,7 +231,7 @@ Scrollable findScrollableAncestor({ Widget target }) {
   return ancestor;
 }
 
-bool ensureWidgetIsVisible(Widget target, { AnimationPerformance animation }) {
+bool ensureWidgetIsVisible(Widget target, { ValueAnimation<double> animation }) {
   assert(target.mounted);
   assert(target.root is RenderBox);
 
