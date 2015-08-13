@@ -6,8 +6,6 @@ homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/workben
 dependencies:
   sky: any
   sky_tools: any
-  # This is a hack until sky_snapshot no longer uses workbench's packages directory.
-  playfair: any
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
