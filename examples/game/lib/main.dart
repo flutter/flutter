@@ -54,6 +54,10 @@ main() async {
   await _sounds["explosion"].load();
   await _sounds["laser"].load();
 
+  SoundTrackPlayer stPlayer = SoundTrackPlayer.sharedInstance();
+  SoundTrack music = await stPlayer.load('https://github.com/slembcke/GalacticGuardian.spritebuilder/raw/GDC/Source/Resources/TempMusic.aac');
+  stPlayer.play(music);
+
   runApp(_app);
 }
 
