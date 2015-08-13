@@ -39,7 +39,6 @@
   void drawPicture(Picture picture);
   void drawDrawable(Drawable drawable);
   void drawPaintingNode(PaintingNode paintingNode, Point p);
-  void drawText(DOMString text, Point p, Paint paint);
 
   // TODO(eseidel): Paint should be optional, but optional doesn't work.
   [RaisesException] void drawAtlas(Image image,

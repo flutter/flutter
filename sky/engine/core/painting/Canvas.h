@@ -91,7 +91,6 @@ public:
     void drawPicture(Picture* picture);
     void drawDrawable(Drawable* drawable);
     void drawPaintingNode(PaintingNode* paintingNode, const Point& p);
-    void drawText(const String& text, const Point& p, const Paint& paint);
 
     void drawAtlas(CanvasImage* atlas,
         const Vector<RSTransform>& transforms, const Vector<Rect>& rects,

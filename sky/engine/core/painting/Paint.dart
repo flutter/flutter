@@ -58,7 +58,6 @@ class Paint {
       _shader,
       _style,
       _transferMode,
-      typeface
     ];
   }
 
@@ -73,8 +72,6 @@ class Paint {
     // TODO(mpcomplete): Figure out how to show a drawLooper.
     if (_drawLooper != null)
       result += ', drawLooper:true';
-    if (typeface != null)
-      result += ', typeface: $_typeface';
     result += ')';
     return result;
   }
