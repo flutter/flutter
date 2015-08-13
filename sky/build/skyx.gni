@@ -32,8 +32,7 @@ template("skyx") {
     args = [
       rebase_path("$sky_snapshot_dir/sky_snapshot", src_dir),
       rebase_path(main_dart, src_dir),
-      "--package-root",
-      rebase_path("//sky/packages/workbench/packages", src_dir),
+      "--package-root", rebase_path("packages"),
       "--snapshot",
       rebase_path(snapshot, src_dir),
       "-C",
