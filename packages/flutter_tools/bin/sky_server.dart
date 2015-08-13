@@ -18,7 +18,7 @@ void printUsage(parser) {
 void addRoute(var router, String route, String path) {
   router.add(
     route,
-    ['GET'],
+    ['GET', 'HEAD'],
     createStaticHandler(
       path,
       serveFilesOutsidePath: true,
