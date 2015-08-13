@@ -116,7 +116,9 @@ class TestPaintingCanvas extends PaintingCanvas {
 }
 
 class TestPaintingContext extends PaintingContext {
-  TestPaintingContext(TestPaintingCanvas canvas) : super(canvas);
+  TestPaintingContext(TestPaintingCanvas canvas) : super.forTesting(canvas);
+
+  TestPaintingCanvas get canvas => super.canvas;
 
   void paintChild(RenderObject child, Point position) {
     canvas.log("paintChild ${child.runtimeType} at $position");
