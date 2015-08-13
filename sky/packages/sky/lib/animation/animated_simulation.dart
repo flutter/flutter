@@ -51,7 +51,8 @@ class Ticker {
 
     _onTick(timeStamp);
 
-    if (isTicking)
+    // The onTick callback may have scheduled another tick already.
+    if (isTicking && _animationId == null)
       _scheduleTick();
   }
 
