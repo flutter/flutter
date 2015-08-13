@@ -33,8 +33,8 @@ class Dot {
     radius = 5 + (95 * event.pressure);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
-    canvas.drawCircle(position + offset, radius, _paint);
+  void paint(PaintingContext context, Offset offset) {
+    context.canvas.drawCircle(position + offset, radius, _paint);
   }
 }
 
@@ -70,7 +70,8 @@ class RenderTouchDemo extends RenderBox {
     size = constraints.biggest;
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
+    final PaintingCanvas canvas = context.canvas;
     Paint white = new Paint()
         ..color = const Color(0xFFFFFFFF);
     canvas.drawRect(offset & size, white);

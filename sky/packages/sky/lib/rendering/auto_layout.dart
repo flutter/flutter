@@ -216,8 +216,8 @@ class RenderAutoLayout extends RenderBox
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
-    defaultPaint(canvas, offset);
+  void paint(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
   }
 
   List<al.Constraint> _constructImplicitConstraints() {

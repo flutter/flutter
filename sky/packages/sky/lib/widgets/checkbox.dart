@@ -101,7 +101,8 @@ class _RenderCheckbox extends RenderToggleable {
     markNeedsPaint();
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
+    final PaintingCanvas canvas = context.canvas;
     // Choose a color between grey and the theme color
     sky.Paint paint = new sky.Paint()
       ..strokeWidth = 2.0

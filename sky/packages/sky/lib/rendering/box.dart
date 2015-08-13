@@ -491,20 +491,20 @@ abstract class RenderBox extends RenderObject {
   }
 
   Rect get paintBounds => Point.origin & size;
-  void debugPaint(PaintingCanvas canvas, Offset offset) {
+  void debugPaint(PaintingContext context, Offset offset) {
     if (debugPaintSizeEnabled)
-      debugPaintSize(canvas, offset);
+      debugPaintSize(context, offset);
     if (debugPaintBaselinesEnabled)
-      debugPaintBaselines(canvas, offset);
+      debugPaintBaselines(context, offset);
   }
-  void debugPaintSize(PaintingCanvas canvas, Offset offset) {
+  void debugPaintSize(PaintingContext context, Offset offset) {
     Paint paint = new Paint();
     paint.setStyle(sky.PaintingStyle.stroke);
     paint.strokeWidth = 1.0;
     paint.color = debugPaintSizeColor;
-    canvas.drawRect(offset & size, paint);
+    context.canvas.drawRect(offset & size, paint);
   }
-  void debugPaintBaselines(PaintingCanvas canvas, Offset offset) {
+  void debugPaintBaselines(PaintingContext context, Offset offset) {
     Paint paint = new Paint();
     paint.setStyle(sky.PaintingStyle.stroke);
     paint.strokeWidth = 0.25;
@@ -516,7 +516,7 @@ abstract class RenderBox extends RenderObject {
       path = new Path();
       path.moveTo(offset.dx, offset.dy + baselineI);
       path.lineTo(offset.dx + size.width, offset.dy + baselineI);
-      canvas.drawPath(path, paint);
+      context.canvas.drawPath(path, paint);
     }
     // alphabetic baseline
     double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
@@ -525,7 +525,7 @@ abstract class RenderBox extends RenderObject {
       path = new Path();
       path.moveTo(offset.dx, offset.dy + baselineA);
       path.lineTo(offset.dx + size.width, offset.dy + baselineA);
-      canvas.drawPath(path, paint);
+      context.canvas.drawPath(path, paint);
     }
   }
 
@@ -586,9 +586,9 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
       super.hitTestChildren(result, position: position);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      canvas.paintChild(child, offset.toPoint());
+      context.paintChild(child, offset.toPoint());
   }
 }
 
@@ -812,7 +812,7 @@ class RenderOpacity extends RenderProxyBox {
     return _cachedPaint;
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       int a = _alpha;
 
@@ -820,13 +820,13 @@ class RenderOpacity extends RenderProxyBox {
         return;
 
       if (a == 255) {
-        canvas.paintChild(child, offset.toPoint());
+        context.paintChild(child, offset.toPoint());
         return;
       }
 
-      canvas.saveLayer(null, _paint);
-      canvas.paintChild(child, offset.toPoint());
-      canvas.restore();
+      context.canvas.saveLayer(null, _paint);
+      context.paintChild(child, offset.toPoint());
+      context.canvas.restore();
     }
   }
 }
@@ -868,11 +868,11 @@ class RenderColorFilter extends RenderProxyBox {
     return _cachedPaint;
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      canvas.saveLayer(offset & size, _paint);
-      canvas.paintChild(child, offset.toPoint());
-      canvas.restore();
+      context.canvas.saveLayer(offset & size, _paint);
+      context.paintChild(child, offset.toPoint());
+      context.canvas.restore();
     }
   }
 }
@@ -880,12 +880,12 @@ class RenderColorFilter extends RenderProxyBox {
 class RenderClipRect extends RenderProxyBox {
   RenderClipRect({ RenderBox child }) : super(child);
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      canvas.save();
-      canvas.clipRect(offset & size);
-      canvas.paintChild(child, offset.toPoint());
-      canvas.restore();
+      context.canvas.save();
+      context.canvas.clipRect(offset & size);
+      context.paintChild(child, offset.toPoint());
+      context.canvas.restore();
     }
   }
 }
@@ -919,14 +919,14 @@ class RenderClipRRect extends RenderProxyBox {
 
   final Paint _paint = new Paint()..isAntiAlias = false;
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      canvas.saveLayer(rect, _paint);
+      context.canvas.saveLayer(rect, _paint);
       sky.RRect rrect = new sky.RRect()..setRectXY(rect, xRadius, yRadius);
-      canvas.clipRRect(rrect);
-      canvas.paintChild(child, offset.toPoint());
-      canvas.restore();
+      context.canvas.clipRRect(rrect);
+      context.paintChild(child, offset.toPoint());
+      context.canvas.restore();
     }
   }
 }
@@ -947,13 +947,13 @@ class RenderClipOval extends RenderProxyBox {
     return _cachedPath;
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      canvas.saveLayer(rect, _paint);
-      canvas.clipPath(_getPath(rect));
-      canvas.paintChild(child, offset.toPoint());
-      canvas.restore();
+      context.canvas.saveLayer(rect, _paint);
+      context.canvas.clipPath(_getPath(rect));
+      context.paintChild(child, offset.toPoint());
+      context.canvas.restore();
     }
   }
 }
@@ -1004,9 +1004,9 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
     return result;
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      canvas.paintChild(child, child.parentData.position + offset);
+      context.paintChild(child, child.parentData.position + offset);
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
@@ -1297,18 +1297,18 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
                       dyInDevicePixels / devicePixelRatio);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Offset roundedScrollOffset = _scrollOffsetRoundedToIntegerDevicePixels;
       bool _needsClip = offset < Offset.zero ||
                         !(offset & size).contains(((offset - roundedScrollOffset) & child.size).bottomRight);
       if (_needsClip) {
-        canvas.save();
-        canvas.clipRect(offset & size);
+        context.canvas.save();
+        context.canvas.clipRect(offset & size);
       }
-      canvas.paintChild(child, (offset - roundedScrollOffset).toPoint());
+      context.paintChild(child, (offset - roundedScrollOffset).toPoint());
       if (_needsClip)
-        canvas.restore();
+        context.canvas.restore();
     }
   }
 
@@ -1452,10 +1452,11 @@ class RenderImage extends RenderBox {
     size = _sizeForConstraints(constraints);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (_image == null)
       return;
     bool needsScale = size.width != _image.width || size.height != _image.height;
+    final PaintingCanvas canvas = context.canvas;
     if (needsScale) {
       double widthScale = size.width / _image.width;
       double heightScale = size.height / _image.height;
@@ -1518,11 +1519,11 @@ class RenderDecoratedBox extends RenderProxyBox {
     super.detach();
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
-    _painter.paint(canvas, offset & size);
-    super.paint(canvas, offset);
+    _painter.paint(context.canvas, offset & size);
+    super.paint(context, offset);
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
@@ -1588,12 +1589,12 @@ class RenderTransform extends RenderProxyBox {
     return super.hitTest(result, position: transformed);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
-    canvas.save();
-    canvas.translate(offset.dx, offset.dy);
-    canvas.concat(_transform.storage);
-    super.paint(canvas, Offset.zero);
-    canvas.restore();
+  void paint(PaintingContext context, Offset offset) {
+    context.canvas.save();
+    context.canvas.translate(offset.dx, offset.dy);
+    context.canvas.concat(_transform.storage);
+    super.paint(context, Offset.zero);
+    context.canvas.restore();
   }
 
   void applyPaintTransform(Matrix4 transform) {
@@ -1656,12 +1657,14 @@ class RenderCustomPaint extends RenderProxyBox {
     super.attach();
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     assert(_callback != null);
-    canvas.translate(offset.dx, offset.dy);
-    _callback(canvas, size);
-    super.paint(canvas, Offset.zero);
-    canvas.translate(-offset.dx, -offset.dy);
+    context.canvas.translate(offset.dx, offset.dy);
+    _callback(context.canvas, size);
+    // TODO(abarth): We should translate back before calling super because in
+    // the future, super.paint might switch our compositing layer.
+    super.paint(context, Offset.zero);
+    context.canvas.translate(-offset.dx, -offset.dy);
   }
 }
 
@@ -1735,9 +1738,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      canvas.paintChild(child, offset.toPoint());
+      context.paintChild(child, offset.toPoint());
   }
 
   void paintFrame() {
@@ -1747,9 +1750,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       sky.PictureRecorder recorder = new sky.PictureRecorder();
       Rect cullRect = Point.origin & (size * devicePixelRatio);
       PaintingCanvas canvas = new PaintingCanvas(recorder, cullRect);
+      PaintingContext context = new PaintingContext(canvas);
       canvas.drawColor(const Color(0xFF000000), sky.TransferMode.src);
       canvas.scale(devicePixelRatio, devicePixelRatio);
-      canvas.paintChild(child, Point.origin);
+      context.paintChild(child, Point.origin);
       sky.view.picture = recorder.endRecording();
     } finally {
       sky.tracing.end('RenderView.paintFrame');
@@ -1817,11 +1821,11 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     }
   }
 
-  void defaultPaint(PaintingCanvas canvas, Offset offset) {
+  void defaultPaint(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
       assert(child.parentData is ParentDataType);
-      canvas.paintChild(child, child.parentData.position + offset);
+      context.paintChild(child, child.parentData.position + offset);
       child = child.parentData.nextSibling;
     }
   }

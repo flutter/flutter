@@ -113,8 +113,9 @@ class RenderInkWell extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (!_splashes.isEmpty) {
+      final PaintingCanvas canvas = context.canvas;
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Point.origin & size);
@@ -122,7 +123,7 @@ class RenderInkWell extends RenderProxyBox {
         splash.paint(canvas);
       canvas.restore();
     }
-    super.paint(canvas, offset);
+    super.paint(context, offset);
   }
 }
 
