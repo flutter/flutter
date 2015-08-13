@@ -41,14 +41,24 @@ class PaintingContext {
   sky.PictureRecorder _recorder;
 
   PaintingContext(Rect bounds) {
+    _startRecording(bounds);
+  }
+
+  PaintingContext.forTesting(this.canvas);
+
+  void _startRecording(Rect bounds) {
+    assert(_layer == null);
+    assert(_recorder == null);
+    assert(canvas == null);
     _layer = new PictureLayer(bounds: bounds);
     _recorder = new sky.PictureRecorder();
     canvas = new PaintingCanvas(_recorder, bounds);
   }
 
-  PaintingContext.forTesting(this.canvas);
-
   void endRecording() {
+    assert(_layer != null);
+    assert(_recorder != null);
+    assert(canvas != null);
     canvas = null;
     _layer.picture = _recorder.endRecording();
     _recorder = null;
@@ -56,9 +66,22 @@ class PaintingContext {
   }
 
   void paintChild(RenderObject child, Point point) {
-    // TODO(abarth): Support compositing.
-    assert(!child.requiresCompositing);
-    child._paintWithContext(this, point.toOffset());
+    final Offset offset = point.toOffset();
+
+    if (!child.requiresCompositing)
+      return child._paintWithContext(this, offset);
+
+    final Layer originalLayer = layer;
+    endRecording();
+
+    Rect bounds = child.paintBounds.shift(offset);
+    PaintingContext context = new PaintingContext(bounds);
+    originalLayer.parent.add(context.layer, before: originalLayer.nextSibling);
+    child._paintWithContext(context, Offset.zero);
+    context.endRecording();
+
+    _startRecording(originalLayer.bounds);
+    originalLayer.parent.add(layer, before: context.layer.nextSibling);
   }
 }
 

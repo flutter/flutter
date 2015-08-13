@@ -4,6 +4,8 @@
 
 #include "sky/engine/core/painting/Picture.h"
 
+#include "sky/engine/core/painting/Canvas.h"
+
 namespace blink {
 
 PassRefPtr<Picture> Picture::create(PassRefPtr<SkPicture> skPicture)
@@ -19,6 +21,11 @@ Picture::Picture(PassRefPtr<SkPicture> skPicture)
 
 Picture::~Picture()
 {
+}
+
+void Picture::playback(Canvas* canvas)
+{
+    m_picture->playback(canvas->skCanvas());
 }
 
 } // namespace blink

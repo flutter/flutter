@@ -12,6 +12,8 @@
 
 namespace blink {
 
+class Canvas;
+
 class Picture : public RefCounted<Picture>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
@@ -19,6 +21,8 @@ public:
     static PassRefPtr<Picture> create(PassRefPtr<SkPicture> skPicture);
 
     SkPicture* toSkia() const { return m_picture.get(); }
+
+    void playback(Canvas* canvas);
 
 private:
     explicit Picture(PassRefPtr<SkPicture> skPicture);
