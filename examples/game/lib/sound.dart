@@ -21,7 +21,6 @@ class SoundEffect {
 class SoundEffectStream {
   SoundEffectStream(
     this.sound,
-    this.tag,
     this.loop,
     this.volume,
     this.pitch,
@@ -36,7 +35,6 @@ class SoundEffectStream {
   double volume = 1.0;
   double pitch = 1.0;
   double pan = 0.0;
-  Object tag;
 
   // TODO: Implement completion callback. On completion, sounds should
   // also be removed from the list of playing sounds.
@@ -62,7 +60,7 @@ class SoundEffectPlayer {
   }
 
   MediaServiceProxy _mediaService;
-  List<SoundEffectStream> _playingSounds = [];
+  List<SoundEffectStream> _soundEffectStreams = [];
 
   // TODO: This should no longer be needed when moving to SoundPool backing
   Map<SoundEffect,MediaPlayerProxy> _mediaPlayers = {};
@@ -87,8 +85,7 @@ class SoundEffectPlayer {
 
   SoundEffectStream play(
     SoundEffect sound,
-    [Object tag,
-      bool loop = false,
+    [bool loop = false,
       double volume = 1.0,
       double pitch = 1.0,
       double pan = 0.0,
@@ -97,7 +94,6 @@ class SoundEffectPlayer {
     // Create new PlayingSound object
     SoundEffectStream playingSound = new SoundEffectStream(
       sound,
-      tag,
       loop,
       volume,
       pitch,
@@ -117,7 +113,7 @@ class SoundEffectPlayer {
         playingSound._player.ptr.start();
       });
 
-      _playingSounds.add(playingSound);
+      _soundEffectStreams.add(playingSound);
       _mediaPlayers[sound] = playingSound._player;
     } else {
       // Reuse player
@@ -129,31 +125,16 @@ class SoundEffectPlayer {
     return playingSound;
   }
 
-  void stop(Object tag) {
-    for (int i = _playingSounds.length; i >= 0; i--) {
-      SoundEffectStream playingSound = _playingSounds[i];
-      if (playingSound.tag == tag) {
-        playingSound._player.ptr.pause();
-        _playingSounds.removeAt(i);
-      }
-    }
-  }
-
-  List<SoundEffectStream> playingSoundsForTag(Object tag) {
-    List<SoundEffectStream> list = [];
-    for (SoundEffectStream playingSound in _playingSounds) {
-      if (playingSound.tag == tag) {
-        list.add(playingSound);
-      }
-    }
-    return list;
+  void stop(SoundEffectStream stream) {
+    stream._player.ptr.pause();
+    _soundEffectStreams.remove(stream);
   }
 
   void stopAll() {
-    for (SoundEffectStream playingSound in _playingSounds) {
+    for (SoundEffectStream playingSound in _soundEffectStreams) {
       playingSound._player.ptr.pause();
     }
-    _playingSounds = [];
+    _soundEffectStreams = [];
   }
 }
 
