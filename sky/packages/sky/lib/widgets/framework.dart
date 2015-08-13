@@ -481,8 +481,10 @@ class Listener extends TagNode  {
     GestureEventListener onGestureFlingStart,
     GestureEventListener onGestureScrollStart,
     GestureEventListener onGestureScrollUpdate,
+    GestureEventListener onGestureLongPress,
     GestureEventListener onGestureTap,
     GestureEventListener onGestureTapDown,
+    GestureEventListener onGestureShowPress,
     PointerEventListener onPointerCancel,
     PointerEventListener onPointerDown,
     PointerEventListener onPointerMove,
@@ -496,6 +498,8 @@ class Listener extends TagNode  {
          onGestureScrollStart: onGestureScrollStart,
          onGestureTap: onGestureTap,
          onGestureTapDown: onGestureTapDown,
+         onGestureLongPress: onGestureLongPress,
+         onGestureShowPress: onGestureShowPress,
          onPointerCancel: onPointerCancel,
          onPointerDown: onPointerDown,
          onPointerMove: onPointerMove,
@@ -514,6 +518,8 @@ class Listener extends TagNode  {
     GestureEventListener onGestureScrollUpdate,
     GestureEventListener onGestureTap,
     GestureEventListener onGestureTapDown,
+    GestureEventListener onGestureLongPress,
+    GestureEventListener onGestureShowPress,
     PointerEventListener onPointerCancel,
     PointerEventListener onPointerDown,
     PointerEventListener onPointerMove,
@@ -538,6 +544,10 @@ class Listener extends TagNode  {
       listeners['gesturetap'] = onGestureTap;
     if (onGestureTapDown != null)
       listeners['gesturetapdown'] = onGestureTapDown;
+    if (onGestureLongPress != null)
+      listeners['gesturelongpress'] = onGestureLongPress;
+    if (onGestureShowPress != null)
+      listeners['gestureshowpress'] = onGestureShowPress;
     if (onPointerCancel != null)
       listeners['pointercancel'] = onPointerCancel;
     if (onPointerDown != null)
