@@ -3,3 +3,6 @@ version: 0.0.9
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: Dart SDK extensions for dart:sky
 homepage: https://github.com/domokit/sky_engine
+# sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
+environment:
+  sdk: '>=1.11.0 <2.0.0'
