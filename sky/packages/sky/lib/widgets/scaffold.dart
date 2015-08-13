@@ -9,8 +9,6 @@ import 'package:sky/rendering/object.dart';
 import 'package:sky/theme/view_configuration.dart';
 import 'package:sky/widgets/framework.dart';
 
-import 'package:vector_math/vector_math.dart';
-
 // Slots are painted in this order and hit tested in reverse of this order
 enum ScaffoldSlots {
   body,
@@ -153,35 +151,13 @@ class RenderScaffold extends RenderBox {
     }
   }
 
-  static Point _transformPoint(Matrix4 transform, Point point) {
-    Vector3 position3 = new Vector3(point.x, point.y, 0.0);
-    Vector3 transformed3 = transform.transform3(position3);
-    return new Point(transformed3.x, transformed3.y);
-  }
-
-  Point parentToLocal(RenderBox box, Point point) {
-    assert(attached);
-    Matrix4 transform = new Matrix4.identity();
-    box.applyPaintTransform(transform);
-    /* double det = */ transform.invert();
-    // TODO(abarth): Check the determinant for degeneracy.
-    return _transformPoint(transform, point);
-  }
-
   void hitTestChildren(HitTestResult result, { Point position }) {
     for (ScaffoldSlots slot in ScaffoldSlots.values.reversed) {
       RenderBox box = _slots[slot];
       if (box != null) {
         assert(box.parentData is BoxParentData);
-        // TODO(abarth): Need to solve this problem in general.
-        // Apply the box's transform to check if it contains position.
-        // But when we pass the position to box.hitTest, we only want to apply
-        // the top-level transform (box will apply its own transforms).
-        Point local = parentToLocal(box, position);
-        if ((Point.origin & box.size).contains(local)) {
-          if (box.hitTest(result, position: (position - box.parentData.position).toPoint()))
-            return;
-        }
+        if (box.hitTest(result, position: (position - box.parentData.position).toPoint()))
+          return;
       }
     }
   }

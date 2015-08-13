@@ -414,9 +414,13 @@ abstract class RenderBox extends RenderObject {
   }
 
   bool hitTest(HitTestResult result, { Point position }) {
-    hitTestChildren(result, position: position);
-    result.add(new BoxHitTestEntry(this, position));
-    return true;
+    if (position.x >= 0.0 && position.x < _size.width &&
+        position.y >= 0.0 && position.y < _size.height) {
+      hitTestChildren(result, position: position);
+      result.add(new BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
   }
   void hitTestChildren(HitTestResult result, { Point position }) { }
 
@@ -1008,11 +1012,8 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   void hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
-      Rect childBounds = child.parentData.position & child.size;
-      if (childBounds.contains(position)) {
-        child.hitTest(result, position: new Point(position.x - child.parentData.position.x,
-                                                      position.y - child.parentData.position.y));
-      }
+      child.hitTest(result, position: new Point(position.x - child.parentData.position.x,
+                                                position.y - child.parentData.position.y));
     }
   }
 
@@ -1319,10 +1320,8 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   void hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
-      Rect childBounds = child.parentData.position & child.size;
-      Point transformedPosition = position + _scrollOffsetRoundedToIntegerDevicePixels;
-      if (childBounds.contains(transformedPosition))
-        child.hitTest(result, position: transformedPosition);
+      Point transformed = position + _scrollOffsetRoundedToIntegerDevicePixels;
+      child.hitTest(result, position: transformed);
     }
   }
 }
@@ -1578,15 +1577,15 @@ class RenderTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Point position }) {
     Matrix4 inverse = new Matrix4.zero();
-    /* double det = */ inverse.copyInverse(_transform);
     // TODO(abarth): Check the determinant for degeneracy.
+    inverse.copyInverse(_transform);
 
     Vector3 position3 = new Vector3(position.x, position.y, 0.0);
     Vector3 transformed3 = inverse.transform3(position3);
     Point transformed = new Point(transformed3.x, transformed3.y);
-    super.hitTestChildren(result, position: transformed);
+    return super.hitTest(result, position: transformed);
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
@@ -1810,12 +1809,10 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     ChildType child = lastChild;
     while (child != null) {
       assert(child.parentData is ParentDataType);
-      Rect childBounds = child.parentData.position & child.size;
-      if (childBounds.contains(position)) {
-        if (child.hitTest(result, position: new Point(position.x - child.parentData.position.x,
-                                                          position.y - child.parentData.position.y)))
-          break;
-      }
+      Point transformed = new Point(position.x - child.parentData.position.x,
+                                    position.y - child.parentData.position.y);
+      if (child.hitTest(result, position: transformed))
+        break;
       child = child.parentData.previousSibling;
     }
   }
