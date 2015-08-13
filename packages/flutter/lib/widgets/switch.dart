@@ -117,7 +117,8 @@ class _RenderSwitch extends RenderToggleable {
     _radialReaction = null;
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
+    final PaintingCanvas canvas = context.canvas;
     sky.Color thumbColor = _kThumbOffColor;
     sky.Color trackColor = _kTrackOffColor;
     if (value) {

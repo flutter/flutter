@@ -201,14 +201,14 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow) {
-      canvas.save();
-      canvas.clipRect(offset & size);
-      defaultPaint(canvas, offset);
-      canvas.restore();
+      context.canvas.save();
+      context.canvas.clipRect(offset & size);
+      defaultPaint(context, offset);
+      context.canvas.restore();
     } else {
-      defaultPaint(canvas, offset);
+      defaultPaint(context, offset);
     }
   }
 }

@@ -141,12 +141,12 @@ class RenderScaffold extends RenderBox {
     }
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     for (ScaffoldSlots slot in ScaffoldSlots.values) {
       RenderBox box = _slots[slot];
       if (box != null) {
         assert(box.parentData is BoxParentData);
-        canvas.paintChild(box, box.parentData.position + offset);
+        context.paintChild(box, box.parentData.position + offset);
       }
     }
   }

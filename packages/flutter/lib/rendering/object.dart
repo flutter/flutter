@@ -29,15 +29,21 @@ class ParentData {
 
 class PaintingCanvas extends sky.Canvas {
   PaintingCanvas(sky.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
+}
+
+class PaintingContext {
+  final PaintingCanvas canvas;
+
+  PaintingContext(this.canvas);
 
   List<RenderObject> _descendentsWithPaintingCanvases = new List<RenderObject>(); // used by RenderObject._updatePaintingCanvas() to find out which RenderObjects to ask to paint
   void paintChild(RenderObject child, Point point) {
     if (child.createNewDisplayList) {
       assert(!_descendentsWithPaintingCanvases.contains(child));
       _descendentsWithPaintingCanvases.add(child);
-      drawPaintingNode(child._paintingNode, point);
+      canvas.drawPaintingNode(child._paintingNode, point);
     } else {
-      child._paintOnCanvas(this, point.toOffset());
+      child._paintWithContext(this, point.toOffset());
     }
   }
 }
@@ -362,10 +368,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_needsLayout);
     assert(createNewDisplayList);
     sky.PictureRecorder recorder = new sky.PictureRecorder();
-    PaintingCanvas canvas = new PaintingCanvas(recorder, paintBounds);
+    sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+    PaintingContext context = new PaintingContext(canvas);
     _needsPaint = false;
     try {
-      _paintOnCanvas(canvas, Offset.zero);
+      _paintWithContext(context, Offset.zero);
     } catch (e) {
       print('Exception raised during _updatePaintingCanvas:\n${e}\nContext:\n${this}');
       if (inDebugBuild)
@@ -375,8 +382,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
     assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
     _paintingNode.setBackingDrawable(recorder.endRecordingAsDrawable());
-    if (canvas._descendentsWithPaintingCanvases != null) {
-      for (RenderObject node in canvas._descendentsWithPaintingCanvases) {
+    if (context._descendentsWithPaintingCanvases != null) {
+      for (RenderObject node in context._descendentsWithPaintingCanvases) {
         assert(node.attached == attached);
         if (node._needsPaint)
           node._updatePaintingCanvas();
@@ -384,7 +391,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  void _paintOnCanvas(PaintingCanvas canvas, Offset offset) {
+  void _paintWithContext(PaintingContext context, Offset offset) {
     _needsPaint = false;
     assert(!_debugDoingThisPaint);
     RenderObject debugLastActivePaint;
@@ -392,17 +399,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisPaint = true;
       debugLastActivePaint = _debugActivePaint;
       _debugActivePaint = this;
-      debugPaint(canvas, offset);
+      debugPaint(context, offset);
       if (debugPaintBoundsEnabled) {
-        canvas.save();
-        canvas.clipRect(paintBounds.shift(offset));
+        context.canvas.save();
+        context.canvas.clipRect(paintBounds.shift(offset));
       }
       return true;
     });
-    paint(canvas, offset);
+    paint(context, offset);
     assert(() {
       if (debugPaintBoundsEnabled)
-        canvas.restore();
+        context.canvas.restore();
       _debugActivePaint = debugLastActivePaint;
       _debugDoingThisPaint = false;
       return true;
@@ -412,8 +419,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   bool get createNewDisplayList => false;
   Rect get paintBounds;
-  void debugPaint(PaintingCanvas canvas, Offset offset) { }
-  void paint(PaintingCanvas canvas, Offset offset) { }
+  void debugPaint(PaintingContext context, Offset offset) { }
+  void paint(PaintingContext context, Offset offset) { }
 
   void applyPaintTransform(Matrix4 transform) { }
 

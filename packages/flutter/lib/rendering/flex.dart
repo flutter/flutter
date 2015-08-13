@@ -449,19 +449,19 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     if (_overflow > 0) {
-      canvas.save();
-      canvas.clipRect(offset & size);
-      defaultPaint(canvas, offset);
-      canvas.restore();
+      context.canvas.save();
+      context.canvas.clipRect(offset & size);
+      defaultPaint(context, offset);
+      context.canvas.restore();
     } else {
-      defaultPaint(canvas, offset);
+      defaultPaint(context, offset);
     }
   }
 
-  void debugPaintSize(PaintingCanvas canvas, Offset offset) {
-    super.debugPaintSize(canvas, offset);
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    super.debugPaintSize(context, offset);
     if (_overflow <= 0)
       return;
 
@@ -479,6 +479,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
                        new Size(size.width, _overflow);
         break;
     }
-    canvas.drawRect(overflowRect, paint);
+    context.canvas.drawRect(overflowRect, paint);
   }
 }
