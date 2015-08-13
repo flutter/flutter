@@ -85,5 +85,9 @@ Shell& Shell::Shared() {
   return *g_shell;
 }
 
+TracingController& Shell::tracing_controller() {
+  return tracing_controller_;
+}
+
 }  // namespace shell
 }  // namespace sky

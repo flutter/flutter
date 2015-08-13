@@ -101,4 +101,12 @@ void SkyView::ScheduleFrame() {
   client_->ScheduleFrame();
 }
 
+void SkyView::StartDartTracing() {
+  dart_controller_->StartTracing();
+}
+
+void SkyView::StopDartTracing(mojo::ScopedDataPipeProducerHandle producer) {
+  dart_controller_->StopTracing(producer.Pass());
+}
+
 } // namespace blink

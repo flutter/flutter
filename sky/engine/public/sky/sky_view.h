@@ -43,6 +43,9 @@ class SkyView {
   PassRefPtr<SkPicture> Paint();
   void HandleInputEvent(const WebInputEvent& event);
 
+  void StartDartTracing();
+  void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
+
  private:
   explicit SkyView(SkyViewClient* client);
 
