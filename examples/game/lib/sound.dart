@@ -156,3 +156,76 @@ class SoundEffectPlayer {
     _playingSounds = [];
   }
 }
+
+typedef void SoundTrackCallback(SoundTrack);
+typedef void SoundTrackBufferingCallback(SoundTrack, int);
+
+class SoundTrack {
+  MediaPlayerProxy _player;
+
+  SoundTrackCallback onSoundComplete;
+  SoundTrackCallback onSeekComplete;
+  SoundTrackBufferingCallback onBufferingUpdate;
+  bool loop;
+  double time;
+}
+
+SoundTrackPlayer _sharedSoundTrackPlayer;
+
+class SoundTrackPlayer {
+  List<SoundTrack> _soundTracks = [];
+
+  static sharedInstance() {
+    if (_sharedSoundTrackPlayer == null) {
+      _sharedSoundTrackPlayer = new SoundTrackPlayer();
+    }
+    return _sharedSoundTrackPlayer;
+  }
+
+  SoundTrackPlayer() {
+    _mediaService = new MediaServiceProxy.unbound();
+    shell.requestService(null, _mediaService);
+  }
+
+  MediaServiceProxy _mediaService;
+
+  Future<SoundTrack> load(String url) async {
+    // Create media player
+    SoundTrack soundTrack = new SoundTrack();
+    soundTrack._player = new MediaPlayerProxy.unbound();
+    _mediaService.ptr.createPlayer(soundTrack._player);
+
+    // Load and prepare
+    UrlResponse response = await fetchUrl(url);
+    await soundTrack._player.ptr.prepare(response.body);
+
+    return soundTrack;
+  }
+
+  void unload(SoundTrack soundTrack) {
+    stop(soundTrack);
+    _soundTracks.remove(soundTrack);
+  }
+
+  void play(
+    SoundTrack soundTrack,
+    [bool loop = false,
+      double volume,
+      double startTime = 0.0]) {
+    // TODO: Implement looping & volume
+    // soundTrack._player.ptr.setLooping(loop);
+    // soundTrack._player.ptr.setVolume(volume);
+    soundTrack._player.ptr.seekTo((startTime * 1000.0).toInt());
+    soundTrack._player.ptr.start();
+  }
+
+  void stop(SoundTrack track) {
+    track._player.ptr.pause();
+  }
+
+  void stopAll() {
+    for (SoundTrack soundTrack in _soundTracks) {
+      soundTrack._player.ptr.pause();
+    }
+  }
+}
