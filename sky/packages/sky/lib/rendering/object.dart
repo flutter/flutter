@@ -10,6 +10,7 @@ import 'package:sky/base/debug.dart';
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/node.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/rendering/layer.dart';
 import 'package:vector_math/vector_math.dart';
 
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
@@ -32,9 +33,27 @@ class PaintingCanvas extends sky.Canvas {
 }
 
 class PaintingContext {
-  final PaintingCanvas canvas;
+  PaintingCanvas canvas;
 
-  PaintingContext(this.canvas);
+  PictureLayer get layer => _layer;
+  PictureLayer _layer;
+
+  sky.PictureRecorder _recorder;
+
+  PaintingContext(Rect bounds) {
+    _layer = new PictureLayer(bounds: bounds);
+    _recorder = new sky.PictureRecorder();
+    canvas = new PaintingCanvas(_recorder, bounds);
+  }
+
+  PaintingContext.forTesting(this.canvas);
+
+  void endRecording() {
+    canvas = null;
+    _layer.picture = _recorder.endRecording();
+    _recorder = null;
+    _layer = null;
+  }
 
   void paintChild(RenderObject child, Point point) {
     // TODO(abarth): Support compositing.
@@ -318,6 +337,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsPaint = true;
   bool get needsPaint => _needsPaint;
 
+  PictureLayer _layer;
+  PictureLayer get layer {
+    assert(requiresCompositing);
+    return _layer;
+  }
+
   void markNeedsPaint() {
     assert(!debugDoingPaint);
     if (!attached) return; // Don't try painting things that aren't in the hierarchy
@@ -357,9 +382,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void _repaint() {
     assert(!_needsLayout);
     assert(requiresCompositing);
-    sky.PictureRecorder recorder = new sky.PictureRecorder();
-    sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
-    PaintingContext context = new PaintingContext(canvas);
+    assert(_layer != null);
+    PaintingContext context = new PaintingContext(paintBounds);
+    _layer.parent.add(context.layer, before: _layer);
+    _layer.detach();
+    _layer = context._layer;
     _needsPaint = false;
     try {
       _paintWithContext(context, Offset.zero);

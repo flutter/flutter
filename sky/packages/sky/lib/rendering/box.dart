@@ -8,6 +8,7 @@ import 'dart:sky' as sky;
 import 'package:sky/base/debug.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/painting/text_style.dart';
+import 'package:sky/rendering/layer.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -1703,6 +1704,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
+  ContainerLayer _rootLayer;
+
   // We never call layout() on this class, so this should never get
   // checked. (This class is laid out using scheduleInitialLayout().)
   bool debugDoesMeetConstraints() { assert(false); return false; }
@@ -1746,15 +1749,22 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void paintFrame() {
     sky.tracing.begin('RenderView.paintFrame');
     try {
-      double devicePixelRatio = sky.view.devicePixelRatio;
-      sky.PictureRecorder recorder = new sky.PictureRecorder();
-      Rect cullRect = Point.origin & (size * devicePixelRatio);
-      PaintingCanvas canvas = new PaintingCanvas(recorder, cullRect);
-      PaintingContext context = new PaintingContext(canvas);
-      canvas.drawColor(const Color(0xFF000000), sky.TransferMode.src);
-      canvas.scale(devicePixelRatio, devicePixelRatio);
+      final double devicePixelRatio = sky.view.devicePixelRatio;
+
+      // TODO(abarth): Really |_rootLayer| should be a TransformLayer that
+      // applies the devicePixelRatio.
+      Rect scaledBounds = Point.origin & (size * devicePixelRatio);
+      PaintingContext context = new PaintingContext(scaledBounds);
+      _rootLayer = new ContainerLayer(bounds: Point.origin & size);
+      _rootLayer.add(context.layer);
+      context.canvas.drawColor(const Color(0xFF000000), sky.TransferMode.src);
+      context.canvas.scale(devicePixelRatio, devicePixelRatio);
       context.paintChild(child, Point.origin);
-      sky.view.picture = recorder.endRecording();
+      context.endRecording();
+
+      // TODO(abarth): Once we have more than one PictureLayer, we should walk
+      // the layer tree to generate the final picture.
+      sky.view.picture = (_rootLayer.firstChild as PictureLayer).picture;
     } finally {
       sky.tracing.end('RenderView.paintFrame');
     }
