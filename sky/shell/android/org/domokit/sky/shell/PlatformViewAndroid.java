@@ -124,11 +124,6 @@ public class PlatformViewAndroid extends SurfaceView
     }
 
     @Override
-    public boolean onCheckIsTextEditor() {
-        return true;
-    }
-
-    @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         return mKeyboardState.createInputConnection(outAttrs);
     }
