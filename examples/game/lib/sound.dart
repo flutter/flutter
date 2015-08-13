@@ -23,7 +23,6 @@ class SoundStream {
     this.sound,
     this.tag,
     this.loop,
-    this.time,
     this.volume,
     this.pitch,
     this.pan,
@@ -34,7 +33,6 @@ class SoundStream {
   SoundEffect sound;
   bool playing = false;
   bool loop = false;
-  double time = 0.0;
   double volume = 1.0;
   double pitch = 1.0;
   double pan = 0.0;
@@ -94,7 +92,6 @@ class SoundPool {
       double volume = 1.0,
       double pitch = 1.0,
       double pan = 0.0,
-      double startTime = 0.0,
       SoundCompleteCallback callback = null]) {
 
     // Create new PlayingSound object
@@ -102,7 +99,6 @@ class SoundPool {
       sound,
       tag,
       loop,
-      startTime,
       volume,
       pitch,
       pan,
@@ -117,7 +113,7 @@ class SoundPool {
 
       // Prepare sound, then play it
       _prepare(playingSound).then((_) {
-        playingSound._player.ptr.seekTo((startTime * 1000.0).toInt());
+        playingSound._player.ptr.seekTo(0);
         playingSound._player.ptr.start();
       });
 
@@ -126,7 +122,7 @@ class SoundPool {
     } else {
       // Reuse player
       playingSound._player = _mediaPlayers[sound];
-      playingSound._player.ptr.seekTo((startTime * 1000.0).toInt());
+      playingSound._player.ptr.seekTo(0);
       playingSound._player.ptr.start();
     }
 
