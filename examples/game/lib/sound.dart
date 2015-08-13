@@ -18,8 +18,8 @@ class SoundEffect {
   Object _data;
 }
 
-class SoundStream {
-  SoundStream(
+class SoundEffectStream {
+  SoundEffectStream(
     this.sound,
     this.tag,
     this.loop,
@@ -45,29 +45,29 @@ class SoundStream {
   MediaPlayerProxy _player;
 }
 
-SoundPool _sharedSoundPool;
+SoundEffectPlayer _sharedSoundPool;
 
-class SoundPool {
+class SoundEffectPlayer {
 
-  static SoundPool sharedInstance() {
+  static SoundEffectPlayer sharedInstance() {
     if (_sharedSoundPool == null) {
-      _sharedSoundPool = new SoundPool();
+      _sharedSoundPool = new SoundEffectPlayer();
     }
     return _sharedSoundPool;
   }
 
-  SoundPool() {
+  SoundEffectPlayer() {
     _mediaService = new MediaServiceProxy.unbound();
     shell.requestService(null, _mediaService);
   }
 
   MediaServiceProxy _mediaService;
-  List<SoundStream> _playingSounds = [];
+  List<SoundEffectStream> _playingSounds = [];
 
   // TODO: This should no longer be needed when moving to SoundPool backing
   Map<SoundEffect,MediaPlayerProxy> _mediaPlayers = {};
 
-  Future _prepare(SoundStream playingSound) async {
+  Future _prepare(SoundEffectStream playingSound) async {
     await playingSound._player.ptr.prepare(playingSound.sound._data);
   }
 
@@ -85,7 +85,7 @@ class SoundPool {
   // TODO: Add paused property (should pause playback of all sounds)
   bool paused;
 
-  SoundStream play(
+  SoundEffectStream play(
     SoundEffect sound,
     [Object tag,
       bool loop = false,
@@ -95,7 +95,7 @@ class SoundPool {
       SoundCompleteCallback callback = null]) {
 
     // Create new PlayingSound object
-    SoundStream playingSound = new SoundStream(
+    SoundEffectStream playingSound = new SoundEffectStream(
       sound,
       tag,
       loop,
@@ -131,7 +131,7 @@ class SoundPool {
 
   void stop(Object tag) {
     for (int i = _playingSounds.length; i >= 0; i--) {
-      SoundStream playingSound = _playingSounds[i];
+      SoundEffectStream playingSound = _playingSounds[i];
       if (playingSound.tag == tag) {
         playingSound._player.ptr.pause();
         _playingSounds.removeAt(i);
@@ -139,9 +139,9 @@ class SoundPool {
     }
   }
 
-  List<SoundStream> playingSoundsForTag(Object tag) {
-    List<SoundStream> list = [];
-    for (SoundStream playingSound in _playingSounds) {
+  List<SoundEffectStream> playingSoundsForTag(Object tag) {
+    List<SoundEffectStream> list = [];
+    for (SoundEffectStream playingSound in _playingSounds) {
       if (playingSound.tag == tag) {
         list.add(playingSound);
       }
@@ -150,7 +150,7 @@ class SoundPool {
   }
 
   void stopAll() {
-    for (SoundStream playingSound in _playingSounds) {
+    for (SoundEffectStream playingSound in _playingSounds) {
       playingSound._player.ptr.pause();
     }
     _playingSounds = [];

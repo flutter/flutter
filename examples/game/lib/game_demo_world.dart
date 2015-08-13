@@ -30,7 +30,7 @@ class GameDemoWorld extends NodeWithSize {
   SpriteSheet _spriteSheetUI;
 
   Map<String,SoundEffect> _sounds;
-  SoundPool _soundPool = SoundPool.sharedInstance();
+  SoundEffectPlayer _soundPool = SoundEffectPlayer.sharedInstance();
 
   Navigator _navigator;
 
