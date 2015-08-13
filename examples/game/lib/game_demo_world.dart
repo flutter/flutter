@@ -28,6 +28,10 @@ class GameDemoWorld extends NodeWithSize {
 
   SpriteSheet _spriteSheet;
   SpriteSheet _spriteSheetUI;
+
+  Map<String,SoundEffect> _sounds;
+  SoundPool _soundPool = SoundPool.sharedInstance();
+
   Navigator _navigator;
 
   // Inputs
@@ -54,7 +58,7 @@ class GameDemoWorld extends NodeWithSize {
 
   Function _gameOverCallback;
 
-  GameDemoWorld(App app, this._navigator, ImageMap images, this._spriteSheet, this._spriteSheetUI, this._gameOverCallback) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
+  GameDemoWorld(App app, this._navigator, ImageMap images, this._spriteSheet, this._spriteSheetUI, this._sounds, this._gameOverCallback) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
     // Fetch images
     _imgNebula = images["assets/nebula.png"];
 
@@ -140,6 +144,8 @@ class GameDemoWorld extends NodeWithSize {
     laser.constrainProportions = true;
     _lasers.add(laser);
     _gameLayer.addChild(laser);
+
+    _soundPool.play(_sounds["laser"]);
   }
 
   void addNebula() {
@@ -225,6 +231,8 @@ class GameDemoWorld extends NodeWithSize {
     }
 
     _gameLayer.addChild(explosionNode);
+
+    _soundPool.play(_sounds["explosion"]);
   }
 
   void update(double dt) {
