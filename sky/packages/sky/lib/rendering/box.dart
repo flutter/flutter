@@ -1750,23 +1750,28 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     sky.tracing.begin('RenderView.paintFrame');
     try {
       final double devicePixelRatio = sky.view.devicePixelRatio;
-
-      // TODO(abarth): Really |_rootLayer| should be a TransformLayer that
-      // applies the devicePixelRatio.
+      Matrix4 transform = new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
+      Rect bounds = Point.origin & size;
       Rect scaledBounds = Point.origin & (size * devicePixelRatio);
-      PaintingContext context = new PaintingContext(scaledBounds);
-      _rootLayer = new ContainerLayer(bounds: Point.origin & size);
+      _rootLayer = new TransformLayer(bounds: scaledBounds, transform: transform);
+      PaintingContext context = new PaintingContext(bounds);
       _rootLayer.add(context.layer);
-      context.canvas.drawColor(const Color(0xFF000000), sky.TransferMode.src);
-      context.canvas.scale(devicePixelRatio, devicePixelRatio);
       context.paintChild(child, Point.origin);
       context.endRecording();
-
-      // TODO(abarth): Once we have more than one PictureLayer, we should walk
-      // the layer tree to generate the final picture.
-      sky.view.picture = (_rootLayer.firstChild as PictureLayer).picture;
     } finally {
       sky.tracing.end('RenderView.paintFrame');
+    }
+  }
+
+  void compositeFrame() {
+    sky.tracing.begin('RenderView.compositeFrame');
+    try {
+      sky.PictureRecorder recorder = new sky.PictureRecorder();
+      sky.Canvas canvas = new sky.Canvas(recorder, _rootLayer.bounds);
+      _rootLayer.paint(canvas);
+      sky.view.picture = recorder.endRecording();
+    } finally {
+      sky.tracing.end('RenderView.compositeFrame');
     }
   }
 

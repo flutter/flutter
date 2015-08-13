@@ -39,6 +39,13 @@ class Rect {
   Rect deflate(double delta) {
     return inflate(-delta);
   }
+  Rect intersect(Rect other) {
+    return new Rect.fromLTRB(
+      math.max(left, other.left),
+      math.max(top, other.top),
+      math.max(right, other.right),
+      math.max(bottom, other.bottom));
+  }
 
   double get width => right - left;
   double get height => bottom - top;

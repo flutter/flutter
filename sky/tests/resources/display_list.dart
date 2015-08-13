@@ -159,6 +159,9 @@ class TestRenderView extends RenderView {
     RenderObject.debugDoingPaint = false;
   }
 
+  void compositeFrame() {
+  }
+
   // TEST API:
 
   void syncCheckFrame() {
