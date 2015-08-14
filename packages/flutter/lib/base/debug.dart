@@ -23,6 +23,9 @@ bool debugPaintBaselinesEnabled = false;
 const sky.Color debugPaintAlphabeticBaselineColor = const sky.Color(0xFF00FF00);
 const sky.Color debugPaintIdeographicBaselineColor = const sky.Color(0xFFFFD000);
 
+bool debugPaintLayerBordersEnabled = false;
+const sky.Color debugPaintLayerBordersColor = const sky.Color(0xFFFF9800);
+
 bool debugPaintBoundsEnabled = false;
 
 double timeDilation = 1.0;
