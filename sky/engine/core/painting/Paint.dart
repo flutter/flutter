@@ -43,7 +43,6 @@ class Paint {
   Shader _shader;
   PaintingStyle _style;
   TransferMode _transferMode;
-  Typeface typeface;
 
   // Must match PaintFields enum in Paint.cpp.
   List<dynamic> get _value {
