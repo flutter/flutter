@@ -5,6 +5,7 @@
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
+import 'package:sky/base/debug.dart';
 import 'package:vector_math/vector_math.dart';
 
 abstract class Layer {
@@ -36,9 +37,21 @@ class PictureLayer extends Layer {
   Size size;
   sky.Picture picture;
 
+  bool _debugPaintLayerBorder(sky.Canvas canvas) {
+    if (debugPaintLayerBordersEnabled) {
+      Paint border = new Paint()
+        ..color = debugPaintLayerBordersColor
+        ..strokeWidth = 2.0
+        ..setStyle(sky.PaintingStyle.stroke);
+      canvas.drawRect(Point.origin & size, border);
+    }
+    return true;
+  }
+
   void paint(sky.Canvas canvas) {
     canvas.translate(offset.dx, offset.dy);
     canvas.drawPicture(picture);
+    assert(_debugPaintLayerBorder(canvas));
     canvas.translate(-offset.dx, -offset.dy);
   }
 }
