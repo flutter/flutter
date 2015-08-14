@@ -70,6 +70,14 @@ class RenderScaffold extends RenderBox {
     }
   }
 
+  void visitChildren(RenderObjectVisitor visitor) {
+    for (ScaffoldSlots slot in ScaffoldSlots.values) {
+      RenderBox box = _slots[slot];
+      if (box != null)
+        visitor(box);
+    }
+  }
+
   ScaffoldSlots remove(RenderBox child) {
     assert(child != null);
     for (ScaffoldSlots slot in ScaffoldSlots.values) {
