@@ -27,7 +27,10 @@ if (is_android) {
   import("//build/config/android/rules.gni")
 
   android_library("activity_lib") {
-    java_files = [ "src/org/domokit/activity/ActivityImpl.java" ]
+    java_files = [
+      "src/org/domokit/activity/ActivityImpl.java",
+      "src/org/domokit/activity/UserFeedbackImpl.java",
+    ]
 
     deps = [
       "//base:base_java",

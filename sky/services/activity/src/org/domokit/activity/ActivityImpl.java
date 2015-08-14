@@ -10,6 +10,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.View;
 
+import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.activity.Activity;
 import org.chromium.mojom.activity.ComponentName;
@@ -17,6 +18,7 @@ import org.chromium.mojom.activity.Intent;
 import org.chromium.mojom.activity.StringExtra;
 import org.chromium.mojom.activity.SystemUiVisibility;
 import org.chromium.mojom.activity.TaskDescription;
+import org.chromium.mojom.activity.UserFeedback;
 
 /**
  * Android implementation of Activity.
@@ -37,6 +39,12 @@ public class ActivityImpl implements Activity {
 
     @Override
     public void onConnectionError(MojoException e) {}
+
+    @Override
+    public void getUserFeedback(InterfaceRequest<UserFeedback> request) {
+        View view = sCurrentActivity.getWindow().getDecorView();
+        UserFeedback.MANAGER.bind(new UserFeedbackImpl(view), request);
+    }
 
     @Override
     public void startActivity(Intent intent) {
