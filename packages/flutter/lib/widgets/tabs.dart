@@ -406,15 +406,15 @@ class TabBar extends Scrollable {
 
   Size _tabBarSize;
   List<double> _tabWidths;
-  AnimationPerformance _indicatorAnimation;
-  AnimationPerformance _scrollAnimation;
+  ValueAnimation<Rect> _indicatorAnimation;
+  ValueAnimation<double> _scrollAnimation;
 
   void initState() {
     super.initState();
-    _indicatorAnimation = new AnimationPerformance()
+    _indicatorAnimation = new ValueAnimation<Rect>()
       ..duration = _kTabBarScroll
       ..variable = new AnimatedRect(null, curve: ease);
-    _scrollAnimation = new AnimationPerformance()
+    _scrollAnimation = new ValueAnimation<double>()
       ..duration = _kTabBarScroll
       ..variable = new AnimatedValue<double>(0.0, curve: ease);
   }
@@ -430,7 +430,7 @@ class TabBar extends Scrollable {
     scrollBehavior.isScrollable = source.isScrollable;
   }
 
-  AnimatedRect get _indicatorRect => _indicatorAnimation.variable as AnimatedRect;
+  AnimatedRect get _indicatorRect => _indicatorAnimation.variable;
 
   void _startIndicatorAnimation(int fromTabIndex, int toTabIndex) {
     _indicatorRect
