@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky_services/activity/activity.mojom.dart';
 
-export 'package:sky_services/activity/activity.mojom.dart' show Intent, ComponentName, StringExtra, SystemUIVisibility_STANDARD, SystemUIVisibility_FULLSCREEN, SystemUIVisibility_IMMERSIVE;
+export 'package:sky_services/activity/activity.mojom.dart';
 
 /// Dart wrapper around Activity mojo service available in Sky on Android.
 ///
@@ -26,6 +26,15 @@ ActivityProxy _initActivity() {
 }
 
 final ActivityProxy _activity = _initActivity();
+
+UserFeedbackProxy _initUserFeedbackProxy() {
+  UserFeedbackProxy proxy = new UserFeedbackProxy.unbound();
+  _activity.ptr.getUserFeedback(proxy);
+  return proxy;
+}
+
+final UserFeedbackProxy _userFeedbackProxy = _initUserFeedbackProxy();
+final UserFeedback userFeedback = _userFeedbackProxy.ptr;
 
 Color _cachedPrimaryColor;
 String _cachedLabel;
