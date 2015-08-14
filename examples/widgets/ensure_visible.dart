@@ -38,7 +38,7 @@ class EnsureVisibleApp extends App {
   List<CardModel> cardModels;
   BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
   ScrollListener scrollListener;
-  AnimationPerformance scrollAnimation;
+  ValueAnimation<double> scrollAnimation;
 
   void initState() {
     List<double> cardHeights = <double>[
@@ -51,7 +51,7 @@ class EnsureVisibleApp extends App {
       return new CardModel(i, cardHeights[i], color);
     });
 
-    scrollAnimation = new AnimationPerformance()
+    scrollAnimation = new ValueAnimation<double>()
       ..duration = const Duration(milliseconds: 200)
       ..variable = new AnimatedValue<double>(0.0, curve: ease);
 
