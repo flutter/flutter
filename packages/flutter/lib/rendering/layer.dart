@@ -8,9 +8,9 @@ import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 import 'package:vector_math/vector_math.dart';
 
 abstract class Layer {
-  Layer({ this.bounds });
+  Layer({ this.offset: Offset.zero });
 
-  Rect bounds;
+  Offset offset; // From parent, in parent's coordinate system.
 
   ContainerLayer _parent;
   ContainerLayer get parent => _parent;
@@ -30,18 +30,21 @@ abstract class Layer {
 }
 
 class PictureLayer extends Layer {
-  PictureLayer({ Rect bounds })
-    : super(bounds: bounds);
+  PictureLayer({ Offset offset: Offset.zero, this.size })
+    : super(offset: offset);
 
+  Size size;
   sky.Picture picture;
 
   void paint(sky.Canvas canvas) {
+    canvas.translate(offset.dx, offset.dy);
     canvas.drawPicture(picture);
+    canvas.translate(-offset.dx, -offset.dy);
   }
 }
 
 class ContainerLayer extends Layer {
-  ContainerLayer({ Rect bounds }) : super(bounds: bounds);
+  ContainerLayer({ Offset offset: Offset.zero }) : super(offset: offset);
 
   void paint(sky.Canvas canvas) {
     Layer child = firstChild;
@@ -133,12 +136,13 @@ class ContainerLayer extends Layer {
 }
 
 class TransformLayer extends ContainerLayer {
-  TransformLayer({ this.transform, Rect bounds }) : super(bounds: bounds);
+  TransformLayer({ Offset offset: Offset.zero, this.transform }) : super(offset: offset);
 
   Matrix4 transform;
 
   void paint(sky.Canvas canvas) {
     canvas.save();
+    canvas.translate(offset.dx, offset.dy);
     canvas.concat(transform.storage);
     super.paint(canvas);
     canvas.restore();
@@ -146,11 +150,14 @@ class TransformLayer extends ContainerLayer {
 }
 
 class ClipLayer extends ContainerLayer {
-  ClipLayer({ Rect bounds }) : super(bounds: bounds);
+  ClipLayer({ Offset offset: Offset.zero, this.size }) : super(offset: offset);
+
+  Size size;
 
   void paint(sky.Canvas canvas) {
     canvas.save();
-    canvas.clipRect(bounds);
+    canvas.translate(offset.dx, offset.dy);
+    canvas.clipRect(Point.origin & size);
     super.paint(canvas);
     canvas.restore();
   }
@@ -158,11 +165,13 @@ class ClipLayer extends ContainerLayer {
 
 class ColorFilterLayer extends ContainerLayer {
   ColorFilterLayer({
-    Rect bounds,
+    Offset offset: Offset.zero,
+    this.size,
     this.color,
     this.transferMode
-  }) : super(bounds: bounds);
+  }) : super(offset: offset);
 
+  Size size;
   Color color;
   sky.TransferMode transferMode;
 
@@ -171,7 +180,8 @@ class ColorFilterLayer extends ContainerLayer {
       ..color = color
       ..setTransferMode(transferMode);
 
-    canvas.saveLayer(bounds, paint);
+    canvas.saveLayer(offset & size, paint);
+    canvas.translate(offset.dx, offset.dy);
     super.paint(canvas);
     canvas.restore();
   }
