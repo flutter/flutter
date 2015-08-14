@@ -8,14 +8,9 @@ import 'dart:sky' as sky;
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/curves.dart';
-import 'package:sky/theme/colors.dart';
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/framework.dart';
-import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/transitions.dart';
 
 const double _kLinearProgressIndicatorHeight = 6.0;
@@ -33,7 +28,7 @@ abstract class ProgressIndicator extends StatefulComponent {
   double bufferValue; // TODO(hansmuller) implement the support for this.
 
   AnimationPerformance _animation;
-  double get _animationValue =>  _animation.variable.value;
+  double get _animationValue => (_animation.variable as AnimatedValue<double>).value;
   Color get _backgroundColor => Theme.of(this).primarySwatch[200];
   Color get _valueColor => Theme.of(this).primaryColor;
 
