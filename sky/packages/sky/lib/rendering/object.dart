@@ -90,6 +90,7 @@ abstract class Constraints {
   bool get isTight;
 }
 
+typedef void RenderObjectVisitor(RenderObject child);
 typedef void LayoutCallback(Constraints constraints);
 
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
@@ -124,6 +125,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     super.dropChild(child);
     markNeedsLayout();
   }
+
+  // Override in subclasses with children and call the visitor for each child.
+  void visitChildren(RenderObjectVisitor visitor) { }
 
   static bool _debugDoingLayout = false;
   static bool get debugDoingLayout => _debugDoingLayout;
@@ -193,10 +197,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (_relayoutSubtreeRoot != this) {
       _relayoutSubtreeRoot = null;
       _needsLayout = true;
-      _cleanRelayoutSubtreeRootChildren();
+      visitChildren((RenderObject child) {
+        child._cleanRelayoutSubtreeRoot();
+      });
     }
   }
-  void _cleanRelayoutSubtreeRootChildren() { } // workaround for lack of inter-class mixins in Dart
   void scheduleInitialLayout() {
     assert(attached);
     assert(parent == null);
@@ -541,9 +546,9 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
     if (_child != null)
       _child.detach();
   }
-  void _cleanRelayoutSubtreeRootChildren() {
+  void visitChildren(RenderObjectVisitor visitor) {
     if (_child != null)
-      _child._cleanRelayoutSubtreeRoot();
+      visitor(_child);
   }
   String debugDescribeChildren(String prefix) {
     if (child != null)
@@ -734,10 +739,10 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
       child = child.parentData.nextSibling;
     }
   }
-  void _cleanRelayoutSubtreeRootChildren() {
+  void visitChildren(RenderObjectVisitor visitor) {
     ChildType child = _firstChild;
     while (child != null) {
-      child._cleanRelayoutSubtreeRoot();
+      visitor(child);
       assert(child.parentData is ParentDataType);
       child = child.parentData.nextSibling;
     }
