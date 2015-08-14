@@ -29,6 +29,7 @@ scoped_ptr<mojo::GLTexture> RasterizerGanesh::Rasterize(SkPicture* picture) {
                               host_->resource_manager()->CreateTexture(size));
 
   SkCanvas* canvas = surface.canvas();
+  canvas->clear(SK_ColorBLACK);
   canvas->drawPicture(picture);
   canvas->flush();
 

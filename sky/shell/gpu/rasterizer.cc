@@ -66,6 +66,7 @@ void Rasterizer::Draw(PassRefPtr<SkPicture> picture) {
 void Rasterizer::DrawPicture(SkPicture* picture) {
   TRACE_EVENT0("sky", "Rasterizer::DrawPicture");
   SkCanvas* canvas = ganesh_surface_->canvas();
+  canvas->clear(SK_ColorBLACK);
   canvas->drawPicture(picture);
   canvas->flush();
 }

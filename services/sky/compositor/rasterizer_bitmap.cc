@@ -31,8 +31,7 @@ scoped_ptr<mojo::GLTexture> RasterizerBitmap::Rasterize(SkPicture* picture) {
 
   SkBitmapDevice device(bitmap_);
   SkCanvas canvas(&device);
-  // Draw red so we can see when we fail to paint.
-  canvas.drawColor(SK_ColorRED);
+  canvas.clear(SK_ColorBLACK);
   canvas.drawPicture(picture);
   canvas.flush();
 
