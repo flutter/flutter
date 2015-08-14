@@ -1,5 +1,5 @@
 name: sky_services
-version: 0.0.10
+version: 0.0.11
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: Mojom interfaces associated with Sky
 homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/sky_services
