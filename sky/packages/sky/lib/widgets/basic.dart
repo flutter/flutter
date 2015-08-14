@@ -10,6 +10,7 @@ import 'package:sky/base/image_resource.dart';
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/painting/text_style.dart';
+import 'package:sky/painting/paragraph_painter.dart';
 import 'package:sky/rendering/block.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
@@ -446,16 +447,16 @@ class Flexible extends ParentDataNode {
 }
 
 class Paragraph extends LeafRenderObjectWrapper {
-  Paragraph({ Key key, this.inline }) : super(key: key);
+  Paragraph({ Key key, this.text }) : super(key: key);
 
-  final RenderInline inline;
+  final TextSpan text;
 
-  RenderParagraph createNode() => new RenderParagraph(inline);
+  RenderParagraph createNode() => new RenderParagraph(text);
   RenderParagraph get root => super.root;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.inline = inline;
+    root.text = text;
   }
 }
 
@@ -464,25 +465,25 @@ class StyledText extends Component {
   // Where "string" is text to display and text-style is an instance of
   // TextStyle. The text-style applies to all of the elements that follow.
   StyledText({ this.elements, Key key }) : super(key: key) {
-    assert(_toInline(elements) != null);
+    assert(_toSpan(elements) != null);
   }
 
   final dynamic elements;
 
-  RenderInline _toInline(dynamic element) {
+  TextSpan _toSpan(dynamic element) {
     if (element is String)
-      return new RenderText(element);
+      return new PlainTextSpan(element);
     if (element is Iterable) {
       dynamic first = element.first;
       if (first is! TextStyle)
         throw new ArgumentError("First element of Iterable is a ${first.runtimeType} not a TextStyle");
-      return new RenderStyled(first, element.skip(1).map(_toInline).toList());
+      return new StyledTextSpan(first, element.skip(1).map(_toSpan).toList());
     }
     throw new ArgumentError("Element is ${element.runtimeType} not a String or an Iterable");
   }
 
   Widget build() {
-    return new Paragraph(inline: _toInline(elements));
+    return new Paragraph(text: _toSpan(elements));
   }
 }
 
@@ -493,7 +494,7 @@ class Text extends Component {
   final TextStyle style;
 
   Widget build() {
-    RenderInline inline = new RenderText(data);
+    TextSpan text = new PlainTextSpan(data);
     TextStyle defaultStyle = DefaultTextStyle.of(this);
     TextStyle combinedStyle;
     if (defaultStyle != null) {
@@ -505,8 +506,8 @@ class Text extends Component {
       combinedStyle = style;
     }
     if (combinedStyle != null)
-      inline = new RenderStyled(combinedStyle, [inline]);
-    return new Paragraph(inline: inline);
+      text = new StyledTextSpan(combinedStyle, [text]);
+    return new Paragraph(text: text);
   }
 }
 
