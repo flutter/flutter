@@ -40,19 +40,19 @@ class PaintingContext {
 
   sky.PictureRecorder _recorder;
 
-  PaintingContext(Rect bounds) {
-    _startRecording(bounds);
+  PaintingContext(Offset offest, Size size) {
+    _startRecording(offest, size);
   }
 
   PaintingContext.forTesting(this.canvas);
 
-  void _startRecording(Rect bounds) {
+  void _startRecording(Offset offset, Size size) {
     assert(_layer == null);
     assert(_recorder == null);
     assert(canvas == null);
-    _layer = new PictureLayer(bounds: bounds);
+    _layer = new PictureLayer(offset: offset, size: size);
     _recorder = new sky.PictureRecorder();
-    canvas = new PaintingCanvas(_recorder, bounds);
+    canvas = new PaintingCanvas(_recorder, Point.origin & size);
   }
 
   void endRecording() {
@@ -70,18 +70,23 @@ class PaintingContext {
 
     if (!child.requiresCompositing)
       return child._paintWithContext(this, offset);
+    _compositChild(child, offset, layer.parent, layer.nextSibling);
+  }
 
-    final Layer originalLayer = layer;
+  void _compositChild(RenderObject child, Offset offset, ContainerLayer parentLayer, Layer nextSibling) {
+    final PictureLayer originalLayer = _layer;
     endRecording();
 
-    Rect bounds = child.paintBounds.shift(offset);
-    PaintingContext context = new PaintingContext(bounds);
-    originalLayer.parent.add(context.layer, before: originalLayer.nextSibling);
-    child._paintWithContext(context, Offset.zero);
-    context.endRecording();
+    Rect childBounds = child.paintBounds;
+    Offset childOffset = childBounds.topLeft.toOffset();
+    PaintingContext context = new PaintingContext(offset + childOffset, childBounds.size);
+    parentLayer.add(context.layer, before: nextSibling);
+    child._layer = context.layer;
+    child._paintWithContext(context, -childOffset);
 
-    _startRecording(originalLayer.bounds);
+    _startRecording(originalLayer.offset, originalLayer.size);
     originalLayer.parent.add(layer, before: context.layer.nextSibling);
+    context.endRecording();
   }
 }
 
@@ -411,7 +416,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_needsLayout);
     assert(requiresCompositing);
     assert(_layer != null);
-    PaintingContext context = new PaintingContext(paintBounds);
+    // TODO(abarth): Using _layer.offset isn't correct if the topLeft of our
+    // paint bounds has changed since our last repaint.
+    PaintingContext context = new PaintingContext(_layer.offset, paintBounds.size);
     _layer.parent.add(context.layer, before: _layer);
     _layer.detach();
     _layer = context._layer;

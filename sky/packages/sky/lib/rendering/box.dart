@@ -1751,10 +1751,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     try {
       final double devicePixelRatio = sky.view.devicePixelRatio;
       Matrix4 transform = new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
-      Rect bounds = Point.origin & size;
-      Rect scaledBounds = Point.origin & (size * devicePixelRatio);
-      _rootLayer = new TransformLayer(bounds: scaledBounds, transform: transform);
-      PaintingContext context = new PaintingContext(bounds);
+      _rootLayer = new TransformLayer(transform: transform);
+      PaintingContext context = new PaintingContext(Offset.zero, size);
       _rootLayer.add(context.layer);
       context.paintChild(child, Point.origin);
       context.endRecording();
@@ -1767,7 +1765,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     sky.tracing.begin('RenderView.compositeFrame');
     try {
       sky.PictureRecorder recorder = new sky.PictureRecorder();
-      sky.Canvas canvas = new sky.Canvas(recorder, _rootLayer.bounds);
+      sky.Canvas canvas = new sky.Canvas(recorder, Point.origin & (size * sky.view.devicePixelRatio));
       _rootLayer.paint(canvas);
       sky.view.picture = recorder.endRecording();
     } finally {
