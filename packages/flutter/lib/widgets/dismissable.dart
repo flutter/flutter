@@ -150,11 +150,14 @@ class Dismissable extends StatefulComponent {
     if (!_isActive)
       return EventDisposition.ignored;
 
+    _dragUnderway = false;
     if (_isHorizontalFlingGesture(event)) {
-      _dragUnderway = false;
       _dragX = event.velocityX.sign;
       _fadePerformance.fling(velocity: event.velocityX.abs() * _kFlingVelocityScale);
+    } else {
+      _fadePerformance.reverse();
     }
+
     return EventDisposition.processed;
   }
 
