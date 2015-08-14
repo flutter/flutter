@@ -4,6 +4,7 @@
 import 'dart:sky' as sky;
 import 'dart:math';
 
+import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/theme/colors.dart' as colors;
@@ -83,33 +84,13 @@ class MineDiggerApp extends App {
     assert(false);
   }
 
-  Stopwatch longPressStopwatch;
-
   PointerEventListener _pointerDownHandlerFor(int posX, int posY) {
     return (sky.PointerEvent event) {
       if (event.buttons == 1) {
         probe(posX, posY);
       } else if (event.buttons == 2) {
         flag(posX, posY);
-      } else {
-        // Touch event.
-        longPressStopwatch = new Stopwatch()..start();
       }
-    };
-  }
-
-  PointerEventListener _pointerUpHandlerFor(int posX, int posY) {
-    return (sky.PointerEvent event) {
-      if (longPressStopwatch == null)
-        return;
-      // Pointer down was a touch event.
-      if (longPressStopwatch.elapsedMilliseconds < 250) {
-        probe(posX, posY);
-      } else {
-        // Long press flags.
-        flag(posX, posY);
-      }
-      longPressStopwatch = null;
     };
   }
 
@@ -128,7 +109,13 @@ class MineDiggerApp extends App {
         if (state == CellState.covered) {
           row.add(new Listener(
             onPointerDown: _pointerDownHandlerFor(ix, iy),
-            onPointerUp: _pointerUpHandlerFor(ix, iy),
+            onGestureTap: (_) {
+              probe(ix, iy);
+            },
+            onGestureLongPress: (_) {
+              activity.userFeedback.performHapticFeedback(activity.HapticFeedbackType_LONG_PRESS);
+              flag(ix, iy);
+            },
             child: new CoveredMineNode(
               flagged: false,
               posX: ix,
