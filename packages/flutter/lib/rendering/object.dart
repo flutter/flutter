@@ -120,6 +120,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     setupParentData(child);
     super.adoptChild(child);
     markNeedsLayout();
+    markNeedsCompositingUpdate();
   }
   void dropChild(RenderObject child) { // only for use by subclasses
     assert(debugCanPerformMutations);
@@ -129,6 +130,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     child.parentData.detach();
     super.dropChild(child);
     markNeedsLayout();
+    markNeedsCompositingUpdate();
   }
 
   // Override in subclasses with children and call the visitor for each child.
@@ -367,14 +369,45 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
 
-  bool _needsPaint = true;
-  bool get needsPaint => _needsPaint;
-
   PictureLayer _layer;
   PictureLayer get layer {
     assert(requiresCompositing);
     return _layer;
   }
+
+  bool get requiresCompositing => false;
+
+  bool _hasCompositedDescendant = false;
+  bool get hasCompositedDescendant {
+    assert(!_needsCompositingUpdate);
+    return _hasCompositedDescendant;
+  }
+
+  bool _needsCompositingUpdate = false;
+  void markNeedsCompositingUpdate() {
+    if (_needsCompositingUpdate)
+      return;
+    _needsCompositingUpdate = true;
+    final AbstractNode parent = this.parent;
+    if (parent is RenderObject)
+      parent.markNeedsCompositingUpdate();
+  }
+
+  void updateCompositing() {
+    if (!_needsCompositingUpdate)
+      return;
+    visitChildren((RenderObject child) {
+      child.updateCompositing();
+      if (child.hasCompositedDescendant)
+        _hasCompositedDescendant = true;
+    });
+    if (requiresCompositing)
+      _hasCompositedDescendant = true;
+    _needsCompositingUpdate = false;
+  }
+
+  bool _needsPaint = true;
+  bool get needsPaint => _needsPaint;
 
   void markNeedsPaint() {
     assert(!debugDoingPaint);
@@ -461,7 +494,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_needsPaint);
   }
 
-  bool get requiresCompositing => false;
   Rect get paintBounds;
   void debugPaint(PaintingContext context, Offset offset) { }
   void paint(PaintingContext context, Offset offset) { }
