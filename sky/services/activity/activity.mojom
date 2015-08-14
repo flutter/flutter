@@ -39,6 +39,8 @@ enum SystemUIVisibility {
 //               of services that only work on specific platforms? We need to
 //               figure out how to rationalize this interface across platforms.
 interface Activity {
+  GetUserFeedback(UserFeedback& user_feedback);
+
   StartActivity(Intent intent);
   FinishCurrentActivity();
   SetTaskDescription(TaskDescription description);
@@ -52,4 +54,24 @@ interface Activity {
 
   // Where to store short-term files.
   GetCacheDir() => (string path);
+};
+
+enum HapticFeedbackType {
+  LONG_PRESS,
+  VIRTUAL_KEY,
+  KEYBOARD_TAP,
+  CLOCK_TICK,
+};
+
+enum AuralFeedbackType {
+  CLICK,
+  NAVIGATION_LEFT,
+  NAVIGATION_UP,
+  NAVIGATION_RIGHT,
+  NAVIGATION_DOWN,
+};
+
+interface UserFeedback {
+  PerformHapticFeedback(HapticFeedbackType type);
+  PerformAuralFeedback(AuralFeedbackType type);
 };
