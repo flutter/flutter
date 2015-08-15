@@ -8,10 +8,10 @@
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/shell/mac/platform_view_mac.h"
-#include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
+#include "sky/shell/shell.h"
+#include "sky/shell/switches.h"
 #include "sky/shell/ui_delegate.h"
-
 
 @interface SkyWindow ()<NSWindowDelegate>
 
@@ -87,9 +87,14 @@ static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   base::CommandLine::StringVector args = command_line.GetArgs();
   if (args.size() > 0) {
-    LOG(INFO) << "Loading " << args[0];
     mojo::String string(args[0]);
     _sky_engine->RunFromNetwork(string);
+    return;
+  }
+
+  if (command_line.HasSwitch(sky::shell::switches::kSnapshot)) {
+    auto snapshot = command_line.GetSwitchValueASCII(sky::shell::switches::kSnapshot);
+    _sky_engine->RunFromSnapshot(snapshot);
     return;
   }
 

@@ -5,57 +5,16 @@
 #import <Cocoa/Cocoa.h>
 #include <iostream>
 #include "base/bind.h"
-#include "base/message_loop/message_loop.h"
-#include "sky/engine/public/web/WebRuntimeFeatures.h"
-#include "sky/shell/mac/platform_mac.h"
 #include "base/command_line.h"
-#include "sky/shell/switches.h"
-#include "sky/shell/testing/test_runner.h"
+#include "base/message_loop/message_loop.h"
+#include "sky/shell/mac/platform_mac.h"
 #include "sky/shell/mac/sky_application.h"
+#include "sky/shell/switches.h"
+#include "sky/shell/testing/testing.h"
 
 namespace sky {
 namespace shell {
 namespace {
-
-bool FlagsValid() {
-  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-
-  if (command_line.HasSwitch(sky::shell::switches::kHelp) ||
-      (!command_line.HasSwitch(sky::shell::switches::kPackageRoot) &&
-       !command_line.HasSwitch(sky::shell::switches::kSnapshot))) {
-    return false;
-  }
-
-  return true;
-}
-
-void Init() {
-  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-  blink::WebRuntimeFeatures::enableObservatory(
-      !command_line.HasSwitch(switches::kNonInteractive));
-
-  // Explicitly boot the shared test runner.
-  TestRunner& runner = TestRunner::Shared();
-
-  std::string package_root =
-      command_line.GetSwitchValueASCII(switches::kPackageRoot);
-  runner.set_package_root(package_root);
-
-  scoped_ptr<TestRunner::SingleTest> single_test;
-  if (command_line.HasSwitch(switches::kSnapshot)) {
-    single_test.reset(new TestRunner::SingleTest);
-    single_test->path = command_line.GetSwitchValueASCII(switches::kSnapshot);
-    single_test->is_snapshot = true;
-  } else {
-    auto args = command_line.GetArgs();
-    if (!args.empty()) {
-      single_test.reset(new TestRunner::SingleTest);
-      single_test->path = args[0];
-    }
-  }
-
-  runner.Start(single_test.Pass());
-}
 
 void AttachMessageLoopToMainRunLoop(void) {
   // We want to call Run() on the MessageLoopForUI but after NSApplicationMain.
@@ -74,15 +33,20 @@ int main(int argc, const char* argv[]) {
   [SkyApplication sharedApplication];
 
   return PlatformMacMain(argc, argv, ^() {
-    if (!sky::shell::FlagsValid()) {
+    base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+    if (command_line.HasSwitch(sky::shell::switches::kHelp)) {
       sky::shell::switches::PrintUsage("SkyShell");
-      sky::shell::AttachMessageLoopToMainRunLoop();
-      return NSApplicationMain(argc, argv);
-    } else {
+      return EXIT_SUCCESS;
+    }
+
+    if (command_line.HasSwitch(sky::shell::switches::kNonInteractive)) {
       auto loop = base::MessageLoop::current();
-      loop->PostTask(FROM_HERE, base::Bind(&sky::shell::Init));
+      loop->PostTask(FROM_HERE, base::Bind(&sky::shell::InitForTesting));
       loop->Run();
       return EXIT_SUCCESS;
     }
+
+    sky::shell::AttachMessageLoopToMainRunLoop();
+    return NSApplicationMain(argc, argv);
   });
 }
