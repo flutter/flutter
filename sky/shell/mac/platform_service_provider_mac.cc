@@ -10,6 +10,7 @@
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/services/ns_net/network_service_impl.h"
+#include "sky/services/keyboard/ios/keyboard_service_impl.h"
 #include "sky/shell/service_provider.h"
 #if !TARGET_OS_IPHONE
 #include "sky/shell/testing/test_runner.h"
@@ -21,18 +22,22 @@ namespace shell {
 class PlatformServiceProvider : public mojo::ServiceProvider {
  public:
   PlatformServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider> request)
-    : binding_(this, request.Pass()) {}
+      : binding_(this, request.Pass()) {}
 
   void ConnectToService(const mojo::String& service_name,
                         mojo::ScopedMessagePipeHandle client_handle) override {
     if (service_name == mojo::NetworkService::Name_) {
-      network_.Create(nullptr,
-        mojo::MakeRequest<mojo::NetworkService>(client_handle.Pass()));
+      network_.Create(nullptr, mojo::MakeRequest<mojo::NetworkService>(
+                                   client_handle.Pass()));
+    }
+    if (service_name == ::keyboard::KeyboardService::Name_) {
+      keyboard_.Create(nullptr, mojo::MakeRequest<::keyboard::KeyboardService>(
+                                    client_handle.Pass()));
     }
 #if !TARGET_OS_IPHONE
     if (service_name == TestHarness::Name_) {
-      TestRunner::Shared().Create(nullptr,
-        mojo::MakeRequest<TestHarness>(client_handle.Pass()));
+      TestRunner::Shared().Create(
+          nullptr, mojo::MakeRequest<TestHarness>(client_handle.Pass()));
     }
 #endif
   }
@@ -40,6 +45,7 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
  private:
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
   mojo::NetworkServiceFactory network_;
+  sky::services::keyboard::KeyboardServiceFactory keyboard_;
 };
 
 static void CreatePlatformServiceProvider(
