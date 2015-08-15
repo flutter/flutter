@@ -10,8 +10,12 @@
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/services/ns_net/network_service_impl.h"
-#include "sky/services/keyboard/ios/keyboard_service_impl.h"
 #include "sky/shell/service_provider.h"
+
+#if TARGET_OS_IPHONE
+#include "sky/services/keyboard/ios/keyboard_service_impl.h"
+#endif
+
 #if !TARGET_OS_IPHONE
 #include "sky/shell/testing/test_runner.h"
 #endif
@@ -30,10 +34,12 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
       network_.Create(nullptr, mojo::MakeRequest<mojo::NetworkService>(
                                    client_handle.Pass()));
     }
+#if TARGET_OS_IPHONE
     if (service_name == ::keyboard::KeyboardService::Name_) {
       keyboard_.Create(nullptr, mojo::MakeRequest<::keyboard::KeyboardService>(
                                     client_handle.Pass()));
     }
+#endif
 #if !TARGET_OS_IPHONE
     if (service_name == TestHarness::Name_) {
       TestRunner::Shared().Create(
@@ -45,7 +51,9 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
  private:
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
   mojo::NetworkServiceFactory network_;
+#if TARGET_OS_IPHONE
   sky::services::keyboard::KeyboardServiceFactory keyboard_;
+#endif
 };
 
 static void CreatePlatformServiceProvider(

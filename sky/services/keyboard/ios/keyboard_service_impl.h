@@ -24,11 +24,11 @@ class KeyboardServiceImpl : public ::keyboard::KeyboardService {
  public:
   explicit KeyboardServiceImpl(
       mojo::InterfaceRequest<::keyboard::KeyboardService> request);
-  virtual ~KeyboardServiceImpl() override;
-  virtual void Show(::keyboard::KeyboardClientPtr client,
-                    ::keyboard::KeyboardType type) override;
-  virtual void ShowByRequest() override;
-  virtual void Hide() override;
+  ~KeyboardServiceImpl() override;
+  void Show(::keyboard::KeyboardClientPtr client,
+            ::keyboard::KeyboardType type) override;
+  void ShowByRequest() override;
+  void Hide() override;
 
  private:
   mojo::StrongBinding<::keyboard::KeyboardService> binding_;
@@ -49,4 +49,4 @@ class KeyboardServiceFactory
 }  // namespace services
 }  // namespace sky
 
-#endif /* defined(SKY_SERVICES_KEYBOARD_IOS_KEYBOARD_SERVICE_IMPL_H__) *
+#endif /* defined(SKY_SERVICES_KEYBOARD_IOS_KEYBOARD_SERVICE_IMPL_H__) */
