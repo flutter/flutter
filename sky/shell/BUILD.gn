@@ -27,6 +27,13 @@ common_deps = [
   "//ui/gl",
 ]
 
+testing_sources = [
+  "testing/test_runner.cc",
+  "testing/test_runner.h",
+  "testing/testing.cc",
+  "testing/testing.h",
+]
+
 source_set("common") {
   sources = [
     "gpu/ganesh_context.cc",
@@ -225,12 +232,10 @@ if (is_android) {
     output_name = "sky_shell"
 
     sources = [
-      "linux/main.cc",
+      "linux/main_linux.cc",
       "linux/platform_service_provider_linux.cc",
       "linux/platform_view_linux.cc",
-      "testing/test_runner.cc",
-      "testing/test_runner.h",
-    ]
+    ] + testing_sources
 
     deps = common_deps + [
              ":common",
@@ -254,9 +259,7 @@ if (is_android) {
       "mac/sky_application.mm",
       "mac/sky_window.h",
       "mac/sky_window.mm",
-      "testing/test_runner.cc",
-      "testing/test_runner.h",
-    ]
+    ] + testing_sources
 
     deps = common_deps + [
              ":common",
