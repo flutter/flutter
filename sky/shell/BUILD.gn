@@ -199,6 +199,7 @@ if (is_android) {
     deps = common_deps + [
              ":common",
              "//sky/services/ns_net",
+             "//sky/services/keyboard",
            ]
   }
 
