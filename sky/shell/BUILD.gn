@@ -27,12 +27,16 @@ common_deps = [
   "//ui/gl",
 ]
 
-testing_sources = [
-  "testing/test_runner.cc",
-  "testing/test_runner.h",
-  "testing/testing.cc",
-  "testing/testing.h",
-]
+if (is_linux || is_mac) {
+
+  testing_sources = [
+    "testing/test_runner.cc",
+    "testing/test_runner.h",
+    "testing/testing.cc",
+    "testing/testing.h",
+  ]
+
+}
 
 source_set("common") {
   sources = [
