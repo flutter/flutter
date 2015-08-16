@@ -4,6 +4,21 @@ Material Design Icons
 A set of icons designed under the
 [material design guidelines](http://www.google.com/design/spec).
 
+What do they look like?
+----------------------
+
+You can view all the icons online at
+[www.google.com/design/icons](https://www.google.com/design/icons/).
+
+Website
+--------
+
+The source for the icons can be found in the
+[material-design-icons](https://github.com/google/material-design-icons) repo.
+This Pub package mirrors the icons; the source for the package can be found in the
+[sky_engine](https://github.com/domokit/sky_engine) repo in the
+`sky/packages/material_design_icons` directory.
+
 License
 -------
 
