@@ -31,6 +31,7 @@ part 'node3d.dart';
 part 'node_with_size.dart';
 part 'particle_system.dart';
 part 'sound.dart';
+part 'sound_manager.dart';
 part 'sprite.dart';
 part 'spritesheet.dart';
 part 'sprite_box.dart';
