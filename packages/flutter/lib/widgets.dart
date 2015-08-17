@@ -14,6 +14,7 @@ export 'widgets/checkbox.dart';
 export 'widgets/default_text_style.dart';
 export 'widgets/dialog.dart';
 export 'widgets/dismissable.dart';
+export 'widgets/drag_target.dart';
 export 'widgets/drawer.dart';
 export 'widgets/drawer_divider.dart';
 export 'widgets/drawer_header.dart';
