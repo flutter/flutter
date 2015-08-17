@@ -6,7 +6,6 @@
 import os
 import subprocess
 import yaml
-import xml.etree.ElementTree as ET
 
 
 PUBSPECS = [
@@ -14,18 +13,6 @@ PUBSPECS = [
     'sky/packages/sky_engine/pubspec.yaml',
     'sky/packages/sky_services/pubspec.yaml',
 ]
-
-MANIFESTS = [
-    'examples/demo_launcher/apk/AndroidManifest.xml',
-]
-
-MANIFEST_PREFACE = '''<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2015 The Chromium Authors. All rights reserved.
-     Use of this source code is governed by a BSD-style license that can be
-     found in the LICENSE file.
- -->
-'''
-
 
 def increment_version(version):
     pieces = version.split('.')
@@ -82,25 +69,6 @@ def prepend_to_file(to_prepend, filepath):
         f.write(to_prepend + content)
 
 
-def update_manifest(manifest):
-    VERSION_CODE = '{http://schemas.android.com/apk/res/android}versionCode'
-    VERSION_NAME = '{http://schemas.android.com/apk/res/android}versionName'
-    tree = ET.parse(manifest)
-    root = tree.getroot()
-    package_name = root.get('package')
-    old_code = root.get(VERSION_CODE)
-    old_name = root.get(VERSION_NAME)
-    root.set(VERSION_CODE, increment_version(old_code))
-    root.set(VERSION_NAME, increment_version(old_name))
-    print "%20s  %6s (%s) => %6s (%s)" % (package_name, old_name, old_code,
-        root.get(VERSION_NAME), root.get(VERSION_CODE))
-    # TODO(eseidel): This isn't smart enough to wrap/intent multi-attribute
-    # elements like <manifest> as is the typical AndroidManifiest.xml style
-    # we could write our own custom prettyprinter to do that?
-    tree.write(manifest)
-    prepend_to_file(MANIFEST_PREFACE, manifest)
-
-
 def main():
     # Should chdir to the root directory.
 
@@ -109,13 +77,6 @@ def main():
         new_version = update_pubspec(pubspec)
         changelog = os.path.join(os.path.dirname(pubspec), 'CHANGELOG.md')
         update_changelog(changelog, pubspec, new_version)
-
-    # TODO(eseidel): Without this ET uses 'ns0' for 'android' which is wrong.
-    ET.register_namespace('android', 'http://schemas.android.com/apk/res/android')
-
-    print 'APKs:'
-    for manifest in MANIFESTS:
-        update_manifest(manifest)
 
 
 if __name__ == '__main__':
