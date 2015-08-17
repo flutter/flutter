@@ -20,7 +20,7 @@ void beginFrame(double timeStamp) {
   PictureRecorder recorder = new PictureRecorder();
   final double devicePixelRatio = view.devicePixelRatio;
   Canvas canvas = new Canvas(recorder, Point.origin & new Size(view.width * devicePixelRatio, view.height * devicePixelRatio));
-  cavnas.scale(devicePixelRatio, devicePixelRatio);
+  canvas.scale(devicePixelRatio, devicePixelRatio);
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
   canvas.scale(0.2, 0.2);
@@ -61,7 +61,7 @@ bool handleEvent(Event event) {
   }
 
   if (event.type == "pointerup") {
-    image_cache.load(url2).then(handleImageLoad);
+    image_cache.load(url2).first.then(handleImageLoad);
     return true;
   }
 
@@ -69,7 +69,7 @@ bool handleEvent(Event event) {
 }
 
 void main() {
-  image_cache.load(url1).then(handleImageLoad);
+  image_cache.load(url1).first.then(handleImageLoad);
   view.setEventCallback(handleEvent);
   view.setFrameCallback(beginFrame);
 }
