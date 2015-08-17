@@ -170,16 +170,13 @@ class SoundTrackPlayer {
 
   MediaServiceProxy _mediaService;
 
-  Future<SoundTrack> load(String url) async {
+  Future<SoundTrack> load(Future<MojoDataPipeConsumer> pipe) async {
     // Create media player
     SoundTrack soundTrack = new SoundTrack();
     soundTrack._player = new MediaPlayerProxy.unbound();
     _mediaService.ptr.createPlayer(soundTrack._player);
 
-    // Load and prepare
-    UrlResponse response = await fetchUrl(url);
-    await soundTrack._player.ptr.prepare(response.body);
-
+    await soundTrack._player.ptr.prepare(await pipe);
     return soundTrack;
   }
 
