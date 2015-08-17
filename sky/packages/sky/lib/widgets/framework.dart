@@ -866,6 +866,17 @@ abstract class RenderObjectWrapper extends Widget {
       new HashMap<RenderObject, RenderObjectWrapper>();
   static RenderObjectWrapper _getMounted(RenderObject node) => _nodeMap[node];
 
+  static Iterable<Widget> getWidgetsForRenderObject(RenderObject renderObject) sync* {
+    Widget target = RenderObjectWrapper._getMounted(renderObject);
+    if (target == null)
+      return;
+    RenderObject targetRoot = target.root;
+    while (target != null && target.root == targetRoot) {
+      yield target;
+      target = target.parent;
+    }
+  }
+
   RenderObjectWrapper _ancestor;
   void insertChildRoot(RenderObjectWrapper child, dynamic slot);
   void detachChildRoot(RenderObjectWrapper child);
@@ -1209,11 +1220,7 @@ class WidgetSkyBinding extends SkyBinding {
     if (disposition == EventDisposition.consumed)
       return EventDisposition.consumed;
     for (HitTestEntry entry in result.path.reversed) {
-      Widget target = RenderObjectWrapper._getMounted(entry.target);
-      if (target == null)
-        continue;
-      RenderObject targetRoot = target.root;
-      while (target != null && target.root == targetRoot) {
+      for (Widget target in RenderObjectWrapper.getWidgetsForRenderObject(entry.target)) {
         if (target is Listener) {
           EventDisposition targetDisposition = target._handleEvent(event);
           if (targetDisposition == EventDisposition.consumed) {
