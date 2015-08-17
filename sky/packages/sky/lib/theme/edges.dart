@@ -4,6 +4,7 @@
 
 enum MaterialEdge { canvas, card, circle }
 
+// This map gives the border radii for each type of material.
 const Map<MaterialEdge, double> edges = const {
   MaterialEdge.canvas: null,
   MaterialEdge.card: 2.0,
