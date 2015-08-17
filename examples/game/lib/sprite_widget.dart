@@ -24,14 +24,14 @@ class SpriteWidget extends OneChildRenderObjectWrapper {
   ///     var mySpriteWidget = new SpriteWidget(mySpriteTree, SpriteBoxTransformMode.fixedHeight);
   SpriteWidget(this.rootNode, [this.transformMode = SpriteBoxTransformMode.letterbox]);
 
-  SpriteBox get root => super.root;
+  SpriteBox get renderObject => super.renderObject;
 
   SpriteBox createNode() => new SpriteBox(rootNode, transformMode);
 
   void syncRenderObject(SpriteWidget old) {
     super.syncRenderObject(old);
 
-    root.rootNode = rootNode;
-    root.transformMode = transformMode;
+    renderObject.rootNode = rootNode;
+    renderObject.transformMode = transformMode;
   }
 }

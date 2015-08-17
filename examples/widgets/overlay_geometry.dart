@@ -115,7 +115,7 @@ class OverlayGeometryApp extends App {
     setState(() {
       markers[MarkerType.touch] = new Point(event.x, event.y);
       markers[MarkerType.topLeft] = target.localToGlobal(new Point(0.0, 0.0));
-      Size size = (target.root as RenderBox).size;
+      Size size = (target.renderObject as RenderBox).size;
       markers[MarkerType.bottomRight] = target.localToGlobal(new Point(size.width, size.height));
 
       Scrollable scrollable = findScrollableAncestor(target: target);

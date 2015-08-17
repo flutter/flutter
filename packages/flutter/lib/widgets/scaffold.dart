@@ -196,7 +196,7 @@ class Scaffold extends RenderObjectWrapper {
 
   Map<ScaffoldSlots, Widget> _slots = new Map<ScaffoldSlots, Widget>();
 
-  RenderScaffold get root => super.root;
+  RenderScaffold get renderObject => super.renderObject;
   RenderScaffold createNode() => new RenderScaffold();
 
   void walkChildren(WidgetTreeWalker walker) {
@@ -208,15 +208,15 @@ class Scaffold extends RenderObjectWrapper {
   }
 
   void insertChildRoot(RenderObjectWrapper child, ScaffoldSlots slot) {
-    root[slot] = child != null ? child.root : null;
+    renderObject[slot] = child != null ? child.renderObject : null;
   }
 
   void detachChildRoot(RenderObjectWrapper child) {
-    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(root is RenderScaffold);
-    assert(root == child.root.parent);
-    root.remove(child.root);
-    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
+    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject is RenderScaffold);
+    assert(renderObject == child.renderObject.parent);
+    renderObject.remove(child.renderObject);
+    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void remove() {

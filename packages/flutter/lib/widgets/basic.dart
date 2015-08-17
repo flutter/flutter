@@ -37,11 +37,11 @@ class Opacity extends OneChildRenderObjectWrapper {
   final double opacity;
 
   RenderOpacity createNode() => new RenderOpacity(opacity: opacity);
-  RenderOpacity get root => super.root;
+  RenderOpacity get renderObject => super.renderObject;
 
   void syncRenderObject(Opacity old) {
     super.syncRenderObject(old);
-    root.opacity = opacity;
+    renderObject.opacity = opacity;
   }
 }
 
@@ -53,12 +53,12 @@ class ColorFilter extends OneChildRenderObjectWrapper {
   final sky.TransferMode transferMode;
 
   RenderColorFilter createNode() => new RenderColorFilter(color: color, transferMode: transferMode);
-  RenderColorFilter get root => super.root;
+  RenderColorFilter get renderObject => super.renderObject;
 
   void syncRenderObject(ColorFilter old) {
     super.syncRenderObject(old);
-    root.color = color;
-    root.transferMode = transferMode;
+    renderObject.color = color;
+    renderObject.transferMode = transferMode;
   }
 }
 
@@ -69,11 +69,11 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
   final BoxDecoration decoration;
 
   RenderDecoratedBox createNode() => new RenderDecoratedBox(decoration: decoration);
-  RenderDecoratedBox get root => super.root;
+  RenderDecoratedBox get renderObject => super.renderObject;
 
   void syncRenderObject(DecoratedBox old) {
     super.syncRenderObject(old);
-    root.decoration = decoration;
+    renderObject.decoration = decoration;
   }
 }
 
@@ -85,17 +85,17 @@ class CustomPaint extends OneChildRenderObjectWrapper {
   final dynamic token; // set this to be repainted automatically when the token changes
 
   RenderCustomPaint createNode() => new RenderCustomPaint(callback: callback);
-  RenderCustomPaint get root => super.root;
+  RenderCustomPaint get renderObject => super.renderObject;
 
   void syncRenderObject(CustomPaint old) {
     super.syncRenderObject(old);
     if (old != null && old.token != token)
-      root.markNeedsPaint();
-    root.callback = callback;
+      renderObject.markNeedsPaint();
+    renderObject.callback = callback;
   }
 
   void remove() {
-    root.callback = null;
+    renderObject.callback = null;
     super.remove();
   }
 }
@@ -105,7 +105,7 @@ class ClipRect extends OneChildRenderObjectWrapper {
     : super(key: key, child: child);
 
   RenderClipRect createNode() => new RenderClipRect();
-  RenderClipRect get root => super.root;
+  RenderClipRect get renderObject => super.renderObject;
 
   // Nothing to sync, so we don't implement syncRenderObject()
 }
@@ -118,12 +118,12 @@ class ClipRRect extends OneChildRenderObjectWrapper {
   final double yRadius;
 
   RenderClipRRect createNode() => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
-  RenderClipRRect get root => super.root;
+  RenderClipRRect get renderObject => super.renderObject;
 
   void syncRenderObject(ClipRRect old) {
     super.syncRenderObject(old);
-    root.xRadius = xRadius;
-    root.yRadius = yRadius;
+    renderObject.xRadius = xRadius;
+    renderObject.yRadius = yRadius;
   }
 }
 
@@ -132,7 +132,7 @@ class ClipOval extends OneChildRenderObjectWrapper {
     : super(key: key, child: child);
 
   RenderClipOval createNode() => new RenderClipOval();
-  RenderClipOval get root => super.root;
+  RenderClipOval get renderObject => super.renderObject;
 
   // Nothing to sync, so we don't implement syncRenderObject()
 }
@@ -147,11 +147,11 @@ class Transform extends OneChildRenderObjectWrapper {
   final Matrix4 transform;
 
   RenderTransform createNode() => new RenderTransform(transform: transform);
-  RenderTransform get root => super.root;
+  RenderTransform get renderObject => super.renderObject;
 
   void syncRenderObject(Transform old) {
     super.syncRenderObject(old);
-    root.transform = transform;
+    renderObject.transform = transform;
   }
 }
 
@@ -162,11 +162,11 @@ class Padding extends OneChildRenderObjectWrapper {
   final EdgeDims padding;
 
   RenderPadding createNode() => new RenderPadding(padding: padding);
-  RenderPadding get root => super.root;
+  RenderPadding get renderObject => super.renderObject;
 
   void syncRenderObject(Padding old) {
     super.syncRenderObject(old);
-    root.padding = padding;
+    renderObject.padding = padding;
   }
 }
 
@@ -175,7 +175,7 @@ class Center extends OneChildRenderObjectWrapper {
     : super(key: key, child: child);
 
   RenderPositionedBox createNode() => new RenderPositionedBox();
-  RenderPositionedBox get root => super.root;
+  RenderPositionedBox get renderObject => super.renderObject;
 
   // Nothing to sync, so we don't implement syncRenderObject()
 }
@@ -188,7 +188,7 @@ class SizedBox extends OneChildRenderObjectWrapper {
   final double height;
 
   RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: _additionalConstraints());
-  RenderConstrainedBox get root => super.root;
+  RenderConstrainedBox get renderObject => super.renderObject;
 
   BoxConstraints _additionalConstraints() {
     BoxConstraints result = const BoxConstraints();
@@ -201,7 +201,7 @@ class SizedBox extends OneChildRenderObjectWrapper {
 
   void syncRenderObject(SizedBox old) {
     super.syncRenderObject(old);
-    root.additionalConstraints = _additionalConstraints();
+    renderObject.additionalConstraints = _additionalConstraints();
   }
 }
 
@@ -212,11 +212,11 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
   final BoxConstraints constraints;
 
   RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: constraints);
-  RenderConstrainedBox get root => super.root;
+  RenderConstrainedBox get renderObject => super.renderObject;
 
   void syncRenderObject(ConstrainedBox old) {
     super.syncRenderObject(old);
-    root.additionalConstraints = constraints;
+    renderObject.additionalConstraints = constraints;
   }
 }
 
@@ -227,11 +227,11 @@ class AspectRatio extends OneChildRenderObjectWrapper {
   final double aspectRatio;
 
   RenderAspectRatio createNode() => new RenderAspectRatio(aspectRatio: aspectRatio);
-  RenderAspectRatio get root => super.root;
+  RenderAspectRatio get renderObject => super.renderObject;
 
   void syncRenderObject(AspectRatio old) {
     super.syncRenderObject(old);
-    root.aspectRatio = aspectRatio;
+    renderObject.aspectRatio = aspectRatio;
   }
 }
 
@@ -243,12 +243,12 @@ class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
   final double stepHeight;
 
   RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth();
-  RenderShrinkWrapWidth get root => super.root;
+  RenderShrinkWrapWidth get renderObject => super.renderObject;
 
   void syncRenderObject(ShrinkWrapWidth old) {
     super.syncRenderObject(old);
-    root.stepWidth = stepWidth;
-    root.stepHeight = stepHeight;
+    renderObject.stepWidth = stepWidth;
+    renderObject.stepHeight = stepHeight;
   }
 }
 
@@ -260,12 +260,12 @@ class Baseline extends OneChildRenderObjectWrapper {
   final TextBaseline baselineType;
 
   RenderBaseline createNode() => new RenderBaseline(baseline: baseline, baselineType: baselineType);
-  RenderBaseline get root => super.root;
+  RenderBaseline get renderObject => super.renderObject;
 
   void syncRenderObject(Baseline old) {
     super.syncRenderObject(old);
-    root.baseline = baseline;
-    root.baselineType = baselineType;
+    renderObject.baseline = baseline;
+    renderObject.baselineType = baselineType;
   }
 }
 
@@ -281,12 +281,12 @@ class Viewport extends OneChildRenderObjectWrapper {
   final ScrollDirection scrollDirection;
 
   RenderViewport createNode() => new RenderViewport(scrollOffset: scrollOffset, scrollDirection: scrollDirection);
-  RenderViewport get root => super.root;
+  RenderViewport get renderObject => super.renderObject;
 
   void syncRenderObject(Viewport old) {
     super.syncRenderObject(old);
-    root.scrollOffset = scrollOffset;
-    root.scrollDirection = scrollDirection;
+    renderObject.scrollOffset = scrollOffset;
+    renderObject.scrollDirection = scrollDirection;
   }
 }
 
@@ -297,15 +297,15 @@ class SizeObserver extends OneChildRenderObjectWrapper {
   final SizeChangedCallback callback;
 
   RenderSizeObserver createNode() => new RenderSizeObserver(callback: callback);
-  RenderSizeObserver get root => super.root;
+  RenderSizeObserver get renderObject => super.renderObject;
 
   void syncRenderObject(SizeObserver old) {
     super.syncRenderObject(old);
-    root.callback = callback;
+    renderObject.callback = callback;
   }
 
   void remove() {
-    root.callback = null;
+    renderObject.callback = null;
     super.remove();
   }
 }
@@ -381,11 +381,11 @@ class Block extends MultiChildRenderObjectWrapper {
   final BlockDirection direction;
 
   RenderBlock createNode() => new RenderBlock(direction: direction);
-  RenderBlock get root => super.root;
+  RenderBlock get renderObject => super.renderObject;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.direction = direction;
+    renderObject.direction = direction;
   }
 }
 
@@ -394,7 +394,7 @@ class Stack extends MultiChildRenderObjectWrapper {
     : super(key: key, children: children);
 
   RenderStack createNode() => new RenderStack();
-  RenderStack get root => super.root;
+  RenderStack get renderObject => super.renderObject;
 }
 
 class Positioned extends ParentDataNode {
@@ -429,14 +429,14 @@ class Flex extends MultiChildRenderObjectWrapper {
   final TextBaseline textBaseline;
 
   RenderFlex createNode() => new RenderFlex(direction: direction);
-  RenderFlex get root => super.root;
+  RenderFlex get renderObject => super.renderObject;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.direction = direction;
-    root.justifyContent = justifyContent;
-    root.alignItems = alignItems;
-    root.textBaseline = textBaseline;
+    renderObject.direction = direction;
+    renderObject.justifyContent = justifyContent;
+    renderObject.alignItems = alignItems;
+    renderObject.textBaseline = textBaseline;
   }
 
 }
@@ -452,11 +452,11 @@ class Paragraph extends LeafRenderObjectWrapper {
   final TextSpan text;
 
   RenderParagraph createNode() => new RenderParagraph(text);
-  RenderParagraph get root => super.root;
+  RenderParagraph get renderObject => super.renderObject;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.text = text;
+    renderObject.text = text;
   }
 }
 
@@ -520,14 +520,14 @@ class Image extends LeafRenderObjectWrapper {
   final sky.ColorFilter colorFilter;
 
   RenderImage createNode() => new RenderImage(image: image, width: width, height: height, colorFilter: colorFilter);
-  RenderImage get root => super.root;
+  RenderImage get renderObject => super.renderObject;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.image = image;
-    root.width = width;
-    root.height = height;
-    root.colorFilter = colorFilter;
+    renderObject.image = image;
+    renderObject.width = width;
+    renderObject.height = height;
+    renderObject.colorFilter = colorFilter;
   }
 }
 
@@ -626,20 +626,20 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
   final RenderBox renderBox;
 
   RenderBox createNode() => this.renderBox;
-  RenderBox get root => super.root;
+  RenderBox get renderObject => super.renderObject;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     if (old != null) {
       assert(old is WidgetToRenderBoxAdapter);
-      assert(root == old.root);
+      assert(renderObject == old.renderObject);
     }
   }
 
   void remove() {
     RenderObjectWrapper ancestor = findAncestorRenderObjectWrapper();
     assert(ancestor is RenderObjectWrapper);
-    assert(ancestor.root == root.parent);
+    assert(ancestor.renderObject == renderObject.parent);
     ancestor.detachChildRoot(this);
     super.remove();
   }
@@ -652,5 +652,5 @@ class IgnorePointer extends OneChildRenderObjectWrapper {
   IgnorePointer({ Key key, Widget child })
     : super(key: key, child: child);
   RenderIgnorePointer createNode() => new RenderIgnorePointer();
-  RenderIgnorePointer get root => super.root;
+  RenderIgnorePointer get renderObject => super.renderObject;
 }
