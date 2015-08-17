@@ -11,11 +11,9 @@ import 'dart:typed_data';
 import 'dart:sky';
 
 import 'package:mojo/core.dart';
-import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/mojo/asset_bundle.dart';
-import 'package:sky/mojo/net/fetch.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
