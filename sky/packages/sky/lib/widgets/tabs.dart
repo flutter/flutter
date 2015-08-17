@@ -287,18 +287,18 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
   final bool isScrollable;
   final LayoutChanged onLayoutChanged;
 
-  RenderTabBar get root => super.root;
+  RenderTabBar get renderObject => super.renderObject;
   RenderTabBar createNode() => new RenderTabBar(onLayoutChanged);
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.selectedIndex = selectedIndex;
-    root.backgroundColor = backgroundColor;
-    root.indicatorColor = indicatorColor;
-    root.indicatorRect = indicatorRect;
-    root.textAndIcons = textAndIcons;
-    root.isScrollable = isScrollable;
-    root.onLayoutChanged = onLayoutChanged;
+    renderObject.selectedIndex = selectedIndex;
+    renderObject.backgroundColor = backgroundColor;
+    renderObject.indicatorColor = indicatorColor;
+    renderObject.indicatorRect = indicatorRect;
+    renderObject.textAndIcons = textAndIcons;
+    renderObject.isScrollable = isScrollable;
+    renderObject.onLayoutChanged = onLayoutChanged;
   }
 }
 

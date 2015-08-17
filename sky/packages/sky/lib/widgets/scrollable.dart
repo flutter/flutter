@@ -233,20 +233,20 @@ Scrollable findScrollableAncestor({ Widget target }) {
 
 bool ensureWidgetIsVisible(Widget target, { ValueAnimation<double> animation }) {
   assert(target.mounted);
-  assert(target.root is RenderBox);
+  assert(target.renderObject is RenderBox);
 
   Scrollable scrollable = findScrollableAncestor(target: target);
   if (scrollable == null)
     return false;
 
-  Size targetSize = (target.root as RenderBox).size;
+  Size targetSize = (target.renderObject as RenderBox).size;
   Point targetCenter = target.localToGlobal(
     scrollable.scrollDirection == ScrollDirection.vertical
       ? new Point(0.0, targetSize.height / 2.0)
       : new Point(targetSize.width / 2.0, 0.0)
   );
 
-  Size scrollableSize = (scrollable.root as RenderBox).size;
+  Size scrollableSize = (scrollable.renderObject as RenderBox).size;
   Point scrollableCenter = scrollable.localToGlobal(
     scrollable.scrollDirection == ScrollDirection.vertical
       ? new Point(0.0, scrollableSize.height / 2.0)

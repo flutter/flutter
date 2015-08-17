@@ -131,6 +131,6 @@ class InkWell extends OneChildRenderObjectWrapper {
   InkWell({ Key key, Widget child })
     : super(key: key, child: child);
 
-  RenderInkWell get root => super.root;
+  RenderInkWell get renderObject => super.renderObject;
   RenderInkWell createNode() => new RenderInkWell();
 }

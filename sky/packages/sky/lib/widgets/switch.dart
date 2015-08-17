@@ -55,15 +55,15 @@ class _SwitchWrapper extends LeafRenderObjectWrapper {
   final ValueChanged onChanged;
   final Color thumbColor;
 
-  _RenderSwitch get root => super.root;
+  _RenderSwitch get renderObject => super.renderObject;
   _RenderSwitch createNode() => new _RenderSwitch(
       value: value, thumbColor: thumbColor, onChanged: onChanged);
 
   void syncRenderObject(_SwitchWrapper old) {
     super.syncRenderObject(old);
-    root.value = value;
-    root.onChanged = onChanged;
-    root.thumbColor = thumbColor;
+    renderObject.value = value;
+    renderObject.onChanged = onChanged;
+    renderObject.thumbColor = thumbColor;
   }
 }
 

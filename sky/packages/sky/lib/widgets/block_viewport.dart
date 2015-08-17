@@ -88,7 +88,7 @@ class BlockViewport extends RenderObjectWrapper {
   Object token;
   BlockViewportLayoutState layoutState;
 
-  RenderBlockViewport get root => super.root;
+  RenderBlockViewport get renderObject => super.renderObject;
   RenderBlockViewport createNode() => new RenderBlockViewport();
 
   void walkChildren(WidgetTreeWalker walker) {
@@ -101,20 +101,20 @@ class BlockViewport extends RenderObjectWrapper {
   void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
     if (slot == _omit)
       return;
-    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
+    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(slot == null || slot is RenderObject);
-    assert(root is ContainerRenderObjectMixin);
-    root.add(child.root, before: slot);
-    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject is ContainerRenderObjectMixin);
+    renderObject.add(child.renderObject, before: slot);
+    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void detachChildRoot(RenderObjectWrapper child) {
-    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(root is ContainerRenderObjectMixin);
-    if (child.root.parent != root)
+    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject is ContainerRenderObjectMixin);
+    if (child.renderObject.parent != renderObject)
       return; // probably had slot == _omit when inserted
-    root.remove(child.root);
-    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
+    renderObject.remove(child.renderObject);
+    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void remove() {
@@ -126,12 +126,12 @@ class BlockViewport extends RenderObjectWrapper {
   }
 
   void didMount() {
-    root.callback = layout;
+    renderObject.callback = layout;
     super.didMount();
   }
 
   void didUnmount() {
-    root.callback = null;
+    renderObject.callback = null;
     super.didUnmount();
   }
 
@@ -173,12 +173,12 @@ class BlockViewport extends RenderObjectWrapper {
   void syncRenderObject(BlockViewport old) {
     super.syncRenderObject(old);
     if (layoutState._dirty || !layoutState.isValid) {
-      root.markNeedsLayout();
+      renderObject.markNeedsLayout();
     } else {
       if (layoutState._visibleChildCount > 0) {
         assert(layoutState.firstVisibleChildIndex >= 0);
         assert(builder != null);
-        assert(root != null);
+        assert(renderObject != null);
         final int startIndex = layoutState._firstVisibleChildIndex;
         int lastIndex = startIndex + layoutState._visibleChildCount - 1;
         for (int index = startIndex; index <= lastIndex; index += 1) {
@@ -188,8 +188,8 @@ class BlockViewport extends RenderObjectWrapper {
           _Key key = new _Key.fromWidget(widget);
           Widget oldWidget = layoutState._childrenByKey[key];
           assert(oldWidget != null);
-          assert(oldWidget.root.parent == root);
-          widget = syncChild(widget, oldWidget, root.childAfter(oldWidget.root));
+          assert(oldWidget.renderObject.parent == renderObject);
+          widget = syncChild(widget, oldWidget, renderObject.childAfter(oldWidget.renderObject));
           assert(widget != null);
           layoutState._childrenByKey[key] = widget;
         }
@@ -214,7 +214,7 @@ class BlockViewport extends RenderObjectWrapper {
     newWidget = syncChild(newWidget, oldWidget, _omit);
     assert(newWidget != null);
     // Update the offsets based on the newWidget's height.
-    RenderBox widgetRoot = newWidget.root;
+    RenderBox widgetRoot = newWidget.renderObject;
     assert(widgetRoot is RenderBox);
     double newHeight = widgetRoot.getMaxIntrinsicHeight(innerConstraints);
     double oldHeight = offsets[index + 1] - offsets[index];
@@ -237,7 +237,7 @@ class BlockViewport extends RenderObjectWrapper {
     if (index >= offsets.length - 1) {
       assert(index == offsets.length - 1);
       final double widgetStartOffset = offsets[index];
-      RenderBox widgetRoot = widget.root;
+      RenderBox widgetRoot = widget.renderObject;
       assert(widgetRoot is RenderBox);
       final double widgetEndOffset = widgetStartOffset + widgetRoot.getMaxIntrinsicHeight(innerConstraints);
       offsets.add(widgetEndOffset);
@@ -266,7 +266,7 @@ class BlockViewport extends RenderObjectWrapper {
 
     final List<double> offsets = layoutState._childOffsets;
     final Map<_Key, Widget> childrenByKey = layoutState._childrenByKey;
-    final double height = root.size.height;
+    final double height = renderObject.size.height;
     final double endOffset = startOffset + height;
     BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: constraints.constrainWidth());
 
@@ -362,7 +362,7 @@ class BlockViewport extends RenderObjectWrapper {
     int index = startIndex;
     if (haveChildren) {
       // Build all the widgets we need.
-      root.startOffset = offsets[index] - startOffset;
+      renderObject.startOffset = offsets[index] - startOffset;
       while (offsets[index] < endOffset) {
         if (!builtChildren.containsKey(index)) {
           Widget widget = _getWidget(index, innerConstraints);
@@ -392,14 +392,14 @@ class BlockViewport extends RenderObjectWrapper {
       while (index > startIndex) {
         index -= 1;
         Widget widget = builtChildren[index];
-        if (widget.root.parent == root) {
-          root.move(widget.root, before: nextSibling);
+        if (widget.renderObject.parent == renderObject) {
+          renderObject.move(widget.renderObject, before: nextSibling);
         } else {
-          assert(widget.root.parent == null);
-          root.add(widget.root, before: nextSibling);
+          assert(widget.renderObject.parent == null);
+          renderObject.add(widget.renderObject, before: nextSibling);
         }
         widget.updateSlot(nextSibling);
-        nextSibling = widget.root;
+        nextSibling = widget.renderObject;
       }
     }
 
