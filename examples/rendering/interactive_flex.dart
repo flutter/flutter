@@ -65,7 +65,7 @@ void main() {
 
   // Resizeable image
   image = new RenderImageGrow(null, new Size(100.0, null));
-  image_cache.load("https://www.dartlang.org/logos/dart-logo.png").then((Image dartLogo) {
+  image_cache.load("https://www.dartlang.org/logos/dart-logo.png").first.then((Image dartLogo) {
     image.image = dartLogo;
   });
 
@@ -84,9 +84,9 @@ porchetta bacon kevin meatball meatloaf pig beef ribs chicken. Brisket ribeye
 andouille leberkas capicola meatloaf. Chicken pig ball tip pork picanha bresaola
 alcatra. Pork pork belly alcatra, flank chuck drumstick biltong doner jowl.
 Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
-  var text = new RenderStyled(
+  var text = new StyledTextSpan(
       new TextStyle(color:  const Color(0xFF009900)),
-      [new RenderText(meatyString)]);
+      [new PlainTextSpan(meatyString)]);
   padding = new RenderPadding(
       padding: const EdgeDims.all(10.0),
       child: new RenderParagraph(text));

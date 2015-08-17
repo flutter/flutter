@@ -21,11 +21,11 @@ void beginFrame(double timeStamp) {
           ..setPaintBits(PaintBits.all)
           ..setOffset(const Offset(5.0, 5.0))
           ..setColorMode(TransferMode.src),
-        (Paint layerPaint) {
-      layerPaint.color = const Color.fromARGB(128, 55, 55, 55);
-      layerPaint.setMaskFilter(
-          new MaskFilter.blur(BlurStyle.normal, 5.0, highQuality: true));
-    })
+        new Paint()
+          ..color = const Color.fromARGB(128, 55, 55, 55)
+          ..setMaskFilter(
+            new MaskFilter.blur(BlurStyle.normal, 5.0, highQuality: true))
+    )
     // Main layer.
     ..addLayerOnTop(new DrawLooperLayerInfo(), new Paint());
   paint.setDrawLooper(builder.build());

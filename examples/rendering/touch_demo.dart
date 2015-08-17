@@ -76,12 +76,12 @@ class RenderTouchDemo extends RenderBox {
         ..color = const Color(0xFFFFFFFF);
     canvas.drawRect(offset & size, white);
     for (Dot dot in dots.values)
-      dot.paint(canvas, offset);
+      dot.paint(context, offset);
   }
 }
 
 void main() {
-  var paragraph = new RenderParagraph(new RenderText("Touch me!"));
+  var paragraph = new RenderParagraph(new PlainTextSpan("Touch me!"));
   var stack = new RenderStack(children: [
     new RenderTouchDemo(),
     paragraph,
