@@ -45,11 +45,11 @@ class RenderChart extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  void paint(PaintingContext context, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
-    _painter.paint(canvas, offset & size);
-    super.paint(canvas, offset);
+    _painter.paint(context.canvas, offset & size);
+    super.paint(context, offset);
   }
 }
 
