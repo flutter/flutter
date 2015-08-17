@@ -21,7 +21,7 @@ Picture draw(int a, int r, int g, int b) {
     paintingNode = new PaintingNode();
     Paint innerPaint = new Paint()..color = new Color.fromARGB(a, 255 - r, 255 - g, 255 - b);
     PictureRecorder innerRecorder = new PictureRecorder();
-    Canvas innerCanvas = new Canvas(innerRecorder, Point.origin & bounds);
+    Canvas innerCanvas = new Canvas(innerRecorder, Point.origin & size);
     innerCanvas.drawCircle(size.center(Point.origin), radius * 0.5, innerPaint);
 
     paintingNode.setBackingDrawable(innerRecorder.endRecordingAsDrawable());
