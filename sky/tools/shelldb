@@ -392,39 +392,6 @@ class StopSky(object):
         pids.clear()
 
 
-class Analyze(object):
-    def add_subparser(self, subparsers):
-        analyze_parser = subparsers.add_parser('analyze',
-            help=('run the dart analyzer with sky url mappings'))
-        analyze_parser.add_argument('app_path', type=str)
-        analyze_parser.add_argument('--congratulate', action="store_true")
-        analyze_parser.set_defaults(func=self.run)
-
-    def run(self, args, pids):
-        build_dir = pids.get('build_dir')
-        if not build_dir:
-            logging.fatal("pids file missing build_dir. Try 'start' first.")
-            return 2
-        analyzer_path = os.path.join(SRC_ROOT, 'sky/tools/skyanalyzer')
-        analyzer_args = [
-            analyzer_path,
-            args.app_path
-        ]
-        if args.congratulate:
-          analyzer_args.append('--congratulate')
-        try:
-          output = subprocess.check_output(analyzer_args, stderr=subprocess.STDOUT)
-          result = 0
-        except subprocess.CalledProcessError as e:
-          output = e.output
-          result = e.returncode
-        lines = output.split('\n')
-        lines.pop()
-        for line in lines:
-          print >> sys.stderr, line
-        return result
-
-
 class StartTracing(object):
     def add_subparser(self, subparsers):
         start_tracing_parser = subparsers.add_parser('start_tracing',
@@ -480,7 +447,6 @@ class SkyShellRunner(object):
             SetBuildDir(),
             StartSky(),
             StopSky(),
-            Analyze(),
             GDBAttach(),
             StartTracing(),
             StopTracing(),

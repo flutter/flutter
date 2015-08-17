@@ -31,9 +31,6 @@ _IGNORED_PATTERNS = [
   # Ignored because they don't affect Sky code
   re.compile(r'\[hint\] When compiled to JS, this test might return true when the left hand side is an int'),
 
-  # TODO: Remove once sdk-extensions are in place
-  re.compile(r'^\[error\] Native functions can only be declared in'),
-
   # TODO: Fix all the warnings in the mojo packages
   re.compile(r'.*dart-pub-cache.*\.mojom\.dart'),
   re.compile(r'.*dart-pub-cache.*/mojo-'),
@@ -42,10 +39,6 @@ _IGNORED_PATTERNS = [
   # TODO: Remove this once Sky no longer generates this warning.
   # dartbug.com/22836
   re.compile(r'.*cannot both be unnamed'),
-
-  # TODO: Remove this once Sky no longer generates this warning.
-  # dartbug.com/23606
-  re.compile(r'^\[warning] Missing concrete implementation of \'RenderObject.toString\''),
 ]
 
 def main():
@@ -56,7 +49,7 @@ def main():
 
     try:
       subprocess.check_output([
-          DARTANALYZER, "--package-warnings", args.app_path,
+          DARTANALYZER, "--package-warnings", os.path.abspath(args.app_path),
           "--package-root", os.path.join(WORKBENCH, "packages"),
           "--fatal-warnings"
       ], stderr=subprocess.STDOUT, cwd=WORKBENCH)
