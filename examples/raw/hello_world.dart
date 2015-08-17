@@ -8,7 +8,7 @@ Picture draw(int a, int r, int g, int b) {
   Size size = new Size(view.width, view.height);
 
   PictureRecorder recorder = new PictureRecorder();
-  final double devicePixelRatio = sky.view.devicePixelRatio;
+  final double devicePixelRatio = view.devicePixelRatio;
   Canvas canvas = new Canvas(recorder, Point.origin & (size * devicePixelRatio));
   canvas.scale(devicePixelRatio, devicePixelRatio);
   double radius = size.shortestSide * 0.45;

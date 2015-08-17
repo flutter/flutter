@@ -13,19 +13,19 @@ import 'package:sky/rendering/sky_binding.dart';
 
 RenderBox getBox(double lh) {
   RenderParagraph paragraph = new RenderParagraph(
-    new RenderStyled(
+    new StyledTextSpan(
       new TextStyle(
         color: const Color(0xFF0000A0)
       ),
       [
-        new RenderText('test'),
-        new RenderStyled(
+        new PlainTextSpan('test'),
+        new StyledTextSpan(
           new TextStyle(
             fontFamily: 'serif',
             fontSize: 50.0,
             height: lh
           ),
-          [new RenderText('مرحبا Hello')]
+          [new PlainTextSpan('مرحبا Hello')]
         )
       ]
     )

@@ -20,12 +20,12 @@ import 'package:sky/widgets/transitions.dart';
 
 class ProgressIndicatorApp extends App {
 
-  AnimationPerformance valueAnimation;
+  ValueAnimation<double> valueAnimation;
   Direction valueAnimationDirection = Direction.forward;
 
   void initState() {
     super.initState();
-    valueAnimation = new AnimationPerformance()
+    valueAnimation = new ValueAnimation<double>()
       ..duration = const Duration(milliseconds: 1500)
       ..variable = new AnimatedValue<double>(
         0.0,
@@ -59,17 +59,17 @@ class ProgressIndicatorApp extends App {
         ),
         new LinearProgressIndicator(),
         new LinearProgressIndicator(),
-        new LinearProgressIndicator(value: valueAnimation.variable.value),
+        new LinearProgressIndicator(value: valueAnimation.value),
         new CircularProgressIndicator(),
         new SizedBox(
             width: 20.0,
             height: 20.0,
-            child: new CircularProgressIndicator(value: valueAnimation.variable.value)
+            child: new CircularProgressIndicator(value: valueAnimation.value)
         ),
         new SizedBox(
           width: 50.0,
           height: 30.0,
-          child: new CircularProgressIndicator(value: valueAnimation.variable.value)
+          child: new CircularProgressIndicator(value: valueAnimation.value)
         )
     ];
     return new Flex(
