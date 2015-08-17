@@ -19,7 +19,7 @@ class FitnessItemList extends Component {
       child: new ScrollableList<FitnessItem>(
         padding: const EdgeDims.all(4.0),
         items: items,
-        itemHeight: kFitnessItemHeight,
+        itemExtent: kFitnessItemHeight,
         itemBuilder: (item) => item.toRow(onDismissed: onDismissed)
       )
     );
