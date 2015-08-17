@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
@@ -23,10 +20,12 @@ class EnsureVisibleApp extends App {
   static const TextStyle cardLabelStyle =
     const TextStyle(color: colors.white, fontSize: 18.0, fontWeight: bold);
 
+  static const TextStyle selectedCardLabelStyle =
+    const TextStyle(color: white, fontSize: 24.0, fontWeight: bold);
+
   List<CardModel> cardModels;
   BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
-  ScrollListener scrollListener;
-  ValueAnimation<double> scrollAnimation;
+  CardModel selectedCardModel;
 
   void initState() {
     List<double> cardHeights = <double>[
@@ -39,15 +38,15 @@ class EnsureVisibleApp extends App {
       return new CardModel(i, cardHeights[i], color);
     });
 
-    scrollAnimation = new ValueAnimation<double>()
-      ..duration = const Duration(milliseconds: 200)
-      ..variable = new AnimatedValue<double>(0.0, curve: ease);
-
     super.initState();
   }
 
-  EventDisposition handleTap(Widget target) {
-    ensureWidgetIsVisible(target, animation: scrollAnimation);
+  EventDisposition handleTap(Widget card, CardModel cardModel) {
+    ensureWidgetIsVisible(card, duration: const Duration(milliseconds: 200))
+    .then((_) {
+      setState(() { selectedCardModel = cardModel; });
+    });
+
     return EventDisposition.processed;
   }
 
@@ -55,17 +54,18 @@ class EnsureVisibleApp extends App {
     if (index >= cardModels.length)
       return null;
     CardModel cardModel = cardModels[index];
+    TextStyle style = (cardModel == selectedCardModel) ? selectedCardLabelStyle : cardLabelStyle;
     Widget card = new Card(
       color: cardModel.color,
       child: new Container(
         height: cardModel.height,
         padding: const EdgeDims.all(8.0),
-        child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
+        child: new Center(child: new Text(cardModel.label, style: style))
       )
     );
     return new Listener(
       key: cardModel.key,
-      onGestureTap: (_) { return handleTap(card); },
+      onGestureTap: (_) { return handleTap(card, cardModel); },
       child: card
     );
   }

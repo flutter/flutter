@@ -14,7 +14,7 @@ class Stocklist extends Component {
       type: MaterialType.canvas,
       child: new ScrollableList<Stock>(
         items: stocks,
-        itemHeight: StockRow.kHeight,
+        itemExtent: StockRow.kHeight,
         itemBuilder: (stock) => new StockRow(stock: stock)
       )
     );

@@ -408,16 +408,12 @@ class TabBar extends Scrollable {
   Size _tabBarSize;
   List<double> _tabWidths;
   ValueAnimation<Rect> _indicatorAnimation;
-  ValueAnimation<double> _scrollAnimation;
 
   void initState() {
     super.initState();
     _indicatorAnimation = new ValueAnimation<Rect>()
       ..duration = _kTabBarScroll
       ..variable = new AnimatedRect(null, curve: ease);
-    _scrollAnimation = new ValueAnimation<double>()
-      ..duration = _kTabBarScroll
-      ..variable = new AnimatedValue<double>(0.0, curve: ease);
   }
 
   void syncFields(TabBar source) {
@@ -473,7 +469,7 @@ class TabBar extends Scrollable {
     if (tabIndex != selectedIndex) {
       if (_tabWidths != null) {
         if (isScrollable)
-          scrollTo(_centeredTabScrollOffset(tabIndex), animation: _scrollAnimation);
+          scrollTo(_centeredTabScrollOffset(tabIndex), duration: _kTabBarScroll);
         _startIndicatorAnimation(selectedIndex, tabIndex);
       }
       if (onChanged != null)
