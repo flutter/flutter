@@ -85,9 +85,7 @@ class SkyBinding {
     if (event is sky.PointerEvent) {
       _handlePointerEvent(event);
     } else if (event is sky.GestureEvent) {
-      HitTestResult result = new HitTestResult();
-      _renderView.hitTest(result, position: new Point(event.x, event.y));
-      dispatchEvent(event, result);
+      dispatchEvent(event, hitTest(new Point(event.x, event.y)));
     } else {
       for (EventListener e in _eventListeners)
         e(event);
@@ -97,8 +95,7 @@ class SkyBinding {
   Map<int, PointerState> _stateForPointer = new Map<int, PointerState>();
 
   PointerState _createStateForPointer(sky.PointerEvent event, Point position) {
-    HitTestResult result = new HitTestResult();
-    _renderView.hitTest(result, position: position);
+    HitTestResult result = hitTest(position);
     PointerState state = new PointerState(result: result, lastPosition: position);
     _stateForPointer[event.pointer] = state;
     return state;
@@ -126,6 +123,12 @@ class SkyBinding {
     state.lastPosition = position;
 
     return dispatchEvent(event, state.result);
+  }
+
+  HitTestResult hitTest(Point position) {
+    HitTestResult result = new HitTestResult();
+    _renderView.hitTest(result, position: position);
+    return result;
   }
 
   EventDisposition dispatchEvent(sky.Event event, HitTestResult result) {
