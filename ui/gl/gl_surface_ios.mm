@@ -30,6 +30,8 @@ GLSurfaceIOS::GLSurfaceIOS(gfx::AcceleratedWidget widget,
       framebuffer_setup_complete_(false) {
 }
 
+GLSurfaceIOS::~GLSurfaceIOS() {}
+
 #ifndef NDEBUG
 static void GLSurfaceIOS_AssertFramebufferCompleteness(void) {
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

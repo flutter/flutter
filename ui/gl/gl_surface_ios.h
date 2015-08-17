@@ -28,6 +28,8 @@ class GL_EXPORT GLSurfaceIOS : public GLSurface {
   uint32_t depth_stencil_packed_buffer_;
   Size last_configured_size_;
   bool framebuffer_setup_complete_;
+
+  ~GLSurfaceIOS() override;
   void SetupFramebufferIfNecessary();
 
   DISALLOW_COPY_AND_ASSIGN(GLSurfaceIOS);
