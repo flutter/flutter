@@ -91,9 +91,10 @@ BoxShadow lerpBoxShadow(BoxShadow a, BoxShadow b, double t) {
   if (b == null)
     return a.scale(1.0 - t);
   return new BoxShadow(
-      color: lerpColor(a.color, b.color, t),
-      offset: lerpOffset(a.offset, b.offset, t),
-      blur: lerpNum(a.blur, b.blur, t));
+    color: lerpColor(a.color, b.color, t),
+    offset: lerpOffset(a.offset, b.offset, t),
+    blur: lerpNum(a.blur, b.blur, t)
+  );
 }
 
 List<BoxShadow> lerpListBoxShadow(List<BoxShadow> a, List<BoxShadow> b, double t) {
@@ -126,18 +127,19 @@ class LinearGradient extends Gradient {
     this.tileMode: sky.TileMode.clamp
   });
 
-  String toString() =>
-      'LinearGradient($endPoints, $colors, $colorStops, $tileMode)';
-
-  sky.Shader createShader() {
-    return new sky.Gradient.linear(this.endPoints, this.colors, this.colorStops,
-                                   this.tileMode);
-  }
-
   final List<Point> endPoints;
   final List<Color> colors;
   final List<double> colorStops;
   final sky.TileMode tileMode;
+
+  sky.Shader createShader() {
+    return new sky.Gradient.linear(this.endPoints, this.colors,
+                                   this.colorStops, this.tileMode);
+  }
+
+  String toString() {
+    return 'LinearGradient($endPoints, $colors, $colorStops, $tileMode)';
+  }
 }
 
 class RadialGradient extends Gradient {
@@ -149,19 +151,20 @@ class RadialGradient extends Gradient {
     this.tileMode: sky.TileMode.clamp
   });
 
-  String toString() =>
-      'RadialGradient($center, $radius, $colors, $colorStops, $tileMode)';
+  final Point center;
+  final double radius;
+  final List<Color> colors;
+  final List<double> colorStops;
+  final sky.TileMode tileMode;
 
   sky.Shader createShader() {
     return new sky.Gradient.radial(this.center, this.radius, this.colors,
                                    this.colorStops, this.tileMode);
   }
 
-  final Point center;
-  final double radius;
-  final List<Color> colors;
-  final List<double> colorStops;
-  final sky.TileMode tileMode;
+  String toString() {
+    return 'RadialGradient($center, $radius, $colors, $colorStops, $tileMode)';
+  }
 }
 
 enum BackgroundFit { fill, contain, cover, none, scaleDown }
@@ -358,7 +361,8 @@ class BoxPainter {
   }
 
   void _paintBackgroundColor(sky.Canvas canvas, Rect rect) {
-    if (_decoration.backgroundColor != null || _decoration.boxShadow != null ||
+    if (_decoration.backgroundColor != null ||
+        _decoration.boxShadow != null ||
         _decoration.gradient != null) {
       switch (_decoration.shape) {
         case Shape.circle:
