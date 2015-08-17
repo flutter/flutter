@@ -23,6 +23,7 @@ class Chart extends LeafRenderObjectWrapper {
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
+    root.textTheme = Theme.of(this).text;
     root.data = data;
   }
 }
@@ -37,11 +38,20 @@ class RenderChart extends RenderConstrainedBox {
   final ChartPainter _painter;
 
   ChartData get data => _painter.data;
-  void set data (ChartData value) {
+  void set data(ChartData value) {
     assert(value != null);
     if (value == _painter.data)
       return;
     _painter.data = value;
+    markNeedsPaint();
+  }
+
+  TextTheme get textTheme => _painter.textTheme;
+  void set textTheme(TextTheme value) {
+    assert(value != null);
+    if (value == _painter.textTheme)
+      return;
+    _painter.textTheme = value;
     markNeedsPaint();
   }
 
@@ -57,6 +67,21 @@ class ChartPainter {
   ChartPainter(this.data);
 
   ChartData data;
+
+  TextTheme _textTheme;
+  TextTheme get textTheme => _textTheme;
+  void set textTheme(TextTheme value) {
+    assert(value != null);
+    if (_textTheme == value)
+      return;
+    _textTheme = value;
+    labels = [
+      new ParagraphPainter(new StyledTextSpan(_textTheme.body1, [new PlainTextSpan("${data.startY}")])),
+      new ParagraphPainter(new StyledTextSpan(_textTheme.body1, [new PlainTextSpan("${data.endY}")])),
+    ];
+  }
+
+  List<ParagraphPainter> labels;
 
   Point _convertPointToRectSpace(Point point, Rect rect) {
     double x = rect.left + ((point.x - data.startX) / (data.endX - data.startX)) * rect.width;
@@ -84,9 +109,13 @@ class ChartPainter {
   }
 
   void _paintScale(sky.Canvas canvas, Rect rect) {
-    Paint paint = new Paint()..color = const Color(0xFF000000);
-    canvas.drawText("${data.startY}", rect.bottomLeft, paint);
-    canvas.drawText("${data.endY}", rect.topLeft, paint);
+    // TODO(jackson): Generalize this to draw the whole axis
+    for(ParagraphPainter painter in labels) {
+      painter.maxWidth = rect.width;
+      painter.layout();
+    }
+    labels[0].paint(canvas, rect.bottomLeft.toOffset());
+    labels[1].paint(canvas, rect.topLeft.toOffset());
   }
 
   void paint(sky.Canvas canvas, Rect rect) {
