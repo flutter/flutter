@@ -272,6 +272,27 @@ abstract class Widget {
     return ancestor;
   }
 
+  Set<Type> _dependencies;
+  Inherited inheritedOfType(Type targetType) {
+    if (_dependencies == null)
+      _dependencies = new Set<Type>();
+    _dependencies.add(targetType);
+    Widget ancestor = parent;
+    while (ancestor != null && ancestor.runtimeType != targetType)
+      ancestor = ancestor.parent;
+    return ancestor;
+  }
+
+  void dependenciesChanged() {
+    // This is called if you've use inheritedOfType and the Inherited
+    // ancestor you were provided was changed. For a widget to use Inherited
+    // it needs an implementation of dependenciesChanged. If your widget extends
+    // Component or RenderObjectWrapper this is provided for you automatically.
+    // If you aren't able to extend one of those classes, you need to
+    // provide your own implementation of dependenciesChanged.
+    assert(false);
+  }
+
   void remove() {
     _renderObject = null;
     setParent(null);
@@ -453,10 +474,9 @@ abstract class Inherited extends TagNode {
   void notifyDescendants() {
     final Type ourRuntimeType = runtimeType;
     void notifyChildren(Widget child) {
-      if (child is Component &&
-          child._dependencies != null &&
+      if (child._dependencies != null &&
           child._dependencies.contains(ourRuntimeType))
-        child._dependenciesChanged();
+          child.dependenciesChanged();
       if (child.runtimeType != ourRuntimeType)
         child.walkChildren(notifyChildren);
     }
@@ -608,17 +628,7 @@ abstract class Component extends Widget {
     _built.detachRoot();
   }
 
-  Set<Type> _dependencies;
-  Inherited inheritedOfType(Type targetType) {
-    if (_dependencies == null)
-      _dependencies = new Set<Type>();
-    _dependencies.add(targetType);
-    Widget ancestor = parent;
-    while (ancestor != null && ancestor.runtimeType != targetType)
-      ancestor = ancestor.parent;
-    return ancestor;
-  }
-  void _dependenciesChanged() {
+  void dependenciesChanged() {
     // called by Inherited.sync()
     _scheduleBuild();
   }
@@ -935,6 +945,11 @@ abstract class RenderObjectWrapper extends Widget {
       if (ancestor != null && ancestor.renderObject != null)
         ancestor.renderObject.markNeedsLayout();
     }
+  }
+
+  void dependenciesChanged() {
+    // called by Inherited.sync()
+    syncRenderObject(this);
   }
 
   void remove() {
