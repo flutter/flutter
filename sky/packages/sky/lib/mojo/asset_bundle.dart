@@ -18,6 +18,7 @@ abstract class AssetBundle {
   void close();
   ImageResource loadImage(String key);
   Future<String> loadString(String key);
+  Future<core.MojoDataPipeConsumer> load(String key);
 }
 
 class NetworkAssetBundle extends AssetBundle {
@@ -27,13 +28,15 @@ class NetworkAssetBundle extends AssetBundle {
 
   void close() { }
 
-  ImageResource loadImage(String key) {
-    return image_cache.load(_baseUrl.resolve(key).toString());
+  String _urlFromKey(String key) => _baseUrl.resolve(key).toString();
+
+  Future<core.MojoDataPipeConsumer> load(String key) async {
+    return (await fetchUrl(_urlFromKey(key))).body;
   }
 
-  Future<String> loadString(String key) {
-    return fetchString(_baseUrl.resolve(key).toString());
-  }
+  ImageResource loadImage(String key) => image_cache.load(_urlFromKey(key));
+
+  Future<String> loadString(String key) => fetchString(_urlFromKey(key));
 }
 
 Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
@@ -66,17 +69,21 @@ class MojoAssetBundle extends AssetBundle {
   ImageResource loadImage(String key) {
     return _imageCache.putIfAbsent(key, () {
       Completer<sky.Image> completer = new Completer<sky.Image>();
-      _bundle.ptr.getAsStream(key).then((response) {
-        new sky.ImageDecoder(response.assetData.handle.h, completer.complete);
+      load(key).then((assetData) {
+        new sky.ImageDecoder(assetData.handle.h, completer.complete);
       });
       return new ImageResource(completer.future);
     });
   }
 
   Future<String> _fetchString(String key) async {
-    core.MojoDataPipeConsumer pipe = (await _bundle.ptr.getAsStream(key)).assetData;
+    core.MojoDataPipeConsumer pipe = await load(key);
     ByteData data = await core.DataPipeDrainer.drainHandle(pipe);
     return new String.fromCharCodes(new Uint8List.view(data.buffer));
+  }
+
+  Future<core.MojoDataPipeConsumer> load(String key) async {
+    return (await _bundle.ptr.getAsStream(key)).assetData;
   }
 
   Future<String> loadString(String key) {

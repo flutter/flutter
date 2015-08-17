@@ -48,8 +48,8 @@ main() async {
 
   _app = new GameDemoApp();
 
-  _sounds["explosion"] = new SoundEffect('https://github.com/slembcke/GalacticGuardian.spritebuilder/raw/GDC/Packages/SpriteBuilder%20Resources.sbpack/TempSounds/Explosion.wav');
-  _sounds["laser"] = new SoundEffect('https://github.com/slembcke/GalacticGuardian.spritebuilder/raw/GDC/Packages/SpriteBuilder%20Resources.sbpack/TempSounds/Laser.wav');
+  _sounds["explosion"] = new SoundEffect(_bundle.load('assets/explosion.wav'));
+  _sounds["laser"] = new SoundEffect(_bundle.load('assets/laser.wav'));
 
   await _sounds["explosion"].load();
   await _sounds["laser"].load();
