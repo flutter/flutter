@@ -3,10 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import argparse
 import os
 import subprocess
 import xml.etree.ElementTree as ET
-import argparse
 
 
 MANIFEST_PREFACE = '''<?xml version="1.0" encoding="utf-8"?>
@@ -21,28 +21,6 @@ def increment_version(version):
     pieces = version.split('.')
     pieces[-1] = str(int(pieces[-1]) + 1)
     return '.'.join(pieces)
-
-
-def count_commits(start, end):
-    return subprocess.check_output([
-        'git', 'rev-list', '%s...%s' % (start, end)]).count('\n')
-
-
-def last_commit_to(file_path):
-    return subprocess.check_output(['git', 'log', '-1', '--format=%h', file_path]).strip()
-
-
-def update_changelog(changelog, pubspec, version):
-    old = last_commit_to(pubspec)
-    new = last_commit_to('.')
-    url = "https://github.com/domokit/mojo/compare/%s...%s" % (old, new)
-    count = count_commits(old, new)
-    message = """## %s
-
-  - %s changes: %s
-
-""" % (version, count, url)
-    prepend_to_file(message, changelog)
 
 
 def prepend_to_file(to_prepend, filepath):
@@ -69,6 +47,7 @@ def update_manifest(manifest):
     # we could write our own custom prettyprinter to do that?
     tree.write(manifest)
     prepend_to_file(MANIFEST_PREFACE, manifest)
+    return root.get(VERSION_NAME)
 
 
 def main():
@@ -80,7 +59,12 @@ def main():
     # TODO(eseidel): Without this ET uses 'ns0' for 'android' which is wrong.
     ET.register_namespace('android', 'http://schemas.android.com/apk/res/android')
 
-    update_manifest(args.manifest)
+    new_version = update_manifest(args.manifest)
+    notes_dir = os.path.join(os.path.dirname(args.manifest), 'release_notes')
+    release_notes = os.path.join(notes_dir, '%s.txt' % new_version)
+    # FIXME: We could open an editor for the release notes and prepopulate
+    # it with the changes url like how we do for pubspec CHANGELOG.md files.
+    print "Please update %s in this commit." % release_notes
 
 
 if __name__ == '__main__':

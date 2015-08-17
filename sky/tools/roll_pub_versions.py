@@ -52,7 +52,7 @@ def update_pubspec(pubspec):
 def update_changelog(changelog, pubspec, version):
     old = last_commit_to(pubspec)
     new = last_commit_to('.')
-    url = "https://github.com/domokit/mojo/compare/%s...%s" % (old, new)
+    url = "https://github.com/domokit/sky_engine/compare/%s...%s" % (old, new)
     count = count_commits(old, new)
     message = """## %s
 
