@@ -30,50 +30,92 @@ class ParentData {
 
 class PaintingCanvas extends sky.Canvas {
   PaintingCanvas(sky.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
+  // TODO(ianh): Just use sky.Canvas everywhere instead
 }
 
 class PaintingContext {
-  PaintingCanvas canvas;
 
-  PictureLayer get layer => _layer;
-  PictureLayer _layer;
+  // A PaintingContext wraps a canvas, so that the canvas can be
+  // hot-swapped whenever we need to start a new layer.
 
-  sky.PictureRecorder _recorder;
+  // Don't keep a reference to the PaintingContext.canvas, since it
+  // can change dynamically after any call to this object's methods.
 
   PaintingContext(Offset offest, Size size) {
     _startRecording(offest, size);
   }
 
-  PaintingContext.forTesting(this.canvas);
+  PaintingCanvas _canvas;
+  PaintingCanvas get canvas => _canvas;
+
+  PictureLayer _layer;
+  PictureLayer get layer => _layer;
+
+  sky.PictureRecorder _recorder;
+
+  PaintingContext.forTesting(this._canvas);
 
   void _startRecording(Offset offset, Size size) {
     assert(_layer == null);
     assert(_recorder == null);
-    assert(canvas == null);
+    assert(_canvas == null);
     _layer = new PictureLayer(offset: offset, size: size);
     _recorder = new sky.PictureRecorder();
-    canvas = new PaintingCanvas(_recorder, Point.origin & size);
+    _canvas = new PaintingCanvas(_recorder, Point.origin & size);
   }
 
   void endRecording() {
     assert(_layer != null);
     assert(_recorder != null);
-    assert(canvas != null);
-    canvas = null;
+    assert(_canvas != null);
     _layer.picture = _recorder.endRecording();
-    _recorder = null;
     _layer = null;
+    _recorder = null;
+    _canvas = null;
+  }
+
+  bool debugCanPaintChild() {
+    // You need to use layers if you are applying transforms, clips,
+    // or similar, to a child. To do so, use the paintChildWith*()
+    // methods below.
+    // (commented out for now because we haven't ported everything yet)
+    // assert(canvas.getSaveCount() == 1);
+    return true;
   }
 
   void paintChild(RenderObject child, Point point) {
+    assert(debugCanPaintChild());
     final Offset offset = point.toOffset();
-
-    if (!child.requiresCompositing)
-      return child._paintWithContext(this, offset);
-    _compositChild(child, offset, layer.parent, layer.nextSibling);
+    if (!child.requiresCompositing) {
+      child._paintWithContext(this, offset);
+    } else {
+      _compositeChild(child, offset, layer.parent, layer.nextSibling);
+    }
   }
 
-  void _compositChild(RenderObject child, Offset offset, ContainerLayer parentLayer, Layer nextSibling) {
+  void paintChildWithClip(RenderObject child, Point point, Rect clipRect) {
+    assert(debugCanPaintChild());
+    final Offset offset = point.toOffset();
+    if (!child.hasCompositedDescendant) {
+      // If none of the descendants require compositing, then we don't
+      // need to use a new layer here, because at no point will any of
+      // the children introduce a new layer of their own.
+      canvas.save();
+      canvas.clipRect(clipRect.shift(offset));
+      child._paintWithContext(this, offset);
+      canvas.restore();
+    } else {
+      // At least one of the descendants requires compositing. We
+      // therefore introduce a new layer to do the clipping, so that
+      // when the children are split into a new layer, the clip is not
+      // lost, as it would if we didn't introduce a new layer.
+      ClipLayer clip = new ClipLayer(offset: offset, clipRect: clipRect);
+      layer.parent.add(clip, before: layer.nextSibling);
+      _compositeChild(child, Offset.zero, clip, null);
+    }
+  }
+
+  void _compositeChild(RenderObject child, Offset offset, ContainerLayer parentLayer, Layer nextSibling) {
     final PictureLayer originalLayer = _layer;
     endRecording();
 
@@ -88,6 +130,7 @@ class PaintingContext {
     originalLayer.parent.add(layer, before: context.layer.nextSibling);
     context.endRecording();
   }
+
 }
 
 abstract class Constraints {
@@ -417,14 +460,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _needsPaint = true;
       _nodesNeedingPaint.add(this);
       scheduler.ensureVisualUpdate();
-    } else if (parent == null) {
+    } else if (parent is! RenderObject) {
+      // we're the root of the render tree (probably a RenderView)
       _needsPaint = true;
       scheduler.ensureVisualUpdate();
     } else {
-      assert(parent != null); // parent always exists on this path because the root node is a RenderView, which sets createNewDisplayList.
-      if (parent is RenderObject) {
-        (parent as RenderObject).markNeedsPaint(); // TODO(ianh): remove the cast once the analyzer is cleverer
-      }
+      (parent as RenderObject).markNeedsPaint(); // TODO(ianh): remove the cast once the analyzer is cleverer
     }
   }
 

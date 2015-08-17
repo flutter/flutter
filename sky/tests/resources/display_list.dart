@@ -26,17 +26,24 @@ class TestPaintingCanvas extends PaintingCanvas {
     logger("${indent} ${s}");
   }
 
+  int _saveCount = 1;
+
   void save() {
     log("save");
+    _saveCount += 1;
   }
 
   void saveLayer(Rect bounds, Paint paint) {
     log("saveLayer($bounds, $paint)");
+    _saveCount += 1;
   }
 
   void restore() {
     log("restore");
+    _saveCount -= 1;
   }
+
+  int getSaveCount() => _saveCount;
 
   void translate(double dx, double dy) {
     log("translate($dx, $dy)");

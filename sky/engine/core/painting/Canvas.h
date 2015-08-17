@@ -63,6 +63,7 @@ public:
     void save();
     void saveLayer(const Rect& bounds, const Paint& paint);
     void restore();
+    int getSaveCount();
 
     void translate(float dx, float dy);
     void scale(float sx, float sy);

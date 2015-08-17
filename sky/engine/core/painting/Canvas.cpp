@@ -47,6 +47,13 @@ void Canvas::restore()
     m_canvas->restore();
 }
 
+int Canvas::getSaveCount()
+{
+    if (!m_canvas)
+        return 0;
+    return m_canvas->getSaveCount();
+}
+
 void Canvas::translate(float dx, float dy)
 {
     if (!m_canvas)
