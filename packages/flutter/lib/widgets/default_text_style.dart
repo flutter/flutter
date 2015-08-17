@@ -19,8 +19,8 @@ class DefaultTextStyle extends Inherited {
 
   final TextStyle style;
 
-  static TextStyle of(Component component) {
-    DefaultTextStyle result = component.inheritedOfType(DefaultTextStyle);
+  static TextStyle of(Widget widget) {
+    DefaultTextStyle result = widget.inheritedOfType(DefaultTextStyle);
     return result == null ? null : result.style;
   }
 

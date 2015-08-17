@@ -30,47 +30,34 @@ const Duration _kCheckDuration = const Duration(milliseconds: 200);
 const Size _kSwitchSize = const Size(_kSwitchWidth + 2.0, _kSwitchHeight + 2.0);
 const double _kReactionRadius = _kSwitchWidth / 2.0;
 
-class Switch extends Component {
-  Switch({Key key, this.value, this.onChanged}) : super(key: key);
-
-  final bool value;
-  final ValueChanged onChanged;
-
-  Widget build() {
-    return new _SwitchWrapper(
-        value: value,
-        onChanged: onChanged,
-        thumbColor: Theme.of(this).accentColor);
-  }
-}
-
-// This wrapper class exists only because Switch needs to be a Component in
-// order to get an accent color from a Theme but Components do not know how to
-// host RenderObjects.
-class _SwitchWrapper extends LeafRenderObjectWrapper {
-  _SwitchWrapper({Key key, this.value, this.onChanged, this.thumbColor})
+class Switch extends LeafRenderObjectWrapper {
+  Switch({ Key key, this.value, this.onChanged })
       : super(key: key);
 
   final bool value;
   final ValueChanged onChanged;
-  final Color thumbColor;
 
   _RenderSwitch get renderObject => super.renderObject;
   _RenderSwitch createNode() => new _RenderSwitch(
-      value: value, thumbColor: thumbColor, onChanged: onChanged);
+    value: value,
+    thumbColor: null,
+    onChanged: onChanged
+  );
 
-  void syncRenderObject(_SwitchWrapper old) {
+  void syncRenderObject(Switch old) {
     super.syncRenderObject(old);
     renderObject.value = value;
     renderObject.onChanged = onChanged;
-    renderObject.thumbColor = thumbColor;
+    renderObject.thumbColor = Theme.of(this).accentColor;
   }
 }
 
 class _RenderSwitch extends RenderToggleable {
-  _RenderSwitch(
-      {bool value, Color thumbColor: _kThumbOffColor, ValueChanged onChanged})
-      : _thumbColor = thumbColor,
+  _RenderSwitch({
+    bool value,
+    Color thumbColor: _kThumbOffColor,
+    ValueChanged onChanged
+  }) : _thumbColor = thumbColor,
         super(value: value, onChanged: onChanged, size: _kSwitchSize) {}
 
   Color _thumbColor;

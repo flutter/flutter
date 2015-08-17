@@ -23,8 +23,8 @@ class Theme extends Inherited {
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
-  static ThemeData of(Component component) {
-    Theme theme = component.inheritedOfType(Theme);
+  static ThemeData of(Widget widget) {
+    Theme theme = widget.inheritedOfType(Theme);
     return theme == null ? _kFallbackTheme : theme.data;
   }
 
