@@ -26,10 +26,11 @@ Color lerpColor(Color a, Color b, double t) {
   if (b == null)
     return _scaleAlpha(a, 1.0 - t);
   return new Color.fromARGB(
-      lerpNum(a.alpha, b.alpha, t).toInt(),
-      lerpNum(a.red, b.red, t).toInt(),
-      lerpNum(a.green, b.green, t).toInt(),
-      lerpNum(a.blue, b.blue, t).toInt());
+    lerpNum(a.alpha, b.alpha, t).toInt(),
+    lerpNum(a.red, b.red, t).toInt(),
+    lerpNum(a.green, b.green, t).toInt(),
+    lerpNum(a.blue, b.blue, t).toInt()
+  );
 }
 
 Offset lerpOffset(Offset a, Offset b, double t) {
@@ -55,5 +56,6 @@ Rect lerpRect(Rect a, Rect b, double t) {
     lerpNum(a.left, b.left, t),
     lerpNum(a.top, b.top, t),
     lerpNum(a.right, b.right, t),
-    lerpNum(a.bottom, b.bottom, t));
+    lerpNum(a.bottom, b.bottom, t)
+  );
 }
