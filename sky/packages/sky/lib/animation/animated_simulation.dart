@@ -33,11 +33,11 @@ class Ticker {
       _animationId = null;
     }
 
+    // We take the _completer into a local variable so that !isTicking
+    // when we actually complete the future (isTicking uses _completer
+    // to determine its state).
     Completer localCompleter = _completer;
     _completer = null;
-
-    // We take the _completer into a local variable so that !isTicking when we
-    // actually complete the future.
     assert(!isTicking);
     localCompleter.complete();
   }
