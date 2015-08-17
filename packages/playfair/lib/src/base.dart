@@ -23,8 +23,8 @@ class Chart extends LeafRenderObjectWrapper {
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.textTheme = Theme.of(this).text;
-    root.data = data;
+    renderObject.textTheme = Theme.of(this).text;
+    renderObject.data = data;
   }
 }
 
