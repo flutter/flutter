@@ -60,6 +60,14 @@ declare_args() {
     # The patch is preapplied to the internal toolchain and hence all bots.
     msvs_xtree_patched = false
   }
+
+  # By default, iOS executables are fat binaries that contain armv7 and arm64
+  # build artifacts. This is suitable for release builds and for testing on
+  # older devices. However, generating fat binaries takes a very long time, and,
+  # depending on the application type, may be unnecessary. If the type of
+  # architecture is known beforehand, setting that as the active arch will
+  # greatly reduce build times and reduce binary sizes.
+  ios_active_arch = ""
 }
 
 # default_include_dirs ---------------------------------------------------------
@@ -258,10 +266,19 @@ config("compiler") {
         "i386",
       ]
     } else if (current_cpu == "arm") {
-      common_mac_flags += [
-        "-arch",
-        "arm64",
-      ]
+      if (ios_active_arch != "") {
+        common_mac_flags += [
+          "-arch",
+          ios_active_arch,
+        ]
+      } else {
+        common_mac_flags += [
+          "-arch",
+          "arm64",
+          "-arch",
+          "armv7",
+        ]
+      }
     }
 
     cflags += common_mac_flags
