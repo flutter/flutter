@@ -64,16 +64,16 @@ class _CheckboxWrapper extends LeafRenderObjectWrapper {
   final Color uncheckedColor;
   final Color accentColor;
 
-  _RenderCheckbox get root => super.root;
+  _RenderCheckbox get renderObject => super.renderObject;
   _RenderCheckbox createNode() => new _RenderCheckbox(
       value: value, uncheckedColor: uncheckedColor, onChanged: onChanged);
 
   void syncRenderObject(_CheckboxWrapper old) {
     super.syncRenderObject(old);
-    root.value = value;
-    root.onChanged = onChanged;
-    root.uncheckedColor = uncheckedColor;
-    root.accentColor = accentColor;
+    renderObject.value = value;
+    renderObject.onChanged = onChanged;
+    renderObject.uncheckedColor = uncheckedColor;
+    renderObject.accentColor = accentColor;
   }
 }
 
