@@ -53,6 +53,9 @@ void Rasterizer::Draw(PassRefPtr<SkPicture> picture) {
   if (size.IsEmpty())
     return;
 
+  if (surface_->GetSize() != size)
+    surface_->Resize(size);
+
   EnsureGLContext();
   CHECK(context_->MakeCurrent(surface_.get()));
   EnsureGaneshSurface(surface_->GetBackingFrameBufferObject(), size);
