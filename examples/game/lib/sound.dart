@@ -149,6 +149,7 @@ class SoundTrack {
   SoundTrackBufferingCallback onBufferingUpdate;
   bool loop;
   double time;
+  double volume;
 }
 
 SoundTrackPlayer _sharedSoundTrackPlayer;
