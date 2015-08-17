@@ -54,7 +54,6 @@ class SoundManager {
 
   static void purgeSharedInstance() {
     if (_sharedSoundManager == null) return;
-    _sharedSoundManager._running = false;
     _sharedSoundManager = null;
   }
 
@@ -72,7 +71,6 @@ class SoundManager {
   bool enableBackgroundMusic;
   bool enableSoundEffects;
 
-  bool _running = true;
   int _lastTimeStamp;
 
   void playEvent(SoundEvent evt, [double volume = 1.0, double pitch = 1.0, double pan = 0.0]) {

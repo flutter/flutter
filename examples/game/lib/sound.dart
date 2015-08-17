@@ -6,16 +6,15 @@ part of sprites;
 typedef void SoundEffectStreamCallback(SoundEffectStream);
 
 class SoundEffect {
-  SoundEffect(this._url);
+  SoundEffect(this._pipeFuture);
 
   // TODO: Remove load method from SoundEffect
   Future load() async {
-    UrlResponse response = await fetchUrl(_url);
-    _data = response.body;
+    _data = await _pipeFuture;
   }
 
-  String _url;
-  Object _data;
+  Future<MojoDataPipeConsumer> _pipeFuture;
+  MojoDataPipeConsumer _data;
 }
 
 class SoundEffectStream {
