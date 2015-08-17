@@ -45,7 +45,6 @@ def to_gn_args(args):
     elif args.target_os == 'ios':
         gn_args['target_os'] = 'ios'
         gn_args['ios_deployment_target'] = '7.0'
-        gn_args['clang_use_chrome_plugins'] = False
         if args.simulator:
             gn_args['use_libjpeg_turbo'] = False
         gn_args['use_ios_simulator'] = args.simulator
