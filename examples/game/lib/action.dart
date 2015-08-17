@@ -295,6 +295,13 @@ class ActionGroup extends ActionInterval {
   }
 }
 
+/// An action that doesn't perform any other task than taking time. This action
+/// is typically used in a sequence to space out other events.
+class ActionDelay extends ActionInterval {
+  /// Creates a new action with the specified [delay]
+  ActionDelay(double delay) : super(delay);
+}
+
 /// An action that doesn't have a duration. If this class is overridden to
 /// create custom instant actions, only the [fire] method should be overriden.
 abstract class ActionInstant extends Action {
