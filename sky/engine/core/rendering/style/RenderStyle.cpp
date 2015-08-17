@@ -46,20 +46,6 @@ struct SameSizeAsBorderValue {
 
 COMPILE_ASSERT(sizeof(BorderValue) == sizeof(SameSizeAsBorderValue), BorderValue_should_not_grow);
 
-struct SameSizeAsRenderStyle : public RefCounted<SameSizeAsRenderStyle> {
-    void* dataRefs[7];
-
-    struct InheritedFlags {
-        unsigned m_bitfields;
-    } inherited_flags;
-
-    struct NonInheritedFlags {
-        unsigned m_bitfields[2];
-    } noninherited_flags;
-};
-
-COMPILE_ASSERT(sizeof(RenderStyle) == sizeof(SameSizeAsRenderStyle), RenderStyle_should_stay_small);
-
 inline RenderStyle* defaultStyle()
 {
     DEFINE_STATIC_REF(RenderStyle, s_defaultStyle, (RenderStyle::createDefaultStyle()));
