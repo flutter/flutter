@@ -105,7 +105,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | paintChild RenderPadding at Point(187.0, 166.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(195.0, 174.0)
+2 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(196.0, 175.0)
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(400.0, 379.0)
 2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
@@ -231,7 +231,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 3 |  |  |  |  |  | paintChild RenderPadding at Point(187.0, 166.0)
 3 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(195.0, 174.0)
+3 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(196.0, 175.0)
 3 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(400.0, 379.0)
 3 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
@@ -360,7 +360,7 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 4 |  |  |  |  |  | paintChild RenderPadding at Point(187.0, 166.0)
 4 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(195.0, 174.0)
+4 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(196.0, 175.0)
 4 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(400.0, 379.0)
 4 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
@@ -492,7 +492,7 @@ PAINT FOR FRAME #5 ----------------------------------------------
 5 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 5 |  |  |  |  |  | paintChild RenderPadding at Point(187.0, 166.0)
 5 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-5 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(195.0, 174.0)
+5 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(196.0, 175.0)
 5 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(400.0, 379.0)
 5 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
@@ -627,7 +627,7 @@ PAINT FOR FRAME #6 ----------------------------------------------
 6 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 6 |  |  |  |  |  | paintChild RenderPadding at Point(187.0, 166.0)
 6 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-6 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(195.0, 174.0)
+6 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(196.0, 175.0)
 6 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(400.0, 379.0)
 6 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
@@ -759,7 +759,7 @@ PAINT FOR FRAME #7 ----------------------------------------------
 7 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 7 |  |  |  |  |  | paintChild RenderPadding at Point(187.0, 166.0)
 7 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-7 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(195.0, 174.0)
+7 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(196.0, 175.0)
 7 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(400.0, 379.0)
 7 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
@@ -888,7 +888,7 @@ PAINT FOR FRAME #8 ----------------------------------------------
 8 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 8 |  |  |  |  |  | paintChild RenderPadding at Point(187.0, 166.0)
 8 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-8 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(195.0, 174.0)
+8 |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(196.0, 175.0)
 8 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(400.0, 379.0)
 8 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0

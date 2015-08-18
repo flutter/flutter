@@ -14,5 +14,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xff0000ff)))
 2 |  |  |  | drawDRRect(Instance of 'RRect', Instance of 'RRect', Paint(color:Color(0x7fff0000)))
+2 |  |  |  | paintChild RenderPadding at Point(350.0, 250.0)
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
 PAINTED 2 FRAMES
