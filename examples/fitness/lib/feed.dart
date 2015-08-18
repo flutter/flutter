@@ -198,7 +198,9 @@ class FeedFragment extends StatefulComponent {
       startY: startY,
       endX: endX,
       endY: endY,
-      dataSet: dataSet
+      dataSet: dataSet,
+      numHorizontalGridlines: 5,
+      roundToPlaces: 1
     );
     return new playfair.Chart(data: data);
   }
