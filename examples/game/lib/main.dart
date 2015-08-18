@@ -45,15 +45,6 @@ main() async {
     'assets/game_ui.png',
   ]));
 
-  // TODO(eseidel): These load in serial which is bad for startup!
-  String json = await _bundle.loadString('assets/sprites.json');
-  _spriteSheet = new SpriteSheet(_imageMap['assets/sprites.png'], json);
-
-  json = await _bundle.loadString('assets/game_ui.json');
-  _spriteSheetUI = new SpriteSheet(_imageMap['assets/game_ui.png'], json);
-
-  _app = new GameDemoApp();
-
   // TODO(eseidel): SoundEffect doesn't really do anything except hold a future.
   _sounds['explosion'] = new SoundEffect(_bundle.load('assets/explosion.wav'));
   _sounds['laser'] = new SoundEffect(_bundle.load('assets/laser.wav'));
@@ -63,11 +54,23 @@ main() async {
     _sounds['laser'].load(),
   ]);
 
+  await Future.wait(loads);
+
+  // TODO(eseidel): These load in serial which is bad for startup!
+  String json = await _bundle.loadString('assets/sprites.json');
+  _spriteSheet = new SpriteSheet(_imageMap['assets/sprites.png'], json);
+
+  json = await _bundle.loadString('assets/game_ui.json');
+  _spriteSheetUI = new SpriteSheet(_imageMap['assets/game_ui.png'], json);
+
+  _app = new GameDemoApp();
+
+  assert(_spriteSheet.image != null);
+
   SoundTrackPlayer stPlayer = SoundTrackPlayer.sharedInstance();
   SoundTrack music = await stPlayer.load(_bundle.load('assets/temp_music.aac'));
   stPlayer.play(music);
 
-  await Future.wait(loads);
   runApp(_app);
 }
 
@@ -244,6 +247,8 @@ class MainScreenBackground extends NodeWithSize {
     Sprite sprtBackground = new Sprite.fromImage(_imageMap['assets/starfield.png']);
     sprtBackground.position = new Point(512.0, 512.0);
     addChild(sprtBackground);
+
+    assert(_spriteSheet.image != null);
 
     StarField starField = new StarField(_spriteSheet, 200, true);
     addChild(starField);
