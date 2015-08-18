@@ -81,8 +81,7 @@ class Cubic implements Curve {
   }
 }
 
-double _bounce(double t)
-{
+double _bounce(double t) {
   if (t < 1.0 / 2.75) {
     return 7.5625 * t * t;
   } else if (t < 2 / 2.75) {
@@ -149,9 +148,8 @@ class ElasticInOutCurve implements Curve {
   final double period;
 
   double transform(double t) {
-    t = t * 2;
     double s = period / 4.0;
-    t = t - 1.0;
+    t = 2.0 * t - 1.0;
     if (t < 0.0)
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);
     else
