@@ -10,6 +10,61 @@ import 'package:sky/base/image_resource.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/shadows.dart';
 
+class EdgeDims {
+  // used for e.g. padding
+  const EdgeDims(this.top, this.right, this.bottom, this.left);
+  const EdgeDims.all(double value)
+      : top = value, right = value, bottom = value, left = value;
+  const EdgeDims.only({ this.top: 0.0,
+                        this.right: 0.0,
+                        this.bottom: 0.0,
+                        this.left: 0.0 });
+  const EdgeDims.symmetric({ double vertical: 0.0,
+                             double horizontal: 0.0 })
+    : top = vertical, left = horizontal, bottom = vertical, right = horizontal;
+
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
+
+  bool operator ==(other) {
+    if (identical(this, other))
+      return true;
+    return other is EdgeDims
+        && top == other.top
+        && right == other.right
+        && bottom == other.bottom
+        && left == other.left;
+  }
+
+  EdgeDims operator+(EdgeDims other) {
+    return new EdgeDims(top + other.top,
+                        right + other.right,
+                        bottom + other.bottom,
+                        left + other.left);
+  }
+
+  EdgeDims operator-(EdgeDims other) {
+    return new EdgeDims(top - other.top,
+                        right - other.right,
+                        bottom - other.bottom,
+                        left - other.left);
+  }
+
+  static const EdgeDims zero = const EdgeDims(0.0, 0.0, 0.0, 0.0);
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + top.hashCode;
+    value = 37 * value + left.hashCode;
+    value = 37 * value + bottom.hashCode;
+    value = 37 * value + right.hashCode;
+    return value;
+  }
+  String toString() => "EdgeDims($top, $right, $bottom, $left)";
+}
+
 class BorderSide {
   const BorderSide({
     this.color: const Color(0xFF000000),
@@ -49,6 +104,10 @@ class Border {
   final BorderSide right;
   final BorderSide bottom;
   final BorderSide left;
+
+  EdgeDims get dimensions {
+    return new EdgeDims(top.width, right.width, bottom.width, left.width);
+  }
 
   int get hashCode {
     int value = 373;
