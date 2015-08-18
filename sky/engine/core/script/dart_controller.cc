@@ -159,8 +159,6 @@ void DartController::InstallView(View* view) {
   builtin_sky_->InstallView(view);
 }
 
-#if 0
-// Re-enable on resolution of https://github.com/domokit/sky_engine/issues/654
 static void DartController_DartStreamConsumer(
     Dart_StreamConsumer_State state,
     const char* stream_name,
@@ -179,21 +177,16 @@ static void DartController_DartStreamConsumer(
     mojo::common::BlockingCopyFromString(data, *handle);
   }
 }
-#endif
+
 void DartController::StartTracing() {
-#if 0
-// Re-enable on resolution of https://github.com/domokit/sky_engine/issues/654
   DartIsolateScope isolate_scope(dart_state()->isolate());
   DartApiScope dart_api_scope;
 
   Dart_TimelineSetRecordedStreams(DART_TIMELINE_STREAM_ALL);
-#endif
 }
 
 void DartController::StopTracing(
     mojo::ScopedDataPipeProducerHandle producer) {
-#if 0
-// Re-enable on resolution of https://github.com/domokit/sky_engine/issues/654
   DartIsolateScope isolate_scope(dart_state()->isolate());
   DartApiScope dart_api_scope;
 
@@ -202,7 +195,6 @@ void DartController::StopTracing(
   auto callback =
       reinterpret_cast<Dart_StreamConsumer>(&DartController_DartStreamConsumer);
   Dart_TimelineGetTrace(callback, &producer);
-#endif
 }
 
 } // namespace blink
