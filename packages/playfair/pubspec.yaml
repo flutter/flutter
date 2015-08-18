@@ -1,6 +1,6 @@
 name: playfair
 description: A simple charting library for Sky
-version: 0.0.3
+version: 0.0.4
 author: Chromium Authors <sky-dev@googlegroups.com>
 homepage: https://github.com/domokit/playfair
 dependencies:
