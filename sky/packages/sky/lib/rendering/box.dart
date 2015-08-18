@@ -1395,48 +1395,52 @@ class RenderImage extends RenderBox {
   }
 
   Size _sizeForConstraints(BoxConstraints constraints) {
+    // Folds the given |width| and |height| into |cosntraints| so they can all
+    // be treated uniformly.
+    constraints = new BoxConstraints.tightFor(
+      width: _width,
+      height: _height
+    ).apply(constraints);
+
     if (constraints.isTight)
-      return constraints.constrain(Size.zero);
+      return constraints.smallest;
 
-    // If there's no image, we can't size ourselves automatically
-    if (_image == null) {
-      double width = _width == null ? 0.0 : _width;
-      double height = _height == null ? 0.0 : _height;
-      return constraints.constrain(new Size(width, height));
+    // This algorithm attempts to find a size for the RenderImage that fits in
+    // the given constraints and preserves the image's intrinisc aspect ratio.
+    // Its goals as follow:
+    //
+    //  - The dimensions of the RenderImage fit within the constraints.
+    //  - The aspect ratio of the RenderImage matches the instrinsic aspect
+    //    ratio of the image.
+    //  - The RenderImage's dimension are maximal subject to being smaller than
+    //    the intrinsic size of the image.
+
+    double width = _image == null ? 0.0 : _image.width.toDouble();
+    double height = _image == null ? 0.0 : _image.height.toDouble();
+    double aspectRatio = width / height;
+
+    if (width > constraints.maxWidth) {
+      width = constraints.maxWidth;
+      height = width / aspectRatio;
     }
 
-    // If neither height nor width are specified, use inherent image
-    // dimensions. If only one dimension is specified, adjust the
-    // other dimension to maintain the aspect ratio. In both cases,
-    // constrain dimensions first, otherwise we end up losing the
-    // ratio after constraining.
-    if (_width == null) {
-      if (_height == null) {
-        // autosize
-        double width = constraints.constrainWidth(_image.width.toDouble());
-        double maxHeight = constraints.constrainHeight(_image.height.toDouble());
-        double ratio = _image.height / _image.width;
-        double height = width * ratio;
-        if (height > maxHeight) {
-          height = maxHeight;
-          width = maxHeight / ratio;
-        }
-        return constraints.constrain(new Size(width, height));
-      }
-
-      // Determine width from height
-      double width = _height * _image.width / _image.height;
-      return constraints.constrain(new Size(width, height));
+    if (height > constraints.maxHeight) {
+      height = constraints.maxHeight;
+      width = height * aspectRatio;
     }
 
-    if (_height == null) {
-      // Determine height from width
-      double height = _width * _image.height / _image.width;
-      return constraints.constrain(new Size(width, height));
+    if (width < constraints.minWidth) {
+      width = constraints.minWidth;
+      height = width / aspectRatio;
     }
 
-    assert(_width != null && _height != null);
-    return constraints.constrain(new Size(_width, _height));
+    if (height < constraints.minHeight) {
+      height = constraints.minHeight;
+      width = height * aspectRatio;
+    }
+
+    assert(width != null && height != null);
+    return constraints.constrain(new Size(width, height));
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
