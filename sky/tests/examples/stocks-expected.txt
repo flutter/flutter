@@ -96,13 +96,14 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | saveLayer(Rect.fromLTRB(728.0, 528.0, 784.0, 584.0), Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | clipPath(Instance of 'Path')
-2 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(728.0, 528.0)
+2 |  |  |  |  |  | translate(728.0, 528.0)
+2 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 0.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  | paintChild RenderInkWell at Point(728.0, 528.0)
+2 |  |  |  |  |  |  | paintChild RenderInkWell at Point(0.0, 0.0)
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(728.0, 528.0)
+2 |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(0.0, 0.0)
 2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(744.0, 544.0)
+2 |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(16.0, 16.0)
 2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | restore
 ------------------------------------------------------------------------
@@ -199,13 +200,14 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | saveLayer(Rect.fromLTRB(728.0, 528.0, 784.0, 584.0), Paint(color:Color(0xff000000)))
 3 |  |  |  |  |  | clipPath(Instance of 'Path')
-3 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(728.0, 528.0)
+3 |  |  |  |  |  | translate(728.0, 528.0)
+3 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 0.0)
 3 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  | paintChild RenderInkWell at Point(728.0, 528.0)
+3 |  |  |  |  |  |  | paintChild RenderInkWell at Point(0.0, 0.0)
 3 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(728.0, 528.0)
+3 |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(0.0, 0.0)
 3 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(744.0, 544.0)
+3 |  |  |  |  |  |  |  |  | paintChild RenderImage at Point(16.0, 16.0)
 3 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | restore
 ------------------------------------------------------------------------

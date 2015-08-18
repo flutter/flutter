@@ -295,18 +295,12 @@ class RenderOpacity extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       int a = _alpha;
-
       if (a == 0)
         return;
-
-      if (a == 255) {
+      if (a == 255)
         context.paintChild(child, offset.toPoint());
-        return;
-      }
-
-      context.canvas.saveLayer(null, _paint); // TODO(abarth): layerize
-      context.paintChild(child, offset.toPoint());
-      context.canvas.restore();
+      else
+        context.paintChildWithPaint(child, offset.toPoint(), null, _paint);
     }
   }
 }
@@ -349,11 +343,8 @@ class RenderColorFilter extends RenderProxyBox {
   }
 
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      context.canvas.saveLayer(offset & size, _paint); // TODO(abarth): layerize
-      context.paintChild(child, offset.toPoint());
-      context.canvas.restore();
-    }
+    if (child != null)
+      context.paintChildWithPaint(child, offset.toPoint(), offset & size, _paint);
   }
 }
 
@@ -362,7 +353,7 @@ class RenderClipRect extends RenderProxyBox {
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChildWithClip(child, offset.toPoint(), Offset.zero & size);
+      context.paintChildWithClipRect(child, offset.toPoint(), offset & size);
   }
 }
 
@@ -393,24 +384,17 @@ class RenderClipRRect extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  final Paint _paint = new Paint()..isAntiAlias = false;
-
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      context.canvas.saveLayer(rect, _paint); // TODO(abarth): layerize
       sky.RRect rrect = new sky.RRect()..setRectXY(rect, xRadius, yRadius);
-      context.canvas.clipRRect(rrect);
-      context.paintChild(child, offset.toPoint());
-      context.canvas.restore();
+      context.paintChildWithClipRRect(child, offset.toPoint(), rect, rrect);
     }
   }
 }
 
 class RenderClipOval extends RenderProxyBox {
   RenderClipOval({ RenderBox child }) : super(child);
-
-  final Paint _paint = new Paint()..isAntiAlias = false;
 
   Rect _cachedRect;
   Path _cachedPath;
@@ -426,10 +410,7 @@ class RenderClipOval extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      context.canvas.saveLayer(rect, _paint); // TODO(abarth): layerize
-      context.canvas.clipPath(_getPath(rect));
-      context.paintChild(child, offset.toPoint());
-      context.canvas.restore();
+      context.paintChildWithClipPath(child, offset.toPoint(), rect, _getPath(rect));
     }
   }
 }
@@ -561,11 +542,8 @@ class RenderTransform extends RenderProxyBox {
   }
 
   void paint(PaintingContext context, Offset offset) {
-    context.canvas.save();
-    context.canvas.translate(offset.dx, offset.dy);
-    context.canvas.concat(_transform.storage);
-    super.paint(context, Offset.zero);
-    context.canvas.restore();
+    if (child != null)
+      context.paintChildWithTransform(child, offset.toPoint(), _transform);
   }
 
   void applyPaintTransform(Matrix4 transform) {

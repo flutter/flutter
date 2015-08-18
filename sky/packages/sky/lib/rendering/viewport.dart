@@ -122,13 +122,10 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
       Offset roundedScrollOffset = _scrollOffsetRoundedToIntegerDevicePixels;
       bool _needsClip = offset < Offset.zero ||
                         !(offset & size).contains(((offset - roundedScrollOffset) & child.size).bottomRight);
-      if (_needsClip) {
-        context.canvas.save();
-        context.canvas.clipRect(offset & size);
-      }
-      context.paintChild(child, (offset - roundedScrollOffset).toPoint());
       if (_needsClip)
-        context.canvas.restore();
+        context.paintChildWithClipRect(child, (offset - roundedScrollOffset).toPoint(), offset & size);
+      else
+        context.paintChild(child, (offset - roundedScrollOffset).toPoint());
     }
   }
 

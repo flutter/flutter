@@ -42,8 +42,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  ContainerLayer _rootLayer;
-
   // We never call layout() on this class, so this should never get
   // checked. (This class is laid out using scheduleInitialLayout().)
   bool debugDoesMeetConstraints() { assert(false); return false; }
@@ -79,6 +77,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
+  bool get hasLayer => true;
+
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.paintChild(child, offset.toPoint());
@@ -88,12 +88,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     sky.tracing.begin('RenderView.paintFrame');
     try {
       final double devicePixelRatio = sky.view.devicePixelRatio;
-      Matrix4 transform = new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
-      _rootLayer = new TransformLayer(transform: transform);
-      PaintingContext context = new PaintingContext(Offset.zero, size);
-      _rootLayer.add(context.layer);
-      context.paintChild(child, Point.origin);
-      context.endRecording();
+      Matrix4 logicalToDeviceZoom = new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
+      ContainerLayer rootLayer = new TransformLayer(transform: logicalToDeviceZoom);
+      initialPaint(rootLayer, size);
     } finally {
       sky.tracing.end('RenderView.paintFrame');
     }
@@ -102,9 +99,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void compositeFrame() {
     sky.tracing.begin('RenderView.compositeFrame');
     try {
+      // Eventually we will want to pass the entire layer tree to the C++ side.
+      // For now, however, we take the layer tree and paint it into a Canvas,
+      // which we then hand to the C++ side.
       sky.PictureRecorder recorder = new sky.PictureRecorder();
       sky.Canvas canvas = new sky.Canvas(recorder, Point.origin & (size * sky.view.devicePixelRatio));
-      _rootLayer.paint(canvas);
+      layer.paint(canvas);
       sky.view.picture = recorder.endRecording();
     } finally {
       sky.tracing.end('RenderView.compositeFrame');

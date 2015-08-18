@@ -3,10 +3,8 @@ import 'dart:async';
 import 'dart:sky' as sky;
 import 'dart:typed_data';
 
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/object.dart';
-import 'package:sky/rendering/view.dart';
-import 'package:sky/widgets/basic.dart';
+import 'package:sky/rendering.dart';
+import 'package:sky/widgets.dart';
 
 import 'harness.dart';
 
@@ -128,10 +126,14 @@ class TestPaintingContext extends PaintingContext {
 
   TestPaintingCanvas get canvas => super.canvas;
 
-  void paintChild(RenderObject child, Point position) {
-    canvas.log("paintChild ${child.runtimeType} at $position");
+  void insertChild(RenderObject child, Offset offset) {
+    canvas.log("paintChild ${child.runtimeType} at ${offset.toPoint()}");
     TestPaintingCanvas childCanvas = new TestPaintingCanvas(new sky.PictureRecorder(), canvas.size, canvas.logger, indent: "${canvas.indent}  |");
-    child.paint(new TestPaintingContext(childCanvas), position.toOffset());
+    child.paint(new TestPaintingContext(childCanvas), offset);
+  }
+
+  void compositeChild(RenderObject child, { Offset childOffset: Offset.zero, ContainerLayer parentLayer }) {
+    _insertChild(child, childOffset);
   }
 }
 
@@ -197,6 +199,7 @@ class TestRenderView extends RenderView {
   void syncCheckFrame() {
     Component.flushBuild();
     RenderObject.flushLayout();
+    updateCompositingBits();
     paintFrame();
     print(lastPaint); // TODO(ianh): figure out how to make this fit the unit testing framework better
   }
