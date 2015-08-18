@@ -339,7 +339,7 @@ class Container extends Component {
   Widget build() {
     Widget current = child;
 
-    if (child == null && width == null && height == null)
+    if (child == null && (width == null || height == null))
       current = new ConstrainedBox(constraints: BoxConstraints.expand);
 
     if (padding != null)
@@ -348,12 +348,13 @@ class Container extends Component {
     if (decoration != null)
       current = new DecoratedBox(decoration: decoration, child: current);
 
-    if (width != null || height != null)
+    if (width != null || height != null) {
       current = new SizedBox(
         width: width,
         height: height,
         child: current
       );
+    }
 
     if (constraints != null)
       current = new ConstrainedBox(constraints: constraints, child: current);
