@@ -167,21 +167,77 @@ class RadialGradient extends Gradient {
   }
 }
 
-enum BackgroundFit { fill, contain, cover, none, scaleDown }
+enum ImageFit { fill, contain, cover, none, scaleDown }
 
-enum BackgroundRepeat { repeat, repeatX, repeatY, noRepeat }
+enum ImageRepeat { repeat, repeatX, repeatY, noRepeat }
+
+void paintImage({
+  sky.Canvas canvas,
+  Rect rect,
+  sky.Image image,
+  sky.ColorFilter colorFilter,
+  fit: ImageFit.scaleDown,
+  repeat: ImageRepeat.noRepeat
+}) {
+  Size bounds = rect.size;
+  Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
+  Size src;
+  Size dst;
+  switch(fit) {
+    case ImageFit.fill:
+      src = imageSize;
+      dst = bounds;
+      break;
+    case ImageFit.contain:
+      src = imageSize;
+      if (bounds.width / bounds.height > src.width / src.height) {
+        dst = new Size(bounds.width, src.height * bounds.width / src.width);
+      } else {
+        dst = new Size(src.width * bounds.height / src.height, bounds.height);
+      }
+      break;
+    case ImageFit.cover:
+      if (bounds.width / bounds.height > imageSize.width / imageSize.height) {
+        src = new Size(imageSize.width, imageSize.width * bounds.height / bounds.width);
+      } else {
+        src = new Size(imageSize.height * bounds.width / bounds.height, imageSize.height);
+      }
+      dst = bounds;
+      break;
+    case ImageFit.none:
+      src = new Size(math.min(imageSize.width, bounds.width),
+                     math.min(imageSize.height, bounds.height));
+      dst = src;
+      break;
+    case ImageFit.scaleDown:
+      src = imageSize;
+      dst = bounds;
+      if (src.height > dst.height) {
+        dst = new Size(src.width * dst.height / src.height, src.height);
+      }
+      if (src.width > dst.width) {
+        dst = new Size(dst.width, src.height * dst.width / src.width);
+      }
+      break;
+  }
+  // TODO(abarth): Implement |repeat|.
+  Paint paint = new Paint();
+  if (colorFilter != null)
+    paint.setColorFilter(colorFilter);
+  canvas.drawImageRect(image, Point.origin & src, rect.topLeft & dst, paint);
+}
 
 typedef void BackgroundImageChangeListener();
 
 class BackgroundImage {
-  final BackgroundFit fit;
-  final BackgroundRepeat repeat;
+  final ImageFit fit;
+  final ImageRepeat repeat;
   final sky.ColorFilter colorFilter;
 
   BackgroundImage({
     ImageResource image,
-    this.fit: BackgroundFit.scaleDown,
-    this.repeat: BackgroundRepeat.noRepeat,
+    this.fit: ImageFit.scaleDown,
+    this.repeat: ImageRepeat.noRepeat,
     this.colorFilter
   }) : _imageResource = image;
 
@@ -189,7 +245,6 @@ class BackgroundImage {
   sky.Image get image => _image;
 
   ImageResource _imageResource;
-  Size _size;
 
   final List<BackgroundImageChangeListener> _listeners =
       new List<BackgroundImageChangeListener>();
@@ -215,7 +270,6 @@ class BackgroundImage {
     if (resolvedImage == null)
       return;
     _image = resolvedImage;
-    _size = new Size(resolvedImage.width.toDouble(), resolvedImage.height.toDouble());
     final List<BackgroundImageChangeListener> localListeners =
         new List<BackgroundImageChangeListener>.from(_listeners);
     for (BackgroundImageChangeListener listener in localListeners) {
@@ -386,53 +440,16 @@ class BoxPainter {
     if (backgroundImage == null)
       return;
     sky.Image image = backgroundImage.image;
-    if (image != null) {
-      Size bounds = rect.size;
-      Size imageSize = backgroundImage._size;
-      Size src;
-      Size dst;
-      switch(backgroundImage.fit) {
-        case BackgroundFit.fill:
-          src = imageSize;
-          dst = bounds;
-          break;
-        case BackgroundFit.contain:
-          src = imageSize;
-          if (bounds.width / bounds.height > src.width / src.height) {
-            dst = new Size(bounds.width, src.height * bounds.width / src.width);
-          } else {
-            dst = new Size(src.width * bounds.height / src.height, bounds.height);
-          }
-          break;
-        case BackgroundFit.cover:
-          if (bounds.width / bounds.height > imageSize.width / imageSize.height) {
-            src = new Size(imageSize.width, imageSize.width * bounds.height / bounds.width);
-          } else {
-            src = new Size(imageSize.height * bounds.width / bounds.height, imageSize.height);
-          }
-          dst = bounds;
-          break;
-        case BackgroundFit.none:
-          src = new Size(math.min(imageSize.width, bounds.width),
-                         math.min(imageSize.height, bounds.height));
-          dst = src;
-          break;
-        case BackgroundFit.scaleDown:
-          src = imageSize;
-          dst = bounds;
-          if (src.height > dst.height) {
-            dst = new Size(src.width * dst.height / src.height, src.height);
-          }
-          if (src.width > dst.width) {
-            dst = new Size(dst.width, src.height * dst.width / src.width);
-          }
-          break;
-      }
-      Paint paint = new Paint();
-      if (backgroundImage.colorFilter != null)
-        paint.setColorFilter(backgroundImage.colorFilter);
-      canvas.drawImageRect(image, Point.origin & src, rect.topLeft & dst, paint);
-    }
+    if (image == null)
+      return;
+    paintImage(
+      canvas: canvas,
+      rect: rect,
+      image: image,
+      colorFilter: backgroundImage.colorFilter,
+      fit:  backgroundImage.fit,
+      repeat: backgroundImage.repeat
+    );
   }
 
   void _paintBorder(sky.Canvas canvas, Rect rect) {
