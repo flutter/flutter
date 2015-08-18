@@ -72,7 +72,7 @@ class SkyBinding {
   }
   void beginFrame(double timeStamp) {
     RenderObject.flushLayout();
-    _renderView.updateCompositing();
+    _renderView.updateCompositingBits();
     RenderObject.flushPaint();
     _renderView.paintFrame();
     _renderView.compositeFrame();

@@ -26,15 +26,40 @@ abstract class Layer {
     if (_parent != null)
       _parent.remove(this);
   }
+  void replaceWith(Layer newLayer) {
+    assert(_parent != null);
+    assert(newLayer._parent == null);
+    assert(newLayer._nextSibling == null);
+    assert(newLayer._previousSibling == null);
+    newLayer._nextSibling = _nextSibling;
+    if (_nextSibling != null)
+      newLayer._nextSibling._previousSibling = newLayer;
+    newLayer._previousSibling = _previousSibling;
+    if (_previousSibling != null)
+      newLayer._previousSibling._nextSibling = newLayer;
+    newLayer._parent = _parent;
+    if (_parent._firstChild == this)
+      _parent._firstChild = newLayer;
+    if (_parent._lastChild == this)
+      _parent._lastChild = newLayer;
+    _nextSibling = null;
+    _previousSibling = null;
+    _parent = null;
+  }
 
+  // The paint() methods are temporary. Eventually, Layers won't have
+  // a paint() method, the entire Layer hierarchy will be handed over
+  // to the C++ side for processing. Until we implement that, though,
+  // we instead have the layers paint themselves into a canvas at
+  // paint time.
   void paint(sky.Canvas canvas);
 }
 
 class PictureLayer extends Layer {
-  PictureLayer({ Offset offset: Offset.zero, this.size })
+  PictureLayer({ Offset offset: Offset.zero, this.paintBounds })
     : super(offset: offset);
 
-  Size size;
+  Rect paintBounds;
   sky.Picture picture;
 
   bool _debugPaintLayerBorder(sky.Canvas canvas) {
@@ -43,12 +68,13 @@ class PictureLayer extends Layer {
         ..color = debugPaintLayerBordersColor
         ..strokeWidth = 2.0
         ..setStyle(sky.PaintingStyle.stroke);
-      canvas.drawRect(Point.origin & size, border);
+      canvas.drawRect(paintBounds, border);
     }
     return true;
   }
 
   void paint(sky.Canvas canvas) {
+    assert(picture != null);
     canvas.translate(offset.dx, offset.dy);
     canvas.drawPicture(picture);
     assert(_debugPaintLayerBorder(canvas));
@@ -59,17 +85,11 @@ class PictureLayer extends Layer {
 class ContainerLayer extends Layer {
   ContainerLayer({ Offset offset: Offset.zero }) : super(offset: offset);
 
-  void paint(sky.Canvas canvas) {
-    Layer child = firstChild;
-    while (child != null) {
-      child.paint(canvas);
-      child = child.nextSibling;
-    }
-  }
-
+  // TODO(ianh): hide firstChild since nobody uses it
   Layer _firstChild;
   Layer get firstChild => _firstChild;
 
+  // TODO(ianh): remove _lastChild since nobody uses it
   Layer _lastChild;
   Layer get lastChild => _lastChild;
 
@@ -89,6 +109,7 @@ class ContainerLayer extends Layer {
     return child == equals;
   }
 
+  // TODO(ianh): Remove 'before' and rename the function to 'append' since nobody uses 'before'
   void add(Layer child, { Layer before }) {
     assert(child != this);
     assert(before != this);
@@ -126,10 +147,11 @@ class ContainerLayer extends Layer {
     }
   }
 
+  // TODO(ianh): Hide this function since only detach() uses it
   void remove(Layer child) {
+    assert(child._parent == this);
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
-    assert(child._parent == this);
     if (child._previousSibling == null) {
       assert(_firstChild == child);
       _firstChild = child._nextSibling;
@@ -146,6 +168,69 @@ class ContainerLayer extends Layer {
     child._nextSibling = null;
     child._parent = null;
   }
+
+  void paint(sky.Canvas canvas) {
+    canvas.translate(offset.dx, offset.dy);
+    paintChildren(canvas);
+    canvas.translate(-offset.dx, -offset.dy);
+  }
+
+  void paintChildren(sky.Canvas canvas) {
+    Layer child = firstChild;
+    while (child != null) {
+      child.paint(canvas);
+      child = child.nextSibling;
+    }
+  }
+}
+
+class ClipRectLayer extends ContainerLayer {
+  ClipRectLayer({ Offset offset: Offset.zero, this.clipRect }) : super(offset: offset);
+
+  // clipRect is _not_ affected by given offset
+  Rect clipRect;
+
+  void paint(sky.Canvas canvas) {
+    canvas.save();
+    canvas.clipRect(clipRect);
+    canvas.translate(offset.dx, offset.dy);
+    paintChildren(canvas);
+    canvas.restore();
+  }
+}
+
+final Paint _disableAntialias = new Paint()..isAntiAlias = false;
+
+class ClipRRectLayer extends ContainerLayer {
+  ClipRRectLayer({ Offset offset: Offset.zero, this.bounds, this.clipRRect }) : super(offset: offset);
+
+  // bounds and clipRRect are _not_ affected by given offset
+  Rect bounds;
+  sky.RRect clipRRect;
+
+  void paint(sky.Canvas canvas) {
+    canvas.saveLayer(bounds, _disableAntialias);
+    canvas.clipRRect(clipRRect);
+    canvas.translate(offset.dx, offset.dy);
+    paintChildren(canvas);
+    canvas.restore();
+  }
+}
+
+class ClipPathLayer extends ContainerLayer {
+  ClipPathLayer({ Offset offset: Offset.zero, this.bounds, this.clipPath }) : super(offset: offset);
+
+  // bounds and clipPath are _not_ affected by given offset
+  Rect bounds;
+  Path clipPath;
+
+  void paint(sky.Canvas canvas) {
+    canvas.saveLayer(bounds, _disableAntialias);
+    canvas.clipPath(clipPath);
+    canvas.translate(offset.dx, offset.dy);
+    paintChildren(canvas);
+    canvas.restore();
+  }
 }
 
 class TransformLayer extends ContainerLayer {
@@ -157,21 +242,22 @@ class TransformLayer extends ContainerLayer {
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
     canvas.concat(transform.storage);
-    super.paint(canvas);
+    paintChildren(canvas);
     canvas.restore();
   }
 }
 
-class ClipLayer extends ContainerLayer {
-  ClipLayer({ Offset offset: Offset.zero, this.clipRect }) : super(offset: offset);
+class PaintLayer extends ContainerLayer {
+  PaintLayer({ Offset offset: Offset.zero, this.bounds, this.paintSettings }) : super(offset: offset);
 
-  Rect clipRect;
+  // bounds is _not_ affected by given offset
+  Rect bounds;
+  Paint paintSettings; // TODO(ianh): rename this to 'paint' once paint() is gone
 
   void paint(sky.Canvas canvas) {
-    canvas.save();
+    canvas.saveLayer(bounds, paintSettings);
     canvas.translate(offset.dx, offset.dy);
-    canvas.clipRect(clipRect);
-    super.paint(canvas);
+    paintChildren(canvas);
     canvas.restore();
   }
 }
@@ -192,10 +278,9 @@ class ColorFilterLayer extends ContainerLayer {
     Paint paint = new Paint()
       ..color = color
       ..setTransferMode(transferMode);
-
     canvas.saveLayer(offset & size, paint);
     canvas.translate(offset.dx, offset.dy);
-    super.paint(canvas);
+    paintChildren(canvas);
     canvas.restore();
   }
 }
