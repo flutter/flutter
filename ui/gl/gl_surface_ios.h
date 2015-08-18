@@ -18,6 +18,7 @@ class GL_EXPORT GLSurfaceIOS : public GLSurface {
   void* GetHandle() override;
   bool OnMakeCurrent(GLContext* context) override;
   unsigned int GetBackingFrameBufferObject() override;
+  bool Resize(const gfx::Size& size) override;
 
  private:
   gfx::AcceleratedWidget widget_;
