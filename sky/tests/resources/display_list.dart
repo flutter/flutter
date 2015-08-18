@@ -134,12 +134,34 @@ class TestPaintingContext extends PaintingContext {
   }
 }
 
+const Size _kTestViewSize = const Size(800.0, 600.0);
+
+class TestView extends RenderView {
+  TestView({ RenderBox child }) : super(child: child) {
+    attach();
+    rootConstraints = new ViewConstraints(size: _kTestViewSize);
+    scheduleInitialLayout();
+    syncCheckFrame();
+  }
+
+  void syncCheckFrame() {
+    Component.flushBuild();
+    RenderObject.flushLayout();
+  }
+
+  void paintFrame() {
+  }
+
+  void compositeFrame() {
+  }
+}
+
 class TestRenderView extends RenderView {
 
   TestRenderView([ RenderBox child = null ]) : super(child: child) {
     print("TestRenderView enabled");
     attach();
-    rootConstraints = new ViewConstraints(size: new Size(800.0, 600.0)); // arbitrary figures
+    rootConstraints = new ViewConstraints(size: _kTestViewSize);
     scheduleInitialLayout();
     syncCheckFrame();
   }
