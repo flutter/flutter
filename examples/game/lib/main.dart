@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/rendering/object.dart';
@@ -24,40 +26,48 @@ AssetBundle _initBundle() {
 
 final AssetBundle _bundle = _initBundle();
 
-ImageMap _loader;
+ImageMap _imageMap;
 SpriteSheet _spriteSheet;
 SpriteSheet _spriteSheetUI;
 GameDemoApp _app;
 Map<String,SoundEffect> _sounds = {};
 
 main() async {
-  _loader = new ImageMap(_bundle);
+  _imageMap = new ImageMap(_bundle);
 
-  await _loader.load([
+  // Use a list to wait on all loads in parallel just before starting the app.
+  List loads = [];
+
+  loads.add(_imageMap.load([
     'assets/nebula.png',
     'assets/sprites.png',
     'assets/starfield.png',
     'assets/game_ui.png',
-  ]);
+  ]));
 
+  // TODO(eseidel): These load in serial which is bad for startup!
   String json = await _bundle.loadString('assets/sprites.json');
-  _spriteSheet = new SpriteSheet(_loader['assets/sprites.png'], json);
+  _spriteSheet = new SpriteSheet(_imageMap['assets/sprites.png'], json);
 
   json = await _bundle.loadString('assets/game_ui.json');
-  _spriteSheetUI = new SpriteSheet(_loader["assets/game_ui.png"], json);
+  _spriteSheetUI = new SpriteSheet(_imageMap['assets/game_ui.png'], json);
 
   _app = new GameDemoApp();
 
-  _sounds["explosion"] = new SoundEffect(_bundle.load('assets/explosion.wav'));
-  _sounds["laser"] = new SoundEffect(_bundle.load('assets/laser.wav'));
+  // TODO(eseidel): SoundEffect doesn't really do anything except hold a future.
+  _sounds['explosion'] = new SoundEffect(_bundle.load('assets/explosion.wav'));
+  _sounds['laser'] = new SoundEffect(_bundle.load('assets/laser.wav'));
 
-  await _sounds["explosion"].load();
-  await _sounds["laser"].load();
+  loads.addAll([
+    _sounds['explosion'].load(),
+    _sounds['laser'].load(),
+  ]);
 
   SoundTrackPlayer stPlayer = SoundTrackPlayer.sharedInstance();
-  SoundTrack music = await stPlayer.load('https://github.com/slembcke/GalacticGuardian.spritebuilder/raw/GDC/Source/Resources/TempMusic.aac');
+  SoundTrack music = await stPlayer.load(_bundle.load('assets/temp_music.aac'));
   stPlayer.play(music);
 
+  await Future.wait(loads);
   runApp(_app);
 }
 
@@ -111,7 +121,7 @@ class GameDemoApp extends App {
             _game = new GameDemoWorld(
               _app,
               navigator,
-              _loader,
+              _imageMap,
               _spriteSheet,
               _spriteSheetUI,
               _sounds,
@@ -121,8 +131,8 @@ class GameDemoApp extends App {
             );
             navigator.pushNamed('/game');
           },
-          texture: _spriteSheetUI["btn_play_up.png"],
-          textureDown: _spriteSheetUI["btn_play_down.png"],
+          texture: _spriteSheetUI['btn_play_up.png'],
+          textureDown: _spriteSheetUI['btn_play_down.png'],
           width: 128.0,
           height: 128.0
         ),
@@ -231,7 +241,7 @@ class _TextureButtonToken {
 
 class MainScreenBackground extends NodeWithSize {
   MainScreenBackground() : super(new Size(1024.0, 1024.0)) {
-    Sprite sprtBackground = new Sprite.fromImage(_loader["assets/starfield.png"]);
+    Sprite sprtBackground = new Sprite.fromImage(_imageMap['assets/starfield.png']);
     sprtBackground.position = new Point(512.0, 512.0);
     addChild(sprtBackground);
 
