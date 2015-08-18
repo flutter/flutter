@@ -67,7 +67,7 @@ declare_args() {
   # depending on the application type, may be unnecessary. If the type of
   # architecture is known beforehand, setting that as the active arch will
   # greatly reduce build times and reduce binary sizes.
-  ios_active_arch = ""
+  ios_active_arch = "armv7"
 }
 
 # default_include_dirs ---------------------------------------------------------
