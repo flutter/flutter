@@ -11,6 +11,7 @@
   // TODO(jackson): Paint should be optional, but making it optional causes crash
   void saveLayer(Rect bounds, /* optional */ Paint paint);
   void restore();
+  int getSaveCount(); // returns 1 for a clean canvas; each call to save() or saveLayer() increments it, and each call to restore() decrements it.
 
   void translate(float dx, float dy);
   void scale(float sx, float sy);

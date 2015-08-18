@@ -163,14 +163,14 @@ class TransformLayer extends ContainerLayer {
 }
 
 class ClipLayer extends ContainerLayer {
-  ClipLayer({ Offset offset: Offset.zero, this.size }) : super(offset: offset);
+  ClipLayer({ Offset offset: Offset.zero, this.clipRect }) : super(offset: offset);
 
-  Size size;
+  Rect clipRect;
 
   void paint(sky.Canvas canvas) {
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
-    canvas.clipRect(Point.origin & size);
+    canvas.clipRect(clipRect);
     super.paint(canvas);
     canvas.restore();
   }
