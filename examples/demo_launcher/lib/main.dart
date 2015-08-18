@@ -73,7 +73,7 @@ List<SkyDemo> demos = [
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
         image: _bundle.loadImage('assets/stocks_thumbnail.png'),
-        fit: BackgroundFit.cover
+        fit: ImageFit.cover
       )
     )
   ),
@@ -86,7 +86,7 @@ List<SkyDemo> demos = [
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
         image: _bundle.loadImage('assets/game_thumbnail.png'),
-        fit: BackgroundFit.cover
+        fit: ImageFit.cover
       )
     )
   ),
