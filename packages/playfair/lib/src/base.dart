@@ -5,13 +5,23 @@
 part of playfair;
 
 class ChartData {
-  const ChartData({ this.startX, this.endX, this.startY, this.endY, this.dataSet });
+  const ChartData({ this.startX, this.endX, this.startY, this.endY, this.dataSet, this.numHorizontalGridlines, this.roundToPlaces });
   final double startX;
   final double endX;
   final double startY;
   final double endY;
+  final int numHorizontalGridlines;
+  final int roundToPlaces;
   final List<Point> dataSet;
 }
+
+// TODO(jackson): Make these configurable
+const double kGridStrokeWidth = 1.0;
+const Color kGridColor = const Color(0xFFCCCCCC);
+const Color kMarkerColor = const Color(0xFF000000);
+const double kMarkerStrokeWidth = 2.0;
+const double kMarkerRadius = 2.0;
+const double kScaleMargin = 10.0;
 
 class Chart extends LeafRenderObjectWrapper {
   Chart({ Key key, this.data }) : super(key: key);
@@ -63,10 +73,26 @@ class RenderChart extends RenderConstrainedBox {
   }
 }
 
-class ChartPainter {
-  ChartPainter(this.data);
+class Gridline {
+  double value;
+  ParagraphPainter labelPainter;
+  Point labelPosition;
+  Point start;
+  Point end;
+}
 
-  ChartData data;
+class ChartPainter {
+  ChartPainter(ChartData data) : _data = data;
+
+  ChartData _data;
+  ChartData get data => _data;
+  void set data(ChartData value) {
+    assert(data != null);
+    if (_data == value)
+      return;
+    _data = value;
+    _needsLayout = true;
+  }
 
   TextTheme _textTheme;
   TextTheme get textTheme => _textTheme;
@@ -75,13 +101,78 @@ class ChartPainter {
     if (_textTheme == value)
       return;
     _textTheme = value;
-    labels = [
-      new ParagraphPainter(new StyledTextSpan(_textTheme.body1, [new PlainTextSpan("${data.startY}")])),
-      new ParagraphPainter(new StyledTextSpan(_textTheme.body1, [new PlainTextSpan("${data.endY}")])),
-    ];
+    _needsLayout = true;
   }
 
-  List<ParagraphPainter> labels;
+  static double _roundToPlaces(double value, int places) {
+    int multiplier = math.pow(10, places);
+    return (value * multiplier).roundToDouble() / multiplier;
+  }
+
+  // If this is set to true we will _layout() the next time we paint()
+  bool _needsLayout = true;
+
+  // The last rectangle that we were drawn into. If it changes we will _layout()
+  Rect _rect;
+
+  // These are updated by _layout()
+  List<Gridline> _horizontalGridlines;
+  List<Point> _markers;
+
+  void _layout() {
+    // Create the scale labels
+    double yScaleWidth = 0.0;
+    _horizontalGridlines = new List<Gridline>();
+    assert(data.numHorizontalGridlines > 1);
+    double stepSize = (data.endY - data.startY) / (data.numHorizontalGridlines - 1);
+    for(int i = 0; i < data.numHorizontalGridlines; i++) {
+      Gridline gridline = new Gridline()
+        ..value = _roundToPlaces(data.startY + stepSize * i, data.roundToPlaces);
+      if (gridline.value < data.startY || gridline.value > data.endY)
+        continue;  // TODO(jackson): Align things so this doesn't ever happen
+      TextSpan text = new StyledTextSpan(
+        _textTheme.body1,
+        [new PlainTextSpan("${gridline.value}")]
+      );
+      gridline.labelPainter = new ParagraphPainter(text)
+        ..maxWidth = _rect.width
+        ..layout();
+      _horizontalGridlines.add(gridline);
+      yScaleWidth = math.max(yScaleWidth, gridline.labelPainter.maxContentWidth);
+    }
+
+    yScaleWidth += kScaleMargin;
+
+    // Leave room for the scale on the right side
+    Rect markerRect = new Rect.fromLTWH(
+      _rect.left,
+      _rect.top,
+      _rect.width - yScaleWidth,
+      _rect.height
+    );
+
+    // Left align and vertically center the labels on the right side
+    for(Gridline gridline in _horizontalGridlines) {
+      gridline.start = _convertPointToRectSpace(new Point(data.startX, gridline.value), markerRect);
+      gridline.end = _convertPointToRectSpace(new Point(data.endX, gridline.value), markerRect);
+      gridline.labelPosition = new Point(
+        gridline.end.x + kScaleMargin,
+        gridline.end.y - gridline.labelPainter.height / 2.0
+      );
+    }
+
+    // Place the markers
+    List<Point> dataSet = data.dataSet;
+    assert(dataSet != null);
+    assert(dataSet.length > 0);
+    _markers = new List<Point>();
+    for(int i = 0; i < dataSet.length; i++) {
+      _markers.add(_convertPointToRectSpace(dataSet[i], markerRect));
+    }
+
+    // we don't need to compute layout again unless something changes
+    _needsLayout = false;
+  }
 
   Point _convertPointToRectSpace(Point point, Rect rect) {
     double x = rect.left + ((point.x - data.startX) / (data.endX - data.startX)) * rect.width;
@@ -89,37 +180,37 @@ class ChartPainter {
     return new Point(x, y);
   }
 
-  void _paintChart(sky.Canvas canvas, Rect rect) {
+  void _paintGrid(sky.Canvas canvas) {
     Paint paint = new Paint()
-      ..strokeWidth = 2.0
-      ..color = const Color(0xFF000000);
-    List<Point> dataSet = data.dataSet;
-    assert(dataSet != null);
-    assert(dataSet.length > 0);
-    Path path = new Path();
-    Point start = _convertPointToRectSpace(data.dataSet[0], rect);
-    path.moveTo(start.x, start.y);
-    for(Point point in data.dataSet) {
-      Point current = _convertPointToRectSpace(point, rect);
-      canvas.drawCircle(current, 3.0, paint);
-      path.lineTo(current.x, current.y);
+      ..strokeWidth = kGridStrokeWidth
+      ..color = kGridColor;
+    for(Gridline gridline in _horizontalGridlines) {
+      gridline.labelPainter.paint(canvas, gridline.labelPosition.toOffset());
+      canvas.drawLine(gridline.start, gridline.end, paint);
+    }
+  }
+
+  void _paintChart(sky.Canvas canvas) {
+    Paint paint = new Paint()
+      ..strokeWidth = kMarkerStrokeWidth
+      ..color = kMarkerColor;
+    Path path = new sky.Path();
+    path.moveTo(_markers[0].x, _markers[0].y);
+    for (Point marker in _markers) {
+      canvas.drawCircle(marker, kMarkerRadius, paint);
+      path.lineTo(marker.x, marker.y);
     }
     paint.setStyle(sky.PaintingStyle.stroke);
     canvas.drawPath(path, paint);
   }
 
-  void _paintScale(sky.Canvas canvas, Rect rect) {
-    // TODO(jackson): Generalize this to draw the whole axis
-    for(ParagraphPainter painter in labels) {
-      painter.maxWidth = rect.width;
-      painter.layout();
-    }
-    labels[0].paint(canvas, rect.bottomLeft.toOffset());
-    labels[1].paint(canvas, rect.topLeft.toOffset());
-  }
-
   void paint(sky.Canvas canvas, Rect rect) {
-    _paintChart(canvas, rect);
-    _paintScale(canvas, rect);
+    if (rect != _rect)
+      _needsLayout = true;
+    _rect = rect;
+    if (_needsLayout)
+      _layout();
+    _paintGrid(canvas);
+    _paintChart(canvas);
   }
 }

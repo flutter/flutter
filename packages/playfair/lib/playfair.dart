@@ -5,6 +5,7 @@
 library playfair;
 
 import 'dart:sky' as sky;
+import 'dart:math' as math;
 
 import 'package:sky/widgets/framework.dart';
 import 'package:sky/widgets/theme.dart';
