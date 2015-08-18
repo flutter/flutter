@@ -1,0 +1,3 @@
+Small updates for various demos
+Asteroids has sounds, Fitness has charting, etc.
+This app is slowly being replaced by publishing individual apps.
