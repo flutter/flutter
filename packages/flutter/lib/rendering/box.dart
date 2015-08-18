@@ -1324,12 +1324,19 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
 }
 
 class RenderImage extends RenderBox {
-
-  RenderImage({ sky.Image image, double width, double height, sky.ColorFilter colorFilter })
-    : _image = image,
+  RenderImage({
+    sky.Image image,
+    double width,
+    double height,
+    sky.ColorFilter colorFilter,
+    fit: ImageFit.scaleDown,
+    repeat: ImageRepeat.noRepeat
+  }) : _image = image,
       _width = width,
       _height = height,
-      _colorFilter = colorFilter;
+      _colorFilter = colorFilter,
+      _fit = fit,
+      _repeat = repeat;
 
   sky.Image _image;
   sky.Image get image => _image;
@@ -1366,18 +1373,25 @@ class RenderImage extends RenderBox {
     if (value == _colorFilter)
       return;
     _colorFilter = value;
-    _cachedPaint = null;
     markNeedsPaint();
   }
 
-  Paint _cachedPaint;
-  Paint get _paint {
-    if (_cachedPaint == null) {
-      _cachedPaint = new Paint();
-      if (colorFilter != null)
-        _cachedPaint.setColorFilter(colorFilter);
-    }
-    return _cachedPaint;
+  ImageFit _fit;
+  ImageFit get fit => _fit;
+  void set fit (ImageFit value) {
+    if (value == _fit)
+      return;
+    _fit = value;
+    markNeedsPaint();
+  }
+
+  ImageRepeat _repeat;
+  ImageRepeat get repeat => _repeat;
+  void set repeat (ImageRepeat value) {
+    if (value == _repeat)
+      return;
+    _repeat = value;
+    markNeedsPaint();
   }
 
   Size _sizeForConstraints(BoxConstraints constraints) {
@@ -1452,19 +1466,14 @@ class RenderImage extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     if (_image == null)
       return;
-    bool needsScale = size.width != _image.width || size.height != _image.height;
-    final PaintingCanvas canvas = context.canvas;
-    if (needsScale) {
-      double widthScale = size.width / _image.width;
-      double heightScale = size.height / _image.height;
-      canvas.save();
-      canvas.translate(offset.dx, offset.dy);
-      canvas.scale(widthScale, heightScale);
-      offset = Offset.zero;
-    }
-    canvas.drawImage(_image, offset.toPoint(), _paint);
-    if (needsScale)
-      canvas.restore();
+    paintImage(
+      canvas: context.canvas,
+      rect: offset & size,
+      image: _image,
+      colorFilter: _colorFilter,
+      fit: _fit,
+      repeat: _repeat
+    );
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}width: ${width}\n${prefix}height: ${height}\n';
