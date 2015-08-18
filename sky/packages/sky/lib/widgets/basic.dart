@@ -336,14 +336,24 @@ class Container extends Component {
   final double width;
   final double height;
 
+  EdgeDims get _paddingIncludingBorder {
+    if (decoration == null || decoration.border == null)
+      return padding;
+    EdgeDims borderPadding = decoration.border.dimensions;
+    if (padding == null)
+      return borderPadding;
+    return padding + borderPadding;
+  }
+
   Widget build() {
     Widget current = child;
 
     if (child == null && (width == null || height == null))
       current = new ConstrainedBox(constraints: BoxConstraints.expand);
 
-    if (padding != null)
-      current = new Padding(padding: padding, child: current);
+    EdgeDims effectivePadding = _paddingIncludingBorder;
+    if (effectivePadding != null)
+      current = new Padding(padding: effectivePadding, child: current);
 
     if (decoration != null)
       current = new DecoratedBox(decoration: decoration, child: current);
