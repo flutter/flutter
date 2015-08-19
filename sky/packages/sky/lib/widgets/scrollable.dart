@@ -39,7 +39,7 @@ abstract class Scrollable extends StatefulComponent {
     this.scrollDirection: ScrollDirection.vertical
   }) : super(key: key) {
     assert(scrollDirection == ScrollDirection.vertical ||
-        scrollDirection == ScrollDirection.horizontal);
+           scrollDirection == ScrollDirection.horizontal);
   }
 
   ScrollDirection scrollDirection;
@@ -347,8 +347,12 @@ class ScrollableBlock extends Component {
 // about offscreen widgets consuming resources.
 abstract class FixedHeightScrollable extends Scrollable {
 
-  FixedHeightScrollable({ Key key, ScrollDirection scrollDirection, this.itemExtent, this.padding })
-      : super(key: key, scrollDirection: scrollDirection) {
+  FixedHeightScrollable({
+    Key key,
+    ScrollDirection scrollDirection: ScrollDirection.vertical,
+    this.itemExtent,
+    this.padding
+  }) : super(key: key, scrollDirection: scrollDirection) {
     assert(itemExtent != null);
   }
 
@@ -468,7 +472,7 @@ typedef Widget ItemBuilder<T>(T item);
 class ScrollableList<T> extends FixedHeightScrollable {
   ScrollableList({
     Key key,
-    ScrollDirection scrollDirection,
+    ScrollDirection scrollDirection: ScrollDirection.vertical,
     this.items,
     this.itemBuilder,
     double itemExtent,
