@@ -347,8 +347,12 @@ class ScrollableBlock extends Component {
 // about offscreen widgets consuming resources.
 abstract class FixedHeightScrollable extends Scrollable {
 
-  FixedHeightScrollable({ Key key, ScrollDirection scrollDirection, this.itemExtent, this.padding })
-      : super(key: key, scrollDirection: scrollDirection) {
+  FixedHeightScrollable({
+    Key key,
+    ScrollDirection scrollDirection: ScrollDirection.vertical,
+    this.itemExtent,
+    this.padding
+  }) : super(key: key, scrollDirection: scrollDirection) {
     assert(itemExtent != null);
   }
 
@@ -468,7 +472,7 @@ typedef Widget ItemBuilder<T>(T item);
 class ScrollableList<T> extends FixedHeightScrollable {
   ScrollableList({
     Key key,
-    ScrollDirection scrollDirection,
+    ScrollDirection scrollDirection: ScrollDirection.vertical,
     this.items,
     this.itemBuilder,
     double itemExtent,
@@ -498,7 +502,7 @@ class ScrollableList<T> extends FixedHeightScrollable {
 class PageableList<T> extends ScrollableList<T> {
   PageableList({
     Key key,
-    ScrollDirection scrollDirection,
+    ScrollDirection scrollDirection: ScrollDirection.horizontal,
     List<T> items,
     ItemBuilder<T> itemBuilder,
     double itemExtent,
