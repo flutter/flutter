@@ -177,7 +177,7 @@ class DemoList extends Component {
   Widget build() {
     return new ScrollableList<SkyDemo>(
       items: demos,
-      itemHeight: kCardHeight,
+      itemExtent: kCardHeight,
       itemBuilder: buildDemo,
       padding: kListPadding
     );
