@@ -1,6 +1,7 @@
 unittest-suite-wait-for-done
 PASS: Image sizing
+PASS: Null image sizing
 
-All 1 tests passed.
+All 2 tests passed.
 unittest-suite-success
 DONE

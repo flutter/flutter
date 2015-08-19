@@ -129,4 +129,48 @@ void main() {
     expect(image.size.width, equals(20.0));
     expect(image.size.height, equals(30.0));
   });
+
+  test('Null image sizing', () {
+    RenderImage image;
+
+    image = new RenderImage();
+    _layout(image,
+            new BoxConstraints(
+              minWidth: 25.0,
+              minHeight: 25.0,
+              maxWidth: 100.0,
+              maxHeight: 100.0));
+    expect(image.size.width, equals(25.0));
+    expect(image.size.height, equals(25.0));
+
+    image = new RenderImage(width: 50.0);
+    _layout(image,
+            new BoxConstraints(
+              minWidth: 25.0,
+              minHeight: 25.0,
+              maxWidth: 100.0,
+              maxHeight: 100.0));
+    expect(image.size.width, equals(50.0));
+    expect(image.size.height, equals(25.0));
+
+    image = new RenderImage(height: 50.0);
+    _layout(image,
+            new BoxConstraints(
+              minWidth: 25.0,
+              minHeight: 25.0,
+              maxWidth: 100.0,
+              maxHeight: 100.0));
+    expect(image.size.width, equals(25.0));
+    expect(image.size.height, equals(50.0));
+
+    image = new RenderImage(width: 100.0, height: 100.0);
+    _layout(image,
+            new BoxConstraints(
+              minWidth: 25.0,
+              minHeight: 25.0,
+              maxWidth: 75.0,
+              maxHeight: 75.0));
+    expect(image.size.width, equals(75.0));
+    expect(image.size.height, equals(75.0));
+  });
 }
