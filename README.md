@@ -3,9 +3,9 @@ Sky
 
 Sky is a new way to build high performance, cross platform mobile apps.
 More specifically, Sky is a rendering engine, a scripting engine, an
-(optional) framework, and a (optional) set of Material Design widgets.
+(optional) framework, and an (optional) set of [Material Design](https://www.google.com/design/spec/material-design/introduction.html) widgets.
 Sky is optimized for today's, and tomorrow's, mobile devices. We are focused
-on low-latency input, high frame rates, and we are purely mobile first.
+on low-latency input and high frame rates on Android and iOS.
 
  - For information about using Sky to build apps, please see
    [Getting Started with Sky](sky/packages/sky/README.md).
