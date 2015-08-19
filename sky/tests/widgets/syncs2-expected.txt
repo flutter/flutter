@@ -1,0 +1,36 @@
+TestRenderView enabled
+
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestPaintingCanvas() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+
+PAINT FOR FRAME #2 ----------------------------------------------
+2 | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 | paintChild RenderFlex at Point(0.0, 0.0)
+2 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  | paintChild RenderConstrainedBox at Point(350.0, 0.0)
+2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  | paintChild RenderConstrainedBox at Point(350.0, 100.0)
+2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+
+PAINT FOR FRAME #3 ----------------------------------------------
+3 | TestPaintingCanvas() constructor: 800.0 x 600.0
+3 | paintChild RenderFlex at Point(0.0, 0.0)
+3 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+3 |  | paintChild RenderConstrainedBox at Point(350.0, 0.0)
+3 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+3 |  | paintChild RenderPadding at Point(390.0, 100.0)
+3 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+
+PAINT FOR FRAME #4 ----------------------------------------------
+4 | TestPaintingCanvas() constructor: 800.0 x 600.0
+4 | paintChild RenderFlex at Point(0.0, 0.0)
+4 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+4 |  | paintChild RenderPadding at Point(390.0, 0.0)
+4 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+4 |  | paintChild RenderPadding at Point(390.0, 20.0)
+4 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+PAINTED 4 FRAMES
