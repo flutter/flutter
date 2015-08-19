@@ -70,8 +70,12 @@ class ColorFilter extends OneChildRenderObjectWrapper {
 }
 
 class DecoratedBox extends OneChildRenderObjectWrapper {
-  DecoratedBox({ Key key, this.decoration, this.position, Widget child })
-    : super(key: key, child: child);
+  DecoratedBox({
+    Key key,
+    this.decoration,
+    this.position: BoxDecorationPosition.background,
+    Widget child
+  }) : super(key: key, child: child);
 
   final BoxDecoration decoration;
   final BoxDecorationPosition position;
