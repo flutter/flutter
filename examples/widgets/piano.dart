@@ -5,7 +5,6 @@
 import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:sky/mojo/net/fetch.dart';
 import 'package:sky/mojo/shell.dart' as shell;
-import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
