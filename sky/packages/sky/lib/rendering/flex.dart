@@ -341,17 +341,34 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       if (flex > 0) {
         double spaceForChild = spacePerFlex * flex;
         BoxConstraints innerConstraints;
-        switch (_direction) {
-          case FlexDirection.horizontal:
-            innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
-                                                  minWidth: spaceForChild,
-                                                  maxWidth: spaceForChild);
-            break;
-          case FlexDirection.vertical:
-            innerConstraints = new BoxConstraints(minHeight: spaceForChild,
-                                                  maxHeight: spaceForChild,
-                                                  maxWidth: constraints.maxWidth);
-            break;
+        if (alignItems == FlexAlignItems.stretch) {
+          switch (_direction) {
+            case FlexDirection.horizontal:
+              innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
+                                                    maxWidth: constraints.maxWidth,
+                                                    minHeight: constraints.minHeight,
+                                                    maxHeight: constraints.maxHeight);
+              break;
+            case FlexDirection.vertical:
+              innerConstraints = new BoxConstraints(minWidth: constraints.minWidth,
+                                                    maxWidth: constraints.maxWidth,
+                                                    minHeight: constraints.maxHeight,
+                                                    maxHeight: constraints.maxHeight);
+              break;
+          }
+        } else {
+          switch (_direction) {
+            case FlexDirection.horizontal:
+              innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
+                                                    minWidth: spaceForChild,
+                                                    maxWidth: spaceForChild);
+              break;
+            case FlexDirection.vertical:
+              innerConstraints = new BoxConstraints(minHeight: spaceForChild,
+                                                    maxHeight: spaceForChild,
+                                                    maxWidth: constraints.maxWidth);
+              break;
+          }
         }
         child.layout(innerConstraints, parentUsesSize: true);
         usedSpace += _getMainSize(child);
