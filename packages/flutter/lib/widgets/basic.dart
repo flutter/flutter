@@ -523,14 +523,30 @@ class Text extends Component {
 }
 
 class Image extends LeafRenderObjectWrapper {
-  Image({ Key key, this.image, this.width, this.height, this.colorFilter }) : super(key: key);
+  Image({
+    Key key,
+    this.image,
+    this.width,
+    this.height,
+    this.colorFilter,
+    this.fit: ImageFit.scaleDown,
+    this.repeat: ImageRepeat.noRepeat
+  }) : super(key: key);
 
   final sky.Image image;
   final double width;
   final double height;
   final sky.ColorFilter colorFilter;
+  final ImageFit fit;
+  final ImageRepeat repeat;
 
-  RenderImage createNode() => new RenderImage(image: image, width: width, height: height, colorFilter: colorFilter);
+  RenderImage createNode() => new RenderImage(
+    image: image,
+    width: width,
+    height: height,
+    colorFilter: colorFilter,
+    fit: fit,
+    repeat: repeat);
   RenderImage get renderObject => super.renderObject;
 
   void syncRenderObject(Widget old) {
@@ -539,16 +555,28 @@ class Image extends LeafRenderObjectWrapper {
     renderObject.width = width;
     renderObject.height = height;
     renderObject.colorFilter = colorFilter;
+    renderObject.fit = fit;
+    renderObject.repeat = repeat;
   }
 }
 
 class ImageListener extends StatefulComponent {
-  ImageListener({ Key key, this.image, this.width, this.height, this.colorFilter }) : super(key: key);
+  ImageListener({
+    Key key,
+    this.image,
+    this.width,
+    this.height,
+    this.colorFilter,
+    this.fit: ImageFit.scaleDown,
+    this.repeat: ImageRepeat.noRepeat
+  }) : super(key: key);
 
   ImageResource image;
   double width;
   double height;
   sky.ColorFilter colorFilter;
+  ImageFit fit;
+  ImageRepeat repeat;
 
   sky.Image _resolvedImage;
 
@@ -578,6 +606,8 @@ class ImageListener extends StatefulComponent {
     width = source.width;
     height = source.height;
     colorFilter = source.colorFilter;
+    fit = source.fit;
+    repeat = source.repeat;
     if (needToUpdateListeners)
       image.addListener(_handleImageChanged);
   }
@@ -587,44 +617,71 @@ class ImageListener extends StatefulComponent {
       image: _resolvedImage,
       width: width,
       height: height,
-      colorFilter: colorFilter
+      colorFilter: colorFilter,
+      fit: fit,
+      repeat: repeat
     );
   }
 }
 
 class NetworkImage extends Component {
-  NetworkImage({ Key key, this.src, this.width, this.height, this.colorFilter }) : super(key: key);
+  NetworkImage({
+    Key key,
+    this.src,
+    this.width,
+    this.height,
+    this.colorFilter,
+    this.fit: ImageFit.scaleDown,
+    this.repeat: ImageRepeat.noRepeat
+  }) : super(key: key);
 
   final String src;
   final double width;
   final double height;
   final sky.ColorFilter colorFilter;
+  final ImageFit fit;
+  final ImageRepeat repeat;
 
   Widget build() {
     return new ImageListener(
       image: image_cache.load(src),
       width: width,
       height: height,
-      colorFilter: colorFilter
+      colorFilter: colorFilter,
+      fit: fit,
+      repeat: repeat
     );
   }
 }
 
 class AssetImage extends Component {
-  AssetImage({ Key key, this.name, this.bundle, this.width, this.height, this.colorFilter }) : super(key: key);
+  AssetImage({
+    Key key,
+    this.name,
+    this.bundle,
+    this.width,
+    this.height,
+    this.colorFilter,
+    this.fit: ImageFit.scaleDown,
+    this.repeat: ImageRepeat.noRepeat
+  }) : super(key: key);
 
   final String name;
   final AssetBundle bundle;
   final double width;
   final double height;
   final sky.ColorFilter colorFilter;
+  final ImageFit fit;
+  final ImageRepeat repeat;
 
   Widget build() {
     return new ImageListener(
       image: bundle.loadImage(name),
       width: width,
       height: height,
-      colorFilter: colorFilter
+      colorFilter: colorFilter,
+      fit: fit,
+      repeat: repeat
     );
   }
 }
