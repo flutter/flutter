@@ -12,7 +12,7 @@ enum ThemeBrightness { dark, light }
 class ThemeData {
 
   ThemeData({
-    ThemeBrightness brightness,
+    ThemeBrightness brightness: ThemeBrightness.light,
     Map<int, Color> primarySwatch,
     Color accentColor,
     this.accentColorBrightness: ThemeBrightness.dark,
