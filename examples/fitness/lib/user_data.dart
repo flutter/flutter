@@ -26,11 +26,11 @@ Future<UserData> loadFitnessData() async {
   print("Loading from $dataPath");
   JsonDecoder decoder = new JsonDecoder();
   Map data = await decoder.convert(await new File(dataPath).readAsString());
-  return new UserData.fromJson(data);
+  return new UserDataImpl.fromJson(data);
 }
 
 // Intentionally synchronous for execution just before shutdown.
-Future saveFitnessData(UserData data) async {
+Future saveFitnessData(UserDataImpl data) async {
   String dataPath = await dataFilePath();
   print("Saving to $dataPath");
   JsonEncoder encoder = new JsonEncoder();
