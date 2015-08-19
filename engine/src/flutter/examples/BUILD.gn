@@ -7,8 +7,7 @@ group("examples") {
 
   deps = [
     "//examples/demo_launcher",
-    # TODO(abarth): Add fitness back once playfair rolls
-    #"//examples/fitness",
+    "//examples/fitness",
     "//examples/game",
     "//examples/mine_digger",
     "//examples/rendering",
