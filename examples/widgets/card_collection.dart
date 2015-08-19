@@ -3,20 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/base/lerp.dart';
-import 'package:sky/painting/text_style.dart';
-import 'package:sky/theme/colors.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/block_viewport.dart';
-import 'package:sky/widgets/card.dart';
-import 'package:sky/widgets/dismissable.dart';
-import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/scrollable.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
-import 'package:sky/widgets/framework.dart';
-import 'package:sky/widgets/task_description.dart';
+import 'package:sky/widgets.dart';
 
 class CardModel {
   CardModel(this.value, this.height, this.color);
@@ -30,7 +19,7 @@ class CardModel {
 class CardCollectionApp extends App {
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: white, fontSize: 18.0, fontWeight: bold);
+    const TextStyle(color: colors.white, fontSize: 18.0, fontWeight: bold);
 
   final TextStyle backgroundTextStyle =
     typography.white.title.copyWith(textAlign: TextAlign.center);
@@ -45,7 +34,7 @@ class CardCollectionApp extends App {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
     ];
     cardModels = new List.generate(cardHeights.length, (i) {
-      Color color = lerpColor(Red[300], Blue[900], i / cardHeights.length);
+      Color color = lerpColor(colors.Red[300], colors.Blue[900], i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
     super.initState();
@@ -123,8 +112,8 @@ class CardCollectionApp extends App {
       child: new Theme(
         data: new ThemeData(
           brightness: ThemeBrightness.light,
-          primarySwatch: Blue,
-          accentColor: RedAccent[200]
+          primarySwatch: colors.Blue,
+          accentColor: colors.RedAccent[200]
         ),
         child: new TaskDescription(
           label: 'Cards',

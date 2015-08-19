@@ -25,11 +25,12 @@ import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/framework.dart';
 
 export 'package:sky/base/hit_test.dart' show EventDisposition, combineEventDispositions;
+export 'package:sky/painting/text_style.dart';
 export 'package:sky/rendering/block.dart' show BlockDirection;
 export 'package:sky/rendering/box.dart' show BoxConstraints;
 export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'package:sky/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxShadow, Border, BorderSide, EdgeDims;
+export 'package:sky/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxShadow, Border, BorderSide, EdgeDims, Shape;
 export 'package:sky/rendering/toggleable.dart' show ValueChanged;
 export 'package:sky/rendering/viewport.dart' show ScrollDirection;
 export 'package:sky/widgets/framework.dart' show Key, GlobalKey, Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;

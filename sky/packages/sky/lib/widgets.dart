@@ -34,6 +34,7 @@ export 'widgets/modal_overlay.dart';
 export 'widgets/navigator.dart';
 export 'widgets/popup_menu.dart';
 export 'widgets/popup_menu_item.dart';
+export 'widgets/progress_indicator.dart';
 export 'widgets/radio.dart';
 export 'widgets/raised_button.dart';
 export 'widgets/scaffold.dart';
@@ -45,3 +46,5 @@ export 'widgets/task_description.dart';
 export 'widgets/theme.dart';
 export 'widgets/tool_bar.dart';
 export 'widgets/transitions.dart';
+
+export 'package:vector_math/vector_math.dart' show Matrix4;

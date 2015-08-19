@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/widgets.dart';
-import 'package:sky/theme/colors.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:sky/theme/colors.dart' as colors;
 
 class BigSwitchApp extends App {
   bool _value = false;
@@ -23,7 +22,7 @@ class BigSwitchApp extends App {
         padding: new EdgeDims.all(20.0),
         transform: scale,
         decoration: new BoxDecoration(
-          backgroundColor: Teal[600]
+          backgroundColor: colors.Teal[600]
         )
     );
   }

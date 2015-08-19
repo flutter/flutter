@@ -4,21 +4,17 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/object.dart';
-import 'package:sky/rendering/paragraph.dart';
-import 'package:sky/rendering/sky_binding.dart';
-import 'package:sky/rendering/stack.dart';
-import 'package:sky/theme/colors.dart';
+import 'package:sky/rendering.dart';
+import 'package:sky/theme/colors.dart' as colors;
 
 // Material design colors. :p
-List<Color> colors = [
-  Teal[500],
-  Amber[500],
-  Purple[500],
-  LightBlue[500],
-  DeepPurple[500],
-  Lime[500],
+List<Color> kColors = [
+  colors.Teal[500],
+  colors.Amber[500],
+  colors.Purple[500],
+  colors.LightBlue[500],
+  colors.DeepPurple[500],
+  colors.Lime[500],
 ];
 
 class Dot {
@@ -47,7 +43,7 @@ class RenderTouchDemo extends RenderBox {
     if (event is sky.PointerEvent) {
       switch (event.type) {
         case 'pointerdown':
-          Color color = colors[event.pointer.remainder(colors.length)];
+          Color color = kColors[event.pointer.remainder(kColors.length)];
           dots[event.pointer] = new Dot(color: color)..update(event);
           break;
         case 'pointerup':

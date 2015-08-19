@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 import 'package:sky/editing/input.dart';
-import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets.dart';

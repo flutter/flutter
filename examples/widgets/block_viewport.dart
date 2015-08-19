@@ -4,14 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/block_viewport.dart';
-import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/raised_button.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets.dart';
 
 class BlockViewportApp extends App {
 

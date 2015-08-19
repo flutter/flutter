@@ -4,11 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/flex.dart';
-import 'package:sky/rendering/proxy_box.dart';
-import 'package:sky/rendering/shifted_box.dart';
-import 'package:sky/rendering/sky_binding.dart';
+import 'package:sky/rendering.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
   final sky.Size desiredSize;
