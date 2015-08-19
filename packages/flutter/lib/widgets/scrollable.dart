@@ -57,7 +57,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void syncFields(Scrollable source) {
-    scrollDirection == source.scrollDirection;
+    scrollDirection = source.scrollDirection;
   }
 
   double _scrollOffset = 0.0;
@@ -358,6 +358,7 @@ abstract class FixedHeightScrollable extends Scrollable {
 
   EdgeDims padding;
   double itemExtent;
+  Size containerSize = Size.zero;
 
   /// Subclasses must implement `get itemCount` to tell FixedHeightScrollable
   /// how many items there are in the list.
@@ -365,22 +366,32 @@ abstract class FixedHeightScrollable extends Scrollable {
   int _previousItemCount;
 
   void syncFields(FixedHeightScrollable source) {
-    if (padding != source.padding || itemExtent != source.itemExtent) {
-      padding = source.padding;
-      itemExtent = source.itemExtent;
-      _updateContentsExtent();
-    }
-    super.syncFields(source);
+    bool scrollBehaviorUpdateNeeded =
+      padding != source.padding ||
+      itemExtent != source.itemExtent ||
+      scrollDirection != source.scrollDirection;
+
+    padding = source.padding;
+    itemExtent = source.itemExtent;
+    super.syncFields(source); // update scrollDirection
+
+    if (scrollBehaviorUpdateNeeded)
+      _updateScrollBehavior();
   }
 
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;
 
-  double _containerExtent;
+  double get _containerExtent {
+    return scrollDirection == ScrollDirection.vertical
+      ? containerSize.height
+      : containerSize.width;
+  }
+
   void _handleSizeChanged(Size newSize) {
     setState(() {
-      _containerExtent = scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
-      scrollBehavior.containerSize = _containerExtent;
+      containerSize = newSize;
+      _updateScrollBehavior();
     });
   }
 
@@ -404,7 +415,9 @@ abstract class FixedHeightScrollable extends Scrollable {
     return new EdgeDims.only(top: padding.top, bottom: padding.bottom);
   }
 
-  void _updateContentsExtent() {
+  void _updateScrollBehavior() {
+    scrollBehavior.containerSize = _containerExtent;
+
     double contentsExtent = itemExtent * itemCount;
     if (padding != null)
       contentsExtent += _leadingPadding + _trailingPadding;
@@ -425,7 +438,7 @@ abstract class FixedHeightScrollable extends Scrollable {
   Widget buildContent() {
     if (itemCount != _previousItemCount) {
       _previousItemCount = itemCount;
-      _updateContentsExtent();
+      _updateScrollBehavior();
       _updateScrollOffset();
     }
 

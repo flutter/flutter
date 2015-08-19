@@ -24,13 +24,14 @@ class CardModel {
   Key get key => new Key.fromObjectIdentity(this);
 }
 
-class TestApp extends App {
+class PageableListApp extends App {
 
   static const TextStyle cardLabelStyle =
     const TextStyle(color: white, fontSize: 18.0, fontWeight: bold);
 
   List<CardModel> cardModels;
   Size pageSize = new Size(200.0, 200.0);
+  ScrollDirection scrollDirection = ScrollDirection.horizontal;
 
   void initState() {
     List<Size> cardSizes = [
@@ -55,6 +56,15 @@ class TestApp extends App {
     });
   }
 
+  EventDisposition handleToolbarTap(_) {
+    setState(() {
+      scrollDirection = (scrollDirection == ScrollDirection.vertical)
+        ? ScrollDirection.horizontal
+        : ScrollDirection.vertical;
+    });
+    return EventDisposition.processed;
+  }
+
   Widget buildCard(CardModel cardModel) {
     Widget card = new Card(
       color: cardModel.color,
@@ -65,9 +75,14 @@ class TestApp extends App {
         child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
       )
     );
+
+    BoxConstraints constraints = (scrollDirection == ScrollDirection.vertical)
+      ? new BoxConstraints.tightFor(height: pageSize.height)
+      : new BoxConstraints.tightFor(width: pageSize.width);
+
     return new Container(
       key: cardModel.key,
-      width: pageSize.width,
+      constraints: constraints,
       child: new Center(child: card)
     );
   }
@@ -76,8 +91,10 @@ class TestApp extends App {
     Widget list = new PageableList<CardModel>(
       items: cardModels,
       itemBuilder: buildCard,
-      scrollDirection: ScrollDirection.horizontal,
-      itemExtent: pageSize.width
+      scrollDirection: scrollDirection,
+      itemExtent: (scrollDirection == ScrollDirection.vertical)
+          ? pageSize.height
+          : pageSize.width
     );
 
     return new IconTheme(
@@ -91,7 +108,10 @@ class TestApp extends App {
         child: new TaskDescription(
           label: 'PageableList',
           child: new Scaffold(
-            toolbar: new ToolBar(center: new Text('PageableList Demo')),
+            toolbar: new Listener(
+              onGestureTap: handleToolbarTap,
+              child: new ToolBar(center: new Text('PageableList: ${scrollDirection}'))
+            ),
             body: new SizeObserver(
               callback: updatePageSize,
               child: new Container(
@@ -107,5 +127,5 @@ class TestApp extends App {
 }
 
 void main() {
-  runApp(new TestApp());
+  runApp(new PageableListApp());
 }

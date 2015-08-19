@@ -285,21 +285,22 @@ class Baseline extends OneChildRenderObjectWrapper {
 class Viewport extends OneChildRenderObjectWrapper {
   Viewport({
     Key key,
-    this.scrollOffset: Offset.zero,
     this.scrollDirection: ScrollDirection.vertical,
+    this.scrollOffset: Offset.zero,
     Widget child
   }) : super(key: key, child: child);
 
-  final Offset scrollOffset;
   final ScrollDirection scrollDirection;
+  final Offset scrollOffset;
 
-  RenderViewport createNode() => new RenderViewport(scrollOffset: scrollOffset, scrollDirection: scrollDirection);
+  RenderViewport createNode() => new RenderViewport(scrollDirection: scrollDirection, scrollOffset: scrollOffset);
   RenderViewport get renderObject => super.renderObject;
 
   void syncRenderObject(Viewport old) {
     super.syncRenderObject(old);
-    renderObject.scrollOffset = scrollOffset;
+    // Order dependency: RenderViewport validates scrollOffset based on scrollDirection.
     renderObject.scrollDirection = scrollDirection;
+    renderObject.scrollOffset = scrollOffset;
   }
 }
 
