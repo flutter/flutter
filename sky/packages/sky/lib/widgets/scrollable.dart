@@ -502,7 +502,7 @@ class ScrollableList<T> extends FixedHeightScrollable {
 class PageableList<T> extends ScrollableList<T> {
   PageableList({
     Key key,
-    ScrollDirection scrollDirection,
+    ScrollDirection scrollDirection: ScrollDirection.horizontal,
     List<T> items,
     ItemBuilder<T> itemBuilder,
     double itemExtent,
