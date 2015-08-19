@@ -7,6 +7,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/proxy_box.dart';
 import 'package:sky/rendering/sky_binding.dart';
 
 const double kTwoPi = 2 * math.PI;

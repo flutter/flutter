@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:sky';
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/object.dart';
-import 'package:sky/rendering/sky_binding.dart';
-import 'package:sky/rendering/auto_layout.dart';
+
 import 'package:cassowary/cassowary.dart' as al;
+import 'package:sky/rendering/auto_layout.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/proxy_box.dart';
+import 'package:sky/rendering/sky_binding.dart';
 
 void main() {
   RenderDecoratedBox c1 = new RenderDecoratedBox(
