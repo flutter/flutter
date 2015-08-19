@@ -864,10 +864,10 @@ void _scheduleComponentForRender(Component component) {
   }
 }
 
-// RenderObjectWrappers correspond to a desired state of a RenderObject.
-// They are fully immutable, with one exception: A Widget which is a
-// Component which lives within an MultiChildRenderObjectWrapper's
-// children list, may be replaced with the "old" instance if it has
+// RenderObjectWrappers correspond to a desired state of a
+// RenderObject. They are fully immutable, except that a Widget which
+// is a Component which lives within a RenderObjectWrapper's children
+// list may be in-place replaced with the "old" instance if it has
 // become stateful.
 abstract class RenderObjectWrapper extends Widget {
 
@@ -911,7 +911,7 @@ abstract class RenderObjectWrapper extends Widget {
       if (_ancestor is RenderObjectWrapper)
         _ancestor.insertChildRoot(this, slot);
     } else {
-      assert(old is RenderObjectWrapper);
+      assert(old.runtimeType == runtimeType);
       _renderObject = old.renderObject;
       _ancestor = old._ancestor;
       assert(_renderObject != null);
@@ -1088,9 +1088,9 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   void syncRenderObject(MultiChildRenderObjectWrapper old) {
     super.syncRenderObject(old);
 
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    if (renderObject is! ContainerRenderObjectMixin)
-      return;
+    final ContainerRenderObjectMixin renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject is ContainerRenderObjectMixin);
+    assert(old == null || old.renderObject == renderObject);
 
     var startIndex = 0;
     var endIndex = children.length;
@@ -1155,28 +1155,21 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       }
     }
 
-    bool searchForOldNode() {
+    void searchForOldNode() {
       if (currentNode.key == null)
-        return false; // never re-order these nodes
+        return; // never re-order these nodes
 
       ensureOldIdMap();
       oldNode = oldNodeIdMap[currentNode.key];
       if (oldNode == null)
-        return false;
+        return;
 
       oldNodeIdMap[currentNode.key] = null; // mark it reordered
       assert(renderObject is ContainerRenderObjectMixin);
       assert(old.renderObject is ContainerRenderObjectMixin);
       assert(oldNode.renderObject != null);
 
-      if (old.renderObject == renderObject) {
-        renderObject.move(oldNode.renderObject, before: nextSibling);
-      } else {
-        (old.renderObject as ContainerRenderObjectMixin).remove(oldNode.renderObject); // TODO(ianh): Remove cast once the analyzer is cleverer
-        renderObject.add(oldNode.renderObject, before: nextSibling);
-      }
-
-      return true;
+      renderObject.move(oldNode.renderObject, before: nextSibling);
     }
 
     // Scan forwards, this time we may re-order;
