@@ -56,7 +56,6 @@ class TestApp extends App {
   }
 
   Widget buildCard(CardModel cardModel) {
-    print("SKY buildCard ${cardModel.label}");
     Widget card = new Card(
       color: cardModel.color,
       child: new Container(
