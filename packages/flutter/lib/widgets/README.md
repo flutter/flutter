@@ -432,6 +432,56 @@ copies of a particular widget to fill its visible region:
    stateful subcomponents will remain attached to the same semantic entry rather
    than the entry in the same numerical position in the viewport.
 
+Widgets for Applications
+------------------------
+
+There are some widgets that do not correspond to on-screen pixels but that are
+nonetheless useful for building applications.
+
+* `Theme`: Takes a [ThemeData](../theme/README.md) object in its `data` argument, to configure the Material Design theme of the rest of the application (as given in the `child` argument).
+* `TaskDescription`: Takes a `label` that names the application for the purpose of the Android task switcher. The colour of the application as used in the system UI is taken from the current `Theme`.
+* `Navigator`: Takes a single argument, which must be a long-lived instance of `NavigatorState`. This object choreographs how the application goes from screen to screen (e.g. from the main screen to a settings screen), as well as modal dialogs, drawer state, and anything else that responds to the system "back" button. By convention the `NavigatorState` object is a private member variable of the class that inherits from `App`, initialized in the `initState()` function. The `NavigatorState` constructor takes a list of `Route` objects, each of which takes a `name` argument giving a path to identify the window (e.g. "/" for the home screen, "/settings" for the settings screen, etc), and a `builder` argument that takes a method which itself takes a `navigator` argument and a `route` argument and returns a `Widget` representing that screen.
+
+Putting this together, a basic application becomes:
+```
+dart
+import 'package:sky/widgets.dart';
+
+class DemoApp extends App {
+
+  NavigationState _state;
+  void initState() {
+    _state = new NavigationState([
+      new Route(
+        name: '/',
+        builder: (navigator, route) {
+          return new Center(child: new Text('Hello Slightly More Elaborate World'));
+        }
+      )
+    ]);
+    super.initState();
+  }
+
+  Widget build() {
+    return new Theme(
+      data: new ThemeData(
+        brightness: ThemeBrightness.light
+      ),
+      child: new TaskDescription(
+        label: 'Sky Demo',
+        child: new Navigator(_state)
+      )
+    );
+  }
+
+}
+
+void main() {
+  runApp(new DemoApp());
+}
+```
+
+
 Useful debugging tools
 ----------------------
 
