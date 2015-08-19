@@ -224,6 +224,11 @@ unsigned int GLSurfaceIOS::GetBackingFrameBufferObject() {
   return framebuffer_;
 }
 
+bool GLSurfaceIOS::Resize(const gfx::Size& size) {
+  // The backing layer has already been updated.
+  return true;
+}
+
 void GLSurfaceIOS::Destroy() {
   DCHECK(glGetError() == GL_NO_ERROR);
 
