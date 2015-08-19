@@ -1347,7 +1347,7 @@ class RenderImage extends RenderBox {
       height: _height
     ).apply(constraints);
 
-    if (constraints.isTight)
+    if (constraints.isTight || _image == null)
       return constraints.smallest;
 
     // This algorithm attempts to find a size for the RenderImage that fits in
@@ -1360,8 +1360,10 @@ class RenderImage extends RenderBox {
     //  - The RenderImage's dimension are maximal subject to being smaller than
     //    the intrinsic size of the image.
 
-    double width = _image == null ? 0.0 : _image.width.toDouble();
-    double height = _image == null ? 0.0 : _image.height.toDouble();
+    double width = _image.width.toDouble();
+    double height = _image.height.toDouble();
+    assert(width > 0.0);
+    assert(height > 0.0);
     double aspectRatio = width / height;
 
     if (width > constraints.maxWidth) {
@@ -1384,7 +1386,6 @@ class RenderImage extends RenderBox {
       width = height * aspectRatio;
     }
 
-    assert(width != null && height != null);
     return constraints.constrain(new Size(width, height));
   }
 
