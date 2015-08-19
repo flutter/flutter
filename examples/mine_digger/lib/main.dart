@@ -6,7 +6,7 @@ import 'dart:math';
 
 import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
 

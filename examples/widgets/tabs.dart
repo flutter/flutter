@@ -2,15 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/card.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/tabs.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets.dart';
 
 class TabbedNavigatorApp extends App {
   // The index of the selected tab for each of the TabNavigators constructed below.

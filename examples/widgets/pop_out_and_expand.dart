@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting/box_painter.dart';
-import 'package:sky/theme/colors.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
 
 class GreenCard extends Component {
@@ -75,8 +74,8 @@ class ExampleApp extends App {
       child: new Theme(
         data: new ThemeData(
           brightness: ThemeBrightness.light,
-          primarySwatch: Blue,
-          accentColor: RedAccent[200]
+          primarySwatch: colors.Blue,
+          accentColor: colors.RedAccent[200]
         ),
         child: new Scaffold(
           toolbar: new ToolBar(

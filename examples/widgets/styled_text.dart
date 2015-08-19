@@ -2,17 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/framework.dart';
-
+import 'package:sky/widgets.dart';
 
 class StyledTextApp extends App {
 
