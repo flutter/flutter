@@ -80,4 +80,21 @@ class GameMath {
       }
     }
   }
+
+  static double pointQuickDist(Point a, Point b) {
+    double dx = a.x - b.x;
+    double dy = a.y - b.y;
+    if (dx < 0.0) dx = -dx;
+    if (dy < 0.0) dy = -dy;
+    if (dx > dy) {
+      return dx + dy/2.0;
+    }
+    else {
+      return dy + dx/2.0;
+    }
+  }
+
+  static double filter (double a, double b, double filterFactor) {
+      return (a * (1-filterFactor)) + b * filterFactor;
+  }
 }
