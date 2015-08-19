@@ -10,6 +10,7 @@ import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/proxy_box.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/framework.dart';
 

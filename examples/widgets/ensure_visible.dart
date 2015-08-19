@@ -8,7 +8,6 @@ import 'package:sky/animation/curves.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/box.dart';
 import 'package:sky/theme/colors.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
