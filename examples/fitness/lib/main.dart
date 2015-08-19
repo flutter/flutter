@@ -20,15 +20,20 @@ part 'meal.dart';
 part 'measurement.dart';
 part 'settings.dart';
 
-class UserData {
-  UserData();
+abstract class UserData {
+  BackupMode get backupMode;
+  List<FitnessItem> get items;
+}
+
+class UserDataImpl extends UserData {
+  UserDataImpl();
 
   List<FitnessItem> _items = [];
 
-  BackupMode _backupSetting;
-  BackupMode get backupSetting => _backupSetting;
+  BackupMode _backupMode;
+  BackupMode get backupMode => _backupMode;
   void setBackupModeAndSave(BackupMode value) {
-    _backupSetting = value;
+    _backupMode = value;
     save();
   }
 
@@ -56,12 +61,12 @@ class UserData {
 
   Future save() => saveFitnessData(this);
 
-  UserData.fromJson(Map json) {
+  UserDataImpl.fromJson(Map json) {
     json['items'].forEach((item) {
       _items.add(new Measurement.fromJson(item));
     });
     try {
-      _backupSetting = BackupMode.values.firstWhere((BackupMode mode) {
+      _backupMode = BackupMode.values.firstWhere((BackupMode mode) {
         return mode.toString() == json['backupMode'];
       });
     } catch(e) {
@@ -72,24 +77,20 @@ class UserData {
   Map toJson() {
     Map json = new Map();
     json['items'] = _items.map((item) => item.toJson()).toList();
-    json['backupMode'] = _backupSetting.toString();
+    json['backupMode'] = _backupMode.toString();
     return json;
   }
 }
 
 class FitnessApp extends App {
   NavigationState _navigationState;
-  UserData _userData = new UserData();
+  UserDataImpl _userData = new UserDataImpl();
 
   void didMount() {
     super.didMount();
     loadFitnessData().then((UserData data) {
       setState(() => _userData = data);
     }).catchError((e) => print("Failed to load data: $e"));
-  }
-
-  void save() {
-    _userData.save().catchError((e) => print("Failed to load data: $e"));
   }
 
   void initState() {
@@ -120,9 +121,9 @@ class FitnessApp extends App {
       new Route(
         name: '/settings',
         builder: (navigator, route) => new SettingsFragment(
-          navigator,
-          _userData.backupSetting,
-          settingsUpdater
+          navigator: navigator,
+          userData: _userData as UserData,
+          updater: settingsUpdater
         )
       ),
     ]);
