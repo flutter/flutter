@@ -8,10 +8,12 @@ import 'dart:math' as math;
 import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/image.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
+import 'package:sky/rendering/proxy_box.dart';
+import 'package:sky/rendering/shifted_box.dart';
 import 'package:sky/rendering/sky_binding.dart';
 
 import 'solid_color_box.dart';

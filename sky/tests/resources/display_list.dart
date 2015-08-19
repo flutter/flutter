@@ -3,9 +3,10 @@ import 'dart:async';
 import 'dart:sky' as sky;
 import 'dart:typed_data';
 
-import 'package:sky/widgets/basic.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/view.dart';
+import 'package:sky/widgets/basic.dart';
 
 import 'harness.dart';
 

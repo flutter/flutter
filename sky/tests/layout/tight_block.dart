@@ -2,8 +2,10 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/stack.dart';
 import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/proxy_box.dart';
+import 'package:sky/rendering/shifted_box.dart';
+import 'package:sky/rendering/stack.dart';
 
 import '../resources/display_list.dart';
 
