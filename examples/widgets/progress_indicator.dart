@@ -7,16 +7,8 @@ import 'dart:sky' as sky;
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/curves.dart';
-import 'package:sky/theme/colors.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/progress_indicator.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/framework.dart';
-import 'package:sky/widgets/task_description.dart';
-import 'package:sky/widgets/transitions.dart';
+import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/widgets.dart';
 
 class ProgressIndicatorApp extends App {
 
@@ -103,8 +95,8 @@ class ProgressIndicatorApp extends App {
       child: new Theme(
         data: new ThemeData(
           brightness: ThemeBrightness.light,
-          primarySwatch: Blue,
-          accentColor: RedAccent[200]
+          primarySwatch: colors.Blue,
+          accentColor: colors.RedAccent[200]
         ),
         child: new TaskDescription(
           label: 'Cards',

@@ -5,14 +5,8 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/base/scheduler.dart' as scheduler;
-import 'package:sky/rendering/flex.dart';
-import 'package:sky/rendering/proxy_box.dart';
-import 'package:sky/rendering/shifted_box.dart';
-import 'package:sky/rendering/sky_binding.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/framework.dart';
-import 'package:sky/widgets/raised_button.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:sky/rendering.dart';
+import 'package:sky/widgets.dart';
 
 import '../rendering/solid_color_box.dart';
 

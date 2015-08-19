@@ -6,6 +6,8 @@ import 'dart:sky' as sky;
 
 import 'package:sky/painting/text_style.dart';
 
+export 'package:sky/painting/text_style.dart';
+
 // This must be immutable, because we won't notice when it changes
 abstract class TextSpan {
   sky.Node _toDOM(sky.Document owner);

@@ -6,7 +6,7 @@ import 'package:sky/painting/paragraph_painter.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 
-export 'package:sky/painting/paragraph_painter.dart' show TextSpan, PlainTextSpan, StyledTextSpan;
+export 'package:sky/painting/paragraph_painter.dart';
 
 // Unfortunately, using full precision floating point here causes bad layouts
 // because floating point math isn't associative. If we add and subtract
