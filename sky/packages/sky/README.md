@@ -76,7 +76,6 @@ the same directory that contains the `pubspec.yaml` file). To run your app,
 follow these instructions:
 
  - The first time: `./packages/sky/sky_tool start --install --checked && adb logcat -s sky chromium`
-
  - Subsequent times: `./packages/sky/sky_tool start --checked && adb logcat -s sky chromium`
 
 The `sky_tool start` command starts the dev server and uploads your app to the device.
@@ -86,6 +85,9 @@ various [debugging features](lib/base/debug.dart) are enabled.
 The `adb logcat` command logs errors and Dart `print()` output from the app. The `-s sky chromium`
 argument limits the output to just output from Sky Dart code and the Sky Engine C++ code (which
 for historical reasons currently uses the tag `chromium`.)
+
+To avoid confusion from old log messages, you may wish to run `adb logcat -c` before calling
+`sky_tool start`, to clear the log between runs.
 
 Debugging
 ---------
