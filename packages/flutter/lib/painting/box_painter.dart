@@ -236,54 +236,55 @@ void paintImage({
   sky.Image image,
   sky.ColorFilter colorFilter,
   fit: ImageFit.scaleDown,
-  repeat: ImageRepeat.noRepeat
+  repeat: ImageRepeat.noRepeat,
+  double positionX: 0.5,
+  double positionY: 0.5
 }) {
   Size bounds = rect.size;
   Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
-  Size src;
-  Size dst;
+  Size sourceSize;
+  Size destinationSize;
   switch(fit) {
     case ImageFit.fill:
-      src = imageSize;
-      dst = bounds;
+      sourceSize = imageSize;
+      destinationSize = bounds;
       break;
     case ImageFit.contain:
-      src = imageSize;
-      if (bounds.width / bounds.height > src.width / src.height) {
-        dst = new Size(bounds.width, src.height * bounds.width / src.width);
-      } else {
-        dst = new Size(src.width * bounds.height / src.height, bounds.height);
-      }
+      sourceSize = imageSize;
+      if (bounds.width / bounds.height > sourceSize.width / sourceSize.height)
+        destinationSize = new Size(sourceSize.width * bounds.height / sourceSize.height, bounds.height);
+      else
+        destinationSize = new Size(bounds.width, sourceSize.height * bounds.width / sourceSize.width);
       break;
     case ImageFit.cover:
-      if (bounds.width / bounds.height > imageSize.width / imageSize.height) {
-        src = new Size(imageSize.width, imageSize.width * bounds.height / bounds.width);
-      } else {
-        src = new Size(imageSize.height * bounds.width / bounds.height, imageSize.height);
-      }
-      dst = bounds;
+      if (bounds.width / bounds.height > imageSize.width / imageSize.height)
+        sourceSize = new Size(imageSize.width, imageSize.width * bounds.height / bounds.width);
+      else
+        sourceSize = new Size(imageSize.height * bounds.width / bounds.height, imageSize.height);
+      destinationSize = bounds;
       break;
     case ImageFit.none:
-      src = new Size(math.min(imageSize.width, bounds.width),
-                     math.min(imageSize.height, bounds.height));
-      dst = src;
+      sourceSize = new Size(math.min(imageSize.width, bounds.width),
+                            math.min(imageSize.height, bounds.height));
+      destinationSize = sourceSize;
       break;
     case ImageFit.scaleDown:
-      src = imageSize;
-      dst = bounds;
-      if (src.height > dst.height) {
-        dst = new Size(src.width * dst.height / src.height, src.height);
-      }
-      if (src.width > dst.width) {
-        dst = new Size(dst.width, src.height * dst.width / src.width);
-      }
+      sourceSize = imageSize;
+      destinationSize = bounds;
+      if (sourceSize.height > destinationSize.height)
+        destinationSize = new Size(sourceSize.width * destinationSize.height / sourceSize.height, sourceSize.height);
+      if (sourceSize.width > destinationSize.width)
+        destinationSize = new Size(destinationSize.width, sourceSize.height * destinationSize.width / sourceSize.width);
       break;
   }
   // TODO(abarth): Implement |repeat|.
   Paint paint = new Paint();
   if (colorFilter != null)
     paint.setColorFilter(colorFilter);
-  canvas.drawImageRect(image, Point.origin & src, rect.topLeft & dst, paint);
+  double dx = (bounds.width - destinationSize.width) * positionX;
+  double dy = (bounds.height - destinationSize.height) * positionY;
+  Point destinationPosition = rect.topLeft + new Offset(dx, dy);
+  canvas.drawImageRect(image, Point.origin & sourceSize, destinationPosition & destinationSize, paint);
 }
 
 typedef void BackgroundImageChangeListener();
