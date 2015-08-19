@@ -30,7 +30,7 @@ export 'package:sky/rendering/block.dart' show BlockDirection;
 export 'package:sky/rendering/box.dart' show BoxConstraints;
 export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'package:sky/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxShadow, Border, BorderSide, EdgeDims, Shape;
+export 'package:sky/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxDecorationPosition, BoxShadow, Border, BorderSide, EdgeDims, Shape;
 export 'package:sky/rendering/toggleable.dart' show ValueChanged;
 export 'package:sky/rendering/viewport.dart' show ScrollDirection;
 export 'package:sky/widgets/framework.dart' show Key, GlobalKey, Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
@@ -70,17 +70,19 @@ class ColorFilter extends OneChildRenderObjectWrapper {
 }
 
 class DecoratedBox extends OneChildRenderObjectWrapper {
-  DecoratedBox({ Key key, this.decoration, Widget child })
+  DecoratedBox({ Key key, this.decoration, this.position, Widget child })
     : super(key: key, child: child);
 
   final BoxDecoration decoration;
+  final BoxDecorationPosition position;
 
-  RenderDecoratedBox createNode() => new RenderDecoratedBox(decoration: decoration);
+  RenderDecoratedBox createNode() => new RenderDecoratedBox(decoration: decoration, position: position);
   RenderDecoratedBox get renderObject => super.renderObject;
 
   void syncRenderObject(DecoratedBox old) {
     super.syncRenderObject(old);
     renderObject.decoration = decoration;
+    renderObject.position = position;
   }
 }
 
@@ -327,6 +329,7 @@ class Container extends Component {
     this.child,
     this.constraints,
     this.decoration,
+    this.foregroundDecoration,
     this.width,
     this.height,
     this.margin,
@@ -337,6 +340,7 @@ class Container extends Component {
   final Widget child;
   final BoxConstraints constraints;
   final BoxDecoration decoration;
+  final BoxDecoration foregroundDecoration;
   final EdgeDims margin;
   final EdgeDims padding;
   final Matrix4 transform;
@@ -364,6 +368,14 @@ class Container extends Component {
 
     if (decoration != null)
       current = new DecoratedBox(decoration: decoration, child: current);
+
+    if (foregroundDecoration != null) {
+      current = new DecoratedBox(
+        decoration: foregroundDecoration,
+        position: BoxDecorationPosition.foreground,
+        child: current
+      );
+    }
 
     if (width != null || height != null) {
       current = new SizedBox(

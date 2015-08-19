@@ -434,13 +434,20 @@ class RenderClipOval extends RenderProxyBox {
   }
 }
 
+enum BoxDecorationPosition {
+  background,
+  foreground,
+}
+
 class RenderDecoratedBox extends RenderProxyBox {
 
   RenderDecoratedBox({
     BoxDecoration decoration,
-    RenderBox child
+    RenderBox child,
+    this.position: BoxDecorationPosition.background
   }) : _painter = new BoxPainter(decoration), super(child);
 
+  BoxDecorationPosition position;
   final BoxPainter _painter;
 
   BoxDecoration get decoration => _painter.decoration;
@@ -483,8 +490,11 @@ class RenderDecoratedBox extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
-    _painter.paint(context.canvas, offset & size);
+    if (position == BoxDecorationPosition.background)
+      _painter.paint(context.canvas, offset & size);
     super.paint(context, offset);
+    if (position == BoxDecorationPosition.foreground)
+      _painter.paint(context.canvas, offset & size);
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
