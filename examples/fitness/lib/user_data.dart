@@ -21,20 +21,16 @@ Future<String> dataFilePath() async {
   return cachedDataFilePath;
 }
 
-Future<List<Measurement>> loadFitnessData() async {
-  List<Measurement> items = [];
+Future<UserData> loadFitnessData() async {
   String dataPath = await dataFilePath();
   print("Loading from $dataPath");
   JsonDecoder decoder = new JsonDecoder();
-  var data = await decoder.convert(await new File(dataPath).readAsString());
-  data.forEach((item) {
-    items.add(new Measurement.fromJson(item));
-  });
-  return items;
+  Map data = await decoder.convert(await new File(dataPath).readAsString());
+  return new UserData.fromJson(data);
 }
 
 // Intentionally synchronous for execution just before shutdown.
-Future saveFitnessData(List<Measurement> data) async {
+Future saveFitnessData(UserData data) async {
   String dataPath = await dataFilePath();
   print("Saving to $dataPath");
   JsonEncoder encoder = new JsonEncoder();
