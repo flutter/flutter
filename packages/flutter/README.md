@@ -29,7 +29,7 @@ Sky assumes the entry point for your application is a `main` function in
 `lib/main.dart`:
 
 ```dart
-import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets.dart';
 
 class HelloWorldApp extends App {
   Widget build() {
