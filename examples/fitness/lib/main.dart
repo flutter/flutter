@@ -12,6 +12,7 @@ import 'package:sky/widgets.dart';
 import 'user_data.dart';
 import 'date_utils.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
 part 'feed.dart';
 part 'fitness_item.dart';
@@ -46,7 +47,7 @@ class UserDataImpl extends UserData {
   List<FitnessItem> get items => _items;
 
   void sort() {
-    _items.sort((a, b) => -a.when.compareTo(b.when));
+    _items.sort((a, b) => a.when.compareTo(b.when));
   }
 
   void add(FitnessItem item) {
@@ -100,7 +101,7 @@ class FitnessApp extends App {
         name: '/',
         builder: (navigator, route) => new FeedFragment(
           navigator: navigator,
-          userData: _userData.items,
+          userData: _userData,
           onItemCreated: _handleItemCreated,
           onItemDeleted: _handleItemDeleted
         )
