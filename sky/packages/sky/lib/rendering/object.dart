@@ -394,6 +394,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void scheduleInitialLayout() {
     assert(attached);
     assert(parent is! RenderObject);
+    assert(!_debugDoingLayout);
     assert(_relayoutSubtreeRoot == null);
     _relayoutSubtreeRoot = this;
     assert(() {
@@ -401,7 +402,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     _nodesNeedingLayout.add(this);
-    scheduler.ensureVisualUpdate();
   }
   static void flushLayout() {
     sky.tracing.begin('RenderObject.flushLayout');
@@ -648,6 +648,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(parent is! RenderObject);
     assert(!_debugDoingPaint);
     assert(hasLayer);
+    assert(_layer == null);
     _layer = rootLayer;
     assert(_needsPaint);
     _nodesNeedingPaint.add(this);
