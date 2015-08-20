@@ -5,13 +5,25 @@
 part of playfair;
 
 class ChartData {
-  const ChartData({ this.startX, this.endX, this.startY, this.endY, this.dataSet, this.numHorizontalGridlines, this.roundToPlaces });
+  const ChartData({
+    this.startX,
+    this.endX,
+    this.startY,
+    this.endY,
+    this.dataSet,
+    this.numHorizontalGridlines,
+    this.roundToPlaces,
+    this.indicatorLine,
+    this.indicatorText
+  });
   final double startX;
   final double endX;
   final double startY;
   final double endY;
   final int numHorizontalGridlines;
   final int roundToPlaces;
+  final double indicatorLine;
+  final String indicatorText;
   final List<Point> dataSet;
 }
 
@@ -22,6 +34,9 @@ const Color kMarkerColor = const Color(0xFF000000);
 const double kMarkerStrokeWidth = 2.0;
 const double kMarkerRadius = 2.0;
 const double kScaleMargin = 10.0;
+const double kIndicatorStrokeWidth = 2.0;
+const Color kIndicatorColor = const Color(0xFFFF4081);
+const double kIndicatorMargin = 2.0;
 
 class Chart extends LeafRenderObjectWrapper {
   Chart({ Key key, this.data }) : super(key: key);
@@ -81,6 +96,13 @@ class Gridline {
   Point end;
 }
 
+class Indicator {
+  Point start;
+  Point end;
+  ParagraphPainter labelPainter;
+  Point labelPosition;
+}
+
 class ChartPainter {
   ChartPainter(ChartData data) : _data = data;
 
@@ -118,6 +140,7 @@ class ChartPainter {
   // These are updated by _layout()
   List<Gridline> _horizontalGridlines;
   List<Point> _markers;
+  Indicator _indicator;
 
   void _layout() {
     // Create the scale labels
@@ -166,8 +189,31 @@ class ChartPainter {
     assert(dataSet != null);
     assert(dataSet.length > 0);
     _markers = new List<Point>();
-    for(int i = 0; i < dataSet.length; i++) {
+    for(int i = 0; i < dataSet.length; i++)
       _markers.add(_convertPointToRectSpace(dataSet[i], markerRect));
+
+    // Place the indicator line
+    if (data.indicatorLine != null &&
+        data.indicatorLine >= data.startY &&
+        data.indicatorLine <= data.endY) {
+      _indicator = new Indicator()
+        ..start = _convertPointToRectSpace(new Point(data.startX, data.indicatorLine), markerRect)
+        ..end = _convertPointToRectSpace(new Point(data.endX, data.indicatorLine), markerRect);
+      if (data.indicatorText != null) {
+        TextSpan text = new StyledTextSpan(
+          _textTheme.body1,
+          [new PlainTextSpan("${data.indicatorText}")]
+        );
+        _indicator.labelPainter = new ParagraphPainter(text)
+          ..maxWidth = markerRect.width
+          ..layout();
+        _indicator.labelPosition = new Point(
+          ((_indicator.start.x + _indicator.end.x) / 2.0) - _indicator.labelPainter.maxContentWidth / 2.0,
+          _indicator.start.y - _indicator.labelPainter.height - kIndicatorMargin
+        );
+      }
+    } else {
+      _indicator = null;
     }
 
     // we don't need to compute layout again unless something changes
@@ -204,6 +250,17 @@ class ChartPainter {
     canvas.drawPath(path, paint);
   }
 
+  void _paintIndicator(sky.Canvas canvas) {
+    if (_indicator == null)
+      return;
+    Paint paint = new Paint()
+      ..strokeWidth = kIndicatorStrokeWidth
+      ..color = kIndicatorColor;
+    canvas.drawLine(_indicator.start, _indicator.end, paint);
+    if (_indicator.labelPainter != null)
+      _indicator.labelPainter.paint(canvas, _indicator.labelPosition.toOffset());
+  }
+
   void paint(sky.Canvas canvas, Rect rect) {
     if (rect != _rect)
       _needsLayout = true;
@@ -212,5 +269,6 @@ class ChartPainter {
       _layout();
     _paintGrid(canvas);
     _paintChart(canvas);
+    _paintIndicator(canvas);
   }
 }
