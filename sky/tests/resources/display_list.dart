@@ -133,7 +133,7 @@ class TestPaintingContext extends PaintingContext {
   }
 
   void compositeChild(RenderObject child, { Offset childOffset: Offset.zero, ContainerLayer parentLayer }) {
-    _insertChild(child, childOffset);
+    insertChild(child, childOffset);
   }
 }
 
