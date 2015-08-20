@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:sky/animation/animated_value.dart';
@@ -68,7 +69,9 @@ class Drawer extends StatefulComponent {
     _performance.attachedForce = kDefaultSpringForce;
 
     if (navigator != null) {
-      navigator.pushState(this, (_) => _performance.reverse());
+      scheduleMicrotask(() {
+        navigator.pushState(this, (_) => _performance.reverse());
+      });
     }
   }
 
