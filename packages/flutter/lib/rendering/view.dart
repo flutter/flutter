@@ -42,6 +42,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
+  void initializeLayerTree() {
+    final double devicePixelRatio = sky.view.devicePixelRatio;
+    Matrix4 logicalToDeviceZoom = new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
+    scheduleInitialPaint(new TransformLayer(transform: logicalToDeviceZoom));
+  }
+
   // We never call layout() on this class, so this should never get
   // checked. (This class is laid out using scheduleInitialLayout().)
   bool debugDoesMeetConstraints() { assert(false); return false; }
@@ -82,18 +88,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.paintChild(child, offset.toPoint());
-  }
-
-  void paintFrame() {
-    sky.tracing.begin('RenderView.paintFrame');
-    try {
-      final double devicePixelRatio = sky.view.devicePixelRatio;
-      Matrix4 logicalToDeviceZoom = new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
-      ContainerLayer rootLayer = new TransformLayer(transform: logicalToDeviceZoom);
-      initialPaint(rootLayer, size);
-    } finally {
-      sky.tracing.end('RenderView.paintFrame');
-    }
   }
 
   void compositeFrame() {

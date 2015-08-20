@@ -44,6 +44,7 @@ class SkyBinding {
       _renderView.attach();
       _renderView.rootConstraints = _createConstraints();
       _renderView.scheduleInitialLayout();
+      _renderView.initializeLayerTree();
     } else {
       _renderView = renderViewOverride;
     }
@@ -74,7 +75,6 @@ class SkyBinding {
     RenderObject.flushLayout();
     _renderView.updateCompositingBits();
     RenderObject.flushPaint();
-    _renderView.paintFrame();
     _renderView.compositeFrame();
   }
 
