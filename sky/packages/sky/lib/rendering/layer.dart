@@ -169,6 +169,19 @@ class ContainerLayer extends Layer {
     child._parent = null;
   }
 
+  void removeAllChildren() {
+    Layer child = _firstChild;
+    while (child != null) {
+      Layer next = child.nextSibling;
+      child._previousSibling = null;
+      child._nextSibling = null;
+      child._parent = null;
+      child = next;
+    }
+    _firstChild = null;
+    _lastChild = null;
+  }
+
   void paint(sky.Canvas canvas) {
     canvas.translate(offset.dx, offset.dy);
     paintChildren(canvas);
