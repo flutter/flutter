@@ -14,8 +14,6 @@ dependencies:
   shelf: ^0.6.2
   shelf_route: ^0.13.4
   shelf_static: ^0.2.3
-
-dev_dependencies:
   test: ^0.12.0
 
 # Add the bin/sky_tools.dart script to the scripts pub installs.
