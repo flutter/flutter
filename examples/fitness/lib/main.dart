@@ -20,8 +20,22 @@ part 'meal.dart';
 part 'measurement.dart';
 part 'settings.dart';
 
-class UserData {
+abstract class UserData {
+  BackupMode get backupMode;
+  List<FitnessItem> get items;
+}
+
+class UserDataImpl extends UserData {
+  UserDataImpl();
+
   List<FitnessItem> _items = [];
+
+  BackupMode _backupMode;
+  BackupMode get backupMode => _backupMode;
+  void setBackupModeAndSave(BackupMode value) {
+    _backupMode = value;
+    save();
+  }
 
   List<FitnessItem> get items => _items;
   void set items(List<FitnessItem> newItems) {
@@ -45,22 +59,38 @@ class UserData {
     save();
   }
 
-  Future save() => saveFitnessData(_items);
+  Future save() => saveFitnessData(this);
+
+  UserDataImpl.fromJson(Map json) {
+    json['items'].forEach((item) {
+      _items.add(new Measurement.fromJson(item));
+    });
+    try {
+      _backupMode = BackupMode.values.firstWhere((BackupMode mode) {
+        return mode.toString() == json['backupMode'];
+      });
+    } catch(e) {
+      print("Failed to load backup mode: ${e}");
+    }
+  }
+
+  Map toJson() {
+    Map json = new Map();
+    json['items'] = _items.map((item) => item.toJson()).toList();
+    json['backupMode'] = _backupMode.toString();
+    return json;
+  }
 }
 
 class FitnessApp extends App {
   NavigationState _navigationState;
-  final UserData _userData = new UserData();
+  UserDataImpl _userData = new UserDataImpl();
 
   void didMount() {
     super.didMount();
-    loadFitnessData().then((List<Measurement> list) {
-      setState(() => _userData.items = list);
+    loadFitnessData().then((UserData data) {
+      setState(() => _userData = data);
     }).catchError((e) => print("Failed to load data: $e"));
-  }
-
-  void save() {
-    _userData.save().catchError((e) => print("Failed to load data: $e"));
   }
 
   void initState() {
@@ -90,7 +120,11 @@ class FitnessApp extends App {
       ),
       new Route(
         name: '/settings',
-        builder: (navigator, route) => new SettingsFragment(navigator, backupSetting, settingsUpdater)
+        builder: (navigator, route) => new SettingsFragment(
+          navigator: navigator,
+          userData: _userData as UserData,
+          updater: settingsUpdater
+        )
       ),
     ]);
     super.initState();
@@ -112,12 +146,10 @@ class FitnessApp extends App {
     setState(() => _userData.removeAndSave(item));
   }
 
-  BackupMode backupSetting = BackupMode.disabled;
-
   void settingsUpdater({ BackupMode backup }) {
     setState(() {
       if (backup != null)
-        backupSetting = backup;
+        _userData.setBackupModeAndSave(backup);
     });
   }
 
