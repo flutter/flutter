@@ -40,6 +40,46 @@ template("code_sign_ios") {
   }
 }
 
+template("xcode_harness_ios") {
+  assert(defined(invoker.deps),
+         "The dependencies must be specified")
+  assert(defined(invoker.app_bundle),
+         "The app bundle must be defined")
+  assert(defined(invoker.app_name),
+         "The application name must be defined")
+  app_name = invoker.app_name
+
+  xcode_project_gen_target_name = app_name + "_xcode"
+  copy(xcode_project_gen_target_name) {
+    sources = [
+      "//build/config/ios/XcodeHarness"
+    ]
+    outputs = [
+      "$root_build_dir/$xcode_project_gen_target_name",
+    ]
+  }
+
+  bundle_copy_gen_target_name = app_name + "_bundle_copy"
+  copy(bundle_copy_gen_target_name) {
+    sources = [
+      invoker.app_bundle
+    ]
+    outputs = [
+      "$root_build_dir/$xcode_project_gen_target_name/Sideload",
+    ]
+
+    deps = invoker.deps + [
+      ":$xcode_project_gen_target_name"
+    ]
+  }
+
+  group(target_name) {
+    deps = [
+      ":$bundle_copy_gen_target_name"
+    ]
+  }
+}
+
 template("resource_copy_ios") {
   assert(defined(invoker.resources),
          "The source list of resources to copy over")
@@ -150,6 +190,13 @@ template("ios_app") {
     ]
   }
 
+  # Generate the Xcode Harness for Profiling
+  xcode_harness_gen_target_name = app_name + "_harness"
+  xcode_harness_ios(xcode_harness_gen_target_name) {
+    app_bundle = "$root_build_dir/$app_name.app"
+    deps = [ ":$copy_gen_target_name" ]
+  }
+
   # Perform Code Signing
 
   code_sign_gen_target_name = target_name + "_codesign"
@@ -165,7 +212,7 @@ template("ios_app") {
   group(target_name) {
     # Skip code signing if no identity is provided. This is useful for simulator
     # builds
-    deps = []
+    deps = [ ":$xcode_harness_gen_target_name" ]
     if (invoker.code_signing_identity == "") {
       deps += [ ":$copy_gen_target_name" ]
     } else {
