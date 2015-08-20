@@ -98,7 +98,7 @@ class BlockViewport extends RenderObjectWrapper {
 
   static const _omit = const Object(); // used as a slot when it's not yet time to attach the child
 
-  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRenderObject(RenderObjectWrapper child, dynamic slot) {
     if (slot == _omit)
       return;
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
@@ -108,7 +108,7 @@ class BlockViewport extends RenderObjectWrapper {
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
-  void detachChildRoot(RenderObjectWrapper child) {
+  void detachChildRenderObject(RenderObjectWrapper child) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(renderObject is ContainerRenderObjectMixin);
     if (child.renderObject.parent != renderObject)
@@ -381,7 +381,7 @@ class BlockViewport extends RenderObjectWrapper {
     // Remove any old children.
     for (_Key oldChildKey in childrenByKey.keys) {
       if (!newChildren.containsKey(oldChildKey))
-        syncChild(null, childrenByKey[oldChildKey], null); // calls detachChildRoot()
+        syncChild(null, childrenByKey[oldChildKey], null); // calls detachChildRenderObject()
     }
 
     if (haveChildren) {
