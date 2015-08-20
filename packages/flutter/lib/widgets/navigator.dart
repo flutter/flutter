@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
@@ -17,6 +15,7 @@ abstract class RouteBase {
   Widget build(Navigator navigator, RouteBase route);
   bool get isOpaque;
   void popState([dynamic result]) { assert(result == null); }
+  TransitionBase buildTransition({ Key key });
 }
 
 class Route extends RouteBase {
@@ -27,20 +26,7 @@ class Route extends RouteBase {
 
   Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
   bool get isOpaque => true;
-}
-
-class DialogRoute extends RouteBase {
-  DialogRoute({ this.completer, this.builder });
-
-  final Completer completer;
-  final RouteBuilder builder;
-
-  Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
-  bool get isOpaque => false;
-
-  void popState([dynamic result]) {
-    completer.complete(result);
-  }
+  TransitionBase buildTransition({ Key key }) => new SlideUpFadeTransition(key: key);
 }
 
 class RouteState extends RouteBase {
@@ -58,32 +44,30 @@ class RouteState extends RouteBase {
     if (callback != null)
       callback(this);
   }
+
+  TransitionBase buildTransition({ Key key }) {
+    // Custom state routes shouldn't be asked to construct a transition
+    assert(false);
+    return null;
+  }
 }
 
 // TODO(jackson): Refactor this into its own file
-// and support multiple transition types
 const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 const Point _kTransitionStartPoint = const Point(0.0, 75.0);
-class Transition extends TransitionBase {
-  Transition({
+class SlideUpFadeTransition extends TransitionBase {
+  SlideUpFadeTransition({
     Key key,
     Widget child,
     Direction direction,
     Function onDismissed,
-    Function onCompleted,
-    this.interactive
+    Function onCompleted
   }): super(key: key,
             child: child,
             duration: _kTransitionDuration,
             direction: direction,
             onDismissed: onDismissed,
             onCompleted: onCompleted);
-  bool interactive;
-
-  void syncFields(Transition source) {
-    interactive = source.interactive;
-    super.syncFields(source);
-  }
 
   Widget buildWithChild(Widget child) {
     // TODO(jackson): Hit testing should ignore transform
@@ -201,22 +185,19 @@ class Navigator extends StatefulComponent {
       }
       if (child == null)
         continue;
-      Transition transition = new Transition(
-        key: new Key.fromObjectIdentity(historyEntry),
-        child: child,
-        direction: (i <= state.historyIndex) ? Direction.forward : Direction.reverse,
-        interactive: (i == state.historyIndex),
-        onDismissed: () {
+      TransitionBase transition = historyEntry.route.buildTransition(key: new Key.fromObjectIdentity(historyEntry))
+        ..child = child
+        ..direction = (i <= state.historyIndex) ? Direction.forward : Direction.reverse
+        ..onDismissed = () {
           setState(() {
             state.history.remove(historyEntry);
           });
-        },
-        onCompleted: () {
+        }
+        ..onCompleted = () {
           setState(() {
             historyEntry.fullyOpaque = historyEntry.route.isOpaque;
           });
-        }
-      );
+        };
       visibleRoutes.add(transition);
     }
     return new Focus(child: new Stack(visibleRoutes));

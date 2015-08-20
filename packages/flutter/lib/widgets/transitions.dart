@@ -8,6 +8,8 @@ import 'package:sky/animation/animated_value.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:vector_math/vector_math.dart';
 
+export 'package:sky/animation/direction.dart' show Direction;
+
 dynamic _maybe(AnimatedValue x) => x != null ? x.value : null;
 
 // A helper class to anchor widgets to one another. Pass an instance of this to
