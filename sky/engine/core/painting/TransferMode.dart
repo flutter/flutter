@@ -6,6 +6,8 @@ part of dart.sky;
 
 /// List of predefined color transfer modes. This list comes from Skia's
 /// SkXfermode.h and the values (order) should be kept in sync.
+/// See [https://skia.org/user/api/skpaint#SkXfermode] for how these
+/// transfer modes behave.
 enum TransferMode {
   clear,
   src,
