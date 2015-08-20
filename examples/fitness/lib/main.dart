@@ -22,6 +22,7 @@ part 'settings.dart';
 
 abstract class UserData {
   BackupMode get backupMode;
+  double get goalWeight;
   List<FitnessItem> get items;
 }
 
@@ -32,31 +33,29 @@ class UserDataImpl extends UserData {
 
   BackupMode _backupMode;
   BackupMode get backupMode => _backupMode;
-  void setBackupModeAndSave(BackupMode value) {
+  void set backupMode(BackupMode value) {
     _backupMode = value;
-    save();
+  }
+
+  double _goalWeight;
+  double get goalWeight => _goalWeight;
+  void set goalWeight(double value) {
+    _goalWeight = value;
   }
 
   List<FitnessItem> get items => _items;
-  void set items(List<FitnessItem> newItems) {
-    _items = [];
-    _items.addAll(newItems);
-    sort();
-  }
 
   void sort() {
     _items.sort((a, b) => -a.when.compareTo(b.when));
   }
 
-  void addAndSave(FitnessItem item) {
+  void add(FitnessItem item) {
     _items.add(item);
     sort();
-    save();
   }
 
-  void removeAndSave(FitnessItem item) {
+  void remove(FitnessItem item) {
     _items.remove(item);
-    save();
   }
 
   Future save() => saveFitnessData(this);
@@ -72,12 +71,14 @@ class UserDataImpl extends UserData {
     } catch(e) {
       print("Failed to load backup mode: ${e}");
     }
+    _goalWeight = json['goalWeight'];
   }
 
   Map toJson() {
     Map json = new Map();
     json['items'] = _items.map((item) => item.toJson()).toList();
     json['backupMode'] = _backupMode.toString();
+    json['goalWeight'] = _goalWeight;
     return json;
   }
 }
@@ -139,17 +140,26 @@ class FitnessApp extends App {
   }
 
   void _handleItemCreated(FitnessItem item) {
-    setState(() => _userData.addAndSave(item));
+    setState(() {
+      _userData.add(item);
+      _userData.save();
+    });
   }
 
   void _handleItemDeleted(FitnessItem item) {
-    setState(() => _userData.removeAndSave(item));
+    setState(() {
+      _userData.remove(item);
+      _userData.save();
+    });
   }
 
-  void settingsUpdater({ BackupMode backup }) {
+  void settingsUpdater({ BackupMode backup, double goalWeight }) {
     setState(() {
       if (backup != null)
-        _userData.setBackupModeAndSave(backup);
+        _userData.backupMode = backup;
+      if (goalWeight != null)
+        _userData.goalWeight = goalWeight;
+      _userData.save();
     });
   }
 
