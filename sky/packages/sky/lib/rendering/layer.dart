@@ -247,15 +247,22 @@ class TransformLayer extends ContainerLayer {
   }
 }
 
-class PaintLayer extends ContainerLayer {
-  PaintLayer({ Offset offset: Offset.zero, this.bounds, this.paintSettings }) : super(offset: offset);
+class OpacityLayer extends ContainerLayer {
+  OpacityLayer({ Offset offset: Offset.zero, this.bounds, this.alpha }) : super(offset: offset);
 
   // bounds is _not_ affected by given offset
   Rect bounds;
-  Paint paintSettings; // TODO(ianh): rename this to 'paint' once paint() is gone
+  int alpha;
+
+  static Paint paintForAlpha(int alpha) {
+    return new Paint()
+      ..color = new Color.fromARGB(alpha, 0, 0, 0)
+      ..setTransferMode(sky.TransferMode.srcOver)
+      ..isAntiAlias = false;
+  }
 
   void paint(sky.Canvas canvas) {
-    canvas.saveLayer(bounds, paintSettings);
+    canvas.saveLayer(bounds, paintForAlpha(alpha));
     canvas.translate(offset.dx, offset.dy);
     paintChildren(canvas);
     canvas.restore();
@@ -265,20 +272,24 @@ class PaintLayer extends ContainerLayer {
 class ColorFilterLayer extends ContainerLayer {
   ColorFilterLayer({
     Offset offset: Offset.zero,
-    this.size,
+    this.bounds,
     this.color,
     this.transferMode
   }) : super(offset: offset);
 
-  Size size;
+  // bounds is _not_ affected by given offset
+  Rect bounds;
   Color color;
   sky.TransferMode transferMode;
 
+  static paintForColorFilter(Color color, sky.TransferMode transferMode) {
+    new Paint()
+      ..setColorFilter(new sky.ColorFilter.mode(color, transferMode))
+      ..isAntiAlias = false;
+  }
+
   void paint(sky.Canvas canvas) {
-    Paint paint = new Paint()
-      ..color = color
-      ..setTransferMode(transferMode);
-    canvas.saveLayer(offset & size, paint);
+    canvas.saveLayer(bounds, paintForColorFilter(color, transferMode));
     canvas.translate(offset.dx, offset.dy);
     paintChildren(canvas);
     canvas.restore();

@@ -275,22 +275,10 @@ class RenderOpacity extends RenderProxyBox {
     if (_opacity == value)
       return;
     _opacity = value;
-    _cachedPaint = null;
     markNeedsPaint();
   }
 
   int get _alpha => (_opacity * 255).round();
-
-  Paint _cachedPaint;
-  Paint get _paint {
-    if (_cachedPaint == null) {
-      _cachedPaint = new Paint()
-        ..color = new Color.fromARGB(_alpha, 0, 0, 0)
-        ..setTransferMode(sky.TransferMode.srcOver)
-        ..isAntiAlias = false;
-    }
-    return _cachedPaint;
-  }
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -300,7 +288,7 @@ class RenderOpacity extends RenderProxyBox {
       if (a == 255)
         context.paintChild(child, offset.toPoint());
       else
-        context.paintChildWithPaint(child, offset.toPoint(), null, _paint);
+        context.paintChildWithOpacity(child, offset.toPoint(), null, a);
     }
   }
 }
@@ -317,7 +305,6 @@ class RenderColorFilter extends RenderProxyBox {
     if (_color == value)
       return;
     _color = value;
-    _cachedPaint = null;
     markNeedsPaint();
   }
 
@@ -328,23 +315,12 @@ class RenderColorFilter extends RenderProxyBox {
     if (_transferMode == value)
       return;
     _transferMode = value;
-    _cachedPaint = null;
     markNeedsPaint();
-  }
-
-  Paint _cachedPaint;
-  Paint get _paint {
-    if (_cachedPaint == null) {
-      _cachedPaint = new Paint()
-        ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode))
-        ..isAntiAlias = false;
-    }
-    return _cachedPaint;
   }
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChildWithPaint(child, offset.toPoint(), offset & size, _paint);
+      context.paintChildWithColorFilter(child, offset.toPoint(), offset & size, _color, _transferMode);
   }
 }
 
