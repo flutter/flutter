@@ -55,6 +55,7 @@ ARTIFACTS = {
     'linux-x64': [
         Artifact('shell', 'icudtl.dat'),
         Artifact('shell', 'sky_shell'),
+        Artifact('shell', 'sky_snapshot'),
         Artifact('viewer', 'sky_viewer.mojo'),
     ]
 }
