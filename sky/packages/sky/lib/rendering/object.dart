@@ -188,16 +188,45 @@ class PaintingContext {
     }
   }
 
-  void paintChildWithPaint(RenderObject child, Point childPosition, Rect bounds, Paint paint) {
+  void paintChildWithOpacity(RenderObject child,
+                             Point childPosition,
+                             Rect bounds,
+                             int alpha) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, paint);
+      canvas.saveLayer(bounds, OpacityLayer.paintForAlpha(alpha));
       canvas.translate(childOffset.dx, childOffset.dy);
       insertChild(child, Offset.zero);
       canvas.restore();
     } else {
-      PaintLayer paintLayer = new PaintLayer(offset: childOffset, bounds: bounds, paintSettings: paint);
+      OpacityLayer paintLayer = new OpacityLayer(
+          offset: childOffset,
+          bounds: bounds,
+          alpha: alpha);
+      _containerLayer.add(paintLayer);
+      compositeChild(child, parentLayer: paintLayer);
+    }
+  }
+
+  void paintChildWithColorFilter(RenderObject child,
+                                 Point childPosition,
+                                 Rect bounds,
+                                 Color color,
+                                 sky.TransferMode transferMode) {
+    assert(debugCanPaintChild(child));
+    final Offset childOffset = childPosition.toOffset();
+    if (!child.needsCompositing) {
+      canvas.saveLayer(bounds, ColorFilterLayer.paintForColorFilter(color, transferMode));
+      canvas.translate(childOffset.dx, childOffset.dy);
+      insertChild(child, Offset.zero);
+      canvas.restore();
+    } else {
+      ColorFilterLayer paintLayer = new ColorFilterLayer(
+          offset: childOffset,
+          bounds: bounds,
+          color: color,
+          transferMode: transferMode);
       _containerLayer.add(paintLayer);
       compositeChild(child, parentLayer: paintLayer);
     }
