@@ -4,6 +4,7 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/rendering/layer.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/box.dart';
@@ -21,17 +22,20 @@ class ViewConstraints {
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
   RenderView({
     RenderBox child,
+    this.devicePixelRatio,
     this.timeForRotation: const Duration(microseconds: 83333)
   }) {
     this.child = child;
   }
+
+  final double devicePixelRatio;
+  Duration timeForRotation;
 
   Size _size = Size.zero;
   Size get size => _size;
 
   int _orientation; // 0..3
   int get orientation => _orientation;
-  Duration timeForRotation;
 
   ViewConstraints _rootConstraints;
   ViewConstraints get rootConstraints => _rootConstraints;
@@ -42,10 +46,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  void initializeLayerTree() {
-    final double devicePixelRatio = sky.view.devicePixelRatio;
+  void scheduleInitialFrame() {
     Matrix4 logicalToDeviceZoom = new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
+    scheduleInitialLayout();
     scheduleInitialPaint(new TransformLayer(transform: logicalToDeviceZoom));
+    scheduler.ensureVisualUpdate();
   }
 
   // We never call layout() on this class, so this should never get
