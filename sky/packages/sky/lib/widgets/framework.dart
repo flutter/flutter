@@ -295,19 +295,9 @@ abstract class Widget {
   }
 
   void remove() {
+    walkChildren((Widget child) => child.remove());
     _renderObject = null;
     setParent(null);
-  }
-
-  void removeChild(Widget node) {
-    // Call this when we no longer have a child equivalent to node.
-    // For example, when our child has changed type, or has been set to null.
-    // Do not call this when our child has been replaced by an equivalent but
-    // newer instance that will sync() with the old one, since in that case
-    // the subtree starting from the old node, as well as the render tree that
-    // belonged to the old node, continue to live on in the replacement node.
-    node.remove();
-    assert(node.parent == null);
   }
 
   void detachRenderObject();
@@ -328,7 +318,7 @@ abstract class Widget {
       // the child in this slot has gone away
       assert(oldNode.mounted);
       oldNode.detachRenderObject();
-      removeChild(oldNode);
+      oldNode.remove();
       assert(!oldNode.mounted);
       return null;
     }
@@ -348,7 +338,7 @@ abstract class Widget {
       } else {
         assert(oldNode.mounted);
         oldNode.detachRenderObject();
-        removeChild(oldNode);
+        oldNode.remove();
         oldNode = null;
       }
     }
@@ -439,12 +429,6 @@ abstract class TagNode extends Widget {
 
   void updateSlot(dynamic newSlot) {
     child.updateSlot(newSlot);
-  }
-
-  void remove() {
-    if (child != null)
-      removeChild(child);
-    super.remove();
   }
 
   void detachRenderObject() {
@@ -618,9 +602,8 @@ abstract class Component extends Widget {
   void remove() {
     assert(_built != null);
     assert(renderObject != null);
-    removeChild(_built);
-    _built = null;
     super.remove();
+    _built = null;
   }
 
   void detachRenderObject() {
@@ -1020,12 +1003,6 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
     renderObject.child = null;
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
-
-  void remove() {
-    if (child != null)
-      removeChild(child);
-    super.remove();
-  }
 }
 
 abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
@@ -1060,15 +1037,6 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
     assert(child.renderObject.parent == renderObject);
     renderObject.remove(child.renderObject);
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
-  }
-
-  void remove() {
-    assert(children != null);
-    for (var child in children) {
-      assert(child != null);
-      removeChild(child);
-    }
-    super.remove();
   }
 
   bool _debugHasDuplicateIds() {

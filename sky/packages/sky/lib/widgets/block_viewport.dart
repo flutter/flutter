@@ -117,14 +117,6 @@ class BlockViewport extends RenderObjectWrapper {
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
-  void remove() {
-    for (Widget child in layoutState._childrenByKey.values) {
-      assert(child != null);
-      removeChild(child);
-    }
-    super.remove();
-  }
-
   void didMount() {
     renderObject.callback = layout;
     super.didMount();
