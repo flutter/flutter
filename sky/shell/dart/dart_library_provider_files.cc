@@ -68,6 +68,12 @@ std::string DartLibraryProviderFiles::CanonicalizePackageURL(std::string url) {
   return package_root_.Append(url).AsUTF8Unsafe();
 }
 
+std::string DartLibraryProviderFiles::CanonicalizeFileURL(std::string url) {
+  DCHECK(base::StartsWithASCII(url, "file:", true));
+  base::ReplaceFirstSubstringAfterOffset(&url, 0, "file:", "");
+  return url;
+}
+
 Dart_Handle DartLibraryProviderFiles::CanonicalizeURL(Dart_Handle library,
                                                       Dart_Handle url) {
   std::string string = blink::StdStringFromDart(url);
@@ -75,6 +81,8 @@ Dart_Handle DartLibraryProviderFiles::CanonicalizeURL(Dart_Handle library,
     return url;
   if (base::StartsWithASCII(string, "package:", true))
     return blink::StdStringToDart(CanonicalizePackageURL(string));
+  if (base::StartsWithASCII(string, "file:", true))
+    return blink::StdStringToDart(CanonicalizeFileURL(string));
   base::FilePath base_path(blink::StdStringFromDart(Dart_LibraryUrl(library)));
   base::FilePath resolved_path = base_path.DirName().Append(string);
   base::FilePath normalized_path = SimplifyPath(resolved_path);

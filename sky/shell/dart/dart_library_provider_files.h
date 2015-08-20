@@ -24,6 +24,7 @@ class DartLibraryProviderFiles : public blink::DartLibraryProvider {
 
  private:
   std::string CanonicalizePackageURL(std::string url);
+  std::string CanonicalizeFileURL(std::string url);
 
   base::FilePath package_root_;
 
