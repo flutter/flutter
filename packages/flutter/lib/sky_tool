@@ -5,6 +5,7 @@
 
 import argparse
 import atexit
+import errno
 import json
 import logging
 import os
@@ -14,10 +15,10 @@ import signal
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 import urlparse
 
-# TODO(eseidel): This should be BIN_DIR.
 PACKAGES_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKY_ENGINE_DIR = os.path.join(PACKAGES_DIR, 'sky_engine')
 APK_DIR = os.path.join(os.path.realpath(SKY_ENGINE_DIR), os.pardir, 'apks')
@@ -28,6 +29,9 @@ ADB_PATH = 'adb'
 APK_NAME = 'SkyShell.apk'
 ANDROID_PACKAGE = "org.domokit.sky.shell"
 ANDROID_COMPONENT = '%s/%s.SkyActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
+
+SKY_SHELL_APP_ID = 'com.google.SkyShell'
+IOS_APP_NAME = 'SkyShell.app'
 
 # FIXME: Do we need to look in $DART_SDK?
 DART_PATH = 'dart'
@@ -40,6 +44,22 @@ PID_FILE_KEYS = frozenset([
     'sky_server_port',
     'sky_server_root',
 ])
+
+IOS_SIM_PATH = [
+    '/Applications/iOS Simulator.app/Contents/MacOS/iOS Simulator'
+]
+
+SIMCTL_PATH = [
+    '/usr/bin/env',
+    'xcrun',
+    'simctl',
+]
+
+PLIST_BUDDY_PATH = [
+    '/usr/bin/env',
+    'xcrun',
+    'PlistBuddy',
+]
 
 
 def _port_in_use(port):
@@ -128,7 +148,6 @@ class StartSky(object):
         start_parser.add_argument('--install', action='store_true')
         start_parser.add_argument('--poke', action='store_true')
         start_parser.add_argument('--checked', action='store_true')
-        start_parser.add_argument('--build-path', type=str)
         start_parser.add_argument('project_or_path', nargs='?', type=str,
             default='.')
         start_parser.set_defaults(func=self.run)
@@ -179,15 +198,26 @@ class StartSky(object):
                               "exist to locate %s." \
                               % (os.path.basename(__file__), APK_NAME))
                 return 2
-            if args.build_path is not None:
-                apk_path = os.path.join(args.build_path, 'apks', APK_NAME)
+            if args.local_build:
+                apk_path = os.path.join(os.path.normpath(args.sky_src_path), args.android_debug_build_path, 'apks', APK_NAME)
             else:
                 apk_path = os.path.join(APK_DIR, APK_NAME)
             if not os.path.exists(apk_path):
                 logging.error("'%s' does not exist?" % apk_path)
                 return 2
 
-            subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
+            cmd = [ADB_PATH, 'install', '-r', apk_path]
+            subprocess.check_call(cmd)
+
+            # Install on connected iOS device
+            if IOSDevice.is_connected() and args.local_build:
+                app_path = os.path.join(args.sky_src_path, args.ios_debug_build_path, IOS_APP_NAME)
+                IOSDevice.install_app(app_path)
+
+            # Install on iOS simulator if it's running
+            if IOSSimulator.is_booted() and args.local_build:
+                app_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, IOS_APP_NAME)
+                IOSSimulator.fork_install_app(app_path)
 
         # Set up port forwarding for observatory
         observatory_port_string = 'tcp:%s' % OBSERVATORY_PORT
@@ -252,6 +282,355 @@ class StopSky(object):
         self._run([ADB_PATH, 'shell', 'am', 'force-stop', ANDROID_PACKAGE])
 
         pids.clear()
+
+
+class IOSDevice(object):
+    _has_ios_deploy = None
+    @classmethod
+    def has_ios_deploy(cls):
+        if cls._has_ios_deploy is not None:
+            return cls._has_ios_deploy
+        cmd = [
+            'which',
+            'ios-deploy'
+        ]
+        out = subprocess.check_output(cmd)
+        match = re.search(r'ios-deploy', out)
+        cls._has_ios_deploy = match is not None
+        return cls._has_ios_deploy
+
+    _is_connected = False
+    @classmethod
+    def is_connected(cls):
+        if not cls.has_ios_deploy():
+            return False
+        if cls._is_connected:
+            return True
+        cmd = [
+            'ios-deploy',
+            '--detect',
+            '--timeout',
+            '1'
+        ]
+        out = subprocess.check_output(cmd)
+        match = re.search(r'\[\.\.\.\.\] Found [^\)]*\) connected', out)
+        cls._is_connected = match is not None
+        return cls._is_connected
+
+    @classmethod
+    def install_app(cls, ios_app_path):
+        if not cls.has_ios_deploy():
+            return
+        cmd = [
+            'ios-deploy',
+            '--justlaunch',
+            '--timeout',
+            '10', # Smaller timeouts cause it to exit before having launched the app
+            '--bundle',
+            ios_app_path
+        ]
+        subprocess.check_call(cmd)
+
+    @classmethod
+    def copy_file(cls, bundle_id, local_path, device_path):
+        if not cls.has_ios_deploy():
+            return
+        cmd = [
+            'ios-deploy',
+            '-t',
+            '1',
+            '--bundle_id',
+            bundle_id,
+            '--upload',
+            local_path,
+            '--to',
+            device_path
+        ]
+        subprocess.check_call(cmd)
+
+
+class IOSSimulator(object):
+    @classmethod
+    def is_booted(cls):
+        return cls.get_simulator_device_id() is not None
+
+    _device_id = None
+    @classmethod
+    def get_simulator_device_id(cls):
+        if cls._device_id is not None:
+            return cls._device_id
+        cmd = [
+            'xcrun',
+            'simctl',
+            'list',
+            'devices',
+        ]
+        out = subprocess.check_output(cmd)
+        match = re.search(r'[^\(]+\(([^\)]+)\) \(Booted\)', out)
+        if match is not None and match.group(1) is not None:
+            cls._device_id = match.group(1)
+            return cls._device_id
+        else:
+            logging.warning('No running simulators found')
+            # TODO: Maybe start the simulator?
+            return None
+        if err is not None:
+            print(err)
+            exit(-1)
+
+    _simulator_path = None
+    @classmethod
+    def get_simulator_path(cls):
+        if cls._simulator_path is not None:
+            return cls._simulator_path
+        home_dir = os.path.expanduser("~")
+        device_id = cls.get_simulator_device_id()
+        if device_id is None:
+            # TODO: Maybe start the simulator?
+            return None
+        cls._simulator_path = os.path.join(home_dir, 'Library', 'Developer', 'CoreSimulator', 'Devices', device_id)
+        return cls._simulator_path
+
+    _simulator_app_id = None
+    @classmethod
+    def get_simulator_app_id(cls):
+        if cls._simulator_app_id is not None:
+            return cls._simulator_app_id
+        simulator_path = cls.get_simulator_path()
+        cmd = [
+            'find',
+            simulator_path + '/data/Containers/Data/Application',
+            '-name',
+            SKY_SHELL_APP_ID
+        ]
+        out = subprocess.check_output(cmd)
+        match = re.search(r'Data\/Application\/([^\/]+)\/Documents\/' + SKY_SHELL_APP_ID, out)
+        if match is not None and match.group(1) is not None:
+            cls._simulator_app_id = match.group(1)
+            return cls._simulator_app_id
+        else:
+            logging.warning(SKY_SHELL_APP_ID + ' is not installed on the simulator')
+            # TODO: Maybe install the app?
+            return None
+        if err is not None:
+            print(err)
+            exit(-1)
+
+    _simulator_app_documents_dir = None
+    @classmethod
+    def get_simulator_app_documents_dir(cls):
+        if cls._simulator_app_documents_dir is not None:
+            return cls._simulator_app_documents_dir
+        if not cls.is_booted():
+            return None
+        simulator_path = cls.get_simulator_path()
+        simulator_app_id = cls.get_simulator_app_id()
+        if simulator_app_id is None:
+            return None
+        cls._simulator_app_documents_dir = os.path.join(simulator_path, 'data', 'Containers', 'Data', 'Application', simulator_app_id, 'Documents')
+        return cls._simulator_app_documents_dir
+
+    @classmethod
+    def fork_install_app(cls, ios_app_path):
+        cmd = [
+            os.path.abspath(__file__),
+            'ios_sim',
+            '-p',
+            # This path manipulation is to work around an issue where simctl fails to correctly parse
+            # paths that start with ../
+            ios_app_path,
+            'launch'
+        ]
+        subprocess.check_call(cmd)
+
+    def get_application_identifier(self, path):
+      identifier = subprocess.check_output( PLIST_BUDDY_PATH + [
+        '-c',
+        'Print CFBundleIdentifier',
+        '%s/Info.plist' % path,
+      ])
+      return identifier.strip()
+
+    def is_simulator_booted(self):
+      devices = subprocess.check_output( SIMCTL_PATH + [ 'list', 'devices' ]).strip().split('\n')
+      for device in devices:
+        if re.search(r'\(Booted\)', device):
+          return True
+      return False
+
+    # Launch whatever simulator the user last used, rather than try to guess which of their simulators they might want to use
+    def boot_simulator(self, args, pids):
+      if self.is_simulator_booted():
+        return
+      # Use Popen here because launching the simulator from the command line in this manner doesn't return, so we can't check the result.
+      if args.ios_sim_path:
+        subprocess.Popen(args.ios_sim_path)
+      else:
+        subprocess.Popen(IOS_SIM_PATH)
+      while not is_simulator_booted():
+        print('Waiting for iOS Simulator to boot...')
+        time.sleep(0.5)
+
+    def install_app(self, args, pids):
+      self.boot_simulator(args, pids)
+      cmd = SIMCTL_PATH + [
+        'install',
+        'booted',
+        args.path,
+      ]
+      return subprocess.check_call(cmd)
+
+    def install_launch_and_wait(self, args, pids, wait):
+      res = self.install_app(args, pids)
+      if res != 0:
+        return res
+      identifier = self.get_application_identifier(args.path)
+      launch_args = [ 'launch' ]
+      if wait:
+        launch_args += [ '-w' ]
+      launch_args += [
+        'booted',
+        identifier,
+        '-target',
+        args.target,
+        '-server',
+        args.server
+      ]
+      return subprocess.check_output( SIMCTL_PATH + launch_args ).strip()
+
+    def launch_app(self, args, pids):
+      self.install_launch_and_wait(args, pids, False)
+
+    def debug_app(self, args, pids):
+      launch_res = self.install_launch_and_wait(args, pids, True)
+      launch_pid = re.search('.*: (\d+)', launch_res).group(1)
+      return os.system(' '.join([
+        '/usr/bin/env',
+        'xcrun',
+        'lldb',
+        # TODO(iansf): get this working again
+        # '-s',
+        # os.path.join(os.path.dirname(__file__), 'lldb_start_commands.txt'),
+        '-p',
+        launch_pid,
+      ]))
+
+    def add_subparser(self, subparsers):
+        simulator_parser = subparsers.add_parser('ios_sim',
+            help='A script that launches an'
+                 ' application in the simulator and attaches'
+                 ' the debugger to it.')
+        simulator_parser.add_argument('-p', dest='path', required=True,
+            help='Path to the simulator application.')
+        simulator_parser.add_argument('-t', dest='target', required=False,
+            default='examples/demo_launcher/lib/main.dart',
+            help='Sky server-relative path to the Sky app to run.')
+        simulator_parser.add_argument('-s', dest='server', required=False,
+            default='localhost:8080',
+            help='Sky server address.')
+        simulator_parser.add_argument('--ios_sim_path', dest='ios_sim_path',
+            help='Path to your iOS Simulator executable. '
+                 'Not normally required.')
+
+        subparsers = simulator_parser.add_subparsers()
+        launch_parser = subparsers.add_parser('launch', help='Launch app')
+        launch_parser.set_defaults(func=self.launch_app)
+        install_parser = subparsers.add_parser('install', help='Install app')
+        install_parser.set_defaults(func=self.install_app)
+        debug_parser = subparsers.add_parser('debug', help='Debug app')
+        debug_parser.set_defaults(func=self.debug_app)
+
+    def run(self, args, pids):
+      return args.func(args)
+
+
+class StartListening(object):
+    def add_subparser(self, subparsers):
+        listen_parser = subparsers.add_parser('listen',
+            help=('Listen for changes to files and reload the running app on all connected devices'))
+        listen_parser.set_defaults(func=self.run)
+
+    def run(self, args, pids):
+        cmd = [
+            'which',
+            'fswatch'
+        ]
+        out = subprocess.check_output(cmd)
+        match = re.search(r'fswatch', out)
+        if match is None:
+            logging.error('"listen" command is only useful if you have installed fswatch.  Run "brew install fswatch" to install it with homebrew.')
+            return
+
+        tempdir = None
+        currdir = None
+        while True:
+            # Watch filesystem for changes
+            cmd = [
+                'fswatch',
+                '-r',
+                '-v',
+                '-1',
+                '.'
+            ]
+            subprocess.check_call(cmd)
+
+            logging.info('Updating running Sky apps...')
+
+            # Restart the app on Android.  Android does not currently restart using skyx files.
+            cmd = [
+                sys.executable,
+                os.path.abspath(__file__),
+                'start',
+                '--poke'
+            ]
+            subprocess.check_call(cmd)
+
+            if not args.local_build:
+                # Currently sending to iOS only works if you are building Sky locally
+                # since we aren't shipping the sky_snapshot binary yet.
+                continue
+
+            if tempdir is None:
+                tempdir = tempfile.mkdtemp()
+                currdir = os.getcwd()
+
+            # Build the snapshot
+            sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, 'clang_x64', 'sky_snapshot')
+            cmd = [
+                sky_snapshot_path,
+                '--package-root=packages',
+                '--snapshot=' + os.path.join(tempdir, 'snapshot_blob.bin'),
+                os.path.join('lib', 'main.dart')
+            ]
+            subprocess.check_call(cmd)
+
+            os.chdir(tempdir)
+            # Turn the snapshot into an app.skyx file
+            cmd = [
+                'zip',
+                '-r',
+                'app.skyx',
+                'snapshot_blob.bin',
+                'action',
+                'content',
+                'navigation'
+            ]
+            subprocess.check_call(cmd)
+            os.chdir(currdir)
+
+            # Copy the app.skyx to the running simulator
+            simulator_app_documents_dir = IOSSimulator.get_simulator_app_documents_dir()
+            if simulator_app_documents_dir is not None:
+                cmd = [
+                    'cp',
+                    os.path.join(tempdir, 'app.skyx'),
+                    simulator_app_documents_dir
+                ]
+                subprocess.check_call(cmd)
+
+            # Copy the app.skyx to the attached iOS device
+            if IOSDevice.is_connected():
+                IOSDevice.copy_file(SKY_SHELL_APP_ID, os.path.join(tempdir, 'app.skyx'), 'Documents/app.skyx')
 
 
 class StartTracing(object):
@@ -382,13 +761,58 @@ class SkyShellRunner(object):
         if not self._check_for_dart():
             sys.exit(2)
 
-        parser = argparse.ArgumentParser(description='Sky Demo Runner')
+        parser = argparse.ArgumentParser(description='Sky App Runner')
+        parser.add_argument('--local-build', dest='local_build', action='store_true',
+            help='Set this if you are building Sky locally and want to use those build products. '
+                 'When set, attempts to automaticaly determine sky-src-path if sky-src-path is '
+                 'not set. Not normally required.')
+        parser.add_argument('--sky-src-path', dest='sky_src_path',
+            help='Path to your Sky src directory, if you are building Sky locally. '
+                 'Ignored if local-build is not set. Not normally required.')
+        parser.add_argument('--android-debug-build-path', dest='android_debug_build_path',
+            help='Path to your Android Debug out directory, if you are building Sky locally. '
+                 'This path is relative to sky-src-path. Not normally required.',
+            default='out/android_Debug/')
+        parser.add_argument('--ios-debug-build-path', dest='ios_debug_build_path',
+            help='Path to your iOS Debug out directory, if you are building Sky locally. '
+                 'This path is relative to sky-src-path. Not normally required.',
+            default='out/ios_Debug/')
+        parser.add_argument('--ios-sim-debug-build-path', dest='ios_sim_debug_build_path',
+            help='Path to your iOS Simulator Debug out directory, if you are building Sky locally. '
+                 'This path is relative to sky-src-path. Not normally required.',
+            default='out/ios_sim_Debug/')
+
         subparsers = parser.add_subparsers(help='sub-command help')
 
-        for command in [StartSky(), StopSky(), StartTracing(), StopTracing()]:
+        for command in [StartSky(), StopSky(), StartListening(), StartTracing(), StopTracing(), IOSSimulator()]:
             command.add_subparser(subparsers)
 
         args = parser.parse_args()
+        if args.local_build and args.sky_src_path is None:
+            real_sky_path = os.path.realpath(os.path.join(PACKAGES_DIR, 'sky'))
+            match = re.match(r'pub.dartlang.org/sky', real_sky_path)
+            if match is not None:
+                args.local_build = False
+            else:
+                sky_src_path = os.path.dirname(
+                    os.path.dirname(
+                        os.path.dirname(
+                            os.path.dirname(real_sky_path))))
+                if sky_src_path == '/' or sky_src_path == '':
+                    args.local_build = False
+                else:
+                    args.sky_src_path = sky_src_path
+
+            if not args.local_build:
+                logging.warning('Unable to detect a valid sky install. Disabling local-build flag.\n'
+                                'The recommended way to use a local build of Sky is to add the following\n'
+                                'to your pubspec.yaml file and then run pub get again:\n'
+                                'dependency_overrides:\n'
+                                '  material_design_icons:\n'
+                                '    path: /path/to/sky_engine/src/sky/packages/material_design_icons\n'
+                                '  sky:\n'
+                                '    path: /path/to/sky_engine/src/sky/packages/sky\n')
+
         pids = Pids.read_from(PID_FILE_PATH, PID_FILE_KEYS)
         atexit.register(pids.write_to, PID_FILE_PATH)
         exit_code = 0
@@ -402,4 +826,4 @@ class SkyShellRunner(object):
 
 
 if __name__ == '__main__':
-    SkyShellRunner().main()
+    sys.exit(SkyShellRunner().main())
