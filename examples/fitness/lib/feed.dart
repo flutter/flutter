@@ -61,7 +61,7 @@ class FeedFragment extends StatefulComponent {
   FeedFragment({ this.navigator, this.userData, this.onItemCreated, this.onItemDeleted });
 
   Navigator navigator;
-  List<FitnessItem> userData;
+  UserData userData;
   FitnessItemHandler onItemCreated;
   FitnessItemHandler onItemDeleted;
 
@@ -179,12 +179,13 @@ class FeedFragment extends StatefulComponent {
     double startY;
     double endY;
     List<Point> dataSet = new List<Point>();
-    for (FitnessItem item in userData) {
+    for (FitnessItem item in userData.items) {
       if (item is Measurement) {
           double x = item.when.millisecondsSinceEpoch.toDouble();
           double y = item.weight;
-          if (startX == null)
+          if (startX == null || startX > x)
             startX = x;
+          if (endX == null || endX < x)
           endX = x;
           if (startY == null || startY > y)
             startY = y;
@@ -193,6 +194,10 @@ class FeedFragment extends StatefulComponent {
           dataSet.add(new Point(x, y));
       }
     }
+    if (userData.goalWeight > 0.0) {
+      startY = math.min(startY, userData.goalWeight);
+      endY = math.max(endY, userData.goalWeight);
+    }
     playfair.ChartData data = new playfair.ChartData(
       startX: startX,
       startY: startY,
@@ -200,14 +205,16 @@ class FeedFragment extends StatefulComponent {
       endY: endY,
       dataSet: dataSet,
       numHorizontalGridlines: 5,
-      roundToPlaces: 1
+      roundToPlaces: 1,
+      indicatorLine: userData.goalWeight,
+      indicatorText: "GOAL WEIGHT"
     );
     return new playfair.Chart(data: data);
   }
 
   Widget buildBody() {
     TextStyle style = Theme.of(this).text.title;
-    if (userData.length == 0)
+    if (userData.items.length == 0)
       return new Material(
         type: MaterialType.canvas,
         child: new Flex(
@@ -218,7 +225,7 @@ class FeedFragment extends StatefulComponent {
     switch (_fitnessMode) {
       case FitnessMode.feed:
         return new FitnessItemList(
-          items: userData,
+          items: userData.items.reversed.toList(),
           onDismissed: _handleItemDismissed
         );
       case FitnessMode.chart:
