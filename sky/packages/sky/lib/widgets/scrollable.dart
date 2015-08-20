@@ -384,14 +384,30 @@ abstract class FixedHeightScrollable extends Scrollable {
     });
   }
 
+  double get _leadingPadding {
+    if (scrollDirection == ScrollDirection.vertical)
+      return padding.top;
+    return padding.left;
+  }
+
+  double get _trailingPadding {
+    if (scrollDirection == ScrollDirection.vertical)
+      return padding.bottom;
+    return padding.right;
+  }
+
+  EdgeDims get _crossAxisPadding {
+    if (padding == null)
+      return null;
+    if (scrollDirection == ScrollDirection.vertical)
+      return new EdgeDims.only(left: padding.left, right: padding.right);
+    return new EdgeDims.only(top: padding.top, bottom: padding.bottom);
+  }
+
   void _updateContentsExtent() {
     double contentsExtent = itemExtent * itemCount;
-    if (padding != null) {
-      if (scrollDirection == ScrollDirection.vertical)
-        contentsExtent += padding.top + padding.bottom;
-      else
-        contentsExtent += padding.left + padding.right;
-    }
+    if (padding != null)
+      contentsExtent += _leadingPadding + _trailingPadding;
     scrollBehavior.contentsSize = contentsExtent;
   }
 
@@ -413,25 +429,29 @@ abstract class FixedHeightScrollable extends Scrollable {
       _updateScrollOffset();
     }
 
+    double paddedScrollOffset = scrollOffset;
+    if (padding != null)
+      paddedScrollOffset -= _leadingPadding;
+
     int itemShowIndex = 0;
     int itemShowCount = 0;
     Offset viewportOffset = Offset.zero;
     if (_containerExtent != null && _containerExtent > 0.0) {
-      if (scrollOffset < 0.0) {
-        double visibleHeight = _containerExtent + scrollOffset;
+      if (paddedScrollOffset < 0.0) {
+        double visibleHeight = _containerExtent + paddedScrollOffset;
         itemShowCount = (visibleHeight / itemExtent).round() + 1;
-        viewportOffset = _toOffset(scrollOffset);
+        viewportOffset = _toOffset(paddedScrollOffset);
       } else {
         itemShowCount = (_containerExtent / itemExtent).ceil();
-        double alignmentDelta = -scrollOffset % itemExtent;
+        double alignmentDelta = -paddedScrollOffset % itemExtent;
         double drawStart;
         if (alignmentDelta != 0.0) {
           alignmentDelta -= itemExtent;
           itemShowCount += 1;
-          drawStart = scrollOffset + alignmentDelta;
+          drawStart = paddedScrollOffset + alignmentDelta;
           viewportOffset = _toOffset(-alignmentDelta);
         } else {
-          drawStart = scrollOffset;
+          drawStart = paddedScrollOffset;
         }
         itemShowIndex = math.max(0, (drawStart / itemExtent).floor());
       }
@@ -453,7 +473,7 @@ abstract class FixedHeightScrollable extends Scrollable {
         scrollDirection: scrollDirection,
         scrollOffset: viewportOffset,
         child: new Container(
-          padding: padding,
+          padding: _crossAxisPadding,
           child: new Block(items, direction: blockDirection)
         )
       )
