@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:sky/animation/animated_value.dart';
+import 'package:sky/animation/curves.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
@@ -12,6 +14,7 @@ import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets/transitions.dart';
 
 typedef Widget DialogBuilder(Navigator navigator);
 
@@ -104,6 +107,47 @@ class Dialog extends Component {
       )
     ]);
 
+  }
+}
+
+class DialogRoute extends RouteBase {
+  DialogRoute({ this.completer, this.builder });
+
+  final Completer completer;
+  final RouteBuilder builder;
+
+  Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
+  bool get isOpaque => false;
+
+  void popState([dynamic result]) {
+    completer.complete(result);
+  }
+
+  TransitionBase buildTransition({ Key key }) => new DialogTransition(key: key);
+}
+
+const Duration _kTransitionDuration = const Duration(milliseconds: 150);
+class DialogTransition extends TransitionBase {
+  DialogTransition({
+    Key key,
+    Widget child,
+    Direction direction,
+    Function onDismissed,
+    Function onCompleted
+  }): super(key: key,
+            child: child,
+            duration: _kTransitionDuration,
+            direction: direction,
+            onDismissed: onDismissed,
+            onCompleted: onCompleted);
+
+  Widget buildWithChild(Widget child) {
+    return new FadeTransition(
+      performance: performance,
+      direction: direction,
+      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
+      child: child
+    );
   }
 }
 
