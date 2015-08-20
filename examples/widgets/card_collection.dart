@@ -76,6 +76,8 @@ class CardCollectionApp extends App {
     // background (text and icons) will just be clipped, not resized.
     Widget background = new Positioned(
       top: 0.0,
+      right: 0.0,
+      bottom: 0.0,
       left: 0.0,
       child: new Container(
         margin: const EdgeDims.all(4.0),
