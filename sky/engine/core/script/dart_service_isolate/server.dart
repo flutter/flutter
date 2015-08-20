@@ -179,7 +179,6 @@ class Server {
       _notifyServerState(ip, _server.port);
       return this;
     }).catchError((e, st) {
-      print('Could not start Observatory HTTP server:\n$e\n$st\n');
       _notifyServerState("", 0);
       return this;
     });

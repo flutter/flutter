@@ -42,8 +42,10 @@ base::FilePath SimplifyPath(const base::FilePath& path) {
 DartLibraryProviderFiles::DartLibraryProviderFiles(
     const base::FilePath& package_root)
     : package_root_(package_root) {
-    CHECK(base::DirectoryExists(package_root_)) << "Invalid --package-root "
-      << "\"" << package_root_.LossyDisplayName() << "\"";
+    if (package_root_.empty())
+      package_root_ = base::FilePath(FILE_PATH_LITERAL("packages"));
+    if (!base::DirectoryExists(package_root_))
+      package_root_ = base::FilePath();
 }
 
 DartLibraryProviderFiles::~DartLibraryProviderFiles() {
@@ -65,6 +67,8 @@ void DartLibraryProviderFiles::GetLibraryAsStream(
 std::string DartLibraryProviderFiles::CanonicalizePackageURL(std::string url) {
   DCHECK(base::StartsWithASCII(url, "package:", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
+  CHECK(!package_root_.empty())
+      << "Cannot import packages without a valid --package-root";
   return package_root_.Append(url).AsUTF8Unsafe();
 }
 

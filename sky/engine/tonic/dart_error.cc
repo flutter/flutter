@@ -16,15 +16,16 @@ const char kInvalidArgument[] = "Invalid argument.";
 
 bool LogIfError(Dart_Handle handle) {
   if (Dart_IsError(handle)) {
-    LOG(ERROR) << Dart_GetError(handle);
-
     // Only unhandled exceptions have stacktraces.
-    if (!Dart_ErrorHasException(handle))
+    if (!Dart_ErrorHasException(handle)) {
+      LOG(ERROR) << Dart_GetError(handle);
       return true;
+    }
 
     Dart_Handle stacktrace = Dart_ErrorGetStacktrace(handle);
     const char* stacktrace_cstr = "";
     Dart_StringToCString(Dart_ToString(stacktrace), &stacktrace_cstr);
+    LOG(ERROR) << "Unhandled exception:";
     LOG(ERROR) << stacktrace_cstr;
     return true;
   }
