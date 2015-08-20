@@ -10,10 +10,10 @@ typedef void SettingsUpdater({
 
 class SettingsFragment extends Component {
 
-  SettingsFragment(this.navigator, this.backup, this.updater);
+  SettingsFragment({ this.navigator, this.userData, this.updater });
 
   final Navigator navigator;
-  final BackupMode backup;
+  final UserData userData;
   final SettingsUpdater updater;
 
   void _handleBackupChanged(bool value) {
@@ -38,10 +38,10 @@ class SettingsFragment extends Component {
           padding: const EdgeDims.symmetric(vertical: 20.0),
           child: new Block([
             new DrawerItem(
-              onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
+              onPressed: () { _handleBackupChanged(!(userData.backupMode == BackupMode.enabled)); },
               children: [
                 new Flexible(child: new Text('Back up data to the cloud')),
-                new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged)
+                new Switch(value: userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged)
               ]
             )
           ])
