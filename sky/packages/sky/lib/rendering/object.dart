@@ -51,13 +51,6 @@ class PaintingContext {
     _startRecording(paintBounds);
   }
 
-  factory PaintingContext.replacingLayer(ContainerLayer oldLayer, Rect paintBounds) {
-    PaintingContext newContext = new PaintingContext.withOffset(oldLayer.offset, paintBounds);
-    if (oldLayer.parent != null)
-      oldLayer.replaceWith(newContext._containerLayer);
-    return newContext;
-  }
-
   PaintingContext.forTesting(this._canvas);
 
   ContainerLayer _containerLayer;
@@ -650,21 +643,20 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       sky.tracing.end('RenderObject.flushPaint');
     }
   }
-  void initialPaint(ContainerLayer rootLayer, Size size) {
+  void scheduleInitialPaint(ContainerLayer rootLayer) {
     assert(attached);
     assert(parent is! RenderObject);
     assert(!_debugDoingPaint);
     assert(hasLayer);
-    PaintingContext newContext = new PaintingContext.withLayer(rootLayer, Point.origin & size);
-    _paintLayer(newContext);
+    _layer = rootLayer;
+    assert(_needsPaint);
+    _nodesNeedingPaint.add(this);
   }
   void _repaint() {
     assert(hasLayer);
     assert(_layer != null);
-    PaintingContext newContext = new PaintingContext.replacingLayer(_layer, paintBounds);
-    _paintLayer(newContext);
-  }
-  void _paintLayer(PaintingContext context) {
+    _layer.removeAllChildren();
+    PaintingContext context = new PaintingContext.withLayer(_layer, paintBounds);
     _layer = context._containerLayer;
     try {
       _paintWithContext(context, Offset.zero);
