@@ -585,31 +585,31 @@ abstract class Component extends Widget {
 
   bool _dirty = true;
 
-  Widget _built;
+  Widget _child;
   dynamic _slot; // cached slot from the last time we were synced
 
   void updateSlot(dynamic newSlot) {
     _slot = newSlot;
-    if (_built != null)
-      _built.updateSlot(newSlot);
+    if (_child != null)
+      _child.updateSlot(newSlot);
   }
 
   void walkChildren(WidgetTreeWalker walker) {
-    if (_built != null)
-      walker(_built);
+    if (_child != null)
+      walker(_child);
   }
 
   void remove() {
-    assert(_built != null);
+    assert(_child != null);
     assert(renderObject != null);
     super.remove();
-    _built = null;
+    _child = null;
   }
 
   void detachRenderObject() {
-    assert(_built != null);
+    assert(_child != null);
     assert(renderObject != null);
-    _built.detachRenderObject();
+    _child.detachRenderObject();
   }
 
   void dependenciesChanged() {
@@ -627,38 +627,38 @@ abstract class Component extends Widget {
 
   // There are three cases here:
   // 1) Building for the first time:
-  //      assert(_built == null && old == null)
+  //      assert(_child == null && old == null)
   // 2) Re-building (because a dirty flag got set):
-  //      assert(_built != null && old == null)
+  //      assert(_child != null && old == null)
   // 3) Syncing against an old version
-  //      assert(_built == null && old != null)
+  //      assert(_child == null && old != null)
   void _sync(Component old, dynamic slot) {
-    assert(_built == null || old == null);
+    assert(_child == null || old == null);
 
     updateSlot(slot);
 
-    var oldBuilt;
+    Widget oldChild;
     if (old == null) {
-      oldBuilt = _built;
+      oldChild = _child;
     } else {
-      assert(_built == null);
-      oldBuilt = old._built;
+      assert(_child == null);
+      oldChild = old._child;
     }
 
     _isBuilding = true;
 
     int lastOrder = _currentOrder;
     _currentOrder = _order;
-    _built = build();
+    _child = build();
     _currentOrder = lastOrder;
-    assert(_built != null);
-    _built = syncChild(_built, oldBuilt, slot);
-    assert(_built != null);
-    assert(_built.parent == this);
+    assert(_child != null);
+    _child = syncChild(_child, oldChild, slot);
+    assert(_child != null);
+    assert(_child.parent == this);
     _isBuilding = false;
 
     _dirty = false;
-    _renderObject = _built.renderObject;
+    _renderObject = _child.renderObject;
     assert(_renderObject == renderObject); // in case a subclass reintroduces it
     assert(renderObject != null);
   }
@@ -709,11 +709,11 @@ abstract class StatefulComponent extends Component {
     assert(newNode != null);
     assert(runtimeType == newNode.runtimeType);
     assert(key == newNode.key);
-    assert(_built != null);
+    assert(_child != null);
     newNode._disqualifiedFromEverAppearingAgain = true;
 
-    newNode._built = _built;
-    _built = null;
+    newNode._child = _child;
+    _child = null;
     _dirty = true;
 
     return true;
