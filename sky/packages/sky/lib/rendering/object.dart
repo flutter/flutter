@@ -41,94 +41,211 @@ class PaintingContext {
   // Don't keep a reference to the PaintingContext.canvas, since it
   // can change dynamically after any call to this object's methods.
 
-  PaintingContext(Offset offest, Size size) {
-    _startRecording(offest, size);
+  PaintingContext.withOffset(Offset offset, Rect paintBounds) {
+    _containerLayer = new ContainerLayer(offset: offset);
+    _startRecording(paintBounds);
   }
 
-  PaintingCanvas _canvas;
-  PaintingCanvas get canvas => _canvas;
+  PaintingContext.withLayer(ContainerLayer containerLayer, Rect paintBounds) {
+    _containerLayer = containerLayer;
+    _startRecording(paintBounds);
+  }
 
-  PictureLayer _layer;
-  PictureLayer get layer => _layer;
-
-  sky.PictureRecorder _recorder;
+  factory PaintingContext.replacingLayer(ContainerLayer oldLayer, Rect paintBounds) {
+    PaintingContext newContext = new PaintingContext.withOffset(oldLayer.offset, paintBounds);
+    if (oldLayer.parent != null)
+      oldLayer.replaceWith(newContext._containerLayer);
+    return newContext;
+  }
 
   PaintingContext.forTesting(this._canvas);
 
-  void _startRecording(Offset offset, Size size) {
-    assert(_layer == null);
+  ContainerLayer _containerLayer;
+  ContainerLayer get containerLayer => _containerLayer;
+
+  PictureLayer _currentLayer;
+  sky.PictureRecorder _recorder;
+  PaintingCanvas _canvas;
+  PaintingCanvas get canvas => _canvas; // Paint on this.
+
+  void _startRecording(Rect paintBounds) {
+    assert(_currentLayer == null);
     assert(_recorder == null);
     assert(_canvas == null);
-    _layer = new PictureLayer(offset: offset, size: size);
+    _currentLayer = new PictureLayer(paintBounds: paintBounds);
     _recorder = new sky.PictureRecorder();
-    _canvas = new PaintingCanvas(_recorder, Point.origin & size);
+    _canvas = new PaintingCanvas(_recorder, paintBounds);
+    _containerLayer.add(_currentLayer);
   }
 
   void endRecording() {
-    assert(_layer != null);
+    assert(_currentLayer != null);
     assert(_recorder != null);
     assert(_canvas != null);
-    _layer.picture = _recorder.endRecording();
-    _layer = null;
+    _currentLayer.picture = _recorder.endRecording();
+    _currentLayer = null;
     _recorder = null;
     _canvas = null;
   }
 
-  bool debugCanPaintChild() {
+  bool debugCanPaintChild(RenderObject child) {
     // You need to use layers if you are applying transforms, clips,
     // or similar, to a child. To do so, use the paintChildWith*()
     // methods below.
     // (commented out for now because we haven't ported everything yet)
-    // assert(canvas.getSaveCount() == 1);
+    assert(canvas.getSaveCount() == 1 || !child.needsCompositing);
     return true;
   }
 
-  void paintChild(RenderObject child, Point point) {
-    assert(debugCanPaintChild());
-    final Offset offset = point.toOffset();
-    if (!child.requiresCompositing) {
-      child._paintWithContext(this, offset);
+  void paintChild(RenderObject child, Point childPosition) {
+    assert(debugCanPaintChild(child));
+    final Offset childOffset = childPosition.toOffset();
+    if (!child.hasLayer) {
+      insertChild(child, childOffset);
     } else {
-      _compositeChild(child, offset, layer.parent, layer.nextSibling);
+      compositeChild(child, childOffset: childOffset, parentLayer: _containerLayer);
     }
   }
 
-  void paintChildWithClip(RenderObject child, Point point, Rect clipRect) {
-    assert(debugCanPaintChild());
-    final Offset offset = point.toOffset();
-    if (!child.hasCompositedDescendant) {
-      // If none of the descendants require compositing, then we don't
-      // need to use a new layer here, because at no point will any of
-      // the children introduce a new layer of their own.
+  // Below we have various variants of the paintChild() method, which
+  // do additional work, such as clipping or transforming, at the same
+  // time as painting the children.
+
+  // If none of the descendants require compositing, then these don't
+  // need to use a new layer, because at no point will any of the
+  // children introduce a new layer of their own. In that case, we
+  // just use regular canvas commands to do the work.
+
+  // If at least one of the descendants requires compositing, though,
+  // we introduce a new layer to do the work, so that when the
+  // children are split into a new layer, the work (e.g. clip) is not
+  // lost, as it would if we didn't introduce a new layer.
+
+  static final Paint _disableAntialias = new Paint()..isAntiAlias = false;
+
+  void paintChildWithClipRect(RenderObject child, Point childPosition, Rect clipRect) {
+    // clipRect is in the parent's coordinate space
+    assert(debugCanPaintChild(child));
+    final Offset childOffset = childPosition.toOffset();
+    if (!child.needsCompositing) {
       canvas.save();
-      canvas.clipRect(clipRect.shift(offset));
-      child._paintWithContext(this, offset);
+      canvas.clipRect(clipRect);
+      insertChild(child, childOffset);
       canvas.restore();
     } else {
-      // At least one of the descendants requires compositing. We
-      // therefore introduce a new layer to do the clipping, so that
-      // when the children are split into a new layer, the clip is not
-      // lost, as it would if we didn't introduce a new layer.
-      ClipLayer clip = new ClipLayer(offset: offset, clipRect: clipRect);
-      layer.parent.add(clip, before: layer.nextSibling);
-      _compositeChild(child, Offset.zero, clip, null);
+      ClipRectLayer clipLayer = new ClipRectLayer(offset: childOffset, clipRect: clipRect);
+      _containerLayer.add(clipLayer);
+      compositeChild(child, parentLayer: clipLayer);
     }
   }
 
-  void _compositeChild(RenderObject child, Offset offset, ContainerLayer parentLayer, Layer nextSibling) {
-    final PictureLayer originalLayer = _layer;
+  void paintChildWithClipRRect(RenderObject child, Point childPosition, Rect bounds, sky.RRect clipRRect) {
+    // clipRRect is in the parent's coordinate space
+    assert(debugCanPaintChild(child));
+    final Offset childOffset = childPosition.toOffset();
+    if (!child.needsCompositing) {
+      canvas.saveLayer(bounds, _disableAntialias);
+      canvas.clipRRect(clipRRect);
+      insertChild(child, childOffset);
+      canvas.restore();
+    } else {
+      ClipRRectLayer clipLayer = new ClipRRectLayer(offset: childOffset, bounds: bounds, clipRRect: clipRRect);
+      _containerLayer.add(clipLayer);
+      compositeChild(child, parentLayer: clipLayer);
+    }
+  }
+
+  void paintChildWithClipPath(RenderObject child, Point childPosition, Rect bounds, Path clipPath) {
+    // bounds and clipPath are in the parent's coordinate space
+    assert(debugCanPaintChild(child));
+    final Offset childOffset = childPosition.toOffset();
+    if (!child.needsCompositing) {
+      canvas.saveLayer(bounds, _disableAntialias);
+      canvas.clipPath(clipPath);
+      canvas.translate(childOffset.dx, childOffset.dy);
+      insertChild(child, Offset.zero);
+      canvas.restore();
+    } else {
+      ClipPathLayer clipLayer = new ClipPathLayer(offset: childOffset, bounds: bounds, clipPath: clipPath);
+      _containerLayer.add(clipLayer);
+      compositeChild(child, parentLayer: clipLayer);
+    }
+  }
+
+  void paintChildWithTransform(RenderObject child, Point childPosition, Matrix4 transform) {
+    assert(debugCanPaintChild(child));
+    final Offset childOffset = childPosition.toOffset();
+    if (!child.needsCompositing) {
+      canvas.save();
+      canvas.translate(childOffset.dx, childOffset.dy);
+      canvas.concat(transform.storage);
+      insertChild(child, Offset.zero);
+      canvas.restore();
+    } else {
+      TransformLayer transformLayer = new TransformLayer(offset: childOffset, transform: transform);
+      _containerLayer.add(transformLayer);
+      compositeChild(child, parentLayer: transformLayer);
+    }
+  }
+
+  void paintChildWithPaint(RenderObject child, Point childPosition, Rect bounds, Paint paint) {
+    assert(debugCanPaintChild(child));
+    final Offset childOffset = childPosition.toOffset();
+    if (!child.needsCompositing) {
+      canvas.saveLayer(bounds, paint);
+      canvas.translate(childOffset.dx, childOffset.dy);
+      insertChild(child, Offset.zero);
+      canvas.restore();
+    } else {
+      PaintLayer paintLayer = new PaintLayer(offset: childOffset, bounds: bounds, paintSettings: paint);
+      _containerLayer.add(paintLayer);
+      compositeChild(child, parentLayer: paintLayer);
+    }
+  }
+
+  // do not call directly
+  void insertChild(RenderObject child, Offset offset) {
+    child._paintWithContext(this, offset);
+  }
+
+  // do not call directly
+  void compositeChild(RenderObject child, { Offset childOffset: Offset.zero, ContainerLayer parentLayer }) {
+    // This ends the current layer and starts a new layer for the
+    // remainder of our rendering. It also creates a new layer for the
+    // child, and inserts that layer into the given parentLayer, which
+    // must either be our current layer's parent layer, or at least
+    // must have our current layer's parent layer as an ancestor.
+    final PictureLayer originalLayer = _currentLayer;
+    assert(() {
+      assert(parentLayer != null);
+      assert(originalLayer != null);
+      assert(originalLayer.parent != null);
+      ContainerLayer ancestor = parentLayer;
+      while (ancestor != null && ancestor != originalLayer.parent)
+        ancestor = ancestor.parent;
+      assert(ancestor == originalLayer.parent);
+      assert(originalLayer.parent == _containerLayer);
+      return true;
+    });
+
+    // End our current layer.
     endRecording();
 
-    Rect childBounds = child.paintBounds;
-    Offset childOffset = childBounds.topLeft.toOffset();
-    PaintingContext context = new PaintingContext(offset + childOffset, childBounds.size);
-    parentLayer.add(context.layer, before: nextSibling);
-    child._layer = context.layer;
-    child._paintWithContext(context, -childOffset);
+    // Create a layer for our child, and paint the child into it.
+    if (child.needsPaint || !child.hasLayer) {
+      PaintingContext newContext = new PaintingContext.withOffset(childOffset, child.paintBounds);
+      child._layer = newContext.containerLayer;
+      child._paintWithContext(newContext, Offset.zero);
+      newContext.endRecording();
+    } else {
+      assert(child._layer != null);
+      child._layer.detach();
+      child._layer.offset = childOffset;
+    }
+    parentLayer.add(child._layer);
 
-    _startRecording(originalLayer.offset, originalLayer.size);
-    originalLayer.parent.add(layer, before: context.layer.nextSibling);
-    context.endRecording();
+    // Start a new layer for anything that remains of our own paint.
+    _startRecording(originalLayer.paintBounds);
   }
 
 }
@@ -163,7 +280,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     setupParentData(child);
     super.adoptChild(child);
     markNeedsLayout();
-    markNeedsCompositingUpdate();
+    markNeedsCompositingBitsUpdate();
   }
   void dropChild(RenderObject child) { // only for use by subclasses
     assert(debugCanPerformMutations);
@@ -173,7 +290,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     child.parentData.detach();
     super.dropChild(child);
     markNeedsLayout();
-    markNeedsCompositingUpdate();
+    markNeedsCompositingBitsUpdate();
   }
 
   // Override in subclasses with children and call the visitor for each child.
@@ -254,7 +371,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
   void scheduleInitialLayout() {
     assert(attached);
-    assert(parent == null);
+    assert(parent is! RenderObject);
     assert(_relayoutSubtreeRoot == null);
     _relayoutSubtreeRoot = this;
     assert(() {
@@ -412,71 +529,90 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
 
-  PictureLayer _layer;
-  PictureLayer get layer {
-    assert(requiresCompositing);
+  // Override this in subclasses to indicate that instances of your
+  // class need to have their own Layer. For example, videos.
+  bool get hasLayer => false;
+
+  ContainerLayer _layer;
+  ContainerLayer get layer {
+    assert(hasLayer);
+    assert(!_needsPaint);
     return _layer;
   }
 
-  bool get requiresCompositing => false;
-
-  bool _hasCompositedDescendant = false;
-  bool get hasCompositedDescendant {
-    assert(!_needsCompositingUpdate);
-    return _hasCompositedDescendant;
-  }
-
-  bool _needsCompositingUpdate = false;
-  void markNeedsCompositingUpdate() {
-    if (_needsCompositingUpdate)
+  // When the subtree is mutated, we need to recompute our
+  // "needsCompositing" bit, and our ancestors need to do the
+  // same (in case ours changed). adoptChild() and dropChild() thus
+  // call markNeedsCompositingBitsUpdate().
+  bool _needsCompositingBitsUpdate = true;
+  void markNeedsCompositingBitsUpdate() {
+    if (_needsCompositingBitsUpdate)
       return;
-    _needsCompositingUpdate = true;
-    final AbstractNode parent = this.parent;
+    _needsCompositingBitsUpdate = true;
+    final AbstractNode parent = this.parent; // TODO(ianh): remove the once the analyzer is cleverer
     if (parent is RenderObject)
-      parent.markNeedsCompositingUpdate();
+      parent.markNeedsCompositingBitsUpdate();
   }
-
-  void updateCompositing() {
-    if (!_needsCompositingUpdate)
+  bool _needsCompositing = false;
+  bool get needsCompositing {
+    // needsCompositing is true if either we have a layer or one of our descendants has a layer
+    assert(!_needsCompositingBitsUpdate); // make sure we don't use this bit when it is dirty
+    return _needsCompositing;
+  }
+  void updateCompositingBits() {
+    if (!_needsCompositingBitsUpdate)
       return;
+    bool didHaveCompositedDescendant = _needsCompositing;
     visitChildren((RenderObject child) {
-      child.updateCompositing();
-      if (child.hasCompositedDescendant)
-        _hasCompositedDescendant = true;
+      child.updateCompositingBits();
+      if (child.needsCompositing)
+        _needsCompositing = true;
     });
-    if (requiresCompositing)
-      _hasCompositedDescendant = true;
-    _needsCompositingUpdate = false;
+    if (hasLayer)
+      _needsCompositing = true;
+    if (didHaveCompositedDescendant != _needsCompositing)
+      markNeedsPaint();
+    _needsCompositingBitsUpdate = false;
   }
 
   bool _needsPaint = true;
   bool get needsPaint => _needsPaint;
-
   void markNeedsPaint() {
     assert(!debugDoingPaint);
     if (!attached) return; // Don't try painting things that aren't in the hierarchy
     if (_needsPaint) return;
-    if (requiresCompositing) {
+    if (hasLayer) {
+      // If we always have our own layer, then we can just repaint
+      // ourselves without involving any other nodes.
+      assert(_layer != null);
       _needsPaint = true;
       _nodesNeedingPaint.add(this);
       scheduler.ensureVisualUpdate();
-    } else if (parent is! RenderObject) {
-      // we're the root of the render tree (probably a RenderView)
+    } else if (parent is RenderObject) {
+      // We don't have our own layer; one of our ancestors will take
+      // care of updating the layer we're in and when they do that
+      // we'll get our paint() method called.
+      assert(_layer == null);
+      (parent as RenderObject).markNeedsPaint(); // TODO(ianh): remove the cast once the analyzer is cleverer
+    } else {
+      // If we're the root of the render tree (probably a RenderView),
+      // then we have to paint ourselves, since nobody else can paint
+      // us. We don't add ourselves to _nodesNeedingPaint in this
+      // case, because the root is always told to paint regardless.
       _needsPaint = true;
       scheduler.ensureVisualUpdate();
-    } else {
-      (parent as RenderObject).markNeedsPaint(); // TODO(ianh): remove the cast once the analyzer is cleverer
     }
   }
-
   static void flushPaint() {
     sky.tracing.begin('RenderObject.flushPaint');
     _debugDoingPaint = true;
     try {
       List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = new List<RenderObject>();
-      for (RenderObject node in dirtyNodes..sort((a, b) => a.depth - b.depth)) {
-        if (node._needsPaint && node.attached)
+      // Sort the dirty nodes in reverse order (deepest first).
+      for (RenderObject node in dirtyNodes..sort((a, b) => b.depth - a.depth)) {
+        assert(node._needsPaint);
+        if (node.attached)
           node._repaint();
       };
       assert(_nodesNeedingPaint.length == 0);
@@ -485,33 +621,36 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       sky.tracing.end('RenderObject.flushPaint');
     }
   }
-
+  void initialPaint(ContainerLayer rootLayer, Size size) {
+    assert(attached);
+    assert(parent is! RenderObject);
+    assert(!_debugDoingPaint);
+    assert(hasLayer);
+    PaintingContext newContext = new PaintingContext.withLayer(rootLayer, Point.origin & size);
+    _paintLayer(newContext);
+  }
   void _repaint() {
-    assert(!_needsLayout);
-    assert(requiresCompositing);
+    assert(hasLayer);
     assert(_layer != null);
-    // TODO(abarth): Using _layer.offset isn't correct if the topLeft of our
-    // paint bounds has changed since our last repaint.
-    PaintingContext context = new PaintingContext(_layer.offset, paintBounds.size);
-    _layer.parent.add(context.layer, before: _layer);
-    _layer.detach();
-    _layer = context._layer;
-    _needsPaint = false;
+    PaintingContext newContext = new PaintingContext.replacingLayer(_layer, paintBounds);
+    _paintLayer(newContext);
+  }
+  void _paintLayer(PaintingContext context) {
+    _layer = context._containerLayer;
     try {
       _paintWithContext(context, Offset.zero);
+      context.endRecording();
     } catch (e) {
-      print('Exception raised during _repaint:\n${e}\nContext:\n${this}');
+      print('Exception raised during _paintLayer:\n${e}\nContext:\n${this}');
       if (inDebugBuild)
         rethrow;
       return;
     }
-    assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
-    assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
   }
-
   void _paintWithContext(PaintingContext context, Offset offset) {
-    _needsPaint = false;
     assert(!_debugDoingThisPaint);
+    assert(!_needsLayout);
+    assert(!_needsCompositingBitsUpdate);
     RenderObject debugLastActivePaint;
     assert(() {
       _debugDoingThisPaint = true;
@@ -522,9 +661,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         context.canvas.save();
         context.canvas.clipRect(paintBounds.shift(offset));
       }
+      assert(!hasLayer || _layer != null);
       return true;
     });
+    _needsPaint = false;
     paint(context, offset);
+    assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
+    assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
     assert(() {
       if (debugPaintBoundsEnabled)
         context.canvas.restore();
@@ -532,7 +675,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisPaint = false;
       return true;
     });
-    assert(!_needsPaint);
   }
 
   Rect get paintBounds;

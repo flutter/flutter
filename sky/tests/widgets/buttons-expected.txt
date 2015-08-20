@@ -64,16 +64,17 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  | saveLayer(Rect.fromLTRB(372.0, 272.0, 428.0, 328.0), Paint(color:Color(0xff000000)))
 4 |  |  |  | clipPath(Instance of 'Path')
-4 |  |  |  | paintChild RenderConstrainedBox at Point(372.0, 272.0)
+4 |  |  |  | translate(372.0, 272.0)
+4 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 0.0)
 4 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  | paintChild RenderInkWell at Point(372.0, 272.0)
+4 |  |  |  |  | paintChild RenderInkWell at Point(0.0, 0.0)
 4 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  | paintChild RenderPositionedBox at Point(372.0, 272.0)
+4 |  |  |  |  |  | paintChild RenderPositionedBox at Point(0.0, 0.0)
 4 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  |  | paintChild RenderParagraph at Point(394.0, 290.0)
+4 |  |  |  |  |  |  | paintChild RenderParagraph at Point(22.0, 18.0)
 4 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  |  |  | translate(394.0, 290.0)
-4 |  |  |  |  |  |  |  | translate(-394.0, -290.0)
+4 |  |  |  |  |  |  |  | translate(22.0, 18.0)
+4 |  |  |  |  |  |  |  | translate(-22.0, -18.0)
 4 |  |  |  | restore
 ------------------------------------------------------------------------
 PAINTED 4 FRAMES
