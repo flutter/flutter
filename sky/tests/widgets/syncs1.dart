@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/raised_button.dart';
+import 'package:sky/widgets.dart';
 
 import '../resources/display_list.dart';
 
@@ -31,7 +30,7 @@ class FiddleApp extends App {
   Widget buildFlex2() {
     return new Flex([
       new Flexible(child: new Container(
-        key: new Key('something-else'),
+        key: const StringKey('something-else'),
         decoration: new BoxDecoration(
           backgroundColor: const Color(0xEFFF9F00)
         )
@@ -54,7 +53,7 @@ class FiddleApp extends App {
   Widget buildStack2() {
     return new Stack([
       new Positioned(child: new Container(
-        key: new Key('something-else'),
+        key: const StringKey('something-else'),
         decoration: new BoxDecoration(
           backgroundColor: const Color(0xEFFF9F00)
         )
@@ -66,12 +65,12 @@ class FiddleApp extends App {
   Widget build() {
     return new Flex([
         new SizedBox(
-          key: new Key('flex-example'),
+          key: const StringKey('flex-example'),
           height: 250.0,
           child: arbitrarySetting ? buildFlex1() : buildFlex2()
         ),
         new SizedBox(
-          key: new Key('stack-example'),
+          key: const StringKey('stack-example'),
           height: 250.0,
           child: arbitrarySetting ? buildStack1() : buildStack2()
         )
