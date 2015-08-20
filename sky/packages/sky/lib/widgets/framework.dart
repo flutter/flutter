@@ -25,14 +25,14 @@ typedef Widget Builder();
 typedef void WidgetTreeWalker(Widget);
 
 abstract class Key {
-  Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+  const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
   factory Key(String value) => new StringKey(value);
   factory Key.stringify(Object value) => new StringKey(value.toString());
   factory Key.fromObjectIdentity(Object value) => new ObjectKey(value);
 }
 
 class StringKey extends Key {
-  StringKey(this.value) : super.constructor();
+  const StringKey(this.value) : super.constructor();
   final String value;
   String toString() => '[\'${value}\']';
   bool operator==(other) => other is StringKey && other.value == value;
@@ -40,7 +40,7 @@ class StringKey extends Key {
 }
 
 class ObjectKey extends Key {
-  ObjectKey(this.value) : super.constructor();
+  const ObjectKey(this.value) : super.constructor();
   final Object value;
   String toString() => '[${value.runtimeType}(${value.hashCode})]';
   bool operator==(other) => other is ObjectKey && identical(other.value, value);
@@ -50,7 +50,7 @@ class ObjectKey extends Key {
 typedef void GlobalKeyRemovalListener(GlobalKey key);
 
 abstract class GlobalKey extends Key {
-  GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+  const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
   factory GlobalKey({ String label }) => new LabeledGlobalKey(label);
   factory GlobalKey.fromObjectIdentity(Object value) => new GlobalObjectKey(value);
 
@@ -136,13 +136,13 @@ abstract class GlobalKey extends Key {
 
 class LabeledGlobalKey extends GlobalKey {
   // the label is purely for documentary purposes and does not affect the key
-  LabeledGlobalKey(this._label) : super.constructor();
+  const LabeledGlobalKey(this._label) : super.constructor();
   final String _label;
   String toString() => '[GlobalKey ${_label != null ? _label : hashCode}]';
 }
 
 class GlobalObjectKey extends GlobalKey {
-  GlobalObjectKey(this.value) : super.constructor();
+  const GlobalObjectKey(this.value) : super.constructor();
   final Object value;
   String toString() => '[GlobalKey ${value.runtimeType}(${value.hashCode})]';
   bool operator==(other) => other is GlobalObjectKey && identical(other.value, value);
