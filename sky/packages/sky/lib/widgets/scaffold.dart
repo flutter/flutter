@@ -219,11 +219,6 @@ class Scaffold extends RenderObjectWrapper {
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
-  void remove() {
-    walkChildren((Widget child) => removeChild(child));
-    super.remove();
-  }
-
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     for (ScaffoldSlots slot in ScaffoldSlots.values) {
