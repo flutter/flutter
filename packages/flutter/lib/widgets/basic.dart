@@ -732,7 +732,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
     RenderObjectWrapper ancestor = findAncestorRenderObjectWrapper();
     assert(ancestor is RenderObjectWrapper);
     assert(ancestor.renderObject == renderObject.parent);
-    ancestor.detachChildRoot(this);
+    ancestor.detachChildRenderObject(this);
     super.remove();
   }
 }

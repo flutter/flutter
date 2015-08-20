@@ -310,7 +310,7 @@ abstract class Widget {
     assert(node.parent == null);
   }
 
-  void detachRoot();
+  void detachRenderObject();
 
   // Returns the child which should be retained as the child of this node.
   Widget syncChild(Widget newNode, Widget oldNode, dynamic slot) {
@@ -327,7 +327,7 @@ abstract class Widget {
     if (newNode == null) {
       // the child in this slot has gone away
       assert(oldNode.mounted);
-      oldNode.detachRoot();
+      oldNode.detachRenderObject();
       removeChild(oldNode);
       assert(!oldNode.mounted);
       return null;
@@ -347,7 +347,7 @@ abstract class Widget {
         }
       } else {
         assert(oldNode.mounted);
-        oldNode.detachRoot();
+        oldNode.detachRenderObject();
         removeChild(oldNode);
         oldNode = null;
       }
@@ -447,9 +447,9 @@ abstract class TagNode extends Widget {
     super.remove();
   }
 
-  void detachRoot() {
+  void detachRenderObject() {
     if (child != null)
-      child.detachRoot();
+      child.detachRenderObject();
   }
 
 }
@@ -623,10 +623,10 @@ abstract class Component extends Widget {
     super.remove();
   }
 
-  void detachRoot() {
+  void detachRenderObject() {
     assert(_built != null);
     assert(renderObject != null);
-    _built.detachRoot();
+    _built.detachRenderObject();
   }
 
   void dependenciesChanged() {
@@ -883,16 +883,16 @@ abstract class RenderObjectWrapper extends Widget {
     Widget target = RenderObjectWrapper._getMounted(renderObject);
     if (target == null)
       return;
-    RenderObject targetRoot = target.renderObject;
-    while (target != null && target.renderObject == targetRoot) {
+    RenderObject targetRenderObject = target.renderObject;
+    while (target != null && target.renderObject == targetRenderObject) {
       yield target;
       target = target.parent;
     }
   }
 
   RenderObjectWrapper _ancestor;
-  void insertChildRoot(RenderObjectWrapper child, dynamic slot);
-  void detachChildRoot(RenderObjectWrapper child);
+  void insertChildRenderObject(RenderObjectWrapper child, dynamic slot);
+  void detachChildRenderObject(RenderObjectWrapper child);
 
   void retainStatefulRenderObjectWrapper(RenderObjectWrapper newNode) {
     newNode._renderObject = _renderObject;
@@ -909,7 +909,7 @@ abstract class RenderObjectWrapper extends Widget {
       assert(_renderObject != null);
       _ancestor = findAncestorRenderObjectWrapper();
       if (_ancestor is RenderObjectWrapper)
-        _ancestor.insertChildRoot(this, slot);
+        _ancestor.insertChildRenderObject(this, slot);
     } else {
       assert(old.runtimeType == runtimeType);
       _renderObject = old.renderObject;
@@ -961,10 +961,10 @@ abstract class RenderObjectWrapper extends Widget {
     super.remove();
   }
 
-  void detachRoot() {
+  void detachRenderObject() {
     assert(_ancestor != null);
     assert(renderObject != null);
-    _ancestor.detachChildRoot(this);
+    _ancestor.detachChildRenderObject(this);
   }
 
 }
@@ -973,11 +973,11 @@ abstract class LeafRenderObjectWrapper extends RenderObjectWrapper {
 
   LeafRenderObjectWrapper({ Key key }) : super(key: key);
 
-  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRenderObject(RenderObjectWrapper child, dynamic slot) {
     assert(false);
   }
 
-  void detachChildRoot(RenderObjectWrapper child) {
+  void detachChildRenderObject(RenderObjectWrapper child) {
     assert(false);
   }
 
@@ -1005,7 +1005,7 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
     assert(oldChild == null || child == oldChild || oldChild.parent == null);
   }
 
-  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRenderObject(RenderObjectWrapper child, dynamic slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(renderObject is RenderObjectWithChildMixin);
     assert(slot == null);
@@ -1013,7 +1013,7 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
-  void detachChildRoot(RenderObjectWrapper child) {
+  void detachChildRenderObject(RenderObjectWrapper child) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(renderObject is RenderObjectWithChildMixin);
     assert(renderObject.child == child.renderObject);
@@ -1046,7 +1046,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       walker(child);
   }
 
-  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRenderObject(RenderObjectWrapper child, dynamic slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(slot == null || slot is RenderObject);
     assert(renderObject is ContainerRenderObjectMixin);
@@ -1054,7 +1054,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
-  void detachChildRoot(RenderObjectWrapper child) {
+  void detachChildRenderObject(RenderObjectWrapper child) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(renderObject is ContainerRenderObjectMixin);
     assert(child.renderObject.parent == renderObject);
