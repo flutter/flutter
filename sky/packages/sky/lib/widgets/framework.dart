@@ -19,7 +19,7 @@ export 'package:sky/rendering/box.dart' show BoxConstraints, BoxDecoration, Bord
 export 'package:sky/rendering/flex.dart' show FlexDirection;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 
-final bool _shouldLogRenderDuration = false;
+final bool _shouldLogRenderDuration = false; // see also 'enableProfilingLoop' argument to runApp()
 
 typedef Widget Builder();
 typedef void WidgetTreeWalker(Widget);
@@ -324,7 +324,7 @@ abstract class Widget {
     }
 
     if (oldNode != null) {
-      if (oldNode.runtimeType == newNode.runtimeType && oldNode.key == newNode.key) {
+      if (_canSync(newNode, oldNode)) {
         if (oldNode.retainStatefulNodeIfPossible(newNode)) {
           assert(oldNode.mounted);
           assert(!newNode.mounted);
@@ -396,6 +396,10 @@ abstract class Widget {
     assert(renderObject is RenderBox);
     return (renderObject as RenderBox).localToGlobal(point);
   }
+}
+
+bool _canSync(Widget a, Widget b) {
+  return a.runtimeType == b.runtimeType && a.key == b.key;
 }
 
 
@@ -707,8 +711,7 @@ abstract class StatefulComponent extends Component {
   bool retainStatefulNodeIfPossible(StatefulComponent newNode) {
     assert(!_disqualifiedFromEverAppearingAgain);
     assert(newNode != null);
-    assert(runtimeType == newNode.runtimeType);
-    assert(key == newNode.key);
+    assert(_canSync(this, newNode);
     assert(_child != null);
     newNode._disqualifiedFromEverAppearingAgain = true;
 
@@ -894,7 +897,7 @@ abstract class RenderObjectWrapper extends Widget {
       if (_ancestor is RenderObjectWrapper)
         _ancestor.insertChildRenderObject(this, slot);
     } else {
-      assert(old.runtimeType == runtimeType);
+      assert(_canSync(this, old));
       _renderObject = old.renderObject;
       _ancestor = old._ancestor;
       assert(_renderObject != null);
@@ -1007,8 +1010,9 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
 abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
-  // In MultiChildRenderObjectWrapper subclasses, slots are RenderObject nodes
-  // to use as the "insert before" sibling in ContainerRenderObjectMixin.add() calls
+  // In MultiChildRenderObjectWrapper subclasses, slots are the Widget
+  // nodes whose RenderObjects are to be used as the "insert before"
+  // sibling in ContainerRenderObjectMixin.add() calls
 
   MultiChildRenderObjectWrapper({ Key key, List<Widget> children })
     : this.children = children == null ? const [] : children,
@@ -1023,11 +1027,12 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       walker(child);
   }
 
-  void insertChildRenderObject(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRenderObject(RenderObjectWrapper child, Widget slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(slot == null || slot is RenderObject);
+    RenderObject nextSibling = slot != null ? slot.renderObject : null;
+    assert(nextSibling == null || nextSibling is RenderObject);
     assert(renderObject is ContainerRenderObjectMixin);
-    renderObject.add(child.renderObject, before: slot);
+    renderObject.add(child.renderObject, before: nextSibling);
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
@@ -1060,121 +1065,134 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
     assert(renderObject is ContainerRenderObjectMixin);
     assert(old == null || old.renderObject == renderObject);
 
-    var startIndex = 0;
-    var endIndex = children.length;
+    // This attempts to diff the new child list (this.children) with
+    // the old child list (old.children), and update our renderObject
+    // accordingly.
 
-    var oldChildren = old == null ? [] : old.children;
-    var oldStartIndex = 0;
-    var oldEndIndex = oldChildren.length;
+    // The cases it tries to optimise for are:
+    //  - the old list is empty
+    //  - the lists are identical
+    //  - there is an insertion or removal of one or more widgets in
+    //    only one place in the list
+    // If a widget with a key is in both lists, it will be synced.
+    // Widgets without keys might be synced but there is no guarantee.
 
-    RenderObject nextSibling = null;
-    Widget currentNode = null;
-    Widget oldNode = null;
+    // The general approach is to sync the entire new list backwards, as follows:
+    // 1. Walk the lists from the top until you no longer have
+    //    matching nodes. We don't sync these yet, but we now know to
+    //    skip them below. We do this because at each sync we need to
+    //    pass the pointer to the new next widget as the slot, which
+    //    we can't do until we've synced the next child.
+    // 2. Walk the lists from the bottom, syncing nodes, until you no
+    //    longer have matching nodes.
+    // At this point we narrowed the old and new lists to the point
+    // where the nodes no longer match.
+    // 3. Walk the narrowed part of the old list to get the list of
+    //    keys and sync null with non-keyed items.
+    // 4. Walk the narrowed part of the new list backwards:
+    //     * Sync unkeyed items with null
+    //     * Sync keyed items with the source if it exists, else with null.
+    // 5. Walk the top list again but backwards, syncing the nodes.
+    // 6. Sync null with any items in the list of keys that are still
+    //    mounted.
 
-    void sync(int atIndex) {
-      children[atIndex] = syncChild(currentNode, oldNode, nextSibling);
-      assert(children[atIndex] != null);
-      assert(children[atIndex].parent == this);
-      if (atIndex > 0)
-        children[atIndex-1].updateSlot(children[atIndex].renderObject);
-    }
+    final List<Widget> newChildren = children;
+    final List<Widget> oldChildren = old == null ? const <Widget>[] : old.children;
+    int childrenTop = 0;
+    int newChildrenBottom = newChildren.length-1;
+    int oldChildrenBottom = oldChildren.length-1;
 
-    // Scan backwards from end of list while nodes can be directly synced
-    // without reordering.
-    while (endIndex > startIndex && oldEndIndex > oldStartIndex) {
-      currentNode = children[endIndex - 1];
-      oldNode = oldChildren[oldEndIndex - 1];
-
-      if (currentNode.runtimeType != oldNode.runtimeType || currentNode.key != oldNode.key) {
+    // top of the lists
+    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
+      Widget oldChild = oldChildren[childrenTop];
+      assert(oldChild.mounted);
+      Widget newChild = newChildren[childrenTop];
+      assert(newChild == oldChild || !newChild.mounted);
+      if (!_canSync(oldChild, newChild))
         break;
+      childrenTop += 1;
+    }
+
+    Widget nextSibling;
+
+    // bottom of the lists
+    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
+      Widget oldChild = oldChildren[oldChildrenBottom];
+      assert(oldChild.mounted);
+      Widget newChild = newChildren[newChildrenBottom];
+      assert(newChild == oldChild || !newChild.mounted);
+      if (!_canSync(oldChild, newChild))
+        break;
+      newChild = syncChild(newChild, oldChild, nextSibling);
+      assert(newChild.mounted);
+      assert(oldChild == newChild || !oldChild.mounted);
+      newChildren[newChildrenBottom] = newChild;
+      nextSibling = newChild;
+      oldChildrenBottom -= 1;
+      newChildrenBottom -= 1;
+    }
+
+    // middle of the lists - old list
+    bool haveOldNodes = childrenTop <= oldChildrenBottom;
+    Map<Key, Widget> oldKeyedChildren;
+    if (haveOldNodes) {
+      oldKeyedChildren = new Map<Key, Widget>();
+      while (childrenTop <= oldChildrenBottom) {
+        Widget oldChild = oldChildren[oldChildrenBottom];
+        assert(oldChild.mounted);
+        if (oldChild.key != null) {
+          oldKeyedChildren[oldChild.key] = oldChild;
+        } else {
+          syncChild(null, oldChild, null);
+        }
+        oldChildrenBottom -= 1;
+      }      
+    }
+
+    // middle of the lists - new list
+    while (childrenTop <= newChildrenBottom) {
+      Widget oldChild;
+      Widget newChild = newChildren[newChildrenBottom];
+      if (haveOldNodes) {
+        Key key = newChild.key;
+        if (key != null) {
+          oldChild = oldKeyedChildren[newChild.key];
+          if (oldChild != null) {
+            if (oldChild.runtimeType != newChild.runtimeType)
+              oldChild = null;
+            oldKeyedChildren.remove(key);
+          }
+        }
       }
+      assert(newChild == oldChild || !newChild.mounted);
+      newChild = syncChild(newChild, oldChild, nextSibling);
+      assert(newChild.mounted);
+      assert(oldChild == newChild || oldChild == null || !oldChild.mounted);
+      newChildren[newChildrenBottom] = newChild;
+      nextSibling = newChild;
+      newChildrenBottom -= 1;
+    }
+    assert(oldChildrenBottom == newChildrenBottom);
+    assert(childrenTop == newChildrenBottom+1);
 
-      endIndex--;
-      oldEndIndex--;
-      sync(endIndex);
-      nextSibling = children[endIndex].renderObject;
+    // now sync the top of the list
+    while (childrenTop > 0) {
+      childrenTop -= 1;
+      Widget oldChild = oldChildren[childrenTop];
+      assert(oldChild.mounted);
+      Widget newChild = newChildren[childrenTop];
+      assert(newChild == oldChild || !newChild.mounted);
+      assert(_canSync(oldChild, newChild));
+      newChild = syncChild(newChild, oldChild, nextSibling);
+      assert(newChild.mounted);
+      assert(oldChild == newChild || oldChild == null || !oldChild.mounted);
+      newChildren[childrenTop] = newChild;
+      nextSibling = newChild;
     }
 
-    HashMap<Key, Widget> oldNodeIdMap = null;
-
-    bool oldNodeReordered(Key key) {
-      return oldNodeIdMap != null &&
-             oldNodeIdMap.containsKey(key) &&
-             oldNodeIdMap[key] == null;
-    }
-
-    void advanceOldStartIndex() {
-      oldStartIndex++;
-      while (oldStartIndex < oldEndIndex &&
-             oldNodeReordered(oldChildren[oldStartIndex].key)) {
-        oldStartIndex++;
-      }
-    }
-
-    void ensureOldIdMap() {
-      if (oldNodeIdMap != null)
-        return;
-
-      oldNodeIdMap = new HashMap<Key, Widget>();
-      for (int i = oldStartIndex; i < oldEndIndex; i++) {
-        var node = oldChildren[i];
-        if (node.key != null)
-          oldNodeIdMap.putIfAbsent(node.key, () => node);
-      }
-    }
-
-    void searchForOldNode() {
-      if (currentNode.key == null)
-        return; // never re-order these nodes
-
-      ensureOldIdMap();
-      oldNode = oldNodeIdMap[currentNode.key];
-      if (oldNode == null)
-        return;
-
-      oldNodeIdMap[currentNode.key] = null; // mark it reordered
-      assert(renderObject is ContainerRenderObjectMixin);
-      assert(old.renderObject is ContainerRenderObjectMixin);
-      assert(oldNode.renderObject != null);
-
-      renderObject.move(oldNode.renderObject, before: nextSibling);
-    }
-
-    // Scan forwards, this time we may re-order;
-    nextSibling = renderObject.firstChild;
-    while (startIndex < endIndex && oldStartIndex < oldEndIndex) {
-      currentNode = children[startIndex];
-      oldNode = oldChildren[oldStartIndex];
-
-      if (currentNode.runtimeType == oldNode.runtimeType && currentNode.key == oldNode.key) {
-        nextSibling = renderObject.childAfter(nextSibling);
-        sync(startIndex);
-        startIndex++;
-        advanceOldStartIndex();
-        continue;
-      }
-
-      oldNode = null;
-      searchForOldNode();
-      sync(startIndex);
-      startIndex++;
-    }
-
-    // New insertions
-    oldNode = null;
-    while (startIndex < endIndex) {
-      currentNode = children[startIndex];
-      sync(startIndex);
-      startIndex++;
-    }
-
-    // Removals
-    currentNode = null;
-    while (oldStartIndex < oldEndIndex) {
-      oldNode = oldChildren[oldStartIndex];
-      syncChild(null, oldNode, null);
-      assert(oldNode.parent == null);
-      advanceOldStartIndex();
+    if (haveOldNodes && !oldKeyedChildren.isEmpty) {
+      for (Widget oldChild in oldKeyedChildren.values)
+        syncChild(null, oldChild, null);
     }
 
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
