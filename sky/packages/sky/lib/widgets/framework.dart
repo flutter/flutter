@@ -711,7 +711,7 @@ abstract class StatefulComponent extends Component {
   bool retainStatefulNodeIfPossible(StatefulComponent newNode) {
     assert(!_disqualifiedFromEverAppearingAgain);
     assert(newNode != null);
-    assert(_canSync(this, newNode);
+    assert(_canSync(this, newNode));
     assert(_child != null);
     newNode._disqualifiedFromEverAppearingAgain = true;
 
