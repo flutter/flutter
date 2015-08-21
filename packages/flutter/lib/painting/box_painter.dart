@@ -516,9 +516,15 @@ class BoxPainter {
     if (_decoration.border == null)
       return;
 
-    if (_hasUniformBorder && _decoration.borderRadius != null) {
-      _paintBorderWithRadius(canvas, rect);
-      return;
+    if (_hasUniformBorder) {
+      if (_decoration.borderRadius != null) {
+        _paintBorderWithRadius(canvas, rect);
+        return;
+      }
+      if (_decoration.shape == Shape.circle) {
+        _paintBorderWithCircle(canvas, rect);
+        return;
+      }
     }
 
     assert(_decoration.borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
@@ -571,6 +577,7 @@ class BoxPainter {
 
   void _paintBorderWithRadius(sky.Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
+    assert(_decoration.shape == Shape.rectangle);
     Color color = _decoration.border.top.color;
     double width = _decoration.border.top.width;
     double radius = _decoration.borderRadius;
@@ -578,6 +585,20 @@ class BoxPainter {
     sky.RRect outer = new sky.RRect()..setRectXY(rect, radius, radius);
     sky.RRect inner = new sky.RRect()..setRectXY(rect.deflate(width), radius - width, radius - width);
     canvas.drawDRRect(outer, inner, new Paint()..color = color);
+  }
+
+  void _paintBorderWithCircle(sky.Canvas canvas, Rect rect) {
+    assert(_hasUniformBorder);
+    assert(_decoration.shape == Shape.circle);
+    assert(_decoration.borderRadius == null);
+    double width = _decoration.border.top.width;
+    Paint paint = new Paint()
+      ..color = _decoration.border.top.color
+      ..strokeWidth = width
+      ..setStyle(sky.PaintingStyle.stroke);
+    Point center = rect.center;
+    double radius = (rect.shortestSide - width) / 2.0;
+    canvas.drawCircle(center, radius, paint);
   }
 
   void paint(sky.Canvas canvas, Rect rect) {
