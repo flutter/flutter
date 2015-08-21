@@ -1,5 +1,0 @@
-{%- macro enum_def(prefix, enum) -%}
-{%- for field in enum.fields %}
-{{prefix}}const int {{enum.name}}_{{field.name}} = {{field.resolved_value}};
-{%- endfor %}
-{%- endmacro %}
