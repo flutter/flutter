@@ -738,6 +738,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   String toString([String prefix = '']) {
     RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
+    String header = toStringName();
+    prefix += '  ';
+    String result = '${header}\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
+    _debugActiveLayout = debugPreviousActiveLayout;
+    return result;
+  }
+  String toStringName() {
     String header = '${runtimeType}';
     if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
       int count = 1;
@@ -752,10 +759,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       header += ' NEEDS-LAYOUT';
     if (!attached)
       header += ' DETACHED';
-    prefix += '  ';
-    String result = '${header}\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
-    _debugActiveLayout = debugPreviousActiveLayout;
-    return result;
+    return header;
   }
   String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n${prefix}constraints: ${constraints}\n';
   String debugDescribeChildren(String prefix) => '';

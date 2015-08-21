@@ -1,0 +1,68 @@
+TestRenderView enabled
+
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestPaintingCanvas() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+
+PAINT FOR FRAME #2 ----------------------------------------------
+2 | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  | paintChild RenderFlex at Point(50.0, 50.0)
+2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  | paintChild RenderPadding at Point(50.0, 50.0)
+2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderDecoratedBox at Point(54.0, 54.0)
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffffffff), drawLooper:true))
+2 |  |  |  |  | paintChild RenderClipRRect at Point(54.0, 54.0)
+2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | saveLayer(Rect.fromLTRB(54.0, 54.0, 354.0, 546.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(54.0, 54.0)
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | paintChild RenderFlex at Point(54.0, 54.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(54.0, 54.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | translate(54.0, 54.0)
+2 |  |  |  |  |  |  |  |  | translate(-54.0, -54.0)
+2 |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(54.0, 74.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | drawRect(Rect.fromLTRB(54.0, 74.0, 354.0, 546.0), Paint(color:Color(0xff509050)))
+2 |  |  |  |  |  |  |  |  | paintChild RenderFlex at Point(54.0, 74.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(54.0, 74.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | translate(54.0, 74.0)
+2 |  |  |  |  |  |  |  |  |  |  | translate(-54.0, -74.0)
+2 |  |  |  |  |  | restore
+2 |  |  | paintChild RenderPadding at Point(358.0, 50.0)
+2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderDecoratedBox at Point(362.0, 54.0)
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffffffff), drawLooper:true))
+2 |  |  |  |  | paintChild RenderClipRRect at Point(362.0, 54.0)
+2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | saveLayer(Rect.fromLTRB(362.0, 54.0, 662.0, 546.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(362.0, 54.0)
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | paintChild RenderFlex at Point(362.0, 54.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(362.0, 54.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | drawRect(Rect.fromLTRB(362.0, 54.0, 662.0, 526.0), Paint(color:Color(0xff509050)))
+2 |  |  |  |  |  |  |  |  | paintChild RenderFlex at Point(362.0, 54.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(362.0, 54.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | translate(362.0, 54.0)
+2 |  |  |  |  |  |  |  |  |  |  | translate(-362.0, -54.0)
+2 |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(362.0, 526.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | translate(362.0, 526.0)
+2 |  |  |  |  |  |  |  |  | translate(-362.0, -526.0)
+2 |  |  |  |  |  | restore
+------------------------------------------------------------------------
+PAINTED 2 FRAMES

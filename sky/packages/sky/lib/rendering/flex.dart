@@ -85,7 +85,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  // Set during layout if overflow occurred on the main axis
   TextBaseline _textBaseline;
   TextBaseline get textBaseline => _textBaseline;
   void set textBaseline (TextBaseline value) {
@@ -95,6 +94,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  // Set during layout if overflow occurred on the main axis
   double _overflow;
 
   void setupParentData(RenderBox child) {
@@ -344,29 +344,29 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (alignItems == FlexAlignItems.stretch) {
           switch (_direction) {
             case FlexDirection.horizontal:
-              innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
-                                                    maxWidth: constraints.maxWidth,
-                                                    minHeight: constraints.minHeight,
+              innerConstraints = new BoxConstraints(minWidth: spaceForChild,
+                                                    maxWidth: spaceForChild,
+                                                    minHeight: constraints.maxHeight,
                                                     maxHeight: constraints.maxHeight);
               break;
             case FlexDirection.vertical:
-              innerConstraints = new BoxConstraints(minWidth: constraints.minWidth,
+              innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
                                                     maxWidth: constraints.maxWidth,
-                                                    minHeight: constraints.maxHeight,
-                                                    maxHeight: constraints.maxHeight);
+                                                    minHeight: spaceForChild,
+                                                    maxHeight: spaceForChild);
               break;
           }
         } else {
           switch (_direction) {
             case FlexDirection.horizontal:
-              innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
-                                                    minWidth: spaceForChild,
-                                                    maxWidth: spaceForChild);
+              innerConstraints = new BoxConstraints(minWidth: spaceForChild,
+                                                    maxWidth: spaceForChild,
+                                                    maxHeight: constraints.maxHeight);
               break;
             case FlexDirection.vertical:
-              innerConstraints = new BoxConstraints(minHeight: spaceForChild,
-                                                    maxHeight: spaceForChild,
-                                                    maxWidth: constraints.maxWidth);
+              innerConstraints = new BoxConstraints(maxWidth: constraints.maxWidth,
+                                                    minHeight: spaceForChild,
+                                                    maxHeight: spaceForChild);
               break;
           }
         }
@@ -467,35 +467,54 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   void paint(PaintingContext context, Offset offset) {
-    if (_overflow > 0) {
-      context.canvas.save();
-      context.canvas.clipRect(offset & size);
+    if (_overflow <= 0.0) {
       defaultPaint(context, offset);
-      context.canvas.restore();
-    } else {
-      defaultPaint(context, offset);
-    }
-  }
-
-  void debugPaintSize(PaintingContext context, Offset offset) {
-    super.debugPaintSize(context, offset);
-    if (_overflow <= 0)
       return;
-
-    // Draw a red rectangle over the overflow area in debug mode
-    // You should be using a Clip if you want to clip your children
-    Paint paint = new Paint()..color = const Color(0x7FFF0000);
-    Rect overflowRect;
-    switch(direction) {
-      case FlexDirection.horizontal:
-        overflowRect = offset + new Offset(size.width, 0.0) &
-                       new Size(_overflow, size.height);
-        break;
-      case FlexDirection.vertical:
-        overflowRect = offset + new Offset(0.0, size.height) &
-                       new Size(size.width, _overflow);
-        break;
     }
-    context.canvas.drawRect(overflowRect, paint);
+
+    // We have overflow. Clip it.
+    context.canvas.save();
+    context.canvas.clipRect(offset & size);
+    defaultPaint(context, offset);
+    context.canvas.restore();
+    assert(() {
+      // In debug mode, if you have overflow, we highlight where the
+      // overflow would be by painting that area red. Since that is
+      // likely to be clipped by an ancestor, we also draw a thick red
+      // line at the edge that's overflowing.
+
+      // If you do want clipping, use a RenderClip (Clip in the
+      // Widgets library).
+
+      Paint markerPaint = new Paint()..color = const Color(0xE0FF0000);
+      Paint highlightPaint = new Paint()..color = const Color(0x7FFF0000);
+      const kMarkerSize = 0.1;
+      Rect markerRect, overflowRect;
+      switch(direction) {
+        case FlexDirection.horizontal:
+          markerRect = offset + new Offset(size.width * (1.0 - kMarkerSize), 0.0) &
+                       new Size(size.width * kMarkerSize, size.height);
+          overflowRect = offset + new Offset(size.width, 0.0) &
+                         new Size(_overflow, size.height);
+          break;
+        case FlexDirection.vertical:
+          markerRect = offset + new Offset(0.0, size.height * (1.0 - kMarkerSize)) &
+                       new Size(size.width, size.height * kMarkerSize);
+          overflowRect = offset + new Offset(0.0, size.height) &
+                         new Size(size.width, _overflow);
+          break;
+      }
+      context.canvas.drawRect(markerRect, markerPaint);
+      context.canvas.drawRect(overflowRect, highlightPaint);
+      return true;
+    });
   }
+
+  String toStringName() {
+    String header = super.toStringName();
+    if (_overflow > 0.0)
+      header += ' OVERFLOWING';
+    return header;
+  }
+
 }
