@@ -194,7 +194,10 @@ template("ios_app") {
   xcode_harness_gen_target_name = app_name + "_harness"
   xcode_harness_ios(xcode_harness_gen_target_name) {
     app_bundle = "$root_build_dir/$app_name.app"
-    deps = [ ":$copy_gen_target_name" ]
+    deps = [
+      ":$struct_gen_target_name",
+      ":$copy_gen_target_name"
+    ]
   }
 
   # Perform Code Signing
