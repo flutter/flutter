@@ -86,7 +86,7 @@ class UserDataImpl extends UserData {
 
 class FitnessApp extends App {
   NavigationState _navigationState;
-  UserDataImpl _userData = new UserDataImpl();
+  UserDataImpl _userData;
 
   void didMount() {
     super.didMount();
