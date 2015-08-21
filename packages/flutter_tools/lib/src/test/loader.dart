@@ -14,14 +14,14 @@ import 'package:test/src/backend/metadata.dart';
 import 'package:test/src/backend/test_platform.dart';
 import 'package:test/src/runner/configuration.dart';
 import 'package:test/src/runner/load_exception.dart';
-import 'package:test/src/runner/loader.dart';
 import 'package:test/src/runner/runner_suite.dart';
+import 'package:test/src/runner/hack_load_vm_file_hook.dart' as hack;
 import 'package:test/src/runner/vm/environment.dart';
 import 'package:test/src/util/io.dart';
 import 'package:test/src/util/remote_exception.dart';
 
 void installHook() {
-  Loader.loadVMFileHook = _loadVMFile;
+  hack.loadVMFileHook = _loadVMFile;
 }
 
 final String _kSkyShell = Platform.environment['SKY_SHELL'];
