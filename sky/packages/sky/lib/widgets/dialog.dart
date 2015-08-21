@@ -99,7 +99,7 @@ class Dialog extends Component {
               level: 4,
               color: _color,
               child: new ShrinkWrapWidth(
-                child: new ScrollableBlock(dialogBody)
+                child: new Block(dialogBody)
               )
             )
           )

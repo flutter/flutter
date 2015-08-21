@@ -91,7 +91,7 @@ class ExampleApp extends App {
           body: new MimicOverlay(
             overlay: _overlay,
             duration: const Duration(milliseconds: 500),
-            children: [ new ScrollableBlock(cards) ]
+            children: [ new Block(cards) ]
           )
         )
       )

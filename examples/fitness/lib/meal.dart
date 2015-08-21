@@ -92,7 +92,7 @@ class MealFragment extends StatefulComponent {
       child: new ScrollableViewport(
         child: new Container(
           padding: const EdgeDims.all(20.0),
-          child: new Block([
+          child: new BlockBody([
             new Text(meal.displayDate),
             new Input(
               key: descriptionKey,

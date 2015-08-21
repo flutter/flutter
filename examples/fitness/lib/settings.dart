@@ -109,7 +109,7 @@ class SettingsFragment extends StatefulComponent {
       child: new ScrollableViewport(
         child: new Container(
           padding: const EdgeDims.symmetric(vertical: 20.0),
-          child: new Block([
+          child: new BlockBody([
             new DrawerItem(
               onPressed: () { _handleBackupChanged(!(userData.backupMode == BackupMode.enabled)); },
               children: [
