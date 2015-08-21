@@ -157,6 +157,13 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   NSString *documentsDirectory = [paths objectAtIndex:0];
   NSString *skyxDocsPath = [documentsDirectory stringByAppendingPathComponent:@"app.skyx"];
 
+  // Write an empty file to help identify the correct simulator app by its bundle id. See sky_tool for its use.
+  NSString *bundleIDPath = [documentsDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+  NSData *data = [[NSData alloc] initWithBytes:"" length:0];
+  if (![data writeToFile:bundleIDPath options:NSDataWritingAtomic error:&error]) {
+      NSLog(@"Couldn't write the bundle id file %@: auto reloading on the iOS simulator won't work\n%@", bundleIDPath, error);
+  }
+
   if (skyxBundlePath != nil && [fileManager fileExistsAtPath:skyxDocsPath] == NO) {
     if ([fileManager copyItemAtPath:skyxBundlePath toPath:skyxDocsPath error:&error]) {
       return skyxDocsPath;
