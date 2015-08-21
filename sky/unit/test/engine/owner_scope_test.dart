@@ -1,11 +1,8 @@
-import "../resources/third_party/unittest/unittest.dart";
-import "../resources/unit.dart";
+import 'dart:sky';
 
-import "dart:sky";
+import 'package:test/test.dart';
 
 void main() {
-  initUnit();
-
   test("should return null for elements not a child of a scope", () {
     var doc = new Document();
     var element = doc.createElement("div");

@@ -1,7 +1,0 @@
-unittest-suite-wait-for-done
-PASS: should return null for elements not a child of a scope
-PASS: should return the document for elements in the document scope
-
-All 2 tests passed.
-unittest-suite-success
-DONE
