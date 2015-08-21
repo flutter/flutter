@@ -12,7 +12,7 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/button_base.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/framework.dart';
-import 'package:sky/widgets/task_description.dart';
+import 'package:sky/widgets/title.dart';
 import 'package:sky/widgets/theme.dart';
 
 import 'game_demo.dart';
@@ -104,8 +104,8 @@ class GameDemoApp extends App {
 
     return new Theme(
       data: theme,
-      child: new TaskDescription(
-        label: 'Asteroids',
+      child: new Title(
+        title: 'Asteroids',
         child: new Navigator(_navigationState)
       )
     );

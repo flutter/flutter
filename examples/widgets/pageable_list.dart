@@ -3,17 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:sky/base/lerp.dart';
-import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/card.dart';
-import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/scrollable.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/framework.dart';
-import 'package:sky/widgets/task_description.dart';
+import 'package:sky/widgets.dart';
 
 class CardModel {
   CardModel(this.value, this.size, this.color);
@@ -105,8 +96,8 @@ class PageableListApp extends App {
           primarySwatch: Blue,
           accentColor: RedAccent[200]
         ),
-        child: new TaskDescription(
-          label: 'PageableList',
+        child: new Title(
+          title: 'PageableList',
           child: new Scaffold(
             toolbar: new Listener(
               onGestureTap: handleToolbarTap,

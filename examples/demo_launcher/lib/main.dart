@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/mojo/activity.dart' as activity;
+import 'package:sky/mojo/activity.dart';
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/colors.dart' as colors;
@@ -25,17 +25,17 @@ EventDisposition launch(String relativeUrl, String bundle) {
   Uri base = rootBundle == null ? Uri.base : productionBase;
   Uri url = base.resolve(relativeUrl);
 
-  activity.ComponentName component = new activity.ComponentName()
+  ComponentName component = new ComponentName()
     ..packageName = 'org.domokit.sky.demo'
     ..className = 'org.domokit.sky.demo.SkyDemoActivity';
-  activity.Intent intent = new activity.Intent()
+  Intent intent = new Intent()
     ..action = 'android.intent.action.VIEW'
     ..component = component
-    ..flags = activity.MULTIPLE_TASK | activity.NEW_DOCUMENT
+    ..flags = MULTIPLE_TASK | NEW_DOCUMENT
     ..url = url.toString();
 
   if (bundle != null) {
-    activity.StringExtra extra = new activity.StringExtra()
+    StringExtra extra = new StringExtra()
       ..name = 'bundleName'
       ..value = bundle;
     intent.stringExtras = [extra];
@@ -191,8 +191,8 @@ class SkyHome extends App {
         brightness: ThemeBrightness.light,
         primarySwatch: colors.Teal
       ),
-      child: new TaskDescription(
-        label: 'Sky Demos',
+      child: new Title(
+        title: 'Sky Demos',
         child: new Scaffold(
           toolbar: new ToolBar(center: new Text('Sky Demos')),
           body: new Material(

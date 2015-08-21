@@ -167,7 +167,7 @@ class OverlayGeometryApp extends App {
           primarySwatch: colors.Blue,
           accentColor: colors.RedAccent[200]
         ),
-        child: new TaskDescription(label: 'Cards', child: new Stack(layers))
+        child: new Title(title: 'Cards', child: new Stack(layers))
       )
     );
   }

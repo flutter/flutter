@@ -21,7 +21,7 @@ class EnsureVisibleApp extends App {
     const TextStyle(color: colors.white, fontSize: 18.0, fontWeight: bold);
 
   static const TextStyle selectedCardLabelStyle =
-    const TextStyle(color: white, fontSize: 24.0, fontWeight: bold);
+    const TextStyle(color: colors.white, fontSize: 24.0, fontWeight: bold);
 
   List<CardModel> cardModels;
   BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
@@ -89,8 +89,8 @@ class EnsureVisibleApp extends App {
           primarySwatch: colors.Blue,
           accentColor: colors.RedAccent[200]
         ),
-        child: new TaskDescription(
-          label: 'Cards',
+        child: new Title(
+          title: 'Cards',
           child: new Scaffold(
             toolbar: new ToolBar(center: new Text('Tap a Card')),
             body: cardCollection
