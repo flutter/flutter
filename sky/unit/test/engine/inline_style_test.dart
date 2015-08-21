@@ -1,14 +1,23 @@
-import "../resources/third_party/unittest/unittest.dart";
-import "../resources/unit.dart";
+import 'dart:sky' as sky;
 
-import "dart:sky";
+import 'package:test/test.dart';
 
 void main() {
-  initUnit();
+  test('should be settable using "style" attribute', () {
+    sky.LayoutRoot layoutRoot = new sky.LayoutRoot();
+    var document = new sky.Document();
+    var foo = document.createElement('foo');
+    layoutRoot.rootElement = foo;
+
+    foo.setAttribute('style', 'color: red');
+
+    expect(foo.getAttribute('style'), equals('color: red'));
+    expect(foo.style["color"], equals('rgb(255, 0, 0)'));
+  });
 
   test('should not crash when setting style to null', () {
-    LayoutRoot layoutRoot = new LayoutRoot();
-    var document = new Document();
+    sky.LayoutRoot layoutRoot = new sky.LayoutRoot();
+    var document = new sky.Document();
     var foo = document.createElement('foo');
     layoutRoot.rootElement = foo;
 

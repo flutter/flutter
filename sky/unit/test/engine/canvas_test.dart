@@ -1,15 +1,13 @@
-import "../resources/dom_utils.dart";
-import "../resources/third_party/unittest/unittest.dart";
-import "../resources/unit.dart";
+import 'dart:sky' as sky;
+import 'dart:sky' show Rect, Color, Paint;
 
-import "dart:sky";
+import 'package:test/test.dart';
 import 'package:vector_math/vector_math.dart';
 
 void main() {
-  initUnit();
 
-  PictureRecorder recorder = new PictureRecorder();
-  Canvas canvas = new Canvas(recorder, new Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
+  sky.PictureRecorder recorder = new sky.PictureRecorder();
+  sky.Canvas canvas = new sky.Canvas(recorder, new Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
 
   test("matrix access should work", () {
     // Matrix equality doesn't work!

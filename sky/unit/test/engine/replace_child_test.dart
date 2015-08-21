@@ -1,12 +1,10 @@
-import "../resources/dom_utils.dart";
-import "../resources/third_party/unittest/unittest.dart";
-import "../resources/unit.dart";
+import 'dart:sky';
 
-import "dart:sky";
+import 'package:test/test.dart';
+
+import 'dom_utils.dart';
 
 void main() {
-  initUnit();
-
   var document = new Document();
 
   test("should replace elements", () {

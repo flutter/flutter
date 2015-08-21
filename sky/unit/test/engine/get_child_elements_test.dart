@@ -1,11 +1,8 @@
-import "../resources/third_party/unittest/unittest.dart";
-import "../resources/unit.dart";
+import 'dart:sky';
 
-import "dart:sky";
+import 'package:test/test.dart';
 
 void main() {
-  initUnit();
-
   test("getChildElements should only include immediate children", () {
     var doc = new Document();
     var parent = doc.createElement('parent');

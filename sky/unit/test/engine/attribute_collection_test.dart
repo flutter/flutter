@@ -1,11 +1,8 @@
-import "../resources/third_party/unittest/unittest.dart";
-import "../resources/unit.dart";
+import 'dart:sky';
 
-import "dart:sky";
+import 'package:test/test.dart';
 
 void main() {
-  initUnit();
-
   var div;
   setUp(() {
     var document = new Document();

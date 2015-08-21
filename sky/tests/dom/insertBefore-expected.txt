@@ -1,6 +1,0 @@
-unittest-suite-wait-for-done
-PASS: should throw with invalid arguments
-
-All 1 tests passed.
-unittest-suite-success
-DONE

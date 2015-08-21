@@ -1,12 +1,8 @@
-import "../resources/dom_utils.dart";
-import "../resources/third_party/unittest/unittest.dart";
-import "../resources/unit.dart";
+import 'dart:sky';
 
-import "dart:sky";
+import 'package:test/test.dart';
 
 void main() {
-  initUnit();
-
   Document document = new Document();
 
   test("should throw with invalid arguments", () {
