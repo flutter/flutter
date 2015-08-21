@@ -105,7 +105,7 @@ class Drawer extends StatefulComponent {
           backgroundColor: Theme.of(this).canvasColor,
           boxShadow: shadows[level]),
         width: _kWidth,
-        child: new ScrollableBlock(children)
+        child: new Block(children)
       )
     );
 

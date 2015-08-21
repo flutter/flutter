@@ -6,9 +6,9 @@ import 'dart:math' as math;
 
 import 'package:sky/widgets.dart';
 
-class BlockViewportApp extends App {
+class MixedViewportApp extends App {
 
-  BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
+  MixedViewportLayoutState layoutState = new MixedViewportLayoutState();
   List<double> lengths = <double>[];
   double offset = 0.0;
 
@@ -87,7 +87,7 @@ class BlockViewportApp extends App {
                     border: new Border.all(color: new Color(0xFF000000))
                   ),
                   padding: new EdgeDims.all(16.0),
-                  child: new BlockViewport(
+                  child: new MixedViewport(
                     builder: builder,
                     startOffset: offset,
                     token: lengths.length,
@@ -124,7 +124,7 @@ class BlockViewportApp extends App {
 }
 
 void main() {
-  runApp(new BlockViewportApp());
+  runApp(new MixedViewportApp());
   // scheduler.addPersistentFrameCallback((_) {
   //   SkyBinding.instance.debugDumpRenderTree();
   // });

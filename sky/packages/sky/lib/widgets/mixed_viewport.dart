@@ -24,8 +24,8 @@ class _Key {
 
 typedef void LayoutChangedCallback();
 
-class BlockViewportLayoutState {
-  BlockViewportLayoutState()
+class MixedViewportLayoutState {
+  MixedViewportLayoutState()
     : _childOffsets = <double>[0.0],
       _firstVisibleChildIndex = 0,
       _visibleChildCount = 0,
@@ -77,8 +77,8 @@ class BlockViewportLayoutState {
   }
 }
 
-class BlockViewport extends RenderObjectWrapper {
-  BlockViewport({ this.builder, this.startOffset, this.token, this.layoutState, Key key })
+class MixedViewport extends RenderObjectWrapper {
+  MixedViewport({ this.builder, this.startOffset, this.token, this.layoutState, Key key })
     : super(key: key) {
     assert(this.layoutState != null);
   }
@@ -86,7 +86,7 @@ class BlockViewport extends RenderObjectWrapper {
   IndexedBuilder builder;
   double startOffset;
   Object token;
-  BlockViewportLayoutState layoutState;
+  MixedViewportLayoutState layoutState;
 
   RenderBlockViewport get renderObject => super.renderObject;
   RenderBlockViewport createNode() => new RenderBlockViewport();
@@ -144,7 +144,7 @@ class BlockViewport extends RenderObjectWrapper {
     return right;
   }
 
-  bool retainStatefulNodeIfPossible(BlockViewport newNode) {
+  bool retainStatefulNodeIfPossible(MixedViewport newNode) {
     assert(layoutState == newNode.layoutState);
     retainStatefulRenderObjectWrapper(newNode);
     if (startOffset != newNode.startOffset) {
@@ -162,7 +162,7 @@ class BlockViewport extends RenderObjectWrapper {
     return true;
   }
 
-  void syncRenderObject(BlockViewport old) {
+  void syncRenderObject(MixedViewport old) {
     super.syncRenderObject(old);
     if (layoutState._dirty || !layoutState.isValid) {
       renderObject.markNeedsLayout();

@@ -16,11 +16,11 @@ import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/viewport.dart';
 import 'package:sky/theme/view_configuration.dart' as config;
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/block_viewport.dart';
-import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets/mixed_viewport.dart';
+import 'package:sky/widgets/scrollable.dart';
 
-export 'package:sky/widgets/block_viewport.dart' show BlockViewportLayoutState;
+export 'package:sky/widgets/mixed_viewport.dart' show MixedViewportLayoutState;
 
 
 // The GestureEvent velocity properties are pixels/second, config min,max limits are pixels/ms
@@ -314,11 +314,11 @@ class ScrollableViewport extends Scrollable {
   }
 }
 
-/// A mashup of [ScrollableViewport] and [Block]. Useful when you have a small,
+/// A mashup of [ScrollableViewport] and [BlockBody]. Useful when you have a small,
 /// fixed number of children that you wish to arrange in a block layout and that
 /// might exceed the height of its container (and therefore need to scroll).
-class ScrollableBlock extends Component {
-  ScrollableBlock(this.children, {
+class Block extends Component {
+  Block(this.children, {
     Key key,
     this.scrollDirection: ScrollDirection.vertical
   }) : super(key: key);
@@ -335,7 +335,7 @@ class ScrollableBlock extends Component {
   Widget build() {
     return new ScrollableViewport(
       scrollDirection: scrollDirection,
-      child: new Block(children, direction: _direction)
+      child: new BlockBody(children, direction: _direction)
     );
   }
 }
@@ -345,9 +345,9 @@ class ScrollableBlock extends Component {
 /// ScrollDirection.vertical itemExtent is the height of each item. Use this
 /// widget when you have a large number of children or when you are concerned
 // about offscreen widgets consuming resources.
-abstract class FixedHeightScrollable extends Scrollable {
+abstract class ScrollableWidgetList extends Scrollable {
 
-  FixedHeightScrollable({
+  ScrollableWidgetList({
     Key key,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
     this.itemExtent,
@@ -360,12 +360,12 @@ abstract class FixedHeightScrollable extends Scrollable {
   double itemExtent;
   Size containerSize = Size.zero;
 
-  /// Subclasses must implement `get itemCount` to tell FixedHeightScrollable
+  /// Subclasses must implement `get itemCount` to tell ScrollableWidgetList
   /// how many items there are in the list.
   int get itemCount;
   int _previousItemCount;
 
-  void syncFields(FixedHeightScrollable source) {
+  void syncFields(ScrollableWidgetList source) {
     bool scrollBehaviorUpdateNeeded =
       padding != source.padding ||
       itemExtent != source.itemExtent ||
@@ -478,7 +478,7 @@ abstract class FixedHeightScrollable extends Scrollable {
       : BlockDirection.horizontal;
 
     // TODO(ianh): Refactor this so that it does the building in the
-    // same frame as the size observing, similar to BlockViewport, but
+    // same frame as the size observing, similar to MixedViewport, but
     // keeping the fixed-height optimisations.
     return new SizeObserver(
       callback: _handleSizeChanged,
@@ -487,7 +487,7 @@ abstract class FixedHeightScrollable extends Scrollable {
         scrollOffset: viewportOffset,
         child: new Container(
           padding: _crossAxisPadding,
-          child: new Block(items, direction: blockDirection)
+          child: new BlockBody(items, direction: blockDirection)
         )
       )
     );
@@ -499,10 +499,10 @@ abstract class FixedHeightScrollable extends Scrollable {
 
 typedef Widget ItemBuilder<T>(T item);
 
-/// A wrapper around [FixedHeightScrollable] that helps you translate a list of
+/// A wrapper around [ScrollableWidgetList] that helps you translate a list of
 /// model objects into a scrollable list of widgets. Assumes all the widgets
 /// have the same height.
-class ScrollableList<T> extends FixedHeightScrollable {
+class ScrollableList<T> extends ScrollableWidgetList {
   ScrollableList({
     Key key,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
@@ -588,11 +588,11 @@ class PageableList<T> extends ScrollableList<T> {
 }
 
 /// A general scrollable list for a large number of children that might not all
-/// have the same height. Prefer [FixedHeightScrollable] when all the children
+/// have the same height. Prefer [ScrollableWidgetList] when all the children
 /// have the same height because it can use that property to be more efficient.
 /// Prefer [ScrollableViewport] with a single child.
-class VariableHeightScrollable extends Scrollable {
-  VariableHeightScrollable({
+class ScrollableMixedWidgetList extends Scrollable {
+  ScrollableMixedWidgetList({
     Key key,
     this.builder,
     this.token,
@@ -601,7 +601,7 @@ class VariableHeightScrollable extends Scrollable {
 
   IndexedBuilder builder;
   Object token;
-  BlockViewportLayoutState layoutState;
+  MixedViewportLayoutState layoutState;
 
   // When the token changes the scrollable's contents may have
   // changed. Remember as much so that after the new contents
@@ -624,7 +624,7 @@ class VariableHeightScrollable extends Scrollable {
     super.didUnmount();
   }
 
-  void syncFields(VariableHeightScrollable source) {
+  void syncFields(ScrollableMixedWidgetList source) {
     builder = source.builder;
     if (token != source.token)
       _contentsChanged = true;
@@ -661,7 +661,7 @@ class VariableHeightScrollable extends Scrollable {
   Widget buildContent() {
     return new SizeObserver(
       callback: _handleSizeChanged,
-      child: new BlockViewport(
+      child: new MixedViewport(
         builder: builder,
         layoutState: layoutState,
         startOffset: scrollOffset,

@@ -54,7 +54,7 @@ class AddressBookApp extends App {
         showDialog(navigator, (navigator) {
           return new Dialog(
             title: new Text("Describe your picture"),
-            content: new ScrollableBlock([
+            content: new Block([
               new Field(inputKey: fillKey, icon: "editor/format_color_fill", placeholder: "Color"),
               new Field(inputKey: emoticonKey, icon: "editor/insert_emoticon", placeholder: "Emotion"),
             ]),
@@ -88,7 +88,7 @@ class AddressBookApp extends App {
 
   Widget buildBody(Navigator navigator) {
     return new Material(
-      child: new ScrollableBlock([
+      child: new Block([
         new AspectRatio(
           aspectRatio: 16.0 / 9.0,
           child: new Container(

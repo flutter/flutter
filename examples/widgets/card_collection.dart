@@ -24,7 +24,7 @@ class CardCollectionApp extends App {
   final TextStyle backgroundTextStyle =
     typography.white.title.copyWith(textAlign: TextAlign.center);
 
-  BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
+  MixedViewportLayoutState layoutState = new MixedViewportLayoutState();
   List<CardModel> cardModels;
 
   void initState() {
@@ -102,7 +102,7 @@ class CardCollectionApp extends App {
     Widget cardCollection = new Container(
       padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
       decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50]),
-      child: new VariableHeightScrollable(
+      child: new ScrollableMixedWidgetList(
         builder: builder,
         token: cardModels.length,
         layoutState: layoutState

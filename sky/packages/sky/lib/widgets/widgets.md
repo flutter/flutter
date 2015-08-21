@@ -59,14 +59,6 @@ Layout models
       `right` and `left` properties to non-null values will force the child to
       have a particular width.
 
- - `Block` Layout a list of child widgets in a vertical line. Each child's width
-   is set to the widget of the block, and each child is positioned directly
-   below the previous child. The block's height is set to the total height of
-   all of its children. A block can be used only in locations that offer an
-   unbounded amount of vertical space (e.g., inside a `Viewport`). Rather than
-   using `Block` directly, most client should use `ScrollableBlock`, which
-   combines `Block` with `Viewport` and scrolling physics.
-
 Positioning and sizing
 ----------------------
 

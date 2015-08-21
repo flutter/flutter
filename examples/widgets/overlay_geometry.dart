@@ -71,7 +71,7 @@ class OverlayGeometryApp extends App {
     const TextStyle(color: colors.white, fontSize: 18.0, fontWeight: bold);
 
   List<CardModel> cardModels;
-  BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
+  MixedViewportLayoutState layoutState = new MixedViewportLayoutState();
   Map<MarkerType, Point> markers = new Map<MarkerType, Point>();
   double markersScrollOffset;
   ScrollListener scrollListener;
@@ -138,7 +138,7 @@ class OverlayGeometryApp extends App {
   }
 
   Widget build() {
-    Scrollable scrollable = new VariableHeightScrollable(
+    Scrollable scrollable = new ScrollableMixedWidgetList(
       builder: builder,
       token: cardModels.length,
       layoutState: layoutState

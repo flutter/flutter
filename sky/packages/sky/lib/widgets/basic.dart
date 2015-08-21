@@ -407,8 +407,8 @@ class Container extends Component {
 
 // LAYOUT NODES
 
-class Block extends MultiChildRenderObjectWrapper {
-  Block(List<Widget> children, {
+class BlockBody extends MultiChildRenderObjectWrapper {
+  BlockBody(List<Widget> children, {
     Key key,
     this.direction: BlockDirection.vertical
   }) : super(key: key, children: children);
