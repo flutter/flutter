@@ -135,8 +135,8 @@ class AddressBookApp extends App {
       data: theme,
       child: new DefaultTextStyle(
         style: typography.error, // if you see this, you've forgotten to correctly configure the text style!
-        child: new TaskDescription(
-          label: 'Address Book',
+        child: new Title(
+          title: 'Address Book',
           child: new Navigator(_navigationState)
         )
       )
