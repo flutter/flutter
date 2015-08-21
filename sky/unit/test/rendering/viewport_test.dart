@@ -1,16 +1,9 @@
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/object.dart';
-import 'package:sky/rendering/proxy_box.dart';
-import 'package:sky/rendering/proxy.dart';
-import 'package:sky/rendering/viewport.dart';
+import 'package:sky/rendering.dart';
+import 'package:test/test.dart';
 
-import '../resources/display_list.dart';
-import '../resources/third_party/unittest/unittest.dart';
-import '../resources/unit.dart';
+import 'layout_utils.dart';
 
 void main() {
-  initUnit();
-
   test('Should be able to hit with negative scroll offset', () {
     RenderBox size = new RenderConstrainedBox(
       additionalConstraints: new BoxConstraints.tight(const Size(100.0, 100.0)));
@@ -22,7 +15,7 @@ void main() {
       child: size);
 
     RenderViewport viewport = new RenderViewport(child: red, scrollOffset: new Offset(0.0, -10.0));
-    TestRenderView renderView = new TestRenderView(viewport);
+    RenderView renderView = layout(viewport);
 
     HitTestResult result;
 
