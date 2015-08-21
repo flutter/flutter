@@ -1,6 +1,0 @@
-class {{interface.name}}RequestValidator : public mojo::MessageFilter {
- public:
-  explicit {{interface.name}}RequestValidator(mojo::MessageReceiver* sink = nullptr);
-
-  bool Accept(mojo::Message* message) override;
-};
