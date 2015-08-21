@@ -9,6 +9,7 @@ import errno
 import json
 import logging
 import os
+import platform
 import random
 import re
 import signal
@@ -290,13 +291,16 @@ class IOSDevice(object):
     def has_ios_deploy(cls):
         if cls._has_ios_deploy is not None:
             return cls._has_ios_deploy
-        cmd = [
-            'which',
-            'ios-deploy'
-        ]
-        out = subprocess.check_output(cmd)
-        match = re.search(r'ios-deploy', out)
-        cls._has_ios_deploy = match is not None
+        try:
+            cmd = [
+                'which',
+                'ios-deploy'
+            ]
+            out = subprocess.check_output(cmd)
+            match = re.search(r'ios-deploy', out)
+            cls._has_ios_deploy = match is not None
+        except subprocess.CalledProcessError:
+            cls._has_ios_deploy = False
         return cls._has_ios_deploy
 
     _is_connected = False
@@ -352,6 +356,8 @@ class IOSDevice(object):
 class IOSSimulator(object):
     @classmethod
     def is_booted(cls):
+        if platform.system() != 'Darwin':
+            return False
         return cls.get_simulator_device_id() is not None
 
     _device_id = None
@@ -545,34 +551,67 @@ class IOSSimulator(object):
 
 
 class StartListening(object):
+    def __init__(self):
+        self.watch_cmd = None
+
     def add_subparser(self, subparsers):
         listen_parser = subparsers.add_parser('listen',
             help=('Listen for changes to files and reload the running app on all connected devices'))
         listen_parser.set_defaults(func=self.run)
 
-    def run(self, args, pids):
-        cmd = [
-            'which',
-            'fswatch'
-        ]
-        out = subprocess.check_output(cmd)
-        match = re.search(r'fswatch', out)
-        if match is None:
-            logging.error('"listen" command is only useful if you have installed fswatch.  Run "brew install fswatch" to install it with homebrew.')
-            return
+    def watch_dir(self, directory):
+        if self.watch_cmd is None:
+            name = platform.system()
+            if name == 'Linux':
+                try:
+                    cmd = [
+                        'which',
+                        'inotifywait'
+                    ]
+                    out = subprocess.check_output(cmd)
+                except subprocess.CalledProcessError:
+                    logging.error('"listen" command is only useful if you have installed inotifywait on Linux.  Run "apt-get install inotify-tools" or equivalent to install it.')
+                    return False
 
-        tempdir = None
-        currdir = None
+                self.watch_cmd = [
+                    'inotifywait',
+                    '-r',
+                    '-e',
+                    'modify,close_write,move,create,delete', # Only listen for events that matter, to avoid triggering constantly from the editor watching files
+                    directory
+                ]
+            elif name == 'Darwin':
+                try:
+                    cmd = [
+                        'which',
+                        'fswatch'
+                    ]
+                    out = subprocess.check_output(cmd)
+                except subprocess.CalledProcessError:
+                    logging.error('"listen" command is only useful if you have installed fswatch on Mac.  Run "brew install fswatch" to install it with homebrew.')
+                    return False
+
+                self.watch_cmd = [
+                    'fswatch',
+                    '-r',
+                    '-v',
+                    '-1',
+                    directory
+                ]
+            else:
+                logging.error('"listen" command is only available on Mac and Linux.')
+                return False
+
+        subprocess.check_call(self.watch_cmd)
+        return True
+
+    def run(self, args, pids):
+        tempdir = tempfile.mkdtemp()
+        currdir = os.getcwd()
         while True:
             # Watch filesystem for changes
-            cmd = [
-                'fswatch',
-                '-r',
-                '-v',
-                '-1',
-                '.'
-            ]
-            subprocess.check_call(cmd)
+            if not self.watch_dir(currdir):
+                return
 
             logging.info('Updating running Sky apps...')
 
@@ -589,10 +628,6 @@ class StartListening(object):
                 # Currently sending to iOS only works if you are building Sky locally
                 # since we aren't shipping the sky_snapshot binary yet.
                 continue
-
-            if tempdir is None:
-                tempdir = tempfile.mkdtemp()
-                currdir = os.getcwd()
 
             # Build the snapshot
             sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, 'clang_x64', 'sky_snapshot')
