@@ -8,7 +8,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
-import 'package:sky/mojo/activity.dart' as activity;
+import 'package:sky/mojo/activity.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/sky_binding.dart';
@@ -1146,7 +1146,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
           syncChild(null, oldChild, null);
         }
         oldChildrenBottom -= 1;
-      }      
+      }
     }
 
     // middle of the lists - new list

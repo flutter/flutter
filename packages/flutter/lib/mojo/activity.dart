@@ -19,17 +19,18 @@ const int NEW_DOCUMENT = 0x00080000;
 const int NEW_TASK = 0x10000000;
 const int MULTIPLE_TASK = 0x08000000;
 
-ActivityProxy _initActivity() {
+ActivityProxy _initActivityProxy() {
   ActivityProxy activity = new ActivityProxy.unbound();
   shell.requestService('mojo:sky_viewer', activity);
   return activity;
 }
 
-final ActivityProxy _activity = _initActivity();
+final ActivityProxy _activityProxy = _initActivityProxy();
+final Activity activity = _activityProxy.ptr;
 
 UserFeedbackProxy _initUserFeedbackProxy() {
   UserFeedbackProxy proxy = new UserFeedbackProxy.unbound();
-  _activity.ptr.getUserFeedback(proxy);
+  _activityProxy.ptr.getUserFeedback(proxy);
   return proxy;
 }
 
@@ -38,16 +39,6 @@ final UserFeedback userFeedback = _userFeedbackProxy.ptr;
 
 Color _cachedPrimaryColor;
 String _cachedLabel;
-
-/// Ends the current activity.
-void finishCurrentActivity() {
-  _activity.ptr.finishCurrentActivity();
-}
-
-/// Asks the Android ActivityManager to start a new Intent-based Activity.
-void startActivity(Intent intent) {
-  _activity.ptr.startActivity(intent);
-}
 
 /// Sets the TaskDescription for the current Activity
 void updateTaskDescription(String label, Color color) {
@@ -61,18 +52,8 @@ void updateTaskDescription(String label, Color color) {
     ..label = label
     ..primaryColor = (color != null ? color.value : null);
 
-  _activity.ptr.setTaskDescription(description);
+  _activityProxy.ptr.setTaskDescription(description);
 }
 
-int _cachedSystemUiVisibility = SystemUIVisibility_STANDARD;
-
-void setSystemUiVisibility(int visibility) {
-  if (_cachedSystemUiVisibility == visibility)
-    return;
-  _cachedSystemUiVisibility = visibility;
-  _activity.ptr.setSystemUiVisibility(visibility);
-}
-
-Future<String> getFilesDir() async => (await _activity.ptr.getFilesDir()).path;
-
-Future<String> getCacheDir() async => (await _activity.ptr.getCacheDir()).path;
+Future<String> getFilesDir() async => (await _activityProxy.ptr.getFilesDir()).path;
+Future<String> getCacheDir() async => (await _activityProxy.ptr.getCacheDir()).path;

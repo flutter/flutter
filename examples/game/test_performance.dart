@@ -4,9 +4,7 @@ import 'dart:math' as math;
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/task_description.dart';
-import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets.dart';
 
 import 'lib/sprites.dart';
 
@@ -46,8 +44,8 @@ class TestApp extends App {
 
     return new Theme(
       data: theme,
-      child: new TaskDescription(
-        label: 'Test Sprite Performance',
+      child: new Title(
+        title: 'Test Sprite Performance',
         child: new SpriteWidget(new TestPerformance())
       )
     );

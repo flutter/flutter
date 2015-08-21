@@ -171,8 +171,8 @@ class FitnessApp extends App {
         primarySwatch: colors.Indigo,
         accentColor: colors.PinkAccent[200]
       ),
-      child: new TaskDescription(
-        label: 'Fitness',
+      child: new Title(
+        title: 'Fitness',
         child: new Navigator(_navigationState)
       )
     );

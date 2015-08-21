@@ -5,7 +5,7 @@
 import 'dart:sky';
 import 'dart:math' as math;
 
-import 'package:sky/mojo/activity.dart' as activity;
+import 'package:sky/mojo/activity.dart';
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/rendering.dart';
 
@@ -98,7 +98,7 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
     child: row
   );
 
-  activity.updateTaskDescription('Interactive Flex', topColor);
+  updateTaskDescription('Interactive Flex', topColor);
   new SkyBinding(root: root);
   view.setEventCallback(handleEvent);
 }
