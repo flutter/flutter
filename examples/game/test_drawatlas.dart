@@ -6,8 +6,7 @@ import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/task_description.dart';
-import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)
@@ -45,8 +44,8 @@ class TestDrawAtlasApp extends App {
 
     return new Theme(
       data: theme,
-      child: new TaskDescription(
-        label: 'Test drawAtlas',
+      child: new Title(
+        title: 'Test drawAtlas',
         child: new SpriteWidget(
           new TestDrawAtlas(),
           SpriteBoxTransformMode.fixedWidth

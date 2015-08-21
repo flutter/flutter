@@ -95,8 +95,8 @@ class StocksApp extends App {
       data: theme,
         child: new DefaultTextStyle(
           style: typography.error, // if you see this, you've forgotten to correctly configure the text style!
-          child: new TaskDescription(
-            label: 'Stocks',
+          child: new Title(
+            title: 'Stocks',
             child: new Navigator(_navigationState)
           )
         )

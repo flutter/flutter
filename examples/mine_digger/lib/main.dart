@@ -183,8 +183,8 @@ class MineDiggerApp extends App {
   Widget build() {
     // We build the board before we build the toolbar because we compute the win state during build step.
     Widget board = buildBoard();
-    return new TaskDescription(
-      label: 'Mine Digger',
+    return new Title(
+      title: 'Mine Digger',
       child: new Scaffold(
         toolbar: buildToolBar(),
         body: new Container(

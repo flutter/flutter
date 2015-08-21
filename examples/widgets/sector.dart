@@ -122,8 +122,8 @@ class SectorApp extends App {
   Widget build() {
     return new Theme(
       data: new ThemeData.light(),
-      child: new TaskDescription(
-        label: 'Sector Layout',
+      child: new Title(
+        title: 'Sector Layout',
         child: new Scaffold(
           toolbar: new ToolBar(
             center: new Text('Sector Layout in a Widget Tree')
