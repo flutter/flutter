@@ -7,7 +7,6 @@
 export 'widgets/animated_component.dart';
 export 'widgets/animated_container.dart';
 export 'widgets/basic.dart';
-export 'widgets/block_viewport.dart';
 export 'widgets/button_base.dart';
 export 'widgets/card.dart';
 export 'widgets/checkbox.dart';
@@ -30,6 +29,7 @@ export 'widgets/material.dart';
 export 'widgets/material_button.dart';
 export 'widgets/mimic.dart';
 export 'widgets/mimic_overlay.dart';
+export 'widgets/mixed_viewport.dart';
 export 'widgets/modal_overlay.dart';
 export 'widgets/navigator.dart';
 export 'widgets/popup_menu.dart';

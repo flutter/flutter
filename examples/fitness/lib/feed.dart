@@ -324,7 +324,7 @@ class AddItemDialog extends StatefulComponent {
     }
     return new Dialog(
       title: new Text("What are you doing?"),
-      content: new ScrollableBlock(menuItems),
+      content: new Block(menuItems),
       onDismiss: navigator.pop,
       actions: [
         new FlatButton(

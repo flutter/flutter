@@ -98,7 +98,7 @@ class StockSettings extends StatefulComponent {
       child: new ScrollableViewport(
         child: new Container(
           padding: const EdgeDims.symmetric(vertical: 20.0),
-          child: new Block([
+          child: new BlockBody([
             new DrawerItem(
               icon: 'action/thumb_up',
               onPressed: () => _confirmOptimismChange(),

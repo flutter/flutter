@@ -114,7 +114,7 @@ class MeasurementFragment extends StatefulComponent {
       child: new ScrollableViewport(
         child: new Container(
           padding: const EdgeDims.all(20.0),
-          child: new Block([
+          child: new BlockBody([
             new Text(measurement.displayDate),
             new Input(
               key: weightKey,

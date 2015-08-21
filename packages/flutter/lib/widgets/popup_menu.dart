@@ -142,7 +142,7 @@ class PopupMenu extends StatefulComponent {
                         horizontal: _kMenuHorizontalPadding,
                         vertical: _kMenuVerticalPadding
                       ),
-                      child: new Block(children)
+                      child: new BlockBody(children)
                     )
                   )
                 )

@@ -24,7 +24,7 @@ class EnsureVisibleApp extends App {
     const TextStyle(color: colors.white, fontSize: 24.0, fontWeight: bold);
 
   List<CardModel> cardModels;
-  BlockViewportLayoutState layoutState = new BlockViewportLayoutState();
+  MixedViewportLayoutState layoutState = new MixedViewportLayoutState();
   CardModel selectedCardModel;
 
   void initState() {
@@ -74,7 +74,7 @@ class EnsureVisibleApp extends App {
     Widget cardCollection = new Container(
       padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
       decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50]),
-      child: new VariableHeightScrollable(
+      child: new ScrollableMixedWidgetList(
         builder: builder,
         token: cardModels.length,
         layoutState: layoutState

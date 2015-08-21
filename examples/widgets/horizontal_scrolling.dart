@@ -42,7 +42,7 @@ class HorizontalScrollingApp extends App {
       child: new Container(
         height: 50.0,
         child: new Flex([
-          new ScrollableBlock(circles, scrollDirection: ScrollDirection.horizontal)
+          new Block(circles, scrollDirection: ScrollDirection.horizontal)
         ], justifyContent: FlexJustifyContent.end)
       )
     );
