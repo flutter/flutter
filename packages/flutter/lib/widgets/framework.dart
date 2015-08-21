@@ -425,10 +425,14 @@ abstract class TagNode extends Widget {
   void _sync(Widget old, dynamic slot) {
     Widget oldChild = old == null ? null : (old as TagNode).child;
     child = syncChild(child, oldChild, slot);
-    assert(child.parent == this);
-    assert(child.renderObject != null);
-    _renderObject = child.renderObject;
-    assert(_renderObject == renderObject); // in case a subclass reintroduces it
+    if (child != null) {
+      assert(child.parent == this);
+      assert(child.renderObject != null);
+      _renderObject = child.renderObject;
+      assert(_renderObject == renderObject); // in case a subclass reintroduces it
+    } else {
+      _renderObject = null;
+    }
   }
 
   void updateSlot(dynamic newSlot) {

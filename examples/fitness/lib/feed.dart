@@ -214,6 +214,8 @@ class FeedFragment extends StatefulComponent {
 
   Widget buildBody() {
     TextStyle style = Theme.of(this).text.title;
+    if (userData == null)
+      return new Material(type: MaterialType.canvas);
     if (userData.items.length == 0)
       return new Material(
         type: MaterialType.canvas,
