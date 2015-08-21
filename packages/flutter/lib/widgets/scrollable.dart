@@ -245,7 +245,7 @@ Future ensureWidgetIsVisible(Widget target, { Duration duration, Curve curve }) 
   double scrollOffsetDelta = scrollable.scrollDirection == ScrollDirection.vertical
     ? targetCenter.y - scrollableCenter.y
     : targetCenter.x - scrollableCenter.x;
-  BoundedBehavior scrollBehavior = scrollable.scrollBehavior;
+  ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
   double scrollOffset = (scrollable.scrollOffset + scrollOffsetDelta)
     .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
 
@@ -286,8 +286,8 @@ class ScrollableViewport extends Scrollable {
   }
   void _updateScrollBehaviour() {
     scrollTo(scrollBehavior.updateExtents(
-      contentsExtents: _childSize,
-      containerExtents: _viewportSize,
+      contentExtent: _childSize,
+      containerExtent: _viewportSize,
       scrollOffset: scrollOffset));
   }
 
@@ -338,6 +338,7 @@ class Block extends Component {
 /// widget when you have a large number of children or when you are concerned
 // about offscreen widgets consuming resources.
 abstract class ScrollableWidgetList extends Scrollable {
+  static const _kEpsilon = .0000001;
 
   ScrollableWidgetList({
     Key key,
@@ -377,7 +378,7 @@ abstract class ScrollableWidgetList extends Scrollable {
   }
 
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
-  OverscrollBehavior get scrollBehavior => super.scrollBehavior;
+  ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   double get _containerExtent {
     return scrollDirection == ScrollDirection.vertical
@@ -394,14 +395,14 @@ abstract class ScrollableWidgetList extends Scrollable {
 
   double get _leadingPadding {
     if (scrollDirection == ScrollDirection.vertical)
-      return padding.top;
-    return padding.left;
+      return padding != null ? padding.top : 0.0;
+    return padding != null ? padding.left : -.0;
   }
 
   double get _trailingPadding {
     if (scrollDirection == ScrollDirection.vertical)
-      return padding.bottom;
-    return padding.right;
+      return padding != null ? padding.bottom : 0.0;
+    return padding != null ? padding.right : 0.0;
   }
 
   EdgeDims get _crossAxisPadding {
@@ -413,13 +414,13 @@ abstract class ScrollableWidgetList extends Scrollable {
   }
 
   void _updateScrollBehavior() {
-    double contentsExtent = itemExtent * itemCount;
+    double contentExtent = itemExtent * itemCount;
     if (padding != null)
-      contentsExtent += _leadingPadding + _trailingPadding;
+      contentExtent += _leadingPadding + _trailingPadding;
 
     scrollTo(scrollBehavior.updateExtents(
-      contentsExtents: contentsExtent,
-      containerExtents: _containerExtent,
+      contentExtent: contentExtent,
+      containerExtent: _containerExtent,
       scrollOffset: scrollOffset));
   }
 
@@ -435,31 +436,33 @@ abstract class ScrollableWidgetList extends Scrollable {
       _updateScrollBehavior();
     }
 
-    double paddedScrollOffset = scrollOffset;
-    if (padding != null)
-      paddedScrollOffset -= _leadingPadding;
-
+    double paddedScrollOffset = scrollOffset - _leadingPadding;
     int itemShowIndex = 0;
     int itemShowCount = 0;
     Offset viewportOffset = Offset.zero;
+
     if (_containerExtent != null && _containerExtent > 0.0) {
-      if (paddedScrollOffset < 0.0) {
-        double visibleHeight = _containerExtent + paddedScrollOffset;
-        itemShowCount = (visibleHeight / itemExtent).round() + 1;
+      if (paddedScrollOffset < scrollBehavior.minScrollOffset) {
+        // Underscroll
+        double visibleExtent = _containerExtent + paddedScrollOffset;
+        itemShowCount = (visibleExtent / itemExtent).round() + 1;
         viewportOffset = _toOffset(paddedScrollOffset);
       } else {
         itemShowCount = (_containerExtent / itemExtent).ceil();
-        double alignmentDelta = -paddedScrollOffset % itemExtent;
-        double drawStart;
+        double alignmentDelta = (-paddedScrollOffset % itemExtent);
+        double drawStart = paddedScrollOffset;
         if (alignmentDelta != 0.0) {
           alignmentDelta -= itemExtent;
           itemShowCount += 1;
-          drawStart = paddedScrollOffset + alignmentDelta;
+          drawStart += alignmentDelta;
           viewportOffset = _toOffset(-alignmentDelta);
-        } else {
-          drawStart = paddedScrollOffset;
         }
-        itemShowIndex = math.max(0, (drawStart / itemExtent).floor());
+        if (itemCount > 0) {
+          // floor(epsilon) = 0, floor(-epsilon) = -1, so:
+          if (drawStart.abs() < _kEpsilon)
+            drawStart = 0.0;
+          itemShowIndex = (drawStart / itemExtent).floor() % itemCount;
+        }
       }
     }
 
@@ -501,26 +504,34 @@ class ScrollableList<T> extends ScrollableWidgetList {
     ScrollDirection scrollDirection: ScrollDirection.vertical,
     this.items,
     this.itemBuilder,
+    this.itemsWrap: false,
     double itemExtent,
     EdgeDims padding
   }) : super(key: key, scrollDirection: scrollDirection, itemExtent: itemExtent, padding: padding);
 
   List<T> items;
   ItemBuilder<T> itemBuilder;
+  bool itemsWrap;
 
   void syncConstructorArguments(ScrollableList<T> source) {
     items = source.items;
     itemBuilder = source.itemBuilder;
+    itemsWrap = source.itemsWrap;
     super.syncConstructorArguments(source);
+  }
+
+  ScrollBehavior createScrollBehavior() {
+    return itemsWrap ? new UnboundedBehavior() : super.createScrollBehavior();
   }
 
   int get itemCount => items.length;
 
   List<Widget> buildItems(int start, int count) {
     List<Widget> result = new List<Widget>();
-    int end = math.min(start + count, items.length);
-    for (int i = start; i < end; ++i)
-      result.add(itemBuilder(items[i]));
+    int begin = itemsWrap ? start : math.max(0, start);
+    int end = itemsWrap ? begin + count : math.min(begin + count, items.length);
+    for (int i = begin; i < end; ++i)
+      result.add(itemBuilder(items[i % itemCount]));
     return result;
   }
 }
@@ -531,6 +542,7 @@ class PageableList<T> extends ScrollableList<T> {
     ScrollDirection scrollDirection: ScrollDirection.horizontal,
     List<T> items,
     ItemBuilder<T> itemBuilder,
+    bool itemsWrap: false,
     double itemExtent,
     EdgeDims padding,
     this.duration: const Duration(milliseconds: 200),
@@ -540,6 +552,7 @@ class PageableList<T> extends ScrollableList<T> {
     scrollDirection: scrollDirection,
     items: items,
     itemBuilder: itemBuilder,
+    itemsWrap: itemsWrap,
     itemExtent: itemExtent,
     padding: padding
   );
@@ -600,7 +613,7 @@ class ScrollableMixedWidgetList extends Scrollable {
   // changed. Remember as much so that after the new contents
   // have been laid out we can adjust the scrollOffset so that
   // the last page of content is still visible.
-  bool _contentsChanged = true;
+  bool _contentChanged = true;
 
   void initState() {
     assert(layoutState != null);
@@ -620,7 +633,7 @@ class ScrollableMixedWidgetList extends Scrollable {
   void syncConstructorArguments(ScrollableMixedWidgetList source) {
     builder = source.builder;
     if (token != source.token)
-      _contentsChanged = true;
+      _contentChanged = true;
     token = source.token;
     if (layoutState != source.layoutState) {
       // Warning: this is unlikely to be what you intended.
@@ -637,17 +650,17 @@ class ScrollableMixedWidgetList extends Scrollable {
 
   void _handleSizeChanged(Size newSize) {
     scrollBy(scrollBehavior.updateExtents(
-      containerExtents: newSize.height,
+      containerExtent: newSize.height,
       scrollOffset: scrollOffset
     ));
   }
 
   void _handleLayoutChanged() {
     double newScrollOffset = scrollBehavior.updateExtents(
-      contentsExtents: layoutState.didReachLastChild ? layoutState.contentsSize : double.INFINITY,
+      contentExtent: layoutState.didReachLastChild ? layoutState.contentsSize : double.INFINITY,
       scrollOffset: scrollOffset);
-    if (_contentsChanged) {
-      _contentsChanged = false;
+    if (_contentChanged) {
+      _contentChanged = false;
       scrollTo(newScrollOffset);
     }
   }
