@@ -22,7 +22,6 @@ import 'package:sky/widgets/scrollable.dart';
 
 export 'package:sky/widgets/mixed_viewport.dart' show MixedViewportLayoutState;
 
-
 // The GestureEvent velocity properties are pixels/second, config min,max limits are pixels/ms
 const double _kMillisecondsPerSecond = 1000.0;
 const double _kMinFlingVelocity = -config.kMaxFlingVelocity * _kMillisecondsPerSecond;
@@ -48,11 +47,11 @@ abstract class Scrollable extends StatefulComponent {
   ValueAnimation<double> _toOffsetAnimation; // Started by scrollTo()
 
   void initState() {
-    _toEndAnimation = new AnimatedSimulation(_tickScrollOffset);
+    _toEndAnimation = new AnimatedSimulation(_setScrollOffset);
     _toOffsetAnimation = new ValueAnimation<double>()
       ..addListener(() {
         AnimatedValue<double> offset = _toOffsetAnimation.variable;
-        scrollTo(offset.value);
+        _setScrollOffset(offset.value);
       });
   }
 
@@ -93,8 +92,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   Future _startToOffsetAnimation(double newScrollOffset, Duration duration, Curve curve) {
-    _stopToEndAnimation();
-    _stopToOffsetAnimation();
+    _stopAnimations();
     _toOffsetAnimation
       ..variable = new AnimatedValue<double>(scrollOffset,
         end: newScrollOffset,
@@ -105,47 +103,46 @@ abstract class Scrollable extends StatefulComponent {
     return _toOffsetAnimation.play();
   }
 
-  void _stopToOffsetAnimation() {
+  void _stopAnimations() {
     if (_toOffsetAnimation.isAnimating)
       _toOffsetAnimation.stop();
+    if (_toEndAnimation.isAnimating)
+      _toEndAnimation.stop();
   }
 
   void _startToEndAnimation({ double velocity: 0.0 }) {
-    _stopToEndAnimation();
-    _stopToOffsetAnimation();
+    _stopAnimations();
     Simulation simulation = scrollBehavior.release(scrollOffset, velocity);
     if (simulation != null)
       _toEndAnimation.start(simulation);
   }
 
-  void _stopToEndAnimation() {
-    _toEndAnimation.stop();
+  void didUnmount() {
+    _stopAnimations();
+    super.didUnmount();
   }
 
-  void didUnmount() {
-    _stopToEndAnimation();
-    _stopToOffsetAnimation();
-    super.didUnmount();
+  void _setScrollOffset(double newScrollOffset) {
+    if (_scrollOffset == newScrollOffset)
+      return;
+    setState(() {
+      _scrollOffset = newScrollOffset;
+    });
+    if (_listeners.length > 0)
+      _notifyListeners();
   }
 
   Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: ease }) {
     if (newScrollOffset == _scrollOffset)
       return new Future.value();
 
-    Future result;
     if (duration == null) {
-      setState(() {
-        _scrollOffset = newScrollOffset;
-      });
-      result = new Future.value();
-    } else {
-      result = _startToOffsetAnimation(newScrollOffset, duration, curve);
+      _stopAnimations();
+      _setScrollOffset(newScrollOffset);
+      return new Future.value();
     }
 
-    if (_listeners.length > 0)
-      _notifyListeners();
-
-    return result;
+    return _startToOffsetAnimation(newScrollOffset, duration, curve);
   }
 
   Future scrollBy(double scrollDelta, { Duration duration, Curve curve }) {
@@ -157,10 +154,6 @@ abstract class Scrollable extends StatefulComponent {
     _startToEndAnimation();
   }
 
-  void _tickScrollOffset(double value) {
-    scrollTo(value);
-  }
-
   // Return the event's velocity in pixels/second.
   double _eventVelocity(sky.GestureEvent event) {
     double velocity = scrollDirection == ScrollDirection.horizontal
@@ -170,8 +163,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   EventDisposition _handlePointerDown(_) {
-    _stopToEndAnimation();
-    _stopToOffsetAnimation();
+    _stopAnimations();
     return EventDisposition.processed;
   }
 
@@ -293,10 +285,10 @@ class ScrollableViewport extends Scrollable {
     _updateScrollBehaviour();
   }
   void _updateScrollBehaviour() {
-    scrollBehavior.contentsSize = _childSize;
-    scrollBehavior.containerSize = _viewportSize;
-    if (scrollOffset > scrollBehavior.maxScrollOffset)
-      settleScrollOffset();
+    scrollTo(scrollBehavior.updateExtents(
+      contentsExtents: _childSize,
+      containerExtents: _viewportSize,
+      scrollOffset: scrollOffset));
   }
 
   Widget buildContent() {
@@ -375,6 +367,11 @@ abstract class ScrollableWidgetList extends Scrollable {
     itemExtent = source.itemExtent;
     super.syncFields(source); // update scrollDirection
 
+    if (itemCount != _previousItemCount) {
+      scrollBehaviorUpdateNeeded = true;
+      _previousItemCount = itemCount;
+    }
+
     if (scrollBehaviorUpdateNeeded)
       _updateScrollBehavior();
   }
@@ -416,17 +413,14 @@ abstract class ScrollableWidgetList extends Scrollable {
   }
 
   void _updateScrollBehavior() {
-    scrollBehavior.containerSize = _containerExtent;
-
     double contentsExtent = itemExtent * itemCount;
     if (padding != null)
       contentsExtent += _leadingPadding + _trailingPadding;
-    scrollBehavior.contentsSize = contentsExtent;
-  }
 
-  void _updateScrollOffset() {
-    if (scrollOffset > scrollBehavior.maxScrollOffset)
-      settleScrollOffset();
+    scrollTo(scrollBehavior.updateExtents(
+      contentsExtents: contentsExtent,
+      containerExtents: _containerExtent,
+      scrollOffset: scrollOffset));
   }
 
   Offset _toOffset(double value) {
@@ -439,7 +433,6 @@ abstract class ScrollableWidgetList extends Scrollable {
     if (itemCount != _previousItemCount) {
       _previousItemCount = itemCount;
       _updateScrollBehavior();
-      _updateScrollOffset();
     }
 
     double paddedScrollOffset = scrollOffset;
@@ -643,18 +636,19 @@ class ScrollableMixedWidgetList extends Scrollable {
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleSizeChanged(Size newSize) {
-    scrollBehavior.containerSize = newSize.height;
+    scrollBy(scrollBehavior.updateExtents(
+      containerExtents: newSize.height,
+      scrollOffset: scrollOffset
+    ));
   }
 
   void _handleLayoutChanged() {
-    if (layoutState.didReachLastChild) {
-      scrollBehavior.contentsSize = layoutState.contentsSize;
-      if (_contentsChanged && scrollOffset > scrollBehavior.maxScrollOffset) {
-        _contentsChanged = false;
-        settleScrollOffset();
-      }
-    } else {
-      scrollBehavior.contentsSize = double.INFINITY;
+    double newScrollOffset = scrollBehavior.updateExtents(
+      contentsExtents: layoutState.didReachLastChild ? layoutState.contentsSize : double.INFINITY,
+      scrollOffset: scrollOffset);
+    if (_contentsChanged) {
+      _contentsChanged = false;
+      scrollTo(newScrollOffset);
     }
   }
 

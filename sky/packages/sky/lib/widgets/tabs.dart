@@ -460,7 +460,7 @@ class TabBar extends Scrollable {
   }
 
   double _centeredTabScrollOffset(int tabIndex) {
-    double viewportWidth = scrollBehavior.containerSize;
+    double viewportWidth = scrollBehavior.containerExtents;
     return (_tabRect(tabIndex).left + _tabWidths[tabIndex] / 2.0 - viewportWidth / 2.0)
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
@@ -495,8 +495,9 @@ class TabBar extends Scrollable {
     setState(() {
       _tabBarSize = tabBarSize;
       _tabWidths = tabWidths;
-      scrollBehavior.containerSize = _tabBarSize.width;
-      scrollBehavior.contentsSize = _tabWidths.reduce((sum, width) => sum + width);
+      scrollBehavior.updateExtents(
+        containerExtents: _tabBarSize.width,
+        contentsExtents: _tabWidths.reduce((sum, width) => sum + width));
     });
   }
 
