@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import os
+import sys
+import subprocess
+import argparse
+
+SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
+SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
+SRC_ROOT = os.path.dirname(SKY_ROOT)
+
+DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
+PUB = os.path.join(DART_SDK, 'pub')
+PUB_CACHE = os.path.join(SRC_ROOT, 'dart-pub-cache')
+
+UNIT_DIR = os.path.join(SRC_ROOT, 'sky', 'unit')
+
+def main():
+    parser = argparse.ArgumentParser(description='Runs Sky tests')
+    parser.add_argument('--config', default='Debug')
+    parser.add_argument('--debug', dest='config', action='store_const', const='Debug')
+    parser.add_argument('--release', dest='config', action='store_const', const='Release')
+    args = parser.parse_args()
+
+    build_dir = os.path.join(SRC_ROOT, 'out', args.config)
+
+    sky_shell = None
+    if sys.platform == 'linux2':
+        sky_shell = os.path.join(build_dir, 'sky_shell')
+    elif sys.platform == 'darwin':
+        sky_shell = os.path.join(build_dir, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell')
+
+    env = os.environ.copy()
+    env['PUB_CACHE'] = PUB_CACHE
+    env['SKY_SHELL'] = sky_shell
+    return subprocess.call([
+        PUB, 'run', 'sky_tools:sky_test',
+    ], cwd=UNIT_DIR, env=env)
+
+if __name__ == '__main__':
+  sys.exit(main())
