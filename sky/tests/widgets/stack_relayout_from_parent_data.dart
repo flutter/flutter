@@ -21,7 +21,7 @@ class ChildComponent extends Component {
 class ParentComponent extends StatefulComponent {
   Size _size = new Size(100.0, 100.0);
 
-  void syncFields(ParentComponent source) {
+  void syncConstructorArguments(ParentComponent source) {
   }
 
   Widget build() {

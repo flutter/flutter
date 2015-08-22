@@ -17,7 +17,7 @@ class StockHome extends StatefulComponent {
   StockMode stockMode;
   ModeUpdater modeUpdater;
 
-  void syncFields(StockHome source) {
+  void syncConstructorArguments(StockHome source) {
     navigator = source.navigator;
     stocks = source.stocks;
     stockMode = source.stockMode;

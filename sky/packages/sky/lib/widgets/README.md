@@ -267,7 +267,7 @@ class MyDialog extends StatefulComponent {
     });
   }
 
-  void syncFields(MyDialog source) {
+  void syncConstructorArguments(MyDialog source) {
     onDismissed = source.onDismissed;
   }
 
@@ -319,9 +319,9 @@ Let's walk through the differences in `MyDialog` caused by its being stateful:
    `build` function, which means the user interface might not update to reflect
    the changed state.
 
- * `MyDialog` implements the `syncFields` member function. To understand
-   `syncFields`, we'll need to dive a bit deeper into how the `build` function
-   is used by the framework.
+ * `MyDialog` implements the `syncConstructorArguments` member function. To
+   understand `syncConstructorArguments`, we'll need to dive a bit deeper into
+   how the `build` function is used by the framework.
 
    A component's `build` function returns a tree of widgets that represent a
    "virtual" description of its appearance. The first time the framework calls
@@ -337,28 +337,29 @@ Let's walk through the differences in `MyDialog` caused by its being stateful:
    hierchy. Old _stateful_ components, however, cannot simply be discarded
    because they contain state that needs to be preserved. Instead, the old
    stateful components are retained in the widget hierarchy and asked to
-   `syncFields` with the new instance of the component created by the parent in
-   its `build` function.
+   `syncConstructorArguments` with the new instance of the component created by
+   the parent in its `build` function.
 
-   Without `syncFields`, the new values the parent component passed to the
-   `MyDialog` constructor in the parent's `build` function would be lost because
-   they would be stored only as member variables on the new instance of the
-   component, which is not retained in the component hiearchy. Therefore, the
-   `syncFields` function in a component should update `this` to account for the
-   new values the parent passed to `source` because `source` is the authorative
-   source of those values.
+   Without `syncConstructorArguments`, the new values the parent component
+   passed to the `MyDialog` constructor in the parent's `build` function would
+   be lost because they would be stored only as member variables on the new
+   instance of the component, which is not retained in the component hiearchy.
+   Therefore, the `syncConstructorArguments` function in a component should
+   update `this` to account for the new values the parent passed to `source`
+   because `source` is the authorative source of those values.
 
    By convention, components typically store the values they receive from their
    parents in public member variables and their own internal state in private
-   member variables. Therefore, a typical `syncFields` implementation will copy
-   the public, but not the private, member variables from `source`. When
-   following this convention, there is no need to copy over the private member
-   variables because those represent the internal state of the object and `this`
-   is the authoritative source of that state.
+   member variables. Therefore, a typical `syncConstructorArguments`
+   implementation will copy the public, but not the private, member variables
+   from `source`. When following this convention, there is no need to copy over
+   the private member variables because those represent the internal state of
+   the object and `this` is the authoritative source of that state.
 
    When implementing a `StatefulComponent`, make sure to call
-   `super.syncFields(source)` from within your `syncFields()` method,
-   unless you are extending `StatefulComponent` directly.
+   `super.syncConstructorArguments(source)` from within your
+   `syncConstructorArguments()` method, unless you are extending
+   `StatefulComponent` directly.
 
 Finally, when the user taps on the "Save" button, `MyDialog` follows the same
 pattern as `MyCheckbox` and calls a function passed in by its parent component
@@ -382,9 +383,9 @@ efficient (and less error-prone) than initializing that state during the
 component's constructor because parent executes the component's constructor each
 time the parent rebuilds even though the framework mounts only the first
 instance into the widget hierarchy. (Instead of mounting later instances, the
-framework passes them to the original instance in `syncFields` so that the first
-instance of the component can incorporate the values passed by the parent to the
-component's constructor.)
+framework passes them to the original instance in `syncConstructorArguments` so
+that the first instance of the component can incorporate the values passed by
+the parent to the component's constructor.)
 
 Components often override `didUnmount` to release resources or to cancel
 subscriptions to event streams from outside the widget hierachy. When overriding

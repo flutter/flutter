@@ -9,7 +9,7 @@ abstract class AnimatedComponent extends StatefulComponent {
 
   AnimatedComponent({ Key key }) : super(key: key);
 
-  void syncFields(AnimatedComponent source) { }
+  void syncConstructorArguments(AnimatedComponent source) { }
 
   final List<AnimationPerformance> _watchedPerformances = new List<AnimationPerformance>();
 

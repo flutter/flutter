@@ -138,7 +138,7 @@ class Navigator extends StatefulComponent {
 
   NavigationState state;
 
-  void syncFields(Navigator source) {
+  void syncConstructorArguments(Navigator source) {
     state = source.state;
   }
 

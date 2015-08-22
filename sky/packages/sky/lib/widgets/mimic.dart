@@ -20,7 +20,7 @@ class Mimic extends StatefulComponent {
     _requestToStartMimic();
   }
 
-  void syncFields(Mimic source) {
+  void syncConstructorArguments(Mimic source) {
     callback = source.callback;
     if (original != source.original) {
       _stopMimic();
@@ -87,7 +87,7 @@ class Mimicable extends StatefulComponent {
   Mimic _mimic;
   bool _didStartMimic = false;
 
-  void syncFields(Mimicable source) {
+  void syncConstructorArguments(Mimicable source) {
     child = source.child;
   }
 

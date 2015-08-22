@@ -29,7 +29,7 @@ class EditableText extends StatefulComponent {
   TextStyle style;
   Color cursorColor;
 
-  void syncFields(EditableText source) {
+  void syncConstructorArguments(EditableText source) {
     value = source.value;
     focused = source.focused;
     style = source.style;

@@ -18,7 +18,7 @@ class StockSettings extends StatefulComponent {
   BackupMode backup;
   SettingsUpdater updater;
 
-  void syncFields(StockSettings source) {
+  void syncConstructorArguments(StockSettings source) {
     navigator = source.navigator;
     optimism = source.optimism;
     backup = source.backup;

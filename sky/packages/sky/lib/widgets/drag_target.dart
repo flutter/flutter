@@ -28,7 +28,7 @@ class DragTarget<T> extends StatefulComponent {
   final List<T> _candidateData = new List<T>();
   final List<dynamic> _rejectedData = new List<dynamic>();
 
-  void syncFields(DragTarget source) {
+  void syncConstructorArguments(DragTarget source) {
     builder = source.builder;
     onWillAccept = source.onWillAccept;
     onAccept = source.onAccept;

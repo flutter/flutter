@@ -52,7 +52,7 @@ class Dismissable extends StatefulComponent {
       _startResizePerformance();
   }
 
-  void syncFields(Dismissable source) {
+  void syncConstructorArguments(Dismissable source) {
     child = source.child;
     onResized = source.onResized;
     onDismissed = source.onDismissed;
