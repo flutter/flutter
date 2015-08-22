@@ -528,7 +528,7 @@ class BoxPainter {
     }
 
     assert(_decoration.borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
-    assert(_decoration.shape == Shape.rectangle); // TODO(ianh): Support borders on circles.
+    assert(_decoration.shape == Shape.rectangle); // TODO(ianh): Support non-uniform borders on circles.
 
     assert(_decoration.border.top != null);
     assert(_decoration.border.right != null);
