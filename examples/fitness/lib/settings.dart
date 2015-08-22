@@ -106,15 +106,18 @@ class SettingsFragment extends StatefulComponent {
               onPressed: () { _handleBackupChanged(!(userData.backupMode == BackupMode.enabled)); },
               child: new Flex([
                 new Flexible(child: new Text('Back up data to the cloud')),
-                new Switch(value: userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged)
-              ], direction: FlexDirection.horizontal)
+                new Switch(value: userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
+              ])
             ),
             new DrawerItem(
               onPressed: () => _handleGoalWeightPressed(),
               child: new Flex([
-                new Text('Goal Weight'),
-                new Text(goalWeightText, style: Theme.of(this).text.caption),
-              ], direction: FlexDirection.vertical, alignItems: FlexAlignItems.start)
+                  new Text('Goal Weight'),
+                  new Text(goalWeightText, style: Theme.of(this).text.caption),
+                ],
+                direction: FlexDirection.vertical,
+                alignItems: FlexAlignItems.start
+              )
             ),
           ])
         )
