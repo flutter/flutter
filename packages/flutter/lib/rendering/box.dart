@@ -396,6 +396,7 @@ abstract class RenderBox extends RenderObject {
       assert(value._owner.parent == this);
     }
     _size = inDebugBuild ? new _DebugSize(value, this, debugCanParentUseSize) : value;
+    assert(debugDoesMeetConstraints());
   }
 
   void applyPaintTransform(Matrix4 transform) {
