@@ -17,32 +17,33 @@ abstract class ScrollBehavior {
 
 class BoundedBehavior extends ScrollBehavior {
   BoundedBehavior({ double contentsSize: 0.0, double containerSize: 0.0 })
-    : _contentsSize = contentsSize,
-      _containerSize = containerSize;
+    : _contentsExtents = contentsSize,
+      _containerExtents = containerSize;
 
-  double _contentsSize;
-  double get contentsSize => _contentsSize;
-  void set contentsSize (double value) {
-    if (_contentsSize != value) {
-      _contentsSize = value;
-      // TODO(ianh) now what? what if we have a simulation ongoing?
-    }
-  }
+  double _contentsExtents;
+  double get contentsExtents => _contentsExtents;
 
-  double _containerSize;
-  double get containerSize => _containerSize;
-  void set containerSize (double value) {
-    if (_containerSize != value) {
-      _containerSize = value;
-      // TODO(ianh) now what? what if we have a simulation ongoing?
-    }
+  double _containerExtents;
+  double get containerExtents => _containerExtents;
+
+  /// Returns the new scrollOffset.
+  double updateExtents({
+    double contentsExtents,
+    double containerExtents,
+    double scrollOffset: 0.0
+  }) {
+    if (contentsExtents != null)
+      _contentsExtents = contentsExtents;
+    if (containerExtents != null)
+      _containerExtents = containerExtents;
+    return scrollOffset.clamp(minScrollOffset, maxScrollOffset);
   }
 
   final double minScrollOffset = 0.0;
-  double get maxScrollOffset => math.max(0.0, _contentsSize - _containerSize);
+  double get maxScrollOffset => math.max(0.0, _contentsExtents - _containerExtents);
 
   double applyCurve(double scrollOffset, double scrollDelta) {
-    return (scrollOffset + scrollDelta).clamp(0.0, maxScrollOffset);
+    return (scrollOffset + scrollDelta).clamp(minScrollOffset, maxScrollOffset);
   }
 }
 
@@ -80,7 +81,7 @@ class OverscrollBehavior extends BoundedBehavior {
 }
 
 class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
-  bool get isScrollable => contentsSize > containerSize;
+  bool get isScrollable => contentsExtents > containerExtents;
 
   Simulation release(double position, double velocity) {
     if (isScrollable || position < minScrollOffset || position > maxScrollOffset)
