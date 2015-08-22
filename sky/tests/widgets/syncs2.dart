@@ -10,7 +10,7 @@ import '../resources/display_list.dart';
 
 class ProblemComponent extends StatefulComponent {
 
-  void syncFields(ProblemComponent source) { }
+  void syncConstructorArguments(ProblemComponent source) { }
 
   bool _flag = false;
 

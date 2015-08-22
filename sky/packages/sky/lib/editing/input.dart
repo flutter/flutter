@@ -44,7 +44,7 @@ class Input extends StatefulComponent {
     super.initState();
   }
 
-  void syncFields(Input source) {
+  void syncConstructorArguments(Input source) {
     placeholder = source.placeholder;
     onChanged = source.onChanged;
     keyboardType = source.keyboardType;

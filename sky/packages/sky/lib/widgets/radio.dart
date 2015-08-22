@@ -27,11 +27,11 @@ class Radio extends ButtonBase {
   Object groupValue;
   RadioValueChanged onChanged;
 
-  void syncFields(Radio source) {
+  void syncConstructorArguments(Radio source) {
     value = source.value;
     groupValue = source.groupValue;
     onChanged = source.onChanged;
-    super.syncFields(source);
+    super.syncConstructorArguments(source);
   }
 
   Color get color {

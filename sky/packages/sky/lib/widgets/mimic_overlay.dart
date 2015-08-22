@@ -25,7 +25,7 @@ class MimicOverlay extends AnimatedComponent {
   Curve curve;
   Rect targetRect;
 
-  void syncFields(MimicOverlay source) {
+  void syncConstructorArguments(MimicOverlay source) {
     children = source.children;
 
     duration = source.duration;

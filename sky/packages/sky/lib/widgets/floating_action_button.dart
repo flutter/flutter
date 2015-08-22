@@ -26,8 +26,8 @@ class FloatingActionButton extends ButtonBase {
   Color backgroundColor;
   Function onPressed;
 
-  void syncFields(FloatingActionButton source) {
-    super.syncFields(source);
+  void syncConstructorArguments(FloatingActionButton source) {
+    super.syncConstructorArguments(source);
     child = source.child;
     backgroundColor = source.backgroundColor;
     onPressed = source.onPressed;

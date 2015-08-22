@@ -58,7 +58,7 @@ class PopupMenu extends StatefulComponent {
       _open();
   }
 
-  void syncFields(PopupMenu source) {
+  void syncConstructorArguments(PopupMenu source) {
     if (!showing && source.showing)
       _open();
     showing = source.showing;

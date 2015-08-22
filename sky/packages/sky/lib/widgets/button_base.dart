@@ -10,7 +10,7 @@ abstract class ButtonBase extends StatefulComponent {
 
   bool highlight;
 
-  void syncFields(ButtonBase source) {
+  void syncConstructorArguments(ButtonBase source) {
     highlight = source.highlight;
   }
 

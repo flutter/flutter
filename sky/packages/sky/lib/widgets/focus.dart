@@ -78,7 +78,7 @@ class Focus extends StatefulComponent {
   bool autofocus;
   Widget child;
 
-  void syncFields(Focus source) {
+  void syncConstructorArguments(Focus source) {
     autofocus = source.autofocus;
     child = source.child;
   }

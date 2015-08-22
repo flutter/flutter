@@ -622,7 +622,7 @@ class ImageListener extends StatefulComponent {
     image.removeListener(_handleImageChanged);
   }
 
-  void syncFields(ImageListener source) {
+  void syncConstructorArguments(ImageListener source) {
     final bool needToUpdateListeners = (image != source.image) && mounted;
     if (needToUpdateListeners)
       image.removeListener(_handleImageChanged);

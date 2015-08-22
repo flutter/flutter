@@ -60,7 +60,7 @@ class MeasurementFragment extends StatefulComponent {
   Navigator navigator;
   FitnessItemHandler onCreated;
 
-  void syncFields(MeasurementFragment source) {
+  void syncConstructorArguments(MeasurementFragment source) {
     navigator = source.navigator;
     onCreated = source.onCreated;
   }

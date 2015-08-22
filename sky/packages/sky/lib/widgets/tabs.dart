@@ -416,8 +416,8 @@ class TabBar extends Scrollable {
       ..variable = new AnimatedRect(null, curve: ease);
   }
 
-  void syncFields(TabBar source) {
-    super.syncFields(source);
+  void syncConstructorArguments(TabBar source) {
+    super.syncConstructorArguments(source);
     labels = source.labels;
     selectedIndex = source.selectedIndex;
     onChanged = source.onChanged;
