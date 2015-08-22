@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--config', default='Debug')
     parser.add_argument('--debug', dest='config', action='store_const', const='Debug')
     parser.add_argument('--release', dest='config', action='store_const', const='Release')
-    args = parser.parse_args()
+    args, remaining = parser.parse_known_args()
 
     build_dir = os.path.join(SRC_ROOT, 'out', args.config)
 
@@ -38,7 +38,7 @@ def main():
     env['SKY_SHELL'] = sky_shell
     return subprocess.call([
         PUB, 'run', 'sky_tools:sky_test',
-    ], cwd=UNIT_DIR, env=env)
+    ] + remaining, cwd=UNIT_DIR, env=env)
 
 if __name__ == '__main__':
   sys.exit(main())
