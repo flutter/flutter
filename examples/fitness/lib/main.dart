@@ -124,7 +124,7 @@ class FitnessApp extends App {
         name: '/settings',
         builder: (navigator, route) => new SettingsFragment(
           navigator: navigator,
-          userData: _userData as UserData,
+          userData: _userData,
           updater: settingsUpdater
         )
       ),

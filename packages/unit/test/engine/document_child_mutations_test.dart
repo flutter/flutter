@@ -70,30 +70,18 @@ void main() {
 
   test("should throw when inserting multiple elements", () {
     doc.appendChild(doc.createElement("div"));
-    var oldChild = doc.appendChild(doc.createText(" text "));
+    doc.appendChild(doc.createText(" text "));
     expect(childElementCount(doc), equals(1));
-    var newChild = doc.createElement("div");
-    // expect(() {
-    //   doc.replaceChild(newChild, 0);
-    // }, throws);
-    // expect(() {
-    //   doc.insertBefore(newChild, oldChild);
-    // }, throws);
+    doc.createElement("div");
   });
 
   test("should throw when inserting multiple elements with a fragment", () {
-    var oldChild = doc.appendChild(doc.createElement("div"));
+    doc.appendChild(doc.createElement("div"));
     expect(childElementCount(doc), equals(1));
     var fragment = doc.createDocumentFragment();
     fragment.appendChild(doc.createText(" text "));
     fragment.appendChild(doc.createElement("div"));
     fragment.appendChild(doc.createElement("div"));
     fragment.appendChild(doc.createText(" "));
-    // expect(() {
-    //   doc.replaceChild(fragment, 0);
-    // }, throws);
-    // expect(() {
-    //   doc.insertBefore(fragment, oldChild);
-    // }, throws);
   });
 }
