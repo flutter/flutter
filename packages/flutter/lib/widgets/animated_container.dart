@@ -57,7 +57,7 @@ class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
 
 abstract class AnimationBehavior {
   void initFields(AnimatedContainer original);
-  void syncFields(AnimatedContainer original, AnimatedContainer updated);
+  void syncConstructorArguments(AnimatedContainer original, AnimatedContainer updated);
 }
 
 class ImplicitlyAnimatedValue<T> {
@@ -97,7 +97,7 @@ abstract class ImplicitlyAnimatedFieldBehavior<T> extends AnimationBehavior {
     _updateField(original, getter(original));
   }
 
-  void syncFields(AnimatedContainer original, AnimatedContainer updated) {
+  void syncConstructorArguments(AnimatedContainer original, AnimatedContainer updated) {
     _updateField(original, getter(updated));
   }
 
@@ -213,10 +213,10 @@ class AnimatedContainer extends AnimatedComponent {
       i.initFields(this);
   }
 
-  void syncFields(AnimatedContainer updated) {
+  void syncConstructorArguments(AnimatedContainer updated) {
     child = updated.child;
     for (AnimationBehavior i in behavior)
-      i.syncFields(this, updated);
+      i.syncConstructorArguments(this, updated);
   }
 
   Widget build() {

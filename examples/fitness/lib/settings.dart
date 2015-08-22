@@ -17,7 +17,7 @@ class SettingsFragment extends StatefulComponent {
   UserData userData;
   SettingsUpdater updater;
 
-  void syncFields(SettingsFragment source) {
+  void syncConstructorArguments(SettingsFragment source) {
     navigator = source.navigator;
     userData = source.userData;
     updater = source.updater;

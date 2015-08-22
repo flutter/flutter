@@ -25,12 +25,12 @@ class DrawerItem extends ButtonBase {
   OnPressedFunction onPressed;
   bool selected;
 
-  void syncFields(DrawerItem source) {
+  void syncConstructorArguments(DrawerItem source) {
     icon = source.icon;
     children = source.children;
     onPressed = source.onPressed;
     selected = source.selected;
-    super.syncFields(source);
+    super.syncConstructorArguments(source);
   }
 
   TextStyle _getTextStyle(ThemeData themeData) {

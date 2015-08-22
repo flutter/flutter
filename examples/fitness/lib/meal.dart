@@ -49,7 +49,7 @@ class MealFragment extends StatefulComponent {
   Navigator navigator;
   FitnessItemHandler onCreated;
 
-  void syncFields(MealFragment source) {
+  void syncConstructorArguments(MealFragment source) {
     navigator = source.navigator;
     onCreated = source.onCreated;
   }

@@ -19,7 +19,7 @@ class DragData {
 class ExampleDragTarget extends StatefulComponent {
   String _text = 'ready';
 
-  void syncFields(ExampleDragTarget source) {
+  void syncConstructorArguments(ExampleDragTarget source) {
   }
 
   void _handleAccept(DragData data) {

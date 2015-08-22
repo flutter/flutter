@@ -32,10 +32,10 @@ class DialogMenuItem extends ButtonBase {
   List<Widget> children;
   Function onPressed;
 
-  void syncFields(DialogMenuItem source) {
+  void syncConstructorArguments(DialogMenuItem source) {
     children = source.children;
     onPressed = source.onPressed;
-    super.syncFields(source);
+    super.syncConstructorArguments(source);
   }
 
   Widget buildContent() {
@@ -73,7 +73,7 @@ class FeedFragment extends StatefulComponent {
     super.initState();
   }
 
-  void syncFields(FeedFragment source) {
+  void syncConstructorArguments(FeedFragment source) {
     navigator = source.navigator;
     userData = source.userData;
     onItemCreated = source.onItemCreated;
@@ -298,7 +298,7 @@ class AddItemDialog extends StatefulComponent {
 
   Navigator navigator;
 
-  void syncFields(AddItemDialog source) {
+  void syncConstructorArguments(AddItemDialog source) {
     this.navigator = source.navigator;
   }
 

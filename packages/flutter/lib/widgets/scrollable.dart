@@ -55,7 +55,7 @@ abstract class Scrollable extends StatefulComponent {
       });
   }
 
-  void syncFields(Scrollable source) {
+  void syncConstructorArguments(Scrollable source) {
     scrollDirection = source.scrollDirection;
   }
 
@@ -266,9 +266,9 @@ class ScrollableViewport extends Scrollable {
 
   Widget child;
 
-  void syncFields(ScrollableViewport source) {
+  void syncConstructorArguments(ScrollableViewport source) {
     child = source.child;
-    super.syncFields(source);
+    super.syncConstructorArguments(source);
   }
 
   ScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
@@ -357,7 +357,7 @@ abstract class ScrollableWidgetList extends Scrollable {
   int get itemCount;
   int _previousItemCount;
 
-  void syncFields(ScrollableWidgetList source) {
+  void syncConstructorArguments(ScrollableWidgetList source) {
     bool scrollBehaviorUpdateNeeded =
       padding != source.padding ||
       itemExtent != source.itemExtent ||
@@ -365,7 +365,7 @@ abstract class ScrollableWidgetList extends Scrollable {
 
     padding = source.padding;
     itemExtent = source.itemExtent;
-    super.syncFields(source); // update scrollDirection
+    super.syncConstructorArguments(source); // update scrollDirection
 
     if (itemCount != _previousItemCount) {
       scrollBehaviorUpdateNeeded = true;
@@ -508,10 +508,10 @@ class ScrollableList<T> extends ScrollableWidgetList {
   List<T> items;
   ItemBuilder<T> itemBuilder;
 
-  void syncFields(ScrollableList<T> source) {
+  void syncConstructorArguments(ScrollableList<T> source) {
     items = source.items;
     itemBuilder = source.itemBuilder;
-    super.syncFields(source);
+    super.syncConstructorArguments(source);
   }
 
   int get itemCount => items.length;
@@ -547,10 +547,10 @@ class PageableList<T> extends ScrollableList<T> {
   Duration duration;
   Curve curve;
 
-  void syncFields(PageableList<T> source) {
+  void syncConstructorArguments(PageableList<T> source) {
     duration = source.duration;
     curve = source.curve;
-    super.syncFields(source);
+    super.syncConstructorArguments(source);
   }
 
   double _snapScrollOffset(double newScrollOffset) {
@@ -617,7 +617,7 @@ class ScrollableMixedWidgetList extends Scrollable {
     super.didUnmount();
   }
 
-  void syncFields(ScrollableMixedWidgetList source) {
+  void syncConstructorArguments(ScrollableMixedWidgetList source) {
     builder = source.builder;
     if (token != source.token)
       _contentsChanged = true;
@@ -629,7 +629,7 @@ class ScrollableMixedWidgetList extends Scrollable {
       layoutState = source.layoutState;
       layoutState.addListener(_handleLayoutChanged);
     }
-    super.syncFields(source);
+    super.syncConstructorArguments(source);
   }
 
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();

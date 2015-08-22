@@ -21,11 +21,11 @@ abstract class MaterialButton extends ButtonBase {
   bool enabled;
   Function onPressed;
 
-  void syncFields(MaterialButton source) {
+  void syncConstructorArguments(MaterialButton source) {
     child = source.child;
     enabled = source.enabled;
     onPressed = source.onPressed;
-    super.syncFields(source);
+    super.syncConstructorArguments(source);
   }
 
   Color get color;

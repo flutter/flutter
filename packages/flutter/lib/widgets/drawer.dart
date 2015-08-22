@@ -75,7 +75,7 @@ class Drawer extends StatefulComponent {
     }
   }
 
-  void syncFields(Drawer source) {
+  void syncConstructorArguments(Drawer source) {
     children = source.children;
     level = source.level;
     navigator = source.navigator;

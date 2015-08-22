@@ -257,7 +257,7 @@ abstract class Widget {
   // Subclasses which implements Nodes that become stateful may return true
   // if the node has become stateful and should be retained.
   // This is called immediately before _sync().
-  // Component.retainStatefulNodeIfPossible() calls syncFields().
+  // Component.retainStatefulNodeIfPossible() calls syncConstructorArguments().
   bool retainStatefulNodeIfPossible(Widget newNode) => false;
 
   void _sync(Widget old, dynamic slot);
@@ -737,7 +737,7 @@ abstract class StatefulComponent extends Component {
       _isStateInitialized = true;
     }
     if (old != null)
-      syncFields(old);
+      syncConstructorArguments(old);
     super._sync(old, slot);
   }
 
@@ -748,9 +748,9 @@ abstract class StatefulComponent extends Component {
 
   // This is called by _sync(). Derived classes should override this
   // method to update `this` to account for the new values the parent
-  // passed to `source`. Make sure to call super.syncFields(source)
+  // passed to `source`. Make sure to call super.syncConstructorArguments(source)
   // unless you are extending StatefulComponent directly.
-  void syncFields(Component source);
+  void syncConstructorArguments(Component source);
 
   Widget syncChild(Widget node, Widget oldNode, dynamic slot) {
     assert(!_disqualifiedFromEverAppearingAgain);
@@ -1262,7 +1262,7 @@ abstract class App extends StatefulComponent {
     SkyBinding.instance.removeEventListener(_handleEvent);
   }
 
-  void syncFields(Component source) { }
+  void syncConstructorArguments(Component source) { }
 
   // Override this to handle back button behavior in your app
   // Call super.onBack() to finish the activity
@@ -1278,7 +1278,7 @@ abstract class AbstractWidgetRoot extends StatefulComponent {
     _scheduleComponentForRender(this);
   }
 
-  void syncFields(AbstractWidgetRoot source) {
+  void syncConstructorArguments(AbstractWidgetRoot source) {
     assert(false);
     // if we get here, it implies that we have a parent
   }

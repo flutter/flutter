@@ -38,7 +38,7 @@ abstract class ProgressIndicator extends StatefulComponent {
       ..variable = new AnimatedValue<double>(0.0, end: 1.0, curve: ease);
   }
 
-  void syncFields(ProgressIndicator source) {
+  void syncConstructorArguments(ProgressIndicator source) {
     value = source.value;
     bufferValue = source.bufferValue;
   }
