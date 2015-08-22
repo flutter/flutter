@@ -28,14 +28,6 @@ class SettingsFragment extends StatefulComponent {
     updater(backup: value ? BackupMode.enabled : BackupMode.disabled);
   }
 
-  void _goalWeightChanged(double value) {
-    assert(updater != null);
-    setState(() {
-      optimism = value ? StockMode.optimistic : StockMode.pessimistic;
-    });
-    sendUpdates();
-  }
-
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
