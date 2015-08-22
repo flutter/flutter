@@ -100,26 +100,26 @@ class FeedFragment extends StatefulComponent {
       onDismissed: _handleDrawerDismissed,
       navigator: navigator,
       children: [
-        new DrawerHeader(children: [new Text('Fitness')]),
+        new DrawerHeader(child: new Text('Fitness')),
         new DrawerItem(
           icon: 'action/view_list',
           onPressed: () => _handleFitnessModeChange(FitnessMode.feed),
           selected: _fitnessMode == FitnessMode.feed,
-          children: [new Text('Feed')]),
+          child: new Text('Feed')),
         new DrawerItem(
           icon: 'action/assessment',
           onPressed: () => _handleFitnessModeChange(FitnessMode.chart),
           selected: _fitnessMode == FitnessMode.chart,
-          children: [new Text('Chart')]),
+          child: new Text('Chart')),
         new DrawerDivider(),
         new DrawerItem(
           icon: 'action/settings',
           onPressed: _handleShowSettings,
-          children: [new Text('Settings')]),
+          child: new Text('Settings')),
         new DrawerItem(
           icon: 'action/help',
-          children: [new Text('Help & Feedback')])
-     ]
+          child: new Text('Help & Feedback'))
+      ]
     );
   }
 

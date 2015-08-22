@@ -17,17 +17,17 @@ import 'package:sky/widgets/framework.dart';
 typedef EventDisposition OnPressedFunction();
 
 class DrawerItem extends ButtonBase {
-  DrawerItem({ Key key, this.icon, this.children, this.onPressed, this.selected: false })
+  DrawerItem({ Key key, this.icon, this.child, this.onPressed, this.selected: false })
     : super(key: key);
 
   String icon;
-  List<Widget> children;
+  Widget child;
   OnPressedFunction onPressed;
   bool selected;
 
   void syncConstructorArguments(DrawerItem source) {
     icon = source.icon;
-    children = source.children;
+    child = source.child;
     onPressed = source.onPressed;
     selected = source.selected;
     super.syncConstructorArguments(source);
@@ -75,7 +75,7 @@ class DrawerItem extends ButtonBase {
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new DefaultTextStyle(
             style: _getTextStyle(themeData),
-            child: new Flex(children, direction: FlexDirection.horizontal)
+            child: child
           )
         )
       )

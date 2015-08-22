@@ -12,9 +12,9 @@ import 'package:sky/widgets/theme.dart';
 
 class DrawerHeader extends Component {
 
-  DrawerHeader({ Key key, this.children }) : super(key: key);
+  DrawerHeader({ Key key, this.child }) : super(key: key);
 
-  final List<Widget> children;
+  final Widget child;
 
   Widget build() {
     return new Container(
@@ -36,7 +36,7 @@ class DrawerHeader extends Component {
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new DefaultTextStyle(
             style: Theme.of(this).text.body2,
-            child: new Flex(children, direction: FlexDirection.horizontal)
+            child: child
           )
         )],
         direction: FlexDirection.vertical
