@@ -28,7 +28,7 @@ SKY_SERVER_PORT = 9888
 OBSERVATORY_PORT = 8181
 ADB_PATH = 'adb'
 APK_NAME = 'SkyShell.apk'
-ANDROID_PACKAGE = "org.domokit.sky.shell"
+ANDROID_PACKAGE = 'org.domokit.sky.shell'
 ANDROID_COMPONENT = '%s/%s.SkyActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
 
 SKY_SHELL_APP_ID = 'com.google.SkyShell'
@@ -38,7 +38,7 @@ IOS_APP_NAME = 'SkyShell.app'
 DART_PATH = 'dart'
 PUB_PATH = 'pub'
 
-PID_FILE_PATH = "/tmp/sky_tool.pids"
+PID_FILE_PATH = '/tmp/sky_tool.pids'
 PID_FILE_KEYS = frozenset([
     'remote_sky_server_port',
     'sky_server_pid',
@@ -47,18 +47,19 @@ PID_FILE_KEYS = frozenset([
 ])
 
 IOS_SIM_PATH = [
-    '/Applications/iOS Simulator.app/Contents/MacOS/iOS Simulator'
+    os.path.join('/Applications', 'iOS Simulator.app', 'Contents', 'MacOS', 'iOS Simulator')
 ]
 
-SIMCTL_PATH = [
-    '/usr/bin/env',
+XCRUN_PATH = [
+    os.path.join('/usr', 'bin', 'env'),
     'xcrun',
+]
+
+SIMCTL_PATH = XCRUN_PATH + [
     'simctl',
 ]
 
-PLIST_BUDDY_PATH = [
-    '/usr/bin/env',
-    'xcrun',
+PLIST_BUDDY_PATH = XCRUN_PATH + [
     'PlistBuddy',
 ]
 
@@ -171,13 +172,13 @@ class StartSky(object):
         if os.path.isdir(project_or_path):
             sky_server_root = project_or_path
             main_dart = os.path.join(project_or_path, 'lib', 'main.dart')
-            missing_msg = "Missing lib/main.dart in project: %s" % project_or_path
+            missing_msg = 'Missing lib/main.dart in project: %s' % project_or_path
         else:
             # FIXME: This assumes the path is at the root of the project!
             # Instead we should walk up looking for a pubspec.yaml
             sky_server_root = os.path.dirname(project_or_path)
             main_dart = project_or_path
-            missing_msg = "%s does not exist." % main_dart
+            missing_msg = '%s does not exist.' % main_dart
 
         if not os.path.isfile(main_dart):
             logging.error(missing_msg)
@@ -185,7 +186,7 @@ class StartSky(object):
 
         package_root = os.path.join(sky_server_root, 'packages')
         if not os.path.isdir(package_root):
-            logging.error("%s is not a valid packages path." % package_root)
+            logging.error('%s is not a valid packages path.' % package_root)
             return 2
 
         if not self._is_package_installed(ANDROID_PACKAGE):
@@ -194,17 +195,16 @@ class StartSky(object):
 
         if args.install:
             if not self._is_valid_script_path():
-                logging.error("'%s' must be located in packages/sky. " \
-                              "The directory packages/sky_engine must also " \
-                              "exist to locate %s." \
-                              % (os.path.basename(__file__), APK_NAME))
+                logging.error('"%s" must be located in packages/sky. '
+                              'The directory packages/sky_engine must also '
+                              'exist to locate %s.' % (os.path.basename(__file__), APK_NAME))
                 return 2
             if args.local_build:
                 apk_path = os.path.join(os.path.normpath(args.sky_src_path), args.android_debug_build_path, 'apks', APK_NAME)
             else:
                 apk_path = os.path.join(APK_DIR, APK_NAME)
             if not os.path.exists(apk_path):
-                logging.error("'%s' does not exist?" % apk_path)
+                logging.error('"%s" does not exist.' % apk_path)
                 return 2
 
             cmd = [ADB_PATH, 'install', '-r', apk_path]
@@ -365,9 +365,7 @@ class IOSSimulator(object):
     def get_simulator_device_id(cls):
         if cls._device_id is not None:
             return cls._device_id
-        cmd = [
-            'xcrun',
-            'simctl',
+        cmd = SIMCTL_PATH + [
             'list',
             'devices',
         ]
@@ -389,7 +387,7 @@ class IOSSimulator(object):
     def get_simulator_path(cls):
         if cls._simulator_path is not None:
             return cls._simulator_path
-        home_dir = os.path.expanduser("~")
+        home_dir = os.path.expanduser('~')
         device_id = cls.get_simulator_device_id()
         if device_id is None:
             # TODO: Maybe start the simulator?
@@ -405,7 +403,7 @@ class IOSSimulator(object):
         simulator_path = cls.get_simulator_path()
         cmd = [
             'find',
-            simulator_path + '/data/Containers/Data/Application',
+            os.path.join(simulator_path, 'data', 'Containers', 'Data', 'Application'),
             '-name',
             SKY_SHELL_APP_ID
         ]
@@ -450,15 +448,15 @@ class IOSSimulator(object):
         subprocess.check_call(cmd)
 
     def get_application_identifier(self, path):
-      identifier = subprocess.check_output( PLIST_BUDDY_PATH + [
+      identifier = subprocess.check_output(PLIST_BUDDY_PATH + [
         '-c',
         'Print CFBundleIdentifier',
-        '%s/Info.plist' % path,
+        os.path.join(path, 'Info.plist')
       ])
       return identifier.strip()
 
     def is_simulator_booted(self):
-      devices = subprocess.check_output( SIMCTL_PATH + [ 'list', 'devices' ]).strip().split('\n')
+      devices = subprocess.check_output(SIMCTL_PATH + [ 'list', 'devices' ]).strip().split('\n')
       for device in devices:
         if re.search(r'\(Booted\)', device):
           return True
@@ -473,7 +471,7 @@ class IOSSimulator(object):
         subprocess.Popen(args.ios_sim_path)
       else:
         subprocess.Popen(IOS_SIM_PATH)
-      while not is_simulator_booted():
+      while not self.is_simulator_booted():
         print('Waiting for iOS Simulator to boot...')
         time.sleep(0.5)
 
@@ -502,7 +500,7 @@ class IOSSimulator(object):
         '-server',
         args.server
       ]
-      return subprocess.check_output( SIMCTL_PATH + launch_args ).strip()
+      return subprocess.check_output(SIMCTL_PATH + launch_args).strip()
 
     def launch_app(self, args, pids):
       self.install_launch_and_wait(args, pids, False)
@@ -510,9 +508,7 @@ class IOSSimulator(object):
     def debug_app(self, args, pids):
       launch_res = self.install_launch_and_wait(args, pids, True)
       launch_pid = re.search('.*: (\d+)', launch_res).group(1)
-      return os.system(' '.join([
-        '/usr/bin/env',
-        'xcrun',
+      return os.system(' '.join(XCRUN_PATH + [
         'lldb',
         # TODO(iansf): get this working again
         # '-s',
@@ -718,10 +714,10 @@ class SkyShellRunner(object):
         global ADB_PATH
         if 'ANDROID_HOME' in os.environ:
             android_home_dir = os.environ['ANDROID_HOME']
-            ADB_PATH = os.path.join(android_home_dir, 'sdk/platform-tools/adb')
+            ADB_PATH = os.path.join(android_home_dir, 'sdk', 'platform-tools', 'adb')
 
     def _is_valid_adb_version(self, adb_version):
-        # Sample output: "Android Debug Bridge version 1.0.31"
+        # Sample output: 'Android Debug Bridge version 1.0.31'
         version_fields = re.search('(\d+)\.(\d+)\.(\d+)', adb_version)
         if version_fields:
             major_version = int(version_fields.group(1))
@@ -744,13 +740,13 @@ class SkyShellRunner(object):
             if self._is_valid_adb_version(adb_version):
                 return True
 
-            adb_path = subprocess.check_output( ['which', ADB_PATH]).rstrip()
-            logging.error("'%s' is too old. Need 1.0.32 or later. " \
-                "Try setting ANDROID_HOME." % adb_path)
+            adb_path = subprocess.check_output(['which', ADB_PATH]).rstrip()
+            logging.error('"%s" is too old. Need 1.0.32 or later. '
+                'Try setting ANDROID_HOME.' % adb_path)
             return False
 
         except OSError:
-            logging.error("'adb' (from the Android SDK) not in $PATH, can't continue.")
+            logging.error('"adb" (from the Android SDK) not in $PATH, cannot continue.')
             return False
         return True
 
@@ -764,14 +760,14 @@ class SkyShellRunner(object):
             subprocess.call([ADB_PATH, 'start-server'])
             sdk_version = subprocess.check_output(
                     [ADB_PATH, 'shell', 'getprop', 'ro.build.version.sdk']).rstrip()
-            # Sample output: "22"
+            # Sample output: '22'
             if not sdk_version.isdigit():
-                logging.error("Unexpected response from getprop: '%s'." % sdk_version)
+                logging.error('Unexpected response from getprop: "%s".' % sdk_version)
                 return False
 
             if int(sdk_version) < 22:
-                logging.error("Version '%s' of the Android SDK is too old. " \
-                              "Need Lollipop (22) or later. " % sdk_version)
+                logging.error('Version "%s" of the Android SDK is too old. '
+                              'Need Lollipop (22) or later. ' % sdk_version)
                 return False
 
         except subprocess.CalledProcessError as e:
@@ -783,7 +779,7 @@ class SkyShellRunner(object):
         try:
             subprocess.check_output([DART_PATH, '--version'], stderr=subprocess.STDOUT)
         except OSError:
-            logging.error("'dart' (from the Dart SDK) not in $PATH, can't continue.")
+            logging.error('"dart" (from the Dart SDK) not in $PATH, cannot continue.')
             return False
         return True
 
