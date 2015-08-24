@@ -407,12 +407,15 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     sky.tracing.begin('RenderObject.flushLayout');
     _debugDoingLayout = true;
     try {
-      List<RenderObject> dirtyNodes = _nodesNeedingLayout;
-      _nodesNeedingLayout = new List<RenderObject>();
-      dirtyNodes..sort((a, b) => a.depth - b.depth)..forEach((node) {
-        if (node._needsLayout && node.attached)
-          node.layoutWithoutResize();
-      });
+      // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
+      while(_nodesNeedingLayout.isNotEmpty) {
+        List<RenderObject> dirtyNodes = _nodesNeedingLayout;
+        _nodesNeedingLayout = new List<RenderObject>();
+        dirtyNodes..sort((a, b) => a.depth - b.depth)..forEach((node) {
+          if (node._needsLayout && node.attached)
+            node.layoutWithoutResize();
+        });
+      }
     } finally {
       _debugDoingLayout = false;
       sky.tracing.end('RenderObject.flushLayout');
