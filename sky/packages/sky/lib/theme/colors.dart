@@ -10,6 +10,10 @@ import 'dart:sky' show Color;
 const white = const Color(0xFFFFFFFF);
 const black = const Color(0xFF000000);
 const transparent = const Color(0x00000000);
+const white54 = const Color(0x8AFFFFFF);
+const white87 = const Color(0xDDFFFFFF);
+const black54 = const Color(0x8A000000);
+const black87 = const Color(0xDD000000);
 
 const Map<int, Color> Red = const {
    50: const Color(0xFFFFEBEE),
