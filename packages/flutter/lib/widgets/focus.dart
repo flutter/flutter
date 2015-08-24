@@ -104,9 +104,9 @@ class Focus extends StatefulComponent {
     }
   }
 
-  void _widgetRemoved(GlobalKey key) {
+  void _handleWidgetRemoved(GlobalKey key) {
     assert(_focusedWidget == key);
-    _currentlyRegisteredWidgetRemovalListenerKey = null;
+    _updateWidgetRemovalListener(null);
     setState(() {
       _focusedWidget = null;
     });
@@ -115,9 +115,9 @@ class Focus extends StatefulComponent {
   void _updateWidgetRemovalListener(GlobalKey key) {
     if (_currentlyRegisteredWidgetRemovalListenerKey != key) {
       if (_currentlyRegisteredWidgetRemovalListenerKey != null)
-        GlobalKey.unregisterRemovalListener(_currentlyRegisteredWidgetRemovalListenerKey, _widgetRemoved);
+        GlobalKey.unregisterRemoveListener(_currentlyRegisteredWidgetRemovalListenerKey, _handleWidgetRemoved);
       if (key != null)
-        GlobalKey.registerRemovalListener(key, _widgetRemoved);
+        GlobalKey.registerRemoveListener(key, _handleWidgetRemoved);
       _currentlyRegisteredWidgetRemovalListenerKey = key;
     }
   }
@@ -151,9 +151,9 @@ class Focus extends StatefulComponent {
   void _updateScopeRemovalListener(GlobalKey key) {
     if (_currentlyRegisteredScopeRemovalListenerKey != key) {
       if (_currentlyRegisteredScopeRemovalListenerKey != null)
-        GlobalKey.unregisterRemovalListener(_currentlyRegisteredScopeRemovalListenerKey, _scopeRemoved);
+        GlobalKey.unregisterRemoveListener(_currentlyRegisteredScopeRemovalListenerKey, _scopeRemoved);
       if (key != null)
-        GlobalKey.registerRemovalListener(key, _scopeRemoved);
+        GlobalKey.registerRemoveListener(key, _scopeRemoved);
       _currentlyRegisteredScopeRemovalListenerKey = key;
     }
   }
