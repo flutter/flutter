@@ -47,6 +47,7 @@ mojo_native_application("sky") {
     "//mojo/services/surfaces/public/interfaces",
     "//mojo/services/view_manager/public/cpp",
     "//mojo/services/view_manager/public/interfaces",
+    "//services/asset_bundle:lib",
     "//services/sky/compositor",
     "//skia",
     "//sky/engine/public/sky",

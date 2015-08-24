@@ -11,6 +11,7 @@
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application.mojom.h"
+#include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "mojo/services/network/public/interfaces/network_service.mojom.h"
@@ -70,6 +71,7 @@ class DocumentView : public blink::ServiceProvider,
 
   void GetPixelsForTesting(std::vector<unsigned char>* pixels);
 
+  mojo::ScopedMessagePipeHandle TakeRootBundleHandle();
   mojo::ScopedMessagePipeHandle TakeServicesProvidedToEmbedder();
   mojo::ScopedMessagePipeHandle TakeServicesProvidedByEmbedder();
   mojo::ScopedMessagePipeHandle TakeServiceRegistry();
@@ -104,6 +106,9 @@ class DocumentView : public blink::ServiceProvider,
   float GetDevicePixelRatio() const;
   scoped_ptr<Rasterizer> CreateRasterizer();
 
+  void LoadFromSnapshotStream(String name,
+                              mojo::ScopedDataPipeConsumerHandle snapshot);
+
   void UpdateRootSizeAndViewportMetrics(const mojo::Rect& new_bounds);
 
   void InitServiceRegistry();
@@ -115,6 +120,7 @@ class DocumentView : public blink::ServiceProvider,
   mojo::ServiceProviderPtr services_provided_by_embedder_;
   mojo::NetworkServicePtr network_service_;
   mojo::Shell* shell_;
+  mojo::asset_bundle::AssetBundlePtr root_bundle_;
   mojo::NavigatorHostPtr navigator_host_;
   std::unique_ptr<blink::SkyView> sky_view_;
   mojo::View* root_;

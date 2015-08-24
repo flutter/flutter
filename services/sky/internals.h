@@ -28,6 +28,7 @@ class Internals : public base::SupportsUserData::Data,
       mojo::ServiceProviderPtr exposed_services) override;
 
   mojo::Handle TakeShellProxyHandle();
+  mojo::Handle TakeRootBundleHandle();
   mojo::Handle TakeServicesProvidedToEmbedder();
   mojo::Handle TakeServicesProvidedByEmbedder();
   mojo::Handle TakeServiceRegistry();

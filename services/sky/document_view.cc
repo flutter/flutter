@@ -6,6 +6,7 @@
 
 #include "base/bind.h"
 #include "base/location.h"
+#include "base/message_loop/message_loop.h"
 #include "base/single_thread_task_runner.h"
 #include "base/strings/string_util.h"
 #include "base/thread_task_runner_handle.h"
@@ -17,6 +18,7 @@
 #include "mojo/services/view_manager/public/cpp/view.h"
 #include "mojo/services/view_manager/public/cpp/view_manager.h"
 #include "mojo/services/view_manager/public/interfaces/view_manager.mojom.h"
+#include "services/asset_bundle/asset_unpacker_job.h"
 #include "services/sky/compositor/layer.h"
 #include "services/sky/compositor/layer_host.h"
 #include "services/sky/compositor/rasterizer_bitmap.h"
@@ -34,8 +36,12 @@
 #include "third_party/skia/include/core/SkDevice.h"
 #include "ui/events/gestures/gesture_recognizer.h"
 
+using mojo::asset_bundle::AssetUnpackerJob;
+
 namespace sky {
 namespace {
+
+const char kSnapshotKey[] = "snapshot_blob.bin";
 
 ui::EventType ConvertEventTypeToUIEventType(blink::WebInputEvent::Type type) {
   if (type == blink::WebInputEvent::PointerDown)
@@ -133,17 +139,34 @@ void DocumentView::OnEmbed(
 void DocumentView::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
   // TODO(aa): Need to figure out how shutdown works.
 }
+
+void DocumentView::LoadFromSnapshotStream(
+    String name, mojo::ScopedDataPipeConsumerHandle snapshot) {
+  if (sky_view_)
+    sky_view_->RunFromSnapshot(name, snapshot.Pass());
+}
+
 void DocumentView::Load(mojo::URLResponsePtr response) {
-  String name = String::fromUTF8(response->url);
-  library_provider_.reset(new DartLibraryProviderImpl(
-      network_service_.get(),
-      CreatePrefetchedLibraryIfNeeded(name, response.Pass())));
   sky_view_ = blink::SkyView::Create(this);
   layer_host_.reset(new LayerHost(this));
   root_layer_ = make_scoped_refptr(new Layer(this));
   root_layer_->set_rasterizer(CreateRasterizer());
   layer_host_->SetRootLayer(root_layer_);
 
+  String name = String::fromUTF8(response->url);
+  if (name.endsWith(".skyx")) {
+    AssetUnpackerJob* unpacker = new AssetUnpackerJob(
+        mojo::GetProxy(&root_bundle_),
+        base::MessageLoop::current()->task_runner());
+    unpacker->Unpack(response->body.Pass());
+    root_bundle_->GetAsStream(kSnapshotKey,
+                              base::Bind(&DocumentView::LoadFromSnapshotStream,
+                                         weak_factory_.GetWeakPtr(), name));
+    return;
+  }
+  library_provider_.reset(new DartLibraryProviderImpl(
+      network_service_.get(),
+      CreatePrefetchedLibraryIfNeeded(name, response.Pass())));
   sky_view_->RunFromLibrary(name, library_provider_.get());
 }
 
@@ -161,6 +184,10 @@ void DocumentView::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
   DCHECK(RuntimeFlags::Get().testing()) << "Requires testing runtime flag";
   DCHECK(root_layer_) << "The root layer owns the rasterizer";
   return bitmap_rasterizer_->GetPixelsForTesting(pixels);
+}
+
+mojo::ScopedMessagePipeHandle DocumentView::TakeRootBundleHandle() {
+  return root_bundle_.PassInterface().PassHandle();
 }
 
 mojo::ScopedMessagePipeHandle DocumentView::TakeServicesProvidedToEmbedder() {
