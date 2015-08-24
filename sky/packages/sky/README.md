@@ -89,6 +89,21 @@ for historical reasons currently uses the tag `chromium`.)
 To avoid confusion from old log messages, you may wish to run `adb logcat -c` before calling
 `sky_tool start`, to clear the log between runs.
 
+Rapid Iteration
+---------------
+
+As an alternative to running `./packages/sky/sky_tool start` every time you make a change,
+you might prefer to have the SkyShell reload your app automatically for you as you edit.  To
+do this, run the following command:
+
+ - `./packages/sky/sky_tool listen`
+
+This is a long-running command -- just press `ctrl-c` when you want to stop listening for
+changes to the file system and automatically reloading your app.
+
+Currently `sky_tool listen` only works for Android, but iOS device and iOS simulator support
+are coming soon.
+
 Debugging
 ---------
 
