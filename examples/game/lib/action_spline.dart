@@ -50,8 +50,6 @@ class ActionSpline extends ActionInterval {
 
     Point newPos = _cardinalSplineAt(p0, p1, p2, p3, tension, lt);
 
-    //print("newPos: $newPos");
-
     setter(newPos);
   }
 }

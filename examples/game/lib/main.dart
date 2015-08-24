@@ -81,15 +81,6 @@ class GameDemoApp extends App {
   int _lastScore = 0;
 
   void initState() {
-    // _game = new GameDemoNode(
-    //   _imageMap,
-    //   _spriteSheet,
-    //   _spriteSheetUI,
-    //   _sounds,
-    //   (lastScore) {
-    //     setState(() {_lastScore = lastScore;});
-    //   });
-
     _navigationState = new NavigationState([
       new Route(
         name: '/',
@@ -252,10 +243,6 @@ class _TextureButtonToken {
 
 class MainScreenBackground extends NodeWithSize {
   MainScreenBackground() : super(new Size(320.0, 320.0)) {
-    // Sprite sprtBackground = new Sprite.fromImage(_imageMap['assets/starfield.png']);
-    // sprtBackground.position = new Point(160.0, 160.0);
-    // addChild(sprtBackground);
-
     assert(_spriteSheet.image != null);
 
     StarField starField = new StarField(_spriteSheet, 200, true);
