@@ -56,6 +56,7 @@ class MimicOverlay extends AnimatedComponent {
     _expandPerformance = new AnimationPerformance()
       ..duration = duration
       ..addVariable(_mimicBounds)
+      ..addListener(_handleAnimationTick)
       ..addStatusListener(_handleAnimationStatusChanged);
     watch(_expandPerformance);
   }
@@ -72,22 +73,38 @@ class MimicOverlay extends AnimatedComponent {
     }
   }
 
-  void _handleMimicCallback(Rect globalBounds) {
+  void _handleAnimationTick() {
+    if (_activeOverlay == null)
+      return;
+    _updateMimicBounds();
+  }
+
+  void _updateMimicBounds() {
+    Mimicable mimicable = GlobalKey.getWidget(_activeOverlay) as Mimicable;
+    Rect globalBounds = mimicable.globalBounds;
+    if (globalBounds == null)
+      return;
+    Rect localBounds = globalToLocal(globalBounds.topLeft) & globalBounds.size;
+    if (localBounds == _mimicBounds.begin)
+      return;
     setState(() {
-      // TODO(abarth): We need to convert global bounds into local coordinates.
-      _mimicBounds.begin =
-          globalToLocal(globalBounds.topLeft) & globalBounds.size;
-      _mimicBounds.value = _mimicBounds.begin;
+      _mimicBounds.begin = localBounds;
+      if (_expandPerformance.isDismissed)
+        _mimicBounds.value = _mimicBounds.begin;
     });
-    _expandPerformance.forward();
+  }
+
+  void _handleMimicReady() {
+    _updateMimicBounds();
+    if (_expandPerformance.isDismissed)
+      _expandPerformance.forward();
   }
 
   Widget build() {
     List<Widget> layers = new List<Widget>();
 
-    if (children != null) {
+    if (children != null)
       layers.addAll(children);
-    }
 
     if (_activeOverlay != null) {
       layers.add(
@@ -98,7 +115,7 @@ class MimicOverlay extends AnimatedComponent {
             width: _mimicBounds.value.width,
             height: _mimicBounds.value.height,
             child: new Mimic(
-              callback: _handleMimicCallback,
+              onMimicReady: _handleMimicReady,
               original: _activeOverlay
             )
           )
