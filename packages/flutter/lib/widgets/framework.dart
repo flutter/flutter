@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:sky' as sky;
 
+import 'package:sky/base/debug.dart';
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/mojo/activity.dart';
@@ -954,6 +955,13 @@ abstract class RenderObjectWrapper extends Widget {
       _renderObject = old.renderObject;
       _ancestor = old._ancestor;
       assert(_renderObject != null);
+    }
+    if (inDebugBuild) {
+      try {
+        throw null;
+      } catch (_, stack) {
+        _renderObject.debugExceptionContext = stack;
+      }
     }
     assert(_renderObject == renderObject); // in case a subclass reintroduces it
     assert(renderObject != null);
