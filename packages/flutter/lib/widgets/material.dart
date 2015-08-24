@@ -56,7 +56,7 @@ class Material extends Component {
         boxShadow: level == 0 ? null : shadows[level],
         shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
       ),
-      child: new DefaultTextStyle(
+      child: child == null ? null : new DefaultTextStyle(
         style: Theme.of(this).text.body1,
         child: child
       )
