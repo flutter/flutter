@@ -74,6 +74,8 @@ class SpriteBox extends RenderBox {
 
   List<ActionController> _actionControllers;
 
+  List<Node> _constrainedNodes;
+
   Rect _visibleArea;
 
   Rect get visibleArea {
@@ -139,11 +141,13 @@ class SpriteBox extends RenderBox {
   _registerNode(Node node) {
     _actionControllers = null;
     _eventTargets = null;
+    if (node == null || node.constraints != null) _constrainedNodes = null;
   }
 
   _deregisterNode(Node node) {
     _actionControllers = null;
     _eventTargets = null;
+    if (node == null || node.constraints != null) _constrainedNodes = null;
   }
 
   // Event handling
@@ -353,8 +357,10 @@ class SpriteBox extends RenderBox {
 
     _frameRate = 1.0/delta;
 
+    _callConstraintsPreUpdate(delta);
     _runActions(delta);
     _callUpdate(_rootNode, delta);
+    _callConstraintsConstrain(delta);
 
     // Schedule next update
     _scheduleTick();
@@ -389,6 +395,42 @@ class SpriteBox extends RenderBox {
       if (!child.paused) {
         _callUpdate(child, dt);
       }
+    }
+  }
+
+  void _callConstraintsPreUpdate(double dt) {
+    if (_constrainedNodes == null) {
+      _constrainedNodes = [];
+      _addConstrainedNodes(_rootNode, _constrainedNodes);
+    }
+
+    for (Node node in _constrainedNodes) {
+      for (Constraint constraint in node.constraints) {
+        constraint.preUpdate(node, dt);
+      }
+    }
+  }
+
+  void _callConstraintsConstrain(double dt) {
+    if (_constrainedNodes == null) {
+      _constrainedNodes = [];
+      _addConstrainedNodes(_rootNode, _constrainedNodes);
+    }
+
+    for (Node node in _constrainedNodes) {
+      for (Constraint constraint in node.constraints) {
+        constraint.constrain(node, dt);
+      }
+    }
+  }
+
+  void _addConstrainedNodes(Node node, List<Node> nodes) {
+    if (node._constraints != null && node._constraints.length > 0) {
+      nodes.add(node);
+    }
+
+    for (Node child in node.children) {
+      _addConstrainedNodes(child, nodes);
     }
   }
 
