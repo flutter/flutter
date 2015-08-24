@@ -318,6 +318,24 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // Override in subclasses with children and call the visitor for each child.
   void visitChildren(RenderObjectVisitor visitor) { }
 
+  dynamic debugExceptionContext = '';
+  static dynamic _debugLastException;
+  bool _debugReportException(dynamic exception, String method) {
+    if (!inDebugBuild) {
+      print('Uncaught exception in ${method}():\n$exception');
+      return false;
+    }
+    if (!identical(exception, _debugLastException)) {
+      print('-- EXCEPTION --');
+      print('An exception was raised during ${method}().');
+      'The following RenderObject was being processed when the exception was fired:\n${this}'.split('\n').forEach(print);
+      if (debugExceptionContext != '')
+        'The RenderObject had the following exception context:\n${debugExceptionContext}'.split('\n').forEach(print);
+      _debugLastException = exception;
+    }
+    return true;
+  }
+
   static bool _debugDoingLayout = false;
   static bool get debugDoingLayout => _debugDoingLayout;
   bool _debugDoingThisResize = false;
@@ -443,10 +461,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         return true;
       });
     } catch (e) {
-      print('Exception raised during layout:\n${e}\nContext:\n${this}');
-      if (inDebugBuild)
+      if (_debugReportException(e, 'layoutWithoutResize'))
         rethrow;
-      return;
     }
     _needsLayout = false;
     markNeedsPaint();
@@ -482,14 +498,19 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugActiveLayout = this;
       return true;
     });
-    performLayout();
-    assert(() {
-      _debugActiveLayout = debugPreviousActiveLayout;
-      _debugDoingThisLayout = false;
-      _debugMutationsLocked = false;
-      return true;
-    });
-    assert(debugDoesMeetConstraints());
+    try {
+      performLayout();
+      assert(() {
+        _debugActiveLayout = debugPreviousActiveLayout;
+        _debugDoingThisLayout = false;
+        _debugMutationsLocked = false;
+        return true;
+      });
+      assert(debugDoesMeetConstraints());
+    } catch (e) {
+      if (_debugReportException(e, 'layout'))
+        rethrow;
+    }
     _needsLayout = false;
     markNeedsPaint();
     assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
@@ -666,10 +687,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _paintWithContext(context, Offset.zero);
       context.endRecording();
     } catch (e) {
-      print('Exception raised during _paintLayer:\n${e}\nContext:\n${this}');
-      if (inDebugBuild)
+      if (_debugReportException(e, '_repaint'))
         rethrow;
-      return;
     }
   }
   void _paintWithContext(PaintingContext context, Offset offset) {
