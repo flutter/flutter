@@ -63,6 +63,13 @@ class ExampleApp extends App {
     );
   }
 
+  Rect _targetRect;
+  void _handleOverlaySizeChanged(Size size) {
+    setState(() {
+      _targetRect = Point.origin & size;
+    });
+  }
+
   Widget build() {
     List<Widget> cards = new List<Widget>();
     for (int i = 0; i < _data.length; ++i) {
@@ -88,10 +95,14 @@ class ExampleApp extends App {
               }
             )
           ),
-          body: new MimicOverlay(
-            overlay: _overlay,
-            duration: const Duration(milliseconds: 500),
-            children: [ new Block(cards) ]
+          body: new SizeObserver(
+            callback: _handleOverlaySizeChanged,
+            child: new MimicOverlay(
+              overlay: _overlay,
+              duration: const Duration(milliseconds: 5000),
+              targetRect: _targetRect,
+              children: [ new Block(cards) ]
+            )
           )
         )
       )

@@ -4,73 +4,105 @@
 
 import 'package:sky/widgets/basic.dart';
 
-typedef MimicCallback(Rect globalBounds);
-
-class Mimic extends StatefulComponent {
-  Mimic({
+abstract class GlobalKeyWatcher extends StatefulComponent {
+  GlobalKeyWatcher({
     Key key,
-    this.original,
-    this.callback
-  }) : super(key: key);
+    this.watchedKey
+  });
 
-  GlobalKey original;
-  MimicCallback callback;
+  GlobalKey watchedKey;
 
-  void initState() {
-    _requestToStartMimic();
-  }
-
-  void syncConstructorArguments(Mimic source) {
-    callback = source.callback;
-    if (original != source.original) {
-      _stopMimic();
-      original = source.original;
-      _requestToStartMimic();
+  void syncConstructorArguments(GlobalKeyWatcher source) {
+    if (source != source.watchedKey) {
+      _removeListeners();
+      watchedKey = source.watchedKey;
+      _addListeners();
     }
   }
 
   void didMount() {
     super.didMount();
-    // TODO(abarth): Why is didMount being called without a call to didUnmount?
-    if (_mimicable == null)
-      _requestToStartMimic();
+    _addListeners();
   }
 
   void didUnmount() {
     super.didUnmount();
-    _stopMimic();
+    _removeListeners();
+  }
+
+  void didSyncWatchedKey(GlobalKey key, Widget widget) {
+    assert(key == watchedKey);
+  }
+
+  void didRemoveWatchedKey(GlobalKey key) {
+    assert(key == watchedKey);
+  }
+
+  void _addListeners() {
+    GlobalKey.registerSyncListener(watchedKey, didSyncWatchedKey);
+    GlobalKey.registerRemoveListener(watchedKey, didRemoveWatchedKey);
+  }
+
+  void _removeListeners() {
+    GlobalKey.unregisterSyncListener(watchedKey, didSyncWatchedKey);
+    GlobalKey.unregisterRemoveListener(watchedKey, didRemoveWatchedKey);
+  }
+}
+
+typedef MimicReadyCallback();
+
+class Mimic extends GlobalKeyWatcher {
+  Mimic({
+    Key key,
+    GlobalKey original,
+    this.onMimicReady
+  }) : super(key: key, watchedKey: original);
+
+  MimicReadyCallback onMimicReady;
+
+  void syncConstructorArguments(Mimic source) {
+    onMimicReady = source.onMimicReady;
+    super.syncConstructorArguments(source);
   }
 
   Mimicable _mimicable;
-  bool _mimicking = false;
 
-  void _requestToStartMimic() {
-    assert(_mimicable == null);
-    assert(!_mimicking);
-    if (original == null)
-      return;
-    _mimicable = GlobalKey.getWidget(original) as Mimicable;
-    assert(_mimicable != null);
-    _mimicable._requestToStartMimic(this);
+  void didMount() {
+    super.didMount();
+    if (_mimicable == null)
+      _setMimicable(GlobalKey.getWidget(watchedKey));
   }
 
-  void _startMimic(GlobalKey key, Rect globalBounds) {
-    assert(key == original);
+  void didUnmount() {
+    super.didUnmount();
+    if (_mimicable != null) {
+      _mimicable.stopMimic();
+      _mimicable = null;
+    }
+  }
+
+  void didSyncWatchedKey(GlobalKey key, Widget widget) {
+    super.didSyncWatchedKey(key, widget);
+    _setMimicable(widget);
+  }
+
+  void didRemoveWatchedKey(GlobalKey key) {
+    super.didRemoveWatchedKey(key);
+    _setMimicable(null);
+  }
+
+  void _setMimicable(widget) {
+    if (_mimicable == null && widget != null)
+      widget.startMimic();
     setState(() {
-      _mimicking = true;
+      _mimicable = widget;
     });
-    callback(globalBounds);
-  }
-
-  void _stopMimic() {
-    if (_mimicable != null)
-      _mimicable._didStopMimic(this);
-    _mimicable = null;
-    _mimicking = false;
+    if (onMimicReady != null && _mimicable != null && _mimicable._didBuildPlaceholder)
+      onMimicReady();
   }
 
   Widget build() {
-    if (!_mimicking || !_mimicable.mounted)
+    if (_mimicable == null || !_mimicable._didBuildPlaceholder)
       return new Container();
     return _mimicable.child;
   }
@@ -84,29 +116,30 @@ class Mimicable extends StatefulComponent {
   Size _size;
   Size get size => _size;
 
-  Mimic _mimic;
-  bool _didStartMimic = false;
-
   void syncConstructorArguments(Mimicable source) {
     child = source.child;
   }
 
-  void _requestToStartMimic(Mimic mimic) {
-    assert(mounted);
-    if (_mimic != null)
-      return;
+  bool _didBuildPlaceholder = false;
+
+  Rect get globalBounds {
+    if (_size == null)
+      return null;
+    return localToGlobal(Point.origin) & _size;
+  }
+
+  bool _mimicRequested = false;
+  void startMimic() {
+    assert(!_mimicRequested);
     setState(() {
-      _mimic = mimic;
-      _didStartMimic = false;
+      _mimicRequested = true;
     });
   }
 
-  void _didStopMimic(Mimic mimic) {
-    assert(_mimic != null);
-    assert(mimic == _mimic);
+  void stopMimic() {
+    assert(_mimicRequested);
     setState(() {
-      _mimic = null;
-      _didStartMimic = false;
+      _mimicRequested = false;
     });
   }
 
@@ -116,19 +149,12 @@ class Mimicable extends StatefulComponent {
     });
   }
 
-  void _startMimicIfNeeded() {
-    if (_didStartMimic)
-      return;
-    assert(_mimic != null);
-    Point globalPosition = localToGlobal(Point.origin);
-    _mimic._startMimic(key, globalPosition & _size);
-    _didStartMimic = true;
-  }
-
   Widget build() {
-    if (_mimic != null) {
-      _startMimicIfNeeded();
-      return new ConstrainedBox(constraints: new BoxConstraints.tight(_size));
+    _didBuildPlaceholder = _mimicRequested && _size != null;
+    if (_didBuildPlaceholder) {
+      return new ConstrainedBox(
+        constraints: new BoxConstraints.tight(_size)
+      );
     }
     return new SizeObserver(
       callback: _handleSizeChanged,
