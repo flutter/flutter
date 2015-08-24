@@ -22,6 +22,8 @@ import 'package:sky_services/media/media.mojom.dart';
 import 'package:vector_math/vector_math.dart';
 
 part 'action.dart';
+part 'constraint.dart';
+part 'action_spline.dart';
 part 'color_secuence.dart';
 part 'image_map.dart';
 part 'layer.dart';
