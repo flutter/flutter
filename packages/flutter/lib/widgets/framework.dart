@@ -47,7 +47,8 @@ class ObjectKey extends Key {
   int get hashCode => identityHashCode(value);
 }
 
-typedef void GlobalKeyRemovalListener(GlobalKey key);
+typedef void GlobalKeySyncListener(GlobalKey key, Widget widget);
+typedef void GlobalKeyRemoveListener(GlobalKey key);
 
 abstract class GlobalKey extends Key {
   const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
@@ -56,7 +57,9 @@ abstract class GlobalKey extends Key {
 
   static final Map<GlobalKey, Widget> _registry = new Map<GlobalKey, Widget>();
   static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
-  static final Map<GlobalKey, Set<GlobalKeyRemovalListener>> _removalListeners = new Map<GlobalKey, Set<GlobalKeyRemovalListener>>();
+  static final Map<GlobalKey, Set<GlobalKeySyncListener>> _syncListeners = new Map<GlobalKey, Set<GlobalKeySyncListener>>();
+  static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = new Map<GlobalKey, Set<GlobalKeyRemoveListener>>();
+  static final Set<GlobalKey> _syncedKeys = new Set<GlobalKey>();
   static final Set<GlobalKey> _removedKeys = new Set<GlobalKey>();
 
   void _register(Widget widget) {
@@ -90,24 +93,47 @@ abstract class GlobalKey extends Key {
     }
   }
 
+  void _didSync() {
+    _syncedKeys.add(this);
+  }
+
   static bool _notifyingListeners = false;
 
-  static void registerRemovalListener(GlobalKey key, GlobalKeyRemovalListener listener) {
+  static void registerSyncListener(GlobalKey key, GlobalKeySyncListener listener) {
     assert(!_notifyingListeners);
     assert(key != null);
-    if (!_removalListeners.containsKey(key))
-      _removalListeners[key] = new Set<GlobalKeyRemovalListener>();
-    bool added = _removalListeners[key].add(listener);
+    Set<GlobalKeySyncListener> listeners =
+        _syncListeners.putIfAbsent(key, () => new Set<GlobalKeySyncListener>());
+    bool added = listeners.add(listener);
     assert(added);
   }
 
-  static void unregisterRemovalListener(GlobalKey key, GlobalKeyRemovalListener listener) {
+  static void unregisterSyncListener(GlobalKey key, GlobalKeySyncListener listener) {
     assert(!_notifyingListeners);
     assert(key != null);
-    assert(_removalListeners.containsKey(key));
-    bool removed = _removalListeners[key].remove(listener);
-    if (_removalListeners[key].isEmpty)
-      _removalListeners.remove(key);
+    assert(_syncListeners.containsKey(key));
+    bool removed = _syncListeners[key].remove(listener);
+    if (_syncListeners[key].isEmpty)
+      _syncListeners.remove(key);
+    assert(removed);
+  }
+
+  static void registerRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
+    assert(!_notifyingListeners);
+    assert(key != null);
+    Set<GlobalKeyRemoveListener> listeners =
+        _removeListeners.putIfAbsent(key, () => new Set<GlobalKeyRemoveListener>());
+    bool added = listeners.add(listener);
+    assert(added);
+  }
+
+  static void unregisterRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
+    assert(!_notifyingListeners);
+    assert(key != null);
+    assert(_removeListeners.containsKey(key));
+    bool removed = _removeListeners[key].remove(listener);
+    if (_removeListeners[key].isEmpty)
+      _removeListeners.remove(key);
     assert(removed);
   }
 
@@ -120,16 +146,34 @@ abstract class GlobalKey extends Key {
     assert(!_inBuildDirtyComponents);
     assert(!Widget._notifyingMountStatus);
     assert(_debugDuplicates.isEmpty);
+    if (_syncedKeys.isEmpty && _removedKeys.isEmpty)
+      return;
     _notifyingListeners = true;
-    for (GlobalKey key in _removedKeys) {
-      if (!_registry.containsKey(key) && _removalListeners.containsKey(key)) {
-        for (GlobalKeyRemovalListener listener in _removalListeners[key])
-          listener(key);
-        _removalListeners.remove(key);
+    try {
+      Map<GlobalKey, Set<GlobalKeyRemoveListener>> localRemoveListeners =
+          new Map<GlobalKey, Set<GlobalKeyRemoveListener>>.from(_removeListeners);
+      Map<GlobalKey, Set<GlobalKeySyncListener>> localSyncListeners =
+          new Map<GlobalKey, Set<GlobalKeySyncListener>>.from(_syncListeners);
+
+      for (GlobalKey key in _syncedKeys) {
+        Widget widget = _registry[key];
+        if (widget != null && localSyncListeners.containsKey(key)) {
+          for (GlobalKeySyncListener listener in localSyncListeners[key])
+            listener(key, widget);
+        }
       }
+
+      for (GlobalKey key in _removedKeys) {
+        if (!_registry.containsKey(key) && localRemoveListeners.containsKey(key)) {
+          for (GlobalKeyRemoveListener listener in localRemoveListeners[key])
+            listener(key);
+        }
+      }
+    } finally {
+      _removedKeys.clear();
+      _syncedKeys.clear();
+      _notifyingListeners = false;
     }
-    _removedKeys.clear();
-    _notifyingListeners = false;
   }
 
 }
@@ -260,7 +304,10 @@ abstract class Widget {
   // Component.retainStatefulNodeIfPossible() calls syncConstructorArguments().
   bool retainStatefulNodeIfPossible(Widget newNode) => false;
 
-  void _sync(Widget old, dynamic slot);
+  void _sync(Widget old, dynamic slot) {
+    if (key is GlobalKey)
+      (key as GlobalKey)._didSync(); // TODO(ianh): Remove the cast once the analyzer is cleverer.
+  }
   void updateSlot(dynamic newSlot);
   // 'slot' is the identifier that the ancestor RenderObjectWrapper uses to know
   // where to put this descendant. If you just defer to a child, then make sure
@@ -433,6 +480,7 @@ abstract class TagNode extends Widget {
     } else {
       _renderObject = null;
     }
+    super._sync(old, slot);
   }
 
   void updateSlot(dynamic newSlot) {
@@ -669,6 +717,7 @@ abstract class Component extends Widget {
     _renderObject = _child.renderObject;
     assert(_renderObject == renderObject); // in case a subclass reintroduces it
     assert(renderObject != null);
+    super._sync(old, slot);
   }
 
   void _buildIfDirty() {
@@ -911,6 +960,7 @@ abstract class RenderObjectWrapper extends Widget {
     assert(mounted);
     _nodeMap[renderObject] = this;
     syncRenderObject(old);
+    super._sync(old, slot);
   }
 
   void updateSlot(dynamic newSlot) {
