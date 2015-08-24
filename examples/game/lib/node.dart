@@ -76,6 +76,25 @@ class Node {
     return _actions;
   }
 
+  List<Constraint> _constraints;
+
+  List<Constraint> get constraints {
+    return _constraints;
+  }
+
+  set constraints(List<Constraint> constraints) {
+    _constraints = constraints;
+    if (_spriteBox != null) _spriteBox._constrainedNodes = null;
+  }
+
+  void applyConstraints(double dt) {
+    if (_constraints == null) return;
+
+    for (Constraint constraint in _constraints) {
+      constraint.constrain(this, dt);
+    }
+  }
+
   // Constructors
 
   /// Creates a new [Node] without any transformation.
