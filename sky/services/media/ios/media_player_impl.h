@@ -5,6 +5,7 @@
 #ifndef SKY_SERVICES_MEDIA_IOS_MEDIA_PLAYER_IMPL_H_
 #define SKY_SERVICES_MEDIA_IOS_MEDIA_PLAYER_IMPL_H_
 
+#include "base/files/file_path.h"
 #include "base/macros.h"
 #include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
@@ -36,6 +37,9 @@ class MediaPlayerImpl : public ::media::MediaPlayer {
   mojo::StrongBinding<::media::MediaPlayer> binding_;
   AudioClient* audio_client_;
 
+  void onCopyToTemp(const ::media::MediaPlayer::PrepareCallback& callback,
+                    base::FilePath path,
+                    bool success);
   void reset();
 
   DISALLOW_COPY_AND_ASSIGN(MediaPlayerImpl);

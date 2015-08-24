@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/files/file_path.h"
+#include "base/bind.h"
+#include "base/message_loop/message_loop.h"
 #include "mojo/common/data_pipe_utils.h"
 #include "sky/services/media/ios/media_player_impl.h"
 
@@ -97,9 +98,25 @@ void MediaPlayerImpl::Prepare(
 
   NSString* filePath = [AudioClient temporaryFilePath];
   base::FilePath path(filePath.UTF8String);
-  mojo::common::BlockingCopyToFile(data_source.Pass(), path);
-  audio_client_ = [[AudioClient alloc] initWithPath:filePath];
-  callback.Run(audio_client_ != nullptr);
+
+  auto taskRunner = base::MessageLoop::current()->task_runner().get();
+  auto copyCallback = base::Bind(&MediaPlayerImpl::onCopyToTemp,
+                                 base::Unretained(this), callback, path);
+  mojo::common::CopyToFile(data_source.Pass(), path, taskRunner, copyCallback);
+}
+
+void MediaPlayerImpl::onCopyToTemp(
+    const ::media::MediaPlayer::PrepareCallback& callback,
+    base::FilePath path,
+    bool success) {
+  if (success) {
+    NSString* filePath =
+        [NSString stringWithUTF8String:path.AsUTF8Unsafe().c_str()];
+    audio_client_ = [[AudioClient alloc] initWithPath:filePath];
+  } else {
+    reset();
+  }
+  callback.Run(success && audio_client_ != nullptr);
 }
 
 void MediaPlayerImpl::Start() {
