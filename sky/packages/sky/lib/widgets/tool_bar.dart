@@ -46,9 +46,12 @@ class ToolBar extends Component {
     }
 
     List<Widget> children = new List<Widget>();
+
+    // left children
     if (left != null)
       children.add(left);
 
+    // center children (left-aligned, but takes all remaining space)
     children.add(
       new Flexible(
         child: new Padding(
@@ -58,15 +61,21 @@ class ToolBar extends Component {
       )
     );
 
+    // right children
     if (right != null)
       children.addAll(right);
 
     Widget content = new Container(
       child: new DefaultTextStyle(
         style: sideStyle,
-        child: new Flex(
-          [new Container(child: new Flex(children), height: kToolBarHeight)],
-          alignItems: FlexAlignItems.end
+        child: new Flex([
+            new Container(
+              child: new Flex(children),
+              height: kToolBarHeight
+            ),
+          ],
+          direction: FlexDirection.vertical,
+          justifyContent: FlexJustifyContent.end
         )
       ),
       padding: new EdgeDims.symmetric(horizontal: 8.0),
