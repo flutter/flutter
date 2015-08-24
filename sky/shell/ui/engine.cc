@@ -30,10 +30,9 @@
 
 namespace sky {
 namespace shell {
+namespace {
 
 const char kSnapshotKey[] = "snapshot_blob.bin";
-
-namespace {
 
 void Ignored(bool) {
 }

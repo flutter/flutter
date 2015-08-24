@@ -31,7 +31,8 @@ void NotifyTestComplete(Dart_NativeArguments args) {
 }
 
 void TakeRootBundleHandle(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, 0);
+  Dart_SetIntegerReturnValue(args,
+      GetInternals()->TakeRootBundleHandle().value());
 }
 
 void TakeShellProxyHandle(Dart_NativeArguments args) {
@@ -98,6 +99,12 @@ Internals::Internals(DocumentView* document_view)
 }
 
 Internals::~Internals() {
+}
+
+mojo::Handle Internals::TakeRootBundleHandle() {
+  if (!document_view_)
+    return mojo::Handle();
+  return document_view_->TakeRootBundleHandle().release();
 }
 
 mojo::Handle Internals::TakeServicesProvidedToEmbedder() {
