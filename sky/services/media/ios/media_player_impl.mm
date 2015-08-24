@@ -58,20 +58,16 @@
 }
 
 + (NSString*)temporaryFilePath {
-  char* path = reinterpret_cast<char*>(calloc(256, sizeof(char)));
+  char temp[256] = {0};
 
-  snprintf(path, 256, "%smedia.XXXXXX", NSTemporaryDirectory().UTF8String);
-  path = mktemp(path);
+  snprintf(temp, sizeof(temp), "%smedia.XXXXXX", NSTemporaryDirectory().UTF8String);
+  char *path = mktemp(temp);
 
   if (path == NULL) {
-    free(path);
     return NULL;
   }
 
-  NSString* pathString = [NSString stringWithUTF8String:path];
-  free(path);
-
-  return pathString;
+  return [NSString stringWithUTF8String:path];
 }
 
 - (void)dealloc {
