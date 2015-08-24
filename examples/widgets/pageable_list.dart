@@ -26,8 +26,6 @@ class PageableListApp extends App {
 
   void initState() {
     List<Size> cardSizes = [
-      [100.0, 300.0], [300.0, 100.0], [200.0, 400.0], [400.0, 400.0], [300.0, 400.0],
-      [100.0, 300.0], [300.0, 100.0], [200.0, 400.0], [400.0, 400.0], [300.0, 400.0],
       [100.0, 300.0], [300.0, 100.0], [200.0, 400.0], [400.0, 400.0], [300.0, 400.0]
     ]
     .map((args) => new Size(args[0], args[1]))
@@ -45,15 +43,6 @@ class PageableListApp extends App {
     setState(() {
       pageSize = newSize;
     });
-  }
-
-  EventDisposition handleToolbarTap(_) {
-    setState(() {
-      scrollDirection = (scrollDirection == ScrollDirection.vertical)
-        ? ScrollDirection.horizontal
-        : ScrollDirection.vertical;
-    });
-    return EventDisposition.processed;
   }
 
   Widget buildCard(CardModel cardModel) {
@@ -78,16 +67,88 @@ class PageableListApp extends App {
     );
   }
 
-  Widget build() {
+  EventDisposition switchScrollDirection() {
+    setState(() {
+      scrollDirection = (scrollDirection == ScrollDirection.vertical)
+        ? ScrollDirection.horizontal
+        : ScrollDirection.vertical;
+    });
+    return EventDisposition.processed;
+  }
+
+  bool _drawerShowing = false;
+  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
+
+  void _handleOpenDrawer() {
+    setState(() {
+      _drawerShowing = true;
+      _drawerStatus = AnimationStatus.forward;
+    });
+  }
+
+  void _handleDrawerDismissed() {
+    setState(() {
+      _drawerStatus = AnimationStatus.dismissed;
+    });
+  }
+
+  Drawer buildDrawer() {
+    if (_drawerStatus == AnimationStatus.dismissed)
+      return null;
+
+    return new Drawer(
+      level: 3,
+      showing: _drawerShowing,
+      onDismissed: _handleDrawerDismissed,
+      children: [
+        new DrawerHeader(child: new Text('Options')),
+        new DrawerItem(
+          icon: 'navigation/more_horiz',
+          selected: scrollDirection == ScrollDirection.horizontal,
+          child: new Text('Horizontal Layout'),
+          onPressed: switchScrollDirection
+        ),
+        new DrawerItem(
+          icon: 'navigation/more_vert',
+          selected: scrollDirection == ScrollDirection.vertical,
+          child: new Text('Vertical Layout'),
+          onPressed: switchScrollDirection
+        )
+      ]
+    );
+
+  }
+
+  Widget buildToolBar() {
+    return new ToolBar(
+      left: new IconButton(icon: "navigation/menu", onPressed: _handleOpenDrawer),
+      center: new Text('PageableList'),
+      right: [
+        new Text(scrollDirection == ScrollDirection.horizontal ? "horizontal" : "vertical")
+      ]
+    );
+  }
+
+  Widget buildBody() {
     Widget list = new PageableList<CardModel>(
       items: cardModels,
+      itemsWrap: true,
       itemBuilder: buildCard,
       scrollDirection: scrollDirection,
       itemExtent: (scrollDirection == ScrollDirection.vertical)
           ? pageSize.height
           : pageSize.width
     );
+    return new SizeObserver(
+      callback: updatePageSize,
+      child: new Container(
+        child: list,
+        decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50])
+      )
+    );
+  }
 
+  Widget build() {
     return new IconTheme(
       data: const IconThemeData(color: IconThemeColor.white),
       child: new Theme(
@@ -99,17 +160,9 @@ class PageableListApp extends App {
         child: new Title(
           title: 'PageableList',
           child: new Scaffold(
-            toolbar: new Listener(
-              onGestureTap: handleToolbarTap,
-              child: new ToolBar(center: new Text('PageableList: ${scrollDirection}'))
-            ),
-            body: new SizeObserver(
-              callback: updatePageSize,
-              child: new Container(
-                child: list,
-                decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50])
-              )
-            )
+            drawer: buildDrawer(),
+            toolbar: buildToolBar(),
+            body: buildBody()
           )
         )
       )

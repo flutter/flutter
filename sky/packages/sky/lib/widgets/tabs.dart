@@ -340,13 +340,13 @@ class Tab extends Component {
   }
 
   Widget build() {
-    Widget labelContents;
+    Widget labelContent;
     if (label.icon == null) {
-      labelContents = _buildLabelText();
+      labelContent = _buildLabelText();
     } else if (label.text == null) {
-      labelContents = _buildLabelIcon();
+      labelContent = _buildLabelIcon();
     } else {
-      labelContents = new Flex(
+      labelContent = new Flex(
         <Widget>[
           new Container(
             child: _buildLabelIcon(),
@@ -361,7 +361,7 @@ class Tab extends Component {
     }
 
     Container centeredLabel = new Container(
-      child: new Center(child: labelContents),
+      child: new Center(child: labelContent),
       constraints: new BoxConstraints(minWidth: _kMinTabWidth),
       padding: _kTabLabelPadding
     );
@@ -371,8 +371,7 @@ class Tab extends Component {
 }
 
 class _TabsScrollBehavior extends BoundedBehavior {
-  _TabsScrollBehavior({ double contentsSize: 0.0, double containerSize: 0.0 })
-    : super(contentsSize: contentsSize, containerSize: containerSize);
+  _TabsScrollBehavior();
 
   bool isScrollable = true;
 
@@ -460,7 +459,7 @@ class TabBar extends Scrollable {
   }
 
   double _centeredTabScrollOffset(int tabIndex) {
-    double viewportWidth = scrollBehavior.containerExtents;
+    double viewportWidth = scrollBehavior.containerExtent;
     return (_tabRect(tabIndex).left + _tabWidths[tabIndex] / 2.0 - viewportWidth / 2.0)
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
@@ -496,8 +495,8 @@ class TabBar extends Scrollable {
       _tabBarSize = tabBarSize;
       _tabWidths = tabWidths;
       scrollBehavior.updateExtents(
-        containerExtents: _tabBarSize.width,
-        contentsExtents: _tabWidths.reduce((sum, width) => sum + width));
+        containerExtent: _tabBarSize.width,
+        contentExtent: _tabWidths.reduce((sum, width) => sum + width));
     });
   }
 
