@@ -638,7 +638,8 @@ abstract class Component extends Widget {
       : _order = _currentOrder + 1,
         super._withKey(key);
 
-  bool _isBuilding = false;
+  bool _debugIsBuilding = false;
+  static String _debugLastComponent;
 
   bool _dirty = true;
 
@@ -702,7 +703,16 @@ abstract class Component extends Widget {
       oldChild = old._child;
     }
 
-    _isBuilding = true;
+    String _debugPreviousComponent;
+    assert(() {
+      _debugIsBuilding = true;
+      _debugPreviousComponent = _debugLastComponent;
+      if (_debugLastComponent != null)
+        _debugLastComponent = "$_debugPreviousComponent -> ${this.toStringName()}";
+      else
+        _debugLastComponent = "Build chain: ${this.toStringName()}";
+      return true;
+    });
 
     int lastOrder = _currentOrder;
     _currentOrder = _order;
@@ -712,7 +722,12 @@ abstract class Component extends Widget {
     _child = syncChild(_child, oldChild, slot);
     assert(_child != null);
     assert(_child.parent == this);
-    _isBuilding = false;
+
+    assert(() {
+      _debugIsBuilding = false;
+      _debugLastComponent = _debugPreviousComponent;
+      return true;
+    });
 
     _dirty = false;
     _renderObject = _child.renderObject;
@@ -729,7 +744,7 @@ abstract class Component extends Widget {
   }
 
   void _scheduleBuild() {
-    assert(!_isBuilding);
+    assert(!_debugIsBuilding);
     if (_dirty || !_mounted)
       return;
     _dirty = true;
@@ -956,13 +971,10 @@ abstract class RenderObjectWrapper extends Widget {
       _ancestor = old._ancestor;
       assert(_renderObject != null);
     }
-    if (inDebugBuild) {
-      try {
-        throw null;
-      } catch (_, stack) {
-        _renderObject.debugExceptionContext = stack;
-      }
-    }
+    assert(() {
+      _renderObject.debugExceptionContext = Component._debugLastComponent;
+      return true;
+    });
     assert(_renderObject == renderObject); // in case a subclass reintroduces it
     assert(renderObject != null);
     assert(mounted);
