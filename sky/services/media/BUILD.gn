@@ -5,13 +5,11 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("media") {
-  testonly = true
-
   deps = [
     ":interfaces",
   ]
 
-  if (is_android) {
+  if (is_android || is_ios) {
     deps += [ ":media_lib" ]
   }
 }
@@ -38,6 +36,22 @@ if (is_android) {
       "//mojo/public/java:bindings",
       "//mojo/public/java:system",
       ":interfaces_java",
+    ]
+  }
+} else if (is_ios) {
+  source_set("media_lib") {
+    sources = [
+      "ios/media_player_impl.h",
+      "ios/media_player_impl.mm",
+      "ios/media_service_impl.h",
+      "ios/media_service_impl.mm",
+    ]
+
+    deps = [
+      ":interfaces",
+      "//base:base",
+      "//mojo/common",
+      "//mojo/public/cpp/application",
     ]
   }
 }

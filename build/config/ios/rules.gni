@@ -145,7 +145,12 @@ template("ios_app") {
   bin_gen_target_name = target_name + "_bin"
 
   executable(bin_gen_target_name) {
-    libs = [ "UIKit.framework", "QuartzCore.framework", "OpenGLES.framework" ]
+    libs = [
+      "UIKit.framework",
+      "AVFoundation.framework",
+      "QuartzCore.framework",
+      "OpenGLES.framework"
+    ]
     deps = invoker.deps
     output_name = app_name
   }

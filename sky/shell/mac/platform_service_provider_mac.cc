@@ -14,6 +14,8 @@
 
 #if TARGET_OS_IPHONE
 #include "sky/services/keyboard/ios/keyboard_service_impl.h"
+#include "sky/services/media/ios/media_service_impl.h"
+#include "sky/services/media/ios/media_player_impl.h"
 #endif
 
 #if !TARGET_OS_IPHONE
@@ -39,6 +41,14 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
       keyboard_.Create(nullptr, mojo::MakeRequest<::keyboard::KeyboardService>(
                                     client_handle.Pass()));
     }
+    if (service_name == ::media::MediaPlayer::Name_) {
+      media_player_.Create(nullptr, mojo::MakeRequest<::media::MediaPlayer>(
+                                        client_handle.Pass()));
+    }
+    if (service_name == ::media::MediaService::Name_) {
+      media_service_.Create(nullptr, mojo::MakeRequest<::media::MediaService>(
+                                         client_handle.Pass()));
+    }
 #endif
 #if !TARGET_OS_IPHONE
     if (service_name == TestHarness::Name_) {
@@ -53,6 +63,8 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
   mojo::NetworkServiceFactory network_;
 #if TARGET_OS_IPHONE
   sky::services::keyboard::KeyboardServiceFactory keyboard_;
+  sky::services::media::MediaPlayerFactory media_player_;
+  sky::services::media::MediaServiceFactory media_service_;
 #endif
 };
 
