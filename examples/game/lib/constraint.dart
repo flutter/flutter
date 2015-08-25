@@ -18,6 +18,7 @@ double _dampenRotation(double src, double dst, double dampening) {
 
 class ConstraintRotationToMovement {
   ConstraintRotationToMovement([this.baseRotation = 0.0, this.dampening]);
+
   final double dampening;
   final double baseRotation;
 
@@ -33,6 +34,32 @@ class ConstraintRotationToMovement {
 
     // Get the target angle
     Offset offset = node.position - _lastPosition;
+    double target = degrees(GameMath.atan2(offset.dy, offset.dx)) + baseRotation;
+
+    if (dampening == null)
+      node.rotation = target;
+    else
+      node.rotation = _dampenRotation(node.rotation, target, dampening);
+  }
+}
+
+class ConstraintRotationToNode {
+  ConstraintRotationToNode(this.targetNode, [this.baseRotation, this.dampening]);
+
+  final Node targetNode;
+  final double baseRotation;
+  final double dampening;
+
+  void constrain(Node node, double dt) {
+    Offset offset;
+
+    if (targetNode.parent == node.parent) {
+      offset = targetNode.position - node.position;
+    } else {
+      offset = node.convertPointToBoxSpace(Point.origin)
+        - targetNode.convertPointToBoxSpace(Point.origin);
+    }
+
     double target = degrees(GameMath.atan2(offset.dy, offset.dx)) + baseRotation;
 
     if (dampening == null)
