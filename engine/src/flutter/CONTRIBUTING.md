@@ -70,11 +70,12 @@ Running the examples
 * You can find example code in subdirectories of the `examples` directory, for example `examples/stocks`.
 * Once you have a local build, run `pub get` from the example folder of your choice to make sure that you have all of the Dart dependencies.
 * Then, to run the current example locally, you can run:
- - `$ ./packages/sky/sky_tool start --build-path ../../out/Debug/`
-* The `--build-path` parameter is the path to your build directory for the build you want to run.  To run on a connected Android device, you could set it to `../../out/android_Debug/`, assuming your output directory is set up normally.
+ - `$ ./packages/sky/sky_tool --local-build start`
+* The `--local-build` parameter attempts to determine the location of your local build directory. You can override it by specifying the `--sky-src-path` and `--android-debug-build-path` parameters. These parameters should not normally be needed, though. Run `$ ./packages/sky/sky_tool -h` to see details about the parameters.
 * You can also specify a particular Dart file to run if you want to run an example that doesn't have a `lib/main.dart` file.  For example, to run the `tabs.dart` example in the `examples/widgets` directory on a connected Android device, from that directory you would run:
- - `$ ./packages/sky/sky_tool start tabs.dart --build-path ../../out/android_Debug/`
+ - `$ ./packages/sky/sky_tool --local-build start tabs.dart`
 * When running code from the `examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `sky` directory and subdirectories will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
+* You can also use `$ ./packages/sky/sky_tool --local-build listen` in the various example directories (or your own Sky apps) to listen for changes you are making to the app and automatically update the running SkyShell instance on your Android device.  iOS device and simulator support are coming soon.
 
 Contributing code
 -----------------
