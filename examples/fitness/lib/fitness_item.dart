@@ -21,7 +21,7 @@ abstract class FitnessItem {
   Map toJson() => { 'when' : when.toIso8601String() };
 
   // TODO(jackson): Internationalize
-  String get displayDate => DateUtils.toRecentTimeString(when);
+  String get displayDate => DateUtils.toDateString(when);
 
   FitnessItemRow toRow({ FitnessItemHandler onDismissed });
 }
