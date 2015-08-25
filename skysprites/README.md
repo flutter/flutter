@@ -1,6 +1,6 @@
 # skysprites
 
-A minimal Sky project.
+A sprite toolkit built on top of Sky.
 
 ## Getting Started
 
