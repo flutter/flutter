@@ -1,0 +1,1 @@
+Now supports setting goal weight.
