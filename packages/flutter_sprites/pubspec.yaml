@@ -1,0 +1,6 @@
+name: skysprites
+description: A sprite toolkit built on top of Sky.
+version: 0.0.1
+dependencies:
+  sky: any
+  sky_tools: any

@@ -5,8 +5,7 @@ import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
-
-import 'lib/sprites.dart';
+import 'package:skysprites/skysprites.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)

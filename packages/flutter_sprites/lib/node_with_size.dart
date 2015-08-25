@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 /// The super class of any [Node] that has a size.
 ///

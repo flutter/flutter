@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 /// A sprite sheet packs a number of smaller images into a single large image.
 ///

@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 /// A texture represents a rectangular area of an image and is typically used to draw a sprite to the screen.
 ///
