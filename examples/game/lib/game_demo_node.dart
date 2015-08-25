@@ -3,6 +3,9 @@ part of game;
 final double _gameSizeWidth = 320.0;
 double _gameSizeHeight = 320.0;
 
+final double _chunkSpacing = 640.0;
+final int _chunksPerLevel = 5;
+
 final bool _drawDebug = false;
 
 class GameDemoNode extends NodeWithSize {
@@ -164,7 +167,6 @@ class GameDemoNode extends NodeWithSize {
   }
 
   int _chunk = 0;
-  double _chunkSpacing = 640.0;
 
   void addObjects() {
 
@@ -181,21 +183,24 @@ class GameDemoNode extends NodeWithSize {
     if (chunk == 0) {
       // Leave the first chunk empty
       return;
-    } else if (chunk == 1) {
-      addLevelAsteroids(10, yPos, 0.0);
-    } else {
-      addLevelAsteroids(9 + chunk, yPos, 0.5);
     }
-  }
 
-  void addLevelAsteroids(int numAsteroids, double yPos, double distribution) {
-    for (int i = 0; i < numAsteroids; i++) {
-      GameObjectType type = (randomDouble() < distribution) ? GameObjectType.asteroidBig : GameObjectType.asteroidSmall;
-      Point pos = new Point(randomSignedDouble() * 160.0,
-                            yPos + _chunkSpacing * randomDouble());
-      _objectFactory.addGameObject(type, pos);
+    chunk -= 1;
+
+    int level = chunk ~/ _chunksPerLevel;
+    int part = chunk % _chunksPerLevel;
+
+    if (part == 0) {
+      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+    } else if  (part == 1) {
+      _objectFactory.addSwarm(4 + level * 2, yPos);
+    } else if (part == 2) {
+      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+    } else if (part == 3) {
+      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+    } else if (part == 4) {
+      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     }
-    _objectFactory.addGameObject(GameObjectType.movingEnemy, new Point(0.0, yPos + 160.0));
   }
 
   void fire() {
@@ -389,7 +394,7 @@ abstract class Asteroid extends Obstacle {
   void setupActions() {
     // Rotate obstacle
     int direction = 1;
-    if (randomDouble() < 0.5) direction = -1;
+    if (randomBool()) direction = -1;
     ActionTween rotate = new ActionTween(
       (a) => _sprt.rotation = a,
       0.0, 360.0 * direction, 5.0 + 5.0 * randomDouble());
@@ -434,20 +439,45 @@ class MovingEnemy extends Obstacle {
     constraints = [new ConstraintRotationToMovement(0.0, 0.5)];
   }
 
+  final double _swirlSpacing = 80.0;
+
+  _addRandomSquare(List<Offset> offsets, double x, double y) {
+    double xMove = (randomBool()) ? _swirlSpacing : -_swirlSpacing;
+    double yMove = (randomBool()) ? _swirlSpacing : -_swirlSpacing;
+
+    if (randomBool()) {
+      offsets.addAll([
+        new Offset(x, y),
+        new Offset(xMove + x, y),
+        new Offset(xMove + x, yMove + y),
+        new Offset(x, yMove + y),
+        new Offset(x, y)
+      ]);
+    } else {
+      offsets.addAll([
+        new Offset(x, y),
+        new Offset(x, y + yMove),
+        new Offset(xMove + x, yMove + y),
+        new Offset(xMove + x, y),
+        new Offset(x, y)
+      ]);
+    }
+  }
+
   void setupActions() {
-    List<Offset> offsets = [
-      new Offset(-160.0, 160.0),
-      new Offset(-80.0, -160.0),
-      new Offset(0.0, 160.0),
-      new Offset(80.0, -160.0),
-      new Offset(160.0, 160.0)];
+
+    List<Offset> offsets = [];
+    _addRandomSquare(offsets, -_swirlSpacing, 0.0);
+    _addRandomSquare(offsets, _swirlSpacing, 0.0);
+    offsets.add(new Offset(-_swirlSpacing, 0.0));
 
     List<Point> points = [];
     for (Offset offset in offsets) {
       points.add(position + offset);
     }
 
-    ActionSpline spline = new ActionSpline((a) => position = a, points, 4.0);
+    ActionSpline spline = new ActionSpline((a) => position = a, points, 6.0);
+    spline.tension = 0.7;
     actions.run(new ActionRepeatForever(spline));
   }
 
@@ -467,6 +497,23 @@ class GameObjectFactory {
   Map<String,SoundEffect> sounds;
   Level level;
 
+  void addAsteroids(int numAsteroids, double yPos, double distribution) {
+    for (int i = 0; i < numAsteroids; i++) {
+      GameObjectType type = (randomDouble() < distribution) ? GameObjectType.asteroidBig : GameObjectType.asteroidSmall;
+      Point pos = new Point(randomSignedDouble() * 160.0,
+                            yPos + _chunkSpacing * randomDouble());
+      addGameObject(type, pos);
+    }
+  }
+
+  void addSwarm(int numEnemies, double yPos) {
+    for (int i = 0; i < numEnemies; i++) {
+      double spacing = math.max(_chunkSpacing / (numEnemies + 1.0), 80.0);
+      double y = yPos + _chunkSpacing / 2.0 - (numEnemies - 1) * spacing / 2.0 + i * spacing;
+      addGameObject(GameObjectType.movingEnemy, new Point(0.0, y));
+    }
+  }
+
   void addGameObject(GameObjectType type, Point pos) {
     GameObject obj;
     if (type == GameObjectType.asteroidBig)
@@ -482,29 +529,6 @@ class GameObjectFactory {
     level.addChild(obj);
   }
 }
-
-// class MovingObstacle extends Obstacle {
-//   MovingObstacle(SpriteSheet sheet, Map<String,SoundEffect> effects, ObstacleType type) : super (sheet, effects, type);
-//
-//   void setupAction() {
-//     actions.stopAll();
-//
-//     List<Offset> offsets = [
-//       new Offset(-160.0, 160.0),
-//       new Offset(-80.0, -160.0),
-//       new Offset(0.0, 160.0),
-//       new Offset(80.0, -160.0),
-//       new Offset(160.0, 160.0)];
-//
-//     List<Point> points = [];
-//     for (Offset offset in offsets) {
-//       points.add(position + offset);
-//     }
-//
-//     ActionSpline spline = new ActionSpline((a) => position = a, points, 4.0);
-//     actions.run(new ActionRepeatForever(spline));
-//   }
-// }
 
 class StarField extends NodeWithSize {
   sky.Image _image;
