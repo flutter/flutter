@@ -439,7 +439,7 @@ abstract class ScrollableWidgetList extends Scrollable {
     int itemShowCount = 0;
     Offset viewportOffset = Offset.zero;
 
-    if (_containerExtent != null && _containerExtent > 0.0) {
+    if (_containerExtent != null && _containerExtent > 0.0 && itemCount > 0) {
       if (paddedScrollOffset < scrollBehavior.minScrollOffset) {
         // Underscroll
         double visibleExtent = _containerExtent + paddedScrollOffset;
