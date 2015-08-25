@@ -24,7 +24,6 @@ import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/transitions.dart';
 import 'package:sky/widgets/framework.dart';
-import 'package:vector_math/vector_math.dart';
 
 typedef void SelectedIndexChanged(int selectedIndex);
 typedef void LayoutChanged(Size size, List<double> widths);
