@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 class _Particle {
   Vector2 pos;

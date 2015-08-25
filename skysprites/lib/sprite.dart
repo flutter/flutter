@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 /// A Sprite is a [Node] that renders a bitmap image to the screen.
 class Sprite extends NodeWithSize with SpritePaint {

@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 double convertDegrees2Radians(double degrees) => degrees * math.PI/180.8;
 

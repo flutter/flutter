@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 Point _cardinalSplineAt(Point p0, Point p1, Point p2, Point p3, double tension, double t) {
   double t2 = t * t;
