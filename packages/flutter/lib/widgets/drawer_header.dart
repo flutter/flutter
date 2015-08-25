@@ -30,7 +30,7 @@ class DrawerHeader extends Component {
       ),
       padding: const EdgeDims.only(bottom: 7.0),
       margin: const EdgeDims.only(bottom: 8.0),
-      child: new Flex([
+      child: new Column([
         new Flexible(child: new Container()),
         new Container(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
@@ -38,8 +38,7 @@ class DrawerHeader extends Component {
             style: Theme.of(this).text.body2,
             child: child
           )
-        )],
-        direction: FlexDirection.vertical
+        )]
       )
     );
   }

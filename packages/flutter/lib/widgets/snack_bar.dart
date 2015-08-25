@@ -94,7 +94,7 @@ class SnackBar extends Component {
           margin: const EdgeDims.symmetric(horizontal: 24.0),
           child: new DefaultTextStyle(
             style: new TextStyle(color: Theme.of(this).accentColor),
-            child: new Flex(children)
+            child: new Row(children)
           )
         )
       )
