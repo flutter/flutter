@@ -22,13 +22,11 @@ class ViewConstraints {
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
   RenderView({
     RenderBox child,
-    this.devicePixelRatio,
     this.timeForRotation: const Duration(microseconds: 83333)
   }) {
     this.child = child;
   }
 
-  final double devicePixelRatio;
   Duration timeForRotation;
 
   Size _size = Size.zero;
@@ -46,10 +44,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
+  Matrix4 get _logicalToDeviceTransform {
+    double devicePixelRatio = sky.view.devicePixelRatio;
+    return new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
+  }
+
   void scheduleInitialFrame() {
-    Matrix4 logicalToDeviceZoom = new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
     scheduleInitialLayout();
-    scheduleInitialPaint(new TransformLayer(transform: logicalToDeviceZoom));
+    scheduleInitialPaint(new TransformLayer(transform: _logicalToDeviceTransform));
     scheduler.ensureVisualUpdate();
   }
 
@@ -98,6 +100,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void compositeFrame() {
     sky.tracing.begin('RenderView.compositeFrame');
     try {
+      (layer as TransformLayer).transform = _logicalToDeviceTransform;
       Rect bounds = Point.origin & (size * sky.view.devicePixelRatio);
       sky.SceneBuilder builder = new sky.SceneBuilder(bounds);
       layer.addToScene(builder, Offset.zero);

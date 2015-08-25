@@ -40,7 +40,7 @@ class SkyBinding {
     sky.view.setMetricsChangedCallback(_handleMetricsChanged);
     scheduler.init();
     if (renderViewOverride == null) {
-      _renderView = new RenderView(child: root, devicePixelRatio: sky.view.devicePixelRatio);
+      _renderView = new RenderView(child: root);
       _renderView.attach();
       _renderView.rootConstraints = _createConstraints();
       _renderView.scheduleInitialFrame();
