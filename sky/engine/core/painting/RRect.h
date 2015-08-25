@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_RRECT_H_
 #define SKY_ENGINE_CORE_PAINTING_RRECT_H_
 
+#include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -26,6 +27,8 @@ public:
 
     const SkRRect& rrect() const { return m_rrect; }
     void setRRect(const SkRRect& rrect) { m_rrect = rrect; }
+
+    PassRefPtr<RRect> shift(const Offset& offset);
 
 private:
     RRect();

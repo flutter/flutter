@@ -7,6 +7,7 @@
 
 #include "base/callback.h"
 #include "base/time/time.h"
+#include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/html/VoidCallback.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/view/EventCallback.h"
@@ -37,6 +38,9 @@ public:
     Picture* picture() const { return m_picture.get(); }
     void setPicture(Picture* picture) { m_picture = picture; }
 
+    Scene* scene() const { return m_scene.get(); }
+    void setScene(Scene* scene) { m_scene = scene; }
+
     void setEventCallback(PassOwnPtr<EventCallback> callback);
 
     void setMetricsChangedCallback(PassOwnPtr<VoidCallback> callback);
@@ -57,6 +61,7 @@ private:
     OwnPtr<VoidCallback> m_metricsChangedCallback;
     OwnPtr<FrameCallback> m_frameCallback;
     RefPtr<Picture> m_picture;
+    RefPtr<Scene> m_scene;
 };
 
 } // namespace blink

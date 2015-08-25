@@ -15,6 +15,7 @@ interface View {
   readonly attribute double height;
 
   attribute Picture picture;
+  attribute Scene scene;
 
   void setEventCallback(EventCallback callback);
   void setMetricsChangedCallback(VoidCallback callback);

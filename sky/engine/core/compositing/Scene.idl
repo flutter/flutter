@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[
-  Constructor(),
-] interface RRect {
-  void setRectXY(Rect rect, float xRad, float yRad);
-
-  RRect shift(Offset offset);
+// An opaque handle to a composited scene.
+interface Scene {
 };

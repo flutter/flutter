@@ -14,4 +14,10 @@ CanvasPath::~CanvasPath()
 {
 }
 
+PassRefPtr<CanvasPath> CanvasPath::shift(const Offset& offset) {
+  RefPtr<CanvasPath> path = CanvasPath::create();
+  m_path.offset(offset.sk_size.width(), offset.sk_size.height(), &path->m_path);
+  return path.release();
+}
+
 } // namespace blink

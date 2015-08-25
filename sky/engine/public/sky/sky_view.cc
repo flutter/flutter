@@ -53,6 +53,8 @@ void SkyView::BeginFrame(base::TimeTicks frame_time) {
 }
 
 PassRefPtr<SkPicture> SkyView::Paint() {
+  if (Scene* scene = view_->scene())
+    return scene->toSkia();
   if (Picture* picture = view_->picture())
     return picture->toSkia();
   return nullptr;
