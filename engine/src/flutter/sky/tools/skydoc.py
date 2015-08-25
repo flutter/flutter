@@ -8,7 +8,6 @@ import os
 import subprocess
 import sys
 import webbrowser
-from skypy.url_mappings import URLMappings
 
 SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
@@ -20,7 +19,7 @@ DARTDOC = 'dartdoc'
 
 def main():
     try:
-        subprocess.check_output([DARTDOC, '--version'])
+        subprocess.check_output(['pub', 'global', 'run', DARTDOC, '--version'])
     except:
         print 'Cannot find "dartdoc". Did you run `pub global activate dartdoc` ?'
         return 1
@@ -36,18 +35,14 @@ def main():
     sky_package = os.path.join(SRC_ROOT, 'sky/packages/sky')
     doc_dir = os.path.join(build_dir, 'gen/dart-pkg/sky/doc')
 
-    # dartdoc doesn't understand sdk_ext yet, so we still need url_mappings:
-    # https://github.com/dart-lang/dartdoc/issues/763
-    url_mappings = URLMappings(SRC_ROOT, build_dir)
-
     analyzer_args = [
+        'pub',
+        'global',
+        'run',
         DARTDOC,
         '--input', sky_package,
-        '--output', doc_dir,
-        # dartdoc appears to ignore --package-root:
-        # https://github.com/dart-lang/dartdoc/issues/766
-        '--package-root', os.path.join(WORKBENCH_ROOT, 'packages')
-    ] + url_mappings.as_args
+        '--output', doc_dir
+    ]
     subprocess.check_call(analyzer_args)
 
     if args.open:
