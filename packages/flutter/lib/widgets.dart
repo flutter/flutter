@@ -10,6 +10,7 @@ export 'widgets/basic.dart';
 export 'widgets/button_base.dart';
 export 'widgets/card.dart';
 export 'widgets/checkbox.dart';
+export 'widgets/date_picker.dart';
 export 'widgets/default_text_style.dart';
 export 'widgets/dialog.dart';
 export 'widgets/dismissable.dart';

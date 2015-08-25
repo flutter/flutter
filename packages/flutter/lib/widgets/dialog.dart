@@ -25,7 +25,9 @@ class Dialog extends Component {
   Dialog({
     Key key,
     this.title,
+    this.titlePadding,
     this.content,
+    this.contentPadding,
     this.actions,
     this.onDismiss
   }): super(key: key);
@@ -34,9 +36,16 @@ class Dialog extends Component {
   /// of the dialog.
   final Widget title;
 
+  // Padding around the title; uses material design default if none is supplied
+  // If there is no title, no padding will be provided
+  final EdgeDims titlePadding;
+
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   final Widget content;
+
+  // Padding around the content; uses material design default if none is supplied
+  final EdgeDims contentPadding;
 
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
@@ -59,8 +68,11 @@ class Dialog extends Component {
     List<Widget> dialogBody = new List<Widget>();
 
     if (title != null) {
+      EdgeDims padding = titlePadding;
+      if (padding == null)
+        padding = new EdgeDims(24.0, 24.0, content == null ? 20.0 : 0.0, 24.0);
       dialogBody.add(new Padding(
-        padding: new EdgeDims(24.0, 24.0, content == null ? 20.0 : 0.0, 24.0),
+        padding: padding,
         child: new DefaultTextStyle(
           style: Theme.of(this).text.title,
           child: title
@@ -69,8 +81,11 @@ class Dialog extends Component {
     }
 
     if (content != null) {
+      EdgeDims padding = contentPadding;
+      if (padding == null)
+        padding = const EdgeDims(20.0, 24.0, 24.0, 24.0);
       dialogBody.add(new Padding(
-        padding: const EdgeDims(20.0, 24.0, 24.0, 24.0),
+        padding: padding,
         child: new DefaultTextStyle(
           style: Theme.of(this).text.subhead,
           child: content
