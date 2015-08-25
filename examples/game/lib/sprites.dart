@@ -39,3 +39,4 @@ part 'sprite_box.dart';
 part 'sprite_widget.dart';
 part 'texture.dart';
 part 'util.dart';
+part 'virtual_joystick.dart';
