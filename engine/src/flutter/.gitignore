@@ -25,6 +25,7 @@ Thumbs.db
 /buildtools/
 /dart/
 /dart-pub-cache/
+/mojo/devtools/
 /mojo/public/
 /native_client/
 /out/
