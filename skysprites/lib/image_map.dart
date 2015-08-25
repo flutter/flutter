@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of sprites;
+part of skysprites;
 
 class ImageMap {
   ImageMap(AssetBundle bundle) : _bundle = bundle;

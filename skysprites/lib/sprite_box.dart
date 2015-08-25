@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 /// Options for setting up a [SpriteBox].
 ///

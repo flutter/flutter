@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 abstract class Constraint {
   void preUpdate(Node node, double dt) {

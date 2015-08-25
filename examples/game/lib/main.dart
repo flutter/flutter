@@ -14,9 +14,9 @@ import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/framework.dart';
 import 'package:sky/widgets/title.dart';
 import 'package:sky/widgets/theme.dart';
+import 'package:skysprites/skysprites.dart';
 
 import 'game_demo.dart';
-import 'sprites.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)

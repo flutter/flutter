@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 enum SoundFadeMode {
   crossFade,

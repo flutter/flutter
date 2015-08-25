@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 
 math.Random _random = new math.Random();
