@@ -1,6 +1,7 @@
 library game;
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'sprites.dart';
 
