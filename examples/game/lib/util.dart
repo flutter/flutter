@@ -17,6 +17,10 @@ int randomInt(int max) {
   return _random.nextInt(max);
 }
 
+bool randomBool() {
+  return _random.nextDouble() < 0.5;
+}
+
 // atan2
 
 class _Atan2Constants {

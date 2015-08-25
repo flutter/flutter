@@ -394,7 +394,7 @@ abstract class Asteroid extends Obstacle {
   void setupActions() {
     // Rotate obstacle
     int direction = 1;
-    if (randomDouble() < 0.5) direction = -1;
+    if (randomBool()) direction = -1;
     ActionTween rotate = new ActionTween(
       (a) => _sprt.rotation = a,
       0.0, 360.0 * direction, 5.0 + 5.0 * randomDouble());
@@ -442,21 +442,25 @@ class MovingEnemy extends Obstacle {
   final double _swirlSpacing = 80.0;
 
   _addRandomSquare(List<Offset> offsets, double x, double y) {
-    double xMove = (randomDouble() < 0.5) ? _swirlSpacing : -_swirlSpacing;
-    double yMove = (randomDouble() < 0.5) ? _swirlSpacing : -_swirlSpacing;
+    double xMove = (randomBool()) ? _swirlSpacing : -_swirlSpacing;
+    double yMove = (randomBool()) ? _swirlSpacing : -_swirlSpacing;
 
-    if (randomDouble() < 0.5) {
-      offsets.add(new Offset(x, y));
-      offsets.add(new Offset(xMove + x, y));
-      offsets.add(new Offset(xMove + x, yMove + y));
-      offsets.add(new Offset(x, yMove + y));
-      offsets.add(new Offset(x, y));
+    if (randomBool()) {
+      offsets.addAll([
+        new Offset(x, y),
+        new Offset(xMove + x, y),
+        new Offset(xMove + x, yMove + y),
+        new Offset(x, yMove + y),
+        new Offset(x, y)
+      ]);
     } else {
-      offsets.add(new Offset(x, y));
-      offsets.add(new Offset(x, y + yMove));
-      offsets.add(new Offset(xMove + x, yMove + y));
-      offsets.add(new Offset(xMove + x, y));
-      offsets.add(new Offset(x, y));
+      offsets.addAll([
+        new Offset(x, y),
+        new Offset(x, y + yMove),
+        new Offset(xMove + x, yMove + y),
+        new Offset(xMove + x, y),
+        new Offset(x, y)
+      ]);
     }
   }
 
