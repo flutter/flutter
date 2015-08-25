@@ -7,68 +7,71 @@ import 'dart:sky' as sky;
 import 'package:sky/rendering.dart';
 
 void main() {
-  var root = new RenderBlock(children: [
-    new RenderPadding(
-      padding: new EdgeDims.all(10.0),
-      child: new RenderConstrainedBox(
-        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
-        child: new RenderDecoratedBox(
-          decoration: new BoxDecoration(
-            backgroundColor: new sky.Color(0xFFFFFF00)
+  var root = new RenderFlex(
+    children: [
+      new RenderPadding(
+        padding: new EdgeDims.all(10.0),
+        child: new RenderConstrainedBox(
+          additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
+          child: new RenderDecoratedBox(
+            decoration: new BoxDecoration(
+              backgroundColor: new sky.Color(0xFFFFFF00)
+            )
           )
         )
-      )
-    ),
-    new RenderPadding(
-      padding: new EdgeDims.all(10.0),
-      child: new RenderConstrainedBox(
-        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
-        child: new RenderDecoratedBox(
-          decoration: new BoxDecoration(
-            border: new Border(
-              top: new BorderSide(color: new sky.Color(0xFFF00000), width: 5.0),
-              right: new BorderSide(color: new sky.Color(0xFFFF9000), width: 10.0),
-              bottom: new BorderSide(color: new sky.Color(0xFFFFF000), width: 15.0),
-              left: new BorderSide(color: new sky.Color(0xFF00FF00), width: 20.0)
-            ),
-            backgroundColor: new sky.Color(0xFFDDDDDD)
+      ),
+      new RenderPadding(
+        padding: new EdgeDims.all(10.0),
+        child: new RenderConstrainedBox(
+          additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
+          child: new RenderDecoratedBox(
+            decoration: new BoxDecoration(
+              border: new Border(
+                top: new BorderSide(color: new sky.Color(0xFFF00000), width: 5.0),
+                right: new BorderSide(color: new sky.Color(0xFFFF9000), width: 10.0),
+                bottom: new BorderSide(color: new sky.Color(0xFFFFF000), width: 15.0),
+                left: new BorderSide(color: new sky.Color(0xFF00FF00), width: 20.0)
+              ),
+              backgroundColor: new sky.Color(0xFFDDDDDD)
+            )
           )
         )
-      )
-    ),
-    new RenderPadding(
-      padding: new EdgeDims.all(10.0),
-      child: new RenderConstrainedBox(
-        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
-        child: new RenderDecoratedBox(
-          decoration: new BoxDecoration(
-            backgroundColor: new sky.Color(0xFFFFFF00)
+      ),
+      new RenderPadding(
+        padding: new EdgeDims.all(10.0),
+        child: new RenderConstrainedBox(
+          additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
+          child: new RenderDecoratedBox(
+            decoration: new BoxDecoration(
+              backgroundColor: new sky.Color(0xFFFFFF00)
+            )
           )
         )
-      )
-    ),
-    new RenderPadding(
-      padding: new EdgeDims.all(10.0),
-      child: new RenderConstrainedBox(
-        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
-        child: new RenderDecoratedBox(
-          decoration: new BoxDecoration(
-            backgroundColor: new sky.Color(0xFFFFFF00)
+      ),
+      new RenderPadding(
+        padding: new EdgeDims.all(10.0),
+        child: new RenderConstrainedBox(
+          additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
+          child: new RenderDecoratedBox(
+            decoration: new BoxDecoration(
+              backgroundColor: new sky.Color(0xFFFFFF00)
+            )
           )
         )
-      )
-    ),
-    new RenderPadding(
-      padding: new EdgeDims.all(10.0),
-      child: new RenderConstrainedBox(
-        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
-        child: new RenderDecoratedBox(
-          decoration: new BoxDecoration(
-            backgroundColor: new sky.Color(0xFFFFFF00)
+      ),
+      new RenderPadding(
+        padding: new EdgeDims.all(10.0),
+        child: new RenderConstrainedBox(
+          additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
+          child: new RenderDecoratedBox(
+            decoration: new BoxDecoration(
+              backgroundColor: new sky.Color(0xFFFFFF00)
+            )
           )
         )
-      )
-    ),
-  ]);
+      ),
+    ],
+    direction: FlexDirection.vertical
+  );
   new SkyBinding(root: root);
 }

@@ -46,13 +46,13 @@ class StockRow extends Component {
           bottom: new BorderSide(color: Theme.of(this).dividerColor)
         )
       ),
-      child: new Flex([
+      child: new Row([
         new Container(
           child: new StockArrow(percentChange: stock.percentChange),
           margin: const EdgeDims.only(right: 5.0)
         ),
         new Flexible(
-          child: new Flex(
+          child: new Row(
             children,
             alignItems: FlexAlignItems.baseline,
             textBaseline: DefaultTextStyle.of(this).textBaseline

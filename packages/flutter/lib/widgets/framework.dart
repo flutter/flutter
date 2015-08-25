@@ -16,7 +16,6 @@ import 'package:sky/rendering/view.dart';
 
 export 'package:sky/base/hit_test.dart' show EventDisposition, combineEventDispositions;
 export 'package:sky/rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
-export 'package:sky/rendering/flex.dart' show FlexDirection;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 final bool _shouldLogRenderDuration = false; // see also 'enableProfilingLoop' argument to runApp()

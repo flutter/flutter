@@ -57,10 +57,10 @@ class MixedViewportApp extends App {
             center: new Text('Block Viewport Demo')),
         body: new Material(
           type: MaterialType.canvas,
-          child: new Flex([
+          child: new Column([
               new Container(
                 padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
-                child: new Flex([
+                child: new Row([
                     new RaisedButton(
                       enabled: enabledAdd,
                       child: new Text('ADD'),
@@ -96,7 +96,6 @@ class MixedViewportApp extends App {
                 )
               ),
             ],
-            direction: FlexDirection.vertical,
             justifyContent: FlexJustifyContent.spaceBetween
           )
         )

@@ -64,11 +64,10 @@ class ProgressIndicatorApp extends App {
           child: new CircularProgressIndicator(value: valueAnimation.value)
         )
     ];
-    return new Flex(
+    return new Column(
       indicators
         .map((c) => new Container(child: c, margin: const EdgeDims.symmetric(vertical: 20.0)))
         .toList(),
-      direction: FlexDirection.vertical,
       justifyContent: FlexJustifyContent.center
     );
   }

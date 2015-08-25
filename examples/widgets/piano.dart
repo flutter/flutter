@@ -88,10 +88,7 @@ class PianoApp extends App {
       );
     }
 
-    return new Flex(
-      children,
-      direction: FlexDirection.vertical
-    );
+    return new Column(children);
   }
 }
 

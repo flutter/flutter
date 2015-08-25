@@ -105,6 +105,6 @@ class EditableText extends StatefulComponent {
       child: new CustomPaint(callback: _paintCursor, token: _showCursor)
     );
 
-    return new Flex([text, cursor]);
+    return new Row([text, cursor]);
   }
 }

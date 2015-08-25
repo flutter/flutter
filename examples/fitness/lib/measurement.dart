@@ -45,7 +45,7 @@ class MeasurementRow extends FitnessItemRow {
         )
       )
     ];
-    return new Flex(
+    return new Row(
       children,
       alignItems: FlexAlignItems.baseline,
       textBaseline: DefaultTextStyle.of(this).textBaseline

@@ -20,7 +20,7 @@ class Field extends Component {
   final String placeholder;
 
   Widget build() {
-    return new Flex([
+    return new Row([
         new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(type: icon, size: 24)
@@ -31,8 +31,7 @@ class Field extends Component {
             placeholder: placeholder
           )
         )
-      ],
-      direction: FlexDirection.horizontal
+      ]
     );
   }
 }
