@@ -181,6 +181,13 @@ class PaintingContext {
     }
   }
 
+  static Paint _getPaintForAlpha(int alpha) {
+    return new Paint()
+      ..color = new Color.fromARGB(alpha, 0, 0, 0)
+      ..setTransferMode(sky.TransferMode.srcOver)
+      ..isAntiAlias = false;
+  }
+
   void paintChildWithOpacity(RenderObject child,
                              Point childPosition,
                              Rect bounds,
@@ -188,7 +195,7 @@ class PaintingContext {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, OpacityLayer.paintForAlpha(alpha));
+      canvas.saveLayer(bounds, _getPaintForAlpha(alpha));
       canvas.translate(childOffset.dx, childOffset.dy);
       insertChild(child, Offset.zero);
       canvas.restore();
@@ -202,6 +209,12 @@ class PaintingContext {
     }
   }
 
+  static Paint _getPaintForColorFilter(Color color, sky.TransferMode transferMode) {
+    return new Paint()
+      ..setColorFilter(new sky.ColorFilter.mode(color, transferMode))
+      ..isAntiAlias = false;
+  }
+
   void paintChildWithColorFilter(RenderObject child,
                                  Point childPosition,
                                  Rect bounds,
@@ -210,7 +223,7 @@ class PaintingContext {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, ColorFilterLayer.paintForColorFilter(color, transferMode));
+      canvas.saveLayer(bounds, _getPaintForColorFilter(color, transferMode));
       canvas.translate(childOffset.dx, childOffset.dy);
       insertChild(child, Offset.zero);
       canvas.restore();
