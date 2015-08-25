@@ -48,7 +48,7 @@ class GameDemoNode extends NodeWithSize {
     _hud = new Hud(_spritesUI);
     addChild(_hud);
 
-
+    // Add initial game objects
     addObjects();
   }
 
@@ -195,6 +195,7 @@ class GameDemoNode extends NodeWithSize {
                             yPos + _chunkSpacing * randomDouble());
       _objectFactory.addGameObject(type, pos);
     }
+    _objectFactory.addGameObject(GameObjectType.movingEnemy, new Point(0.0, yPos + 160.0));
   }
 
   void fire() {
@@ -230,66 +231,6 @@ class GameDemoNode extends NodeWithSize {
 
     // Return to main scene and report the score back in 2 seconds
     new Timer(new Duration(seconds: 2), () { _gameOverCallback(_hud.score); });
-  }
-}
-
-class VirtualJoystick extends NodeWithSize {
-  VirtualJoystick() : super(new Size(160.0, 160.0)) {
-    userInteractionEnabled = true;
-    handleMultiplePointers = false;
-    position = new Point(160.0, -20.0);
-    pivot = new Point(0.5, 1.0);
-    _center = new Point(size.width / 2.0, size.height / 2.0);
-    _handlePos = _center;
-
-    _paintHandle = new Paint()
-      ..color=new Color(0xffffffff);
-    _paintControl = new Paint()
-      ..color=new Color(0xffffffff)
-      ..strokeWidth = 1.0
-      ..setStyle(sky.PaintingStyle.stroke);
-  }
-
-  Point value = Point.origin;
-
-  bool _isDown = false;
-  bool get isDown => _isDown;
-
-  Point _pointerDownAt;
-  Point _center;
-  Point _handlePos;
-
-  Paint _paintHandle;
-  Paint _paintControl;
-
-  bool handleEvent(SpriteBoxEvent event) {
-    if (event.type == "pointerdown") {
-      _pointerDownAt = event.boxPosition;
-      actions.stopAll();
-      _isDown = true;
-    }
-    else if (event.type == "pointerup" || event.type == "pointercancel") {
-      _pointerDownAt = null;
-      value = Point.origin;
-      ActionTween moveToCenter = new ActionTween((a) => _handlePos = a, _handlePos, _center, 0.4, elasticOut);
-      actions.run(moveToCenter);
-      _isDown = false;
-    } else if (event.type == "pointermove") {
-      Offset movedDist = event.boxPosition - _pointerDownAt;
-
-      value = new Point(
-        (movedDist.dx / 80.0).clamp(-1.0, 1.0),
-        (movedDist.dy / 80.0).clamp(-1.0, 1.0));
-
-        _handlePos = _center + new Offset(value.x * 40.0, value.y * 40.0);
-    }
-    return true;
-  }
-
-  void paint(PaintingCanvas canvas) {
-    applyTransformForPivot(canvas);
-    canvas.drawCircle(_handlePos, 25.0, _paintHandle);
-    canvas.drawCircle(_center, 40.0, _paintControl);
   }
 }
 
@@ -482,9 +423,41 @@ class AsteroidSmall extends Asteroid {
   }
 }
 
+class MovingEnemy extends Obstacle {
+  MovingEnemy(GameObjectFactory f) : super(f) {
+    _sprt = new Sprite(f.sheet["ship.png"]);
+    _sprt.scale = 0.2;
+    radius = 12.0;
+    maxDamage = 2.0;
+    addChild(_sprt);
+
+    constraints = [new ConstraintRotationToMovement(0.0, 0.5)];
+  }
+
+  void setupActions() {
+    List<Offset> offsets = [
+      new Offset(-160.0, 160.0),
+      new Offset(-80.0, -160.0),
+      new Offset(0.0, 160.0),
+      new Offset(80.0, -160.0),
+      new Offset(160.0, 160.0)];
+
+    List<Point> points = [];
+    for (Offset offset in offsets) {
+      points.add(position + offset);
+    }
+
+    ActionSpline spline = new ActionSpline((a) => position = a, points, 4.0);
+    actions.run(new ActionRepeatForever(spline));
+  }
+
+  Sprite _sprt;
+}
+
 enum GameObjectType {
   asteroidBig,
   asteroidSmall,
+  movingEnemy,
 }
 
 class GameObjectFactory {
@@ -500,6 +473,8 @@ class GameObjectFactory {
       obj = new AsteroidBig(this);
     else if (type == GameObjectType.asteroidSmall)
       obj = new AsteroidSmall(this);
+    else if (type == GameObjectType.movingEnemy)
+      obj = new MovingEnemy(this);
 
     obj.position = pos;
     obj.setupActions();
