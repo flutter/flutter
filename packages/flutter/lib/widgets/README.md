@@ -46,10 +46,9 @@ very commonly used:
  * `Text`: The `Text` widget lets you create a run of styled text within your
    application.
 
- * `Flex`: The `Flex` widget lets you create flexible layouts in both the
-   horizontal and vertical direction. Its design is based on the web's flexbox
-   layout model. You can also use the simpler `Block` widget to create vertical
-   layouts of inflexible items.
+ * `Row`, `Column`: These flex widgets let you create flexible layouts
+   in both the horizontal (`Row`) and vertical (`Column`) directions.
+   Its design is based on the web's flexbox layout model.
 
  * `Container`: The `Container` widget lets you create rectangular visual
    element. A container can be decorated with a `BoxDecoration`, such as a
@@ -75,7 +74,7 @@ class MyToolBar extends Component {
       ),
       height: 56.0,
       padding: const EdgeDims.symmetric(horizontal: 8.0),
-      child: new Flex([
+      child: new Row([
         new NetworkImage(src: 'menu.png', width: 25.0, height: 25.0),
         new Flexible(child: new Text('My awesome toolbar')),
         new NetworkImage(src: 'search.png', width: 25.0, height: 25.0),
@@ -85,14 +84,15 @@ class MyToolBar extends Component {
 }
 ```
 
-The `MyToolBar` component creates a cyan `Container` with a height of 56
-device-independent pixels with an internal padding of 8 pixels, both on the
-left and the right. Inside the container, `MyToolBar` uses a `Flex` layout
-in the (default) horizontal direction. The middle child, the `Text` widget, is
-marked as `Flexible`, which means it expands to fill any remaining available
-space that hasn't been consumed by the inflexible children. You can have
-multiple `Flexible` children and determine the ratio in which they consume the
-available space using the `flex` argument to `Flexible`.
+The `MyToolBar` component creates a cyan `Container` with a height of
+56 device-independent pixels with an internal padding of 8 pixels,
+both on the left and the right. Inside the container, `MyToolBar` uses
+a `Row` layout. The middle child, the `Text` widget, is marked as
+`Flexible`, which means it expands to fill any remaining available
+space that hasn't been consumed by the inflexible children. You can
+have multiple `Flexible` children and determine the ratio in which
+they consume the available space using the `flex` argument to
+`Flexible`.
 
 To use this component, we simply create an instance of `MyToolBar` in a `build`
 function:
@@ -207,7 +207,7 @@ button:
   Widget build() {
     return new MyButton(
       child: new ShrinkWrapWidth(
-        child: new Flex([
+        child: new Row([
           new NetworkImage(src: 'thumbs-up.png', width: 25.0, height: 25.0),
           new Container(
             padding: const EdgeDims.only(left: 10.0),
@@ -272,7 +272,7 @@ class MyDialog extends StatefulComponent {
   }
 
   Widget build() {
-    return new Flex([
+    return new Row([
       new MyCheckbox(
         value: _checkboxValue,
         onChanged: _handleCheckboxValueChanged

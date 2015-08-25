@@ -91,7 +91,7 @@ class DrawerItem extends ButtonBase {
         height: 48.0,
         decoration: new BoxDecoration(backgroundColor: _getBackgroundColor(themeData)),
         child: new InkWell(
-          child: new Flex(flexChildren)
+          child: new Row(flexChildren)
         )
       )
     );

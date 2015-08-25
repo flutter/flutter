@@ -346,7 +346,7 @@ class Tab extends Component {
     } else if (label.text == null) {
       labelContent = _buildLabelIcon();
     } else {
-      labelContent = new Flex(
+      labelContent = new Column(
         <Widget>[
           new Container(
             child: _buildLabelIcon(),
@@ -355,8 +355,7 @@ class Tab extends Component {
           _buildLabelText()
         ],
         justifyContent: FlexJustifyContent.center,
-        alignItems: FlexAlignItems.center,
-        direction: FlexDirection.vertical
+        alignItems: FlexAlignItems.center
       );
     }
 
@@ -609,8 +608,6 @@ class TabNavigator extends Component {
     );
 
     Widget content = views[selectedIndex].buildContent();
-    return new Flex([tabBar, new Flexible(child: content)],
-      direction: FlexDirection.vertical
-    );
+    return new Column([tabBar, new Flexible(child: content)]);
   }
 }
