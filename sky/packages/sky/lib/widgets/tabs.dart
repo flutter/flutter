@@ -35,7 +35,6 @@ const double _kTextAndIconTabHeight = 72.0;
 const double _kTabIndicatorHeight = 2.0;
 const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
-const double _kRelativeMaxTabWidth = 56.0;
 const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
 const int _kTabIconSize = 24;
 const double _kTabBarScrollDrag = 0.025;
@@ -139,9 +138,8 @@ class RenderTabBar extends RenderBox with
     return constraints.constrainWidth(width);
   }
 
-  double get _tabBarHeight {
-    return (textAndIcons ? _kTextAndIconTabHeight : _kTabHeight) + _kTabIndicatorHeight;
-  }
+  double get _tabHeight => textAndIcons ? _kTextAndIconTabHeight : _kTabHeight;
+  double get _tabBarHeight => _tabHeight + _kTabIndicatorHeight;
 
   double _getIntrinsicHeight(BoxConstraints constraints) => constraints.constrainHeight(_tabBarHeight);
 
@@ -152,7 +150,7 @@ class RenderTabBar extends RenderBox with
   void layoutFixedWidthTabs() {
     double tabWidth = size.width / childCount;
     BoxConstraints tabConstraints =
-      new BoxConstraints.tightFor(width: tabWidth, height: size.height);
+      new BoxConstraints.tightFor(width: tabWidth, height: _tabHeight);
     double x = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
@@ -164,12 +162,13 @@ class RenderTabBar extends RenderBox with
     }
   }
 
-  void layoutScrollableTabs() {
+  double layoutScrollableTabs() {
     BoxConstraints tabConstraints = new BoxConstraints(
       minWidth: _kMinTabWidth,
-      maxWidth: math.min(size.width - _kRelativeMaxTabWidth, _kMaxTabWidth),
-      minHeight: size.height,
-      maxHeight: size.height);
+      maxWidth: _kMaxTabWidth,
+      minHeight: _tabHeight,
+      maxHeight: _tabHeight
+    );
     double x = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
@@ -179,6 +178,7 @@ class RenderTabBar extends RenderBox with
       x += child.size.width;
       child = child.parentData.nextSibling;
     }
+    return x;
   }
 
   Size layoutSize;
@@ -209,17 +209,16 @@ class RenderTabBar extends RenderBox with
 
   void performLayout() {
     assert(constraints is BoxConstraints);
-
-    size = constraints.constrain(new Size(constraints.maxWidth, _tabBarHeight));
-    assert(!size.isInfinite);
-
     if (childCount == 0)
       return;
 
-    if (isScrollable)
-      layoutScrollableTabs();
-    else
+    if (isScrollable) {
+      double tabBarWidth = layoutScrollableTabs();
+      size = constraints.constrain(new Size(tabBarWidth, _tabBarHeight));
+    } else {
+      size = constraints.constrain(new Size(constraints.maxWidth, _tabBarHeight));
       layoutFixedWidthTabs();
+    }
 
     if (onLayoutChanged != null)
       reportLayoutChangedIfNeeded();
@@ -234,7 +233,7 @@ class RenderTabBar extends RenderBox with
       return;
 
     if (indicatorRect != null) {
-      canvas.drawRect(indicatorRect, new Paint()..color = indicatorColor);
+      canvas.drawRect(indicatorRect.shift(offset), new Paint()..color = indicatorColor);
       return;
     }
 
@@ -404,6 +403,7 @@ class TabBar extends Scrollable {
   bool isScrollable;
 
   Size _tabBarSize;
+  Size _viewportSize = Size.zero;
   List<double> _tabWidths;
   ValueAnimation<Rect> _indicatorAnimation;
 
@@ -412,6 +412,7 @@ class TabBar extends Scrollable {
     _indicatorAnimation = new ValueAnimation<Rect>()
       ..duration = _kTabBarScroll
       ..variable = new AnimatedRect(null, curve: ease);
+    scrollBehavior.isScrollable = isScrollable;
   }
 
   void syncConstructorArguments(TabBar source) {
@@ -447,7 +448,7 @@ class TabBar extends Scrollable {
     if (tabIndex > 0)
       tabLeft = _tabWidths.take(tabIndex).reduce((sum, width) => sum + width);
     double tabTop = 0.0;
-    double tabBottom = _tabBarSize.height -_kTabIndicatorHeight;
+    double tabBottom = _tabBarSize.height - _kTabIndicatorHeight;
     double tabRight = tabLeft + _tabWidths[tabIndex];
     return new Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
   }
@@ -489,14 +490,24 @@ class TabBar extends Scrollable {
     );
   }
 
+  void _updateScrollBehavior() {
+    scrollBehavior.updateExtents(
+      containerExtent: scrollDirection == ScrollDirection.vertical ? _viewportSize.height : _viewportSize.width,
+      contentExtent: _tabWidths.reduce((sum, width) => sum + width)
+    );
+  }
+
   void _layoutChanged(Size tabBarSize, List<double> tabWidths) {
     setState(() {
       _tabBarSize = tabBarSize;
       _tabWidths = tabWidths;
-      scrollBehavior.updateExtents(
-        containerExtent: _tabBarSize.width,
-        contentExtent: _tabWidths.reduce((sum, width) => sum + width));
+      _updateScrollBehavior();
     });
+  }
+
+  void _handleViewportSizeChanged(Size newSize) {
+    _viewportSize = newSize;
+    _updateScrollBehavior();
   }
 
   Widget buildContent() {
@@ -531,33 +542,39 @@ class TabBar extends Scrollable {
         textAndIcons = true;
     }
 
-    Matrix4 transform = new Matrix4.identity();
-    transform.translate(-scrollOffset, 0.0);
-
-    return new Transform(
-      transform: transform,
-      child: new IconTheme(
-        data: new IconThemeData(color: iconThemeColor),
-        child: new DefaultTextStyle(
-          style: textStyle,
-          child: new BuilderTransition(
-            variables: [_indicatorRect],
-            direction: Direction.forward,
-            performance: _indicatorAnimation,
-            builder: () {
-              return new TabBarWrapper(
-                children: tabs,
-                selectedIndex: selectedIndex,
-                backgroundColor: backgroundColor,
-                indicatorColor: indicatorColor,
-                indicatorRect: _indicatorRect.value,
-                textAndIcons: textAndIcons,
-                isScrollable: isScrollable,
-                onLayoutChanged: _layoutChanged
-              );
-            }
-          )
+    Widget tabBar = new IconTheme(
+      data: new IconThemeData(color: iconThemeColor),
+      child: new DefaultTextStyle(
+        style: textStyle,
+        child: new BuilderTransition(
+          variables: [_indicatorRect],
+          direction: Direction.forward,
+          performance: _indicatorAnimation,
+          builder: () {
+            return new TabBarWrapper(
+              children: tabs,
+              selectedIndex: selectedIndex,
+              backgroundColor: backgroundColor,
+              indicatorColor: indicatorColor,
+              indicatorRect: _indicatorRect.value,
+              textAndIcons: textAndIcons,
+              isScrollable: isScrollable,
+              onLayoutChanged: _layoutChanged
+            );
+          }
         )
+      )
+    );
+
+    if (!isScrollable)
+      return tabBar;
+
+    return new SizeObserver(
+      callback: _handleViewportSizeChanged,
+      child: new Viewport(
+        scrollDirection: ScrollDirection.horizontal,
+        scrollOffset: new Offset(scrollOffset, 0.0),
+        child: tabBar
       )
     );
   }
