@@ -75,10 +75,7 @@ class Mimic extends GlobalKeyWatcher {
 
   void didUnmount() {
     super.didUnmount();
-    if (_mimicable != null) {
-      _mimicable.stopMimic();
-      _mimicable = null;
-    }
+    _stopMimic();
   }
 
   void didSyncWatchedKey(GlobalKey key, Widget widget) {
@@ -91,9 +88,18 @@ class Mimic extends GlobalKeyWatcher {
     _setMimicable(null);
   }
 
+  void _stopMimic() {
+    if (_mimicable != null) {
+      _mimicable.stopMimic();
+      _mimicable = null;
+    }
+  }
+
   void _setMimicable(widget) {
-    if (_mimicable == null && widget != null)
+    if (_mimicable != widget) {
+      _stopMimic();
       widget.startMimic();
+    }
     setState(() {
       _mimicable = widget;
     });
