@@ -193,7 +193,7 @@ class Align extends OneChildRenderObjectWrapper {
   RenderPositionedBox createNode() => new RenderPositionedBox(horizontal: horizontal, vertical: vertical);
   RenderPositionedBox get renderObject => super.renderObject;
 
-  void syncRenderObject(SizedBox old) {
+  void syncRenderObject(Align old) {
     super.syncRenderObject(old);
     renderObject.horizontal = horizontal;
     renderObject.vertical = vertical;
