@@ -483,29 +483,6 @@ class GameObjectFactory {
   }
 }
 
-// class MovingObstacle extends Obstacle {
-//   MovingObstacle(SpriteSheet sheet, Map<String,SoundEffect> effects, ObstacleType type) : super (sheet, effects, type);
-//
-//   void setupAction() {
-//     actions.stopAll();
-//
-//     List<Offset> offsets = [
-//       new Offset(-160.0, 160.0),
-//       new Offset(-80.0, -160.0),
-//       new Offset(0.0, 160.0),
-//       new Offset(80.0, -160.0),
-//       new Offset(160.0, 160.0)];
-//
-//     List<Point> points = [];
-//     for (Offset offset in offsets) {
-//       points.add(position + offset);
-//     }
-//
-//     ActionSpline spline = new ActionSpline((a) => position = a, points, 4.0);
-//     actions.run(new ActionRepeatForever(spline));
-//   }
-// }
-
 class StarField extends NodeWithSize {
   sky.Image _image;
   SpriteSheet _spriteSheet;
