@@ -68,13 +68,12 @@ class ToolBar extends Component {
     Widget content = new Container(
       child: new DefaultTextStyle(
         style: sideStyle,
-        child: new Flex([
+        child: new Column([
             new Container(
-              child: new Flex(children),
+              child: new Row(children),
               height: kToolBarHeight
             ),
           ],
-          direction: FlexDirection.vertical,
           justifyContent: FlexJustifyContent.end
         )
       ),

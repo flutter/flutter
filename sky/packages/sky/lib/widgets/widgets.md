@@ -26,31 +26,40 @@ order to make them easier to use.
 Layout models
 -------------
 
- - `Flex` Layout a list of child widgets in either the horizontal or vertical
-   `direction`. The direction along which the widgets are laid out is called the
-   *main* direction and the other axis is called the *cross* direction. A `Flex`
-   widget sizes itself to the maximum size permitted by its parent.
+There are two _flex_ layout models:
 
-   Each child of a `Flex` widget is either *flexible* or *inflexible*. The flex
-   first lays out its inflexible children and subtracts their total length along
-   the main direction to determine how much free space is available. The flex
-   then divides this free space among the flexible children in a ratio
-   determined by their `flex` properties.
+ - `Row`: Layout a list of child widgets in the horizontal direction.
 
-   The `alignItems` property determines how children are positioned in the cross
-   direction. The `justifyContent` property determines how the remaining free
-   space (if any) in the main direction is allocated.
+ - `Column': Layout a list of child widgets in the vertical direction.
 
-   - `Flexible` Mark this child as being flexible with the given `flex` ratio.
+The direction along which the widgets are laid out is called the
+*main* direction and the other axis is called the *cross* direction.
+These flex widgets size themselves to the maximum size permitted by
+its parent, unless that would be infinite size, in which case they
+shrink-wrap their children. For details, see [flex.md](flex.md).
 
- - `Stack` Layout a list of child widgets on top of each other from back to
+Each child of a flex widget is either *flexible* or *inflexible*.
+The flex first lays out its inflexible children and subtracts their
+total length along the main direction to determine how much free space
+is available. The flex then divides this free space among the flexible
+children in a ratio determined by their `flex` properties.
+
+The `alignItems` property determines how children are positioned in
+the cross direction. The `justifyContent` property determines how the
+remaining free space (if any) in the main direction is allocated.
+
+ - `Flexible`: Mark this child as being flexible with the given `flex` ratio.
+
+There is also a stacking layout model:
+
+ - `Stack`: Layout a list of child widgets on top of each other from back to
    front. Each child of a `Stack` widget is either *positioned* or
    *non-positioned*. The stack sizes itself to the contain all the
    non-positioned children, which are located at the top-left corner of the
    stack. The *positioned* children are then located relative to the stack
    according to their `top`, `right`, `bottom`, and `left` properties.
 
-    - `Positioned` Mark this child as *positioned*. If the `top` property is
+    - `Positioned`: Mark this child as *positioned*. If the `top` property is
       non-null, the top edge of this child will be positioned `top` layout units
       from the top of the stack widget. The `right`, `bottom`, and `right`
       properties work analogously. Note that if the both the `top` and `bottom`
