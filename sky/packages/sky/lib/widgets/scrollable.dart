@@ -35,18 +35,22 @@ abstract class Scrollable extends StatefulComponent {
 
   Scrollable({
     Key key,
+    this.initialScrollOffset,
     this.scrollDirection: ScrollDirection.vertical
   }) : super(key: key) {
     assert(scrollDirection == ScrollDirection.vertical ||
            scrollDirection == ScrollDirection.horizontal);
   }
 
+  double initialScrollOffset;
   ScrollDirection scrollDirection;
 
   AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
   ValueAnimation<double> _toOffsetAnimation; // Started by scrollTo()
 
   void initState() {
+    if (initialScrollOffset is double)
+      _scrollOffset = initialScrollOffset;
     _toEndAnimation = new AnimatedSimulation(_setScrollOffset);
     _toOffsetAnimation = new ValueAnimation<double>()
       ..addListener(() {
@@ -261,8 +265,13 @@ class ScrollableViewport extends Scrollable {
   ScrollableViewport({
     Key key,
     this.child,
+    double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical
-  }) : super(key: key, scrollDirection: scrollDirection);
+  }) : super(
+    key: key,
+    scrollDirection: scrollDirection,
+    initialScrollOffset: initialScrollOffset
+  );
 
   Widget child;
 
@@ -312,10 +321,12 @@ class ScrollableViewport extends Scrollable {
 class Block extends Component {
   Block(this.children, {
     Key key,
+    this.initialScrollOffset,
     this.scrollDirection: ScrollDirection.vertical
   }) : super(key: key);
 
   final List<Widget> children;
+  final double initialScrollOffset;
   final ScrollDirection scrollDirection;
 
   BlockDirection get _direction {
@@ -326,6 +337,7 @@ class Block extends Component {
 
   Widget build() {
     return new ScrollableViewport(
+      initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
       child: new BlockBody(children, direction: _direction)
     );
@@ -340,10 +352,11 @@ class Block extends Component {
 abstract class ScrollableWidgetList extends Scrollable {
   ScrollableWidgetList({
     Key key,
+    double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
     this.itemExtent,
     this.padding
-  }) : super(key: key, scrollDirection: scrollDirection) {
+  }) : super(key: key, initialScrollOffset: initialScrollOffset, scrollDirection: scrollDirection) {
     assert(itemExtent != null);
   }
 
@@ -488,13 +501,19 @@ typedef Widget ItemBuilder<T>(T item);
 class ScrollableList<T> extends ScrollableWidgetList {
   ScrollableList({
     Key key,
+    double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
     this.items,
     this.itemBuilder,
     this.itemsWrap: false,
     double itemExtent,
     EdgeDims padding
-  }) : super(key: key, scrollDirection: scrollDirection, itemExtent: itemExtent, padding: padding);
+  }) : super(
+    key: key,
+    initialScrollOffset: initialScrollOffset,
+    scrollDirection: scrollDirection,
+    itemExtent: itemExtent,
+    padding: padding);
 
   List<T> items;
   ItemBuilder<T> itemBuilder;
@@ -526,6 +545,7 @@ class ScrollableList<T> extends ScrollableWidgetList {
 class PageableList<T> extends ScrollableList<T> {
   PageableList({
     Key key,
+    double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.horizontal,
     List<T> items,
     ItemBuilder<T> itemBuilder,
@@ -536,6 +556,7 @@ class PageableList<T> extends ScrollableList<T> {
     this.curve: ease
   }) : super(
     key: key,
+    initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
     items: items,
     itemBuilder: itemBuilder,
@@ -587,10 +608,11 @@ class PageableList<T> extends ScrollableList<T> {
 class ScrollableMixedWidgetList extends Scrollable {
   ScrollableMixedWidgetList({
     Key key,
+    double initialScrollOffset,
     this.builder,
     this.token,
     this.layoutState
-  }) : super(key: key);
+  }) : super(key: key, initialScrollOffset: initialScrollOffset);
 
   IndexedBuilder builder;
   Object token;
