@@ -24,11 +24,11 @@ class ActionSpline extends ActionInterval {
 
   final Function setter;
   final List<Point> points;
+  double tension = 0.5;
 
   double _dt;
 
   void update(double t) {
-    double tension = 0.5;
 
     int p;
     double lt;
