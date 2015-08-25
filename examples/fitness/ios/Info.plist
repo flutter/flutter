@@ -19,7 +19,7 @@
   <string>LaunchScreen</string>
 
   <key>CFBundleIdentifier</key>
-  <string>com.google.sky.fitness</string>
+  <string>com.google.SkyFitness</string>
   
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
