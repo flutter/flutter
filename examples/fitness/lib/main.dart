@@ -92,7 +92,10 @@ class FitnessApp extends App {
     super.didMount();
     loadFitnessData().then((UserData data) {
       setState(() => _userData = data);
-    }).catchError((e) => print("Failed to load data: $e"));
+    }).catchError((e) {
+      print("Failed to load data: $e");
+      setState(() => _userData = new UserDataImpl());
+    });
   }
 
   void initState() {
