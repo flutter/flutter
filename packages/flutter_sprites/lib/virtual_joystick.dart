@@ -1,4 +1,4 @@
-part of sprites;
+part of skysprites;
 
 class VirtualJoystick extends NodeWithSize {
   VirtualJoystick() : super(new Size(160.0, 160.0)) {

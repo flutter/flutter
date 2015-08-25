@@ -2,8 +2,11 @@ name: asteroids
 dependencies:
   sky: any
   sky_tools: any
+  skysprites: any
 dependency_overrides:
   material_design_icons:
     path: ../../sky/packages/material_design_icons
   sky:
     path: ../../sky/packages/sky
+  skysprites:
+    path: ../../skysprites
