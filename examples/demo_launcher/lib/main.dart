@@ -148,14 +148,14 @@ class DemoList extends Component {
         child: new InkWell(
           child: new Container(
             margin: const EdgeDims.only(top: 24.0, left: 24.0),
-            child: new Flex([
-              new Text(demo.name, style: demo.textTheme.title),
-              new Flexible(
-                child: new Text(demo.description, style: demo.textTheme.subhead)
-              )
-            ],
-            direction: FlexDirection.vertical,
-            alignItems: FlexAlignItems.start)
+            child: new Column([
+                new Text(demo.name, style: demo.textTheme.title),
+                new Flexible(
+                  child: new Text(demo.description, style: demo.textTheme.subhead)
+                )
+              ],
+              alignItems: FlexAlignItems.start
+            )
           )
         )
     );

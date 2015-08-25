@@ -49,7 +49,7 @@ class DialogMenuItem extends ButtonBase {
         child: new InkWell(
           child: new Padding(
             padding: const EdgeDims.symmetric(horizontal: 16.0),
-            child: new Flex(children)
+            child: new Row(children)
           )
         )
       )
@@ -219,7 +219,7 @@ class FeedFragment extends StatefulComponent {
     if (userData.items.length == 0)
       return new Material(
         type: MaterialType.canvas,
-        child: new Flex(
+        child: new Row(
           [new Text("No data yet.\nAdd some!", style: style)],
           justifyContent: FlexJustifyContent.center
         )

@@ -28,7 +28,7 @@ export 'package:sky/base/hit_test.dart' show EventDisposition, combineEventDispo
 export 'package:sky/painting/text_style.dart';
 export 'package:sky/rendering/block.dart' show BlockDirection;
 export 'package:sky/rendering/box.dart' show BoxConstraints;
-export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
+export 'package:sky/rendering/flex.dart' show FlexJustifyContent, FlexAlignItems, FlexDirection;
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxDecorationPosition, BoxShadow, Border, BorderSide, EdgeDims, Shape;
 export 'package:sky/rendering/toggleable.dart' show ValueChanged;
@@ -494,7 +494,7 @@ class Row extends Flex {
     justifyContent: FlexJustifyContent.start,
     alignItems: FlexAlignItems.center,
     textBaseline
-  }) : super(children, key: key, direction: FlexDirection.horizontal, justifyContent: justifyContent, alignItems: alignItems);
+  }) : super(children, key: key, direction: FlexDirection.horizontal, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
 }
 
 class Column extends Flex {
@@ -503,7 +503,7 @@ class Column extends Flex {
     justifyContent: FlexJustifyContent.start,
     alignItems: FlexAlignItems.center,
     textBaseline
-  }) : super(children, key: key, direction: FlexDirection.vertical, justifyContent: justifyContent, alignItems: alignItems);
+  }) : super(children, key: key, direction: FlexDirection.vertical, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
 }
 
 class Flexible extends ParentDataNode {

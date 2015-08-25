@@ -102,7 +102,7 @@ class StockSettings extends StatefulComponent {
             new DrawerItem(
               icon: 'action/thumb_up',
               onPressed: () => _confirmOptimismChange(),
-              child: new Flex([
+              child: new Row([
                 new Flexible(child: new Text('Everything is awesome')),
                 new Checkbox(value: optimism == StockMode.optimistic, onChanged: (_) => _confirmOptimismChange()),
               ])
@@ -110,7 +110,7 @@ class StockSettings extends StatefulComponent {
             new DrawerItem(
               icon: 'action/backup',
               onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
-              child: new Flex([
+              child: new Row([
                 new Flexible(child: new Text('Back up stock list to the cloud')),
                 new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged),
               ])

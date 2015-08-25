@@ -118,33 +118,33 @@ class GameDemoApp extends App {
   Widget _buildMainScene(navigator, route) {
     return new Stack([
       new SpriteWidget(new MainScreenBackground(), SpriteBoxTransformMode.fixedWidth),
-      new Flex([
-        new TextureButton(
-          onPressed: () {
-            _game = new GameDemoNode(
-              _imageMap,
-              _spriteSheet,
-              _spriteSheetUI,
-              _sounds,
-              (lastScore) {
-                setState(() {_lastScore = lastScore;});
-                navigator.pop();
-              }
-            );
-            navigator.pushNamed('/game');
-          },
-          texture: _spriteSheetUI['btn_play_up.png'],
-          textureDown: _spriteSheetUI['btn_play_down.png'],
-          width: 128.0,
-          height: 128.0
-        ),
-        new Text(
-          "Last Score: $_lastScore",
-          style: new TextStyle(fontSize:20.0)
-        )
-      ],
-      direction: FlexDirection.vertical,
-      justifyContent: FlexJustifyContent.center)
+      new Column([
+          new TextureButton(
+            onPressed: () {
+              _game = new GameDemoNode(
+                _imageMap,
+                _spriteSheet,
+                _spriteSheetUI,
+                _sounds,
+                (lastScore) {
+                  setState(() {_lastScore = lastScore;});
+                  navigator.pop();
+                }
+              );
+              navigator.pushNamed('/game');
+            },
+            texture: _spriteSheetUI['btn_play_up.png'],
+            textureDown: _spriteSheetUI['btn_play_down.png'],
+            width: 128.0,
+            height: 128.0
+          ),
+          new Text(
+            "Last Score: $_lastScore",
+            style: new TextStyle(fontSize:20.0)
+          )
+        ],
+        justifyContent: FlexJustifyContent.center
+      )
     ]);
   }
 }

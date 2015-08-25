@@ -105,7 +105,7 @@ class DragAndDropApp extends App {
 
   Widget build() {
     List<Widget> layers = <Widget>[
-      new Flex([
+      new Row([
         new ExampleDragTarget(),
         new ExampleDragTarget(),
         new ExampleDragTarget(),

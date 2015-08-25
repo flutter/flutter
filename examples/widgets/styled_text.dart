@@ -85,8 +85,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 
     Container body = new Container(
         padding: new EdgeDims.symmetric(horizontal: 8.0),
-        child: new Flex(children,
-          direction: FlexDirection.vertical,
+        child: new Column(children,
           justifyContent: FlexJustifyContent.center,
           alignItems: FlexAlignItems.start
         )

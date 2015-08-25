@@ -85,7 +85,7 @@ class CardCollectionApp extends App {
           child: new Container(
             height: cardModel.height,
             decoration: new BoxDecoration(backgroundColor: Theme.of(this).primaryColor),
-            child: new Flex([
+            child: new Row([
               new Icon(type: 'navigation/arrow_back', size: 36),
               new Flexible(child: backgroundText),
               new Icon(type: 'navigation/arrow_forward', size: 36)

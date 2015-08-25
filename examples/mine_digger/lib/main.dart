@@ -96,7 +96,7 @@ class MineDiggerApp extends App {
 
   Widget buildBoard() {
     bool hasCoveredCell = false;
-    List<Flex> flexRows = <Flex>[];
+    List<Row> flexRows = <Row>[];
     for (int iy = 0; iy != 9; iy++) {
       List<Widget> row = <Widget>[];
       for (int ix = 0; ix != 9; ix++) {
@@ -139,9 +139,8 @@ class MineDiggerApp extends App {
         }
       }
       flexRows.add(
-        new Flex(
+        new Row(
           row,
-          direction: FlexDirection.horizontal,
           justifyContent: FlexJustifyContent.center,
           key: new Key.stringify(iy)
         )
@@ -159,10 +158,7 @@ class MineDiggerApp extends App {
       padding: new EdgeDims.all(10.0),
       margin: new EdgeDims.all(10.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFF6B6B6B)),
-      child: new Flex(
-        flexRows,
-        direction: FlexDirection.vertical
-      )
+      child: new Column(flexRows)
     );
   }
 
