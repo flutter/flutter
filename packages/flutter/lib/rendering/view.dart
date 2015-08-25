@@ -98,13 +98,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void compositeFrame() {
     sky.tracing.begin('RenderView.compositeFrame');
     try {
-      // Eventually we will want to pass the entire layer tree to the C++ side.
-      // For now, however, we take the layer tree and paint it into a Canvas,
-      // which we then hand to the C++ side.
-      sky.PictureRecorder recorder = new sky.PictureRecorder();
-      sky.Canvas canvas = new sky.Canvas(recorder, Point.origin & (size * sky.view.devicePixelRatio));
-      layer.paint(canvas);
-      sky.view.picture = recorder.endRecording();
+      Rect bounds = Point.origin & (size * sky.view.devicePixelRatio);
+      sky.SceneBuilder builder = new sky.SceneBuilder(bounds);
+      layer.addToScene(builder, Offset.zero);
+      sky.view.scene = builder.build();
     } finally {
       sky.tracing.end('RenderView.compositeFrame');
     }

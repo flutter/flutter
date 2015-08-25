@@ -5,7 +5,6 @@
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
-import 'package:sky/base/debug.dart';
 import 'package:vector_math/vector_math.dart';
 
 abstract class Layer {
@@ -47,12 +46,7 @@ abstract class Layer {
     _parent = null;
   }
 
-  // The paint() methods are temporary. Eventually, Layers won't have
-  // a paint() method, the entire Layer hierarchy will be handed over
-  // to the C++ side for processing. Until we implement that, though,
-  // we instead have the layers paint themselves into a canvas at
-  // paint time.
-  void paint(sky.Canvas canvas);
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset);
 }
 
 class PictureLayer extends Layer {
@@ -62,24 +56,10 @@ class PictureLayer extends Layer {
   Rect paintBounds;
   sky.Picture picture;
 
-  bool _debugPaintLayerBorder(sky.Canvas canvas) {
-    if (debugPaintLayerBordersEnabled) {
-      Paint border = new Paint()
-        ..color = debugPaintLayerBordersColor
-        ..strokeWidth = 2.0
-        ..setStyle(sky.PaintingStyle.stroke);
-      canvas.drawRect(paintBounds, border);
-    }
-    return true;
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    builder.addPicture(offset + layerOffset, picture, paintBounds);
   }
 
-  void paint(sky.Canvas canvas) {
-    assert(picture != null);
-    canvas.translate(offset.dx, offset.dy);
-    canvas.drawPicture(picture);
-    assert(_debugPaintLayerBorder(canvas));
-    canvas.translate(-offset.dx, -offset.dy);
-  }
 }
 
 class ContainerLayer extends Layer {
@@ -182,19 +162,18 @@ class ContainerLayer extends Layer {
     _lastChild = null;
   }
 
-  void paint(sky.Canvas canvas) {
-    canvas.translate(offset.dx, offset.dy);
-    paintChildren(canvas);
-    canvas.translate(-offset.dx, -offset.dy);
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    addChildrenToScene(builder, offset + layerOffset);
   }
 
-  void paintChildren(sky.Canvas canvas) {
+  void addChildrenToScene(sky.SceneBuilder builder, Offset layerOffset) {
     Layer child = firstChild;
     while (child != null) {
-      child.paint(canvas);
+      child.addToScene(builder, layerOffset);
       child = child.nextSibling;
     }
   }
+
 }
 
 class ClipRectLayer extends ContainerLayer {
@@ -203,16 +182,13 @@ class ClipRectLayer extends ContainerLayer {
   // clipRect is _not_ affected by given offset
   Rect clipRect;
 
-  void paint(sky.Canvas canvas) {
-    canvas.save();
-    canvas.clipRect(clipRect);
-    canvas.translate(offset.dx, offset.dy);
-    paintChildren(canvas);
-    canvas.restore();
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    builder.pushClipRect(clipRect.shift(layerOffset));
+    addChildrenToScene(builder, offset + layerOffset);
+    builder.pop();
   }
-}
 
-final Paint _disableAntialias = new Paint()..isAntiAlias = false;
+}
 
 class ClipRRectLayer extends ContainerLayer {
   ClipRRectLayer({ Offset offset: Offset.zero, this.bounds, this.clipRRect }) : super(offset: offset);
@@ -221,13 +197,12 @@ class ClipRRectLayer extends ContainerLayer {
   Rect bounds;
   sky.RRect clipRRect;
 
-  void paint(sky.Canvas canvas) {
-    canvas.saveLayer(bounds, _disableAntialias);
-    canvas.clipRRect(clipRRect);
-    canvas.translate(offset.dx, offset.dy);
-    paintChildren(canvas);
-    canvas.restore();
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    builder.pushClipRRect(clipRRect.shift(layerOffset), bounds.shift(layerOffset));
+    addChildrenToScene(builder, offset + layerOffset);
+    builder.pop();
   }
+
 }
 
 class ClipPathLayer extends ContainerLayer {
@@ -237,13 +212,12 @@ class ClipPathLayer extends ContainerLayer {
   Rect bounds;
   Path clipPath;
 
-  void paint(sky.Canvas canvas) {
-    canvas.saveLayer(bounds, _disableAntialias);
-    canvas.clipPath(clipPath);
-    canvas.translate(offset.dx, offset.dy);
-    paintChildren(canvas);
-    canvas.restore();
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    builder.pushClipPath(clipPath.shift(layerOffset), bounds.shift(layerOffset));
+    addChildrenToScene(builder, offset + layerOffset);
+    builder.pop();
   }
+
 }
 
 class TransformLayer extends ContainerLayer {
@@ -251,12 +225,12 @@ class TransformLayer extends ContainerLayer {
 
   Matrix4 transform;
 
-  void paint(sky.Canvas canvas) {
-    canvas.save();
-    canvas.translate(offset.dx, offset.dy);
-    canvas.concat(transform.storage);
-    paintChildren(canvas);
-    canvas.restore();
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    Matrix4 offsetTransform = new Matrix4.identity();
+    offsetTransform.translate(offset.dx + layerOffset.dx, offset.dy + layerOffset.dy);
+    builder.pushTransform((offsetTransform * transform).storage);
+    addChildrenToScene(builder, Offset.zero);
+    builder.pop();
   }
 }
 
@@ -267,18 +241,10 @@ class OpacityLayer extends ContainerLayer {
   Rect bounds;
   int alpha;
 
-  static Paint paintForAlpha(int alpha) {
-    return new Paint()
-      ..color = new Color.fromARGB(alpha, 0, 0, 0)
-      ..setTransferMode(sky.TransferMode.srcOver)
-      ..isAntiAlias = false;
-  }
-
-  void paint(sky.Canvas canvas) {
-    canvas.saveLayer(bounds, paintForAlpha(alpha));
-    canvas.translate(offset.dx, offset.dy);
-    paintChildren(canvas);
-    canvas.restore();
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    builder.pushOpacity(alpha, bounds == null ? null : bounds.shift(layerOffset));
+    addChildrenToScene(builder, offset + layerOffset);
+    builder.pop();
   }
 }
 
@@ -295,16 +261,9 @@ class ColorFilterLayer extends ContainerLayer {
   Color color;
   sky.TransferMode transferMode;
 
-  static paintForColorFilter(Color color, sky.TransferMode transferMode) {
-    new Paint()
-      ..setColorFilter(new sky.ColorFilter.mode(color, transferMode))
-      ..isAntiAlias = false;
-  }
-
-  void paint(sky.Canvas canvas) {
-    canvas.saveLayer(bounds, paintForColorFilter(color, transferMode));
-    canvas.translate(offset.dx, offset.dy);
-    paintChildren(canvas);
-    canvas.restore();
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    builder.pushColorFilter(color, transferMode, bounds.shift(offset));
+    addChildrenToScene(builder, offset + layerOffset);
+    builder.pop();
   }
 }
