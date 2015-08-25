@@ -82,11 +82,7 @@ def main(argv, stdout, stderr):
             gen_dash_board = GenerateDashBoard(port)
             gen_dash_board.generate()
 
-        if run_details.exit_code != 0:
-            return run_details.exit_code
-
-        analyzer_result = run_analyzer(port, options, args, stderr)
-        return analyzer_result
+        return run_details.exit_code
 
     # We need to still handle KeyboardInterrupt, atleast for webkitpy unittest cases.
     except KeyboardInterrupt:
@@ -391,23 +387,6 @@ def run_tests(port, options, args, logging_stream):
     finally:
         printer.cleanup()
 
-def run_analyzer(port, options, args, logging_stream):
-    test_dir = os.path.dirname(os.path.abspath(__file__))
-    sky_tools_dir = os.path.dirname(os.path.dirname(test_dir))
-    analyzer_path = os.path.join(sky_tools_dir, 'skyanalyzer')
-    src_dir = os.path.dirname(os.path.dirname(sky_tools_dir))
-    analyzer_target_path = os.path.join(src_dir, 'examples/stocks/lib/main.dart')
-    analyzer_args = [
-        analyzer_path,
-        analyzer_target_path
-    ]
-    try:
-        output = subprocess.check_output(analyzer_args, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        print >> logging_stream, "Analyzer found new issues:"
-        print >> logging_stream, e.output
-        return e.returncode
-    return 0
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:], sys.stdout, sys.stderr))
