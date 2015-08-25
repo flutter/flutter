@@ -106,4 +106,48 @@ void main() {
     GlobalKey.unregisterSyncListener(globalKey, syncListener);
     GlobalKey.unregisterRemoveListener(globalKey, removeListener);
   });
+
+  test('Global key mutate during iteration', () {
+    GlobalKey globalKey = new GlobalKey();
+
+    bool syncListenerCalled = false;
+    bool removeListenerCalled = false;
+
+    void syncListener(GlobalKey key, Widget widget) {
+      GlobalKey.unregisterSyncListener(globalKey, syncListener);
+      syncListenerCalled = true;
+    }
+
+    void removeListener(GlobalKey key) {
+      GlobalKey.unregisterRemoveListener(globalKey, removeListener);
+      removeListenerCalled = true;
+    }
+
+    GlobalKey.registerSyncListener(globalKey, syncListener);
+    GlobalKey.registerRemoveListener(globalKey, removeListener);
+    WidgetTester tester = new WidgetTester();
+
+    tester.pumpFrame(() {
+      return new Container(key: globalKey);
+    });
+    expect(syncListenerCalled, isTrue);
+    expect(removeListenerCalled, isFalse);
+
+    syncListenerCalled = false;
+    removeListenerCalled = false;
+    tester.pumpFrame(() {
+      return new Container();
+    });
+    expect(syncListenerCalled, isFalse);
+    expect(removeListenerCalled, isTrue);
+
+    syncListenerCalled = false;
+    removeListenerCalled = false;
+    tester.pumpFrame(() {
+      return new Container(key: globalKey);
+    });
+    expect(syncListenerCalled, isFalse);
+    expect(removeListenerCalled, isFalse);
+
+  });
 }
