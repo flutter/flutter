@@ -24,6 +24,7 @@ minikin_src_files := \
     GraphemeBreak.cpp \
     Hyphenator.cpp \
     Layout.cpp \
+    LayoutUtils.cpp \
     LineBreaker.cpp \
     Measurement.cpp \
     MinikinInternal.cpp \

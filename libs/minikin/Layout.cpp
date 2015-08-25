@@ -33,6 +33,7 @@
 #include <unicode/ubidi.h>
 #include <hb-icu.h>
 
+#include "LayoutUtils.h"
 #include "MinikinInternal.h"
 #include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>
@@ -469,56 +470,6 @@ static hb_script_t getScriptRun(const uint16_t* chars, size_t len, ssize_t* iter
 }
 
 /**
- * For the purpose of layout, a word break is a boundary with no
- * kerning or complex script processing. This is necessarily a
- * heuristic, but should be accurate most of the time.
- */
-static bool isWordBreak(int c) {
-    if (c == ' ' || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
-        // spaces
-        return true;
-    }
-    if ((c >= 0x3400 && c <= 0x9fff)) {
-        // CJK ideographs (and yijing hexagram symbols)
-        return true;
-    }
-    // Note: kana is not included, as sophisticated fonts may kern kana
-    return false;
-}
-
-/**
- * Return offset of previous word break. It is either < offset or == 0.
- */
-static size_t getPrevWordBreak(const uint16_t* chars, size_t offset) {
-    if (offset == 0) return 0;
-    if (isWordBreak(chars[offset - 1])) {
-        return offset - 1;
-    }
-    for (size_t i = offset - 1; i > 0; i--) {
-        if (isWordBreak(chars[i - 1])) {
-            return i;
-        }
-    }
-    return 0;
-}
-
-/**
- * Return offset of next word break. It is either > offset or == len.
- */
-static size_t getNextWordBreak(const uint16_t* chars, size_t offset, size_t len) {
-    if (offset >= len) return len;
-    if (isWordBreak(chars[offset])) {
-        return offset + 1;
-    }
-    for (size_t i = offset + 1; i < len; i++) {
-        if (isWordBreak(chars[i])) {
-            return i;
-        }
-    }
-    return len;
-}
-
-/**
  * Disable certain scripts (mostly those with cursive connection) from having letterspacing
  * applied. See https://github.com/behdad/harfbuzz/issues/64 for more details.
  */
@@ -615,10 +566,11 @@ void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, 
     HyphenEdit hyphen = ctx->paint.hyphenEdit;
     if (!isRtl) {
         // left to right
-        size_t wordstart = start == bufSize ? start : getPrevWordBreak(buf, start + 1);
+        size_t wordstart =
+                start == bufSize ? start : getPrevWordBreakForCache(buf, start + 1, bufSize);
         size_t wordend;
         for (size_t iter = start; iter < start + count; iter = wordend) {
-            wordend = getNextWordBreak(buf, iter, bufSize);
+            wordend = getNextWordBreakForCache(buf, iter, bufSize);
             // Only apply hyphen to the last word in the string.
             ctx->paint.hyphenEdit = wordend >= start + count ? hyphen : HyphenEdit();
             size_t wordcount = std::min(start + count, wordend) - iter;
@@ -630,9 +582,9 @@ void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, 
         // right to left
         size_t wordstart;
         size_t end = start + count;
-        size_t wordend = end == 0 ? 0 : getNextWordBreak(buf, end - 1, bufSize);
+        size_t wordend = end == 0 ? 0 : getNextWordBreakForCache(buf, end - 1, bufSize);
         for (size_t iter = end; iter > start; iter = wordstart) {
-            wordstart = getPrevWordBreak(buf, iter);
+            wordstart = getPrevWordBreakForCache(buf, iter, bufSize);
             // Only apply hyphen to the last (leftmost) word in the string.
             ctx->paint.hyphenEdit = iter == end ? hyphen : HyphenEdit();
             size_t bufStart = std::max(start, wordstart);

@@ -36,6 +36,9 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_SRC_FILES += \
     GraphemeBreakTests.cpp \
+    LayoutUtilsTest.cpp \
     UnicodeUtils.cpp
+
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../libs/minikin/
 
 include $(BUILD_NATIVE_TEST)
