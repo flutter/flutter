@@ -7,6 +7,7 @@
 
 #include "math.h"
 
+#include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -54,6 +55,8 @@ public:
     }
 
     const SkPath& path() const { return m_path; }
+
+    PassRefPtr<CanvasPath> shift(const Offset& offset);
 
 private:
     CanvasPath();

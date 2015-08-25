@@ -16,7 +16,14 @@ RRect::~RRect()
 
 void RRect::setRectXY(const Rect& rect, float xRad, float yRad)
 {
- 	m_rrect.setRectXY(rect.sk_rect, xRad, yRad);
+    m_rrect.setRectXY(rect.sk_rect, xRad, yRad);
+}
+
+PassRefPtr<RRect> RRect::shift(const Offset& offset) {
+    RefPtr<RRect> rrect = RRect::create();
+    rrect->m_rrect = m_rrect;
+    rrect->m_rrect.offset(offset.sk_size.width(), offset.sk_size.height());
+    return rrect.release();
 }
 
 } // namespace blink

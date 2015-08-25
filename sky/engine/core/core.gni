@@ -7,6 +7,10 @@ sky_core_output_dir = "$root_gen_dir/sky/core"
 sky_core_files = [
   "Init.cpp",
   "Init.h",
+  "compositing/Scene.cpp",
+  "compositing/Scene.h",
+  "compositing/SceneBuilder.cpp",
+  "compositing/SceneBuilder.h",
   "css/BasicShapeFunctions.cpp",
   "css/BasicShapeFunctions.h",
   "css/BinaryDataFontFaceSource.cpp",
@@ -434,6 +438,8 @@ sky_core_files = [
   "painting/LayoutRoot.h",
   "painting/MaskFilter.cpp",
   "painting/MaskFilter.h",
+  "painting/Matrix.cpp",
+  "painting/Matrix.h",
   "painting/Offset.cpp",
   "painting/Offset.h",
   "painting/Paint.cpp",
@@ -626,6 +632,8 @@ sky_core_files = [
 ]
 
 core_idl_files = get_path_info([
+                                 "compositing/Scene.idl",
+                                 "compositing/SceneBuilder.idl",
                                  "css/CSS.idl",
                                  "css/CSSStyleDeclaration.idl",
                                  "css/MediaQueryList.idl",
