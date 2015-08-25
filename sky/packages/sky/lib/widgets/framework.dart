@@ -97,10 +97,7 @@ abstract class GlobalKey extends Key {
     _syncedKeys.add(this);
   }
 
-  static bool _notifyingListeners = false;
-
   static void registerSyncListener(GlobalKey key, GlobalKeySyncListener listener) {
-    assert(!_notifyingListeners);
     assert(key != null);
     Set<GlobalKeySyncListener> listeners =
         _syncListeners.putIfAbsent(key, () => new Set<GlobalKeySyncListener>());
@@ -109,7 +106,6 @@ abstract class GlobalKey extends Key {
   }
 
   static void unregisterSyncListener(GlobalKey key, GlobalKeySyncListener listener) {
-    assert(!_notifyingListeners);
     assert(key != null);
     assert(_syncListeners.containsKey(key));
     bool removed = _syncListeners[key].remove(listener);
@@ -119,7 +115,6 @@ abstract class GlobalKey extends Key {
   }
 
   static void registerRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
-    assert(!_notifyingListeners);
     assert(key != null);
     Set<GlobalKeyRemoveListener> listeners =
         _removeListeners.putIfAbsent(key, () => new Set<GlobalKeyRemoveListener>());
@@ -128,7 +123,6 @@ abstract class GlobalKey extends Key {
   }
 
   static void unregisterRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
-    assert(!_notifyingListeners);
     assert(key != null);
     assert(_removeListeners.containsKey(key));
     bool removed = _removeListeners[key].remove(listener);
@@ -148,31 +142,27 @@ abstract class GlobalKey extends Key {
     assert(_debugDuplicates.isEmpty);
     if (_syncedKeys.isEmpty && _removedKeys.isEmpty)
       return;
-    _notifyingListeners = true;
     try {
-      Map<GlobalKey, Set<GlobalKeyRemoveListener>> localRemoveListeners =
-          new Map<GlobalKey, Set<GlobalKeyRemoveListener>>.from(_removeListeners);
-      Map<GlobalKey, Set<GlobalKeySyncListener>> localSyncListeners =
-          new Map<GlobalKey, Set<GlobalKeySyncListener>>.from(_syncListeners);
 
       for (GlobalKey key in _syncedKeys) {
         Widget widget = _registry[key];
-        if (widget != null && localSyncListeners.containsKey(key)) {
-          for (GlobalKeySyncListener listener in localSyncListeners[key])
+        if (widget != null && _syncListeners.containsKey(key)) {
+          Set<GlobalKeySyncListener> localListeners = new Set<GlobalKeySyncListener>.from(_syncListeners[key]);
+          for (GlobalKeySyncListener listener in localListeners)
             listener(key, widget);
         }
       }
 
       for (GlobalKey key in _removedKeys) {
-        if (!_registry.containsKey(key) && localRemoveListeners.containsKey(key)) {
-          for (GlobalKeyRemoveListener listener in localRemoveListeners[key])
+        if (!_registry.containsKey(key) && _removeListeners.containsKey(key)) {
+          Set<GlobalKeyRemoveListener> localListeners = new Set<GlobalKeyRemoveListener>.from(_removeListeners[key]);
+          for (GlobalKeyRemoveListener listener in localListeners)
             listener(key);
         }
       }
     } finally {
       _removedKeys.clear();
       _syncedKeys.clear();
-      _notifyingListeners = false;
     }
   }
 
