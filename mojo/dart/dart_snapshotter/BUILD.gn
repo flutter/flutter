@@ -1,0 +1,27 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+executable("dart_snapshotter") {
+  sources = [
+    "main.cc",
+    "vm.cc",
+    "vm.h",
+  ]
+
+  deps = [
+    "//base",
+    "//build/config/sanitizers:deps",
+    "//dart/runtime/vm:libdart_platform",
+    "//dart/runtime:libdart",
+    "//mojo/common",
+    "//mojo/dart/embedder:dart_snapshot_cc",
+    "//mojo/edk/system",
+    "//mojo/environment:chromium",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
+    "//third_party/zlib",
+    "//tonic",
+  ]
+}

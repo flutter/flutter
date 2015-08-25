@@ -4,6 +4,9 @@
 
 #include "mojo/edk/system/test_utils.h"
 
+#include <stdint.h>
+#include <stdlib.h>
+
 #include <limits>
 
 #include "base/logging.h"
@@ -50,6 +53,23 @@ void Sleep(MojoDeadline deadline) {
            static_cast<MojoDeadline>(std::numeric_limits<int64_t>::max()));
   base::PlatformThread::Sleep(
       base::TimeDelta::FromMicroseconds(static_cast<int64_t>(deadline)));
+}
+
+// TODO(vtl): Replace all of this implementation with suitable use of C++11
+// <random> when we can.
+int RandomInt(int min, int max) {
+  DCHECK_LE(min, max);
+  DCHECK_LE(static_cast<int64_t>(max) - min, RAND_MAX);
+  DCHECK_LT(static_cast<int64_t>(max) - min, std::numeric_limits<int>::max());
+
+  // This is in-range for an |int| due to the above.
+  int range = max - min + 1;
+  int max_valid = (RAND_MAX / range) * range - 1;
+  int value;
+  do {
+    value = rand();
+  } while (value > max_valid);
+  return min + (value % range);
 }
 
 Stopwatch::Stopwatch() {

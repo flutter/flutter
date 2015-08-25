@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//mojo/public/dart/rules.gni")
+import("//mojo/services/mojo_services.gni")
 
 dart_pkg("mojo_services") {
   sources = [

@@ -28,6 +28,7 @@ source_set("gpu") {
     "//gpu/command_buffer/common",
     "//mojo/environment:chromium",
     "//mojo/public/c/gles2",
+    "//mojo/public/c/gpu:gpu_onscreen",
     "//mojo/public/c/system",
     "//mojo/public/cpp/application",
     "//mojo/public/cpp/bindings",

@@ -16,7 +16,7 @@ source_set("lib") {
 
   deps = [
     "//base",
-    "//mojo/common",
+    "//mojo/data_pipe_utils",
     "//mojo/public/cpp/bindings:callback",
     "//mojo/public/cpp/system",
     "//mojo/services/asset_bundle/public/interfaces",
@@ -32,7 +32,6 @@ mojo_native_application("asset_bundle") {
   deps = [
     "//base",
     "//mojo/application",
-    "//mojo/common",
     "//mojo/public/cpp/application",
     "//mojo/public/cpp/bindings:callback",
     "//mojo/public/cpp/system",
@@ -54,7 +53,7 @@ mojo_native_application("apptests") {
     "//base",
     "//mojo/application",
     "//mojo/application:test_support",
-    "//mojo/common",
+    "//mojo/data_pipe_utils",
     "//mojo/public/cpp/bindings",
     "//mojo/services/asset_bundle/public/interfaces",
     "//third_party/zlib:zip",

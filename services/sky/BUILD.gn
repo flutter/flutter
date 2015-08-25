@@ -30,7 +30,6 @@ mojo_native_application("sky") {
 
   deps = [
     "//mojo/application",
-    "//mojo/common",
     "//mojo/common:tracing_impl",
     "//mojo/converters/geometry",
     "//mojo/converters/input_events",

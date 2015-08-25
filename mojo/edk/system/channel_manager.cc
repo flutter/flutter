@@ -87,6 +87,13 @@ scoped_refptr<MessagePipeDispatcher> ChannelManager::CreateChannelOnIOThread(
   return dispatcher;
 }
 
+scoped_refptr<Channel> ChannelManager::CreateChannelWithoutBootstrapOnIOThread(
+    ChannelId channel_id,
+    embedder::ScopedPlatformHandle platform_handle) {
+  return CreateChannelOnIOThreadHelper(channel_id, platform_handle.Pass(),
+                                       nullptr);
+}
+
 scoped_refptr<MessagePipeDispatcher> ChannelManager::CreateChannel(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle,
@@ -163,19 +170,19 @@ void ChannelManager::ShutdownHelper(
   }
 }
 
-void ChannelManager::CreateChannelOnIOThreadHelper(
+scoped_refptr<Channel> ChannelManager::CreateChannelOnIOThreadHelper(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle,
     scoped_refptr<system::ChannelEndpoint> bootstrap_channel_endpoint) {
   DCHECK_NE(channel_id, kInvalidChannelId);
   DCHECK(platform_handle.is_valid());
-  DCHECK(bootstrap_channel_endpoint);
 
   // Create and initialize a |system::Channel|.
   scoped_refptr<system::Channel> channel =
       new system::Channel(platform_support_);
   channel->Init(system::RawChannel::Create(platform_handle.Pass()));
-  channel->SetBootstrapEndpoint(bootstrap_channel_endpoint);
+  if (bootstrap_channel_endpoint)
+    channel->SetBootstrapEndpoint(bootstrap_channel_endpoint);
 
   {
     MutexLocker locker(&mutex_);
@@ -183,6 +190,7 @@ void ChannelManager::CreateChannelOnIOThreadHelper(
     channels_[channel_id] = channel;
   }
   channel->SetChannelManager(this);
+  return channel;
 }
 
 void ChannelManager::CreateChannelHelper(

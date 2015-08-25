@@ -18,7 +18,6 @@
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/scoped_vector.h"
-#include "base/rand_util.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/test/test_io_thread.h"
 #include "base/threading/simple_thread.h"
@@ -325,7 +324,7 @@ class RawChannelWriterThread : public base::SimpleThread {
 
     while (left_to_write_-- > 0) {
       EXPECT_TRUE(raw_channel_->WriteMessage(MakeTestMessage(
-          static_cast<uint32_t>(base::RandInt(1, kMaxRandomMessageSize)))));
+          static_cast<uint32_t>(test::RandomInt(1, kMaxRandomMessageSize)))));
     }
   }
 

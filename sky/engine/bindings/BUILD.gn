@@ -376,7 +376,6 @@ source_set("generated_bindings") {
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
     "//mojo/application",
-    "//mojo/common",
     "//mojo/public/c/system",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",

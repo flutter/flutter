@@ -1,0 +1,30 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("url") {
+  sources = [
+    "url_type_converters.cc",
+    "url_type_converters.h",
+  ]
+
+  deps = [
+    "//mojo/public/cpp/bindings",
+    "//url",
+  ]
+}
+
+source_set("tests") {
+  testonly = true
+
+  sources = [
+    "url_type_converters_unittest.cc",
+  ]
+
+  deps = [
+    ":url",
+    "//mojo/public/cpp/bindings",
+    "//testing/gtest",
+    "//url",
+  ]
+}

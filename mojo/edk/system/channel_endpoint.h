@@ -168,12 +168,22 @@ class MOJO_SYSTEM_IMPL_EXPORT ChannelEndpoint final
   // Helper for |OnReadMessage()|, handling messages for the client.
   void OnReadMessageForClient(scoped_ptr<MessageInTransit> message);
 
-  // Resets |channel_| to null (and sets |channel_state_| to
-  // |ChannelState::DETACHED|). This may only be called if |channel_| is
-  // non-null.
-  void ResetChannelNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+  // Moves |state_| from |RUNNING| to |DEAD|. |channel_| must be non-null, but
+  // this does not call |channel_->DetachEndpoint()|.
+  void DieNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   Mutex mutex_;
+
+  enum class State {
+    // |AttachAndRun()| has not been called yet (|channel_| is null).
+    PAUSED,
+    // |AttachAndRun()| has been called, but not |DetachFromChannel()|
+    // (|channel_| is non-null and valid).
+    RUNNING,
+    // |DetachFromChannel()| has been called (|channel_| is null).
+    DEAD
+  };
+  State state_ MOJO_GUARDED_BY(mutex_);
 
   // |client_| must be valid whenever it is non-null. Before |*client_| gives up
   // its reference to this object, it must call |DetachFromClient()|.
@@ -193,17 +203,6 @@ class MOJO_SYSTEM_IMPL_EXPORT ChannelEndpoint final
   scoped_refptr<ChannelEndpointClient> client_ MOJO_GUARDED_BY(mutex_);
   unsigned client_port_ MOJO_GUARDED_BY(mutex_);
 
-  // State with respect to interaction with the |Channel|.
-  enum class ChannelState {
-    // |AttachAndRun()| has not been called yet (|channel_| is null).
-    NOT_YET_ATTACHED,
-    // |AttachAndRun()| has been called, but not |DetachFromChannel()|
-    // (|channel_| is non-null and valid).
-    ATTACHED,
-    // |DetachFromChannel()| has been called (|channel_| is null).
-    DETACHED
-  };
-  ChannelState channel_state_ MOJO_GUARDED_BY(mutex_);
   // |channel_| must be valid whenever it is non-null. Before |*channel_| gives
   // up its reference to this object, it must call |DetachFromChannel()|.
   // |local_id_| and |remote_id_| are valid if and only |channel_| is non-null.

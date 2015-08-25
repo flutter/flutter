@@ -1,0 +1,14 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+group("dart") {
+  deps = [
+    "//mojo/dart/apptest",
+    "//mojo/dart/dart_snapshotter($host_toolchain)",
+    "//mojo/dart/http_load_test",
+    "//mojo/dart/mojom",
+    "//mojo/dart/mojo_services",
+    "//mojo/dart/observatory_test",
+  ]
+}

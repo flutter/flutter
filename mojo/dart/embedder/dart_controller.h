@@ -156,14 +156,10 @@ class DartController {
                              const char** arguments,
                              int arguments_count);
 
-  static void BlockWaitingForDependencies(
-      tonic::DartLibraryLoader* loader,
-      const std::unordered_set<tonic::DartDependency*>& dependencies);
+  static void BlockForServiceIsolate();
+  static void BlockForServiceIsolateLocked();
+
   static void LoadEmptyScript(const std::string& script_uri);
-  static void InnerLoadScript(const std::string& script_uri,
-                              tonic::DartLibraryProvider* library_provider);
-  static void LoadScript(const std::string& script_uri,
-                         tonic::DartLibraryProvider* library_provider);
 
   static tonic::DartLibraryProvider* library_provider_;
   static base::Lock lock_;

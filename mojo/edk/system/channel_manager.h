@@ -72,6 +72,14 @@ class MOJO_SYSTEM_IMPL_EXPORT ChannelManager {
       ChannelId channel_id,
       embedder::ScopedPlatformHandle platform_handle);
 
+  // Like |CreateChannelOnIOThread()|, but doesn't create a bootstrap message
+  // pipe. Returns the newly-created |Channel|.
+  // TODO(vtl): Maybe get rid of the others (and bootstrap message pipes in
+  // general).
+  scoped_refptr<Channel> CreateChannelWithoutBootstrapOnIOThread(
+      ChannelId channel_id,
+      embedder::ScopedPlatformHandle platform_handle);
+
   // Like |CreateChannelOnIOThread()|, but may be called from any thread. On
   // completion, will call |callback| (using |callback_thread_task_runner| if it
   // is non-null, else on the I/O thread). Note: This will always post a task to
@@ -116,8 +124,9 @@ class MOJO_SYSTEM_IMPL_EXPORT ChannelManager {
       scoped_refptr<base::TaskRunner> callback_thread_task_runner);
 
   // Used by |CreateChannelOnIOThread()| and |CreateChannelHelper()|. Called on
-  // the I/O thread.
-  void CreateChannelOnIOThreadHelper(
+  // the I/O thread. |bootstrap_channel_endpoint| is optional and may be null.
+  // Returns the newly-created |Channel|.
+  scoped_refptr<Channel> CreateChannelOnIOThreadHelper(
       ChannelId channel_id,
       embedder::ScopedPlatformHandle platform_handle,
       scoped_refptr<system::ChannelEndpoint> bootstrap_channel_endpoint);

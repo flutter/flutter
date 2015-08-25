@@ -7,6 +7,7 @@
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/gpu/public/interfaces/gpu.mojom.h"
+#include "mojo/gpu/mojo_gles2_impl_autogen.h"
 
 namespace mojo {
 
@@ -24,8 +25,7 @@ GLContext::GLContext(Shell* shell) : weak_factory_(this) {
   context_ = MojoGLES2CreateContext(
       command_buffer.PassInterface().PassHandle().release().value(),
       &ContextLostThunk, this, Environment::GetDefaultAsyncWaiter());
-  gl_ = static_cast<gpu::gles2::GLES2Interface*>(
-      MojoGLES2GetGLES2Interface(context_));
+  gl_impl_.reset(new MojoGLES2Impl(context_));
 }
 
 GLContext::~GLContext() {
@@ -42,6 +42,10 @@ void GLContext::MakeCurrent() {
 
 void GLContext::Destroy() {
   delete this;
+}
+
+gpu::gles2::GLES2Interface* GLContext::gl() const {
+  return gl_impl_.get();
 }
 
 void GLContext::AddObserver(Observer* observer) {

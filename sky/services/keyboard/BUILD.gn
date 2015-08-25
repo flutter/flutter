@@ -10,7 +10,6 @@ if (is_ios) {
     ]
     deps = [
       "//base:base",
-      "//mojo/common",
       "//mojo/public/cpp/application",
       "//mojo/services/keyboard/public/interfaces",
     ]

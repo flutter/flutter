@@ -4,7 +4,7 @@
 
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
-#include "mojo/common/data_pipe_utils.h"
+#include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "sky/services/media/ios/media_player_impl.h"
 
 #import <Foundation/Foundation.h>

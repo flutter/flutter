@@ -7,7 +7,7 @@
 #define SKY_ENGINE_CORE_LOADER_CANVASIMAGELOADER_H_
 
 #include "base/memory/weak_ptr.h"
-#include "mojo/common/data_pipe_drainer.h"
+#include "mojo/data_pipe_utils/data_pipe_drainer.h"
 #include "sky/engine/core/loader/ImageDecoderCallback.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/tonic/dart_wrappable.h"

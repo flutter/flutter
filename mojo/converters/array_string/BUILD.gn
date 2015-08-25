@@ -1,0 +1,28 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("array_string") {
+  sources = [
+    "array_string_type_converters.cc",
+    "array_string_type_converters.h",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/public/cpp/bindings",
+  ]
+}
+
+source_set("tests") {
+  testonly = true
+  sources = [
+    "array_string_type_converters_unittest.cc",
+  ]
+
+  deps = [
+    ":array_string",
+    "//base",
+    "//testing/gtest",
+  ]
+}

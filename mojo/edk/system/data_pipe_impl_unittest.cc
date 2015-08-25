@@ -2394,6 +2394,67 @@ TYPED_TEST(DataPipeImplTest, TwoPhaseMoreInvalidArguments) {
   this->ConsumerClose();
 }
 
+// Tests the behavior of writing, closing the producer, and then doing a
+// two-phase read of all the data.
+// Note: If this test fails/crashes flakily, this is almost certainly an
+// indication of a problem in the implementation and not the test.
+TYPED_TEST(DataPipeImplTest, WriteCloseProducerTwoPhaseReadAllData) {
+  const char kTestData[] = "hello world";
+  const uint32_t kTestDataSize = static_cast<uint32_t>(sizeof(kTestData));
+
+  const MojoCreateDataPipeOptions options = {
+      kSizeOfOptions,                           // |struct_size|.
+      MOJO_CREATE_DATA_PIPE_OPTIONS_FLAG_NONE,  // |flags|.
+      1u,                                       // |element_num_bytes|.
+      1000u                                     // |capacity_num_bytes|.
+  };
+  this->Create(options);
+  this->DoTransfer();
+
+  // Write some data, so we'll have something to read.
+  uint32_t num_bytes = kTestDataSize;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            this->ProducerWriteData(UserPointer<const void>(kTestData),
+                                    MakeUserPointer(&num_bytes), false));
+  EXPECT_EQ(kTestDataSize, num_bytes);
+
+  // TODO(vtl): Hack: We can't currently wait for a specified amount of data to
+  // be available, so poll.
+  for (size_t i = 0; i < kMaxPoll; i++) {
+    num_bytes = 0u;
+    EXPECT_EQ(MOJO_RESULT_OK,
+              this->ConsumerQueryData(MakeUserPointer(&num_bytes)));
+    if (num_bytes >= kTestDataSize)
+      break;
+
+    test::Sleep(test::EpsilonDeadline());
+  }
+  EXPECT_EQ(kTestDataSize, num_bytes);
+
+  const void* read_buffer_ptr = nullptr;
+  num_bytes = 0u;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            this->ConsumerBeginReadData(MakeUserPointer(&read_buffer_ptr),
+                                        MakeUserPointer(&num_bytes), false));
+  EXPECT_EQ(kTestDataSize, num_bytes);
+  EXPECT_EQ(0, memcmp(read_buffer_ptr, kTestData, kTestDataSize));
+
+  // Close the producer.
+  this->ProducerClose();
+
+  // Note: This tiny sleep is to allow/encourage a certain race. In particular,
+  // for the remote producer case in
+  // |RemoteProducerDataPipeImpl::MarkDataAsConsumed()| (caused by
+  // |ConsumerEndReadData()| below) we want |producer_open()| to be false but
+  // the call to |channel_endpoint_->EnqueueMessage()| to fail. (This race can
+  // occur without the sleep, but is much less likely.)
+  test::Sleep(10u);
+
+  EXPECT_EQ(MOJO_RESULT_OK, this->ConsumerEndReadData(num_bytes));
+
+  this->ConsumerClose();
+}
+
 }  // namespace
 }  // namespace system
 }  // namespace mojo

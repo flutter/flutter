@@ -5,8 +5,8 @@
 #include "mojo/common/interface_ptr_set.h"
 
 #include "base/message_loop/message_loop.h"
-#include "mojo/common/message_pump_mojo.h"
 #include "mojo/common/test_interfaces.mojom.h"
+#include "mojo/message_pump/message_pump_mojo.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "testing/gtest/include/gtest/gtest.h"
 

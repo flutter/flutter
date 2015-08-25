@@ -13,7 +13,7 @@ source_set("application") {
   ]
   deps = [
     "//base",
-    "//mojo/common",
+    "//mojo/message_pump",
     "//mojo/public/cpp/system",
     "//mojo/environment:chromium",
   ]
@@ -27,8 +27,8 @@ source_set("content_handler") {
   deps = [
     ":application",
     "//base",
-    "//mojo/common",
     "//mojo/environment:chromium",
+    "//mojo/message_pump",
     "//mojo/public/interfaces/application",
     "//mojo/services/content_handler/public/interfaces",
     "//mojo/services/network/public/interfaces",

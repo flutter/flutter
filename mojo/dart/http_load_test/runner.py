@@ -40,6 +40,8 @@ if __name__ == '__main__':
                       help="Path to dart executable.")
   args = parser.parse_args()
   tester_directory = os.path.dirname(os.path.realpath(__file__))
-  tester_dart_script = os.path.join(tester_directory, 'tester.dart')
+  tester_dart_script = os.path.join(tester_directory, 'bin', 'tester.dart')
+  package_directory = os.path.join(
+      args.build_dir, 'gen', 'dart-pkg', 'mojo_dart_http_load_test')
   sys.exit(main(args.build_dir, args.dart_exe, tester_dart_script,
-                tester_directory))
+                package_directory))

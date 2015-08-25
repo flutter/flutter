@@ -204,6 +204,7 @@ test("mojo_system_unittests") {
     "simple_dispatcher_unittest.cc",
     "test_channel_endpoint_client.cc",
     "test_channel_endpoint_client.h",
+    "test_utils_unittest.cc",
     "thread_annotations_unittest.cc",
     "unique_identifier_unittest.cc",
     "waiter_test_utils.cc",

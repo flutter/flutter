@@ -13,7 +13,7 @@ namespace mojo {
 
 class ApplicationImpl;
 
-class TracingImpl : public InterfaceFactory<tracing::TraceController> {
+class TracingImpl : public InterfaceFactory<tracing::TraceProvider> {
  public:
   TracingImpl();
   ~TracingImpl() override;
@@ -23,9 +23,9 @@ class TracingImpl : public InterfaceFactory<tracing::TraceController> {
   void Initialize(ApplicationImpl* app);
 
  private:
-  // InterfaceFactory<tracing::TraceController> implementation.
+  // InterfaceFactory<tracing::TraceProvider> implementation.
   void Create(ApplicationConnection* connection,
-              InterfaceRequest<tracing::TraceController> request) override;
+              InterfaceRequest<tracing::TraceProvider> request) override;
 
   DISALLOW_COPY_AND_ASSIGN(TracingImpl);
 };

@@ -5,7 +5,7 @@
 #include "mojo/common/tracing_impl.h"
 
 #include "base/trace_event/trace_event_impl.h"
-#include "mojo/common/trace_controller_impl.h"
+#include "mojo/common/trace_provider_impl.h"
 #include "mojo/public/cpp/application/application_connection.h"
 #include "mojo/public/cpp/application/application_impl.h"
 
@@ -23,8 +23,8 @@ void TracingImpl::Initialize(ApplicationImpl* app) {
 }
 
 void TracingImpl::Create(ApplicationConnection* connection,
-                         InterfaceRequest<tracing::TraceController> request) {
-  new TraceControllerImpl(request.Pass());
+                         InterfaceRequest<tracing::TraceProvider> request) {
+  new TraceProviderImpl(request.Pass());
 }
 
 }  // namespace mojo

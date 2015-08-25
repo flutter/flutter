@@ -1,0 +1,30 @@
+diff --git a/services/keyboard/src/org/chromium/mojo/keyboard/InputConnectionAdaptor.java b/services/keyboard/src/org/chromium/mojo/keyboard/InputConnectionAdaptor.java
+index 42bdd57..a3cdc61 100644
+--- a/services/keyboard/src/org/chromium/mojo/keyboard/InputConnectionAdaptor.java
++++ b/services/keyboard/src/org/chromium/mojo/keyboard/InputConnectionAdaptor.java
+@@ -4,7 +4,10 @@
+ 
+ package org.chromium.mojo.keyboard;
+ 
++import java.lang.StringBuilder;
++
+ import android.view.View;
++import android.view.KeyEvent;
+ import android.view.inputmethod.BaseInputConnection;
+ import android.view.inputmethod.CompletionInfo;
+ import android.view.inputmethod.CorrectionInfo;
+@@ -71,4 +74,14 @@ public class InputConnectionAdaptor extends BaseInputConnection {
+         mClient.setSelection(start, end);
+         return super.setSelection(start, end);
+     }
++
++    // Number keys come through as key events instead of commitText!?
++    @Override
++    public boolean sendKeyEvent(KeyEvent event) {
++        if (event.getAction() == KeyEvent.ACTION_UP) {
++            // 1 appears to always be the value for newCursorPosition?
++            mClient.commitText(String.valueOf(event.getNumber()), 1);
++        }
++        return super.sendKeyEvent(event);
++    }
+ }

@@ -15,7 +15,6 @@
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_vector.h"
-#include "base/rand_util.h"
 #include "base/threading/simple_thread.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/test_utils.h"
@@ -504,12 +503,12 @@ class WriterThread : public base::SimpleThread {
       buffer[i] = static_cast<unsigned char>(i);
 
     // Number of messages to write.
-    *messages_written_ = static_cast<size_t>(base::RandInt(1000, 6000));
+    *messages_written_ = static_cast<size_t>(test::RandomInt(1000, 6000));
 
     // Write messages.
     for (size_t i = 0; i < *messages_written_; i++) {
       uint32_t bytes_to_write = static_cast<uint32_t>(
-          base::RandInt(1, static_cast<int>(kMaxMessageSize)));
+          test::RandomInt(1, static_cast<int>(kMaxMessageSize)));
       EXPECT_EQ(MOJO_RESULT_OK,
                 write_dispatcher_->WriteMessage(UserPointer<const void>(buffer),
                                                 bytes_to_write, nullptr,

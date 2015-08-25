@@ -5,8 +5,9 @@
 #ifndef GPU_COMMAND_BUFFER_SERVICE_GL_SURFACE_MOCK_H_
 #define GPU_COMMAND_BUFFER_SERVICE_GL_SURFACE_MOCK_H_
 
-#include "ui/gl/gl_surface.h"
 #include "testing/gmock/include/gmock/gmock.h"
+#include "ui/gfx/swap_result.h"
+#include "ui/gl/gl_surface.h"
 
 namespace gpu {
 
@@ -18,8 +19,8 @@ class GLSurfaceMock : public gfx::GLSurface {
   MOCK_METHOD0(Destroy, void());
   MOCK_METHOD1(Resize, bool(const gfx::Size& size));
   MOCK_METHOD0(IsOffscreen, bool());
-  MOCK_METHOD0(SwapBuffers, bool());
-  MOCK_METHOD4(PostSubBuffer, bool(int x, int y, int width, int height));
+  MOCK_METHOD0(SwapBuffers, gfx::SwapResult());
+  MOCK_METHOD4(PostSubBuffer, gfx::SwapResult(int x, int y, int width, int height));
   MOCK_METHOD0(SupportsPostSubBuffer, bool());
   MOCK_METHOD0(GetSize, gfx::Size());
   MOCK_METHOD0(GetHandle, void*());

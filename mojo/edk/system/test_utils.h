@@ -13,6 +13,8 @@ namespace mojo {
 namespace system {
 namespace test {
 
+// Deadlines/timeouts and sleeping ---------------------------------------------
+
 MojoDeadline DeadlineFromMilliseconds(unsigned milliseconds);
 
 // A timeout smaller than |TestTimeouts::tiny_timeout()|, as a |MojoDeadline|.
@@ -31,6 +33,13 @@ MojoDeadline ActionDeadline();
 
 // Sleeps for at least the specified duration.
 void Sleep(MojoDeadline deadline);
+
+// Pseudorandom numbers for testing --------------------------------------------
+
+// Returns a (uniformly) (pseudo)random integer in the interval [min, max].
+// Currently, |max - min| must be at most |RAND_MAX| and must also be (strictly)
+// less than |INT_MAX|.
+int RandomInt(int min, int max);
 
 // Stopwatch -------------------------------------------------------------------
 

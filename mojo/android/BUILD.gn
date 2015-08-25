@@ -45,10 +45,10 @@ source_set("libsystem_java") {
   deps = [
     ":system_java_jni_headers",
     "//base",
-    "//mojo/public/cpp/environment",
-    "//mojo/common:common",
+    "//mojo/message_pump",
     "//mojo/public/c/system:system",
     "//mojo/public/cpp/bindings:callback",
+    "//mojo/public/cpp/environment",
   ]
 }
 
@@ -125,13 +125,12 @@ shared_library("mojo_java_unittests") {
     ":system_java_jni_headers",
     "//base",
     "//base/test/:test_support",
-    "//mojo/common",
-    "//mojo/edk/system",
-    "//mojo/public/cpp/bindings/tests:mojo_public_bindings_test_utils",
-    "//mojo/public/cpp/test_support:test_utils",
-    "//mojo/public/cpp/environment",
     "//mojo/edk/system",
     "//mojo/environment:chromium",
+    "//mojo/message_pump",
+    "//mojo/public/cpp/bindings/tests:mojo_public_bindings_test_utils",
+    "//mojo/public/cpp/environment",
+    "//mojo/public/cpp/test_support:test_utils",
   ]
   defines = [ "UNIT_TEST" ]
 }

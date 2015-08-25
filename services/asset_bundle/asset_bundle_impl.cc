@@ -8,7 +8,7 @@
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/logging.h"
-#include "mojo/common/data_pipe_utils.h"
+#include "mojo/data_pipe_utils/data_pipe_utils.h"
 
 namespace mojo {
 namespace asset_bundle {

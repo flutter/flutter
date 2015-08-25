@@ -5,24 +5,24 @@
 [DartPackage="mojo_services"]
 module tracing;
 
-// To participate in the tracing ecosystem, implement the TraceController
-// interface and connect to the tracing app. Then, when the controller's Start()
+// To participate in the tracing ecosystem, implement the TraceProvider
+// interface and connect to the tracing app. Then, when the provider's Start()
 // function is called collect tracing data and pass it back via the provided
-// TraceDataCollector interface up until Stop() is called.
+// TraceRecorder interface up until Stop() is called.
 
-interface TraceController {
+interface TraceProvider {
   // Categories can either be the empty string to mean the default set of
   // categories or a comma-delimited list of categories to trace.
-  StartTracing(string categories, TraceDataCollector collector);
+  StartTracing(string categories, TraceRecorder recorder);
   StopTracing();
 };
 
-interface TraceDataCollector {
-  DataCollected(string json);
+interface TraceRecorder {
+  Record(string json);
 };
 
-interface TraceCoordinator {
-  // Request tracing data from all connected TraceControllers to stream to
+interface TraceCollector {
+  // Request tracing data from all connected providers to stream to
   // |stream|.
   Start(handle<data_pipe_producer> stream, string categories);
 

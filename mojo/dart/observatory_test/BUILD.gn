@@ -4,9 +4,13 @@
 
 import("//mojo/public/dart/rules.gni")
 
-dartzip_packaged_application("observatory_test") {
+dart_pkg("observatory_test") {
+  apps = [ [
+        "dart_observatory_test",
+        "lib/main.dart",
+      ] ]
   sources = [
-    "main.dart",
+    "pubspec.yaml",
   ]
   deps = [
     "//mojo/public/dart",

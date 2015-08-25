@@ -74,7 +74,7 @@ class MOJO_SYSTEM_IMPL_EXPORT UniqueIdentifier {
 
   explicit UniqueIdentifier() {}
 
-  char data_[16];
+  unsigned char data_[16];
 
   // Copying and assignment allowed.
 };
