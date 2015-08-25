@@ -194,7 +194,7 @@ class FeedFragment extends StatefulComponent {
           dataSet.add(new Point(x, y));
       }
     }
-    if (userData.goalWeight > 0.0) {
+    if (userData.goalWeight != null && userData.goalWeight > 0.0) {
       startY = math.min(startY, userData.goalWeight);
       endY = math.max(endY, userData.goalWeight);
     }
