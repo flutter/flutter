@@ -67,6 +67,8 @@ Thumbs.db
 /examples/**/pubspec.lock
 /mojo/common/dart/packages
 /mojo/dart/apptest/packages
+/mojo/dart/http_load_test/bin/packages
+/mojo/dart/http_load_test/packages/
 /mojo/dart/mojo_services/packages
 /mojo/dart/mojo_services/pubspec.lock
 /mojo/dart/mojom/bin/packages
