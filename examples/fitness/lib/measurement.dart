@@ -132,7 +132,7 @@ class MeasurementFragment extends StatefulComponent {
     if (_errorMessage == null)
       return null;
     // TODO(jackson): This doesn't show up, unclear why.
-    return new SnackBar(content: new Text(_errorMessage));
+    return new SnackBar(content: new Text(_errorMessage), showing: true);
   }
 
   Widget build() {
