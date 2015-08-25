@@ -338,8 +338,6 @@ class Block extends Component {
 /// widget when you have a large number of children or when you are concerned
 // about offscreen widgets consuming resources.
 abstract class ScrollableWidgetList extends Scrollable {
-  static const _kEpsilon = .0000001;
-
   ScrollableWidgetList({
     Key key,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
@@ -445,24 +443,13 @@ abstract class ScrollableWidgetList extends Scrollable {
       if (paddedScrollOffset < scrollBehavior.minScrollOffset) {
         // Underscroll
         double visibleExtent = _containerExtent + paddedScrollOffset;
-        itemShowCount = (visibleExtent / itemExtent).round() + 1;
+        itemShowCount = (visibleExtent / itemExtent).ceil();
         viewportOffset = _toOffset(paddedScrollOffset);
       } else {
-        itemShowCount = (_containerExtent / itemExtent).ceil();
-        double alignmentDelta = (-paddedScrollOffset % itemExtent);
-        double drawStart = paddedScrollOffset;
-        if (alignmentDelta != 0.0) {
-          alignmentDelta -= itemExtent;
-          itemShowCount += 1;
-          drawStart += alignmentDelta;
-          viewportOffset = _toOffset(-alignmentDelta);
-        }
-        if (itemCount > 0) {
-          // floor(epsilon) = 0, floor(-epsilon) = -1, so:
-          if (drawStart.abs() < _kEpsilon)
-            drawStart = 0.0;
-          itemShowIndex = (drawStart / itemExtent).floor() % itemCount;
-        }
+        itemShowCount = (_containerExtent / itemExtent).ceil() + 1;
+        itemShowIndex = (paddedScrollOffset / itemExtent).floor();
+        viewportOffset = _toOffset(paddedScrollOffset - itemShowIndex * itemExtent);
+        itemShowIndex %= itemCount; // Wrap index for when itemWrap is true.
       }
     }
 
