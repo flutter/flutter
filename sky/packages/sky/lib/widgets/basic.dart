@@ -183,14 +183,26 @@ class Padding extends OneChildRenderObjectWrapper {
   }
 }
 
-class Center extends OneChildRenderObjectWrapper {
-  Center({ Key key, Widget child })
+class Align extends OneChildRenderObjectWrapper {
+  Align({ Key key, this.horizontal: 0.5, this.vertical: 0.5, Widget child })
     : super(key: key, child: child);
 
-  RenderPositionedBox createNode() => new RenderPositionedBox();
+  final double horizontal;
+  final double vertical;
+
+  RenderPositionedBox createNode() => new RenderPositionedBox(horizontal: horizontal, vertical: vertical);
   RenderPositionedBox get renderObject => super.renderObject;
 
-  // Nothing to sync, so we don't implement syncRenderObject()
+  void syncRenderObject(SizedBox old) {
+    super.syncRenderObject(old);
+    renderObject.horizontal = horizontal;
+    renderObject.vertical = vertical;
+  }
+}
+
+class Center extends Align {
+  Center({ Key key, Widget child })
+    : super(key: key, child: child);
 }
 
 class SizedBox extends OneChildRenderObjectWrapper {
