@@ -476,6 +476,24 @@ class Flex extends MultiChildRenderObjectWrapper {
 
 }
 
+class Row extends Flex {
+  Row(List<Widget> children, {
+    Key key,
+    justifyContent: FlexJustifyContent.start,
+    alignItems: FlexAlignItems.center,
+    textBaseline
+  }) : super(children, key: key, direction: FlexDirection.horizontal, justifyContent: justifyContent, alignItems: alignItems);
+}
+
+class Column extends Flex {
+  Column(List<Widget> children, {
+    Key key,
+    justifyContent: FlexJustifyContent.start,
+    alignItems: FlexAlignItems.center,
+    textBaseline
+  }) : super(children, key: key, direction: FlexDirection.vertical, justifyContent: justifyContent, alignItems: alignItems);
+}
+
 class Flexible extends ParentDataNode {
   Flexible({ Key key, int flex: 1, Widget child })
     : super(child, new FlexBoxParentData()..flex = flex, key: key);

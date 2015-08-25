@@ -80,7 +80,7 @@ class Dialog extends Component {
 
     if (actions != null)
       dialogBody.add(new Container(
-        child: new Flex(actions,
+        child: new Row(actions,
           justifyContent: FlexJustifyContent.end
         )
       ));
