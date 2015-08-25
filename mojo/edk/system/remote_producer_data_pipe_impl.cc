@@ -348,14 +348,19 @@ bool RemoteProducerDataPipeImpl::ConsumerEndSerialize(
 
 bool RemoteProducerDataPipeImpl::OnReadMessage(unsigned /*port*/,
                                                MessageInTransit* message) {
-  // Always take ownership of the message. (This means that we should always
-  // return true.)
-  scoped_ptr<MessageInTransit> msg(message);
-
   if (!producer_open()) {
+    // This will happen only on the rare occasion that the call to
+    // |OnReadMessage()| is racing with us calling
+    // |ChannelEndpoint::ReplaceClient()|, in which case we reject the message,
+    // and the |ChannelEndpoint| can retry (calling the new client's
+    // |OnReadMessage()|).
     DCHECK(!channel_endpoint_);
-    return true;
+    return false;
   }
+
+  // Otherwise, we take ownership of the message. (This means that we should
+  // always return true below.)
+  scoped_ptr<MessageInTransit> msg(message);
 
   if (!ValidateIncomingMessage(element_num_bytes(), capacity_num_bytes(),
                                current_num_bytes_, msg.get())) {
@@ -462,12 +467,8 @@ void RemoteProducerDataPipeImpl::Disconnect() {
   // buffer around. Currently, we won't free it even if it empties later. (We
   // could do this -- requiring a check on every read -- but that seems to be
   // optimizing for the uncommon case.)
-  if (!consumer_open() || !current_num_bytes_) {
-    // Note: There can only be a two-phase *read* (by the consumer) if we still
-    // have data.
-    DCHECK(!consumer_in_two_phase_read());
+  if (!consumer_open() || !current_num_bytes_)
     DestroyBuffer();
-  }
 }
 
 }  // namespace system

@@ -22,7 +22,7 @@ test("dart_unittests") {
     "validation_unittest.cc",
   ]
   deps = [
-    "//mojo/public/dart:mojo",
+    "//mojo/public/dart",
     "//mojo/dart/testing",
     ":dart_controller_for_test",
     ":dart_to_cpp_unittests",

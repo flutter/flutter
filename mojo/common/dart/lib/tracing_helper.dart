@@ -4,7 +4,7 @@
 
 library tracing;
 
-import 'trace_controller_impl.dart';
+import 'trace_provider_impl.dart';
 
 import 'dart:async';
 import 'dart:convert';
@@ -15,12 +15,12 @@ import 'dart:isolate';
 import 'package:mojo/application.dart';
 import 'package:mojo/bindings.dart';
 import 'package:mojo/core.dart';
-import 'package:mojom/tracing/tracing.mojom.dart';
+import 'package:mojo_services/tracing/tracing.mojom.dart';
 
 // TracingHelper is used by Dart code running in the Mojo shell in order
 // to perform tracing.
 class TracingHelper {
-  TraceControllerImpl _impl;
+  TraceProviderImpl _impl;
   String _tid;
 
   // Construct an instance of TracingHelper from within your application's
@@ -36,9 +36,9 @@ class TracingHelper {
     }
     _tid = "${appName}/${Isolate.current.hashCode.toString()}";
     ApplicationConnection connection = app.connectToApplication("mojo:tracing");
-    connection.provideService(TraceControllerName, (e) {
+    connection.provideService(TraceProviderName, (e) {
       assert(_impl == null);
-      _impl = new TraceControllerImpl.fromEndpoint(e);
+      _impl = new TraceProviderImpl.fromEndpoint(e);
     });
   }
 

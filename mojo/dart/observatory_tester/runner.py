@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 MOJO_SHELL = 'mojo_shell'
-TESTEE = 'mojo:observatory_test'
+TESTEE = 'mojo:dart_observatory_test'
 
 def main(build_dir, dart_exe, tester_script):
   shell_exe = os.path.join(build_dir, MOJO_SHELL)

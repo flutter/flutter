@@ -11,6 +11,7 @@
 #include "base/command_line.h"
 #include "base/location.h"
 #include "base/logging.h"
+#include "base/memory/scoped_ptr.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/test/test_io_thread.h"
 #include "base/test/test_timeouts.h"
@@ -36,6 +37,84 @@ namespace system {
 namespace {
 
 const char kConnectionIdFlag[] = "test-connection-id";
+
+// Tests writing a message (containing just data) to |write_mp| and then reading
+// it from |read_mp| (it should be the next message, i.e., there should be no
+// other messages already enqueued in that direction).
+void TestWriteReadMessage(scoped_refptr<MessagePipeDispatcher> write_mp,
+                          scoped_refptr<MessagePipeDispatcher> read_mp) {
+  // Set up waiting on the read end first (to avoid racing).
+  Waiter waiter;
+  waiter.Init();
+  ASSERT_EQ(
+      MOJO_RESULT_OK,
+      read_mp->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 0, nullptr));
+
+  // Write a message with just 'x' through the write end.
+  EXPECT_EQ(MOJO_RESULT_OK,
+            write_mp->WriteMessage(UserPointer<const void>("x"), 1, nullptr,
+                                   MOJO_WRITE_MESSAGE_FLAG_NONE));
+
+  // Wait for it to arrive.
+  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), nullptr));
+  read_mp->RemoveAwakable(&waiter, nullptr);
+
+  // Read the message from the read end.
+  char buffer[10] = {};
+  uint32_t buffer_size = static_cast<uint32_t>(sizeof(buffer));
+  EXPECT_EQ(MOJO_RESULT_OK,
+            read_mp->ReadMessage(UserPointer<void>(buffer),
+                                 MakeUserPointer(&buffer_size), 0, nullptr,
+                                 MOJO_READ_MESSAGE_FLAG_NONE));
+  EXPECT_EQ(1u, buffer_size);
+  EXPECT_EQ('x', buffer[0]);
+}
+
+// Writes a message pipe dispatcher (in a message) to |write_mp| and reads it
+// from |read_mp| (it should be the next message, i.e., there should be no other
+// other messages already enqueued in that direction).
+scoped_refptr<MessagePipeDispatcher> SendMessagePipeDispatcher(
+    scoped_refptr<MessagePipeDispatcher> write_mp,
+    scoped_refptr<MessagePipeDispatcher> read_mp,
+    scoped_refptr<MessagePipeDispatcher> mp_to_send) {
+  CHECK_NE(mp_to_send, write_mp);
+  CHECK_NE(mp_to_send, read_mp);
+
+  // Set up waiting on the read end first (to avoid racing).
+  Waiter waiter;
+  waiter.Init();
+  CHECK_EQ(
+      read_mp->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 0, nullptr),
+      MOJO_RESULT_OK);
+
+  // Write a message with just |mp_to_send| through the write end.
+  DispatcherTransport transport(
+      test::DispatcherTryStartTransport(mp_to_send.get()));
+  CHECK(transport.is_valid());
+  std::vector<DispatcherTransport> transports;
+  transports.push_back(transport);
+  CHECK_EQ(write_mp->WriteMessage(NullUserPointer(), 0, &transports,
+                                  MOJO_WRITE_MESSAGE_FLAG_NONE),
+           MOJO_RESULT_OK);
+  transport.End();
+
+  // Wait for it to arrive.
+  CHECK_EQ(waiter.Wait(test::ActionDeadline(), nullptr), MOJO_RESULT_OK);
+  read_mp->RemoveAwakable(&waiter, nullptr);
+
+  // Read the message from the read end.
+  DispatcherVector dispatchers;
+  uint32_t num_dispatchers = 10;
+  CHECK_EQ(
+      read_mp->ReadMessage(NullUserPointer(), NullUserPointer(), &dispatchers,
+                           &num_dispatchers, MOJO_READ_MESSAGE_FLAG_NONE),
+      MOJO_RESULT_OK);
+  CHECK_EQ(dispatchers.size(), 1u);
+  CHECK_EQ(num_dispatchers, 1u);
+  CHECK_EQ(dispatchers[0]->GetType(), Dispatcher::Type::MESSAGE_PIPE);
+  return scoped_refptr<MessagePipeDispatcher>(
+      static_cast<MessagePipeDispatcher*>(dispatchers[0].get()));
+}
 
 class TestMasterProcessDelegate : public embedder::MasterProcessDelegate {
  public:
@@ -203,18 +282,109 @@ class TestSlave {
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestSlave);
 };
 
+// Encapsulates both the master and slave sides for each slave.
+class TestSlaveSetup {
+ public:
+  TestSlaveSetup(embedder::SimplePlatformSupport* platform_support,
+                 base::TestIOThread* test_io_thread,
+                 TestMasterProcessDelegate* master_process_delegate,
+                 IPCSupport* master_ipc_support)
+      : platform_support_(platform_support),
+        test_io_thread_(test_io_thread),
+        master_process_delegate_(master_process_delegate),
+        master_ipc_support_(master_ipc_support) {}
+  ~TestSlaveSetup() {
+    CHECK(!slave_connection_);
+    CHECK(!slave_);
+  }
+
+  void Init() {
+    // Set up the master side entirely before the slave side, since this
+    // simulates what's likely to happen "in reality" more closely.
+    slave_connection_.reset(
+        new TestSlaveConnection(test_io_thread_, master_ipc_support_));
+    master_mp_ = slave_connection_->ConnectToSlave();
+
+    slave_.reset(new TestSlave(platform_support_, test_io_thread_,
+                               slave_connection_->PassSlavePlatformHandle()));
+    slave_mp_ = slave_->ConnectToMaster(slave_connection_->connection_id());
+  }
+
+  void TestConnection() {
+    TestWriteReadMessage(master_mp_, slave_mp_);
+    TestWriteReadMessage(slave_mp_, master_mp_);
+  }
+
+  scoped_refptr<MessagePipeDispatcher> PassMasterMessagePipe() {
+    return master_mp_.Pass();
+  }
+
+  scoped_refptr<MessagePipeDispatcher> PassSlaveMessagePipe() {
+    return slave_mp_.Pass();
+  }
+
+  void Shutdown() {
+    if (master_mp_) {
+      master_mp_->Close();
+      master_mp_ = nullptr;
+    }
+    if (slave_mp_) {
+      slave_mp_->Close();
+      slave_mp_ = nullptr;
+    }
+
+    slave_->ShutdownChannelToMaster();
+    slave_->ShutdownIPCSupport();
+    EXPECT_TRUE(master_process_delegate_->TryWaitForOnSlaveDisconnect());
+    slave_connection_->ShutdownChannelToSlave();
+
+    slave_.reset();
+    slave_connection_.reset();
+  }
+
+  TestSlaveConnection* slave_connection() { return slave_connection_.get(); }
+  // Note: To close the master message pipe, use |PassMasterMessagePipe()|.
+  MessagePipeDispatcher* master_mp() { return master_mp_.get(); }
+
+  TestSlave* slave() { return slave_.get(); }
+  // Note: To close the slave message pipe, use |PassSlaveMessagePipe()|.
+  MessagePipeDispatcher* slave_mp() { return slave_mp_.get(); }
+
+ private:
+  embedder::SimplePlatformSupport* const platform_support_;
+  base::TestIOThread* const test_io_thread_;
+  TestMasterProcessDelegate* const master_process_delegate_;
+  IPCSupport* const master_ipc_support_;
+
+  scoped_ptr<TestSlaveConnection> slave_connection_;
+  scoped_refptr<MessagePipeDispatcher> master_mp_;
+
+  scoped_ptr<TestSlave> slave_;
+  scoped_refptr<MessagePipeDispatcher> slave_mp_;
+
+  MOJO_DISALLOW_COPY_AND_ASSIGN(TestSlaveSetup);
+};
+
 class IPCSupportTest : public testing::Test {
  public:
   // Note: Run master process delegate methods on the I/O thread.
   IPCSupportTest()
       : test_io_thread_(base::TestIOThread::kAutoStart),
-        master_ipc_support_(&platform_support(),
+        master_ipc_support_(&platform_support_,
                             embedder::ProcessType::MASTER,
                             test_io_thread_.task_runner(),
                             &master_process_delegate_,
                             test_io_thread_.task_runner(),
                             embedder::ScopedPlatformHandle()) {}
   ~IPCSupportTest() override {}
+
+  scoped_ptr<TestSlaveSetup> SetupSlave() {
+    scoped_ptr<TestSlaveSetup> s(
+        new TestSlaveSetup(&platform_support_, &test_io_thread_,
+                           &master_process_delegate_, &master_ipc_support_));
+    s->Init();
+    return s;
+  }
 
   void ShutdownMasterIPCSupport() {
     test_io_thread_.PostTaskAndWait(
@@ -242,38 +412,6 @@ class IPCSupportTest : public testing::Test {
   MOJO_DISALLOW_COPY_AND_ASSIGN(IPCSupportTest);
 };
 
-// Tests writing a message (containing just data) to |write_mp| and then reading
-// it from |read_mp| (it should be the next message, i.e., there should be no
-// other messages already enqueued in that direction).
-void TestWriteReadMessage(scoped_refptr<MessagePipeDispatcher> write_mp,
-                          scoped_refptr<MessagePipeDispatcher> read_mp) {
-  // Set up waiting on the read end first (to avoid racing).
-  Waiter waiter;
-  waiter.Init();
-  ASSERT_EQ(
-      MOJO_RESULT_OK,
-      read_mp->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 0, nullptr));
-
-  // Write a message with just 'x' through the write end.
-  EXPECT_EQ(MOJO_RESULT_OK,
-            write_mp->WriteMessage(UserPointer<const void>("x"), 1, nullptr,
-                                   MOJO_WRITE_MESSAGE_FLAG_NONE));
-
-  // Wait for it to arrive.
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), nullptr));
-  read_mp->RemoveAwakable(&waiter, nullptr);
-
-  // Read the message from the read end.
-  char buffer[10] = {};
-  uint32_t buffer_size = static_cast<uint32_t>(sizeof(buffer));
-  EXPECT_EQ(MOJO_RESULT_OK,
-            read_mp->ReadMessage(UserPointer<void>(buffer),
-                                 MakeUserPointer(&buffer_size), 0, nullptr,
-                                 MOJO_READ_MESSAGE_FLAG_NONE));
-  EXPECT_EQ(1u, buffer_size);
-  EXPECT_EQ('x', buffer[0]);
-}
-
 using MessagePipeDispatcherPair =
     std::pair<scoped_refptr<MessagePipeDispatcher>,
               scoped_refptr<MessagePipeDispatcher>>;
@@ -289,83 +427,23 @@ MessagePipeDispatcherPair CreateMessagePipe() {
   return rv;
 }
 
-// Writes a message pipe dispatcher (in a message) to |write_mp| and reads it
-// from |read_mp| (it should be the next message, i.e., there should be no other
-// other messages already enqueued in that direction).
-scoped_refptr<MessagePipeDispatcher> SendMessagePipeDispatcher(
-    scoped_refptr<MessagePipeDispatcher> write_mp,
-    scoped_refptr<MessagePipeDispatcher> read_mp,
-    scoped_refptr<MessagePipeDispatcher> mp_to_send) {
-  CHECK_NE(mp_to_send, write_mp);
-  CHECK_NE(mp_to_send, read_mp);
-
-  // Set up waiting on the read end first (to avoid racing).
-  Waiter waiter;
-  waiter.Init();
-  CHECK_EQ(
-      read_mp->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 0, nullptr),
-      MOJO_RESULT_OK);
-
-  // Write a message with just |mp_to_send| through the write end.
-  DispatcherTransport transport(
-      test::DispatcherTryStartTransport(mp_to_send.get()));
-  CHECK(transport.is_valid());
-  std::vector<DispatcherTransport> transports;
-  transports.push_back(transport);
-  CHECK_EQ(write_mp->WriteMessage(NullUserPointer(), 0, &transports,
-                                  MOJO_WRITE_MESSAGE_FLAG_NONE),
-           MOJO_RESULT_OK);
-  transport.End();
-
-  // Wait for it to arrive.
-  CHECK_EQ(waiter.Wait(test::ActionDeadline(), nullptr), MOJO_RESULT_OK);
-  read_mp->RemoveAwakable(&waiter, nullptr);
-
-  // Read the message from the read end.
-  DispatcherVector dispatchers;
-  uint32_t num_dispatchers = 10;
-  CHECK_EQ(
-      read_mp->ReadMessage(NullUserPointer(), NullUserPointer(), &dispatchers,
-                           &num_dispatchers, MOJO_READ_MESSAGE_FLAG_NONE),
-      MOJO_RESULT_OK);
-  CHECK_EQ(dispatchers.size(), 1u);
-  CHECK_EQ(num_dispatchers, 1u);
-  CHECK_EQ(dispatchers[0]->GetType(), Dispatcher::Type::MESSAGE_PIPE);
-  return scoped_refptr<MessagePipeDispatcher>(
-      static_cast<MessagePipeDispatcher*>(dispatchers[0].get()));
-}
-
 TEST_F(IPCSupportTest, MasterSlave) {
-  TestSlaveConnection slave_connection(&test_io_thread(),
-                                       &master_ipc_support());
-  scoped_refptr<MessagePipeDispatcher> master_mp =
-      slave_connection.ConnectToSlave();
+  scoped_ptr<TestSlaveSetup> s(SetupSlave());
 
-  TestSlave slave(&platform_support(), &test_io_thread(),
-                  slave_connection.PassSlavePlatformHandle());
-  scoped_refptr<MessagePipeDispatcher> slave_mp =
-      slave.ConnectToMaster(slave_connection.connection_id());
-
-  // Test that we can send a message from the master to the slave.
-  TestWriteReadMessage(master_mp, slave_mp);
-  // And vice versa.
-  TestWriteReadMessage(slave_mp, master_mp);
+  s->TestConnection();
 
   // Don't need the message pipe anymore.
-  master_mp->Close();
-  slave_mp->Close();
+  s->PassMasterMessagePipe()->Close();
+  s->PassSlaveMessagePipe()->Close();
 
   // A message was sent through the message pipe, |Channel|s must have been
   // established on both sides. The events have thus almost certainly been
   // signalled, but we'll wait just to be sure.
-  slave_connection.WaitForChannelToSlave();
-  slave.WaitForChannelToMaster();
+  s->slave_connection()->WaitForChannelToSlave();
+  s->slave()->WaitForChannelToMaster();
 
-  slave.ShutdownChannelToMaster();
-  slave.ShutdownIPCSupport();
-  EXPECT_TRUE(master_process_delegate().TryWaitForOnSlaveDisconnect());
+  s->Shutdown();
 
-  slave_connection.ShutdownChannelToSlave();
   ShutdownMasterIPCSupport();
 }
 
@@ -378,47 +456,28 @@ TEST_F(IPCSupportTest, MasterSlave) {
 // TODO(vtl): In this scenario, we can't test the intermediary (the master)
 // going away.
 TEST_F(IPCSupportTest, ConnectTwoSlaves) {
-  TestSlaveConnection slave1_connection(&test_io_thread(),
-                                        &master_ipc_support());
-  scoped_refptr<MessagePipeDispatcher> master_mp1 =
-      slave1_connection.ConnectToSlave();
-
-  TestSlave slave1(&platform_support(), &test_io_thread(),
-                   slave1_connection.PassSlavePlatformHandle());
-  scoped_refptr<MessagePipeDispatcher> slave1_mp =
-      slave1.ConnectToMaster(slave1_connection.connection_id());
-
-  TestSlaveConnection slave2_connection(&test_io_thread(),
-                                        &master_ipc_support());
-  scoped_refptr<MessagePipeDispatcher> master_mp2 =
-      slave2_connection.ConnectToSlave();
-
-  TestSlave slave2(&platform_support(), &test_io_thread(),
-                   slave2_connection.PassSlavePlatformHandle());
-  scoped_refptr<MessagePipeDispatcher> slave2_mp =
-      slave2.ConnectToMaster(slave2_connection.connection_id());
-
-  TestWriteReadMessage(master_mp1, slave1_mp);
-  TestWriteReadMessage(slave1_mp, master_mp1);
-  TestWriteReadMessage(master_mp2, slave2_mp);
-  TestWriteReadMessage(slave2_mp, master_mp2);
+  scoped_ptr<TestSlaveSetup> s1(SetupSlave());
+  scoped_ptr<TestSlaveSetup> s2(SetupSlave());
+  s1->TestConnection();
+  s2->TestConnection();
 
   // Make a message pipe (logically "in" the master) and send one end to each
   // slave.
-  MessagePipeDispatcherPair send_mps = CreateMessagePipe();
+  MessagePipeDispatcherPair send_mp = CreateMessagePipe();
   scoped_refptr<MessagePipeDispatcher> slave1_received_mp =
-      SendMessagePipeDispatcher(master_mp1, slave1_mp, send_mps.first);
+      SendMessagePipeDispatcher(s1->master_mp(), s1->slave_mp(), send_mp.first);
   scoped_refptr<MessagePipeDispatcher> slave2_received_mp =
-      SendMessagePipeDispatcher(master_mp2, slave2_mp, send_mps.second);
+      SendMessagePipeDispatcher(s2->master_mp(), s2->slave_mp(),
+                                send_mp.second);
 
   // These should be connected.
   TestWriteReadMessage(slave1_received_mp, slave2_received_mp);
   TestWriteReadMessage(slave2_received_mp, slave1_received_mp);
 
-  master_mp1->Close();
-  master_mp2->Close();
-  slave1_mp->Close();
-  slave2_mp->Close();
+  s1->PassMasterMessagePipe()->Close();
+  s2->PassMasterMessagePipe()->Close();
+  s1->PassSlaveMessagePipe()->Close();
+  s2->PassSlaveMessagePipe()->Close();
 
   // They should still be connected.
   TestWriteReadMessage(slave1_received_mp, slave2_received_mp);
@@ -427,15 +486,95 @@ TEST_F(IPCSupportTest, ConnectTwoSlaves) {
   slave1_received_mp->Close();
   slave2_received_mp->Close();
 
-  slave1.ShutdownChannelToMaster();
-  slave1.ShutdownIPCSupport();
-  EXPECT_TRUE(master_process_delegate().TryWaitForOnSlaveDisconnect());
-  slave1_connection.ShutdownChannelToSlave();
+  s1->Shutdown();
+  s2->Shutdown();
 
-  slave2.ShutdownChannelToMaster();
-  slave2.ShutdownIPCSupport();
-  EXPECT_TRUE(master_process_delegate().TryWaitForOnSlaveDisconnect());
-  slave2_connection.ShutdownChannelToSlave();
+  ShutdownMasterIPCSupport();
+}
+
+// Like |ConnectTwoSlaves|, but does it twice, to test reusing a connection.
+TEST_F(IPCSupportTest, ConnectTwoSlavesTwice) {
+  scoped_ptr<TestSlaveSetup> s1(SetupSlave());
+  scoped_ptr<TestSlaveSetup> s2(SetupSlave());
+  s1->TestConnection();
+  s2->TestConnection();
+
+  MessagePipeDispatcherPair send_mp1 = CreateMessagePipe();
+  scoped_refptr<MessagePipeDispatcher> slave1_received_mp1 =
+      SendMessagePipeDispatcher(s1->master_mp(), s1->slave_mp(),
+                                send_mp1.first);
+  scoped_refptr<MessagePipeDispatcher> slave2_received_mp1 =
+      SendMessagePipeDispatcher(s2->master_mp(), s2->slave_mp(),
+                                send_mp1.second);
+
+  MessagePipeDispatcherPair send_mp2 = CreateMessagePipe();
+  scoped_refptr<MessagePipeDispatcher> slave1_received_mp2 =
+      SendMessagePipeDispatcher(s1->master_mp(), s1->slave_mp(),
+                                send_mp2.first);
+  scoped_refptr<MessagePipeDispatcher> slave2_received_mp2 =
+      SendMessagePipeDispatcher(s2->master_mp(), s2->slave_mp(),
+                                send_mp2.second);
+
+  s1->PassMasterMessagePipe()->Close();
+  s2->PassMasterMessagePipe()->Close();
+  s1->PassSlaveMessagePipe()->Close();
+  s2->PassSlaveMessagePipe()->Close();
+
+  TestWriteReadMessage(slave1_received_mp1, slave2_received_mp1);
+  TestWriteReadMessage(slave2_received_mp1, slave1_received_mp1);
+
+  TestWriteReadMessage(slave1_received_mp2, slave2_received_mp2);
+  TestWriteReadMessage(slave2_received_mp2, slave1_received_mp2);
+
+  slave1_received_mp1->Close();
+  slave2_received_mp1->Close();
+
+  TestWriteReadMessage(slave1_received_mp2, slave2_received_mp2);
+  TestWriteReadMessage(slave2_received_mp2, slave1_received_mp2);
+
+  slave1_received_mp2->Close();
+  slave2_received_mp2->Close();
+
+  s1->Shutdown();
+  s2->Shutdown();
+
+  ShutdownMasterIPCSupport();
+}
+
+// Creates a message pipe in the slave, which sends both ends (in separate
+// messages) to the master.
+TEST_F(IPCSupportTest, SlavePassBackToMaster) {
+  scoped_ptr<TestSlaveSetup> s(SetupSlave());
+
+  s->TestConnection();
+
+  // Make a message pipe (logically "in" the slave) and send both ends
+  // (separately) to the master.
+  MessagePipeDispatcherPair send_mp = CreateMessagePipe();
+  scoped_refptr<MessagePipeDispatcher> received_mp1 =
+      SendMessagePipeDispatcher(s->slave_mp(), s->master_mp(), send_mp.first);
+
+  TestWriteReadMessage(received_mp1, send_mp.second);
+  TestWriteReadMessage(send_mp.second, received_mp1);
+
+  scoped_refptr<MessagePipeDispatcher> received_mp2 =
+      SendMessagePipeDispatcher(s->slave_mp(), s->master_mp(), send_mp.second);
+
+  s->PassMasterMessagePipe()->Close();
+  s->PassSlaveMessagePipe()->Close();
+
+  TestWriteReadMessage(received_mp1, received_mp2);
+  TestWriteReadMessage(received_mp2, received_mp1);
+
+  s->Shutdown();
+
+  // These should still be connected.
+  // TODO(vtl): This is not yet implemented, thus will fail here!
+  // TestWriteReadMessage(received_mp1, received_mp2);
+  // TestWriteReadMessage(received_mp2, received_mp1);
+
+  received_mp1->Close();
+  received_mp2->Close();
 
   ShutdownMasterIPCSupport();
 }

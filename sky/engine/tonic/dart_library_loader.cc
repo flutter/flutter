@@ -6,7 +6,7 @@
 
 #include "base/callback.h"
 #include "base/trace_event/trace_event.h"
-#include "mojo/common/data_pipe_drainer.h"
+#include "mojo/data_pipe_utils/data_pipe_drainer.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_dependency_catcher.h"

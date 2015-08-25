@@ -11,7 +11,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
-#include "mojo/common/data_pipe_drainer.h"
+#include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
 namespace blink {
 class DartState;

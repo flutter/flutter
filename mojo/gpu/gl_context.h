@@ -17,6 +17,7 @@ class GLES2Interface;
 }
 
 namespace mojo {
+class MojoGLES2Impl;
 class Shell;
 
 class GLContext {
@@ -34,7 +35,7 @@ class GLContext {
   void MakeCurrent();
   void Destroy();
 
-  gpu::gles2::GLES2Interface* gl() const { return gl_; }
+  gpu::gles2::GLES2Interface* gl() const;
 
   void AddObserver(Observer* observer);
   void RemoveObserver(Observer* observer);
@@ -47,7 +48,7 @@ class GLContext {
   void OnContextLost();
 
   MojoGLES2Context context_;
-  gpu::gles2::GLES2Interface* gl_;
+  scoped_ptr<MojoGLES2Impl> gl_impl_;
 
   base::ObserverList<Observer> observers_;
   base::WeakPtrFactory<GLContext> weak_factory_;

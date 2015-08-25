@@ -9,7 +9,7 @@
 #include "base/files/file_path.h"
 #include "base/threading/worker_pool.h"
 #include "base/trace_event/trace_event.h"
-#include "mojo/common/data_pipe_utils.h"
+#include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "services/asset_bundle/asset_unpacker_job.h"
 #include "sky/engine/public/platform/WebInputEvent.h"

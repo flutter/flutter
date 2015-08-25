@@ -12,13 +12,36 @@ config("gles2_use_mojo") {
   defines = [ "GLES2_USE_MOJO" ]
 }
 
-source_set("gles2") {
+source_set("control_thunks") {
   sources = [
     "command_buffer_client_impl.cc",
     "command_buffer_client_impl.h",
-    "gles2_impl.cc",
+    "control_thunks_impl.cc",
+    "control_thunks_impl.h",
     "gles2_context.cc",
     "gles2_context.h",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/public/c/system",
+    "//gpu/command_buffer/client",
+    "//gpu/command_buffer/client:gles2_cmd_helper",
+    "//gpu/command_buffer/client:gles2_implementation",
+    "//gpu/command_buffer/common",
+    "//mojo/public/c/gles2:headers",
+    "//mojo/public/c/gpu:MGL",
+    "//mojo/public/c/gpu:MGL_onscreen",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//services/gles2:lib",
+    "//mojo/services/gpu/public/interfaces",
+  ]
+}
+
+source_set("gles2") {
+  sources = [
+    "gles2_impl.cc",
   ]
 
   defines = [
@@ -34,19 +57,26 @@ source_set("gles2") {
   all_dependent_configs = [ ":mojo_use_gles2" ]
 
   deps = [
-    "//base",
-    "//base/third_party/dynamic_annotations",
-    "//gpu/command_buffer/client",
-    "//gpu/command_buffer/client:gles2_cmd_helper",
-    "//gpu/command_buffer/client:gles2_implementation",
+    ":control_thunks",
     "//gpu/command_buffer/client:gles2_interface",
-    "//gpu/command_buffer/common",
-    "//mojo/environment:chromium",
     "//mojo/public/c/gles2:headers",
-    "//mojo/public/c/system",
-    "//mojo/public/cpp/bindings",
+    "//mojo/public/c/gpu:MGL",
+  ]
+}
+
+source_set("mgl") {
+  sources = [
+    "mgl_impl.cc",
+  ]
+
+  configs += [ ":gles2_use_mojo" ]
+
+  deps = [
+    ":control_thunks",
+    ":gles2",
+    "//mojo/public/c/gles2:headers",
+    "//mojo/public/c/gpu:MGL",
+    "//mojo/public/c/gpu:MGL_onscreen",
     "//mojo/public/cpp/system",
-    "//mojo/services/gpu/public/interfaces",
-    "//services/gles2:lib",
   ]
 }

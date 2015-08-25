@@ -57,7 +57,7 @@ source_set("tonic") {
 
   deps = [
     "//base",
-    "//mojo/common",
+    "//mojo/data_pipe_utils",
     "//mojo/public/cpp/system",
     "//sky/engine/wtf",
   ]

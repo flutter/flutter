@@ -168,6 +168,9 @@ TEST_F(ChannelManagerTest, CallsFromOtherThread) {
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
 }
 
+// TODO(vtl): Test |CreateChannelWithoutBootstrapOnIOThread()|. (This will
+// require additional functionality in |Channel|.)
+
 }  // namespace
 }  // namespace system
 }  // namespace mojo

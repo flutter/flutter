@@ -11,9 +11,16 @@
 #include "mojo/gpu/mojo_gles2_impl_autogen.h"
 
 #include "base/logging.h"
+#include "mojo/public/c/gles2/chromium_bind_uniform_location.h"
+#include "mojo/public/c/gles2/chromium_map_sub.h"
+#include "mojo/public/c/gles2/chromium_miscellaneous.h"
 #include "mojo/public/c/gles2/chromium_sync_point.h"
 #include "mojo/public/c/gles2/chromium_texture_mailbox.h"
+#include "mojo/public/c/gles2/ext_debug_marker.h"
 #include "mojo/public/c/gles2/gles2.h"
+#include "mojo/public/c/gles2/occlusion_query_ext.h"
+#include "mojo/public/c/gles2/oes_vertex_array_object.h"
+#include "mojo/public/c/gpu/MGL/mgl_onscreen.h"
 
 namespace mojo {
 
@@ -771,8 +778,8 @@ void MojoGLES2Impl::ShallowFinishCHROMIUM() {
   NOTREACHED() << "Unimplemented ShallowFinishCHROMIUM.";
 }
 void MojoGLES2Impl::ShallowFlushCHROMIUM() {
-  return static_cast<gpu::gles2::GLES2Interface*>(
-             MojoGLES2GetGLES2Interface(context_))->ShallowFlushCHROMIUM();
+  MojoGLES2MakeCurrent(context_);
+  glShallowFlushCHROMIUM();
 }
 void MojoGLES2Impl::OrderingBarrierCHROMIUM() {
   NOTREACHED() << "Unimplemented OrderingBarrierCHROMIUM.";
@@ -1203,63 +1210,68 @@ void MojoGLES2Impl::TexStorage2DEXT(GLenum target,
   NOTREACHED() << "Unimplemented TexStorage2DEXT.";
 }
 void MojoGLES2Impl::GenQueriesEXT(GLsizei n, GLuint* queries) {
-  return static_cast<gpu::gles2::GLES2Interface*>(
-             MojoGLES2GetGLES2Interface(context_))->GenQueriesEXT(n, queries);
+  MojoGLES2MakeCurrent(context_);
+  glGenQueriesEXT(n, queries);
 }
 void MojoGLES2Impl::DeleteQueriesEXT(GLsizei n, const GLuint* queries) {
-  return static_cast<gpu::gles2::GLES2Interface*>(
-             MojoGLES2GetGLES2Interface(context_))
-      ->DeleteQueriesEXT(n, queries);
+  MojoGLES2MakeCurrent(context_);
+  glDeleteQueriesEXT(n, queries);
 }
 GLboolean MojoGLES2Impl::IsQueryEXT(GLuint id) {
-  NOTREACHED() << "Unimplemented IsQueryEXT.";
-  return 0;
+  MojoGLES2MakeCurrent(context_);
+  return glIsQueryEXT(id);
 }
 void MojoGLES2Impl::BeginQueryEXT(GLenum target, GLuint id) {
-  return static_cast<gpu::gles2::GLES2Interface*>(
-             MojoGLES2GetGLES2Interface(context_))->BeginQueryEXT(target, id);
+  MojoGLES2MakeCurrent(context_);
+  glBeginQueryEXT(target, id);
 }
 void MojoGLES2Impl::BeginTransformFeedback(GLenum primitivemode) {
   NOTREACHED() << "Unimplemented BeginTransformFeedback.";
 }
 void MojoGLES2Impl::EndQueryEXT(GLenum target) {
-  return static_cast<gpu::gles2::GLES2Interface*>(
-             MojoGLES2GetGLES2Interface(context_))->EndQueryEXT(target);
+  MojoGLES2MakeCurrent(context_);
+  glEndQueryEXT(target);
 }
 void MojoGLES2Impl::EndTransformFeedback() {
   NOTREACHED() << "Unimplemented EndTransformFeedback.";
 }
 void MojoGLES2Impl::GetQueryivEXT(GLenum target, GLenum pname, GLint* params) {
-  NOTREACHED() << "Unimplemented GetQueryivEXT.";
+  MojoGLES2MakeCurrent(context_);
+  glGetQueryivEXT(target, pname, params);
 }
 void MojoGLES2Impl::GetQueryObjectuivEXT(GLuint id,
                                          GLenum pname,
                                          GLuint* params) {
-  return static_cast<gpu::gles2::GLES2Interface*>(
-             MojoGLES2GetGLES2Interface(context_))
-      ->GetQueryObjectuivEXT(id, pname, params);
+  MojoGLES2MakeCurrent(context_);
+  glGetQueryObjectuivEXT(id, pname, params);
 }
 void MojoGLES2Impl::InsertEventMarkerEXT(GLsizei length, const GLchar* marker) {
-  NOTREACHED() << "Unimplemented InsertEventMarkerEXT.";
+  MojoGLES2MakeCurrent(context_);
+  glInsertEventMarkerEXT(length, marker);
 }
 void MojoGLES2Impl::PushGroupMarkerEXT(GLsizei length, const GLchar* marker) {
-  NOTREACHED() << "Unimplemented PushGroupMarkerEXT.";
+  MojoGLES2MakeCurrent(context_);
+  glPushGroupMarkerEXT(length, marker);
 }
 void MojoGLES2Impl::PopGroupMarkerEXT() {
-  NOTREACHED() << "Unimplemented PopGroupMarkerEXT.";
+  MojoGLES2MakeCurrent(context_);
+  glPopGroupMarkerEXT();
 }
 void MojoGLES2Impl::GenVertexArraysOES(GLsizei n, GLuint* arrays) {
-  NOTREACHED() << "Unimplemented GenVertexArraysOES.";
+  MojoGLES2MakeCurrent(context_);
+  glGenVertexArraysOES(n, arrays);
 }
 void MojoGLES2Impl::DeleteVertexArraysOES(GLsizei n, const GLuint* arrays) {
-  NOTREACHED() << "Unimplemented DeleteVertexArraysOES.";
+  MojoGLES2MakeCurrent(context_);
+  glDeleteVertexArraysOES(n, arrays);
 }
 GLboolean MojoGLES2Impl::IsVertexArrayOES(GLuint array) {
-  NOTREACHED() << "Unimplemented IsVertexArrayOES.";
-  return 0;
+  MojoGLES2MakeCurrent(context_);
+  return glIsVertexArrayOES(array);
 }
 void MojoGLES2Impl::BindVertexArrayOES(GLuint array) {
-  NOTREACHED() << "Unimplemented BindVertexArrayOES.";
+  MojoGLES2MakeCurrent(context_);
+  glBindVertexArrayOES(array);
 }
 void MojoGLES2Impl::SwapBuffers() {
   NOTREACHED() << "Unimplemented SwapBuffers.";
@@ -1287,11 +1299,12 @@ void* MojoGLES2Impl::MapBufferSubDataCHROMIUM(GLuint target,
                                               GLintptr offset,
                                               GLsizeiptr size,
                                               GLenum access) {
-  NOTREACHED() << "Unimplemented MapBufferSubDataCHROMIUM.";
-  return 0;
+  MojoGLES2MakeCurrent(context_);
+  return glMapBufferSubDataCHROMIUM(target, offset, size, access);
 }
 void MojoGLES2Impl::UnmapBufferSubDataCHROMIUM(const void* mem) {
-  NOTREACHED() << "Unimplemented UnmapBufferSubDataCHROMIUM.";
+  MojoGLES2MakeCurrent(context_);
+  glUnmapBufferSubDataCHROMIUM(mem);
 }
 void* MojoGLES2Impl::MapBufferRange(GLenum target,
                                     GLintptr offset,
@@ -1313,20 +1326,19 @@ void* MojoGLES2Impl::MapTexSubImage2DCHROMIUM(GLenum target,
                                               GLenum format,
                                               GLenum type,
                                               GLenum access) {
-  return static_cast<gpu::gles2::GLES2Interface*>(
-             MojoGLES2GetGLES2Interface(context_))
-      ->MapTexSubImage2DCHROMIUM(target, level, xoffset, yoffset, width, height,
-                                 format, type, access);
+  MojoGLES2MakeCurrent(context_);
+  return glMapTexSubImage2DCHROMIUM(target, level, xoffset, yoffset, width,
+                                    height, format, type, access);
 }
 void MojoGLES2Impl::UnmapTexSubImage2DCHROMIUM(const void* mem) {
-  return static_cast<gpu::gles2::GLES2Interface*>(
-             MojoGLES2GetGLES2Interface(context_))
-      ->UnmapTexSubImage2DCHROMIUM(mem);
+  MojoGLES2MakeCurrent(context_);
+  glUnmapTexSubImage2DCHROMIUM(mem);
 }
 void MojoGLES2Impl::ResizeCHROMIUM(GLuint width,
                                    GLuint height,
                                    GLfloat scale_factor) {
-  NOTREACHED() << "Unimplemented ResizeCHROMIUM.";
+  MojoGLES2MakeCurrent(context_);
+  MGLResizeSurface(width, height);
 }
 const GLchar* MojoGLES2Impl::GetRequestableExtensionsCHROMIUM() {
   NOTREACHED() << "Unimplemented GetRequestableExtensionsCHROMIUM.";
@@ -1460,7 +1472,8 @@ GLuint MojoGLES2Impl::CreateAndConsumeTextureCHROMIUM(GLenum target,
 void MojoGLES2Impl::BindUniformLocationCHROMIUM(GLuint program,
                                                 GLint location,
                                                 const char* name) {
-  NOTREACHED() << "Unimplemented BindUniformLocationCHROMIUM.";
+  MojoGLES2MakeCurrent(context_);
+  glBindUniformLocationCHROMIUM(program, location, name);
 }
 void MojoGLES2Impl::GenValuebuffersCHROMIUM(GLsizei n, GLuint* buffers) {
   NOTREACHED() << "Unimplemented GenValuebuffersCHROMIUM.";

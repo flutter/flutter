@@ -13,11 +13,11 @@
 #include "base/sys_info.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
-#include "mojo/common/message_pump_mojo.h"
 #include "mojo/dart/embedder/builtin.h"
 #include "mojo/dart/embedder/dart_controller.h"
 #include "mojo/dart/embedder/mojo_dart_state.h"
 #include "mojo/dart/embedder/vmservice.h"
+#include "mojo/message_pump/message_pump_mojo.h"
 #include "mojo/public/c/system/core.h"
 #include "tonic/dart_converter.h"
 #include "tonic/dart_debugger.h"
@@ -27,6 +27,7 @@
 #include "tonic/dart_library_provider.h"
 #include "tonic/dart_library_provider_files.h"
 #include "tonic/dart_library_provider_network.h"
+#include "tonic/dart_script_loader_sync.h"
 
 namespace mojo {
 namespace dart {
@@ -38,6 +39,8 @@ static const char* kAsyncLibURL = "dart:async";
 static const char* kInternalLibURL = "dart:_internal";
 static const char* kIsolateLibURL = "dart:isolate";
 static const char* kCoreLibURL = "dart:core";
+
+static uint8_t snapshot_magic_number[] = { 0xf5, 0xf5, 0xdc, 0xdc };
 
 static Dart_Handle SetWorkingDirectory(Dart_Handle builtin_lib) {
   base::FilePath current_dir;
@@ -299,6 +302,8 @@ Dart_Isolate DartController::CreateIsolateHelper(
     } else {
       package_root_str = package_root.c_str();
     }
+    isolate_data->library_loader().set_magic_number(
+        snapshot_magic_number, sizeof(snapshot_magic_number));
     if (use_network_loader) {
       mojo::NetworkService* network_service = isolate_data->network_service();
       isolate_data->set_library_provider(
@@ -349,10 +354,19 @@ Dart_Isolate DartController::CreateIsolateHelper(
       // Special case for starting and stopping the the handle watcher isolate.
       LoadEmptyScript(script_uri);
     } else {
-      LoadScript(script_uri, isolate_data->library_provider());
+      tonic::DartScriptLoaderSync::LoadScript(
+          script_uri,
+          isolate_data->library_provider());
     }
 
     InitializeDartMojoIo();
+  }
+
+  if (isolate_data->library_loader().error_during_loading()) {
+    *error = strdup("Library loader reported error during loading. See log.");
+    Dart_EnterIsolate(isolate);
+    Dart_ShutdownIsolate();
+    return nullptr;
   }
 
   // Make the isolate runnable so that it is ready to handle messages.
@@ -606,32 +620,22 @@ void DartController::InitVmIfNeeded(Dart_EntropySource entropy,
                            nullptr, nullptr, nullptr, nullptr,
                            entropy);
   CHECK(result);
+  initialized_ = true;
+}
+
+void DartController::BlockForServiceIsolate() {
+  base::AutoLock al(lock_);
+  BlockForServiceIsolateLocked();
+}
+
+void DartController::BlockForServiceIsolateLocked() {
+  if (service_isolate_running_) {
+    return;
+  }
   // By waiting for the load port, we ensure that the service isolate is fully
   // running before returning.
   Dart_ServiceWaitForLoadPort();
-  initialized_ = true;
   service_isolate_running_ = true;
-}
-
-void DartController::BlockWaitingForDependencies(
-      tonic::DartLibraryLoader* loader,
-      const std::unordered_set<tonic::DartDependency*>& dependencies) {
-  {
-    scoped_refptr<base::SingleThreadTaskRunner> task_runner =
-        base::MessageLoop::current()->task_runner();
-    base::RunLoop run_loop;
-    task_runner->PostTask(
-        FROM_HERE,
-        base::Bind(
-            &tonic::DartLibraryLoader::WaitForDependencies,
-            base::Unretained(loader),
-            dependencies,
-            base::Bind(
-               base::IgnoreResult(&base::SingleThreadTaskRunner::PostTask),
-               task_runner.get(), FROM_HERE,
-               run_loop.QuitClosure())));
-    run_loop.Run();
-  }
 }
 
 void DartController::LoadEmptyScript(const std::string& script_uri) {
@@ -646,60 +650,11 @@ void DartController::LoadEmptyScript(const std::string& script_uri) {
   tonic::LogIfError(Dart_FinalizeLoading(true));
 }
 
-void DartController::InnerLoadScript(
-    const std::string& script_uri,
-    tonic::DartLibraryProvider* library_provider) {
-  // When spawning isolates, Dart expects the script loading to be completed
-  // before returning from the isolate creation callback. The mojo dart
-  // controller also expects the isolate to be finished loading a script
-  // before the isolate creation callback returns.
-
-  // We block here by creating a nested message pump and waiting for the load
-  // to complete.
-
-  DCHECK(base::MessageLoop::current() != nullptr);
-  base::MessageLoop::ScopedNestableTaskAllower allow(
-      base::MessageLoop::current());
-
-  // Initiate the load.
-  auto dart_state = tonic::DartState::Current();
-  DCHECK(library_provider != nullptr);
-  tonic::DartLibraryLoader& loader = dart_state->library_loader();
-  loader.set_library_provider(library_provider);
-  std::unordered_set<tonic::DartDependency*> dependencies;
-  {
-    tonic::DartDependencyCatcher dependency_catcher(loader);
-    loader.LoadScript(script_uri);
-    // Copy dependencies before dependency_catcher goes out of scope.
-    dependencies = std::unordered_set<tonic::DartDependency*>(
-        dependency_catcher.dependencies());
-  }
-
-  // Run inner message loop.
-  BlockWaitingForDependencies(&loader, dependencies);
-
-  // Finalize loading.
-  tonic::LogIfError(Dart_FinalizeLoading(true));
-}
-
-void DartController::LoadScript(const std::string& script_uri,
-                                tonic::DartLibraryProvider* library_provider) {
-  if (base::MessageLoop::current() == nullptr) {
-    // Threads running on the Dart thread pool may not have a message loop,
-    // we rely on a message loop during loading. Create a temporary one
-    // here.
-    base::MessageLoop message_loop(common::MessagePumpMojo::Create());
-    InnerLoadScript(script_uri, library_provider);
-  } else {
-    // Thread has a message loop, use it.
-    InnerLoadScript(script_uri, library_provider);
-  }
-}
-
 bool DartController::RunSingleDartScript(const DartControllerConfig& config) {
   InitVmIfNeeded(config.entropy,
                  config.vm_flags,
                  config.vm_flags_count);
+  BlockForServiceIsolate();
   Dart_Isolate isolate = CreateIsolateHelper(config.application_data,
                                              config.strict_compilation,
                                              config.callbacks,
@@ -735,6 +690,7 @@ bool DartController::Initialize(
 }
 
 bool DartController::RunDartScript(const DartControllerConfig& config) {
+  BlockForServiceIsolate();
   CHECK(service_isolate_running_);
   const bool strict = strict_compilation_ || config.strict_compilation;
   Dart_Isolate isolate = CreateIsolateHelper(config.application_data,
@@ -762,6 +718,7 @@ void DartController::Shutdown() {
   if (!initialized_) {
     return;
   }
+  BlockForServiceIsolateLocked();
   StopHandleWatcherIsolate();
   Dart_Cleanup();
   service_isolate_running_ = false;

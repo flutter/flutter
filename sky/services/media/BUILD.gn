@@ -50,7 +50,7 @@ if (is_android) {
     deps = [
       ":interfaces",
       "//base:base",
-      "//mojo/common",
+      "//mojo/data_pipe_utils",
       "//mojo/public/cpp/application",
     ]
   }

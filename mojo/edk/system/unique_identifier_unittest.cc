@@ -93,19 +93,23 @@ TEST_F(UniqueIdentifierTest, FromStringFailures) {
   // encoding. So first check something that we know should succeed, to roughly
   // confirm our knowledge.
   success = false;
-  UniqueIdentifier::FromString("0123456789abcdef0123456789ABCDEF", &success);
+  UniqueIdentifier::FromString("0123456789ABCDEF0123456789ABCDEF", &success);
   EXPECT_TRUE(success);
+
+  success = true;
+  UniqueIdentifier::FromString("0123456789abcdef0123456789abcdef", &success);
+  EXPECT_FALSE(success);
 
   success = true;
   UniqueIdentifier::FromString("!@#$%^&*()_+-=/\\,.<>[]{};':\"|", &success);
   EXPECT_FALSE(success);
 
   success = true;
-  UniqueIdentifier::FromString("0123456789abcdef0123456789ABCDE", &success);
+  UniqueIdentifier::FromString("0123456789ABCDEF0123456789ABCDE", &success);
   EXPECT_FALSE(success);
 
   success = true;
-  UniqueIdentifier::FromString("0123456789abcdef0123456789ABCD", &success);
+  UniqueIdentifier::FromString("0123456789ABCDEF0123456789ABCD", &success);
   EXPECT_FALSE(success);
 }
 

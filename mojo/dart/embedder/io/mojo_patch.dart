@@ -91,9 +91,14 @@ class _NetworkServiceCodec {
         r += '${digit}${divider}';
       }
     } else {
-      for (var i = 0; i < 16; i++) {
-        var digit = address[i].toRadixString(16);
-        var divider = (i != 15) ? ':' : '';
+      for (var i = 0; i < 16; i += 2) {
+        var first = '';
+        if (address[i] != 0) {
+          first = address[i].toRadixString(16).padLeft(2, '0');
+        }
+        var second = address[i + 1].toRadixString(16).padLeft(2, '0');
+        var digit = '$first$second';
+        var divider = (i != 14) ? ':' : '';
         r += '${digit}${divider}';
       }
     }

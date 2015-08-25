@@ -14,7 +14,7 @@ source_set("dart") {
     "//base",
     "//build/config/sanitizers:deps",
     "//dart/runtime:libdart",
-    "//mojo/common",
+    "//mojo/data_pipe_utils",
     "//mojo/public/cpp/application",
     "//mojo/services/network/public/interfaces",
     "//sky/engine/tonic",

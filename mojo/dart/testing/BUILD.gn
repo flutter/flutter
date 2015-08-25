@@ -5,7 +5,7 @@
 import("//mojo/public/dart/rules.gni")
 
 dart_pkg("testing") {
-  entrypoints = [
+  libs = [
     "lib/async_helper.dart",
     "lib/expect.dart",
     "lib/validation_test_input_parser.dart",

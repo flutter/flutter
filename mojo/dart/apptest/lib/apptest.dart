@@ -10,8 +10,7 @@ import 'package:mojo/application.dart';
 import 'package:mojo/bindings.dart';
 import 'package:mojo/core.dart';
 
-// Import and reexport the test package. We are a *.dartzip file designed to
-// be linked into your_apptest.mojo file and are your main entrypoint.
+// Import and reexport the test package.
 import 'package:test/test.dart';
 export 'package:test/test.dart';
 

@@ -7,8 +7,9 @@ common_deps = [
   "//base:i18n",
   "//build/config/sanitizers:deps",
   "//dart/runtime:libdart",
-  "//mojo/common",
+  "//mojo/data_pipe_utils",
   "//mojo/edk/system",
+  "//mojo/message_pump",
   "//mojo/public/cpp/application",
   "//mojo/public/interfaces/application",
   "//mojo/services/asset_bundle/public/interfaces",
@@ -244,6 +245,7 @@ if (is_android) {
 
     deps = common_deps + [
              ":common",
+             "//mojo/common",
              "//sky/services/testing:interfaces",
            ]
   }

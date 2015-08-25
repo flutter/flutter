@@ -542,7 +542,6 @@ source_set("platform") {
     ":make_platform_generated",
     "//base:base",
     "//mojo/application",
-    "//mojo/common",
     "//mojo/environment:chromium",
     "//mojo/public/c/system",
     "//mojo/public/cpp/bindings",

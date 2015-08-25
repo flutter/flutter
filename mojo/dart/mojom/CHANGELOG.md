@@ -1,3 +1,7 @@
+## 0.0.22
+
+  - 59 changes: https://github.com/domokit/mojo/compare/c73419d...35de44e
+
 ## 0.0.18
 
   - 89 changes: https://github.com/domokit/mojo/compare/0fd4d06...c3119f6

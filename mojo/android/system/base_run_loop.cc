@@ -12,7 +12,7 @@
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "jni/BaseRunLoop_jni.h"
-#include "mojo/common/message_pump_mojo.h"
+#include "mojo/message_pump/message_pump_mojo.h"
 
 namespace mojo {
 namespace android {

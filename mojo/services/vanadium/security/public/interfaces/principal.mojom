@@ -1,0 +1,49 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module vanadium;
+
+// Represents the name of an application. |url| is the url of the
+// application. |qualifier| is a string that allows to tie a specific
+// instance of an application to another.
+struct AppInstanceName {
+  string url;
+  string? qualifier;
+};
+
+// Certificate represents a human-readable name and public-key (DER encoded) pair.
+// The private-key for a certificate is only available for signing operations
+// within the principal service application.
+struct Certificate {
+   string extension;
+   array<uint8>? publickey;
+};
+
+// Blessing is a credential binding a user identity to a public key. The corresponding
+// private key is only available for signing within the PrincipalService application.
+struct Blessing {
+   array<Certificate> chain;
+};
+
+// ChainSeparator is the separator used to join name extensions in a certificate chain.
+const string ChainSeparator = "/";
+
+// A service that binds user identities to an application instance running in Mojo
+interface PrincipalService {
+  // Login is called by an application instance (requestor_url/qualifier) that
+  // wants to get a user blessing. The service may obtain the user blessing
+  // through a third-party authentication flow (eg:oauth2). The user blessing
+  // is bound to a public/private key-pair that this service generates and
+  // persists for this application instance. Returns null if login fails.
+  Login() => (Blessing? user_blessing);
+
+  // Removes the user blessing for the application instance that invokes the
+  // Logout method.
+  Logout();
+
+  // GetUserBlessing returns the user blessing for a given application instance.
+  // It returns an error if the application instance has not invoked Login().
+  GetUserBlessing(AppInstanceName app) => (Blessing? user_blessing);
+};
+

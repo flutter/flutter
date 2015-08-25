@@ -9,7 +9,7 @@
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "mojo/common/data_pipe_utils.h"
+#include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/bindings/builtin_natives.h"
