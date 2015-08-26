@@ -49,6 +49,16 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     return new BoxConstraints.tightFor(height: constraints.constrainHeight(constraints.maxHeight));
   }
 
+  double get _mainAxisExtent {
+    RenderBox child = lastChild;
+    if (child == null)
+      return 0.0;
+    BoxParentData parentData = child.parentData;
+    return _isVertical ?
+        parentData.position.y + child.size.height :
+        parentData.position.x + child.size.width;
+  }
+
   void performLayout() {
     BoxConstraints innerConstraints = _getInnerConstraints(constraints);
     double position = 0.0;
@@ -60,6 +70,10 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
       position += _isVertical ? child.size.height : child.size.width;
       child = child.parentData.nextSibling;
     }
+    size = _isVertical ?
+        constraints.constrain(new Size(constraints.maxWidth, _mainAxisExtent)) :
+        constraints.constrain(new Size(_mainAxisExtent, constraints.maxHeight));
+    assert(!size.isInfinite);
   }
 
 }
@@ -137,23 +151,11 @@ class RenderBlock extends RenderBlockBase {
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
-  double get _mainAxisExtent {
-    RenderBox child = lastChild;
-    if (child == null)
-      return 0.0;
-    BoxParentData parentData = child.parentData;
-    return _isVertical ?
-        parentData.position.y + child.size.height :
-        parentData.position.x + child.size.width;
-  }
-
   void performLayout() {
-    assert(_isVertical ? constraints.maxHeight >= double.INFINITY : constraints.maxWidth >= double.INFINITY);
+    assert((_isVertical ? constraints.maxHeight >= double.INFINITY : constraints.maxWidth >= double.INFINITY) &&
+           'RenderBlock does not clip or resize its children, so it must be placed in a parent that does not constrain ' +
+           'the block\'s main direction. You probably want to put the RenderBlock inside a RenderViewport.' is String);
     super.performLayout();
-    size = _isVertical ?
-        constraints.constrain(new Size(constraints.maxWidth, _mainAxisExtent)) :
-        constraints.constrain(new Size(_mainAxisExtent, constraints.maxHeight));
-    assert(!size.isInfinite);
   }
 
   void paint(PaintingContext context, Offset offset) {
@@ -167,9 +169,6 @@ class RenderBlock extends RenderBlockBase {
 }
 
 class RenderBlockViewport extends RenderBlockBase {
-
-  // sizes itself to the given constraints
-  // at the start of layout, calls callback
 
   RenderBlockViewport({
     LayoutCallback callback,
@@ -200,20 +199,30 @@ class RenderBlockViewport extends RenderBlockBase {
       markNeedsPaint();
   }
 
+  double _noIntrinsicDimensions() {
+    assert(() {
+      'RenderBlockViewport does not support returning intrinsic dimensions. ' +
+      'Calculating the intrinsic dimensions would require walking the entire child list, ' +
+      'which defeats the entire point of having a lazily-built list of children.';
+      return false;
+    });
+    return 0.0;
+  }
+
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth();
+    return _noIntrinsicDimensions();
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth();
+    return _noIntrinsicDimensions();
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight();
+    return _noIntrinsicDimensions();
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight();
+    return _noIntrinsicDimensions();
   }
 
   // We don't override computeDistanceToActualBaseline(), because we
@@ -221,16 +230,8 @@ class RenderBlockViewport extends RenderBlockBase {
   // scroll the RenderBlockViewport, it would shift in its parent if
   // the parent was baseline-aligned, which makes no sense.
 
-  bool get sizedByParent => true;
-
-  void performResize() {
-    size = constraints.biggest;
-    assert(!size.isInfinite);
-  }
-
   bool get debugDoesLayoutWithCallback => true;
   void performLayout() {
-    assert(constraints.maxHeight < double.INFINITY);
     if (_callback != null) {
       try {
         _inCallback = true;
