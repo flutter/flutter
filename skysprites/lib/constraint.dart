@@ -19,8 +19,8 @@ double _dampenRotation(double src, double dst, double dampening) {
   return src + delta;
 }
 
-class ConstraintRotationToMovement {
-  ConstraintRotationToMovement([this.baseRotation = 0.0, this.dampening]);
+class ConstraintRotationToMovement extends Constraint {
+  ConstraintRotationToMovement({this.baseRotation: 0.0, this.dampening});
 
   final double dampening;
   final double baseRotation;
@@ -43,8 +43,8 @@ class ConstraintRotationToMovement {
   }
 }
 
-class ConstraintRotationToNode {
-  ConstraintRotationToNode(this.targetNode, [this.baseRotation, this.dampening]);
+class ConstraintRotationToNode extends Constraint {
+  ConstraintRotationToNode(this.targetNode, {this.baseRotation: 0.0, this.dampening});
 
   final Node targetNode;
   final double baseRotation;
