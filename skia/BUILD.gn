@@ -109,7 +109,7 @@ config("skia_config") {
 
   defines = gypi_skia_defines.skia_for_chromium_defines
 
-  defines += []
+  defines += [ "SK_SUPPORT_LEGACY_SHADERBITMAPTYPE" ]
 
   if (component_mode == "shared_library") {
     defines += [
@@ -146,6 +146,7 @@ config("skia_library_config") {
   # exported to dependents. It's not clear if this is on purpose, but this
   # matches the GYP build.
   include_dirs = [
+    "//third_party/skia/include/private",
     "//third_party/skia/src/core",
     "//third_party/skia/src/image",
     "//third_party/skia/src/opts",
@@ -357,7 +358,6 @@ component("skia") {
     "//third_party/skia/src/utils/SkSHA1.cpp",
     "//third_party/skia/src/utils/SkSHA1.h",
     "//third_party/skia/src/utils/SkTFitsIn.h",
-    "//third_party/skia/src/utils/SkTLogic.h",
 
     # We don't currently need to change thread affinity, so leave out this complexity for now.
     "//third_party/skia/src/utils/SkThreadUtils_pthread_linux.cpp",

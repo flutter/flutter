@@ -31,7 +31,7 @@
 #include "sky/engine/platform/fonts/FontPlatformData.h"
 
 #include "sky/engine/platform/fonts/FontCache.h"
-#include "third_party/skia/include/core/SkEndian.h"
+#include "third_party/skia/src/core/SkEndian.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {

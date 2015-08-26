@@ -174,12 +174,12 @@ void NativeImageSkia::draw(
 static SkBitmap createBitmapWithSpace(const SkBitmap& bitmap, int spaceWidth, int spaceHeight)
 {
     SkImageInfo info = bitmap.info();
-    info.fWidth += spaceWidth;
-    info.fHeight += spaceHeight;
-    info.fAlphaType = kPremul_SkAlphaType;
+    SkImageInfo newInfo = SkImageInfo::Make(
+        info.width() + spaceWidth, info.height() + spaceHeight,
+        info.colorType(), kPremul_SkAlphaType, info.profileType());
 
     SkBitmap result;
-    result.allocPixels(info);
+    result.allocPixels(newInfo);
     result.eraseColor(SK_ColorTRANSPARENT);
     bitmap.copyPixelsTo(reinterpret_cast<uint8_t*>(result.getPixels()), result.rowBytes() * result.height(), result.rowBytes());
 

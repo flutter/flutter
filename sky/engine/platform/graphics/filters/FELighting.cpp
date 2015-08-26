@@ -31,6 +31,7 @@
 #include "sky/engine/platform/graphics/filters/ParallelJobs.h"
 #include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
 #include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "third_party/skia/include/core/SkPoint3.h"
 #include "third_party/skia/include/effects/SkLightingImageFilter.h"
 
 namespace blink {
@@ -441,9 +442,9 @@ PassRefPtr<SkImageFilter> FELighting::createImageFilter(SkiaImageFilterBuilder* 
         DistantLightSource* distantLightSource = static_cast<DistantLightSource*>(m_lightSource.get());
         float azimuthRad = deg2rad(distantLightSource->azimuth());
         float elevationRad = deg2rad(distantLightSource->elevation());
-        SkPoint3 direction(cosf(azimuthRad) * cosf(elevationRad),
-                           sinf(azimuthRad) * cosf(elevationRad),
-                           sinf(elevationRad));
+        SkPoint3 direction = SkPoint3::Make(cosf(azimuthRad) * cosf(elevationRad),
+                                            sinf(azimuthRad) * cosf(elevationRad),
+                                            sinf(elevationRad));
         if (m_specularConstant > 0)
             return adoptRef(SkLightingImageFilter::CreateDistantLitSpecular(direction, lightColor.rgb(), m_surfaceScale, m_specularConstant, m_specularExponent, input.get(), &rect));
         return adoptRef(SkLightingImageFilter::CreateDistantLitDiffuse(direction, lightColor.rgb(), m_surfaceScale, m_diffuseConstant, input.get(), &rect));
@@ -451,15 +452,15 @@ PassRefPtr<SkImageFilter> FELighting::createImageFilter(SkiaImageFilterBuilder* 
     case LS_POINT: {
         PointLightSource* pointLightSource = static_cast<PointLightSource*>(m_lightSource.get());
         FloatPoint3D position = pointLightSource->position();
-        SkPoint3 skPosition(position.x(), position.y(), position.z());
+        SkPoint3 skPosition = SkPoint3::Make(position.x(), position.y(), position.z());
         if (m_specularConstant > 0)
             return adoptRef(SkLightingImageFilter::CreatePointLitSpecular(skPosition, lightColor.rgb(), m_surfaceScale, m_specularConstant, m_specularExponent, input.get(), &rect));
         return adoptRef(SkLightingImageFilter::CreatePointLitDiffuse(skPosition, lightColor.rgb(), m_surfaceScale, m_diffuseConstant, input.get(), &rect));
     }
     case LS_SPOT: {
         SpotLightSource* spotLightSource = static_cast<SpotLightSource*>(m_lightSource.get());
-        SkPoint3 location(spotLightSource->position().x(), spotLightSource->position().y(), spotLightSource->position().z());
-        SkPoint3 target(spotLightSource->direction().x(), spotLightSource->direction().y(), spotLightSource->direction().z());
+        SkPoint3 location = SkPoint3::Make(spotLightSource->position().x(), spotLightSource->position().y(), spotLightSource->position().z());
+        SkPoint3 target = SkPoint3::Make(spotLightSource->direction().x(), spotLightSource->direction().y(), spotLightSource->direction().z());
         float specularExponent = spotLightSource->specularExponent();
         float limitingConeAngle = spotLightSource->limitingConeAngle();
         if (!limitingConeAngle || limitingConeAngle > 90 || limitingConeAngle < -90)

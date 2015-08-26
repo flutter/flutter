@@ -3,8 +3,6 @@
 # Files are relative to third_party/skia.
 {
   'skia_library_sources': [
-    '<(skia_src_path)/core/SkFlate.cpp',  # this should likely be moved into src/utils in skia
-
     '<(skia_src_path)/ports/SkImageGenerator_none.cpp',
 
     '<(skia_include_path)/images/SkMovie.h',
