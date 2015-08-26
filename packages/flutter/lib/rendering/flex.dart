@@ -308,7 +308,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         // Flexible children can only be used when the RenderFlex box's container has a finite size.
         // When the container is infinite, for example if you are in a scrollable viewport, then
         // it wouldn't make any sense to have a flexible child.
-        assert(canFlex && 'See https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/widgets/flex.md' is String);
+        assert(canFlex && 'See https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/widgets/sizing.md#user-content-flex' is String);
         totalFlex += child.parentData.flex;
       } else {
         BoxConstraints innerConstraints;
