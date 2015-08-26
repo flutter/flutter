@@ -6,6 +6,7 @@
 import argparse
 import atexit
 import errno
+import hashlib
 import json
 import logging
 import os
@@ -30,6 +31,7 @@ ADB_PATH = 'adb'
 APK_NAME = 'SkyShell.apk'
 ANDROID_PACKAGE = 'org.domokit.sky.shell'
 ANDROID_COMPONENT = '%s/%s.SkyActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
+SHA1_PATH = '/sdcard/%s/%s.sha1' % (ANDROID_PACKAGE, APK_NAME)
 
 SKY_SHELL_APP_ID = 'com.google.SkyShell'
 IOS_APP_NAME = 'SkyShell.app'
@@ -163,11 +165,21 @@ class StartSky(object):
         script_dirs = script_path.split('/')
         return len(script_dirs) > 1 and script_dirs[-2] == 'packages'
 
+    def _get_device_apk_sha1(self, apk_path):
+        # We might need to install a new APK, so check SHA1
+        return subprocess.check_output([ADB_PATH, 'shell', 'cat', SHA1_PATH])
+
     def run(self, args, pids):
         if not args.poke:
             StopSky().run(args, pids)
 
         project_or_path = os.path.abspath(args.project_or_path)
+
+        if args.local_build:
+            apk_path = os.path.join(os.path.normpath(args.sky_src_path), args.android_debug_build_path, 'apks', APK_NAME)
+        else:
+            apk_path = os.path.join(APK_DIR, APK_NAME)
+        source_sha1 = hashlib.sha1(open(apk_path, 'rb').read()).hexdigest()
 
         if os.path.isdir(project_or_path):
             sky_server_root = project_or_path
@@ -192,6 +204,9 @@ class StartSky(object):
         if not self._is_package_installed(ANDROID_PACKAGE):
             logging.info('%s is not on the device. Installing now...' % APK_NAME)
             args.install = True
+        elif self._get_device_apk_sha1(apk_path) != source_sha1:
+            logging.info('%s on the device is out of date. Installing now...' % APK_NAME)
+            args.install = True
 
         if args.install:
             if not self._is_valid_script_path():
@@ -199,16 +214,17 @@ class StartSky(object):
                               'The directory packages/sky_engine must also '
                               'exist to locate %s.' % (os.path.basename(__file__), APK_NAME))
                 return 2
-            if args.local_build:
-                apk_path = os.path.join(os.path.normpath(args.sky_src_path), args.android_debug_build_path, 'apks', APK_NAME)
-            else:
-                apk_path = os.path.join(APK_DIR, APK_NAME)
             if not os.path.exists(apk_path):
                 logging.error('"%s" does not exist.' % apk_path)
                 return 2
 
             cmd = [ADB_PATH, 'install', '-r', apk_path]
             subprocess.check_call(cmd)
+            # record the SHA1 of the APK we just pushed
+            with tempfile.NamedTemporaryFile() as fp:
+                fp.write(source_sha1)
+                fp.seek(0)
+                subprocess.check_call([ADB_PATH, 'push', fp.name, SHA1_PATH])
 
             # Install on connected iOS device
             if IOSDevice.is_connected() and args.local_build:
@@ -787,6 +803,10 @@ class SkyShellRunner(object):
         logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
         self._update_paths()
+
+        # Checking for lollipop only needs to be done if we are starting an
+        # app, but it has an important side effect, which is to discard any
+        # progress messages if the adb server is restarted.
         if not self._check_for_adb() or not self._check_for_lollipop_or_later():
             sys.exit(2)
         if not self._check_for_dart():
