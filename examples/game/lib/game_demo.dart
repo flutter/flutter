@@ -12,5 +12,7 @@ part 'explosions.dart';
 part 'flash.dart';
 part 'game_demo_node.dart';
 part 'game_objects.dart';
+part 'game_object_factory.dart';
+part 'player_state.dart';
 part 'repeated_image.dart';
 part 'star_field.dart';
