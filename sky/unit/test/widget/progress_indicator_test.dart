@@ -3,7 +3,7 @@ import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
-import 'build_utils.dart';
+import 'widget_tester.dart';
 
 void main() {
   test('LinearProgressIndicator changes when its value changes', () {

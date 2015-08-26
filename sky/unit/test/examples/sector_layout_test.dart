@@ -1,5 +1,6 @@
 import 'package:test/test.dart';
-import '../rendering/layout_utils.dart';
+
+import '../rendering/rendering_tester.dart';
 import '../../../../examples/rendering/sector_layout.dart';
 
 void main() {
