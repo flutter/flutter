@@ -82,11 +82,11 @@ class RenderConstrainedBox extends RenderProxyBox {
 
   BoxConstraints _additionalConstraints;
   BoxConstraints get additionalConstraints => _additionalConstraints;
-  void set additionalConstraints (BoxConstraints value) {
-    assert(value != null);
-    if (_additionalConstraints == value)
+  void set additionalConstraints (BoxConstraints newConstraints) {
+    assert(newConstraints != null);
+    if (_additionalConstraints == newConstraints)
       return;
-    _additionalConstraints = value;
+    _additionalConstraints = newConstraints;
     markNeedsLayout();
   }
 
@@ -136,11 +136,11 @@ class RenderAspectRatio extends RenderProxyBox {
 
   double _aspectRatio;
   double get aspectRatio => _aspectRatio;
-  void set aspectRatio (double value) {
-    assert(value != null);
-    if (_aspectRatio == value)
+  void set aspectRatio (double newAspectRatio) {
+    assert(newAspectRatio != null);
+    if (_aspectRatio == newAspectRatio)
       return;
-    _aspectRatio = value;
+    _aspectRatio = newAspectRatio;
     markNeedsLayout();
   }
 
@@ -190,19 +190,19 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
 
   double _stepWidth;
   double get stepWidth => _stepWidth;
-  void set stepWidth(double value) {
-    if (value == _stepWidth)
+  void set stepWidth(double newStepWidth) {
+    if (newStepWidth == _stepWidth)
       return;
-    _stepWidth = value;
+    _stepWidth = newStepWidth;
     markNeedsLayout();
   }
 
   double _stepHeight;
   double get stepHeight => _stepHeight;
-  void set stepHeight(double value) {
-    if (value == _stepHeight)
+  void set stepHeight(double newStepHeight) {
+    if (newStepHeight == _stepHeight)
       return;
-    _stepHeight = value;
+    _stepHeight = newStepHeight;
     markNeedsLayout();
   }
 
@@ -269,12 +269,12 @@ class RenderOpacity extends RenderProxyBox {
 
   double _opacity;
   double get opacity => _opacity;
-  void set opacity (double value) {
-    assert(value != null);
-    assert(value >= 0.0 && value <= 1.0);
-    if (_opacity == value)
+  void set opacity (double newOpacity) {
+    assert(newOpacity != null);
+    assert(newOpacity >= 0.0 && newOpacity <= 1.0);
+    if (_opacity == newOpacity)
       return;
-    _opacity = value;
+    _opacity = newOpacity;
     markNeedsPaint();
   }
 
@@ -300,21 +300,21 @@ class RenderColorFilter extends RenderProxyBox {
 
   Color _color;
   Color get color => _color;
-  void set color (Color value) {
-    assert(value != null);
-    if (_color == value)
+  void set color (Color newColor) {
+    assert(newColor != null);
+    if (_color == newColor)
       return;
-    _color = value;
+    _color = newColor;
     markNeedsPaint();
   }
 
   sky.TransferMode _transferMode;
   sky.TransferMode get transferMode => _transferMode;
-  void set transferMode (sky.TransferMode value) {
-    assert(value != null);
-    if (_transferMode == value)
+  void set transferMode (sky.TransferMode newTransferMode) {
+    assert(newTransferMode != null);
+    if (_transferMode == newTransferMode)
       return;
-    _transferMode = value;
+    _transferMode = newTransferMode;
     markNeedsPaint();
   }
 
@@ -342,21 +342,21 @@ class RenderClipRRect extends RenderProxyBox {
 
   double _xRadius;
   double get xRadius => _xRadius;
-  void set xRadius (double value) {
-    assert(value != null);
-    if (_xRadius == value)
+  void set xRadius (double newXRadius) {
+    assert(newXRadius != null);
+    if (_xRadius == newXRadius)
       return;
-    _xRadius = value;
+    _xRadius = newXRadius;
     markNeedsPaint();
   }
 
   double _yRadius;
   double get yRadius => _yRadius;
-  void set yRadius (double value) {
-    assert(value != null);
-    if (_yRadius == value)
+  void set yRadius (double newYRadius) {
+    assert(newYRadius != null);
+    if (_yRadius == newYRadius)
       return;
-    _yRadius = value;
+    _yRadius = newYRadius;
     markNeedsPaint();
   }
 
@@ -408,12 +408,12 @@ class RenderDecoratedBox extends RenderProxyBox {
   final BoxPainter _painter;
 
   BoxDecoration get decoration => _painter.decoration;
-  void set decoration (BoxDecoration value) {
-    assert(value != null);
-    if (value == _painter.decoration)
+  void set decoration (BoxDecoration newDecoration) {
+    assert(newDecoration != null);
+    if (newDecoration == _painter.decoration)
       return;
     _removeBackgroundImageListenerIfNeeded();
-    _painter.decoration = value;
+    _painter.decoration = newDecoration;
     _addBackgroundImageListenerIfNeeded();
     markNeedsPaint();
   }
@@ -468,11 +468,11 @@ class RenderTransform extends RenderProxyBox {
 
   Matrix4 _transform;
 
-  void set transform(Matrix4 value) {
-    assert(value != null);
-    if (_transform == value)
+  void set transform(Matrix4 newTransform) {
+    assert(newTransform != null);
+    if (_transform == newTransform)
       return;
-    _transform = new Matrix4.copy(value);
+    _transform = new Matrix4.copy(newTransform);
     markNeedsPaint();
   }
 
@@ -569,11 +569,11 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   CustomPaintCallback _callback;
-  void set callback (CustomPaintCallback value) {
-    assert(value != null || !attached);
-    if (_callback == value)
+  void set callback (CustomPaintCallback newCallback) {
+    assert(newCallback != null || !attached);
+    if (_callback == newCallback)
       return;
-    _callback = value;
+    _callback = newCallback;
     markNeedsPaint();
   }
 
