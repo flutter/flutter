@@ -9,4 +9,4 @@ environment:
   sdk: '>=1.9.0 <2.0.0'
 homepage: https://github.com/domokit/mojo
 name: mojom
-version: 0.0.22
+version: 0.0.23

@@ -1009,6 +1009,8 @@ void FeatureInfo::InitializeFeatures() {
       blend_equation_advanced_coherent;
   }
 
+  // Not exposed in Mojo
+#if 0
   if (extensions.Contains("GL_NV_path_rendering")) {
     if (extensions.Contains("GL_EXT_direct_state_access") ||
         gl_version_info_->is_es3) {
@@ -1018,6 +1020,7 @@ void FeatureInfo::InitializeFeatures() {
       validators_.g_l_state.AddValue(GL_PATH_PROJECTION_MATRIX_CHROMIUM);
     }
   }
+#endif
 
   if ((gl_version_info_->is_es3 || extensions.Contains("GL_EXT_texture_rg") ||
        extensions.Contains("GL_ARB_texture_rg")) &&

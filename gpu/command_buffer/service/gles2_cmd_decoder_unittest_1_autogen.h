@@ -748,8 +748,9 @@ TEST_P(GLES2DecoderTest1, DeleteTexturesImmediateInvalidArgs) {
 }
 
 TEST_P(GLES2DecoderTest1, DeleteTransformFeedbacksImmediateValidArgs) {
-  EXPECT_CALL(*gl_, DeleteTransformFeedbacks(
-                        1, Pointee(kServiceTransformFeedbackId))).Times(1);
+  EXPECT_CALL(*gl_,
+              DeleteTransformFeedbacks(1, Pointee(kServiceTransformFeedbackId)))
+      .Times(1);
   cmds::DeleteTransformFeedbacksImmediate& cmd =
       *GetImmediateAs<cmds::DeleteTransformFeedbacksImmediate>();
   SpecializedSetup<cmds::DeleteTransformFeedbacksImmediate, 0>(true);

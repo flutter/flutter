@@ -179,6 +179,11 @@ class MOJO_SYSTEM_IMPL_EXPORT Channel final
   friend class base::RefCountedThreadSafe<Channel>;
   ~Channel() override;
 
+  // Helper for |DetachEndpoint()| (returns true if a "remove" should be sent).
+  bool DetachEndpointInternal(ChannelEndpoint* endpoint,
+                              ChannelEndpointId local_id,
+                              ChannelEndpointId remote_id);
+
   // |RawChannel::Delegate| implementation (only called on the creation thread):
   void OnReadMessage(
       const MessageInTransit::View& message_view,
@@ -224,8 +229,9 @@ class MOJO_SYSTEM_IMPL_EXPORT Channel final
   // from any thread.
   bool SendControlMessage(MessageInTransit::Subtype subtype,
                           ChannelEndpointId source_id,
-                          ChannelEndpointId destination_id)
-      MOJO_LOCKS_EXCLUDED(mutex_);
+                          ChannelEndpointId destination_id,
+                          uint32_t num_bytes,
+                          const void* bytes) MOJO_LOCKS_EXCLUDED(mutex_);
 
   base::ThreadChecker creation_thread_checker_;
 

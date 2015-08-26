@@ -693,11 +693,12 @@ void GLES2Implementation::FramebufferRenderbuffer(GLenum target,
                                                   GLenum renderbuffertarget,
                                                   GLuint renderbuffer) {
   GPU_CLIENT_SINGLE_THREAD_CHECK();
-  GPU_CLIENT_LOG("[" << GetLogPrefix() << "] glFramebufferRenderbuffer("
-                     << GLES2Util::GetStringFrameBufferTarget(target) << ", "
-                     << GLES2Util::GetStringAttachment(attachment) << ", "
-                     << GLES2Util::GetStringRenderBufferTarget(
-                            renderbuffertarget) << ", " << renderbuffer << ")");
+  GPU_CLIENT_LOG(
+      "[" << GetLogPrefix() << "] glFramebufferRenderbuffer("
+          << GLES2Util::GetStringFrameBufferTarget(target) << ", "
+          << GLES2Util::GetStringAttachment(attachment) << ", "
+          << GLES2Util::GetStringRenderBufferTarget(renderbuffertarget) << ", "
+          << renderbuffer << ")");
   helper_->FramebufferRenderbuffer(target, attachment, renderbuffertarget,
                                    renderbuffer);
   CheckGLError();
@@ -3046,9 +3047,10 @@ void GLES2Implementation::DeleteQueriesEXT(GLsizei n, const GLuint* queries) {
 
 void GLES2Implementation::BeginTransformFeedback(GLenum primitivemode) {
   GPU_CLIENT_SINGLE_THREAD_CHECK();
-  GPU_CLIENT_LOG("[" << GetLogPrefix() << "] glBeginTransformFeedback("
-                     << GLES2Util::GetStringTransformFeedbackPrimitiveMode(
-                            primitivemode) << ")");
+  GPU_CLIENT_LOG(
+      "[" << GetLogPrefix() << "] glBeginTransformFeedback("
+          << GLES2Util::GetStringTransformFeedbackPrimitiveMode(primitivemode)
+          << ")");
   helper_->BeginTransformFeedback(primitivemode);
   CheckGLError();
 }

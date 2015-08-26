@@ -23,8 +23,7 @@ ClientContextState::EnableFlags::EnableFlags()
       scissor_test(false),
       stencil_test(false),
       rasterizer_discard(false),
-      primitive_restart_fixed_index(false) {
-}
+      primitive_restart_fixed_index(false) {}
 
 bool ClientContextState::SetCapabilityState(GLenum cap,
                                             bool enabled,
