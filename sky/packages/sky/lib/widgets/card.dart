@@ -23,11 +23,7 @@ class Card extends Component {
         color: color,
         type: MaterialType.card,
         level: 2,
-        child: new ClipRRect(
-          xRadius: edges[MaterialType.card],
-          yRadius: edges[MaterialType.card],
-          child: child
-        )
+        child: child
       )
     );
   }

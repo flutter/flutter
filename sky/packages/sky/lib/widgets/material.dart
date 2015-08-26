@@ -48,6 +48,20 @@ class Material extends Component {
   }
 
   Widget build() {
+    Widget contents = child;
+    if (child != null) {
+      contents = new DefaultTextStyle(
+        style: Theme.of(this).text.body1,
+        child: contents
+      );
+      if (edges[type] != null) {
+        contents = new ClipRRect(
+          xRadius: edges[type],
+          yRadius: edges[type],
+          child: contents
+        );
+      }
+    }
     return new AnimatedContainer(
       behavior: implicitlyAnimate(const Duration(milliseconds: 200)),
       decoration: new BoxDecoration(
@@ -56,10 +70,7 @@ class Material extends Component {
         boxShadow: level == 0 ? null : shadows[level],
         shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
       ),
-      child: child == null ? null : new DefaultTextStyle(
-        style: Theme.of(this).text.body1,
-        child: child
-      )
+      child: contents
     );
   }
 }
