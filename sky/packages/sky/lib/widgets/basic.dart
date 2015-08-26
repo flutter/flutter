@@ -267,7 +267,7 @@ class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
   final double stepWidth;
   final double stepHeight;
 
-  RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth();
+  RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth(stepWidth: stepWidth, stepHeight: stepHeight);
   RenderShrinkWrapWidth get renderObject => super.renderObject;
 
   void syncRenderObject(ShrinkWrapWidth old) {
@@ -275,6 +275,16 @@ class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
     renderObject.stepWidth = stepWidth;
     renderObject.stepHeight = stepHeight;
   }
+}
+
+class ShrinkWrapHeight extends OneChildRenderObjectWrapper {
+  ShrinkWrapHeight({ Key key, Widget child })
+    : super(key: key, child: child);
+
+  RenderShrinkWrapHeight createNode() => new RenderShrinkWrapHeight();
+  RenderShrinkWrapHeight get renderObject => super.renderObject;
+
+  // Nothing to sync, so we don't implement syncRenderObject()
 }
 
 class Baseline extends OneChildRenderObjectWrapper {

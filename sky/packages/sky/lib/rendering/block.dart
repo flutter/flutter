@@ -76,6 +76,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     assert(!size.isInfinite);
   }
 
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}direction: ${direction}\n';
 }
 
 class RenderBlock extends RenderBlockBase {
@@ -259,4 +260,5 @@ class RenderBlockViewport extends RenderBlockBase {
     defaultHitTestChildren(result, position: position + new Offset(0.0, -startOffset));
   }
 
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}startOffset: ${startOffset}\n';
 }
