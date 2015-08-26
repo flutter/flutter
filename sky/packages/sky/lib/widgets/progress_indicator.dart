@@ -31,6 +31,7 @@ abstract class ProgressIndicator extends StatefulComponent {
   double get _animationValue => (_animation.variable as AnimatedValue<double>).value;
   Color get _backgroundColor => Theme.of(this).primarySwatch[200];
   Color get _valueColor => Theme.of(this).primaryColor;
+  Object get _customPaintToken => value != null ? value : _animationValue;
 
   void initState() {
     _animation = new AnimationPerformance()
@@ -92,7 +93,7 @@ class LinearProgressIndicator extends ProgressIndicator {
 
   Widget _buildIndicator() {
     return new Container(
-      child: new CustomPaint(callback: _paint),
+      child: new CustomPaint(callback: _paint, token: _customPaintToken),
       constraints: new BoxConstraints.tightFor(
         width: double.INFINITY,
         height: _kLinearProgressIndicatorHeight
@@ -138,7 +139,7 @@ class CircularProgressIndicator extends ProgressIndicator {
 
   Widget _buildIndicator() {
     return new Container(
-      child: new CustomPaint(callback: _paint),
+      child: new CustomPaint(callback: _paint, token: _customPaintToken),
       constraints: new BoxConstraints(
         minWidth: _kMinCircularProgressIndicatorSize,
         minHeight: _kMinCircularProgressIndicatorSize
