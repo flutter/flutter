@@ -299,12 +299,16 @@ class MonthPicker extends ScrollableWidgetList {
   }
 
   DateTime _currentDate;
+  Timer _timer;
+
   void _updateCurrentDate() {
     _currentDate = new DateTime.now();
     DateTime tomorrow = new DateTime(_currentDate.year, _currentDate.month, _currentDate.day + 1);
     Duration timeUntilTomorrow = tomorrow.difference(_currentDate);
     timeUntilTomorrow += const Duration(seconds: 1);  // so we don't miss it by rounding
-    new Timer(timeUntilTomorrow, () {
+    if (_timer != null)
+      _timer.cancel();
+    _timer = new Timer(timeUntilTomorrow, () {
       setState(() {
         _updateCurrentDate();
       });
@@ -331,6 +335,13 @@ class MonthPicker extends ScrollableWidgetList {
       result.add(item);
     }
     return result;
+  }
+
+  void didUnmount() {
+    super.didUnmount();
+    if (_timer != null) {
+      _timer.cancel();
+    }
   }
 }
 
