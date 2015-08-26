@@ -18,6 +18,7 @@ import 'package:sky/rendering/viewport.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/framework.dart';
 import 'package:sky/widgets/gesture_detector.dart';
+import 'package:sky/widgets/homogeneous_viewport.dart';
 import 'package:sky/widgets/mixed_viewport.dart';
 
 export 'package:sky/widgets/mixed_viewport.dart' show MixedViewportLayoutState;
@@ -421,17 +422,11 @@ abstract class ScrollableWidgetList extends Scrollable {
     double contentExtent = itemExtent * itemCount;
     if (padding != null)
       contentExtent += _leadingPadding + _trailingPadding;
-
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: contentExtent,
       containerExtent: _containerExtent,
-      scrollOffset: scrollOffset));
-  }
-
-  Offset _toOffset(double value) {
-    return scrollDirection == ScrollDirection.vertical
-      ? new Offset(0.0, value)
-      : new Offset(value, 0.0);
+      scrollOffset: scrollOffset
+    ));
   }
 
   Widget buildContent() {
@@ -440,46 +435,25 @@ abstract class ScrollableWidgetList extends Scrollable {
       _updateScrollBehavior();
     }
 
-    double paddedScrollOffset = scrollOffset - _leadingPadding;
-    int itemShowIndex = 0;
-    int itemShowCount = 0;
-    Offset viewportOffset = Offset.zero;
-
-    if (_containerExtent != null && _containerExtent > 0.0 && itemCount > 0) {
-      if (paddedScrollOffset < scrollBehavior.minScrollOffset) {
-        // Underscroll
-        double visibleExtent = _containerExtent + paddedScrollOffset;
-        itemShowCount = (visibleExtent / itemExtent).ceil();
-        viewportOffset = _toOffset(paddedScrollOffset);
-      } else {
-        itemShowCount = (_containerExtent / itemExtent).ceil() + 1;
-        itemShowIndex = (paddedScrollOffset / itemExtent).floor();
-        viewportOffset = _toOffset(paddedScrollOffset - itemShowIndex * itemExtent);
-        itemShowIndex %= itemCount; // Wrap index for when itemWrap is true.
-      }
-    }
-
-    List<Widget> items = buildItems(itemShowIndex, itemShowCount);
-    assert(items.every((item) => item.key != null));
-
-    BlockDirection blockDirection = scrollDirection == ScrollDirection.vertical
-      ? BlockDirection.vertical
-      : BlockDirection.horizontal;
-
-    // TODO(ianh): Refactor this so that it does the building in the
-    // same frame as the size observing, similar to MixedViewport, but
-    // keeping the fixed-height optimisations.
     return new SizeObserver(
       callback: _handleSizeChanged,
-      child: new Viewport(
-        scrollDirection: scrollDirection,
-        scrollOffset: viewportOffset,
-        child: new Container(
-          padding: _crossAxisPadding,
-          child: new BlockBody(items, direction: blockDirection)
+      child: new Container(
+        padding: _crossAxisPadding,
+        child: new HomogeneousViewport(
+          builder: _buildItems,
+          itemExtent: itemExtent,
+          itemCount: itemCount,
+          direction: scrollDirection,
+          startOffset: scrollOffset - _leadingPadding
         )
       )
     );
+  }
+
+  List<Widget> _buildItems(int start, int count) {
+    List<Widget> result = buildItems(start, count);
+    assert(result.every((item) => item.key != null));
+    return result;
   }
 
   List<Widget> buildItems(int start, int count);

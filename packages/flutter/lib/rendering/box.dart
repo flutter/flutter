@@ -319,7 +319,10 @@ abstract class RenderBox extends RenderObject {
   bool debugDoesMeetConstraints() {
     assert(constraints != null);
     assert(_size != null);
-    assert(!_size.isInfinite && 'See https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/widgets/sizing.md#user-content-unbounded-constraints' is String);
+    assert(() {
+      'See https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/widgets/sizing.md#user-content-unbounded-constraints';
+      return !_size.isInfinite;
+    });
     bool result = constraints.contains(_size);
     if (!result)
       print("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
