@@ -76,7 +76,8 @@ void Animator::BeginFrame(int64_t time_stamp) {
 
   config_.gpu_task_runner->PostTaskAndReply(
       FROM_HERE,
-      base::Bind(&GPUDelegate::Draw, config_.gpu_delegate, picture),
+      base::Bind(&GPUDelegate::Draw, config_.gpu_delegate, picture,
+                 engine_->physical_size()),
       base::Bind(&Animator::OnFrameComplete, weak_factory_.GetWeakPtr()));
 }
 

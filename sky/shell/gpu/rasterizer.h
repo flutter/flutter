@@ -34,7 +34,7 @@ class Rasterizer : public GPUDelegate {
 
   void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
   void OnOutputSurfaceDestroyed() override;
-  void Draw(PassRefPtr<SkPicture> picture) override;
+  void Draw(PassRefPtr<SkPicture> picture, gfx::Size size) override;
 
  private:
   void EnsureGLContext();
