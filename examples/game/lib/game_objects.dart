@@ -53,6 +53,10 @@ abstract class GameObject extends Node {
     }
   }
 
+  void collect() {
+    removeFromParent();
+  }
+
   void addDamage(double d) {
     if (!canBeDamaged) return;
 
@@ -263,6 +267,7 @@ class Coin extends PowerUp {
     _sprt = new Sprite(f.sheet["shield.png"]);
     _sprt.transferMode = sky.TransferMode.plus;
     _sprt.size = new Size(15.0, 15.0);
+    _sprt.colorOverlay = new Color(0xffffff00);
     addChild(_sprt);
 
     radius = 7.5;
@@ -274,4 +279,9 @@ class Coin extends PowerUp {
   }
 
   Sprite _sprt;
+
+  void collect() {
+    f.playerState.addCoin(this);
+    super.collect();
+  }
 }

@@ -39,7 +39,7 @@ class GameDemoNode extends NodeWithSize {
     _gameScreen.addChild(_level);
 
     // Add heads up display
-    _playerState = new PlayerState(_spritesUI);
+    _playerState = new PlayerState(_spritesUI, _spritesGame);
     addChild(_playerState);
 
     _objectFactory = new GameObjectFactory(_spritesGame, _sounds, _level, _playerState);
@@ -165,7 +165,7 @@ class GameDemoNode extends NodeWithSize {
       } else if (node is GameObject && node.canBeCollected) {
         if (node.collidingWith(_level.ship)) {
           // The ship ran over something collectable
-          node.removeFromParent();
+          node.collect();
         }
       }
     }
