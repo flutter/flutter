@@ -166,6 +166,14 @@ class RenderSectorWithChildren extends RenderDecoratedSector with ContainerRende
       child = child.parentData.previousSibling;
     }
   }
+
+  void visitChildren(RenderObjectVisitor visitor) {
+    RenderSector child = lastChild;
+    while (child != null) {
+      visitor(child);
+      child = child.parentData.previousSibling;
+    }
+  }
 }
 
 class RenderSectorRing extends RenderSectorWithChildren {
@@ -411,6 +419,10 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
   void setupParentData(RenderObject child) {
     if (child.parentData is! SectorParentData)
       child.parentData = new SectorParentData();
+  }
+
+  void visitChildren(RenderObjectVisitor visitor) {
+    visitor(_child);
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
