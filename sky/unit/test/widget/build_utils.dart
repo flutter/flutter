@@ -1,7 +1,6 @@
 import 'dart:sky' as sky;
 import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
-import 'package:test/test.dart';
 
 const Size _kTestViewSize = const Size(800.0, 600.0);
 
