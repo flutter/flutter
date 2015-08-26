@@ -66,14 +66,14 @@ class SectorApp extends App {
   Widget buildBody() {
     return new Material(
       type: MaterialType.canvas,
-      child: new Flex([
+      child: new Column([
           new Container(
             padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
-            child: new Flex([
+            child: new Row([
                 new RaisedButton(
                   enabled: enabledAdd,
                   child: new ShrinkWrapWidth(
-                    child: new Flex([
+                    child: new Row([
                       new Container(
                         padding: new EdgeDims.all(4.0),
                         margin: new EdgeDims.only(right: 10.0),
@@ -87,7 +87,7 @@ class SectorApp extends App {
                 new RaisedButton(
                   enabled: enabledRemove,
                   child: new ShrinkWrapWidth(
-                    child: new Flex([
+                    child: new Row([
                       new Container(
                         padding: new EdgeDims.all(4.0),
                         margin: new EdgeDims.only(right: 10.0),
@@ -113,7 +113,6 @@ class SectorApp extends App {
             )
           ),
         ],
-        direction: FlexDirection.vertical,
         justifyContent: FlexJustifyContent.spaceBetween
       )
     );

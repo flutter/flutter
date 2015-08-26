@@ -136,7 +136,7 @@ class StockHome extends StatefulComponent {
         new DrawerItem(
           icon: 'action/thumb_up',
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
-          child: new Flex([
+          child: new Row([
             new Flexible(child: new Text('Optimistic')),
             new Radio(value: StockMode.optimistic, groupValue: stockMode, onChanged: _handleStockModeChange)
           ])
@@ -144,7 +144,7 @@ class StockHome extends StatefulComponent {
         new DrawerItem(
           icon: 'action/thumb_down',
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
-          child: new Flex([
+          child: new Row([
             new Flexible(child: new Text('Pessimistic')),
             new Radio(value: StockMode.pessimistic, groupValue: stockMode, onChanged: _handleStockModeChange)
           ])

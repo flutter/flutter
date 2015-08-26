@@ -17,7 +17,7 @@ class FiddleApp extends App {
   }
 
   Widget buildFlex1() {
-    return new Flex([
+    return new Row([
       new Flexible(child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: const Color(0xFF00FFFF)
@@ -28,7 +28,7 @@ class FiddleApp extends App {
   }
 
   Widget buildFlex2() {
-    return new Flex([
+    return new Row([
       new Flexible(child: new Container(
         key: const StringKey('something-else'),
         decoration: new BoxDecoration(
@@ -63,7 +63,7 @@ class FiddleApp extends App {
   }
 
   Widget build() {
-    return new Flex([
+    return new Column([
         new SizedBox(
           key: const StringKey('flex-example'),
           height: 250.0,
@@ -75,7 +75,6 @@ class FiddleApp extends App {
           child: arbitrarySetting ? buildStack1() : buildStack2()
         )
       ],
-      direction: FlexDirection.vertical,
       alignItems: FlexAlignItems.stretch
     );
   }

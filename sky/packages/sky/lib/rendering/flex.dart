@@ -387,7 +387,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           crossSize = math.max(crossSize, _getCrossSize(child));
         }
         if (alignItems == FlexAlignItems.baseline) {
-          assert(textBaseline != null);
+          assert(textBaseline != null && 'To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.' is String);
           double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
           if (distance != null)
             maxBaselineDistance = math.max(maxBaselineDistance, distance);

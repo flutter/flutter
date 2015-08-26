@@ -32,11 +32,11 @@ ProblemComponent b;
 
 class TestApp extends App {
   Widget build() {
-    return new Flex([
+    return new Column([
         a = new ProblemComponent(),
         b = new ProblemComponent()
-      ],
-    direction: FlexDirection.vertical);
+      ]
+    );
   }
 }
 

@@ -17,7 +17,9 @@ void main() {
 
   Matrix4 transform = new Matrix4.identity();
   RenderTransform spin = new RenderTransform(
-      transform: transform, child: box);
+    transform: transform,
+    child: box
+  );
   spin.rotateZ(1.0);
 
   RenderFlex flex = new RenderFlex();

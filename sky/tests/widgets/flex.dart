@@ -10,25 +10,23 @@ class TestApp extends App {
   Widget build() {
     return new Container(
       padding: new EdgeDims.all(50.0),
-      child: new Flex([
+      child: new Row([
           new Card(
             child: new Container(
               width: 300.0,
               height: 500.0,
-              child: new Flex([
+              child: new Column([
                   new Text('TOP'),
                   new Flexible(
                     child: new Container(
                       decoration: new BoxDecoration(backgroundColor: new Color(0xFF509050)),
-                      child: new Flex([new Text('bottom')],
-                        direction: FlexDirection.vertical,
+                      child: new Column([new Text('bottom')],
                         alignItems: FlexAlignItems.stretch
                       )
                     )
                   )
                 ],
-                alignItems: FlexAlignItems.stretch,
-                direction: FlexDirection.vertical
+                alignItems: FlexAlignItems.stretch
               )
             )
           ),
@@ -36,25 +34,22 @@ class TestApp extends App {
             child: new Container(
               width: 300.0,
               height: 500.0,
-              child: new Flex([
+              child: new Column([
                   new Flexible(
                     child: new Container(
                       decoration: new BoxDecoration(backgroundColor: new Color(0xFF509050)),
-                      child: new Flex([new Text('top')],
-                        direction: FlexDirection.vertical,
+                      child: new Column([new Text('top')],
                         alignItems: FlexAlignItems.stretch
                       )
                     )
                   ),
                   new Text('BOTTOM')
                 ],
-                alignItems: FlexAlignItems.stretch,
-                direction: FlexDirection.vertical
+                alignItems: FlexAlignItems.stretch
               )
             )
           )
-        ],
-        direction: FlexDirection.horizontal
+        ]
       )
     );
   }

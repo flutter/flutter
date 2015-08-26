@@ -41,9 +41,11 @@ class HorizontalScrollingApp extends App {
     return new Center(
       child: new Container(
         height: 50.0,
-        child: new Flex([
-          new Block(circles, scrollDirection: ScrollDirection.horizontal)
-        ], justifyContent: FlexJustifyContent.end)
+        child: new Row([
+            new Block(circles, scrollDirection: ScrollDirection.horizontal)
+          ],
+          justifyContent: FlexJustifyContent.end
+        )
       )
     );
   }
