@@ -98,7 +98,9 @@ class Mimic extends GlobalKeyWatcher {
   void _setMimicable(widget) {
     if (_mimicable != widget) {
       _stopMimic();
-      widget.startMimic();
+      if (widget != null) {
+        widget.startMimic();
+      }
     }
     setState(() {
       _mimicable = widget;
