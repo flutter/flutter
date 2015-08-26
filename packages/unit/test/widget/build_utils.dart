@@ -40,6 +40,15 @@ class WidgetTester {
   TestApp _app;
   RenderView _renderView;
 
+  void walkWidgets(WidgetTreeWalker walker) {
+    void walk(Widget widget) {
+      walker(widget);
+      widget.walkChildren(walk);
+    }
+
+    _app.walkChildren(walk);
+  }
+
   void pumpFrame(WidgetBuilder builder) {
     _app.builder = builder;
     Component.flushBuild();
