@@ -17,14 +17,6 @@
 
 namespace sky {
 namespace shell {
-namespace {
-
-gfx::Size GetSize(SkPicture* picture) {
-  const SkRect& rect = picture->cullRect();
-  return gfx::Size(rect.width(), rect.height());
-}
-
-}  // namespace
 
 Rasterizer::Rasterizer()
     : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
@@ -43,14 +35,10 @@ void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   CHECK(surface_) << "GLSurface required.";
 }
 
-void Rasterizer::Draw(PassRefPtr<SkPicture> picture) {
+void Rasterizer::Draw(PassRefPtr<SkPicture> picture, gfx::Size size) {
   TRACE_EVENT0("sky", "Rasterizer::Draw");
 
   if (!surface_)
-    return;
-
-  gfx::Size size = GetSize(picture.get());
-  if (size.IsEmpty())
     return;
 
   if (surface_->GetSize() != size)
