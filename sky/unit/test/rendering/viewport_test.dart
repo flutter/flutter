@@ -15,16 +15,16 @@ void main() {
       child: size);
 
     RenderViewport viewport = new RenderViewport(child: red, scrollOffset: new Offset(0.0, -10.0));
-    RenderView renderView = layout(viewport);
+    RenderingTester tester = layout(viewport);
 
     HitTestResult result;
 
     result = new HitTestResult();
-    renderView.hitTest(result, position: new Point(15.0, 0.0));
+    tester.renderView.hitTest(result, position: new Point(15.0, 0.0));
     expect(result.path.first.target, equals(viewport));
 
     result = new HitTestResult();
-    renderView.hitTest(result, position: new Point(15.0, 15.0));
+    tester.renderView.hitTest(result, position: new Point(15.0, 15.0));
     expect(result.path.first.target, equals(size));
   });
 }

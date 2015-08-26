@@ -7,14 +7,36 @@ class TestRenderView extends RenderView {
     attach();
     rootConstraints = new ViewConstraints(size: _kTestViewSize);
     scheduleInitialLayout();
-  }
-
-  void beginFrame(double timeStamp) {
-    RenderObject.flushLayout();
+    scheduleInitialPaint(new TransformLayer(transform: new Matrix4.identity()));
   }
 }
 
-RenderView layout(RenderBox box, { BoxConstraints constraints }) {
+enum EnginePhase {
+  layout,
+  paint,
+  composite
+}
+
+class RenderingTester {
+  RenderingTester({ RenderBox root }) {
+    renderView = new TestRenderView(child: root);
+  }
+
+  RenderView renderView;
+
+  void pumpFrame({ EnginePhase phase: EnginePhase.composite }) {
+    RenderObject.flushLayout();
+    if (phase == EnginePhase.layout)
+      return;
+    renderView.updateCompositingBits();
+    RenderObject.flushPaint();
+    if (phase == EnginePhase.paint)
+      return;
+    renderView.compositeFrame();
+  }
+}
+
+RenderingTester layout(RenderBox box, { BoxConstraints constraints }) {
   if (constraints != null) {
     box = new RenderPositionedBox(
       child: new RenderConstrainedBox(
@@ -24,7 +46,7 @@ RenderView layout(RenderBox box, { BoxConstraints constraints }) {
     );
   }
 
-  TestRenderView renderView = new TestRenderView(child: box);
-  renderView.beginFrame(0.0);
-  return renderView;
+  RenderingTester tester = new RenderingTester(root: box);
+  tester.pumpFrame(phase: EnginePhase.layout);
+  return tester;
 }
