@@ -13,6 +13,12 @@ class DateUtils {
   static const MS_IN_WEEK =
         DateTime.DAYS_PER_WEEK * Duration.MILLISECONDS_PER_DAY;
 
+  // TODO(jmesserly): locale specific date format
+  static String _twoDigits(int n) {
+    if (n >= 10) return "${n}";
+    return "0${n}";
+  }
+
   /** Formats a time in H:MM A format */
   static String toHourMinutesString(Duration duration) {
     assert(duration.inDays == 0);
@@ -68,14 +74,16 @@ class DateUtils {
     } else if (delta.inMilliseconds < MS_IN_WEEK) {
       return WEEKDAYS[then.weekday];
     } else {
-      // TODO(jmesserly): locale specific date format
-      String twoDigits(int n) {
-        if (n >= 10) return "${n}";
-        return "0${n}";
-      }
-      String twoDigitMonth = twoDigits(then.month);
-      String twoDigitDay = twoDigits(then.day);
+      String twoDigitMonth = _twoDigits(then.month);
+      String twoDigitDay = _twoDigits(then.day);
       return "${then.year}-${twoDigitMonth}-${twoDigitDay}";
     }
+  }
+
+  static String toDateString(DateTime then) {
+    // TODO(jmesserly): locale specific date format
+    String twoDigitMonth = _twoDigits(then.month);
+    String twoDigitDay = _twoDigits(then.day);
+    return "${then.year}-${twoDigitMonth}-${twoDigitDay}";
   }
 }
