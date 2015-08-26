@@ -34,8 +34,7 @@ ContextState::EnableFlags::EnableFlags()
       rasterizer_discard(false),
       cached_rasterizer_discard(false),
       primitive_restart_fixed_index(false),
-      cached_primitive_restart_fixed_index(false) {
-}
+      cached_primitive_restart_fixed_index(false) {}
 
 void ContextState::Initialize() {
   blend_color_red = 0.0f;

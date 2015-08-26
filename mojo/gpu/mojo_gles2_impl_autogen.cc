@@ -11,16 +11,13 @@
 #include "mojo/gpu/mojo_gles2_impl_autogen.h"
 
 #include "base/logging.h"
-#include "mojo/public/c/gles2/chromium_bind_uniform_location.h"
-#include "mojo/public/c/gles2/chromium_map_sub.h"
-#include "mojo/public/c/gles2/chromium_miscellaneous.h"
-#include "mojo/public/c/gles2/chromium_sync_point.h"
-#include "mojo/public/c/gles2/chromium_texture_mailbox.h"
-#include "mojo/public/c/gles2/ext_debug_marker.h"
 #include "mojo/public/c/gles2/gles2.h"
-#include "mojo/public/c/gles2/occlusion_query_ext.h"
-#include "mojo/public/c/gles2/oes_vertex_array_object.h"
 #include "mojo/public/c/gpu/MGL/mgl_onscreen.h"
+
+#define GL_GLEXT_PROTOTYPES
+#include "mojo/public/c/gpu/GLES2/gl2.h"
+#include "mojo/public/c/gpu/GLES2/gl2ext.h"
+#include "mojo/public/c/gpu/GLES2/gl2extmojo.h"
 
 namespace mojo {
 
