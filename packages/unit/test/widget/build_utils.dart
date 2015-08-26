@@ -2,17 +2,6 @@ import 'dart:sky' as sky;
 import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
 
-const Size _kTestViewSize = const Size(800.0, 600.0);
-
-class TestRenderView extends RenderView {
-  TestRenderView({ RenderBox child }) : super(child: child) {
-    attach();
-    rootConstraints = new ViewConstraints(size: _kTestViewSize);
-    scheduleInitialLayout();
-    scheduleInitialPaint(new TransformLayer(transform: new Matrix4.identity()));
-  }
-}
-
 typedef Widget WidgetBuilder();
 
 class TestApp extends App {
@@ -57,12 +46,10 @@ class TestGestureEvent extends sky.GestureEvent {
 class WidgetTester {
   WidgetTester() {
     _app = new TestApp();
-    _renderView = new TestRenderView();
-    runApp(_app, renderViewOverride: _renderView);
+    runApp(_app);
   }
 
   TestApp _app;
-  RenderView _renderView;
 
   List<Layer> _layers(Layer layer) {
     List<Layer> result = [layer];
@@ -76,7 +63,7 @@ class WidgetTester {
     }
     return result;
   }
-  List<Layer> get layers => _layers(_renderView.layer);
+  List<Layer> get layers => _layers(SkyBinding.instance.renderView.layer);
 
   void walkWidgets(WidgetTreeWalker walker) {
     void walk(Widget widget) {
@@ -125,17 +112,7 @@ class WidgetTester {
 
   void pumpFrame(WidgetBuilder builder) {
     _app.builder = builder;
-    Component.flushBuild();
-    RenderObject.flushLayout();
-  }
-
-  // TODO(hansmuller): just having one pumpFrame() fn would be preferable.
-  void pumpPaintFrame(WidgetBuilder builder) {
-    _app.builder = builder;
-    Component.flushBuild();
-    RenderObject.flushLayout();
-    _renderView.updateCompositingBits();
-    RenderObject.flushPaint();
+    SkyBinding.instance.beginFrame(0.0);
   }
 
 }
