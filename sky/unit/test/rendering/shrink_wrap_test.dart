@@ -1,7 +1,7 @@
 import 'package:sky/rendering.dart';
 import 'package:test/test.dart';
 
-import 'layout_utils.dart';
+import 'rendering_tester.dart';
 
 class RenderTestBox extends RenderBox {
   RenderTestBox(this._intrinsicDimensions);

@@ -3,7 +3,7 @@ import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/shadows.dart';
 import 'package:test/test.dart';
 
-import 'layout_utils.dart';
+import 'rendering_tester.dart';
 
 void main() {
   test("should size to render view", () {

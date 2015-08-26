@@ -3,7 +3,7 @@ import 'dart:sky' as sky;
 import 'package:sky/rendering.dart';
 import 'package:test/test.dart';
 
-import 'layout_utils.dart';
+import 'rendering_tester.dart';
 
 class SquareImage implements sky.Image {
   int get width => 10;
