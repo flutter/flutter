@@ -5,47 +5,7 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/rendering.dart';
-
-class RenderSolidColor extends RenderDecoratedBox {
-  final sky.Size desiredSize;
-  final sky.Color backgroundColor;
-
-  RenderSolidColor(sky.Color backgroundColor, { this.desiredSize: sky.Size.infinite })
-      : backgroundColor = backgroundColor,
-        super(decoration: new BoxDecoration(backgroundColor: backgroundColor)) {
-  }
-
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(desiredSize.width);
-  }
-
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(desiredSize.width);
-  }
-
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(desiredSize.height);
-  }
-
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(desiredSize.height);
-  }
-
-  void performLayout() {
-    size = constraints.constrain(desiredSize);
-  }
-
-  EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown') {
-      decoration = new BoxDecoration(backgroundColor: const sky.Color(0xFFFF0000));
-      return EventDisposition.processed;
-    } else if (event.type == 'pointerup') {
-      decoration = new BoxDecoration(backgroundColor: backgroundColor);
-      return EventDisposition.processed;
-    }
-    return super.handleEvent(event, entry);
-  }
-}
+import 'solid_color_box.dart';
 
 RenderBox buildFlexExample() {
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
@@ -56,7 +16,7 @@ RenderBox buildFlexExample() {
   );
 
   void addFlexChildSolidColor(RenderFlex parent, sky.Color backgroundColor, { int flex: 0 }) {
-    RenderSolidColor child = new RenderSolidColor(backgroundColor);
+    RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
     parent.add(child);
     child.parentData.flex = flex;
   }
@@ -65,7 +25,7 @@ RenderBox buildFlexExample() {
   addFlexChildSolidColor(flexRoot, const sky.Color(0xFFFFFF00), flex: 1);
 
   // Turquoise box
-  flexRoot.add(new RenderSolidColor(const sky.Color(0x7700FFFF), desiredSize: new sky.Size(100.0, 100.0)));
+  flexRoot.add(new RenderSolidColorBox(const sky.Color(0x7700FFFF), desiredSize: new sky.Size(100.0, 100.0)));
 
   var renderDecoratedBlock = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFFFFFF))

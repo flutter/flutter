@@ -8,6 +8,7 @@ export 'rendering/auto_layout.dart';
 export 'rendering/block.dart';
 export 'rendering/box.dart';
 export 'rendering/flex.dart';
+export 'rendering/grid.dart';
 export 'rendering/image.dart';
 export 'rendering/layer.dart';
 export 'rendering/object.dart';
