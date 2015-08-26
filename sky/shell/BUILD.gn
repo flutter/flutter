@@ -270,6 +270,7 @@ if (is_android) {
 
     deps = common_deps + [
              ":common",
+             "//mojo/common",
              "//sky/services/ns_net",
              "//sky/services/testing:interfaces",
            ]
