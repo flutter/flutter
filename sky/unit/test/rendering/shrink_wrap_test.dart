@@ -1,5 +1,3 @@
-import 'dart:sky' as sky;
-
 import 'package:sky/rendering.dart';
 import 'package:test/test.dart';
 
