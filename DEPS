@@ -19,7 +19,7 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'mojo_sdk_revision': '76ff57433b48527dc491dac4c52c9d71a7c3a0e3',
+  'mojo_sdk_revision': 'eb7dac2f90187db12c0d29792a0bd999bc96cbe5',
   'mojo_devtools_revision': '2feda37728d3e551ef543b8f6c4f4b20eaa2d81f',
   'skia_revision': '29ccdf86ab0a1649fd775c9431891bacb1391e99',
   'dart_revision': 'cab003366785773ace16b5305ac1f33c228cac54',

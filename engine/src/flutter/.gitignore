@@ -76,3 +76,4 @@ Thumbs.db
 /mojo/dart/mojom/packages
 /mojo/dart/mojom/test/packages
 /sky/packages/**/packages
+/sky/packages/sky_services/lib/
