@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:sky/mojo/activity.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets.dart';
@@ -43,15 +44,23 @@ class DatePicker extends StatefulComponent {
   DatePickerMode _mode = DatePickerMode.day;
 
   void _handleModeChanged(DatePickerMode mode) {
+    userFeedback.performHapticFeedback(HapticFeedbackType_VIRTUAL_KEY);
     setState(() {
       _mode = mode;
     });
   }
 
   void _handleYearChanged(DateTime dateTime) {
+    userFeedback.performHapticFeedback(HapticFeedbackType_VIRTUAL_KEY);
     setState(() {
       _mode = DatePickerMode.day;
     });
+    if (onChanged != null)
+      onChanged(dateTime);
+  }
+
+  void _handleDayChanged(DateTime dateTime) {
+    userFeedback.performHapticFeedback(HapticFeedbackType_VIRTUAL_KEY);
     if (onChanged != null)
       onChanged(dateTime);
   }
@@ -69,7 +78,7 @@ class DatePicker extends StatefulComponent {
       case DatePickerMode.day:
         picker = new MonthPicker(
           selectedDate: selectedDate,
-          onChanged: onChanged,
+          onChanged: _handleDayChanged,
           firstDate: firstDate,
           lastDate: lastDate,
           itemExtent: _calendarHeight
@@ -167,6 +176,7 @@ class DayPicker extends Component {
   }) {
     assert(selectedDate != null);
     assert(currentDate != null);
+    assert(onChanged != null);
     assert(displayedMonth != null);
   }
 
@@ -239,8 +249,7 @@ class DayPicker extends Component {
         item = new Listener(
           onGestureTap: (_) {
             DateTime result = new DateTime(year, month, day);
-            if (onChanged != null)
-              onChanged(result);
+            onChanged(result);
           },
           child: new Container(
             height: 30.0,
@@ -277,6 +286,7 @@ class MonthPicker extends ScrollableWidgetList {
     double itemExtent
   }) : super(itemExtent: itemExtent) {
     assert(selectedDate != null);
+    assert(onChanged != null);
     assert(lastDate.isAfter(firstDate));
   }
 
@@ -354,6 +364,7 @@ class YearPicker extends ScrollableWidgetList {
     this.lastDate
   }) : super(itemExtent: 50.0) {
     assert(selectedDate != null);
+    assert(onChanged != null);
     assert(lastDate.isAfter(firstDate));
   }
   DateTime selectedDate;
@@ -381,8 +392,7 @@ class YearPicker extends ScrollableWidgetList {
         key: new Key(label),
         onGestureTap: (_) {
           DateTime result = new DateTime(year, selectedDate.month, selectedDate.day);
-          if (onChanged != null)
-            onChanged(result);
+          onChanged(result);
         },
         child: new InkWell(
           child: new Container(
