@@ -9,6 +9,7 @@ class TestRenderView extends RenderView {
     attach();
     rootConstraints = new ViewConstraints(size: _kTestViewSize);
     scheduleInitialLayout();
+    scheduleInitialPaint(new TransformLayer(transform: new Matrix4.identity()));
   }
 }
 
@@ -63,6 +64,20 @@ class WidgetTester {
   TestApp _app;
   RenderView _renderView;
 
+  List<Layer> _layers(Layer layer) {
+    List<Layer> result = [layer];
+    if (layer is ContainerLayer) {
+      ContainerLayer root = layer;
+      Layer child = root.firstChild;
+      while(child != null) {
+        result.addAll(_layers(child));
+        child = child.nextSibling;
+      }
+    }
+    return result;
+  }
+  List<Layer> get layers => _layers(_renderView.layer);
+
   void walkWidgets(WidgetTreeWalker walker) {
     void walk(Widget widget) {
       walker(widget);
@@ -113,4 +128,14 @@ class WidgetTester {
     Component.flushBuild();
     RenderObject.flushLayout();
   }
+
+  // TODO(hansmuller): just having one pumpFrame() fn would be preferable.
+  void pumpPaintFrame(WidgetBuilder builder) {
+    _app.builder = builder;
+    Component.flushBuild();
+    RenderObject.flushLayout();
+    _renderView.updateCompositingBits();
+    RenderObject.flushPaint();
+  }
+
 }
