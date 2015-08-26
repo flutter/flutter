@@ -109,8 +109,6 @@ class DocumentView : public blink::ServiceProvider,
   void LoadFromSnapshotStream(String name,
                               mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  void UpdateRootMetricsAndAddObserver();
-
   void UpdateRootSizeAndViewportMetrics(const mojo::Rect& new_bounds);
 
   void InitServiceRegistry();
