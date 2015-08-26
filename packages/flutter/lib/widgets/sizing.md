@@ -1,5 +1,5 @@
-How To Use Flex In Sky
-======================
+Sizing in Sky
+=============
 
 Background
 ----------
@@ -24,6 +24,9 @@ their constructor arguments. In the case of `Container`, it defaults
 to trying to be as big as possible, but if you give it a `width`, for
 instance, it tries to honor that and be that particular size.
 
+Others, for example `Row` and `Column` (flex boxes) vary based on the
+constraints they are given, as described below in the "Flex" section.
+
 The constraints are sometimes "tight", meaning that they leave no room
 for the render box to decide on a size (e.g. if the minimum and
 maximum width are the same, it is said to have a tight width). The
@@ -31,7 +34,14 @@ main example of this is the `App` widget, which is contained by the
 `RenderView` class: the box used by the child returned by the
 application's `build` function is given a constraint that forces it to
 exactly fill the application's content area (typically, the entire
-screen).
+screen). Many of the boxes in Sky, especially those that just take a
+single child, will pass their constraint on to their children. This
+means that if you nest a bunch of boxes inside each other at the root
+of your application's render tree, they'll all exactly fit in each
+other, forced by these tight constraints.
+
+Some boxes _loosen_ the constraints, meaning the maximum is maintained
+but the minimum is removed. For example, `Center`.
 
 Unbounded constraints
 ---------------------
@@ -41,12 +51,21 @@ _unbounded_, or infinite. This means that either the maximum width or
 the maximum height is set to `double.INFINITY`.
 
 A box that tries to be as big as possible won't function usefully when
-given an unbounded constraint, and in checked mode, will assert.
+given an unbounded constraint, and in checked mode, will assert with a
+message saying `!_size.isInfinite` and a string that points to this
+file.
 
 The most common cases where a render box finds itself with unbounded
 constraints are within flex boxes (`Row` and `Column`), and **within
 scrollable regions** (mainly `Block`, `ScollableList<T>`, and
 `ScrollableMixedWidgetList`).
+
+In particular, `Block` tries to expand to fit the space available in
+its cross-direction (i.e. if it's a vertically-scrolling block, it
+will try to be as wide as its parent). If you nest a vertically
+scrolling `Block` inside a horizontally scrolling `Block`, the inner
+one will try to be as wide as possible, which is infinitely wide,
+since the outer one is scrollable in that direction.
 
 Flex
 ----
@@ -62,7 +81,8 @@ In unbounded constraints, they try to fit their children in that
 direction. In this case, you cannot set `flex` on the children to
 anything other than 0 (the default). In the widget hierarchy, this
 means that you cannot use `Flexible` when the flex box is inside
-another flex box or inside a scrollable.
+another flex box or inside a scrollable. If you do, you'll get an
+assert that `canFlex` is not true, pointing you at this section.
 
 In the _cross_ direction, i.e. in their width for `Column` (vertical
 flex) and in their height for `Row` (horizontal flex), they must never
