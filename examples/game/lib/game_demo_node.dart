@@ -436,7 +436,7 @@ class MovingEnemy extends Obstacle {
     maxDamage = 2.0;
     addChild(_sprt);
 
-    constraints = [new ConstraintRotationToMovement(0.0, 0.5)];
+    constraints = [new ConstraintRotationToMovement(dampening: 0.5)];
   }
 
   final double _swirlSpacing = 80.0;
