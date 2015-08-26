@@ -1,5 +1,7 @@
+import 'dart:sky' as sky;
 import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
+import 'package:test/test.dart';
 
 const Size _kTestViewSize = const Size(800.0, 600.0);
 
@@ -30,6 +32,28 @@ class TestApp extends App {
   }
 }
 
+class TestGestureEvent extends sky.GestureEvent {
+  TestGestureEvent({
+    this.type,
+    this.primaryPointer,
+    this.x,
+    this.y,
+    this.dx,
+    this.dy,
+    this.velocityX,
+    this.velocityY
+  });
+
+  String type;
+  int primaryPointer;
+  double x;
+  double y;
+  double dx;
+  double dy;
+  double velocityX;
+  double velocityY;
+}
+
 class WidgetTester {
   WidgetTester() {
     _app = new TestApp();
@@ -47,6 +71,42 @@ class WidgetTester {
     }
 
     _app.walkChildren(walk);
+  }
+
+  Widget findWidget(bool predicate(Widget widget)) {
+    try {
+      walkWidgets((Widget widget) {
+        if (predicate(widget))
+          throw widget;
+      });
+    } catch (e) {
+      if (e is Widget)
+        return e;
+      rethrow;
+    }
+    return null;
+  }
+
+  Text findText(String text) {
+    return findWidget((Widget widget) {
+      return widget is Text && widget.data == text;
+    });
+  }
+
+  Point getCenter(Widget widget) {
+    assert(widget != null);
+    RenderBox box = widget.renderObject as RenderBox;
+    assert(box != null);
+    return box.localToGlobal(box.size.center(Point.origin));
+  }
+
+  void tap(Widget widget) {
+    dispatchEvent(new TestGestureEvent(type: 'gesturetap'), getCenter(widget));
+  }
+
+  void dispatchEvent(sky.Event event, Point position) {
+    HitTestResult result = SkyBinding.instance.hitTest(position);
+    SkyBinding.instance.dispatchEvent(event, result);
   }
 
   void pumpFrame(WidgetBuilder builder) {
