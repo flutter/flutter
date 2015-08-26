@@ -17,12 +17,14 @@ PUB = os.path.join(DART_SDK, 'pub')
 PUB_CACHE = os.path.join(SRC_ROOT, 'dart-pub-cache')
 
 UNIT_DIR = os.path.join(SRC_ROOT, 'sky', 'unit')
+PACKAGES_DIR = os.path.join(UNIT_DIR, 'packages')
 
 def main():
     parser = argparse.ArgumentParser(description='Runs Sky tests')
     parser.add_argument('--config', default='Debug')
     parser.add_argument('--debug', dest='config', action='store_const', const='Debug')
     parser.add_argument('--release', dest='config', action='store_const', const='Release')
+    parser.add_argument('--only', help='Run only the specified test')
     args, remaining = parser.parse_known_args()
 
     build_dir = os.path.join(SRC_ROOT, 'out', args.config)
@@ -32,6 +34,13 @@ def main():
         sky_shell = os.path.join(build_dir, 'sky_shell')
     elif sys.platform == 'darwin':
         sky_shell = os.path.join(build_dir, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell')
+
+    if args.only:
+        return subprocess.call([
+            sky_shell,
+            '--package-root=%s' % PACKAGES_DIR,
+            args.only,
+        ])
 
     env = os.environ.copy()
     env['PUB_CACHE'] = PUB_CACHE
