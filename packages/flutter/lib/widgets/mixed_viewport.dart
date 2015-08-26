@@ -78,7 +78,7 @@ class MixedViewportLayoutState {
 }
 
 class MixedViewport extends RenderObjectWrapper {
-  MixedViewport({ this.builder, this.startOffset, this.token, this.layoutState, Key key })
+  MixedViewport({ Key key, this.builder, this.startOffset, this.token, this.layoutState })
     : super(key: key) {
     assert(this.layoutState != null);
   }
@@ -258,7 +258,11 @@ class MixedViewport extends RenderObjectWrapper {
 
     final List<double> offsets = layoutState._childOffsets;
     final Map<_Key, Widget> childrenByKey = layoutState._childrenByKey;
-    final double height = renderObject.size.height;
+    final double height = constraints.maxHeight;
+    assert(height < double.INFINITY &&
+      'There is no point putting a lazily-built MixedViewport inside a box with infinite internal height ' +
+      '(e.g. inside something that scrolls), because it would then just eagerly build all the children. ' +
+      'You probably want to put the MixedViewport inside a container with a fixed height.' is String);
     final double endOffset = startOffset + height;
     BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: constraints.constrainWidth());
 
