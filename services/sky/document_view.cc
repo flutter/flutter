@@ -130,9 +130,6 @@ void DocumentView::OnEmbed(
   services_provided_by_embedder_ = services_provided_by_embedder.Pass();
 
   Load(response_.Pass());
-
-  UpdateRootSizeAndViewportMetrics(root_->bounds());
-
   root_->AddObserver(this);
 }
 
@@ -142,8 +139,10 @@ void DocumentView::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
 
 void DocumentView::LoadFromSnapshotStream(
     String name, mojo::ScopedDataPipeConsumerHandle snapshot) {
-  if (sky_view_)
+  if (sky_view_) {
     sky_view_->RunFromSnapshot(name, snapshot.Pass());
+    UpdateRootSizeAndViewportMetrics(root_->bounds());
+  }
 }
 
 void DocumentView::Load(mojo::URLResponsePtr response) {
@@ -168,6 +167,7 @@ void DocumentView::Load(mojo::URLResponsePtr response) {
       network_service_.get(),
       CreatePrefetchedLibraryIfNeeded(name, response.Pass())));
   sky_view_->RunFromLibrary(name, library_provider_.get());
+  UpdateRootSizeAndViewportMetrics(root_->bounds());
 }
 
 scoped_ptr<Rasterizer> DocumentView::CreateRasterizer() {
