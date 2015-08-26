@@ -136,8 +136,6 @@ class DatePickerHeader extends Component {
     TextStyle dayStyle = headerTheme.display3.copyWith(color: dayColor, height: 1.0, fontSize: 100.0);
     TextStyle monthStyle = headerTheme.headline.copyWith(color: dayColor, height: 1.0);
     TextStyle yearStyle = headerTheme.headline.copyWith(color: yearColor, height: 1.0);
-    DateTime firstDate = new DateTime(1900);
-    DateTime lastDate = new DateTime(2101);
 
     return new Container(
       child: new BlockBody([
