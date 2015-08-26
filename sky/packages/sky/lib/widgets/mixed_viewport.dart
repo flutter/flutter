@@ -117,13 +117,29 @@ class MixedViewport extends RenderObjectWrapper {
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
+  double _noIntrinsicDimensions(BoxConstraints constraints) {
+    assert(() {
+      'MixedViewport does not support returning intrinsic dimensions. ' +
+      'Calculating the intrinsic dimensions would require walking the entire child list, ' +
+      'which defeats the entire point of having a lazily-built list of children.';
+      return false;
+    });
+    return null;
+  }
+
   void didMount() {
     renderObject.callback = layout;
+    renderObject.totalExtentCallback = _noIntrinsicDimensions;
+    renderObject.maxCrossAxisDimensionCallback = _noIntrinsicDimensions;
+    renderObject.minCrossAxisDimensionCallback = _noIntrinsicDimensions;
     super.didMount();
   }
 
   void didUnmount() {
     renderObject.callback = null;
+    renderObject.totalExtentCallback = null;
+    renderObject.maxCrossAxisDimensionCallback = null;
+    renderObject.minCrossAxisDimensionCallback = null;
     super.didUnmount();
   }
 

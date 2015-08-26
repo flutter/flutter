@@ -292,6 +292,7 @@ abstract class Constraints {
 
 typedef void RenderObjectVisitor(RenderObject child);
 typedef void LayoutCallback(Constraints constraints);
+typedef double DimensionCallback(Constraints constraints);
 
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
