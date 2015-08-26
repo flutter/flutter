@@ -1,0 +1,3 @@
+analyzer:
+  exclude:
+    - 'test/engine/append_child_test.dart'

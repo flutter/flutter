@@ -1,7 +1,7 @@
 import 'package:sky/rendering.dart';
 import 'package:test/test.dart';
 
-import 'layout_utils.dart';
+import 'rendering_tester.dart';
 
 void main() {
   test('Stack can layout with top, right, bottom, left 0.0', () {
