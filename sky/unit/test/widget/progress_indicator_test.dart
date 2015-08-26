@@ -9,12 +9,12 @@ void main() {
   test('LinearProgressIndicator changes when its value changes', () {
     WidgetTester tester = new WidgetTester();
 
-    tester.pumpPaintFrame(() {
+    tester.pumpFrame(() {
       return new Block([new LinearProgressIndicator(value: 0.0)]);
     });
     List<Layer> layers1 = tester.layers;
 
-    tester.pumpPaintFrame(() {
+    tester.pumpFrame(() {
       return new Block([new LinearProgressIndicator(value: 0.5)]);
     });
     List<Layer> layers2 = tester.layers;
