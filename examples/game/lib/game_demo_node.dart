@@ -38,7 +38,11 @@ class GameDemoNode extends NodeWithSize {
     _level = new Level();
     _gameScreen.addChild(_level);
 
-    _objectFactory = new GameObjectFactory(_spritesGame, _sounds, _level);
+    // Add heads up display
+    _playerState = new PlayerState(_spritesUI);
+    addChild(_playerState);
+
+    _objectFactory = new GameObjectFactory(_spritesGame, _sounds, _level, _playerState);
 
     _level.ship = new Ship(_objectFactory);
     _level.addChild(_level.ship);
@@ -46,10 +50,6 @@ class GameDemoNode extends NodeWithSize {
     // Add the joystick
     _joystick = new VirtualJoystick();
     _gameScreen.addChild(_joystick);
-
-    // Add HUD
-    _hud = new Hud(_spritesUI);
-    addChild(_hud);
 
     // Add initial game objects
     addObjects();
@@ -76,7 +76,7 @@ class GameDemoNode extends NodeWithSize {
   StarField _starField;
   RepeatedImage _background;
   RepeatedImage _nebula;
-  Hud _hud;
+  PlayerState _playerState;
 
   // Game properties
   double _scrollSpeed = 2.0;
@@ -147,7 +147,7 @@ class GameDemoNode extends NodeWithSize {
       for (GameObject damageable in damageables) {
         if (laser.collidingWith(damageable)) {
           // Hit something that can take damage
-          _hud.score += damageable.addDamage(laser.impact);
+          damageable.addDamage(laser.impact);
           laser.destroy();
         }
       }
@@ -161,6 +161,11 @@ class GameDemoNode extends NodeWithSize {
           // The ship was hit :(
           killShip();
           _level.ship.visible = false;
+        }
+      } else if (node is GameObject && node.canBeCollected) {
+        if (node.collidingWith(_level.ship)) {
+          // The ship ran over something collectable
+          node.removeFromParent();
         }
       }
     }
@@ -235,7 +240,7 @@ class GameDemoNode extends NodeWithSize {
     _gameOver = true;
 
     // Return to main scene and report the score back in 2 seconds
-    new Timer(new Duration(seconds: 2), () { _gameOverCallback(_hud.score); });
+    new Timer(new Duration(seconds: 2), () { _gameOverCallback(_playerState.score); });
   }
 }
 
@@ -256,14 +261,16 @@ enum GameObjectType {
   asteroidBig,
   asteroidSmall,
   movingEnemy,
+  coin,
 }
 
 class GameObjectFactory {
-  GameObjectFactory(this.sheet, this.sounds, this.level);
+  GameObjectFactory(this.sheet, this.sounds, this.level, this.playerState);
 
   SpriteSheet sheet;
   Map<String,SoundEffect> sounds;
   Level level;
+  PlayerState playerState;
 
   void addAsteroids(int numAsteroids, double yPos, double distribution) {
     for (int i = 0; i < numAsteroids; i++) {
@@ -290,6 +297,8 @@ class GameObjectFactory {
       obj = new AsteroidSmall(this);
     else if (type == GameObjectType.movingEnemy)
       obj = new MovingEnemy(this);
+    else if (type == GameObjectType.coin)
+      obj = new Coin(this);
 
     obj.position = pos;
     obj.setupActions();
@@ -298,7 +307,7 @@ class GameObjectFactory {
   }
 }
 
-class Hud extends Node {
+class PlayerState extends Node {
   SpriteSheet sheet;
   Sprite sprtBgScore;
 
@@ -312,7 +321,7 @@ class Hud extends Node {
     _dirtyScore = true;
   }
 
-  Hud(this.sheet) {
+  PlayerState(this.sheet) {
     position = new Point(310.0, 10.0);
     scale = 0.6;
 

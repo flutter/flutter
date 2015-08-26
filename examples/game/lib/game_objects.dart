@@ -1,12 +1,17 @@
 part of game;
 
 abstract class GameObject extends Node {
+  GameObject(this.f);
+
   double radius = 0.0;
   double removeLimit = 1280.0;
   bool canDamageShip = true;
   bool canBeDamaged = true;
+  bool canBeCollected = false;
   double maxDamage = 3.0;
   double damage = 0.0;
+
+  final GameObjectFactory f;
 
   Paint _paintDebug = new Paint()
     ..color=new Color(0xffff0000)
@@ -37,22 +42,32 @@ abstract class GameObject extends Node {
         parent.addChild(explo);
       }
 
+      PowerUp powerUp = createPowerUp();
+      if (powerUp != null) {
+        powerUp.position = position;
+        powerUp.setupActions();
+        parent.addChild(powerUp);
+      }
+
       removeFromParent();
     }
   }
 
-  int addDamage(double d) {
-    if (!canBeDamaged) return 0;
+  void addDamage(double d) {
+    if (!canBeDamaged) return;
 
     damage += d;
     if (damage >= maxDamage) {
       destroy();
-      return (maxDamage * 10).ceil();
+      f.playerState.score += (maxDamage * 10).ceil();
     }
-    return 10;
   }
 
   Explosion createExplosion() {
+    return null;
+  }
+
+  PowerUp createPowerUp() {
     return null;
   }
 
@@ -68,7 +83,7 @@ abstract class GameObject extends Node {
 }
 
 class Ship extends GameObject {
-  Ship(GameObjectFactory f) {
+  Ship(GameObjectFactory f) : super(f) {
     // Add main ship sprite
     _sprt = new Sprite(f.sheet["ship.png"]);
     _sprt.scale = 0.3;
@@ -99,7 +114,7 @@ class Ship extends GameObject {
 class Laser extends GameObject {
   double impact = 1.0;
 
-  Laser(GameObjectFactory f) {
+  Laser(GameObjectFactory f) : super(f) {
     // Add sprite
     _sprt = new Sprite(f.sheet["laser.png"]);
     _sprt.scale = 0.3;
@@ -121,14 +136,13 @@ class Laser extends GameObject {
 
 abstract class Obstacle extends GameObject {
 
-  Obstacle(this._f);
+  Obstacle(GameObjectFactory f) : super(f);
 
   double explosionScale = 1.0;
-  GameObjectFactory _f;
 
   Explosion createExplosion() {
-    SoundEffectPlayer.sharedInstance().play(_f.sounds["explosion"]);
-    Explosion explo = new Explosion(_f.sheet);
+    SoundEffectPlayer.sharedInstance().play(f.sounds["explosion"]);
+    Explosion explo = new Explosion(f.sheet);
     explo.scale = explosionScale;
     return explo;
   }
@@ -153,6 +167,10 @@ abstract class Asteroid extends Obstacle {
     super.damage = d;
     int alpha = ((200.0 * d) ~/ maxDamage).clamp(0, 200);
     _sprt.colorOverlay = new Color.fromARGB(alpha, 255, 3, 86);
+  }
+
+  PowerUp createPowerUp() {
+    return new Coin(f);
   }
 }
 
@@ -181,7 +199,7 @@ class MovingEnemy extends Obstacle {
     _sprt = new Sprite(f.sheet["ship.png"]);
     _sprt.scale = 0.2;
     radius = 12.0;
-    maxDamage = 2.0;
+    maxDamage = 1.0;
     addChild(_sprt);
 
     constraints = [new ConstraintRotationToMovement(dampening: 0.5)];
@@ -227,6 +245,32 @@ class MovingEnemy extends Obstacle {
     ActionSpline spline = new ActionSpline((a) => position = a, points, 6.0);
     spline.tension = 0.7;
     actions.run(new ActionRepeatForever(spline));
+  }
+
+  Sprite _sprt;
+}
+
+class PowerUp extends GameObject {
+  PowerUp(GameObjectFactory f) : super(f) {
+    canDamageShip = false;
+    canBeDamaged = false;
+    canBeCollected = true;
+  }
+}
+
+class Coin extends PowerUp {
+  Coin(GameObjectFactory f) : super(f) {
+    _sprt = new Sprite(f.sheet["shield.png"]);
+    _sprt.transferMode = sky.TransferMode.plus;
+    _sprt.size = new Size(15.0, 15.0);
+    addChild(_sprt);
+
+    radius = 7.5;
+  }
+
+  setupActions() {
+    ActionTween rotate = new ActionTween((a) => _sprt.rotation = a, 0.0, 360.0, 1.0);
+    actions.run(new ActionRepeatForever(rotate));
   }
 
   Sprite _sprt;
