@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 import 'build_utils.dart';
 
 void main() {
-  test('Global key mutate during iteration', () {
+  test('Align smoke test', () {
     WidgetTester tester = new WidgetTester();
 
     tester.pumpFrame(() {
