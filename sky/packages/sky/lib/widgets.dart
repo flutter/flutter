@@ -24,6 +24,7 @@ export 'package:sky/widgets/floating_action_button.dart';
 export 'package:sky/widgets/focus.dart';
 export 'package:sky/widgets/framework.dart';
 export 'package:sky/widgets/gesture_detector.dart';
+export 'package:sky/widgets/homogeneous_viewport.dart';
 export 'package:sky/widgets/icon.dart';
 export 'package:sky/widgets/icon_button.dart';
 export 'package:sky/widgets/ink_well.dart';

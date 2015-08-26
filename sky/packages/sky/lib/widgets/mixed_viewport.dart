@@ -91,11 +91,11 @@ class MixedViewport extends RenderObjectWrapper {
 
   Map<_Key, Widget> _childrenByKey = new Map<_Key, Widget>();
 
-  // we don't pass the direction or offset to the render object when we create it, because
-  // the render object is empty so it will not matter
   RenderBlockViewport get renderObject => super.renderObject;
 
   RenderBlockViewport createNode() {
+    // we don't pass the direction or offset to the render object when we
+    // create it, because the render object is empty so it will not matter
     RenderBlockViewport result = new RenderBlockViewport();
     result.callback = layout;
     result.totalExtentCallback = _noIntrinsicDimensions;
