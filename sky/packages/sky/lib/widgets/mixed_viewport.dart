@@ -35,7 +35,6 @@ class MixedViewportLayoutState {
     _readOnlyChildOffsets = new UnmodifiableListView<double>(_childOffsets);
   }
 
-  Map<_Key, Widget> _childrenByKey = new Map<_Key, Widget>();
   bool _dirty = true;
 
   int _firstVisibleChildIndex;
@@ -90,13 +89,33 @@ class MixedViewport extends RenderObjectWrapper {
   Object token;
   MixedViewportLayoutState layoutState;
 
+  Map<_Key, Widget> _childrenByKey = new Map<_Key, Widget>();
+
   // we don't pass the direction or offset to the render object when we create it, because
   // the render object is empty so it will not matter
   RenderBlockViewport get renderObject => super.renderObject;
-  RenderBlockViewport createNode() => new RenderBlockViewport();
+
+  RenderBlockViewport createNode() {
+    RenderBlockViewport result = new RenderBlockViewport();
+    result.callback = layout;
+    result.totalExtentCallback = _noIntrinsicDimensions;
+    result.maxCrossAxisDimensionCallback = _noIntrinsicDimensions;
+    result.minCrossAxisDimensionCallback = _noIntrinsicDimensions;
+    return result;
+  }
+
+  void remove() {
+    renderObject.callback = null;
+    renderObject.totalExtentCallback = null;
+    renderObject.maxCrossAxisDimensionCallback = null;
+    renderObject.minCrossAxisDimensionCallback = null;
+    super.remove();
+    _childrenByKey.clear();
+    layoutState._dirty = true;
+  }
 
   void walkChildren(WidgetTreeWalker walker) {
-    for (Widget child in layoutState._childrenByKey.values)
+    for (Widget child in _childrenByKey.values)
       walker(child);
   }
 
@@ -129,22 +148,6 @@ class MixedViewport extends RenderObjectWrapper {
       return false;
     });
     return null;
-  }
-
-  void didMount() {
-    renderObject.callback = layout;
-    renderObject.totalExtentCallback = _noIntrinsicDimensions;
-    renderObject.maxCrossAxisDimensionCallback = _noIntrinsicDimensions;
-    renderObject.minCrossAxisDimensionCallback = _noIntrinsicDimensions;
-    super.didMount();
-  }
-
-  void didUnmount() {
-    renderObject.callback = null;
-    renderObject.totalExtentCallback = null;
-    renderObject.maxCrossAxisDimensionCallback = null;
-    renderObject.minCrossAxisDimensionCallback = null;
-    super.didUnmount();
   }
 
   int _findIndexForOffsetBeforeOrAt(double offset) {
@@ -199,12 +202,12 @@ class MixedViewport extends RenderObjectWrapper {
           assert(widget != null);
           assert(widget.key != null);
           _Key key = new _Key.fromWidget(widget);
-          Widget oldWidget = layoutState._childrenByKey[key];
+          Widget oldWidget = _childrenByKey[key];
           assert(oldWidget != null);
           assert(oldWidget.renderObject.parent == renderObject);
           widget = syncChild(widget, oldWidget, renderObject.childAfter(oldWidget.renderObject));
           assert(widget != null);
-          layoutState._childrenByKey[key] = widget;
+          _childrenByKey[key] = widget;
         }
       }
     }
@@ -223,7 +226,7 @@ class MixedViewport extends RenderObjectWrapper {
     assert(newWidget != null);
     assert(newWidget.key != null);
     final _Key key = new _Key.fromWidget(newWidget);
-    Widget oldWidget = layoutState._childrenByKey[key];
+    Widget oldWidget = _childrenByKey[key];
     newWidget = syncChild(newWidget, oldWidget, _omit);
     assert(newWidget != null);
     // Update the offsets based on the newWidget's dimensions.
@@ -250,7 +253,7 @@ class MixedViewport extends RenderObjectWrapper {
       return null;
     assert(widget.key != null); // items in lists must have keys
     final _Key key = new _Key.fromWidget(widget);
-    Widget oldWidget = layoutState._childrenByKey[key];
+    Widget oldWidget = _childrenByKey[key];
     widget = syncChild(widget, oldWidget, _omit);
     if (index >= offsets.length - 1) {
       assert(index == offsets.length - 1);
@@ -288,7 +291,7 @@ class MixedViewport extends RenderObjectWrapper {
     Map<int, Widget> builtChildren = new Map<int, Widget>();
 
     final List<double> offsets = layoutState._childOffsets;
-    final Map<_Key, Widget> childrenByKey = layoutState._childrenByKey;
+    final Map<_Key, Widget> childrenByKey = _childrenByKey;
     double extent;
     if (direction == ScrollDirection.vertical) {
       extent = constraints.maxHeight;
@@ -451,7 +454,7 @@ class MixedViewport extends RenderObjectWrapper {
       }
     }
 
-    layoutState._childrenByKey = newChildren;
+    _childrenByKey = newChildren;
     layoutState._firstVisibleChildIndex = startIndex;
     layoutState._visibleChildCount = newChildren.length;
   }
