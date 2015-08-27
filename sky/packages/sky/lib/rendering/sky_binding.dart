@@ -4,6 +4,7 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/base/pointer_router.dart';
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/rendering/box.dart';
@@ -92,6 +93,8 @@ class SkyBinding {
     }
   }
 
+  final PointerRouter pointerRouter = new PointerRouter();
+
   Map<int, PointerState> _stateForPointer = new Map<int, PointerState>();
 
   PointerState _createStateForPointer(sky.PointerEvent event, Point position) {
@@ -127,6 +130,7 @@ class SkyBinding {
 
   HitTestResult hitTest(Point position) {
     HitTestResult result = new HitTestResult();
+    result.add(new HitTestEntry(pointerRouter));
     _renderView.hitTest(result, position: position);
     return result;
   }

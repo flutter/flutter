@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:sky/base/hit_test.dart';
+import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/framework.dart';
@@ -80,6 +81,8 @@ class DragController {
 
   DragTarget _getDragTarget(List<HitTestEntry> path) {
     for (HitTestEntry entry in path.reversed) {
+      if (entry.target is! RenderObject)
+        continue;
       for (Widget widget in RenderObjectWrapper.getWidgetsForRenderObject(entry.target)) {
         if (widget is DragTarget)
           return widget;
