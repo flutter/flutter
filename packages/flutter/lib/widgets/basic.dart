@@ -633,7 +633,9 @@ class ImageListener extends StatefulComponent {
     this.colorFilter,
     this.fit: ImageFit.scaleDown,
     this.repeat: ImageRepeat.noRepeat
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(image != null);
+  }
 
   ImageResource image;
   double width;
@@ -645,8 +647,7 @@ class ImageListener extends StatefulComponent {
   sky.Image _resolvedImage;
 
   void _handleImageChanged(sky.Image resolvedImage) {
-    if (!mounted)
-      return;
+    assert(mounted);
     setState(() {
       _resolvedImage = resolvedImage;
     });

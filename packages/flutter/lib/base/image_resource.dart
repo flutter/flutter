@@ -9,11 +9,7 @@ typedef void ImageListener(sky.Image image);
 
 class ImageResource {
   ImageResource(this._futureImage) {
-    _futureImage.then((sky.Image image) {
-      _image = image;
-      _resolved = true;
-      _notifyListeners();
-    });
+    _futureImage.then(_handleImageLoaded, onError: _handleImageError);
   }
 
   bool _resolved = false;
@@ -33,10 +29,25 @@ class ImageResource {
     _listeners.remove(listener);
   }
 
+  void _handleImageLoaded(sky.Image image) {
+    _image = image;
+    _resolved = true;
+    _notifyListeners();
+  }
+
+  void _handleImageError(e, stackTrace) {
+    print('Failed to load image: $e\nStack trace: $stackTrace');
+  }
+
   void _notifyListeners() {
     assert(_resolved);
     List<ImageListener> localListeners = new List<ImageListener>.from(_listeners);
-    for (ImageListener listener in localListeners)
-      listener(_image);
+    for (ImageListener listener in localListeners) {
+      try {
+        listener(_image);
+      } catch(e) {
+        print('Image listener had exception: $e');
+      }
+    }
   }
 }
