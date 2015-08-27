@@ -175,7 +175,7 @@ class StartSky(object):
 
         project_or_path = os.path.abspath(args.project_or_path)
 
-        if args.local_build:
+        if args.android_build_available:
             apk_path = os.path.join(os.path.normpath(args.sky_src_path), args.android_debug_build_path, 'apks', APK_NAME)
         else:
             apk_path = os.path.join(APK_DIR, APK_NAME)
@@ -227,12 +227,12 @@ class StartSky(object):
                 subprocess.check_call([ADB_PATH, 'push', fp.name, SHA1_PATH])
 
             # Install on connected iOS device
-            if IOSDevice.is_connected() and args.local_build:
+            if IOSDevice.is_connected() and args.ios_build_available:
                 app_path = os.path.join(args.sky_src_path, args.ios_debug_build_path, IOS_APP_NAME)
                 IOSDevice.install_app(app_path)
 
             # Install on iOS simulator if it's running
-            if IOSSimulator.is_booted() and args.local_build:
+            if IOSSimulator.is_booted() and args.ios_sim_build_available:
                 app_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, IOS_APP_NAME)
                 IOSSimulator.fork_install_app(app_path)
 
@@ -638,7 +638,14 @@ class StartListening(object):
                 continue
 
             # Build the snapshot
-            sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, 'clang_x64', 'sky_snapshot')
+            if args.ios_sim_build_available:
+                sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, 'clang_x64', 'sky_snapshot')
+            elif args.ios_build_available:
+                sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_debug_build_path, 'clang_x64', 'sky_snapshot')
+            else:
+                # If there is no build available, we can't make a snapshot
+                continue
+
             cmd = [
                 sky_snapshot_path,
                 '--package-root=packages',
@@ -839,6 +846,12 @@ class SkyShellRunner(object):
             command.add_subparser(subparsers)
 
         args = parser.parse_args()
+        # TODO(iansf): args is unfortunately just a global context variable.  For now, add some additional context to it.
+        args.android_build_available = False
+        args.ios_build_available = False
+        args.ios_sim_build_available = False
+
+        # Also make sure that args is consistent with machine state for local builds
         if args.local_build and args.sky_src_path is None:
             real_sky_path = os.path.realpath(os.path.join(PACKAGES_DIR, 'sky'))
             match = re.match(r'pub.dartlang.org/sky', real_sky_path)
@@ -863,6 +876,18 @@ class SkyShellRunner(object):
                                 '    path: /path/to/sky_engine/src/sky/packages/material_design_icons\n'
                                 '  sky:\n'
                                 '    path: /path/to/sky_engine/src/sky/packages/sky\n')
+        if args.local_build:
+            if not os.path.isdir(args.sky_src_path):
+                logging.warning('The selected sky-src-path (' + args.sky_src_path + ') does not exist.'
+                                'Disabling local-build flag.')
+                args.local_build = False
+        if args.local_build:
+            if os.path.isdir(os.path.join(args.sky_src_path, args.android_debug_build_path)):
+                args.android_build_available = True
+            if os.path.isdir(os.path.join(args.sky_src_path, args.ios_debug_build_path)):
+                args.ios_build_available = True
+            if os.path.isdir(os.path.join(args.sky_src_path, args.ios_sim_debug_build_path)):
+                args.ios_sim_build_available = True
 
         pids = Pids.read_from(PID_FILE_PATH, PID_FILE_KEYS)
         atexit.register(pids.write_to, PID_FILE_PATH)
