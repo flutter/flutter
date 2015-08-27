@@ -358,14 +358,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool get debugDoingThisLayout => _debugDoingThisLayout;
   static RenderObject _debugActiveLayout = null;
   static RenderObject get debugActiveLayout => _debugActiveLayout;
-  bool _debugDoingThisLayoutWithCallback = false;
   bool _debugMutationsLocked = false;
   bool _debugCanParentUseSize;
   bool get debugCanParentUseSize => _debugCanParentUseSize;
   bool get debugCanPerformMutations {
     RenderObject node = this;
     while (true) {
-      if (node._debugDoingThisLayoutWithCallback)
+      if (node._doingThisLayoutWithCallback)
         return true;
       if (node._debugMutationsLocked)
         return false;
@@ -379,6 +378,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsLayout = true;
   bool get needsLayout => _needsLayout;
   RenderObject _relayoutSubtreeRoot;
+  bool _doingThisLayoutWithCallback = false;
   Constraints _constraints;
   Constraints get constraints => _constraints;
   bool debugDoesMeetConstraints(); // override this in a subclass to verify that your state matches the constraints object
@@ -390,7 +390,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(node._relayoutSubtreeRoot == _relayoutSubtreeRoot);
       assert(node.parent != null);
       node = node.parent as RenderObject;
-      if (!node._needsLayout)
+      if ((!node._needsLayout) && (!node._debugDoingThisLayout))
         return false;
     }
     assert(node._relayoutSubtreeRoot == node);
@@ -407,7 +407,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (_relayoutSubtreeRoot != this) {
       final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
       assert(parent is RenderObject);
-      parent.markNeedsLayout();
+      if (!_doingThisLayoutWithCallback) {
+        parent.markNeedsLayout();
+      } else {
+        assert(parent._debugDoingThisLayout);
+      }
       assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
     } else {
       _nodesNeedingLayout.add(this);
@@ -458,7 +462,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(_relayoutSubtreeRoot == this);
       RenderObject debugPreviousActiveLayout;
       assert(!_debugMutationsLocked);
-      assert(!_debugDoingThisLayoutWithCallback);
+      assert(!_doingThisLayoutWithCallback);
       assert(_debugCanParentUseSize != null);
       assert(() {
         _debugMutationsLocked = true;
@@ -494,7 +498,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _constraints = constraints;
     _relayoutSubtreeRoot = relayoutSubtreeRoot;
     assert(!_debugMutationsLocked);
-    assert(!_debugDoingThisLayoutWithCallback);
+    assert(!_doingThisLayoutWithCallback);
     assert(() {
       _debugMutationsLocked = true;
       _debugCanParentUseSize = parentUsesSize;
@@ -546,16 +550,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void invokeLayoutCallback(LayoutCallback callback) {
     assert(_debugMutationsLocked);
     assert(_debugDoingThisLayout);
-    assert(!_debugDoingThisLayoutWithCallback);
-    assert(() {
-      _debugDoingThisLayoutWithCallback = true;
-      return true;
-    });
-    callback(constraints);
-    assert(() {
-      _debugDoingThisLayoutWithCallback = false;
-      return true;
-    });
+    assert(!_doingThisLayoutWithCallback);
+    _doingThisLayoutWithCallback = true;
+    try {
+      callback(constraints);
+    } finally {
+      _doingThisLayoutWithCallback = false;
+    }
   }
 
   // when the parent has rotated (e.g. when the screen has been turned
