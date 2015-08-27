@@ -8,16 +8,9 @@
 #include "base/basictypes.h"
 #include "base/memory/weak_ptr.h"
 #include "base/observer_list.h"
-#include "mojo/public/c/gles2/gles2.h"
-
-namespace gpu {
-namespace gles2 {
-class GLES2Interface;
-}
-}
+#include "mojo/public/c/gpu/MGL/mgl.h"
 
 namespace mojo {
-class MojoGLES2Impl;
 class Shell;
 
 class GLContext {
@@ -33,9 +26,8 @@ class GLContext {
   static base::WeakPtr<GLContext> Create(Shell* shell);
 
   void MakeCurrent();
+  bool IsCurrent();
   void Destroy();
-
-  gpu::gles2::GLES2Interface* gl() const;
 
   void AddObserver(Observer* observer);
   void RemoveObserver(Observer* observer);
@@ -47,8 +39,7 @@ class GLContext {
   static void ContextLostThunk(void* self);
   void OnContextLost();
 
-  MojoGLES2Context context_;
-  scoped_ptr<MojoGLES2Impl> gl_impl_;
+  MGLContext context_;
 
   base::ObserverList<Observer> observers_;
   base::WeakPtrFactory<GLContext> weak_factory_;

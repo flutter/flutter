@@ -11,29 +11,23 @@
 #include "skia/ext/refptr.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
-namespace gpu {
-namespace gles2 {
-class GLES2Interface;
-}
-}
-
 namespace mojo {
 
 class GaneshContext : public GLContext::Observer {
  public:
   class Scope {
    public:
-    explicit Scope(GaneshContext*);
+    explicit Scope(GaneshContext* context);
     ~Scope();
 
    private:
-    gpu::gles2::GLES2Interface* previous_;
+    MGLContext previous_;
   };
 
   explicit GaneshContext(base::WeakPtr<GLContext> gl_context);
   ~GaneshContext() override;
 
-  // Note: You must be in a GaneshContext::Scope to use GrContext.
+  void MakeCurrent();
   GrContext* gr() const {
     DCHECK(InScope());
     return context_.get();

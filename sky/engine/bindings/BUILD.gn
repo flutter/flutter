@@ -57,10 +57,10 @@ action("generate_snapshot_bin") {
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
-    "//mojo/public/dart/sdk_ext/internal.dart",
-    "//mojo/public/dart/sdk_ext/src/handle_watcher.dart",
-    "//mojo/public/dart/sdk_ext/src/natives.dart",
-    "//mojo/public/dart/sdk_ext/src/timer_queue.dart",
+    "//mojo/public/dart/mojo/sdk_ext/internal.dart",
+    "//mojo/public/dart/mojo/sdk_ext/src/handle_watcher.dart",
+    "//mojo/public/dart/mojo/sdk_ext/src/natives.dart",
+    "//mojo/public/dart/mojo/sdk_ext/src/timer_queue.dart",
     "//sky/engine/bindings/builtin_natives.dart",
     "//sky/engine/bindings/sky_internals.dart",
     "snapshot.dart",
@@ -73,7 +73,7 @@ action("generate_snapshot_bin") {
   ]
 
   dart_mojo_internal_path =
-      rebase_path("//mojo/public/dart/sdk_ext/internal.dart")
+      rebase_path("//mojo/public/dart/mojo/sdk_ext/internal.dart")
   dart_sky_builtin_natives_path =
       rebase_path("//sky/engine/bindings/builtin_natives.dart")
   dart_sky_internals_path =

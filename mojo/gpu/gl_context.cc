@@ -7,7 +7,6 @@
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/gpu/public/interfaces/gpu.mojom.h"
-#include "mojo/gpu/mojo_gles2_impl_autogen.h"
 
 namespace mojo {
 
@@ -22,14 +21,15 @@ GLContext::GLContext(Shell* shell) : weak_factory_(this) {
   ConnectToService(native_viewport.get(), &gpu_service);
   CommandBufferPtr command_buffer;
   gpu_service->CreateOffscreenGLES2Context(GetProxy(&command_buffer));
-  context_ = MojoGLES2CreateContext(
+  context_ = MGLCreateContext(MGL_API_VERSION_GLES2,
       command_buffer.PassInterface().PassHandle().release().value(),
+      MGL_NO_CONTEXT,
       &ContextLostThunk, this, Environment::GetDefaultAsyncWaiter());
-  gl_impl_.reset(new MojoGLES2Impl(context_));
+  DCHECK(context_ != MGL_NO_CONTEXT);
 }
 
 GLContext::~GLContext() {
-  MojoGLES2DestroyContext(context_);
+  MGLDestroyContext(context_);
 }
 
 base::WeakPtr<GLContext> GLContext::Create(Shell* shell) {
@@ -37,15 +37,15 @@ base::WeakPtr<GLContext> GLContext::Create(Shell* shell) {
 }
 
 void GLContext::MakeCurrent() {
-  MojoGLES2MakeCurrent(context_);
+  MGLMakeCurrent(context_);
+}
+
+bool GLContext::IsCurrent() {
+  return context_ == MGLGetCurrentContext();
 }
 
 void GLContext::Destroy() {
   delete this;
-}
-
-gpu::gles2::GLES2Interface* GLContext::gl() const {
-  return gl_impl_.get();
 }
 
 void GLContext::AddObserver(Observer* observer) {

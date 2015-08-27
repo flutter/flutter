@@ -4,8 +4,8 @@
 
 #include "mojo/skia/ganesh_context.h"
 
-#include "gpu/command_buffer/client/gles2_lib.h"
-#include "gpu/skia_bindings/gl_bindings_skia_cmd_buffer.h"
+#include "mojo/public/c/gpu/MGL/mgl.h"
+#include "mojo/skia/gl_bindings_skia.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace mojo {
@@ -19,37 +19,25 @@ const int kMaxGaneshResourceCacheCount = 2048;
 // GPU cache.
 const size_t kMaxGaneshResourceCacheBytes = 96 * 1024 * 1024;
 
-void EnsureInitialized() {
-  static bool initialized;
-  if (initialized)
-    return;
-  gles2::Initialize();
-  initialized = true;
-}
 }
 
 GaneshContext::Scope::Scope(GaneshContext* context)
-    : previous_(gles2::GetGLContext()) {
-  auto gl = context->gl_context_->gl();
-  DCHECK(gl);
-  gles2::SetGLContext(gl);
-  DCHECK(gles2::GetGLContext());
+    : previous_(MGLGetCurrentContext()) {
+  context->gl_context_->MakeCurrent();
 }
 
 GaneshContext::Scope::~Scope() {
-  gles2::SetGLContext(previous_);
+  MGLMakeCurrent(previous_);
 }
 
 GaneshContext::GaneshContext(base::WeakPtr<GLContext> gl_context)
     : gl_context_(gl_context) {
-  EnsureInitialized();
-
   DCHECK(gl_context_);
   gl_context_->AddObserver(this);
   Scope scope(this);
 
   skia::RefPtr<GrGLInterface> interface =
-      skia::AdoptRef(skia_bindings::CreateCommandBufferSkiaGLBinding());
+      skia::AdoptRef(skia_bindings::CreateMojoSkiaGLBinding());
   DCHECK(interface);
 
   context_ = skia::AdoptRef(GrContext::Create(
@@ -69,7 +57,7 @@ GaneshContext::~GaneshContext() {
 }
 
 bool GaneshContext::InScope() const {
-  return gles2::GetGLContext() == gl_context_->gl();
+  return gl_context_->IsCurrent();
 }
 
 void GaneshContext::OnContextLost() {
