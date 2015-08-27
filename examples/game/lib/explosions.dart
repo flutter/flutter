@@ -1,7 +1,13 @@
 part of game;
 
 class Explosion extends Node {
-  Explosion(SpriteSheet sheet) {
+  Explosion() {
+    zPosition = 10.0;
+  }
+}
+
+class ExplosionBig extends Explosion {
+  ExplosionBig(SpriteSheet sheet) {
     // Add particles
     ParticleSystem particlesDebris = new ParticleSystem(
       sheet["explosion_particle.png"],
@@ -68,4 +74,8 @@ class Explosion extends Node {
       actions.run(fadeInOut);
     }
   }
+}
+
+class ExplosionMini extends Explosion {
+
 }

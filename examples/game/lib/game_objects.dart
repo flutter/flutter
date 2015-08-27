@@ -120,8 +120,9 @@ class Laser extends GameObject {
 
   Laser(GameObjectFactory f) : super(f) {
     // Add sprite
-    _sprt = new Sprite(f.sheet["laser.png"]);
-    _sprt.scale = 0.3;
+    _sprt = new Sprite(f.sheet["explosion_particle.png"]);
+    _sprt.scale = 0.5;
+    _sprt.colorOverlay = new Color(0xff95f4fb);
     _sprt.transferMode = sky.TransferMode.plus;
     addChild(_sprt);
     radius = 10.0;
@@ -138,6 +139,11 @@ class Laser extends GameObject {
   }
 }
 
+Color colorForDamage(double damage, double maxDamage) {
+  int alpha = ((200.0 * damage) ~/ maxDamage).clamp(0, 200);
+  return new Color.fromARGB(alpha, 255, 3, 86);
+}
+
 abstract class Obstacle extends GameObject {
 
   Obstacle(GameObjectFactory f) : super(f);
@@ -146,7 +152,7 @@ abstract class Obstacle extends GameObject {
 
   Explosion createExplosion() {
     SoundEffectPlayer.sharedInstance().play(f.sounds["explosion"]);
-    Explosion explo = new Explosion(f.sheet);
+    Explosion explo = new ExplosionBig(f.sheet);
     explo.scale = explosionScale;
     return explo;
   }
@@ -169,8 +175,7 @@ abstract class Asteroid extends Obstacle {
 
   set damage(double d) {
     super.damage = d;
-    int alpha = ((200.0 * d) ~/ maxDamage).clamp(0, 200);
-    _sprt.colorOverlay = new Color.fromARGB(alpha, 255, 3, 86);
+    _sprt.colorOverlay = colorForDamage(d, maxDamage);
   }
 
   PowerUp createPowerUp() {
@@ -198,10 +203,10 @@ class AsteroidSmall extends Asteroid {
   }
 }
 
-class MovingEnemy extends Obstacle {
-  MovingEnemy(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["ship.png"]);
-    _sprt.scale = 0.2;
+class EnemyScout extends Obstacle {
+  EnemyScout(GameObjectFactory f) : super(f) {
+    _sprt = new Sprite(f.sheet["enemy_scout_0.png"]);
+    _sprt.scale = 0.32;
     radius = 12.0;
     maxDamage = 1.0;
     addChild(_sprt);
@@ -251,7 +256,85 @@ class MovingEnemy extends Obstacle {
     actions.run(new ActionRepeatForever(spline));
   }
 
+  PowerUp createPowerUp() {
+    return new Coin(f);
+  }
+
   Sprite _sprt;
+}
+
+class EnemyDestroyer extends Obstacle {
+  EnemyDestroyer(GameObjectFactory f) : super(f) {
+    _sprt = new Sprite(f.sheet["enemy_destroyer_1.png"]);
+    _sprt.scale = 0.32;
+    radius = 24.0;
+    maxDamage = 4.0;
+    addChild(_sprt);
+
+    constraints = [new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
+  }
+
+  int _countDown = randomInt(120) + 240;
+
+  void setupActions() {
+    ActionCircularMove circle = new ActionCircularMove(
+      (a) => position = a,
+      position, 40.0,
+      360.0 * randomDouble(),
+      randomBool(),
+      3.0);
+    actions.run(new ActionRepeatForever(circle));
+  }
+
+  PowerUp createPowerUp() {
+    return new Coin(f);
+  }
+
+  void update(double dt) {
+    _countDown -= 1;
+    if (_countDown <= 0) {
+      print("SHOOT!!");
+
+      // Shoot at player
+      EnemyLaser laser = new EnemyLaser(f, rotation, 5.0, new Color(0xffffe38e));
+      laser.position = position;
+      f.level.addChild(laser);
+
+      _countDown = 60 + randomInt(120);
+    }
+  }
+
+  set damage(double d) {
+    super.damage = d;
+    _sprt.colorOverlay = colorForDamage(d, maxDamage);
+  }
+
+  Sprite _sprt;
+}
+
+class EnemyLaser extends Obstacle {
+  EnemyLaser(GameObjectFactory f, double rotation, double speed, Color color) : super(f) {
+    _sprt = new Sprite(f.sheet["explosion_particle.png"]);
+    _sprt.scale = 0.5;
+    _sprt.rotation = rotation + 90;
+    _sprt.colorOverlay = color;
+    addChild(_sprt);
+
+    canDamageShip = true;
+    canBeDamaged = false;
+
+    double rad = radians(rotation);
+    _movement = new Offset(math.cos(rad) * speed, math.sin(rad) * speed);
+
+    print("LASER!!");
+  }
+
+  Sprite _sprt;
+  Offset _movement;
+
+  void move() {
+    position += _movement;
+  }
 }
 
 class PowerUp extends GameObject {
@@ -264,10 +347,8 @@ class PowerUp extends GameObject {
 
 class Coin extends PowerUp {
   Coin(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["shield.png"]);
-    _sprt.transferMode = sky.TransferMode.plus;
-    _sprt.size = new Size(15.0, 15.0);
-    _sprt.colorOverlay = new Color(0xffffff00);
+    _sprt = new Sprite(f.sheet["coin.png"]);
+    _sprt.scale = 0.7;
     addChild(_sprt);
 
     radius = 7.5;

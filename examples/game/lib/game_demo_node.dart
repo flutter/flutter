@@ -198,11 +198,11 @@ class GameDemoNode extends NodeWithSize {
     if (part == 0) {
       _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     } else if  (part == 1) {
-      _objectFactory.addSwarm(4 + level * 2, yPos);
+      _objectFactory.addEnemyScoutSwarm(4 + level * 2, yPos);
     } else if (part == 2) {
       _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     } else if (part == 3) {
-      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+      _objectFactory.addEnemyDestroyerSwarm(2 + level, yPos);
     } else if (part == 4) {
       _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     }
@@ -227,7 +227,7 @@ class GameDemoNode extends NodeWithSize {
     _effectPlayer.play(_sounds["explosion"]);
 
     // Add explosion
-    Explosion explo = new Explosion(_spritesGame);
+    ExplosionBig explo = new ExplosionBig(_spritesGame);
     explo.scale = 1.5;
     explo.position = _level.ship.position;
     _level.addChild(explo);
