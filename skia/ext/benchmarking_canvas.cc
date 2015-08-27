@@ -8,11 +8,13 @@
 #include "skia/ext/benchmarking_canvas.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
-#include "third_party/skia/include/core/SkTLazy.h"
+#include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkRegion.h"
+#include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
+#include "third_party/skia/include/core/SkTLazy.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 
 namespace {
@@ -360,15 +362,6 @@ scoped_ptr<base::Value> AsValue(const SkPath& path) {
       { "move", "line", "quad", "conic", "cubic", "close", "done" };
   static const int gPtsPerVerb[] = { 1, 1, 2, 2, 3, 0, 0 };
   static const int gPtOffsetPerVerb[] = { 0, 1, 1, 1, 1, 0, 0 };
-  SK_COMPILE_ASSERT(
-      SK_ARRAY_COUNT(gVerbStrings) == static_cast<size_t>(SkPath::kDone_Verb + 1),
-      gVerbStrings_size_mismatch);
-  SK_COMPILE_ASSERT(
-      SK_ARRAY_COUNT(gVerbStrings) == SK_ARRAY_COUNT(gPtsPerVerb),
-      gPtsPerVerb_size_mismatch);
-  SK_COMPILE_ASSERT(
-      SK_ARRAY_COUNT(gVerbStrings) == SK_ARRAY_COUNT(gPtOffsetPerVerb),
-      gPtOffsetPerVerb_size_mismatch);
 
   scoped_ptr<base::ListValue> verbs_val(new base::ListValue());
   SkPath::Iter iter(const_cast<SkPath&>(path), false);

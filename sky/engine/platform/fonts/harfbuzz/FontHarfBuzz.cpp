@@ -39,7 +39,7 @@
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 
 #include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkTemplates.h"
+#include "third_party/skia/include/private/SkTemplates.h"
 
 #include "sky/engine/wtf/unicode/Unicode.h"
 
