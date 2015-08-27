@@ -632,55 +632,54 @@ class StartListening(object):
             ]
             subprocess.check_call(cmd)
 
-            if not args.local_build:
+            if args.local_build:
                 # Currently sending to iOS only works if you are building Sky locally
                 # since we aren't shipping the sky_snapshot binary yet.
-                continue
 
-            # Build the snapshot
-            if args.ios_sim_build_available:
-                sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, 'clang_x64', 'sky_snapshot')
-            elif args.ios_build_available:
-                sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_debug_build_path, 'clang_x64', 'sky_snapshot')
-            else:
-                # If there is no build available, we can't make a snapshot
-                continue
+                # Check if we can make a snapshot
+                sky_snapshot_path = None
+                if args.ios_sim_build_available:
+                    sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, 'clang_x64', 'sky_snapshot')
+                elif args.ios_build_available:
+                    sky_snapshot_path = os.path.join(args.sky_src_path, args.ios_debug_build_path, 'clang_x64', 'sky_snapshot')
 
-            cmd = [
-                sky_snapshot_path,
-                '--package-root=packages',
-                '--snapshot=' + os.path.join(tempdir, 'snapshot_blob.bin'),
-                os.path.join('lib', 'main.dart')
-            ]
-            subprocess.check_call(cmd)
+                if sky_snapshot_path is not None:
+                    # If we can make a snapshot, do so and then send it to running iOS instances
+                    cmd = [
+                        sky_snapshot_path,
+                        '--package-root=packages',
+                        '--snapshot=' + os.path.join(tempdir, 'snapshot_blob.bin'),
+                        os.path.join('lib', 'main.dart')
+                    ]
+                    subprocess.check_call(cmd)
 
-            os.chdir(tempdir)
-            # Turn the snapshot into an app.skyx file
-            cmd = [
-                'zip',
-                '-r',
-                'app.skyx',
-                'snapshot_blob.bin',
-                'action',
-                'content',
-                'navigation'
-            ]
-            subprocess.check_call(cmd)
-            os.chdir(currdir)
+                    os.chdir(tempdir)
+                    # Turn the snapshot into an app.skyx file
+                    cmd = [
+                        'zip',
+                        '-r',
+                        'app.skyx',
+                        'snapshot_blob.bin',
+                        'action',
+                        'content',
+                        'navigation'
+                    ]
+                    subprocess.check_call(cmd)
+                    os.chdir(currdir)
 
-            # Copy the app.skyx to the running simulator
-            simulator_app_documents_dir = IOSSimulator.get_simulator_app_documents_dir()
-            if simulator_app_documents_dir is not None:
-                cmd = [
-                    'cp',
-                    os.path.join(tempdir, 'app.skyx'),
-                    simulator_app_documents_dir
-                ]
-                subprocess.check_call(cmd)
+                    # Copy the app.skyx to the running simulator
+                    simulator_app_documents_dir = IOSSimulator.get_simulator_app_documents_dir()
+                    if simulator_app_documents_dir is not None:
+                        cmd = [
+                            'cp',
+                            os.path.join(tempdir, 'app.skyx'),
+                            simulator_app_documents_dir
+                        ]
+                        subprocess.check_call(cmd)
 
-            # Copy the app.skyx to the attached iOS device
-            if IOSDevice.is_connected():
-                IOSDevice.copy_file(SKY_SHELL_APP_ID, os.path.join(tempdir, 'app.skyx'), 'Documents/app.skyx')
+                    # Copy the app.skyx to the attached iOS device
+                    if IOSDevice.is_connected():
+                        IOSDevice.copy_file(SKY_SHELL_APP_ID, os.path.join(tempdir, 'app.skyx'), 'Documents/app.skyx')
 
             # Watch filesystem for changes
             if not self.watch_dir(currdir):
