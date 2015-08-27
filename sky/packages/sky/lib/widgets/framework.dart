@@ -979,6 +979,7 @@ abstract class RenderObjectWrapper extends Widget {
   }
 
   void syncRenderObject(RenderObjectWrapper old) {
+    assert(old == null || old.renderObject == renderObject);
     ParentData parentData = null;
     Widget ancestor = parent;
     while (ancestor != null && ancestor is! RenderObjectWrapper) {
@@ -996,6 +997,143 @@ abstract class RenderObjectWrapper extends Widget {
       if (ancestor != null && ancestor.renderObject != null)
         ancestor.renderObject.markNeedsLayout();
     }
+  }
+
+  // for use by subclasses that manage their children using lists
+  void syncChildren(List<Widget> newChildren, List<Widget> oldChildren) {
+
+    // This attempts to diff the new child list (this.children) with
+    // the old child list (old.children), and update our renderObject
+    // accordingly.
+
+    // The cases it tries to optimise for are:
+    //  - the old list is empty
+    //  - the lists are identical
+    //  - there is an insertion or removal of one or more widgets in
+    //    only one place in the list
+    // If a widget with a key is in both lists, it will be synced.
+    // Widgets without keys might be synced but there is no guarantee.
+
+    // The general approach is to sync the entire new list backwards, as follows:
+    // 1. Walk the lists from the top until you no longer have
+    //    matching nodes. We don't sync these yet, but we now know to
+    //    skip them below. We do this because at each sync we need to
+    //    pass the pointer to the new next widget as the slot, which
+    //    we can't do until we've synced the next child.
+    // 2. Walk the lists from the bottom, syncing nodes, until you no
+    //    longer have matching nodes.
+    // At this point we narrowed the old and new lists to the point
+    // where the nodes no longer match.
+    // 3. Walk the narrowed part of the old list to get the list of
+    //    keys and sync null with non-keyed items.
+    // 4. Walk the narrowed part of the new list backwards:
+    //     * Sync unkeyed items with null
+    //     * Sync keyed items with the source if it exists, else with null.
+    // 5. Walk the top list again but backwards, syncing the nodes.
+    // 6. Sync null with any items in the list of keys that are still
+    //    mounted.
+
+    final ContainerRenderObjectMixin renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject is ContainerRenderObjectMixin);
+
+    int childrenTop = 0;
+    int newChildrenBottom = newChildren.length-1;
+    int oldChildrenBottom = oldChildren.length-1;
+
+    // top of the lists
+    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
+      Widget oldChild = oldChildren[childrenTop];
+      assert(oldChild.mounted);
+      Widget newChild = newChildren[childrenTop];
+      assert(newChild == oldChild || !newChild.mounted);
+      if (!_canSync(oldChild, newChild))
+        break;
+      childrenTop += 1;
+    }
+
+    Widget nextSibling;
+
+    // bottom of the lists
+    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
+      Widget oldChild = oldChildren[oldChildrenBottom];
+      assert(oldChild.mounted);
+      Widget newChild = newChildren[newChildrenBottom];
+      assert(newChild == oldChild || !newChild.mounted);
+      if (!_canSync(oldChild, newChild))
+        break;
+      newChild = syncChild(newChild, oldChild, nextSibling);
+      assert(newChild.mounted);
+      assert(oldChild == newChild || !oldChild.mounted);
+      newChildren[newChildrenBottom] = newChild;
+      nextSibling = newChild;
+      oldChildrenBottom -= 1;
+      newChildrenBottom -= 1;
+    }
+
+    // middle of the lists - old list
+    bool haveOldNodes = childrenTop <= oldChildrenBottom;
+    Map<Key, Widget> oldKeyedChildren;
+    if (haveOldNodes) {
+      oldKeyedChildren = new Map<Key, Widget>();
+      while (childrenTop <= oldChildrenBottom) {
+        Widget oldChild = oldChildren[oldChildrenBottom];
+        assert(oldChild.mounted);
+        if (oldChild.key != null) {
+          oldKeyedChildren[oldChild.key] = oldChild;
+        } else {
+          syncChild(null, oldChild, null);
+        }
+        oldChildrenBottom -= 1;
+      }
+    }
+
+    // middle of the lists - new list
+    while (childrenTop <= newChildrenBottom) {
+      Widget oldChild;
+      Widget newChild = newChildren[newChildrenBottom];
+      if (haveOldNodes) {
+        Key key = newChild.key;
+        if (key != null) {
+          oldChild = oldKeyedChildren[newChild.key];
+          if (oldChild != null) {
+            if (oldChild.runtimeType != newChild.runtimeType)
+              oldChild = null;
+            oldKeyedChildren.remove(key);
+          }
+        }
+      }
+      assert(newChild == oldChild || !newChild.mounted);
+      newChild = syncChild(newChild, oldChild, nextSibling);
+      assert(newChild.mounted);
+      assert(oldChild == newChild || oldChild == null || !oldChild.mounted);
+      newChildren[newChildrenBottom] = newChild;
+      nextSibling = newChild;
+      newChildrenBottom -= 1;
+    }
+    assert(oldChildrenBottom == newChildrenBottom);
+    assert(childrenTop == newChildrenBottom+1);
+
+    // now sync the top of the list
+    while (childrenTop > 0) {
+      childrenTop -= 1;
+      Widget oldChild = oldChildren[childrenTop];
+      assert(oldChild.mounted);
+      Widget newChild = newChildren[childrenTop];
+      assert(newChild == oldChild || !newChild.mounted);
+      assert(_canSync(oldChild, newChild));
+      newChild = syncChild(newChild, oldChild, nextSibling);
+      assert(newChild.mounted);
+      assert(oldChild == newChild || oldChild == null || !oldChild.mounted);
+      newChildren[childrenTop] = newChild;
+      nextSibling = newChild;
+    }
+
+    if (haveOldNodes && !oldKeyedChildren.isEmpty) {
+      for (Widget oldChild in oldKeyedChildren.values)
+        syncChild(null, oldChild, null);
+    }
+
+    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void dependenciesChanged() {
@@ -1122,142 +1260,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
   void syncRenderObject(MultiChildRenderObjectWrapper old) {
     super.syncRenderObject(old);
-
-    final ContainerRenderObjectMixin renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(renderObject is ContainerRenderObjectMixin);
-    assert(old == null || old.renderObject == renderObject);
-
-    // This attempts to diff the new child list (this.children) with
-    // the old child list (old.children), and update our renderObject
-    // accordingly.
-
-    // The cases it tries to optimise for are:
-    //  - the old list is empty
-    //  - the lists are identical
-    //  - there is an insertion or removal of one or more widgets in
-    //    only one place in the list
-    // If a widget with a key is in both lists, it will be synced.
-    // Widgets without keys might be synced but there is no guarantee.
-
-    // The general approach is to sync the entire new list backwards, as follows:
-    // 1. Walk the lists from the top until you no longer have
-    //    matching nodes. We don't sync these yet, but we now know to
-    //    skip them below. We do this because at each sync we need to
-    //    pass the pointer to the new next widget as the slot, which
-    //    we can't do until we've synced the next child.
-    // 2. Walk the lists from the bottom, syncing nodes, until you no
-    //    longer have matching nodes.
-    // At this point we narrowed the old and new lists to the point
-    // where the nodes no longer match.
-    // 3. Walk the narrowed part of the old list to get the list of
-    //    keys and sync null with non-keyed items.
-    // 4. Walk the narrowed part of the new list backwards:
-    //     * Sync unkeyed items with null
-    //     * Sync keyed items with the source if it exists, else with null.
-    // 5. Walk the top list again but backwards, syncing the nodes.
-    // 6. Sync null with any items in the list of keys that are still
-    //    mounted.
-
-    final List<Widget> newChildren = children;
-    final List<Widget> oldChildren = old == null ? const <Widget>[] : old.children;
-    int childrenTop = 0;
-    int newChildrenBottom = newChildren.length-1;
-    int oldChildrenBottom = oldChildren.length-1;
-
-    // top of the lists
-    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
-      Widget oldChild = oldChildren[childrenTop];
-      assert(oldChild.mounted);
-      Widget newChild = newChildren[childrenTop];
-      assert(newChild == oldChild || !newChild.mounted);
-      if (!_canSync(oldChild, newChild))
-        break;
-      childrenTop += 1;
-    }
-
-    Widget nextSibling;
-
-    // bottom of the lists
-    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
-      Widget oldChild = oldChildren[oldChildrenBottom];
-      assert(oldChild.mounted);
-      Widget newChild = newChildren[newChildrenBottom];
-      assert(newChild == oldChild || !newChild.mounted);
-      if (!_canSync(oldChild, newChild))
-        break;
-      newChild = syncChild(newChild, oldChild, nextSibling);
-      assert(newChild.mounted);
-      assert(oldChild == newChild || !oldChild.mounted);
-      newChildren[newChildrenBottom] = newChild;
-      nextSibling = newChild;
-      oldChildrenBottom -= 1;
-      newChildrenBottom -= 1;
-    }
-
-    // middle of the lists - old list
-    bool haveOldNodes = childrenTop <= oldChildrenBottom;
-    Map<Key, Widget> oldKeyedChildren;
-    if (haveOldNodes) {
-      oldKeyedChildren = new Map<Key, Widget>();
-      while (childrenTop <= oldChildrenBottom) {
-        Widget oldChild = oldChildren[oldChildrenBottom];
-        assert(oldChild.mounted);
-        if (oldChild.key != null) {
-          oldKeyedChildren[oldChild.key] = oldChild;
-        } else {
-          syncChild(null, oldChild, null);
-        }
-        oldChildrenBottom -= 1;
-      }
-    }
-
-    // middle of the lists - new list
-    while (childrenTop <= newChildrenBottom) {
-      Widget oldChild;
-      Widget newChild = newChildren[newChildrenBottom];
-      if (haveOldNodes) {
-        Key key = newChild.key;
-        if (key != null) {
-          oldChild = oldKeyedChildren[newChild.key];
-          if (oldChild != null) {
-            if (oldChild.runtimeType != newChild.runtimeType)
-              oldChild = null;
-            oldKeyedChildren.remove(key);
-          }
-        }
-      }
-      assert(newChild == oldChild || !newChild.mounted);
-      newChild = syncChild(newChild, oldChild, nextSibling);
-      assert(newChild.mounted);
-      assert(oldChild == newChild || oldChild == null || !oldChild.mounted);
-      newChildren[newChildrenBottom] = newChild;
-      nextSibling = newChild;
-      newChildrenBottom -= 1;
-    }
-    assert(oldChildrenBottom == newChildrenBottom);
-    assert(childrenTop == newChildrenBottom+1);
-
-    // now sync the top of the list
-    while (childrenTop > 0) {
-      childrenTop -= 1;
-      Widget oldChild = oldChildren[childrenTop];
-      assert(oldChild.mounted);
-      Widget newChild = newChildren[childrenTop];
-      assert(newChild == oldChild || !newChild.mounted);
-      assert(_canSync(oldChild, newChild));
-      newChild = syncChild(newChild, oldChild, nextSibling);
-      assert(newChild.mounted);
-      assert(oldChild == newChild || oldChild == null || !oldChild.mounted);
-      newChildren[childrenTop] = newChild;
-      nextSibling = newChild;
-    }
-
-    if (haveOldNodes && !oldKeyedChildren.isEmpty) {
-      for (Widget oldChild in oldKeyedChildren.values)
-        syncChild(null, oldChild, null);
-    }
-
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+    syncChildren(children, old == null ? const <Widget>[] : old.children);
   }
 
 }
