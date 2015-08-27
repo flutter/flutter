@@ -56,6 +56,16 @@ def PerformCodeSigning(args):
     args.application_path,
   ])
 
+def GenerateDSYM(args):
+  return subprocess.check_call([
+    '/usr/bin/env',
+    'xcrun',
+    'dsymutil',
+    '-o',
+    args.output,
+    args.executable_path
+  ])
+
 
 def GenerateProjectStructure(args):
   application_path = os.path.join( args.dir, args.name + ".app" )
@@ -101,6 +111,20 @@ def Main():
   code_signing_parser.add_argument('-e', dest='entitlements_path',
                                    required=True,
                                    help='The path to the entitlements .xcent')
+
+  # dSYM Generation
+
+  dsym_generation_parser = subparsers.add_parser('dsym',
+                        help='Generate a .dSYM file for an executable')
+
+  dsym_generation_parser.set_defaults(func=GenerateDSYM)
+
+  dsym_generation_parser.add_argument('-e', dest='executable_path',
+                                      required=True,
+                                      help='The executable path')
+  dsym_generation_parser.add_argument('-o', dest='output',
+                                      required=True,
+                                      help='The output file name')
 
   # Engage!
 

@@ -59,13 +59,38 @@ template("xcode_harness_ios") {
     ]
   }
 
+  dsym_gen_target_name = app_name + "_dsym"
+  action(dsym_gen_target_name) {
+    sources = [
+      "$root_build_dir/$app_name"
+    ]
+
+    script = ios_app_script
+
+    outputs = [
+      "$root_build_dir/$xcode_project_gen_target_name/Harness.app.dSYM"
+    ]
+
+    args = [
+      "dsym",
+      "-e",
+      rebase_path("$root_build_dir/$app_name", root_build_dir),
+      "-o",
+      rebase_path("$root_build_dir/$xcode_project_gen_target_name/Harness.app.dSYM", root_build_dir),
+    ]
+
+    deps = invoker.deps + [
+      ":$xcode_project_gen_target_name",
+    ]
+  }
+
   bundle_copy_gen_target_name = app_name + "_bundle_copy"
   copy(bundle_copy_gen_target_name) {
     sources = [
       invoker.app_bundle
     ]
     outputs = [
-      "$root_build_dir/$xcode_project_gen_target_name/Sideload",
+      "$root_build_dir/$xcode_project_gen_target_name/Application",
     ]
 
     deps = invoker.deps + [
@@ -75,7 +100,8 @@ template("xcode_harness_ios") {
 
   group(target_name) {
     deps = [
-      ":$bundle_copy_gen_target_name"
+      ":$dsym_gen_target_name",
+      ":$bundle_copy_gen_target_name",
     ]
   }
 }
@@ -200,8 +226,9 @@ template("ios_app") {
   xcode_harness_ios(xcode_harness_gen_target_name) {
     app_bundle = "$root_build_dir/$app_name.app"
     deps = [
+      ":$bin_gen_target_name",
       ":$struct_gen_target_name",
-      ":$copy_gen_target_name"
+      ":$copy_gen_target_name",
     ]
   }
 
