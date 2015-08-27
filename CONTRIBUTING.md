@@ -57,12 +57,18 @@ target. Building on MacOS for Android, iOS, and a head-less MacOS target is comi
 Running the tests
 -----------------
 
-* `./sky/tools/test_sky --debug` runs the tests on the host machine using `out/Debug`.
+* `./sky/tools/run_tests --debug` runs the tests on the host machine using `out/Debug`.
 * If you want to run the run a test directly:
-  - (Linux) `./out/Debug/sky_shell --package-root=sky/packages/workbench/packages sky/tests/lowlevel/trivial.dart`
-  - (Mac) `./out/Debug/SkyShell.app/Contents/MacOS/SkyShell --package-root=sky/packages/workbench/packages sky/tests/lowlevel/trivial.dart`
+  - (Linux) `./out/Debug/sky_shell --package-root=sky/unit/packages sky/unit/test/harness/trivial_test.dart`
+  - (Mac) `./out/Debug/SkyShell.app/Contents/MacOS/SkyShell --package-root=sky/unit/packages sky/unit/test/harness/trivial_test.dart`
 
 Note: The tests are headless, you won't see any UI. You can use `print` to generate console output or you can interact with the DartVM via observatory at [http://localhost:8181/](http://localhost:8181/).
+
+Adding a test
+-------------
+
+To add a test, simply create a file whose name ends with `_test.dart` in the `sky/unit/test` directory.
+The test should have a `main` function and use `package:test`.
 
 Running the examples
 --------------------
