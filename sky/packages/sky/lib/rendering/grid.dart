@@ -10,11 +10,14 @@ class GridParentData extends BoxParentData with ContainerParentDataMixin<RenderB
 class GridMetrics {
   // Grid is width-in, height-out.  We fill the max width and adjust height
   // accordingly.
-  factory GridMetrics({ double width, int childCount, double childExtent }) {
+  factory GridMetrics({ double width, int childCount, double maxChildExtent }) {
     assert(width != null);
     assert(childCount != null);
-    assert(childExtent != null);
-    int childrenPerRow = (width / childExtent).floor() + 1;
+    assert(maxChildExtent != null);
+    double childExtent = maxChildExtent;
+    int childrenPerRow = (width / childExtent).floor();
+    // If the child extent divides evenly into the width use that, otherwise + 1
+    if (width / childExtent != childrenPerRow.toDouble()) childrenPerRow += 1;
     double totalPadding = 0.0;
     if (childrenPerRow * childExtent > width) {
       // TODO(eseidel): We should snap to pixel bounderies.
@@ -49,6 +52,14 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
 
   double _maxChildExtent;
   bool _hasVisualOverflow = false;
+
+  double get maxChildExtent => _maxChildExtent;
+  void set maxChildExtent (double value) {
+    if (_maxChildExtent != value) {
+      _maxChildExtent = value;
+      markNeedsLayout();
+    }
+  }
 
   void setupParentData(RenderBox child) {
     if (child.parentData is! GridParentData)
@@ -93,7 +104,7 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
     return new GridMetrics(
       width: constraints.maxWidth,
       childCount: childCount,
-      childExtent: _maxChildExtent
+      maxChildExtent: _maxChildExtent
     );
   }
 

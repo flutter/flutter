@@ -14,6 +14,7 @@ import 'package:sky/painting/paragraph_painter.dart';
 import 'package:sky/rendering/block.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/grid.dart';
 import 'package:sky/rendering/image.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
@@ -454,6 +455,21 @@ class Stack extends MultiChildRenderObjectWrapper {
   RenderStack get renderObject => super.renderObject;
 }
 
+class Grid extends MultiChildRenderObjectWrapper {
+  Grid(List<Widget> children, { Key key, this.maxChildExtent })
+    : super(key: key, children: children);
+
+  final double maxChildExtent;
+
+  RenderGrid createNode() => new RenderGrid(maxChildExtent: maxChildExtent);
+  RenderGrid get renderObject => super.renderObject;
+
+  void syncRenderObject(Widget old) {
+    super.syncRenderObject(old);
+    renderObject.maxChildExtent = maxChildExtent;
+  }
+}
+
 class Positioned extends ParentDataNode {
   Positioned({
     Key key,
@@ -495,7 +511,6 @@ class Flex extends MultiChildRenderObjectWrapper {
     renderObject.alignItems = alignItems;
     renderObject.textBaseline = textBaseline;
   }
-
 }
 
 class Row extends Flex {
