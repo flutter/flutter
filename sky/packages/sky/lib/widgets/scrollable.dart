@@ -542,6 +542,8 @@ class ScrollableList<T> extends ScrollableWidgetList {
   }
 }
 
+typedef void PageChangedCallback(int newPage);
+
 class PageableList<T> extends ScrollableList<T> {
   PageableList({
     Key key,
@@ -551,6 +553,7 @@ class PageableList<T> extends ScrollableList<T> {
     ItemBuilder<T> itemBuilder,
     bool itemsWrap: false,
     double itemExtent,
+    PageChangedCallback this.pageChanged,
     EdgeDims padding,
     this.duration: const Duration(milliseconds: 200),
     this.curve: ease
@@ -567,10 +570,12 @@ class PageableList<T> extends ScrollableList<T> {
 
   Duration duration;
   Curve curve;
+  PageChangedCallback pageChanged;
 
   void syncConstructorArguments(PageableList<T> source) {
     duration = source.duration;
     curve = source.curve;
+    pageChanged = source.pageChanged;
     super.syncConstructorArguments(source);
   }
 
@@ -592,12 +597,19 @@ class PageableList<T> extends ScrollableList<T> {
     double newScrollOffset = _snapScrollOffset(scrollOffset + velocity.sign * itemExtent)
       .clamp(_snapScrollOffset(scrollOffset - itemExtent / 2.0),
              _snapScrollOffset(scrollOffset + itemExtent / 2.0));
-    scrollTo(newScrollOffset, duration: duration, curve: curve);
+    scrollTo(newScrollOffset, duration: duration, curve: curve).then(_notifyPageChanged);
     return EventDisposition.processed;
   }
 
+  int get currentPage => (scrollOffset / itemExtent).floor();
+
+  void _notifyPageChanged(_) {
+    if (pageChanged != null)
+      pageChanged(currentPage);
+  }
+
   void settleScrollOffset() {
-    scrollTo(_snapScrollOffset(scrollOffset), duration: duration, curve: curve);
+    scrollTo(_snapScrollOffset(scrollOffset), duration: duration, curve: curve).then(_notifyPageChanged);
   }
 }
 
