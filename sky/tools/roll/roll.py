@@ -80,8 +80,6 @@ dirs_from_mojo = [
     'mojo/data_pipe_utils',
     'mojo/edk',
     'mojo/environment',
-    'mojo/gles2',
-    'mojo/gpu',
     'mojo/icu',
     'mojo/java',
     'mojo/message_pump',
