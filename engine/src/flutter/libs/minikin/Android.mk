@@ -63,3 +63,17 @@ LOCAL_C_INCLUDES := $(minikin_c_includes)
 LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
 
 include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+# Reduced library (currently just hyphenation) for host
+
+LOCAL_MODULE := libminikin_host
+LOCAL_MODULE_TAGS := optional
+LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
+LOCAL_C_INCLUDES := $(minikin_c_includes)
+LOCAL_SHARED_LIBRARIES := liblog libicuuc-host
+
+LOCAL_SRC_FILES := Hyphenator.cpp
+
+include $(BUILD_HOST_STATIC_LIBRARY)
