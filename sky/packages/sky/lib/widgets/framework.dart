@@ -1282,6 +1282,8 @@ class WidgetSkyBinding extends SkyBinding {
     if (disposition == EventDisposition.consumed)
       return EventDisposition.consumed;
     for (HitTestEntry entry in result.path.reversed) {
+      if (entry.target is! RenderObject)
+        continue;
       for (Widget target in RenderObjectWrapper.getWidgetsForRenderObject(entry.target)) {
         if (target is Listener) {
           EventDisposition targetDisposition = target._handleEvent(event);
