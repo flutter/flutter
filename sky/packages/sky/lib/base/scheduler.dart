@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:sky' as sky;
 
 import 'package:sky/base/debug.dart';
@@ -12,9 +13,10 @@ bool _haveScheduledVisualUpdate = false;
 int _nextCallbackId = 1;
 
 final List<Callback> _persistentCallbacks = new List<Callback>();
-Map<int, Callback> _transientCallbacks = new Map<int, Callback>();
+Map<int, Callback> _transientCallbacks = new LinkedHashMap<int, Callback>();
+final Set<int> _removedIds = new Set<int>();
 
-void _beginFrame(double timeStamp) {
+void beginFrame(double timeStamp) {
   timeStamp /= timeDilation;
 
   _haveScheduledVisualUpdate = false;
@@ -23,15 +25,17 @@ void _beginFrame(double timeStamp) {
   _transientCallbacks = new Map<int, Callback>();
 
   callbacks.forEach((id, callback) {
-    callback(timeStamp);
+    if (!_removedIds.contains(id))
+      callback(timeStamp);
   });
+  _removedIds.clear();
 
   for (Callback callback in _persistentCallbacks)
     callback(timeStamp);
 }
 
 void init() {
-  sky.view.setFrameCallback(_beginFrame);
+  sky.view.setFrameCallback(beginFrame);
 }
 
 void addPersistentFrameCallback(Callback callback) {
@@ -47,6 +51,7 @@ int requestAnimationFrame(Callback callback) {
 
 void cancelAnimationFrame(int id) {
   _transientCallbacks.remove(id);
+  _removedIds.add(id);
 }
 
 void ensureVisualUpdate() {
