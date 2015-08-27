@@ -3,6 +3,7 @@ dependencies:
   sky: any
   sky_tools: any
   test: any
+  quiver: any
 dependency_overrides:
   material_design_icons:
     path: ../packages/material_design_icons

@@ -1,6 +1,7 @@
 import 'dart:sky' as sky;
 import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
+import 'package:sky/base/scheduler.dart' as scheduler;
 
 typedef Widget WidgetBuilder();
 
@@ -21,6 +22,63 @@ class TestApp extends App {
   }
 }
 
+class TestPointerEvent extends sky.PointerEvent {
+  TestPointerEvent({
+    this.type,
+    this.pointer,
+    this.kind,
+    this.x,
+    this.y,
+    this.dx,
+    this.dy,
+    this.velocityX,
+    this.velocityY,
+    this.buttons,
+    this.down,
+    this.primary,
+    this.obscured,
+    this.pressure,
+    this.pressureMin,
+    this.pressureMax,
+    this.distance,
+    this.distanceMin,
+    this.distanceMax,
+    this.radiusMajor,
+    this.radiusMinor,
+    this.radiusMin,
+    this.radiusMax,
+    this.orientation,
+    this.tilt
+  });
+
+  // These are all of the PointerEvent members, but not all of Event.
+  String type;
+  int pointer;
+  String kind;
+  double x;
+  double y;
+  double dx;
+  double dy;
+  double velocityX;
+  double velocityY;
+  int buttons;
+  bool down;
+  bool primary;
+  bool obscured;
+  double pressure;
+  double pressureMin;
+  double pressureMax;
+  double distance;
+  double distanceMin;
+  double distanceMax;
+  double radiusMajor;
+  double radiusMinor;
+  double radiusMin;
+  double radiusMax;
+  double orientation;
+  double tilt;
+}
+
 class TestGestureEvent extends sky.GestureEvent {
   TestGestureEvent({
     this.type,
@@ -33,6 +91,7 @@ class TestGestureEvent extends sky.GestureEvent {
     this.velocityY
   });
 
+  // These are all of the GestureEvent members, but not all of Event.
   String type;
   int primaryPointer;
   double x;
@@ -105,14 +164,25 @@ class WidgetTester {
     dispatchEvent(new TestGestureEvent(type: 'gesturetap'), getCenter(widget));
   }
 
+  void scroll(Widget widget, Offset offset) {
+    dispatchEvent(new TestGestureEvent(type: 'gesturescrollstart'), getCenter(widget));
+    dispatchEvent(new TestGestureEvent(
+      type: 'gesturescrollupdate',
+      dx: offset.dx,
+      dy: offset.dy), getCenter(widget));
+    // pointerup to trigger scroll settling in Scrollable<T>
+    dispatchEvent(new TestPointerEvent(
+      type: 'pointerup', down: false, primary: true), getCenter(widget));
+  }
+
   void dispatchEvent(sky.Event event, Point position) {
     HitTestResult result = SkyBinding.instance.hitTest(position);
     SkyBinding.instance.dispatchEvent(event, result);
   }
 
-  void pumpFrame(WidgetBuilder builder) {
+  void pumpFrame(WidgetBuilder builder, [double frameTimeMs = 0.0]) {
     _app.builder = builder;
-    SkyBinding.instance.beginFrame(0.0);
+    scheduler.beginFrame(frameTimeMs);
   }
 
 }
