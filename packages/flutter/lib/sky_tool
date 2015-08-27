@@ -621,10 +621,6 @@ class StartListening(object):
         tempdir = tempfile.mkdtemp()
         currdir = os.getcwd()
         while True:
-            # Watch filesystem for changes
-            if not self.watch_dir(currdir):
-                return
-
             logging.info('Updating running Sky apps...')
 
             # Restart the app on Android.  Android does not currently restart using skyx files.
@@ -678,6 +674,10 @@ class StartListening(object):
             # Copy the app.skyx to the attached iOS device
             if IOSDevice.is_connected():
                 IOSDevice.copy_file(SKY_SHELL_APP_ID, os.path.join(tempdir, 'app.skyx'), 'Documents/app.skyx')
+
+            # Watch filesystem for changes
+            if not self.watch_dir(currdir):
+                return
 
 
 class StartTracing(object):
