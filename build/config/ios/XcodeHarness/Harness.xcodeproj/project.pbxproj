@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9E16D11C1B8684E900402ACB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E16D11B1B8684E900402ACB /* main.m */; };
+		9E16D11C1B8684E900402ACB /* FakeMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E16D11B1B8684E900402ACB /* FakeMain.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		9E16D11B1B8684E900402ACB /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		9E16D11B1B8684E900402ACB /* FakeMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FakeMain.m; sourceTree = "<group>"; };
 		9E842F101B866F0F00C84ECC /* Harness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Harness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -29,7 +29,7 @@
 		9E16D11D1B8684F000402ACB /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				9E16D11B1B8684E900402ACB /* main.m */,
+				9E16D11B1B8684E900402ACB /* FakeMain.m */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -59,8 +59,8 @@
 			buildPhases = (
 				9E842EDC1B864EA100C84ECC /* Sources */,
 				9E842EDD1B864EA100C84ECC /* Frameworks */,
-				9EA9970A1B867E74007B8C62 /* Copy GN Built Contents */,
-				9E842EDE1B864EA100C84ECC /* Resources */,
+				9EA9970A1B867E74007B8C62 /* Copy Application + Debugging Symbols */,
+				9E3A4F5C1B8F82BE00095803 /* Nuke Fake Binary */,
 			);
 			buildRules = (
 			);
@@ -103,30 +103,34 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXResourcesBuildPhase section */
-		9E842EDE1B864EA100C84ECC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
-
 /* Begin PBXShellScriptBuildPhase section */
-		9EA9970A1B867E74007B8C62 /* Copy GN Built Contents */ = {
+		9E3A4F5C1B8F82BE00095803 /* Nuke Fake Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy GN Built Contents";
+			name = "Nuke Fake Binary";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cp -R ${SOURCE_ROOT}/Sideload/ ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app";
+			shellScript = "rm ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Harness";
+		};
+		9EA9970A1B867E74007B8C62 /* Copy Application + Debugging Symbols */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Application + Debugging Symbols";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp -R ${SOURCE_ROOT}/Application/ ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\ncp -R ${SOURCE_ROOT}/Harness.app.dSYM ${BUILT_PRODUCTS_DIR}";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -136,7 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E16D11C1B8684E900402ACB /* main.m in Sources */,
+				9E16D11C1B8684E900402ACB /* FakeMain.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,7 +233,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				INFOPLIST_FILE = "$(SRCROOT)/Sideload/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Application/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -239,7 +243,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				INFOPLIST_FILE = "$(SRCROOT)/Sideload/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Application/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
