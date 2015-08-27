@@ -1001,6 +1001,9 @@ abstract class RenderObjectWrapper extends Widget {
 
   // for use by subclasses that manage their children using lists
   void syncChildren(List<Widget> newChildren, List<Widget> oldChildren) {
+    assert(newChildren != null);
+    assert(oldChildren != null);
+    assert(!identical(newChildren, oldChildren));
 
     // This attempts to diff the new child list (this.children) with
     // the old child list (old.children), and update our renderObject
@@ -1260,7 +1263,19 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
   void syncRenderObject(MultiChildRenderObjectWrapper old) {
     super.syncRenderObject(old);
-    syncChildren(children, old == null ? const <Widget>[] : old.children);
+    List<Widget> oldChildren = old == null ? const <Widget>[] : old.children;
+    if (oldChildren == children) {
+      int index = children.length;
+      Widget nextSibling = null;
+      while (index > 0) {
+        index -= 1;
+        Widget child = children[index];
+        nextSibling = syncChild(child, child, nextSibling);
+        children[index] = nextSibling;
+      }
+    } else {
+      syncChildren(children, oldChildren);
+    }
   }
 
 }
