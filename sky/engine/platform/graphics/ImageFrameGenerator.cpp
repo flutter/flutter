@@ -103,7 +103,7 @@ bool ImageFrameGenerator::decodeAndScale(const SkImageInfo& info, size_t index, 
     MutexLocker lock(m_decodeMutex);
 
     // This implementation does not support scaling so check the requested size.
-    SkISize scaledSize = SkISize::Make(info.fWidth, info.fHeight);
+    SkISize scaledSize = SkISize::Make(info.width(), info.height());
     ASSERT(m_fullSize == scaledSize);
 
     if (m_decodeFailedAndEmpty)
@@ -128,7 +128,7 @@ bool ImageFrameGenerator::decodeAndScale(const SkImageInfo& info, size_t index, 
     // Check to see if decoder has written directly to the memory provided
     // by Skia. If not make a copy.
     if (bitmap.getPixels() != pixels)
-        result = bitmap.copyPixelsTo(pixels, rowBytes * info.fHeight, rowBytes);
+        result = bitmap.copyPixelsTo(pixels, rowBytes * info.height(), rowBytes);
     return result;
 }
 

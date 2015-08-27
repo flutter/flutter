@@ -970,7 +970,7 @@ void GraphicsContext::drawBitmapRect(const SkBitmap& bitmap, const SkRect* src,
     SkCanvas::SrcRectConstraint flags =
         immutableState()->shouldClampToSourceRect() ? SkCanvas::kStrict_SrcRectConstraint : SkCanvas::kFast_SrcRectConstraint;
 
-    m_canvas->drawBitmapRect(bitmap, src, dst, paint, flags);
+    m_canvas->drawBitmapRect(bitmap, *src, dst, paint, flags);
 
     if (regionTrackingEnabled())
         m_trackedRegion.didDrawRect(this, dst, *paint, &bitmap);
