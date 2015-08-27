@@ -272,7 +272,8 @@ class RenderBlockViewport extends RenderBlockBase {
       result = intrinsicCallback(constraints);
       if (result == null)
         result = constrainer(0.0);
-      assert(constrainer(result) == result);
+      else
+        result = constrainer(result);
     } finally {
       _inCallback = false;
     }
