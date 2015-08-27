@@ -26,11 +26,8 @@
 
 namespace android {
 
-class Trie {
-public:
-    std::vector<uint8_t> result;
-    std::unordered_map<uint16_t, Trie> succ;
-};
+// hyb file header; implementation details are in the .cpp file
+struct Header;
 
 class Hyphenator {
 public:
@@ -44,17 +41,41 @@ public:
     // Example: word is "hyphen", result is [0 0 1 0 0 0], corresponding to "hy-phen".
     void hyphenate(std::vector<uint8_t>* result, const uint16_t* word, size_t len);
 
-private:
-    void addPattern(const uint16_t* pattern, size_t size);
+    // pattern data is in binary format, as described in doc/hyb_file_format.md. Note:
+    // the caller is responsible for ensuring that the lifetime of the pattern data is
+    // at least as long as the Hyphenator object.
 
-    void hyphenateSoft(std::vector<uint8_t>* result, const uint16_t* word, size_t len);
+    // Note: nullptr is valid input, in which case the hyphenator only processes soft hyphens
+    static Hyphenator* loadBinary(const uint8_t* patternData);
+
+private:
+    // apply soft hyphens only, ignoring patterns
+    void hyphenateSoft(uint8_t* result, const uint16_t* word, size_t len);
+
+    // try looking up word in alphabet table, return false if any code units fail to map
+    // Note that this methor writes len+2 entries into alpha_codes (including start and stop)
+    bool alphabetLookup(uint16_t* alpha_codes, const uint16_t* word, size_t len);
+
+    // calculate hyphenation from patterns, assuming alphabet lookup has already been done
+    void hyphenateFromCodes(uint8_t* result, const uint16_t* codes, size_t len);
 
     // TODO: these should become parameters, as they might vary by locale, screen size, and
     // possibly explicit user control.
     static const int MIN_PREFIX = 2;
     static const int MIN_SUFFIX = 3;
 
-    Trie root;
+    // See also LONGEST_HYPHENATED_WORD in LineBreaker.cpp. Here the constant is used so
+    // that temporary buffers can be stack-allocated without waste, which is a slightly
+    // different use case. It measures UTF-16 code units.
+    static const size_t MAX_HYPHENATED_SIZE = 64;
+
+    const uint8_t* patternData;
+
+    // accessors for binary data
+    const Header* getHeader() const {
+        return reinterpret_cast<const Header*>(patternData);
+    }
+
 };
 
 }  // namespace android
