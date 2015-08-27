@@ -262,8 +262,6 @@ component("skia") {
     "ext/SkMemory_new_handler.cpp",
     "ext/analysis_canvas.cc",
     "ext/analysis_canvas.h",
-    "ext/benchmarking_canvas.cc",
-    "ext/benchmarking_canvas.h",
     "ext/bitmap_platform_device.h",
     "ext/convolver.cc",
     "ext/convolver.h",
