@@ -7,7 +7,9 @@ import 'dart:sky' as sky;
 import 'package:sky/rendering/object.dart';
 import 'package:sky/widgets/framework.dart';
 import 'package:skysprites/skysprites.dart';
+import 'package:vector_math/vector_math.dart';
 
+part 'custom_actions.dart';
 part 'explosions.dart';
 part 'flash.dart';
 part 'game_demo_node.dart';
