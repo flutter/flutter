@@ -53,7 +53,6 @@ _third_party_deps = [
     'third_party/jinja2',
     'third_party/jsr-305',
     'third_party/junit',
-    'third_party/khronos',
     'third_party/libjpeg',
     'third_party/libpng',
     'third_party/libXNVCtrl',
