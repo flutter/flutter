@@ -8,6 +8,7 @@ import 'package:sky/rendering/block.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets/basic.dart';
 
 // return null if index is greater than index of last entry
 typedef Widget IndexedBuilder(int index);
@@ -78,16 +79,19 @@ class MixedViewportLayoutState {
 }
 
 class MixedViewport extends RenderObjectWrapper {
-  MixedViewport({ Key key, this.builder, this.startOffset, this.token, this.layoutState })
+  MixedViewport({ Key key, this.startOffset, this.direction: ScrollDirection.vertical, this.builder, this.token, this.layoutState })
     : super(key: key) {
     assert(this.layoutState != null);
   }
 
-  IndexedBuilder builder;
   double startOffset;
+  ScrollDirection direction;
+  IndexedBuilder builder;
   Object token;
   MixedViewportLayoutState layoutState;
 
+  // we don't pass the direction or offset to the render object when we create it, because
+  // the render object is empty so it will not matter
   RenderBlockViewport get renderObject => super.renderObject;
   RenderBlockViewport createNode() => new RenderBlockViewport();
 
@@ -167,13 +171,14 @@ class MixedViewport extends RenderObjectWrapper {
       layoutState._dirty = true;
       startOffset = newNode.startOffset;
     }
-    if (token != newNode.token || builder != newNode.builder) {
+    if (direction != newNode.direction || builder != newNode.builder || token != newNode.token) {
       layoutState._dirty = true;
-      builder = newNode.builder;
-      token = newNode.token;
       layoutState._didReachLastChild = false;
       layoutState._childOffsets = <double>[0.0];
       layoutState._invalidIndices = new Set<int>();
+      direction = newNode.direction;
+      builder = newNode.builder;
+      token = newNode.token;
     }
     return true;
   }
@@ -221,14 +226,19 @@ class MixedViewport extends RenderObjectWrapper {
     Widget oldWidget = layoutState._childrenByKey[key];
     newWidget = syncChild(newWidget, oldWidget, _omit);
     assert(newWidget != null);
-    // Update the offsets based on the newWidget's height.
+    // Update the offsets based on the newWidget's dimensions.
     RenderBox widgetRoot = newWidget.renderObject;
     assert(widgetRoot is RenderBox);
-    double newHeight = widgetRoot.getMaxIntrinsicHeight(innerConstraints);
-    double oldHeight = offsets[index + 1] - offsets[index];
-    double heightDelta = newHeight - oldHeight;
+    double newOffset;
+    if (direction == ScrollDirection.vertical) {
+      newOffset = widgetRoot.getMaxIntrinsicHeight(innerConstraints);
+    } else {
+      newOffset = widgetRoot.getMaxIntrinsicWidth(innerConstraints);
+    }
+    double oldOffset = offsets[index + 1] - offsets[index];
+    double offsetDelta = newOffset - oldOffset;
     for (int i = index + 1; i <= endIndex; i++)
-      offsets[i] += heightDelta;
+      offsets[i] += offsetDelta;
     return newWidget;
   }
 
@@ -247,7 +257,12 @@ class MixedViewport extends RenderObjectWrapper {
       final double widgetStartOffset = offsets[index];
       RenderBox widgetRoot = widget.renderObject;
       assert(widgetRoot is RenderBox);
-      final double widgetEndOffset = widgetStartOffset + widgetRoot.getMaxIntrinsicHeight(innerConstraints);
+      double widgetEndOffset;
+      if (direction == ScrollDirection.vertical) {
+        widgetEndOffset = widgetStartOffset + widgetRoot.getMaxIntrinsicHeight(innerConstraints);
+      } else {
+        widgetEndOffset = widgetStartOffset + widgetRoot.getMaxIntrinsicWidth(innerConstraints);
+      }
       offsets.add(widgetEndOffset);
     }
     return widget;
@@ -274,13 +289,28 @@ class MixedViewport extends RenderObjectWrapper {
 
     final List<double> offsets = layoutState._childOffsets;
     final Map<_Key, Widget> childrenByKey = layoutState._childrenByKey;
-    final double height = constraints.maxHeight;
-    assert(height < double.INFINITY &&
-      'There is no point putting a lazily-built MixedViewport inside a box with infinite internal height ' +
-      '(e.g. inside something that scrolls), because it would then just eagerly build all the children. ' +
-      'You probably want to put the MixedViewport inside a container with a fixed height.' is String);
-    final double endOffset = startOffset + height;
-    BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: constraints.constrainWidth());
+    double extent;
+    if (direction == ScrollDirection.vertical) {
+      extent = constraints.maxHeight;
+      assert(extent < double.INFINITY &&
+        'There is no point putting a lazily-built vertical MixedViewport inside a box with infinite internal ' +
+        'height (e.g. inside something else that scrolls vertically), because it would then just eagerly build ' +
+        'all the children. You probably want to put the MixedViewport inside a Container with a fixed height.' is String);
+    } else {
+      extent = constraints.maxWidth;
+      assert(extent < double.INFINITY &&
+        'There is no point putting a lazily-built horizontal MixedViewport inside a box with infinite internal ' +
+        'width (e.g. inside something else that scrolls horizontally), because it would then just eagerly build ' +
+        'all the children. You probably want to put the MixedViewport inside a Container with a fixed width.' is String);
+    }
+    final double endOffset = startOffset + extent;
+    
+    BoxConstraints innerConstraints;
+    if (direction == ScrollDirection.vertical) {
+      innerConstraints = new BoxConstraints.tightFor(width: constraints.constrainWidth());
+    } else {
+      innerConstraints = new BoxConstraints.tightFor(height: constraints.constrainHeight());
+    }
 
     // Before doing the actual layout, fix the offsets for the widgets
     // whose size or type has changed.
@@ -373,8 +403,14 @@ class MixedViewport extends RenderObjectWrapper {
 
     int index = startIndex;
     if (haveChildren) {
-      // Build all the widgets we need.
+      // Update the renderObject configuration
+      if (direction == ScrollDirection.vertical) {
+        renderObject.direction = BlockDirection.vertical;
+      } else {
+        renderObject.direction = BlockDirection.horizontal;
+      }
       renderObject.startOffset = offsets[index] - startOffset;
+      // Build all the widgets we still need.
       while (offsets[index] < endOffset) {
         if (!builtChildren.containsKey(index)) {
           Widget widget = _getWidget(index, innerConstraints);
