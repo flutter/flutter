@@ -6,11 +6,6 @@ import("//mojo/public/tools/bindings/mojom.gni")
 
 mojom("interfaces") {
   sources = [
-    "input_event.mojom",
-    "sky_engine.mojom",
-  ]
-
-  deps = [
-    "//sky/services/pointer:interfaces"
+    "pointer.mojom",
   ]
 }

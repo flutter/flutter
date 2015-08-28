@@ -70,6 +70,7 @@ class Engine : public UIDelegate,
   // SkyEngine implementation:
   void OnViewportMetricsChanged(ViewportMetricsPtr metrics) override;
   void OnInputEvent(InputEventPtr event) override;
+  void OnPointerPacket(pointer::PointerPacketPtr packet) override;
 
   void RunFromNetwork(const mojo::String& url) override;
   void RunFromFile(const mojo::String& main,

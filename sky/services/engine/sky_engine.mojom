@@ -5,6 +5,7 @@
 module sky;
 
 import "sky/services/engine/input_event.mojom";
+import "sky/services/pointer/pointer.mojom";
 
 struct ViewportMetrics {
   int32 physical_width;
@@ -22,6 +23,7 @@ interface SkyEngine {
 
   OnViewportMetricsChanged(ViewportMetrics metrics);
   OnInputEvent(InputEvent event);
+  OnPointerPacket(pointer.PointerPacket packet);
 
   RunFromNetwork(string url);
   RunFromFile(string main, string package_root);
