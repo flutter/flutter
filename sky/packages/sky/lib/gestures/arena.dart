@@ -7,14 +7,26 @@ enum GestureDisposition {
   rejected
 }
 
+/// Represents an object participating in an arena.
+///
+/// Receives callbacks from the GestureArena to notify the object when it wins
+/// or loses a gesture negotiation. Exactly one of [acceptGesture] or
+/// [rejectGesture] will be called for each arena key this member was added to,
+/// regardless of what caused the arena to be resolved. For example, if a
+/// member resolves the arena itself, that member still receives an
+/// [acceptGesture] callback.
 abstract class GestureArenaMember {
-  /// Called when this member wins the arena.
+  /// Called when this member wins the arena for the given key.
   void acceptGesture(Object key);
 
-  /// Called when this member loses the arena.
+  /// Called when this member loses the arena for the given key.
   void rejectGesture(Object key);
 }
 
+/// An interface to information to an arena
+///
+/// A given [GestureArenaMember] can have multiple entries in multiple arenas
+/// with different keys.
 class GestureArenaEntry {
   GestureArenaEntry._(this._arena, this._key, this._member);
 
@@ -23,6 +35,8 @@ class GestureArenaEntry {
   final GestureArenaMember _member;
 
   /// Call this member to claim victory (with accepted) or admit defeat (with rejected).
+  ///
+  /// It's fine to attempt to resolve an arena that is already resolved.
   void resolve(GestureDisposition disposition) {
     _arena._resolve(_key, _member, disposition);
   }
@@ -32,6 +46,8 @@ class GestureArenaEntry {
 class GestureArena {
   final Map<Object, List<GestureArenaMember>> _arenas = new Map<Object, List<GestureArenaMember>>();
 
+  static final GestureArena instance = new GestureArena();
+
   GestureArenaEntry add(Object key, GestureArenaMember member) {
     List<GestureArenaMember> members = _arenas.putIfAbsent(key, () => new List<GestureArenaMember>());
     members.add(member);
@@ -40,10 +56,13 @@ class GestureArena {
 
   void _resolve(Object key, GestureArenaMember member, GestureDisposition disposition) {
     List<GestureArenaMember> members = _arenas[key];
+    if (members == null)
+      return;  // This arena has already resolved.
     assert(members != null);
     assert(members.contains(member));
     if (disposition == GestureDisposition.rejected) {
       members.remove(member);
+      member.rejectGesture(key);
       if (members.length == 1) {
         _arenas.remove(key);
         members.first.acceptGesture(key);
@@ -52,7 +71,6 @@ class GestureArena {
       }
     } else {
       assert(disposition == GestureDisposition.accepted);
-      List<GestureArenaMember> members = _arenas[key];
       _arenas.remove(key);
       for (GestureArenaMember rejectedMember in members) {
         if (rejectedMember != member)
