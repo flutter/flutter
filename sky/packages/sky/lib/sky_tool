@@ -75,6 +75,7 @@ def _start_http_server(port, root):
     server_command = [
         PUB_PATH, 'run', 'sky_tools:sky_server', str(port),
     ]
+    logging.info(' '.join(server_command))
     return subprocess.Popen(server_command, cwd=root).pid
 
 
@@ -158,6 +159,7 @@ class StartSky(object):
 
     def _is_package_installed(self, package_name):
         pm_path_cmd = [ADB_PATH, 'shell', 'pm', 'path', package_name]
+        logging.info(' '.join(pm_path_cmd))
         return subprocess.check_output(pm_path_cmd).strip() != ''
 
     def _is_valid_script_path(self):
@@ -167,7 +169,9 @@ class StartSky(object):
 
     def _get_device_apk_sha1(self, apk_path):
         # We might need to install a new APK, so check SHA1
-        return subprocess.check_output([ADB_PATH, 'shell', 'cat', SHA1_PATH])
+        cmd = [ADB_PATH, 'shell', 'cat', SHA1_PATH]
+        logging.info(' '.join(cmd))
+        return subprocess.check_output(cmd)
 
     def run(self, args, pids):
         if not args.poke:
@@ -221,12 +225,15 @@ class StartSky(object):
                 return 2
 
             cmd = [ADB_PATH, 'install', '-r', apk_path]
+            logging.info(' '.join(cmd))
             subprocess.check_call(cmd)
             # record the SHA1 of the APK we just pushed
             with tempfile.NamedTemporaryFile() as fp:
                 fp.write(source_sha1)
                 fp.seek(0)
-                subprocess.check_call([ADB_PATH, 'push', fp.name, SHA1_PATH])
+                cmd = [ADB_PATH, 'push', fp.name, SHA1_PATH]
+                logging.info(' '.join(cmd))
+                subprocess.check_call(cmd)
 
             # Install on connected iOS device
             if IOSDevice.is_connected() and args.ios_build_available:
@@ -246,9 +253,14 @@ class StartSky(object):
 
         # Set up port forwarding for observatory
         observatory_port_string = 'tcp:%s' % OBSERVATORY_PORT
-        subprocess.check_call([
-            ADB_PATH, 'forward', observatory_port_string, observatory_port_string
-        ])
+        cmd = [
+            ADB_PATH,
+            'forward',
+            observatory_port_string,
+            observatory_port_string
+        ]
+        logging.info(' '.join(cmd))
+        subprocess.check_call(cmd)
 
         sky_server_port = SKY_SERVER_PORT
         pids['sky_server_port'] = sky_server_port
@@ -261,9 +273,14 @@ class StartSky(object):
             pids['sky_server_root'] = sky_server_root
 
         port_string = 'tcp:%s' % sky_server_port
-        subprocess.check_call([
-            ADB_PATH, 'reverse', port_string, port_string
-        ])
+        cmd = [
+            ADB_PATH,
+            'reverse',
+            port_string,
+            port_string
+        ]
+        logging.info(' '.join(cmd))
+        subprocess.check_call(cmd)
         pids['remote_sky_server_port'] = sky_server_port
 
         # The load happens on the remote device, use the remote port.
@@ -283,7 +300,7 @@ class StartSky(object):
             cmd += [ '--ez', 'enable-checked-mode', 'true' ]
 
         cmd += [ ANDROID_COMPONENT ]
-
+        logging.info(' '.join(cmd))
         subprocess.check_output(cmd)
 
 
@@ -295,6 +312,7 @@ class StopSky(object):
 
     def _run(self, args):
         with open('/dev/null', 'w') as dev_null:
+            logging.info(' '.join(args))
             subprocess.call(args, stdout=dev_null, stderr=dev_null)
 
     def run(self, args, pids):
@@ -320,6 +338,7 @@ class IOSDevice(object):
                 'which',
                 'ios-deploy'
             ]
+            logging.info(' '.join(cmd))
             out = subprocess.check_output(cmd)
             match = re.search(r'ios-deploy', out)
             cls._has_ios_deploy = match is not None
@@ -340,6 +359,7 @@ class IOSDevice(object):
             '--timeout',
             '1'
         ]
+        logging.info(' '.join(cmd))
         out = subprocess.check_output(cmd)
         match = re.search(r'\[\.\.\.\.\] Found [^\)]*\) connected', out)
         cls._is_connected = match is not None
@@ -357,6 +377,7 @@ class IOSDevice(object):
             '--bundle',
             ios_app_path
         ]
+        logging.info(' '.join(cmd))
         subprocess.check_call(cmd)
 
     @classmethod
@@ -374,6 +395,7 @@ class IOSDevice(object):
             '--to',
             device_path
         ]
+        logging.info(' '.join(cmd))
         subprocess.check_call(cmd)
 
 
@@ -393,6 +415,7 @@ class IOSSimulator(object):
             'list',
             'devices',
         ]
+        logging.info(' '.join(cmd))
         out = subprocess.check_output(cmd)
         match = re.search(r'[^\(]+\(([^\)]+)\) \(Booted\)', out)
         if match is not None and match.group(1) is not None:
@@ -431,6 +454,7 @@ class IOSSimulator(object):
             '-name',
             SKY_SHELL_APP_ID
         ]
+        logging.info(' '.join(cmd))
         out = subprocess.check_output(cmd)
         match = re.search(r'Data\/Application\/([^\/]+)\/Documents\/' + SKY_SHELL_APP_ID, out)
         if match is not None and match.group(1) is not None:
@@ -464,82 +488,91 @@ class IOSSimulator(object):
             os.path.abspath(__file__),
             'ios_sim',
             '-p',
-            # This path manipulation is to work around an issue where simctl fails to correctly parse
-            # paths that start with ../
             ios_app_path,
             'launch'
         ]
+        logging.info(' '.join(cmd))
         subprocess.check_call(cmd)
 
     def get_application_identifier(self, path):
-      identifier = subprocess.check_output(PLIST_BUDDY_PATH + [
-        '-c',
-        'Print CFBundleIdentifier',
-        os.path.join(path, 'Info.plist')
-      ])
-      return identifier.strip()
+        cmd = PLIST_BUDDY_PATH + [
+            '-c',
+            'Print CFBundleIdentifier',
+            os.path.join(path, 'Info.plist')
+        ]
+        logging.info(' '.join(cmd))
+        identifier = subprocess.check_output(cmd)
+        return identifier.strip()
 
     def is_simulator_booted(self):
-      devices = subprocess.check_output(SIMCTL_PATH + [ 'list', 'devices' ]).strip().split('\n')
-      for device in devices:
-        if re.search(r'\(Booted\)', device):
-          return True
-      return False
+        cmd = SIMCTL_PATH + [ 'list', 'devices' ]
+        logging.info(' '.join(cmd))
+        devices = subprocess.check_output(cmd).strip().split('\n')
+        for device in devices:
+            if re.search(r'\(Booted\)', device):
+                return True
+        return False
 
     # Launch whatever simulator the user last used, rather than try to guess which of their simulators they might want to use
     def boot_simulator(self, args, pids):
-      if self.is_simulator_booted():
-        return
-      # Use Popen here because launching the simulator from the command line in this manner doesn't return, so we can't check the result.
-      if args.ios_sim_path:
-        subprocess.Popen(args.ios_sim_path)
-      else:
-        subprocess.Popen(IOS_SIM_PATH)
-      while not self.is_simulator_booted():
-        print('Waiting for iOS Simulator to boot...')
-        time.sleep(0.5)
+        if self.is_simulator_booted():
+            return
+        # Use Popen here because launching the simulator from the command line in this manner doesn't return, so we can't check the result.
+        if args.ios_sim_path:
+            logging.info(args.ios_sim_path)
+            subprocess.Popen(args.ios_sim_path)
+        else:
+            logging.info(IOS_SIM_PATH)
+            subprocess.Popen(IOS_SIM_PATH)
+        while not self.is_simulator_booted():
+            print('Waiting for iOS Simulator to boot...')
+            time.sleep(0.5)
 
     def install_app(self, args, pids):
-      self.boot_simulator(args, pids)
-      cmd = SIMCTL_PATH + [
-        'install',
-        'booted',
-        args.path,
-      ]
-      return subprocess.check_call(cmd)
+        self.boot_simulator(args, pids)
+        cmd = SIMCTL_PATH + [
+            'install',
+            'booted',
+            args.path,
+        ]
+        logging.info(' '.join(cmd))
+        return subprocess.check_call(cmd)
 
     def install_launch_and_wait(self, args, pids, wait):
-      res = self.install_app(args, pids)
-      if res != 0:
-        return res
-      identifier = self.get_application_identifier(args.path)
-      launch_args = [ 'launch' ]
-      if wait:
-        launch_args += [ '-w' ]
-      launch_args += [
-        'booted',
-        identifier,
-        '-target',
-        args.target,
-        '-server',
-        args.server
-      ]
-      return subprocess.check_output(SIMCTL_PATH + launch_args).strip()
+        res = self.install_app(args, pids)
+        if res != 0:
+            return res
+        identifier = self.get_application_identifier(args.path)
+        launch_args = SIMCTL_PATH + ['launch']
+        if wait:
+            launch_args += [ '-w' ]
+        launch_args += [
+            'booted',
+            identifier,
+            '-target',
+            args.target,
+            '-server',
+            args.server
+        ]
+        logging.info(' '.join(launch_args))
+        return subprocess.check_output(launch_args).strip()
 
     def launch_app(self, args, pids):
-      self.install_launch_and_wait(args, pids, False)
+        self.install_launch_and_wait(args, pids, False)
 
     def debug_app(self, args, pids):
-      launch_res = self.install_launch_and_wait(args, pids, True)
-      launch_pid = re.search('.*: (\d+)', launch_res).group(1)
-      return os.system(' '.join(XCRUN_PATH + [
-        'lldb',
-        # TODO(iansf): get this working again
-        # '-s',
-        # os.path.join(os.path.dirname(__file__), 'lldb_start_commands.txt'),
-        '-p',
-        launch_pid,
-      ]))
+        launch_res = self.install_launch_and_wait(args, pids, True)
+        launch_pid = re.search('.*: (\d+)', launch_res).group(1)
+        cmd = XCRUN_PATH + [
+            'lldb',
+            # TODO(iansf): get this working again
+            # '-s',
+            # os.path.join(os.path.dirname(__file__), 'lldb_start_commands.txt'),
+            '-p',
+            launch_pid,
+        ]
+        logging.info(' '.join(cmd))
+        return subprocess.call(cmd)
 
     def add_subparser(self, subparsers):
         simulator_parser = subparsers.add_parser('ios_sim',
@@ -588,6 +621,7 @@ class StartListening(object):
                         'which',
                         'inotifywait'
                     ]
+                    logging.info(' '.join(cmd))
                     out = subprocess.check_output(cmd)
                 except subprocess.CalledProcessError:
                     logging.error('"listen" command is only useful if you have installed inotifywait on Linux.  Run "apt-get install inotify-tools" or equivalent to install it.')
@@ -606,6 +640,7 @@ class StartListening(object):
                         'which',
                         'fswatch'
                     ]
+                    logging.info(' '.join(cmd))
                     out = subprocess.check_output(cmd)
                 except subprocess.CalledProcessError:
                     logging.error('"listen" command is only useful if you have installed fswatch on Mac.  Run "brew install fswatch" to install it with homebrew.')
@@ -622,6 +657,7 @@ class StartListening(object):
                 logging.error('"listen" command is only available on Mac and Linux.')
                 return False
 
+        logging.info(' '.join(self.watch_cmd))
         subprocess.check_call(self.watch_cmd)
         return True
 
@@ -643,6 +679,7 @@ class StartListening(object):
                 'start',
                 '--poke'
             ]
+            logging.info(' '.join(cmd))
             subprocess.check_call(cmd)
 
             if args.local_build:
@@ -664,6 +701,7 @@ class StartListening(object):
                         '--snapshot=' + os.path.join(tempdir, 'snapshot_blob.bin'),
                         os.path.join('lib', 'main.dart')
                     ]
+                    logging.info(' '.join(cmd))
                     subprocess.check_call(cmd)
 
                     os.chdir(tempdir)
@@ -677,6 +715,7 @@ class StartListening(object):
                         'content',
                         'navigation'
                     ]
+                    logging.info(' '.join(cmd))
                     subprocess.check_call(cmd)
                     os.chdir(currdir)
 
@@ -688,6 +727,7 @@ class StartListening(object):
                             os.path.join(tempdir, 'app.skyx'),
                             simulator_app_documents_dir
                         ]
+                        logging.info(' '.join(cmd))
                         subprocess.check_call(cmd)
 
                     # Copy the app.skyx to the attached iOS device
@@ -706,9 +746,16 @@ class StartTracing(object):
         start_tracing_parser.set_defaults(func=self.run)
 
     def run(self, args, pids):
-        subprocess.check_output([ADB_PATH, 'shell',
-            'am', 'broadcast',
-            '-a', 'org.domokit.sky.shell.TRACING_START'])
+        cmd = [
+            ADB_PATH,
+            'shell',
+            'am',
+            'broadcast',
+            '-a',
+            'org.domokit.sky.shell.TRACING_START'
+        ]
+        logging.info(' '.join(cmd))
+        subprocess.check_output(cmd)
 
 
 TRACE_COMPLETE_REGEXP = re.compile('Trace complete')
@@ -722,15 +769,28 @@ class StopTracing(object):
         stop_tracing_parser.set_defaults(func=self.run)
 
     def run(self, args, pids):
-        subprocess.check_output([ADB_PATH, 'logcat', '-c'])
-        subprocess.check_output([ADB_PATH, 'shell',
-            'am', 'broadcast',
-            '-a', 'org.domokit.sky.shell.TRACING_STOP'])
+        cmd = [ADB_PATH, 'logcat', '-c']
+        logging.info(' '.join(cmd))
+        subprocess.check_output(cmd)
+
+        cmd = [
+            ADB_PATH,
+            'shell',
+            'am',
+            'broadcast',
+            '-a',
+            'org.domokit.sky.shell.TRACING_STOP'
+        ]
+        logging.info(' '.join(cmd))
+        subprocess.check_output(cmd)
+
         device_path = None
         is_complete = False
         while not is_complete:
             time.sleep(0.2)
-            log = subprocess.check_output([ADB_PATH, 'logcat', '-d'])
+            cmd = [ADB_PATH, 'logcat', '-d']
+            logging.info(' '.join(cmd))
+            log = subprocess.check_output(cmd)
             if device_path is None:
                 result = TRACE_FILE_REGEXP.search(log)
                 if result:
@@ -740,8 +800,13 @@ class StopTracing(object):
         logging.info('Downloading trace %s ...' % os.path.basename(device_path))
 
         if device_path:
-            subprocess.check_output([ADB_PATH, 'pull', device_path])
-            subprocess.check_output([ADB_PATH, 'shell', 'rm', device_path])
+            cmd = [ADB_PATH, 'pull', device_path]
+            logging.info(' '.join(cmd))
+            subprocess.check_output(cmd)
+
+            cmd = [ADB_PATH, 'shell', 'rm', device_path]
+            logging.info(' '.join(cmd))
+            subprocess.check_output(cmd)
 
 
 class SkyShellRunner(object):
@@ -771,11 +836,15 @@ class SkyShellRunner(object):
 
     def _check_for_adb(self):
         try:
-            adb_version = subprocess.check_output([ADB_PATH, 'version'])
+            cmd = [ADB_PATH, 'version']
+            logging.info(' '.join(cmd))
+            adb_version = subprocess.check_output(cmd)
             if self._is_valid_adb_version(adb_version):
                 return True
 
-            adb_path = subprocess.check_output(['which', ADB_PATH]).rstrip()
+            cmd = ['which', ADB_PATH]
+            logging.info(' '.join(cmd))
+            adb_path = subprocess.check_output(cmd).rstrip()
             logging.error('"%s" is too old. Need 1.0.32 or later. '
                 'Try setting ANDROID_HOME.' % adb_path)
             return False
@@ -791,10 +860,13 @@ class SkyShellRunner(object):
             # output lines like this, which we want to ignore:
             #   adb server is out of date.  killing..
             #   * daemon started successfully *
+            cmd = [ADB_PATH, 'start-server']
+            logging.info(' '.join(cmd))
+            subprocess.call(cmd)
 
-            subprocess.call([ADB_PATH, 'start-server'])
-            sdk_version = subprocess.check_output(
-                    [ADB_PATH, 'shell', 'getprop', 'ro.build.version.sdk']).rstrip()
+            cmd = [ADB_PATH, 'shell', 'getprop', 'ro.build.version.sdk']
+            logging.info(' '.join(cmd))
+            sdk_version = subprocess.check_output(cmd).rstrip()
             # Sample output: '22'
             if not sdk_version.isdigit():
                 logging.error('Unexpected response from getprop: "%s".' % sdk_version)
@@ -812,14 +884,16 @@ class SkyShellRunner(object):
 
     def _check_for_dart(self):
         try:
-            subprocess.check_output([DART_PATH, '--version'], stderr=subprocess.STDOUT)
+            cmd = [DART_PATH, '--version']
+            logging.info(' '.join(cmd))
+            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         except OSError:
             logging.error('"dart" (from the Dart SDK) not in $PATH, cannot continue.')
             return False
         return True
 
     def main(self):
-        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+        logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 
         self._update_paths()
 
@@ -832,6 +906,8 @@ class SkyShellRunner(object):
             sys.exit(2)
 
         parser = argparse.ArgumentParser(description='Sky App Runner')
+        parser.add_argument('--verbose', dest='verbose', action='store_true',
+            help='Noisy logging, including all shell commands executed')
         parser.add_argument('--release', dest='use_release', action='store_true',
             help='Set this if you are building Sky locally and want to use the release build products. '
                  'When set, attempts to automaticaly determine sky-src-path if sky-src-path is '
@@ -876,6 +952,9 @@ class SkyShellRunner(object):
             command.add_subparser(subparsers)
 
         args = parser.parse_args()
+        if args.verbose:
+            logging.getLogger().setLevel(logging.INFO)
+
         if args.use_release:
             args.local_build = True
 
@@ -933,11 +1012,11 @@ class SkyShellRunner(object):
         atexit.register(pids.write_to, PID_FILE_PATH)
         exit_code = 0
         try:
-          exit_code = args.func(args, pids)
+            exit_code = args.func(args, pids)
         except subprocess.CalledProcessError as e:
-          # Don't print a stack trace if the adb command fails.
-          logging.error(e)
-          exit_code = 2
+            # Don't print a stack trace if the adb command fails.
+            logging.error(e)
+            exit_code = 2
         sys.exit(exit_code)
 
 
