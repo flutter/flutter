@@ -3,6 +3,7 @@ part of game;
 enum GameObjectType {
   asteroidBig,
   asteroidSmall,
+  asteroidPowerUp,
   enemyScout,
   enemyDestroyer,
   coin,
@@ -19,6 +20,7 @@ class GameObjectFactory {
   void addAsteroids(int numAsteroids, double yPos, double distribution) {
     for (int i = 0; i < numAsteroids; i++) {
       GameObjectType type = (randomDouble() < distribution) ? GameObjectType.asteroidBig : GameObjectType.asteroidSmall;
+      if (i == 0) type = GameObjectType.asteroidPowerUp;
       Point pos = new Point(randomSignedDouble() * 160.0,
                             yPos + _chunkSpacing * randomDouble());
       addGameObject(type, pos);
@@ -45,6 +47,8 @@ class GameObjectFactory {
       obj = new AsteroidBig(this);
     else if (type == GameObjectType.asteroidSmall)
       obj = new AsteroidSmall(this);
+    else if (type == GameObjectType.asteroidPowerUp)
+      obj = new AsteroidPowerUp(this);
     else if (type == GameObjectType.enemyScout)
       obj = new EnemyScout(this);
     else if (type == GameObjectType.enemyDestroyer)

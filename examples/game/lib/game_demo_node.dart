@@ -45,6 +45,7 @@ class GameDemoNode extends NodeWithSize {
     _objectFactory = new GameObjectFactory(_spritesGame, _sounds, _level, _playerState);
 
     _level.ship = new Ship(_objectFactory);
+    _level.ship.setupActions();
     _level.addChild(_level.ship);
 
     // Add the joystick
@@ -111,7 +112,7 @@ class GameDemoNode extends NodeWithSize {
     // Add shots
     if (_framesToFire == 0 && _joystick.isDown && !_gameOver) {
       fire();
-      _framesToFire = _framesBetweenShots;
+      _framesToFire = (_playerState.speedLaserActive) ? _framesBetweenShots ~/ 2 : _framesBetweenShots;
     }
     if (_framesToFire > 0) _framesToFire--;
 
@@ -158,9 +159,13 @@ class GameDemoNode extends NodeWithSize {
     for (Node node in nodes) {
       if (node is GameObject && node.canDamageShip) {
         if (node.collidingWith(_level.ship)) {
-          // The ship was hit :(
-          killShip();
-          _level.ship.visible = false;
+          if (_playerState.shieldActive) {
+            // Hit, but saved by the shield!
+            node.destroy();
+          } else {
+            // The ship was hit :(
+            killShip();
+          }
         }
       } else if (node is GameObject && node.canBeCollected) {
         if (node.collidingWith(_level.ship)) {
@@ -209,13 +214,23 @@ class GameDemoNode extends NodeWithSize {
   }
 
   void fire() {
-    Laser shot0 = new Laser(_objectFactory);
+    Laser shot0 = new Laser(_objectFactory, -90.0);
     shot0.position = _level.ship.position + new Offset(17.0, -10.0);
     _level.addChild(shot0);
 
-    Laser shot1 = new Laser(_objectFactory);
+    Laser shot1 = new Laser(_objectFactory, -90.0);
     shot1.position = _level.ship.position + new Offset(-17.0, -10.0);
     _level.addChild(shot1);
+
+    if (_playerState.sideLaserActive) {
+      Laser shot2 = new Laser(_objectFactory, 0.0);
+      shot2.position = _level.ship.position + new Offset(17.0, -10.0);
+      _level.addChild(shot2);
+
+      Laser shot3 = new Laser(_objectFactory, 180.0);
+      shot3.position = _level.ship.position + new Offset(-17.0, -10.0);
+      _level.addChild(shot3);
+    }
 
     _effectPlayer.play(_sounds["laser"]);
   }
