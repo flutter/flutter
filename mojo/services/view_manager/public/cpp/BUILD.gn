@@ -43,9 +43,8 @@ mojo_sdk_source_set("cpp") {
   ]
 
   mojo_sdk_deps = [
-    "mojo/public/c/gles2:headers",
     "mojo/public/cpp/application",
-    "mojo/public/cpp/bindings:bindings",
+    "mojo/public/cpp/bindings",
     "mojo/public/cpp/system",
     "mojo/public/interfaces/application",
   ]

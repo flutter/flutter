@@ -9,10 +9,8 @@
 #endif
 
 #include <GLES2/gl2.h>
-#include <GLES2/gl2chromium.h>
-#include <GLES2/gl2extchromium.h>
+#include <GLES2/gl2extmojo.h>
 
-#include "mojo/public/c/gles2/gles2.h"
 #include "mojo/services/geometry/public/cpp/geometry_util.h"
 #include "mojo/services/surfaces/public/cpp/surfaces_utils.h"
 

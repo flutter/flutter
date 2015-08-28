@@ -21,7 +21,6 @@ source_set("gpu") {
   deps = [
     "//base",
     "//mojo/environment:chromium",
-    "//mojo/public/c/gles2",
     "//mojo/public/c/gpu",
     "//mojo/public/c/gpu:gpu_onscreen",
     "//mojo/public/c/system",
