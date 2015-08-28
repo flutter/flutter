@@ -30,7 +30,7 @@ abstract class FitnessItemRow extends Component {
 
   FitnessItemRow({ FitnessItem item, this.onDismissed })
    : this.item = item,
-     super(key: new Key(item.when.toString())) {
+     super(key: new ValueKey<DateTime>(item.when)) {
     assert(onDismissed != null);
   }
 

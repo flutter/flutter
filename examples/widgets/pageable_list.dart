@@ -12,7 +12,7 @@ class CardModel {
   Size size;
   Color color;
   String get label => "Card $value";
-  Key get key => new Key.fromObjectIdentity(this);
+  Key get key => new ObjectKey(this);
 }
 
 class PageableListApp extends App {

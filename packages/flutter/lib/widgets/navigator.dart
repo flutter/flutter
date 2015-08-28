@@ -186,7 +186,7 @@ class Navigator extends StatefulComponent {
       }
       if (child == null)
         continue;
-      TransitionBase transition = historyEntry.route.buildTransition(key: new Key.fromObjectIdentity(historyEntry))
+      TransitionBase transition = historyEntry.route.buildTransition(key: new ObjectKey(historyEntry))
         ..child = child
         ..direction = (i <= state.historyIndex) ? Direction.forward : Direction.reverse
         ..onDismissed = () {

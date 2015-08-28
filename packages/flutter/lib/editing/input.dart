@@ -75,7 +75,7 @@ class Input extends StatefulComponent {
 
     if (placeholder != null && _value.isEmpty) {
       Widget child = new Opacity(
-        key: const StringKey('placeholder'),
+        key: const ValueKey<String>('placeholder'),
         child: new Text(placeholder, style: textStyle),
         opacity: themeData.hintOpacity
       );

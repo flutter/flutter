@@ -14,7 +14,7 @@ void main() {
 
     Widget buildPage(int page) {
       return new Container(
-        key: new StringKey(page.toString()),
+        key: new ValueKey<int>(page),
         width: pageSize.width,
         height: pageSize.height,
         child: new Text(page.toString())
