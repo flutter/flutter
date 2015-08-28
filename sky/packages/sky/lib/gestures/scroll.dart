@@ -14,7 +14,7 @@ enum ScrollState {
   accepted
 }
 
-typedef void GestureScrollStartCallback(sky.Offset scrollDelta);
+typedef void GestureScrollStartCallback();
 typedef void GestureScrollUpdateCallback(sky.Offset scrollDelta);
 typedef void GestureScrollEndCallback();
 
@@ -47,7 +47,8 @@ class ScrollGestureRecognizer extends GestureRecognizer {
     if (event.type == 'pointermove') {
       sky.Offset offset = _getScrollOffset(event);
       if (state == ScrollState.accepted) {
-        onScrollUpdate(offset);
+        if (onScrollUpdate != null)
+          onScrollUpdate(offset);
       } else {
         pendingScrollOffset += offset;
         if (pendingScrollOffset.distance > kTouchSlop)
@@ -62,14 +63,17 @@ class ScrollGestureRecognizer extends GestureRecognizer {
       state = ScrollState.accepted;
       sky.Offset offset = pendingScrollOffset;
       pendingScrollOffset = null;
-      onScrollStart(offset);
+      if (onScrollStart != null)
+        onScrollStart();
+      if (offset != sky.Offset.zero && onScrollUpdate != null)
+        onScrollUpdate(offset);
     }
   }
 
   void didStopTrackingLastPointer() {
-     bool wasAccepted = (state == ScrollState.accepted);
-     state = ScrollState.ready;
-     if (wasAccepted)
+    bool wasAccepted = (state == ScrollState.accepted);
+    state = ScrollState.ready;
+    if (wasAccepted && onScrollEnd != null)
       onScrollEnd();
   }
 
