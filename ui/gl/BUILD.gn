@@ -122,6 +122,9 @@ component("gl") {
   ]
 
   all_dependent_configs = [ ":gl_config" ]
+  direct_dependent_configs = [
+    "//third_party/khronos:khronos_headers",
+  ]
 
   configs += [
     "//third_party/khronos:khronos_headers",
