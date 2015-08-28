@@ -12,9 +12,9 @@ import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/animation/scroll_behavior.dart';
+import 'package:sky/gestures/constants.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/viewport.dart';
-import 'package:sky/theme/view_configuration.dart' as config;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/framework.dart';
 import 'package:sky/widgets/mixed_viewport.dart';
@@ -24,8 +24,8 @@ export 'package:sky/widgets/mixed_viewport.dart' show MixedViewportLayoutState;
 
 // The GestureEvent velocity properties are pixels/second, config min,max limits are pixels/ms
 const double _kMillisecondsPerSecond = 1000.0;
-const double _kMinFlingVelocity = -config.kMaxFlingVelocity * _kMillisecondsPerSecond;
-const double _kMaxFlingVelocity = config.kMaxFlingVelocity * _kMillisecondsPerSecond;
+const double _kMinFlingVelocity = -kMaxFlingVelocity * _kMillisecondsPerSecond;
+const double _kMaxFlingVelocity = kMaxFlingVelocity * _kMillisecondsPerSecond;
 
 typedef void ScrollListener();
 
