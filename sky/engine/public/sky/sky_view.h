@@ -35,6 +35,8 @@ class SkyView {
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
   void BeginFrame(base::TimeTicks frame_time);
 
+  void CreateView(const String& name);
+
   void RunFromLibrary(const WebString& name,
                       DartLibraryProvider* library_provider);
   void RunFromSnapshot(const WebString& name,
@@ -49,7 +51,6 @@ class SkyView {
  private:
   explicit SkyView(SkyViewClient* client);
 
-  void CreateView(const String& name);
   void ScheduleFrame();
 
   SkyViewClient* client_;

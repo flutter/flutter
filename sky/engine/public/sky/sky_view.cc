@@ -36,15 +36,33 @@ void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
   view_->setDisplayMetrics(display_metrics_);
 }
 
+void SkyView::CreateView(const String& name) {
+  DCHECK(!view_);
+  DCHECK(!dart_controller_);
+
+  view_ = View::create(
+      base::Bind(&SkyView::ScheduleFrame, weak_factory_.GetWeakPtr()));
+  view_->setDisplayMetrics(display_metrics_);
+
+  dart_controller_ = adoptPtr(new DartController);
+  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(name)));
+  dart_controller_->InstallView(view_.get());
+
+  Dart_Isolate isolate = dart_controller_->dart_state()->isolate();
+  DartIsolateScope scope(isolate);
+  DartApiScope api_scope;
+  client_->DidCreateIsolate(isolate);
+}
+
 void SkyView::RunFromLibrary(const WebString& name,
                              DartLibraryProvider* library_provider) {
-  CreateView(name);
+  DCHECK(view_);
   dart_controller_->RunFromLibrary(name, library_provider);
 }
 
 void SkyView::RunFromSnapshot(const WebString& name,
                               mojo::ScopedDataPipeConsumerHandle snapshot) {
-  CreateView(name);
+  DCHECK(view_);
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 
@@ -79,24 +97,6 @@ void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
     view_->handleInputEvent(Event::create("back"));
   }
 
-}
-
-void SkyView::CreateView(const String& name) {
-  DCHECK(!view_);
-  DCHECK(!dart_controller_);
-
-  view_ = View::create(
-      base::Bind(&SkyView::ScheduleFrame, weak_factory_.GetWeakPtr()));
-  view_->setDisplayMetrics(display_metrics_);
-
-  dart_controller_ = adoptPtr(new DartController);
-  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(name)));
-  dart_controller_->InstallView(view_.get());
-
-  Dart_Isolate isolate = dart_controller_->dart_state()->isolate();
-  DartIsolateScope scope(isolate);
-  DartApiScope api_scope;
-  client_->DidCreateIsolate(isolate);
 }
 
 void SkyView::ScheduleFrame() {
