@@ -4,7 +4,6 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/base/pointer_router.dart';
 import 'package:sky/gestures/arena.dart';
 import 'package:sky/gestures/recognizer.dart';
 
