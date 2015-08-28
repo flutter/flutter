@@ -52,10 +52,11 @@ template("xcode_harness_ios") {
   xcode_project_gen_target_name = app_name + "_xcode"
   copy(xcode_project_gen_target_name) {
     sources = [
-      "//build/config/ios/XcodeHarness"
+      "//build/config/ios/XcodeHarness/FakeMain.m",
+      "//build/config/ios/XcodeHarness/Harness.xcodeproj",
     ]
     outputs = [
-      "$root_build_dir/$xcode_project_gen_target_name",
+      "$root_build_dir/$xcode_project_gen_target_name/{{source_file_part}}",
     ]
   }
 
@@ -79,9 +80,7 @@ template("xcode_harness_ios") {
       rebase_path("$root_build_dir/$xcode_project_gen_target_name/Harness.app.dSYM", root_build_dir),
     ]
 
-    deps = invoker.deps + [
-      ":$xcode_project_gen_target_name",
-    ]
+    deps = invoker.deps
   }
 
   bundle_copy_gen_target_name = app_name + "_bundle_copy"
@@ -93,13 +92,12 @@ template("xcode_harness_ios") {
       "$root_build_dir/$xcode_project_gen_target_name/Application",
     ]
 
-    deps = invoker.deps + [
-      ":$xcode_project_gen_target_name"
-    ]
+    deps = invoker.deps
   }
 
   group(target_name) {
     deps = [
+      ":$xcode_project_gen_target_name",
       ":$dsym_gen_target_name",
       ":$bundle_copy_gen_target_name",
     ]
@@ -222,6 +220,7 @@ template("ios_app") {
   }
 
   # Generate the Xcode Harness for Profiling
+
   xcode_harness_gen_target_name = app_name + "_harness"
   xcode_harness_ios(xcode_harness_gen_target_name) {
     app_bundle = "$root_build_dir/$app_name.app"
