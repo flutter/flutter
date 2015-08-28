@@ -8,10 +8,11 @@ import 'dart:sky' as sky;
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/forces.dart';
-import 'package:sky/theme/shadows.dart';
 import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/theme/shadows.dart';
 import 'package:sky/widgets/animated_container.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
@@ -84,14 +85,16 @@ class Drawer extends StatefulComponent {
   }
 
   Widget build() {
-    var mask = new Listener(
+    var mask = new GestureDetector(
       child: new ColorTransition(
         performance: _performance,
         direction: showing ? Direction.forward : Direction.reverse,
         color: new AnimatedColorValue(colors.transparent, end: const Color(0x7F000000)),
         child: new Container()
       ),
-      onGestureTap: handleMaskTap
+      onTap: () {
+        _performance.reverse();
+      }
     );
 
     Widget content = new SlideTransition(
@@ -131,11 +134,6 @@ class Drawer extends StatefulComponent {
   bool get _isMostlyClosed => _performance.progress < 0.5;
 
   void _settle() { _isMostlyClosed ? _performance.reverse() : _performance.play(); }
-
-  EventDisposition handleMaskTap(_) {
-    _performance.reverse();
-    return EventDisposition.consumed;
-  }
 
   // TODO(mpcomplete): Figure out how to generalize these handlers on a
   // "PannableThingy" interface.

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/curves.dart';
@@ -28,7 +26,7 @@ class ProgressIndicatorApp extends App {
       );
   }
 
-  void handleTap(sky.GestureEvent event) {
+  void handleTap() {
     if (valueAnimation.isAnimating)
       valueAnimation.stop();
     else
@@ -73,8 +71,8 @@ class ProgressIndicatorApp extends App {
   }
 
   Widget build() {
-    Widget body = new Listener(
-      onGestureTap: (e) { handleTap(e); },
+    Widget body = new GestureDetector(
+      onTap: handleTap,
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
         decoration: new BoxDecoration(backgroundColor: Theme.of(this).cardColor),

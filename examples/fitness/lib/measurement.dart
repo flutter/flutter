@@ -119,7 +119,7 @@ class MeasurementFragment extends StatefulComponent {
   DateTime _when = new DateTime.now();
   String _errorMessage = null;
 
-  EventDisposition _handleSave() {
+  void _handleSave() {
     double parsedWeight;
     try {
       parsedWeight = double.parse(_weight);
@@ -128,11 +128,9 @@ class MeasurementFragment extends StatefulComponent {
       setState(() {
         _errorMessage = "Save failed";
       });
-      return EventDisposition.processed;
     }
     onCreated(new Measurement(when: _when, weight: parsedWeight));
     navigator.pop();
-    return EventDisposition.processed;
   }
 
   Widget buildToolBar() {
@@ -142,8 +140,8 @@ class MeasurementFragment extends StatefulComponent {
         onPressed: navigator.pop),
       center: new Text('New Measurement'),
       right: [new InkWell(
-        child: new Listener(
-          onGestureTap: (_) => _handleSave(),
+        child: new GestureDetector(
+          onTap: _handleSave,
           child: new Text('SAVE')
         )
       )]
@@ -158,7 +156,7 @@ class MeasurementFragment extends StatefulComponent {
 
   static final GlobalKey weightKey = new GlobalKey();
 
-  EventDisposition _handleDatePressed(_) {
+  void _handleDatePressed() {
     showDialog(navigator, (navigator) {
       return new MeasurementDateDialog(navigator: navigator, previousDate: _when);
     }).then((DateTime value) {
@@ -168,7 +166,6 @@ class MeasurementFragment extends StatefulComponent {
         _when = value;
       });
     });
-    return EventDisposition.processed;
   }
 
   Widget buildBody() {
@@ -179,8 +176,8 @@ class MeasurementFragment extends StatefulComponent {
       child: new Container(
         padding: const EdgeDims.all(20.0),
         child: new Column([
-          new Listener(
-            onGestureTap: _handleDatePressed,
+          new GestureDetector(
+            onTap: _handleDatePressed,
             child: new Container(
               height: 50.0,
               child: new Column([

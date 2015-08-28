@@ -4,6 +4,7 @@
 
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 
 class ModalOverlay extends Component {
 
@@ -13,11 +14,8 @@ class ModalOverlay extends Component {
   final Function onDismiss;
 
   Widget build() {
-    return new Listener(
-      onGestureTap: (_) {
-        if (onDismiss != null)
-          onDismiss();
-      },
+    return new GestureDetector(
+      onTap: onDismiss,
       child: new Stack(children)
     );
   }
