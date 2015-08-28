@@ -56,10 +56,9 @@ class MealFragment extends StatefulComponent {
 
   String _description = "";
 
-  EventDisposition _handleSave() {
+  void _handleSave() {
     onCreated(new Meal(when: new DateTime.now(), description: _description));
     navigator.pop();
-    return EventDisposition.processed;
   }
 
   Widget buildToolBar() {
@@ -69,8 +68,8 @@ class MealFragment extends StatefulComponent {
         onPressed: navigator.pop),
       center: new Text('New Meal'),
       right: [new InkWell(
-        child: new Listener(
-          onGestureTap: (_) => _handleSave(),
+        child: new GestureDetector(
+          onTap: _handleSave,
           child: new Text('SAVE')
         )
       )]

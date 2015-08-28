@@ -162,9 +162,9 @@ class DemoList extends Component {
   }
 
   Widget buildDemo(SkyDemo demo) {
-    return new Listener(
+    return new GestureDetector(
       key: demo.key,
-      onGestureTap: (_) => launch(demo.href, demo.bundle),
+      onTap: () => launch(demo.href, demo.bundle),
       child: new Container(
         height: kCardHeight,
         child: new Card(

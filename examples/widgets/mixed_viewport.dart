@@ -106,17 +106,15 @@ class MixedViewportApp extends App {
   Widget builder(int index) {
     if (index >= lengths.length)
       return null;
-    return new Listener(
+    return new GestureDetector(
       key: new Key.stringify(lengths[index]),
+      onTap: () => removeBox(index),
       child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: new Color((0xFF000000 + 0xFFFFFF * lengths[index] / kMaxLength).round())
         ),
         height: lengths[index] + 12.0
-      ),
-      onGestureTap: (_) {
-        removeBox(index);
-      }
+      )
     );
   }
 
@@ -124,7 +122,4 @@ class MixedViewportApp extends App {
 
 void main() {
   runApp(new MixedViewportApp());
-  // scheduler.addPersistentFrameCallback((_) {
-  //   SkyBinding.instance.debugDumpRenderTree();
-  // });
 }

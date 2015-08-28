@@ -4,6 +4,7 @@
 
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/button_base.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/material.dart';
@@ -47,11 +48,8 @@ class FloatingActionButton extends ButtonBase {
       type: MaterialType.circle,
       level: highlight ? 3 : 2,
       child: new ClipOval(
-        child: new Listener(
-          onGestureTap: (_) {
-            if (onPressed != null)
-              onPressed();
-          },
+        child: new GestureDetector(
+          onTap: onPressed,
           child: new Container(
             width: _kSize,
             height: _kSize,

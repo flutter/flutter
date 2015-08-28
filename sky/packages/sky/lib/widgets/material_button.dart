@@ -4,6 +4,7 @@
 
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/button_base.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/material.dart';
 
@@ -36,7 +37,8 @@ abstract class MaterialButton extends ButtonBase {
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       child: new Center(child: child) // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
     );
-    return new Listener(
+    return new GestureDetector(
+      onTap: enabled ? onPressed : null,
       child: new Container(
         height: 36.0,
         constraints: new BoxConstraints(minWidth: 88.0),
@@ -47,8 +49,7 @@ abstract class MaterialButton extends ButtonBase {
           level: level,
           color: color
         )
-      ),
-      onGestureTap: (_) { if (onPressed != null && enabled) onPressed(); }
+      )
     );
   }
 

@@ -9,10 +9,11 @@ import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/button_base.dart';
 import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/theme.dart';
-import 'package:sky/widgets/framework.dart';
 
 typedef EventDisposition OnPressedFunction();
 
@@ -81,12 +82,8 @@ class DrawerItem extends ButtonBase {
       )
     );
 
-    return new Listener(
-      onGestureTap: (_) {
-        if (onPressed != null)
-          return onPressed();
-        return EventDisposition.ignored;
-      },
+    return new GestureDetector(
+      onTap: onPressed,
       child: new Container(
         height: 48.0,
         decoration: new BoxDecoration(backgroundColor: _getBackgroundColor(themeData)),
