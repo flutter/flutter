@@ -123,4 +123,8 @@ class WidgetTester {
     scheduler.beginFrame(frameTimeMs);
   }
 
+  void pumpFrameWithoutChange([double frameTimeMs = 0.0]) {
+    scheduler.beginFrame(frameTimeMs);
+  }
+
 }
