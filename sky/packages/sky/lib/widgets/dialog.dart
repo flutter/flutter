@@ -178,7 +178,7 @@ Future showDialog(Navigator navigator, DialogBuilder builder) {
     completer: completer,
     builder: (navigator, route) {
       return new Focus(
-        key: new GlobalKey.fromObjectIdentity(route),
+        key: new GlobalObjectKey(route),
         autofocus: true,
         child: builder(navigator)
       );

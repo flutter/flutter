@@ -13,7 +13,7 @@ class CardModel {
   double height;
   Color color;
   String get label => "Item $value";
-  Key get key => new Key.fromObjectIdentity(this);
+  Key get key => new ObjectKey(this);
 }
 
 class CardCollectionApp extends App {

@@ -25,16 +25,14 @@ typedef void WidgetTreeWalker(Widget);
 
 abstract class Key {
   const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
-  factory Key(String value) => new StringKey(value);
-  factory Key.stringify(Object value) => new StringKey(value.toString());
-  factory Key.fromObjectIdentity(Object value) => new ObjectKey(value);
+  factory Key(String value) => new ValueKey<String>(value);
 }
 
-class StringKey extends Key {
-  const StringKey(this.value) : super.constructor();
-  final String value;
+class ValueKey<T> extends Key {
+  const ValueKey(this.value) : super.constructor();
+  final T value;
   String toString() => '[\'${value}\']';
-  bool operator==(other) => other is StringKey && other.value == value;
+  bool operator==(other) => other is ValueKey<T> && other.value == value;
   int get hashCode => value.hashCode;
 }
 
@@ -51,8 +49,7 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 
 abstract class GlobalKey extends Key {
   const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
-  factory GlobalKey({ String label }) => new LabeledGlobalKey(label);
-  factory GlobalKey.fromObjectIdentity(Object value) => new GlobalObjectKey(value);
+  factory GlobalKey({ String label }) => new LabeledGlobalKey(label); // the label is purely for debugging purposes and is otherwise ignored
 
   static final Map<GlobalKey, Widget> _registry = new Map<GlobalKey, Widget>();
   static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();

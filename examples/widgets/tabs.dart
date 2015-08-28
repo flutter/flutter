@@ -35,7 +35,7 @@ class TabbedNavigatorApp extends App {
           builder: () => _buildContent(text)
         );
       });
-    return _buildTabNavigator(n, views.toList(), const StringKey('textLabelsTabNavigator'));
+    return _buildTabNavigator(n, views.toList(), const ValueKey<String>('textLabelsTabNavigator'));
   }
 
   TabNavigator _buildIconLabelsTabNavigator(int n) {
@@ -46,7 +46,7 @@ class TabbedNavigatorApp extends App {
           builder: () => _buildContent(icon_name)
         );
       });
-    return _buildTabNavigator(n, views.toList(), const StringKey('iconLabelsTabNavigator'));
+    return _buildTabNavigator(n, views.toList(), const ValueKey<String>('iconLabelsTabNavigator'));
   }
 
   TabNavigator _buildTextAndIconLabelsTabNavigator(int n) {
@@ -64,7 +64,7 @@ class TabbedNavigatorApp extends App {
         builder: () => _buildContent("Summary")
       )
     ];
-    return _buildTabNavigator(n, views, const StringKey('textAndIconLabelsTabNavigator'));
+    return _buildTabNavigator(n, views, const ValueKey<String>('textAndIconLabelsTabNavigator'));
   }
 
   TabNavigator _buildScrollableTabNavigator(int n) {
@@ -86,7 +86,7 @@ class TabbedNavigatorApp extends App {
           builder: () => _buildContent(text)
         );
       });
-    return _buildTabNavigator(n, views.toList(), const StringKey('scrollableTabNavigator'), isScrollable: true);
+    return _buildTabNavigator(n, views.toList(), const ValueKey<String>('scrollableTabNavigator'), isScrollable: true);
   }
 
 
@@ -118,7 +118,7 @@ class TabbedNavigatorApp extends App {
       )
     ];
 
-    TabNavigator tabNavigator = _buildTabNavigator(4, views, const StringKey('tabs'));
+    TabNavigator tabNavigator = _buildTabNavigator(4, views, const ValueKey<String>('tabs'));
     assert(selectedIndices.length == 5);
 
     ToolBar toolbar = new ToolBar(
