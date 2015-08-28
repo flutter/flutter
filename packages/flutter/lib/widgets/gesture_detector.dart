@@ -19,27 +19,48 @@ class GestureDetector extends StatefulComponent {
     this.onTap,
     this.onShowPress,
     this.onLongPress,
-    this.onScrollStart,
-    this.onScrollUpdate,
-    this.onScrollEnd
+    this.onVerticalScrollStart,
+    this.onVerticalScrollUpdate,
+    this.onVerticalScrollEnd,
+    this.onHorizontalScrollStart,
+    this.onHorizontalScrollUpdate,
+    this.onHorizontalScrollEnd,
+    this.onPanStart,
+    this.onPanUpdate,
+    this.onPanEnd
   }) : super(key: key);
 
   Widget child;
   GestureTapListener onTap;
   GestureShowPressListener onShowPress;
   GestureLongPressListener onLongPress;
-  GestureScrollStartCallback onScrollStart;
-  GestureScrollUpdateCallback onScrollUpdate;
-  GestureScrollEndCallback onScrollEnd;
+
+  GestureScrollStartCallback onVerticalScrollStart;
+  GestureScrollUpdateCallback onVerticalScrollUpdate;
+  GestureScrollEndCallback onVerticalScrollEnd;
+
+  GestureScrollStartCallback onHorizontalScrollStart;
+  GestureScrollUpdateCallback onHorizontalScrollUpdate;
+  GestureScrollEndCallback onHorizontalScrollEnd;
+
+  GesturePanStartCallback onPanStart;
+  GesturePanUpdateCallback onPanUpdate;
+  GesturePanEndCallback onPanEnd;
 
   void syncConstructorArguments(GestureDetector source) {
     child = source.child;
     onTap = source.onTap;
     onShowPress = source.onShowPress;
     onLongPress = source.onLongPress;
-    onScrollStart = source.onScrollStart;
-    onScrollUpdate = source.onScrollUpdate;
-    onScrollEnd = source.onScrollEnd;
+    onVerticalScrollStart = onVerticalScrollStart;
+    onVerticalScrollUpdate = onVerticalScrollUpdate;
+    onVerticalScrollEnd = onVerticalScrollEnd;
+    onHorizontalScrollStart = onHorizontalScrollStart;
+    onHorizontalScrollUpdate = onHorizontalScrollUpdate;
+    onHorizontalScrollEnd = onHorizontalScrollEnd;
+    onPanStart = source.onPanStart;
+    onPanUpdate = source.onPanUpdate;
+    onPanEnd = source.onPanEnd;
     _syncGestureListeners();
   }
 
@@ -66,11 +87,25 @@ class GestureDetector extends StatefulComponent {
     return _longPress;
   }
 
-  ScrollGestureRecognizer _scroll;
-  ScrollGestureRecognizer _ensureScroll() {
-    if (_scroll == null)
-      _scroll = new ScrollGestureRecognizer(router: _router);
-    return _scroll;
+  VerticalScrollGestureRecognizer _verticalScroll;
+  VerticalScrollGestureRecognizer _ensureVerticalScroll() {
+    if (_verticalScroll == null)
+      _verticalScroll = new VerticalScrollGestureRecognizer(router: _router);
+    return _verticalScroll;
+  }
+
+  HorizontalScrollGestureRecognizer _horizontalScroll;
+  HorizontalScrollGestureRecognizer _ensureHorizontalScroll() {
+    if (_horizontalScroll == null)
+      _horizontalScroll = new HorizontalScrollGestureRecognizer(router: _router);
+    return _horizontalScroll;
+  }
+
+  PanGestureRecognizer _pan;
+  PanGestureRecognizer _ensurePan() {
+    if (_pan == null)
+      _pan = new PanGestureRecognizer(router: _router);
+    return _pan;
   }
 
   void didMount() {
@@ -83,14 +118,18 @@ class GestureDetector extends StatefulComponent {
     _tap = _ensureDisposed(_tap);
     _showPress = _ensureDisposed(_showPress);
     _longPress = _ensureDisposed(_longPress);
-    _scroll = _ensureDisposed(_scroll);
+    _verticalScroll = _ensureDisposed(_verticalScroll);
+    _horizontalScroll = _ensureDisposed(_horizontalScroll);
+    _pan = _ensureDisposed(_pan);
   }
 
   void _syncGestureListeners() {
     _syncTap();
     _syncShowPress();
     _syncLongPress();
-    _syncScroll();
+    _syncVerticalScroll();
+    _syncHorizontalScroll();
+    _syncPan();
   }
 
   void _syncTap() {
@@ -114,14 +153,36 @@ class GestureDetector extends StatefulComponent {
       _ensureLongPress().onLongPress = onLongPress;
   }
 
-  void _syncScroll() {
-    if (onScrollStart == null && onScrollUpdate == null && onScrollEnd == null) {
-      _scroll = _ensureDisposed(_scroll);
+  void _syncVerticalScroll() {
+    if (onVerticalScrollStart == null && onVerticalScrollUpdate == null && onVerticalScrollEnd == null) {
+      _verticalScroll = _ensureDisposed(_verticalScroll);
     } else {
-      _ensureScroll()
-        ..onScrollStart = onScrollStart
-        ..onScrollUpdate = onScrollUpdate
-        ..onScrollEnd = onScrollEnd;
+      _ensureVerticalScroll()
+        ..onStart = onVerticalScrollStart
+        ..onUpdate = onVerticalScrollUpdate
+        ..onEnd = onVerticalScrollEnd;
+    }
+  }
+
+  void _syncHorizontalScroll() {
+    if (onHorizontalScrollStart == null && onHorizontalScrollUpdate == null && onHorizontalScrollEnd == null) {
+      _horizontalScroll = _ensureDisposed(_horizontalScroll);
+    } else {
+      _ensureHorizontalScroll()
+        ..onStart = onHorizontalScrollStart
+        ..onUpdate = onHorizontalScrollUpdate
+        ..onEnd = onHorizontalScrollEnd;
+    }
+  }
+
+  void _syncPan() {
+    if (onPanStart == null && onPanUpdate == null && onPanEnd == null) {
+      _pan = _ensureDisposed(_pan);
+    } else {
+      _ensurePan()
+        ..onStart = onPanStart
+        ..onUpdate = onPanUpdate
+        ..onEnd = onPanEnd;
     }
   }
 
@@ -138,8 +199,12 @@ class GestureDetector extends StatefulComponent {
       _showPress.addPointer(event);
     if (_longPress != null)
       _longPress.addPointer(event);
-    if (_scroll != null)
-      _scroll.addPointer(event);
+    if (_verticalScroll != null)
+      _verticalScroll.addPointer(event);
+    if (_horizontalScroll != null)
+      _horizontalScroll.addPointer(event);
+    if (_pan != null)
+      _pan.addPointer(event);
     return EventDisposition.processed;
   }
 

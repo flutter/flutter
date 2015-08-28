@@ -84,8 +84,10 @@ abstract class Scrollable extends StatefulComponent {
 
   Widget build() {
     return new GestureDetector(
-      onScrollUpdate: _handleScrollUpdate,
-      onScrollEnd: _maybeSettleScrollOffset,
+      onVerticalScrollUpdate: scrollDirection == ScrollDirection.vertical ? scrollBy : null,
+      onVerticalScrollEnd: scrollDirection == ScrollDirection.vertical ? _maybeSettleScrollOffset : null,
+      onHorizontalScrollUpdate: scrollDirection == ScrollDirection.horizontal ? scrollBy : null,
+      onHorizontalScrollEnd: scrollDirection == ScrollDirection.horizontal ? _maybeSettleScrollOffset : null,
       child: new Listener(
         child: buildContent(),
         onPointerDown: _handlePointerDown,
@@ -170,10 +172,6 @@ abstract class Scrollable extends StatefulComponent {
   EventDisposition _handlePointerDown(_) {
     _stopAnimations();
     return EventDisposition.processed;
-  }
-
-  void _handleScrollUpdate(Offset offset) {
-    scrollBy(scrollDirection == ScrollDirection.horizontal ? offset.dx : offset.dy);
   }
 
   EventDisposition _handleFlingStart(sky.GestureEvent event) {
