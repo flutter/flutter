@@ -43,9 +43,9 @@ void main() {
     PointerRouter router = new PointerRouter();
     ScrollGestureRecognizer scroll = new ScrollGestureRecognizer(router: router);
 
-    sky.Offset startOffset;
-    scroll.onScrollStart = (sky.Offset offset) {
-      startOffset = offset;
+    bool didStartScroll = false;
+    scroll.onScrollStart = () {
+      didStartScroll = true;
     };
 
     sky.Offset updateOffset;
@@ -59,29 +59,30 @@ void main() {
     };
 
     scroll.addPointer(down);
-    expect(startOffset, isNull);
+    expect(didStartScroll, isFalse);
     expect(updateOffset, isNull);
     expect(didEndScroll, isFalse);
 
     router.handleEvent(down, null);
-    expect(startOffset, isNull);
+    expect(didStartScroll, isFalse);
     expect(updateOffset, isNull);
     expect(didEndScroll, isFalse);
 
     router.handleEvent(move1, null);
-    expect(startOffset, new sky.Offset(10.0, -10.0));
-    startOffset = null;
-    expect(updateOffset, isNull);
+    expect(didStartScroll, isTrue);
+    didStartScroll = false;
+    expect(updateOffset, new sky.Offset(10.0, -10.0));
+    updateOffset = null;
     expect(didEndScroll, isFalse);
 
     router.handleEvent(move2, null);
-    expect(startOffset, isNull);
+    expect(didStartScroll, isFalse);
     expect(updateOffset, new sky.Offset(0.0, -5.0));
     updateOffset = null;
     expect(didEndScroll, isFalse);
 
     router.handleEvent(up, null);
-    expect(startOffset, isNull);
+    expect(didStartScroll, isFalse);
     expect(updateOffset, isNull);
     expect(didEndScroll, isTrue);
     didEndScroll = false;

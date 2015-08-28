@@ -84,8 +84,7 @@ abstract class Scrollable extends StatefulComponent {
 
   Widget build() {
     return new GestureDetector(
-      onScrollStart: _handleScrollOffset,
-      onScrollUpdate: _handleScrollOffset,
+      onScrollUpdate: _handleScrollUpdate,
       onScrollEnd: _maybeSettleScrollOffset,
       child: new Listener(
         child: buildContent(),
@@ -173,7 +172,7 @@ abstract class Scrollable extends StatefulComponent {
     return EventDisposition.processed;
   }
 
-  void _handleScrollOffset(Offset offset) {
+  void _handleScrollUpdate(Offset offset) {
     scrollBy(scrollDirection == ScrollDirection.horizontal ? offset.dx : offset.dy);
   }
 
