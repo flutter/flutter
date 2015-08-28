@@ -118,15 +118,17 @@ component("gl") {
 
   include_dirs = [
     "//third_party/switfshader/include",
-    "//third_party/khronos",
     "//third_party/mesa/src/include",
   ]
 
   all_dependent_configs = [ ":gl_config" ]
 
+  configs += [
+    "//third_party/khronos:khronos_headers",
+  ]
+
   deps = [
     "//base/third_party/dynamic_annotations",
-    "//gpu/command_buffer/common",
     "//skia",
   ]
   public_deps = [
