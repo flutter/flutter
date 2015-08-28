@@ -4,11 +4,7 @@ import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/pointer_router.dart';
 import 'package:test/test.dart';
 
-class TestPointerEvent extends sky.PointerEvent {
-  TestPointerEvent({ this.pointer });
-
-  final int pointer;
-}
+import '../engine/mock_events.dart';
 
 void main() {
   test('Should route pointers', () {
