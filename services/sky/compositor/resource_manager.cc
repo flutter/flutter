@@ -7,15 +7,14 @@
 #ifndef GL_GLEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES
 #endif
+#include <GLES2/gl2.h>
+#include <GLES2/gl2extmojo.h>
 
 #include "base/logging.h"
 #include "base/stl_util.h"
-#include "gpu/GLES2/gl2chromium.h"
-#include "gpu/GLES2/gl2extchromium.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/gpu/gl_texture.h"
-#include "mojo/public/c/gles2/gles2.h"
 #include "services/sky/compositor/layer.h"
 
 namespace sky {

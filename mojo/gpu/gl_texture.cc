@@ -4,7 +4,7 @@
 
 #include "mojo/gpu/gl_texture.h"
 
-#include "mojo/public/c/gles2/gles2.h"
+#include "mojo/public/c/gpu/GLES2/gl2.h"
 
 namespace mojo {
 
