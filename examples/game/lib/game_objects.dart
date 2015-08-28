@@ -42,7 +42,7 @@ abstract class GameObject extends Node {
         parent.addChild(explo);
       }
 
-      PowerUp powerUp = createPowerUp();
+      Collectable powerUp = createPowerUp();
       if (powerUp != null) {
         powerUp.position = position;
         powerUp.setupActions();
@@ -71,7 +71,7 @@ abstract class GameObject extends Node {
     return null;
   }
 
-  PowerUp createPowerUp() {
+  Collectable createPowerUp() {
     return null;
   }
 
@@ -93,8 +93,13 @@ class Ship extends GameObject {
     _sprt.scale = 0.3;
     _sprt.rotation = -90.0;
     addChild(_sprt);
-    radius = 20.0;
 
+    _sprtShield = new Sprite(f.sheet["shield.png"]);
+    _sprtShield.scale = 0.35;
+    _sprtShield.transferMode = sky.TransferMode.plus;
+    addChild(_sprtShield);
+
+    radius = 20.0;
     canBeDamaged = false;
     canDamageShip = false;
 
@@ -103,6 +108,7 @@ class Ship extends GameObject {
   }
 
   Sprite _sprt;
+  Sprite _sprtShield;
 
   void applyThrust(Point joystickValue, double scroll) {
     Point oldPos = position;
@@ -113,29 +119,57 @@ class Ship extends GameObject {
       GameMath.filter(oldPos.x, target.x, filterFactor),
       GameMath.filter(oldPos.y, target.y, filterFactor));
   }
+
+  void setupActions() {
+    ActionTween rotate = new ActionTween((a) => _sprtShield.rotation = a, 0.0, 360.0, 1.0);
+    _sprtShield.actions.run(new ActionRepeatForever(rotate));
+  }
+
+  void update(double dt) {
+    // Update shield
+    if (f.playerState.shieldActive) {
+      if (f.playerState.shieldDeactivating)
+        _sprtShield.visible = !_sprtShield.visible;
+      else
+        _sprtShield.visible = true;
+    } else {
+      _sprtShield.visible = false;
+    }
+  }
 }
 
 class Laser extends GameObject {
   double impact = 1.0;
 
-  Laser(GameObjectFactory f) : super(f) {
+  Laser(GameObjectFactory f, double r) : super(f) {
     // Add sprite
-    _sprt = new Sprite(f.sheet["laser.png"]);
-    _sprt.scale = 0.3;
+    _sprt = new Sprite(f.sheet["explosion_particle.png"]);
+    _sprt.scale = 0.5;
+    _sprt.colorOverlay = new Color(0xff95f4fb);
     _sprt.transferMode = sky.TransferMode.plus;
+    _sprt.rotation = r + 90.0;
     addChild(_sprt);
     radius = 10.0;
     removeLimit = 640.0;
 
+
     canDamageShip = false;
     canBeDamaged = false;
+
+    _offset = new Offset(math.cos(radians(r)) * 10.0, math.sin(radians(r)) * 10.0);
   }
 
   Sprite _sprt;
+  Offset _offset;
 
   void move() {
-    position += new Offset(0.0, -10.0);
+    position += _offset;
   }
+}
+
+Color colorForDamage(double damage, double maxDamage) {
+  int alpha = ((200.0 * damage) ~/ maxDamage).clamp(0, 200);
+  return new Color.fromARGB(alpha, 255, 3, 86);
 }
 
 abstract class Obstacle extends GameObject {
@@ -146,7 +180,7 @@ abstract class Obstacle extends GameObject {
 
   Explosion createExplosion() {
     SoundEffectPlayer.sharedInstance().play(f.sounds["explosion"]);
-    Explosion explo = new Explosion(f.sheet);
+    Explosion explo = new ExplosionBig(f.sheet);
     explo.scale = explosionScale;
     return explo;
   }
@@ -169,11 +203,10 @@ abstract class Asteroid extends Obstacle {
 
   set damage(double d) {
     super.damage = d;
-    int alpha = ((200.0 * d) ~/ maxDamage).clamp(0, 200);
-    _sprt.colorOverlay = new Color.fromARGB(alpha, 255, 3, 86);
+    _sprt.colorOverlay = colorForDamage(d, maxDamage);
   }
 
-  PowerUp createPowerUp() {
+  Collectable createPowerUp() {
     return new Coin(f);
   }
 }
@@ -198,10 +231,18 @@ class AsteroidSmall extends Asteroid {
   }
 }
 
-class MovingEnemy extends Obstacle {
-  MovingEnemy(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["ship.png"]);
-    _sprt.scale = 0.2;
+class AsteroidPowerUp extends AsteroidBig {
+  AsteroidPowerUp(GameObjectFactory f) : super(f);
+
+  Collectable createPowerUp() {
+    return new PowerUp(f, nextPowerUpType());
+  }
+}
+
+class EnemyScout extends Obstacle {
+  EnemyScout(GameObjectFactory f) : super(f) {
+    _sprt = new Sprite(f.sheet["enemy_scout_0.png"]);
+    _sprt.scale = 0.32;
     radius = 12.0;
     maxDamage = 1.0;
     addChild(_sprt);
@@ -251,37 +292,168 @@ class MovingEnemy extends Obstacle {
     actions.run(new ActionRepeatForever(spline));
   }
 
+  Collectable createPowerUp() {
+    return new Coin(f);
+  }
+
   Sprite _sprt;
 }
 
-class PowerUp extends GameObject {
-  PowerUp(GameObjectFactory f) : super(f) {
-    canDamageShip = false;
+class EnemyDestroyer extends Obstacle {
+  EnemyDestroyer(GameObjectFactory f) : super(f) {
+    _sprt = new Sprite(f.sheet["enemy_destroyer_1.png"]);
+    _sprt.scale = 0.32;
+    radius = 24.0;
+    maxDamage = 4.0;
+    addChild(_sprt);
+
+    constraints = [new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
+  }
+
+  int _countDown = randomInt(120) + 240;
+
+  void setupActions() {
+    ActionCircularMove circle = new ActionCircularMove(
+      (a) => position = a,
+      position, 40.0,
+      360.0 * randomDouble(),
+      randomBool(),
+      3.0);
+    actions.run(new ActionRepeatForever(circle));
+  }
+
+  Collectable createPowerUp() {
+    return new Coin(f);
+  }
+
+  void update(double dt) {
+    _countDown -= 1;
+    if (_countDown <= 0) {
+      print("SHOOT!!");
+
+      // Shoot at player
+      EnemyLaser laser = new EnemyLaser(f, rotation, 5.0, new Color(0xffffe38e));
+      laser.position = position;
+      f.level.addChild(laser);
+
+      _countDown = 60 + randomInt(120);
+    }
+  }
+
+  set damage(double d) {
+    super.damage = d;
+    _sprt.colorOverlay = colorForDamage(d, maxDamage);
+  }
+
+  Sprite _sprt;
+}
+
+class EnemyLaser extends Obstacle {
+  EnemyLaser(GameObjectFactory f, double rotation, double speed, Color color) : super(f) {
+    _sprt = new Sprite(f.sheet["explosion_particle.png"]);
+    _sprt.scale = 0.5;
+    _sprt.rotation = rotation + 90;
+    _sprt.colorOverlay = color;
+    addChild(_sprt);
+
+    canDamageShip = true;
     canBeDamaged = false;
-    canBeCollected = true;
+
+    double rad = radians(rotation);
+    _movement = new Offset(math.cos(rad) * speed, math.sin(rad) * speed);
+
+    print("LASER!!");
+  }
+
+  Sprite _sprt;
+  Offset _movement;
+
+  void move() {
+    position += _movement;
   }
 }
 
-class Coin extends PowerUp {
+class Collectable extends GameObject {
+  Collectable(GameObjectFactory f) : super(f) {
+    canDamageShip = false;
+    canBeDamaged = false;
+    canBeCollected = true;
+
+    zPosition = 20.0;
+  }
+}
+
+class Coin extends Collectable {
   Coin(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["shield.png"]);
-    _sprt.transferMode = sky.TransferMode.plus;
-    _sprt.size = new Size(15.0, 15.0);
-    _sprt.colorOverlay = new Color(0xffffff00);
+    _sprt = new Sprite(f.sheet["coin.png"]);
+    _sprt.scale = 0.7;
     addChild(_sprt);
 
     radius = 7.5;
   }
 
-  setupActions() {
+  void setupActions() {
+    // Rotate
     ActionTween rotate = new ActionTween((a) => _sprt.rotation = a, 0.0, 360.0, 1.0);
     actions.run(new ActionRepeatForever(rotate));
+
+    // Fade in
+    ActionTween fadeIn = new ActionTween((a) => _sprt.opacity = a, 0.0, 1.0, 0.6);
+    actions.run(fadeIn);
   }
 
   Sprite _sprt;
 
   void collect() {
     f.playerState.addCoin(this);
+    super.collect();
+  }
+}
+
+enum PowerUpType {
+  shield,
+  speedLaser,
+  sideLaser,
+}
+
+List<PowerUpType> _powerUpTypes = new List.from(PowerUpType.values);
+int _lastPowerUp = _powerUpTypes.length;
+
+PowerUpType nextPowerUpType() {
+  if (_lastPowerUp >= _powerUpTypes.length) {
+     _powerUpTypes.shuffle();
+     _lastPowerUp = 0;
+  }
+
+  PowerUpType type = _powerUpTypes[_lastPowerUp];
+  _lastPowerUp++;
+
+  return type;
+}
+
+class PowerUp extends Collectable {
+  PowerUp(GameObjectFactory f, this.type) : super(f) {
+    _sprt = new Sprite(f.sheet["coin.png"]);
+    _sprt.scale = 1.2;
+    addChild(_sprt);
+
+    radius = 10.0;
+  }
+
+  Sprite _sprt;
+  PowerUpType type;
+
+  void setupActions() {
+    ActionTween rotate = new ActionTween((a) => _sprt.rotation = a, 0.0, 360.0, 1.0);
+    actions.run(new ActionRepeatForever(rotate));
+
+    // Fade in
+    ActionTween fadeIn = new ActionTween((a) => _sprt.opacity = a, 0.0, 1.0, 0.6);
+    actions.run(fadeIn);
+  }
+
+  void collect() {
+    f.playerState.activatePowerUp(type);
     super.collect();
   }
 }

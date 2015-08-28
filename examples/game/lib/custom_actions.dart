@@ -1,0 +1,19 @@
+part of game;
+
+class ActionCircularMove extends ActionInterval {
+  ActionCircularMove(this.setter, this.center, this.radius, this.startAngle, this.clockWise, double duration) : super (duration);
+
+  final Function setter;
+  final Point center;
+  final double radius;
+  final double startAngle;
+  final bool clockWise;
+
+  void update(double t) {
+    if (!clockWise) t = -t;
+    double rad = radians(startAngle + t * 360.0);
+    Offset offset = new Offset(math.cos(rad) * radius, math.sin(rad) * radius);
+    Point pos = center + offset;
+    setter(pos);
+  }
+}
