@@ -119,22 +119,6 @@
 #endif
 
 /*-------------------------------------------------------------------------
- * Chromium-specific overrides of KHRONOS_APICALL and KHRONOS_APIENTRY
- *-----------------------------------------------------------------------*/
-
-#undef KHRONOS_APICALL
-#if defined(GLES2_USE_MOJO)
-#include "mojo/public/c/gles2/gles2_export.h"
-#define KHRONOS_APICALL MOJO_GLES2_EXPORT
-#else
-#include "gpu/command_buffer/client/gles2_c_lib_export.h"
-#define KHRONOS_APICALL GLES2_C_LIB_EXPORT
-#endif
-
-#undef KHRONOS_APIENTRY
-#define KHRONOS_APIENTRY
-
-/*-------------------------------------------------------------------------
  * Definition of KHRONOS_APIATTRIBUTES
  *-------------------------------------------------------------------------
  * This follows the closing parenthesis of the function prototype arguments.
