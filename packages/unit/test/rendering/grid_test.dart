@@ -12,7 +12,7 @@ void main() {
       new RenderDecoratedBox(decoration: new BoxDecoration())
     ];
 
-    RenderBox grid = new RenderGrid(children: children, maxChildExtent: 100.0);
+    RenderGrid grid = new RenderGrid(children: children, maxChildExtent: 100.0);
     RenderingTester tester = layout(grid, constraints: const BoxConstraints(maxWidth: 200.0));
 
     children.forEach((child) {
