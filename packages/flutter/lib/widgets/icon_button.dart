@@ -27,10 +27,7 @@ class IconButton extends Component {
       );
     }
     return new GestureDetector(
-      onTap: () {
-        if (onPressed != null)
-          onPressed();
-      },
+      onTap: onPressed,
       child: new Padding(
         child: child,
         padding: const EdgeDims.all(8.0))

@@ -84,7 +84,9 @@ class WidgetTester {
   }
 
   void tap(Widget widget) {
-    dispatchEvent(new TestGestureEvent(type: 'gesturetap'), getCenter(widget));
+    Point location = getCenter(widget);
+    dispatchEvent(new TestPointerEvent(type: 'pointerdown', x: location.x, y: location.y), location);
+    dispatchEvent(new TestPointerEvent(type: 'pointerup', x: location.x, y: location.y), location);
   }
 
   void scroll(Widget widget, Offset offset) {

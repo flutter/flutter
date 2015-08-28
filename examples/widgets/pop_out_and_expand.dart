@@ -46,8 +46,8 @@ class ExampleApp extends App {
   GlobalKey _overlay;
 
   Widget _buildCard(CardData cardData) {
-    return new Listener(
-      onGestureTap: (_) {
+    return new GestureDetector(
+      onTap: () {
         setState(() {
           _overlay = cardData.key;
         });

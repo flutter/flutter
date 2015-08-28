@@ -39,11 +39,8 @@ class DialogMenuItem extends ButtonBase {
   }
 
   Widget buildContent() {
-    return new Listener(
-      onGestureTap: (_) {
-        if (onPressed != null)
-          onPressed();
-      },
+    return new GestureDetector(
+      onTap: onPressed,
       child: new Container(
         height: 48.0,
         child: new InkWell(
