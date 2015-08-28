@@ -19,7 +19,6 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/framework.dart';
 import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/mixed_viewport.dart';
-import 'package:sky/widgets/scrollable.dart';
 
 export 'package:sky/widgets/mixed_viewport.dart' show MixedViewportLayoutState;
 
