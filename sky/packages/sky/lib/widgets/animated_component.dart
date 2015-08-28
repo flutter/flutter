@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/framework.dart';
 
 abstract class AnimatedComponent extends StatefulComponent {
 

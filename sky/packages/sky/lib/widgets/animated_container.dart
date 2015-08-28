@@ -9,8 +9,9 @@ import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/box_painter.dart';
-import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/animated_component.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/framework.dart';
 
 class AnimatedBoxConstraintsValue extends AnimatedValue<BoxConstraints> {
   AnimatedBoxConstraintsValue(BoxConstraints begin, { BoxConstraints end, Curve curve: linear })
