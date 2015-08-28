@@ -7,6 +7,7 @@ import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/framework.dart';
 import 'package:sky/widgets/mimic.dart';
 
 class MimicOverlay extends AnimatedComponent {

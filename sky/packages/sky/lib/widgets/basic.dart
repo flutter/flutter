@@ -34,7 +34,6 @@ export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color
 export 'package:sky/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxDecorationPosition, BoxShadow, Border, BorderSide, EdgeDims, Shape;
 export 'package:sky/rendering/toggleable.dart' show ValueChanged;
 export 'package:sky/rendering/viewport.dart' show ScrollDirection;
-export 'package:sky/widgets/framework.dart' show Key, GlobalKey, Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
 
 // PAINTING NODES
 
