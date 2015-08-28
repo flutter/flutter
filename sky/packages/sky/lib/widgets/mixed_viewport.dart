@@ -372,14 +372,13 @@ class MixedViewport extends RenderObjectWrapper {
           }
           _Key widgetKey = new _Key.fromWidget(widget);
           if (offsets.last > startOffset) {
+            // it's visible
             newChildren[widgetKey] = widget;
             builtChildren[startIndex] = widget;
             break;
           }
-          if (!childrenByKey.containsKey(widgetKey)) {
-            // we don't actually need this one, release it
-            syncChild(null, widget, null);
-          } // else we'll get rid of it later, when we remove old children
+          childrenByKey.remove(widgetKey);
+          syncChild(null, widget, null);
           startIndex += 1;
           assert(startIndex == offsets.length - 1);
         }
