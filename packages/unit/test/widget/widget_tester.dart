@@ -83,26 +83,39 @@ class WidgetTester {
     return box.localToGlobal(box.size.center(Point.origin));
   }
 
+  HitTestResult _hitTest(Point location) => SkyBinding.instance.hitTest(location);
+
+  EventDisposition _dispatchEvent(sky.Event event, HitTestResult result) {
+    return SkyBinding.instance.dispatchEvent(event, result);
+  }
+
   void tap(Widget widget) {
     Point location = getCenter(widget);
-    dispatchEvent(new TestPointerEvent(type: 'pointerdown', x: location.x, y: location.y), location);
-    dispatchEvent(new TestPointerEvent(type: 'pointerup', x: location.x, y: location.y), location);
+    HitTestResult result = _hitTest(location);
+    _dispatchEvent(new TestPointerEvent(type: 'pointerdown', x: location.x, y: location.y), result);
+    _dispatchEvent(new TestPointerEvent(type: 'pointerup', x: location.x, y: location.y), result);
   }
 
   void scroll(Widget widget, Offset offset) {
-    dispatchEvent(new TestGestureEvent(type: 'gesturescrollstart'), getCenter(widget));
-    dispatchEvent(new TestGestureEvent(
-      type: 'gesturescrollupdate',
-      dx: offset.dx,
-      dy: offset.dy), getCenter(widget));
-    // pointerup to trigger scroll settling in Scrollable<T>
-    dispatchEvent(new TestPointerEvent(
-      type: 'pointerup', down: false, primary: true), getCenter(widget));
+    Point startLocation = getCenter(widget);
+    HitTestResult result = _hitTest(startLocation);
+    _dispatchEvent(new TestPointerEvent(type: 'pointerdown', x: startLocation.x, y: startLocation.y), result);
+    Point endLocation = startLocation + offset;
+    _dispatchEvent(
+      new TestPointerEvent(
+        type: 'pointermove',
+        x: endLocation.x,
+        y: endLocation.y,
+        dx: offset.dx,
+        dy: offset.dy
+      ),
+      result
+    );
+    _dispatchEvent(new TestPointerEvent(type: 'pointerup', x: endLocation.x, y: endLocation.y), result);
   }
 
-  void dispatchEvent(sky.Event event, Point position) {
-    HitTestResult result = SkyBinding.instance.hitTest(position);
-    SkyBinding.instance.dispatchEvent(event, result);
+  void dispatchEvent(sky.Event event, Point location) {
+    _dispatchEvent(event, _hitTest(location));
   }
 
   void pumpFrame(WidgetBuilder builder, [double frameTimeMs = 0.0]) {

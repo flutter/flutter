@@ -4,9 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/base/pointer_router.dart';
 import 'package:sky/gestures/long_press.dart';
 import 'package:sky/gestures/recognizer.dart';
+import 'package:sky/gestures/scroll.dart';
 import 'package:sky/gestures/show_press.dart';
 import 'package:sky/gestures/tap.dart';
 import 'package:sky/rendering/sky_binding.dart';
@@ -18,19 +18,28 @@ class GestureDetector extends StatefulComponent {
     this.child,
     this.onTap,
     this.onShowPress,
-    this.onLongPress
+    this.onLongPress,
+    this.onScrollStart,
+    this.onScrollUpdate,
+    this.onScrollEnd
   }) : super(key: key);
 
   Widget child;
   GestureTapListener onTap;
   GestureShowPressListener onShowPress;
   GestureLongPressListener onLongPress;
+  GestureScrollStartCallback onScrollStart;
+  GestureScrollUpdateCallback onScrollUpdate;
+  GestureScrollEndCallback onScrollEnd;
 
   void syncConstructorArguments(GestureDetector source) {
     child = source.child;
     onTap = source.onTap;
     onShowPress = source.onShowPress;
     onLongPress = source.onLongPress;
+    onScrollStart = source.onScrollStart;
+    onScrollUpdate = source.onScrollUpdate;
+    onScrollEnd = source.onScrollEnd;
     _syncGestureListeners();
   }
 
@@ -57,6 +66,13 @@ class GestureDetector extends StatefulComponent {
     return _longPress;
   }
 
+  ScrollGestureRecognizer _scroll;
+  ScrollGestureRecognizer _ensureScroll() {
+    if (_scroll == null)
+      _scroll = new ScrollGestureRecognizer(router: _router);
+    return _scroll;
+  }
+
   void didMount() {
     super.didMount();
     _syncGestureListeners();
@@ -67,12 +83,14 @@ class GestureDetector extends StatefulComponent {
     _tap = _ensureDisposed(_tap);
     _showPress = _ensureDisposed(_showPress);
     _longPress = _ensureDisposed(_longPress);
+    _scroll = _ensureDisposed(_scroll);
   }
 
   void _syncGestureListeners() {
     _syncTap();
     _syncShowPress();
     _syncLongPress();
+    _syncScroll();
   }
 
   void _syncTap() {
@@ -96,6 +114,17 @@ class GestureDetector extends StatefulComponent {
       _ensureLongPress().onLongPress = onLongPress;
   }
 
+  void _syncScroll() {
+    if (onScrollStart == null && onScrollUpdate == null && onScrollEnd == null) {
+      _scroll = _ensureDisposed(_scroll);
+    } else {
+      _ensureScroll()
+        ..onScrollStart = onScrollStart
+        ..onScrollUpdate = onScrollUpdate
+        ..onScrollEnd = onScrollEnd;
+    }
+  }
+
   GestureRecognizer _ensureDisposed(GestureRecognizer recognizer) {
     if (recognizer != null)
       recognizer.dispose();
@@ -109,6 +138,8 @@ class GestureDetector extends StatefulComponent {
       _showPress.addPointer(event);
     if (_longPress != null)
       _longPress.addPointer(event);
+    if (_scroll != null)
+      _scroll.addPointer(event);
     return EventDisposition.processed;
   }
 

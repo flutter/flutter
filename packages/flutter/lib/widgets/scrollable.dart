@@ -8,8 +8,8 @@ import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
 import 'package:sky/animation/animated_simulation.dart';
-import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/animated_value.dart';
+import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/gestures/constants.dart';
@@ -17,6 +17,7 @@ import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/viewport.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/mixed_viewport.dart';
 import 'package:sky/widgets/scrollable.dart';
 
@@ -83,15 +84,17 @@ abstract class Scrollable extends StatefulComponent {
   Widget buildContent();
 
   Widget build() {
-    return new Listener(
-      child: buildContent(),
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUpOrCancel,
-      onPointerCancel: _handlePointerUpOrCancel,
-      onGestureFlingStart: _handleFlingStart,
-      onGestureFlingCancel: _handleFlingCancel,
-      onGestureScrollUpdate: _handleScrollUpdate,
-      onWheel: _handleWheel
+    return new GestureDetector(
+      onScrollStart: _handleScrollOffset,
+      onScrollUpdate: _handleScrollOffset,
+      onScrollEnd: _maybeSettleScrollOffset,
+      child: new Listener(
+        child: buildContent(),
+        onPointerDown: _handlePointerDown,
+        onGestureFlingStart: _handleFlingStart,
+        onGestureFlingCancel: _handleFlingCancel,
+        onWheel: _handleWheel
+      )
     );
   }
 
@@ -171,9 +174,8 @@ abstract class Scrollable extends StatefulComponent {
     return EventDisposition.processed;
   }
 
-  EventDisposition _handleScrollUpdate(sky.GestureEvent event) {
-    scrollBy(scrollDirection == ScrollDirection.horizontal ? event.dx : -event.dy);
-    return EventDisposition.processed;
+  void _handleScrollOffset(Offset offset) {
+    scrollBy(scrollDirection == ScrollDirection.horizontal ? offset.dx : offset.dy);
   }
 
   EventDisposition _handleFlingStart(sky.GestureEvent event) {
@@ -185,11 +187,6 @@ abstract class Scrollable extends StatefulComponent {
     if (!_toEndAnimation.isAnimating &&
         (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating))
       settleScrollOffset();
-  }
-
-  EventDisposition _handlePointerUpOrCancel(_) {
-    _maybeSettleScrollOffset();
-    return EventDisposition.processed;
   }
 
   EventDisposition _handleFlingCancel(sky.GestureEvent event) {

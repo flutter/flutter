@@ -9,6 +9,8 @@ import 'package:sky/base/pointer_router.dart';
 import 'package:sky/gestures/arena.dart';
 import 'package:sky/gestures/constants.dart';
 
+export 'package:sky/base/pointer_router.dart' show PointerRouter;
+
 abstract class GestureRecognizer extends GestureArenaMember {
   GestureRecognizer({ PointerRouter router }) : _router = router;
 
@@ -21,8 +23,8 @@ abstract class GestureRecognizer extends GestureArenaMember {
   void addPointer(sky.PointerEvent event);
 
   void handleEvent(sky.PointerEvent event);
-  void acceptGesture(int key);
-  void rejectGesture(int key);
+  void acceptGesture(int pointer) { }
+  void rejectGesture(int pointer) { }
   void didStopTrackingLastPointer();
 
   void resolve(GestureDisposition disposition) {
@@ -113,9 +115,6 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
   /// You must override this function if you supply a [deadline].
   void didExceedDeadline() {
     assert(deadline == null);
-  }
-
-  void acceptGesture(int pointer) {
   }
 
   void rejectGesture(int pointer) {
