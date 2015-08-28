@@ -36,7 +36,6 @@ extern "C" {
 ** Khronos $Revision: 28366 $ on $Date: 2014-10-20 11:29:02 +0200 (Mon, 20 Oct 2014) $
 */
 
-#include <GLES2/gl2chromium.h>
 #include <GLES2/gl2platform.h>
 
 /* Generated on date 20141020 */
