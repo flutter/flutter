@@ -5,6 +5,7 @@
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/theme.dart';
 
@@ -24,11 +25,8 @@ class PopupMenuItem extends Component {
   TextStyle get textStyle => Theme.of(this).text.subhead;
 
   Widget build() {
-    return new Listener(
-      onGestureTap: (_) {
-        if (onPressed != null)
-          onPressed();
-      },
+    return new GestureDetector(
+      onTap: onPressed,
       child: new InkWell(
         child: new Container(
           height: kMenuItemHeight,

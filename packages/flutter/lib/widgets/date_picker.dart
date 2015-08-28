@@ -140,21 +140,21 @@ class DatePickerHeader extends Component {
     return new Container(
       child: new BlockBody([
         new Center(
-          child: new Listener(
+          child: new GestureDetector(
             child: new Text(new DateFormat("MMM").format(selectedDate).toUpperCase(), style: monthStyle),
-            onGestureTap: (_) => _handleChangeMode(DatePickerMode.day)
+            onTap: () => _handleChangeMode(DatePickerMode.day)
           )
         ),
         new Center(
-          child: new Listener(
+          child: new GestureDetector(
             child: new Text(new DateFormat("d").format(selectedDate), style: dayStyle),
-            onGestureTap: (_) => _handleChangeMode(DatePickerMode.day)
+            onTap: () => _handleChangeMode(DatePickerMode.day)
           )
         ),
         new Center(
-          child: new Listener(
+          child: new GestureDetector(
             child: new Text(new DateFormat("yyyy").format(selectedDate), style: yearStyle),
-            onGestureTap: (_) => _handleChangeMode(DatePickerMode.year)
+            onTap: () => _handleChangeMode(DatePickerMode.year)
           )
         )
       ]),
@@ -244,8 +244,8 @@ class DayPicker extends Component {
             currentDate.day == day)
           itemStyle = itemStyle.copyWith(color: theme.primaryColor);
 
-        item = new Listener(
-          onGestureTap: (_) {
+        item = new GestureDetector(
+          onTap: () {
             DateTime result = new DateTime(year, month, day);
             onChanged(result);
           },
@@ -386,9 +386,9 @@ class YearPicker extends ScrollableWidgetList {
     for(int i = start; i < start + count; i++) {
       int year = firstDate.year + i;
       String label = year.toString();
-      Widget item = new Listener(
+      Widget item = new GestureDetector(
         key: new Key(label),
-        onGestureTap: (_) {
+        onTap: () {
           DateTime result = new DateTime(year, selectedDate.month, selectedDate.day);
           onChanged(result);
         },

@@ -7,6 +7,7 @@ import 'dart:sky' as sky;
 import 'package:sky/rendering/object.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/button_base.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/theme.dart';
 
 const sky.Color _kLightOffColor = const sky.Color(0x8A000000);
@@ -21,7 +22,9 @@ class Radio extends ButtonBase {
     this.value,
     this.groupValue,
     this.onChanged
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(onChanged != null);
+  }
 
   Object value;
   Object groupValue;
@@ -45,7 +48,8 @@ class Radio extends ButtonBase {
     const double kDiameter = 16.0;
     const double kOuterRadius = kDiameter / 2;
     const double kInnerRadius = 5.0;
-    return new Listener(
+    return new GestureDetector(
+      onTap: () => onChanged(value),
       child: new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
         width: kDiameter,
@@ -67,14 +71,8 @@ class Radio extends ButtonBase {
             }
           }
         )
-      ),
-      onGestureTap: _handleTap
+      )
     );
-  }
-
-  EventDisposition _handleTap(_) {
-    onChanged(value);
-    return EventDisposition.consumed;
   }
 
 }

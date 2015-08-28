@@ -18,12 +18,13 @@ import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/transitions.dart';
-import 'package:sky/widgets/framework.dart';
 
 typedef void SelectedIndexChanged(int selectedIndex);
 typedef void LayoutChanged(Size size, List<double> widths);
@@ -478,14 +479,14 @@ class TabBar extends Scrollable {
   }
 
   Widget _toTab(TabLabel label, int tabIndex, Color color, Color selectedColor) {
-    return new Listener(
+    return new GestureDetector(
+      onTap: () => _handleTap(tabIndex),
       child: new Tab(
         label: label,
         color: color,
         selected: tabIndex == selectedIndex,
         selectedColor: selectedColor
-      ),
-      onGestureTap: (_) => _handleTap(tabIndex)
+      )
     );
   }
 

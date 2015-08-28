@@ -10,6 +10,7 @@ import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/focus.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable.dart';
@@ -101,13 +102,13 @@ class Dialog extends Component {
       ));
 
     return new Stack([
-      new Listener(
+      new GestureDetector(
         child: new Container(
           decoration: const BoxDecoration(
             backgroundColor: const Color(0x7F000000)
           )
         ),
-        onGestureTap: (_) => onDismiss()
+        onTap: onDismiss
       ),
       new Center(
         child: new Container(

@@ -23,6 +23,7 @@ export 'widgets/flat_button.dart';
 export 'widgets/floating_action_button.dart';
 export 'widgets/focus.dart';
 export 'widgets/framework.dart';
+export 'widgets/gesture_detector.dart';
 export 'widgets/icon.dart';
 export 'widgets/icon_button.dart';
 export 'widgets/ink_well.dart';
