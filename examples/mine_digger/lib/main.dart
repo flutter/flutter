@@ -142,7 +142,7 @@ class MineDiggerApp extends App {
         new Row(
           row,
           justifyContent: FlexJustifyContent.center,
-          key: new Key.stringify(iy)
+          key: new ValueKey<int>(iy)
         )
       );
     }

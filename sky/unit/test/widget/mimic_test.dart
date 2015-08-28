@@ -13,7 +13,7 @@ void main() {
         new Mimicable(
           key: globalKey,
           child: new Container(
-            key: new Key.stringify('inner'),
+            key: new Key('inner'),
             height: 10.0,
             width: 10.0
           )
@@ -50,13 +50,13 @@ void main() {
     tester.pumpFrame(() {
       return new Flex([
         new Container(
-          key: new Key.stringify('outer'),
+          key: new Key('outer'),
           height: 10.0,
           width: 10.0,
           child: new Mimicable(
             key: globalKey,
             child: new Container(
-              key: new Key.stringify('inner'),
+              key: new Key('inner'),
               height: 10.0,
               width: 10.0
             )

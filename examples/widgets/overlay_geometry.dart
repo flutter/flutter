@@ -15,7 +15,7 @@ class CardModel {
   double height;
   Color color;
   String get label => "Card $value";
-  Key get key => new Key.fromObjectIdentity(this);
+  Key get key => new ObjectKey(this);
 }
 
 enum MarkerType { topLeft, bottomRight, touch }

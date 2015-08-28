@@ -768,7 +768,7 @@ class AssetImage extends Component {
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
   WidgetToRenderBoxAdapter(RenderBox renderBox)
     : renderBox = renderBox,
-      super(key: new Key.fromObjectIdentity(renderBox));
+      super(key: new ObjectKey(renderBox));
 
   final RenderBox renderBox;
 
