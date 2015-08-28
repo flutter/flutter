@@ -71,6 +71,26 @@ class PlayerState extends Node {
     addChild(sprt);
   }
 
+  void activatePowerUp(PowerUpType type) {
+    if (type == PowerUpType.shield) {
+      _shieldFrames += 300;
+    } else if (type == PowerUpType.sideLaser) {
+      _sideLaserFrames += 300;
+    } else if (type == PowerUpType.speedLaser) {
+      _speedLaserFrames += 300;
+    }
+  }
+
+  int _shieldFrames = 0;
+  bool get shieldActive => _shieldFrames > 0;
+  bool get shieldDeactivating => _shieldFrames > 0 && _shieldFrames < 60;
+
+  int _sideLaserFrames = 0;
+  bool get sideLaserActive => _sideLaserFrames > 0;
+
+  int _speedLaserFrames = 0;
+  bool get speedLaserActive => _speedLaserFrames > 0;
+
   void flashBgSprite(Sprite sprt) {
     sprt.actions.stopAll();
     ActionTween flash = new ActionTween(
@@ -79,6 +99,12 @@ class PlayerState extends Node {
       new Color(0x00ccfff0),
       0.3);
     sprt.actions.run(flash);
+  }
+
+  void update(double dt) {
+    if (_shieldFrames > 0) _shieldFrames--;
+    if (_sideLaserFrames > 0) _sideLaserFrames--;
+    if (_speedLaserFrames > 0) _speedLaserFrames--;
   }
 }
 
