@@ -61,6 +61,7 @@
 				9E842EDD1B864EA100C84ECC /* Frameworks */,
 				9EA9970A1B867E74007B8C62 /* Copy Application + Debugging Symbols */,
 				9E3A4F5C1B8F82BE00095803 /* Nuke Fake Binary */,
+				9EB8E2DA1B90DF6F006BFAC2 /* Generate dSYM */,
 			);
 			buildRules = (
 			);
@@ -117,6 +118,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "rm ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Harness";
+			showEnvVarsInLog = 0;
 		};
 		9EA9970A1B867E74007B8C62 /* Copy Application + Debugging Symbols */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -130,8 +132,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cp -R ${SOURCE_ROOT}/Application/ ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\ncp -R ${SOURCE_ROOT}/Harness.app.dSYM ${BUILT_PRODUCTS_DIR}";
+			shellScript = "cp -R ${SOURCE_ROOT}/Application/ ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app";
 			showEnvVarsInLog = 0;
+		};
+		9EB8E2DA1B90DF6F006BFAC2 /* Generate dSYM */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Application/",
+			);
+			name = "Generate dSYM";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/Harness.app.dSYM",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ACTUAL_EXECUTABLE_NAME=`(PlistBuddy -c \"print CFBundleExecutable\" ${INFOPLIST_FILE})`\ndsymutil -o ${BUILT_PRODUCTS_DIR}/Harness.app.dSYM ${SOURCE_ROOT}/Application/${ACTUAL_EXECUTABLE_NAME}";
 		};
 /* End PBXShellScriptBuildPhase section */
 
