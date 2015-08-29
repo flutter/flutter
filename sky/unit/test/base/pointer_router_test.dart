@@ -1,6 +1,5 @@
 import 'dart:sky' as sky;
 
-import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/pointer_router.dart';
 import 'package:test/test.dart';
 
@@ -13,15 +12,18 @@ void main() {
       callbackRan = true;
     }
 
+    TestPointer pointer2 = new TestPointer(2);
+    TestPointer pointer3 = new TestPointer(3);
+
     PointerRouter router = new PointerRouter();
     router.addRoute(3, callback);
-    expect(router.handleEvent(new TestPointerEvent(pointer: 2), null), equals(EventDisposition.ignored));
+    router.route(pointer2.down());
     expect(callbackRan, isFalse);
-    expect(router.handleEvent(new TestPointerEvent(pointer: 3), null), equals(EventDisposition.processed));
+    router.route(pointer3.down());
     expect(callbackRan, isTrue);
     callbackRan = false;
     router.removeRoute(3, callback);
-    expect(router.handleEvent(new TestPointerEvent(pointer: 3), null), equals(EventDisposition.ignored));
+    router.route(pointer3.up());
     expect(callbackRan, isFalse);
   });
 }

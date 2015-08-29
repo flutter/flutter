@@ -1,5 +1,6 @@
 import 'package:quiver/testing/async.dart';
 import 'package:sky/base/pointer_router.dart';
+import 'package:sky/gestures/arena.dart';
 import 'package:sky/gestures/long_press.dart';
 import 'package:sky/gestures/show_press.dart';
 import 'package:test/test.dart';
@@ -32,8 +33,9 @@ void main() {
 
     new FakeAsync().run((async) {
       longPress.addPointer(down);
+      GestureArena.instance.close(5);
       expect(longPressRecognized, isFalse);
-      router.handleEvent(down, null);
+      router.route(down);
       expect(longPressRecognized, isFalse);
       async.elapse(new Duration(milliseconds: 300));
       expect(longPressRecognized, isFalse);
@@ -55,12 +57,13 @@ void main() {
 
     new FakeAsync().run((async) {
       longPress.addPointer(down);
+      GestureArena.instance.close(5);
       expect(longPressRecognized, isFalse);
-      router.handleEvent(down, null);
+      router.route(down);
       expect(longPressRecognized, isFalse);
       async.elapse(new Duration(milliseconds: 300));
       expect(longPressRecognized, isFalse);
-      router.handleEvent(up, null);
+      router.route(up);
       expect(longPressRecognized, isFalse);
       async.elapse(new Duration(seconds: 1));
       expect(longPressRecognized, isFalse);
@@ -87,9 +90,10 @@ void main() {
     new FakeAsync().run((async) {
       showPress.addPointer(down);
       longPress.addPointer(down);
+      GestureArena.instance.close(5);
       expect(showPressRecognized, isFalse);
       expect(longPressRecognized, isFalse);
-      router.handleEvent(down, null);
+      router.route(down);
       expect(showPressRecognized, isFalse);
       expect(longPressRecognized, isFalse);
       async.elapse(new Duration(milliseconds: 300));

@@ -1,5 +1,7 @@
 import 'dart:sky' as sky;
 
+export 'dart:sky' show Point;
+
 class TestPointerEvent extends sky.PointerEvent {
   TestPointerEvent({
     this.type,
@@ -78,4 +80,61 @@ class TestGestureEvent extends sky.GestureEvent {
   double dy;
   double velocityX;
   double velocityY;
+}
+
+class TestPointer {
+  TestPointer([ this.pointer = 1 ]);
+
+  int pointer;
+  bool isDown = false;
+  sky.Point location;
+
+  sky.PointerEvent down([sky.Point newLocation = sky.Point.origin ]) {
+    assert(!isDown);
+    isDown = true;
+    location = newLocation;
+    return new TestPointerEvent(
+      type: 'pointerdown',
+      pointer: pointer,
+      x: location.x,
+      y: location.y
+    );
+  }
+
+  sky.PointerEvent move([sky.Point newLocation = sky.Point.origin ]) {
+    assert(isDown);
+    sky.Offset delta = newLocation - location;
+    location = newLocation;
+    return new TestPointerEvent(
+      type: 'pointermove',
+      pointer: pointer,
+      x: newLocation.x,
+      y: newLocation.y,
+      dx: delta.dx,
+      dy: delta.dy
+    );
+  }
+
+  sky.PointerEvent up() {
+    assert(isDown);
+    isDown = false;
+    return new TestPointerEvent(
+      type: 'pointerup',
+      pointer: pointer,
+      x: location.x,
+      y: location.y
+    );
+  }
+
+  sky.PointerEvent cancel() {
+    assert(isDown);
+    isDown = false;
+    return new TestPointerEvent(
+      type: 'pointercancel',
+      pointer: pointer,
+      x: location.x,
+      y: location.y
+    );
+  }
+
 }

@@ -42,37 +42,61 @@ class GestureArenaEntry {
   }
 }
 
+class _GestureArenaState {
+  final List<GestureArenaMember> members = new List<GestureArenaMember>();
+  bool isOpen = true;
+
+  void add(GestureArenaMember member) {
+    assert(isOpen);
+    members.add(member);
+  }
+}
+
 /// The first member to accept or the last member to not to reject wins.
 class GestureArena {
-  final Map<Object, List<GestureArenaMember>> _arenas = new Map<Object, List<GestureArenaMember>>();
+  final Map<Object, _GestureArenaState> _arenas = new Map<Object, _GestureArenaState>();
 
   static final GestureArena instance = new GestureArena();
 
   GestureArenaEntry add(Object key, GestureArenaMember member) {
-    List<GestureArenaMember> members = _arenas.putIfAbsent(key, () => new List<GestureArenaMember>());
-    members.add(member);
+    _GestureArenaState state = _arenas.putIfAbsent(key, () => new _GestureArenaState());
+    state.add(member);
     return new GestureArenaEntry._(this, key, member);
   }
 
+  void close(Object key) {
+    _GestureArenaState state = _arenas[key];
+    if (state == null)
+      return;  // This arena either never existed or has been resolved.
+    state.isOpen = false;
+    _tryToResolveArena(key, state);
+  }
+
+  void _tryToResolveArena(Object key, _GestureArenaState state) {
+    assert(_arenas[key] == state);
+    assert(!state.isOpen);
+    if (state.members.length == 1) {
+      _arenas.remove(key);
+      state.members.first.acceptGesture(key);
+    } else if (state.members.isEmpty) {
+      _arenas.remove(key);
+    }
+  }
+
   void _resolve(Object key, GestureArenaMember member, GestureDisposition disposition) {
-    List<GestureArenaMember> members = _arenas[key];
-    if (members == null)
+    _GestureArenaState state = _arenas[key];
+    if (state == null)
       return;  // This arena has already resolved.
-    assert(members != null);
-    assert(members.contains(member));
+    assert(!state.isOpen);
+    assert(state.members.contains(member));
     if (disposition == GestureDisposition.rejected) {
-      members.remove(member);
+      state.members.remove(member);
       member.rejectGesture(key);
-      if (members.length == 1) {
-        _arenas.remove(key);
-        members.first.acceptGesture(key);
-      } else if (members.isEmpty) {
-        _arenas.remove(key);
-      }
+      _tryToResolveArena(key, state);
     } else {
       assert(disposition == GestureDisposition.accepted);
       _arenas.remove(key);
-      for (GestureArenaMember rejectedMember in members) {
+      for (GestureArenaMember rejectedMember in state.members) {
         if (rejectedMember != member)
           rejectedMember.rejectGesture(key);
       }
