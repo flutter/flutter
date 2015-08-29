@@ -43,7 +43,7 @@ void main() {
 
     expect(currentPage, isNull);
     new FakeAsync().run((async) {
-      tester.scroll(tester.findText('1'), new Offset(300.0, 0.0));
+      tester.scroll(tester.findText('1'), new Offset(-300.0, 0.0));
       // One frame to start the animation, a second to complete it.
       tester.pumpFrame(builder);
       tester.pumpFrame(builder, 5000.0);
