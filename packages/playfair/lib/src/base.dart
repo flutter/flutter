@@ -44,7 +44,7 @@ class Chart extends LeafRenderObjectWrapper {
   final ChartData data;
 
   RenderChart createNode() => new RenderChart(data: data);
-  RenderChart get root => super.root;
+  RenderChart get renderObject => super.renderObject;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
@@ -90,7 +90,7 @@ class RenderChart extends RenderConstrainedBox {
 
 class Gridline {
   double value;
-  ParagraphPainter labelPainter;
+  TextPainter labelPainter;
   Point labelPosition;
   Point start;
   Point end;
@@ -99,12 +99,12 @@ class Gridline {
 class Indicator {
   Point start;
   Point end;
-  ParagraphPainter labelPainter;
+  TextPainter labelPainter;
   Point labelPosition;
 }
 
 class ChartPainter {
-  ChartPainter(ChartData data) : _data = data;
+  ChartPainter(this._data);
 
   ChartData _data;
   ChartData get data => _data;
@@ -157,7 +157,7 @@ class ChartPainter {
         _textTheme.body1,
         [new PlainTextSpan("${gridline.value}")]
       );
-      gridline.labelPainter = new ParagraphPainter(text)
+      gridline.labelPainter = new TextPainter(text)
         ..maxWidth = _rect.width
         ..layout();
       _horizontalGridlines.add(gridline);
@@ -204,7 +204,7 @@ class ChartPainter {
           _textTheme.body1,
           [new PlainTextSpan("${data.indicatorText}")]
         );
-        _indicator.labelPainter = new ParagraphPainter(text)
+        _indicator.labelPainter = new TextPainter(text)
           ..maxWidth = markerRect.width
           ..layout();
         _indicator.labelPosition = new Point(
