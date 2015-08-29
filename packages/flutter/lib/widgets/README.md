@@ -6,7 +6,7 @@ inspiration from [React](http://facebook.github.io/react/). The central idea is
 that you build your UI out of components. Components describe what their view
 should look like given their current configuration and state. When a component's
 state changes, the component rebuilds its description, which the framework diffs
-against the previous description in order to determine the minial changes needed
+against the previous description in order to determine the minimal changes needed
 in the underlying render tree to transition from one state to the next.
 
 Hello World
