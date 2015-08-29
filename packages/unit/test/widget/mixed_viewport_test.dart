@@ -1,6 +1,5 @@
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
-import 'package:quiver/testing/async.dart';
 
 import 'widget_tester.dart';
 
