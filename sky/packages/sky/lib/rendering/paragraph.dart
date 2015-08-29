@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting/paragraph_painter.dart';
+import 'package:sky/painting/text_painter.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 
-export 'package:sky/painting/paragraph_painter.dart';
+export 'package:sky/painting/text_painter.dart';
 
 // Unfortunately, using full precision floating point here causes bad layouts
 // because floating point math isn't associative. If we add and subtract
@@ -21,20 +21,19 @@ double _applyFloatingPointHack(double layoutValue) {
 
 class RenderParagraph extends RenderBox {
 
-  RenderParagraph(TextSpan text)
-   : _paragraphPainter = new ParagraphPainter(text) {
+  RenderParagraph(TextSpan text) : _textPainter = new TextPainter(text) {
     assert(text != null);
   }
 
-  ParagraphPainter _paragraphPainter;
+  TextPainter _textPainter;
 
   BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
 
-  TextSpan get text => _paragraphPainter.text;
+  TextSpan get text => _textPainter.text;
   void set text(TextSpan value) {
-    if (_paragraphPainter.text == value)
+    if (_textPainter.text == value)
       return;
-    _paragraphPainter.text = value;
+    _textPainter.text = value;
     _constraintsForCurrentLayout = null;
     markNeedsLayout();
   }
@@ -43,30 +42,30 @@ class RenderParagraph extends RenderBox {
     assert(constraints != null);
     if (_constraintsForCurrentLayout == constraints)
       return; // already cached this layout
-    _paragraphPainter.maxWidth = constraints.maxWidth;
-    _paragraphPainter.minWidth = constraints.minWidth;
-    _paragraphPainter.minHeight = constraints.minHeight;
-    _paragraphPainter.maxHeight = constraints.maxHeight;
-    _paragraphPainter.layout();
+    _textPainter.maxWidth = constraints.maxWidth;
+    _textPainter.minWidth = constraints.minWidth;
+    _textPainter.minHeight = constraints.minHeight;
+    _textPainter.maxHeight = constraints.maxHeight;
+    _textPainter.layout();
     _constraintsForCurrentLayout = constraints;
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     _layout(constraints);
     return constraints.constrainWidth(
-        _applyFloatingPointHack(_paragraphPainter.minContentWidth));
+        _applyFloatingPointHack(_textPainter.minContentWidth));
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     _layout(constraints);
     return constraints.constrainWidth(
-        _applyFloatingPointHack(_paragraphPainter.maxContentWidth));
+        _applyFloatingPointHack(_textPainter.maxContentWidth));
   }
 
   double _getIntrinsicHeight(BoxConstraints constraints) {
     _layout(constraints);
     return constraints.constrainHeight(
-        _applyFloatingPointHack(_paragraphPainter.height));
+        _applyFloatingPointHack(_textPainter.height));
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
@@ -80,14 +79,14 @@ class RenderParagraph extends RenderBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     _layout(constraints);
-    return _paragraphPainter.computeDistanceToActualBaseline(baseline);
+    return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
   void performLayout() {
     _layout(constraints);
     // _paragraphPainter.width always expands to fill, use maxContentWidth instead.
-    size = constraints.constrain(new Size(_applyFloatingPointHack(_paragraphPainter.maxContentWidth),
-                                          _applyFloatingPointHack(_paragraphPainter.height)));
+    size = constraints.constrain(new Size(_applyFloatingPointHack(_textPainter.maxContentWidth),
+                                          _applyFloatingPointHack(_textPainter.height)));
   }
 
   void paint(PaintingContext context, Offset offset) {
@@ -99,7 +98,7 @@ class RenderParagraph extends RenderBox {
     // TODO(abarth): Make computing the min/max intrinsic width/height
     // a non-destructive operation.
     _layout(constraints);
-    _paragraphPainter.paint(context.canvas, offset);
+    _textPainter.paint(context.canvas, offset);
   }
 
   // we should probably expose a way to do precise (inter-glpyh) hit testing
