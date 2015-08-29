@@ -4,11 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/base/hit_test.dart';
-
 typedef void _Route(sky.PointerEvent event);
 
-class PointerRouter extends HitTestTarget {
+class PointerRouter {
   final Map<int, List<_Route>> _routeMap = new Map<int, List<_Route>>();
 
   void addRoute(int pointer, _Route route) {
@@ -26,15 +24,11 @@ class PointerRouter extends HitTestTarget {
       _routeMap.remove(pointer);
   }
 
-  EventDisposition handleEvent(sky.Event e, HitTestEntry entry) {
-    if (e is! sky.PointerEvent)
-      return EventDisposition.ignored;
-    sky.PointerEvent event = e;
+  void route(sky.PointerEvent event) {
     List<_Route> routes = _routeMap[event.pointer];
     if (routes == null)
-      return EventDisposition.ignored;
+      return;
     for (_Route route in new List<_Route>.from(routes))
       route(event);
-    return EventDisposition.processed;
   }
 }

@@ -118,12 +118,14 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
   }
 
   void rejectGesture(int pointer) {
-    _stopTimer();
-    if (pointer == primaryPointer)
+    if (pointer == primaryPointer) {
+      _stopTimer();
       state = GestureRecognizerState.defunct;
+    }
   }
 
   void didStopTrackingLastPointer() {
+    _stopTimer();
     state = GestureRecognizerState.ready;
   }
 

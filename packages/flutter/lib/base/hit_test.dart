@@ -28,7 +28,11 @@ class HitTestEntry {
 }
 
 class HitTestResult {
-  final List<HitTestEntry> path = new List<HitTestEntry>();
+  HitTestResult({ List<HitTestEntry> path })
+    : path = path != null ? path : new List<HitTestEntry>();
+
+  final List<HitTestEntry> path;
+
   void add(HitTestEntry data) {
     path.add(data);
   }

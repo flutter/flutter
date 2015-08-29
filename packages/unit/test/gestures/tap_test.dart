@@ -1,4 +1,5 @@
 import 'package:sky/base/pointer_router.dart';
+import 'package:sky/gestures/arena.dart';
 import 'package:sky/gestures/tap.dart';
 import 'package:test/test.dart';
 
@@ -22,8 +23,9 @@ void main() {
     );
 
     tap.addPointer(down);
+    GestureArena.instance.close(5);
     expect(tapRecognized, isFalse);
-    router.handleEvent(down, null);
+    router.route(down);
     expect(tapRecognized, isFalse);
 
     TestPointerEvent up = new TestPointerEvent(
@@ -33,7 +35,7 @@ void main() {
       y: 9.0
     );
 
-    router.handleEvent(up, null);
+    router.route(up);
     expect(tapRecognized, isTrue);
 
     tap.dispose();

@@ -1273,12 +1273,9 @@ class WidgetSkyBinding extends SkyBinding {
     assert(SkyBinding.instance is WidgetSkyBinding);
   }
 
-  EventDisposition dispatchEvent(sky.Event event, HitTestResult result) {
-    assert(SkyBinding.instance == this);
-    EventDisposition disposition = super.dispatchEvent(event, result);
-    if (disposition == EventDisposition.consumed)
-      return EventDisposition.consumed;
-    for (HitTestEntry entry in result.path.reversed) {
+  EventDisposition handleEvent(sky.Event event, BindingHitTestEntry entry) {
+    EventDisposition disposition = EventDisposition.ignored;
+    for (HitTestEntry entry in entry.result.path.reversed) {
       if (entry.target is! RenderObject)
         continue;
       for (Widget target in RenderObjectWrapper.getWidgetsForRenderObject(entry.target)) {
@@ -1293,7 +1290,7 @@ class WidgetSkyBinding extends SkyBinding {
         target = target._parent;
       }
     }
-    return disposition;
+    return combineEventDispositions(disposition, super.handleEvent(event, entry));
   }
 
   void beginFrame(double timeStamp) {
