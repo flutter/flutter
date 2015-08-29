@@ -90,8 +90,8 @@ class StyledTextSpan extends TextSpan {
   }
 }
 
-class ParagraphPainter {
-  ParagraphPainter(TextSpan text) {
+class TextPainter {
+  TextPainter(TextSpan text) {
     _layoutRoot.rootElement = _document.createElement('p');
     assert(text != null);
     this.text = text;
@@ -99,40 +99,68 @@ class ParagraphPainter {
 
   final sky.Document _document = new sky.Document();
   final sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
+  bool _needsLayout = true;
 
   TextSpan _text;
   TextSpan get text => _text;
   void set text(TextSpan value) {
+    if (_text == value)
+      return;
     _text = value;
     _layoutRoot.rootElement.setChild(_text._toDOM(_document));
     _layoutRoot.rootElement.removeAttribute('style');
     _text._applyStyleToContainer(_layoutRoot.rootElement);
+    _needsLayout = true;
   }
 
   double get minWidth => _layoutRoot.minWidth;
   void set minWidth(value) {
+    if (_layoutRoot.minWidth == value)
+      return;
     _layoutRoot.minWidth = value;
+    _needsLayout = true;
   }
 
   double get maxWidth => _layoutRoot.maxWidth;
   void set maxWidth(value) {
+    if (_layoutRoot.maxWidth == value)
+      return;
     _layoutRoot.maxWidth = value;
+    _needsLayout = true;
   }
 
   double get minHeight => _layoutRoot.minHeight;
   void set minHeight(value) {
+    if (_layoutRoot.minHeight == value)
+      return;
     _layoutRoot.minHeight = value;
+    _needsLayout = true;
   }
 
   double get maxHeight => _layoutRoot.maxHeight;
   void set maxHeight(value) {
+    if (_layoutRoot.maxHeight == value)
+      return;
     _layoutRoot.maxHeight = value;
   }
 
-  double get minContentWidth => _layoutRoot.rootElement.minContentWidth;
-  double get maxContentWidth => _layoutRoot.rootElement.maxContentWidth;
-  double get height => _layoutRoot.rootElement.height;
+  double get minContentWidth {
+    assert(!_needsLayout);
+    return _layoutRoot.rootElement.minContentWidth;
+  }
+
+  double get maxContentWidth {
+    assert(!_needsLayout);
+    return _layoutRoot.rootElement.maxContentWidth;
+  }
+
+  double get height {
+    assert(!_needsLayout);
+    return _layoutRoot.rootElement.height;
+  }
+
   double computeDistanceToActualBaseline(TextBaseline baseline) {
+    assert(!_needsLayout);
     sky.Element root = _layoutRoot.rootElement;
     switch (baseline) {
       case TextBaseline.alphabetic: return root.alphabeticBaseline;
@@ -140,9 +168,15 @@ class ParagraphPainter {
     }
   }
 
-  void layout() => _layoutRoot.layout();
+  void layout() {
+    if (!_needsLayout)
+      return;
+    _layoutRoot.layout();
+    _needsLayout = false;
+  }
 
   void paint(sky.Canvas canvas, sky.Offset offset) {
+    assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
     // TODO(ianh): Make LayoutRoot support a paint offset so we don't
     // need to translate for each span of text.
     canvas.translate(offset.dx, offset.dy);
