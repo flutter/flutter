@@ -41,20 +41,20 @@ TestPointerEvent up = new TestPointerEvent(
 void main() {
   test('Should recognize scroll', () {
     PointerRouter router = new PointerRouter();
-    ScrollGestureRecognizer scroll = new ScrollGestureRecognizer(router: router);
+    PanGestureRecognizer scroll = new PanGestureRecognizer(router: router);
 
     bool didStartScroll = false;
-    scroll.onScrollStart = () {
+    scroll.onStart = () {
       didStartScroll = true;
     };
 
     sky.Offset updateOffset;
-    scroll.onScrollUpdate = (sky.Offset offset) {
+    scroll.onUpdate = (sky.Offset offset) {
       updateOffset = offset;
     };
 
     bool didEndScroll = false;
-    scroll.onScrollEnd = () {
+    scroll.onEnd = () {
       didEndScroll = true;
     };
 

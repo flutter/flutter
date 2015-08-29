@@ -15,43 +15,48 @@ enum ScrollState {
 }
 
 typedef void GestureScrollStartCallback();
-typedef void GestureScrollUpdateCallback(sky.Offset scrollDelta);
+typedef void GestureScrollUpdateCallback(double scrollDelta);
 typedef void GestureScrollEndCallback();
 
-sky.Offset _getScrollOffset(sky.PointerEvent event) {
-  // Notice that we negate dy because scroll offsets go in the opposite direction.
-  return new sky.Offset(event.dx, -event.dy);
-}
+typedef void GesturePanStartCallback();
+typedef void GesturePanUpdateCallback(sky.Offset scrollDelta);
+typedef void GesturePanEndCallback();
 
-class ScrollGestureRecognizer extends GestureRecognizer {
-  ScrollGestureRecognizer({ PointerRouter router, this.onScrollStart, this.onScrollUpdate, this.onScrollEnd })
+typedef void _GesturePolymorphicUpdateCallback<T>(T scrollDelta);
+
+abstract class _ScrollGestureRecognizer<T extends dynamic> extends GestureRecognizer {
+  _ScrollGestureRecognizer({ PointerRouter router, this.onStart, this.onUpdate, this.onEnd })
     : super(router: router);
 
-  GestureScrollStartCallback onScrollStart;
-  GestureScrollUpdateCallback onScrollUpdate;
-  GestureScrollEndCallback onScrollEnd;
+  GestureScrollStartCallback onStart;
+  _GesturePolymorphicUpdateCallback<T> onUpdate;
+  GestureScrollEndCallback onEnd;
 
-  ScrollState state = ScrollState.ready;
-  sky.Offset pendingScrollOffset;
+  ScrollState _state = ScrollState.ready;
+  T _pendingScrollDelta;
+
+  T get _initialPendingScrollDelta;
+  T _getScrollDelta(sky.PointerEvent event);
+  bool get _hasSufficientPendingScrollDeltaToAccept;
 
   void addPointer(sky.PointerEvent event) {
     startTrackingPointer(event.pointer);
-    if (state == ScrollState.ready) {
-      state = ScrollState.possible;
-      pendingScrollOffset = sky.Offset.zero;
+    if (_state == ScrollState.ready) {
+      _state = ScrollState.possible;
+      _pendingScrollDelta = _initialPendingScrollDelta;
     }
   }
 
   void handleEvent(sky.PointerEvent event) {
-    assert(state != ScrollState.ready);
+    assert(_state != ScrollState.ready);
     if (event.type == 'pointermove') {
-      sky.Offset offset = _getScrollOffset(event);
-      if (state == ScrollState.accepted) {
-        if (onScrollUpdate != null)
-          onScrollUpdate(offset);
+      T delta = _getScrollDelta(event);
+      if (_state == ScrollState.accepted) {
+        if (onUpdate != null)
+          onUpdate(delta);
       } else {
-        pendingScrollOffset += offset;
-        if (pendingScrollOffset.distance > kTouchSlop)
+        _pendingScrollDelta += delta;
+        if (_hasSufficientPendingScrollDeltaToAccept)
           resolve(GestureDisposition.accepted);
       }
     }
@@ -59,22 +64,64 @@ class ScrollGestureRecognizer extends GestureRecognizer {
   }
 
   void acceptGesture(int pointer) {
-    if (state != ScrollState.accepted) {
-      state = ScrollState.accepted;
-      sky.Offset offset = pendingScrollOffset;
-      pendingScrollOffset = null;
-      if (onScrollStart != null)
-        onScrollStart();
-      if (offset != sky.Offset.zero && onScrollUpdate != null)
-        onScrollUpdate(offset);
+    if (_state != ScrollState.accepted) {
+      _state = ScrollState.accepted;
+      T delta = _pendingScrollDelta;
+      _pendingScrollDelta = null;
+      if (onStart != null)
+        onStart();
+      if (delta != _initialPendingScrollDelta && onUpdate != null)
+        onUpdate(delta);
     }
   }
 
   void didStopTrackingLastPointer() {
-    bool wasAccepted = (state == ScrollState.accepted);
-    state = ScrollState.ready;
-    if (wasAccepted && onScrollEnd != null)
-      onScrollEnd();
+    bool wasAccepted = (_state == ScrollState.accepted);
+    _state = ScrollState.ready;
+    if (wasAccepted && onEnd != null)
+      onEnd();
   }
+}
 
+class VerticalScrollGestureRecognizer extends _ScrollGestureRecognizer<double> {
+  VerticalScrollGestureRecognizer({
+    PointerRouter router,
+    GestureScrollStartCallback onStart,
+    GestureScrollUpdateCallback onUpdate,
+    GestureScrollEndCallback onEnd
+  }) : super(router: router, onStart: onStart, onUpdate: onUpdate, onEnd: onEnd);
+
+  double get _initialPendingScrollDelta => 0.0;
+  // Notice that we negate dy because scroll offsets go in the opposite direction.
+  double _getScrollDelta(sky.PointerEvent event) => -event.dy;
+  bool get _hasSufficientPendingScrollDeltaToAccept => _pendingScrollDelta.abs() > kTouchSlop;
+}
+
+class HorizontalScrollGestureRecognizer extends _ScrollGestureRecognizer<double> {
+  HorizontalScrollGestureRecognizer({
+    PointerRouter router,
+    GestureScrollStartCallback onStart,
+    GestureScrollUpdateCallback onUpdate,
+    GestureScrollEndCallback onEnd
+  }) : super(router: router, onStart: onStart, onUpdate: onUpdate, onEnd: onEnd);
+
+  double get _initialPendingScrollDelta => 0.0;
+  double _getScrollDelta(sky.PointerEvent event) => -event.dx;
+  bool get _hasSufficientPendingScrollDeltaToAccept => _pendingScrollDelta.abs() > kTouchSlop;
+}
+
+class PanGestureRecognizer extends _ScrollGestureRecognizer<sky.Offset> {
+  PanGestureRecognizer({
+    PointerRouter router,
+    GesturePanStartCallback onStart,
+    GesturePanUpdateCallback onUpdate,
+    GesturePanEndCallback onEnd
+  }) : super(router: router, onStart: onStart, onUpdate: onUpdate, onEnd: onEnd);
+
+  sky.Offset get _initialPendingScrollDelta => sky.Offset.zero;
+  // Notice that we negate dy because scroll offsets go in the opposite direction.
+  sky.Offset _getScrollDelta(sky.PointerEvent event) => new sky.Offset(event.dx, -event.dy);
+  bool get _hasSufficientPendingScrollDeltaToAccept {
+    return _pendingScrollDelta.dx.abs() > kTouchSlop || _pendingScrollDelta.dy.abs() > kTouchSlop;
+  }
 }
