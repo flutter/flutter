@@ -4,6 +4,7 @@
 
 import 'dart:sky';
 
+/// Linearly interpolate between two numbers.
 num lerpNum(num a, num b, double t) {
   if (a == null && b == null)
     return null;
@@ -18,6 +19,10 @@ Color _scaleAlpha(Color a, double factor) {
   return a.withAlpha((a.alpha * factor).round());
 }
 
+/// Linearly interpolate between two [Color] objects.
+///
+/// If either color is null, this function linearly interpolates from a
+/// transparent instance of othe other color.
 Color lerpColor(Color a, Color b, double t) {
   if (a == null && b == null)
     return null;
@@ -33,6 +38,9 @@ Color lerpColor(Color a, Color b, double t) {
   );
 }
 
+/// Linearly interpolate between two [Offset] objects.
+///
+/// If either offset is null, this function interpolates from [Offset.zero].
 Offset lerpOffset(Offset a, Offset b, double t) {
   if (a == null && b == null)
     return null;
@@ -43,6 +51,9 @@ Offset lerpOffset(Offset a, Offset b, double t) {
   return new Offset(lerpNum(a.dx, b.dx, t), lerpNum(a.dy, b.dy, t));
 }
 
+/// Linearly interpolate between two [Rect] objects.
+///
+/// If either rect is null, this function interpolates from 0x0x0x0.
 Rect lerpRect(Rect a, Rect b, double t) {
   if (a == null && b == null)
     return null;
