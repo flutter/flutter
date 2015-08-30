@@ -16,7 +16,8 @@ APIs to provide base classes for tree structures
 ([base/scheduler.dart](base/scheduler.dart)).
 
 Above this are the files in the [animation/](animation/) directory,
-which provide core primitives for animating values.
+which provide core primitives for animating values, and in the [gestures/](gestures/)
+directory, which define a gesture recognition and disambiguation system.
 
 The next layer consists of the files in the [painting/](painting/) directory,
 which provide APIs related to drawing graphics. Some of the code here
