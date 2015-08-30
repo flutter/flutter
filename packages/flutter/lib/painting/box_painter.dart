@@ -478,7 +478,7 @@ class BoxPainter {
     double shortestSide = rect.shortestSide;
     // In principle, we should use shortestSide / 2.0, but we don't want to
     // run into floating point rounding errors. Instead, we just use
-    // shortestSide and let sky.Canvas do any remaning clamping.
+    // shortestSide and let sky.Canvas do any remaining clamping.
     return _decoration.borderRadius > shortestSide ? shortestSide : _decoration.borderRadius;
   }
 
