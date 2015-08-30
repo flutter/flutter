@@ -15,10 +15,12 @@ APIs to provide base classes for tree structures
 ([base/debug.dart](base/debug.dart)), and task scheduling
 ([base/scheduler.dart](base/scheduler.dart)).
 
-Above this are the files in the [painting/](painting/) directory,
-which provide APIs related to drawing graphics, and in the
-[animation/](animation/) directory, which provide core primitives for
-animating values.
+Above this are the files in the [animation/](animation/) directory,
+which provide core primitives for animating values.
+
+The next layer consists of the files in the [painting/](painting/) directory,
+which provide APIs related to drawing graphics. Some of the code here
+uses the [animation/](animation/) utilities mentioned above.
 
 Layout primitives are provided in the next layer, found in the
 [rendering/](rendering/) directory. They use ```dart:sky``` and the
@@ -46,11 +48,13 @@ Here is a diagram summarising all this:
     |     |      editing/      |  |
     |  +--+-------------------++  |
     |  |  widgets/  (theme/)  |   |
-    | ++---------------------++   |  Dart
-    | |      rendering/      |    |
-    +-+---------+------------+    |
-    | painting/ | animation/ |    |
-    +---------------+--------+    |
+    | ++---------------------++   |
+    | |      rendering/      |    |  Dart
+    | |---------+------------+    |
+    | |         | painting/  |    |
+    +-+         +------------+    |
+    | gestures/ | animation/ |    |
+    +-----------+---+--------+    |
     |    base/      |  mojo/      |
     +------------+--+-+----+------+ -------
     |  dart:sky  |    |    | Host |
