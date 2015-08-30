@@ -5,8 +5,14 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 
+/// A callback for when the image is available.
 typedef void ImageListener(sky.Image image);
 
+/// A handle to an image resource
+///
+/// ImageResource represents a handle to a [sky.Image] object. The underlying
+/// image object might change over time, either because the image is animating
+/// or because the underlying image resource was mutated.
 class ImageResource {
   ImageResource(this._futureImage) {
     _futureImage.then(_handleImageLoaded, onError: _handleImageError);
@@ -17,14 +23,22 @@ class ImageResource {
   sky.Image _image;
   final List<ImageListener> _listeners = new List<ImageListener>();
 
+  /// The first concrete [sky.Image] object represented by this handle.
+  ///
+  /// Instead of receivingly only the first image, most clients will want to
+  /// [addListener] to be notified whenever a a concrete image is available.
   Future<sky.Image> get first => _futureImage;
 
+  /// Adds a listener callback that is called whenever a concrete [sky.Image]
+  /// object is available. Note: If a concrete image is available currently,
+  /// this object will call the listener synchronously.
   void addListener(ImageListener listener) {
     _listeners.add(listener);
     if (_resolved)
       listener(_image);
   }
 
+  /// Stop listening for new concrete [sky.Image] objects.
   void removeListener(ImageListener listener) {
     _listeners.remove(listener);
   }

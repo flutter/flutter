@@ -2,45 +2,73 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// An abstract node in a tree
+///
+/// AbstractNode has as notion of depth, attachment, and parent, but does not
+/// have a model for children.
 class AbstractNode {
 
   // AbstractNode represents a node in a tree.
   // The AbstractNode protocol is described in README.md.
 
   int _depth = 0;
+  /// The depth of this node in the tree.
+  ///
+  /// The depth of nodes in a tree monotonically increases as you traverse down
+  /// the trees.
   int get depth => _depth;
-  void redepthChild(AbstractNode child) { // internal, do not call
+
+  /// Call only from overrides of [redepthChildren]
+  void redepthChild(AbstractNode child) {
     assert(child._attached == _attached);
     if (child._depth <= _depth) {
       child._depth = _depth + 1;
       child.redepthChildren();
     }
   }
-  void redepthChildren() { // internal, do not call
-    // override this in subclasses with child nodes
-    // simply call redepthChild(child) for each child
-  }
+
+  /// Override this function in subclasses with child nodes to call
+  /// redepthChild(child) for each child. Do not call directly.
+  void redepthChildren() { }
 
   bool _attached = false;
+  /// Whether this node is in a tree whose root is attached to something.
   bool get attached => _attached;
+
+  /// Mark this node as attached.
+  ///
+  /// Typically called only from overrides of [attachChildren] and to mark the
+  /// root of a tree attached.
   void attach() {
-    // override this in subclasses with child nodes
-    // simply call attach() for each child then call your superclass
     _attached = true;
     attachChildren();
   }
-  attachChildren() { } // workaround for lack of inter-class mixins in Dart
+
+  /// Override this function in subclasses with child to call attach() for each
+  /// child. Do not call directly.
+  attachChildren() { }
+
+  /// Mark this node as detached.
+  ///
+  /// Typically called only from overrides for [detachChildren] and to mark the
+  /// root of a tree detached.
   void detach() {
-    // override this in subclasses with child nodes
-    // simply call detach() for each child then call your superclass
     _attached = false;
     detachChildren();
   }
-  detachChildren() { } // workaround for lack of inter-class mixins in Dart
+
+  /// Override this function in subclasses with child to call detach() for each
+  /// child. Do not call directly.
+  detachChildren() { }
+
+  // TODO(ianh): remove attachChildren()/detachChildren() workaround once mixins can use super.
 
   AbstractNode _parent;
+  /// The parent of this node in the tree.
   AbstractNode get parent => _parent;
-  void adoptChild(AbstractNode child) { // only for use by subclasses
+
+  /// Subclasses should call this function when they acquire a new child.
+  void adoptChild(AbstractNode child) {
     assert(child != null);
     assert(child._parent == null);
     child._parent = this;
@@ -48,7 +76,9 @@ class AbstractNode {
       child.attach();
     redepthChild(child);
   }
-  void dropChild(AbstractNode child) { // only for use by subclasses
+
+  /// Subclasses should call this function when they lose a child.
+  void dropChild(AbstractNode child) {
     assert(child != null);
     assert(child._parent == this);
     assert(child.attached == attached);
