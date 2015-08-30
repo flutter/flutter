@@ -474,6 +474,14 @@ class BoxPainter {
     return hasUniformWidth;
   }
 
+  double _getEffectiveBorderRadius(Rect rect) {
+    double shortestSide = rect.shortestSide;
+    // In principle, we should use shortestSide / 2.0, but we don't want to
+    // run into floating point rounding errors. Instead, we just use
+    // shortestSide and let sky.Canvas do any remaning clamping.
+    return _decoration.borderRadius > shortestSide ? shortestSide : _decoration.borderRadius;
+  }
+
   void _paintBackgroundColor(sky.Canvas canvas, Rect rect) {
     if (_decoration.backgroundColor != null ||
         _decoration.boxShadow != null ||
@@ -486,10 +494,12 @@ class BoxPainter {
           canvas.drawCircle(center, radius, _backgroundPaint);
           break;
         case Shape.rectangle:
-          if (_decoration.borderRadius == null)
+          if (_decoration.borderRadius == null) {
             canvas.drawRect(rect, _backgroundPaint);
-          else
-            canvas.drawRRect(new sky.RRect()..setRectXY(rect, _decoration.borderRadius, _decoration.borderRadius), _backgroundPaint);
+          } else {
+            double radius = _getEffectiveBorderRadius(rect);
+            canvas.drawRRect(new sky.RRect()..setRectXY(rect, radius, radius), _backgroundPaint);
+          }
           break;
       }
     }
@@ -580,7 +590,7 @@ class BoxPainter {
     assert(_decoration.shape == Shape.rectangle);
     Color color = _decoration.border.top.color;
     double width = _decoration.border.top.width;
-    double radius = _decoration.borderRadius;
+    double radius = _getEffectiveBorderRadius(rect);
 
     sky.RRect outer = new sky.RRect()..setRectXY(rect, radius, radius);
     sky.RRect inner = new sky.RRect()..setRectXY(rect.deflate(width), radius - width, radius - width);
