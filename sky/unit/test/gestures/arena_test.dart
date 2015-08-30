@@ -52,6 +52,7 @@ void main() {
 
     GestureArenaEntry firstEntry = arena.add(primaryKey, first);
     arena.add(primaryKey, second);
+    arena.close(primaryKey);
 
     expect(firstAcceptRan, isFalse);
     expect(firstRejectRan, isFalse);

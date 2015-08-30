@@ -89,29 +89,22 @@ class WidgetTester {
     return SkyBinding.instance.dispatchEvent(event, result);
   }
 
-  void tap(Widget widget) {
+  void tap(Widget widget, { int pointer: 1 }) {
     Point location = getCenter(widget);
     HitTestResult result = _hitTest(location);
-    _dispatchEvent(new TestPointerEvent(type: 'pointerdown', x: location.x, y: location.y), result);
-    _dispatchEvent(new TestPointerEvent(type: 'pointerup', x: location.x, y: location.y), result);
+    TestPointer p = new TestPointer(pointer);
+    _dispatchEvent(p.down(location), result);
+    _dispatchEvent(p.up(), result);
   }
 
-  void scroll(Widget widget, Offset offset) {
+  void scroll(Widget widget, Offset offset, { int pointer: 1 }) {
     Point startLocation = getCenter(widget);
-    HitTestResult result = _hitTest(startLocation);
-    _dispatchEvent(new TestPointerEvent(type: 'pointerdown', x: startLocation.x, y: startLocation.y), result);
     Point endLocation = startLocation + offset;
-    _dispatchEvent(
-      new TestPointerEvent(
-        type: 'pointermove',
-        x: endLocation.x,
-        y: endLocation.y,
-        dx: offset.dx,
-        dy: offset.dy
-      ),
-      result
-    );
-    _dispatchEvent(new TestPointerEvent(type: 'pointerup', x: endLocation.x, y: endLocation.y), result);
+    HitTestResult result = _hitTest(startLocation);
+    TestPointer p = new TestPointer(pointer);
+    _dispatchEvent(p.down(startLocation), result);
+    _dispatchEvent(p.move(endLocation), result);
+    _dispatchEvent(p.up(), result);
   }
 
   void dispatchEvent(sky.Event event, Point location) {

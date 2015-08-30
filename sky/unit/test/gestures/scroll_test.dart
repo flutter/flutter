@@ -1,92 +1,78 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/base/pointer_router.dart';
+import 'package:sky/gestures/arena.dart';
 import 'package:sky/gestures/scroll.dart';
+import 'package:sky/gestures/tap.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';
 
-TestPointerEvent down = new TestPointerEvent(
-  pointer: 5,
-  type: 'pointerdown',
-  x: 10.0,
-  y: 10.0
-);
-
-TestPointerEvent move1 = new TestPointerEvent(
-  pointer: 5,
-  type: 'pointermove',
-  x: 20.0,
-  y: 20.0,
-  dx: 10.0,
-  dy: 10.0
-);
-
-TestPointerEvent move2 = new TestPointerEvent(
-  pointer: 5,
-  type: 'pointermove',
-  x: 20.0,
-  y: 25.0,
-  dx: 0.0,
-  dy: 5.0
-);
-
-TestPointerEvent up = new TestPointerEvent(
-  pointer: 5,
-  type: 'pointerup',
-  x: 20.0,
-  y: 25.0
-);
-
 void main() {
-  test('Should recognize scroll', () {
+  test('Should recognize pan', () {
     PointerRouter router = new PointerRouter();
-    PanGestureRecognizer scroll = new PanGestureRecognizer(router: router);
+    PanGestureRecognizer pan = new PanGestureRecognizer(router: router);
+    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
 
-    bool didStartScroll = false;
-    scroll.onStart = () {
-      didStartScroll = true;
+    bool didStartPan = false;
+    pan.onStart = () {
+      didStartPan = true;
     };
 
-    sky.Offset updateOffset;
-    scroll.onUpdate = (sky.Offset offset) {
-      updateOffset = offset;
+    sky.Offset updatedScrollDelta;
+    pan.onUpdate = (sky.Offset offset) {
+      updatedScrollDelta = offset;
     };
 
-    bool didEndScroll = false;
-    scroll.onEnd = () {
-      didEndScroll = true;
+    bool didEndPan = false;
+    pan.onEnd = () {
+      didEndPan = true;
     };
 
-    scroll.addPointer(down);
-    expect(didStartScroll, isFalse);
-    expect(updateOffset, isNull);
-    expect(didEndScroll, isFalse);
+    bool didTap = false;
+    tap.onTap = () {
+      didTap = true;
+    };
 
-    router.handleEvent(down, null);
-    expect(didStartScroll, isFalse);
-    expect(updateOffset, isNull);
-    expect(didEndScroll, isFalse);
+    TestPointer pointer = new TestPointer(5);
+    sky.PointerEvent down = pointer.down(new Point(10.0, 10.0));
+    pan.addPointer(down);
+    tap.addPointer(down);
+    GestureArena.instance.close(5);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+    expect(didTap, isFalse);
 
-    router.handleEvent(move1, null);
-    expect(didStartScroll, isTrue);
-    didStartScroll = false;
-    expect(updateOffset, new sky.Offset(10.0, -10.0));
-    updateOffset = null;
-    expect(didEndScroll, isFalse);
+    router.route(down);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+    expect(didTap, isFalse);
 
-    router.handleEvent(move2, null);
-    expect(didStartScroll, isFalse);
-    expect(updateOffset, new sky.Offset(0.0, -5.0));
-    updateOffset = null;
-    expect(didEndScroll, isFalse);
+    router.route(pointer.move(new Point(20.0, 20.0)));
+    expect(didStartPan, isTrue);
+    didStartPan = false;
+    expect(updatedScrollDelta, new sky.Offset(10.0, -10.0));
+    updatedScrollDelta = null;
+    expect(didEndPan, isFalse);
+    expect(didTap, isFalse);
 
-    router.handleEvent(up, null);
-    expect(didStartScroll, isFalse);
-    expect(updateOffset, isNull);
-    expect(didEndScroll, isTrue);
-    didEndScroll = false;
+    router.route(pointer.move(new Point(20.0, 25.0)));
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, new sky.Offset(0.0, -5.0));
+    updatedScrollDelta = null;
+    expect(didEndPan, isFalse);
+    expect(didTap, isFalse);
 
-    scroll.dispose();
+    router.route(pointer.up());
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isTrue);
+    didEndPan = false;
+    expect(didTap, isFalse);
+
+    pan.dispose();
+    tap.dispose();
   });
 }

@@ -7,6 +7,7 @@ import 'dart:sky' as sky;
 import 'package:sky/base/pointer_router.dart';
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/gestures/arena.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/view.dart';
@@ -30,7 +31,12 @@ class PointerState {
 
 typedef void EventListener(sky.Event event);
 
-class SkyBinding {
+class BindingHitTestEntry extends HitTestEntry {
+  const BindingHitTestEntry(HitTestTarget target, this.result) : super(target);
+  final HitTestResult result;
+}
+
+class SkyBinding extends HitTestTarget {
 
   SkyBinding({ RenderBox root: null, RenderView renderViewOverride }) {
     assert(_instance == null);
@@ -88,8 +94,8 @@ class SkyBinding {
     } else if (event is sky.GestureEvent) {
       dispatchEvent(event, hitTest(new Point(event.x, event.y)));
     } else {
-      for (EventListener e in _eventListeners)
-        e(event);
+      for (EventListener listener in _eventListeners)
+        listener(event);
     }
   }
 
@@ -130,7 +136,7 @@ class SkyBinding {
 
   HitTestResult hitTest(Point position) {
     HitTestResult result = new HitTestResult();
-    result.add(new HitTestEntry(pointerRouter));
+    result.add(new BindingHitTestEntry(this, result));
     _renderView.hitTest(result, position: position);
     return result;
   }
@@ -146,6 +152,16 @@ class SkyBinding {
         disposition = EventDisposition.processed;
     }
     return disposition;
+  }
+
+  EventDisposition handleEvent(sky.Event e, BindingHitTestEntry entry) {
+    if (e is! sky.PointerEvent)
+      return EventDisposition.ignored;
+    sky.PointerEvent event = e;
+    pointerRouter.route(event);
+    if (event.type == 'pointerdown')
+      GestureArena.instance.close(event.pointer);
+    return EventDisposition.processed;
   }
 
   String toString() => 'Render Tree:\n${_renderView}';
