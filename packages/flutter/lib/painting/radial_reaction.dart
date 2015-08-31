@@ -20,6 +20,9 @@ int _roundOpacity(double opacity) {
   return (255 * opacity).round();
 }
 
+/// A material design radial ink reaction
+///
+/// See [https://www.google.com/design/spec/animation/responsive-interaction.html#responsive-interaction-radial-action]
 class RadialReaction {
   RadialReaction({
     this.center,
@@ -41,7 +44,10 @@ class RadialReaction {
       ..duration =_kHideDuration;
   }
 
+  /// The center of the circle in which the reaction occurs
   final Point center;
+
+  /// The radius of the circle in which the reaction occurs
   final double radius;
 
   AnimationPerformance _showPerformance;
@@ -54,15 +60,22 @@ class RadialReaction {
   AnimationPerformance _hidePerformance;
   AnimatedValue<double> _fade;
 
-  void show() {
-    _showComplete = _showPerformance.forward();
+  /// Show the reaction
+  ///
+  /// Returns a future that resolves when the reaction is completely revealed.
+  Future show() {
+    return _showComplete = _showPerformance.forward();
   }
 
+  /// Hide the reaction
+  ///
+  /// Returns a future that resolves when the reaction is completely hidden.
   Future hide() async {
     await _showComplete;
     await _hidePerformance.forward();
   }
 
+  /// Call listener whenever the visual appearance of the reaction changes
   void addListener(Function listener) {
     _showPerformance.addListener(listener);
     _hidePerformance.addListener(listener);
@@ -71,6 +84,7 @@ class RadialReaction {
   final Paint _outerPaint = new Paint();
   final Paint _innerPaint = new Paint();
 
+  /// Paint the reaction onto the given canvas at the given offset
   void paint(sky.Canvas canvas, Offset offset) {
     _outerPaint.color = _kOuterColor.withAlpha(_roundOpacity(_outerOpacity.value * _fade.value));
     canvas.drawCircle(center + offset, radius, _outerPaint);

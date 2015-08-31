@@ -8,8 +8,9 @@ import 'package:sky/painting/text_style.dart';
 
 export 'package:sky/painting/text_style.dart';
 
-// This must be immutable, because we won't notice when it changes
+/// An immutable span of text
 abstract class TextSpan {
+  // This class must be immutable, because we won't notice when it changes
   sky.Node _toDOM(sky.Document owner);
   String toString([String prefix = '']);
 
@@ -17,11 +18,13 @@ abstract class TextSpan {
   }
 }
 
+/// An immutable span of unstyled text
 class PlainTextSpan extends TextSpan {
   PlainTextSpan(this.text) {
     assert(text != null);
   }
 
+  /// The text contained in the span
   final String text;
 
   sky.Node _toDOM(sky.Document owner) {
@@ -34,13 +37,17 @@ class PlainTextSpan extends TextSpan {
   String toString([String prefix = '']) => '${prefix}${runtimeType}: "${text}"';
 }
 
+/// An immutable text span that applies a style to a list of children
 class StyledTextSpan extends TextSpan {
   StyledTextSpan(this.style, this.children) {
     assert(style != null);
     assert(children != null);
   }
 
+  /// The style to apply to the children
   final TextStyle style;
+
+  /// The children to which the style is applied
   final List<TextSpan> children;
 
   sky.Node _toDOM(sky.Document owner) {
@@ -90,6 +97,7 @@ class StyledTextSpan extends TextSpan {
   }
 }
 
+/// An object that paints a [TextSpan] into a canvas
 class TextPainter {
   TextPainter(TextSpan text) {
     _layoutRoot.rootElement = _document.createElement('p');
@@ -102,6 +110,7 @@ class TextPainter {
   bool _needsLayout = true;
 
   TextSpan _text;
+  /// The (potentially styled) text to paint
   TextSpan get text => _text;
   void set text(TextSpan value) {
     if (_text == value)
@@ -113,6 +122,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// The minimum width at which to layout the text
   double get minWidth => _layoutRoot.minWidth;
   void set minWidth(value) {
     if (_layoutRoot.minWidth == value)
@@ -121,6 +131,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// The maximum width at which to layout the text
   double get maxWidth => _layoutRoot.maxWidth;
   void set maxWidth(value) {
     if (_layoutRoot.maxWidth == value)
@@ -129,6 +140,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// The minimum height at which to layout the text
   double get minHeight => _layoutRoot.minHeight;
   void set minHeight(value) {
     if (_layoutRoot.minHeight == value)
@@ -137,6 +149,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// The maximum height at which to layout the text
   double get maxHeight => _layoutRoot.maxHeight;
   void set maxHeight(value) {
     if (_layoutRoot.maxHeight == value)
@@ -144,21 +157,25 @@ class TextPainter {
     _layoutRoot.maxHeight = value;
   }
 
+  /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds
   double get minContentWidth {
     assert(!_needsLayout);
     return _layoutRoot.rootElement.minContentWidth;
   }
 
+  /// The width at which increasing the width of the text no longer decreases the height
   double get maxContentWidth {
     assert(!_needsLayout);
     return _layoutRoot.rootElement.maxContentWidth;
   }
 
+  /// The height required to paint the text completely within its bounds
   double get height {
     assert(!_needsLayout);
     return _layoutRoot.rootElement.height;
   }
 
+  /// The distance from the top of the text to the first baseline of the given type
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!_needsLayout);
     sky.Element root = _layoutRoot.rootElement;
@@ -168,6 +185,7 @@ class TextPainter {
     }
   }
 
+  /// Compute the visual position of the glyphs for painting the text
   void layout() {
     if (!_needsLayout)
       return;
@@ -175,6 +193,7 @@ class TextPainter {
     _needsLayout = false;
   }
 
+  /// Paint the text onto the given canvas at the given offset
   void paint(sky.Canvas canvas, sky.Offset offset) {
     assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
     // TODO(ianh): Make LayoutRoot support a paint offset so we don't

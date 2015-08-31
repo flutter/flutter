@@ -4,23 +4,118 @@
 
 import 'dart:sky';
 
-enum FontWeight { w100, w200, w300, w400, w500, w600, w700, w800, w900 }
+/// The thickness of the glyphs used to draw the text
+enum FontWeight {
+  /// Thin, the least thick
+  w100,
+
+  /// Extra-light
+  w200,
+
+  /// Light
+  w300,
+
+  /// Normal / regular / plain
+  w400,
+
+  /// Medium
+  w500,
+
+  /// Semi-bold
+  w600,
+
+  /// Bold
+  w700,
+
+  /// Extra-bold
+  w800,
+
+  /// Black, the most thick
+  w900
+}
+
+/// A normal font weight
 const normal = FontWeight.w400;
+
+/// A bold font weight
 const bold = FontWeight.w700;
 
-enum FontStyle { normal, italic, oblique }
+/// Whether to slant the glyphs in the font
+enum FontStyle {
+  /// Use the upright glyphs
+  normal,
 
-enum TextAlign { left, right, center }
+  /// Use glyphs designed for slanting
+  italic,
 
-enum TextBaseline { alphabetic, ideographic }
+  /// Use the upright glyphs but slant them during painting
+  oblique  // TODO(abarth): Remove. We don't really support this value.
+}
 
-enum TextDecoration { none, underline, overline, lineThrough }
+/// Whether to align text horizontally
+enum TextAlign {
+  /// Align the text on the left edge of the container
+  left,
+
+  /// Align the text on the right edge of the container
+  right,
+
+  /// Align the text in the center of the container
+  center
+}
+
+/// A horizontal line used for aligning text
+enum TextBaseline {
+  // The horizontal line used to align the bottom of glyphs for alphabetic characters
+  alphabetic,
+
+  // The horizontal line used to align ideographic characters
+  ideographic
+}
+
+/// A linear decoration to draw near the text
+enum TextDecoration {
+  /// Do not draw a decoration
+  none,
+
+  /// Draw a line underneath each line of text
+  underline,
+
+  /// Draw a line above each line of text
+  overline,
+
+  /// Draw a line through each line of text
+  lineThrough
+}
+
+/// Draw a line underneath each line of text
 const underline = const <TextDecoration>[TextDecoration.underline];
+
+/// Draw a line above each line of text
 const overline = const <TextDecoration>[TextDecoration.overline];
+
+/// Draw a line through each line of text
 const lineThrough = const <TextDecoration>[TextDecoration.lineThrough];
 
-enum TextDecorationStyle { solid, double, dotted, dashed, wavy }
+/// The style in which to draw a text decoration
+enum TextDecorationStyle {
+  /// Draw a solid line
+  solid,
 
+  /// Draw two lines
+  double,
+
+  /// Draw a dotted line
+  dotted,
+
+  /// Draw a dashed line
+  dashed,
+
+  /// Draw a sinusoidal line
+  wavy
+}
+
+/// An immutable style in which paint text
 class TextStyle {
   const TextStyle({
     this.color,
@@ -36,18 +131,42 @@ class TextStyle {
     this.decorationStyle
   });
 
+  /// The color to use when painting the text
   final Color color;
+
+  /// The name of the font to use when painting the text
   final String fontFamily;
-  final double fontSize; // in pixels
+
+  /// The size of gyphs (in logical pixels) to use when painting the text
+  final double fontSize;
+
+  /// The font weight to use when painting the text
   final FontWeight fontWeight;
+
+  /// The font style to use when painting the text
   final FontStyle fontStyle;
+
+  /// How the text should be aligned (applies only to the outermost
+  /// StyledTextSpan, which establishes the container for the text)
   final TextAlign textAlign;
+
+  /// The baseline to use for aligning the text
   final TextBaseline textBaseline;
-  final double height; // multiple of fontSize
+
+  /// The distance between the text baselines, as a multiple of the font size
+  final double height;
+
+  /// A list of decorations to paint near the text
   final List<TextDecoration> decoration; // TODO(ianh): Switch this to a Set<> once Dart supports constant Sets
+
+  /// The color in which to paint the text decorations
   final Color decorationColor;
+
+  /// The style in which to paint the text decorations
   final TextDecorationStyle decorationStyle;
 
+  /// Returns a new text style that matches this text style but with the given
+  /// values replaced
   TextStyle copyWith({
     Color color,
     String fontFamily,
@@ -76,6 +195,8 @@ class TextStyle {
     );
   }
 
+  /// Returns a new text style that matches this text style but with some values
+  /// replaced by the non-null parameters of the given text style
   TextStyle merge(TextStyle other) {
     return copyWith(
       color: other.color,
@@ -124,6 +245,10 @@ class TextStyle {
     return toCSS[decorationStyle];
   }
 
+  /// Program this text style into the engine
+  ///
+  /// Note: This function will likely be removed when we refactor the interface
+  /// between the framework and the engine
   void applyToCSSStyle(CSSStyleDeclaration cssStyle) {
     if (color != null) {
       cssStyle['color'] = _colorToCSSString(color);
@@ -163,6 +288,10 @@ class TextStyle {
     }
   }
 
+  /// Program the container aspects of this text style into the engine
+  ///
+  /// Note: This function will likely be removed when we refactor the interface
+  /// between the framework and the engine
   void applyToContainerCSSStyle(CSSStyleDeclaration cssStyle) {
     if (textAlign != null) {
       cssStyle['text-align'] = const {
