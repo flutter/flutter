@@ -25,7 +25,7 @@ class AnimatedBoxDecorationValue extends AnimatedValue<BoxDecoration> {
   AnimatedBoxDecorationValue(BoxDecoration begin, { BoxDecoration end, Curve curve: linear })
     : super(begin, end: end, curve: curve);
 
-  BoxDecoration lerp(double t) => lerpBoxDecoration(begin, end, t);
+  BoxDecoration lerp(double t) => BoxDecoration.lerp(begin, end, t);
 }
 
 class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
