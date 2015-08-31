@@ -81,7 +81,7 @@ follow these instructions:
 The `sky_tool start` command starts the dev server and uploads your app to the device.
 The `--install` flag installs `SkyShell.apk` if it is not already installed on the device.
 The `--checked` flag triggers checked mode, in which types are checked, asserts are run, and
-various [debugging features](lib/base/debug.dart) are enabled.
+various [debugging features](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/base/debug.dart) are enabled.
 The `adb logcat` command logs errors and Dart `print()` output from the app. The `-s sky chromium`
 argument limits the output to just output from Sky Dart code and the Sky Engine C++ code (which
 for historical reasons currently uses the tag `chromium`.)
