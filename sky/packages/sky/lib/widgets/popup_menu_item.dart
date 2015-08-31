@@ -10,8 +10,8 @@ import 'package:sky/widgets/gesture_detector.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/theme.dart';
 
-const double kMenuItemHeight = 48.0;
-const double kBaselineOffsetFromBottom = 20.0;
+const double _kMenuItemHeight = 48.0;
+const double _kBaselineOffsetFromBottom = 20.0;
 
 class PopupMenuItem extends Component {
   PopupMenuItem({
@@ -30,11 +30,11 @@ class PopupMenuItem extends Component {
       onTap: onPressed,
       child: new InkWell(
         child: new Container(
-          height: kMenuItemHeight,
+          height: _kMenuItemHeight,
           child: new DefaultTextStyle(
             style: textStyle,
             child: new Baseline(
-              baseline: kMenuItemHeight - kBaselineOffsetFromBottom,
+              baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
               child: child
             )
           )
