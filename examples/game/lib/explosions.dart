@@ -22,7 +22,9 @@ class ExplosionBig extends Explosion {
       numParticlesToEmit: 25,
       emissionRate:1000.0,
       greenVar: 127,
-      redVar: 127
+      redVar: 127,
+      life: 0.75,
+      lifeVar: 0.5
     );
     particlesDebris.zPosition = 1010.0;
     addChild(particlesDebris);
@@ -38,7 +40,9 @@ class ExplosionBig extends Explosion {
       endSizeVar: 0.1,
       posVar: new Point(10.0, 10.0),
       speed: 10.0,
-      speedVar: 5.0
+      speedVar: 5.0,
+      life: 0.75,
+      lifeVar: 0.5
     );
     particlesFire.zPosition = 1011.0;
     addChild(particlesFire);
@@ -48,9 +52,9 @@ class ExplosionBig extends Explosion {
     sprtRing.transferMode = sky.TransferMode.plus;
     addChild(sprtRing);
 
-    Action scale = new ActionTween( (a) => sprtRing.scale = a, 0.2, 1.0, 1.5);
+    Action scale = new ActionTween( (a) => sprtRing.scale = a, 0.2, 1.0, 0.75);
     Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveNode(sprtRing)]);
-    Action fade = new ActionTween( (a) => sprtRing.opacity = a, 1.0, 0.0, 1.5);
+    Action fade = new ActionTween( (a) => sprtRing.opacity = a, 1.0, 0.0, 0.75);
     actions.run(scaleAndRemove);
     actions.run(fade);
 
@@ -65,10 +69,10 @@ class ExplosionBig extends Explosion {
 
       double multiplier = randomDouble() * 0.3 + 1.0;
 
-      Action scale = new ActionTween( (a) => sprtFlare.scaleY = a, 0.3 * multiplier, 0.8, 1.5 * multiplier);
+      Action scale = new ActionTween( (a) => sprtFlare.scaleY = a, 0.3 * multiplier, 0.8, 0.75 * multiplier);
       Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveNode(sprtFlare)]);
-      Action fadeIn = new ActionTween( (a) => sprtFlare.opacity = a, 0.0, 1.0, 0.5 * multiplier);
-      Action fadeOut = new ActionTween( (a) => sprtFlare.opacity = a, 1.0, 0.0, 1.0 * multiplier);
+      Action fadeIn = new ActionTween( (a) => sprtFlare.opacity = a, 0.0, 1.0, 0.25 * multiplier);
+      Action fadeOut = new ActionTween( (a) => sprtFlare.opacity = a, 1.0, 0.0, 0.5 * multiplier);
       Action fadeInOut = new ActionSequence([fadeIn, fadeOut]);
       actions.run(scaleAndRemove);
       actions.run(fadeInOut);
