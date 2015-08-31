@@ -441,8 +441,10 @@ bool _canSync(Widget a, Widget b) {
 // stylistic information, etc.
 abstract class TagNode extends Widget {
 
-  TagNode(Widget child, { Key key })
-    : this.child = child, super(key: key);
+  TagNode({ Key key, Widget child })
+    : this.child = child, super(key: key) {
+    assert(child != null);
+  }
 
   // TODO(jackson): Remove this workaround for limitation of Dart mixins
   TagNode._withKey(Widget child, Key key)
@@ -480,10 +482,15 @@ abstract class TagNode extends Widget {
 
 }
 
-class ParentDataNode extends TagNode {
-  ParentDataNode(Widget child, this.parentData, { Key key })
-    : super(child, key: key);
-  final ParentData parentData;
+abstract class ParentDataNode extends TagNode {
+  ParentDataNode({ Key key, Widget child })
+    : super(key: key, child: child);
+
+  /// Subclasses should override this function to ensure that they are placed
+  /// inside widgets that expect them.
+  ///
+  /// The given ancestor is the first non-component ancestor of this widget.
+  void debugValidateAncestor(Widget ancestor);
 }
 
 abstract class Inherited extends TagNode {
@@ -553,7 +560,7 @@ class Listener extends TagNode  {
          onPointerUp: onPointerUp,
          custom: custom
        ),
-       super(child, key: key);
+       super(key: key, child: child);
 
   final Map<String, EventListener> listeners;
 
@@ -975,24 +982,30 @@ abstract class RenderObjectWrapper extends Widget {
     // we give them their own slots for them to fit into us.
   }
 
+  /// Override this function if your RenderObjectWrapper uses a [ParentDataNode]
+  /// to program parent data into children.
+  void updateParentData(RenderObject child, ParentDataNode node) { }
+
   void syncRenderObject(RenderObjectWrapper old) {
     assert(old == null || old.renderObject == renderObject);
-    ParentData parentData = null;
-    Widget ancestor = parent;
-    while (ancestor != null && ancestor is! RenderObjectWrapper) {
-      if (ancestor is ParentDataNode && ancestor.parentData != null) {
-        if (parentData != null)
-          parentData.merge(ancestor.parentData); // this will throw if the types aren't the same
-        else
-          parentData = ancestor.parentData;
+    ParentDataNode parentDataNode = null;
+    for (Widget current = parent; current != null; current = current.parent) {
+      assert(() {
+        if (current is ParentDataNode) {
+          Widget ancestor = current.parent;
+          while (ancestor != null && ancestor is Component)
+            ancestor = ancestor.parent;
+          current.debugValidateAncestor(ancestor);
+        }
+        return true;
+      });
+      if (current is ParentDataNode) {
+        assert(parentDataNode == null);
+        parentDataNode = current;
+      } else if (current is RenderObjectWrapper) {
+        current.updateParentData(renderObject, parentDataNode);
+        break;
       }
-      ancestor = ancestor.parent;
-    }
-    if (parentData != null) {
-      assert(renderObject.parentData != null);
-      renderObject.parentData.merge(parentData); // this will throw if the types aren't appropriate
-      if (ancestor != null && ancestor.renderObject != null)
-        ancestor.renderObject.markNeedsLayout();
     }
   }
 

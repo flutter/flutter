@@ -9,10 +9,10 @@ import 'package:sky/rendering/object.dart';
 
 export 'package:sky/rendering/object.dart' show EventDisposition;
 
-class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
+class FlexParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
   int flex;
 
-  void merge(FlexBoxParentData other) {
+  void merge(FlexParentData other) {
     if (other.flex != null)
       flex = other.flex;
     super.merge(other);
@@ -41,8 +41,8 @@ enum FlexAlignItems {
 
 typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints);
 
-class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexBoxParentData>,
-                                        RenderBoxContainerDefaultsMixin<RenderBox, FlexBoxParentData> {
+class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
+                                        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
   // lays out RenderBox children using flexible layout
 
   RenderFlex({
@@ -98,8 +98,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _overflow;
 
   void setupParentData(RenderBox child) {
-    if (child.parentData is! FlexBoxParentData)
-      child.parentData = new FlexBoxParentData();
+    if (child.parentData is! FlexParentData)
+      child.parentData = new FlexParentData();
   }
 
   double _getIntrinsicSize({ BoxConstraints constraints,
@@ -133,7 +133,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         } else {
           inflexibleSpace += childSize(child, childConstraints);
         }
-        assert(child.parentData is FlexBoxParentData);
+        assert(child.parentData is FlexParentData);
         child = child.parentData.nextSibling;
       }
       double mainSize = maxFlexFractionSoFar * totalFlex + inflexibleSpace;
@@ -196,7 +196,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);
         }
-        assert(child.parentData is FlexBoxParentData);
+        assert(child.parentData is FlexParentData);
         child = child.parentData.nextSibling;
       }
 
@@ -224,7 +224,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           }
           maxCrossSize = math.max(maxCrossSize, crossSize);
         }
-        assert(child.parentData is FlexBoxParentData);
+        assert(child.parentData is FlexParentData);
         child = child.parentData.nextSibling;
       }
 
@@ -276,7 +276,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   int _getFlex(RenderBox child) {
-    assert(child.parentData is FlexBoxParentData);
+    assert(child.parentData is FlexParentData);
     return child.parentData.flex != null ? child.parentData.flex : 0;
   }
 
@@ -301,7 +301,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double freeSpace = canFlex ? mainSize : 0.0;
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is FlexBoxParentData);
+      assert(child.parentData is FlexParentData);
       totalChildren++;
       int flex = _getFlex(child);
       if (flex > 0) {
@@ -392,7 +392,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           if (distance != null)
             maxBaselineDistance = math.max(maxBaselineDistance, distance);
         }
-        assert(child.parentData is FlexBoxParentData);
+        assert(child.parentData is FlexParentData);
         child = child.parentData.nextSibling;
       }
     }
@@ -461,7 +461,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double childMainPosition = leadingSpace;
     child = firstChild;
     while (child != null) {
-      assert(child.parentData is FlexBoxParentData);
+      assert(child.parentData is FlexParentData);
       double childCrossPosition;
       switch (_alignItems) {
         case FlexAlignItems.stretch:
