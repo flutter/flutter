@@ -146,11 +146,48 @@ def _url_for_path(port, root, path):
     return 'http://localhost:%s/%s' % (port, relative_path)
 
 
+class InstallSky(object):
+    def add_subparser(self, subparsers):
+        install_parser = subparsers.add_parser('install',
+            help='install SkyShell on Android and iOS devices and simulators')
+        install_parser.set_defaults(func=self.run)
+
+    def run(self, args, pids):
+        android = AndroidDevice()
+
+        # Install on connected Android device
+        if android.is_connected() and args.android_build_available:
+            if args.use_release:
+                apk_path = os.path.join(args.sky_src_path, args.android_release_build_path, 'apks', APK_NAME)
+            else:
+                apk_path = os.path.join(args.sky_src_path, args.android_debug_build_path, 'apks', APK_NAME)
+            android.install_apk(apk_path)
+
+        # Install on connected iOS device
+        if IOSDevice.is_connected() and args.ios_build_available:
+            if args.use_release:
+                app_path = os.path.join(args.sky_src_path, args.ios_release_build_path, IOS_APP_NAME)
+            else:
+                app_path = os.path.join(args.sky_src_path, args.ios_debug_build_path, IOS_APP_NAME)
+            IOSDevice.install_app(app_path)
+
+        # Install on iOS simulator if it's running
+        if IOSSimulator.is_booted() and args.ios_sim_build_available:
+            if args.use_release:
+                app_path = os.path.join(args.sky_src_path, args.ios_sim_release_build_path, IOS_APP_NAME)
+            else:
+                app_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, IOS_APP_NAME)
+            IOSSimulator.fork_install_app(app_path)
+
+    # TODO(iansf): get rid of need for args
+    def needs_install(self, args):
+        return AndroidDevice().needs_install(args) or IOSDevice.needs_install(args) or IOSSimulator.needs_install(args)
+
+
 class StartSky(object):
     def add_subparser(self, subparsers):
         start_parser = subparsers.add_parser('start',
             help='launch %s on the device' % APK_NAME)
-        start_parser.add_argument('--install', action='store_true')
         start_parser.add_argument('--poke', action='store_true')
         start_parser.add_argument('--checked', action='store_true')
         start_parser.add_argument('project_or_path', nargs='?', type=str,
@@ -161,16 +198,14 @@ class StartSky(object):
         if not args.poke:
             StopSky().run(args, pids)
 
+            # Only install if the user did not specify a poke
+            installer = InstallSky()
+            if installer.needs_install(args):
+                installer.run(args, pids)
+
         android = AndroidDevice()
 
         project_or_path = os.path.abspath(args.project_or_path)
-
-        if args.android_build_available and args.use_release:
-            apk_path = os.path.join(os.path.normpath(args.sky_src_path), args.android_release_build_path, 'apks', APK_NAME)
-        elif args.android_build_available:
-            apk_path = os.path.join(os.path.normpath(args.sky_src_path), args.android_debug_build_path, 'apks', APK_NAME)
-        else:
-            apk_path = os.path.join(APK_DIR, APK_NAME)
 
         if os.path.isdir(project_or_path):
             sky_server_root = project_or_path
@@ -191,38 +226,6 @@ class StartSky(object):
         if not os.path.isdir(package_root):
             logging.error('%s is not a valid packages path.' % package_root)
             return 2
-
-        if not android.is_package_installed(ANDROID_PACKAGE):
-            logging.info('%s is not on the device. Installing now...' % APK_NAME)
-            args.install = True
-        elif android.get_device_apk_sha1(apk_path) != android.get_source_sha1(apk_path):
-            logging.info('%s on the device is out of date. Installing now...' % APK_NAME)
-            args.install = True
-
-        if args.install:
-            # Install on connected Android device
-            if android.is_connected() and args.android_build_available:
-                if args.use_release:
-                    apk_path = os.path.join(args.sky_src_path, args.android_release_build_path, 'apks', APK_NAME)
-                else:
-                    apk_path = os.path.join(args.sky_src_path, args.android_debug_build_path, 'apks', APK_NAME)
-                android.install_apk(apk_path)
-
-            # Install on connected iOS device
-            if IOSDevice.is_connected() and args.ios_build_available:
-                if args.use_release:
-                    app_path = os.path.join(args.sky_src_path, args.ios_release_build_path, IOS_APP_NAME)
-                else:
-                    app_path = os.path.join(args.sky_src_path, args.ios_debug_build_path, IOS_APP_NAME)
-                IOSDevice.install_app(app_path)
-
-            # Install on iOS simulator if it's running
-            if IOSSimulator.is_booted() and args.ios_sim_build_available:
-                if args.use_release:
-                    app_path = os.path.join(args.sky_src_path, args.ios_sim_release_build_path, IOS_APP_NAME)
-                else:
-                    app_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, IOS_APP_NAME)
-                IOSSimulator.fork_install_app(app_path)
 
         # TODO(iansf): fix this so that we don't have to pass sky_server_root, main_dart, pid, and args.
         android.setup_servers(sky_server_root, main_dart, pids, args)
@@ -361,8 +364,28 @@ class AndroidDevice(object):
     def get_source_sha1(self, apk_path):
         return hashlib.sha1(open(apk_path, 'rb').read()).hexdigest()
 
+    # TODO(iansf): get rid of need for args
+    def get_apk_path(self, args):
+        if args.android_build_available and args.use_release:
+            return os.path.join(os.path.normpath(args.sky_src_path), args.android_release_build_path, 'apks', APK_NAME)
+        elif args.android_build_available:
+            return os.path.join(os.path.normpath(args.sky_src_path), args.android_debug_build_path, 'apks', APK_NAME)
+        else:
+            return os.path.join(APK_DIR, APK_NAME)
+
     def is_connected(self):
         return self.has_valid_android
+
+    def needs_install(self, args):
+        apk_path = self.get_apk_path(args)
+
+        if not self.is_package_installed(ANDROID_PACKAGE):
+            logging.info('%s is not on the device. Installing now...' % APK_NAME)
+            return True
+        elif self.get_device_apk_sha1(apk_path) != self.get_source_sha1(apk_path):
+            logging.info('%s on the device is out of date. Installing now...' % APK_NAME)
+            return True
+        return False
 
     def install_apk(self, apk_path):
         if not os.path.exists(apk_path):
@@ -479,6 +502,10 @@ class IOSDevice(object):
         except subprocess.CalledProcessError:
             cls._is_connected = False
         return cls._is_connected
+
+    @classmethod
+    def needs_install(cls, args):
+        return cls.is_connected()
 
     @classmethod
     def install_app(cls, ios_app_path):
@@ -602,6 +629,10 @@ class IOSSimulator(object):
             return None
         cls._simulator_app_documents_dir = os.path.join(simulator_path, 'data', 'Containers', 'Data', 'Application', simulator_app_id, 'Documents')
         return cls._simulator_app_documents_dir
+
+    @classmethod
+    def needs_install(cls, args):
+        return cls.is_booted()
 
     @classmethod
     def fork_install_app(cls, ios_app_path):
@@ -987,7 +1018,7 @@ class SkyShellRunner(object):
 
         subparsers = parser.add_subparsers(help='sub-command help')
 
-        for command in [StartSky(), StopSky(), StartListening(), StartTracing(), StopTracing(), IOSSimulator()]:
+        for command in [InstallSky(), StartSky(), StopSky(), StartListening(), StartTracing(), StopTracing(), IOSSimulator()]:
             command.add_subparser(subparsers)
 
         args = parser.parse_args()
