@@ -15,6 +15,12 @@
 #include "ui/gl/gl_bindings.h"
 #include "ui/gl/gl_surface_egl.h"
 
+#if defined(USE_X11)
+extern "C" {
+#include <X11/Xlib.h>
+}
+#endif
+
 using ui::GetLastEGLErrorString;
 
 namespace gfx {
@@ -211,7 +217,11 @@ GLContextEGL::~GLContextEGL() {
 }
 
 #if !defined(OS_ANDROID)
-#error EGL should only be used on Android.
+bool GLContextEGL::GetTotalGpuMemory(size_t* bytes) {
+  DCHECK(bytes);
+  *bytes = 0;
+  return false;
+}
 #endif
 
 }  // namespace gfx

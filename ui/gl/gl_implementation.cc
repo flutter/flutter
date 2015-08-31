@@ -48,7 +48,16 @@ void CleanupNativeLibraries(void* unused) {
 base::ThreadLocalPointer<GLApi>* g_current_gl_context_tls = NULL;
 OSMESAApi* g_current_osmesa_context;
 
-#if defined(OS_ANDROID)
+#if defined(USE_X11)
+
+EGLApi* g_current_egl_context;
+GLXApi* g_current_glx_context;
+
+#elif defined(USE_OZONE)
+
+EGLApi* g_current_egl_context;
+
+#elif defined(OS_ANDROID)
 
 EGLApi* g_current_egl_context;
 
