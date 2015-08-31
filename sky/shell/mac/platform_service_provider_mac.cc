@@ -16,6 +16,7 @@
 #include "sky/services/keyboard/ios/keyboard_service_impl.h"
 #include "sky/services/media/ios/media_service_impl.h"
 #include "sky/services/media/ios/media_player_impl.h"
+#include "sky/services/vsync/ios/vsync_provider_impl.h"
 #endif
 
 #if !TARGET_OS_IPHONE
@@ -49,6 +50,10 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
       media_service_.Create(nullptr, mojo::MakeRequest<::media::MediaService>(
                                          client_handle.Pass()));
     }
+    if (service_name == ::vsync::VSyncProvider::Name_) {
+      vsync_.Create(nullptr, mojo::MakeRequest<::vsync::VSyncProvider>(
+                                 client_handle.Pass()));
+    }
 #endif
 #if !TARGET_OS_IPHONE
     if (service_name == TestHarness::Name_) {
@@ -65,6 +70,7 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
   sky::services::keyboard::KeyboardServiceFactory keyboard_;
   sky::services::media::MediaPlayerFactory media_player_;
   sky::services::media::MediaServiceFactory media_service_;
+  sky::services::vsync::VSyncProviderFactory vsync_;
 #endif
 };
 
