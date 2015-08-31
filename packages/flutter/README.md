@@ -72,14 +72,12 @@ Running a Sky application
 The `sky` pub package includes a `sky_tool` script to assist in running
 Sky applications inside the `SkyShell.apk` harness.  The `sky_tool` script
 expects to be run from the root directory of your application's package (i.e.,
-the same directory that contains the `pubspec.yaml` file). To run your app,
-follow these instructions:
+the same directory that contains the `pubspec.yaml` file).
 
- - The first time: `./packages/sky/sky_tool start --install --checked && adb logcat -s sky chromium`
- - Subsequent times: `./packages/sky/sky_tool start --checked && adb logcat -s sky chromium`
+To run your app with logging, run this command:
+ - `./packages/sky/sky_tool start --checked && adb logcat -s sky chromium`
 
-The `sky_tool start` command starts the dev server and uploads your app to the device.
-The `--install` flag installs `SkyShell.apk` if it is not already installed on the device.
+The `sky_tool start` command starts the dev server and uploads your app to the device, installing `SkyShell.apk` if needed.
 The `--checked` flag triggers checked mode, in which types are checked, asserts are run, and
 various [debugging features](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/base/debug.dart) are enabled.
 The `adb logcat` command logs errors and Dart `print()` output from the app. The `-s sky chromium`
