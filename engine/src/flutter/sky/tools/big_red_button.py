@@ -51,12 +51,14 @@ ARTIFACTS = {
     'android-arm': [
         Artifact('shell', 'SkyShell.apk'),
         Artifact('viewer', 'sky_viewer.mojo'),
+        Artifact('viewer', 'libsky_viewer_library.so'),
     ],
     'linux-x64': [
         Artifact('shell', 'icudtl.dat'),
         Artifact('shell', 'sky_shell'),
         Artifact('shell', 'sky_snapshot'),
         Artifact('viewer', 'sky_viewer.mojo'),
+        Artifact('viewer', 'libsky_viewer_library.so'),
     ]
 }
 
