@@ -23,8 +23,10 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
 
   RenderBlockBase({
     List<RenderBox> children,
-    BlockDirection direction: BlockDirection.vertical
-  }) : _direction = direction {
+    BlockDirection direction: BlockDirection.vertical,
+    double itemExtent,
+    double minExtent: 0.0
+  }) : _direction = direction, _itemExtent = itemExtent, _minExtent = minExtent {
     addAll(children);
   }
 
@@ -42,22 +44,42 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     }
   }
 
+  double _itemExtent;
+  double get itemExtent => _itemExtent;
+  void set itemExtent(double value) {
+    if (value != _itemExtent) {
+      _itemExtent = value;
+      markNeedsLayout();
+    }
+  }
+
+  double _minExtent;
+  double get minExtent => _minExtent;
+  void set minExtent(double value) {
+    if (value != _minExtent) {
+      _minExtent = value;
+      markNeedsLayout();
+    }
+  }
+
   bool get isVertical => _direction == BlockDirection.vertical;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     if (isVertical)
-      return new BoxConstraints.tightFor(width: constraints.constrainWidth(constraints.maxWidth));
-    return new BoxConstraints.tightFor(height: constraints.constrainHeight(constraints.maxHeight));
+      return new BoxConstraints.tightFor(width: constraints.constrainWidth(constraints.maxWidth),
+                                         height: itemExtent);
+    return new BoxConstraints.tightFor(height: constraints.constrainHeight(constraints.maxHeight),
+                                       width: itemExtent);
   }
 
   double get _mainAxisExtent {
     RenderBox child = lastChild;
     if (child == null)
-      return 0.0;
+      return minExtent;
     BoxParentData parentData = child.parentData;
     return isVertical ?
-        parentData.position.y + child.size.height :
-        parentData.position.x + child.size.width;
+        math.max(minExtent, parentData.position.y + child.size.height) :
+        math.max(minExtent, parentData.position.x + child.size.width);
   }
 
   void performLayout() {
@@ -84,8 +106,10 @@ class RenderBlock extends RenderBlockBase {
 
   RenderBlock({
     List<RenderBox> children,
-    BlockDirection direction: BlockDirection.vertical
-  }) : super(children: children, direction: direction);
+    BlockDirection direction: BlockDirection.vertical,
+    double itemExtent,
+    double minExtent: 0.0
+  }) : super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
 
   double _getIntrinsicCrossAxis(BoxConstraints constraints, _ChildSizingFunction childSize) {
     double extent = 0.0;
@@ -116,7 +140,7 @@ class RenderBlock extends RenderBlockBase {
       assert(child.parentData is BlockParentData);
       child = child.parentData.nextSibling;
     }
-    return extent;
+    return math.max(extent, minExtent);
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
@@ -185,15 +209,17 @@ class RenderBlockViewport extends RenderBlockBase {
     DimensionCallback totalExtentCallback,
     DimensionCallback maxCrossAxisDimensionCallback,
     DimensionCallback minCrossAxisDimensionCallback,
+    BlockDirection direction: BlockDirection.vertical,
+    double itemExtent,
+    double minExtent: 0.0,
     double startOffset: 0.0,
-    List<RenderBox> children,
-    BlockDirection direction: BlockDirection.vertical
+    List<RenderBox> children
   }) : _callback = callback,
        _totalExtentCallback = totalExtentCallback,
        _maxCrossAxisDimensionCallback = maxCrossAxisDimensionCallback,
        _minCrossAxisDimensionCallback = minCrossAxisDimensionCallback,
        _startOffset = startOffset,
-       super(children: children, direction: direction);
+       super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
 
   bool _inCallback = false;
 
@@ -250,11 +276,10 @@ class RenderBlockViewport extends RenderBlockBase {
   double _startOffset;
   double get startOffset => _startOffset;
   void set startOffset(double value) {
-    if (value == _startOffset)
-      return;
-    _startOffset = value;
-    if (!_inCallback)
+    if (value != _startOffset) {
+      _startOffset = value;
       markNeedsPaint();
+    }
   }
 
   double _getIntrinsicDimension(BoxConstraints constraints, DimensionCallback intrinsicCallback, _Constrainer constrainer) {
@@ -283,13 +308,13 @@ class RenderBlockViewport extends RenderBlockBase {
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (isVertical)
       return _getIntrinsicDimension(constraints, minCrossAxisDimensionCallback, constraints.constrainWidth);
-    return constraints.constrainWidth(0.0);
+    return constraints.constrainWidth(minExtent);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (isVertical)
       return _getIntrinsicDimension(constraints, maxCrossAxisDimensionCallback, constraints.constrainWidth);
-    return _getIntrinsicDimension(constraints, totalExtentCallback, constraints.constrainWidth);
+    return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minWidth: minExtent).apply(constraints).constrainWidth);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
@@ -301,7 +326,7 @@ class RenderBlockViewport extends RenderBlockBase {
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (!isVertical)
       return _getIntrinsicDimension(constraints, maxCrossAxisDimensionCallback, constraints.constrainHeight);
-    return _getIntrinsicDimension(constraints, totalExtentCallback, constraints.constrainHeight);
+    return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minHeight: minExtent).apply(constraints).constrainHeight);
   }
 
   // We don't override computeDistanceToActualBaseline(), because we
@@ -325,7 +350,10 @@ class RenderBlockViewport extends RenderBlockBase {
   void paint(PaintingContext context, Offset offset) {
     context.canvas.save();
     context.canvas.clipRect(offset & size);
-    defaultPaint(context, offset.translate(0.0, startOffset));
+    if (isVertical)
+      defaultPaint(context, offset.translate(0.0, startOffset));
+    else
+      defaultPaint(context, offset.translate(startOffset, 0.0));
     context.canvas.restore();
   }
 

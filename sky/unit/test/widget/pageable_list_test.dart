@@ -38,8 +38,6 @@ void main() {
     }
 
     tester.pumpFrame(builder);
-    // TODO(abarth): We shouldn't need to pump a second frame here.
-    tester.pumpFrame(builder);
 
     expect(currentPage, isNull);
     new FakeAsync().run((async) {
