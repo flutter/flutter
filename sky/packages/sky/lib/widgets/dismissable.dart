@@ -10,6 +10,7 @@ import 'package:sky/animation/curves.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/transitions.dart';
 import 'package:sky/widgets/framework.dart';
+import 'package:sky/widgets/gesture_detector.dart';
 
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const Duration _kCardDismissResize = const Duration(milliseconds: 300);
@@ -99,45 +100,33 @@ class Dismissable extends StatefulComponent {
       _maybeCallOnResized();
   }
 
-  EventDisposition _handlePointerDown(sky.PointerEvent event) {
+  void _handleScrollStart() {
     if (_fadePerformance.isAnimating)
-      return EventDisposition.processed;
-
+      return;
     _dragUnderway = true;
     _dragX = 0.0;
     _fadePerformance.progress = 0.0;
-    return EventDisposition.processed;
   }
 
-  EventDisposition _handlePointerMove(sky.PointerEvent event) {
-    if (!_isActive)
-      return EventDisposition.ignored;
-
-    if (_fadePerformance.isAnimating)
-      return EventDisposition.processed;
-
+  void _handleScrollUpdate(double scrollOffset) {
+    if (!_isActive || _fadePerformance.isAnimating)
+      return;
     double oldDragX = _dragX;
-    _dragX += event.dx;
+    _dragX -= scrollOffset;
     if (oldDragX.sign != _dragX.sign)
       setState(() {}); // Rebuild to update the new drag endpoint.
     if (!_fadePerformance.isAnimating)
       _fadePerformance.progress = _dragX.abs() / (_size.width * _kDismissCardThreshold);
-    return EventDisposition.processed;
   }
 
-  EventDisposition _handlePointerUpOrCancel(_) {
-    if (!_isActive)
-      return EventDisposition.ignored;
-
-    if (_fadePerformance.isAnimating)
-      return EventDisposition.processed;
-
+  _handleScrollEnd() {
+    if (!_isActive || _fadePerformance.isAnimating)
+      return;
     _dragUnderway = false;
     if (_fadePerformance.isCompleted)
       _startResizePerformance();
     else if (!_fadePerformance.isAnimating)
       _fadePerformance.reverse();
-    return EventDisposition.processed;
   }
 
   bool _isHorizontalFlingGesture(sky.GestureEvent event) {
@@ -185,22 +174,23 @@ class Dismissable extends StatefulComponent {
         height: dismissHeight);
     }
 
-    return new Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerMove: _handlePointerMove,
-      onPointerUp: _handlePointerUpOrCancel,
-      onPointerCancel: _handlePointerUpOrCancel,
-      onGestureFlingStart: _handleFlingStart,
-      child: new SizeObserver(
-        callback: _handleSizeChanged,
-        child: new FadeTransition(
-          performance: _fadePerformance,
-          onCompleted: _handleFadeCompleted,
-          opacity: new AnimatedValue<double>(1.0, end: 0.0),
-          child: new SlideTransition(
+    return new GestureDetector(
+      onHorizontalScrollStart: _handleScrollStart,
+      onHorizontalScrollUpdate: _handleScrollUpdate,
+      onHorizontalScrollEnd: _handleScrollEnd,
+      child: new Listener(
+        onGestureFlingStart: _handleFlingStart,
+        child: new SizeObserver(
+          callback: _handleSizeChanged,
+          child: new FadeTransition(
             performance: _fadePerformance,
-            position: new AnimatedValue<Point>(Point.origin, end: _activeCardDragEndPoint),
-            child: child
+            onCompleted: _handleFadeCompleted,
+            opacity: new AnimatedValue<double>(1.0, end: 0.0),
+            child: new SlideTransition(
+              performance: _fadePerformance,
+              position: new AnimatedValue<Point>(Point.origin, end: _activeCardDragEndPoint),
+              child: child
+            )
           )
         )
       )

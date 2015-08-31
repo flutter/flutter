@@ -83,6 +83,20 @@ class WidgetTester {
     return box.localToGlobal(box.size.center(Point.origin));
   }
 
+  Point getTopLeft(Widget widget) {
+    assert(widget != null);
+    RenderBox box = widget.renderObject as RenderBox;
+    assert(box != null);
+    return box.localToGlobal(Point.origin);
+  }
+
+  Point getTopRight(Widget widget) {
+    assert(widget != null);
+    RenderBox box = widget.renderObject as RenderBox;
+    assert(box != null);
+    return box.localToGlobal(box.size.topRight(Point.origin));
+  }
+
   HitTestResult _hitTest(Point location) => SkyBinding.instance.hitTest(location);
 
   EventDisposition _dispatchEvent(sky.Event event, HitTestResult result) {
