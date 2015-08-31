@@ -4,10 +4,8 @@
 
 #include "ui/gl/egl_util.h"
 
-#if defined(OS_ANDROID)
-#include <EGL/egl.h>
-#else
-#include "third_party/khronos/EGL/egl.h"
+#if !defined(OS_ANDROID)
+#error EGL should only be used on Android.
 #endif
 
 // This needs to be after the EGL includes
