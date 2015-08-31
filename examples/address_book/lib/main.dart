@@ -48,31 +48,7 @@ class AddressBookApp extends App {
   Widget buildFloatingActionButton(Navigator navigator) {
     return new FloatingActionButton(
       child: new Icon(type: 'image/photo_camera', size: 24),
-      backgroundColor: Theme.of(this).accentColor,
-      onPressed: () {
-        showDialog(navigator, (navigator) {
-          return new Dialog(
-            title: new Text("Describe your picture"),
-            content: new Block([
-              new Field(inputKey: fillKey, icon: "editor/format_color_fill", placeholder: "Color"),
-              new Field(inputKey: emoticonKey, icon: "editor/insert_emoticon", placeholder: "Emotion"),
-            ]),
-            onDismiss: navigator.pop,
-            actions: [
-              new FlatButton(
-                child: new Text('DISCARD'),
-                onPressed: navigator.pop
-              ),
-              new FlatButton(
-                child: new Text('SAVE'),
-                onPressed: () {
-                  navigator.pop();
-                }
-              ),
-            ]
-          );
-        });
-      }
+      backgroundColor: Theme.of(this).accentColor
     );
   }
 
