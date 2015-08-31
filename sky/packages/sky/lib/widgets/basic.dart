@@ -485,22 +485,64 @@ class Stack extends MultiChildRenderObjectWrapper {
 
   RenderStack createNode() => new RenderStack();
   RenderStack get renderObject => super.renderObject;
+
+  void updateParentData(RenderObject child, Positioned positioned) {
+    if (positioned == null)
+      _updateParentDataWithValues(child, null, null, null, null);
+    else
+      _updateParentDataWithValues(child, positioned.top, positioned.right, positioned.bottom, positioned.left);
+  }
+
+  void _updateParentDataWithValues(RenderObject child, double top, double right, double bottom, double left) {
+    assert(child.parentData is StackParentData);
+    final StackParentData parentData = child.parentData;
+    bool needsLayout = false;
+    if (parentData.top != top) {
+      parentData.top = top;
+      needsLayout = true;
+    }
+
+    if (parentData.right != right) {
+      parentData.right = right;
+      needsLayout = true;
+    }
+
+    if (parentData.bottom != bottom) {
+      parentData.bottom = bottom;
+      needsLayout = true;
+    }
+
+    if (parentData.left != left) {
+      parentData.left = left;
+      needsLayout = true;
+    }
+
+    if (needsLayout)
+      renderObject.markNeedsLayout();
+  }
 }
 
 class Positioned extends ParentDataNode {
   Positioned({
     Key key,
     Widget child,
-    double top,
-    double right,
-    double bottom,
-    double left
-  }) : super(child,
-             new StackParentData()..top = top
-                                  ..right = right
-                                  ..bottom = bottom
-                                  ..left = left,
-             key: key);
+    this.top,
+    this.right,
+    this.bottom,
+    this.left
+  }) : super(key: key, child: child);
+
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
+
+   void debugValidateAncestor(Widget ancestor) {
+     assert(() {
+       'Positioned must placed directly inside a Stack';
+       return ancestor is Stack;
+     });
+   }
 }
 
 class Grid extends MultiChildRenderObjectWrapper {
@@ -548,6 +590,19 @@ class Flex extends MultiChildRenderObjectWrapper {
     renderObject.alignItems = alignItems;
     renderObject.textBaseline = textBaseline;
   }
+
+  void updateParentData(RenderObject child, Flexible flexible) {
+    _updateParentDataWithValues(child, flexible == null ? null : flexible.flex);
+  }
+
+  void _updateParentDataWithValues(RenderObject child, int flex) {
+    assert(child.parentData is FlexParentData);
+    final FlexParentData parentData = child.parentData;
+    if (parentData.flex != flex) {
+      parentData.flex = flex;
+      renderObject.markNeedsLayout();
+    }
+  }
 }
 
 class Row extends Flex {
@@ -569,8 +624,17 @@ class Column extends Flex {
 }
 
 class Flexible extends ParentDataNode {
-  Flexible({ Key key, int flex: 1, Widget child })
-    : super(child, new FlexBoxParentData()..flex = flex, key: key);
+  Flexible({ Key key, this.flex: 1, Widget child })
+    : super(key: key, child: child);
+
+  final int flex;
+
+  void debugValidateAncestor(Widget ancestor) {
+    assert(() {
+      'Flexible must placed directly inside a Flex';
+      return ancestor is Flex;
+    });
+  }
 }
 
 class Paragraph extends LeafRenderObjectWrapper {
