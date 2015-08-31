@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <sstream>
-#include <GLES2/gl2.h>
 
 #include "ui/gl/gl_enums.h"
 
@@ -25,7 +24,7 @@ std::string GLEnums::GetStringEnum(uint32 value) {
 }
 
 std::string GLEnums::GetStringError(uint32 value) {
-  if (value == GL_NONE)
+  if (value == 0u)
     return "GL_NONE";
   return GetStringEnum(value);
 }

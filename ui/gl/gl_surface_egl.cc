@@ -23,16 +23,6 @@
 #include "ui/gl/scoped_make_current.h"
 #include "ui/gl/sync_control_vsync_provider.h"
 
-#if defined(USE_X11)
-extern "C" {
-#include <X11/Xlib.h>
-}
-#endif
-
-#if defined (USE_OZONE)
-#include "ui/ozone/public/surface_factory_ozone.h"
-#endif
-
 #if !defined(EGL_FIXED_SIZE_ANGLE)
 #define EGL_FIXED_SIZE_ANGLE 0x3201
 #endif
@@ -125,17 +115,7 @@ void* GetEGLConfig(const EGLNativeWindowType window,
                    const gfx::SurfaceConfiguration configuration,
                    bool allow_window_bit) {
   // Choose an EGL configuration.
-  // On X this is only used for PBuffer surfaces.
   EGLConfig config = {0};
-
-#if defined(USE_X11)
-  XWindowAttributes win_attribs;
-  if (!XGetWindowAttributes(GLSurfaceEGL::GetNativeDisplay(),
-                            window,
-                            &win_attribs)) {
-    return nullptr;
-  }
-#endif
 
   EGLint renderable_type = EGL_OPENGL_ES2_BIT;
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
@@ -160,19 +140,6 @@ void* GetEGLConfig(const EGLNativeWindowType window,
     EGL_NONE
   };
 
-#if defined(USE_OZONE)
-  config_attribs =
-      ui::SurfaceFactoryOzone::GetInstance()->GetEGLSurfaceProperties(
-          config_attribs);
-#elif defined(USE_X11)
-  // Try matching the window depth with an alpha channel,
-  // because we're worried the destination alpha width could
-  // constrain blending precision.
-  const int kBufferSizeOffset = 1;
-  const int kAlphaSizeOffset = 3;
-  config_attribs[kBufferSizeOffset] = win_attribs.depth;
-#endif
-
   EGLint num_configs;
   if (!eglChooseConfig(g_display,
                        config_attribs,
@@ -193,36 +160,6 @@ void* GetEGLConfig(const EGLNativeWindowType window,
                << GetLastEGLErrorString();
     return nullptr;
   }
-
-#if defined(USE_X11)
-  if (num_configs) {
-    EGLint config_depth;
-    if (!eglGetConfigAttrib(g_display,
-                            config,
-                            EGL_BUFFER_SIZE,
-                            &config_depth)) {
-      LOG(ERROR) << "eglGetConfigAttrib failed with error "
-                 << GetLastEGLErrorString();
-      return nullptr;
-    }
-
-    if (config_depth == win_attribs.depth) {
-      return config;
-    }
-  }
-
-  // Try without an alpha channel.
-  config_attribs[kAlphaSizeOffset] = 0;
-  if (!eglChooseConfig(g_display,
-                       config_attribs,
-                       &config,
-                       1,
-                       &num_configs)) {
-    LOG(ERROR) << "eglChooseConfig failed with error "
-               << GetLastEGLErrorString();
-    return nullptr;
-  }
-#endif
 
   if (num_configs == 0) {
     LOG(ERROR) << "No suitable EGL configs found.";
