@@ -107,7 +107,7 @@ class MixedViewportApp extends App {
     if (index >= lengths.length)
       return null;
     return new GestureDetector(
-      key: new Key.stringify(lengths[index]),
+      key: new ValueKey<double>(lengths[index]),
       onTap: () => removeBox(index),
       child: new Container(
         decoration: new BoxDecoration(
