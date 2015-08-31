@@ -90,7 +90,10 @@ class WidgetTester {
   }
 
   void tap(Widget widget, { int pointer: 1 }) {
-    Point location = getCenter(widget);
+    tapAt(getCenter(widget), pointer: pointer);
+  }
+
+  void tapAt(Point location, { int pointer: 1 }) {
     HitTestResult result = _hitTest(location);
     TestPointer p = new TestPointer(pointer);
     _dispatchEvent(p.down(location), result);
