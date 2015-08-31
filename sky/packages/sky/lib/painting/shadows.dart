@@ -4,11 +4,11 @@
 
 import 'dart:sky' as sky;
 
-/// Helper class to build a Paint DrawLooper that adds shadows to the Paint's
-/// operation.
+/// A helper class to build a [sky.DrawLooper] for drawing shadows
 class ShadowDrawLooperBuilder {
   var builder_ = new sky.LayerDrawLooperBuilder();
 
+  /// Add a shadow with the given parameters
   void addShadow(sky.Offset offset, sky.Color color, double blur) {
     builder_.addLayerOnTop(
           new sky.DrawLooperLayerInfo()
@@ -20,6 +20,7 @@ class ShadowDrawLooperBuilder {
             ..setMaskFilter(new sky.MaskFilter.blur(sky.BlurStyle.normal, blur)));
   }
 
+  /// Returns the draw looper built for the added shadows
   sky.DrawLooper build() {
     builder_.addLayerOnTop(new sky.DrawLooperLayerInfo(), new sky.Paint());
     return builder_.build();
