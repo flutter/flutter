@@ -154,17 +154,19 @@ class ClipOval extends OneChildRenderObjectWrapper {
 // POSITIONING AND SIZING NODES
 
 class Transform extends OneChildRenderObjectWrapper {
-  Transform({ Key key, this.transform, Widget child })
+  Transform({ Key key, this.transform, this.origin, Widget child })
     : super(key: key, child: child);
 
   final Matrix4 transform;
+  final Offset origin;
 
-  RenderTransform createNode() => new RenderTransform(transform: transform);
+  RenderTransform createNode() => new RenderTransform(transform: transform, origin: origin);
   RenderTransform get renderObject => super.renderObject;
 
   void syncRenderObject(Transform old) {
     super.syncRenderObject(old);
     renderObject.transform = transform;
+    renderObject.origin = origin;
   }
 }
 
