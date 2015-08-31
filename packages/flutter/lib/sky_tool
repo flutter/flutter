@@ -465,50 +465,59 @@ class IOSDevice(object):
             return False
         if cls._is_connected:
             return True
-        cmd = [
-            'ios-deploy',
-            '--detect',
-            '--timeout',
-            '1'
-        ]
-        logging.info(' '.join(cmd))
-        out = subprocess.check_output(cmd)
-        match = re.search(r'\[\.\.\.\.\] Found [^\)]*\) connected', out)
-        cls._is_connected = match is not None
+        try:
+            cmd = [
+                'ios-deploy',
+                '--detect',
+                '--timeout',
+                '1'
+            ]
+            logging.info(' '.join(cmd))
+            out = subprocess.check_output(cmd)
+            match = re.search(r'\[\.\.\.\.\] Found [^\)]*\) connected', out)
+            cls._is_connected = match is not None
+        except subprocess.CalledProcessError:
+            cls._is_connected = False
         return cls._is_connected
 
     @classmethod
     def install_app(cls, ios_app_path):
         if not cls.has_ios_deploy():
             return
-        cmd = [
-            'ios-deploy',
-            '--justlaunch',
-            '--timeout',
-            '10', # Smaller timeouts cause it to exit before having launched the app
-            '--bundle',
-            ios_app_path
-        ]
-        logging.info(' '.join(cmd))
-        subprocess.check_call(cmd)
+        try:
+            cmd = [
+                'ios-deploy',
+                '--justlaunch',
+                '--timeout',
+                '10', # Smaller timeouts cause it to exit before having launched the app
+                '--bundle',
+                ios_app_path
+            ]
+            logging.info(' '.join(cmd))
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError:
+            pass
 
     @classmethod
     def copy_file(cls, bundle_id, local_path, device_path):
         if not cls.has_ios_deploy():
             return
-        cmd = [
-            'ios-deploy',
-            '-t',
-            '1',
-            '--bundle_id',
-            bundle_id,
-            '--upload',
-            local_path,
-            '--to',
-            device_path
-        ]
-        logging.info(' '.join(cmd))
-        subprocess.check_call(cmd)
+        try:
+            cmd = [
+                'ios-deploy',
+                '-t',
+                '1',
+                '--bundle_id',
+                bundle_id,
+                '--upload',
+                local_path,
+                '--to',
+                device_path
+            ]
+            logging.info(' '.join(cmd))
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError:
+            pass
 
 
 class IOSSimulator(object):
