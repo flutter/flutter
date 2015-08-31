@@ -98,6 +98,12 @@ public class SkyActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        ActivityImpl.onResumeActivity(this);
+    }
+
+    @Override
     protected void onPostResume() {
         super.onPostResume();
         if (mView != null) {
