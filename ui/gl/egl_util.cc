@@ -4,6 +4,8 @@
 
 #include "ui/gl/egl_util.h"
 
+#include "build/build_config.h"
+
 #if !defined(OS_ANDROID)
 #error EGL should only be used on Android.
 #endif
