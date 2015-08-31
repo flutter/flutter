@@ -10,22 +10,40 @@ import 'package:sky/base/image_resource.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/shadows.dart';
 
+/// An immutable set of offsets in each of the four cardinal directions
+///
+/// Typically used for an offset from each of the four sides of a box. For
+/// example, the padding inside a box can be represented using this class.
 class EdgeDims {
-  // used for e.g. padding
+  // TODO(abarth): Remove this constructor or rename it to EdgeDims.fromTRBL.
+  /// Constructs an EdgeDims from offsets from the top, right, bottom and left
   const EdgeDims(this.top, this.right, this.bottom, this.left);
+
+  /// Constructs an EdgeDims where all the offsets are value
   const EdgeDims.all(double value)
       : top = value, right = value, bottom = value, left = value;
+
+  /// Constructs an EdgeDims with only the given values non-zero
   const EdgeDims.only({ this.top: 0.0,
                         this.right: 0.0,
                         this.bottom: 0.0,
                         this.left: 0.0 });
+
+  /// Constructs an EdgeDims with symmetrical vertical and horizontal offsets
   const EdgeDims.symmetric({ double vertical: 0.0,
                              double horizontal: 0.0 })
     : top = vertical, left = horizontal, bottom = vertical, right = horizontal;
 
+  /// The offset from the top
   final double top;
+
+  /// The offset from the right
   final double right;
+
+  /// The offset from the bottom
   final double bottom;
+
+  /// The offset from the left
   final double left;
 
   bool operator ==(other) {
@@ -52,6 +70,7 @@ class EdgeDims {
                         left - other.left);
   }
 
+  /// An EdgeDims with zero offsets in each direction
   static const EdgeDims zero = const EdgeDims(0.0, 0.0, 0.0, 0.0);
 
   int get hashCode {
@@ -65,14 +84,20 @@ class EdgeDims {
   String toString() => "EdgeDims($top, $right, $bottom, $left)";
 }
 
+/// A side of a border of a box
 class BorderSide {
   const BorderSide({
     this.color: const Color(0xFF000000),
     this.width: 1.0
   });
+
+  /// The color of this side of the border
   final Color color;
+
+  /// The width of this side of the border
   final double width;
 
+  /// A black border side of zero width
   static const none = const BorderSide(width: 0.0);
 
   int get hashCode {
@@ -84,6 +109,7 @@ class BorderSide {
   String toString() => 'BorderSide($color, $width)';
 }
 
+/// A border of a box, comprised of four sides
 class Border {
   const Border({
     this.top: BorderSide.none,
@@ -92,6 +118,7 @@ class Border {
     this.left: BorderSide.none
   });
 
+  /// A uniform border with all sides the same color and width
   factory Border.all({
     Color color: const Color(0xFF000000),
     double width: 1.0
@@ -100,11 +127,19 @@ class Border {
     return new Border(top: side, right: side, bottom: side, left: side);
   }
 
+  /// The top side of this border
   final BorderSide top;
+
+  /// The right side of this border
   final BorderSide right;
+
+  /// The bottom side of this border
   final BorderSide bottom;
+
+  /// The left side of this border
   final BorderSide left;
 
+  /// The widths of the sides of this border represented as an EdgeDims
   EdgeDims get dimensions {
     return new EdgeDims(top.width, right.width, bottom.width, left.width);
   }
@@ -120,6 +155,10 @@ class Border {
   String toString() => 'Border($top, $right, $bottom, $left)';
 }
 
+/// A shadow cast by a box
+///
+/// Note: BoxShadow can cast non-rectangular shadows if the box is
+/// non-rectangular (e.g., has a border radius or a circular shape).
 class BoxShadow {
   const BoxShadow({
     this.color,
@@ -127,10 +166,16 @@ class BoxShadow {
     this.blur
   });
 
+  /// The color of the shadow
   final Color color;
+
+  /// The displacement of the shadow from the box
   final Offset offset;
+
+  /// The standard deviation of the Gaussian to convolve with the box's shape
   final double blur;
 
+  /// Returns a new box shadow with its offset and blur scaled by the given factor
   BoxShadow scale(double factor) {
     return new BoxShadow(
       color: color,
@@ -139,97 +184,172 @@ class BoxShadow {
     );
   }
 
+  /// Linearly interpolate between two box shadows
+  ///
+  /// If either box shadow is null, this function linearly interpolates from a
+  /// a box shadow that matches the other box shadow in color but has a zero
+  /// offset and a zero blur.
+  static BoxShadow lerp(BoxShadow a, BoxShadow b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
+    return new BoxShadow(
+      color: lerpColor(a.color, b.color, t),
+      offset: lerpOffset(a.offset, b.offset, t),
+      blur: lerpNum(a.blur, b.blur, t)
+    );
+  }
+
+  /// Linearly interpolate between two lists of box shadows
+  ///
+  /// If the lists differ in length, excess items are lerped with null.
+  static List<BoxShadow> lerpList(List<BoxShadow> a, List<BoxShadow> b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      a = new List<BoxShadow>();
+    if (b == null)
+      b = new List<BoxShadow>();
+    List<BoxShadow> result = new List<BoxShadow>();
+    int commonLength = math.min(a.length, b.length);
+    for (int i = 0; i < commonLength; ++i)
+      result.add(BoxShadow.lerp(a[i], b[i], t));
+    for (int i = commonLength; i < a.length; ++i)
+      result.add(a[i].scale(1.0 - t));
+    for (int i = commonLength; i < b.length; ++i)
+      result.add(b[i].scale(t));
+    return result;
+  }
+
   String toString() => 'BoxShadow($color, $offset, $blur)';
 }
 
-BoxShadow lerpBoxShadow(BoxShadow a, BoxShadow b, double t) {
-  if (a == null && b == null)
-    return null;
-  if (a == null)
-    return b.scale(t);
-  if (b == null)
-    return a.scale(1.0 - t);
-  return new BoxShadow(
-    color: lerpColor(a.color, b.color, t),
-    offset: lerpOffset(a.offset, b.offset, t),
-    blur: lerpNum(a.blur, b.blur, t)
-  );
-}
-
-List<BoxShadow> lerpListBoxShadow(List<BoxShadow> a, List<BoxShadow> b, double t) {
-  if (a == null && b == null)
-    return null;
-  if (a == null)
-    a = new List<BoxShadow>();
-  if (b == null)
-    b = new List<BoxShadow>();
-  List<BoxShadow> result = new List<BoxShadow>();
-  int commonLength = math.min(a.length, b.length);
-  for (int i = 0; i < commonLength; ++i)
-    result.add(lerpBoxShadow(a[i], b[i], t));
-  for (int i = commonLength; i < a.length; ++i)
-    result.add(a[i].scale(1.0 - t));
-  for (int i = commonLength; i < b.length; ++i)
-    result.add(b[i].scale(t));
-  return result;
-}
-
+/// A 2D gradient
 abstract class Gradient {
   sky.Shader createShader();
 }
 
+/// A 2D linear gradient
 class LinearGradient extends Gradient {
   LinearGradient({
-    this.endPoints,
+    this.begin,
+    this.end,
     this.colors,
-    this.colorStops,
+    this.stops,
     this.tileMode: sky.TileMode.clamp
-  });
+  }) {
+    assert(colors.length == stops.length);
+  }
 
-  final List<Point> endPoints;
+  /// The point at which stop 0.0 of the gradient is placed
+  final Point begin;
+
+  /// The point at which stop 1.0 of the gradient is placed
+  final Point end;
+
+  /// The colors the gradient should obtain at each of the stops
+  ///
+  /// Note: This list must have the same length as [stops].
   final List<Color> colors;
-  final List<double> colorStops;
+
+  /// A list of values from 0.0 to 1.0 that denote fractions of the vector from start to end
+  ///
+  /// Note: This list must have the same length as [colors].
+  final List<double> stops;
+
+  /// How this gradient should tile the plane
   final sky.TileMode tileMode;
 
   sky.Shader createShader() {
-    return new sky.Gradient.linear(this.endPoints, this.colors,
-                                   this.colorStops, this.tileMode);
+    return new sky.Gradient.linear([begin, end], this.colors,
+                                   this.stops, this.tileMode);
   }
 
   String toString() {
-    return 'LinearGradient($endPoints, $colors, $colorStops, $tileMode)';
+    return 'LinearGradient($begin, $end, $colors, $stops, $tileMode)';
   }
 }
 
+/// A 2D radial gradient
 class RadialGradient extends Gradient {
   RadialGradient({
     this.center,
     this.radius,
     this.colors,
-    this.colorStops,
+    this.stops,
     this.tileMode: sky.TileMode.clamp
   });
 
+  /// The center of the gradient
   final Point center;
+
+  /// The radius at which stop 1.0 is placed
   final double radius;
+
+  /// The colors the gradient should obtain at each of the stops
+  ///
+  /// Note: This list must have the same length as [stops].
   final List<Color> colors;
-  final List<double> colorStops;
+
+  /// A list of values from 0.0 to 1.0 that denote concentric rings
+  ///
+  /// The rings are centered at [center] and have a radius equal to the value of
+  /// the stop times [radius].
+  ///
+  /// Note: This list must have the same length as [colors].
+  final List<double> stops;
+
+  /// How this gradient should tile the plane
   final sky.TileMode tileMode;
 
   sky.Shader createShader() {
-    return new sky.Gradient.radial(this.center, this.radius, this.colors,
-                                   this.colorStops, this.tileMode);
+    return new sky.Gradient.radial(center, radius, colors, stops, tileMode);
   }
 
   String toString() {
-    return 'RadialGradient($center, $radius, $colors, $colorStops, $tileMode)';
+    return 'RadialGradient($center, $radius, $colors, $stops, $tileMode)';
   }
 }
 
-enum ImageFit { fill, contain, cover, none, scaleDown }
+/// How an image should be inscribed into a box
+enum ImageFit {
+  /// Fill the box by distorting the image's aspect ratio
+  fill,
 
-enum ImageRepeat { repeat, repeatX, repeatY, noRepeat }
+  /// As large as possible while still containing the image entirely within the box
+  contain,
 
+  /// As small as possible while still covering the entire box
+  cover,
+
+  /// Center the image within the box and discard any portions of the image that
+  /// lie outside the box
+  none,
+
+  /// Center the image within the box and, if necessary, scale the image down to
+  /// ensure that the image fits within the box
+  scaleDown
+}
+
+/// How to paint any portions of a box not covered by an image
+enum ImageRepeat {
+  /// Repeat the image in both the x and y directions until the box is filled
+  repeat,
+
+  /// Repeat the image in the x direction until the box is filled horizontally
+  repeatX,
+
+  /// Repeat the image in the y direction until the box is filled vertically
+  repeatY,
+
+  /// Leave uncovered poritions of the box transparent
+  noRepeat
+}
+
+/// Paint an image into the given rectangle in the canvas
 void paintImage({
   sky.Canvas canvas,
   Rect rect,
@@ -289,9 +409,15 @@ void paintImage({
 
 typedef void BackgroundImageChangeListener();
 
+/// A background image for a box
 class BackgroundImage {
+  /// How the background image should be inscribed into the box
   final ImageFit fit;
+
+  /// How to paint any portions of the box not covered by the background image
   final ImageRepeat repeat;
+
+  /// A color filter to apply to the background image before painting it
   final sky.ColorFilter colorFilter;
 
   BackgroundImage({
@@ -302,6 +428,7 @@ class BackgroundImage {
   }) : _imageResource = image;
 
   sky.Image _image;
+  /// The image to be painted into the background
   sky.Image get image => _image;
 
   ImageResource _imageResource;
@@ -309,6 +436,7 @@ class BackgroundImage {
   final List<BackgroundImageChangeListener> _listeners =
       new List<BackgroundImageChangeListener>();
 
+  /// Call listener when the background images changes (e.g., arrives from the network)
   void addChangeListener(BackgroundImageChangeListener listener) {
     // We add the listener to the _imageResource first so that the first change
     // listener doesn't get callback synchronously if the image resource is
@@ -318,6 +446,7 @@ class BackgroundImage {
     _listeners.add(listener);
   }
 
+  /// No longer call listener when the background image changes
   void removeChangeListener(BackgroundImageChangeListener listener) {
     _listeners.remove(listener);
     // We need to remove ourselves as listeners from the _imageResource so that
@@ -340,9 +469,17 @@ class BackgroundImage {
   String toString() => 'BackgroundImage($fit, $repeat)';
 }
 
-enum Shape { rectangle, circle }
+// TODO(abarth): Rename to BoxShape?
+/// A 2D geometrical shape
+enum Shape {
+  /// An axis-aligned, 2D rectangle
+  rectangle,
 
-// This must be immutable, because we won't notice when it changes
+  /// A 2D locus of points equidistant from a single point
+  circle
+}
+
+/// An immutable description of how to paint a box
 class BoxDecoration {
   const BoxDecoration({
     this.backgroundColor, // null = don't draw background color
@@ -354,14 +491,33 @@ class BoxDecoration {
     this.shape: Shape.rectangle
   });
 
+  /// The color to fill in the background of the box
+  ///
+  /// The color is filled into the shape of the box (e.g., either a rectangle,
+  /// potentially with a border radius, or a circle).
   final Color backgroundColor;
+
+  /// An image to paint above the background color
   final BackgroundImage backgroundImage;
-  final double borderRadius;
+
+  /// A border to draw above the background
   final Border border;
+
+  /// If non-null, the corners of this box are rounded by this radius
+  ///
+  /// Applies only to boxes with rectangular shapes.
+  final double borderRadius;
+
+  /// A list of shadows cast by this box behind the background
   final List<BoxShadow> boxShadow;
+
+  /// A graident to use when filling the background
   final Gradient gradient;
+
+  /// The shape to fill the background color into and to cast as a shadow
   final Shape shape;
 
+  /// Returns a new box decoration that is scalled by the given factor
   BoxDecoration scale(double factor) {
     // TODO(abarth): Scale ALL the things.
     return new BoxDecoration(
@@ -369,9 +525,31 @@ class BoxDecoration {
       backgroundImage: backgroundImage,
       border: border,
       borderRadius: lerpNum(null, borderRadius, factor),
-      boxShadow: lerpListBoxShadow(null, boxShadow, factor),
+      boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
       shape: shape
+    );
+  }
+
+  /// Linearly interpolate between two box decorations
+  ///
+  /// Interpolates each parameter of the box decoration separately.
+  static BoxDecoration lerp(BoxDecoration a, BoxDecoration b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
+    // TODO(abarth): lerp ALL the fields.
+    return new BoxDecoration(
+      backgroundColor: lerpColor(a.backgroundColor, b.backgroundColor, t),
+      backgroundImage: b.backgroundImage,
+      border: b.border,
+      borderRadius: lerpNum(a.borderRadius, b.borderRadius, t),
+      boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
+      gradient: b.gradient,
+      shape: b.shape
     );
   }
 
@@ -397,31 +575,14 @@ class BoxDecoration {
   }
 }
 
-BoxDecoration lerpBoxDecoration(BoxDecoration a, BoxDecoration b, double t) {
-  if (a == null && b == null)
-    return null;
-  if (a == null)
-    return b.scale(t);
-  if (b == null)
-    return a.scale(1.0 - t);
-  // TODO(abarth): lerp ALL the fields.
-  return new BoxDecoration(
-    backgroundColor: lerpColor(a.backgroundColor, b.backgroundColor, t),
-    backgroundImage: b.backgroundImage,
-    border: b.border,
-    borderRadius: lerpNum(a.borderRadius, b.borderRadius, t),
-    boxShadow: lerpListBoxShadow(a.boxShadow, b.boxShadow, t),
-    gradient: b.gradient,
-    shape: b.shape
-  );
-}
-
+/// An object that paints a [BoxDecoration] into a canvas
 class BoxPainter {
   BoxPainter(BoxDecoration decoration) : _decoration = decoration {
     assert(decoration != null);
   }
 
   BoxDecoration _decoration;
+  /// The box decoration to paint
   BoxDecoration get decoration => _decoration;
   void set decoration (BoxDecoration value) {
     assert(value != null);
@@ -611,6 +772,7 @@ class BoxPainter {
     canvas.drawCircle(center, radius, paint);
   }
 
+  /// Paint the box decoration into the given location on the given canvas
   void paint(sky.Canvas canvas, Rect rect) {
     _paintBackgroundColor(canvas, rect);
     _paintBackgroundImage(canvas, rect);

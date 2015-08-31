@@ -131,7 +131,8 @@ import 'package:sky/widgets.dart';
 final BoxDecoration _decoration = new BoxDecoration(
   borderRadius: 5.0,
   gradient: new LinearGradient(
-    endPoints: [ Point.origin, const Point(0.0, 36.0) ],
+    start: Point.origin,
+    end: const Point(0.0, 36.0),
     colors: [ const Color(0xFFEEEEEE), const Color(0xFFCCCCCC) ]
   )
 );
