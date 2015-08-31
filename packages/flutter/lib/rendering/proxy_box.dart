@@ -287,13 +287,13 @@ class RenderShrinkWrapHeight extends RenderProxyBox {
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (child == null)
       return constraints.constrainWidth(0.0);
-    return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));    
+    return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (child == null)
       return constraints.constrainWidth(0.0);
-    return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));    
+    return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
@@ -516,13 +516,24 @@ class RenderDecoratedBox extends RenderProxyBox {
 class RenderTransform extends RenderProxyBox {
   RenderTransform({
     Matrix4 transform,
+    Offset origin,
     RenderBox child
   }) : super(child) {
     assert(transform != null);
     this.transform = transform;
+    this.origin = origin;
   }
 
   Matrix4 _transform;
+  Offset _origin;
+
+  Offset get origin => _origin;
+  void set origin (Offset newOrigin) {
+    if (_origin == newOrigin)
+      return;
+    _origin = newOrigin;
+    markNeedsPaint();
+  }
 
   void set transform(Matrix4 newTransform) {
     assert(newTransform != null);
@@ -562,10 +573,20 @@ class RenderTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  Matrix4 get _effectiveTransform {
+    if (_origin == null)
+      return _transform;
+    return new Matrix4
+      .identity()
+      .translate(_origin.dx, _origin.dy)
+      .multiply(_transform)
+      .translate(-_origin.dx, -_origin.dy);
+  }
+
   bool hitTest(HitTestResult result, { Point position }) {
     Matrix4 inverse = new Matrix4.zero();
     // TODO(abarth): Check the determinant for degeneracy.
-    inverse.copyInverse(_transform);
+    inverse.copyInverse(_effectiveTransform);
 
     Vector3 position3 = new Vector3(position.x, position.y, 0.0);
     Vector3 transformed3 = inverse.transform3(position3);
@@ -575,18 +596,18 @@ class RenderTransform extends RenderProxyBox {
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChildWithTransform(child, offset.toPoint(), _transform);
+      context.paintChildWithTransform(child, offset.toPoint(), _effectiveTransform);
   }
 
   void applyPaintTransform(Matrix4 transform) {
     super.applyPaintTransform(transform);
-    transform.multiply(_transform);
+    transform.multiply(_effectiveTransform);
   }
 
   String debugDescribeSettings(String prefix) {
     List<String> result = _transform.toString().split('\n').map((s) => '$prefix  $s\n').toList();
     result.removeLast();
-    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}';
+    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: ${origin}\n';
   }
 }
 
