@@ -39,7 +39,9 @@ export 'package:sky/rendering/viewport.dart' show ScrollDirection;
 
 class Opacity extends OneChildRenderObjectWrapper {
   Opacity({ Key key, this.opacity, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(opacity >= 0.0 && opacity <= 1.0);
+  }
 
   final double opacity;
 
@@ -54,7 +56,10 @@ class Opacity extends OneChildRenderObjectWrapper {
 
 class ColorFilter extends OneChildRenderObjectWrapper {
   ColorFilter({ Key key, this.color, this.transferMode, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(color != null);
+    assert(transferMode != null);
+  }
 
   final Color color;
   final sky.TransferMode transferMode;
@@ -75,7 +80,10 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
     this.decoration,
     this.position: BoxDecorationPosition.background,
     Widget child
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: child) {
+    assert(decoration != null);
+    assert(position != null);
+  }
 
   final BoxDecoration decoration;
   final BoxDecorationPosition position;
@@ -92,7 +100,9 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
 
 class CustomPaint extends OneChildRenderObjectWrapper {
   CustomPaint({ Key key, this.callback, this.token, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(callback != null);
+  }
 
   final CustomPaintCallback callback;
   final dynamic token; // set this to be repainted automatically when the token changes
@@ -155,7 +165,9 @@ class ClipOval extends OneChildRenderObjectWrapper {
 
 class Transform extends OneChildRenderObjectWrapper {
   Transform({ Key key, this.transform, this.origin, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(transform != null);
+  }
 
   final Matrix4 transform;
   final Offset origin;
@@ -172,7 +184,9 @@ class Transform extends OneChildRenderObjectWrapper {
 
 class Padding extends OneChildRenderObjectWrapper {
   Padding({ Key key, this.padding, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(padding != null);
+  }
 
   final EdgeDims padding;
 
@@ -187,7 +201,10 @@ class Padding extends OneChildRenderObjectWrapper {
 
 class Align extends OneChildRenderObjectWrapper {
   Align({ Key key, this.horizontal: 0.5, this.vertical: 0.5, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(horizontal != null);
+    assert(vertical != null);
+  }
 
   final double horizontal;
   final double vertical;
@@ -234,7 +251,9 @@ class SizedBox extends OneChildRenderObjectWrapper {
 
 class ConstrainedBox extends OneChildRenderObjectWrapper {
   ConstrainedBox({ Key key, this.constraints, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(constraints != null);
+  }
 
   final BoxConstraints constraints;
 
@@ -249,7 +268,9 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
 
 class AspectRatio extends OneChildRenderObjectWrapper {
   AspectRatio({ Key key, this.aspectRatio, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(aspectRatio != null);
+  }
 
   final double aspectRatio;
 
@@ -291,7 +312,10 @@ class ShrinkWrapHeight extends OneChildRenderObjectWrapper {
 
 class Baseline extends OneChildRenderObjectWrapper {
   Baseline({ Key key, this.baseline, this.baselineType: TextBaseline.alphabetic, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(baseline != null);
+    assert(baselineType != null);
+  }
 
   final double baseline; // in pixels
   final TextBaseline baselineType;
@@ -312,7 +336,10 @@ class Viewport extends OneChildRenderObjectWrapper {
     this.scrollDirection: ScrollDirection.vertical,
     this.scrollOffset: Offset.zero,
     Widget child
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: child) {
+    assert(scrollDirection != null);
+    assert(scrollOffset != null);
+  }
 
   final ScrollDirection scrollDirection;
   final Offset scrollOffset;
@@ -330,7 +357,9 @@ class Viewport extends OneChildRenderObjectWrapper {
 
 class SizeObserver extends OneChildRenderObjectWrapper {
   SizeObserver({ Key key, this.callback, Widget child })
-    : super(key: key, child: child);
+    : super(key: key, child: child) {
+    assert(callback != null);
+  }
 
   final SizeChangedCallback callback;
 
@@ -435,7 +464,9 @@ class BlockBody extends MultiChildRenderObjectWrapper {
   BlockBody(List<Widget> children, {
     Key key,
     this.direction: BlockDirection.vertical
-  }) : super(key: key, children: children);
+  }) : super(key: key, children: children) {
+    assert(direction != null);
+  }
 
   final BlockDirection direction;
 
@@ -456,21 +487,6 @@ class Stack extends MultiChildRenderObjectWrapper {
   RenderStack get renderObject => super.renderObject;
 }
 
-class Grid extends MultiChildRenderObjectWrapper {
-  Grid(List<Widget> children, { Key key, this.maxChildExtent })
-    : super(key: key, children: children);
-
-  final double maxChildExtent;
-
-  RenderGrid createNode() => new RenderGrid(maxChildExtent: maxChildExtent);
-  RenderGrid get renderObject => super.renderObject;
-
-  void syncRenderObject(Widget old) {
-    super.syncRenderObject(old);
-    renderObject.maxChildExtent = maxChildExtent;
-  }
-}
-
 class Positioned extends ParentDataNode {
   Positioned({
     Key key,
@@ -487,15 +503,35 @@ class Positioned extends ParentDataNode {
              key: key);
 }
 
-class Flex extends MultiChildRenderObjectWrapper {
+class Grid extends MultiChildRenderObjectWrapper {
+  Grid(List<Widget> children, { Key key, this.maxChildExtent })
+    : super(key: key, children: children) {
+    assert(maxChildExtent != null);
+  }
 
+  final double maxChildExtent;
+
+  RenderGrid createNode() => new RenderGrid(maxChildExtent: maxChildExtent);
+  RenderGrid get renderObject => super.renderObject;
+
+  void syncRenderObject(Widget old) {
+    super.syncRenderObject(old);
+    renderObject.maxChildExtent = maxChildExtent;
+  }
+}
+
+class Flex extends MultiChildRenderObjectWrapper {
   Flex(List<Widget> children, {
     Key key,
     this.direction: FlexDirection.horizontal,
     this.justifyContent: FlexJustifyContent.start,
     this.alignItems: FlexAlignItems.center,
     this.textBaseline
-  }) : super(key: key, children: children);
+  }) : super(key: key, children: children) {
+    assert(direction != null);
+    assert(justifyContent != null);
+    assert(alignItems != null);
+  }
 
   final FlexDirection direction;
   final FlexJustifyContent justifyContent;
@@ -538,7 +574,9 @@ class Flexible extends ParentDataNode {
 }
 
 class Paragraph extends LeafRenderObjectWrapper {
-  Paragraph({ Key key, this.text }) : super(key: key);
+  Paragraph({ Key key, this.text }) : super(key: key) {
+    assert(text != null);
+  }
 
   final TextSpan text;
 
@@ -579,7 +617,9 @@ class StyledText extends Component {
 }
 
 class Text extends Component {
-  Text(this.data, { Key key, TextStyle this.style }) : super(key: key);
+  Text(this.data, { Key key, TextStyle this.style }) : super(key: key) {
+    assert(data != null);
+  }
 
   final String data;
   final TextStyle style;
