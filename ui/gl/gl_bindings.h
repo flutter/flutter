@@ -335,7 +335,7 @@ struct GL_EXPORT DriverOSMESA {
   static std::string GetPlatformExtensions();
 };
 
-#if !defined(OS_MACOSX)
+#if defined(OS_ANDROID)
 struct GL_EXPORT DriverEGL {
   void InitializeStaticBindings();
   void InitializeDebugBindings();
