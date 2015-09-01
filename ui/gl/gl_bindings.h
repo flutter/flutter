@@ -14,8 +14,11 @@
 
 #include <GL/gl.h>
 #include <GL/glext.h>
+
+#if defined(OS_ANDROID) || defined(OS_LINUX)
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#endif
 
 #include "base/logging.h"
 #include "base/threading/thread_local.h"
