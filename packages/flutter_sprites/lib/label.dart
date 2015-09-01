@@ -29,28 +29,28 @@ class Label extends Node {
   TextPainter _painter;
   double _width;
 
-  final double _maxWidth = 10000.0;
-
   void paint(PaintingCanvas canvas) {
     if (_painter == null) {
       PlainTextSpan textSpan = new PlainTextSpan(_text);
       StyledTextSpan styledTextSpan = new StyledTextSpan(_textStyle, [textSpan]);
       _painter = new TextPainter(styledTextSpan);
 
-      _painter.maxWidth = _maxWidth;
-      _painter.minWidth = _maxWidth;
+      _painter.maxWidth = double.INFINITY;
+      _painter.minWidth = 0.0;
       _painter.layout();
 
-      _width = _painter.maxContentWidth;
+      _width = _painter.maxContentWidth.ceil().toDouble();
+
+      _painter.maxWidth = _width;
+      _painter.minWidth = _width;
+      _painter.layout();
     }
 
     Offset offset = Offset.zero;
     if (_textStyle.textAlign == TextAlign.center) {
-      //canvas.translate(-_maxWidth / 2.0, 0.0);
-      offset = new Offset(-_maxWidth / 2.0, 0.0);
+      offset = new Offset(-_width / 2.0, 0.0);
     } else if (_textStyle.textAlign == TextAlign.right) {
-      //canvas.translate(-_maxWidth, 0.0);
-      offset = new Offset(-_maxWidth, 0.0);
+      offset = new Offset(-_width, 0.0);
     }
 
     _painter.paint(canvas, offset);
