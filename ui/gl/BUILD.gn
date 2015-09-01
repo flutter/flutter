@@ -55,27 +55,8 @@ component("gl") {
     "gl_enums.h",
     "gl_enums_implementation_autogen.h",
     "gl_export.h",
-    "gl_fence.cc",
-    "gl_fence.h",
-    "gl_fence_arb.cc",
-    "gl_fence_arb.h",
-    "gl_fence_egl.cc",
-    "gl_fence_egl.h",
-    "gl_fence_nv.cc",
-    "gl_fence_nv.h",
     "gl_gl_api_implementation.cc",
     "gl_gl_api_implementation.h",
-    "gl_image.h",
-    "gl_image_egl.cc",
-    "gl_image_egl.h",
-    "gl_image_memory.cc",
-    "gl_image_memory.h",
-    "gl_image_ref_counted_memory.cc",
-    "gl_image_ref_counted_memory.h",
-    "gl_image_shared_memory.cc",
-    "gl_image_shared_memory.h",
-    "gl_image_stub.cc",
-    "gl_image_stub.h",
     "gl_implementation.cc",
     "gl_implementation.h",
     "gl_implementation_android.cc",
@@ -150,10 +131,6 @@ component("gl") {
   }
   if (is_linux) {
     deps += [ "//third_party/libevent" ]
-    sources += [
-      "gl_image_linux_dma_buffer.cc",
-      "gl_image_linux_dma_buffer.h",
-    ]
   }
   if (use_x11) {
     sources += [
@@ -166,8 +143,6 @@ component("gl") {
       "gl_egl_api_implementation.h",
       "gl_glx_api_implementation.cc",
       "gl_glx_api_implementation.h",
-      "gl_image_glx.cc",
-      "gl_image_glx.h",
       "gl_implementation_x11.cc",
       "gl_surface_glx.cc",
       "gl_surface_glx.h",
@@ -186,8 +161,6 @@ component("gl") {
     sources += [
       "gl_egl_api_implementation.cc",
       "gl_egl_api_implementation.h",
-      "gl_image_surface_texture.cc",
-      "gl_image_surface_texture.h",
     ]
 
     defines += [
@@ -198,19 +171,6 @@ component("gl") {
     libs = [ "android" ]
 
     deps += [ ":gl_jni_headers" ]
-  }
-  if (use_ozone) {
-    sources += [
-      "gl_context_ozone.cc",
-      "gl_egl_api_implementation.cc",
-      "gl_egl_api_implementation.h",
-      "gl_implementation_ozone.cc",
-      "gl_surface_ozone.cc",
-    ]
-    deps += [
-      "//ui/ozone",
-      "//ui/ozone:ozone_base",
-    ]
   }
   if (is_ios || is_mac) {
     sources = []
