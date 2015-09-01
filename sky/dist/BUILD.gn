@@ -7,6 +7,7 @@ root_dist_dir = "$root_build_dir/dist"
 copy("sky_viewer") {
   sources = [
     "$root_build_dir/sky_viewer.mojo",
+    "$root_build_dir/symbols/libsky_viewer_library.so",
   ]
   outputs = [ "$root_dist_dir/viewer/{{source_file_part}}" ]
 
