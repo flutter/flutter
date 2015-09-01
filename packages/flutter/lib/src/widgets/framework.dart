@@ -212,6 +212,15 @@ abstract class Widget {
   /// The parent of this widget in the widget tree.
   Widget get parent => _parent;
 
+  // The "generation" of a Widget is the frame in which it was last
+  // synced. We use this to tell if an instance of a Widget has moved
+  // to earlier in the tree so that when we come across where it used
+  // to be, we pretend it was never there. See syncChild().
+  static int _currentGeneration = 1;
+  int _generation = 0;
+  bool get isFromOldGeneration => _generation < _currentGeneration;
+  void _markAsFromCurrentGeneration() { _generation = _currentGeneration; }
+
   bool _mounted = false;
   bool _wasMounted = false;
   bool get mounted => _mounted;
@@ -305,6 +314,11 @@ abstract class Widget {
   bool retainStatefulNodeIfPossible(Widget newNode) => false;
 
   void _sync(Widget old, dynamic slot) {
+    assert(isFromOldGeneration);
+    assert(old == null || old.isFromOldGeneration);
+    _markAsFromCurrentGeneration();
+    if (old != null && old != this)
+      old._markAsFromCurrentGeneration();
     if (key is GlobalKey)
       (key as GlobalKey)._didSync(); // TODO(ianh): Remove the cast once the analyzer is cleverer.
   }
@@ -342,35 +356,63 @@ abstract class Widget {
   }
 
   void remove() {
-    walkChildren((Widget child) => child.remove());
+    walkChildren((Widget child) {
+      if (child._generation <= _generation)
+        child.remove();
+    });
     _renderObject = null;
     setParent(null);
   }
 
   void detachRenderObject();
 
+  Widget _getCandidateSingleChildFrom(Widget oldChild) {
+    Widget candidate = oldChild.singleChild;
+    if (candidate != null && !candidate.isFromOldGeneration)
+      candidate = null;
+    assert(candidate == null || candidate.parent == oldChild);
+    return candidate;
+  }
+
   // Returns the child which should be retained as the child of this node.
   Widget syncChild(Widget newNode, Widget oldNode, dynamic slot) {
 
+    assert(() {
+      'You have probably used a single instance of a Widget in two different places in the widget tree. Widgets can only be used in one place at a time.';
+      return newNode == null || newNode.isFromOldGeneration;
+    });
+
+    if (oldNode != null && !oldNode.isFromOldGeneration)
+      oldNode = null;
+
     if (newNode == oldNode) {
-      assert(newNode == null || newNode.mounted);
+      assert(newNode == null || newNode.isFromOldGeneration);
       assert(newNode is! RenderObjectWrapper ||
              (newNode is RenderObjectWrapper && newNode._ancestor != null)); // TODO(ianh): Simplify this once the analyzer is cleverer
-      if (newNode != null)
+      if (newNode != null) {
         newNode.setParent(this);
+        newNode._markAsFromCurrentGeneration();
+      }
       return newNode; // Nothing to do. Subtrees must be identical.
     }
 
     if (newNode == null) {
-      // the child in this slot has gone away
+      // the child in this slot has gone away (we know oldNode != null)
+      assert(oldNode != null);
+      assert(oldNode.isFromOldGeneration);
       assert(oldNode.mounted);
       oldNode.detachRenderObject();
       oldNode.remove();
       assert(!oldNode.mounted);
+      // we don't update the generation of oldNode, because there's
+      // still a chance it could be reused as-is later in the tree.
       return null;
     }
 
     if (oldNode != null) {
+      assert(newNode != null);
+      assert(newNode.isFromOldGeneration);
+      assert(oldNode.isFromOldGeneration);
       if (!_canSync(newNode, oldNode)) {
         assert(oldNode.mounted);
         // We want to handle the case where there is a removal of zero
@@ -378,8 +420,7 @@ abstract class Widget {
         // ourselves with a Widget that is a descendant of the
         // oldNode, skipping the nodes in between. Let's try that.
         Widget deadNode = oldNode;
-        Widget candidate = oldNode.singleChild;
-        assert(candidate == null || candidate.parent == oldNode);
+        Widget candidate = _getCandidateSingleChildFrom(oldNode);
         oldNode = null;
         while (candidate != null && _shouldReparentDuringSync) {
           if (_canSync(newNode, candidate)) {
@@ -389,13 +430,15 @@ abstract class Widget {
             oldNode = candidate;
             break;
           }
-          assert(candidate.singleChild == null || candidate.singleChild.parent == candidate);
-          candidate = candidate.singleChild;
+          candidate = _getCandidateSingleChildFrom(candidate);
         }
         deadNode.detachRenderObject();
         deadNode.remove();
       }
       if (oldNode != null) {
+        assert(newNode.isFromOldGeneration);
+        assert(oldNode.isFromOldGeneration);
+        assert(_canSync(newNode, oldNode));
         if (oldNode.retainStatefulNodeIfPossible(newNode)) {
           assert(oldNode.mounted);
           assert(!newNode.mounted);
@@ -410,7 +453,6 @@ abstract class Widget {
     }
 
     assert(oldNode == null || (oldNode.mounted == false && oldNode.parent == null));
-    assert(!newNode.mounted);
     newNode.setParent(this);
     newNode._sync(oldNode, slot);
     assert(newNode.renderObject is RenderObject);
@@ -439,7 +481,13 @@ abstract class Widget {
       nextPrefix = prefix + '   ';
       childrenString += lastChild.toString(nextPrefix, _adjustPrefixWithParentCheck(lastChild, nextStartPrefix));
     }
-    return '$startPrefix${toStringName()}\n$childrenString';
+    String suffix = '';
+    if (_generation != _currentGeneration) {
+      int delta = _generation - _currentGeneration;
+      String sign = delta < 0 ? '' : '+';
+      suffix = ' gen$sign$delta';
+    }
+    return '$startPrefix${toStringName()}$suffix\n$childrenString';
   }
   String toStringName() {
     if (key == null)
@@ -465,7 +513,9 @@ abstract class Widget {
 }
 
 bool _canSync(Widget a, Widget b) {
-  return a.runtimeType == b.runtimeType && a.key == b.key;
+  return a.runtimeType == b.runtimeType &&
+         a.key == b.key &&
+         (a._generation == 0 || b._generation == 0);
 }
 
 
@@ -786,6 +836,7 @@ abstract class Component extends Widget {
   void _buildIfDirty() {
     if (!_dirty || !_mounted)
       return;
+    assert(isFromOldGeneration);
     assert(renderObject != null);
     _sync(null, _slot);
   }
@@ -900,7 +951,7 @@ void exitLayoutCallbackBuilder(LayoutCallbackBuilderHandle handle) {
     _inLayoutCallbackBuilder -= 1;
     return true;
   });
-  Widget._notifyMountStatusChanged();
+  _endSyncPhase();
 }
 
 List<int> _debugFrameTimes = <int>[];
@@ -942,8 +993,7 @@ void _buildDirtyComponents() {
       _inBuildDirtyComponents = false;
       sky.tracing.end('Component.flushBuild');
     }
-
-    Widget._notifyMountStatusChanged();
+    _endSyncPhase();
   }
 
   if (_shouldLogRenderDuration) {
@@ -956,6 +1006,12 @@ void _buildDirtyComponents() {
       _debugFrameTimes.clear();
     }
   }
+
+}
+
+void _endSyncPhase() {
+  Widget._currentGeneration += 1;
+  Widget._notifyMountStatusChanged();
 }
 
 void _scheduleComponentForRender(Component component) {
@@ -1111,9 +1167,10 @@ abstract class RenderObjectWrapper extends Widget {
     // top of the lists
     while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
       Widget oldChild = oldChildren[childrenTop];
+      if (!oldChild.isFromOldGeneration)
+        break;
       assert(oldChild.mounted);
       Widget newChild = newChildren[childrenTop];
-      assert(newChild == oldChild || !newChild.mounted);
       if (!_canSync(oldChild, newChild))
         break;
       childrenTop += 1;
@@ -1124,9 +1181,10 @@ abstract class RenderObjectWrapper extends Widget {
     // bottom of the lists
     while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
       Widget oldChild = oldChildren[oldChildrenBottom];
+      if (!oldChild.isFromOldGeneration)
+        break;
       assert(oldChild.mounted);
       Widget newChild = newChildren[newChildrenBottom];
-      assert(newChild == oldChild || !newChild.mounted);
       if (!_canSync(oldChild, newChild))
         break;
       newChild = syncChild(newChild, oldChild, nextSibling);
@@ -1145,13 +1203,15 @@ abstract class RenderObjectWrapper extends Widget {
       oldKeyedChildren = new Map<Key, Widget>();
       while (childrenTop <= oldChildrenBottom) {
         Widget oldChild = oldChildren[oldChildrenBottom];
-        assert(oldChild.mounted);
-        if (oldChild.key != null) {
-          oldKeyedChildren[oldChild.key] = oldChild;
-        } else {
-          syncChild(null, oldChild, null);
+        if (oldChild.isFromOldGeneration) {
+          assert(oldChild.mounted);
+          if (oldChild.key != null) {
+            oldKeyedChildren[oldChild.key] = oldChild;
+          } else {
+            syncChild(null, oldChild, null);
+          }
+          oldChildrenBottom -= 1;
         }
-        oldChildrenBottom -= 1;
       }
     }
 
@@ -1163,7 +1223,7 @@ abstract class RenderObjectWrapper extends Widget {
         Key key = newChild.key;
         if (key != null) {
           oldChild = oldKeyedChildren[newChild.key];
-          if (oldChild != null) {
+          if (oldChild != null && oldChild.isFromOldGeneration) {
             if (oldChild.runtimeType != newChild.runtimeType)
               oldChild = null;
             oldKeyedChildren.remove(key);
@@ -1186,8 +1246,9 @@ abstract class RenderObjectWrapper extends Widget {
       childrenTop -= 1;
       Widget oldChild = oldChildren[childrenTop];
       assert(oldChild.mounted);
+      assert(oldChild.isFromOldGeneration);
       Widget newChild = newChildren[childrenTop];
-      assert(newChild == oldChild || !newChild.mounted);
+      assert(newChild.isFromOldGeneration);
       assert(_canSync(oldChild, newChild));
       newChild = syncChild(newChild, oldChild, nextSibling);
       assert(newChild.mounted);
@@ -1198,7 +1259,8 @@ abstract class RenderObjectWrapper extends Widget {
 
     if (haveOldNodes && !oldKeyedChildren.isEmpty) {
       for (Widget oldChild in oldKeyedChildren.values)
-        syncChild(null, oldChild, null);
+        if (oldChild.isFromOldGeneration)
+          syncChild(null, oldChild, null);
     }
 
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
