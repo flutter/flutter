@@ -165,6 +165,10 @@ class Laser extends GameObject {
   void move() {
     position += _offset;
   }
+
+  Explosion createExplosion() {
+    return new ExplosionMini(f.sheet);
+  }
 }
 
 Color colorForDamage(double damage, double maxDamage) {
