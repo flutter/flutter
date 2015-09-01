@@ -998,6 +998,9 @@ class SkyShellRunner(object):
 
     def main(self):
         logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
+        real_path = os.path.realpath(__file__)
+        if re.match(r'.*src\/sky\/packages\/sky\/', real_path) is not None:
+            logging.warning('Using overridden sky package located at ' + os.path.dirname(os.path.dirname(real_path)))
 
         parser = argparse.ArgumentParser(description='Sky App Runner')
         parser.add_argument('--verbose', dest='verbose', action='store_true',
