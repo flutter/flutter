@@ -159,9 +159,7 @@ component("gl") {
     sources += [
       "gl_bindings_autogen_glx.cc",
       "gl_bindings_autogen_glx.h",
-      "gl_context_glx.cc",
-      "gl_context_glx.h",
-      "gl_context_x11.cc",
+      "gl_context_osmesa_x11.cc",
       "gl_egl_api_implementation.cc",
       "gl_egl_api_implementation.h",
       "gl_glx_api_implementation.cc",
@@ -171,7 +169,8 @@ component("gl") {
       "gl_implementation_x11.cc",
       "gl_surface_glx.cc",
       "gl_surface_glx.h",
-      "gl_surface_x11.cc",
+      "gl_surface_osmesa_x11.cc",
+      "gl_surface_osmesa_x11.h",
     ]
 
     configs += [
