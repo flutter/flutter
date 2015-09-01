@@ -32,6 +32,7 @@
 
 #include <unicode/ubidi.h>
 #include <hb-icu.h>
+#include <hb-ot.h>
 
 #include "LayoutUtils.h"
 #include "MinikinInternal.h"
@@ -314,18 +315,6 @@ hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData)  {
         HB_MEMORY_MODE_WRITABLE, buffer, free);
 }
 
-static hb_bool_t harfbuzzGetGlyph(hb_font_t* hbFont, void* fontData, hb_codepoint_t unicode, hb_codepoint_t variationSelector, hb_codepoint_t* glyph, void* userData)
-{
-    MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
-    MinikinFont* font = paint->font;
-    uint32_t glyph_id;
-    bool ok = font->GetGlyph(unicode, &glyph_id);
-    if (ok) {
-        *glyph = glyph_id;
-    }
-    return ok;
-}
-
 static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, void* userData)
 {
     MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
@@ -346,7 +335,6 @@ hb_font_funcs_t* getHbFontFuncs() {
 
     if (hbFontFuncs == 0) {
         hbFontFuncs = hb_font_funcs_create();
-        hb_font_funcs_set_glyph_func(hbFontFuncs, harfbuzzGetGlyph, 0, 0);
         hb_font_funcs_set_glyph_h_advance_func(hbFontFuncs, harfbuzzGetGlyphHorizontalAdvance, 0, 0);
         hb_font_funcs_set_glyph_h_origin_func(hbFontFuncs, harfbuzzGetGlyphHorizontalOrigin, 0, 0);
         hb_font_funcs_make_immutable(hbFontFuncs);
@@ -367,7 +355,15 @@ static hb_face_t* getHbFace(MinikinFont* minikinFont) {
 
 static hb_font_t* create_hb_font(MinikinFont* minikinFont, MinikinPaint* minikinPaint) {
     hb_face_t* face = getHbFace(minikinFont);
-    hb_font_t* font = hb_font_create(face);
+    hb_font_t* parent_font = hb_font_create(face);
+    hb_ot_font_set_funcs(parent_font);
+
+    unsigned int upem = hb_face_get_upem(face);
+    hb_font_set_scale(parent_font, upem, upem);
+
+    hb_font_t* font = hb_font_create_sub_font(parent_font);
+    hb_font_destroy(parent_font);
+
     hb_font_set_funcs(font, getHbFontFuncs(), minikinPaint, 0);
     return font;
 }
