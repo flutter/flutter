@@ -15,6 +15,37 @@
 
 namespace gfx {
 
+#if defined(OS_LINUX)
+// On Linux, we always use the OSMesa implementation of GL so we hardcode these
+// functions here.
+
+void GetAllowedGLImplementations(std::vector<GLImplementation>* impls) {
+  impls->push_back(kGLImplementationOSMesaGL);
+}
+bool InitializeDynamicGLBindings(GLImplementation implementation,
+                                 GLContext* context) {
+  DCHECK_EQ(implementation, kGLImplementationOSMesaGL);
+  InitializeDynamicGLBindingsGL(context);
+  return true;
+}
+
+bool InitializeStaticGLBindings(GLImplementation implementation) {
+  DCHECK_EQ(implementation, kGLImplementationOSMesaGL);
+
+  return InitializeStaticGLBindingsOSMesaGL();
+}
+
+void InitializeDebugGLBindings() {
+  InitializeDebugGLBindingsOSMESA();
+}
+
+void ClearGLBindings() {
+  ClearGLBindingsOSMESA();
+  SetGLImplementation(kGLImplementationNone);
+  UnloadGLNativeLibraries();
+}
+#endif
+
 base::NativeLibrary LoadLibraryAndPrintError(const base::FilePath& filename) {
   base::NativeLibraryLoadError error;
   base::NativeLibrary library = base::LoadNativeLibrary(filename, &error);

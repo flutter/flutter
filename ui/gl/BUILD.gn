@@ -8,15 +8,7 @@ if (is_android) {
   import("//build/config/android/rules.gni")
 }
 
-config("gl_config") {
-  if (use_x11) {
-    defines = [ "GL_GLEXT_PROTOTYPES" ]
-  }
-}
-
-component("gl") {
-  output_name = "gl_wrapper"  # Avoid colliding with OS X"s libGL.dylib.
-
+source_set("gl") {
   sources = [
     "android/gl_jni_registrar.cc",
     "android/gl_jni_registrar.h",
@@ -26,12 +18,8 @@ component("gl") {
     "android/surface_texture.h",
     "android/surface_texture_listener.cc",
     "android/surface_texture_listener.h",
-    "egl_util.cc",
-    "egl_util.h",
     "gl_bindings.cc",
     "gl_bindings.h",
-    "gl_bindings_autogen_egl.cc",
-    "gl_bindings_autogen_egl.h",
     "gl_bindings_autogen_gl.cc",
     "gl_bindings_autogen_gl.h",
     "gl_bindings_autogen_osmesa.cc",
@@ -41,8 +29,6 @@ component("gl") {
     "gl_context.cc",
     "gl_context.h",
     "gl_context_android.cc",
-    "gl_context_egl.cc",
-    "gl_context_egl.h",
     "gl_context_mac.mm",
     "gl_context_osmesa.cc",
     "gl_context_osmesa.h",
@@ -71,8 +57,6 @@ component("gl") {
     "gl_surface.cc",
     "gl_surface.h",
     "gl_surface_android.cc",
-    "gl_surface_egl.cc",
-    "gl_surface_egl.h",
     "gl_surface_mac.mm",
     "gl_surface_osmesa.cc",
     "gl_surface_osmesa.h",
@@ -95,14 +79,10 @@ component("gl") {
     "sync_control_vsync_provider.h",
   ]
 
-  defines = [ "GL_IMPLEMENTATION" ]
-
   include_dirs = [
-    "//third_party/switfshader/include",
     "//third_party/mesa/src/include",
   ]
 
-  all_dependent_configs = [ ":gl_config" ]
   deps = [
     "//base/third_party/dynamic_annotations",
     "//skia",
@@ -121,25 +101,14 @@ component("gl") {
       "gl_implementation_osmesa.h",
     ]
 
-    configs += [
-      "//third_party/khronos:khronos_headers",
-    ]
+    configs += [ "//third_party/khronos:khronos_headers" ]
   }
   if (is_linux) {
     deps += [ "//third_party/libevent" ]
   }
   if (use_x11) {
     sources += [
-      "gl_bindings_autogen_glx.cc",
-      "gl_bindings_autogen_glx.h",
       "gl_context_osmesa_x11.cc",
-      "gl_egl_api_implementation.cc",
-      "gl_egl_api_implementation.h",
-      "gl_glx_api_implementation.cc",
-      "gl_glx_api_implementation.h",
-      "gl_implementation_x11.cc",
-      "gl_surface_glx.cc",
-      "gl_surface_glx.h",
       "gl_surface_osmesa_x11.cc",
       "gl_surface_osmesa_x11.h",
     ]
@@ -154,11 +123,19 @@ component("gl") {
   }
   if (is_android) {
     sources += [
+      "egl_util.cc",
+      "egl_util.h",
+      "gl_bindings_autogen_egl.cc",
+      "gl_bindings_autogen_egl.h",
+      "gl_context_egl.cc",
+      "gl_context_egl.h",
       "gl_egl_api_implementation.cc",
       "gl_egl_api_implementation.h",
+      "gl_surface_egl.cc",
+      "gl_surface_egl.h",
     ]
 
-    defines += [
+    defines = [
       "GL_GLEXT_PROTOTYPES",
       "EGL_EGLEXT_PROTOTYPES",
     ]
@@ -220,24 +197,6 @@ component("gl") {
       "gpu_switching_manager.h",
     ]
   }
-}
-
-source_set("gl_unittest_utils") {
-  testonly = true
-  sources = [
-    "gl_bindings_autogen_mock.cc",
-    "gl_bindings_autogen_mock.h",
-    "gl_mock.cc",
-    "gl_mock.h",
-    "gl_mock_autogen_gl.h",
-  ]
-
-  configs += [ "//third_party/khronos:khronos_headers" ]
-
-  deps = [
-    ":gl",
-    "//testing/gmock",
-  ]
 }
 
 if (is_android) {
