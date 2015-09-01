@@ -82,6 +82,8 @@ Running the examples
  - `$ ./packages/sky/sky_tool --local-build start tabs.dart`
 * When running code from the `examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `sky` directory and subdirectories will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
 * You can also use `$ ./packages/sky/sky_tool --local-build listen` in the various example directories (or your own Sky apps) to listen for changes you are making to the app and automatically update the running SkyShell instance on your Android device.  iOS device and simulator support are coming soon.
+* You can replace `--local-build` in any of the above commands with `--release` if you have made release builds and want to test with them.  E.g., `$ ./packages/sky/sky_tool --release start` will attempt to use your release build of the Android SkyShell.apk.
+* If you just need to install SkyShell on a device, you can run `$ ./packages/sky/sky_tool --local-build install`.
 
 Contributing code
 -----------------
