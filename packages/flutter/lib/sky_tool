@@ -647,6 +647,17 @@ class IOSSimulator(object):
         logging.info(' '.join(cmd))
         subprocess.check_call(cmd)
 
+    def _process_args(self, args):
+        if args.ios_sim_build_path is None:
+            if args.ios_sim_build_available:
+                if args.use_release:
+                    args.ios_sim_build_path = os.path.join(args.sky_src_path, args.ios_sim_release_build_path, IOS_APP_NAME)
+                elif args.local_build:
+                    args.ios_sim_build_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, IOS_APP_NAME)
+        if args.ios_sim_build_path is None:
+            logging.error('ios_sim commands require a valid -p argument if not using the --release or --local-build global arguments')
+            sys.exit(2)
+
     def get_application_identifier(self, path):
         cmd = PLIST_BUDDY_PATH + [
             '-c',
@@ -668,6 +679,8 @@ class IOSSimulator(object):
 
     # Launch whatever simulator the user last used, rather than try to guess which of their simulators they might want to use
     def boot_simulator(self, args, pids):
+        # Guarantee that the args get processed, since all of the commands funnel through here.
+        self._process_args(args)
         if self.is_simulator_booted():
             return
         # Use Popen here because launching the simulator from the command line in this manner doesn't return, so we can't check the result.
@@ -686,7 +699,7 @@ class IOSSimulator(object):
         cmd = SIMCTL_PATH + [
             'install',
             'booted',
-            args.path,
+            args.ios_sim_build_path,
         ]
         logging.info(' '.join(cmd))
         return subprocess.check_call(cmd)
@@ -695,7 +708,7 @@ class IOSSimulator(object):
         res = self.install_app(args, pids)
         if res != 0:
             return res
-        identifier = self.get_application_identifier(args.path)
+        identifier = self.get_application_identifier(args.ios_sim_build_path)
         launch_args = SIMCTL_PATH + ['launch']
         if wait:
             launch_args += [ '-w' ]
@@ -732,28 +745,28 @@ class IOSSimulator(object):
             help='A script that launches an'
                  ' application in the simulator and attaches'
                  ' the debugger to it.')
-        simulator_parser.add_argument('-p', dest='path', required=True,
-            help='Path to the simulator application.')
+        simulator_parser.add_argument('-p', dest='ios_sim_build_path', required=False,
+            help='Path to the simulator app build. Defaults to values specified by '
+                 'the sky_src_path and ios_sim_[debug|release]_build_path parameters, '
+                 'which are normally specified by using the local-build or release '
+                 'parameters. Not normally required.')
         simulator_parser.add_argument('-t', dest='target', required=False,
             default='examples/demo_launcher/lib/main.dart',
-            help='Sky server-relative path to the Sky app to run.')
+            help='Sky server-relative path to the Sky app to run. Not normally required.')
         simulator_parser.add_argument('-s', dest='server', required=False,
             default='localhost:8080',
-            help='Sky server address.')
+            help='Sky server address. Not normally required.')
         simulator_parser.add_argument('--ios_sim_path', dest='ios_sim_path',
             help='Path to your iOS Simulator executable. '
                  'Not normally required.')
 
         subparsers = simulator_parser.add_subparsers()
-        launch_parser = subparsers.add_parser('launch', help='Launch app')
-        launch_parser.set_defaults(func=self.launch_app)
         install_parser = subparsers.add_parser('install', help='Install app')
         install_parser.set_defaults(func=self.install_app)
-        debug_parser = subparsers.add_parser('debug', help='Debug app')
+        launch_parser = subparsers.add_parser('launch', help='Launch app. Automatically installs.')
+        launch_parser.set_defaults(func=self.launch_app)
+        debug_parser = subparsers.add_parser('debug', help='Debug app. Automatically installs and launches.')
         debug_parser.set_defaults(func=self.debug_app)
-
-    def run(self, args, pids):
-      return args.func(args)
 
 
 class StartListening(object):
