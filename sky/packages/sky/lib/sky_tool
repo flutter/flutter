@@ -955,7 +955,7 @@ class StopTracing(object):
             cmd = [ADB_PATH, 'root']
             logging.info(' '.join(cmd))
             output = subprocess.check_output(cmd)
-            match = re.match(r'.*cannot run as root.*', output
+            match = re.match(r'.*cannot run as root.*', output)
             if match is not None:
                 logging.error('Unable to download trace file %s\n'
                               'You need to be able to run adb as root '
