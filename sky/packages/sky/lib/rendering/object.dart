@@ -16,50 +16,71 @@ import 'package:vector_math/vector_math.dart';
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/base/hit_test.dart' show EventDisposition, HitTestTarget, HitTestEntry, HitTestResult;
 
+/// Base class for data associated with a [RenderObject] by its parent
+///
+/// Some render objects wish to store data on their children, such as their
+/// input parameters to the parent's layout algorithm or their position relative
+/// to other children.
 class ParentData {
   void detach() {
     detachSiblings();
   }
   void detachSiblings() { } // workaround for lack of inter-class mixins in Dart
+
+  /// Override this function in subclasses to merge in data from other instance into this instance
   void merge(ParentData other) {
-    // override this in subclasses to merge in data from other into this
     assert(other.runtimeType == this.runtimeType);
   }
   String toString() => '<none>';
 }
 
+/// Obsolete class that will be removed eventually
 class PaintingCanvas extends sky.Canvas {
   PaintingCanvas(sky.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
   // TODO(ianh): Just use sky.Canvas everywhere instead
 }
 
+/// A place to paint
+///
+/// Rather than holding a canvas directly, render objects paint using a painting
+/// context. The painting context has a canvas, which receives the
+/// individual draw operations, and also has functions for painting child
+/// render objects.
+///
+/// When painting a child render object, the canvas held by the painting context
+/// can change because the draw operations issued before and after painting the
+/// child might be recorded in separate compositing layers. For this reason, do
+/// not hold a reference to the canvas across operations that might paint
+/// child render objects.
 class PaintingContext {
-
-  // A PaintingContext wraps a canvas, so that the canvas can be
-  // hot-swapped whenever we need to start a new layer.
-
-  // Don't keep a reference to the PaintingContext.canvas, since it
-  // can change dynamically after any call to this object's methods.
-
+  /// Construct a painting context at a given offset with the given bounds
   PaintingContext.withOffset(Offset offset, Rect paintBounds) {
     _containerLayer = new ContainerLayer(offset: offset);
     _startRecording(paintBounds);
   }
 
+  /// Construct a painting context for paiting into the given layer with the given bounds
   PaintingContext.withLayer(ContainerLayer containerLayer, Rect paintBounds) {
     _containerLayer = containerLayer;
     _startRecording(paintBounds);
   }
 
+  /// A backdoor for testing that lets the test set a specific canvas
   PaintingContext.forTesting(this._canvas);
 
   ContainerLayer _containerLayer;
+  /// The layer contain all the composting layers that will be used for this context
   ContainerLayer get containerLayer => _containerLayer;
 
   PictureLayer _currentLayer;
   sky.PictureRecorder _recorder;
   PaintingCanvas _canvas;
-  PaintingCanvas get canvas => _canvas; // Paint on this.
+  /// The canvas on which to paint
+  ///
+  /// This getter can return a different canvas object after painting child
+  /// render objects using this canvas because draw operations before and after
+  /// a child might need to be recorded in separate compositing layers.
+  PaintingCanvas get canvas => _canvas;
 
   void _startRecording(Rect paintBounds) {
     assert(_currentLayer == null);
@@ -71,6 +92,7 @@ class PaintingContext {
     _containerLayer.add(_currentLayer);
   }
 
+  /// Stop recording draw operations into the current compositing layer
   void endRecording() {
     assert(_currentLayer != null);
     assert(_recorder != null);
@@ -81,6 +103,7 @@ class PaintingContext {
     _canvas = null;
   }
 
+  /// Whether the canvas is in a state that permits drawing the given child
   bool debugCanPaintChild(RenderObject child) {
     // You need to use layers if you are applying transforms, clips,
     // or similar, to a child. To do so, use the paintChildWith*()
@@ -90,6 +113,13 @@ class PaintingContext {
     return true;
   }
 
+  /// Paint a child render object at the given position
+  ///
+  /// If the child needs compositing, a new composited layer will be created
+  /// and inserted into the containerLayer. If the child does not require
+  /// compositing, the child will be painted into the current canvas.
+  ///
+  /// Note: After calling this function, the current canvas might change.
   void paintChild(RenderObject child, Point childPosition) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
@@ -116,8 +146,13 @@ class PaintingContext {
 
   static final Paint _disableAntialias = new Paint()..isAntiAlias = false;
 
+  /// Paint a child with a rectangular clip
+  ///
+  /// If the child needs compositing, the clip will be applied by a
+  /// compositing layer. Otherwise, the clip will be applied by the canvas.
+  ///
+  /// Note: clipRect is in the parent's coordinate space
   void paintChildWithClipRect(RenderObject child, Point childPosition, Rect clipRect) {
-    // clipRect is in the parent's coordinate space
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
@@ -132,8 +167,13 @@ class PaintingContext {
     }
   }
 
+  /// Paint a child with a rounded-rectangular clip
+  ///
+  /// If the child needs compositing, the clip will be applied by a
+  /// compositing layer. Otherwise, the clip will be applied by the canvas.
+  ///
+  /// Note: clipRRect is in the parent's coordinate space
   void paintChildWithClipRRect(RenderObject child, Point childPosition, Rect bounds, sky.RRect clipRRect) {
-    // clipRRect is in the parent's coordinate space
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
@@ -148,8 +188,13 @@ class PaintingContext {
     }
   }
 
+  /// Paint a child with a clip path
+  ///
+  /// If the child needs compositing, the clip will be applied by a
+  /// compositing layer. Otherwise, the clip will be applied by the canvas.
+  ///
+  /// Note: bounds and clipPath are in the parent's coordinate space
   void paintChildWithClipPath(RenderObject child, Point childPosition, Rect bounds, Path clipPath) {
-    // bounds and clipPath are in the parent's coordinate space
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
@@ -165,6 +210,10 @@ class PaintingContext {
     }
   }
 
+  /// Paint a child with a transform
+  ///
+  /// If the child needs compositing, the transform will be applied by a
+  /// compositing layer. Otherwise, the transform will be applied by the canvas.
   void paintChildWithTransform(RenderObject child, Point childPosition, Matrix4 transform) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
@@ -188,6 +237,11 @@ class PaintingContext {
       ..isAntiAlias = false;
   }
 
+  /// Paint a child with an opacity
+  ///
+  /// If the child needs compositing, the blending operation will be applied by
+  /// a compositing layer. Otherwise, the blending operation will be applied by
+  /// the canvas.
   void paintChildWithOpacity(RenderObject child,
                              Point childPosition,
                              Rect bounds,
@@ -215,6 +269,14 @@ class PaintingContext {
       ..isAntiAlias = false;
   }
 
+  /// Paint a child with a color filter
+  ///
+  /// The color filter is constructed by combining the given color and the given
+  /// transfer mode, as if they were passed to the [ColorFilter.mode] constructor.
+  ///
+  /// If the child needs compositing, the blending operation will be applied by
+  /// a compositing layer. Otherwise, the blending operation will be applied by
+  /// the canvas.
   void paintChildWithColorFilter(RenderObject child,
                                  Point childPosition,
                                  Rect bounds,
@@ -238,12 +300,18 @@ class PaintingContext {
     }
   }
 
-  // do not call directly
+  /// Instructs the child to draw itself onto this context at the given offset
+  ///
+  /// Do not call directly. This function is visible so that it can be
+  /// overridden in tests.
   void insertChild(RenderObject child, Offset offset) {
     child._paintWithContext(this, offset);
   }
 
-  // do not call directly
+  /// Instructs the child to paint itself into a new composited layer using this context
+  ///
+  /// Do not call directly. This function is visible so that it can be
+  /// overridden in tests.
   void compositeChild(RenderObject child, { Offset childOffset: Offset.zero, ContainerLayer parentLayer }) {
     // This ends the current layer and starts a new layer for the
     // remainder of our rendering. It also creates a new layer for the
@@ -285,8 +353,14 @@ class PaintingContext {
 
 }
 
+/// An abstract set of layout constraints
+///
+/// Concrete layout models (such as box) will create concrete subclasses to
+/// communicate layout constraints between parents and children.
 abstract class Constraints {
   const Constraints();
+
+  /// Whether there is exactly one size possible given these constraints
   bool get isTight;
 }
 
@@ -294,31 +368,61 @@ typedef void RenderObjectVisitor(RenderObject child);
 typedef void LayoutCallback(Constraints constraints);
 typedef double DimensionCallback(Constraints constraints);
 
+/// An object in the render tree
+///
+/// Render objects have a reference to their parent but do not commit to a model
+/// for their children.
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // LAYOUT
 
-  // parentData is only for use by the RenderObject that actually lays this
-  // node out, and any other nodes who happen to know exactly what
-  // kind of node that is.
+  /// Data for use by the parent render object
+  ///
+  /// The parent data is used by the render object that lays out this object
+  /// (typically this object's parent in the render tree) to store information
+  /// relevant to itself and to any other nodes who happen to know exactly what
+  /// the data means. The parent data is opaque to the child.
+  ///
+  /// - The parent data object must inherit from [ParentData] (despite being
+  ///   typed as `dynamic`).
+  /// - The parent data field must not be directly set, except by calling
+  ///   [setupParentData] on the parent node.
+  /// - The parent data can be set before the child is added to the parent, by
+  ///   calling [setupParentData] on the future parent node.
+  /// - The conventions for using the parent data depend on the layout protocol
+  ///   used between the parent and child. For example, in box layout, the
+  ///   parent data is completely opaque but in sector layout the child is
+  ///   permitted to read some fields of the parent data.
   dynamic parentData; // TODO(ianh): change the type of this back to ParentData once the analyzer is cleverer
+
+  /// Override to setup parent data correctly for your children
+  ///
+  /// You can call this function to set up the parent data for child before the
+  /// child is added to the parent's child list.
   void setupParentData(RenderObject child) {
-    // override this to setup .parentData correctly for your class
     assert(debugCanPerformMutations);
     if (child.parentData is! ParentData)
       child.parentData = new ParentData();
   }
 
-  void adoptChild(RenderObject child) { // only for use by subclasses
-    // call this whenever you decide a node is a child
+  /// Called by subclases when they decide a render object is a child
+  ///
+  /// Only for use by subclasses when changing their child lists. Calling this
+  /// in other cases will lead to an inconsistent tree and probably cause crashes.
+  void adoptChild(RenderObject child) {
     assert(debugCanPerformMutations);
     assert(child != null);
     setupParentData(child);
     super.adoptChild(child);
     markNeedsLayout();
-    markNeedsCompositingBitsUpdate();
+    _markNeedsCompositingBitsUpdate();
   }
-  void dropChild(RenderObject child) { // only for use by subclasses
+
+  /// Called by subclases when they decide a render object is no longer a child
+  ///
+  /// Only for use by subclasses when changing their child lists. Calling this
+  /// in other cases will lead to an inconsistent tree and probably cause crashes.
+  void dropChild(RenderObject child) {
     assert(debugCanPerformMutations);
     assert(child != null);
     assert(child.parentData != null);
@@ -326,10 +430,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     child.parentData.detach();
     super.dropChild(child);
     markNeedsLayout();
-    markNeedsCompositingBitsUpdate();
+    _markNeedsCompositingBitsUpdate();
   }
 
-  // Override in subclasses with children and call the visitor for each child.
+  /// Calls visitor for each immediate child of this render object
+  ///
+  /// Override in subclasses with children and call the visitor for each child
   void visitChildren(RenderObjectVisitor visitor) { }
 
   dynamic debugExceptionContext = '';
@@ -376,12 +482,15 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   static List<RenderObject> _nodesNeedingLayout = new List<RenderObject>();
   bool _needsLayout = true;
+  /// Whether this render object's layout information is dirty
   bool get needsLayout => _needsLayout;
   RenderObject _relayoutSubtreeRoot;
   bool _doingThisLayoutWithCallback = false;
   Constraints _constraints;
+  /// The layout constraints most recently supplied by the parent
   Constraints get constraints => _constraints;
-  bool debugDoesMeetConstraints(); // override this in a subclass to verify that your state matches the constraints object
+  /// Override this function in a subclass to verify that your state matches the constraints object
+  bool debugDoesMeetConstraints();
   bool debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
       return true; // we haven't yet done layout even once, so there's nothing for us to do
@@ -396,6 +505,21 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(node._relayoutSubtreeRoot == node);
     return true;
   }
+
+  /// Mark this render object's layout information as dirty
+  ///
+  /// Rather than eagerly updating layout information in response to writes into
+  /// this render object, we instead mark the layout information as dirty, which
+  /// schedules a visual update. As part of the visual update, the rendering
+  /// pipeline will update this render object's layout information.
+  ///
+  /// This mechanism batches the layout work so that multiple sequential writes
+  /// are coalesced, removing redundant computation.
+  ///
+  /// Causes [needsLayout] to return true for this render object. If the parent
+  /// render object indicated that it uses the size of this render object in
+  /// computing its layout information, this function will also mark the parent
+  /// as needing layout.
   void markNeedsLayout() {
     assert(debugCanPerformMutations);
     if (_needsLayout) {
@@ -418,6 +542,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       scheduler.ensureVisualUpdate();
     }
   }
+
   void _cleanRelayoutSubtreeRoot() {
     if (_relayoutSubtreeRoot != this) {
       _relayoutSubtreeRoot = null;
@@ -427,6 +552,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       });
     }
   }
+
+  /// Bootstrap the rendering pipeline by scheduling the very first layout
+  ///
+  /// Requires this render object to be attached and that this render object
+  /// is the root of the render tree.
+  ///
+  /// See [RenderView] for an example of how this function is used.
   void scheduleInitialLayout() {
     assert(attached);
     assert(parent is! RenderObject);
@@ -439,6 +571,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     _nodesNeedingLayout.add(this);
   }
+
+  /// Update the layout information for all dirty render objects
+  ///
+  /// This function is one of the core stages of the rendering pipeline. Layout
+  /// information is cleaned prior to painting so that render objects will
+  /// appear on screen in their up-to-date locations.
+  ///
+  /// See [SkyBinding] for an example of how this function is used.
   static void flushLayout() {
     sky.tracing.begin('RenderObject.flushLayout');
     _debugDoingLayout = true;
@@ -449,7 +589,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         _nodesNeedingLayout = new List<RenderObject>();
         dirtyNodes..sort((a, b) => a.depth - b.depth)..forEach((node) {
           if (node._needsLayout && node.attached)
-            node.layoutWithoutResize();
+            node._layoutWithoutResize();
         });
       }
     } finally {
@@ -457,7 +597,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       sky.tracing.end('RenderObject.flushLayout');
     }
   }
-  void layoutWithoutResize() {
+  void _layoutWithoutResize() {
     try {
       assert(_relayoutSubtreeRoot == this);
       RenderObject debugPreviousActiveLayout;
@@ -485,6 +625,29 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _needsLayout = false;
     markNeedsPaint();
   }
+
+  /// Compute the layout for this render object
+  ///
+  /// This function is the main entry point for parents to ask their children to
+  /// update their layout information. The parent passes a constraints object,
+  /// which informs the child as which layouts are permissible. The child is
+  /// required to obey the given constraints.
+  ///
+  /// If the parent reads information computed during the child's layout, the
+  /// parent must pass true for parentUsesSize. In that case, the parent will be
+  /// marked as needing layout whenever the child is marked as needing layout
+  /// because the parent's layout information depends on the child's layout
+  /// information. If the parent uses the default value (false) for
+  /// parentUsesSize, the child can change its layout information (subject to
+  /// the given constraints) without informing the parent.
+  ///
+  /// Subclasses should not override layout directly. Instead, they should
+  /// override performResize and/or performLayout.
+  ///
+  /// The parent's performLayout method should call the layout of all its
+  /// children unconditionally. It is the layout functions's responsibility (as
+  /// implemented here) to return early if the child does not need to do any
+  /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
     final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
     RenderObject relayoutSubtreeRoot;
@@ -533,20 +696,51 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     markNeedsPaint();
     assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
   }
-  bool get sizedByParent => false; // return true if the constraints are the only input to the sizing algorithm (in particular, child nodes have no impact)
-  void performResize(); // set the local dimensions, using only the constraints (only called if sizedByParent is true)
+
+  /// Whether the constraints are the only input to the sizing algorithm (in
+  /// particular, child nodes have no impact)
+  ///
+  /// Returning false is always correct, but returning true can be more
+  /// efficient when computing the size of this render object because we don't
+  /// need to recompute the size if the constraints don't change.
+  bool get sizedByParent => false;
+
+  /// Updates the render objects size using only the constraints
+  ///
+  /// Do not call this function directly: call [layout] instead. This function
+  /// is called by [layout] when there is actually work to be done by this
+  /// render object during layout. The layout constraints provided by your
+  /// parent are available via the [constraints] getter.
+  ///
+  /// Subclasses that set [sizedByParent] to true should override this function
+  /// to compute their size.
+  ///
+  /// Note: This function is called only if [sizedByParent] is true.
+  void performResize();
+
+  /// Do the work of computing the layout for this render object
+  ///
+  /// Do not call this function directly: call [layout] instead. This function
+  /// is called by [layout] when there is actually work to be done by this
+  /// render object during layout. The layout constraints provided by your
+  /// parent are available via the [constraints] getter.
+  ///
+  /// If [sizedByParent] is true, then this function should not actually change
+  /// the dimensions of this render object. Instead, that work should be done by
+  /// [performResize]. If [sizedByParent] is false, then this function should
+  /// both change the dimensions of this render object and instruct its children
+  /// to layout.
+  ///
+  /// In implementing this function, you must call [layout] on each of your
+  /// children, passing true for parentUsesSize if your layout information is
+  /// dependent on your child's layout information. Passing true for
+  /// parentUsesSize ensures that this render object will undergo layout if the
+  /// child undergoes layout. Otherwise, the child can changes its layout
+  /// information without informing this render object.
   void performLayout();
-    // Override this to perform relayout without your parent's
-    // involvement.
-    //
-    // This is called during layout. If sizedByParent is true, then
-    // performLayout() should not change your dimensions, only do that
-    // in performResize(). If sizedByParent is false, then set both
-    // your dimensions and do your children's layout here.
-    //
-    // When calling layout() on your children, pass in
-    // "parentUsesSize: true" if your size or layout is dependent on
-    // your child's size or intrinsic dimensions.
+
+  /// Allows this render object to mutation its child list during layout and
+  /// invokes callback
   void invokeLayoutCallback(LayoutCallback callback) {
     assert(_debugMutationsLocked);
     assert(_debugDoingThisLayout);
@@ -559,6 +753,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
+  /// Rotate this render object (not yet implemented)
+  void rotate({
+    int oldAngle, // 0..3
+    int newAngle, // 0..3
+    Duration time
+  }) { }
+
   // when the parent has rotated (e.g. when the screen has been turned
   // 90 degrees), immediately prior to layout() being called for the
   // new dimensions, rotate() is called with the old and new angles.
@@ -568,12 +769,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // ...but the rendering is expected to remain the same, pixel for
   // pixel, on the output device. Then, the layout() method or
   // equivalent will be invoked.
-
-  void rotate({
-    int oldAngle, // 0..3
-    int newAngle, // 0..3
-    Duration time
-  }) { }
 
 
   // PAINTING
@@ -590,36 +785,54 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
 
-  // Override this in subclasses to indicate that instances of your
-  // class need to have their own Layer. For example, videos.
+  /// Whether this render object paints using a composited layer
+  ///
+  /// Override this in subclasses to indicate that instances of your class need
+  /// to have their own compositing layer. For example, videos should return
+  /// true if they use hardware decoders.
+  ///
+  /// Note: This getter must not change value over the lifetime of this object.
   bool get hasLayer => false;
 
   ContainerLayer _layer;
+  /// The compositing layer that this render object uses to paint
+  ///
+  /// Call only when [hasLayer] is true.
   ContainerLayer get layer {
     assert(hasLayer);
     assert(!_needsPaint);
     return _layer;
   }
 
-  // When the subtree is mutated, we need to recompute our
-  // "needsCompositing" bit, and our ancestors need to do the
-  // same (in case ours changed). adoptChild() and dropChild() thus
-  // call markNeedsCompositingBitsUpdate().
   bool _needsCompositingBitsUpdate = true;
-  void markNeedsCompositingBitsUpdate() {
+  /// Mark the compositing state for this render object as dirty
+  ///
+  /// When the subtree is mutated, we need to recompute our [needsCompositing]
+  /// bit, and our ancestors need to do the same (in case ours changed).
+  /// Therefore, [adoptChild] and [dropChild] call
+  /// [markNeedsCompositingBitsUpdate].
+  void _markNeedsCompositingBitsUpdate() {
     if (_needsCompositingBitsUpdate)
       return;
     _needsCompositingBitsUpdate = true;
     final AbstractNode parent = this.parent; // TODO(ianh): remove the once the analyzer is cleverer
     if (parent is RenderObject)
-      parent.markNeedsCompositingBitsUpdate();
+      parent._markNeedsCompositingBitsUpdate();
   }
   bool _needsCompositing = false;
+  /// Whether we or one of our descendants has a compositing layer
+  ///
+  /// Only legal to call after [flushLayout] and [updateCompositingBits] have
+  /// been called.
   bool get needsCompositing {
-    // needsCompositing is true if either we have a layer or one of our descendants has a layer
     assert(!_needsCompositingBitsUpdate); // make sure we don't use this bit when it is dirty
     return _needsCompositing;
   }
+
+  /// Updates the [needsCompositing] bits
+  ///
+  /// Called as part of the rendering pipeline after [flushLayout] and before
+  /// [flushPaint].
   void updateCompositingBits() {
     if (!_needsCompositingBitsUpdate)
       return;
@@ -637,7 +850,19 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   bool _needsPaint = true;
+  /// The visual appearance of this render object has changed since it last painted
   bool get needsPaint => _needsPaint;
+
+  /// Mark this render object as having changed its visual appearance
+  ///
+  /// Rather than eagerly updating this render object's display list
+  /// in response to writes, we instead mark the the render object as needing to
+  /// paint, which schedules a visual update. As part of the visual update, the
+  /// rendering pipeline will give this render object an opportunity to update
+  /// its display list.
+  ///
+  /// This mechanism batches the painting work so that multiple sequential
+  /// writes are coalesced, removing redundant computation.
   void markNeedsPaint() {
     assert(!debugDoingPaint);
     if (!attached) return; // Don't try painting things that aren't in the hierarchy
@@ -664,6 +889,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       scheduler.ensureVisualUpdate();
     }
   }
+
+  /// Update the display lists for all render objects
+  ///
+  /// This function is one of the core stages of the rendering pipeline.
+  /// Painting occurs after layout and before the scene is recomposited so that
+  /// scene is composited with up-to-date display lists for every render object.
+  ///
+  /// See [SkyBinding] for an example of how this function is used.
   static void flushPaint() {
     sky.tracing.begin('RenderObject.flushPaint');
     _debugDoingPaint = true;
@@ -682,6 +915,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       sky.tracing.end('RenderObject.flushPaint');
     }
   }
+
+  /// Bootstrap the rendering pipeline by scheduling the very first paint
+  ///
+  /// Requires that this render object is attached, is the root of the render
+  /// tree, and has a composited layer.
+  ///
+  /// See [RenderView] for an example of how this function is used.
   void scheduleInitialPaint(ContainerLayer rootLayer) {
     assert(attached);
     assert(parent is! RenderObject);
@@ -736,18 +976,50 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
   }
 
+  /// The bounds within which this render object will paint
+  ///
+  /// A render object is permitted to paint outside the region it occupies
+  /// during layout but is not permitted to paint outside these paints bounds.
+  /// These paint bounds are used to construct memory-efficient composited
+  /// layers, which means attempting to paint outside these bounds can attempt
+  /// to write to pixels that do not exist in this render object's composited
+  /// layer.
   Rect get paintBounds;
+
+  /// Override this function to paint debugging information
   void debugPaint(PaintingContext context, Offset offset) { }
+
+  /// Paint this render object into the given context at the given offset
+  ///
+  /// Subclasses should override this function to provide a visual appearance
+  /// for themselves. The render object's local coordinate system is
+  /// axis-aligned with the coordinate system of the context's canvas and the
+  /// render object's local origin (i.e, x=0 and y=0) is placed at the given
+  /// offset in the context's canvas.
+  ///
+  /// Do not call this function directly. If you wish to paint yourself, call
+  /// [markNeedsPaint] instead to schedule a call to this function. If you wish
+  /// to paint one of your children, call one of the paint child functions on
+  /// the given context, such as [paintChild] or [paintChildWithClipRect].
+  ///
+  /// When painting one of your children (via a paint child function on the
+  /// given context), the current canvas held by the context might change
+  /// because draw operations before and after painting children might need to
+  /// be recorded on separate compositing layers.
   void paint(PaintingContext context, Offset offset) { }
 
+  /// If this render object applies a transform before painting, apply that
+  /// transform to the given matrix
+  ///
+  /// Used by coordinate conversion functions to translate coordiantes local to
+  /// one render object into coordinates local to another render object.
   void applyPaintTransform(Matrix4 transform) { }
 
 
   // EVENTS
 
+  /// Override this function to handle events that hit this render object
   EventDisposition handleEvent(sky.Event event, HitTestEntry entry) {
-    // override this if you have a client, to hand it to the client
-    // override this if you want to do anything with the event
     return EventDisposition.ignored;
   }
 
@@ -781,6 +1053,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
   }
+
+  /// Returns a human understandable name
   String toStringName() {
     String header = '${runtimeType}';
     if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
@@ -798,11 +1072,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       header += ' DETACHED';
     return header;
   }
+
   String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n${prefix}constraints: ${constraints}\n';
   String debugDescribeChildren(String prefix) => '';
 
 }
 
+/// Obsolete function that will be removed eventually
 double clamp({ double min: 0.0, double value: 0.0, double max: double.INFINITY }) {
   assert(min != null);
   assert(value != null);
@@ -811,10 +1087,12 @@ double clamp({ double min: 0.0, double value: 0.0, double max: double.INFINITY }
 }
 
 
-// GENERIC MIXIN FOR RENDER NODES WITH ONE CHILD
-
+/// Generic mixin for render objects with one child
+///
+/// Provides a child model for a render object subclass that has a unique child
 abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implements RenderObject {
   ChildType _child;
+  /// The render object's unique child
   ChildType get child => _child;
   void set child (ChildType value) {
     if (_child != null)
@@ -842,12 +1120,14 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
   }
 }
 
-
-// GENERIC MIXIN FOR RENDER NODES WITH A LIST OF CHILDREN
-
+/// Parent data to support a doubly-linked list of children
 abstract class ContainerParentDataMixin<ChildType extends RenderObject> {
+  /// The previous sibling in the parent's child list
   ChildType previousSibling;
+  /// The next sibling in the parent's child list
   ChildType nextSibling;
+
+  /// Clear the sibling pointers.
   void detachSiblings() {
     if (previousSibling != null) {
       assert(previousSibling.parentData is ContainerParentDataMixin<ChildType>);
@@ -866,6 +1146,10 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> {
   }
 }
 
+/// Generic mixin for render objects with a list of children
+///
+/// Provides a child model for a render object subclass that has a doubly-linked
+/// list of children.
 abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> implements RenderObject {
 
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
@@ -888,6 +1172,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   }
 
   int _childCount = 0;
+  /// The number of children
   int get childCount => _childCount;
 
   ChildType _firstChild;
@@ -934,6 +1219,9 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
       }
     }
   }
+  /// Insert child into this render object's child list before the given child
+  ///
+  /// To insert a child at the end of the child list, omit the before parameter.
   void add(ChildType child, { ChildType before }) {
     assert(child != this);
     assert(before != this);
@@ -943,11 +1231,14 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     adoptChild(child);
     _addToChildList(child, before: before);
   }
+
+  /// Add all the children to the end of this render object's child list
   void addAll(List<ChildType> children) {
     if (children != null)
       for (ChildType child in children)
         add(child);
   }
+
   void _removeFromChildList(ChildType child) {
     assert(child.parentData is ParentDataType);
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
@@ -971,10 +1262,18 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     child.parentData.nextSibling = null;
     _childCount -= 1;
   }
+
+  /// Remove this child from the child list
+  ///
+  /// Requires the child to be present in the child list.
   void remove(ChildType child) {
     _removeFromChildList(child);
     dropChild(child);
   }
+
+  /// Remove all their children from this render object's child list
+  ///
+  /// More efficient than removing them individually.
   void removeAll() {
     ChildType child = _firstChild;
     while (child != null) {
@@ -989,6 +1288,12 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     _lastChild = null;
     _childCount = 0;
   }
+
+  /// Move this child in the child list to be before the given child
+  ///
+  /// More efficient than removing and re-adding the child. Requires the child
+  /// to already be in the child list at some position. Pass null for before to
+  /// move the child to the end of the child list.
   void move(ChildType child, { ChildType before }) {
     assert(child != this);
     assert(before != this);
@@ -1033,8 +1338,13 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
   }
 
+  /// The first child in the child list
   ChildType get firstChild => _firstChild;
+
+  /// The last child in the child list
   ChildType get lastChild => _lastChild;
+
+  /// The next child after the given child in the child list
   ChildType childAfter(ChildType child) {
     assert(child.parentData is ParentDataType);
     return child.parentData.nextSibling;

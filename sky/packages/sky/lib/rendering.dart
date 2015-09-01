@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Includes and re-exports all Sky rendering classes.
+// Includes and re-exports all Sky rendering classes.
+
+/// The Sky render tree
+library rendering;
 
 export 'package:sky/rendering/auto_layout.dart';
 export 'package:sky/rendering/block.dart';
