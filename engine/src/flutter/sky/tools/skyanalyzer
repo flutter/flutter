@@ -36,6 +36,9 @@ _IGNORED_PATTERNS = [
   re.compile(r'.*dart-pub-cache.*/mojo-'),
   re.compile(r'.*/mojo/public/dart/'),
 
+  # It'd be nice if the other packages we used didn't have warnings, too...
+  re.compile(r'.*/dart-pub-cache/hosted/pub.dartlang.org/'),
+
   # TODO: Remove this once Sky no longer generates this warning.
   # dartbug.com/22836
   re.compile(r'.*cannot both be unnamed'),
