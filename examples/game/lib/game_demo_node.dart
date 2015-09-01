@@ -4,7 +4,7 @@ final double _gameSizeWidth = 320.0;
 double _gameSizeHeight = 320.0;
 
 final double _chunkSpacing = 640.0;
-final int _chunksPerLevel = 5;
+final int _chunksPerLevel = 6;
 
 final bool _drawDebug = false;
 
@@ -190,25 +190,22 @@ class GameDemoNode extends NodeWithSize {
   }
 
   void addLevelChunk(int chunk, double yPos) {
-    if (chunk == 0) {
-      // Leave the first chunk empty
-      return;
-    }
-
-    chunk -= 1;
-
     int level = chunk ~/ _chunksPerLevel;
     int part = chunk % _chunksPerLevel;
 
     if (part == 0) {
+      LevelLabel lbl = new LevelLabel(_objectFactory, level + 1);
+      lbl.position = new Point(0.0, yPos + _chunkSpacing / 2.0 - 150.0);
+      _level.addChild(lbl);
+    } else if (part == 1) {
       _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
-    } else if  (part == 1) {
-      _objectFactory.addEnemyScoutSwarm(4 + level * 2, yPos);
     } else if (part == 2) {
-      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+      _objectFactory.addEnemyScoutSwarm(4 + level * 2, yPos);
     } else if (part == 3) {
-      _objectFactory.addEnemyDestroyerSwarm(2 + level, yPos);
+      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     } else if (part == 4) {
+      _objectFactory.addEnemyDestroyerSwarm(2 + level, yPos);
+    } else if (part == 5) {
       _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     }
   }

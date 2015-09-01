@@ -86,6 +86,23 @@ abstract class GameObject extends Node {
   }
 }
 
+class LevelLabel extends GameObject {
+  LevelLabel(GameObjectFactory f, int level) : super(f) {
+    canDamageShip = false;
+    canBeDamaged = false;
+
+    Label lbl = new Label(
+      "LEVEL $level",
+      new TextStyle(
+        textAlign: TextAlign.center,
+        color:new Color(0xffffffff),
+        fontSize: 24.0,
+        fontWeight: FontWeight.w600
+      ));
+    addChild(lbl);
+  }
+}
+
 class Ship extends GameObject {
   Ship(GameObjectFactory f) : super(f) {
     // Add main ship sprite
