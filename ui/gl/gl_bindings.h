@@ -15,7 +15,9 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 
-#if defined(OS_ANDROID) || defined(OS_LINUX)
+#include "build/build_config.h"
+
+#if defined(OS_ANDROID) || defined(USE_X11)
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #endif
