@@ -59,40 +59,39 @@ void main() {
 
   });
 
-  // Requires _shouldReparentDuringSync
-  // test('remove one', () {
-  //
-  //   WidgetTester tester = new WidgetTester();
-  //
-  //   tester.pumpFrame(() {
-  //     return new Container(
-  //       child: new Container(
-  //         child: new TestState(
-  //           state: 10,
-  //           child: new Container()
-  //         )
-  //       )
-  //     );
-  //   });
-  //
-  //   TestState stateWidget = tester.findWidget((widget) => widget is TestState);
-  //
-  //   expect(stateWidget.state, equals(10));
-  //   expect(stateWidget.syncs, equals(0));
-  //
-  //   tester.pumpFrame(() {
-  //     return new Container(
-  //       child: new TestState(
-  //         state: 11,
-  //         child: new Container()
-  //       )
-  //     );
-  //   });
-  //
-  //   expect(stateWidget.state, equals(10));
-  //   expect(stateWidget.syncs, equals(1));
-  //
-  // });
+  test('remove one', () {
+
+    WidgetTester tester = new WidgetTester();
+
+    tester.pumpFrame(() {
+      return new Container(
+        child: new Container(
+          child: new TestState(
+            persistentState: 10,
+            child: new Container()
+          )
+        )
+      );
+    });
+
+    TestState stateWidget = tester.findWidget((widget) => widget is TestState);
+
+    expect(stateWidget.persistentState, equals(10));
+    expect(stateWidget.syncs, equals(0));
+
+    tester.pumpFrame(() {
+      return new Container(
+        child: new TestState(
+          persistentState: 11,
+          child: new Container()
+        )
+      );
+    });
+
+    expect(stateWidget.persistentState, equals(10));
+    expect(stateWidget.syncs, equals(1));
+
+  });
 
   test('swap instances around', () {
 
