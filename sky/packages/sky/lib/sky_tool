@@ -157,27 +157,15 @@ class InstallSky(object):
 
         # Install on connected Android device
         if android.is_connected() and args.android_build_available:
-            if args.use_release:
-                apk_path = os.path.join(args.sky_src_path, args.android_release_build_path, 'apks', APK_NAME)
-            else:
-                apk_path = os.path.join(args.sky_src_path, args.android_debug_build_path, 'apks', APK_NAME)
-            android.install_apk(apk_path)
+            android.install_apk(android.get_apk_path(args))
 
         # Install on connected iOS device
         if IOSDevice.is_connected() and args.ios_build_available:
-            if args.use_release:
-                app_path = os.path.join(args.sky_src_path, args.ios_release_build_path, IOS_APP_NAME)
-            else:
-                app_path = os.path.join(args.sky_src_path, args.ios_debug_build_path, IOS_APP_NAME)
-            IOSDevice.install_app(app_path)
+            IOSDevice.install_app(IOSDevice.get_app_path(args))
 
         # Install on iOS simulator if it's running
         if IOSSimulator.is_booted() and args.ios_sim_build_available:
-            if args.use_release:
-                app_path = os.path.join(args.sky_src_path, args.ios_sim_release_build_path, IOS_APP_NAME)
-            else:
-                app_path = os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, IOS_APP_NAME)
-            IOSSimulator.fork_install_app(app_path)
+            IOSSimulator.fork_install_app(IOSSimulator.get_app_path(args))
 
     # TODO(iansf): get rid of need for args
     def needs_install(self, args):
@@ -203,8 +191,6 @@ class StartSky(object):
             if installer.needs_install(args):
                 installer.run(args, pids)
 
-        android = AndroidDevice()
-
         project_or_path = os.path.abspath(args.project_or_path)
 
         if os.path.isdir(project_or_path):
@@ -227,6 +213,7 @@ class StartSky(object):
             logging.error('%s is not a valid packages path.' % package_root)
             return 2
 
+        android = AndroidDevice()
         # TODO(iansf): fix this so that we don't have to pass sky_server_root, main_dart, pid, and args.
         android.setup_servers(sky_server_root, main_dart, pids, args)
 
@@ -368,7 +355,7 @@ class AndroidDevice(object):
     def get_apk_path(self, args):
         if args.android_build_available and args.use_release:
             return os.path.join(os.path.normpath(args.sky_src_path), args.android_release_build_path, 'apks', APK_NAME)
-        elif args.android_build_available:
+        elif args.android_build_available and args.local_build:
             return os.path.join(os.path.normpath(args.sky_src_path), args.android_debug_build_path, 'apks', APK_NAME)
         else:
             return os.path.join(APK_DIR, APK_NAME)
@@ -504,6 +491,13 @@ class IOSDevice(object):
         return cls._is_connected
 
     @classmethod
+    def get_app_path(cls, args):
+        if args.use_release:
+            return os.path.join(args.sky_src_path, args.ios_release_build_path, IOS_APP_NAME)
+        else:
+            return os.path.join(args.sky_src_path, args.ios_debug_build_path, IOS_APP_NAME)
+
+    @classmethod
     def needs_install(cls, args):
         return cls.is_connected()
 
@@ -629,6 +623,13 @@ class IOSSimulator(object):
             return None
         cls._simulator_app_documents_dir = os.path.join(simulator_path, 'data', 'Containers', 'Data', 'Application', simulator_app_id, 'Documents')
         return cls._simulator_app_documents_dir
+
+    @classmethod
+    def get_app_path(cls, args):
+        if args.use_release:
+            return os.path.join(args.sky_src_path, args.ios_sim_release_build_path, IOS_APP_NAME)
+        else:
+            return os.path.join(args.sky_src_path, args.ios_sim_debug_build_path, IOS_APP_NAME)
 
     @classmethod
     def needs_install(cls, args):
@@ -1087,6 +1088,9 @@ class SkyShellRunner(object):
                 args.ios_build_available = True
             if os.path.isdir(os.path.join(args.sky_src_path, args.ios_sim_debug_build_path)):
                 args.ios_sim_build_available = True
+        else:
+            if os.path.isdir(APK_DIR):
+                args.android_build_available = True
 
         if not self._check_for_dart():
             sys.exit(2)
