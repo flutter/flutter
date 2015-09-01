@@ -952,6 +952,16 @@ class StopTracing(object):
         logging.info('Downloading trace %s ...' % os.path.basename(device_path))
 
         if device_path:
+            cmd = [ADB_PATH, 'root']
+            logging.info(' '.join(cmd))
+            output = subprocess.check_output(cmd)
+            match = re.match(r'.*cannot run as root.*', output
+            if match is not None:
+                logging.error('Unable to download trace file %s\n'
+                              'You need to be able to run adb as root '
+                              'on your android device' % device_path)
+                return 2
+
             cmd = [ADB_PATH, 'pull', device_path]
             logging.info(' '.join(cmd))
             subprocess.check_output(cmd)
