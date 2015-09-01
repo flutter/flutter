@@ -246,6 +246,19 @@ abstract class Widget {
   /// chain being correctly configured at this point.
   void walkChildren(WidgetTreeWalker walker) { }
 
+  /// If the object has a single child, return it. Override this if
+  /// you define a new child model with only one child.
+  Widget get singleChild => null;
+
+  /// Detaches the single child of this object from this object,
+  /// without calling remove() on that child.
+  /// Only called when singleChild returns a non-null node.
+  /// Override this if you override singleChild to return non-null.
+  void takeChild() {
+    assert(singleChild != null);
+    throw '${runtimeType} does not define a "takeChild()" method';
+  }
+
   static void _notifyMountStatusChanged() {
     try {
       sky.tracing.begin("Widget._notifyMountStatusChanged");
@@ -357,7 +370,31 @@ abstract class Widget {
     }
 
     if (oldNode != null) {
-      if (_canSync(newNode, oldNode)) {
+      if (!_canSync(newNode, oldNode)) {
+        assert(oldNode.mounted);
+        // We want to handle the case where there is a removal of zero
+        // or more widgets. In this case, we should be able to sync
+        // ourselves with a Widget that is a descendant of the
+        // oldNode, skipping the nodes in between. Let's try that.
+        Widget deadNode = oldNode;
+        Widget candidate = oldNode.singleChild;
+        assert(candidate == null || candidate.parent == oldNode);
+        oldNode = null;
+        while (candidate != null) {
+          if (_canSync(newNode, candidate)) {
+            assert(candidate.parent != null);
+            assert(candidate.parent.singleChild == candidate);
+            candidate.parent.takeChild();
+            oldNode = candidate;
+            break;
+          }
+          assert(candidate.singleChild == null || candidate.singleChild.parent == candidate);
+          candidate = candidate.singleChild;
+        }
+        deadNode.detachRenderObject();
+        deadNode.remove();
+      }
+      if (oldNode != null) {
         if (oldNode.retainStatefulNodeIfPossible(newNode)) {
           assert(oldNode.mounted);
           assert(!newNode.mounted);
@@ -368,11 +405,6 @@ abstract class Widget {
         } else {
           oldNode.setParent(null);
         }
-      } else {
-        assert(oldNode.mounted);
-        oldNode.detachRenderObject();
-        oldNode.remove();
-        oldNode = null;
       }
     }
 
@@ -442,19 +474,27 @@ bool _canSync(Widget a, Widget b) {
 abstract class TagNode extends Widget {
 
   TagNode({ Key key, Widget child })
-    : this.child = child, super(key: key) {
+    : child = child, super(key: key) {
     assert(child != null);
   }
 
   // TODO(jackson): Remove this workaround for limitation of Dart mixins
   TagNode._withKey(Widget child, Key key)
-    : this.child = child, super._withKey(key);
+    : child = child, super._withKey(key);
 
   Widget child;
 
   void walkChildren(WidgetTreeWalker walker) {
     if (child != null)
       walker(child);
+  }
+
+  Widget get singleChild => child;
+
+  void takeChild() {
+    assert(singleChild == child);
+    assert(child != null);
+    child = null;
   }
 
   void _sync(Widget old, dynamic slot) {
@@ -636,35 +676,47 @@ abstract class Component extends Widget {
   bool _dirty = true;
 
   Widget _child;
-  dynamic _slot; // cached slot from the last time we were synced
-
-  void updateSlot(dynamic newSlot) {
-    _slot = newSlot;
-    if (_child != null)
-      _child.updateSlot(newSlot);
-  }
 
   void walkChildren(WidgetTreeWalker walker) {
     if (_child != null)
       walker(_child);
   }
 
-  void remove() {
+  Widget get singleChild => _child;
+
+  bool _debugChildTaken = false;
+
+  void takeChild() {
+    assert(!_debugChildTaken);
+    assert(singleChild == _child);
     assert(_child != null);
-    assert(renderObject != null);
+    _child = null;
+    _renderObject = null;
+    assert(() { _debugChildTaken = true; return true; });
+  }
+
+  void remove() {
+    assert(_debugChildTaken || (_child != null && _renderObject != null));
     super.remove();
     _child = null;
   }
 
   void detachRenderObject() {
-    assert(_child != null);
-    assert(renderObject != null);
-    _child.detachRenderObject();
+    if (_child != null)
+      _child.detachRenderObject();
   }
 
   void dependenciesChanged() {
     // called by Inherited.sync()
     _scheduleBuild();
+  }
+
+  dynamic _slot; // cached slot from the last time we were synced
+
+  void updateSlot(dynamic newSlot) {
+    _slot = newSlot;
+    if (_child != null)
+      _child.updateSlot(newSlot);
   }
 
   // order corresponds to _build_ order, not depth in the tree.
@@ -711,7 +763,9 @@ abstract class Component extends Widget {
     _child = build();
     _currentOrder = lastOrder;
     assert(_child != null);
+    assert(() { _debugChildTaken = false; return true; });
     _child = syncChild(_child, oldChild, slot);
+    assert(!_debugChildTaken); // we shouldn't be able to lose our child when we're syncing it!
     assert(_child != null);
     assert(_child.parent == this);
 
@@ -1193,6 +1247,14 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
   void walkChildren(WidgetTreeWalker walker) {
     if (child != null)
       walker(child);
+  }
+
+  Widget get singleChild => _child;
+
+  void takeChild() {
+    assert(singleChild == child);
+    assert(child != null);
+    _child = null;
   }
 
   void syncRenderObject(RenderObjectWrapper old) {
