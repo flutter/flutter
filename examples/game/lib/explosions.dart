@@ -81,5 +81,29 @@ class ExplosionBig extends Explosion {
 }
 
 class ExplosionMini extends Explosion {
+  ExplosionMini(SpriteSheet sheet) {
+    for (int i = 0; i < 2; i++) {
+      Sprite star = new Sprite(sheet["star_0.png"]);
+      star.scale = 0.5;
+      star.colorOverlay = new Color(0xff95f4fb);
+      star.transferMode = sky.TransferMode.plus;
+      addChild(star);
 
+      double rotationStart = randomDouble() * 90.0;
+      double rotationEnd = 180.0 + randomDouble() * 90.0;
+      if (i == 0) {
+        rotationStart = -rotationStart;
+        rotationEnd = -rotationEnd;
+      }
+
+      ActionTween rotate = new ActionTween((a) => star.rotation = a, rotationStart, rotationEnd, 0.2);
+      actions.run(rotate);
+
+      ActionTween fade = new ActionTween((a) => star.opacity = a, 1.0, 0.0, 0.2);
+      actions.run(fade);
+    }
+
+    ActionSequence seq = new ActionSequence([new ActionDelay(0.2), new ActionRemoveNode(this)]);
+    actions.run(seq);
+  }
 }
