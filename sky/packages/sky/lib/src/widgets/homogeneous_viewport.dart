@@ -83,6 +83,10 @@ class HomogeneousViewport extends RenderObjectWrapper {
       _layoutDirty = true;
       itemCount = newNode.itemCount;
     }
+    if (itemsWrap != newNode.itemsWrap) {
+      _layoutDirty = true;
+      itemsWrap = newNode.itemsWrap;
+    }
     if (itemExtent != newNode.itemExtent) {
       _layoutDirty = true;
       itemExtent = newNode.itemExtent;

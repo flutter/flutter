@@ -23,6 +23,7 @@ class PageableListApp extends App {
   List<CardModel> cardModels;
   Size pageSize = new Size(200.0, 200.0);
   ScrollDirection scrollDirection = ScrollDirection.horizontal;
+  bool itemsWrap = false;
 
   void initState() {
     List<Size> cardSizes = [
@@ -67,13 +68,18 @@ class PageableListApp extends App {
     );
   }
 
-  EventDisposition switchScrollDirection() {
+  void switchScrollDirection() {
     setState(() {
       scrollDirection = (scrollDirection == ScrollDirection.vertical)
         ? ScrollDirection.horizontal
         : ScrollDirection.vertical;
     });
-    return EventDisposition.processed;
+  }
+
+  void toggleItemsWrap() {
+    setState(() {
+      itemsWrap = !itemsWrap;
+    });
   }
 
   bool _drawerShowing = false;
@@ -113,6 +119,13 @@ class PageableListApp extends App {
           selected: scrollDirection == ScrollDirection.vertical,
           child: new Text('Vertical Layout'),
           onPressed: switchScrollDirection
+        ),
+        new DrawerItem(
+          onPressed: toggleItemsWrap,
+          child: new Row([
+            new Flexible(child: new Text('Scrolling wraps around')),
+            new Checkbox(value: itemsWrap)
+          ])
         )
       ]
     );
@@ -132,7 +145,7 @@ class PageableListApp extends App {
   Widget buildBody() {
     Widget list = new PageableList<CardModel>(
       items: cardModels,
-      itemsWrap: true,
+      itemsWrap: itemsWrap,
       itemBuilder: buildCard,
       scrollDirection: scrollDirection,
       itemExtent: (scrollDirection == ScrollDirection.vertical)
