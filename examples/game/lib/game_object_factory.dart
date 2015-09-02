@@ -61,4 +61,13 @@ class GameObjectFactory {
 
     level.addChild(obj);
   }
+
+  void addBossFight(int l, double yPos) {
+    EnemyBoss boss = new EnemyBoss(this);
+    boss.position = new Point(0.0, yPos + _chunkSpacing / 2.0);
+    boss.setupActions();
+
+    level.addChild(boss);
+    playerState.boss = boss;
+  }
 }

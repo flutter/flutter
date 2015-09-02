@@ -36,6 +36,8 @@ class PlayerState extends Node {
 
   double _scrollSpeedTarget = normalScrollSpeed;
 
+  EnemyBoss boss;
+
   Sprite _sprtBgScore;
   ScoreDisplay _scoreDisplay;
   Sprite _sprtBgCoins;
@@ -87,7 +89,7 @@ class PlayerState extends Node {
     } else if (type == PowerUpType.speedLaser) {
       _speedLaserFrames += 300;
     } else if (type == PowerUpType.speedBoost) {
-      _speedBoostFrames += 300;
+      _speedBoostFrames += 150;
     }
   }
 
@@ -122,10 +124,18 @@ class PlayerState extends Node {
     if (_speedBoostFrames > 0) _speedBoostFrames--;
 
     // Update speed
-    if (speedBoostActive)
-      _scrollSpeedTarget = normalScrollSpeed * 6.0;
-    else
-      _scrollSpeedTarget = normalScrollSpeed;
+    if (boss != null) {
+      Point globalBossPos = boss.convertPointToBoxSpace(Point.origin);
+      if (globalBossPos.y > (_gameSizeHeight - 400.0))
+        _scrollSpeedTarget = 0.0;
+      else
+        _scrollSpeedTarget = normalScrollSpeed;
+    } else {
+      if (speedBoostActive)
+        _scrollSpeedTarget = normalScrollSpeed * 6.0;
+      else
+        _scrollSpeedTarget = normalScrollSpeed;
+    }
 
     scrollSpeed = GameMath.filter(scrollSpeed, _scrollSpeedTarget, 0.1);
   }

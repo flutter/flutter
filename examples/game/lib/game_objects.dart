@@ -377,8 +377,6 @@ class EnemyDestroyer extends Obstacle {
   void update(double dt) {
     _countDown -= 1;
     if (_countDown <= 0) {
-      print("SHOOT!!");
-
       // Shoot at player
       EnemyLaser laser = new EnemyLaser(f, rotation, 5.0, new Color(0xffffe38e));
       laser.position = position;
@@ -409,8 +407,6 @@ class EnemyLaser extends Obstacle {
 
     double rad = radians(rotation);
     _movement = new Offset(math.cos(rad) * speed, math.sin(rad) * speed);
-
-    print("LASER!!");
   }
 
   Sprite _sprt;
@@ -418,6 +414,39 @@ class EnemyLaser extends Obstacle {
 
   void move() {
     position += _movement;
+  }
+}
+
+class EnemyBoss extends Obstacle {
+  EnemyBoss(GameObjectFactory f) : super(f) {
+    radius = 48.0;
+    _sprt = new Sprite(f.sheet["enemy_destroyer_1.png"]);
+    _sprt.scale = 0.64;
+    addChild(_sprt);
+    maxDamage = 40.0;
+
+    constraints = [new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
+  }
+
+  Sprite _sprt;
+
+  int _countDown = randomInt(120) + 240;
+
+  void update(double dt) {
+    _countDown -= 1;
+    if (_countDown <= 0) {
+      // Shoot at player
+      EnemyLaser laser = new EnemyLaser(f, rotation, 5.0, new Color(0xffffe38e));
+      laser.position = position;
+      f.level.addChild(laser);
+
+      _countDown = 60 + randomInt(120);
+    }
+  }
+
+  void destroy() {
+    f.playerState.boss = null;
+    super.destroy();
   }
 }
 
