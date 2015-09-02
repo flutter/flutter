@@ -39,7 +39,6 @@
 namespace blink {
 
 class CSSStyleDeclaration;
-class DOMURL;
 class DOMWindowProperty;
 class Database;
 class DatabaseCallback;
