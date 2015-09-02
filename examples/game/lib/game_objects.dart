@@ -92,7 +92,7 @@ class LevelLabel extends GameObject {
     canBeDamaged = false;
 
     Label lbl = new Label(
-      "LEVEL $level",
+      "L E V E L $level",
       new TextStyle(
         textAlign: TextAlign.center,
         color:new Color(0xffffffff),
@@ -156,27 +156,54 @@ class Ship extends GameObject {
 }
 
 class Laser extends GameObject {
-  double impact = 1.0;
+  double impact = 0.0;
 
-  Laser(GameObjectFactory f, double r) : super(f) {
-    // Add sprite
-    _sprt = new Sprite(f.sheet["explosion_particle.png"]);
-    _sprt.scale = 0.5;
-    _sprt.colorOverlay = new Color(0xff95f4fb);
-    _sprt.transferMode = sky.TransferMode.plus;
-    _sprt.rotation = r + 90.0;
-    addChild(_sprt);
+  final List<Color> laserColors = [
+    new Color(0xff95f4fb),
+    new Color(0xff5bff35),
+    new Color(0xffff886c),
+    new Color(0xffffd012),
+    new Color(0xfffd7fff)
+  ];
+
+  Laser(GameObjectFactory f, int level, double r) : super(f) {
+    // Game object properties
     radius = 10.0;
     removeLimit = 640.0;
-
-
     canDamageShip = false;
     canBeDamaged = false;
+    impact = 1.0 + level * 0.5;
 
+    // Offset for movement
     _offset = new Offset(math.cos(radians(r)) * 10.0, math.sin(radians(r)) * 10.0);
+
+    // Drawing properties
+    rotation = r + 90.0;
+    int numLasers = level % 3 + 1;
+    Color laserColor = laserColors[(level ~/ 3) % laserColors.length];
+
+    // Add sprites
+    List<Sprite> sprites = [];
+    for (int i = 0; i < numLasers; i++) {
+      Sprite sprt = new Sprite(f.sheet["explosion_particle.png"]);
+      sprt.scale = 0.5;
+      sprt.colorOverlay = laserColor;
+      sprt.transferMode = sky.TransferMode.plus;
+      addChild(sprt);
+      sprites.add(sprt);
+    }
+
+    // Position the individual sprites
+    if (numLasers == 2) {
+      sprites[0].position = new Point(-3.0, 0.0);
+      sprites[1].position = new Point(3.0, 0.0);
+    } else if (numLasers == 3) {
+      sprites[0].position = new Point(-4.0, 0.0);
+      sprites[1].position = new Point(4.0, 0.0);
+      sprites[2].position = new Point(0.0, -2.0);
+    }
   }
 
-  Sprite _sprt;
   Offset _offset;
 
   void move() {
