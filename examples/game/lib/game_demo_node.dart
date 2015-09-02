@@ -80,7 +80,6 @@ class GameDemoNode extends NodeWithSize {
   PlayerState _playerState;
 
   // Game properties
-  double _scrollSpeed = 2.0;
   double _scroll = 0.0;
 
   int _framesToFire = 0;
@@ -95,11 +94,11 @@ class GameDemoNode extends NodeWithSize {
 
   void update(double dt) {
     // Scroll the level
-    _scroll = _level.scroll(_scrollSpeed);
-    _starField.move(0.0, _scrollSpeed);
+    _scroll = _level.scroll(_playerState.scrollSpeed);
+    _starField.move(0.0, _playerState.scrollSpeed);
 
-    _background.move(_scrollSpeed * 0.1);
-    _nebula.move(_scrollSpeed);
+    _background.move(_playerState.scrollSpeed * 0.1);
+    _nebula.move(_playerState.scrollSpeed);
 
     // Add objects
     addObjects();
@@ -226,11 +225,11 @@ class GameDemoNode extends NodeWithSize {
     _level.addChild(shot1);
 
     if (_playerState.sideLaserActive) {
-      Laser shot2 = new Laser(_objectFactory, laserLevel, 0.0);
+      Laser shot2 = new Laser(_objectFactory, laserLevel, -45.0);
       shot2.position = _level.ship.position + new Offset(17.0, -10.0);
       _level.addChild(shot2);
 
-      Laser shot3 = new Laser(_objectFactory, laserLevel, 180.0);
+      Laser shot3 = new Laser(_objectFactory, laserLevel, -135.0);
       shot3.position = _level.ship.position + new Offset(-17.0, -10.0);
       _level.addChild(shot3);
     }
