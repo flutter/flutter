@@ -61,7 +61,7 @@ Iterable<MaterialAsset> generateMaterialAssets(Map assetDescriptor) sync* {
     currentAssetDescriptor['density'] = density;
     for (String theme in generateValues(assetDescriptor, 'theme', kThemes)) {
       currentAssetDescriptor['theme'] = theme;
-      for (String size in generateValues(assetDescriptor, 'size', kSizes)) {
+      for (int size in generateValues(assetDescriptor, 'size', kSizes)) {
         currentAssetDescriptor['size'] = size;
         yield new MaterialAsset(currentAssetDescriptor);
       }
