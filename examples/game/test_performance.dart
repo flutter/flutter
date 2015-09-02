@@ -2,7 +2,7 @@ import 'dart:sky' as sky;
 import 'dart:math' as math;
 
 import 'package:sky/mojo/asset_bundle.dart';
-import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
 import 'package:skysprites/skysprites.dart';

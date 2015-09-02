@@ -5,15 +5,15 @@
 import 'dart:async';
 
 import 'package:sky/mojo/asset_bundle.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/rendering/object.dart';
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/button_base.dart';
-import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/framework.dart';
-import 'package:sky/widgets/title.dart';
-import 'package:sky/widgets/theme.dart';
+import 'package:sky/src/rendering/object.dart';
+import 'package:sky/src/widgets/basic.dart';
+import 'package:sky/src/widgets/button_base.dart';
+import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/widgets/navigator.dart';
+import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/src/widgets/title.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:skysprites/skysprites.dart';
 
 import 'game_demo.dart';
