@@ -6,43 +6,43 @@ part of dart.sky;
 
 class Paint {
   void setColorFilter(ColorFilter colorFilter) {
-    _colorFilter = colorFilter;
+    this.colorFilter = colorFilter;
   }
 
   void setDrawLooper(DrawLooper drawLooper) {
-    _drawLooper = drawLooper;
+    this.drawLooper = drawLooper;
   }
 
   void setFilterQuality(FilterQuality filterQuality) {
-    _filterQuality = filterQuality;
+    this.filterQuality = filterQuality;
   }
 
   void setMaskFilter(MaskFilter maskFilter) {
-    _maskFilter = maskFilter;
+    this.maskFilter = maskFilter;
   }
 
   void setStyle(PaintingStyle style) {
-    _style = style;
+    this.style = style;
   }
 
   void setShader(Shader shader) {
-    _shader = shader;
+    this.shader = shader;
   }
 
   void setTransferMode(TransferMode transferMode) {
-    _transferMode = transferMode;
+    this.transferMode = transferMode;
   }
 
   double strokeWidth;
   bool isAntiAlias = true;
   Color color = const Color(0xFF000000);
-  ColorFilter _colorFilter;
-  DrawLooper _drawLooper;
-  FilterQuality _filterQuality;
-  MaskFilter _maskFilter;
-  Shader _shader;
-  PaintingStyle _style;
-  TransferMode _transferMode;
+  ColorFilter colorFilter;
+  DrawLooper drawLooper;
+  FilterQuality filterQuality;
+  MaskFilter maskFilter;
+  Shader shader;
+  PaintingStyle style;
+  TransferMode transferMode;
 
   // Must match PaintFields enum in Paint.cpp.
   List<dynamic> get _value {
@@ -50,26 +50,26 @@ class Paint {
       strokeWidth,
       isAntiAlias,
       color,
-      _colorFilter,
-      _drawLooper,
-      _filterQuality,
-      _maskFilter,
-      _shader,
-      _style,
-      _transferMode,
+      colorFilter,
+      drawLooper,
+      filterQuality,
+      maskFilter,
+      shader,
+      style,
+      transferMode,
     ];
   }
 
   String toString() {
     String result = 'Paint(color:$color';
-    if (_shader != null)
-      result += ', shader: $_shader';
-    if (_colorFilter != null)
-      result += ', colorFilter: $_colorFilter';
-    if (_maskFilter != null)
-      result += ', maskFilter: $_maskFilter';
+    if (shader != null)
+      result += ', shader: $shader';
+    if (colorFilter != null)
+      result += ', colorFilter: $colorFilter';
+    if (maskFilter != null)
+      result += ', maskFilter: $maskFilter';
     // TODO(mpcomplete): Figure out how to show a drawLooper.
-    if (_drawLooper != null)
+    if (drawLooper != null)
       result += ', drawLooper:true';
     result += ')';
     return result;
