@@ -226,11 +226,11 @@ class GameDemoNode extends NodeWithSize {
     _level.addChild(shot1);
 
     if (_playerState.sideLaserActive) {
-      Laser shot2 = new Laser(_objectFactory, laserLevel, 0.0);
+      Laser shot2 = new Laser(_objectFactory, laserLevel, -45.0);
       shot2.position = _level.ship.position + new Offset(17.0, -10.0);
       _level.addChild(shot2);
 
-      Laser shot3 = new Laser(_objectFactory, laserLevel, 180.0);
+      Laser shot3 = new Laser(_objectFactory, laserLevel, -135.0);
       shot3.position = _level.ship.position + new Offset(-17.0, -10.0);
       _level.addChild(shot3);
     }
