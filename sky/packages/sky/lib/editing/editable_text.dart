@@ -7,9 +7,9 @@ import 'dart:sky' as sky;
 
 import 'package:sky/editing/editable_string.dart';
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/object.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/framework.dart';
+import 'package:sky/src/rendering/object.dart';
+import 'package:sky/src/widgets/basic.dart';
+import 'package:sky/src/widgets/framework.dart';
 
 const _kCursorBlinkPeriod = 500; // milliseconds
 const _kCursorGap = 1.0;

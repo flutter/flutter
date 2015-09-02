@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky/widgets/framework.dart';
+import 'package:sky/src/widgets/framework.dart';
 
 import '../../../examples/widgets/overlay_geometry.dart';
 import '../resources/display_list.dart';

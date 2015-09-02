@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/flat_button.dart';
-import 'package:sky/widgets/floating_action_button.dart';
-import 'package:sky/widgets/raised_button.dart';
+import 'package:sky/src/widgets/basic.dart';
+import 'package:sky/src/widgets/flat_button.dart';
+import 'package:sky/src/widgets/floating_action_button.dart';
+import 'package:sky/src/widgets/raised_button.dart';
 
 import '../resources/display_list.dart';
 
