@@ -34,7 +34,6 @@
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
-#include "sky/engine/core/css/DOMWindowCSS.h"
 #include "sky/engine/core/css/MediaQueryList.h"
 #include "sky/engine/core/css/MediaQueryMatcher.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
@@ -42,7 +41,6 @@
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/RequestAnimationFrameCallback.h"
-#include "sky/engine/core/events/PageTransitionEvent.h"
 #include "sky/engine/core/frame/DOMWindowProperty.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -299,13 +297,6 @@ void LocalDOMWindow::cancelAnimationFrame(int id)
 {
     if (Document* d = document())
         d->cancelAnimationFrame(id);
-}
-
-DOMWindowCSS& LocalDOMWindow::css() const
-{
-    if (!m_css)
-        m_css = DOMWindowCSS::create();
-    return *m_css;
 }
 
 void LocalDOMWindow::printErrorMessage(const String& message)

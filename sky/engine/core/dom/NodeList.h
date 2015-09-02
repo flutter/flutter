@@ -31,8 +31,7 @@ namespace blink {
 
 class Node;
 
-class NodeList : public RefCounted<NodeList>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+class NodeList : public RefCounted<NodeList> {
 public:
     virtual ~NodeList() { }
 

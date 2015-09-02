@@ -57,8 +57,7 @@ typedef HashSet<RawPtr<MutationObserverRegistration> > MutationObserverRegistrat
 typedef Vector<RefPtr<MutationObserver> > MutationObserverVector;
 typedef Vector<RefPtr<MutationRecord> > MutationRecordVector;
 
-class MutationObserver final : public RefCounted<MutationObserver>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+class MutationObserver final : public RefCounted<MutationObserver> {
 public:
     enum MutationType {
         ChildList = 1 << 0,

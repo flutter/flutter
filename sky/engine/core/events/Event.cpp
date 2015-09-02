@@ -24,6 +24,7 @@
 
 #include "gen/sky/core/EventHeaders.h"
 #include "gen/sky/core/EventInterfaces.h"
+#include "gen/sky/core/EventNames.h"
 #include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/wtf/CurrentTime.h"
 
@@ -100,11 +101,6 @@ const AtomicString& Event::interfaceName() const
     return EventNames::Event;
 }
 
-bool Event::isUIEvent() const
-{
-    return false;
-}
-
 bool Event::isKeyboardEvent() const
 {
     return false;
@@ -116,11 +112,6 @@ bool Event::isDragEvent() const
 }
 
 bool Event::isClipboardEvent() const
-{
-    return false;
-}
-
-bool Event::isBeforeTextInsertedEvent() const
 {
     return false;
 }

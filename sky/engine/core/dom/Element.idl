@@ -10,17 +10,11 @@ interface Element : ParentNode {
   [RaisesException] void setAttribute(DOMString name, optional DOMString? value);
   void removeAttribute(DOMString name);
 
-  sequence<Attr> getAttributes();
-
   void setNeedsLayout();
   void layout();
 
   // TODO(abarth): Move to Node.
   readonly attribute CSSStyleDeclaration style;
-
-  // TODO(abarth): Remove these when we implement more of the system.
-  [RaisesException] boolean matches(DOMString selectors);
-  readonly attribute DOMTokenList classList;
 
   ClientRect getBoundingClientRect();
   readonly attribute long offsetLeft;

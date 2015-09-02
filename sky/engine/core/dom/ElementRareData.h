@@ -23,7 +23,6 @@
 #define SKY_ENGINE_CORE_DOM_ELEMENTRAREDATA_H_
 
 #include "sky/engine/core/css/PropertySetCSSStyleDeclaration.h"
-#include "sky/engine/core/dom/DOMTokenList.h"
 #include "sky/engine/core/dom/NodeRareData.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -45,11 +44,7 @@ public:
     void setComputedStyle(PassRefPtr<RenderStyle> computedStyle) { m_computedStyle = computedStyle; }
     void clearComputedStyle() { m_computedStyle = nullptr; }
 
-    DOMTokenList* classList() const { return m_classList.get(); }
-    void setClassList(PassOwnPtr<DOMTokenList> classList) { m_classList = classList; }
-
 private:
-    OwnPtr<DOMTokenList> m_classList;
     OwnPtr<InlineCSSStyleDeclaration> m_cssomWrapper;
 
     RefPtr<RenderStyle> m_computedStyle;

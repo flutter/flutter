@@ -105,7 +105,6 @@ public:
     virtual const AtomicString& interfaceName() const;
 
     // These events are general classes of events.
-    virtual bool isUIEvent() const;
     virtual bool isKeyboardEvent() const;
 
     // Drag events are a subset of mouse events.
@@ -113,7 +112,6 @@ public:
 
     // These events lack a DOM interface.
     virtual bool isClipboardEvent() const;
-    virtual bool isBeforeTextInsertedEvent() const;
 
     bool propagationStopped() const { return m_propagationStopped || m_immediatePropagationStopped; }
     bool immediatePropagationStopped() const { return m_immediatePropagationStopped; }

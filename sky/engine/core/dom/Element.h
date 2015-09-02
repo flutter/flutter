@@ -42,7 +42,6 @@ class CSSStyleDeclaration;
 class Canvas;
 class ClientRect;
 class ClientRectList;
-class DOMTokenList;
 class Document;
 class ElementRareData;
 class ExceptionState;
@@ -50,7 +49,6 @@ class Image;
 class IntSize;
 class LayoutCallback;
 class MutableStylePropertySet;
-class PaintingCallback;
 class PropertySetCSSStyleDeclaration;
 class PseudoElement;
 class StylePropertySet;
@@ -124,8 +122,6 @@ public:
 
     PassRefPtr<ClientRectList> getClientRects();
     PassRefPtr<ClientRect> getBoundingClientRect();
-
-    void requestPaint(PassOwnPtr<PaintingCallback>);
 
     virtual void didMoveToNewDocument(Document&) override;
 
@@ -229,8 +225,6 @@ public:
     virtual const AtomicString imageSourceURL() const;
 
     bool matches(const String& selectors, ExceptionState&);
-
-    DOMTokenList& classList();
 
     virtual bool canContainRangeEndPoint() const override { return true; }
 

@@ -39,7 +39,6 @@
 #include "sky/engine/core/dom/Attr.h"
 #include "sky/engine/core/dom/ClientRect.h"
 #include "sky/engine/core/dom/ClientRectList.h"
-#include "sky/engine/core/dom/DOMTokenList.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ElementDataCache.h"
 #include "sky/engine/core/dom/ElementRareData.h"
@@ -63,8 +62,6 @@
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/painting/Canvas.h"
-#include "sky/engine/core/painting/PaintingCallback.h"
-#include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -337,12 +334,6 @@ PassRefPtr<ClientRect> Element::getBoundingClientRect()
         result.unite(quads[i].boundingBox());
 
     return ClientRect::create(result);
-}
-
-void Element::requestPaint(PassOwnPtr<PaintingCallback> callback)
-{
-    PaintingTasks::enqueueRequest(this, callback);
-    document().scheduleVisualUpdate();
 }
 
 void Element::setAttribute(const AtomicString& localName, const AtomicString& value, ExceptionState& exceptionState)
@@ -927,14 +918,6 @@ bool Element::matches(const String& selectors, ExceptionState& exceptionState)
     if (!selectorQuery)
         return false;
     return selectorQuery->matches(*this);
-}
-
-DOMTokenList& Element::classList()
-{
-    ElementRareData& rareData = ensureElementRareData();
-    if (!rareData.classList())
-        rareData.setClassList(DOMTokenList::create(*this));
-    return *rareData.classList();
 }
 
 KURL Element::hrefURL() const

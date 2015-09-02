@@ -42,8 +42,7 @@ class MediaQuerySet;
 // retrieve the current value of the given media query and to add/remove listeners that
 // will be called whenever the value of the query changes.
 
-class MediaQueryList final : public DartWrappable, public RefCounted<MediaQueryList> {
-    DEFINE_WRAPPERTYPEINFO();
+class MediaQueryList final : public RefCounted<MediaQueryList> {
 public:
     static PassRefPtr<MediaQueryList> create(PassRefPtr<MediaQueryMatcher>, PassRefPtr<MediaQuerySet>);
     virtual ~MediaQueryList();
