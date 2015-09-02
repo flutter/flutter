@@ -80,10 +80,10 @@ class Color {
     if (b == null)
       return _scaleAlpha(a, 1.0 - t);
     return new Color.fromARGB(
-      lerpNum(a.alpha, b.alpha, t).toInt(),
-      lerpNum(a.red, b.red, t).toInt(),
-      lerpNum(a.green, b.green, t).toInt(),
-      lerpNum(a.blue, b.blue, t).toInt()
+      lerpDouble(a.alpha, b.alpha, t).toInt(),
+      lerpDouble(a.red, b.red, t).toInt(),
+      lerpDouble(a.green, b.green, t).toInt(),
+      lerpDouble(a.blue, b.blue, t).toInt()
     );
   }
 

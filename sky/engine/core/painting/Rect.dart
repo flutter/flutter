@@ -118,10 +118,10 @@ class Rect {
       return new Rect.fromLTRB(b.left * k, b.top * k, b.right * k, b.bottom * k);
     }
     return new Rect.fromLTRB(
-      lerpNum(a.left, b.left, t),
-      lerpNum(a.top, b.top, t),
-      lerpNum(a.right, b.right, t),
-      lerpNum(a.bottom, b.bottom, t)
+      lerpDouble(a.left, b.left, t),
+      lerpDouble(a.top, b.top, t),
+      lerpDouble(a.right, b.right, t),
+      lerpDouble(a.bottom, b.bottom, t)
     );
   }
 

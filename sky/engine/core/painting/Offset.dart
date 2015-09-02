@@ -55,7 +55,7 @@ class Offset extends OffsetBase {
       return b * t;
     if (b == null)
       return a * (1.0 - t);
-    return new Offset(lerpNum(a.dx, b.dx, t), lerpNum(a.dy, b.dy, t));
+    return new Offset(lerpDouble(a.dx, b.dx, t), lerpDouble(a.dy, b.dy, t));
   }
 
   String toString() => "Offset($dx, $dy)";
