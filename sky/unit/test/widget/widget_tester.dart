@@ -117,8 +117,10 @@ class WidgetTester {
   void scroll(Widget widget, Offset offset, { int pointer: 1 }) {
     Point startLocation = getCenter(widget);
     Point endLocation = startLocation + offset;
-    HitTestResult result = _hitTest(startLocation);
     TestPointer p = new TestPointer(pointer);
+    // Events for the entire press-drag-release gesture are dispatched
+    // to the widgets "hit" by the pointer down event.
+    HitTestResult result = _hitTest(startLocation);
     _dispatchEvent(p.down(startLocation), result);
     _dispatchEvent(p.move(endLocation), result);
     _dispatchEvent(p.up(), result);
