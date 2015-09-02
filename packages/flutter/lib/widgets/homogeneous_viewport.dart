@@ -16,6 +16,7 @@ class HomogeneousViewport extends RenderObjectWrapper {
   HomogeneousViewport({
     Key key,
     this.builder,
+    this.itemsWrap: false,
     this.itemExtent, // required
     this.itemCount, // optional, but you cannot shrink-wrap this class or otherwise use its intrinsic dimensions if you don't specify it
     this.direction: ScrollDirection.vertical,
@@ -25,6 +26,7 @@ class HomogeneousViewport extends RenderObjectWrapper {
   }
 
   ListBuilder builder;
+  bool itemsWrap;
   double itemExtent;
   int itemCount;
   ScrollDirection direction;
@@ -115,16 +117,16 @@ class HomogeneousViewport extends RenderObjectWrapper {
     try {
       double mainAxisExtent = direction == ScrollDirection.vertical ? constraints.maxHeight : constraints.maxWidth;
       double offset;
-      if (startOffset <= 0.0) {
+      if (startOffset <= 0.0 && !itemsWrap) {
         _layoutFirstIndex = 0;
         offset = -startOffset;
       } else {
-        _layoutFirstIndex = startOffset ~/ itemExtent;
+        _layoutFirstIndex = (startOffset / itemExtent).floor();
         offset = -(startOffset % itemExtent);
       }
       if (mainAxisExtent < double.INFINITY) {
         _layoutItemCount = ((mainAxisExtent - offset) / itemExtent).ceil();
-        if (itemCount != null)
+        if (itemCount != null && !itemsWrap)
           _layoutItemCount = math.min(_layoutItemCount, itemCount - _layoutFirstIndex);
       } else {
         assert(() {

@@ -348,6 +348,7 @@ abstract class ScrollableWidgetList extends Scrollable {
     Key key,
     double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
+    this.itemsWrap: false,
     this.itemExtent,
     this.padding
   }) : super(key: key, initialScrollOffset: initialScrollOffset, scrollDirection: scrollDirection) {
@@ -355,6 +356,7 @@ abstract class ScrollableWidgetList extends Scrollable {
   }
 
   EdgeDims padding;
+  bool itemsWrap;
   double itemExtent;
   Size containerSize = Size.zero;
 
@@ -441,6 +443,7 @@ abstract class ScrollableWidgetList extends Scrollable {
         padding: _crossAxisPadding,
         child: new HomogeneousViewport(
           builder: _buildItems,
+          itemsWrap: itemsWrap,
           itemExtent: itemExtent,
           itemCount: itemCount,
           direction: scrollDirection,
@@ -472,19 +475,19 @@ class ScrollableList<T> extends ScrollableWidgetList {
     ScrollDirection scrollDirection: ScrollDirection.vertical,
     this.items,
     this.itemBuilder,
-    this.itemsWrap: false,
+    itemsWrap: false,
     double itemExtent,
     EdgeDims padding
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
+    itemsWrap: itemsWrap,
     itemExtent: itemExtent,
     padding: padding);
 
   List<T> items;
   ItemBuilder<T> itemBuilder;
-  bool itemsWrap;
 
   void syncConstructorArguments(ScrollableList<T> source) {
     items = source.items;
@@ -568,7 +571,7 @@ class PageableList<T> extends ScrollableList<T> {
     return EventDisposition.processed;
   }
 
-  int get currentPage => (scrollOffset / itemExtent).floor();
+  int get currentPage => (scrollOffset / itemExtent).floor() % itemCount;
 
   void _notifyPageChanged(_) {
     if (pageChanged != null)
