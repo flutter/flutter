@@ -53,6 +53,11 @@ class ConstraintRotationToNode extends Constraint {
   void constrain(Node node, double dt) {
     Offset offset;
 
+    if (targetNode.spriteBox != node.spriteBox) {
+      // The target node is in another sprite box or has been removed
+      return;
+    }
+
     if (targetNode.parent == node.parent) {
       offset = targetNode.position - node.position;
     } else {
