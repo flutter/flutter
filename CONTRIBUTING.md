@@ -73,6 +73,8 @@ The test should have a `main` function and use `package:test`.
 Running the examples
 --------------------
 
+* Before running the examples, you'll need to set up your path to include the Dart SDK directory, like so (starting in the src directory of your code tree):
+ - ``$ export PATH=$PATH:`pwd`/third_party/dark-sdk/dart-sdk/bin``
 * You can find example code in subdirectories of the `examples` directory, for example `examples/stocks`.
 * Once you have a local build, run `pub get` from the example folder of your choice to make sure that you have all of the Dart dependencies.
 * Then, to run the current example locally, you can run:
