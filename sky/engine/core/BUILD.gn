@@ -21,6 +21,7 @@ source_set("libraries") {
     "//mojo/public/cpp/utility",
     "//mojo/public/interfaces/application",
     "//skia",
+    "//sky/compositor",
     "//sky/engine/tonic:tonic",
     "//sky/engine/wtf",
     "//third_party/iccjpeg",
