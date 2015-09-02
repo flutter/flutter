@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/base/lerp.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets.dart';
@@ -34,7 +33,7 @@ class CardCollectionApp extends App {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
     ];
     cardModels = new List.generate(cardHeights.length, (i) {
-      Color color = lerpColor(colors.Red[300], colors.Blue[900], i / cardHeights.length);
+      Color color = Color.lerp(colors.Red[300], colors.Blue[900], i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
     super.initState();

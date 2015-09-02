@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/base/lerp.dart';
 import 'package:sky/theme/colors.dart';
 import 'package:sky/widgets.dart';
 
@@ -33,7 +32,7 @@ class PageableListApp extends App {
     .toList();
 
     cardModels = new List.generate(cardSizes.length, (i) {
-      Color color = lerpColor(Red[300], Blue[900], i / cardSizes.length);
+      Color color = Color.lerp(Red[300], Blue[900], i / cardSizes.length);
       return new CardModel(i, cardSizes[i], color);
     });
 
