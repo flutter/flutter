@@ -5,6 +5,7 @@
 #ifndef SKY_SHELL_UI_ENGINE_H_
 #define SKY_SHELL_UI_ENGINE_H_
 
+#include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
@@ -60,6 +61,8 @@ class Engine : public UIDelegate,
 
   void StartDartTracing();
   void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
+
+  void SaveFrameToSkPicture(const base::FilePath& destination);
 
  private:
   // UIDelegate implementation:

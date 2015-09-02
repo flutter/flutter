@@ -5,6 +5,7 @@
 #ifndef SKY_SHELL_SHELL_VIEW_H_
 #define SKY_SHELL_SHELL_VIEW_H_
 
+#include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
 #include "mojo/public/cpp/system/data_pipe.h"
@@ -25,6 +26,8 @@ class ShellView {
 
   void StartDartTracing();
   void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
+
+  void SaveFrameToSkPicture(base::FilePath& destination);
 
  private:
   void CreateEngine();

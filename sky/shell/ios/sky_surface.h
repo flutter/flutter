@@ -10,3 +10,7 @@
 -(instancetype) initWithShellView:(sky::shell::ShellView *) shellView;
 
 @end
+
+extern "C" {
+void SaveFrameToSkPicture();
+}

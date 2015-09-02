@@ -108,6 +108,12 @@ void TracingController::OnBaseTraceChunk(
   }
 }
 
+void TracingController::SaveFrameToSkPicture(base::FilePath& destination) {
+  if (view_ != nullptr) {
+    view_->SaveFrameToSkPicture(destination);
+  }
+}
+
 void TracingController::RegisterShellView(ShellView* view) {
   view_ = view;
 }

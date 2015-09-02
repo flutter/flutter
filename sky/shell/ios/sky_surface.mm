@@ -385,3 +385,27 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 }
 
 @end
+
+void SaveFrameToSkPicture() {
+  @autoreleasepool {
+    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                         NSUserDomainMask, YES);
+    NSString* basePath = paths.firstObject;
+
+    if (basePath.length == 0) {
+      return;
+    }
+
+    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"HH_mm_ss"];
+    NSString* dateString = [formatter stringFromDate:[NSDate date]];
+    [formatter release];
+
+    NSString* path =
+        [NSString stringWithFormat:@"%@/%@.trace.skp", basePath, dateString];
+
+    base::FilePath filePath(path.UTF8String);
+    sky::shell::Shell::Shared().tracing_controller().SaveFrameToSkPicture(
+        filePath);
+  }
+}
