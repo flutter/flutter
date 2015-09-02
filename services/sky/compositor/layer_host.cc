@@ -10,7 +10,7 @@
 #include "mojo/gpu/gl_context.h"
 #include "mojo/services/surfaces/public/cpp/surfaces_utils.h"
 #include "mojo/skia/ganesh_context.h"
-#include "services/sky/compositor/layer.h"
+#include "services/sky/compositor/texture_layer.h"
 
 namespace sky {
 
@@ -36,7 +36,7 @@ void LayerHost::SetNeedsAnimate() {
     BeginFrameSoon();
 }
 
-void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
+void LayerHost::SetRootLayer(scoped_refptr<TextureLayer> layer) {
   DCHECK(!root_layer_.get());
   root_layer_ = layer;
 }
@@ -86,7 +86,7 @@ void LayerHost::BeginFrame() {
   Upload(root_layer_.get());
 }
 
-void LayerHost::Upload(Layer* layer) {
+void LayerHost::Upload(TextureLayer* layer) {
   TRACE_EVENT0("sky", "LayerHost::Upload");
 
   gfx::Size size = layer->size();

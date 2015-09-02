@@ -15,7 +15,7 @@
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/gpu/gl_texture.h"
-#include "services/sky/compositor/layer.h"
+#include "services/sky/compositor/texture_layer.h"
 
 namespace sky {
 
@@ -39,7 +39,7 @@ scoped_ptr<mojo::GLTexture> ResourceManager::CreateTexture(
 }
 
 mojo::TransferableResourcePtr ResourceManager::CreateTransferableResource(
-    Layer* layer) {
+    TextureLayer* layer) {
   scoped_ptr<mojo::GLTexture> texture = layer->GetTexture();
   mojo::Size size = texture->size();
 

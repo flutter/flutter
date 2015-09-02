@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_VIEWER_COMPOSITOR_LAYER_H_
-#define SKY_VIEWER_COMPOSITOR_LAYER_H_
+#ifndef SKY_VIEWER_COMPOSITOR_TEXTURE_LAYER_H_
+#define SKY_VIEWER_COMPOSITOR_TEXTURE_LAYER_H_
 
 #include "base/memory/ref_counted.h"
 #include "mojo/gpu/gl_texture.h"
@@ -17,9 +17,9 @@ namespace sky {
 
 class LayerHost;
 
-class Layer : public base::RefCounted<Layer> {
+class TextureLayer : public base::RefCounted<TextureLayer> {
  public:
-  explicit Layer(LayerClient* client);
+  explicit TextureLayer(LayerClient* client);
 
   void SetSize(const gfx::Size& size);
   void Display();
@@ -33,8 +33,8 @@ class Layer : public base::RefCounted<Layer> {
   }
 
  private:
-  friend class base::RefCounted<Layer>;
-  ~Layer();
+  friend class base::RefCounted<TextureLayer>;
+  ~TextureLayer();
 
   PassRefPtr<SkPicture> RecordPicture();
 
@@ -43,9 +43,9 @@ class Layer : public base::RefCounted<Layer> {
   scoped_ptr<mojo::GLTexture> texture_;
   scoped_ptr<Rasterizer> rasterizer_;
 
-  DISALLOW_COPY_AND_ASSIGN(Layer);
+  DISALLOW_COPY_AND_ASSIGN(TextureLayer);
 };
 
 }  // namespace sky
 
-#endif  // SKY_VIEWER_COMPOSITOR_LAYER_H_
+#endif  // SKY_VIEWER_COMPOSITOR_TEXTURE_LAYER_H_

@@ -4,8 +4,6 @@
 
 source_set("compositor") {
   sources = [
-    "layer.cc",
-    "layer.h",
     "layer_client.cc",
     "layer_client.h",
     "layer_host.cc",
@@ -28,6 +26,8 @@ source_set("compositor") {
     "surface_holder.h",
     "texture_cache.cc",
     "texture_cache.h",
+    "texture_layer.cc",
+    "texture_layer.h",
   ]
 
   deps = [
