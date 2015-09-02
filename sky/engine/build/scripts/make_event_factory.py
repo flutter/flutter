@@ -40,8 +40,7 @@ import template_expander
 def case_insensitive_matching(name):
     return (name == ('HTMLEvents')
             or name == 'Event'
-            or name == 'Events'
-            or name.startswith('UIEvent'))
+            or name == 'Events')
 
 class EventFactoryWriter(name_macros.Writer):
     defaults = {

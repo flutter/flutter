@@ -10,7 +10,6 @@
 #include "sky/engine/core/painting/Drawable.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
-#include "sky/engine/core/painting/PaintingNode.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
 #include "sky/engine/core/painting/Point.h"
@@ -91,7 +90,6 @@ public:
     void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint);
     void drawPicture(Picture* picture);
     void drawDrawable(Drawable* drawable);
-    void drawPaintingNode(PaintingNode* paintingNode, const Point& p);
 
     void drawAtlas(CanvasImage* atlas,
         const Vector<RSTransform>& transforms, const Vector<Rect>& rects,

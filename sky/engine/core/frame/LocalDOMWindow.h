@@ -40,7 +40,6 @@ namespace blink {
 
 class CSSStyleDeclaration;
 class DOMURL;
-class DOMWindowCSS;
 class DOMWindowProperty;
 class Database;
 class DatabaseCallback;
@@ -126,8 +125,6 @@ public:
     int requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback>);
     void cancelAnimationFrame(int id);
 
-    DOMWindowCSS& css() const;
-
     // This is the interface orientation in degrees. Some examples are:
     //  0 is straight up; -90 is when the device is rotated 90 clockwise;
     //  90 is when rotated counter clockwise.
@@ -158,7 +155,6 @@ private:
     HashSet<DOMWindowProperty*> m_properties;
 
     mutable RefPtr<Tracing> m_tracing;
-    mutable RefPtr<DOMWindowCSS> m_css;
 };
 
 } // namespace blink

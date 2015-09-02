@@ -10,7 +10,6 @@
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Matrix.h"
-#include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -230,16 +229,6 @@ void Canvas::drawDrawable(Drawable* drawable)
         return;
     ASSERT(drawable);
     m_canvas->drawDrawable(drawable->toSkia());
-}
-
-void Canvas::drawPaintingNode(PaintingNode* paintingNode, const Point& p)
-{
-    if (!m_canvas)
-        return;
-    ASSERT(paintingNode);
-    translate(p.sk_point.x(), p.sk_point.y());
-    m_canvas->drawDrawable(paintingNode->toSkia());
-    translate(-p.sk_point.x(), -p.sk_point.y());
 }
 
 void Canvas::drawAtlas(CanvasImage* atlas,

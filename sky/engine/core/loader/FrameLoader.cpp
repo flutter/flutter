@@ -36,7 +36,6 @@
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
-#include "sky/engine/core/events/PageTransitionEvent.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"

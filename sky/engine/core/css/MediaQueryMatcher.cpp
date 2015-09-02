@@ -22,7 +22,6 @@
 #include "sky/engine/core/css/MediaList.h"
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/MediaQueryList.h"
-#include "sky/engine/core/css/MediaQueryListEvent.h"
 #include "sky/engine/core/css/MediaQueryListListener.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Document.h"

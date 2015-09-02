@@ -144,7 +144,7 @@ source_set("snapshot_cc") {
 }
 
 action("compute_interfaces_info_individual") {
-  sources = core_idl_files + core_dependency_idl_files
+  sources = core_idl_files
   script = "$bindings_scripts_dir/compute_interfaces_info_individual.py"
   output_file = "$bindings_output_dir/InterfacesInfoIndividual.pickle"
 
@@ -262,15 +262,6 @@ template("idl_compiler") {
       # This data is generally stable.
       interfaces_info_overall_path,
     ]
-
-    # Further, if any dependency (partial interface or implemented
-    # interface) changes, rebuild everything, since every IDL potentially
-    # depends on them, because we"re not computing dependencies
-    # file-by-file.
-    # FIXME: This is too conservative, and causes excess rebuilds:
-    # compute this file-by-file.  http://crbug.com/341748
-    # This should theoretically just be the IDL files passed in.
-    inputs += core_dependency_idl_files
 
     sources = invoker.sources
     outputs = [

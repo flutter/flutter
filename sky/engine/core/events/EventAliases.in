@@ -4,4 +4,3 @@ HTMLEvents ImplementedAs=Event
 KeyboardEvents ImplementedAs=KeyboardEvent
 OrientationEvent ImplementedAs=Event, RuntimeEnabled=OrientationEventEnabled
 SVGEvents ImplementedAs=Event
-UIEvents ImplementedAs=UIEvent

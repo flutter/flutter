@@ -32,8 +32,7 @@
 
 namespace blink {
 
-class Attr : public RefCounted<Attr>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+class Attr : public RefCounted<Attr> {
 public:
     static PassRefPtr<Attr> create(const QualifiedName& name, const AtomicString& value);
     ~Attr();
