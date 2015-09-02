@@ -128,6 +128,13 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'TransferMode': 'SkXfermode::Mode',
     'FilterQuality': 'SkFilterQuality',
     'PaintingStyle': 'SkPaint::Style',
+    # TODO(abarth): Give these better C++ types.
+    'FontStyle': 'int',
+    'FontWeight': 'int',
+    'TextAlign': 'int',
+    'TextBaseline': 'int',
+    'TextDecoration': 'int',
+    'TextDecorationStyle': 'int',
 }
 
 
@@ -381,6 +388,12 @@ DART_TO_CPP_VALUE = {
     'TransferMode': pass_by_value_format('TransferMode', ''),
     'FilterQuality': pass_by_value_format('FilterQuality', ''),
     'PaintingStyle': pass_by_value_format('PaintingStyle', ''),
+    'FontStyle': pass_by_value_format('FontStyle', ''),
+    'FontWeight': pass_by_value_format('FontWeight', ''),
+    'TextAlign': pass_by_value_format('TextAlign', ''),
+    'TextBaseline': pass_by_value_format('TextBaseline', ''),
+    'TextDecoration': pass_by_value_format('TextDecoration', ''),
+    'TextDecorationStyle': pass_by_value_format('TextDecorationStyle', ''),
     'MojoDataPipeConsumer': pass_by_value_format('mojo::ScopedDataPipeConsumerHandle'),
 }
 
