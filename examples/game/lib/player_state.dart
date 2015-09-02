@@ -30,6 +30,12 @@ class PlayerState extends Node {
 
   int laserLevel = 0;
 
+  static const double normalScrollSpeed = 2.0;
+
+  double scrollSpeed = normalScrollSpeed;
+
+  double _scrollSpeedTarget = normalScrollSpeed;
+
   Sprite _sprtBgScore;
   ScoreDisplay _scoreDisplay;
   Sprite _sprtBgCoins;
@@ -80,18 +86,24 @@ class PlayerState extends Node {
       _sideLaserFrames += 300;
     } else if (type == PowerUpType.speedLaser) {
       _speedLaserFrames += 300;
+    } else if (type == PowerUpType.speedBoost) {
+      _speedBoostFrames += 300;
     }
   }
 
   int _shieldFrames = 0;
-  bool get shieldActive => _shieldFrames > 0;
-  bool get shieldDeactivating => _shieldFrames > 0 && _shieldFrames < 60;
+  bool get shieldActive => _shieldFrames > 0 || _speedBoostFrames > 0;
+  bool get shieldDeactivating =>
+    math.max(_shieldFrames, _speedBoostFrames) > 0 && math.max(_shieldFrames, _speedBoostFrames) < 60;
 
   int _sideLaserFrames = 0;
   bool get sideLaserActive => _sideLaserFrames > 0;
 
   int _speedLaserFrames = 0;
   bool get speedLaserActive => _speedLaserFrames > 0;
+
+  int _speedBoostFrames = 0;
+  bool get speedBoostActive => _speedBoostFrames > 0;
 
   void flashBgSprite(Sprite sprt) {
     sprt.actions.stopAll();
@@ -107,6 +119,15 @@ class PlayerState extends Node {
     if (_shieldFrames > 0) _shieldFrames--;
     if (_sideLaserFrames > 0) _sideLaserFrames--;
     if (_speedLaserFrames > 0) _speedLaserFrames--;
+    if (_speedBoostFrames > 0) _speedBoostFrames--;
+
+    // Update speed
+    if (speedBoostActive)
+      _scrollSpeedTarget = normalScrollSpeed * 6.0;
+    else
+      _scrollSpeedTarget = normalScrollSpeed;
+
+    scrollSpeed = GameMath.filter(scrollSpeed, _scrollSpeedTarget, 0.1);
   }
 }
 
