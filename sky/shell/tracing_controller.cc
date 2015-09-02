@@ -108,9 +108,9 @@ void TracingController::OnBaseTraceChunk(
   }
 }
 
-void TracingController::SaveFrameToSkp(base::FilePath& destination) {
+void TracingController::SaveFrameToSkPicture(base::FilePath& destination) {
   if (view_ != nullptr) {
-    view_->SaveFrameToSkp(destination);
+    view_->SaveFrameToSkPicture(destination);
   }
 }
 

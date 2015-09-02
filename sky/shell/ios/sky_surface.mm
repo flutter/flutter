@@ -386,7 +386,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 
 @end
 
-void SaveFrameToSkp() {
+void SaveFrameToSkPicture() {
   @autoreleasepool {
     NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                          NSUserDomainMask, YES);
@@ -405,6 +405,7 @@ void SaveFrameToSkp() {
         [NSString stringWithFormat:@"%@/%@.trace.skp", basePath, dateString];
 
     base::FilePath filePath(path.UTF8String);
-    sky::shell::Shell::Shared().tracing_controller().SaveFrameToSkp(filePath);
+    sky::shell::Shell::Shared().tracing_controller().SaveFrameToSkPicture(
+        filePath);
   }
 }

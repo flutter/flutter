@@ -35,7 +35,7 @@ class TracingController : public mojo::common::DataPipeDrainer::Client {
   // be merged before viewing in the trace viewer
   void StopTracing(const base::FilePath& path);
 
-  void SaveFrameToSkp(base::FilePath& destination);
+  void SaveFrameToSkPicture(base::FilePath& destination);
 
  private:
   std::unique_ptr<mojo::common::DataPipeDrainer> drainer_;

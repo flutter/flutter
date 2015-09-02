@@ -271,7 +271,7 @@ void Engine::StopDartTracing(mojo::ScopedDataPipeProducerHandle producer) {
   sky_view_->StopDartTracing(producer.Pass());
 }
 
-void Engine::SaveFrameToSkp(const base::FilePath& destination) {
+void Engine::SaveFrameToSkPicture(const base::FilePath& destination) {
   PassRefPtr<SkPicture> picture = Paint();
   SerializePicture(destination.AsUTF8Unsafe().c_str(), picture.get());
 }

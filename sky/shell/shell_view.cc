@@ -63,10 +63,10 @@ void ShellView::StopDartTracing(
                             base::Passed(&producer)));
 }
 
-void ShellView::SaveFrameToSkp(base::FilePath& destination) {
+void ShellView::SaveFrameToSkPicture(base::FilePath& destination) {
   shell_.ui_task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&Engine::SaveFrameToSkp, engine_->GetWeakPtr(), destination));
+      FROM_HERE, base::Bind(&Engine::SaveFrameToSkPicture,
+                            engine_->GetWeakPtr(), destination));
 }
 
 }  // namespace shell

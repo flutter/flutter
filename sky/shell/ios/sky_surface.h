@@ -12,5 +12,5 @@
 @end
 
 extern "C" {
-void SaveFrameToSkp();
+void SaveFrameToSkPicture();
 }

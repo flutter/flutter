@@ -27,7 +27,7 @@ class ShellView {
   void StartDartTracing();
   void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
 
-  void SaveFrameToSkp(base::FilePath& destination);
+  void SaveFrameToSkPicture(base::FilePath& destination);
 
  private:
   void CreateEngine();
