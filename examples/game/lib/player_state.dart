@@ -28,6 +28,8 @@ class PlayerState extends Node {
   final SpriteSheet _sheetUI;
   final SpriteSheet _sheetGame;
 
+  int laserLevel = 0;
+
   Sprite _sprtBgScore;
   ScoreDisplay _scoreDisplay;
   Sprite _sprtBgCoins;

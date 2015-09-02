@@ -4,7 +4,7 @@ final double _gameSizeWidth = 320.0;
 double _gameSizeHeight = 320.0;
 
 final double _chunkSpacing = 640.0;
-final int _chunksPerLevel = 6;
+final int _chunksPerLevel = 8;
 
 final bool _drawDebug = false;
 
@@ -198,33 +198,39 @@ class GameDemoNode extends NodeWithSize {
       lbl.position = new Point(0.0, yPos + _chunkSpacing / 2.0 - 150.0);
       _level.addChild(lbl);
     } else if (part == 1) {
-      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+      _objectFactory.addAsteroids(10 + level * 2, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     } else if (part == 2) {
       _objectFactory.addEnemyScoutSwarm(4 + level * 2, yPos);
     } else if (part == 3) {
-      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+      _objectFactory.addAsteroids(10 + level * 2, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     } else if (part == 4) {
       _objectFactory.addEnemyDestroyerSwarm(2 + level, yPos);
     } else if (part == 5) {
-      _objectFactory.addAsteroids(10 + level * 4, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+      _objectFactory.addAsteroids(10 + level * 2, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+    } else if (part == 6) {
+      _objectFactory.addEnemyScoutSwarm(4 + level * 2, yPos);
+    } else if (part == 7) {
+      _objectFactory.addAsteroids(10 + level * 2, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
     }
   }
 
   void fire() {
-    Laser shot0 = new Laser(_objectFactory, -90.0);
+    int laserLevel = _objectFactory.playerState.laserLevel;
+
+    Laser shot0 = new Laser(_objectFactory, laserLevel, -90.0);
     shot0.position = _level.ship.position + new Offset(17.0, -10.0);
     _level.addChild(shot0);
 
-    Laser shot1 = new Laser(_objectFactory, -90.0);
+    Laser shot1 = new Laser(_objectFactory, laserLevel, -90.0);
     shot1.position = _level.ship.position + new Offset(-17.0, -10.0);
     _level.addChild(shot1);
 
     if (_playerState.sideLaserActive) {
-      Laser shot2 = new Laser(_objectFactory, 0.0);
+      Laser shot2 = new Laser(_objectFactory, laserLevel, 0.0);
       shot2.position = _level.ship.position + new Offset(17.0, -10.0);
       _level.addChild(shot2);
 
-      Laser shot3 = new Laser(_objectFactory, 180.0);
+      Laser shot3 = new Laser(_objectFactory, laserLevel, 180.0);
       shot3.position = _level.ship.position + new Offset(-17.0, -10.0);
       _level.addChild(shot3);
     }
