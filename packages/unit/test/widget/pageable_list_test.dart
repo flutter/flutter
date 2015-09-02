@@ -7,6 +7,7 @@ import 'widget_tester.dart';
 const Size pageSize = const Size(800.0, 600.0);
 const List<int> pages = const <int>[0, 1, 2, 3, 4, 5];
 int currentPage = null;
+bool itemsWrap = false;
 
 Widget buildPage(int page) {
   return new Container(
@@ -17,7 +18,7 @@ Widget buildPage(int page) {
   );
 }
 
-Widget buildFrame({ bool itemsWrap: false }) {
+Widget buildFrame() {
   // The test framework forces the frame (and so the PageableList)
   // to be 800x600. The pageSize constant reflects as much.
   return new PageableList<int>(
@@ -55,6 +56,7 @@ void main() {
   test('Scroll left from page 0 to page 1', () {
     WidgetTester tester = new WidgetTester();
     currentPage = null;
+    itemsWrap = false;
     tester.pumpFrame(buildFrame);
     expect(currentPage, isNull);
     pageLeft(tester);
@@ -64,6 +66,7 @@ void main() {
   test('Underscroll (scroll right), return to page 0', () {
     WidgetTester tester = new WidgetTester();
     currentPage = null;
+    itemsWrap = false;
     tester.pumpFrame(buildFrame);
     expect(currentPage, isNull);
     pageRight(tester);
@@ -72,10 +75,13 @@ void main() {
 
   // PageableList with itemsWrap: true
 
+  itemsWrap = true;
+
   test('Scroll left page 0 to page 1, itemsWrap: true', () {
     WidgetTester tester = new WidgetTester();
     currentPage = null;
-    tester.pumpFrame(() { return buildFrame(itemsWrap: true); });
+    itemsWrap = true;
+    tester.pumpFrame(buildFrame);
     expect(currentPage, isNull);
     pageLeft(tester);
     expect(currentPage, equals(1));
@@ -84,7 +90,8 @@ void main() {
   test('Scroll right from page 0 to page 5, itemsWrap: true', () {
     WidgetTester tester = new WidgetTester();
     currentPage = null;
-    tester.pumpFrame(() { return buildFrame(itemsWrap: true); });
+    itemsWrap = true;
+    tester.pumpFrame(buildFrame);
     expect(currentPage, isNull);
     pageRight(tester);
     expect(currentPage, equals(5));
