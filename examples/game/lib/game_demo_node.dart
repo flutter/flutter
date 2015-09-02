@@ -80,7 +80,6 @@ class GameDemoNode extends NodeWithSize {
   PlayerState _playerState;
 
   // Game properties
-  double _scrollSpeed = 2.0;
   double _scroll = 0.0;
 
   int _framesToFire = 0;
@@ -95,11 +94,11 @@ class GameDemoNode extends NodeWithSize {
 
   void update(double dt) {
     // Scroll the level
-    _scroll = _level.scroll(_scrollSpeed);
-    _starField.move(0.0, _scrollSpeed);
+    _scroll = _level.scroll(_playerState.scrollSpeed);
+    _starField.move(0.0, _playerState.scrollSpeed);
 
-    _background.move(_scrollSpeed * 0.1);
-    _nebula.move(_scrollSpeed);
+    _background.move(_playerState.scrollSpeed * 0.1);
+    _nebula.move(_playerState.scrollSpeed);
 
     // Add objects
     addObjects();
