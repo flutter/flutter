@@ -371,7 +371,13 @@ abstract class ScrollableWidgetList extends Scrollable {
       itemExtent != source.itemExtent ||
       scrollDirection != source.scrollDirection;
 
+    if (itemsWrap != source.itemsWrap) {
+      _scrollBehavior = null;
+      scrollBehaviorUpdateNeeded = true;
+    }
+
     padding = source.padding;
+    itemsWrap = source.itemsWrap;
     itemExtent = source.itemExtent;
     super.syncConstructorArguments(source); // update scrollDirection
 
@@ -492,7 +498,6 @@ class ScrollableList<T> extends ScrollableWidgetList {
   void syncConstructorArguments(ScrollableList<T> source) {
     items = source.items;
     itemBuilder = source.itemBuilder;
-    itemsWrap = source.itemsWrap;
     super.syncConstructorArguments(source);
   }
 
