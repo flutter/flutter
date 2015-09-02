@@ -22,8 +22,8 @@ class GLTexture;
 }
 
 namespace sky {
-class Layer;
 class LayerHost;
+class TextureLayer;
 
 class ResourceManager {
  public:
@@ -32,7 +32,7 @@ class ResourceManager {
 
   scoped_ptr<mojo::GLTexture> CreateTexture(const gfx::Size& size);
 
-  mojo::TransferableResourcePtr CreateTransferableResource(Layer* layer);
+  mojo::TransferableResourcePtr CreateTransferableResource(TextureLayer* layer);
   void ReturnResources(mojo::Array<mojo::ReturnedResourcePtr> resources);
 
  private:

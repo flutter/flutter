@@ -19,10 +19,10 @@
 #include "mojo/services/view_manager/public/cpp/view_manager.h"
 #include "mojo/services/view_manager/public/interfaces/view_manager.mojom.h"
 #include "services/asset_bundle/asset_unpacker_job.h"
-#include "services/sky/compositor/layer.h"
 #include "services/sky/compositor/layer_host.h"
 #include "services/sky/compositor/rasterizer_bitmap.h"
 #include "services/sky/compositor/rasterizer_ganesh.h"
+#include "services/sky/compositor/texture_layer.h"
 #include "services/sky/converters/input_event_types.h"
 #include "services/sky/dart_library_provider_impl.h"
 #include "services/sky/internals.h"
@@ -149,7 +149,7 @@ void DocumentView::LoadFromSnapshotStream(
 void DocumentView::Load(mojo::URLResponsePtr response) {
   sky_view_ = blink::SkyView::Create(this);
   layer_host_.reset(new LayerHost(this));
-  root_layer_ = make_scoped_refptr(new Layer(this));
+  root_layer_ = make_scoped_refptr(new TextureLayer(this));
   root_layer_->set_rasterizer(CreateRasterizer());
   layer_host_->SetRootLayer(root_layer_);
 

@@ -16,7 +16,7 @@
 
 namespace sky {
 class ResourceManager;
-class Layer;
+class TextureLayer;
 class LayerHostClient;
 
 class LayerHost : public SurfaceHolder::Client {
@@ -39,7 +39,7 @@ class LayerHost : public SurfaceHolder::Client {
   }
 
   void SetNeedsAnimate();
-  void SetRootLayer(scoped_refptr<Layer> layer);
+  void SetRootLayer(scoped_refptr<TextureLayer> layer);
 
  private:
   enum State {
@@ -55,7 +55,7 @@ class LayerHost : public SurfaceHolder::Client {
   void BeginFrameSoon();
   void BeginFrame();
 
-  void Upload(Layer* layer);
+  void Upload(TextureLayer* layer);
   void DidCompleteFrame();
 
   LayerHostClient* client_;
@@ -65,7 +65,7 @@ class LayerHost : public SurfaceHolder::Client {
   mojo::GLContextOwner gl_context_owner_;
   mojo::GaneshContext ganesh_context_;
   ResourceManager resource_manager_;
-  scoped_refptr<Layer> root_layer_;
+  scoped_refptr<TextureLayer> root_layer_;
 
   base::WeakPtrFactory<LayerHost> weak_factory_;
 

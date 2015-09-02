@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "services/sky/compositor/layer.h"
+#include "services/sky/compositor/texture_layer.h"
 
 #include "base/trace_event/trace_event.h"
 #include "services/sky/compositor/layer_host.h"
@@ -15,17 +15,17 @@
 
 namespace sky {
 
-Layer::Layer(LayerClient* client) : client_(client) {
+TextureLayer::TextureLayer(LayerClient* client) : client_(client) {
 }
 
-Layer::~Layer() {
+TextureLayer::~TextureLayer() {
 }
 
-void Layer::SetSize(const gfx::Size& size) {
+void TextureLayer::SetSize(const gfx::Size& size) {
   size_ = size;
 }
 
-void Layer::Display() {
+void TextureLayer::Display() {
   TRACE_EVENT0("sky", "Layer::Display");
   DCHECK(rasterizer_);
   RefPtr<SkPicture> picture = RecordPicture();
@@ -38,7 +38,7 @@ void Layer::Display() {
   texture_ = rasterizer_->Rasterize(picture.get());
 }
 
-PassRefPtr<SkPicture> Layer::RecordPicture() {
+PassRefPtr<SkPicture> TextureLayer::RecordPicture() {
   TRACE_EVENT0("sky", "Layer::RecordPicture");
 
   SkRTreeFactory factory;
@@ -52,7 +52,7 @@ PassRefPtr<SkPicture> Layer::RecordPicture() {
   return adoptRef(recorder.endRecordingAsPicture());
 }
 
-scoped_ptr<mojo::GLTexture> Layer::GetTexture() {
+scoped_ptr<mojo::GLTexture> TextureLayer::GetTexture() {
   return texture_.Pass();
 }
 

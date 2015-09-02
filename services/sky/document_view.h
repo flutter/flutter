@@ -33,11 +33,11 @@ class View;
 }
 
 namespace sky {
+class DartLibraryProviderImpl;
+class LayerHost;
 class Rasterizer;
 class RasterizerBitmap;
-class Layer;
-class LayerHost;
-class DartLibraryProviderImpl;
+class TextureLayer;
 
 class DocumentView : public blink::ServiceProvider,
                      public blink::SkyViewClient,
@@ -127,7 +127,7 @@ class DocumentView : public blink::ServiceProvider,
   mojo::ViewManagerClientFactory view_manager_client_factory_;
   scoped_ptr<DartLibraryProviderImpl> library_provider_;
   scoped_ptr<LayerHost> layer_host_;
-  scoped_refptr<Layer> root_layer_;
+  scoped_refptr<TextureLayer> root_layer_;
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
   mojo::ServiceRegistryPtr service_registry_;
   scoped_ptr<mojo::StrongBinding<mojo::ServiceProvider>>
