@@ -558,10 +558,6 @@ class PageableList<T> extends ScrollableList<T> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  EventDisposition _handlePointerDown(_) {
-    return EventDisposition.ignored;
-  }
-
   EventDisposition _handleFlingStart(sky.GestureEvent event) {
     double velocity = _eventVelocity(event);
     double newScrollOffset = _snapScrollOffset(scrollOffset + velocity.sign * itemExtent)
