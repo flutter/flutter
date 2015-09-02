@@ -15,10 +15,10 @@ import 'package:sky/animation/curves.dart';
 import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/mojo/shell.dart' as shell;
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/object.dart';
 import 'package:sky/painting/text_painter.dart';
-import 'package:sky/widgets/framework.dart';
+import 'package:sky/src/rendering/box.dart';
+import 'package:sky/src/rendering/object.dart';
+import 'package:sky/src/widgets/framework.dart';
 import 'package:sky_services/media/media.mojom.dart';
 import 'package:vector_math/vector_math.dart';
 
