@@ -37,6 +37,10 @@ extern "C" {
 #define EGL_FIXED_SIZE_ANGLE 0x3201
 #endif
 
+#if !defined(EGL_NV_post_sub_buffer)
+#define EGL_POST_SUB_BUFFER_SUPPORTED_NV 0x30BE
+#endif
+
 #if !defined(EGL_OPENGL_ES3_BIT)
 #define EGL_OPENGL_ES3_BIT 0x00000040
 #endif

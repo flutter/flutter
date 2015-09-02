@@ -5,7 +5,8 @@
 #ifndef UI_GL_GL_SURFACE_OSMESA_X11_H_
 #define UI_GL_GL_SURFACE_OSMESA_X11_H_
 
-#include "third_party/khronos/EGL/eglplatform.h"  // For Pixmap
+#include <EGL/eglplatform.h>
+
 #include "ui/gfx/native_widget_types.h"
 #include "ui/gfx/x/x11_types.h"
 #include "ui/gl/gl_surface.h"
@@ -40,7 +41,7 @@ class NativeViewGLSurfaceOSMesa : public GLSurfaceOSMesa {
   GC window_graphics_context_;
   AcceleratedWidget window_;
   GC pixmap_graphics_context_;
-  Pixmap pixmap_;
+  EGLNativePixmapType pixmap_;
 
   DISALLOW_COPY_AND_ASSIGN(NativeViewGLSurfaceOSMesa);
 };

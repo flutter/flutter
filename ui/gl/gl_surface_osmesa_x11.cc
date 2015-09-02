@@ -4,6 +4,8 @@
 
 #include "ui/gl/gl_surface_osmesa_x11.h"
 
+#include <X11/Xlib.h>
+
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"

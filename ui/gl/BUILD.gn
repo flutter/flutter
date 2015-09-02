@@ -100,8 +100,6 @@ source_set("gl") {
       "gl_implementation_osmesa.cc",
       "gl_implementation_osmesa.h",
     ]
-
-    configs += [ "//third_party/khronos:khronos_headers" ]
   }
   if (is_linux) {
     deps += [ "//third_party/libevent" ]
