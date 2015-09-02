@@ -90,6 +90,7 @@ if (is_android) {
       "android/org/domokit/sky/shell/PlatformViewAndroid.java",
       "android/org/domokit/sky/shell/SkyMain.java",
       "android/org/domokit/sky/shell/TracingController.java",
+      "android/org/domokit/sky/shell/UpdateService.java",
     ]
     jni_package = "sky/shell"
   }
@@ -105,6 +106,7 @@ if (is_android) {
       "android/sky_main.h",
       "android/tracing_controller.cc",
       "android/tracing_controller.h",
+      "android/update_service_android.cc",
     ]
 
     deps = common_deps + [
@@ -131,6 +133,7 @@ if (is_android) {
       "android/org/domokit/sky/shell/SkyApplication.java",
       "android/org/domokit/sky/shell/SkyMain.java",
       "android/org/domokit/sky/shell/TracingController.java",
+      "android/org/domokit/sky/shell/UpdateService.java",
     ]
 
     deps = [
