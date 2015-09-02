@@ -4,7 +4,7 @@ final double _gameSizeWidth = 320.0;
 double _gameSizeHeight = 320.0;
 
 final double _chunkSpacing = 640.0;
-final int _chunksPerLevel = 8;
+final int _chunksPerLevel = 9;
 
 final bool _drawDebug = false;
 
@@ -210,6 +210,8 @@ class GameDemoNode extends NodeWithSize {
       _objectFactory.addEnemyScoutSwarm(4 + level * 2, yPos);
     } else if (part == 7) {
       _objectFactory.addAsteroids(10 + level * 2, yPos, 0.0 + (level * 0.2).clamp(0.0, 0.7));
+    } else if (part == 8) {
+      _objectFactory.addBossFight(level, yPos);
     }
   }
 
