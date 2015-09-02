@@ -12,6 +12,25 @@ import urllib2
 SRC_ROOT = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir, os.pardir))
 VERSION_FILE = '.version.sha1'
 
+REMOVE = set([
+  '1x_web',
+  '2x_web',
+  'drawable-anydpi-v21',
+  'drawable-ldrtl-hdpi',
+  'drawable-ldrtl-mdpi',
+  'drawable-ldrtl-xhdpi',
+  'drawable-ldrtl-xxhdpi',
+  'drawable-ldrtl-xxxhdpi',
+  'ios',
+  'svg',
+])
+
+def clean(start):
+  for path, dirs, files in os.walk(start):
+    basename = os.path.basename(path)
+    if basename in REMOVE:
+      shutil.rmtree(path, ignore_errors=True)
+
 def main():
     package_dir = os.path.join(SRC_ROOT, 'sky/packages/material_design_icons/lib')
     icons_dir = os.path.join(package_dir, 'icons')
@@ -48,6 +67,7 @@ def main():
     subprocess.call([ 'cp', desired_sha1_path, icons_dir ])
 
     os.unlink(tgz_path)
+    clean(icons_dir)
 
 if __name__ == '__main__':
     sys.exit(main())
