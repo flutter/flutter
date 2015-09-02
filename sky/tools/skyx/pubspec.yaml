@@ -4,6 +4,6 @@ dependencies:
   args: '>=0.13.0 <1.0.0'
   yaml: '>=2.1.3 <3.0.0'
 description: Developer tool for packaging Sky applications
-homepage: https://github.com/domokit/mojo/tree/master/sky/tools/skyx
+homepage: https://github.com/domokit/sky_engine/tree/master/sky/tools/skyx
 name: skyx
-version: 0.0.2
+version: 0.0.3
