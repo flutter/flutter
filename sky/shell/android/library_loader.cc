@@ -15,6 +15,7 @@
 #include "sky/shell/android/platform_view_android.h"
 #include "sky/shell/android/sky_main.h"
 #include "sky/shell/android/tracing_controller.h"
+#include "sky/shell/android/update_service_android.h"
 
 namespace {
 
@@ -25,6 +26,7 @@ base::android::RegistrationMethod kSkyRegisteredMethods[] = {
     {"PlatformViewAndroid", sky::shell::PlatformViewAndroid::Register},
     {"SkyMain", sky::shell::RegisterSkyMain},
     {"TracingController", sky::shell::RegisterTracingController},
+    {"UpdateService", sky::shell::RegisterUpdateService},
 };
 
 bool RegisterJNI(JNIEnv* env) {

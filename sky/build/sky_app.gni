@@ -47,8 +47,11 @@ template("sky_app") {
 
       sources = [
         "$root_build_dir/icudtl.dat",
-        "$target_gen_dir/app.skyx",
+        "$target_gen_dir/app.skyx"
       ]
+      if (defined(invoker.manifest)) {
+        sources += [ invoker.manifest ]
+      }
       deps = [
         ":$skyx_target_name",
         ":gen_${bundle_prefix}_bundle",
