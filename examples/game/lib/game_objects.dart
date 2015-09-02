@@ -462,6 +462,7 @@ enum PowerUpType {
   shield,
   speedLaser,
   sideLaser,
+  speedBoost,
 }
 
 List<PowerUpType> _powerUpTypes = new List.from(PowerUpType.values);
