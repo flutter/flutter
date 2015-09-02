@@ -6,7 +6,6 @@ import "dart:sky";
 
 import 'package:sky/animation/curves.dart';
 import 'package:sky/animation/direction.dart';
-import 'package:sky/base/lerp.dart';
 
 export 'package:sky/animation/curves.dart' show Interval;
 
@@ -89,12 +88,12 @@ class AnimatedColorValue extends AnimatedValue<Color> {
   AnimatedColorValue(Color begin, { Color end, Curve curve })
     : super(begin, end: end, curve: curve);
 
-  Color lerp(double t) => lerpColor(begin, end, t);
+  Color lerp(double t) => Color.lerp(begin, end, t);
 }
 
 class AnimatedRect extends AnimatedValue<Rect> {
   AnimatedRect(Rect begin, { Rect end, Curve curve })
     : super(begin, end: end, curve: curve);
 
-  Rect lerp(double t) => lerpRect(begin, end, t);
+  Rect lerp(double t) => Rect.lerp(begin, end, t);
 }

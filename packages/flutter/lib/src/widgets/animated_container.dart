@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:vector_math/vector_math.dart';
+import 'dart:sky' as sky;
 
+import 'package:vector_math/vector_math.dart';
 import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
-import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';
@@ -34,10 +34,10 @@ class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
 
   EdgeDims lerp(double t) {
     return new EdgeDims(
-      lerpNum(begin.top, end.top, t),
-      lerpNum(begin.right, end.right, t),
-      lerpNum(begin.bottom, end.bottom, t),
-      lerpNum(begin.bottom, end.left, t)
+      sky.lerpDouble(begin.top, end.top, t),
+      sky.lerpDouble(begin.right, end.right, t),
+      sky.lerpDouble(begin.bottom, end.bottom, t),
+      sky.lerpDouble(begin.bottom, end.left, t)
     );
   }
 }
