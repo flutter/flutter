@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering.dart';
 
 import '../../../examples/rendering/flex.dart';
 import '../resources/display_list.dart';
