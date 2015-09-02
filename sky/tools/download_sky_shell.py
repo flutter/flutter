@@ -33,5 +33,8 @@ def main():
     download(base_url, out_dir, 'icudtl.dat')
     download(base_url, out_dir, 'sky_snapshot')
 
+    subprocess.call([ 'chmod', 'a+x', os.path.join(out_dir, 'sky_shell' )])
+    subprocess.call([ 'chmod', 'a+x', os.path.join(out_dir, 'sky_snapshot' )])
+
 if __name__ == '__main__':
     sys.exit(main())
