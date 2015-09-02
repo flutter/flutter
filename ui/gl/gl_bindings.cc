@@ -22,7 +22,7 @@ std::string DriverOSMESA::GetPlatformExtensions() {
   return "";
 }
 
-#if defined(USE_X11) || defined(OS_ANDROID) || defined(USE_OZONE)
+#if defined(OS_ANDROID)
 std::string DriverEGL::GetPlatformExtensions() {
   EGLDisplay display =
     g_driver_egl.fn.eglGetDisplayFn(GetPlatformDefaultEGLNativeDisplay());
@@ -31,15 +31,6 @@ std::string DriverEGL::GetPlatformExtensions() {
   g_driver_egl.fn.eglInitializeFn(display, NULL, NULL);
   DCHECK(g_driver_egl.fn.eglQueryStringFn);
   const char* str = g_driver_egl.fn.eglQueryStringFn(display, EGL_EXTENSIONS);
-  return str ? std::string(str) : "";
-}
-#endif
-
-#if defined(USE_X11)
-std::string DriverGLX::GetPlatformExtensions() {
-  DCHECK(g_driver_glx.fn.glXQueryExtensionsStringFn);
-  const char* str =
-      g_driver_glx.fn.glXQueryExtensionsStringFn(gfx::GetXDisplay(), 0);
   return str ? std::string(str) : "";
 }
 #endif

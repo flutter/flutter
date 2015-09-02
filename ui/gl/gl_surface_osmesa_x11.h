@@ -5,8 +5,7 @@
 #ifndef UI_GL_GL_SURFACE_OSMESA_X11_H_
 #define UI_GL_GL_SURFACE_OSMESA_X11_H_
 
-#include <EGL/eglplatform.h>  // For Pixmap
-
+#include "third_party/khronos/EGL/eglplatform.h"  // For Pixmap
 #include "ui/gfx/native_widget_types.h"
 #include "ui/gfx/x/x11_types.h"
 #include "ui/gl/gl_surface.h"
