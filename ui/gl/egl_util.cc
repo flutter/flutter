@@ -4,11 +4,7 @@
 
 #include "ui/gl/egl_util.h"
 
-#if defined(OS_ANDROID)
 #include <EGL/egl.h>
-#else
-#include "third_party/khronos/EGL/egl.h"
-#endif
 
 // This needs to be after the EGL includes
 #include "ui/gl/gl_bindings.h"

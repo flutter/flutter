@@ -4,9 +4,10 @@
 
 #include "ui/gl/gl_surface.h"
 
+#include <EGL/egl.h>
+
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
-#include "third_party/khronos/EGL/egl.h"
 #include "ui/gfx/native_widget_types.h"
 #include "ui/gl/gl_implementation.h"
 #include "ui/gl/gl_surface_egl.h"

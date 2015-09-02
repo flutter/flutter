@@ -4,13 +4,14 @@
 
 #include "ui/gl/gl_context_egl.h"
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #include "base/command_line.h"
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/trace_event/trace_event.h"
 #include "build/build_config.h"
-#include "third_party/khronos/EGL/egl.h"
-#include "third_party/khronos/EGL/eglext.h"
 #include "ui/gl/egl_util.h"
 #include "ui/gl/gl_bindings.h"
 #include "ui/gl/gl_surface_egl.h"
@@ -19,6 +20,13 @@
 extern "C" {
 #include <X11/Xlib.h>
 }
+#endif
+
+#if !defined(EGL_EXT_create_context_robustness)
+#define EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT                0x30BF
+#define EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY_EXT  0x3138
+#define EGL_NO_RESET_NOTIFICATION_EXT                       0x31BE
+#define EGL_LOSE_CONTEXT_ON_RESET_EXT                       0x31BF
 #endif
 
 using ui::GetLastEGLErrorString;
