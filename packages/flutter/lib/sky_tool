@@ -9,6 +9,7 @@ import errno
 import hashlib
 import json
 import logging
+import multiprocessing
 import os
 import platform
 import random
@@ -144,6 +145,46 @@ class Pids(object):
 def _url_for_path(port, root, path):
     relative_path = os.path.relpath(path, root)
     return 'http://localhost:%s/%s' % (port, relative_path)
+
+
+class SkyLogs(object):
+    def add_subparser(self, subparsers):
+        logs_parser = subparsers.add_parser('logs',
+            help='Show logs for running Sky apps')
+        logs_parser.set_defaults(func=self.run)
+
+    def run(self, args, pids):
+        android_log_reader = None
+        ios_dev_log_reader = None
+        ios_sim_log_reader = None
+
+        android = AndroidDevice()
+        if android.is_connected():
+            android_log_reader = android.logs()
+
+        if IOSDevice.is_connected():
+            ios_dev_log_reader = IOSDevice.logs()
+
+        if IOSSimulator.is_connected():
+            ios_sim_log_reader = IOSSimulator.logs()
+
+        if android_log_reader is not None:
+            try:
+                android_log_reader.join()
+            except KeyboardInterrupt:
+                pass
+
+        if ios_dev_log_reader is not None:
+            try:
+                ios_dev_log_reader.join()
+            except KeyboardInterrupt:
+                pass
+
+        if ios_sim_log_reader is not None:
+            try:
+                ios_sim_log_reader.join()
+            except KeyboardInterrupt:
+                pass
 
 
 class InstallSky(object):
@@ -447,6 +488,27 @@ class AndroidDevice(object):
         logging.info(' '.join(cmd))
         subprocess.check_output(cmd)
 
+    def logs(self):
+        def do_logs():
+            cmd = [
+                self.adb_path,
+                'logcat',
+                '-s',
+                'sky',
+                'chromium',
+            ]
+            logging.info(' '.join(cmd))
+            log_process = subprocess.Popen(cmd, bufsize=1, stdout=subprocess.PIPE)
+            while True:
+                try:
+                    sys.stdout.write('ANDROID: ' + log_process.stdout.readline())
+                    sys.stdout.flush()
+                except KeyboardInterrupt:
+                    break
+        log_reader = multiprocessing.Process(target=do_logs)
+        log_reader.daemon = True
+        log_reader.start()
+        return log_reader
 
 
 class IOSDevice(object):
@@ -540,6 +602,27 @@ class IOSDevice(object):
         except subprocess.CalledProcessError:
             pass
 
+    @classmethod
+    def logs(cls):
+        def do_logs():
+            cmd = [
+                'idevicesyslog',
+            ]
+            logging.info(' '.join(cmd))
+            log_process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            while True:
+                try:
+                    log_line = log_process.stdout.readline()
+                    if re.match(r'.*SkyShell.*', log_line) is not None:
+                        sys.stdout.write('IOS DEV: ' + log_line)
+                        sys.stdout.flush()
+                except KeyboardInterrupt:
+                    break
+        log_reader = multiprocessing.Process(target=do_logs)
+        log_reader.daemon = True
+        log_reader.start()
+        return log_reader
+
 
 class IOSSimulator(object):
     @classmethod
@@ -547,6 +630,10 @@ class IOSSimulator(object):
         if platform.system() != 'Darwin':
             return False
         return cls.get_simulator_device_id() is not None
+
+    @classmethod
+    def is_connected(cls):
+        return cls.is_booted()
 
     _device_id = None
     @classmethod
@@ -634,6 +721,29 @@ class IOSSimulator(object):
     @classmethod
     def needs_install(cls, args):
         return cls.is_booted()
+
+    @classmethod
+    def logs(cls):
+        def do_logs():
+            cmd = [
+                'tail',
+                '-f',
+                os.path.expanduser('~/Library/Logs/CoreSimulator/' + cls.get_simulator_device_id() + '/system.log'),
+            ]
+            logging.info(' '.join(cmd))
+            log_process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            while True:
+                try:
+                    log_line = log_process.stdout.readline()
+                    if re.match(r'.*SkyShell.*', log_line) is not None:
+                        sys.stdout.write('IOS SIM: ' + log_line)
+                        sys.stdout.flush()
+                except KeyboardInterrupt:
+                    break
+        log_reader = multiprocessing.Process(target=do_logs)
+        log_reader.daemon = True
+        log_reader.start()
+        return log_reader
 
     @classmethod
     def fork_install_app(cls, ios_app_path):
@@ -1045,7 +1155,7 @@ class SkyShellRunner(object):
 
         subparsers = parser.add_subparsers(help='sub-command help')
 
-        for command in [InstallSky(), StartSky(), StopSky(), StartListening(), StartTracing(), StopTracing(), IOSSimulator()]:
+        for command in [SkyLogs(), InstallSky(), StartSky(), StopSky(), StartListening(), StartTracing(), StopTracing(), IOSSimulator()]:
             command.add_subparser(subparsers)
 
         args = parser.parse_args()
