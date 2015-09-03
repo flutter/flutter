@@ -33,7 +33,9 @@ sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
   sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
   Float32List deviceTransform = new Float32List(16)
     ..[0] = devicePixelRatio
-    ..[5] = devicePixelRatio;
+    ..[5] = devicePixelRatio
+    ..[10] = 1.0
+    ..[15] = 1.0;
   sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
     ..addPicture(sky.Offset.zero, picture, paintBounds)
@@ -49,6 +51,7 @@ void beginFrame(double timeStamp) {
   sky.Picture picture = paint(paintBounds, delta);
   sky.Scene scene = composite(picture, paintBounds);
   sky.view.scene = scene;
+  sky.view.scheduleFrame();
 }
 
 void main() {
@@ -59,6 +62,7 @@ void main() {
   block.style['display'] = 'paragraph';
   block.style['direction'] = 'rtl';
   block.style['unicode-bidi'] = 'plaintext';
+  block.style['color'] = 'black';
   block.appendChild(arabic);
   block.appendChild(more);
 

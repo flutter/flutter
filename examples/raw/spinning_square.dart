@@ -29,7 +29,9 @@ void beginFrame(double timeStamp) {
   sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
   Float32List deviceTransform = new Float32List(16)
     ..[0] = devicePixelRatio
-    ..[5] = devicePixelRatio;
+    ..[5] = devicePixelRatio
+    ..[10] = 1.0
+    ..[15] = 1.0;
   sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
     ..addPicture(sky.Offset.zero, picture, paintBounds)
@@ -37,6 +39,7 @@ void beginFrame(double timeStamp) {
   sky.view.scene = sceneBuilder.build();
 
   sky.tracing.end('beginFrame');
+  sky.view.scheduleFrame();
 }
 
 void main() {
