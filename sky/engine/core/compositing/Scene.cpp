@@ -4,21 +4,34 @@
 
 #include "sky/engine/core/compositing/Scene.h"
 
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
+
 namespace blink {
 
-PassRefPtr<Scene> Scene::create(PassRefPtr<SkPicture> picture)
+PassRefPtr<Scene> Scene::create(std::unique_ptr<sky::Layer> rootLayer)
 {
-    ASSERT(picture);
-    return adoptRef(new Scene(picture));
+    ASSERT(rootLayer);
+    return adoptRef(new Scene(std::move(rootLayer)));
 }
 
-Scene::Scene(PassRefPtr<SkPicture> picture)
-    : m_picture(picture)
+Scene::Scene(std::unique_ptr<sky::Layer> rootLayer)
+    : m_rootLayer(std::move(rootLayer))
 {
 }
 
 Scene::~Scene()
 {
+}
+
+PassRefPtr<SkPicture> Scene::createPicture() const
+{
+    SkRTreeFactory rtreeFactory;
+    SkPictureRecorder pictureRecorder;
+    SkCanvas* canvas = pictureRecorder.beginRecording(m_rootLayer->paint_bounds(),
+        &rtreeFactory, SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag);
+    m_rootLayer->Paint(canvas);
+    return adoptRef(pictureRecorder.endRecording());
 }
 
 } // namespace blink

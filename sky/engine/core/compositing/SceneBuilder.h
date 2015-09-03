@@ -5,6 +5,9 @@
 #ifndef SKY_ENGINE_CORE_COMPOSITING_SCENEBUILDER_H_
 #define SKY_ENGINE_CORE_COMPOSITING_SCENEBUILDER_H_
 
+#include <memory>
+
+#include "sky/compositor/layer.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/painting/CanvasPath.h"
@@ -19,8 +22,6 @@
 #include "sky/engine/tonic/float32_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace blink {
 
@@ -47,9 +48,11 @@ public:
 private:
     explicit SceneBuilder(const Rect& bounds);
 
-    SkRTreeFactory m_rtreeFactory;
-    SkPictureRecorder m_pictureRecorder;
-    SkCanvas* m_canvas;
+    void addLayer(std::unique_ptr<sky::ContainerLayer> layer);
+
+    SkRect m_rootPaintBounds;
+    std::unique_ptr<sky::ContainerLayer> m_rootLayer;
+    sky::ContainerLayer* m_currentLayer;
 };
 
 } // namespace blink

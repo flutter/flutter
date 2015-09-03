@@ -5,6 +5,9 @@
 #ifndef SKY_ENGINE_CORE_COMPOSITING_SCENE_H_
 #define SKY_ENGINE_CORE_COMPOSITING_SCENE_H_
 
+#include <memory>
+
+#include "sky/compositor/layer.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -16,16 +19,16 @@ class Scene : public RefCounted<Scene>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     ~Scene() override;
-    static PassRefPtr<Scene> create(PassRefPtr<SkPicture> skPicture);
-
-    SkPicture* toSkia() const { return m_picture.get(); }
-
-private:
-    explicit Scene(PassRefPtr<SkPicture> skPicture);
+    static PassRefPtr<Scene> create(std::unique_ptr<sky::Layer> rootLayer);
 
     // While bootstraping the compositing system, we use an SkPicture instead
     // of a layer tree to back the scene.
-    RefPtr<SkPicture> m_picture;
+    PassRefPtr<SkPicture> createPicture() const;
+
+private:
+    explicit Scene(std::unique_ptr<sky::Layer> rootLayer);
+
+    std::unique_ptr<sky::Layer> m_rootLayer;
 };
 
 } // namespace blink
