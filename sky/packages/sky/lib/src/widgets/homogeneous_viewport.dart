@@ -65,7 +65,7 @@ class HomogeneousViewport extends RenderObjectWrapper {
   }
 
   void insertChildRenderObject(RenderObjectWrapper child, Widget slot) {
-    RenderObject nextSibling = slot != null ? slot.renderObject : null;
+    RenderObject nextSibling = slot?.renderObject;
     renderObject.add(child.renderObject, before: nextSibling);
   }
 

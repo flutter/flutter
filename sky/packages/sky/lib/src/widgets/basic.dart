@@ -487,10 +487,7 @@ class Stack extends MultiChildRenderObjectWrapper {
   RenderStack get renderObject => super.renderObject;
 
   void updateParentData(RenderObject child, Positioned positioned) {
-    if (positioned == null)
-      _updateParentDataWithValues(child, null, null, null, null);
-    else
-      _updateParentDataWithValues(child, positioned.top, positioned.right, positioned.bottom, positioned.left);
+    _updateParentDataWithValues(child, positioned?.top, positioned?.right, positioned?.bottom, positioned?.left);
   }
 
   void _updateParentDataWithValues(RenderObject child, double top, double right, double bottom, double left) {
@@ -592,7 +589,7 @@ class Flex extends MultiChildRenderObjectWrapper {
   }
 
   void updateParentData(RenderObject child, Flexible flexible) {
-    _updateParentDataWithValues(child, flexible == null ? null : flexible.flex);
+    _updateParentDataWithValues(child, flexible?.flex);
   }
 
   void _updateParentDataWithValues(RenderObject child, int flex) {

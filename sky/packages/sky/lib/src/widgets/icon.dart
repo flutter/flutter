@@ -31,7 +31,7 @@ class IconTheme extends Inherited {
 
   static IconThemeData of(Component component) {
     IconTheme result = component.inheritedOfType(IconTheme);
-    return result == null ? null : result.data;
+    return result?.data;
   }
 
   bool syncShouldNotify(IconTheme old) => data != old.data;

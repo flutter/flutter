@@ -11,8 +11,6 @@ import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/animation/direction.dart' show Direction;
 
-dynamic _maybe(AnimatedValue x) => x != null ? x.value : null;
-
 // A helper class to anchor widgets to one another. Pass an instance of this to
 // a Transition, then use the build() method to create a child with the same
 // transition applied.
@@ -270,7 +268,7 @@ class SquashTransition extends TransitionBase {
       performance.updateVariable(width);
     if (height != null)
       performance.updateVariable(height);
-    return new SizedBox(width: _maybe(width), height: _maybe(height), child: child);
+    return new SizedBox(width: width?.value, height: height?.value, child: child);
   }
 }
 
