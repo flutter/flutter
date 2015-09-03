@@ -6,21 +6,17 @@ import 'dart:sky' as sky;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-void beginFrame(double timeStamp) {
-  sky.Size size = new sky.Size(sky.view.width, sky.view.height);
+sky.Picture paint(sky.Rect paintBounds) {
   sky.PictureRecorder recorder = new sky.PictureRecorder();
-  final double devicePixelRatio = sky.view.devicePixelRatio;
-  sky.Canvas canvas = new sky.Canvas(recorder, sky.Point.origin & (size * devicePixelRatio));
-  canvas.scale(devicePixelRatio, devicePixelRatio);
+  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+  sky.Size size = paintBounds.size;
 
   sky.Paint paint = new sky.Paint();
   sky.Point mid = size.center(sky.Point.origin);
   double radius = size.shortestSide / 2.0;
-
   canvas.drawPaint(new sky.Paint()..color = const sky.Color(0xFFFFFFFF));
 
   canvas.save();
-
   canvas.translate(-mid.x/2.0, sky.view.height*2.0);
   canvas.clipRect(
       new sky.Rect.fromLTRB(0.0, -sky.view.height, sky.view.width, radius));
@@ -39,7 +35,7 @@ void beginFrame(double timeStamp) {
   var scaleMatrix = new Float32List.fromList([
       0.5, 0.0, 0.0, 0.0,
       0.0, 0.5, 0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
       0.0, 0.0, 0.0, 1.0,
   ]);
   canvas.concat(scaleMatrix);
@@ -81,7 +77,27 @@ void beginFrame(double timeStamp) {
   paint.setDrawLooper(builder.build());
   canvas.drawCircle(sky.Point.origin, radius, paint);
 
-  sky.view.picture = recorder.endRecording();
+  return recorder.endRecording();
+}
+
+sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
+  final double devicePixelRatio = sky.view.devicePixelRatio;
+  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+  Float32List deviceTransform = new Float32List(16)
+    ..[0] = devicePixelRatio
+    ..[5] = devicePixelRatio;
+  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+    ..pushTransform(deviceTransform)
+    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..pop();
+  return sceneBuilder.build();
+}
+
+void beginFrame(double timeStamp) {
+  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
+  sky.Picture picture = paint(paintBounds);
+  sky.Scene scene = composite(picture, paintBounds);
+  sky.view.scene = scene;
 }
 
 void main() {
