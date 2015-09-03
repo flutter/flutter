@@ -19,6 +19,7 @@ export 'package:sky/src/rendering/box.dart' show BoxConstraints, BoxDecoration, 
 export 'package:sky/src/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 final bool _shouldLogRenderDuration = false; // see also 'enableProfilingLoop' argument to runApp()
+final bool _shouldReparentDuringSync = false; // currently in development
 
 typedef Widget Builder();
 typedef void WidgetTreeWalker(Widget);
@@ -380,7 +381,7 @@ abstract class Widget {
         Widget candidate = oldNode.singleChild;
         assert(candidate == null || candidate.parent == oldNode);
         oldNode = null;
-        while (candidate != null) {
+        while (candidate != null && _shouldReparentDuringSync) {
           if (_canSync(newNode, candidate)) {
             assert(candidate.parent != null);
             assert(candidate.parent.singleChild == candidate);
