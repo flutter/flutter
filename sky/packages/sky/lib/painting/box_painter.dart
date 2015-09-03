@@ -7,7 +7,6 @@ import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:sky/base/image_resource.dart';
-import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/shadows.dart';
 
 /// An immutable set of offsets in each of the four cardinal directions
@@ -197,9 +196,9 @@ class BoxShadow {
     if (b == null)
       return a.scale(1.0 - t);
     return new BoxShadow(
-      color: lerpColor(a.color, b.color, t),
-      offset: lerpOffset(a.offset, b.offset, t),
-      blur: lerpNum(a.blur, b.blur, t)
+      color: Color.lerp(a.color, b.color, t),
+      offset: Offset.lerp(a.offset, b.offset, t),
+      blur: sky.lerpDouble(a.blur, b.blur, t)
     );
   }
 
@@ -521,10 +520,10 @@ class BoxDecoration {
   BoxDecoration scale(double factor) {
     // TODO(abarth): Scale ALL the things.
     return new BoxDecoration(
-      backgroundColor: lerpColor(null, backgroundColor, factor),
+      backgroundColor: Color.lerp(null, backgroundColor, factor),
       backgroundImage: backgroundImage,
       border: border,
-      borderRadius: lerpNum(null, borderRadius, factor),
+      borderRadius: sky.lerpDouble(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
       shape: shape
@@ -543,10 +542,10 @@ class BoxDecoration {
       return a.scale(1.0 - t);
     // TODO(abarth): lerp ALL the fields.
     return new BoxDecoration(
-      backgroundColor: lerpColor(a.backgroundColor, b.backgroundColor, t),
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       backgroundImage: b.backgroundImage,
       border: b.border,
-      borderRadius: lerpNum(a.borderRadius, b.borderRadius, t),
+      borderRadius: sky.lerpDouble(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: b.gradient,
       shape: b.shape
