@@ -763,6 +763,9 @@ class BoxPainter {
     assert(_decoration.shape == Shape.circle);
     assert(_decoration.borderRadius == null);
     double width = _decoration.border.top.width;
+    if (width <= 0.0) {
+      return;
+    }
     Paint paint = new Paint()
       ..color = _decoration.border.top.color
       ..strokeWidth = width
