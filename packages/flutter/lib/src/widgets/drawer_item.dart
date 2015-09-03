@@ -15,7 +15,7 @@ import 'package:sky/src/widgets/icon.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/theme.dart';
 
-typedef EventDisposition OnPressedFunction();
+typedef void OnPressedFunction();
 
 class DrawerItem extends ButtonBase {
   DrawerItem({ Key key, this.icon, this.child, this.onPressed, this.selected: false })

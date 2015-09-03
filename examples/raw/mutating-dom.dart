@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import "dart:math" as math;
+import 'dart:math' as math;
 import 'dart:sky' as sky;
+import 'dart:typed_data';
 
 const kMaxIterations = 100;
 int peakCount = 1000; // this is the number that must be reached for us to start reporting the peak number of nodes in the tree each frame
@@ -32,7 +33,7 @@ String colorToCSSString(sky.Color color) {
   return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
 }
 
-void doFrame(double timeStamp) {
+void mutate(sky.Canvas canvas) {
   // mutate the DOM randomly
   int iterationsLeft = kMaxIterations;
   sky.Node node = root;
@@ -201,16 +202,37 @@ void doFrame(double timeStamp) {
 
   // draw the result
   report("recording...");
-  sky.PictureRecorder recorder = new sky.PictureRecorder();
-  final double devicePixelRatio = sky.view.devicePixelRatio;
-  sky.Canvas canvas = new sky.Canvas(recorder, new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio));
-  canvas.scale(devicePixelRatio, devicePixelRatio);
   layoutRoot.maxWidth = sky.view.width;
   layoutRoot.layout();
   layoutRoot.paint(canvas);
   report("painting...");
-  sky.view.picture = recorder.endRecording();
-  sky.view.scheduleFrame();
+}
+
+sky.Picture paint(sky.Rect paintBounds) {
+  sky.PictureRecorder recorder = new sky.PictureRecorder();
+  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+  mutate(canvas);
+  return recorder.endRecording();
+}
+
+sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
+  final double devicePixelRatio = sky.view.devicePixelRatio;
+  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+  Float32List deviceTransform = new Float32List(16)
+    ..[0] = devicePixelRatio
+    ..[5] = devicePixelRatio;
+  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+    ..pushTransform(deviceTransform)
+    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..pop();
+  return sceneBuilder.build();
+}
+
+void beginFrame(double timeStamp) {
+  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
+  sky.Picture picture = paint(paintBounds);
+  sky.Scene scene = composite(picture, paintBounds);
+  sky.view.scene = scene;
 }
 
 void main() {
@@ -218,6 +240,6 @@ void main() {
   root.style['display'] = 'paragraph';
   root.style['color'] = '#FFFFFF';
   layoutRoot.rootElement = root;
-  sky.view.setFrameCallback(doFrame);
+  sky.view.setFrameCallback(beginFrame);
   sky.view.scheduleFrame();
 }
