@@ -18,7 +18,7 @@ final Interval _kCardDismissResizeInterval = new Interval(0.4, 1.0);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
-const double _kDismissCardThreshold = 0.6;
+const double _kDismissCardThreshold = 0.4;
 
 typedef void ResizedCallback();
 typedef void DismissedCallback();
@@ -140,12 +140,11 @@ class Dismissable extends StatefulComponent {
       return EventDisposition.ignored;
 
     _dragUnderway = false;
-    if (_isHorizontalFlingGesture(event)) {
+    if (_fadePerformance.isCompleted) { // drag then fling
+      _startResizePerformance();
+    } else if (_isHorizontalFlingGesture(event)) {
       _dragX = event.velocityX.sign;
-      if (_fadePerformance.isCompleted)
-        _startResizePerformance();
-      else
-        _fadePerformance.fling(velocity: event.velocityX.abs() * _kFlingVelocityScale);
+      _fadePerformance.fling(velocity: event.velocityX.abs() * _kFlingVelocityScale);
     } else {
       _fadePerformance.reverse();
     }
