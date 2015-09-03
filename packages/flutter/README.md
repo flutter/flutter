@@ -4,7 +4,7 @@ Getting Started with Sky
 Sky apps are written in Dart. To get started, we need to set up Dart SDK:
 
  - Install the [Dart SDK](https://www.dartlang.org/downloads/):
-   - Mac: `brew tap dart-lang/dart && brew install dart`
+   - Mac: `brew tap dart-lang/dart && brew install dart --devel`
    - Linux: See [https://www.dartlang.org/downloads/linux.html](https://www.dartlang.org/downloads/linux.html)
  - Ensure that `$DART_SDK` is set to the path of your Dart SDK and that the
    `dart` and `pub` executables are on your `$PATH`.
@@ -57,6 +57,8 @@ of the Android operating system.
  - Install the `adb` tool from the [Android SDK](https://developer.android.com/sdk/installing/index.html?pkg=tools):
   - Mac: `brew install android-platform-tools`
   - Linux: `sudo apt-get install android-tools-adb`
+    - If the version of `adb` provided by your Linux distribution is too old,
+      you might need to (install the Android SDK manually)[https://developer.android.com/sdk/installing/index.html?pkg=tools].
 
  - Enable developer mode on your device by visiting `Settings > About phone`
    and tapping the `Build number` field five times.
