@@ -242,7 +242,7 @@ class OpacityLayer extends ContainerLayer {
   int alpha;
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
-    builder.pushOpacity(alpha, bounds == null ? null : bounds.shift(layerOffset));
+    builder.pushOpacity(alpha, bounds?.shift(layerOffset));
     addChildrenToScene(builder, offset + layerOffset);
     builder.pop();
   }

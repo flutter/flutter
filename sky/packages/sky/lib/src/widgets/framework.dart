@@ -498,7 +498,7 @@ abstract class TagNode extends Widget {
   }
 
   void _sync(Widget old, dynamic slot) {
-    Widget oldChild = old == null ? null : (old as TagNode).child;
+    Widget oldChild = (old as TagNode)?.child;
     child = syncChild(child, oldChild, slot);
     if (child != null) {
       assert(child.parent == this);
@@ -1259,7 +1259,7 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
   void syncRenderObject(RenderObjectWrapper old) {
     super.syncRenderObject(old);
-    Widget oldChild = old == null ? null : (old as OneChildRenderObjectWrapper).child;
+    Widget oldChild = (old as OneChildRenderObjectWrapper)?.child;
     Widget newChild = child;
     _child = syncChild(newChild, oldChild, null);
     assert((newChild == null && child == null) || (newChild != null && child.parent == this));
@@ -1304,7 +1304,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
   void insertChildRenderObject(RenderObjectWrapper child, Widget slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    RenderObject nextSibling = slot != null ? slot.renderObject : null;
+    RenderObject nextSibling = slot?.renderObject;
     assert(nextSibling == null || nextSibling is RenderObject);
     assert(renderObject is ContainerRenderObjectMixin);
     renderObject.add(child.renderObject, before: nextSibling);

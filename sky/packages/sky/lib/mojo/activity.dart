@@ -50,7 +50,7 @@ void updateTaskDescription(String label, Color color) {
 
   TaskDescription description = new TaskDescription()
     ..label = label
-    ..primaryColor = (color != null ? color.value : null);
+    ..primaryColor = color?.value;
 
   _activityProxy.ptr.setTaskDescription(description);
 }
