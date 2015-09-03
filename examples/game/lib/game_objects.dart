@@ -44,9 +44,7 @@ abstract class GameObject extends Node {
 
       Collectable powerUp = createPowerUp();
       if (powerUp != null) {
-        powerUp.position = position;
-        powerUp.setupActions();
-        parent.addChild(powerUp);
+        f.addGameObject(powerUp, position);
       }
 
       removeFromParent();
