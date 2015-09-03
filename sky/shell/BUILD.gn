@@ -18,6 +18,7 @@ common_deps = [
   "//mojo/services/network/public/interfaces",
   "//services/asset_bundle:lib",
   "//skia",
+  "//sky/compositor",
   "//sky/engine",
   "//sky/engine/tonic",
   "//sky/engine/wtf",

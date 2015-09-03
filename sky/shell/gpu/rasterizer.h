@@ -34,12 +34,11 @@ class Rasterizer : public GPUDelegate {
 
   void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
   void OnOutputSurfaceDestroyed() override;
-  void Draw(PassRefPtr<SkPicture> picture, gfx::Size size) override;
+  void Draw(scoped_ptr<LayerTree> layer_tree) override;
 
  private:
   void EnsureGLContext();
   void EnsureGaneshSurface(intptr_t window_fbo, const gfx::Size& size);
-  void DrawPicture(SkPicture* picture);
 
   scoped_refptr<gfx::GLShareGroup> share_group_;
   scoped_refptr<gfx::GLSurface> surface_;

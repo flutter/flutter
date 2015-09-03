@@ -96,27 +96,18 @@ void Engine::Init() {
   blink::initialize(g_platform_impl);
 }
 
-void Engine::BeginFrame(base::TimeTicks frame_time) {
+std::unique_ptr<LayerTree> Engine::BeginFrame(base::TimeTicks frame_time) {
   TRACE_EVENT0("sky", "Engine::BeginFrame");
 
-  if (sky_view_)
-    sky_view_->BeginFrame(frame_time);
-}
+  if (!sky_view_)
+    return nullptr;
 
-PassRefPtr<SkPicture> Engine::Paint() {
-  TRACE_EVENT0("sky", "Engine::Paint");
-
-  if (sky_view_) {
-    RefPtr<SkPicture> picture = sky_view_->Paint();
-    if (picture)
-      return picture.release();
+  std::unique_ptr<LayerTree> layer_tree = sky_view_->BeginFrame(frame_time);
+  if (layer_tree) {
+    layer_tree->set_frame_size(SkISize::Make(physical_size_.width(),
+                                             physical_size_.height()));
   }
-
-  SkPictureRecorder recorder;
-  SkCanvas* canvas = recorder.beginRecording(
-      physical_size_.width(), physical_size_.height());
-  canvas->clear(SK_ColorBLACK);
-  return adoptRef(recorder.endRecordingAsPicture());
+  return layer_tree;
 }
 
 void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
@@ -272,8 +263,6 @@ void Engine::StopDartTracing(mojo::ScopedDataPipeProducerHandle producer) {
 }
 
 void Engine::SaveFrameToSkPicture(const base::FilePath& destination) {
-  PassRefPtr<SkPicture> picture = Paint();
-  SerializePicture(destination.AsUTF8Unsafe().c_str(), picture.get());
 }
 
 }  // namespace shell

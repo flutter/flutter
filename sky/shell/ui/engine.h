@@ -55,9 +55,7 @@ class Engine : public UIDelegate,
 
   static void Init();
 
-  void BeginFrame(base::TimeTicks frame_time);
-  PassRefPtr<SkPicture> Paint();
-  const gfx::Size& physical_size() { return physical_size_; }
+  std::unique_ptr<LayerTree> BeginFrame(base::TimeTicks frame_time);
 
   void StartDartTracing();
   void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);

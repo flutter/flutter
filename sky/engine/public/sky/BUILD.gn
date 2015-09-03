@@ -8,6 +8,7 @@ source_set("sky") {
     "//mojo/public/cpp/system",
     "//mojo/services/network/public/interfaces",
     "//skia",
+    "//sky/compositor",
     "//sky/engine/core",
     "//sky/engine/platform",
     "//sky/engine/wtf",

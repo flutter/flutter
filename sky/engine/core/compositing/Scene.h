@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "sky/compositor/layer.h"
+#include "sky/compositor/layer_tree.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -21,14 +22,12 @@ public:
     ~Scene() override;
     static PassRefPtr<Scene> create(std::unique_ptr<sky::Layer> rootLayer);
 
-    // While bootstraping the compositing system, we use an SkPicture instead
-    // of a layer tree to back the scene.
-    PassRefPtr<SkPicture> createPicture() const;
+    std::unique_ptr<sky::LayerTree> takeLayerTree();
 
 private:
     explicit Scene(std::unique_ptr<sky::Layer> rootLayer);
 
-    std::unique_ptr<sky::Layer> m_rootLayer;
+    std::unique_ptr<sky::LayerTree> m_layerTree;
 };
 
 } // namespace blink

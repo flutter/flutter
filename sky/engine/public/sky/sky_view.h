@@ -11,6 +11,7 @@
 #include "base/time/time.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/services/network/public/interfaces/url_loader.mojom.h"
+#include "sky/compositor/layer_tree.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebURL.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
@@ -33,7 +34,8 @@ class SkyView {
 
   const SkyDisplayMetrics& display_metrics() const { return display_metrics_; }
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
-  void BeginFrame(base::TimeTicks frame_time);
+
+  std::unique_ptr<sky::LayerTree> BeginFrame(base::TimeTicks frame_time);
 
   void CreateView(const String& name);
 
@@ -42,7 +44,6 @@ class SkyView {
   void RunFromSnapshot(const WebString& name,
                        mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  PassRefPtr<SkPicture> Paint();
   void HandleInputEvent(const WebInputEvent& event);
 
   void StartDartTracing();

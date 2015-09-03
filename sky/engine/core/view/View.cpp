@@ -65,12 +65,13 @@ void View::handleInputEvent(PassRefPtr<Event> event)
         m_eventCallback->handleEvent(event.get());
 }
 
-void View::beginFrame(base::TimeTicks frameTime)
+std::unique_ptr<sky::LayerTree> View::beginFrame(base::TimeTicks frameTime)
 {
     if (!m_frameCallback)
-        return;
+        return nullptr;
     double frameTimeMS = (frameTime - base::TimeTicks()).InMillisecondsF();
     m_frameCallback->handleEvent(frameTimeMS);
+    return m_scene ? m_scene->takeLayerTree() : nullptr;
 }
 
 } // namespace blink

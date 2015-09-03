@@ -66,16 +66,8 @@ void SkyView::RunFromSnapshot(const WebString& name,
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 
-void SkyView::BeginFrame(base::TimeTicks frame_time) {
-  view_->beginFrame(frame_time);
-}
-
-PassRefPtr<SkPicture> SkyView::Paint() {
-  if (Scene* scene = view_->scene())
-    return scene->createPicture();
-  if (Picture* picture = view_->picture())
-    return picture->toSkia();
-  return nullptr;
+std::unique_ptr<sky::LayerTree> SkyView::BeginFrame(base::TimeTicks frame_time) {
+  return view_->beginFrame(frame_time);
 }
 
 void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {

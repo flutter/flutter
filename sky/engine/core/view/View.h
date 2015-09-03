@@ -35,9 +35,6 @@ public:
     double width() const;
     double height() const;
 
-    Picture* picture() const { return m_picture.get(); }
-    void setPicture(Picture* picture) { m_picture = picture; }
-
     Scene* scene() const { return m_scene.get(); }
     void setScene(Scene* scene) { m_scene = scene; }
 
@@ -50,7 +47,7 @@ public:
 
     void setDisplayMetrics(const SkyDisplayMetrics& metrics);
     void handleInputEvent(PassRefPtr<Event> event);
-    void beginFrame(base::TimeTicks frameTime);
+    std::unique_ptr<sky::LayerTree> beginFrame(base::TimeTicks frameTime);
 
 private:
     explicit View(const base::Closure& scheduleFrameCallback);
@@ -60,7 +57,6 @@ private:
     OwnPtr<EventCallback> m_eventCallback;
     OwnPtr<VoidCallback> m_metricsChangedCallback;
     OwnPtr<FrameCallback> m_frameCallback;
-    RefPtr<Picture> m_picture;
     RefPtr<Scene> m_scene;
 };
 

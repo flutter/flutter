@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_H_
-#define SKY_COMPOSITOR_H_
+#ifndef SKY_COMPOSITOR_LAYER_H_
+#define SKY_COMPOSITOR_LAYER_H_
 
 #include <memory>
 #include <vector>
@@ -170,4 +170,4 @@ class ColorFilterLayer : public ContainerLayer {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_H_
+#endif  // SKY_COMPOSITOR_LAYER_H_
