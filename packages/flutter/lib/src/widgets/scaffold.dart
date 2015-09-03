@@ -208,7 +208,7 @@ class Scaffold extends RenderObjectWrapper {
   }
 
   void insertChildRenderObject(RenderObjectWrapper child, ScaffoldSlots slot) {
-    renderObject[slot] = child != null ? child.renderObject : null;
+    renderObject[slot] = child?.renderObject;
   }
 
   void detachChildRenderObject(RenderObjectWrapper child) {

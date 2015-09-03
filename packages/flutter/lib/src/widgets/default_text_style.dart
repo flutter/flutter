@@ -21,7 +21,7 @@ class DefaultTextStyle extends Inherited {
 
   static TextStyle of(Widget widget) {
     DefaultTextStyle result = widget.inheritedOfType(DefaultTextStyle);
-    return result == null ? null : result.style;
+    return result?.style;
   }
 
   bool syncShouldNotify(DefaultTextStyle old) => style != old.style;
