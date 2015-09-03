@@ -90,13 +90,18 @@ Running the examples
 Contributing code
 -----------------
 
-The Sky engine repository gladly accepts contributions via GitHub pull requests:
+The Sky engine repository gladly accepts contributions via GitHub pull requests.
+
+To start working on a patch:
 
  * `git fetch upstream`
  * `git checkout upstream/master -b name_of_your_branch`
  * Hack away
  * `git commit -a`
  * `git push origin name_of_your_branch`
+
+To send us a pull request:
+
  * `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or go to `https://github.com/<your_name_here>/sky_engine` and click the
    "Compare & pull request" button
 
