@@ -77,16 +77,15 @@ expects to be run from the root directory of your application's package (i.e.,
 the same directory that contains the `pubspec.yaml` file).
 
 To run your app with logging, run this command:
- - `./packages/sky/sky_tool start --checked && adb logcat -s sky chromium`
+ - `./packages/sky/sky_tool start --checked && ./packages/sky/sky_tool logs`
 
 The `sky_tool start` command starts the dev server and uploads your app to the device, installing `SkyShell.apk` if needed.
 The `--checked` flag triggers checked mode, in which types are checked, asserts are run, and
 various [debugging features](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/base/debug.dart) are enabled.
-The `adb logcat` command logs errors and Dart `print()` output from the app. The `-s sky chromium`
-argument limits the output to just output from Sky Dart code and the Sky Engine C++ code (which
+The `sky_tool logs` command logs errors and Dart `print()` output from the app, automatically limiting the output to just output from Sky Dart code and the Sky Engine C++ code (which
 for historical reasons currently uses the tag `chromium`.)
 
-To avoid confusion from old log messages, you may wish to run `adb logcat -c` before calling
+To avoid confusion from old log messages, you may wish to call `sky_tool logs --clear` before calling
 `sky_tool start`, to clear the log between runs.
 
 Rapid Iteration
