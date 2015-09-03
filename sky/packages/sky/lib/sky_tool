@@ -512,7 +512,12 @@ class AndroidDevice(object):
             log_process = subprocess.Popen(cmd, bufsize=1, stdout=subprocess.PIPE)
             while True:
                 try:
-                    sys.stdout.write('ANDROID: ' + log_process.stdout.readline())
+                    log_line = log_process.stdout.readline()
+                    if log_line == '':
+                        if log_process.poll() != None:
+                            logging.error('The Android logging process has quit unexpectedly. Please call the "logs" command again.')
+                            break
+                    sys.stdout.write('ANDROID: ' + log_line)
                     sys.stdout.flush()
                 except KeyboardInterrupt:
                     break
@@ -635,6 +640,10 @@ class IOSDevice(object):
             while True:
                 try:
                     log_line = log_process.stdout.readline()
+                    if log_line == '':
+                        if log_process.poll() != None:
+                            logging.error('The iOS logging process has quit unexpectedly. Please call the "logs" command again.')
+                            break
                     if re.match(r'.*SkyShell.*', log_line) is not None:
                         sys.stdout.write('IOS DEV: ' + log_line)
                         sys.stdout.flush()
@@ -757,6 +766,10 @@ class IOSSimulator(object):
             while True:
                 try:
                     log_line = log_process.stdout.readline()
+                    if log_line == '':
+                        if log_process.poll() != None:
+                            logging.error('The iOS Simulator logging process has quit unexpectedly. Please call the "logs" command again.')
+                            break
                     if re.match(r'.*SkyShell.*', log_line) is not None:
                         sys.stdout.write('IOS SIM: ' + log_line)
                         sys.stdout.flush()
