@@ -78,6 +78,7 @@ abstract class _ScrollGestureRecognizer<T extends dynamic> extends GestureRecogn
   void didStopTrackingLastPointer() {
     if (_state == ScrollState.possible) {
       resolve(GestureDisposition.rejected);
+      _state = ScrollState.ready;
       return;
     }
     bool wasAccepted = (_state == ScrollState.accepted);

@@ -27,7 +27,7 @@ View view;
 typedef EventListener(Event event);
 
 /// Linearly interpolate between two numbers.
-double lerpDouble(double a, double b, double t) {
+num lerpDouble(num a, num b, double t) {
   if (a == null && b == null)
     return null;
   if (a == null)
