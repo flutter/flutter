@@ -173,7 +173,9 @@ class Laser extends GameObject {
     impact = 1.0 + level * 0.5;
 
     // Offset for movement
-    _offset = new Offset(math.cos(radians(r)) * 10.0, math.sin(radians(r)) * 10.0);
+    _offset = new Offset(
+      math.cos(radians(r)) * 8.0,
+      math.sin(radians(r)) * 8.0 - f.playerState.scrollSpeed);
 
     // Drawing properties
     rotation = r + 90.0;
