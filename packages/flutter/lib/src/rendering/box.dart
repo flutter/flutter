@@ -519,7 +519,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     return result;
   }
 
-  void defaultHitTestChildren(HitTestResult result, { Point position }) {
+  bool defaultHitTestChildren(HitTestResult result, { Point position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
@@ -527,9 +527,10 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
       Point transformed = new Point(position.x - child.parentData.position.x,
                                     position.y - child.parentData.position.y);
       if (child.hitTest(result, position: transformed))
-        break;
+        return true;
       child = child.parentData.previousSibling;
     }
+    return false;
   }
 
   void defaultPaint(PaintingContext context, Offset offset) {
