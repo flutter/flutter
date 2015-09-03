@@ -295,7 +295,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalFlex = 0;
     int totalChildren = 0;
     assert(constraints != null);
-    final double mainSize = (_direction == FlexDirection.horizontal) ? constraints.maxWidth : constraints.maxHeight;
+    final double mainSize = (_direction == FlexDirection.horizontal) ? constraints.constrainWidth() : constraints.constrainHeight();
     final bool canFlex = mainSize < double.INFINITY;
     double crossSize = 0.0;  // This is determined as we lay out the children
     double freeSpace = canFlex ? mainSize : 0.0;
