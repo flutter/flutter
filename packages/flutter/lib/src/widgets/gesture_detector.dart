@@ -187,8 +187,7 @@ class GestureDetector extends StatefulComponent {
   }
 
   GestureRecognizer _ensureDisposed(GestureRecognizer recognizer) {
-    if (recognizer != null)
-      recognizer.dispose();
+    recognizer?.dispose();
     return null;
   }
 
