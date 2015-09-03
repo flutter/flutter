@@ -2,24 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import "dart:math" as math;
-import 'dart:sky';
+import 'dart:math' as math;
+import 'dart:sky' as sky;
+import 'dart:typed_data';
 
 double timeBase = null;
-LayoutRoot layoutRoot = new LayoutRoot();
+sky.LayoutRoot layoutRoot = new sky.LayoutRoot();
 
-void beginFrame(double timeStamp) {
-  if (timeBase == null)
-    timeBase = timeStamp;
-  double delta = timeStamp - timeBase;
-  PictureRecorder recorder = new PictureRecorder();
-  final double devicePixelRatio = view.devicePixelRatio;
-  Canvas canvas = new Canvas(recorder, new Rect.fromLTWH(0.0, 0.0, view.width * devicePixelRatio, view.height * devicePixelRatio));
-  canvas.scale(devicePixelRatio, devicePixelRatio);
-  canvas.translate(view.width / 2.0, view.height / 2.0);
+sky.Picture paint(sky.Rect paintBounds, double delta) {
+  sky.PictureRecorder recorder = new sky.PictureRecorder();
+  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+
+  canvas.translate(sky.view.width / 2.0, sky.view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
-  canvas.drawRect(new Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
-                  new Paint()..color = const Color.fromARGB(255, 0, 255, 0));
+  canvas.drawRect(new sky.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
+                  new sky.Paint()..color = const sky.Color.fromARGB(255, 0, 255, 0));
 
   double sin = math.sin(delta / 200);
   layoutRoot.maxWidth = 150.0 + (50 * sin);
@@ -28,12 +25,34 @@ void beginFrame(double timeStamp) {
   canvas.translate(layoutRoot.maxWidth / -2.0, (layoutRoot.maxWidth / 2.0) - 125);
   layoutRoot.paint(canvas);
 
-  view.picture = recorder.endRecording();
-  view.scheduleFrame();
+  return recorder.endRecording();
+}
+
+sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
+  final double devicePixelRatio = sky.view.devicePixelRatio;
+  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+  Float32List deviceTransform = new Float32List(16)
+    ..[0] = devicePixelRatio
+    ..[5] = devicePixelRatio;
+  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+    ..pushTransform(deviceTransform)
+    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..pop();
+  return sceneBuilder.build();
+}
+
+void beginFrame(double timeStamp) {
+  if (timeBase == null)
+    timeBase = timeStamp;
+  double delta = timeStamp - timeBase;
+  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
+  sky.Picture picture = paint(paintBounds, delta);
+  sky.Scene scene = composite(picture, paintBounds);
+  sky.view.scene = scene;
 }
 
 void main() {
-  var document = new Document();
+  var document = new sky.Document();
   var arabic = document.createText("هذا هو قليلا طويلة من النص الذي يجب التفاف .");
   var more = document.createText(" و أكثر قليلا لجعله أطول. ");
   var block = document.createElement('p');
@@ -45,6 +64,6 @@ void main() {
 
   layoutRoot.rootElement = block;
 
-  view.setFrameCallback(beginFrame);
-  view.scheduleFrame();
+  sky.view.setFrameCallback(beginFrame);
+  sky.view.scheduleFrame();
 }

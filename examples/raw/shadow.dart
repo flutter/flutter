@@ -2,41 +2,62 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky';
+import 'dart:sky' as sky;
+import 'dart:typed_data';
 
-void beginFrame(double timeStamp) {
+sky.Picture paint(sky.Rect paintBounds) {
+  sky.PictureRecorder recorder = new sky.PictureRecorder();
+  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+
   double size = 100.0;
-  PictureRecorder recorder = new PictureRecorder();
-  final double devicePixelRatio = view.devicePixelRatio;
-  Canvas canvas = new Canvas(recorder, new Rect.fromLTWH(0.0, 0.0, view.width * devicePixelRatio, view.height * devicePixelRatio));
-  canvas.scale(devicePixelRatio, devicePixelRatio);
   canvas.translate(size + 10.0, size + 10.0);
 
-  Paint paint = new Paint();
-  paint.color = const Color.fromARGB(255, 0, 255, 0);
-  var builder = new LayerDrawLooperBuilder()
+  sky.Paint paint = new sky.Paint();
+  paint.color = const sky.Color.fromARGB(255, 0, 255, 0);
+  var builder = new sky.LayerDrawLooperBuilder()
     // Shadow layer.
     ..addLayerOnTop(
-        new DrawLooperLayerInfo()
-          ..setPaintBits(PaintBits.all)
-          ..setOffset(const Offset(5.0, 5.0))
-          ..setColorMode(TransferMode.src),
-        new Paint()
-          ..color = const Color.fromARGB(128, 55, 55, 55)
+        new sky.DrawLooperLayerInfo()
+          ..setPaintBits(sky.PaintBits.all)
+          ..setOffset(const sky.Offset(5.0, 5.0))
+          ..setColorMode(sky.TransferMode.src),
+        new sky.Paint()
+          ..color = const sky.Color.fromARGB(128, 55, 55, 55)
           ..setMaskFilter(
-            new MaskFilter.blur(BlurStyle.normal, 5.0, highQuality: true))
+            new sky.MaskFilter.blur(sky.BlurStyle.normal, 5.0))
     )
     // Main layer.
-    ..addLayerOnTop(new DrawLooperLayerInfo(), new Paint());
+    ..addLayerOnTop(new sky.DrawLooperLayerInfo(), new sky.Paint());
   paint.setDrawLooper(builder.build());
 
   canvas.drawPaint(
-      new Paint()..color = const Color.fromARGB(255, 255, 255, 255));
-  canvas.drawRect(new Rect.fromLTRB(-size, -size, size, size), paint);
-  view.picture = recorder.endRecording();
+      new sky.Paint()..color = const sky.Color.fromARGB(255, 255, 255, 255));
+  canvas.drawRect(new sky.Rect.fromLTRB(-size, -size, size, size), paint);
+
+  return recorder.endRecording();
+}
+
+sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
+  final double devicePixelRatio = sky.view.devicePixelRatio;
+  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+  Float32List deviceTransform = new Float32List(16)
+    ..[0] = devicePixelRatio
+    ..[5] = devicePixelRatio;
+  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+    ..pushTransform(deviceTransform)
+    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..pop();
+  return sceneBuilder.build();
+}
+
+void beginFrame(double timeStamp) {
+  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
+  sky.Picture picture = paint(paintBounds);
+  sky.Scene scene = composite(picture, paintBounds);
+  sky.view.scene = scene;
 }
 
 void main() {
-  view.setFrameCallback(beginFrame);
-  view.scheduleFrame();
+  sky.view.setFrameCallback(beginFrame);
+  sky.view.scheduleFrame();
 }
