@@ -426,9 +426,15 @@ class EnemyBoss extends Obstacle {
     maxDamage = 40.0;
 
     constraints = [new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
+
+    _powerBar = new PowerBar(new Size(60.0, 10.0));
+    _powerBar.position = new Point(-80.0, 0.0);
+    _powerBar.pivot = new Point(0.5, 0.5);
+    addChild(_powerBar);
   }
 
   Sprite _sprt;
+  PowerBar _powerBar;
 
   int _countDown = randomInt(120) + 240;
 
@@ -436,17 +442,48 @@ class EnemyBoss extends Obstacle {
     _countDown -= 1;
     if (_countDown <= 0) {
       // Shoot at player
-      EnemyLaser laser = new EnemyLaser(f, rotation, 5.0, new Color(0xffffe38e));
-      laser.position = position;
-      f.level.addChild(laser);
+      fire(10.0);
+      fire(0.0);
+      fire(-10.0);
 
       _countDown = 60 + randomInt(120);
     }
+
+    _powerBar.rotation = -rotation;
+  }
+
+  void fire(double r) {
+    r += rotation;
+    EnemyLaser laser = new EnemyLaser(f, r, 5.0, new Color(0xffffe38e));
+
+    double rad = radians(r);
+    Offset startOffset = new Offset(math.cos(rad) * 30.0, math.sin(rad) * 30.0);
+
+    laser.position = position + startOffset;
+    f.level.addChild(laser);
+  }
+
+  void setupActions() {
+    ActionOscillate oscillate = new ActionOscillate((a) => position = a, position, 120.0, 3.0);
+    actions.run(new ActionRepeatForever(oscillate));
   }
 
   void destroy() {
     f.playerState.boss = null;
     super.destroy();
+  }
+
+  set damage(double d) {
+    super.damage = d;
+    _sprt.actions.stopAll();
+    _sprt.actions.run(new ActionTween(
+      (a) =>_sprt.colorOverlay = a,
+      new Color.fromARGB(180, 255, 3, 86),
+      new Color(0x00000000),
+      0.3
+    ));
+
+    _powerBar.power = (1.0 - (damage / maxDamage)).clamp(0.0, 1.0);
   }
 }
 
