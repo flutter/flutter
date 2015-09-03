@@ -604,6 +604,17 @@ class IOSDevice(object):
 
     @classmethod
     def logs(cls):
+        try:
+            cmd = [
+                'which',
+                'idevicesyslog'
+            ]
+            logging.info(' '.join(cmd))
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError:
+            logging.error('"log" command only works with iOS devices if you have installed idevicesyslog. Run "brew install libimobiledevice" to install it with homebrew.')
+            return None
+
         def do_logs():
             cmd = [
                 'idevicesyslog',
