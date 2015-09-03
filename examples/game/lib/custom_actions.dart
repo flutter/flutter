@@ -17,3 +17,17 @@ class ActionCircularMove extends ActionInterval {
     setter(pos);
   }
 }
+
+class ActionOscillate extends ActionInterval {
+  ActionOscillate(this.setter, this.center, this.radius, double duration) : super(duration);
+
+  final Function setter;
+  final Point center;
+  final double radius;
+
+  void update(double t) {
+    double rad = radians(t * 360.0);
+    Offset offset = new Offset(math.sin(rad) * radius, 0.0);
+    setter(center + offset);
+  }
+}
