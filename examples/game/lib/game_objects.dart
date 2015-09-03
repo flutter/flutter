@@ -426,9 +426,13 @@ class EnemyBoss extends Obstacle {
     constraints = [new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
 
     _powerBar = new PowerBar(new Size(60.0, 10.0));
-    _powerBar.position = new Point(-80.0, 0.0);
     _powerBar.pivot = new Point(0.5, 0.5);
-    addChild(_powerBar);
+    f.level.addChild(_powerBar);
+    _powerBar.constraints = [new ConstraintPositionToNode(
+      this,
+      dampening: 0.5,
+      offset: new Offset(0.0, -70.0)
+    )];
   }
 
   Sprite _sprt;
@@ -446,8 +450,6 @@ class EnemyBoss extends Obstacle {
 
       _countDown = 60 + randomInt(120);
     }
-
-    _powerBar.rotation = -rotation;
   }
 
   void fire(double r) {
@@ -468,7 +470,9 @@ class EnemyBoss extends Obstacle {
 
   void destroy() {
     f.playerState.boss = null;
+    _powerBar.removeFromParent();
 
+    // Flash the screen
     NodeWithSize screen = f.playerState.parent;
     screen.addChild(new Flash(screen.size, 1.0));
     super.destroy();
