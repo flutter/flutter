@@ -468,7 +468,25 @@ class EnemyBoss extends Obstacle {
 
   void destroy() {
     f.playerState.boss = null;
+
+    NodeWithSize screen = f.playerState.parent;
+    screen.addChild(new Flash(screen.size, 1.0));
     super.destroy();
+
+    // Add coins
+    for (int i = 0; i < 20; i++) {
+      Coin coin = new Coin(f);
+      Point pos = new Point(
+        randomSignedDouble() * 160,
+        position.y + randomSignedDouble() * 160.0);
+      f.addGameObject(coin, pos);
+    }
+  }
+
+  Explosion createExplosion() {
+    ExplosionBig explo = new ExplosionBig(f.sheet);
+    explo.scale = 1.5;
+    return explo;
   }
 
   set damage(double d) {
