@@ -151,6 +151,8 @@ class SkyLogs(object):
     def add_subparser(self, subparsers):
         logs_parser = subparsers.add_parser('logs',
             help='Show logs for running Sky apps')
+        logs_parser.add_argument('--clear', action='store_true', dest='clear_logs',
+            help='Clear log history before reading from logs (currently only implemented for Android)')
         logs_parser.set_defaults(func=self.run)
 
     def run(self, args, pids):
@@ -160,13 +162,13 @@ class SkyLogs(object):
 
         android = AndroidDevice()
         if android.is_connected():
-            android_log_reader = android.logs()
+            android_log_reader = android.logs(args.clear_logs)
 
         if IOSDevice.is_connected():
-            ios_dev_log_reader = IOSDevice.logs()
+            ios_dev_log_reader = IOSDevice.logs(args.clear_logs)
 
         if IOSSimulator.is_connected():
-            ios_sim_log_reader = IOSSimulator.logs()
+            ios_sim_log_reader = IOSSimulator.logs(args.clear_logs)
 
         if android_log_reader is not None:
             try:
@@ -488,8 +490,17 @@ class AndroidDevice(object):
         logging.info(' '.join(cmd))
         subprocess.check_output(cmd)
 
-    def logs(self):
+    def logs(self, clear=False):
         def do_logs():
+            if clear:
+                cmd = [
+                    self.adb_path,
+                    'logcat',
+                    '-c'
+                ]
+                logging.info(' '.join(cmd))
+                subprocess.check_call(cmd)
+
             cmd = [
                 self.adb_path,
                 'logcat',
@@ -603,7 +614,7 @@ class IOSDevice(object):
             pass
 
     @classmethod
-    def logs(cls):
+    def logs(cls, clear=False):
         try:
             cmd = [
                 'which',
@@ -734,7 +745,7 @@ class IOSSimulator(object):
         return cls.is_booted()
 
     @classmethod
-    def logs(cls):
+    def logs(cls, clear=False):
         def do_logs():
             cmd = [
                 'tail',
