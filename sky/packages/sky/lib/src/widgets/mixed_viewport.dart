@@ -201,9 +201,15 @@ class MixedViewport extends RenderObjectWrapper {
           Widget widget = builder(index);
           assert(widget != null);
           assert(widget.key != null);
+          assert(widget.isFromOldGeneration);
           _Key key = new _Key.fromWidget(widget);
           Widget oldWidget = _childrenByKey[key];
           assert(oldWidget != null);
+          assert(() {
+            'One of the nodes that was in this MixedViewport was placed in another part of the tree, without the MixedViewport\'s token or builder being changed ' +
+            'and without the MixedViewport\'s MixedViewportLayoutState object being told about that any of the children were invalid.';
+            return oldWidget.isFromOldGeneration;
+          });
           assert(oldWidget.renderObject.parent == renderObject);
           widget = syncChild(widget, oldWidget, renderObject.childAfter(oldWidget.renderObject));
           assert(widget != null);
@@ -225,8 +231,11 @@ class MixedViewport extends RenderObjectWrapper {
     Widget newWidget = builder(index);
     assert(newWidget != null);
     assert(newWidget.key != null);
+    assert(newWidget.isFromOldGeneration);
     final _Key key = new _Key.fromWidget(newWidget);
     Widget oldWidget = _childrenByKey[key];
+    if (oldWidget != null && !oldWidget.isFromOldGeneration)
+      oldWidget = null;
     newWidget = syncChild(newWidget, oldWidget, _omit);
     assert(newWidget != null);
     // Update the offsets based on the newWidget's dimensions.
@@ -254,6 +263,8 @@ class MixedViewport extends RenderObjectWrapper {
     assert(widget.key != null); // items in lists must have keys
     final _Key key = new _Key.fromWidget(widget);
     Widget oldWidget = _childrenByKey[key];
+    if (oldWidget != null && !oldWidget.isFromOldGeneration)
+      oldWidget = null;
     widget = syncChild(widget, oldWidget, _omit);
     if (index >= offsets.length - 1) {
       assert(index == offsets.length - 1);
@@ -284,6 +295,18 @@ class MixedViewport extends RenderObjectWrapper {
     }
 
     layoutState._notifyListeners();
+  }
+
+  void _unsyncChild(Widget widget) {
+    assert(!widget.isFromOldGeneration);
+    // The following two lines are the equivalent of "syncChild(null,
+    // widget, null)", but actually doing that wouldn't work because
+    // widget is now from the new generation and so syncChild() would
+    // assume that that means someone else has already sync()ed with it
+    // and that it's wanted. But it's not wanted! We want to get rid of
+    // it. So we do it manually.
+    widget.detachRenderObject();
+    widget.remove();
   }
 
   void _doLayout(BoxConstraints constraints) {
@@ -334,7 +357,7 @@ class MixedViewport extends RenderObjectWrapper {
           builtChildren[index] = widget;
         } else {
           childrenByKey.remove(widgetKey);
-          syncChild(null, widget, null);
+          _unsyncChild(widget);
         }
       }
     }
@@ -378,7 +401,7 @@ class MixedViewport extends RenderObjectWrapper {
             break;
           }
           childrenByKey.remove(widgetKey);
-          syncChild(null, widget, null);
+          _unsyncChild(widget);
           startIndex += 1;
           assert(startIndex == offsets.length - 1);
         }
