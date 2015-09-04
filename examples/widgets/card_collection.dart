@@ -64,7 +64,7 @@ class CardCollectionApp extends App {
     });
   }
 
-  String dismissDirectionText(DismissDirection direction) {
+  String _dismissDirectionText(DismissDirection direction) {
     String s = direction.toString();
     return "dismiss ${s.substring(s.indexOf('.') + 1)}";
   }
@@ -85,7 +85,7 @@ class CardCollectionApp extends App {
         icon: icon,
         onPressed: () { changeDismissDirection(direction); },
         child: new Row([
-          new Flexible(child: new Text(dismissDirectionText(direction))),
+          new Flexible(child: new Text(_dismissDirectionText(direction))),
           new Radio(
             value: direction,
             onChanged: changeDismissDirection,
@@ -116,7 +116,7 @@ class CardCollectionApp extends App {
       left: new IconButton(icon: "navigation/menu", onPressed: _handleOpenDrawer),
       center: new Text('Swipe Away'),
       right: [
-        new Text(dismissDirectionText(_dismissDirection))
+        new Text(_dismissDirectionText(_dismissDirection))
       ]
     );
   }
