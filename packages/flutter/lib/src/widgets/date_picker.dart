@@ -98,7 +98,13 @@ class DatePicker extends StatefulComponent {
         );
         break;
     }
-    return new BlockBody([header, new Container(height: _calendarHeight, child: picker)]);
+    return new Column([
+      header,
+      new Container(
+        height: _calendarHeight,
+        child: picker
+      )
+    ], alignItems: FlexAlignItems.stretch);
   }
 
 }
@@ -143,28 +149,22 @@ class DatePickerHeader extends Component {
     TextStyle yearStyle = headerTheme.headline.copyWith(color: yearColor, height: 1.0);
 
     return new Container(
-      child: new BlockBody([
-        new Center(
-          child: new GestureDetector(
-            child: new Text(new DateFormat("MMM").format(selectedDate).toUpperCase(), style: monthStyle),
-            onTap: () => _handleChangeMode(DatePickerMode.day)
-          )
-        ),
-        new Center(
-          child: new GestureDetector(
-            child: new Text(new DateFormat("d").format(selectedDate), style: dayStyle),
-            onTap: () => _handleChangeMode(DatePickerMode.day)
-          )
-        ),
-        new Center(
-          child: new GestureDetector(
-            child: new Text(new DateFormat("yyyy").format(selectedDate), style: yearStyle),
-            onTap: () => _handleChangeMode(DatePickerMode.year)
-          )
-        )
-      ]),
       padding: new EdgeDims.all(10.0),
-      decoration: new BoxDecoration(backgroundColor: theme.primaryColor)
+      decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+      child: new Column([
+        new GestureDetector(
+          onTap: () => _handleChangeMode(DatePickerMode.day),
+          child: new Text(new DateFormat("MMM").format(selectedDate).toUpperCase(), style: monthStyle)
+        ),
+        new GestureDetector(
+          onTap: () => _handleChangeMode(DatePickerMode.day),
+          child: new Text(new DateFormat("d").format(selectedDate), style: dayStyle)
+        ),
+        new GestureDetector(
+          onTap: () => _handleChangeMode(DatePickerMode.year),
+          child: new Text(new DateFormat("yyyy").format(selectedDate), style: yearStyle)
+        )
+      ])
     );
   }
 }
@@ -267,11 +267,8 @@ class DayPicker extends Component {
     }
     for (int w = 0; w < weeksShown; w++) {
       int startIndex = w * days.length;
-      rows.add(new Container(
-        child: new Flex(
-          labels.sublist(startIndex, startIndex + days.length),
-          justifyContent: FlexJustifyContent.spaceAround
-        )
+      rows.add(new Row(
+        labels.sublist(startIndex, startIndex + days.length)
       ));
     }
 

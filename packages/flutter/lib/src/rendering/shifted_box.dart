@@ -136,6 +136,13 @@ class RenderPadding extends RenderShiftedBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}padding: ${padding}\n';
 }
 
+enum ShrinkWrap {
+  width,
+  height,
+  both,
+  none
+}
+
 class RenderPositionedBox extends RenderShiftedBox {
 
   // This box aligns a child box within itself. It's only useful for
@@ -147,12 +154,15 @@ class RenderPositionedBox extends RenderShiftedBox {
   RenderPositionedBox({
     RenderBox child,
     double horizontal: 0.5,
-    double vertical: 0.5
+    double vertical: 0.5,
+    ShrinkWrap shrinkWrap: ShrinkWrap.none
   }) : _horizontal = horizontal,
        _vertical = vertical,
+       _shrinkWrap = shrinkWrap,
        super(child) {
     assert(horizontal != null);
     assert(vertical != null);
+    assert(shrinkWrap != null);
   }
 
   double _horizontal;
@@ -175,15 +185,30 @@ class RenderPositionedBox extends RenderShiftedBox {
     markNeedsLayout();
   }
 
+  ShrinkWrap _shrinkWrap;
+  ShrinkWrap get shrinkWrap => _shrinkWrap;
+  void set shrinkWrap (ShrinkWrap value) {
+    assert(value != null);
+    if (_shrinkWrap == value)
+      return;
+    _shrinkWrap = value;
+    markNeedsLayout();
+  }
+
+  bool get _shinkWrapWidth => _shrinkWrap == ShrinkWrap.width || _shrinkWrap == ShrinkWrap.both;
+  bool get _shinkWrapHeight => _shrinkWrap == ShrinkWrap.height || _shrinkWrap == ShrinkWrap.both;
+
   void performLayout() {
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
-      size = constraints.constrain(child.size);
+      size = constraints.constrain(new Size(_shinkWrapWidth ? child.size.width : double.INFINITY,
+                                            _shinkWrapHeight ? child.size.height : double.INFINITY));
       assert(child.parentData is BoxParentData);
       Offset delta = size - child.size;
       child.parentData.position = (delta.scale(horizontal, vertical)).toPoint();
     } else {
-      performResize();
+      size = constraints.constrain(new Size(_shinkWrapWidth ? 0.0 : double.INFINITY,
+                                            _shinkWrapHeight ? 0.0 : double.INFINITY));
     }
   }
 
