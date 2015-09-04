@@ -46,11 +46,29 @@ class GameObjectFactory {
   }
 
   void addBossFight(int l, double yPos) {
+    // Add boss
     EnemyBoss boss = new EnemyBoss(this);
     Point pos = new Point(0.0, yPos + _chunkSpacing / 2.0);
 
     addGameObject(boss, pos);
 
     playerState.boss = boss;
+
+    // Add boss's helpers
+    if (l >= 1) {
+      EnemyDestroyer destroyer0 = new EnemyDestroyer(this);
+      addGameObject(destroyer0, new Point(-80.0, yPos + _chunkSpacing / 2.0 + 70.0));
+
+      EnemyDestroyer destroyer1 = new EnemyDestroyer(this);
+      addGameObject(destroyer1, new Point(80.0, yPos + _chunkSpacing / 2.0 + 70.0));
+
+      if (l >= 2) {
+        EnemyDestroyer destroyer0 = new EnemyDestroyer(this);
+        addGameObject(destroyer0, new Point(-80.0, yPos + _chunkSpacing / 2.0 - 70.0));
+
+        EnemyDestroyer destroyer1 = new EnemyDestroyer(this);
+        addGameObject(destroyer1, new Point(80.0, yPos + _chunkSpacing / 2.0 - 70.0));
+      }
+    }
   }
 }

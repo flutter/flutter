@@ -167,13 +167,15 @@ class Laser extends GameObject {
   Laser(GameObjectFactory f, int level, double r) : super(f) {
     // Game object properties
     radius = 10.0;
-    removeLimit = 640.0;
+    removeLimit = _gameSizeHeight + radius;
     canDamageShip = false;
     canBeDamaged = false;
     impact = 1.0 + level * 0.5;
 
     // Offset for movement
-    _offset = new Offset(math.cos(radians(r)) * 10.0, math.sin(radians(r)) * 10.0);
+    _offset = new Offset(
+      math.cos(radians(r)) * 8.0,
+      math.sin(radians(r)) * 8.0 - f.playerState.scrollSpeed);
 
     // Drawing properties
     rotation = r + 90.0;
