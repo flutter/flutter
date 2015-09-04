@@ -79,6 +79,7 @@ class RenderPadding extends RenderShiftedBox {
   EdgeDims get padding => _padding;
   void set padding (EdgeDims value) {
     assert(value != null);
+    assert(value.isNonNegative);
     if (_padding == value)
       return;
     _padding = value;
