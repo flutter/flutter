@@ -671,8 +671,10 @@ class RenderCustomPaint extends RenderProxyBox {
 }
 
 class RenderIgnorePointer extends RenderProxyBox {
-  RenderIgnorePointer({ RenderBox child }) : super(child);
+  RenderIgnorePointer({ RenderBox child, bool ignoring: true }) : super(child);
+
+  bool ignoring;
   bool hitTest(HitTestResult result, { Point position }) {
-    return false;
+    return ignoring ? false : super.hitTest(result, position: position);
   }
 }
