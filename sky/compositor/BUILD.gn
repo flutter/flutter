@@ -4,6 +4,8 @@
 
 source_set("compositor") {
   sources = [
+    "layer_tree.cc",
+    "layer_tree.h",
     "layer.cc",
     "layer.h",
   ]

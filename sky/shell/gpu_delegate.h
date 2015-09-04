@@ -5,7 +5,10 @@
 #ifndef SKY_SHELL_GPU_DELEGATE_H_
 #define SKY_SHELL_GPU_DELEGATE_H_
 
-#include "sky/engine/wtf/PassRefPtr.h"
+#include <memory>
+
+#include "base/memory/scoped_ptr.h"
+#include "sky/compositor/layer_tree.h"
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/native_widget_types.h"
 
@@ -18,7 +21,7 @@ class GPUDelegate {
  public:
   virtual void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) = 0;
   virtual void OnOutputSurfaceDestroyed() = 0;
-  virtual void Draw(PassRefPtr<SkPicture> picture, gfx::Size size) = 0;
+  virtual void Draw(scoped_ptr<LayerTree> layer_tree) = 0;
 
  protected:
   virtual ~GPUDelegate();

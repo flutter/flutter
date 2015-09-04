@@ -71,13 +71,18 @@ void Animator::BeginFrame(int64_t time_stamp) {
   base::TimeTicks frame_time = time_stamp ?
       base::TimeTicks::FromInternalValue(time_stamp) : base::TimeTicks::Now();
 
-  engine_->BeginFrame(frame_time);
-  RefPtr<SkPicture> picture = engine_->Paint();
+  scoped_ptr<LayerTree> layer_tree =
+      make_scoped_ptr(engine_->BeginFrame(frame_time).release());
+
+  if (!layer_tree) {
+    OnFrameComplete();
+    return;
+  }
 
   config_.gpu_task_runner->PostTaskAndReply(
       FROM_HERE,
-      base::Bind(&GPUDelegate::Draw, config_.gpu_delegate, picture,
-                 engine_->physical_size()),
+      base::Bind(&GPUDelegate::Draw, config_.gpu_delegate,
+                 base::Passed(&layer_tree)),
       base::Bind(&Animator::OnFrameComplete, weak_factory_.GetWeakPtr()));
 }
 

@@ -14,7 +14,6 @@ interface View {
   readonly attribute double width;
   readonly attribute double height;
 
-  attribute Picture picture;
   attribute Scene scene;
 
   void setEventCallback(EventCallback callback);

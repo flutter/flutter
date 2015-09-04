@@ -5,6 +5,7 @@
 #include "sky/shell/gpu/rasterizer.h"
 
 #include "base/trace_event/trace_event.h"
+#include "sky/compositor/layer.h"
 #include "sky/shell/gpu/ganesh_context.h"
 #include "sky/shell/gpu/ganesh_surface.h"
 #include "sky/shell/gpu/picture_serializer.h"
@@ -35,11 +36,14 @@ void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   CHECK(surface_) << "GLSurface required.";
 }
 
-void Rasterizer::Draw(PassRefPtr<SkPicture> picture, gfx::Size size) {
+void Rasterizer::Draw(scoped_ptr<LayerTree> layer_tree) {
   TRACE_EVENT0("sky", "Rasterizer::Draw");
 
   if (!surface_)
     return;
+
+  gfx::Size size(layer_tree->frame_size().width(),
+                 layer_tree->frame_size().height());
 
   if (surface_->GetSize() != size)
     surface_->Resize(size);
@@ -47,19 +51,14 @@ void Rasterizer::Draw(PassRefPtr<SkPicture> picture, gfx::Size size) {
   EnsureGLContext();
   CHECK(context_->MakeCurrent(surface_.get()));
   EnsureGaneshSurface(surface_->GetBackingFrameBufferObject(), size);
+  SkCanvas* canvas = ganesh_surface_->canvas();
 
-  DrawPicture(picture.get());
+  canvas->clear(SK_ColorBLACK);
+  layer_tree->root_layer()->Paint(canvas);
+  canvas->flush();
   surface_->SwapBuffers();
 
   // SerializePicture("/data/data/org.domokit.sky.shell/cache/layer0.skp", picture.get());
-}
-
-void Rasterizer::DrawPicture(SkPicture* picture) {
-  TRACE_EVENT0("sky", "Rasterizer::DrawPicture");
-  SkCanvas* canvas = ganesh_surface_->canvas();
-  canvas->clear(SK_ColorBLACK);
-  canvas->drawPicture(picture);
-  canvas->flush();
 }
 
 void Rasterizer::OnOutputSurfaceDestroyed() {

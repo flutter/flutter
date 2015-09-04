@@ -16,22 +16,17 @@ PassRefPtr<Scene> Scene::create(std::unique_ptr<sky::Layer> rootLayer)
 }
 
 Scene::Scene(std::unique_ptr<sky::Layer> rootLayer)
-    : m_rootLayer(std::move(rootLayer))
+    : m_layerTree(new sky::LayerTree())
 {
+    m_layerTree->set_root_layer(std::move(rootLayer));
 }
 
 Scene::~Scene()
 {
 }
 
-PassRefPtr<SkPicture> Scene::createPicture() const
-{
-    SkRTreeFactory rtreeFactory;
-    SkPictureRecorder pictureRecorder;
-    SkCanvas* canvas = pictureRecorder.beginRecording(m_rootLayer->paint_bounds(),
-        &rtreeFactory, SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag);
-    m_rootLayer->Paint(canvas);
-    return adoptRef(pictureRecorder.endRecording());
+std::unique_ptr<sky::LayerTree> Scene::takeLayerTree() {
+  return std::move(m_layerTree);
 }
 
 } // namespace blink
