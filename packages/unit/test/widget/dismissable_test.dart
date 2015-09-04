@@ -77,6 +77,8 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
       downLocation = tester.getTopLeft(itemWidget);
       upLocation = tester.getBottomLeft(itemWidget);
       break;
+    default:
+      fail("unsupported gestureDirection");
   }
 
   TestPointer pointer = new TestPointer(5);

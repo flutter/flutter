@@ -9,49 +9,49 @@ void main() {
     WidgetTester tester = new WidgetTester();
     TestPointer pointer = new TestPointer(7);
 
-    bool didStartScroll = false;
-    double updatedScrollDelta;
-    bool didEndScroll = false;
+    bool didStartDrag = false;
+    double updatedDragDelta;
+    bool didEndDrag = false;
 
     Widget builder() {
       return new GestureDetector(
-        onVerticalScrollStart: () {
-          didStartScroll = true;
+        onVerticalDragStart: () {
+          didStartDrag = true;
         },
-        onVerticalScrollUpdate: (double scrollDelta) {
-          updatedScrollDelta = scrollDelta;
+        onVerticalDragUpdate: (double scrollDelta) {
+          updatedDragDelta = scrollDelta;
         },
-        onVerticalScrollEnd: () {
-          didEndScroll = true;
+        onVerticalDragEnd: () {
+          didEndDrag = true;
         },
         child: new Container()
       );
     }
 
     tester.pumpFrame(builder);
-    expect(didStartScroll, isFalse);
-    expect(updatedScrollDelta, isNull);
-    expect(didEndScroll, isFalse);
+    expect(didStartDrag, isFalse);
+    expect(updatedDragDelta, isNull);
+    expect(didEndDrag, isFalse);
 
     Point firstLocation = new Point(10.0, 10.0);
     tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
-    expect(didStartScroll, isTrue);
-    didStartScroll = false;
-    expect(updatedScrollDelta, isNull);
-    expect(didEndScroll, isFalse);
+    expect(didStartDrag, isTrue);
+    didStartDrag = false;
+    expect(updatedDragDelta, isNull);
+    expect(didEndDrag, isFalse);
 
     Point secondLocation = new Point(10.0, 9.0);
     tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
-    expect(didStartScroll, isFalse);
-    expect(updatedScrollDelta, 1.0);
-    updatedScrollDelta = null;
-    expect(didEndScroll, isFalse);
+    expect(didStartDrag, isFalse);
+    expect(updatedDragDelta, 1.0);
+    updatedDragDelta = null;
+    expect(didEndDrag, isFalse);
 
     tester.dispatchEvent(pointer.up(), firstLocation);
-    expect(didStartScroll, isFalse);
-    expect(updatedScrollDelta, isNull);
-    expect(didEndScroll, isTrue);
-    didEndScroll = false;
+    expect(didStartDrag, isFalse);
+    expect(updatedDragDelta, isNull);
+    expect(didEndDrag, isTrue);
+    didEndDrag = false;
 
     tester.pumpFrame(() => new Container());
   });
@@ -68,10 +68,10 @@ void main() {
 
     Widget builder() {
       return new GestureDetector(
-        onVerticalScrollUpdate: (double delta) { dragDistance += delta; },
-        onVerticalScrollEnd: () { gestureCount += 1; },
-        onHorizontalScrollUpdate: (_) { fail("gesture should not match"); },
-        onHorizontalScrollEnd: () { fail("gesture should not match"); },
+        onVerticalDragUpdate: (double delta) { dragDistance += delta; },
+        onVerticalDragEnd: () { gestureCount += 1; },
+        onHorizontalDragUpdate: (_) { fail("gesture should not match"); },
+        onHorizontalDragEnd: () { fail("gesture should not match"); },
         child: new Container()
       );
     }

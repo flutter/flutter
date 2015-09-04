@@ -85,10 +85,10 @@ abstract class Scrollable extends StatefulComponent {
 
   Widget build() {
     return new GestureDetector(
-      onVerticalScrollUpdate: scrollDirection == ScrollDirection.vertical ? scrollBy : null,
-      onVerticalScrollEnd: scrollDirection == ScrollDirection.vertical ? _maybeSettleScrollOffset : null,
-      onHorizontalScrollUpdate: scrollDirection == ScrollDirection.horizontal ? scrollBy : null,
-      onHorizontalScrollEnd: scrollDirection == ScrollDirection.horizontal ? _maybeSettleScrollOffset : null,
+      onVerticalDragUpdate: scrollDirection == ScrollDirection.vertical ? scrollBy : null,
+      onVerticalDragEnd: scrollDirection == ScrollDirection.vertical ? _maybeSettleScrollOffset : null,
+      onHorizontalDragUpdate: scrollDirection == ScrollDirection.horizontal ? scrollBy : null,
+      onHorizontalDragEnd: scrollDirection == ScrollDirection.horizontal ? _maybeSettleScrollOffset : null,
       child: new Listener(
         child: buildContent(),
         onPointerDown: _handlePointerDown,
