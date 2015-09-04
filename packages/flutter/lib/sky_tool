@@ -198,17 +198,23 @@ class InstallSky(object):
     def run(self, args, pids):
         android = AndroidDevice()
 
+        installed_somewhere = False
         # Install on connected Android device
         if android.is_connected() and args.android_build_available:
-            android.install_apk(android.get_apk_path(args))
+            installed_somewhere = installed_somewhere or android.install_apk(android.get_apk_path(args))
 
         # Install on connected iOS device
         if IOSDevice.is_connected() and args.ios_build_available:
-            IOSDevice.install_app(IOSDevice.get_app_path(args))
+            installed_somewhere = installed_somewhere or IOSDevice.install_app(IOSDevice.get_app_path(args))
 
         # Install on iOS simulator if it's running
         if IOSSimulator.is_booted() and args.ios_sim_build_available:
-            IOSSimulator.fork_install_app(IOSSimulator.get_app_path(args))
+            installed_somewhere = installed_somewhere or IOSSimulator.fork_install_app(IOSSimulator.get_app_path(args))
+
+        if installed_somewhere:
+            return 0
+        else:
+            return 2
 
     # TODO(iansf): get rid of need for args
     def needs_install(self, args):
@@ -226,13 +232,14 @@ class StartSky(object):
         start_parser.set_defaults(func=self.run)
 
     def run(self, args, pids):
+        started_sky_somewhere = False
         if not args.poke:
             StopSky().run(args, pids)
 
             # Only install if the user did not specify a poke
             installer = InstallSky()
             if installer.needs_install(args):
-                installer.run(args, pids)
+                started_sky_somewhere = (installer.run(args, pids) == 0)
 
         project_or_path = os.path.abspath(args.project_or_path)
 
@@ -258,7 +265,12 @@ class StartSky(object):
 
         android = AndroidDevice()
         # TODO(iansf): fix this so that we don't have to pass sky_server_root, main_dart, pid, and args.
-        android.setup_servers(sky_server_root, main_dart, pids, args)
+        started_sky_on_android = android.setup_servers(sky_server_root, main_dart, pids, args)
+
+        if started_sky_somewhere or started_sky_on_android:
+            return 0
+        else:
+            return 2
 
 
 class StopSky(object):
@@ -420,7 +432,7 @@ class AndroidDevice(object):
     def install_apk(self, apk_path):
         if not os.path.exists(apk_path):
             logging.error('"%s" does not exist.' % apk_path)
-            return
+            return False
 
         cmd = [self.adb_path, 'install', '-r', apk_path]
         logging.info(' '.join(cmd))
@@ -433,10 +445,13 @@ class AndroidDevice(object):
             logging.info(' '.join(cmd))
             subprocess.check_call(cmd)
 
+        return True
+
+
     # TODO(iansf): refactor setup_servers
     def setup_servers(self, sky_server_root, main_dart, pids, args):
         if not self.is_connected():
-            return
+            return False
 
         # Set up port forwarding for observatory
         observatory_port_string = 'tcp:%s' % OBSERVATORY_PORT
@@ -489,6 +504,8 @@ class AndroidDevice(object):
         cmd += [ANDROID_COMPONENT]
         logging.info(' '.join(cmd))
         subprocess.check_output(cmd)
+
+        return True
 
     def logs(self, clear=False):
         def do_logs():
@@ -582,7 +599,7 @@ class IOSDevice(object):
     @classmethod
     def install_app(cls, ios_app_path):
         if not cls.has_ios_deploy():
-            return
+            return False
         try:
             cmd = [
                 'ios-deploy',
@@ -595,7 +612,8 @@ class IOSDevice(object):
             logging.info(' '.join(cmd))
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError:
-            pass
+            return False
+        return True
 
     @classmethod
     def copy_file(cls, bundle_id, local_path, device_path):
@@ -782,15 +800,19 @@ class IOSSimulator(object):
 
     @classmethod
     def fork_install_app(cls, ios_app_path):
-        cmd = [
-            os.path.abspath(__file__),
-            'ios_sim',
-            '-p',
-            ios_app_path,
-            'launch'
-        ]
-        logging.info(' '.join(cmd))
-        subprocess.check_call(cmd)
+        try:
+            cmd = [
+                os.path.abspath(__file__),
+                'ios_sim',
+                '-p',
+                ios_app_path,
+                'launch'
+            ]
+            logging.info(' '.join(cmd))
+            subprocess.check_call(cmd)
+            return True
+        except subprocess.CalledProcessError:
+            return False
 
     def _process_args(self, args):
         if args.ios_sim_build_path is None:
