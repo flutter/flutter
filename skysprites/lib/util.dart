@@ -101,4 +101,8 @@ class GameMath {
   static double filter (double a, double b, double filterFactor) {
       return (a * (1-filterFactor)) + b * filterFactor;
   }
+
+  static Point filterPoint(Point a, Point b, double filterFactor) {
+    return new Point(filter(a.x, b.x, filterFactor), filter(a.y, b.y, filterFactor));
+  }
 }
