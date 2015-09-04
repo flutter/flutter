@@ -899,8 +899,15 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
 // EVENT HANDLING
 
 class IgnorePointer extends OneChildRenderObjectWrapper {
-  IgnorePointer({ Key key, Widget child })
+  IgnorePointer({ Key key, Widget child, this.ignoring })
     : super(key: key, child: child);
-  RenderIgnorePointer createNode() => new RenderIgnorePointer();
+
+  final bool ignoring;
+  RenderIgnorePointer createNode() => new RenderIgnorePointer(ignoring: ignoring);
   RenderIgnorePointer get renderObject => super.renderObject;
+
+  void syncRenderObject(Widget old) {
+    super.syncRenderObject(old);
+    renderObject.ignoring = ignoring;
+  }
 }
