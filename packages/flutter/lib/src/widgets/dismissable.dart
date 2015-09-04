@@ -20,6 +20,15 @@ const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissCardThreshold = 0.4;
 
+enum DismissDirection {
+  vertical,
+  horizontal,
+  left,
+  right,
+  up,
+  down
+}
+
 typedef void ResizedCallback();
 typedef void DismissedCallback();
 
@@ -29,23 +38,38 @@ class Dismissable extends StatefulComponent {
     Key key,
     this.child,
     this.onResized,
-    this.onDismissed
-    // TODO(hansmuller): direction
+    this.onDismissed,
+    this.direction: DismissDirection.horizontal
   }) : super(key: key);
 
   Widget child;
   ResizedCallback onResized;
   DismissedCallback onDismissed;
+  DismissDirection direction;
 
   AnimationPerformance _fadePerformance;
   AnimationPerformance _resizePerformance;
 
   Size _size;
-  double _dragX = 0.0;
+  double _dragExtent = 0.0;
   bool _dragUnderway = false;
 
   void initState() {
     _fadePerformance = new AnimationPerformance(duration: _kCardDismissFadeout);
+  }
+
+  void syncConstructorArguments(Dismissable source) {
+    child = source.child;
+    onResized = source.onResized;
+    onDismissed = source.onDismissed;
+    direction = source.direction;
+  }
+
+  bool get _directionIsYAxis {
+    return
+      direction == DismissDirection.vertical ||
+      direction == DismissDirection.up ||
+      direction == DismissDirection.down;
   }
 
   void _handleFadeCompleted() {
@@ -53,17 +77,12 @@ class Dismissable extends StatefulComponent {
       _startResizePerformance();
   }
 
-  void syncConstructorArguments(Dismissable source) {
-    child = source.child;
-    onResized = source.onResized;
-    onDismissed = source.onDismissed;
-  }
-
   Point get _activeCardDragEndPoint {
     if (!_isActive)
       return Point.origin;
     assert(_size != null);
-    return new Point(_dragX.sign * _size.width * _kDismissCardThreshold, 0.0);
+    double extent = _directionIsYAxis ? _size.height : _size.width;
+    return new Point(_dragExtent.sign * extent * _kDismissCardThreshold, 0.0);
   }
 
   bool get _isActive {
@@ -104,19 +123,38 @@ class Dismissable extends StatefulComponent {
     if (_fadePerformance.isAnimating)
       return;
     _dragUnderway = true;
-    _dragX = 0.0;
+    _dragExtent = 0.0;
     _fadePerformance.progress = 0.0;
   }
 
   void _handleScrollUpdate(double scrollOffset) {
     if (!_isActive || _fadePerformance.isAnimating)
       return;
-    double oldDragX = _dragX;
-    _dragX -= scrollOffset;
-    if (oldDragX.sign != _dragX.sign)
+
+    double oldDragExtent = _dragExtent;
+    switch(direction) {
+      case DismissDirection.horizontal:
+      case DismissDirection.vertical:
+        _dragExtent -= scrollOffset;
+        break;
+
+      case DismissDirection.up:
+      case DismissDirection.left:
+        if (_dragExtent - scrollOffset < 0)
+          _dragExtent -= scrollOffset;
+        break;
+
+      case DismissDirection.down:
+      case DismissDirection.right:
+        if (_dragExtent - scrollOffset > 0)
+          _dragExtent -= scrollOffset;
+        break;
+    }
+
+    if (oldDragExtent.sign != _dragExtent.sign)
       setState(() {}); // Rebuild to update the new drag endpoint.
     if (!_fadePerformance.isAnimating)
-      _fadePerformance.progress = _dragX.abs() / (_size.width * _kDismissCardThreshold);
+      _fadePerformance.progress = _dragExtent.abs() / (_size.width * _kDismissCardThreshold);
   }
 
   _handleScrollEnd() {
@@ -129,10 +167,33 @@ class Dismissable extends StatefulComponent {
       _fadePerformance.reverse();
   }
 
-  bool _isHorizontalFlingGesture(sky.GestureEvent event) {
-    double vx = event.velocityX.abs();
-    double vy = event.velocityY.abs();
-    return vx - vy > _kMinFlingVelocityDelta && vx > _kMinFlingVelocity;
+  bool _isFlingGesture(sky.GestureEvent event) {
+    double vx = event.velocityX;
+    double vy = event.velocityY;
+    if (_directionIsYAxis) {
+      if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta)
+        return false;
+      switch(direction) {
+        case DismissDirection.vertical:
+          return vy.abs() > _kMinFlingVelocity;
+        case DismissDirection.up:
+          return -vy > _kMinFlingVelocity;
+        default:
+          return vy > _kMinFlingVelocity;
+      }
+    } else {
+      if (vx.abs() - vy.abs() < _kMinFlingVelocityDelta)
+        return false;
+      switch(direction) {
+        case DismissDirection.horizontal:
+          return vx.abs() > _kMinFlingVelocity;
+        case DismissDirection.left:
+          return -vx > _kMinFlingVelocity;
+        default:
+          return vx > _kMinFlingVelocity;
+      }
+    }
+    return false;
   }
 
   EventDisposition _handleFlingStart(sky.GestureEvent event) {
@@ -142,9 +203,10 @@ class Dismissable extends StatefulComponent {
     _dragUnderway = false;
     if (_fadePerformance.isCompleted) { // drag then fling
       _startResizePerformance();
-    } else if (_isHorizontalFlingGesture(event)) {
-      _dragX = event.velocityX.sign;
-      _fadePerformance.fling(velocity: event.velocityX.abs() * _kFlingVelocityScale);
+    } else if (_isFlingGesture(event)) {
+      double velocity = _directionIsYAxis ? event.velocityY : event.velocityX;
+      _dragExtent = velocity.sign;
+      _fadePerformance.fling(velocity: velocity.abs() * _kFlingVelocityScale);
     } else {
       _fadePerformance.reverse();
     }
@@ -160,8 +222,8 @@ class Dismissable extends StatefulComponent {
 
   Widget build() {
     if (_resizePerformance != null) {
-      AnimatedValue<double> dismissHeight = new AnimatedValue<double>(
-        _size.height,
+      AnimatedValue<double> squashAxisExtent = new AnimatedValue<double>(
+        _directionIsYAxis ? _size.width : _size.height,
         end: 0.0,
         curve: ease,
         interval: _kCardDismissResizeInterval
@@ -170,13 +232,18 @@ class Dismissable extends StatefulComponent {
       return new SquashTransition(
         performance: _resizePerformance,
         direction: Direction.forward,
-        height: dismissHeight);
+        width: _directionIsYAxis ? squashAxisExtent : null,
+        height: !_directionIsYAxis ? squashAxisExtent : null
+      );
     }
 
     return new GestureDetector(
-      onHorizontalScrollStart: _handleScrollStart,
-      onHorizontalScrollUpdate: _handleScrollUpdate,
-      onHorizontalScrollEnd: _handleScrollEnd,
+      onHorizontalScrollStart: _directionIsYAxis ? null : _handleScrollStart,
+      onHorizontalScrollUpdate: _directionIsYAxis ? null : _handleScrollUpdate,
+      onHorizontalScrollEnd: _directionIsYAxis ? null : _handleScrollEnd,
+      onVerticalScrollStart: _directionIsYAxis ? _handleScrollStart : null,
+      onVerticalScrollUpdate: _directionIsYAxis ? _handleScrollUpdate : null,
+      onVerticalScrollEnd: _directionIsYAxis ? _handleScrollEnd : null,
       child: new Listener(
         onGestureFlingStart: _handleFlingStart,
         child: new SizeObserver(
