@@ -393,7 +393,10 @@ class Container extends Component {
     this.margin,
     this.padding,
     this.transform
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(margin == null || margin.isNonNegative);
+    assert(padding == null || padding.isNonNegative);
+  }
 
   final Widget child;
   final BoxConstraints constraints;
