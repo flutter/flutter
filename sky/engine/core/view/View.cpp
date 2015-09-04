@@ -65,8 +65,8 @@ void View::handleInputEvent(PassRefPtr<Event> event)
         m_eventCallback->handleEvent(event.get());
 }
 
-std::unique_ptr<sky::LayerTree> View::beginFrame(base::TimeTicks frameTime)
-{
+std::unique_ptr<sky::compositor::LayerTree> View::beginFrame(
+    base::TimeTicks frameTime) {
     if (!m_frameCallback)
         return nullptr;
     double frameTimeMS = (frameTime - base::TimeTicks()).InMillisecondsF();

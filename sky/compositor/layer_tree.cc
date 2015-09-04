@@ -7,6 +7,7 @@
 #include "sky/compositor/layer.h"
 
 namespace sky {
+namespace compositor {
 
 LayerTree::LayerTree() {
 }
@@ -14,4 +15,5 @@ LayerTree::LayerTree() {
 LayerTree::~LayerTree() {
 }
 
+}  // namespace compositor
 }  // namespace sky

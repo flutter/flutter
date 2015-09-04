@@ -21,7 +21,7 @@ class GPUDelegate {
  public:
   virtual void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) = 0;
   virtual void OnOutputSurfaceDestroyed() = 0;
-  virtual void Draw(scoped_ptr<LayerTree> layer_tree) = 0;
+  virtual void Draw(scoped_ptr<compositor::LayerTree> layer_tree) = 0;
 
  protected:
   virtual ~GPUDelegate();

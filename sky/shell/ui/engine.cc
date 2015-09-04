@@ -96,13 +96,15 @@ void Engine::Init() {
   blink::initialize(g_platform_impl);
 }
 
-std::unique_ptr<LayerTree> Engine::BeginFrame(base::TimeTicks frame_time) {
+std::unique_ptr<compositor::LayerTree> Engine::BeginFrame(
+    base::TimeTicks frame_time) {
   TRACE_EVENT0("sky", "Engine::BeginFrame");
 
   if (!sky_view_)
     return nullptr;
 
-  std::unique_ptr<LayerTree> layer_tree = sky_view_->BeginFrame(frame_time);
+  std::unique_ptr<compositor::LayerTree> layer_tree =
+      sky_view_->BeginFrame(frame_time);
   if (layer_tree) {
     layer_tree->set_frame_size(SkISize::Make(physical_size_.width(),
                                              physical_size_.height()));

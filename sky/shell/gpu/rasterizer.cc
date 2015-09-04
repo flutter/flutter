@@ -53,7 +53,7 @@ void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   CHECK(surface_) << "GLSurface required.";
 }
 
-void Rasterizer::Draw(scoped_ptr<LayerTree> layer_tree) {
+void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   TRACE_EVENT0("sky", "Rasterizer::Draw");
 
   if (!surface_)
@@ -71,7 +71,7 @@ void Rasterizer::Draw(scoped_ptr<LayerTree> layer_tree) {
   SkCanvas* canvas = ganesh_surface_->canvas();
 
   canvas->clear(SK_ColorBLACK);
-  layer_tree->root_layer()->Paint(canvas);
+  layer_tree->root_layer()->Paint(ganesh_context_->gr(), canvas);
   canvas->flush();
   surface_->SwapBuffers();
 

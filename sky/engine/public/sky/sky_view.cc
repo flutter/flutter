@@ -66,7 +66,8 @@ void SkyView::RunFromSnapshot(const WebString& name,
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 
-std::unique_ptr<sky::LayerTree> SkyView::BeginFrame(base::TimeTicks frame_time) {
+std::unique_ptr<sky::compositor::LayerTree> SkyView::BeginFrame(
+    base::TimeTicks frame_time) {
   return view_->beginFrame(frame_time);
 }
 

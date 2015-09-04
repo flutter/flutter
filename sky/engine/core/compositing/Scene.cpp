@@ -9,23 +9,20 @@
 
 namespace blink {
 
-PassRefPtr<Scene> Scene::create(std::unique_ptr<sky::Layer> rootLayer)
-{
-    ASSERT(rootLayer);
-    return adoptRef(new Scene(std::move(rootLayer)));
+PassRefPtr<Scene> Scene::create(
+    std::unique_ptr<sky::compositor::Layer> rootLayer) {
+  ASSERT(rootLayer);
+  return adoptRef(new Scene(std::move(rootLayer)));
 }
 
-Scene::Scene(std::unique_ptr<sky::Layer> rootLayer)
-    : m_layerTree(new sky::LayerTree())
-{
-    m_layerTree->set_root_layer(std::move(rootLayer));
+Scene::Scene(std::unique_ptr<sky::compositor::Layer> rootLayer)
+    : m_layerTree(new sky::compositor::LayerTree()) {
+  m_layerTree->set_root_layer(std::move(rootLayer));
 }
 
-Scene::~Scene()
-{
-}
+Scene::~Scene() {}
 
-std::unique_ptr<sky::LayerTree> Scene::takeLayerTree() {
+std::unique_ptr<sky::compositor::LayerTree> Scene::takeLayerTree() {
   return std::move(m_layerTree);
 }
 
