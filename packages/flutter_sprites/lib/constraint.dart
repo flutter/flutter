@@ -70,3 +70,34 @@ class ConstraintRotationToNode extends Constraint {
     node.rotation = _dampenRotation(node.rotation, target, dampening);
   }
 }
+
+class ConstraintPositionToNode extends Constraint {
+  ConstraintPositionToNode(this.targetNode, {this.dampening, this.offset: Offset.zero});
+
+  final Node targetNode;
+  final Offset offset;
+  final double dampening;
+
+  void constrain(Node node, double dt) {
+    Point targetPosition;
+
+    if (targetNode.spriteBox != node.spriteBox || node.parent == null) {
+      // The target node is in another sprite box or has been removed
+      return;
+    }
+
+    if (targetNode.parent == node.parent) {
+      targetPosition = targetNode.position;
+    } else {
+      targetPosition = node.parent.convertPointFromNode(Point.origin, targetNode);
+    }
+
+    if (offset != null)
+      targetPosition += offset;
+
+    if (dampening == null)
+      node.position = targetPosition;
+    else
+      node.position = GameMath.filterPoint(node.position, targetPosition, dampening);
+  }
+}
