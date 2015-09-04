@@ -247,7 +247,7 @@ abstract class Widget {
     }
   }
 
-  /// Walks the immediate children of this widget
+  /// Walks the immediate children of this widget.
   ///
   /// Override this if you have children and call walker on each child.
   /// Note that you may be called before the child has had its parent
