@@ -76,25 +76,31 @@ class WidgetTester {
     });
   }
 
-  Point getCenter(Widget widget) {
+  Point _getWidgetPoint(Widget widget, Function sizeToPoint) {
     assert(widget != null);
     RenderBox box = widget.renderObject as RenderBox;
     assert(box != null);
-    return box.localToGlobal(box.size.center(Point.origin));
+    return box.localToGlobal(sizeToPoint(box.size));
+  }
+
+  Point getCenter(Widget widget) {
+    return _getWidgetPoint(widget, (Size size) => size.center(Point.origin));
   }
 
   Point getTopLeft(Widget widget) {
-    assert(widget != null);
-    RenderBox box = widget.renderObject as RenderBox;
-    assert(box != null);
-    return box.localToGlobal(Point.origin);
+    return _getWidgetPoint(widget, (_) => Point.origin);
   }
 
   Point getTopRight(Widget widget) {
-    assert(widget != null);
-    RenderBox box = widget.renderObject as RenderBox;
-    assert(box != null);
-    return box.localToGlobal(box.size.topRight(Point.origin));
+    return _getWidgetPoint(widget, (Size size) => size.topRight(Point.origin));
+  }
+
+  Point getBottomLeft(Widget widget) {
+    return _getWidgetPoint(widget, (Size size) => size.bottomLeft(Point.origin));
+  }
+
+  Point getBottomRight(Widget widget) {
+    return _getWidgetPoint(widget, (Size size) => size.bottomRight(Point.origin));
   }
 
   HitTestResult _hitTest(Point location) => SkyBinding.instance.hitTest(location);
