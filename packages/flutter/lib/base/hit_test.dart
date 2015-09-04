@@ -52,17 +52,16 @@ class HitTestResult {
 
   /// The list of [HitTestEntry] objects recorded during the hit test.
   ///
-  /// The first entry in the path is the least specific, typically the one at
-  /// the root of tree being hit tested. Event propagation starts with the most
-  /// specific (i.e., last) entry and proceeds in reverse order through the
-  /// path.
+  /// The first entry in the path is the most specific, typically the one at
+  /// the leaf of tree being hit tested. Event propagation starts with the most
+  /// specific (i.e., first) entry and proceeds in order through the path.
   final List<HitTestEntry> path;
 
   /// Add a [HitTestEntry] to the path.
   ///
   /// The new entry is added at the end of the path, which means entries should
-  /// be added in order from last specific to most specific, typically during a
-  /// downward walk in the tree being hit tested.
+  /// be added in order from most specific to least specific, typically during a
+  /// upward walk in the tree being hit tested.
   void add(HitTestEntry entry) {
     path.add(entry);
   }
