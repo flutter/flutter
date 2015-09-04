@@ -1366,7 +1366,7 @@ class WidgetSkyBinding extends SkyBinding {
 
   EventDisposition handleEvent(sky.Event event, BindingHitTestEntry entry) {
     EventDisposition disposition = EventDisposition.ignored;
-    for (HitTestEntry entry in entry.result.path.reversed) {
+    for (HitTestEntry entry in entry.result.path) {
       if (entry.target is! RenderObject)
         continue;
       for (Widget target in RenderObjectWrapper.getWidgetsForRenderObject(entry.target)) {

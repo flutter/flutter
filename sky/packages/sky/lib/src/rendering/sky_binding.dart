@@ -136,15 +136,15 @@ class SkyBinding extends HitTestTarget {
 
   HitTestResult hitTest(Point position) {
     HitTestResult result = new HitTestResult();
-    result.add(new BindingHitTestEntry(this, result));
     _renderView.hitTest(result, position: position);
+    result.add(new BindingHitTestEntry(this, result));
     return result;
   }
 
   EventDisposition dispatchEvent(sky.Event event, HitTestResult result) {
     assert(result != null);
     EventDisposition disposition = EventDisposition.ignored;
-    for (HitTestEntry entry in result.path.reversed) {
+    for (HitTestEntry entry in result.path) {
       EventDisposition entryDisposition = entry.target.handleEvent(event, entry);
       if (entryDisposition == EventDisposition.consumed)
         return EventDisposition.consumed;
