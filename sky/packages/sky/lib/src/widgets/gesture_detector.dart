@@ -19,12 +19,12 @@ class GestureDetector extends StatefulComponent {
     this.onTap,
     this.onShowPress,
     this.onLongPress,
-    this.onVerticalScrollStart,
-    this.onVerticalScrollUpdate,
-    this.onVerticalScrollEnd,
-    this.onHorizontalScrollStart,
-    this.onHorizontalScrollUpdate,
-    this.onHorizontalScrollEnd,
+    this.onVerticalDragStart,
+    this.onVerticalDragUpdate,
+    this.onVerticalDragEnd,
+    this.onHorizontalDragStart,
+    this.onHorizontalDragUpdate,
+    this.onHorizontalDragEnd,
     this.onPanStart,
     this.onPanUpdate,
     this.onPanEnd
@@ -35,13 +35,13 @@ class GestureDetector extends StatefulComponent {
   GestureShowPressListener onShowPress;
   GestureLongPressListener onLongPress;
 
-  GestureScrollStartCallback onVerticalScrollStart;
-  GestureScrollUpdateCallback onVerticalScrollUpdate;
-  GestureScrollEndCallback onVerticalScrollEnd;
+  GestureDragStartCallback onVerticalDragStart;
+  GestureDragUpdateCallback onVerticalDragUpdate;
+  GestureDragEndCallback onVerticalDragEnd;
 
-  GestureScrollStartCallback onHorizontalScrollStart;
-  GestureScrollUpdateCallback onHorizontalScrollUpdate;
-  GestureScrollEndCallback onHorizontalScrollEnd;
+  GestureDragStartCallback onHorizontalDragStart;
+  GestureDragUpdateCallback onHorizontalDragUpdate;
+  GestureDragEndCallback onHorizontalDragEnd;
 
   GesturePanStartCallback onPanStart;
   GesturePanUpdateCallback onPanUpdate;
@@ -52,12 +52,12 @@ class GestureDetector extends StatefulComponent {
     onTap = source.onTap;
     onShowPress = source.onShowPress;
     onLongPress = source.onLongPress;
-    onVerticalScrollStart = source.onVerticalScrollStart;
-    onVerticalScrollUpdate = source.onVerticalScrollUpdate;
-    onVerticalScrollEnd = source.onVerticalScrollEnd;
-    onHorizontalScrollStart = source.onHorizontalScrollStart;
-    onHorizontalScrollUpdate = source.onHorizontalScrollUpdate;
-    onHorizontalScrollEnd = source.onHorizontalScrollEnd;
+    onVerticalDragStart = source.onVerticalDragStart;
+    onVerticalDragUpdate = source.onVerticalDragUpdate;
+    onVerticalDragEnd = source.onVerticalDragEnd;
+    onHorizontalDragStart = source.onHorizontalDragStart;
+    onHorizontalDragUpdate = source.onHorizontalDragUpdate;
+    onHorizontalDragEnd = source.onHorizontalDragEnd;
     onPanStart = source.onPanStart;
     onPanUpdate = source.onPanUpdate;
     onPanEnd = source.onPanEnd;
@@ -87,18 +87,18 @@ class GestureDetector extends StatefulComponent {
     return _longPress;
   }
 
-  VerticalScrollGestureRecognizer _verticalScroll;
-  VerticalScrollGestureRecognizer _ensureVerticalScroll() {
-    if (_verticalScroll == null)
-      _verticalScroll = new VerticalScrollGestureRecognizer(router: _router);
-    return _verticalScroll;
+  VerticalDragGestureRecognizer _verticalDrag;
+  VerticalDragGestureRecognizer _ensureVerticalDrag() {
+    if (_verticalDrag == null)
+      _verticalDrag = new VerticalDragGestureRecognizer(router: _router);
+    return _verticalDrag;
   }
 
-  HorizontalScrollGestureRecognizer _horizontalScroll;
-  HorizontalScrollGestureRecognizer _ensureHorizontalScroll() {
-    if (_horizontalScroll == null)
-      _horizontalScroll = new HorizontalScrollGestureRecognizer(router: _router);
-    return _horizontalScroll;
+  HorizontalDragGestureRecognizer _horizontalDrag;
+  HorizontalDragGestureRecognizer _ensureHorizontalDrag() {
+    if (_horizontalDrag == null)
+      _horizontalDrag = new HorizontalDragGestureRecognizer(router: _router);
+    return _horizontalDrag;
   }
 
   PanGestureRecognizer _pan;
@@ -118,8 +118,8 @@ class GestureDetector extends StatefulComponent {
     _tap = _ensureDisposed(_tap);
     _showPress = _ensureDisposed(_showPress);
     _longPress = _ensureDisposed(_longPress);
-    _verticalScroll = _ensureDisposed(_verticalScroll);
-    _horizontalScroll = _ensureDisposed(_horizontalScroll);
+    _verticalDrag = _ensureDisposed(_verticalDrag);
+    _horizontalDrag = _ensureDisposed(_horizontalDrag);
     _pan = _ensureDisposed(_pan);
   }
 
@@ -127,8 +127,8 @@ class GestureDetector extends StatefulComponent {
     _syncTap();
     _syncShowPress();
     _syncLongPress();
-    _syncVerticalScroll();
-    _syncHorizontalScroll();
+    _syncVerticalDrag();
+    _syncHorizontalDrag();
     _syncPan();
   }
 
@@ -153,25 +153,25 @@ class GestureDetector extends StatefulComponent {
       _ensureLongPress().onLongPress = onLongPress;
   }
 
-  void _syncVerticalScroll() {
-    if (onVerticalScrollStart == null && onVerticalScrollUpdate == null && onVerticalScrollEnd == null) {
-      _verticalScroll = _ensureDisposed(_verticalScroll);
+  void _syncVerticalDrag() {
+    if (onVerticalDragStart == null && onVerticalDragUpdate == null && onVerticalDragEnd == null) {
+      _verticalDrag = _ensureDisposed(_verticalDrag);
     } else {
-      _ensureVerticalScroll()
-        ..onStart = onVerticalScrollStart
-        ..onUpdate = onVerticalScrollUpdate
-        ..onEnd = onVerticalScrollEnd;
+      _ensureVerticalDrag()
+        ..onStart = onVerticalDragStart
+        ..onUpdate = onVerticalDragUpdate
+        ..onEnd = onVerticalDragEnd;
     }
   }
 
-  void _syncHorizontalScroll() {
-    if (onHorizontalScrollStart == null && onHorizontalScrollUpdate == null && onHorizontalScrollEnd == null) {
-      _horizontalScroll = _ensureDisposed(_horizontalScroll);
+  void _syncHorizontalDrag() {
+    if (onHorizontalDragStart == null && onHorizontalDragUpdate == null && onHorizontalDragEnd == null) {
+      _horizontalDrag = _ensureDisposed(_horizontalDrag);
     } else {
-      _ensureHorizontalScroll()
-        ..onStart = onHorizontalScrollStart
-        ..onUpdate = onHorizontalScrollUpdate
-        ..onEnd = onHorizontalScrollEnd;
+      _ensureHorizontalDrag()
+        ..onStart = onHorizontalDragStart
+        ..onUpdate = onHorizontalDragUpdate
+        ..onEnd = onHorizontalDragEnd;
     }
   }
 
@@ -198,10 +198,10 @@ class GestureDetector extends StatefulComponent {
       _showPress.addPointer(event);
     if (_longPress != null)
       _longPress.addPointer(event);
-    if (_verticalScroll != null)
-      _verticalScroll.addPointer(event);
-    if (_horizontalScroll != null)
-      _horizontalScroll.addPointer(event);
+    if (_verticalDrag != null)
+      _verticalDrag.addPointer(event);
+    if (_horizontalDrag != null)
+      _horizontalDrag.addPointer(event);
     if (_pan != null)
       _pan.addPointer(event);
     return EventDisposition.processed;

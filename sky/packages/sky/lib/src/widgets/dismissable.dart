@@ -119,7 +119,7 @@ class Dismissable extends StatefulComponent {
       _maybeCallOnResized();
   }
 
-  void _handleScrollStart() {
+  void _handleDragStart() {
     if (_fadePerformance.isAnimating)
       return;
     _dragUnderway = true;
@@ -127,7 +127,7 @@ class Dismissable extends StatefulComponent {
     _fadePerformance.progress = 0.0;
   }
 
-  void _handleScrollUpdate(double scrollOffset) {
+  void _handleDragUpdate(double scrollOffset) {
     if (!_isActive || _fadePerformance.isAnimating)
       return;
 
@@ -157,7 +157,7 @@ class Dismissable extends StatefulComponent {
       _fadePerformance.progress = _dragExtent.abs() / (_size.width * _kDismissCardThreshold);
   }
 
-  _handleScrollEnd() {
+  _handleDragEnd() {
     if (!_isActive || _fadePerformance.isAnimating)
       return;
     _dragUnderway = false;
@@ -238,12 +238,12 @@ class Dismissable extends StatefulComponent {
     }
 
     return new GestureDetector(
-      onHorizontalScrollStart: _directionIsYAxis ? null : _handleScrollStart,
-      onHorizontalScrollUpdate: _directionIsYAxis ? null : _handleScrollUpdate,
-      onHorizontalScrollEnd: _directionIsYAxis ? null : _handleScrollEnd,
-      onVerticalScrollStart: _directionIsYAxis ? _handleScrollStart : null,
-      onVerticalScrollUpdate: _directionIsYAxis ? _handleScrollUpdate : null,
-      onVerticalScrollEnd: _directionIsYAxis ? _handleScrollEnd : null,
+      onHorizontalDragStart: _directionIsYAxis ? null : _handleDragStart,
+      onHorizontalDragUpdate: _directionIsYAxis ? null : _handleDragUpdate,
+      onHorizontalDragEnd: _directionIsYAxis ? null : _handleDragEnd,
+      onVerticalDragStart: _directionIsYAxis ? _handleDragStart : null,
+      onVerticalDragUpdate: _directionIsYAxis ? _handleDragUpdate : null,
+      onVerticalDragEnd: _directionIsYAxis ? _handleDragEnd : null,
       child: new Listener(
         onGestureFlingStart: _handleFlingStart,
         child: new SizeObserver(
