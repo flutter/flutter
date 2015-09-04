@@ -23,8 +23,12 @@ class CardCollectionApp extends App {
   final TextStyle backgroundTextStyle =
     typography.white.title.copyWith(textAlign: TextAlign.center);
 
-  MixedViewportLayoutState layoutState = new MixedViewportLayoutState();
-  List<CardModel> cardModels;
+  MixedViewportLayoutState _layoutState = new MixedViewportLayoutState();
+  List<CardModel> _cardModels;
+  DismissDirection _dismissDirection = DismissDirection.horizontal;
+  bool _drawerShowing = false;
+  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
+
 
   void initState() {
     List<double> cardHeights = <double>[
@@ -32,7 +36,7 @@ class CardCollectionApp extends App {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
     ];
-    cardModels = new List.generate(cardHeights.length, (i) {
+    _cardModels = new List.generate(cardHeights.length, (i) {
       Color color = Color.lerp(colors.Red[300], colors.Blue[900], i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
@@ -40,20 +44,91 @@ class CardCollectionApp extends App {
   }
 
   void dismissCard(CardModel card) {
-    if (cardModels.contains(card)) {
+    if (_cardModels.contains(card)) {
       setState(() {
-        cardModels.remove(card);
+        _cardModels.remove(card);
       });
     }
   }
 
-  Widget builder(int index) {
-    if (index >= cardModels.length)
+  void _handleOpenDrawer() {
+    setState(() {
+      _drawerShowing = true;
+      _drawerStatus = AnimationStatus.forward;
+    });
+  }
+
+  void _handleDrawerDismissed() {
+    setState(() {
+      _drawerStatus = AnimationStatus.dismissed;
+    });
+  }
+
+  String dismissDirectionText(DismissDirection direction) {
+    String s = direction.toString();
+    return "dismiss ${s.substring(s.indexOf('.') + 1)}";
+  }
+
+  void changeDismissDirection(DismissDirection newDismissDirection) {
+    setState(() {
+      _dismissDirection = newDismissDirection;
+      _drawerStatus = AnimationStatus.dismissed;
+    });
+  }
+
+  Widget buildDrawer() {
+    if (_drawerStatus == AnimationStatus.dismissed)
       return null;
 
-    CardModel cardModel = cardModels[index];
+    Widget buildDrawerItem(DismissDirection direction, String icon) {
+      return new DrawerItem(
+        icon: icon,
+        onPressed: () { changeDismissDirection(direction); },
+        child: new Row([
+          new Flexible(child: new Text(dismissDirectionText(direction))),
+          new Radio(
+            value: direction,
+            onChanged: changeDismissDirection,
+            groupValue: _dismissDirection
+          )
+        ])
+      );
+    }
+
+    return new IconTheme(
+      data: const IconThemeData(color: IconThemeColor.black),
+      child: new Drawer(
+        level: 3,
+        showing: _drawerShowing,
+        onDismissed: _handleDrawerDismissed,
+        children: [
+          new DrawerHeader(child: new Text('Dismiss Direction')),
+          buildDrawerItem(DismissDirection.horizontal, 'action/code'),
+          buildDrawerItem(DismissDirection.left, 'navigation/arrow_back'),
+          buildDrawerItem(DismissDirection.right, 'navigation/arrow_forward')
+        ]
+      )
+    );
+  }
+
+  Widget buildToolBar() {
+    return new ToolBar(
+      left: new IconButton(icon: "navigation/menu", onPressed: _handleOpenDrawer),
+      center: new Text('Swipe Away'),
+      right: [
+        new Text(dismissDirectionText(_dismissDirection))
+      ]
+    );
+  }
+
+  Widget buildCard(int index) {
+    if (index >= _cardModels.length)
+      return null;
+
+    CardModel cardModel = _cardModels[index];
     Widget card = new Dismissable(
-      onResized: () { layoutState.invalidate([index]); },
+      direction: _dismissDirection,
+      onResized: () { _layoutState.invalidate([index]); },
       onDismissed: () { dismissCard(cardModel); },
       child: new Card(
         color: cardModel.color,
@@ -65,8 +140,28 @@ class CardCollectionApp extends App {
       )
     );
 
-    Widget backgroundText =
-      new Text("Swipe in either direction", style: backgroundTextStyle);
+    String backgroundMessage;
+    switch(_dismissDirection) {
+      case DismissDirection.horizontal:
+        backgroundMessage = "Swipe in either direction";
+        break;
+      case DismissDirection.left:
+        backgroundMessage = "Swipe left to dismiss";
+        break;
+      case DismissDirection.right:
+        backgroundMessage = "Swipe right to dismiss";
+        break;
+      default:
+        backgroundMessage = "Unsupported dismissDirection";
+    }
+
+    Widget leftArrowIcon =  new Icon(type: 'navigation/arrow_back', size: 36);
+    if (_dismissDirection == DismissDirection.right)
+      leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
+
+    Widget rightArrowIcon =  new Icon(type: 'navigation/arrow_forward', size: 36);
+    if (_dismissDirection == DismissDirection.left)
+      rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 
     // The background Widget appears behind the Dismissable card when the card
     // moves to the left or right. The Positioned widget ensures that the
@@ -85,16 +180,20 @@ class CardCollectionApp extends App {
             height: cardModel.height,
             decoration: new BoxDecoration(backgroundColor: Theme.of(this).primaryColor),
             child: new Row([
-              new Icon(type: 'navigation/arrow_back', size: 36),
-              new Flexible(child: backgroundText),
-              new Icon(type: 'navigation/arrow_forward', size: 36)
+              leftArrowIcon,
+              new Flexible(child: new Text(backgroundMessage, style: backgroundTextStyle)),
+              rightArrowIcon
             ])
           )
         )
       )
     );
 
-    return new Stack([background, card], key: cardModel.key);
+    return new IconTheme(
+      key: cardModel.key,
+      data: const IconThemeData(color: IconThemeColor.white),
+      child: new Stack([background, card])
+    );
   }
 
   Widget build() {
@@ -102,26 +201,24 @@ class CardCollectionApp extends App {
       padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
       decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50]),
       child: new ScrollableMixedWidgetList(
-        builder: builder,
-        token: cardModels.length,
-        layoutState: layoutState
+        builder: buildCard,
+        token: _cardModels.length,
+        layoutState: _layoutState
       )
     );
 
-    return new IconTheme(
-      data: const IconThemeData(color: IconThemeColor.white),
-      child: new Theme(
-        data: new ThemeData(
-          brightness: ThemeBrightness.light,
-          primarySwatch: colors.Blue,
-          accentColor: colors.RedAccent[200]
-        ),
-        child: new Title(
-          title: 'Cards',
-          child: new Scaffold(
-            toolbar: new ToolBar(center: new Text('Swipe Away')),
-            body: cardCollection
-          )
+    return new Theme(
+      data: new ThemeData(
+        brightness: ThemeBrightness.light,
+        primarySwatch: colors.Blue,
+        accentColor: colors.RedAccent[200]
+      ),
+      child: new Title(
+        title: 'Cards',
+        child: new Scaffold(
+          toolbar: buildToolBar(),
+          drawer: buildDrawer(),
+          body: cardCollection
         )
       )
     );
