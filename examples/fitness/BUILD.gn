@@ -19,5 +19,8 @@ sky_app("fitness") {
     launcher_resources = [
       "ios/LaunchScreen.storyboardc",
     ]
+  } else if (is_mac) {
+    info_plist = "mac/Info.plist"
+    xibs = [ "mac/sky_mac.xib" ]
   }
 }
