@@ -32,6 +32,7 @@ export 'package:sky/src/rendering/box.dart' show BoxConstraints;
 export 'package:sky/src/rendering/flex.dart' show FlexJustifyContent, FlexAlignItems, FlexDirection;
 export 'package:sky/src/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/src/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxDecorationPosition, BoxShadow, Border, BorderSide, EdgeDims, Shape;
+export 'package:sky/src/rendering/shifted_box.dart' show ShrinkWrap;
 export 'package:sky/src/rendering/toggleable.dart' show ValueChanged;
 export 'package:sky/src/rendering/viewport.dart' show ScrollDirection;
 
@@ -200,28 +201,36 @@ class Padding extends OneChildRenderObjectWrapper {
 }
 
 class Align extends OneChildRenderObjectWrapper {
-  Align({ Key key, this.horizontal: 0.5, this.vertical: 0.5, Widget child })
-    : super(key: key, child: child) {
+  Align({
+    Key key,
+    this.horizontal: 0.5,
+    this.vertical: 0.5,
+    this.shrinkWrap: ShrinkWrap.none,
+    Widget child
+  }) : super(key: key, child: child) {
     assert(horizontal != null);
     assert(vertical != null);
+    assert(shrinkWrap != null);
   }
 
   final double horizontal;
   final double vertical;
+  final ShrinkWrap shrinkWrap;
 
-  RenderPositionedBox createNode() => new RenderPositionedBox(horizontal: horizontal, vertical: vertical);
+  RenderPositionedBox createNode() => new RenderPositionedBox(horizontal: horizontal, vertical: vertical, shrinkWrap: shrinkWrap);
   RenderPositionedBox get renderObject => super.renderObject;
 
   void syncRenderObject(Align old) {
     super.syncRenderObject(old);
     renderObject.horizontal = horizontal;
     renderObject.vertical = vertical;
+    renderObject.shrinkWrap = shrinkWrap;
   }
 }
 
 class Center extends Align {
-  Center({ Key key, Widget child })
-    : super(key: key, child: child);
+  Center({ Key key, ShrinkWrap shrinkWrap: ShrinkWrap.none, Widget child })
+    : super(key: key, shrinkWrap: shrinkWrap, child: child);
 }
 
 class SizedBox extends OneChildRenderObjectWrapper {

@@ -36,7 +36,10 @@ abstract class MaterialButton extends ButtonBase {
   Widget buildContent() {
     Widget contents = new Container(
       padding: new EdgeDims.symmetric(horizontal: 8.0),
-      child: new Center(child: child) // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
+      child: new Center(
+        shrinkWrap: ShrinkWrap.width,
+        child: child // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
+      )
     );
     return new GestureDetector(
       onTap: enabled ? onPressed : null,
