@@ -95,21 +95,22 @@ class Dialog extends Component {
       ));
     }
 
-    if (actions != null)
+    if (actions != null) {
       dialogBody.add(new Container(
         child: new Row(actions,
           justifyContent: FlexJustifyContent.end
         )
       ));
+    }
 
     return new Stack([
       new GestureDetector(
+        onTap: onDismiss,
         child: new Container(
           decoration: const BoxDecoration(
             backgroundColor: const Color(0x7F000000)
           )
-        ),
-        onTap: onDismiss
+        )
       ),
       new Center(
         child: new Container(
