@@ -81,11 +81,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   bool hitTest(HitTestResult result, { Point position }) {
-    if (child != null) {
-      Rect childBounds = Point.origin & child.size;
-      if (childBounds.contains(position))
-        child.hitTest(result, position: position);
-    }
+    if (child != null)
+      child.hitTest(result, position: position);
     result.add(new HitTestEntry(this));
     return true;
   }
