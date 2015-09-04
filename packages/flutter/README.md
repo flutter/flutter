@@ -46,7 +46,7 @@ Execution starts in `main`, which in this example runs a new instance of the `He
 The `HelloWorldApp` builds a `Text` widget containing the traditional `Hello, world!`
 string and centers it on the screen using a `Center` widget. To learn more about
 the widget system, please see the
-[widgets tutorial](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/widgets/README.md).
+[widgets tutorial](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/src/widgets/README.md).
 
 Setting up your Android device
 -------------------------
