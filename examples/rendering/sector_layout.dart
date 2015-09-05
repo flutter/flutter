@@ -452,7 +452,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
   Size getIntrinsicDimensions(BoxConstraints constraints) {
     assert(child is RenderSector);
     assert(child.parentData is SectorParentData);
-    assert(!constraints.isInfinite);
+    assert(constraints.maxWidth < double.INFINITY || constraints.maxHeight < double.INFINITY);
     double maxChildDeltaRadius = math.min(constraints.maxWidth, constraints.maxHeight) / 2.0 - innerRadius;
     SectorDimensions childDimensions = child.getIntrinsicDimensions(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), innerRadius);
     double dimension = (innerRadius + childDimensions.deltaRadius) * 2.0;
@@ -464,7 +464,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
       size = constraints.constrain(Size.zero);
     } else {
       assert(child is RenderSector);
-      assert(!constraints.isInfinite);
+      assert(constraints.maxWidth < double.INFINITY || constraints.maxHeight < double.INFINITY);
       double maxChildDeltaRadius = math.min(constraints.maxWidth, constraints.maxHeight) / 2.0 - innerRadius;
       assert(child.parentData is SectorParentData);
       child.parentData.radius = innerRadius;
