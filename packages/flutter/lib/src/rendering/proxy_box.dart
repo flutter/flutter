@@ -92,34 +92,34 @@ class RenderConstrainedBox extends RenderProxyBox {
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      return child.getMinIntrinsicWidth(_additionalConstraints.apply(constraints));
-    return _additionalConstraints.apply(constraints).constrainWidth(0.0);
+      return child.getMinIntrinsicWidth(_additionalConstraints.enforce(constraints));
+    return _additionalConstraints.enforce(constraints).constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      return child.getMaxIntrinsicWidth(_additionalConstraints.apply(constraints));
-    return _additionalConstraints.apply(constraints).constrainWidth(0.0);
+      return child.getMaxIntrinsicWidth(_additionalConstraints.enforce(constraints));
+    return _additionalConstraints.enforce(constraints).constrainWidth(0.0);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
-      return child.getMinIntrinsicHeight(_additionalConstraints.apply(constraints));
-    return _additionalConstraints.apply(constraints).constrainHeight(0.0);
+      return child.getMinIntrinsicHeight(_additionalConstraints.enforce(constraints));
+    return _additionalConstraints.enforce(constraints).constrainHeight(0.0);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
-      return child.getMaxIntrinsicHeight(_additionalConstraints.apply(constraints));
-    return _additionalConstraints.apply(constraints).constrainHeight(0.0);
+      return child.getMaxIntrinsicHeight(_additionalConstraints.enforce(constraints));
+    return _additionalConstraints.enforce(constraints).constrainHeight(0.0);
   }
 
   void performLayout() {
     if (child != null) {
-      child.layout(_additionalConstraints.apply(constraints), parentUsesSize: true);
+      child.layout(_additionalConstraints.enforce(constraints), parentUsesSize: true);
       size = child.size;
     } else {
-      size = _additionalConstraints.apply(constraints).constrain(Size.zero);
+      size = _additionalConstraints.enforce(constraints).constrain(Size.zero);
     }
   }
 
@@ -218,7 +218,7 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
       return constraints;
     double width = child.getMaxIntrinsicWidth(constraints);
     assert(width == constraints.constrainWidth(width));
-    return constraints.applyWidth(applyStep(width, _stepWidth));
+    return constraints.tightenWidth(applyStep(width, _stepWidth));
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
@@ -250,7 +250,7 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
     if (child != null) {
       BoxConstraints childConstraints = _getInnerConstraints(constraints);
       if (_stepHeight != null)
-        childConstraints.applyHeight(getMaxIntrinsicHeight(childConstraints));
+        childConstraints.tightenHeight(getMaxIntrinsicHeight(childConstraints));
       child.layout(childConstraints, parentUsesSize: true);
       size = child.size;
     } else {
@@ -281,7 +281,7 @@ class RenderShrinkWrapHeight extends RenderProxyBox {
       return constraints;
     double height = child.getMaxIntrinsicHeight(constraints);
     assert(height == constraints.constrainHeight(height));
-    return constraints.applyHeight(height);
+    return constraints.tightenHeight(height);
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
