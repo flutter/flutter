@@ -203,13 +203,18 @@ class BoxConstraints extends Constraints {
   String toString() => "BoxConstraints($minWidth<=w<$maxWidth, $minHeight<=h<$maxHeight)";
 }
 
+/// A hit test entry used by [RenderBox]
 class BoxHitTestEntry extends HitTestEntry {
   const BoxHitTestEntry(HitTestTarget target, this.localPosition) : super(target);
+
+  /// The position of the hit test in the local coordinates of [target]
   final Point localPosition;
 }
 
+/// Parent data used by [RenderBox] and its subclasses
 class BoxParentData extends ParentData {
   Point _position = Point.origin;
+  /// The point at which to paint the child in the parent's coordinate system
   Point get position => _position;
   void set position(Point value) {
     assert(RenderObject.debugDoingLayout);
@@ -218,6 +223,24 @@ class BoxParentData extends ParentData {
   String toString() => 'position=$position';
 }
 
+/// A render object in a 2D cartesian coordinate system
+///
+/// The size of each box is expressed as a width and a height. Each box has its
+/// own coordinate system in which its upper left corner is placed at (0, 0).
+/// The lower right corner of the box is therefore at (width, height). The box
+/// contains all the points including the upper left corner and extending to,
+/// but not including, the lower right corner.
+///
+/// Box layout is performed by passing a [BoxConstraints] object down the tree.
+/// The box constraints establish a min and max value for the child's width
+/// and height. In determining its size, the child must respect the constraints
+/// given to it by its parent.
+///
+/// This protocol is sufficient for expressing a number of common box layout
+/// data flows.  For example, to implement a width-in-height-out data flow, call
+/// your child's [layout] function with a set of box constraints with a tight
+/// width value (and pass true for parentUsesSize). After the child determines
+/// its height, use the child's height to determine your size.
 abstract class RenderBox extends RenderObject {
 
   void setupParentData(RenderObject child) {
@@ -225,29 +248,38 @@ abstract class RenderBox extends RenderObject {
       child.parentData = new BoxParentData();
   }
 
-  // getMinIntrinsicWidth() should return the minimum width that this box could
-  // be without failing to render its contents within itself.
+  /// Returns the minimum width that this box could be without failing to paint
+  /// its contents within itself
+  ///
+  /// Override in subclasses that implement [performLayout].
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
 
-  // getMaxIntrinsicWidth() should return the smallest width beyond which
-  // increasing the width never decreases the height.
+  /// Returns the smallest width beyond which increasing the width never
+  /// decreases the height
+  ///
+  /// Override in subclasses that implement [performLayout].
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
 
-  // getMinIntrinsicHeight() should return the minimum height that this box could
-  // be without failing to render its contents within itself.
+  /// Return the minimum height that this box could be without failing to render
+  /// its contents within itself.
+  ///
+  /// Override in subclasses that implement [performLayout].
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(0.0);
   }
 
-  // getMaxIntrinsicHeight should return the smallest height beyond which
-  // increasing the height never decreases the width.
-  // If the layout algorithm used is width-in-height-out, i.e. the height
-  // depends on the width and not vice versa, then this will return the same
-  // as getMinIntrinsicHeight().
+  /// Returns the smallest height beyond which increasing the height never
+  /// decreases the width.
+  ///
+  /// If the layout algorithm used is width-in-height-out, i.e. the height
+  /// depends on the width and not vice versa, then this will return the same
+  /// as getMinIntrinsicHeight().
+  ///
+  /// Override in subclasses that implement [performLayout].
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(0.0);
   }
@@ -259,17 +291,20 @@ abstract class RenderBox extends RenderObject {
     _debugDoingBaseline = value;
     return true;
   }
-  // getDistanceToBaseline() returns the distance from the
-  // y-coordinate of the position of the box to the y-coordinate of
-  // the first given baseline in the box's contents. This is used by
-  // certain layout models to align adjacent boxes on a common
-  // baseline, regardless of padding, font size differences, etc. If
-  // there is no baseline, and the 'onlyReal' argument was not set to
-  // true, then it returns the distance from the y-coordinate of the
-  // position of the box to the y-coordinate of the bottom of the box,
-  // i.e., the height of the box. Only call this after layout has been
-  // performed. You are only allowed to call this from the parent of
-  // this node during that parent's performLayout() or paint().
+
+  /// Returns the distance from the y-coordinate of the position of the box to
+  /// the y-coordinate of the first given baseline in the box's contents.
+  ///
+  /// Used by certain layout models to align adjacent boxes on a common
+  /// baseline, regardless of padding, font size differences, etc. If there is
+  /// no baseline, this function returns the distance from the y-coordinate of
+  /// the position of the box to the y-coordinate of the bottom of the box
+  /// (i.e., the height of the box) unless the the caller passes true
+  /// for `onlyReal`, in which case the function returns null.
+  ///
+  /// Only call this function calling [layout] on this box. You are only
+  /// allowed to call this from the parent of this box during that parent's
+  /// [performLayout] or [paint] functions.
   double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
     assert(!needsLayout);
     assert(!_debugDoingBaseline);
@@ -291,10 +326,12 @@ abstract class RenderBox extends RenderObject {
       return size.height;
     return result;
   }
-  // getDistanceToActualBaseline() must only be called from
-  // getDistanceToBaseline() and computeDistanceToActualBaseline(). Do
-  // not call it directly from outside those two methods. It just
-  // calls computeDistanceToActualBaseline() and caches the result.
+
+  /// Calls [computeDistanceToActualBaseline] and caches the result.
+  ///
+  /// This function must only be called from [getDistanceToBaseline] and
+  /// [computeDistanceToActualBaseline]. Do not call this function directly from
+  /// outside those two methods.
   double getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
     _ancestorUsesBaseline = true;
@@ -303,21 +340,25 @@ abstract class RenderBox extends RenderObject {
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
     return _cachedBaselines[baseline];
   }
-  // computeDistanceToActualBaseline() should return the distance from
-  // the y-coordinate of the position of the box to the y-coordinate
-  // of the first given baseline in the box's contents, if any, or
-  // null otherwise. This is the method that you should override in
-  // subclasses. This method (computeDistanceToActualBaseline())
-  // should not be called directly. Use getDistanceToBaseline() if you
-  // need to know the baseline of a child from performLayout(). If you
-  // need the baseline during paint, cache it during performLayout().
-  // Use getDistanceToActualBaseline() if you are implementing
-  // computeDistanceToActualBaseline() and need to defer to a child.
+
+  /// Returns the distance from the y-coordinate of the position of the box to
+  /// the y-coordinate of the first given baseline in the box's contents, if
+  /// any, or null otherwise.
+  ///
+  /// Do not call this function directly. Instead, call [getDistanceToBaseline]
+  /// if you need to know the baseline of a child from an invocation of
+  /// [performLayout] or [paint] and call [getDistanceToActualBaseline] if you
+  /// are implementing [computeDistanceToActualBaseline] and need to defer to a
+  /// child.
+  ///
+  /// Subclasses should override this function to supply the distances to their
+  /// baselines.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
     return null;
   }
 
+  /// The box constraints most recently received from the parent
   BoxConstraints get constraints => super.constraints;
   bool debugDoesMeetConstraints() {
     assert(constraints != null);
@@ -363,6 +404,15 @@ abstract class RenderBox extends RenderObject {
     assert(sizedByParent);
   }
 
+  /// Determines the set of render objects located at the given position
+  ///
+  /// Returns true if the given point is contained in this render object or one
+  /// of its descendants. Adds any render objects that contain the point to the
+  /// given hit test result.
+  ///
+  /// The caller is responsible for transforming [position] into the local
+  /// coordinate space of the callee.  The callee is responsible for checking
+  /// whether the given position is within its bounds.
   bool hitTest(HitTestResult result, { Point position }) {
     if (position.x >= 0.0 && position.x < _size.width &&
         position.y >= 0.0 && position.y < _size.height) {
@@ -372,6 +422,13 @@ abstract class RenderBox extends RenderObject {
     }
     return false;
   }
+
+  /// Override this function to check whether any children are located at the
+  /// given position
+  ///
+  /// Typically children should be hit tested in reverse paint order so that
+  /// hit tests at locations where children overlap hit the child that is
+  /// visually "on top" (i.e., paints later).
   void hitTestChildren(HitTestResult result, { Point position }) { }
 
   // TODO(ianh): move size up to before constraints
@@ -379,6 +436,17 @@ abstract class RenderBox extends RenderObject {
   // Size size = Size.zero;
   // In debug builds, however:
   Size _size = Size.zero;
+
+  /// The size of this render box computed during layout
+  ///
+  /// This value is stale whenever this object is marked as needing layout.
+  /// During [performLayout], do not read the size of a child unless you pass
+  /// true for parentUsesSize when calling the child's [layout] function.
+  ///
+  /// The size of a box should be set only during the box's [performLayout] or
+  /// [performResize] functions. If you wish to change the size of a box outside
+  /// of those functins, call [markNeedsLayout] instead to schedule a layout of
+  /// the box.
   Size get size {
     if (_size is _DebugSize) {
       final _DebugSize _size = this._size; // TODO(ianh): Remove this once the analyzer is cleverer
@@ -405,6 +473,12 @@ abstract class RenderBox extends RenderObject {
     assert(debugDoesMeetConstraints());
   }
 
+  /// Multiply the transform from the parent's coordinate system to this box's
+  /// coordinate system into the given transform
+  ///
+  /// This function is used to convert coordinate systems between boxes.
+  /// Subclasses that apply transforms during painting should override this
+  /// function to factor those transforms into the calculation.
   void applyPaintTransform(Matrix4 transform) {
     if (parentData is BoxParentData) {
       Point position = (parentData as BoxParentData).position;
@@ -418,6 +492,8 @@ abstract class RenderBox extends RenderObject {
     return new Point(transformed3.x, transformed3.y);
   }
 
+  /// Convert the given point from the global coodinate system to the local
+  /// coordinate system for this box
   Point globalToLocal(Point point) {
     assert(attached);
     Matrix4 transform = new Matrix4.identity();
@@ -431,6 +507,8 @@ abstract class RenderBox extends RenderObject {
     return _transformPoint(transform, point);
   }
 
+  /// Convert the given point from the local coordiante system for this box to
+  /// the global coordinate sytem
   Point localToGlobal(Point point) {
     List <RenderObject> renderers = <RenderObject>[];
     for (RenderObject renderer = this; renderer != null; renderer = renderer.parent)
@@ -441,7 +519,21 @@ abstract class RenderBox extends RenderObject {
     return _transformPoint(transform, point);
   }
 
+  /// Returns a rectangle that contains all the pixels painted by this box
+  ///
+  /// The paint bounds can be larger or smaller than [size], which is the amount
+  /// of space this box takes up during layout. For example, if this box casts a
+  /// shadow, that shadow might extend beyond the space allocated to this box
+  /// during layout.
+  ///
+  /// The paint bounds are used to size the buffers into which this box paints.
+  /// If the box attempts to paints outside its paint bounds, there might not be
+  /// enough memory allocated to represent the box's visual appearance, which
+  /// can lead to undefined behavior.
+  ///
+  /// The returned paint bounds are in the local coordinate system of this box.
   Rect get paintBounds => Point.origin & size;
+
   void debugPaint(PaintingContext context, Offset offset) {
     if (debugPaintSizeEnabled)
       debugPaintSize(context, offset);
@@ -483,13 +575,17 @@ abstract class RenderBox extends RenderObject {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }
 
-
-// HELPER METHODS FOR RENDERBOX CONTAINERS
+/// A mixin that provides useful default behaviors for boxes with children managed by the [ContainerRenderObjectMixin] mixin
+///
+/// By convention, this class doesn't override any members of the superclass.
+/// Instead, it provides helpful functions that subclasses can call as
+/// appropriate.
 abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
 
-  // This class, by convention, doesn't override any members of the superclass.
-  // It only provides helper functions that subclasses can call.
-
+  /// Returns the baseline of the first child with a baseline
+  ///
+  /// Useful when the children are displayed vertically in the same order they
+  /// appear in the child list.
   double defaultComputeDistanceToFirstActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     RenderBox child = firstChild;
@@ -503,6 +599,10 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     return null;
   }
 
+  /// Returns the minimum baseline value among every child
+  ///
+  /// Useful when the vertical position of the children isn't determined by the
+  /// order in the child list.
   double defaultComputeDistanceToHighestActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     double result;
@@ -522,6 +622,10 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     return result;
   }
 
+  /// Performs a hit test on each child by walking the child list backwards
+  ///
+  /// Stops walking once after the first child reports that it contains the
+  /// given point. Returns whether any children contain the given point.
   bool defaultHitTestChildren(HitTestResult result, { Point position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
@@ -536,6 +640,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     return false;
   }
 
+  /// Paints each child by walking the child list forwards
   void defaultPaint(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
