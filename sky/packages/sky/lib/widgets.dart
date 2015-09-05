@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Includes and re-exports all Sky widgets classes.
-
-/// The Sky widget framework
+/// The Sky widget framework.
+///
+/// This library includes and re-exports all Sky widgets classes.
 library widgets;
 
 export 'package:sky/src/widgets/animated_component.dart';

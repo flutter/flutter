@@ -25,7 +25,7 @@ def main():
          help='Open docs after building.')
     args = parser.parse_args()
 
-    doc_dir = os.path.join(SKY_PACKAGE, 'doc')
+    doc_dir = os.path.join(SKY_PACKAGE, 'doc', 'api')
 
     cmd = [
         DARTDOC,

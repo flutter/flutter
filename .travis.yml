@@ -11,4 +11,5 @@ addons:
     - g++-4.8
 before_script:
   - ./travis/setup.sh
-script: ./travis/build.sh
+script:
+  - ./travis/build.sh
