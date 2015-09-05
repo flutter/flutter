@@ -23,7 +23,22 @@ class _DebugSize extends Size {
   final bool _canBeUsedByParent;
 }
 
+/// Immutable layout constraints for box layout
+///
+/// A size respects a BoxConstraints if, and only if, all of the following
+/// relations hold:
+///
+/// * `minWidth <= size.width <= constraints.maxWidth`
+/// * `minHeight <= size.height <= maxHeight`
+///
+/// The constraints themselves must satisfy these relations:
+///
+/// * `0.0 <= minWidth <= maxWidth <= double.INFINITY`
+/// * `0.0 <= minHeight <= maxHeight <= double.INFINITY`
+///
+/// Note: `double.INFINITY` is a legal value for each constraint.
 class BoxConstraints extends Constraints {
+  /// Constructs box constraints with the given constraints
   const BoxConstraints({
     this.minWidth: 0.0,
     this.maxWidth: double.INFINITY,
@@ -31,12 +46,19 @@ class BoxConstraints extends Constraints {
     this.maxHeight: double.INFINITY
   });
 
+  final double minWidth;
+  final double maxWidth;
+  final double minHeight;
+  final double maxHeight;
+
+  /// Constructs box constraints that is respected only by the given size
   BoxConstraints.tight(Size size)
     : minWidth = size.width,
       maxWidth = size.width,
       minHeight = size.height,
       maxHeight = size.height;
 
+  /// Constructs box constraints that require the given width or height
   const BoxConstraints.tightFor({
     double width,
     double height
@@ -45,43 +67,41 @@ class BoxConstraints extends Constraints {
       minHeight = height != null ? height : 0.0,
       maxHeight = height != null ? height : double.INFINITY;
 
+  /// Constructs box constraints that forbid sizes larger than the given size
   BoxConstraints.loose(Size size)
     : minWidth = 0.0,
       maxWidth = size.width,
       minHeight = 0.0,
       maxHeight = size.height;
 
-  const BoxConstraints.expandWidth({
-    this.maxHeight: double.INFINITY
-  }): minWidth = double.INFINITY,
-      maxWidth = double.INFINITY,
-      minHeight = 0.0;
+    /// Constructs box constraints that expand to fill another box contraints
+    ///
+    /// If width or height is given, the constraints will require exactly the
+    /// given value in the given dimension.
+    const BoxConstraints.expand({
+      double width,
+      double height
+    }): minWidth = width != null ? width : double.INFINITY,
+        maxWidth = width != null ? width : double.INFINITY,
+        minHeight = height != null ? height : double.INFINITY,
+        maxHeight = height != null ? height : double.INFINITY;
 
-  const BoxConstraints.expandHeight({
-    this.maxWidth: double.INFINITY
-  }): minWidth = 0.0,
-      minHeight = double.INFINITY,
-      maxHeight = double.INFINITY;
-
-  static const BoxConstraints expand = const BoxConstraints(
-    minWidth: double.INFINITY,
-    maxWidth: double.INFINITY,
-    minHeight: double.INFINITY,
-    maxHeight: double.INFINITY
-  );
-
+  /// Returns new box constraints that are smaller by the given edge dimensions
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
     double horizontal = edges.left + edges.right;
     double vertical = edges.top + edges.bottom;
+    double deflatedMinWidth = math.max(0.0, minWidth - horizontal);
+    double deflatedMinHeight = math.max(0.0, minHeight - vertical);
     return new BoxConstraints(
-      minWidth: math.max(0.0, minWidth - horizontal),
-      maxWidth: maxWidth - horizontal,
-      minHeight: math.max(0.0, minHeight - vertical),
-      maxHeight: maxHeight - vertical
+      minWidth: deflatedMinWidth,
+      maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
+      minHeight: deflatedMinHeight,
+      maxHeight: math.max(deflatedMinHeight, maxHeight - vertical)
     );
   }
 
+  /// Returns new box constraints that remove the minimum width and height requirements
   BoxConstraints loosen() {
     return new BoxConstraints(
       minWidth: 0.0,
@@ -91,7 +111,8 @@ class BoxConstraints extends Constraints {
     );
   }
 
-  BoxConstraints apply(BoxConstraints constraints) {
+  /// Returns new box constraints that respect the given constraints while being as close as possible to the original constraints
+  BoxConstraints enforce(BoxConstraints constraints) {
     return new BoxConstraints(
       minWidth: clamp(min: constraints.minWidth, max: constraints.maxWidth, value: minWidth),
       maxWidth: clamp(min: constraints.minWidth, max: constraints.maxWidth, value: maxWidth),
@@ -100,81 +121,63 @@ class BoxConstraints extends Constraints {
     );
   }
 
-  BoxConstraints applyWidth(double width) {
+  /// Returns new box constraints with a tight width as close to the given width as possible while still respecting the original box constraints
+  BoxConstraints tightenWidth(double width) {
     return new BoxConstraints(minWidth: math.max(math.min(maxWidth, width), minWidth),
                               maxWidth: math.max(math.min(maxWidth, width), minWidth),
                               minHeight: minHeight,
                               maxHeight: maxHeight);
   }
 
-  BoxConstraints applyMinWidth(double newMinWidth) {
-    return new BoxConstraints(minWidth: math.max(minWidth, newMinWidth),
-                              maxWidth: math.max(maxWidth, newMinWidth),
-                              minHeight: minHeight,
-                              maxHeight: maxHeight);
-  }
-
-  BoxConstraints applyMaxWidth(double newMaxWidth) {
-    return new BoxConstraints(minWidth: minWidth,
-                              maxWidth: math.min(maxWidth, newMaxWidth),
-                              minHeight: minHeight,
-                              maxHeight: maxHeight);
-  }
-
-  BoxConstraints applyHeight(double height) {
+  /// Returns new box constraints with a tight height as close to the given height as possible while still respecting the original box constraints
+  BoxConstraints tightenHeight(double height) {
     return new BoxConstraints(minWidth: minWidth,
                               maxWidth: maxWidth,
                               minHeight: math.max(math.min(maxHeight, height), minHeight),
                               maxHeight: math.max(math.min(maxHeight, height), minHeight));
   }
 
-  BoxConstraints applyMinHeight(double newMinHeight) {
-    return new BoxConstraints(minWidth: minWidth,
-                              maxWidth: maxWidth,
-                              minHeight: math.max(minHeight, newMinHeight),
-                              maxHeight: math.max(maxHeight, newMinHeight));
-  }
-
-  BoxConstraints applyMaxHeight(double newMaxHeight) {
-    return new BoxConstraints(minWidth: minWidth,
-                              maxWidth: maxWidth,
-                              minHeight: minHeight,
-                              maxHeight: math.min(maxHeight, newMaxHeight));
-  }
-
+  /// Returns box constraints with the same width constraints but with unconstrainted height
   BoxConstraints widthConstraints() => new BoxConstraints(minWidth: minWidth, maxWidth: maxWidth);
 
+  /// Returns box constraints with the same height constraints but with unconstrainted width
   BoxConstraints heightConstraints() => new BoxConstraints(minHeight: minHeight, maxHeight: maxHeight);
 
-  final double minWidth;
-  final double maxWidth;
-  final double minHeight;
-  final double maxHeight;
-
+  /// Returns the width that both satisfies the constraints and is as close as possible to the given width
   double constrainWidth([double width = double.INFINITY]) {
     return clamp(min: minWidth, max: maxWidth, value: width);
   }
 
+  /// Returns the height that both satisfies the constraints and is as close as possible to the given height
   double constrainHeight([double height = double.INFINITY]) {
     return clamp(min: minHeight, max: maxHeight, value: height);
   }
 
+  /// Returns the size that both satisfies the constraints and is as close as possible to the given size
   Size constrain(Size size) {
     Size result = new Size(constrainWidth(size.width), constrainHeight(size.height));
     if (size is _DebugSize)
       result = new _DebugSize(result, size._owner, size._canBeUsedByParent);
     return result;
   }
+
+  /// The biggest size that satisifes the constraints
   Size get biggest => new Size(constrainWidth(), constrainHeight());
+
+  /// The smallest size that satisfies the constraints
   Size get smallest => new Size(constrainWidth(0.0), constrainHeight(0.0));
 
-  bool get isInfinite => maxWidth >= double.INFINITY && maxHeight >= double.INFINITY;
-
+  /// Whether there is exactly one width value that satisfies the constraints
   bool get hasTightWidth => minWidth >= maxWidth;
+
+  /// Whether there is exactly one height value that satisfies the constraints
   bool get hasTightHeight => minHeight >= maxHeight;
+
+  /// Whether there is exactly one size that satifies the constraints
   bool get isTight => hasTightWidth && hasTightHeight;
 
-  bool contains(Size size) {
+  /// Whether the given size satisfies the constraints
+  bool isSatisfiedBy(Size size) {
     return (minWidth <= size.width) && (size.width <= math.max(minWidth, maxWidth)) &&
            (minHeight <= size.height) && (size.height <= math.max(minHeight, maxHeight));
   }
@@ -323,7 +326,7 @@ abstract class RenderBox extends RenderObject {
       'See https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/src/widgets/sizing.md#user-content-unbounded-constraints';
       return !_size.isInfinite;
     });
-    bool result = constraints.contains(_size);
+    bool result = constraints.isSatisfiedBy(_size);
     if (!result)
       print("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
     return result;
