@@ -27,6 +27,7 @@
 #include <cmath>
 #include <vector>
 #include "minikin/Hyphenator.h"
+#include "minikin/WordBreaker.h"
 
 namespace android {
 
@@ -101,11 +102,6 @@ class TabStops {
 class LineBreaker {
     public:
         const static int kTab_Shift = 29;  // keep synchronized with TAB_MASK in StaticLayout.java
-
-        ~LineBreaker() {
-            utext_close(&mUText);
-            delete mBreakIterator;
-        }
 
         // Note: Locale persists across multiple invocations (it is not cleaned up by finish()),
         // explicitly to avoid the cost of creating ICU BreakIterator objects. It should always
@@ -214,8 +210,7 @@ class LineBreaker {
 
         void finishBreaksOptimal();
 
-        icu::BreakIterator* mBreakIterator = nullptr;
-        UText mUText = UTEXT_INITIALIZER;
+        WordBreaker mWordBreaker;
         std::vector<uint16_t>mTextBuf;
         std::vector<float>mCharWidths;
 
