@@ -246,9 +246,9 @@ class SizedBox extends OneChildRenderObjectWrapper {
   BoxConstraints _additionalConstraints() {
     BoxConstraints result = const BoxConstraints();
     if (width != null)
-      result = result.applyWidth(width);
+      result = result.tightenWidth(width);
     if (height != null)
-      result = result.applyHeight(height);
+      result = result.tightenHeight(height);
     return result;
   }
 
@@ -430,7 +430,7 @@ class Container extends Component {
     Widget current = child;
 
     if (child == null && (width == null || height == null))
-      current = new ConstrainedBox(constraints: BoxConstraints.expand);
+      current = new ConstrainedBox(constraints: const BoxConstraints.expand());
 
     EdgeDims effectivePadding = _paddingIncludingBorder;
     if (effectivePadding != null)

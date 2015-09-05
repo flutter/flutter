@@ -314,7 +314,7 @@ class RenderBlockViewport extends RenderBlockBase {
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (isVertical)
       return _getIntrinsicDimension(constraints, maxCrossAxisDimensionCallback, constraints.constrainWidth);
-    return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minWidth: minExtent).apply(constraints).constrainWidth);
+    return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minWidth: minExtent).enforce(constraints).constrainWidth);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
@@ -326,7 +326,7 @@ class RenderBlockViewport extends RenderBlockBase {
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (!isVertical)
       return _getIntrinsicDimension(constraints, maxCrossAxisDimensionCallback, constraints.constrainHeight);
-    return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minHeight: minExtent).apply(constraints).constrainHeight);
+    return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minHeight: minExtent).enforce(constraints).constrainHeight);
   }
 
   // We don't override computeDistanceToActualBaseline(), because we

@@ -85,7 +85,7 @@ class RenderImage extends RenderBox {
     constraints = new BoxConstraints.tightFor(
       width: _width,
       height: _height
-    ).apply(constraints);
+    ).enforce(constraints);
 
     if (constraints.isTight || _image == null)
       return constraints.smallest;
