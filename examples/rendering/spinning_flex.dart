@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 
 import 'solid_color_box.dart';

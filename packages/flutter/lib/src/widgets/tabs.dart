@@ -6,14 +6,9 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/curves.dart';
-import 'package:sky/animation/scroll_behavior.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/viewport.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/src/widgets/basic.dart';

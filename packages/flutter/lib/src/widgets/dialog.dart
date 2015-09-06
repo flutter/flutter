@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/curves.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
