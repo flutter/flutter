@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';

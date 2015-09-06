@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:newton/newton.dart';
-import 'package:sky/animation/animated_simulation.dart';
+
+import 'package:sky/src/animation/animated_simulation.dart';
 
 // Simple simulation that linearly varies from |begin| to |end| over |duration|.
 class TweenSimulation extends Simulation {

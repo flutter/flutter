@@ -40,6 +40,3 @@ const sky.Color debugPaintLayerBordersColor = const sky.Color(0xFFFF9800);
 
 /// Causes RenderObjects to paint warnings when painting outside their bounds.
 bool debugPaintBoundsEnabled = false;
-
-/// Slows down animations by this factor to help in development.
-double timeDilation = 1.0;

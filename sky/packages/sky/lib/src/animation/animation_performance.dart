@@ -4,12 +4,9 @@
 
 import 'dart:async';
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/direction.dart';
-import 'package:sky/animation/forces.dart';
-import 'package:sky/animation/timeline.dart';
-
-export 'package:sky/animation/direction.dart' show Direction;
+import 'package:sky/src/animation/animated_value.dart';
+import 'package:sky/src/animation/forces.dart';
+import 'package:sky/src/animation/timeline.dart';
 
 enum AnimationStatus {
   dismissed, // stoped at 0

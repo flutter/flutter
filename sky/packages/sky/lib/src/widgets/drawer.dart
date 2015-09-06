@@ -5,9 +5,7 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/forces.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/src/widgets/animated_container.dart';
@@ -18,8 +16,6 @@ import 'package:sky/src/widgets/navigator.dart';
 import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
-
-export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://www.google.com/design/spec/layout/structure.html#structure-side-nav

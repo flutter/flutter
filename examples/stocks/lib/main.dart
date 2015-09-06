@@ -9,6 +9,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/animation.dart';
 import 'package:sky/widgets.dart';
 
 import 'stock_data.dart';

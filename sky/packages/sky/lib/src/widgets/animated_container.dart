@@ -5,9 +5,7 @@
 import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';

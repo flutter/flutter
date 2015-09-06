@@ -5,31 +5,30 @@ Sky and Sky's SDK are designed as layered frameworks, where each layer
 depends on the ones below it but could be replaced wholesale.
 
 The bottom-most layer is the Sky Platform, which is exposed to Dart
-code as [various ```dart:``` packages](https://api.dartlang.org/),
-including ```dart:sky```.
+code as [various `dart:` packages](https://api.dartlang.org/),
+including `dart:sky`.
 
 The [base/](base/) directory contains libraries that extend these core
 APIs to provide base classes for tree structures
 ([base/node.dart](base/node.dart)), hit testing
-([base/hit_test.dart](base/hit_test.dart)), debugging
-([base/debug.dart](base/debug.dart)), and task scheduling
-([base/scheduler.dart](base/scheduler.dart)).
+([base/hit_test.dart](base/hit_test.dart)), and debugging
+([base/debug.dart](base/debug.dart)).
 
-Above this are the files in the [animation/](animation/) directory,
-which provide core primitives for animating values, and in the [gestures/](gestures/)
+Above this layer is the [animation](animation.dart) library,
+which provides core animation primitives, and the [gestures/](gestures/)
 directory, which define a gesture recognition and disambiguation system.
 
 The next layer consists of the files in the [painting/](painting/) directory,
 which provide APIs related to drawing graphics. Some of the code here
-uses the [animation/](animation/) utilities mentioned above.
+uses the [animation](animation.dart) utilities mentioned above.
 
 Layout primitives are provided in the next layer, found in the
-[rendering/](rendering/) directory. They use ```dart:sky``` and the
-APIs exposed in painting/ to provide a retained-mode layout and
+[rendering](rendering.dart) library. They use `dart:sky` and the
+APIs exposed in [painting/](painting/) to provide a retained-mode layout and
 rendering model for applications or documents.
 
-Widgets are provided by the files in the [widgets/](widgets/)
-directory, using a reactive framework. They use data given in the
+Widgets are provided by the files in the [widgets](widgets.dart)
+library, using a reactive framework. They use data given in the
 [theme/](theme/) directory to select styles consistent with Material
 Design.
 
@@ -38,18 +37,18 @@ anything that uses the Mojo IPC mechanism, typically as part of
 wrapping host operating system features. Some of those Host APIs are
 implemented in the host system's preferred language.
 
-Here is a diagram summarising all this:
+Here is a diagram summarizing all this:
 
     +-----------------------------+ ------
     |           YOUR APP          |
     |  +----------------------+---+
-    |  |  widgets/  (theme/)  |   |
+    |  |  widgets   (theme/)  |   |
     | ++---------------------++   |
-    | |      rendering/      |    |  Dart
+    | |      rendering       |    |  Dart
     | |---------+------------+    |
     | |         | painting/  |    |
     +-+         +------------+    |
-    | gestures/ | animation/ |    |
+    | gestures/ | animation  |    |
     +-----------+---+--------+    |
     |    base/      |  mojo/      |
     +------------+--+-+----+------+ -------

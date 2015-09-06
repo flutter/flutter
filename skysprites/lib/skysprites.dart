@@ -11,8 +11,7 @@ import 'dart:typed_data';
 import 'dart:sky';
 
 import 'package:mojo/core.dart';
-import 'package:sky/animation/curves.dart';
-import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/animation.dart';
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky/painting/text_painter.dart';

@@ -6,9 +6,7 @@ import 'dart:async';
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Color, Paint;
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
+import 'package:sky/animation.dart';
 
 const Duration _kShowDuration = const Duration(milliseconds: 300);
 const Duration _kHideDuration = const Duration(milliseconds: 200);
