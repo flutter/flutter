@@ -33,9 +33,6 @@ directory, using a reactive framework. They use data given in the
 [theme/](theme/) directory to select styles consistent with Material
 Design.
 
-Text input widgets are layered on this mechanism and can be found in
-the [editing/](editing/) directory.
-
 Alongside the above is the [mojo/](mojo/) directory, which contains
 anything that uses the Mojo IPC mechanism, typically as part of
 wrapping host operating system features. Some of those Host APIs are
@@ -45,9 +42,7 @@ Here is a diagram summarising all this:
 
     +-----------------------------+ ------
     |           YOUR APP          |
-    |     +--------------------+--+ 
-    |     |      editing/      |  |
-    |  +--+-------------------++  |
+    |  +----------------------+---+
     |  |  widgets/  (theme/)  |   |
     | ++---------------------++   |
     | |      rendering/      |    |  Dart
