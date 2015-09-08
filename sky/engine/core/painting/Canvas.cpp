@@ -231,6 +231,61 @@ void Canvas::drawDrawable(Drawable* drawable)
     m_canvas->drawDrawable(drawable->toSkia());
 }
 
+void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
+        const Vector<Point>& vertices,
+        const Vector<Point>& textureCoordinates,
+        const Vector<SkColor>& colors,
+        SkXfermode::Mode transferMode,
+        const Vector<int>& indices,
+        const Paint& paint,
+        ExceptionState& es)
+{
+    if (!m_canvas)
+        return;
+    size_t vertexCount = vertices.size();
+
+    if (textureCoordinates.size() && textureCoordinates.size() != vertexCount)
+        return es.ThrowRangeError("vertices and textureCoordinates lengths must match");
+    if (colors.size() && colors.size() != vertexCount)
+        return es.ThrowRangeError("vertices and colors lengths must match");
+
+    Vector<SkPoint> skVertices;
+    for (size_t x = 0; x < vertices.size(); x++) {
+        const Point& point = vertices[x];
+        if (point.is_null)
+            return es.ThrowRangeError("vertices contained a null");
+        skVertices.append(point.sk_point);
+    }
+
+    Vector<SkPoint> skTextureCoordinates;
+    for (size_t x = 0; x < textureCoordinates.size(); x++) {
+        const Point& point = textureCoordinates[x];
+        if (point.is_null)
+            return es.ThrowRangeError("textureCoordinates contained a null");
+        skTextureCoordinates.append(point.sk_point);
+    }
+
+    Vector<uint16_t> skIndices;
+    for (size_t x = 0; x < indices.size(); x++) {
+        uint16_t i = indices[x];
+        skIndices.append(i);
+    }
+
+    RefPtr<SkXfermode> transferModePtr = adoptRef(SkXfermode::Create(transferMode));
+
+    m_canvas->drawVertices(
+        vertexMode,
+        skVertices.size(),
+        skVertices.data(),
+        skTextureCoordinates.isEmpty() ? nullptr : skTextureCoordinates.data(),
+        colors.isEmpty() ? nullptr : colors.data(),
+        transferModePtr.get(),
+        skIndices.isEmpty() ? nullptr : skIndices.data(),
+        skIndices.size(),
+        *paint.paint()
+    );
+}
+
 void Canvas::drawAtlas(CanvasImage* atlas,
     const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
     const Vector<SkColor>& colors, SkXfermode::Mode mode,

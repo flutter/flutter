@@ -17,6 +17,7 @@
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/painting/Size.h"
 #include "sky/engine/core/painting/RSTransform.h"
+#include "sky/engine/core/painting/VertexMode.h"
 #include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float32_list.h"
@@ -90,6 +91,15 @@ public:
     void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint);
     void drawPicture(Picture* picture);
     void drawDrawable(Drawable* drawable);
+
+    void drawVertices(SkCanvas::VertexMode vertexMode,
+        const Vector<Point>& vertices,
+        const Vector<Point>& textureCoordinates,
+        const Vector<SkColor>& colors,
+        SkXfermode::Mode transferMode,
+        const Vector<int>& indices,
+        const Paint& paint,
+        ExceptionState& es);
 
     void drawAtlas(CanvasImage* atlas,
         const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
