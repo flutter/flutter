@@ -37,6 +37,8 @@ class ColorSequence {
   Color colorAtPosition(double pos) {
     assert(pos >= 0.0 && pos <= 1.0);
 
+    if (pos == 0.0) return colors[0];
+
     double lastStop = colorStops[0];
     Color lastColor = colors[0];
 
