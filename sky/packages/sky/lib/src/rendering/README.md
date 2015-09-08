@@ -384,6 +384,7 @@ scheduler.addPersistentFrameCallback((_) {
 Dependencies
 ------------
 
+ * [`package:sky/animation.dart`](../../animation.dart)
  * [`package:sky/base`](../../base)
  * [`package:sky/mojo`](../../mojo)
- * [`package:sky/animation.dart`](../../animation.dart)
+ * [`package:sky/painting.dart`](../../painting.dart)

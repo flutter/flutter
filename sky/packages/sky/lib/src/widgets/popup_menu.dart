@@ -5,7 +5,7 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
-import 'package:sky/painting/box_painter.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/theme/colors.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/src/widgets/basic.dart';

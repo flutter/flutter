@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/painting/box_painter.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/box.dart';
 

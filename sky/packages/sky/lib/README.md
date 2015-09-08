@@ -18,14 +18,14 @@ Above this layer is the [animation](animation.dart) library,
 which provides core animation primitives, and the [gestures/](gestures/)
 directory, which define a gesture recognition and disambiguation system.
 
-The next layer consists of the files in the [painting/](painting/) directory,
-which provide APIs related to drawing graphics. Some of the code here
-uses the [animation](animation.dart) utilities mentioned above.
+The next layer consists of the [painting](painting.dart) library,
+which provides APIs related to drawing graphics. Some of the code here
+uses the [animation](animation.dart) library mentioned above.
 
 Layout primitives are provided in the next layer, found in the
 [rendering](rendering.dart) library. They use `dart:sky` and the
-APIs exposed in [painting/](painting/) to provide a retained-mode layout and
-rendering model for applications or documents.
+APIs exposed in the [painting](painting.dart) library to provide a retained-mode
+layout and rendering model for applications or documents.
 
 Widgets are provided by the files in the [widgets](widgets.dart)
 library, using a reactive framework. They use data given in the
@@ -46,7 +46,7 @@ Here is a diagram summarizing all this:
     | ++---------------------++   |
     | |      rendering       |    |  Dart
     | |---------+------------+    |
-    | |         | painting/  |    |
+    | |         | painting   |    |
     +-+         +------------+    |
     | gestures/ | animation  |    |
     +-----------+---+--------+    |

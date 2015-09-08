@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting/text_painter.dart';
+import 'package:sky/src/painting/text_painter.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';
 
-export 'package:sky/painting/text_painter.dart';
+export 'package:sky/src/painting/text_painter.dart';
 
 // Unfortunately, using full precision floating point here causes bad layouts
 // because floating point math isn't associative. If we add and subtract

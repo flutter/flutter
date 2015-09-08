@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
-import 'package:sky/painting/text_style.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 
