@@ -6,8 +6,8 @@ import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 
-import 'package:sky/base/image_resource.dart';
 import 'package:sky/mojo/asset_bundle.dart';
+import 'package:sky/mojo/image_resource.dart';
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/src/painting/text_painter.dart';
 import 'package:sky/src/painting/text_style.dart';
@@ -25,11 +25,11 @@ import 'package:sky/src/rendering/viewport.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
 
-export 'package:sky/base/hit_test.dart' show EventDisposition, combineEventDispositions;
 export 'package:sky/src/painting/text_style.dart';
 export 'package:sky/src/rendering/block.dart' show BlockDirection;
 export 'package:sky/src/rendering/box.dart' show BoxConstraints;
 export 'package:sky/src/rendering/flex.dart' show FlexJustifyContent, FlexAlignItems, FlexDirection;
+export 'package:sky/src/rendering/hit_test.dart' show EventDisposition, combineEventDispositions;
 export 'package:sky/src/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/src/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxDecorationPosition, BoxShadow, Border, BorderSide, EdgeDims, Shape;
 export 'package:sky/src/rendering/shifted_box.dart' show ShrinkWrap;

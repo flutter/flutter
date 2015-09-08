@@ -4,9 +4,7 @@
 
 import 'dart:collection';
 
-import 'package:sky/base/hit_test.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/sky_binding.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 
