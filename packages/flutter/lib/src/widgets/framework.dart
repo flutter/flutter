@@ -563,8 +563,7 @@ abstract class TagNode extends Widget {
 
   void _sync(Widget old, dynamic slot) {
     assert(!_debugChildTaken);
-    Widget oldChild = (old as TagNode)?.child;
-    child = syncChild(child, oldChild, slot);
+    child = syncChild(child, (old as TagNode)?.child, slot);
     if (child != null) {
       assert(child.parent == this);
       assert(child.renderObject != null);
@@ -945,6 +944,12 @@ abstract class StatefulComponent extends Component {
     fn();
     _scheduleBuild();
   }
+
+  String toStringName([String prefix = '', String startPrefix = '']) {
+    if (_disqualifiedFromEverAppearingAgain)
+      return '[[DISQUALIFIED]] ${super.toStringName()}';
+    return super.toStringName();
+  }
 }
 
 Set<Component> _dirtyComponents = new Set<Component>();
@@ -1228,8 +1233,8 @@ abstract class RenderObjectWrapper extends Widget {
           } else {
             syncChild(null, oldChild, null);
           }
-          oldChildrenBottom -= 1;
-        }
+        } // else the node was probably moved elsewhere, ignore it
+        oldChildrenBottom -= 1;
       }
     }
 
