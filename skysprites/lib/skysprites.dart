@@ -21,9 +21,10 @@ import 'package:sky_services/media/media.mojom.dart';
 import 'package:vector_math/vector_math.dart';
 
 part 'action.dart';
-part 'constraint.dart';
 part 'action_spline.dart';
 part 'color_secuence.dart';
+part 'constraint.dart';
+part 'effect_line.dart';
 part 'image_map.dart';
 part 'label.dart';
 part 'layer.dart';
@@ -38,5 +39,6 @@ part 'spritesheet.dart';
 part 'sprite_box.dart';
 part 'sprite_widget.dart';
 part 'texture.dart';
+part 'textured_line.dart';
 part 'util.dart';
 part 'virtual_joystick.dart';
