@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/theme/colors.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/widgets.dart';
 
 class CardModel {

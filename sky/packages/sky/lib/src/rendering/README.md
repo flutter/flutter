@@ -372,8 +372,8 @@ This can be quite useful in figuring out exactly what is going on when
 working with the render tree.
 
 ```dart
-import 'package:sky/src/rendering/sky_binding.dart';
-import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/animation.dart';
+import 'package:sky/rendering.dart';
 
 scheduler.addPersistentFrameCallback((_) {
   SkyBinding.instance.debugDumpRenderTree();
@@ -384,6 +384,6 @@ scheduler.addPersistentFrameCallback((_) {
 Dependencies
 ------------
 
- * [`package:sky/base`](../base)
- * [`package:sky/mojo`](../mojo)
- * [`package:sky/animation`](../mojo)
+ * [`package:sky/base`](../../base)
+ * [`package:sky/mojo`](../../mojo)
+ * [`package:sky/animation.dart`](../../animation.dart)

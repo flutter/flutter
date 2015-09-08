@@ -4,10 +4,12 @@
 
 import "dart:sky";
 
-import 'package:sky/animation/curves.dart';
-import 'package:sky/animation/direction.dart';
+import 'package:sky/src/animation/curves.dart';
 
-export 'package:sky/animation/curves.dart' show Interval;
+enum Direction {
+  forward,
+  reverse
+}
 
 abstract class AnimatedVariable {
   void setProgress(double t, Direction direction);

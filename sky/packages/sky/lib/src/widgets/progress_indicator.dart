@@ -5,9 +5,7 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/curves.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/framework.dart';

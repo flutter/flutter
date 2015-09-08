@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:sky' as sky;
 
+import 'package:sky/animation.dart';
 import 'package:sky/base/hit_test.dart';
-import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/mojo/activity.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';

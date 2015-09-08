@@ -6,10 +6,10 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
+import 'package:sky/animation.dart';
 import 'package:sky/base/debug.dart';
 import 'package:sky/base/hit_test.dart';
 import 'package:sky/base/node.dart';
-import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/src/rendering/layer.dart';
 import 'package:vector_math/vector_math.dart';
 

@@ -500,8 +500,8 @@ Dependencies
 ------------
 
  * `package:vector_math`
- * [`package:sky/animation`](../animation)
- * [`package:sky/base`](../base)
- * [`package:sky/painting`](../painting)
- * [`package:sky/rendering`](../rendering)
- * [`package:sky/theme`](../theme)
+ * [`package:sky/animation.dart`](../../animation.dart)
+ * [`package:sky/base`](../../base)
+ * [`package:sky/painting`](../../painting)
+ * [`package:sky/rendering.dart`](../../rendering.dart)
+ * [`package:sky/theme`](../../theme)

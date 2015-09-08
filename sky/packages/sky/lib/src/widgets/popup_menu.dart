@@ -4,8 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/colors.dart';
 import 'package:sky/theme/shadows.dart';
@@ -15,8 +14,6 @@ import 'package:sky/src/widgets/navigator.dart';
 import 'package:sky/src/widgets/popup_menu_item.dart';
 import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/transitions.dart';
-
-export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
 double _kMenuCloseIntervalEnd = 2.0 / 3.0;

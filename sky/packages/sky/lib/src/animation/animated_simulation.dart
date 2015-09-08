@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:newton/newton.dart';
-import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/src/animation/scheduler.dart';
 
 const double _kSecondsPerMillisecond = 1000.0;
 

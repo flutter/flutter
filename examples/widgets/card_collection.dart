@@ -4,6 +4,7 @@
 
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/animation.dart';
 import 'package:sky/widgets.dart';
 
 class CardModel {
