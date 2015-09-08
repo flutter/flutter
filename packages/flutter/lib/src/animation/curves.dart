@@ -11,10 +11,17 @@ double _evaluateCubic(double a, double b, double m) {
 
 const double _kCubicErrorBound = 0.001;
 
+/// A mapping of the unit interval to the unit interval
+///
+/// A curve must map 0.0 to 0.0 and 1.0 to 1.0.
 abstract class Curve {
+  /// Return the value of the curve at point t
+  ///
+  /// The value of t must be between 0.0 and 1.0, inclusive.
   double transform(double t);
 }
 
+/// The idenity map over the unit interval
 class Linear implements Curve {
   const Linear();
 
@@ -23,8 +30,12 @@ class Linear implements Curve {
   }
 }
 
+/// A curve that is initially 0.0, then linear, then 1.0
 class Interval implements Curve {
+  /// The smallest value for which this interval is 0.0
   final double start;
+
+  /// The smallest value for which this interval is 1.0
   final double end;
 
   Interval(this.start, this.end) {
@@ -39,6 +50,7 @@ class Interval implements Curve {
   }
 }
 
+/// A cubic polynomial mapping of the unit interval
 class Cubic implements Curve {
   final double a;
   final double b;
@@ -79,6 +91,7 @@ double _bounce(double t) {
   return 7.5625 * t * t + 0.984375;
 }
 
+/// An oscillating curve that grows in magnitude
 class BounceInCurve implements Curve {
   const BounceInCurve();
 
@@ -87,6 +100,7 @@ class BounceInCurve implements Curve {
   }
 }
 
+/// An oscillating curve that shrink in magnitude
 class BounceOutCurve implements Curve {
   const BounceOutCurve();
 
@@ -95,6 +109,7 @@ class BounceOutCurve implements Curve {
   }
 }
 
+/// An oscillating curve that first grows and then shrink in magnitude
 class BounceInOutCurve implements Curve {
   const BounceInOutCurve();
 
@@ -106,6 +121,7 @@ class BounceInOutCurve implements Curve {
   }
 }
 
+/// An oscillating curve that grows in magnitude while overshootings its bounds
 class ElasticInCurve implements Curve {
   const ElasticInCurve([this.period = 0.4]);
   final double period;
@@ -117,6 +133,7 @@ class ElasticInCurve implements Curve {
   }
 }
 
+/// An oscillating curve that shrinks in magnitude while overshootings its bounds
 class ElasticOutCurve implements Curve {
   const ElasticOutCurve([this.period = 0.4]);
   final double period;
@@ -127,6 +144,7 @@ class ElasticOutCurve implements Curve {
   }
 }
 
+/// An oscillating curve that grows and then shrinks in magnitude while overshootings its bounds
 class ElasticInOutCurve implements Curve {
   const ElasticInOutCurve([this.period = 0.4]);
   final double period;
@@ -141,14 +159,35 @@ class ElasticInOutCurve implements Curve {
   }
 }
 
+/// A linear animation curve
 const Linear linear = const Linear();
+
+/// A cubic animation cuve that speeds up quickly and ends slowly
 const Cubic ease = const Cubic(0.25, 0.1, 0.25, 1.0);
+
+/// A cubic animation cuve that starts slowly and ends quickly
 const Cubic easeIn = const Cubic(0.42, 0.0, 1.0, 1.0);
+
+/// A cubic animation cuve that starts quickly and ends slowly
 const Cubic easeOut = const Cubic(0.0, 0.0, 0.58, 1.0);
+
+/// A cubic animation cuve that starts slowly, speeds up, and then and ends slowly
 const Cubic easeInOut = const Cubic(0.42, 0.0, 0.58, 1.0);
+
+/// An oscillating curve that grows in magnitude
 const BounceInCurve bounceIn = const BounceInCurve();
+
+/// An oscillating curve that first grows and then shrink in magnitude
 const BounceOutCurve bounceOut = const BounceOutCurve();
+
+/// An oscillating curve that first grows and then shrink in magnitude
 const BounceInOutCurve bounceInOut = const BounceInOutCurve();
+
+/// An oscillating curve that grows in magnitude while overshootings its bounds
 const ElasticInCurve elasticIn = const ElasticInCurve();
+
+/// An oscillating curve that shrinks in magnitude while overshootings its bounds
 const ElasticOutCurve elasticOut = const ElasticOutCurve();
+
+/// An oscillating curve that grows and then shrinks in magnitude while overshootings its bounds
 const ElasticInOutCurve elasticInOut = const ElasticInOutCurve();
