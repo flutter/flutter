@@ -7,7 +7,7 @@ import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:sky/base/image_resource.dart';
-import 'package:sky/painting/shadows.dart';
+import 'package:sky/src/painting/shadows.dart';
 
 /// An immutable set of offsets in each of the four cardinal directions
 ///

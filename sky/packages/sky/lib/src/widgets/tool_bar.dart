@@ -4,15 +4,15 @@
 
 import 'package:sky/src/widgets/theme.dart';
 
-import 'package:sky/painting/text_style.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/rendering/flex.dart';
-import 'package:sky/theme/shadows.dart';
-import 'package:sky/theme/typography.dart' as typography;
-import 'package:sky/theme/view_configuration.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/icon.dart';
+import 'package:sky/theme/shadows.dart';
+import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/theme/view_configuration.dart';
 
 class ToolBar extends Component {
 
