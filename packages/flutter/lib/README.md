@@ -8,12 +8,6 @@ The bottom-most layer is the Sky Platform, which is exposed to Dart
 code as [various `dart:` packages](https://api.dartlang.org/),
 including `dart:sky`.
 
-The [base/](base/) directory contains libraries that extend these core
-APIs to provide base classes for tree structures
-([base/node.dart](base/node.dart)), hit testing
-([base/hit_test.dart](base/hit_test.dart)), and debugging
-([base/debug.dart](base/debug.dart)).
-
 Above this layer is the [animation](animation.dart) library,
 which provides core animation primitives, and the [gestures/](gestures/)
 directory, which define a gesture recognition and disambiguation system.
@@ -49,8 +43,8 @@ Here is a diagram summarizing all this:
     | |         | painting   |    |
     +-+         +------------+    |
     | gestures/ | animation  |    |
-    +-----------+---+--------+    |
-    |    base/      |  mojo/      |
+    +-----------+------------+    |
+    |             mojo/           |
     +------------+--+-+----+------+ -------
     |  dart:sky  |    |    | Host |
     +--------+---+    |    | APIs |  C++

@@ -5,11 +5,11 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 
-import 'package:sky/base/pointer_router.dart';
 import 'package:sky/gestures/arena.dart';
 import 'package:sky/gestures/constants.dart';
+import 'package:sky/gestures/pointer_router.dart';
 
-export 'package:sky/base/pointer_router.dart' show PointerRouter;
+export 'package:sky/gestures/pointer_router.dart' show PointerRouter;
 
 abstract class GestureRecognizer extends GestureArenaMember {
   GestureRecognizer({ PointerRouter router }) : _router = router;
