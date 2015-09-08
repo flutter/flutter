@@ -338,7 +338,7 @@ class GatherPixelRefDevice : public SkBitmapDevice {
       // Check whether the shader is a gradient in order to prevent generation
       // of bitmaps from gradient shaders, which implement asABitmap.
       if (SkShader::kNone_GradientType == shader->asAGradient(NULL))
-        return shader->asABitmap(bm, NULL, NULL);
+        return shader->isABitmap(bm, NULL, NULL);
     }
     return false;
   }
