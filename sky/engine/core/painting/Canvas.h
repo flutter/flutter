@@ -92,11 +92,11 @@ public:
     void drawPicture(Picture* picture);
     void drawDrawable(Drawable* drawable);
 
-    void drawVertices(SkCanvas::VertexMode vmode,
+    void drawVertices(SkCanvas::VertexMode vertexMode,
         const Vector<Point>& vertices,
-        const Vector<Point>& texs,
+        const Vector<Point>& textureCoordinates,
         const Vector<SkColor>& colors,
-        SkXfermode::Mode mode,
+        SkXfermode::Mode transferMode,
         const Vector<int>& indices,
         const Paint& paint,
         ExceptionState& es);

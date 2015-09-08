@@ -4,6 +4,7 @@
 
 part of dart.sky;
 
+/// Defines how a list of points is interpreted when drawing a set of triangles. See Skia or OpenGL documentation for more details.
 enum VertexMode {
   triangles,
   triangleStrip,

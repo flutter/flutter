@@ -231,11 +231,11 @@ void Canvas::drawDrawable(Drawable* drawable)
     m_canvas->drawDrawable(drawable->toSkia());
 }
 
-void Canvas::drawVertices(SkCanvas::VertexMode vmode,
+void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
         const Vector<Point>& vertices,
-        const Vector<Point>& texs,
+        const Vector<Point>& textureCoordinates,
         const Vector<SkColor>& colors,
-        SkXfermode::Mode mode,
+        SkXfermode::Mode transferMode,
         const Vector<int>& indices,
         const Paint& paint,
         ExceptionState& es)
@@ -244,8 +244,8 @@ void Canvas::drawVertices(SkCanvas::VertexMode vmode,
         return;
     size_t vertexCount = vertices.size();
 
-    if (texs.size() && texs.size() != vertexCount)
-        return es.ThrowRangeError("vertices and texs lengths must match");
+    if (textureCoordinates.size() && textureCoordinates.size() != vertexCount)
+        return es.ThrowRangeError("vertices and textureCoordinates lengths must match");
     if (colors.size() && colors.size() != vertexCount)
         return es.ThrowRangeError("vertices and colors lengths must match");
 
@@ -257,12 +257,12 @@ void Canvas::drawVertices(SkCanvas::VertexMode vmode,
         skVertices.append(point.sk_point);
     }
 
-    Vector<SkPoint> skTexs;
-    for (size_t x = 0; x < texs.size(); x++) {
-        const Point& point = texs[x];
+    Vector<SkPoint> skTextureCoordinates;
+    for (size_t x = 0; x < textureCoordinates.size(); x++) {
+        const Point& point = textureCoordinates[x];
         if (point.is_null)
-            return es.ThrowRangeError("texs contained a null");
-        skTexs.append(point.sk_point);
+            return es.ThrowRangeError("textureCoordinates contained a null");
+        skTextureCoordinates.append(point.sk_point);
     }
 
     Vector<uint16_t> skIndices;
@@ -271,15 +271,15 @@ void Canvas::drawVertices(SkCanvas::VertexMode vmode,
         skIndices.append(i);
     }
 
-    RefPtr<SkXfermode> modePtr = adoptRef(SkXfermode::Create(mode));
+    RefPtr<SkXfermode> transferModePtr = adoptRef(SkXfermode::Create(transferMode));
 
     m_canvas->drawVertices(
-        vmode,
+        vertexMode,
         skVertices.size(),
         skVertices.data(),
-        skTexs.isEmpty() ? nullptr : skTexs.data(),
+        skTextureCoordinates.isEmpty() ? nullptr : skTextureCoordinates.data(),
         colors.isEmpty() ? nullptr : colors.data(),
-        modePtr.get(),
+        transferModePtr.get(),
         skIndices.isEmpty() ? nullptr : skIndices.data(),
         skIndices.size(),
         *paint.paint()
