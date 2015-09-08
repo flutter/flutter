@@ -945,7 +945,7 @@ abstract class StatefulComponent extends Component {
     _scheduleBuild();
   }
 
-  String toStringName([String prefix = '', String startPrefix = '']) {
+  String toStringName() {
     if (_disqualifiedFromEverAppearingAgain)
       return '[[DISQUALIFIED]] ${super.toStringName()}';
     return super.toStringName();
