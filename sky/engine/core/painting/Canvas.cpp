@@ -231,6 +231,61 @@ void Canvas::drawDrawable(Drawable* drawable)
     m_canvas->drawDrawable(drawable->toSkia());
 }
 
+void Canvas::drawVertices(SkCanvas::VertexMode vmode,
+        const Vector<Point>& vertices,
+        const Vector<Point>& texs,
+        const Vector<SkColor>& colors,
+        SkXfermode::Mode mode,
+        const Vector<int>& indices,
+        const Paint& paint,
+        ExceptionState& es)
+{
+    if (!m_canvas)
+        return;
+    size_t vertexCount = vertices.size();
+
+    if (texs.size() && texs.size() != vertexCount)
+        return es.ThrowRangeError("vertices and texs lengths must match");
+    if (colors.size() && colors.size() != vertexCount)
+        return es.ThrowRangeError("vertices and colors lengths must match");
+
+    Vector<SkPoint> skVertices;
+    for (size_t x = 0; x < vertices.size(); x++) {
+        const Point& point = vertices[x];
+        if (point.is_null)
+            return es.ThrowRangeError("vertices contained a null");
+        skVertices.append(point.sk_point);
+    }
+
+    Vector<SkPoint> skTexs;
+    for (size_t x = 0; x < texs.size(); x++) {
+        const Point& point = texs[x];
+        if (point.is_null)
+            return es.ThrowRangeError("texs contained a null");
+        skTexs.append(point.sk_point);
+    }
+
+    Vector<uint16_t> skIndices;
+    for (size_t x = 0; x < indices.size(); x++) {
+        uint16_t i = indices[x];
+        skIndices.append(i);
+    }
+
+    RefPtr<SkXfermode> modePtr = adoptRef(SkXfermode::Create(mode));
+
+    m_canvas->drawVertices(
+        vmode,
+        skVertices.size(),
+        skVertices.data(),
+        skTexs.isEmpty() ? nullptr : skTexs.data(),
+        colors.isEmpty() ? nullptr : colors.data(),
+        modePtr.get(),
+        skIndices.isEmpty() ? nullptr : skIndices.data(),
+        skIndices.size(),
+        *paint.paint()
+    );
+}
+
 void Canvas::drawAtlas(CanvasImage* atlas,
     const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
     const Vector<SkColor>& colors, SkXfermode::Mode mode,

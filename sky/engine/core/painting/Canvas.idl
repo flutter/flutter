@@ -39,6 +39,7 @@
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint);
   void drawPicture(Picture picture);
   void drawDrawable(Drawable drawable);
+  [RaisesException] void drawVertices(VertexMode vmode, sequence<Point> vertices, sequence<Point> texs, sequence<Color> colors, TransferMode mode, sequence<long> indicies, Paint paint);
 
   // TODO(eseidel): Paint should be optional, but optional doesn't work.
   [RaisesException] void drawAtlas(Image image,

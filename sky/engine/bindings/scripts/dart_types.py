@@ -126,6 +126,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'MojoDataPipeConsumer': 'mojo::ScopedDataPipeConsumerHandle',
     'TileMode': 'SkShader::TileMode',
     'TransferMode': 'SkXfermode::Mode',
+    'VertexMode': 'SkCanvas::VertexMode',
     'FilterQuality': 'SkFilterQuality',
     'PaintingStyle': 'SkPaint::Style',
     # TODO(abarth): Give these better C++ types.
@@ -386,6 +387,7 @@ DART_TO_CPP_VALUE = {
     'Size': pass_by_value_format('Size'),
     'TileMode': pass_by_value_format('TileMode', ''),
     'TransferMode': pass_by_value_format('TransferMode', ''),
+    'VertexMode': pass_by_value_format('VertexMode', ''),
     'FilterQuality': pass_by_value_format('FilterQuality', ''),
     'PaintingStyle': pass_by_value_format('PaintingStyle', ''),
     'FontStyle': pass_by_value_format('FontStyle', ''),
