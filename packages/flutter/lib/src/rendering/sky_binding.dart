@@ -4,9 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/base/pointer_router.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/base/hit_test.dart';
-import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/base/pointer_router.dart';
 import 'package:sky/gestures/arena.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';
@@ -45,7 +45,6 @@ class SkyBinding extends HitTestTarget {
     sky.view.setEventCallback(_handleEvent);
 
     sky.view.setMetricsChangedCallback(_handleMetricsChanged);
-    scheduler.init();
     if (renderViewOverride == null) {
       _renderView = new RenderView(child: root);
       _renderView.attach();

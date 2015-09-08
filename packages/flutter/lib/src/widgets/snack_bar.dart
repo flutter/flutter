@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/src/widgets/basic.dart';
@@ -15,8 +13,6 @@ import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/material.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
-
-export 'package:sky/animation/animation_performance.dart' show AnimationStatus;
 
 typedef void SnackBarDismissedCallback();
 

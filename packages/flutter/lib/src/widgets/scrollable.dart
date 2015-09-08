@@ -7,11 +7,7 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
-import 'package:sky/animation/animated_simulation.dart';
-import 'package:sky/animation/animated_value.dart';
-import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
-import 'package:sky/animation/scroll_behavior.dart';
+import 'package:sky/animation.dart';
 import 'package:sky/gestures/constants.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/viewport.dart';

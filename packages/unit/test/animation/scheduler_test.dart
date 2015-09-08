@@ -1,4 +1,4 @@
-import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/animation.dart';
 import 'package:test/test.dart';
 
 void main() {
