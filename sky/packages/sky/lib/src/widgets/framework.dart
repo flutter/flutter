@@ -19,7 +19,6 @@ export 'package:sky/src/rendering/box.dart' show BoxConstraints, BoxDecoration, 
 export 'package:sky/src/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 final bool _shouldLogRenderDuration = false; // see also 'enableProfilingLoop' argument to runApp()
-final bool _shouldReparentDuringSync = false; // currently in development
 
 typedef Widget Builder();
 typedef void WidgetTreeWalker(Widget);
@@ -422,17 +421,26 @@ abstract class Widget {
         Widget deadNode = oldNode;
         Widget candidate = _getCandidateSingleChildFrom(oldNode);
         oldNode = null;
-        while (candidate != null && _shouldReparentDuringSync) {
+
+        while (candidate != null) {
           if (_canSync(newNode, candidate)) {
             assert(candidate.parent != null);
             assert(candidate.parent.singleChild == candidate);
-            candidate.parent.takeChild();
-            oldNode = candidate;
+            if (candidate.renderObject != deadNode.renderObject) {
+              // TODO(ianh): Handle removal across RenderNode boundaries
+            } else {
+              candidate.parent.takeChild();
+              oldNode = candidate;
+            }
             break;
           }
           candidate = _getCandidateSingleChildFrom(candidate);
         }
-        deadNode.detachRenderObject();
+
+        // TODO(ianh): Handle insertion, too...
+
+        if (oldNode == null)
+          deadNode.detachRenderObject();
         deadNode.remove();
       }
       if (oldNode != null) {
@@ -542,13 +550,19 @@ abstract class TagNode extends Widget {
 
   Widget get singleChild => child;
 
+  bool _debugChildTaken = false;
+
   void takeChild() {
+    assert(!_debugChildTaken);
     assert(singleChild == child);
     assert(child != null);
     child = null;
+    _renderObject = null;
+    assert(() { _debugChildTaken = true; return true; });
   }
 
   void _sync(Widget old, dynamic slot) {
+    assert(!_debugChildTaken);
     Widget oldChild = (old as TagNode)?.child;
     child = syncChild(child, oldChild, slot);
     if (child != null) {
@@ -567,6 +581,7 @@ abstract class TagNode extends Widget {
   }
 
   void detachRenderObject() {
+    assert(!_debugChildTaken);
     if (child != null)
       child.detachRenderObject();
   }
@@ -750,9 +765,11 @@ abstract class Component extends Widget {
     assert(_debugChildTaken || (_child != null && _renderObject != null));
     super.remove();
     _child = null;
+    _renderObject = null;
   }
 
   void detachRenderObject() {
+    assert(!_debugChildTaken);
     if (_child != null)
       _child.detachRenderObject();
   }
@@ -786,6 +803,7 @@ abstract class Component extends Widget {
   // 3) Syncing against an old version
   //      assert(_child == null && old != null)
   void _sync(Component old, dynamic slot) {
+    assert(!_debugChildTaken);
     assert(_child == null || old == null);
 
     updateSlot(slot);
@@ -1278,8 +1296,9 @@ abstract class RenderObjectWrapper extends Widget {
   }
 
   void detachRenderObject() {
-    assert(_ancestor != null);
     assert(renderObject != null);
+    assert(_ancestor != null);
+    assert(_ancestor.renderObject != null);
     _ancestor.detachChildRenderObject(this);
   }
 
@@ -1314,13 +1333,18 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
   Widget get singleChild => _child;
 
+  bool _debugChildTaken = false;
+
   void takeChild() {
+    assert(!_debugChildTaken);
     assert(singleChild == child);
     assert(child != null);
     _child = null;
+    assert(() { _debugChildTaken = true; return true; });
   }
 
   void syncRenderObject(RenderObjectWrapper old) {
+    assert(!_debugChildTaken);
     super.syncRenderObject(old);
     Widget oldChild = (old as OneChildRenderObjectWrapper)?.child;
     Widget newChild = child;
