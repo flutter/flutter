@@ -502,6 +502,6 @@ Dependencies
  * `package:vector_math`
  * [`package:sky/animation.dart`](../../animation.dart)
  * [`package:sky/base`](../../base)
- * [`package:sky/painting`](../../painting)
+ * [`package:sky/painting.dart`](../../painting.dart)
  * [`package:sky/rendering.dart`](../../rendering.dart)
  * [`package:sky/theme`](../../theme)

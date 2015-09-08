@@ -4,13 +4,13 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/painting/box_painter.dart';
-import 'package:sky/painting/text_style.dart';
+import 'package:sky/src/painting/box_painter.dart';
+import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:vector_math/vector_math.dart';
 
-export 'package:sky/painting/box_painter.dart';
+export 'package:sky/src/painting/box_painter.dart';
 
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
 

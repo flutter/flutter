@@ -5,8 +5,7 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 
-import 'package:sky/painting/radial_reaction.dart';
-import 'package:sky/painting/shadows.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/theme/shadows.dart';

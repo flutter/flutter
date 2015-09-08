@@ -14,7 +14,7 @@ import 'package:mojo/core.dart';
 import 'package:sky/animation.dart';
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/mojo/shell.dart' as shell;
-import 'package:sky/painting/text_painter.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/widgets/framework.dart';

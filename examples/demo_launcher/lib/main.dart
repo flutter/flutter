@@ -4,7 +4,7 @@
 
 import 'package:sky/mojo/activity.dart';
 import 'package:sky/mojo/asset_bundle.dart';
-import 'package:sky/painting/box_painter.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets.dart';

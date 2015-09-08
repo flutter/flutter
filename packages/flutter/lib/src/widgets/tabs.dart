@@ -7,7 +7,7 @@ import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';
-import 'package:sky/painting/text_style.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
