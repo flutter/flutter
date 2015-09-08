@@ -1,7 +1,7 @@
 import 'package:quiver/testing/async.dart';
-import 'package:sky/base/pointer_router.dart';
 import 'package:sky/gestures/arena.dart';
 import 'package:sky/gestures/long_press.dart';
+import 'package:sky/gestures/pointer_router.dart';
 import 'package:sky/gestures/show_press.dart';
 import 'package:test/test.dart';
 
