@@ -16,8 +16,25 @@
 #include "ui/gl/gl_share_group.h"
 #include "ui/gl/gl_surface.h"
 
+// Set this value to 1 to serialize the layer tree to disk.
+#define SERIALIZE_LAYER_TREE 0
+
 namespace sky {
 namespace shell {
+namespace {
+
+#if SERIALIZE_LAYER_TREE
+
+void SketchySerializeLayerTree(const char* path, LayerTree* layer_tree) {
+  const auto& layers = static_cast<ContainerLayer*>(layer_tree->root_layer())->layers();
+  if (layers.empty())
+    return;
+  SerializePicture(path, static_cast<PictureLayer*>(layers[0].get())->picture());
+}
+
+#endif
+
+}  // namespace
 
 Rasterizer::Rasterizer()
     : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
@@ -58,7 +75,9 @@ void Rasterizer::Draw(scoped_ptr<LayerTree> layer_tree) {
   canvas->flush();
   surface_->SwapBuffers();
 
-  // SerializePicture("/data/data/org.domokit.sky.shell/cache/layer0.skp", picture.get());
+#if SERIALIZE_LAYER_TREE
+  SketchySerializeLayerTree("/data/data/org.domokit.sky.shell/cache/layer0.skp", layer_tree.get());
+#endif
 }
 
 void Rasterizer::OnOutputSurfaceDestroyed() {

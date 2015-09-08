@@ -49,6 +49,8 @@ class PictureLayer : public Layer {
   PictureLayer();
   ~PictureLayer() override;
 
+  SkPicture* picture() const { return picture_.get(); }
+
   void Paint(SkCanvas* canvas) override;
 
   void set_offset(const SkPoint& offset) { offset_ = offset; }
@@ -65,6 +67,8 @@ class ContainerLayer : public Layer {
  public:
   ContainerLayer();
   ~ContainerLayer() override;
+
+  const std::vector<std::unique_ptr<Layer>>& layers() const { return layers_; }
 
   void Add(std::unique_ptr<Layer> layer);
 
