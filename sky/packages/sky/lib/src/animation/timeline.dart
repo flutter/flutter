@@ -8,10 +8,14 @@ import 'package:newton/newton.dart';
 
 import 'package:sky/src/animation/animated_simulation.dart';
 
-// Simple simulation that linearly varies from |begin| to |end| over |duration|.
+/// A simulation that linearly varies from [begin] to [end] over [duration]
 class TweenSimulation extends Simulation {
   final double _durationInSeconds;
+
+  /// The initial value of the simulation
   final double begin;
+
+  /// The terminal value of the simulation
   final double end;
 
   TweenSimulation(Duration duration, this.begin, this.end) :
@@ -32,14 +36,15 @@ class TweenSimulation extends Simulation {
   bool isDone(double timeInSeconds) => timeInSeconds > _durationInSeconds;
 }
 
+/// A timeline for an animation
 class Timeline {
-  Timeline(Function onTick) : _onTick = onTick {
-    _animation = new AnimatedSimulation(_tick);
+  Timeline(Function onTick) {
+    _animation = new AnimatedSimulation(onTick);
   }
 
-  final Function _onTick;
   AnimatedSimulation _animation;
 
+  /// The current value of the timeline
   double get value => _animation.value.clamp(0.0, 1.0);
   void set value(double newValue) {
     assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
@@ -47,6 +52,7 @@ class Timeline {
     _animation.value = newValue;
   }
 
+  /// Whether the timeline is currently animating
   bool get isAnimating => _animation.isAnimating;
 
   Future _start({
@@ -59,22 +65,23 @@ class Timeline {
     return _animation.start(new TweenSimulation(duration, begin, end));
   }
 
+  /// Animate value of the timeline to the given target over the given duration
+  ///
+  /// Returns a future that resolves when the timeline stops animating,
+  /// typically when the timeline arives at the target value.
   Future animateTo(double target, { Duration duration }) {
     assert(duration > Duration.ZERO);
     return _start(duration: duration, begin: value, end: target);
   }
 
+  /// Stop animating the timeline
   void stop() {
     _animation.stop();
   }
 
-  // Give |simulation| control over the timeline.
+  // Gives the given simulation control over the timeline
   Future fling(Simulation simulation) {
     stop();
     return _animation.start(simulation);
-  }
-
-  void _tick(double newValue) {
-    _onTick(value);
   }
 }

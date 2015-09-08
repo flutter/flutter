@@ -8,50 +8,62 @@ import 'package:sky/src/animation/animated_value.dart';
 import 'package:sky/src/animation/forces.dart';
 import 'package:sky/src/animation/timeline.dart';
 
+/// The status of an animation
 enum AnimationStatus {
-  dismissed, // stoped at 0
-  forward,   // animating from 0 => 1
-  reverse,   // animating from 1 => 0
-  completed, // stopped at 1
+  /// The animation is stopped at the beginning
+  dismissed,
+
+  /// The animation is running from beginning to end
+  forward,
+
+  /// The animation is running backwards, from end to beginning
+  reverse,
+
+  /// The animation is stopped at the end
+  completed,
 }
 
-// This class manages a "performance" - a collection of values that change
-// based on a timeline. For example, a performance may handle an animation
-// of a menu opening by sliding and fading in (changing Y value and opacity)
-// over .5 seconds. The performance can move forwards (present) or backwards
-// (dismiss). A consumer may also take direct control of the timeline by
-// manipulating |progress|, or |fling| the timeline causing a physics-based
-// simulation to take over the progression.
+/// A collection of values that animated based on a timeline
+///
+/// For example, a performance may handle an animation of a menu opening by
+/// sliding and fading in (changing Y value and opacity) over .5 seconds. The
+/// performance can move forwards (present) or backwards (dismiss). A consumer
+/// may also take direct control of the timeline by manipulating [progress], or
+/// [fling] the timeline causing a physics-based simulation to take over the
+/// progression.
 class AnimationPerformance {
   AnimationPerformance({AnimatedVariable variable, this.duration}) :
     _variable = variable {
     _timeline = new Timeline(_tick);
   }
 
-  AnimatedVariable _variable;
+  /// The length of time this performance should last
   Duration duration;
 
+  /// The variable being updated by this performance
   AnimatedVariable get variable => _variable;
-  void set variable(AnimatedVariable v) { _variable = v; }
+  void set variable(AnimatedVariable variable) { _variable = variable; }
+  AnimatedVariable _variable;
 
-  // Advances from 0 to 1. On each tick, we'll update our variable's values.
   Timeline _timeline;
-  Timeline get timeline => _timeline;
-
   Direction _direction;
-  Direction get direction => _direction;
 
-  // This controls which curve we use for variables with different curves in
-  // the forward/reverse directions. Curve direction is only reset when we hit
-  // 0 or 1, to avoid discontinuities.
+  /// The direction used to select the current curve
+  ///
+  /// Curve direction is only reset when we hit the beginning or the end of the
+  /// timeline to avoid discontinuities in the value of the variable.
   Direction _curveDirection;
-  Direction get curveDirection => _curveDirection;
 
+  /// If non-null, animate with this timing instead of a linear timing
   AnimationTiming timing;
 
-  // If non-null, animate with this force instead of a tween animation.
+  /// If non-null, animate with this force instead of a zero-to-one timeline.
   Force attachedForce;
 
+  /// Add a variable to this animation
+  ///
+  /// If there are no attached variables, this variable becomes the value of
+  /// [variable]. Otherwise, all the variables are stored in an [AnimatedList].
   void addVariable(AnimatedVariable newVariable) {
     if (variable == null) {
       variable = newVariable;
@@ -62,70 +74,92 @@ class AnimationPerformance {
     }
   }
 
-  double get progress => timeline.value;
+  /// The progress of this performance along the timeline
+  ///
+  /// Note: Setting this value stops the current animation.
+  double get progress => _timeline.value;
   void set progress(double t) {
     // TODO(mpcomplete): should this affect |direction|?
     stop();
-    timeline.value = t.clamp(0.0, 1.0);
+    _timeline.value = t.clamp(0.0, 1.0);
     _checkStatusChanged();
   }
 
-  double get curvedProgress {
-    return timing != null ? timing.transform(progress, curveDirection) : progress;
+  double get _curvedProgress {
+    return timing != null ? timing.transform(progress, _curveDirection) : progress;
   }
 
+  /// Whether this animation is stopped at the beginning
   bool get isDismissed => status == AnimationStatus.dismissed;
-  bool get isCompleted => status == AnimationStatus.completed;
-  bool get isAnimating => timeline.isAnimating;
 
+  /// Whether this animation is stopped at the end
+  bool get isCompleted => status == AnimationStatus.completed;
+
+  /// Whether this animation is currently animating in either the forward or reverse direction
+  bool get isAnimating => _timeline.isAnimating;
+
+  /// The current status of this animation
   AnimationStatus get status {
     if (!isAnimating && progress == 1.0)
       return AnimationStatus.completed;
     if (!isAnimating && progress == 0.0)
       return AnimationStatus.dismissed;
-    return direction == Direction.forward ?
+    return _direction == Direction.forward ?
         AnimationStatus.forward :
         AnimationStatus.reverse;
   }
 
+  /// Update the given varaible according to the current progress of this performance
   void updateVariable(AnimatedVariable variable) {
-    variable.setProgress(curvedProgress, curveDirection);
+    variable.setProgress(_curvedProgress, _curveDirection);
   }
 
+  /// Start running this animation in the given direction
   Future play([Direction direction = Direction.forward]) {
     _direction = direction;
     return resume();
   }
+
+  /// Start running this animation forwards (towards the end)
   Future forward() => play(Direction.forward);
+
+  /// Start running this animation in reverse (towards the beginning)
   Future reverse() => play(Direction.reverse);
+
+  /// Start running this animation in the most recently direction
   Future resume() {
     if (attachedForce != null) {
       return fling(velocity: _direction == Direction.forward ? 1.0 : -1.0,
                    force: attachedForce);
     }
-    return _animateTo(direction == Direction.forward ? 1.0 : 0.0);
+    return _animateTo(_direction == Direction.forward ? 1.0 : 0.0);
   }
 
+  /// Stop running this animation
   void stop() {
-    timeline.stop();
+    _timeline.stop();
   }
 
-  // Flings the timeline with an optional force (defaults to a critically
-  // damped spring) and initial velocity. If velocity is positive, the
-  // animation will complete, otherwise it will dismiss.
+  /// Start running this animation according to the given physical parameters
+  ///
+  /// Flings the timeline with an optional force (defaults to a critically
+  /// damped spring) and initial velocity. If velocity is positive, the
+  /// animation will complete, otherwise it will dismiss.
   Future fling({double velocity: 1.0, Force force}) {
     if (force == null)
       force = kDefaultSpringForce;
     _direction = velocity < 0.0 ? Direction.reverse : Direction.forward;
-    return timeline.fling(force.release(progress, velocity));
+    return _timeline.fling(force.release(progress, velocity));
   }
 
   final List<Function> _listeners = new List<Function>();
 
+  /// Calls the listener every time the progress of this performance changes
   void addListener(Function listener) {
     _listeners.add(listener);
   }
 
+  /// Stop calling the listener every time the progress of this performance changes
   void removeListener(Function listener) {
     _listeners.remove(listener);
   }
@@ -138,10 +172,12 @@ class AnimationPerformance {
 
   final List<Function> _statusListeners = new List<Function>();
 
+  /// Calls listener every time the status of this performance changes
   void addStatusListener(Function listener) {
     _statusListeners.add(listener);
   }
 
+  /// Stops calling the listener every time the status of this performance changes
   void removeStatusListener(Function listener) {
     _statusListeners.remove(listener);
   }
@@ -160,28 +196,28 @@ class AnimationPerformance {
   void _updateCurveDirection() {
     if (status != _lastStatus) {
       if (_lastStatus == AnimationStatus.dismissed || _lastStatus == AnimationStatus.completed)
-        _curveDirection = direction;
+        _curveDirection = _direction;
     }
   }
 
   Future _animateTo(double target) {
-    Duration remainingDuration = duration * (target - timeline.value).abs();
-    timeline.stop();
+    Duration remainingDuration = duration * (target - _timeline.value).abs();
+    _timeline.stop();
     if (remainingDuration == Duration.ZERO)
       return new Future.value();
-    return timeline.animateTo(target, duration: remainingDuration);
+    return _timeline.animateTo(target, duration: remainingDuration);
   }
 
   void _tick(double t) {
     _updateCurveDirection();
     if (variable != null)
-      variable.setProgress(curvedProgress, curveDirection);
+      variable.setProgress(_curvedProgress, _curveDirection);
     _notifyListeners();
     _checkStatusChanged();
   }
 }
 
-// Simple helper class for an animation with a single value.
+/// An animation performance with an animated variable with a concrete type
 class ValueAnimation<T> extends AnimationPerformance {
   ValueAnimation({AnimatedValue<T> variable, Duration duration}) :
     super(variable: variable, duration: duration);
