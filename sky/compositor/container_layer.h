@@ -19,6 +19,8 @@ class ContainerLayer : public Layer {
 
   void PaintChildren(GrContext* context, SkCanvas* canvas) const;
 
+  const std::vector<std::unique_ptr<Layer>>& layers() const { return layers_; }
+
  private:
   std::vector<std::unique_ptr<Layer>> layers_;
 
