@@ -28,6 +28,7 @@
 #include "services/sky/internals.h"
 #include "services/sky/runtime_flags.h"
 #include "skia/ext/refptr.h"
+#include "sky/compositor/paint_context.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
@@ -222,8 +223,10 @@ void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
 }
 
 void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {
-  if (current_layer_tree_)
-    current_layer_tree_->root_layer()->Paint(nullptr, canvas);
+  if (current_layer_tree_) {
+    compositor::PaintContext context(picture_rasterizer_, nullptr, canvas); 
+    current_layer_tree_->root_layer()->Paint(context);
+  }
 }
 
 float DocumentView::GetDevicePixelRatio() const {

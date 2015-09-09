@@ -5,9 +5,10 @@
 #include "sky/shell/gpu/rasterizer.h"
 
 #include "base/trace_event/trace_event.h"
-#include "sky/compositor/layer.h"
-#include "sky/compositor/picture_layer.h"
 #include "sky/compositor/container_layer.h"
+#include "sky/compositor/layer.h"
+#include "sky/compositor/paint_context.h"
+#include "sky/compositor/picture_layer.h"
 #include "sky/shell/gpu/ganesh_context.h"
 #include "sky/shell/gpu/ganesh_surface.h"
 #include "sky/shell/gpu/picture_serializer.h"
@@ -43,8 +44,8 @@ void SketchySerializeLayerTree(const char* path,
 }  // namespace
 
 Rasterizer::Rasterizer()
-    : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
-}
+    : share_group_(new gfx::GLShareGroup()),
+      weak_factory_(this) {}
 
 Rasterizer::~Rasterizer() {
 }
@@ -77,7 +78,8 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   SkCanvas* canvas = ganesh_surface_->canvas();
 
   canvas->clear(SK_ColorBLACK);
-  layer_tree->root_layer()->Paint(ganesh_context_->gr(), canvas);
+  compositor::PaintContext context(rasterizer_, ganesh_context_->gr(), canvas);
+  layer_tree->root_layer()->Paint(context);
   canvas->flush();
   surface_->SwapBuffers();
 

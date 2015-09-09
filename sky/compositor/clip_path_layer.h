@@ -17,7 +17,7 @@ class ClipPathLayer : public ContainerLayer {
 
   void set_clip_path(const SkPath& clip_path) { clip_path_ = clip_path; }
 
-  void Paint(GrContext* context, SkCanvas* canvas) override;
+  void Paint(PaintContext& context) override;
 
  private:
   SkPath clip_path_;

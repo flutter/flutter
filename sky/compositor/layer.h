@@ -20,6 +20,8 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkXfermode.h"
+#include "sky/compositor/paint_context.h"
+#include "sky/compositor/picture_rasterizer.h"
 
 namespace sky {
 namespace compositor {
@@ -30,7 +32,7 @@ class Layer {
   Layer();
   virtual ~Layer();
 
-  virtual void Paint(GrContext* context, SkCanvas* canvas) = 0;
+  virtual void Paint(PaintContext& context) = 0;
 
   virtual SkMatrix model_view_matrix(const SkMatrix& model_matrix) const;
 
