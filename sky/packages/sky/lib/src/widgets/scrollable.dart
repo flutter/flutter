@@ -85,10 +85,10 @@ abstract class Scrollable extends StatefulComponent {
       onVerticalDragEnd: scrollDirection == ScrollDirection.vertical ? _maybeSettleScrollOffset : null,
       onHorizontalDragUpdate: scrollDirection == ScrollDirection.horizontal ? scrollBy : null,
       onHorizontalDragEnd: scrollDirection == ScrollDirection.horizontal ? _maybeSettleScrollOffset : null,
+      onFling: _handleFling,
       child: new Listener(
         child: buildContent(),
         onPointerDown: _handlePointerDown,
-        onGestureFlingStart: _handleFlingStart,
         onGestureFlingCancel: _handleFlingCancel,
         onWheel: _handleWheel
       )
@@ -158,12 +158,11 @@ abstract class Scrollable extends StatefulComponent {
     _startToEndAnimation();
   }
 
-  // Return the event's velocity in pixels/second.
-  double _eventVelocity(sky.GestureEvent event) {
-    double velocity = scrollDirection == ScrollDirection.horizontal
-      ? -event.velocityX
-      : -event.velocityY;
-    return velocity.clamp(_kMinFlingVelocity, _kMaxFlingVelocity) / _kMillisecondsPerSecond;
+  double _scrollVelocity(sky.Offset velocity) {
+    double scrollVelocity = scrollDirection == ScrollDirection.horizontal
+      ? -velocity.dx
+      : -velocity.dy;
+    return scrollVelocity.clamp(_kMinFlingVelocity, _kMaxFlingVelocity) / _kMillisecondsPerSecond;
   }
 
   EventDisposition _handlePointerDown(_) {
@@ -171,9 +170,8 @@ abstract class Scrollable extends StatefulComponent {
     return EventDisposition.processed;
   }
 
-  EventDisposition _handleFlingStart(sky.GestureEvent event) {
-    _startToEndAnimation(velocity: _eventVelocity(event));
-    return EventDisposition.processed;
+  void _handleFling(Offset velocity) {
+    _startToEndAnimation(velocity: _scrollVelocity(velocity));
   }
 
   void _maybeSettleScrollOffset() {
@@ -559,13 +557,12 @@ class PageableList<T> extends ScrollableList<T> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  EventDisposition _handleFlingStart(sky.GestureEvent event) {
-    double velocity = _eventVelocity(event);
-    double newScrollOffset = _snapScrollOffset(scrollOffset + velocity.sign * itemExtent)
+  void _handleFling(sky.Offset velocity) {
+    double scrollVelocity = _scrollVelocity(velocity);
+    double newScrollOffset = _snapScrollOffset(scrollOffset + scrollVelocity.sign * itemExtent)
       .clamp(_snapScrollOffset(scrollOffset - itemExtent / 2.0),
              _snapScrollOffset(scrollOffset + itemExtent / 2.0));
     scrollTo(newScrollOffset, duration: duration, curve: curve).then(_notifyPageChanged);
-    return EventDisposition.processed;
   }
 
   int get currentPage => (scrollOffset / itemExtent).floor() % itemCount;
