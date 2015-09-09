@@ -360,7 +360,7 @@ abstract class RenderBox extends RenderObject {
     assert(constraints != null);
     assert(_size != null);
     assert(() {
-      'See https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/lib/src/widgets/sizing.md#user-content-unbounded-constraints';
+      'See https://flutter.github.io/layout/#unbounded-constraints';
       return !_size.isInfinite;
     });
     bool result = constraints.isSatisfiedBy(_size);
