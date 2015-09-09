@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky';
+import 'dart:sky' as sky;
 import 'dart:math' as math;
 
 import 'package:sky/mojo/activity.dart';
@@ -20,7 +20,7 @@ class Touch {
 class RenderImageGrow extends RenderImage {
   final Size _startingSize;
 
-  RenderImageGrow(Image image, Size size)
+  RenderImageGrow(sky.Image image, Size size)
     : _startingSize = size, super(image: image, width: size.width, height: size.height);
 
   double _growth = 0.0;
@@ -36,7 +36,7 @@ RenderImageGrow image;
 
 Map<int, Touch> touches = new Map();
 void handleEvent(event) {
-  if (event is PointerEvent) {
+  if (event is sky.PointerEvent) {
     if (event.type == 'pointermove')
       image.growth = math.max(0.0, image.growth + event.x - touches[event.pointer].x);
     touches[event.pointer] = new Touch(event.x, event.y);
@@ -60,7 +60,7 @@ void main() {
 
   // Resizeable image
   image = new RenderImageGrow(null, new Size(100.0, null));
-  image_cache.load("https://www.dartlang.org/logos/dart-logo.png").first.then((Image dartLogo) {
+  image_cache.load("https://www.dartlang.org/logos/dart-logo.png").first.then((sky.Image dartLogo) {
     image.image = dartLogo;
   });
 
@@ -100,5 +100,5 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
 
   updateTaskDescription('Interactive Flex', topColor);
   new SkyBinding(root: root);
-  view.setEventCallback(handleEvent);
+  sky.view.setEventCallback(handleEvent);
 }
