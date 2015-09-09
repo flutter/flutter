@@ -43,16 +43,16 @@ class HomogeneousViewport extends RenderObjectWrapper {
     RenderBlockViewport result = new RenderBlockViewport();
     result.callback = layout;
     result.totalExtentCallback = getTotalExtent;
-    result.minCrossAxisDimensionCallback = getMinCrossAxisDimension;
-    result.maxCrossAxisDimensionCallback = getMaxCrossAxisDimension;
+    result.minCrossAxisExtentCallback = getMinCrossAxisExtent;
+    result.maxCrossAxisExtentCallback = getMaxCrossAxisExtent;
     return result;
   }
 
   void remove() {
     renderObject.callback = null;
     renderObject.totalExtentCallback = null;
-    renderObject.minCrossAxisDimensionCallback = null;
-    renderObject.maxCrossAxisDimensionCallback = null;
+    renderObject.minCrossAxisExtentCallback = null;
+    renderObject.maxCrossAxisExtentCallback = null;
     super.remove();
     _children.clear();
     _layoutDirty = true;
@@ -172,11 +172,11 @@ class HomogeneousViewport extends RenderObjectWrapper {
     return itemCount != null ? itemCount * itemExtent : double.INFINITY;
   }
 
-  double getMinCrossAxisDimension(BoxConstraints constraints) {
+  double getMinCrossAxisExtent(BoxConstraints constraints) {
     return 0.0;
   }
 
-  double getMaxCrossAxisDimension(BoxConstraints constraints) {
+  double getMaxCrossAxisExtent(BoxConstraints constraints) {
     if (direction == ScrollDirection.vertical)
       return constraints.maxWidth;
     return constraints.maxHeight;

@@ -8,6 +8,10 @@ import 'package:sky/painting.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/box.dart';
 
+/// An image in the render tree
+///
+/// The render image attempts to find a size for itself that fits in the given
+/// constraints and preserves the image's intrinisc aspect ratio.
 class RenderImage extends RenderBox {
   RenderImage({
     sky.Image image,
@@ -24,6 +28,7 @@ class RenderImage extends RenderBox {
       _repeat = repeat;
 
   sky.Image _image;
+  /// The image to display
   sky.Image get image => _image;
   void set image (sky.Image value) {
     if (value == _image)
@@ -35,6 +40,7 @@ class RenderImage extends RenderBox {
   }
 
   double _width;
+  /// If non-null, requires the image to have this width
   double get width => _width;
   void set width (double value) {
     if (value == _width)
@@ -44,6 +50,7 @@ class RenderImage extends RenderBox {
   }
 
   double _height;
+  /// If non-null, requires the image to have this height
   double get height => _height;
   void set height (double value) {
     if (value == _height)
@@ -53,6 +60,7 @@ class RenderImage extends RenderBox {
   }
 
   sky.ColorFilter _colorFilter;
+  /// If non-null, apply this color filter to the image before painint.
   sky.ColorFilter get colorFilter => _colorFilter;
   void set colorFilter (sky.ColorFilter value) {
     if (value == _colorFilter)
@@ -62,6 +70,7 @@ class RenderImage extends RenderBox {
   }
 
   ImageFit _fit;
+  /// How to inscribe the image into the place allocated during layout
   ImageFit get fit => _fit;
   void set fit (ImageFit value) {
     if (value == _fit)
@@ -71,6 +80,7 @@ class RenderImage extends RenderBox {
   }
 
   ImageRepeat _repeat;
+  /// Not yet implemented
   ImageRepeat get repeat => _repeat;
   void set repeat (ImageRepeat value) {
     if (value == _repeat)
@@ -79,6 +89,13 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Find a size for the render image within the given constraints
+  ///
+  ///  - The dimensions of the RenderImage must fit within the constraints.
+  ///  - The aspect ratio of the RenderImage matches the instrinsic aspect
+  ///    ratio of the image.
+  ///  - The RenderImage's dimension are maximal subject to being smaller than
+  ///    the intrinsic size of the image.
   Size _sizeForConstraints(BoxConstraints constraints) {
     // Folds the given |width| and |height| into |cosntraints| so they can all
     // be treated uniformly.
@@ -89,16 +106,6 @@ class RenderImage extends RenderBox {
 
     if (constraints.isTight || _image == null)
       return constraints.smallest;
-
-    // This algorithm attempts to find a size for the RenderImage that fits in
-    // the given constraints and preserves the image's intrinisc aspect ratio.
-    // Its goals as follow:
-    //
-    //  - The dimensions of the RenderImage fit within the constraints.
-    //  - The aspect ratio of the RenderImage matches the instrinsic aspect
-    //    ratio of the image.
-    //  - The RenderImage's dimension are maximal subject to being smaller than
-    //    the intrinsic size of the image.
 
     double width = _image.width.toDouble();
     double height = _image.height.toDouble();

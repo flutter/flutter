@@ -98,17 +98,17 @@ class MixedViewport extends RenderObjectWrapper {
     // create it, because the render object is empty so it will not matter
     RenderBlockViewport result = new RenderBlockViewport();
     result.callback = layout;
-    result.totalExtentCallback = _noIntrinsicDimensions;
-    result.maxCrossAxisDimensionCallback = _noIntrinsicDimensions;
-    result.minCrossAxisDimensionCallback = _noIntrinsicDimensions;
+    result.totalExtentCallback = _noIntrinsicExtent;
+    result.maxCrossAxisExtentCallback = _noIntrinsicExtent;
+    result.minCrossAxisExtentCallback = _noIntrinsicExtent;
     return result;
   }
 
   void remove() {
     renderObject.callback = null;
     renderObject.totalExtentCallback = null;
-    renderObject.maxCrossAxisDimensionCallback = null;
-    renderObject.minCrossAxisDimensionCallback = null;
+    renderObject.maxCrossAxisExtentCallback = null;
+    renderObject.minCrossAxisExtentCallback = null;
     super.remove();
     _childrenByKey.clear();
     layoutState._dirty = true;
@@ -140,7 +140,7 @@ class MixedViewport extends RenderObjectWrapper {
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
-  double _noIntrinsicDimensions(BoxConstraints constraints) {
+  double _noIntrinsicExtent(BoxConstraints constraints) {
     assert(() {
       'MixedViewport does not support returning intrinsic dimensions. ' +
       'Calculating the intrinsic dimensions would require walking the entire child list, ' +
@@ -330,7 +330,7 @@ class MixedViewport extends RenderObjectWrapper {
         'all the children. You probably want to put the MixedViewport inside a Container with a fixed width.' is String);
     }
     final double endOffset = startOffset + extent;
-    
+
     BoxConstraints innerConstraints;
     if (direction == ScrollDirection.vertical) {
       innerConstraints = new BoxConstraints.tightFor(width: constraints.constrainWidth());
