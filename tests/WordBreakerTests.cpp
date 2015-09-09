@@ -42,10 +42,12 @@ TEST_F(WordBreakerTest, basic) {
     EXPECT_EQ(6, breaker.next());  // after "hello "
     EXPECT_EQ(0, breaker.wordStart());  // "hello"
     EXPECT_EQ(5, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ(6, breaker.current());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(6, breaker.wordStart());  // "world"
     EXPECT_EQ(11, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ(11, breaker.current());
 }
 
@@ -58,9 +60,11 @@ TEST_F(WordBreakerTest, softHyphen) {
     EXPECT_EQ(7, breaker.next());  // after "hel{SOFT HYPHEN}lo "
     EXPECT_EQ(0, breaker.wordStart());  // "hel{SOFT HYPHEN}lo"
     EXPECT_EQ(6, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(7, breaker.wordStart());  // "world"
     EXPECT_EQ(12, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 TEST_F(WordBreakerTest, punct) {
@@ -73,9 +77,11 @@ TEST_F(WordBreakerTest, punct) {
     EXPECT_EQ(9, breaker.next());  // after "¡¡hello, "
     EXPECT_EQ(2, breaker.wordStart());  // "hello"
     EXPECT_EQ(7, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(9, breaker.wordStart());  // "world"
     EXPECT_EQ(14, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 TEST_F(WordBreakerTest, email) {
@@ -87,11 +93,14 @@ TEST_F(WordBreakerTest, email) {
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(11, breaker.next());  // after "foo@example"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(16, breaker.next());  // after ".com "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(16, breaker.wordStart());  // "x"
     EXPECT_EQ(17, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 TEST_F(WordBreakerTest, mailto) {
@@ -103,13 +112,17 @@ TEST_F(WordBreakerTest, mailto) {
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(7, breaker.next());  // after "mailto:"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(18, breaker.next());  // after "foo@example"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(23, breaker.next());  // after ".com "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(23, breaker.wordStart());  // "x"
     EXPECT_EQ(24, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 // The current logic always places a line break after a detected email address or URL
@@ -123,11 +136,14 @@ TEST_F(WordBreakerTest, emailNonAscii) {
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(11, breaker.next());  // after "foo@example"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(15, breaker.next());  // after ".com"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(15, breaker.wordStart());  // "一"
     EXPECT_EQ(16, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 TEST_F(WordBreakerTest, emailCombining) {
@@ -139,11 +155,14 @@ TEST_F(WordBreakerTest, emailCombining) {
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(11, breaker.next());  // after "foo@example"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(17, breaker.next());  // after ".com̃ "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(17, breaker.wordStart());  // "x"
     EXPECT_EQ(18, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 TEST_F(WordBreakerTest, lonelyAt) {
@@ -155,11 +174,14 @@ TEST_F(WordBreakerTest, lonelyAt) {
     EXPECT_EQ(2, breaker.next());  // after "a "
     EXPECT_EQ(0, breaker.wordStart());  // "a"
     EXPECT_EQ(1, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ(4, breaker.next());  // after "@ "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(4, breaker.wordStart());  // "b"
     EXPECT_EQ(5, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 TEST_F(WordBreakerTest, url) {
@@ -171,15 +193,20 @@ TEST_F(WordBreakerTest, url) {
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(5, breaker.next());  // after "http:"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(7, breaker.next());  // after "//"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(14, breaker.next());  // after "example"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(19, breaker.next());  // after ".com "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(19, breaker.wordStart());  // "x"
     EXPECT_EQ(20, breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 // Breaks according to section 14.12 of Chicago Manual of Style, *URLs or DOIs and line breaks*
@@ -192,38 +219,55 @@ TEST_F(WordBreakerTest, urlBreakChars) {
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(5, breaker.next());  // after "http:"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(7, breaker.next());  // after "//"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(8, breaker.next());  // after "a"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(10, breaker.next());  // after ".b"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(11, breaker.next());  // after "/"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(13, breaker.next());  // after "~c"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(15, breaker.next());  // after ",d"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(17, breaker.next());  // after "-e"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(19, breaker.next());  // after "?f"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(20, breaker.next());  // after "="
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(21, breaker.next());  // after "g"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(22, breaker.next());  // after "&"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(23, breaker.next());  // after "h"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(25, breaker.next());  // after "#i"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(27, breaker.next());  // after "%j"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ(29, breaker.next());  // after "_k"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(1, breaker.breakBadness());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
 }
 
 TEST_F(WordBreakerTest, urlNoHyphenBreak) {
