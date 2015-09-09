@@ -698,7 +698,7 @@ class IOSSimulator(object):
             cls._device_id = match.group(1)
             return cls._device_id
         else:
-            logging.warning('No running simulators found')
+            logging.info('No running simulators found')
             # TODO: Maybe start the simulator?
             return None
         if err is not None:
