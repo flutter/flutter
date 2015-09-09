@@ -63,7 +63,7 @@ private:
 
     // state for the email address / url detector
     ssize_t mScanOffset;
-    bool mSuppressHyphen;
+    bool mInEmailOrUrl;
 };
 
 }  // namespace
