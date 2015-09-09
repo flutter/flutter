@@ -22,16 +22,17 @@ class Input extends StatefulComponent {
 
   Input({
     GlobalKey key,
+    String initialValue: '',
     this.placeholder,
     this.onChanged,
     this.keyboardType : KeyboardType_TEXT
-  }): super(key: key);
+  }): _value = initialValue, super(key: key);
 
   int keyboardType;
   String placeholder;
   StringValueChanged onChanged;
 
-  String _value = '';
+  String _value;
   EditableString _editableValue;
   KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
 
