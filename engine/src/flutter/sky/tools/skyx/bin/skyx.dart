@@ -88,6 +88,8 @@ Future loadManifest(String manifestPath) async {
 
 Future<ArchiveFile> createFile(String key, String assetBase) async {
   File file = new File('${assetBase}/${key}');
+  if (!await file.exists())
+    return null;
   List<int> content = await file.readAsBytes();
   return new ArchiveFile.noCompress(key, content.length, content);
 }
@@ -126,8 +128,11 @@ main(List<String> argv) async {
   for (Asset asset in assets)
     archive.addFile(await createFile(asset.key, asset.base));
 
-  for (MaterialAsset asset in materialAssets)
-    archive.addFile(await createFile(asset.key, args['asset-base']));
+  for (MaterialAsset asset in materialAssets) {
+    ArchiveFile file = await createFile(asset.key, args['asset-base']);
+    if (file != null)
+      archive.addFile(file);
+  }
 
   File outputFile = new File(args['output-file']);
   await outputFile.writeAsBytes(new ZipEncoder().encode(archive));
