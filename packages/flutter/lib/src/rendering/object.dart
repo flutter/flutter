@@ -366,7 +366,7 @@ abstract class Constraints {
 
 typedef void RenderObjectVisitor(RenderObject child);
 typedef void LayoutCallback(Constraints constraints);
-typedef double DimensionCallback(Constraints constraints);
+typedef double ExtentCallback(Constraints constraints);
 
 /// An object in the render tree
 ///
