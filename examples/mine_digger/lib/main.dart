@@ -106,9 +106,12 @@ class MineDiggerApp extends App {
           if (state != CellState.exploded)
             state = cells[iy][ix] ? CellState.shown : state;
         }
-        if (state == CellState.covered) {
+        if (state == CellState.covered || state == CellState.flagged) {
           row.add(new GestureDetector(
-            onTap: () => probe(ix, iy),
+            onTap: () {
+              if (state == CellState.covered)
+                probe(ix, iy);
+            },
             onLongPress: () {
               activity.userFeedback.performHapticFeedback(activity.HapticFeedbackType_LONG_PRESS);
               flag(ix, iy);
@@ -116,21 +119,17 @@ class MineDiggerApp extends App {
             child: new Listener(
               onPointerDown: _pointerDownHandlerFor(ix, iy),
               child: new CoveredMineNode(
-                flagged: false,
+                flagged: state == CellState.flagged,
                 posX: ix,
                 posY: iy
               )
             )
           ));
-          // Mutating |hasCoveredCell| here is hacky, but convenient, same
-          // goes for mutating |hasWon| below.
-          hasCoveredCell = true;
-        } else if (state == CellState.flagged) {
-          row.add(new CoveredMineNode(
-            flagged: true,
-            posX: ix,
-            posY: iy
-          ));
+          if (state == CellState.covered) {
+            // Mutating |hasCoveredCell| here is hacky, but convenient, same
+            // goes for mutating |hasWon| below.
+            hasCoveredCell = true;
+          }
         } else {
           row.add(new ExposedMineNode(
             state: state,
