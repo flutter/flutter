@@ -129,7 +129,7 @@ class DocumentView : public blink::ServiceProvider,
   scoped_ptr<DartLibraryProviderImpl> library_provider_;
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<TextureLayer> root_layer_;
-  std::unique_ptr<LayerTree> current_layer_tree_;  // TODO(abarth): Integrate //sky/compositor and //services/sky/compositor.
+  std::unique_ptr<compositor::LayerTree> current_layer_tree_;  // TODO(abarth): Integrate //sky/compositor and //services/sky/compositor.
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
   mojo::ServiceRegistryPtr service_registry_;
   scoped_ptr<mojo::StrongBinding<mojo::ServiceProvider>>
