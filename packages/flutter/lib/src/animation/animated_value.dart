@@ -22,7 +22,9 @@ abstract class AnimatedVariable {
   String toString();
 }
 
-///
+/// Used by [AnimationPerformance] to convert the timing of a performance to a different timescale.
+/// For example, by setting different values for the interval and reverseInterval, a performance
+/// can be made to take longer in one direction that the other.
 class AnimationTiming {
   AnimationTiming({
     this.interval,
@@ -36,7 +38,7 @@ class AnimationTiming {
 
   /// The interval during which this timing is active in the reverse direction
   ///
-  /// If this field is null, the timing defaules to using [interval] in both directions.
+  /// If this field is null, the timing defaults to using [interval] in both directions.
   Interval reverseInterval;
 
   /// The curve that this timing applies to the animation clock in the forward direction
@@ -44,7 +46,7 @@ class AnimationTiming {
 
   /// The curve that this timing applies to the animation clock in the reverse direction
   ///
-  /// If this field is null, the timing defaules to using [curve] in both directions.
+  /// If this field is null, the timing defaults to using [curve] in both directions.
   Curve reverseCurve;
 
   /// Applies this timing to the given animation clock value in the given direction
