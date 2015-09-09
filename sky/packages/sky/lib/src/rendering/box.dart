@@ -12,9 +12,6 @@ import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/painting.dart' show TextBaseline;
 
-// GENERIC BOX RENDERING
-// Anything that has a concept of x, y, width, height is going to derive from this
-
 // This class should only be used in debug builds
 class _DebugSize extends Size {
   _DebugSize(Size source, this._owner, this._canBeUsedByParent): super.copy(source);

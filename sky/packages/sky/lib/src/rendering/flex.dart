@@ -9,7 +9,14 @@ import 'package:sky/src/rendering/object.dart';
 
 export 'package:sky/src/rendering/object.dart' show EventDisposition;
 
+/// Parent data for use with [RenderFlex]
 class FlexParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
+  /// The flex factor to use for this child
+  ///
+  /// If null, the child is inflexible and determines its own size. If non-null,
+  /// the child is flexible and its extent in the main axis is determined by
+  /// dividing the free space (after placing the inflexible children)
+  /// according to the flex factors of the flexible children.
   int flex;
 
   void merge(FlexParentData other) {
@@ -21,29 +28,61 @@ class FlexParentData extends BoxParentData with ContainerParentDataMixin<RenderB
   String toString() => '${super.toString()}; flex=$flex';
 }
 
-enum FlexDirection { horizontal, vertical }
+/// The direction in which the box should flex
+enum FlexDirection {
+  /// Children are arranged horizontally, from left to right
+  horizontal,
+  /// Children are arranged vertically, from top to bottom
+  vertical
+}
 
+/// How the children should be placed along the main axis in a flex layout
 enum FlexJustifyContent {
+  /// Place the children as close to the start of the main axis as possible
   start,
+  /// Place the children as close to the end of the main axis as possible
   end,
+  /// Place the children as close to the middle of the main axis as possible
   center,
+  /// Place the free space evenly between the children
   spaceBetween,
+  /// Place the free space evenly between the children as well as before and after the first and last child
   spaceAround,
 }
 
+/// How the children should be placed along the cross axis in a flex layout
 enum FlexAlignItems {
+  /// Place the children as close to the start of the cross axis as possible
   start,
+  /// Place the children as close to the end of the cross axis as possible
   end,
+  /// Place the children as close to the middle of the cross axis as possible
   center,
+  /// Require the children to fill the cross axis
   stretch,
+  /// Place the children along the cross axis such that their baselines match
   baseline,
 }
 
 typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints);
 
+/// Implements the flex layout algorithm
+///
+/// In flex layout, children are arranged linearly along the main axis (either
+/// horizontally or vertically). First, inflexible children (those with a null
+/// flex factor) are allocated space along the main axis. If the flex is given
+/// unlimited space in the main axis, the flex sizes its main axis to the total
+/// size of the inflexible children along the main axis and forbids flexible
+/// children. Otherwise, the flex expands to the maximum max-axis size and the
+/// remaining space along is divided among the flexible children according to
+/// their flex factors. Any remaining free space (i.e., if there aren't any
+/// flexible children) is allocated according to the [justifyContent] property.
+///
+/// In the cross axis, children determine their own size. The flex then sizes
+/// its cross axis to fix the largest of its children. The children are then
+/// positioned along the cross axis according to the [alignItems] property.
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
-  // lays out RenderBox children using flexible layout
 
   RenderFlex({
     List<RenderBox> children,
@@ -58,8 +97,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     addAll(children);
   }
 
-  FlexDirection _direction;
+  /// The direction to use as the main axis
   FlexDirection get direction => _direction;
+  FlexDirection _direction;
   void set direction (FlexDirection value) {
     if (_direction != value) {
       _direction = value;
@@ -67,8 +107,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  FlexJustifyContent _justifyContent;
+  /// How the children should be placed along the main axis
   FlexJustifyContent get justifyContent => _justifyContent;
+  FlexJustifyContent _justifyContent;
   void set justifyContent (FlexJustifyContent value) {
     if (_justifyContent != value) {
       _justifyContent = value;
@@ -76,8 +117,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  FlexAlignItems _alignItems;
+  /// How the children should be placed along the cross axis
   FlexAlignItems get alignItems => _alignItems;
+  FlexAlignItems _alignItems;
   void set alignItems (FlexAlignItems value) {
     if (_alignItems != value) {
       _alignItems = value;
@@ -85,8 +127,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  TextBaseline _textBaseline;
+  /// If using aligning items according to their baseline, which baseline to use
   TextBaseline get textBaseline => _textBaseline;
+  TextBaseline _textBaseline;
   void set textBaseline (TextBaseline value) {
     if (_textBaseline != value) {
       _textBaseline = value;
@@ -94,7 +137,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  // Set during layout if overflow occurred on the main axis
+  /// Set during layout if overflow occurred on the main axis
   double _overflow;
 
   void setupParentData(RenderBox child) {
