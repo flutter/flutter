@@ -519,6 +519,8 @@ class AndroidDevice(object):
             cmd = [
                 self.adb_path,
                 'logcat',
+                '-v',
+                'tag', # Only log the tag and the message
                 '-s',
                 'sky',
                 'chromium',
