@@ -26,6 +26,8 @@ static void ImageReleaseProc(SkImage::ReleaseContext texture) {
 PictureRasterzier::Key::Key(uint32_t ident, SkISize sz)
     : pictureID(ident), size(sz){};
 
+PictureRasterzier::Key::Key(const Key& key) = default;
+
 PictureRasterzier::Value::Value()
     : access_count(kDeadAccessCount), image(nullptr) {
 }

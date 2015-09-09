@@ -35,6 +35,7 @@ class PictureRasterzier {
     SkISize size;
 
     explicit Key(uint32_t ident, SkISize sz);
+    Key(const Key& key);
   };
 
   struct KeyHash {
