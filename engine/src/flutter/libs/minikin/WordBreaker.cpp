@@ -193,6 +193,10 @@ ssize_t WordBreaker::wordEnd() const {
     return result;
 }
 
+int WordBreaker::breakBadness() const {
+    return (mInEmailOrUrl && mCurrent < mScanOffset) ? 1 : 0;
+}
+
 void WordBreaker::finish() {
     mText = nullptr;
     // Note: calling utext_close multiply is safe

@@ -207,7 +207,8 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
 
             // Skip break for zero-width characters inside replacement span
             if (paint != nullptr || current == end || mCharWidths[current] > 0) {
-                addWordBreak(current, mWidth, postBreak, 0.0, 0);
+                float penalty = hyphenPenalty * mWordBreaker.breakBadness();
+                addWordBreak(current, mWidth, postBreak, penalty, 0);
             }
             lastBreak = current;
             lastBreakWidth = mWidth;
