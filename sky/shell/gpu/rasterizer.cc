@@ -6,6 +6,8 @@
 
 #include "base/trace_event/trace_event.h"
 #include "sky/compositor/layer.h"
+#include "sky/compositor/picture_layer.h"
+#include "sky/compositor/container_layer.h"
 #include "sky/shell/gpu/ganesh_context.h"
 #include "sky/shell/gpu/ganesh_surface.h"
 #include "sky/shell/gpu/picture_serializer.h"
@@ -25,11 +27,15 @@ namespace {
 
 #if SERIALIZE_LAYER_TREE
 
-void SketchySerializeLayerTree(const char* path, LayerTree* layer_tree) {
-  const auto& layers = static_cast<ContainerLayer*>(layer_tree->root_layer())->layers();
+void SketchySerializeLayerTree(const char* path,
+                               compositor::LayerTree* layer_tree) {
+  const auto& layers =
+      static_cast<compositor::ContainerLayer*>(layer_tree->root_layer())
+          ->layers();
   if (layers.empty())
     return;
-  SerializePicture(path, static_cast<PictureLayer*>(layers[0].get())->picture());
+  SerializePicture(
+      path, static_cast<compositor::PictureLayer*>(layers[0].get())->picture());
 }
 
 #endif
@@ -76,7 +82,8 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   surface_->SwapBuffers();
 
 #if SERIALIZE_LAYER_TREE
-  SketchySerializeLayerTree("/data/data/org.domokit.sky.shell/cache/layer0.skp", layer_tree.get());
+  SketchySerializeLayerTree("/data/data/org.domokit.sky.shell/cache/layer0.skp",
+                            layer_tree.get());
 #endif
 }
 

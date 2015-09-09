@@ -23,6 +23,8 @@ class PictureLayer : public Layer {
 
   void Paint(GrContext* context, SkCanvas* canvas) override;
 
+  SkPicture* picture() const { return picture_.get(); }
+
  private:
   SkPoint offset_;
   RefPtr<SkPicture> picture_;
