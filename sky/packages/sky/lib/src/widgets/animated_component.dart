@@ -20,7 +20,9 @@ abstract class AnimatedComponent extends StatefulComponent {
     });
   }
 
-  bool isWatching(performance) => _watchedPerformances.contains(performance);
+  bool isWatching(AnimationPerformance performance) {
+    return _watchedPerformances.contains(performance);
+  }
 
   void watch(AnimationPerformance performance) {
     assert(!isWatching(performance));
