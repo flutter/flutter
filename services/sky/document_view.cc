@@ -209,7 +209,7 @@ mojo::Shell* DocumentView::GetShell() {
 
 void DocumentView::BeginFrame(base::TimeTicks frame_time) {
   if (sky_view_) {
-    std::unique_ptr<LayerTree> layer_tree = sky_view_->BeginFrame(frame_time);
+    std::unique_ptr<compositor::LayerTree> layer_tree = sky_view_->BeginFrame(frame_time);
     if (layer_tree)
       current_layer_tree_ = std::move(layer_tree);
     root_layer_->SetSize(sky_view_->display_metrics().physical_size);
@@ -223,7 +223,7 @@ void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
 
 void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {
   if (current_layer_tree_)
-    current_layer_tree_->root_layer()->Paint(canvas);
+    current_layer_tree_->root_layer()->Paint(nullptr, canvas);
 }
 
 float DocumentView::GetDevicePixelRatio() const {

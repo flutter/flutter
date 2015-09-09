@@ -85,7 +85,7 @@ void PictureLayer::Paint(GrContext* context, SkCanvas* canvas) {
   if (last_picture_id_ == picture_->uniqueID()) {
     // The last picture painted was the same as this one. Cache this into an
     // offscreen surface and render that instead
-    if (!cached_image_) {
+    if (!cached_image_ && context) {
       // Generate the cached image
       cached_image_ = ImageFromPicture(context, picture_.get(), paint_bounds());
     }
