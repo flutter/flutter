@@ -916,7 +916,7 @@ abstract class StatefulComponent extends Component {
   // because our retainStatefulNodeIfPossible() method returns true,
   // when _sync is called, our 'old' is actually the new instance that
   // we are to copy state from.
-  void _sync(Widget old, dynamic slot) {
+  void _sync(StatefulComponent old, dynamic slot) {
     if (old == null) {
       if (!_isStateInitialized) {
         initState();
@@ -925,7 +925,7 @@ abstract class StatefulComponent extends Component {
     }
     if (old != null) {
       assert(_isStateInitialized);
-      assert(!(old as StatefulComponent)._isStateInitialized);
+      assert(!old._isStateInitialized);
       syncConstructorArguments(old);
     }
     super._sync(old, slot);

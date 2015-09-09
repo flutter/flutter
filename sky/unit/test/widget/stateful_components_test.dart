@@ -21,12 +21,12 @@ class InnerComponent extends StatefulComponent {
   }
 }
 
-class OutterContainer extends StatefulComponent {
-  OutterContainer({ this.child });
+class OuterContainer extends StatefulComponent {
+  OuterContainer({ this.child });
 
   InnerComponent child;
 
-  void syncConstructorArguments(OutterContainer source) {
+  void syncConstructorArguments(OuterContainer source) {
     child = source.child;
   }
 
@@ -41,22 +41,22 @@ void main() {
     WidgetTester tester = new WidgetTester();
 
     InnerComponent inner;
-    OutterContainer outter;
+    OuterContainer outer;
 
     tester.pumpFrame(() {
-      return new OutterContainer(child: new InnerComponent());
+      return new OuterContainer(child: new InnerComponent());
     });
 
     tester.pumpFrame(() {
       inner = new InnerComponent();
-      outter = new OutterContainer(child: inner);
-      return outter;
+      outer = new OuterContainer(child: inner);
+      return outer;
     });
 
     expect(inner._didInitState, isFalse);
     expect(inner.parent, isNull);
 
-    outter.setState(() {});
+    outer.setState(() {});
     scheduler.beginFrame(0.0);
 
     expect(inner._didInitState, isFalse);
