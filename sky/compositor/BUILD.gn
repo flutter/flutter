@@ -20,8 +20,12 @@ source_set("compositor") {
     "layer_tree.h",
     "opacity_layer.cc",
     "opacity_layer.h",
+    "paint_context.cc",
+    "paint_context.h",
     "picture_layer.cc",
     "picture_layer.h",
+    "picture_rasterizer.cc",
+    "picture_rasterizer.h",
     "transform_layer.cc",
     "transform_layer.h",
   ]

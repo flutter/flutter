@@ -21,7 +21,7 @@ class ColorFilterLayer : public ContainerLayer {
     transfer_mode_ = transfer_mode;
   }
 
-  void Paint(GrContext* context, SkCanvas* canvas) override;
+  void Paint(PaintContext& context) override;
 
  private:
   SkColor color_;

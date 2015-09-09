@@ -19,10 +19,11 @@ SkMatrix TransformLayer::model_view_matrix(const SkMatrix& model_matrix) const {
   return modelView;
 }
 
-void TransformLayer::Paint(GrContext* context, SkCanvas* canvas) {
+void TransformLayer::Paint(PaintContext& context) {
+  SkCanvas* canvas = context.canvas();
   canvas->save();
   canvas->concat(transform_);
-  PaintChildren(context, canvas);
+  PaintChildren(context);
   canvas->restore();
 }
 

@@ -21,15 +21,13 @@ class PictureLayer : public Layer {
 
   SkMatrix model_view_matrix(const SkMatrix& model_matrix) const override;
 
-  void Paint(GrContext* context, SkCanvas* canvas) override;
+  void Paint(PaintContext& context) override;
 
   SkPicture* picture() const { return picture_.get(); }
 
  private:
   SkPoint offset_;
   RefPtr<SkPicture> picture_;
-  RefPtr<SkImage> cached_image_;
-  uint32_t last_picture_id_;
 
   DISALLOW_COPY_AND_ASSIGN(PictureLayer);
 };

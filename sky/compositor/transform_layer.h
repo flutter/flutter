@@ -19,7 +19,7 @@ class TransformLayer : public ContainerLayer {
 
   SkMatrix model_view_matrix(const SkMatrix& model_matrix) const override;
 
-  void Paint(GrContext* context, SkCanvas* canvas) override;
+  void Paint(PaintContext& context) override;
 
  private:
   SkMatrix transform_;

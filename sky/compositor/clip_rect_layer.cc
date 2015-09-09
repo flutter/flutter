@@ -13,10 +13,11 @@ ClipRectLayer::ClipRectLayer() {
 ClipRectLayer::~ClipRectLayer() {
 }
 
-void ClipRectLayer::Paint(GrContext* context, SkCanvas* canvas) {
+void ClipRectLayer::Paint(PaintContext& context) {
+  SkCanvas* canvas = context.canvas();
   canvas->save();
   canvas->clipRect(clip_rect_);
-  PaintChildren(context, canvas);
+  PaintChildren(context);
   canvas->restore();
 }
 
