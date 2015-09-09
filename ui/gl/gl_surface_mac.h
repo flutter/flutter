@@ -16,6 +16,7 @@ class GL_EXPORT GLSurfaceMac : public GLSurface {
   bool IsOffscreen() override;
   gfx::Size GetSize() override;
   void* GetHandle() override;
+  bool Resize(const gfx::Size& size) override;
   bool OnMakeCurrent(GLContext* context) override;
   
  private:

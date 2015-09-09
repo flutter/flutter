@@ -52,6 +52,11 @@ void* GLSurfaceMac::GetHandle() {
   return (void*)widget_;
 }
 
+bool GLSurfaceMac::Resize(const gfx::Size& size) {
+  // The backing has already been updated.
+  return true;
+}
+
 bool GLSurface::InitializeOneOffInternal() {
   // On EGL, this method is used to perfom one-time initialization tasks like
   // initializing the display, setting up config lists, etc. There is no such
