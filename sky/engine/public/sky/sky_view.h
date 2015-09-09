@@ -35,7 +35,8 @@ class SkyView {
   const SkyDisplayMetrics& display_metrics() const { return display_metrics_; }
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
 
-  std::unique_ptr<sky::LayerTree> BeginFrame(base::TimeTicks frame_time);
+  std::unique_ptr<sky::compositor::LayerTree> BeginFrame(
+      base::TimeTicks frame_time);
 
   void CreateView(const String& name);
 

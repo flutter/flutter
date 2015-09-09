@@ -22,20 +22,27 @@
 #include "third_party/skia/include/core/SkXfermode.h"
 
 namespace sky {
-class ContainerLayer;
+namespace compositor {
 
+class ContainerLayer;
 class Layer {
  public:
   Layer();
   virtual ~Layer();
 
-  virtual void Paint(SkCanvas* canvas) = 0;
+  virtual void Paint(GrContext* context, SkCanvas* canvas) = 0;
+
+  virtual SkMatrix model_view_matrix(const SkMatrix& model_matrix) const;
 
   ContainerLayer* parent() const { return parent_; }
+
   void set_parent(ContainerLayer* parent) { parent_ = parent; }
 
   const SkRect& paint_bounds() const { return paint_bounds_; }
-  void set_paint_bounds(const SkRect& paint_bounds) { paint_bounds_ = paint_bounds; }
+
+  void set_paint_bounds(const SkRect& paint_bounds) {
+    paint_bounds_ = paint_bounds;
+  }
 
  private:
   ContainerLayer* parent_;
@@ -44,134 +51,7 @@ class Layer {
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };
 
-class PictureLayer : public Layer {
- public:
-  PictureLayer();
-  ~PictureLayer() override;
-
-  SkPicture* picture() const { return picture_.get(); }
-
-  void Paint(SkCanvas* canvas) override;
-
-  void set_offset(const SkPoint& offset) { offset_ = offset; }
-  void set_picture(PassRefPtr<SkPicture> picture) { picture_ = picture; }
-
- private:
-  SkPoint offset_;
-  RefPtr<SkPicture> picture_;
-
-  DISALLOW_COPY_AND_ASSIGN(PictureLayer);
-};
-
-class ContainerLayer : public Layer {
- public:
-  ContainerLayer();
-  ~ContainerLayer() override;
-
-  const std::vector<std::unique_ptr<Layer>>& layers() const { return layers_; }
-
-  void Add(std::unique_ptr<Layer> layer);
-
-  void PaintChildren(SkCanvas* canvas);
-
- private:
-  std::vector<std::unique_ptr<Layer>> layers_;
-
-  DISALLOW_COPY_AND_ASSIGN(ContainerLayer);
-};
-
-class TransformLayer : public ContainerLayer {
- public:
-  TransformLayer();
-  ~TransformLayer() override;
-
-  void Paint(SkCanvas* canvas) override;
-
-  void set_transform(const SkMatrix& transform) { transform_ = transform; }
-
- private:
-  SkMatrix transform_;
-
-  DISALLOW_COPY_AND_ASSIGN(TransformLayer);
-};
-
-class ClipRectLayer : public ContainerLayer {
- public:
-  ClipRectLayer();
-  ~ClipRectLayer() override;
-
-  void Paint(SkCanvas* canvas) override;
-
-  void set_clip_rect(const SkRect& clip_rect) { clip_rect_ = clip_rect; }
-
- private:
-  SkRect clip_rect_;
-
-  DISALLOW_COPY_AND_ASSIGN(ClipRectLayer);
-};
-
-class ClipRRectLayer : public ContainerLayer {
- public:
-  ClipRRectLayer();
-  ~ClipRRectLayer() override;
-
-  void Paint(SkCanvas* canvas) override;
-
-  void set_clip_rrect(const SkRRect& clip_rrect) { clip_rrect_ = clip_rrect; }
-
- private:
-  SkRRect clip_rrect_;
-
-  DISALLOW_COPY_AND_ASSIGN(ClipRRectLayer);
-};
-
-class ClipPathLayer : public ContainerLayer {
- public:
-  ClipPathLayer();
-  ~ClipPathLayer() override;
-
-  void Paint(SkCanvas* canvas) override;
-
-  void set_clip_path(const SkPath& clip_path) { clip_path_ = clip_path; }
-
- private:
-  SkPath clip_path_;
-
-  DISALLOW_COPY_AND_ASSIGN(ClipPathLayer);
-};
-
-class OpacityLayer : public ContainerLayer {
- public:
-  OpacityLayer();
-  ~OpacityLayer() override;
-
-  void Paint(SkCanvas* canvas) override;
-
-  void set_alpha(int alpha) { alpha_ = alpha; }
-
- private:
-  int alpha_;
-
-  DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
-};
-
-class ColorFilterLayer : public ContainerLayer {
- public:
-  ColorFilterLayer();
-  ~ColorFilterLayer() override;
-
-  void Paint(SkCanvas* canvas) override;
-
-  void set_color(SkColor color) { color_ = color; }
-  void set_transfer_mode(SkXfermode::Mode transfer_mode) { transfer_mode_ = transfer_mode; }
-
- private:
-  SkColor color_;
-  SkXfermode::Mode transfer_mode_;
-
-  DISALLOW_COPY_AND_ASSIGN(ColorFilterLayer);
-};
-
+}  // namespace compositor
 }  // namespace sky
 
 #endif  // SKY_COMPOSITOR_LAYER_H_

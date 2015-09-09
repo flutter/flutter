@@ -55,7 +55,7 @@ class Engine : public UIDelegate,
 
   static void Init();
 
-  std::unique_ptr<LayerTree> BeginFrame(base::TimeTicks frame_time);
+  std::unique_ptr<compositor::LayerTree> BeginFrame(base::TimeTicks frame_time);
 
   void StartDartTracing();
   void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);

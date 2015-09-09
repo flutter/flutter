@@ -34,7 +34,7 @@ class Rasterizer : public GPUDelegate {
 
   void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
   void OnOutputSurfaceDestroyed() override;
-  void Draw(scoped_ptr<LayerTree> layer_tree) override;
+  void Draw(scoped_ptr<compositor::LayerTree> layer_tree) override;
 
  private:
   void EnsureGLContext();

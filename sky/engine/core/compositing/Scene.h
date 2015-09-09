@@ -17,17 +17,19 @@
 namespace blink {
 
 class Scene : public RefCounted<Scene>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
-public:
-    ~Scene() override;
-    static PassRefPtr<Scene> create(std::unique_ptr<sky::Layer> rootLayer);
+  DEFINE_WRAPPERTYPEINFO();
 
-    std::unique_ptr<sky::LayerTree> takeLayerTree();
+ public:
+  ~Scene() override;
+  static PassRefPtr<Scene> create(
+      std::unique_ptr<sky::compositor::Layer> rootLayer);
 
-private:
-    explicit Scene(std::unique_ptr<sky::Layer> rootLayer);
+  std::unique_ptr<sky::compositor::LayerTree> takeLayerTree();
 
-    std::unique_ptr<sky::LayerTree> m_layerTree;
+ private:
+  explicit Scene(std::unique_ptr<sky::compositor::Layer> rootLayer);
+
+  std::unique_ptr<sky::compositor::LayerTree> m_layerTree;
 };
 
 } // namespace blink

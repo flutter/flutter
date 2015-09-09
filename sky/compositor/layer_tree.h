@@ -12,6 +12,7 @@
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace sky {
+namespace compositor {
 
 class LayerTree {
  public:
@@ -19,20 +20,23 @@ class LayerTree {
   ~LayerTree();
 
   Layer* root_layer() const { return root_layer_.get(); }
+
   void set_root_layer(std::unique_ptr<Layer> root_layer) {
     root_layer_ = std::move(root_layer);
   }
 
   const SkISize& frame_size() const { return frame_size_; }
+
   void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }
 
  private:
-  SkISize frame_size_; // Physical pixels.
+  SkISize frame_size_;  // Physical pixels.
   std::unique_ptr<Layer> root_layer_;
 
   DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };
 
+}  // namespace compositor
 }  // namespace sky
 
 #endif  // SKY_COMPOSITOR_LAYER_TREE_H_
