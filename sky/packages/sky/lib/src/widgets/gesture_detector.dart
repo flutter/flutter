@@ -4,6 +4,7 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/gestures/fling.dart';
 import 'package:sky/gestures/long_press.dart';
 import 'package:sky/gestures/recognizer.dart';
 import 'package:sky/gestures/scroll.dart';
@@ -27,7 +28,8 @@ class GestureDetector extends StatefulComponent {
     this.onHorizontalDragEnd,
     this.onPanStart,
     this.onPanUpdate,
-    this.onPanEnd
+    this.onPanEnd,
+    this.onFling
   }) : super(key: key);
 
   Widget child;
@@ -47,6 +49,8 @@ class GestureDetector extends StatefulComponent {
   GesturePanUpdateCallback onPanUpdate;
   GesturePanEndCallback onPanEnd;
 
+  GestureFlingCallback onFling;
+
   void syncConstructorArguments(GestureDetector source) {
     child = source.child;
     onTap = source.onTap;
@@ -61,6 +65,7 @@ class GestureDetector extends StatefulComponent {
     onPanStart = source.onPanStart;
     onPanUpdate = source.onPanUpdate;
     onPanEnd = source.onPanEnd;
+    onFling = source.onFling;
     _syncGestureListeners();
   }
 
@@ -108,6 +113,13 @@ class GestureDetector extends StatefulComponent {
     return _pan;
   }
 
+  FlingGestureRecognizer _fling;
+  FlingGestureRecognizer _ensureFling() {
+    if (_fling == null)
+      _fling = new FlingGestureRecognizer(router: _router);
+    return _fling;
+  }
+
   void didMount() {
     super.didMount();
     _syncGestureListeners();
@@ -121,6 +133,7 @@ class GestureDetector extends StatefulComponent {
     _verticalDrag = _ensureDisposed(_verticalDrag);
     _horizontalDrag = _ensureDisposed(_horizontalDrag);
     _pan = _ensureDisposed(_pan);
+    _fling = _ensureDisposed(_fling);
   }
 
   void _syncGestureListeners() {
@@ -130,6 +143,7 @@ class GestureDetector extends StatefulComponent {
     _syncVerticalDrag();
     _syncHorizontalDrag();
     _syncPan();
+    _syncFling();
   }
 
   void _syncTap() {
@@ -186,6 +200,13 @@ class GestureDetector extends StatefulComponent {
     }
   }
 
+  void _syncFling() {
+    if (onFling == null)
+      _fling = _ensureDisposed(_fling);
+    else
+      _ensureFling().onFling = onFling;
+  }
+
   GestureRecognizer _ensureDisposed(GestureRecognizer recognizer) {
     recognizer?.dispose();
     return null;
@@ -204,6 +225,8 @@ class GestureDetector extends StatefulComponent {
       _horizontalDrag.addPointer(event);
     if (_pan != null)
       _pan.addPointer(event);
+    if (_fling != null)
+      _fling.addPointer(event);
     return EventDisposition.processed;
   }
 

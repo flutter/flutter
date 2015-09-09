@@ -19,5 +19,5 @@ const double kDoubleTapTouchSlop = kTouchSlop;  // Logical pixels
 const double kPagingTouchSlop = kTouchSlop * 2.0;  // Logical pixels
 const double kDoubleTapSlop = 100.0;  // Logical pixels
 const double kWindowTouchSlop = 16.0;  // Logical pixels
-const double kMinFlingVelocity = 50.0;  // TODO(abarth): Which units is this in?
-const double kMaxFlingVelocity = 8000.0;  // TODO(abarth): Which units is this in?
+const double kMinFlingVelocity = 50.0;  // Logical pixels / second
+const double kMaxFlingVelocity = 8000.0;  // Logical pixels / second
