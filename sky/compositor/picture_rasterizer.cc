@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "sky/compositor/compositor_config.h"
+#include "sky/compositor/compositor_tools.h"
 #include "sky/compositor/picture_rasterizer.h"
 #include "base/logging.h"
 #include "third_party/skia/include/core/SkPicture.h"
@@ -79,6 +81,10 @@ static RefPtr<SkImage> ImageFromPicture(GrContext* context,
   DCHECK(canvas);
 
   canvas->drawPicture(picture);
+
+#if COMPOSITOR_HIGHLIGHT_RASTERIZED_PICTURES
+  DrawCheckerboard(canvas, desc.fWidth, desc.fHeight);
+#endif
 
   // Step 4: Create an image representation from the texture
 
