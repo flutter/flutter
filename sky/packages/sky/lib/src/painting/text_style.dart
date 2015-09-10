@@ -2,91 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky';
+import 'dart:sky' as sky;
+import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path, FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
 
-/// The thickness of the glyphs used to draw the text
-enum FontWeight {
-  /// Thin, the least thick
-  w100,
-
-  /// Extra-light
-  w200,
-
-  /// Light
-  w300,
-
-  /// Normal / regular / plain
-  w400,
-
-  /// Medium
-  w500,
-
-  /// Semi-bold
-  w600,
-
-  /// Bold
-  w700,
-
-  /// Extra-bold
-  w800,
-
-  /// Black, the most thick
-  w900
-}
+export 'dart:sky' show FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
 
 /// A normal font weight
 const normal = FontWeight.w400;
 
 /// A bold font weight
 const bold = FontWeight.w700;
-
-/// Whether to slant the glyphs in the font
-enum FontStyle {
-  /// Use the upright glyphs
-  normal,
-
-  /// Use glyphs designed for slanting
-  italic,
-
-  /// Use the upright glyphs but slant them during painting
-  oblique  // TODO(abarth): Remove. We don't really support this value.
-}
-
-/// Whether to align text horizontally
-enum TextAlign {
-  /// Align the text on the left edge of the container
-  left,
-
-  /// Align the text on the right edge of the container
-  right,
-
-  /// Align the text in the center of the container
-  center
-}
-
-/// A horizontal line used for aligning text
-enum TextBaseline {
-  // The horizontal line used to align the bottom of glyphs for alphabetic characters
-  alphabetic,
-
-  // The horizontal line used to align ideographic characters
-  ideographic
-}
-
-/// A linear decoration to draw near the text
-enum TextDecoration {
-  /// Do not draw a decoration
-  none,
-
-  /// Draw a line underneath each line of text
-  underline,
-
-  /// Draw a line above each line of text
-  overline,
-
-  /// Draw a line through each line of text
-  lineThrough
-}
 
 /// Draw a line underneath each line of text
 const underline = const <TextDecoration>[TextDecoration.underline];
@@ -96,24 +21,6 @@ const overline = const <TextDecoration>[TextDecoration.overline];
 
 /// Draw a line through each line of text
 const lineThrough = const <TextDecoration>[TextDecoration.lineThrough];
-
-/// The style in which to draw a text decoration
-enum TextDecorationStyle {
-  /// Draw a solid line
-  solid,
-
-  /// Draw two lines
-  double,
-
-  /// Draw a dotted line
-  dotted,
-
-  /// Draw a dashed line
-  dashed,
-
-  /// Draw a sinusoidal line
-  wavy
-}
 
 /// An immutable style in which paint text
 class TextStyle {
@@ -249,7 +156,7 @@ class TextStyle {
   ///
   /// Note: This function will likely be removed when we refactor the interface
   /// between the framework and the engine
-  void applyToCSSStyle(CSSStyleDeclaration cssStyle) {
+  void applyToCSSStyle(sky.CSSStyleDeclaration cssStyle) {
     if (color != null) {
       cssStyle['color'] = _colorToCSSString(color);
     }
@@ -292,7 +199,7 @@ class TextStyle {
   ///
   /// Note: This function will likely be removed when we refactor the interface
   /// between the framework and the engine
-  void applyToContainerCSSStyle(CSSStyleDeclaration cssStyle) {
+  void applyToContainerCSSStyle(sky.CSSStyleDeclaration cssStyle) {
     if (textAlign != null) {
       cssStyle['text-align'] = const {
         TextAlign.left: 'left',

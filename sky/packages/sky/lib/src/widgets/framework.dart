@@ -906,7 +906,7 @@ abstract class StatefulComponent extends Component {
     }
     if (old != null) {
       assert(_isStateInitialized);
-      assert(!old._isStateInitialized);
+      assert(!(old as StatefulComponent)._isStateInitialized);
       syncConstructorArguments(old);
     }
     super._sync(old, slot);
