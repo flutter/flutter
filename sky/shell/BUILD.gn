@@ -27,6 +27,7 @@ common_deps = [
   "//sky/shell/dart",
   "//ui/gfx/geometry",
   "//ui/gl",
+  "//url:url",
 ]
 
 if (is_linux || is_mac) {
@@ -76,6 +77,10 @@ source_set("common") {
     "ui/platform_impl.h",
     "ui_delegate.cc",
     "ui_delegate.h",
+    "updater/manifest.cc",
+    "updater/manifest.h",
+    "updater/update_task.cc",
+    "updater/update_task.h",
   ]
 
   deps = common_deps
