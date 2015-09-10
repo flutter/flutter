@@ -13,7 +13,6 @@ SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SKYPY_PATH)))
 WORKBENCH_ROOT = os.path.join(SRC_ROOT, 'sky', 'packages', 'workbench')
 DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
 PUB = os.path.join(DART_SDK, 'pub')
-PUB_CACHE = os.path.join(SRC_ROOT, "dart-pub-cache")
 EXAMPLES_ROOT = os.path.join(SRC_ROOT, 'examples')
 SKY_ROOT = os.path.join(SRC_ROOT, 'sky')
 
@@ -36,15 +35,13 @@ class SkyServer(object):
                 self.port)
             return
 
-        env = os.environ.copy()
-        env["PUB_CACHE"] = PUB_CACHE
         args = [PUB,
                 'run',
                 'sky_tools:sky_server',
                 '--route=/sky,%s' % SKY_ROOT,
                 '--route=/examples,%s' % EXAMPLES_ROOT,
                 str(self.port)]
-        self.server = subprocess.Popen(args, cwd=WORKBENCH_ROOT, env=env)
+        self.server = subprocess.Popen(args, cwd=WORKBENCH_ROOT)
         return self.server.pid
 
     def stop(self):

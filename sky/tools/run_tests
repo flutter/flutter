@@ -14,7 +14,6 @@ SRC_ROOT = os.path.dirname(SKY_ROOT)
 
 DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
 PUB = os.path.join(DART_SDK, 'pub')
-PUB_CACHE = os.path.join(SRC_ROOT, 'dart-pub-cache')
 
 UNIT_DIR = os.path.join(SRC_ROOT, 'sky', 'unit')
 PACKAGES_DIR = os.path.join(UNIT_DIR, 'packages')
@@ -35,7 +34,6 @@ def main():
         sky_shell = os.path.join(build_dir, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell')
 
     env = os.environ.copy()
-    env['PUB_CACHE'] = PUB_CACHE
     env['SKY_SHELL'] = sky_shell
     return subprocess.call([
         PUB, 'run', 'sky_tools:sky_test',

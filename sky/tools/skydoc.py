@@ -17,7 +17,6 @@ SKY_PACKAGE = os.path.join(SRC_ROOT, 'sky', 'packages', 'sky')
 
 DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
 DARTDOC = os.path.join(DART_SDK, 'dartdoc')
-PUB_CACHE = os.path.join(SRC_ROOT, 'dart-pub-cache')
 
 def main():
     parser = argparse.ArgumentParser(description='Sky Documentation Generator')
