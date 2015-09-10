@@ -2,35 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_UPDATE_SERVICE_H_
-#define SKY_SHELL_UPDATE_SERVICE_H_
+#ifndef SKY_SHELL_ANDROID_UPDATE_SERVICE_ANDROID_H_
+#define SKY_SHELL_ANDROID_UPDATE_SERVICE_ANDROID_H_
 
 #include <jni.h>
 
 #include "base/android/jni_string.h"
-#include "base/files/file_path.h"
-#include "mojo/services/network/public/interfaces/network_service.mojom.h"
+#include "sky/shell/updater/update_task.h"
 
 namespace sky {
 namespace shell {
 
-class UpdateTask {
+class UpdateTaskAndroid : public UpdateTask {
  public:
-  UpdateTask(JNIEnv* env, jobject update_service, std::string data_dir);
+  UpdateTaskAndroid(JNIEnv* env,
+                    jobject update_service,
+                    const std::string& data_dir);
+  ~UpdateTaskAndroid();
 
-  void DownloadAppBundle(const std::string& url);
-  void Detach(JNIEnv* env, jobject jcaller);
+  void Finish() override;
+
+  // This C++ object is owned by the Java UpdateService. This is called by
+  // UpdateService when it is destroyed.
+  void Destroy(JNIEnv* env, jobject jcaller);
 
  private:
-  void OnResponse(mojo::URLResponsePtr response);
-  void OnCopied(bool success);
-  void CallOnFinished();
-
   base::android::ScopedJavaGlobalRef<jobject> update_service_;
-  mojo::NetworkServicePtr network_service_;
-  base::FilePath temp_path_;
-  base::FilePath final_path_;
-  mojo::URLLoaderPtr url_loader_;
 };
 
 bool RegisterUpdateService(JNIEnv* env);
@@ -38,4 +35,4 @@ bool RegisterUpdateService(JNIEnv* env);
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_UPDATE_SERVICE_H_
+#endif  // SKY_SHELL_ANDROID_UPDATE_SERVICE_ANDROID_H_

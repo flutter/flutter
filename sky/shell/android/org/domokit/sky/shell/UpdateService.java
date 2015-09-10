@@ -59,7 +59,7 @@ public class UpdateService extends Service {
     @Override
     public void onDestroy() {
         if (mNativePtr != 0)
-            nativeDetach(mNativePtr);
+            nativeDestroy(mNativePtr);
         mNativePtr = 0;
     }
 
@@ -82,5 +82,5 @@ public class UpdateService extends Service {
     }
 
     private native long nativeCheckForUpdates(String dataDir);
-    private native void nativeDetach(long nativeUpdateTask);
+    private native void nativeDestroy(long nativeUpdateTaskAndroid);
 }
