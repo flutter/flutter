@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_COMPOSITOR_TOOLS_H_
-#define SKY_COMPOSITOR_COMPOSITOR_TOOLS_H_
+#ifndef SKY_COMPOSITOR_CHECKERBOARD_H_
+#define SKY_COMPOSITOR_CHECKERBOARD_H_
 
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -15,4 +15,4 @@ void DrawCheckerboard(SkCanvas* canvas, int width, int height);
 }  // namespace compositor
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_COMPOSITOR_TOOLS_H_
+#endif  // SKY_COMPOSITOR_CHECKERBOARD_H_

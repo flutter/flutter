@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "sky/compositor/compositor_config.h"
-#include "sky/compositor/compositor_tools.h"
+#include "sky/compositor/checkerboard.h"
 #include "sky/compositor/picture_rasterizer.h"
 #include "base/logging.h"
 #include "third_party/skia/include/core/SkPicture.h"
