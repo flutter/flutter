@@ -32,8 +32,10 @@ class HomogeneousViewport extends RenderObjectWrapper {
   ScrollDirection direction;
   double startOffset;
 
-  bool _layoutDirty = true;
   List<Widget> _children;
+  bool _layoutDirty = true;
+  int _layoutFirstIndex;
+  int _layoutItemCount;
 
   RenderBlockViewport get renderObject => super.renderObject;
 
@@ -56,10 +58,16 @@ class HomogeneousViewport extends RenderObjectWrapper {
     super.remove();
     _children.clear();
     _layoutDirty = true;
+    assert(() {
+      _layoutFirstIndex = null;
+      _layoutItemCount = null;
+      return true;
+    });
   }
 
   void walkChildren(WidgetTreeWalker walker) {
-    if (_children == null) return;
+    if (_children == null)
+      return;
     for (Widget child in _children)
       walker(child);
   }
@@ -112,9 +120,6 @@ class HomogeneousViewport extends RenderObjectWrapper {
       _updateChildren();
     }
   }
-
-  int _layoutFirstIndex;
-  int _layoutItemCount;
 
   void layout(BoxConstraints constraints) {
     LayoutCallbackBuilderHandle handle = enterLayoutCallbackBuilder();
