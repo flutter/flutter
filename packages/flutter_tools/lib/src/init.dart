@@ -22,20 +22,22 @@ class InitCommandHandler extends CommandHandler {
     parser.addFlag('help',
         abbr: 'h', negatable: false, help: 'Display this help message.');
     parser.addOption('out', abbr: 'o', help: 'The output directory.');
-    parser.addFlag('pub', defaultsTo: true,
+    parser.addFlag('pub',
+        defaultsTo: true,
         help: 'Whether to run pub after the project has been created.');
     return parser;
   }
 
-  Future processArgResults(ArgResults results) async {
+  @override
+  Future<int> processArgResults(ArgResults results) async {
     if (results['help']) {
       printUsage();
-      return new Future.value();
+      return 0;
     }
 
     if (!results.wasParsed('out')) {
       printUsage('No option specified for the output directory.');
-      return new Future.value();
+      return 2;
     }
 
     // TODO: Confirm overwrite of an existing directory with the user.
@@ -58,7 +60,8 @@ Or if the Sky APK is not already on your device, run:
 
     if (results['pub']) {
       print("Running pub get...");
-      Process process = await Process.start('pub', ['get'], workingDirectory: out.path);
+      Process process =
+          await Process.start('pub', ['get'], workingDirectory: out.path);
       stdout.addStream(process.stdout);
       stderr.addStream(process.stderr);
       int code = await process.exitCode;
@@ -67,7 +70,9 @@ Or if the Sky APK is not already on your device, run:
       }
     } else {
       print(message);
+      return 2;
     }
+    return 0;
   }
 }
 
@@ -85,10 +90,7 @@ abstract class Template {
     dir.createSync(recursive: true);
 
     files.forEach((String path, String contents) {
-      Map m = {
-        'projectName': projectName,
-        'description': description
-      };
+      Map m = {'projectName': projectName, 'description': description};
       contents = mustache.render(contents, m);
       File file = new File(p.join(dir.path, path));
       file.parent.createSync();
@@ -102,10 +104,10 @@ abstract class Template {
 
 class SkySimpleTemplate extends Template {
   SkySimpleTemplate() : super('sky-simple', 'A minimal Sky project.') {
-    files['.gitignore']= _gitignore;
-    files['pubspec.yaml']= _pubspec;
-    files['README.md']= _readme;
-    files['lib/main.dart']= _libMain;
+    files['.gitignore'] = _gitignore;
+    files['pubspec.yaml'] = _pubspec;
+    files['README.md'] = _readme;
+    files['lib/main.dart'] = _libMain;
   }
 }
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:args/args.dart';
 
 abstract class CommandHandler {
@@ -12,7 +14,7 @@ abstract class CommandHandler {
 
   ArgParser get parser;
 
-  void processArgResults(ArgResults results);
+  Future<int> processArgResults(ArgResults results);
 
   void printUsage([String message]) {
     if (message != null) {
