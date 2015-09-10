@@ -78,8 +78,10 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   SkCanvas* canvas = ganesh_surface_->canvas();
 
   canvas->clear(SK_ColorBLACK);
-  compositor::PaintContext context(rasterizer_, ganesh_context_->gr(), canvas);
-  layer_tree->root_layer()->Paint(context);
+  {
+    auto frame = paint_context_.AcquireFrame(*canvas, ganesh_context_->gr());
+    layer_tree->root_layer()->Paint(frame);
+  }
   canvas->flush();
   surface_->SwapBuffers();
 

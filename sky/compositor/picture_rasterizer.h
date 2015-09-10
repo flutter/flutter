@@ -18,12 +18,13 @@
 namespace sky {
 namespace compositor {
 
+class PaintContext;
 class PictureRasterzier {
  public:
   PictureRasterzier();
   ~PictureRasterzier();
 
-  RefPtr<SkImage> GetCachedImageIfPresent(GrContext* context,
+  RefPtr<SkImage> GetCachedImageIfPresent(PaintContext& context,
                                           SkPicture* picture,
                                           SkISize size);
 

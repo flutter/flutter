@@ -9,13 +9,6 @@
 namespace sky {
 namespace compositor {
 
-CompositorOptions& CompositorOptions::Shared() {
-  static std::once_flag once;
-  static CompositorOptions* options = nullptr;
-  std::call_once(once, []() { options = new CompositorOptions(); });
-  return *options;
-}
-
 CompositorOptions::CompositorOptions() {
   static_assert(std::is_unsigned<OptionType>::value,
                 "OptionType must be unsigned");

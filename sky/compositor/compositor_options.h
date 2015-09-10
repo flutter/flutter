@@ -23,7 +23,8 @@ class CompositorOptions {
     TerminationSentinel,
   };
 
-  static CompositorOptions& Shared();
+  CompositorOptions();
+  ~CompositorOptions();
 
   bool isEnabled(Option option) const;
 
@@ -31,9 +32,6 @@ class CompositorOptions {
 
  private:
   std::vector<bool> options_;
-
-  CompositorOptions();
-  ~CompositorOptions();
 
   DISALLOW_COPY_AND_ASSIGN(CompositorOptions);
 };

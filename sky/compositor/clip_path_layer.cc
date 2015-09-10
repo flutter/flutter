@@ -14,11 +14,11 @@ ClipPathLayer::~ClipPathLayer() {
 }
 
 void ClipPathLayer::Paint(PaintContext& context) {
-  SkCanvas* canvas = context.canvas();
-  canvas->saveLayer(&clip_path_.getBounds(), nullptr);
-  canvas->clipPath(clip_path_);
+  SkCanvas& canvas = context.canvas();
+  canvas.saveLayer(&clip_path_.getBounds(), nullptr);
+  canvas.clipPath(clip_path_);
   PaintChildren(context);
-  canvas->restore();
+  canvas.restore();
 }
 
 }  // namespace compositor

@@ -19,10 +19,10 @@ void OpacityLayer::Paint(PaintContext& context) {
       SkColorFilter::CreateModeFilter(color, SkXfermode::kSrcOver_Mode));
   SkPaint paint;
   paint.setColorFilter(colorFilter.get());
-  SkCanvas* canvas = context.canvas();
-  canvas->saveLayer(&paint_bounds(), &paint);
+  SkCanvas& canvas = context.canvas();
+  canvas.saveLayer(&paint_bounds(), &paint);
   PaintChildren(context);
-  canvas->restore();
+  canvas.restore();
 }
 
 }  // namespace compositor

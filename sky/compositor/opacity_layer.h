@@ -17,6 +17,7 @@ class OpacityLayer : public ContainerLayer {
 
   void set_alpha(int alpha) { alpha_ = alpha; }
 
+ protected:
   void Paint(PaintContext& context) override;
 
  private:

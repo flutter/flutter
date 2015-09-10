@@ -17,6 +17,7 @@ class ClipRectLayer : public ContainerLayer {
 
   void set_clip_rect(const SkRect& clip_rect) { clip_rect_ = clip_rect; }
 
+ protected:
   void Paint(PaintContext& context) override;
 
  private:

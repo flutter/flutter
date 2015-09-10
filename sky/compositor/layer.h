@@ -32,7 +32,7 @@ class Layer {
   Layer();
   virtual ~Layer();
 
-  virtual void Paint(PaintContext& context) = 0;
+  void Paint(PaintContext::ScopedFrame& frame) { Paint(frame.paint_context()); }
 
   virtual SkMatrix model_view_matrix(const SkMatrix& model_matrix) const;
 
@@ -46,9 +46,14 @@ class Layer {
     paint_bounds_ = paint_bounds;
   }
 
+ protected:
+  virtual void Paint(PaintContext& context) = 0;
+
  private:
   ContainerLayer* parent_;
   SkRect paint_bounds_;
+
+  friend class ContainerLayer;
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };

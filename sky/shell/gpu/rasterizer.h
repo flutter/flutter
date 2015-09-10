@@ -11,7 +11,7 @@
 #include "sky/shell/gpu_delegate.h"
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/native_widget_types.h"
-#include "sky/compositor/picture_rasterizer.h"
+#include "sky/compositor/paint_context.h"
 
 class SkPicture;
 
@@ -48,7 +48,7 @@ class Rasterizer : public GPUDelegate {
   scoped_ptr<GaneshContext> ganesh_context_;
   scoped_ptr<GaneshSurface> ganesh_surface_;
 
-  compositor::PictureRasterzier rasterizer_;
+  compositor::PaintContext paint_context_;
 
   base::WeakPtrFactory<Rasterizer> weak_factory_;
 

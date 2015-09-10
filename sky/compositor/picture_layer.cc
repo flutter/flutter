@@ -27,16 +27,16 @@ void PictureLayer::Paint(PaintContext& context) {
   SkISize size = SkISize::Make(bounds.width(), bounds.height());
 
   RefPtr<SkImage> image = context.rasterizer().GetCachedImageIfPresent(
-      context.gr_context(), picture_.get(), size);
-  SkCanvas* canvas = context.canvas();
+      context, picture_.get(), size);
+  SkCanvas& canvas = context.canvas();
 
   if (image) {
-    canvas->drawImage(image.get(), offset_.x(), offset_.y());
+    canvas.drawImage(image.get(), offset_.x(), offset_.y());
   } else {
-    canvas->save();
-    canvas->translate(offset_.x(), offset_.y());
-    canvas->drawPicture(picture_.get());
-    canvas->restore();
+    canvas.save();
+    canvas.translate(offset_.x(), offset_.y());
+    canvas.drawPicture(picture_.get());
+    canvas.restore();
   }
 }
 

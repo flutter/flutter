@@ -18,10 +18,10 @@ void ColorFilterLayer::Paint(PaintContext& context) {
       adoptRef(SkColorFilter::CreateModeFilter(color_, transfer_mode_));
   SkPaint paint;
   paint.setColorFilter(color_filter.get());
-  SkCanvas* canvas = context.canvas();
-  canvas->saveLayer(&paint_bounds(), &paint);
+  SkCanvas& canvas = context.canvas();
+  canvas.saveLayer(&paint_bounds(), &paint);
   PaintChildren(context);
-  canvas->restore();
+  canvas.restore();
 }
 
 }  // namespace compositor

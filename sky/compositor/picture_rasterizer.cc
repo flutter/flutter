@@ -5,6 +5,7 @@
 #include "sky/compositor/compositor_options.h"
 #include "sky/compositor/checkerboard.h"
 #include "sky/compositor/picture_rasterizer.h"
+#include "sky/compositor/paint_context.h"
 #include "base/logging.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/gpu/GrContext.h"
@@ -37,7 +38,7 @@ PictureRasterzier::Value::Value()
 PictureRasterzier::Value::~Value() {
 }
 
-static RefPtr<SkImage> ImageFromPicture(GrContext* context,
+static RefPtr<SkImage> ImageFromPicture(PaintContext& context,
                                         SkPicture* picture,
                                         const SkISize& size) {
   // Step 1: Create a texture from the context's texture provider
@@ -48,7 +49,8 @@ static RefPtr<SkImage> ImageFromPicture(GrContext* context,
   desc.fFlags = kRenderTarget_GrSurfaceFlag;
   desc.fConfig = kRGBA_8888_GrPixelConfig;
 
-  GrTexture* texture = context->textureProvider()->createTexture(desc, true);
+  GrTexture* texture =
+      context.gr_context()->textureProvider()->createTexture(desc, true);
 
   if (!texture) {
     // The texture provider could not allocate a texture backing. Render
@@ -82,22 +84,24 @@ static RefPtr<SkImage> ImageFromPicture(GrContext* context,
 
   canvas->drawPicture(picture);
 
-  if (CompositorOptions::Shared().isEnabled(
+  if (context.options().isEnabled(
           CompositorOptions::Option::HightlightRasterizedImages)) {
     DrawCheckerboard(canvas, desc.fWidth, desc.fHeight);
   }
 
   // Step 4: Create an image representation from the texture
 
-  RefPtr<SkImage> image = adoptRef(SkImage::NewFromTexture(
-      context, backendDesc, kPremul_SkAlphaType, &ImageReleaseProc, texture));
+  RefPtr<SkImage> image = adoptRef(
+      SkImage::NewFromTexture(context.gr_context(), backendDesc,
+                              kPremul_SkAlphaType, &ImageReleaseProc, texture));
   return image;
 }
 
-RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(GrContext* context,
-                                                           SkPicture* picture,
-                                                           SkISize size) {
-  if (size.isEmpty() || picture == nullptr || context == nullptr) {
+RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
+    PaintContext& context,
+    SkPicture* picture,
+    SkISize size) {
+  if (size.isEmpty() || picture == nullptr || context.gr_context() == nullptr) {
     return nullptr;
   }
 
