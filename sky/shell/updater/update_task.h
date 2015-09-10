@@ -5,8 +5,6 @@
 #ifndef SKY_SHELL_UPDATER_UPDATE_TASK_H_
 #define SKY_SHELL_UPDATER_UPDATE_TASK_H_
 
-#include <jni.h>
-
 #include "base/files/file_path.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/task_runner.h"
@@ -51,8 +49,6 @@ class UpdateTask {
   base::FilePath data_dir_;
   base::FilePath temp_path_;
 };
-
-bool RegisterUpdateService(JNIEnv* env);
 
 }  // namespace shell
 }  // namespace sky
