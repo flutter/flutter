@@ -879,25 +879,13 @@ abstract class StatefulComponent extends Component {
 
   StatefulComponent({ Key key }) : super(key: key);
 
-  bool _disqualifiedFromEverAppearingAgain = false;
   bool _isStateInitialized = false;
 
-  void didMount() {
-    assert(!_disqualifiedFromEverAppearingAgain);
-    super.didMount();
-  }
-
-  void _buildIfDirty() {
-    assert(!_disqualifiedFromEverAppearingAgain);
-    super._buildIfDirty();
-  }
-
   bool retainStatefulNodeIfPossible(StatefulComponent newNode) {
-    assert(!_disqualifiedFromEverAppearingAgain);
     assert(newNode != null);
+    assert(!newNode._isStateInitialized);
     assert(_canSync(this, newNode));
     assert(_child != null);
-    newNode._disqualifiedFromEverAppearingAgain = true;
 
     newNode._child = _child;
     _child = null;
@@ -910,14 +898,17 @@ abstract class StatefulComponent extends Component {
   // when _sync is called, our 'old' is actually the new instance that
   // we are to copy state from.
   void _sync(Widget old, dynamic slot) {
-    assert(!_disqualifiedFromEverAppearingAgain);
-    // TODO(ianh): _sync should only be called once when old == null
-    if (old == null && !_isStateInitialized) {
-      initState();
-      _isStateInitialized = true;
+    if (old == null) {
+      if (!_isStateInitialized) {
+        initState();
+        _isStateInitialized = true;
+      }
     }
-    if (old != null)
+    if (old != null) {
+      assert(_isStateInitialized);
+      assert(!old._isStateInitialized);
       syncConstructorArguments(old);
+    }
     super._sync(old, slot);
   }
 
@@ -930,25 +921,21 @@ abstract class StatefulComponent extends Component {
   // method to update `this` to account for the new values the parent
   // passed to `source`. Make sure to call super.syncConstructorArguments(source)
   // unless you are extending StatefulComponent directly.
+  // A given source can be used multiple times as a source.
+  // The source must not be mutated.
   void syncConstructorArguments(Component source);
-
-  Widget syncChild(Widget node, Widget oldNode, dynamic slot) {
-    assert(!_disqualifiedFromEverAppearingAgain);
-    return super.syncChild(node, oldNode, slot);
-  }
 
   // Calls function fn immediately and then schedules another build
   // for this Component.
   void setState(void fn()) {
-    assert(!_disqualifiedFromEverAppearingAgain);
     fn();
     _scheduleBuild();
   }
 
   String toStringName() {
-    if (_disqualifiedFromEverAppearingAgain)
-      return '[[DISQUALIFIED]] ${super.toStringName()}';
-    return super.toStringName();
+    if (_isStateInitialized)
+      return 'Stateful ${super.toStringName()}';
+    return 'Stateless ${super.toStringName()}';
   }
 }
 
