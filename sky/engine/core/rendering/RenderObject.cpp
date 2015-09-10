@@ -186,7 +186,7 @@ bool RenderObject::isDescendantOf(const RenderObject* obj) const
 
 void RenderObject::addChild(RenderObject* newChild, RenderObject* beforeChild)
 {
-    ASSERT(isAllowedToModifyRenderTreeStructure(document()));
+    ASSERT(!m_node || isAllowedToModifyRenderTreeStructure(document()));
 
     RenderObjectChildList* children = virtualChildren();
     ASSERT(children);
@@ -195,7 +195,7 @@ void RenderObject::addChild(RenderObject* newChild, RenderObject* beforeChild)
 
 void RenderObject::removeChild(RenderObject* oldChild)
 {
-    ASSERT(isAllowedToModifyRenderTreeStructure(document()));
+  ASSERT(!m_node || isAllowedToModifyRenderTreeStructure(document()));
 
     RenderObjectChildList* children = virtualChildren();
     ASSERT(children);

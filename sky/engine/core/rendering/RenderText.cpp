@@ -76,7 +76,7 @@ RenderText::RenderText(Node* node, PassRefPtr<StringImpl> str)
     , m_lastTextBox(0)
 {
     ASSERT(m_text);
-    ASSERT(node && !node->isDocumentNode());
+    ASSERT(!node || !node->isDocumentNode());
 
     m_isAllASCII = m_text.containsOnlyASCII();
     m_canUseSimpleFontCodePath = computeCanUseSimpleFontCodePath();

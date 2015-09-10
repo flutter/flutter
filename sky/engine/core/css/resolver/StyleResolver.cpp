@@ -177,7 +177,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
         state.setParentStyle(RenderStyle::clone(state.style()));
     }
 
-    state.fontBuilder().initForStyleResolve(state.document(), state.style());
+    state.fontBuilder().initForStyleResolve(&state.document(), state.style());
 
     {
         ElementRuleCollector collector(state.elementContext(), state.style());
@@ -204,7 +204,7 @@ PassRefPtr<RenderStyle> StyleResolver::defaultStyleForElement()
 {
     StyleResolverState state(m_document, nullptr);
     state.setStyle(RenderStyle::create());
-    state.fontBuilder().initForStyleResolve(m_document, state.style());
+    state.fontBuilder().initForStyleResolve(&m_document, state.style());
     state.style()->setLineHeight(RenderStyle::initialLineHeight());
     state.setLineHeightValue(0);
     state.fontBuilder().setInitial();
@@ -415,7 +415,7 @@ void StyleResolver::applyPropertiesToStyle(const CSSPropertyValue* properties, s
     StyleResolverState state(m_document, nullptr, style);
     state.setStyle(style);
 
-    state.fontBuilder().initForStyleResolve(m_document, style);
+    state.fontBuilder().initForStyleResolve(&m_document, style);
 
     for (size_t i = 0; i < count; ++i) {
         if (properties[i].value) {

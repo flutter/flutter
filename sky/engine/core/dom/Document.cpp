@@ -627,7 +627,7 @@ void Document::scheduleVisualUpdate()
 void Document::setupFontBuilder(RenderStyle* documentStyle)
 {
     FontBuilder fontBuilder;
-    fontBuilder.initForStyleResolve(*this, documentStyle);
+    fontBuilder.initForStyleResolve(this, documentStyle);
     RefPtr<CSSFontSelector> selector = m_styleEngine->fontSelector();
     fontBuilder.createFontForDocument(selector, documentStyle);
 }

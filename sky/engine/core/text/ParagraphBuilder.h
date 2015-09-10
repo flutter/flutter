@@ -32,6 +32,11 @@ public:
 
 private:
     explicit ParagraphBuilder();
+
+    OwnPtr<RenderView> m_renderView;
+
+    RefPtr<RenderStyle> m_parentStyle;
+    RenderParagraph* m_renderParagraph;
 };
 
 } // namespace blink

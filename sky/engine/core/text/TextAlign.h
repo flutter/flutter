@@ -6,10 +6,9 @@
 #define SKY_ENGINE_CORE_TEXT_TEXTALIGN_H_
 
 #include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
 
 namespace blink {
-
-class TextAlign {};
 
 template <>
 struct DartConverter<TextAlign>

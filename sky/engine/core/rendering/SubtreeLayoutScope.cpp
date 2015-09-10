@@ -38,7 +38,7 @@ namespace blink {
 SubtreeLayoutScope::SubtreeLayoutScope(RenderObject& root)
     : m_root(root)
 {
-    RELEASE_ASSERT(m_root.document().view()->isInPerformLayout());
+    RELEASE_ASSERT(!m_root.node() || m_root.document().view()->isInPerformLayout());
 }
 
 SubtreeLayoutScope::~SubtreeLayoutScope()

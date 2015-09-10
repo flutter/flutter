@@ -6,10 +6,9 @@
 #define SKY_ENGINE_CORE_TEXT_TEXTBASELINE_H_
 
 #include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
 
 namespace blink {
-
-class TextBaseline {};
 
 template <>
 struct DartConverter<TextBaseline>

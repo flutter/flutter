@@ -774,7 +774,7 @@ DEFINE_COMPARISON_OPERATORS_WITH_REFERENCES(RenderObject)
 
 inline bool RenderObject::documentBeingDestroyed() const
 {
-    return !document().isActive();
+    return m_node && !document().isActive();
 }
 
 // setNeedsLayout() won't cause full paint invalidations as

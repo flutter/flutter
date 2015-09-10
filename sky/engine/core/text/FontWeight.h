@@ -6,10 +6,9 @@
 #define SKY_ENGINE_CORE_TEXT_FONTWEIGHT_H_
 
 #include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/platform/fonts/FontTraits.h"
 
 namespace blink {
-
-class FontWeight {};
 
 template <>
 struct DartConverter<FontWeight>
