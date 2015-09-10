@@ -155,7 +155,7 @@ class Dismissable extends StatefulComponent {
       _fadePerformance.progress = _dragExtent.abs() / (_size.width * _kDismissCardThreshold);
   }
 
-  _handleDragEnd() {
+  void _handleDragEnd(Offset velocity) {
     if (!_isActive || _fadePerformance.isAnimating)
       return;
     _dragUnderway = false;

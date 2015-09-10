@@ -25,7 +25,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
   void handleEvent(sky.PointerEvent event);
   void acceptGesture(int pointer) { }
   void rejectGesture(int pointer) { }
-  void didStopTrackingLastPointer();
+  void didStopTrackingLastPointer(int pointer);
 
   void resolve(GestureDisposition disposition) {
     List<GestureArenaEntry> localEntries = new List.from(_entries);
@@ -53,7 +53,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
     _router.removeRoute(pointer, handleEvent);
     _trackedPointers.remove(pointer);
     if (_trackedPointers.isEmpty)
-      didStopTrackingLastPointer();
+      didStopTrackingLastPointer(pointer);
   }
 
   void stopTrackingIfPointerNoLongerDown(sky.PointerEvent event) {
@@ -124,7 +124,7 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
     }
   }
 
-  void didStopTrackingLastPointer() {
+  void didStopTrackingLastPointer(int pointer) {
     _stopTimer();
     state = GestureRecognizerState.ready;
   }

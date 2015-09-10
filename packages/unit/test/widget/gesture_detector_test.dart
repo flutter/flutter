@@ -21,7 +21,7 @@ void main() {
         onVerticalDragUpdate: (double scrollDelta) {
           updatedDragDelta = scrollDelta;
         },
-        onVerticalDragEnd: () {
+        onVerticalDragEnd: (Offset velocity) {
           didEndDrag = true;
         },
         child: new Container()
@@ -69,9 +69,9 @@ void main() {
     Widget builder() {
       return new GestureDetector(
         onVerticalDragUpdate: (double delta) { dragDistance += delta; },
-        onVerticalDragEnd: () { gestureCount += 1; },
+        onVerticalDragEnd: (Offset velocity) { gestureCount += 1; },
         onHorizontalDragUpdate: (_) { fail("gesture should not match"); },
-        onHorizontalDragEnd: () { fail("gesture should not match"); },
+        onHorizontalDragEnd: (Offset velocity) { fail("gesture should not match"); },
         child: new Container()
       );
     }

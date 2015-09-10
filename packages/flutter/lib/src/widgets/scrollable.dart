@@ -89,7 +89,7 @@ abstract class Scrollable extends StatefulComponent {
   GestureDragEndCallback _getDragEndHandler(ScrollDirection direction) {
     if (scrollDirection != direction || !scrollBehavior.isScrollable)
       return null;
-    return _maybeSettleScrollOffset;
+    return _handleDragEnd;
   }
 
   Widget build() {
@@ -98,11 +98,9 @@ abstract class Scrollable extends StatefulComponent {
       onVerticalDragEnd: _getDragEndHandler(ScrollDirection.vertical),
       onHorizontalDragUpdate: _getDragUpdateHandler(ScrollDirection.horizontal),
       onHorizontalDragEnd: _getDragEndHandler(ScrollDirection.horizontal),
-      onFling: scrollBehavior.isScrollable ? _handleFling : null,
       child: new Listener(
         child: buildContent(),
         onPointerDown: _handlePointerDown,
-        onGestureFlingCancel: _handleFlingCancel,
         onWheel: _handleWheel
       )
     );
@@ -183,19 +181,12 @@ abstract class Scrollable extends StatefulComponent {
     return EventDisposition.processed;
   }
 
-  void _handleFling(Offset velocity) {
-    _startToEndAnimation(velocity: _scrollVelocity(velocity));
-  }
-
-  void _maybeSettleScrollOffset() {
-    if (!_toEndAnimation.isAnimating &&
-        (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating))
+  void _handleDragEnd(Offset velocity) {
+    if (velocity != Offset.zero) {
+      _startToEndAnimation(velocity: _scrollVelocity(velocity));
+    } else if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating)) {
       settleScrollOffset();
-  }
-
-  EventDisposition _handleFlingCancel(sky.GestureEvent event) {
-    _maybeSettleScrollOffset();
-    return EventDisposition.processed;
+    }
   }
 
   EventDisposition _handleWheel(sky.WheelEvent event) {
@@ -570,7 +561,7 @@ class PageableList<T> extends ScrollableList<T> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  void _handleFling(sky.Offset velocity) {
+  void _handleDragEnd(sky.Offset velocity) {
     double scrollVelocity = _scrollVelocity(velocity);
     double newScrollOffset = _snapScrollOffset(scrollOffset + scrollVelocity.sign * itemExtent)
       .clamp(_snapScrollOffset(scrollOffset - itemExtent / 2.0),

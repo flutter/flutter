@@ -25,7 +25,7 @@ void main() {
     };
 
     bool didEndPan = false;
-    pan.onEnd = () {
+    pan.onEnd = (sky.Offset velocity) {
       didEndPan = true;
     };
 

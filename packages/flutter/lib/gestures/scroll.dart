@@ -16,13 +16,25 @@ enum DragState {
 
 typedef void GestureDragStartCallback();
 typedef void GestureDragUpdateCallback(double scrollDelta);
-typedef void GestureDragEndCallback();
+typedef void GestureDragEndCallback(sky.Offset velocity);
 
 typedef void GesturePanStartCallback();
 typedef void GesturePanUpdateCallback(sky.Offset scrollDelta);
-typedef void GesturePanEndCallback();
+typedef void GesturePanEndCallback(sky.Offset velocity);
 
 typedef void _GesturePolymorphicUpdateCallback<T>(T scrollDelta);
+
+// Fling velocities are logical pixels per second.
+typedef void GestureFlingCallback(sky.Offset velocity);
+
+int _eventTime(sky.PointerEvent event) => (event.timeStamp * 1000.0).toInt(); // microseconds
+
+bool _isFlingGesture(sky.GestureVelocity velocity) {
+  double velocitySquared = velocity.x * velocity.x + velocity.y * velocity.y;
+  return velocity.isValid &&
+    velocitySquared > kMinFlingVelocity * kMinFlingVelocity &&
+    velocitySquared < kMaxFlingVelocity * kMaxFlingVelocity;
+}
 
 abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecognizer {
   _DragGestureRecognizer({ PointerRouter router, this.onStart, this.onUpdate, this.onEnd })
@@ -39,6 +51,8 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
   T _getDragDelta(sky.PointerEvent event);
   bool get _hasSufficientPendingDragDeltaToAccept;
 
+  final sky.VelocityTracker _velocityTracker = new sky.VelocityTracker();
+
   void addPointer(sky.PointerEvent event) {
     startTrackingPointer(event.pointer);
     if (_state == DragState.ready) {
@@ -50,6 +64,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
   void handleEvent(sky.PointerEvent event) {
     assert(_state != DragState.ready);
     if (event.type == 'pointermove') {
+      _velocityTracker.addPosition(_eventTime(event), event.pointer, event.x, event.y);
       T delta = _getDragDelta(event);
       if (_state == DragState.accepted) {
         if (onUpdate != null)
@@ -75,7 +90,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
     }
   }
 
-  void didStopTrackingLastPointer() {
+  void didStopTrackingLastPointer(int pointer) {
     if (_state == DragState.possible) {
       resolve(GestureDisposition.rejected);
       _state = DragState.ready;
@@ -83,8 +98,20 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
     }
     bool wasAccepted = (_state == DragState.accepted);
     _state = DragState.ready;
-    if (wasAccepted && onEnd != null)
-      onEnd();
+    if (wasAccepted && onEnd != null) {
+      sky.GestureVelocity gestureVelocity = _velocityTracker.getVelocity(pointer);
+      sky.Offset velocity = sky.Offset.zero;
+      if (_isFlingGesture(gestureVelocity))
+        velocity = new sky.Offset(gestureVelocity.x, gestureVelocity.y);
+      resolve(GestureDisposition.accepted);
+      onEnd(velocity);
+    }
+    _velocityTracker.reset();
+  }
+
+  void dispose() {
+    _velocityTracker.reset();
+    super.dispose();
   }
 }
 
