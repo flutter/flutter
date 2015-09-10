@@ -313,7 +313,15 @@ class AndroidDevice(object):
             return
         if 'ANDROID_HOME' in os.environ:
             android_home_dir = os.environ['ANDROID_HOME']
-            self.adb_path = os.path.join(android_home_dir, 'sdk', 'platform-tools', 'adb')
+            adb_location1 = os.path.join(android_home_dir, 'sdk', 'platform-tools', 'adb')
+            adb_location2 = os.path.join(android_home_dir, 'platform-tools', 'adb')
+            if os.path.exists(adb_location1):
+                self.adb_path = adb_location1
+            elif os.path.exists(adb_location2):
+                self.adb_path = adb_location2
+            else:
+                logging.warning('"adb" not found at\n  "%s" or\n  "%s"\nusing default path "%s"' % (adb_location1, adb_location2, ADB_PATH))
+                self.adb_path = ADB_PATH
         else:
             self.adb_path = ADB_PATH
 
