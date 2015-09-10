@@ -4,6 +4,8 @@
 
 source_set("compositor") {
   sources = [
+    "checkerboard.cc",
+    "checkerboard.h",
     "clip_path_layer.cc",
     "clip_path_layer.h",
     "clip_rect_layer.cc",
@@ -12,6 +14,7 @@ source_set("compositor") {
     "clip_rrect_layer.h",
     "color_filter_layer.cc",
     "color_filter_layer.h",
+    "compositor_config.h",
     "container_layer.cc",
     "container_layer.h",
     "layer.cc",
