@@ -19,6 +19,9 @@ abstract class ScrollBehavior {
 
   /// The new scroll offset to use when the user attempts to scroll from the given offset by the given delta
   double applyCurve(double scrollOffset, double scrollDelta);
+
+  /// Whether this scroll behavior currently permits scrolling
+  bool get isScrollable => true;
 }
 
 /// A scroll behavior for a scrollable widget with linear extent
