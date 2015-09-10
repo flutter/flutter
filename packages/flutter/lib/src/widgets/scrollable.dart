@@ -9,6 +9,7 @@ import 'dart:sky' as sky;
 import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';
 import 'package:sky/gestures/constants.dart';
+import 'package:sky/gestures/scroll.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/viewport.dart';
 import 'package:sky/src/widgets/basic.dart';
@@ -79,13 +80,25 @@ abstract class Scrollable extends StatefulComponent {
 
   Widget buildContent();
 
+  GestureDragUpdateCallback _getDragUpdateHandler(ScrollDirection direction) {
+    if (scrollDirection != direction || !scrollBehavior.isScrollable)
+      return null;
+    return scrollBy;
+  }
+
+  GestureDragEndCallback _getDragEndHandler(ScrollDirection direction) {
+    if (scrollDirection != direction || !scrollBehavior.isScrollable)
+      return null;
+    return _maybeSettleScrollOffset;
+  }
+
   Widget build() {
     return new GestureDetector(
-      onVerticalDragUpdate: scrollDirection == ScrollDirection.vertical ? scrollBy : null,
-      onVerticalDragEnd: scrollDirection == ScrollDirection.vertical ? _maybeSettleScrollOffset : null,
-      onHorizontalDragUpdate: scrollDirection == ScrollDirection.horizontal ? scrollBy : null,
-      onHorizontalDragEnd: scrollDirection == ScrollDirection.horizontal ? _maybeSettleScrollOffset : null,
-      onFling: _handleFling,
+      onVerticalDragUpdate: _getDragUpdateHandler(ScrollDirection.vertical),
+      onVerticalDragEnd: _getDragEndHandler(ScrollDirection.vertical),
+      onHorizontalDragUpdate: _getDragUpdateHandler(ScrollDirection.horizontal),
+      onHorizontalDragEnd: _getDragEndHandler(ScrollDirection.horizontal),
+      onFling: scrollBehavior.isScrollable ? _handleFling : null,
       child: new Listener(
         child: buildContent(),
         onPointerDown: _handlePointerDown,
