@@ -204,4 +204,30 @@ void main() {
     expect(tester.findText('0'), isNull);
     expect(dismissedItems, equals([0]));
   });
+
+  // This is a regression test for
+  // https://github.com/domokit/sky_engine/issues/1068
+  /*
+  test('Verify that drag-move events do not assert', () {
+    WidgetTester tester = new WidgetTester();
+    scrollDirection = ScrollDirection.horizontal;
+    dismissDirection = DismissDirection.down;
+
+    tester.pumpFrame(widgetBuilder);
+    Widget itemWidget = tester.findText('0');
+
+    TestPointer pointer = new TestPointer(5);
+    Point location = tester.getTopLeft(itemWidget);
+    Offset offset = new Offset(0.0, 5.0);
+    tester.dispatchEvent(pointer.down(location), location);
+    tester.dispatchEvent(pointer.move(location + offset), location);
+    tester.pumpFrame(widgetBuilder);
+    tester.dispatchEvent(pointer.move(location + (offset * 2.0)), location);
+    tester.pumpFrame(widgetBuilder);
+    tester.dispatchEvent(pointer.move(location + (offset * 3.0)), location);
+    tester.pumpFrame(widgetBuilder);
+    tester.dispatchEvent(pointer.move(location + (offset * 4.0)), location);
+    tester.pumpFrame(widgetBuilder);
+  });
+  */
 }

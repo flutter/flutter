@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 // This file is a largely a copy of ui/events/gesture_detection/velocity_tracker.h
-// from https://chromium.googlesource.com/chromium/src. The
-// VelocityTracker::AddMovement(const MotionEvent& event) method and a few of
-// its supporting definitions have been removed.
-
+// and ui/events/gesture_detection/bitset_32.h from https://chromium.googlesource.com.
+// The VelocityTracker::AddMovement(const MotionEvent& event) method and a
+// few of its supporting definitions have been removed.
 
 #ifndef SKY_ENGINE_CORE_EVENTS_VELOCITY_TRACKER_H_
 #define SKY_ENGINE_CORE_EVENTS_VELOCITY_TRACKER_H_
@@ -220,8 +219,8 @@ public:
     return adoptRef(new VelocityTracker());
   }
   void reset();
-  void addPosition(long timeStamp, long pointerId, float x, float y);
-  PassRefPtr<GestureVelocity> getVelocity(long pointerId);
+  void addPosition(int timeStamp, int pointerId, float x, float y);
+  PassRefPtr<GestureVelocity> getVelocity(int pointerId);
 
 
   // Creates a velocity tracker using the default strategy for the platform.

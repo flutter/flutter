@@ -24,9 +24,6 @@ typedef void GesturePanEndCallback(sky.Offset velocity);
 
 typedef void _GesturePolymorphicUpdateCallback<T>(T scrollDelta);
 
-// Fling velocities are logical pixels per second.
-typedef void GestureFlingCallback(sky.Offset velocity);
-
 int _eventTime(sky.PointerEvent event) => (event.timeStamp * 1000.0).toInt(); // microseconds
 
 bool _isFlingGesture(sky.GestureVelocity velocity) {
