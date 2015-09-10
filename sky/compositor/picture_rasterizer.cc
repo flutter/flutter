@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/compositor_config.h"
+#include "sky/compositor/compositor_options.h"
 #include "sky/compositor/checkerboard.h"
 #include "sky/compositor/picture_rasterizer.h"
 #include "base/logging.h"
@@ -82,9 +82,10 @@ static RefPtr<SkImage> ImageFromPicture(GrContext* context,
 
   canvas->drawPicture(picture);
 
-#if COMPOSITOR_HIGHLIGHT_RASTERIZED_PICTURES
-  DrawCheckerboard(canvas, desc.fWidth, desc.fHeight);
-#endif
+  if (CompositorOptions::Shared().isEnabled(
+          CompositorOptions::Option::HightlightRasterizedImages)) {
+    DrawCheckerboard(canvas, desc.fWidth, desc.fHeight);
+  }
 
   // Step 4: Create an image representation from the texture
 
