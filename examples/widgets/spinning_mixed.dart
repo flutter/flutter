@@ -88,6 +88,6 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);
 
-  SkyBinding.instance.root = root;
+  SkyBinding.instance.renderView.child = root;
   scheduler.addPersistentFrameCallback(rotate);
 }

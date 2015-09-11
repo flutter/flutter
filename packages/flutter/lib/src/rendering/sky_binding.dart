@@ -23,19 +23,23 @@ int _hammingWeight(int value) {
   return weight;
 }
 
-class PointerState {
-  PointerState({ this.result, this.lastPosition });
+class _PointerState {
+  _PointerState({ this.result, this.lastPosition });
   HitTestResult result;
   Point lastPosition;
 }
 
 typedef void EventListener(sky.Event event);
 
+/// A hit test entry used by [SkyBinding]
 class BindingHitTestEntry extends HitTestEntry {
   const BindingHitTestEntry(HitTestTarget target, this.result) : super(target);
+
+  /// The result of the hit test
   final HitTestResult result;
 }
 
+/// The glue between the render tree and the sky engine
 class SkyBinding extends HitTestTarget {
 
   SkyBinding({ RenderBox root: null, RenderView renderViewOverride }) {
@@ -59,11 +63,13 @@ class SkyBinding extends HitTestTarget {
     assert(_instance == this);
   }
 
-  static SkyBinding _instance; // used to enforce that we're a singleton
+  /// The singleton instance of the binding
   static SkyBinding get instance => _instance;
+  static SkyBinding _instance;
 
-  RenderView _renderView;
+  /// The render tree that's attached to the output surface
   RenderView get renderView => _renderView;
+  RenderView _renderView;
 
   ViewConstraints _createConstraints() {
     return new ViewConstraints(size: new Size(sky.view.width, sky.view.height));
@@ -72,10 +78,7 @@ class SkyBinding extends HitTestTarget {
     _renderView.rootConstraints = _createConstraints();
   }
 
-  RenderBox get root => _renderView.child;
-  void set root(RenderBox value) {
-    _renderView.child = value;
-  }
+  /// Pump the rendering pipeline to generate a frame for the given time stamp
   void beginFrame(double timeStamp) {
     RenderObject.flushLayout();
     _renderView.updateCompositingBits();
@@ -84,8 +87,12 @@ class SkyBinding extends HitTestTarget {
   }
 
   final List<EventListener> _eventListeners = new List<EventListener>();
-  void addEventListener(EventListener e) => _eventListeners.add(e);
-  bool removeEventListener(EventListener e) => _eventListeners.remove(e);
+
+  /// Calls listener for every event that isn't localized to a given view coordinate
+  void addEventListener(EventListener listener) => _eventListeners.add(listener);
+
+  /// Stops calling listener for every event that isn't localized to a given view coordinate
+  bool removeEventListener(EventListener listener) => _eventListeners.remove(listener);
 
   void _handleEvent(sky.Event event) {
     if (event is sky.PointerEvent) {
@@ -98,19 +105,20 @@ class SkyBinding extends HitTestTarget {
     }
   }
 
+  /// A router that routes all pointer events received from the engine
   final PointerRouter pointerRouter = new PointerRouter();
 
-  Map<int, PointerState> _stateForPointer = new Map<int, PointerState>();
+  Map<int, _PointerState> _stateForPointer = new Map<int, _PointerState>();
 
-  PointerState _createStateForPointer(sky.PointerEvent event, Point position) {
+  _PointerState _createStateForPointer(sky.PointerEvent event, Point position) {
     HitTestResult result = hitTest(position);
-    PointerState state = new PointerState(result: result, lastPosition: position);
+    _PointerState state = new _PointerState(result: result, lastPosition: position);
     _stateForPointer[event.pointer] = state;
     return state;
   }
 
-  PointerState _getOrCreateStateForPointer(event, position) {
-    PointerState state = _stateForPointer[event.pointer];
+  _PointerState _getOrCreateStateForPointer(event, position) {
+    _PointerState state = _stateForPointer[event.pointer];
     if (state == null)
       state = _createStateForPointer(event, position);
     return state;
@@ -119,7 +127,7 @@ class SkyBinding extends HitTestTarget {
   EventDisposition _handlePointerEvent(sky.PointerEvent event) {
     Point position = new Point(event.x, event.y);
 
-    PointerState state = _getOrCreateStateForPointer(event, position);
+    _PointerState state = _getOrCreateStateForPointer(event, position);
 
     if (event.type == 'pointerup' || event.type == 'pointercancel') {
       if (_hammingWeight(event.buttons) <= 1)
@@ -133,6 +141,7 @@ class SkyBinding extends HitTestTarget {
     return dispatchEvent(event, state.result);
   }
 
+  /// Determine which [HitTestTarget] objects are located at a given position
   HitTestResult hitTest(Point position) {
     HitTestResult result = new HitTestResult();
     _renderView.hitTest(result, position: position);
@@ -140,6 +149,7 @@ class SkyBinding extends HitTestTarget {
     return result;
   }
 
+  /// Dispatch the given event to the path of the given hit test result
   EventDisposition dispatchEvent(sky.Event event, HitTestResult result) {
     assert(result != null);
     EventDisposition disposition = EventDisposition.ignored;
@@ -165,6 +175,7 @@ class SkyBinding extends HitTestTarget {
 
   String toString() => 'Render Tree:\n${_renderView}';
 
+  /// Prints a textual representation of the entire render tree
   void debugDumpRenderTree() {
     toString().split('\n').forEach(print);
   }

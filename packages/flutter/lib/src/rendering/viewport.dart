@@ -8,8 +8,25 @@ import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:vector_math/vector_math.dart';
 
-enum ScrollDirection { horizontal, vertical, both }
+/// The direction in which to scroll
+enum ScrollDirection {
+  /// Scroll left and right
+  horizontal,
 
+  /// Scroll up and down
+  vertical,
+
+  /// Scroll in all four cardinal directions
+  both
+}
+
+/// A render object that's bigger on the inside
+///
+/// A viewport is the core scrolling primitive in the render tree. The child of
+/// a viewport can layout to a larger size than the viewport itself. If that
+/// happens, only a portion of the child will be visible through the viewport.
+/// The portiion of the child that is visible is controlled by the scroll
+/// offset.
 class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
 
   RenderViewport({
@@ -33,8 +50,11 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     }
   }
 
-  Offset _scrollOffset;
+  /// The offset at which to paint the child
+  ///
+  /// The offset can be non-zero only in the [scrollDirection].
   Offset get scrollOffset => _scrollOffset;
+  Offset _scrollOffset;
   void set scrollOffset(Offset value) {
     if (value == _scrollOffset)
       return;
@@ -43,8 +63,13 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     markNeedsPaint();
   }
 
-  ScrollDirection _scrollDirection;
+  /// In which direction the child is permitted to be larger than the viewport
+  ///
+  /// If the viewport is scrollable in a particular direction (e.g., vertically),
+  /// the child is given layout constraints that are fully unconstrainted in
+  /// that direction (e.g., the child can be as tall as it wants).
   ScrollDirection get scrollDirection => _scrollDirection;
+  ScrollDirection _scrollDirection;
   void set scrollDirection(ScrollDirection value) {
     if (value == _scrollDirection)
       return;

@@ -89,7 +89,7 @@ class PaintingContext {
     _currentLayer = new PictureLayer(paintBounds: paintBounds);
     _recorder = new sky.PictureRecorder();
     _canvas = new PaintingCanvas(_recorder, paintBounds);
-    _containerLayer.add(_currentLayer);
+    _containerLayer.append(_currentLayer);
   }
 
   /// Stop recording draw operations into the current compositing layer
@@ -162,7 +162,7 @@ class PaintingContext {
       canvas.restore();
     } else {
       ClipRectLayer clipLayer = new ClipRectLayer(offset: childOffset, clipRect: clipRect);
-      _containerLayer.add(clipLayer);
+      _containerLayer.append(clipLayer);
       compositeChild(child, parentLayer: clipLayer);
     }
   }
@@ -183,7 +183,7 @@ class PaintingContext {
       canvas.restore();
     } else {
       ClipRRectLayer clipLayer = new ClipRRectLayer(offset: childOffset, bounds: bounds, clipRRect: clipRRect);
-      _containerLayer.add(clipLayer);
+      _containerLayer.append(clipLayer);
       compositeChild(child, parentLayer: clipLayer);
     }
   }
@@ -205,7 +205,7 @@ class PaintingContext {
       canvas.restore();
     } else {
       ClipPathLayer clipLayer = new ClipPathLayer(offset: childOffset, bounds: bounds, clipPath: clipPath);
-      _containerLayer.add(clipLayer);
+      _containerLayer.append(clipLayer);
       compositeChild(child, parentLayer: clipLayer);
     }
   }
@@ -225,7 +225,7 @@ class PaintingContext {
       canvas.restore();
     } else {
       TransformLayer transformLayer = new TransformLayer(offset: childOffset, transform: transform);
-      _containerLayer.add(transformLayer);
+      _containerLayer.append(transformLayer);
       compositeChild(child, parentLayer: transformLayer);
     }
   }
@@ -258,7 +258,7 @@ class PaintingContext {
           offset: childOffset,
           bounds: bounds,
           alpha: alpha);
-      _containerLayer.add(paintLayer);
+      _containerLayer.append(paintLayer);
       compositeChild(child, parentLayer: paintLayer);
     }
   }
@@ -295,7 +295,7 @@ class PaintingContext {
           bounds: bounds,
           color: color,
           transferMode: transferMode);
-      _containerLayer.add(paintLayer);
+      _containerLayer.append(paintLayer);
       compositeChild(child, parentLayer: paintLayer);
     }
   }
@@ -345,7 +345,7 @@ class PaintingContext {
       child._layer.detach();
       child._layer.offset = childOffset;
     }
-    parentLayer.add(child._layer);
+    parentLayer.append(child._layer);
 
     // Start a new layer for anything that remains of our own paint.
     _startRecording(originalLayer.paintBounds);
