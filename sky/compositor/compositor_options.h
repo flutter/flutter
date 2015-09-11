@@ -19,6 +19,8 @@ class CompositorOptions {
     // picture rasterizer. This guard enables highlighting the rasterized
     // images. Useful when debugging caching.
     HightlightRasterizedImages,
+    DisplayFrameStatistics,
+    DisplayRasterizerStatistics,
 
     TerminationSentinel,
   };

@@ -26,7 +26,7 @@ class PaintContext {
 
     ScopedFrame(ScopedFrame&& frame) = default;
 
-    ~ScopedFrame() { context_.endFrame(); }
+    ~ScopedFrame() { context_.endFrame(*this); }
 
    private:
     PaintContext& context_;
@@ -38,7 +38,7 @@ class PaintContext {
     ScopedFrame(PaintContext& context, SkCanvas& canvas, GrContext* gr_context)
         : context_(context), canvas_(canvas), gr_context_(gr_context) {
       DCHECK(&canvas) << "The frame requries a valid canvas";
-      context_.beginFrame();
+      context_.beginFrame(*this);
     };
 
     friend class PaintContext;
@@ -62,9 +62,9 @@ class PaintContext {
   instrumentation::Counter frame_count_;
   instrumentation::Stopwatch frame_time_;
 
-  void beginFrame();
-
-  void endFrame();
+  void beginFrame(ScopedFrame& frame);
+  void endFrame(ScopedFrame& frame);
+  void DisplayStatistics(ScopedFrame& frame);
 
   DISALLOW_COPY_AND_ASSIGN(PaintContext);
 };
