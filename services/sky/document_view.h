@@ -131,7 +131,7 @@ class DocumentView : public blink::ServiceProvider,
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<TextureLayer> root_layer_;
   std::unique_ptr<compositor::LayerTree> current_layer_tree_;  // TODO(abarth): Integrate //sky/compositor and //services/sky/compositor.
-  compositor::PictureRasterzier picture_rasterizer_;
+  compositor::PaintContext paint_context_;
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
   mojo::ServiceRegistryPtr service_registry_;
   scoped_ptr<mojo::StrongBinding<mojo::ServiceProvider>>
