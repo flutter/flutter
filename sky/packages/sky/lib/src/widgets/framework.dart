@@ -823,7 +823,6 @@ abstract class Component extends Widget {
       assert(_child == null);
     }
 
-    String _debugPreviousComponent;
     assert(() {
       _debugIsBuilding = true;
       _debugComponentBuildTree.add(this);
@@ -1137,7 +1136,8 @@ abstract class RenderObjectWrapper extends Widget {
           Widget ancestor = current.parent;
           while (ancestor != null && ancestor is Component)
             ancestor = ancestor.parent;
-          current.debugValidateAncestor(ancestor);
+          if (ancestor != null)
+            current.debugValidateAncestor(ancestor);
         }
         return true;
       });
