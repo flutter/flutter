@@ -14,6 +14,7 @@ abstract class CommandHandler {
 
   ArgParser get parser;
 
+  /// @return 0 for no errors or warnings executing command, 1 for warnings, 2 for errors.
   Future<int> processArgResults(ArgResults results);
 
   void printUsage([String message]) {

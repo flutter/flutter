@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:sky_tools/src/common.dart';
 import 'package:sky_tools/src/init.dart';
+import 'package:sky_tools/src/install.dart';
 
 void main(List<String> args) {
   Map<String, CommandHandler> handlers = {};
@@ -17,9 +18,13 @@ void main(List<String> args) {
       abbr: 'h', negatable: false, help: 'Display this help message.');
   parser.addSeparator('commands:');
 
-  CommandHandler handler = new InitCommandHandler();
-  parser.addCommand(handler.name, handler.parser);
-  handlers[handler.name] = handler;
+  for (CommandHandler handler in [
+    new InitCommandHandler(),
+    new InstallCommandHandler()
+  ]) {
+    parser.addCommand(handler.name, handler.parser);
+    handlers[handler.name] = handler;
+  }
 
   ArgResults results;
 
@@ -33,7 +38,14 @@ void main(List<String> args) {
   if (results['help']) {
     _printUsage(parser, handlers);
   } else if (results.command != null) {
-    handlers[results.command.name].processArgResults(results.command);
+    handlers[results.command.name]
+        .processArgResults(results.command)
+        .then((int code) => exit(code))
+        .catchError((e, stack) {
+      print('Error running ' + results.command.name + ': $e');
+      print(stack);
+      exit(2);
+    });
   } else {
     _printUsage(parser, handlers, 'No command specified.');
     exit(1);
