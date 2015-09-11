@@ -42,13 +42,13 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
     PaintContext& context,
     GrContext* gr_context,
     SkPicture* picture,
-    const SkISize& size,
-    const SkMatrix& incomingCTM) {
+    const SkISize& physical_size,
+    const SkMatrix& incoming_ctm) {
   // Step 1: Create a texture from the context's texture provider
 
   GrSurfaceDesc desc;
-  desc.fWidth = size.width() * incomingCTM.getScaleX();
-  desc.fHeight = size.height() * incomingCTM.getScaleY();
+  desc.fWidth = physical_size.width();
+  desc.fHeight = physical_size.height();
   desc.fFlags = kRenderTarget_GrSurfaceFlag;
   desc.fConfig = kRGBA_8888_GrPixelConfig;
 
@@ -65,10 +65,8 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
 
   GrBackendTextureDesc backendDesc;
   backendDesc.fConfig = desc.fConfig;
-  // Note that here, we are not using GrSurfaceDesc's dimensions as those are
-  // not in point space.
-  backendDesc.fWidth = size.width();
-  backendDesc.fHeight = size.height();
+  backendDesc.fWidth = physical_size.width() / incoming_ctm.getScaleX();
+  backendDesc.fHeight = physical_size.height() / incoming_ctm.getScaleY();
   backendDesc.fSampleCnt = desc.fSampleCnt;
   backendDesc.fFlags = kRenderTarget_GrBackendTextureFlag;
   backendDesc.fConfig = desc.fConfig;
@@ -86,7 +84,7 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
   SkCanvas* canvas = surface->getCanvas();
   DCHECK(canvas);
 
-  canvas->setMatrix(incomingCTM);
+  canvas->setMatrix(incoming_ctm);
   canvas->drawPicture(picture);
 
   if (context.options().isEnabled(
@@ -111,13 +109,13 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
     PaintContext& context,
     GrContext* gr_context,
     SkPicture* picture,
-    const SkISize& size,
-    const SkMatrix& incomingCTM) {
-  if (size.isEmpty() || picture == nullptr || gr_context == nullptr) {
+    const SkISize& physical_size,
+    const SkMatrix& incoming_ctm) {
+  if (physical_size.isEmpty() || picture == nullptr || gr_context == nullptr) {
     return nullptr;
   }
 
-  const Key key(picture->uniqueID(), size);
+  const Key key(picture->uniqueID(), physical_size);
 
   Value& value = cache_[key];
 
@@ -131,8 +129,8 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
       << "Did you forget to call PurgeCache between frames?";
 
   if (!value.image) {
-    value.image =
-        ImageFromPicture(context, gr_context, picture, size, incomingCTM);
+    value.image = ImageFromPicture(context, gr_context, picture, physical_size,
+                                   incoming_ctm);
   }
 
   if (value.image) {
