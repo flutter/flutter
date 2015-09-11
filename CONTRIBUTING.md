@@ -40,10 +40,17 @@ Building the code
 Currently we support building on Linux only, for an Android target and for a headless Linux
 target. Building on MacOS for Android, iOS, and a head-less MacOS target is coming soon.
 
-### Android (cross-compiling from Linux)
+### Android (cross-compiling from Mac or Linux)
 
-* (Only the first time) `./tools/android/download_android_tools.py`
-* (Only the first time) `sudo ./build/install-build-deps-android.sh`
+## The first time
+
+* `./tools/android/download_android_tools.py`
+* On Linux: `sudo ./build/install-build-deps-android.sh`
+* On Mac: Install Oracle's Java JDK, version 1.7 or later.
+* On Mac: Install "ant": `brew install ant`.
+
+## Building
+
 * `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
 * `./sky/tools/shelldb start out/android_Debug/ examples/hello_world/lib/main.dart`
