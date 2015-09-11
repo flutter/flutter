@@ -126,7 +126,7 @@ class RenderAutoLayout extends RenderBox
          RenderBoxContainerDefaultsMixin<RenderBox, AutoLayoutParentData>,
          _AutoLayoutParamMixin {
 
-  RenderAutoLayout({ List<RenderBox> children }) {
+  RenderAutoLayout({ Iterable<RenderBox> children }) {
     _setupLayoutParameters(this);
     _setupEditVariablesInSolver(_solver, al.Priority.required - 1);
     addAll(children);
