@@ -21,22 +21,28 @@ bool _initInDebugBuild() {
 bool debugPaintSizeEnabled = false;
 
 /// The color to use when painting RenderObject bounds.
-const sky.Color debugPaintSizeColor = const sky.Color(0xFF00FFFF);
+sky.Color debugPaintSizeColor = const sky.Color(0xFF00FFFF);
 
 /// Causes each RenderBox to paint a line at each of its baselines.
 bool debugPaintBaselinesEnabled = false;
 
 /// The color to use when painting alphabetic baselines.
-const sky.Color debugPaintAlphabeticBaselineColor = const sky.Color(0xFF00FF00);
+sky.Color debugPaintAlphabeticBaselineColor = const sky.Color(0xFF00FF00);
 
 /// The color ot use when painting ideographic baselines.
-const sky.Color debugPaintIdeographicBaselineColor = const sky.Color(0xFFFFD000);
+sky.Color debugPaintIdeographicBaselineColor = const sky.Color(0xFFFFD000);
 
 /// Causes each Layer to paint a box around its bounds.
 bool debugPaintLayerBordersEnabled = false;
 
 /// The color to use when painting Layer borders.
-const sky.Color debugPaintLayerBordersColor = const sky.Color(0xFFFF9800);
+sky.Color debugPaintLayerBordersColor = const sky.Color(0xFFFF9800);
 
 /// Causes RenderObjects to paint warnings when painting outside their bounds.
 bool debugPaintBoundsEnabled = false;
+
+/// The color to use when painting RenderError boxes in checked mode.
+sky.Color debugErrorBoxColor = const sky.Color(0xFFFF0000);
+
+/// How many lines of debugging output to include when an exception is reported.
+int debugRenderObjectDumpMaxLength = 10;
