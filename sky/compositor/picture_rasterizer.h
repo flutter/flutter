@@ -28,7 +28,8 @@ class PictureRasterzier {
   RefPtr<SkImage> GetCachedImageIfPresent(PaintContext& context,
                                           GrContext* gr_context,
                                           SkPicture* picture,
-                                          SkISize size);
+                                          const SkISize& size,
+                                          const SkMatrix& incomingCTM);
 
   void PurgeCache();
 
@@ -80,7 +81,8 @@ class PictureRasterzier {
   RefPtr<SkImage> ImageFromPicture(PaintContext& context,
                                    GrContext* gr_context,
                                    SkPicture* picture,
-                                   const SkISize& size);
+                                   const SkISize& size,
+                                   const SkMatrix& incomingCTM);
 
   DISALLOW_COPY_AND_ASSIGN(PictureRasterzier);
 };

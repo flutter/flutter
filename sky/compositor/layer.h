@@ -34,8 +34,6 @@ class Layer {
 
   virtual void Paint(PaintContext::ScopedFrame& frame) = 0;
 
-  virtual SkMatrix model_view_matrix(const SkMatrix& model_matrix) const;
-
   ContainerLayer* parent() const { return parent_; }
 
   void set_parent(ContainerLayer* parent) { parent_ = parent; }

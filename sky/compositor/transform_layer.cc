@@ -13,12 +13,6 @@ TransformLayer::TransformLayer() {
 TransformLayer::~TransformLayer() {
 }
 
-SkMatrix TransformLayer::model_view_matrix(const SkMatrix& model_matrix) const {
-  SkMatrix modelView = model_matrix;
-  modelView.postConcat(transform_);
-  return modelView;
-}
-
 void TransformLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkCanvas& canvas = frame.canvas();
   canvas.save();

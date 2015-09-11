@@ -32,7 +32,7 @@ void DrawCheckerboard(SkCanvas* canvas, int width, int height) {
 
   // Draw a checkerboard
   canvas->clipRect(rect);
-  DrawCheckerboard(canvas, 0x9900FF00, 0x00000000, 12);
+  DrawCheckerboard(canvas, 0x4400FF00, 0x00000000, 12);
 
   // Stroke the drawn area
   SkPaint debugPaint;

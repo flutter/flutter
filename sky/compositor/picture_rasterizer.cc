@@ -38,15 +38,17 @@ PictureRasterzier::Value::Value()
 PictureRasterzier::Value::~Value() {
 }
 
-RefPtr<SkImage> PictureRasterzier::ImageFromPicture(PaintContext& context,
-                                                    GrContext* gr_context,
-                                                    SkPicture* picture,
-                                                    const SkISize& size) {
+RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
+    PaintContext& context,
+    GrContext* gr_context,
+    SkPicture* picture,
+    const SkISize& size,
+    const SkMatrix& incomingCTM) {
   // Step 1: Create a texture from the context's texture provider
 
   GrSurfaceDesc desc;
-  desc.fWidth = size.width();
-  desc.fHeight = size.height();
+  desc.fWidth = size.width() * incomingCTM.getScaleX();
+  desc.fHeight = size.height() * incomingCTM.getScaleY();
   desc.fFlags = kRenderTarget_GrSurfaceFlag;
   desc.fConfig = kRGBA_8888_GrPixelConfig;
 
@@ -63,8 +65,10 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(PaintContext& context,
 
   GrBackendTextureDesc backendDesc;
   backendDesc.fConfig = desc.fConfig;
-  backendDesc.fWidth = desc.fWidth;
-  backendDesc.fHeight = desc.fHeight;
+  // Note that here, we are not using GrSurfaceDesc's dimensions as those are
+  // not in point space.
+  backendDesc.fWidth = size.width();
+  backendDesc.fHeight = size.height();
   backendDesc.fSampleCnt = desc.fSampleCnt;
   backendDesc.fFlags = kRenderTarget_GrBackendTextureFlag;
   backendDesc.fConfig = desc.fConfig;
@@ -82,6 +86,7 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(PaintContext& context,
   SkCanvas* canvas = surface->getCanvas();
   DCHECK(canvas);
 
+  canvas->setMatrix(incomingCTM);
   canvas->drawPicture(picture);
 
   if (context.options().isEnabled(
@@ -106,7 +111,8 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
     PaintContext& context,
     GrContext* gr_context,
     SkPicture* picture,
-    SkISize size) {
+    const SkISize& size,
+    const SkMatrix& incomingCTM) {
   if (size.isEmpty() || picture == nullptr || gr_context == nullptr) {
     return nullptr;
   }
@@ -122,10 +128,11 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
 
   value.access_count++;
   DCHECK(value.access_count == 1)
-      << "Did you forget to call purge_cache between frames?";
+      << "Did you forget to call PurgeCache between frames?";
 
   if (!value.image) {
-    value.image = ImageFromPicture(context, gr_context, picture, size);
+    value.image =
+        ImageFromPicture(context, gr_context, picture, size, incomingCTM);
   }
 
   if (value.image) {
