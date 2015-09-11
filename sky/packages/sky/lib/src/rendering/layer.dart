@@ -7,24 +7,36 @@ import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:vector_math/vector_math.dart';
 
+/// A composited layer
+///
+/// During painting, the render tree generates a tree of composited layers that
+/// are uploaded into the engine and displayed by the compositor. This class is
+/// the base class for all composited layers.
 abstract class Layer {
   Layer({ this.offset: Offset.zero });
 
-  Offset offset; // From parent, in parent's coordinate system.
+  /// Offset from parent in the parent's coordinate system.
+  Offset offset;
 
-  ContainerLayer _parent;
+  /// This layer's parent in the layer tree
   ContainerLayer get parent => _parent;
+  ContainerLayer _parent;
 
-  Layer _nextSibling;
+  /// This layer's next sibling in the parent layer's child list
   Layer get nextSibling => _nextSibling;
+  Layer _nextSibling;
 
-  Layer _previousSibling;
+  /// This layer's previous sibling in the parent layer's child list
   Layer get previousSibling => _previousSibling;
+  Layer _previousSibling;
 
+  /// Removes this layer from its parent layer's child list
   void detach() {
     if (_parent != null)
-      _parent.remove(this);
+      _parent._remove(this);
   }
+
+  /// Replaces this layer with the given layer in the parent layer's child list
   void replaceWith(Layer newLayer) {
     assert(_parent != null);
     assert(newLayer._parent == null);
@@ -46,14 +58,27 @@ abstract class Layer {
     _parent = null;
   }
 
+  /// Override this function to upload this layer to the engine
+  ///
+  /// The layerOffset is the accumulated offset of this layer's parent from the
+  /// origin of the builder's coordinate system.
   void addToScene(sky.SceneBuilder builder, Offset layerOffset);
 }
 
+/// A composited layer containing a [Picture]
 class PictureLayer extends Layer {
   PictureLayer({ Offset offset: Offset.zero, this.paintBounds })
     : super(offset: offset);
 
+  /// The rectangle in this layer's coodinate system that bounds the recording
+  ///
+  /// The paint bounds are used to decide how much graphics memory to allocate
+  /// when rasterizing this layer.
   Rect paintBounds;
+
+  /// The picture recorded for this layer
+  ///
+  /// The picture's coodinate system matches this layer's coodinate system
   sky.Picture picture;
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
@@ -62,16 +87,17 @@ class PictureLayer extends Layer {
 
 }
 
+/// A composited layer that has a list of children
 class ContainerLayer extends Layer {
   ContainerLayer({ Offset offset: Offset.zero }) : super(offset: offset);
 
-  // TODO(ianh): hide firstChild since nobody uses it
-  Layer _firstChild;
+  /// The first composited layer in this layer's child list
   Layer get firstChild => _firstChild;
+  Layer _firstChild;
 
-  // TODO(ianh): remove _lastChild since nobody uses it
-  Layer _lastChild;
+  /// The last composited layer in this layer's child list
   Layer get lastChild => _lastChild;
+  Layer _lastChild;
 
   bool _debugUltimatePreviousSiblingOf(Layer child, { Layer equals }) {
     while (child._previousSibling != null) {
@@ -89,46 +115,24 @@ class ContainerLayer extends Layer {
     return child == equals;
   }
 
-  // TODO(ianh): Remove 'before' and rename the function to 'append' since nobody uses 'before'
-  void add(Layer child, { Layer before }) {
+  /// Adds the given layer to the end of this layer's child list
+  void append(Layer child) {
     assert(child != this);
-    assert(before != this);
-    assert(child != before);
     assert(child != _firstChild);
     assert(child != _lastChild);
     assert(child._parent == null);
     assert(child._nextSibling == null);
     assert(child._previousSibling == null);
     child._parent = this;
-    if (before == null) {
-      child._previousSibling = _lastChild;
-      if (_lastChild != null)
-        _lastChild._nextSibling = child;
-      _lastChild = child;
-      if (_firstChild == null)
-        _firstChild = child;
-    } else {
-      assert(_firstChild != null);
-      assert(_lastChild != null);
-      assert(_debugUltimatePreviousSiblingOf(before, equals: _firstChild));
-      assert(_debugUltimateNextSiblingOf(before, equals: _lastChild));
-      if (before._previousSibling == null) {
-        assert(before == _firstChild);
-        child._nextSibling = before;
-        before._previousSibling = child;
-        _firstChild = child;
-      } else {
-        child._previousSibling = before._previousSibling;
-        child._nextSibling = before;
-        child._previousSibling._nextSibling = child;
-        child._nextSibling._previousSibling = child;
-        assert(before._previousSibling == child);
-      }
-    }
+    child._previousSibling = _lastChild;
+    if (_lastChild != null)
+      _lastChild._nextSibling = child;
+    _lastChild = child;
+    if (_firstChild == null)
+      _firstChild = child;
   }
 
-  // TODO(ianh): Hide this function since only detach() uses it
-  void remove(Layer child) {
+  void _remove(Layer child) {
     assert(child._parent == this);
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
@@ -149,6 +153,7 @@ class ContainerLayer extends Layer {
     child._parent = null;
   }
 
+  /// Removes all of this layer's children from its child list
   void removeAllChildren() {
     Layer child = _firstChild;
     while (child != null) {
@@ -166,8 +171,9 @@ class ContainerLayer extends Layer {
     addChildrenToScene(builder, offset + layerOffset);
   }
 
+  /// Uploads all of this layer's children to the engine
   void addChildrenToScene(sky.SceneBuilder builder, Offset layerOffset) {
-    Layer child = firstChild;
+    Layer child = _firstChild;
     while (child != null) {
       child.addToScene(builder, layerOffset);
       child = child.nextSibling;
@@ -176,11 +182,14 @@ class ContainerLayer extends Layer {
 
 }
 
+/// A composite layer that clips its children using a rectangle
 class ClipRectLayer extends ContainerLayer {
   ClipRectLayer({ Offset offset: Offset.zero, this.clipRect }) : super(offset: offset);
 
-  // clipRect is _not_ affected by given offset
+  /// The rectangle to clip in the parent's coordinate system
   Rect clipRect;
+  // TODO(abarth): Why is the rectangle in the parent's coordinate system
+  // instead of in the coordinate system of this layer?
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipRect(clipRect.shift(layerOffset));
@@ -190,12 +199,18 @@ class ClipRectLayer extends ContainerLayer {
 
 }
 
+/// A composite layer that clips its children using a rounded rectangle
 class ClipRRectLayer extends ContainerLayer {
   ClipRRectLayer({ Offset offset: Offset.zero, this.bounds, this.clipRRect }) : super(offset: offset);
 
-  // bounds and clipRRect are _not_ affected by given offset
+  /// Unused
   Rect bounds;
+  // TODO(abarth): Remove.
+
+  /// The rounded-rect to clip in the parent's coordinate system
   sky.RRect clipRRect;
+  // TODO(abarth): Why is the rounded-rect in the parent's coordinate system
+  // instead of in the coordinate system of this layer?
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipRRect(clipRRect.shift(layerOffset), bounds.shift(layerOffset));
@@ -205,12 +220,18 @@ class ClipRRectLayer extends ContainerLayer {
 
 }
 
+/// A composite layer that clips its children using a path
 class ClipPathLayer extends ContainerLayer {
   ClipPathLayer({ Offset offset: Offset.zero, this.bounds, this.clipPath }) : super(offset: offset);
 
-  // bounds and clipPath are _not_ affected by given offset
+  /// Unused
   Rect bounds;
+  // TODO(abarth): Remove.
+
+  /// The path to clip in the parent's coordinate system
   Path clipPath;
+  // TODO(abarth): Why is the path in the parent's coordinate system instead of
+  // in the coordinate system of this layer?
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipPath(clipPath.shift(layerOffset), bounds.shift(layerOffset));
@@ -220,9 +241,11 @@ class ClipPathLayer extends ContainerLayer {
 
 }
 
+/// A composited layer that applies a transformation matrix to its children
 class TransformLayer extends ContainerLayer {
   TransformLayer({ Offset offset: Offset.zero, this.transform }) : super(offset: offset);
 
+  /// The matrix to apply
   Matrix4 transform;
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
@@ -234,11 +257,18 @@ class TransformLayer extends ContainerLayer {
   }
 }
 
+/// A composited layer that makes its children partially transparent
 class OpacityLayer extends ContainerLayer {
   OpacityLayer({ Offset offset: Offset.zero, this.bounds, this.alpha }) : super(offset: offset);
 
-  // bounds is _not_ affected by given offset
+  /// Unused
   Rect bounds;
+  // TODO(abarth): Remove.
+
+  /// The amount to multiply into the alpha channel
+  ///
+  /// The opacity is expressed as an integer from 0 to 255, where 0 is fully
+  /// transparent and 255 is fully opaque.
   int alpha;
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
@@ -248,6 +278,7 @@ class OpacityLayer extends ContainerLayer {
   }
 }
 
+/// A composited layer that applies a color filter to its children
 class ColorFilterLayer extends ContainerLayer {
   ColorFilterLayer({
     Offset offset: Offset.zero,
@@ -256,9 +287,14 @@ class ColorFilterLayer extends ContainerLayer {
     this.transferMode
   }) : super(offset: offset);
 
-  // bounds is _not_ affected by given offset
+  /// Unused
   Rect bounds;
+  // TODO(abarth): Remove.
+
+  /// The color to use as input to the color filter
   Color color;
+
+  /// The transfer mode to use to combine [color] with the children's painting
   sky.TransferMode transferMode;
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
