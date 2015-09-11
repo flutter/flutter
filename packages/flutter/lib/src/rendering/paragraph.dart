@@ -19,6 +19,7 @@ double _applyFloatingPointHack(double layoutValue) {
   return layoutValue.ceilToDouble();
 }
 
+/// A render object that displays a paragraph of text
 class RenderParagraph extends RenderBox {
 
   RenderParagraph(TextSpan text) : _textPainter = new TextPainter(text) {
@@ -29,6 +30,7 @@ class RenderParagraph extends RenderBox {
 
   BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
 
+  /// The text to display
   TextSpan get text => _textPainter.text;
   void set text(TextSpan value) {
     if (_textPainter.text == value)
