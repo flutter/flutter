@@ -18,9 +18,9 @@ void ContainerLayer::Add(std::unique_ptr<Layer> layer) {
   layers_.push_back(std::move(layer));
 }
 
-void ContainerLayer::PaintChildren(PaintContext& context) const {
+void ContainerLayer::PaintChildren(PaintContext::ScopedFrame& frame) const {
   for (auto& layer : layers_)
-    layer->Paint(context);
+    layer->Paint(frame);
 }
 
 }  // namespace compositor

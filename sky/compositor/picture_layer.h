@@ -21,9 +21,9 @@ class PictureLayer : public Layer {
 
   SkMatrix model_view_matrix(const SkMatrix& model_matrix) const override;
 
-  void Paint(PaintContext& context) override;
-
   SkPicture* picture() const { return picture_.get(); }
+
+  void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:
   SkPoint offset_;

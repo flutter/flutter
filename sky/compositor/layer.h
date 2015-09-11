@@ -32,7 +32,7 @@ class Layer {
   Layer();
   virtual ~Layer();
 
-  virtual void Paint(PaintContext& context) = 0;
+  virtual void Paint(PaintContext::ScopedFrame& frame) = 0;
 
   virtual SkMatrix model_view_matrix(const SkMatrix& model_matrix) const;
 

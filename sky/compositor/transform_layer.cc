@@ -19,12 +19,12 @@ SkMatrix TransformLayer::model_view_matrix(const SkMatrix& model_matrix) const {
   return modelView;
 }
 
-void TransformLayer::Paint(PaintContext& context) {
-  SkCanvas* canvas = context.canvas();
-  canvas->save();
-  canvas->concat(transform_);
-  PaintChildren(context);
-  canvas->restore();
+void TransformLayer::Paint(PaintContext::ScopedFrame& frame) {
+  SkCanvas& canvas = frame.canvas();
+  canvas.save();
+  canvas.concat(transform_);
+  PaintChildren(frame);
+  canvas.restore();
 }
 
 }  // namespace compositor

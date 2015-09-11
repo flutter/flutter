@@ -20,23 +20,24 @@ SkMatrix PictureLayer::model_view_matrix(const SkMatrix& model_matrix) const {
   return modelView;
 }
 
-void PictureLayer::Paint(PaintContext& context) {
+void PictureLayer::Paint(PaintContext::ScopedFrame& frame) {
   DCHECK(picture_);
 
   const SkRect& bounds = paint_bounds();
   SkISize size = SkISize::Make(bounds.width(), bounds.height());
 
-  RefPtr<SkImage> image = context.rasterizer().GetCachedImageIfPresent(
-      context.gr_context(), picture_.get(), size);
-  SkCanvas* canvas = context.canvas();
+  RefPtr<SkImage> image =
+      frame.paint_context().rasterizer().GetCachedImageIfPresent(
+          frame.paint_context(), frame.gr_context(), picture_.get(), size);
+  SkCanvas& canvas = frame.canvas();
 
   if (image) {
-    canvas->drawImage(image.get(), offset_.x(), offset_.y());
+    canvas.drawImage(image.get(), offset_.x(), offset_.y());
   } else {
-    canvas->save();
-    canvas->translate(offset_.x(), offset_.y());
-    canvas->drawPicture(picture_.get());
-    canvas->restore();
+    canvas.save();
+    canvas.translate(offset_.x(), offset_.y());
+    canvas.drawPicture(picture_.get());
+    canvas.restore();
   }
 }
 

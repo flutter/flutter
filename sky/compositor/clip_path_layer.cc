@@ -13,12 +13,12 @@ ClipPathLayer::ClipPathLayer() {
 ClipPathLayer::~ClipPathLayer() {
 }
 
-void ClipPathLayer::Paint(PaintContext& context) {
-  SkCanvas* canvas = context.canvas();
-  canvas->saveLayer(&clip_path_.getBounds(), nullptr);
-  canvas->clipPath(clip_path_);
-  PaintChildren(context);
-  canvas->restore();
+void ClipPathLayer::Paint(PaintContext::ScopedFrame& frame) {
+  SkCanvas& canvas = frame.canvas();
+  canvas.saveLayer(&clip_path_.getBounds(), nullptr);
+  canvas.clipPath(clip_path_);
+  PaintChildren(frame);
+  canvas.restore();
 }
 
 }  // namespace compositor

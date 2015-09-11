@@ -13,16 +13,16 @@ OpacityLayer::OpacityLayer() {
 OpacityLayer::~OpacityLayer() {
 }
 
-void OpacityLayer::Paint(PaintContext& context) {
+void OpacityLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkColor color = SkColorSetARGB(alpha_, 0, 0, 0);
   RefPtr<SkColorFilter> colorFilter = adoptRef(
       SkColorFilter::CreateModeFilter(color, SkXfermode::kSrcOver_Mode));
   SkPaint paint;
   paint.setColorFilter(colorFilter.get());
-  SkCanvas* canvas = context.canvas();
-  canvas->saveLayer(&paint_bounds(), &paint);
-  PaintChildren(context);
-  canvas->restore();
+  SkCanvas& canvas = frame.canvas();
+  canvas.saveLayer(&paint_bounds(), &paint);
+  PaintChildren(frame);
+  canvas.restore();
 }
 
 }  // namespace compositor

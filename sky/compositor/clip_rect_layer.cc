@@ -13,12 +13,12 @@ ClipRectLayer::ClipRectLayer() {
 ClipRectLayer::~ClipRectLayer() {
 }
 
-void ClipRectLayer::Paint(PaintContext& context) {
-  SkCanvas* canvas = context.canvas();
-  canvas->save();
-  canvas->clipRect(clip_rect_);
-  PaintChildren(context);
-  canvas->restore();
+void ClipRectLayer::Paint(PaintContext::ScopedFrame& frame) {
+  SkCanvas& canvas = frame.canvas();
+  canvas.save();
+  canvas.clipRect(clip_rect_);
+  PaintChildren(frame);
+  canvas.restore();
 }
 
 }  // namespace compositor
