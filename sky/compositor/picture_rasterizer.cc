@@ -85,7 +85,8 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
   SkCanvas* canvas = surface->getCanvas();
   DCHECK(canvas);
 
-  canvas->setMatrix(incoming_ctm);
+  canvas->setMatrix(
+      SkMatrix::MakeScale(incoming_ctm.getScaleX(), incoming_ctm.getScaleY()));
   canvas->drawPicture(picture);
 
   if (context.options().isEnabled(
