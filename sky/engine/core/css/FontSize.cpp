@@ -53,7 +53,7 @@ float FontSize::getComputedSizeFromSpecifiedSize(const Document* document, bool 
     // However we always allow the page to set an explicit pixel size that is smaller,
     // since sites will mis-render otherwise (e.g., http://www.gamespot.com with a 9px minimum).
 
-    Settings* settings = document->settings();
+    Settings* settings = document ? document->settings() : nullptr;
     if (!settings)
         return 1.0f;
 
@@ -112,7 +112,7 @@ static int inline rowFromMediumFontSizeInRange(const Settings* settings, FixedPi
 float FontSize::fontSizeForKeyword(const Document* document, CSSValueID keyword, FixedPitchFontType fixedPitchFontType)
 {
     ASSERT(keyword >= CSSValueXxSmall && keyword <= CSSValueWebkitXxxLarge);
-    const Settings* settings = document->settings();
+    const Settings* settings = document ? document->settings() : nullptr;
     if (!settings)
         return 1.0f;
 

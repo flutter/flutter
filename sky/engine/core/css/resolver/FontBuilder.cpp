@@ -67,10 +67,10 @@ FontBuilder::FontBuilder()
 {
 }
 
-void FontBuilder::initForStyleResolve(const Document& document, RenderStyle* style)
+void FontBuilder::initForStyleResolve(Document* document, RenderStyle* style)
 {
-    ASSERT(document.frame());
-    m_document = &document;
+    ASSERT(!document || document->frame());
+    m_document = document;
     m_style = style;
     m_fontDirty = false;
 }

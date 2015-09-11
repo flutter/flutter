@@ -44,7 +44,7 @@ public:
     FontBuilder();
 
     // FIXME: The name is probably wrong, but matches StyleResolverState callsite for consistency.
-    void initForStyleResolve(const Document&, RenderStyle*);
+    void initForStyleResolve(Document*, RenderStyle*);
 
     void setInitial();
 

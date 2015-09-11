@@ -37,7 +37,7 @@ namespace blink {
 
 RenderView::RenderView(Document* document)
     : RenderFlexibleBox(document)
-    , m_frameView(document->view())
+    , m_frameView(document ? document->view() : nullptr)
     , m_selectionStart(nullptr)
     , m_selectionEnd(nullptr)
     , m_selectionStartPos(-1)
@@ -356,14 +356,14 @@ int RenderView::viewHeight() const
 {
     if (m_frameView)
         return m_frameView->layoutSize().height();
-    return 0;
+    return m_frameViewSize.height();
 }
 
 int RenderView::viewWidth() const
 {
     if (m_frameView)
         return m_frameView->layoutSize().width();
-    return 0;
+    return m_frameViewSize.width();
 }
 
 int RenderView::viewLogicalHeight() const

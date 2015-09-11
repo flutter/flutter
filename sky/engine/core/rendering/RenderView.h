@@ -77,6 +77,7 @@ public:
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
     virtual LayoutRect viewRect() const override;
+    void setFrameViewSize(const IntSize& frameViewSize) { m_frameViewSize = frameViewSize; }
 
     IntRect unscaledDocumentRect() const;
     LayoutRect backgroundRect(RenderBox* backgroundRenderer) const;
@@ -95,6 +96,7 @@ private:
     void positionDialogs();
 
     FrameView* m_frameView;
+    IntSize m_frameViewSize;
 
     RawPtr<RenderObject> m_selectionStart;
     RawPtr<RenderObject> m_selectionEnd;
