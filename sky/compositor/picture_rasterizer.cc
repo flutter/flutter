@@ -91,7 +91,7 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
 
   if (context.options().isEnabled(
           CompositorOptions::Option::HightlightRasterizedImages)) {
-    DrawCheckerboard(canvas, desc.fWidth, desc.fHeight);
+    DrawCheckerboard(canvas, backendDesc.fWidth, backendDesc.fHeight);
   }
 
   // Step 4: Create an image representation from the texture
