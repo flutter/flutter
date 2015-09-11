@@ -8,6 +8,7 @@
 #include "base/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "sky/compositor/instrumentation.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
 
@@ -66,6 +67,14 @@ class PictureRasterzier {
 
   using Cache = std::unordered_map<Key, Value, KeyHash, KeyEqual>;
   Cache cache_;
+  instrumentation::Counter cache_fills_;
+  instrumentation::Counter cache_hits_;
+  instrumentation::Counter cache_evictions_;
+
+  RefPtr<SkImage> ImageFromPicture(PaintContext& context,
+                                   GrContext* gr_context,
+                                   SkPicture* picture,
+                                   const SkISize& size);
 
   DISALLOW_COPY_AND_ASSIGN(PictureRasterzier);
 };
