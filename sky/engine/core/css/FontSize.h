@@ -38,14 +38,11 @@ private:
     }
 
 public:
-    static float getComputedSizeFromSpecifiedSize(const Document*, bool isAbsoluteSize, float specifiedSize, ESmartMinimumForFontSize = UseSmartMinimumForFontFize);
+    static float getComputedSizeFromSpecifiedSize(bool isAbsoluteSize, float specifiedSize, ESmartMinimumForFontSize = UseSmartMinimumForFontFize);
 
     // Given a CSS keyword in the range (xx-small to -webkit-xxx-large), this function will return
     // the correct font size scaled relative to the user's default (medium).
-    static float fontSizeForKeyword(const Document*, CSSValueID keyword, FixedPitchFontType);
-
-    // Given a font size in pixel, this function will return legacy font size between 1 and 7.
-    static int legacyFontSize(const Document*, int pixelFontSize, FixedPitchFontType);
+    static float fontSizeForKeyword(CSSValueID keyword, FixedPitchFontType);
 };
 
 } // namespace blink

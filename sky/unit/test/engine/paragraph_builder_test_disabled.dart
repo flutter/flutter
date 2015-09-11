@@ -8,6 +8,14 @@ void main() {
     builder.addText('Hello');
     Paragraph paragraph = builder.build(new ParagraphStyle());
     expect(paragraph, isNotNull);
+
+    paragraph.minWidth = 0.0;
+    paragraph.maxWidth = 800.0;
+    paragraph.minHeight = 0.0;
+    paragraph.maxHeight = 600.0;
+
     paragraph.layout();
+    expect(paragraph.width, isNonZero);
+    expect(paragraph.height, isNonZero);
   });
 }
