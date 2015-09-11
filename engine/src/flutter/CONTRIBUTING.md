@@ -42,14 +42,14 @@ target. Building on MacOS for Android, iOS, and a head-less MacOS target is comi
 
 ### Android (cross-compiling from Mac or Linux)
 
-## The first time
+#### The first time
 
 * `./tools/android/download_android_tools.py`
 * On Linux: `sudo ./build/install-build-deps-android.sh`
 * On Mac: Install Oracle's Java JDK, version 1.7 or later.
 * On Mac: Install "ant": `brew install ant`.
 
-## Building
+#### Building
 
 * `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
