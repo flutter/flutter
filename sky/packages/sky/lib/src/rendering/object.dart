@@ -1230,7 +1230,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   }
 
   /// Add all the children to the end of this render object's child list
-  void addAll(List<ChildType> children) {
+  void addAll(Iterable<ChildType> children) {
     if (children != null)
       for (ChildType child in children)
         add(child);

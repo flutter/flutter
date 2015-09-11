@@ -45,7 +45,7 @@ class GridMetrics {
 
 class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, GridParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, GridParentData> {
-  RenderGrid({ List<RenderBox> children, double maxChildExtent }) {
+  RenderGrid({ Iterable<RenderBox> children, double maxChildExtent }) {
     addAll(children);
     _maxChildExtent = maxChildExtent;
   }

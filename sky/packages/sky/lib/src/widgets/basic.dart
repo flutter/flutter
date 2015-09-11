@@ -473,7 +473,7 @@ class Container extends Component {
 // LAYOUT NODES
 
 class BlockBody extends MultiChildRenderObjectWrapper {
-  BlockBody(List<Widget> children, {
+  BlockBody(Iterable<Widget> children, {
     Key key,
     this.direction: BlockDirection.vertical
   }) : super(key: key, children: children) {
@@ -492,7 +492,7 @@ class BlockBody extends MultiChildRenderObjectWrapper {
 }
 
 class Stack extends MultiChildRenderObjectWrapper {
-  Stack(List<Widget> children, { Key key })
+  Stack(Iterable<Widget> children, { Key key })
     : super(key: key, children: children);
 
   RenderStack createNode() => new RenderStack();
@@ -555,7 +555,7 @@ class Positioned extends ParentDataNode {
 }
 
 class Grid extends MultiChildRenderObjectWrapper {
-  Grid(List<Widget> children, { Key key, this.maxChildExtent })
+  Grid(Iterable<Widget> children, { Key key, this.maxChildExtent })
     : super(key: key, children: children) {
     assert(maxChildExtent != null);
   }
@@ -572,7 +572,7 @@ class Grid extends MultiChildRenderObjectWrapper {
 }
 
 class Flex extends MultiChildRenderObjectWrapper {
-  Flex(List<Widget> children, {
+  Flex(Iterable<Widget> children, {
     Key key,
     this.direction: FlexDirection.horizontal,
     this.justifyContent: FlexJustifyContent.start,
@@ -615,7 +615,7 @@ class Flex extends MultiChildRenderObjectWrapper {
 }
 
 class Row extends Flex {
-  Row(List<Widget> children, {
+  Row(Iterable<Widget> children, {
     Key key,
     justifyContent: FlexJustifyContent.start,
     alignItems: FlexAlignItems.center,
@@ -624,7 +624,7 @@ class Row extends Flex {
 }
 
 class Column extends Flex {
-  Column(List<Widget> children, {
+  Column(Iterable<Widget> children, {
     Key key,
     justifyContent: FlexJustifyContent.start,
     alignItems: FlexAlignItems.center,
