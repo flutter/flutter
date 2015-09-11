@@ -52,7 +52,7 @@ class AndroidDevice extends _Device {
 
   @override
   bool installApp(String path) {
-    return false;
+    return true;
   }
 
   @override

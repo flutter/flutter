@@ -16,6 +16,9 @@ dependencies:
   shelf_static: ^0.2.3
   test: ">=0.12.4+5 <0.12.5"
 
+dev_dependencies:
+  mockito: "^0.10.1"
+
 # Add the bin/sky_tools.dart script to the scripts pub installs.
 executables:
   sky_tools:
