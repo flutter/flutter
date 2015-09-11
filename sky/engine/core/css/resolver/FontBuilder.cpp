@@ -101,7 +101,7 @@ void FontBuilder::setInitial()
     scope.reset();
     setFontFamilyToStandard(scope.fontDescription(), m_document);
     scope.fontDescription().setKeywordSize(CSSValueMedium - CSSValueXxSmall + 1);
-    setSize(scope.fontDescription(), FontSize::fontSizeForKeyword(m_document, CSSValueMedium, NonFixedPitchFont));
+    setSize(scope.fontDescription(), FontSize::fontSizeForKeyword(CSSValueMedium, NonFixedPitchFont));
 }
 
 void FontBuilder::inheritFrom(const FontDescription& fontDescription)
@@ -125,12 +125,6 @@ void FontBuilder::fromSystemFont(CSSValueID valueId)
 
     // Double-check and see if the theme did anything. If not, don't bother updating the font.
     if (!fontDescription.isAbsoluteSize())
-        return;
-
-    // Make sure the rendering mode and printer font settings are updated.
-    const Settings* settings = m_document->settings();
-    ASSERT(settings); // If we're doing style resolution, this document should always be in a frame and thus have settings
-    if (!settings)
         return;
 
     fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontDescription, fontDescription.specifiedSize()));
@@ -231,8 +225,8 @@ void FontBuilder::setFontFamilyValue(CSSValue* value)
         return;
 
     if (scope.fontDescription().keywordSize() && scope.fontDescription().fixedPitchFontType() != oldFixedPitchFontType) {
-        scope.fontDescription().setSpecifiedSize(FontSize::fontSizeForKeyword(m_document,
-        static_cast<CSSValueID>(CSSValueXxSmall + scope.fontDescription().keywordSize() - 1), scope.fontDescription().fixedPitchFontType()));
+        scope.fontDescription().setSpecifiedSize(FontSize::fontSizeForKeyword(
+          static_cast<CSSValueID>(CSSValueXxSmall + scope.fontDescription().keywordSize() - 1), scope.fontDescription().fixedPitchFontType()));
     }
 }
 
@@ -240,7 +234,7 @@ void FontBuilder::setFontSizeInitial()
 {
     FontDescriptionChangeScope scope(this);
 
-    float size = FontSize::fontSizeForKeyword(m_document, CSSValueMedium, scope.fontDescription().fixedPitchFontType());
+    float size = FontSize::fontSizeForKeyword(CSSValueMedium, scope.fontDescription().fixedPitchFontType());
 
     if (size < 0)
         return;
@@ -305,7 +299,7 @@ void FontBuilder::setFontSizeValue(CSSValue* value, RenderStyle* parentStyle)
         case CSSValueXLarge:
         case CSSValueXxLarge:
         case CSSValueWebkitXxxLarge:
-            size = FontSize::fontSizeForKeyword(m_document, valueID, scope.fontDescription().fixedPitchFontType());
+            size = FontSize::fontSizeForKeyword(valueID, scope.fontDescription().fixedPitchFontType());
             scope.fontDescription().setKeywordSize(valueID - CSSValueXxSmall + 1);
             break;
         case CSSValueLarger:
@@ -429,7 +423,7 @@ void FontBuilder::setSize(FontDescription& fontDescription, float size)
 
 float FontBuilder::getComputedSizeFromSpecifiedSize(FontDescription& fontDescription, float specifiedSize)
 {
-    return FontSize::getComputedSizeFromSpecifiedSize(m_document, fontDescription.isAbsoluteSize(), specifiedSize);
+    return FontSize::getComputedSizeFromSpecifiedSize(fontDescription.isAbsoluteSize(), specifiedSize);
 }
 
 static void getFontAndGlyphOrientation(const RenderStyle* style, FontOrientation& fontOrientation, NonCJKGlyphOrientation& glyphOrientation)
@@ -476,7 +470,7 @@ void FontBuilder::checkForGenericFamilyChange(RenderStyle* style, const RenderSt
     // multiplying by our scale factor.
     float size;
     if (scope.fontDescription().keywordSize()) {
-        size = FontSize::fontSizeForKeyword(m_document, static_cast<CSSValueID>(CSSValueXxSmall + scope.fontDescription().keywordSize() - 1), scope.fontDescription().fixedPitchFontType());
+        size = FontSize::fontSizeForKeyword(static_cast<CSSValueID>(CSSValueXxSmall + scope.fontDescription().keywordSize() - 1), scope.fontDescription().fixedPitchFontType());
     } else {
         Settings* settings = m_document->settings();
         float fixedScaleFactor = (settings && settings->defaultFixedFontSize() && settings->defaultFontSize())
@@ -518,7 +512,7 @@ void FontBuilder::createFontForDocument(PassRefPtr<FontSelector> fontSelector, R
 
     setFontFamilyToStandard(fontDescription, m_document);
     fontDescription.setKeywordSize(CSSValueMedium - CSSValueXxSmall + 1);
-    int size = FontSize::fontSizeForKeyword(m_document, CSSValueMedium, NonFixedPitchFont);
+    int size = FontSize::fontSizeForKeyword(CSSValueMedium, NonFixedPitchFont);
     fontDescription.setSpecifiedSize(size);
     fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontDescription, size));
 

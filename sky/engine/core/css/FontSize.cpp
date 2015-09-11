@@ -34,7 +34,7 @@
 
 namespace blink {
 
-float FontSize::getComputedSizeFromSpecifiedSize(const Document* document, bool isAbsoluteSize, float specifiedSize, ESmartMinimumForFontSize useSmartMinimumForFontSize)
+float FontSize::getComputedSizeFromSpecifiedSize(bool isAbsoluteSize, float specifiedSize, ESmartMinimumForFontSize useSmartMinimumForFontSize)
 {
     // Text with a 0px font size should not be visible and therefore needs to be
     // exempt from minimum font size rules. Acid3 relies on this for pixel-perfect
@@ -52,10 +52,6 @@ float FontSize::getComputedSizeFromSpecifiedSize(const Document* document, bool 
     // With the smart minimum, we never want to get smaller than the minimum font size to keep fonts readable.
     // However we always allow the page to set an explicit pixel size that is smaller,
     // since sites will mis-render otherwise (e.g., http://www.gamespot.com with a 9px minimum).
-
-    Settings* settings = document ? document->settings() : nullptr;
-    if (!settings)
-        return 1.0f;
 
     int minSize = 0;
     int minLogicalSize = 0;
@@ -80,6 +76,11 @@ const int fontSizeTableMax = 16;
 const int fontSizeTableMin = 9;
 const int totalKeywords = 8;
 
+// Using 14px default to match Material Design English Body1:
+// http://www.google.com/design/spec/style/typography.html#typography-typeface
+const int defaultFontSize = 14;
+const int defaultFixedFontSize = 14;
+
 // Strict mode table matches MacIE and Mozilla's settings exactly.
 static const int strictFontSizeTable[fontSizeTableMax - fontSizeTableMin + 1][totalKeywords] =
 {
@@ -101,23 +102,20 @@ static const int strictFontSizeTable[fontSizeTableMax - fontSizeTableMin + 1][to
 // factors for each keyword value.
 static const float fontSizeFactors[totalKeywords] = { 0.60f, 0.75f, 0.89f, 1.0f, 1.2f, 1.5f, 2.0f, 3.0f };
 
-static int inline rowFromMediumFontSizeInRange(const Settings* settings, FixedPitchFontType fixedPitchFontType, int& mediumSize)
+static int inline rowFromMediumFontSizeInRange(FixedPitchFontType fixedPitchFontType, int& mediumSize)
 {
-    mediumSize = fixedPitchFontType == FixedPitchFont ? settings->defaultFixedFontSize() : settings->defaultFontSize();
+    mediumSize = fixedPitchFontType == FixedPitchFont ? defaultFixedFontSize : defaultFontSize;
     if (mediumSize >= fontSizeTableMin && mediumSize <= fontSizeTableMax)
         return mediumSize - fontSizeTableMin;
     return -1;
 }
 
-float FontSize::fontSizeForKeyword(const Document* document, CSSValueID keyword, FixedPitchFontType fixedPitchFontType)
+float FontSize::fontSizeForKeyword(CSSValueID keyword, FixedPitchFontType fixedPitchFontType)
 {
     ASSERT(keyword >= CSSValueXxSmall && keyword <= CSSValueWebkitXxxLarge);
-    const Settings* settings = document ? document->settings() : nullptr;
-    if (!settings)
-        return 1.0f;
 
     int mediumSize = 0;
-    int row = rowFromMediumFontSizeInRange(settings, fixedPitchFontType, mediumSize);
+    int row = rowFromMediumFontSizeInRange(fixedPitchFontType, mediumSize);
     if (row >= 0) {
         int col = (keyword - CSSValueXxSmall);
         return strictFontSizeTable[row][col];
@@ -126,33 +124,6 @@ float FontSize::fontSizeForKeyword(const Document* document, CSSValueID keyword,
     // Value is outside the range of the table. Apply the scale factor instead.
     float minLogicalSize = 1;
     return std::max(fontSizeFactors[keyword - CSSValueXxSmall] * mediumSize, minLogicalSize);
-}
-
-
-
-template<typename T>
-static int findNearestLegacyFontSize(int pixelFontSize, const T* table, int multiplier)
-{
-    // Ignore table[0] because xx-small does not correspond to any legacy font size.
-    for (int i = 1; i < totalKeywords - 1; i++) {
-        if (pixelFontSize * 2 < (table[i] + table[i + 1]) * multiplier)
-            return i;
-    }
-    return totalKeywords - 1;
-}
-
-int FontSize::legacyFontSize(const Document* document, int pixelFontSize, FixedPitchFontType fixedPitchFontType)
-{
-    const Settings* settings = document->settings();
-    if (!settings)
-        return 1;
-
-    int mediumSize = 0;
-    int row = rowFromMediumFontSizeInRange(settings, fixedPitchFontType, mediumSize);
-    if (row >= 0)
-        return findNearestLegacyFontSize<int>(pixelFontSize, strictFontSizeTable[row], 1);
-
-    return findNearestLegacyFontSize<float>(pixelFontSize, fontSizeFactors, mediumSize);
 }
 
 } // namespace blink
