@@ -155,19 +155,9 @@ class Dismissable extends StatefulComponent {
       _fadePerformance.progress = _dragExtent.abs() / (_size.width * _kDismissCardThreshold);
   }
 
-  void _handleDragEnd(Offset velocity) {
-    if (!_isActive || _fadePerformance.isAnimating)
-      return;
-    _dragUnderway = false;
-    if (_fadePerformance.isCompleted)
-      _startResizePerformance();
-    else if (!_fadePerformance.isAnimating)
-      _fadePerformance.reverse();
-  }
-
-  bool _isFlingGesture(sky.GestureEvent event) {
-    double vx = event.velocityX;
-    double vy = event.velocityY;
+  bool _isFlingGesture(sky.Offset velocity) {
+    double vx = velocity.dx;
+    double vy = velocity.dy;
     if (_directionIsYAxis) {
       if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta)
         return false;
@@ -194,22 +184,20 @@ class Dismissable extends StatefulComponent {
     return false;
   }
 
-  EventDisposition _handleFlingStart(sky.GestureEvent event) {
-    if (!_isActive)
-      return EventDisposition.ignored;
+  void _handleDragEnd(sky.Offset velocity) {
+    if (!_isActive || _fadePerformance.isAnimating)
+      return;
 
     _dragUnderway = false;
-    if (_fadePerformance.isCompleted) { // drag then fling
+    if (_fadePerformance.isCompleted) {
       _startResizePerformance();
-    } else if (_isFlingGesture(event)) {
-      double velocity = _directionIsYAxis ? event.velocityY : event.velocityX;
-      _dragExtent = velocity.sign;
-      _fadePerformance.fling(velocity: velocity.abs() * _kFlingVelocityScale);
+    } else if (_isFlingGesture(velocity)) {
+      double flingVelocity = _directionIsYAxis ? velocity.dy : velocity.dx;
+      _dragExtent = flingVelocity.sign;
+      _fadePerformance.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
     } else {
       _fadePerformance.reverse();
     }
-
-    return EventDisposition.processed;
   }
 
   void _handleSizeChanged(Size newSize) {
@@ -242,19 +230,16 @@ class Dismissable extends StatefulComponent {
       onVerticalDragStart: _directionIsYAxis ? _handleDragStart : null,
       onVerticalDragUpdate: _directionIsYAxis ? _handleDragUpdate : null,
       onVerticalDragEnd: _directionIsYAxis ? _handleDragEnd : null,
-      child: new Listener(
-        onGestureFlingStart: _handleFlingStart,
-        child: new SizeObserver(
-          callback: _handleSizeChanged,
-          child: new FadeTransition(
+      child: new SizeObserver(
+        callback: _handleSizeChanged,
+        child: new FadeTransition(
+          performance: _fadePerformance,
+          onCompleted: _handleFadeCompleted,
+          opacity: new AnimatedValue<double>(1.0, end: 0.0),
+          child: new SlideTransition(
             performance: _fadePerformance,
-            onCompleted: _handleFadeCompleted,
-            opacity: new AnimatedValue<double>(1.0, end: 0.0),
-            child: new SlideTransition(
-              performance: _fadePerformance,
-              position: new AnimatedValue<Point>(Point.origin, end: _activeCardDragEndPoint),
-              child: child
-            )
+            position: new AnimatedValue<Point>(Point.origin, end: _activeCardDragEndPoint),
+            child: child
           )
         )
       )

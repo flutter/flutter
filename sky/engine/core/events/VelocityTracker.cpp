@@ -35,7 +35,6 @@ class VelocityTrackerStrategy {
 namespace {
 
 // From platform/frameworks/native/include/input/MotionPointer.h
-// TBD: put this in Pointer.h?
 enum { MAX_POINTER_ID = 31, MAX_TOUCH_POINT_COUNT = 16 };
 //COMPILE_ASSERT(MotionEvent::MAX_POINTER_ID < 32, max_pointer_id_too_large);
 
@@ -177,7 +176,7 @@ class IntegratingVelocityTrackerStrategy : public VelocityTrackerStrategy {
 
   const uint32_t degree_;
   BitSet32 pointer_id_bits_;
-  State mPointerState[/*MotionEvent::*/MAX_POINTER_ID + 1];
+  State mPointerState[MAX_POINTER_ID + 1];
 
   void InitState(State& state,
                  const TimeTicks& event_time,
@@ -220,14 +219,14 @@ VelocityTrackerStrategy* CreateStrategy(VelocityTracker::Strategy strategy) {
 
 // --- VelocityTracker.idl implementation ---
 
-void VelocityTracker::addPosition(long timeStamp, long pointerId, float x, float y) {
+void VelocityTracker::addPosition(int timeStamp, int pointerId, float x, float y) {
   TimeTicks event_time(TimeTicks::FromInternalValue(timeStamp));
   BitSet32 id_bits(BitSet32::value_for_bit(pointerId));
   PointerXY position = {x, y};
   AddMovement(event_time, id_bits, &position);
 }
 
-PassRefPtr<GestureVelocity> VelocityTracker::getVelocity(long pointerId) {
+PassRefPtr<GestureVelocity> VelocityTracker::getVelocity(int pointerId) {
   float vx = 0;
   float vy = 0;
   bool result = GetVelocity(pointerId, &vx, &vy);
