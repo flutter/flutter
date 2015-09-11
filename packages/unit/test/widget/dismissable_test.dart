@@ -207,7 +207,6 @@ void main() {
 
   // This is a regression test for
   // https://github.com/domokit/sky_engine/issues/1068
-  /*
   test('Verify that drag-move events do not assert', () {
     WidgetTester tester = new WidgetTester();
     scrollDirection = ScrollDirection.horizontal;
@@ -229,5 +228,4 @@ void main() {
     tester.dispatchEvent(pointer.move(location + (offset * 4.0)), location);
     tester.pumpFrame(widgetBuilder);
   });
-  */
 }
