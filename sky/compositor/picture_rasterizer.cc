@@ -38,19 +38,22 @@ PictureRasterzier::Value::Value()
 PictureRasterzier::Value::~Value() {
 }
 
-RefPtr<SkImage> PictureRasterzier::ImageFromPicture(PaintContext& context,
-                                                    GrContext* gr_context,
-                                                    SkPicture* picture,
-                                                    const SkISize& size) {
+RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
+    PaintContext& context,
+    GrContext* gr_context,
+    SkPicture* picture,
+    const SkISize& physical_size,
+    const SkMatrix& incoming_ctm) {
   // Step 1: Create a texture from the context's texture provider
 
-  GrSurfaceDesc desc;
-  desc.fWidth = size.width();
-  desc.fHeight = size.height();
-  desc.fFlags = kRenderTarget_GrSurfaceFlag;
-  desc.fConfig = kRGBA_8888_GrPixelConfig;
+  GrSurfaceDesc surfaceDesc;
+  surfaceDesc.fWidth = physical_size.width();
+  surfaceDesc.fHeight = physical_size.height();
+  surfaceDesc.fFlags = kRenderTarget_GrSurfaceFlag;
+  surfaceDesc.fConfig = kRGBA_8888_GrPixelConfig;
 
-  GrTexture* texture = gr_context->textureProvider()->createTexture(desc, true);
+  GrTexture* texture =
+      gr_context->textureProvider()->createTexture(surfaceDesc, true);
 
   if (!texture) {
     // The texture provider could not allocate a texture backing. Render
@@ -61,14 +64,14 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(PaintContext& context,
 
   // Step 2: Create a backend render target description for the created texture
 
-  GrBackendTextureDesc backendDesc;
-  backendDesc.fConfig = desc.fConfig;
-  backendDesc.fWidth = desc.fWidth;
-  backendDesc.fHeight = desc.fHeight;
-  backendDesc.fSampleCnt = desc.fSampleCnt;
-  backendDesc.fFlags = kRenderTarget_GrBackendTextureFlag;
-  backendDesc.fConfig = desc.fConfig;
-  backendDesc.fTextureHandle = texture->getTextureHandle();
+  GrBackendTextureDesc textureDesc;
+  textureDesc.fConfig = surfaceDesc.fConfig;
+  textureDesc.fWidth = physical_size.width() / incoming_ctm.getScaleX();
+  textureDesc.fHeight = physical_size.height() / incoming_ctm.getScaleY();
+  textureDesc.fSampleCnt = surfaceDesc.fSampleCnt;
+  textureDesc.fFlags = kRenderTarget_GrBackendTextureFlag;
+  textureDesc.fConfig = surfaceDesc.fConfig;
+  textureDesc.fTextureHandle = texture->getTextureHandle();
 
   // Step 3: Render the picture into the offscreen texture
 
@@ -82,17 +85,19 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(PaintContext& context,
   SkCanvas* canvas = surface->getCanvas();
   DCHECK(canvas);
 
+  canvas->setMatrix(
+      SkMatrix::MakeScale(incoming_ctm.getScaleX(), incoming_ctm.getScaleY()));
   canvas->drawPicture(picture);
 
   if (context.options().isEnabled(
           CompositorOptions::Option::HightlightRasterizedImages)) {
-    DrawCheckerboard(canvas, desc.fWidth, desc.fHeight);
+    DrawCheckerboard(canvas, textureDesc.fWidth, textureDesc.fHeight);
   }
 
   // Step 4: Create an image representation from the texture
 
   RefPtr<SkImage> image = adoptRef(
-      SkImage::NewFromTexture(gr_context, backendDesc, kPremul_SkAlphaType,
+      SkImage::NewFromTexture(gr_context, textureDesc, kPremul_SkAlphaType,
                               &ImageReleaseProc, texture));
 
   if (image) {
@@ -106,12 +111,13 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
     PaintContext& context,
     GrContext* gr_context,
     SkPicture* picture,
-    SkISize size) {
-  if (size.isEmpty() || picture == nullptr || gr_context == nullptr) {
+    const SkISize& physical_size,
+    const SkMatrix& incoming_ctm) {
+  if (physical_size.isEmpty() || picture == nullptr || gr_context == nullptr) {
     return nullptr;
   }
 
-  const Key key(picture->uniqueID(), size);
+  const Key key(picture->uniqueID(), physical_size);
 
   Value& value = cache_[key];
 
@@ -122,10 +128,11 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
 
   value.access_count++;
   DCHECK(value.access_count == 1)
-      << "Did you forget to call purge_cache between frames?";
+      << "Did you forget to call PurgeCache between frames?";
 
   if (!value.image) {
-    value.image = ImageFromPicture(context, gr_context, picture, size);
+    value.image = ImageFromPicture(context, gr_context, picture, physical_size,
+                                   incoming_ctm);
   }
 
   if (value.image) {

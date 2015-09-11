@@ -14,22 +14,19 @@ PictureLayer::PictureLayer() {
 PictureLayer::~PictureLayer() {
 }
 
-SkMatrix PictureLayer::model_view_matrix(const SkMatrix& model_matrix) const {
-  SkMatrix modelView = model_matrix;
-  modelView.postTranslate(offset_.x(), offset_.y());
-  return modelView;
-}
-
 void PictureLayer::Paint(PaintContext::ScopedFrame& frame) {
   DCHECK(picture_);
 
-  const SkRect& bounds = paint_bounds();
-  SkISize size = SkISize::Make(bounds.width(), bounds.height());
-
-  RefPtr<SkImage> image =
-      frame.paint_context().rasterizer().GetCachedImageIfPresent(
-          frame.paint_context(), frame.gr_context(), picture_.get(), size);
   SkCanvas& canvas = frame.canvas();
+  const SkRect& bounds = paint_bounds();
+  const SkMatrix& ctm = canvas.getTotalMatrix();
+  const SkISize physical_size = SkISize::Make(
+      bounds.width() * ctm.getScaleX(), bounds.height() * ctm.getScaleY());
+
+  PictureRasterzier& rasterizer = frame.paint_context().rasterizer();
+  RefPtr<SkImage> image = rasterizer.GetCachedImageIfPresent(
+      frame.paint_context(), frame.gr_context(), picture_.get(), physical_size,
+      ctm);
 
   if (image) {
     canvas.drawImage(image.get(), offset_.x(), offset_.y());

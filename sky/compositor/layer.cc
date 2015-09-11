@@ -15,9 +15,5 @@ Layer::Layer() {
 Layer::~Layer() {
 }
 
-SkMatrix Layer::model_view_matrix(const SkMatrix& model_matrix) const {
-  return model_matrix;
-}
-
 }  // namespace compositor
 }  // namespace sky

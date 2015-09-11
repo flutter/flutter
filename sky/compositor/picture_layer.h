@@ -19,8 +19,6 @@ class PictureLayer : public Layer {
 
   void set_picture(PassRefPtr<SkPicture> picture) { picture_ = picture; }
 
-  SkMatrix model_view_matrix(const SkMatrix& model_matrix) const override;
-
   SkPicture* picture() const { return picture_.get(); }
 
   void Paint(PaintContext::ScopedFrame& frame) override;
