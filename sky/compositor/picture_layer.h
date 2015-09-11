@@ -23,8 +23,7 @@ class PictureLayer : public Layer {
 
   SkPicture* picture() const { return picture_.get(); }
 
- protected:
-  void Paint(PaintContext& context) override;
+  void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:
   SkPoint offset_;

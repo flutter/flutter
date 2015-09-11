@@ -25,6 +25,7 @@ class PictureRasterzier {
   ~PictureRasterzier();
 
   RefPtr<SkImage> GetCachedImageIfPresent(PaintContext& context,
+                                          GrContext* gr_context,
                                           SkPicture* picture,
                                           SkISize size);
 

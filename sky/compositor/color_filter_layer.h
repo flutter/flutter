@@ -21,8 +21,7 @@ class ColorFilterLayer : public ContainerLayer {
     transfer_mode_ = transfer_mode;
   }
 
- protected:
-  void Paint(PaintContext& context) override;
+  void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:
   SkColor color_;

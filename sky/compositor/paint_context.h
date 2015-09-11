@@ -19,18 +19,25 @@ class PaintContext {
    public:
     PaintContext& paint_context() { return context_; };
 
+    GrContext* gr_context() { return gr_context_; }
+
+    SkCanvas& canvas() { return canvas_; }
+
     ScopedFrame(ScopedFrame&& frame) = default;
 
     ~ScopedFrame() { context_.endFrame(); }
 
    private:
     PaintContext& context_;
+    SkCanvas& canvas_;
+    GrContext* gr_context_;
 
     ScopedFrame() = delete;
 
     ScopedFrame(PaintContext& context, SkCanvas& canvas, GrContext* gr_context)
-        : context_(context) {
-      context_.beginFrame(canvas, gr_context);
+        : context_(context), canvas_(canvas), gr_context_(gr_context) {
+      DCHECK(&canvas) << "The frame requries a valid canvas";
+      context_.beginFrame();
     };
 
     friend class PaintContext;
@@ -45,24 +52,13 @@ class PaintContext {
 
   CompositorOptions& options() { return options_; };
 
-  GrContext* gr_context() { return gr_context_; }
-
-  SkCanvas& canvas() {
-    DCHECK(canvas_) << "Tried to access the canvas of a context whose frame "
-                       "was not initialized. Did you forget to "
-                       "`AcquireFrame`?";
-    return *canvas_;
-  }
-
   ScopedFrame AcquireFrame(SkCanvas& canvas, GrContext* gr_context);
 
  private:
   PictureRasterzier rasterizer_;
   CompositorOptions options_;
-  GrContext* gr_context_;
-  SkCanvas* canvas_;
 
-  void beginFrame(SkCanvas& canvas, GrContext* context);
+  void beginFrame();
 
   void endFrame();
 

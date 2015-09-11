@@ -39,6 +39,7 @@ PictureRasterzier::Value::~Value() {
 }
 
 static RefPtr<SkImage> ImageFromPicture(PaintContext& context,
+                                        GrContext* gr_context,
                                         SkPicture* picture,
                                         const SkISize& size) {
   // Step 1: Create a texture from the context's texture provider
@@ -49,8 +50,7 @@ static RefPtr<SkImage> ImageFromPicture(PaintContext& context,
   desc.fFlags = kRenderTarget_GrSurfaceFlag;
   desc.fConfig = kRGBA_8888_GrPixelConfig;
 
-  GrTexture* texture =
-      context.gr_context()->textureProvider()->createTexture(desc, true);
+  GrTexture* texture = gr_context->textureProvider()->createTexture(desc, true);
 
   if (!texture) {
     // The texture provider could not allocate a texture backing. Render
@@ -92,16 +92,17 @@ static RefPtr<SkImage> ImageFromPicture(PaintContext& context,
   // Step 4: Create an image representation from the texture
 
   RefPtr<SkImage> image = adoptRef(
-      SkImage::NewFromTexture(context.gr_context(), backendDesc,
-                              kPremul_SkAlphaType, &ImageReleaseProc, texture));
+      SkImage::NewFromTexture(gr_context, backendDesc, kPremul_SkAlphaType,
+                              &ImageReleaseProc, texture));
   return image;
 }
 
 RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
     PaintContext& context,
+    GrContext* gr_context,
     SkPicture* picture,
     SkISize size) {
-  if (size.isEmpty() || picture == nullptr || context.gr_context() == nullptr) {
+  if (size.isEmpty() || picture == nullptr || gr_context == nullptr) {
     return nullptr;
   }
 
@@ -119,7 +120,7 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
       << "Did you forget to call purge_cache between frames?";
 
   if (!value.image) {
-    value.image = ImageFromPicture(context, picture, size);
+    value.image = ImageFromPicture(context, gr_context, picture, size);
   }
 
   return value.image;

@@ -11,20 +11,11 @@ namespace compositor {
 PaintContext::PaintContext() {
 }
 
-void PaintContext::beginFrame(SkCanvas& canvas, GrContext* gr_context) {
-  canvas_ = &canvas;         // required
-  gr_context_ = gr_context;  // optional
-
-  DCHECK(canvas_);
+void PaintContext::beginFrame() {
 }
 
 void PaintContext::endFrame() {
-  DCHECK(canvas_);
-
   rasterizer_.PurgeCache();
-
-  canvas_ = nullptr;
-  gr_context_ = nullptr;
 }
 
 PaintContext::ScopedFrame PaintContext::AcquireFrame(SkCanvas& canvas,

@@ -13,11 +13,11 @@ ClipPathLayer::ClipPathLayer() {
 ClipPathLayer::~ClipPathLayer() {
 }
 
-void ClipPathLayer::Paint(PaintContext& context) {
-  SkCanvas& canvas = context.canvas();
+void ClipPathLayer::Paint(PaintContext::ScopedFrame& frame) {
+  SkCanvas& canvas = frame.canvas();
   canvas.saveLayer(&clip_path_.getBounds(), nullptr);
   canvas.clipPath(clip_path_);
-  PaintChildren(context);
+  PaintChildren(frame);
   canvas.restore();
 }
 

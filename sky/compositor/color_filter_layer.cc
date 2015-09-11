@@ -13,14 +13,14 @@ ColorFilterLayer::ColorFilterLayer() {
 ColorFilterLayer::~ColorFilterLayer() {
 }
 
-void ColorFilterLayer::Paint(PaintContext& context) {
+void ColorFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
   RefPtr<SkColorFilter> color_filter =
       adoptRef(SkColorFilter::CreateModeFilter(color_, transfer_mode_));
   SkPaint paint;
   paint.setColorFilter(color_filter.get());
-  SkCanvas& canvas = context.canvas();
+  SkCanvas& canvas = frame.canvas();
   canvas.saveLayer(&paint_bounds(), &paint);
-  PaintChildren(context);
+  PaintChildren(frame);
   canvas.restore();
 }
 
