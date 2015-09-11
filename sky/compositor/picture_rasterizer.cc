@@ -46,13 +46,14 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
     const SkMatrix& incoming_ctm) {
   // Step 1: Create a texture from the context's texture provider
 
-  GrSurfaceDesc desc;
-  desc.fWidth = physical_size.width();
-  desc.fHeight = physical_size.height();
-  desc.fFlags = kRenderTarget_GrSurfaceFlag;
-  desc.fConfig = kRGBA_8888_GrPixelConfig;
+  GrSurfaceDesc surfaceDesc;
+  surfaceDesc.fWidth = physical_size.width();
+  surfaceDesc.fHeight = physical_size.height();
+  surfaceDesc.fFlags = kRenderTarget_GrSurfaceFlag;
+  surfaceDesc.fConfig = kRGBA_8888_GrPixelConfig;
 
-  GrTexture* texture = gr_context->textureProvider()->createTexture(desc, true);
+  GrTexture* texture =
+      gr_context->textureProvider()->createTexture(surfaceDesc, true);
 
   if (!texture) {
     // The texture provider could not allocate a texture backing. Render
@@ -63,14 +64,14 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
 
   // Step 2: Create a backend render target description for the created texture
 
-  GrBackendTextureDesc backendDesc;
-  backendDesc.fConfig = desc.fConfig;
-  backendDesc.fWidth = physical_size.width() / incoming_ctm.getScaleX();
-  backendDesc.fHeight = physical_size.height() / incoming_ctm.getScaleY();
-  backendDesc.fSampleCnt = desc.fSampleCnt;
-  backendDesc.fFlags = kRenderTarget_GrBackendTextureFlag;
-  backendDesc.fConfig = desc.fConfig;
-  backendDesc.fTextureHandle = texture->getTextureHandle();
+  GrBackendTextureDesc textureDesc;
+  textureDesc.fConfig = surfaceDesc.fConfig;
+  textureDesc.fWidth = physical_size.width() / incoming_ctm.getScaleX();
+  textureDesc.fHeight = physical_size.height() / incoming_ctm.getScaleY();
+  textureDesc.fSampleCnt = surfaceDesc.fSampleCnt;
+  textureDesc.fFlags = kRenderTarget_GrBackendTextureFlag;
+  textureDesc.fConfig = surfaceDesc.fConfig;
+  textureDesc.fTextureHandle = texture->getTextureHandle();
 
   // Step 3: Render the picture into the offscreen texture
 
@@ -89,13 +90,13 @@ RefPtr<SkImage> PictureRasterzier::ImageFromPicture(
 
   if (context.options().isEnabled(
           CompositorOptions::Option::HightlightRasterizedImages)) {
-    DrawCheckerboard(canvas, backendDesc.fWidth, backendDesc.fHeight);
+    DrawCheckerboard(canvas, textureDesc.fWidth, textureDesc.fHeight);
   }
 
   // Step 4: Create an image representation from the texture
 
   RefPtr<SkImage> image = adoptRef(
-      SkImage::NewFromTexture(gr_context, backendDesc, kPremul_SkAlphaType,
+      SkImage::NewFromTexture(gr_context, textureDesc, kPremul_SkAlphaType,
                               &ImageReleaseProc, texture));
 
   if (image) {
