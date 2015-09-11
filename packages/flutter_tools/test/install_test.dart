@@ -4,10 +4,11 @@
 
 library install_test;
 
-import 'package:args/args.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sky_tools/src/install.dart';
 import 'package:test/test.dart';
+
+import 'src/common.dart';
 
 main() => defineTests();
 
@@ -22,10 +23,4 @@ defineTests() {
           .then((int code) => expect(code, equals(0)));
     });
   });
-}
-
-@proxy
-class MockArgResults extends Mock implements ArgResults {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

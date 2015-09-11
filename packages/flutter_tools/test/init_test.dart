@@ -4,10 +4,12 @@
 
 import 'dart:io';
 
-import 'package:args/args.dart';
+import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as p;
 import 'package:sky_tools/src/init.dart';
 import 'package:test/test.dart';
+
+import 'src/common.dart';
 
 main() => defineTests();
 
@@ -26,10 +28,11 @@ defineTests() {
     // Verify that we create a project that is well-formed.
     test('init sky-simple', () async {
       InitCommandHandler handler = new InitCommandHandler();
-      _MockArgResults results = new _MockArgResults();
-      results.values['help'] = false;
-      results.values['pub'] = true;
-      results.values['out'] = temp.path;
+      MockArgResults results = new MockArgResults();
+      when(results['help']).thenReturn(false);
+      when(results['pub']).thenReturn(true);
+      when(results.wasParsed('out')).thenReturn(true);
+      when(results['out']).thenReturn(temp.path);
       await handler.processArgResults(results);
       String path = p.join(temp.path, 'lib/main.dart');
       expect(new File(path).existsSync(), true);
@@ -39,15 +42,4 @@ defineTests() {
       expect(exec.exitCode, 0);
     });
   });
-}
-
-class _MockArgResults implements ArgResults {
-  Map values = {};
-  operator [](String name) => values[name];
-  List<String> get arguments => null;
-  ArgResults get command => null;
-  String get name => null;
-  Iterable<String> get options => values.keys;
-  List<String> get rest => null;
-  bool wasParsed(String name) => values.containsKey(name);
 }

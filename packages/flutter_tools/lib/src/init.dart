@@ -65,13 +65,10 @@ Or if the Sky APK is not already on your device, run:
       stdout.addStream(process.stdout);
       stderr.addStream(process.stderr);
       int code = await process.exitCode;
-      if (code == 0) {
-        print('\n${message}');
-      }
-    } else {
-      print(message);
-      return 2;
+      if (code != 0) return code;
     }
+
+    print(message);
     return 0;
   }
 }
@@ -146,6 +143,7 @@ name: {{projectName}}
 description: {{description}}
 dependencies:
   sky: any
+dev_dependencies:
   sky_tools: any
 ''';
 
