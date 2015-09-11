@@ -137,7 +137,9 @@ void DocumentView::OnEmbed(
 }
 
 void DocumentView::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
-  // TODO(aa): Need to figure out how shutdown works.
+  // TODO(ksimbili): Need to figure out how to shutdown when view manager
+  // doesn't connect.
+  delete this;
 }
 
 void DocumentView::LoadFromSnapshotStream(
