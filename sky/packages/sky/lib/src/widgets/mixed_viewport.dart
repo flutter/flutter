@@ -78,8 +78,9 @@ class MixedViewportLayoutState {
 }
 
 class MixedViewport extends RenderObjectWrapper {
-  MixedViewport({ Key key, this.startOffset, this.direction: ScrollDirection.vertical, this.builder, this.token, this.layoutState })
-    : super(key: key) {
+  MixedViewport({ this.startOffset, this.direction: ScrollDirection.vertical, this.builder, this.token, MixedViewportLayoutState layoutState })
+    : layoutState = layoutState, super(key: new ObjectKey(layoutState)) {
+    // using the layout state as the key is important to prevent us from being synced with someone with a different layout state
     assert(this.layoutState != null);
   }
 

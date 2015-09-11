@@ -220,6 +220,15 @@ abstract class Widget {
   bool get isFromOldGeneration => _generation < _currentGeneration;
   void _markAsFromCurrentGeneration() { _generation = _currentGeneration; }
 
+  bool get _hasState => false;
+  static bool _canSync(Widget a, Widget b) {
+    assert(a != null);
+    assert(b != null);
+    return a.runtimeType == b.runtimeType &&
+           a.key == b.key &&
+           (!a._hasState || !b._hasState);
+  }
+
   bool _mounted = false;
   bool _wasMounted = false;
   bool get mounted => _mounted;
@@ -310,6 +319,9 @@ abstract class Widget {
   // if the node has become stateful and should be retained.
   // This is called immediately before _sync().
   // Component.retainStatefulNodeIfPossible() calls syncConstructorArguments().
+  // This is only ever called on a node A with an argument B if _canSync(A, B)
+  // is true. It's ok if after calling retainStatefulNodeIfPossible(), the two
+  // nodes no longer return true from _canSync().
   bool retainStatefulNodeIfPossible(Widget newNode) => false;
 
   void _sync(Widget old, dynamic slot) {
@@ -412,7 +424,7 @@ abstract class Widget {
       assert(newNode != null);
       assert(newNode.isFromOldGeneration);
       assert(oldNode.isFromOldGeneration);
-      if (!_canSync(newNode, oldNode)) {
+      if (!Widget._canSync(newNode, oldNode)) {
         assert(oldNode.mounted);
         // We want to handle the case where there is a removal of zero
         // or more widgets. In this case, we should be able to sync
@@ -423,7 +435,7 @@ abstract class Widget {
         oldNode = null;
 
         while (candidate != null) {
-          if (_canSync(newNode, candidate)) {
+          if (Widget._canSync(newNode, candidate)) {
             assert(candidate.parent != null);
             assert(candidate.parent.singleChild == candidate);
             if (candidate.renderObject != deadNode.renderObject) {
@@ -446,7 +458,7 @@ abstract class Widget {
       if (oldNode != null) {
         assert(newNode.isFromOldGeneration);
         assert(oldNode.isFromOldGeneration);
-        assert(_canSync(newNode, oldNode));
+        assert(Widget._canSync(newNode, oldNode));
         if (oldNode.retainStatefulNodeIfPossible(newNode)) {
           assert(oldNode.mounted);
           assert(!newNode.mounted);
@@ -518,12 +530,6 @@ abstract class Widget {
     assert(renderObject is RenderBox);
     return (renderObject as RenderBox).localToGlobal(point);
   }
-}
-
-bool _canSync(Widget a, Widget b) {
-  return a.runtimeType == b.runtimeType &&
-         a.key == b.key &&
-         (a._generation == 0 || b._generation == 0);
 }
 
 
@@ -881,10 +887,12 @@ abstract class StatefulComponent extends Component {
 
   bool _isStateInitialized = false;
 
+  bool get _hasState => _isStateInitialized;
+
   bool retainStatefulNodeIfPossible(StatefulComponent newNode) {
     assert(newNode != null);
     assert(!newNode._isStateInitialized);
-    assert(_canSync(this, newNode));
+    assert(Widget._canSync(this, newNode));
     assert(_child != null);
 
     newNode._child = _child;
@@ -1062,6 +1070,8 @@ abstract class RenderObjectWrapper extends Widget {
   void insertChildRenderObject(RenderObjectWrapper child, dynamic slot);
   void detachChildRenderObject(RenderObjectWrapper child);
 
+  bool get _hasState => _renderObject != null;
+
   void retainStatefulRenderObjectWrapper(RenderObjectWrapper newNode) {
     newNode._renderObject = _renderObject;
     newNode._ancestor = _ancestor;
@@ -1079,7 +1089,6 @@ abstract class RenderObjectWrapper extends Widget {
       if (_ancestor is RenderObjectWrapper)
         _ancestor.insertChildRenderObject(this, slot);
     } else {
-      assert(_canSync(this, old));
       _renderObject = old.renderObject;
       _ancestor = old._ancestor;
       assert(_renderObject != null);
@@ -1181,7 +1190,7 @@ abstract class RenderObjectWrapper extends Widget {
         break;
       assert(oldChild.mounted);
       Widget newChild = newChildren[childrenTop];
-      if (!_canSync(oldChild, newChild))
+      if (!Widget._canSync(oldChild, newChild))
         break;
       childrenTop += 1;
     }
@@ -1195,7 +1204,7 @@ abstract class RenderObjectWrapper extends Widget {
         break;
       assert(oldChild.mounted);
       Widget newChild = newChildren[newChildrenBottom];
-      if (!_canSync(oldChild, newChild))
+      if (!Widget._canSync(oldChild, newChild))
         break;
       newChild = syncChild(newChild, oldChild, nextSibling);
       assert(newChild.mounted);
@@ -1259,7 +1268,7 @@ abstract class RenderObjectWrapper extends Widget {
       assert(oldChild.isFromOldGeneration);
       Widget newChild = newChildren[childrenTop];
       assert(newChild.isFromOldGeneration);
-      assert(_canSync(oldChild, newChild));
+      assert(Widget._canSync(oldChild, newChild));
       newChild = syncChild(newChild, oldChild, nextSibling);
       assert(newChild.mounted);
       assert(oldChild == newChild || oldChild == null || !oldChild.mounted);
