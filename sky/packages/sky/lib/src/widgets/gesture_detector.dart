@@ -4,9 +4,9 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/gestures/drag.dart';
 import 'package:sky/gestures/long_press.dart';
 import 'package:sky/gestures/recognizer.dart';
-import 'package:sky/gestures/scroll.dart';
 import 'package:sky/gestures/show_press.dart';
 import 'package:sky/gestures/tap.dart';
 import 'package:sky/src/rendering/sky_binding.dart';

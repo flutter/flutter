@@ -1,8 +1,8 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/gestures/arena.dart';
+import 'package:sky/gestures/drag.dart';
 import 'package:sky/gestures/pointer_router.dart';
-import 'package:sky/gestures/scroll.dart';
 import 'package:sky/gestures/tap.dart';
 import 'package:test/test.dart';
 
