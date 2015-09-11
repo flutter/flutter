@@ -439,21 +439,16 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void visitChildren(RenderObjectVisitor visitor) { }
 
   dynamic debugExceptionContext = '';
-  static dynamic _debugLastException;
-  bool _debugReportException(dynamic exception, String method) {
-    if (!inDebugBuild) {
-      print('Uncaught exception in ${method}():\n$exception');
-      return false;
-    }
-    if (!identical(exception, _debugLastException)) {
-      print('-- EXCEPTION --');
-      print('An exception was raised during ${method}().');
-      'The following RenderObject was being processed when the exception was fired:\n${this}'.split('\n').forEach(print);
-      if (debugExceptionContext != '')
-        'The RenderObject had the following exception context:\n${debugExceptionContext}'.split('\n').forEach(print);
-      _debugLastException = exception;
-    }
-    return true;
+  void _debugReportException(String method, dynamic exception, StackTrace stack) {
+    print('-- EXCEPTION --');
+    print('The following exception was raised during ${method}():');
+    print('$exception');
+    print('Stack trace:');
+    print('$stack');
+    'The following RenderObject was being processed when the exception was fired (limited to $debugRenderObjectDumpMaxLength lines):\n${this}'
+      .split('\n').take(debugRenderObjectDumpMaxLength+1).forEach(print);
+    if (debugExceptionContext != '')
+      'The RenderObject had the following exception context:\n${debugExceptionContext}'.split('\n').forEach(print);
   }
 
   static bool _debugDoingLayout = false;
@@ -598,30 +593,29 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
   void _layoutWithoutResize() {
+    assert(_relayoutSubtreeRoot == this);
+    RenderObject debugPreviousActiveLayout;
+    assert(!_debugMutationsLocked);
+    assert(!_doingThisLayoutWithCallback);
+    assert(_debugCanParentUseSize != null);
+    assert(() {
+      _debugMutationsLocked = true;
+      _debugDoingThisLayout = true;
+      debugPreviousActiveLayout = _debugActiveLayout;
+      _debugActiveLayout = this;
+      return true;
+    });
     try {
-      assert(_relayoutSubtreeRoot == this);
-      RenderObject debugPreviousActiveLayout;
-      assert(!_debugMutationsLocked);
-      assert(!_doingThisLayoutWithCallback);
-      assert(_debugCanParentUseSize != null);
-      assert(() {
-        _debugMutationsLocked = true;
-        _debugDoingThisLayout = true;
-        debugPreviousActiveLayout = _debugActiveLayout;
-        _debugActiveLayout = this;
-        return true;
-      });
       performLayout();
-      assert(() {
-        _debugActiveLayout = debugPreviousActiveLayout;
-        _debugDoingThisLayout = false;
-        _debugMutationsLocked = false;
-        return true;
-      });
-    } catch (e) {
-      if (_debugReportException(e, 'layoutWithoutResize'))
-        rethrow;
+    } catch (e, stack) {
+      _debugReportException('performLayout', e, stack);
     }
+    assert(() {
+      _debugActiveLayout = debugPreviousActiveLayout;
+      _debugDoingThisLayout = false;
+      _debugMutationsLocked = false;
+      return true;
+    });
     _needsLayout = false;
     markNeedsPaint();
   }
@@ -669,7 +663,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     if (sizedByParent) {
       assert(() { _debugDoingThisResize = true; return true; });
-      performResize();
+      try {
+        performResize();
+        assert(debugDoesMeetConstraints());
+      } catch (e, stack) {
+        _debugReportException('performResize', e, stack);
+      }
       assert(() { _debugDoingThisResize = false; return true; });
     }
     RenderObject debugPreviousActiveLayout;
@@ -681,17 +680,16 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     try {
       performLayout();
-      assert(() {
-        _debugActiveLayout = debugPreviousActiveLayout;
-        _debugDoingThisLayout = false;
-        _debugMutationsLocked = false;
-        return true;
-      });
       assert(debugDoesMeetConstraints());
-    } catch (e) {
-      if (_debugReportException(e, 'layout'))
-        rethrow;
+    } catch (e, stack) {
+      _debugReportException('performLayout', e, stack);
     }
+    assert(() {
+      _debugActiveLayout = debugPreviousActiveLayout;
+      _debugDoingThisLayout = false;
+      _debugMutationsLocked = false;
+      return true;
+    });
     _needsLayout = false;
     markNeedsPaint();
     assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
@@ -938,13 +936,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _layer.removeAllChildren();
     PaintingContext context = new PaintingContext.withLayer(_layer, paintBounds);
     _layer = context._containerLayer;
-    try {
-      _paintWithContext(context, Offset.zero);
-      context.endRecording();
-    } catch (e) {
-      if (_debugReportException(e, '_repaint'))
-        rethrow;
-    }
+    _paintWithContext(context, Offset.zero);
+    context.endRecording();
   }
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(!_debugDoingThisPaint);
@@ -964,9 +957,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     _needsPaint = false;
-    paint(context, offset);
-    assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
-    assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
+    try {
+      paint(context, offset);
+      assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
+      assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
+    } catch (e, stack) {
+      _debugReportException('paint', e, stack);
+    }
     assert(() {
       if (debugPaintBoundsEnabled)
         context.canvas.restore();
