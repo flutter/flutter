@@ -4,8 +4,6 @@
 
 #include "sky/compositor/compositor_options.h"
 
-#include <mutex>
-
 namespace sky {
 namespace compositor {
 
