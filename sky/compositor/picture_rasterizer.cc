@@ -38,10 +38,10 @@ PictureRasterzier::Value::Value()
 PictureRasterzier::Value::~Value() {
 }
 
-static RefPtr<SkImage> ImageFromPicture(PaintContext& context,
-                                        GrContext* gr_context,
-                                        SkPicture* picture,
-                                        const SkISize& size) {
+RefPtr<SkImage> PictureRasterzier::ImageFromPicture(PaintContext& context,
+                                                    GrContext* gr_context,
+                                                    SkPicture* picture,
+                                                    const SkISize& size) {
   // Step 1: Create a texture from the context's texture provider
 
   GrSurfaceDesc desc;
@@ -94,6 +94,11 @@ static RefPtr<SkImage> ImageFromPicture(PaintContext& context,
   RefPtr<SkImage> image = adoptRef(
       SkImage::NewFromTexture(gr_context, backendDesc, kPremul_SkAlphaType,
                               &ImageReleaseProc, texture));
+
+  if (image) {
+    cache_fills_.increment();
+  }
+
   return image;
 }
 
@@ -123,6 +128,10 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
     value.image = ImageFromPicture(context, gr_context, picture, size);
   }
 
+  if (value.image) {
+    cache_hits_.increment();
+  }
+
   return value.image;
 }
 
@@ -135,6 +144,8 @@ void PictureRasterzier::PurgeCache() {
       keys_to_purge.insert(item.first);
     }
   }
+
+  cache_evictions_.increment(keys_to_purge.size());
 
   for (const auto& key : keys_to_purge) {
     cache_.erase(key);

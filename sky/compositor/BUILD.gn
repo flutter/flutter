@@ -18,6 +18,8 @@ source_set("compositor") {
     "compositor_options.h",
     "container_layer.cc",
     "container_layer.h",
+    "instrumentation.cc",
+    "instrumentation.h",
     "layer.cc",
     "layer.h",
     "layer_tree.cc",

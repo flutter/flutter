@@ -8,6 +8,7 @@
 #include "base/macros.h"
 #include "base/logging.h"
 #include "sky/compositor/compositor_options.h"
+#include "sky/compositor/instrumentation.h"
 #include "sky/compositor/picture_rasterizer.h"
 
 namespace sky {
@@ -57,6 +58,9 @@ class PaintContext {
  private:
   PictureRasterzier rasterizer_;
   CompositorOptions options_;
+
+  instrumentation::Counter frame_count_;
+  instrumentation::Stopwatch frame_time_;
 
   void beginFrame();
 

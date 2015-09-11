@@ -12,10 +12,13 @@ PaintContext::PaintContext() {
 }
 
 void PaintContext::beginFrame() {
+  frame_count_.increment();
+  frame_time_.start();
 }
 
 void PaintContext::endFrame() {
   rasterizer_.PurgeCache();
+  frame_time_.stop();
 }
 
 PaintContext::ScopedFrame PaintContext::AcquireFrame(SkCanvas& canvas,
