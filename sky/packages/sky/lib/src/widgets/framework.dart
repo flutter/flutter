@@ -9,6 +9,7 @@ import 'dart:sky' as sky;
 import 'package:sky/animation.dart';
 import 'package:sky/mojo/activity.dart';
 import 'package:sky/src/rendering/box.dart';
+import 'package:sky/src/rendering/error.dart';
 import 'package:sky/src/rendering/hit_test.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/sky_binding.dart';
@@ -742,7 +743,7 @@ abstract class Component extends Widget {
         super._withKey(key);
 
   bool _debugIsBuilding = false;
-  static String _debugLastComponent;
+  static Queue<Component> _debugComponentBuildTree = new Queue<Component>();
 
   bool _dirty = true;
 
@@ -816,37 +817,48 @@ abstract class Component extends Widget {
     Widget oldChild;
     if (old == null) {
       oldChild = _child;
+      _child = null;
     } else {
-      assert(_child == null);
       oldChild = old._child;
+      assert(_child == null);
     }
 
     String _debugPreviousComponent;
     assert(() {
       _debugIsBuilding = true;
-      _debugPreviousComponent = _debugLastComponent;
-      if (_debugLastComponent != null)
-        _debugLastComponent = "$_debugPreviousComponent -> ${this.toStringName()}";
-      else
-        _debugLastComponent = "Build chain: ${this.toStringName()}";
+      _debugComponentBuildTree.add(this);
       return true;
     });
 
     int lastOrder = _currentOrder;
     _currentOrder = _order;
-    _child = build();
+    try {
+      _child = build();
+      assert(_child != null);
+    } catch (e, stack) {
+      _debugReportException("building ${this.toStringName()}", e, stack);
+    }
     _currentOrder = lastOrder;
-    assert(_child != null);
     assert(() { _debugChildTaken = false; return true; });
-    _child = syncChild(_child, oldChild, slot);
-    assert(!_debugChildTaken); // we shouldn't be able to lose our child when we're syncing it!
-    assert(_child != null);
-    assert(_child.parent == this);
-
+    try {
+      // even if build() failed (i.e. _child == null), we still call syncChild(), to remove the oldChild
+      _child = syncChild(_child, oldChild, slot);
+      assert(!_debugChildTaken); // we shouldn't be able to lose our child when we're syncing it!
+      assert(_child == null || _child.parent == this);
+    } catch (e, stack) {
+      _debugReportException('syncing build output of ${this.toStringName()}\n  old child: ${oldChild?.toStringName()}\n  new child: ${_child?.toStringName()}', e, stack);
+      _child = null;
+    }
     assert(() {
+      if (_child == null) {
+        try {
+          _child = new ErrorWidget()..setParent(this).._sync(null, slot);
+        } catch (e) {
+          print('(application is now in an unstable state - ignore any subsequent exceptions)');
+        }
+      }
       _debugIsBuilding = false;
-      _debugLastComponent = _debugPreviousComponent;
-      return true;
+      return identical(_debugComponentBuildTree.removeLast(), this);
     });
 
     _dirty = false;
@@ -1094,7 +1106,7 @@ abstract class RenderObjectWrapper extends Widget {
       assert(_renderObject != null);
     }
     assert(() {
-      _renderObject.debugExceptionContext = Component._debugLastComponent;
+      _renderObject.debugExceptionContext = Component._debugComponentBuildTree.fold('  Widget build stack:', (String s, Component c) => s + '\n    ${c.toStringName()}');
       return true;
     });
     assert(_renderObject == renderObject); // in case a subclass reintroduces it
@@ -1598,4 +1610,21 @@ class RenderBoxToWidgetAdapter extends AbstractWidgetRoot {
   }
 
   Widget build() => builder();
+}
+
+class ErrorWidget extends LeafRenderObjectWrapper {
+  RenderBox createNode() => new RenderErrorBox();
+}
+
+void _debugReportException(String context, dynamic exception, StackTrace stack) {
+  print('------------------------------------------------------------------------');
+  print('Exception caught while $context');
+  print('$exception');
+  print('Stack trace:');
+  '$stack'.split('\n').forEach(print);
+  print('Build stack:');
+  Component._debugComponentBuildTree.forEach((Component c) { print('  ${c.toStringName()}'); });
+  print('Current application widget tree:');
+  debugDumpApp();
+  print('------------------------------------------------------------------------');
 }

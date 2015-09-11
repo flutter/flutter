@@ -11,6 +11,7 @@ export 'package:sky/src/rendering/auto_layout.dart';
 export 'package:sky/src/rendering/block.dart';
 export 'package:sky/src/rendering/box.dart';
 export 'package:sky/src/rendering/debug.dart';
+export 'package:sky/src/rendering/error.dart';
 export 'package:sky/src/rendering/flex.dart';
 export 'package:sky/src/rendering/grid.dart';
 export 'package:sky/src/rendering/hit_test.dart';
