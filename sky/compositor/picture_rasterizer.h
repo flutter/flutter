@@ -32,6 +32,12 @@ class PictureRasterzier {
 
   void PurgeCache();
 
+  const instrumentation::Counter& cache_fills() { return cache_fills_; }
+
+  const instrumentation::Counter& cache_hits() { return cache_hits_; }
+
+  const instrumentation::Counter& cache_evictions() { return cache_evictions_; }
+
  private:
   struct Key {
     uint32_t pictureID;
