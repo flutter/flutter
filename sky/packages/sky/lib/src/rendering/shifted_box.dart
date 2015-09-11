@@ -194,8 +194,9 @@ class RenderPositionedBox extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  bool get _shinkWrapWidth => _shrinkWrap == ShrinkWrap.width || _shrinkWrap == ShrinkWrap.both;
-  bool get _shinkWrapHeight => _shrinkWrap == ShrinkWrap.height || _shrinkWrap == ShrinkWrap.both;
+  // These are only valid during performLayout() and paint(), since they rely on constraints which is only set after layout() is called.
+  bool get _shinkWrapWidth => _shrinkWrap == ShrinkWrap.width || _shrinkWrap == ShrinkWrap.both || constraints.maxWidth == double.INFINITY;
+  bool get _shinkWrapHeight => _shrinkWrap == ShrinkWrap.height || _shrinkWrap == ShrinkWrap.both || constraints.maxHeight == double.INFINITY;
 
   void performLayout() {
     if (child != null) {
