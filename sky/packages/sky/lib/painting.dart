@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Sky render tree.
+/// Utilities for painting.
 ///
-/// This library includes and re-exports all Sky rendering classes.
+/// This library includes and re-exports a variety of classes that wrap the Sky
+/// engine's painting API for more specialised purposes, such as painting scaled
+/// images, interpolating between shadows, painting borders around boxes, etc.
 library painting;
 
 export 'src/painting/box_painter.dart';
