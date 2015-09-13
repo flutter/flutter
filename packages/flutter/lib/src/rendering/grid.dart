@@ -5,12 +5,10 @@
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';
 
-class GridParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {}
-
-class GridMetrics {
+class _GridMetrics {
   // Grid is width-in, height-out.  We fill the max width and adjust height
   // accordingly.
-  factory GridMetrics({ double width, int childCount, double maxChildExtent }) {
+  factory _GridMetrics({ double width, int childCount, double maxChildExtent }) {
     assert(width != null);
     assert(childCount != null);
     assert(maxChildExtent != null);
@@ -31,10 +29,10 @@ class GridMetrics {
     double height = childPadding * (rowCount + 1) + (childExtent * rowCount);
     Size childSize = new Size(childExtent, childExtent);
     Size size = new Size(width, height);
-    return new GridMetrics._(size, childSize, childrenPerRow, childPadding, rowCount);
+    return new _GridMetrics._(size, childSize, childrenPerRow, childPadding, rowCount);
   }
 
-  const GridMetrics._(this.size, this.childSize, this.childrenPerRow, this.childPadding, this.rowCount);
+  const _GridMetrics._(this.size, this.childSize, this.childrenPerRow, this.childPadding, this.rowCount);
 
   final Size size;
   final Size childSize;
@@ -43,6 +41,15 @@ class GridMetrics {
   final int rowCount;
 }
 
+/// Parent data for use with [RenderGrid]
+class GridParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {}
+
+/// Implements the grid layout algorithm
+///
+/// In grid layout, children are arranged into rows and collumns in on a two
+/// dimensional grid. The grid determines how many children will be placed in
+/// each row by making the children as wide as possible while still respecting
+/// the given [maxChildExtent].
 class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, GridParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, GridParentData> {
   RenderGrid({ Iterable<RenderBox> children, double maxChildExtent }) {
@@ -66,32 +73,21 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
       child.parentData = new GridParentData();
   }
 
-  // getMinIntrinsicWidth() should return the minimum width that this box could
-  // be without failing to render its contents within itself.
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     // We can render at any width.
     return constraints.constrainWidth(0.0);
   }
 
-  // getMaxIntrinsicWidth() should return the smallest width beyond which
-  // increasing the width never decreases the height.
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     double maxWidth = childCount * _maxChildExtent;
     return constraints.constrainWidth(maxWidth);
   }
 
-  // getMinIntrinsicHeight() should return the minimum height that this box could
-  // be without failing to render its contents within itself.
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     double desiredHeight = _computeMetrics().size.height;
     return constraints.constrainHeight(desiredHeight);
   }
 
-  // getMaxIntrinsicHeight should return the smallest height beyond which
-  // increasing the height never decreases the width.
-  // If the layout algorithm used is width-in-height-out, i.e. the height
-  // depends on the width and not vice versa, then this will return the same
-  // as getMinIntrinsicHeight().
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return getMinIntrinsicHeight(constraints);
   }
@@ -100,8 +96,8 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
-  GridMetrics _computeMetrics() {
-    return new GridMetrics(
+  _GridMetrics _computeMetrics() {
+    return new _GridMetrics(
       width: constraints.maxWidth,
       childCount: childCount,
       maxChildExtent: _maxChildExtent
@@ -111,7 +107,7 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
   void performLayout() {
     // We could shrink-wrap our contents when infinite, but for now we don't.
     assert(constraints.maxWidth < double.INFINITY);
-    GridMetrics metrics = _computeMetrics();
+    _GridMetrics metrics = _computeMetrics();
     size = constraints.constrain(metrics.size);
     if (constraints.maxHeight < size.height)
       _hasVisualOverflow = true;

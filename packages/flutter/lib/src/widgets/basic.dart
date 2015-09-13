@@ -292,29 +292,29 @@ class AspectRatio extends OneChildRenderObjectWrapper {
   }
 }
 
-class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
-  ShrinkWrapWidth({ Key key, this.stepWidth, this.stepHeight, Widget child })
+class IntrinsicWidth extends OneChildRenderObjectWrapper {
+  IntrinsicWidth({ Key key, this.stepWidth, this.stepHeight, Widget child })
     : super(key: key, child: child);
 
   final double stepWidth;
   final double stepHeight;
 
-  RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth(stepWidth: stepWidth, stepHeight: stepHeight);
-  RenderShrinkWrapWidth get renderObject => super.renderObject;
+  RenderIntrinsicWidth createNode() => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
+  RenderIntrinsicWidth get renderObject => super.renderObject;
 
-  void syncRenderObject(ShrinkWrapWidth old) {
+  void syncRenderObject(IntrinsicWidth old) {
     super.syncRenderObject(old);
     renderObject.stepWidth = stepWidth;
     renderObject.stepHeight = stepHeight;
   }
 }
 
-class ShrinkWrapHeight extends OneChildRenderObjectWrapper {
-  ShrinkWrapHeight({ Key key, Widget child })
+class IntrinsicHeight extends OneChildRenderObjectWrapper {
+  IntrinsicHeight({ Key key, Widget child })
     : super(key: key, child: child);
 
-  RenderShrinkWrapHeight createNode() => new RenderShrinkWrapHeight();
-  RenderShrinkWrapHeight get renderObject => super.renderObject;
+  RenderIntrinsicHeight createNode() => new RenderIntrinsicHeight();
+  RenderIntrinsicHeight get renderObject => super.renderObject;
 
   // Nothing to sync, so we don't implement syncRenderObject()
 }

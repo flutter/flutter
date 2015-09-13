@@ -12,9 +12,18 @@ import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/src/painting/box_painter.dart';
 
+/// A base class for render objects that resemble their children
+///
+/// A proxy box has a single child and simply mimics all the properties of that
+/// child by calling through to the child for each function in the render box
+/// protocol. For example, a proxy box determines its size by askings its child
+/// to layout with the same constraints and then matching the size.
+///
+/// A proxy box isn't useful on its own because you might as well just replace
+/// the proxy box with its child. However, RenderProxyBox is a useful base class
+/// for render objects that wish to mimic most, but not all, of the properties
+/// of their child.
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-
-  // ProxyBox assumes the child will be at 0,0 and will have the same size
 
   RenderProxyBox([RenderBox child = null]) {
     this.child = child;
@@ -72,6 +81,15 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
   }
 }
 
+/// A render object that imposes additional constraints on its child
+///
+/// A render constrainted box proxies most functions in the render box protocol
+/// to its child, except that when laying out its child, it tightens the
+/// constraints provided by its parent by enforcing the [additionalConstraints]
+/// as well.
+///
+/// For example, if you wanted [child] to have a minimum height, you could use
+/// `const BoxConstraints(minHeight: 50.0)`` as the [additionalConstraints].
 class RenderConstrainedBox extends RenderProxyBox {
   RenderConstrainedBox({
     RenderBox child,
@@ -80,8 +98,9 @@ class RenderConstrainedBox extends RenderProxyBox {
     assert(additionalConstraints != null);
   }
 
-  BoxConstraints _additionalConstraints;
+  /// Additional constraints to apply to [child] during layout
   BoxConstraints get additionalConstraints => _additionalConstraints;
+  BoxConstraints _additionalConstraints;
   void set additionalConstraints (BoxConstraints newConstraints) {
     assert(newConstraints != null);
     if (_additionalConstraints == newConstraints)
@@ -126,6 +145,14 @@ class RenderConstrainedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: ${additionalConstraints}\n';
 }
 
+/// Forces child to layout at a specific aspect ratio
+///
+/// The width of this render object is the largest width permited by the layout
+/// constraints. The height of the render object is determined by applying the
+/// given aspect ratio to the width.
+///
+/// The aspect ratio is expressed as a ratio of width to height. For example,
+/// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
 class RenderAspectRatio extends RenderProxyBox {
   RenderAspectRatio({
     RenderBox child,
@@ -134,8 +161,12 @@ class RenderAspectRatio extends RenderProxyBox {
     assert(_aspectRatio != null);
   }
 
-  double _aspectRatio;
+  /// The aspect ratio to use when computing the height from the width
+  ///
+  /// The aspect ratio is expressed as a ratio of width to height. For example,
+  /// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
   double get aspectRatio => _aspectRatio;
+  double _aspectRatio;
   void set aspectRatio (double newAspectRatio) {
     assert(newAspectRatio != null);
     if (_aspectRatio == newAspectRatio)
@@ -172,24 +203,29 @@ class RenderAspectRatio extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}aspectRatio: ${aspectRatio}\n';
 }
 
-class RenderShrinkWrapWidth extends RenderProxyBox {
+/// Sizes its child to the child's intrinsic width
+///
+/// This class will size its child's width to the child's maximum intrinsic
+/// width. If [stepWidth] is non-null, the child's width will be snapped to a
+/// multiple of the [stepWidth]. Similarly, if [stepHeight] is non-null, the
+/// child's height will be snapped to a multiple of the [stepHeight].
+///
+/// This class is useful, for example, when unlimited width is available and
+/// you would like a child that would otherwise attempt to expand infinitely to
+/// instead size itself to a more reasonable width.
+///
+/// Note: This class is relatively expensive. Avoid using it where possible.
+class RenderIntrinsicWidth extends RenderProxyBox {
 
-  // This class will attempt to size its child to the child's maximum
-  // intrinsic width, snapped to a multiple of the stepWidth, if one
-  // is provided, and given the provided constraints; and will then
-  // adopt the child's resulting dimensions.
-
-  // Note: laying out this class is relatively expensive. Avoid using
-  // it where possible.
-
-  RenderShrinkWrapWidth({
+  RenderIntrinsicWidth({
     double stepWidth,
     double stepHeight,
     RenderBox child
   }) : _stepWidth = stepWidth, _stepHeight = stepHeight, super(child);
 
-  double _stepWidth;
+  /// If non-null, force the child's width to be a multiple of this value
   double get stepWidth => _stepWidth;
+  double _stepWidth;
   void set stepWidth(double newStepWidth) {
     if (newStepWidth == _stepWidth)
       return;
@@ -197,8 +233,9 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  double _stepHeight;
+  /// If non-null, force the child's height to be a multiple of this value
   double get stepHeight => _stepHeight;
+  double _stepHeight;
   void set stepHeight(double newStepHeight) {
     if (newStepHeight == _stepHeight)
       return;
@@ -206,7 +243,7 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  static double applyStep(double input, double step) {
+  static double _applyStep(double input, double step) {
     if (step == null)
       return input;
     return (input / step).ceil() * step;
@@ -218,7 +255,7 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
       return constraints;
     double width = child.getMaxIntrinsicWidth(constraints);
     assert(width == constraints.constrainWidth(width));
-    return constraints.tightenWidth(applyStep(width, _stepWidth));
+    return constraints.tightenWidth(_applyStep(width, _stepWidth));
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
@@ -229,21 +266,21 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
     if (child == null)
       return constraints.constrainWidth(0.0);
     double childResult = child.getMaxIntrinsicWidth(constraints);
-    return constraints.constrainWidth(applyStep(childResult, _stepWidth));
+    return constraints.constrainWidth(_applyStep(childResult, _stepWidth));
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     if (child == null)
       return constraints.constrainHeight(0.0);
     double childResult = child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
-    return constraints.constrainHeight(applyStep(childResult, _stepHeight));
+    return constraints.constrainHeight(_applyStep(childResult, _stepHeight));
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (child == null)
       return constraints.constrainHeight(0.0);
     double childResult = child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
-    return constraints.constrainHeight(applyStep(childResult, _stepHeight));
+    return constraints.constrainHeight(_applyStep(childResult, _stepHeight));
   }
 
   void performLayout() {
@@ -262,16 +299,19 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
 
 }
 
-class RenderShrinkWrapHeight extends RenderProxyBox {
+/// Sizes its child to the child's intrinsic height
+///
+/// This class will size its child's height to the child's maximum intrinsic
+/// height.
+///
+/// This class is useful, for example, when unlimited height is available and
+/// you would like a child that would otherwise attempt to expand infinitely to
+/// instead size itself to a more reasonable height.
+///
+/// Note: This class is relatively expensive. Avoid using it where possible.
+class RenderIntrinsicHeight extends RenderProxyBox {
 
-  // This class will attempt to size its child to the child's maximum
-  // intrinsic height, given the provided constraints; and will then
-  // adopt the child's resulting dimensions.
-
-  // Note: laying out this class is relatively expensive. Avoid using
-  // it where possible.
-
-  RenderShrinkWrapHeight({
+  RenderIntrinsicHeight({
     RenderBox child
   }) : super(child);
 
@@ -317,14 +357,25 @@ class RenderShrinkWrapHeight extends RenderProxyBox {
 
 }
 
+/// Makes its child partially transparent
+///
+/// This class paints its child into an intermediate buffer and then blends the
+/// child back into the scene partially transparent.
+///
+/// Note: This class is relatively expensive because it requires painting the
+/// child into an intermediate buffer.
 class RenderOpacity extends RenderProxyBox {
   RenderOpacity({ RenderBox child, double opacity })
     : this._opacity = opacity, super(child) {
     assert(opacity >= 0.0 && opacity <= 1.0);
   }
 
-  double _opacity;
+  /// The fraction to scale the child's alpha value
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e., invisible).
   double get opacity => _opacity;
+  double _opacity;
   void set opacity (double newOpacity) {
     assert(newOpacity != null);
     assert(newOpacity >= 0.0 && newOpacity <= 1.0);
@@ -349,13 +400,21 @@ class RenderOpacity extends RenderProxyBox {
   }
 }
 
+/// Applies a color filter when painting its child
+///
+/// This class paints its child into an intermediate buffer and then blends the
+/// child back into the scene using a color filter.
+///
+/// Note: This class is relatively expensive because it requires painting the
+/// child into an intermediate buffer.
 class RenderColorFilter extends RenderProxyBox {
   RenderColorFilter({ RenderBox child, Color color, sky.TransferMode transferMode })
     : _color = color, _transferMode = transferMode, super(child) {
   }
 
-  Color _color;
+  /// The color to use as input to the color filter
   Color get color => _color;
+  Color _color;
   void set color (Color newColor) {
     assert(newColor != null);
     if (_color == newColor)
@@ -364,8 +423,9 @@ class RenderColorFilter extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  sky.TransferMode _transferMode;
+  /// The transfer mode to use when combining the child's painting and the [color]
   sky.TransferMode get transferMode => _transferMode;
+  sky.TransferMode _transferMode;
   void set transferMode (sky.TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
@@ -380,6 +440,9 @@ class RenderColorFilter extends RenderProxyBox {
   }
 }
 
+/// Clips its child using a rectangle
+///
+/// Prevents its child from painting outside its bounds.
 class RenderClipRect extends RenderProxyBox {
   RenderClipRect({ RenderBox child }) : super(child);
 
@@ -389,6 +452,11 @@ class RenderClipRect extends RenderProxyBox {
   }
 }
 
+/// Clips its child using a rounded rectangle
+///
+/// Creates a rounded rectangle from its layout dimensions and the given x and
+/// y radius values and prevents its child from painting outside that rounded
+/// rectangle.
 class RenderClipRRect extends RenderProxyBox {
   RenderClipRRect({ RenderBox child, double xRadius, double yRadius })
     : _xRadius = xRadius, _yRadius = yRadius, super(child) {
@@ -396,8 +464,12 @@ class RenderClipRRect extends RenderProxyBox {
     assert(_yRadius != null);
   }
 
-  double _xRadius;
+  /// The radius of the rounded corners in the horizontal direction
+  ///
+  /// Values are clamped to be between zero and half the width of the render
+  /// object.
   double get xRadius => _xRadius;
+  double _xRadius;
   void set xRadius (double newXRadius) {
     assert(newXRadius != null);
     if (_xRadius == newXRadius)
@@ -406,8 +478,12 @@ class RenderClipRRect extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  double _yRadius;
+  /// The radius of the rounded corners in the vertical direction
+  ///
+  /// Values are clamped to be between zero and half the height of the render
+  /// object.
   double get yRadius => _yRadius;
+  double _yRadius;
   void set yRadius (double newYRadius) {
     assert(newYRadius != null);
     if (_yRadius == newYRadius)
@@ -425,6 +501,10 @@ class RenderClipRRect extends RenderProxyBox {
   }
 }
 
+/// Clips its child using an oval
+///
+/// Inscribes an oval into its layout dimensions and prevents its child from
+/// painting outside that oval.
 class RenderClipOval extends RenderProxyBox {
   RenderClipOval({ RenderBox child }) : super(child);
 
@@ -447,22 +527,40 @@ class RenderClipOval extends RenderProxyBox {
   }
 }
 
+/// Where to paint a box decoration
 enum BoxDecorationPosition {
+  /// Paint the box decoration behind the children
   background,
+
+  /// Paint the box decoration in front of the children
   foreground,
 }
 
+/// Paints a [BoxDecoration] either before or after its child paints
 class RenderDecoratedBox extends RenderProxyBox {
 
   RenderDecoratedBox({
     BoxDecoration decoration,
     RenderBox child,
-    this.position: BoxDecorationPosition.background
-  }) : _painter = new BoxPainter(decoration), super(child);
+    BoxDecorationPosition position: BoxDecorationPosition.background
+  }) : _painter = new BoxPainter(decoration),
+       _position = position,
+       super(child) {
+    assert(decoration != null);
+    assert(position != null);
+  }
 
-  BoxDecorationPosition position;
-  final BoxPainter _painter;
+  /// Where to paint the box decoration
+  BoxDecorationPosition get position => _position;
+  BoxDecorationPosition _position;
+  void set position (BoxDecorationPosition newPosition) {
+    assert(newPosition != null);
+    if (newPosition == _position)
+      return;
+    markNeedsPaint();
+  }
 
+  /// What decoration to paint
   BoxDecoration get decoration => _painter.decoration;
   void set decoration (BoxDecoration newDecoration) {
     assert(newDecoration != null);
@@ -473,6 +571,8 @@ class RenderDecoratedBox extends RenderProxyBox {
     _addBackgroundImageListenerIfNeeded();
     markNeedsPaint();
   }
+
+  final BoxPainter _painter;
 
   bool get _needsBackgroundImageListener {
     return attached &&
@@ -513,6 +613,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
 }
 
+/// Applies a transformation before painting its child
 class RenderTransform extends RenderProxyBox {
   RenderTransform({
     Matrix4 transform,
@@ -524,10 +625,13 @@ class RenderTransform extends RenderProxyBox {
     this.origin = origin;
   }
 
-  Matrix4 _transform;
-  Offset _origin;
-
+  /// The origin of the coordinate system (relative to the upper left corder of
+  /// this render object) in which to apply the matrix
+  ///
+  /// Setting an origin is equivalent to conjugating the transform matrix by a
+  /// translation. This property is provided just for convenience.
   Offset get origin => _origin;
+  Offset _origin;
   void set origin (Offset newOrigin) {
     if (_origin == newOrigin)
       return;
@@ -535,6 +639,10 @@ class RenderTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  // Note the lack of a getter for transform because Matrix4 is not immutable
+  Matrix4 _transform;
+
+  /// The matrix to transform the child by during painting
   void set transform(Matrix4 newTransform) {
     assert(newTransform != null);
     if (_transform == newTransform)
@@ -543,31 +651,37 @@ class RenderTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// Sets the transform to the identity matrix
   void setIdentity() {
     _transform.setIdentity();
     markNeedsPaint();
   }
 
+  /// Concatenates a rotation about the x axis into the transform
   void rotateX(double radians) {
     _transform.rotateX(radians);
     markNeedsPaint();
   }
 
+  /// Concatenates a rotation about the y axis into the transform
   void rotateY(double radians) {
     _transform.rotateY(radians);
     markNeedsPaint();
   }
 
+  /// Concatenates a rotation about the z axis into the transform
   void rotateZ(double radians) {
     _transform.rotateZ(radians);
     markNeedsPaint();
   }
 
+  /// Concatenates a translation by (x, y, z) into the transform
   void translate(x, [double y = 0.0, double z = 0.0]) {
     _transform.translate(x, y, z);
     markNeedsPaint();
   }
 
+  /// Concatenates a scale into the transform
   void scale(x, [double y, double z]) {
     _transform.scale(x, y, z);
     markNeedsPaint();
@@ -611,8 +725,13 @@ class RenderTransform extends RenderProxyBox {
   }
 }
 
+/// Called when a size changes
 typedef void SizeChangedCallback(Size newSize);
 
+/// Calls [callback] whenever the child's layout size changes
+///
+/// Note: Size observer calls its callback during layout, which means you cannot
+/// dirty layout information during the callback.
 class RenderSizeObserver extends RenderProxyBox {
   RenderSizeObserver({
     this.callback,
@@ -621,20 +740,32 @@ class RenderSizeObserver extends RenderProxyBox {
     assert(callback != null);
   }
 
+  /// The callback to call whenever the child's layout size changes
   SizeChangedCallback callback;
 
   void performLayout() {
     Size oldSize = size;
-
     super.performLayout();
-
     if (oldSize != size)
       callback(size);
   }
 }
 
+/// Called when its time to paint into the given canvas
 typedef void CustomPaintCallback(PaintingCanvas canvas, Size size);
 
+/// Delegates its painting to [callback]
+///
+/// When asked to paint, custom paint first calls its callback with the current
+/// canvas and then paints its children. The coodinate system of the canvas
+/// matches the coordinate system of the custom paint object. The callback is
+/// expected to paint with in a rectangle starting at the origin and
+/// encompassing a region of the given size. If the callback paints outside
+/// those bounds, there might be insufficient memory allocated to rasterize the
+/// painting commands and the resulting behavior is undefined.
+///
+/// Note: Custom paint calls its callback during paint, which means you cannot
+/// dirty layout or paint information during the callback.
 class RenderCustomPaint extends RenderProxyBox {
 
   RenderCustomPaint({
@@ -645,6 +776,11 @@ class RenderCustomPaint extends RenderProxyBox {
     _callback = callback;
   }
 
+  /// The callback to which this render object delegates its painting
+  ///
+  /// The callback must be non-null whenever the render object is attached to
+  /// the render tree.
+  CustomPaintCallback get callback => _callback;
   CustomPaintCallback _callback;
   void set callback (CustomPaintCallback newCallback) {
     assert(newCallback != null || !attached);
@@ -670,6 +806,12 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 }
 
+/// Is invisible during hit testing
+///
+/// When [ignoring] is true, this render object is invisible to hit testing. It
+/// still consumes space during layout and paints its child as usual. It just
+/// cannot be the target of located events because it returns false from
+/// [hitTest].
 class RenderIgnorePointer extends RenderProxyBox {
   RenderIgnorePointer({ RenderBox child, bool ignoring: true }) : super(child);
 
