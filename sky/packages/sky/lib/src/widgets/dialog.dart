@@ -119,7 +119,7 @@ class Dialog extends Component {
             child: new Material(
               level: 4,
               color: _color,
-              child: new ShrinkWrapWidth(
+              child: new IntrinsicWidth(
                 child: new Block(dialogBody)
               )
             )

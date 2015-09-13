@@ -132,7 +132,7 @@ class PopupMenu extends StatefulComponent {
                   minWidth: _kMenuMinWidth,
                   maxWidth: _kMenuMaxWidth
                 ),
-                child: new ShrinkWrapWidth(
+                child: new IntrinsicWidth(
                   stepWidth: _kMenuWidthStep,
                   child: new ScrollableViewport(
                     child: new Container(

@@ -35,7 +35,7 @@ void main() {
   test('Shrink-wrapping width', () {
     RenderBox child = new RenderTestBox(new BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
 
-    RenderBox parent = new RenderShrinkWrapWidth(child: child);
+    RenderBox parent = new RenderIntrinsicWidth(child: child);
     layout(parent,
           constraints: new BoxConstraints(
               minWidth: 5.0,
@@ -49,7 +49,7 @@ void main() {
   test('Shrink-wrapping height', () {
     RenderBox child = new RenderTestBox(new BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
 
-    RenderBox parent = new RenderShrinkWrapHeight(child: child);
+    RenderBox parent = new RenderIntrinsicHeight(child: child);
     layout(parent,
           constraints: new BoxConstraints(
               minWidth: 5.0,
