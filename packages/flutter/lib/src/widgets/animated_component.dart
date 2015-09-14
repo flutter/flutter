@@ -7,47 +7,49 @@ import 'package:sky/src/widgets/framework.dart';
 
 abstract class AnimatedComponent extends StatefulComponent {
 
-  AnimatedComponent({ Key key }) : super(key: key);
+  AnimatedComponent({ Key key, this.direction, this.duration }) : super(key: key);
 
-  void syncConstructorArguments(AnimatedComponent source) { }
+  Duration duration;
+  Direction direction;
 
-  final List<AnimationPerformance> _watchedPerformances = new List<AnimationPerformance>();
+  void syncConstructorArguments(AnimatedComponent source) {
+    bool resumePerformance = false;
+    if (duration != source.duration) {
+      duration = source.duration;
+      resumePerformance = true;
+    }
+    if (direction != source.direction) {
+      direction = source.direction;
+      resumePerformance = true;
+    }
+    if (resumePerformance)
+      performance.play(direction);
+  }
 
-  void _performanceChanged() {
-    setState(() {
-      // We don't actually have any state to change, per se,
-      // we just know that we have in fact changed state.
+  AnimationPerformance get performance => _performance;
+  AnimationPerformance _performance;
+
+  void initState() {
+    _performance = new AnimationPerformance(duration: duration);
+    performance.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed)
+        handleCompleted();
+      else if (status == AnimationStatus.dismissed)
+        handleDismissed();
     });
+    if (buildDependsOnPerformance) {
+      performance.addListener(() {
+        setState(() {
+          // We don't actually have any state to change, per se,
+          // we just know that we have in fact changed state.
+        });
+      });
+    }
+    performance.play(direction);
   }
 
-  bool isWatching(AnimationPerformance performance) {
-    return _watchedPerformances.contains(performance);
-  }
-
-  void watch(AnimationPerformance performance) {
-    assert(!isWatching(performance));
-    _watchedPerformances.add(performance);
-    if (mounted)
-      performance.addListener(_performanceChanged);
-  }
-
-  void unwatch(AnimationPerformance performance) {
-    assert(isWatching(performance));
-    _watchedPerformances.remove(performance);
-    if (mounted)
-      performance.removeListener(_performanceChanged);
-  }
-
-  void didMount() {
-    for (AnimationPerformance performance in _watchedPerformances)
-      performance.addListener(_performanceChanged);
-    super.didMount();
-  }
-
-  void didUnmount() {
-    for (AnimationPerformance performance in _watchedPerformances)
-      performance.removeListener(_performanceChanged);
-    super.didUnmount();
-  }
+  bool get buildDependsOnPerformance => false;
+  void handleCompleted() { }
+  void handleDismissed() { }
 
 }

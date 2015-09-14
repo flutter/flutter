@@ -13,12 +13,14 @@ abstract class GlobalKeyWatcher extends StatefulComponent {
   GlobalKey watchedKey;
 
   void syncConstructorArguments(GlobalKeyWatcher source) {
-    if (source != source.watchedKey) {
-      _removeListeners();
+    if (watchedKey != source.watchedKey) {
+      if (watchedKey != null)
+        _removeListeners();
       watchedKey = source.watchedKey;
-      if (mounted)
+      if (mounted && watchedKey != null) {
         _setWatchedWidget(GlobalKey.getWidget(watchedKey));
-      _addListeners();
+        _addListeners();
+      }
     }
   }
 
@@ -29,7 +31,7 @@ abstract class GlobalKeyWatcher extends StatefulComponent {
     if (watchedWidget != value) {
       if (watchedWidget != null)
         stopWatching();
-      assert(debugValidateWatchedWidget(value));
+      assert(value == null || debugValidateWatchedWidget(value));
       setState(() {
         _watchedWidget = value;
       });
@@ -42,13 +44,16 @@ abstract class GlobalKeyWatcher extends StatefulComponent {
 
   void didMount() {
     super.didMount();
-    _setWatchedWidget(GlobalKey.getWidget(watchedKey));
-    _addListeners();
+    if (watchedKey != null) {
+      _setWatchedWidget(GlobalKey.getWidget(watchedKey));
+      _addListeners();
+    }
   }
 
   void didUnmount() {
     super.didUnmount();
-    _removeListeners();
+    if (watchedKey != null)
+      _removeListeners();
     _setWatchedWidget(null);
   }
 

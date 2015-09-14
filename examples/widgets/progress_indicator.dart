@@ -22,21 +22,28 @@ class ProgressIndicatorApp extends App {
         reverseCurve: ease,
         interval: new Interval(0.0, 0.9)
       );
+    valueAnimation.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.dismissed || status == AnimationStatus.completed)
+        reverseValueAnimationDirection();
+    });
+    valueAnimation.play(valueAnimationDirection);
   }
 
   void handleTap() {
-    if (valueAnimation.isAnimating)
-      valueAnimation.stop();
-    else
-      valueAnimation.resume();
+    setState(() {
+      // valueAnimation.isAnimating is part of our build state
+      if (valueAnimation.isAnimating)
+        valueAnimation.stop();
+      else
+        valueAnimation.resume();
+    });
   }
 
   void reverseValueAnimationDirection() {
-    setState(() {
-      valueAnimationDirection = (valueAnimationDirection == Direction.forward)
-        ? Direction.reverse
-        : Direction.forward;
-    });
+    valueAnimationDirection = (valueAnimationDirection == Direction.forward)
+      ? Direction.reverse
+      : Direction.forward;
+    valueAnimation.play(valueAnimationDirection);
   }
 
   Widget buildIndicators() {
@@ -58,11 +65,12 @@ class ProgressIndicatorApp extends App {
           width: 50.0,
           height: 30.0,
           child: new CircularProgressIndicator(value: valueAnimation.value)
-        )
+        ),
+        new Text("${(valueAnimation.value * 100.0).toStringAsFixed(1)}%" + (valueAnimation.isAnimating ? '' : ' (paused)'))
     ];
     return new Column(
       indicators
-        .map((c) => new Container(child: c, margin: const EdgeDims.symmetric(vertical: 20.0)))
+        .map((c) => new Container(child: c, margin: const EdgeDims.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
       justifyContent: FlexJustifyContent.center
     );
@@ -76,10 +84,7 @@ class ProgressIndicatorApp extends App {
         decoration: new BoxDecoration(backgroundColor: Theme.of(this).cardColor),
         child: new BuilderTransition(
           variables: [valueAnimation.variable],
-          direction: valueAnimationDirection,
-          performance: valueAnimation,
-          onDismissed: reverseValueAnimationDirection,
-          onCompleted: reverseValueAnimationDirection,
+          performance: valueAnimation.view,
           builder: buildIndicators
         )
       )
@@ -94,10 +99,13 @@ class ProgressIndicatorApp extends App {
           accentColor: Colors.redAccent[200]
         ),
         child: new Title(
-          title: 'Cards',
+          title: 'Progress Indicators',
           child: new Scaffold(
             toolbar: new ToolBar(center: new Text('Progress Indicators')),
-            body: body
+            body: new DefaultTextStyle(
+              style: Theme.of(this).text.title,
+              child: body
+            )
           )
         )
       )

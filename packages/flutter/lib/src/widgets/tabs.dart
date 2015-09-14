@@ -542,8 +542,7 @@ class TabBar extends Scrollable {
         style: textStyle,
         child: new BuilderTransition(
           variables: [_indicatorRect],
-          direction: Direction.forward,
-          performance: _indicatorAnimation,
+          performance: _indicatorAnimation.view,
           builder: () {
             return new TabBarWrapper(
               children: tabs,

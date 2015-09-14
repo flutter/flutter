@@ -10,13 +10,49 @@ import 'package:sky/src/widgets/transitions.dart';
 
 typedef Widget RouteBuilder(Navigator navigator, RouteBase route);
 
+typedef void NotificationCallback();
+
 abstract class RouteBase {
   Widget build(Navigator navigator, RouteBase route);
   bool get isOpaque;
   void popState([dynamic result]) { assert(result == null); }
-  TransitionBase buildTransition({ Key key });
+
+  AnimationPerformance _performance;
+  NotificationCallback onDismissed;
+  NotificationCallback onCompleted;
+  WatchableAnimationPerformance ensurePerformance({ Direction direction }) {
+    assert(direction != null);
+    if (_performance == null) {
+      _performance = new AnimationPerformance(duration: transitionDuration);
+      _performance.addStatusListener((AnimationStatus status) {
+        switch (status) {
+          case AnimationStatus.dismissed:
+            if (onDismissed != null)
+              onDismissed();
+            break;
+          case AnimationStatus.completed:
+            if (onCompleted != null)
+              onCompleted();
+            break;
+          default:
+            ;
+        }
+      });
+    }
+    AnimationStatus desiredStatus = direction == Direction.forward ? AnimationStatus.forward : AnimationStatus.reverse;
+    if (_performance.status != desiredStatus)
+      _performance.play(direction);
+    return _performance.view;
+  }
+
+  Duration get transitionDuration;
+  TransitionBase buildTransition({ Key key, Widget child, WatchableAnimationPerformance performance });
+
+  String toString() => '$runtimeType()';
 }
 
+const Duration _kTransitionDuration = const Duration(milliseconds: 150);
+const Point _kTransitionStartPoint = const Point(0.0, 75.0);
 class Route extends RouteBase {
   Route({ this.name, this.builder });
 
@@ -25,7 +61,24 @@ class Route extends RouteBase {
 
   Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
   bool get isOpaque => true;
-  TransitionBase buildTransition({ Key key }) => new SlideUpFadeTransition(key: key);
+
+  Duration get transitionDuration => _kTransitionDuration;
+  TransitionBase buildTransition({ Key key, Widget child, WatchableAnimationPerformance performance }) {
+    // TODO(jackson): Hit testing should ignore transform
+    // TODO(jackson): Block input unless content is interactive
+    return new SlideTransition(
+      key: key,
+      performance: performance,
+      position: new AnimatedValue<Point>(_kTransitionStartPoint, end: Point.origin, curve: easeOut),
+      child: new FadeTransition(
+        performance: performance,
+        opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
+        child: child
+      )
+    );
+  }
+
+  String toString() => '$runtimeType(name="$name")';
 }
 
 class RouteState extends RouteBase {
@@ -44,44 +97,14 @@ class RouteState extends RouteBase {
       callback(this);
   }
 
-  TransitionBase buildTransition({ Key key }) {
-    // Custom state routes shouldn't be asked to construct a transition
+  // Custom state routes shouldn't be asked to construct a transition
+  Duration get transitionDuration {
+    assert(false);
+    return const Duration();
+  }
+  TransitionBase buildTransition({ Key key, Widget child, WatchableAnimationPerformance performance }) {
     assert(false);
     return null;
-  }
-}
-
-// TODO(jackson): Refactor this into its own file
-const Duration _kTransitionDuration = const Duration(milliseconds: 150);
-const Point _kTransitionStartPoint = const Point(0.0, 75.0);
-class SlideUpFadeTransition extends TransitionBase {
-  SlideUpFadeTransition({
-    Key key,
-    Widget child,
-    Direction direction,
-    Function onDismissed,
-    Function onCompleted
-  }): super(key: key,
-            child: child,
-            duration: _kTransitionDuration,
-            direction: direction,
-            onDismissed: onDismissed,
-            onCompleted: onCompleted);
-
-  Widget buildWithChild(Widget child) {
-    // TODO(jackson): Hit testing should ignore transform
-    // TODO(jackson): Block input unless content is interactive
-    return new SlideTransition(
-      performance: performance,
-      direction: direction,
-      position: new AnimatedValue<Point>(_kTransitionStartPoint, end: Point.origin, curve: easeOut),
-      child: new FadeTransition(
-        performance: performance,
-        direction: direction,
-        opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-        child: child
-      )
-    );
   }
 }
 
@@ -90,6 +113,7 @@ class HistoryEntry {
   final RouteBase route;
   bool fullyOpaque = false;
   // TODO(jackson): Keep track of the requested transition
+  String toString() => "HistoryEntry($route, hashCode=$hashCode)";
 }
 
 class NavigationState {
@@ -116,6 +140,7 @@ class NavigationState {
   }
 
   void push(RouteBase route) {
+    assert(!_debugCurrentlyHaveRoute(route));
     HistoryEntry historyEntry = new HistoryEntry(route: route);
     history.insert(historyIndex + 1, historyEntry);
     historyIndex++;
@@ -128,6 +153,10 @@ class NavigationState {
       entry.fullyOpaque = false;
       historyIndex--;
     }
+  }
+
+  bool _debugCurrentlyHaveRoute(RouteBase route) {
+    return history.any((entry) => entry.route == route);
   }
 }
 
@@ -184,19 +213,25 @@ class Navigator extends StatefulComponent {
       }
       if (child == null)
         continue;
-      TransitionBase transition = historyEntry.route.buildTransition(key: new ObjectKey(historyEntry))
-        ..child = child
-        ..direction = (i <= state.historyIndex) ? Direction.forward : Direction.reverse
-        ..onDismissed = () {
-          setState(() {
-            state.history.remove(historyEntry);
-          });
-        }
-        ..onCompleted = () {
-          setState(() {
-            historyEntry.fullyOpaque = historyEntry.route.isOpaque;
-          });
-        };
+      WatchableAnimationPerformance performance = historyEntry.route.ensurePerformance(
+        direction: (i <= state.historyIndex) ? Direction.forward : Direction.reverse
+      );
+      historyEntry.route.onDismissed = () {
+        setState(() {
+          assert(state.history.contains(historyEntry));
+          state.history.remove(historyEntry);
+        });
+      };
+      historyEntry.route.onCompleted = () {
+        setState(() {
+          historyEntry.fullyOpaque = historyEntry.route.isOpaque;
+        });
+      };
+      TransitionBase transition = historyEntry.route.buildTransition(
+        key: new ObjectKey(historyEntry),
+        child: child,
+        performance: performance
+      );
       visibleRoutes.add(transition);
     }
     return new Focus(child: new Stack(visibleRoutes));

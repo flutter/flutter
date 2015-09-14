@@ -15,7 +15,10 @@ enum Direction {
   reverse
 }
 
-/// A variable that changes as an animation progresses
+/// An interface describing a variable that changes as an animation progresses.
+/// 
+/// AnimatedVariables, by convention, must be cheap to create. This allows them to be used in 
+/// build functions in Widgets.
 abstract class AnimatedVariable {
   /// Update the variable to a given time in an animation that is running in the given direction
   void setProgress(double t, Direction direction);

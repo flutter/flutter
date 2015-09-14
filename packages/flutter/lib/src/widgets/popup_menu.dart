@@ -45,10 +45,13 @@ class PopupMenu extends StatefulComponent {
   AnimationPerformance _performance;
 
   void initState() {
-    _performance = new AnimationPerformance()
-      ..duration = _kMenuDuration;
+    _performance = new AnimationPerformance(duration: _kMenuDuration);
     _performance.timing = new AnimationTiming()
-      ..reverseInterval = new Interval(0.0, _kMenuCloseIntervalEnd);
+                          ..reverseInterval = new Interval(0.0, _kMenuCloseIntervalEnd);
+    _performance.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.dismissed)
+        _handleDismissed();
+    });
     _updateBoxPainter();
 
     if (showing)
@@ -69,6 +72,7 @@ class PopupMenu extends StatefulComponent {
 
   void _open() {
     navigator.pushState(this, (_) => _close());
+    _performance.play();
   }
 
   void _close() {
@@ -82,7 +86,7 @@ class PopupMenu extends StatefulComponent {
       boxShadow: shadows[level]));
   }
 
-  void _onDismissed() {
+  void _handleDismissed() {
     if (navigator != null &&
         navigator.currentRoute is RouteState &&
         (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
@@ -100,24 +104,21 @@ class PopupMenu extends StatefulComponent {
       double start = (i + 1) * unit;
       double end = (start + 1.5 * unit).clamp(0.0, 1.0);
       children.add(new FadeTransition(
-        direction: showing ? Direction.forward : Direction.reverse,
-        performance: _performance,
+        performance: _performance.view,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(start, end)),
-        child: items[i]));
+        child: items[i])
+      );
     }
 
     final width = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit));
     final height = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit * items.length));
     return new FadeTransition(
-      direction: showing ? Direction.forward : Direction.reverse,
-      performance: _performance,
-      onDismissed: _onDismissed,
+      performance: _performance.view,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, 1.0 / 3.0)),
       child: new Container(
         margin: new EdgeDims.all(_kMenuMargin),
         child: new BuilderTransition(
-          direction: showing ? Direction.forward : Direction.reverse,
-          performance: _performance,
+          performance: _performance.view,
           variables: [width, height],
           builder: () {
             return new CustomPaint(
