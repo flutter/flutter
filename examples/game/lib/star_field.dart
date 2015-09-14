@@ -15,9 +15,9 @@ class StarField extends NodeWithSize {
   Size _paddedSize = Size.zero;
 
   Paint _paint = new Paint()
-    ..setFilterQuality(sky.FilterQuality.low)
+    ..filterQuality = sky.FilterQuality.low
     ..isAntiAlias = false
-    ..setTransferMode(sky.TransferMode.plus);
+    ..transferMode = sky.TransferMode.plus;
 
   StarField(this._spriteSheet, this._numStars, [this._autoScroll = false]) : super(Size.zero) {
     _image = _spriteSheet.image;

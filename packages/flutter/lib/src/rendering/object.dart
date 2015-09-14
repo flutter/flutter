@@ -265,7 +265,7 @@ class PaintingContext {
 
   static Paint _getPaintForColorFilter(Color color, sky.TransferMode transferMode) {
     return new Paint()
-      ..setColorFilter(new sky.ColorFilter.mode(color, transferMode))
+      ..colorFilter = new sky.ColorFilter.mode(color, transferMode)
       ..isAntiAlias = false;
   }
 

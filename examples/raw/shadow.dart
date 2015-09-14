@@ -23,12 +23,11 @@ sky.Picture paint(sky.Rect paintBounds) {
           ..setColorMode(sky.TransferMode.src),
         new sky.Paint()
           ..color = const sky.Color.fromARGB(128, 55, 55, 55)
-          ..setMaskFilter(
-            new sky.MaskFilter.blur(sky.BlurStyle.normal, 5.0))
+          ..maskFilter = new sky.MaskFilter.blur(sky.BlurStyle.normal, 5.0)
     )
     // Main layer.
     ..addLayerOnTop(new sky.DrawLooperLayerInfo(), new sky.Paint());
-  paint.setDrawLooper(builder.build());
+  paint.drawLooper = builder.build();
 
   canvas.drawPaint(
       new sky.Paint()..color = const sky.Color.fromARGB(255, 255, 255, 255));

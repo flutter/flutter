@@ -75,7 +75,9 @@ class TestDrawAtlas extends NodeWithSize {
       colors,
       TransferMode.src,
       null,
-      new Paint()..setFilterQuality(FilterQuality.low)..isAntiAlias=false
+      new Paint()
+        ..filterQuality = FilterQuality.low
+        ..isAntiAlias = false
     );
   }
 }
