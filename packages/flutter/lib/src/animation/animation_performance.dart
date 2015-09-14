@@ -32,7 +32,7 @@ enum AnimationStatus {
 /// [fling] the timeline causing a physics-based simulation to take over the
 /// progression.
 class AnimationPerformance {
-  AnimationPerformance({AnimatedVariable variable, this.duration}) :
+  AnimationPerformance({ AnimatedVariable variable, this.duration }) :
     _variable = variable {
     _timeline = new Timeline(_tick);
   }
@@ -68,7 +68,8 @@ class AnimationPerformance {
     if (variable == null) {
       variable = newVariable;
     } else if (variable is AnimatedList) {
-      (variable as AnimatedList).variables.add(newVariable);
+      final AnimatedList variable = this.variable; // TODO(ianh): Remove this line when the analyzer is cleverer
+      variable.variables.add(newVariable);
     } else {
       variable = new AnimatedList([variable, newVariable]);
     }
@@ -219,7 +220,7 @@ class AnimationPerformance {
 
 /// An animation performance with an animated variable with a concrete type
 class ValueAnimation<T> extends AnimationPerformance {
-  ValueAnimation({AnimatedValue<T> variable, Duration duration}) :
+  ValueAnimation({ AnimatedValue<T> variable, Duration duration }) :
     super(variable: variable, duration: duration);
 
   AnimatedValue<T> get variable => _variable as AnimatedValue<T>;
