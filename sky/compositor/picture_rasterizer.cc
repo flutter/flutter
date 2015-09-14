@@ -145,14 +145,22 @@ RefPtr<SkImage> PictureRasterzier::GetCachedImageIfPresent(
 void PictureRasterzier::PurgeCache() {
   std::unordered_set<Key, KeyHash, KeyEqual> keys_to_purge;
 
+  size_t evictions = 0;
+
   for (auto& item : cache_) {
+    // Decrement the access count at the end of the frame.
+    // If the item is dead, evict it from the cache and note the same
     const auto count = --item.second.access_count;
     if (count == Value::kDeadAccessCount) {
       keys_to_purge.insert(item.first);
+      if (item.second.image) {
+        // Only note an eviction if an image was actually inflated for the key
+        evictions++;
+      }
     }
   }
 
-  cache_evictions_.increment(keys_to_purge.size());
+  cache_evictions_.increment(evictions);
 
   for (const auto& key : keys_to_purge) {
     cache_.erase(key);
