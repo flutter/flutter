@@ -52,7 +52,7 @@ class GridParentData extends BoxParentData with ContainerParentDataMixin<RenderB
 /// the given [maxChildExtent].
 class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, GridParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, GridParentData> {
-  RenderGrid({ Iterable<RenderBox> children, double maxChildExtent }) {
+  RenderGrid({ List<RenderBox> children, double maxChildExtent }) {
     addAll(children);
     _maxChildExtent = maxChildExtent;
   }
