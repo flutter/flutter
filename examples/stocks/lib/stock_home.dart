@@ -74,28 +74,6 @@ class StockHome extends StatefulComponent {
     });
   }
 
-  bool _menuShowing = false;
-  AnimationStatus _menuStatus = AnimationStatus.dismissed;
-
-  void _handleMenuShow() {
-    setState(() {
-      _menuShowing = true;
-      _menuStatus = AnimationStatus.forward;
-    });
-  }
-
-  void _handleMenuHide() {
-    setState(() {
-      _menuShowing = false;
-    });
-  }
-
-  void _handleMenuDismissed() {
-    setState(() {
-      _menuStatus = AnimationStatus.dismissed;
-    });
-  }
-
   bool _autorefresh = false;
   void _handleAutorefreshChanged(bool value) {
     setState(() {
@@ -110,6 +88,13 @@ class StockHome extends StatefulComponent {
     if (modeUpdater != null)
       modeUpdater(value);
     return EventDisposition.processed;
+  }
+
+  void _handleMenuShow() {
+    showStockMenu(navigator,
+      autorefresh: _autorefresh,
+      onAutorefreshChanged: _handleAutorefreshChanged
+    );
   }
 
   Drawer buildDrawer() {
@@ -282,31 +267,13 @@ class StockHome extends StatefulComponent {
     );
   }
 
-  void addMenuToOverlays(List<Widget> overlays) {
-    if (_menuStatus == AnimationStatus.dismissed)
-      return;
-    overlays.add(new ModalOverlay(
-      children: [new StockMenu(
-        showing: _menuShowing,
-        onDismissed: _handleMenuDismissed,
-        navigator: navigator,
-        autorefresh: _autorefresh,
-        onAutorefreshChanged: _handleAutorefreshChanged
-      )],
-      onDismiss: _handleMenuHide));
-  }
-
   Widget build() {
-    List<Widget> overlays = [
-      new Scaffold(
-        toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
-        body: buildTabNavigator(),
-        snackBar: buildSnackBar(),
-        floatingActionButton: buildFloatingActionButton(),
-        drawer: buildDrawer()
-      ),
-    ];
-    addMenuToOverlays(overlays);
-    return new Stack(overlays);
+    return new Scaffold(
+      toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
+      body: buildTabNavigator(),
+      snackBar: buildSnackBar(),
+      floatingActionButton: buildFloatingActionButton(),
+      drawer: buildDrawer()
+    );
   }
 }

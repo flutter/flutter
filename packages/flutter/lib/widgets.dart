@@ -36,7 +36,6 @@ export 'package:sky/src/widgets/material.dart';
 export 'package:sky/src/widgets/material_button.dart';
 export 'package:sky/src/widgets/mimic.dart';
 export 'package:sky/src/widgets/mixed_viewport.dart';
-export 'package:sky/src/widgets/modal_overlay.dart';
 export 'package:sky/src/widgets/navigator.dart';
 export 'package:sky/src/widgets/popup_menu.dart';
 export 'package:sky/src/widgets/popup_menu_item.dart';
