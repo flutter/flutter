@@ -9,6 +9,7 @@ import 'package:sky/src/rendering/object.dart';
 const double _kMaxWidth = 100000.0;
 const double _kMaxHeight = 100000.0;
 
+/// A render object used as a placeholder when an error occurs
 class RenderErrorBox extends RenderBox {
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {

@@ -72,7 +72,7 @@ class SectorApp extends App {
             child: new Row([
                 new RaisedButton(
                   enabled: enabledAdd,
-                  child: new ShrinkWrapWidth(
+                  child: new IntrinsicWidth(
                     child: new Row([
                       new Container(
                         padding: new EdgeDims.all(4.0),
@@ -86,7 +86,7 @@ class SectorApp extends App {
                 ),
                 new RaisedButton(
                   enabled: enabledRemove,
-                  child: new ShrinkWrapWidth(
+                  child: new IntrinsicWidth(
                     child: new Row([
                       new Container(
                         padding: new EdgeDims.all(4.0),
