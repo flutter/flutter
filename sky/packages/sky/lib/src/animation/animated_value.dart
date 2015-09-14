@@ -77,8 +77,8 @@ class AnimationTiming {
 
 /// An animated variable with a concrete type
 class AnimatedValue<T extends dynamic> extends AnimationTiming implements AnimatedVariable {
-  AnimatedValue(this.begin, { this.end, Interval interval, Curve curve, Curve reverseCurve })
-    : super(interval: interval, curve: curve, reverseCurve: reverseCurve) {
+  AnimatedValue(this.begin, { this.end, Interval interval, Interval reverseInterval, Curve curve, Curve reverseCurve })
+    : super(interval: interval, reverseInterval: reverseInterval, curve: curve, reverseCurve: reverseCurve) {
     value = begin;
   }
 
@@ -110,8 +110,8 @@ class AnimatedList extends AnimationTiming implements AnimatedVariable {
   /// The list of variables contained in the list
   List<AnimatedVariable> variables;
 
-  AnimatedList(this.variables, { Interval interval, Curve curve, Curve reverseCurve })
-    : super(interval: interval, curve: curve, reverseCurve: reverseCurve);
+  AnimatedList(this.variables, { Interval interval, Interval reverseInterval, Curve curve, Curve reverseCurve })
+    : super(interval: interval, reverseInterval: reverseInterval, curve: curve, reverseCurve: reverseCurve);
 
   // Updates the value of all the variables in the list according to the given animation clock value and direction
   void setProgress(double t, Direction direction) {
@@ -128,8 +128,8 @@ class AnimatedList extends AnimationTiming implements AnimatedVariable {
 /// This class specializes the interpolation of AnimatedValue<Color> to be
 /// appropriate for colors.
 class AnimatedColorValue extends AnimatedValue<Color> {
-  AnimatedColorValue(Color begin, { Color end, Curve curve })
-    : super(begin, end: end, curve: curve);
+  AnimatedColorValue(Color begin, { Color end, Interval interval, Interval reverseInterval, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, interval: interval, reverseInterval: reverseInterval, curve: curve, reverseCurve: reverseCurve);
 
   Color lerp(double t) => Color.lerp(begin, end, t);
 }
@@ -139,8 +139,8 @@ class AnimatedColorValue extends AnimatedValue<Color> {
 /// This class specializes the interpolation of AnimatedValue<Rect> to be
 /// appropriate for rectangles.
 class AnimatedRect extends AnimatedValue<Rect> {
-  AnimatedRect(Rect begin, { Rect end, Curve curve })
-    : super(begin, end: end, curve: curve);
+  AnimatedRect(Rect begin, { Rect end, Interval interval, Interval reverseInterval, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, interval: interval, reverseInterval: reverseInterval, curve: curve, reverseCurve: reverseCurve);
 
   Rect lerp(double t) => Rect.lerp(begin, end, t);
 }
