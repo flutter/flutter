@@ -35,7 +35,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
                                                       RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
 
   RenderBlockBase({
-    Iterable<RenderBox> children,
+    List<RenderBox> children,
     BlockDirection direction: BlockDirection.vertical,
     double itemExtent,
     double minExtent: 0.0
@@ -123,7 +123,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
 class RenderBlock extends RenderBlockBase {
 
   RenderBlock({
-    Iterable<RenderBox> children,
+    List<RenderBox> children,
     BlockDirection direction: BlockDirection.vertical,
     double itemExtent,
     double minExtent: 0.0
@@ -231,7 +231,7 @@ class RenderBlockViewport extends RenderBlockBase {
     double itemExtent,
     double minExtent: 0.0,
     double startOffset: 0.0,
-    Iterable<RenderBox> children
+    List<RenderBox> children
   }) : _callback = callback,
        _totalExtentCallback = totalExtentCallback,
        _maxCrossAxisExtentCallback = maxCrossAxisDimensionCallback,

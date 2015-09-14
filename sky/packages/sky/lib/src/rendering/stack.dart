@@ -68,7 +68,7 @@ class StackParentData extends BoxParentData with ContainerParentDataMixin<Render
 class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>,
                                          RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
   RenderStack({
-    Iterable<RenderBox> children
+    List<RenderBox> children
   }) {
     addAll(children);
   }

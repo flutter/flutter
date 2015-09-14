@@ -85,7 +85,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
 
   RenderFlex({
-    Iterable<RenderBox> children,
+    List<RenderBox> children,
     FlexDirection direction: FlexDirection.horizontal,
     FlexJustifyContent justifyContent: FlexJustifyContent.start,
     FlexAlignItems alignItems: FlexAlignItems.center,
