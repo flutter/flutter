@@ -60,8 +60,8 @@ class _AnchorTransition extends AnimatedComponent {
 abstract class TransitionBase extends AnimatedComponent {
   TransitionBase({
     Key key,
-    this.anchor,
     this.child,
+    this.anchor,
     this.direction,
     this.duration,
     this.performance,
@@ -84,9 +84,9 @@ abstract class TransitionBase extends AnimatedComponent {
     if (performance == null) {
       assert(duration != null);
       performance = new AnimationPerformance(duration: duration);
+      if (direction == Direction.reverse)
+        performance.progress = 1.0;
     }
-    if (direction == Direction.reverse)
-      performance.progress = 1.0;
     performance.addStatusListener(_checkStatusChanged);
 
     watch(performance);
@@ -127,8 +127,6 @@ abstract class TransitionBase extends AnimatedComponent {
 }
 
 class SlideTransition extends TransitionBase {
-  // TODO(mpcomplete): this constructor is mostly boilerplate, passing values
-  // to super. Is there a simpler way?
   SlideTransition({
     Key key,
     Anchor anchor,
