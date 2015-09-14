@@ -149,10 +149,18 @@ class RenderConstrainedBox extends RenderProxyBox {
 ///
 /// The width of this render object is the largest width permited by the layout
 /// constraints. The height of the render object is determined by applying the
-/// given aspect ratio to the width.
+/// given aspect ratio to the width, expressed as a ratio of width to height.
+/// For example, a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
 ///
-/// The aspect ratio is expressed as a ratio of width to height. For example,
-/// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
+/// For example, given an aspect ratio of 2.0 and layout constraints that
+/// require the width to be between 0.0 and 100.0 and the height to be between
+/// 0.0 and 100.0, we'll select a width of 100.0 (the biggest allowed) and a
+/// height of 50.0 (to match the aspect ratio).
+///
+/// In that same situation, if the aspect ratio is 0.5, we'll also select a
+/// width of 100.0 (still the biggest allowed) and we'll attempt to use a height
+/// of 200.0. Unfortunately, that violates the constraints and we'll end up with
+/// a height of 100.0 instead.
 class RenderAspectRatio extends RenderProxyBox {
   RenderAspectRatio({
     RenderBox child,
@@ -464,7 +472,7 @@ class RenderClipRRect extends RenderProxyBox {
     assert(_yRadius != null);
   }
 
-  /// The radius of the rounded corners in the horizontal direction
+  /// The radius of the rounded corners in the horizontal direction in logical pixels
   ///
   /// Values are clamped to be between zero and half the width of the render
   /// object.
@@ -478,7 +486,7 @@ class RenderClipRRect extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// The radius of the rounded corners in the vertical direction
+  /// The radius of the rounded corners in the vertical direction in logical pixels
   ///
   /// Values are clamped to be between zero and half the height of the render
   /// object.
