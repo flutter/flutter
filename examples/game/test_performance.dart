@@ -209,7 +209,7 @@ class TestPerformanceAtlas extends PerformanceTest {
   double rotation = 0.0;
   List<Rect> rects = [];
   Paint cachedPaint = new Paint()
-    ..setFilterQuality(sky.FilterQuality.low)
+    ..filterQuality = sky.FilterQuality.low
     ..isAntiAlias = false;
 
   TestPerformanceAtlas() {
@@ -262,7 +262,7 @@ class TestPerformanceAtlas2 extends PerformanceTest {
   double rotation = 0.0;
   List<Rect> rects = [];
   Paint cachedPaint = new Paint()
-    ..setFilterQuality(sky.FilterQuality.low)
+    ..filterQuality = sky.FilterQuality.low
     ..isAntiAlias = false;
 
   TestPerformanceAtlas2() {

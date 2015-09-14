@@ -401,7 +401,7 @@ void paintImage({
   // TODO(abarth): Implement |repeat|.
   Paint paint = new Paint();
   if (colorFilter != null)
-    paint.setColorFilter(colorFilter);
+    paint.colorFilter = colorFilter;
   double dx = (bounds.width - destinationSize.width) * positionX;
   double dy = (bounds.height - destinationSize.height) * positionY;
   Point destinationPosition = rect.topLeft + new Offset(dx, dy);
@@ -605,11 +605,11 @@ class BoxPainter {
         var builder = new ShadowDrawLooperBuilder();
         for (BoxShadow boxShadow in _decoration.boxShadow)
           builder.addShadow(boxShadow.offset, boxShadow.color, boxShadow.blur);
-        paint.setDrawLooper(builder.build());
+        paint.drawLooper = builder.build();
       }
 
       if (_decoration.gradient != null)
-        paint.setShader(_decoration.gradient.createShader());
+        paint.shader = _decoration.gradient.createShader();
 
       _cachedBackgroundPaint = paint;
     }

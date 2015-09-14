@@ -152,7 +152,7 @@ class ParticleSystem extends Node {
   int _numEmittedParticles = 0;
 
   static Paint _paint = new Paint()
-    ..setFilterQuality(FilterQuality.low)
+    ..filterQuality = FilterQuality.low
     ..isAntiAlias = false;
 
   ParticleSystem(this.texture,

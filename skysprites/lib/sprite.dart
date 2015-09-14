@@ -17,7 +17,7 @@ class Sprite extends NodeWithSize with SpritePaint {
   bool constrainProportions = false;
 
   Paint _cachedPaint = new Paint()
-    ..setFilterQuality(FilterQuality.low)
+    ..filterQuality = FilterQuality.low
     ..isAntiAlias = false;
 
   /// Creates a new sprite from the provided [texture].
@@ -113,11 +113,11 @@ abstract class SpritePaint {
     paint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
 
     if (colorOverlay != null) {
-      paint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATop));
+      paint.colorFilter = new ColorFilter.mode(colorOverlay, TransferMode.srcATop);
     }
 
     if (transferMode != null) {
-      paint.setTransferMode(transferMode);
+      paint.transferMode = transferMode;
     }
   }
 }
