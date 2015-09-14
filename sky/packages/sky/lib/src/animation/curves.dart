@@ -21,29 +21,26 @@ abstract class Curve {
   double transform(double t);
 }
 
-/// The idenity map over the unit interval
+/// The identity map over the unit interval
 class Linear implements Curve {
   const Linear();
-
-  double transform(double t) {
-    return t;
-  }
+  double transform(double t) => t;
 }
 
 /// A curve that is initially 0.0, then linear, then 1.0
 class Interval implements Curve {
-  /// The smallest value for which this interval is 0.0
-  final double start;
-
-  /// The smallest value for which this interval is 1.0
-  final double end;
-
   Interval(this.start, this.end) {
     assert(start >= 0.0);
     assert(start <= 1.0);
     assert(end >= 0.0);
     assert(end <= 1.0);
   }
+
+  /// The smallest value for which this interval is 0.0
+  final double start;
+
+  /// The smallest value for which this interval is 1.0
+  final double end;
 
   double transform(double t) {
     return ((t - start) / (end - start)).clamp(0.0, 1.0);
@@ -52,12 +49,12 @@ class Interval implements Curve {
 
 /// A cubic polynomial mapping of the unit interval
 class Cubic implements Curve {
+  const Cubic(this.a, this.b, this.c, this.d);
+
   final double a;
   final double b;
   final double c;
   final double d;
-
-  const Cubic(this.a, this.b, this.c, this.d);
 
   double transform(double t) {
     double start = 0.0;
@@ -65,10 +62,8 @@ class Cubic implements Curve {
     while (true) {
       double midpoint = (start + end) / 2;
       double estimate = _evaluateCubic(a, c, midpoint);
-
       if ((t - estimate).abs() < _kCubicErrorBound)
         return _evaluateCubic(b, d, midpoint);
-
       if (estimate < t)
         start = midpoint;
       else
@@ -94,7 +89,6 @@ double _bounce(double t) {
 /// An oscillating curve that grows in magnitude
 class BounceInCurve implements Curve {
   const BounceInCurve();
-
   double transform(double t) {
     return 1.0 - _bounce(1.0 - t);
   }
@@ -103,7 +97,6 @@ class BounceInCurve implements Curve {
 /// An oscillating curve that shrink in magnitude
 class BounceOutCurve implements Curve {
   const BounceOutCurve();
-
   double transform(double t) {
     return _bounce(t);
   }
@@ -112,7 +105,6 @@ class BounceOutCurve implements Curve {
 /// An oscillating curve that first grows and then shrink in magnitude
 class BounceInOutCurve implements Curve {
   const BounceInOutCurve();
-
   double transform(double t) {
     if (t < 0.5)
       return (1.0 - _bounce(1.0 - t)) * 0.5;
@@ -125,7 +117,6 @@ class BounceInOutCurve implements Curve {
 class ElasticInCurve implements Curve {
   const ElasticInCurve([this.period = 0.4]);
   final double period;
-
   double transform(double t) {
     double s = period / 4.0;
     t = t - 1.0;
@@ -137,7 +128,6 @@ class ElasticInCurve implements Curve {
 class ElasticOutCurve implements Curve {
   const ElasticOutCurve([this.period = 0.4]);
   final double period;
-
   double transform(double t) {
     double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.PI * 2.0) / period) + 1.0;
@@ -148,7 +138,6 @@ class ElasticOutCurve implements Curve {
 class ElasticInOutCurve implements Curve {
   const ElasticInOutCurve([this.period = 0.4]);
   final double period;
-
   double transform(double t) {
     double s = period / 4.0;
     t = 2.0 * t - 1.0;
