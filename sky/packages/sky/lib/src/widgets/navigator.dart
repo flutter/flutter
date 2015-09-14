@@ -49,7 +49,7 @@ abstract class RouteBase {
 
   Duration get transitionDuration;
   bool get isOpaque;
-  Widget build(Key key, Navigator navigator, RouteBase route, WatchableAnimationPerformance performance);
+  Widget build(Key key, Navigator navigator, WatchableAnimationPerformance performance);
   void popState([dynamic result]) { assert(result == null); }
 
   String toString() => '$runtimeType()';
@@ -67,7 +67,7 @@ class Route extends RouteBase {
 
   Duration get transitionDuration => _kTransitionDuration;
 
-  Widget build(Key key, Navigator navigator, RouteBase route, WatchableAnimationPerformance performance) {
+  Widget build(Key key, Navigator navigator, WatchableAnimationPerformance performance) {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
     return new SlideTransition(
@@ -77,7 +77,7 @@ class Route extends RouteBase {
       child: new FadeTransition(
         performance: performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-        child: builder(navigator, route)
+        child: builder(navigator, this)
       )
     );
   }
@@ -102,7 +102,7 @@ class RouteState extends RouteBase {
 
   bool get hasContent => false;
   Duration get transitionDuration => const Duration();
-  Widget build(Key key, Navigator navigator, RouteBase route, WatchableAnimationPerformance performance) => null;
+  Widget build(Key key, Navigator navigator, WatchableAnimationPerformance performance) => null;
 }
 
 class NavigationState {
@@ -202,10 +202,16 @@ class Navigator extends StatefulComponent {
         });
       };
       Key key = new ObjectKey(route);
-      Widget widget = route.build(key, this, route, performance);
+      Widget widget = route.build(key, this, performance);
       visibleRoutes.add(widget);
       if (route.isActuallyOpaque)
         break;
+    }
+    if (visibleRoutes.length > 1) {
+      visibleRoutes.insert(1, new Listener(
+        onPointerDown: (_) { pop(); return EventDisposition.consumed; },
+        child: new Container()
+      ));
     }
     return new Focus(child: new Stack(visibleRoutes.reversed.toList()));
   }
