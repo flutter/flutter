@@ -113,8 +113,9 @@ class _RenderSwitch extends RenderToggleable {
     }
 
     // Draw the track rrect
-    sky.Paint paint = new sky.Paint()..color = trackColor;
-    paint.setStyle(sky.PaintingStyle.fill);
+    sky.Paint paint = new sky.Paint()
+      ..color = trackColor
+      ..style = sky.PaintingStyle.fill;
     sky.Rect rect = new sky.Rect.fromLTWH(offset.dx,
         offset.dy + _kSwitchHeight / 2.0 - _kTrackHeight / 2.0, _kTrackWidth,
         _kTrackHeight);
@@ -127,10 +128,10 @@ class _RenderSwitch extends RenderToggleable {
 
     // Draw the raised thumb with a shadow
     paint.color = thumbColor;
-    var builder = new ShadowDrawLooperBuilder();
-    for (BoxShadow boxShadow in shadows[1]) builder.addShadow(
-        boxShadow.offset, boxShadow.color, boxShadow.blur);
-    paint.setDrawLooper(builder.build());
+    ShadowDrawLooperBuilder builder = new ShadowDrawLooperBuilder();
+    for (BoxShadow boxShadow in shadows[1])
+      builder.addShadow(boxShadow.offset, boxShadow.color, boxShadow.blur);
+    paint.drawLooper = builder.build();
 
     // The thumb contracts slightly during the animation
     double inset = 2.0 - (position.value - 0.5).abs() * 2.0;

@@ -17,7 +17,7 @@ class ShadowDrawLooperBuilder {
             ..setColorMode(sky.TransferMode.src),
           new sky.Paint()
             ..color = color
-            ..setMaskFilter(new sky.MaskFilter.blur(sky.BlurStyle.normal, blur)));
+            ..maskFilter = new sky.MaskFilter.blur(sky.BlurStyle.normal, blur));
   }
 
   /// Returns the draw looper built for the added shadows
