@@ -23,6 +23,26 @@ enum AnimationStatus {
   completed,
 }
 
+typedef void AnimationPerformanceListener();
+typedef void AnimationPerformanceStatusListener(AnimationStatus status);
+
+/// An interface that is implemented by [AnimationPerformance] that exposes a
+/// read-only view of the underlying performance. This is used by classes that
+/// want to watch a performance but should not be able to change the
+/// performance's state.
+abstract class WatchableAnimationPerformance {
+  /// Update the given variable according to the current progress of the performance
+  void updateVariable(AnimatedVariable variable);
+  /// Calls the listener every time the progress of the performance changes
+  void addListener(AnimationPerformanceListener listener);
+  /// Stop calling the listener every time the progress of the performance changes
+  void removeListener(AnimationPerformanceListener listener);
+  /// Calls listener every time the status of the performance changes
+  void addStatusListener(AnimationPerformanceStatusListener listener);
+  /// Stops calling the listener every time the status of the performance changes
+  void removeStatusListener(AnimationPerformanceStatusListener listener);
+}
+
 /// A collection of values that animated based on a timeline
 ///
 /// For example, a performance may handle an animation of a menu opening by
@@ -31,11 +51,16 @@ enum AnimationStatus {
 /// may also take direct control of the timeline by manipulating [progress], or
 /// [fling] the timeline causing a physics-based simulation to take over the
 /// progression.
-class AnimationPerformance {
+class AnimationPerformance implements WatchableAnimationPerformance {
   AnimationPerformance({ AnimatedVariable variable, this.duration }) :
     _variable = variable {
     _timeline = new Timeline(_tick);
   }
+
+  /// Returns a [WatchableAnimationPerformance] for this performance,
+  /// so that a pointer to this object can be passed around without
+  /// allowing users of that pointer to mutate the AnimationPerformance state.
+  WatchableAnimationPerformance get view => this;
 
   /// The length of time this performance should last
   Duration duration;
@@ -155,33 +180,33 @@ class AnimationPerformance {
     return _timeline.fling(force.release(progress, velocity));
   }
 
-  final List<Function> _listeners = new List<Function>();
+  final List<AnimationPerformanceListener> _listeners = new List<AnimationPerformanceListener>();
 
   /// Calls the listener every time the progress of this performance changes
-  void addListener(Function listener) {
+  void addListener(AnimationPerformanceListener listener) {
     _listeners.add(listener);
   }
 
   /// Stop calling the listener every time the progress of this performance changes
-  void removeListener(Function listener) {
+  void removeListener(AnimationPerformanceListener listener) {
     _listeners.remove(listener);
   }
 
   void _notifyListeners() {
-    List<Function> localListeners = new List<Function>.from(_listeners);
-    for (Function listener in localListeners)
+    List<AnimationPerformanceListener> localListeners = new List<AnimationPerformanceListener>.from(_listeners);
+    for (AnimationPerformanceListener listener in localListeners)
       listener();
   }
 
-  final List<Function> _statusListeners = new List<Function>();
+  final List<AnimationPerformanceStatusListener> _statusListeners = new List<AnimationPerformanceStatusListener>();
 
   /// Calls listener every time the status of this performance changes
-  void addStatusListener(Function listener) {
+  void addStatusListener(AnimationPerformanceStatusListener listener) {
     _statusListeners.add(listener);
   }
 
   /// Stops calling the listener every time the status of this performance changes
-  void removeStatusListener(Function listener) {
+  void removeStatusListener(AnimationPerformanceStatusListener listener) {
     _statusListeners.remove(listener);
   }
 
@@ -189,8 +214,8 @@ class AnimationPerformance {
   void _checkStatusChanged() {
     AnimationStatus currentStatus = status;
     if (currentStatus != _lastStatus) {
-      List<Function> localListeners = new List<Function>.from(_statusListeners);
-      for (Function listener in localListeners)
+      List<AnimationPerformanceStatusListener> localListeners = new List<AnimationPerformanceStatusListener>.from(_statusListeners);
+      for (AnimationPerformanceStatusListener listener in localListeners)
         listener(currentStatus);
     }
     _lastStatus = currentStatus;

@@ -15,7 +15,7 @@ class Stocklist extends Component {
       child: new ScrollableList<Stock>(
         items: stocks,
         itemExtent: StockRow.kHeight,
-        itemBuilder: (stock) => new StockRow(stock: stock)
+        itemBuilder: (Stock stock) => new StockRow(stock: stock)
       )
     );
   }

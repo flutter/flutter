@@ -6,117 +6,107 @@ import 'package:sky/animation.dart';
 import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/widgets/global_key_watcher.dart';
 import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/animation.dart' show Direction;
 
-// A helper class to anchor widgets to one another. Pass an instance of this to
-// a Transition, then use the build() method to create a child with the same
-// transition applied.
-class Anchor {
-  Anchor();
+class TransitionProxy extends GlobalKeyWatcher {
 
-  TransitionBase transition;
-
-  Widget build(Widget child) {
-    return new _AnchorTransition(anchoredTo: this, child: child);
-  }
-}
-
-// Used with the Anchor class to apply a transition to multiple children.
-class _AnchorTransition extends AnimatedComponent {
-  _AnchorTransition({
+  TransitionProxy({
     Key key,
-    this.anchoredTo,
+    GlobalKey transitionKey,
     this.child
-  }) : super(key: key);
+  }) : super(key: key, watchedKey: transitionKey);
 
-  Anchor anchoredTo;
   Widget child;
-  TransitionBase get transition => anchoredTo.transition;
 
-  void initState() {
-    if (transition != null)
-      watch(transition.performance);
-  }
-
-  void syncConstructorArguments(_AnchorTransition source) {
-    if (transition != null && isWatching(transition.performance))
-      unwatch(transition.performance);
-    anchoredTo = source.anchoredTo;
-    if (transition != null)
-      watch(transition.performance);
+  void syncConstructorArguments(TransitionProxy source) {
     child = source.child;
     super.syncConstructorArguments(source);
+  }
+
+  bool debugValidateWatchedWidget(Widget candidate) {
+    return candidate is TransitionBaseWithChild;
+  }
+
+  TransitionBaseWithChild get transition => this.watchedWidget;
+
+  void startWatching() {
+    transition.performance.addListener(_performanceChanged);
+  }
+
+  void stopWatching() {
+    transition.performance.removeListener(_performanceChanged);
+  }
+
+  void _performanceChanged() {
+    setState(() {
+      // The performance changed, so we probably need to ask the transition
+      // we're watching for a rebuild.
+    });
   }
 
   Widget build() {
-    if (transition == null)
-      return child;
-    return transition.buildWithChild(child);
+    if (transition != null)
+      return transition.buildWithChild(child);
+    return child;
   }
+
 }
 
-abstract class TransitionBase extends AnimatedComponent {
+abstract class TransitionBase extends StatefulComponent {
+
   TransitionBase({
     Key key,
-    this.child,
-    this.anchor,
-    this.direction,
-    this.duration,
-    this.performance,
-    this.onDismissed,
-    this.onCompleted
-  }) : super(key: key);
-
-  Widget child;
-  Anchor anchor;
-  Direction direction;
-  Duration duration;
-  AnimationPerformance performance;
-  Function onDismissed;
-  Function onCompleted;
-
-  void initState() {
-    if (anchor != null)
-      anchor.transition = this;
-
-    if (performance == null) {
-      assert(duration != null);
-      performance = new AnimationPerformance(duration: duration);
-      if (direction == Direction.reverse)
-        performance.progress = 1.0;
-    }
-    performance.addStatusListener(_checkStatusChanged);
-
-    watch(performance);
-    _start();
+    this.performance
+  }) : super(key: key) {
+    assert(performance != null);
   }
+
+  WatchableAnimationPerformance performance;
 
   void syncConstructorArguments(TransitionBase source) {
+    if (performance != source.performance) {
+      if (mounted)
+        performance.removeListener(_performanceChanged);
+      performance = source.performance;
+      if (mounted)
+        performance.addListener(_performanceChanged);
+    }
+  }
+
+  void _performanceChanged() {
+    setState(() {
+      // The performance's state is our build state, and it changed already.
+    });
+  }
+
+  void didMount() {
+    performance.addListener(_performanceChanged);
+    super.didMount();
+  }
+
+  void didUnmount() {
+    performance.removeListener(_performanceChanged);
+    super.didUnmount();
+  }
+
+}
+
+abstract class TransitionBaseWithChild extends TransitionBase {
+
+  TransitionBaseWithChild({
+    Key key,
+    this.child,
+    WatchableAnimationPerformance performance
+  }) : super(key: key, performance: performance);
+
+  Widget child;
+
+  void syncConstructorArguments(TransitionBaseWithChild source) {
     child = source.child;
-    onCompleted = source.onCompleted;
-    onDismissed = source.onDismissed;
-    duration = source.duration;
-    if (direction != source.direction) {
-      direction = source.direction;
-      _start();
-    }
     super.syncConstructorArguments(source);
-  }
-
-  void _start() {
-    performance.play(direction);
-  }
-
-  void _checkStatusChanged(AnimationStatus status) {
-    if (performance.isDismissed) {
-      if (onDismissed != null)
-        onDismissed();
-    } else if (performance.isCompleted) {
-      if (onCompleted != null)
-        onCompleted();
-    }
   }
 
   Widget build() {
@@ -124,26 +114,17 @@ abstract class TransitionBase extends AnimatedComponent {
   }
 
   Widget buildWithChild(Widget child);
+
 }
 
-class SlideTransition extends TransitionBase {
+class SlideTransition extends TransitionBaseWithChild {
   SlideTransition({
     Key key,
-    Anchor anchor,
     this.position,
-    Duration duration,
-    AnimationPerformance performance,
-    Direction direction,
-    Function onDismissed,
-    Function onCompleted,
+    WatchableAnimationPerformance performance,
     Widget child
   }) : super(key: key,
-             anchor: anchor,
-             duration: duration,
              performance: performance,
-             direction: direction,
-             onDismissed: onDismissed,
-             onCompleted: onCompleted,
              child: child);
 
   AnimatedValue<Point> position;
@@ -161,24 +142,14 @@ class SlideTransition extends TransitionBase {
   }
 }
 
-class FadeTransition extends TransitionBase {
+class FadeTransition extends TransitionBaseWithChild {
   FadeTransition({
     Key key,
-    Anchor anchor,
     this.opacity,
-    Duration duration,
-    AnimationPerformance performance,
-    Direction direction,
-    Function onDismissed,
-    Function onCompleted,
+    WatchableAnimationPerformance performance,
     Widget child
   }) : super(key: key,
-             anchor: anchor,
-             duration: duration,
              performance: performance,
-             direction: direction,
-             onDismissed: onDismissed,
-             onCompleted: onCompleted,
              child: child);
 
   AnimatedValue<double> opacity;
@@ -194,24 +165,14 @@ class FadeTransition extends TransitionBase {
   }
 }
 
-class ColorTransition extends TransitionBase {
+class ColorTransition extends TransitionBaseWithChild {
   ColorTransition({
     Key key,
-    Anchor anchor,
     this.color,
-    Duration duration,
-    AnimationPerformance performance,
-    Direction direction,
-    Function onDismissed,
-    Function onCompleted,
+    WatchableAnimationPerformance performance,
     Widget child
   }) : super(key: key,
-             anchor: anchor,
-             duration: duration,
              performance: performance,
-             direction: direction,
-             onDismissed: onDismissed,
-             onCompleted: onCompleted,
              child: child);
 
   AnimatedColorValue color;
@@ -230,25 +191,15 @@ class ColorTransition extends TransitionBase {
   }
 }
 
-class SquashTransition extends TransitionBase {
+class SquashTransition extends TransitionBaseWithChild {
   SquashTransition({
     Key key,
-    Anchor anchor,
     this.width,
     this.height,
-    Duration duration,
-    AnimationPerformance performance,
-    Direction direction,
-    Function onDismissed,
-    Function onCompleted,
+    WatchableAnimationPerformance performance,
     Widget child
   }) : super(key: key,
-             anchor: anchor,
-             duration: duration,
              performance: performance,
-             direction: direction,
-             onDismissed: onDismissed,
-             onCompleted: onCompleted,
              child: child);
 
   AnimatedValue<double> width;
@@ -274,23 +225,11 @@ typedef Widget BuilderFunction();
 class BuilderTransition extends TransitionBase {
   BuilderTransition({
     Key key,
-    Anchor anchor,
     this.variables,
     this.builder,
-    Duration duration,
-    AnimationPerformance performance,
-    Direction direction,
-    Function onDismissed,
-    Function onCompleted,
-    Widget child
+    WatchableAnimationPerformance performance
   }) : super(key: key,
-             anchor: anchor,
-             duration: duration,
-             performance: performance,
-             direction: direction,
-             onDismissed: onDismissed,
-             onCompleted: onCompleted,
-             child: child);
+             performance: performance);
 
   List<AnimatedValue> variables;
   BuilderFunction builder;
@@ -301,7 +240,7 @@ class BuilderTransition extends TransitionBase {
     super.syncConstructorArguments(source);
   }
 
-  Widget buildWithChild(Widget child) {
+  Widget build() {
     for (int i = 0; i < variables.length; ++i)
       performance.updateVariable(variables[i]);
     return builder();
