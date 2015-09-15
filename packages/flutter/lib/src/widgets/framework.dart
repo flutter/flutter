@@ -223,9 +223,10 @@ abstract class Widget {
   static bool _canSync(Widget a, Widget b) {
     assert(a != null);
     assert(b != null);
-    return a.runtimeType == b.runtimeType &&
-           a.key == b.key &&
-           (!a._hasState || !b._hasState);
+    return (a == b) ||
+           (a.runtimeType == b.runtimeType &&
+            a.key == b.key &&
+            (!a._hasState || !b._hasState));
   }
 
   bool _mounted = false;
@@ -407,11 +408,9 @@ abstract class Widget {
         return newNode; // Nothing to do. Subtrees must be identical.
       }
 
-      assert(() {
-        'You have probably used a single instance of a Widget in two different places in the widget tree. Widgets can only be used in one place at a time.';
-        return newNode == null || newNode.isFromOldGeneration;
-      });
-
+      // if the old node isn't the same as the new node and has already been synced, then
+      // we must assume that it has been moved elsewhere in the tree and isn't really a
+      // match for the node we're trying to insert.
       if (oldNode != null && !oldNode.isFromOldGeneration)
         oldNode = null;
 
@@ -470,7 +469,11 @@ abstract class Widget {
           assert(newNode.isFromOldGeneration);
           assert(oldNode.isFromOldGeneration);
           assert(Widget._canSync(newNode, oldNode));
-          if (oldNode.retainStatefulNodeIfPossible(newNode)) {
+          if (oldNode == newNode) {
+            newNode.setParent(this);
+            newNode._markAsFromCurrentGeneration();
+            return newNode;
+          } else if (oldNode.retainStatefulNodeIfPossible(newNode)) {
             assert(oldNode.mounted);
             assert(!newNode.mounted);
             oldNode.setParent(this);
@@ -483,7 +486,8 @@ abstract class Widget {
         }
       }
 
-      assert(oldNode == null || (oldNode.mounted == false && oldNode.parent == null));
+      assert(oldNode == null || (oldNode.mounted == false && oldNode.parent == null && newNode.mounted == false && newNode.isFromOldGeneration));
+      assert(oldNode != newNode);
       newNode.setParent(this);
       newNode._sync(oldNode, slot);
       assert(newNode.renderObject is RenderObject);
@@ -936,6 +940,7 @@ abstract class StatefulComponent extends Component {
   bool retainStatefulNodeIfPossible(StatefulComponent newNode) {
     assert(newNode != null);
     assert(!newNode._isStateInitialized);
+    assert(this != newNode);
     assert(Widget._canSync(this, newNode));
     assert(_child != null);
 
@@ -1235,10 +1240,13 @@ abstract class RenderObjectWrapper extends Widget {
     // top of the lists
     while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
       Widget oldChild = oldChildren[childrenTop];
-      if (!oldChild.isFromOldGeneration)
-        break;
-      assert(oldChild.mounted);
       Widget newChild = newChildren[childrenTop];
+      if (oldChild != newChild && !oldChild.isFromOldGeneration) {
+        // even if the two nodes could in theory be synced, they can't really because
+        // it would seem that the old node has already been synced elsewhere in the tree.
+        break;
+      }
+      assert(oldChild.mounted);
       if (!Widget._canSync(oldChild, newChild))
         break;
       childrenTop += 1;
@@ -1249,15 +1257,18 @@ abstract class RenderObjectWrapper extends Widget {
     // bottom of the lists
     while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
       Widget oldChild = oldChildren[oldChildrenBottom];
-      if (!oldChild.isFromOldGeneration)
-        break;
-      assert(oldChild.mounted);
       Widget newChild = newChildren[newChildrenBottom];
+      if (oldChild != newChild && !oldChild.isFromOldGeneration) {
+        // even if the two nodes could in theory be synced, they can't really because
+        // it would seem that the old node has already been synced elsewhere in the tree.
+        break;
+      }
+      assert(oldChild.mounted);
       if (!Widget._canSync(oldChild, newChild))
         break;
+      assert(oldChild == newChild || !newChild.mounted);
       newChild = syncChild(newChild, oldChild, nextSibling);
       assert(newChild.mounted);
-      assert(oldChild == newChild || !oldChild.mounted);
       newChildren[newChildrenBottom] = newChild;
       nextSibling = newChild;
       oldChildrenBottom -= 1;
@@ -1271,14 +1282,17 @@ abstract class RenderObjectWrapper extends Widget {
       oldKeyedChildren = new Map<Key, Widget>();
       while (childrenTop <= oldChildrenBottom) {
         Widget oldChild = oldChildren[oldChildrenBottom];
-        if (oldChild.isFromOldGeneration) {
-          assert(oldChild.mounted);
-          if (oldChild.key != null) {
-            oldKeyedChildren[oldChild.key] = oldChild;
-          } else {
+        assert(oldChild.mounted);
+        if (oldChild.key != null) {
+          oldKeyedChildren[oldChild.key] = oldChild;
+        } else {
+          // Let's give up trying to sync this node with a new node. If this
+          // child is from the old generation, then we'll remove it from our
+          // child list. It it's not, then that means it's already been synced
+          // elsewhere and we should leave it alone.
+          if (oldChild.isFromOldGeneration)
             syncChild(null, oldChild, null);
-          }
-        } // else the node was probably moved elsewhere, ignore it
+        }
         oldChildrenBottom -= 1;
       }
     }
@@ -1291,14 +1305,22 @@ abstract class RenderObjectWrapper extends Widget {
         Key key = newChild.key;
         if (key != null) {
           oldChild = oldKeyedChildren[newChild.key];
-          if (oldChild != null && oldChild.isFromOldGeneration) {
-            if (oldChild.runtimeType != newChild.runtimeType)
+          if (oldChild != null) {
+            if ((Widget._canSync(oldChild, newChild)) &&
+                (oldChild == newChild || oldChild.isFromOldGeneration)) {
+              // we found a match!
+              // remove it from oldKeyedChildren so we don't unsync it later
+              oldKeyedChildren.remove(key);
+            } else {
+              // Either it wasn't a match, or it's already been synced elsewhere in the tree.
+              // In either case, let's pretend we didn't see it for now.
               oldChild = null;
-            oldKeyedChildren.remove(key);
+            }
           }
         }
       }
-      assert(newChild == oldChild || !newChild.mounted);
+      assert(oldChild == null || Widget._canSync(oldChild, newChild));
+      assert(oldChild == newChild || !newChild.mounted);
       newChild = syncChild(newChild, oldChild, nextSibling);
       assert(newChild.mounted);
       assert(oldChild == newChild || oldChild == null || !oldChild.mounted);
@@ -1314,9 +1336,7 @@ abstract class RenderObjectWrapper extends Widget {
       childrenTop -= 1;
       Widget oldChild = oldChildren[childrenTop];
       assert(oldChild.mounted);
-      assert(oldChild.isFromOldGeneration);
       Widget newChild = newChildren[childrenTop];
-      assert(newChild.isFromOldGeneration);
       assert(Widget._canSync(oldChild, newChild));
       newChild = syncChild(newChild, oldChild, nextSibling);
       assert(newChild.mounted);
@@ -1325,6 +1345,7 @@ abstract class RenderObjectWrapper extends Widget {
       nextSibling = newChild;
     }
 
+    // clean up any of the remaining middle nodes from the old list
     if (haveOldNodes && !oldKeyedChildren.isEmpty) {
       for (Widget oldChild in oldKeyedChildren.values)
         if (oldChild.isFromOldGeneration)
