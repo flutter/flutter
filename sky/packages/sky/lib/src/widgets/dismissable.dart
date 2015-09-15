@@ -75,14 +75,6 @@ class Dismissable extends StatefulComponent {
       _startResizePerformance();
   }
 
-  Point get _activeCardDragEndPoint {
-    if (!_isActive)
-      return Point.origin;
-    assert(_size != null);
-    double extent = _directionIsYAxis ? _size.height : _size.width;
-    return new Point(_dragExtent.sign * extent * _kDismissCardThreshold, 0.0);
-  }
-
   bool get _isActive {
     return _size != null && (_dragUnderway || _fadePerformance.isAnimating);
   }
@@ -120,9 +112,11 @@ class Dismissable extends StatefulComponent {
   void _handleDragStart() {
     if (_fadePerformance.isAnimating)
       return;
-    _dragUnderway = true;
-    _dragExtent = 0.0;
-    _fadePerformance.progress = 0.0;
+    setState(() {
+      _dragUnderway = true;
+      _dragExtent = 0.0;
+      _fadePerformance.progress = 0.0;
+    });
   }
 
   void _handleDragUpdate(double scrollOffset) {
@@ -149,8 +143,14 @@ class Dismissable extends StatefulComponent {
         break;
     }
 
-    if (oldDragExtent.sign != _dragExtent.sign)
-      setState(() {}); // Rebuild to update the new drag endpoint.
+    if (oldDragExtent.sign != _dragExtent.sign) {
+      setState(() {
+        // Rebuild to update the new drag endpoint.
+        // The sign of _dragExtent is part of our build state;
+        // the actual value is not, it's just used to configure
+        // the performances.
+      });
+    }
     if (!_fadePerformance.isAnimating)
       _fadePerformance.progress = _dragExtent.abs() / (_size.width * _kDismissCardThreshold);
   }
@@ -188,22 +188,32 @@ class Dismissable extends StatefulComponent {
     if (!_isActive || _fadePerformance.isAnimating)
       return;
 
-    _dragUnderway = false;
-    if (_fadePerformance.isCompleted) {
-      _startResizePerformance();
-    } else if (_isFlingGesture(velocity)) {
-      double flingVelocity = _directionIsYAxis ? velocity.dy : velocity.dx;
-      _dragExtent = flingVelocity.sign;
-      _fadePerformance.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
-    } else {
-      _fadePerformance.reverse();
-    }
+    setState(() {
+      _dragUnderway = false;
+      if (_fadePerformance.isCompleted) {
+        _startResizePerformance();
+      } else if (_isFlingGesture(velocity)) {
+        double flingVelocity = _directionIsYAxis ? velocity.dy : velocity.dx;
+        _dragExtent = flingVelocity.sign;
+        _fadePerformance.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
+      } else {
+        _fadePerformance.reverse();
+      }
+    });
   }
 
   void _handleSizeChanged(Size newSize) {
     setState(() {
       _size = new Size.copy(newSize);
     });
+  }
+
+  Point get _activeCardDragEndPoint {
+    if (!_isActive)
+      return Point.origin;
+    assert(_size != null);
+    double extent = _directionIsYAxis ? _size.height : _size.width;
+    return new Point(_dragExtent.sign * extent * _kDismissCardThreshold, 0.0);
   }
 
   Widget build() {
