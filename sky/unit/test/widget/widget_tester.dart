@@ -9,7 +9,6 @@ import '../engine/mock_events.dart';
 typedef Widget WidgetBuilder();
 
 class TestApp extends App {
-  TestApp();
 
   WidgetBuilder _builder;
   void set builder (WidgetBuilder value) {
@@ -29,6 +28,7 @@ class WidgetTester {
   WidgetTester() {
     _app = new TestApp();
     runApp(_app);
+    scheduler.beginFrame(0.0); // to initialise the app
   }
 
   TestApp _app;

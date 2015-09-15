@@ -389,6 +389,19 @@ abstract class Widget {
   // Returns the child which should be retained as the child of this node.
   Widget syncChild(Widget newNode, Widget oldNode, dynamic slot) {
 
+    if (newNode == oldNode) {
+      // TODO(ianh): Simplify next few asserts once the analyzer is cleverer
+      assert(newNode is! RenderObjectWrapper ||
+             (newNode is RenderObjectWrapper && newNode._ancestor != null)); // if the child didn't change, it had better be configured
+      assert(newNode is! StatefulComponent ||
+             (newNode is StatefulComponent && newNode._isStateInitialized)); // if the child didn't change, it had better be configured
+      if (newNode != null) {
+        newNode.setParent(this);
+        newNode._markAsFromCurrentGeneration();
+      }
+      return newNode; // Nothing to do. Subtrees must be identical.
+    }
+
     assert(() {
       'You have probably used a single instance of a Widget in two different places in the widget tree. Widgets can only be used in one place at a time.';
       return newNode == null || newNode.isFromOldGeneration;
@@ -397,27 +410,19 @@ abstract class Widget {
     if (oldNode != null && !oldNode.isFromOldGeneration)
       oldNode = null;
 
-    if (newNode == oldNode) {
-      assert(newNode == null || newNode.isFromOldGeneration);
-      assert(newNode is! RenderObjectWrapper ||
-             (newNode is RenderObjectWrapper && newNode._ancestor != null)); // TODO(ianh): Simplify this once the analyzer is cleverer
-      if (newNode != null) {
-        newNode.setParent(this);
-        newNode._markAsFromCurrentGeneration();
-      }
-      return newNode; // Nothing to do. Subtrees must be identical.
-    }
-
     if (newNode == null) {
-      // the child in this slot has gone away (we know oldNode != null)
-      assert(oldNode != null);
-      assert(oldNode.isFromOldGeneration);
-      assert(oldNode.mounted);
-      oldNode.detachRenderObject();
-      oldNode.remove();
-      assert(!oldNode.mounted);
-      // we don't update the generation of oldNode, because there's
-      // still a chance it could be reused as-is later in the tree.
+      // the child in this slot has gone away
+      // remove it if they old one is still here
+      if (oldNode != null) {
+        assert(oldNode != null);
+        assert(oldNode.isFromOldGeneration);
+        assert(oldNode.mounted);
+        oldNode.detachRenderObject();
+        oldNode.remove();
+        assert(!oldNode.mounted);
+        // we don't update the generation of oldNode, because there's
+        // still a chance it could be reused as-is later in the tree.
+      }
       return null;
     }
 
@@ -868,6 +873,12 @@ abstract class Component extends Widget {
     super._sync(old, slot);
   }
 
+  void _markAsFromCurrentGeneration() {
+    if (_dirty)
+      return;
+    super._markAsFromCurrentGeneration();
+  }
+
   void _buildIfDirty() {
     if (!_dirty || !_mounted)
       return;
@@ -947,6 +958,8 @@ abstract class StatefulComponent extends Component {
   // Calls function fn immediately and then schedules another build
   // for this Component.
   void setState(void fn()) {
+    assert(!_debugIsBuilding);
+    assert(_isStateInitialized);
     fn();
     _scheduleBuild();
   }
@@ -985,12 +998,14 @@ void exitLayoutCallbackBuilder(LayoutCallbackBuilderHandle handle) {
 
 List<int> _debugFrameTimes = <int>[];
 
+// TODO(ianh): Move this to Component
 void _absorbDirtyComponents(List<Component> list) {
   list.addAll(_dirtyComponents);
   _dirtyComponents.clear();
   list.sort((Component a, Component b) => a._order - b._order);
 }
 
+// TODO(ianh): Move this to Component
 void _buildDirtyComponents() {
   assert(!_dirtyComponents.isEmpty);
 
@@ -1038,11 +1053,13 @@ void _buildDirtyComponents() {
 
 }
 
+// TODO(ianh): Move this to Widget
 void _endSyncPhase() {
   Widget._currentGeneration += 1;
   Widget._notifyMountStatusChanged();
 }
 
+// TODO(ianh): Move this to Component
 void _scheduleComponentForRender(Component component) {
   _dirtyComponents.add(component);
   if (!_buildScheduled) {

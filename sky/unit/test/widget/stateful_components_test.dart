@@ -40,27 +40,36 @@ void main() {
 
     WidgetTester tester = new WidgetTester();
 
-    InnerComponent inner;
+    InnerComponent inner1;
+    InnerComponent inner2;
     OuterContainer outer;
 
     tester.pumpFrame(() {
-      return new OuterContainer(child: new InnerComponent());
-    });
-
-    tester.pumpFrame(() {
-      inner = new InnerComponent();
-      outer = new OuterContainer(child: inner);
+      inner1 = new InnerComponent();
+      outer = new OuterContainer(child: inner1);
       return outer;
     });
 
-    expect(inner._didInitState, isFalse);
-    expect(inner.parent, isNull);
+    expect(inner1._didInitState, isTrue);
+    expect(inner1.parent, isNotNull);
+
+    tester.pumpFrame(() {
+      inner2 = new InnerComponent();
+      return new OuterContainer(child: inner2);
+    });
+
+    expect(inner1._didInitState, isTrue);
+    expect(inner1.parent, isNotNull);
+    expect(inner2._didInitState, isFalse);
+    expect(inner2.parent, isNull);
 
     outer.setState(() {});
-    scheduler.beginFrame(0.0);
+    tester.pumpFrameWithoutChange(0.0);
 
-    expect(inner._didInitState, isFalse);
-    expect(inner.parent, isNull);
+    expect(inner1._didInitState, isTrue);
+    expect(inner1.parent, isNotNull);
+    expect(inner2._didInitState, isFalse);
+    expect(inner2.parent, isNull);
 
   });
 }
