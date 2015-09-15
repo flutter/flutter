@@ -5,17 +5,27 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:logging/logging.dart';
 import 'package:sky_tools/src/common.dart';
 import 'package:sky_tools/src/init.dart';
 import 'package:sky_tools/src/install.dart';
 
 void main(List<String> args) {
+  Logger.root.level = Level.WARNING;
+  Logger.root.onRecord.listen((LogRecord rec) {
+    print('${rec.level.name}: ${rec.message}');
+  });
+
   Map<String, CommandHandler> handlers = {};
 
   ArgParser parser = new ArgParser();
   parser.addSeparator('options:');
   parser.addFlag('help',
       abbr: 'h', negatable: false, help: 'Display this help message.');
+  parser.addFlag('verbose',
+      abbr: 'v',
+      negatable: false,
+      help: 'Noisy logging, including all shell commands executed.');
   parser.addSeparator('commands:');
 
   for (CommandHandler handler in [
@@ -33,6 +43,10 @@ void main(List<String> args) {
   } catch (e) {
     _printUsage(parser, handlers, e is FormatException ? e.message : '${e}');
     exit(1);
+  }
+
+  if (results['verbose']) {
+    Logger.root.level = Level.INFO;
   }
 
   if (results['help']) {
