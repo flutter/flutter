@@ -14,6 +14,12 @@ void main(List<String> args) {
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((LogRecord rec) {
     print('${rec.level.name}: ${rec.message}');
+    if (rec.error != null) {
+      print(rec.error);
+    }
+    if (rec.stackTrace != null) {
+      print(rec.stackTrace);
+    }
   });
 
   Map<String, CommandHandler> handlers = {};
