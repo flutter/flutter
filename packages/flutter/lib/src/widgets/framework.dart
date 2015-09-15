@@ -1171,8 +1171,13 @@ abstract class RenderObjectWrapper extends Widget {
       assert(() {
         if (current is ParentDataNode) {
           Widget ancestor = current.parent;
-          while (ancestor != null && ancestor is Component)
+          while (ancestor is Component)
             ancestor = ancestor.parent;
+          // ancestor might be null in two cases:
+          //  - asking for the ancestor of a Widget that has no non-Component
+          //    ancestors between itself and its AbstractWidgetRoot ancestor
+          //  - if the node is just being synced to get its intrinsic
+          //    dimensions, as e.g. MixedViewport does.
           if (ancestor != null)
             current.debugValidateAncestor(ancestor);
         }
