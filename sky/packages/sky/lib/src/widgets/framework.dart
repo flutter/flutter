@@ -140,7 +140,6 @@ abstract class GlobalKey extends Key {
     if (_syncedKeys.isEmpty && _removedKeys.isEmpty)
       return;
     try {
-
       for (GlobalKey key in _syncedKeys) {
         Widget widget = _registry[key];
         if (widget != null && _syncListeners.containsKey(key)) {
@@ -149,7 +148,6 @@ abstract class GlobalKey extends Key {
             listener(key, widget);
         }
       }
-
       for (GlobalKey key in _removedKeys) {
         if (!_registry.containsKey(key) && _removeListeners.containsKey(key)) {
           Set<GlobalKeyRemoveListener> localListeners = new Set<GlobalKeyRemoveListener>.from(_removeListeners[key]);
@@ -388,101 +386,113 @@ abstract class Widget {
 
   // Returns the child which should be retained as the child of this node.
   Widget syncChild(Widget newNode, Widget oldNode, dynamic slot) {
-
-    if (newNode == oldNode) {
-      // TODO(ianh): Simplify next few asserts once the analyzer is cleverer
-      assert(newNode is! RenderObjectWrapper ||
-             (newNode is RenderObjectWrapper && newNode._ancestor != null)); // if the child didn't change, it had better be configured
-      assert(newNode is! StatefulComponent ||
-             (newNode is StatefulComponent && newNode._isStateInitialized)); // if the child didn't change, it had better be configured
-      if (newNode != null) {
-        newNode.setParent(this);
-        newNode._markAsFromCurrentGeneration();
-      }
-      return newNode; // Nothing to do. Subtrees must be identical.
-    }
-
+    String debugDetails;
     assert(() {
-      'You have probably used a single instance of a Widget in two different places in the widget tree. Widgets can only be used in one place at a time.';
-      return newNode == null || newNode.isFromOldGeneration;
+      // we save this information early because by the time the exception fires we might have changed everything around
+      debugDetails = "  old child: ${oldNode?.toStringName()}\n  new child: ${newNode?.toStringName()}";
+      return true;
     });
+    try {
 
-    if (oldNode != null && !oldNode.isFromOldGeneration)
-      oldNode = null;
-
-    if (newNode == null) {
-      // the child in this slot has gone away
-      // remove it if they old one is still here
-      if (oldNode != null) {
-        assert(oldNode != null);
-        assert(oldNode.isFromOldGeneration);
-        assert(oldNode.mounted);
-        oldNode.detachRenderObject();
-        oldNode.remove();
-        assert(!oldNode.mounted);
-        // we don't update the generation of oldNode, because there's
-        // still a chance it could be reused as-is later in the tree.
+      if (newNode == oldNode) {
+        // TODO(ianh): Simplify next few asserts once the analyzer is cleverer
+        assert(newNode is! RenderObjectWrapper ||
+               (newNode is RenderObjectWrapper && newNode._ancestor != null)); // if the child didn't change, it had better be configured
+        assert(newNode is! StatefulComponent ||
+               (newNode is StatefulComponent && newNode._isStateInitialized)); // if the child didn't change, it had better be configured
+        if (newNode != null) {
+          newNode.setParent(this);
+          newNode._markAsFromCurrentGeneration();
+        }
+        return newNode; // Nothing to do. Subtrees must be identical.
       }
-      return null;
-    }
 
-    if (oldNode != null) {
-      assert(newNode != null);
-      assert(newNode.isFromOldGeneration);
-      assert(oldNode.isFromOldGeneration);
-      if (!Widget._canSync(newNode, oldNode)) {
-        assert(oldNode.mounted);
-        // We want to handle the case where there is a removal of zero
-        // or more widgets. In this case, we should be able to sync
-        // ourselves with a Widget that is a descendant of the
-        // oldNode, skipping the nodes in between. Let's try that.
-        Widget deadNode = oldNode;
-        Widget candidate = _getCandidateSingleChildFrom(oldNode);
+      assert(() {
+        'You have probably used a single instance of a Widget in two different places in the widget tree. Widgets can only be used in one place at a time.';
+        return newNode == null || newNode.isFromOldGeneration;
+      });
+
+      if (oldNode != null && !oldNode.isFromOldGeneration)
         oldNode = null;
 
-        while (candidate != null) {
-          if (Widget._canSync(newNode, candidate)) {
-            assert(candidate.parent != null);
-            assert(candidate.parent.singleChild == candidate);
-            if (candidate.renderObject != deadNode.renderObject) {
-              // TODO(ianh): Handle removal across RenderNode boundaries
-            } else {
-              candidate.parent.takeChild();
-              oldNode = candidate;
-            }
-            break;
-          }
-          candidate = _getCandidateSingleChildFrom(candidate);
+      if (newNode == null) {
+        // the child in this slot has gone away
+        // remove it if they old one is still here
+        if (oldNode != null) {
+          assert(oldNode != null);
+          assert(oldNode.isFromOldGeneration);
+          assert(oldNode.mounted);
+          oldNode.detachRenderObject();
+          oldNode.remove();
+          assert(!oldNode.mounted);
+          // we don't update the generation of oldNode, because there's
+          // still a chance it could be reused as-is later in the tree.
         }
-
-        // TODO(ianh): Handle insertion, too...
-
-        if (oldNode == null)
-          deadNode.detachRenderObject();
-        deadNode.remove();
+        return null;
       }
+
       if (oldNode != null) {
+        assert(newNode != null);
         assert(newNode.isFromOldGeneration);
         assert(oldNode.isFromOldGeneration);
-        assert(Widget._canSync(newNode, oldNode));
-        if (oldNode.retainStatefulNodeIfPossible(newNode)) {
+        if (!Widget._canSync(newNode, oldNode)) {
           assert(oldNode.mounted);
-          assert(!newNode.mounted);
-          oldNode.setParent(this);
-          oldNode._sync(newNode, slot);
-          assert(oldNode.renderObject is RenderObject);
-          return oldNode;
-        } else {
-          oldNode.setParent(null);
+          // We want to handle the case where there is a removal of zero
+          // or more widgets. In this case, we should be able to sync
+          // ourselves with a Widget that is a descendant of the
+          // oldNode, skipping the nodes in between. Let's try that.
+          Widget deadNode = oldNode;
+          Widget candidate = _getCandidateSingleChildFrom(oldNode);
+          oldNode = null;
+
+          while (candidate != null) {
+            if (Widget._canSync(newNode, candidate)) {
+              assert(candidate.parent != null);
+              assert(candidate.parent.singleChild == candidate);
+              if (candidate.renderObject != deadNode.renderObject) {
+                // TODO(ianh): Handle removal across RenderNode boundaries
+              } else {
+                candidate.parent.takeChild();
+                oldNode = candidate;
+              }
+              break;
+            }
+            candidate = _getCandidateSingleChildFrom(candidate);
+          }
+
+          // TODO(ianh): Handle insertion, too...
+
+          if (oldNode == null)
+            deadNode.detachRenderObject();
+          deadNode.remove();
+        }
+        if (oldNode != null) {
+          assert(newNode.isFromOldGeneration);
+          assert(oldNode.isFromOldGeneration);
+          assert(Widget._canSync(newNode, oldNode));
+          if (oldNode.retainStatefulNodeIfPossible(newNode)) {
+            assert(oldNode.mounted);
+            assert(!newNode.mounted);
+            oldNode.setParent(this);
+            oldNode._sync(newNode, slot);
+            assert(oldNode.renderObject is RenderObject);
+            return oldNode;
+          } else {
+            oldNode.setParent(null);
+          }
         }
       }
-    }
 
-    assert(oldNode == null || (oldNode.mounted == false && oldNode.parent == null));
-    newNode.setParent(this);
-    newNode._sync(oldNode, slot);
-    assert(newNode.renderObject is RenderObject);
-    return newNode;
+      assert(oldNode == null || (oldNode.mounted == false && oldNode.parent == null));
+      newNode.setParent(this);
+      newNode._sync(oldNode, slot);
+      assert(newNode.renderObject is RenderObject);
+      return newNode;
+
+    } catch (e, stack) {
+      _debugReportException('syncing children of ${this.toStringName()}\n$debugDetails', e, stack);
+      return null;
+    }
   }
 
   String _adjustPrefixWithParentCheck(Widget child, String prefix) {
@@ -507,19 +517,25 @@ abstract class Widget {
       nextPrefix = prefix + '   ';
       childrenString += lastChild.toString(nextPrefix, _adjustPrefixWithParentCheck(lastChild, nextStartPrefix));
     }
-    String suffix = '';
+    return '$startPrefix${toStringName()}\n$childrenString';
+  }
+  String toStringName() {
+    List<String> details = <String>[];
+    debugAddDetails(details);
+    String detailString = details.join('; ');
+    return '$runtimeType($detailString})';
+  }
+  void debugAddDetails(List<String> details) {
+    if (key != null)
+      details.add('$key');
+    details.add('hashCode=$hashCode');
+    details.add(mounted ? 'mounted' : 'not mounted');
+    String generationString = '';
     if (_generation != _currentGeneration) {
       int delta = _generation - _currentGeneration;
       String sign = delta < 0 ? '' : '+';
-      suffix = ' gen$sign$delta';
+      details.add('gen$sign$delta');
     }
-    return '$startPrefix${toStringName()}$suffix\n$childrenString';
-  }
-  String toStringName() {
-    String keyString = key == null ? '' : '$key; ';
-    String hashCodeString = 'hashCode=$hashCode';
-    String mountedString = mounted ? '; mounted' : '; not mounted';
-    return '$runtimeType($keyString$hashCodeString$mountedString)';
   }
 
   // This function can be safely called when the layout is valid.
@@ -902,6 +918,11 @@ abstract class Component extends Widget {
 
   Widget build();
 
+  void debugAddDetails(List<String> details) {
+    super.debugAddDetails(details);
+    if (_dirty)
+      details.add('dirty');
+  }
 }
 
 abstract class StatefulComponent extends Component {
@@ -964,10 +985,9 @@ abstract class StatefulComponent extends Component {
     _scheduleBuild();
   }
 
-  String toStringName() {
-    if (_isStateInitialized)
-      return 'Stateful ${super.toStringName()}';
-    return 'Stateless ${super.toStringName()}';
+  void debugAddDetails(List<String> details) {
+    super.debugAddDetails(details);
+    details.add(_isStateInitialized ? 'stateful' : 'stateless');
   }
 }
 
