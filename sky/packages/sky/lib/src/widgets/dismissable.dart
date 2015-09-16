@@ -119,7 +119,7 @@ class Dismissable extends StatefulComponent {
     });
   }
 
-  void _handleDragUpdate(double scrollOffset) {
+  void _handleDragUpdate(double delta) {
     if (!_isActive || _fadePerformance.isAnimating)
       return;
 
@@ -127,19 +127,19 @@ class Dismissable extends StatefulComponent {
     switch(direction) {
       case DismissDirection.horizontal:
       case DismissDirection.vertical:
-        _dragExtent -= scrollOffset;
+        _dragExtent += delta;
         break;
 
       case DismissDirection.up:
       case DismissDirection.left:
-        if (_dragExtent - scrollOffset < 0)
-          _dragExtent -= scrollOffset;
+        if (_dragExtent + delta < 0)
+          _dragExtent += delta;
         break;
 
       case DismissDirection.down:
       case DismissDirection.right:
-        if (_dragExtent - scrollOffset > 0)
-          _dragExtent -= scrollOffset;
+        if (_dragExtent + delta > 0)
+          _dragExtent += delta;
         break;
     }
 

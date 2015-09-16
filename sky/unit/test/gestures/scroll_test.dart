@@ -53,14 +53,14 @@ void main() {
     router.route(pointer.move(new Point(20.0, 20.0)));
     expect(didStartPan, isTrue);
     didStartPan = false;
-    expect(updatedScrollDelta, new sky.Offset(10.0, -10.0));
+    expect(updatedScrollDelta, new sky.Offset(10.0, 10.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
     router.route(pointer.move(new Point(20.0, 25.0)));
     expect(didStartPan, isFalse);
-    expect(updatedScrollDelta, new sky.Offset(0.0, -5.0));
+    expect(updatedScrollDelta, new sky.Offset(0.0, 5.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);

@@ -109,13 +109,11 @@ class Drawer extends StatefulComponent {
       )
     );
 
-    return new Listener(
-      child: new Stack([ mask, content ]),
-      onPointerDown: handlePointerDown,
-      onPointerMove: handlePointerMove,
-      onPointerUp: handlePointerUp,
-      onPointerCancel: handlePointerCancel,
-      onGestureFlingStart: handleFlingStart
+    return new GestureDetector(
+      onHorizontalDragStart: _performance.stop,
+      onHorizontalDragUpdate: _handleDragUpdate,
+      onHorizontalDragEnd: _handleDragEnd,
+      child: new Stack([ mask, content ])
     );
   }
 
@@ -132,41 +130,17 @@ class Drawer extends StatefulComponent {
 
   void _settle() { _isMostlyClosed ? _performance.reverse() : _performance.play(); }
 
-  // TODO(mpcomplete): Figure out how to generalize these handlers on a
-  // "PannableThingy" interface.
-  EventDisposition handlePointerDown(_) {
-    _performance.stop();
-    return EventDisposition.processed;
- }
-
-  EventDisposition handlePointerMove(sky.PointerEvent event) {
-    if (_performance.isAnimating)
-      return EventDisposition.ignored;
-    _performance.progress += event.dx / _kWidth;
-    return EventDisposition.processed;
+  void _handleDragUpdate(double delta) {
+    _performance.progress += delta / _kWidth;
   }
 
-  EventDisposition handlePointerUp(_) {
-    if (!_performance.isAnimating) {
+  void _handleDragEnd(Offset velocity) {
+    if (velocity.dx.abs() >= _kMinFlingVelocity) {
+      _performance.fling(velocity: velocity.dx * _kFlingVelocityScale);
+      return;
+    } else {
       _settle();
-      return EventDisposition.processed;
     }
-    return EventDisposition.ignored;
   }
 
-  EventDisposition handlePointerCancel(_) {
-    if (!_performance.isAnimating) {
-      _settle();
-      return EventDisposition.processed;
-    }
-    return EventDisposition.ignored;
-  }
-
-  EventDisposition handleFlingStart(event) {
-    if (event.velocityX.abs() >= _kMinFlingVelocity) {
-      _performance.fling(velocity: event.velocityX * _kFlingVelocityScale);
-      return EventDisposition.processed;
-    }
-    return EventDisposition.ignored;
-  }
 }
