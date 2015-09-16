@@ -7,7 +7,6 @@ import 'dart:sky' as sky;
 import 'package:vector_math/vector_math.dart';
 import 'package:sky/animation.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 
@@ -182,7 +181,7 @@ List<AnimationBehavior> implicitlyAnimate(Duration duration) {
   ];
 }
 
-class AnimatedContainer extends AnimatedComponent {
+class AnimatedContainer extends StatefulComponent {
   AnimatedContainer({
     Key key,
     this.child,
