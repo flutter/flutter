@@ -100,7 +100,6 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
       sky.Offset velocity = sky.Offset.zero;
       if (_isFlingGesture(gestureVelocity))
         velocity = new sky.Offset(gestureVelocity.x, gestureVelocity.y);
-      resolve(GestureDisposition.accepted);
       onEnd(velocity);
     }
     _velocityTracker.reset();

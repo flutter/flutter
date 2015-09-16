@@ -6,7 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/gestures/drag.dart';
 import 'package:sky/gestures/long_press.dart';
-import 'package:sky/gestures/pinch.dart';
+import 'package:sky/gestures/scale.dart';
 import 'package:sky/gestures/recognizer.dart';
 import 'package:sky/gestures/show_press.dart';
 import 'package:sky/gestures/tap.dart';
@@ -29,9 +29,9 @@ class GestureDetector extends StatefulComponent {
     this.onPanStart,
     this.onPanUpdate,
     this.onPanEnd,
-    this.onPinchStart,
-    this.onPinchUpdate,
-    this.onPinchEnd
+    this.onScaleStart,
+    this.onScaleUpdate,
+    this.onScaleEnd
   }) : super(key: key);
 
   Widget child;
@@ -51,9 +51,9 @@ class GestureDetector extends StatefulComponent {
   GesturePanUpdateCallback onPanUpdate;
   GesturePanEndCallback onPanEnd;
 
-  GesturePinchStartCallback onPinchStart;
-  GesturePinchUpdateCallback onPinchUpdate;
-  GesturePinchEndCallback onPinchEnd;
+  GestureScaleStartCallback onScaleStart;
+  GestureScaleUpdateCallback onScaleUpdate;
+  GestureScaleEndCallback onScaleEnd;
 
   void syncConstructorArguments(GestureDetector source) {
     child = source.child;
@@ -69,9 +69,9 @@ class GestureDetector extends StatefulComponent {
     onPanStart = source.onPanStart;
     onPanUpdate = source.onPanUpdate;
     onPanEnd = source.onPanEnd;
-    onPinchStart = source.onPinchStart;
-    onPinchUpdate = source.onPinchUpdate;
-    onPinchEnd = source.onPinchEnd;
+    onScaleStart = source.onScaleStart;
+    onScaleUpdate = source.onScaleUpdate;
+    onScaleEnd = source.onScaleEnd;
     _syncGestureListeners();
   }
 
@@ -114,16 +114,18 @@ class GestureDetector extends StatefulComponent {
 
   PanGestureRecognizer _pan;
   PanGestureRecognizer _ensurePan() {
+    assert(_scale == null);  // Scale is a superset of pan; just use scale
     if (_pan == null)
       _pan = new PanGestureRecognizer(router: _router);
     return _pan;
   }
 
-  PinchGestureRecognizer _pinch;
-  PinchGestureRecognizer _ensurePinch() {
-    if (_pinch == null)
-      _pinch = new PinchGestureRecognizer(router: _router);
-    return _pinch;
+  ScaleGestureRecognizer _scale;
+  ScaleGestureRecognizer _ensureScale() {
+    assert(_pan == null);  // Scale is a superset of pan; just use scale
+    if (_scale == null)
+      _scale = new ScaleGestureRecognizer(router: _router);
+    return _scale;
   }
 
   void didMount() {
@@ -139,7 +141,7 @@ class GestureDetector extends StatefulComponent {
     _verticalDrag = _ensureDisposed(_verticalDrag);
     _horizontalDrag = _ensureDisposed(_horizontalDrag);
     _pan = _ensureDisposed(_pan);
-    _pinch = _ensureDisposed(_pinch);
+    _scale = _ensureDisposed(_scale);
   }
 
   void _syncGestureListeners() {
@@ -149,7 +151,7 @@ class GestureDetector extends StatefulComponent {
     _syncVerticalDrag();
     _syncHorizontalDrag();
     _syncPan();
-    _syncPinch();
+    _syncScale();
   }
 
   void _syncTap() {
@@ -206,14 +208,14 @@ class GestureDetector extends StatefulComponent {
     }
   }
 
-  void _syncPinch() {
-    if (onPinchStart == null && onPinchUpdate == null && onPinchEnd == null) {
-      _pinch = _ensureDisposed(_pan);
+  void _syncScale() {
+    if (onScaleStart == null && onScaleUpdate == null && onScaleEnd == null) {
+      _scale = _ensureDisposed(_pan);
     } else {
-      _ensurePinch()
-        ..onStart = onPinchStart
-        ..onUpdate = onPinchUpdate
-        ..onEnd = onPinchEnd;
+      _ensureScale()
+        ..onStart = onScaleStart
+        ..onUpdate = onScaleUpdate
+        ..onEnd = onScaleEnd;
     }
   }
 
@@ -235,8 +237,8 @@ class GestureDetector extends StatefulComponent {
       _horizontalDrag.addPointer(event);
     if (_pan != null)
       _pan.addPointer(event);
-    if (_pinch != null)
-      _pinch.addPointer(event);
+    if (_scale != null)
+      _scale.addPointer(event);
     return EventDisposition.processed;
   }
 
