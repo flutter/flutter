@@ -534,7 +534,6 @@ abstract class Widget {
       details.add('$key');
     details.add('hashCode=$hashCode');
     details.add(mounted ? 'mounted' : 'not mounted');
-    String generationString = '';
     if (_generation != _currentGeneration) {
       int delta = _generation - _currentGeneration;
       String sign = delta < 0 ? '' : '+';
