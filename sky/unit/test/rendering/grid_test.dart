@@ -13,7 +13,7 @@ void main() {
     ];
 
     RenderGrid grid = new RenderGrid(children: children, maxChildExtent: 100.0);
-    RenderingTester tester = layout(grid, constraints: const BoxConstraints(maxWidth: 200.0));
+    layout(grid, constraints: const BoxConstraints(maxWidth: 200.0));
 
     children.forEach((child) {
       expect(child.size.width, equals(100.0), reason: "child width");
@@ -27,7 +27,7 @@ void main() {
     grid.maxChildExtent = 60.0;
     expect(grid.needsLayout, equals(true));
 
-    tester.pumpFrame(phase: EnginePhase.layout);
+    pumpFrame();
 
     children.forEach((child) {
       expect(child.size.width, equals(50.0), reason: "child width");
