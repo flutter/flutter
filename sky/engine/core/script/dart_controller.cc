@@ -77,14 +77,11 @@ void DartController::DidLoadMainLibrary(String name) {
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
 
-  if (LogIfError(Dart_FinalizeLoading(true)))
-    return;
+  CHECK(!LogIfError(Dart_FinalizeLoading(true)));
 
   Dart_Handle library = Dart_LookupLibrary(StringToDart(dart_state(), name));
-  // TODO(eseidel): We need to load a 404 page instead!
-  if (LogIfError(library))
-    return;
-  DartInvokeAppField(library, ToDart("main"), 0, nullptr);
+  CHECK(!LogIfError(library));
+  CHECK(!DartInvokeAppField(library, ToDart("main"), 0, nullptr));
 }
 
 void DartController::DidLoadSnapshot() {

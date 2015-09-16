@@ -17,7 +17,7 @@ namespace {
 
 void CopyComplete(base::FilePath file, bool success) {
   if (!success)
-    LOG(ERROR) << "Failed to load " << file.AsUTF8Unsafe();
+    LOG(FATAL) << "Failed to load " << file.AsUTF8Unsafe();
 }
 
 base::FilePath SimplifyPath(const base::FilePath& path) {
