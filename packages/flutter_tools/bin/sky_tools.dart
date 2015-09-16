@@ -32,6 +32,10 @@ void main(List<String> args) {
       abbr: 'v',
       negatable: false,
       help: 'Noisy logging, including all shell commands executed.');
+  parser.addFlag('very-verbose',
+      negatable: false,
+      help: 'Very noisy logging, including the output of all '
+          'shell commands executed.');
   parser.addSeparator('commands:');
 
   for (CommandHandler handler in [
@@ -53,6 +57,10 @@ void main(List<String> args) {
 
   if (results['verbose']) {
     Logger.root.level = Level.INFO;
+  }
+
+  if (results['very-verbose']) {
+    Logger.root.level = Level.FINE;
   }
 
   if (results['help']) {

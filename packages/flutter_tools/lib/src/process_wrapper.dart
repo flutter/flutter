@@ -13,10 +13,14 @@ String runCheckedSync(List<String> cmd) {
   ProcessResult results =
       Process.runSync(cmd[0], cmd.getRange(1, cmd.length).toList());
   if (results.exitCode != 0) {
+    if (results.stderr.length > 0) {
+      _logging.info('Errors logged: ' + results.stderr);
+    }
     throw 'Error code ' +
         results.exitCode.toString() +
         ' returned when attempting to run command: ' +
         cmd.join(' ');
   }
+  _logging.fine(results.stdout.trim());
   return results.stdout;
 }
