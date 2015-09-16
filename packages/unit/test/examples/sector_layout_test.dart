@@ -5,7 +5,6 @@ import '../../../../examples/rendering/sector_layout.dart';
 
 void main() {
   test('Sector layout can paint', () {
-    RenderingTester tester = new RenderingTester(root: buildSectorExample());
-    tester.pumpFrame();
+    layout(buildSectorExample(), phase: EnginePhase.composite);
   });
 }

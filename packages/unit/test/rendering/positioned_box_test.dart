@@ -22,19 +22,19 @@ void main() {
       child: new RenderDecoratedBox(decoration: new BoxDecoration())
     );
     RenderPositionedBox positioner = new RenderPositionedBox(child: sizer, shrinkWrap: ShrinkWrap.width);
-    RenderingTester tester = layout(positioner, constraints: new BoxConstraints.loose(new Size(200.0, 200.0)));
+    layout(positioner, constraints: new BoxConstraints.loose(new Size(200.0, 200.0)));
 
     expect(positioner.size.width, equals(100.0), reason: "positioner width");
     expect(positioner.size.height, equals(200.0), reason: "positioner height");
 
     positioner.shrinkWrap = ShrinkWrap.height;
-    tester.pumpFrame(phase: EnginePhase.layout);
+    pumpFrame();
 
     expect(positioner.size.width, equals(200.0), reason: "positioner width");
     expect(positioner.size.height, equals(100.0), reason: "positioner height");
 
     positioner.shrinkWrap = ShrinkWrap.both;
-    tester.pumpFrame(phase: EnginePhase.layout);
+    pumpFrame();
 
     expect(positioner.size.width, equals(100.0), reason: "positioner width");
     expect(positioner.size.height, equals(100.0), reason: "positioner height");
