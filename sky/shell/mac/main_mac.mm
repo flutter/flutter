@@ -40,9 +40,9 @@ int main(int argc, const char* argv[]) {
     }
 
     if (command_line.HasSwitch(sky::shell::switches::kNonInteractive)) {
-      auto loop = base::MessageLoop::current();
-      loop->PostTask(FROM_HERE, base::Bind(&sky::shell::InitForTesting));
-      loop->Run();
+      if (!sky::shell::InitForTesting())
+        return 1;
+      base::MessageLoop::current()->Run();
       return EXIT_SUCCESS;
     }
 

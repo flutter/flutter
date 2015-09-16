@@ -23,10 +23,6 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
 
   void ConnectToService(const mojo::String& service_name,
                         mojo::ScopedMessagePipeHandle client_handle) override {
-    if (service_name == TestHarness::Name_) {
-      TestRunner::Shared().Create(nullptr,
-        mojo::MakeRequest<TestHarness>(client_handle.Pass()));
-    }
   }
 
  private:

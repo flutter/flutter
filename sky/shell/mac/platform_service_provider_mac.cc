@@ -55,12 +55,6 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
                                  client_handle.Pass()));
     }
 #endif
-#if !TARGET_OS_IPHONE
-    if (service_name == TestHarness::Name_) {
-      TestRunner::Shared().Create(
-          nullptr, mojo::MakeRequest<TestHarness>(client_handle.Pass()));
-    }
-#endif
   }
 
  private:

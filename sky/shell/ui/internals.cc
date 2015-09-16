@@ -26,9 +26,6 @@ Internals* GetInternals() {
   return static_cast<Internals*>(state->GetUserData(&kInternalsKey));
 }
 
-void NotifyTestComplete(Dart_NativeArguments args) {
-}
-
 void TakeRootBundleHandle(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(
       args, GetInternals()->TakeRootBundleHandle().value());
@@ -52,7 +49,6 @@ void TakeServiceRegistry(Dart_NativeArguments args) {
 }
 
 const DartBuiltin::Natives kNativeFunctions[] = {
-    {"notifyTestComplete", NotifyTestComplete, 1},
     {"takeRootBundleHandle", TakeRootBundleHandle, 0},
     {"takeServiceRegistry", TakeServiceRegistry, 0},
     {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
