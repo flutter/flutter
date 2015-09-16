@@ -79,7 +79,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
     if (_state != DragState.accepted) {
       _state = DragState.accepted;
       T delta = _pendingDragDelta;
-      _pendingDragDelta = null;
+      _pendingDragDelta = _initialPendingDragDelta;
       if (onStart != null)
         onStart();
       if (delta != _initialPendingDragDelta && onUpdate != null)
@@ -149,6 +149,6 @@ class PanGestureRecognizer extends _DragGestureRecognizer<sky.Offset> {
   sky.Offset get _initialPendingDragDelta => sky.Offset.zero;
   sky.Offset _getDragDelta(sky.PointerEvent event) => new sky.Offset(event.dx, event.dy);
   bool get _hasSufficientPendingDragDeltaToAccept {
-    return _pendingDragDelta.dx.abs() > kTouchSlop || _pendingDragDelta.dy.abs() > kTouchSlop;
+    return _pendingDragDelta.distance > kPanSlop;
   }
 }
