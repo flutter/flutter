@@ -358,11 +358,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (alignItems == FlexAlignItems.stretch) {
           switch (_direction) {
             case FlexDirection.horizontal:
-              innerConstraints = new BoxConstraints(minHeight: constraints.minHeight,
+              innerConstraints = new BoxConstraints(minHeight: constraints.maxHeight,
                                                     maxHeight: constraints.maxHeight);
               break;
             case FlexDirection.vertical:
-              innerConstraints = new BoxConstraints(minWidth: constraints.minWidth,
+              innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
                                                     maxWidth: constraints.maxWidth);
               break;
           }
