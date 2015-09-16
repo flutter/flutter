@@ -83,7 +83,7 @@ abstract class Scrollable extends StatefulComponent {
   GestureDragUpdateCallback _getDragUpdateHandler(ScrollDirection direction) {
     if (scrollDirection != direction || !scrollBehavior.isScrollable)
       return null;
-    return scrollBy;
+    return _handleDragUpdate;
   }
 
   GestureDragEndCallback _getDragEndHandler(ScrollDirection direction) {
@@ -179,6 +179,12 @@ abstract class Scrollable extends StatefulComponent {
   EventDisposition _handlePointerDown(_) {
     _stopAnimations();
     return EventDisposition.processed;
+  }
+
+  void _handleDragUpdate(double delta) {
+    // We negate the delta here because a positive scroll offset moves the
+    // the content up (or to the left) rather than down (or the right).
+    scrollBy(-delta);
   }
 
   void _handleDragEnd(Offset velocity) {
