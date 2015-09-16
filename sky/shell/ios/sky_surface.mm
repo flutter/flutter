@@ -43,23 +43,6 @@ static inline int64 InputEventTimestampFromNSTimeInterval(
   return base::TimeDelta::FromSecondsD(interval).InMilliseconds();
 }
 
-static sky::InputEventPtr BasicInputEventFromRecognizer(
-    sky::EventType type,
-    UIGestureRecognizer* recognizer) {
-  auto input = sky::InputEvent::New();
-  input->type = type;
-  input->time_stamp = InputEventTimestampFromNSTimeInterval(
-      CACurrentMediaTime());
-
-  input->gesture_data = sky::GestureData::New();
-
-  CGPoint windowCoordinates = [recognizer locationInView:recognizer.view];
-  const CGFloat scale = [UIScreen mainScreen].scale;
-  input->gesture_data->x = windowCoordinates.x * scale;
-  input->gesture_data->y = windowCoordinates.y * scale;
-  return input.Pass();
-}
-
 @implementation SkySurface {
   BOOL _platformViewInitialized;
   CGPoint _lastScrollTranslation;
@@ -77,7 +60,6 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   if (self) {
     _shell_view.reset(shellView);
     self.multipleTouchEnabled = YES;
-    [self installGestureRecognizers];
   }
   return self;
 }
@@ -258,119 +240,6 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
   [self dispatchTouches:touches phase:UITouchPhaseCancelled];
-}
-
-#pragma mark - Gesture Recognizers
-
--(void) installGestureRecognizers {
-  // For:
-  //   GESTURE_FLING_CANCEL
-  //   GESTURE_FLING_START
-  UISwipeGestureRecognizer *swipe = [[UISwipeGestureRecognizer alloc]
-    initWithTarget:self action:@selector(onFling:)];
-  swipe.cancelsTouchesInView = NO;
-  [self addGestureRecognizer: swipe];
-  [swipe release];
-
-  // For:
-  //   GESTURE_LONG_PRESS
-  //   GESTURE_SHOW_PRESS
-  UILongPressGestureRecognizer *longPress =
-    [[UILongPressGestureRecognizer alloc]
-      initWithTarget:self action:@selector(onLongPress:)];
-  longPress.cancelsTouchesInView = NO;
-  [self addGestureRecognizer: longPress];
-  [longPress release];
-
-  // For:
-  //   GESTURE_SCROLL_BEGIN
-  //   GESTURE_SCROLL_END
-  //   GESTURE_SCROLL_UPDATE
-  UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc]
-    initWithTarget:self action:@selector(onScroll:)];
-  pan.cancelsTouchesInView = NO;
-  [self addGestureRecognizer: pan];
-  [pan release];
-
-  // For:
-  //   GESTURE_TAP
-  //   GESTURE_TAP_DOWN
-  UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]
-    initWithTarget:self action:@selector(onTap:)];
-  tap.cancelsTouchesInView = NO;
-  [self addGestureRecognizer: tap];
-  [tap release];
-}
-
--(void) onFling:(UISwipeGestureRecognizer *) recognizer {
-  // Swipes are discrete gestures already. So there is no equivalent to a cancel
-  if (recognizer.state != UIGestureRecognizerStateEnded) {
-    return;
-  }
-
-  auto input = BasicInputEventFromRecognizer(
-    sky::EVENT_TYPE_GESTURE_FLING_START, recognizer);
-  _sky_engine->OnInputEvent(input.Pass());
-}
-
--(void) onLongPress:(UILongPressGestureRecognizer *) recognizer {
-  if (recognizer.state != UIGestureRecognizerStateEnded) {
-    return;
-  }
-
-  auto input = BasicInputEventFromRecognizer(sky::EVENT_TYPE_GESTURE_LONG_PRESS,
-                                             recognizer);
-  _sky_engine->OnInputEvent(input.Pass());
-}
-
--(void) onScroll:(UIPanGestureRecognizer *) recognizer {
-  sky::EventType type = sky::EVENT_TYPE_UNKNOWN;
-  switch (recognizer.state) {
-    case UIGestureRecognizerStateBegan:
-      _lastScrollTranslation = CGPointZero;
-      type = sky::EVENT_TYPE_GESTURE_SCROLL_BEGIN;
-      break;
-    case UIGestureRecognizerStateChanged:
-      type = sky::EVENT_TYPE_GESTURE_SCROLL_UPDATE;
-      break;
-    case UIGestureRecognizerStateEnded:
-    case UIGestureRecognizerStateCancelled:
-    case UIGestureRecognizerStateFailed:
-      type = sky::EVENT_TYPE_GESTURE_SCROLL_END;
-      break;
-    default:
-      break;
-  }
-
-  if (type == sky::EVENT_TYPE_UNKNOWN) {
-    return;
-  }
-
-  auto input = BasicInputEventFromRecognizer(type, recognizer);
-  auto scale = [UIScreen mainScreen].scale;
-  auto translation = [recognizer translationInView: self];
-  auto velocity = [recognizer velocityInView: self];
-
-  input->gesture_data->dx = (translation.x - _lastScrollTranslation.x) * scale;
-  input->gesture_data->dy =  (translation.y - _lastScrollTranslation.y) * scale;
-
-  _lastScrollTranslation = translation;
-
-  input->gesture_data->velocityX = velocity.x * scale;
-  input->gesture_data->velocityY =  velocity.y * scale;
-
-  _sky_engine->OnInputEvent(input.Pass());
-}
-
--(void) onTap:(UITapGestureRecognizer *) recognizer {
-
-  if (recognizer.state != UIGestureRecognizerStateEnded) {
-    return;
-  }
-
-  auto input = BasicInputEventFromRecognizer(sky::EVENT_TYPE_GESTURE_TAP,
-                                             recognizer);
-  _sky_engine->OnInputEvent(input.Pass());
 }
 
 #pragma mark - Misc.

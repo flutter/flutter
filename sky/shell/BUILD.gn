@@ -128,7 +128,6 @@ if (is_android) {
 
   android_library("java") {
     java_files = [
-      "android/org/domokit/sky/shell/GestureProvider.java",
       "android/org/domokit/sky/shell/PlatformServiceProvider.java",
       "android/org/domokit/sky/shell/PlatformViewAndroid.java",
       "android/org/domokit/sky/shell/ResourceCleaner.java",
