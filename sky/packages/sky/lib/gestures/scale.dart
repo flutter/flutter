@@ -9,37 +9,37 @@ import 'package:sky/gestures/arena.dart';
 import 'package:sky/gestures/recognizer.dart';
 import 'package:sky/gestures/constants.dart';
 
-enum PinchState {
+enum ScaleState {
   ready,
   possible,
-  started,
-  ended
+  accepted,
+  started
 }
 
-typedef void GesturePinchStartCallback();
-typedef void GesturePinchUpdateCallback(double scale);
-typedef void GesturePinchEndCallback();
+typedef void GestureScaleStartCallback(sky.Point focalPoint);
+typedef void GestureScaleUpdateCallback(double scale, sky.Point focalPoint);
+typedef void GestureScaleEndCallback();
 
-class PinchGestureRecognizer extends GestureRecognizer {
-  PinchGestureRecognizer({ PointerRouter router, this.onStart, this.onUpdate, this.onEnd })
+class ScaleGestureRecognizer extends GestureRecognizer {
+  ScaleGestureRecognizer({ PointerRouter router, this.onStart, this.onUpdate, this.onEnd })
     : super(router: router);
 
-  GesturePinchStartCallback onStart;
-  GesturePinchUpdateCallback onUpdate;
-  GesturePinchEndCallback onEnd;
+  GestureScaleStartCallback onStart;
+  GestureScaleUpdateCallback onUpdate;
+  GestureScaleEndCallback onEnd;
 
-  PinchState _state = PinchState.ready;
+  ScaleState _state = ScaleState.ready;
 
   double _initialSpan;
   double _currentSpan;
   Map<int, sky.Point> _pointerLocations;
 
-  double get _scaleFactor => _initialSpan > 0 ? _currentSpan / _initialSpan : 1.0;
+  double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
   void addPointer(sky.PointerEvent event) {
     startTrackingPointer(event.pointer);
-    if (_state == PinchState.ready) {
-      _state = PinchState.possible;
+    if (_state == ScaleState.ready) {
+      _state = ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
       _pointerLocations = new Map<int, sky.Point>();
@@ -47,7 +47,7 @@ class PinchGestureRecognizer extends GestureRecognizer {
   }
 
   void handleEvent(sky.PointerEvent event) {
-    assert(_state != PinchState.ready);
+    assert(_state != ScaleState.ready);
     bool configChanged = false;
     switch(event.type) {
       case 'pointerup':
@@ -63,6 +63,12 @@ class PinchGestureRecognizer extends GestureRecognizer {
         break;
     }
 
+    _update(configChanged);
+
+    stopTrackingIfPointerNoLongerDown(event);
+  }
+
+  void _update(bool configChanged) {
     int count = _pointerLocations.keys.length;
 
     // Compute the focal point
@@ -79,58 +85,53 @@ class PinchGestureRecognizer extends GestureRecognizer {
 
     if (configChanged) {
       _initialSpan = _currentSpan;
-      if (_state == PinchState.started) {
-        _state = PinchState.ended;
+      if (_state == ScaleState.started) {
         if (onEnd != null)
           onEnd();
+        _state = ScaleState.accepted;
       }
     }
 
-    if (_state == PinchState.ready)
-      _state = PinchState.possible;
+    if (_state == ScaleState.ready)
+      _state = ScaleState.possible;
 
-    if (_state == PinchState.possible &&
-        (_currentSpan - _initialSpan).abs() > kPinchSlop) {
+    if (_state == ScaleState.possible &&
+        (_currentSpan - _initialSpan).abs() > kScaleSlop) {
       resolve(GestureDisposition.accepted);
     }
 
-    if (_state == PinchState.ended && _currentSpan != _initialSpan) {
-      _state = PinchState.started;
+    if (_state == ScaleState.accepted && !configChanged) {
+      _state = ScaleState.started;
       if (onStart != null)
-        onStart();
+        onStart(focalPoint);
     }
 
-    if (_state == PinchState.started && onUpdate != null)
-      onUpdate(_scaleFactor);
-
-    stopTrackingIfPointerNoLongerDown(event);
+    if (_state == ScaleState.started && onUpdate != null)
+      onUpdate(_scaleFactor, focalPoint);
   }
 
   void acceptGesture(int pointer) {
-    if (_state != PinchState.started) {
-      _state = PinchState.started;
-      if (onStart != null)
-        onStart();
-      if (onUpdate != null)
-        onUpdate(_scaleFactor);
+    if (_state != ScaleState.accepted) {
+      _state = ScaleState.accepted;
+      _update(false);
     }
   }
 
   void didStopTrackingLastPointer(int pointer) {
     switch(_state) {
-      case PinchState.possible:
+      case ScaleState.possible:
         resolve(GestureDisposition.rejected);
         break;
-      case PinchState.ready:
-        assert(false);
+      case ScaleState.ready:
+        assert(false);  // We should have not seen a pointer yet
         break;
-      case PinchState.started:
-        assert(false);
+      case ScaleState.accepted:
         break;
-      case PinchState.ended:
+      case ScaleState.started:
+        assert(false);  // We should be in the accepted state when user is done
         break;
     }
-    _state = PinchState.ready;
+    _state = ScaleState.ready;
   }
 
   void dispose() {
