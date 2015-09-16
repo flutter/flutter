@@ -100,8 +100,7 @@ abstract class Scrollable extends StatefulComponent {
       onHorizontalDragEnd: _getDragEndHandler(ScrollDirection.horizontal),
       child: new Listener(
         child: buildContent(),
-        onPointerDown: _handlePointerDown,
-        onWheel: _handleWheel
+        onPointerDown: _handlePointerDown
       )
     );
   }
@@ -193,11 +192,6 @@ abstract class Scrollable extends StatefulComponent {
     } else if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating)) {
       settleScrollOffset();
     }
-  }
-
-  EventDisposition _handleWheel(sky.WheelEvent event) {
-    scrollBy(-event.offsetY);
-    return EventDisposition.processed;
   }
 
   final List<ScrollListener> _listeners = new List<ScrollListener>();
