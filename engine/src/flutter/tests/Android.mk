@@ -27,18 +27,28 @@ LOCAL_STATIC_LIBRARIES := libminikin
 # pulled in by the build system (and thus sadly must be repeated).
 
 LOCAL_SHARED_LIBRARIES := \
-    libharfbuzz_ng \
+    libskia \
     libft2 \
-    liblog \
-    libz \
+    libharfbuzz_ng \
     libicuuc \
-    libutils
+    liblog \
+    libutils \
+    libz
+
+LOCAL_STATIC_LIBRARIES += \
+    libxml2
 
 LOCAL_SRC_FILES += \
+    FontCollectionItemizeTest.cpp \
+    FontTestUtils.cpp \
+    MinikinFontForTest.cpp \
     GraphemeBreakTests.cpp \
     LayoutUtilsTest.cpp \
     UnicodeUtils.cpp
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/../libs/minikin/
+LOCAL_C_INCLUDES := \
+    $(LOCAL_PATH)/../libs/minikin/ \
+    external/libxml2/include \
+    external/skia/src/core \
 
 include $(BUILD_NATIVE_TEST)
