@@ -243,5 +243,4 @@ class AndroidDevice extends _Device {
 
   @override
   bool isConnected() => _hasValidAndroid;
-  }
 }
