@@ -663,102 +663,31 @@ typedef EventDisposition PointerEventListener(sky.PointerEvent e);
 typedef EventDisposition EventListener(sky.Event e);
 
 class Listener extends TagNode  {
-
   Listener({
     Key key,
     Widget child,
-    EventListener onWheel,
-    GestureEventListener onGestureFlingCancel,
-    GestureEventListener onGestureFlingStart,
-    GestureEventListener onGestureScrollStart,
-    GestureEventListener onGestureScrollUpdate,
-    GestureEventListener onGestureLongPress,
-    GestureEventListener onGestureTap,
-    GestureEventListener onGestureTapDown,
-    GestureEventListener onGestureShowPress,
-    PointerEventListener onPointerCancel,
-    PointerEventListener onPointerDown,
-    PointerEventListener onPointerMove,
-    PointerEventListener onPointerUp,
-    Map<String, EventListener> custom
-  }) : listeners = _createListeners(
-         onWheel: onWheel,
-         onGestureFlingCancel: onGestureFlingCancel,
-         onGestureFlingStart: onGestureFlingStart,
-         onGestureScrollUpdate: onGestureScrollUpdate,
-         onGestureScrollStart: onGestureScrollStart,
-         onGestureTap: onGestureTap,
-         onGestureTapDown: onGestureTapDown,
-         onGestureLongPress: onGestureLongPress,
-         onGestureShowPress: onGestureShowPress,
-         onPointerCancel: onPointerCancel,
-         onPointerDown: onPointerDown,
-         onPointerMove: onPointerMove,
-         onPointerUp: onPointerUp,
-         custom: custom
-       ),
-       super(key: key, child: child);
+    PointerEventListener this.onPointerDown,
+    PointerEventListener this.onPointerMove,
+    PointerEventListener this.onPointerUp,
+    PointerEventListener this.onPointerCancel
+  }) : super(key: key, child: child);
 
-  final Map<String, EventListener> listeners;
+  final PointerEventListener onPointerDown;
+  final PointerEventListener onPointerMove;
+  final PointerEventListener onPointerUp;
+  final PointerEventListener onPointerCancel;
 
-  static Map<String, EventListener> _createListeners({
-    EventListener onWheel,
-    GestureEventListener onGestureFlingCancel,
-    GestureEventListener onGestureFlingStart,
-    GestureEventListener onGestureScrollStart,
-    GestureEventListener onGestureScrollUpdate,
-    GestureEventListener onGestureTap,
-    GestureEventListener onGestureTapDown,
-    GestureEventListener onGestureLongPress,
-    GestureEventListener onGestureShowPress,
-    PointerEventListener onPointerCancel,
-    PointerEventListener onPointerDown,
-    PointerEventListener onPointerMove,
-    PointerEventListener onPointerUp,
-    Map<String, EventListener> custom
-  }) {
-    var listeners = custom != null ?
-        new HashMap<String, EventListener>.from(custom) :
-        new HashMap<String, EventListener>();
-
-    if (onWheel != null)
-      listeners['wheel'] = onWheel;
-    if (onGestureFlingCancel != null)
-      listeners['gestureflingcancel'] = onGestureFlingCancel;
-    if (onGestureFlingStart != null)
-      listeners['gestureflingstart'] = onGestureFlingStart;
-    if (onGestureScrollStart != null)
-      listeners['gesturescrollstart'] = onGestureScrollStart;
-    if (onGestureScrollUpdate != null)
-      listeners['gesturescrollupdate'] = onGestureScrollUpdate;
-    if (onGestureTap != null)
-      listeners['gesturetap'] = onGestureTap;
-    if (onGestureTapDown != null)
-      listeners['gesturetapdown'] = onGestureTapDown;
-    if (onGestureLongPress != null)
-      listeners['gesturelongpress'] = onGestureLongPress;
-    if (onGestureShowPress != null)
-      listeners['gestureshowpress'] = onGestureShowPress;
-    if (onPointerCancel != null)
-      listeners['pointercancel'] = onPointerCancel;
-    if (onPointerDown != null)
-      listeners['pointerdown'] = onPointerDown;
-    if (onPointerMove != null)
-      listeners['pointermove'] = onPointerMove;
-    if (onPointerUp != null)
-      listeners['pointerup'] = onPointerUp;
-
-    return listeners;
-  }
-
-  EventDisposition _handleEvent(sky.Event e) {
-    EventListener listener = listeners[e.type];
-    if (listener != null) {
-      return listener(e);
-    }
+  EventDisposition _handleEvent(sky.Event event) {
+    if (onPointerDown != null && event.type == 'pointerdown')
+      return onPointerDown(event);
+    if (onPointerMove != null && event.type == 'pointermove')
+      return onPointerMove(event);
+    if (onPointerUp != null && event.type == 'pointerup')
+      return onPointerUp(event);
+    if (onPointerCancel != null && event.type == 'pointercancel')
+      return onPointerCancel(event);
     return EventDisposition.ignored;
   }
-
 }
 
 abstract class Component extends Widget {
