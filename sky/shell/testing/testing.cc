@@ -12,32 +12,26 @@
 namespace sky {
 namespace shell {
 
-void InitForTesting() {
+bool InitForTesting() {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   blink::WebRuntimeFeatures::enableObservatory(
       !command_line.HasSwitch(switches::kNonInteractive));
 
-  // Explicitly boot the shared test runner.
-  TestRunner& runner = TestRunner::Shared();
+  TestRunner::TestDescriptor test;
+  test.package_root = command_line.GetSwitchValueASCII(switches::kPackageRoot);
 
-  std::string package_root =
-      command_line.GetSwitchValueASCII(switches::kPackageRoot);
-  runner.set_package_root(package_root);
-
-  scoped_ptr<TestRunner::SingleTest> single_test;
   if (command_line.HasSwitch(switches::kSnapshot)) {
-    single_test.reset(new TestRunner::SingleTest);
-    single_test->path = command_line.GetSwitchValueASCII(switches::kSnapshot);
-    single_test->is_snapshot = true;
+    test.path = command_line.GetSwitchValueASCII(switches::kSnapshot);
+    test.is_snapshot = true;
   } else {
     auto args = command_line.GetArgs();
-    if (!args.empty()) {
-      single_test.reset(new TestRunner::SingleTest);
-      single_test->path = args[0];
-    }
+    if (args.empty())
+      return false;
+    test.path = args[0];
   }
 
-  runner.Start(single_test.Pass());
+  TestRunner::Shared().Run(test);
+  return true;
 }
 
 }  // namespace shell

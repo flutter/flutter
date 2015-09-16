@@ -29,8 +29,11 @@ int main(int argc, const char* argv[]) {
   sky::shell::Shell::Init(make_scoped_ptr(
       new sky::shell::ServiceProviderContext(message_loop.task_runner())));
 
-  message_loop.PostTask(FROM_HERE, base::Bind(&sky::shell::InitForTesting));
-  message_loop.Run();
+  if (!sky::shell::InitForTesting()) {
+    sky::shell::switches::PrintUsage("sky_shell");
+    return 1;
+  }
 
+  message_loop.Run();
   return 0;
 }

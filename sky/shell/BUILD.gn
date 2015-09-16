@@ -256,7 +256,6 @@ if (is_android) {
     deps = common_deps + [
              ":common",
              "//mojo/common",
-             "//sky/services/testing:interfaces",
            ]
   }
 } else if (is_mac) {
@@ -282,7 +281,6 @@ if (is_android) {
              ":common",
              "//mojo/common",
              "//sky/services/ns_net",
-             "//sky/services/testing:interfaces",
            ]
   }
 

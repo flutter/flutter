@@ -6,8 +6,6 @@ library sky.internals;
 
 // TODO(abarth): Move these functions into dart:sky
 
-void notifyTestComplete(String test_result) native "notifyTestComplete";
-
 int takeRootBundleHandle() native "takeRootBundleHandle";
 int takeServiceRegistry() native "takeServiceRegistry";
 int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";

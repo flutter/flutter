@@ -8,7 +8,7 @@
 namespace sky {
 namespace shell {
 
-void InitForTesting();
+bool InitForTesting();
 
 }  // namespace shell
 }  // namespace sky
