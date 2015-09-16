@@ -43,7 +43,7 @@ void main() {
     Point secondLocation = new Point(10.0, 9.0);
     tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
     expect(didStartDrag, isFalse);
-    expect(updatedDragDelta, 1.0);
+    expect(updatedDragDelta, -1.0);
     updatedDragDelta = null;
     expect(didEndDrag, isFalse);
 
@@ -86,6 +86,6 @@ void main() {
     tester.dispatchEvent(pointer.up(), downLocation);
 
     expect(gestureCount, 2);
-    expect(dragDistance, -20.0);
+    expect(dragDistance, 20.0);
   });
 }
