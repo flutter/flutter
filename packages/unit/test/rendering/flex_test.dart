@@ -8,9 +8,67 @@ void main() {
     RenderDecoratedBox box = new RenderDecoratedBox(decoration: new BoxDecoration());
     RenderFlex flex = new RenderFlex(children: [ box ]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 200.0, maxWidth: 100.0, minHeight: 200.0, maxHeight: 100.0));
+      minWidth: 200.0, maxWidth: 100.0, minHeight: 200.0, maxHeight: 100.0)
+    );
 
     expect(flex.size.width, equals(200.0), reason: "flex width");
     expect(flex.size.height, equals(200.0), reason: "flex height");
+  });
+
+  test('Defaults', () {
+    RenderFlex flex = new RenderFlex();
+    expect(flex.alignItems, equals(FlexAlignItems.center));
+    expect(flex.direction, equals(FlexDirection.horizontal));
+  });
+
+  test('Parent data', () {
+    RenderDecoratedBox box1 = new RenderDecoratedBox(decoration: new BoxDecoration());
+    RenderDecoratedBox box2 = new RenderDecoratedBox(decoration: new BoxDecoration());
+    RenderFlex flex = new RenderFlex(children: [ box1, box2 ]);
+    layout(flex, constraints: const BoxConstraints(
+      minWidth: 0.0, maxWidth: 100.0, minHeight: 0.0, maxHeight: 100.0)
+    );
+    expect(box1.size.width, equals(0.0));
+    expect(box1.size.height, equals(0.0));
+    expect(box2.size.width, equals(0.0));
+    expect(box2.size.height, equals(0.0));
+
+    box2.parentData.flex = 1;
+    flex.markNeedsLayout();
+    pumpFrame();
+    expect(box1.size.width, equals(0.0));
+    expect(box1.size.height, equals(0.0));
+    expect(box2.size.width, equals(100.0));
+    expect(box2.size.height, equals(0.0));
+  });
+
+  test('Stretch', () {
+    RenderDecoratedBox box1 = new RenderDecoratedBox(decoration: new BoxDecoration());
+    RenderDecoratedBox box2 = new RenderDecoratedBox(decoration: new BoxDecoration());
+    RenderFlex flex = new RenderFlex();
+    flex.setupParentData(box2);
+    box2.parentData.flex = 2;
+    flex.addAll([box1, box2]);
+    layout(flex, constraints: const BoxConstraints(
+      minWidth: 0.0, maxWidth: 100.0, minHeight: 0.0, maxHeight: 100.0)
+    );
+    expect(box1.size.width, equals(0.0));
+    expect(box1.size.height, equals(0.0));
+    expect(box2.size.width, equals(100.0));
+    expect(box2.size.height, equals(0.0));
+
+    flex.alignItems = FlexAlignItems.stretch;
+    pumpFrame();
+    expect(box1.size.width, equals(0.0));
+    expect(box1.size.height, equals(100.0));
+    expect(box2.size.width, equals(100.0));
+    expect(box2.size.height, equals(100.0));
+
+    flex.direction = FlexDirection.vertical;
+    pumpFrame();
+    expect(box1.size.width, equals(100.0));
+    expect(box1.size.height, equals(0.0));
+    expect(box2.size.width, equals(100.0));
+    expect(box2.size.height, equals(100.0));
   });
 }
