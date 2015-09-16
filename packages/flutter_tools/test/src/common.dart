@@ -4,9 +4,14 @@
 
 import 'package:args/args.dart';
 import 'package:mockito/mockito.dart';
+import 'package:sky_tools/src/device.dart';
 
-@proxy
 class MockArgResults extends Mock implements ArgResults {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

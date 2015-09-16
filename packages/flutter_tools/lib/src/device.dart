@@ -40,13 +40,13 @@ abstract class _Device {
   _Device._(this.id);
 
   /// Install an app package on the current device
-  bool installApp(String path);
-
-  /// Check if the current device needs an installation
-  bool needsInstall();
+  bool installApp(String appPath, String appPackageID, String appFileName);
 
   /// Check if the device is currently connected
   bool isConnected();
+
+  /// Check if the current version of the given app is already installed
+  bool isAppInstalled(String appPath, String appPackageID, String appFileName);
 }
 
 class AndroidDevice extends _Device {
@@ -57,54 +57,44 @@ class AndroidDevice extends _Device {
 
   String _adbPath;
   String get adbPath => _adbPath;
+  bool _hasAdb = false;
+  bool _hasValidAndroid = false;
 
   factory AndroidDevice([String id = null]) {
     return new _Device(className, id);
   }
 
   AndroidDevice._(id) : super._(id) {
-    _updatePaths();
+    _adbPath = _getAdbPath();
+    _hasAdb = _checkForAdb();
 
     // Checking for lollipop only needs to be done if we are starting an
     // app, but it has an important side effect, which is to discard any
     // progress messages if the adb server is restarted.
-    if (!_checkForAdb() || !_checkForLollipopOrLater()) {
+    _hasValidAndroid = _checkForLollipopOrLater();
+
+    if (!_hasAdb || !_hasValidAndroid) {
       _logging.severe('Unable to run on Android.');
     }
   }
 
-  @override
-  bool installApp(String path) {
-    return true;
-  }
-
-  @override
-  bool needsInstall() {
-    return true;
-  }
-
-  @override
-  bool isConnected() {
-    return true;
-  }
-
-  void _updatePaths() {
+  String _getAdbPath() {
     if (Platform.environment.containsKey('ANDROID_HOME')) {
       String androidHomeDir = Platform.environment['ANDROID_HOME'];
       String adbPath1 =
           path.join(androidHomeDir, 'sdk', 'platform-tools', 'adb');
       String adbPath2 = path.join(androidHomeDir, 'platform-tools', 'adb');
       if (FileSystemEntity.isFileSync(adbPath1)) {
-        _adbPath = adbPath1;
+        return adbPath1;
       } else if (FileSystemEntity.isFileSync(adbPath2)) {
-        _adbPath = adbPath2;
+        return adbPath2;
       } else {
         _logging.info('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
             'using default path "$_ADB_PATH"');
-        _adbPath = _ADB_PATH;
+        return _ADB_PATH;
       }
     } else {
-      _adbPath = _ADB_PATH;
+      return _ADB_PATH;
     }
   }
 
@@ -183,5 +173,75 @@ class AndroidDevice extends _Device {
       _logging.severe('Unexpected failure from adb: ', e, stack);
     }
     return false;
+  }
+
+  String _getDeviceSha1Path(String appPackageID, String appFileName) {
+    return '/sdcard/$appPackageID/$appFileName.sha1';
+  }
+
+  String _getDeviceApkSha1(String appPackageID, String appFileName) {
+    return runCheckedSync([
+      adbPath,
+      'shell',
+      'cat',
+      _getDeviceSha1Path(appPackageID, appFileName)
+    ]);
+  }
+
+  String _getSourceSha1(String apkPath) {
+    String sha1 =
+        runCheckedSync(['shasum', '-a', '1', '-p', apkPath]).split(' ')[0];
+    return sha1;
+  }
+
+  @override
+  bool isAppInstalled(String appPath, String appPackageID, String appFileName) {
+    if (!isConnected()) {
+      return false;
+    }
+    if (runCheckedSync([adbPath, 'shell', 'pm', 'path', appPackageID]) == '') {
+      _logging.info(
+          'TODO(iansf): move this log to the caller. $appFileName is not on the device. Installing now...');
+      return false;
+    }
+    if (_getDeviceApkSha1(appPackageID, appFileName) !=
+        _getSourceSha1(appPath)) {
+      _logging.info(
+          'TODO(iansf): move this log to the caller. $appFileName is out of date. Installing now...');
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  bool installApp(String appPath, String appPackageID, String appFileName) {
+    if (!isConnected()) {
+      _logging.info('Android device not connected. Not installing.');
+      return false;
+    }
+    if (!FileSystemEntity.isFileSync(appPath)) {
+      _logging.severe('"$appPath" does not exist.');
+      return false;
+    }
+
+    runCheckedSync([adbPath, 'install', '-r', appPath]);
+
+    Directory tempDir = Directory.systemTemp;
+    String sha1Path = path.join(
+        tempDir.path, appPath.replaceAll(path.separator, '_'), '.sha1');
+    File sha1TempFile = new File(sha1Path);
+    sha1TempFile.writeAsStringSync(_getSourceSha1(appPath), flush: true);
+    runCheckedSync([
+      adbPath,
+      'push',
+      sha1Path,
+      _getDeviceSha1Path(appPackageID, appFileName)
+    ]);
+    sha1TempFile.deleteSync();
+    return true;
+  }
+
+  @override
+  bool isConnected() => _hasValidAndroid;
   }
 }

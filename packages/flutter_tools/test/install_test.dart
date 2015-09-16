@@ -14,10 +14,14 @@ main() => defineTests();
 
 defineTests() {
   group('install', () {
-    test('install returns 0', () {
+    test('returns 0 when Android is connected and ready for an install', () {
+      MockAndroidDevice android = new MockAndroidDevice();
+      when(android.isConnected()).thenReturn(true);
+      when(android.installApp(any, any, any)).thenReturn(true);
+      InstallCommandHandler handler = new InstallCommandHandler(android);
+
       MockArgResults results = new MockArgResults();
       when(results['help']).thenReturn(false);
-      InstallCommandHandler handler = new InstallCommandHandler();
       handler
           .processArgResults(results)
           .then((int code) => expect(code, equals(0)));

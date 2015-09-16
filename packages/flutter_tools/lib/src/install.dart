@@ -12,7 +12,8 @@ import 'common.dart';
 import 'device.dart';
 
 class InstallCommandHandler extends CommandHandler {
-  InstallCommandHandler()
+  AndroidDevice android = null;
+  InstallCommandHandler([this.android])
       : super('install', 'Install your Sky app on attached devices.');
 
   @override
@@ -32,9 +33,11 @@ class InstallCommandHandler extends CommandHandler {
 
     bool installedSomewhere = false;
 
-    AndroidDevice android = new AndroidDevice();
+    if (android == null) {
+      android = new AndroidDevice();
+    }
     if (android.isConnected()) {
-      installedSomewhere = installedSomewhere || android.installApp('');
+      installedSomewhere = installedSomewhere || android.installApp('', '', '');
     }
 
     if (installedSomewhere) {
