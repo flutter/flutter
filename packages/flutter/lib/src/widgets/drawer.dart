@@ -137,7 +137,6 @@ class Drawer extends StatefulComponent {
   void _handleDragEnd(Offset velocity) {
     if (velocity.dx.abs() >= _kMinFlingVelocity) {
       _performance.fling(velocity: velocity.dx * _kFlingVelocityScale);
-      return;
     } else {
       _settle();
     }
