@@ -136,7 +136,16 @@ abstract class GlobalKey extends Key {
   static void _notifyListeners() {
     assert(!_inBuildDirtyComponents);
     assert(!Widget._notifyingMountStatus);
-    assert(_debugDuplicates.isEmpty);
+    assert(() {
+      String message = '';
+      for (GlobalKey key in _debugDuplicates.keys) {
+        message += "Duplicate GlobalKey found amongst mounted widgets: $key (${_debugDuplicates[key]} instances)\n";
+        message += "Most recently registered instance is:\n${_registry[key]}\n";
+      }
+      if (!_debugDuplicates.isEmpty)
+        throw message;
+      return true;
+    });
     if (_syncedKeys.isEmpty && _removedKeys.isEmpty)
       return;
     try {
@@ -535,9 +544,13 @@ abstract class Widget {
     details.add('hashCode=$hashCode');
     details.add(mounted ? 'mounted' : 'not mounted');
     if (_generation != _currentGeneration) {
-      int delta = _generation - _currentGeneration;
-      String sign = delta < 0 ? '' : '+';
-      details.add('gen$sign$delta');
+      if (_generation == 0) {
+        details.add('never synced');
+      } else {
+        int delta = _generation - _currentGeneration;
+        String sign = delta < 0 ? '' : '+';
+        details.add('gen$sign$delta');
+      }
     }
   }
 
@@ -885,6 +898,8 @@ abstract class StatefulComponent extends Component {
   void _sync(StatefulComponent old, dynamic slot) {
     if (old == null) {
       if (!_isStateInitialized) {
+        assert(mounted);
+        assert(!_wasMounted);
         initState();
         _isStateInitialized = true;
       }
@@ -1008,8 +1023,13 @@ void _buildDirtyComponents() {
 
 // TODO(ianh): Move this to Widget
 void _endSyncPhase() {
-  Widget._currentGeneration += 1;
-  Widget._notifyMountStatusChanged();
+  try {
+    Widget._currentGeneration += 1;
+    Widget._notifyMountStatusChanged();
+  } catch (e, stack) {
+    _debugReportException('sending post-sync notifications', e, stack);
+    return null;
+  }
 }
 
 // TODO(ianh): Move this to Component
@@ -1418,7 +1438,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
         continue; // when these nodes are reordered, we just reassign the data
 
       if (!idSet.add(child.key)) {
-        throw '''If multiple keyed nodes exist as children of another node, they must have unique keys. $this has duplicate child key "${child.key}".''';
+        throw '''If multiple keyed nodes exist as children of another node, they must have unique keys. ${toStringName()} has multiple children with key "${child.key}".''';
       }
     }
     return false;
@@ -1609,7 +1629,7 @@ class ErrorWidget extends LeafRenderObjectWrapper {
 
 void _debugReportException(String context, dynamic exception, StackTrace stack) {
   print('------------------------------------------------------------------------');
-  print('Exception caught while $context');
+  'Exception caught while $context'.split('\n').forEach(print);
   print('$exception');
   print('Stack trace:');
   '$stack'.split('\n').forEach(print);
