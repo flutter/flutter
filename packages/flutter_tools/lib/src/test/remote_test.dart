@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:test/src/backend/live_test.dart';
 import 'package:test/src/backend/live_test_controller.dart';
 import 'package:test/src/backend/metadata.dart';
@@ -16,23 +18,24 @@ class RemoteTest implements Test {
   final String name;
   final Metadata metadata;
 
-  final JSONSocket _socket;
+  final Future<JSONSocket> _socket;
   final int _index;
 
   RemoteTest(this.name, this.metadata, this._socket, this._index);
 
   LiveTest load(Suite suite) {
-    var controller;
-    var subscription;
+    LiveTestController controller;
+    StreamSubscription subscription;
 
-    controller = new LiveTestController(suite, this, () {
+    controller = new LiveTestController(suite, this, () async {
       controller.setState(const State(Status.running, Result.success));
 
-      _socket.send({'command': 'run', 'index': _index});
+      JSONSocket socket = await _socket;
+      socket.send({'command': 'run', 'index': _index});
 
-      subscription = _socket.stream.listen((message) {
+      subscription = socket.stream.listen((message) {
         if (message['type'] == 'error') {
-          var asyncError = RemoteException.deserialize(message['error']);
+          AsyncError asyncError = RemoteException.deserialize(message['error']);
           controller.addError(asyncError.error, asyncError.stackTrace);
         } else if (message['type'] == 'state-change') {
           controller.setState(
@@ -48,8 +51,9 @@ class RemoteTest implements Test {
           controller.completer.complete();
         }
       });
-    }, () {
-      _socket.send({'command': 'close'});
+    }, () async {
+      JSONSocket socket = await _socket;
+      socket.send({'command': 'close'});
       if (subscription != null) {
         subscription.cancel();
         subscription = null;
