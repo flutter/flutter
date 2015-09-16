@@ -6,6 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/gestures/drag.dart';
 import 'package:sky/gestures/long_press.dart';
+import 'package:sky/gestures/pinch.dart';
 import 'package:sky/gestures/recognizer.dart';
 import 'package:sky/gestures/show_press.dart';
 import 'package:sky/gestures/tap.dart';
@@ -27,7 +28,10 @@ class GestureDetector extends StatefulComponent {
     this.onHorizontalDragEnd,
     this.onPanStart,
     this.onPanUpdate,
-    this.onPanEnd
+    this.onPanEnd,
+    this.onPinchStart,
+    this.onPinchUpdate,
+    this.onPinchEnd
   }) : super(key: key);
 
   Widget child;
@@ -47,6 +51,10 @@ class GestureDetector extends StatefulComponent {
   GesturePanUpdateCallback onPanUpdate;
   GesturePanEndCallback onPanEnd;
 
+  GesturePinchStartCallback onPinchStart;
+  GesturePinchUpdateCallback onPinchUpdate;
+  GesturePinchEndCallback onPinchEnd;
+
   void syncConstructorArguments(GestureDetector source) {
     child = source.child;
     onTap = source.onTap;
@@ -61,6 +69,9 @@ class GestureDetector extends StatefulComponent {
     onPanStart = source.onPanStart;
     onPanUpdate = source.onPanUpdate;
     onPanEnd = source.onPanEnd;
+    onPinchStart = source.onPinchStart;
+    onPinchUpdate = source.onPinchUpdate;
+    onPinchEnd = source.onPinchEnd;
     _syncGestureListeners();
   }
 
@@ -108,6 +119,13 @@ class GestureDetector extends StatefulComponent {
     return _pan;
   }
 
+  PinchGestureRecognizer _pinch;
+  PinchGestureRecognizer _ensurePinch() {
+    if (_pinch == null)
+      _pinch = new PinchGestureRecognizer(router: _router);
+    return _pinch;
+  }
+
   void didMount() {
     super.didMount();
     _syncGestureListeners();
@@ -121,6 +139,7 @@ class GestureDetector extends StatefulComponent {
     _verticalDrag = _ensureDisposed(_verticalDrag);
     _horizontalDrag = _ensureDisposed(_horizontalDrag);
     _pan = _ensureDisposed(_pan);
+    _pinch = _ensureDisposed(_pinch);
   }
 
   void _syncGestureListeners() {
@@ -130,6 +149,7 @@ class GestureDetector extends StatefulComponent {
     _syncVerticalDrag();
     _syncHorizontalDrag();
     _syncPan();
+    _syncPinch();
   }
 
   void _syncTap() {
@@ -186,6 +206,17 @@ class GestureDetector extends StatefulComponent {
     }
   }
 
+  void _syncPinch() {
+    if (onPinchStart == null && onPinchUpdate == null && onPinchEnd == null) {
+      _pinch = _ensureDisposed(_pan);
+    } else {
+      _ensurePinch()
+        ..onStart = onPinchStart
+        ..onUpdate = onPinchUpdate
+        ..onEnd = onPinchEnd;
+    }
+  }
+
   GestureRecognizer _ensureDisposed(GestureRecognizer recognizer) {
     recognizer?.dispose();
     return null;
@@ -204,6 +235,8 @@ class GestureDetector extends StatefulComponent {
       _horizontalDrag.addPointer(event);
     if (_pan != null)
       _pan.addPointer(event);
+    if (_pinch != null)
+      _pinch.addPointer(event);
     return EventDisposition.processed;
   }
 
