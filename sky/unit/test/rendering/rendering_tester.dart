@@ -3,7 +3,7 @@ import 'package:sky/rendering.dart';
 const Size _kTestViewSize = const Size(800.0, 600.0);
 
 class TestRenderView extends RenderView {
-  TestRenderView({ RenderBox child }) : super(child: child) {
+  TestRenderView() {
     attach();
     rootConstraints = new ViewConstraints(size: _kTestViewSize);
     scheduleInitialLayout();
@@ -17,26 +17,18 @@ enum EnginePhase {
   composite
 }
 
-class RenderingTester {
-  RenderingTester({ RenderBox root }) {
-    renderView = new TestRenderView(child: root);
-  }
+RenderView _renderView;
+RenderView get renderView => _renderView;
 
-  RenderView renderView;
+void layout(RenderBox box, { BoxConstraints constraints, EnginePhase phase: EnginePhase.layout }) {
+  assert(box != null); // if you want to just repump the last box, call pumpFrame().
 
-  void pumpFrame({ EnginePhase phase: EnginePhase.composite }) {
-    RenderObject.flushLayout();
-    if (phase == EnginePhase.layout)
-      return;
-    renderView.updateCompositingBits();
-    RenderObject.flushPaint();
-    if (phase == EnginePhase.paint)
-      return;
-    renderView.compositeFrame();
-  }
-}
+  if (renderView == null)
+    _renderView = new TestRenderView();
 
-RenderingTester layout(RenderBox box, { BoxConstraints constraints }) {
+  if (renderView.child != null)
+    renderView.child = null;
+
   if (constraints != null) {
     box = new RenderPositionedBox(
       child: new RenderConstrainedBox(
@@ -46,7 +38,18 @@ RenderingTester layout(RenderBox box, { BoxConstraints constraints }) {
     );
   }
 
-  RenderingTester tester = new RenderingTester(root: box);
-  tester.pumpFrame(phase: EnginePhase.layout);
-  return tester;
+  renderView.child = box;
+
+  pumpFrame(phase: phase);
+}
+
+void pumpFrame({ EnginePhase phase: EnginePhase.layout }) {
+  RenderObject.flushLayout();
+  if (phase == EnginePhase.layout)
+    return;
+  renderView.updateCompositingBits();
+  RenderObject.flushPaint();
+  if (phase == EnginePhase.paint)
+    return;
+  renderView.compositeFrame();
 }
