@@ -115,23 +115,25 @@ class AnimationPerformance {
     variable.setProgress(_curvedProgress, _curveDirection);
   }
 
-  /// Start running this animation in the given direction
-  Future play([Direction direction = Direction.forward]) {
-    _direction = direction;
-    return resume();
-  }
-
   /// Start running this animation forwards (towards the end)
   Future forward() => play(Direction.forward);
 
   /// Start running this animation in reverse (towards the beginning)
   Future reverse() => play(Direction.reverse);
 
+  /// Start running this animation in the given direction
+  Future play([Direction direction = Direction.forward]) {
+    _direction = direction;
+    return resume();
+  }
+
   /// Start running this animation in the most recently direction
   Future resume() {
     if (attachedForce != null) {
-      return fling(velocity: _direction == Direction.forward ? 1.0 : -1.0,
-                   force: attachedForce);
+      return fling(
+        velocity: _direction == Direction.forward ? 1.0 : -1.0,
+        force: attachedForce
+      );
     }
     return _animateTo(_direction == Direction.forward ? 1.0 : 0.0);
   }
