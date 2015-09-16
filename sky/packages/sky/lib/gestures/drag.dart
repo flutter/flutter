@@ -15,14 +15,14 @@ enum DragState {
 }
 
 typedef void GestureDragStartCallback();
-typedef void GestureDragUpdateCallback(double scrollDelta);
+typedef void GestureDragUpdateCallback(double delta);
 typedef void GestureDragEndCallback(sky.Offset velocity);
 
 typedef void GesturePanStartCallback();
-typedef void GesturePanUpdateCallback(sky.Offset scrollDelta);
+typedef void GesturePanUpdateCallback(sky.Offset delta);
 typedef void GesturePanEndCallback(sky.Offset velocity);
 
-typedef void _GesturePolymorphicUpdateCallback<T>(T scrollDelta);
+typedef void _GesturePolymorphicUpdateCallback<T>(T delta);
 
 int _eventTime(sky.PointerEvent event) => (event.timeStamp * 1000.0).toInt(); // microseconds
 
@@ -121,8 +121,7 @@ class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   }) : super(router: router, onStart: onStart, onUpdate: onUpdate, onEnd: onEnd);
 
   double get _initialPendingDragDelta => 0.0;
-  // Notice that we negate dy because scroll offsets go in the opposite direction.
-  double _getDragDelta(sky.PointerEvent event) => -event.dy;
+  double _getDragDelta(sky.PointerEvent event) => event.dy;
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
 }
 
@@ -135,7 +134,7 @@ class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   }) : super(router: router, onStart: onStart, onUpdate: onUpdate, onEnd: onEnd);
 
   double get _initialPendingDragDelta => 0.0;
-  double _getDragDelta(sky.PointerEvent event) => -event.dx;
+  double _getDragDelta(sky.PointerEvent event) => event.dx;
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
 }
 
@@ -148,8 +147,7 @@ class PanGestureRecognizer extends _DragGestureRecognizer<sky.Offset> {
   }) : super(router: router, onStart: onStart, onUpdate: onUpdate, onEnd: onEnd);
 
   sky.Offset get _initialPendingDragDelta => sky.Offset.zero;
-  // Notice that we negate dy because scroll offsets go in the opposite direction.
-  sky.Offset _getDragDelta(sky.PointerEvent event) => new sky.Offset(event.dx, -event.dy);
+  sky.Offset _getDragDelta(sky.PointerEvent event) => new sky.Offset(event.dx, event.dy);
   bool get _hasSufficientPendingDragDeltaToAccept {
     return _pendingDragDelta.dx.abs() > kTouchSlop || _pendingDragDelta.dy.abs() > kTouchSlop;
   }
