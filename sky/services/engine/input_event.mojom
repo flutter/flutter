@@ -11,15 +11,6 @@ enum EventType {
   POINTER_DOWN,
   POINTER_MOVE,
   POINTER_UP,
-  GESTURE_FLING_CANCEL,
-  GESTURE_FLING_START,
-  GESTURE_LONG_PRESS,
-  GESTURE_SCROLL_BEGIN,
-  GESTURE_SCROLL_END,
-  GESTURE_SCROLL_UPDATE,
-  GESTURE_SHOW_PRESS,
-  GESTURE_TAP,
-  GESTURE_TAP_DOWN,
   BACK,
 };
 
@@ -47,21 +38,10 @@ struct PointerData {
   float tilt;
 };
 
-struct GestureData {
-  int32 primary_pointer;
-  float x;
-  float y;
-  float dx;
-  float dy;
-  float velocityX;
-  float velocityY;
-};
-
 // TODO(abarth): Should we have a malloc-free way of creating an input event
 // message? What we have now could stress out the Android Java GC.
 struct InputEvent {
   EventType type;
   int64 time_stamp;
   PointerData? pointer_data;
-  GestureData? gesture_data;
 };

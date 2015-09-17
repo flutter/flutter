@@ -32,14 +32,12 @@ import org.chromium.mojom.sky.ViewportMetrics;
  * A view containing Sky
  */
 @JNINamespace("sky::shell")
-public class PlatformViewAndroid extends SurfaceView
-        implements GestureProvider.OnGestureListener {
+public class PlatformViewAndroid extends SurfaceView {
     private static final String TAG = "PlatformViewAndroid";
 
     private long mNativePlatformView;
     private SkyEngine.Proxy mSkyEngine;
     private final SurfaceHolder.Callback mSurfaceCallback;
-    private GestureProvider mGestureProvider;
     private final EdgeDims mPadding;
     private final KeyboardServiceState mKeyboardState;
 
@@ -95,8 +93,6 @@ public class PlatformViewAndroid extends SurfaceView
             }
         };
         getHolder().addCallback(mSurfaceCallback);
-
-        mGestureProvider = new GestureProvider(context, this);
 
         // TODO(eseidel): We need per-view services!
         mKeyboardState = new KeyboardServiceState(this);
@@ -184,7 +180,6 @@ public class PlatformViewAndroid extends SurfaceView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             requestUnbufferedDispatch(event);
         }
-        mGestureProvider.onTouchEvent(event);
 
         // TODO(abarth): Rather than unpacking these events here, we should
         // probably send them in one packet to the engine.
@@ -205,11 +200,6 @@ public class PlatformViewAndroid extends SurfaceView
             }
         }
         return true;
-    }
-
-    @Override
-    public void onGestureEvent(InputEvent event) {
-        mSkyEngine.onInputEvent(event);
     }
 
     private void attach() {
