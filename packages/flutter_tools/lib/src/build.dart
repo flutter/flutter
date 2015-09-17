@@ -2,43 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+library sky_tools.build;
+
 import 'dart:async';
+import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:args/args.dart';
 import 'package:yaml/yaml.dart';
 
-import 'common.dart';
 import 'artifacts.dart';
+import 'common.dart';
 
-const String kSnapshotKey = 'snapshot_blob.bin';
-const List<String> kDensities = const ['drawable-xxhdpi'];
-const List<String> kThemes = const ['white', 'black'];
-const List<int> kSizes = const [24];
+const String _kSnapshotKey = 'snapshot_blob.bin';
+const List<String> _kDensities = const ['drawable-xxhdpi'];
+const List<String> _kThemes = const ['white', 'black'];
+const List<int> _kSizes = const [24];
 
-class Asset {
+class _Asset {
   final String base;
   final String key;
 
-  Asset({ this.base, this.key });
+  _Asset({ this.base, this.key });
 }
 
-Iterable<Asset> parseAssets(Map manifestDescriptor, String manifestPath) sync* {
+Iterable<_Asset> _parseAssets(Map manifestDescriptor, String manifestPath) sync* {
   if (manifestDescriptor == null || !manifestDescriptor.containsKey('assets'))
     return;
   String basePath = new File(manifestPath).parent.path;
   for (String asset in manifestDescriptor['assets'])
-    yield new Asset(base: basePath, key: asset);
+    yield new _Asset(base: basePath, key: asset);
 }
 
-class MaterialAsset {
+class _MaterialAsset {
   final String name;
   final String density;
   final String theme;
   final int size;
 
-  MaterialAsset(Map descriptor)
+  _MaterialAsset(Map descriptor)
     : name = descriptor['name'],
       density = descriptor['density'],
       theme = descriptor['theme'],
@@ -52,44 +54,44 @@ class MaterialAsset {
   }
 }
 
-List generateValues(Map assetDescriptor, String key, List defaults) {
+List _generateValues(Map assetDescriptor, String key, List defaults) {
   if (assetDescriptor.containsKey(key))
     return [assetDescriptor[key]];
   return defaults;
 }
 
-Iterable<MaterialAsset> generateMaterialAssets(Map assetDescriptor) sync* {
+Iterable<_MaterialAsset> _generateMaterialAssets(Map assetDescriptor) sync* {
   Map currentAssetDescriptor = new Map.from(assetDescriptor);
-  for (String density in generateValues(assetDescriptor, 'density', kDensities)) {
+  for (String density in _generateValues(assetDescriptor, 'density', _kDensities)) {
     currentAssetDescriptor['density'] = density;
-    for (String theme in generateValues(assetDescriptor, 'theme', kThemes)) {
+    for (String theme in _generateValues(assetDescriptor, 'theme', _kThemes)) {
       currentAssetDescriptor['theme'] = theme;
-      for (int size in generateValues(assetDescriptor, 'size', kSizes)) {
+      for (int size in _generateValues(assetDescriptor, 'size', _kSizes)) {
         currentAssetDescriptor['size'] = size;
-        yield new MaterialAsset(currentAssetDescriptor);
+        yield new _MaterialAsset(currentAssetDescriptor);
       }
     }
   }
 }
 
-Iterable<MaterialAsset> parseMaterialAssets(Map manifestDescriptor) sync* {
+Iterable<_MaterialAsset> _parseMaterialAssets(Map manifestDescriptor) sync* {
   if (manifestDescriptor == null || !manifestDescriptor.containsKey('material-design-icons'))
     return;
   for (Map assetDescriptor in manifestDescriptor['material-design-icons']) {
-    for (MaterialAsset asset in generateMaterialAssets(assetDescriptor)) {
+    for (_MaterialAsset asset in _generateMaterialAssets(assetDescriptor)) {
       yield asset;
     }
   }
 }
 
-Future loadManifest(String manifestPath) async {
+Future _loadManifest(String manifestPath) async {
   if (manifestPath == null)
     return null;
   String manifestDescriptor = await new File(manifestPath).readAsString();
   return loadYaml(manifestDescriptor);
 }
 
-Future<ArchiveFile> createFile(String key, String assetBase) async {
+Future<ArchiveFile> _createFile(String key, String assetBase) async {
   File file = new File('${assetBase}/${key}');
   if (!await file.exists())
     return null;
@@ -97,7 +99,7 @@ Future<ArchiveFile> createFile(String key, String assetBase) async {
   return new ArchiveFile.noCompress(key, content.length, content);
 }
 
-Future compileSnapshot({
+Future _compileSnapshot({
   String mainPath,
   String packageRoot,
   String snapshotPath
@@ -110,14 +112,14 @@ Future compileSnapshot({
   ]);
 }
 
-Future<ArchiveFile> createSnapshotFile(String snapshotPath) async {
+Future<ArchiveFile> _createSnapshotFile(String snapshotPath) async {
   File file = new File(snapshotPath);
   List<int> content = await file.readAsBytes();
-  return new ArchiveFile(kSnapshotKey, content.length, content);
+  return new ArchiveFile(_kSnapshotKey, content.length, content);
 }
 
 class BuildCommandHandler extends CommandHandler {
-  BuildCommandHandler() : super('build', 'Create an Flutter package.');
+  BuildCommandHandler() : super('build', 'Create a Flutter package.');
 
   ArgParser get parser {
     ArgParser parser = new ArgParser();
@@ -139,24 +141,24 @@ class BuildCommandHandler extends CommandHandler {
     }
 
     String manifestPath = results['manifest'];
-    Map manifestDescriptor = await loadManifest(manifestPath);
-    Iterable<Asset> assets = parseAssets(manifestDescriptor, manifestPath);
-    Iterable<MaterialAsset> materialAssets = parseMaterialAssets(manifestDescriptor);
+    Map manifestDescriptor = await _loadManifest(manifestPath);
+    Iterable<_Asset> assets = _parseAssets(manifestDescriptor, manifestPath);
+    Iterable<_MaterialAsset> materialAssets = _parseMaterialAssets(manifestDescriptor);
 
     Archive archive = new Archive();
 
     String snapshotPath = results['snapshot'];
-    await compileSnapshot(
+    await _compileSnapshot(
       mainPath: results['main'],
       packageRoot: results['package-root'],
       snapshotPath: snapshotPath);
-    archive.addFile(await createSnapshotFile(snapshotPath));
+    archive.addFile(await _createSnapshotFile(snapshotPath));
 
-    for (Asset asset in assets)
-      archive.addFile(await createFile(asset.key, asset.base));
+    for (_Asset asset in assets)
+      archive.addFile(await _createFile(asset.key, asset.base));
 
-    for (MaterialAsset asset in materialAssets) {
-      ArchiveFile file = await createFile(asset.key, results['asset-base']);
+    for (_MaterialAsset asset in materialAssets) {
+      ArchiveFile file = await _createFile(asset.key, results['asset-base']);
       if (file != null)
         archive.addFile(file);
     }
