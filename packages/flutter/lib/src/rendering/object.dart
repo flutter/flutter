@@ -1041,18 +1041,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // You must not add yourself to /result/ if you return false.
 
 
-  String toString([String prefix = '']) {
-    RenderObject debugPreviousActiveLayout = _debugActiveLayout;
-    _debugActiveLayout = null;
-    String header = toStringName();
-    prefix += '  ';
-    String result = '${header}\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
-    _debugActiveLayout = debugPreviousActiveLayout;
-    return result;
-  }
-
   /// Returns a human understandable name
-  String toStringName() {
+  String toString() {
     String header = '${runtimeType}';
     if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
       int count = 1;
@@ -1070,7 +1060,25 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     return header;
   }
 
+  /// Returns a description of the tree rooted at this node.
+  /// If the prefix argument is provided, then every line in the output
+  /// will be prefixed by that string.
+  String toStringDeep([String prefix = '']) {
+    RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+    _debugActiveLayout = null;
+    prefix += '  ';
+    String result = '$this\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
+    _debugActiveLayout = debugPreviousActiveLayout;
+    return result;
+  }
+
+  /// Returns a string describing the current node's fields, one field per line,
+  /// with each line prefixed by the prefix argument. Subclasses should override
+  /// this to have their information included in toStringDeep().
   String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n${prefix}constraints: ${constraints}\n';
+
+  /// Returns a string describing the current node's descendants. Each line of
+  /// the subtree in the output should be indented by the prefix argument.
   String debugDescribeChildren(String prefix) => '';
 
 }
@@ -1112,7 +1120,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
   }
   String debugDescribeChildren(String prefix) {
     if (child != null)
-      return '${prefix}child: ${child.toString(prefix)}';
+      return '${prefix}child: ${child.toStringDeep(prefix)}';
     return '';
   }
 }
@@ -1352,7 +1360,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     int count = 1;
     ChildType child = _firstChild;
     while (child != null) {
-      result += '${prefix}child ${count}: ${child.toString(prefix)}';
+      result += '${prefix}child ${count}: ${child.toStringDeep(prefix)}';
       count += 1;
       child = child.parentData.nextSibling;
     }
