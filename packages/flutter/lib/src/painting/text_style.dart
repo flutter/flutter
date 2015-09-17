@@ -183,7 +183,6 @@ class TextStyle {
       cssStyle['font-style'] = const {
         FontStyle.normal: 'normal',
         FontStyle.italic: 'italic',
-        FontStyle.oblique: 'oblique',
       }[fontStyle];
     }
     if (decoration != null) {
