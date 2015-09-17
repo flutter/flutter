@@ -139,8 +139,8 @@ abstract class GlobalKey extends Key {
     assert(() {
       String message = '';
       for (GlobalKey key in _debugDuplicates.keys) {
-        message += "Duplicate GlobalKey found amongst mounted widgets: $key (${_debugDuplicates[key]} instances)\n";
-        message += "Most recently registered instance is:\n${_registry[key]}\n";
+        message += 'Duplicate GlobalKey found amongst mounted widgets: $key (${_debugDuplicates[key]} instances)\n';
+        message += 'Most recently registered instance is:\n${_registry[key]}\n';
       }
       if (!_debugDuplicates.isEmpty)
         throw message;
@@ -288,7 +288,7 @@ abstract class Widget {
 
   static void _notifyMountStatusChanged() {
     try {
-      sky.tracing.begin("Widget._notifyMountStatusChanged");
+      sky.tracing.begin('Widget._notifyMountStatusChanged');
       _notifyingMountStatus = true;
       for (Widget node in _mountedChanged) {
         if (node._wasMounted != node._mounted) {
@@ -302,7 +302,7 @@ abstract class Widget {
       _mountedChanged.clear();
     } finally {
       _notifyingMountStatus = false;
-      sky.tracing.end("Widget._notifyMountStatusChanged");
+      sky.tracing.end('Widget._notifyMountStatusChanged');
     }
     GlobalKey._notifyListeners();
   }
@@ -404,7 +404,7 @@ abstract class Widget {
     String debugDetails;
     assert(() {
       // we save this information early because by the time the exception fires we might have changed everything around
-      debugDetails = "  old child: ${oldNode?.toStringName()}\n  new child: ${newNode?.toStringName()}";
+      debugDetails = '  old child: $oldNode\n  new child: $newNode';
       return true;
     });
     try {
@@ -508,36 +508,28 @@ abstract class Widget {
       return newNode;
 
     } catch (e, stack) {
-      _debugReportException('syncing children of ${this.toStringName()}\n$debugDetails', e, stack);
+      _debugReportException('syncing children of $this\n$debugDetails', e, stack);
       return null;
     }
   }
 
-  String _adjustPrefixWithParentCheck(Widget child, String prefix) {
-    if (child.parent == this)
-      return prefix;
-    if (child.parent == null)
-      return '$prefix [[DISCONNECTED]] ';
-    return '$prefix [[PARENT IS ${child.parent.toStringName()}]] ';
+  // This function can be safely called when the layout is valid.
+  // For example Listener or SizeObserver callbacks can safely call
+  // globalToLocal().
+  Point globalToLocal(Point point) {
+    assert(mounted);
+    assert(renderObject is RenderBox);
+    return (renderObject as RenderBox).globalToLocal(point);
   }
 
-  String toString([String prefix = '', String startPrefix = '']) {
-    String childrenString = '';
-    List<Widget> children = new List<Widget>();
-    walkChildren(children.add);
-    if (children.length > 0) {
-      Widget lastChild = children.removeLast();
-      String nextStartPrefix = prefix + ' +-';
-      String nextPrefix = prefix + ' | ';
-      for (Widget child in children)
-        childrenString += child.toString(nextPrefix, _adjustPrefixWithParentCheck(child, nextStartPrefix));
-      nextStartPrefix = prefix + ' \'-';
-      nextPrefix = prefix + '   ';
-      childrenString += lastChild.toString(nextPrefix, _adjustPrefixWithParentCheck(lastChild, nextStartPrefix));
-    }
-    return '$startPrefix${toStringName()}\n$childrenString';
+  // See globalToLocal().
+  Point localToGlobal(Point point) {
+    assert(mounted);
+    assert(renderObject is RenderBox);
+    return (renderObject as RenderBox).localToGlobal(point);
   }
-  String toStringName() {
+
+  String toString() {
     List<String> details = <String>[];
     debugAddDetails(details);
     String detailString = details.join('; ');
@@ -558,21 +550,28 @@ abstract class Widget {
       }
     }
   }
-
-  // This function can be safely called when the layout is valid.
-  // For example Listener or SizeObserver callbacks can safely call
-  // globalToLocal().
-  Point globalToLocal(Point point) {
-    assert(mounted);
-    assert(renderObject is RenderBox);
-    return (renderObject as RenderBox).globalToLocal(point);
+  String toStringDeep([String prefix = '', String startPrefix = '']) {
+    String childrenString = '';
+    List<Widget> children = new List<Widget>();
+    walkChildren(children.add);
+    if (children.length > 0) {
+      Widget lastChild = children.removeLast();
+      String nextStartPrefix = prefix + ' +-';
+      String nextPrefix = prefix + ' | ';
+      for (Widget child in children)
+        childrenString += child.toStringDeep(nextPrefix, _adjustPrefixWithParentCheck(child, nextStartPrefix));
+      nextStartPrefix = prefix + ' \'-';
+      nextPrefix = prefix + '   ';
+      childrenString += lastChild.toStringDeep(nextPrefix, _adjustPrefixWithParentCheck(lastChild, nextStartPrefix));
+    }
+    return '$startPrefix$this\n$childrenString';
   }
-
-  // See globalToLocal().
-  Point localToGlobal(Point point) {
-    assert(mounted);
-    assert(renderObject is RenderBox);
-    return (renderObject as RenderBox).localToGlobal(point);
+  String _adjustPrefixWithParentCheck(Widget child, String prefix) {
+    if (child.parent == this)
+      return prefix;
+    if (child.parent == null)
+      return '$prefix [[DISCONNECTED]] ';
+    return '$prefix [[PARENT IS ${child.parent}]] ';
   }
 }
 
@@ -807,7 +806,7 @@ abstract class Component extends Widget {
       _child = build();
       assert(_child != null);
     } catch (e, stack) {
-      _debugReportException("building ${this.toStringName()}", e, stack);
+      _debugReportException('building $this', e, stack);
     }
     _currentOrder = lastOrder;
     assert(() { _debugChildTaken = false; return true; });
@@ -817,7 +816,7 @@ abstract class Component extends Widget {
       assert(!_debugChildTaken); // we shouldn't be able to lose our child when we're syncing it!
       assert(_child == null || _child.parent == this);
     } catch (e, stack) {
-      _debugReportException('syncing build output of ${this.toStringName()}\n  old child: ${oldChild?.toStringName()}\n  new child: ${_child?.toStringName()}', e, stack);
+      _debugReportException('syncing build output of $this\n  old child: $oldChild\n  new child: $_child', e, stack);
       _child = null;
     }
     assert(() {
@@ -1100,7 +1099,7 @@ abstract class RenderObjectWrapper extends Widget {
       assert(_renderObject != null);
     }
     assert(() {
-      _renderObject.debugExceptionContext = Component._debugComponentBuildTree.fold('  Widget build stack:', (String s, Component c) => s + '\n    ${c.toStringName()}');
+      _renderObject.debugExceptionContext = Component._debugComponentBuildTree.fold('  Widget build stack:', (String result, Component component) => result + '\n    $component');
       return true;
     });
     assert(_renderObject == renderObject); // in case a subclass reintroduces it
@@ -1443,7 +1442,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
         continue; // when these nodes are reordered, we just reassign the data
 
       if (!idSet.add(child.key)) {
-        throw '''If multiple keyed nodes exist as children of another node, they must have unique keys. ${toStringName()} has multiple children with key "${child.key}".''';
+        throw 'If multiple keyed nodes exist as children of another node, they must have unique keys. $this has multiple children with key "${child.key}".';
       }
     }
     return false;
@@ -1579,11 +1578,13 @@ void runApp(App app, { RenderView renderViewOverride, bool enableProfilingLoop: 
     });
   }
 }
+
+/// Prints a textual representation of the entire widget tree
 void debugDumpApp() {
   if (_container != null)
-    _container.toString().split('\n').forEach(print);
+    _container.toStringDeep().split('\n').forEach(print);
   else
-    print("runApp() not yet called");
+    print('runApp() not yet called');
 }
 
 
@@ -1639,7 +1640,7 @@ void _debugReportException(String context, dynamic exception, StackTrace stack) 
   print('Stack trace:');
   '$stack'.split('\n').forEach(print);
   print('Build stack:');
-  Component._debugComponentBuildTree.forEach((Component c) { print('  ${c.toStringName()}'); });
+  Component._debugComponentBuildTree.forEach((Component component) { print('  $component'); });
   print('Current application widget tree:');
   debugDumpApp();
   print('------------------------------------------------------------------------');

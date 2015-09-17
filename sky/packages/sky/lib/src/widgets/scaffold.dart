@@ -171,7 +171,7 @@ class RenderScaffold extends RenderBox {
   }
 
   String debugDescribeChildren(String prefix) {
-    return _slots.keys.map((slot) => '${prefix}${slot}: ${_slots[slot].toString(prefix)}').join();
+    return _slots.keys.map((slot) => '${prefix}${slot}: ${_slots[slot].toStringDeep(prefix)}').join();
   }
 }
 
