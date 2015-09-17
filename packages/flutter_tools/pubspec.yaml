@@ -8,13 +8,15 @@ environment:
   sdk: ">=1.8.0 <2.0.0"
 
 dependencies:
+  archive: ^1.0.20
   args: ^0.13.0
   mustache4dart: ^1.0.0
   path: ^1.3.0
-  shelf: ^0.6.2
   shelf_route: ^0.13.4
   shelf_static: ^0.2.3
+  shelf: ^0.6.2
   test: ">=0.12.4+5 <0.12.5"
+  yaml: ^2.1.3
 
 dev_dependencies:
   mockito: "^0.10.1"

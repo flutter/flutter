@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:logging/logging.dart';
+import 'package:sky_tools/src/build.dart';
 import 'package:sky_tools/src/common.dart';
 import 'package:sky_tools/src/init.dart';
 import 'package:sky_tools/src/install.dart';
@@ -39,8 +40,9 @@ void main(List<String> args) {
   parser.addSeparator('commands:');
 
   for (CommandHandler handler in [
+    new BuildCommandHandler(),
     new InitCommandHandler(),
-    new InstallCommandHandler()
+    new InstallCommandHandler(),
   ]) {
     parser.addCommand(handler.name, handler.parser);
     handlers[handler.name] = handler;
