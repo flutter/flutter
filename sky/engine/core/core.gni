@@ -610,6 +610,7 @@ sky_core_files = [
   "text/ParagraphStyle.h",
   "text/TextAlign.h",
   "text/TextBaseline.h",
+  "text/TextDecoration.cpp",
   "text/TextDecoration.h",
   "text/TextDecorationStyle.h",
   "text/TextStyle.cpp",

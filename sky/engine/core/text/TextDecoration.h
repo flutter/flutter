@@ -11,8 +11,13 @@
 namespace blink {
 
 template <>
-struct DartConverter<TextDecoration>
-    : public DartConverterEnum<int> {};
+struct DartConverter<TextDecoration> {
+  static TextDecoration FromArguments(Dart_NativeArguments args,
+                                      int index,
+                                      Dart_Handle& exception);
+
+  static TextDecoration FromDart(Dart_Handle handle);
+};
 
 } // namespace blink
 

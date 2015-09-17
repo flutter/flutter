@@ -10,12 +10,22 @@ TextStyle::TextStyle(
     SkColor color,
     const String& fontFamily,
     double fontSize,
-    int fontWeight,
-    int fontStyle,
-    const Vector<int>& decoration,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    const Vector<TextDecoration>& decoration,
     SkColor decorationColor,
-    int decorationStyle)
+    TextDecorationStyle decorationStyle)
+    : m_color(color)
+    , m_fontFamily(fontFamily)
+    , m_fontSize(fontSize)
+    , m_fontWeight(fontWeight)
+    , m_fontStyle(fontStyle)
+    , m_decoration(TextDecorationNone)
+    , m_decorationColor(decorationColor)
+    , m_decorationStyle(decorationStyle)
 {
+    for (const auto& d : decoration)
+        m_decoration |= d;
 }
 
 TextStyle::~TextStyle()

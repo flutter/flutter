@@ -12,7 +12,7 @@ namespace blink {
 
 template <>
 struct DartConverter<FontWeight>
-    : public DartConverterEnum<int> {};
+    : public DartConverterEnum<FontWeight> {};
 
 } // namespace blink
 

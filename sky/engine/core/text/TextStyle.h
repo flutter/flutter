@@ -24,11 +24,11 @@ public:
       SkColor color = SK_ColorWHITE,
       const String& fontFamily = nullAtom,
       double fontSize = 0.0,
-      int fontWeight = 0,
-      int fontStyle = 0,
-      const Vector<int>& decoration = Vector<int>(),
+      FontWeight fontWeight = FontWeightNormal,
+      FontStyle fontStyle = FontStyleNormal,
+      const Vector<TextDecoration>& decoration = Vector<TextDecoration>(),
       SkColor decorationColor = SK_ColorWHITE,
-      int decorationStyle = 0
+      TextDecorationStyle decorationStyle = TextDecorationStyleSolid
     ) {
       return adoptRef(new TextStyle(
         color,
@@ -44,17 +44,35 @@ public:
 
     ~TextStyle() override;
 
+    SkColor color() const { return m_color; }
+    const String& fontFamily() const { return m_fontFamily; }
+    double fontSize() const { return m_fontSize; }
+    FontWeight fontWeight() const { return m_fontWeight; }
+    FontStyle fontStyle() const { return m_fontStyle; }
+    TextDecoration decoration() const { return m_decoration; }
+    SkColor decorationColor() const { return m_decorationColor; }
+    TextDecorationStyle decorationStyle() const { return m_decorationStyle; }
+
 private:
     explicit TextStyle(
         SkColor color,
         const String& fontFamily,
         double fontSize,
-        int fontWeight,
-        int fontStyle,
-        const Vector<int>& decoration,
+        FontWeight fontWeight,
+        FontStyle fontStyle,
+        const Vector<TextDecoration>& decoration,
         SkColor decorationColor,
-        int decorationStyle
+        TextDecorationStyle decorationStyle
     );
+
+    SkColor m_color;
+    String m_fontFamily;
+    double m_fontSize;
+    FontWeight m_fontWeight;
+    FontStyle m_fontStyle;
+    TextDecoration m_decoration;
+    SkColor m_decorationColor;
+    TextDecorationStyle m_decorationStyle;
 };
 
 } // namespace blink

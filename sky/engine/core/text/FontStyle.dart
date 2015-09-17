@@ -11,7 +11,4 @@ enum FontStyle {
 
   /// Use glyphs designed for slanting
   italic,
-
-  /// Use the upright glyphs but slant them during painting
-  oblique  // TODO(abarth): Remove. We don't really support this value.
 }

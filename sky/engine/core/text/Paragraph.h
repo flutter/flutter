@@ -48,6 +48,8 @@ public:
     RenderView* renderView() const { return m_renderView.get(); }
 
 private:
+    RenderBox* firstChildBox() const { return m_renderView->firstChildBox(); }
+
     LayoutUnit m_minWidth;
     LayoutUnit m_maxWidth;
     LayoutUnit m_minHeight;

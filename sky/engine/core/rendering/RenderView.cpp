@@ -106,13 +106,12 @@ bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& l
 
 void RenderView::computeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit, LogicalExtentComputedValues& computedValues) const
 {
-    computedValues.m_extent = m_frameView ? LayoutUnit(viewLogicalHeight()) : logicalHeight;
+    computedValues.m_extent = logicalHeight;
 }
 
 void RenderView::updateLogicalWidth()
 {
-    if (m_frameView)
-        setLogicalWidth(viewLogicalWidth());
+    setLogicalWidth(viewLogicalWidth());
 }
 
 bool RenderView::isChildAllowed(RenderObject* child, RenderStyle*) const
@@ -124,7 +123,7 @@ void RenderView::layout()
 {
     SubtreeLayoutScope layoutScope(*this);
 
-    bool relayoutChildren = (!m_frameView || width() != viewWidth() || height() != viewHeight());
+    bool relayoutChildren = width() != viewWidth() || height() != viewHeight();
     if (relayoutChildren) {
         layoutScope.setChildNeedsLayout(this);
         for (RenderObject* child = firstChild(); child; child = child->nextSibling()) {
@@ -354,15 +353,11 @@ IntRect RenderView::documentRect() const
 
 int RenderView::viewHeight() const
 {
-    if (m_frameView)
-        return m_frameView->layoutSize().height();
     return m_frameViewSize.height();
 }
 
 int RenderView::viewWidth() const
 {
-    if (m_frameView)
-        return m_frameView->layoutSize().width();
     return m_frameViewSize.width();
 }
 
