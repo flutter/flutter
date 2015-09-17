@@ -171,12 +171,9 @@ class SkyBinding extends HitTestTarget {
       GestureArena.instance.close(event.pointer);
     return EventDisposition.processed;
   }
+}
 
-  String toString() => 'Render Tree:\n${_renderView}';
-
-  /// Prints a textual representation of the entire render tree
-  void debugDumpRenderTree() {
-    toString().split('\n').forEach(print);
-  }
-
+/// Prints a textual representation of the entire render tree
+void debugDumpRenderTree() {
+  SkyBinding.instance.renderView.toStringDeep().split('\n').forEach(print);
 }
