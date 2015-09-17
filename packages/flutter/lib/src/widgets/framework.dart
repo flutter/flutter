@@ -334,8 +334,15 @@ abstract class Widget {
   bool retainStatefulNodeIfPossible(Widget newNode) => false;
 
   void _sync(Widget old, dynamic slot) {
+    // When this is called, old must be from an old generation. It's a violation
+    // of the _sync() contract to call _sync() with an old node that has already
+    // been synced this generation, as this means that that node is elsewhere in
+    // the tree by now.
+    // By the time we get here, though, syncChild() has already been called on
+    // our children (by the subclasses overriding this). This means 'old' may
+    // have been moved to somewhere else in the tree and might therefore already
+    // be from a new generation.
     assert(isFromOldGeneration);
-    assert(old == null || old.isFromOldGeneration);
     _markAsFromCurrentGeneration();
     if (old != null && old != this)
       old._markAsFromCurrentGeneration();
@@ -409,12 +416,23 @@ abstract class Widget {
     });
     try {
 
+      // At this point, oldNode might have been moved to a new part in the tree.
+      // If this has happened, it will already have been synced, in which case
+      // it will be from a new generation. Our contract with _sync() is that we
+      // will not pass an old child that has been moved to elsewhere in the
+      // tree, so it's important that we verify at each step here that we're not
+      // dealing with such a child. This is why this function keeps checking
+      // isFromOldGeneration on the candidate "old" children.
+
       if (newNode == oldNode) {
-        // TODO(ianh): Simplify next few asserts once the analyzer is cleverer
+        // If our child literally hasn't changed identity, short-circuit the
+        // work. That subtree hasn't changed. We still need to set the parent
+        // because _we_ might have changed identity, even if the child hasn't.
         assert(newNode is! RenderObjectWrapper ||
                (newNode is RenderObjectWrapper && newNode._ancestor != null)); // if the child didn't change, it had better be configured
         assert(newNode is! StatefulComponent ||
                (newNode is StatefulComponent && newNode._isStateInitialized)); // if the child didn't change, it had better be configured
+        // TODO(ianh): Simplify the two asserts above once the analyzer is cleverer
         if (newNode != null) {
           newNode.setParent(this);
           newNode._markAsFromCurrentGeneration();
@@ -500,7 +518,7 @@ abstract class Widget {
         }
       }
 
-      assert(oldNode == null || (oldNode.mounted == false && oldNode.parent == null && newNode.mounted == false && newNode.isFromOldGeneration));
+      assert(oldNode == null || (oldNode.mounted == false && oldNode.parent == null && newNode.mounted == false && oldNode.isFromOldGeneration && newNode.isFromOldGeneration));
       assert(oldNode != newNode);
       newNode.setParent(this);
       newNode._sync(oldNode, slot);
@@ -610,9 +628,9 @@ abstract class TagNode extends Widget {
     assert(() { _debugChildTaken = true; return true; });
   }
 
-  void _sync(Widget old, dynamic slot) {
+  void _sync(TagNode old, dynamic slot) {
     assert(!_debugChildTaken);
-    child = syncChild(child, (old as TagNode)?.child, slot);
+    child = syncChild(child, old?.child, slot);
     if (child != null) {
       assert(child.parent == this);
       assert(child.renderObject != null);
@@ -717,7 +735,6 @@ abstract class Component extends Widget {
   static Queue<Component> _debugComponentBuildTree = new Queue<Component>();
 
   bool _dirty = true;
-
   Widget _child;
 
   void walkChildren(WidgetTreeWalker walker) {
@@ -777,11 +794,12 @@ abstract class Component extends Widget {
   //      assert(_child == null && old == null)
   // 2) Re-building (because a dirty flag got set):
   //      assert(_child != null && old == null)
-  // 3) Syncing against an old version
+  // 3) Syncing against an old version (we are either new, or Stateful and pretending to be new)
   //      assert(_child == null && old != null)
   void _sync(Component old, dynamic slot) {
     assert(!_debugChildTaken);
     assert(_child == null || old == null);
+    assert(old == null || old.isFromOldGeneration);
 
     updateSlot(slot);
 
@@ -791,6 +809,7 @@ abstract class Component extends Widget {
       _child = null;
     } else {
       oldChild = old._child;
+      old._child = null;
       assert(_child == null);
     }
 
@@ -815,6 +834,7 @@ abstract class Component extends Widget {
       _child = syncChild(_child, oldChild, slot);
       assert(!_debugChildTaken); // we shouldn't be able to lose our child when we're syncing it!
       assert(_child == null || _child.parent == this);
+      assert(_child == null || _child.renderObject != null);
     } catch (e, stack) {
       _debugReportException('syncing build output of $this\n  old child: $oldChild\n  new child: $_child', e, stack);
       _child = null;
@@ -834,7 +854,6 @@ abstract class Component extends Widget {
     _dirty = false;
     _renderObject = _child.renderObject;
     assert(_renderObject == renderObject); // in case a subclass reintroduces it
-    assert(renderObject != null);
     super._sync(old, slot);
   }
 
@@ -910,9 +929,11 @@ abstract class StatefulComponent extends Component {
     } else {
       assert(_isStateInitialized);
       assert(!old._isStateInitialized);
+      assert(old.isFromOldGeneration);
       syncConstructorArguments(old);
     }
     super._sync(old, slot);
+    assert(_child != null);
   }
 
   // Stateful components can override initState if they want
@@ -1087,6 +1108,7 @@ abstract class RenderObjectWrapper extends Widget {
     //               RenderViewObject doesn't need to inherit all this code it
     //               doesn't need.
     assert(parent != null || this is RenderViewWrapper);
+    assert(old == null || old.isFromOldGeneration);
     if (old == null) {
       _renderObject = createNode();
       assert(_renderObject != null);
