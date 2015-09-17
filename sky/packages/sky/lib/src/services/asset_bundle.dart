@@ -9,10 +9,10 @@ import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
-import 'package:sky/mojo/image_resource.dart';
-import 'package:sky/mojo/net/fetch.dart';
-import 'package:sky/mojo/net/image_cache.dart' as image_cache;
-import 'package:sky/mojo/shell.dart' as shell;
+import 'package:sky/src/services/fetch.dart';
+import 'package:sky/src/services/image_cache.dart';
+import 'package:sky/src/services/image_resource.dart';
+import 'package:sky/src/services/shell.dart';
 
 abstract class AssetBundle {
   void close();
@@ -34,7 +34,7 @@ class NetworkAssetBundle extends AssetBundle {
     return (await fetchUrl(_urlFromKey(key))).body;
   }
 
-  ImageResource loadImage(String key) => image_cache.load(_urlFromKey(key));
+  ImageResource loadImage(String key) => imageCache.load(_urlFromKey(key));
 
   Future<String> loadString(String key) => fetchString(_urlFromKey(key));
 }

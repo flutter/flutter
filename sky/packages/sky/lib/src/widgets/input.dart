@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/mojo/keyboard.dart';
+import 'package:sky/services.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/editable_text.dart';
@@ -10,7 +10,7 @@ import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/theme.dart';
 
-export 'package:sky/mojo/keyboard.dart' show KeyboardType_TEXT, KeyboardType_NUMBER, KeyboardType_PHONE, KeyboardType_DATETIME;
+export 'package:sky/services.dart' show KeyboardType_TEXT, KeyboardType_NUMBER, KeyboardType_PHONE, KeyboardType_DATETIME;
 
 typedef void StringValueChanged(String value);
 

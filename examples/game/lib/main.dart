@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky/mojo/asset_bundle.dart';
+import 'package:sky/services.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/widgets/basic.dart';

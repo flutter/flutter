@@ -7,7 +7,7 @@ import 'dart:sky.internals' as internals;
 import 'package:mojo/application.dart';
 import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/service_provider.mojom.dart';
-import 'package:sky/mojo/embedder.dart';
+import 'package:sky/src/services/embedder.dart';
 
 ApplicationConnection _initConnection() {
   int rawHandle = internals.takeServicesProvidedByEmbedder();
@@ -18,9 +18,15 @@ ApplicationConnection _initConnection() {
   return new ApplicationConnection(null, serviceProvider);
 }
 
-final ApplicationConnection _connection = _initConnection();
+class _ShellImpl {
+  _ShellImpl._();
 
-void requestService(String url, Object proxy) {
-  if (embedder.shell == null) _connection.requestService(proxy);
-  else embedder.connectToService(url, proxy);
+  final ApplicationConnection _connection = _initConnection();
+
+  void requestService(String url, Object proxy) {
+    if (embedder.shell == null) _connection.requestService(proxy);
+    else embedder.connectToService(url, proxy);
+  }
 }
+
+final _ShellImpl shell = new _ShellImpl._();

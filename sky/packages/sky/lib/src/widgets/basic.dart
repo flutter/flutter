@@ -6,9 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 
-import 'package:sky/mojo/asset_bundle.dart';
-import 'package:sky/mojo/image_resource.dart';
-import 'package:sky/mojo/net/image_cache.dart' as image_cache;
+import 'package:sky/services.dart';
 import 'package:sky/src/painting/text_painter.dart';
 import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/src/rendering/block.dart';
@@ -838,7 +836,7 @@ class NetworkImage extends Component {
 
   Widget build() {
     return new ImageListener(
-      image: image_cache.load(src),
+      image: imageCache.load(src),
       width: width,
       height: height,
       colorFilter: colorFilter,

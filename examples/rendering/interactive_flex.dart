@@ -5,8 +5,7 @@
 import 'dart:sky' as sky;
 import 'dart:math' as math;
 
-import 'package:sky/mojo/activity.dart';
-import 'package:sky/mojo/net/image_cache.dart' as image_cache;
+import 'package:sky/services.dart';
 import 'package:sky/rendering.dart';
 
 import 'solid_color_box.dart';
@@ -60,7 +59,7 @@ void main() {
 
   // Resizeable image
   image = new RenderImageGrow(null, new Size(100.0, null));
-  image_cache.load("https://www.dartlang.org/logos/dart-logo.png").first.then((sky.Image dartLogo) {
+  imageCache.load("https://www.dartlang.org/logos/dart-logo.png").first.then((sky.Image dartLogo) {
     image.image = dartLogo;
   });
 
