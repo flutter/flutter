@@ -7,14 +7,15 @@ template("skyx") {
   bundle = "$target_gen_dir/${bundle_prefix}.skyx"
   snapshot = "$target_gen_dir/${bundle_prefix}_snapshot.bin"
 
-  action("gen_${bundle_prefix}_snapshot") {
+  action("gen_${bundle_prefix}_bundle") {
     main_dart = invoker.main_dart
+    asset_base = "//sky/packages/material_design_icons/lib/icons"
 
     inputs = [
       main_dart,
     ]
     outputs = [
-      snapshot,
+      bundle,
     ]
 
     if (defined(invoker.sources)) {
@@ -24,20 +25,23 @@ template("skyx") {
     sky_snapshot_dir =
         get_label_info("//sky/tools/sky_snapshot($host_toolchain)", "root_out_dir")
 
-    script = "//sky/tools/sky_snapshot.py"
-
-    src_dir = "//"
-    cwd = rebase_path(src_dir, root_build_dir)
+    script = "//sky/tools/sky_build.py"
 
     args = [
-      rebase_path("$sky_snapshot_dir/sky_snapshot", src_dir),
-      rebase_path(main_dart, src_dir),
-      "--package-root", rebase_path("packages"),
-      "--snapshot",
-      rebase_path(snapshot, src_dir),
-      "-C",
-      cwd,
+      "--asset-base", rebase_path(asset_base, root_build_dir),
+      "--compiler", rebase_path("$sky_snapshot_dir/sky_snapshot", root_build_dir),
+      "--main", rebase_path(main_dart, root_build_dir),
+      "--package-root", rebase_path("packages", root_build_dir),
+      "--snapshot", rebase_path(snapshot, root_build_dir),
+      "--output-file", rebase_path(bundle, root_build_dir),
     ]
+
+    if (defined(invoker.manifest)) {
+      inputs += [ invoker.manifest ]
+      args += [
+        "--manifest", rebase_path(invoker.manifest, root_build_dir),
+      ]
+    }
 
     deps = [
       "//sky/tools/sky_snapshot($host_toolchain)",
@@ -46,43 +50,6 @@ template("skyx") {
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
-  }
-
-  action("gen_${bundle_prefix}_bundle") {
-    asset_base = "//sky/packages/material_design_icons/lib/icons"
-
-    sources = [
-      "//sky/tools/skyx/bin/skyx.dart",
-      snapshot,
-    ]
-
-    outputs = [
-      bundle,
-    ]
-
-    script = "//sky/tools/skyx.py"
-    args = [
-      "--package-root",
-      rebase_path("//sky/tools/skyx/packages", root_build_dir),
-      "--asset-base",
-      rebase_path(asset_base, root_build_dir),
-      "--snapshot",
-      rebase_path(snapshot, root_build_dir),
-      "-o",
-      rebase_path(bundle, root_build_dir),
-    ]
-
-    if (defined(invoker.manifest)) {
-      sources += [ invoker.manifest ]
-      args += [
-        "--manifest",
-        rebase_path(invoker.manifest, root_build_dir),
-      ]
-    }
-
-    deps = [
-      ":gen_${bundle_prefix}_snapshot",
-    ]
   }
 
   group(target_name) {
