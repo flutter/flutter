@@ -6,6 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/gestures/drag.dart';
 import 'package:sky/gestures/long_press.dart';
+import 'package:sky/gestures/scale.dart';
 import 'package:sky/gestures/recognizer.dart';
 import 'package:sky/gestures/show_press.dart';
 import 'package:sky/gestures/tap.dart';
@@ -27,7 +28,10 @@ class GestureDetector extends StatefulComponent {
     this.onHorizontalDragEnd,
     this.onPanStart,
     this.onPanUpdate,
-    this.onPanEnd
+    this.onPanEnd,
+    this.onScaleStart,
+    this.onScaleUpdate,
+    this.onScaleEnd
   }) : super(key: key);
 
   Widget child;
@@ -47,6 +51,10 @@ class GestureDetector extends StatefulComponent {
   GesturePanUpdateCallback onPanUpdate;
   GesturePanEndCallback onPanEnd;
 
+  GestureScaleStartCallback onScaleStart;
+  GestureScaleUpdateCallback onScaleUpdate;
+  GestureScaleEndCallback onScaleEnd;
+
   void syncConstructorArguments(GestureDetector source) {
     child = source.child;
     onTap = source.onTap;
@@ -61,6 +69,9 @@ class GestureDetector extends StatefulComponent {
     onPanStart = source.onPanStart;
     onPanUpdate = source.onPanUpdate;
     onPanEnd = source.onPanEnd;
+    onScaleStart = source.onScaleStart;
+    onScaleUpdate = source.onScaleUpdate;
+    onScaleEnd = source.onScaleEnd;
     _syncGestureListeners();
   }
 
@@ -103,9 +114,18 @@ class GestureDetector extends StatefulComponent {
 
   PanGestureRecognizer _pan;
   PanGestureRecognizer _ensurePan() {
+    assert(_scale == null);  // Scale is a superset of pan; just use scale
     if (_pan == null)
       _pan = new PanGestureRecognizer(router: _router);
     return _pan;
+  }
+
+  ScaleGestureRecognizer _scale;
+  ScaleGestureRecognizer _ensureScale() {
+    assert(_pan == null);  // Scale is a superset of pan; just use scale
+    if (_scale == null)
+      _scale = new ScaleGestureRecognizer(router: _router);
+    return _scale;
   }
 
   void didMount() {
@@ -121,6 +141,7 @@ class GestureDetector extends StatefulComponent {
     _verticalDrag = _ensureDisposed(_verticalDrag);
     _horizontalDrag = _ensureDisposed(_horizontalDrag);
     _pan = _ensureDisposed(_pan);
+    _scale = _ensureDisposed(_scale);
   }
 
   void _syncGestureListeners() {
@@ -130,6 +151,7 @@ class GestureDetector extends StatefulComponent {
     _syncVerticalDrag();
     _syncHorizontalDrag();
     _syncPan();
+    _syncScale();
   }
 
   void _syncTap() {
@@ -186,6 +208,17 @@ class GestureDetector extends StatefulComponent {
     }
   }
 
+  void _syncScale() {
+    if (onScaleStart == null && onScaleUpdate == null && onScaleEnd == null) {
+      _scale = _ensureDisposed(_pan);
+    } else {
+      _ensureScale()
+        ..onStart = onScaleStart
+        ..onUpdate = onScaleUpdate
+        ..onEnd = onScaleEnd;
+    }
+  }
+
   GestureRecognizer _ensureDisposed(GestureRecognizer recognizer) {
     recognizer?.dispose();
     return null;
@@ -204,6 +237,8 @@ class GestureDetector extends StatefulComponent {
       _horizontalDrag.addPointer(event);
     if (_pan != null)
       _pan.addPointer(event);
+    if (_scale != null)
+      _scale.addPointer(event);
     return EventDisposition.processed;
   }
 
