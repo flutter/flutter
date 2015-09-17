@@ -1,4 +1,3 @@
-import 'package:sky/animation.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 

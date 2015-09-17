@@ -4,10 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/gestures/arena.dart';
-import 'package:sky/gestures/constants.dart';
-import 'package:sky/gestures/pointer_router.dart';
-import 'package:sky/gestures/recognizer.dart';
+import 'package:sky/src/gestures/arena.dart';
+import 'package:sky/src/gestures/constants.dart';
+import 'package:sky/src/gestures/pointer_router.dart';
+import 'package:sky/src/gestures/recognizer.dart';
 
 typedef void GestureLongPressListener();
 

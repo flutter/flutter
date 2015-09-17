@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/theme/colors.dart' as colors;

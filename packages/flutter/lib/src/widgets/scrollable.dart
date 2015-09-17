@@ -8,8 +8,7 @@ import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';
-import 'package:sky/gestures/constants.dart';
-import 'package:sky/gestures/drag.dart';
+import 'package:sky/gestures.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/viewport.dart';
 import 'package:sky/src/widgets/basic.dart';
