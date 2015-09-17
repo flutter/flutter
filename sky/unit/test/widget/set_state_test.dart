@@ -1,6 +1,3 @@
-import 'package:sky/gestures/arena.dart';
-import 'package:sky/gestures/pointer_router.dart';
-import 'package:sky/gestures/tap.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
@@ -68,7 +65,7 @@ void main() {
     tester.pumpFrameWithoutChange();
 
     tester.dispatchEvent(pointer.up(), location);
-   
+
     tester.pumpFrameWithoutChange();
 
   });

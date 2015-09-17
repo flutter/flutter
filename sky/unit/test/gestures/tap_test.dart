@@ -1,6 +1,4 @@
-import 'package:sky/gestures/arena.dart';
-import 'package:sky/gestures/pointer_router.dart';
-import 'package:sky/gestures/tap.dart';
+import 'package:sky/gestures.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';

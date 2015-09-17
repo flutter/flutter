@@ -1,6 +1,6 @@
 import 'dart:sky' as sky;
 
-import 'package:sky/gestures/pointer_router.dart';
+import 'package:sky/gestures.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';
