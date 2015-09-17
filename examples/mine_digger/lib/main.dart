@@ -4,7 +4,7 @@
 import 'dart:sky' as sky;
 import 'dart:math';
 
-import 'package:sky/mojo/activity.dart' as activity;
+import 'package:sky/services.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/theme/colors.dart' as colors;
@@ -113,7 +113,7 @@ class MineDiggerApp extends App {
                 probe(ix, iy);
             },
             onLongPress: () {
-              activity.userFeedback.performHapticFeedback(activity.HapticFeedbackType_LONG_PRESS);
+              userFeedback.performHapticFeedback(HapticFeedbackType_LONG_PRESS);
               flag(ix, iy);
             },
             child: new Listener(

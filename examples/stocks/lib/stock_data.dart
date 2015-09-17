@@ -10,8 +10,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:sky/mojo/asset_bundle.dart';
-import 'package:sky/mojo/net/fetch.dart';
+import 'package:sky/services.dart';
 
 final math.Random _rng = new math.Random();
 

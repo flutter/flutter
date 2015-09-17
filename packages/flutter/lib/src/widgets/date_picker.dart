@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
-import 'package:sky/mojo/activity.dart';
+import 'package:sky/services.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/src/widgets/basic.dart';

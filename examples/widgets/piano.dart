@@ -4,8 +4,7 @@
 
 import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:sky_services/media/media.mojom.dart';
-import 'package:sky/mojo/net/fetch.dart';
-import 'package:sky/mojo/shell.dart' as shell;
+import 'package:sky/services.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';

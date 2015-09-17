@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
-import 'package:sky/mojo/shell.dart' as shell;
+import 'package:sky/src/services/shell.dart';
+
 export 'package:mojo_services/keyboard/keyboard.mojom.dart';
 
 class _KeyboardConnection {
