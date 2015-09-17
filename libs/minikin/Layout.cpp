@@ -35,6 +35,7 @@
 #include <hb-ot.h>
 
 #include "LayoutUtils.h"
+#include "HbFaceCache.h"
 #include "MinikinInternal.h"
 #include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>
@@ -188,22 +189,6 @@ private:
     static const size_t kMaxEntries = 5000;
 };
 
-class HbFaceCache : private OnEntryRemoved<int32_t, hb_face_t*> {
-public:
-    HbFaceCache() : mCache(kMaxEntries) {
-        mCache.setOnEntryRemovedListener(this);
-    }
-
-    // callback for OnEntryRemoved
-    void operator()(int32_t& key, hb_face_t*& value) {
-        hb_face_destroy(value);
-    }
-
-    LruCache<int32_t, hb_face_t*> mCache;
-private:
-    static const size_t kMaxEntries = 100;
-};
-
 static unsigned int disabledDecomposeCompatibility(hb_unicode_funcs_t*, hb_codepoint_t,
                                                    hb_codepoint_t*, void*) {
     return 0;
@@ -223,7 +208,6 @@ public:
     hb_buffer_t* hbBuffer;
     hb_unicode_funcs_t* unicodeFunctions;
     LayoutCache layoutCache;
-    HbFaceCache hbFaceCache;
 };
 
 ANDROID_SINGLETON_STATIC_INSTANCE(LayoutEngine);
@@ -291,30 +275,6 @@ void Layout::setFontCollection(const FontCollection* collection) {
     mCollection = collection;
 }
 
-hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData)  {
-    MinikinFont* font = reinterpret_cast<MinikinFont*>(userData);
-    size_t length = 0;
-    bool ok = font->GetTable(tag, NULL, &length);
-    if (!ok) {
-        return 0;
-    }
-    char* buffer = reinterpret_cast<char*>(malloc(length));
-    if (!buffer) {
-        return 0;
-    }
-    ok = font->GetTable(tag, reinterpret_cast<uint8_t*>(buffer), &length);
-#ifdef VERBOSE_DEBUG
-    ALOGD("referenceTable %c%c%c%c length=%d %d",
-        (tag >>24) & 0xff, (tag>>16)&0xff, (tag>>8)&0xff, tag&0xff, length, ok);
-#endif
-    if (!ok) {
-        free(buffer);
-        return 0;
-    }
-    return hb_blob_create(const_cast<char*>(buffer), length,
-        HB_MEMORY_MODE_WRITABLE, buffer, free);
-}
-
 static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, void* userData)
 {
     MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
@@ -342,19 +302,8 @@ hb_font_funcs_t* getHbFontFuncs() {
     return hbFontFuncs;
 }
 
-static hb_face_t* getHbFace(MinikinFont* minikinFont) {
-    HbFaceCache& cache = LayoutEngine::getInstance().hbFaceCache;
-    int32_t fontId = minikinFont->GetUniqueId();
-    hb_face_t* face = cache.mCache.get(fontId);
-    if (face == NULL) {
-        face = hb_face_create_for_tables(referenceTable, minikinFont, NULL);
-        cache.mCache.put(fontId, face);
-    }
-    return face;
-}
-
 static hb_font_t* create_hb_font(MinikinFont* minikinFont, MinikinPaint* minikinPaint) {
-    hb_face_t* face = getHbFace(minikinFont);
+    hb_face_t* face = getHbFaceLocked(minikinFont);
     hb_font_t* parent_font = hb_font_create(face);
     hb_ot_font_set_funcs(parent_font);
 
@@ -885,8 +834,7 @@ void Layout::purgeCaches() {
     AutoMutex _l(gMinikinLock);
     LayoutCache& layoutCache = LayoutEngine::getInstance().layoutCache;
     layoutCache.clear();
-    HbFaceCache& hbCache = LayoutEngine::getInstance().hbFaceCache;
-    hbCache.mCache.clear();
+    purgeHbFaceCacheLocked();
 }
 
 }  // namespace android

@@ -22,6 +22,7 @@ minikin_src_files := \
     FontCollection.cpp \
     FontFamily.cpp \
     GraphemeBreak.cpp \
+    HbFaceCache.cpp \
     Hyphenator.cpp \
     Layout.cpp \
     LayoutUtils.cpp \
