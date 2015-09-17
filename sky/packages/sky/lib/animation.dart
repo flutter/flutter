@@ -7,8 +7,6 @@
 /// This library includes and re-exports all Sky animation classes.
 library animation;
 
-export 'package:sky/src/rendering/auto_layout.dart';
-
 export 'src/animation/animated_simulation.dart';
 export 'src/animation/animated_value.dart';
 export 'src/animation/animation_performance.dart';
