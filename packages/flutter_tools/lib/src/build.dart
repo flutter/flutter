@@ -100,16 +100,24 @@ Future<ArchiveFile> _createFile(String key, String assetBase) async {
 }
 
 Future _compileSnapshot({
+  String compilerPath,
   String mainPath,
   String packageRoot,
   String snapshotPath
 }) async {
-  File compiler = await artifactStore.getPath(Artifact.FlutterCompiler);
-  await Process.run(compiler.path, [
+  File compiler = compilerPath == null ?
+      await artifactStore.getPath(Artifact.FlutterCompiler) :
+      new File(compilerPath);
+  ProcessResult result = await Process.run(compiler.path, [
     mainPath,
     '--package-root=$packageRoot',
     '--snapshot=$snapshotPath'
   ]);
+  if (result.exitCode != 0) {
+    print(result.stdout);
+    print(result.stderr);
+    exit(result.exitCode);
+  }
 }
 
 Future<ArchiveFile> _createSnapshotFile(String snapshotPath) async {
@@ -125,8 +133,9 @@ class BuildCommandHandler extends CommandHandler {
     ArgParser parser = new ArgParser();
     parser.addFlag('help', abbr: 'h', negatable: false);
     parser.addOption('asset-base', defaultsTo: 'packages/material_design_icons/icons');
+    parser.addOption('compiler');
     parser.addOption('main', defaultsTo: 'lib/main.dart');
-    parser.addOption('manifest', defaultsTo: 'flutter.yaml');
+    parser.addOption('manifest');
     parser.addOption('output-file', abbr: 'o', defaultsTo: 'app.flx');
     parser.addOption('package-root', defaultsTo: 'packages');
     parser.addOption('snapshot', defaultsTo: 'snapshot_blob.bin');
@@ -149,6 +158,7 @@ class BuildCommandHandler extends CommandHandler {
 
     String snapshotPath = results['snapshot'];
     await _compileSnapshot(
+      compilerPath: results['compiler'],
       mainPath: results['main'],
       packageRoot: results['package-root'],
       snapshotPath: snapshotPath);
