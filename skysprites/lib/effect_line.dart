@@ -15,12 +15,15 @@ class EffectLine extends Node {
 
   EffectLine({
     this.texture: null,
+    this.transferMode: sky.TransferMode.dstOver,
     List<Point> points,
     this.widthMode : EffectLineWidthMode.linear,
     this.minWidth: 10.0,
     this.maxWidth: 10.0,
+    this.widthGrowthSpeed: 0.0,
     this.animationMode: EffectLineAnimationMode.none,
     this.scrollSpeed: 0.1,
+    double scrollStart: 0.0,
     this.fadeDuration: null,
     this.fadeAfterDelay: null,
     this.textureLoopLength: null,
@@ -36,15 +39,20 @@ class EffectLine extends Node {
         new Color(0xffffffff),
         new Color(0xffffffff));
 
+    _offset = scrollStart;
+
     _painter = new TexturedLinePainter(points, _colors, _widths, texture);
     _painter.textureLoopLength = textureLoopLength;
   }
 
   final Texture texture;
 
+  final sky.TransferMode transferMode;
+
   final EffectLineWidthMode widthMode;
   final double minWidth;
   final double maxWidth;
+  final double widthGrowthSpeed;
 
   final EffectLineAnimationMode animationMode;
   final double scrollSpeed;
@@ -86,22 +94,31 @@ class EffectLine extends Node {
       _offset = randomDouble();
     }
 
-    // Update age of line points, and remove if neccessary
+    // Update age of line points and remove if neccesasry
     if (fadeDuration != null && fadeAfterDelay != null) {
+      // Increase age of points
       for (int i = _points.length - 1; i >= 0; i--) {
         _pointAges[i] += dt;
-        if (_pointAges[i] > (fadeDuration + fadeAfterDelay)) {
-          _pointAges.removeAt(i);
-          _points.removeAt(i);
+      }
+
+      // Check if the first/oldest point should be removed
+      while(_points.length > 0 && _pointAges[0] > (fadeDuration + fadeAfterDelay)) {
+        // Update scroll if it isn't the last and only point that is about to removed
+        if (_points.length > 1 && textureLoopLength != null) {
+          double dist = GameMath.pointQuickDist(_points[0], _points[1]);
+          _offset = (_offset - (dist / textureLoopLength)) % 1.0;
+          if (_offset < 0.0) _offset += 1;
         }
+
+        // Remove the point
+        _pointAges.removeAt(0);
+        _points.removeAt(0);
       }
     }
   }
 
   void paint(PaintingCanvas canvas) {
     if (points.length < 2) return;
-
-    //_painter.textureLoopLength = textureLoopLength;
 
     _painter.points = points;
 
@@ -127,12 +144,14 @@ class EffectLine extends Node {
 
     // Calculate widths
     List<double> widths = [];
-    for (double stop in stops) {
+    for (int i = 0; i < stops.length; i++) {
+      double stop = stops[i];
+      double growth = math.max(widthGrowthSpeed * _pointAges[i], 0.0);
       if (widthMode == EffectLineWidthMode.linear) {
-        double width = minWidth + (maxWidth - minWidth) * stop;
+        double width = minWidth + (maxWidth - minWidth) * stop + growth;
         widths.add(width);
       } else if (widthMode == EffectLineWidthMode.barrel) {
-        double width = minWidth + math.sin(stop * math.PI) * (maxWidth - minWidth);
+        double width = minWidth + math.sin(stop * math.PI) * (maxWidth - minWidth) + growth;
         widths.add(width);
       }
     }
@@ -148,12 +167,38 @@ class EffectLine extends Node {
     if (points.length > 0 && point.x == points[points.length - 1].x && point.y == points[points.length - 1].y)
       return;
 
-    if (simplify) {
+    if (simplify && points.length >= 2 && GameMath.pointQuickDist(point, points[points.length - 2]) < 10.0) {
+      // Check if we should remove last point before adding the new one
 
+      // Calculate the square distance from the middle point to the line of the
+      // new point and the second to last point
+      double dist2 = _distToSeqment2(
+        points[points.length - 1],
+        point,
+        points[points.length - 2]
+      );
+
+      // If the point is on the line, remove it
+      if (dist2 < 1.0) {
+        _points.removeAt(_points.length - 1);
+      }
     }
 
     // Add point and point's age
     _points.add(point);
     _pointAges.add(0.0);
+  }
+
+  double _sqr(double x) => x * x;
+
+  double _dist2(Point v, Point w) => _sqr(v.x - w.x) + _sqr(v.y - w.y);
+
+  double _distToSeqment2(Point p, Point v, Point w) {
+    double l2 = _dist2(v, w);
+    if (l2 == 0.0) return _dist2(p, v);
+    double t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+    if (t < 0) return _dist2(p, v);
+    if (t > 1) return _dist2(p, w);
+    return _dist2(p, new Point(v.x + t * (w.x - v.x), v.y + t * (w.y - v.y)));
   }
 }
