@@ -12,7 +12,7 @@ namespace blink {
 
 template <>
 struct DartConverter<TextDecorationStyle>
-    : public DartConverterEnum<int> {};
+    : public DartConverterEnum<TextDecorationStyle> {};
 
 } // namespace blink
 

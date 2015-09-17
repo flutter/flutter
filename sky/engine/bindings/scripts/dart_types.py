@@ -130,12 +130,12 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'FilterQuality': 'SkFilterQuality',
     'PaintingStyle': 'SkPaint::Style',
     # TODO(abarth): Give these better C++ types.
-    'FontStyle': 'int',
-    'FontWeight': 'int',
+    'FontStyle': 'FontStyle',
+    'FontWeight': 'FontWeight',
     'TextAlign': 'int',
     'TextBaseline': 'int',
-    'TextDecoration': 'int',
-    'TextDecorationStyle': 'int',
+    'TextDecoration': 'TextDecoration',
+    'TextDecorationStyle': 'TextDecorationStyle',
 }
 
 
