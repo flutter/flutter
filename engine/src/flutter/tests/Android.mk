@@ -43,12 +43,14 @@ LOCAL_SRC_FILES += \
     FontTestUtils.cpp \
     MinikinFontForTest.cpp \
     GraphemeBreakTests.cpp \
+    HbFaceCacheTest.cpp \
     LayoutUtilsTest.cpp \
     UnicodeUtils.cpp
 
 LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/../libs/minikin/ \
+    external/harfbuzz_ng/src \
     external/libxml2/include \
-    external/skia/src/core \
+    external/skia/src/core
 
 include $(BUILD_NATIVE_TEST)

@@ -18,8 +18,14 @@
 
 #include "MinikinInternal.h"
 
+#include <cutils/log.h>
+
 namespace android {
 
 Mutex gMinikinLock;
+
+void assertMinikinLocked() {
+    LOG_FATAL_IF(gMinikinLock.tryLock() == 0);
+}
 
 }

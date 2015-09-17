@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-// Definitions internal to Minikin
+#ifndef MINIKIN_HBFACE_CACHE_H
+#define MINIKIN_HBFACE_CACHE_H
 
-#ifndef MINIKIN_INTERNAL_H
-#define MINIKIN_INTERNAL_H
-
-#include <utils/Mutex.h>
+struct hb_face_t;
 
 namespace android {
+class MinikinFont;
 
-// All external Minikin interfaces are designed to be thread-safe.
-// Presently, that's implemented by through a global lock, and having
-// all external interfaces take that lock.
+void purgeHbFaceCacheLocked();
+hb_face_t* getHbFaceLocked(MinikinFont* minikinFont);
 
-extern Mutex gMinikinLock;
-
-// Aborts if gMinikinLock is not acquired. Do nothing on the release build.
-void assertMinikinLocked();
-
-}
-
-#endif  // MINIKIN_INTERNAL_H
+}  // namespace android
+#endif  // MINIKIN_HBFACE_CACHE_H
