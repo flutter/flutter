@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/mojo/asset_bundle.dart';
+import 'package:sky/services.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/framework.dart';

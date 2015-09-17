@@ -6,7 +6,7 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:typed_data';
 
-import 'package:sky/mojo/net/image_cache.dart' as image_cache;
+import 'package:sky/services.dart';
 
 double timeBase = null;
 
@@ -84,7 +84,7 @@ bool handleEvent(sky.Event event) {
   }
 
   if (event.type == "pointerup") {
-    image_cache.load(url2).first.then(handleImageLoad);
+    imageCache.load(url2).first.then(handleImageLoad);
     return true;
   }
 
@@ -92,7 +92,7 @@ bool handleEvent(sky.Event event) {
 }
 
 void main() {
-  image_cache.load(url1).first.then(handleImageLoad);
+  imageCache.load(url1).first.then(handleImageLoad);
   sky.view.setEventCallback(handleEvent);
   sky.view.setFrameCallback(beginFrame);
 }

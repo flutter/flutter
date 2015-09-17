@@ -10,7 +10,7 @@ import 'package:mojo/mojo/url_request.mojom.dart';
 import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:mojo_services/mojo/network_service.mojom.dart';
 import 'package:mojo_services/mojo/url_loader.mojom.dart';
-import 'package:sky/mojo/shell.dart' as shell;
+import 'package:sky/src/services/shell.dart';
 
 export 'package:mojo/mojo/url_response.mojom.dart' show UrlResponse;
 
