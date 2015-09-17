@@ -283,13 +283,30 @@ class StopSky(object):
             subprocess.call(args, stdout=dev_null, stderr=dev_null)
 
     def run(self, args, pids):
-        self._run(['fuser', '-k', '%s/tcp' % SKY_SERVER_PORT])
-
         if 'remote_sky_server_port' in pids:
             port_string = 'tcp:%s' % pids['remote_sky_server_port']
             self._run([AndroidDevice().adb_path, 'reverse', '--remove', port_string])
 
         self._run([AndroidDevice().adb_path, 'shell', 'am', 'force-stop', ANDROID_PACKAGE])
+
+        try:
+            # Because the server gets forked by dart, pids.get(['sky_server_pid']) returns an invalid pid,
+            # so just force things closed.
+            if platform.system() == 'Darwin':
+                cmd = ['lsof', '-i', ':%s' % SKY_SERVER_PORT, '-t']
+                logging.info(' '.join(cmd))
+                pid = subprocess.check_output(cmd)
+
+                # Killing a pid with a shell command from within python is hard,
+                # so use a library command, but it's still nice to give the
+                # equivalent command when doing verbose logging.
+                logging.info('kill %s' % pid)
+                os.kill(int(pid), signal.SIGTERM)
+            else:
+                # This usage of fuser is not valid on OS X
+                self._run(['fuser', '-k', '%s/tcp' % SKY_SERVER_PORT])
+        except subprocess.CalledProcessError as e:
+            pass
 
         pids.clear()
 
