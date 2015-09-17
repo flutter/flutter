@@ -10,6 +10,7 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/painting/Canvas.h"
+#include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -65,10 +66,7 @@ void LayoutRoot::layout()
 
     LayoutUnit maxWidth = std::max(m_minWidth, m_maxWidth);
     LayoutUnit maxHeight = std::max(m_minHeight, m_maxHeight);
-    IntSize maxSize(maxWidth, maxHeight);
-
-    m_frame->view()->setFrameRect(IntRect(IntPoint(), maxSize));
-    m_frame->view()->setLayoutSize(maxSize);
+    m_frame->view()->renderView()->setFrameViewSize(IntSize(maxWidth, maxHeight));
 
     m_document->updateLayout();
 
