@@ -235,8 +235,10 @@ class Focus extends StatefulComponent {
     }
   }
 
-  String toStringName() {
-    return '${super.toStringName()}(focusedScope=$_focusedScope; focusedWidget=$_focusedWidget)';
+  void debugAddDetails(List<String> details) {
+    super.debugAddDetails(details);
+    details.add('focusedScope=$_focusedScope');
+    details.add('focusedWidget=$_focusedWidget');
   }
 
 }

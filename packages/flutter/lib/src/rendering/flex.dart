@@ -588,8 +588,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     });
   }
 
-  String toStringName() {
-    String header = super.toStringName();
+  String toString() {
+    String header = super.toString();
     if (_overflow is double && _overflow > 0.0)
       header += ' OVERFLOWING';
     return header;
