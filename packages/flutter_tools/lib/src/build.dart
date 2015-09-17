@@ -174,7 +174,8 @@ class BuildCommandHandler extends CommandHandler {
     }
 
     File outputFile = new File(results['output-file']);
-    await outputFile.writeAsBytes(new ZipEncoder().encode(archive));
+    await outputFile.writeAsString('#!mojo mojo:sky_viewer\n')
+    await outputFile.writeAsBytes(new ZipEncoder().encode(archive), mode: FileMode.APPEND);
     return 0;
   }
 }
