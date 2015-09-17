@@ -377,8 +377,13 @@ abstract class Widget {
 
   void remove() {
     walkChildren((Widget child) {
-      if (child._generation <= _generation)
+      if (child.isFromOldGeneration || !isFromOldGeneration) {
+        assert(child.parent == this);
         child.remove();
+      } else {
+        // if it's from the current generation and we're not, it means it's been moved somewhere else in the tree already and isn't really our child anymore
+        assert(child.parent != this);
+      }
     });
     _renderObject = null;
     setParent(null);
