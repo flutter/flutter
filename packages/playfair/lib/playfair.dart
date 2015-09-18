@@ -7,8 +7,8 @@ library playfair;
 import 'dart:sky' as sky;
 import 'dart:math' as math;
 
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/typography.dart';
 import 'package:sky/widgets.dart';
 
 part 'src/base.dart';
