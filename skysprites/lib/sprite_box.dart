@@ -178,11 +178,11 @@ class SpriteBox extends RenderBox {
     }
   }
 
-  EventDisposition handleEvent(Event event, _SpriteBoxHitTestEntry entry) {
+  EventDisposition handleEvent(sky.Event event, _SpriteBoxHitTestEntry entry) {
     if (!attached)
       return EventDisposition.ignored;
 
-    if (event is PointerEvent) {
+    if (event is sky.PointerEvent) {
 
       if (event.type == 'pointerdown') {
         // Build list of event targets
