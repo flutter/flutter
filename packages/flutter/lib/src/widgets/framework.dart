@@ -22,7 +22,7 @@ export 'package:sky/src/rendering/object.dart' show Point, Offset, Size, Rect, C
 final bool _shouldLogRenderDuration = false; // see also 'enableProfilingLoop' argument to runApp()
 
 typedef Widget Builder();
-typedef void WidgetTreeWalker(Widget);
+typedef void WidgetTreeWalker(Widget widget);
 
 abstract class Key {
   const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
