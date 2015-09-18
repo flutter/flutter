@@ -156,6 +156,13 @@ class EditableText extends StatefulComponent {
   Timer _cursorTimer;
   bool _showCursor = false;
 
+  /// Whether the blinking cursor is visible (exposed for testing).
+  bool get test_showCursor => _showCursor;
+
+  /// The cursor blink interval (exposed for testing).
+  Duration get test_cursorBlinkPeriod =>
+      new Duration(milliseconds: _kCursorBlinkPeriod);
+
   void _cursorTick(Timer timer) {
     setState(() {
       _showCursor = !_showCursor;
@@ -184,11 +191,12 @@ class EditableText extends StatefulComponent {
     if (!_showCursor)
       return;
 
+    double cursorHeight = style.fontSize + 2.0 * _kCursorHeightOffset;
     Rect cursorRect =  new Rect.fromLTWH(
       _kCursorGap,
-      -_kCursorHeightOffset,
+      (size.height - cursorHeight) / 2.0,
       _kCursorWidth,
-      style.fontSize + 2 * _kCursorHeightOffset
+      cursorHeight
     );
     canvas.drawRect(cursorRect, new Paint()..color = cursorColor);
   }
@@ -203,21 +211,22 @@ class EditableText extends StatefulComponent {
     else if (!focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    if (!value.composing.isValid) {
+    Widget text;
+    if (value.composing.isValid) {
+      TextStyle composingStyle = style.merge(const TextStyle(decoration: underline));
+      text = new StyledText(elements: [
+        style,
+        value.textBefore(value.composing),
+        [composingStyle, value.textInside(value.composing)],
+        value.textAfter(value.composing)
+      ]);
+    } else {
       // TODO(eseidel): This is the wrong height if empty!
-      return new Row([new Text(value.text, style: style)]);
+      text = new Text(value.text, style: style);
     }
 
-    TextStyle composingStyle = style.merge(const TextStyle(decoration: underline));
-    StyledText text = new StyledText(elements: [
-      style,
-      value.textBefore(value.composing),
-      [composingStyle, value.textInside(value.composing)],
-      value.textAfter(value.composing)
-    ]);
-
     Widget cursor = new Container(
-      height: style.fontSize,
+      height: style.fontSize * style.height,
       width: _kCursorGap + _kCursorWidth,
       child: new CustomPaint(callback: _paintCursor, token: _showCursor)
     );
