@@ -227,7 +227,7 @@ void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
 void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {
   if (current_layer_tree_) {
     compositor::PaintContext::ScopedFrame frame =
-        paint_context_.AcquireFrame(*canvas, nullptr);
+        paint_context_.AcquireFrame(*canvas);
     current_layer_tree_->root_layer()->Paint(frame);
   }
 }

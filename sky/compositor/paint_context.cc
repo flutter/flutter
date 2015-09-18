@@ -18,7 +18,6 @@ void PaintContext::beginFrame(ScopedFrame& frame) {
 }
 
 void PaintContext::endFrame(ScopedFrame& frame) {
-  rasterizer_.PurgeCache();
   frame_time_.stop();
 
   DisplayStatistics(frame);
@@ -50,26 +49,13 @@ void PaintContext::DisplayStatistics(ScopedFrame& frame) {
     PaintContext_DrawStatisticsText(frame.canvas(), stream.str(), x, y);
     y += kLineSpacing;
   }
-
-  if (options_.isEnabled(
-          CompositorOptions::Option::DisplayRasterizerStatistics)) {
-    // Rasterizer: Hits: 2 Misses: 4 Evictions: 8
-    std::stringstream stream;
-    stream << "Rasterizer Hits: " << rasterizer_.cache_hits().count()
-           << " Fills: " << rasterizer_.cache_fills().count()
-           << " Evictions: " << rasterizer_.cache_evictions().count();
-    PaintContext_DrawStatisticsText(frame.canvas(), stream.str(), x, y);
-    y += kLineSpacing;
-  }
 }
 
-PaintContext::ScopedFrame PaintContext::AcquireFrame(SkCanvas& canvas,
-                                                     GrContext* gr_context) {
-  return ScopedFrame(*this, canvas, gr_context);
+PaintContext::ScopedFrame PaintContext::AcquireFrame(SkCanvas& canvas) {
+  return ScopedFrame(*this, canvas);
 }
 
 PaintContext::~PaintContext() {
-  rasterizer_.PurgeCache();
 }
 
 }  // namespace compositor

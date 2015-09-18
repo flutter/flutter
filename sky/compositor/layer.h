@@ -21,7 +21,6 @@
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 #include "sky/compositor/paint_context.h"
-#include "sky/compositor/picture_rasterizer.h"
 
 namespace sky {
 namespace compositor {

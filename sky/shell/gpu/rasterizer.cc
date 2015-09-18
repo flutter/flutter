@@ -79,7 +79,7 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
 
   canvas->clear(SK_ColorBLACK);
   {
-    auto frame = paint_context_.AcquireFrame(*canvas, ganesh_context_->gr());
+    auto frame = paint_context_.AcquireFrame(*canvas);
     layer_tree->root_layer()->Paint(frame);
   }
   canvas->flush();
