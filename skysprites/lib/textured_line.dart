@@ -75,6 +75,8 @@ class TexturedLinePainter {
     _calculatedTextureStops = null;
   }
 
+  sky.TransferMode transferMode = sky.TransferMode.srcOver;
+
   Paint _cachedPaint = new Paint();
 
   void paint(PaintingCanvas canvas) {
@@ -84,6 +86,8 @@ class TexturedLinePainter {
 
     assert(_points.length == colors.length);
     assert(_points.length == widths.length);
+
+    _cachedPaint.transferMode = transferMode;
 
     // Calculate normals
     List<Vector2> vectors = [];
@@ -216,7 +220,13 @@ Vector2 _computeMiter(Vector2 lineA, Vector2 lineB) {
   Vector2 miter = new Vector2(- (lineA[1] + lineB[1]), lineA[0] + lineB[0]);
   miter.normalize();
 
-  double miterLength = 1.0 / dot2(miter, new Vector2(-lineA[1], lineA[0]));
+  double dot = dot2(miter, new Vector2(-lineA[1], lineA[0]));
+  if (dot.abs() < 0.1) {
+    miter = _vectorNormal(lineA).normalize();
+    return miter;
+  }
+
+  double miterLength = 1.0 / dot;
   miter = miter.scale(miterLength);
 
   return miter;

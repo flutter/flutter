@@ -42,19 +42,20 @@ class TestApp extends App {
   List<String> _labelTexts = [
     "Colored",
     "Smoke",
-    "Electric"
+    "Electric",
+    "Rocket Trail"
   ];
 
   Widget build() {
     ThemeData theme = new ThemeData(
       brightness: ThemeBrightness.light,
-      primarySwatch: Colors.purple
+      primarySwatch: Colors.blue
     );
 
     return new Theme(
       data: theme,
       child: new Title(
-        title: 'Test drawAtlas',
+        title: 'EffectLine Demo',
         child: _buildColumn()
       )
     );
@@ -114,11 +115,10 @@ class TestBed extends NodeWithSize {
       // Create a line with no texture and a color sequence
       _line = new EffectLine(
         texture: null,
-        colorSequence: new ColorSequence.fromStartAndEndColor(new Color(0xffff0000), new Color(0xff0000ff)),
+        colorSequence: new ColorSequence.fromStartAndEndColor(new Color(0xaaffff00), new Color(0xaaff9900)),
         widthMode: EffectLineWidthMode.barrel,
-        minWidth: 20.0,
-        maxWidth: 50.0,
-        animationMode: EffectLineAnimationMode.scroll,
+        minWidth: 10.0,
+        maxWidth: 15.0,
         fadeAfterDelay: 1.0,
         fadeDuration: 1.0
       );
@@ -146,6 +146,20 @@ class TestBed extends NodeWithSize {
         minWidth: 20.0,
         maxWidth: 100.0,
         animationMode: EffectLineAnimationMode.random
+      );
+    } else if (lineType == "Rocket Trail") {
+      Texture baseTexture = new Texture(_images['assets/line_effects.png']);
+      Texture trailLineTexture = baseTexture.textureFromRect(new Rect.fromLTRB(0.0, 896.0, 1024.0, 1024.0));
+
+      _line = new EffectLine(
+        texture: trailLineTexture,
+        textureLoopLength: 300.0,
+        widthMode: EffectLineWidthMode.barrel,
+        minWidth: 20.0,
+        maxWidth: 40.0,
+        widthGrowthSpeed: 40.0,
+        fadeAfterDelay: 0.5,
+        fadeDuration: 1.5
       );
     }
 
