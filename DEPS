@@ -21,7 +21,7 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'mojo_sdk_revision': '3ec8c53e9c9e5a8cd3cf251c4ae4754b75172225',
   'mojo_devtools_revision': '49879d78ce4486e10c2214a101d9b2e82794b2f4',
-  'skia_revision': 'ec00d94199fad7723b5987b86c1abef8ddafe2d8',
+  'skia_revision': '0d39d37ddcfb3847795639eaef513f1112eba627',
   'dart_revision': 'cab003366785773ace16b5305ac1f33c228cac54',
   'dart_observatory_packages_revision': 'cdc4b3d4c15b9c0c8e7702dff127b440afbb7485',
 
