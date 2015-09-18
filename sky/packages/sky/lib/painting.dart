@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Utilities for painting.
+/// The Flutter painting library
 ///
-/// This library includes and re-exports a variety of classes that wrap the Sky
+/// This library includes a variety of classes that wrap the Sky
 /// engine's painting API for more specialised purposes, such as painting scaled
 /// images, interpolating between shadows, painting borders around boxes, etc.
+///
+/// This library depends only on the core Dart libraries and animation.dart.
+/// Note: animation.dart depends on the `newton` package.
 library painting;
 
 export 'src/painting/box_painter.dart';

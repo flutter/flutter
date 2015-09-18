@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Sky animation engine.
+/// The Flutter animation engine.
 ///
-/// This library includes and re-exports all Sky animation classes.
+/// This library depends only on core Dart libraries and the `newton` package.
 library animation;
 
 export 'src/animation/animated_simulation.dart';

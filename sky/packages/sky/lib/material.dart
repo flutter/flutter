@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Widgets implementing Material Design
+/// Flutter widgets implementing Material Design
 ///
 /// See https://www.google.com/design/spec/material-design/introduction.html
 library material;
