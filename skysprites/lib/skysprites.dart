@@ -8,16 +8,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:sky';
+import 'dart:sky' as sky;
 
 import 'package:mojo/core.dart';
+import 'package:sky_services/media/media.mojom.dart';
 import 'package:sky/animation.dart';
 import 'package:sky/painting.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky_services/media/media.mojom.dart';
+import 'package:sky/widgets.dart';
 import 'package:vector_math/vector_math.dart';
 
 part 'action.dart';
