@@ -205,7 +205,7 @@ class EditableText extends StatefulComponent {
 
     if (!value.composing.isValid) {
       // TODO(eseidel): This is the wrong height if empty!
-      return new Text(value.text, style: style);
+      return new Row([new Text(value.text, style: style)]);
     }
 
     TextStyle composingStyle = style.merge(const TextStyle(decoration: underline));
