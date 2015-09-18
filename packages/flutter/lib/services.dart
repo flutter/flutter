@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Services provided by Mojo
+/// System services exposed to Flutter apps
+///
+/// For example, this library includes [fetch], which fetches data from the
+/// network.
+///
+/// This library depends only on core Dart libraries as well as the `mojo`,
+/// `mojo_services`, and `sky_services` and packages.
 library services;
 
 export 'src/services/activity.dart';

@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Sky render tree.
-///
-/// This library includes and re-exports all Sky rendering classes.
+/// The Flutter rendering tree
 library rendering;
 
 export 'package:sky/src/rendering/auto_layout.dart';

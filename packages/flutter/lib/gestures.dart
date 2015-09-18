@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Sky gesture recognizers
+/// The Flutter gesture recognizers
 library gestures;
 
 export 'src/gestures/arena.dart';
