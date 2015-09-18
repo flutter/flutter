@@ -10,6 +10,7 @@ import 'package:sky_tools/src/build.dart';
 import 'package:sky_tools/src/common.dart';
 import 'package:sky_tools/src/init.dart';
 import 'package:sky_tools/src/install.dart';
+import 'package:sky_tools/src/run_mojo.dart';
 
 void main(List<String> args) {
   Logger.root.level = Level.WARNING;
@@ -43,6 +44,7 @@ void main(List<String> args) {
     new BuildCommandHandler(),
     new InitCommandHandler(),
     new InstallCommandHandler(),
+    new RunMojoCommandHandler(),
   ]) {
     parser.addCommand(handler.name, handler.parser);
     handlers[handler.name] = handler;

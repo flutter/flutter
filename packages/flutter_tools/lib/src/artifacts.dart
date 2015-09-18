@@ -11,12 +11,15 @@ import 'package:logging/logging.dart';
 
 final Logger _logging = new Logger('sky_tools.device');
 
-enum Artifact {
-  FlutterCompiler,
-}
+enum Artifact { FlutterCompiler, SkyViewerMojo, }
 
 class _ArtifactStore {
   _ArtifactStore._();
+
+  // Keep in sync with https://github.com/flutter/engine/blob/master/sky/tools/big_red_button.py#L50
+  String _googleStorageUrl(String category, String name, String engineRevision) {
+    return 'https://storage.googleapis.com/mojo/sky/${category}/linux-x64/${engineRevision}/${name}';
+  }
 
   Future _downloadFile(String url, File file) async {
     _logging.fine('Downloading $url to ${file.path}');
@@ -44,23 +47,39 @@ class _ArtifactStore {
     return cacheDir;
   }
 
+  // Whether the artifact needs to be marked as executable on disk.
+  bool _needsToBeExecutable(Artifact artifact) {
+    return artifact == Artifact.FlutterCompiler;
+  }
+
   Future<String> getPath(Artifact artifact, String packageRoot) async {
     String engineRevision = await _getEngineRevision(packageRoot);
     Directory cacheDir = await _cacheDir(engineRevision, packageRoot);
 
+    String category, name;
+
     if (artifact == Artifact.FlutterCompiler) {
-      File skySnapshotFile = new File(cacheDir.path + 'sky_snapshot');
-      if (!await skySnapshotFile.exists()) {
-        _logging.info('Downloading sky_snapshot from the cloud, one moment please...');
-        String googleStorageUrl = 'https://storage.googleapis.com/mojo/sky/shell/linux-x64/${engineRevision}/sky_snapshot';
-        await _downloadFile(googleStorageUrl, skySnapshotFile);
-        ProcessResult result = await Process.run('chmod', ['u+x', skySnapshotFile.path]);
-        if (result.exitCode != 0) throw new Exception(result.stderr);
-      }
-      return skySnapshotFile.path;
+      category = 'shell';
+      name = 'sky_snapshot';
+    } else if (artifact == Artifact.SkyViewerMojo) {
+      category = 'viewer';
+      name = 'sky_viewer.mojo';
+    } else {
+      // Unknown artifact.
+      return '';
     }
 
-    return '';
+    File cachedFile = new File(cacheDir.path + name);
+    if (!await cachedFile.exists()) {
+      _logging.info('Downloading ${name} from the cloud, one moment please...');
+      String googleStorageUrl = _googleStorageUrl(category, name, engineRevision);
+      await _downloadFile(googleStorageUrl, cachedFile);
+      if (_needsToBeExecutable(artifact)) {
+        ProcessResult result = await Process.run('chmod', ['u+x', cachedFile.path]);
+        if (result.exitCode != 0) throw new Exception(result.stderr);
+      }
+    }
+    return cachedFile.path;
   }
 }
 
