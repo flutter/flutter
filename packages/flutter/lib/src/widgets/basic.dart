@@ -544,12 +544,12 @@ class Positioned extends ParentDataNode {
   final double bottom;
   final double left;
 
-   void debugValidateAncestor(Widget ancestor) {
-     assert(() {
-       'Positioned must placed directly inside a Stack';
-       return ancestor is Stack;
-     });
-   }
+  void debugValidateAncestor(Widget ancestor) {
+    assert(() {
+      'Positioned must placed directly inside a Stack';
+      return ancestor is Stack;
+    });
+  }
 }
 
 class Grid extends MultiChildRenderObjectWrapper {
