@@ -4,6 +4,7 @@
 
 library stocks;
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 

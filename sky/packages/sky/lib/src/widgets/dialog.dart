@@ -141,11 +141,11 @@ class DialogRoute extends RouteBase {
 
   Duration get transitionDuration => _kTransitionDuration;
   bool get isOpaque => false;
-  Widget build(Key key, Navigator navigator, RouteBase route, WatchableAnimationPerformance performance) {
+  Widget build(Key key, Navigator navigator, WatchableAnimationPerformance performance) {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-      child: builder(navigator, route)
+      child: builder(navigator, this)
     );
   }
 
