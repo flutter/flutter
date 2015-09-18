@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/widgets.dart';
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/material.dart';
 
 void main() => runApp(new DatePickerDemo());
 
@@ -26,7 +26,7 @@ class DatePickerDemo extends App {
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,
-        primarySwatch: colors.Teal
+        primarySwatch: Colors.teal
       ),
       child: new Stack([
         new Scaffold(

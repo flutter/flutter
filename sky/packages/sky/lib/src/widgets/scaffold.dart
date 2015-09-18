@@ -4,9 +4,8 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/theme/view_configuration.dart';
+import 'package:sky/material.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/framework.dart';
 
 // Slots are painted in this order and hit tested in reverse of this order

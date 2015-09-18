@@ -5,15 +5,14 @@
 import 'dart:sky';
 
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/shadows.dart';
+import 'package:sky/material.dart';
 
 void main() {
   var coloredBox = new RenderDecoratedBox(
     decoration: new BoxDecoration(
       gradient: new RadialGradient(
         center: Point.origin, radius: 500.0,
-        colors: [colors.Yellow[500], colors.Blue[500]]),
+        colors: [Colors.yellow[500], Colors.blue[500]]),
       boxShadow: shadows[3])
   );
   var paddedBox = new RenderPadding(

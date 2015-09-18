@@ -41,7 +41,8 @@ void main() {
   test('duplicate key smoke test', () {
     WidgetTester tester = new WidgetTester();
     tester.pumpFrame(builder);
-    tester.findWidget((widget) => widget is StatefulLeaf).test();
+    StatefulLeaf leaf = tester.findWidget((widget) => widget is StatefulLeaf);
+    leaf.test();
     tester.pumpFrameWithoutChange();
     Item lastItem = items[1];
     items.remove(lastItem);

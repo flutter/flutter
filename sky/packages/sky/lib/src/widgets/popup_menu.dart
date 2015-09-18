@@ -6,8 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/theme/colors.dart';
-import 'package:sky/theme/shadows.dart';
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/navigator.dart';
@@ -78,7 +77,7 @@ class PopupMenu extends StatefulComponent {
 
   void _updateBoxPainter() {
     _painter = new BoxPainter(new BoxDecoration(
-      backgroundColor: Grey[50],
+      backgroundColor: Colors.grey[50],
       borderRadius: 2.0,
       boxShadow: shadows[level]));
   }

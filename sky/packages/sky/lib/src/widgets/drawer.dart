@@ -5,8 +5,7 @@
 import 'dart:async';
 
 import 'package:sky/animation.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/shadows.dart';
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/animated_container.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/basic.dart';
@@ -85,7 +84,7 @@ class Drawer extends StatefulComponent {
       child: new ColorTransition(
         performance: _performance,
         direction: showing ? Direction.forward : Direction.reverse,
-        color: new AnimatedColorValue(colors.transparent, end: const Color(0x7F000000)),
+        color: new AnimatedColorValue(Colors.transparent, end: const Color(0x7F000000)),
         child: new Container()
       ),
       onTap: () {

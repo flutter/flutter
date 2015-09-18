@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:sky/animation.dart';
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/focus.dart';
@@ -58,9 +58,9 @@ class Dialog extends Component {
   Color get _color {
     switch (Theme.of(this).brightness) {
       case ThemeBrightness.light:
-        return colors.white;
+        return Colors.white;
       case ThemeBrightness.dark:
-        return colors.Grey[800];
+        return Colors.grey[800];
     }
   }
 

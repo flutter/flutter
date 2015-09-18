@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/material_button.dart';
@@ -25,9 +25,9 @@ class RaisedButton extends MaterialButton {
       switch (Theme.of(this).brightness) {
         case ThemeBrightness.light:
           if (highlight)
-            return colors.Grey[350];
+            return Colors.grey[350];
           else
-            return colors.Grey[300];
+            return Colors.grey[300];
           break;
         case ThemeBrightness.dark:
           if (highlight)
@@ -37,7 +37,7 @@ class RaisedButton extends MaterialButton {
           break;
       }
     } else {
-      return colors.Grey[350];
+      return Colors.grey[350];
     }
   }
 

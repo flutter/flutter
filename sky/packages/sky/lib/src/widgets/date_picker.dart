@@ -6,9 +6,8 @@ import 'dart:async';
 
 import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
+import 'package:sky/material.dart';
 import 'package:sky/services.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
@@ -129,19 +128,19 @@ class DatePickerHeader extends Component {
 
   Widget build() {
     ThemeData theme = Theme.of(this);
-    typography.TextTheme headerTheme;
+    TextTheme headerTheme;
     Color dayColor;
     Color yearColor;
     switch(theme.primaryColorBrightness) {
       case ThemeBrightness.light:
-        headerTheme = typography.black;
-        dayColor = mode == DatePickerMode.day ? colors.black87 : colors.black54;
-        yearColor = mode == DatePickerMode.year ? colors.black87 : colors.black54;
+        headerTheme = Typography.black;
+        dayColor = mode == DatePickerMode.day ? Colors.black87 : Colors.black54;
+        yearColor = mode == DatePickerMode.year ? Colors.black87 : Colors.black54;
         break;
       case ThemeBrightness.dark:
-        headerTheme = typography.white;
-        dayColor = mode == DatePickerMode.day ? colors.white87 : colors.white54;
-        yearColor = mode == DatePickerMode.year ? colors.white87 : colors.white54;
+        headerTheme = Typography.white;
+        dayColor = mode == DatePickerMode.day ? Colors.white87 : Colors.white54;
+        yearColor = mode == DatePickerMode.year ? Colors.white87 : Colors.white54;
         break;
     }
     TextStyle dayStyle = headerTheme.display3.copyWith(color: dayColor, height: 1.0, fontSize: 100.0);
@@ -383,7 +382,7 @@ class YearPicker extends ScrollableWidgetList {
   int get itemCount => lastDate.year - firstDate.year + 1;
 
   List<Widget> buildItems(int start, int count) {
-    TextStyle style = Theme.of(this).text.body1.copyWith(color: colors.black54);
+    TextStyle style = Theme.of(this).text.body1.copyWith(color: Colors.black54);
     List<Widget> items = new List<Widget>();
     for(int i = start; i < start + count; i++) {
       int year = firstDate.year + i;

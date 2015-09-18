@@ -4,8 +4,8 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
 
 class CardModel {
@@ -67,7 +67,7 @@ class Marker extends Component {
 class OverlayGeometryApp extends App {
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: colors.white, fontSize: 18.0, fontWeight: bold);
+    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
 
   List<CardModel> cardModels;
   MixedViewportLayoutState layoutState = new MixedViewportLayoutState();
@@ -82,7 +82,7 @@ class OverlayGeometryApp extends App {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
     ];
     cardModels = new List.generate(cardHeights.length, (i) {
-      Color color = Color.lerp(colors.Red[300], colors.Blue[900], i / cardHeights.length);
+      Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
     super.initState();
@@ -163,8 +163,8 @@ class OverlayGeometryApp extends App {
       child: new Theme(
         data: new ThemeData(
           brightness: ThemeBrightness.light,
-          primarySwatch: colors.Blue,
-          accentColor: colors.RedAccent[200]
+          primarySwatch: Colors.blue,
+          accentColor: Colors.redAccent[200]
         ),
         child: new Title(title: 'Cards', child: new Stack(layers))
       )

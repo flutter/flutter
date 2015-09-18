@@ -4,8 +4,9 @@
 
 import 'dart:async';
 
-import 'package:sky/services.dart';
+import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
+import 'package:sky/services.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/button_base.dart';
@@ -13,7 +14,6 @@ import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/navigator.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/title.dart';
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:skysprites/skysprites.dart';
 
 import 'game_demo.dart';
@@ -99,7 +99,7 @@ class GameDemoApp extends App {
     // a custom theme swatch to match the purples in the sprites.
     ThemeData theme = new ThemeData(
       brightness: ThemeBrightness.light,
-      primarySwatch: colors.Purple
+      primarySwatch: Colors.purple
     );
 
     return new Theme(

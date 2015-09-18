@@ -4,15 +4,13 @@
 
 import 'package:sky/src/widgets/theme.dart';
 
+import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/src/rendering/flex.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/icon.dart';
-import 'package:sky/theme/shadows.dart';
-import 'package:sky/theme/typography.dart' as typography;
-import 'package:sky/theme/view_configuration.dart';
 
 class ToolBar extends Component {
 
@@ -32,14 +30,14 @@ class ToolBar extends Component {
   Widget build() {
     Color toolbarColor = backgroundColor;
     IconThemeData iconThemeData;
-    TextStyle centerStyle = typography.white.title;
-    TextStyle sideStyle = typography.white.body1;
+    TextStyle centerStyle = Typography.white.title;
+    TextStyle sideStyle = Typography.white.body1;
     if (toolbarColor == null) {
       ThemeData themeData = Theme.of(this);
       toolbarColor = themeData.primaryColor;
       if (themeData.primaryColorBrightness == ThemeBrightness.light) {
-        centerStyle = typography.black.title;
-        sideStyle = typography.black.body2;
+        centerStyle = Typography.black.title;
+        sideStyle = Typography.black.body2;
         iconThemeData = const IconThemeData(color: IconThemeColor.black);
       } else {
         iconThemeData = const IconThemeData(color: IconThemeColor.white);

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/painting.dart';
-import 'package:sky/theme/shadows.dart';
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/animated_container.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/default_text_style.dart';

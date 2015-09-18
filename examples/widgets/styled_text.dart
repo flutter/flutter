@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
 
 class StyledTextApp extends App {
@@ -32,8 +32,8 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
   // [["Dave", "Open the pod bay..."] ...]
   List<List<String>> nameLines;
 
-  final TextStyle daveStyle = new TextStyle(color: colors.Indigo[400], height: 1.8);
-  final TextStyle halStyle = new TextStyle(color: colors.Red[400], fontFamily: "monospace");
+  final TextStyle daveStyle = new TextStyle(color: Colors.indigo[400], height: 1.8);
+  final TextStyle halStyle = new TextStyle(color: Colors.red[400], fontFamily: "monospace");
   final TextStyle boldStyle = const TextStyle(fontWeight: bold);
   final TextStyle underlineStyle = const TextStyle(
     decoration: underline,
@@ -100,7 +100,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
       data: new ThemeData.light(),
       child: new Scaffold(
         body: new Material(
-          color: colors.Grey[50],
+          color: Colors.grey[50],
           child: interactiveBody
         ),
         toolbar: new ToolBar(

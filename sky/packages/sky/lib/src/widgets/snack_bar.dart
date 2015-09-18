@@ -5,7 +5,7 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
@@ -63,7 +63,7 @@ class SnackBar extends Component {
         child: new Container(
           margin: const EdgeDims.symmetric(vertical: 14.0),
           child: new DefaultTextStyle(
-            style: typography.white.subhead,
+            style: Typography.white.subhead,
             child: content
           )
         )

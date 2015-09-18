@@ -4,17 +4,17 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
 
 // Material design colors. :p
 List<Color> kColors = [
-  colors.Teal[500],
-  colors.Amber[500],
-  colors.Purple[500],
-  colors.LightBlue[500],
-  colors.DeepPurple[500],
-  colors.Lime[500],
+  Colors.teal[500],
+  Colors.amber[500],
+  Colors.purple[500],
+  Colors.lightBlue[500],
+  Colors.deepPurple[500],
+  Colors.lime[500],
 ];
 
 class Dot {
