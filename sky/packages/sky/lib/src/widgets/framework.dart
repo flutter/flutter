@@ -1655,6 +1655,16 @@ class ErrorWidget extends LeafRenderObjectWrapper {
   RenderBox createNode() => new RenderErrorBox();
 }
 
+typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTrace stack);
+/// This callback is invoked whenever an exception is caught by the widget
+/// system. The 'context' argument is a description of what was happening when
+/// the exception occurred, and may include additional details such as
+/// descriptions of the objects involved. The 'exception' argument contains the
+/// object that was thrown, and the 'stack' argument contains the stack trace.
+/// The callback is invoked after the information is printed to the console, and
+/// could be used to print additional information, such as from
+/// [debugDumpApp()].
+WidgetsExceptionHandler debugWidgetsExceptionHandler;
 void _debugReportException(String context, dynamic exception, StackTrace stack) {
   print('------------------------------------------------------------------------');
   'Exception caught while $context'.split('\n').forEach(print);
@@ -1663,7 +1673,7 @@ void _debugReportException(String context, dynamic exception, StackTrace stack) 
   '$stack'.split('\n').forEach(print);
   print('Build stack:');
   Component._debugComponentBuildTree.forEach((Component component) { print('  $component'); });
-  print('Current application widget tree:');
-  debugDumpApp();
+  if (debugWidgetsExceptionHandler != null)
+    debugWidgetsExceptionHandler(context, exception, stack);
   print('------------------------------------------------------------------------');
 }
