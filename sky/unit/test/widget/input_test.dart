@@ -1,4 +1,5 @@
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
+import 'package:quiver/testing/async.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
@@ -20,11 +21,11 @@ class MockKeyboard implements KeyboardService {
 }
 
 void main() {
+  MockKeyboard mockKeyboard = new MockKeyboard();
+  serviceMocker.registerMockService(KeyboardServiceName, mockKeyboard);
+
   test('Editable text has consistent width', () {
     WidgetTester tester = new WidgetTester();
-
-    MockKeyboard mockKeyboard = new MockKeyboard();
-    serviceMocker.registerMockService(KeyboardServiceName, mockKeyboard);
 
     GlobalKey inputKey = new GlobalKey();
     String inputValue;
@@ -56,5 +57,42 @@ void main() {
 
     // Check that the Input with text has the same size as the empty Input.
     expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
+  });
+
+  test('Cursor blinks', () {
+    WidgetTester tester = new WidgetTester();
+
+    GlobalKey inputKey = new GlobalKey();
+
+    Widget builder() {
+      return new Center(
+        child: new Input(
+          key: inputKey,
+          placeholder: 'Placeholder'
+        )
+      );
+    }
+
+    new FakeAsync().run((async) {
+      tester.pumpFrame(builder);
+
+      EditableText editableText = tester.findWidget(
+          (Widget widget) => widget is EditableText);
+
+      // Check that the cursor visibility toggles after each blink interval.
+      void checkCursorToggle() {
+        bool initialShowCursor = editableText.test_showCursor;
+        async.elapse(editableText.test_cursorBlinkPeriod);
+        expect(editableText.test_showCursor, equals(!initialShowCursor));
+        async.elapse(editableText.test_cursorBlinkPeriod);
+        expect(editableText.test_showCursor, equals(initialShowCursor));
+      }
+
+      checkCursorToggle();
+
+      // Try the test again with a nonempty EditableText.
+      mockKeyboard.client.setComposingText('X', 1);
+      checkCursorToggle();
+    });
   });
 }
