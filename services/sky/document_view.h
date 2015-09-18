@@ -23,7 +23,6 @@
 #include "services/sky/compositor/layer_client.h"
 #include "services/sky/compositor/layer_host_client.h"
 #include "sky/compositor/layer_tree.h"
-#include "sky/compositor/picture_rasterizer.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
