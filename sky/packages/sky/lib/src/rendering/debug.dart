@@ -4,19 +4,6 @@
 
 import 'dart:sky' as sky;
 
-/// Indicates whether we're running with asserts enabled.
-final bool inDebugBuild = _initInDebugBuild();
-
-bool _initInDebugBuild() {
-  bool _inDebug = false;
-  bool setAssert() {
-    _inDebug = true;
-    return true;
-  }
-  assert(setAssert());
-  return _inDebug;
-}
-
 /// Causes each RenderBox to paint a box around its bounds.
 bool debugPaintSizeEnabled = false;
 
@@ -43,6 +30,3 @@ bool debugPaintBoundsEnabled = false;
 
 /// The color to use when painting RenderError boxes in checked mode.
 sky.Color debugErrorBoxColor = const sky.Color(0xFFFF0000);
-
-/// How many lines of debugging output to include when an exception is reported.
-int debugRenderObjectDumpMaxLength = 10;
