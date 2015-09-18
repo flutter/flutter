@@ -54,6 +54,10 @@ class Dismissable extends StatefulComponent {
 
   void initState() {
     _fadePerformance = new AnimationPerformance(duration: _kCardDismissFadeout);
+    _fadePerformance.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed)
+        _handleFadeCompleted();
+    });
   }
 
   void syncConstructorArguments(Dismissable source) {
@@ -99,6 +103,7 @@ class Dismissable extends StatefulComponent {
       _resizePerformance = new AnimationPerformance()
         ..duration = _kCardDismissResize
         ..addListener(_handleResizeProgressChanged);
+      _resizePerformance.play();
     });
   }
 
@@ -226,8 +231,7 @@ class Dismissable extends StatefulComponent {
       );
 
       return new SquashTransition(
-        performance: _resizePerformance,
-        direction: Direction.forward,
+        performance: _resizePerformance.view,
         width: _directionIsYAxis ? squashAxisExtent : null,
         height: !_directionIsYAxis ? squashAxisExtent : null
       );
@@ -243,11 +247,10 @@ class Dismissable extends StatefulComponent {
       child: new SizeObserver(
         callback: _handleSizeChanged,
         child: new FadeTransition(
-          performance: _fadePerformance,
-          onCompleted: _handleFadeCompleted,
+          performance: _fadePerformance.view,
           opacity: new AnimatedValue<double>(1.0, end: 0.0),
           child: new SlideTransition(
-            performance: _fadePerformance,
+            performance: _fadePerformance.view,
             position: new AnimatedValue<Point>(Point.origin, end: _activeCardDragEndPoint),
             child: child
           )

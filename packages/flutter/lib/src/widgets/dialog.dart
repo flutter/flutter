@@ -131,6 +131,8 @@ class Dialog extends Component {
   }
 }
 
+const Duration _kTransitionDuration = const Duration(milliseconds: 150);
+
 class DialogRoute extends RouteBase {
   DialogRoute({ this.completer, this.builder });
 
@@ -144,28 +146,10 @@ class DialogRoute extends RouteBase {
     completer.complete(result);
   }
 
-  TransitionBase buildTransition({ Key key }) => new DialogTransition(key: key);
-}
-
-const Duration _kTransitionDuration = const Duration(milliseconds: 150);
-class DialogTransition extends TransitionBase {
-  DialogTransition({
-    Key key,
-    Widget child,
-    Direction direction,
-    Function onDismissed,
-    Function onCompleted
-  }): super(key: key,
-            child: child,
-            duration: _kTransitionDuration,
-            direction: direction,
-            onDismissed: onDismissed,
-            onCompleted: onCompleted);
-
-  Widget buildWithChild(Widget child) {
+  Duration get transitionDuration => _kTransitionDuration;
+  TransitionBase buildTransition({ Key key, Widget child, WatchableAnimationPerformance performance }) {
     return new FadeTransition(
       performance: performance,
-      direction: direction,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
       child: child
     );

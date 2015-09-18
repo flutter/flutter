@@ -25,16 +25,21 @@ abstract class ProgressIndicator extends StatefulComponent {
   double value; // Null for non-determinate progress indicator.
   double bufferValue; // TODO(hansmuller) implement the support for this.
 
-  AnimationPerformance _animation;
-  double get _animationValue => (_animation.variable as AnimatedValue<double>).value;
+  AnimationPerformance _performance;
+  double get _performanceValue => (_performance.variable as AnimatedValue<double>).value;
   Color get _backgroundColor => Theme.of(this).primarySwatch[200];
   Color get _valueColor => Theme.of(this).primaryColor;
-  Object get _customPaintToken => value != null ? value : _animationValue;
+  Object get _customPaintToken => value != null ? value : _performanceValue;
 
   void initState() {
-    _animation = new AnimationPerformance()
+    _performance = new AnimationPerformance()
       ..duration = const Duration(milliseconds: 1500)
       ..variable = new AnimatedValue<double>(0.0, end: 1.0, curve: ease);
+    _performance.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed)
+        _restartAnimation();
+    });
+    _performance.play();
   }
 
   void syncConstructorArguments(ProgressIndicator source) {
@@ -43,8 +48,8 @@ abstract class ProgressIndicator extends StatefulComponent {
   }
 
   void _restartAnimation() {
-    _animation.progress = 0.0;
-    _animation.play();
+    _performance.progress = 0.0;
+    _performance.play();
   }
 
   Widget build() {
@@ -52,10 +57,8 @@ abstract class ProgressIndicator extends StatefulComponent {
       return _buildIndicator();
 
     return new BuilderTransition(
-      variables: [_animation.variable],
-      direction: Direction.forward,
-      performance: _animation,
-      onCompleted: _restartAnimation,
+      variables: [_performance.variable],
+      performance: _performance.view,
       builder: _buildIndicator
     );
   }
@@ -81,7 +84,7 @@ class LinearProgressIndicator extends ProgressIndicator {
       double width = value.clamp(0.0, 1.0) * size.width;
       canvas.drawRect(Point.origin & new Size(width, size.height), paint);
     } else {
-      double startX = size.width * (1.5 * _animationValue - 0.5);
+      double startX = size.width * (1.5 * _performanceValue - 0.5);
       double endX = startX + 0.5 * size.width;
       double x = startX.clamp(0.0, size.width);
       double width = endX.clamp(0.0, size.width) - x;
@@ -125,7 +128,7 @@ class CircularProgressIndicator extends ProgressIndicator {
         ..arcTo(Point.origin & size, _kStartAngle, angle, false);
       canvas.drawPath(path, paint);
     } else {
-      double startAngle = _kTwoPI * (1.75 * _animationValue - 0.75);
+      double startAngle = _kTwoPI * (1.75 * _performanceValue - 0.75);
       double endAngle = startAngle + _kTwoPI * 0.75;
       double arcAngle = startAngle.clamp(0.0, _kTwoPI);
       double arcSweep = endAngle.clamp(0.0, _kTwoPI) - arcAngle;

@@ -58,32 +58,41 @@ class Drawer extends StatefulComponent {
 
   void initState() {
     _performance = new AnimationPerformance(duration: _kBaseSettleDuration);
-
+    _performance.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.dismissed)
+        _handleDismissed();
+    });
     // Use a spring force for animating the drawer. We can't use curves for
     // this because we need a linear curve in order to track the user's finger
     // while dragging.
     _performance.attachedForce = kDefaultSpringForce;
-
     if (navigator != null) {
+      // TODO(ianh): This is crazy. We should convert drawer to use a pattern like openDialog().
+      // https://github.com/domokit/sky_engine/pull/1186
       scheduleMicrotask(() {
         navigator.pushState(this, (_) => _performance.reverse());
       });
     }
+    _performance.play(_direction);
   }
+
+  Direction get _direction => showing ? Direction.forward : Direction.reverse;
 
   void syncConstructorArguments(Drawer source) {
     children = source.children;
+    if (showing != source.showing) {
+      showing = source.showing;
+      _performance.play(_direction);
+    }
     level = source.level;
-    navigator = source.navigator;
-    showing = source.showing;
     onDismissed = source.onDismissed;
+    navigator = source.navigator;
   }
 
   Widget build() {
     var mask = new GestureDetector(
       child: new ColorTransition(
-        performance: _performance,
-        direction: showing ? Direction.forward : Direction.reverse,
+        performance: _performance.view,
         color: new AnimatedColorValue(Colors.transparent, end: const Color(0x7F000000)),
         child: new Container()
       ),
@@ -93,10 +102,8 @@ class Drawer extends StatefulComponent {
     );
 
     Widget content = new SlideTransition(
-      performance: _performance,
-      direction: showing ? Direction.forward : Direction.reverse,
+      performance: _performance.view,
       position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
-      onDismissed: _onDismissed,
       child: new AnimatedContainer(
         behavior: implicitlyAnimate(const Duration(milliseconds: 200)),
         decoration: new BoxDecoration(
@@ -115,7 +122,7 @@ class Drawer extends StatefulComponent {
     );
   }
 
-  void _onDismissed() {
+  void _handleDismissed() {
     if (navigator != null &&
         navigator.currentRoute is RouteState &&
         (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer

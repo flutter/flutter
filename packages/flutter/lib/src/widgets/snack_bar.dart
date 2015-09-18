@@ -6,6 +6,7 @@
 import 'package:sky/animation.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/material.dart';
+import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
@@ -17,6 +18,7 @@ import 'package:sky/src/widgets/transitions.dart';
 typedef void SnackBarDismissedCallback();
 
 const Duration _kSlideInDuration = const Duration(milliseconds: 200);
+// TODO(ianh): factor out some of the constants below
 
 class SnackBarAction extends Component {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
@@ -38,24 +40,36 @@ class SnackBarAction extends Component {
   }
 }
 
-class SnackBar extends Component {
+class SnackBar extends AnimatedComponent {
 
   SnackBar({
     Key key,
-    this.anchor,
+    this.transitionKey,
     this.content,
     this.actions,
-    this.showing,
+    bool showing,
     this.onDismissed
-  }) : super(key: key) {
+  }) : super(key: key, direction: showing ? Direction.forward : Direction.reverse, duration: _kSlideInDuration) {
     assert(content != null);
   }
 
-  Anchor anchor;
+  Key transitionKey;
   Widget content;
   List<SnackBarAction> actions;
-  bool showing;
   SnackBarDismissedCallback onDismissed;
+
+  void syncConstructorArguments(SnackBar source) {
+    transitionKey = source.transitionKey;
+    content = source.content;
+    actions = source.actions;
+    onDismissed = source.onDismissed;
+    super.syncConstructorArguments(source);
+  }
+
+  void handleDismissed() {
+    if (onDismissed != null)
+      onDismissed();
+  }
 
   Widget build() {
     List<Widget> children = [
@@ -71,15 +85,15 @@ class SnackBar extends Component {
     ];
     if (actions != null)
       children.addAll(actions);
-
     return new SlideTransition(
-      duration: _kSlideInDuration,
-      direction: showing ? Direction.forward : Direction.reverse,
-      position: new AnimatedValue<Point>(Point.origin,
-                                         end: const Point(0.0, -52.0),
-                                         curve: easeIn, reverseCurve: easeOut),
-      onDismissed: onDismissed,
-      anchor: anchor,
+      key: transitionKey,
+      performance: performance.view,
+      position: new AnimatedValue<Point>(
+        Point.origin,
+        end: const Point(0.0, -52.0),
+        curve: easeIn,
+        reverseCurve: easeOut
+      ),
       child: new Material(
         level: 2,
         color: const Color(0xFF323232),
