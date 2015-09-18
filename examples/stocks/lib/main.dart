@@ -7,9 +7,8 @@ library stocks;
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/animation.dart';
+import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
 import 'stock_data.dart';
@@ -82,19 +81,19 @@ class StocksApp extends App {
     if (optimismSetting == StockMode.optimistic) {
       theme = new ThemeData(
         brightness: ThemeBrightness.light,
-        primarySwatch: colors.Purple
+        primarySwatch: Colors.purple
       );
     } else {
       theme = new ThemeData(
         brightness: ThemeBrightness.dark,
-        accentColor: colors.RedAccent[200]
+        accentColor: Colors.redAccent[200]
       );
     }
 
     return new Theme(
       data: theme,
         child: new DefaultTextStyle(
-          style: typography.error, // if you see this, you've forgotten to correctly configure the text style!
+          style: Typography.error, // if you see this, you've forgotten to correctly configure the text style!
           child: new Title(
             title: 'Stocks',
             child: new Navigator(_navigationState)

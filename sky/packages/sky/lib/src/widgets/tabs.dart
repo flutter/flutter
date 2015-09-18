@@ -9,8 +9,7 @@ import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
@@ -512,18 +511,18 @@ class TabBar extends Scrollable {
     Color backgroundColor = themeData.primaryColor;
     Color indicatorColor = themeData.accentColor;
     if (indicatorColor == backgroundColor) {
-      indicatorColor = colors.white;
+      indicatorColor = Colors.white;
     }
 
     TextStyle textStyle;
     IconThemeColor iconThemeColor;
     switch (themeData.primaryColorBrightness) {
       case ThemeBrightness.light:
-        textStyle = typography.black.body1;
+        textStyle = Typography.black.body1;
         iconThemeColor = IconThemeColor.black;
         break;
       case ThemeBrightness.dark:
-        textStyle = typography.white.body1;
+        textStyle = Typography.white.body1;
         iconThemeColor = IconThemeColor.white;
         break;
     }

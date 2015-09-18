@@ -4,9 +4,9 @@
 
 import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:sky_services/media/media.mojom.dart';
-import 'package:sky/services.dart';
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
 
 // All of these sounds are marked as public domain at soundbible.
@@ -42,12 +42,12 @@ class Key {
 
 class PianoApp extends App {
   final List<Key> keys = [
-    new Key(colors.Red[500], chimes),
-    new Key(colors.Orange[500], chainsaw),
-    new Key(colors.Yellow[500], stag),
-    new Key(colors.Green[500], frogs),
-    new Key(colors.Blue[500], rattle),
-    new Key(colors.Purple[500], iLoveYou),
+    new Key(Colors.red[500], chimes),
+    new Key(Colors.orange[500], chainsaw),
+    new Key(Colors.yellow[500], stag),
+    new Key(Colors.green[500], frogs),
+    new Key(Colors.blue[500], rattle),
+    new Key(Colors.purple[500], iLoveYou),
   ];
 
   PianoApp() {

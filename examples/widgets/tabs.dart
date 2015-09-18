@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
 class TabbedNavigatorApp extends App {
@@ -122,7 +122,7 @@ class TabbedNavigatorApp extends App {
     assert(selectedIndices.length == 5);
 
     ToolBar toolbar = new ToolBar(
-      center: new Text('Tabbed Navigator', style: typography.white.title)
+      center: new Text('Tabbed Navigator', style: Typography.white.title)
     );
 
     return new Scaffold(

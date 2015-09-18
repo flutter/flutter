@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/animation.dart';
+import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
 class CardModel {
@@ -19,10 +18,10 @@ class CardModel {
 class CardCollectionApp extends App {
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: colors.white, fontSize: 18.0, fontWeight: bold);
+    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
 
   final TextStyle backgroundTextStyle =
-    typography.white.title.copyWith(textAlign: TextAlign.center);
+    Typography.white.title.copyWith(textAlign: TextAlign.center);
 
   MixedViewportLayoutState _layoutState = new MixedViewportLayoutState();
   List<CardModel> _cardModels;
@@ -38,7 +37,7 @@ class CardCollectionApp extends App {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
     ];
     _cardModels = new List.generate(cardHeights.length, (i) {
-      Color color = Color.lerp(colors.Red[300], colors.Blue[900], i / cardHeights.length);
+      Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
     super.initState();
@@ -211,8 +210,8 @@ class CardCollectionApp extends App {
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,
-        primarySwatch: colors.Blue,
-        accentColor: colors.RedAccent[200]
+        primarySwatch: Colors.blue,
+        accentColor: Colors.redAccent[200]
       ),
       child: new Title(
         title: 'Cards',

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/theme_data.dart';
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/framework.dart';
 
-export 'package:sky/theme/theme_data.dart' show ThemeData, ThemeBrightness;
+export 'package:sky/material.dart' show ThemeData, ThemeBrightness;
 
 class Theme extends Inherited {
 

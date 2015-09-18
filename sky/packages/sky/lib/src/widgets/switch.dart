@@ -5,10 +5,9 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 
+import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/theme/shadows.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/framework.dart';

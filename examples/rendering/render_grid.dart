@@ -4,14 +4,15 @@
 
 import 'dart:math' as math;
 
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
+
 import 'solid_color_box.dart';
 
 Color randomColor() {
   final List<Color> allColors = [
-    colors.Blue,
-    colors.Indigo
+    Colors.blue,
+    Colors.indigo
   ].map((p) => p.values).fold([], (a, b) => a..addAll(b));
   final random = new math.Random();
   return allColors[random.nextInt(allColors.length)];

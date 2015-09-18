@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/colors.dart';
 import 'package:sky/animation.dart';
+import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
 class CardModel {
@@ -18,7 +18,7 @@ class CardModel {
 class PageableListApp extends App {
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: white, fontSize: 18.0, fontWeight: bold);
+    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
 
   List<CardModel> cardModels;
   Size pageSize = new Size(200.0, 200.0);
@@ -33,7 +33,7 @@ class PageableListApp extends App {
     .toList();
 
     cardModels = new List.generate(cardSizes.length, (i) {
-      Color color = Color.lerp(Red[300], Blue[900], i / cardSizes.length);
+      Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardSizes.length);
       return new CardModel(i, cardSizes[i], color);
     });
 
@@ -167,8 +167,8 @@ class PageableListApp extends App {
       child: new Theme(
         data: new ThemeData(
           brightness: ThemeBrightness.light,
-          primarySwatch: Blue,
-          accentColor: RedAccent[200]
+          primarySwatch: Colors.blue,
+          accentColor: Colors.redAccent[200]
         ),
         child: new Title(
           title: 'PageableList',

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/animation.dart';
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
 class ProgressIndicatorApp extends App {
@@ -90,8 +90,8 @@ class ProgressIndicatorApp extends App {
       child: new Theme(
         data: new ThemeData(
           brightness: ThemeBrightness.light,
-          primarySwatch: colors.Blue,
-          accentColor: colors.RedAccent[200]
+          primarySwatch: Colors.blue,
+          accentColor: Colors.redAccent[200]
         ),
         child: new Title(
           title: 'Cards',

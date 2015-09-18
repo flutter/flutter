@@ -1,8 +1,6 @@
-import 'dart:sky' as sky;
-
-import 'package:sky/services.dart';
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
 import 'package:skysprites/skysprites.dart';
 
@@ -50,7 +48,7 @@ class TestApp extends App {
   Widget build() {
     ThemeData theme = new ThemeData(
       brightness: ThemeBrightness.light,
-      primarySwatch: colors.Purple
+      primarySwatch: Colors.purple
     );
 
     return new Theme(
