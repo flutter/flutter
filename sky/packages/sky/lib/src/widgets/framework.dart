@@ -354,13 +354,6 @@ abstract class Widget {
   // where to put this descendant. If you just defer to a child, then make sure
   // to pass them the slot.
 
-  Widget findAncestorRenderObjectWrapper() {
-    var ancestor = _parent;
-    while (ancestor != null && ancestor is! RenderObjectWrapper)
-      ancestor = ancestor._parent;
-    return ancestor;
-  }
-
   Set<Type> _dependencies;
   Inherited inheritedOfType(Type targetType) {
     if (_dependencies == null)
@@ -1103,6 +1096,13 @@ abstract class RenderObjectWrapper extends Widget {
     newNode._ancestor = _ancestor;
   }
 
+  RenderObjectWrapper findAncestorRenderObjectWrapper() {
+    Widget ancestor = parent;
+    while (ancestor != null && ancestor is! RenderObjectWrapper)
+      ancestor = ancestor.parent;
+    return ancestor;
+  }
+
   void _sync(RenderObjectWrapper old, dynamic slot) {
     // TODO(abarth): We should split RenderObjectWrapper into two pieces so that
     //               RenderViewObject doesn't need to inherit all this code it
@@ -1113,7 +1113,7 @@ abstract class RenderObjectWrapper extends Widget {
       _renderObject = createNode();
       assert(_renderObject != null);
       _ancestor = findAncestorRenderObjectWrapper();
-      if (_ancestor is RenderObjectWrapper)
+      if (_ancestor != null)
         _ancestor.insertChildRenderObject(this, slot);
     } else {
       _renderObject = old.renderObject;
