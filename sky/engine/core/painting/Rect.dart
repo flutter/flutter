@@ -63,8 +63,8 @@ class Rect {
     return new Rect.fromLTRB(
       math.max(left, other.left),
       math.max(top, other.top),
-      math.max(right, other.right),
-      math.max(bottom, other.bottom));
+      math.min(right, other.right),
+      math.min(bottom, other.bottom));
   }
 
   /// The distance between the left and right edges of this rectangle
