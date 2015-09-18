@@ -368,6 +368,17 @@ typedef void RenderObjectVisitor(RenderObject child);
 typedef void LayoutCallback(Constraints constraints);
 typedef double ExtentCallback(Constraints constraints);
 
+typedef void RenderingExceptionHandler(RenderObject source, String method, dynamic exception, StackTrace stack);
+/// This callback is invoked whenever an exception is caught by the rendering
+/// system. The 'source' argument is the [RenderObject] object that caught the
+/// exception. The 'method' argument is the method in which the exception
+/// occurred; it will be one of 'performResize', 'performLayout, or 'paint'. The
+/// 'exception' argument contains the object that was thrown, and the 'stack'
+/// argument contains the stack trace. The callback is invoked after the
+/// information is printed to the console, and could be used to print additional
+/// information, such as from [debugDumpRenderTree()].
+RenderingExceptionHandler debugRenderingExceptionHandler;
+
 /// An object in the render tree
 ///
 /// Render objects have a reference to their parent but do not commit to a model
@@ -445,10 +456,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     print('$exception');
     print('Stack trace:');
     print('$stack');
-    'The following RenderObject was being processed when the exception was fired (limited to $debugRenderObjectDumpMaxLength lines):\n${this}'
-      .split('\n').take(debugRenderObjectDumpMaxLength+1).forEach(print);
+    print('The following RenderObject was being processed when the exception was fired:\n${this}');
     if (debugExceptionContext != '')
-      'The RenderObject had the following exception context:\n${debugExceptionContext}'.split('\n').forEach(print);
+      'That RenderObject had the following exception context:\n${debugExceptionContext}'.split('\n').forEach(print);
+    if (debugRenderingExceptionHandler != null)
+      debugRenderingExceptionHandler(this, method, exception, stack);
   }
 
   static bool _debugDoingLayout = false;

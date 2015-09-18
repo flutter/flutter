@@ -444,28 +444,36 @@ abstract class RenderBox extends RenderObject {
   /// of those functins, call [markNeedsLayout] instead to schedule a layout of
   /// the box.
   Size get size {
-    if (_size is _DebugSize) {
-      final _DebugSize _size = this._size; // TODO(ianh): Remove this once the analyzer is cleverer
-      assert(_size._owner == this);
-      if (RenderObject.debugActiveLayout != null) {
-        // we are always allowed to access our own size (for print debugging and asserts if nothing else)
-        // other than us, the only object that's allowed to read our size is our parent, if they're said they will
-        // if you hit this assert trying to access a child's size, pass parentUsesSize: true in layout()
-        assert(debugDoingThisResize || debugDoingThisLayout ||
-               (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
+    assert(() {
+      if (_size is _DebugSize) {
+        final _DebugSize _size = this._size; // TODO(ianh): Remove this once the analyzer is cleverer
+        assert(_size._owner == this);
+        if (RenderObject.debugActiveLayout != null) {
+          // we are always allowed to access our own size (for print debugging and asserts if nothing else)
+          // other than us, the only object that's allowed to read our size is our parent, if they're said they will
+          // if you hit this assert trying to access a child's size, pass parentUsesSize: true in layout()
+          assert(debugDoingThisResize || debugDoingThisLayout ||
+                 (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
+        }
+        assert(_size == this._size); // TODO(ianh): Remove this once the analyzer is cleverer
       }
-      assert(_size == this._size); // TODO(ianh): Remove this once the analyzer is cleverer
-    }
+      return true;
+    });
     return _size;
   }
   void set size(Size value) {
     assert((sizedByParent && debugDoingThisResize) ||
            (!sizedByParent && debugDoingThisLayout));
-    if (value is _DebugSize) {
-      assert(value._canBeUsedByParent);
-      assert(value._owner.parent == this);
-    }
-    _size = inDebugBuild ? new _DebugSize(value, this, debugCanParentUseSize) : value;
+    assert(() {
+      if (value is _DebugSize)
+        return value._canBeUsedByParent && value._owner.parent == this;
+      return true;
+    });
+    _size = value;
+    assert(() {
+      _size = new _DebugSize(_size, this, debugCanParentUseSize);
+      return true;
+    });
     assert(debugDoesMeetConstraints());
   }
 
