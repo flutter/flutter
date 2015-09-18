@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
-import 'package:sky/theme/colors.dart' as colors;
 
 class BigSwitchApp extends App {
   bool _value = false;
@@ -22,7 +22,7 @@ class BigSwitchApp extends App {
         padding: new EdgeDims.all(20.0),
         transform: scale,
         decoration: new BoxDecoration(
-          backgroundColor: colors.Teal[600]
+          backgroundColor: Colors.teal[600]
         )
     );
   }

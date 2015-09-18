@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/services.dart';
+import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
 
 AssetBundle _initBundle() {
@@ -58,7 +57,7 @@ class SkyDemo {
   final String href;
   final String bundle;
   final String description;
-  final typography.TextTheme textTheme;
+  final TextTheme textTheme;
   final BoxDecoration decoration;
 }
 
@@ -68,7 +67,7 @@ List<SkyDemo> demos = [
     href: '../../stocks/lib/main.dart',
     bundle: 'stocks.skyx',
     description: 'Multi-screen app with scrolling list',
-    textTheme: typography.black,
+    textTheme: Typography.black,
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
         image: _bundle.loadImage('assets/stocks_thumbnail.png'),
@@ -81,7 +80,7 @@ List<SkyDemo> demos = [
     href: '../../game/lib/main.dart',
     bundle: 'game.skyx',
     description: '2D game using sprite sheets',
-    textTheme: typography.white,
+    textTheme: Typography.white,
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
         image: _bundle.loadImage('assets/game_thumbnail.png'),
@@ -94,9 +93,9 @@ List<SkyDemo> demos = [
     href: '../../fitness/lib/main.dart',
     bundle: 'fitness.skyx',
     description: 'Track progress towards healthy goals',
-    textTheme: typography.white,
+    textTheme: Typography.white,
     decoration: new BoxDecoration(
-      backgroundColor: colors.Indigo[500]
+      backgroundColor: Colors.indigo[500]
     )
   ),
   new SkyDemo(
@@ -104,9 +103,9 @@ List<SkyDemo> demos = [
     href: '../../widgets/card_collection.dart',
     bundle: 'cards.skyx',
     description: 'Infinite list of swipeable cards',
-    textTheme: typography.white,
+    textTheme: Typography.white,
     decoration: new BoxDecoration(
-      backgroundColor: colors.RedAccent[200]
+      backgroundColor: Colors.redAccent[200]
     )
   ),
   new SkyDemo(
@@ -114,7 +113,7 @@ List<SkyDemo> demos = [
     href: '../../rendering/interactive_flex.dart',
     bundle: 'interactive_flex.skyx',
     description: 'Swipe to reflow the app',
-    textTheme: typography.white,
+    textTheme: Typography.white,
     decoration: new BoxDecoration(
       backgroundColor: const Color(0xFF0081C6)
     )
@@ -127,9 +126,9 @@ List<SkyDemo> demos = [
     href: '../../mine_digger/lib/main.dart',
     bundle: 'mine_digger.skyx',
     description: 'Clone of the classic Minesweeper game',
-    textTheme: typography.white,
+    textTheme: Typography.white,
     decoration: new BoxDecoration(
-      backgroundColor: colors.black
+      backgroundColor: Colors.black
     )
   ),
 
@@ -188,7 +187,7 @@ class SkyHome extends App {
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,
-        primarySwatch: colors.Teal
+        primarySwatch: Colors.teal
       ),
       child: new Title(
         title: 'Sky Demos',

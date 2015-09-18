@@ -275,7 +275,7 @@ class StockHome extends StatefulComponent {
     return _snackBarAnchor.build(
       new FloatingActionButton(
         child: new Icon(type: 'content/add', size: 24),
-        backgroundColor: colors.RedAccent[200],
+        backgroundColor: Colors.redAccent[200],
         onPressed: _handleStockPurchased
       ));
   }

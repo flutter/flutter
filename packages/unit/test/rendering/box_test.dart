@@ -1,6 +1,5 @@
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/shadows.dart';
 import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
@@ -12,7 +11,7 @@ void main() {
         backgroundColor: const Color(0xFF00FF00),
         gradient: new RadialGradient(
           center: Point.origin, radius: 500.0,
-          colors: [colors.Yellow[500], colors.Blue[500]]),
+          colors: [Colors.yellow[500], Colors.blue[500]]),
         boxShadow: shadows[3])
     );
     layout(root);

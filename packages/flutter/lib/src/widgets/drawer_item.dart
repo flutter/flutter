@@ -5,7 +5,7 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/painting.dart';
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/button_base.dart';
 import 'package:sky/src/widgets/default_text_style.dart';
@@ -46,7 +46,7 @@ class DrawerItem extends ButtonBase {
       return themeData.highlightColor;
     if (selected)
       return themeData.selectedColor;
-    return colors.transparent;
+    return Colors.transparent;
   }
 
   sky.ColorFilter _getColorFilter(ThemeData themeData) {

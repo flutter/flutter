@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
 
 class ScaleApp extends App {
@@ -41,7 +41,7 @@ class ScaleApp extends App {
     double radius = size.width / 2.0 * _zoom;
     Gradient gradient = new RadialGradient(
       center: center, radius: radius,
-      colors: [colors.Blue[200], colors.Blue[800]]
+      colors: [Colors.blue[200], Colors.blue[800]]
     );
     Paint paint = new Paint()
       ..shader = gradient.createShader();

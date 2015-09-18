@@ -18,8 +18,8 @@ class StockArrow extends Component {
 
   Color _colorForPercentChange(double percentChange) {
     if (percentChange > 0)
-      return colors.Green[_colorIndexForPercentChange(percentChange)];
-    return colors.Red[_colorIndexForPercentChange(percentChange)];
+      return Colors.green[_colorIndexForPercentChange(percentChange)];
+    return Colors.red[_colorIndexForPercentChange(percentChange)];
   }
 
   Widget build() {

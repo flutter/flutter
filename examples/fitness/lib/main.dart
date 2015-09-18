@@ -6,9 +6,10 @@ library fitness;
 
 import 'package:playfair/playfair.dart' as playfair;
 import 'package:sky/animation.dart';
+import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets.dart';
+
 import 'user_data.dart';
 import 'date_utils.dart';
 import 'dart:async';
@@ -171,8 +172,8 @@ class FitnessApp extends App {
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,
-        primarySwatch: colors.Indigo,
-        accentColor: colors.PinkAccent[200]
+        primarySwatch: Colors.indigo,
+        accentColor: Colors.pinkAccent[200]
       ),
       child: new Title(
         title: 'Fitness',

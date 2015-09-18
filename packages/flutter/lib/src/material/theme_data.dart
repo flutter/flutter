@@ -4,8 +4,8 @@
 
 import 'dart:sky';
 
-import 'package:sky/theme/typography.dart' as typography;
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/src/material/typography.dart';
+import 'package:sky/src/material/colors.dart';
 
 enum ThemeBrightness { dark, light }
 
@@ -16,12 +16,12 @@ class ThemeData {
     Map<int, Color> primarySwatch,
     Color accentColor,
     this.accentColorBrightness: ThemeBrightness.dark,
-    typography.TextTheme text
+    TextTheme text
   }): this.brightness = brightness,
       this.primarySwatch = primarySwatch,
       primaryColorBrightness = primarySwatch == null ? brightness : ThemeBrightness.dark,
-      canvasColor = brightness == ThemeBrightness.dark ? colors.Grey[850] : colors.Grey[50],
-      cardColor = brightness == ThemeBrightness.dark ? colors.Grey[800] : colors.white,
+      canvasColor = brightness == ThemeBrightness.dark ? Colors.grey[850] : Colors.grey[50],
+      cardColor = brightness == ThemeBrightness.dark ? Colors.grey[800] : Colors.white,
       dividerColor = brightness == ThemeBrightness.dark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
       // Some users want the pre-multiplied color, others just want the opacity.
       hintColor = brightness == ThemeBrightness.dark ? const Color(0x42FFFFFF) : const Color(0x4C000000),
@@ -35,27 +35,27 @@ class ThemeData {
       // revert when you cancel the tap.
       highlightColor = const Color(0x33999999),
       selectedColor = const Color(0x66999999),
-      text = brightness == ThemeBrightness.dark ? typography.white : typography.black {
+      text = brightness == ThemeBrightness.dark ? Typography.white : Typography.black {
     assert(brightness != null);
 
     if (primarySwatch == null) {
       if (brightness == ThemeBrightness.dark) {
-        _primaryColor = colors.Grey[900];
+        _primaryColor = Colors.grey[900];
       } else {
-        _primaryColor = colors.Grey[100];
+        _primaryColor = Colors.grey[100];
       }
     } else {
       _primaryColor = primarySwatch[500];
     }
 
     if (accentColor == null) {
-      _accentColor = primarySwatch == null ? colors.Blue[500] : primarySwatch[500];
+      _accentColor = primarySwatch == null ? Colors.blue[500] : primarySwatch[500];
     } else {
       _accentColor = accentColor;
     }
   }
 
-  factory ThemeData.light() => new ThemeData(primarySwatch: colors.Blue, brightness: ThemeBrightness.light);
+  factory ThemeData.light() => new ThemeData(primarySwatch: Colors.blue, brightness: ThemeBrightness.light);
   factory ThemeData.dark() => new ThemeData(brightness: ThemeBrightness.dark);
   factory ThemeData.fallback() => new ThemeData.light();
 
@@ -68,7 +68,7 @@ class ThemeData {
   final Color highlightColor;
   final Color selectedColor;
   final double hintOpacity;
-  final typography.TextTheme text;
+  final TextTheme text;
 
   Color _primaryColor;
   Color get primaryColor => _primaryColor;

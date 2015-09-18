@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
 final double kTop = 10.0 + sky.view.paddingTop;
@@ -39,9 +39,9 @@ class ExampleDragTarget extends StatefulComponent {
           decoration: new BoxDecoration(
             border: new Border.all(
               width: 3.0,
-              color: data.isEmpty ? colors.white : colors.Blue[500]
+              color: data.isEmpty ? Colors.white : Colors.blue[500]
             ),
-            backgroundColor: data.isEmpty ? colors.Grey[500] : colors.Green[500]
+            backgroundColor: data.isEmpty ? Colors.grey[500] : Colors.green[500]
           ),
           child: new Center(
             child: new Text(_text)
@@ -58,7 +58,7 @@ class Dot extends Component {
       width: 50.0,
       height: 50.0,
       decoration: new BoxDecoration(
-        backgroundColor: colors.DeepOrange[500]
+        backgroundColor: Colors.deepOrange[500]
       )
     );
   }
@@ -140,7 +140,7 @@ class DragAndDropApp extends App {
     }
 
     return new Container(
-      decoration: new BoxDecoration(backgroundColor: colors.Pink[500]),
+      decoration: new BoxDecoration(backgroundColor: Colors.pink[500]),
       child: new Stack(layers)
     );
   }

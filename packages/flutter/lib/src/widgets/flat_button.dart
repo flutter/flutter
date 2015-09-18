@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/colors.dart';
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/material_button.dart';
 import 'package:sky/src/widgets/theme.dart';
@@ -23,9 +23,9 @@ class FlatButton extends MaterialButton {
       return null;
     switch (Theme.of(this).brightness) {
       case ThemeBrightness.light:
-        return Grey[400];
+        return Colors.grey[400];
       case ThemeBrightness.dark:
-        return Grey[200];
+        return Colors.grey[200];
     }
   }
 
