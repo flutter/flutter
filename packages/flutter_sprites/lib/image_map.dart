@@ -8,18 +8,18 @@ class ImageMap {
   ImageMap(AssetBundle bundle) : _bundle = bundle;
 
   final AssetBundle _bundle;
-  final Map<String, Image> _images = new Map<String, Image>();
+  final Map<String, sky.Image> _images = new Map<String, sky.Image>();
 
-  Future<List<Image>> load(List<String> urls) {
+  Future<List<sky.Image>> load(List<String> urls) {
     return Future.wait(urls.map(_loadImage));
   }
 
-  Future<Image> _loadImage(String url) async {
-    Image image = await _bundle.loadImage(url).first;
+  Future<sky.Image> _loadImage(String url) async {
+    sky.Image image = await _bundle.loadImage(url).first;
     _images[url] = image;
     return image;
   }
 
-  Image getImage(String url) => _images[url];
-  Image operator [](String url) => _images[url];
+  sky.Image getImage(String url) => _images[url];
+  sky.Image operator [](String url) => _images[url];
 }
