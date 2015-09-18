@@ -27,14 +27,9 @@ class Linear implements Curve {
   double transform(double t) => t;
 }
 
-/// A curve that is initially 0.0, then linear, then 1.0
+/// A curve that is 0.0 until start, then linear from 0.0 to 1.0 at end, then 1.0
 class Interval implements Curve {
-  Interval(this.start, this.end) {
-    assert(start >= 0.0);
-    assert(start <= 1.0);
-    assert(end >= 0.0);
-    assert(end <= 1.0);
-  }
+  const Interval(this.start, this.end);
 
   /// The smallest value for which this interval is 0.0
   final double start;
@@ -43,6 +38,10 @@ class Interval implements Curve {
   final double end;
 
   double transform(double t) {
+    assert(start >= 0.0);
+    assert(start <= 1.0);
+    assert(end >= 0.0);
+    assert(end <= 1.0);
     return ((t - start) / (end - start)).clamp(0.0, 1.0);
   }
 }

@@ -15,7 +15,7 @@ import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
-double _kMenuCloseIntervalEnd = 2.0 / 3.0;
+const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuMargin = 16.0; // 24.0 on tablet
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;

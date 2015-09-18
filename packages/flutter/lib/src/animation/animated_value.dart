@@ -30,9 +30,9 @@ abstract class AnimatedVariable {
 /// can be made to take longer in one direction that the other.
 class AnimationTiming {
   AnimationTiming({
-    this.interval,
+    this.interval: const Interval(0.0, 1.0),
     this.reverseInterval,
-    this.curve,
+    this.curve: linear,
     this.reverseCurve
   });
 

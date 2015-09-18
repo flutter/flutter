@@ -139,20 +139,18 @@ class DialogRoute extends RouteBase {
   final Completer completer;
   final RouteBuilder builder;
 
-  Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
-  bool get isOpaque => false;
-
-  void popState([dynamic result]) {
-    completer.complete(result);
-  }
-
   Duration get transitionDuration => _kTransitionDuration;
-  TransitionBase buildTransition({ Key key, Widget child, WatchableAnimationPerformance performance }) {
+  bool get isOpaque => false;
+  Widget build(Key key, Navigator navigator, RouteBase route, WatchableAnimationPerformance performance) {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-      child: child
+      child: builder(navigator, route)
     );
+  }
+
+  void popState([dynamic result]) {
+    completer.complete(result);
   }
 }
 
