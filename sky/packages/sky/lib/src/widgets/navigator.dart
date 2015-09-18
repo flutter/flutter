@@ -13,40 +13,44 @@ typedef Widget RouteBuilder(Navigator navigator, RouteBase route);
 typedef void NotificationCallback();
 
 abstract class RouteBase {
-  Widget build(Navigator navigator, RouteBase route);
-  bool get isOpaque;
-  void popState([dynamic result]) { assert(result == null); }
-
   AnimationPerformance _performance;
   NotificationCallback onDismissed;
   NotificationCallback onCompleted;
+  AnimationPerformance createPerformance() {
+    AnimationPerformance result = new AnimationPerformance(duration: transitionDuration);
+    result.addStatusListener((AnimationStatus status) {
+      switch (status) {
+        case AnimationStatus.dismissed:
+          if (onDismissed != null)
+            onDismissed();
+          break;
+        case AnimationStatus.completed:
+          if (onCompleted != null)
+            onCompleted();
+          break;
+        default:
+          ;
+      }
+    });
+    return result;
+  }
   WatchableAnimationPerformance ensurePerformance({ Direction direction }) {
     assert(direction != null);
-    if (_performance == null) {
-      _performance = new AnimationPerformance(duration: transitionDuration);
-      _performance.addStatusListener((AnimationStatus status) {
-        switch (status) {
-          case AnimationStatus.dismissed:
-            if (onDismissed != null)
-              onDismissed();
-            break;
-          case AnimationStatus.completed:
-            if (onCompleted != null)
-              onCompleted();
-            break;
-          default:
-            ;
-        }
-      });
-    }
+    if (_performance == null)
+      _performance = createPerformance();
     AnimationStatus desiredStatus = direction == Direction.forward ? AnimationStatus.forward : AnimationStatus.reverse;
     if (_performance.status != desiredStatus)
       _performance.play(direction);
     return _performance.view;
   }
+  bool get isActuallyOpaque => _performance != null && _performance.isCompleted && isOpaque;
+
+  bool get hasContent => true; // set to false if you have nothing useful to return from build()
 
   Duration get transitionDuration;
-  TransitionBase buildTransition({ Key key, Widget child, WatchableAnimationPerformance performance });
+  bool get isOpaque;
+  Widget build(Key key, Navigator navigator, RouteBase route, WatchableAnimationPerformance performance);
+  void popState([dynamic result]) { assert(result == null); }
 
   String toString() => '$runtimeType()';
 }
@@ -59,11 +63,11 @@ class Route extends RouteBase {
   final String name;
   final RouteBuilder builder;
 
-  Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
   bool get isOpaque => true;
 
   Duration get transitionDuration => _kTransitionDuration;
-  TransitionBase buildTransition({ Key key, Widget child, WatchableAnimationPerformance performance }) {
+
+  Widget build(Key key, Navigator navigator, RouteBase route, WatchableAnimationPerformance performance) {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
     return new SlideTransition(
@@ -73,7 +77,7 @@ class Route extends RouteBase {
       child: new FadeTransition(
         performance: performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-        child: child
+        child: builder(navigator, route)
       )
     );
   }
@@ -88,7 +92,6 @@ class RouteState extends RouteBase {
   RouteBase route;
   StatefulComponent owner;
 
-  Widget build(Navigator navigator, RouteBase route) => null;
   bool get isOpaque => false;
 
   void popState([dynamic result]) {
@@ -97,23 +100,9 @@ class RouteState extends RouteBase {
       callback(this);
   }
 
-  // Custom state routes shouldn't be asked to construct a transition
-  Duration get transitionDuration {
-    assert(false);
-    return const Duration();
-  }
-  TransitionBase buildTransition({ Key key, Widget child, WatchableAnimationPerformance performance }) {
-    assert(false);
-    return null;
-  }
-}
-
-class HistoryEntry {
-  HistoryEntry({ this.route });
-  final RouteBase route;
-  bool fullyOpaque = false;
-  // TODO(jackson): Keep track of the requested transition
-  String toString() => "HistoryEntry($route, hashCode=$hashCode)";
+  bool get hasContent => false;
+  Duration get transitionDuration => const Duration();
+  Widget build(Key key, Navigator navigator, RouteBase route, WatchableAnimationPerformance performance) => null;
 }
 
 class NavigationState {
@@ -123,14 +112,14 @@ class NavigationState {
       if (route.name != null)
         namedRoutes[route.name] = route;
     }
-    history.add(new HistoryEntry(route: routes[0]));
+    history.add(routes[0]);
   }
 
-  List<HistoryEntry> history = new List<HistoryEntry>();
+  List<RouteBase> history = new List<RouteBase>();
   int historyIndex = 0;
   Map<String, RouteBase> namedRoutes = new Map<String, RouteBase>();
 
-  RouteBase get currentRoute => history[historyIndex].route;
+  RouteBase get currentRoute => history[historyIndex];
   bool hasPrevious() => historyIndex > 0;
 
   void pushNamed(String name) {
@@ -141,22 +130,20 @@ class NavigationState {
 
   void push(RouteBase route) {
     assert(!_debugCurrentlyHaveRoute(route));
-    HistoryEntry historyEntry = new HistoryEntry(route: route);
-    history.insert(historyIndex + 1, historyEntry);
+    history.insert(historyIndex + 1, route);
     historyIndex++;
   }
 
   void pop([dynamic result]) {
     if (historyIndex > 0) {
-      HistoryEntry entry = history[historyIndex];
-      entry.route.popState(result);
-      entry.fullyOpaque = false;
+      RouteBase route = history[historyIndex];
+      route.popState(result);
       historyIndex--;
     }
   }
 
   bool _debugCurrentlyHaveRoute(RouteBase route) {
-    return history.any((entry) => entry.route == route);
+    return history.any((candidate) => candidate == route);
   }
 }
 
@@ -201,39 +188,25 @@ class Navigator extends StatefulComponent {
 
   Widget build() {
     List<Widget> visibleRoutes = new List<Widget>();
-    for (int i = 0; i < state.history.length; i++) {
-      // Avoid building routes that are not visible
-      if (i + 1 < state.history.length && state.history[i + 1].fullyOpaque)
+    for (int i = state.history.length-1; i >= 0; i -= 1) {
+      RouteBase route = state.history[i];
+      if (!route.hasContent)
         continue;
-      HistoryEntry historyEntry = state.history[i];
-      Widget child = historyEntry.route.build(this, historyEntry.route);
-      if (i == 0) {
-        visibleRoutes.add(child);
-        continue;
-      }
-      if (child == null)
-        continue;
-      WatchableAnimationPerformance performance = historyEntry.route.ensurePerformance(
+      WatchableAnimationPerformance performance = route.ensurePerformance(
         direction: (i <= state.historyIndex) ? Direction.forward : Direction.reverse
       );
-      historyEntry.route.onDismissed = () {
+      route.onDismissed = () {
         setState(() {
-          assert(state.history.contains(historyEntry));
-          state.history.remove(historyEntry);
+          assert(state.history.contains(route));
+          state.history.remove(route);
         });
       };
-      historyEntry.route.onCompleted = () {
-        setState(() {
-          historyEntry.fullyOpaque = historyEntry.route.isOpaque;
-        });
-      };
-      TransitionBase transition = historyEntry.route.buildTransition(
-        key: new ObjectKey(historyEntry),
-        child: child,
-        performance: performance
-      );
-      visibleRoutes.add(transition);
+      Key key = new ObjectKey(route);
+      Widget widget = route.build(key, this, route, performance);
+      visibleRoutes.add(widget);
+      if (route.isActuallyOpaque)
+        break;
     }
-    return new Focus(child: new Stack(visibleRoutes));
+    return new Focus(child: new Stack(visibleRoutes.reversed.toList()));
   }
 }
