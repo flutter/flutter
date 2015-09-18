@@ -4,10 +4,10 @@
 import 'dart:sky' as sky;
 import 'dart:math';
 
-import 'package:sky/services.dart';
+import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
 
 // Classic minesweeper-inspired game. The mouse controls are standard
@@ -184,7 +184,7 @@ class MineDiggerApp extends App {
         toolbar: buildToolBar(),
         body: new Container(
           child: new Center(child: board),
-          decoration: new BoxDecoration(backgroundColor: colors.Grey[50])
+          decoration: new BoxDecoration(backgroundColor: Colors.grey[50])
         )
       )
     );

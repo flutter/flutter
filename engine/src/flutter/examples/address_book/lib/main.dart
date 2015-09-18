@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
 class Field extends Component {
@@ -66,7 +65,7 @@ class AddressBookApp extends App {
         new AspectRatio(
           aspectRatio: 16.0 / 9.0,
           child: new Container(
-            decoration: new BoxDecoration(backgroundColor: colors.Purple[300])
+            decoration: new BoxDecoration(backgroundColor: Colors.purple[300])
           )
         ),
         new Field(inputKey: nameKey, icon: "social/person", placeholder: "Name"),
@@ -102,13 +101,13 @@ class AddressBookApp extends App {
   Widget build() {
     ThemeData theme = new ThemeData(
       brightness: ThemeBrightness.light,
-      primarySwatch: colors.Teal,
-      accentColor: colors.PinkAccent[100]
+      primarySwatch: Colors.teal,
+      accentColor: Colors.pinkAccent[100]
     );
     return new Theme(
       data: theme,
       child: new DefaultTextStyle(
-        style: typography.error, // if you see this, you've forgotten to correctly configure the text style!
+        style: Typography.error, // if you see this, you've forgotten to correctly configure the text style!
         child: new Title(
           title: 'Address Book',
           child: new Navigator(_navigationState)
