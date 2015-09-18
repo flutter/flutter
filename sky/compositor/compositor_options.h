@@ -15,12 +15,7 @@ class CompositorOptions {
  public:
   using OptionType = unsigned int;
   enum class Option : OptionType {
-    // SkPictures that dont mutate from frame to frame are rasterized by the
-    // picture rasterizer. This guard enables highlighting the rasterized
-    // images. Useful when debugging caching.
-    HightlightRasterizedImages,
     DisplayFrameStatistics,
-    DisplayRasterizerStatistics,
 
     TerminationSentinel,
   };

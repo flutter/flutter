@@ -9,7 +9,7 @@
 #include "base/logging.h"
 #include "sky/compositor/compositor_options.h"
 #include "sky/compositor/instrumentation.h"
-#include "sky/compositor/picture_rasterizer.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 
 namespace sky {
 namespace compositor {
@@ -18,10 +18,6 @@ class PaintContext {
  public:
   class ScopedFrame {
    public:
-    PaintContext& paint_context() { return context_; };
-
-    GrContext* gr_context() { return gr_context_; }
-
     SkCanvas& canvas() { return canvas_; }
 
     ScopedFrame(ScopedFrame&& frame) = default;
@@ -31,12 +27,11 @@ class PaintContext {
    private:
     PaintContext& context_;
     SkCanvas& canvas_;
-    GrContext* gr_context_;
 
     ScopedFrame() = delete;
 
-    ScopedFrame(PaintContext& context, SkCanvas& canvas, GrContext* gr_context)
-        : context_(context), canvas_(canvas), gr_context_(gr_context) {
+    ScopedFrame(PaintContext& context, SkCanvas& canvas)
+        : context_(context), canvas_(canvas) {
       DCHECK(&canvas) << "The frame requries a valid canvas";
       context_.beginFrame(*this);
     };
@@ -49,14 +44,11 @@ class PaintContext {
   PaintContext();
   ~PaintContext();
 
-  PictureRasterzier& rasterizer() { return rasterizer_; }
-
   CompositorOptions& options() { return options_; };
 
-  ScopedFrame AcquireFrame(SkCanvas& canvas, GrContext* gr_context);
+  ScopedFrame AcquireFrame(SkCanvas& canvas);
 
  private:
-  PictureRasterzier rasterizer_;
   CompositorOptions options_;
 
   instrumentation::Counter frame_count_;
