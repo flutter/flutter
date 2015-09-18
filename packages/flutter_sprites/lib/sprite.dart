@@ -17,7 +17,7 @@ class Sprite extends NodeWithSize with SpritePaint {
   bool constrainProportions = false;
 
   Paint _cachedPaint = new Paint()
-    ..filterQuality = FilterQuality.low
+    ..filterQuality = sky.FilterQuality.low
     ..isAntiAlias = false;
 
   /// Creates a new sprite from the provided [texture].
@@ -35,7 +35,7 @@ class Sprite extends NodeWithSize with SpritePaint {
   /// Creates a new sprite from the provided [image].
   ///
   /// var mySprite = new Sprite.fromImage(myImage);
-  Sprite.fromImage(Image image) : super(Size.zero) {
+  Sprite.fromImage(sky.Image image) : super(Size.zero) {
     assert(image != null);
 
     texture = new Texture(image);
@@ -107,13 +107,13 @@ abstract class SpritePaint {
   ///
   ///     // Add the colors of the sprite with the colors of the background
   ///     mySprite.transferMode = TransferMode.plusMode;
-  TransferMode transferMode;
+  sky.TransferMode transferMode;
 
   void _updatePaint(Paint paint) {
     paint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
 
     if (colorOverlay != null) {
-      paint.colorFilter = new ColorFilter.mode(colorOverlay, TransferMode.srcATop);
+      paint.colorFilter = new sky.ColorFilter.mode(colorOverlay, sky.TransferMode.srcATop);
     }
 
     if (transferMode != null) {

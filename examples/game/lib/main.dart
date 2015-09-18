@@ -6,14 +6,9 @@ import 'dart:async';
 
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/button_base.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/navigator.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/title.dart';
+import 'package:sky/widgets.dart';
 import 'package:skysprites/skysprites.dart';
 
 import 'game_demo.dart';
