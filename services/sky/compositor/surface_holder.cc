@@ -9,7 +9,6 @@
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "services/sky/compositor/surface_allocator.h"
 
 namespace sky {
 
