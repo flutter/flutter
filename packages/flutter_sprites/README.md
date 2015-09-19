@@ -1,8 +1,8 @@
 # skysprites
 
-A sprite toolkit built on top of Sky.
+A sprite toolkit built on top of Flutter.
 
 ## Getting Started
 
-For help getting started with Sky, view our online
-[documentation](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/README.md).
+For help getting started with Flutter, view our online
+[documentation](http://flutter.io).
