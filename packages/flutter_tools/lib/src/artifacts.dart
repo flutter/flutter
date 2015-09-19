@@ -45,7 +45,7 @@ class _ArtifactStore {
   }
 
   Future<String> getPath(Artifact artifact, String packageRoot) async {
-    String engineRevision = await _getEngineRevision(packageRoot); 
+    String engineRevision = await _getEngineRevision(packageRoot);
     Directory cacheDir = await _cacheDir(engineRevision, packageRoot);
 
     if (artifact == Artifact.FlutterCompiler) {

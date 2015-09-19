@@ -8,10 +8,8 @@
 set -e
 
 # Verify that the libraries are error free.
-dartanalyzer --fatal-warnings \
-  bin/build_sky_apk.dart \
-  bin/sky_server.dart \
-  bin/sky_tools.dart
+pub global activate tuneup
+pub global run tuneup check
 
 # And run our tests.
 pub run test
