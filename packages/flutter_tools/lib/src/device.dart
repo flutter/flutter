@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'process_wrapper.dart';
+import 'application_package.dart';
 
 final Logger _logging = new Logger('sky_tools.device');
 
@@ -40,13 +41,13 @@ abstract class _Device {
   _Device._(this.id);
 
   /// Install an app package on the current device
-  bool installApp(String appPath, String appPackageID, String appFileName);
+  bool installApp(ApplicationPackage app);
 
   /// Check if the device is currently connected
   bool isConnected();
 
   /// Check if the current version of the given app is already installed
-  bool isAppInstalled(String appPath, String appPackageID, String appFileName);
+  bool isAppInstalled(ApplicationPackage app);
 }
 
 class AndroidDevice extends _Device {
@@ -175,68 +176,58 @@ class AndroidDevice extends _Device {
     return false;
   }
 
-  String _getDeviceSha1Path(String appPackageID, String appFileName) {
-    return '/sdcard/$appPackageID/$appFileName.sha1';
+  String _getDeviceSha1Path(ApplicationPackage app) {
+    return '/sdcard/${app.appPackageID}/${app.appFileName}.sha1';
   }
 
-  String _getDeviceApkSha1(String appPackageID, String appFileName) {
-    return runCheckedSync([
-      adbPath,
-      'shell',
-      'cat',
-      _getDeviceSha1Path(appPackageID, appFileName)
-    ]);
+  String _getDeviceApkSha1(ApplicationPackage app) {
+    return runCheckedSync([adbPath, 'shell', 'cat', _getDeviceSha1Path(app)]);
   }
 
-  String _getSourceSha1(String apkPath) {
+  String _getSourceSha1(ApplicationPackage app) {
     String sha1 =
-        runCheckedSync(['shasum', '-a', '1', '-p', apkPath]).split(' ')[0];
+        runCheckedSync(['shasum', '-a', '1', '-p', app.appPath]).split(' ')[0];
     return sha1;
   }
 
   @override
-  bool isAppInstalled(String appPath, String appPackageID, String appFileName) {
+  bool isAppInstalled(ApplicationPackage app) {
     if (!isConnected()) {
       return false;
     }
-    if (runCheckedSync([adbPath, 'shell', 'pm', 'path', appPackageID]) == '') {
+    if (runCheckedSync([adbPath, 'shell', 'pm', 'path', app.appPackageID]) ==
+        '') {
       _logging.info(
-          'TODO(iansf): move this log to the caller. $appFileName is not on the device. Installing now...');
+          'TODO(iansf): move this log to the caller. ${app.appFileName} is not on the device. Installing now...');
       return false;
     }
-    if (_getDeviceApkSha1(appPackageID, appFileName) !=
-        _getSourceSha1(appPath)) {
+    if (_getDeviceApkSha1(app) != _getSourceSha1(app)) {
       _logging.info(
-          'TODO(iansf): move this log to the caller. $appFileName is out of date. Installing now...');
+          'TODO(iansf): move this log to the caller. ${app.appFileName} is out of date. Installing now...');
       return false;
     }
     return true;
   }
 
   @override
-  bool installApp(String appPath, String appPackageID, String appFileName) {
+  bool installApp(ApplicationPackage app) {
     if (!isConnected()) {
       _logging.info('Android device not connected. Not installing.');
       return false;
     }
-    if (!FileSystemEntity.isFileSync(appPath)) {
-      _logging.severe('"$appPath" does not exist.');
+    if (!FileSystemEntity.isFileSync(app.appPath)) {
+      _logging.severe('"${app.appPath}" does not exist.');
       return false;
     }
 
-    runCheckedSync([adbPath, 'install', '-r', appPath]);
+    runCheckedSync([adbPath, 'install', '-r', app.appPath]);
 
     Directory tempDir = Directory.systemTemp;
     String sha1Path = path.join(
-        tempDir.path, appPath.replaceAll(path.separator, '_'), '.sha1');
+        tempDir.path, (app.appPath + '.sha1').replaceAll(path.separator, '_'));
     File sha1TempFile = new File(sha1Path);
-    sha1TempFile.writeAsStringSync(_getSourceSha1(appPath), flush: true);
-    runCheckedSync([
-      adbPath,
-      'push',
-      sha1Path,
-      _getDeviceSha1Path(appPackageID, appFileName)
-    ]);
+    sha1TempFile.writeAsStringSync(_getSourceSha1(app), flush: true);
+    runCheckedSync([adbPath, 'push', sha1Path, _getDeviceSha1Path(app)]);
     sha1TempFile.deleteSync();
     return true;
   }

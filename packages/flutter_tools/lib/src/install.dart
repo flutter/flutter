@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 
+import 'application_package.dart';
 import 'common.dart';
 import 'device.dart';
 
@@ -33,11 +34,14 @@ class InstallCommandHandler extends CommandHandler {
 
     bool installedSomewhere = false;
 
+    Map<BuildPlatform, ApplicationPackage> packages =
+        ApplicationPackageFactory.getAvailableApplicationPackages();
     if (android == null) {
       android = new AndroidDevice();
     }
-    if (android.isConnected()) {
-      installedSomewhere = installedSomewhere || android.installApp('', '', '');
+    ApplicationPackage androidApp = packages[BuildPlatform.android];
+    if (androidApp != null && android.isConnected()) {
+      installedSomewhere = installedSomewhere || android.installApp(androidApp);
     }
 
     if (installedSomewhere) {
