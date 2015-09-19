@@ -2,7 +2,7 @@ name: workbench
 version: 0.0.1
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: A workspace to host pub packages
-homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/workbench
+homepage: https://github.com/flutter/engine/tree/master/sky/packages/workbench
 dependencies:
   sky: any
   sky_tools: any
