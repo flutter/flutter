@@ -1,8 +1,0 @@
-solutions = [{
-  "name"        : "src",
-  "url"         : "https://github.com/domokit/sky_engine.git",
-  "deps_file"   : "DEPS",
-  "managed"     : False,
-  "safesync_url": "",
-}]
-target_os = ['linux', 'android']

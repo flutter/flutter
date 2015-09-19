@@ -1,8 +1,8 @@
 name: sky
 version: 0.0.46
 author: Chromium Authors <sky-dev@googlegroups.com>
-description: A framework for writing Sky applications
-homepage: https://github.com/domokit/sky_engine/tree/master/sky/packages/sky
+description: A framework for writing Flutter applications
+homepage: http://flutter.io
 dependencies:
   cassowary: ^0.1.7
   material_design_icons: ^0.0.3
