@@ -13,12 +13,11 @@
 #include "mojo/public/interfaces/application/application.mojom.h"
 #include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
+#include "mojo/services/native_viewport/public/interfaces/native_viewport.mojom.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "mojo/services/network/public/interfaces/url_loader.mojom.h"
 #include "mojo/services/service_registry/public/interfaces/service_registry.mojom.h"
-#include "mojo/services/view_manager/public/cpp/view_manager_client_factory.h"
-#include "mojo/services/view_manager/public/cpp/view_manager_delegate.h"
-#include "mojo/services/view_manager/public/cpp/view_observer.h"
+#include "mojo/services/surfaces/public/interfaces/display.mojom.h"
 #include "services/sky/compositor/layer_client.h"
 #include "services/sky/compositor/layer_host_client.h"
 #include "sky/compositor/layer_tree.h"
@@ -26,11 +25,6 @@
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
 #include "ui/events/gestures/gesture_types.h"
-
-namespace mojo {
-class ViewManager;
-class View;
-}
 
 namespace sky {
 class DartLibraryProviderImpl;
@@ -41,14 +35,13 @@ class TextureLayer;
 
 class DocumentView : public blink::ServiceProvider,
                      public blink::SkyViewClient,
-                     public mojo::ViewManagerDelegate,
-                     public mojo::ViewObserver,
+                     public mojo::NativeViewportEventDispatcher,
                      public sky::LayerClient,
                      public sky::LayerHostClient,
                      public ui::GestureConsumer {
  public:
-  DocumentView(mojo::InterfaceRequest<mojo::ServiceProvider> services,
-               mojo::ServiceProviderPtr exported_services,
+  DocumentView(mojo::InterfaceRequest<mojo::ServiceProvider> exported_services,
+               mojo::ServiceProviderPtr imported_services,
                mojo::URLResponsePtr response,
                mojo::Shell* shell);
   ~DocumentView() override;
@@ -83,24 +76,14 @@ class DocumentView : public blink::ServiceProvider,
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;
 
-  // ViewManagerDelegate methods:
-  void OnEmbed(mojo::View* root,
-               mojo::InterfaceRequest<mojo::ServiceProvider> services,
-               mojo::ServiceProviderPtr exposed_services) override;
-  void OnViewManagerDisconnected(mojo::ViewManager* view_manager) override;
+  // NativeViewportEventDispatcher methods:
+  void OnEvent(mojo::EventPtr event,
+               const mojo::Callback<void()>& callback) override;
 
-  // ViewObserver methods:
-  void OnViewBoundsChanged(mojo::View* view,
-                           const mojo::Rect& old_bounds,
-                           const mojo::Rect& new_bounds) override;
-  void OnViewViewportMetricsChanged(
-      mojo::View* view,
-      const mojo::ViewportMetrics& old_metrics,
-      const mojo::ViewportMetrics& new_metrics) override;
-  void OnViewFocusChanged(mojo::View* gained_focus,
-                          mojo::View* lost_focus) override;
-  void OnViewDestroyed(mojo::View* view) override;
-  void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
+  void OnViewportConnectionError();
+  void OnViewportCreated(mojo::ViewportMetricsPtr metrics);
+  void OnViewportMetricsChanged(mojo::ViewportMetricsPtr metrics);
+  void RequestUpdatedViewportMetrics();
 
   void Load(mojo::URLResponsePtr response);
   float GetDevicePixelRatio() const;
@@ -109,29 +92,31 @@ class DocumentView : public blink::ServiceProvider,
   void LoadFromSnapshotStream(String name,
                               mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  void UpdateRootSizeAndViewportMetrics(const mojo::Rect& new_bounds);
+  void UpdateViewportMetrics(mojo::ViewportMetricsPtr viewport_metrics);
+
+  void HandleInputEvent(mojo::EventPtr event);
 
   void InitServiceRegistry();
+  void InitViewport();
 
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
   mojo::ServiceProviderPtr imported_services_;
-  mojo::InterfaceRequest<mojo::ServiceProvider> services_provided_to_embedder_;
-  mojo::ServiceProviderPtr services_provided_by_embedder_;
+  mojo::NativeViewportPtr viewport_service_;
   mojo::Shell* shell_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
   mojo::NavigatorHostPtr navigator_host_;
   std::unique_ptr<blink::SkyView> sky_view_;
-  mojo::View* root_;
-  mojo::ViewManagerClientFactory view_manager_client_factory_;
+  scoped_ptr<DartLibraryProviderImpl> library_provider_;
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<TextureLayer> root_layer_;
   std::unique_ptr<compositor::LayerTree> current_layer_tree_;  // TODO(abarth): Integrate //sky/compositor and //services/sky/compositor.
   compositor::PaintContext paint_context_;
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
   mojo::ServiceRegistryPtr service_registry_;
-  scoped_ptr<mojo::StrongBinding<mojo::ServiceProvider>>
-      service_registry_service_provider_binding_;
+  mojo::Binding<NativeViewportEventDispatcher> event_dispatcher_binding_;
+  mojo::ViewportMetricsPtr viewport_metrics_;
+  mojo::DisplayPtr display_;
 
   base::WeakPtrFactory<DocumentView> weak_factory_;
 
