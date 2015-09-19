@@ -1,6 +1,6 @@
 # sky_tools
 
-[![Build Status](https://travis-ci.org/domokit/sky_tools.svg)](https://travis-ci.org/domokit/sky_tools)
+[![Build Status](https://travis-ci.org/flutter/sky_tools.svg)](https://travis-ci.org/flutter/sky_tools)
 
 Tools for building Sky applications.
 
@@ -47,4 +47,4 @@ usage: pub run sky_tools:build_sky_apk <options>
 ## Filing Issues
 
 Please file reports on the
-[GitHub Issue Tracker](https://github.com/domokit/sky_tools/issues).
+[GitHub Issue Tracker](https://github.com/flutter/sky_tools/issues).
