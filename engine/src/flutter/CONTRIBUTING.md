@@ -1,14 +1,14 @@
 Contributing to Sky
 ===================
 
-[![Build Status](https://travis-ci.org/domokit/sky_engine.svg)](https://travis-ci.org/domokit/sky_engine)
+[![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
 
 Getting the code
 ----------------
 
 To get the code:
 
- * Fork https://github.com/domokit/sky_engine into your own GitHub account.
+ * Fork `https://github.com/flutter/engine` into your own GitHub account.
  * [Download depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
    and make sure it is in your path.
  * If you haven't configured your machine with an SSH key that's shared by github then
@@ -32,7 +32,7 @@ target_os = ["android"]
 
  * `gclient sync`
  * `cd src`
- * `git remote add upstream git@github.com:domokit/sky_engine.git`
+ * `git remote add upstream git@github.com:flutter/engine.git`
 
 Building the code
 -----------------
