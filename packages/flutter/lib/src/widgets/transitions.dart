@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:sky/animation.dart';
-import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/global_key_watcher.dart';
