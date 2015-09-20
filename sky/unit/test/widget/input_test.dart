@@ -1,4 +1,5 @@
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
@@ -9,7 +10,7 @@ import '../services/mock_services.dart';
 class MockKeyboard implements KeyboardService {
   KeyboardClient client;
 
-  void show(Object client, int type) {
+  void show(KeyboardClientStub client, int type) {
     this.client = client.impl;
   }
 
@@ -41,7 +42,7 @@ void main() {
     tester.pumpFrame(builder);
 
     Input input = tester.findWidget((Widget widget) => widget.key == inputKey);
-    Size emptyInputSize = input.renderObject.size;
+    Size emptyInputSize = (input.renderObject as RenderBox).size;
 
     // Simulate entry of text through the keyboard.
     expect(mockKeyboard.client, isNotNull);
@@ -54,6 +55,6 @@ void main() {
     tester.pumpFrame(builder);
 
     // Check that the Input with text has the same size as the empty Input.
-    expect(input.renderObject.size, equals(emptyInputSize));
+    expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
   });
 }

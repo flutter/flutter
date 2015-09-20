@@ -10,7 +10,7 @@ class _ServiceMocker {
   // Map of interface names to mock implementations.
   Map<String, Object> _interfaceMock = new Map<String, Object>();
 
-  bool _requestService(String url, Object proxy) {
+  bool _requestService(String url, dynamic proxy) {
     Object mock = _interfaceMock[proxy.impl.name];
     if (mock != null) {
       // Replace the proxy's implementation of the service interface with the
