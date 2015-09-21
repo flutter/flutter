@@ -12,40 +12,24 @@
 #include "sky/shell/gpu/ganesh_context.h"
 #include "sky/shell/gpu/ganesh_surface.h"
 #include "sky/shell/gpu/picture_serializer.h"
+#include "sky/shell/shell.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gl/gl_bindings.h"
 #include "ui/gl/gl_context.h"
 #include "ui/gl/gl_share_group.h"
 #include "ui/gl/gl_surface.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 
 // Set this value to 1 to serialize the layer tree to disk.
 #define SERIALIZE_LAYER_TREE 0
 
 namespace sky {
 namespace shell {
-namespace {
-
-#if SERIALIZE_LAYER_TREE
-
-void SketchySerializeLayerTree(const char* path,
-                               compositor::LayerTree* layer_tree) {
-  const auto& layers =
-      static_cast<compositor::ContainerLayer*>(layer_tree->root_layer())
-          ->layers();
-  if (layers.empty())
-    return;
-  SerializePicture(
-      path, static_cast<compositor::PictureLayer*>(layers[0].get())->picture());
-}
-
-#endif
-
-}  // namespace
 
 Rasterizer::Rasterizer()
-    : share_group_(new gfx::GLShareGroup()),
-      weak_factory_(this) {}
+    : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
+}
 
 Rasterizer::~Rasterizer() {
 }
@@ -55,8 +39,8 @@ base::WeakPtr<Rasterizer> Rasterizer::GetWeakPtr() {
 }
 
 void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
-  surface_ = gfx::GLSurface::CreateViewGLSurface(widget,
-                                                 gfx::SurfaceConfiguration());
+  surface_ =
+      gfx::GLSurface::CreateViewGLSurface(widget, gfx::SurfaceConfiguration());
   CHECK(surface_) << "GLSurface required.";
 }
 
@@ -72,6 +56,8 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   if (surface_->GetSize() != size)
     surface_->Resize(size);
 
+  // Use the canvas from the Ganesh Surface to render the current frame into
+
   EnsureGLContext();
   CHECK(context_->MakeCurrent(surface_.get()));
   EnsureGaneshSurface(surface_->GetBackingFrameBufferObject(), size);
@@ -79,16 +65,22 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
 
   canvas->clear(SK_ColorBLACK);
   {
-    auto frame = paint_context_.AcquireFrame(*canvas);
+    sky::compositor::PaintContext::ScopedFrame frame =
+        paint_context_.AcquireFrame(*canvas);
     layer_tree->root_layer()->Paint(frame);
   }
   canvas->flush();
   surface_->SwapBuffers();
 
-#if SERIALIZE_LAYER_TREE
-  SketchySerializeLayerTree("/data/data/org.domokit.sky.shell/cache/layer0.skp",
-                            layer_tree.get());
-#endif
+  // Optionally, if the user has specified tracing the current scene to a file,
+  // acquire another frame and draw into it to obtain an SkPicture to serialize
+
+  auto options = Shell::Shared().tracing_controller().picture_tracing_options();
+  if (options.first) {
+    sky::compositor::PaintContext::ScopedFrame to_file_frame =
+        paint_context_.AcquireFrame(options.second);
+    layer_tree->root_layer()->Paint(to_file_frame);
+  }
 }
 
 void Rasterizer::OnOutputSurfaceDestroyed() {
@@ -118,7 +110,7 @@ void Rasterizer::EnsureGaneshSurface(intptr_t window_fbo,
                                      const gfx::Size& size) {
   if (!ganesh_surface_ || ganesh_surface_->size() != size)
     ganesh_surface_.reset(
-      new GaneshSurface(window_fbo, ganesh_context_.get(), size));
+        new GaneshSurface(window_fbo, ganesh_context_.get(), size));
 }
 
 }  // namespace shell

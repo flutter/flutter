@@ -60,8 +60,6 @@ class Engine : public UIDelegate,
   void StartDartTracing();
   void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
 
-  void SaveFrameToSkPicture(const base::FilePath& destination);
-
  private:
   // UIDelegate implementation:
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) override;

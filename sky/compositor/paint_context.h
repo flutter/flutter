@@ -10,6 +10,7 @@
 #include "sky/compositor/compositor_options.h"
 #include "sky/compositor/instrumentation.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace sky {
 namespace compositor {
@@ -18,23 +19,21 @@ class PaintContext {
  public:
   class ScopedFrame {
    public:
-    SkCanvas& canvas() { return canvas_; }
+    SkCanvas& canvas() { return *canvas_; }
 
-    ScopedFrame(ScopedFrame&& frame) = default;
+    ScopedFrame(ScopedFrame&& frame);
 
-    ~ScopedFrame() { context_.endFrame(*this); }
+    ~ScopedFrame();
 
    private:
     PaintContext& context_;
-    SkCanvas& canvas_;
+    SkCanvas* canvas_;
+    std::string trace_file_name_;
+    std::unique_ptr<SkPictureRecorder> trace_recorder_;
 
-    ScopedFrame() = delete;
+    ScopedFrame(PaintContext& context, SkCanvas& canvas);
 
-    ScopedFrame(PaintContext& context, SkCanvas& canvas)
-        : context_(context), canvas_(canvas) {
-      DCHECK(&canvas) << "The frame requries a valid canvas";
-      context_.beginFrame(*this);
-    };
+    ScopedFrame(PaintContext& context, const std::string& trace_file_name);
 
     friend class PaintContext;
 
@@ -47,6 +46,8 @@ class PaintContext {
   CompositorOptions& options() { return options_; };
 
   ScopedFrame AcquireFrame(SkCanvas& canvas);
+
+  ScopedFrame AcquireFrame(const std::string& trace_file_name);
 
  private:
   CompositorOptions options_;
