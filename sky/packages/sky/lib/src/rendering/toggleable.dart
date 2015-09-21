@@ -5,6 +5,8 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
+import 'package:sky/gestures.dart';
+import 'package:sky/src/rendering/sky_binding.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/proxy_box.dart';
@@ -30,11 +32,31 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   }
 
   EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event is sky.GestureEvent && event.type == 'gesturetap') {
-      _onChanged(!_value);
-      return EventDisposition.consumed;
+    if (event.type == 'pointerdown') {
+      _tap.addPointer(event);
+      return EventDisposition.processed;
     }
     return EventDisposition.ignored;
+  }
+
+  TapGestureRecognizer _tap;
+
+  void attach() {
+    super.attach();
+    _tap = new TapGestureRecognizer(
+      router: SkyBinding.instance.pointerRouter,
+      onTap: _handleTap
+    );
+  }
+
+  void detatch() {
+    _tap.dispose();
+    _tap = null;
+    super.detach();
+  }
+
+  void _handleTap() {
+    _onChanged(!_value);
   }
 
   bool _value;
