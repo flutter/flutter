@@ -13,7 +13,9 @@ To get the code:
    and make sure it is in your path.
  * If you haven't configured your machine with an SSH key that's shared by github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
- * Create a `.gclient` file in an empty directory with the following contents, replacing
+ * Create an empty directory for your copy of the repository. Call it what you like. For
+   the sake of the instructions that follow, we'll call it `flutter`.
+ * Create a `.gclient` in the `flutter` directory with the following contents, replacing
    `<your_name_here`> with your GitHub account name:
 
 ```
@@ -21,7 +23,7 @@ solutions = [
   {
     "managed": False,
     "name": "src",
-    "url": "git@github.com:<your_name_here>/sky_engine.git",
+    "url": "git@github.com:<your_name_here>/engine.git",
     "custom_deps": {},
     "deps_file": "DEPS",
     "safesync_url": "",
@@ -29,7 +31,7 @@ solutions = [
 ]
 target_os = ["android"]
 ```
-
+ * `cd flutter`
  * `gclient sync`
  * `cd src`
  * `git remote add upstream git@github.com:flutter/engine.git`
@@ -104,7 +106,7 @@ To start working on a patch:
  * `git fetch upstream`
  * `git checkout upstream/master -b name_of_your_branch`
  * Hack away
- * `git commit -a`
+ * `git commit -a -m "<your brief but informative commit message>"`
  * `git push origin name_of_your_branch`
 
 To send us a pull request:
