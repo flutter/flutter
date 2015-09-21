@@ -10,8 +10,6 @@ source_set("compositor") {
     "layer_host.h",
     "layer_host_client.cc",
     "layer_host_client.h",
-    "picture_serializer.cc",
-    "picture_serializer.h",
     "rasterizer.cc",
     "rasterizer.h",
     "rasterizer_bitmap.cc",
