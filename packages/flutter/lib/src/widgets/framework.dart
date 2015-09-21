@@ -869,7 +869,7 @@ abstract class Component extends Widget {
     if (_dirty || !_mounted)
       return;
     _dirty = true;
-    _scheduleComponentForRender(this);
+    _scheduleComponentForBuild(this);
   }
 
   static void flushBuild() {
@@ -1051,7 +1051,7 @@ void _endSyncPhase() {
 }
 
 // TODO(ianh): Move this to Component
-void _scheduleComponentForRender(Component component) {
+void _scheduleComponentForBuild(Component component) {
   _dirtyComponents.add(component);
   if (!_buildScheduled) {
     _buildScheduled = true;
@@ -1559,7 +1559,7 @@ abstract class AbstractWidgetRoot extends StatefulComponent {
 
   AbstractWidgetRoot() {
     _mounted = true;
-    _scheduleComponentForRender(this);
+    _scheduleComponentForBuild(this);
   }
 
   void syncConstructorArguments(AbstractWidgetRoot source) {
