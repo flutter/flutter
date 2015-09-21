@@ -6,6 +6,8 @@ class TestComponent extends Component {
   Widget build() => child;
 }
 
+final Object _rootSlot = new Object();
+
 class WidgetTester {
   ComponentElement _rootElement;
 
@@ -35,9 +37,9 @@ class WidgetTester {
   void pumpFrame(Widget widget) {
     if (_rootElement == null) {
       _rootElement = new ComponentElement(new TestComponent(child: widget));
-      _rootElement.mount(null);
+      _rootElement.mount(_rootSlot);
     } else {
-      _rootElement.update(new TestComponent(child: widget), null);
+      _rootElement.update(new TestComponent(child: widget));
     }
   }
 
