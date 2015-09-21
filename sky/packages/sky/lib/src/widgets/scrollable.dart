@@ -174,9 +174,8 @@ abstract class Scrollable extends StatefulComponent {
     return scrollVelocity.clamp(_kMinFlingVelocity, _kMaxFlingVelocity) / _kMillisecondsPerSecond;
   }
 
-  EventDisposition _handlePointerDown(_) {
+  void _handlePointerDown(_) {
     _stopAnimations();
-    return EventDisposition.processed;
   }
 
   void _handleDragUpdate(double delta) {

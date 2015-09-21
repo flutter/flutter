@@ -219,7 +219,7 @@ class GestureDetector extends StatefulComponent {
     return null;
   }
 
-  EventDisposition _handlePointerDown(sky.PointerEvent event) {
+  void _handlePointerDown(sky.PointerEvent event) {
     if (_tap != null)
       _tap.addPointer(event);
     if (_showPress != null)
@@ -234,7 +234,6 @@ class GestureDetector extends StatefulComponent {
       _pan.addPointer(event);
     if (_scale != null)
       _scale.addPointer(event);
-    return EventDisposition.processed;
   }
 
   Widget build() {

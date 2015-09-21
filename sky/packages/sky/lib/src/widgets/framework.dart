@@ -16,7 +16,6 @@ import 'package:sky/src/rendering/sky_binding.dart';
 import 'package:sky/src/rendering/view.dart';
 
 export 'package:sky/src/rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
-export 'package:sky/src/rendering/hit_test.dart' show EventDisposition, combineEventDispositions;
 export 'package:sky/src/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 final bool _shouldLogRenderDuration = false; // see also 'enableProfilingLoop' argument to runApp()
@@ -686,9 +685,7 @@ abstract class Inherited extends TagNode {
 
 }
 
-typedef EventDisposition GestureEventListener(sky.GestureEvent e);
-typedef EventDisposition PointerEventListener(sky.PointerEvent e);
-typedef EventDisposition EventListener(sky.Event e);
+typedef void PointerEventListener(sky.PointerEvent e);
 
 class Listener extends TagNode  {
   Listener({
@@ -705,7 +702,7 @@ class Listener extends TagNode  {
   final PointerEventListener onPointerUp;
   final PointerEventListener onPointerCancel;
 
-  EventDisposition _handleEvent(sky.Event event) {
+  void _handleEvent(sky.Event event) {
     if (onPointerDown != null && event.type == 'pointerdown')
       return onPointerDown(event);
     if (onPointerMove != null && event.type == 'pointermove')
@@ -714,7 +711,6 @@ class Listener extends TagNode  {
       return onPointerUp(event);
     if (onPointerCancel != null && event.type == 'pointercancel')
       return onPointerCancel(event);
-    return EventDisposition.ignored;
   }
 }
 
@@ -1500,24 +1496,16 @@ class WidgetSkyBinding extends SkyBinding {
     assert(SkyBinding.instance is WidgetSkyBinding);
   }
 
-  EventDisposition handleEvent(sky.Event event, BindingHitTestEntry entry) {
-    EventDisposition disposition = EventDisposition.ignored;
+  void handleEvent(sky.Event event, BindingHitTestEntry entry) {
     for (HitTestEntry entry in entry.result.path) {
       if (entry.target is! RenderObject)
         continue;
       for (Widget target in RenderObjectWrapper.getWidgetsForRenderObject(entry.target)) {
-        if (target is Listener) {
-          EventDisposition targetDisposition = target._handleEvent(event);
-          if (targetDisposition == EventDisposition.consumed) {
-            return targetDisposition;
-          } else if (targetDisposition == EventDisposition.processed) {
-            disposition = EventDisposition.processed;
-          }
-        }
-        target = target._parent;
+        if (target is Listener)
+          target._handleEvent(event);
       }
     }
-    return combineEventDispositions(disposition, super.handleEvent(event, entry));
+    super.handleEvent(event, entry);
   }
 
   void beginFrame(double timeStamp) {

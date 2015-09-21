@@ -209,7 +209,7 @@ class Navigator extends StatefulComponent {
     }
     if (visibleRoutes.length > 1) {
       visibleRoutes.insert(1, new Listener(
-        onPointerDown: (_) { pop(); return EventDisposition.consumed; },
+        onPointerDown: (_) { pop(); },
         child: new Container()
       ));
     }

@@ -27,7 +27,6 @@ export 'package:sky/src/painting/text_style.dart';
 export 'package:sky/src/rendering/block.dart' show BlockDirection;
 export 'package:sky/src/rendering/box.dart' show BoxConstraints;
 export 'package:sky/src/rendering/flex.dart' show FlexJustifyContent, FlexAlignItems, FlexDirection;
-export 'package:sky/src/rendering/hit_test.dart' show EventDisposition, combineEventDispositions;
 export 'package:sky/src/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/src/rendering/proxy_box.dart' show BackgroundImage, BoxDecoration, BoxDecorationPosition, BoxShadow, Border, BorderSide, EdgeDims, Shape;
 export 'package:sky/src/rendering/shifted_box.dart' show ShrinkWrap;
