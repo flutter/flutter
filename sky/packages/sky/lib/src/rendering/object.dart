@@ -14,7 +14,7 @@ import 'package:sky/src/rendering/node.dart';
 import 'package:vector_math/vector_math.dart';
 
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'package:sky/src/rendering/hit_test.dart' show EventDisposition, HitTestTarget, HitTestEntry, HitTestResult;
+export 'package:sky/src/rendering/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
 
 /// Base class for data associated with a [RenderObject] by its parent
 ///
@@ -1028,8 +1028,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // EVENTS
 
   /// Override this function to handle events that hit this render object
-  EventDisposition handleEvent(sky.Event event, HitTestEntry entry) {
-    return EventDisposition.ignored;
+  void handleEvent(sky.Event event, HitTestEntry entry) {
   }
 
 

@@ -99,7 +99,7 @@ class OverlayGeometryApp extends App {
     });
   }
 
-  EventDisposition handlePointerDown(Widget target, sky.PointerEvent event) {
+  void handlePointerDown(Widget target, sky.PointerEvent event) {
     setState(() {
       markers[MarkerType.touch] = new Point(event.x, event.y);
       markers[MarkerType.topLeft] = target.localToGlobal(new Point(0.0, 0.0));
@@ -113,8 +113,6 @@ class OverlayGeometryApp extends App {
         scrollable.addListener(scrollListener);
       }
     });
-
-    return EventDisposition.processed;
   }
 
   Widget builder(int index) {

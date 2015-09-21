@@ -39,7 +39,7 @@ class RenderTouchDemo extends RenderBox {
 
   RenderTouchDemo();
 
-  EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
+  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
     if (event is sky.PointerEvent) {
       switch (event.type) {
         case 'pointerdown':
@@ -57,9 +57,7 @@ class RenderTouchDemo extends RenderBox {
           break;
       }
       markNeedsPaint();
-      return EventDisposition.processed;
     }
-    return EventDisposition.processed;
   }
 
   void performLayout() {

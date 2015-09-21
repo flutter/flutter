@@ -81,13 +81,12 @@ class StockHome extends StatefulComponent {
     });
   }
 
-  EventDisposition _handleStockModeChange(StockMode value) {
+  void _handleStockModeChange(StockMode value) {
     setState(() {
       stockMode = value;
     });
     if (modeUpdater != null)
       modeUpdater(value);
-    return EventDisposition.processed;
   }
 
   void _handleMenuShow() {
@@ -146,10 +145,9 @@ class StockHome extends StatefulComponent {
     );
   }
 
-  EventDisposition _handleShowSettings() {
+  void _handleShowSettings() {
     navigator.pop();
     navigator.pushNamed('/settings');
-    return EventDisposition.processed;
   }
 
   Widget buildToolBar() {

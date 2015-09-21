@@ -42,14 +42,10 @@ class RenderSolidColorBox extends RenderDecoratedBox {
     size = constraints.constrain(desiredSize);
   }
 
-  EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown') {
+  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
+    if (event.type == 'pointerdown')
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
-      return EventDisposition.processed;
-    } else if (event.type == 'pointerup') {
+    else if (event.type == 'pointerup')
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
-      return EventDisposition.processed;
-    }
-    return EventDisposition.ignored;
   }
 }

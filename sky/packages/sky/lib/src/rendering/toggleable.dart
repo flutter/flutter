@@ -31,12 +31,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       ..addListener(markNeedsPaint);
   }
 
-  EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown') {
+  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
+    if (event.type == 'pointerdown')
       _tap.addPointer(event);
-      return EventDisposition.processed;
-    }
-    return EventDisposition.ignored;
   }
 
   TapGestureRecognizer _tap;

@@ -68,20 +68,14 @@ class _RenderSwitch extends RenderToggleable {
 
   RadialReaction _radialReaction;
 
-  EventDisposition handleEvent(sky.Event event, BoxHitTestEntry entry) {
+  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
     if (event is sky.PointerEvent) {
-      if (event.type == 'pointerdown') {
+      if (event.type == 'pointerdown')
         _showRadialReaction(entry.localPosition);
-        return combineEventDispositions(EventDisposition.processed,
-                                        super.handleEvent(event, entry));
-      }
-      if (event.type == 'pointerup') {
+      else if (event.type == 'pointerup')
         _hideRadialReaction();
-        return combineEventDispositions(EventDisposition.processed,
-                                        super.handleEvent(event, entry));
-      }
     }
-    return super.handleEvent(event, entry);
+    super.handleEvent(event, entry);
   }
 
   void _showRadialReaction(Point startLocation) {

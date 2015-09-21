@@ -4,34 +4,10 @@
 
 import 'dart:sky' as sky;
 
-/// The outcome of running an event handler.
-enum EventDisposition {
-  /// The event handler ignored this event.
-  ignored,
-
-  /// The event handler did not ignore the event but other event handlers should
-  /// process the event as well.
-  processed,
-
-  /// The event handler did not ignore the event and other event handlers
-  /// should not process the event.
-  consumed,
-}
-
-/// Merges two [EventDisposition] values such that the result indicates the
-/// maximum amount of processing indicated by the two inputs.
-EventDisposition combineEventDispositions(EventDisposition left, EventDisposition right) {
-  if (left == EventDisposition.consumed || right == EventDisposition.consumed)
-    return EventDisposition.consumed;
-  if (left == EventDisposition.processed || right == EventDisposition.processed)
-    return EventDisposition.processed;
-  return EventDisposition.ignored;
-}
-
 /// An object that can handle events.
 abstract class HitTestTarget {
   /// Override this function to receive events.
-  EventDisposition handleEvent(sky.Event event, HitTestEntry entry);
+  void handleEvent(sky.Event event, HitTestEntry entry);
 }
 
 /// Data collected during a hit test about a specific [HitTestTarget].

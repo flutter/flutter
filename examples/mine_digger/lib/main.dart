@@ -190,11 +190,10 @@ class MineDiggerApp extends App {
     );
   }
 
-  EventDisposition handleToolbarPointerDown(sky.PointerEvent event) {
+  void handleToolbarPointerDown(sky.PointerEvent event) {
     setState(() {
       resetGame();
     });
-    return EventDisposition.processed;
   }
 
   // User action. The user uncovers the cell which can cause losing the game.

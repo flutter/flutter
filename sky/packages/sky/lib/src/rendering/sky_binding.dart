@@ -123,7 +123,7 @@ class SkyBinding extends HitTestTarget {
     return state;
   }
 
-  EventDisposition _handlePointerEvent(sky.PointerEvent event) {
+  void _handlePointerEvent(sky.PointerEvent event) {
     Point position = new Point(event.x, event.y);
 
     _PointerState state = _getOrCreateStateForPointer(event, position);
@@ -149,27 +149,19 @@ class SkyBinding extends HitTestTarget {
   }
 
   /// Dispatch the given event to the path of the given hit test result
-  EventDisposition dispatchEvent(sky.Event event, HitTestResult result) {
+  void dispatchEvent(sky.Event event, HitTestResult result) {
     assert(result != null);
-    EventDisposition disposition = EventDisposition.ignored;
-    for (HitTestEntry entry in result.path) {
-      EventDisposition entryDisposition = entry.target.handleEvent(event, entry);
-      if (entryDisposition == EventDisposition.consumed)
-        return EventDisposition.consumed;
-      else if (entryDisposition == EventDisposition.processed)
-        disposition = EventDisposition.processed;
-    }
-    return disposition;
+    for (HitTestEntry entry in result.path)
+      entry.target.handleEvent(event, entry);
   }
 
-  EventDisposition handleEvent(sky.Event e, BindingHitTestEntry entry) {
-    if (e is! sky.PointerEvent)
-      return EventDisposition.ignored;
-    sky.PointerEvent event = e;
-    pointerRouter.route(event);
-    if (event.type == 'pointerdown')
-      GestureArena.instance.close(event.pointer);
-    return EventDisposition.processed;
+  void handleEvent(sky.Event e, BindingHitTestEntry entry) {
+    if (e is sky.PointerEvent) {
+      sky.PointerEvent event = e;
+      pointerRouter.route(event);
+      if (event.type == 'pointerdown')
+        GestureArena.instance.close(event.pointer);
+    }
   }
 }
 

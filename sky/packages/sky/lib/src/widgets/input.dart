@@ -113,7 +113,7 @@ class Input extends StatefulComponent {
     );
   }
 
-  EventDisposition focus(_) {
+  void focus(_) {
     if (Focus.at(this)) {
       assert(_keyboardHandle.attached);
       _keyboardHandle.showByRequest();
@@ -121,7 +121,6 @@ class Input extends StatefulComponent {
       Focus.moveTo(this);
       // we'll get told to rebuild and we'll take care of the keyboard then
     }
-    return EventDisposition.processed;
   }
 
   void didUnmount() {

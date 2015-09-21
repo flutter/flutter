@@ -178,9 +178,9 @@ class SpriteBox extends RenderBox {
     }
   }
 
-  EventDisposition handleEvent(sky.Event event, _SpriteBoxHitTestEntry entry) {
+  void handleEvent(sky.Event event, _SpriteBoxHitTestEntry entry) {
     if (!attached)
-      return EventDisposition.ignored;
+      return;
 
     if (event is sky.PointerEvent) {
 
@@ -229,7 +229,6 @@ class SpriteBox extends RenderBox {
         }
       }
     }
-    return EventDisposition.ignored;
   }
 
   bool hitTest(HitTestResult result, { Point position }) {
