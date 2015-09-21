@@ -32,6 +32,21 @@ class TestComponentState extends ComponentState {
 final BoxDecoration kBoxDecorationA = new BoxDecoration();
 final BoxDecoration kBoxDecorationB = new BoxDecoration();
 
+class TestBuildCounter extends Component {
+  static int buildCount = 0;
+
+  Widget build() {
+    ++buildCount;
+    return new DecoratedBox(decoration: kBoxDecorationA);
+  }
+}
+
+void flipStatefulComponent(WidgetTester tester) {
+  ComponentStateElement stateElement =
+      tester.findElement((element) => element is ComponentStateElement);
+  (stateElement.state as TestComponentState).flip();
+}
+
 void main() {
   test('Stateful component smoke test', () {
     WidgetTester tester = new WidgetTester();
@@ -63,10 +78,7 @@ void main() {
 
     checkTree(kBoxDecorationB);
 
-    ComponentStateElement stateElement =
-        tester.findElement((element) => element is ComponentStateElement);
-    (stateElement.state as TestComponentState).flip();
-
+    flipStatefulComponent(tester);
     Element.flushBuild();
 
     checkTree(kBoxDecorationA);
@@ -82,4 +94,20 @@ void main() {
 
   });
 
+  test('Don\'t rebuild subcomponents', () {
+    WidgetTester tester = new WidgetTester();
+    tester.pumpFrame(
+      new TestComponentConfig(
+        left: new TestBuildCounter(),
+        right: new DecoratedBox(decoration: kBoxDecorationB)
+      )
+    );
+
+    expect(TestBuildCounter.buildCount, equals(1));
+
+    flipStatefulComponent(tester);
+    Element.flushBuild();
+
+    expect(TestBuildCounter.buildCount, equals(1));
+  });
 }
