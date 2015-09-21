@@ -204,6 +204,9 @@ abstract class Element<T extends Widget> {
     }
 
     if (child != null) {
+      assert(child._slot == slot);
+      if (child._widget == updated)
+        return child;
       if (_canUpdate(child._widget, updated)) {
         child.update(updated);
         return child;
