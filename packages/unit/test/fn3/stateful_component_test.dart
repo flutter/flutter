@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 
 import 'widget_tester.dart';
 
-class TestComponentConfig extends ComponentConfiguration {
+class TestComponentConfig extends StatefulComponent {
   TestComponentConfig({ this.left, this.right });
 
   final Widget left;
@@ -13,9 +13,7 @@ class TestComponentConfig extends ComponentConfiguration {
   TestComponentState createState() => new TestComponentState();
 }
 
-class TestComponentState extends ComponentState {
-  TestComponentConfig get config => super.config;
-
+class TestComponentState extends ComponentState<TestComponentConfig> {
   bool _showLeft = true;
 
   void flip() {
@@ -32,7 +30,7 @@ class TestComponentState extends ComponentState {
 final BoxDecoration kBoxDecorationA = new BoxDecoration();
 final BoxDecoration kBoxDecorationB = new BoxDecoration();
 
-class TestBuildCounter extends Component {
+class TestBuildCounter extends StatelessComponent {
   static int buildCount = 0;
 
   Widget build() {
@@ -42,8 +40,8 @@ class TestBuildCounter extends Component {
 }
 
 void flipStatefulComponent(WidgetTester tester) {
-  ComponentStateElement stateElement =
-      tester.findElement((element) => element is ComponentStateElement);
+  StatefulComponentElement stateElement =
+      tester.findElement((element) => element is StatefulComponentElement);
   (stateElement.state as TestComponentState).flip();
 }
 
