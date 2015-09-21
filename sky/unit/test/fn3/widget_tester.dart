@@ -1,6 +1,6 @@
 import 'package:sky/src/fn3/framework.dart';
 
-class TestComponent extends Component {
+class TestComponent extends StatelessComponent {
   TestComponent({ this.child });
   final Widget child;
   Widget build() => child;
@@ -9,7 +9,7 @@ class TestComponent extends Component {
 final Object _rootSlot = new Object();
 
 class WidgetTester {
-  ComponentElement _rootElement;
+  StatelessComponentElement _rootElement;
 
   void walkElements(ElementVisitor visitor) {
     void walk(Element element) {
@@ -36,7 +36,7 @@ class WidgetTester {
 
   void pumpFrame(Widget widget) {
     if (_rootElement == null) {
-      _rootElement = new ComponentElement(new TestComponent(child: widget));
+      _rootElement = new StatelessComponentElement(new TestComponent(child: widget));
       _rootElement.mount(_rootSlot);
     } else {
       _rootElement.update(new TestComponent(child: widget));
