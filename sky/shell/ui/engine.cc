@@ -12,7 +12,6 @@
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "services/asset_bundle/asset_unpacker_job.h"
-#include "sky/shell/gpu/picture_serializer.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
