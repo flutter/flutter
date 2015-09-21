@@ -16,37 +16,46 @@ SRC_ROOT = os.path.dirname(SKY_ROOT)
 WORKBENCH = os.path.join(SRC_ROOT, 'sky', 'packages', 'workbench')
 DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
 DARTANALYZER = os.path.join(DART_SDK, 'dartanalyzer')
+SKY_UNIT_TESTS = os.path.join(SKY_ROOT, 'unit', 'test')
 
 _IGNORED_PATTERNS = [
   # Ignored because they're not indicative of specific errors.
   re.compile(r'^$'),
   re.compile(r'^Analyzing \['),
   re.compile(r'^No issues found'),
-  re.compile(r'^[0-9]+ errors? and [0-9]+ warnings? found.'),
-  re.compile(r'^([0-9]+|No) (error|warning|issue)s? found.'),
 
   # Ignore analyzer status output.
-  re.compile(r'^[0-9]+ errors(, [0-9]+ warnings)? and [0-9]+ hints found.'),
+  re.compile(r'^[0-9]+ (error|warning|hint).*found[.]'),
 
   # TODO: Fix all the warnings in the mojo packages
-  re.compile(r'.*dart-pub-cache.*\.mojom\.dart'),
+  re.compile(r'.*pub-cache.*\.mojom\.dart'),
 
   # It'd be nice if the other packages we used didn't have warnings, too...
-  re.compile(r'.*/dart-pub-cache/hosted/pub.dartlang.org/'),
+  re.compile(r'.*pub-cache/hosted/pub.dartlang.org/'),
 ]
 
 def main():
     parser = argparse.ArgumentParser(description='Sky Analyzer')
     parser.add_argument('--congratulate', action="store_true")
-    parser.add_argument('app_path', type=str)
+    parser.add_argument('app_path', type=str, nargs="?")
     args = parser.parse_args()
+
+    if args.app_path is not None:
+        app_paths = [args.app_path]
+    else:
+        # If no app_path is provided, then run the analyzer on any Dart file
+        # within the unit tests.
+        app_paths = []
+        for root, _, files in os.walk(SKY_UNIT_TESTS):
+            app_paths.extend(os.path.join(root, f)
+                             for f in files if f.endswith(".dart"))
 
     try:
       subprocess.check_output([
-          DARTANALYZER, "--package-warnings", args.app_path,
+          DARTANALYZER, "--package-warnings",
           "--package-root", os.path.join(WORKBENCH, "packages"),
           "--fatal-warnings"
-      ], stderr=subprocess.STDOUT)
+      ] + app_paths, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
       errors = [l for l in e.output.split('\n')
                 if not any(p.match(l) for p in _IGNORED_PATTERNS)]
