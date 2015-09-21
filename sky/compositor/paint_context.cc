@@ -5,6 +5,7 @@
 #include "sky/compositor/paint_context.h"
 #include "base/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "services/sky/compositor/picture_serializer.h"
 
 namespace sky {
 namespace compositor {
@@ -53,6 +54,39 @@ void PaintContext::DisplayStatistics(ScopedFrame& frame) {
 
 PaintContext::ScopedFrame PaintContext::AcquireFrame(SkCanvas& canvas) {
   return ScopedFrame(*this, canvas);
+}
+
+PaintContext::ScopedFrame PaintContext::AcquireFrame(
+    const std::string& trace_file_name) {
+  return ScopedFrame(*this, trace_file_name);
+}
+
+PaintContext::ScopedFrame::ScopedFrame(PaintContext& context, SkCanvas& canvas)
+    : context_(context), canvas_(&canvas) {
+  context_.beginFrame(*this);
+};
+
+PaintContext::ScopedFrame::ScopedFrame(ScopedFrame&& frame) = default;
+
+PaintContext::ScopedFrame::ScopedFrame(PaintContext& context,
+                                       const std::string& trace_file_name)
+    : context_(context),
+      trace_file_name_(trace_file_name),
+      trace_recorder_(new SkPictureRecorder()) {
+  trace_recorder_->beginRecording(
+      SkRect::MakeWH(SK_ScalarInfinity, SK_ScalarInfinity));
+  canvas_ = trace_recorder_->getRecordingCanvas();
+  DCHECK(canvas_);
+  context_.beginFrame(*this);
+};
+
+PaintContext::ScopedFrame::~ScopedFrame() {
+  context_.endFrame(*this);
+
+  if (trace_file_name_.length() > 0) {
+    auto picture = trace_recorder_->endRecordingAsPicture();
+    SerializePicture(trace_file_name_.c_str(), picture);
+  }
 }
 
 PaintContext::~PaintContext() {

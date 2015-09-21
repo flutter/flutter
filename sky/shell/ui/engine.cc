@@ -264,8 +264,5 @@ void Engine::StopDartTracing(mojo::ScopedDataPipeProducerHandle producer) {
   sky_view_->StopDartTracing(producer.Pass());
 }
 
-void Engine::SaveFrameToSkPicture(const base::FilePath& destination) {
-}
-
 }  // namespace shell
 }  // namespace sky

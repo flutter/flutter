@@ -17,7 +17,8 @@ const char kBaseTraceStart[] = "{\"traceEvents\":[";
 const char kBaseTraceEnd[] = "]}";
 const char kSentinel[] = "\0";
 
-TracingController::TracingController() : view_(nullptr) {}
+TracingController::TracingController()
+    : view_(nullptr), picture_tracing_enabled_(false) {}
 
 TracingController::~TracingController() {}
 
@@ -108,18 +109,27 @@ void TracingController::OnBaseTraceChunk(
   }
 }
 
-void TracingController::SaveFrameToSkPicture(base::FilePath& destination) {
-  if (view_ != nullptr) {
-    view_->SaveFrameToSkPicture(destination);
-  }
-}
-
 void TracingController::RegisterShellView(ShellView* view) {
   view_ = view;
 }
 
 void TracingController::UnregisterShellView(ShellView* view) {
   view_ = nullptr;
+}
+
+TracingController::SkPictureTracingOptions
+TracingController::picture_tracing_options() const {
+  return SkPictureTracingOptions(
+      picture_tracing_path_.length() == 0 ? false : picture_tracing_enabled_,
+      picture_tracing_path_);
+}
+
+void TracingController::set_picture_tracing_path(const std::string& path) {
+  picture_tracing_path_ = path;
+}
+
+void TracingController::set_picture_tracing_enabled(bool enabled) {
+  picture_tracing_enabled_ = enabled;
 }
 
 }  // namespace shell

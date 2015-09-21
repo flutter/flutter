@@ -55,9 +55,24 @@ static inline int64 InputEventTimestampFromNSTimeInterval(
 #endif
 }
 
+static std::string SkPictureTracingPath() {
+  NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                       NSUserDomainMask, YES);
+
+  char* temp = reinterpret_cast<char*>(calloc(256, sizeof(char)));
+  snprintf(temp, 256, "%s/layers.skp", [paths.firstObject UTF8String]);
+  std::string path(temp);
+  free(temp);
+
+  return path;
+}
+
 -(instancetype) initWithShellView:(sky::shell::ShellView *) shellView {
   self = [super init];
   if (self) {
+    sky::shell::Shell::Shared().tracing_controller().set_picture_tracing_path(
+        SkPictureTracingPath());
+
     _shell_view.reset(shellView);
     self.multipleTouchEnabled = YES;
   }
@@ -254,27 +269,3 @@ static inline int64 InputEventTimestampFromNSTimeInterval(
 }
 
 @end
-
-void SaveFrameToSkPicture() {
-  @autoreleasepool {
-    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                         NSUserDomainMask, YES);
-    NSString* basePath = paths.firstObject;
-
-    if (basePath.length == 0) {
-      return;
-    }
-
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"HH_mm_ss"];
-    NSString* dateString = [formatter stringFromDate:[NSDate date]];
-    [formatter release];
-
-    NSString* path =
-        [NSString stringWithFormat:@"%@/%@.trace.skp", basePath, dateString];
-
-    base::FilePath filePath(path.UTF8String);
-    sky::shell::Shell::Shared().tracing_controller().SaveFrameToSkPicture(
-        filePath);
-  }
-}
