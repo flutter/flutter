@@ -5,7 +5,7 @@
 #include "sky/compositor/paint_context.h"
 #include "base/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-#include "services/sky/compositor/picture_serializer.h"
+#include "sky/compositor/picture_serializer.h"
 
 namespace sky {
 namespace compositor {

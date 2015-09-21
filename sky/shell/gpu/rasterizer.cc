@@ -11,7 +11,6 @@
 #include "sky/compositor/picture_layer.h"
 #include "sky/shell/gpu/ganesh_context.h"
 #include "sky/shell/gpu/ganesh_surface.h"
-#include "sky/shell/gpu/picture_serializer.h"
 #include "sky/shell/shell.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"

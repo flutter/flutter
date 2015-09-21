@@ -30,6 +30,8 @@ source_set("compositor") {
     "paint_context.h",
     "picture_layer.cc",
     "picture_layer.h",
+    "picture_serializer.cc",
+    "picture_serializer.h",
     "transform_layer.cc",
     "transform_layer.h",
   ]
@@ -38,5 +40,6 @@ source_set("compositor") {
     "//base",
     "//skia",
     "//sky/engine/wtf",
+    "//ui/gfx"
   ]
 }
