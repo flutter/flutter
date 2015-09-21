@@ -108,31 +108,36 @@ def main():
 
     run(sky_engine_root, ['git', 'fetch', 'upstream'])
     run(sky_engine_root, ['git', 'reset', 'upstream/master', '--hard'])
-    run(sky_engine_root, ['gclient', 'sync'])
 
-    commit_hash = git_revision(sky_engine_root)
+    def stage_one():
+        run(sky_engine_root, ['gclient', 'sync'])
 
-    run(sky_engine_root, ['sky/tools/gn', '--android', '--release'])
-    run(sky_engine_root, ['ninja', '-C', 'out/android_Release', ':dist'])
+        commit_hash = git_revision(sky_engine_root)
 
-    run(sky_engine_root, ['sky/tools/gn', '--release'])
-    run(sky_engine_root, ['ninja', '-C', 'out/Release', ':dist'])
+        run(sky_engine_root, ['sky/tools/gn', '--android', '--release'])
+        run(sky_engine_root, ['ninja', '-C', 'out/android_Release', ':dist'])
 
-    run(sky_engine_root, ['cp', 'AUTHORS', 'LICENSE', sky_package_root])
+        run(sky_engine_root, ['sky/tools/gn', '--release'])
+        run(sky_engine_root, ['ninja', '-C', 'out/Release', ':dist'])
 
-    with open(sky_engine_revision_file, 'w') as stream:
-        stream.write(commit_hash)
+        with open(sky_engine_revision_file, 'w') as stream:
+            stream.write(commit_hash)
 
-    if not args.stage_two:
         upload_artifacts(android_dist_root, 'android-arm', commit_hash)
         upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
 
-    if args.publish:
-        if args.stage_two:
-            run(sky_package_root, [pub_path, 'publish', '--force'])
-        else:
+        if args.publish:
             run(sky_engine_package_root, [pub_path, 'publish', '--force'])
             run(sky_services_package_root, [pub_path, 'publish', '--force'])
+
+    def stage_two():
+        if args.publish:
+            run(sky_package_root, [pub_path, 'publish', '--force'])
+
+    if args.stage_two:
+        stage_two()
+    else:
+        stage_one()
 
 
 if __name__ == '__main__':
