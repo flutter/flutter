@@ -80,6 +80,7 @@ gcc_toolchain("clang_x64") {
   nm = "nm"
   ar = "ar"
   ld = cxx
+  strip = "strip"
 
   toolchain_cpu = "x64"
   toolchain_os = "linux"
