@@ -10,7 +10,7 @@ void main() {
   test("should throw with invalid arguments", () {
     var parent = document.createElement("div");
     expect(() {
-      parent.appendChild();
+      Function.apply(parent.appendChild, []);
     }, throws);
     expect(() {
       parent.appendChild(null);
