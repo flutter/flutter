@@ -119,11 +119,9 @@ class DatePickerHeader extends Component {
   DatePickerMode mode;
   DatePickerModeChanged onModeChanged;
 
-  EventDisposition _handleChangeMode(DatePickerMode value) {
-    if (value == mode)
-      return EventDisposition.ignored;
-    onModeChanged(value);
-    return EventDisposition.processed;
+  void _handleChangeMode(DatePickerMode value) {
+    if (value != mode)
+      onModeChanged(value);
   }
 
   Widget build() {

@@ -105,8 +105,8 @@ class WidgetTester {
 
   HitTestResult _hitTest(Point location) => SkyBinding.instance.hitTest(location);
 
-  EventDisposition _dispatchEvent(sky.Event event, HitTestResult result) {
-    return SkyBinding.instance.dispatchEvent(event, result);
+  void _dispatchEvent(sky.Event event, HitTestResult result) {
+    SkyBinding.instance.dispatchEvent(event, result);
   }
 
   void tap(Widget widget, { int pointer: 1 }) {

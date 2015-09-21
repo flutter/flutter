@@ -16,7 +16,6 @@ export 'package:sky/rendering.dart' show
     BoxShadow,
     Color,
     EdgeDims,
-    EventDisposition,
     FlexAlignItems,
     FlexDirection,
     FlexJustifyContent,

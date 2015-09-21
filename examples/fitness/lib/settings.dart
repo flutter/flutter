@@ -63,7 +63,7 @@ class SettingsFragment extends StatefulComponent {
     }
   }
 
-  EventDisposition _handleGoalWeightPressed() {
+  void _handleGoalWeightPressed() {
     showDialog(navigator, (navigator) {
       return new Dialog(
         title: new Text("Goal Weight"),
@@ -92,7 +92,6 @@ class SettingsFragment extends StatefulComponent {
         ]
       );
     }).then((double goalWeight) => updater(goalWeight: goalWeight));
-    return EventDisposition.processed;
   }
 
   Widget buildSettingsPane() {

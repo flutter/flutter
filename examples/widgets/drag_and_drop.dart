@@ -68,39 +68,35 @@ class DragAndDropApp extends App {
   DragController _dragController;
   Offset _displacement = Offset.zero;
 
-  EventDisposition _startDrag(sky.PointerEvent event) {
+  void _startDrag(sky.PointerEvent event) {
     setState(() {
       _dragController = new DragController(new DragData("Orange"));
       _dragController.update(new Point(event.x, event.y));
       _displacement = Offset.zero;
     });
-    return EventDisposition.consumed;
   }
 
-  EventDisposition _updateDrag(sky.PointerEvent event) {
+  void _updateDrag(sky.PointerEvent event) {
     setState(() {
       _dragController.update(new Point(event.x, event.y));
       _displacement += new Offset(event.dx, event.dy);
     });
-    return EventDisposition.consumed;
   }
 
-  EventDisposition _cancelDrag(sky.PointerEvent event) {
+  void _cancelDrag(sky.PointerEvent event) {
     setState(() {
       _dragController.cancel();
       _dragController = null;
     });
-    return EventDisposition.consumed;
   }
 
-  EventDisposition _drop(sky.PointerEvent event) {
+  void _drop(sky.PointerEvent event) {
     setState(() {
       _dragController.update(new Point(event.x, event.y));
       _dragController.drop();
       _dragController = null;
       _displacement = Offset.zero;
     });
-    return EventDisposition.consumed;
   }
 
   Widget build() {
@@ -114,6 +110,7 @@ class DragAndDropApp extends App {
       new Positioned(
         top: kTop,
         left: kLeft,
+        // TODO(abarth): We should be using a GestureDetector
         child: new Listener(
           onPointerDown: _startDrag,
           onPointerMove: _updateDrag,

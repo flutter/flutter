@@ -14,23 +14,22 @@ abstract class ButtonBase extends StatefulComponent {
     highlight = source.highlight;
   }
 
-  EventDisposition _handlePointerDown(_) {
+  void _handlePointerDown(_) {
     setState(() {
       highlight = true;
     });
-    return EventDisposition.processed;
   }
-  EventDisposition _handlePointerUp(_) {
+
+  void _handlePointerUp(_) {
     setState(() {
       highlight = false;
     });
-    return EventDisposition.processed;
   }
-  EventDisposition _handlePointerCancel(_) {
+
+  void _handlePointerCancel(_) {
     setState(() {
       highlight = false;
     });
-    return EventDisposition.processed;
   }
 
   Widget build() {

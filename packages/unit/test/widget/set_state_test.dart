@@ -15,9 +15,8 @@ class Inside extends StatefulComponent {
     );
   }
 
-  EventDisposition _handlePointerDown(_) {
+  void _handlePointerDown(_) {
     setState(() { });
-    return EventDisposition.processed;
   }
 }
 
@@ -37,9 +36,8 @@ class Middle extends StatefulComponent {
     );
   }
 
-  EventDisposition _handlePointerDown(_) {
+  void _handlePointerDown(_) {
     setState(() { });
-    return EventDisposition.processed;
   }
 
 }
