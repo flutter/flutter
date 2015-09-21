@@ -466,6 +466,10 @@ class RenderObjectElement<T extends RenderObjectWidget> extends Element<T> {
   }
 }
 
+class LeafRenderObjectElement<T extends RenderObjectWidget> extends RenderObjectElement<T> {
+  LeafRenderObjectElement(T widget): super(widget);
+}
+
 final Object _uniqueChild = new Object();
 
 class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends RenderObjectElement<T> {

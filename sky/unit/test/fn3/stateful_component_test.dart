@@ -10,10 +10,11 @@ class TestComponentConfig extends StatefulComponent {
   final Widget left;
   final Widget right;
 
-  TestComponentState createState() => new TestComponentState();
+  TestComponentState createState() => new TestComponentState(this);
 }
 
 class TestComponentState extends ComponentState<TestComponentConfig> {
+  TestComponentState(TestComponentConfig config): super(config);
   bool _showLeft = true;
 
   void flip() {
