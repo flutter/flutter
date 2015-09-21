@@ -5,93 +5,149 @@
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 
-abstract class Key {
-}
+abstract class Key { }
 
+/// A Widget object describes the configuration for an [Element].
+/// Widget subclasses should be immutable with const constructors.
+/// Widgets form a tree that is then inflated into an Element tree.
 abstract class Widget {
-  Widget(this.key);
+  const Widget({ this.key });
   final Key key;
 
+  /// Inflates this configuration to a concrete instance.
   Element createElement();
 }
 
-typedef Widget WidgetBuilder();
-
+/// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
+/// which wrap [RenderObject]s, which provide the actual rendering of the
+/// application.
 abstract class RenderObjectWidget extends Widget {
-  RenderObjectWidget({ Key key }) : super(key);
+  const RenderObjectWidget({ Key key }) : super(key: key);
 
-  Element createElement() => new RenderObjectElement(this);
+  /// RenderObjectWidgets always inflate to a RenderObjectElement subclass.
+  RenderObjectElement createElement();
 
+  /// Constructs an instance of the RenderObject class that this
+  /// RenderObjectWidget represents, using the configuration described by this
+  /// RenderObjectWidget.
   RenderObject createRenderObject();
+
+  /// Copies the configuration described by this RenderObjectWidget to the given
+  /// RenderObject, which must be of the same type as returned by this class'
+  /// createRenderObject().
   void updateRenderObject(RenderObject renderObject);
 }
 
+/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// that have no children.
+abstract class LeafRenderObjectWidget extends RenderObjectWidget {
+  const LeafRenderObjectWidget({ Key key }) : super(key: key);
+
+  RenderObjectElement createElement() => new LeafRenderObjectElement(this);
+}
+
+/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// that have a single child slot. (This superclass only provides the storage
+/// for that child, it doesn't actually provide the updating logic.)
 abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
-  OneChildRenderObjectWidget({ Key key, Widget this.child }) : super(key: key);
+  const OneChildRenderObjectWidget({ Key key, Widget this.child }) : super(key: key);
 
   final Widget child;
 
-  Element createElement() => new OneChildRenderObjectElement(this);
+  RenderObjectElement createElement() => new OneChildRenderObjectElement(this);
 }
 
+/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// that have a single list of children. (This superclass only provides the
+/// storage for that child list, it doesn't actually provide the updating
+/// logic.)
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
-  MultiChildRenderObjectWidget({ Key key, List<Widget> this.children })
+  const MultiChildRenderObjectWidget({ Key key, List<Widget> this.children })
     : super(key: key);
 
   final List<Widget> children;
 
-  Element createElement() => new MultiChildRenderObjectElement(this);
+  RenderObjectElement createElement() => new MultiChildRenderObjectElement(this);
 }
 
-abstract class Component extends Widget {
-  Component({ Key key }) : super(key);
-  Element createElement() => new ComponentElement(this);
+/// StatelessComponents describe a way to compose other Widgets to form reusable
+/// parts, which doesn't depend on anything other than the configuration
+/// information in the object itself. (For compositions that can change
+/// dynamically, e.g. due to having an internal clock-driven state, or depending
+/// on some system state, use [StatefulComponent].)
+abstract class StatelessComponent extends Widget {
+  const StatelessComponent({ Key key }) : super(key: key);
 
+  /// StatelessComponents always use StatelessComponentElements to represent
+  /// themselves in the Element tree.
+  StatelessComponentElement createElement() => new StatelessComponentElement(this);
+
+  /// Returns another Widget out of which this StatelessComponent is built.
+  /// Typically that Widget will have been configured with further children,
+  /// such that really this function returns a tree of configuration.
   Widget build();
 }
 
-abstract class ComponentState<T extends ComponentConfiguration> {
-  ComponentStateElement _holder;
+/// StatefulComponents provide the configuration for
+/// [StatefulComponentElement]s, which wrap [ComponentState]s, which hold
+/// mutable state and can dynamically and spontaneously ask to be rebuilt.
+abstract class StatefulComponent extends Widget {
+  const StatefulComponent({ Key key }) : super(key: key);
 
-  void setState(void fn()) {
-    fn();
-    _holder.scheduleBuild();
-  }
+  /// StatefulComponents always use StatefulComponentElements to represent
+  /// themselves in the Element tree.
+  StatefulComponentElement createElement() => new StatefulComponentElement(this);
 
-  T get config => _config;
-  T _config;
-
-  /// Override this setter to update additional state when the config changes.
-  void set config(T config) {
-    _config = config;
-  }
-
-  /// Called when this object is removed from the tree
-  void didUnmount() { }
-
-  Widget build();
-}
-
-abstract class ComponentConfiguration extends Widget {
-  ComponentConfiguration({ Key key }) : super(key);
-
-  ComponentStateElement createElement() => new ComponentStateElement(this);
-
+  /// Returns an instance of the state to which this StatefulComponent is
+  /// related, using this object as the configuration. Subclasses should
+  /// override this to return a new instance of the ComponentState class
+  /// associated with this StatefulComponent class, like this:
+  ///
+  ///   MyComponentState createState() => new MyComponentState(this);
   ComponentState createState();
 }
 
-bool _canUpdate(Widget oldWidget, Widget newWidget) {
-  return oldWidget.runtimeType == newWidget.runtimeType
-    && oldWidget.key == newWidget.key;
+/// The logic and internal state for a StatefulComponent.
+abstract class ComponentState<T extends StatefulComponent> {
+  ComponentState(this._config);
+
+  StatefulComponentElement _element;
+
+  /// Whenever you need to change internal state for a ComponentState object,
+  /// make the change in a function that you pass to setState(), as in:
+  ///
+  ///    setState(() { myState = newValue });
+  ///
+  /// If you just change the state directly without calling setState(), then
+  /// the component will not be scheduled for rebuilding, meaning that its
+  /// rendering will not be updated.
+  void setState(void fn()) {
+    fn();
+    _element.scheduleBuild();
+  }
+
+  /// The current configuration (an instance of the corresponding
+  /// StatefulComponent class).
+  T get config => _config;
+  T _config;
+
+  /// Called whenever the configuration changes. Override this method to update
+  /// additional state when the config field's value is changed.
+  void didUpdateConfig(T oldConfig) { }
+
+  /// Called when this object is removed from the tree. Override this to clean
+  /// up any resources allocated by this object.
+  void dispose() { }
+
+  /// Returns another Widget out of which this StatefulComponent is built.
+  /// Typically that Widget will have been configured with further children,
+  /// such that really this function returns a tree of configuration.
+  Widget build();
 }
 
-void _debugReportException(String context, dynamic exception, StackTrace stack) {
-  print('------------------------------------------------------------------------');
-  'Exception caught while $context'.split('\n').forEach(print);
-  print('$exception');
-  print('Stack trace:');
-  '$stack'.split('\n').forEach(print);
-  print('------------------------------------------------------------------------');
+bool _canUpdate(Widget oldWidget, Widget newWidget) {
+  return oldWidget.runtimeType == newWidget.runtimeType &&
+         oldWidget.key == newWidget.key;
 }
 
 enum _ElementLifecycle {
@@ -108,15 +164,23 @@ abstract class Element<T extends Widget> {
   }
 
   Element _parent;
+
+  /// information set by parent to define where this child fits in its parent's
+  /// child list
   dynamic _slot;
+
+  /// an integer that is guaranteed to be greater than the parent's, if any
   int _depth;
 
+  /// the configuration for this element
   T _widget;
 
   _ElementLifecycle _lifecycleState = _ElementLifecycle.initial;
 
+  /// Calls the argument for each child. Must be overridden by subclasses that support having children.
   void visitChildren(ElementVisitor visitor) { }
 
+  /// Calls the argument for each descendant, depth-first pre-order.
   void visitDescendants(ElementVisitor visitor) {
     void walk(Element element) {
       visitor(element);
@@ -146,13 +210,13 @@ abstract class Element<T extends Widget> {
     _slot = slot;
   }
 
-  void update(T updated) {
-    assert(updated != null);
+  void update(T newWidget) {
+    assert(newWidget != null);
     assert(_lifecycleState == _ElementLifecycle.mounted);
     assert(_widget != null);
     assert(_depth != null);
-    assert(_canUpdate(_widget, updated));
-    _widget = updated;
+    assert(_canUpdate(_widget, newWidget));
+    _widget = newWidget;
   }
 
   void unmount() {
@@ -272,6 +336,8 @@ class _BuildScheduler {
 
 final _BuildScheduler _buildScheduler = new _BuildScheduler();
 
+typedef Widget WidgetBuilder();
+
 abstract class BuildableElement<T extends Widget> extends Element<T> {
   BuildableElement(T widget) : super(widget);
 
@@ -317,40 +383,42 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   }
 }
 
-class ComponentElement extends BuildableElement<Component> {
-  ComponentElement(Component component) : super(component) {
+class StatelessComponentElement extends BuildableElement<StatelessComponent> {
+  StatelessComponentElement(StatelessComponent component) : super(component) {
     _builder = component.build;
   }
 
-  void update(Component updated) {
-    super.update(updated);
-    assert(_widget == updated);
+  void update(StatelessComponent newWidget) {
+    super.update(newWidget);
+    assert(_widget == newWidget);
     _builder = _widget.build;
     _rebuild();
   }
 }
 
-class ComponentStateElement extends BuildableElement<ComponentConfiguration> {
-  ComponentStateElement(ComponentConfiguration configuration)
+class StatefulComponentElement extends BuildableElement<StatefulComponent> {
+  StatefulComponentElement(StatefulComponent configuration)
     : _state = configuration.createState(), super(configuration) {
+    assert(_state._config == configuration);
+    _state._element = this;
     _builder = _state.build;
-    _state._holder = this;
-    _state.config = configuration;
   }
 
   ComponentState get state => _state;
   ComponentState _state;
 
-  void update(ComponentConfiguration updated) {
-    super.update(updated);
-    assert(_widget == updated);
-    _state.config = _widget;
+  void update(StatefulComponent newWidget) {
+    super.update(newWidget);
+    assert(_widget == newWidget);
+    StatefulComponent oldConfig = _state._config;
+    _state._config = _widget;
+    _state.didUpdateConfig(oldConfig);
     _rebuild();
   }
 
   void unmount() {
     super.unmount();
-    _state.didUnmount();
+    _state.dispose();
     _state = null;
   }
 }
@@ -440,4 +508,27 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
 
 class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> extends RenderObjectElement<T> {
   MultiChildRenderObjectElement(T widget) : super(widget);
+}
+
+
+
+typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTrace stack);
+/// This callback is invoked whenever an exception is caught by the widget
+/// system. The 'context' argument is a description of what was happening when
+/// the exception occurred, and may include additional details such as
+/// descriptions of the objects involved. The 'exception' argument contains the
+/// object that was thrown, and the 'stack' argument contains the stack trace.
+/// The callback is invoked after the information is printed to the console, and
+/// could be used to print additional information, such as from
+/// [debugDumpApp()].
+WidgetsExceptionHandler debugWidgetsExceptionHandler;
+void _debugReportException(String context, dynamic exception, StackTrace stack) {
+  print('------------------------------------------------------------------------');
+  'Exception caught while $context'.split('\n').forEach(print);
+  print('$exception');
+  print('Stack trace:');
+  '$stack'.split('\n').forEach(print);
+  if (debugWidgetsExceptionHandler != null)
+    debugWidgetsExceptionHandler(context, exception, stack);
+  print('------------------------------------------------------------------------');
 }
