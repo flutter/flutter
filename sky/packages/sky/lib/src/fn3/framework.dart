@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 
 abstract class Key {
@@ -107,6 +108,9 @@ abstract class Element<T extends Widget> {
   }
 
   Element _parent;
+  dynamic _slot;
+  int _depth;
+
   T _widget;
 
   _ElementLifecycle _lifecycleState = _ElementLifecycle.initial;
@@ -123,15 +127,30 @@ abstract class Element<T extends Widget> {
 
   void mount(dynamic slot) {
     assert(_lifecycleState == _ElementLifecycle.initial);
-    assert(_widget != null);
-    _lifecycleState = _ElementLifecycle.mounted;
     assert(_parent == null || _parent._lifecycleState == _ElementLifecycle.mounted);
+    assert(slot != null);
+    assert(_widget != null);
+    assert(_depth == null);
+    _lifecycleState = _ElementLifecycle.mounted;
+    _slot = slot;
+    _depth = _parent == null ? 0 : _parent._depth + 1;
   }
 
-  void update(T updated, dynamic slot) {
+  void updateSlot(dynamic slot) {
+    assert(slot != null);
+    assert(_lifecycleState == _ElementLifecycle.mounted);
+    assert(_parent != null);
+    assert(_parent._lifecycleState == _ElementLifecycle.mounted);
+    assert(_widget != null);
+    assert(_depth == null);
+    _slot = slot;
+  }
+
+  void update(T updated) {
+    assert(updated != null);
     assert(_lifecycleState == _ElementLifecycle.mounted);
     assert(_widget != null);
-    assert(updated != null);
+    assert(_depth != null);
     assert(_canUpdate(_widget, updated));
     _widget = updated;
   }
@@ -139,12 +158,30 @@ abstract class Element<T extends Widget> {
   void unmount() {
     assert(_lifecycleState == _ElementLifecycle.mounted);
     assert(_widget != null);
+    assert(_depth != null);
+    _slot = null;
+    _depth = null;
     _lifecycleState = _ElementLifecycle.defunct;
+  }
+
+  void _updateSlotForChild(Element child, dynamic slot) {
+    if (child == null)
+      return;
+    assert(child._parent == this);
+
+    void move(Element element) {
+      child.updateSlot(slot);
+      if (child is! RenderObjectElement)
+        child.visitChildren(move);
+    }
+
+    move(child);
   }
 
   void _detachChild(Element child) {
     if (child == null)
       return;
+    assert(child._parent == this);
     child._parent = null;
 
     bool haveDetachedRenderObject = false;
@@ -168,7 +205,7 @@ abstract class Element<T extends Widget> {
 
     if (child != null) {
       if (_canUpdate(child._widget, updated)) {
-        child.update(updated, slot);
+        child.update(updated);
         return child;
       }
       _detachChild(child);
@@ -181,15 +218,66 @@ abstract class Element<T extends Widget> {
     return newChild;
   }
 
+  static void flushBuild() {
+    _buildScheduler.buildDirtyElements();
+  }
 }
+
+class _BuildScheduler {
+  final Set<BuildableElement> _dirtyElements = new Set<BuildableElement>();
+  bool _inBuildDirtyElements = false;
+
+  void schedule(BuildableElement element) {
+    if (_dirtyElements.isEmpty)
+      scheduler.ensureVisualUpdate();
+    _dirtyElements.add(element);
+  }
+
+  void _absorbDirtyElement(List<BuildableElement> list) {
+    list.addAll(_dirtyElements);
+    _dirtyElements.clear();
+    list.sort((BuildableElement a, BuildableElement b) => a._depth - b._depth);
+  }
+
+  void buildDirtyElements() {
+    if (_dirtyElements.isEmpty)
+      return;
+
+    _inBuildDirtyElements = true;
+    try {
+      while (!_dirtyElements.isEmpty) {
+        List<BuildableElement> sortedDirtyElements = new List<BuildableElement>();
+        _absorbDirtyElement(sortedDirtyElements);
+        int index = 0;
+        while (index < sortedDirtyElements.length) {
+          sortedDirtyElements[index]._rebuildIfNeeded();
+          if (!_dirtyElements.isEmpty) {
+            assert(_dirtyElements.every((Element element) => !sortedDirtyElements.contains(element)));
+            _absorbDirtyElement(sortedDirtyElements);
+            index = 0;
+          } else {
+            index += 1;
+          }
+        }
+      }
+    } finally {
+      _inBuildDirtyElements = false;
+    }
+    assert(_dirtyElements.isEmpty);
+  }
+}
+
+final _BuildScheduler _buildScheduler = new _BuildScheduler();
 
 abstract class BuildableElement<T extends Widget> extends Element<T> {
   BuildableElement(T widget) : super(widget);
 
   WidgetBuilder _builder;
   Element _child;
+  bool _dirty = true;
 
-  void _rebuild(dynamic slot) {
+  void _rebuild() {
+    _dirty = false;
     Widget built;
     try {
       built = _builder();
@@ -197,7 +285,20 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     } catch (e, stack) {
       _debugReportException('building $this', e, stack);
     }
-    _child = _updateChild(_child, built, slot);
+    _child = _updateChild(_child, built, _slot);
+  }
+
+  void _rebuildIfNeeded() {
+    if (_dirty && _lifecycleState == _ElementLifecycle.mounted)
+      _rebuild();
+  }
+
+  void scheduleBuild() {
+    if (_dirty || _lifecycleState != _ElementLifecycle.mounted)
+      return;
+    _dirty = true;
+    _buildScheduler.schedule(this);
+    // TODO(abarth): Implement rebuilding.
   }
 
   void visitChildren(ElementVisitor visitor) {
@@ -208,7 +309,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   void mount(dynamic slot) {
     super.mount(slot);
     assert(_child == null);
-    _rebuild(slot);
+    _rebuild();
     assert(_child != null);
   }
 }
@@ -218,11 +319,11 @@ class ComponentElement extends BuildableElement<Component> {
     _builder = component.build;
   }
 
-  void update(Component updated, dynamic slot) {
-    super.update(updated, slot);
+  void update(Component updated) {
+    super.update(updated);
     assert(_widget == updated);
     _builder = _widget.build;
-    _rebuild(slot);
+    _rebuild();
   }
 }
 
@@ -234,23 +335,20 @@ class ComponentStateElement extends BuildableElement<ComponentConfiguration> {
     _state.config = configuration;
   }
 
+  ComponentState get state => _state;
   ComponentState _state;
 
-  void update(ComponentConfiguration updated, dynamic slot) {
-    super.update(updated, slot);
+  void update(ComponentConfiguration updated) {
+    super.update(updated);
     assert(_widget == updated);
     _state.config = _widget;
-    _rebuild(slot);
+    _rebuild();
   }
 
   void unmount() {
     super.unmount();
     _state.didUnmount();
     _state = null;
-  }
-
-  void scheduleBuild() {
-    // TODO(abarth): Implement rebuilding.
   }
 }
 
@@ -275,8 +373,8 @@ class RenderObjectElement<T extends RenderObjectWidget> extends Element<T> {
       _ancestorRenderObjectElement.insertChildRenderObject(renderObject, slot);
   }
 
-  void update(T updated, dynamic slot) {
-    super.update(updated, slot);
+  void update(T updated) {
+    super.update(updated);
     assert(_widget == updated);
     _widget.updateRenderObject(renderObject);
   }
@@ -297,6 +395,8 @@ class RenderObjectElement<T extends RenderObjectWidget> extends Element<T> {
   }
 }
 
+final Object _uniqueChild = new Object();
+
 class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends RenderObjectElement<T> {
   OneChildRenderObjectElement(T widget) : super(widget);
 
@@ -309,19 +409,19 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
 
   void mount(dynamic slot) {
     super.mount(slot);
-    _child = _updateChild(_child, _widget.child, null);
+    _child = _updateChild(_child, _widget.child, _uniqueChild);
   }
 
-  void update(T updated, dynamic slot) {
-    super.update(updated, slot);
+  void update(T updated) {
+    super.update(updated);
     assert(_widget == updated);
-    _child = _updateChild(_child, _widget.child, null);
+    _child = _updateChild(_child, _widget.child, _uniqueChild);
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(renderObject is RenderObjectWithChildMixin);
-    assert(slot == null);
+    assert(slot == _uniqueChild);
     renderObject.child = child;
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
