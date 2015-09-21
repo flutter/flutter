@@ -21,9 +21,6 @@
 #include "ui/gl/gl_surface.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 
-// Set this value to 1 to serialize the layer tree to disk.
-#define SERIALIZE_LAYER_TREE 0
-
 namespace sky {
 namespace shell {
 
