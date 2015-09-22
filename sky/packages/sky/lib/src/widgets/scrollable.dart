@@ -277,17 +277,23 @@ class ScrollableViewport extends Scrollable {
   double _childSize = 0.0;
   void _handleViewportSizeChanged(Size newSize) {
     _viewportSize = scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
-    _updateScrollBehaviour();
+    setState(() {
+      _updateScrollBehaviour();
+    });
   }
   void _handleChildSizeChanged(Size newSize) {
     _childSize = scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
-    _updateScrollBehaviour();
+    setState(() {
+      _updateScrollBehaviour();
+    });
   }
   void _updateScrollBehaviour() {
+    // if you don't call this from build() or syncConstructorArguments(), you must call it from setState().
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: _childSize,
       containerExtent: _viewportSize,
-      scrollOffset: scrollOffset));
+      scrollOffset: scrollOffset
+    ));
   }
 
   Widget buildContent() {
@@ -423,6 +429,7 @@ abstract class ScrollableWidgetList extends Scrollable {
   }
 
   void _updateScrollBehavior() {
+    // if you don't call this from build() or syncConstructorArguments(), you must call it from setState().
     double contentExtent = itemExtent * itemCount;
     if (padding != null)
       contentExtent += _leadingPadding + _trailingPadding;
@@ -636,16 +643,22 @@ class ScrollableMixedWidgetList extends Scrollable {
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleSizeChanged(Size newSize) {
-    scrollBy(scrollBehavior.updateExtents(
-      containerExtent: newSize.height,
-      scrollOffset: scrollOffset
-    ));
+    setState(() {
+      scrollBy(scrollBehavior.updateExtents(
+        containerExtent: newSize.height,
+        scrollOffset: scrollOffset
+      ));
+    });
   }
 
   void _handleLayoutChanged() {
-    double newScrollOffset = scrollBehavior.updateExtents(
-      contentExtent: layoutState.didReachLastChild ? layoutState.contentsSize : double.INFINITY,
-      scrollOffset: scrollOffset);
+    double newScrollOffset;
+    setState(() {
+      newScrollOffset = scrollBehavior.updateExtents(
+        contentExtent: layoutState.didReachLastChild ? layoutState.contentsSize : double.INFINITY,
+        scrollOffset: scrollOffset
+      );
+    });
     if (_contentChanged) {
       _contentChanged = false;
       scrollTo(newScrollOffset);
