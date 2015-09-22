@@ -119,7 +119,7 @@ class ClipRect extends OneChildRenderObjectWidget {
 
   RenderClipRect createRenderObject() => new RenderClipRect();
 
-  void updateRenderObject(ClipRect renderObject, ClipRect oldWidget) {
+  void updateRenderObject(RenderClipRect renderObject, ClipRect oldWidget) {
     // Nothing to update
   }
 }
@@ -145,7 +145,7 @@ class ClipOval extends OneChildRenderObjectWidget {
 
   RenderClipOval createRenderObject() => new RenderClipOval();
 
-  void updateRenderObject(ClipOval renderObject, ClipOval oldWidget) {
+  void updateRenderObject(RenderClipOval renderObject, ClipOval oldWidget) {
     // Nothing to update
   }
 }
@@ -464,7 +464,7 @@ class Stack extends MultiChildRenderObjectWidget {
 
   RenderStack createRenderObject() => new RenderStack();
 
-  void updateRenderObject(ClipRect renderObject, Stack oldWidget) {
+  void updateRenderObject(RenderStack renderObject, Stack oldWidget) {
     // Nothing to update
   }
 
@@ -747,7 +747,7 @@ class IgnorePointer extends OneChildRenderObjectWidget {
 
   final bool ignoring;
 
-  RenderIgnorePointer createElement() => new RenderIgnorePointer(ignoring: ignoring);
+  RenderIgnorePointer createRenderObject() => new RenderIgnorePointer(ignoring: ignoring);
 
   void updateRenderObject(RenderIgnorePointer renderObject, IgnorePointer oldWidget) {
     renderObject.ignoring = ignoring;

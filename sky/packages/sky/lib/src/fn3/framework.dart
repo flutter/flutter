@@ -519,6 +519,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
   void unmount() {
     super.unmount();
     _widget.didUnmountRenderObject(renderObject);
+    _registry.remove(renderObject);
   }
 
   void detachRenderObject() {
@@ -526,11 +527,6 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
       _ancestorRenderObjectElement.removeChildRenderObject(renderObject);
       _ancestorRenderObjectElement = null;
     }
-  }
-
-  void unmount() {
-    super.unmount();
-    _registry.remove(renderObject);
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot);
