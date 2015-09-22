@@ -22,21 +22,12 @@ const Object _rootSlot = const Object();
 
 class WidgetTester {
 
-  WidgetTester() {
-    WidgetSkyBinding.initWidgetSkyBinding();
-    _rootElement = new StatefulComponentElement(new RootComponent());
-    _rootElement.mount(null, _rootSlot);
-  }
-
-  StatefulComponentElement _rootElement;
-
   void walkElements(ElementVisitor visitor) {
     void walk(Element element) {
       visitor(element);
       element.visitChildren(walk);
     }
-
-    _rootElement.visitChildren(walk);
+    WidgetFlutterBinding.instance.renderViewElement.visitChildren(walk);
   }
 
   Element findElement(bool predicate(Element widget)) {
@@ -54,12 +45,12 @@ class WidgetTester {
   }
 
   void pumpFrame(Widget widget) {
-    (_rootElement.state as RootComponentState).child = widget;
-    WidgetSkyBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+    runApp(widget);
+    WidgetFlutterBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
   }
 
   void pumpFrameWithoutChange() {
-    WidgetSkyBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+    WidgetFlutterBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
   }
 
 }

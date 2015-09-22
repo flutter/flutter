@@ -7,21 +7,34 @@ import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3/framework.dart';
 
-class WidgetSkyBinding extends SkyBinding {
+class WidgetFlutterBinding extends SkyBinding {
 
-  WidgetSkyBinding({ RenderView renderViewOverride: null })
-    : super(renderViewOverride: renderViewOverride) {
+  WidgetFlutterBinding() {
     BuildableElement.scheduleBuildFor = scheduleBuildFor;
+    _renderViewElement = new RenderObjectToWidgetElement<RenderBox>(describeApp(null));
+    _renderViewElement.mount(null, this);
   }
 
   /// Ensures that there is a SkyBinding object instantiated.
-  static void initWidgetSkyBinding({ RenderView renderViewOverride: null }) {
+  static void initBinding() {
     if (SkyBinding.instance == null)
-      new WidgetSkyBinding(renderViewOverride: renderViewOverride);
-    assert(SkyBinding.instance is WidgetSkyBinding);
+      new WidgetFlutterBinding();
+    assert(SkyBinding.instance is WidgetFlutterBinding);
   }
 
-  static WidgetSkyBinding get instance => SkyBinding.instance;
+  static WidgetFlutterBinding get instance => SkyBinding.instance;
+
+  /// The [Element] that is at the root of the hierarchy (and which wraps the
+  /// [RenderView] object at the root of the rendering hierarchy).
+  Element get renderViewElement => _renderViewElement;
+  Element _renderViewElement;
+
+  RenderObjectToWidgetAdapter<RenderBox> describeApp(Widget app) {
+    return new RenderObjectToWidgetAdapter<RenderBox>(
+      container: instance.renderView,
+      child: app
+    );
+  }
 
   void handleEvent(sky.Event event, BindingHitTestEntry entry) {
     for (HitTestEntry entry in entry.result.path) {
@@ -88,5 +101,76 @@ class WidgetSkyBinding extends SkyBinding {
       }
     } while (_dirtyElements.isNotEmpty);
     assert(() { _debugBuildingAtDepth = null; return true; });
+  }
+}
+
+void runApp(Widget app) {
+  WidgetFlutterBinding.initBinding();
+  WidgetFlutterBinding.instance.renderViewElement.update(
+    WidgetFlutterBinding.instance.describeApp(app)
+  );
+}
+
+/// This class provides a bridge from a RenderObject to an Element tree. The
+/// given container is the RenderObject that the Element tree should be inserted
+/// into. It must be a RenderObject that implements the
+/// RenderObjectWithChildMixin protocol. The type argument T is the kind of
+/// RenderObject that the container expects as its child.
+class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
+  RenderObjectToWidgetAdapter({ this.child, RenderObjectWithChildMixin<T> container })
+    : container = container, super(key: new GlobalObjectKey(container));
+
+  final Widget child;
+  final RenderObjectWithChildMixin<T> container;
+
+  RenderObjectToWidgetElement<T> createElement() => new RenderObjectToWidgetElement<T>(this);
+
+  RenderObjectWithChildMixin<T> createRenderObject() => container;
+
+  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
+}
+
+/// This element class is the instantiation of a [RenderObjectToWidgetAdapter].
+/// It can only be used as the root of an Element tree (it cannot be mounted
+/// into another Element, it's parent must be null).
+///
+/// In typical usage, it will be instantiated for a RenderObjectToWidgetAdapter
+/// whose container is the RenderView that connects to the Flutter engine. In
+/// this usage, it is normally instantiated by the bootstrapping logic in the
+/// WidgetFlutterBinding singleton created by runApp().
+class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectElement {
+  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
+
+  Element _child;
+
+  static const _rootChild = const Object();
+
+  void visitChildren(ElementVisitor visitor) {
+    if (_child != null)
+      visitor(_child);
+  }
+
+  void mount(Element parent, dynamic slot) {
+    assert(parent == null);
+    super.mount(parent, slot);
+    _child = updateChild(_child, widget.child, _rootChild);
+  }
+
+  void update(RenderObjectToWidgetAdapter<T> newWidget) {
+    super.update(newWidget);
+    assert(widget == newWidget);
+    _child = updateChild(_child, widget.child, _rootChild);
+  }
+
+  RenderObjectWithChildMixin<T> get renderObject => super.renderObject;
+
+  void insertChildRenderObject(RenderObject child, dynamic slot) {
+    assert(slot == _rootChild);
+    renderObject.child = child;
+  }
+
+  void removeChildRenderObject(RenderObject child) {
+    assert(renderObject.child == child);
+    renderObject.child = null;
   }
 }
