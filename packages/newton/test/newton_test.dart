@@ -168,7 +168,6 @@ void main() {
 
     var scroll =
         new ScrollSimulation(100.0, 400.0, 0.0, double.INFINITY, spring, 0.3);
-
     scroll.tolerance = const Tolerance(velocity: 1.0);
 
     expect(scroll.isDone(0.0), false);
