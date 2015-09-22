@@ -23,7 +23,7 @@ class TestComponentState extends ComponentState<TestComponentConfig> {
     });
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return _showLeft ? config.left : config.right;
   }
 }
@@ -34,7 +34,7 @@ final BoxDecoration kBoxDecorationB = new BoxDecoration();
 class TestBuildCounter extends StatelessComponent {
   static int buildCount = 0;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     ++buildCount;
     return new DecoratedBox(decoration: kBoxDecorationA);
   }
