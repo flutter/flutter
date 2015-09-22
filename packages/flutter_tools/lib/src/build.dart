@@ -126,7 +126,7 @@ Future<ArchiveFile> _createSnapshotFile(String snapshotPath) async {
 }
 
 class BuildCommandHandler extends CommandHandler {
-  BuildCommandHandler() : super('build', 'Create a Flutter package.');
+  BuildCommandHandler() : super('build', 'Create a Flutter app.');
 
   ArgParser get parser {
     ArgParser parser = new ArgParser();
