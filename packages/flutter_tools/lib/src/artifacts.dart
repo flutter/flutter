@@ -43,12 +43,21 @@ class ArtifactStore {
   }
 
   Future<Directory> _cacheDir() async {
-    String cacheDirPath = path.join(packageRoot, 'sky_tools', 'cache', 'sky_engine', engineRevision);
-    Directory cacheDir = new Directory(cacheDirPath);
+    Directory cacheDir = new Directory(path.join(packageRoot, 'sky_tools', 'cache'));
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
     }
     return cacheDir;
+  }
+
+  Future<Directory> _engineSpecificCacheDir() async {
+    Directory cacheDir = await _cacheDir();
+    Directory engineSpecificDir = new Directory(path.join(cacheDir.path, 'sky_engine', engineRevision));
+
+    if (!await engineSpecificDir.exists()) {
+      await engineSpecificDir.create(recursive: true);
+    }
+    return engineSpecificDir;
   }
 
   // Whether the artifact needs to be marked as executable on disk.
@@ -57,19 +66,19 @@ class ArtifactStore {
   }
 
   Future<String> getPath(Artifact artifact) async {
-    Directory cacheDir = await _cacheDir();
+    Directory cacheDir = await _engineSpecificCacheDir();
 
     String category, name;
 
-    if (artifact == Artifact.FlutterCompiler) {
-      category = 'shell';
-      name = 'sky_snapshot';
-    } else if (artifact == Artifact.SkyViewerMojo) {
-      category = 'viewer';
-      name = 'sky_viewer.mojo';
-    } else {
-      // Unknown artifact.
-      return '';
+    switch (artifact) {
+      case Artifact.FlutterCompiler:
+        category = 'shell';
+        name = 'sky_snapshot';
+        break;
+      case Artifact.SkyViewerMojo:
+        category = 'viewer';
+        name = 'sky_viewer.mojo';
+        break;
     }
 
     File cachedFile = new File(path.join(cacheDir.path, name));
@@ -83,5 +92,18 @@ class ArtifactStore {
       }
     }
     return cachedFile.path;
+  }
+
+  Future clear() async {
+    Directory cacheDir = await _cacheDir();
+    _logging.fine('Clearing cache directory ${cacheDir.path}');
+    await cacheDir.delete(recursive: true);
+  }
+
+  Future populate() async {
+    for (Artifact artifact in Artifact.values) {
+      _logging.fine('Populating cache with $artifact');
+      await getPath(artifact);
+    }
   }
 }
