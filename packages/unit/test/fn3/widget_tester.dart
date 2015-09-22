@@ -15,7 +15,7 @@ class RootComponentState extends ComponentState<RootComponent> {
       });
     }
   }
-  Widget build() => child;
+  Widget build(BuildContext context) => child;
 }
 
 const Object _rootSlot = const Object();
