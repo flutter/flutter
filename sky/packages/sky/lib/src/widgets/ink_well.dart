@@ -82,13 +82,15 @@ class RenderInkWell extends RenderProxyBox {
   final List<InkSplash> _splashes = new List<InkSplash>();
 
   void handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event is sky.GestureEvent) {
+    // TODO(abarth): We should trigger these effects based on gestures.
+    // https://github.com/flutter/engine/issues/1271
+    if (event is sky.PointerEvent) {
       switch (event.type) {
-        case 'gesturetapdown':
-          _startSplash(event.primaryPointer, entry.localPosition);
+        case 'pointerdown':
+          _startSplash(event.pointer, entry.localPosition);
           break;
-        case 'gesturetap':
-          _confirmSplash(event.primaryPointer);
+        case 'pointerup':
+          _confirmSplash(event.pointer);
           break;
       }
     }

@@ -19,7 +19,7 @@ import 'package:sky/src/widgets/mixed_viewport.dart';
 
 export 'package:sky/src/widgets/mixed_viewport.dart' show MixedViewportLayoutState;
 
-// The GestureEvent velocity properties are pixels/second, config min,max limits are pixels/ms
+// The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
 const double _kMillisecondsPerSecond = 1000.0;
 const double _kMinFlingVelocity = -kMaxFlingVelocity * _kMillisecondsPerSecond;
 const double _kMaxFlingVelocity = kMaxFlingVelocity * _kMillisecondsPerSecond;
