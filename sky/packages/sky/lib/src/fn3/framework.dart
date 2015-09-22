@@ -158,6 +158,12 @@ enum _ElementLifecycle {
 
 typedef void ElementVisitor(Element element);
 
+const Object _uniqueChild = const Object();
+
+/// Elements are the instantiations of Widget configurations.
+/// 
+/// Elements can, in principle, have children. Only subclasses of
+/// RenderObjectElement are allowed to have more than one child.
 abstract class Element<T extends Widget> {
   Element(T widget) : _widget = widget {
     assert(_widget != null);
@@ -165,17 +171,21 @@ abstract class Element<T extends Widget> {
 
   Element _parent;
 
-  /// information set by parent to define where this child fits in its parent's
-  /// child list
+  /// Information set by parent to define where this child fits in its parent's
+  /// child list.
+  ///
+  /// Subclasses of Element that only have one child should use _uniqueChild for
+  /// the slot for that child.
   dynamic _slot;
 
-  /// an integer that is guaranteed to be greater than the parent's, if any
+  /// An integer that is guaranteed to be greater than the parent's, if any.
   int _depth;
 
-  /// the configuration for this element
+  /// The configuration for this element.
   T _widget;
 
-  _ElementLifecycle _lifecycleState = _ElementLifecycle.initial;
+  /// This is used to verify that Element objects move through life in an orderly fashion.
+  _ElementLifecycle _debugLifecycleState = _ElementLifecycle.initial;
 
   /// Calls the argument for each child. Must be overridden by subclasses that support having children.
   void visitChildren(ElementVisitor visitor) { }
@@ -189,52 +199,90 @@ abstract class Element<T extends Widget> {
     visitChildren(walk);
   }
 
-  void mount(dynamic slot) {
-    assert(_lifecycleState == _ElementLifecycle.initial);
-    assert(_parent == null || _parent._lifecycleState == _ElementLifecycle.mounted);
+  Element _updateChild(Element child, Widget newWidget, dynamic slot) {
+    // This method is the core of the system.
+    //
+    // It is called each time we are to add, update, or remove a child based on
+    // an updated configuration.
+    //
+    // If the child is null, and the newWidget is not null, then we have a new
+    // child for which we need to create an Element, configured with newWidget.
+    //
+    // If the newWidget is null, and the child is not null, then we need to
+    // remove it because it no longer has a configuration.
+    //
+    // If neither are null, then we need to update the child's configuration to
+    // be the new configuration given by newWidget. If newWidget can be given to
+    // the existing child, then it is so given. Otherwise, the old child needs
+    // to be disposed and a new child created for the new configuration.
+    //
+    // If both are null, then we don't have a child and won't have a child, so
+    // we do nothing.
+    //
+    // The _updateChild() method returns the new child, if it had to create one,
+    // or the child that was passed in, if it just had to update the child, or
+    // null, if it removed the child and did not replace it.
     assert(slot != null);
-    assert(_widget != null);
-    assert(_depth == null);
-    _lifecycleState = _ElementLifecycle.mounted;
-    _slot = slot;
-    _depth = _parent == null ? 0 : _parent._depth + 1;
+    if (newWidget == null) {
+      if (child != null)
+        _detachChild(child);
+      return null;
+    }
+    if (child != null) {
+      assert(child._slot == slot);
+      if (child._widget == newWidget)
+        return child;
+      if (_canUpdate(child._widget, newWidget)) {
+        child.update(newWidget);
+        assert(child._widget == newWidget);
+        return child;
+      }
+      _detachChild(child);
+      assert(child._parent == null);
+    }
+    child = newWidget.createElement();
+    child.mount(this, slot);
+    assert(child._debugLifecycleState == _ElementLifecycle.mounted);
+    return child;
   }
 
-  void updateSlot(dynamic slot) {
-    assert(slot != null);
-    assert(_lifecycleState == _ElementLifecycle.mounted);
-    assert(_parent != null);
-    assert(_parent._lifecycleState == _ElementLifecycle.mounted);
+  /// Called when an Element is given a new parent shortly after having been
+  /// created.
+  void mount(Element parent, dynamic slot) {
+    assert(_debugLifecycleState == _ElementLifecycle.initial);
     assert(_widget != null);
+    assert(_parent == null);
+    assert(parent == null || parent._debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_slot == null);
+    assert(slot != null);
     assert(_depth == null);
+    _parent = parent;
     _slot = slot;
+    _depth = _parent != null ? _parent._depth + 1 : 0;
+    assert(() { _debugLifecycleState = _ElementLifecycle.mounted; return true; });
   }
 
+  /// Called when an Element receives a new configuration widget.
   void update(T newWidget) {
-    assert(newWidget != null);
-    assert(_lifecycleState == _ElementLifecycle.mounted);
+    assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(_widget != null);
+    assert(newWidget != null);
+    assert(_slot != null);
     assert(_depth != null);
     assert(_canUpdate(_widget, newWidget));
     _widget = newWidget;
   }
 
-  void unmount() {
-    assert(_lifecycleState == _ElementLifecycle.mounted);
-    assert(_widget != null);
-    assert(_depth != null);
-    _slot = null;
-    _depth = null;
-    _lifecycleState = _ElementLifecycle.defunct;
-  }
-
-  void _updateSlotForChild(Element child, dynamic slot) {
-    if (child == null)
-      return;
+  /// Called by MultiChildRenderObjectElement, and other RenderObjectElement
+  /// subclasses that have multiple children, to update the slot of a particular
+  /// child when the child is moved in its child list.
+  void updateSlotForChild(Element child, dynamic slot) {
+    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(child != null);
     assert(child._parent == this);
 
     void move(Element element) {
-      child.updateSlot(slot);
+      child._updateSlot(slot);
       if (child is! RenderObjectElement)
         child.visitChildren(move);
     }
@@ -242,47 +290,47 @@ abstract class Element<T extends Widget> {
     move(child);
   }
 
+  void _updateSlot(dynamic slot) {
+    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_widget != null);
+    assert(_parent != null);
+    assert(_parent._debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_slot != null);
+    assert(slot != null);
+    assert(_depth == null);
+    _slot = slot;
+  }
+
   void _detachChild(Element child) {
-    if (child == null)
-      return;
+    assert(child != null);
     assert(child._parent == this);
     child._parent = null;
 
     bool haveDetachedRenderObject = false;
     void detach(Element descendant) {
-      if (!haveDetachedRenderObject && descendant is RenderObjectElement) {
-        descendant.detachRenderObject();
-        haveDetachedRenderObject = true;
+      if (!haveDetachedRenderObject) {
+        descendant._slot = null;
+        if (descendant is RenderObjectElement) {
+          descendant.detachRenderObject();
+          haveDetachedRenderObject = true;
+        }
       }
       descendant.unmount();
+      assert(descendant._debugLifecycleState == _ElementLifecycle.defunct);
     }
 
     detach(child);
     child.visitDescendants(detach);
   }
 
-  Element _updateChild(Element child, Widget updated, dynamic slot) {
-    if (updated == null) {
-      _detachChild(child);
-      return null;
-    }
-
-    if (child != null) {
-      assert(child._slot == slot);
-      if (child._widget == updated)
-        return child;
-      if (_canUpdate(child._widget, updated)) {
-        child.update(updated);
-        return child;
-      }
-      _detachChild(child);
-      assert(child._parent == null);
-    }
-
-    Element newChild = updated.createElement();
-    newChild._parent = this;
-    newChild.mount(slot);
-    return newChild;
+  /// Called when an Element is removed from the tree.
+  /// Currently, an Element removed from the tree never returns.
+  void unmount() {
+    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_widget != null);
+    assert(_slot == null);
+    assert(_depth != null);
+    assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; });
   }
 
   static void flushBuild() {
@@ -300,7 +348,7 @@ class _BuildScheduler {
     _dirtyElements.add(element);
   }
 
-  void _absorbDirtyElement(List<BuildableElement> list) {
+  void _absorbDirtyElements(List<BuildableElement> list) {
     list.addAll(_dirtyElements);
     _dirtyElements.clear();
     list.sort((BuildableElement a, BuildableElement b) => a._depth - b._depth);
@@ -314,7 +362,7 @@ class _BuildScheduler {
     try {
       while (!_dirtyElements.isEmpty) {
         List<BuildableElement> sortedDirtyElements = new List<BuildableElement>();
-        _absorbDirtyElement(sortedDirtyElements);
+        _absorbDirtyElements(sortedDirtyElements);
         int index = 0;
         while (index < sortedDirtyElements.length) {
           sortedDirtyElements[index]._rebuildIfNeeded();
@@ -346,6 +394,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   bool _dirty = true;
 
   void _rebuild() {
+    assert(_debugLifecycleState == _ElementLifecycle.mounted);
     _dirty = false;
     Widget built;
     try {
@@ -358,12 +407,13 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   }
 
   void _rebuildIfNeeded() {
-    if (_dirty && _lifecycleState == _ElementLifecycle.mounted)
+    if (_dirty)
       _rebuild();
   }
 
   void scheduleBuild() {
-    if (_dirty || _lifecycleState != _ElementLifecycle.mounted)
+    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    if (_dirty)
       return;
     _dirty = true;
     _buildScheduler.schedule(this);
@@ -375,11 +425,16 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
       visitor(_child);
   }
 
-  void mount(dynamic slot) {
-    super.mount(slot);
+  void mount(Element parent, dynamic slot) {
+    super.mount(parent, slot);
     assert(_child == null);
     _rebuild();
     assert(_child != null);
+  }
+
+  void unmount() {
+    super.unmount();
+    _dirty = false;
   }
 }
 
@@ -436,17 +491,17 @@ class RenderObjectElement<T extends RenderObjectWidget> extends Element<T> {
   final RenderObject renderObject;
   RenderObjectElement _ancestorRenderObjectElement;
 
-  void mount(dynamic slot) {
-    super.mount(slot);
+  void mount(Element parent, dynamic slot) {
+    super.mount(parent, slot);
     assert(_ancestorRenderObjectElement == null);
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement(_parent);
     if (_ancestorRenderObjectElement != null)
       _ancestorRenderObjectElement.insertChildRenderObject(renderObject, slot);
   }
 
-  void update(T updated) {
-    super.update(updated);
-    assert(_widget == updated);
+  void update(T newWidget) {
+    super.update(newWidget);
+    assert(_widget == newWidget);
     _widget.updateRenderObject(renderObject);
   }
 
@@ -470,8 +525,6 @@ class LeafRenderObjectElement<T extends RenderObjectWidget> extends RenderObject
   LeafRenderObjectElement(T widget): super(widget);
 }
 
-final Object _uniqueChild = new Object();
-
 class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends RenderObjectElement<T> {
   OneChildRenderObjectElement(T widget) : super(widget);
 
@@ -482,21 +535,21 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
       visitor(_child);
   }
 
-  void mount(dynamic slot) {
-    super.mount(slot);
-    _child = _updateChild(_child, _widget.child, _uniqueChild);
+  void mount(Element parent, dynamic slot) {
+    super.mount(parent, slot);
+    _child = _updateChild(_child, _widget.child, uniqueChild);
   }
 
-  void update(T updated) {
-    super.update(updated);
-    assert(_widget == updated);
-    _child = _updateChild(_child, _widget.child, _uniqueChild);
+  void update(T newWidget) {
+    super.update(newWidget);
+    assert(_widget == newWidget);
+    _child = _updateChild(_child, _widget.child, uniqueChild);
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(renderObject is RenderObjectWithChildMixin);
-    assert(slot == _uniqueChild);
+    assert(slot == uniqueChild);
     renderObject.child = child;
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
