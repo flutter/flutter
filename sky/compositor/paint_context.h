@@ -5,6 +5,8 @@
 #ifndef SKY_COMPOSITOR_PAINT_CONTEXT_CC_
 #define SKY_COMPOSITOR_PAINT_CONTEXT_CC_
 
+#include <memory>
+
 #include "base/macros.h"
 #include "base/logging.h"
 #include "sky/compositor/compositor_options.h"
