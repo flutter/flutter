@@ -6,7 +6,6 @@
 
 #include "base/bind.h"
 #include "base/trace_event/trace_event.h"
-#include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/events/PointerEvent.h"
 #include "sky/engine/core/events/WheelEvent.h"
@@ -77,9 +76,6 @@ void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
   if (WebInputEvent::isPointerEventType(inputEvent.type)) {
       const WebPointerEvent& event = static_cast<const WebPointerEvent&>(inputEvent);
       view_->handleInputEvent(PointerEvent::create(event));
-  } else if (WebInputEvent::isGestureEventType(inputEvent.type)) {
-      const WebGestureEvent& event = static_cast<const WebGestureEvent&>(inputEvent);
-      view_->handleInputEvent(GestureEvent::create(event));
   } else if (WebInputEvent::isKeyboardEventType(inputEvent.type)) {
       const WebKeyboardEvent& event = static_cast<const WebKeyboardEvent&>(inputEvent);
       view_->handleInputEvent(KeyboardEvent::create(event));

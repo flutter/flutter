@@ -318,8 +318,6 @@ sky_core_files = [
   "events/Event.cpp",
   "events/Event.h",
   "events/EventSender.h",
-  "events/GestureEvent.cpp",
-  "events/GestureEvent.h",
   "events/GestureVelocity.cpp",
   "events/GestureVelocity.h",
   "events/KeyboardEvent.cpp",
@@ -638,7 +636,6 @@ core_idl_files = get_path_info([
                                  "dom/Range.idl",
                                  "dom/Text.idl",
                                  "events/Event.idl",
-                                 "events/GestureEvent.idl",
                                  "events/GestureVelocity.idl",
                                  "events/KeyboardEvent.idl",
                                  "events/PointerEvent.idl",
@@ -708,7 +705,6 @@ core_dart_files = get_path_info([
 # interfaces that inherit from Event, including Event itself
 core_event_idl_files = get_path_info([
                                        "events/Event.idl",
-                                       "events/GestureEvent.idl",
                                        "events/KeyboardEvent.idl",
                                        "events/PointerEvent.idl",
                                        "events/WheelEvent.idl",
