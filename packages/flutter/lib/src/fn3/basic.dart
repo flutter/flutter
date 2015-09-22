@@ -467,11 +467,59 @@ class Stack extends MultiChildRenderObjectWidget {
   void updateRenderObject(RenderStack renderObject, Stack oldWidget) {
     // Nothing to update
   }
-
-  // TODO(abarth): Update parent data
 }
 
-// TODO(abarth): Positioned
+class Positioned extends ParentDataWidget {
+  Positioned({
+    Key key,
+    Widget child,
+    this.top,
+    this.right,
+    this.bottom,
+    this.left
+  }) : super(key: key, child: child);
+
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
+
+  void debugValidateAncestor(Widget ancestor) {
+    assert(() {
+      'Positioned must placed inside a Stack';
+      return ancestor is Stack;
+    });
+  }
+
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is StackParentData);
+    final StackParentData parentData = renderObject.parentData;
+    bool needsLayout = false;
+
+    if (parentData.top != top) {
+      parentData.top = top;
+      needsLayout = true;
+    }
+
+    if (parentData.right != right) {
+      parentData.right = right;
+      needsLayout = true;
+    }
+
+    if (parentData.bottom != bottom) {
+      parentData.bottom = bottom;
+      needsLayout = true;
+    }
+
+    if (parentData.left != left) {
+      parentData.left = left;
+      needsLayout = true;
+    }
+
+    if (needsLayout)
+      renderObject.markNeedsLayout();
+  }
+}
 
 class Grid extends MultiChildRenderObjectWidget {
   Grid(List<Widget> children, { Key key, this.maxChildExtent })
@@ -514,8 +562,6 @@ class Flex extends MultiChildRenderObjectWidget {
     renderObject.alignItems = alignItems;
     renderObject.textBaseline = textBaseline;
   }
-
-  // TODO(abarth): Update parent data
 }
 
 class Row extends Flex {
@@ -536,7 +582,28 @@ class Column extends Flex {
   }) : super(children, key: key, direction: FlexDirection.vertical, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
 }
 
-// TODO(abarth): Flexible
+class Flexible extends ParentDataWidget {
+  Flexible({ Key key, this.flex: 1, Widget child })
+    : super(key: key, child: child);
+
+  final int flex;
+
+  void debugValidateAncestor(Widget ancestor) {
+    assert(() {
+      'Flexible must placed inside a Flex';
+      return ancestor is Flex;
+    });
+  }
+
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is FlexParentData);
+    final FlexParentData parentData = renderObject.parentData;
+    if (parentData.flex != flex) {
+      parentData.flex = flex;
+      renderObject.markNeedsLayout();
+    }
+  }
+}
 
 class Paragraph extends LeafRenderObjectWidget {
   Paragraph({ Key key, this.text }) : super(key: key) {
@@ -579,7 +646,51 @@ class StyledText extends StatelessComponent {
   }
 }
 
-// TODO(abarth): Text
+class DefaultTextStyle extends InheritedWidget {
+  DefaultTextStyle({
+    Key key,
+    this.style,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(style != null);
+    assert(child != null);
+  }
+
+  final TextStyle style;
+
+  static TextStyle of(BuildContext context) {
+    DefaultTextStyle result = context.inheritedWidgetOfType(DefaultTextStyle);
+    return result?.style;
+  }
+
+  bool updateShouldNotify(DefaultTextStyle old) => style != old.style;
+}
+
+class Text extends StatelessComponent {
+  Text(this.data, { Key key, TextStyle this.style }) : super(key: key) {
+    assert(data != null);
+  }
+
+  final String data;
+  final TextStyle style;
+
+  Widget build(BuildContext context) {
+    TextSpan text = new PlainTextSpan(data);
+    TextStyle defaultStyle = DefaultTextStyle.of(context);
+    TextStyle combinedStyle;
+    if (defaultStyle != null) {
+      if (style != null)
+        combinedStyle = defaultStyle.merge(style);
+      else
+        combinedStyle = defaultStyle;
+    } else {
+      combinedStyle = style;
+    }
+    if (combinedStyle != null)
+      text = new StyledTextSpan(combinedStyle, [text]);
+    return new Paragraph(text: text);
+  }
+}
 
 class Image extends LeafRenderObjectWidget {
   Image({
