@@ -105,37 +105,44 @@ class SkyBinding extends HitTestTarget {
   /// A router that routes all pointer events received from the engine
   final PointerRouter pointerRouter = new PointerRouter();
 
+  /// State for all pointers which are currently down.
+  /// We do not track the state of hovering pointers because we need
+  /// to hit-test them on each movement.
   Map<int, _PointerState> _stateForPointer = new Map<int, _PointerState>();
-
-  _PointerState _createStateForPointer(sky.PointerEvent event, Point position) {
-    HitTestResult result = hitTest(position);
-    _PointerState state = new _PointerState(result: result, lastPosition: position);
-    _stateForPointer[event.pointer] = state;
-    return state;
-  }
-
-  _PointerState _getOrCreateStateForPointer(event, position) {
-    _PointerState state = _stateForPointer[event.pointer];
-    if (state == null)
-      state = _createStateForPointer(event, position);
-    return state;
-  }
 
   void _handlePointerEvent(sky.PointerEvent event) {
     Point position = new Point(event.x, event.y);
 
-    _PointerState state = _getOrCreateStateForPointer(event, position);
-
-    if (event.type == 'pointerup' || event.type == 'pointercancel') {
-      if (_hammingWeight(event.buttons) <= 1)
-        _stateForPointer.remove(event.pointer);
+    _PointerState state = _stateForPointer[event.pointer];
+    switch (event.type) {
+      case 'pointerdown':
+        if (state == null) {
+          state = new _PointerState(result: hitTest(position), lastPosition: position);
+          _stateForPointer[event.pointer] = state;
+        }
+        break;
+      case 'pointermove':
+        if (state == null) {
+          // The pointer is hovering, ignore it for now since we don't
+          // know what to do with it yet.
+          return;
+        }
+        event.dx = position.x - state.lastPosition.x;
+        event.dy = position.y - state.lastPosition.y;
+        state.lastPosition = position;
+        break;
+      case 'pointerup':
+      case 'pointercancel':
+        if (state == null) {
+          // This seems to be a spurious event.  Ignore it.
+          return;
+        }
+        // Only remove the pointer state when the last button has been released.
+        if (_hammingWeight(event.buttons) <= 1)
+          _stateForPointer.remove(event.pointer);
+        break;
     }
-
-    event.dx = position.x - state.lastPosition.x;
-    event.dy = position.y - state.lastPosition.y;
-    state.lastPosition = position;
-
-    return dispatchEvent(event, state.result);
+    dispatchEvent(event, state.result);
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position
