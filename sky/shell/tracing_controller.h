@@ -8,6 +8,7 @@
 #include "base/files/file.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted_memory.h"
+#include "base/time/time.h"
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/shell/shell_view.h"
@@ -52,6 +53,7 @@ class TracingController : public mojo::common::DataPipeDrainer::Client {
   ShellView* view_;
   std::string picture_tracing_path_;
   bool picture_tracing_enabled_;
+  base::TimeTicks trace_controller_start_;
 
   void StartDartTracing();
   void StartBaseTracing();
