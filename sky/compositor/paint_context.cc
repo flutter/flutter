@@ -6,6 +6,7 @@
 #include "base/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "sky/compositor/picture_serializer.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace sky {
 namespace compositor {
@@ -86,9 +87,9 @@ PaintContext::ScopedFrame::~ScopedFrame() {
   context_.endFrame(*this);
 
   if (trace_file_name_.length() > 0) {
-    SkPicture* picture = trace_recorder_->endRecordingAsPicture();
-    SerializePicture(trace_file_name_.c_str(), picture);
-    picture->unref();
+    RefPtr<SkPicture> picture =
+        adoptRef(trace_recorder_->endRecordingAsPicture());
+    SerializePicture(trace_file_name_.c_str(), picture.get());
   }
 }
 
