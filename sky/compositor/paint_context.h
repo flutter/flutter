@@ -13,6 +13,7 @@
 #include "sky/compositor/instrumentation.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "ui/gfx/geometry/size.h"
 
 namespace sky {
 namespace compositor {
@@ -35,7 +36,9 @@ class PaintContext {
 
     ScopedFrame(PaintContext& context, SkCanvas& canvas);
 
-    ScopedFrame(PaintContext& context, const std::string& trace_file_name);
+    ScopedFrame(PaintContext& context,
+                const std::string& trace_file_name,
+                gfx::Size frame_size);
 
     friend class PaintContext;
 
@@ -49,7 +52,8 @@ class PaintContext {
 
   ScopedFrame AcquireFrame(SkCanvas& canvas);
 
-  ScopedFrame AcquireFrame(const std::string& trace_file_name);
+  ScopedFrame AcquireFrame(const std::string& trace_file_name,
+                           gfx::Size frame_size);
 
  private:
   CompositorOptions options_;

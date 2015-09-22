@@ -74,7 +74,7 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   auto options = Shell::Shared().tracing_controller().picture_tracing_options();
   if (options.first) {
     sky::compositor::PaintContext::ScopedFrame to_file_frame =
-        paint_context_.AcquireFrame(options.second);
+        paint_context_.AcquireFrame(options.second, size);
     layer_tree->root_layer()->Paint(to_file_frame);
   }
 }
