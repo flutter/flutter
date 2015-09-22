@@ -161,7 +161,7 @@ typedef void ElementVisitor(Element element);
 const Object _uniqueChild = const Object();
 
 /// Elements are the instantiations of Widget configurations.
-/// 
+///
 /// Elements can, in principle, have children. Only subclasses of
 /// RenderObjectElement are allowed to have more than one child.
 abstract class Element<T extends Widget> {
@@ -368,7 +368,7 @@ class _BuildScheduler {
           sortedDirtyElements[index]._rebuildIfNeeded();
           if (!_dirtyElements.isEmpty) {
             assert(_dirtyElements.every((Element element) => !sortedDirtyElements.contains(element)));
-            _absorbDirtyElement(sortedDirtyElements);
+            _absorbDirtyElements(sortedDirtyElements);
             index = 0;
           } else {
             index += 1;
