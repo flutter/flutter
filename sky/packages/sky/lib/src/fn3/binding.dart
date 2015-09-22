@@ -11,7 +11,7 @@ class WidgetSkyBinding extends SkyBinding {
 
   WidgetSkyBinding({ RenderView renderViewOverride: null })
     : super(renderViewOverride: renderViewOverride) {
-    BuildableElement.scheduleBuildFor = this.scheduleBuildFor;
+    BuildableElement.scheduleBuildFor = scheduleBuildFor;
   }
 
   /// Ensures that there is a SkyBinding object instantiated.
