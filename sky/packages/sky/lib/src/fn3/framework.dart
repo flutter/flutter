@@ -5,7 +5,26 @@
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 
-abstract class Key { }
+abstract class Key {
+  const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+  factory Key(String value) => new ValueKey<String>(value);
+}
+
+class ValueKey<T> extends Key {
+  const ValueKey(this.value) : super.constructor();
+  final T value;
+  String toString() => '[\'${value}\']';
+  bool operator==(other) => other is ValueKey<T> && other.value == value;
+  int get hashCode => value.hashCode;
+}
+
+class ObjectKey extends Key {
+  const ObjectKey(this.value) : super.constructor();
+  final Object value;
+  String toString() => '[${value.runtimeType}(${value.hashCode})]';
+  bool operator==(other) => other is ObjectKey && identical(other.value, value);
+  int get hashCode => identityHashCode(value);
+}
 
 /// A Widget object describes the configuration for an [Element].
 /// Widget subclasses should be immutable with const constructors.
@@ -35,7 +54,9 @@ abstract class RenderObjectWidget extends Widget {
   /// Copies the configuration described by this RenderObjectWidget to the given
   /// RenderObject, which must be of the same type as returned by this class'
   /// createRenderObject().
-  void updateRenderObject(RenderObject renderObject);
+  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget);
+
+  void didUnmountRenderObject(RenderObject renderObject) { }
 }
 
 /// A superclass for RenderObjectWidgets that configure RenderObject subclasses
@@ -469,9 +490,15 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
   }
 
   void update(T newWidget) {
+    Widget oldWidget = _widget;
     super.update(newWidget);
     assert(_widget == newWidget);
-    _widget.updateRenderObject(renderObject);
+    _widget.updateRenderObject(renderObject, oldWidget);
+  }
+
+  void unmount() {
+    super.unmount();
+    _widget.didUnmountRenderObject(renderObject);
   }
 
   void detachRenderObject() {
