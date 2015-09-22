@@ -14,7 +14,6 @@
 #include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
-#include "mojo/services/network/public/interfaces/network_service.mojom.h"
 #include "mojo/services/network/public/interfaces/url_loader.mojom.h"
 #include "mojo/services/service_registry/public/interfaces/service_registry.mojom.h"
 #include "mojo/services/view_manager/public/cpp/view_manager_client_factory.h"
@@ -119,14 +118,12 @@ class DocumentView : public blink::ServiceProvider,
   mojo::ServiceProviderPtr imported_services_;
   mojo::InterfaceRequest<mojo::ServiceProvider> services_provided_to_embedder_;
   mojo::ServiceProviderPtr services_provided_by_embedder_;
-  mojo::NetworkServicePtr network_service_;
   mojo::Shell* shell_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
   mojo::NavigatorHostPtr navigator_host_;
   std::unique_ptr<blink::SkyView> sky_view_;
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
-  scoped_ptr<DartLibraryProviderImpl> library_provider_;
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<TextureLayer> root_layer_;
   std::unique_ptr<compositor::LayerTree> current_layer_tree_;  // TODO(abarth): Integrate //sky/compositor and //services/sky/compositor.

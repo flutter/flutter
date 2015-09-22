@@ -70,18 +70,6 @@ scoped_ptr<ui::TouchEvent> ConvertToUITouchEvent(
       base::TimeDelta::FromMillisecondsD(pointer_event.timeStampMS)));
 }
 
-scoped_ptr<DartLibraryProviderImpl::PrefetchedLibrary>
-CreatePrefetchedLibraryIfNeeded(const String& name,
-                                mojo::URLResponsePtr response) {
-  scoped_ptr<DartLibraryProviderImpl::PrefetchedLibrary> prefetched;
-  if (response->status_code == 200) {
-    prefetched.reset(new DartLibraryProviderImpl::PrefetchedLibrary());
-    prefetched->name = name.toUTF8();
-    prefetched->pipe = response->body.Pass();
-  }
-  return prefetched.Pass();
-}
-
 }  // namespace
 
 DocumentView::DocumentView(
@@ -99,11 +87,6 @@ DocumentView::DocumentView(
       weak_factory_(this) {
   exported_services_.AddService(&view_manager_client_factory_);
   InitServiceRegistry();
-  mojo::ServiceProviderPtr network_service_provider;
-  shell->ConnectToApplication("mojo:authenticated_network_service",
-                              mojo::GetProxy(&network_service_provider),
-                              nullptr);
-  mojo::ConnectToService(network_service_provider.get(), &network_service_);
 }
 
 DocumentView::~DocumentView() {
@@ -158,20 +141,13 @@ void DocumentView::Load(mojo::URLResponsePtr response) {
 
   String name = String::fromUTF8(response->url);
   sky_view_->CreateView(name);
-  if (name.endsWith(".skyx")) {
-    AssetUnpackerJob* unpacker = new AssetUnpackerJob(
-        mojo::GetProxy(&root_bundle_),
-        base::MessageLoop::current()->task_runner());
-    unpacker->Unpack(response->body.Pass());
-    root_bundle_->GetAsStream(kSnapshotKey,
-                              base::Bind(&DocumentView::LoadFromSnapshotStream,
-                                         weak_factory_.GetWeakPtr(), name));
-    return;
-  }
-  library_provider_.reset(new DartLibraryProviderImpl(
-      network_service_.get(),
-      CreatePrefetchedLibraryIfNeeded(name, response.Pass())));
-  sky_view_->RunFromLibrary(name, library_provider_.get());
+  AssetUnpackerJob* unpacker = new AssetUnpackerJob(
+      mojo::GetProxy(&root_bundle_),
+      base::MessageLoop::current()->task_runner());
+  unpacker->Unpack(response->body.Pass());
+  root_bundle_->GetAsStream(kSnapshotKey,
+                            base::Bind(&DocumentView::LoadFromSnapshotStream,
+                                       weak_factory_.GetWeakPtr(), name));
 }
 
 scoped_ptr<Rasterizer> DocumentView::CreateRasterizer() {
