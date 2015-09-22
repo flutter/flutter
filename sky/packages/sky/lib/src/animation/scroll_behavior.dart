@@ -108,9 +108,11 @@ Simulation _createDefaultScrollSimulation(double position, double velocity, doub
   // destiniation scroll offset.
   double endDistance = 0.5 * sky.view.devicePixelRatio;
 
+  Tolerance tolerance = new Tolerance(velocity: endVelocity, distance: endDistance);
   SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
   return new ScrollSimulation(
-      position, startVelocity, endVelocity, endDistance, minScrollOffset, maxScrollOffset, spring, _kScrollDrag);
+      position, startVelocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag, tolerance);
+
 }
 
 /// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance
