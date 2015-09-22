@@ -37,7 +37,7 @@ class WidgetTester {
   void pumpFrame(Widget widget) {
     if (_rootElement == null) {
       _rootElement = new StatelessComponentElement(new TestComponent(child: widget));
-      _rootElement.mount(_rootSlot);
+      _rootElement.mount(null, _rootSlot);
     } else {
       _rootElement.update(new TestComponent(child: widget));
     }
