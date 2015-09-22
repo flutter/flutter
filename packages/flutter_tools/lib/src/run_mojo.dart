@@ -38,8 +38,8 @@ class RunMojoCommandHandler extends CommandHandler {
     return file.absolute.path;
   }
 
-  Future<int> _runAndroid(ArgResults results, String appPath, String engineRevision) async {
-    String skyViewerUrl = artifactStore.googleStorageUrl('viewer', 'android-arm', engineRevision);
+  Future<int> _runAndroid(ArgResults results, String appPath, ArtifactStore artifacts) async {
+    String skyViewerUrl = artifacts.googleStorageUrl('viewer', 'android-arm');
     String command = await _makePathAbsolute(path.join(results['mojo-path'], 'mojo', 'devtools', 'common', 'mojo_run'));
     String appName = path.basename(appPath);
     String appDir = path.dirname(appPath);
@@ -58,8 +58,8 @@ class RunMojoCommandHandler extends CommandHandler {
     return runCommandAndStreamOutput(command, args);
   }
 
-  Future<int> _runLinux(ArgResults results, String appPath, String packageRoot, String engineRevision) async {
-    String viewerPath = await _makePathAbsolute(await artifactStore.getPath(Artifact.SkyViewerMojo, packageRoot));
+  Future<int> _runLinux(ArgResults results, String appPath, ArtifactStore artifacts) async {
+    String viewerPath = await _makePathAbsolute(await artifacts.getPath(Artifact.SkyViewerMojo));
     String mojoShellPath = await _makePathAbsolute(path.join(results['mojo-path'], 'out', 'Release', 'mojo_shell'));
     List<String> mojoRunArgs = [
       'mojo:window_manager file://${appPath}',
@@ -79,12 +79,12 @@ class RunMojoCommandHandler extends CommandHandler {
       return 1;
     }
     String packageRoot = results['package-root'];
-    String engineRevision = await artifactStore.getEngineRevision(packageRoot);
+    ArtifactStore artifacts = new ArtifactStore(packageRoot);
     String appPath = await _makePathAbsolute(results['app']);
     if (results['android']) {
-      return _runAndroid(results, appPath, engineRevision);
+      return _runAndroid(results, appPath, artifacts);
     } else {
-      return _runLinux(results, appPath, packageRoot, engineRevision);
+      return _runLinux(results, appPath, artifacts);
     }
   }
 }

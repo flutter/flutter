@@ -8,16 +8,24 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 
-final Logger _logging = new Logger('sky_tools.device');
+final Logger _logging = new Logger('sky_tools.artifacts');
 
 enum Artifact { FlutterCompiler, SkyViewerMojo, }
 
-class _ArtifactStore {
-  _ArtifactStore._();
+class ArtifactStore {
+  String _engineRevision;
+  final String packageRoot;
+
+  ArtifactStore(this.packageRoot) {
+    _engineRevision = new File(path.join(packageRoot, 'sky_engine', 'REVISION')).readAsStringSync();
+  }
+
+  String get engineRevision => _engineRevision;
 
   // Keep in sync with https://github.com/flutter/engine/blob/master/sky/tools/big_red_button.py#L50
-  String googleStorageUrl(String category, String platform, String engineRevision) {
+  String googleStorageUrl(String category, String platform) {
     return 'https://storage.googleapis.com/mojo/sky/${category}/${platform}/${engineRevision}/';
   }
 
@@ -34,8 +42,8 @@ class _ArtifactStore {
     _logging.fine('Wrote file');
   }
 
-  Future<Directory> _cacheDir(String engineRevision, String packageRoot) async {
-    String cacheDirPath = '${packageRoot}/sky_tools/cache/sky_engine/${engineRevision}/';
+  Future<Directory> _cacheDir() async {
+    String cacheDirPath = path.join(packageRoot, 'sky_tools', 'cache', 'sky_engine', engineRevision);
     Directory cacheDir = new Directory(cacheDirPath);
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
@@ -48,14 +56,8 @@ class _ArtifactStore {
     return artifact == Artifact.FlutterCompiler;
   }
 
-
-  Future<String> getEngineRevision(String packageRoot) {
-    return new File(packageRoot + '/sky_engine/REVISION').readAsString();
-  }
-
-  Future<String> getPath(Artifact artifact, String packageRoot) async {
-    String engineRevision = await getEngineRevision(packageRoot);
-    Directory cacheDir = await _cacheDir(engineRevision, packageRoot);
+  Future<String> getPath(Artifact artifact) async {
+    Directory cacheDir = await _cacheDir();
 
     String category, name;
 
@@ -70,10 +72,10 @@ class _ArtifactStore {
       return '';
     }
 
-    File cachedFile = new File(cacheDir.path + name);
+    File cachedFile = new File(path.join(cacheDir.path, name));
     if (!await cachedFile.exists()) {
       _logging.info('Downloading ${name} from the cloud, one moment please...');
-      String url = googleStorageUrl(category, 'linux-x64', engineRevision) + name;
+      String url = googleStorageUrl(category, 'linux-x64') + name;
       await _downloadFile(url, cachedFile);
       if (_needsToBeExecutable(artifact)) {
         ProcessResult result = await Process.run('chmod', ['u+x', cachedFile.path]);
@@ -83,5 +85,3 @@ class _ArtifactStore {
     return cachedFile.path;
   }
 }
-
-final _ArtifactStore artifactStore = new _ArtifactStore._();

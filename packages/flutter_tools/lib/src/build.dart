@@ -105,8 +105,10 @@ Future _compileSnapshot({
   String packageRoot,
   String snapshotPath
 }) async {
-  if (compilerPath == null)
-      compilerPath = await artifactStore.getPath(Artifact.FlutterCompiler, packageRoot);
+  if (compilerPath == null) {
+    ArtifactStore artifacts = new ArtifactStore(packageRoot);
+    compilerPath = await artifacts.getPath(Artifact.FlutterCompiler);
+  }
   ProcessResult result = await Process.run(compilerPath, [
     mainPath,
     '--package-root=$packageRoot',
