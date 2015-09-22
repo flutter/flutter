@@ -46,7 +46,7 @@ class Opacity extends OneChildRenderObjectWidget {
 
   RenderOpacity createRenderObject() => new RenderOpacity(opacity: opacity);
 
-  void updateRenderObject(RenderOpacity renderObject) {
+  void updateRenderObject(RenderOpacity renderObject, Opacity oldWidget) {
     renderObject.opacity = opacity;
   }
 }
@@ -63,7 +63,7 @@ class ColorFilter extends OneChildRenderObjectWidget {
 
   RenderColorFilter createRenderObject() => new RenderColorFilter(color: color, transferMode: transferMode);
 
-  void updateRenderObject(RenderColorFilter renderObject) {
+  void updateRenderObject(RenderColorFilter renderObject, ColorFilter oldWidget) {
     renderObject.color = color;
     renderObject.transferMode = transferMode;
   }
@@ -85,13 +85,33 @@ class DecoratedBox extends OneChildRenderObjectWidget {
 
   RenderObject createRenderObject() => new RenderDecoratedBox(decoration: decoration, position: position);
 
-  void updateRenderObject(RenderDecoratedBox renderObject) {
+  void updateRenderObject(RenderDecoratedBox renderObject, DecoratedBox oldWidget) {
     renderObject.decoration = decoration;
     renderObject.position = position;
   }
 }
 
-// TODO(abarth): CustomPaint
+class CustomPaint extends OneChildRenderObjectWidget {
+  CustomPaint({ Key key, this.callback, this.token, Widget child })
+    : super(key: key, child: child) {
+    assert(callback != null);
+  }
+
+  final CustomPaintCallback callback;
+  final Object token; // set this to be repainted automatically when the token changes
+
+  RenderCustomPaint createRenderObject() => new RenderCustomPaint(callback: callback);
+
+  void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
+    if (oldWidget != null && oldWidget.token != token)
+      renderObject.markNeedsPaint();
+    renderObject.callback = callback;
+  }
+
+  void didUnmountRenderObject(RenderCustomPaint renderObject) {
+    renderObject.callback = null;
+  }
+}
 
 class ClipRect extends OneChildRenderObjectWidget {
   ClipRect({ Key key, Widget child })
@@ -99,7 +119,7 @@ class ClipRect extends OneChildRenderObjectWidget {
 
   RenderClipRect createRenderObject() => new RenderClipRect();
 
-  void updateRenderObject(ClipRect renderObject) {
+  void updateRenderObject(ClipRect renderObject, ClipRect oldWidget) {
     // Nothing to update
   }
 }
@@ -113,7 +133,7 @@ class ClipRRect extends OneChildRenderObjectWidget {
 
   RenderClipRRect createRenderObject() => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
 
-  void updateRenderObject(RenderClipRRect renderObject) {
+  void updateRenderObject(RenderClipRRect renderObject, ClipRRect oldWidget) {
     renderObject.xRadius = xRadius;
     renderObject.yRadius = yRadius;
   }
@@ -125,7 +145,7 @@ class ClipOval extends OneChildRenderObjectWidget {
 
   RenderClipOval createRenderObject() => new RenderClipOval();
 
-  void updateRenderObject(ClipOval renderObject) {
+  void updateRenderObject(ClipOval renderObject, ClipOval oldWidget) {
     // Nothing to update
   }
 }
@@ -144,7 +164,7 @@ class Transform extends OneChildRenderObjectWidget {
 
   RenderTransform createRenderObject() => new RenderTransform(transform: transform, origin: origin);
 
-  void updateRenderObject(RenderTransform renderObject) {
+  void updateRenderObject(RenderTransform renderObject, Transform oldWidget) {
     renderObject.transform = transform;
     renderObject.origin = origin;
   }
@@ -160,7 +180,7 @@ class Padding extends OneChildRenderObjectWidget {
 
   RenderPadding createRenderObject() => new RenderPadding(padding: padding);
 
-  void updateRenderObject(RenderPadding renderObject) {
+  void updateRenderObject(RenderPadding renderObject, Padding oldWidget) {
     renderObject.padding = padding;
   }
 }
@@ -184,7 +204,7 @@ class Align extends OneChildRenderObjectWidget {
 
   RenderPositionedBox createRenderObject() => new RenderPositionedBox(horizontal: horizontal, vertical: vertical, shrinkWrap: shrinkWrap);
 
-  void updateRenderObject(RenderPositionedBox renderObject) {
+  void updateRenderObject(RenderPositionedBox renderObject, Align oldWidget) {
     renderObject.horizontal = horizontal;
     renderObject.vertical = vertical;
     renderObject.shrinkWrap = shrinkWrap;
@@ -214,7 +234,7 @@ class SizedBox extends OneChildRenderObjectWidget {
     return result;
   }
 
-  void updateRenderObject(RenderConstrainedBox renderObject) {
+  void updateRenderObject(RenderConstrainedBox renderObject, SizedBox oldWidget) {
     renderObject.additionalConstraints = _additionalConstraints;
   }
 }
@@ -229,7 +249,7 @@ class ConstrainedBox extends OneChildRenderObjectWidget {
 
   RenderConstrainedBox createRenderObject() => new RenderConstrainedBox(additionalConstraints: constraints);
 
-  void updateRenderObject(RenderConstrainedBox renderObject) {
+  void updateRenderObject(RenderConstrainedBox renderObject, ConstrainedBox oldWidget) {
     renderObject.additionalConstraints = constraints;
   }
 }
@@ -244,7 +264,7 @@ class AspectRatio extends OneChildRenderObjectWidget {
 
   RenderAspectRatio createRenderObject() => new RenderAspectRatio(aspectRatio: aspectRatio);
 
-  void updateRenderObject(RenderAspectRatio renderObject) {
+  void updateRenderObject(RenderAspectRatio renderObject, AspectRatio oldWidget) {
     renderObject.aspectRatio = aspectRatio;
   }
 }
@@ -258,7 +278,7 @@ class IntrinsicWidth extends OneChildRenderObjectWidget {
 
   RenderIntrinsicWidth createRenderObject() => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
 
-  void updateRenderObject(RenderIntrinsicWidth renderObject) {
+  void updateRenderObject(RenderIntrinsicWidth renderObject, IntrinsicWidth oldWidget) {
     renderObject.stepWidth = stepWidth;
     renderObject.stepHeight = stepHeight;
   }
@@ -270,7 +290,7 @@ class IntrinsicHeight extends OneChildRenderObjectWidget {
 
   RenderIntrinsicHeight createRenderObject() => new RenderIntrinsicHeight();
 
-  void updateRenderObject(RenderIntrinsicHeight renderObject) {
+  void updateRenderObject(RenderIntrinsicHeight renderObject, IntrinsicHeight oldWidget) {
     // Nothing to update
   }
 }
@@ -287,7 +307,7 @@ class Baseline extends OneChildRenderObjectWidget {
 
   RenderBaseline createRenderObject() => new RenderBaseline(baseline: baseline, baselineType: baselineType);
 
-  void updateRenderObject(RenderBaseline renderObject) {
+  void updateRenderObject(RenderBaseline renderObject, Baseline oldWidget) {
     renderObject.baseline = baseline;
     renderObject.baselineType = baselineType;
   }
@@ -309,7 +329,7 @@ class Viewport extends OneChildRenderObjectWidget {
 
   RenderViewport createRenderObject() => new RenderViewport(scrollDirection: scrollDirection, scrollOffset: scrollOffset);
 
-  void updateRenderObject(RenderViewport renderObject) {
+  void updateRenderObject(RenderViewport renderObject, Viewport oldWidget) {
     // Order dependency: RenderViewport validates scrollOffset based on scrollDirection.
     renderObject.scrollDirection = scrollDirection;
     renderObject.scrollOffset = scrollOffset;
@@ -326,11 +346,13 @@ class SizeObserver extends OneChildRenderObjectWidget {
 
   RenderSizeObserver createRenderObject() => new RenderSizeObserver(callback: callback);
 
-  void updateRenderObject(RenderSizeObserver renderObject) {
+  void updateRenderObject(RenderSizeObserver renderObject, SizeObserver oldWidget) {
     renderObject.callback = callback;
   }
 
-  // TODO(abarth): Null out renderObject.callback during unmount
+  void didUnmountRenderObject(RenderSizeObserver renderObject) {
+    renderObject.callback = null;
+  }
 }
 
 
@@ -431,7 +453,7 @@ class BlockBody extends MultiChildRenderObjectWidget {
 
   RenderBlock createRenderObject() => new RenderBlock(direction: direction);
 
-  void updateRenderObject(RenderBlock renderObject) {
+  void updateRenderObject(RenderBlock renderObject, BlockBody oldWidget) {
     renderObject.direction = direction;
   }
 }
@@ -442,7 +464,7 @@ class Stack extends MultiChildRenderObjectWidget {
 
   RenderStack createRenderObject() => new RenderStack();
 
-  void updateRenderObject(ClipRect renderObject) {
+  void updateRenderObject(ClipRect renderObject, Stack oldWidget) {
     // Nothing to update
   }
 
@@ -461,7 +483,7 @@ class Grid extends MultiChildRenderObjectWidget {
 
   RenderGrid createRenderObject() => new RenderGrid(maxChildExtent: maxChildExtent);
 
-  void updateRenderObject(RenderGrid renderObject) {
+  void updateRenderObject(RenderGrid renderObject, Grid oldWidget) {
     renderObject.maxChildExtent = maxChildExtent;
   }
 }
@@ -486,7 +508,7 @@ class Flex extends MultiChildRenderObjectWidget {
 
   RenderFlex createRenderObject() => new RenderFlex(direction: direction);
 
-  void updateRenderObject(RenderFlex renderObject) {
+  void updateRenderObject(RenderFlex renderObject, Flex oldWidget) {
     renderObject.direction = direction;
     renderObject.justifyContent = justifyContent;
     renderObject.alignItems = alignItems;
@@ -525,7 +547,7 @@ class Paragraph extends LeafRenderObjectWidget {
 
   RenderParagraph createRenderObject() => new RenderParagraph(text);
 
-  void updateRenderObject(RenderParagraph renderObject) {
+  void updateRenderObject(RenderParagraph renderObject, Paragraph oldWidget) {
     renderObject.text = text;
   }
 }
@@ -585,7 +607,7 @@ class Image extends LeafRenderObjectWidget {
     fit: fit,
     repeat: repeat);
 
-  void updateRenderObject(RenderImage renderObject) {
+  void updateRenderObject(RenderImage renderObject, Image oldWidget) {
     renderObject.image = image;
     renderObject.width = width;
     renderObject.height = height;
@@ -716,8 +738,6 @@ class AssetImage extends StatelessComponent {
   }
 }
 
-// TODO(abarth): WidgetToRenderBoxAdapter
-
 
 // EVENT HANDLING
 
@@ -729,7 +749,7 @@ class IgnorePointer extends OneChildRenderObjectWidget {
 
   RenderIgnorePointer createElement() => new RenderIgnorePointer(ignoring: ignoring);
 
-  void updateRenderObject(RenderIgnorePointer renderObject) {
+  void updateRenderObject(RenderIgnorePointer renderObject, IgnorePointer oldWidget) {
     renderObject.ignoring = ignoring;
   }
 }
