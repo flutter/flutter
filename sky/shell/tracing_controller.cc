@@ -6,8 +6,9 @@
 #include "base/macros.h"
 #include "base/trace_event/trace_config.h"
 #include "base/trace_event/trace_event.h"
-#include "sky/shell/tracing_controller.h"
 #include "sky/shell/shell.h"
+#include "sky/shell/tracing_controller.h"
+
 #include <string>
 
 namespace sky {
@@ -18,7 +19,9 @@ const char kBaseTraceEnd[] = "]}";
 const char kSentinel[] = "\0";
 
 TracingController::TracingController()
-    : view_(nullptr), picture_tracing_enabled_(false) {}
+    : view_(nullptr),
+      picture_tracing_enabled_(false),
+      trace_controller_start_(base::TimeTicks::Now()) {}
 
 TracingController::~TracingController() {}
 
@@ -121,7 +124,9 @@ TracingController::SkPictureTracingOptions
 TracingController::picture_tracing_options() const {
   return SkPictureTracingOptions(
       picture_tracing_path_.length() == 0 ? false : picture_tracing_enabled_,
-      picture_tracing_path_);
+      picture_tracing_path_ +
+          std::to_string((base::TimeTicks::Now() - trace_controller_start_)
+                             .InMillisecondsRoundedUp()));
 }
 
 void TracingController::set_picture_tracing_path(const std::string& path) {
