@@ -59,29 +59,6 @@ class TestPointerEvent extends sky.PointerEvent {
   double tilt;
 }
 
-class TestGestureEvent extends sky.GestureEvent {
-  TestGestureEvent({
-    this.type,
-    this.primaryPointer,
-    this.x,
-    this.y,
-    this.dx,
-    this.dy,
-    this.velocityX,
-    this.velocityY
-  });
-
-  // These are all of the GestureEvent members, but not all of Event.
-  String type;
-  int primaryPointer;
-  double x;
-  double y;
-  double dx;
-  double dy;
-  double velocityX;
-  double velocityY;
-}
-
 class TestPointer {
   TestPointer([ this.pointer = 1 ]);
 

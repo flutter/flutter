@@ -96,8 +96,6 @@ class SkyBinding extends HitTestTarget {
   void _handleEvent(sky.Event event) {
     if (event is sky.PointerEvent) {
       _handlePointerEvent(event);
-    } else if (event is sky.GestureEvent) {
-      dispatchEvent(event, hitTest(new Point(event.x, event.y)));
     } else {
       for (EventListener listener in _eventListeners)
         listener(event);
