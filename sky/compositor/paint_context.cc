@@ -57,8 +57,9 @@ PaintContext::ScopedFrame PaintContext::AcquireFrame(SkCanvas& canvas) {
 }
 
 PaintContext::ScopedFrame PaintContext::AcquireFrame(
-    const std::string& trace_file_name) {
-  return ScopedFrame(*this, trace_file_name);
+    const std::string& trace_file_name,
+    gfx::Size frame_size) {
+  return ScopedFrame(*this, trace_file_name, frame_size);
 }
 
 PaintContext::ScopedFrame::ScopedFrame(PaintContext& context, SkCanvas& canvas)
@@ -69,12 +70,13 @@ PaintContext::ScopedFrame::ScopedFrame(PaintContext& context, SkCanvas& canvas)
 PaintContext::ScopedFrame::ScopedFrame(ScopedFrame&& frame) = default;
 
 PaintContext::ScopedFrame::ScopedFrame(PaintContext& context,
-                                       const std::string& trace_file_name)
+                                       const std::string& trace_file_name,
+                                       gfx::Size frame_size)
     : context_(context),
       trace_file_name_(trace_file_name),
       trace_recorder_(new SkPictureRecorder()) {
   trace_recorder_->beginRecording(
-      SkRect::MakeWH(SK_ScalarInfinity, SK_ScalarInfinity));
+      SkRect::MakeWH(frame_size.width(), frame_size.height()));
   canvas_ = trace_recorder_->getRecordingCanvas();
   DCHECK(canvas_);
   context_.beginFrame(*this);
