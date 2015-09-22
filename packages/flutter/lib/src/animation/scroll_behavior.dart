@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
 
@@ -95,10 +96,23 @@ class UnboundedBehavior extends ExtentScrollBehavior {
 }
 
 Simulation _createDefaultScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
-  double velocityPerSecond = velocity * _kSecondsPerMillisecond;
-  SpringDescription spring = new SpringDescription.withDampingRatio(
-      mass: 1.0, springConstant: 170.0, ratio: 1.1);
-  return new ScrollSimulation(position, velocityPerSecond, minScrollOffset, maxScrollOffset, spring, _kScrollDrag);
+  double startVelocity = velocity * _kSecondsPerMillisecond;
+
+  // Assume that we're rendering at atleast 15 FPS. Stop when we're
+  // scrolling less than one logical pixel per frame. We're essentially
+  // normalizing by the devicePixelRatio so that the threshold has the
+  // same effect independent of the device's pixel density.
+  double endVelocity = 15.0 * sky.view.devicePixelRatio;
+
+  // Similar to endVelocity. Stop scrolling when we're this close to
+  // destiniation scroll offset.
+  double endDistance = 0.5 * sky.view.devicePixelRatio;
+
+  SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
+  ScrollSimulation simulation =
+      new ScrollSimulation(position, startVelocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag)
+    ..tolerance = new Tolerance(velocity: endVelocity, distance: endDistance);
+  return simulation;
 }
 
 /// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance
