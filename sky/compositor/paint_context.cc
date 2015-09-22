@@ -86,8 +86,9 @@ PaintContext::ScopedFrame::~ScopedFrame() {
   context_.endFrame(*this);
 
   if (trace_file_name_.length() > 0) {
-    auto picture = trace_recorder_->endRecordingAsPicture();
+    SkPicture* picture = trace_recorder_->endRecordingAsPicture();
     SerializePicture(trace_file_name_.c_str(), picture);
+    picture->unref();
   }
 }
 
