@@ -8,6 +8,12 @@ final BoxDecoration kBoxDecorationA = new BoxDecoration();
 final BoxDecoration kBoxDecorationB = new BoxDecoration();
 final BoxDecoration kBoxDecorationC = new BoxDecoration();
 
+class TestComponent extends StatelessComponent {
+  const TestComponent({ this.child });
+  final Widget child;
+  Widget build() => child;
+}
+
 void main() {
   test('RenderObjectWidget smoke test', () {
     WidgetTester tester = new WidgetTester();

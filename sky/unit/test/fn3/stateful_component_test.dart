@@ -78,7 +78,8 @@ void main() {
     checkTree(kBoxDecorationB);
 
     flipStatefulComponent(tester);
-    Element.flushBuild();
+
+    tester.pumpFrameWithoutChange();
 
     checkTree(kBoxDecorationA);
 
@@ -105,7 +106,8 @@ void main() {
     expect(TestBuildCounter.buildCount, equals(1));
 
     flipStatefulComponent(tester);
-    Element.flushBuild();
+
+    tester.pumpFrameWithoutChange();
 
     expect(TestBuildCounter.buildCount, equals(1));
   });
