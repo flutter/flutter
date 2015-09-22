@@ -11,7 +11,7 @@ final BoxDecoration kBoxDecorationC = new BoxDecoration();
 class TestComponent extends StatelessComponent {
   const TestComponent({ this.child });
   final Widget child;
-  Widget build() => child;
+  Widget build(BuildContext context) => child;
 }
 
 void main() {

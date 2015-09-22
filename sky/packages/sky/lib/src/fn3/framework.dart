@@ -105,7 +105,11 @@ abstract class StatelessComponent extends Widget {
   /// Returns another Widget out of which this StatelessComponent is built.
   /// Typically that Widget will have been configured with further children,
   /// such that really this function returns a tree of configuration.
-  Widget build();
+  ///
+  /// The given build context object contains information about the location in
+  /// the tree at which this component is being built. For example, the context
+  /// provides the set of inherited widgets for this location in the tree.
+  Widget build(BuildContext context);
 }
 
 /// StatefulComponents provide the configuration for
@@ -162,7 +166,41 @@ abstract class ComponentState<T extends StatefulComponent> {
   /// Returns another Widget out of which this StatefulComponent is built.
   /// Typically that Widget will have been configured with further children,
   /// such that really this function returns a tree of configuration.
-  Widget build();
+  ///
+  /// The given build context object contains information about the location in
+  /// the tree at which this component is being built. For example, the context
+  /// provides the set of inherited widgets for this location in the tree.
+  Widget build(BuildContext context);
+}
+
+abstract class ProxyWidget extends StatelessComponent {
+  const ProxyWidget({ Key key, Widget this.child }) : super(key: key);
+
+  final Widget child;
+
+  Widget build(BuildContext context) => child;
+}
+
+abstract class ParentDataWidget extends ProxyWidget {
+  ParentDataWidget({ Key key, Widget child })
+    : super(key: key, child: child);
+
+  /// Subclasses should override this function to ensure that they are placed
+  /// inside widgets that expect them.
+  ///
+  /// The given ancestor is the first RenderObjectWidget ancestor of this widget.
+  void debugValidateAncestor(RenderObjectWidget ancestor);
+
+  void applyParentData(RenderObject renderObject);
+}
+
+abstract class InheritedWidget extends ProxyWidget {
+  const InheritedWidget({ Key key, Widget child })
+    : super(key: key, child: child);
+
+  InheritedElement createElement() => new InheritedElement(this);
+
+  bool updateShouldNotify(InheritedWidget oldWidget);
 }
 
 bool _canUpdate(Widget oldWidget, Widget newWidget) {
@@ -180,11 +218,15 @@ typedef void ElementVisitor(Element element);
 
 const Object _uniqueChild = const Object();
 
+abstract class BuildContext {
+  InheritedWidget inheritedWidgetOfType(Type targetType);
+}
+
 /// Elements are the instantiations of Widget configurations.
 ///
 /// Elements can, in principle, have children. Only subclasses of
 /// RenderObjectElement are allowed to have more than one child.
-abstract class Element<T extends Widget> {
+abstract class Element<T extends Widget> implements BuildContext {
   Element(T widget) : _widget = widget {
     assert(_widget != null);
   }
@@ -355,9 +397,24 @@ abstract class Element<T extends Widget> {
     assert(_depth != null);
     assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; });
   }
+
+  Set<Type> _dependencies;
+  InheritedWidget inheritedWidgetOfType(Type targetType) {
+    if (_dependencies == null)
+      _dependencies = new Set<Type>();
+    _dependencies.add(targetType);
+    Element ancestor = _parent;
+    while (ancestor != null && ancestor._widget.runtimeType != targetType)
+      ancestor = ancestor._parent;
+    return ancestor._widget;
+  }
+
+  void dependenciesChanged() {
+    assert(false);
+  }
 }
 
-typedef Widget WidgetBuilder();
+typedef Widget WidgetBuilder(BuildContext context);
 typedef void BuildScheduler(BuildableElement element);
 
 /// Base class for the instantiation of StatelessComponent and StatefulComponent
@@ -393,7 +450,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     _dirty = false;
     Widget built;
     try {
-      built = _builder();
+      built = _builder(this);
       assert(built != null);
     } catch (e, stack) {
       _debugReportException('building $this', e, stack);
@@ -428,10 +485,14 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     super.unmount();
     _dirty = false; // so that we don't get rebuilt even if we're already marked dirty
   }
+
+  void dependenciesChanged() {
+    markNeedsBuild();
+  }
 }
 
 /// Instantiation of StatelessComponent widgets.
-class StatelessComponentElement extends BuildableElement<StatelessComponent> {
+class StatelessComponentElement<T extends StatelessComponent> extends BuildableElement<T> {
   StatelessComponentElement(StatelessComponent widget) : super(widget) {
     _builder = _widget.build;
   }
@@ -474,6 +535,52 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
   }
 }
 
+class ParentDataElement extends StatelessComponentElement<ParentDataWidget> {
+  ParentDataElement(ParentDataWidget widget) : super(widget);
+
+  void update(ParentDataWidget newWidget) {
+    ParentDataWidget oldWidget = _widget;
+    super.update(newWidget);
+    assert(_widget == newWidget);
+    if (_widget != oldWidget)
+      _notifyDescendants();
+  }
+
+  void _notifyDescendants() {
+    void notifyChildren(Element child) {
+      if (child is RenderObjectElement)
+        child.updateParentData(_widget);
+      else if (child is! ParentDataElement)
+        child.visitChildren(notifyChildren);
+    }
+    visitChildren(notifyChildren);
+  }
+}
+
+class InheritedElement extends StatelessComponentElement<InheritedWidget> {
+  InheritedElement(InheritedWidget widget) : super(widget);
+
+  void update(StatelessComponent newWidget) {
+    InheritedWidget oldWidget = _widget;
+    super.update(newWidget);
+    assert(_widget == newWidget);
+    if (_widget.updateShouldNotify(oldWidget))
+      _notifyDescendants();
+  }
+
+  void _notifyDescendants() {
+    final Type ourRuntimeType = runtimeType;
+    void notifyChildren(Element child) {
+      if (child._dependencies != null &&
+          child._dependencies.contains(ourRuntimeType))
+        child.dependenciesChanged();
+      if (child.runtimeType != ourRuntimeType)
+        child.visitChildren(notifyChildren);
+    }
+    visitChildren(notifyChildren);
+  }
+}
+
 /// Base class for instantiations of RenderObjectWidget subclasses
 abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element<T> {
   RenderObjectElement(T widget)
@@ -488,6 +595,16 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     while (ancestor != null && ancestor is! RenderObjectElement)
       ancestor = ancestor._parent;
     return ancestor;
+  }
+
+  ParentDataElement _findAncestorParentDataElement() {
+    Element ancestor = _parent;
+    while (ancestor != null && ancestor is! RenderObjectElement) {
+      if (ancestor is ParentDataElement)
+        return ancestor;
+      ancestor = ancestor._parent;
+    }
+    return null;
   }
 
   static Map<RenderObject, RenderObjectElement> _registry = new Map<RenderObject, RenderObjectElement>();
@@ -507,10 +624,13 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     assert(_ancestorRenderObjectElement == null);
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
     _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, slot);
+    ParentDataElement parentDataElement = _findAncestorParentDataElement();
+    if (parentDataElement != null)
+      updateParentData(parentDataElement._widget);
   }
 
   void update(T newWidget) {
-    Widget oldWidget = _widget;
+    RenderObjectWidget oldWidget = _widget;
     super.update(newWidget);
     assert(_widget == newWidget);
     _widget.updateRenderObject(renderObject, oldWidget);
@@ -520,6 +640,14 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     super.unmount();
     _widget.didUnmountRenderObject(renderObject);
     _registry.remove(renderObject);
+  }
+
+  void updateParentData(ParentDataWidget parentData) {
+    assert(() {
+      parentData.debugValidateAncestor(_ancestorRenderObjectElement._widget);
+      return true;
+    });
+    parentData.applyParentData(renderObject);
   }
 
   void detachRenderObject() {
@@ -590,7 +718,15 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
 class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> extends RenderObjectElement<T> {
   MultiChildRenderObjectElement(T widget) : super(widget);
 
-  // TODO(ianh): implement
+  void insertChildRenderObject(RenderObject child, dynamic slot) {
+    // TODO(ianh): implement
+    assert(false);
+  }
+
+  void removeChildRenderObject(RenderObject child) {
+    // TODO(ianh): implement
+    assert(false);
+  }
 }
 
 typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTrace stack);
