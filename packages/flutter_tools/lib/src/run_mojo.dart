@@ -5,7 +5,6 @@
 library sky_tools.run_mojo;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -14,6 +13,7 @@ import 'package:path/path.dart' as path;
 
 import 'artifacts.dart';
 import 'common.dart';
+import 'process.dart';
 
 final Logger _logging = new Logger('sky_tools.run_mojo');
 
@@ -22,10 +22,11 @@ class RunMojoCommandHandler extends CommandHandler {
 
   ArgParser get parser {
     ArgParser parser = new ArgParser();
+    parser.addFlag('android', negatable: false, help: 'Run on an Android device');
     parser.addFlag('help', abbr: 'h', negatable: false);
-    parser.addOption('package-root', defaultsTo: 'packages');
-    parser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services');
     parser.addOption('app', defaultsTo: 'app.flx');
+    parser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services');
+    parser.addOption('package-root', defaultsTo: 'packages');
     return parser;
   }
 
@@ -35,6 +36,36 @@ class RunMojoCommandHandler extends CommandHandler {
       throw new Exception("Path \"${relativePath}\" does not exist");
     }
     return file.absolute.path;
+  }
+
+  Future<int> _runAndroid(ArgResults results, String appPath, String engineRevision) async {
+    String skyViewerUrl = artifactStore.googleStorageUrl('viewer', 'android-arm', engineRevision);
+    String command = await _makePathAbsolute(path.join(results['mojo-path'], 'mojo', 'devtools', 'common', 'mojo_run'));
+    String appName = path.basename(appPath);
+    String appDir = path.dirname(appPath);
+    List<String> args = [
+      '--android', '--release', '--embed', 'http://app/$appName',
+      '--map-origin=http://app/=$appDir',
+      '--map-origin=http://sky_viewer/=$skyViewerUrl',
+      '--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo',
+    ];
+    if (_logging.level <= Level.INFO) {
+      args.add('--verbose');
+      if (_logging.level <= Level.FINE) {
+        args.add('--verbose');
+      }
+    }
+    return runCommandAndStreamOutput(command, args);
+  }
+
+  Future<int> _runLinux(ArgResults results, String appPath, String packageRoot, String engineRevision) async {
+    String viewerPath = await _makePathAbsolute(await artifactStore.getPath(Artifact.SkyViewerMojo, packageRoot));
+    String mojoShellPath = await _makePathAbsolute(path.join(results['mojo-path'], 'out', 'Release', 'mojo_shell'));
+    List<String> mojoRunArgs = [
+      'mojo:window_manager file://${appPath}',
+      '--url-mappings=mojo:window_manager=mojo:kiosk_wm,mojo:sky_viewer=file://${viewerPath}'
+    ];
+    return runCommandAndStreamOutput(mojoShellPath, mojoRunArgs);
   }
 
   @override
@@ -48,23 +79,12 @@ class RunMojoCommandHandler extends CommandHandler {
       return 1;
     }
     String packageRoot = results['package-root'];
+    String engineRevision = await artifactStore.getEngineRevision(packageRoot);
     String appPath = await _makePathAbsolute(results['app']);
-    String viewerPath = await _makePathAbsolute(await artifactStore.getPath(Artifact.SkyViewerMojo, packageRoot));
-    String mojoShellPath = await _makePathAbsolute(path.join(results['mojo-path'], 'mojo_shell'));
-    List<String> mojoRunArgs = [
-      'mojo:window_manager file://${appPath}',
-      '--url-mappings=mojo:window_manager=mojo:kiosk_wm,mojo:sky_viewer=file://${viewerPath}'
-    ];
-    _logging.fine("Starting ${mojoShellPath} with args: ${mojoRunArgs}");
-    Process proc = await Process.start(mojoShellPath, mojoRunArgs);
-    proc.stdout.transform(UTF8.decoder).listen((data) {
-      stdout.write(data);
-    });
-    proc.stderr.transform(UTF8.decoder).listen((data) {
-      stderr.write(data);
-    });
-    int exitCode = await proc.exitCode;
-    if (exitCode != 0) throw new Exception(exitCode);
-    return 0;
+    if (results['android']) {
+      return _runAndroid(results, appPath, engineRevision);
+    } else {
+      return _runLinux(results, appPath, packageRoot, engineRevision);
+    }
   }
 }
