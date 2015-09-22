@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 
 abstract class Key {
@@ -144,7 +143,7 @@ abstract class ComponentState<T extends StatefulComponent> {
   /// rendering will not be updated.
   void setState(void fn()) {
     fn();
-    _element.scheduleBuild();
+    _element.markNeedsBuild();
   }
 
   /// The current configuration (an instance of the corresponding
@@ -201,6 +200,7 @@ abstract class Element<T extends Widget> {
 
   /// An integer that is guaranteed to be greater than the parent's, if any.
   /// The element at the root of the tree must have a depth greater than 0.
+  int get depth => _depth;
   int _depth;
 
   /// The configuration for this element.
@@ -270,6 +270,7 @@ abstract class Element<T extends Widget> {
 
   /// Called when an Element is given a new parent shortly after having been
   /// created.
+  // TODO(ianh): rename to didMount
   void mount(Element parent, dynamic slot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
     assert(_widget != null);
@@ -347,20 +348,17 @@ abstract class Element<T extends Widget> {
 
   /// Called when an Element is removed from the tree.
   /// Currently, an Element removed from the tree never returns.
+  // TODO(ianh): rename to didUnmount
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(_widget != null);
     assert(_depth != null);
     assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; });
   }
-
-  // TODO(ianh): Merge this into the binding, expose for tests
-  static void flushBuild() {
-    _buildScheduler.buildDirtyElements();
-  }
 }
 
 typedef Widget WidgetBuilder();
+typedef void BuildScheduler(BuildableElement element);
 
 /// Base class for the instantiation of StatelessComponent and StatefulComponent
 /// widgets.
@@ -369,18 +367,29 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
 
   WidgetBuilder _builder;
   Element _child;
+
+  /// Returns true if the element has been marked as needing rebuilding.
+  bool get dirty => _dirty;
   bool _dirty = true;
 
   void mount(Element parent, dynamic slot) {
     super.mount(parent, slot);
     assert(_child == null);
-    _rebuild();
+    rebuild();
     assert(_child != null);
   }
 
-  // This is also called for the first build
-  void _rebuild() {
+  /// Reinvokes the build() method of the StatelessComponent object (for
+  /// stateless components) or the ComponentState object (for stateful
+  /// components) and then updates the widget tree.
+  ///
+  /// Called automatically during didMount() to generate the first build, by the
+  /// binding when scheduleBuild() has been called to mark this element dirty,
+  /// and by update() when the Widget has changed.
+  void rebuild() {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    if (!_dirty)
+      return;
     _dirty = false;
     Widget built;
     try {
@@ -392,11 +401,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     _child = _updateChild(_child, built, _slot);
   }
 
-  /// Called by the binding when scheduleBuild() has been called to mark this element dirty.
-  void _rebuildIfNeeded() {
-    if (_dirty)
-      _rebuild();
-  }
+  static BuildScheduler scheduleBuildFor;
 
   /// Marks the element as dirty and adds it to the global list of widgets to
   /// rebuild in the next frame.
@@ -405,12 +410,13 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// applications and components should be structured so as to only mark
   /// components dirty during event handlers before the frame begins, not during
   /// the build itself.
-  void scheduleBuild() {
+  void markNeedsBuild() {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
     if (_dirty)
       return;
     _dirty = true;
-    _buildScheduler.schedule(this);
+    assert(scheduleBuildFor != null);
+    scheduleBuildFor(this);
   }
 
   void visitChildren(ElementVisitor visitor) {
@@ -434,7 +440,8 @@ class StatelessComponentElement extends BuildableElement<StatelessComponent> {
     super.update(newWidget);
     assert(_widget == newWidget);
     _builder = _widget.build;
-    _rebuild();
+    _dirty = true;
+    rebuild();
   }
 }
 
@@ -456,7 +463,8 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
     StatefulComponent oldConfig = _state._config;
     _state._config = _widget;
     _state.didUpdateConfig(oldConfig);
-    _rebuild();
+    _dirty = true;
+    rebuild();
   }
 
   void unmount() {
@@ -482,8 +490,20 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     return ancestor;
   }
 
+  static Map<RenderObject, RenderObjectElement> _registry = new Map<RenderObject, RenderObjectElement>();
+  static Iterable<RenderObjectElement> getElementsForRenderObject(RenderObject renderObject) sync* {
+    Element target = _registry[renderObject];
+    while (target != null) {
+      yield target;
+      target = target._parent;
+      if (target is RenderObjectElement)
+        break;
+    }
+  }
+
   void mount(Element parent, dynamic slot) {
     super.mount(parent, slot);
+    _registry[renderObject] = this;
     assert(_ancestorRenderObjectElement == null);
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
     _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, slot);
@@ -506,6 +526,11 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
       _ancestorRenderObjectElement.removeChildRenderObject(renderObject);
       _ancestorRenderObjectElement = null;
     }
+  }
+
+  void unmount() {
+    super.unmount();
+    _registry.remove(renderObject);
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot);
@@ -571,56 +596,6 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
 
   // TODO(ianh): implement
 }
-
-class _BuildScheduler {
-  final List<BuildableElement> _dirtyElements = new List<BuildableElement>();
-
-  int _debugBuildingAtDepth;
-
-  void schedule(BuildableElement element) {
-    assert(_debugBuildingAtDepth == null || element._depth > _debugBuildingAtDepth);
-    assert(!_dirtyElements.contains(element));
-    if (_dirtyElements.isEmpty)
-      scheduler.ensureVisualUpdate();
-    _dirtyElements.add(element);
-  }
-
-  void _absorbDirtyElements(List<BuildableElement> list) {
-    assert(_debugBuildingAtDepth != null);
-    assert(!_dirtyElements.any((element) => element._depth <= _debugBuildingAtDepth));
-    _dirtyElements.sort((BuildableElement a, BuildableElement b) => a._depth - b._depth);
-    list.addAll(_dirtyElements);
-    _dirtyElements.clear();
-  }
-
-  /// Builds all the elements that were marked as dirty using schedule(), in depth order.
-  /// If elements are marked as dirty while this runs, they must be deeper than the algorithm
-  /// has yet reached.
-  void buildDirtyElements() {
-    assert(_debugBuildingAtDepth == null);
-    if (_dirtyElements.isEmpty)
-      return;
-    assert(() { _debugBuildingAtDepth = 0; return true; });
-    List<BuildableElement> sortedDirtyElements = new List<BuildableElement>();
-    int index = 0;
-    do {
-      _absorbDirtyElements(sortedDirtyElements);
-      for (; index < sortedDirtyElements.length; index += 1) {
-        BuildableElement element = sortedDirtyElements[index];
-        assert(() {
-          if (element._depth > _debugBuildingAtDepth)
-            _debugBuildingAtDepth = element._depth;
-          return element._depth == _debugBuildingAtDepth;
-        });
-        element._rebuildIfNeeded();
-      }
-    } while (_dirtyElements.isNotEmpty);
-    assert(() { _debugBuildingAtDepth = null; return true; });
-  }
-}
-
-final _BuildScheduler _buildScheduler = new _BuildScheduler();
-
 
 typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTrace stack);
 /// This callback is invoked whenever an exception is caught by the widget
