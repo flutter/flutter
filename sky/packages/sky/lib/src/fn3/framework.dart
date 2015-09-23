@@ -425,10 +425,10 @@ abstract class Element<T extends Widget> implements BuildContext {
   T get widget => _widget;
   T _widget;
 
-  RenderObject get _descendantRenderObject {
+  RenderObject get renderObject {
     RenderObject result;
     void visit(Element element) {
-      assert(result == null);
+      assert(result == null); // this verifies that there's only one child
       if (element is RenderObjectElement)
         result = element.renderObject;
       else
@@ -800,10 +800,11 @@ class InheritedElement extends StatelessComponentElement<InheritedWidget> {
 /// Base class for instantiations of RenderObjectWidget subclasses
 abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element<T> {
   RenderObjectElement(T widget)
-    : renderObject = widget.createRenderObject(), super(widget);
+    : _renderObject = widget.createRenderObject(), super(widget);
 
   /// The underlying [RenderObject] for this element
-  final RenderObject renderObject;
+  RenderObject get renderObject => _renderObject;
+  final RenderObject _renderObject;
   RenderObjectElement _ancestorRenderObjectElement;
 
   RenderObjectElement _findAncestorRenderObjectElement() {
@@ -938,7 +939,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
 
   void insertChildRenderObject(RenderObject child, Element slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    RenderObject nextSibling = slot?._descendantRenderObject;
+    RenderObject nextSibling = slot?.renderObject;
     assert(renderObject is ContainerRenderObjectMixin);
     renderObject.add(child, before: nextSibling);
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
@@ -946,7 +947,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
 
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    RenderObject nextSibling = slot?._descendantRenderObject;
+    RenderObject nextSibling = slot?.renderObject;
     assert(renderObject is ContainerRenderObjectMixin);
     renderObject.move(child, before: nextSibling);
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
