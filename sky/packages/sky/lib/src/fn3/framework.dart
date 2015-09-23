@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:sky/rendering.dart';
 
 abstract class Key {
@@ -247,6 +249,19 @@ abstract class Element<T extends Widget> implements BuildContext {
 
   /// The configuration for this element.
   T _widget;
+
+  RenderObject get _descendantRenderObject {
+    RenderObject result;
+    void visit(Element element) {
+      assert(result == null);
+      if (element is RenderObjectElement)
+        result = element.renderObject;
+      else
+        element.visitChildren(visit);
+    }
+    visit(this);
+    return result;
+  }
 
   /// This is used to verify that Element objects move through life in an orderly fashion.
   _ElementLifecycle _debugLifecycleState = _ElementLifecycle.initial;
@@ -716,17 +731,208 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
 
 /// Instantiation of RenderObjectWidgets that can have a list of children
 class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> extends RenderObjectElement<T> {
-  MultiChildRenderObjectElement(T widget) : super(widget);
+  MultiChildRenderObjectElement(T widget) : super(widget) {
+    assert(!_debugHasDuplicateIds());
+  }
 
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
-    // TODO(ianh): implement
-    assert(false);
+  List<Element> _children;
+
+  void insertChildRenderObject(RenderObject child, Element slot) {
+    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
+    RenderObject nextSibling = slot._descendantRenderObject;
+    assert(nextSibling == null || nextSibling is RenderObject);
+    assert(renderObject is ContainerRenderObjectMixin);
+    renderObject.add(child, before: nextSibling);
+    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void removeChildRenderObject(RenderObject child) {
-    // TODO(ianh): implement
-    assert(false);
+    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject is ContainerRenderObjectMixin);
+    assert(child.parent == renderObject);
+    renderObject.remove(child);
+    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
+
+  bool _debugHasDuplicateIds() {
+    var idSet = new HashSet<Key>();
+    for (Widget child in _widget.children) {
+      assert(child != null);
+      if (child.key == null)
+        continue; // when these nodes are reordered, we just reassign the data
+
+      if (!idSet.add(child.key)) {
+        throw 'If multiple keyed nodes exist as children of another node, they must have unique keys. $_widget has multiple children with key "${child.key}".';
+      }
+    }
+    return false;
+  }
+
+  void visitChildren(ElementVisitor visitor) {
+    for (Element child in _children)
+      visitor(child);
+  }
+
+  void mount(Element parent, dynamic slot) {
+    super.mount(parent, slot);
+    _children = new List<Element>(_widget.children.length);
+    Element previousChild;
+    for (int i = 0; i < _children.length; ++i) {
+      Element newChild = _widget.children[i].createElement();
+      newChild.mount(this, previousChild);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
+      _children[i] = newChild;
+      previousChild = newChild;
+    }
+  }
+
+  void update(T newWidget) {
+    super.update(newWidget);
+    assert(_widget == newWidget);
+    _children = _updateChildren(_children, _widget.children);
+  }
+
+  List<Element> _updateChildren(List<Element> oldChildren, List<Widget> newWidgets) {
+    assert(oldChildren != null);
+    assert(newWidgets != null);
+
+    // This attempts to diff the new child list (this.children) with
+    // the old child list (old.children), and update our renderObject
+    // accordingly.
+
+    // The cases it tries to optimise for are:
+    //  - the old list is empty
+    //  - the lists are identical
+    //  - there is an insertion or removal of one or more widgets in
+    //    only one place in the list
+    // If a widget with a key is in both lists, it will be synced.
+    // Widgets without keys might be synced but there is no guarantee.
+
+    // The general approach is to sync the entire new list backwards, as follows:
+    // 1. Walk the lists from the top until you no longer have
+    //    matching nodes. We don't sync these yet, but we now know to
+    //    skip them below. We do this because at each sync we need to
+    //    pass the pointer to the new next widget as the slot, which
+    //    we can't do until we've synced the next child.
+    // 2. Walk the lists from the bottom, syncing nodes, until you no
+    //    longer have matching nodes.
+    // At this point we narrowed the old and new lists to the point
+    // where the nodes no longer match.
+    // 3. Walk the narrowed part of the old list to get the list of
+    //    keys and sync null with non-keyed items.
+    // 4. Walk the narrowed part of the new list backwards:
+    //     * Sync unkeyed items with null
+    //     * Sync keyed items with the source if it exists, else with null.
+    // 5. Walk the top list again but backwards, syncing the nodes.
+    // 6. Sync null with any items in the list of keys that are still
+    //    mounted.
+
+    final ContainerRenderObjectMixin renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject is ContainerRenderObjectMixin);
+
+    int childrenTop = 0;
+    int newChildrenBottom = newWidgets.length - 1;
+    int oldChildrenBottom = oldChildren.length - 1;
+
+    // top of the lists
+    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
+      Element oldChild = oldChildren[childrenTop];
+      Widget newWidget = newWidgets[childrenTop];
+      assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
+      if (!_canUpdate(oldChild._widget, newWidget))
+        break;
+      childrenTop += 1;
+    }
+
+    List<Element> newChildren = oldChildren.length == newWidgets.length ?
+        oldChildren : new List<Element>(newWidgets.length);
+
+    Element nextSibling;
+
+    // bottom of the lists
+    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
+      Element oldChild = oldChildren[oldChildrenBottom];
+      Widget newWidget = newWidgets[newChildrenBottom];
+      assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
+      if (!_canUpdate(oldChild._widget, newWidget))
+        break;
+      Element newChild = _updateChild(oldChild, newWidget, nextSibling);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
+      newChildren[newChildrenBottom] = newChild;
+      nextSibling = newChild;
+      oldChildrenBottom -= 1;
+      newChildrenBottom -= 1;
+    }
+
+    // middle of the lists - old list
+    bool haveOldNodes = childrenTop <= oldChildrenBottom;
+    Map<Key, Element> oldKeyedChildren;
+    if (haveOldNodes) {
+      oldKeyedChildren = new Map<Key, Element>();
+      while (childrenTop <= oldChildrenBottom) {
+        Element oldChild = oldChildren[oldChildrenBottom];
+        assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
+        if (oldChild._widget.key != null)
+          oldKeyedChildren[oldChild._widget.key] = oldChild;
+        oldChildrenBottom -= 1;
+      }
+    }
+
+    // middle of the lists - new list
+    while (childrenTop <= newChildrenBottom) {
+      Element oldChild;
+      Widget newWidget = newWidgets[newChildrenBottom];
+      if (haveOldNodes) {
+        Key key = newWidget.key;
+        if (key != null) {
+          oldChild = oldKeyedChildren[newWidget.key];
+          if (oldChild != null) {
+            if (_canUpdate(oldChild._widget, newWidget)) {
+              // we found a match!
+              // remove it from oldKeyedChildren so we don't unsync it later
+              oldKeyedChildren.remove(key);
+            } else {
+              // Not a match, let's pretend we didn't see it for now.
+              oldChild = null;
+            }
+          }
+        }
+      }
+      assert(oldChild == null || _canUpdate(oldChild._widget, newWidget));
+      Element newChild = _updateChild(oldChild, newWidget, nextSibling);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
+      assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.mounted);
+      newChildren[newChildrenBottom] = newChild;
+      nextSibling = newChild;
+      newChildrenBottom -= 1;
+    }
+    assert(oldChildrenBottom == newChildrenBottom);
+    assert(childrenTop == newChildrenBottom + 1);
+
+    // now sync the top of the list
+    while (childrenTop > 0) {
+      childrenTop -= 1;
+      Element oldChild = oldChildren[childrenTop];
+      assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
+      Widget newWidget = newWidgets[childrenTop];
+      assert(_canUpdate(oldChild._widget, newWidget));
+      Element newChild = _updateChild(oldChild, newWidget, nextSibling);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
+      assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.mounted);
+      newChildren[childrenTop] = newChild;
+      nextSibling = newChild;
+    }
+
+    // clean up any of the remaining middle nodes from the old list
+    if (haveOldNodes && !oldKeyedChildren.isEmpty) {
+      for (Element oldChild in oldKeyedChildren.values)
+        oldChild.unmount();
+    }
+
+    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+    return newChildren;
+  }
+
 }
 
 typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTrace stack);
