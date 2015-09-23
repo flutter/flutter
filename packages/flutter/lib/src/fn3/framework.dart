@@ -419,6 +419,7 @@ abstract class Element<T extends Widget> implements BuildContext {
   ///
   /// Subclasses of Element that only have one child should use null for
   /// the slot for that child.
+  dynamic get slot => _slot;
   dynamic _slot;
 
   /// An integer that is guaranteed to be greater than the parent's, if any.
@@ -488,12 +489,12 @@ abstract class Element<T extends Widget> implements BuildContext {
     }
     if (child != null) {
       if (child.widget == newWidget) {
-        if (child._slot != newSlot)
+        if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         return child;
       }
       if (_canUpdate(child.widget, newWidget)) {
-        if (child._slot != newSlot)
+        if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         child.update(newWidget);
         assert(child.widget == newWidget);
@@ -517,7 +518,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(widget != null);
     assert(_parent == null);
     assert(parent == null || parent._debugLifecycleState == _ElementLifecycle.mounted);
-    assert(_slot == null);
+    assert(slot == null);
     assert(depth == null);
     _parent = parent;
     _slot = newSlot;
@@ -654,12 +655,12 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     }
 
     try {
-      _child = updateChild(_child, built, _slot);
+      _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
       _debugReportException('building $this', e, stack);
       built = new ErrorWidget();
-      _child = updateChild(null, built, _slot);
+      _child = updateChild(null, built, slot);
     }
   }
 
@@ -735,6 +736,7 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
   StatefulComponentElement(StatefulComponent widget)
     : _state = widget.createState(), super(widget) {
     assert(_state._config == widget);
+    assert(_state._element == null);
     _state._element = this;
     _builder = _state.build;
   }
@@ -755,6 +757,7 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
   void unmount() {
     super.unmount();
     _state.dispose();
+    _state._element = null;
     _state = null;
   }
 }
@@ -1016,6 +1019,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
 
   void unmount() {
     super.unmount();
+    assert(!renderObject.attached);
     widget.didUnmountRenderObject(renderObject);
   }
 
@@ -1024,10 +1028,10 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
   }
 
   void _updateSlot(dynamic newSlot) {
-    assert(_slot != newSlot);
+    assert(slot != newSlot);
     super._updateSlot(newSlot);
-    assert(_slot == newSlot);
-    _ancestorRenderObjectElement.moveChildRenderObject(renderObject, _slot);
+    assert(slot == newSlot);
+    _ancestorRenderObjectElement.moveChildRenderObject(renderObject, slot);
   }
 
   void detachRenderObject() {
