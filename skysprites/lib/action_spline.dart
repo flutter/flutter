@@ -17,13 +17,25 @@ Point _cardinalSplineAt(Point p0, Point p1, Point p2, Point p3, double tension, 
   return new Point(x, y);
 }
 
+/// The spline action is used to animate a point along a spline definied by
+/// a set of points.
 class ActionSpline extends ActionInterval {
+
+  /// Creates a new spline action with a set of points. The [setter] is a
+  /// callback for setting the positions, [points] define the spline, and
+  /// [duration] is the time for the action to complete. Optionally a [curve]
+  /// can be used for easing.
   ActionSpline(this.setter, this.points, double duration, [Curve curve]) : super(duration, curve) {
     _dt = 1.0 / (points.length - 1.0);
   }
 
+  /// The callback used to update a point when the action is run.
   final Function setter;
+
+  /// A list of points that define the spline.
   final List<Point> points;
+
+  /// The tension of the spline, defines the roundness of the curve.
   double tension = 0.5;
 
   double _dt;
