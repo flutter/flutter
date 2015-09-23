@@ -33,9 +33,9 @@ abstract class ButtonState<T extends StatefulComponent> extends ComponentState<T
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
       onPointerCancel: _handlePointerCancel,
-      child: buildContent()
+      child: buildContent(context)
     );
   }
 
-  Widget buildContent();
+  Widget buildContent(BuildContext context);
 }
