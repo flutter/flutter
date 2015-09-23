@@ -18,8 +18,6 @@ source_set("compositor") {
     "rasterizer_ganesh.h",
     "resource_manager.cc",
     "resource_manager.h",
-    "surface_allocator.cc",
-    "surface_allocator.h",
     "surface_holder.cc",
     "surface_holder.h",
     "texture_cache.cc",

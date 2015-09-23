@@ -18,8 +18,6 @@ class Shell;
 }
 
 namespace sky {
-class SurfaceAllocator;
-
 class SurfaceHolder : public mojo::ResourceReturner {
  public:
   class Client {
