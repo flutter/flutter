@@ -8,12 +8,13 @@
 #include <string.h>
 
 #include "mojo/edk/system/process_identifier.h"
-#include "mojo/edk/system/system_impl_export.h"
+#include "mojo/public/c/system/macros.h"
 
 namespace mojo {
 namespace system {
 
-struct ConnectionManagerAckSuccessConnectData {
+// Align as 8 bytes to force 32/64-bit architectures to match size.
+struct MOJO_ALIGNAS(8) ConnectionManagerAckSuccessConnectData {
   // Set to the process identifier of the process that the receiver of this ack
   // ack should connect to.
   ProcessIdentifier peer_process_identifier;

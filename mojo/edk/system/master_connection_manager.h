@@ -7,13 +7,13 @@
 
 #include <stdint.h>
 
-#include "base/containers/hash_tables.h"
+#include <unordered_map>
+
 #include "base/memory/ref_counted.h"
 #include "base/threading/thread.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/connection_manager.h"
 #include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace base {
@@ -36,8 +36,7 @@ namespace system {
 // its internal, private thread), with condition that |Init()| be called before
 // anything else and |Shutdown()| be called before destruction (and no other
 // public methods may be called during/after |Shutdown()|).
-class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
-    : public ConnectionManager {
+class MasterConnectionManager final : public ConnectionManager {
  public:
   // Note: None of the public methods may be called from |private_thread_|.
 
@@ -143,7 +142,7 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
   base::Thread private_thread_;
 
   // The following members are only accessed on |private_thread_|:
-  base::hash_map<ProcessIdentifier, Helper*> helpers_;  // Owns its values.
+  std::unordered_map<ProcessIdentifier, Helper*> helpers_;  // Owns its values.
 
   // Note: |mutex_| is not needed in the constructor, |Init()|,
   // |Shutdown()|/|ShutdownOnPrivateThread()|, or the destructor
@@ -156,8 +155,8 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
   // |AllowConnect()| but both have not yet called |Connect()| (or
   // |CancelConnect()|).
   struct PendingConnectInfo;
-  base::hash_map<ConnectionIdentifier, PendingConnectInfo*> pending_connects_
-      MOJO_GUARDED_BY(mutex_);  // Owns its values.
+  std::unordered_map<ConnectionIdentifier, PendingConnectInfo*>
+      pending_connects_ MOJO_GUARDED_BY(mutex_);  // Owns its values.
 
   // A |ProcessConnections| stores information about connections "from" a given
   // (fixed, implied) process "to" other processes. A connection may be not
@@ -166,7 +165,7 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager final
   // "from" side must still be given a platform handle).
   class ProcessConnections;
   // This is a map from "from" processes to its |ProcessConnections| (above).
-  base::hash_map<ProcessIdentifier, ProcessConnections*> connections_
+  std::unordered_map<ProcessIdentifier, ProcessConnections*> connections_
       MOJO_GUARDED_BY(mutex_);  // Owns its values.
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MasterConnectionManager);

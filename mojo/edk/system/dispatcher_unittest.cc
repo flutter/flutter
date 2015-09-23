@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/dispatcher.h"
 
+#include <memory>
+
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_vector.h"
 #include "base/synchronization/waitable_event.h"
@@ -204,7 +206,7 @@ class ThreadSafetyStressThread : public base::SimpleThread {
         break;
       }
       case MAP_BUFFER: {
-        scoped_ptr<embedder::PlatformSharedBufferMapping> unused;
+        std::unique_ptr<embedder::PlatformSharedBufferMapping> unused;
         EXPECT_EQ(
             MOJO_RESULT_INVALID_ARGUMENT,
             dispatcher_->MapBuffer(0u, 0u, MOJO_MAP_BUFFER_FLAG_NONE, &unused));

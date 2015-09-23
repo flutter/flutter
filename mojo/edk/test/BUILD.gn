@@ -13,9 +13,12 @@ mojo_edk_source_set("test_support") {
     "multiprocess_test_helper.h",
     "scoped_ipc_support.cc",
     "scoped_ipc_support.h",
+    "scoped_test_dir.cc",
+    "scoped_test_dir.h",
+    "test_io_thread.cc",
+    "test_io_thread.h",
     "test_utils.h",
     "test_utils_posix.cc",
-    "test_utils_win.cc",
   ]
 
   deps = [
@@ -24,7 +27,10 @@ mojo_edk_source_set("test_support") {
     "//testing/gtest",
   ]
 
-  mojo_edk_deps = [ "mojo/edk/system" ]
+  mojo_edk_deps = [
+    "mojo/edk/system",
+    "mojo/edk/util",
+  ]
 
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
 }

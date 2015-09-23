@@ -82,13 +82,7 @@ class MockSimpleDispatcher final : public SimpleDispatcher {
   MOJO_DISALLOW_COPY_AND_ASSIGN(MockSimpleDispatcher);
 };
 
-#if defined(OS_WIN)
-// http://crbug.com/396404
-#define MAYBE_Basic DISABLED_Basic
-#else
-#define MAYBE_Basic Basic
-#endif
-TEST(SimpleDispatcherTest, MAYBE_Basic) {
+TEST(SimpleDispatcherTest, Basic) {
   test::Stopwatch stopwatch;
 
   scoped_refptr<MockSimpleDispatcher> d(new MockSimpleDispatcher());
@@ -321,13 +315,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
   // Don't need to remove waiters from closed dispatchers.
 }
 
-#if defined(OS_WIN)
-// http://crbug.com/396393
-#define MAYBE_BasicThreaded DISABLED_BasicThreaded
-#else
-#define MAYBE_BasicThreaded BasicThreaded
-#endif
-TEST(SimpleDispatcherTest, MAYBE_BasicThreaded) {
+TEST(SimpleDispatcherTest, BasicThreaded) {
   test::Stopwatch stopwatch;
   bool did_wait;
   MojoResult result;
@@ -448,13 +436,7 @@ TEST(SimpleDispatcherTest, MAYBE_BasicThreaded) {
             hss.satisfiable_signals);
 }
 
-#if defined(OS_WIN)
-// http://crbug.com/387124
-#define MAYBE_MultipleWaiters DISABLED_MultipleWaiters
-#else
-#define MAYBE_MultipleWaiters MultipleWaiters
-#endif
-TEST(SimpleDispatcherTest, MAYBE_MultipleWaiters) {
+TEST(SimpleDispatcherTest, MultipleWaiters) {
   static const uint32_t kNumWaiters = 20;
 
   bool did_wait[kNumWaiters];

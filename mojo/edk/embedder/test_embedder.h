@@ -5,15 +5,13 @@
 #ifndef MOJO_EDK_EMBEDDER_TEST_EMBEDDER_H_
 #define MOJO_EDK_EMBEDDER_TEST_EMBEDDER_H_
 
-#include "mojo/edk/system/system_impl_export.h"
-
 namespace mojo {
 namespace embedder {
 namespace test {
 
 // Calls |Init()| with a |SimplePlatformSupport| (use this in tests if, e.g.,
 // you don't care about sandboxing, etc.).
-MOJO_SYSTEM_IMPL_EXPORT void InitWithSimplePlatformSupport();
+void InitWithSimplePlatformSupport();
 
 // This shuts down the global, singleton instance. (Note: "Real" embedders are
 // not expected to ever shut down this instance. This |Shutdown()| function will
@@ -23,7 +21,7 @@ MOJO_SYSTEM_IMPL_EXPORT void InitWithSimplePlatformSupport();
 //
 // Note: It is up to the caller to ensure that there are not outstanding
 // callbacks from |CreateChannel()| before calling this.
-MOJO_SYSTEM_IMPL_EXPORT bool Shutdown();
+bool Shutdown();
 
 }  // namespace test
 }  // namespace embedder

@@ -5,6 +5,7 @@
 #include "mojo/edk/system/channel.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "base/bind.h"
 #include "base/logging.h"
@@ -35,14 +36,14 @@ Channel::Channel(embedder::PlatformSupport* platform_support)
       channel_manager_(nullptr) {
 }
 
-void Channel::Init(scoped_ptr<RawChannel> raw_channel) {
+void Channel::Init(std::unique_ptr<RawChannel> raw_channel) {
   DCHECK(creation_thread_checker_.CalledOnValidThread());
   DCHECK(raw_channel);
 
   // No need to take |mutex_|, since this must be called before this object
   // becomes thread-safe.
   DCHECK(!is_running_);
-  raw_channel_ = raw_channel.Pass();
+  raw_channel_ = std::move(raw_channel);
   raw_channel_->Init(this);
   is_running_ = true;
 }
@@ -124,7 +125,7 @@ void Channel::SetBootstrapEndpointWithIds(
   endpoint->AttachAndRun(this, local_id, remote_id);
 }
 
-bool Channel::WriteMessage(scoped_ptr<MessageInTransit> message) {
+bool Channel::WriteMessage(std::unique_ptr<MessageInTransit> message) {
   MutexLocker locker(&mutex_);
   if (!is_running_) {
     // TODO(vtl): I think this is probably not an error condition, but I should
@@ -134,7 +135,7 @@ bool Channel::WriteMessage(scoped_ptr<MessageInTransit> message) {
   }
 
   DLOG_IF(WARNING, is_shutting_down_) << "WriteMessage() while shutting down";
-  return raw_channel_->WriteMessage(message.Pass());
+  return raw_channel_->WriteMessage(std::move(message));
 }
 
 bool Channel::IsWriteBufferEmpty() {
@@ -147,6 +148,13 @@ bool Channel::IsWriteBufferEmpty() {
 void Channel::DetachEndpoint(ChannelEndpoint* endpoint,
                              ChannelEndpointId local_id,
                              ChannelEndpointId remote_id) {
+  // Keep a reference to |this| to prevent this |Channel| from being deleted
+  // while this function is running.  Without this, if |Shutdown()| is started
+  // on the IO thread immediately after |mutex_| is released below and finishes
+  // before |SendControlMessage()| gets to run, |this| could be deleted while
+  // this function is still running.
+  scoped_refptr<Channel> self(this);
+
   if (!DetachEndpointInternal(endpoint, local_id, remote_id))
     return;
 
@@ -289,10 +297,10 @@ void Channel::OnReadMessage(
   switch (message_view.type()) {
     case MessageInTransit::Type::ENDPOINT_CLIENT:
     case MessageInTransit::Type::ENDPOINT:
-      OnReadMessageForEndpoint(message_view, platform_handles.Pass());
+      OnReadMessageForEndpoint(message_view, std::move(platform_handles));
       break;
     case MessageInTransit::Type::CHANNEL:
-      OnReadMessageForChannel(message_view, platform_handles.Pass());
+      OnReadMessageForChannel(message_view, std::move(platform_handles));
       break;
     default:
       HandleRemoteError(
@@ -383,16 +391,16 @@ void Channel::OnReadMessageForEndpoint(
     return;
   }
 
-  scoped_ptr<MessageInTransit> message(new MessageInTransit(message_view));
+  std::unique_ptr<MessageInTransit> message(new MessageInTransit(message_view));
   if (message_view.transport_data_buffer_size() > 0) {
     DCHECK(message_view.transport_data_buffer());
     message->SetDispatchers(TransportData::DeserializeDispatchers(
         message_view.transport_data_buffer(),
-        message_view.transport_data_buffer_size(), platform_handles.Pass(),
+        message_view.transport_data_buffer_size(), std::move(platform_handles),
         this));
   }
 
-  endpoint->OnReadMessage(message.Pass());
+  endpoint->OnReadMessage(std::move(message));
 }
 
 void Channel::OnReadMessageForChannel(
@@ -616,11 +624,11 @@ bool Channel::SendControlMessage(MessageInTransit::Subtype subtype,
                                  const void* bytes) {
   DVLOG(2) << "Sending channel control message: subtype " << subtype
            << ", local ID " << local_id << ", remote ID " << remote_id;
-  scoped_ptr<MessageInTransit> message(new MessageInTransit(
+  std::unique_ptr<MessageInTransit> message(new MessageInTransit(
       MessageInTransit::Type::CHANNEL, subtype, num_bytes, bytes));
   message->set_source_id(local_id);
   message->set_destination_id(remote_id);
-  return WriteMessage(message.Pass());
+  return WriteMessage(std::move(message));
 }
 
 }  // namespace system

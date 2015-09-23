@@ -6,38 +6,42 @@
 #define MOJO_COMMON_TRACE_PROVIDER_IMPL_H_
 
 #include "base/memory/ref_counted_memory.h"
+#include "base/memory/weak_ptr.h"
+#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
-#include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/services/tracing/public/interfaces/tracing.mojom.h"
 
 namespace mojo {
 
 class TraceProviderImpl : public tracing::TraceProvider {
  public:
-  explicit TraceProviderImpl(InterfaceRequest<tracing::TraceProvider> request);
+  TraceProviderImpl();
   ~TraceProviderImpl() override;
 
-  // Set to true if base::trace_event::TraceLog is enabled externally to this
-  // class. If this is set to true this class will save the collector but not
-  // enable tracing when it receives a StartTracing message from the tracing
-  // service.
-  void set_tracing_already_started(bool tracing_already_started) {
-    tracing_already_started_ = tracing_already_started;
-  }
+  void Bind(InterfaceRequest<tracing::TraceProvider> request);
+
+  // Enable tracing without waiting for an inbound connection. It will stop if
+  // no TraceRecorder is sent within a set time.
+  void ForceEnableTracing();
 
  private:
   // tracing::TraceProvider implementation:
   void StartTracing(const String& categories,
-                    tracing::TraceRecorderPtr collector) override;
+                    tracing::TraceRecorderPtr recorder) override;
   void StopTracing() override;
 
   void SendChunk(const scoped_refptr<base::RefCountedString>& events_str,
                  bool has_more_events);
 
-  bool tracing_already_started_;
-  tracing::TraceRecorderPtr recorder_;
-  StrongBinding<tracing::TraceProvider> binding_;
+  void DelayedStop();
+  // Stop the collection of traces if no external connection asked for them yet.
+  void StopIfForced();
 
+  Binding<tracing::TraceProvider> binding_;
+  bool tracing_forced_;
+  tracing::TraceRecorderPtr recorder_;
+
+  base::WeakPtrFactory<TraceProviderImpl> weak_factory_;
   DISALLOW_COPY_AND_ASSIGN(TraceProviderImpl);
 };
 

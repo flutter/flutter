@@ -7,7 +7,6 @@
 
 #include "base/callback.h"
 #include "mojo/edk/system/awakable.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -15,13 +14,13 @@ namespace mojo {
 namespace system {
 
 // An |Awakable| implementation that just calls a given callback object.
-class MOJO_SYSTEM_IMPL_EXPORT AsyncWaiter final : public Awakable {
+class AsyncWaiter final : public Awakable {
  public:
   using AwakeCallback = base::Callback<void(MojoResult)>;
 
   // |callback| must satisfy the same contract as |Awakable::Awake()|.
   explicit AsyncWaiter(const AwakeCallback& callback);
-  virtual ~AsyncWaiter();
+  ~AsyncWaiter() override;
 
  private:
   // |Awakable| implementation:

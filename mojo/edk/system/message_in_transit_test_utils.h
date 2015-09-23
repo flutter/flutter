@@ -5,7 +5,8 @@
 #ifndef MOJO_EDK_SYSTEM_MESSAGE_IN_TRANSIT_TEST_UTILS_H_
 #define MOJO_EDK_SYSTEM_MESSAGE_IN_TRANSIT_TEST_UTILS_H_
 
-#include "base/memory/scoped_ptr.h"
+#include <memory>
+
 #include "mojo/edk/system/message_in_transit.h"
 
 namespace mojo {
@@ -17,7 +18,7 @@ namespace test {
 // |MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA|, and contain data
 // associated with |id| (so that test messages with different |id|s are
 // distinguishable).
-scoped_ptr<MessageInTransit> MakeTestMessage(unsigned id);
+std::unique_ptr<MessageInTransit> MakeTestMessage(unsigned id);
 
 // Verifies a test message: ASSERTs that |message| is non-null, and EXPECTs that
 // it looks like a message created using |MakeTestMessage(id)| (see above).

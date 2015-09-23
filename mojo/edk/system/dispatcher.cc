@@ -208,7 +208,7 @@ MojoResult Dispatcher::MapBuffer(
     uint64_t offset,
     uint64_t num_bytes,
     MojoMapBufferFlags flags,
-    scoped_ptr<embedder::PlatformSharedBufferMapping>* mapping) {
+    std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping) {
   MutexLocker locker(&mutex_);
   if (is_closed_)
     return MOJO_RESULT_INVALID_ARGUMENT;
@@ -360,7 +360,7 @@ MojoResult Dispatcher::MapBufferImplNoLock(
     uint64_t /*offset*/,
     uint64_t /*num_bytes*/,
     MojoMapBufferFlags /*flags*/,
-    scoped_ptr<embedder::PlatformSharedBufferMapping>* /*mapping*/) {
+    std::unique_ptr<embedder::PlatformSharedBufferMapping>* /*mapping*/) {
   mutex_.AssertHeld();
   DCHECK(!is_closed_);
   // By default, not supported. Only needed for buffer dispatchers.

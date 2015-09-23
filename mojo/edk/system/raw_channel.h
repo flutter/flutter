@@ -5,16 +5,16 @@
 #ifndef MOJO_EDK_SYSTEM_RAW_CHANNEL_H_
 #define MOJO_EDK_SYSTEM_RAW_CHANNEL_H_
 
+#include <memory>
 #include <vector>
 
-#include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
-#include "base/synchronization/lock.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
-#include "mojo/edk/system/system_impl_export.h"
+#include "mojo/edk/system/mutex.h"
+#include "mojo/edk/system/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace base {
@@ -36,10 +36,10 @@ namespace system {
 // OS-specific implementation subclasses are to be instantiated using the
 // |Create()| static factory method.
 //
-// With the exception of |WriteMessage()|, this class is thread-unsafe (and in
-// general its methods should only be used on the I/O thread, i.e., the thread
-// on which |Init()| is called).
-class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
+// With the exception of |WriteMessage()| and |IsWriteBufferEmpty()|, this class
+// is thread-unsafe (and in general its methods should only be used on the I/O
+// thread, i.e., the thread on which |Init()| is called).
+class RawChannel {
  public:
   // This object may be destroyed on any thread (if |Init()| was called, after
   // |Shutdown()| was called).
@@ -47,7 +47,7 @@ class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
 
   // The |Delegate| is only accessed on the same thread as the message loop
   // (passed in on creation).
-  class MOJO_SYSTEM_IMPL_EXPORT Delegate {
+  class Delegate {
    public:
     enum Error {
       // Failed read due to raw channel shutdown (e.g., on the other side).
@@ -84,22 +84,23 @@ class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
   // Static factory method. |handle| should be a handle to a
   // (platform-appropriate) bidirectional communication channel (e.g., a socket
   // on POSIX, a named pipe on Windows).
-  static scoped_ptr<RawChannel> Create(embedder::ScopedPlatformHandle handle);
+  static std::unique_ptr<RawChannel> Create(
+      embedder::ScopedPlatformHandle handle);
 
   // This must be called (on an I/O thread) before this object is used. Does
   // *not* take ownership of |delegate|. Both the I/O thread and |delegate| must
   // remain alive until |Shutdown()| is called (unless this fails); |delegate|
   // will no longer be used after |Shutdown()|.
-  void Init(Delegate* delegate);
+  void Init(Delegate* delegate) MOJO_NOT_THREAD_SAFE;
 
   // This must be called (on the I/O thread) before this object is destroyed.
-  void Shutdown();
+  void Shutdown() MOJO_NOT_THREAD_SAFE;
 
   // Writes the given message (or schedules it to be written). |message| must
   // have no |Dispatcher|s still attached (i.e.,
   // |SerializeAndCloseDispatchers()| should have been called). This method is
   // thread-safe and may be called from any thread. Returns true on success.
-  bool WriteMessage(scoped_ptr<MessageInTransit> message);
+  bool WriteMessage(std::unique_ptr<MessageInTransit> message);
 
   // Returns true if the write buffer is empty (i.e., all messages written using
   // |WriteMessage()| have actually been sent.
@@ -125,7 +126,7 @@ class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
     IO_PENDING
   };
 
-  class MOJO_SYSTEM_IMPL_EXPORT ReadBuffer {
+  class ReadBuffer {
    public:
     ReadBuffer();
     ~ReadBuffer();
@@ -145,7 +146,7 @@ class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
     MOJO_DISALLOW_COPY_AND_ASSIGN(ReadBuffer);
   };
 
-  class MOJO_SYSTEM_IMPL_EXPORT WriteBuffer {
+  class WriteBuffer {
    public:
     struct Buffer {
       const char* addr;
@@ -199,31 +200,32 @@ class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
 
   RawChannel();
 
-  // |result| must not be |IO_PENDING|. Must be called on the I/O thread WITHOUT
-  // |write_lock_| held. This object may be destroyed by this call.
-  void OnReadCompleted(IOResult io_result, size_t bytes_read);
-  // |result| must not be |IO_PENDING|. Must be called on the I/O thread WITHOUT
-  // |write_lock_| held. This object may be destroyed by this call.
+  // |result| must not be |IO_PENDING|. Must be called on the I/O thread. This
+  // object may be destroyed by this call.
+  void OnReadCompleted(IOResult io_result, size_t bytes_read)
+      MOJO_LOCKS_EXCLUDED(write_mutex_);
+  // |result| must not be |IO_PENDING|. Must be called on the I/O thread. This
+  // object may be destroyed by this call.
   void OnWriteCompleted(IOResult io_result,
                         size_t platform_handles_written,
-                        size_t bytes_written);
+                        size_t bytes_written) MOJO_LOCKS_EXCLUDED(write_mutex_);
 
   base::MessageLoopForIO* message_loop_for_io() { return message_loop_for_io_; }
-  base::Lock& write_lock() { return write_lock_; }
+  Mutex& write_mutex() MOJO_LOCK_RETURNED(write_mutex_) { return write_mutex_; }
 
   // Should only be called on the I/O thread.
   ReadBuffer* read_buffer() { return read_buffer_.get(); }
 
-  // Only called under |write_lock_|.
-  WriteBuffer* write_buffer_no_lock() {
-    write_lock_.AssertAcquired();
+  WriteBuffer* write_buffer_no_lock()
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(write_mutex_) {
     return write_buffer_.get();
   }
 
   // Adds |message| to the write message queue. Implementation subclasses may
   // override this to add any additional "control" messages needed. This is
-  // called (on any thread) with |write_lock_| held.
-  virtual void EnqueueMessageNoLock(scoped_ptr<MessageInTransit> message);
+  // called (on any thread).
+  virtual void EnqueueMessageNoLock(std::unique_ptr<MessageInTransit> message)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(write_mutex_);
 
   // Handles any control messages targeted to the |RawChannel| (or
   // implementation subclass). Implementation subclasses may override this to
@@ -239,34 +241,34 @@ class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
   // - the area indicated by |GetBuffer()| will stay valid until read completion
   //   (but please also see the comments for |OnShutdownNoLock()|);
   // - a second read is not started if there is a pending read;
-  // - the method is called on the I/O thread WITHOUT |write_lock_| held.
+  // - the method is called on the I/O thread.
   //
   // The implementing subclass must guarantee that:
   // - |bytes_read| is untouched unless |Read()| returns |IO_SUCCEEDED|;
   // - if the method returns |IO_PENDING|, |OnReadCompleted()| will be called on
   //   the I/O thread to report the result, unless |Shutdown()| is called.
-  virtual IOResult Read(size_t* bytes_read) = 0;
+  virtual IOResult Read(size_t* bytes_read)
+      MOJO_LOCKS_EXCLUDED(write_mutex_) = 0;
   // Similar to |Read()|, except that the implementing subclass must also
   // guarantee that the method doesn't succeed synchronously, i.e., it only
   // returns |IO_FAILED_...| or |IO_PENDING|.
-  virtual IOResult ScheduleRead() = 0;
+  virtual IOResult ScheduleRead() MOJO_LOCKS_EXCLUDED(write_mutex_) = 0;
 
   // Called by |OnReadCompleted()| to get the platform handles associated with
   // the given platform handle table (from a message). This should only be
   // called when |num_platform_handles| is nonzero. Returns null if the
   // |num_platform_handles| handles are not available. Only called on the I/O
-  // thread (without |write_lock_| held).
+  // thread.
   virtual embedder::ScopedPlatformHandleVectorPtr GetReadPlatformHandles(
       size_t num_platform_handles,
-      const void* platform_handle_table) = 0;
+      const void* platform_handle_table) MOJO_LOCKS_EXCLUDED(write_mutex_) = 0;
 
   // Writes contents in |write_buffer_no_lock()|.
   // This class guarantees that:
   // - the |PlatformHandle|s given by |GetPlatformHandlesToSend()| and the
   //   buffer(s) given by |GetBuffers()| will remain valid until write
   //   completion (see also the comments for |OnShutdownNoLock()|);
-  // - a second write is not started if there is a pending write;
-  // - the method is called under |write_lock_|.
+  // - a second write is not started if there is a pending write.
   //
   // The implementing subclass must guarantee that:
   // - |platform_handles_written| and |bytes_written| are untouched unless
@@ -274,37 +276,39 @@ class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
   // - if the method returns |IO_PENDING|, |OnWriteCompleted()| will be called
   //   on the I/O thread to report the result, unless |Shutdown()| is called.
   virtual IOResult WriteNoLock(size_t* platform_handles_written,
-                               size_t* bytes_written) = 0;
+                               size_t* bytes_written)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(write_mutex_) = 0;
   // Similar to |WriteNoLock()|, except that the implementing subclass must also
   // guarantee that the method doesn't succeed synchronously, i.e., it only
   // returns |IO_FAILED_...| or |IO_PENDING|.
   virtual IOResult ScheduleWriteNoLock() = 0;
 
-  // Must be called on the I/O thread WITHOUT |write_lock_| held.
-  virtual void OnInit() = 0;
+  // Must be called on the I/O thread.
+  virtual void OnInit() MOJO_LOCKS_EXCLUDED(write_mutex_) = 0;
   // On shutdown, passes the ownership of the buffers to subclasses, which may
   // want to preserve them if there are pending read/writes. After this is
   // called, |OnReadCompleted()| must no longer be called. Must be called on the
-  // I/O thread under |write_lock_|.
-  virtual void OnShutdownNoLock(scoped_ptr<ReadBuffer> read_buffer,
-                                scoped_ptr<WriteBuffer> write_buffer) = 0;
+  // I/O thread.
+  virtual void OnShutdownNoLock(std::unique_ptr<ReadBuffer> read_buffer,
+                                std::unique_ptr<WriteBuffer> write_buffer)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(write_mutex_) = 0;
 
  private:
   // Converts an |IO_FAILED_...| for a read to a |Delegate::Error|.
   static Delegate::Error ReadIOResultToError(IOResult io_result);
 
-  // Calls |delegate_->OnError(error)|. Must be called on the I/O thread WITHOUT
-  // |write_lock_| held. This object may be destroyed by this call.
-  void CallOnError(Delegate::Error error);
+  // Calls |delegate_->OnError(error)|. Must be called on the I/O thread. This
+  // object may be destroyed by this call.
+  void CallOnError(Delegate::Error error) MOJO_LOCKS_EXCLUDED(write_mutex_);
 
   // If |io_result| is |IO_SUCCESS|, updates the write buffer and schedules a
   // write operation to run later if there is more to write. If |io_result| is
   // failure or any other error occurs, cancels pending writes and returns
-  // false. Must be called under |write_lock_| and only if |write_stopped_| is
-  // false.
+  // false. May only be called if |write_stopped_| is false.
   bool OnWriteCompletedNoLock(IOResult io_result,
                               size_t platform_handles_written,
-                              size_t bytes_written);
+                              size_t bytes_written)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(write_mutex_);
 
   // Set in |Init()| and never changed (hence usable on any thread without
   // locking):
@@ -313,16 +317,16 @@ class MOJO_SYSTEM_IMPL_EXPORT RawChannel {
   // Only used on the I/O thread:
   Delegate* delegate_;
   bool* set_on_shutdown_;
-  scoped_ptr<ReadBuffer> read_buffer_;
+  std::unique_ptr<ReadBuffer> read_buffer_;
 
-  base::Lock write_lock_;  // Protects the following members.
-  bool write_stopped_;
-  scoped_ptr<WriteBuffer> write_buffer_;
+  Mutex write_mutex_;  // Protects the following members.
+  bool write_stopped_ MOJO_GUARDED_BY(write_mutex_);
+  std::unique_ptr<WriteBuffer> write_buffer_ MOJO_GUARDED_BY(write_mutex_);
 
-  // This is used for posting tasks from write threads to the I/O thread. It
-  // must only be accessed under |write_lock_|. The weak pointers it produces
-  // are only used/invalidated on the I/O thread.
-  base::WeakPtrFactory<RawChannel> weak_ptr_factory_;
+  // This is used for posting tasks from write threads to the I/O thread. The
+  // weak pointers it produces are only used/invalidated on the I/O thread.
+  base::WeakPtrFactory<RawChannel> weak_ptr_factory_
+      MOJO_GUARDED_BY(write_mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RawChannel);
 };

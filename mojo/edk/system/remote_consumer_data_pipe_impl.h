@@ -5,12 +5,12 @@
 #ifndef MOJO_EDK_SYSTEM_REMOTE_CONSUMER_DATA_PIPE_IMPL_H_
 #define MOJO_EDK_SYSTEM_REMOTE_CONSUMER_DATA_PIPE_IMPL_H_
 
+#include <memory>
+
 #include "base/memory/aligned_memory.h"
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/data_pipe_impl.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -19,11 +19,16 @@ namespace system {
 // |RemoteConsumerDataPipeImpl| is a subclass that "implements" |DataPipe| for
 // data pipes whose producer is local and whose consumer is remote. See
 // |DataPipeImpl| for more details.
-class MOJO_SYSTEM_IMPL_EXPORT RemoteConsumerDataPipeImpl final
-    : public DataPipeImpl {
+class RemoteConsumerDataPipeImpl final : public DataPipeImpl {
  public:
-  RemoteConsumerDataPipeImpl(ChannelEndpoint* channel_endpoint,
-                             size_t consumer_num_bytes);
+  // |buffer| is only required if |producer_two_phase_max_num_bytes_written()|
+  // is nonzero (i.e., if we're in the middle of a two-phase write when the
+  // consumer handle is transferred); |start_index| is ignored if it is zero.
+  RemoteConsumerDataPipeImpl(
+      ChannelEndpoint* channel_endpoint,
+      size_t consumer_num_bytes,
+      std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
+      size_t start_index);
   ~RemoteConsumerDataPipeImpl() override;
 
   // Processes messages that were received and queued by an |IncomingEndpoint|.
@@ -97,7 +102,10 @@ class MOJO_SYSTEM_IMPL_EXPORT RemoteConsumerDataPipeImpl final
   size_t consumer_num_bytes_;
 
   // Used for two-phase writes.
-  scoped_ptr<char, base::AlignedFreeDeleter> buffer_;
+  std::unique_ptr<char, base::AlignedFreeDeleter> buffer_;
+  // This is nearly always zero, except when the two-phase write started on a
+  // |LocalDataPipeImpl|.
+  size_t start_index_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RemoteConsumerDataPipeImpl);
 };

@@ -5,13 +5,14 @@
 #ifndef MOJO_EDK_SYSTEM_CHANNEL_TEST_BASE_H_
 #define MOJO_EDK_SYSTEM_CHANNEL_TEST_BASE_H_
 
+#include <memory>
+
 #include "base/bind.h"
 #include "base/location.h"
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
-#include "base/test/test_io_thread.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
+#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -43,8 +44,9 @@ class ChannelTestBase : public testing::Test {
   void InitChannelOnIOThread(unsigned i);
   void CreateAndInitChannelOnIOThread(unsigned i);
   void ShutdownChannelOnIOThread(unsigned i);
+  void ShutdownAndReleaseChannelOnIOThread(unsigned i);
 
-  base::TestIOThread* io_thread() { return &io_thread_; }
+  mojo::test::TestIOThread* io_thread() { return &io_thread_; }
   Channel* channel(unsigned i) { return channels_[i].get(); }
   scoped_refptr<Channel>* mutable_channel(unsigned i) { return &channels_[i]; }
 
@@ -52,8 +54,8 @@ class ChannelTestBase : public testing::Test {
   void SetUpOnIOThread();
 
   embedder::SimplePlatformSupport platform_support_;
-  base::TestIOThread io_thread_;
-  scoped_ptr<RawChannel> raw_channels_[2];
+  mojo::test::TestIOThread io_thread_;
+  std::unique_ptr<RawChannel> raw_channels_[2];
   scoped_refptr<Channel> channels_[2];
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ChannelTestBase);

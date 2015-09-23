@@ -34,7 +34,7 @@ size_t TestChannelEndpointClient::NumMessages() const {
   return messages_.Size();
 }
 
-scoped_ptr<MessageInTransit> TestChannelEndpointClient::PopMessage() {
+std::unique_ptr<MessageInTransit> TestChannelEndpointClient::PopMessage() {
   MutexLocker locker(&mutex_);
   if (messages_.IsEmpty())
     return nullptr;
@@ -52,7 +52,7 @@ bool TestChannelEndpointClient::OnReadMessage(unsigned port,
 
   EXPECT_EQ(port_, port);
   EXPECT_TRUE(endpoint_);
-  messages_.AddMessage(make_scoped_ptr(message));
+  messages_.AddMessage(std::unique_ptr<MessageInTransit>(message));
 
   if (read_event_)
     read_event_->Signal();

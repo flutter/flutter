@@ -4,6 +4,8 @@
 
 #include "sky/shell/shell.h"
 
+#include <memory>
+
 #include "base/bind.h"
 #include "base/i18n/icu_util.h"
 #include "base/lazy_instance.h"
@@ -52,7 +54,7 @@ base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 Shell::Shell(scoped_ptr<ServiceProviderContext> service_provider_context)
     : service_provider_context_(service_provider_context.Pass()) {
   DCHECK(!g_shell);
-  mojo::embedder::Init(scoped_ptr<mojo::embedder::PlatformSupport>(
+  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
       new mojo::embedder::SimplePlatformSupport()));
 
   base::Thread::Options options;

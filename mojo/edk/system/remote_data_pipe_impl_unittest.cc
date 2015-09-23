@@ -11,7 +11,6 @@
 #include "base/location.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
-#include "base/test/test_io_thread.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
@@ -24,6 +23,7 @@
 #include "mojo/edk/system/raw_channel.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/waiter.h"
+#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -37,7 +37,7 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 
 class RemoteDataPipeImplTest : public testing::Test {
  public:
-  RemoteDataPipeImplTest() : io_thread_(base::TestIOThread::kAutoStart) {}
+  RemoteDataPipeImplTest() : io_thread_(mojo::test::TestIOThread::kAutoStart) {}
   ~RemoteDataPipeImplTest() override {}
 
   void SetUp() override {
@@ -111,7 +111,7 @@ class RemoteDataPipeImplTest : public testing::Test {
   }
 
   embedder::SimplePlatformSupport platform_support_;
-  base::TestIOThread io_thread_;
+  mojo::test::TestIOThread io_thread_;
   scoped_refptr<Channel> channels_[2];
   scoped_refptr<MessagePipe> message_pipes_[2];
 
@@ -157,8 +157,6 @@ TEST_F(RemoteDataPipeImplTest, Sanity) {
   EXPECT_STREQ(kHello, read_buffer);
 }
 
-// TODO(vtl): This test doesn't have an obvious analogue in
-// |LocalDataPipeImplTest|.
 TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   char read_buffer[100] = {};
   uint32_t read_buffer_size = static_cast<uint32_t>(sizeof(read_buffer));
@@ -273,6 +271,235 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   }
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
+
+  consumer->Close();
+}
+
+TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
+  char read_buffer[100] = {};
+  uint32_t read_buffer_size = static_cast<uint32_t>(sizeof(read_buffer));
+  DispatcherVector read_dispatchers;
+  uint32_t read_num_dispatchers = 10;  // Maximum to get.
+  Waiter waiter;
+  HandleSignalsState hss;
+  uint32_t context = 0;
+
+  scoped_refptr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
+  // This is the consumer dispatcher we'll send.
+  scoped_refptr<DataPipeConsumerDispatcher> consumer =
+      DataPipeConsumerDispatcher::Create();
+  consumer->Init(dp);
+
+  uint32_t num_bytes = static_cast<uint32_t>(10u * sizeof(int32_t));
+  void* write_ptr = nullptr;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            dp->ProducerBeginWriteData(MakeUserPointer(&write_ptr),
+                                       MakeUserPointer(&num_bytes), false));
+  ASSERT_GE(num_bytes, 1u * sizeof(int32_t));
+
+  // Write the consumer to MP 0 (port 0). Wait and receive on MP 1 (port 0).
+  // (Add the waiter first, to avoid any handling the case where it's already
+  // readable.)
+  waiter.Init();
+  ASSERT_EQ(MOJO_RESULT_OK,
+            message_pipe(1)->AddAwakable(
+                0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
+  {
+    DispatcherTransport transport(
+        test::DispatcherTryStartTransport(consumer.get()));
+    EXPECT_TRUE(transport.is_valid());
+
+    std::vector<DispatcherTransport> transports;
+    transports.push_back(transport);
+    EXPECT_EQ(MOJO_RESULT_OK, message_pipe(0)->WriteMessage(
+                                  0, NullUserPointer(), 0, &transports,
+                                  MOJO_WRITE_MESSAGE_FLAG_NONE));
+    transport.End();
+
+    // |consumer| should have been closed. This is |DCHECK()|ed when it is
+    // destroyed.
+    EXPECT_TRUE(consumer->HasOneRef());
+    consumer = nullptr;
+  }
+  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+  EXPECT_EQ(123u, context);
+  hss = HandleSignalsState();
+  message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
+            hss.satisfied_signals);
+  EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+  EXPECT_EQ(MOJO_RESULT_OK,
+            message_pipe(1)->ReadMessage(
+                0, UserPointer<void>(read_buffer),
+                MakeUserPointer(&read_buffer_size), &read_dispatchers,
+                &read_num_dispatchers, MOJO_READ_MESSAGE_FLAG_NONE));
+  EXPECT_EQ(0u, static_cast<size_t>(read_buffer_size));
+  EXPECT_EQ(1u, read_dispatchers.size());
+  EXPECT_EQ(1u, read_num_dispatchers);
+  ASSERT_TRUE(read_dispatchers[0]);
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+
+  EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
+            read_dispatchers[0]->GetType());
+  consumer =
+      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get());
+  read_dispatchers.clear();
+
+  // Now actually write the data, complete the two-phase write, and close the
+  // producer.
+  *static_cast<int32_t*>(write_ptr) = 123456;
+  EXPECT_EQ(MOJO_RESULT_OK, dp->ProducerEndWriteData(
+                                static_cast<uint32_t>(1u * sizeof(int32_t))));
+  dp->ProducerClose();
+
+  // Wait for the consumer to be readable.
+  waiter.Init();
+  hss = HandleSignalsState();
+  MojoResult result =
+      consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 456, &hss);
+  if (result == MOJO_RESULT_OK) {
+    context = 0;
+    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+    EXPECT_EQ(456u, context);
+    consumer->RemoveAwakable(&waiter, &hss);
+  } else {
+    ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
+  }
+  // We don't know if the fact that the producer has been closed is known yet.
+  EXPECT_TRUE((hss.satisfied_signals & MOJO_HANDLE_SIGNAL_READABLE));
+  EXPECT_TRUE((hss.satisfiable_signals & MOJO_HANDLE_SIGNAL_READABLE));
+
+  // Read one element.
+  int32_t elements[10] = {-1, -1};
+  num_bytes = static_cast<uint32_t>(1u * sizeof(elements[0]));
+  EXPECT_EQ(MOJO_RESULT_OK, consumer->ReadData(UserPointer<void>(elements),
+                                               MakeUserPointer(&num_bytes),
+                                               MOJO_READ_DATA_FLAG_NONE));
+  EXPECT_EQ(1u * sizeof(elements[0]), num_bytes);
+  EXPECT_EQ(123456, elements[0]);
+  EXPECT_EQ(-1, elements[1]);
+
+  consumer->Close();
+}
+
+// Like |SendConsumerDuringTwoPhaseWrite|, but transfers the consumer during the
+// second two-phase write (to try to test that the offset in circular buffer is
+// properly preserved).
+TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
+  char read_buffer[100] = {};
+  uint32_t read_buffer_size = static_cast<uint32_t>(sizeof(read_buffer));
+  DispatcherVector read_dispatchers;
+  uint32_t read_num_dispatchers = 10;  // Maximum to get.
+  Waiter waiter;
+  HandleSignalsState hss;
+  uint32_t context = 0;
+
+  scoped_refptr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
+  // This is the consumer dispatcher we'll send.
+  scoped_refptr<DataPipeConsumerDispatcher> consumer =
+      DataPipeConsumerDispatcher::Create();
+  consumer->Init(dp);
+
+  uint32_t num_bytes = static_cast<uint32_t>(10u * sizeof(int32_t));
+  void* write_ptr = nullptr;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            dp->ProducerBeginWriteData(MakeUserPointer(&write_ptr),
+                                       MakeUserPointer(&num_bytes), false));
+  ASSERT_GE(num_bytes, 1u * sizeof(int32_t));
+  *static_cast<int32_t*>(write_ptr) = 123456;
+  EXPECT_EQ(MOJO_RESULT_OK, dp->ProducerEndWriteData(
+                                static_cast<uint32_t>(1u * sizeof(int32_t))));
+
+  num_bytes = static_cast<uint32_t>(10u * sizeof(int32_t));
+  write_ptr = nullptr;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            dp->ProducerBeginWriteData(MakeUserPointer(&write_ptr),
+                                       MakeUserPointer(&num_bytes), false));
+  ASSERT_GE(num_bytes, 1u * sizeof(int32_t));
+
+  // Write the consumer to MP 0 (port 0). Wait and receive on MP 1 (port 0).
+  // (Add the waiter first, to avoid any handling the case where it's already
+  // readable.)
+  waiter.Init();
+  ASSERT_EQ(MOJO_RESULT_OK,
+            message_pipe(1)->AddAwakable(
+                0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
+  {
+    DispatcherTransport transport(
+        test::DispatcherTryStartTransport(consumer.get()));
+    EXPECT_TRUE(transport.is_valid());
+
+    std::vector<DispatcherTransport> transports;
+    transports.push_back(transport);
+    EXPECT_EQ(MOJO_RESULT_OK, message_pipe(0)->WriteMessage(
+                                  0, NullUserPointer(), 0, &transports,
+                                  MOJO_WRITE_MESSAGE_FLAG_NONE));
+    transport.End();
+
+    // |consumer| should have been closed. This is |DCHECK()|ed when it is
+    // destroyed.
+    EXPECT_TRUE(consumer->HasOneRef());
+    consumer = nullptr;
+  }
+  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+  EXPECT_EQ(123u, context);
+  hss = HandleSignalsState();
+  message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
+            hss.satisfied_signals);
+  EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+  EXPECT_EQ(MOJO_RESULT_OK,
+            message_pipe(1)->ReadMessage(
+                0, UserPointer<void>(read_buffer),
+                MakeUserPointer(&read_buffer_size), &read_dispatchers,
+                &read_num_dispatchers, MOJO_READ_MESSAGE_FLAG_NONE));
+  EXPECT_EQ(0u, static_cast<size_t>(read_buffer_size));
+  EXPECT_EQ(1u, read_dispatchers.size());
+  EXPECT_EQ(1u, read_num_dispatchers);
+  ASSERT_TRUE(read_dispatchers[0]);
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+
+  EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
+            read_dispatchers[0]->GetType());
+  consumer =
+      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get());
+  read_dispatchers.clear();
+
+  // Now actually write the data, complete the two-phase write, and close the
+  // producer.
+  *static_cast<int32_t*>(write_ptr) = 789012;
+  EXPECT_EQ(MOJO_RESULT_OK, dp->ProducerEndWriteData(
+                                static_cast<uint32_t>(1u * sizeof(int32_t))));
+  dp->ProducerClose();
+
+  // Wait for the consumer to know that the producer is closed.
+  waiter.Init();
+  hss = HandleSignalsState();
+  MojoResult result =
+      consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_PEER_CLOSED, 456, &hss);
+  if (result == MOJO_RESULT_OK) {
+    context = 0;
+    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+    EXPECT_EQ(456u, context);
+    consumer->RemoveAwakable(&waiter, &hss);
+  } else {
+    ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
+  }
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+            hss.satisfied_signals);
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+            hss.satisfiable_signals);
+
+  // Read some elements.
+  int32_t elements[10] = {};
+  num_bytes = static_cast<uint32_t>(sizeof(elements));
+  EXPECT_EQ(MOJO_RESULT_OK, consumer->ReadData(UserPointer<void>(elements),
+                                               MakeUserPointer(&num_bytes),
+                                               MOJO_READ_DATA_FLAG_NONE));
+  EXPECT_EQ(2u * sizeof(elements[0]), num_bytes);
+  EXPECT_EQ(123456, elements[0]);
+  EXPECT_EQ(789012, elements[1]);
+  EXPECT_EQ(0, elements[2]);
 
   consumer->Close();
 }

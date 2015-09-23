@@ -183,16 +183,16 @@ class _InternetAddress implements InternetAddress {
   static Uint8List _parse(String address) native "InternetAddress_Parse";
 }
 
-int _internetAddressTypeToAddressFamily(InternetAddressType type) {
+NetAddressFamily _internetAddressTypeToAddressFamily(InternetAddressType type) {
   if (type == null) {
-    return NetAddressFamily_UNSPECIFIED;
+    return NetAddressFamily.UNSPECIFIED;
   }
   if (type == InternetAddressType.IP_V4) {
-    return NetAddressFamily_IPV4;
+    return NetAddressFamily.IPV4;
   } else if (type == InternetAddressType.IP_V6) {
-    return NetAddressFamily_IPV6;
+    return NetAddressFamily.IPV6;
   }
-  return NetAddressFamily_UNSPECIFIED;
+  return NetAddressFamily.UNSPECIFIED;
 }
 
 class _MojoInternetAddress {

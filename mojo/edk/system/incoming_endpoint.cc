@@ -67,7 +67,7 @@ bool IncomingEndpoint::OnReadMessage(unsigned /*port*/,
   if (!endpoint_)
     return false;
 
-  message_queue_.AddMessage(make_scoped_ptr(message));
+  message_queue_.AddMessage(std::unique_ptr<MessageInTransit>(message));
   return true;
 }
 

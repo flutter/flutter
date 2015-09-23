@@ -6,6 +6,8 @@
 
 #include <string.h>
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/message_in_transit.h"
@@ -44,12 +46,12 @@ bool LocalMessagePipeEndpoint::OnPeerClose() {
 }
 
 void LocalMessagePipeEndpoint::EnqueueMessage(
-    scoped_ptr<MessageInTransit> message) {
+    std::unique_ptr<MessageInTransit> message) {
   DCHECK(is_open_);
   DCHECK(is_peer_open_);
 
   bool was_empty = message_queue_.IsEmpty();
-  message_queue_.AddMessage(message.Pass());
+  message_queue_.AddMessage(std::move(message));
   if (was_empty)
     awakable_list_.AwakeForStateChange(GetHandleSignalsState());
 }

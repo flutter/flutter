@@ -5,10 +5,11 @@
 #ifndef MOJO_EDK_SYSTEM_IPC_SUPPORT_H_
 #define MOJO_EDK_SYSTEM_IPC_SUPPORT_H_
 
+#include <memory>
+
 #include "base/callback_forward.h"
 #include "base/gtest_prod_util.h"
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/task_runner.h"
 #include "mojo/edk/embedder/process_type.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
@@ -16,7 +17,6 @@
 #include "mojo/edk/system/channel_id.h"
 #include "mojo/edk/system/connection_identifier.h"
 #include "mojo/edk/system/process_identifier.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -53,7 +53,7 @@ void MultiprocessMasterSlaveInternalTestChildTest();
 //
 // Except for |ShutdownOnIOThread()|, this class is thread-safe. (No methods may
 // be called during/after |ShutdownOnIOThread()|.)
-class MOJO_SYSTEM_IMPL_EXPORT IPCSupport {
+class IPCSupport {
  public:
   // Constructor: initializes for the given |process_type|; |process_delegate|
   // must match the process type. |platform_handle| is only used for slave
@@ -169,8 +169,8 @@ class MOJO_SYSTEM_IMPL_EXPORT IPCSupport {
   embedder::ProcessDelegate* process_delegate_;
   scoped_refptr<base::TaskRunner> io_thread_task_runner_;
 
-  scoped_ptr<ConnectionManager> connection_manager_;
-  scoped_ptr<ChannelManager> channel_manager_;
+  std::unique_ptr<ConnectionManager> connection_manager_;
+  std::unique_ptr<ChannelManager> channel_manager_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(IPCSupport);
 };

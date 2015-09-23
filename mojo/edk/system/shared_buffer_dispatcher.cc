@@ -7,7 +7,6 @@
 #include <limits>
 
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/embedder/platform_support.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/configuration.h"
@@ -208,7 +207,7 @@ MojoResult SharedBufferDispatcher::MapBufferImplNoLock(
     uint64_t offset,
     uint64_t num_bytes,
     MojoMapBufferFlags flags,
-    scoped_ptr<embedder::PlatformSharedBufferMapping>* mapping) {
+    std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping) {
   mutex().AssertHeld();
   DCHECK(shared_buffer_);
 

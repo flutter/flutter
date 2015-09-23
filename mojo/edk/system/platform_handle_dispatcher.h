@@ -7,7 +7,6 @@
 
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/simple_dispatcher.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -15,8 +14,7 @@ namespace system {
 
 // A dispatcher that simply wraps/transports a |PlatformHandle| (only for use by
 // the embedder).
-class MOJO_SYSTEM_IMPL_EXPORT PlatformHandleDispatcher final
-    : public SimpleDispatcher {
+class PlatformHandleDispatcher final : public SimpleDispatcher {
  public:
   static scoped_refptr<PlatformHandleDispatcher> Create(
       embedder::ScopedPlatformHandle platform_handle) {

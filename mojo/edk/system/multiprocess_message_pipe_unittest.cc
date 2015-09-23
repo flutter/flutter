@@ -6,14 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "base/bind.h"
-#include "base/files/file_path.h"
-#include "base/files/file_util.h"
-#include "base/files/scoped_file.h"
-#include "base/files/scoped_temp_dir.h"
 #include "base/location.h"
 #include "base/logging.h"
 #include "build/build_config.h"  // TODO(vtl): Remove this.
@@ -27,7 +24,9 @@
 #include "mojo/edk/system/raw_channel.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 #include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/test/scoped_test_dir.h"
 #include "mojo/edk/test/test_utils.h"
+#include "mojo/edk/util/scoped_file.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
@@ -94,13 +93,13 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(EchoEcho) {
   return rv;
 }
 
-// Sends "hello" to child, and expects "hellohello" back.
 #if defined(OS_ANDROID)
 // Android multi-process tests are not executing the new process. This is flaky.
 #define MAYBE_Basic DISABLED_Basic
 #else
 #define MAYBE_Basic Basic
-#endif  // defined(OS_ANDROID)
+#endif
+// Sends "hello" to child, and expects "hellohello" back.
 TEST_F(MultiprocessMessagePipeTest, MAYBE_Basic) {
   helper()->StartChild("EchoEcho");
 
@@ -139,14 +138,14 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_Basic) {
   EXPECT_EQ(1 % 100, helper()->WaitForChildShutdown());
 }
 
-// Sends a bunch of messages to the child. Expects them "repeated" back. Waits
-// for the child to close its end before quitting.
 #if defined(OS_ANDROID)
 // Android multi-process tests are not executing the new process. This is flaky.
 #define MAYBE_QueueMessages DISABLED_QueueMessages
 #else
 #define MAYBE_QueueMessages QueueMessages
-#endif  // defined(OS_ANDROID)
+#endif
+// Sends a bunch of messages to the child. Expects them "repeated" back. Waits
+// for the child to close its end before quitting.
 TEST_F(MultiprocessMessagePipeTest, DISABLED_QueueMessages) {
   helper()->StartChild("EchoEcho");
 
@@ -245,7 +244,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckSharedBuffer) {
       static_cast<SharedBufferDispatcher*>(dispatchers[0].get()));
 
   // Make a mapping.
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
   CHECK_EQ(dispatcher->MapBuffer(0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping),
            MOJO_RESULT_OK);
   CHECK(mapping);
@@ -295,12 +294,11 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckSharedBuffer) {
   return 0;
 }
 
-#if defined(OS_POSIX) && !defined(OS_ANDROID)
-#define MAYBE_SharedBufferPassing SharedBufferPassing
-#else
-// Not yet implemented (on Windows).
+#if defined(OS_ANDROID)
 // Android multi-process tests are not executing the new process. This is flaky.
 #define MAYBE_SharedBufferPassing DISABLED_SharedBufferPassing
+#else
+#define MAYBE_SharedBufferPassing SharedBufferPassing
 #endif
 TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
   helper()->StartChild("CheckSharedBuffer");
@@ -318,7 +316,7 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
   ASSERT_TRUE(dispatcher);
 
   // Make a mapping.
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
   EXPECT_EQ(MOJO_RESULT_OK,
             dispatcher->MapBuffer(0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
   ASSERT_TRUE(mapping);
@@ -431,7 +429,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckPlatformHandleFile) {
     CHECK(h.is_valid());
     dispatcher->Close();
 
-    base::ScopedFILE fp(mojo::test::FILEFromPlatformHandle(h.Pass(), "r"));
+    util::ScopedFILE fp(mojo::test::FILEFromPlatformHandle(h.Pass(), "r"));
     CHECK(fp);
     std::string fread_buffer(100, '\0');
     size_t bytes_read =
@@ -448,8 +446,7 @@ class MultiprocessMessagePipeTestWithPipeCount
       public testing::WithParamInterface<size_t> {};
 
 TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
-  base::ScopedTempDir temp_dir;
-  ASSERT_TRUE(temp_dir.CreateUniqueTempDir());
+  mojo::test::ScopedTestDir test_dir;
 
   helper()->StartChild("CheckPlatformHandleFile");
 
@@ -462,9 +459,7 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
 
   size_t pipe_count = GetParam();
   for (size_t i = 0; i < pipe_count; ++i) {
-    base::FilePath unused;
-    base::ScopedFILE fp(
-        CreateAndOpenTemporaryFileInDir(temp_dir.path(), &unused));
+    util::ScopedFILE fp(test_dir.CreateFile());
     const std::string world("world");
     CHECK_EQ(fwrite(&world[0], 1, world.size(), fp.get()), world.size());
     fflush(fp.get());
@@ -506,9 +501,8 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
   EXPECT_EQ(0, helper()->WaitForChildShutdown());
 }
 
-// Not yet implemented (on Windows).
 // Android multi-process tests are not executing the new process. This is flaky.
-#if defined(OS_POSIX) && !defined(OS_ANDROID)
+#if !defined(OS_ANDROID)
 INSTANTIATE_TEST_CASE_P(PipeCount,
                         MultiprocessMessagePipeTestWithPipeCount,
                         testing::Values(1u, 128u, 140u));

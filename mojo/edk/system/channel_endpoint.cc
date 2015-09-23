@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/channel_endpoint.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "base/threading/platform_thread.h"
 #include "mojo/edk/system/channel.h"
@@ -26,17 +28,18 @@ ChannelEndpoint::ChannelEndpoint(ChannelEndpointClient* client,
     channel_message_queue_.Swap(message_queue);
 }
 
-bool ChannelEndpoint::EnqueueMessage(scoped_ptr<MessageInTransit> message) {
+bool ChannelEndpoint::EnqueueMessage(
+    std::unique_ptr<MessageInTransit> message) {
   DCHECK(message);
 
   MutexLocker locker(&mutex_);
 
   switch (state_) {
     case State::PAUSED:
-      channel_message_queue_.AddMessage(message.Pass());
+      channel_message_queue_.AddMessage(std::move(message));
       return true;
     case State::RUNNING:
-      return WriteMessageNoLock(message.Pass());
+      return WriteMessageNoLock(std::move(message));
     case State::DEAD:
       return false;
   }
@@ -96,9 +99,9 @@ void ChannelEndpoint::AttachAndRun(Channel* channel,
   }
 }
 
-void ChannelEndpoint::OnReadMessage(scoped_ptr<MessageInTransit> message) {
+void ChannelEndpoint::OnReadMessage(std::unique_ptr<MessageInTransit> message) {
   if (message->type() == MessageInTransit::Type::ENDPOINT_CLIENT) {
-    OnReadMessageForClient(message.Pass());
+    OnReadMessageForClient(std::move(message));
     return;
   }
 
@@ -148,7 +151,8 @@ ChannelEndpoint::~ChannelEndpoint() {
   DCHECK(!remote_id_.is_valid());
 }
 
-bool ChannelEndpoint::WriteMessageNoLock(scoped_ptr<MessageInTransit> message) {
+bool ChannelEndpoint::WriteMessageNoLock(
+    std::unique_ptr<MessageInTransit> message) {
   DCHECK(message);
 
   mutex_.AssertHeld();
@@ -160,11 +164,11 @@ bool ChannelEndpoint::WriteMessageNoLock(scoped_ptr<MessageInTransit> message) {
   message->SerializeAndCloseDispatchers(channel_);
   message->set_source_id(local_id_);
   message->set_destination_id(remote_id_);
-  return channel_->WriteMessage(message.Pass());
+  return channel_->WriteMessage(std::move(message));
 }
 
 void ChannelEndpoint::OnReadMessageForClient(
-    scoped_ptr<MessageInTransit> message) {
+    std::unique_ptr<MessageInTransit> message) {
   DCHECK_EQ(message->type(), MessageInTransit::Type::ENDPOINT_CLIENT);
 
   scoped_refptr<ChannelEndpointClient> client;

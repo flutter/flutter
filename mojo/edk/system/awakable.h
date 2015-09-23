@@ -7,25 +7,26 @@
 
 #include <stdint.h>
 
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/types.h"
 
 namespace mojo {
 namespace system {
 
-// An interface that may be waited on |AwakableList|.
-class MOJO_SYSTEM_IMPL_EXPORT Awakable {
+// An interface for things that may be awoken. E.g., |Waiter| is an
+// implementation that blocks while waiting to be awoken.
+class Awakable {
  public:
   // |Awake()| must satisfy the following contract:
-  // * As this is called from any thread, this must be thread-safe.
-  // * As this is called inside a lock, this must not call anything that takes
-  //   "non-terminal" locks, i.e., those which are always safe to take.
-  // This should return false if this must not be called again for the same
-  // reason (e.g., for the same call to |AwakableList::Add()|).
+  //   - It must be thread-safe.
+  //   - Since it is called with a mutex held, it must not call anything that
+  //     takes "non-terminal" locks, i.e., those which are always safe to take.
+  //   - It should return false if it must not be called again for the same
+  //     reason (e.g., for the same call to |AwakableList::Add()|).
   virtual bool Awake(MojoResult result, uintptr_t context) = 0;
 
  protected:
   Awakable() {}
+  virtual ~Awakable() {}
 };
 
 }  // namespace system

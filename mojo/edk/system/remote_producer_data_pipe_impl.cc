@@ -7,9 +7,10 @@
 #include <string.h>
 
 #include <algorithm>
+#include <memory>
+#include <utility>
 
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/configuration.h"
@@ -68,11 +69,11 @@ RemoteProducerDataPipeImpl::RemoteProducerDataPipeImpl(
 
 RemoteProducerDataPipeImpl::RemoteProducerDataPipeImpl(
     ChannelEndpoint* channel_endpoint,
-    scoped_ptr<char, base::AlignedFreeDeleter> buffer,
+    std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
     size_t start_index,
     size_t current_num_bytes)
     : channel_endpoint_(channel_endpoint),
-      buffer_(buffer.Pass()),
+      buffer_(std::move(buffer)),
       start_index_(start_index),
       current_num_bytes_(current_num_bytes) {
   DCHECK(buffer_ || !current_num_bytes);
@@ -82,21 +83,21 @@ RemoteProducerDataPipeImpl::RemoteProducerDataPipeImpl(
 bool RemoteProducerDataPipeImpl::ProcessMessagesFromIncomingEndpoint(
     const MojoCreateDataPipeOptions& validated_options,
     MessageInTransitQueue* messages,
-    scoped_ptr<char, base::AlignedFreeDeleter>* buffer,
+    std::unique_ptr<char, base::AlignedFreeDeleter>* buffer,
     size_t* buffer_num_bytes) {
   DCHECK(!*buffer);  // Not wrong, but unlikely.
 
   const size_t element_num_bytes = validated_options.element_num_bytes;
   const size_t capacity_num_bytes = validated_options.capacity_num_bytes;
 
-  scoped_ptr<char, base::AlignedFreeDeleter> new_buffer(static_cast<char*>(
+  std::unique_ptr<char, base::AlignedFreeDeleter> new_buffer(static_cast<char*>(
       base::AlignedAlloc(capacity_num_bytes,
                          GetConfiguration().data_pipe_buffer_alignment_bytes)));
 
   size_t current_num_bytes = 0;
   if (messages) {
     while (!messages->IsEmpty()) {
-      scoped_ptr<MessageInTransit> message(messages->GetMessage());
+      std::unique_ptr<MessageInTransit> message(messages->GetMessage());
       if (!ValidateIncomingMessage(element_num_bytes, capacity_num_bytes,
                                    current_num_bytes, message.get())) {
         messages->Clear();
@@ -109,7 +110,7 @@ bool RemoteProducerDataPipeImpl::ProcessMessagesFromIncomingEndpoint(
     }
   }
 
-  *buffer = new_buffer.Pass();
+  *buffer = std::move(new_buffer);
   *buffer_num_bytes = current_num_bytes;
   return true;
 }
@@ -339,7 +340,7 @@ bool RemoteProducerDataPipeImpl::ConsumerEndSerialize(
   channel_endpoint.swap(channel_endpoint_);
   channel->SerializeEndpointWithRemotePeer(destination_for_endpoint,
                                            &message_queue, channel_endpoint);
-  owner()->SetProducerClosedNoLock();
+  SetProducerClosed();
 
   *actual_size = sizeof(SerializedDataPipeConsumerDispatcher) +
                  channel->GetSerializedEndpointSize();
@@ -360,7 +361,7 @@ bool RemoteProducerDataPipeImpl::OnReadMessage(unsigned /*port*/,
 
   // Otherwise, we take ownership of the message. (This means that we should
   // always return true below.)
-  scoped_ptr<MessageInTransit> msg(message);
+  std::unique_ptr<MessageInTransit> msg(message);
 
   if (!ValidateIncomingMessage(element_num_bytes(), capacity_num_bytes(),
                                current_num_bytes_, msg.get())) {
@@ -449,18 +450,18 @@ void RemoteProducerDataPipeImpl::MarkDataAsConsumed(size_t num_bytes) {
 
   RemoteDataPipeAck ack_data = {};
   ack_data.num_bytes_consumed = static_cast<uint32_t>(num_bytes);
-  scoped_ptr<MessageInTransit> message(new MessageInTransit(
+  std::unique_ptr<MessageInTransit> message(new MessageInTransit(
       MessageInTransit::Type::ENDPOINT_CLIENT,
       MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA_PIPE_ACK,
       static_cast<uint32_t>(sizeof(ack_data)), &ack_data));
-  if (!channel_endpoint_->EnqueueMessage(message.Pass()))
+  if (!channel_endpoint_->EnqueueMessage(std::move(message)))
     Disconnect();
 }
 
 void RemoteProducerDataPipeImpl::Disconnect() {
   DCHECK(producer_open());
   DCHECK(channel_endpoint_);
-  owner()->SetProducerClosedNoLock();
+  SetProducerClosed();
   channel_endpoint_->DetachFromClient();
   channel_endpoint_ = nullptr;
   // If the consumer is still open and we still have data, we have to keep the

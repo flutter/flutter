@@ -6,7 +6,6 @@
 #define MOJO_EDK_EMBEDDER_SIMPLE_PLATFORM_SUPPORT_H_
 
 #include "mojo/edk/embedder/platform_support.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -17,12 +16,12 @@ namespace embedder {
 // has no state, and different instances of |SimplePlatformSupport| are mutually
 // compatible (i.e., you don't need to use a single instance of it everywhere --
 // you may simply create one whenever/wherever you need it).
-class MOJO_SYSTEM_IMPL_EXPORT SimplePlatformSupport final
-    : public PlatformSupport {
+class SimplePlatformSupport final : public PlatformSupport {
  public:
   SimplePlatformSupport() {}
   ~SimplePlatformSupport() override {}
 
+  MojoTimeTicks GetTimeTicksNow() override;
   void GetCryptoRandomBytes(void* bytes, size_t num_bytes) override;
   PlatformSharedBuffer* CreateSharedBuffer(size_t num_bytes) override;
   PlatformSharedBuffer* CreateSharedBufferFromHandle(

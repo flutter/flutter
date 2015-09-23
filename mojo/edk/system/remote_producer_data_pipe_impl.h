@@ -5,12 +5,12 @@
 #ifndef MOJO_EDK_SYSTEM_REMOTE_PRODUCER_DATA_PIPE_IMPL_H_
 #define MOJO_EDK_SYSTEM_REMOTE_PRODUCER_DATA_PIPE_IMPL_H_
 
+#include <memory>
+
 #include "base/memory/aligned_memory.h"
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/data_pipe_impl.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -21,14 +21,14 @@ class MessageInTransitQueue;
 // |RemoteProducerDataPipeImpl| is a subclass that "implements" |DataPipe| for
 // data pipes whose producer is remote and whose consumer is local. See
 // |DataPipeImpl| for more details.
-class MOJO_SYSTEM_IMPL_EXPORT RemoteProducerDataPipeImpl final
-    : public DataPipeImpl {
+class RemoteProducerDataPipeImpl final : public DataPipeImpl {
  public:
   explicit RemoteProducerDataPipeImpl(ChannelEndpoint* channel_endpoint);
-  RemoteProducerDataPipeImpl(ChannelEndpoint* channel_endpoint,
-                             scoped_ptr<char, base::AlignedFreeDeleter> buffer,
-                             size_t start_index,
-                             size_t current_num_bytes);
+  RemoteProducerDataPipeImpl(
+      ChannelEndpoint* channel_endpoint,
+      std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
+      size_t start_index,
+      size_t current_num_bytes);
   ~RemoteProducerDataPipeImpl() override;
 
   // Processes messages that were received and queued by an |IncomingEndpoint|.
@@ -38,7 +38,7 @@ class MOJO_SYSTEM_IMPL_EXPORT RemoteProducerDataPipeImpl final
   static bool ProcessMessagesFromIncomingEndpoint(
       const MojoCreateDataPipeOptions& validated_options,
       MessageInTransitQueue* messages,
-      scoped_ptr<char, base::AlignedFreeDeleter>* buffer,
+      std::unique_ptr<char, base::AlignedFreeDeleter>* buffer,
       size_t* buffer_num_bytes);
 
  private:
@@ -107,7 +107,7 @@ class MOJO_SYSTEM_IMPL_EXPORT RemoteProducerDataPipeImpl final
   // Should be valid if and only if |producer_open()| returns true.
   scoped_refptr<ChannelEndpoint> channel_endpoint_;
 
-  scoped_ptr<char, base::AlignedFreeDeleter> buffer_;
+  std::unique_ptr<char, base::AlignedFreeDeleter> buffer_;
   // Circular buffer.
   size_t start_index_;
   size_t current_num_bytes_;

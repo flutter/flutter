@@ -122,7 +122,7 @@ TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
   EXPECT_EQ(Dispatcher::Type::SHARED_BUFFER, dispatcher->GetType());
 
   // Make a couple of mappings.
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping1;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping1;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->MapBuffer(
                                 0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping1));
   ASSERT_TRUE(mapping1);
@@ -131,7 +131,7 @@ TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
   // Write something.
   static_cast<char*>(mapping1->GetBase())[50] = 'x';
 
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping2;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping2;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->MapBuffer(
                                 50, 50, MOJO_MAP_BUFFER_FLAG_NONE, &mapping2));
   ASSERT_TRUE(mapping2);
@@ -155,7 +155,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {
                                 100, &dispatcher1));
 
   // Map and write something.
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher1->MapBuffer(
                                 0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
   static_cast<char*>(mapping->GetBase())[0] = 'x';
@@ -258,7 +258,7 @@ TEST_F(SharedBufferDispatcherTest, MapBufferInvalidArguments) {
                                 SharedBufferDispatcher::kDefaultCreateOptions,
                                 100, &dispatcher));
 
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             dispatcher->MapBuffer(0, 101, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
   EXPECT_FALSE(mapping);

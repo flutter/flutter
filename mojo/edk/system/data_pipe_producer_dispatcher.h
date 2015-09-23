@@ -7,7 +7,6 @@
 
 #include "base/memory/ref_counted.h"
 #include "mojo/edk/system/dispatcher.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -18,8 +17,7 @@ class DataPipe;
 // This is the |Dispatcher| implementation for the producer handle for data
 // pipes (created by the Mojo primitive |MojoCreateDataPipe()|). This class is
 // thread-safe.
-class MOJO_SYSTEM_IMPL_EXPORT DataPipeProducerDispatcher final
-    : public Dispatcher {
+class DataPipeProducerDispatcher final : public Dispatcher {
  public:
   static scoped_refptr<DataPipeProducerDispatcher> Create() {
     return make_scoped_refptr(new DataPipeProducerDispatcher());

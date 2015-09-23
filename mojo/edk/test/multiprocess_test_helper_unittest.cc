@@ -4,28 +4,20 @@
 
 #include "mojo/edk/test/multiprocess_test_helper.h"
 
+#include <fcntl.h>
+
 #include "base/logging.h"
 #include "build/build_config.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/test/test_utils.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
-#if defined(OS_POSIX)
-#include <fcntl.h>
-#endif
-
 namespace mojo {
 namespace test {
 namespace {
 
 bool IsNonBlocking(const embedder::PlatformHandle& handle) {
-#if defined(OS_WIN)
-  // Haven't figured out a way to query whether a HANDLE was created with
-  // FILE_FLAG_OVERLAPPED.
-  return true;
-#else
   return fcntl(handle.fd, F_GETFL) & O_NONBLOCK;
-#endif
 }
 
 bool WriteByte(const embedder::PlatformHandle& handle, char c) {

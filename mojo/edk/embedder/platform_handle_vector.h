@@ -5,21 +5,21 @@
 #ifndef MOJO_EDK_EMBEDDER_PLATFORM_HANDLE_VECTOR_H_
 #define MOJO_EDK_EMBEDDER_PLATFORM_HANDLE_VECTOR_H_
 
+#include <memory>
 #include <vector>
 
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/embedder/platform_handle.h"
 #include "mojo/edk/embedder/platform_handle_utils.h"
-#include "mojo/edk/system/system_impl_export.h"
 
 namespace mojo {
 namespace embedder {
 
+// TODO(vtl): Can we switch to using std::vector<ScopedPlatformHandle> instead?
 using PlatformHandleVector = std::vector<PlatformHandle>;
 
-// A deleter (for use with |scoped_ptr|) which closes all handles and then
+// A deleter (for use with |std::unique_ptr|) that closes all handles and then
 // |delete|s the |PlatformHandleVector|.
-struct MOJO_SYSTEM_IMPL_EXPORT PlatformHandleVectorDeleter {
+struct PlatformHandleVectorDeleter {
   void operator()(PlatformHandleVector* platform_handles) const {
     CloseAllPlatformHandles(platform_handles);
     delete platform_handles;
@@ -27,7 +27,7 @@ struct MOJO_SYSTEM_IMPL_EXPORT PlatformHandleVectorDeleter {
 };
 
 using ScopedPlatformHandleVectorPtr =
-    scoped_ptr<PlatformHandleVector, PlatformHandleVectorDeleter>;
+    std::unique_ptr<PlatformHandleVector, PlatformHandleVectorDeleter>;
 
 }  // namespace embedder
 }  // namespace mojo

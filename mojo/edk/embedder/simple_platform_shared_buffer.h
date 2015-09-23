@@ -8,15 +8,13 @@
 #include <stddef.h>
 
 #include "mojo/edk/embedder/platform_shared_buffer.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
 namespace embedder {
 
 // A simple implementation of |PlatformSharedBuffer|.
-class MOJO_SYSTEM_IMPL_EXPORT SimplePlatformSharedBuffer final
-    : public PlatformSharedBuffer {
+class SimplePlatformSharedBuffer final : public PlatformSharedBuffer {
  public:
   // Creates a shared buffer of size |num_bytes| bytes (initially zero-filled).
   // |num_bytes| must be nonzero. Returns null on failure.
@@ -28,11 +26,12 @@ class MOJO_SYSTEM_IMPL_EXPORT SimplePlatformSharedBuffer final
 
   // |PlatformSharedBuffer| implementation:
   size_t GetNumBytes() const override;
-  scoped_ptr<PlatformSharedBufferMapping> Map(size_t offset,
-                                              size_t length) override;
+  std::unique_ptr<PlatformSharedBufferMapping> Map(size_t offset,
+                                                   size_t length) override;
   bool IsValidMap(size_t offset, size_t length) override;
-  scoped_ptr<PlatformSharedBufferMapping> MapNoCheck(size_t offset,
-                                                     size_t length) override;
+  std::unique_ptr<PlatformSharedBufferMapping> MapNoCheck(
+      size_t offset,
+      size_t length) override;
   ScopedPlatformHandle DuplicatePlatformHandle() override;
   ScopedPlatformHandle PassPlatformHandle() override;
 
@@ -51,7 +50,8 @@ class MOJO_SYSTEM_IMPL_EXPORT SimplePlatformSharedBuffer final
   bool InitFromPlatformHandle(ScopedPlatformHandle platform_handle);
 
   // The platform-dependent part of |Map()|; doesn't check arguments.
-  scoped_ptr<PlatformSharedBufferMapping> MapImpl(size_t offset, size_t length);
+  std::unique_ptr<PlatformSharedBufferMapping> MapImpl(size_t offset,
+                                                       size_t length);
 
   const size_t num_bytes_;
 
@@ -65,7 +65,7 @@ class MOJO_SYSTEM_IMPL_EXPORT SimplePlatformSharedBuffer final
 
 // An implementation of |PlatformSharedBufferMapping|, produced by
 // |SimplePlatformSharedBuffer|.
-class MOJO_SYSTEM_IMPL_EXPORT SimplePlatformSharedBufferMapping
+class SimplePlatformSharedBufferMapping final
     : public PlatformSharedBufferMapping {
  public:
   ~SimplePlatformSharedBufferMapping() override;

@@ -1,0 +1,13 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+import "geometry/public/interfaces/geometry.mojom";
+import "ozone_drm_gpu/public/interfaces/ozone_drm_gpu.mojom";
+
+interface OzoneDrmHost {
+  UpdateNativeDisplays(array<DisplaySnapshot> displays);
+  DisplayConfigured(int64 id, bool result);
+};

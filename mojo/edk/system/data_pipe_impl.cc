@@ -5,9 +5,10 @@
 #include "mojo/edk/system/data_pipe_impl.h"
 
 #include <algorithm>
+#include <memory>
+#include <utility>
 
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
@@ -34,11 +35,11 @@ void DataPipeImpl::ConvertDataToMessages(const char* buffer,
         std::min(max_message_num_bytes, current_contiguous_num_bytes);
 
     // Note: |message_num_bytes| fits in a |uint32_t| since the capacity does.
-    scoped_ptr<MessageInTransit> message(new MessageInTransit(
+    std::unique_ptr<MessageInTransit> message(new MessageInTransit(
         MessageInTransit::Type::ENDPOINT_CLIENT,
         MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
         static_cast<uint32_t>(message_num_bytes), buffer + *start_index));
-    message_queue->AddMessage(message.Pass());
+    message_queue->AddMessage(std::move(message));
 
     DCHECK_LE(message_num_bytes, *current_num_bytes);
     *start_index += message_num_bytes;

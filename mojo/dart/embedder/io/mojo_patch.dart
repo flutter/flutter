@@ -111,9 +111,9 @@ class _NetworkServiceCodec {
       return null;
     }
     var address;
-    if (netAddress.family == NetAddressFamily_IPV4) {
+    if (netAddress.family == NetAddressFamily.IPV4) {
       address = netAddress.ipv4.addr;
-    } else if (netAddress.family == NetAddressFamily_IPV6) {
+    } else if (netAddress.family == NetAddressFamily.IPV6) {
       address = netAddress.ipv6.addr;
     } else {
       return null;
@@ -127,9 +127,9 @@ class _NetworkServiceCodec {
     if (netAddress == null) {
       return null;
     }
-    if (netAddress.family == NetAddressFamily_IPV4) {
+    if (netAddress.family == NetAddressFamily.IPV4) {
       return netAddress.ipv4.port;
-    } else if (netAddress.family == NetAddressFamily_IPV6) {
+    } else if (netAddress.family == NetAddressFamily.IPV6) {
       return netAddress.ipv6.port;
     } else {
       return null;
@@ -145,7 +145,7 @@ class _NetworkServiceCodec {
     var netAddress = new NetAddress();
     var rawAddress = internetAddress.rawAddress;
     if (rawAddress.length == 4) {
-      netAddress.family = NetAddressFamily_IPV4;
+      netAddress.family = NetAddressFamily.IPV4;
       netAddress.ipv4 = new NetAddressIPv4();
       netAddress.ipv4.addr = new List.from(rawAddress, growable: false);
       if (port != null) {
@@ -153,7 +153,7 @@ class _NetworkServiceCodec {
       }
     } else {
       assert(rawAddress.length == 16);
-      netAddress.family = NetAddressFamily_IPV6;
+      netAddress.family = NetAddressFamily.IPV6;
       netAddress.ipv6 = new NetAddressIPv6();
       netAddress.ipv6.addr = new List.from(rawAddress, growable: false);
       if (port != null) {
@@ -169,7 +169,7 @@ class _NetworkService {
   /// Return a [NetAddress] for localhost:port.
   static NetAddress _localhostIpv4([int port = 0]) {
     var addr = new NetAddress();
-    addr.family = NetAddressFamily_IPV4;
+    addr.family = NetAddressFamily.IPV4;
     addr.ipv4 = new NetAddressIPv4();
     addr.ipv4.addr = [127, 0, 0, 1];
     addr.ipv4.port = port;
@@ -179,7 +179,7 @@ class _NetworkService {
   /// Return a [NetAddress] for localhost:port.
   static NetAddress _localHostIpv6([int port = 0]) {
     var addr = new NetAddress();
-    addr.family = NetAddressFamily_IPV6;
+    addr.family = NetAddressFamily.IPV6;
     addr.ipv6 = new NetAddressIPv6();
     addr.ipv6.addr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
     addr.ipv6.port = port;

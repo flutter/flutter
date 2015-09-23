@@ -4,6 +4,9 @@
 
 #include "mojo/edk/system/message_pipe.h"
 
+#include <memory>
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
@@ -14,12 +17,13 @@
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/message_pipe_endpoint.h"
 #include "mojo/edk/system/proxy_message_pipe_endpoint.h"
+#include "mojo/edk/util/make_unique.h"
 
 namespace mojo {
 namespace system {
 
 // static
-MessagePipe* MessagePipe::CreateLocalLocal() {
+MessagePipe* MessagePipe::CreateLocalLocal() MOJO_NO_THREAD_SAFETY_ANALYSIS {
   MessagePipe* message_pipe = new MessagePipe();
   message_pipe->endpoints_[0].reset(new LocalMessagePipeEndpoint());
   message_pipe->endpoints_[1].reset(new LocalMessagePipeEndpoint());
@@ -28,7 +32,8 @@ MessagePipe* MessagePipe::CreateLocalLocal() {
 
 // static
 MessagePipe* MessagePipe::CreateLocalProxy(
-    scoped_refptr<ChannelEndpoint>* channel_endpoint) {
+    scoped_refptr<ChannelEndpoint>* channel_endpoint)
+    MOJO_NO_THREAD_SAFETY_ANALYSIS {
   DCHECK(!*channel_endpoint);  // Not technically wrong, but unlikely.
   MessagePipe* message_pipe = new MessagePipe();
   message_pipe->endpoints_[0].reset(new LocalMessagePipeEndpoint());
@@ -41,7 +46,7 @@ MessagePipe* MessagePipe::CreateLocalProxy(
 // static
 MessagePipe* MessagePipe::CreateLocalProxyFromExisting(
     MessageInTransitQueue* message_queue,
-    ChannelEndpoint* channel_endpoint) {
+    ChannelEndpoint* channel_endpoint) MOJO_NO_THREAD_SAFETY_ANALYSIS {
   DCHECK(message_queue);
   MessagePipe* message_pipe = new MessagePipe();
   message_pipe->endpoints_[0].reset(
@@ -64,7 +69,8 @@ MessagePipe* MessagePipe::CreateLocalProxyFromExisting(
 
 // static
 MessagePipe* MessagePipe::CreateProxyLocal(
-    scoped_refptr<ChannelEndpoint>* channel_endpoint) {
+    scoped_refptr<ChannelEndpoint>* channel_endpoint)
+    MOJO_NO_THREAD_SAFETY_ANALYSIS {
   DCHECK(!*channel_endpoint);  // Not technically wrong, but unlikely.
   MessagePipe* message_pipe = new MessagePipe();
   *channel_endpoint = new ChannelEndpoint(message_pipe, 0);
@@ -106,7 +112,7 @@ bool MessagePipe::Deserialize(Channel* channel,
 
 MessagePipeEndpoint::Type MessagePipe::GetType(unsigned port) {
   DCHECK(port == 0 || port == 1);
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
   DCHECK(endpoints_[port]);
 
   return endpoints_[port]->GetType();
@@ -115,7 +121,7 @@ MessagePipeEndpoint::Type MessagePipe::GetType(unsigned port) {
 void MessagePipe::CancelAllAwakables(unsigned port) {
   DCHECK(port == 0 || port == 1);
 
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
   DCHECK(endpoints_[port]);
   endpoints_[port]->CancelAllAwakables();
 }
@@ -125,7 +131,7 @@ void MessagePipe::Close(unsigned port) {
 
   unsigned peer_port = GetPeerPort(port);
 
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
   // The endpoint's |OnPeerClose()| may have been called first and returned
   // false, which would have resulted in its destruction.
   if (!endpoints_[port])
@@ -148,12 +154,12 @@ MojoResult MessagePipe::WriteMessage(
     MojoWriteMessageFlags flags) {
   DCHECK(port == 0 || port == 1);
 
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
   return EnqueueMessageNoLock(
       GetPeerPort(port),
-      make_scoped_ptr(new MessageInTransit(
+      util::MakeUnique<MessageInTransit>(
           MessageInTransit::Type::ENDPOINT_CLIENT,
-          MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA, num_bytes, bytes)),
+          MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA, num_bytes, bytes),
       transports);
 }
 
@@ -165,7 +171,7 @@ MojoResult MessagePipe::ReadMessage(unsigned port,
                                     MojoReadMessageFlags flags) {
   DCHECK(port == 0 || port == 1);
 
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
   DCHECK(endpoints_[port]);
 
   return endpoints_[port]->ReadMessage(bytes, num_bytes, dispatchers,
@@ -175,7 +181,7 @@ MojoResult MessagePipe::ReadMessage(unsigned port,
 HandleSignalsState MessagePipe::GetHandleSignalsState(unsigned port) const {
   DCHECK(port == 0 || port == 1);
 
-  base::AutoLock locker(const_cast<base::Lock&>(lock_));
+  MutexLocker locker(&mutex_);
   DCHECK(endpoints_[port]);
 
   return endpoints_[port]->GetHandleSignalsState();
@@ -188,7 +194,7 @@ MojoResult MessagePipe::AddAwakable(unsigned port,
                                     HandleSignalsState* signals_state) {
   DCHECK(port == 0 || port == 1);
 
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
   DCHECK(endpoints_[port]);
 
   return endpoints_[port]->AddAwakable(awakable, signals, context,
@@ -200,7 +206,7 @@ void MessagePipe::RemoveAwakable(unsigned port,
                                  HandleSignalsState* signals_state) {
   DCHECK(port == 0 || port == 1);
 
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
   DCHECK(endpoints_[port]);
 
   endpoints_[port]->RemoveAwakable(awakable, signals_state);
@@ -222,7 +228,7 @@ bool MessagePipe::EndSerialize(
     embedder::PlatformHandleVector* /*platform_handles*/) {
   DCHECK(port == 0 || port == 1);
 
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
   DCHECK(endpoints_[port]);
 
   // The port being serialized must be local.
@@ -274,7 +280,7 @@ bool MessagePipe::EndSerialize(
 }
 
 bool MessagePipe::OnReadMessage(unsigned port, MessageInTransit* message) {
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
 
   if (!endpoints_[port]) {
     // This will happen only on the rare occasion that the call to
@@ -289,8 +295,8 @@ bool MessagePipe::OnReadMessage(unsigned port, MessageInTransit* message) {
   // |ProxyMessagePipeEndpoint| |port| receives a message (from the |Channel|).
   // We need to pass this message on to its peer port (typically a
   // |LocalMessagePipeEndpoint|).
-  MojoResult result = EnqueueMessageNoLock(GetPeerPort(port),
-                                           make_scoped_ptr(message), nullptr);
+  MojoResult result = EnqueueMessageNoLock(
+      GetPeerPort(port), std::unique_ptr<MessageInTransit>(message), nullptr);
   DLOG_IF(WARNING, result != MOJO_RESULT_OK)
       << "EnqueueMessageNoLock() failed (result  = " << result << ")";
   return true;
@@ -313,7 +319,7 @@ MessagePipe::~MessagePipe() {
 
 MojoResult MessagePipe::EnqueueMessageNoLock(
     unsigned port,
-    scoped_ptr<MessageInTransit> message,
+    std::unique_ptr<MessageInTransit> message,
     std::vector<DispatcherTransport>* transports) {
   DCHECK(port == 0 || port == 1);
   DCHECK(message);
@@ -332,7 +338,7 @@ MojoResult MessagePipe::EnqueueMessageNoLock(
   }
 
   // The endpoint's |EnqueueMessage()| may not report failure.
-  endpoints_[port]->EnqueueMessage(message.Pass());
+  endpoints_[port]->EnqueueMessage(std::move(message));
   return MOJO_RESULT_OK;
 }
 
@@ -365,7 +371,7 @@ MojoResult MessagePipe::AttachTransportsNoLock(
 
   // Clone the dispatchers and attach them to the message. (This must be done as
   // a separate loop, since we want to leave the dispatchers alone on failure.)
-  scoped_ptr<DispatcherVector> dispatchers(new DispatcherVector());
+  std::unique_ptr<DispatcherVector> dispatchers(new DispatcherVector());
   dispatchers->reserve(transports->size());
   for (size_t i = 0; i < transports->size(); i++) {
     if ((*transports)[i].is_valid()) {
@@ -376,7 +382,7 @@ MojoResult MessagePipe::AttachTransportsNoLock(
       dispatchers->push_back(nullptr);
     }
   }
-  message->SetDispatchers(dispatchers.Pass());
+  message->SetDispatchers(std::move(dispatchers));
   return MOJO_RESULT_OK;
 }
 

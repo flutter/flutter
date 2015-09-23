@@ -8,10 +8,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <functional>
 #include <string>
 
-#include "base/containers/hash_tables.h"
-#include "mojo/edk/system/system_impl_export.h"
+#include "base/containers/hash_tables.h"  // For |base::HashInts64()|.
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -22,13 +22,13 @@ class UniqueIdentifier;
 }  // namespace system
 }  // namespace mojo
 
-namespace BASE_HASH_NAMESPACE {
+namespace std {
 
 // Declare this before |UniqueIdentifier|, so that it can be friended.
 template <>
 struct hash<mojo::system::UniqueIdentifier>;
 
-}  // BASE_HASH_NAMESPACE
+}  // namespace std
 
 namespace mojo {
 
@@ -42,7 +42,7 @@ namespace system {
 
 // |UniqueIdentifier| is a POD class whose value is used to uniquely identify
 // things.
-class MOJO_SYSTEM_IMPL_EXPORT UniqueIdentifier {
+class UniqueIdentifier {
  public:
   // This generates a new identifier. Uniqueness is "guaranteed" (i.e.,
   // probabilistically) for identifiers.
@@ -70,7 +70,7 @@ class MOJO_SYSTEM_IMPL_EXPORT UniqueIdentifier {
   }
 
  private:
-  friend BASE_HASH_NAMESPACE::hash<mojo::system::UniqueIdentifier>;
+  friend std::hash<mojo::system::UniqueIdentifier>;
 
   explicit UniqueIdentifier() {}
 
@@ -87,8 +87,10 @@ static_assert(MOJO_ALIGNOF(UniqueIdentifier) == 1,
 }  // namespace system
 }  // namespace mojo
 
-namespace BASE_HASH_NAMESPACE {
+namespace std {
 
+// Specialization of |std::hash<>| for |UniqueIdentifier|s, so they can be used
+// in unordered sets/maps.
 template <>
 struct hash<mojo::system::UniqueIdentifier> {
   size_t operator()(mojo::system::UniqueIdentifier unique_identifier) const {
@@ -99,6 +101,6 @@ struct hash<mojo::system::UniqueIdentifier> {
   }
 };
 
-}  // BASE_HASH_NAMESPACE
+}  // namespace std
 
 #endif  // MOJO_EDK_SYSTEM_UNIQUE_IDENTIFIER_H_

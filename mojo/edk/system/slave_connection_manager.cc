@@ -11,6 +11,7 @@
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
+#include "mojo/edk/util/make_unique.h"
 
 namespace mojo {
 namespace system {
@@ -160,10 +161,10 @@ void SlaveConnectionManager::AllowConnectOnPrivateThread(
 
   DVLOG(1) << "Sending AllowConnect: connection ID "
            << connection_id.ToString();
-  if (!raw_channel_->WriteMessage(make_scoped_ptr(new MessageInTransit(
+  if (!raw_channel_->WriteMessage(util::MakeUnique<MessageInTransit>(
           MessageInTransit::Type::CONNECTION_MANAGER,
           MessageInTransit::Subtype::CONNECTION_MANAGER_ALLOW_CONNECT,
-          sizeof(connection_id), &connection_id)))) {
+          sizeof(connection_id), &connection_id))) {
     // Don't tear things down; possibly we'll still read some messages.
     *result = Result::FAILURE;
     event_.Signal();
@@ -185,10 +186,10 @@ void SlaveConnectionManager::CancelConnectOnPrivateThread(
 
   DVLOG(1) << "Sending CancelConnect: connection ID "
            << connection_id.ToString();
-  if (!raw_channel_->WriteMessage(make_scoped_ptr(new MessageInTransit(
+  if (!raw_channel_->WriteMessage(util::MakeUnique<MessageInTransit>(
           MessageInTransit::Type::CONNECTION_MANAGER,
           MessageInTransit::Subtype::CONNECTION_MANAGER_CANCEL_CONNECT,
-          sizeof(connection_id), &connection_id)))) {
+          sizeof(connection_id), &connection_id))) {
     // Don't tear things down; possibly we'll still read some messages.
     *result = Result::FAILURE;
     event_.Signal();
@@ -212,10 +213,10 @@ void SlaveConnectionManager::ConnectOnPrivateThread(
   DCHECK_EQ(awaiting_ack_type_, NOT_AWAITING_ACK);
 
   DVLOG(1) << "Sending Connect: connection ID " << connection_id.ToString();
-  if (!raw_channel_->WriteMessage(make_scoped_ptr(new MessageInTransit(
+  if (!raw_channel_->WriteMessage(util::MakeUnique<MessageInTransit>(
           MessageInTransit::Type::CONNECTION_MANAGER,
           MessageInTransit::Subtype::CONNECTION_MANAGER_CONNECT,
-          sizeof(connection_id), &connection_id)))) {
+          sizeof(connection_id), &connection_id))) {
     // Don't tear things down; possibly we'll still read some messages.
     *result = Result::FAILURE;
     platform_handle->reset();

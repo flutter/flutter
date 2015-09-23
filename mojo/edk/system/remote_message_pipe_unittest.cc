@@ -6,18 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <memory>
 #include <vector>
 
 #include "base/bind.h"
-#include "base/files/file_path.h"
-#include "base/files/file_util.h"
-#include "base/files/scoped_file.h"
-#include "base/files/scoped_temp_dir.h"
 #include "base/location.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
-#include "base/test/test_io_thread.h"
-#include "build/build_config.h"              // TODO(vtl): Remove this.
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
@@ -33,7 +28,10 @@
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/waiter.h"
+#include "mojo/edk/test/scoped_test_dir.h"
+#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/edk/test/test_utils.h"
+#include "mojo/edk/util/scoped_file.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -47,7 +45,7 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 
 class RemoteMessagePipeTest : public testing::Test {
  public:
-  RemoteMessagePipeTest() : io_thread_(base::TestIOThread::kAutoStart) {}
+  RemoteMessagePipeTest() : io_thread_(mojo::test::TestIOThread::kAutoStart) {}
   ~RemoteMessagePipeTest() override {}
 
   void SetUp() override {
@@ -93,7 +91,7 @@ class RemoteMessagePipeTest : public testing::Test {
   }
 
   embedder::PlatformSupport* platform_support() { return &platform_support_; }
-  base::TestIOThread* io_thread() { return &io_thread_; }
+  mojo::test::TestIOThread* io_thread() { return &io_thread_; }
   // Warning: It's up to the caller to ensure that the returned channel
   // is/remains valid.
   Channel* channels(size_t i) { return channels_[i].get(); }
@@ -160,7 +158,7 @@ class RemoteMessagePipeTest : public testing::Test {
   }
 
   embedder::SimplePlatformSupport platform_support_;
-  base::TestIOThread io_thread_;
+  mojo::test::TestIOThread io_thread_;
   embedder::ScopedPlatformHandle platform_handles_[2];
   scoped_refptr<Channel> channels_[2];
 
@@ -338,7 +336,7 @@ TEST_F(RemoteMessagePipeTest, Multiplex) {
                       &max_platform_handle_count);
   EXPECT_GT(max_endpoint_info_size, 0u);
   ASSERT_EQ(0u, max_platform_handle_count);
-  scoped_ptr<char[]> endpoint_info(new char[max_endpoint_info_size]);
+  std::unique_ptr<char[]> endpoint_info(new char[max_endpoint_info_size]);
   size_t endpoint_info_size;
   mp2->EndSerialize(1, channels(0), endpoint_info.get(), &endpoint_info_size,
                     nullptr);
@@ -363,7 +361,7 @@ TEST_F(RemoteMessagePipeTest, Multiplex) {
   EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
 
   EXPECT_EQ(endpoint_info_size, channels(1)->GetSerializedEndpointSize());
-  scoped_ptr<char[]> received_endpoint_info(new char[endpoint_info_size]);
+  std::unique_ptr<char[]> received_endpoint_info(new char[endpoint_info_size]);
   buffer_size = static_cast<uint32_t>(endpoint_info_size);
   EXPECT_EQ(MOJO_RESULT_OK,
             mp1->ReadMessage(1, UserPointer<void>(received_endpoint_info.get()),
@@ -893,13 +891,7 @@ TEST_F(RemoteMessagePipeTest, HandlePassingHalfClosed) {
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->Close());
 }
 
-#if defined(OS_POSIX)
-#define MAYBE_SharedBufferPassing SharedBufferPassing
-#else
-// Not yet implemented (on Windows).
-#define MAYBE_SharedBufferPassing DISABLED_SharedBufferPassing
-#endif
-TEST_F(RemoteMessagePipeTest, MAYBE_SharedBufferPassing) {
+TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
   static const char kHello[] = "hello";
   Waiter waiter;
   HandleSignalsState hss;
@@ -920,7 +912,7 @@ TEST_F(RemoteMessagePipeTest, MAYBE_SharedBufferPassing) {
   ASSERT_TRUE(dispatcher);
 
   // Make a mapping.
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping0;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping0;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->MapBuffer(
                                 0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping0));
   ASSERT_TRUE(mapping0);
@@ -987,7 +979,7 @@ TEST_F(RemoteMessagePipeTest, MAYBE_SharedBufferPassing) {
   dispatcher = static_cast<SharedBufferDispatcher*>(read_dispatchers[0].get());
 
   // Make another mapping.
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping1;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping1;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->MapBuffer(
                                 0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping1));
   ASSERT_TRUE(mapping1);
@@ -1017,15 +1009,8 @@ TEST_F(RemoteMessagePipeTest, MAYBE_SharedBufferPassing) {
   EXPECT_EQ('x', static_cast<char*>(mapping1->GetBase())[1]);
 }
 
-#if defined(OS_POSIX)
-#define MAYBE_PlatformHandlePassing PlatformHandlePassing
-#else
-// Not yet implemented (on Windows).
-#define MAYBE_PlatformHandlePassing DISABLED_PlatformHandlePassing
-#endif
-TEST_F(RemoteMessagePipeTest, MAYBE_PlatformHandlePassing) {
-  base::ScopedTempDir temp_dir;
-  ASSERT_TRUE(temp_dir.CreateUniqueTempDir());
+TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
+  mojo::test::ScopedTestDir test_dir;
 
   static const char kHello[] = "hello";
   static const char kWorld[] = "world";
@@ -1039,9 +1024,7 @@ TEST_F(RemoteMessagePipeTest, MAYBE_PlatformHandlePassing) {
   scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
   BootstrapChannelEndpoints(ep0, ep1);
 
-  base::FilePath unused;
-  base::ScopedFILE fp(
-      base::CreateAndOpenTemporaryFileInDir(temp_dir.path(), &unused));
+  util::ScopedFILE fp(test_dir.CreateFile());
   EXPECT_EQ(sizeof(kHello), fwrite(kHello, 1, sizeof(kHello), fp.get()));
   // We'll try to pass this dispatcher, which will cause a |PlatformHandle| to
   // be passed.

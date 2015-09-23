@@ -7,11 +7,13 @@
 
 #include <stdint.h>
 
+#include <utility>
+
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
-#include "mojo/edk/system/system_impl_export.h"
+#include "mojo/edk/system/thread_annotations.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/macros.h"
 #include "mojo/public/c/system/types.h"
@@ -25,8 +27,29 @@ class MessageInTransit;
 // Base class/interface for classes that "implement" |DataPipe| for various
 // situations (local versus remote). The methods, other than the constructor,
 // |set_owner()|, and the destructor, are always protected by |DataPipe|'s
-// |lock_|.
-class MOJO_SYSTEM_IMPL_EXPORT DataPipeImpl {
+// |mutex_|.
+//
+// Methods that access |owner_| are marked |MOJO_NO_THREAD_SAFETY_ANALYSIS| for
+// the reason described below.
+//
+// Ideally, they'd be marked as requiring |owner_->mutex_|, but then we'd have
+// trouble with the |DataPipe| methods that call |DataPipeImpl| methods (via
+// |DataPipe|'s |impl_| member): we cannot tell the compiler that |impl_->owner_
+// == this| in |DataPipe| methods, so that taking |mutex_| is equivalent to
+// taking |impl_->owner_->mutex_|.
+//
+// Since |DataPipeImpl| methods are only called by |DataPipe| methods (which are
+// required to hold |mutex_| since |impl_| marked as being guarded by it) and by
+// |DataPipeImpl| and subclasses' methods (which are all transitively under
+// |mutex_|, having originated from a call from |DataPipe|), we choose to turn
+// off thread-safety analysis for our methods, which are trivial (they just
+// thunk to |owner_|), rather than turn off thread-safety analysis for
+// |DataPipe|'s methods, which aren't.
+
+// Note that subclasses do not have access to the owning |DataPipe| (except as a
+// |ChannelEndpointClient|), so that their methods should never need
+// |MOJO_NO_THREAD_SAFETY_ANALYSIS| annotations.
+class DataPipeImpl {
  public:
   virtual ~DataPipeImpl() {}
 
@@ -98,31 +121,50 @@ class MOJO_SYSTEM_IMPL_EXPORT DataPipeImpl {
                              size_t* current_num_bytes,
                              MessageInTransitQueue* message_queue);
 
-  DataPipe* owner() const { return owner_; }
+  std::unique_ptr<DataPipeImpl> ReplaceImpl(
+      std::unique_ptr<DataPipeImpl> new_impl) MOJO_NO_THREAD_SAFETY_ANALYSIS {
+    return owner_->ReplaceImplNoLock(std::move(new_impl));
+  }
+  void SetProducerClosed() MOJO_NO_THREAD_SAFETY_ANALYSIS {
+    owner_->SetProducerClosedNoLock();
+  }
+  void SetConsumerClosed() MOJO_NO_THREAD_SAFETY_ANALYSIS {
+    owner_->SetConsumerClosedNoLock();
+  }
+
+  ChannelEndpointClient* channel_endpoint_client() const { return owner_; }
 
   const MojoCreateDataPipeOptions& validated_options() const {
     return owner_->validated_options();
   }
   size_t element_num_bytes() const { return owner_->element_num_bytes(); }
   size_t capacity_num_bytes() const { return owner_->capacity_num_bytes(); }
-  bool producer_open() const { return owner_->producer_open_no_lock(); }
-  bool consumer_open() const { return owner_->consumer_open_no_lock(); }
-  uint32_t producer_two_phase_max_num_bytes_written() const {
+  bool producer_open() const MOJO_NO_THREAD_SAFETY_ANALYSIS {
+    return owner_->producer_open_no_lock();
+  }
+  bool consumer_open() const MOJO_NO_THREAD_SAFETY_ANALYSIS {
+    return owner_->consumer_open_no_lock();
+  }
+  uint32_t producer_two_phase_max_num_bytes_written() const
+      MOJO_NO_THREAD_SAFETY_ANALYSIS {
     return owner_->producer_two_phase_max_num_bytes_written_no_lock();
   }
-  uint32_t consumer_two_phase_max_num_bytes_read() const {
+  uint32_t consumer_two_phase_max_num_bytes_read() const
+      MOJO_NO_THREAD_SAFETY_ANALYSIS {
     return owner_->consumer_two_phase_max_num_bytes_read_no_lock();
   }
-  void set_producer_two_phase_max_num_bytes_written(uint32_t num_bytes) {
+  void set_producer_two_phase_max_num_bytes_written(uint32_t num_bytes)
+      MOJO_NO_THREAD_SAFETY_ANALYSIS {
     owner_->set_producer_two_phase_max_num_bytes_written_no_lock(num_bytes);
   }
-  void set_consumer_two_phase_max_num_bytes_read(uint32_t num_bytes) {
+  void set_consumer_two_phase_max_num_bytes_read(uint32_t num_bytes)
+      MOJO_NO_THREAD_SAFETY_ANALYSIS {
     owner_->set_consumer_two_phase_max_num_bytes_read_no_lock(num_bytes);
   }
-  bool producer_in_two_phase_write() const {
+  bool producer_in_two_phase_write() const MOJO_NO_THREAD_SAFETY_ANALYSIS {
     return owner_->producer_in_two_phase_write_no_lock();
   }
-  bool consumer_in_two_phase_read() const {
+  bool consumer_in_two_phase_read() const MOJO_NO_THREAD_SAFETY_ANALYSIS {
     return owner_->consumer_in_two_phase_read_no_lock();
   }
 

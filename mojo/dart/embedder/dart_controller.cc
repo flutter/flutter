@@ -68,10 +68,12 @@ static Dart_Handle ResolveScriptUri(Dart_Handle builtin_lib, Dart_Handle uri) {
                      dart_args);
 }
 
-static Dart_Handle PrepareIsolateLibraries(const std::string& package_root,
+static Dart_Handle PrepareBuiltinLibraries(const std::string& package_root,
                                            const std::string& script_uri) {
   // First ensure all required libraries are available.
-  Dart_Handle builtin_lib = Builtin::GetLibrary(Builtin::kBuiltinLibrary);
+  Dart_Handle builtin_lib = Builtin::PrepareLibrary(Builtin::kBuiltinLibrary);
+  Builtin::PrepareLibrary(Builtin::kMojoInternalLibrary);
+  Builtin::PrepareLibrary(Builtin::kDartMojoIoLibrary);
   Dart_Handle url = Dart_NewStringFromCString(kInternalLibURL);
   DART_CHECK_VALID(url);
   Dart_Handle internal_lib = Dart_LookupLibrary(url);
@@ -274,6 +276,7 @@ Dart_Isolate DartController::CreateIsolateHelper(
                                         callbacks,
                                         script_uri,
                                         package_root);
+  CHECK(isolate_snapshot_buffer != nullptr);
   Dart_Isolate isolate =
       Dart_CreateIsolate(script_uri.c_str(), "main", isolate_snapshot_buffer,
                          nullptr, isolate_data, error);
@@ -317,25 +320,8 @@ Dart_Isolate DartController::CreateIsolateHelper(
     DART_CHECK_VALID(result);
     // Toggle checked mode.
     Dart_IsolateSetStrictCompilation(strict_compilation);
-    // Setup the native resolvers for the builtin libraries as they are not set
-    // up when the snapshot is read.
-    CHECK(isolate_snapshot_buffer != nullptr);
-    Builtin::PrepareLibrary(Builtin::kBuiltinLibrary);
-    Builtin::PrepareLibrary(Builtin::kMojoInternalLibrary);
-    Builtin::PrepareLibrary(Builtin::kDartMojoIoLibrary);
-
-    // TODO(johnmccutchan): Remove?
-    if (!callbacks.create.is_null()) {
-      DCHECK(false);
-      callbacks.create.Run(script_uri.c_str(),
-                           "main",
-                           package_root.c_str(),
-                           isolate_data,
-                           error);
-    }
-
     // Prepare builtin and its dependent libraries.
-    result = PrepareIsolateLibraries(package_root, script_uri);
+    result = PrepareBuiltinLibraries(package_root, script_uri);
     DART_CHECK_VALID(result);
 
     // The VM is creating the service isolate.
@@ -436,9 +422,6 @@ void DartController::IsolateShutdownCallback(void* callback_data) {
   }
 
   auto isolate_data = MojoDartState::Cast(callback_data);
-  if (!isolate_data->callbacks().shutdown.is_null()) {
-    isolate_data->callbacks().shutdown.Run(callback_data);
-  }
   delete isolate_data;
 }
 
@@ -690,8 +673,6 @@ bool DartController::Initialize(
 }
 
 bool DartController::RunDartScript(const DartControllerConfig& config) {
-  BlockForServiceIsolate();
-  CHECK(service_isolate_running_);
   const bool strict = strict_compilation_ || config.strict_compilation;
   Dart_Isolate isolate = CreateIsolateHelper(config.application_data,
                                              strict,

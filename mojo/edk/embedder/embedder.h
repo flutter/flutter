@@ -5,17 +5,16 @@
 #ifndef MOJO_EDK_EMBEDDER_EMBEDDER_H_
 #define MOJO_EDK_EMBEDDER_EMBEDDER_H_
 
+#include <memory>
 #include <string>
 
 #include "base/callback.h"
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/task_runner.h"
 #include "mojo/edk/embedder/channel_info_forward.h"
 #include "mojo/edk/embedder/process_type.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/embedder/slave_info.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/message_pipe.h"
 
 namespace mojo {
@@ -33,11 +32,11 @@ class ProcessDelegate;
 
 // Returns the global configuration. In general, you should not need to change
 // the configuration, but if you do you must do it before calling |Init()|.
-MOJO_SYSTEM_IMPL_EXPORT Configuration* GetConfiguration();
+Configuration* GetConfiguration();
 
 // Must be called first, or just after setting configuration parameters, to
 // initialize the (global, singleton) system.
-MOJO_SYSTEM_IMPL_EXPORT void Init(scoped_ptr<PlatformSupport> platform_support);
+void Init(std::unique_ptr<PlatformSupport> platform_support);
 
 // Basic functions -------------------------------------------------------------
 
@@ -47,26 +46,24 @@ MOJO_SYSTEM_IMPL_EXPORT void Init(scoped_ptr<PlatformSupport> platform_support);
 // called exactly once, when |handle| satisfies a signal in |signals| or it
 // becomes known that it will never do so. |callback| will be executed on an
 // arbitrary thread, so it must not call any Mojo system or embedder functions.
-MOJO_SYSTEM_IMPL_EXPORT MojoResult
-AsyncWait(MojoHandle handle,
-          MojoHandleSignals signals,
-          const base::Callback<void(MojoResult)>& callback);
+MojoResult AsyncWait(MojoHandle handle,
+                     MojoHandleSignals signals,
+                     const base::Callback<void(MojoResult)>& callback);
 
 // Creates a |MojoHandle| that wraps the given |PlatformHandle| (taking
 // ownership of it). This |MojoHandle| can then, e.g., be passed through message
 // pipes. Note: This takes ownership (and thus closes) |platform_handle| even on
 // failure, which is different from what you'd expect from a Mojo API, but it
 // makes for a more convenient embedder API.
-MOJO_SYSTEM_IMPL_EXPORT MojoResult
-CreatePlatformHandleWrapper(ScopedPlatformHandle platform_handle,
-                            MojoHandle* platform_handle_wrapper_handle);
+MojoResult CreatePlatformHandleWrapper(
+    ScopedPlatformHandle platform_handle,
+    MojoHandle* platform_handle_wrapper_handle);
 
 // Retrieves the |PlatformHandle| that was wrapped into a |MojoHandle| (using
 // |CreatePlatformHandleWrapper()| above). Note that the |MojoHandle| must still
 // be closed separately.
-MOJO_SYSTEM_IMPL_EXPORT MojoResult
-PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
-                          ScopedPlatformHandle* platform_handle);
+MojoResult PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
+                                     ScopedPlatformHandle* platform_handle);
 
 // Initialialization/shutdown for interprocess communication (IPC) -------------
 
@@ -90,23 +87,22 @@ PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
 //     |platform_handle| should be connected to the handle passed to
 //     |ConnectToSlave()| (in the master process). For other processes,
 //     |platform_handle| is ignored (and should not be valid).
-MOJO_SYSTEM_IMPL_EXPORT void InitIPCSupport(
-    ProcessType process_type,
-    scoped_refptr<base::TaskRunner> delegate_thread_task_runner,
-    ProcessDelegate* process_delegate,
-    scoped_refptr<base::TaskRunner> io_thread_task_runner,
-    ScopedPlatformHandle platform_handle);
+void InitIPCSupport(ProcessType process_type,
+                    scoped_refptr<base::TaskRunner> delegate_thread_task_runner,
+                    ProcessDelegate* process_delegate,
+                    scoped_refptr<base::TaskRunner> io_thread_task_runner,
+                    ScopedPlatformHandle platform_handle);
 
 // Shuts down the subsystem initialized by |InitIPCSupport()|. This must be
 // called on the I/O thread (given to |InitIPCSupport()|). This completes
 // synchronously and does not result in a call to the process delegate's
 // |OnShutdownComplete()|.
-MOJO_SYSTEM_IMPL_EXPORT void ShutdownIPCSupportOnIOThread();
+void ShutdownIPCSupportOnIOThread();
 
 // Like |ShutdownIPCSupportOnIOThread()|, but may be called from any thread,
 // signalling shutdown completion via the process delegate's
 // |OnShutdownComplete()|.
-MOJO_SYSTEM_IMPL_EXPORT void ShutdownIPCSupport();
+void ShutdownIPCSupport();
 
 // Interprocess communication (IPC) functions ----------------------------------
 
@@ -131,13 +127,13 @@ MOJO_SYSTEM_IMPL_EXPORT void ShutdownIPCSupport();
 // |ChannelInfo*| is valid.
 //
 // TODO(vtl): The API is a little crazy with respect to the |ChannelInfo*|.
-MOJO_SYSTEM_IMPL_EXPORT ScopedMessagePipeHandle
-ConnectToSlave(SlaveInfo slave_info,
-               ScopedPlatformHandle platform_handle,
-               const base::Closure& did_connect_to_slave_callback,
-               scoped_refptr<base::TaskRunner> did_connect_to_slave_runner,
-               std::string* platform_connection_id,
-               ChannelInfo** channel_info);
+ScopedMessagePipeHandle ConnectToSlave(
+    SlaveInfo slave_info,
+    ScopedPlatformHandle platform_handle,
+    const base::Closure& did_connect_to_slave_callback,
+    scoped_refptr<base::TaskRunner> did_connect_to_slave_runner,
+    std::string* platform_connection_id,
+    ChannelInfo** channel_info);
 
 // Called in a slave process to connect it to the IPC system. (This should only
 // be called in a process initialized (using |InitIPCSupport()|) with process
@@ -150,11 +146,11 @@ ConnectToSlave(SlaveInfo slave_info,
 // |did_connect_to_master_runner| are analagous to in |ConnectToSlave()|.
 //
 // TODO(vtl): The API is a little crazy with respect to the |ChannelInfo*|.
-MOJO_SYSTEM_IMPL_EXPORT ScopedMessagePipeHandle
-ConnectToMaster(const std::string& platform_connection_id,
-                const base::Closure& did_connect_to_master_callback,
-                scoped_refptr<base::TaskRunner> did_connect_to_master_runner,
-                ChannelInfo** channel_info);
+ScopedMessagePipeHandle ConnectToMaster(
+    const std::string& platform_connection_id,
+    const base::Closure& did_connect_to_master_callback,
+    scoped_refptr<base::TaskRunner> did_connect_to_master_runner,
+    ChannelInfo** channel_info);
 
 // A "channel" is a connection on top of an OS "pipe", on top of which Mojo
 // message pipes (etc.) can be multiplexed. It must "live" on some I/O thread.
@@ -168,9 +164,8 @@ ConnectToMaster(const std::string& platform_connection_id,
 //
 // Both creation functions have a |platform_handle| argument, which should be an
 // OS-dependent handle to one side of a suitable bidirectional OS "pipe" (e.g.,
-// a file descriptor to a socket on POSIX, a handle to a named pipe on Windows);
-// this "pipe" should be connected and ready for operation (e.g., to be written
-// to or read from).
+// a file descriptor to a Unix domain socket); this "pipe" should be connected
+// and ready for operation (e.g., to be written to or read from).
 //
 // Both (synchronously) return a handle to the bootstrap message pipe on the
 // channel that was (or is to be) created, or |MOJO_HANDLE_INVALID| on error
@@ -196,9 +191,9 @@ ConnectToMaster(const std::string& platform_connection_id,
 // should be a handle to a connected OS "pipe". Eventually (even on failure),
 // the "out" value |*channel_info| should be passed to |DestoryChannel()| to
 // tear down the channel. Returns a handle to the bootstrap message pipe.
-MOJO_SYSTEM_IMPL_EXPORT ScopedMessagePipeHandle
-CreateChannelOnIOThread(ScopedPlatformHandle platform_handle,
-                        ChannelInfo** channel_info);
+ScopedMessagePipeHandle CreateChannelOnIOThread(
+    ScopedPlatformHandle platform_handle,
+    ChannelInfo** channel_info);
 
 // Creates a channel asynchronously; may be called from any thread.
 // |platform_handle| should be a handle to a connected OS "pipe".
@@ -210,7 +205,7 @@ CreateChannelOnIOThread(ScopedPlatformHandle platform_handle,
 //
 // Note: This should only be used to establish a channel with a process of type
 // |ProcessType::NONE|. This function may be removed in the future.
-MOJO_SYSTEM_IMPL_EXPORT ScopedMessagePipeHandle CreateChannel(
+ScopedMessagePipeHandle CreateChannel(
     ScopedPlatformHandle platform_handle,
     const base::Callback<void(ChannelInfo*)>& did_create_channel_callback,
     scoped_refptr<base::TaskRunner> did_create_channel_runner);
@@ -219,23 +214,21 @@ MOJO_SYSTEM_IMPL_EXPORT ScopedMessagePipeHandle CreateChannel(
 // |ConnectToSlave()|, |CreateChannel()|, or |CreateChannelOnIOThread()|; must
 // be called from the channel's I'O thread. Completes synchronously (and posts
 // no tasks).
-MOJO_SYSTEM_IMPL_EXPORT void DestroyChannelOnIOThread(
-    ChannelInfo* channel_info);
+void DestroyChannelOnIOThread(ChannelInfo* channel_info);
 
 // Like |DestroyChannelOnIOThread()|, but asynchronous and may be called from
 // any thread. The callback will be called using |did_destroy_channel_runner|
 // if that is non-null, or otherwise it will be called on the "channel thread".
 // The "channel thread" must remain alive and continue to process tasks until
 // the callback has been executed.
-MOJO_SYSTEM_IMPL_EXPORT void DestroyChannel(
-    ChannelInfo* channel_info,
-    const base::Closure& did_destroy_channel_callback,
-    scoped_refptr<base::TaskRunner> did_destroy_channel_runner);
+void DestroyChannel(ChannelInfo* channel_info,
+                    const base::Closure& did_destroy_channel_callback,
+                    scoped_refptr<base::TaskRunner> did_destroy_channel_runner);
 
 // Inform the channel that it will soon be destroyed (doing so is optional).
 // This may be called from any thread, but the caller must ensure that this is
 // called before |DestroyChannel()|.
-MOJO_SYSTEM_IMPL_EXPORT void WillDestroyChannelSoon(ChannelInfo* channel_info);
+void WillDestroyChannelSoon(ChannelInfo* channel_info);
 
 }  // namespace embedder
 }  // namespace mojo

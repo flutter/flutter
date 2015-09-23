@@ -4,6 +4,7 @@
 
 #include "mojo/edk/system/ipc_support.h"
 
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -11,9 +12,7 @@
 #include "base/command_line.h"
 #include "base/location.h"
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/synchronization/waitable_event.h"
-#include "base/test/test_io_thread.h"
 #include "base/test/test_timeouts.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
@@ -28,11 +27,15 @@
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
+#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/edk/test/test_utils.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
+
+using test::TestIOThread;
+
 namespace system {
 namespace {
 
@@ -158,7 +161,7 @@ class TestSlaveProcessDelegate : public embedder::SlaveProcessDelegate {
 // Represents the master's side of its connection to a slave.
 class TestSlaveConnection {
  public:
-  TestSlaveConnection(base::TestIOThread* test_io_thread,
+  TestSlaveConnection(TestIOThread* test_io_thread,
                       IPCSupport* master_ipc_support)
       : test_io_thread_(test_io_thread),
         master_ipc_support_(master_ipc_support),
@@ -206,7 +209,7 @@ class TestSlaveConnection {
   const ConnectionIdentifier& connection_id() const { return connection_id_; }
 
  private:
-  base::TestIOThread* const test_io_thread_;
+  TestIOThread* const test_io_thread_;
   IPCSupport* const master_ipc_support_;
   const ConnectionIdentifier connection_id_;
   // The master's message pipe dispatcher.
@@ -224,7 +227,7 @@ class TestSlave {
  public:
   // Note: Before destruction, |ShutdownIPCSupport()| must be called.
   TestSlave(embedder::PlatformSupport* platform_support,
-            base::TestIOThread* test_io_thread,
+            TestIOThread* test_io_thread,
             embedder::ScopedPlatformHandle platform_handle)
       : test_io_thread_(test_io_thread),
         slave_ipc_support_(platform_support,
@@ -274,7 +277,7 @@ class TestSlave {
   }
 
  private:
-  base::TestIOThread* const test_io_thread_;
+  TestIOThread* const test_io_thread_;
   TestSlaveProcessDelegate slave_process_delegate_;
   IPCSupport slave_ipc_support_;
   base::WaitableEvent event_;
@@ -286,7 +289,7 @@ class TestSlave {
 class TestSlaveSetup {
  public:
   TestSlaveSetup(embedder::SimplePlatformSupport* platform_support,
-                 base::TestIOThread* test_io_thread,
+                 TestIOThread* test_io_thread,
                  TestMasterProcessDelegate* master_process_delegate,
                  IPCSupport* master_ipc_support)
       : platform_support_(platform_support),
@@ -352,14 +355,14 @@ class TestSlaveSetup {
 
  private:
   embedder::SimplePlatformSupport* const platform_support_;
-  base::TestIOThread* const test_io_thread_;
+  TestIOThread* const test_io_thread_;
   TestMasterProcessDelegate* const master_process_delegate_;
   IPCSupport* const master_ipc_support_;
 
-  scoped_ptr<TestSlaveConnection> slave_connection_;
+  std::unique_ptr<TestSlaveConnection> slave_connection_;
   scoped_refptr<MessagePipeDispatcher> master_mp_;
 
-  scoped_ptr<TestSlave> slave_;
+  std::unique_ptr<TestSlave> slave_;
   scoped_refptr<MessagePipeDispatcher> slave_mp_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestSlaveSetup);
@@ -369,7 +372,7 @@ class IPCSupportTest : public testing::Test {
  public:
   // Note: Run master process delegate methods on the I/O thread.
   IPCSupportTest()
-      : test_io_thread_(base::TestIOThread::kAutoStart),
+      : test_io_thread_(TestIOThread::kAutoStart),
         master_ipc_support_(&platform_support_,
                             embedder::ProcessType::MASTER,
                             test_io_thread_.task_runner(),
@@ -378,8 +381,8 @@ class IPCSupportTest : public testing::Test {
                             embedder::ScopedPlatformHandle()) {}
   ~IPCSupportTest() override {}
 
-  scoped_ptr<TestSlaveSetup> SetupSlave() {
-    scoped_ptr<TestSlaveSetup> s(
+  std::unique_ptr<TestSlaveSetup> SetupSlave() {
+    std::unique_ptr<TestSlaveSetup> s(
         new TestSlaveSetup(&platform_support_, &test_io_thread_,
                            &master_process_delegate_, &master_ipc_support_));
     s->Init();
@@ -395,7 +398,7 @@ class IPCSupportTest : public testing::Test {
   embedder::SimplePlatformSupport& platform_support() {
     return platform_support_;
   }
-  base::TestIOThread& test_io_thread() { return test_io_thread_; }
+  TestIOThread& test_io_thread() { return test_io_thread_; }
   TestMasterProcessDelegate& master_process_delegate() {
     return master_process_delegate_;
   }
@@ -403,7 +406,7 @@ class IPCSupportTest : public testing::Test {
 
  private:
   embedder::SimplePlatformSupport platform_support_;
-  base::TestIOThread test_io_thread_;
+  TestIOThread test_io_thread_;
 
   // All tests require a master.
   TestMasterProcessDelegate master_process_delegate_;
@@ -428,7 +431,7 @@ MessagePipeDispatcherPair CreateMessagePipe() {
 }
 
 TEST_F(IPCSupportTest, MasterSlave) {
-  scoped_ptr<TestSlaveSetup> s(SetupSlave());
+  std::unique_ptr<TestSlaveSetup> s(SetupSlave());
 
   s->TestConnection();
 
@@ -456,8 +459,8 @@ TEST_F(IPCSupportTest, MasterSlave) {
 // TODO(vtl): In this scenario, we can't test the intermediary (the master)
 // going away.
 TEST_F(IPCSupportTest, ConnectTwoSlaves) {
-  scoped_ptr<TestSlaveSetup> s1(SetupSlave());
-  scoped_ptr<TestSlaveSetup> s2(SetupSlave());
+  std::unique_ptr<TestSlaveSetup> s1(SetupSlave());
+  std::unique_ptr<TestSlaveSetup> s2(SetupSlave());
   s1->TestConnection();
   s2->TestConnection();
 
@@ -494,8 +497,8 @@ TEST_F(IPCSupportTest, ConnectTwoSlaves) {
 
 // Like |ConnectTwoSlaves|, but does it twice, to test reusing a connection.
 TEST_F(IPCSupportTest, ConnectTwoSlavesTwice) {
-  scoped_ptr<TestSlaveSetup> s1(SetupSlave());
-  scoped_ptr<TestSlaveSetup> s2(SetupSlave());
+  std::unique_ptr<TestSlaveSetup> s1(SetupSlave());
+  std::unique_ptr<TestSlaveSetup> s2(SetupSlave());
   s1->TestConnection();
   s2->TestConnection();
 
@@ -544,7 +547,7 @@ TEST_F(IPCSupportTest, ConnectTwoSlavesTwice) {
 // Creates a message pipe in the slave, which sends both ends (in separate
 // messages) to the master.
 TEST_F(IPCSupportTest, SlavePassBackToMaster) {
-  scoped_ptr<TestSlaveSetup> s(SetupSlave());
+  std::unique_ptr<TestSlaveSetup> s(SetupSlave());
 
   s->TestConnection();
 
@@ -683,7 +686,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlaveInternal) {
   ASSERT_TRUE(client_platform_handle.is_valid());
 
   embedder::SimplePlatformSupport platform_support;
-  base::TestIOThread test_io_thread(base::TestIOThread::kAutoStart);
+  TestIOThread test_io_thread(TestIOThread::kAutoStart);
   TestSlaveProcessDelegate slave_process_delegate;
   // Note: Run process delegate methods on the I/O thread.
   IPCSupport ipc_support(&platform_support, embedder::ProcessType::SLAVE,

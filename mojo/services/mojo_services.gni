@@ -2,6 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# This list is used to populate the Dart mojo_services package. It must be
+# updated to contain the public interfaces under //mojo/services. If you add a
+# new directory, X, containing public interfaces, then you must add
+# //mojo/services/X/public/interfaces to this list.
+
 mojo_services = [
   "//mojo/services/accessibility/public/interfaces",
   "//mojo/services/asset_bundle/public/interfaces",
@@ -13,20 +18,28 @@ mojo_services = [
   "//mojo/services/device_info/public/interfaces",
   "//mojo/services/files/public/interfaces",
   "//mojo/services/geometry/public/interfaces",
+  "//mojo/services/gpu/public/interfaces",
   "//mojo/services/http_server/public/interfaces",
+  "//mojo/services/icu_data/public/interfaces",
   "//mojo/services/input_events/public/interfaces",
+  "//mojo/services/keyboard/public/interfaces",
   "//mojo/services/location/public/interfaces",
   "//mojo/services/native_viewport/public/interfaces",
   "//mojo/services/navigation/public/interfaces",
   "//mojo/services/network/public/interfaces",
-  "//mojo/services/notifications/public/interfaces",
   "//mojo/services/nfc/public/interfaces",
+  "//mojo/services/notifications/public/interfaces",
+  "//mojo/services/ozone_drm_gpu/public/interfaces",
+  "//mojo/services/ozone_drm_host/public/interfaces",
+  "//mojo/services/prediction/public/interfaces",
   "//mojo/services/sensors/public/interfaces",
   "//mojo/services/service_registry/public/interfaces",
-  "//mojo/services/speech_recognizer/public/interfaces",
   "//mojo/services/sharing/public/interfaces",
+  "//mojo/services/speech_recognizer/public/interfaces",
   "//mojo/services/surfaces/public/interfaces",
   "//mojo/services/terminal/public/interfaces",
+  "//mojo/services/tracing/public/interfaces",
+  "//mojo/services/url_response_disk_cache/public/interfaces",
   "//mojo/services/vanadium/security/public/interfaces",
   "//mojo/services/view_manager/public/interfaces",
   "//mojo/services/window_manager/public/interfaces",

@@ -7,9 +7,10 @@
 
 #include <stdint.h>
 
-#include "base/containers/hash_tables.h"
+#include <memory>
+#include <unordered_map>
+
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/threading/thread_checker.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/channel_endpoint.h"
@@ -18,7 +19,6 @@
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/mutex.h"
 #include "mojo/edk/system/raw_channel.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -49,9 +49,8 @@ class MessageInTransitQueue;
 // |ChannelEndpointClient| (e.g., |MessagePipe|), |ChannelEndpoint|, |Channel|.
 // Thus |Channel| may not call into |ChannelEndpoint| with |Channel|'s lock
 // held.
-class MOJO_SYSTEM_IMPL_EXPORT Channel final
-    : public base::RefCountedThreadSafe<Channel>,
-      public RawChannel::Delegate {
+class Channel final : public base::RefCountedThreadSafe<Channel>,
+                      public RawChannel::Delegate {
  public:
   // |platform_support| must remain alive until after |Shutdown()| is called.
   explicit Channel(embedder::PlatformSupport* platform_support);
@@ -59,7 +58,7 @@ class MOJO_SYSTEM_IMPL_EXPORT Channel final
   // This must be called on the creation thread before any other methods are
   // called, and before references to this object are given to any other
   // threads. |raw_channel| should be uninitialized.
-  void Init(scoped_ptr<RawChannel> raw_channel) MOJO_NOT_THREAD_SAFE;
+  void Init(std::unique_ptr<RawChannel> raw_channel) MOJO_NOT_THREAD_SAFE;
 
   // Sets the channel manager associated with this channel. This should be set
   // at most once and only called before |WillShutdownSoon()| (and
@@ -99,7 +98,7 @@ class MOJO_SYSTEM_IMPL_EXPORT Channel final
                                    ChannelEndpointId remote_id);
 
   // This forwards |message| verbatim to |raw_channel_|.
-  bool WriteMessage(scoped_ptr<MessageInTransit> message);
+  bool WriteMessage(std::unique_ptr<MessageInTransit> message);
 
   // See |RawChannel::IsWriteBufferEmpty()|.
   // TODO(vtl): Maybe we shouldn't expose this, and instead have a
@@ -247,7 +246,7 @@ class MOJO_SYSTEM_IMPL_EXPORT Channel final
   // https://github.com/domokit/mojo/issues/313
   mutable Mutex mutex_;
 
-  scoped_ptr<RawChannel> raw_channel_ MOJO_GUARDED_BY(mutex_);
+  std::unique_ptr<RawChannel> raw_channel_ MOJO_GUARDED_BY(mutex_);
   bool is_running_ MOJO_GUARDED_BY(mutex_);
   // Set when |WillShutdownSoon()| is called.
   bool is_shutting_down_ MOJO_GUARDED_BY(mutex_);
@@ -256,7 +255,7 @@ class MOJO_SYSTEM_IMPL_EXPORT Channel final
   ChannelManager* channel_manager_ MOJO_GUARDED_BY(mutex_);
 
   using IdToEndpointMap =
-      base::hash_map<ChannelEndpointId, scoped_refptr<ChannelEndpoint>>;
+      std::unordered_map<ChannelEndpointId, scoped_refptr<ChannelEndpoint>>;
   // Map from local IDs to endpoints. If the endpoint is null, this means that
   // we're just waiting for the remove ack before removing the entry.
   IdToEndpointMap local_id_to_endpoint_map_ MOJO_GUARDED_BY(mutex_);
@@ -264,7 +263,7 @@ class MOJO_SYSTEM_IMPL_EXPORT Channel final
   LocalChannelEndpointIdGenerator local_id_generator_ MOJO_GUARDED_BY(mutex_);
 
   using IdToIncomingEndpointMap =
-      base::hash_map<ChannelEndpointId, scoped_refptr<IncomingEndpoint>>;
+      std::unordered_map<ChannelEndpointId, scoped_refptr<IncomingEndpoint>>;
   // Map from local IDs to incoming endpoints (i.e., those received inside other
   // messages, but not yet claimed via |DeserializeEndpoint()|).
   IdToIncomingEndpointMap incoming_endpoints_ MOJO_GUARDED_BY(mutex_);

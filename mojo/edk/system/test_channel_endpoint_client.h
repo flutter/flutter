@@ -5,8 +5,9 @@
 #ifndef MOJO_EDK_SYSTEM_TEST_CHANNEL_ENDPOINT_CLIENT_H_
 #define MOJO_EDK_SYSTEM_TEST_CHANNEL_ENDPOINT_CLIENT_H_
 
+#include <memory>
+
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
@@ -36,7 +37,7 @@ class TestChannelEndpointClient final : public ChannelEndpointClient {
 
   // Gets/removes a message that was received (|NumMessages()| must be
   // non-zero), in FIFO order.
-  scoped_ptr<MessageInTransit> PopMessage();
+  std::unique_ptr<MessageInTransit> PopMessage();
 
   // Sets an event to signal when we receive a message. (|read_event| must live
   // until this object is destroyed or the read event is reset to null.)

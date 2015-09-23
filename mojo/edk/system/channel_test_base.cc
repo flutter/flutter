@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/channel_test_base.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
@@ -14,8 +16,7 @@ namespace system {
 namespace test {
 
 ChannelTestBase::ChannelTestBase()
-    : io_thread_(base::TestIOThread::kAutoStart) {
-}
+    : io_thread_(mojo::test::TestIOThread::kAutoStart) {}
 
 ChannelTestBase::~ChannelTestBase() {
 }
@@ -36,7 +37,7 @@ void ChannelTestBase::InitChannelOnIOThread(unsigned i) {
 
   CHECK(raw_channels_[i]);
   CHECK(channels_[i]);
-  channels_[i]->Init(raw_channels_[i].Pass());
+  channels_[i]->Init(std::move(raw_channels_[i]));
 }
 
 void ChannelTestBase::CreateAndInitChannelOnIOThread(unsigned i) {
@@ -49,6 +50,11 @@ void ChannelTestBase::ShutdownChannelOnIOThread(unsigned i) {
 
   CHECK(channels_[i]);
   channels_[i]->Shutdown();
+}
+
+void ChannelTestBase::ShutdownAndReleaseChannelOnIOThread(unsigned i) {
+  ShutdownChannelOnIOThread(i);
+  channels_[i] = nullptr;
 }
 
 void ChannelTestBase::SetUpOnIOThread() {

@@ -112,15 +112,20 @@ public class ValidationTest extends MojoTestCase {
                 handles.add(new HandleMock());
             }
             Message message = new Message(test.inputData.getData(), handles);
-            boolean passed = messageReceiver.accept(message);
-            if (passed && !test.expectedResult.equals("PASS")) {
-                fail("Input: " + test.dataFile.getName()
-                        + ": The message should have been refused. Expected error: "
-                        + test.expectedResult);
-            }
-            if (!passed && test.expectedResult.equals("PASS")) {
-                fail("Input: " + test.dataFile.getName()
-                        + ": The message should have been accepted.");
+            try {
+                boolean passed = messageReceiver.accept(message);
+                if (passed && !test.expectedResult.equals("PASS")) {
+                    fail("Input: " + test.dataFile.getName()
+                            + ": The message should have been refused. Expected error: "
+                            + test.expectedResult);
+                }
+                if (!passed && test.expectedResult.equals("PASS")) {
+                    fail("Input: " + test.dataFile.getName()
+                            + ": The message should have been accepted.");
+                }
+            } catch (SerializationException e) {
+                e.printStackTrace();
+                fail("Input: " + test.dataFile.getName() + ": Serialization error.");
             }
         }
     }

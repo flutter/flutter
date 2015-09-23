@@ -40,7 +40,7 @@ class Builtin {
   // 1) Setting the native resolver (if any).
   // 2) Applying patch files (if any).
   // NOTE: This should only be called once for a library per isolate.
-  static void PrepareLibrary(BuiltinLibraryId id);
+  static Dart_Handle PrepareLibrary(BuiltinLibraryId id);
 
   static int64_t GetIntegerValue(Dart_Handle value_obj) {
     int64_t value = 0;

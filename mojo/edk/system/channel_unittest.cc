@@ -17,6 +17,8 @@ namespace {
 
 using ChannelTest = test::ChannelTestBase;
 
+void DoNothing() {}
+
 // ChannelTest.InitShutdown ----------------------------------------------------
 
 TEST_F(ChannelTest, InitShutdown) {
@@ -112,6 +114,34 @@ TEST_F(ChannelTest, WaitAfterAttachRunAndShutdown) {
   mp->Close(0);
 
   EXPECT_TRUE(channel(0)->HasOneRef());
+}
+
+// ChannelTest.EndpointChannelShutdownRace -------------------------------------
+
+TEST_F(ChannelTest, EndpointChannelShutdownRace) {
+  const size_t kIterations = 1000;
+
+  for (size_t i = 0; i < kIterations; i++) {
+    // Need a new set of |RawChannel|s on every iteration.
+    SetUp();
+    PostMethodToIOThreadAndWait(
+        FROM_HERE, &ChannelTest::CreateAndInitChannelOnIOThread, 0);
+
+    scoped_refptr<ChannelEndpoint> channel_endpoint;
+    scoped_refptr<MessagePipe> mp(
+        MessagePipe::CreateLocalProxy(&channel_endpoint));
+
+    channel(0)->SetBootstrapEndpoint(channel_endpoint);
+
+    io_thread()->PostTask(
+        FROM_HERE, base::Bind(&ChannelTest::ShutdownAndReleaseChannelOnIOThread,
+                              base::Unretained(this), 0));
+    mp->Close(0);
+
+    // Wait for the IO thread to finish shutting down the channel.
+    io_thread()->PostTaskAndWait(FROM_HERE, base::Bind(&DoNothing));
+    EXPECT_FALSE(channel(0));
+  }
 }
 
 // TODO(vtl): More. ------------------------------------------------------------

@@ -5,8 +5,9 @@
 #ifndef MOJO_EDK_SYSTEM_SLAVE_CONNECTION_MANAGER_H_
 #define MOJO_EDK_SYSTEM_SLAVE_CONNECTION_MANAGER_H_
 
+#include <memory>
+
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/threading/thread.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
@@ -14,7 +15,6 @@
 #include "mojo/edk/system/connection_manager.h"
 #include "mojo/edk/system/mutex.h"
 #include "mojo/edk/system/raw_channel.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace base {
@@ -35,9 +35,8 @@ namespace system {
 // its internal, private thread), with condition that |Init()| be called before
 // anything else and |Shutdown()| be called before destruction (and no other
 // public methods may be called during/after |Shutdown()|).
-class MOJO_SYSTEM_IMPL_EXPORT SlaveConnectionManager final
-    : public ConnectionManager,
-      public RawChannel::Delegate {
+class SlaveConnectionManager final : public ConnectionManager,
+                                     public RawChannel::Delegate {
  public:
   // Note: None of the public methods may be called from |private_thread_|.
 
@@ -106,7 +105,7 @@ class MOJO_SYSTEM_IMPL_EXPORT SlaveConnectionManager final
   base::Thread private_thread_;
 
   // Only accessed on |private_thread_|:
-  scoped_ptr<RawChannel> raw_channel_;
+  std::unique_ptr<RawChannel> raw_channel_;
   enum AwaitingAckType {
     NOT_AWAITING_ACK,
     AWAITING_ACCEPT_CONNECT_ACK,

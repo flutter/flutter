@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-#include <ostream>
+#include <utility>
 
 #include "base/logging.h"
 #include "mojo/edk/system/configuration.h"
@@ -144,12 +144,12 @@ bool MessageInTransit::GetNextMessageSize(const void* buffer,
 }
 
 void MessageInTransit::SetDispatchers(
-    scoped_ptr<DispatcherVector> dispatchers) {
+    std::unique_ptr<DispatcherVector> dispatchers) {
   DCHECK(dispatchers);
   DCHECK(!dispatchers_);
   DCHECK(!transport_data_);
 
-  dispatchers_ = dispatchers.Pass();
+  dispatchers_ = std::move(dispatchers);
 #ifndef NDEBUG
   for (size_t i = 0; i < dispatchers_->size(); i++)
     DCHECK(!(*dispatchers_)[i] || (*dispatchers_)[i]->HasOneRef());
@@ -157,12 +157,12 @@ void MessageInTransit::SetDispatchers(
 }
 
 void MessageInTransit::SetTransportData(
-    scoped_ptr<TransportData> transport_data) {
+    std::unique_ptr<TransportData> transport_data) {
   DCHECK(transport_data);
   DCHECK(!transport_data_);
   DCHECK(!dispatchers_);
 
-  transport_data_ = transport_data.Pass();
+  transport_data_ = std::move(transport_data);
   UpdateTotalSize();
 }
 
@@ -173,7 +173,7 @@ void MessageInTransit::SerializeAndCloseDispatchers(Channel* channel) {
   if (!dispatchers_ || !dispatchers_->size())
     return;
 
-  transport_data_.reset(new TransportData(dispatchers_.Pass(), channel));
+  transport_data_.reset(new TransportData(std::move(dispatchers_), channel));
 
   // Update the sizes in the message header.
   UpdateTotalSize();

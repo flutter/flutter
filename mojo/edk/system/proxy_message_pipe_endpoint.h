@@ -8,7 +8,6 @@
 #include "base/memory/ref_counted.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/message_pipe_endpoint.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -27,8 +26,7 @@ class MessagePipe;
 // remote consists of a |LocalMessagePipeEndpoint| and a
 // |ProxyMessagePipeEndpoint|, with only the local endpoint being accessible via
 // a |MessagePipeDispatcher|.
-class MOJO_SYSTEM_IMPL_EXPORT ProxyMessagePipeEndpoint final
-    : public MessagePipeEndpoint {
+class ProxyMessagePipeEndpoint final : public MessagePipeEndpoint {
  public:
   explicit ProxyMessagePipeEndpoint(ChannelEndpoint* channel_endpoint);
   ~ProxyMessagePipeEndpoint() override;
@@ -44,7 +42,7 @@ class MOJO_SYSTEM_IMPL_EXPORT ProxyMessagePipeEndpoint final
   // |MessagePipeEndpoint| implementation:
   Type GetType() const override;
   bool OnPeerClose() override;
-  void EnqueueMessage(scoped_ptr<MessageInTransit> message) override;
+  void EnqueueMessage(std::unique_ptr<MessageInTransit> message) override;
   void Close() override;
 
  private:

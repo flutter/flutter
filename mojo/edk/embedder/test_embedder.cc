@@ -5,13 +5,13 @@
 #include "mojo/edk/embedder/test_embedder.h"
 
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel_manager.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/edk/system/handle_table.h"
+#include "mojo/edk/util/make_unique.h"
 
 namespace mojo {
 
@@ -41,7 +41,7 @@ namespace embedder {
 namespace test {
 
 void InitWithSimplePlatformSupport() {
-  Init(make_scoped_ptr(new SimplePlatformSupport()));
+  Init(util::MakeUnique<SimplePlatformSupport>());
 }
 
 bool Shutdown() {

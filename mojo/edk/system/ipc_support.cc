@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/ipc_support.h"
 
+#include <type_traits>
+
 #include "base/logging.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/slave_process_delegate.h"
@@ -96,8 +98,7 @@ scoped_refptr<system::MessagePipeDispatcher> IPCSupport::ConnectToSlave(
   DCHECK(channel_id);
 
   // We rely on |ChannelId| and |ProcessIdentifier| being identical types.
-  // TODO(vtl): Use std::is_same instead when we are allowed to (C++11 library).
-  static_assert(sizeof(ChannelId) == sizeof(ProcessIdentifier),
+  static_assert(std::is_same<ChannelId, ProcessIdentifier>::value,
                 "ChannelId and ProcessIdentifier types don't match");
 
   embedder::ScopedPlatformHandle platform_connection_handle =
@@ -115,8 +116,7 @@ scoped_refptr<system::MessagePipeDispatcher> IPCSupport::ConnectToMaster(
     ChannelId* channel_id) {
   DCHECK(channel_id);
 
-  // TODO(vtl): Use std::is_same instead when we are allowed to (C++11 library).
-  static_assert(sizeof(ChannelId) == sizeof(ProcessIdentifier),
+  static_assert(std::is_same<ChannelId, ProcessIdentifier>::value,
                 "ChannelId and ProcessIdentifier types don't match");
   embedder::ScopedPlatformHandle platform_connection_handle =
       ConnectToMasterInternal(connection_id);

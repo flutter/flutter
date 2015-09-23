@@ -8,6 +8,7 @@
 #include <string>
 
 #include "base/callback_forward.h"
+#include "base/files/scoped_file.h"
 #include "base/threading/platform_thread.h"
 #include "mojo/public/cpp/system/core.h"
 
@@ -42,11 +43,11 @@ bool BlockingCopyToString(ScopedDataPipeConsumerHandle source,
 bool BlockingCopyFromString(const std::string& source,
                             const ScopedDataPipeProducerHandle& destination);
 
-// Synchronously copies data from source to the destination file returning true
-// on success and false on error.  In case of an error, |destination| holds the
-// data that could be read from the source before the error occured.
-bool BlockingCopyToFile(ScopedDataPipeConsumerHandle source,
-                        const base::FilePath& destination);
+// Synchronously copies source data to a temporary file, returning a file
+// pointer on success and NULL on error. The temporary file is unlinked
+// immediately so that it is only accessible by file pointer (and removed once
+// closed or the creating process dies).
+base::ScopedFILE BlockingCopyToTempFile(ScopedDataPipeConsumerHandle source);
 
 }  // namespace common
 }  // namespace mojo

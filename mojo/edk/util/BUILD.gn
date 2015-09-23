@@ -1,0 +1,20 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../mojo_edk.gni")
+
+mojo_edk_source_set("util") {
+  sources = [
+    "make_unique.h",
+    "scoped_file.h",
+  ]
+
+  defines = [ "MOJO_SYSTEM_IMPLEMENTATION" ]
+
+  mojo_edk_configs = [ "mojo/edk/system:system_config" ]
+
+  deps = [
+    "//base",
+  ]
+}

@@ -4,6 +4,10 @@
 
 #include "mojo/edk/system/master_connection_manager.h"
 
+#include <memory>
+#include <unordered_map>
+#include <utility>
+
 #include "base/bind.h"
 #include "base/bind_helpers.h"
 #include "base/location.h"
@@ -18,6 +22,7 @@
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/raw_channel.h"
 #include "mojo/edk/system/transport_data.h"
+#include "mojo/edk/util/make_unique.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -61,8 +66,7 @@ MessageInTransit::Subtype ConnectionManagerResultToMessageInTransitSubtype(
 
 // |MasterConnectionManager::Helper| is not thread-safe, and must only be used
 // on its |owner_|'s private thread.
-class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager::Helper final
-    : public RawChannel::Delegate {
+class MasterConnectionManager::Helper final : public RawChannel::Delegate {
  public:
   Helper(MasterConnectionManager* owner,
          ProcessIdentifier process_identifier,
@@ -88,7 +92,7 @@ class MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager::Helper final
   MasterConnectionManager* const owner_;
   const ProcessIdentifier process_identifier_;
   embedder::SlaveInfo const slave_info_;
-  scoped_ptr<RawChannel> raw_channel_;
+  std::unique_ptr<RawChannel> raw_channel_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Helper);
 };
@@ -181,7 +185,7 @@ void MasterConnectionManager::Helper::OnReadMessage(
       return;
   }
 
-  scoped_ptr<MessageInTransit> response(new MessageInTransit(
+  std::unique_ptr<MessageInTransit> response(new MessageInTransit(
       MessageInTransit::Type::CONNECTION_MANAGER_ACK,
       ConnectionManagerResultToMessageInTransitSubtype(result), num_bytes,
       bytes));
@@ -193,14 +197,14 @@ void MasterConnectionManager::Helper::OnReadMessage(
     embedder::ScopedPlatformHandleVectorPtr platform_handles(
         new embedder::PlatformHandleVector());
     platform_handles->push_back(platform_handle.release());
-    response->SetTransportData(make_scoped_ptr(
-        new TransportData(platform_handles.Pass(),
-                          raw_channel_->GetSerializedPlatformHandleSize())));
+    response->SetTransportData(util::MakeUnique<TransportData>(
+        std::move(platform_handles),
+        raw_channel_->GetSerializedPlatformHandleSize()));
   } else {
     DCHECK(!platform_handle.is_valid());
   }
 
-  if (!raw_channel_->WriteMessage(response.Pass())) {
+  if (!raw_channel_->WriteMessage(std::move(response))) {
     LOG(ERROR) << "WriteMessage failed";
     FatalError();  // WARNING: This destroys us.
     return;
@@ -221,7 +225,7 @@ void MasterConnectionManager::Helper::FatalError() {
 
 // MasterConnectionManager::PendingConnectInfo ---------------------------------
 
-struct MOJO_SYSTEM_IMPL_EXPORT MasterConnectionManager::PendingConnectInfo {
+struct MasterConnectionManager::PendingConnectInfo {
   // States:
   //   - This is created upon a first "allow connect" (with |first| set
   //     immediately). We then wait for a second "allow connect".
@@ -308,7 +312,7 @@ class MasterConnectionManager::ProcessConnections {
   }
 
  private:
-  base::hash_map<ProcessIdentifier, embedder::PlatformHandle>
+  std::unordered_map<ProcessIdentifier, embedder::PlatformHandle>
       process_connections_;  // "Owns" any valid platform handles.
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ProcessConnections);
@@ -554,7 +558,7 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
   // The remaining cases all result in |it| being removed from
   // |pending_connects_| and deleting |info|.
   pending_connects_.erase(it);
-  scoped_ptr<PendingConnectInfo> info_deleter(info);
+  std::unique_ptr<PendingConnectInfo> info_deleter(info);
 
   // |remaining_connectee| should be the same as |process_identifier|.
   ProcessIdentifier remaining_connectee;
@@ -672,8 +676,8 @@ void MasterConnectionManager::AddSlaveOnPrivateThread(
   DCHECK(event);
   AssertOnPrivateThread();
 
-  scoped_ptr<Helper> helper(new Helper(this, slave_process_identifier,
-                                       slave_info, platform_handle.Pass()));
+  std::unique_ptr<Helper> helper(new Helper(
+      this, slave_process_identifier, slave_info, platform_handle.Pass()));
   helper->Init();
 
   DCHECK(helpers_.find(slave_process_identifier) == helpers_.end());

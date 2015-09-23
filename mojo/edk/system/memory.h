@@ -9,8 +9,9 @@
 #include <stdint.h>
 #include <string.h>  // For |memcpy()|.
 
-#include "base/memory/scoped_ptr.h"
-#include "mojo/edk/system/system_impl_export.h"
+#include <memory>
+#include <type_traits>
+
 #include "mojo/public/c/system/macros.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -18,17 +19,6 @@ namespace mojo {
 namespace system {
 
 namespace internal {
-
-// Removes |const| from |T| (available as |remove_const<T>::type|):
-// TODO(vtl): Remove these once we have the C++11 |remove_const|.
-template <typename T>
-struct remove_const {
-  using type = T;
-};
-template <typename T>
-struct remove_const<const T> {
-  using type = T;
-};
 
 // Yields |(const) char| if |T| is |(const) void|, else |T|:
 template <typename T>
@@ -47,19 +37,17 @@ struct VoidToChar<const void> {
 // Checks (insofar as appropriate/possible) that |pointer| is a valid pointer to
 // a buffer of the given size and alignment (both in bytes).
 template <size_t size, size_t alignment>
-void MOJO_SYSTEM_IMPL_EXPORT CheckUserPointer(const void* pointer);
+void CheckUserPointer(const void* pointer);
 
 // Checks (insofar as appropriate/possible) that |pointer| is a valid pointer to
 // a buffer of |count| elements of the given size and alignment (both in bytes).
 template <size_t size, size_t alignment>
-void MOJO_SYSTEM_IMPL_EXPORT
-CheckUserPointerWithCount(const void* pointer, size_t count);
+void CheckUserPointerWithCount(const void* pointer, size_t count);
 
 // Checks (insofar as appropriate/possible) that |pointer| is a valid pointer to
 // a buffer of the given size and alignment (both in bytes).
 template <size_t alignment>
-void MOJO_SYSTEM_IMPL_EXPORT
-CheckUserPointerWithSize(const void* pointer, size_t size);
+void CheckUserPointerWithSize(const void* pointer, size_t size);
 
 }  // namespace internal
 
@@ -156,7 +144,7 @@ class UserPointer {
   // void|) from the location pointed to by this user pointer. Use this when
   // you'd do something like |memcpy(destination, user_pointer, count *
   // sizeof(Type)|.
-  void GetArray(typename internal::remove_const<Type>::type* destination,
+  void GetArray(typename std::remove_cv<Type>::type* destination,
                 size_t count) const {
     CheckArray(count);
     memcpy(destination, pointer_, count * sizeof(NonVoidType));
@@ -269,7 +257,7 @@ inline UserPointer<Type> MakeUserPointer(Type* pointer) {
 template <typename Type>
 class UserPointerReader {
  private:
-  using TypeNoConst = typename internal::remove_const<Type>::type;
+  using TypeNoConst = typename std::remove_const<Type>::type;
 
  public:
   // Note: If |count| is zero, |GetPointer()| will always return null.
@@ -305,7 +293,7 @@ class UserPointerReader {
     memcpy(buffer_.get(), user_pointer, count * sizeof(Type));
   }
 
-  scoped_ptr<TypeNoConst[]> buffer_;
+  std::unique_ptr<TypeNoConst[]> buffer_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(UserPointerReader);
 };
@@ -334,7 +322,7 @@ class UserPointerWriter {
  private:
   UserPointer<Type> user_pointer_;
   size_t count_;
-  scoped_ptr<Type[]> buffer_;
+  std::unique_ptr<Type[]> buffer_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(UserPointerWriter);
 };
@@ -366,7 +354,7 @@ class UserPointerReaderWriter {
  private:
   UserPointer<Type> user_pointer_;
   size_t count_;
-  scoped_ptr<Type[]> buffer_;
+  std::unique_ptr<Type[]> buffer_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(UserPointerReaderWriter);
 };

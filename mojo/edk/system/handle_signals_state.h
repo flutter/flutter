@@ -5,7 +5,6 @@
 #ifndef MOJO_EDK_SYSTEM_HANDLE_SIGNALS_STATE_H_
 #define MOJO_EDK_SYSTEM_HANDLE_SIGNALS_STATE_H_
 
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/types.h"
 
 namespace mojo {
@@ -13,8 +12,7 @@ namespace system {
 
 // Just "add" some constructors and methods to the C struct
 // |MojoHandleSignalsState| (for convenience). This should add no overhead.
-struct MOJO_SYSTEM_IMPL_EXPORT HandleSignalsState final
-    : public MojoHandleSignalsState {
+struct HandleSignalsState final : public MojoHandleSignalsState {
   HandleSignalsState() {
     satisfied_signals = MOJO_HANDLE_SIGNAL_NONE;
     satisfiable_signals = MOJO_HANDLE_SIGNAL_NONE;
