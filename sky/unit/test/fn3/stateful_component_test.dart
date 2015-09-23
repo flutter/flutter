@@ -57,6 +57,7 @@ void main() {
     WidgetTester tester = new WidgetTester();
     tester.pumpFrame(
       new FlipComponent(
+        key: new Key('rebuild test'), // this is so we don't get the state from the TestComponentConfig in the last test, but instead instantiate a new element with a new state.
         left: new TestBuildCounter(),
         right: new DecoratedBox(decoration: kBoxDecorationB)
       )

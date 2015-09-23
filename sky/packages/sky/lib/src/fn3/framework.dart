@@ -6,11 +6,24 @@ import 'dart:collection';
 
 import 'package:sky/rendering.dart';
 
+/// A Key is an identifier for [Widget]s and [Element]s. A new Widget will only
+/// be used to reconfigure an existing Element if its Key is the same as its
+/// original Widget's Key.
+///
+/// Keys must be unique amongst the Elements with the same parent.
 abstract class Key {
+  /// Default constructor, used by subclasses.
   const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+
+  /// Construct a ValueKey<String> with the given String.
+  /// This is the simplest way to create keys.
   factory Key(String value) => new ValueKey<String>(value);
 }
 
+/// A kind of [Key] that uses a value of a particular type to identify itself.
+///
+/// For example, a ValueKey<String> is equal to another ValueKey<String> if
+/// their values match.
 class ValueKey<T> extends Key {
   const ValueKey(this.value) : super.constructor();
   final T value;
@@ -19,6 +32,10 @@ class ValueKey<T> extends Key {
   int get hashCode => value.hashCode;
 }
 
+/// A kind of [Key] that takes its identity from the object used as its value.
+///
+/// Used to tie the identity of a Widget to the identity of an object used to
+/// generate that Widget.
 class ObjectKey extends Key {
   const ObjectKey(this.value) : super.constructor();
   final Object value;
@@ -26,6 +43,163 @@ class ObjectKey extends Key {
   bool operator==(other) => other is ObjectKey && identical(other.value, value);
   int get hashCode => identityHashCode(value);
 }
+
+typedef void GlobalKeyUpdateListener(GlobalKey key, Element element);
+typedef void GlobalKeyRemoveListener(GlobalKey key);
+
+/// A GlobalKey is one that must be unique across the entire application. It is
+/// used by components that need to communicate with other components across the
+/// application's element tree.
+abstract class GlobalKey extends Key {
+  const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+
+  /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
+  /// The label is not used for comparing the identity of the key.
+  factory GlobalKey({ String label }) => new LabeledGlobalKey(label); // the label is purely for debugging purposes and is otherwise ignored
+
+  static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
+  static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
+  static final Map<GlobalKey, Set<GlobalKeyUpdateListener>> _updateListeners = new Map<GlobalKey, Set<GlobalKeyUpdateListener>>();
+  static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = new Map<GlobalKey, Set<GlobalKeyRemoveListener>>();
+  static final Set<GlobalKey> _updatedKeys = new Set<GlobalKey>();
+  static final Set<GlobalKey> _removedKeys = new Set<GlobalKey>();
+
+  // TODO(ianh): call this
+  void _register(Element element) {
+    assert(() {
+      if (_registry.containsKey(this)) {
+        int oldCount = _debugDuplicates.putIfAbsent(this, () => 1);
+        assert(oldCount >= 1);
+        _debugDuplicates[this] = oldCount + 1;
+      }
+      return true;
+    });
+    _registry[this] = element;
+  }
+
+  // TODO(ianh): call this
+  void _unregister(Element element) {
+    assert(() {
+      if (_registry.containsKey(this) && _debugDuplicates.containsKey(this)) {
+        int oldCount = _debugDuplicates[this];
+        assert(oldCount >= 2);
+        if (oldCount == 2) {
+          _debugDuplicates.remove(this);
+        } else {
+          _debugDuplicates[this] = oldCount - 1;
+        }
+      }
+      return true;
+    });
+    if (_registry[this] == element) {
+      _registry.remove(this);
+      _removedKeys.add(this);
+    }
+  }
+
+  // TODO(ianh): call this
+  void _didUpdate() {
+    _updatedKeys.add(this);
+  }
+
+  static void registerUpdateListener(GlobalKey key, GlobalKeyUpdateListener listener) {
+    assert(key != null);
+    Set<GlobalKeyUpdateListener> listeners =
+        _updateListeners.putIfAbsent(key, () => new Set<GlobalKeyUpdateListener>());
+    bool added = listeners.add(listener);
+    assert(added);
+  }
+
+  static void unregisterUpdateListener(GlobalKey key, GlobalKeyUpdateListener listener) {
+    assert(key != null);
+    assert(_updateListeners.containsKey(key));
+    bool removed = _updateListeners[key].remove(listener);
+    if (_updateListeners[key].isEmpty)
+      _updateListeners.remove(key);
+    assert(removed);
+  }
+
+  static void registerRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
+    assert(key != null);
+    Set<GlobalKeyRemoveListener> listeners =
+        _removeListeners.putIfAbsent(key, () => new Set<GlobalKeyRemoveListener>());
+    bool added = listeners.add(listener);
+    assert(added);
+  }
+
+  static void unregisterRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
+    assert(key != null);
+    assert(_removeListeners.containsKey(key));
+    bool removed = _removeListeners[key].remove(listener);
+    if (_removeListeners[key].isEmpty)
+      _removeListeners.remove(key);
+    assert(removed);
+  }
+
+  static Element getElement(GlobalKey key) {
+    assert(key != null);
+    return _registry[key];
+  }
+
+  // TODO(ianh): call this
+  static void _notifyListeners() {
+    assert(() {
+      String message = '';
+      for (GlobalKey key in _debugDuplicates.keys) {
+        message += 'Duplicate GlobalKey found amongst mounted elements: $key (${_debugDuplicates[key]} instances)\n';
+        message += 'Most recently registered instance is:\n${_registry[key]}\n';
+      }
+      if (!_debugDuplicates.isEmpty)
+        throw message;
+      return true;
+    });
+    if (_updatedKeys.isEmpty && _removedKeys.isEmpty)
+      return;
+    try {
+      for (GlobalKey key in _updatedKeys) {
+        Element element = _registry[key];
+        if (element != null && _updateListeners.containsKey(key)) {
+          Set<GlobalKeyUpdateListener> localListeners = new Set<GlobalKeyUpdateListener>.from(_updateListeners[key]);
+          for (GlobalKeyUpdateListener listener in localListeners)
+            listener(key, element);
+        }
+      }
+      for (GlobalKey key in _removedKeys) {
+        if (!_registry.containsKey(key) && _removeListeners.containsKey(key)) {
+          Set<GlobalKeyRemoveListener> localListeners = new Set<GlobalKeyRemoveListener>.from(_removeListeners[key]);
+          for (GlobalKeyRemoveListener listener in localListeners)
+            listener(key);
+        }
+      }
+    } finally {
+      _removedKeys.clear();
+      _updatedKeys.clear();
+    }
+  }
+
+}
+
+/// Each LabeledGlobalKey instance is a unique key.
+/// The optional label can be used for documentary purposes. It does not affect
+/// the key's identity.
+class LabeledGlobalKey extends GlobalKey {
+  const LabeledGlobalKey(this._label) : super.constructor();
+  final String _label;
+  String toString() => '[GlobalKey ${_label != null ? _label : hashCode}]';
+}
+
+/// A kind of [GlobalKey] that takes its identity from the object used as its value.
+///
+/// Used to tie the identity of a Widget to the identity of an object used to
+/// generate that Widget.
+class GlobalObjectKey extends GlobalKey {
+  const GlobalObjectKey(this.value) : super.constructor();
+  final Object value;
+  String toString() => '[GlobalKey ${value.runtimeType}(${value.hashCode})]';
+  bool operator==(other) => other is GlobalObjectKey && identical(other.value, value);
+  int get hashCode => identityHashCode(value);
+}
+
 
 /// A Widget object describes the configuration for an [Element].
 /// Widget subclasses should be immutable with const constructors.
@@ -65,7 +239,7 @@ abstract class RenderObjectWidget extends Widget {
 abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   const LeafRenderObjectWidget({ Key key }) : super(key: key);
 
-  RenderObjectElement createElement() => new LeafRenderObjectElement(this);
+  LeafRenderObjectElement createElement() => new LeafRenderObjectElement(this);
 }
 
 /// A superclass for RenderObjectWidgets that configure RenderObject subclasses
@@ -76,7 +250,7 @@ abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
 
   final Widget child;
 
-  RenderObjectElement createElement() => new OneChildRenderObjectElement(this);
+  OneChildRenderObjectElement createElement() => new OneChildRenderObjectElement(this);
 }
 
 /// A superclass for RenderObjectWidgets that configure RenderObject subclasses
@@ -89,7 +263,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
 
   final List<Widget> children;
 
-  RenderObjectElement createElement() => new MultiChildRenderObjectElement(this);
+  MultiChildRenderObjectElement createElement() => new MultiChildRenderObjectElement(this);
 }
 
 /// StatelessComponents describe a way to compose other Widgets to form reusable
@@ -230,7 +404,7 @@ abstract class BuildContext {
 /// RenderObjectElement are allowed to have more than one child.
 abstract class Element<T extends Widget> implements BuildContext {
   Element(T widget) : _widget = widget {
-    assert(_widget != null);
+    assert(widget != null);
   }
 
   Element _parent;
@@ -248,6 +422,7 @@ abstract class Element<T extends Widget> implements BuildContext {
   int _depth;
 
   /// The configuration for this element.
+  T get widget => _widget;
   T _widget;
 
   RenderObject get _descendantRenderObject {
@@ -278,45 +453,45 @@ abstract class Element<T extends Widget> implements BuildContext {
     visitChildren(visit);
   }
 
-  Element _updateChild(Element child, Widget newWidget, dynamic slot) {
-    // This method is the core of the system.
-    //
-    // It is called each time we are to add, update, or remove a child based on
-    // an updated configuration.
-    //
-    // If the child is null, and the newWidget is not null, then we have a new
-    // child for which we need to create an Element, configured with newWidget.
-    //
-    // If the newWidget is null, and the child is not null, then we need to
-    // remove it because it no longer has a configuration.
-    //
-    // If neither are null, then we need to update the child's configuration to
-    // be the new configuration given by newWidget. If newWidget can be given to
-    // the existing child, then it is so given. Otherwise, the old child needs
-    // to be disposed and a new child created for the new configuration.
-    //
-    // If both are null, then we don't have a child and won't have a child, so
-    // we do nothing.
-    //
-    // The _updateChild() method returns the new child, if it had to create one,
-    // or the child that was passed in, if it just had to update the child, or
-    // null, if it removed the child and did not replace it.
+  /// This method is the core of the system.
+  ///
+  /// It is called each time we are to add, update, or remove a child based on
+  /// an updated configuration.
+  ///
+  /// If the child is null, and the newWidget is not null, then we have a new
+  /// child for which we need to create an Element, configured with newWidget.
+  ///
+  /// If the newWidget is null, and the child is not null, then we need to
+  /// remove it because it no longer has a configuration.
+  ///
+  /// If neither are null, then we need to update the child's configuration to
+  /// be the new configuration given by newWidget. If newWidget can be given to
+  /// the existing child, then it is so given. Otherwise, the old child needs
+  /// to be disposed and a new child created for the new configuration.
+  ///
+  /// If both are null, then we don't have a child and won't have a child, so
+  /// we do nothing.
+  ///
+  /// The updateChild() method returns the new child, if it had to create one,
+  /// or the child that was passed in, if it just had to update the child, or
+  /// null, if it removed the child and did not replace it.
+  Element updateChild(Element child, Widget newWidget, dynamic slot) {
     if (newWidget == null) {
       if (child != null)
         _detachChild(child);
       return null;
     }
     if (child != null) {
-      if (child._widget == newWidget) {
+      if (child.widget == newWidget) {
         if (child._slot != slot)
           updateSlotForChild(child, slot);
         return child;
       }
-      if (_canUpdate(child._widget, newWidget)) {
+      if (_canUpdate(child.widget, newWidget)) {
         if (child._slot != slot)
           updateSlotForChild(child, slot);
         child.update(newWidget);
-        assert(child._widget == newWidget);
+        assert(child.widget == newWidget);
         return child;
       }
       _detachChild(child);
@@ -333,24 +508,24 @@ abstract class Element<T extends Widget> implements BuildContext {
   // TODO(ianh): rename to didMount
   void mount(Element parent, dynamic slot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
-    assert(_widget != null);
+    assert(widget != null);
     assert(_parent == null);
     assert(parent == null || parent._debugLifecycleState == _ElementLifecycle.mounted);
     assert(_slot == null);
-    assert(_depth == null);
+    assert(depth == null);
     _parent = parent;
     _slot = slot;
-    _depth = _parent != null ? _parent._depth + 1 : 1;
+    _depth = _parent != null ? _parent.depth + 1 : 1;
     assert(() { _debugLifecycleState = _ElementLifecycle.mounted; return true; });
   }
 
   /// Called when an Element receives a new configuration widget.
   void update(T newWidget) {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
-    assert(_widget != null);
+    assert(widget != null);
     assert(newWidget != null);
-    assert(_depth != null);
-    assert(_canUpdate(_widget, newWidget));
+    assert(depth != null);
+    assert(_canUpdate(widget, newWidget));
     _widget = newWidget;
   }
 
@@ -371,10 +546,10 @@ abstract class Element<T extends Widget> implements BuildContext {
 
   void _updateSlot(dynamic slot) {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
-    assert(_widget != null);
+    assert(widget != null);
     assert(_parent != null);
     assert(_parent._debugLifecycleState == _ElementLifecycle.mounted);
-    assert(_depth != null);
+    assert(depth != null);
     _slot = slot;
   }
 
@@ -405,8 +580,8 @@ abstract class Element<T extends Widget> implements BuildContext {
   // TODO(ianh): rename to didUnmount
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
-    assert(_widget != null);
-    assert(_depth != null);
+    assert(widget != null);
+    assert(depth != null);
     assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; });
   }
 
@@ -416,9 +591,9 @@ abstract class Element<T extends Widget> implements BuildContext {
       _dependencies = new Set<Type>();
     _dependencies.add(targetType);
     Element ancestor = _parent;
-    while (ancestor != null && ancestor._widget.runtimeType != targetType)
+    while (ancestor != null && ancestor.widget.runtimeType != targetType)
       ancestor = ancestor._parent;
-    return ancestor._widget;
+    return ancestor?.widget;
   }
 
   void dependenciesChanged() {
@@ -467,7 +642,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     } catch (e, stack) {
       _debugReportException('building $this', e, stack);
     }
-    _child = _updateChild(_child, built, _slot);
+    _child = updateChild(_child, built, _slot);
   }
 
   static BuildScheduler scheduleBuildFor;
@@ -506,13 +681,13 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
 /// Instantiation of StatelessComponent widgets.
 class StatelessComponentElement<T extends StatelessComponent> extends BuildableElement<T> {
   StatelessComponentElement(StatelessComponent widget) : super(widget) {
-    _builder = _widget.build;
+    _builder = widget.build;
   }
 
   void update(StatelessComponent newWidget) {
     super.update(newWidget);
-    assert(_widget == newWidget);
-    _builder = _widget.build;
+    assert(widget == newWidget);
+    _builder = widget.build;
     _dirty = true;
     rebuild();
   }
@@ -532,9 +707,9 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
 
   void update(StatefulComponent newWidget) {
     super.update(newWidget);
-    assert(_widget == newWidget);
+    assert(widget == newWidget);
     StatefulComponent oldConfig = _state._config;
-    _state._config = _widget;
+    _state._config = widget;
     _state.didUpdateConfig(oldConfig);
     _dirty = true;
     rebuild();
@@ -551,17 +726,17 @@ class ParentDataElement extends StatelessComponentElement<ParentDataWidget> {
   ParentDataElement(ParentDataWidget widget) : super(widget);
 
   void update(ParentDataWidget newWidget) {
-    ParentDataWidget oldWidget = _widget;
+    ParentDataWidget oldWidget = widget;
     super.update(newWidget);
-    assert(_widget == newWidget);
-    if (_widget != oldWidget)
+    assert(widget == newWidget);
+    if (widget != oldWidget)
       _notifyDescendants();
   }
 
   void _notifyDescendants() {
     void notifyChildren(Element child) {
       if (child is RenderObjectElement)
-        child.updateParentData(_widget);
+        child.updateParentData(widget);
       else if (child is! ParentDataElement)
         child.visitChildren(notifyChildren);
     }
@@ -573,10 +748,10 @@ class InheritedElement extends StatelessComponentElement<InheritedWidget> {
   InheritedElement(InheritedWidget widget) : super(widget);
 
   void update(StatelessComponent newWidget) {
-    InheritedWidget oldWidget = _widget;
+    InheritedWidget oldWidget = widget;
     super.update(newWidget);
-    assert(_widget == newWidget);
-    if (_widget.updateShouldNotify(oldWidget))
+    assert(widget == newWidget);
+    if (widget.updateShouldNotify(oldWidget))
       _notifyDescendants();
   }
 
@@ -638,25 +813,25 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, slot);
     ParentDataElement parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
-      updateParentData(parentDataElement._widget);
+      updateParentData(parentDataElement.widget);
   }
 
   void update(T newWidget) {
-    RenderObjectWidget oldWidget = _widget;
+    T oldWidget = widget;
     super.update(newWidget);
-    assert(_widget == newWidget);
-    _widget.updateRenderObject(renderObject, oldWidget);
+    assert(widget == newWidget);
+    widget.updateRenderObject(renderObject, oldWidget);
   }
 
   void unmount() {
     super.unmount();
-    _widget.didUnmountRenderObject(renderObject);
+    widget.didUnmountRenderObject(renderObject);
     _registry.remove(renderObject);
   }
 
   void updateParentData(ParentDataWidget parentData) {
     assert(() {
-      parentData.debugValidateAncestor(_ancestorRenderObjectElement._widget);
+      parentData.debugValidateAncestor(_ancestorRenderObjectElement.widget);
       return true;
     });
     parentData.applyParentData(renderObject);
@@ -711,13 +886,13 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
 
   void mount(Element parent, dynamic slot) {
     super.mount(parent, slot);
-    _child = _updateChild(_child, _widget.child, _uniqueChild);
+    _child = updateChild(_child, widget.child, _uniqueChild);
   }
 
   void update(T newWidget) {
     super.update(newWidget);
-    assert(_widget == newWidget);
-    _child = _updateChild(_child, _widget.child, _uniqueChild);
+    assert(widget == newWidget);
+    _child = updateChild(_child, widget.child, _uniqueChild);
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot) {
@@ -775,13 +950,13 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
 
   bool _debugHasDuplicateIds() {
     var idSet = new HashSet<Key>();
-    for (Widget child in _widget.children) {
+    for (Widget child in widget.children) {
       assert(child != null);
       if (child.key == null)
         continue; // when these nodes are reordered, we just reassign the data
 
       if (!idSet.add(child.key)) {
-        throw 'If multiple keyed nodes exist as children of another node, they must have unique keys. $_widget has multiple children with key "${child.key}".';
+        throw 'If multiple keyed nodes exist as children of another node, they must have unique keys. $widget has multiple children with key "${child.key}".';
       }
     }
     return false;
@@ -794,10 +969,10 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
 
   void mount(Element parent, dynamic slot) {
     super.mount(parent, slot);
-    _children = new List<Element>(_widget.children.length);
+    _children = new List<Element>(widget.children.length);
     Element previousChild;
     for (int i = _children.length - 1; i >= 0; --i) {
-      Element newChild = _widget.children[i].createElement();
+      Element newChild = widget.children[i].createElement();
       newChild.mount(this, previousChild);
       assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
       _children[i] = newChild;
@@ -807,8 +982,8 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
 
   void update(T newWidget) {
     super.update(newWidget);
-    assert(_widget == newWidget);
-    _children = _updateChildren(_children, _widget.children);
+    assert(widget == newWidget);
+    _children = _updateChildren(_children, widget.children);
   }
 
   List<Element> _updateChildren(List<Element> oldChildren, List<Widget> newWidgets) {
@@ -858,7 +1033,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
       Element oldChild = oldChildren[childrenTop];
       Widget newWidget = newWidgets[childrenTop];
       assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
-      if (!_canUpdate(oldChild._widget, newWidget))
+      if (!_canUpdate(oldChild.widget, newWidget))
         break;
       childrenTop += 1;
     }
@@ -873,9 +1048,9 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
       Element oldChild = oldChildren[oldChildrenBottom];
       Widget newWidget = newWidgets[newChildrenBottom];
       assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
-      if (!_canUpdate(oldChild._widget, newWidget))
+      if (!_canUpdate(oldChild.widget, newWidget))
         break;
-      Element newChild = _updateChild(oldChild, newWidget, nextSibling);
+      Element newChild = updateChild(oldChild, newWidget, nextSibling);
       assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
       newChildren[newChildrenBottom] = newChild;
       nextSibling = newChild;
@@ -891,8 +1066,8 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
       while (childrenTop <= oldChildrenBottom) {
         Element oldChild = oldChildren[oldChildrenBottom];
         assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
-        if (oldChild._widget.key != null)
-          oldKeyedChildren[oldChild._widget.key] = oldChild;
+        if (oldChild.widget.key != null)
+          oldKeyedChildren[oldChild.widget.key] = oldChild;
         else
           _detachChild(oldChild);
         oldChildrenBottom -= 1;
@@ -908,7 +1083,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
         if (key != null) {
           oldChild = oldKeyedChildren[newWidget.key];
           if (oldChild != null) {
-            if (_canUpdate(oldChild._widget, newWidget)) {
+            if (_canUpdate(oldChild.widget, newWidget)) {
               // we found a match!
               // remove it from oldKeyedChildren so we don't unsync it later
               oldKeyedChildren.remove(key);
@@ -919,8 +1094,8 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
           }
         }
       }
-      assert(oldChild == null || _canUpdate(oldChild._widget, newWidget));
-      Element newChild = _updateChild(oldChild, newWidget, nextSibling);
+      assert(oldChild == null || _canUpdate(oldChild.widget, newWidget));
+      Element newChild = updateChild(oldChild, newWidget, nextSibling);
       assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.mounted);
       newChildren[newChildrenBottom] = newChild;
@@ -936,8 +1111,8 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
       Element oldChild = oldChildren[childrenTop];
       assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
       Widget newWidget = newWidgets[childrenTop];
-      assert(_canUpdate(oldChild._widget, newWidget));
-      Element newChild = _updateChild(oldChild, newWidget, nextSibling);
+      assert(_canUpdate(oldChild.widget, newWidget));
+      Element newChild = updateChild(oldChild, newWidget, nextSibling);
       assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.mounted);
       newChildren[childrenTop] = newChild;
