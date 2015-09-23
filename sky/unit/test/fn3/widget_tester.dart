@@ -1,4 +1,9 @@
+import 'dart:sky' as sky;
+
+import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3.dart';
+
+import '../engine/mock_events.dart';
 
 class RootComponent extends StatefulComponent {
   RootComponentState createState() => new RootComponentState(this);
@@ -19,6 +24,16 @@ class RootComponentState extends ComponentState<RootComponent> {
 }
 
 class WidgetTester {
+
+  void pumpFrame(Widget widget) {
+    runApp(widget);
+    WidgetFlutterBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+  }
+
+  void pumpFrameWithoutChange() {
+    WidgetFlutterBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+  }
+
 
   void walkElements(ElementVisitor visitor) {
     void walk(Element element) {
@@ -44,13 +59,60 @@ class WidgetTester {
     return findElement((Element element) => element.widget.key == key);
   }
 
-  void pumpFrame(Widget widget) {
-    runApp(widget);
-    WidgetFlutterBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+  Element findText(String text) {
+    return findElement((Element element) {
+      return element.widget is Text && element.widget.data == text;
+    });
   }
 
-  void pumpFrameWithoutChange() {
-    WidgetFlutterBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+
+  Point getCenter(Element element) {
+    return _getElementPoint(element, (Size size) => size.center(Point.origin));
+  }
+
+  Point getTopLeft(Element element) {
+    return _getElementPoint(element, (_) => Point.origin);
+  }
+
+  Point getTopRight(Element element) {
+    return _getElementPoint(element, (Size size) => size.topRight(Point.origin));
+  }
+
+  Point getBottomLeft(Element element) {
+    return _getElementPoint(element, (Size size) => size.bottomLeft(Point.origin));
+  }
+
+  Point getBottomRight(Element element) {
+    return _getElementPoint(element, (Size size) => size.bottomRight(Point.origin));
+  }
+
+  Point _getElementPoint(Element element, Function sizeToPoint) {
+    assert(element != null);
+    RenderBox box = element.renderObject as RenderBox;
+    assert(box != null);
+    return box.localToGlobal(sizeToPoint(box.size));
+  }
+
+
+  void tap(Element element, { int pointer: 1 }) {
+    tapAt(getCenter(element), pointer: pointer);
+  }
+
+  void tapAt(Point location, { int pointer: 1 }) {
+    HitTestResult result = _hitTest(location);
+    TestPointer p = new TestPointer(pointer);
+    _dispatchEvent(p.down(location), result);
+    _dispatchEvent(p.up(), result);
+  }
+
+  void dispatchEvent(sky.Event event, Point location) {
+    _dispatchEvent(event, _hitTest(location));
+  }
+
+  HitTestResult _hitTest(Point location) => WidgetFlutterBinding.instance.hitTest(location);
+
+  void _dispatchEvent(sky.Event event, HitTestResult result) {
+    WidgetFlutterBinding.instance.dispatchEvent(event, result);
   }
 
 }
