@@ -70,10 +70,11 @@ class TouchMapper {
     return freeSpot;
   }
 
-  void unregisterTouch(uintptr_t touch) {
+  int unregisterTouch(uintptr_t touch) {
     auto index = touch_map_[touch];
     free_spots_ |= 1 << (index - 1);
     touch_map_.erase(touch);
+    return index;
   }
 
   int identifierOf(uintptr_t touch) { return touch_map_[touch]; }
@@ -281,8 +282,7 @@ static std::string SkPictureTracingPath() {
         touch_identifier = _touch_mapper.registerTouch(touch_ptr);
         break;
       case Removed:
-        touch_identifier = _touch_mapper.identifierOf(touch_ptr);
-        _touch_mapper.unregisterTouch(touch_ptr);
+        touch_identifier = _touch_mapper.unregisterTouch(touch_ptr);
         break;
     }
 
