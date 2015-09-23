@@ -775,7 +775,7 @@ class ImageListenerState extends ComponentState<ImageListener> {
     }
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Image(
       image: _resolvedImage,
       width: config.width,
@@ -805,7 +805,7 @@ class NetworkImage extends StatelessComponent {
   final ImageFit fit;
   final ImageRepeat repeat;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new ImageListener(
       image: imageCache.load(src),
       width: width,
@@ -837,7 +837,7 @@ class AssetImage extends StatelessComponent {
   final ImageFit fit;
   final ImageRepeat repeat;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new ImageListener(
       image: bundle.loadImage(name),
       width: width,
