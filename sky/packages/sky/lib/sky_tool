@@ -603,9 +603,8 @@ class IOSDevice(object):
                 '1'
             ]
             logging.info(' '.join(cmd))
-            out = subprocess.check_output(cmd)
-            match = re.search(r'\[\.\.\.\.\] Found [^\)]*\) connected', out)
-            cls._is_connected = match is not None
+            subprocess.check_output(cmd)
+            cls._is_connected = True
         except subprocess.CalledProcessError:
             cls._is_connected = False
         return cls._is_connected
@@ -1030,15 +1029,17 @@ class StartListening(object):
         while True:
             logging.info('Updating running Sky apps...')
 
-            # Restart the app on Android.  Android does not currently restart using skyx files.
-            cmd = [
-                sys.executable,
-                os.path.abspath(__file__),
-                'start',
-                '--poke'
-            ]
-            logging.info(' '.join(cmd))
-            subprocess.check_call(cmd)
+            device = AndroidDevice()
+            if device.is_connected():
+                # Restart the app on Android.  Android does not currently restart using skyx files.
+                cmd = [
+                    sys.executable,
+                    os.path.abspath(__file__),
+                    'start',
+                    '--poke'
+                ]
+                logging.info(' '.join(cmd))
+                subprocess.check_call(cmd)
 
             if args.local_build:
                 # Currently sending to iOS only works if you are building Sky locally
