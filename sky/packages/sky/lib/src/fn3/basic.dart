@@ -395,7 +395,7 @@ class Container extends StatelessComponent {
     return padding + borderPadding;
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Widget current = child;
 
     if (child == null && (width == null || height == null))
@@ -641,7 +641,7 @@ class StyledText extends StatelessComponent {
     throw new ArgumentError("Element is ${element.runtimeType} not a String or an Iterable");
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Paragraph(text: _toSpan(elements));
   }
 }
