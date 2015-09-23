@@ -1,7 +1,9 @@
 part of skysprites;
 
+/// Labels are used to display a string of text in a the node tree. To align
+/// the label, the textAlign property of teh [TextStyle] can be set.
 class Label extends Node {
-
+  /// Creates a new Label with the provided [_text] and [_textStyle].
   Label(this._text, [this._textStyle]) {
     if (_textStyle == null) {
       _textStyle = new TextStyle();
@@ -10,6 +12,7 @@ class Label extends Node {
 
   String _text;
 
+  /// The text being drawn by the label.
   String get text => _text;
 
   set text(String text) {
@@ -19,6 +22,7 @@ class Label extends Node {
 
   TextStyle _textStyle;
 
+  /// The style to draw the text in.
   TextStyle get textStyle => _textStyle;
 
   set textStyle(TextStyle textStyle) {

@@ -78,6 +78,8 @@ class Node {
 
   List<Constraint> _constraints;
 
+  /// A [List] of [Constraint]s that will be applied to the node.
+  /// The constraints are applied after the [update] method has been called.
   List<Constraint> get constraints {
     return _constraints;
   }
@@ -87,6 +89,9 @@ class Node {
     if (_spriteBox != null) _spriteBox._constrainedNodes = null;
   }
 
+  /// Called to apply the [constraints] to the node. Normally, this method is
+  /// called automatically by the [SpriteBox], but it can be called manually
+  /// if the constraints need to be applied immediately.
   void applyConstraints(double dt) {
     if (_constraints == null) return;
 
