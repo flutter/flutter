@@ -114,14 +114,8 @@ class CustomPaint extends OneChildRenderObjectWidget {
 }
 
 class ClipRect extends OneChildRenderObjectWidget {
-  ClipRect({ Key key, Widget child })
-    : super(key: key, child: child);
-
+  ClipRect({ Key key, Widget child }) : super(key: key, child: child);
   RenderClipRect createRenderObject() => new RenderClipRect();
-
-  void updateRenderObject(RenderClipRect renderObject, ClipRect oldWidget) {
-    // Nothing to update
-  }
 }
 
 class ClipRRect extends OneChildRenderObjectWidget {
@@ -140,14 +134,8 @@ class ClipRRect extends OneChildRenderObjectWidget {
 }
 
 class ClipOval extends OneChildRenderObjectWidget {
-  ClipOval({ Key key, Widget child })
-    : super(key: key, child: child);
-
+  ClipOval({ Key key, Widget child }) : super(key: key, child: child);
   RenderClipOval createRenderObject() => new RenderClipOval();
-
-  void updateRenderObject(RenderClipOval renderObject, ClipOval oldWidget) {
-    // Nothing to update
-  }
 }
 
 
@@ -285,14 +273,8 @@ class IntrinsicWidth extends OneChildRenderObjectWidget {
 }
 
 class IntrinsicHeight extends OneChildRenderObjectWidget {
-  IntrinsicHeight({ Key key, Widget child })
-    : super(key: key, child: child);
-
+  IntrinsicHeight({ Key key, Widget child }) : super(key: key, child: child);
   RenderIntrinsicHeight createRenderObject() => new RenderIntrinsicHeight();
-
-  void updateRenderObject(RenderIntrinsicHeight renderObject, IntrinsicHeight oldWidget) {
-    // Nothing to update
-  }
 }
 
 class Baseline extends OneChildRenderObjectWidget {
@@ -459,14 +441,8 @@ class BlockBody extends MultiChildRenderObjectWidget {
 }
 
 class Stack extends MultiChildRenderObjectWidget {
-  Stack(List<Widget> children, { Key key })
-    : super(key: key, children: children);
-
+  Stack(List<Widget> children, { Key key }) : super(key: key, children: children);
   RenderStack createRenderObject() => new RenderStack();
-
-  void updateRenderObject(RenderStack renderObject, Stack oldWidget) {
-    // Nothing to update
-  }
 }
 
 class Positioned extends ParentDataWidget {
@@ -855,7 +831,7 @@ class AssetImage extends StatelessComponent {
 class Listener extends OneChildRenderObjectWidget {
   Listener({
     Key key,
-    Widget child,    
+    Widget child,
     this.onPointerDown,
     this.onPointerMove,
     this.onPointerUp,

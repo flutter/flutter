@@ -229,7 +229,7 @@ abstract class RenderObjectWidget extends Widget {
   /// Copies the configuration described by this RenderObjectWidget to the given
   /// RenderObject, which must be of the same type as returned by this class'
   /// createRenderObject().
-  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget);
+  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
 
   void didUnmountRenderObject(RenderObject renderObject) { }
 }
@@ -604,7 +604,6 @@ typedef void BuildScheduler(BuildableElement element);
 
 class ErrorWidget extends LeafRenderObjectWidget {
   RenderBox createRenderObject() => new RenderErrorBox();
-  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
 }
 
 /// Base class for the instantiation of StatelessComponent and StatefulComponent
