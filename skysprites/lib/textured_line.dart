@@ -75,6 +75,8 @@ class TexturedLinePainter {
     _calculatedTextureStops = null;
   }
 
+  bool removeArtifacts = true;
+
   sky.TransferMode transferMode = sky.TransferMode.srcOver;
 
   Paint _cachedPaint = new Paint();
@@ -184,8 +186,26 @@ class TexturedLinePainter {
     Offset offset0 = new Offset(miter[0] * halfWidth, miter[1] * halfWidth);
     Offset offset1 = new Offset(-miter[0] * halfWidth, -miter[1] * halfWidth);
 
-    vertices.add(point + offset0);
-    vertices.add(point + offset1);
+    Point vertex0 = point + offset0;
+    Point vertex1 = point + offset1;
+
+    int vertexCount = vertices.length;
+    if (removeArtifacts && vertexCount >= 2) {
+      Point oldVertex0 = vertices[vertexCount - 2];
+      Point oldVertex1 = vertices[vertexCount - 1];
+
+      Point intersection = GameMath.lineIntersection(oldVertex0, oldVertex1, vertex0, vertex1);
+      if (intersection != null) {
+        if (GameMath.pointQuickDist(vertex0, intersection) < GameMath.pointQuickDist(vertex1, intersection)) {
+          vertex0 = oldVertex0;
+        } else {
+          vertex1 = oldVertex1;
+        }
+      }
+    }
+
+    vertices.add(vertex0);
+    vertices.add(vertex1);
   }
 
   void _calculateTextureStops() {
