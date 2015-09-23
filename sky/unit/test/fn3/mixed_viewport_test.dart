@@ -5,7 +5,7 @@ import 'widget_tester.dart';
 import 'test_widgets.dart';
 
 void main() {
-  test('HomogeneousViewport mount/dismount smoke test', () {
+  test('MixedViewport mount/dismount smoke test', () {
     WidgetTester tester = new WidgetTester();
 
     List<int> callbackTracker = <int>[];
@@ -15,21 +15,16 @@ void main() {
 
     Widget builder() {
       return new FlipComponent(
-        left: new HomogeneousViewport(
-          builder: (BuildContext context, int start, int count) {
-            List<Widget> result = <Widget>[];
-            for (int index = start; index < start + count; index += 1) {
-              callbackTracker.add(index);
-              result.add(new Container(
-                key: new ValueKey<int>(index),
-                height: 100.0,
-                child: new Text("$index")
-              ));
-            }
-            return result;
+        left: new MixedViewport(
+          builder: (BuildContext context, int i) {
+            callbackTracker.add(i);
+            return new Container(
+              key: new ValueKey<int>(i),
+              height: 100.0,
+              child: new Text("$i")
+            );
           },
-          startOffset: 0.0,
-          itemExtent: 100.0
+          startOffset: 0.0
         ),
         right: new Text('Not Today')
       );
@@ -53,9 +48,10 @@ void main() {
     tester.pumpFrameWithoutChange();
 
     expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+
   });
 
-  test('HomogeneousViewport vertical', () {
+  test('MixedViewport vertical', () {
     WidgetTester tester = new WidgetTester();
 
     List<int> callbackTracker = <int>[];
@@ -66,36 +62,30 @@ void main() {
 
     double offset = 300.0;
 
-    ListBuilder itemBuilder = (BuildContext context, int start, int count) {
-      List<Widget> result = <Widget>[];
-      for (int index = start; index < start + count; index += 1) {
-        callbackTracker.add(index);
-        result.add(new Container(
-          key: new ValueKey<int>(index),
-          width: 500.0, // this should be ignored
-          height: 400.0, // should be overridden by itemExtent
-          child: new Text("$index")
-        ));
-      }
-      return result;
+    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+      callbackTracker.add(i);
+      return new Container(
+        key: new ValueKey<int>(i),
+        width: 500.0, // this should be ignored
+        height: 200.0,
+        child: new Text("$i")
+      );
     };
 
-    FlipComponent testComponent;
     Widget builder() {
-      testComponent = new FlipComponent(
-        left: new HomogeneousViewport(
+      return new FlipComponent(
+        left: new MixedViewport(
           builder: itemBuilder,
-          startOffset: offset,
-          itemExtent: 200.0
+          startOffset: offset
         ),
         right: new Text('Not Today')
       );
-      return testComponent;
     }
 
     tester.pumpFrame(builder());
 
-    expect(callbackTracker, equals([1, 2, 3, 4]));
+    // 0 is built to find its width
+    expect(callbackTracker, equals([0, 1, 2, 3, 4]));
 
     callbackTracker.clear();
 
@@ -103,12 +93,14 @@ void main() {
 
     tester.pumpFrame(builder());
 
+    // 0 and 1 aren't built, we know their size and nothing else changed
     expect(callbackTracker, equals([2, 3, 4]));
 
     callbackTracker.clear();
+
   });
 
-  test('HomogeneousViewport horizontal', () {
+  test('MixedViewport horizontal', () {
     WidgetTester tester = new WidgetTester();
 
     List<int> callbackTracker = <int>[];
@@ -119,37 +111,31 @@ void main() {
 
     double offset = 300.0;
 
-    ListBuilder itemBuilder = (BuildContext context, int start, int count) {
-      List<Widget> result = <Widget>[];
-      for (int index = start; index < start + count; index += 1) {
-        callbackTracker.add(index);
-        result.add(new Container(
-          key: new ValueKey<int>(index),
-          width: 400.0, // this should be overridden by itemExtent
-          height: 500.0, // this should be ignored
-          child: new Text("$index")
-        ));
-      }
-      return result;
+    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+      callbackTracker.add(i);
+      return new Container(
+        key: new ValueKey<int>(i),
+        height: 500.0, // this should be ignored
+        width: 200.0,
+        child: new Text("$i")
+      );
     };
 
-    FlipComponent testComponent;
     Widget builder() {
-      testComponent = new FlipComponent(
-        left: new HomogeneousViewport(
+      return new FlipComponent(
+        left: new MixedViewport(
           builder: itemBuilder,
           startOffset: offset,
-          itemExtent: 200.0,
           direction: ScrollDirection.horizontal
         ),
         right: new Text('Not Today')
       );
-      return testComponent;
     }
 
     tester.pumpFrame(builder());
 
-    expect(callbackTracker, equals([1, 2, 3, 4, 5]));
+    // 0 is built to find its width
+    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
 
     callbackTracker.clear();
 
@@ -157,8 +143,10 @@ void main() {
 
     tester.pumpFrame(builder());
 
+    // 0 and 1 aren't built, we know their size and nothing else changed
     expect(callbackTracker, equals([2, 3, 4, 5]));
 
     callbackTracker.clear();
+
   });
 }
