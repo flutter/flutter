@@ -31,7 +31,7 @@ class Keyboard {
 
   KeyboardHandle _currentHandle;
 
-  KeyboardHandle show(KeyboardClientStub stub, int keyboardType) {
+  KeyboardHandle show(KeyboardClientStub stub, KeyboardType keyboardType) {
     assert(stub != null);
     if (_currentHandle != null) {
       if (_currentHandle.stub == stub)
@@ -46,7 +46,7 @@ class Keyboard {
 
 class KeyboardHandle {
 
-  KeyboardHandle._show(Keyboard keyboard, this.stub, int keyboardType) : _keyboard = keyboard {
+  KeyboardHandle._show(Keyboard keyboard, this.stub, KeyboardType keyboardType) : _keyboard = keyboard {
     _keyboard.service.show(stub, keyboardType);
     _attached = true;
   }

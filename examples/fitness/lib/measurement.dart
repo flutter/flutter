@@ -189,7 +189,7 @@ class MeasurementFragment extends StatefulComponent {
           new Input(
             key: weightKey,
             placeholder: 'Enter weight',
-            keyboardType: KeyboardType_NUMBER,
+            keyboardType: KeyboardType.NUMBER,
             onChanged: _handleWeightChanged
           ),
         ], alignItems: FlexAlignItems.stretch)

@@ -70,7 +70,7 @@ class SettingsFragment extends StatefulComponent {
         content: new Input(
           key: weightGoalKey,
           placeholder: 'Goal weight in lbs',
-          keyboardType: KeyboardType_NUMBER,
+          keyboardType: KeyboardType.NUMBER,
           onChanged: _handleGoalWeightChanged
         ),
         onDismiss: () {
