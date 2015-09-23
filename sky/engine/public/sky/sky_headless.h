@@ -1,0 +1,32 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef SKY_ENGINE_PUBLIC_SKY_SKY_HEADLESS_H_
+#define SKY_ENGINE_PUBLIC_SKY_SKY_HEADLESS_H_
+
+#include "base/basictypes.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
+
+namespace blink {
+class DartController;
+
+// This class provides a way to run Dart script without a View.
+class SkyHeadless {
+ public:
+  SkyHeadless();
+  ~SkyHeadless();
+
+  void Init(const String& name);
+  void RunFromSnapshotBuffer(const uint8_t* buffer, size_t size);
+
+ private:
+  OwnPtr<DartController> dart_controller_;
+
+  DISALLOW_COPY_AND_ASSIGN(SkyHeadless);
+};
+
+} // namespace blink
+
+#endif  // SKY_ENGINE_PUBLIC_SKY_SKY_HEADLESS_H_

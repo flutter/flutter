@@ -42,6 +42,7 @@ source_set("bindings") {
     "//sky/engine/wtf",
     ":generated_bindings",
     ":snapshot_cc",
+    ":updater_snapshot_cc",
   ]
   include_dirs = [
     "..",
@@ -133,6 +134,37 @@ action("generate_snapshot_file") {
   ]
 }
 
+# TODO(mpcomplete): make this a template with the above?
+action("generate_updater_snapshot_file") {
+  updater_bin = "$root_gen_dir/sky/packages/updater/updater_snapshot.bin"
+  deps = [
+    "//sky/packages/updater",
+  ]
+  inputs = [
+    "//dart/runtime/tools/create_snapshot_file.py",
+    "//sky/engine/bindings/updater_snapshot.cc.tmpl",
+    updater_bin,
+  ]
+  output = "$target_gen_dir/updater_snapshot.cc"
+  outputs = [
+    output,
+  ]
+
+  script = "//dart/runtime/tools/create_snapshot_file.py"
+  args = [
+    # Note: one of these updater_bin arguments is redundant, but
+    # create_snapshot_file expects both.
+    "--vm_input_bin",
+    rebase_path(updater_bin),
+    "--input_bin",
+    rebase_path(updater_bin),
+    "--input_cc",
+    rebase_path("//sky/engine/bindings/updater_snapshot.cc.tmpl"),
+    "--output",
+    rebase_path(output),
+  ]
+}
+
 source_set("snapshot_cc") {
   sources = [
     "$target_gen_dir/snapshot.cc",
@@ -140,6 +172,16 @@ source_set("snapshot_cc") {
 
   deps = [
     ":generate_snapshot_file",
+  ]
+}
+
+source_set("updater_snapshot_cc") {
+  sources = [
+    "$target_gen_dir/updater_snapshot.cc",
+  ]
+
+  deps = [
+    ":generate_updater_snapshot_file",
   ]
 }
 

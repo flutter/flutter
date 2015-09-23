@@ -34,6 +34,7 @@ class DartController {
   void RunFromLibrary(const String& name,
                       DartLibraryProvider* library_provider);
   void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
+  void RunFromSnapshotBuffer(const uint8_t* buffer, size_t size);
 
   void CreateIsolateFor(PassOwnPtr<DOMDartState> dom_dart_state);
   void Shutdown();

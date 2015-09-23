@@ -65,8 +65,7 @@ public class UpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        final File dataDir = new File(PathUtils.getDataDirectory(this));
-        mNativePtr = nativeCheckForUpdates(dataDir.getPath());
+        mNativePtr = nativeCheckForUpdates();
         return START_NOT_STICKY;
     }
 
@@ -81,6 +80,6 @@ public class UpdateService extends Service {
         stopSelf();
     }
 
-    private native long nativeCheckForUpdates(String dataDir);
+    private native long nativeCheckForUpdates();
     private native void nativeDestroy(long nativeUpdateTaskAndroid);
 }

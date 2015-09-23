@@ -7,26 +7,32 @@
 
 #include <jni.h>
 
-#include "base/android/jni_string.h"
-#include "sky/shell/updater/update_task.h"
+#include "base/android/scoped_java_ref.h"
+#include "base/memory/scoped_ptr.h"
+
+namespace blink {
+class SkyHeadless;
+}
 
 namespace sky {
 namespace shell {
 
-class UpdateTaskAndroid : public UpdateTask {
+class UpdateTaskAndroid {
  public:
-  UpdateTaskAndroid(JNIEnv* env,
-                    jobject update_service,
-                    const std::string& data_dir);
-  ~UpdateTaskAndroid();
+  UpdateTaskAndroid(JNIEnv* env, jobject update_service);
+  virtual ~UpdateTaskAndroid();
 
-  void Finish() override;
+  void Start();
+  void Finish();
 
-  // This C++ object is owned by the Java UpdateService. This is called by
-  // UpdateService when it is destroyed.
+  // This C++ object is owned by the Java UpdateTask. This is called by
+  // UpdateTask when it is destroyed.
   void Destroy(JNIEnv* env, jobject jcaller);
 
  private:
+  void RunDartOnUIThread();
+
+  scoped_ptr<blink::SkyHeadless> headless_;
   base::android::ScopedJavaGlobalRef<jobject> update_service_;
 };
 

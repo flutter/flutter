@@ -106,6 +106,15 @@ void DartController::RunFromSnapshot(
       base::Bind(&DartController::DidLoadSnapshot, weak_factory_.GetWeakPtr()));
 }
 
+void DartController::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
+  DartState::Scope scope(dart_state());
+  LogIfError(Dart_LoadScriptFromSnapshot(buffer, size));
+  Dart_Handle library = Dart_RootLibrary();
+  if (LogIfError(library))
+    return;
+  DartInvokeAppField(library, ToDart("main"), 0, nullptr);
+}
+
 void DartController::RunFromLibrary(const String& name,
                                     DartLibraryProvider* library_provider) {
   DartState::Scope scope(dart_state());
