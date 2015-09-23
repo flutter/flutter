@@ -89,6 +89,7 @@ abstract class Template {
     files.forEach((String path, String contents) {
       Map m = {'projectName': projectName, 'description': description};
       contents = mustache.render(contents, m);
+      path = path.replaceAll('/', Platform.pathSeparator);
       File file = new File(p.join(dir.path, path));
       file.parent.createSync();
       file.writeAsStringSync(contents);
