@@ -55,17 +55,19 @@ class RunMojoCommandHandler extends CommandHandler {
         args.add('--verbose');
       }
     }
+    args.addAll(results.rest);
     return runCommandAndStreamOutput(command, args);
   }
 
   Future<int> _runLinux(ArgResults results, String appPath, ArtifactStore artifacts) async {
     String viewerPath = await _makePathAbsolute(await artifacts.getPath(Artifact.SkyViewerMojo));
     String mojoShellPath = await _makePathAbsolute(path.join(results['mojo-path'], 'out', 'Release', 'mojo_shell'));
-    List<String> mojoRunArgs = [
+    List<String> args = [
       'mojo:window_manager file://${appPath}',
       '--url-mappings=mojo:window_manager=mojo:kiosk_wm,mojo:sky_viewer=file://${viewerPath}'
     ];
-    return runCommandAndStreamOutput(mojoShellPath, mojoRunArgs);
+    args.addAll(results.rest);
+    return runCommandAndStreamOutput(mojoShellPath, args);
   }
 
   @override
