@@ -1,9 +1,9 @@
 name: sky_services
-version: 0.0.25
+version: 0.0.26
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: Mojom interfaces associated with Flutter
 homepage: http://flutter.io
 dependencies:
-  mojo: ^0.0.21
+  mojo: '>=0.1.0 <0.2.0'
 environment:
   sdk: '>=1.8.0 <2.0.0'
