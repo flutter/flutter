@@ -54,7 +54,7 @@ static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
 
   self.delegate = self;
 
-  [self windowDidResize:nil];
+  [self updateWindowSize];
 }
 
 - (void)setupShell {
@@ -115,9 +115,11 @@ static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
 }
 
 - (void)windowDidResize:(NSNotification*)notification {
-  [self setupSurfaceIfNecessary];
+  [self updateWindowSize];
+}
 
-  // Resize
+- (void)updateWindowSize {
+  [self setupSurfaceIfNecessary];
 
   auto metrics = sky::ViewportMetrics::New();
   auto size = self.renderSurface.frame.size;
