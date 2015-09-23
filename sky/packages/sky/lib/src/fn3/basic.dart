@@ -870,3 +870,16 @@ class IgnorePointer extends OneChildRenderObjectWidget {
     renderObject.ignoring = ignoring;
   }
 }
+
+class MetaData extends OneChildRenderObjectWidget {
+  MetaData({ Key key, Widget child, this.metaData })
+    : super(key: key, child: child);
+
+  final dynamic metaData;
+
+  RenderMetaData createRenderObject() => new RenderMetaData(metaData: metaData);
+
+  void updateRenderObject(RenderMetaData renderObject, MetaData oldWidget) {
+    renderObject.metaData = metaData;
+  }
+}
