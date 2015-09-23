@@ -361,6 +361,8 @@ abstract class ParentDataWidget extends ProxyWidget {
   ParentDataWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
+  ParentDataElement createElement() => new ParentDataElement(this);
+
   /// Subclasses should override this function to ensure that they are placed
   /// inside widgets that expect them.
   ///
@@ -600,6 +602,11 @@ abstract class Element<T extends Widget> implements BuildContext {
 typedef Widget WidgetBuilder(BuildContext context);
 typedef void BuildScheduler(BuildableElement element);
 
+class ErrorWidget extends LeafRenderObjectWidget {
+  RenderBox createRenderObject() => new RenderErrorBox();
+  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
+}
+
 /// Base class for the instantiation of StatelessComponent and StatefulComponent
 /// widgets.
 abstract class BuildableElement<T extends Widget> extends Element<T> {
@@ -637,8 +644,17 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
       assert(built != null);
     } catch (e, stack) {
       _debugReportException('building $this', e, stack);
+      built = new ErrorWidget();
     }
-    _child = updateChild(_child, built, _slot);
+
+    try {
+      _child = updateChild(_child, built, _slot);
+      assert(_child != null);
+    } catch (e, stack) {
+      _debugReportException('building $this', e, stack);
+      built = new ErrorWidget();
+      _child = updateChild(null, built, _slot);
+    }
   }
 
   static BuildScheduler scheduleBuildFor;
@@ -720,6 +736,23 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
 
 class ParentDataElement extends StatelessComponentElement<ParentDataWidget> {
   ParentDataElement(ParentDataWidget widget) : super(widget);
+
+  void mount(Element parent, dynamic slot) {
+    assert(() {
+      Element ancestor = parent;
+      while (ancestor is! RenderObjectElement) {
+        assert(ancestor != null);
+        assert(() {
+          'You cannot nest parent data widgets inside one another.';
+          return ancestor is! ParentDataElement;
+        });
+        ancestor = ancestor._parent;
+      }
+      _widget.debugValidateAncestor(ancestor._widget);
+      return true;
+    });
+    super.mount(parent, slot);
+  }
 
   void update(ParentDataWidget newWidget) {
     ParentDataWidget oldWidget = widget;
@@ -813,10 +846,6 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
   }
 
   void updateParentData(ParentDataWidget parentData) {
-    assert(() {
-      parentData.debugValidateAncestor(_ancestorRenderObjectElement.widget);
-      return true;
-    });
     parentData.applyParentData(renderObject);
   }
 
@@ -1125,12 +1154,14 @@ typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTra
 /// [debugDumpApp()].
 WidgetsExceptionHandler debugWidgetsExceptionHandler;
 void _debugReportException(String context, dynamic exception, StackTrace stack) {
-  print('------------------------------------------------------------------------');
-  'Exception caught while $context'.split('\n').forEach(print);
-  print('$exception');
-  print('Stack trace:');
-  '$stack'.split('\n').forEach(print);
-  if (debugWidgetsExceptionHandler != null)
+  if (debugWidgetsExceptionHandler != null) {
     debugWidgetsExceptionHandler(context, exception, stack);
-  print('------------------------------------------------------------------------');
+  } else {
+    print('------------------------------------------------------------------------');
+    'Exception caught while $context'.split('\n').forEach(print);
+    print('$exception');
+    print('Stack trace:');
+    '$stack'.split('\n').forEach(print);
+    print('------------------------------------------------------------------------');
+  }
 }
