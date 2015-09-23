@@ -271,11 +271,11 @@ abstract class Element<T extends Widget> implements BuildContext {
 
   /// Calls the argument for each descendant, depth-first pre-order.
   void visitDescendants(ElementVisitor visitor) {
-    void walk(Element element) {
+    void visit(Element element) {
       visitor(element);
-      element.visitChildren(walk);
+      element.visitChildren(visit);
     }
-    visitChildren(walk);
+    visitChildren(visit);
   }
 
   Element _updateChild(Element child, Widget newWidget, dynamic slot) {
@@ -301,17 +301,20 @@ abstract class Element<T extends Widget> implements BuildContext {
     // The _updateChild() method returns the new child, if it had to create one,
     // or the child that was passed in, if it just had to update the child, or
     // null, if it removed the child and did not replace it.
-    assert(slot != null);
     if (newWidget == null) {
       if (child != null)
         _detachChild(child);
       return null;
     }
     if (child != null) {
-      assert(child._slot == slot);
-      if (child._widget == newWidget)
+      if (child._widget == newWidget) {
+        if (child._slot != slot)
+          updateSlotForChild(child, slot);
         return child;
+      }
       if (_canUpdate(child._widget, newWidget)) {
+        if (child._slot != slot)
+          updateSlotForChild(child, slot);
         child.update(newWidget);
         assert(child._widget == newWidget);
         return child;
@@ -334,7 +337,6 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_parent == null);
     assert(parent == null || parent._debugLifecycleState == _ElementLifecycle.mounted);
     assert(_slot == null);
-    assert(slot != null);
     assert(_depth == null);
     _parent = parent;
     _slot = slot;
@@ -347,7 +349,6 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(_widget != null);
     assert(newWidget != null);
-    assert(_slot != null);
     assert(_depth != null);
     assert(_canUpdate(_widget, newWidget));
     _widget = newWidget;
@@ -360,14 +361,12 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(child != null);
     assert(child._parent == this);
-
-    void move(Element element) {
-      child._updateSlot(slot);
-      if (child is! RenderObjectElement)
-        child.visitChildren(move);
+    void visit(Element element) {
+      element._updateSlot(slot);
+      if (element is! RenderObjectElement)
+        element.visitChildren(visit);
     }
-
-    move(child);
+    visit(child);
   }
 
   void _updateSlot(dynamic slot) {
@@ -375,9 +374,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_widget != null);
     assert(_parent != null);
     assert(_parent._debugLifecycleState == _ElementLifecycle.mounted);
-    assert(_slot != null);
-    assert(slot != null);
-    assert(_depth == null);
+    assert(_depth != null);
     _slot = slot;
   }
 
@@ -665,6 +662,13 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     parentData.applyParentData(renderObject);
   }
 
+  void _updateSlot(dynamic slot) {
+    assert(_slot != slot);
+    super._updateSlot(slot);
+    assert(_slot == slot);
+    _ancestorRenderObjectElement.moveChildRenderObject(renderObject, _slot);
+  }
+
   void detachRenderObject() {
     if (_ancestorRenderObjectElement != null) {
       _ancestorRenderObjectElement.removeChildRenderObject(renderObject);
@@ -673,7 +677,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot);
-
+  void moveChildRenderObject(RenderObject child, dynamic slot);
   void removeChildRenderObject(RenderObject child);
 }
 
@@ -682,6 +686,10 @@ class LeafRenderObjectElement<T extends RenderObjectWidget> extends RenderObject
   LeafRenderObjectElement(T widget): super(widget);
 
   void insertChildRenderObject(RenderObject child, dynamic slot) {
+    assert(false);
+  }
+
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
     assert(false);
   }
 
@@ -720,6 +728,10 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    assert(false);
+  }
+
   void removeChildRenderObject(RenderObject child) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(renderObject is RenderObjectWithChildMixin);
@@ -739,10 +751,17 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
 
   void insertChildRenderObject(RenderObject child, Element slot) {
     final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    RenderObject nextSibling = slot._descendantRenderObject;
-    assert(nextSibling == null || nextSibling is RenderObject);
+    RenderObject nextSibling = slot?._descendantRenderObject;
     assert(renderObject is ContainerRenderObjectMixin);
     renderObject.add(child, before: nextSibling);
+    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+  }
+
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
+    RenderObject nextSibling = slot?._descendantRenderObject;
+    assert(renderObject is ContainerRenderObjectMixin);
+    renderObject.move(child, before: nextSibling);
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
@@ -777,7 +796,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
     super.mount(parent, slot);
     _children = new List<Element>(_widget.children.length);
     Element previousChild;
-    for (int i = 0; i < _children.length; ++i) {
+    for (int i = _children.length - 1; i >= 0; --i) {
       Element newChild = _widget.children[i].createElement();
       newChild.mount(this, previousChild);
       assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
@@ -874,6 +893,8 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
         assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
         if (oldChild._widget.key != null)
           oldKeyedChildren[oldChild._widget.key] = oldChild;
+        else
+          _detachChild(oldChild);
         oldChildrenBottom -= 1;
       }
     }
@@ -926,7 +947,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
     // clean up any of the remaining middle nodes from the old list
     if (haveOldNodes && !oldKeyedChildren.isEmpty) {
       for (Element oldChild in oldKeyedChildren.values)
-        oldChild.unmount();
+        _detachChild(oldChild);
     }
 
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
