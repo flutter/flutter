@@ -18,8 +18,6 @@ class RootComponentState extends ComponentState<RootComponent> {
   Widget build(BuildContext context) => child;
 }
 
-const Object _rootSlot = const Object();
-
 class WidgetTester {
 
   void walkElements(ElementVisitor visitor) {
