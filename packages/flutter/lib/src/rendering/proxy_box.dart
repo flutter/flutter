@@ -850,11 +850,19 @@ class RenderPointerListener extends RenderProxyBox {
 /// as usual. It just cannot be the target of located events because it returns
 /// false from [hitTest].
 class RenderIgnorePointer extends RenderProxyBox {
-  RenderIgnorePointer({ RenderBox child, bool ignoring: true }) : super(child);
+  RenderIgnorePointer({ RenderBox child, this.ignoring: true }) : super(child);
 
   bool ignoring;
 
   bool hitTest(HitTestResult result, { Point position }) {
     return ignoring ? false : super.hitTest(result, position: position);
   }
+}
+
+/// Holds opaque meta data in the render tree
+class RenderMetaData extends RenderProxyBox {
+  RenderMetaData({ RenderBox child, this.metaData }) : super(child);
+
+  /// Opaque meta data ignored by the render tree
+  dynamic metaData;
 }
