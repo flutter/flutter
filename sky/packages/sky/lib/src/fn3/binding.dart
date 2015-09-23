@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3/framework.dart';
@@ -154,6 +153,10 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectEl
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(slot == _rootChild);
     renderObject.child = child;
+  }
+
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    assert(false);
   }
 
   void removeChildRenderObject(RenderObject child) {
