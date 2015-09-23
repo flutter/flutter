@@ -28,18 +28,20 @@ class WidgetTester {
     WidgetFlutterBinding.instance.renderViewElement.visitChildren(walk);
   }
 
-  Element findElement(bool predicate(Element widget)) {
+  Element findElement(bool predicate(Element element)) {
     try {
-      walkElements((Element widget) {
-        if (predicate(widget))
-          throw widget;
+      walkElements((Element element) {
+        if (predicate(element))
+          throw element;
       });
-    } catch (e) {
-      if (e is Element)
-        return e;
-      rethrow;
+    } on Element catch (e) {
+      return e;
     }
     return null;
+  }
+
+  Element findElementByKey(Key key) {
+    return findElement((Element element) => element.widget.key == key);
   }
 
   void pumpFrame(Widget widget) {
