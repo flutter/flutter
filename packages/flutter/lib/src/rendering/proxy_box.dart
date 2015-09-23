@@ -814,12 +814,41 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 }
 
-/// Is invisible during hit testing
+typedef void PointerEventListener(sky.PointerEvent e);
+
+/// Invokes the callbacks in response to pointer events.
+class RenderPointerListener extends RenderProxyBox {
+  RenderPointerListener({
+    this.onPointerDown,
+    this.onPointerMove,
+    this.onPointerUp,
+    this.onPointerCancel,
+    RenderBox child
+  }) : super(child);
+
+  PointerEventListener onPointerDown;
+  PointerEventListener onPointerMove;
+  PointerEventListener onPointerUp;
+  PointerEventListener onPointerCancel;
+
+  void handleEvent(sky.Event event, HitTestEntry entry) {
+    if (onPointerDown != null && event.type == 'pointerdown')
+      return onPointerDown(event);
+    if (onPointerMove != null && event.type == 'pointermove')
+      return onPointerMove(event);
+    if (onPointerUp != null && event.type == 'pointerup')
+      return onPointerUp(event);
+    if (onPointerCancel != null && event.type == 'pointercancel')
+      return onPointerCancel(event);
+  }
+}
+
+/// Is invisible during hit testing.
 ///
-/// When [ignoring] is true, this render object is invisible to hit testing. It
-/// still consumes space during layout and paints its child as usual. It just
-/// cannot be the target of located events because it returns false from
-/// [hitTest].
+/// When [ignoring] is true, this render object (and its subtree) is invisible
+/// to hit testing. It still consumes space during layout and paints its child
+/// as usual. It just cannot be the target of located events because it returns
+/// false from [hitTest].
 class RenderIgnorePointer extends RenderProxyBox {
   RenderIgnorePointer({ RenderBox child, bool ignoring: true }) : super(child);
 

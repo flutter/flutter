@@ -852,6 +852,36 @@ class AssetImage extends StatelessComponent {
 
 // EVENT HANDLING
 
+class Listener extends OneChildRenderObjectWidget {
+  Listener({
+    Key key,
+    Widget child,    
+    this.onPointerDown,
+    this.onPointerMove,
+    this.onPointerUp,
+    this.onPointerCancel
+  }): super(key: key, child: child);
+
+  final PointerEventListener onPointerDown;
+  final PointerEventListener onPointerMove;
+  final PointerEventListener onPointerUp;
+  final PointerEventListener onPointerCancel;
+
+  RenderPointerListener createRenderObject() => new RenderPointerListener(
+    onPointerDown: onPointerDown,
+    onPointerMove: onPointerMove,
+    onPointerUp: onPointerUp,
+    onPointerCancel: onPointerCancel
+  );
+
+  void updateRenderObject(RenderPointerListener renderObject, Listener oldWidget) {
+    renderObject.onPointerDown = onPointerDown;
+    renderObject.onPointerMove = onPointerMove;
+    renderObject.onPointerUp = onPointerUp;
+    renderObject.onPointerCancel = onPointerCancel;
+  }
+}
+
 class IgnorePointer extends OneChildRenderObjectWidget {
   IgnorePointer({ Key key, Widget child, this.ignoring: true })
     : super(key: key, child: child);
