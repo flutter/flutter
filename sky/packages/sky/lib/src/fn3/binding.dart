@@ -12,7 +12,7 @@ class WidgetFlutterBinding extends SkyBinding {
   WidgetFlutterBinding() {
     BuildableElement.scheduleBuildFor = scheduleBuildFor;
     _renderViewElement = new RenderObjectToWidgetElement<RenderBox>(describeApp(null));
-    _renderViewElement.mount(null, this);
+    _renderViewElement.mount(null, null);
   }
 
   /// Ensures that there is a SkyBinding object instantiated.
@@ -34,19 +34,6 @@ class WidgetFlutterBinding extends SkyBinding {
       container: instance.renderView,
       child: app
     );
-  }
-
-  void handleEvent(sky.Event event, BindingHitTestEntry entry) {
-    for (HitTestEntry entry in entry.result.path) {
-      if (entry.target is! RenderObject)
-        continue;
-      for (Widget target in RenderObjectElement.getElementsForRenderObject(entry.target)) {
-        // TODO(ianh): implement event handling
-        // if (target is ListenerElement)
-        //  target.handleEvent(event);
-      }
-    }
-    super.handleEvent(event, entry);
   }
 
   void beginFrame(double timeStamp) {
@@ -150,9 +137,9 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectEl
       visitor(_child);
   }
 
-  void mount(Element parent, dynamic slot) {
+  void mount(Element parent, dynamic newSlot) {
     assert(parent == null);
-    super.mount(parent, slot);
+    super.mount(parent, newSlot);
     _child = updateChild(_child, widget.child, _rootChild);
   }
 
