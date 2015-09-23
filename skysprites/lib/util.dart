@@ -105,4 +105,29 @@ class GameMath {
   static Point filterPoint(Point a, Point b, double filterFactor) {
     return new Point(filter(a.x, b.x, filterFactor), filter(a.y, b.y, filterFactor));
   }
+
+  static Point lineIntersection(Point p, Point p2, Point q, Point q2) {
+    double epsilon = 1e-10;
+
+    Vector2 r = new Vector2(p2.x - p.x, p2.y - p.y);
+    Vector2 s = new Vector2(q2.x - q.x, q2.y - q.y);
+    Vector2 qp = new Vector2(q.x - p.x, q.y - p.y);
+
+    double rxs = cross2(r, s);
+
+    if (rxs.abs() < epsilon) {
+      // The lines are linear or collinear
+      return null;
+    }
+
+    double t = cross2(qp, s) / rxs;
+    double u = cross2(qp, r) / rxs;
+
+    if ((0.0 <= t && t <= 1.0) && (0.0 <= u && u <= 1.0)) {
+      return new Point(p.x + t * r.x, p.y + t * r.y);
+    }
+
+    // No intersection between the lines
+    return null;
+  }
 }
