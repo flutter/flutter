@@ -7,3 +7,4 @@ library fn3;
 export 'fn3/basic.dart';
 export 'fn3/framework.dart';
 export 'fn3/binding.dart';
+export 'fn3/homogeneous_viewport.dart';
