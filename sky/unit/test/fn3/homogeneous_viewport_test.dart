@@ -33,7 +33,7 @@ void main() {
 
     Widget builder() {
       return new TestComponent(new HomogeneousViewport(
-        builder: (int start, int count, BuildContext context) {
+        builder: (BuildContext context, int start, int count) {
           List<Widget> result = <Widget>[];
           for (int index = start; index < start + count; index += 1) {
             callbackTracker.add(index);
@@ -52,18 +52,19 @@ void main() {
 
     tester.pumpFrame(builder());
 
-    TestComponentState testComponent = tester.findElement((element) => element.widget is TestComponent).state;
+    StatefulComponentElement testComponent = tester.findElement((element) => element.widget is TestComponent);
+    TestComponentState testComponentState = testComponent.state;
 
     expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
 
     callbackTracker.clear();
-    testComponent.go(false);
+    testComponentState.go(false);
     tester.pumpFrameWithoutChange();
 
     expect(callbackTracker, equals([]));
 
     callbackTracker.clear();
-    testComponent.go(true);
+    testComponentState.go(true);
     tester.pumpFrameWithoutChange();
 
     expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
@@ -80,7 +81,7 @@ void main() {
 
     double offset = 300.0;
 
-    ListBuilder itemBuilder = (int start, int count, BuildContext context) {
+    ListBuilder itemBuilder = (BuildContext context, int start, int count) {
       List<Widget> result = <Widget>[];
       for (int index = start; index < start + count; index += 1) {
         callbackTracker.add(index);
@@ -130,7 +131,7 @@ void main() {
 
     double offset = 300.0;
 
-    ListBuilder itemBuilder = (int start, int count, BuildContext context) {
+    ListBuilder itemBuilder = (BuildContext context, int start, int count) {
       List<Widget> result = <Widget>[];
       for (int index = start; index < start + count; index += 1) {
         callbackTracker.add(index);
