@@ -27,24 +27,40 @@ const Duration _kCheckDuration = const Duration(milliseconds: 200);
 const Size _kSwitchSize = const Size(_kSwitchWidth + 2.0, _kSwitchHeight + 2.0);
 const double _kReactionRadius = _kSwitchWidth / 2.0;
 
-class Switch extends LeafRenderObjectWidget {
+class Switch extends StatelessComponent {
   Switch({ Key key, this.value, this.onChanged })
       : super(key: key);
 
   final bool value;
   final ValueChanged onChanged;
 
+  Widget build(BuildContext context) {
+    return new _SwitchWrapper(
+      value: value,
+      thumbColor: Theme.of(context).accentColor,
+      onChanged: onChanged
+    );
+  }
+}
+
+class _SwitchWrapper extends LeafRenderObjectWidget {
+  _SwitchWrapper({ Key key, this.value, this.thumbColor, this.onChanged })
+      : super(key: key);
+
+  final bool value;
+  final Color thumbColor;
+  final ValueChanged onChanged;
+
   _RenderSwitch createRenderObject() => new _RenderSwitch(
     value: value,
-    thumbColor: null,
+    thumbColor: thumbColor,
     onChanged: onChanged
   );
 
-  void updateRenderObject(_RenderSwitch renderObject, Switch oldWidget) {
+  void updateRenderObject(_RenderSwitch renderObject, _SwitchWrapper oldWidget) {
     renderObject.value = value;
+    renderObject.thumbColor = thumbColor;
     renderObject.onChanged = onChanged;
-    // TODO(abarth): How do we get the current theme here?
-    // renderObject.thumbColor = Theme.of(this).accentColor;
   }
 }
 

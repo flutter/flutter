@@ -3,9 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
-class BigSwitchApp extends App {
+class BigSwitch extends StatefulComponent {
+  BigSwitch({ this.scale });
+
+  final double scale;
+
+  BigSwitchState createState() => new BigSwitchState(this);
+}
+
+class BigSwitchState extends ComponentState<BigSwitch> {
+  BigSwitchState(BigSwitch config) : super(config);
+
   bool _value = false;
 
   void _handleOnChanged(bool value) {
@@ -14,20 +24,22 @@ class BigSwitchApp extends App {
     });
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Matrix4 scale = new Matrix4.identity();
-    scale.scale(5.0, 5.0);
-    return new Container(
-        child: new Switch(value: _value, onChanged: _handleOnChanged),
-        padding: new EdgeDims.all(20.0),
-        transform: scale,
-        decoration: new BoxDecoration(
-          backgroundColor: Colors.teal[600]
-        )
+    scale.scale(config.scale, config.scale);
+    return new Transform(
+      transform: scale,
+      child: new Switch(value: _value, onChanged: _handleOnChanged)
     );
   }
 }
 
 void main() {
-  runApp(new BigSwitchApp());
+  runApp(new Container(
+    child: new BigSwitch(scale: 5.0),
+    padding: new EdgeDims.all(20.0),
+    decoration: new BoxDecoration(
+      backgroundColor: Colors.teal[600]
+    )
+  ));
 }
