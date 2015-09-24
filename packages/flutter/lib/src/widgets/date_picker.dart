@@ -48,14 +48,14 @@ class DatePicker extends StatefulComponent {
   DatePickerMode _mode = DatePickerMode.day;
 
   void _handleModeChanged(DatePickerMode mode) {
-    userFeedback.performHapticFeedback(HapticFeedbackType_VIRTUAL_KEY);
+    userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
     setState(() {
       _mode = mode;
     });
   }
 
   void _handleYearChanged(DateTime dateTime) {
-    userFeedback.performHapticFeedback(HapticFeedbackType_VIRTUAL_KEY);
+    userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
     setState(() {
       _mode = DatePickerMode.day;
     });
@@ -64,7 +64,7 @@ class DatePicker extends StatefulComponent {
   }
 
   void _handleDayChanged(DateTime dateTime) {
-    userFeedback.performHapticFeedback(HapticFeedbackType_VIRTUAL_KEY);
+    userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
     if (onChanged != null)
       onChanged(dateTime);
   }
