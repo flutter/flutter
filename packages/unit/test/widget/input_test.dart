@@ -11,7 +11,7 @@ import '../services/mock_services.dart';
 class MockKeyboard implements KeyboardService {
   KeyboardClient client;
 
-  void show(KeyboardClientStub client, int type) {
+  void show(KeyboardClientStub client, KeyboardType type) {
     this.client = client.impl;
   }
 
