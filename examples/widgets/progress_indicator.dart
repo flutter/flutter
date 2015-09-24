@@ -7,7 +7,7 @@ import 'package:sky/material.dart';
 import 'package:sky/src/fn3.dart';
 
 class ProgressIndicatorApp extends StatefulComponent {
-  ProgressIndicatorAppState createState() => new ProgressIndicatorAppState(this);
+  ProgressIndicatorAppState createState() => new ProgressIndicatorAppState();
 }
 
 class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {

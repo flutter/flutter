@@ -3,9 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/painting.dart';
+import 'package:sky/src/fn3.dart';
 
-class TabbedNavigatorApp extends App {
+class TabbedNavigatorApp extends StatefulComponent {
+  TabbedNavigatorAppState createState() => new TabbedNavigatorAppState();
+}
+
+class TabbedNavigatorAppState extends State<TabbedNavigatorApp> {
   // The index of the selected tab for each of the TabNavigators constructed below.
   List<int> selectedIndices = new List<int>.filled(5, 0);
 
@@ -32,7 +37,7 @@ class TabbedNavigatorApp extends App {
       .map((text) {
         return new TabNavigatorView(
           label: new TabLabel(text: text),
-          builder: () => _buildContent(text)
+          builder: (BuildContext context) => _buildContent(text)
         );
       });
     return _buildTabNavigator(n, views.toList(), const ValueKey<String>('textLabelsTabNavigator'));
@@ -43,7 +48,7 @@ class TabbedNavigatorApp extends App {
       .map((icon_name) {
         return new TabNavigatorView(
           label: new TabLabel(icon: "action/${icon_name}"),
-          builder: () => _buildContent(icon_name)
+          builder: (BuildContext context) => _buildContent(icon_name)
         );
       });
     return _buildTabNavigator(n, views.toList(), const ValueKey<String>('iconLabelsTabNavigator'));
@@ -53,15 +58,15 @@ class TabbedNavigatorApp extends App {
     List<TabNavigatorView> views = <TabNavigatorView>[
       new TabNavigatorView(
         label: const TabLabel(text: 'STOCKS', icon: 'action/list'),
-        builder: () => _buildContent("Stocks")
+        builder: (BuildContext context) => _buildContent("Stocks")
       ),
       new TabNavigatorView(
         label: const TabLabel(text: 'PORTFOLIO', icon: 'action/account_circle'),
-        builder: () => _buildContent("Portfolio")
+        builder: (BuildContext context) => _buildContent("Portfolio")
       ),
       new TabNavigatorView(
         label: const TabLabel(text: 'SUMMARY', icon: 'action/assessment'),
-        builder: () => _buildContent("Summary")
+        builder: (BuildContext context) => _buildContent("Summary")
       )
     ];
     return _buildTabNavigator(n, views, const ValueKey<String>('textAndIconLabelsTabNavigator'));
@@ -83,38 +88,38 @@ class TabbedNavigatorApp extends App {
       .map((text) {
         return new TabNavigatorView(
           label: new TabLabel(text: text),
-          builder: () => _buildContent(text)
+          builder: (BuildContext context) => _buildContent(text)
         );
       });
     return _buildTabNavigator(n, views.toList(), const ValueKey<String>('scrollableTabNavigator'), isScrollable: true);
   }
 
 
-  Container _buildCard(TabNavigator tabNavigator) {
+  Container _buildCard(BuildContext context, TabNavigator tabNavigator) {
     return new Container(
      child: new Card(child: new Padding(child: tabNavigator, padding: const EdgeDims.all(8.0))),
      padding: const EdgeDims.all(12.0),
-     decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[100])
+     decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[100])
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     List<TabNavigatorView> views = <TabNavigatorView>[
       new TabNavigatorView(
         label: const TabLabel(text: 'TEXT'),
-        builder: () => _buildCard(_buildTextLabelsTabNavigator(0))
+        builder: (BuildContext context) => _buildCard(context, _buildTextLabelsTabNavigator(0))
       ),
       new TabNavigatorView(
         label: const TabLabel(text: 'ICONS'),
-        builder: () => _buildCard(_buildIconLabelsTabNavigator(1))
+        builder: (BuildContext context) => _buildCard(context, _buildIconLabelsTabNavigator(1))
       ),
       new TabNavigatorView(
         label: const TabLabel(text: 'BOTH'),
-        builder: () => _buildCard(_buildTextAndIconLabelsTabNavigator(2))
+        builder: (BuildContext context) => _buildCard(context, _buildTextAndIconLabelsTabNavigator(2))
       ),
       new TabNavigatorView(
         label: const TabLabel(text: 'SCROLL'),
-        builder: () => _buildCard(_buildScrollableTabNavigator(3))
+        builder: (BuildContext context) => _buildCard(context, _buildScrollableTabNavigator(3))
       )
     ];
 

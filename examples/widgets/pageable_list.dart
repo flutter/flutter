@@ -17,7 +17,7 @@ class CardModel {
 }
 
 class PageableListApp extends StatefulComponent {
-  PageableListAppState createState() => new PageableListAppState(this);
+  PageableListAppState createState() => new PageableListAppState();
 }
 
 class PageableListAppState extends State<PageableListApp> {
