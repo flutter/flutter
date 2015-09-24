@@ -44,7 +44,6 @@ class ObjectKey extends Key {
   int get hashCode => identityHashCode(value);
 }
 
-typedef void GlobalKeyUpdateListener(GlobalKey key, Element element);
 typedef void GlobalKeyRemoveListener(GlobalKey key);
 
 /// A GlobalKey is one that must be unique across the entire application. It is
@@ -59,12 +58,9 @@ abstract class GlobalKey extends Key {
 
   static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
   static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
-  static final Map<GlobalKey, Set<GlobalKeyUpdateListener>> _updateListeners = new Map<GlobalKey, Set<GlobalKeyUpdateListener>>();
   static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = new Map<GlobalKey, Set<GlobalKeyRemoveListener>>();
-  static final Set<GlobalKey> _updatedKeys = new Set<GlobalKey>();
   static final Set<GlobalKey> _removedKeys = new Set<GlobalKey>();
 
-  // TODO(ianh): call this
   void _register(Element element) {
     assert(() {
       if (_registry.containsKey(this)) {
@@ -77,7 +73,6 @@ abstract class GlobalKey extends Key {
     _registry[this] = element;
   }
 
-  // TODO(ianh): call this
   void _unregister(Element element) {
     assert(() {
       if (_registry.containsKey(this) && _debugDuplicates.containsKey(this)) {
@@ -95,28 +90,6 @@ abstract class GlobalKey extends Key {
       _registry.remove(this);
       _removedKeys.add(this);
     }
-  }
-
-  // TODO(ianh): call this
-  void _didUpdate() {
-    _updatedKeys.add(this);
-  }
-
-  static void registerUpdateListener(GlobalKey key, GlobalKeyUpdateListener listener) {
-    assert(key != null);
-    Set<GlobalKeyUpdateListener> listeners =
-        _updateListeners.putIfAbsent(key, () => new Set<GlobalKeyUpdateListener>());
-    bool added = listeners.add(listener);
-    assert(added);
-  }
-
-  static void unregisterUpdateListener(GlobalKey key, GlobalKeyUpdateListener listener) {
-    assert(key != null);
-    assert(_updateListeners.containsKey(key));
-    bool removed = _updateListeners[key].remove(listener);
-    if (_updateListeners[key].isEmpty)
-      _updateListeners.remove(key);
-    assert(removed);
   }
 
   static void registerRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
@@ -153,17 +126,9 @@ abstract class GlobalKey extends Key {
         throw message;
       return true;
     });
-    if (_updatedKeys.isEmpty && _removedKeys.isEmpty)
+    if (_removedKeys.isEmpty)
       return;
     try {
-      for (GlobalKey key in _updatedKeys) {
-        Element element = _registry[key];
-        if (element != null && _updateListeners.containsKey(key)) {
-          Set<GlobalKeyUpdateListener> localListeners = new Set<GlobalKeyUpdateListener>.from(_updateListeners[key]);
-          for (GlobalKeyUpdateListener listener in localListeners)
-            listener(key, element);
-        }
-      }
       for (GlobalKey key in _removedKeys) {
         if (!_registry.containsKey(key) && _removeListeners.containsKey(key)) {
           Set<GlobalKeyRemoveListener> localListeners = new Set<GlobalKeyRemoveListener>.from(_removeListeners[key]);
@@ -173,7 +138,6 @@ abstract class GlobalKey extends Key {
       }
     } finally {
       _removedKeys.clear();
-      _updatedKeys.clear();
     }
   }
 
@@ -545,6 +509,8 @@ abstract class Element<T extends Widget> implements BuildContext {
     _parent = parent;
     _slot = newSlot;
     _depth = _parent != null ? _parent.depth + 1 : 1;
+    if (widget.key is GlobalKey)
+      widget.key._register(this);
     assert(() { _debugLifecycleState = _ElementLifecycle.mounted; return true; });
   }
 
@@ -610,6 +576,8 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(widget != null);
     assert(depth != null);
+    if (widget.key is GlobalKey)
+      widget.key._unregister(this);
     assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; });
   }
 
