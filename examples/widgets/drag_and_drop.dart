@@ -5,7 +5,7 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
 final double kTop = 10.0 + sky.view.paddingTop;
 final double kLeft = 10.0;
@@ -17,10 +17,13 @@ class DragData {
 }
 
 class ExampleDragTarget extends StatefulComponent {
-  String _text = 'ready';
+  ExampleDragTargetState createState() => new ExampleDragTargetState(this);
+}
 
-  void syncConstructorArguments(ExampleDragTarget source) {
-  }
+class ExampleDragTargetState extends ComponentState<ExampleDragTarget> {
+  ExampleDragTargetState(ExampleDragTarget config) : super(config);
+
+  String _text = 'ready';
 
   void _handleAccept(DragData data) {
     setState(() {
@@ -28,10 +31,10 @@ class ExampleDragTarget extends StatefulComponent {
     });
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new DragTarget<DragData>(
       onAccept: _handleAccept,
-      builder: (List<DragData> data, _) {
+      builder: (BuildContext context, List<DragData> data, _) {
         return new Container(
           width: 100.0,
           height: 100.0,
@@ -52,8 +55,8 @@ class ExampleDragTarget extends StatefulComponent {
   }
 }
 
-class Dot extends Component {
-  Widget build() {
+class Dot extends StatelessComponent {
+  Widget build(BuildContext context) {
     return new Container(
       width: 50.0,
       height: 50.0,
@@ -64,7 +67,13 @@ class Dot extends Component {
   }
 }
 
-class DragAndDropApp extends App {
+class DragAndDropApp extends StatefulComponent {
+  DragAndDropAppState createState() => new DragAndDropAppState(this);
+}
+
+class DragAndDropAppState extends ComponentState<DragAndDropApp> {
+  DragAndDropAppState(DragAndDropApp config) : super(config);
+
   DragController _dragController;
   Offset _displacement = Offset.zero;
 
@@ -99,7 +108,7 @@ class DragAndDropApp extends App {
     });
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     List<Widget> layers = <Widget>[
       new Row([
         new ExampleDragTarget(),

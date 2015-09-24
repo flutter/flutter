@@ -7,7 +7,7 @@ import 'package:sky_services/media/media.mojom.dart';
 import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
 // All of these sounds are marked as public domain at soundbible.
 const String chimes = "http://soundbible.com/grab.php?id=2030&type=wav";
@@ -38,7 +38,7 @@ class Key {
   }
 }
 
-class PianoApp extends App {
+class PianoApp extends StatelessComponent {
   final List<Key> keys = [
     new Key(Colors.red[500], chimes),
     new Key(Colors.orange[500], chainsaw),
@@ -68,19 +68,19 @@ class PianoApp extends App {
     // Are we leaking all the player connections?
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     List<Widget> children = [];
     for (Key key in keys) {
       children.add(
-        new Listener(
-          child: new Flexible(
+        new Flexible(
+          child: new Listener(
             child: new Container(
               decoration: new BoxDecoration(backgroundColor: key.color)
-            )
-          ),
-          onPointerCancel: (_) => key.up(),
-          onPointerDown: (_) => key.down(),
-          onPointerUp: (_) => key.up()
+            ),
+            onPointerCancel: (_) => key.up(),
+            onPointerDown: (_) => key.down(),
+            onPointerUp: (_) => key.up()
+          )
         )
       );
     }

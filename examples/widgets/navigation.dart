@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
 List<Route> routes = [
   new Route(
@@ -60,21 +60,28 @@ List<Route> routes = [
   )
 ];
 
-class NavigationExampleApp extends App {
-  NavigationState _navState = new NavigationState(routes);
+class NavigationExampleApp extends StatefulComponent {
+  NavigationExampleAppState createState() => new NavigationExampleAppState(this);
+}
+
+class NavigationExampleAppState extends ComponentState<NavigationExampleApp> {
+  NavigationExampleAppState(NavigationExampleApp config) : super(config);
+
+  NavigatorHistory _history = new NavigatorHistory(routes);
 
   void onBack() {
-    if (_navState.hasPrevious()) {
+    if (_history.hasPrevious()) {
       setState(() {
-        _navState.pop();
+        _history.pop();
       });
     } else {
-      super.onBack();
+      // TODO(abarth): Integrate with the system navigator.
+      // super.onBack();
     }
   }
 
-  Widget build() {
-    return new Row([new Navigator(_navState)]);
+  Widget build(BuildContext context) {
+    return new Row([new Navigator(_history)]);
   }
 }
 
