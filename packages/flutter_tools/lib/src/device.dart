@@ -9,8 +9,8 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
-import 'process_wrapper.dart';
 import 'application_package.dart';
+import 'process_wrapper.dart';
 
 final Logger _logging = new Logger('sky_tools.device');
 

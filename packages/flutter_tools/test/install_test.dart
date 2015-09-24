@@ -4,9 +4,10 @@
 
 library install_test;
 
+import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/install.dart';
 import 'package:sky_tools/src/application_package.dart';
+import 'package:sky_tools/src/install.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -23,12 +24,11 @@ defineTests() {
       MockAndroidDevice android = new MockAndroidDevice();
       when(android.isConnected()).thenReturn(true);
       when(android.installApp(any)).thenReturn(true);
-      InstallCommandHandler handler = new InstallCommandHandler(android);
+      InstallCommand command = new InstallCommand(android);
 
-      MockArgResults results = new MockArgResults();
-      when(results['help']).thenReturn(false);
-      handler
-          .processArgResults(results)
+      CommandRunner runner = new CommandRunner('test_flutter', '')
+          ..addCommand(command);
+      runner.run(['install'])
           .then((int code) => expect(code, equals(0)));
     });
   });

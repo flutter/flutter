@@ -8,26 +8,23 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'artifacts.dart';
-import 'common.dart';
 import 'process.dart';
 
 final Logger _logging = new Logger('sky_tools.run_mojo');
 
-class RunMojoCommandHandler extends CommandHandler {
-  RunMojoCommandHandler() : super('run_mojo', 'Run a Flutter app in mojo.');
-
-  ArgParser get parser {
-    ArgParser parser = new ArgParser();
-    parser.addFlag('android', negatable: false, help: 'Run on an Android device');
-    parser.addFlag('help', abbr: 'h', negatable: false);
-    parser.addOption('app', defaultsTo: 'app.flx');
-    parser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services');
-    parser.addOption('package-root', defaultsTo: 'packages');
-    return parser;
+class RunMojoCommand extends Command {
+  final name = 'run_mojo';
+  final description = 'Run a Flutter app in mojo.';
+  RunMojoCommand() {
+    argParser.addFlag('android', negatable: false, help: 'Run on an Android device');
+    argParser.addOption('app', defaultsTo: 'app.flx');
+    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services');
+    argParser.addOption('package-root', defaultsTo: 'packages');
   }
 
   Future<String> _makePathAbsolute(String relativePath) async {
@@ -71,22 +68,18 @@ class RunMojoCommandHandler extends CommandHandler {
   }
 
   @override
-  Future<int> processArgResults(ArgResults results) async {
-    if (results['help']) {
-      print(parser.usage);
-      return 0;
-    }
-    if (results['mojo-path'] == null) {
+  Future<int> run() async {
+    if (argResults['mojo-path'] == null) {
       _logging.severe('Must specify --mojo-path to mojo_run');
       return 1;
     }
-    String packageRoot = results['package-root'];
+    String packageRoot = argResults['package-root'];
     ArtifactStore artifacts = new ArtifactStore(packageRoot);
-    String appPath = await _makePathAbsolute(results['app']);
-    if (results['android']) {
-      return _runAndroid(results, appPath, artifacts);
+    String appPath = await _makePathAbsolute(argResults['app']);
+    if (argResults['android']) {
+      return _runAndroid(argResults, appPath, artifacts);
     } else {
-      return _runLinux(results, appPath, artifacts);
+      return _runLinux(argResults, appPath, artifacts);
     }
   }
 }
