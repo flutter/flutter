@@ -7,41 +7,30 @@ library sky_tools.init;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/args.dart';
+import 'package:args/command_runner.dart';
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as p;
 
-import 'common.dart';
-
-class InitCommandHandler extends CommandHandler {
-  InitCommandHandler() : super('init', 'Create a new sky project.');
-
-  ArgParser get parser {
-    // TODO: Add a --template option for template selection when we have more than one.
-    ArgParser parser = new ArgParser();
-    parser.addFlag('help',
-        abbr: 'h', negatable: false, help: 'Display this help message.');
-    parser.addOption('out', abbr: 'o', help: 'The output directory.');
-    parser.addFlag('pub',
+class InitCommand extends Command {
+  final name = 'init';
+  final description = 'Create a new sky project.';
+  InitCommand() {
+    argParser.addOption('out', abbr: 'o', help: 'The output directory.');
+    argParser.addFlag('pub',
         defaultsTo: true,
         help: 'Whether to run pub after the project has been created.');
-    return parser;
   }
 
   @override
-  Future<int> processArgResults(ArgResults results) async {
-    if (results['help']) {
-      printUsage();
-      return 0;
-    }
-
-    if (!results.wasParsed('out')) {
-      printUsage('No option specified for the output directory.');
+  Future<int> run() async {
+    if (!argResults.wasParsed('out')) {
+      print('No option specified for the output directory.');
+      print(argParser.getUsage());
       return 2;
     }
 
     // TODO: Confirm overwrite of an existing directory with the user.
-    Directory out = new Directory(results['out']);
+    Directory out = new Directory(argResults['out']);
 
     new SkySimpleTemplate().generateInto(out);
 
@@ -58,7 +47,7 @@ Or if the Sky APK is not already on your device, run:
 
   ''';
 
-    if (results['pub']) {
+    if (argResults['pub']) {
       print("Running pub get...");
       Process process =
           await Process.start('pub', ['get'], workingDirectory: out.path);

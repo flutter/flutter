@@ -8,11 +8,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:args/args.dart';
+import 'package:args/command_runner.dart';
 import 'package:yaml/yaml.dart';
 
 import 'artifacts.dart';
-import 'common.dart';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const List<String> _kDensities = const ['drawable-xxhdpi'];
@@ -127,41 +126,33 @@ Future<ArchiveFile> _createSnapshotFile(String snapshotPath) async {
   return new ArchiveFile(_kSnapshotKey, content.length, content);
 }
 
-class BuildCommandHandler extends CommandHandler {
-  BuildCommandHandler() : super('build', 'Create a Flutter app.');
-
-  ArgParser get parser {
-    ArgParser parser = new ArgParser();
-    parser.addFlag('help', abbr: 'h', negatable: false);
-    parser.addOption('asset-base', defaultsTo: 'packages/material_design_icons/icons');
-    parser.addOption('compiler');
-    parser.addOption('main', defaultsTo: 'lib/main.dart');
-    parser.addOption('manifest');
-    parser.addOption('output-file', abbr: 'o', defaultsTo: 'app.flx');
-    parser.addOption('package-root', defaultsTo: 'packages');
-    parser.addOption('snapshot', defaultsTo: 'snapshot_blob.bin');
-    return parser;
+class BuildCommand extends Command {
+  final name = 'build';
+  final description = 'Create a Flutter app.';
+  BuildCommand() {
+    argParser.addOption('asset-base', defaultsTo: 'packages/material_design_icons/icons');
+    argParser.addOption('compiler');
+    argParser.addOption('main', defaultsTo: 'lib/main.dart');
+    argParser.addOption('manifest');
+    argParser.addOption('output-file', abbr: 'o', defaultsTo: 'app.flx');
+    argParser.addOption('package-root', defaultsTo: 'packages');
+    argParser.addOption('snapshot', defaultsTo: 'snapshot_blob.bin');
   }
 
   @override
-  Future<int> processArgResults(ArgResults results) async {
-    if (results['help']) {
-      print(parser.usage);
-      return 0;
-    }
-
-    String manifestPath = results['manifest'];
+  Future<int> run() async {
+    String manifestPath = argResults['manifest'];
     Map manifestDescriptor = await _loadManifest(manifestPath);
     Iterable<_Asset> assets = _parseAssets(manifestDescriptor, manifestPath);
     Iterable<_MaterialAsset> materialAssets = _parseMaterialAssets(manifestDescriptor);
 
     Archive archive = new Archive();
 
-    String snapshotPath = results['snapshot'];
+    String snapshotPath = argResults['snapshot'];
     await _compileSnapshot(
-      compilerPath: results['compiler'],
-      mainPath: results['main'],
-      packageRoot: results['package-root'],
+      compilerPath: argResults['compiler'],
+      mainPath: argResults['main'],
+      packageRoot: argResults['package-root'],
       snapshotPath: snapshotPath);
     archive.addFile(await _createSnapshotFile(snapshotPath));
 
@@ -169,12 +160,12 @@ class BuildCommandHandler extends CommandHandler {
       archive.addFile(await _createFile(asset.key, asset.base));
 
     for (_MaterialAsset asset in materialAssets) {
-      ArchiveFile file = await _createFile(asset.key, results['asset-base']);
+      ArchiveFile file = await _createFile(asset.key, argResults['asset-base']);
       if (file != null)
         archive.addFile(file);
     }
 
-    File outputFile = new File(results['output-file']);
+    File outputFile = new File(argResults['output-file']);
     await outputFile.writeAsString('#!mojo mojo:sky_viewer\n');
     await outputFile.writeAsBytes(new ZipEncoder().encode(archive), mode: FileMode.APPEND);
     return 0;

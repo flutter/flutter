@@ -6,32 +6,19 @@ library sky_tools.install;
 
 import 'dart:async';
 
-import 'package:args/args.dart';
+import 'package:args/command_runner.dart';
 
 import 'application_package.dart';
-import 'common.dart';
 import 'device.dart';
 
-class InstallCommandHandler extends CommandHandler {
+class InstallCommand extends Command {
+  final name = 'install';
+  final description = 'Install your Flutter app on attached devices.';
   AndroidDevice android = null;
-  InstallCommandHandler([this.android])
-      : super('install', 'Install your Sky app on attached devices.');
+  InstallCommand([this.android]);
 
   @override
-  ArgParser get parser {
-    ArgParser parser = new ArgParser();
-    parser.addFlag('help',
-        abbr: 'h', negatable: false, help: 'Display this help message.');
-    return parser;
-  }
-
-  @override
-  Future<int> processArgResults(ArgResults results) async {
-    if (results['help']) {
-      printUsage();
-      return 0;
-    }
-
+  Future<int> run() async {
     bool installedSomewhere = false;
 
     Map<BuildPlatform, ApplicationPackage> packages =
