@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
-class ContainerApp extends App {
-  Widget build() {
+class ContainerApp extends StatelessComponent {
+  Widget build(BuildContext context) {
     return new Column([
         new Container(
           padding: new EdgeDims.all(10.0),
           margin: new EdgeDims.all(10.0),
           decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
           child: new NetworkImage(
-            src: "https://www.dartlang.org/logos/dart-logo.png",
+            src: "https://raw.githubusercontent.com/dart-lang/logos/master/logos_and_wordmarks/dart-logo.png",
             width: 300.0,
             height: 300.0
           )

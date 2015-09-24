@@ -40,12 +40,7 @@ abstract class Scrollable extends StatefulComponent {
 }
 
 abstract class ScrollableState<T extends Scrollable> extends ComponentState<T> {
-  ScrollableState(T config) : super(config);
-
-  AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
-  ValueAnimation<double> _toOffsetAnimation; // Started by scrollTo()
-
-  void initState(BuildContext context) {
+  ScrollableState(T config) : super(config) {
     if (config.initialScrollOffset is double)
       _scrollOffset = config.initialScrollOffset;
     _toEndAnimation = new AnimatedSimulation(_setScrollOffset);
@@ -55,6 +50,9 @@ abstract class ScrollableState<T extends Scrollable> extends ComponentState<T> {
         _setScrollOffset(offset.value);
       });
   }
+
+  AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
+  ValueAnimation<double> _toOffsetAnimation; // Started by scrollTo()
 
   double _scrollOffset = 0.0;
   double get scrollOffset => _scrollOffset;

@@ -2,19 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:sky/material.dart';
 
 void main() => runApp(new DatePickerDemo());
 
-class DatePickerDemo extends App {
+class DatePickerDemo extends StatefulComponent {
+  DatePickerDemoState createState() => new DatePickerDemoState(this);
+}
 
-  DateTime _dateTime;
-
-  void initState() {
+class DatePickerDemoState extends ComponentState<DatePickerDemo> {
+  DatePickerDemoState(DatePickerDemo config) : super(config) {
     DateTime now = new DateTime.now();
     _dateTime = new DateTime(now.year, now.month, now.day);
   }
+
+  DateTime _dateTime;
 
   void _handleDateChanged(DateTime dateTime) {
     setState(() {
@@ -22,7 +25,7 @@ class DatePickerDemo extends App {
     });
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,

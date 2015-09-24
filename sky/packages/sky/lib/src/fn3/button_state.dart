@@ -8,7 +8,7 @@ import 'package:sky/src/fn3/framework.dart';
 abstract class ButtonState<T extends StatefulComponent> extends ComponentState<T> {
   ButtonState(T config) : super(config);
 
-  bool highlight;
+  bool highlight = false;
 
   void _handlePointerDown(_) {
     setState(() {
