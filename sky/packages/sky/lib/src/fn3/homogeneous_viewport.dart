@@ -30,11 +30,11 @@ class HomogeneousViewport extends RenderObjectWidget {
   final ScrollDirection direction;
   final double startOffset;
 
-  RenderObjectElement createElement() => new HomogeneousViewportElement(this);
+  HomogeneousViewportElement createElement() => new HomogeneousViewportElement(this);
 
   // we don't pass constructor arguments to the RenderBlockViewport() because until
   // we know our children, the constructor arguments we could give have no effect
-  RenderObject createRenderObject() => new RenderBlockViewport();
+  RenderBlockViewport createRenderObject() => new RenderBlockViewport();
 
   bool isLayoutDifferentThan(HomogeneousViewport oldWidget) {
     return itemsWrap != oldWidget.itemsWrap ||
@@ -163,7 +163,8 @@ class HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewport
     renderObject.add(child, before: nextSibling);
   }
 
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveChildRenderObject(RenderObject child, Element slot) {
+    assert(child.parent == renderObject);
     RenderObject nextSibling = slot?.renderObject;
     renderObject.move(child, before: nextSibling);
   }
