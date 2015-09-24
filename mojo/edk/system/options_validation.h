@@ -15,10 +15,10 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <type_traits>
 
 #include "base/logging.h"
 #include "mojo/edk/system/memory.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -28,6 +28,11 @@ namespace system {
 template <class Options>
 class UserOptionsReader {
  public:
+  static_assert(offsetof(Options, struct_size) == 0,
+                "struct_size not first member of Options");
+  static_assert(std::is_same<decltype(Options::struct_size), uint32_t>::value,
+                "Options::struct_size not a uint32_t");
+
   // Constructor from a |UserPointer<const Options>| (which it checks -- this
   // constructor has side effects!).
   // Note: We initialize |options_reader_| without checking, since we do a check
@@ -35,14 +40,7 @@ class UserOptionsReader {
   explicit UserOptionsReader(UserPointer<const Options> options)
       : options_reader_(UserPointer<const char>::Reader::NoCheck(),
                         options.template ReinterpretCast<const char>(),
-                        GetSizeForReader(options)) {
-    static_assert(offsetof(Options, struct_size) == 0,
-                  "struct_size not first member of Options");
-    // TODO(vtl): Enable when MSVC supports this (C++11 extended sizeof):
-    //   static_assert(sizeof(Options::struct_size) == sizeof(uint32_t),
-    //                 "Options::struct_size not a uint32_t");
-    // (Or maybe assert that its type is uint32_t?)
-  }
+                        GetSizeForReader(options)) {}
 
   bool is_valid() const { return !!options_reader_.GetPointer(); }
 
@@ -90,11 +88,11 @@ class UserOptionsReader {
 // (We can't just give |HasMember()| a member pointer template argument instead,
 // since there's no good/strictly-correct way to get an offset from that.)
 //
-// TODO(vtl): With C++11, use |sizeof(Options::member)| instead of (the
-// contortion below). We might also be able to pull out the type |Options| from
-// |reader| (using |decltype|) instead of requiring a parameter.
+// TODO(vtl): Can we pull out the type |Options| from |reader| instead of
+// requiring a parameter? (E.g., we could give |UserOptionsReader| a type alias
+// for |Options|. Or maybe there's a clever way to use |decltype|.)
 #define OPTIONS_STRUCT_HAS_MEMBER(Options, member, reader) \
-  reader.HasMember(offsetof(Options, member), sizeof(reader.options().member))
+  reader.HasMember(offsetof(Options, member), sizeof(Options::member))
 
 }  // namespace system
 }  // namespace mojo

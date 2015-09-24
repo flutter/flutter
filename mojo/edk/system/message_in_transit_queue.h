@@ -6,10 +6,9 @@
 #define MOJO_EDK_SYSTEM_MESSAGE_IN_TRANSIT_QUEUE_H_
 
 #include <deque>
+#include <memory>
 
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/message_in_transit.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -17,7 +16,7 @@ namespace system {
 
 // A simple queue for |MessageInTransit|s (that owns its messages).
 // This class is not thread-safe.
-class MOJO_SYSTEM_IMPL_EXPORT MessageInTransitQueue {
+class MessageInTransitQueue {
  public:
   MessageInTransitQueue();
   ~MessageInTransitQueue();
@@ -25,14 +24,14 @@ class MOJO_SYSTEM_IMPL_EXPORT MessageInTransitQueue {
   bool IsEmpty() const { return queue_.empty(); }
   size_t Size() const { return queue_.size(); }
 
-  void AddMessage(scoped_ptr<MessageInTransit> message) {
+  void AddMessage(std::unique_ptr<MessageInTransit> message) {
     queue_.push_back(message.release());
   }
 
-  scoped_ptr<MessageInTransit> GetMessage() {
+  std::unique_ptr<MessageInTransit> GetMessage() {
     MessageInTransit* rv = queue_.front();
     queue_.pop_front();
-    return make_scoped_ptr(rv);
+    return std::unique_ptr<MessageInTransit>(rv);
   }
 
   const MessageInTransit* PeekMessage() const { return queue_.front(); }
@@ -50,7 +49,7 @@ class MOJO_SYSTEM_IMPL_EXPORT MessageInTransitQueue {
 
  private:
   // TODO(vtl): When C++11 is available, switch this to a deque of
-  // |scoped_ptr|/|unique_ptr|s.
+  // |unique_ptr|s.
   std::deque<MessageInTransit*> queue_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MessageInTransitQueue);

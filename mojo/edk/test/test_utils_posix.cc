@@ -5,8 +5,10 @@
 #include "mojo/edk/test/test_utils.h"
 
 #include <fcntl.h>
+#include <stdio.h>
 #include <unistd.h>
 
+#include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
 
 namespace mojo {
@@ -72,17 +74,17 @@ bool NonBlockingRead(const embedder::PlatformHandle& handle,
   return true;
 }
 
-embedder::ScopedPlatformHandle PlatformHandleFromFILE(base::ScopedFILE fp) {
+embedder::ScopedPlatformHandle PlatformHandleFromFILE(util::ScopedFILE fp) {
   CHECK(fp);
   int rv = dup(fileno(fp.get()));
   PCHECK(rv != -1) << "dup";
   return embedder::ScopedPlatformHandle(embedder::PlatformHandle(rv));
 }
 
-base::ScopedFILE FILEFromPlatformHandle(embedder::ScopedPlatformHandle h,
+util::ScopedFILE FILEFromPlatformHandle(embedder::ScopedPlatformHandle h,
                                         const char* mode) {
   CHECK(h.is_valid());
-  base::ScopedFILE rv(fdopen(h.release().fd, mode));
+  util::ScopedFILE rv(fdopen(h.release().fd, mode));
   PCHECK(rv) << "fdopen";
   return rv.Pass();
 }

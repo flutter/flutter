@@ -6,13 +6,14 @@
 
 #include <string.h>
 
+#include <memory>
+
 #include "base/bind.h"
 #include "base/command_line.h"
 #include "base/location.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "base/synchronization/waitable_event.h"
-#include "base/test/test_io_thread.h"
 #include "base/test/test_timeouts.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/test_embedder.h"
@@ -20,6 +21,7 @@
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
 #include "mojo/edk/test/scoped_ipc_support.h"
+#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/public/c/system/core.h"
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -27,6 +29,9 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
+
+using test::TestIOThread;
+
 namespace embedder {
 namespace {
 
@@ -39,6 +44,8 @@ const MojoHandleSignals kSignalAll = MOJO_HANDLE_SIGNAL_READABLE |
 
 const char kConnectionIdFlag[] = "test-connection-id";
 
+void DoNothing() {}
+
 class ScopedTestChannel {
  public:
   // Creates a channel, which lives on the I/O thread given to
@@ -50,7 +57,8 @@ class ScopedTestChannel {
   explicit ScopedTestChannel(ScopedPlatformHandle platform_handle)
       : bootstrap_message_pipe_(MOJO_HANDLE_INVALID),
         event_(true, false),  // Manual reset.
-        channel_info_(nullptr) {
+        channel_info_(nullptr),
+        wait_on_shutdown_(true) {
     bootstrap_message_pipe_ =
         CreateChannel(platform_handle.Pass(),
                       base::Bind(&ScopedTestChannel::DidCreateChannel,
@@ -67,11 +75,15 @@ class ScopedTestChannel {
     // |WaitForChannelCreationCompletion()| must be called before destruction.
     CHECK(event_.IsSignaled());
     event_.Reset();
-    DestroyChannel(channel_info_,
-                   base::Bind(&ScopedTestChannel::DidDestroyChannel,
-                              base::Unretained(this)),
-                   nullptr);
-    event_.Wait();
+    if (wait_on_shutdown_) {
+      DestroyChannel(channel_info_,
+                     base::Bind(&ScopedTestChannel::DidDestroyChannel,
+                                base::Unretained(this)),
+                     nullptr);
+      event_.Wait();
+    } else {
+      DestroyChannel(channel_info_, base::Bind(&DoNothing), nullptr);
+    }
   }
 
   // Waits for channel creation to be completed.
@@ -82,6 +94,10 @@ class ScopedTestChannel {
   // Call only after |WaitForChannelCreationCompletion()|. Use only to check
   // that it's not null.
   const ChannelInfo* channel_info() const { return channel_info_; }
+
+  // Don't wait for the channel shutdown to finish on destruction. Used to
+  // exercise races.
+  void NoWaitOnShutdown() { wait_on_shutdown_ = false; }
 
  private:
   void DidCreateChannel(ChannelInfo* channel_info) {
@@ -107,16 +123,19 @@ class ScopedTestChannel {
   // Valid after channel creation completion until destruction.
   ChannelInfo* channel_info_;
 
+  // Whether the destructor should wait until the channel is destroyed.
+  bool wait_on_shutdown_;
+
   MOJO_DISALLOW_COPY_AND_ASSIGN(ScopedTestChannel);
 };
 
 class EmbedderTest : public testing::Test {
  public:
-  EmbedderTest() : test_io_thread_(base::TestIOThread::kAutoStart) {}
+  EmbedderTest() : test_io_thread_(TestIOThread::kAutoStart) {}
   ~EmbedderTest() override {}
 
  protected:
-  base::TestIOThread& test_io_thread() { return test_io_thread_; }
+  TestIOThread& test_io_thread() { return test_io_thread_; }
   scoped_refptr<base::TaskRunner> test_io_task_runner() {
     return test_io_thread_.task_runner();
   }
@@ -126,7 +145,7 @@ class EmbedderTest : public testing::Test {
 
   void TearDown() override { EXPECT_TRUE(test::Shutdown()); }
 
-  base::TestIOThread test_io_thread_;
+  TestIOThread test_io_thread_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(EmbedderTest);
 };
@@ -431,12 +450,34 @@ TEST_F(EmbedderTest, MAYBE_MultiprocessMasterSlave) {
       base::Bind(&DestroyChannelOnIOThread, base::Unretained(channel_info)));
 }
 
+TEST_F(EmbedderTest, ChannelShutdownRace_MessagePipeClose) {
+  const size_t kIterations = 1000;
+  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner());
+
+  for (size_t i = 0; i < kIterations; i++) {
+    PlatformChannelPair channel_pair;
+    std::unique_ptr<ScopedTestChannel> server_channel(
+        new ScopedTestChannel(channel_pair.PassServerHandle()));
+    server_channel->WaitForChannelCreationCompletion();
+    server_channel->NoWaitOnShutdown();
+
+    MojoHandle server_mp = server_channel->bootstrap_message_pipe();
+    EXPECT_NE(server_mp, MOJO_HANDLE_INVALID);
+
+    // Race between channel shutdown and closing a message pipe. The message
+    // pipe doesn't have to be the bootstrap pipe. It just has to be bound to
+    // the channel.
+    server_channel.reset();
+    MojoClose(server_mp);
+  }
+}
+
 MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
   ScopedPlatformHandle client_platform_handle =
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   EXPECT_TRUE(client_platform_handle.is_valid());
 
-  base::TestIOThread test_io_thread(base::TestIOThread::kAutoStart);
+  TestIOThread test_io_thread(TestIOThread::kAutoStart);
   test::InitWithSimplePlatformSupport();
 
   {
@@ -631,7 +672,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessChannelsClient) {
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   EXPECT_TRUE(client_platform_handle.is_valid());
 
-  base::TestIOThread test_io_thread(base::TestIOThread::kAutoStart);
+  TestIOThread test_io_thread(TestIOThread::kAutoStart);
   test::InitWithSimplePlatformSupport();
 
   {

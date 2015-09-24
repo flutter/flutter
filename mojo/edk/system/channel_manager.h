@@ -7,8 +7,9 @@
 
 #include <stdint.h>
 
+#include <unordered_map>
+
 #include "base/callback_forward.h"
-#include "base/containers/hash_tables.h"
 #include "base/memory/ref_counted.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/channel_id.h"
@@ -35,7 +36,7 @@ class MessagePipeDispatcher;
 // This class manages and "owns" |Channel|s (which typically connect to other
 // processes) for a given process. This class is thread-safe, except as
 // specifically noted.
-class MOJO_SYSTEM_IMPL_EXPORT ChannelManager {
+class ChannelManager {
  public:
   // |io_thread_task_runner| should be the |TaskRunner| for the I/O thread, on
   // which this channel manager will create all channels. Connection manager is
@@ -151,7 +152,7 @@ class MOJO_SYSTEM_IMPL_EXPORT ChannelManager {
   mutable Mutex mutex_;
 
   using ChannelIdToChannelMap =
-      base::hash_map<ChannelId, scoped_refptr<Channel>>;
+      std::unordered_map<ChannelId, scoped_refptr<Channel>>;
   ChannelIdToChannelMap channels_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ChannelManager);

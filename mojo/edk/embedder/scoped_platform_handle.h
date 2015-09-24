@@ -5,16 +5,16 @@
 #ifndef MOJO_EDK_EMBEDDER_SCOPED_PLATFORM_HANDLE_H_
 #define MOJO_EDK_EMBEDDER_SCOPED_PLATFORM_HANDLE_H_
 
-#include "base/move.h"
 #include "mojo/edk/embedder/platform_handle.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/macros.h"
+#include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
 namespace embedder {
 
-class MOJO_SYSTEM_IMPL_EXPORT ScopedPlatformHandle {
-  MOVE_ONLY_TYPE_WITH_MOVE_CONSTRUCTOR_FOR_CPP_03(ScopedPlatformHandle)
+// Scoper for |PlatformHandle|s, which are just file descriptors.
+class ScopedPlatformHandle {
+  MOJO_MOVE_ONLY_TYPE(ScopedPlatformHandle)
 
  public:
   ScopedPlatformHandle() {}

@@ -9,7 +9,6 @@
 
 #include <vector>
 
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -19,14 +18,14 @@ namespace system {
 class Awakable;
 struct HandleSignalsState;
 
-// |AwakableList| tracks all the |Waiter|s that are waiting on a given
-// handle/|Dispatcher|. There should be a |AwakableList| for each handle that
-// can be waited on (in any way). In the simple case, the |AwakableList| is
-// owned by the |Dispatcher|, whereas in more complex cases it is owned by the
-// secondary object (see simple_dispatcher.* and the explanatory comment in
-// core.cc). This class is thread-unsafe (all concurrent access must be
-// protected by some lock).
-class MOJO_SYSTEM_IMPL_EXPORT AwakableList {
+// |AwakableList| tracks all the |Awakable|s (usually |Waiter|s) that are
+// waiting on a given handle/|Dispatcher|. There should be a |AwakableList| for
+// each handle that can be waited on (in any way). In the simple case, the
+// |AwakableList| is owned by the |Dispatcher|, whereas in more complex cases it
+// is owned by the secondary object (see simple_dispatcher.* and the explanatory
+// comment in core.cc). This class is thread-unsafe (all concurrent access must
+// be protected by some lock).
+class AwakableList {
  public:
   AwakableList();
   ~AwakableList();

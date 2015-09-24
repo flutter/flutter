@@ -10,7 +10,6 @@
 #include "base/synchronization/condition_variable.h"
 #include "base/synchronization/lock.h"
 #include "mojo/edk/system/awakable.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -21,10 +20,10 @@ namespace system {
 // under other locks, in particular, |Dispatcher::lock_|s, so |Waiter| methods
 // must never call out to other objects (in particular, |Dispatcher|s). This
 // class is thread-safe.
-class MOJO_SYSTEM_IMPL_EXPORT Waiter final : public Awakable {
+class Waiter final : public Awakable {
  public:
   Waiter();
-  ~Waiter();
+  ~Waiter() override;
 
   // A |Waiter| can be used multiple times; |Init()| should be called before
   // each time it's used.

@@ -14,7 +14,6 @@
 
 #include "base/synchronization/lock_impl.h"
 #include "base/threading/platform_thread.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/edk/system/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -23,7 +22,7 @@ namespace system {
 
 // Mutex -----------------------------------------------------------------------
 
-class MOJO_SYSTEM_IMPL_EXPORT MOJO_LOCKABLE Mutex {
+class MOJO_LOCKABLE Mutex {
  public:
 #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
   Mutex() : lock_() {}
@@ -73,7 +72,7 @@ class MOJO_SYSTEM_IMPL_EXPORT MOJO_LOCKABLE Mutex {
 
 // MutexLocker -----------------------------------------------------------------
 
-class MOJO_SYSTEM_IMPL_EXPORT MOJO_SCOPED_LOCKABLE MutexLocker {
+class MOJO_SCOPED_LOCKABLE MutexLocker {
  public:
   explicit MutexLocker(Mutex* mutex) MOJO_EXCLUSIVE_LOCK_FUNCTION(mutex)
       : mutex_(mutex) {

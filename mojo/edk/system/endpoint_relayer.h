@@ -5,11 +5,11 @@
 #ifndef MOJO_EDK_SYSTEM_ENDPOINT_RELAYER_H_
 #define MOJO_EDK_SYSTEM_ENDPOINT_RELAYER_H_
 
+#include <memory>
+
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -19,8 +19,7 @@ class ChannelEndpoint;
 
 // This is a simple |ChannelEndpointClient| that just relays messages between
 // two |ChannelEndpoint|s (without the overhead of |MessagePipe|).
-class MOJO_SYSTEM_IMPL_EXPORT EndpointRelayer final
-    : public ChannelEndpointClient {
+class EndpointRelayer final : public ChannelEndpointClient {
  public:
   // A class that can inspect and optionally handle messages of type
   // |Type::ENDPOINT_CLIENT| received from either |ChannelEndpoint|.
@@ -30,7 +29,7 @@ class MOJO_SYSTEM_IMPL_EXPORT EndpointRelayer final
   //
   // Destructors may not call methods of the |EndpointRelayer| (nor of the
   // |ChannelEndpoint|s).
-  class MOJO_SYSTEM_IMPL_EXPORT Filter {
+  class Filter {
    public:
     virtual ~Filter() {}
 
@@ -73,7 +72,7 @@ class MOJO_SYSTEM_IMPL_EXPORT EndpointRelayer final
 
   // Sets (or resets) the filter, which can (optionally) handle/filter
   // |Type::ENDPOINT_CLIENT| messages (see |Filter| above).
-  void SetFilter(scoped_ptr<Filter> filter);
+  void SetFilter(std::unique_ptr<Filter> filter);
 
   // |ChannelEndpointClient| methods:
   bool OnReadMessage(unsigned port, MessageInTransit* message) override;
@@ -84,7 +83,7 @@ class MOJO_SYSTEM_IMPL_EXPORT EndpointRelayer final
 
   Mutex mutex_;
   scoped_refptr<ChannelEndpoint> endpoints_[2] MOJO_GUARDED_BY(mutex_);
-  scoped_ptr<Filter> filter_ MOJO_GUARDED_BY(mutex_);
+  std::unique_ptr<Filter> filter_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(EndpointRelayer);
 };

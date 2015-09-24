@@ -1,4 +1,0 @@
-name: apptest
-version: 0.0.1
-dependencies:
-  test: ^0.12.3+7

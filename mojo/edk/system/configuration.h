@@ -6,22 +6,19 @@
 #define MOJO_EDK_SYSTEM_CONFIGURATION_H_
 
 #include "mojo/edk/embedder/configuration.h"
-#include "mojo/edk/system/system_impl_export.h"
 
 namespace mojo {
 namespace system {
 
 namespace internal {
-MOJO_SYSTEM_IMPL_EXPORT extern embedder::Configuration g_configuration;
+extern embedder::Configuration g_configuration;
 }  // namespace internal
 
-MOJO_SYSTEM_IMPL_EXPORT inline const embedder::Configuration&
-GetConfiguration() {
+inline const embedder::Configuration& GetConfiguration() {
   return internal::g_configuration;
 }
 
-MOJO_SYSTEM_IMPL_EXPORT inline embedder::Configuration*
-GetMutableConfiguration() {
+inline embedder::Configuration* GetMutableConfiguration() {
   return &internal::g_configuration;
 }
 

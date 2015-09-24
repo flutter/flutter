@@ -135,7 +135,7 @@ Dart_Handle Builtin::GetLibrary(BuiltinLibraryId id) {
   return library;
 }
 
-void Builtin::PrepareLibrary(BuiltinLibraryId id) {
+Dart_Handle Builtin::PrepareLibrary(BuiltinLibraryId id) {
   Dart_Handle library = GetLibrary(id);
   DCHECK(!Dart_IsError(library));
   if (builtin_libraries_[id].has_natives_) {
@@ -151,6 +151,7 @@ void Builtin::PrepareLibrary(BuiltinLibraryId id) {
                    builtin_libraries_[id].patch_url_,
                    builtin_libraries_[id].patch_resources_);
   }
+  return library;
 }
 
 }  // namespace dart

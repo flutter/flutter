@@ -12,6 +12,7 @@
 #include "mojo/edk/system/message_in_transit_queue.h"
 #include "mojo/edk/system/message_in_transit_test_utils.h"
 #include "mojo/edk/system/test_channel_endpoint_client.h"
+#include "mojo/edk/util/make_unique.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -98,7 +99,7 @@ TEST_F(EndpointRelayerTest, Basic) {
   client1b()->SetReadEvent(nullptr);
 
   ASSERT_EQ(1u, client1b()->NumMessages());
-  scoped_ptr<MessageInTransit> read_message = client1b()->PopMessage();
+  std::unique_ptr<MessageInTransit> read_message = client1b()->PopMessage();
   ASSERT_TRUE(read_message);
   test::VerifyTestMessage(read_message.get(), 12345);
 
@@ -136,7 +137,7 @@ TEST_F(EndpointRelayerTest, MultipleMessages) {
   // Check the received messages.
   ASSERT_EQ(5u, client1b()->NumMessages());
   for (unsigned message_id = 1; message_id <= 5; message_id++) {
-    scoped_ptr<MessageInTransit> read_message = client1b()->PopMessage();
+    std::unique_ptr<MessageInTransit> read_message = client1b()->PopMessage();
     ASSERT_TRUE(read_message);
     test::VerifyTestMessage(read_message.get(), message_id);
   }
@@ -169,7 +170,8 @@ class TestFilter : public EndpointRelayer::Filter {
 
     unsigned id = 0;
     if (test::IsTestMessage(message, &id) && id >= 1000) {
-      filtered_messages_->AddMessage(make_scoped_ptr(message));
+      filtered_messages_->AddMessage(
+          std::unique_ptr<MessageInTransit>(message));
       return true;
     }
 
@@ -184,7 +186,7 @@ class TestFilter : public EndpointRelayer::Filter {
 
 TEST_F(EndpointRelayerTest, Filter) {
   MessageInTransitQueue filtered_messages;
-  relayer()->SetFilter(make_scoped_ptr(new TestFilter(&filtered_messages)));
+  relayer()->SetFilter(util::MakeUnique<TestFilter>(&filtered_messages));
 
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(1)));
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(2)));
@@ -206,7 +208,7 @@ TEST_F(EndpointRelayerTest, Filter) {
   // Check the received messages: We should get "1"-"5".
   ASSERT_EQ(5u, client1b()->NumMessages());
   for (unsigned message_id = 1; message_id <= 5; message_id++) {
-    scoped_ptr<MessageInTransit> read_message = client1b()->PopMessage();
+    std::unique_ptr<MessageInTransit> read_message = client1b()->PopMessage();
     ASSERT_TRUE(read_message);
     test::VerifyTestMessage(read_message.get(), message_id);
   }
@@ -218,7 +220,7 @@ TEST_F(EndpointRelayerTest, Filter) {
   // the latter must have also been "received"/filtered.
   ASSERT_EQ(3u, filtered_messages.Size());
   for (unsigned message_id = 1001; message_id <= 1003; message_id++) {
-    scoped_ptr<MessageInTransit> message = filtered_messages.GetMessage();
+    std::unique_ptr<MessageInTransit> message = filtered_messages.GetMessage();
     ASSERT_TRUE(message);
     test::VerifyTestMessage(message.get(), message_id);
   }

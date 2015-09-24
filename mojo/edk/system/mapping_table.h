@@ -7,11 +7,10 @@
 
 #include <stdint.h>
 
+#include <memory>
+#include <unordered_map>
 #include <vector>
 
-#include "base/containers/hash_tables.h"
-#include "base/memory/scoped_ptr.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -35,7 +34,7 @@ bool ShutdownCheckNoLeaks(Core*);
 // which maps mapping base addresses to |PlatformSharedBufferMapping|s.
 //
 // This class is NOT thread-safe; locking is left to |Core|.
-class MOJO_SYSTEM_IMPL_EXPORT MappingTable {
+class MappingTable {
  public:
   MappingTable();
   ~MappingTable();
@@ -43,14 +42,15 @@ class MOJO_SYSTEM_IMPL_EXPORT MappingTable {
   // Tries to add a mapping. (Takes ownership of the mapping in all cases; on
   // failure, it will be destroyed.)
   MojoResult AddMapping(
-      scoped_ptr<embedder::PlatformSharedBufferMapping> mapping);
+      std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping);
   MojoResult RemoveMapping(uintptr_t address);
 
  private:
   friend bool internal::ShutdownCheckNoLeaks(Core*);
 
+  // TODO(vtl): Should the value type be |std::unique_ptr|?
   using AddressToMappingMap =
-      base::hash_map<uintptr_t, embedder::PlatformSharedBufferMapping*>;
+      std::unordered_map<uintptr_t, embedder::PlatformSharedBufferMapping*>;
   AddressToMappingMap address_to_mapping_map_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MappingTable);

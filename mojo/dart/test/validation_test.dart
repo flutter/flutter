@@ -60,6 +60,8 @@ class ConformanceTestInterfaceImpl implements ConformanceTestInterface {
     if (param2 != null) param2.close(immediate: true);
     _complete();
   }
+  method14(UnionA param0) => _complete();
+  method15(StructH param0) => _complete();
 
   Future close({bool immediate: false}) => _stub.close(immediate: immediate);
 }

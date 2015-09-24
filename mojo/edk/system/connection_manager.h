@@ -9,7 +9,6 @@
 
 #include "mojo/edk/system/connection_identifier.h"
 #include "mojo/edk/system/process_identifier.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/edk/system/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -60,7 +59,7 @@ namespace system {
 // connected to the master by a special dedicated |RawChannel|, on which it does
 // synchronous IPC (note, however, that the master should never block on any
 // slave).
-class MOJO_SYSTEM_IMPL_EXPORT ConnectionManager {
+class ConnectionManager {
  public:
   enum class Result {
     FAILURE = 0,
@@ -122,9 +121,8 @@ class MOJO_SYSTEM_IMPL_EXPORT ConnectionManager {
 };
 
 // So logging macros and |DCHECK_EQ()|, etc. work.
-MOJO_SYSTEM_IMPL_EXPORT inline std::ostream& operator<<(
-    std::ostream& out,
-    ConnectionManager::Result result) {
+inline std::ostream& operator<<(std::ostream& out,
+                                ConnectionManager::Result result) {
   return out << static_cast<int>(result);
 }
 

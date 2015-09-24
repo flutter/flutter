@@ -82,8 +82,8 @@ interface File {
   AsBuffer() => (Error error, handle<shared_buffer>? buffer);
 
   // Special-file-specific control function, for device "files". |in| and |out|
-  // are dependent on |request|.
-  // TODO(vtl): Make a master list of request values somewhere.
+  // are dependent on |request|. See ioctl.mojom for the master list of request
+  // values.
   Ioctl(uint32 request, array<uint32>? in_values)
       => (Error error, array<uint32>? out_values);
 

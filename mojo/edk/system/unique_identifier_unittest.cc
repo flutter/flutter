@@ -6,8 +6,8 @@
 
 #include <set>
 #include <string>
+#include <unordered_set>
 
-#include "base/containers/hash_tables.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -140,8 +140,8 @@ TEST_F(UniqueIdentifierTest, StdSet) {
   EXPECT_TRUE(s.empty());
 }
 
-TEST_F(UniqueIdentifierTest, HashSet) {
-  base::hash_set<UniqueIdentifier> s;
+TEST_F(UniqueIdentifierTest, UnorderedSet) {
+  std::unordered_set<UniqueIdentifier> s;
   EXPECT_TRUE(s.empty());
 
   UniqueIdentifier id1 = UniqueIdentifier::Generate(platform_support());

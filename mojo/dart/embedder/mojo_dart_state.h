@@ -20,9 +20,6 @@ namespace mojo {
 namespace dart {
 
 struct IsolateCallbacks {
-  base::Callback<Dart_Isolate(const char*,const char*,const char*,void*,char**)>
-      create;
-  base::Callback<void(void*)> shutdown;
   base::Callback<void(Dart_Handle)> exception;
 };
 

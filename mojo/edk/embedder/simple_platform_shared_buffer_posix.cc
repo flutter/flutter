@@ -15,12 +15,11 @@
 
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
-#include "base/files/scoped_file.h"
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/sys_info.h"
 #include "base/threading/thread_restrictions.h"
-#include "mojo/edk/embedder/platform_handle.h"
+#include "mojo/edk/util/scoped_file.h"
 
 // We assume that |size_t| and |off_t| (type for |ftruncate()|) fits in a
 // |uint64_t|.
@@ -57,7 +56,7 @@ bool SimplePlatformSharedBuffer::Init() {
     return false;
   }
   base::FilePath shared_buffer_file;
-  base::ScopedFILE fp(base::CreateAndOpenTemporaryFileInDir(
+  util::ScopedFILE fp(base::CreateAndOpenTemporaryFileInDir(
       shared_buffer_dir, &shared_buffer_file));
   if (!fp) {
     LOG(ERROR) << "Failed to create/open temporary file for shared memory";
@@ -71,18 +70,19 @@ bool SimplePlatformSharedBuffer::Init() {
   }
 
   // Note: |dup()| is not interruptible (but |dup2()|/|dup3()| are).
-  base::ScopedFD fd(dup(fileno(fp.get())));
-  if (!fd.is_valid()) {
+  ScopedPlatformHandle handle(PlatformHandle(dup(fileno(fp.get()))));
+  if (!handle.is_valid()) {
     PLOG(ERROR) << "dup";
     return false;
   }
 
-  if (HANDLE_EINTR(ftruncate(fd.get(), static_cast<off_t>(num_bytes_))) != 0) {
+  if (HANDLE_EINTR(
+          ftruncate(handle.get().fd, static_cast<off_t>(num_bytes_))) != 0) {
     PLOG(ERROR) << "ftruncate";
     return false;
   }
 
-  handle_.reset(PlatformHandle(fd.release()));
+  handle_ = handle.Pass();
   return true;
 }
 
@@ -120,9 +120,8 @@ bool SimplePlatformSharedBuffer::InitFromPlatformHandle(
 
 #endif  // !defined(OS_ANDROID)
 
-scoped_ptr<PlatformSharedBufferMapping> SimplePlatformSharedBuffer::MapImpl(
-    size_t offset,
-    size_t length) {
+std::unique_ptr<PlatformSharedBufferMapping>
+SimplePlatformSharedBuffer::MapImpl(size_t offset, size_t length) {
   size_t offset_rounding = offset % base::SysInfo::VMAllocationGranularity();
   size_t real_offset = offset - offset_rounding;
   size_t real_length = length + offset_rounding;
@@ -143,8 +142,11 @@ scoped_ptr<PlatformSharedBufferMapping> SimplePlatformSharedBuffer::MapImpl(
   }
 
   void* base = static_cast<char*>(real_base) + offset_rounding;
-  return make_scoped_ptr(new SimplePlatformSharedBufferMapping(
-      base, length, real_base, real_length));
+  // Note: We can't use |MakeUnique| here, since it's not a friend of
+  // |SimplePlatformSharedBufferMapping| (only we are).
+  return std::unique_ptr<SimplePlatformSharedBufferMapping>(
+      new SimplePlatformSharedBufferMapping(base, length, real_base,
+                                            real_length));
 }
 
 // SimplePlatformSharedBufferMapping -------------------------------------------

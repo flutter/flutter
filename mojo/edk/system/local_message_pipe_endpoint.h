@@ -9,14 +9,12 @@
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
 #include "mojo/edk/system/message_pipe_endpoint.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
 namespace system {
 
-class MOJO_SYSTEM_IMPL_EXPORT LocalMessagePipeEndpoint final
-    : public MessagePipeEndpoint {
+class LocalMessagePipeEndpoint final : public MessagePipeEndpoint {
  public:
   // If |message_queue| is non-null, its contents will be taken as the queue of
   // (already-received) messages.
@@ -27,7 +25,7 @@ class MOJO_SYSTEM_IMPL_EXPORT LocalMessagePipeEndpoint final
   // |MessagePipeEndpoint| implementation:
   Type GetType() const override;
   bool OnPeerClose() override;
-  void EnqueueMessage(scoped_ptr<MessageInTransit> message) override;
+  void EnqueueMessage(std::unique_ptr<MessageInTransit> message) override;
 
   // There's a dispatcher for |LocalMessagePipeEndpoint|s, so we have to
   // implement/override these:

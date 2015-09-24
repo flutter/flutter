@@ -5,10 +5,10 @@
 #ifndef MOJO_EDK_SYSTEM_LOCAL_DATA_PIPE_IMPL_H_
 #define MOJO_EDK_SYSTEM_LOCAL_DATA_PIPE_IMPL_H_
 
+#include <memory>
+
 #include "base/memory/aligned_memory.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/data_pipe_impl.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -19,7 +19,7 @@ class MessageInTransitQueue;
 // |LocalDataPipeImpl| is a subclass that "implements" |DataPipe| for data pipes
 // whose producer and consumer are both local. See |DataPipeImpl| for more
 // details.
-class MOJO_SYSTEM_IMPL_EXPORT LocalDataPipeImpl final : public DataPipeImpl {
+class LocalDataPipeImpl final : public DataPipeImpl {
  public:
   LocalDataPipeImpl();
   ~LocalDataPipeImpl() override;
@@ -82,7 +82,7 @@ class MOJO_SYSTEM_IMPL_EXPORT LocalDataPipeImpl final : public DataPipeImpl {
   // no greater than |current_num_bytes_|.
   void MarkDataAsConsumed(size_t num_bytes);
 
-  scoped_ptr<char, base::AlignedFreeDeleter> buffer_;
+  std::unique_ptr<char, base::AlignedFreeDeleter> buffer_;
   // Circular buffer.
   size_t start_index_;
   size_t current_num_bytes_;

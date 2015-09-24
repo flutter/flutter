@@ -9,7 +9,6 @@
 
 #include "mojo/edk/system/awakable_list.h"
 #include "mojo/edk/system/dispatcher.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -19,7 +18,7 @@ namespace system {
 // correspondence between handles and dispatchers (see the explanatory comment
 // in core.cc). This class implements the standard waiter-signalling mechanism
 // in that case.
-class MOJO_SYSTEM_IMPL_EXPORT SimpleDispatcher : public Dispatcher {
+class SimpleDispatcher : public Dispatcher {
  protected:
   SimpleDispatcher();
   ~SimpleDispatcher() override;

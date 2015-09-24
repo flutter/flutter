@@ -8,16 +8,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <memory>
 #include <ostream>
 #include <vector>
 
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/c/system/buffer.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/message_pipe.h"
@@ -47,8 +46,7 @@ using DispatcherVector = std::vector<scoped_refptr<Dispatcher>>;
 namespace test {
 
 // Test helper. We need to declare it here so we can friend it.
-MOJO_SYSTEM_IMPL_EXPORT DispatcherTransport
-DispatcherTryStartTransport(Dispatcher* dispatcher);
+DispatcherTransport DispatcherTryStartTransport(Dispatcher* dispatcher);
 
 }  // namespace test
 
@@ -57,8 +55,7 @@ DispatcherTryStartTransport(Dispatcher* dispatcher);
 // object is thread-safe, with its state being protected by a single mutex
 // |mutex_|, which is also made available to implementation subclasses (via the
 // |mutex()| method).
-class MOJO_SYSTEM_IMPL_EXPORT Dispatcher
-    : public base::RefCountedThreadSafe<Dispatcher> {
+class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
  public:
   enum class Type {
     UNKNOWN = 0,
@@ -121,7 +118,7 @@ class MOJO_SYSTEM_IMPL_EXPORT Dispatcher
       uint64_t offset,
       uint64_t num_bytes,
       MojoMapBufferFlags flags,
-      scoped_ptr<embedder::PlatformSharedBufferMapping>* mapping);
+      std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping);
 
   // Gets the current handle signals state. (The default implementation simply
   // returns a default-constructed |HandleSignalsState|, i.e., no signals
@@ -272,7 +269,7 @@ class MOJO_SYSTEM_IMPL_EXPORT Dispatcher
       uint64_t offset,
       uint64_t num_bytes,
       MojoMapBufferFlags flags,
-      scoped_ptr<embedder::PlatformSharedBufferMapping>* mapping)
+      std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual HandleSignalsState GetHandleSignalsStateImplNoLock() const
       MOJO_SHARED_LOCKS_REQUIRED(mutex_);
@@ -390,7 +387,7 @@ class MOJO_SYSTEM_IMPL_EXPORT Dispatcher
 //
 // Note: This class is deliberately "thin" -- no more expensive than a
 // |Dispatcher*|.
-class MOJO_SYSTEM_IMPL_EXPORT DispatcherTransport {
+class DispatcherTransport {
  public:
   DispatcherTransport() : dispatcher_(nullptr) {}
 
@@ -423,8 +420,7 @@ class MOJO_SYSTEM_IMPL_EXPORT DispatcherTransport {
 };
 
 // So logging macros and |DCHECK_EQ()|, etc. work.
-MOJO_SYSTEM_IMPL_EXPORT inline std::ostream& operator<<(std::ostream& out,
-                                                        Dispatcher::Type type) {
+inline std::ostream& operator<<(std::ostream& out, Dispatcher::Type type) {
   return out << static_cast<int>(type);
 }
 

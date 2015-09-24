@@ -5,10 +5,15 @@
 #include "mojo/edk/embedder/simple_platform_support.h"
 
 #include "base/rand_util.h"
+#include "base/time/time.h"
 #include "mojo/edk/embedder/simple_platform_shared_buffer.h"
 
 namespace mojo {
 namespace embedder {
+
+MojoTimeTicks SimplePlatformSupport::GetTimeTicksNow() {
+  return base::TimeTicks::Now().ToInternalValue();
+}
 
 void SimplePlatformSupport::GetCryptoRandomBytes(void* bytes,
                                                  size_t num_bytes) {

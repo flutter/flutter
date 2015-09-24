@@ -4,17 +4,18 @@
 
 #include "mojo/edk/system/message_in_transit_test_utils.h"
 
+#include "mojo/edk/util/make_unique.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
 namespace system {
 namespace test {
 
-scoped_ptr<MessageInTransit> MakeTestMessage(unsigned id) {
-  return make_scoped_ptr(
-      new MessageInTransit(MessageInTransit::Type::ENDPOINT_CLIENT,
-                           MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
-                           static_cast<uint32_t>(sizeof(id)), &id));
+std::unique_ptr<MessageInTransit> MakeTestMessage(unsigned id) {
+  return util::MakeUnique<MessageInTransit>(
+      MessageInTransit::Type::ENDPOINT_CLIENT,
+      MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
+      static_cast<uint32_t>(sizeof(id)), &id);
 }
 
 void VerifyTestMessage(const MessageInTransit* message, unsigned id) {

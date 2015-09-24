@@ -8,7 +8,6 @@
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/simple_dispatcher.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -22,8 +21,7 @@ namespace system {
 // TODO(vtl): We derive from SimpleDispatcher, even though we don't currently
 // have anything that's waitable. I want to add a "transferrable" wait flag
 // (which would entail overriding |GetHandleSignalsStateImplNoLock()|, etc.).
-class MOJO_SYSTEM_IMPL_EXPORT SharedBufferDispatcher final
-    : public SimpleDispatcher {
+class SharedBufferDispatcher final : public SimpleDispatcher {
  public:
   // The default options to use for |MojoCreateSharedBuffer()|. (Real uses
   // should obtain this via |ValidateCreateOptions()| with a null |in_options|;
@@ -90,7 +88,7 @@ class MOJO_SYSTEM_IMPL_EXPORT SharedBufferDispatcher final
       uint64_t offset,
       uint64_t num_bytes,
       MojoMapBufferFlags flags,
-      scoped_ptr<embedder::PlatformSharedBufferMapping>* mapping) override;
+      std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping) override;
   void StartSerializeImplNoLock(Channel* channel,
                                 size_t* max_size,
                                 size_t* max_platform_handles) override

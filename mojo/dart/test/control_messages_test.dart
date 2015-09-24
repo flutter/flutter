@@ -21,11 +21,11 @@ class IntegerAccessorImpl implements sample.IntegerAccessor {
 
   Future<sample.IntegerAccessorGetIntegerResponseParams>
       getInteger([Function responseFactory = null]) {
-    return new Future.value(responseFactory(_value, sample.Enum_VALUE));
+    return new Future.value(responseFactory(_value, sample.Enum.VALUE));
   }
 
-  void setInteger(int data, int type) {
-    Expect.equals(sample.Enum_VALUE, type);
+  void setInteger(int data, sample.Enum type) {
+    Expect.equals(sample.Enum.VALUE.value, type.value);
     // Update data.
     _value = data;
   }
@@ -81,7 +81,7 @@ testRequireVersionDisconnect() async {
   proxy.requireVersion(maxVersion);
   Expect.equals(maxVersion, proxy.version);
   // Set integer.
-  proxy.ptr.setInteger(34, sample.Enum_VALUE);
+  proxy.ptr.setInteger(34, sample.Enum.VALUE);
   // Get integer.
   var response = await proxy.ptr.getInteger();
   Expect.equals(34, response.data);

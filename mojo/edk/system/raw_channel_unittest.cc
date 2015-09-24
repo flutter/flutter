@@ -7,21 +7,16 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <memory>
+#include <utility>
 #include <vector>
 
 #include "base/bind.h"
-#include "base/files/file_path.h"
-#include "base/files/file_util.h"
-#include "base/files/scoped_file.h"
-#include "base/files/scoped_temp_dir.h"
 #include "base/location.h"
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/memory/scoped_vector.h"
 #include "base/synchronization/waitable_event.h"
-#include "base/test/test_io_thread.h"
 #include "base/threading/simple_thread.h"
-#include "build/build_config.h"  // TODO(vtl): Remove this.
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/platform_handle.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
@@ -29,7 +24,11 @@
 #include "mojo/edk/system/mutex.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/transport_data.h"
+#include "mojo/edk/test/scoped_test_dir.h"
+#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/edk/test/test_utils.h"
+#include "mojo/edk/util/make_unique.h"
+#include "mojo/edk/util/scoped_file.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -37,14 +36,14 @@ namespace mojo {
 namespace system {
 namespace {
 
-scoped_ptr<MessageInTransit> MakeTestMessage(uint32_t num_bytes) {
+std::unique_ptr<MessageInTransit> MakeTestMessage(uint32_t num_bytes) {
   std::vector<unsigned char> bytes(num_bytes, 0);
   for (size_t i = 0; i < num_bytes; i++)
     bytes[i] = static_cast<unsigned char>(i + num_bytes);
-  return make_scoped_ptr(
-      new MessageInTransit(MessageInTransit::Type::ENDPOINT_CLIENT,
-                           MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
-                           num_bytes, bytes.empty() ? nullptr : &bytes[0]));
+  return util::MakeUnique<MessageInTransit>(
+      MessageInTransit::Type::ENDPOINT_CLIENT,
+      MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA, num_bytes,
+      bytes.empty() ? nullptr : &bytes[0]);
 }
 
 bool CheckMessageData(const void* bytes, uint32_t num_bytes) {
@@ -62,7 +61,7 @@ void InitOnIOThread(RawChannel* raw_channel, RawChannel::Delegate* delegate) {
 
 bool WriteTestMessageToHandle(const embedder::PlatformHandle& handle,
                               uint32_t num_bytes) {
-  scoped_ptr<MessageInTransit> message(MakeTestMessage(num_bytes));
+  std::unique_ptr<MessageInTransit> message(MakeTestMessage(num_bytes));
 
   size_t write_size = 0;
   mojo::test::BlockingWrite(handle, message->main_buffer(),
@@ -74,7 +73,7 @@ bool WriteTestMessageToHandle(const embedder::PlatformHandle& handle,
 
 class RawChannelTest : public testing::Test {
  public:
-  RawChannelTest() : io_thread_(base::TestIOThread::kManualStart) {}
+  RawChannelTest() : io_thread_(mojo::test::TestIOThread::kManualStart) {}
   ~RawChannelTest() override {}
 
   void SetUp() override {
@@ -91,12 +90,12 @@ class RawChannelTest : public testing::Test {
   }
 
  protected:
-  base::TestIOThread* io_thread() { return &io_thread_; }
+  mojo::test::TestIOThread* io_thread() { return &io_thread_; }
 
   embedder::ScopedPlatformHandle handles[2];
 
  private:
-  base::TestIOThread io_thread_;
+  mojo::test::TestIOThread io_thread_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RawChannelTest);
 };
@@ -193,7 +192,7 @@ class TestMessageReaderAndChecker {
 // Tests writing (and verifies reading using our own custom reader).
 TEST_F(RawChannelTest, WriteMessage) {
   WriteOnlyRawChannelDelegate delegate;
-  scoped_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   TestMessageReaderAndChecker checker(handles[1].get());
   io_thread()->PostTaskAndWait(
       FROM_HERE,
@@ -279,7 +278,7 @@ class ReadCheckerRawChannelDelegate : public RawChannel::Delegate {
 // Tests reading (writing using our own custom writer).
 TEST_F(RawChannelTest, OnReadMessage) {
   ReadCheckerRawChannelDelegate delegate;
-  scoped_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   io_thread()->PostTaskAndWait(
       FROM_HERE,
       base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
@@ -376,14 +375,14 @@ TEST_F(RawChannelTest, WriteMessageAndOnReadMessage) {
   static const size_t kNumWriteMessagesPerThread = 4000;
 
   WriteOnlyRawChannelDelegate writer_delegate;
-  scoped_ptr<RawChannel> writer_rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> writer_rc(RawChannel::Create(handles[0].Pass()));
   io_thread()->PostTaskAndWait(FROM_HERE,
                                base::Bind(&InitOnIOThread, writer_rc.get(),
                                           base::Unretained(&writer_delegate)));
 
   ReadCountdownRawChannelDelegate reader_delegate(kNumWriterThreads *
                                                   kNumWriteMessagesPerThread);
-  scoped_ptr<RawChannel> reader_rc(RawChannel::Create(handles[1].Pass()));
+  std::unique_ptr<RawChannel> reader_rc(RawChannel::Create(handles[1].Pass()));
   io_thread()->PostTaskAndWait(FROM_HERE,
                                base::Bind(&InitOnIOThread, reader_rc.get(),
                                           base::Unretained(&reader_delegate)));
@@ -473,7 +472,7 @@ class ErrorRecordingRawChannelDelegate
 // Tests (fatal) errors.
 TEST_F(RawChannelTest, OnError) {
   ErrorRecordingRawChannelDelegate delegate(0, true, true);
-  scoped_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   io_thread()->PostTaskAndWait(
       FROM_HERE,
       base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
@@ -516,7 +515,7 @@ TEST_F(RawChannelTest, ReadUnaffectedByWriteError) {
   // Only start up reading here. The system buffer should still contain the
   // messages that were written.
   ErrorRecordingRawChannelDelegate delegate(kMessageCount, true, true);
-  scoped_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   io_thread()->PostTaskAndWait(
       FROM_HERE,
       base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
@@ -542,7 +541,7 @@ TEST_F(RawChannelTest, ReadUnaffectedByWriteError) {
 // correctly.
 TEST_F(RawChannelTest, WriteMessageAfterShutdown) {
   WriteOnlyRawChannelDelegate delegate;
-  scoped_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   io_thread()->PostTaskAndWait(
       FROM_HERE,
       base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
@@ -602,7 +601,7 @@ TEST_F(RawChannelTest, ShutdownOnReadMessage) {
   for (size_t count = 0; count < 5; count++)
     EXPECT_TRUE(WriteTestMessageToHandle(handles[1].get(), 10));
 
-  scoped_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   ShutdownOnReadMessageRawChannelDelegate delegate(rc.get(), false);
   io_thread()->PostTaskAndWait(
       FROM_HERE,
@@ -674,7 +673,7 @@ class ShutdownOnErrorRawChannelDelegate : public RawChannel::Delegate {
 };
 
 TEST_F(RawChannelTest, ShutdownOnErrorRead) {
-  scoped_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   ShutdownOnErrorRawChannelDelegate delegate(
       rc.get(), false, RawChannel::Delegate::ERROR_READ_SHUTDOWN);
   io_thread()->PostTaskAndWait(
@@ -703,7 +702,7 @@ TEST_F(RawChannelTest, ShutdownAndDestroyOnErrorRead) {
 }
 
 TEST_F(RawChannelTest, ShutdownOnErrorWrite) {
-  scoped_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   ShutdownOnErrorRawChannelDelegate delegate(rc.get(), false,
                                              RawChannel::Delegate::ERROR_WRITE);
   io_thread()->PostTaskAndWait(
@@ -763,7 +762,7 @@ class ReadPlatformHandlesCheckerRawChannelDelegate
     {
       char buffer[100] = {};
 
-      base::ScopedFILE fp(mojo::test::FILEFromPlatformHandle(h1.Pass(), "rb"));
+      util::ScopedFILE fp(mojo::test::FILEFromPlatformHandle(h1.Pass(), "rb"));
       EXPECT_TRUE(fp);
       rewind(fp.get());
       EXPECT_EQ(1u, fread(buffer, 1, sizeof(buffer), fp.get()));
@@ -772,7 +771,7 @@ class ReadPlatformHandlesCheckerRawChannelDelegate
 
     {
       char buffer[100] = {};
-      base::ScopedFILE fp(mojo::test::FILEFromPlatformHandle(h2.Pass(), "rb"));
+      util::ScopedFILE fp(mojo::test::FILEFromPlatformHandle(h2.Pass(), "rb"));
       EXPECT_TRUE(fp);
       rewind(fp.get());
       EXPECT_EQ(1u, fread(buffer, 1, sizeof(buffer), fp.get()));
@@ -794,34 +793,24 @@ class ReadPlatformHandlesCheckerRawChannelDelegate
   MOJO_DISALLOW_COPY_AND_ASSIGN(ReadPlatformHandlesCheckerRawChannelDelegate);
 };
 
-#if defined(OS_POSIX)
-#define MAYBE_ReadWritePlatformHandles ReadWritePlatformHandles
-#else
-// Not yet implemented (on Windows).
-#define MAYBE_ReadWritePlatformHandles DISABLED_ReadWritePlatformHandles
-#endif
-TEST_F(RawChannelTest, MAYBE_ReadWritePlatformHandles) {
-  base::ScopedTempDir temp_dir;
-  ASSERT_TRUE(temp_dir.CreateUniqueTempDir());
+TEST_F(RawChannelTest, ReadWritePlatformHandles) {
+  mojo::test::ScopedTestDir test_dir;
 
   WriteOnlyRawChannelDelegate write_delegate;
-  scoped_ptr<RawChannel> rc_write(RawChannel::Create(handles[0].Pass()));
+  std::unique_ptr<RawChannel> rc_write(RawChannel::Create(handles[0].Pass()));
   io_thread()->PostTaskAndWait(FROM_HERE,
                                base::Bind(&InitOnIOThread, rc_write.get(),
                                           base::Unretained(&write_delegate)));
 
   ReadPlatformHandlesCheckerRawChannelDelegate read_delegate;
-  scoped_ptr<RawChannel> rc_read(RawChannel::Create(handles[1].Pass()));
+  std::unique_ptr<RawChannel> rc_read(RawChannel::Create(handles[1].Pass()));
   io_thread()->PostTaskAndWait(FROM_HERE,
                                base::Bind(&InitOnIOThread, rc_read.get(),
                                           base::Unretained(&read_delegate)));
 
-  base::FilePath unused;
-  base::ScopedFILE fp1(
-      base::CreateAndOpenTemporaryFileInDir(temp_dir.path(), &unused));
+  util::ScopedFILE fp1(test_dir.CreateFile());
   EXPECT_EQ(1u, fwrite("1", 1, 1, fp1.get()));
-  base::ScopedFILE fp2(
-      base::CreateAndOpenTemporaryFileInDir(temp_dir.path(), &unused));
+  util::ScopedFILE fp2(test_dir.CreateFile());
   EXPECT_EQ(1u, fwrite("2", 1, 1, fp2.get()));
 
   {
@@ -833,13 +822,14 @@ TEST_F(RawChannelTest, MAYBE_ReadWritePlatformHandles) {
     platform_handles->push_back(
         mojo::test::PlatformHandleFromFILE(fp2.Pass()).release());
 
-    scoped_ptr<MessageInTransit> message(
+    std::unique_ptr<MessageInTransit> message(
         new MessageInTransit(MessageInTransit::Type::ENDPOINT_CLIENT,
                              MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
                              sizeof(kHello), kHello));
-    message->SetTransportData(make_scoped_ptr(new TransportData(
-        platform_handles.Pass(), rc_write->GetSerializedPlatformHandleSize())));
-    EXPECT_TRUE(rc_write->WriteMessage(message.Pass()));
+    message->SetTransportData(util::MakeUnique<TransportData>(
+        std::move(platform_handles),
+        rc_write->GetSerializedPlatformHandleSize()));
+    EXPECT_TRUE(rc_write->WriteMessage(std::move(message)));
   }
 
   read_delegate.Wait();

@@ -315,18 +315,24 @@ size_t CopyToFileHelper(FILE* fp, const void* buffer, uint32_t num_bytes) {
 
 }  // namespace
 
-bool BlockingCopyToFile(ScopedDataPipeConsumerHandle source,
-                        const base::FilePath& destination) {
-  TRACE_EVENT1("data_pipe_utils", "BlockingCopyToFile", "dest",
-               destination.MaybeAsASCII());
-  base::ScopedFILE fp(base::OpenFile(destination, "wb"));
+base::ScopedFILE BlockingCopyToTempFile(ScopedDataPipeConsumerHandle source) {
+  base::FilePath path;
+  base::ScopedFILE fp(CreateAndOpenTemporaryFile(&path));
   if (!fp) {
-    LOG(ERROR) << "OpenFile('" << destination.value()
-               << "'failed in BlockingCopyToFile";
-    return false;
+    LOG(ERROR) << "CreateAndOpenTemporaryFile failed in"
+               << "BlockingCopyToTempFile";
+    return nullptr;
   }
-  return BlockingCopyHelper(source.Pass(),
-                            base::Bind(&CopyToFileHelper, fp.get()));
+  if (unlink(path.value().c_str())) {
+    LOG(ERROR) << "Failed to unlink temporary file";
+    return nullptr;
+  }
+  if (!BlockingCopyHelper(source.Pass(),
+                          base::Bind(&CopyToFileHelper, fp.get()))) {
+    LOG(ERROR) << "Could not copy source to temporary file";
+    return nullptr;
+  }
+  return fp;
 }
 
 void CopyToFile(ScopedDataPipeConsumerHandle source,

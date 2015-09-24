@@ -5,11 +5,11 @@
 #ifndef MOJO_EDK_SYSTEM_MESSAGE_PIPE_TEST_UTILS_H_
 #define MOJO_EDK_SYSTEM_MESSAGE_PIPE_TEST_UTILS_H_
 
-#include "base/test/test_io_thread.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
+#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -40,7 +40,7 @@ class ChannelThread {
   void ShutdownChannelOnIOThread();
 
   embedder::PlatformSupport* const platform_support_;
-  base::TestIOThread test_io_thread_;
+  mojo::test::TestIOThread test_io_thread_;
   scoped_refptr<Channel> channel_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ChannelThread);

@@ -1,0 +1,19 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("ozone_drm_gpu") {
+  sources = [
+    "ozone_drm_gpu_type_converters.cc",
+    "ozone_drm_gpu_type_converters.h",
+  ]
+
+  deps = [
+    "//base",
+    "//ui/ozone:ozone_common_message_types",
+    "//mojo/converters/geometry",
+    "//mojo/environment:chromium",
+    "//mojo/public/c/system",
+    "//mojo/services/ozone_drm_gpu/public/interfaces",
+  ]
+}

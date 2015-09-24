@@ -28,7 +28,8 @@ bool RegisterJNI(JNIEnv* env) {
 }
 
 bool Init() {
-  mojo::embedder::Init(scoped_ptr<mojo::embedder::PlatformSupport>(
+  // TODO(vtl): Use make_unique when C++14 is available.
+  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
       new mojo::embedder::SimplePlatformSupport()));
   return true;
 }

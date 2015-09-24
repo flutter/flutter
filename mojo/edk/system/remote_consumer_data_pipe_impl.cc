@@ -7,9 +7,10 @@
 #include <string.h>
 
 #include <algorithm>
+#include <memory>
+#include <utility>
 
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/configuration.h"
@@ -68,10 +69,14 @@ bool ValidateIncomingMessage(size_t element_num_bytes,
 
 RemoteConsumerDataPipeImpl::RemoteConsumerDataPipeImpl(
     ChannelEndpoint* channel_endpoint,
-    size_t consumer_num_bytes)
+    size_t consumer_num_bytes,
+    std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
+    size_t start_index)
     : channel_endpoint_(channel_endpoint),
-      consumer_num_bytes_(consumer_num_bytes) {
-  // Note: |buffer_| is lazily allocated.
+      consumer_num_bytes_(consumer_num_bytes),
+      buffer_(std::move(buffer)),
+      start_index_(start_index) {
+  // Note: |buffer_| may be null (in which case it'll be lazily allocated).
 }
 
 RemoteConsumerDataPipeImpl::~RemoteConsumerDataPipeImpl() {
@@ -96,7 +101,7 @@ bool RemoteConsumerDataPipeImpl::ProcessMessagesFromIncomingEndpoint(
 
   if (messages) {
     while (!messages->IsEmpty()) {
-      scoped_ptr<MessageInTransit> message(messages->GetMessage());
+      std::unique_ptr<MessageInTransit> message(messages->GetMessage());
       if (!ValidateIncomingMessage(element_num_bytes, capacity_num_bytes,
                                    *consumer_num_bytes, message.get())) {
         messages->Clear();
@@ -148,11 +153,11 @@ MojoResult RemoteConsumerDataPipeImpl::ProducerWriteData(
   while (offset < num_bytes_to_write) {
     size_t message_num_bytes =
         std::min(max_message_num_bytes, num_bytes_to_write - offset);
-    scoped_ptr<MessageInTransit> message(new MessageInTransit(
+    std::unique_ptr<MessageInTransit> message(new MessageInTransit(
         MessageInTransit::Type::ENDPOINT_CLIENT,
         MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
         static_cast<uint32_t>(message_num_bytes), elements.At(offset)));
-    if (!channel_endpoint_->EnqueueMessage(message.Pass())) {
+    if (!channel_endpoint_->EnqueueMessage(std::move(message))) {
       Disconnect();
       break;
     }
@@ -192,6 +197,7 @@ MojoResult RemoteConsumerDataPipeImpl::ProducerBeginWriteData(
     return MOJO_RESULT_SHOULD_WAIT;
 
   EnsureBuffer();
+  start_index_ = 0;  // We always have the full buffer.
   buffer.Put(buffer_.get());
   buffer_num_bytes.Put(static_cast<uint32_t>(max_num_bytes_to_write));
   set_producer_two_phase_max_num_bytes_written(
@@ -201,12 +207,12 @@ MojoResult RemoteConsumerDataPipeImpl::ProducerBeginWriteData(
 
 MojoResult RemoteConsumerDataPipeImpl::ProducerEndWriteData(
     uint32_t num_bytes_written) {
+  DCHECK(buffer_);
   DCHECK_LE(num_bytes_written, producer_two_phase_max_num_bytes_written());
   DCHECK_EQ(num_bytes_written % element_num_bytes(), 0u);
   DCHECK_LE(num_bytes_written, capacity_num_bytes() - consumer_num_bytes_);
 
   if (!consumer_open()) {
-    DCHECK(buffer_);
     set_producer_two_phase_max_num_bytes_written(0);
     DestroyBuffer();
     return MOJO_RESULT_OK;
@@ -227,11 +233,12 @@ MojoResult RemoteConsumerDataPipeImpl::ProducerEndWriteData(
   while (offset < num_bytes_written) {
     size_t message_num_bytes =
         std::min(max_message_num_bytes, num_bytes_written - offset);
-    scoped_ptr<MessageInTransit> message(new MessageInTransit(
-        MessageInTransit::Type::ENDPOINT_CLIENT,
-        MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
-        static_cast<uint32_t>(message_num_bytes), buffer_.get() + offset));
-    if (!channel_endpoint_->EnqueueMessage(message.Pass())) {
+    std::unique_ptr<MessageInTransit> message(
+        new MessageInTransit(MessageInTransit::Type::ENDPOINT_CLIENT,
+                             MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
+                             static_cast<uint32_t>(message_num_bytes),
+                             buffer_.get() + start_index_ + offset));
+    if (!channel_endpoint_->EnqueueMessage(std::move(message))) {
       set_producer_two_phase_max_num_bytes_written(0);
       Disconnect();
       return MOJO_RESULT_OK;
@@ -299,7 +306,7 @@ bool RemoteConsumerDataPipeImpl::ProducerEndSerialize(
   channel_endpoint.swap(channel_endpoint_);
   channel->SerializeEndpointWithRemotePeer(destination_for_endpoint, nullptr,
                                            channel_endpoint);
-  owner()->SetConsumerClosedNoLock();
+  SetConsumerClosed();
 
   *actual_size = sizeof(SerializedDataPipeProducerDispatcher) +
                  channel->GetSerializedEndpointSize();
@@ -373,7 +380,7 @@ bool RemoteConsumerDataPipeImpl::OnReadMessage(unsigned /*port*/,
                                                MessageInTransit* message) {
   // Always take ownership of the message. (This means that we should always
   // return true.)
-  scoped_ptr<MessageInTransit> msg(message);
+  std::unique_ptr<MessageInTransit> msg(message);
 
   if (!ValidateIncomingMessage(element_num_bytes(), capacity_num_bytes(),
                                consumer_num_bytes_, msg.get())) {
@@ -419,7 +426,7 @@ void RemoteConsumerDataPipeImpl::DestroyBuffer() {
 void RemoteConsumerDataPipeImpl::Disconnect() {
   DCHECK(consumer_open());
   DCHECK(channel_endpoint_);
-  owner()->SetConsumerClosedNoLock();
+  SetConsumerClosed();
   channel_endpoint_->DetachFromClient();
   channel_endpoint_ = nullptr;
   if (!producer_in_two_phase_write())

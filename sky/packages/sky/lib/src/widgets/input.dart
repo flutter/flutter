@@ -10,7 +10,7 @@ import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/theme.dart';
 
-export 'package:sky/services.dart' show KeyboardType_TEXT, KeyboardType_NUMBER, KeyboardType_PHONE, KeyboardType_DATETIME;
+export 'package:sky/services.dart' show KeyboardType;
 
 typedef void StringValueChanged(String value);
 
@@ -25,10 +25,10 @@ class Input extends StatefulComponent {
     String initialValue: '',
     this.placeholder,
     this.onChanged,
-    this.keyboardType : KeyboardType_TEXT
+    this.keyboardType : KeyboardType.TEXT
   }): _value = initialValue, super(key: key);
 
-  int keyboardType;
+  KeyboardType keyboardType;
   String placeholder;
   StringValueChanged onChanged;
 

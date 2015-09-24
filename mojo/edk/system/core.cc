@@ -4,10 +4,11 @@
 
 #include "mojo/edk/system/core.h"
 
+#include <memory>
+#include <utility>
 #include <vector>
 
 #include "base/logging.h"
-#include "base/time/time.h"
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/embedder/platform_support.h"
 #include "mojo/edk/system/async_waiter.h"
@@ -77,7 +78,6 @@ namespace system {
 //    - Locks at the "INF" level may not have any locks taken while they are
 //      held.
 
-// TODO(vtl): This should take a |scoped_ptr<PlatformSupport>| as a parameter.
 Core::Core(embedder::PlatformSupport* platform_support)
     : platform_support_(platform_support) {
 }
@@ -113,7 +113,7 @@ MojoResult Core::AsyncWait(MojoHandle handle,
   scoped_refptr<Dispatcher> dispatcher = GetDispatcher(handle);
   DCHECK(dispatcher);
 
-  scoped_ptr<AsyncWaiter> waiter = make_scoped_ptr(new AsyncWaiter(callback));
+  std::unique_ptr<AsyncWaiter> waiter(new AsyncWaiter(callback));
   MojoResult rv = dispatcher->AddAwakable(waiter.get(), signals, 0, nullptr);
   if (rv == MOJO_RESULT_OK)
     ignore_result(waiter.release());
@@ -121,7 +121,7 @@ MojoResult Core::AsyncWait(MojoHandle handle,
 }
 
 MojoTimeTicks Core::GetTimeTicksNow() {
-  return base::TimeTicks::Now().ToInternalValue();
+  return platform_support_->GetTimeTicksNow();
 }
 
 MojoResult Core::Close(MojoHandle handle) {
@@ -531,7 +531,7 @@ MojoResult Core::MapBuffer(MojoHandle buffer_handle,
   if (!dispatcher)
     return MOJO_RESULT_INVALID_ARGUMENT;
 
-  scoped_ptr<embedder::PlatformSharedBufferMapping> mapping;
+  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
   MojoResult result = dispatcher->MapBuffer(offset, num_bytes, flags, &mapping);
   if (result != MOJO_RESULT_OK)
     return result;
@@ -540,7 +540,7 @@ MojoResult Core::MapBuffer(MojoHandle buffer_handle,
   void* address = mapping->GetBase();
   {
     MutexLocker locker(&mapping_table_mutex_);
-    result = mapping_table_.AddMapping(mapping.Pass());
+    result = mapping_table_.AddMapping(std::move(mapping));
   }
   if (result != MOJO_RESULT_OK)
     return result;

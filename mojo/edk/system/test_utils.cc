@@ -23,15 +23,11 @@ MojoDeadline DeadlineFromMilliseconds(unsigned milliseconds) {
 }
 
 MojoDeadline EpsilonDeadline() {
-// Originally, our epsilon timeout was 10 ms, which was mostly fine but flaky on
-// some Windows bots. I don't recall ever seeing flakes on other bots. At 30 ms
-// tests seem reliable on Windows bots, but not at 25 ms. We'd like this timeout
-// to be as small as possible (see the description in the .h file).
-//
 // Currently, |tiny_timeout()| is usually 100 ms (possibly scaled under ASAN,
-// etc.). Based on this, set it to (usually be) 30 ms on Windows and 20 ms
-// elsewhere.
-#if defined(OS_WIN) || defined(OS_ANDROID)
+// etc.). Based on this, set it to (usually be) 30 ms on Android and 20 ms
+// elsewhere. (We'd like this to be as small as possible, without making things
+// flaky)
+#if defined(OS_ANDROID)
   return (TinyDeadline() * 3) / 10;
 #else
   return (TinyDeadline() * 2) / 10;
@@ -79,11 +75,11 @@ Stopwatch::~Stopwatch() {
 }
 
 void Stopwatch::Start() {
-  start_time_ = base::TimeTicks::Now();
+  start_time_ = platform_support_.GetTimeTicksNow();
 }
 
 MojoDeadline Stopwatch::Elapsed() {
-  int64_t result = (base::TimeTicks::Now() - start_time_).InMicroseconds();
+  int64_t result = platform_support_.GetTimeTicksNow() - start_time_;
   // |DCHECK_GE|, not |CHECK_GE|, since this may be performance-important.
   DCHECK_GE(result, 0);
   return static_cast<MojoDeadline>(result);

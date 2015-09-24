@@ -13,7 +13,8 @@ namespace dart {
 
 static void SetupSockAddr(sockaddr_storage* dest,
                           socklen_t* salen,
-                          const RawAddr& addr, intptr_t addr_length) {
+                          const RawAddr& addr,
+                          intptr_t addr_length) {
   CHECK((addr_length == 4) || (addr_length == 16));
   if (addr_length == 4) {
     dest->ss_family = AF_INET;
@@ -44,21 +45,18 @@ bool InternetAddress::Parse(int type, const char* address, RawAddr* addr) {
   return result == 1;
 }
 
-bool InternetAddress::Reverse(const RawAddr& addr, intptr_t addr_length,
-                              char* host, intptr_t host_len,
+bool InternetAddress::Reverse(const RawAddr& addr,
+                              intptr_t addr_length,
+                              char* host,
+                              intptr_t host_len,
                               intptr_t* error_code,
                               const char** error_description) {
   CHECK(host_len >= NI_MAXHOST);
   sockaddr_storage sock_addr;
   socklen_t salen;
   SetupSockAddr(&sock_addr, &salen, addr, addr_length);
-  int status = getnameinfo(reinterpret_cast<sockaddr*>(&sock_addr),
-                           salen,
-                           host,
-                           host_len,
-                           NULL,
-                           0,
-                           NI_NAMEREQD);
+  int status = getnameinfo(reinterpret_cast<sockaddr*>(&sock_addr), salen, host,
+                           host_len, NULL, 0, NI_NAMEREQD);
   *error_code = status;
   if (status != 0) {
     CHECK(*error_description == NULL);

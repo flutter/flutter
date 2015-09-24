@@ -6,6 +6,8 @@
 
 #include <string.h>
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/local_message_pipe_endpoint.h"
@@ -44,9 +46,9 @@ bool ProxyMessagePipeEndpoint::OnPeerClose() {
 // -- it may have been written to and closed immediately, before we were ready.
 // This case is handled in |Run()| (which will call us).
 void ProxyMessagePipeEndpoint::EnqueueMessage(
-    scoped_ptr<MessageInTransit> message) {
+    std::unique_ptr<MessageInTransit> message) {
   DCHECK(channel_endpoint_);
-  bool ok = channel_endpoint_->EnqueueMessage(message.Pass());
+  bool ok = channel_endpoint_->EnqueueMessage(std::move(message));
   LOG_IF(WARNING, !ok) << "Failed to write enqueue message to channel";
 }
 

@@ -5,7 +5,7 @@
 #ifndef MOJO_EDK_SYSTEM_TEST_UTILS_H_
 #define MOJO_EDK_SYSTEM_TEST_UTILS_H_
 
-#include "base/time/time.h"
+#include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -55,7 +55,11 @@ class Stopwatch {
   MojoDeadline Elapsed();
 
  private:
-  base::TimeTicks start_time_;
+  // TODO(vtl): We need this for |GetTimeTicksNow()|. Maybe we should have a
+  // singleton for tests instead? Or maybe it should be injected?
+  embedder::SimplePlatformSupport platform_support_;
+
+  MojoTimeTicks start_time_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };

@@ -10,18 +10,19 @@
 
 #include <algorithm>
 #include <deque>
+#include <memory>
+#include <utility>
 
 #include "base/bind.h"
 #include "base/location.h"
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "base/message_loop/message_loop.h"
-#include "base/synchronization/lock.h"
 #include "mojo/edk/embedder/platform_channel_utils_posix.h"
 #include "mojo/edk/embedder/platform_handle.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/transport_data.h"
+#include "mojo/edk/util/make_unique.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -42,7 +43,8 @@ class RawChannelPosix final : public RawChannel,
   // |RawChannel| protected methods:
   // Actually override this so that we can send multiple messages with (only)
   // FDs if necessary.
-  void EnqueueMessageNoLock(scoped_ptr<MessageInTransit> message) override;
+  void EnqueueMessageNoLock(std::unique_ptr<MessageInTransit> message) override
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(write_mutex());
   // Override this to handle those extra FD-only messages.
   bool OnReadMessageForRawChannel(
       const MessageInTransit::View& message_view) override;
@@ -55,8 +57,8 @@ class RawChannelPosix final : public RawChannel,
                        size_t* bytes_written) override;
   IOResult ScheduleWriteNoLock() override;
   void OnInit() override;
-  void OnShutdownNoLock(scoped_ptr<ReadBuffer> read_buffer,
-                        scoped_ptr<WriteBuffer> write_buffer) override;
+  void OnShutdownNoLock(std::unique_ptr<ReadBuffer> read_buffer,
+                        std::unique_ptr<WriteBuffer> write_buffer) override;
 
   // |base::MessageLoopForIO::Watcher| implementation:
   void OnFileCanReadWithoutBlocking(int fd) override;
@@ -71,21 +73,19 @@ class RawChannelPosix final : public RawChannel,
   embedder::ScopedPlatformHandle fd_;
 
   // The following members are only used on the I/O thread:
-  scoped_ptr<base::MessageLoopForIO::FileDescriptorWatcher> read_watcher_;
-  scoped_ptr<base::MessageLoopForIO::FileDescriptorWatcher> write_watcher_;
+  std::unique_ptr<base::MessageLoopForIO::FileDescriptorWatcher> read_watcher_;
+  std::unique_ptr<base::MessageLoopForIO::FileDescriptorWatcher> write_watcher_;
 
   bool pending_read_;
 
   std::deque<embedder::PlatformHandle> read_platform_handles_;
 
-  // The following members are used on multiple threads and protected by
-  // |write_lock()|:
-  bool pending_write_;
+  bool pending_write_ MOJO_GUARDED_BY(write_mutex());
 
-  // This is used for posting tasks from write threads to the I/O thread. It
-  // must only be accessed under |write_lock_|. The weak pointers it produces
-  // are only used/invalidated on the I/O thread.
-  base::WeakPtrFactory<RawChannelPosix> weak_ptr_factory_;
+  // This is used for posting tasks from write threads to the I/O thread. The
+  // weak pointers it produces are only used/invalidated on the I/O thread.
+  base::WeakPtrFactory<RawChannelPosix> weak_ptr_factory_
+      MOJO_GUARDED_BY(write_mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RawChannelPosix);
 };
@@ -102,7 +102,7 @@ RawChannelPosix::~RawChannelPosix() {
   DCHECK(!pending_read_);
   DCHECK(!pending_write_);
 
-  // No need to take the |write_lock()| here -- if there are still weak pointers
+  // No need to take |write_mutex()| here -- if there are still weak pointers
   // outstanding, then we're hosed anyway (since we wouldn't be able to
   // invalidate them cleanly, since we might not be on the I/O thread).
   DCHECK(!weak_ptr_factory_.HasWeakPtrs());
@@ -120,7 +120,7 @@ size_t RawChannelPosix::GetSerializedPlatformHandleSize() const {
 }
 
 void RawChannelPosix::EnqueueMessageNoLock(
-    scoped_ptr<MessageInTransit> message) {
+    std::unique_ptr<MessageInTransit> message) {
   if (message->transport_data()) {
     embedder::PlatformHandleVector* const platform_handles =
         message->transport_data()->platform_handles();
@@ -133,7 +133,7 @@ void RawChannelPosix::EnqueueMessageNoLock(
       for (; platform_handles->size() - i >
                  embedder::kPlatformChannelMaxNumHandles;
            i += embedder::kPlatformChannelMaxNumHandles) {
-        scoped_ptr<MessageInTransit> fd_message(new MessageInTransit(
+        std::unique_ptr<MessageInTransit> fd_message(new MessageInTransit(
             MessageInTransit::Type::RAW_CHANNEL,
             MessageInTransit::Subtype::RAW_CHANNEL_POSIX_EXTRA_PLATFORM_HANDLES,
             0, nullptr));
@@ -142,9 +142,9 @@ void RawChannelPosix::EnqueueMessageNoLock(
                 platform_handles->begin() + i,
                 platform_handles->begin() + i +
                     embedder::kPlatformChannelMaxNumHandles));
-        fd_message->SetTransportData(make_scoped_ptr(
-            new TransportData(fds.Pass(), GetSerializedPlatformHandleSize())));
-        RawChannel::EnqueueMessageNoLock(fd_message.Pass());
+        fd_message->SetTransportData(util::MakeUnique<TransportData>(
+            std::move(fds), GetSerializedPlatformHandleSize()));
+        RawChannel::EnqueueMessageNoLock(std::move(fd_message));
       }
 
       // Remove the handles that we "moved" into the other messages.
@@ -153,7 +153,7 @@ void RawChannelPosix::EnqueueMessageNoLock(
     }
   }
 
-  RawChannel::EnqueueMessageNoLock(message.Pass());
+  RawChannel::EnqueueMessageNoLock(std::move(message));
 }
 
 bool RawChannelPosix::OnReadMessageForRawChannel(
@@ -209,13 +209,13 @@ embedder::ScopedPlatformHandleVectorPtr RawChannelPosix::GetReadPlatformHandles(
   read_platform_handles_.erase(
       read_platform_handles_.begin(),
       read_platform_handles_.begin() + num_platform_handles);
-  return rv.Pass();
+  return rv;
 }
 
 RawChannel::IOResult RawChannelPosix::WriteNoLock(
     size_t* platform_handles_written,
     size_t* bytes_written) {
-  write_lock().AssertAcquired();
+  write_mutex().AssertHeld();
 
   DCHECK(!pending_write_);
 
@@ -288,7 +288,7 @@ RawChannel::IOResult RawChannelPosix::WriteNoLock(
 }
 
 RawChannel::IOResult RawChannelPosix::ScheduleWriteNoLock() {
-  write_lock().AssertAcquired();
+  write_mutex().AssertHeld();
 
   DCHECK(!pending_write_);
 
@@ -329,10 +329,10 @@ void RawChannelPosix::OnInit() {
 }
 
 void RawChannelPosix::OnShutdownNoLock(
-    scoped_ptr<ReadBuffer> /*read_buffer*/,
-    scoped_ptr<WriteBuffer> /*write_buffer*/) {
+    std::unique_ptr<ReadBuffer> /*read_buffer*/,
+    std::unique_ptr<WriteBuffer> /*write_buffer*/) {
   DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io());
-  write_lock().AssertAcquired();
+  write_mutex().AssertHeld();
 
   read_watcher_.reset();   // This will stop watching (if necessary).
   write_watcher_.reset();  // This will stop watching (if necessary).
@@ -385,7 +385,7 @@ void RawChannelPosix::OnFileCanWriteWithoutBlocking(int fd) {
   size_t platform_handles_written = 0;
   size_t bytes_written = 0;
   {
-    base::AutoLock locker(write_lock());
+    MutexLocker locker(&write_mutex());
 
     DCHECK(pending_write_);
 
@@ -454,7 +454,7 @@ void RawChannelPosix::WaitToWrite() {
           fd_.get().fd, false, base::MessageLoopForIO::WATCH_WRITE,
           write_watcher_.get(), this)) {
     {
-      base::AutoLock locker(write_lock());
+      MutexLocker locker(&write_mutex());
 
       DCHECK(pending_write_);
       pending_write_ = false;
@@ -470,9 +470,9 @@ void RawChannelPosix::WaitToWrite() {
 
 // Static factory method declared in raw_channel.h.
 // static
-scoped_ptr<RawChannel> RawChannel::Create(
+std::unique_ptr<RawChannel> RawChannel::Create(
     embedder::ScopedPlatformHandle handle) {
-  return make_scoped_ptr(new RawChannelPosix(handle.Pass()));
+  return util::MakeUnique<RawChannelPosix>(handle.Pass());
 }
 
 }  // namespace system

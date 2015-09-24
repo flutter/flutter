@@ -7,7 +7,6 @@
 
 #include "mojo/edk/embedder/process_delegate.h"
 #include "mojo/edk/embedder/slave_info.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -15,7 +14,7 @@ namespace embedder {
 
 // An interface for the master process delegate (which lives in the master
 // process).
-class MOJO_SYSTEM_IMPL_EXPORT MasterProcessDelegate : public ProcessDelegate {
+class MasterProcessDelegate : public ProcessDelegate {
  public:
   ProcessType GetType() const override;
 

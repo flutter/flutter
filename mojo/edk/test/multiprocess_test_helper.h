@@ -5,6 +5,7 @@
 #ifndef MOJO_EDK_TEST_MULTIPROCESS_TEST_HELPER_H_
 #define MOJO_EDK_TEST_MULTIPROCESS_TEST_HELPER_H_
 
+#include <memory>
 #include <string>
 
 #include "base/process/process.h"
@@ -61,7 +62,7 @@ class MultiprocessTestHelper {
   static embedder::ScopedPlatformHandle client_platform_handle;
 
  private:
-  scoped_ptr<embedder::PlatformChannelPair> platform_channel_pair_;
+  std::unique_ptr<embedder::PlatformChannelPair> platform_channel_pair_;
 
   // Valid after |StartChild()| and before |WaitForChildShutdown()|.
   base::Process test_child_;

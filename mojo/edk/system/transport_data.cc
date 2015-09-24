@@ -6,6 +6,8 @@
 
 #include <string.h>
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/configuration.h"
@@ -60,7 +62,7 @@ struct TransportData::PrivateStructForCompileAsserts {
                 "alignment");
 };
 
-TransportData::TransportData(scoped_ptr<DispatcherVector> dispatchers,
+TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
                              Channel* channel)
     : buffer_size_() {
   DCHECK(dispatchers);
@@ -194,7 +196,7 @@ TransportData::TransportData(scoped_ptr<DispatcherVector> dispatchers,
 TransportData::TransportData(
     embedder::ScopedPlatformHandleVectorPtr platform_handles,
     size_t serialized_platform_handle_size)
-    : buffer_size_(), platform_handles_(platform_handles.Pass()) {
+    : buffer_size_(), platform_handles_(std::move(platform_handles)) {
   buffer_size_ = MessageInTransit::RoundUpMessageAlignment(
       sizeof(Header) +
       platform_handles_->size() * serialized_platform_handle_size);
@@ -306,7 +308,7 @@ void TransportData::GetPlatformHandleTable(const void* transport_data_buffer,
 }
 
 // static
-scoped_ptr<DispatcherVector> TransportData::DeserializeDispatchers(
+std::unique_ptr<DispatcherVector> TransportData::DeserializeDispatchers(
     const void* buffer,
     size_t buffer_size,
     embedder::ScopedPlatformHandleVectorPtr platform_handles,
@@ -317,7 +319,8 @@ scoped_ptr<DispatcherVector> TransportData::DeserializeDispatchers(
 
   const Header* header = static_cast<const Header*>(buffer);
   const size_t num_handles = header->num_handles;
-  scoped_ptr<DispatcherVector> dispatchers(new DispatcherVector(num_handles));
+  std::unique_ptr<DispatcherVector> dispatchers(
+      new DispatcherVector(num_handles));
 
   const HandleTableEntry* handle_table =
       reinterpret_cast<const HandleTableEntry*>(
@@ -335,7 +338,7 @@ scoped_ptr<DispatcherVector> TransportData::DeserializeDispatchers(
         channel, handle_table[i].type, source, size, platform_handles.get());
   }
 
-  return dispatchers.Pass();
+  return dispatchers;
 }
 
 }  // namespace system

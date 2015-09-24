@@ -7,14 +7,15 @@
 
 #include <stdint.h>
 
+#include <memory>
+
 #include "base/compiler_specific.h"
-#include "base/memory/scoped_ptr.h"
-#include "base/synchronization/lock.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
-#include "mojo/edk/system/system_impl_export.h"
+#include "mojo/edk/system/mutex.h"
+#include "mojo/edk/system/thread_annotations.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -35,7 +36,7 @@ class MessageInTransitQueue;
 // Its subclasses implement the three cases: local producer and consumer, local
 // producer and remote consumer, and remote producer and local consumer. This
 // class is thread-safe.
-class MOJO_SYSTEM_IMPL_EXPORT DataPipe final : public ChannelEndpointClient {
+class DataPipe final : public ChannelEndpointClient {
  public:
   // The default options for |MojoCreateDataPipe()|. (Real uses should obtain
   // this via |ValidateCreateOptions()| with a null |in_options|; this is
@@ -164,14 +165,16 @@ class MOJO_SYSTEM_IMPL_EXPORT DataPipe final : public ChannelEndpointClient {
   // serializing data pipe dispatchers (i.e., in |ProducerEndSerialize()| and
   // |ConsumerEndSerialize()|). Returns the old value of |impl_| (in case the
   // caller needs to manage its lifetime).
-  scoped_ptr<DataPipeImpl> ReplaceImplNoLock(scoped_ptr<DataPipeImpl> new_impl);
-  void SetProducerClosedNoLock();
-  void SetConsumerClosedNoLock();
+  std::unique_ptr<DataPipeImpl> ReplaceImplNoLock(
+      std::unique_ptr<DataPipeImpl> new_impl)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+  void SetProducerClosedNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+  void SetConsumerClosedNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
-  void ProducerCloseNoLock();
-  void ConsumerCloseNoLock();
+  void ProducerCloseNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+  void ConsumerCloseNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
-  // Thread-safe and fast (they don't take the lock):
+  // Thread-safe and fast (they don't take |mutex_|):
   const MojoCreateDataPipeOptions& validated_options() const {
     return validated_options_;
   }
@@ -182,38 +185,43 @@ class MOJO_SYSTEM_IMPL_EXPORT DataPipe final : public ChannelEndpointClient {
     return validated_options_.capacity_num_bytes;
   }
 
-  // Must be called under lock.
-  bool producer_open_no_lock() const {
-    lock_.AssertAcquired();
+  // Must be called under |mutex_|.
+  bool producer_open_no_lock() const MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     return producer_open_;
   }
-  bool consumer_open_no_lock() const {
-    lock_.AssertAcquired();
+  bool consumer_open_no_lock() const MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     return consumer_open_;
   }
-  uint32_t producer_two_phase_max_num_bytes_written_no_lock() const {
-    lock_.AssertAcquired();
+  uint32_t producer_two_phase_max_num_bytes_written_no_lock() const
+      MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     return producer_two_phase_max_num_bytes_written_;
   }
-  uint32_t consumer_two_phase_max_num_bytes_read_no_lock() const {
-    lock_.AssertAcquired();
+  uint32_t consumer_two_phase_max_num_bytes_read_no_lock() const
+      MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     return consumer_two_phase_max_num_bytes_read_;
   }
-  void set_producer_two_phase_max_num_bytes_written_no_lock(
-      uint32_t num_bytes) {
-    lock_.AssertAcquired();
+  void set_producer_two_phase_max_num_bytes_written_no_lock(uint32_t num_bytes)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     producer_two_phase_max_num_bytes_written_ = num_bytes;
   }
-  void set_consumer_two_phase_max_num_bytes_read_no_lock(uint32_t num_bytes) {
-    lock_.AssertAcquired();
+  void set_consumer_two_phase_max_num_bytes_read_no_lock(uint32_t num_bytes)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     consumer_two_phase_max_num_bytes_read_ = num_bytes;
   }
-  bool producer_in_two_phase_write_no_lock() const {
-    lock_.AssertAcquired();
+  bool producer_in_two_phase_write_no_lock() const
+      MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     return producer_two_phase_max_num_bytes_written_ > 0;
   }
-  bool consumer_in_two_phase_read_no_lock() const {
-    lock_.AssertAcquired();
+  bool consumer_in_two_phase_read_no_lock() const
+      MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     return consumer_two_phase_max_num_bytes_read_ > 0;
   }
 
@@ -229,7 +237,7 @@ class MOJO_SYSTEM_IMPL_EXPORT DataPipe final : public ChannelEndpointClient {
   DataPipe(bool has_local_producer,
            bool has_local_consumer,
            const MojoCreateDataPipeOptions& validated_options,
-           scoped_ptr<DataPipeImpl> impl);
+           std::unique_ptr<DataPipeImpl> impl);
   ~DataPipe() override;
 
   // |ChannelEndpointClient| implementation:
@@ -237,36 +245,38 @@ class MOJO_SYSTEM_IMPL_EXPORT DataPipe final : public ChannelEndpointClient {
   void OnDetachFromChannel(unsigned port) override;
 
   void AwakeProducerAwakablesForStateChangeNoLock(
-      const HandleSignalsState& new_producer_state);
+      const HandleSignalsState& new_producer_state)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   void AwakeConsumerAwakablesForStateChangeNoLock(
-      const HandleSignalsState& new_consumer_state);
+      const HandleSignalsState& new_consumer_state)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   void SetProducerClosed();
   void SetConsumerClosed();
 
-  bool has_local_producer_no_lock() const {
-    lock_.AssertAcquired();
+  bool has_local_producer_no_lock() const MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     return !!producer_awakable_list_;
   }
-  bool has_local_consumer_no_lock() const {
-    lock_.AssertAcquired();
+  bool has_local_consumer_no_lock() const MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
+    mutex_.AssertHeld();
     return !!consumer_awakable_list_;
   }
 
   MSVC_SUPPRESS_WARNING(4324)
   const MojoCreateDataPipeOptions validated_options_;
 
-  mutable base::Lock lock_;  // Protects the following members.
+  mutable Mutex mutex_;
   // *Known* state of producer or consumer.
-  bool producer_open_;
-  bool consumer_open_;
+  bool producer_open_ MOJO_GUARDED_BY(mutex_);
+  bool consumer_open_ MOJO_GUARDED_BY(mutex_);
   // Non-null only if the producer or consumer, respectively, is local.
-  scoped_ptr<AwakableList> producer_awakable_list_;
-  scoped_ptr<AwakableList> consumer_awakable_list_;
+  std::unique_ptr<AwakableList> producer_awakable_list_ MOJO_GUARDED_BY(mutex_);
+  std::unique_ptr<AwakableList> consumer_awakable_list_ MOJO_GUARDED_BY(mutex_);
   // These are nonzero if and only if a two-phase write/read is in progress.
-  uint32_t producer_two_phase_max_num_bytes_written_;
-  uint32_t consumer_two_phase_max_num_bytes_read_;
-  scoped_ptr<DataPipeImpl> impl_;
+  uint32_t producer_two_phase_max_num_bytes_written_ MOJO_GUARDED_BY(mutex_);
+  uint32_t consumer_two_phase_max_num_bytes_read_ MOJO_GUARDED_BY(mutex_);
+  std::unique_ptr<DataPipeImpl> impl_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(DataPipe);
 };

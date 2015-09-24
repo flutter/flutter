@@ -4,6 +4,9 @@
 
 #include "mojo/edk/system/channel_endpoint.h"
 
+#include <memory>
+#include <utility>
+
 #include "base/synchronization/waitable_event.h"
 #include "base/test/test_timeouts.h"
 #include "mojo/edk/system/channel_test_base.h"
@@ -64,7 +67,8 @@ TEST_F(ChannelEndpointTest, Basic) {
 
   // Make a test message.
   unsigned message_id = 0x12345678;
-  scoped_ptr<MessageInTransit> send_message = test::MakeTestMessage(message_id);
+  std::unique_ptr<MessageInTransit> send_message =
+      test::MakeTestMessage(message_id);
   // Check that our test utility works (at least in one direction).
   test::VerifyTestMessage(send_message.get(), message_id);
 
@@ -72,7 +76,7 @@ TEST_F(ChannelEndpointTest, Basic) {
   EXPECT_FALSE(read_event.IsSignaled());
 
   // Send it through channel/endpoint 1.
-  EXPECT_TRUE(endpoint1->EnqueueMessage(send_message.Pass()));
+  EXPECT_TRUE(endpoint1->EnqueueMessage(std::move(send_message)));
 
   // Wait to receive it.
   EXPECT_TRUE(read_event.TimedWait(TestTimeouts::tiny_timeout()));
@@ -80,7 +84,7 @@ TEST_F(ChannelEndpointTest, Basic) {
 
   // Check the received message.
   ASSERT_EQ(1u, client0->NumMessages());
-  scoped_ptr<MessageInTransit> read_message = client0->PopMessage();
+  std::unique_ptr<MessageInTransit> read_message = client0->PopMessage();
   ASSERT_TRUE(read_message);
   test::VerifyTestMessage(read_message.get(), message_id);
 }
@@ -126,7 +130,7 @@ TEST_F(ChannelEndpointTest, Prequeued) {
   // Check the received messages.
   ASSERT_EQ(6u, client0->NumMessages());
   for (unsigned message_id = 1; message_id <= 6; message_id++) {
-    scoped_ptr<MessageInTransit> read_message = client0->PopMessage();
+    std::unique_ptr<MessageInTransit> read_message = client0->PopMessage();
     ASSERT_TRUE(read_message);
     test::VerifyTestMessage(read_message.get(), message_id);
   }

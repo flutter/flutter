@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/endpoint_relayer.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_in_transit.h"
@@ -30,9 +32,9 @@ void EndpointRelayer::Init(ChannelEndpoint* endpoint0,
   endpoints_[1] = endpoint1;
 }
 
-void EndpointRelayer::SetFilter(scoped_ptr<Filter> filter) {
+void EndpointRelayer::SetFilter(std::unique_ptr<Filter> filter) {
   MutexLocker locker(&mutex_);
-  filter_ = filter.Pass();
+  filter_ = std::move(filter);
 }
 
 bool EndpointRelayer::OnReadMessage(unsigned port, MessageInTransit* message) {
@@ -53,8 +55,10 @@ bool EndpointRelayer::OnReadMessage(unsigned port, MessageInTransit* message) {
   }
 
   // Otherwise, consume it even if the peer port is closed.
-  if (endpoints_[peer_port])
-    endpoints_[peer_port]->EnqueueMessage(make_scoped_ptr(message));
+  if (endpoints_[peer_port]) {
+    endpoints_[peer_port]->EnqueueMessage(
+        std::unique_ptr<MessageInTransit>(message));
+  }
   return true;
 }
 

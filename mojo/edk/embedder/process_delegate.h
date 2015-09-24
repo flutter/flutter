@@ -6,14 +6,13 @@
 #define MOJO_EDK_EMBEDDER_PROCESS_DELEGATE_H_
 
 #include "mojo/edk/embedder/process_type.h"
-#include "mojo/edk/system/system_impl_export.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
 namespace embedder {
 
 // An interface for process delegates.
-class MOJO_SYSTEM_IMPL_EXPORT ProcessDelegate {
+class ProcessDelegate {
  public:
   virtual ProcessType GetType() const;
 

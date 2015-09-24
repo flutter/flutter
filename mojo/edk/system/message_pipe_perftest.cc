@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -84,7 +85,7 @@ class MultiprocessMessagePipePerfTest
   size_t message_size_;
   std::string payload_;
   std::string read_buffer_;
-  scoped_ptr<base::PerfTimeLogger> perf_logger_;
+  std::unique_ptr<base::PerfTimeLogger> perf_logger_;
 };
 
 // For each message received, sends a reply message with the same contents

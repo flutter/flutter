@@ -10,6 +10,8 @@ mojom("interfaces") {
     "directory.mojom",
     "file.mojom",
     "files.mojom",
+    "ioctl.mojom",
+    "ioctl_terminal.mojom",
     "types.mojom",
   ]
 

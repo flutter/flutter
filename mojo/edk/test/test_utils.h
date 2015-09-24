@@ -6,13 +6,10 @@
 #define MOJO_EDK_TEST_TEST_UTILS_H_
 
 #include <stddef.h>
-#include <stdio.h>
 
-#include <string>
-
-#include "base/files/scoped_file.h"
 #include "mojo/edk/embedder/platform_handle.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/util/scoped_file.h"
 
 namespace mojo {
 namespace test {
@@ -41,10 +38,10 @@ bool NonBlockingRead(const embedder::PlatformHandle& handle,
                      size_t* bytes_read);
 
 // Gets a (scoped) |PlatformHandle| from the given (scoped) |FILE|.
-embedder::ScopedPlatformHandle PlatformHandleFromFILE(base::ScopedFILE fp);
+embedder::ScopedPlatformHandle PlatformHandleFromFILE(util::ScopedFILE fp);
 
 // Gets a (scoped) |FILE| from a (scoped) |PlatformHandle|.
-base::ScopedFILE FILEFromPlatformHandle(embedder::ScopedPlatformHandle h,
+util::ScopedFILE FILEFromPlatformHandle(embedder::ScopedPlatformHandle h,
                                         const char* mode);
 
 }  // namespace test

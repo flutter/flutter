@@ -48,7 +48,7 @@ size_t SimplePlatformSharedBuffer::GetNumBytes() const {
   return num_bytes_;
 }
 
-scoped_ptr<PlatformSharedBufferMapping> SimplePlatformSharedBuffer::Map(
+std::unique_ptr<PlatformSharedBufferMapping> SimplePlatformSharedBuffer::Map(
     size_t offset,
     size_t length) {
   if (!IsValidMap(offset, length))
@@ -69,9 +69,8 @@ bool SimplePlatformSharedBuffer::IsValidMap(size_t offset, size_t length) {
   return true;
 }
 
-scoped_ptr<PlatformSharedBufferMapping> SimplePlatformSharedBuffer::MapNoCheck(
-    size_t offset,
-    size_t length) {
+std::unique_ptr<PlatformSharedBufferMapping>
+SimplePlatformSharedBuffer::MapNoCheck(size_t offset, size_t length) {
   DCHECK(IsValidMap(offset, length));
   return MapImpl(offset, length);
 }

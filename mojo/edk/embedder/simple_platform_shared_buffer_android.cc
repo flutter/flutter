@@ -10,9 +10,7 @@
 
 #include <limits>
 
-#include "base/files/scoped_file.h"
 #include "base/logging.h"
-#include "mojo/edk/embedder/platform_handle.h"
 #include "third_party/ashmem/ashmem.h"
 
 namespace mojo {
@@ -28,18 +26,19 @@ bool SimplePlatformSharedBuffer::Init() {
     return false;
   }
 
-  base::ScopedFD fd(ashmem_create_region(nullptr, num_bytes_));
-  if (!fd.is_valid()) {
+  ScopedPlatformHandle handle(
+      PlatformHandle(ashmem_create_region(nullptr, num_bytes_)));
+  if (!handle.is_valid()) {
     DPLOG(ERROR) << "ashmem_create_region()";
     return false;
   }
 
-  if (ashmem_set_prot_region(fd.get(), PROT_READ | PROT_WRITE) < 0) {
+  if (ashmem_set_prot_region(handle.get().fd, PROT_READ | PROT_WRITE) < 0) {
     DPLOG(ERROR) << "ashmem_set_prot_region()";
     return false;
   }
 
-  handle_.reset(PlatformHandle(fd.release()));
+  handle_ = handle.Pass();
   return true;
 }
 
