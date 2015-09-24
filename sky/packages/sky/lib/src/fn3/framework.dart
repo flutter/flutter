@@ -289,8 +289,8 @@ abstract class StatelessComponent extends Widget {
 }
 
 /// StatefulComponents provide the configuration for
-/// [StatefulComponentElement]s, which wrap [ComponentState]s, which hold
-/// mutable state and can dynamically and spontaneously ask to be rebuilt.
+/// [StatefulComponentElement]s, which wrap [State]s, which hold mutable state
+/// and can dynamically and spontaneously ask to be rebuilt.
 abstract class StatefulComponent extends Widget {
   const StatefulComponent({ Key key }) : super(key: key);
 
@@ -300,49 +300,71 @@ abstract class StatefulComponent extends Widget {
 
   /// Returns an instance of the state to which this StatefulComponent is
   /// related, using this object as the configuration. Subclasses should
-  /// override this to return a new instance of the ComponentState class
-  /// associated with this StatefulComponent class, like this:
+  /// override this to return a new instance of the State class associated with
+  /// this StatefulComponent class, like this:
   ///
-  ///   MyComponentState createState() => new MyComponentState(this);
-  ComponentState createState();
+  ///   MyState createState() => new MyState(this);
+  State createState();
+}
+
+enum _StateLifecycle {
+  created,
+  initialized,
+  ready,
+  defunct,
 }
 
 /// The logic and internal state for a StatefulComponent.
-abstract class ComponentState<T extends StatefulComponent> {
-  ComponentState(this._config);
-
-  StatefulComponentElement _element;
-
-  /// Whenever you need to change internal state for a ComponentState object,
-  /// make the change in a function that you pass to setState(), as in:
-  ///
-  ///    setState(() { myState = newValue });
-  ///
-  /// If you just change the state directly without calling setState(), then
-  /// the component will not be scheduled for rebuilding, meaning that its
-  /// rendering will not be updated.
-  void setState(void fn()) {
-    fn();
-    _element.markNeedsBuild();
-  }
-
+abstract class State<T extends StatefulComponent> {
   /// The current configuration (an instance of the corresponding
   /// StatefulComponent class).
   T get config => _config;
   T _config;
 
+  /// This is used to verify that State objects move through life in an orderly fashion.
+  _StateLifecycle _debugLifecycleState = _StateLifecycle.created;
+
+  /// Pointer to the owner Element object
+  StatefulComponentElement _element;
+
+  /// Called when this object is inserted into the tree. Override this function
+  /// to perform initialization that depends on the location at which this
+  /// object was inserted into the tree or on the widget configuration object.
+  ///
+  /// If you override this, make sure your method starts with a call to
+  /// super.initState(context).
+  void initState(BuildContext context) {
+    assert(_debugLifecycleState == _StateLifecycle.created);
+    assert(() { _debugLifecycleState = _StateLifecycle.initialized; return true; });
+  }
+
   /// Called whenever the configuration changes. Override this method to update
   /// additional state when the config field's value is changed.
   void didUpdateConfig(T oldConfig) { }
 
-  /// Called when this object is inserted into the tree. Override this function
-  /// to perform initialization that depends on the location at which this
-  /// object was inserted into the tree.
-  void initState(BuildContext context) { }
+  /// Whenever you need to change internal state for a State object, make the
+  /// change in a function that you pass to setState(), as in:
+  ///
+  ///    setState(() { myState = newValue });
+  ///
+  /// If you just change the state directly without calling setState(), then the
+  /// component will not be scheduled for rebuilding, meaning that its rendering
+  /// will not be updated.
+  void setState(void fn()) {
+    assert(_debugLifecycleState == _StateLifecycle.ready);
+    fn();
+    _element.markNeedsBuild();
+  }
 
   /// Called when this object is removed from the tree. Override this to clean
   /// up any resources allocated by this object.
-  void dispose() { }
+  ///
+  /// If you override this, make sure to end your method with a call to
+  /// super.dispose().
+  void dispose() {
+    assert(_debugLifecycleState == _StateLifecycle.ready);
+    assert(() { _debugLifecycleState = _StateLifecycle.defunct; return true; });
+  }
 
   /// Returns another Widget out of which this StatefulComponent is built.
   /// Typically that Widget will have been configured with further children,
@@ -634,8 +656,8 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   }
 
   /// Reinvokes the build() method of the StatelessComponent object (for
-  /// stateless components) or the ComponentState object (for stateful
-  /// components) and then updates the widget tree.
+  /// stateless components) or the State object (for stateful components) and
+  /// then updates the widget tree.
   ///
   /// Called automatically during mount() to generate the first build, by the
   /// binding when scheduleBuild() has been called to mark this element dirty,
@@ -670,8 +692,8 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   static bool get _debugStateLocked => _debugStateLockLevel > 0;
 
   /// Calls the callback argument synchronously, but in a context where calls to
-  /// ComponentState.setState() will fail. Use this when it is possible that you
-  /// will trigger code in components but want to make sure that there is no
+  /// State.setState() will fail. Use this when it is possible that you will
+  /// trigger code in components but want to make sure that there is no
   /// possibility that any components will be marked dirty, for example because
   /// you are in the middle of layout and you are not going to be flushing the
   /// build queue (since that could mutate the layout tree).
@@ -735,14 +757,19 @@ class StatelessComponentElement<T extends StatelessComponent> extends BuildableE
 class StatefulComponentElement extends BuildableElement<StatefulComponent> {
   StatefulComponentElement(StatefulComponent widget)
     : _state = widget.createState(), super(widget) {
-    assert(_state._config == widget);
     assert(_state._element == null);
     _state._element = this;
+    assert(_state._config == null);
+    _state._config = widget;
+    assert(_state._debugLifecycleState == _StateLifecycle.created);
+    _state.initState(this);
+    assert(_state._debugLifecycleState == _StateLifecycle.initialized);
+    assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
     _builder = _state.build;
   }
 
-  ComponentState get state => _state;
-  ComponentState _state;
+  State get state => _state;
+  State _state;
 
   void update(StatefulComponent newWidget) {
     super.update(newWidget);
@@ -757,6 +784,7 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
   void unmount() {
     super.unmount();
     _state.dispose();
+    assert(_state._debugLifecycleState == _StateLifecycle.defunct);
     _state._element = null;
     _state = null;
   }

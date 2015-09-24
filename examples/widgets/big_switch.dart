@@ -10,12 +10,10 @@ class BigSwitch extends StatefulComponent {
 
   final double scale;
 
-  BigSwitchState createState() => new BigSwitchState(this);
+  BigSwitchState createState() => new BigSwitchState();
 }
 
-class BigSwitchState extends ComponentState<BigSwitch> {
-  BigSwitchState(BigSwitch config) : super(config);
-
+class BigSwitchState extends State<BigSwitch> {
   bool _value = false;
 
   void _handleOnChanged(bool value) {

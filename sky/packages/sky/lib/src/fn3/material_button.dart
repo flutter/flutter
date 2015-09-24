@@ -26,8 +26,6 @@ abstract class MaterialButton extends StatefulComponent {
 }
 
 abstract class MaterialButtonState<T extends MaterialButton> extends ButtonState<T> {
-  MaterialButtonState(T config) : super(config);
-
   Color getColor(BuildContext context);
   int get level;
 

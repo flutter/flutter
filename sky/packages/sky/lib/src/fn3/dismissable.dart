@@ -44,11 +44,12 @@ class Dismissable extends StatefulComponent {
   DismissedCallback onDismissed;
   DismissDirection direction;
 
-  DismissableState createState() => new DismissableState(this);
+  DismissableState createState() => new DismissableState();
 }
 
-class DismissableState extends ComponentState<Dismissable> {
-  DismissableState(Dismissable config) : super(config) {
+class DismissableState extends State<Dismissable> {
+  void initState(BuildContext context) {
+    super.initState(context);
     _fadePerformance = new AnimationPerformance(duration: _kCardDismissFadeout);
     _fadePerformance.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed)

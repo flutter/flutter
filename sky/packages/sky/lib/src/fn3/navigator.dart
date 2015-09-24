@@ -90,7 +90,7 @@ class RouteState extends RouteBase {
 
   Function callback;
   RouteBase route;
-  ComponentState owner;
+  State owner;
 
   bool get isOpaque => false;
 
@@ -152,15 +152,13 @@ class Navigator extends StatefulComponent {
 
   final NavigatorHistory history;
 
-  NavigatorState createState() => new NavigatorState(this);
+  NavigatorState createState() => new NavigatorState();
 }
 
-class NavigatorState extends ComponentState<Navigator> {
-  NavigatorState(Navigator config) : super(config);
-
+class NavigatorState extends State<Navigator> {
   RouteBase get currentRoute => config.history.currentRoute;
 
-  void pushState(ComponentState owner, Function callback) {
+  void pushState(State owner, Function callback) {
     RouteBase route = new RouteState(
       owner: owner,
       callback: callback,

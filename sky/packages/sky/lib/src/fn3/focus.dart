@@ -75,12 +75,10 @@ class Focus extends StatefulComponent {
   final bool autofocus;
   final Widget child;
 
-  FocusState createState() => new FocusState(this);
+  FocusState createState() => new FocusState();
 }
 
-class FocusState extends ComponentState<Focus> {
-  FocusState(Focus config) : super(config);
-
+class FocusState extends State<Focus> {
   GlobalKey _focusedWidget; // when null, the first component to ask if it's focused will get the focus
   GlobalKey _currentlyRegisteredWidgetRemovalListenerKey;
 
@@ -164,6 +162,7 @@ class FocusState extends ComponentState<Focus> {
   void dispose() {
     _updateWidgetRemovalListener(null);
     _updateScopeRemovalListener(null);
+    super.dispose();
   }
 
   Widget build(BuildContext context) {

@@ -52,7 +52,6 @@ class HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewport
   HomogeneousViewportElement(HomogeneousViewport widget) : super(widget);
 
   List<Element> _children = const <Element>[];
-  bool _layoutDirty = true;
   int _layoutFirstIndex;
   int _layoutItemCount;
 

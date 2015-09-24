@@ -19,12 +19,10 @@ class FlatButton extends MaterialButton {
              enabled: enabled,
              onPressed: onPressed);
 
-  FlatButtonState createState() => new FlatButtonState(this);
+  FlatButtonState createState() => new FlatButtonState();
 }
 
 class FlatButtonState extends MaterialButtonState<FlatButton> {
-  FlatButtonState(FlatButton config) : super(config);
-
   Color getColor(BuildContext context) {
     if (!config.enabled || !highlight)
       return null;

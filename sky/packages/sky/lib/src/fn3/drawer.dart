@@ -53,11 +53,12 @@ class Drawer extends StatefulComponent {
   final DrawerDismissedCallback onDismissed;
   final NavigatorState navigator;
 
-  DrawerState createState() => new DrawerState(this);
+  DrawerState createState() => new DrawerState();
 }
 
-class DrawerState extends ComponentState<Drawer> {
-  DrawerState(Drawer config) : super(config) {
+class DrawerState extends State<Drawer> {
+  void initState(BuildContext context) {
+    super.initState(context);
     _performance = new AnimationPerformance(duration: _kBaseSettleDuration);
     _performance.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed)

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3/framework.dart';
 import 'package:sky/src/fn3/basic.dart';
@@ -63,9 +61,9 @@ class _ChildKey {
 }
 
 class MixedViewportElement extends RenderObjectElement<MixedViewport> {
-  MixedViewportElement(MixedViewport config) : super(config) {
-    if (config.onInvalidatorAvailable != null)
-      config.onInvalidatorAvailable(invalidate);
+  MixedViewportElement(MixedViewport widget) : super(widget) {
+    if (widget.onInvalidatorAvailable != null)
+      widget.onInvalidatorAvailable(invalidate);
   }
 
   /// _childOffsets contains the offsets of each child from the top of the list
@@ -269,9 +267,13 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
   double _getOffset(Element element, BoxConstraints innerConstraints) {
     final RenderBox childRenderObject = element.renderObject;
     switch (widget.direction) {
-      case ScrollDirection.vertical: return childRenderObject.getMaxIntrinsicHeight(innerConstraints);
-      case ScrollDirection.horizontal: return childRenderObject.getMaxIntrinsicWidth(innerConstraints);
-      case ScrollDirection.both: assert(false); // we don't support ScrollDirection.both, see issue 888
+      case ScrollDirection.vertical:
+        return childRenderObject.getMaxIntrinsicHeight(innerConstraints);
+      case ScrollDirection.horizontal:
+        return childRenderObject.getMaxIntrinsicWidth(innerConstraints);
+      case ScrollDirection.both:
+        assert(false); // we don't support ScrollDirection.both, see issue 888
+        return double.NAN;
     }
   }
 

@@ -31,11 +31,12 @@ abstract class ProgressIndicator extends StatefulComponent {
 
   Widget _buildIndicator(BuildContext context, double performanceValue);
 
-  ProgressIndicatorState createState() => new ProgressIndicatorState(this);
+  ProgressIndicatorState createState() => new ProgressIndicatorState();
 }
 
-class ProgressIndicatorState extends ComponentState<ProgressIndicator> {
-  ProgressIndicatorState(ProgressIndicator config) : super(config) {
+class ProgressIndicatorState extends State<ProgressIndicator> {
+  void initState(BuildContext context) {
+    super.initState(context);
     _performance = new AnimationPerformance()
       ..duration = const Duration(milliseconds: 1500)
       ..variable = new AnimatedValue<double>(0.0, end: 1.0, curve: ease);
@@ -44,7 +45,6 @@ class ProgressIndicatorState extends ComponentState<ProgressIndicator> {
         _restartAnimation();
     });
     _performance.play();
-
   }
 
   AnimationPerformance _performance;

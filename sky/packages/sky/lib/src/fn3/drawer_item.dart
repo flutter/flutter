@@ -24,12 +24,10 @@ class DrawerItem extends StatefulComponent {
   final GestureTapListener onPressed;
   final bool selected;
 
-  DrawerItemState createState() => new DrawerItemState(this);
+  DrawerItemState createState() => new DrawerItemState();
 }
 
 class DrawerItemState extends ButtonState<DrawerItem> {
-  DrawerItemState(DrawerItem config) : super(config);
-
   TextStyle _getTextStyle(ThemeData themeData) {
     TextStyle result = themeData.text.body2;
     if (config.selected)

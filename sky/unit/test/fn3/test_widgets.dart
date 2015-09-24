@@ -21,11 +21,10 @@ class FlipComponent extends StatefulComponent {
   final Widget left;
   final Widget right;
 
-  FlipComponentState createState() => new FlipComponentState(this);
+  FlipComponentState createState() => new FlipComponentState();
 }
 
-class FlipComponentState extends ComponentState<FlipComponent> {
-  FlipComponentState(FlipComponent config): super(config);
+class FlipComponentState extends State<FlipComponent> {
   bool _showLeft = true;
 
   void flip() {

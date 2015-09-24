@@ -17,12 +17,10 @@ class DragData {
 }
 
 class ExampleDragTarget extends StatefulComponent {
-  ExampleDragTargetState createState() => new ExampleDragTargetState(this);
+  ExampleDragTargetState createState() => new ExampleDragTargetState();
 }
 
-class ExampleDragTargetState extends ComponentState<ExampleDragTarget> {
-  ExampleDragTargetState(ExampleDragTarget config) : super(config);
-
+class ExampleDragTargetState extends State<ExampleDragTarget> {
   String _text = 'ready';
 
   void _handleAccept(DragData data) {
@@ -71,9 +69,7 @@ class DragAndDropApp extends StatefulComponent {
   DragAndDropAppState createState() => new DragAndDropAppState(this);
 }
 
-class DragAndDropAppState extends ComponentState<DragAndDropApp> {
-  DragAndDropAppState(DragAndDropApp config) : super(config);
-
+class DragAndDropAppState extends State<DragAndDropApp> {
   DragController _dragController;
   Offset _displacement = Offset.zero;
 

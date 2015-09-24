@@ -9,8 +9,7 @@ class RootComponent extends StatefulComponent {
   RootComponentState createState() => new RootComponentState(this);
 }
 
-class RootComponentState extends ComponentState<RootComponent> {
-  RootComponentState(RootComponent widget) : super(widget);
+class RootComponentState extends State<RootComponent> {
   Widget _child = new DecoratedBox(decoration: new BoxDecoration());
   Widget get child => _child;
   void set child(Widget value) {

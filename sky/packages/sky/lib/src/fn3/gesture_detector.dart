@@ -51,11 +51,12 @@ class GestureDetector extends StatefulComponent {
   final GestureScaleUpdateCallback onScaleUpdate;
   final GestureScaleEndCallback onScaleEnd;
 
-  GestureDetectorState createState() => new GestureDetectorState(this);
+  GestureDetectorState createState() => new GestureDetectorState();
 }
 
-class GestureDetectorState extends ComponentState<GestureDetector> {
-  GestureDetectorState(GestureDetector config) : super(config) {
+class GestureDetectorState extends State<GestureDetector> {
+  void initState(BuildContext context) {
+    super.initState(context);
     didUpdateConfig(null);
   }
 
@@ -120,6 +121,7 @@ class GestureDetectorState extends ComponentState<GestureDetector> {
     _horizontalDrag = _ensureDisposed(_horizontalDrag);
     _pan = _ensureDisposed(_pan);
     _scale = _ensureDisposed(_scale);
+    super.dispose();
   }
 
   void didUpdateConfig(GestureDetector oldConfig) {
