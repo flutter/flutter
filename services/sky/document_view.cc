@@ -34,7 +34,6 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkDevice.h"
-#include "ui/events/gestures/gesture_recognizer.h"
 
 using mojo::asset_bundle::AssetUnpackerJob;
 
@@ -42,32 +41,6 @@ namespace sky {
 namespace {
 
 const char kSnapshotKey[] = "snapshot_blob.bin";
-
-ui::EventType ConvertEventTypeToUIEventType(blink::WebInputEvent::Type type) {
-  if (type == blink::WebInputEvent::PointerDown)
-    return ui::ET_TOUCH_PRESSED;
-  if (type == blink::WebInputEvent::PointerUp)
-    return ui::ET_TOUCH_RELEASED;
-  if (type == blink::WebInputEvent::PointerMove)
-    return ui::ET_TOUCH_MOVED;
-  DCHECK(type == blink::WebInputEvent::PointerCancel);
-  return ui::ET_TOUCH_CANCELLED;
-}
-
-scoped_ptr<ui::TouchEvent> ConvertToUITouchEvent(
-    const blink::WebInputEvent& event,
-    float device_pixel_ratio) {
-  if (!blink::WebInputEvent::isPointerEventType(event.type))
-    return nullptr;
-  const blink::WebPointerEvent& pointer_event =
-      static_cast<const blink::WebPointerEvent&>(event);
-  return make_scoped_ptr(new ui::TouchEvent(
-      ConvertEventTypeToUIEventType(event.type),
-      gfx::PointF(pointer_event.x * device_pixel_ratio,
-                  pointer_event.y * device_pixel_ratio),
-      pointer_event.pointer,
-      base::TimeDelta::FromMillisecondsD(pointer_event.timeStampMS)));
-}
 
 }  // namespace
 
@@ -88,7 +61,6 @@ DocumentView::DocumentView(
 }
 
 DocumentView::~DocumentView() {
-  ui::GestureRecognizer::Get()->CleanupStateForConsumer(this);
 }
 
 base::WeakPtr<DocumentView> DocumentView::GetWeakPtr() {
@@ -301,31 +273,8 @@ void DocumentView::HandleInputEvent(mojo::EventPtr event) {
   if (!web_event)
     return;
 
-  ui::GestureRecognizer* recognizer = ui::GestureRecognizer::Get();
-  scoped_ptr<ui::TouchEvent> touch_event =
-      ConvertToUITouchEvent(*web_event, device_pixel_ratio);
-  if (touch_event)
-    recognizer->ProcessTouchEventPreDispatch(*touch_event, this);
-
-  bool handled = false;
-
   if (sky_view_)
     sky_view_->HandleInputEvent(*web_event);
-
-  if (touch_event) {
-    ui::EventResult result = handled ? ui::ER_UNHANDLED : ui::ER_UNHANDLED;
-    if (auto gestures = recognizer->ProcessTouchEventPostDispatch(
-            *touch_event, result, this)) {
-      for (auto& gesture : *gestures) {
-        scoped_ptr<blink::WebInputEvent> gesture_event =
-            ConvertEvent(*gesture, device_pixel_ratio);
-        if (gesture_event) {
-          if (sky_view_)
-            sky_view_->HandleInputEvent(*gesture_event);
-        }
-      }
-    }
-  }
 }
 
 void DocumentView::StartDebuggerInspectorBackend() {
