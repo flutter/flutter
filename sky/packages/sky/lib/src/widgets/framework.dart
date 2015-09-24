@@ -8,15 +8,9 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/services.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/error.dart';
-import 'package:sky/src/rendering/hit_test.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/sky_binding.dart';
-import 'package:sky/src/rendering/view.dart';
+import 'package:sky/rendering.dart';
 
-export 'package:sky/src/rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
-export 'package:sky/src/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
+export 'package:sky/rendering.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims, Point, Offset, Size, Rect, Color, Paint, Path;
 
 final bool _shouldLogRenderDuration = false; // see also 'enableProfilingLoop' argument to runApp()
 
@@ -684,8 +678,6 @@ abstract class Inherited extends TagNode {
   bool syncShouldNotify(Inherited old);
 
 }
-
-typedef void PointerEventListener(sky.PointerEvent e);
 
 class Listener extends TagNode  {
   Listener({
