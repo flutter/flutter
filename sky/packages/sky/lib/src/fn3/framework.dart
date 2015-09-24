@@ -335,6 +335,11 @@ abstract class ComponentState<T extends StatefulComponent> {
   /// additional state when the config field's value is changed.
   void didUpdateConfig(T oldConfig) { }
 
+  /// Called when this object is inserted into the tree. Override this function
+  /// to perform initialization that depends on the location at which this
+  /// object was inserted into the tree.
+  void initState(BuildContext context) { }
+
   /// Called when this object is removed from the tree. Override this to clean
   /// up any resources allocated by this object.
   void dispose() { }
