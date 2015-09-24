@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
-class Circle extends Component {
+class Circle extends StatelessComponent {
   Circle({ this.margin: EdgeDims.zero });
 
   final EdgeDims margin;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Container(
       width: 50.0,
       margin: margin + new EdgeDims.symmetric(horizontal: 2.0),
@@ -21,8 +21,8 @@ class Circle extends Component {
   }
 }
 
-class HorizontalScrollingApp extends App {
-  Widget build() {
+class HorizontalScrollingApp extends StatelessComponent {
+  Widget build(BuildContext context) {
     List<Widget> circles = [
       new Circle(margin: new EdgeDims.only(left: 10.0)),
       new Circle(),
@@ -41,11 +41,7 @@ class HorizontalScrollingApp extends App {
     return new Center(
       child: new Container(
         height: 50.0,
-        child: new Row([
-            new Block(circles, scrollDirection: ScrollDirection.horizontal)
-          ],
-          justifyContent: FlexJustifyContent.end
-        )
+        child: new Block(circles, scrollDirection: ScrollDirection.horizontal)
       )
     );
   }
