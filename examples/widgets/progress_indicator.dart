@@ -4,15 +4,14 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
-class ProgressIndicatorApp extends App {
+class ProgressIndicatorApp extends StatefulComponent {
+  ProgressIndicatorAppState createState() => new ProgressIndicatorAppState(this);
+}
 
-  ValueAnimation<double> valueAnimation;
-  Direction valueAnimationDirection = Direction.forward;
-
-  void initState() {
-    super.initState();
+class ProgressIndicatorAppState extends ComponentState<ProgressIndicatorApp> {
+  ProgressIndicatorAppState(ProgressIndicatorApp config) : super(config) {
     valueAnimation = new ValueAnimation<double>()
       ..duration = const Duration(milliseconds: 1500)
       ..variable = new AnimatedValue<double>(
@@ -28,6 +27,9 @@ class ProgressIndicatorApp extends App {
     });
     valueAnimation.play(valueAnimationDirection);
   }
+
+  ValueAnimation<double> valueAnimation;
+  Direction valueAnimationDirection = Direction.forward;
 
   void handleTap() {
     setState(() {
@@ -46,7 +48,7 @@ class ProgressIndicatorApp extends App {
     valueAnimation.play(valueAnimationDirection);
   }
 
-  Widget buildIndicators() {
+  Widget buildIndicators(BuildContext context) {
     List<Widget> indicators = <Widget>[
         new SizedBox(
           width: 200.0,
@@ -76,12 +78,12 @@ class ProgressIndicatorApp extends App {
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Widget body = new GestureDetector(
       onTap: handleTap,
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-        decoration: new BoxDecoration(backgroundColor: Theme.of(this).cardColor),
+        decoration: new BoxDecoration(backgroundColor: Theme.of(context).cardColor),
         child: new BuilderTransition(
           variables: [valueAnimation.variable],
           performance: valueAnimation.view,
@@ -103,7 +105,7 @@ class ProgressIndicatorApp extends App {
           child: new Scaffold(
             toolbar: new ToolBar(center: new Text('Progress Indicators')),
             body: new DefaultTextStyle(
-              style: Theme.of(this).text.title,
+              style: Theme.of(context).text.title,
               child: body
             )
           )

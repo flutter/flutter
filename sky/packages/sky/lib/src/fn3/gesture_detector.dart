@@ -55,7 +55,9 @@ class GestureDetector extends StatefulComponent {
 }
 
 class GestureDetectorState extends ComponentState<GestureDetector> {
-  GestureDetectorState(GestureDetector config) : super(config);
+  GestureDetectorState(GestureDetector config) : super(config) {
+    didUpdateConfig(null);
+  }
 
   final PointerRouter _router = SkyBinding.instance.pointerRouter;
 

@@ -4,7 +4,8 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/painting.dart';
+import 'package:sky/src/fn3.dart';
 
 class CardModel {
   CardModel(this.value, this.size, this.color);
@@ -15,17 +16,12 @@ class CardModel {
   Key get key => new ObjectKey(this);
 }
 
-class PageableListApp extends App {
+class PageableListApp extends StatefulComponent {
+  PageableListAppState createState() => new PageableListAppState(this);
+}
 
-  static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
-
-  List<CardModel> cardModels;
-  Size pageSize = new Size(200.0, 200.0);
-  ScrollDirection scrollDirection = ScrollDirection.horizontal;
-  bool itemsWrap = false;
-
-  void initState() {
+class PageableListAppState extends ComponentState<PageableListApp> {
+  PageableListAppState(PageableListApp config) : super(config) {
     List<Size> cardSizes = [
       [100.0, 300.0], [300.0, 100.0], [200.0, 400.0], [400.0, 400.0], [300.0, 400.0]
     ]
@@ -36,9 +32,15 @@ class PageableListApp extends App {
       Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardSizes.length);
       return new CardModel(i, cardSizes[i], color);
     });
-
-    super.initState();
   }
+
+  static const TextStyle cardLabelStyle =
+    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
+
+  List<CardModel> cardModels;
+  Size pageSize = new Size(200.0, 200.0);
+  ScrollDirection scrollDirection = ScrollDirection.horizontal;
+  bool itemsWrap = false;
 
   void updatePageSize(Size newSize) {
     setState(() {
@@ -46,7 +48,7 @@ class PageableListApp extends App {
     });
   }
 
-  Widget buildCard(CardModel cardModel) {
+  Widget buildCard(BuildContext context, CardModel cardModel) {
     Widget card = new Card(
       color: cardModel.color,
       child: new Container(
@@ -142,7 +144,7 @@ class PageableListApp extends App {
     );
   }
 
-  Widget buildBody() {
+  Widget buildBody(BuildContext context) {
     Widget list = new PageableList<CardModel>(
       items: cardModels,
       itemsWrap: itemsWrap,
@@ -156,12 +158,12 @@ class PageableListApp extends App {
       callback: updatePageSize,
       child: new Container(
         child: list,
-        decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50])
+        decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50])
       )
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new IconTheme(
       data: const IconThemeData(color: IconThemeColor.white),
       child: new Theme(
@@ -175,7 +177,7 @@ class PageableListApp extends App {
           child: new Scaffold(
             drawer: buildDrawer(),
             toolbar: buildToolBar(),
-            body: buildBody()
+            body: buildBody(context)
           )
         )
       )
