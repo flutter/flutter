@@ -40,6 +40,7 @@ LOCAL_STATIC_LIBRARIES += \
 
 LOCAL_SRC_FILES += \
     FontCollectionItemizeTest.cpp \
+    FontFamilyTest.cpp \
     FontTestUtils.cpp \
     MinikinFontForTest.cpp \
     GraphemeBreakTests.cpp \
