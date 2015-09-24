@@ -4,11 +4,14 @@
 
 import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
-class StyledTextApp extends App {
+class StyledTextApp extends StatefulComponent {
+  StyledTextAppState createState() => new StyledTextAppState();
+}
 
-  StyledTextApp() {
+class StyledTextAppState extends State<StyledTextApp> {
+  void initState(BuildContext context) {
     toText = toStyledText;
     nameLines = dialogText
       .split('\n')
@@ -41,7 +44,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
     decorationStyle: TextDecorationStyle.wavy
   );
 
-  Component toStyledText(String name, String text) {
+  Widget toStyledText(String name, String text) {
     TextStyle lineStyle = (name == "Dave") ? daveStyle : halStyle;
     return new StyledText(
       key: new Key(text),
@@ -49,9 +52,9 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
     );
   }
 
-  Component toPlainText(String name, String text) => new Text(name + ":" + text);
+  Widget toPlainText(String name, String text) => new Text(name + ":" + text);
 
-  Component createSeparator() {
+  Widget createSeparator() {
     return new Container(
       constraints: const BoxConstraints.expand(height: 0.0),
       margin: const EdgeDims.symmetric(vertical: 10.0, horizontal: 64.0),
@@ -69,20 +72,20 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
     });
   }
 
-  Widget build() {
-    List<Component> lines = nameLines
+  Widget build(BuildContext context) {
+    List<Widget> lines = nameLines
       .map((nameAndText) => Function.apply(toText, nameAndText))
       .toList();
 
-    List<Component> children = [];
-    for (Component line in lines) {
+    List<Widget> children = [];
+    for (Widget line in lines) {
       children.add(line);
       if (line != lines.last) {
         children.add(createSeparator());
       }
     }
 
-    Container body = new Container(
+    Widget body = new Container(
         padding: new EdgeDims.symmetric(horizontal: 8.0),
         child: new Column(children,
           justifyContent: FlexJustifyContent.center,

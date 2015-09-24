@@ -7,7 +7,7 @@ import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3.dart';
 
 class ScaleApp extends StatefulComponent {
-  ScaleAppState createState() => new ScaleAppState(this);
+  ScaleAppState createState() => new ScaleAppState();
 }
 
 class ScaleAppState extends State<ScaleApp> {
