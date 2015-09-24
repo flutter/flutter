@@ -113,7 +113,7 @@ class MineDiggerApp extends App {
                 probe(ix, iy);
             },
             onLongPress: () {
-              userFeedback.performHapticFeedback(HapticFeedbackType_LONG_PRESS);
+              userFeedback.performHapticFeedback(HapticFeedbackType.LONG_PRESS);
               flag(ix, iy);
             },
             child: new Listener(

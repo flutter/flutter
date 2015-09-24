@@ -28,7 +28,9 @@ struct TaskDescription {
   uint32 primaryColor;
 };
 
-enum SystemUIVisibility {
+// TODO(jamesr): This should be called SystemUIVisibility (note case). This name
+// is a workaround for https://github.com/domokit/mojo/issues/445.
+enum SystemUiVisibility {
   STANDARD,
   FULLSCREEN,
   IMMERSIVE,
@@ -52,7 +54,7 @@ interface Activity {
   StartActivity(Intent intent);
   FinishCurrentActivity();
   SetTaskDescription(TaskDescription description);
-  SetSystemUIVisibility(SystemUIVisibility visibility);
+  SetSystemUIVisibility(SystemUiVisibility visibility);
   SetRequestedOrientation(ScreenOrientation orientation);
 
   // These are stored off the Activity on Android, but probably belong in a
