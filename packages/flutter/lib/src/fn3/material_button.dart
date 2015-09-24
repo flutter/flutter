@@ -11,12 +11,14 @@ import 'package:sky/src/fn3/material.dart';
 
 // Rather than using this class directly, please use FlatButton or RaisedButton.
 abstract class MaterialButton extends StatefulComponent {
-  const MaterialButton({
+  MaterialButton({
     Key key,
     this.child,
     this.enabled: true,
     this.onPressed
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(enabled != null);
+  }
 
   final Widget child;
   final bool enabled;
