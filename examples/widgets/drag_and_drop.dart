@@ -66,7 +66,7 @@ class Dot extends StatelessComponent {
 }
 
 class DragAndDropApp extends StatefulComponent {
-  DragAndDropAppState createState() => new DragAndDropAppState(this);
+  DragAndDropAppState createState() => new DragAndDropAppState();
 }
 
 class DragAndDropAppState extends State<DragAndDropApp> {
