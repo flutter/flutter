@@ -233,4 +233,11 @@ uint32_t FontCollection::getId() const {
     return mId;
 }
 
+void FontCollection::purgeFontFamilyHbFontCache() const {
+    assertMinikinLocked();
+    for (size_t i = 0; i < mFamilies.size(); ++i) {
+        mFamilies[i]->purgeHbFontCache();
+    }
+}
+
 }  // namespace android

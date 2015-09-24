@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <string>
+#include <hb.h>
 
 #include <utils/TypeHelpers.h>
 
@@ -123,9 +124,9 @@ struct FakedFont {
 
 class FontFamily : public MinikinRefCounted {
 public:
-    FontFamily() { }
+    FontFamily() : mHbFont(nullptr) { }
 
-    FontFamily(FontLanguage lang, int variant) : mLang(lang), mVariant(variant) {
+    FontFamily(FontLanguage lang, int variant) : mLang(lang), mVariant(variant), mHbFont(nullptr) {
     }
 
     ~FontFamily();
@@ -147,6 +148,16 @@ public:
     // Get Unicode coverage. Lifetime of returned bitset is same as receiver. May return nullptr on
     // error.
     const SparseBitSet* getCoverage();
+
+    // Returns true if the font has a glyph for the code point and variation selector pair.
+    // Caller should acquire a lock before calling the method.
+    bool hasVariationSelector(uint32_t codepoint, uint32_t variationSelector);
+
+    // Purges cached mHbFont.
+    // hb_font_t keeps a reference to hb_face_t which is managed by HbFaceCache. Thus,
+    // it is good to purge hb_font_t once it is no longer necessary.
+    // Caller should acquire a lock before calling the method.
+    void purgeHbFontCache();
 private:
     void addFontLocked(MinikinFont* typeface, FontStyle style);
 
@@ -163,6 +174,8 @@ private:
 
     SparseBitSet mCoverage;
     bool mCoverageValid;
+
+    hb_font_t* mHbFont;
 };
 
 }  // namespace android

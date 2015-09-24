@@ -131,6 +131,7 @@ public:
         layout->setFontCollection(collection);
         layout->mAdvances.resize(mCount, 0);
         ctx->clearHbFonts();
+        collection->purgeFontFamilyHbFontCache();
         layout->doLayoutRun(mChars, mStart, mCount, mNchars, mIsRtl, ctx);
     }
 
@@ -595,6 +596,7 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
                 start);
     }
     ctx.clearHbFonts();
+    mCollection->purgeFontFamilyHbFontCache();
 }
 
 void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
