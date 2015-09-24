@@ -15,27 +15,40 @@
 #include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui_delegate.h"
+#include <strings.h>
 
 #ifndef NDEBUG
 #include "document_watcher.h"
 #endif
 
-static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
+enum MapperPhase {
+  Accessed,
+  Added,
+  Removed,
+};
+
+using EventTypeMapperPhase = std::pair<sky::EventType, MapperPhase>;
+static inline EventTypeMapperPhase EventTypePhaseFromUITouchPhase(
+    UITouchPhase phase) {
   switch (phase) {
     case UITouchPhaseBegan:
-      return sky::EVENT_TYPE_POINTER_DOWN;
+      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_DOWN,
+                                  MapperPhase::Added);
     case UITouchPhaseMoved:
     case UITouchPhaseStationary:
       // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
       // with the same coordinates
-      return sky::EVENT_TYPE_POINTER_MOVE;
+      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_MOVE,
+                                  MapperPhase::Accessed);
     case UITouchPhaseEnded:
-      return sky::EVENT_TYPE_POINTER_UP;
+      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_UP,
+                                  MapperPhase::Removed);
     case UITouchPhaseCancelled:
-      return sky::EVENT_TYPE_POINTER_CANCEL;
+      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_CANCEL,
+                                  MapperPhase::Removed);
   }
 
-  return sky::EVENT_TYPE_UNKNOWN;
+  return EventTypeMapperPhase(sky::EVENT_TYPE_UNKNOWN, MapperPhase::Accessed);
 }
 
 static inline int64 InputEventTimestampFromNSTimeInterval(
@@ -43,12 +56,42 @@ static inline int64 InputEventTimestampFromNSTimeInterval(
   return base::TimeDelta::FromSecondsD(interval).InMilliseconds();
 }
 
+// UITouch pointers cannot be used as touch ids (even though they remain
+// constant throughout the multitouch sequence) because internal components
+// assume that ids are < 16. This class maps touch pointers to ids
+class TouchMapper {
+ public:
+  TouchMapper() : free_spots_(~0) {}
+
+  int registerTouch(uintptr_t touch) {
+    int freeSpot = ffsll(free_spots_);
+    touch_map_[touch] = freeSpot;
+    free_spots_ &= ~(1 << (freeSpot - 1));
+    return freeSpot;
+  }
+
+  int unregisterTouch(uintptr_t touch) {
+    auto index = touch_map_[touch];
+    free_spots_ |= 1 << (index - 1);
+    touch_map_.erase(touch);
+    return index;
+  }
+
+  int identifierOf(uintptr_t touch) { return touch_map_[touch]; }
+
+ private:
+  using BitSet = long long int;
+  BitSet free_spots_;
+  std::map<uintptr_t, int> touch_map_;
+};
+
 @implementation SkySurface {
   BOOL _platformViewInitialized;
   CGPoint _lastScrollTranslation;
 
   sky::SkyEnginePtr _sky_engine;
   scoped_ptr<sky::shell::ShellView> _shell_view;
+  TouchMapper _touch_mapper;
 
 #ifndef NDEBUG
   DocumentWatcher *_document_watcher;
@@ -217,20 +260,34 @@ static std::string SkPictureTracingPath() {
 #pragma mark - UIResponder overrides for raw touches
 
 - (void)dispatchTouches:(NSSet*)touches phase:(UITouchPhase)phase {
-  auto eventType = EventTypeFromUITouchPhase(phase);
+  auto eventTypePhase = EventTypePhaseFromUITouchPhase(phase);
   const CGFloat scale = [UIScreen mainScreen].scale;
 
   for (UITouch* touch in touches) {
     auto input = sky::InputEvent::New();
-    input->type = eventType;
+    input->type = eventTypePhase.first;
     input->time_stamp = InputEventTimestampFromNSTimeInterval(touch.timestamp);
 
     input->pointer_data = sky::PointerData::New();
     input->pointer_data->kind = sky::POINTER_KIND_TOUCH;
 
-    #define LOWER_32(x) (*((int32_t *) &x))
-    input->pointer_data->pointer = LOWER_32(touch);
-    #undef LOWER_32
+    int touch_identifier = 0;
+    uintptr_t touch_ptr = reinterpret_cast<uintptr_t>(touch);
+
+    switch (eventTypePhase.second) {
+      case Accessed:
+        touch_identifier = _touch_mapper.identifierOf(touch_ptr);
+        break;
+      case Added:
+        touch_identifier = _touch_mapper.registerTouch(touch_ptr);
+        break;
+      case Removed:
+        touch_identifier = _touch_mapper.unregisterTouch(touch_ptr);
+        break;
+    }
+
+    DCHECK(touch_identifier != 0);
+    input->pointer_data->pointer = touch_identifier;
 
     CGPoint windowCoordinates = [touch locationInView:nil];
 
