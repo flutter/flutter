@@ -17,7 +17,9 @@ class RaisedButton extends MaterialButton {
   }) : super(key: key,
              child: child,
              enabled: enabled,
-             onPressed: onPressed);
+             onPressed: onPressed) {
+    assert(enabled != null);
+  }
 
   RaisedButtonState createState() => new RaisedButtonState(this);
 }

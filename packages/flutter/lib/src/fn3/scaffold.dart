@@ -218,8 +218,9 @@ class ScaffoldElement extends RenderObjectElement<Scaffold> {
     super.mount(parent, newSlot);
     _children = new Map<ScaffoldSlots, Element>();
     for (ScaffoldSlots slot in ScaffoldSlots.values) {
-      _children[slot] = widget._children[slot].createElement()
-        ..mount(this, slot);
+      Element newChild = widget._children[slot]?.createElement();
+      _children[slot] = newChild;
+      newChild?.mount(this, slot);
     }
   }
 
