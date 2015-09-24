@@ -1,3 +1,4 @@
+import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
@@ -9,7 +10,6 @@ void main() {
 
     Key keyA = new GlobalKey();
     Key keyB = new GlobalKey();
-    Key keyC = new GlobalKey();
 
     tester.pumpFrame(
       new Stack([
@@ -34,13 +34,13 @@ void main() {
       ])
     );
 
-    expect(tester.findElementByKey(keyA).renderObject.localToGlobal(const Point(0.0, 0.0)),
+    expect((tester.findElementByKey(keyA).renderObject as RenderBox).localToGlobal(const Point(0.0, 0.0)),
            equals(const Point(100.0, 100.0)));
 
-    expect(tester.findElementByKey(keyB).renderObject.localToGlobal(const Point(0.0, 0.0)),
+    expect((tester.findElementByKey(keyB).renderObject as RenderBox).localToGlobal(const Point(0.0, 0.0)),
            equals(const Point(100.0, 200.0)));
 
-    expect(tester.findElementByKey(keyB).renderObject.globalToLocal(const Point(110.0, 205.0)),
+    expect((tester.findElementByKey(keyB).renderObject as RenderBox).globalToLocal(const Point(110.0, 205.0)),
            equals(const Point(10.0, 5.0)));
   });
 }
