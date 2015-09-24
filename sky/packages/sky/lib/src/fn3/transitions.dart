@@ -23,11 +23,12 @@ abstract class TransitionComponent extends StatefulComponent {
 
   Widget build(BuildContext context);
 
-  TransitionComponentState createState() => new TransitionComponentState(this);
+  TransitionState createState() => new TransitionState();
 }
 
-class TransitionComponentState extends ComponentState<TransitionComponent> {
-  TransitionComponentState(TransitionComponent config) : super(config) {
+class TransitionState extends State<TransitionComponent> {
+  void initState(BuildContext context) {
+    super.initState(context);
     config.performance.addListener(_performanceChanged);
   }
 
@@ -40,6 +41,7 @@ class TransitionComponentState extends ComponentState<TransitionComponent> {
 
   void dispose() {
     config.performance.removeListener(_performanceChanged);
+    super.dispose();
   }
 
   void _performanceChanged() {

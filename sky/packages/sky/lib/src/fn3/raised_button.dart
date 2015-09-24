@@ -21,12 +21,10 @@ class RaisedButton extends MaterialButton {
     assert(enabled != null);
   }
 
-  RaisedButtonState createState() => new RaisedButtonState(this);
+  RaisedButtonState createState() => new RaisedButtonState();
 }
 
 class RaisedButtonState extends MaterialButtonState<RaisedButton> {
-  RaisedButtonState(RaisedButton config) : super(config);
-
   Color getColor(BuildContext context) {
     if (config.enabled) {
       switch (Theme.of(context).brightness) {

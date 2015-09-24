@@ -61,12 +61,10 @@ List<Route> routes = [
 ];
 
 class NavigationExampleApp extends StatefulComponent {
-  NavigationExampleAppState createState() => new NavigationExampleAppState(this);
+  NavigationExampleAppState createState() => new NavigationExampleAppState();
 }
 
-class NavigationExampleAppState extends ComponentState<NavigationExampleApp> {
-  NavigationExampleAppState(NavigationExampleApp config) : super(config);
-
+class NavigationExampleAppState extends State<NavigationExampleApp> {
   NavigatorHistory _history = new NavigatorHistory(routes);
 
   void onBack() {

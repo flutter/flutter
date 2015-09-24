@@ -28,12 +28,10 @@ class FloatingActionButton extends StatefulComponent {
   final Color backgroundColor;
   final GestureTapListener onPressed;
 
-  FloatingActionButtonState createState() => new FloatingActionButtonState(this);
+  FloatingActionButtonState createState() => new FloatingActionButtonState();
 }
 
 class FloatingActionButtonState extends ButtonState<FloatingActionButton> {
-  FloatingActionButtonState(FloatingActionButton config) : super(config);
-
   Widget buildContent(BuildContext context) {
     IconThemeColor iconThemeColor = IconThemeColor.white;
     Color materialColor = config.backgroundColor;

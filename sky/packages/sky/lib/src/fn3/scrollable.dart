@@ -9,8 +9,7 @@ import 'dart:sky' as sky;
 import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/viewport.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3/basic.dart';
 import 'package:sky/src/fn3/framework.dart';
 import 'package:sky/src/fn3/gesture_detector.dart';
@@ -39,8 +38,9 @@ abstract class Scrollable extends StatefulComponent {
   final ScrollDirection scrollDirection;
 }
 
-abstract class ScrollableState<T extends Scrollable> extends ComponentState<T> {
-  ScrollableState(T config) : super(config) {
+abstract class ScrollableState<T extends Scrollable> extends State<T> {
+  void initState(BuildContext context) {
+    super.initState(context);
     if (config.initialScrollOffset is double)
       _scrollOffset = config.initialScrollOffset;
     _toEndAnimation = new AnimatedSimulation(_setScrollOffset);
@@ -126,6 +126,7 @@ abstract class ScrollableState<T extends Scrollable> extends ComponentState<T> {
 
   void dispose() {
     _stopAnimations();
+    super.dispose();
   }
 
   void _setScrollOffset(double newScrollOffset) {
@@ -220,12 +221,10 @@ class ScrollableViewport extends Scrollable {
 
   final Widget child;
 
-  ScrollableViewportState createState() => new ScrollableViewportState(this);
+  ScrollableViewportState createState() => new ScrollableViewportState();
 }
 
 class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
-  ScrollableViewportState(ScrollableViewport config) : super(config);
-
   ScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
   OverscrollWhenScrollableBehavior get scrollBehavior => super.scrollBehavior;
 
@@ -320,8 +319,6 @@ abstract class ScrollableWidgetList extends Scrollable {
 }
 
 abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends ScrollableState<T> {
-  ScrollableWidgetListState(T config) : super(config);
-
   /// Subclasses must implement `get itemCount` to tell ScrollableWidgetList
   /// how many items there are in the list.
   int get itemCount;
@@ -458,12 +455,10 @@ class ScrollableList<T> extends ScrollableWidgetList {
   final List<T> items;
   final ItemBuilder<T> itemBuilder;
 
-  ScrollableListState<T, ScrollableList<T>> createState() => new ScrollableListState<T, ScrollableList<T>>(this);
+  ScrollableListState<T, ScrollableList<T>> createState() => new ScrollableListState<T, ScrollableList<T>>();
 }
 
 class ScrollableListState<T, Config extends ScrollableList<T>> extends ScrollableWidgetListState<Config> {
-  ScrollableListState(Config config) : super(config);
-
   ScrollBehavior createScrollBehavior() {
     return config.itemsWrap ? new UnboundedBehavior() : super.createScrollBehavior();
   }
@@ -512,8 +507,6 @@ class PageableList<T> extends ScrollableList<T> {
 }
 
 class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
-  PageableListState(PageableList<T> config) : super(config);
-
   double _snapScrollOffset(double newScrollOffset) {
     double scaledScrollOffset = newScrollOffset / config.itemExtent;
     double previousScrollOffset = scaledScrollOffset.floor() * config.itemExtent;

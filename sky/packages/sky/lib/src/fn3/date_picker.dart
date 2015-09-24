@@ -39,12 +39,10 @@ class DatePicker extends StatefulComponent {
   final DateTime firstDate;
   final DateTime lastDate;
 
-  DatePickerState createState() => new DatePickerState(this);
+  DatePickerState createState() => new DatePickerState();
 }
 
-class DatePickerState extends ComponentState<DatePicker> {
-  DatePickerState(DatePicker config) : super(config);
-
+class DatePickerState extends State<DatePicker> {
   DatePickerMode _mode = DatePickerMode.day;
 
   void _handleModeChanged(DatePickerMode mode) {
@@ -292,11 +290,12 @@ class MonthPicker extends ScrollableWidgetList {
   final DateTime firstDate;
   final DateTime lastDate;
 
-  MonthPickerState createState() => new MonthPickerState(this);
+  MonthPickerState createState() => new MonthPickerState();
 }
 
 class MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
-  MonthPickerState(MonthPicker config) : super(config) {
+  void initState(BuildContext context) {
+    super.initState(context);
     _updateCurrentDate();
   }
 
@@ -342,6 +341,7 @@ class MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
   void dispose() {
     if (_timer != null)
       _timer.cancel();
+    super.dispose();
   }
 }
 
@@ -363,12 +363,10 @@ class YearPicker extends ScrollableWidgetList {
   final DateTime firstDate;
   final DateTime lastDate;
 
-  YearPickerState createState() => new YearPickerState(this);
+  YearPickerState createState() => new YearPickerState();
 }
 
 class YearPickerState extends ScrollableWidgetListState<YearPicker> {
-  YearPickerState(YearPicker config) : super(config);
-
   int get itemCount => config.lastDate.year - config.firstDate.year + 1;
 
   List<Widget> buildItems(BuildContext context, int start, int count) {

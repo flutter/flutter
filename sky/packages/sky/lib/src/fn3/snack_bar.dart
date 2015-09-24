@@ -56,12 +56,10 @@ class SnackBar extends AnimatedComponent {
   final List<SnackBarAction> actions;
   final SnackBarDismissedCallback onDismissed;
 
-  SnackBarState createState() => new SnackBarState(this);
+  SnackBarState createState() => new SnackBarState();
 }
 
-class SnackBarState extends AnimatedComponentState<SnackBar> {
-  SnackBarState(SnackBar config) : super(config);
-
+class SnackBarState extends AnimatedState<SnackBar> {
   void handleDismissed() {
     if (config.onDismissed != null)
       config.onDismissed();

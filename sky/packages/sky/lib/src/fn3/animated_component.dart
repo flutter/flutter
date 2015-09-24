@@ -12,8 +12,9 @@ abstract class AnimatedComponent extends StatefulComponent {
   final Direction direction;
 }
 
-abstract class AnimatedComponentState<T extends AnimatedComponent> extends ComponentState<T> {
-  AnimatedComponentState(T config) : super(config) {
+abstract class AnimatedState<T extends AnimatedComponent> extends State<T> {
+  void initState(BuildContext context) {
+    super.initState(context);
     _performance = new AnimationPerformance(duration: config.duration);
     performance.addStatusListener(_handleAnimationStatusChanged);
     if (buildDependsOnPerformance) {
