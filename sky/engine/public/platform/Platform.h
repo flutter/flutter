@@ -33,7 +33,6 @@
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebData.h"
-#include "sky/engine/public/platform/WebGestureDevice.h"
 #include "sky/engine/public/platform/WebGraphicsContext3D.h"
 #include "sky/engine/public/platform/WebLocalizedString.h"
 #include "sky/engine/public/platform/WebString.h"

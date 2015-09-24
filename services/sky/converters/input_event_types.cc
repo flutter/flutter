@@ -8,7 +8,6 @@
 #include "base/time/time.h"
 #include "mojo/services/input_events/public/interfaces/input_event_constants.mojom.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
-#include "ui/events/event.h"
 
 namespace sky {
 namespace {
@@ -29,14 +28,6 @@ int EventFlagsToWebInputEventModifiers(int flags) {
        blink::WebInputEvent::MiddleButtonDown : 0) |
       (flags & mojo::EVENT_FLAGS_RIGHT_MOUSE_BUTTON ?
        blink::WebInputEvent::RightButtonDown : 0);
-}
-
-int UIEventFlagsToWebInputEventModifiers(int flags) {
-  return (flags & ui::EF_SHIFT_DOWN ? blink::WebInputEvent::ShiftKey : 0) |
-         (flags & ui::EF_CONTROL_DOWN ? blink::WebInputEvent::ControlKey : 0) |
-         (flags & ui::EF_CAPS_LOCK_DOWN ? blink::WebInputEvent::CapsLockOn
-                                        : 0) |
-         (flags & ui::EF_ALT_DOWN ? blink::WebInputEvent::AltKey : 0);
 }
 
 scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
@@ -87,89 +78,6 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
   web_event->radiusMajor = event->pointer_data->radius_major;
   web_event->radiusMinor = event->pointer_data->radius_minor;
   web_event->orientation = event->pointer_data->orientation;
-
-  return web_event.Pass();
-}
-
-scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
-    const ui::GestureEvent& event,
-    float device_pixel_ratio) {
-  scoped_ptr<blink::WebGestureEvent> web_event(new blink::WebGestureEvent);
-
-  web_event->modifiers = UIEventFlagsToWebInputEventModifiers(event.flags());
-  web_event->timeStampMS = event.time_stamp().InMillisecondsF();
-
-  switch (event.type()) {
-    case ui::ET_GESTURE_SCROLL_BEGIN:
-      web_event->type = blink::WebInputEvent::GestureScrollBegin;
-      break;
-    case ui::ET_GESTURE_SCROLL_END:
-      web_event->type = blink::WebInputEvent::GestureScrollEnd;
-      break;
-    case ui::ET_GESTURE_SCROLL_UPDATE:
-      web_event->type = blink::WebInputEvent::GestureScrollUpdate;
-      web_event->data.scrollUpdate.deltaX =
-          event.details().scroll_x() / device_pixel_ratio;
-      web_event->data.scrollUpdate.deltaY =
-          event.details().scroll_y() / device_pixel_ratio;
-      break;
-    case ui::ET_SCROLL_FLING_START:
-      web_event->type = blink::WebInputEvent::GestureFlingStart;
-      web_event->data.flingStart.velocityX =
-          event.details().velocity_x() / device_pixel_ratio;
-      web_event->data.flingStart.velocityY =
-          event.details().velocity_y() / device_pixel_ratio;
-      break;
-    case ui::ET_SCROLL_FLING_CANCEL:
-      web_event->type = blink::WebInputEvent::GestureFlingCancel;
-      break;
-    case ui::ET_GESTURE_SHOW_PRESS:
-      web_event->type = blink::WebInputEvent::GestureShowPress;
-      break;
-    case ui::ET_GESTURE_TAP:
-      web_event->type = blink::WebInputEvent::GestureTap;
-      web_event->data.tap.tapCount = event.details().tap_count();
-      break;
-    case ui::ET_GESTURE_TAP_UNCONFIRMED:
-      web_event->type = blink::WebInputEvent::GestureTapUnconfirmed;
-      web_event->data.tap.tapCount = event.details().tap_count();
-      break;
-    case ui::ET_GESTURE_TAP_DOWN:
-      web_event->type = blink::WebInputEvent::GestureTapDown;
-      break;
-    case ui::ET_GESTURE_TAP_CANCEL:
-      web_event->type = blink::WebInputEvent::GestureTapCancel;
-      break;
-    case ui::ET_GESTURE_DOUBLE_TAP:
-      web_event->type = blink::WebInputEvent::GestureDoubleTap;
-      web_event->data.tap.tapCount = event.details().tap_count();
-      break;
-    case ui::ET_GESTURE_TWO_FINGER_TAP:
-      web_event->type = blink::WebInputEvent::GestureTwoFingerTap;
-      break;
-    case ui::ET_GESTURE_LONG_PRESS:
-      web_event->type = blink::WebInputEvent::GestureLongPress;
-      break;
-    case ui::ET_GESTURE_LONG_TAP:
-      web_event->type = blink::WebInputEvent::GestureLongTap;
-      break;
-    case ui::ET_GESTURE_PINCH_BEGIN:
-      web_event->type = blink::WebInputEvent::GesturePinchBegin;
-      break;
-    case ui::ET_GESTURE_PINCH_END:
-      web_event->type = blink::WebInputEvent::GesturePinchEnd;
-      break;
-    case ui::ET_GESTURE_PINCH_UPDATE:
-      web_event->type = blink::WebInputEvent::GesturePinchUpdate;
-      web_event->data.pinchUpdate.scale =
-          event.details().scale() / device_pixel_ratio;
-      break;
-    default:
-      break;
-  }
-
-  web_event->x = event.location().x() / device_pixel_ratio;
-  web_event->y = event.location().y() / device_pixel_ratio;
 
   return web_event.Pass();
 }
@@ -244,11 +152,6 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
   }
 
   return nullptr;
-}
-
-scoped_ptr<blink::WebInputEvent> ConvertEvent(const ui::GestureEvent& event,
-                                              float device_pixel_ratio) {
-  return BuildWebGestureEvent(event, device_pixel_ratio);
 }
 
 }  // namespace mojo

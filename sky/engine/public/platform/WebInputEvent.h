@@ -33,7 +33,6 @@
 
 #include <string.h>
 #include "sky/engine/public/platform/WebCommon.h"
-#include "sky/engine/public/platform/WebGestureDevice.h"
 #include "sky/engine/public/platform/WebRect.h"
 
 namespace blink {
@@ -100,28 +99,6 @@ public:
         Char,
         KeyboardTypeLast = Char,
 
-        // WebGestureEvent
-        GestureScrollBegin,
-        GestureTypeFirst = GestureScrollBegin,
-        GestureScrollEnd,
-        GestureScrollUpdate,
-        GestureScrollUpdateWithoutPropagation,
-        GestureFlingStart,
-        GestureFlingCancel,
-        GestureShowPress,
-        GestureTap,
-        GestureTapUnconfirmed,
-        GestureTapDown,
-        GestureTapCancel,
-        GestureDoubleTap,
-        GestureTwoFingerTap,
-        GestureLongPress,
-        GestureLongTap,
-        GesturePinchBegin,
-        GesturePinchEnd,
-        GesturePinchUpdate,
-        GestureTypeLast = GesturePinchUpdate,
-
         WheelEvent,
 
         Back,
@@ -177,11 +154,6 @@ public:
     static bool isKeyboardEventType(int type)
     {
         return KeyboardTypeFirst <= type && type <= KeyboardTypeLast;
-    }
-
-    static bool isGestureEventType(int type)
-    {
-        return GestureTypeFirst <= type && type <= GestureTypeLast;
     }
 
     static bool isWheelEventType(int type)
@@ -268,74 +240,6 @@ public:
     float offsetY = 0;
 
     WebWheelEvent() : WebInputEvent(sizeof(WebWheelEvent)) {}
-};
-
-// WebGestureEvent ------------------------------------------------------------
-
-class WebGestureEvent : public WebInputEvent {
-public:
-    int primaryPointer = 0;
-    float x = 0;
-    float y = 0;
-
-    union {
-        // Tap information must be set for GestureTap, GestureTapUnconfirmed,
-        // and GestureDoubleTap events.
-        struct {
-            int tapCount;
-            float width;
-            float height;
-        } tap;
-
-        struct {
-            float width;
-            float height;
-        } tapDown;
-
-        struct {
-            float width;
-            float height;
-        } showPress;
-
-        struct {
-            float width;
-            float height;
-        } longPress;
-
-        struct {
-            float firstFingerWidth;
-            float firstFingerHeight;
-        } twoFingerTap;
-
-        struct {
-            // Initial motion that triggered the scroll.
-            // May be redundant with deltaX/deltaY in the first scrollUpdate.
-            float deltaXHint;
-            float deltaYHint;
-        } scrollBegin;
-
-        struct {
-            float deltaX;
-            float deltaY;
-            float velocityX;
-            float velocityY;
-        } scrollUpdate;
-
-        struct {
-            float velocityX;
-            float velocityY;
-        } flingStart;
-
-        struct {
-            float scale;
-        } pinchUpdate;
-    } data;
-
-    WebGestureEvent()
-        : WebInputEvent(sizeof(WebGestureEvent))
-    {
-        memset(&data, 0, sizeof(data));
-    }
 };
 
 #pragma pack(pop)

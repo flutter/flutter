@@ -24,7 +24,6 @@
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
-#include "ui/events/gestures/gesture_types.h"
 
 namespace sky {
 class DartLibraryProviderImpl;
@@ -37,8 +36,7 @@ class DocumentView : public blink::ServiceProvider,
                      public blink::SkyViewClient,
                      public mojo::NativeViewportEventDispatcher,
                      public sky::LayerClient,
-                     public sky::LayerHostClient,
-                     public ui::GestureConsumer {
+                     public sky::LayerHostClient {
  public:
   DocumentView(mojo::InterfaceRequest<mojo::ServiceProvider> exported_services,
                mojo::ServiceProviderPtr imported_services,
