@@ -8,7 +8,7 @@ import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3/framework.dart';
 import 'package:sky/src/fn3/basic.dart';
 
-typedef List<Widget> ListBuilder(int startIndex, int count, BuildContext context);
+typedef List<Widget> ListBuilder(BuildContext context, int startIndex, int count);
 
 class HomogeneousViewport extends RenderObjectWidget {
   HomogeneousViewport({
@@ -137,7 +137,7 @@ class HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewport
     assert(_layoutItemCount != null);
     List<Widget> newWidgets;
     if (_layoutItemCount > 0)
-      newWidgets = widget.builder(_layoutFirstIndex, _layoutItemCount, this);
+      newWidgets = widget.builder(this, _layoutFirstIndex, _layoutItemCount);
     else
       newWidgets = <Widget>[];
     _children = updateChildren(_children, newWidgets);
