@@ -44,7 +44,9 @@ class RunMojoCommandHandler extends CommandHandler {
     String appName = path.basename(appPath);
     String appDir = path.dirname(appPath);
     List<String> args = [
-      '--android', '--release', '--embed', 'http://app/$appName',
+      '--android',
+      '--release',
+      'http://app/$appName',
       '--map-origin=http://app/=$appDir',
       '--map-origin=http://sky_viewer/=$skyViewerUrl',
       '--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo',
@@ -63,8 +65,8 @@ class RunMojoCommandHandler extends CommandHandler {
     String viewerPath = await _makePathAbsolute(await artifacts.getPath(Artifact.SkyViewerMojo));
     String mojoShellPath = await _makePathAbsolute(path.join(results['mojo-path'], 'out', 'Release', 'mojo_shell'));
     List<String> args = [
-      'mojo:window_manager file://${appPath}',
-      '--url-mappings=mojo:window_manager=mojo:kiosk_wm,mojo:sky_viewer=file://${viewerPath}'
+      'file://${appPath}',
+      '--url-mappings=mojo:sky_viewer=file://${viewerPath}'
     ];
     args.addAll(results.rest);
     return runCommandAndStreamOutput(mojoShellPath, args);
