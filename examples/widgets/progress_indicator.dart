@@ -10,8 +10,9 @@ class ProgressIndicatorApp extends StatefulComponent {
   ProgressIndicatorAppState createState() => new ProgressIndicatorAppState(this);
 }
 
-class ProgressIndicatorAppState extends ComponentState<ProgressIndicatorApp> {
-  ProgressIndicatorAppState(ProgressIndicatorApp config) : super(config) {
+class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
+  void initState(BuildContext context) {
+    super.initState(context);
     valueAnimation = new ValueAnimation<double>()
       ..duration = const Duration(milliseconds: 1500)
       ..variable = new AnimatedValue<double>(

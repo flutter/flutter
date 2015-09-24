@@ -25,12 +25,10 @@ class DragTarget<T> extends StatefulComponent {
   final DragTargetWillAccept<T> onWillAccept;
   final DragTargetAccept<T> onAccept;
 
-  DragTargetState<T> createState() => new DragTargetState<T>(this);
+  DragTargetState<T> createState() => new DragTargetState<T>();
 }
 
-class DragTargetState<T> extends ComponentState<DragTarget<T>> {
-  DragTargetState(DragTarget<T> config) : super(config);
-
+class DragTargetState<T> extends State<DragTarget<T>> {
   final List<T> _candidateData = new List<T>();
   final List<dynamic> _rejectedData = new List<dynamic>();
 

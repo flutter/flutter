@@ -43,11 +43,12 @@ class PopupMenu extends StatefulComponent {
   final NavigatorState navigator;
   final WatchableAnimationPerformance performance;
 
-  PopupMenuState createState() => new PopupMenuState(this);
+  PopupMenuState createState() => new PopupMenuState();
 }
 
-class PopupMenuState extends ComponentState<PopupMenu> {
-  PopupMenuState(PopupMenu config) : super(config) {
+class PopupMenuState extends State<PopupMenu> {
+  void initState(BuildContext context) {
+    super.initState(context);
     _updateBoxPainter();
     config.performance.addListener(_performanceChanged);
   }
@@ -75,6 +76,7 @@ class PopupMenuState extends ComponentState<PopupMenu> {
 
   void dispose() {
     config.performance.removeListener(_performanceChanged);
+    super.dispose();
   }
 
   void _performanceChanged() {

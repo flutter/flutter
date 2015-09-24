@@ -28,12 +28,10 @@ class Radio extends StatefulComponent {
   final Object groupValue;
   final RadioValueChanged onChanged;
 
-  RadioState createState() => new RadioState(this);
+  RadioState createState() => new RadioState();
 }
 
-class RadioState extends ComponentState<Radio> {
-  RadioState(Radio config) : super(config);
-
+class RadioState extends State<Radio> {
   Color _getColor(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     if (config.value == config.groupValue)

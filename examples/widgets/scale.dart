@@ -10,8 +10,9 @@ class ScaleApp extends StatefulComponent {
   ScaleAppState createState() => new ScaleAppState(this);
 }
 
-class ScaleAppState extends ComponentState<ScaleApp> {
-  ScaleAppState(ScaleApp config) : super(config) {
+class ScaleAppState extends State<ScaleApp> {
+  void initState(BuildContext context) {
+    super.initState(context);
     _offset = Offset.zero;
     _zoom = 1.0;
   }

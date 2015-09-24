@@ -8,11 +8,12 @@ import 'package:sky/material.dart';
 void main() => runApp(new DatePickerDemo());
 
 class DatePickerDemo extends StatefulComponent {
-  DatePickerDemoState createState() => new DatePickerDemoState(this);
+  DatePickerDemoState createState() => new DatePickerDemoState();
 }
 
-class DatePickerDemoState extends ComponentState<DatePickerDemo> {
-  DatePickerDemoState(DatePickerDemo config) : super(config) {
+class DatePickerDemoState extends State<DatePickerDemo> {
+  void initState(BuildContext context) {
+    super.initState(context);
     DateTime now = new DateTime.now();
     _dateTime = new DateTime(now.year, now.month, now.day);
   }
