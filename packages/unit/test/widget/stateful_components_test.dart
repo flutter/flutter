@@ -1,36 +1,37 @@
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
 class InnerComponent extends StatefulComponent {
-  InnerComponent();
+  InnerComponent({ Key key }) : super(key: key);
+  InnerComponentState createState() => new InnerComponentState();
+}
 
+class InnerComponentState extends State<InnerComponent> {
   bool _didInitState = false;
 
-  void initState() {
+  void initState(BuildContext context) {
+    super.initState(context);
     _didInitState = true;
   }
 
-  void syncConstructorArguments(InnerComponent source) {
-  }
-
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Container();
   }
 }
 
 class OuterContainer extends StatefulComponent {
-  OuterContainer({ this.child });
+  OuterContainer({ Key key, this.child }) : super(key: key);
 
-  InnerComponent child;
+  final InnerComponent child;
 
-  void syncConstructorArguments(OuterContainer source) {
-    child = source.child;
-  }
+  OuterContainerState createState() => new OuterContainerState();
+}
 
-  Widget build() {
-    return child;
+class OuterContainerState extends State<OuterContainer> {
+  Widget build(BuildContext context) {
+    return config.child;
   }
 }
 
@@ -39,36 +40,42 @@ void main() {
 
     WidgetTester tester = new WidgetTester();
 
-    InnerComponent inner1;
+    Key innerKey = new Key('inner');
+    Key outerKey = new Key('outer');
+
+    InnerComponent inner1 = new InnerComponent(key: innerKey);
     InnerComponent inner2;
-    OuterContainer outer;
+    OuterContainer outer1 = new OuterContainer(key: outerKey, child: inner1);
+    OuterContainer outer2;
 
-    tester.pumpFrame(() {
-      inner1 = new InnerComponent();
-      outer = new OuterContainer(child: inner1);
-      return outer;
-    });
+    tester.pumpFrame(outer1);
 
-    expect(inner1._didInitState, isTrue);
-    expect(inner1.parent, isNotNull);
+    StatefulComponentElement innerElement = tester.findElementByKey(innerKey);
+    InnerComponentState innerElementState = innerElement.state;
+    expect(innerElementState.config, equals(inner1));
+    expect(innerElementState._didInitState, isTrue);
+    expect(innerElement.renderObject.attached, isTrue);
 
-    tester.pumpFrame(() {
-      inner2 = new InnerComponent();
-      return new OuterContainer(child: inner2);
-    });
+    inner2 = new InnerComponent(key: innerKey);
+    outer2 = new OuterContainer(key: outerKey, child: inner2);
 
-    expect(inner1._didInitState, isTrue);
-    expect(inner1.parent, isNotNull);
-    expect(inner2._didInitState, isFalse);
-    expect(inner2.parent, isNull);
+    tester.pumpFrame(outer2);
 
-    outer.setState(() {});
+    expect(tester.findElementByKey(innerKey), equals(innerElement));
+    expect(innerElement.state, equals(innerElementState));
+
+    expect(innerElementState.config, equals(inner2));
+    expect(innerElementState._didInitState, isTrue);
+    expect(innerElement.renderObject.attached, isTrue);
+
+    StatefulComponentElement outerElement = tester.findElementByKey(outerKey);
+    expect(outerElement.state.config, equals(outer2));
+    outerElement.state.setState(() {});
     tester.pumpFrameWithoutChange(0.0);
 
-    expect(inner1._didInitState, isTrue);
-    expect(inner1.parent, isNotNull);
-    expect(inner2._didInitState, isFalse);
-    expect(inner2.parent, isNull);
-
+    expect(tester.findElementByKey(innerKey), equals(innerElement));
+    expect(innerElement.state, equals(innerElementState));
+    expect(innerElementState.config, equals(inner2));
+    expect(innerElement.renderObject.attached, isTrue);
   });
 }

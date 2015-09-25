@@ -313,10 +313,9 @@ abstract class ScrollableWidgetList extends Scrollable {
     assert(itemExtent != null);
   }
 
-  EdgeDims padding;
-  bool itemsWrap;
-  double itemExtent;
-  Size containerSize = Size.zero;
+  final bool itemsWrap;
+  final double itemExtent;
+  final EdgeDims padding;
 }
 
 abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends ScrollableState<T> {
@@ -324,6 +323,8 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
   /// how many items there are in the list.
   int get itemCount;
   int _previousItemCount;
+
+  Size _containerSize = Size.zero;
 
   void didUpdateConfig(T oldConfig) {
     super.didUpdateConfig(oldConfig);
@@ -352,13 +353,13 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
 
   double get _containerExtent {
     return config.scrollDirection == ScrollDirection.vertical
-      ? config.containerSize.height
-      : config.containerSize.width;
+      ? _containerSize.height
+      : _containerSize.width;
   }
 
   void _handleSizeChanged(Size newSize) {
     setState(() {
-      config.containerSize = newSize;
+      _containerSize = newSize;
       _updateScrollBehavior();
     });
   }
@@ -502,9 +503,11 @@ class PageableList<T> extends ScrollableList<T> {
     padding: padding
   );
 
-  Duration duration;
-  Curve curve;
-  PageChangedCallback pageChanged;
+  final Duration duration;
+  final Curve curve;
+  final PageChangedCallback pageChanged;
+
+  PageableListState<T> createState() => new PageableListState();
 }
 
 class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
