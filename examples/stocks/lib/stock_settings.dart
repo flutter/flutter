@@ -10,42 +10,32 @@ typedef void SettingsUpdater({
 });
 
 class StockSettings extends StatefulComponent {
+  const StockSettings(this.navigator, this.optimism, this.backup, this.updater);
 
-  StockSettings(this.navigator, this.optimism, this.backup, this.updater);
+  final NavigatorState navigator;
+  final StockMode optimism;
+  final BackupMode backup;
+  final SettingsUpdater updater;
 
-  Navigator navigator;
-  StockMode optimism;
-  BackupMode backup;
-  SettingsUpdater updater;
+  StockSettingsState createState() => new StockSettingsState();
+}
 
-  void syncConstructorArguments(StockSettings source) {
-    navigator = source.navigator;
-    optimism = source.optimism;
-    backup = source.backup;
-    updater = source.updater;
-  }
-
+class StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
-    setState(() {
-      optimism = value ? StockMode.optimistic : StockMode.pessimistic;
-    });
-    sendUpdates();
+    sendUpdates(value ? StockMode.optimistic : StockMode.pessimistic, config.backup);
   }
 
   void _handleBackupChanged(bool value) {
-    setState(() {
-      backup = value ? BackupMode.enabled : BackupMode.disabled;
-    });
-    sendUpdates();
+    sendUpdates(config.optimism, value ? BackupMode.enabled : BackupMode.disabled);
   }
 
   void _confirmOptimismChange() {
-    switch (optimism) {
+    switch (config.optimism) {
       case StockMode.optimistic:
         _handleOptimismChanged(false);
         break;
       case StockMode.pessimistic:
-        showDialog(navigator, (navigator) {
+        showDialog(config.navigator, (NavigatorState navigator) {
           return new Dialog(
             title: new Text("Change mode?"),
             content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
@@ -72,24 +62,25 @@ class StockSettings extends StatefulComponent {
     }
   }
 
-  void sendUpdates() {
-    if (updater != null)
-      updater(
+  void sendUpdates(StockMode optimism, BackupMode backup) {
+    if (config.updater != null)
+      config.updater(
         optimism: optimism,
         backup: backup
       );
   }
 
-  Widget buildToolBar() {
+  Widget buildToolBar(BuildContext context) {
     return new ToolBar(
       left: new IconButton(
         icon: 'navigation/arrow_back',
-        onPressed: navigator.pop),
+        onPressed: config.navigator.pop
+      ),
       center: new Text('Settings')
     );
   }
 
-  Widget buildSettingsPane() {
+  Widget buildSettingsPane(BuildContext context) {
     // TODO(ianh): Once we have the gesture API hooked up, fix https://github.com/domokit/mojo/issues/281
     // (whereby tapping the widgets below causes both the widget and the menu item to fire their callbacks)
     return new Material(
@@ -103,15 +94,21 @@ class StockSettings extends StatefulComponent {
               onPressed: () => _confirmOptimismChange(),
               child: new Row([
                 new Flexible(child: new Text('Everything is awesome')),
-                new Checkbox(value: optimism == StockMode.optimistic, onChanged: (_) => _confirmOptimismChange()),
+                new Checkbox(
+                  value: config.optimism == StockMode.optimistic,
+                  onChanged: (_) => _confirmOptimismChange()
+                ),
               ])
             ),
             new DrawerItem(
               icon: 'action/backup',
-              onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
+              onPressed: () { _handleBackupChanged(!(config.backup == BackupMode.enabled)); },
               child: new Row([
                 new Flexible(child: new Text('Back up stock list to the cloud')),
-                new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged),
+                new Switch(
+                  value: config.backup == BackupMode.enabled,
+                  onChanged: _handleBackupChanged
+                ),
               ])
             ),
           ])
@@ -120,10 +117,10 @@ class StockSettings extends StatefulComponent {
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(),
-      body: buildSettingsPane()
+      toolbar: buildToolBar(context),
+      body: buildSettingsPane(context)
     );
   }
 }

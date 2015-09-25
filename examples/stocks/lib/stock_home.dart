@@ -9,20 +9,17 @@ typedef void ModeUpdater(StockMode mode);
 const Duration _kSnackbarSlideDuration = const Duration(milliseconds: 200);
 
 class StockHome extends StatefulComponent {
-
   StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater);
 
-  Navigator navigator;
-  List<Stock> stocks;
-  StockMode stockMode;
-  ModeUpdater modeUpdater;
+  final NavigatorState navigator;
+  final List<Stock> stocks;
+  final StockMode stockMode;
+  final ModeUpdater modeUpdater;
 
-  void syncConstructorArguments(StockHome source) {
-    navigator = source.navigator;
-    stocks = source.stocks;
-    stockMode = source.stockMode;
-    modeUpdater = source.modeUpdater;
-  }
+  StockHomeState createState() => new StockHomeState();
+}
+
+class StockHomeState extends State<StockHome> {
 
   bool _isSearching = false;
   String _searchQuery;
@@ -31,7 +28,7 @@ class StockHome extends StatefulComponent {
   bool _isSnackBarShowing = false;
 
   void _handleSearchBegin() {
-    navigator.pushState(this, (_) {
+    config.navigator.pushState(this, (_) {
       setState(() {
         _isSearching = false;
         _searchQuery = null;
@@ -43,9 +40,9 @@ class StockHome extends StatefulComponent {
   }
 
   void _handleSearchEnd() {
-    assert(navigator.currentRoute is RouteState);
-    assert((navigator.currentRoute as RouteState).owner == this); // TODO(ianh): remove cast once analyzer is cleverer
-    navigator.pop();
+    assert(config.navigator.currentRoute is RouteState);
+    assert((config.navigator.currentRoute as RouteState).owner == this); // TODO(ianh): remove cast once analyzer is cleverer
+    config.navigator.pop();
     setState(() {
       _isSearching = false;
       _searchQuery = null;
@@ -82,15 +79,12 @@ class StockHome extends StatefulComponent {
   }
 
   void _handleStockModeChange(StockMode value) {
-    setState(() {
-      stockMode = value;
-    });
-    if (modeUpdater != null)
-      modeUpdater(value);
+    if (config.modeUpdater != null)
+      config.modeUpdater(value);
   }
 
   void _handleMenuShow() {
-    showStockMenu(navigator,
+    showStockMenu(config.navigator,
       autorefresh: _autorefresh,
       onAutorefreshChanged: _handleAutorefreshChanged
     );
@@ -104,7 +98,7 @@ class StockHome extends StatefulComponent {
       level: 3,
       showing: _drawerShowing,
       onDismissed: _handleDrawerDismissed,
-      navigator: navigator,
+      navigator: config.navigator,
       children: [
         new DrawerHeader(child: new Text('Stocks')),
         new DrawerItem(
@@ -122,7 +116,7 @@ class StockHome extends StatefulComponent {
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
           child: new Row([
             new Flexible(child: new Text('Optimistic')),
-            new Radio(value: StockMode.optimistic, groupValue: stockMode, onChanged: _handleStockModeChange)
+            new Radio(value: StockMode.optimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
           ])
         ),
         new DrawerItem(
@@ -130,7 +124,7 @@ class StockHome extends StatefulComponent {
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
           child: new Row([
             new Flexible(child: new Text('Pessimistic')),
-            new Radio(value: StockMode.pessimistic, groupValue: stockMode, onChanged: _handleStockModeChange)
+            new Radio(value: StockMode.pessimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
           ])
         ),
         new DrawerDivider(),
@@ -146,23 +140,26 @@ class StockHome extends StatefulComponent {
   }
 
   void _handleShowSettings() {
-    navigator.pop();
-    navigator.pushNamed('/settings');
+    config.navigator.pop();
+    config.navigator.pushNamed('/settings');
   }
 
   Widget buildToolBar() {
     return new ToolBar(
         left: new IconButton(
           icon: "navigation/menu",
-          onPressed: _handleOpenDrawer),
+          onPressed: _handleOpenDrawer
+        ),
         center: new Text('Stocks'),
         right: [
           new IconButton(
             icon: "action/search",
-            onPressed: _handleSearchBegin),
+            onPressed: _handleSearchBegin
+          ),
           new IconButton(
             icon: "navigation/more_vert",
-            onPressed: _handleMenuShow)
+            onPressed: _handleMenuShow
+          )
         ]
       );
   }
@@ -181,12 +178,12 @@ class StockHome extends StatefulComponent {
     return stocks.where((stock) => stock.symbol.contains(regexp));
   }
 
-  Widget buildMarketStockList() {
-    return new Stocklist(stocks: _filterBySearchQuery(stocks).toList());
+  Widget buildMarketStockList(BuildContext context) {
+    return new Stocklist(stocks: _filterBySearchQuery(config.stocks).toList());
   }
 
-  Widget buildPortfolioStocklist() {
-    return new Stocklist(stocks: _filterBySearchQuery(_filterByPortfolio(stocks)).toList());
+  Widget buildPortfolioStocklist(BuildContext context) {
+    return new Stocklist(stocks: _filterBySearchQuery(_filterByPortfolio(config.stocks)).toList());
   }
 
   Widget buildTabNavigator() {
@@ -216,7 +213,7 @@ class StockHome extends StatefulComponent {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/arrow_back",
-        color: Theme.of(this).accentColor,
+        color: Theme.of(context).accentColor,
         onPressed: _handleSearchEnd
       ),
       center: new Input(
@@ -224,7 +221,7 @@ class StockHome extends StatefulComponent {
         placeholder: 'Search stocks',
         onChanged: _handleSearchQueryChanged
       ),
-      backgroundColor: Theme.of(this).canvasColor
+      backgroundColor: Theme.of(context).canvasColor
     );
   }
 
@@ -255,17 +252,14 @@ class StockHome extends StatefulComponent {
   }
 
   Widget buildFloatingActionButton() {
-    return new TransitionProxy(
-      transitionKey: snackBarKey,
-      child: new FloatingActionButton(
-        child: new Icon(type: 'content/add', size: 24),
-        backgroundColor: Colors.redAccent[200],
-        onPressed: _handleStockPurchased
-      )
+    return new FloatingActionButton(
+      child: new Icon(type: 'content/add', size: 24),
+      backgroundColor: Colors.redAccent[200],
+      onPressed: _handleStockPurchased
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Scaffold(
       toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
       body: buildTabNavigator(),
