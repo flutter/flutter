@@ -8,7 +8,7 @@ dependencies:
   material_design_icons: ^0.0.3
   mojo_services: '>=0.1.0 <0.2.0'
   mojo: '>=0.1.0 <0.2.0'
-  newton: ^0.1.3
+  newton: ^0.1.4
   sky_engine: ^0.0.28
   sky_services: ^0.0.28
   sky_tools: ^0.0.15
