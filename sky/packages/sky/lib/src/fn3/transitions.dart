@@ -9,8 +9,6 @@ import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/animation.dart' show Direction;
 
-// TODO(abarth): TransitionProxy
-
 abstract class TransitionComponent extends StatefulComponent {
   TransitionComponent({
     Key key,

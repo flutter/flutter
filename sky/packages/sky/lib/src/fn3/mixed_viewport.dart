@@ -66,13 +66,18 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
       widget.onInvalidatorAvailable(invalidate);
   }
 
-  /// _childOffsets contains the offsets of each child from the top of the list
-  /// up to the last one we've ever created, and the offset of the end of the
-  /// last one. If there are no children, then the only offset is 0.0. The
-  /// offset of the end of the last child created (the actual last child, if
-  /// didReachLastChild is true), is also the distance from the top (left) of
-  /// the first child to the bottom (right) of the last child created.
-  List<double> _childOffsets = <double>[0.0];
+  /// _childExtents contains the extents of each child from the top of the list
+  /// up to the last one we've ever created.
+  final List<double> _childExtents = <double>[];
+
+  /// _childOffsets contains the offsets of the top of each child from the top
+  /// of the list up to the last one we've ever created, and the offset of the
+  /// end of the last one. The first value is always 0.0. If there are no
+  /// children, that is the only value. The offset of the end of the last child
+  /// created (the actual last child, if didReachLastChild is true), is also the
+  /// distance from the top (left) of the first child to the bottom (right) of
+  /// the last child created.
+  final List<double> _childOffsets = <double>[0.0];
 
   /// Whether childOffsets includes the offset of the last child.
   bool _didReachLastChild = false;
@@ -111,8 +116,10 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
 
   /// Forget all the known child offsets.
   void _resetCache() {
+    _childExtents.clear();
+    _childOffsets.clear();
+    _childOffsets.add(0.0);
     _didReachLastChild = false;
-    _childOffsets = <double>[0.0];
     _invalidIndices.clear();
   }
 
@@ -273,8 +280,10 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
     final Element newElement = _inflateOrUpdateWidget(newWidget);
 
     // Update the offsets based on the newElement's dimensions.
-    final double newOffset = _getElementExtent(newElement, innerConstraints);
-    _childOffsets.add(_childOffsets[index] + newOffset);
+    final double newExtent = _getElementExtent(newElement, innerConstraints);
+    _childExtents.add(newExtent);
+    _childOffsets.add(_childOffsets[index] + newExtent);
+    assert(_childExtents.length == _childOffsets.length - 1);
 
     return newElement;
   }
@@ -308,21 +317,13 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
   /// This compares the offsets we had for an element with its current
   /// intrinsic dimensions.
   bool _debugIsSameSize(Element element, int index, BoxConstraints constraints) {
+    assert(_invalidIndices.isEmpty);
     BoxConstraints innerConstraints = _getInnerConstraints(constraints);
-    // We multiple both sides by 32 and then round to avoid floating
-    // point errors. (You have to round, not truncate, because otherwise
-    // if the error is on either side of an integer, you'll magnify it
-    // rather than hiding it.)
-    // This is an issue because we don't actually record the raw data
-    // (the intrinsic dimensions), we record the offsets.
-    // The offsets therefore accumulate floating point errors. The
-    // errors are far too small to make the slightest diffference, but
-    // they're big enough to trip the assertion if we don't do this.
-    // We multiply by 32 so that we notice errors up to 1/32nd of a
-    // logical pixel. I'm assuming 32x resolution displays aren't going
-    // to happen. When I'm invariably proved wrong, just bump this up to
-    // a higher power of two.
-    return ((_childOffsets[index+1] - _childOffsets[index]) * 32.0).round() == (_getElementExtent(element, innerConstraints) * 32.0).round();
+    double newExtent = _getElementExtent(element, innerConstraints);
+    bool result = _childExtents[index] == newExtent;
+    if (!result)
+      print("Element $element at index $index was size ${_childExtents[index]} but is now size ${newExtent} yet no invalidate() was received to that effect");
+    return result;
   }
 
   /// This is the core lazy-build algorithm. It builds widgets incrementally
@@ -357,18 +358,19 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
     final BoxConstraints innerConstraints = _getInnerConstraints(constraints);
 
     // Before doing the actual layout, fix the offsets for the widgets whose
-    // size or type has changed.
+    // size has apparently changed.
     if (!isValid) {
       assert(_childOffsets.length > 0);
+      assert(_childOffsets.length == _childExtents.length + 1);
       List<int> invalidIndices = _invalidIndices.toList();
       invalidIndices.sort();
       for (int i = 0; i < invalidIndices.length; i += 1) {
 
         // Determine the indices for this pass.
         final int widgetIndex = invalidIndices[i];
-        if (widgetIndex >= _childOffsets.length-1)
+        if (widgetIndex >= _childExtents.length)
           break; // we don't have that child, so there's nothing to invalidate
-        int endIndex;
+        int endIndex; // the last index into _childOffsets that we want to update this round
         if (i == invalidIndices.length - 1) {
           // This is the last invalid index. Update all the remaining entries in _childOffsets.
           endIndex = _childOffsets.length - 1;
@@ -385,11 +387,10 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
         final Element newElement = _getElement(widgetIndex, innerConstraints);
 
         // Update the offsets based on the newElement's dimensions.
-        final double newOffset = _getElementExtent(newElement, innerConstraints);
-        final double oldOffset = _childOffsets[widgetIndex + 1] - _childOffsets[widgetIndex];
-        final double offsetDelta = newOffset - oldOffset;
+        _childExtents[widgetIndex] = _getElementExtent(newElement, innerConstraints);
         for (int j = widgetIndex + 1; j <= endIndex; j++)
-          _childOffsets[j] += offsetDelta;
+          _childOffsets[j] = _childOffsets[j - 1] + _childExtents[j - 1];
+        assert(_childOffsets.length == _childExtents.length + 1);
 
         // Decide if it's visible.
         final _ChildKey key = new _ChildKey.fromWidget(newElement.widget);
@@ -418,7 +419,7 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
       startIndex = 0;
       // If we're scrolled up past the top, then our first visible widget, if
       // any, is the first widget.
-      if (_childOffsets.length > 1) {
+      if (_childExtents.length > 0) {
         haveChildren = true;
       } else {
         final Element element = _getElementAtLastKnownOffset(startIndex, innerConstraints);
@@ -435,7 +436,7 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
       // We're at some sane (not higher than the top) scroll offset.
       // See if we can already find the offset in our cache.
       startIndex = _findIndexForOffsetBeforeOrAt(widget.startOffset);
-      if (startIndex < _childOffsets.length - 1) {
+      if (startIndex < _childExtents.length) {
         // We already know of a child that would be visible at this offset.
         haveChildren = true;
       } else {
@@ -465,7 +466,7 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
           _childrenByKey.remove(key);
           updateChild(element, null, null);
           startIndex += 1;
-          assert(startIndex == _childOffsets.length - 1);
+          assert(startIndex == _childExtents.length);
         }
         assert(haveChildren == _childOffsets.last > widget.startOffset);
         assert(() {
@@ -475,8 +476,9 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
             // If we're here, we have at least one child, so our list has
             // at least two offsets, the top of the child and the bottom
             // of the child.
-            assert(_childOffsets.length >= 2);
-            assert(startIndex == _childOffsets.length - 2);
+            assert(_childExtents.length >= 1);
+            assert(_childOffsets.length == _childExtents.length + 1);
+            assert(startIndex == _childExtents.length - 1);
           }
           return true;
         });
@@ -485,7 +487,7 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
     assert(haveChildren != null);
     assert(haveChildren || _didReachLastChild || endOffset < 0.0);
     assert(startIndex >= 0);
-    assert(startIndex < _childOffsets.length);
+    assert(startIndex < _childExtents.length);
 
     // Build the other widgets that are visible.
     int index = startIndex;
@@ -509,10 +511,12 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
             _didReachLastChild = true;
             break;
           }
-          if (index == _childOffsets.length-1) {
+          if (index == _childExtents.length) {
             // Remember this element's offset.
-            final double newOffset = _getElementExtent(element, innerConstraints);
-            _childOffsets.add(_childOffsets[index] + newOffset);
+            final double newExtent = _getElementExtent(element, innerConstraints);
+            _childExtents.add(newExtent);
+            _childOffsets.add(_childOffsets[index] + newExtent);
+            assert(_childOffsets.length == _childExtents.length + 1);
           } else {
             // Verify that it hasn't changed size.
             // If this assertion fires, it means you didn't call "invalidate"
