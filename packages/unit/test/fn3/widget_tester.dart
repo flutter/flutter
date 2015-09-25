@@ -34,6 +34,21 @@ class WidgetTester {
   }
 
 
+  List<Layer> _layers(Layer layer) {
+    List<Layer> result = [layer];
+    if (layer is ContainerLayer) {
+      ContainerLayer root = layer;
+      Layer child = root.firstChild;
+      while(child != null) {
+        result.addAll(_layers(child));
+        child = child.nextSibling;
+      }
+    }
+    return result;
+  }
+  List<Layer> get layers => _layers(SkyBinding.instance.renderView.layer);
+
+
   void walkElements(ElementVisitor visitor) {
     void walk(Element element) {
       visitor(element);
@@ -107,6 +122,18 @@ class WidgetTester {
     HitTestResult result = _hitTest(location);
     TestPointer p = new TestPointer(pointer);
     _dispatchEvent(p.down(location), result);
+    _dispatchEvent(p.up(), result);
+  }
+
+  void scroll(Element element, Offset offset, { int pointer: 1 }) {
+    Point startLocation = getCenter(element);
+    Point endLocation = startLocation + offset;
+    TestPointer p = new TestPointer(pointer);
+    // Events for the entire press-drag-release gesture are dispatched
+    // to the widgets "hit" by the pointer down event.
+    HitTestResult result = _hitTest(startLocation);
+    _dispatchEvent(p.down(startLocation), result);
+    _dispatchEvent(p.move(endLocation), result);
     _dispatchEvent(p.up(), result);
   }
 
