@@ -1,15 +1,15 @@
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
 void main() {
   test('Can hit test flex children of stacks', () {
     WidgetTester tester = new WidgetTester();
 
     bool didReceiveTap = false;
-    tester.pumpFrame(() {
-      return new Container(
+    tester.pumpFrame(
+      new Container(
         decoration: const BoxDecoration(
           backgroundColor: const Color(0xFF00FF00)
         ),
@@ -36,8 +36,8 @@ void main() {
             ])
           )
         ])
-      );
-    });
+      )
+    );
 
     tester.tap(tester.findText('X'));
     expect(didReceiveTap, isTrue);

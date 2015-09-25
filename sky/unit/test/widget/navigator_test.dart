@@ -1,15 +1,15 @@
 import 'package:sky/animation.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
-class FirstComponent extends Component {
+class FirstComponent extends StatelessComponent {
   FirstComponent(this.navigator);
 
-  final Navigator navigator;
+  final NavigatorState navigator;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () {
         navigator.pushNamed('/second');
@@ -27,15 +27,15 @@ class FirstComponent extends Component {
 class SecondComponent extends StatefulComponent {
   SecondComponent(this.navigator);
 
-  Navigator navigator;
+  final NavigatorState navigator;
 
-  void syncConstructorArguments(SecondComponent source) {
-    navigator = source.navigator;
-  }
+  SecondComponentState createState() => new SecondComponentState();
+}
 
-  Widget build() {
+class SecondComponentState extends State<SecondComponent> {
+  Widget build(BuildContext context) {
     return new GestureDetector(
-      onTap: navigator.pop,
+      onTap: config.navigator.pop,
       child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: new Color(0xFFFF00FF)
@@ -50,7 +50,7 @@ void main() {
   test('Can navigator navigate to and from a stateful component', () {
     WidgetTester tester = new WidgetTester();
 
-    final NavigationState routes = new NavigationState([
+    final NavigatorHistory routes = new NavigatorHistory([
       new Route(
         name: '/',
         builder: (navigator, route) => new FirstComponent(navigator)
@@ -61,9 +61,7 @@ void main() {
       )
     ]);
 
-    tester.pumpFrame(() {
-      return new Navigator(routes);
-    });
+    tester.pumpFrame(new Navigator(routes));
 
     expect(tester.findText('X'), isNotNull);
     expect(tester.findText('Y'), isNull);

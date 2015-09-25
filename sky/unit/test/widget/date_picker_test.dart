@@ -1,7 +1,7 @@
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
 void main() {
   test('Can select a day', () {
@@ -9,26 +9,24 @@ void main() {
 
     DateTime currentValue;
 
-    Widget builder() {
-      return new Block([
-        new DatePicker(
-          selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),
-          firstDate: new DateTime.utc(2013),
-          lastDate: new DateTime.utc(2018),
-          onChanged: (DateTime dateTime) {
-            currentValue = dateTime;
-          }
-        )
-      ]);
-    }
+    Widget widget = new Block([
+      new DatePicker(
+        selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),
+        firstDate: new DateTime.utc(2013),
+        lastDate: new DateTime.utc(2018),
+        onChanged: (DateTime dateTime) {
+          currentValue = dateTime;
+        }
+      )
+    ]);
 
-    tester.pumpFrame(builder);
+    tester.pumpFrame(widget);
 
     expect(currentValue, isNull);
     tester.tap(tester.findText('2015'));
-    tester.pumpFrame(builder);
+    tester.pumpFrame(widget);
     tester.tap(tester.findText('2014'));
-    tester.pumpFrame(builder);
+    tester.pumpFrame(widget);
     expect(currentValue, equals(new DateTime(2014, 6, 9)));
     tester.tap(tester.findText('30'));
     expect(currentValue, equals(new DateTime(2013, 1, 30)));
