@@ -163,6 +163,14 @@ abstract class Scrollable extends StatefulComponent {
     return scrollTo(newScrollOffset, duration: duration, curve: curve);
   }
 
+  void fling(Offset velocity) {
+    if (velocity != Offset.zero) {
+      _startToEndAnimation(velocity: _scrollVelocity(velocity));
+    } else if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating)) {
+      settleScrollOffset();
+    }
+  }
+
   void settleScrollOffset() {
     _startToEndAnimation();
   }
@@ -185,11 +193,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void _handleDragEnd(Offset velocity) {
-    if (velocity != Offset.zero) {
-      _startToEndAnimation(velocity: _scrollVelocity(velocity));
-    } else if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating)) {
-      settleScrollOffset();
-    }
+    fling(velocity);
   }
 
   final List<ScrollListener> _listeners = new List<ScrollListener>();
@@ -566,7 +570,7 @@ class PageableList<T> extends ScrollableList<T> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  void _handleDragEnd(sky.Offset velocity) {
+  void fling(sky.Offset velocity) {
     double scrollVelocity = _scrollVelocity(velocity);
     double newScrollOffset = _snapScrollOffset(scrollOffset + scrollVelocity.sign * itemExtent)
       .clamp(_snapScrollOffset(scrollOffset - itemExtent / 2.0),
