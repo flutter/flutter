@@ -102,6 +102,11 @@ class DismissableState extends State<Dismissable> {
         ..addListener(_handleResizeProgressChanged);
       _resizePerformance.play();
     });
+    // Our squash curve (ease) does not return v=0.0 for t=0.0, so we
+    // technically resize on the first frame. To make sure this doesn't confuse
+    // any other widgets (like MixedViewport, which checks for this kind of
+    // thing), we report a resize straight away.
+    _maybeCallOnResized();
   }
 
   void _handleResizeProgressChanged() {
@@ -220,6 +225,9 @@ class DismissableState extends State<Dismissable> {
 
   Widget build(BuildContext context) {
     if (_resizePerformance != null) {
+      // make sure you remove this widget once it's been dismissed!
+      assert(_resizePerformance.status == AnimationStatus.forward);
+
       AnimatedValue<double> squashAxisExtent = new AnimatedValue<double>(
         _directionIsYAxis ? _size.width : _size.height,
         end: 0.0,
