@@ -21,7 +21,7 @@ const double _kMillisecondsPerSecond = 1000.0;
 const double _kMinFlingVelocity = -kMaxFlingVelocity * _kMillisecondsPerSecond;
 const double _kMaxFlingVelocity = kMaxFlingVelocity * _kMillisecondsPerSecond;
 
-typedef void ScrollListener();
+typedef void ScrollListener(double scrollOffset);
 
 /// A base class for scrollable widgets that reacts to user input and generates
 /// a scrollOffset.
@@ -29,7 +29,8 @@ abstract class Scrollable extends StatefulComponent {
   Scrollable({
     Key key,
     this.initialScrollOffset,
-    this.scrollDirection: ScrollDirection.vertical
+    this.scrollDirection: ScrollDirection.vertical,
+    this.onScroll
   }) : super(key: key) {
     assert(scrollDirection == ScrollDirection.vertical ||
            scrollDirection == ScrollDirection.horizontal);
@@ -37,6 +38,7 @@ abstract class Scrollable extends StatefulComponent {
 
   final double initialScrollOffset;
   final ScrollDirection scrollDirection;
+  final ScrollListener onScroll;
 }
 
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
@@ -136,8 +138,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     setState(() {
       _scrollOffset = newScrollOffset;
     });
-    if (_listeners.length > 0)
-      _notifyListeners();
+    if (config.onScroll != null)
+      config.onScroll(_scrollOffset);
   }
 
   Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: ease }) {
@@ -189,21 +191,6 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   void _handleDragEnd(Offset velocity) {
     fling(velocity);
-  }
-
-  final List<ScrollListener> _listeners = new List<ScrollListener>();
-  void addListener(ScrollListener listener) {
-    _listeners.add(listener);
-  }
-
-  void removeListener(ScrollListener listener) {
-    _listeners.remove(listener);
-  }
-
-  void _notifyListeners() {
-    List<ScrollListener> localListeners = new List<ScrollListener>.from(_listeners);
-    for (ScrollListener listener in localListeners)
-      listener();
   }
 }
 
@@ -271,11 +258,13 @@ class ScrollableViewport extends Scrollable {
     Key key,
     this.child,
     double initialScrollOffset,
-    ScrollDirection scrollDirection: ScrollDirection.vertical
+    ScrollDirection scrollDirection: ScrollDirection.vertical,
+    ScrollListener onScroll
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
-    initialScrollOffset: initialScrollOffset
+    initialScrollOffset: initialScrollOffset,
+    onScroll: onScroll
   );
 
   final Widget child;
@@ -332,12 +321,14 @@ class Block extends StatelessComponent {
   Block(this.children, {
     Key key,
     this.initialScrollOffset,
-    this.scrollDirection: ScrollDirection.vertical
+    this.scrollDirection: ScrollDirection.vertical,
+    this.onScroll
   }) : super(key: key);
 
   final List<Widget> children;
   final double initialScrollOffset;
   final ScrollDirection scrollDirection;
+  final ScrollListener onScroll;
 
   BlockDirection get _direction {
     if (scrollDirection == ScrollDirection.vertical)
@@ -349,6 +340,7 @@ class Block extends StatelessComponent {
     return new ScrollableViewport(
       initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
+      onScroll: onScroll,
       child: new BlockBody(children, direction: _direction)
     );
   }
@@ -364,10 +356,16 @@ abstract class ScrollableWidgetList extends Scrollable {
     Key key,
     double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
+    ScrollListener onScroll,
     this.itemsWrap: false,
     this.itemExtent,
     this.padding
-  }) : super(key: key, initialScrollOffset: initialScrollOffset, scrollDirection: scrollDirection) {
+  }) : super(
+    key: key,
+    initialScrollOffset: initialScrollOffset,
+    scrollDirection: scrollDirection,
+    onScroll: onScroll
+  ) {
     assert(itemExtent != null);
   }
 
@@ -499,6 +497,7 @@ class ScrollableList<T> extends ScrollableWidgetList {
     Key key,
     double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
+    ScrollListener onScroll,
     this.items,
     this.itemBuilder,
     itemsWrap: false,
@@ -508,6 +507,7 @@ class ScrollableList<T> extends ScrollableWidgetList {
     key: key,
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
+    onScroll: onScroll,
     itemsWrap: itemsWrap,
     itemExtent: itemExtent,
     padding: padding);
@@ -542,6 +542,7 @@ class PageableList<T> extends ScrollableList<T> {
     Key key,
     double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.horizontal,
+    ScrollListener onScroll,
     List<T> items,
     ItemBuilder<T> itemBuilder,
     bool itemsWrap: false,
@@ -554,6 +555,7 @@ class PageableList<T> extends ScrollableList<T> {
     key: key,
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
+    onScroll: onScroll,
     items: items,
     itemBuilder: itemBuilder,
     itemsWrap: itemsWrap,
@@ -606,10 +608,15 @@ class ScrollableMixedWidgetList extends Scrollable {
   ScrollableMixedWidgetList({
     Key key,
     double initialScrollOffset,
+    ScrollListener onScroll,
     this.builder,
     this.token,
     this.onInvalidatorAvailable
-  }) : super(key: key, initialScrollOffset: initialScrollOffset);
+  }) : super(
+    key: key,
+    initialScrollOffset: initialScrollOffset,
+    onScroll: onScroll
+  );
 
   final IndexedBuilder builder;
   final Object token;
