@@ -47,5 +47,6 @@ export 'fn3/theme.dart';
 export 'fn3/title.dart';
 export 'fn3/tool_bar.dart';
 export 'fn3/transitions.dart';
+export 'fn3/unique_component.dart';
 
 export 'package:vector_math/vector_math.dart' show Matrix4;
