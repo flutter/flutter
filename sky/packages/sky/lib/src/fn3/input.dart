@@ -4,11 +4,11 @@
 
 import 'package:sky/services.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/editable_text.dart';
-import 'package:sky/src/widgets/focus.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/src/fn3/basic.dart';
+import 'package:sky/src/fn3/editable_text.dart';
+import 'package:sky/src/fn3/focus.dart';
+import 'package:sky/src/fn3/framework.dart';
+import 'package:sky/src/fn3/theme.dart';
 
 export 'package:sky/services.dart' show KeyboardType;
 
@@ -19,35 +19,34 @@ typedef void StringValueChanged(String value);
 const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
 
 class Input extends StatefulComponent {
-
   Input({
     GlobalKey key,
-    String initialValue: '',
+    this.initialValue: '',
     this.placeholder,
     this.onChanged,
-    this.keyboardType : KeyboardType.TEXT
-  }): _value = initialValue, super(key: key);
+    this.keyboardType: KeyboardType.TEXT
+  }): super(key: key);
 
-  KeyboardType keyboardType;
-  String placeholder;
-  StringValueChanged onChanged;
+  final String initialValue;
+  final KeyboardType keyboardType;
+  final String placeholder;
+  final StringValueChanged onChanged;
 
+  InputState createState() => new InputState();
+}
+
+class InputState extends State<Input> {
   String _value;
   EditableString _editableValue;
   KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
 
-  void initState() {
+  void initState(BuildContext context) {
+    super.initState(context);
+    _value = config.initialValue;
     _editableValue = new EditableString(
       text: _value,
       onUpdated: _handleTextUpdated
     );
-    super.initState();
-  }
-
-  void syncConstructorArguments(Input source) {
-    placeholder = source.placeholder;
-    onChanged = source.onChanged;
-    keyboardType = source.keyboardType;
   }
 
   void _handleTextUpdated() {
@@ -55,17 +54,17 @@ class Input extends StatefulComponent {
       setState(() {
         _value = _editableValue.text;
       });
-      if (onChanged != null)
-        onChanged(_value);
+      if (config.onChanged != null)
+        config.onChanged(_value);
     }
   }
 
-  Widget build() {
-    ThemeData themeData = Theme.of(this);
-    bool focused = Focus.at(this);
+  Widget build(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
+    bool focused = FocusState.at(context, config);
 
     if (focused && !_keyboardHandle.attached) {
-      _keyboardHandle = keyboard.show(_editableValue.stub, keyboardType);
+      _keyboardHandle = keyboard.show(_editableValue.stub, config.keyboardType);
     } else if (!focused && _keyboardHandle.attached) {
       _keyboardHandle.release();
     }
@@ -73,10 +72,10 @@ class Input extends StatefulComponent {
     TextStyle textStyle = themeData.text.subhead;
     List<Widget> textChildren = <Widget>[];
 
-    if (placeholder != null && _value.isEmpty) {
+    if (config.placeholder != null && _value.isEmpty) {
       Widget child = new Opacity(
         key: const ValueKey<String>('placeholder'),
-        child: new Text(placeholder, style: textStyle),
+        child: new Text(config.placeholder, style: textStyle),
         opacity: themeData.hintOpacity
       );
       textChildren.add(child);
@@ -109,23 +108,21 @@ class Input extends StatefulComponent {
 
     return new Listener(
       child: input,
-      onPointerDown: focus
+      onPointerDown: (_) {
+        if (FocusState.at(context, config)) {
+          assert(_keyboardHandle.attached);
+          _keyboardHandle.showByRequest();
+        } else {
+          FocusState.moveTo(context, config);
+          // we'll get told to rebuild and we'll take care of the keyboard then
+        }
+      }
     );
   }
 
-  void focus(_) {
-    if (Focus.at(this)) {
-      assert(_keyboardHandle.attached);
-      _keyboardHandle.showByRequest();
-    } else {
-      Focus.moveTo(this);
-      // we'll get told to rebuild and we'll take care of the keyboard then
-    }
-  }
-
-  void didUnmount() {
+  void dispose() {
     if (_keyboardHandle.attached)
       _keyboardHandle.release();
-    super.didUnmount();
+    super.dispose();
   }
 }
