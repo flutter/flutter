@@ -32,7 +32,7 @@ class _ClearCommand extends Command {
   @override
   Future<int> run() async {
     ArtifactStore artifacts = new ArtifactStore(argResults['package-root']);
-    await artifacts.populate();
+    await artifacts.clear();
     return 0;
   }
 }
