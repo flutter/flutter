@@ -396,6 +396,8 @@ typedef void ElementVisitor(Element element);
 abstract class BuildContext {
   InheritedWidget inheritedWidgetOfType(Type targetType);
   RenderObject findRenderObject();
+
+  void visitAncestorElements(bool visitor(Element element));
 }
 
 /// Elements are the instantiations of Widget configurations.
@@ -606,6 +608,12 @@ abstract class Element<T extends Widget> implements BuildContext {
   }
 
   RenderObject findRenderObject() => renderObject;
+
+  void visitAncestorElements(bool visitor(Element element)) {
+    Element ancestor = _parent;
+    while (ancestor != null && visitor(ancestor))
+      ancestor = ancestor._parent;
+  }
 
   void dependenciesChanged() {
     assert(false);

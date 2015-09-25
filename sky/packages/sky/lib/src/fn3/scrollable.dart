@@ -207,8 +207,62 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 }
 
-// TODO(abarth): findScrollableAncestor
-// TODO(abarth): ensureWidgetIsVisible
+ScrollableState findScrollableAncestor(BuildContext context) {
+  ScrollableState result;
+  context.visitAncestorElements((Element element) {
+    if (element is StatefulComponentElement) {
+      if (element.state is ScrollableState) {
+        result = element.state;
+        return false;
+      }
+    }
+    return true;
+  });
+  return result;
+}
+
+Future ensureWidgetIsVisible(BuildContext context, { Duration duration, Curve curve }) {
+  assert(context.findRenderObject() is RenderBox);
+  // TODO(abarth): This function doesn't handle nested scrollable widgets.
+
+  ScrollableState scrollable = findScrollableAncestor(context);
+  if (scrollable == null)
+    return new Future.value();
+
+  RenderBox targetBox = context.findRenderObject();
+  assert(targetBox.attached);
+  Size targetSize = targetBox.size;
+
+  RenderBox scrollableBox = scrollable.context.findRenderObject();
+  assert(scrollableBox.attached);
+  Size scrollableSize = scrollableBox.size;
+
+  double scrollOffsetDelta;
+  switch (scrollable.config.scrollDirection) {
+    case ScrollDirection.vertical:
+      Point targetCenter = targetBox.localToGlobal(new Point(0.0, targetSize.height / 2.0));
+      Point scrollableCenter = scrollableBox.localToGlobal(new Point(0.0, scrollableSize.height / 2.0));
+      scrollOffsetDelta = targetCenter.y - scrollableCenter.y;
+      break;
+    case ScrollDirection.horizontal:
+      Point targetCenter = targetBox.localToGlobal(new Point(targetSize.width / 2.0, 0.0));
+      Point scrollableCenter = scrollableBox.localToGlobal(new Point(scrollableSize.width / 2.0, 0.0));
+      scrollOffsetDelta = targetCenter.x - scrollableCenter.x;
+      break;
+    case ScrollDirection.both:
+      assert(false); // See https://github.com/flutter/engine/issues/888
+      break;
+  }
+
+  ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
+  double scrollOffset = (scrollable.scrollOffset + scrollOffsetDelta)
+    .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
+
+  if (scrollOffset != scrollable.scrollOffset)
+    return scrollable.scrollTo(scrollOffset, duration: duration, curve: curve);
+
+  return new Future.value();
+}
 
 /// A simple scrollable widget that has a single child. Use this component if
 /// you are not worried about offscreen widgets consuming resources.
