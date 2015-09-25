@@ -7,8 +7,8 @@ import 'dart:sky' as sky;
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/fn3/basic.dart';
+import 'package:sky/src/fn3/framework.dart';
 
 const _kCursorBlinkPeriod = 500; // milliseconds
 const _kCursorGap = 1.0;
@@ -133,7 +133,6 @@ class EditableString implements KeyboardClient {
 }
 
 class EditableText extends StatefulComponent {
-
   EditableText({
     Key key,
     this.value,
@@ -141,18 +140,15 @@ class EditableText extends StatefulComponent {
     this.style,
     this.cursorColor}) : super(key: key);
 
-  EditableString value;
-  bool focused;
-  TextStyle style;
-  Color cursorColor;
+  final EditableString value;
+  final bool focused;
+  final TextStyle style;
+  final Color cursorColor;
 
-  void syncConstructorArguments(EditableText source) {
-    value = source.value;
-    focused = source.focused;
-    style = source.style;
-    cursorColor = source.cursorColor;
-  }
+  EditableTextState createState() => new EditableTextState();
+}
 
+class EditableTextState extends State<EditableText> {
   Timer _cursorTimer;
   bool _showCursor = false;
 
@@ -175,10 +171,10 @@ class EditableText extends StatefulComponent {
       new Duration(milliseconds: _kCursorBlinkPeriod), _cursorTick);
   }
 
-  void didUnmount() {
+  void dispose() {
     if (_cursorTimer != null)
       _stopCursorTimer();
-    super.didUnmount();
+    super.dispose();
   }
 
   void _stopCursorTimer() {
@@ -191,25 +187,28 @@ class EditableText extends StatefulComponent {
     if (!_showCursor)
       return;
 
-    double cursorHeight = style.fontSize + 2.0 * _kCursorHeightOffset;
+    double cursorHeight = config.style.fontSize + 2.0 * _kCursorHeightOffset;
     Rect cursorRect =  new Rect.fromLTWH(
       _kCursorGap,
       (size.height - cursorHeight) / 2.0,
       _kCursorWidth,
       cursorHeight
     );
-    canvas.drawRect(cursorRect, new Paint()..color = cursorColor);
+    canvas.drawRect(cursorRect, new Paint()..color = config.cursorColor);
   }
 
-  Widget build() {
-    assert(style != null);
-    assert(focused != null);
-    assert(cursorColor != null);
+  Widget build(BuildContext context) {
+    assert(config.style != null);
+    assert(config.focused != null);
+    assert(config.cursorColor != null);
 
-    if (focused && _cursorTimer == null)
+    if (config.focused && _cursorTimer == null)
       _startCursorTimer();
-    else if (!focused && _cursorTimer != null)
+    else if (!config.focused && _cursorTimer != null)
       _stopCursorTimer();
+
+    final EditableString value = config.value;
+    final TextStyle style = config.style;
 
     Widget text;
     if (value.composing.isValid) {
