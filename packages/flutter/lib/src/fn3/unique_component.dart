@@ -5,12 +5,12 @@
 import 'package:sky/src/fn3.dart';
 
 abstract class UniqueComponent<T extends State> extends StatefulComponent {
- UniqueComponent({ GlobalKey key }) : super(key: key ?? new GlobalKey());
+  UniqueComponent({ GlobalKey key }) : super(key: key ?? new GlobalKey());
 
- T createState();
+  T createState();
 
- T get currentState {
-   GlobalKey globalKey = key;
-   return globalKey.currentState;
- }
+  T get currentState {
+    GlobalKey globalKey = key;
+    return globalKey.currentState;
+  }
 }
