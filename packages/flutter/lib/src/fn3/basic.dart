@@ -530,7 +530,7 @@ class Flex extends MultiChildRenderObjectWidget {
   final FlexAlignItems alignItems;
   final TextBaseline textBaseline;
 
-  RenderFlex createRenderObject() => new RenderFlex(direction: direction);
+  RenderFlex createRenderObject() => new RenderFlex(direction: direction, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
 
   void updateRenderObject(RenderFlex renderObject, Flex oldWidget) {
     renderObject.direction = direction;
