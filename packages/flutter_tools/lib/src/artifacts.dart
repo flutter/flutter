@@ -52,7 +52,11 @@ class ArtifactStore {
 
   Future<Directory> _engineSpecificCacheDir() async {
     Directory cacheDir = await _cacheDir();
-    Directory engineSpecificDir = new Directory(path.join(cacheDir.path, 'sky_engine', engineRevision));
+    // For now, all downloaded artifacts are release mode host binaries so use
+    // a path that mirrors a local release build.
+    // TODO(jamesr): Add support for more configurations.
+    String config = 'Release';
+    Directory engineSpecificDir = new Directory(path.join(cacheDir.path, 'sky_engine', engineRevision, config));
 
     if (!await engineSpecificDir.exists()) {
       await engineSpecificDir.create(recursive: true);
