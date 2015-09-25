@@ -1,5 +1,5 @@
 name: sky
-version: 0.0.49
+version: 0.0.50
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: A framework for writing Flutter applications
 homepage: http://flutter.io
@@ -9,9 +9,9 @@ dependencies:
   mojo_services: '>=0.1.0 <0.2.0'
   mojo: '>=0.1.0 <0.2.0'
   newton: ^0.1.3
-  sky_engine: ^0.0.27
-  sky_services: ^0.0.27
-  sky_tools: ^0.0.14
+  sky_engine: ^0.0.28
+  sky_services: ^0.0.28
+  sky_tools: ^0.0.15
   vector_math: ^1.4.3
   intl: ^0.12.4+2
 environment:
