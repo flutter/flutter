@@ -19,7 +19,7 @@ abstract class GameObject extends Node {
     ..setStyle(sky.PaintingStyle.stroke);
 
   bool collidingWith(GameObject obj) {
-    return (GameMath.pointQuickDist(position, obj.position)
+    return (GameMath.distanceBetweenPoints(position, obj.position)
       < radius + obj.radius);
   }
 
