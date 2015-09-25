@@ -92,6 +92,15 @@ abstract class GlobalKey extends Key {
     }
   }
 
+  Element get currentElement => _registry[this];
+  Widget get currentWidget => currentElement?.widget;
+  State get currentState {
+    Element element = currentElement;
+    if (element is StatefulComponentElement)
+      return element.state;
+    return null;
+  }
+
   static void registerRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
     assert(key != null);
     Set<GlobalKeyRemoveListener> listeners =
@@ -107,11 +116,6 @@ abstract class GlobalKey extends Key {
     if (_removeListeners[key].isEmpty)
       _removeListeners.remove(key);
     assert(removed);
-  }
-
-  static Element getElement(GlobalKey key) {
-    assert(key != null);
-    return _registry[key];
   }
 
   // TODO(ianh): call this
