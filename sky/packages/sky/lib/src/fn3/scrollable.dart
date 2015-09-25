@@ -158,6 +158,14 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return scrollTo(newScrollOffset, duration: duration, curve: curve);
   }
 
+  void fling(Offset velocity) {
+    if (velocity != Offset.zero) {
+      _startToEndAnimation(velocity: _scrollVelocity(velocity));
+    } else if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating)) {
+      settleScrollOffset();
+    }
+  }
+
   void settleScrollOffset() {
     _startToEndAnimation();
   }
@@ -180,11 +188,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleDragEnd(Offset velocity) {
-    if (velocity != Offset.zero) {
-      _startToEndAnimation(velocity: _scrollVelocity(velocity));
-    } else if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating)) {
-      settleScrollOffset();
-    }
+    fling(velocity);
   }
 
   final List<ScrollListener> _listeners = new List<ScrollListener>();
@@ -520,7 +524,7 @@ class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  void _handleDragEnd(sky.Offset velocity) {
+  void fling(sky.Offset velocity) {
     double scrollVelocity = _scrollVelocity(velocity);
     double newScrollOffset = _snapScrollOffset(scrollOffset + scrollVelocity.sign * config.itemExtent)
       .clamp(_snapScrollOffset(scrollOffset - config.itemExtent / 2.0),
