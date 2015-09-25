@@ -1,8 +1,8 @@
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
 void main() {
   test('Uncontested scrolls start immediately', () {
@@ -13,22 +13,20 @@ void main() {
     double updatedDragDelta;
     bool didEndDrag = false;
 
-    Widget builder() {
-      return new GestureDetector(
-        onVerticalDragStart: () {
-          didStartDrag = true;
-        },
-        onVerticalDragUpdate: (double scrollDelta) {
-          updatedDragDelta = scrollDelta;
-        },
-        onVerticalDragEnd: (Offset velocity) {
-          didEndDrag = true;
-        },
-        child: new Container()
-      );
-    }
+    Widget widget = new GestureDetector(
+      onVerticalDragStart: () {
+        didStartDrag = true;
+      },
+      onVerticalDragUpdate: (double scrollDelta) {
+        updatedDragDelta = scrollDelta;
+      },
+      onVerticalDragEnd: (Offset velocity) {
+        didEndDrag = true;
+      },
+      child: new Container()
+    );
 
-    tester.pumpFrame(builder);
+    tester.pumpFrame(widget);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
@@ -53,7 +51,7 @@ void main() {
     expect(didEndDrag, isTrue);
     didEndDrag = false;
 
-    tester.pumpFrame(() => new Container());
+    tester.pumpFrame(new Container());
   });
 
   test('Match two scroll gestures in succession', () {
@@ -66,16 +64,14 @@ void main() {
     Point downLocation = new Point(10.0, 10.0);
     Point upLocation = new Point(10.0, 20.0);
 
-    Widget builder() {
-      return new GestureDetector(
-        onVerticalDragUpdate: (double delta) { dragDistance += delta; },
-        onVerticalDragEnd: (Offset velocity) { gestureCount += 1; },
-        onHorizontalDragUpdate: (_) { fail("gesture should not match"); },
-        onHorizontalDragEnd: (Offset velocity) { fail("gesture should not match"); },
-        child: new Container()
-      );
-    }
-    tester.pumpFrame(builder);
+    Widget widget = new GestureDetector(
+      onVerticalDragUpdate: (double delta) { dragDistance += delta; },
+      onVerticalDragEnd: (Offset velocity) { gestureCount += 1; },
+      onHorizontalDragUpdate: (_) { fail("gesture should not match"); },
+      onHorizontalDragEnd: (Offset velocity) { fail("gesture should not match"); },
+      child: new Container()
+    );
+    tester.pumpFrame(widget);
 
     tester.dispatchEvent(pointer.down(downLocation), downLocation);
     tester.dispatchEvent(pointer.move(upLocation), downLocation);
@@ -87,5 +83,7 @@ void main() {
 
     expect(gestureCount, 2);
     expect(dragDistance, 20.0);
+
+    tester.pumpFrame(new Container());
   });
 }

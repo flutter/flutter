@@ -1,7 +1,7 @@
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
 void main() {
   test('Events bubble up the tree', () {
@@ -9,8 +9,8 @@ void main() {
 
     List<String> log = new List<String>();
 
-    tester.pumpFrame(() {
-      return new Listener(
+    tester.pumpFrame(
+      new Listener(
         onPointerDown: (_) {
           log.add('top');
         },
@@ -28,8 +28,8 @@ void main() {
             )
           )
         )
-      );
-    });
+      )
+    );
 
     tester.tap(tester.findText('X'));
 

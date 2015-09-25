@@ -6,7 +6,7 @@ import 'package:sky/src/fn3.dart';
 import '../engine/mock_events.dart';
 
 class RootComponent extends StatefulComponent {
-  RootComponentState createState() => new RootComponentState(this);
+  RootComponentState createState() => new RootComponentState();
 }
 
 class RootComponentState extends State<RootComponent> {
@@ -24,13 +24,13 @@ class RootComponentState extends State<RootComponent> {
 
 class WidgetTester {
 
-  void pumpFrame(Widget widget) {
+  void pumpFrame(Widget widget, [ double frameTimeMs = 0.0 ]) {
     runApp(widget);
-    WidgetFlutterBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+    WidgetFlutterBinding.instance.beginFrame(frameTimeMs); // TODO(ianh): https://github.com/flutter/engine/issues/1084
   }
 
-  void pumpFrameWithoutChange() {
-    WidgetFlutterBinding.instance.beginFrame(0.0); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+  void pumpFrameWithoutChange([ double frameTimeMs = 0.0 ]) {
+    WidgetFlutterBinding.instance.beginFrame(frameTimeMs); // TODO(ianh): https://github.com/flutter/engine/issues/1084
   }
 
 
@@ -64,6 +64,12 @@ class WidgetTester {
     });
   }
 
+  State findStateOfType(Type type) {
+    StatefulComponentElement element = findElement((Element element) {
+      return element is StatefulComponentElement && element.state.runtimeType == type;
+    });
+    return element?.state;
+  }
 
   Point getCenter(Element element) {
     return _getElementPoint(element, (Size size) => size.center(Point.origin));
