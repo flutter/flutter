@@ -19,6 +19,14 @@ class InstallCommand extends Command {
 
   @override
   Future<int> run() async {
+    if (install()) {
+      return 0;
+    } else {
+      return 2;
+    }
+  }
+
+  bool install() {
     bool installedSomewhere = false;
 
     Map<BuildPlatform, ApplicationPackage> packages =
@@ -28,13 +36,9 @@ class InstallCommand extends Command {
     }
     ApplicationPackage androidApp = packages[BuildPlatform.android];
     if (androidApp != null && android.isConnected()) {
-      installedSomewhere = installedSomewhere || android.installApp(androidApp);
+      installedSomewhere = android.installApp(androidApp) || installedSomewhere;
     }
 
-    if (installedSomewhere) {
-      return 0;
-    } else {
-      return 2;
-    }
+    return installedSomewhere;
   }
 }

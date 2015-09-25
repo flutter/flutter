@@ -4,7 +4,9 @@
 
 library sky_tools.device;
 
+import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
@@ -52,6 +54,7 @@ abstract class _Device {
 
 class AndroidDevice extends _Device {
   static const String _ADB_PATH = 'adb';
+  static const String _observatoryPort = '8181';
   static const String _serverPort = '9888';
 
   static const String className = 'AndroidDevice';
@@ -233,6 +236,66 @@ class AndroidDevice extends _Device {
     return true;
   }
 
+  Future<bool> startServer(
+      String target, bool poke, bool checked, AndroidApk apk) async {
+    String serverRoot = '';
+    String mainDart = '';
+    String missingMessage = '';
+    if (await FileSystemEntity.isDirectory(target)) {
+      serverRoot = target;
+      mainDart = path.join(serverRoot, 'lib', 'main.dart');
+      missingMessage = 'Missing lib/main.dart in project: $serverRoot';
+    } else {
+      serverRoot = Directory.current.path;
+      mainDart = target;
+      missingMessage = '$mainDart does not exist.';
+    }
+
+    if (!await FileSystemEntity.isFile(mainDart)) {
+      _logging.severe(missingMessage);
+      return false;
+    }
+
+    // Set up port forwarding for observatory.
+    String observatoryPortString = 'tcp:$_observatoryPort';
+    runCheckedSync(
+        [adbPath, 'forward', observatoryPortString, observatoryPortString]);
+
+    // Actually start the server.
+    await Process.start('pub', ['run', 'sky_tools:sky_server', _serverPort],
+        workingDirectory: serverRoot, mode: ProcessStartMode.DETACHED);
+
+    // Set up reverse port-forwarding so that the Android app can reach the
+    // server running on localhost.
+    String serverPortString = 'tcp:$_serverPort';
+    runCheckedSync([adbPath, 'reverse', serverPortString, serverPortString]);
+
+    String relativeDartMain = path.relative(mainDart, from: serverRoot);
+    String url = 'http://localhost:$_serverPort/$relativeDartMain';
+    if (poke) {
+      url += '?rand=${new Random().nextDouble()}';
+    }
+
+    // Actually launch the app on Android.
+    List<String> cmd = [
+      adbPath,
+      'shell',
+      'am',
+      'start',
+      '-a',
+      'android.intent.action.VIEW',
+      '-d',
+      url,
+    ];
+    if (checked) {
+      cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
+    }
+    cmd.add(apk.component);
+
+    runCheckedSync(cmd);
+
+    return true;
+  }
 
   bool stop(AndroidApk apk) {
     // Turn off reverse port forwarding

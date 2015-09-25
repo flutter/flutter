@@ -14,11 +14,12 @@ import 'package:sky_tools/src/cache.dart';
 import 'package:sky_tools/src/init.dart';
 import 'package:sky_tools/src/install.dart';
 import 'package:sky_tools/src/run_mojo.dart';
+import 'package:sky_tools/src/start.dart';
 import 'package:sky_tools/src/stop.dart';
 
 class FlutterCommandRunner extends CommandRunner {
   FlutterCommandRunner()
-      : super('flutter', 'Manage your flutter app development.') {
+      : super('flutter', 'Manage your Flutter app development.') {
     argParser.addFlag('verbose',
         abbr: 'v',
         negatable: false,
@@ -77,8 +78,7 @@ class FlutterCommandRunner extends CommandRunner {
             'This path is relative to sky-src-path. Not normally required.',
         defaultsTo: 'out/ios_sim_Release/');
     argParser.addOption('package-root',
-        help: 'Path to your packages directory.',
-        defaultsTo: 'packages');
+        help: 'Path to your packages directory.', defaultsTo: 'packages');
   }
 
   Future<int> runCommand(ArgResults topLevelResults) async {
@@ -144,11 +144,12 @@ void main(List<String> args) {
   });
 
   new FlutterCommandRunner()
-    ..addCommand(new StopCommand())
     ..addCommand(new BuildCommand())
     ..addCommand(new CacheCommand())
     ..addCommand(new InitCommand())
     ..addCommand(new InstallCommand())
     ..addCommand(new RunMojoCommand())
+    ..addCommand(new StartCommand())
+    ..addCommand(new StopCommand())
     ..run(args);
 }
