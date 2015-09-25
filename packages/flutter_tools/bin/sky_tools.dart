@@ -14,9 +14,11 @@ import 'package:sky_tools/src/cache.dart';
 import 'package:sky_tools/src/init.dart';
 import 'package:sky_tools/src/install.dart';
 import 'package:sky_tools/src/run_mojo.dart';
+import 'package:sky_tools/src/stop.dart';
 
 class FlutterCommandRunner extends CommandRunner {
-  FlutterCommandRunner() : super('flutter', 'Manage your flutter app development.') {
+  FlutterCommandRunner()
+      : super('flutter', 'Manage your flutter app development.') {
     argParser.addFlag('verbose',
         abbr: 'v',
         negatable: false,
@@ -41,7 +43,8 @@ class FlutterCommandRunner extends CommandRunner {
             'not set. Note that release is not compatible with the listen command '
             'on iOS devices and simulators. Not normally required.');
     argParser.addOption('sky-src-path',
-        help: 'Path to your Sky src directory, if you are building Sky locally. '
+        help:
+            'Path to your Sky src directory, if you are building Sky locally. '
             'Ignored if neither debug nor release is set. Not normally required.');
     argParser.addOption('android-debug-build-path',
         help:
@@ -120,8 +123,8 @@ class FlutterCommandRunner extends CommandRunner {
       ApplicationPackageFactory.defaultBuildType = BuildType.release;
       ApplicationPackageFactory.setBuildPath(BuildType.release,
           BuildPlatform.android, results['android-release-build-path']);
-      ApplicationPackageFactory.setBuildPath(BuildType.release, BuildPlatform.iOS,
-          results['ios-release-build-path']);
+      ApplicationPackageFactory.setBuildPath(BuildType.release,
+          BuildPlatform.iOS, results['ios-release-build-path']);
       ApplicationPackageFactory.setBuildPath(BuildType.release,
           BuildPlatform.iOSSimulator, results['ios-sim-release-build-path']);
     }
@@ -141,6 +144,7 @@ void main(List<String> args) {
   });
 
   new FlutterCommandRunner()
+    ..addCommand(new StopCommand())
     ..addCommand(new BuildCommand())
     ..addCommand(new CacheCommand())
     ..addCommand(new InitCommand())
