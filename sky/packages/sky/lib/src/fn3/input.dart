@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation.dart';
 import 'package:sky/services.dart';
 import 'package:sky/painting.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3/basic.dart';
 import 'package:sky/src/fn3/editable_text.dart';
 import 'package:sky/src/fn3/focus.dart';
 import 'package:sky/src/fn3/framework.dart';
+import 'package:sky/src/fn3/scrollable.dart';
 import 'package:sky/src/fn3/theme.dart';
 
 export 'package:sky/services.dart' show KeyboardType;
@@ -18,14 +21,18 @@ typedef void StringValueChanged(String value);
 // http://www.google.com/design/spec/components/text-fields.html#text-fields-single-line-text-field
 const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
 
-class Input extends StatefulComponent {
+class Input extends Scrollable {
   Input({
     GlobalKey key,
     this.initialValue: '',
     this.placeholder,
     this.onChanged,
     this.keyboardType: KeyboardType.TEXT
-  }): super(key: key);
+  }): super(
+    key: key,
+    initialScrollOffset: 0.0,
+    scrollDirection: ScrollDirection.horizontal
+  );
 
   final String initialValue;
   final KeyboardType keyboardType;
@@ -35,10 +42,13 @@ class Input extends StatefulComponent {
   InputState createState() => new InputState();
 }
 
-class InputState extends State<Input> {
+class InputState extends ScrollableState<Input> {
   String _value;
   EditableString _editableValue;
   KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
+
+  double _contentWidth = 0.0;
+  double _containerWidth = 0.0;
 
   void initState(BuildContext context) {
     super.initState(context);
@@ -59,7 +69,7 @@ class InputState extends State<Input> {
     }
   }
 
-  Widget build(BuildContext context) {
+  Widget buildContent(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     bool focused = FocusState.at(context, config);
 
@@ -92,22 +102,25 @@ class InputState extends State<Input> {
       value: _editableValue,
       focused: focused,
       style: textStyle,
-      cursorColor: cursorColor
+      cursorColor: cursorColor,
+      onContentSizeChanged: _handleContentSizeChanged,
+      scrollOffset: scrollOffsetVector
     ));
-
-    Border focusHighlight = new Border(bottom: new BorderSide(
-      color: focusHighlightColor,
-      width: focused ? 2.0 : 1.0
-    ));
-
-    Container input = new Container(
-      child: new Stack(textChildren),
-      padding: _kTextfieldPadding,
-      decoration: new BoxDecoration(border: focusHighlight)
-    );
 
     return new Listener(
-      child: input,
+      child: new SizeObserver(
+        callback: _handleContainerSizeChanged,
+        child: new Container(
+          child: new Stack(textChildren),
+          padding: _kTextfieldPadding,
+          decoration: new BoxDecoration(border: new Border(
+            bottom: new BorderSide(
+              color: focusHighlightColor,
+              width: focused ? 2.0 : 1.0
+            )
+          ))
+        )
+      ),
       onPointerDown: (_) {
         if (FocusState.at(context, config)) {
           assert(_keyboardHandle.attached);
@@ -124,5 +137,28 @@ class InputState extends State<Input> {
     if (_keyboardHandle.attached)
       _keyboardHandle.release();
     super.dispose();
+  }
+
+  ScrollBehavior createScrollBehavior() => new BoundedBehavior();
+  BoundedBehavior get scrollBehavior => super.scrollBehavior;
+
+  void _handleContainerSizeChanged(Size newSize) {
+    _containerWidth = newSize.width;
+    _updateScrollBehavior();
+  }
+
+  void _handleContentSizeChanged(Size newSize) {
+    _contentWidth = newSize.width;
+    _updateScrollBehavior();
+  }
+
+  void _updateScrollBehavior() {
+    // Set the scroll offset to match the content width so that the cursor
+    // (which is always at the end of the text) will be visible.
+    scrollTo(scrollBehavior.updateExtents(
+      contentExtent: _contentWidth,
+      containerExtent: _containerWidth,
+      scrollOffset: _contentWidth)
+    );
   }
 }
