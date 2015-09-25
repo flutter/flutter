@@ -86,6 +86,13 @@ class WidgetTester {
     return element?.state;
   }
 
+  State findStateByConfig(Widget config) {
+    StatefulComponentElement element = findElement((Element element) {
+      return element is StatefulComponentElement && element.state.config == config;
+    });
+    return element?.state;
+  }
+
   Point getCenter(Element element) {
     return _getElementPoint(element, (Size size) => size.center(Point.origin));
   }

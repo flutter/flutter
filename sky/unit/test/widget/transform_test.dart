@@ -1,15 +1,15 @@
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
 void main() {
   test('Transform origin', () {
     WidgetTester tester = new WidgetTester();
 
     bool didReceiveTap = false;
-    tester.pumpFrame(() {
-      return new Stack([
+    tester.pumpFrame(
+      new Stack([
         new Positioned(
           top: 100.0,
           left: 100.0,
@@ -39,8 +39,8 @@ void main() {
             )
           )
         )
-      ]);
-    });
+      ])
+    );
 
     expect(didReceiveTap, isFalse);
     tester.tapAt(new Point(110.0, 110.0));
