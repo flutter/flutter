@@ -63,6 +63,7 @@ class Typography {
   // TODO(abarth): Maybe this should be hard-coded in Scaffold?
   static const String typeface = 'font-family: sans-serif';
 
+  // TODO(ianh): Remove this when we remove fn2, now that it's hard-coded in App.
   static const TextStyle error = const TextStyle(
     color: const Color(0xD0FF0000),
     fontFamily: 'monospace',

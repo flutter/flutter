@@ -8,11 +8,11 @@ import 'package:sky/src/fn3/focus.dart';
 import 'package:sky/src/fn3/framework.dart';
 import 'package:sky/src/fn3/transitions.dart';
 
-typedef Widget RouteBuilder(NavigatorState navigator, RouteBase route);
+typedef Widget RouteBuilder(NavigatorState navigator, Route route);
 
 typedef void NotificationCallback();
 
-abstract class RouteBase {
+abstract class Route {
   AnimationPerformance _performance;
   NotificationCallback onDismissed;
   NotificationCallback onCompleted;
@@ -57,10 +57,10 @@ abstract class RouteBase {
 
 const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 const Point _kTransitionStartPoint = const Point(0.0, 75.0);
-class Route extends RouteBase {
-  Route({ this.name, this.builder });
 
-  final String name;
+class PageRoute extends Route {
+  PageRoute(this.builder);
+
   final RouteBuilder builder;
 
   bool get isOpaque => true;
@@ -81,16 +81,16 @@ class Route extends RouteBase {
       )
     );
   }
-
-  String toString() => '$runtimeType(name="$name")';
 }
 
-class RouteState extends RouteBase {
-  RouteState({ this.callback, this.route, this.owner });
+typedef void RouteStateCallback(RouteState route);
 
-  Function callback;
-  RouteBase route;
+class RouteState extends Route {
+  RouteState({ this.route, this.owner, this.callback });
+
+  Route route;
   State owner;
+  RouteStateCallback callback;
 
   bool get isOpaque => false;
 
@@ -105,99 +105,81 @@ class RouteState extends RouteBase {
   Widget build(Key key, NavigatorState navigator, WatchableAnimationPerformance performance) => null;
 }
 
-class NavigatorHistory {
-
-  NavigatorHistory(List<Route> routes) {
-    for (Route route in routes) {
-      if (route.name != null)
-        namedRoutes[route.name] = route;
-    }
-    recents.add(routes[0]);
-  }
-
-  List<RouteBase> recents = new List<RouteBase>();
-  int index = 0;
-  Map<String, RouteBase> namedRoutes = new Map<String, RouteBase>();
-
-  RouteBase get currentRoute => recents[index];
-  bool hasPrevious() => index > 0;
-
-  void pushNamed(String name) {
-    Route route = namedRoutes[name];
-    assert(route != null);
-    push(route);
-  }
-
-  void push(RouteBase route) {
-    assert(!_debugCurrentlyHaveRoute(route));
-    recents.insert(index + 1, route);
-    index++;
-  }
-
-  void pop([dynamic result]) {
-    if (index > 0) {
-      RouteBase route = recents[index];
-      route.popState(result);
-      index--;
-    }
-  }
-
-  bool _debugCurrentlyHaveRoute(RouteBase route) {
-    return recents.any((candidate) => candidate == route);
-  }
-}
-
 class Navigator extends StatefulComponent {
-  Navigator(this.history, { Key key }) : super(key: key);
+  Navigator({ this.routes, Key key }) : super(key: key) {
+    // To use a navigator, you must at a minimum define the route with the name '/'.
+    assert(routes.containsKey('/'));
+  }
 
-  final NavigatorHistory history;
+  final Map<String, RouteBuilder> routes;
 
   NavigatorState createState() => new NavigatorState();
 }
 
 class NavigatorState extends State<Navigator> {
-  RouteBase get currentRoute => config.history.currentRoute;
+
+  List<Route> _history = new List<Route>();
+  int _currentPosition = 0;
+
+  Route get currentRoute => _history[_currentPosition];
+  bool get hasPreviousRoute => _history.length > 1;
+
+  void initState(BuildContext context) {
+    super.initState(context);
+    PageRoute route = new PageRoute(config.routes['/']);
+    assert(route != null);
+    _history.add(route);
+  }
 
   void pushState(State owner, Function callback) {
-    RouteBase route = new RouteState(
+    push(new RouteState(
+      route: currentRoute,
       owner: owner,
-      callback: callback,
-      route: currentRoute
-    );
-    push(route);
+      callback: callback
+    ));
   }
 
   void pushNamed(String name) {
-    setState(() {
-      config.history.pushNamed(name);
-    });
+    PageRoute route = new PageRoute(config.routes[name]);
+    assert(route != null);
+    push(route);
   }
 
-  void push(RouteBase route) {
+  void push(Route route) {
+    assert(!_debugCurrentlyHaveRoute(route));
+    _history.insert(_currentPosition + 1, route);
     setState(() {
-      config.history.push(route);
+      _currentPosition += 1;
     });
   }
 
   void pop([dynamic result]) {
-    setState(() {
-      config.history.pop(result);
-    });
+    if (_currentPosition > 0) {
+      Route route = _history[_currentPosition];
+      route.popState(result);
+      setState(() {
+        _currentPosition -= 1;
+      });
+    }
+  }
+
+  bool _debugCurrentlyHaveRoute(Route route) {
+    return _history.any((candidate) => candidate == route);
   }
 
   Widget build(BuildContext context) {
     List<Widget> visibleRoutes = new List<Widget>();
-    for (int i = config.history.recents.length-1; i >= 0; i -= 1) {
-      RouteBase route = config.history.recents[i];
+    for (int i = _history.length-1; i >= 0; i -= 1) {
+      Route route = _history[i];
       if (!route.hasContent)
         continue;
       WatchableAnimationPerformance performance = route.ensurePerformance(
-        direction: (i <= config.history.index) ? Direction.forward : Direction.reverse
+        direction: (i <= _currentPosition) ? Direction.forward : Direction.reverse
       );
       route.onDismissed = () {
         setState(() {
-          assert(config.history.recents.contains(route));
-          config.history.recents.remove(route);
+          assert(_history.contains(route));
+          _history.remove(route);
         });
       };
       Key key = new ObjectKey(route);

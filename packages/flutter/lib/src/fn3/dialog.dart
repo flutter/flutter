@@ -16,7 +16,7 @@ import 'package:sky/src/fn3/scrollable.dart';
 import 'package:sky/src/fn3/theme.dart';
 import 'package:sky/src/fn3/transitions.dart';
 
-typedef Widget DialogBuilder(Navigator navigator);
+typedef Dialog DialogBuilder(NavigatorState navigator);
 
 /// A material design dialog
 ///
@@ -132,7 +132,7 @@ class Dialog extends StatelessComponent {
 
 const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 
-class DialogRoute extends RouteBase {
+class DialogRoute extends Route {
   DialogRoute({ this.completer, this.builder });
 
   final Completer completer;
