@@ -27,7 +27,7 @@ def FindValidIdentity():
     res = exp.match(line)
     if res is None:
       continue
-    if "iPhone Developer" in res.group(2):
+    if "iPhone Developer: Google Development" in res.group(2):
       return res.group(1)
   return ""
 
