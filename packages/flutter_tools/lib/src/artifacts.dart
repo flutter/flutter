@@ -15,21 +15,21 @@ final Logger _logging = new Logger('sky_tools.artifacts');
 enum Artifact { FlutterCompiler, SkyViewerMojo, }
 
 class ArtifactStore {
-  String _engineRevision;
-  final String packageRoot;
+  static String packageRoot;
+  static String _engineRevision;
 
-  ArtifactStore(this.packageRoot) {
-    _engineRevision = new File(path.join(packageRoot, 'sky_engine', 'REVISION')).readAsStringSync();
+  static String get engineRevision {
+    if (_engineRevision == null)
+      _engineRevision = new File(path.join(packageRoot, 'sky_engine', 'REVISION')).readAsStringSync();
+    return _engineRevision;
   }
 
-  String get engineRevision => _engineRevision;
-
   // Keep in sync with https://github.com/flutter/engine/blob/master/sky/tools/big_red_button.py#L50
-  String googleStorageUrl(String category, String platform) {
+  static String googleStorageUrl(String category, String platform) {
     return 'https://storage.googleapis.com/mojo/sky/${category}/${platform}/${engineRevision}/';
   }
 
-  Future _downloadFile(String url, File file) async {
+  static Future _downloadFile(String url, File file) async {
     _logging.fine('Downloading $url to ${file.path}');
     HttpClient httpClient = new HttpClient();
     HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
@@ -42,7 +42,7 @@ class ArtifactStore {
     _logging.fine('Wrote file');
   }
 
-  Future<Directory> _cacheDir() async {
+  static Future<Directory> _cacheDir() async {
     Directory cacheDir = new Directory(path.join(packageRoot, 'sky_tools', 'cache'));
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
@@ -50,7 +50,7 @@ class ArtifactStore {
     return cacheDir;
   }
 
-  Future<Directory> _engineSpecificCacheDir() async {
+  static Future<Directory> _engineSpecificCacheDir() async {
     Directory cacheDir = await _cacheDir();
     // For now, all downloaded artifacts are release mode host binaries so use
     // a path that mirrors a local release build.
@@ -65,11 +65,11 @@ class ArtifactStore {
   }
 
   // Whether the artifact needs to be marked as executable on disk.
-  bool _needsToBeExecutable(Artifact artifact) {
+  static bool _needsToBeExecutable(Artifact artifact) {
     return artifact == Artifact.FlutterCompiler;
   }
 
-  Future<String> getPath(Artifact artifact) async {
+  static Future<String> getPath(Artifact artifact) async {
     Directory cacheDir = await _engineSpecificCacheDir();
 
     String category, name;
@@ -98,13 +98,13 @@ class ArtifactStore {
     return cachedFile.path;
   }
 
-  Future clear() async {
+  static Future clear() async {
     Directory cacheDir = await _cacheDir();
     _logging.fine('Clearing cache directory ${cacheDir.path}');
     await cacheDir.delete(recursive: true);
   }
 
-  Future populate() async {
+  static Future populate() async {
     for (Artifact artifact in Artifact.values) {
       _logging.fine('Populating cache with $artifact');
       await getPath(artifact);

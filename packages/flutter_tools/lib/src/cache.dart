@@ -25,14 +25,10 @@ class CacheCommand extends Command {
 class _ClearCommand extends Command {
   final name = 'clear';
   final description = 'Clears all artifacts from the cache.';
-  _ClearCommand() {
-    argParser.addOption('package-root', defaultsTo: 'packages');
-  }
 
   @override
   Future<int> run() async {
-    ArtifactStore artifacts = new ArtifactStore(argResults['package-root']);
-    await artifacts.clear();
+    await ArtifactStore.clear();
     return 0;
   }
 }
@@ -40,14 +36,10 @@ class _ClearCommand extends Command {
 class _PopulateCommand extends Command {
   final name = 'populate';
   final description = 'Populates the cache with all known artifacts.';
-  _PopulateCommand() {
-    argParser.addOption('package-root', defaultsTo: 'packages');
-  }
 
   @override
   Future<int> run() async {
-    ArtifactStore artifacts = new ArtifactStore(argResults['package-root']);
-    await artifacts.populate();
+    await ArtifactStore.populate();
     return 0;
   }
 }

@@ -105,8 +105,7 @@ Future _compileSnapshot({
   String snapshotPath
 }) async {
   if (compilerPath == null) {
-    ArtifactStore artifacts = new ArtifactStore(packageRoot);
-    compilerPath = await artifacts.getPath(Artifact.FlutterCompiler);
+    compilerPath = await ArtifactStore.getPath(Artifact.FlutterCompiler);
   }
   ProcessResult result = await Process.run(compilerPath, [
     mainPath,
@@ -135,7 +134,6 @@ class BuildCommand extends Command {
     argParser.addOption('main', defaultsTo: 'lib/main.dart');
     argParser.addOption('manifest');
     argParser.addOption('output-file', abbr: 'o', defaultsTo: 'app.flx');
-    argParser.addOption('package-root', defaultsTo: 'packages');
     argParser.addOption('snapshot', defaultsTo: 'snapshot_blob.bin');
   }
 

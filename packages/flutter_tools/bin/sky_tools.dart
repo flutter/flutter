@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:sky_tools/src/application_package.dart';
+import 'package:sky_tools/src/artifacts.dart';
 import 'package:sky_tools/src/build.dart';
 import 'package:sky_tools/src/cache.dart';
 import 'package:sky_tools/src/init.dart';
@@ -72,6 +73,9 @@ class FlutterCommandRunner extends CommandRunner {
             'Path to your iOS Simulator Release out directory, if you are building Sky locally. '
             'This path is relative to sky-src-path. Not normally required.',
         defaultsTo: 'out/ios_sim_Release/');
+    argParser.addOption('package-root',
+        help: 'Path to your packages directory.',
+        defaultsTo: 'packages');
   }
 
   Future<int> runCommand(ArgResults topLevelResults) async {
@@ -89,6 +93,7 @@ class FlutterCommandRunner extends CommandRunner {
   }
 
   void _setupPaths(ArgResults results) {
+    ArtifactStore.packageRoot = results['package-root'];
     if (results['debug'] || results['release']) {
       if (results['sky-src-path'] == null) {
         // TODO(iansf): Figure out how to get the default src path

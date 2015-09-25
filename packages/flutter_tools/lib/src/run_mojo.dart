@@ -38,8 +38,8 @@ class RunMojoCommand extends Command {
     return file.absolute.path;
   }
 
-  Future<int> _runAndroid(ArgResults results, String appPath, ArtifactStore artifacts) async {
-    String skyViewerUrl = artifacts.googleStorageUrl('viewer', 'android-arm');
+  Future<int> _runAndroid(ArgResults results, String appPath) async {
+    String skyViewerUrl = ArtifactStore.googleStorageUrl('viewer', 'android-arm');
     String command = await _makePathAbsolute(path.join(results['mojo-path'], 'mojo', 'devtools', 'common', 'mojo_run'));
     String appName = path.basename(appPath);
     String appDir = path.dirname(appPath);
@@ -62,8 +62,8 @@ class RunMojoCommand extends Command {
     return runCommandAndStreamOutput(command, args);
   }
 
-  Future<int> _runLinux(ArgResults results, String appPath, ArtifactStore artifacts) async {
-    String viewerPath = await _makePathAbsolute(await artifacts.getPath(Artifact.SkyViewerMojo));
+  Future<int> _runLinux(ArgResults results, String appPath) async {
+    String viewerPath = await _makePathAbsolute(await ArtifactStore.getPath(Artifact.SkyViewerMojo));
     String mojoBuildType = argResults['mojo-debug'] ? 'Debug' : 'Release';
     String mojoShellPath = await _makePathAbsolute(path.join(results['mojo-path'], 'out', mojoBuildType, 'mojo_shell'));
     List<String> args = [
@@ -84,13 +84,11 @@ class RunMojoCommand extends Command {
       _logging.severe('Cannot specify both --mojo-debug and --mojo-release');
       return 1;
     }
-    String packageRoot = argResults['package-root'];
-    ArtifactStore artifacts = new ArtifactStore(packageRoot);
     String appPath = await _makePathAbsolute(argResults['app']);
     if (argResults['android']) {
-      return _runAndroid(argResults, appPath, artifacts);
+      return _runAndroid(argResults, appPath);
     } else {
-      return _runLinux(argResults, appPath, artifacts);
+      return _runLinux(argResults, appPath);
     }
   }
 }
