@@ -291,6 +291,9 @@ abstract class State<T extends StatefulComponent> {
   /// Pointer to the owner Element object
   StatefulComponentElement _element;
 
+  /// The context in which this object will be built
+  BuildContext get context => _element;
+
   /// Called when this object is inserted into the tree. Override this function
   /// to perform initialization that depends on the location at which this
   /// object was inserted into the tree or on the widget configuration object.
@@ -392,6 +395,7 @@ typedef void ElementVisitor(Element element);
 
 abstract class BuildContext {
   InheritedWidget inheritedWidgetOfType(Type targetType);
+  RenderObject findRenderObject();
 }
 
 /// Elements are the instantiations of Widget configurations.
@@ -600,6 +604,8 @@ abstract class Element<T extends Widget> implements BuildContext {
       ancestor = ancestor._parent;
     return ancestor?.widget;
   }
+
+  RenderObject findRenderObject() => renderObject;
 
   void dependenciesChanged() {
     assert(false);
