@@ -105,7 +105,7 @@ class EffectLine extends Node {
       while(_points.length > 0 && _pointAges[0] > (fadeDuration + fadeAfterDelay)) {
         // Update scroll if it isn't the last and only point that is about to removed
         if (_points.length > 1 && textureLoopLength != null) {
-          double dist = GameMath.pointQuickDist(_points[0], _points[1]);
+          double dist = GameMath.distanceBetweenPoints(_points[0], _points[1]);
           _offset = (_offset - (dist / textureLoopLength)) % 1.0;
           if (_offset < 0.0) _offset += 1;
         }
@@ -167,7 +167,7 @@ class EffectLine extends Node {
     if (points.length > 0 && point.x == points[points.length - 1].x && point.y == points[points.length - 1].y)
       return;
 
-    if (simplify && points.length >= 2 && GameMath.pointQuickDist(point, points[points.length - 2]) < 10.0) {
+    if (simplify && points.length >= 2 && GameMath.distanceBetweenPoints(point, points[points.length - 2]) < 10.0) {
       // Check if we should remove last point before adding the new one
 
       // Calculate the square distance from the middle point to the line of the
