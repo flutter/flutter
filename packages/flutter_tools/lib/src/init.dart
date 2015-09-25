@@ -13,7 +13,8 @@ import 'package:path/path.dart' as p;
 
 class InitCommand extends Command {
   final name = 'init';
-  final description = 'Create a new sky project.';
+  final description = 'Create a new Flutter project.';
+
   InitCommand() {
     argParser.addOption('out', abbr: 'o', help: 'The output directory.');
     argParser.addFlag('pub',
@@ -32,7 +33,7 @@ class InitCommand extends Command {
     // TODO: Confirm overwrite of an existing directory with the user.
     Directory out = new Directory(argResults['out']);
 
-    new SkySimpleTemplate().generateInto(out);
+    new FlutterSimpleTemplate().generateInto(out);
 
     print('');
 
@@ -89,8 +90,8 @@ abstract class Template {
   String toString() => name;
 }
 
-class SkySimpleTemplate extends Template {
-  SkySimpleTemplate() : super('sky-simple', 'A minimal Sky project.') {
+class FlutterSimpleTemplate extends Template {
+  FlutterSimpleTemplate() : super('flutter-simple', 'A minimal Flutter project.') {
     files['.gitignore'] = _gitignore;
     files['pubspec.yaml'] = _pubspec;
     files['README.md'] = _readme;
@@ -124,8 +125,8 @@ const _readme = r'''
 
 ## Getting Started
 
-For help getting started with Sky, view our online
-[documentation](https://github.com/domokit/sky_engine/blob/master/sky/packages/sky/README.md).
+For help getting started with Flutter, view our online
+[documentation](http://flutter.io/).
 ''';
 
 const _pubspec = r'''
@@ -145,7 +146,7 @@ void main() => runApp(new HelloWorldApp());
 class HelloWorldApp extends App {
   Widget build() {
     return new Scaffold(
-        toolbar: new ToolBar(center: new Text("Sky Demo")),
+        toolbar: new ToolBar(center: new Text("Flutter Demo")),
         body: new Material(child: new Center(child: new Text("Hello world!"))),
         floatingActionButton: new FloatingActionButton(
             child: new Icon(type: 'content/add', size: 24)));

@@ -24,7 +24,7 @@ defineTests() {
     });
 
     // Verify that we create a project that is well-formed.
-    test('init sky-simple', () async {
+    test('init flutter-simple', () async {
       InitCommand command = new InitCommand();
       CommandRunner runner = new CommandRunner('test_flutter', '')
           ..addCommand(command);
