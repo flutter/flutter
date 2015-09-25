@@ -173,6 +173,7 @@ void Logger_PrintString(Dart_NativeArguments args) {
     // Uses fwrite to support printing NUL bytes.
     fwrite(chars, 1, length, stdout);
     fputs("\n", stdout);
+    fflush(stdout);
 #if defined(OS_ANDROID)
     // In addition to writing to the stdout, write to the logcat so that the
     // message is discoverable when running on an unrooted device.
