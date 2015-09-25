@@ -298,6 +298,8 @@ abstract class State<T extends StatefulComponent> {
   /// The context in which this object will be built
   BuildContext get context => _element;
 
+  bool get mounted => _element != null;
+
   /// Called when this object is inserted into the tree. Override this function
   /// to perform initialization that depends on the location at which this
   /// object was inserted into the tree or on the widget configuration object.
