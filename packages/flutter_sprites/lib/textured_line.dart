@@ -196,7 +196,7 @@ class TexturedLinePainter {
 
       Point intersection = GameMath.lineIntersection(oldVertex0, oldVertex1, vertex0, vertex1);
       if (intersection != null) {
-        if (GameMath.pointQuickDist(vertex0, intersection) < GameMath.pointQuickDist(vertex1, intersection)) {
+        if (GameMath.distanceBetweenPoints(vertex0, intersection) < GameMath.distanceBetweenPoints(vertex1, intersection)) {
           vertex0 = oldVertex0;
         } else {
           vertex1 = oldVertex1;
@@ -220,7 +220,7 @@ class TexturedLinePainter {
       Point lastPoint = _points[i - 1];
       Point currentPoint = _points[i];
 
-      double dist = GameMath.pointQuickDist(lastPoint, currentPoint);
+      double dist = GameMath.distanceBetweenPoints(lastPoint, currentPoint);
       length += dist;
       stops.add(length);
     }
