@@ -1,7 +1,7 @@
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/basic.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
-import 'widget_tester.dart';
+
+import '../fn3/widget_tester.dart';
 
 class Item {
   GlobalKey key1 = new GlobalKey();
@@ -12,15 +12,18 @@ List<Item> items = [new Item(), new Item()];
 
 class StatefulLeaf extends StatefulComponent {
   StatefulLeaf({ GlobalKey key }) : super(key: key);
-  void syncConstructorArguments(StatefulLeaf source) { }
-  void test() { setState(() { }); }
-  Widget build() => new Text('leaf');
+  StatefulLeafState createState() => new StatefulLeafState();
 }
 
-class KeyedWrapper extends Component {
+class StatefulLeafState extends State<StatefulLeaf> {
+  void test() { setState(() { }); }
+  Widget build(BuildContext context) => new Text('leaf');
+}
+
+class KeyedWrapper extends StatelessComponent {
   KeyedWrapper(this.key1, this.key2);
   Key key1, key2;
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Container(
       key: key1,
       child: new StatefulLeaf(
@@ -40,13 +43,13 @@ Widget builder() {
 void main() {
   test('duplicate key smoke test', () {
     WidgetTester tester = new WidgetTester();
-    tester.pumpFrame(builder);
-    StatefulLeaf leaf = tester.findWidget((widget) => widget is StatefulLeaf);
+    tester.pumpFrame(builder());
+    StatefulLeafState leaf = tester.findStateOfType(StatefulLeafState);
     leaf.test();
     tester.pumpFrameWithoutChange();
     Item lastItem = items[1];
     items.remove(lastItem);
     items.insert(0, lastItem);
-    tester.pumpFrame(builder); // this marks the app dirty and rebuilds it
+    tester.pumpFrame(builder()); // this marks the app dirty and rebuilds it
   });
 }

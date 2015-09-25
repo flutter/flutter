@@ -631,9 +631,9 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// binding when scheduleBuild() has been called to mark this element dirty,
   /// and by update() when the Widget has changed.
   void rebuild() {
-    assert(_debugLifecycleState == _ElementLifecycle.mounted);
     if (!_dirty)
       return;
+    assert(_debugLifecycleState == _ElementLifecycle.mounted);
     _dirty = false;
     Widget built;
     try {
@@ -731,7 +731,12 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
     _state._config = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
     _state.initState(this);
-    assert(_state._debugLifecycleState == _StateLifecycle.initialized);
+    assert(() {
+      if (_state._debugLifecycleState == _StateLifecycle.initialized)
+        return true;
+      print('${_state.runtimeType}.initState failed to call super.initState');
+      return false;
+    });
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
     _builder = _state.build;
   }
