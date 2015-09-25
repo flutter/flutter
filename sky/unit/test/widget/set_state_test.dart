@@ -1,14 +1,15 @@
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
 class Inside extends StatefulComponent {
-  void syncConstructorArguments(Inside source) {
-  }
+  InsideState createState() => new InsideState();
+}
 
-  Widget build() {
+class InsideState extends State<Inside> {
+  Widget build(BuildContext context) {
     return new Listener(
       onPointerDown: _handlePointerDown,
       child: new Text('INSIDE')
@@ -21,29 +22,32 @@ class Inside extends StatefulComponent {
 }
 
 class Middle extends StatefulComponent {
-  Inside child;
-
   Middle({ this.child });
 
-  void syncConstructorArguments(Middle source) {
-    child = source.child;
-  }
+  final Inside child;
 
-  Widget build() {
+  MiddleState createState() => new MiddleState();
+}
+
+class MiddleState extends State<Middle> {
+  Widget build(BuildContext context) {
     return new Listener(
       onPointerDown: _handlePointerDown,
-      child: child
+      child: config.child
     );
   }
 
   void _handlePointerDown(_) {
     setState(() { });
   }
-
 }
 
-class Outside extends App {
-  Widget build() {
+class Outside extends StatefulComponent {
+  OutsideState createState() => new OutsideState();
+}
+
+class OutsideState extends State<Outside> {
+  Widget build(BuildContext context) {
     return new Middle(child: new Inside());
   }
 }
@@ -51,20 +55,12 @@ class Outside extends App {
 void main() {
   test('setState() smoke test', () {
     WidgetTester tester = new WidgetTester();
-
-    tester.pumpFrame(() {
-      return new Outside();
-    });
-
+    tester.pumpFrame(new Outside());
     TestPointer pointer = new TestPointer(1);
     Point location = tester.getCenter(tester.findText('INSIDE'));
     tester.dispatchEvent(pointer.down(location), location);
-
     tester.pumpFrameWithoutChange();
-
     tester.dispatchEvent(pointer.up(), location);
-
     tester.pumpFrameWithoutChange();
-
   });
 }

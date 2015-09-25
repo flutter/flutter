@@ -2,40 +2,55 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
-import 'widget_tester.dart';
 
-Changer changer;
+import '../fn3/widget_tester.dart';
+
+ChangerState changer;
+
 class Changer extends StatefulComponent {
   Changer(this.child);
-  Widget child;
-  void syncConstructorArguments(Changer source) {
-    child = source.child;
-  }
-  bool _state = false;
-  void initState() { changer = this; }
-  void test() { setState(() { _state = true; }); }
-  Widget build() => _state ? new Wrapper(child) : child;
+
+  final Widget child;
+
+  ChangerState createState() => new ChangerState();
 }
 
-class Wrapper extends Component {
+class ChangerState extends State<Changer> {
+  bool _state = false;
+
+  void initState(BuildContext context) {
+    super.initState(context);
+    changer = this;
+  }
+
+  void test() { setState(() { _state = true; }); }
+
+  Widget build(BuildContext) => _state ? new Wrapper(config.child) : config.child;
+}
+
+class Wrapper extends StatelessComponent {
   Wrapper(this.child);
+
   final Widget child;
-  Widget build() => child;
+
+  Widget build(BuildContext context) => child;
 }
 
 class Leaf extends StatefulComponent {
-  void syncConstructorArguments(Leaf source) { }
-  Widget build() => new Text("leaf");
+  LeafState createState() => new LeafState();
+}
+
+class LeafState extends State<Leaf> {
+  Widget build(BuildContext context) => new Text("leaf");
 }
 
 void main() {
   test('three-way setState() smoke test', () {
     WidgetTester tester = new WidgetTester();
-    tester.pumpFrame(() => new Changer(new Wrapper(new Leaf())));
-    tester.pumpFrame(() => new Changer(new Wrapper(new Leaf())));
+    tester.pumpFrame(new Changer(new Wrapper(new Leaf())));
+    tester.pumpFrame(new Changer(new Wrapper(new Leaf())));
     changer.test();
     tester.pumpFrameWithoutChange();
   });
