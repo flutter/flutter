@@ -29,6 +29,48 @@ void main() {
     expect(friction.x(5.0) > 431 && friction.x(5.0) < 432, true);
   });
 
+  test('test_friction_through', () {
+    // Use a normal FrictionSimulation to generate start and end
+    // velocity and positions with drag = 0.025.
+    var startPosition = 10.0;
+    var startVelocity = 600.0;
+    var f = new FrictionSimulation(0.025, startPosition, startVelocity);
+    var endPosition = f.x(1.0);
+    var endVelocity = f.dx(1.0);
+    expect(endPosition, greaterThan(startPosition));
+    expect(endVelocity, lessThan(startVelocity));
+
+    // Verify that that the "through" FrictionSimulation ends up at
+    // endPosition and endVelocity; implies that it computed the right
+    // value for _drag.
+    var friction = new FrictionSimulation.through(
+        startPosition, endPosition, startVelocity, endVelocity);
+    expect(friction.isDone(0.0), false);
+    expect(friction.x(0.0), 10.0);
+    expect(friction.dx(0.0), 600.0);
+
+    double epsilon = 1e-4;
+    expect(friction.isDone(1.0 + epsilon), true);
+    expect(friction.x(1.0), closeTo(endPosition, epsilon));
+    expect(friction.dx(1.0), closeTo(endVelocity, epsilon));
+
+    // Same scenario as above except that the velocities are
+    // are negative.
+    startPosition = 1000.0;
+    startVelocity = -500.0;
+    f = new FrictionSimulation(0.025, 1000.0, -500.0);
+    endPosition = f.x(1.0);
+    endVelocity = f.dx(1.0);
+    expect(endPosition, lessThan(startPosition));
+    expect(endVelocity, greaterThan(startVelocity));
+
+    friction = new FrictionSimulation.through(
+        startPosition, endPosition, startVelocity, endVelocity);
+    expect(friction.isDone(1.0 + epsilon), true);
+    expect(friction.x(1.0), closeTo(endPosition, epsilon));
+    expect(friction.dx(1.0), closeTo(endVelocity, epsilon));
+  });
+
   test('test_gravity', () {
     var gravity = new GravitySimulation(200.0, 100.0, 600.0, 0.0);
 
