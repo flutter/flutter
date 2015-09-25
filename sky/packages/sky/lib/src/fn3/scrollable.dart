@@ -14,6 +14,7 @@ import 'package:sky/src/fn3/basic.dart';
 import 'package:sky/src/fn3/framework.dart';
 import 'package:sky/src/fn3/gesture_detector.dart';
 import 'package:sky/src/fn3/homogeneous_viewport.dart';
+import 'package:sky/src/fn3/mixed_viewport.dart';
 
 // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
 const double _kMillisecondsPerSecond = 1000.0;
@@ -386,7 +387,7 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
   }
 
   void _updateScrollBehavior() {
-    // if you don't call this from build() or syncConstructorArguments(), you must call it from setState().
+    // if you don't call this from build(), you must call it from setState().
     double contentExtent = config.itemExtent * itemCount;
     if (config.padding != null)
       contentExtent += _leadingPadding + _trailingPadding;
@@ -536,4 +537,83 @@ class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
   }
 }
 
-// TODO(abarth): ScrollableMixedWidgetList
+/// A general scrollable list for a large number of children that might not all
+/// have the same height. Prefer [ScrollableWidgetList] when all the children
+/// have the same height because it can use that property to be more efficient.
+/// Prefer [ScrollableViewport] with a single child.
+class ScrollableMixedWidgetList extends Scrollable {
+  ScrollableMixedWidgetList({
+    Key key,
+    double initialScrollOffset,
+    this.builder,
+    this.token,
+    this.onInvalidatorAvailable
+  }) : super(key: key, initialScrollOffset: initialScrollOffset);
+
+  final IndexedBuilder builder;
+  final Object token;
+  final InvalidatorAvailableCallback onInvalidatorAvailable;
+
+  ScrollableMixedWidgetListState createState() => new ScrollableMixedWidgetListState();
+}
+
+class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidgetList> {
+  void initState(BuildContext context) {
+    super.initState(context);
+    scrollBehavior.updateExtents(
+      contentExtent: double.INFINITY
+    );
+  }
+
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
+  OverscrollBehavior get scrollBehavior => super.scrollBehavior;
+
+  void _handleSizeChanged(Size newSize) {
+    setState(() {
+      scrollBy(scrollBehavior.updateExtents(
+        containerExtent: newSize.height,
+        scrollOffset: scrollOffset
+      ));
+    });
+  }
+
+  bool _contentChanged = false;
+
+  void didUpdateConfig(ScrollableMixedWidgetList oldConfig) {
+    super.didUpdateConfig(oldConfig);
+    if (config.token != oldConfig.token) {
+      // When the token changes the scrollable's contents may have changed.
+      // Remember as much so that after the new contents have been laid out we
+      // can adjust the scrollOffset so that the last page of content is still
+      // visible.
+      _contentChanged = true;
+    }
+  }
+
+  void _handleExtentsUpdate(double newExtents) {
+    double newScrollOffset;
+    setState(() {
+      newScrollOffset = scrollBehavior.updateExtents(
+        contentExtent: newExtents ?? double.INFINITY,
+        scrollOffset: scrollOffset
+      );
+    });
+    if (_contentChanged) {
+      _contentChanged = false;
+      scrollTo(newScrollOffset);
+    }
+  }
+
+  Widget buildContent(BuildContext context) {
+    return new SizeObserver(
+      callback: _handleSizeChanged,
+      child: new MixedViewport(
+        startOffset: scrollOffset,
+        builder: config.builder,
+        token: config.token,
+        onInvalidatorAvailable: config.onInvalidatorAvailable,
+        onExtentsUpdate: _handleExtentsUpdate
+      )
+    );
+  }
+}

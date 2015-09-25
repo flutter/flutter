@@ -4,7 +4,8 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/painting.dart';
+import 'package:sky/src/fn3.dart';
 
 class CardModel {
   CardModel(this.value, this.height, this.color);
@@ -15,7 +16,11 @@ class CardModel {
   Key get key => new ObjectKey(this);
 }
 
-class CardCollectionApp extends App {
+class CardCollectionApp extends StatefulComponent {
+  CardCollectionAppState createState() => new CardCollectionAppState();
+}
+
+class CardCollectionAppState extends State<CardCollectionApp> {
 
   static const TextStyle cardLabelStyle =
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
@@ -23,14 +28,14 @@ class CardCollectionApp extends App {
   final TextStyle backgroundTextStyle =
     Typography.white.title.copyWith(textAlign: TextAlign.center);
 
-  MixedViewportLayoutState _layoutState = new MixedViewportLayoutState();
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   bool _drawerShowing = false;
   AnimationStatus _drawerStatus = AnimationStatus.dismissed;
+  InvalidatorCallback _invalidator;
 
-
-  void initState() {
+  void initState(BuildContext context) {
+    super.initState(context);
     List<double> cardHeights = <double>[
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -40,7 +45,6 @@ class CardCollectionApp extends App {
       Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
-    super.initState();
   }
 
   void dismissCard(CardModel card) {
@@ -121,14 +125,14 @@ class CardCollectionApp extends App {
     );
   }
 
-  Widget buildCard(int index) {
+  Widget buildCard(BuildContext context, int index) {
     if (index >= _cardModels.length)
       return null;
 
     CardModel cardModel = _cardModels[index];
     Widget card = new Dismissable(
       direction: _dismissDirection,
-      onResized: () { _layoutState.invalidate([index]); },
+      onResized: () { _invalidator([index]); },
       onDismissed: () { dismissCard(cardModel); },
       child: new Card(
         color: cardModel.color,
@@ -178,7 +182,7 @@ class CardCollectionApp extends App {
         child: new Viewport(
           child: new Container(
             height: cardModel.height,
-            decoration: new BoxDecoration(backgroundColor: Theme.of(this).primaryColor),
+            decoration: new BoxDecoration(backgroundColor: Theme.of(context).primaryColor),
             child: new Row([
               leftArrowIcon,
               new Flexible(child: new Text(backgroundMessage, style: backgroundTextStyle)),
@@ -196,14 +200,14 @@ class CardCollectionApp extends App {
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Widget cardCollection = new Container(
       padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-      decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50]),
+      decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
       child: new ScrollableMixedWidgetList(
         builder: buildCard,
         token: _cardModels.length,
-        layoutState: _layoutState
+        onInvalidatorAvailable: (InvalidatorCallback callback) { _invalidator = callback; }
       )
     );
 

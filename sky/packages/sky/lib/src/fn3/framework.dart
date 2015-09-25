@@ -315,9 +315,14 @@ abstract class State<T extends StatefulComponent> {
   /// component will not be scheduled for rebuilding, meaning that its rendering
   /// will not be updated.
   void setState(void fn()) {
-    assert(_debugLifecycleState == _StateLifecycle.ready);
+    assert(_debugLifecycleState != _StateLifecycle.defunct);
     fn();
-    _element.markNeedsBuild();
+    if (_element._builder != null) {
+      // _element._builder is set after initState(). We verify that we're past
+      // that before calling markNeedsBuild() so that setState()s triggered
+      // during initState() during lockState() don't cause any trouble.
+      _element.markNeedsBuild();
+    }
   }
 
   /// Called when this object is removed from the tree. Override this to clean
@@ -509,8 +514,10 @@ abstract class Element<T extends Widget> implements BuildContext {
     _parent = parent;
     _slot = newSlot;
     _depth = _parent != null ? _parent.depth + 1 : 1;
-    if (widget.key is GlobalKey)
-      widget.key._register(this);
+    if (widget.key is GlobalKey) {
+      final GlobalKey key = widget.key;
+      key._register(this);
+    }
     assert(() { _debugLifecycleState = _ElementLifecycle.mounted; return true; });
   }
 
@@ -576,8 +583,10 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(widget != null);
     assert(depth != null);
-    if (widget.key is GlobalKey)
-      widget.key._unregister(this);
+    if (widget.key is GlobalKey) {
+      final GlobalKey key = widget.key;
+      key._unregister(this);
+    }
     assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; });
   }
 
@@ -631,6 +640,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// binding when scheduleBuild() has been called to mark this element dirty,
   /// and by update() when the Widget has changed.
   void rebuild() {
+    assert(_debugLifecycleState != _ElementLifecycle.initial);
     if (!_dirty)
       return;
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
@@ -738,6 +748,9 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
       return false;
     });
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
+    assert(_builder == null);
+    // see State.setState() for why it's important that _builder be set after
+    // initState() is called.
     _builder = _state.build;
   }
 
@@ -1184,9 +1197,8 @@ typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTra
 /// the exception occurred, and may include additional details such as
 /// descriptions of the objects involved. The 'exception' argument contains the
 /// object that was thrown, and the 'stack' argument contains the stack trace.
-/// The callback is invoked after the information is printed to the console, and
-/// could be used to print additional information, such as from
-/// [debugDumpApp()].
+/// If no callback is set, then a default behaviour consisting of dumping the
+/// context, exception, and stack trace to the console is used instead.
 WidgetsExceptionHandler debugWidgetsExceptionHandler;
 void _debugReportException(String context, dynamic exception, StackTrace stack) {
   if (debugWidgetsExceptionHandler != null) {
