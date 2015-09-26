@@ -118,8 +118,7 @@ abstract class GlobalKey extends Key {
     assert(removed);
   }
 
-  // TODO(ianh): call this
-  static void _notifyListeners() {
+  static void checkForDuplicatesAndNotifyListeners() {
     assert(() {
       String message = '';
       for (GlobalKey key in _debugDuplicates.keys) {
@@ -326,12 +325,7 @@ abstract class State<T extends StatefulComponent> {
   void setState(void fn()) {
     assert(_debugLifecycleState != _StateLifecycle.defunct);
     fn();
-    if (_element._builder != null) {
-      // _element._builder is set after initState(). We verify that we're past
-      // that before calling markNeedsBuild() so that setState()s triggered
-      // during initState() during lockState() don't cause any trouble.
-      _element.markNeedsBuild();
-    }
+    _element.markNeedsBuild();
   }
 
   /// Called when this object is removed from the tree. Override this to clean
@@ -645,6 +639,17 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   bool get dirty => _dirty;
   bool _dirty = true;
 
+  // We to let component authors call setState from initState, didUpdateConfig,
+  // and build even when state is locked because its convenient and a no-op
+  // anyway. This flag ensures that this convenience is only allowed on the
+  // element currently undergoing initState, didUpdateConfig, or build.
+  bool _debugAllowIgnoredCallsToMarkNeedsBuild = false;
+  bool _debugSetAllowIgnoredCallsToMarkNeedsBuild(bool value) {
+    assert(_debugAllowIgnoredCallsToMarkNeedsBuild == !value);
+    _debugAllowIgnoredCallsToMarkNeedsBuild = value;
+    return true;
+  }
+
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     assert(_child == null);
@@ -664,21 +669,27 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     if (!_dirty)
       return;
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
-    _dirty = false;
+    assert(_debugStateLocked);
+    assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
     try {
       built = _builder(this);
       assert(built != null);
     } catch (e, stack) {
-      _debugReportException('building $this', e, stack);
+      _debugReportException('building ${_widget}', e, stack);
       built = new ErrorWidget();
+    } finally {
+      // We delay marking the element as clean until after calling _builder so
+      // that attempts to markNeedsBuild() during build() will be ignored.
+      _dirty = false;
+      assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(false));
     }
 
     try {
       _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
-      _debugReportException('building $this', e, stack);
+      _debugReportException('building ${_widget}', e, stack);
       built = new ErrorWidget();
       _child = updateChild(null, built, slot);
     }
@@ -689,12 +700,16 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   static int _debugStateLockLevel = 0;
   static bool get _debugStateLocked => _debugStateLockLevel > 0;
 
-  /// Calls the callback argument synchronously, but in a context where calls to
-  /// State.setState() will fail. Use this when it is possible that you will
-  /// trigger code in components but want to make sure that there is no
-  /// possibility that any components will be marked dirty, for example because
-  /// you are in the middle of layout and you are not going to be flushing the
-  /// build queue (since that could mutate the layout tree).
+  /// Establishes a scope in which component build functions can run.
+  ///
+  /// Inside a build scope, component build functions are allowed to run, but
+  /// State.setState() is forbidden. This mechanism prevents build functions
+  /// from transitively requiring other build functions to run, potentially
+  /// causing infinite loops.
+  ///
+  /// After unwinding the last build scope on the stack, the framework verifies
+  /// that each global key is used at most once and notifies listeners about
+  /// changes to global keys.
   static void lockState(void callback()) {
     _debugStateLockLevel += 1;
     try {
@@ -712,10 +727,12 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// components dirty during event handlers before the frame begins, not during
   /// the build itself.
   void markNeedsBuild() {
-    assert(!_debugStateLocked);
-    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_debugLifecycleState != _ElementLifecycle.defunct);
+    assert(!_debugStateLocked || (_debugAllowIgnoredCallsToMarkNeedsBuild && _dirty));
     if (_dirty)
       return;
+    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(!_debugStateLocked);
     _dirty = true;
     assert(scheduleBuildFor != null);
     scheduleBuildFor(this);
@@ -757,10 +774,17 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
     : _state = widget.createState(), super(widget) {
     assert(_state._element == null);
     _state._element = this;
+    assert(_builder == null);
+    _builder = _state.build;
     assert(_state._config == null);
     _state._config = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
-    _state.initState(this);
+    try {
+      _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
+      _state.initState(this);
+    } finally {
+      _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
+    }
     assert(() {
       if (_state._debugLifecycleState == _StateLifecycle.initialized)
         return true;
@@ -768,10 +792,6 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
       return false;
     });
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
-    assert(_builder == null);
-    // see State.setState() for why it's important that _builder be set after
-    // initState() is called.
-    _builder = _state.build;
   }
 
   State get state => _state;
@@ -781,16 +801,30 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
     super.update(newWidget);
     assert(widget == newWidget);
     StatefulComponent oldConfig = _state._config;
-    _state._config = widget;
-    _state.didUpdateConfig(oldConfig);
+    // Notice that we mark ourselves as dirty before calling didUpdateConfig to
+    // let authors call setState from within didUpdateConfig without triggering
+    // asserts.
     _dirty = true;
+    _state._config = widget;
+    try {
+      _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
+      _state.didUpdateConfig(oldConfig);
+    } finally {
+      _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
+    }
     rebuild();
   }
 
   void unmount() {
     super.unmount();
     _state.dispose();
-    assert(_state._debugLifecycleState == _StateLifecycle.defunct);
+    assert(() {
+      if (_state._debugLifecycleState == _StateLifecycle.defunct)
+        return true;
+      print('${_state.runtimeType}.dispose failed to call super.dispose');
+      return false;
+    });
+    assert(!_dirty); // See BuildableElement.unmount for why this is important.
     _state._element = null;
     _state = null;
   }
