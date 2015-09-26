@@ -1477,15 +1477,15 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
 }
 
-class WidgetSkyBinding extends SkyBinding {
+class WidgetFlutterBinding extends FlutterBinding {
 
-  WidgetSkyBinding({ RenderView renderViewOverride: null })
+  WidgetFlutterBinding({ RenderView renderViewOverride: null })
       : super(renderViewOverride: renderViewOverride);
 
-  static void initWidgetSkyBinding({ RenderView renderViewOverride: null }) {
-    if (SkyBinding.instance == null)
-      new WidgetSkyBinding(renderViewOverride: renderViewOverride);
-    assert(SkyBinding.instance is WidgetSkyBinding);
+  static void initWidgetFlutterBinding({ RenderView renderViewOverride: null }) {
+    if (FlutterBinding.instance == null)
+      new WidgetFlutterBinding(renderViewOverride: renderViewOverride);
+    assert(FlutterBinding.instance is WidgetFlutterBinding);
   }
 
   void handleEvent(sky.Event event, BindingHitTestEntry entry) {
@@ -1518,12 +1518,12 @@ abstract class App extends StatefulComponent {
 
   void didMount() {
     super.didMount();
-    SkyBinding.instance.addEventListener(_handleEvent);
+    FlutterBinding.instance.addEventListener(_handleEvent);
   }
 
   void didUnmount() {
     super.didUnmount();
-    SkyBinding.instance.removeEventListener(_handleEvent);
+    FlutterBinding.instance.removeEventListener(_handleEvent);
   }
 
   void syncConstructorArguments(Component source) { }
@@ -1559,12 +1559,12 @@ abstract class AbstractWidgetRoot extends StatefulComponent {
 class RenderViewWrapper extends OneChildRenderObjectWrapper {
   RenderViewWrapper({ Key key, Widget child }) : super(key: key, child: child);
   RenderView get renderObject => super.renderObject;
-  RenderView createNode() => SkyBinding.instance.renderView;
+  RenderView createNode() => FlutterBinding.instance.renderView;
 }
 
 class AppContainer extends AbstractWidgetRoot {
   AppContainer(this.app) {
-    assert(SkyBinding.instance is WidgetSkyBinding);
+    assert(FlutterBinding.instance is WidgetFlutterBinding);
   }
   final App app;
   Widget build() => new RenderViewWrapper(child: app);
@@ -1572,7 +1572,7 @@ class AppContainer extends AbstractWidgetRoot {
 
 AppContainer _container;
 void runApp(App app, { RenderView renderViewOverride, bool enableProfilingLoop: false }) {
-  WidgetSkyBinding.initWidgetSkyBinding(renderViewOverride: renderViewOverride);
+  WidgetFlutterBinding.initWidgetFlutterBinding(renderViewOverride: renderViewOverride);
   _container = new AppContainer(app);
   if (enableProfilingLoop) {
     new Timer.periodic(const Duration(milliseconds: 20), (_) {

@@ -70,12 +70,12 @@ void rotate(double timeStamp) {
 
 void main() {
   // Because we're going to use Widgets, we want to initialise its
-  // SkyBinding, not use the default one. We don't really need to do
+  // FlutterBinding, not use the default one. We don't really need to do
   // this, because RenderBoxToWidgetAdapter does it for us, but
   // it's good practice in case we happen to not have a
   // RenderBoxToWidgetAdapter in our tree at startup, or in case we
   // want a renderViewOverride.
-  WidgetSkyBinding.initWidgetSkyBinding();
+  WidgetFlutterBinding.initWidgetFlutterBinding();
 
   RenderProxyBox proxy = new RenderProxyBox();
   new RenderBoxToWidgetAdapter(proxy, builder); // adds itself to proxy
@@ -88,6 +88,6 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);
 
-  SkyBinding.instance.renderView.child = root;
+  FlutterBinding.instance.renderView.child = root;
   scheduler.addPersistentFrameCallback(rotate);
 }

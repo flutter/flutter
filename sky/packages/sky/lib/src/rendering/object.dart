@@ -585,7 +585,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// information is cleaned prior to painting so that render objects will
   /// appear on screen in their up-to-date locations.
   ///
-  /// See [SkyBinding] for an example of how this function is used.
+  /// See [FlutterBinding] for an example of how this function is used.
   static void flushLayout() {
     sky.tracing.begin('RenderObject.flushLayout');
     _debugDoingLayout = true;
@@ -906,7 +906,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Painting occurs after layout and before the scene is recomposited so that
   /// scene is composited with up-to-date display lists for every render object.
   ///
-  /// See [SkyBinding] for an example of how this function is used.
+  /// See [FlutterBinding] for an example of how this function is used.
   static void flushPaint() {
     sky.tracing.begin('RenderObject.flushPaint');
     _debugDoingPaint = true;

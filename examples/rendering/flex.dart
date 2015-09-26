@@ -51,5 +51,5 @@ RenderBox buildFlexExample() {
 }
 
 void main() {
-  new SkyBinding(root: buildFlexExample());
+  new FlutterBinding(root: buildFlexExample());
 }

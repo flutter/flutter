@@ -6,7 +6,7 @@ import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3/framework.dart';
 
-class WidgetFlutterBinding extends SkyBinding {
+class WidgetFlutterBinding extends FlutterBinding {
 
   WidgetFlutterBinding() {
     BuildableElement.scheduleBuildFor = scheduleBuildFor;
@@ -14,14 +14,14 @@ class WidgetFlutterBinding extends SkyBinding {
     _renderViewElement.mount(null, null);
   }
 
-  /// Ensures that there is a SkyBinding object instantiated.
+  /// Ensures that there is a FlutterBinding object instantiated.
   static void initBinding() {
-    if (SkyBinding.instance == null)
+    if (FlutterBinding.instance == null)
       new WidgetFlutterBinding();
-    assert(SkyBinding.instance is WidgetFlutterBinding);
+    assert(FlutterBinding.instance is WidgetFlutterBinding);
   }
 
-  static WidgetFlutterBinding get instance => SkyBinding.instance;
+  static WidgetFlutterBinding get instance => FlutterBinding.instance;
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
   /// [RenderView] object at the root of the rendering hierarchy).

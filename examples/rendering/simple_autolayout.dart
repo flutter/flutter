@@ -59,5 +59,5 @@ void main() {
     (p4.verticalCenter == p2.height / al.cm(2.0)) as al.Constraint,
   ]);
 
-  new SkyBinding(root: root);
+  new FlutterBinding(root: root);
 }
