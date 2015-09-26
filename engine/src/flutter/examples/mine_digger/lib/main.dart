@@ -8,7 +8,7 @@ import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
 // Classic minesweeper-inspired game. The mouse controls are standard
 // except for left + right combo which is not implemented. For touch,
@@ -33,7 +33,11 @@ const List<TextStyle> textStyles = const <TextStyle>[
 
 enum CellState { covered, exploded, cleared, flagged, shown }
 
-class MineDiggerApp extends App {
+class MineDigger extends StatefulComponent {
+  MineDiggerState createState() => new MineDiggerState();
+}
+
+class MineDiggerState extends State<MineDigger> {
   static const int rows = 9;
   static const int cols = 9;
   static const int totalMineCount = 11;
@@ -47,7 +51,8 @@ class MineDiggerApp extends App {
   // |uiState| keeps track of the visible player progess.
   List<List<CellState>> uiState;
 
-  void initState() {
+  void initState(BuildContext context) {
+    super.initState(context);
     resetGame();
   }
 
@@ -161,7 +166,7 @@ class MineDiggerApp extends App {
     );
   }
 
-  Widget buildToolBar() {
+  Widget buildToolBar(BuildContext context) {
     String toolbarCaption = hasWon ?
       'Awesome!!' : alive ?
         'Mine Digger [$detectedCount-$totalMineCount]': 'Kaboom! [press here]';
@@ -170,18 +175,18 @@ class MineDiggerApp extends App {
       // FIXME: Strange to have the toolbar be tapable.
       center: new Listener(
         onPointerDown: handleToolbarPointerDown,
-        child: new Text(toolbarCaption, style: Theme.of(this).text.title)
+        child: new Text(toolbarCaption, style: Theme.of(context).text.title)
       )
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     // We build the board before we build the toolbar because we compute the win state during build step.
     Widget board = buildBoard();
     return new Title(
       title: 'Mine Digger',
       child: new Scaffold(
-        toolbar: buildToolBar(),
+        toolbar: buildToolBar(context),
         body: new Container(
           child: new Center(child: board),
           decoration: new BoxDecoration(backgroundColor: Colors.grey[50])
@@ -294,7 +299,7 @@ Widget buildInnerCell(Widget child) {
   );
 }
 
-class CoveredMineNode extends Component {
+class CoveredMineNode extends StatelessComponent {
 
   CoveredMineNode({ this.flagged, this.posX, this.posY });
 
@@ -302,7 +307,7 @@ class CoveredMineNode extends Component {
   final int posX;
   final int posY;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Widget text;
     if (flagged)
       text = buildInnerCell(new StyledText(elements : [textStyles[5], '\u2691']));
@@ -318,14 +323,14 @@ class CoveredMineNode extends Component {
   }
 }
 
-class ExposedMineNode extends Component {
+class ExposedMineNode extends StatelessComponent {
 
   ExposedMineNode({ this.state, this.count });
 
   final CellState state;
   final int count;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     StyledText text;
     if (state == CellState.cleared) {
       // Uncovered cell with nearby mine count.
@@ -342,5 +347,5 @@ class ExposedMineNode extends Component {
 }
 
 void main() {
-  runApp(new MineDiggerApp());
+  runApp(new MineDigger());
 }
