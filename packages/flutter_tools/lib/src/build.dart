@@ -150,7 +150,7 @@ class BuildCommand extends Command {
     await _compileSnapshot(
       compilerPath: argResults['compiler'],
       mainPath: argResults['main'],
-      packageRoot: argResults['package-root'],
+      packageRoot: globalResults['package-root'],
       snapshotPath: snapshotPath);
     archive.addFile(await _createSnapshotFile(snapshotPath));
 

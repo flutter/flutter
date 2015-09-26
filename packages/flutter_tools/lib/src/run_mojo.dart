@@ -29,7 +29,6 @@ class RunMojoCommand extends Command {
 
     argParser.addOption('app', defaultsTo: 'app.flx');
     argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services');
-    argParser.addOption('package-root', defaultsTo: 'packages');
   }
 
   Future<String> _makePathAbsolute(String relativePath) async {
