@@ -32,6 +32,7 @@ export 'fn3/ink_well.dart';
 export 'fn3/input.dart';
 export 'fn3/material.dart';
 export 'fn3/material_button.dart';
+export 'fn3/mimic.dart';
 export 'fn3/mixed_viewport.dart';
 export 'fn3/navigator.dart';
 export 'fn3/popup_menu.dart';
