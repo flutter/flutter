@@ -90,12 +90,14 @@ class HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewport
   }
 
   void layout(BoxConstraints constraints) {
-    // we lock the framework state (meaning that no elements can call markNeedsBuild()) because we are
-    // in the middle of layout and if we allowed people to set state, they'd expect to have that state
-    // reflected immediately, which, if we were to try to honour it, would potentially result in
-    // assertions since you can't normally mutate the render object tree during layout. (If there was
-    // a way to limit this to only descendants of this, it'd be ok, since we are exempt from that
-    // assert since we are actively doing our own layout still.)
+    // We enter a build scope (meaning that markNeedsBuild() is forbidden)
+    // because we are in the middle of layout and if we allowed people to set
+    // state, they'd expect to have that state reflected immediately, which, if
+    // we were to try to honour it, would potentially result in assertions
+    // because you can't normally mutate the render object tree during layout.
+    // (If there were a way to limit these writes to descendants of this, it'd
+    // be ok because we are exempt from that assert since we are still actively
+    // doing our own layout.)
     BuildableElement.lockState(() {
       double mainAxisExtent = widget.direction == ScrollDirection.vertical ? constraints.maxHeight : constraints.maxWidth;
       double offset;
