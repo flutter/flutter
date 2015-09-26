@@ -29,7 +29,7 @@ void main() {
 
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(20.0), child: transformBox);
 
-  new SkyBinding(root: root);
+  new FlutterBinding(root: root);
 
   scheduler.addPersistentFrameCallback(rotate);
 }

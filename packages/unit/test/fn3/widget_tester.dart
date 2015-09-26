@@ -46,7 +46,7 @@ class WidgetTester {
     }
     return result;
   }
-  List<Layer> get layers => _layers(SkyBinding.instance.renderView.layer);
+  List<Layer> get layers => _layers(FlutterBinding.instance.renderView.layer);
 
 
   void walkElements(ElementVisitor visitor) {

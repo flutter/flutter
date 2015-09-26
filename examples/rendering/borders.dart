@@ -73,5 +73,5 @@ void main() {
     ],
     direction: FlexDirection.vertical
   );
-  new SkyBinding(root: root);
+  new FlutterBinding(root: root);
 }

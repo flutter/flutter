@@ -72,5 +72,5 @@ void main() {
     direction: FlexDirection.vertical,
     alignItems: FlexAlignItems.stretch
   );
-  new SkyBinding(root: root);
+  new FlutterBinding(root: root);
 }

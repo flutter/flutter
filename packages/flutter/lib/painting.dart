@@ -4,7 +4,7 @@
 
 /// The Flutter painting library
 ///
-/// This library includes a variety of classes that wrap the Sky
+/// This library includes a variety of classes that wrap the Flutter
 /// engine's painting API for more specialised purposes, such as painting scaled
 /// images, interpolating between shadows, painting borders around boxes, etc.
 ///

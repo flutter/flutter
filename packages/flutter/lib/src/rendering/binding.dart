@@ -32,7 +32,7 @@ class _PointerState {
 
 typedef void EventListener(sky.Event event);
 
-/// A hit test entry used by [SkyBinding]
+/// A hit test entry used by [FlutterBinding]
 class BindingHitTestEntry extends HitTestEntry {
   const BindingHitTestEntry(HitTestTarget target, this.result) : super(target);
 
@@ -42,9 +42,9 @@ class BindingHitTestEntry extends HitTestEntry {
 
 /// The glue between the render tree and the sky engine
 // TODO(ianh): rename this class FlutterBinding
-class SkyBinding extends HitTestTarget {
+class FlutterBinding extends HitTestTarget {
 
-  SkyBinding({ RenderBox root: null, RenderView renderViewOverride }) {
+  FlutterBinding({ RenderBox root: null, RenderView renderViewOverride }) {
     assert(_instance == null);
     _instance = this;
 
@@ -66,8 +66,8 @@ class SkyBinding extends HitTestTarget {
   }
 
   /// The singleton instance of the binding
-  static SkyBinding get instance => _instance;
-  static SkyBinding _instance;
+  static FlutterBinding get instance => _instance;
+  static FlutterBinding _instance;
 
   /// The render tree that's attached to the output surface
   RenderView get renderView => _renderView;
@@ -175,5 +175,5 @@ class SkyBinding extends HitTestTarget {
 
 /// Prints a textual representation of the entire render tree
 void debugDumpRenderTree() {
-  SkyBinding.instance.renderView.toStringDeep().split('\n').forEach(print);
+  FlutterBinding.instance.renderView.toStringDeep().split('\n').forEach(print);
 }
