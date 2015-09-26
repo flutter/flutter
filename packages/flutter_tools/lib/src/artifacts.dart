@@ -88,6 +88,8 @@ class ArtifactStore {
     File cachedFile = new File(path.join(cacheDir.path, name));
     if (!await cachedFile.exists()) {
       _logging.info('Downloading ${name} from the cloud, one moment please...');
+      if (!Platform.isLinux)
+        throw new Exception('Platform unsupported.');
       String url = googleStorageUrl(category, 'linux-x64') + name;
       await _downloadFile(url, cachedFile);
       if (_needsToBeExecutable(artifact)) {
