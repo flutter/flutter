@@ -45,7 +45,7 @@ class WidgetTester {
     }
     return result;
   }
-  List<Layer> get layers => _layers(SkyBinding.instance.renderView.layer);
+  List<Layer> get layers => _layers(FlutterBinding.instance.renderView.layer);
 
   void walkWidgets(WidgetTreeWalker walker) {
     void walk(Widget widget) {
@@ -103,10 +103,10 @@ class WidgetTester {
     return _getWidgetPoint(widget, (Size size) => size.bottomRight(Point.origin));
   }
 
-  HitTestResult _hitTest(Point location) => SkyBinding.instance.hitTest(location);
+  HitTestResult _hitTest(Point location) => FlutterBinding.instance.hitTest(location);
 
   void _dispatchEvent(sky.Event event, HitTestResult result) {
-    SkyBinding.instance.dispatchEvent(event, result);
+    FlutterBinding.instance.dispatchEvent(event, result);
   }
 
   void tap(Widget widget, { int pointer: 1 }) {

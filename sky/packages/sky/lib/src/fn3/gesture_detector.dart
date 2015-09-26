@@ -7,7 +7,7 @@ import 'dart:sky' as sky;
 import 'package:sky/gestures.dart';
 import 'package:sky/src/fn3/basic.dart';
 import 'package:sky/src/fn3/framework.dart';
-import 'package:sky/src/rendering/sky_binding.dart';
+import 'package:sky/src/rendering/binding.dart';
 
 class GestureDetector extends StatefulComponent {
   const GestureDetector({
@@ -60,7 +60,7 @@ class GestureDetectorState extends State<GestureDetector> {
     didUpdateConfig(null);
   }
 
-  final PointerRouter _router = SkyBinding.instance.pointerRouter;
+  final PointerRouter _router = FlutterBinding.instance.pointerRouter;
 
   TapGestureRecognizer _tap;
   TapGestureRecognizer _ensureTap() {

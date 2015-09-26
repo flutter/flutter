@@ -36,5 +36,5 @@ void main() {
     child: new RenderPadding(child: table, padding: new EdgeDims.symmetric(vertical: 50.0))
   );
 
-  new SkyBinding(root: root);
+  new FlutterBinding(root: root);
 }

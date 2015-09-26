@@ -6,7 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
-import 'package:sky/src/rendering/sky_binding.dart';
+import 'package:sky/src/rendering/binding.dart';
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/proxy_box.dart';
@@ -41,7 +41,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   void attach() {
     super.attach();
     _tap = new TapGestureRecognizer(
-      router: SkyBinding.instance.pointerRouter,
+      router: FlutterBinding.instance.pointerRouter,
       onTap: _handleTap
     );
   }

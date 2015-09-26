@@ -20,7 +20,7 @@ export 'package:sky/src/rendering/object.dart';
 export 'package:sky/src/rendering/paragraph.dart';
 export 'package:sky/src/rendering/proxy_box.dart';
 export 'package:sky/src/rendering/shifted_box.dart';
-export 'package:sky/src/rendering/sky_binding.dart';
+export 'package:sky/src/rendering/binding.dart';
 export 'package:sky/src/rendering/stack.dart';
 export 'package:sky/src/rendering/toggleable.dart';
 export 'package:sky/src/rendering/view.dart';

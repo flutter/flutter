@@ -90,7 +90,7 @@ class DragController {
   }
 
   void update(Point globalPosition) {
-    HitTestResult result = SkyBinding.instance.hitTest(globalPosition);
+    HitTestResult result = FlutterBinding.instance.hitTest(globalPosition);
     DragTarget target = _getDragTarget(result.path);
     if (target == _activeTarget)
       return;

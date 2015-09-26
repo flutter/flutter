@@ -549,5 +549,5 @@ RenderBox buildSectorExample() {
 }
 
 void main() {
-  new SkyBinding(root: buildSectorExample());
+  new FlutterBinding(root: buildSectorExample());
 }

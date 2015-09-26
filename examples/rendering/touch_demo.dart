@@ -84,5 +84,5 @@ void main() {
   // that it doesn't eat events.
   paragraph.parentData..top = 40.0
                       ..left = 20.0;
-  new SkyBinding(root: stack);
+  new FlutterBinding(root: stack);
 }
