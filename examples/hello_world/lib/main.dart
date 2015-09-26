@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
-class HelloWorldApp extends App {
-  Widget build() {
-    return new Center(child: new Text('Hello, world!'));
-  }
-}
-
-void main() {
-  runApp(new HelloWorldApp());
-}
+void main() => runApp(new Center(child: new Text('Hello, world!')));
