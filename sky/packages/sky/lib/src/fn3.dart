@@ -5,6 +5,7 @@
 library fn3;
 
 export 'fn3/animated_component.dart';
+export 'fn3/app.dart';
 export 'fn3/basic.dart';
 export 'fn3/binding.dart';
 export 'fn3/button_state.dart';

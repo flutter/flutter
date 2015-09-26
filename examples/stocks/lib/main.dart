@@ -10,7 +10,8 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/painting.dart';
+import 'package:sky/src/fn3.dart';
 
 import 'stock_data.dart';
 
@@ -22,53 +23,16 @@ part 'stock_row.dart';
 part 'stock_settings.dart';
 part 'stock_types.dart';
 
-class StocksApp extends App {
+class StocksApp extends StatefulComponent {
+  StocksAppState createState() => new StocksAppState();
+}
 
-  NavigationState _navigationState;
-
-  void initState() {
-    _navigationState = new NavigationState([
-      new Route(
-        name: '/',
-        builder: (navigator, route) => new StockHome(navigator, _stocks, optimismSetting, modeUpdater)
-      ),
-      new Route(
-        name: '/settings',
-        builder: (navigator, route) => new StockSettings(navigator, optimismSetting, backupSetting, settingsUpdater)
-      ),
-    ]);
-    super.initState();
-  }
-
-  void onBack() {
-    if (_navigationState.hasPrevious()) {
-      setState(() {
-        _navigationState.pop();
-      });
-    } else {
-      super.onBack();
-    }
-  }
-
-  StockMode optimismSetting = StockMode.optimistic;
-  BackupMode backupSetting = BackupMode.disabled;
-  void modeUpdater(StockMode optimism) {
-    setState(() {
-      optimismSetting = optimism;
-    });
-  }
-  void settingsUpdater({ StockMode optimism, BackupMode backup }) {
-    setState(() {
-      if (optimism != null)
-        optimismSetting = optimism;
-      if (backup != null)
-        backupSetting = backup;
-    });
-  }
+class StocksAppState extends State<StocksApp> {
 
   final List<Stock> _stocks = [];
-  void didMount() {
-    super.didMount();
+
+  void initState(BuildContext context) {
+    super.initState(context);
     new StockDataFetcher((StockData data) {
       setState(() {
         data.appendTo(_stocks);
@@ -76,32 +40,47 @@ class StocksApp extends App {
     });
   }
 
-  Widget build() {
+  StockMode _optimismSetting = StockMode.optimistic;
+  BackupMode _backupSetting = BackupMode.disabled;
+  void modeUpdater(StockMode optimism) {
+    setState(() {
+      _optimismSetting = optimism;
+    });
+  }
+  void settingsUpdater({ StockMode optimism, BackupMode backup }) {
+    setState(() {
+      if (optimism != null)
+        _optimismSetting = optimism;
+      if (backup != null)
+        _backupSetting = backup;
+    });
+  }
 
-    ThemeData theme;
-    if (optimismSetting == StockMode.optimistic) {
-      theme = new ThemeData(
-        brightness: ThemeBrightness.light,
-        primarySwatch: Colors.purple
-      );
-    } else {
-      theme = new ThemeData(
-        brightness: ThemeBrightness.dark,
-        accentColor: Colors.redAccent[200]
-      );
+  ThemeData get theme {
+    switch (_optimismSetting) {
+      case StockMode.optimistic:
+        return new ThemeData(
+          brightness: ThemeBrightness.light,
+          primarySwatch: Colors.purple
+        );
+      case StockMode.pessimistic:
+        return new ThemeData(
+          brightness: ThemeBrightness.dark,
+          accentColor: Colors.redAccent[200]
+        );
     }
+  }
 
-    return new Theme(
-      data: theme,
-        child: new DefaultTextStyle(
-          style: Typography.error, // if you see this, you've forgotten to correctly configure the text style!
-          child: new Title(
-            title: 'Stocks',
-            child: new Navigator(_navigationState)
-          )
-        )
-     );
-   }
+  Widget build(BuildContext context) {
+    return new App(
+      title: 'Stocks',
+      theme: theme,
+      routes: <String, RouteBuilder>{
+         '/':         (navigator, route) => new StockHome(navigator, _stocks, _optimismSetting, modeUpdater),
+         '/settings': (navigator, route) => new StockSettings(navigator, _optimismSetting, _backupSetting, settingsUpdater)
+      }
+    );
+  }
 }
 
 void main() {

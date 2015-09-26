@@ -4,15 +4,14 @@
 
 part of stocks;
 
-class StockRow extends Component {
-
+class StockRow extends StatelessComponent {
   StockRow({ Stock stock }) : this.stock = stock, super(key: new Key(stock.symbol));
 
   final Stock stock;
 
   static const double kHeight = 79.0;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
 
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
@@ -32,7 +31,7 @@ class StockRow extends Component {
       new Flexible(
         child: new Text(
           changeInPrice,
-          style: Theme.of(this).text.caption.copyWith(textAlign: TextAlign.right)
+          style: Theme.of(context).text.caption.copyWith(textAlign: TextAlign.right)
         )
       )
     ];
@@ -43,7 +42,7 @@ class StockRow extends Component {
       height: kHeight,
       decoration: new BoxDecoration(
         border: new Border(
-          bottom: new BorderSide(color: Theme.of(this).dividerColor)
+          bottom: new BorderSide(color: Theme.of(context).dividerColor)
         )
       ),
       child: new Row([
@@ -55,7 +54,7 @@ class StockRow extends Component {
           child: new Row(
             children,
             alignItems: FlexAlignItems.baseline,
-            textBaseline: DefaultTextStyle.of(this).textBaseline
+            textBaseline: DefaultTextStyle.of(context).textBaseline
           )
         )
       ])

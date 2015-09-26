@@ -44,10 +44,11 @@ class Checkbox extends StatelessComponent {
         ? _kLightUncheckedColor
         : _kDarkUncheckedColor;
     return new _CheckboxWrapper(
-        value: value,
-        onChanged: onChanged,
-        uncheckedColor: uncheckedColor,
-        accentColor: themeData.accentColor);
+      value: value,
+      onChanged: onChanged,
+      uncheckedColor: uncheckedColor,
+      accentColor: themeData.accentColor
+    );
   }
 }
 
@@ -55,9 +56,16 @@ class Checkbox extends StatelessComponent {
 // order to get an accent color from a Theme but Components do not know how to
 // host RenderObjects.
 class _CheckboxWrapper extends LeafRenderObjectWidget {
-  _CheckboxWrapper({Key key, this.value, this.onChanged, this.uncheckedColor,
-      this.accentColor})
-      : super(key: key);
+  _CheckboxWrapper({
+    Key key,
+    this.value,
+    this.onChanged,
+    this.uncheckedColor,
+    this.accentColor
+  }): super(key: key) {
+    assert(uncheckedColor != null);
+    assert(accentColor != null);
+  }
 
   final bool value;
   final ValueChanged onChanged;
@@ -65,7 +73,11 @@ class _CheckboxWrapper extends LeafRenderObjectWidget {
   final Color accentColor;
 
   _RenderCheckbox createRenderObject() => new _RenderCheckbox(
-      value: value, uncheckedColor: uncheckedColor, onChanged: onChanged);
+    value: value,
+    accentColor: accentColor,
+    uncheckedColor: uncheckedColor,
+    onChanged: onChanged
+  );
 
   void updateRenderObject(_RenderCheckbox renderObject, _CheckboxWrapper oldWidget) {
     renderObject.value = value;
@@ -76,25 +88,38 @@ class _CheckboxWrapper extends LeafRenderObjectWidget {
 }
 
 class _RenderCheckbox extends RenderToggleable {
-  _RenderCheckbox({bool value, Color uncheckedColor, ValueChanged onChanged})
-      : _uncheckedColor = uncheckedColor,
-        super(
-            value: value,
-            onChanged: onChanged,
-            size: new Size(_kEdgeSize, _kEdgeSize)) {}
+  _RenderCheckbox({
+    bool value,
+    Color uncheckedColor,
+    Color accentColor,
+    ValueChanged onChanged
+  }): _uncheckedColor = uncheckedColor,
+      _accentColor = accentColor,
+      super(
+        value: value,
+        onChanged: onChanged,
+        size: new Size(_kEdgeSize, _kEdgeSize)
+      ) {
+    assert(uncheckedColor != null);
+    assert(accentColor != null);
+  }
 
   Color _uncheckedColor;
   Color get uncheckedColor => _uncheckedColor;
 
   void set uncheckedColor(Color value) {
-    if (value == _uncheckedColor) return;
+    assert(value != null);
+    if (value == _uncheckedColor)
+      return;
     _uncheckedColor = value;
     markNeedsPaint();
   }
 
   Color _accentColor;
   void set accentColor(Color value) {
-    if (value == _accentColor) return;
+    assert(value != null);
+    if (value == _accentColor)
+      return;
     _accentColor = value;
     markNeedsPaint();
   }

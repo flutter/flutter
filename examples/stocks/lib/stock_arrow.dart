@@ -4,8 +4,7 @@
 
 part of stocks;
 
-class StockArrow extends Component {
-
+class StockArrow extends StatelessComponent {
   StockArrow({ Key key, this.percentChange }) : super(key: key);
 
   final double percentChange;
@@ -22,7 +21,7 @@ class StockArrow extends Component {
     return Colors.red[_colorIndexForPercentChange(percentChange)];
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     // TODO(jackson): This should change colors with the theme
     Color color = _colorForPercentChange(percentChange);
     const double kSize = 40.0;
@@ -65,5 +64,4 @@ class StockArrow extends Component {
       margin: const EdgeDims.symmetric(horizontal: 5.0)
     );
   }
-
 }

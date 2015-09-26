@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
-import 'package:sky/painting.dart';
 import 'package:sky/material.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/fn3/basic.dart';
 import 'package:sky/src/fn3/focus.dart';
 import 'package:sky/src/fn3/framework.dart';
@@ -15,6 +15,7 @@ import 'package:sky/src/fn3/gesture_detector.dart';
 import 'package:sky/src/fn3/navigator.dart';
 import 'package:sky/src/fn3/popup_menu_item.dart';
 import 'package:sky/src/fn3/scrollable.dart';
+import 'package:sky/src/fn3/theme.dart';
 import 'package:sky/src/fn3/transitions.dart';
 
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
@@ -25,6 +26,8 @@ const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
 const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
+
+typedef List<PopupMenuItem> PopupMenuItemsBuilder(NavigatorState navigator);
 
 class PopupMenu extends StatefulComponent {
   PopupMenu({
@@ -49,25 +52,10 @@ class PopupMenu extends StatefulComponent {
 class PopupMenuState extends State<PopupMenu> {
   void initState(BuildContext context) {
     super.initState(context);
-    _updateBoxPainter();
     config.performance.addListener(_performanceChanged);
   }
 
-  BoxPainter _painter;
-
-  void _updateBoxPainter() {
-    _painter = new BoxPainter(
-      new BoxDecoration(
-        backgroundColor: Colors.grey[50],
-        borderRadius: 2.0,
-        boxShadow: shadows[config.level]
-      )
-    );
-  }
-
   void didUpdateConfig(PopupMenu oldConfig) {
-    if (config.level != config.level)
-      _updateBoxPainter();
     if (config.performance != oldConfig.performance) {
       oldConfig.performance.removeListener(_performanceChanged);
       config.performance.addListener(_performanceChanged);
@@ -85,7 +73,19 @@ class PopupMenuState extends State<PopupMenu> {
     });
   }
 
+  BoxPainter _painter;
+
+  void _updateBoxPainter(BoxDecoration decoration) {
+    if (_painter == null || _painter.decoration != decoration)
+      _painter = new BoxPainter(decoration);
+  }
+
   Widget build(BuildContext context) {
+    _updateBoxPainter(new BoxDecoration(
+      backgroundColor: Theme.of(context).canvasColor,
+      borderRadius: 2.0,
+      boxShadow: shadows[config.level]
+    ));
     double unit = 1.0 / (config.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     List<Widget> children = [];
     for (int i = 0; i < config.items.length; ++i) {
@@ -151,7 +151,7 @@ class MenuPosition {
   final double left;
 }
 
-class MenuRoute extends RouteBase {
+class MenuRoute extends Route {
   MenuRoute({ this.completer, this.position, this.builder, this.level });
 
   final Completer completer;
@@ -193,8 +193,6 @@ class MenuRoute extends RouteBase {
     completer.complete(result);
   }
 }
-
-typedef List<PopupMenuItem> PopupMenuItemsBuilder(NavigatorState navigator);
 
 Future showMenu({ NavigatorState navigator, MenuPosition position, PopupMenuItemsBuilder builder, int level: 4 }) {
   Completer completer = new Completer();

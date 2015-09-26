@@ -4,18 +4,18 @@
 
 part of stocks;
 
-class Stocklist extends Component {
+class Stocklist extends StatelessComponent {
   Stocklist({ Key key, this.stocks }) : super(key: key);
 
   final List<Stock> stocks;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Material(
       type: MaterialType.canvas,
       child: new ScrollableList<Stock>(
         items: stocks,
         itemExtent: StockRow.kHeight,
-        itemBuilder: (Stock stock) => new StockRow(stock: stock)
+        itemBuilder: (BuildContext context, Stock stock) => new StockRow(stock: stock)
       )
     );
   }
