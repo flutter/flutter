@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
-class Field extends Component {
+class Field extends StatelessComponent {
   Field({
     Key key,
     this.inputKey,
@@ -17,7 +17,7 @@ class Field extends Component {
   final String icon;
   final String placeholder;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Row([
         new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
@@ -34,19 +34,22 @@ class Field extends Component {
   }
 }
 
-class AddressBookApp extends App {
+class AddressBookHome extends StatelessComponent {
+  AddressBookHome({ this.navigator });
 
-  Widget buildToolBar(Navigator navigator) {
+  final NavigatorState navigator;
+
+  Widget buildToolBar(BuildContext context) {
     return new ToolBar(
         left: new IconButton(icon: "navigation/arrow_back"),
         right: [new IconButton(icon: "navigation/check")]
       );
   }
 
-  Widget buildFloatingActionButton(Navigator navigator) {
+  Widget buildFloatingActionButton(BuildContext context) {
     return new FloatingActionButton(
       child: new Icon(type: 'image/photo_camera', size: 24),
-      backgroundColor: Theme.of(this).accentColor
+      backgroundColor: Theme.of(context).accentColor
     );
   }
 
@@ -59,7 +62,7 @@ class AddressBookApp extends App {
   static final GlobalKey fillKey = new GlobalKey();
   static final GlobalKey emoticonKey = new GlobalKey();
 
-  Widget buildBody(Navigator navigator) {
+  Widget buildBody(BuildContext context) {
     return new Material(
       child: new Block([
         new AspectRatio(
@@ -78,45 +81,27 @@ class AddressBookApp extends App {
     );
   }
 
-  Widget buildMain(Navigator navigator) {
+  Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(navigator),
-      body: buildBody(navigator),
-      floatingActionButton: buildFloatingActionButton(navigator)
-    );
-  }
-
-  NavigationState _navigationState;
-
-  void initState() {
-    _navigationState = new NavigationState([
-      new Route(
-        name: '/',
-        builder: (navigator, route) => buildMain(navigator)
-      ),
-    ]);
-    super.initState();
-  }
-
-  Widget build() {
-    ThemeData theme = new ThemeData(
-      brightness: ThemeBrightness.light,
-      primarySwatch: Colors.teal,
-      accentColor: Colors.pinkAccent[100]
-    );
-    return new Theme(
-      data: theme,
-      child: new DefaultTextStyle(
-        style: Typography.error, // if you see this, you've forgotten to correctly configure the text style!
-        child: new Title(
-          title: 'Address Book',
-          child: new Navigator(_navigationState)
-        )
-      )
+      toolbar: buildToolBar(context),
+      body: buildBody(context),
+      floatingActionButton: buildFloatingActionButton(context)
     );
   }
 }
 
+final ThemeData theme = new ThemeData(
+  brightness: ThemeBrightness.light,
+  primarySwatch: Colors.teal,
+  accentColor: Colors.pinkAccent[100]
+);
+
 void main() {
-  runApp(new AddressBookApp());
+  runApp(new App(
+    title: 'Address Book',
+    theme: theme,
+    routes: <String, RouteBuilder>{
+      '/': (NavigatorState navigator, Route route) => new AddressBookHome(navigator: navigator)
+    }
+  ));
 }
