@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(ianh): rename this file 'binding.dart'
-
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
@@ -40,8 +38,7 @@ class BindingHitTestEntry extends HitTestEntry {
   final HitTestResult result;
 }
 
-/// The glue between the render tree and the sky engine
-// TODO(ianh): rename this class FlutterBinding
+/// The glue between the render tree and the Flutter engine
 class FlutterBinding extends HitTestTarget {
 
   FlutterBinding({ RenderBox root: null, RenderView renderViewOverride }) {
