@@ -244,13 +244,11 @@ class FeedFragment extends StatefulComponent {
     });
   }
 
-  Anchor _snackBarAnchor = new Anchor();
   Widget buildSnackBar() {
     if (_snackBarStatus == AnimationStatus.dismissed)
       return null;
     return new SnackBar(
       showing: _isShowingSnackBar,
-      anchor: _snackBarAnchor,
       content: new Text("Item deleted."),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
       onDismissed: () { setState(() { _snackBarStatus = AnimationStatus.dismissed; }); }
@@ -267,11 +265,10 @@ class FeedFragment extends StatefulComponent {
   Widget buildFloatingActionButton() {
     switch (_fitnessMode) {
       case FitnessMode.feed:
-        return _snackBarAnchor.build(
-          new FloatingActionButton(
-            child: new Icon(type: 'content/add', size: 24),
-            onPressed: _handleActionButtonPressed
-          ));
+        return new FloatingActionButton(
+          child: new Icon(type: 'content/add', size: 24),
+          onPressed: _handleActionButtonPressed
+        );
       case FitnessMode.chart:
         return null;
     }
