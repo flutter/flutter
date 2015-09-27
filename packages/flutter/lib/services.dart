@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// System services exposed to Flutter apps
+/// System services exposed to Flutter apps.
 ///
 /// For example, this library includes [fetch], which fetches data from the
 /// network.
