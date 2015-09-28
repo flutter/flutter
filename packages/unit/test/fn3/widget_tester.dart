@@ -1,5 +1,6 @@
 import 'dart:sky' as sky;
 
+import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3.dart';
 
@@ -26,11 +27,11 @@ class WidgetTester {
 
   void pumpFrame(Widget widget, [ double frameTimeMs = 0.0 ]) {
     runApp(widget);
-    WidgetFlutterBinding.instance.beginFrame(frameTimeMs); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+    scheduler.beginFrame(frameTimeMs); // TODO(ianh): https://github.com/flutter/engine/issues/1084
   }
 
   void pumpFrameWithoutChange([ double frameTimeMs = 0.0 ]) {
-    WidgetFlutterBinding.instance.beginFrame(frameTimeMs); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+    scheduler.beginFrame(frameTimeMs); // TODO(ianh): https://github.com/flutter/engine/issues/1084
   }
 
 
