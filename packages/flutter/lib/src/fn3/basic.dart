@@ -211,7 +211,9 @@ class SizedBox extends OneChildRenderObjectWidget {
   final double width;
   final double height;
 
-  RenderConstrainedBox createRenderObject() => new RenderConstrainedBox(additionalConstraints: _additionalConstraints);
+  RenderConstrainedBox createRenderObject() => new RenderConstrainedBox(
+    additionalConstraints: _additionalConstraints
+  );
 
   BoxConstraints get _additionalConstraints {
     BoxConstraints result = const BoxConstraints();
@@ -224,6 +226,24 @@ class SizedBox extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderConstrainedBox renderObject, SizedBox oldWidget) {
     renderObject.additionalConstraints = _additionalConstraints;
+  }
+}
+
+class OverflowBox extends OneChildRenderObjectWidget {
+  OverflowBox({ Key key, this.width, this.height, Widget child })
+    : super(key: key, child: child);
+
+  final double width;
+  final double height;
+
+  RenderOverflowBox createRenderObject() => new RenderOverflowBox(
+    innerWidth: width,
+    innerHeight: height
+  );
+
+  void updateRenderObject(RenderOverflowBox renderObject, OverflowBox oldWidget) {
+    renderObject.innerWidth = width;
+    renderObject.innerHeight = height;
   }
 }
 

@@ -17,7 +17,10 @@ import 'package:sky/src/fn3/transitions.dart';
 typedef void SnackBarDismissedCallback();
 
 const Duration _kSlideInDuration = const Duration(milliseconds: 200);
-// TODO(ianh): factor out some of the constants below
+const double kSnackHeight = 52.0;
+const double kSideMargins = 24.0;
+const double kVerticalPadding = 14.0;
+const Color kSnackBackground = const Color(0xFF323232);
 
 class SnackBarAction extends StatelessComponent {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
@@ -31,8 +34,8 @@ class SnackBarAction extends StatelessComponent {
     return new GestureDetector(
       onTap: onPressed,
       child: new Container(
-        margin: const EdgeDims.only(left: 24.0),
-        padding: const EdgeDims.only(top: 14.0, bottom: 14.0),
+        margin: const EdgeDims.only(left: kSideMargins),
+        padding: const EdgeDims.symmetric(vertical: kVerticalPadding),
         child: new Text(label)
       )
     );
@@ -42,7 +45,6 @@ class SnackBarAction extends StatelessComponent {
 class SnackBar extends AnimatedComponent {
   SnackBar({
     Key key,
-    this.transitionKey,
     this.content,
     this.actions,
     bool showing,
@@ -51,7 +53,6 @@ class SnackBar extends AnimatedComponent {
     assert(content != null);
   }
 
-  final Key transitionKey;
   final Widget content;
   final List<SnackBarAction> actions;
   final SnackBarDismissedCallback onDismissed;
@@ -69,7 +70,7 @@ class SnackBarState extends AnimatedState<SnackBar> {
     List<Widget> children = [
       new Flexible(
         child: new Container(
-          margin: const EdgeDims.symmetric(vertical: 14.0),
+          margin: const EdgeDims.symmetric(vertical: kVerticalPadding),
           child: new DefaultTextStyle(
             style: Typography.white.subhead,
             child: config.content
@@ -79,24 +80,28 @@ class SnackBarState extends AnimatedState<SnackBar> {
     ];
     if (config.actions != null)
       children.addAll(config.actions);
-    return new SlideTransition(
-      key: config.transitionKey,
+    return new SquashTransition(
       performance: performance.view,
-      position: new AnimatedValue<Point>(
-        Point.origin,
-        end: const Point(0.0, -52.0),
+      height: new AnimatedValue<double>(
+        0.0,
+        end: kSnackHeight,
         curve: easeIn,
         reverseCurve: easeOut
       ),
-      child: new Material(
-        level: 2,
-        color: const Color(0xFF323232),
-        type: MaterialType.canvas,
-        child: new Container(
-          margin: const EdgeDims.symmetric(horizontal: 24.0),
-          child: new DefaultTextStyle(
-            style: new TextStyle(color: Theme.of(context).accentColor),
-            child: new Row(children)
+      child: new ClipRect(
+        child: new OverflowBox(
+          height: kSnackHeight,
+          child: new Material(
+            level: 2,
+            color: kSnackBackground,
+            type: MaterialType.canvas,
+            child: new Container(
+              margin: const EdgeDims.symmetric(horizontal: kSideMargins),
+              child: new DefaultTextStyle(
+                style: new TextStyle(color: Theme.of(context).accentColor),
+                child: new Row(children)
+              )
+            )
           )
         )
       )
