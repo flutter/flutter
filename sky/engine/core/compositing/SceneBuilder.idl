@@ -14,6 +14,7 @@
   void pop();
 
   void addPicture(Offset offset, Picture picture, Rect bounds);
+  void addStatistics(unsigned long enabledOptions, Rect bounds);
 
   Scene build();
 };

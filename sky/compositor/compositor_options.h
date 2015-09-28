@@ -21,6 +21,8 @@ class CompositorOptions {
   };
 
   CompositorOptions();
+  explicit CompositorOptions(uint64_t mask);
+
   ~CompositorOptions();
 
   bool isEnabled(Option option) const;
