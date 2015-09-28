@@ -23,7 +23,6 @@ const double _kTrackHeight = 14.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
 const double _kTrackWidth =
     _kSwitchWidth - (_kThumbRadius - _kTrackRadius) * 2.0;
-const Duration _kCheckDuration = const Duration(milliseconds: 200);
 const Size _kSwitchSize = const Size(_kSwitchWidth + 2.0, _kSwitchHeight + 2.0);
 const double _kReactionRadius = _kSwitchWidth / 2.0;
 
