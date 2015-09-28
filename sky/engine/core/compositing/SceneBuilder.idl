@@ -11,6 +11,7 @@
   void pushClipPath(Path path, Rect bounds);
   void pushOpacity(long alpha, Rect bounds);
   void pushColorFilter(Color color, TransferMode transferMode, Rect bounds);
+  void pushStatistics(unsigned long enabledOptions, Rect bounds);
   void pop();
 
   void addPicture(Offset offset, Picture picture, Rect bounds);

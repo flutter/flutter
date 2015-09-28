@@ -40,6 +40,8 @@ public:
     void pushClipPath(const CanvasPath* path, const Rect& bounds);
     void pushOpacity(int alpha, const Rect& bounds);
     void pushColorFilter(SkColor color, SkXfermode::Mode transferMode, const Rect& bounds);
+    void pushStatistics(uint64_t enabledOptions, const Rect& bounds);
+
     void pop();
     void addPicture(const Offset& offset, Picture* picture, const Rect& bounds);
 

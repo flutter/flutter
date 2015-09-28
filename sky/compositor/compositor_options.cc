@@ -13,6 +13,15 @@ CompositorOptions::CompositorOptions() {
   options_.resize(static_cast<OptionType>(Option::TerminationSentinel), false);
 }
 
+CompositorOptions::CompositorOptions(uint64_t mask) : CompositorOptions() {
+  OptionType sentinel = static_cast<OptionType>(Option::TerminationSentinel);
+  for (OptionType i = 0; i < sentinel; i++) {
+    if ((1 << i) & mask) {
+      setEnabled(static_cast<Option>(i), true);
+    }
+  }
+}
+
 bool CompositorOptions::isEnabled(Option option) const {
   if (option >= Option::TerminationSentinel) {
     return false;

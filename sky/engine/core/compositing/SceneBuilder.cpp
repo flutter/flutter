@@ -4,9 +4,8 @@
 
 #include "sky/engine/core/compositing/SceneBuilder.h"
 
-#include "sky/engine/core/painting/Matrix.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
-#include "sky/compositor/transform_layer.h"
+#include "sky/engine/core/painting/Matrix.h"
 #include "sky/compositor/clip_path_layer.h"
 #include "sky/compositor/clip_rect_layer.h"
 #include "sky/compositor/clip_rrect_layer.h"
@@ -14,6 +13,8 @@
 #include "sky/compositor/container_layer.h"
 #include "sky/compositor/opacity_layer.h"
 #include "sky/compositor/picture_layer.h"
+#include "sky/compositor/statistics_layer.h"
+#include "sky/compositor/transform_layer.h"
 
 namespace blink {
 
@@ -107,6 +108,15 @@ void SceneBuilder::addPicture(const Offset& offset, Picture* picture, const Rect
     layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
     layer->set_picture(picture->toSkia());
     layer->set_paint_bounds(paintBounds.sk_rect);
+    m_currentLayer->Add(std::move(layer));
+}
+
+void SceneBuilder::pushStatistics(uint64_t enabledOptions, const Rect& bounds)
+{
+    if (!m_currentLayer)
+        return;
+    std::unique_ptr<sky::compositor::StatisticsLayer> layer(new sky::compositor::StatisticsLayer(enabledOptions));
+    layer->set_paint_bounds(bounds.sk_rect);
     m_currentLayer->Add(std::move(layer));
 }
 

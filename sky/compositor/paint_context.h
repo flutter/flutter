@@ -9,7 +9,6 @@
 
 #include "base/macros.h"
 #include "base/logging.h"
-#include "sky/compositor/compositor_options.h"
 #include "sky/compositor/instrumentation.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -23,6 +22,8 @@ class PaintContext {
   class ScopedFrame {
    public:
     SkCanvas& canvas() { return *canvas_; }
+
+    const PaintContext& context() const { return context_; };
 
     ScopedFrame(ScopedFrame&& frame);
 
@@ -48,22 +49,21 @@ class PaintContext {
   PaintContext();
   ~PaintContext();
 
-  CompositorOptions& options() { return options_; };
-
   ScopedFrame AcquireFrame(SkCanvas& canvas);
 
   ScopedFrame AcquireFrame(const std::string& trace_file_name,
                            gfx::Size frame_size);
 
- private:
-  CompositorOptions options_;
+  const instrumentation::Counter& frame_count() const { return frame_count_; }
 
+  const instrumentation::Stopwatch& frame_time() const { return frame_time_; }
+
+ private:
   instrumentation::Counter frame_count_;
   instrumentation::Stopwatch frame_time_;
 
   void beginFrame(ScopedFrame& frame);
   void endFrame(ScopedFrame& frame);
-  void DisplayStatistics(ScopedFrame& frame);
 
   DISALLOW_COPY_AND_ASSIGN(PaintContext);
 };
