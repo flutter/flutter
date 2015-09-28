@@ -377,11 +377,17 @@ class RenderBlockViewport extends RenderBlockBase {
 
   void applyPaintTransform(Matrix4 transform) {
     super.applyPaintTransform(transform);
-    transform.translate(0.0, startOffset);
+    if (isVertical)
+      transform.translate(0.0, startOffset);
+    else
+      transform.translate(startOffset, 0.0);
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
-    defaultHitTestChildren(result, position: position + new Offset(0.0, -startOffset));
+    if (isVertical)
+      defaultHitTestChildren(result, position: position + new Offset(0.0, -startOffset));
+    else
+      defaultHitTestChildren(result, position: position + new Offset(-startOffset, 0.0));
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}startOffset: ${startOffset}\n';
