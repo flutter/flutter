@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Flutter painting library
+/// The Flutter painting library.
 ///
 /// This library includes a variety of classes that wrap the Flutter
 /// engine's painting API for more specialised purposes, such as painting scaled
