@@ -6,6 +6,9 @@ homepage: http://flutter.io
 dependencies:
   sky: ">=0.0.36 < 0.1.0"
   sky_tools: ">=0.0.10 < 0.1.0"
+  box2d: any
 dependency_overrides:
   sky:
     path: ../sky/packages/sky
+  box2d:
+    path: ../../../box2d.dart

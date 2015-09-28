@@ -131,6 +131,19 @@ class Node {
 
   void set rotation(double rotation) {
     assert(rotation != null);
+
+    if (_physicsBody != null && parent is PhysicsNode) {
+      PhysicsNode physicsNode = parent;
+      physicsNode._updateRotation(this.physicsBody, rotation);
+      return;
+    }
+
+    _rotation = rotation;
+    invalidateTransformMatrix();
+  }
+
+  void _setRotationFromPhysics(double rotation) {
+    assert(rotation != null);
     _rotation = rotation;
     invalidateTransformMatrix();
   }
@@ -141,6 +154,19 @@ class Node {
   Point get position => _position;
 
   void set position(Point position) {
+    assert(position != null);
+
+    if (_physicsBody != null && parent is PhysicsNode) {
+      PhysicsNode physicsNode = parent;
+      physicsNode._updatePosition(this.physicsBody, position);
+      return;
+    }
+
+    _position = position;
+    invalidateTransformMatrix();
+  }
+
+  void _setPositionFromPhysics(Point position) {
     assert(position != null);
     _position = position;
     invalidateTransformMatrix();
@@ -608,5 +634,25 @@ class Node {
   ///     }
   bool handleEvent(SpriteBoxEvent event) {
     return false;
+  }
+
+  // Physics
+
+  PhysicsBody _physicsBody;
+
+  PhysicsBody get physicsBody => _physicsBody;
+
+  set physicsBody(PhysicsBody physicsBody) {
+    if (parent != null) {
+      assert(parent is PhysicsNode);
+
+      if (physicsBody == null) {
+        physicsBody._detach();
+      } else {
+        physicsBody._attach(parent, this);
+      }
+    }
+
+    _physicsBody = physicsBody;
   }
 }
