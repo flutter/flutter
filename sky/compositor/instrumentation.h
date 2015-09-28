@@ -7,6 +7,9 @@
 
 #include "base/macros.h"
 #include "base/time/time.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+
+#include <vector>
 
 namespace sky {
 namespace compositor {
@@ -28,19 +31,24 @@ class Stopwatch {
     DISALLOW_COPY_AND_ASSIGN(ScopedLap);
   };
 
-  explicit Stopwatch() : _start(base::TimeTicks::Now()), _lastLap() {}
+  explicit Stopwatch();
+  ~Stopwatch();
 
   const base::TimeDelta& lastLap() const { return _lastLap; }
 
   base::TimeDelta currentLap() const { return base::TimeTicks::Now() - _start; }
 
-  void start() { _start = base::TimeTicks::Now(); }
+  void visualize(SkCanvas& canvas, const SkRect& rect) const;
 
-  void stop() { _lastLap = base::TimeTicks::Now() - _start; }
+  void start();
+
+  void stop();
 
  private:
   base::TimeTicks _start;
+  std::vector<base::TimeDelta> _laps;
   base::TimeDelta _lastLap;
+  size_t _current_sample;
 
   DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };
