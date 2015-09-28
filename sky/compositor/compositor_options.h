@@ -21,7 +21,7 @@ class CompositorOptions {
   };
 
   CompositorOptions();
-  CompositorOptions(uint64_t mask);
+  explicit CompositorOptions(uint64_t mask);
 
   ~CompositorOptions();
 
