@@ -83,6 +83,18 @@ void LayerHost::BeginFrame() {
     root_layer_->Display();
   }
 
+  // We may have culled the root layer down to nothing which is equivalent to
+  // the empty size case above.
+  //
+  // TODO(jamesr): This needs to have proper flow control as well to avoid
+  // spinning when we have nothing to draw.
+  if (!root_layer_->HaveTexture()) {
+    base::MessageLoop::current()->PostTask(
+        FROM_HERE,
+        base::Bind(&LayerHost::DidCompleteFrame, weak_factory_.GetWeakPtr()));
+    return;
+  }
+
   Upload(root_layer_.get());
 }
 

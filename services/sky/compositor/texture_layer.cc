@@ -45,6 +45,10 @@ PassRefPtr<SkPicture> TextureLayer::RecordPicture() {
   return adoptRef(recorder.endRecordingAsPicture());
 }
 
+bool TextureLayer::HaveTexture() const {
+  return texture_;
+}
+
 scoped_ptr<mojo::GLTexture> TextureLayer::GetTexture() {
   return texture_.Pass();
 }

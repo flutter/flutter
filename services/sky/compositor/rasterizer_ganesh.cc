@@ -24,6 +24,8 @@ scoped_ptr<mojo::GLTexture> RasterizerGanesh::Rasterize(SkPicture* picture) {
 
   SkRect cull_rect = picture->cullRect();
   gfx::Size size(cull_rect.width(), cull_rect.height());
+  if (size.IsEmpty())
+    return nullptr;
 
   mojo::GaneshSurface surface(host_->ganesh_context(),
                               host_->resource_manager()->CreateTexture(size));
