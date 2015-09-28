@@ -28,6 +28,7 @@ def main():
 
     cmd = [
         DARTDOC,
+        '--header', os.path.join(SKY_PACKAGE, 'doc', 'styles.html'),
         '--input', SKY_PACKAGE,
         '--output', doc_dir
     ]
