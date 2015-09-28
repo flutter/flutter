@@ -22,6 +22,7 @@ const double _kMinFlingVelocity = -kMaxFlingVelocity * _kMillisecondsPerSecond;
 const double _kMaxFlingVelocity = kMaxFlingVelocity * _kMillisecondsPerSecond;
 
 typedef void ScrollListener(double scrollOffset);
+typedef double SnapOffsetCallback(double scrollOffset);
 
 /// A base class for scrollable widgets that reacts to user input and generates
 /// a scrollOffset.
@@ -30,7 +31,9 @@ abstract class Scrollable extends StatefulComponent {
     Key key,
     this.initialScrollOffset,
     this.scrollDirection: ScrollDirection.vertical,
-    this.onScroll
+    this.onScroll,
+    this.snapOffsetCallback,
+    this.snapAlignmentOffset: 0.0
   }) : super(key: key) {
     assert(scrollDirection == ScrollDirection.vertical ||
            scrollDirection == ScrollDirection.horizontal);
@@ -39,6 +42,8 @@ abstract class Scrollable extends StatefulComponent {
   final double initialScrollOffset;
   final ScrollDirection scrollDirection;
   final ScrollListener onScroll;
+  final SnapOffsetCallback snapOffsetCallback;
+  final double snapAlignmentOffset;
 }
 
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
@@ -120,11 +125,37 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       _toEndAnimation.stop();
   }
 
-  void _startToEndAnimation({ double velocity: 0.0 }) {
+  bool _scrollOffsetIsInBounds(double offset) {
+    return offset >= scrollBehavior.minScrollOffset && offset < scrollBehavior.maxScrollOffset;
+  }
+
+  double _alignedScrollSnapOffset(double offset) {
+    return config.snapOffsetCallback(offset + config.snapAlignmentOffset) - config.snapAlignmentOffset;
+  }
+
+  void _startToEndAnimation({ double velocity }) {
     _stopAnimations();
-    Simulation simulation = scrollBehavior.release(scrollOffset, velocity);
-    if (simulation != null)
-      _toEndAnimation.start(simulation);
+
+    if (velocity != null && config.snapOffsetCallback != null && _scrollOffsetIsInBounds(scrollOffset)) {
+      Simulation simulation = scrollBehavior.release(scrollOffset, velocity);
+      if (simulation == null)
+        return;
+      double endScrollOffset = simulation.x(double.INFINITY);
+      if (!endScrollOffset.isNaN) {
+        double alignedScrollOffset = _alignedScrollSnapOffset(endScrollOffset);
+        if (_scrollOffsetIsInBounds(alignedScrollOffset)) {
+          Simulation toSnapSimulation = scrollBehavior.createSnapScrollSimulation(
+              scrollOffset, alignedScrollOffset, velocity);
+          _toEndAnimation.start(toSnapSimulation);
+          return;
+        }
+      }
+    }
+
+    Simulation simulation = scrollBehavior.release(scrollOffset, velocity ?? 0.0);
+    if (simulation == null)
+      return;
+    _toEndAnimation.start(simulation);
   }
 
   void dispose() {
@@ -357,6 +388,8 @@ abstract class ScrollableWidgetList extends Scrollable {
     double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
     ScrollListener onScroll,
+    SnapOffsetCallback snapOffsetCallback,
+    double snapAlignmentOffset: 0.0,
     this.itemsWrap: false,
     this.itemExtent,
     this.padding
@@ -364,7 +397,9 @@ abstract class ScrollableWidgetList extends Scrollable {
     key: key,
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
-    onScroll: onScroll
+    onScroll: onScroll,
+    snapOffsetCallback: snapOffsetCallback,
+    snapAlignmentOffset: snapAlignmentOffset
   ) {
     assert(itemExtent != null);
   }
@@ -498,6 +533,8 @@ class ScrollableList<T> extends ScrollableWidgetList {
     double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
     ScrollListener onScroll,
+    SnapOffsetCallback snapOffsetCallback,
+    double snapAlignmentOffset: 0.0,
     this.items,
     this.itemBuilder,
     itemsWrap: false,
@@ -508,6 +545,8 @@ class ScrollableList<T> extends ScrollableWidgetList {
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
     onScroll: onScroll,
+    snapOffsetCallback: snapOffsetCallback,
+    snapAlignmentOffset: snapAlignmentOffset,
     itemsWrap: itemsWrap,
     itemExtent: itemExtent,
     padding: padding);
@@ -609,13 +648,17 @@ class ScrollableMixedWidgetList extends Scrollable {
     Key key,
     double initialScrollOffset,
     ScrollListener onScroll,
+    SnapOffsetCallback snapOffsetCallback,
+    double snapAlignmentOffset: 0.0,
     this.builder,
     this.token,
     this.onInvalidatorAvailable
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
-    onScroll: onScroll
+    onScroll: onScroll,
+    snapOffsetCallback: snapOffsetCallback,
+    snapAlignmentOffset: snapAlignmentOffset
   );
 
   final IndexedBuilder builder;
