@@ -5,7 +5,9 @@
 import 'package:sky/src/fn3.dart';
 
 abstract class UniqueComponent<T extends State> extends StatefulComponent {
-  UniqueComponent({ GlobalKey key }) : super(key: key ?? new GlobalKey());
+  UniqueComponent({ GlobalKey key }) : super(key: key) {
+    assert(key != null);
+  }
 
   T createState();
 
