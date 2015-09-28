@@ -111,7 +111,7 @@ void SceneBuilder::addPicture(const Offset& offset, Picture* picture, const Rect
     m_currentLayer->Add(std::move(layer));
 }
 
-void SceneBuilder::pushStatistics(uint64_t enabledOptions, const Rect& bounds)
+void SceneBuilder::addStatistics(uint64_t enabledOptions, const Rect& bounds)
 {
     if (!m_currentLayer)
         return;
