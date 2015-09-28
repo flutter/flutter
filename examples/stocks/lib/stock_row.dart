@@ -5,9 +5,10 @@
 part of stocks;
 
 class StockRow extends StatelessComponent {
-  StockRow({ Stock stock }) : this.stock = stock, super(key: new Key(stock.symbol));
+  StockRow({ Stock stock, this.onPressed }) : this.stock = stock, super(key: new Key(stock.symbol));
 
   final Stock stock;
+  final GestureTapListener onPressed;
 
   static const double kHeight = 79.0;
 
@@ -36,28 +37,31 @@ class StockRow extends StatelessComponent {
       )
     ];
 
-    // TODO(hansmuller): An explicit |height| shouldn't be needed
-    return new Container(
-      padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
-      height: kHeight,
-      decoration: new BoxDecoration(
-        border: new Border(
-          bottom: new BorderSide(color: Theme.of(context).dividerColor)
+    return new GestureDetector(
+      onTap: onPressed,
+      child: new InkWell(
+        child: new Container(
+          padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
+          decoration: new BoxDecoration(
+            border: new Border(
+              bottom: new BorderSide(color: Theme.of(context).dividerColor)
+            )
+          ),
+          child: new Row([
+            new Container(
+              child: new StockArrow(percentChange: stock.percentChange),
+              margin: const EdgeDims.only(right: 5.0)
+            ),
+            new Flexible(
+              child: new Row(
+                children,
+                alignItems: FlexAlignItems.baseline,
+                textBaseline: DefaultTextStyle.of(context).textBaseline
+              )
+            )
+          ])
         )
-      ),
-      child: new Row([
-        new Container(
-          child: new StockArrow(percentChange: stock.percentChange),
-          margin: const EdgeDims.only(right: 5.0)
-        ),
-        new Flexible(
-          child: new Row(
-            children,
-            alignItems: FlexAlignItems.baseline,
-            textBaseline: DefaultTextStyle.of(context).textBaseline
-          )
-        )
-      ])
+      )
     );
   }
 }
