@@ -83,7 +83,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
 /// A render object that imposes additional constraints on its child
 ///
-/// A render constrainted box proxies most functions in the render box protocol
+/// A render constrained box proxies most functions in the render box protocol
 /// to its child, except that when laying out its child, it tightens the
 /// constraints provided by its parent by enforcing the [additionalConstraints]
 /// as well.
@@ -94,7 +94,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   RenderConstrainedBox({
     RenderBox child,
     BoxConstraints additionalConstraints
-  }) : super(child), _additionalConstraints = additionalConstraints {
+  }) : _additionalConstraints = additionalConstraints, super(child) {
     assert(additionalConstraints != null);
   }
 
@@ -143,6 +143,99 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: ${additionalConstraints}\n';
+}
+
+/// A render object that imposes different constraints on its child than it gets
+/// from its parent, possibly allowing the child to overflow the parent.
+///
+/// A render overflow box proxies most functions in the render box protocol to
+/// its child, except that when laying out its child, it passes constraints
+/// based on the innerWidth and innerHeight fields instead of just passing the
+/// parent's constraints in. It then sizes itself based on the parent's
+/// constraints' maxWidth and maxHeight, ignoring the child's dimensions.
+///
+/// For example, if you wanted a box to always render 50x50, regardless of where
+/// it was rendered, you would wrap it in a RenderOverflow with innerWidth and
+/// innerHeight members set to 50.0. Generally speaking, to avoid confusing
+/// behaviour around hit testing, a RenderOverflowBox should usually be wrapped
+/// in a RenderClipRect.
+///
+/// The child is positioned at the top left of the box. To position a smaller
+/// child inside a larger parent, use [RenderPositionedBox] and
+/// [RenderConstrainedBox] rather than RenderOverflowBox.
+///
+/// If you pass null for innerWidth or innerHeight, the constraints from the
+/// parent are passed instead.
+class RenderOverflowBox extends RenderProxyBox {
+  RenderOverflowBox({
+    RenderBox child,
+    double innerWidth,
+    double innerHeight
+  }) : _innerWidth = innerWidth, _innerHeight = innerHeight, super(child);
+
+  /// The tight width constraint to give the child. Set this to null (the
+  /// default) to use the constraints from the parent instead.
+  double get innerWidth => _innerWidth;
+  double _innerWidth;
+  void set innerWidth (double value) {
+    if (_innerWidth == value)
+      return;
+    _innerWidth = value;
+    markNeedsLayout();
+  }
+
+  /// The tight height constraint to give the child. Set this to null (the
+  /// default) to use the constraints from the parent instead.
+  double get innerHeight => _innerHeight;
+  double _innerHeight;
+  void set innerHeight (double value) {
+    if (_innerHeight == value)
+      return;
+    _innerHeight = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints childConstraints(BoxConstraints constraints) {
+    return new BoxConstraints(
+      minWidth: _innerWidth ?? constraints.minWidth,
+      maxWidth: _innerWidth ?? constraints.maxWidth,
+      minHeight: _innerHeight ?? constraints.minHeight,
+      maxHeight: _innerHeight ?? constraints.maxHeight
+    );
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.constrainWidth();
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.constrainWidth();
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    return constraints.constrainHeight();
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    return constraints.constrainHeight();
+  }
+
+  bool get sizedByParent => true;
+
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  void performLayout() {
+    if (child != null)
+      child.layout(childConstraints(constraints));
+  }
+
+  String debugDescribeSettings(String prefix) {
+    return '${super.debugDescribeSettings(prefix)}' + 
+           '${prefix}innerWidth: ${innerWidth ?? "use parent width constraints"}\n' +
+           '${prefix}innerHeight: ${innerHeight ?? "use parent height constraints"}\n';
+  }
 }
 
 /// Forces child to layout at a specific aspect ratio
