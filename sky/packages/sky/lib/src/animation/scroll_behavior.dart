@@ -12,13 +12,16 @@ const double _kScrollDrag = 0.025;
 
 /// An interface for controlling the behavior of scrollable widgets
 abstract class ScrollBehavior {
-  /// A simulation to run to determine the scroll offset
-  ///
-  /// Called when the user stops scrolling at a given position with a given
-  /// instantaneous velocity.
+  /// Called when a drag gesture ends. Returns a simulation that
+  /// propels the scrollOffset.
   Simulation release(double position, double velocity) => null;
 
-  /// The new scroll offset to use when the user attempts to scroll from the given offset by the given delta
+  /// Called when a drag gesture ends and toSnapOffset is specified.
+  /// Returns an animation that ends at the snap offset.
+  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double velocity) => null;
+
+  /// Return the scroll offset to use when the user attempts to scroll
+  /// from the given offset by the given delta
   double applyCurve(double scrollOffset, double scrollDelta);
 
   /// Whether this scroll behavior currently permits scrolling
@@ -87,6 +90,10 @@ class UnboundedBehavior extends ExtentScrollBehavior {
     );
   }
 
+  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
+    return _createSnapScrollSimulation(startOffset, endOffset, velocity);
+  }
+
   double get minScrollOffset => double.NEGATIVE_INFINITY;
   double get maxScrollOffset => double.INFINITY;
 
@@ -95,7 +102,7 @@ class UnboundedBehavior extends ExtentScrollBehavior {
   }
 }
 
-Simulation _createDefaultScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
+Simulation _createFlingScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
   double startVelocity = velocity * _kSecondsPerMillisecond;
 
   // Assume that we're rendering at atleast 15 FPS. Stop when we're
@@ -111,8 +118,14 @@ Simulation _createDefaultScrollSimulation(double position, double velocity, doub
   SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
   ScrollSimulation simulation =
       new ScrollSimulation(position, startVelocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag)
-    ..tolerance = new Tolerance(velocity: endVelocity, distance: endDistance);
+    ..tolerance = new Tolerance(velocity: endVelocity.abs(), distance: endDistance);
   return simulation;
+}
+
+Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
+  double startVelocity = velocity * _kSecondsPerMillisecond;
+  double endVelocity = 15.0 * sky.view.devicePixelRatio * velocity.sign;
+  return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
 }
 
 /// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance
@@ -121,7 +134,11 @@ class OverscrollBehavior extends BoundedBehavior {
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
 
   Simulation release(double position, double velocity) {
-    return _createDefaultScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
+    return _createFlingScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
+  }
+
+  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
+    return _createSnapScrollSimulation(startOffset, endOffset, velocity);
   }
 
   double applyCurve(double scrollOffset, double scrollDelta) {

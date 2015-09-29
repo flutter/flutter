@@ -30,12 +30,14 @@ class CardCollectionAppState extends State<CardCollectionApp> {
 
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
+  bool _snapToCenter = false;
+  bool _fixedSizeCards = false;
   bool _drawerShowing = false;
   AnimationStatus _drawerStatus = AnimationStatus.dismissed;
   InvalidatorCallback _invalidator;
+  Size _cardCollectionSize = new Size(200.0, 200.0);
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void _initVariableSizedCardModels() {
     List<double> cardHeights = <double>[
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -45,6 +47,27 @@ class CardCollectionAppState extends State<CardCollectionApp> {
       Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
+  }
+
+  void _initFixedSizedCardModels() {
+    const int cardCount = 27;
+    const double cardHeight = 100.0;
+    _cardModels = new List.generate(cardCount, (i) {
+      Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardCount);
+      return new CardModel(i, cardHeight, color);
+    });
+  }
+
+  void _initCardModels() {
+    if (_fixedSizeCards)
+      _initFixedSizedCardModels();
+    else
+      _initVariableSizedCardModels();
+  }
+
+  void initState(BuildContext context) {
+    super.initState(context);
+    _initCardModels();
   }
 
   void dismissCard(CardModel card) {
@@ -73,7 +96,20 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     return "dismiss ${s.substring(s.indexOf('.') + 1)}";
   }
 
-  void changeDismissDirection(DismissDirection newDismissDirection) {
+  void _toggleFixedSizeCards() {
+    setState(() {
+      _fixedSizeCards = !_fixedSizeCards;
+      _initCardModels();
+    });
+  }
+
+  void _toggleSnapToCenter() {
+    setState(() {
+      _snapToCenter = !_snapToCenter;
+    });
+  }
+
+  _changeDismissDirection(DismissDirection newDismissDirection) {
     setState(() {
       _dismissDirection = newDismissDirection;
       _drawerStatus = AnimationStatus.dismissed;
@@ -84,15 +120,25 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     if (_drawerStatus == AnimationStatus.dismissed)
       return null;
 
-    Widget buildDrawerItem(DismissDirection direction, String icon) {
+    Widget buildDrawerCheckbox(String label, bool value, Function callback) {
+      return new DrawerItem(
+        onPressed: callback,
+        child: new Row([
+          new Flexible(child: new Text(label)),
+          new Checkbox(value: value, onChanged: (_) { callback(); })
+        ])
+      );
+    }
+
+    Widget buildDrawerRadioItem(DismissDirection direction, String icon) {
       return new DrawerItem(
         icon: icon,
-        onPressed: () { changeDismissDirection(direction); },
+        onPressed: () { _changeDismissDirection(direction); },
         child: new Row([
           new Flexible(child: new Text(_dismissDirectionText(direction))),
           new Radio(
             value: direction,
-            onChanged: changeDismissDirection,
+            onChanged: _changeDismissDirection,
             groupValue: _dismissDirection
           )
         ])
@@ -106,10 +152,13 @@ class CardCollectionAppState extends State<CardCollectionApp> {
         showing: _drawerShowing,
         onDismissed: _handleDrawerDismissed,
         children: [
-          new DrawerHeader(child: new Text('Dismiss Direction')),
-          buildDrawerItem(DismissDirection.horizontal, 'action/code'),
-          buildDrawerItem(DismissDirection.left, 'navigation/arrow_back'),
-          buildDrawerItem(DismissDirection.right, 'navigation/arrow_forward')
+          new DrawerHeader(child: new Text('Options')),
+          buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
+          buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
+          new DrawerDivider(),//buildDrawerSpacerItem(),
+          buildDrawerRadioItem(DismissDirection.horizontal, 'action/code'),
+          buildDrawerRadioItem(DismissDirection.left, 'navigation/arrow_back'),
+          buildDrawerRadioItem(DismissDirection.right, 'navigation/arrow_forward'),
         ]
       )
     );
@@ -200,16 +249,83 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     );
   }
 
+  void _updateCardCollectionSize(Size newSize) {
+    setState(() {
+      _cardCollectionSize = newSize;
+    });
+  }
+
+  double _variableSizeToSnapOffset(double scrollOffset) {
+    double cumulativeHeight = 0.0;
+    double  margins = 8.0;
+    List<double> cumulativeHeights = _cardModels.map((card) {
+      cumulativeHeight += card.height + margins;
+      return cumulativeHeight;
+    })
+    .toList();
+
+    double offset;
+    for (int i = 0; i <  cumulativeHeights.length; i++) {
+      if (cumulativeHeights[i] >= scrollOffset)
+        return 12.0 + (margins + _cardModels[i].height) / 2.0 + ((i == 0) ? 0.0 : cumulativeHeights[i - 1]);
+    }
+
+    assert(false);
+    return 0.0;
+  }
+
+  double _fixedSizeToSnapOffset(double scrollOffset) {
+    double cardHeight = _cardModels[0].height;
+    return 12.0 + (scrollOffset / cardHeight).floor() * cardHeight + cardHeight * 0.5;
+  }
+
+  double _toSnapOffset(double scrollOffset) {
+    return _fixedSizeCards ? _fixedSizeToSnapOffset(scrollOffset) : _variableSizeToSnapOffset(scrollOffset);
+  }
+
   Widget build(BuildContext context) {
-    Widget cardCollection = new Container(
-      padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-      decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
-      child: new ScrollableMixedWidgetList(
+
+    Widget cardCollection;
+    if (_fixedSizeCards) {
+      cardCollection = new ScrollableList<CardModel> (
+        snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
+        snapAlignmentOffset: _cardCollectionSize.height / 2.0,
+        items: _cardModels,
+        itemBuilder: (BuildContext context, CardModel card) => buildCard(context, card.value),
+        itemExtent: _cardModels[0].height
+      );
+    } else {
+      cardCollection = new ScrollableMixedWidgetList(
         builder: buildCard,
         token: _cardModels.length,
+        snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
+        snapAlignmentOffset: _cardCollectionSize.height / 2.0,
         onInvalidatorAvailable: (InvalidatorCallback callback) { _invalidator = callback; }
+      );
+    }
+
+    Widget body = new SizeObserver(
+      callback: _updateCardCollectionSize,
+      child: new Container(
+        padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
+        decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
+        child: cardCollection
       )
     );
+
+    if (_snapToCenter) {
+      Widget indicator = new IgnorePointer(
+        child: new Align(
+          horizontal: 0.0,
+          vertical: 0.5,
+          child: new Container(
+            height: 1.0,
+            decoration: new BoxDecoration(backgroundColor: const Color(0x80FFFFFF))
+          )
+        )
+      );
+      body = new Stack([body, indicator]);
+    }
 
     return new Theme(
       data: new ThemeData(
@@ -222,7 +338,7 @@ class CardCollectionAppState extends State<CardCollectionApp> {
         child: new Scaffold(
           toolbar: buildToolBar(),
           drawer: buildDrawer(),
-          body: cardCollection
+          body: body
         )
       )
     );
