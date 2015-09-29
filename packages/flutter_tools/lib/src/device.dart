@@ -52,6 +52,7 @@ abstract class _Device {
 
 class AndroidDevice extends _Device {
   static const String _ADB_PATH = 'adb';
+  static const String _serverPort = '9888';
 
   static const String className = 'AndroidDevice';
   static final String defaultDeviceID = 'default';
@@ -229,6 +230,31 @@ class AndroidDevice extends _Device {
     sha1TempFile.writeAsStringSync(_getSourceSha1(app), flush: true);
     runCheckedSync([adbPath, 'push', sha1Path, _getDeviceSha1Path(app)]);
     sha1TempFile.deleteSync();
+    return true;
+  }
+
+
+  bool stop(AndroidApk apk) {
+    // Turn off reverse port forwarding
+    try {
+      runCheckedSync([adbPath, 'reverse', '--remove', 'tcp:$_serverPort']);
+    } catch (e) {}
+    // Stop the app
+    runCheckedSync([adbPath, 'shell', 'am', 'force-stop', apk.appPackageID]);
+    // Kill the server
+    try {
+      if (Platform.isMacOS) {
+        String pid = runCheckedSync(['lsof', '-i', ':$_serverPort', '-t']);
+        // Killing a pid with a shell command from within dart is hard,
+        // so use a library command, but it's still nice to give the
+        // equivalent command when doing verbose logging.
+        _logging.info('kill $pid');
+        Process.killPid(int.parse(pid));
+      } else {
+        runCheckedSync(['fuser', '-k', '$_serverPort/tcp']);
+      }
+    } catch (e) {}
+
     return true;
   }
 

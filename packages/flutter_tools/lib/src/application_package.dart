@@ -29,10 +29,16 @@ abstract class ApplicationPackage {
 
 class AndroidApk extends ApplicationPackage {
   static const String _apkName = 'SkyShell.apk';
-  static const String _androidPackage = 'org.domokit.sky.shell';
+  static const String _packageID = 'org.domokit.sky.shell';
+  static const String _componentID = '$_packageID/$_packageID.SkyActivity';
 
+  /// The path to the activity that should be launched.
+  /// Defaults to 'org.domokit.sky.shell/org.domokit.sky.shell.SkyActivity'
+  String component;
   AndroidApk(String appDir,
-      [String appPackageID = _androidPackage, String appFileName = _apkName])
+      {String appPackageID: _packageID,
+      String appFileName: _apkName,
+      this.component: _componentID})
       : super(path.join(appDir, 'apks'), appPackageID, appFileName);
 }
 
