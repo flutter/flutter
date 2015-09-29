@@ -139,8 +139,8 @@ class DialogRoute extends Route {
   final RouteBuilder builder;
 
   Duration get transitionDuration => _kTransitionDuration;
-  bool get isOpaque => false;
-  Widget build(Key key, NavigatorState navigator, WatchableAnimationPerformance performance) {
+  bool get opaque => false;
+  Widget build(Key key, NavigatorState navigator) {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
@@ -148,8 +148,9 @@ class DialogRoute extends Route {
     );
   }
 
-  void popState([dynamic result]) {
+  void didPop([dynamic result]) {
     completer.complete(result);
+    super.didPop(result);
   }
 }
 
