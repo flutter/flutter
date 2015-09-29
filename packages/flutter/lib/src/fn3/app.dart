@@ -6,6 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
+import 'package:sky/services.dart';
 import 'package:sky/src/fn3/basic.dart';
 import 'package:sky/src/fn3/binding.dart';
 import 'package:sky/src/fn3/framework.dart';
@@ -61,6 +62,8 @@ class AppState extends State<App> {
       assert(navigator != null);
       if (navigator.hasPreviousRoute)
         navigator.pop();
+      else
+        activity.finishCurrentActivity();
     }
   }
 
