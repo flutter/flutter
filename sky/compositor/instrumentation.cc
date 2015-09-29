@@ -44,7 +44,7 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
   path.moveTo(0, 0);
   path.lineTo(0, height * (_laps[0].InMillisecondsF() / 16.0));
   for (size_t i = 0; i < kMaxSamples; i++) {
-    path.lineTo(width * ((double)i / kMaxSamples),
+    path.lineTo(width * (static_cast<double>(i) / kMaxSamples),
                 height * (_laps[i].InMillisecondsF() / 16.0));
   }
   path.lineTo(width, 0);
@@ -58,7 +58,7 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
   paint.setColor(0xFF00FF00);
   paint.setStrokeWidth(3);
   paint.setStyle(SkPaint::Style::kStroke_Style);
-  auto sampleX = width * ((double)_current_sample / kMaxSamples);
+  auto sampleX = width * (static_cast<double>(_current_sample) / kMaxSamples);
   canvas.drawLine(sampleX, 0, sampleX, height, paint);
 }
 

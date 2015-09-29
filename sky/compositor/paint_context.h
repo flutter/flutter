@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_PAINT_CONTEXT_CC_
-#define SKY_COMPOSITOR_PAINT_CONTEXT_CC_
+#ifndef SKY_COMPOSITOR_PAINT_CONTEXT_H_
+#define SKY_COMPOSITOR_PAINT_CONTEXT_H_
 
 #include <memory>
+#include <string>
 
 #include "base/macros.h"
 #include "base/logging.h"
@@ -23,7 +24,7 @@ class PaintContext {
    public:
     SkCanvas& canvas() { return *canvas_; }
 
-    const PaintContext& context() const { return context_; };
+    const PaintContext& context() const { return context_; }
 
     ScopedFrame(ScopedFrame&& frame);
 
@@ -71,4 +72,4 @@ class PaintContext {
 }  // namespace compositor
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_PAINT_CONTEXT_CC_
+#endif  // SKY_COMPOSITOR_PAINT_CONTEXT_H_

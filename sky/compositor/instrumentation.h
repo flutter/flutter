@@ -5,11 +5,10 @@
 #ifndef SKY_COMPOSITOR_INSTRUMENTATION_H_
 #define SKY_COMPOSITOR_INSTRUMENTATION_H_
 
+#include <vector>
 #include "base/macros.h"
 #include "base/time/time.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-
-#include <vector>
 
 namespace sky {
 namespace compositor {
