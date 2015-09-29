@@ -14,15 +14,16 @@ final Logger _logging = new Logger('sky_tools.process');
 
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr.
-Future<int> runCommandAndStreamOutput(List<String> cmd) async {
+Future<int> runCommandAndStreamOutput(List<String> cmd,
+    {String prefix: ''}) async {
   _logging.info(cmd.join(' '));
   Process proc =
       await Process.start(cmd[0], cmd.getRange(1, cmd.length).toList());
   proc.stdout.transform(UTF8.decoder).listen((data) {
-    stdout.write(data);
+    stdout.write('$prefix${data.trimRight().split('\n').join('\n$prefix')}\n');
   });
   proc.stderr.transform(UTF8.decoder).listen((data) {
-    stderr.write(data);
+    stderr.write('$prefix${data.trimRight().split('\n').join('\n$prefix')}\n');
   });
   return proc.exitCode;
 }

@@ -334,7 +334,7 @@ class AndroidDevice extends _Device {
       '-s',
       'sky',
       'chromium',
-    ]);
+    ], prefix: 'ANDROID: ');
   }
 
   @override
