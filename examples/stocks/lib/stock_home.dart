@@ -236,7 +236,6 @@ class StockHomeState extends State<StockHome> {
     if (_snackBarStatus == AnimationStatus.dismissed)
       return null;
     return new SnackBar(
-      transitionKey: snackBarKey,
       showing: _isSnackBarShowing,
       content: new Text("Stock purchased!"),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],

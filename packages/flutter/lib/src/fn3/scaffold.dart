@@ -102,6 +102,7 @@ class RenderScaffold extends RenderBox {
   void performLayout() {
     double bodyHeight = size.height;
     double bodyPosition = 0.0;
+    double fabOffset = 0.0;
     if (_slots[ScaffoldSlots.statusBar] != null) {
       RenderBox statusBar = _slots[ScaffoldSlots.statusBar];
       statusBar.layout(new BoxConstraints.tight(new Size(size.width, kStatusBarHeight)));
@@ -127,18 +128,20 @@ class RenderScaffold extends RenderBox {
     if (_slots[ScaffoldSlots.snackBar] != null) {
       RenderBox snackBar = _slots[ScaffoldSlots.snackBar];
       // TODO(jackson): On tablet/desktop, minWidth = 288, maxWidth = 568
-      snackBar.layout(new BoxConstraints(minWidth: size.width, maxWidth: size.width, minHeight: 0.0, maxHeight: size.height),
-                      parentUsesSize: true);
+      snackBar.layout(
+        new BoxConstraints(minWidth: size.width, maxWidth: size.width, minHeight: 0.0, maxHeight: bodyHeight),
+        parentUsesSize: true
+      );
       assert(snackBar.parentData is BoxParentData);
-      // Position it off-screen. SnackBar slides in with an animation.
-      snackBar.parentData.position = new Point(0.0, size.height);
+      snackBar.parentData.position = new Point(0.0, bodyPosition + bodyHeight - snackBar.size.height);
+      fabOffset += snackBar.size.height;
     }
     if (_slots[ScaffoldSlots.floatingActionButton] != null) {
       RenderBox floatingActionButton = _slots[ScaffoldSlots.floatingActionButton];
       Size area = new Size(size.width - kButtonX, size.height - kButtonY);
       floatingActionButton.layout(new BoxConstraints.loose(area), parentUsesSize: true);
       assert(floatingActionButton.parentData is BoxParentData);
-      floatingActionButton.parentData.position = (area - floatingActionButton.size).toPoint();
+      floatingActionButton.parentData.position = (area - floatingActionButton.size).toPoint() + new Offset(0.0, -fabOffset);
     }
     if (_slots[ScaffoldSlots.drawer] != null) {
       RenderBox drawer = _slots[ScaffoldSlots.drawer];
