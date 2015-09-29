@@ -24,6 +24,7 @@ class TextureLayer : public base::RefCounted<TextureLayer> {
   void SetSize(const gfx::Size& size);
   void Display();
 
+  bool HaveTexture() const;
   scoped_ptr<mojo::GLTexture> GetTexture();
 
   const gfx::Size& size() const { return size_; }
