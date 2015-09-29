@@ -157,22 +157,33 @@ class TextPainter {
     _layoutRoot.maxHeight = value;
   }
 
+  // Unfortunately, using full precision floating point here causes bad layouts
+  // because floating point math isn't associative. If we add and subtract
+  // padding, for example, we'll get different values when we estimate sizes and
+  // when we actually compute layout because the operations will end up associated
+  // differently. To work around this problem for now, we round fractional pixel
+  // values up to the nearest whole pixel value. The right long-term fix is to do
+  // layout using fixed precision arithmetic.
+  double _applyFloatingPointHack(double layoutValue) {
+    return layoutValue.ceilToDouble();
+  }
+
   /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds
   double get minContentWidth {
     assert(!_needsLayout);
-    return _layoutRoot.rootElement.minContentWidth;
+    return _applyFloatingPointHack(_layoutRoot.rootElement.minContentWidth);
   }
 
   /// The width at which increasing the width of the text no longer decreases the height
   double get maxContentWidth {
     assert(!_needsLayout);
-    return _layoutRoot.rootElement.maxContentWidth;
+    return _applyFloatingPointHack(_layoutRoot.rootElement.maxContentWidth);
   }
 
   /// The height required to paint the text completely within its bounds
   double get height {
     assert(!_needsLayout);
-    return _layoutRoot.rootElement.height;
+    return _applyFloatingPointHack(_layoutRoot.rootElement.height);
   }
 
   /// The distance from the top of the text to the first baseline of the given type
