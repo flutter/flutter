@@ -14,7 +14,7 @@ const double _kScrollDrag = 0.025;
 abstract class ScrollBehavior {
   /// Called when a drag gesture ends. Returns a simulation that
   /// propels the scrollOffset.
-  Simulation release(double position, double velocity) => null;
+  Simulation createFlingScrollSimulation(double position, double velocity) => null;
 
   /// Called when a drag gesture ends and toSnapOffset is specified.
   /// Returns an animation that ends at the snap offset.
@@ -83,7 +83,7 @@ class UnboundedBehavior extends ExtentScrollBehavior {
   UnboundedBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
 
-  Simulation release(double position, double velocity) {
+  Simulation createFlingScrollSimulation(double position, double velocity) {
     double velocityPerSecond = velocity * 1000.0;
     return new BoundedFrictionSimulation(
       _kScrollDrag, position, velocityPerSecond, double.NEGATIVE_INFINITY, double.INFINITY
@@ -133,7 +133,7 @@ class OverscrollBehavior extends BoundedBehavior {
   OverscrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
 
-  Simulation release(double position, double velocity) {
+  Simulation createFlingScrollSimulation(double position, double velocity) {
     return _createFlingScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
   }
 
@@ -162,9 +162,9 @@ class OverscrollBehavior extends BoundedBehavior {
 class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
   bool get isScrollable => contentExtent > containerExtent;
 
-  Simulation release(double position, double velocity) {
+  Simulation createFlingScrollSimulation(double position, double velocity) {
     if (isScrollable || position < minScrollOffset || position > maxScrollOffset)
-      return super.release(position, velocity);
+      return super.createFlingScrollSimulation(position, velocity);
     return null;
   }
 
