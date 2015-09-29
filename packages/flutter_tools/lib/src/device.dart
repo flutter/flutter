@@ -12,7 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'application_package.dart';
-import 'process_wrapper.dart';
+import 'process.dart';
 
 final Logger _logging = new Logger('sky_tools.device');
 
@@ -299,24 +299,20 @@ class AndroidDevice extends _Device {
 
   bool stop(AndroidApk apk) {
     // Turn off reverse port forwarding
-    try {
-      runCheckedSync([adbPath, 'reverse', '--remove', 'tcp:$_serverPort']);
-    } catch (e) {}
+    runSync([adbPath, 'reverse', '--remove', 'tcp:$_serverPort']);
     // Stop the app
-    runCheckedSync([adbPath, 'shell', 'am', 'force-stop', apk.appPackageID]);
+    runSync([adbPath, 'shell', 'am', 'force-stop', apk.appPackageID]);
     // Kill the server
-    try {
-      if (Platform.isMacOS) {
-        String pid = runCheckedSync(['lsof', '-i', ':$_serverPort', '-t']);
-        // Killing a pid with a shell command from within dart is hard,
-        // so use a library command, but it's still nice to give the
-        // equivalent command when doing verbose logging.
-        _logging.info('kill $pid');
-        Process.killPid(int.parse(pid));
-      } else {
-        runCheckedSync(['fuser', '-k', '$_serverPort/tcp']);
-      }
-    } catch (e) {}
+    if (Platform.isMacOS) {
+      String pid = runSync(['lsof', '-i', ':$_serverPort', '-t']);
+      // Killing a pid with a shell command from within dart is hard,
+      // so use a library command, but it's still nice to give the
+      // equivalent command when doing verbose logging.
+      _logging.info('kill $pid');
+      Process.killPid(int.parse(pid));
+    } else {
+      runSync(['fuser', '-k', '$_serverPort/tcp']);
+    }
 
     return true;
   }

@@ -45,7 +45,8 @@ class RunMojoCommand extends Command {
     String appName = path.basename(appPath);
     String appDir = path.dirname(appPath);
     String buildFlag = mojoConfig == _MojoConfig.Debug ? '--debug' : '--release';
-    List<String> args = [
+    List<String> cmd = [
+      command,
       '--android',
       buildFlag,
       'http://app/$appName',
@@ -54,25 +55,26 @@ class RunMojoCommand extends Command {
       '--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo',
     ];
     if (_logging.level <= Level.INFO) {
-      args.add('--verbose');
+      cmd.add('--verbose');
       if (_logging.level <= Level.FINE) {
-        args.add('--verbose');
+        cmd.add('--verbose');
       }
     }
-    args.addAll(additionalArgs);
-    return runCommandAndStreamOutput(command, args);
+    cmd.addAll(additionalArgs);
+    return runCommandAndStreamOutput(cmd);
   }
 
   Future<int> _runLinux(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) async {
     String viewerPath = await _makePathAbsolute(await ArtifactStore.getPath(Artifact.SkyViewerMojo));
     String mojoBuildType = mojoConfig == _MojoConfig.Debug ? 'Debug' : 'Release';
     String mojoShellPath = await _makePathAbsolute(path.join(mojoPath, 'out', mojoBuildType, 'mojo_shell'));
-    List<String> args = [
+    List<String> cmd = [
+      mojoShellPath,
       'file://${appPath}',
       '--url-mappings=mojo:sky_viewer=file://${viewerPath}'
     ];
-    args.addAll(additionalArgs);
-    return runCommandAndStreamOutput(mojoShellPath, args);
+    cmd.addAll(additionalArgs);
+    return runCommandAndStreamOutput(cmd);
   }
 
   @override
