@@ -23,11 +23,16 @@ static void PaintContext_DrawStatisticsText(SkCanvas& canvas,
 }
 
 void StatisticsLayer::Paint(PaintContext::ScopedFrame& frame) {
-  const int x = 10;
-  int y = 20;
+  const int x = 8;
+  int y = 70;
   static const int kLineSpacing = 18;
 
   const PaintContext& context = frame.context();
+
+  if (options_.isEnabled(CompositorOptions::Option::VisualizeFrameStatistics)) {
+    SkRect visualizationRect = SkRect::MakeWH(paint_bounds().width(), 80);
+    context.frame_time().visualize(frame.canvas(), visualizationRect);
+  }
 
   if (options_.isEnabled(CompositorOptions::Option::DisplayFrameStatistics)) {
     // Frame (2032): 3.26ms

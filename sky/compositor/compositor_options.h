@@ -16,6 +16,7 @@ class CompositorOptions {
   using OptionType = unsigned int;
   enum class Option : OptionType {
     DisplayFrameStatistics,
+    VisualizeFrameStatistics,
 
     TerminationSentinel,
   };
