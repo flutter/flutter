@@ -30,12 +30,14 @@ class App extends StatefulComponent {
     Key key,
     this.title,
     this.theme,
-    this.routes
+    this.routes,
+    this.onGenerateRoute
   }): super(key: key);
 
   final String title;
   final ThemeData theme;
   final Map<String, RouteBuilder> routes;
+  final RouteGenerator onGenerateRoute;
 
   AppState createState() => new AppState();
 }
@@ -76,7 +78,8 @@ class AppState extends State<App> {
           title: config.title,
           child: new Navigator(
             key: _navigator,
-            routes: config.routes
+            routes: config.routes,
+            onGenerateRoute: config.onGenerateRoute
           )
         )
       )
