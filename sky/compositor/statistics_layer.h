@@ -14,7 +14,7 @@ namespace compositor {
 
 class StatisticsLayer : public Layer {
  public:
-  StatisticsLayer(uint64_t enabledOptions);
+  explicit StatisticsLayer(uint64_t enabledOptions);
 
   void Paint(PaintContext::ScopedFrame& frame) override;
 

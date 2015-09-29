@@ -5,6 +5,7 @@
 #ifndef SKY_COMPOSITOR_CONTAINER_LAYER_H_
 #define SKY_COMPOSITOR_CONTAINER_LAYER_H_
 
+#include <vector>
 #include "sky/compositor/layer.h"
 
 namespace sky {

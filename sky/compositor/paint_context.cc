@@ -36,7 +36,7 @@ PaintContext::ScopedFrame PaintContext::AcquireFrame(
 PaintContext::ScopedFrame::ScopedFrame(PaintContext& context, SkCanvas& canvas)
     : context_(context), canvas_(&canvas) {
   context_.beginFrame(*this);
-};
+}
 
 PaintContext::ScopedFrame::ScopedFrame(ScopedFrame&& frame) = default;
 
@@ -51,7 +51,7 @@ PaintContext::ScopedFrame::ScopedFrame(PaintContext& context,
   canvas_ = trace_recorder_->getRecordingCanvas();
   DCHECK(canvas_);
   context_.beginFrame(*this);
-};
+}
 
 PaintContext::ScopedFrame::~ScopedFrame() {
   context_.endFrame(*this);
