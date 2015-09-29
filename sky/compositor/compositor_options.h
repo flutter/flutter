@@ -6,6 +6,9 @@
 #define SKY_COMPOSITOR_COMPOSITOR_OPTIONS_H_
 
 #include "base/macros.h"
+
+#include <stdint.h>
+
 #include <vector>
 
 namespace sky {
