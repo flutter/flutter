@@ -128,7 +128,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   bool _scrollOffsetIsInBounds(double offset) {
     if (scrollBehavior is! ExtentScrollBehavior)
       return false;
-    ExtentScrollBehavior behavior = scrollBehavior as ExtentScrollBehavior;
+    ExtentScrollBehavior behavior = scrollBehavior;
     return offset >= behavior.minScrollOffset && offset < behavior.maxScrollOffset;
   }
 
