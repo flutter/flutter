@@ -167,9 +167,12 @@ class MenuRoute extends Route {
     return result;
   }
 
+  bool get ephemeral => true;
+  bool get modal => true;
+
   Duration get transitionDuration => _kMenuDuration;
-  bool get isOpaque => false;
-  Widget build(Key key, NavigatorState navigator, WatchableAnimationPerformance performance) {
+  bool get opaque => false;
+  Widget build(Key key, NavigatorState navigator) {
     return new Positioned(
       top: position?.top,
       right: position?.right,
@@ -189,8 +192,9 @@ class MenuRoute extends Route {
     );
   }
 
-  void popState([dynamic result]) {
+  void didPop([dynamic result]) {
     completer.complete(result);
+    super.didPop(result);
   }
 }
 
