@@ -367,7 +367,7 @@ class _TabsScrollBehavior extends BoundedBehavior {
 
   bool isScrollable = true;
 
-  Simulation release(double position, double velocity) {
+  Simulation createFlingScrollSimulation(double position, double velocity) {
     if (!isScrollable)
       return null;
 

@@ -137,7 +137,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     _stopAnimations();
 
     if (velocity != null && config.snapOffsetCallback != null && _scrollOffsetIsInBounds(scrollOffset)) {
-      Simulation simulation = scrollBehavior.release(scrollOffset, velocity);
+      Simulation simulation = scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity);
       if (simulation == null)
         return;
       double endScrollOffset = simulation.x(double.INFINITY);
@@ -152,7 +152,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       }
     }
 
-    Simulation simulation = scrollBehavior.release(scrollOffset, velocity ?? 0.0);
+    Simulation simulation = scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity ?? 0.0);
     if (simulation == null)
       return;
     _toEndAnimation.start(simulation);
