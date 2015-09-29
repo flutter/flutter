@@ -52,7 +52,7 @@ class MimicableState extends State<Mimicable> {
   }
 
   void _stopMimic() {
-    assert(!_beingMimicked);
+    assert(_beingMimicked);
     if (!mounted) {
       _beingMimicked = false;
       return;
