@@ -317,6 +317,26 @@ class AndroidDevice extends _Device {
     return true;
   }
 
+  void clearLogs() {
+    runSync([adbPath, 'logcat', '-c']);
+  }
+
+  Future<int> logs({bool clear: false}) {
+    if (clear) {
+      clearLogs();
+    }
+
+    return runCommandAndStreamOutput([
+      adbPath,
+      'logcat',
+      '-v',
+      'tag', // Only log the tag and the message
+      '-s',
+      'sky',
+      'chromium',
+    ]);
+  }
+
   @override
   bool isConnected() => _hasValidAndroid;
 }
