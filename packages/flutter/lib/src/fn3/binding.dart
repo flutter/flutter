@@ -81,6 +81,12 @@ void runApp(Widget app) {
   });
 }
 
+void debugDumpApp() {
+  assert(WidgetFlutterBinding.instance != null);
+  assert(WidgetFlutterBinding.instance.renderViewElement != null);
+  WidgetFlutterBinding.instance.renderViewElement.toStringDeep().split('\n').forEach(print);
+}
+
 /// This class provides a bridge from a RenderObject to an Element tree. The
 /// given container is the RenderObject that the Element tree should be inserted
 /// into. It must be a RenderObject that implements the
