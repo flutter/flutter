@@ -9,15 +9,24 @@ import 'package:sky/src/fn3/framework.dart';
 import 'package:sky/src/fn3/transitions.dart';
 
 typedef Widget RouteBuilder(NavigatorState navigator, Route route);
+typedef RouteBuilder RouteGenerator(String name);
+typedef void RouteStateCallback(RouteState route);
 typedef void NotificationCallback();
 
 class Navigator extends StatefulComponent {
-  Navigator({ this.routes, Key key }) : super(key: key) {
+  Navigator({
+    Key key,
+    this.routes,
+    this.onGenerateRoute, // you need to implement this if you pushNamed() to names that might not be in routes.
+    this.onUnknownRoute // 404 generator. You only need to implement this if you have a way to navigate to arbitrary names.
+  }) : super(key: key) {
     // To use a navigator, you must at a minimum define the route with the name '/'.
     assert(routes.containsKey('/'));
   }
 
   final Map<String, RouteBuilder> routes;
+  final RouteGenerator onGenerateRoute;
+  final RouteBuilder onUnknownRoute;
 
   NavigatorState createState() => new NavigatorState();
 }
@@ -47,9 +56,17 @@ class NavigatorState extends State<Navigator> {
   }
 
   void pushNamed(String name) {
-    PageRoute route = new PageRoute(config.routes[name]);
-    assert(route != null);
-    push(route);
+    RouteBuilder builder;
+    if (!config.routes.containsKey(name)) {
+      assert(config.onGenerateRoute != null);
+      builder = config.onGenerateRoute(name);
+    } else {
+      builder = config.routes[name];
+    }
+    if (builder == null)
+      builder = config.onUnknownRoute; // 404!
+    assert(builder != null); // 404 getting your 404!
+    push(new PageRoute(builder));
   }
 
   void push(Route route) {
@@ -172,6 +189,10 @@ abstract class Route {
   /// NavigatorState.pushState().
   /// 
   /// Set hasContent to false if you have nothing useful to return from build().
+  ///
+  /// modal must be false if hasContent is false, since otherwise any
+  /// interaction with the system at all would imply that the current route is
+  /// popped, which would be pointless.
   bool get hasContent => true;
 
   /// If ephemeral is true, then to explicitly pop the route you have to use
@@ -196,6 +217,7 @@ abstract class Route {
   /// popped.
   ///
   /// ephemeral must be true if modal is false.
+  /// hasContent must be true if modal is true.
   bool get modal => true;
 
   /// If opaque is true, then routes below this one will not be built or painted
@@ -253,8 +275,6 @@ class PageRoute extends Route {
   }
 }
 
-typedef void RouteStateCallback(RouteState route);
-
 class RouteState extends Route {
   RouteState({ this.route, this.owner, this.callback });
 
@@ -262,6 +282,8 @@ class RouteState extends Route {
   State owner;
   RouteStateCallback callback;
 
+  bool get hasContent => false;
+  bool get modal => false;
   bool get opaque => false;
 
   void didPop([dynamic result]) {
@@ -271,6 +293,5 @@ class RouteState extends Route {
     super.didPop(result);
   }
 
-  bool get hasContent => false;
   Widget build(Key key, NavigatorState navigator) => null;
 }
