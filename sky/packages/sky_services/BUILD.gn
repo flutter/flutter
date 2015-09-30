@@ -25,6 +25,7 @@ dart_pkg("sky_services") {
     ":copy_sky_services_license",
     "//sky/services/activity:interfaces",
     "//sky/services/media:interfaces",
+    "//sky/services/updater:interfaces",
     "//sky/services/vsync:interfaces",
   ]
 }
