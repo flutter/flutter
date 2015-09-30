@@ -21,7 +21,7 @@ void InitDartVM() {
   CHECK(Dart_SetVMFlags(arraysize(kDartArgs), kDartArgs));
   CHECK(Dart_Initialize(blink::kDartVmIsolateSnapshotBuffer, nullptr, nullptr,
                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                        nullptr));
+                        nullptr, nullptr) == nullptr);
 }
 
 Dart_Isolate CreateDartIsolate() {

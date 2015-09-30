@@ -186,12 +186,14 @@ void InitDartVM() {
   CHECK(Dart_SetVMFlags(args.size(), args.data()));
   // This should be called before calling Dart_Initialize.
   DartDebugger::InitDebugger();
-  CHECK(Dart_Initialize(kDartVmIsolateSnapshotBuffer,
-                        IsolateCreateCallback,
-                        nullptr,  // Isolate interrupt callback.
-                        UnhandledExceptionCallback, IsolateShutdownCallback,
-                        // File IO callbacks.
-                        nullptr, nullptr, nullptr, nullptr, nullptr));
+  CHECK(Dart_Initialize(
+      kDartVmIsolateSnapshotBuffer,
+      nullptr,
+      IsolateCreateCallback,
+      nullptr,  // Isolate interrupt callback.
+      UnhandledExceptionCallback, IsolateShutdownCallback,
+      // File IO callbacks.
+      nullptr, nullptr, nullptr, nullptr, nullptr) == nullptr);
   // Wait for load port- ensures handle watcher and service isolates are
   // running.
   Dart_ServiceWaitForLoadPort();
