@@ -230,20 +230,26 @@ class SizedBox extends OneChildRenderObjectWidget {
 }
 
 class OverflowBox extends OneChildRenderObjectWidget {
-  OverflowBox({ Key key, this.width, this.height, Widget child })
+  OverflowBox({ Key key, this.minWidth, this.maxWidth, this.minHeight, this.maxHeight, Widget child })
     : super(key: key, child: child);
 
-  final double width;
-  final double height;
+  final double minWidth;
+  final double maxWidth;
+  final double minHeight;
+  final double maxHeight;
 
   RenderOverflowBox createRenderObject() => new RenderOverflowBox(
-    innerWidth: width,
-    innerHeight: height
+    minWidth: minWidth,
+    maxWidth: maxWidth,
+    minHeight: minHeight,
+    maxHeight: maxHeight
   );
 
   void updateRenderObject(RenderOverflowBox renderObject, OverflowBox oldWidget) {
-    renderObject.innerWidth = width;
-    renderObject.innerHeight = height;
+    renderObject.minWidth = minWidth;
+    renderObject.maxWidth = maxWidth;
+    renderObject.minHeight = minHeight;
+    renderObject.maxHeight = maxHeight;
   }
 }
 
