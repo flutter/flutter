@@ -4,7 +4,7 @@
 
 part of stocks;
 
-enum _MenuItems { add, remove, autorefresh }
+enum _MenuItems { autorefresh, autorefreshCheckbox, add, remove }
 
 Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged onAutorefreshChanged }) async {
   switch (await showMenu(
@@ -16,6 +16,22 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
     builder: (NavigatorState navigator) {
       return <PopupMenuItem>[
         new PopupMenuItem(
+          value: _MenuItems.autorefresh,
+          child: new Row([
+              new Flexible(child: new Text('Autorefresh')),
+              new Checkbox(
+                value: autorefresh,
+                onChanged: (bool value) {
+                  navigator.setState(() {
+                    autorefresh = value;
+                  });
+                  navigator.pop(_MenuItems.autorefreshCheckbox);
+                }
+              )
+            ]
+          )
+        ),
+        new PopupMenuItem(
           value: _MenuItems.add,
           child: new Text('Add stock')
         ),
@@ -23,22 +39,17 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
           value: _MenuItems.remove,
           child: new Text('Remove stock')
         ),
-        new PopupMenuItem(
-          value: _MenuItems.autorefresh,
-          child: new Row([
-              new Flexible(child: new Text('Autorefresh')),
-              new Checkbox(
-                value: autorefresh,
-                onChanged: onAutorefreshChanged
-              )
-            ]
-          )
-        ),
       ];
     }
   )) {
     case _MenuItems.autorefresh:
-      onAutorefreshChanged(!autorefresh);
+      navigator.setState(() {
+        autorefresh = !autorefresh;
+      });
+      continue autorefreshNotify;
+    autorefreshNotify:
+    case _MenuItems.autorefreshCheckbox:
+      onAutorefreshChanged(autorefresh);
       break;
     case _MenuItems.add:
     case _MenuItems.remove:
