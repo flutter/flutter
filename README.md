@@ -16,4 +16,4 @@ Community
 ---------
 
 Join us on IRC at `#flutter` on Freenode or join our mailing list,
-[sky-dev@googlegroups.com](https://groups.google.com/forum/#!forum/sky-dev).
+[flutter-dev@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-dev).
