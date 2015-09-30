@@ -15,7 +15,11 @@ class InstallCommand extends Command {
   final name = 'install';
   final description = 'Install your Flutter app on attached devices.';
   AndroidDevice android = null;
-  InstallCommand([this.android]);
+  InstallCommand([this.android]) {
+    if (android == null) {
+      android = new AndroidDevice();
+    }
+  }
 
   @override
   Future<int> run() async {
@@ -31,9 +35,6 @@ class InstallCommand extends Command {
 
     Map<BuildPlatform, ApplicationPackage> packages =
         ApplicationPackageFactory.getAvailableApplicationPackages();
-    if (android == null) {
-      android = new AndroidDevice();
-    }
     ApplicationPackage androidApp = packages[BuildPlatform.android];
     if (androidApp != null && android.isConnected()) {
       installedSomewhere = android.installApp(androidApp) || installedSomewhere;

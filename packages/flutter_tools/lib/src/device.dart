@@ -256,19 +256,21 @@ class AndroidDevice extends _Device {
       return false;
     }
 
-    // Set up port forwarding for observatory.
-    String observatoryPortString = 'tcp:$_observatoryPort';
-    runCheckedSync(
-        [adbPath, 'forward', observatoryPortString, observatoryPortString]);
+    if (!poke) {
+      // Set up port forwarding for observatory.
+      String observatoryPortString = 'tcp:$_observatoryPort';
+      runCheckedSync(
+          [adbPath, 'forward', observatoryPortString, observatoryPortString]);
 
-    // Actually start the server.
-    await Process.start('pub', ['run', 'sky_tools:sky_server', _serverPort],
-        workingDirectory: serverRoot, mode: ProcessStartMode.DETACHED);
+      // Actually start the server.
+      await Process.start('pub', ['run', 'sky_tools:sky_server', _serverPort],
+          workingDirectory: serverRoot, mode: ProcessStartMode.DETACHED);
 
-    // Set up reverse port-forwarding so that the Android app can reach the
-    // server running on localhost.
-    String serverPortString = 'tcp:$_serverPort';
-    runCheckedSync([adbPath, 'reverse', serverPortString, serverPortString]);
+      // Set up reverse port-forwarding so that the Android app can reach the
+      // server running on localhost.
+      String serverPortString = 'tcp:$_serverPort';
+      runCheckedSync([adbPath, 'reverse', serverPortString, serverPortString]);
+    }
 
     String relativeDartMain = path.relative(mainDart, from: serverRoot);
     String url = 'http://localhost:$_serverPort/$relativeDartMain';
