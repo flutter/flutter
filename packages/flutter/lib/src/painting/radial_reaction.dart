@@ -30,16 +30,16 @@ class RadialReaction {
     _outerOpacity = new AnimatedValue<double>(0.0, end: _kMaxOpacity, curve: easeOut);
     _innerCenter = new AnimatedValue<Point>(startPosition, end: center, curve: easeOut);
     _innerRadius = new AnimatedValue<double>(0.0, end: radius, curve: easeOut);
-    _showPerformance = new AnimationPerformance()
-      ..addVariable(_outerOpacity)
-      ..addVariable(_innerCenter)
-      ..addVariable(_innerRadius)
-      ..duration = _kShowDuration;
-
-    _fade = new AnimatedValue(1.0, end: 0.0, curve: easeIn);
-    _hidePerformance = new AnimationPerformance()
-      ..addVariable(_fade)
-      ..duration =_kHideDuration;
+    _showPerformance = new AnimationPerformance(duration: _kShowDuration)
+      ..addListener(() {
+        _showPerformance.updateVariable(_outerOpacity);
+        _showPerformance.updateVariable(_innerCenter);
+        _showPerformance.updateVariable(_innerRadius);
+      });
+    _fade = new ValueAnimation<double>(
+      variable: new AnimatedValue(1.0, end: 0.0, curve: easeIn),
+      duration: _kHideDuration
+    );
   }
 
   /// The center of the circle in which the reaction occurs
@@ -55,8 +55,7 @@ class RadialReaction {
 
   Future _showComplete;
 
-  AnimationPerformance _hidePerformance;
-  AnimatedValue<double> _fade;
+  ValueAnimation<double> _fade;
 
   /// Show the reaction
   ///
@@ -70,13 +69,13 @@ class RadialReaction {
   /// Returns a future that resolves when the reaction is completely hidden.
   Future hide() async {
     await _showComplete;
-    await _hidePerformance.forward();
+    await _fade.forward();
   }
 
   /// Call listener whenever the visual appearance of the reaction changes
   void addListener(Function listener) {
     _showPerformance.addListener(listener);
-    _hidePerformance.addListener(listener);
+    _fade.addListener(listener);
   }
 
   final Paint _outerPaint = new Paint();

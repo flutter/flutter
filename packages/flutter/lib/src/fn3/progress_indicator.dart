@@ -35,20 +35,21 @@ abstract class ProgressIndicator extends StatefulComponent {
 }
 
 class ProgressIndicatorState extends State<ProgressIndicator> {
+
+  ValueAnimation<double> _performance;
+
   void initState() {
     super.initState();
-    _performance = new AnimationPerformance()
-      ..duration = const Duration(milliseconds: 1500)
-      ..variable = new AnimatedValue<double>(0.0, end: 1.0, curve: ease);
+    _performance = new ValueAnimation<double>(
+      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: ease),
+      duration: const Duration(milliseconds: 1500)
+    );
     _performance.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed)
         _restartAnimation();
     });
     _performance.play();
   }
-
-  AnimationPerformance _performance;
-  double get _performanceValue => (_performance.variable as AnimatedValue<double>).value;
 
   void _restartAnimation() {
     _performance.progress = 0.0;
@@ -57,13 +58,13 @@ class ProgressIndicatorState extends State<ProgressIndicator> {
 
   Widget build(BuildContext context) {
     if (config.value != null)
-      return config._buildIndicator(context, _performanceValue);
+      return config._buildIndicator(context, _performance.value);
 
     return new BuilderTransition(
       variables: [_performance.variable],
       performance: _performance.view,
       builder: (BuildContext context) {
-        return config._buildIndicator(context, _performanceValue);
+        return config._buildIndicator(context, _performance.value);
       }
     );
   }
