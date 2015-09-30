@@ -39,7 +39,6 @@ void StatisticsLayer::Paint(PaintContext::ScopedFrame& frame) {
   }
 
   if (options_.isEnabled(CompositorOptions::Option::DisplayFrameStatistics)) {
-    // Frame (2032): 3.26ms
     double msPerFrame = context.frame_time().lastLap().InMillisecondsF();
     double fps = 1e3 / msPerFrame;
 

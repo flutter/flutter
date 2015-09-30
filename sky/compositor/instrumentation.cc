@@ -27,6 +27,10 @@ void Stopwatch::stop() {
   _laps[_current_sample] = _lastLap;
 }
 
+static inline constexpr double UnitFrameInterval(double frameTimeMS) {
+  return frameTimeMS * 60.0 * 1e-3;
+}
+
 void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
   SkAutoCanvasRestore save(&canvas, false);
 
@@ -41,14 +45,19 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
   auto width = rect.width();
   auto height = rect.height();
 
-  path.moveTo(0, 0);
-  path.lineTo(0, height * (_laps[0].InMillisecondsF() / 16.0));
+  auto unitHeight = (1.0 - UnitFrameInterval(_laps[0].InMillisecondsF()));
+
+  path.moveTo(0, height);
+  path.lineTo(0, height * unitHeight);
+
   for (size_t i = 0; i < kMaxSamples; i++) {
-    path.lineTo(width * (static_cast<double>(i) / kMaxSamples),
-                height * (_laps[i].InMillisecondsF() / 16.0));
+    double unitWidth = (static_cast<double>(i + 1) / kMaxSamples);
+    unitHeight = (1.0 - UnitFrameInterval(_laps[i].InMillisecondsF()));
+    path.lineTo(width * unitWidth, height * unitHeight);
   }
-  path.lineTo(width, 0);
-  path.lineTo(0, 0);
+
+  path.lineTo(width, height);
+
   path.close();
 
   paint.setColor(0xAA0000FF);
