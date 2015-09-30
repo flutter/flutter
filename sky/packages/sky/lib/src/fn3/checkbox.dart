@@ -131,7 +131,7 @@ class _RenderCheckbox extends RenderToggleable {
       ..color = uncheckedColor;
 
     // The rrect contracts slightly during the animation
-    double inset = 2.0 - (position.value - _kMidpoint).abs() * 2.0;
+    double inset = 2.0 - (position - _kMidpoint).abs() * 2.0;
     sky.Rect rect = new sky.Rect.fromLTWH(offset.dx + inset, offset.dy + inset,
         _kEdgeSize - inset, _kEdgeSize - inset);
     sky.RRect rrect = new sky.RRect()
@@ -142,19 +142,19 @@ class _RenderCheckbox extends RenderToggleable {
     canvas.drawRRect(rrect, paint);
 
     // Radial gradient that changes size
-    if (position.value > 0) {
+    if (position > 0) {
       paint.setStyle(sky.PaintingStyle.fill);
       paint.setShader(new sky.Gradient.radial(
           new Point(_kEdgeSize / 2.0, _kEdgeSize / 2.0),
-          _kEdgeSize * (_kMidpoint - position.value) * 8.0, [
+          _kEdgeSize * (_kMidpoint - position) * 8.0, [
         const sky.Color(0x00000000),
         uncheckedColor
       ]));
       canvas.drawRRect(rrect, paint);
     }
 
-    if (position.value > _kMidpoint) {
-      double t = (position.value - _kMidpoint) / (1.0 - _kMidpoint);
+    if (position > _kMidpoint) {
+      double t = (position - _kMidpoint) / (1.0 - _kMidpoint);
 
       // Solid filled rrect
       paint.setStyle(sky.PaintingStyle.strokeAndFill);

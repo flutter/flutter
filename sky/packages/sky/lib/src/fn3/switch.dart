@@ -97,9 +97,9 @@ class _RenderSwitch extends RenderToggleable {
     _radialReaction = new RadialReaction(
       center: new Point(_kSwitchSize.width / 2.0, _kSwitchSize.height / 2.0),
       radius: _kReactionRadius,
-      startPosition: startLocation)
-      ..addListener(markNeedsPaint)
-      ..show();
+      startPosition: startLocation
+    )..addListener(markNeedsPaint)
+     ..show();
   }
 
   Future _hideRadialReaction() async {
@@ -140,10 +140,10 @@ class _RenderSwitch extends RenderToggleable {
     paint.drawLooper = builder.build();
 
     // The thumb contracts slightly during the animation
-    double inset = 2.0 - (position.value - 0.5).abs() * 2.0;
+    double inset = 2.0 - (position - 0.5).abs() * 2.0;
     Point thumbPos = new Point(offset.dx +
             _kTrackRadius +
-            position.value * (_kTrackWidth - _kTrackRadius * 2),
+            position * (_kTrackWidth - _kTrackRadius * 2),
         offset.dy + _kSwitchHeight / 2.0);
     canvas.drawCircle(thumbPos, _kThumbRadius - inset, paint);
   }
