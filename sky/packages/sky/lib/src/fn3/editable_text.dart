@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 import 'package:sky/painting.dart';
