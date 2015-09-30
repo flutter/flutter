@@ -177,6 +177,8 @@ abstract class Widget {
 
   /// Inflates this configuration to a concrete instance.
   Element createElement();
+
+  String toString() => '$runtimeType';
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -346,6 +348,22 @@ abstract class State<T extends StatefulComponent> {
   /// the tree at which this component is being built. For example, the context
   /// provides the set of inherited widgets for this location in the tree.
   Widget build(BuildContext context);
+
+  String toString() {
+    final List<String> data = <String>[];
+    debugFillDescription(data);
+    return '$runtimeType(${data.join("; ")})';
+  }
+
+  void debugFillDescription(List<String> description) {
+    description.add('$hashCode');
+    if (_debugLifecycleState != _StateLifecycle.ready)
+      description.add('$_debugLifecycleState');
+    if (_config == null)
+      description.add('no config');
+    if (_element == null)
+      description.add('not mounted');
+  }
 }
 
 abstract class ProxyWidget extends StatelessComponent {
@@ -618,6 +636,35 @@ abstract class Element<T extends Widget> implements BuildContext {
   void dependenciesChanged() {
     assert(false);
   }
+
+  String toString() {
+    final List<String> data = <String>[];
+    debugFillDescription(data);
+    final String name = widget != null ? '$widget' : '[$runtimeType]';
+    return '$name(${data.join("; ")})';
+  }
+
+  void debugFillDescription(List<String> description) {
+    if (depth == null)
+      description.add('no depth');
+    if (widget == null)
+      description.add('no widget');
+  }
+
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+    String result = '${prefixLineOne}$this\n';
+    List<Element> children = <Element>[];
+    visitChildren((Element child) {
+      children.add(child);
+    });
+    if (children.length > 0) {
+      Element last = children.removeLast();
+      for (Element child in children)
+        result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
+      result += '${last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
+    }
+    return result;
+  }
 }
 
 class ErrorWidget extends LeafRenderObjectWidget {
@@ -666,7 +713,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// and by update() when the Widget has changed.
   void rebuild() {
     assert(_debugLifecycleState != _ElementLifecycle.initial);
-    if (!_dirty)
+    if (!dirty)
       return;
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(_debugStateLocked);
@@ -728,8 +775,8 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// the build itself.
   void markNeedsBuild() {
     assert(_debugLifecycleState != _ElementLifecycle.defunct);
-    assert(!_debugStateLocked || (_debugAllowIgnoredCallsToMarkNeedsBuild && _dirty));
-    if (_dirty)
+    assert(!_debugStateLocked || (_debugAllowIgnoredCallsToMarkNeedsBuild && dirty));
+    if (dirty)
       return;
     assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(!_debugStateLocked);
@@ -750,6 +797,12 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
 
   void dependenciesChanged() {
     markNeedsBuild();
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (dirty)
+      description.add('dirty');
   }
 }
 
@@ -824,9 +877,15 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
       print('${_state.runtimeType}.dispose failed to call super.dispose');
       return false;
     });
-    assert(!_dirty); // See BuildableElement.unmount for why this is important.
+    assert(!dirty); // See BuildableElement.unmount for why this is important.
     _state._element = null;
     _state = null;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (state != null)
+      description.add('state: $state');
   }
 }
 
@@ -1112,6 +1171,12 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
   void insertChildRenderObject(RenderObject child, dynamic slot);
   void moveChildRenderObject(RenderObject child, dynamic slot);
   void removeChildRenderObject(RenderObject child);
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (renderObject != null)
+      description.add('renderObject: $renderObject');
+  }
 }
 
 /// Instantiation of RenderObjectWidgets that have no children

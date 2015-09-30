@@ -110,6 +110,11 @@ class StockHomeState extends State<StockHome> {
           icon: 'action/account_balance',
           child: new Text('Account Balance')
         ),
+        new DrawerItem(
+          icon: 'device/dvr',
+          onPressed: () { debugDumpApp(); },
+          child: new Text('Dump App to Console')
+        ),
         new DrawerDivider(),
         new DrawerItem(
           icon: 'action/thumb_up',
