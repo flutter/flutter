@@ -899,6 +899,9 @@ class IgnorePointer extends OneChildRenderObjectWidget {
   }
 }
 
+
+// UTILITY NODES
+
 class MetaData extends OneChildRenderObjectWidget {
   MetaData({ Key key, Widget child, this.metaData })
     : super(key: key, child: child);
@@ -910,4 +913,13 @@ class MetaData extends OneChildRenderObjectWidget {
   void updateRenderObject(RenderMetaData renderObject, MetaData oldWidget) {
     renderObject.metaData = metaData;
   }
+}
+
+class KeyedSubtree extends StatelessComponent {
+  KeyedSubtree({ Key key, this.child })
+    : super(key: key);
+
+  final Widget child;
+
+  Widget build(BuildContext context) => child;
 }
