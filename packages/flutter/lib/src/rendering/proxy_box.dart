@@ -150,57 +150,81 @@ class RenderConstrainedBox extends RenderProxyBox {
 ///
 /// A render overflow box proxies most functions in the render box protocol to
 /// its child, except that when laying out its child, it passes constraints
-/// based on the innerWidth and innerHeight fields instead of just passing the
-/// parent's constraints in. It then sizes itself based on the parent's
-/// constraints' maxWidth and maxHeight, ignoring the child's dimensions.
+/// based on the minWidth, maxWidth, minHeight, and maxHeight fields instead of
+/// just passing the parent's constraints in. Specifically, it overrides any of
+/// the equivalent fields on the constraints given by the parent with the
+/// constraints given by these fields for each such field that is not null. It
+/// then sizes itself based on the parent's constraints' maxWidth and maxHeight,
+/// ignoring the child's dimensions.
 ///
-/// For example, if you wanted a box to always render 50x50, regardless of where
-/// it was rendered, you would wrap it in a RenderOverflow with innerWidth and
-/// innerHeight members set to 50.0. Generally speaking, to avoid confusing
+/// For example, if you wanted a box to always render 50 pixels high, regardless
+/// of where it was rendered, you would wrap it in a RenderOverflow with
+/// minHeight and maxHeight set to 50.0. Generally speaking, to avoid confusing
 /// behaviour around hit testing, a RenderOverflowBox should usually be wrapped
 /// in a RenderClipRect.
 ///
 /// The child is positioned at the top left of the box. To position a smaller
 /// child inside a larger parent, use [RenderPositionedBox] and
 /// [RenderConstrainedBox] rather than RenderOverflowBox.
-///
-/// If you pass null for innerWidth or innerHeight, the constraints from the
-/// parent are passed instead.
 class RenderOverflowBox extends RenderProxyBox {
   RenderOverflowBox({
     RenderBox child,
-    double innerWidth,
-    double innerHeight
-  }) : _innerWidth = innerWidth, _innerHeight = innerHeight, super(child);
+    double minWidth,
+    double maxWidth,
+    double minHeight,
+    double maxHeight
+  }) : _minWidth = minWidth, _maxWidth = maxWidth, _minHeight = minHeight, _maxHeight = maxHeight, super(child);
 
-  /// The tight width constraint to give the child. Set this to null (the
-  /// default) to use the constraints from the parent instead.
-  double get innerWidth => _innerWidth;
-  double _innerWidth;
-  void set innerWidth (double value) {
-    if (_innerWidth == value)
+  /// The minimum width constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  double get minWidth => _minWidth;
+  double _minWidth;
+  void set minWidth (double value) {
+    if (_minWidth == value)
       return;
-    _innerWidth = value;
+    _minWidth = value;
     markNeedsLayout();
   }
 
-  /// The tight height constraint to give the child. Set this to null (the
-  /// default) to use the constraints from the parent instead.
-  double get innerHeight => _innerHeight;
-  double _innerHeight;
-  void set innerHeight (double value) {
-    if (_innerHeight == value)
+  /// The maximum width constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  double get maxWidth => _maxWidth;
+  double _maxWidth;
+  void set maxWidth (double value) {
+    if (_maxWidth == value)
       return;
-    _innerHeight = value;
+    _maxWidth = value;
+    markNeedsLayout();
+  }
+
+  /// The minimum height constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  double get minHeight => _minHeight;
+  double _minHeight;
+  void set minHeight (double value) {
+    if (_minHeight == value)
+      return;
+    _minHeight = value;
+    markNeedsLayout();
+  }
+
+  /// The maximum height constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  double get maxHeight => _maxHeight;
+  double _maxHeight;
+  void set maxHeight (double value) {
+    if (_maxHeight == value)
+      return;
+    _maxHeight = value;
     markNeedsLayout();
   }
 
   BoxConstraints childConstraints(BoxConstraints constraints) {
     return new BoxConstraints(
-      minWidth: _innerWidth ?? constraints.minWidth,
-      maxWidth: _innerWidth ?? constraints.maxWidth,
-      minHeight: _innerHeight ?? constraints.minHeight,
-      maxHeight: _innerHeight ?? constraints.maxHeight
+      minWidth: _minWidth ?? constraints.minWidth,
+      maxWidth: _maxWidth ?? constraints.maxWidth,
+      minHeight: _minHeight ?? constraints.minHeight,
+      maxHeight: _maxHeight ?? constraints.maxHeight
     );
   }
 
@@ -233,8 +257,10 @@ class RenderOverflowBox extends RenderProxyBox {
 
   String debugDescribeSettings(String prefix) {
     return '${super.debugDescribeSettings(prefix)}' + 
-           '${prefix}innerWidth: ${innerWidth ?? "use parent width constraints"}\n' +
-           '${prefix}innerHeight: ${innerHeight ?? "use parent height constraints"}\n';
+           '${prefix}minWidth: ${minWidth ?? "use parent minWidth constraint"}\n' +
+           '${prefix}maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}\n' +
+           '${prefix}minHeight: ${minHeight ?? "use parent minHeight constraint"}\n' + 
+           '${prefix}maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}\n';
   }
 }
 
