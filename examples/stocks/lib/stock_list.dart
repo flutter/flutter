@@ -4,10 +4,13 @@
 
 part of stocks;
 
-class Stocklist extends StatelessComponent {
-  Stocklist({ Key key, this.stocks }) : super(key: key);
+typedef void StockActionListener(Stock stock);
+
+class StockList extends StatelessComponent {
+  StockList({ Key key, this.stocks, this.onAction }) : super(key: key);
 
   final List<Stock> stocks;
+  final StockActionListener onAction;
 
   Widget build(BuildContext context) {
     return new Material(
@@ -15,7 +18,12 @@ class Stocklist extends StatelessComponent {
       child: new ScrollableList<Stock>(
         items: stocks,
         itemExtent: StockRow.kHeight,
-        itemBuilder: (BuildContext context, Stock stock) => new StockRow(stock: stock)
+        itemBuilder: (BuildContext context, Stock stock) {
+          return new StockRow(
+            stock: stock,
+            onPressed: () { onAction(stock); }
+          );
+        }
       )
     );
   }
