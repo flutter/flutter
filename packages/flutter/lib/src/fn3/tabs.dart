@@ -401,8 +401,8 @@ class TabBar extends Scrollable {
 }
 
 class TabBarState extends ScrollableState<TabBar> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _indicatorAnimation = new ValueAnimation<Rect>()
       ..duration = _kTabBarScroll
       ..variable = new AnimatedRect(null, curve: ease);

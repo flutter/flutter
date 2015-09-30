@@ -11,8 +11,8 @@ class StyledTextApp extends StatefulComponent {
 }
 
 class StyledTextAppState extends State<StyledTextApp> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     toText = toStyledText;
     nameLines = dialogText
       .split('\n')

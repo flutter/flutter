@@ -294,8 +294,8 @@ class MonthPicker extends ScrollableWidgetList {
 }
 
 class MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _updateCurrentDate();
   }
 

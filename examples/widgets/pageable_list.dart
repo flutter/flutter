@@ -21,8 +21,8 @@ class PageableListApp extends StatefulComponent {
 }
 
 class PageableListAppState extends State<PageableListApp> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     List<Size> cardSizes = [
       [100.0, 300.0], [300.0, 100.0], [200.0, 400.0], [400.0, 400.0], [300.0, 400.0]
     ]

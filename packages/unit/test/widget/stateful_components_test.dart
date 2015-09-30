@@ -11,8 +11,8 @@ class InnerComponent extends StatefulComponent {
 class InnerComponentState extends State<InnerComponent> {
   bool _didInitState = false;
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _didInitState = true;
   }
 

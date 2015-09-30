@@ -18,8 +18,8 @@ class TestWidgetState extends State<TestWidget> {
   int syncedState;
   int updates = 0;
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     persistentState = config.persistentState;
     syncedState = config.syncedState;
   }

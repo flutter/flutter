@@ -25,8 +25,8 @@ abstract class TransitionComponent extends StatefulComponent {
 }
 
 class TransitionState extends State<TransitionComponent> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     config.performance.addListener(_performanceChanged);
   }
 

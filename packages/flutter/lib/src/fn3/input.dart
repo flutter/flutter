@@ -50,8 +50,8 @@ class InputState extends ScrollableState<Input> {
   double _contentWidth = 0.0;
   double _containerWidth = 0.0;
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _value = config.initialValue;
     _editableValue = new EditableString(
       text: _value,

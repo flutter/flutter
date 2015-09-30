@@ -754,8 +754,8 @@ class ImageListener extends StatefulComponent {
 }
 
 class ImageListenerState extends State<ImageListener> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     config.image.addListener(_handleImageChanged);
   }
 

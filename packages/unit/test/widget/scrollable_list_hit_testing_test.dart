@@ -1,4 +1,3 @@
-import 'package:quiver/testing/async.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
@@ -7,10 +6,6 @@ import '../fn3/widget_tester.dart';
 
 const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 List<int> tapped = <int>[];
-
-Widget buildFrame() {
-  return ;
-}
 
 void main() {
   double t = 0.0;

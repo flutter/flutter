@@ -11,8 +11,8 @@ class ProbeWidget extends StatefulComponent {
 class ProbeWidgetState extends State<ProbeWidget> {
   static int buildCount = 0;
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     setState(() {});
   }
 
