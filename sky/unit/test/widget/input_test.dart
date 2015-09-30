@@ -2,10 +2,10 @@ import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/widgets_next.dart';
 import 'package:test/test.dart';
 
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 import '../services/mock_services.dart';
 
 class MockKeyboard implements KeyboardService {
@@ -40,9 +40,9 @@ void main() {
       );
     }
 
-    tester.pumpFrame(builder);
+    tester.pumpFrame(builder());
 
-    Input input = tester.findWidget((Widget widget) => widget.key == inputKey);
+    Element input = tester.findElementByKey(inputKey);
     Size emptyInputSize = (input.renderObject as RenderBox).size;
 
     // Simulate entry of text through the keyboard.
@@ -53,7 +53,7 @@ void main() {
     // Check that the onChanged event handler fired.
     expect(inputValue, equals(testValue));
 
-    tester.pumpFrame(builder);
+    tester.pumpFrame(builder());
 
     // Check that the Input with text has the same size as the empty Input.
     expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
@@ -74,10 +74,9 @@ void main() {
     }
 
     new FakeAsync().run((async) {
-      tester.pumpFrame(builder);
+      tester.pumpFrame(builder());
 
-      EditableText editableText = tester.findWidget(
-          (Widget widget) => widget is EditableText);
+      EditableTextState editableText = tester.findStateOfType(EditableTextState);
 
       // Check that the cursor visibility toggles after each blink interval.
       void checkCursorToggle() {
