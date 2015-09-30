@@ -63,7 +63,7 @@ class TraceCommand extends Command {
     if (tracePath == null) {
       _logging.warning('No trace file saved.');
     } else {
-      _logging.warning('Trace file saved to $tracePath');
+      print('Trace file saved to $tracePath');
     }
   }
 }

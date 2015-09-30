@@ -13,6 +13,7 @@ import 'package:sky_tools/src/build.dart';
 import 'package:sky_tools/src/cache.dart';
 import 'package:sky_tools/src/init.dart';
 import 'package:sky_tools/src/install.dart';
+import 'package:sky_tools/src/list.dart';
 import 'package:sky_tools/src/listen.dart';
 import 'package:sky_tools/src/logs.dart';
 import 'package:sky_tools/src/run_mojo.dart';
@@ -151,6 +152,7 @@ void main(List<String> args) {
     ..addCommand(new CacheCommand())
     ..addCommand(new InitCommand())
     ..addCommand(new InstallCommand())
+    ..addCommand(new ListCommand())
     ..addCommand(new ListenCommand())
     ..addCommand(new LogsCommand())
     ..addCommand(new RunMojoCommand())

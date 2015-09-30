@@ -60,13 +60,60 @@ class AndroidDevice extends _Device {
   static const String className = 'AndroidDevice';
   static final String defaultDeviceID = 'default';
 
+  String productID;
+  String modelID;
+  String deviceCodeName;
+
   String _adbPath;
   String get adbPath => _adbPath;
   bool _hasAdb = false;
   bool _hasValidAndroid = false;
 
-  factory AndroidDevice([String id = null]) {
-    return new _Device(className, id);
+  factory AndroidDevice(
+      {String id: null,
+      String productID: null,
+      String modelID: null,
+      String deviceCodeName: null}) {
+    AndroidDevice device = new _Device(className, id);
+    device.productID = productID;
+    device.modelID = modelID;
+    device.deviceCodeName = deviceCodeName;
+    return device;
+  }
+
+  /// mockAndroid argument is only to facilitate testing with mocks, so that
+  /// we don't have to rely on the test setup having adb available to it.
+  static List<AndroidDevice> getAttachedDevices([AndroidDevice mockAndroid]) {
+    List<AndroidDevice> devices = [];
+    String adbPath = _getAdbPath();
+    if (mockAndroid != null) {
+      adbPath = mockAndroid.adbPath;
+    }
+    List<String> output =
+        runSync([adbPath, 'devices', '-l']).trim().split('\n');
+    RegExp deviceInfo = new RegExp(
+        r'^(\S+)\s+device\s+\S+\s+product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
+    // Skip first line, which is always 'List of devices attached'.
+    for (String line in output.skip(1)) {
+      Match match = deviceInfo.firstMatch(line);
+      if (match != null) {
+        String deviceID = match[1];
+        String productID = match[2];
+        String modelID = match[3];
+        String deviceCodeName = match[4];
+
+        devices.add(new AndroidDevice(
+            id: deviceID,
+            productID: productID,
+            modelID: modelID,
+            deviceCodeName: deviceCodeName));
+      } else {
+        _logging.warning('Unexpected failure parsing device information '
+            'from adb output:\n$line\n'
+            'Please report a bug at http://flutter.io/');
+      }
+    }
+    return devices;
   }
 
   AndroidDevice._(id) : super._(id) {
@@ -83,7 +130,7 @@ class AndroidDevice extends _Device {
     }
   }
 
-  String _getAdbPath() {
+  static String _getAdbPath() {
     if (Platform.environment.containsKey('ANDROID_HOME')) {
       String androidHomeDir = Platform.environment['ANDROID_HOME'];
       String adbPath1 =

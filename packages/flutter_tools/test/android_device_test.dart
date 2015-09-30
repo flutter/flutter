@@ -18,14 +18,14 @@ defineTests() {
 
     test('stores the requested id', () {
       String deviceID = '1234';
-      AndroidDevice android = new AndroidDevice(deviceID);
+      AndroidDevice android = new AndroidDevice(id: deviceID);
       expect(android.id, equals(deviceID));
     });
 
     test('correctly creates only one of each requested device id', () {
       String deviceID = '1234';
-      AndroidDevice a1 = new AndroidDevice(deviceID);
-      AndroidDevice a2 = new AndroidDevice(deviceID);
+      AndroidDevice a1 = new AndroidDevice(id: deviceID);
+      AndroidDevice a2 = new AndroidDevice(id: deviceID);
       expect(a1, equals(a2));
     });
   });
