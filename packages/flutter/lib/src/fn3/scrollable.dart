@@ -132,34 +132,45 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return offset >= behavior.minScrollOffset && offset < behavior.maxScrollOffset;
   }
 
-  double _alignedScrollSnapOffset(double offset) {
-    return config.snapOffsetCallback(offset + config.snapAlignmentOffset) - config.snapAlignmentOffset;
+  Simulation _createFlingSimulation(double velocity) {
+    return scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity);
   }
 
-  void _startToEndAnimation({ double velocity }) {
-    _stopAnimations();
+  Simulation _createSnapSimulation(double velocity) {
+    if (velocity == null || config.snapOffsetCallback == null || !_scrollOffsetIsInBounds(scrollOffset))
+      return null;
 
-    if (velocity != null && config.snapOffsetCallback != null && _scrollOffsetIsInBounds(scrollOffset)) {
-      Simulation simulation = scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity);
-      if (simulation == null)
-        return;
-      double endScrollOffset = simulation.x(double.INFINITY);
-      if (!endScrollOffset.isNaN) {
-        double alignedScrollOffset = _alignedScrollSnapOffset(endScrollOffset);
-        if (_scrollOffsetIsInBounds(alignedScrollOffset)) {
-          double snapVelocity = velocity.abs() * (alignedScrollOffset - scrollOffset).sign;
-          Simulation toSnapSimulation = scrollBehavior.createSnapScrollSimulation(
-              scrollOffset, alignedScrollOffset, snapVelocity);
-          _toEndAnimation.start(toSnapSimulation);
-          return;
-        }
-      }
-    }
-
-    Simulation simulation = scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity ?? 0.0);
+    Simulation simulation = _createFlingSimulation(velocity);
     if (simulation == null)
-      return;
-    _toEndAnimation.start(simulation);
+        return null;
+
+    double endScrollOffset = simulation.x(double.INFINITY);
+    if (endScrollOffset.isNaN)
+      return null;
+
+    double snappedScrollOffset = config.snapOffsetCallback(endScrollOffset + config.snapAlignmentOffset);
+    double alignedScrollOffset = snappedScrollOffset - config.snapAlignmentOffset;
+    if (!_scrollOffsetIsInBounds(alignedScrollOffset))
+      return null;
+
+    double snapVelocity = velocity.abs() * (alignedScrollOffset - scrollOffset).sign;
+    Simulation toSnapSimulation =
+      scrollBehavior.createSnapScrollSimulation(scrollOffset, alignedScrollOffset, snapVelocity);
+    if (toSnapSimulation == null)
+      return null;
+
+    double offsetMin = math.min(scrollOffset, alignedScrollOffset);
+    double offsetMax = math.max(scrollOffset, alignedScrollOffset);
+    return new ClampedSimulation(toSnapSimulation, xMin: offsetMin, xMax: offsetMax);
+  }
+
+  Future _startToEndAnimation({ double velocity }) {
+    _stopAnimations();
+    Simulation simulation =
+      _createSnapSimulation(velocity) ?? _createFlingSimulation(velocity ?? 0.0);
+    if (simulation == null)
+      return new Future.value();
+    return _toEndAnimation.start(simulation);
   }
 
   void dispose() {
@@ -195,16 +206,16 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return scrollTo(newScrollOffset, duration: duration, curve: curve);
   }
 
-  void fling(Offset velocity) {
-    if (velocity != Offset.zero) {
-      _startToEndAnimation(velocity: _scrollVelocity(velocity));
-    } else if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating)) {
-      settleScrollOffset();
-    }
+  Future fling(Offset velocity) {
+    if (velocity != Offset.zero)
+      return _startToEndAnimation(velocity: _scrollVelocity(velocity));
+    if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating))
+      return settleScrollOffset();
+    return new Future.value();
   }
 
-  void settleScrollOffset() {
-    _startToEndAnimation();
+  Future settleScrollOffset() {
+    return _startToEndAnimation();
   }
 
   double _scrollVelocity(sky.Offset velocity) {
@@ -623,12 +634,12 @@ class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  void fling(sky.Offset velocity) {
+  Future fling(sky.Offset velocity) {
     double scrollVelocity = _scrollVelocity(velocity);
     double newScrollOffset = _snapScrollOffset(scrollOffset + scrollVelocity.sign * config.itemExtent)
       .clamp(_snapScrollOffset(scrollOffset - config.itemExtent / 2.0),
              _snapScrollOffset(scrollOffset + config.itemExtent / 2.0));
-    scrollTo(newScrollOffset, duration: config.duration, curve: config.curve).then(_notifyPageChanged);
+    return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve).then(_notifyPageChanged);
   }
 
   int get currentPage => (scrollOffset / config.itemExtent).floor() % itemCount;
@@ -638,8 +649,8 @@ class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
       config.onPageChanged(currentPage);
   }
 
-  void settleScrollOffset() {
-    scrollTo(_snapScrollOffset(scrollOffset), duration: config.duration, curve: config.curve).then(_notifyPageChanged);
+  Future settleScrollOffset() {
+    return scrollTo(_snapScrollOffset(scrollOffset), duration: config.duration, curve: config.curve).then(_notifyPageChanged);
   }
 }
 
