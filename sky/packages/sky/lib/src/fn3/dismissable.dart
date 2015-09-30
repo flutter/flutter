@@ -48,8 +48,8 @@ class Dismissable extends StatefulComponent {
 }
 
 class DismissableState extends State<Dismissable> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _fadePerformance = new AnimationPerformance(duration: _kCardDismissFadeout);
     _fadePerformance.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed)

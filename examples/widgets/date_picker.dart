@@ -12,8 +12,8 @@ class DatePickerDemo extends StatefulComponent {
 }
 
 class DatePickerDemoState extends State<DatePickerDemo> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     DateTime now = new DateTime.now();
     _dateTime = new DateTime(now.year, now.month, now.day);
   }

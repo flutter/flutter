@@ -57,8 +57,8 @@ class Drawer extends StatefulComponent {
 }
 
 class DrawerState extends State<Drawer> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _performance = new AnimationPerformance(duration: _kBaseSettleDuration);
     _performance.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed)

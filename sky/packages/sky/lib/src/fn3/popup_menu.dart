@@ -50,8 +50,8 @@ class PopupMenu extends StatefulComponent {
 }
 
 class PopupMenuState extends State<PopupMenu> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     config.performance.addListener(_performanceChanged);
   }
 

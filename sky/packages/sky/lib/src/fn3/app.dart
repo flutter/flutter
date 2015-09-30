@@ -46,8 +46,8 @@ class AppState extends State<App> {
 
   GlobalObjectKey _navigator;
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _navigator = new GlobalObjectKey(this);
     WidgetFlutterBinding.instance.addEventListener(_backHandler);
   }
