@@ -118,6 +118,7 @@ class NavigatorState extends State<Navigator> {
   Widget build(BuildContext context) {
     List<Widget> visibleRoutes = new List<Widget>();
     bool alreadyInsertModalBarrier = false;
+    WatchableAnimationPerformance nextPerformance;
     for (int i = _history.length-1; i >= 0; i -= 1) {
       Route route = _history[i];
       if (!route.hasContent) {
@@ -133,9 +134,12 @@ class NavigatorState extends State<Navigator> {
           _history.remove(route);
         });
       };
-      Key key = new ObjectKey(route);
-      Widget widget = route.build(key, this);
-      visibleRoutes.add(widget);
+      visibleRoutes.add(
+        new KeyedSubtree(
+          key: new ObjectKey(route),
+          child: route.build(this, nextPerformance)
+        )
+      );
       if (route.isActuallyOpaque)
         break;
       assert(route.modal || route.ephemeral);
@@ -146,6 +150,7 @@ class NavigatorState extends State<Navigator> {
         ));
         alreadyInsertModalBarrier = true;
       }
+      nextPerformance = route.performance;
     }
     return new Focus(child: new Stack(visibleRoutes.reversed.toList()));
   }
@@ -238,7 +243,7 @@ abstract class Route {
 
   bool get isActuallyOpaque => (performance == null || _performance.isCompleted) && opaque;
 
-  Widget build(Key key, NavigatorState navigator);
+  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance);
   void didPop([dynamic result]) {
     if (performance == null && _onDismissed != null)
       _onDismissed();
@@ -256,14 +261,12 @@ class PageRoute extends Route {
   final RouteBuilder builder;
 
   bool get opaque => true;
-
   Duration get transitionDuration => _kTransitionDuration;
 
-  Widget build(Key key, NavigatorState navigator) {
+  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
     return new SlideTransition(
-      key: key,
       performance: performance,
       position: new AnimatedValue<Point>(_kTransitionStartPoint, end: Point.origin, curve: easeOut),
       child: new FadeTransition(
@@ -293,5 +296,5 @@ class RouteState extends Route {
     super.didPop(result);
   }
 
-  Widget build(Key key, NavigatorState navigator) => null;
+  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) => null;
 }
