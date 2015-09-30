@@ -1,7 +1,7 @@
 name: skysprites
 description: A sprite toolkit built on top of Flutter
 version: 0.0.1
-author: Chromium Authors <sky-dev@googlegroups.com>
+author: Flutter Authors <flutter-dev@googlegroups.com>
 homepage: http://flutter.io
 dependencies:
   sky: ">=0.0.36 < 0.1.0"

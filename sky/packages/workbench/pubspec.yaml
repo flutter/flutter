@@ -1,6 +1,6 @@
 name: workbench
 version: 0.0.1
-author: Chromium Authors <sky-dev@googlegroups.com>
+author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A workspace to host pub packages
 homepage: https://github.com/flutter/engine/tree/master/sky/packages/workbench
 dependencies:
