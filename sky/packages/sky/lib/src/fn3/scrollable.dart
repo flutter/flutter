@@ -147,8 +147,9 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       if (!endScrollOffset.isNaN) {
         double alignedScrollOffset = _alignedScrollSnapOffset(endScrollOffset);
         if (_scrollOffsetIsInBounds(alignedScrollOffset)) {
+          double snapVelocity = velocity.abs() * (alignedScrollOffset - scrollOffset).sign;
           Simulation toSnapSimulation = scrollBehavior.createSnapScrollSimulation(
-              scrollOffset, alignedScrollOffset, velocity);
+              scrollOffset, alignedScrollOffset, snapVelocity);
           _toEndAnimation.start(toSnapSimulation);
           return;
         }
