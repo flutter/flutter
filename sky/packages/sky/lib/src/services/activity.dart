@@ -37,6 +37,15 @@ UserFeedbackProxy _initUserFeedbackProxy() {
 final UserFeedbackProxy _userFeedbackProxy = _initUserFeedbackProxy();
 final UserFeedback userFeedback = _userFeedbackProxy.ptr;
 
+PathServiceProxy _initPathServiceProxy() {
+  PathServiceProxy proxy = new PathServiceProxy.unbound();
+  shell.requestService(null, proxy);
+  return proxy;
+}
+
+final PathServiceProxy _pathServiceProxy = _initPathServiceProxy();
+final PathService pathService = _pathServiceProxy.ptr;
+
 Color _cachedPrimaryColor;
 String _cachedLabel;
 
@@ -55,5 +64,6 @@ void updateTaskDescription(String label, Color color) {
   _activityProxy.ptr.setTaskDescription(description);
 }
 
-Future<String> getFilesDir() async => (await _activityProxy.ptr.getFilesDir()).path;
-Future<String> getCacheDir() async => (await _activityProxy.ptr.getCacheDir()).path;
+Future<String> getAppDataDir() async => (await _pathServiceProxy.ptr.getAppDataDir()).path;
+Future<String> getFilesDir() async => (await _pathServiceProxy.ptr.getFilesDir()).path;
+Future<String> getCacheDir() async => (await _pathServiceProxy.ptr.getCacheDir()).path;

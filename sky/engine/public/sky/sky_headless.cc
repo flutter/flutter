@@ -9,7 +9,7 @@
 
 namespace blink {
 
-SkyHeadless::SkyHeadless() {
+SkyHeadless::SkyHeadless(Client* client) : client_(client) {
 }
 
 SkyHeadless::~SkyHeadless() {
@@ -20,6 +20,11 @@ void SkyHeadless::Init(const String& name) {
 
   dart_controller_ = adoptPtr(new DartController);
   dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(name)));
+
+  Dart_Isolate isolate = dart_controller_->dart_state()->isolate();
+  DartIsolateScope scope(isolate);
+  DartApiScope api_scope;
+  client_->DidCreateIsolate(isolate);
 }
 
 void SkyHeadless::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {

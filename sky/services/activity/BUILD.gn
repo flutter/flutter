@@ -29,6 +29,7 @@ if (is_android) {
   android_library("activity_lib") {
     java_files = [
       "src/org/domokit/activity/ActivityImpl.java",
+      "src/org/domokit/activity/PathServiceImpl.java",
       "src/org/domokit/activity/UserFeedbackImpl.java",
     ]
 
