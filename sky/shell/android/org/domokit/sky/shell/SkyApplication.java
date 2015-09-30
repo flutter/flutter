@@ -17,12 +17,14 @@ import org.chromium.mojo.sensors.SensorServiceImpl;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojom.activity.Activity;
+import org.chromium.mojom.activity.PathService;
 import org.chromium.mojom.keyboard.KeyboardService;
 import org.chromium.mojom.media.MediaService;
 import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.sensors.SensorService;
 import org.chromium.mojom.vsync.VSyncProvider;
 import org.domokit.activity.ActivityImpl;
+import org.domokit.activity.PathServiceImpl;
 import org.domokit.media.MediaServiceImpl;
 import org.domokit.oknet.NetworkServiceImpl;
 import org.domokit.vsync.VSyncProviderImpl;
@@ -71,6 +73,22 @@ public class SkyApplication extends BaseChromiumApplication {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 Activity.MANAGER.bind(new ActivityImpl(), pipe);
+            }
+        });
+
+        registry.register(org.chromium.mojom.updater.UpdateService.MANAGER.getName(),
+                          new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                org.chromium.mojom.updater.UpdateService.MANAGER.bind(
+                    new UpdateService.MojoService(), pipe);
+            }
+        });
+
+        registry.register(PathService.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                PathService.MANAGER.bind(new PathServiceImpl(getApplicationContext()), pipe);
             }
         });
 

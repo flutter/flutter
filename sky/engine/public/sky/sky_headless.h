@@ -9,13 +9,23 @@
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
+typedef struct _Dart_Isolate* Dart_Isolate;
+
 namespace blink {
 class DartController;
 
 // This class provides a way to run Dart script without a View.
 class SkyHeadless {
  public:
-  SkyHeadless();
+  class Client {
+   public:
+    virtual void DidCreateIsolate(Dart_Isolate isolate) = 0;
+
+   protected:
+    virtual ~Client() {}
+  };
+
+  SkyHeadless(Client* client);
   ~SkyHeadless();
 
   void Init(const String& name);
@@ -23,6 +33,7 @@ class SkyHeadless {
 
  private:
   OwnPtr<DartController> dart_controller_;
+  Client* client_;
 
   DISALLOW_COPY_AND_ASSIGN(SkyHeadless);
 };

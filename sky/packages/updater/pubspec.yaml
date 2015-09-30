@@ -1,9 +1,16 @@
-name: sky_updater
+name: updater
 version: 0.0.1
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: The autoupdater for flutter
 homepage: http://flutter.io
 dependencies:
-  mojo: ^0.0.21
+  mojo: '>=0.1.0 <0.2.0'
+  sky: any
+  sky_services: any
+  path: any
+  yaml: any
+dependency_overrides:
+  sky:
+    path: ../sky
 environment:
   sdk: '>=1.12.0 <2.0.0'

@@ -9,21 +9,17 @@
 
 #include "base/android/scoped_java_ref.h"
 #include "base/memory/scoped_ptr.h"
-
-namespace blink {
-class SkyHeadless;
-}
+#include "sky/engine/public/sky/sky_headless.h"
 
 namespace sky {
 namespace shell {
 
-class UpdateTaskAndroid {
+class UpdateTaskAndroid : public blink::SkyHeadless::Client {
  public:
   UpdateTaskAndroid(JNIEnv* env, jobject update_service);
   virtual ~UpdateTaskAndroid();
 
   void Start();
-  void Finish();
 
   // This C++ object is owned by the Java UpdateTask. This is called by
   // UpdateTask when it is destroyed.
@@ -31,6 +27,9 @@ class UpdateTaskAndroid {
 
  private:
   void RunDartOnUIThread();
+
+  // SkyHeadless::Client:
+  void DidCreateIsolate(Dart_Isolate isolate) override;
 
   scoped_ptr<blink::SkyHeadless> headless_;
   base::android::ScopedJavaGlobalRef<jobject> update_service_;

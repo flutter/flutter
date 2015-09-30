@@ -10,6 +10,7 @@
 #include "sky/engine/bindings/updater_snapshot.h"
 #include "sky/engine/public/sky/sky_headless.h"
 #include "sky/shell/shell.h"
+#include "sky/shell/ui/internals.h"
 
 namespace sky {
 namespace shell {
@@ -25,7 +26,7 @@ bool RegisterUpdateService(JNIEnv* env) {
 }
 
 UpdateTaskAndroid::UpdateTaskAndroid(JNIEnv* env, jobject update_service)
-    : headless_(new blink::SkyHeadless) {
+    : headless_(new blink::SkyHeadless(this)) {
   update_service_.Reset(env, update_service);
 }
 
@@ -38,24 +39,20 @@ void UpdateTaskAndroid::Start() {
                             base::Unretained(this)));
 }
 
-void UpdateTaskAndroid::RunDartOnUIThread() {
-  // TODO(mpcomplete): pass variables into main.
+void UpdateTaskAndroid::DidCreateIsolate(Dart_Isolate isolate) {
+  Internals::Create(isolate, CreateServiceProvider(
+                                 Shell::Shared().service_provider_context()),
+                    nullptr);
+}
 
+void UpdateTaskAndroid::RunDartOnUIThread() {
   headless_->Init("sky:updater");
   headless_->RunFromSnapshotBuffer(kUpdaterSnapshotBuffer,
                                    kUpdaterSnapshotBufferSize);
-
-  // TODO(mpcomplete): Have Dart notify us when done so we can notify Java
-  // and be deleted. Or can Dart talk to Java directly?
-}
-
-void UpdateTaskAndroid::Finish() {
-  // The Java side is responsible for deleting us when finished.
-  Java_UpdateService_onUpdateFinished(base::android::AttachCurrentThread(),
-                                      update_service_.obj());
 }
 
 void UpdateTaskAndroid::Destroy(JNIEnv* env, jobject jcaller) {
+  Shell::Shared().ui_task_runner()->DeleteSoon(FROM_HERE, headless_.release());
   delete this;
 }
 
