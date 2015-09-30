@@ -62,14 +62,17 @@ class Material extends StatelessComponent {
       }
     }
     // TODO(abarth): This should use AnimatedContainer.
-    return new Container(
-      decoration: new BoxDecoration(
-        backgroundColor: getBackgroundColor(context),
-        borderRadius: edges[type],
-        boxShadow: level == 0 ? null : shadows[level],
-        shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
-      ),
-      child: contents
+    return new DefaultTextStyle(
+      style: Theme.of(context).text.body1,
+      child: new Container(
+        decoration: new BoxDecoration(
+          backgroundColor: getBackgroundColor(context),
+          borderRadius: edges[type],
+          boxShadow: level == 0 ? null : shadows[level],
+          shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
+        ),
+        child: contents
+      )
     );
   }
 }

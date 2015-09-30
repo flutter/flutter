@@ -22,6 +22,7 @@ part 'stock_list.dart';
 part 'stock_menu.dart';
 part 'stock_row.dart';
 part 'stock_settings.dart';
+part 'stock_symbol_viewer.dart';
 part 'stock_types.dart';
 
 class StocksApp extends StatefulComponent {
@@ -30,13 +31,14 @@ class StocksApp extends StatefulComponent {
 
 class StocksAppState extends State<StocksApp> {
 
-  final List<Stock> _stocks = [];
+  final Map<String, Stock> _stocks = <String, Stock>{};
+  final List<String> _symbols = <String>[];
 
   void initState(BuildContext context) {
     super.initState(context);
     new StockDataFetcher((StockData data) {
       setState(() {
-        data.appendTo(_stocks);
+        data.appendTo(_stocks, _symbols);
       });
     });
   }
@@ -72,14 +74,29 @@ class StocksAppState extends State<StocksApp> {
     }
   }
 
+  RouteBuilder _getRoute(String name) {
+    List<String> path = name.split('/');
+    if (path[0] != '')
+      return null;
+    if (path[1] == 'stock') {
+      if (path.length != 3)
+        return null;
+      if (_stocks.containsKey(path[2]))
+        return (navigator, route) => new StockSymbolViewer(navigator, _stocks[path[2]]);
+      return null;
+    }
+    return null;
+  }
+
   Widget build(BuildContext context) {
     return new App(
       title: 'Stocks',
       theme: theme,
       routes: <String, RouteBuilder>{
-         '/':         (navigator, route) => new StockHome(navigator, _stocks, _optimismSetting, modeUpdater),
+         '/':         (navigator, route) => new StockHome(navigator, _stocks, _symbols, _optimismSetting, modeUpdater),
          '/settings': (navigator, route) => new StockSettings(navigator, _optimismSetting, _backupSetting, settingsUpdater)
-      }
+      },
+      onGenerateRoute: _getRoute
     );
   }
 }

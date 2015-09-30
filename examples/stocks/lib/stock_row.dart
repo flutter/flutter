@@ -5,10 +5,15 @@
 part of stocks;
 
 class StockRow extends StatelessComponent {
-  StockRow({ Stock stock, this.onPressed }) : this.stock = stock, super(key: new Key(stock.symbol));
+  StockRow({
+    Stock stock,
+    this.onPressed,
+    this.onLongPressed
+  }) : this.stock = stock, super(key: new Key(stock.symbol));
 
   final Stock stock;
   final GestureTapListener onPressed;
+  final GestureLongPressListener onLongPressed;
 
   static const double kHeight = 79.0;
 
@@ -39,6 +44,7 @@ class StockRow extends StatelessComponent {
 
     return new GestureDetector(
       onTap: onPressed,
+      onLongPress: onLongPressed,
       child: new InkWell(
         child: new Container(
           padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),

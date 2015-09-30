@@ -9,10 +9,11 @@ typedef void ModeUpdater(StockMode mode);
 const Duration _kSnackbarSlideDuration = const Duration(milliseconds: 200);
 
 class StockHome extends StatefulComponent {
-  StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater);
+  StockHome(this.navigator, this.stocks, this.symbols, this.stockMode, this.modeUpdater);
 
   final NavigatorState navigator;
-  final List<Stock> stocks;
+  final Map<String, Stock> stocks;
+  final List<String> symbols;
   final StockMode stockMode;
   final ModeUpdater modeUpdater;
 
@@ -170,10 +171,9 @@ class StockHomeState extends State<StockHome> {
   }
 
   int selectedTabIndex = 0;
-  List<String> portfolioSymbols = ["AAPL","FIZZ", "FIVE", "FLAT", "ZINC", "ZNGA"];
 
-  Iterable<Stock> _filterByPortfolio(Iterable<Stock> stocks) {
-    return stocks.where((stock) => portfolioSymbols.contains(stock.symbol));
+  Iterable<Stock> _getStockList(Iterable<String> symbols) {
+    return symbols.map((symbol) => config.stocks[symbol]);
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
@@ -191,20 +191,25 @@ class StockHomeState extends State<StockHome> {
           stock.percentChange = 100.0 * (1.0 / stock.lastSale);
           stock.lastSale += 1.0;
         });
+      },
+      onOpen: (Stock stock) {
+        config.navigator.pushNamed('/stock/${stock.symbol}');
       }
     );
   }
+
+  static const List<String> portfolioSymbols = const <String>["AAPL","FIZZ", "FIVE", "FLAT", "ZINC", "ZNGA"];
 
   Widget buildTabNavigator() {
     return new TabNavigator(
       views: <TabNavigatorView>[
         new TabNavigatorView(
           label: const TabLabel(text: 'MARKET'),
-          builder: (BuildContext context) => buildStockList(context, _filterBySearchQuery(config.stocks))
+          builder: (BuildContext context) => buildStockList(context, _filterBySearchQuery(_getStockList(config.symbols)).toList())
         ),
         new TabNavigatorView(
           label: const TabLabel(text: 'PORTFOLIO'),
-          builder: (BuildContext context) => buildStockList(context, _filterByPortfolio(config.stocks))
+          builder: (BuildContext context) => buildStockList(context, _filterBySearchQuery(_getStockList(portfolioSymbols)).toList())
         )
       ],
       selectedIndex: selectedTabIndex,
