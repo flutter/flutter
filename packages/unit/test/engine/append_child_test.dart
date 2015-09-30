@@ -16,7 +16,7 @@ void main() {
       parent.appendChild(null);
     }, throws);
     expect(() {
-      parent.appendChild({"tagName": "div"});
+      Function.apply(parent.appendChild, [{"tagName": "div"}]);
     }, throws);
   });
 
