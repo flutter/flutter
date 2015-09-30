@@ -31,8 +31,9 @@ const List<Color> textColors = const <Color>[
   const Color(0xFF000000),
 ];
 
-final List<TextStyle> textStyles = textColors.map((c) =>
-  new TextStyle(color: c, fontWeight: bold, textAlign: TextAlign.center)).toList();
+final List<TextStyle> textStyles = textColors.map((color) {
+    return new TextStyle(color: color, fontWeight: bold, textAlign: TextAlign.center);
+}).toList();
 
 enum CellState { covered, exploded, cleared, flagged, shown }
 
@@ -272,8 +273,7 @@ class MineDiggerState extends State<MineDigger> {
 
   int bombs(int x, int y) => inBoard(x, y) && cells[y][x] ? 1 : 0;
 
-  bool inBoard(int x, int y) =>
-    (x > 0 && x < (cols - 1) && y > 0 && y < (rows -1));
+  bool inBoard(int x, int y) => x >= 0 && x < cols && y >= 0 && y < rows;
 }
 
 Widget buildCell(Widget child) {
