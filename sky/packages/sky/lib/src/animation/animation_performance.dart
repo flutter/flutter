@@ -43,7 +43,7 @@ abstract class WatchableAnimationPerformance {
   void removeStatusListener(AnimationPerformanceStatusListener listener);
 }
 
-/// A collection of values that animated based on a timeline
+/// A timeline that can be reversed and used to update [AnimatedVariable]s.
 ///
 /// For example, a performance may handle an animation of a menu opening by
 /// sliding and fading in (changing Y value and opacity) over .5 seconds. The
@@ -52,9 +52,10 @@ abstract class WatchableAnimationPerformance {
 /// [fling] the timeline causing a physics-based simulation to take over the
 /// progression.
 class AnimationPerformance implements WatchableAnimationPerformance {
-  AnimationPerformance({ AnimatedVariable variable, this.duration }) :
-    _variable = variable {
+  AnimationPerformance({ this.duration, double progress }) {
     _timeline = new Timeline(_tick);
+    if (progress != null)
+      _timeline.value = progress.clamp(0.0, 1.0);
   }
 
   /// Returns a [WatchableAnimationPerformance] for this performance,
@@ -65,18 +66,14 @@ class AnimationPerformance implements WatchableAnimationPerformance {
   /// The length of time this performance should last
   Duration duration;
 
-  /// The variable being updated by this performance
-  AnimatedVariable get variable => _variable;
-  void set variable(AnimatedVariable variable) { _variable = variable; }
-  AnimatedVariable _variable;
-
   Timeline _timeline;
   Direction _direction;
 
   /// The direction used to select the current curve
   ///
   /// Curve direction is only reset when we hit the beginning or the end of the
-  /// timeline to avoid discontinuities in the value of the variable.
+  /// timeline to avoid discontinuities in the value of any variables this
+  /// performance is used to animate.
   Direction _curveDirection;
 
   /// If non-null, animate with this timing instead of a linear timing
@@ -84,21 +81,6 @@ class AnimationPerformance implements WatchableAnimationPerformance {
 
   /// If non-null, animate with this force instead of a zero-to-one timeline.
   Force attachedForce;
-
-  /// Add a variable to this animation
-  ///
-  /// If there are no attached variables, this variable becomes the value of
-  /// [variable]. Otherwise, all the variables are stored in an [AnimatedList].
-  void addVariable(AnimatedVariable newVariable) {
-    if (variable == null) {
-      variable = newVariable;
-    } else if (variable is AnimatedList) {
-      final AnimatedList variable = this.variable; // TODO(ianh): Remove this line when the analyzer is cleverer
-      variable.variables.add(newVariable);
-    } else {
-      variable = new AnimatedList([variable, newVariable]);
-    }
-  }
 
   /// The progress of this performance along the timeline
   ///
@@ -238,8 +220,10 @@ class AnimationPerformance implements WatchableAnimationPerformance {
 
   void _tick(double t) {
     _updateCurveDirection();
-    if (variable != null)
-      variable.setProgress(_curvedProgress, _curveDirection);
+    didTick(t);
+  }
+
+  void didTick(double t) {
     _notifyListeners();
     _checkStatusChanged();
   }
@@ -247,11 +231,15 @@ class AnimationPerformance implements WatchableAnimationPerformance {
 
 /// An animation performance with an animated variable with a concrete type
 class ValueAnimation<T> extends AnimationPerformance {
-  ValueAnimation({ AnimatedValue<T> variable, Duration duration }) :
-    super(variable: variable, duration: duration);
+  ValueAnimation({ this.variable, Duration duration, double progress }) :
+    super(duration: duration, progress: progress);
 
-  AnimatedValue<T> get variable => _variable as AnimatedValue<T>;
-  void set variable(AnimatedValue<T> v) { _variable = v; }
-
+  AnimatedValue<T> variable;
   T get value => variable.value;
+
+  void didTick(double t) {
+    if (variable != null)
+      variable.setProgress(_curvedProgress, _curveDirection);
+    super.didTick(t);
+  }
 }

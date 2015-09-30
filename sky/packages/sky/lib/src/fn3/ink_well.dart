@@ -30,11 +30,11 @@ class InkSplash {
     _radius = new AnimatedValue<double>(
         _kSplashInitialSize, end: _targetRadius, curve: easeOut);
 
-    _performance = new AnimationPerformance()
-      ..variable = _radius
-      ..duration = new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
-      ..addListener(_handleRadiusChange)
-      ..play();
+    _performance = new ValueAnimation<double>(
+      variable: _radius,
+      duration: new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
+    )..addListener(_handleRadiusChange)
+     ..play();
   }
 
   final int pointer;

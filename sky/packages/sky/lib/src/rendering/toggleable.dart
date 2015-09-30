@@ -24,12 +24,17 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       : _value = value,
         _onChanged = onChanged,
         super(additionalConstraints: new BoxConstraints.tight(size)) {
-    _performance = new AnimationPerformance()
-      ..variable = _position
-      ..duration = _kToggleDuration
-      ..progress = _value ? 1.0 : 0.0
-      ..addListener(markNeedsPaint);
+    _performance = new ValueAnimation<double>(
+      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: easeIn, reverseCurve: easeOut),
+      duration: _kToggleDuration,
+      progress: _value ? 1.0 : 0.0
+    )..addListener(markNeedsPaint);
   }
+
+  ValueAnimation<double> get performance => _performance;
+  ValueAnimation<double> _performance;
+
+  double get position => _performance.value;
 
   void handleEvent(sky.Event event, BoxHitTestEntry entry) {
     if (event.type == 'pointerdown')
@@ -68,15 +73,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   ValueChanged get onChanged => _onChanged;
   ValueChanged _onChanged;
-
   void set onChanged(ValueChanged onChanged) {
     _onChanged = onChanged;
   }
-
-  AnimatedValue<double> get position => _position;
-  final AnimatedValue<double> _position =
-      new AnimatedValue<double>(0.0, end: 1.0, curve: easeIn, reverseCurve: easeOut);
-
-  AnimationPerformance get performance => _performance;
-  AnimationPerformance _performance;
 }
