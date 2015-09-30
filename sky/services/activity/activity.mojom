@@ -57,8 +57,14 @@ interface Activity {
   SetSystemUIVisibility(SystemUiVisibility visibility);
   SetRequestedOrientation(ScreenOrientation orientation);
 
-  // These are stored off the Activity on Android, but probably belong in a
-  // separate FileSystem service.
+  // TODO(mpcomplete): moving to PathService. Remove these.
+  GetFilesDir() => (string path);
+  GetCacheDir() => (string path);
+};
+
+interface PathService {
+  // Where the application files are.
+  GetAppDataDir() => (string path);
 
   // Where to store long-term files.
   GetFilesDir() => (string path);

@@ -152,6 +152,7 @@ if (is_android) {
       "//sky/services/media:interfaces_java",
       "//sky/services/media:media_lib",
       "//sky/services/oknet",
+      "//sky/services/updater:interfaces_java",
       "//sky/services/vsync:interfaces_java",
       "//sky/services/vsync:vsync_lib",
     ]
