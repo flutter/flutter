@@ -69,7 +69,7 @@ class AppState extends State<App> {
 
   Widget build(BuildContext context) {
     return new Theme(
-      data: config.theme,
+      data: config.theme ?? new ThemeData.fallback(),
       child: new DefaultTextStyle(
         style: _errorTextStyle,
         child: new Title(

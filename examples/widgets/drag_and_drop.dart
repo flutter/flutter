@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
 import 'package:sky/material.dart';
+import 'package:sky/painting.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3.dart';
-
-final double kTop = 10.0 + sky.view.paddingTop;
-final double kLeft = 10.0;
 
 class DragData {
   DragData(this.text);
@@ -21,11 +18,11 @@ class ExampleDragTarget extends StatefulComponent {
 }
 
 class ExampleDragTargetState extends State<ExampleDragTarget> {
-  String _text = 'ready';
+  String _text = 'Drag Target';
 
   void _handleAccept(DragData data) {
     setState(() {
-      _text = data.text;
+      _text = 'dropped: ${data.text}';
     });
   }
 
@@ -34,7 +31,6 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
       onAccept: _handleAccept,
       builder: (BuildContext context, List<DragData> data, _) {
         return new Container(
-          width: 100.0,
           height: 100.0,
           margin: new EdgeDims.all(10.0),
           decoration: new BoxDecoration(
@@ -54,100 +50,76 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatelessComponent {
+  Dot({ Key key, this.color }): super(key: key);
+  final Color color;
   Widget build(BuildContext context) {
     return new Container(
       width: 50.0,
       height: 50.0,
       decoration: new BoxDecoration(
-        backgroundColor: Colors.deepOrange[500]
+        backgroundColor: color
       )
     );
   }
 }
 
+class ExampleDragSource extends StatelessComponent {
+  ExampleDragSource({ Key key, this.navigator, this.name, this.color }): super(key: key);
+  final NavigatorState navigator;
+  final String name;
+  final Color color;
+  Widget build(BuildContext context) {
+    return new Draggable(
+      navigator: navigator,
+      data: new DragData(name),
+      child: new Dot(color: color),
+      feedback: new Dot(color: color)
+    );
+  }
+}
+
 class DragAndDropApp extends StatefulComponent {
+  DragAndDropApp({ this.navigator });
+  final NavigatorState navigator;
   DragAndDropAppState createState() => new DragAndDropAppState();
 }
 
 class DragAndDropAppState extends State<DragAndDropApp> {
-  DragController _dragController;
-  Offset _displacement = Offset.zero;
-
-  void _startDrag(sky.PointerEvent event) {
-    setState(() {
-      _dragController = new DragController(new DragData("Orange"));
-      _dragController.update(new Point(event.x, event.y));
-      _displacement = Offset.zero;
-    });
-  }
-
-  void _updateDrag(sky.PointerEvent event) {
-    setState(() {
-      _dragController.update(new Point(event.x, event.y));
-      _displacement += new Offset(event.dx, event.dy);
-    });
-  }
-
-  void _cancelDrag(sky.PointerEvent event) {
-    setState(() {
-      _dragController.cancel();
-      _dragController = null;
-    });
-  }
-
-  void _drop(sky.PointerEvent event) {
-    setState(() {
-      _dragController.update(new Point(event.x, event.y));
-      _dragController.drop();
-      _dragController = null;
-      _displacement = Offset.zero;
-    });
-  }
-
   Widget build(BuildContext context) {
-    List<Widget> layers = <Widget>[
-      new Row([
-        new ExampleDragTarget(),
-        new ExampleDragTarget(),
-        new ExampleDragTarget(),
-        new ExampleDragTarget(),
-      ]),
-      new Positioned(
-        top: kTop,
-        left: kLeft,
-        // TODO(abarth): We should be using a GestureDetector
-        child: new Listener(
-          onPointerDown: _startDrag,
-          onPointerMove: _updateDrag,
-          onPointerCancel: _cancelDrag,
-          onPointerUp: _drop,
-          child: new Dot()
-        )
+    return new Scaffold(
+      toolbar: new ToolBar(
+        center: new Text('Drag and Drop Flutter Demo')
       ),
-    ];
-
-    if (_dragController != null) {
-      layers.add(
-        new Positioned(
-          top: kTop + _displacement.dy,
-          left: kLeft + _displacement.dx,
-          child: new IgnorePointer(
-            child: new Opacity(
-              opacity: 0.5,
-              child: new Dot()
-            )
-          )
+      body: new Material(
+        child: new DefaultTextStyle(
+          style: Theme.of(context).text.body1.copyWith(textAlign: TextAlign.center),
+          child: new Column([
+            new Flexible(child: new Row([
+                new ExampleDragSource(navigator: config.navigator, name: 'Orange', color: const Color(0xFFFF9000)),
+                new ExampleDragSource(navigator: config.navigator, name: 'Teal', color: const Color(0xFF00FFFF)),
+                new ExampleDragSource(navigator: config.navigator, name: 'Yellow', color: const Color(0xFFFFF000)),
+              ],
+              alignItems: FlexAlignItems.center,
+              justifyContent: FlexJustifyContent.spaceAround
+            )),
+            new Flexible(child: new Row([
+              new Flexible(child: new ExampleDragTarget()),
+              new Flexible(child: new ExampleDragTarget()),
+              new Flexible(child: new ExampleDragTarget()),
+              new Flexible(child: new ExampleDragTarget()),
+            ])),
+          ])
         )
-      );
-    }
-
-    return new Container(
-      decoration: new BoxDecoration(backgroundColor: Colors.pink[500]),
-      child: new Stack(layers)
+      )
     );
   }
 }
 
 void main() {
-  runApp(new DragAndDropApp());
+  runApp(new App(
+    title: 'Drag and Drop Flutter Demo',
+    routes: {
+     '/': (NavigatorState navigator, Route route) => new DragAndDropApp(navigator: navigator)
+    }
+  ));
 }
