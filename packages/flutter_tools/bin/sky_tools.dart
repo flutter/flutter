@@ -18,6 +18,7 @@ import 'package:sky_tools/src/logs.dart';
 import 'package:sky_tools/src/run_mojo.dart';
 import 'package:sky_tools/src/start.dart';
 import 'package:sky_tools/src/stop.dart';
+import 'package:sky_tools/src/trace.dart';
 
 class FlutterCommandRunner extends CommandRunner {
   FlutterCommandRunner()
@@ -155,5 +156,6 @@ void main(List<String> args) {
     ..addCommand(new RunMojoCommand())
     ..addCommand(new StartCommand())
     ..addCommand(new StopCommand())
+    ..addCommand(new TraceCommand())
     ..run(args);
 }

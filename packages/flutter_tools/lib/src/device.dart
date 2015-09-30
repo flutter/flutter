@@ -339,6 +339,62 @@ class AndroidDevice extends _Device {
     ], prefix: 'ANDROID: ');
   }
 
+  void startTracing(AndroidApk apk) {
+    runCheckedSync([
+      adbPath,
+      'shell',
+      'am',
+      'broadcast',
+      '-a',
+      '${apk.appPackageID}.TRACING_START'
+    ]);
+  }
+
+  String stopTracing(AndroidApk apk) {
+    clearLogs();
+    runCheckedSync([
+      adbPath,
+      'shell',
+      'am',
+      'broadcast',
+      '-a',
+      '${apk.appPackageID}.TRACING_STOP'
+    ]);
+
+    RegExp traceRegExp = new RegExp(r'Saving trace to (\S+)', multiLine: true);
+    RegExp completeRegExp = new RegExp(r'Trace complete', multiLine: true);
+
+    String tracePath = null;
+    bool isComplete = false;
+    while (!isComplete) {
+      String logs = runSync([adbPath, 'logcat', '-d']);
+      Match fileMatch = traceRegExp.firstMatch(logs);
+      if (fileMatch[1] != null) {
+        tracePath = fileMatch[1];
+      }
+      isComplete = completeRegExp.hasMatch(logs);
+    }
+
+    if (tracePath != null) {
+      // adb root exits with 0 even if the command fails,
+      // so check the output string
+      String output = runSync([adbPath, 'root']);
+      if (new RegExp(r'.*cannot run as root.*').hasMatch(output)) {
+        _logging
+            .severe('Unable to download trace "${path.basename(tracePath)}"\n'
+                'You need to be able to run adb as root '
+                'on your android device');
+        return null;
+      }
+      runSync([adbPath, 'pull', tracePath]);
+      runSync([adbPath, 'shell', 'rm', tracePath]);
+      return path.basename(tracePath);
+    }
+    _logging.warning('No trace file detected. '
+        'Did you remember to start the trace before stopping it?');
+    return null;
+  }
+
   @override
   bool isConnected() => _hasValidAndroid;
 }
