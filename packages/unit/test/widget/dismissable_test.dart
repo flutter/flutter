@@ -1,9 +1,9 @@
 import 'package:quiver/testing/async.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';
-import 'widget_tester.dart';
+import '../fn3/widget_tester.dart';
 
 const double itemExtent = 100.0;
 ScrollDirection scrollDirection = ScrollDirection.vertical;
@@ -19,7 +19,7 @@ void handleOnDismissed(item) {
   dismissedItems.add(item);
 }
 
-Widget buildDismissableItem(int item) {
+Widget buildDismissableItem(BuildContext context, int item) {
   return new Dismissable(
     key: new ValueKey<int>(item),
     direction: dismissDirection,
@@ -37,7 +37,7 @@ Widget widgetBuilder() {
   return new Container(
     padding: const EdgeDims.all(10.0),
     child: new ScrollableList<int>(
-      items: [0, 1, 2, 3, 4],
+      items: [0, 1, 2, 3, 4].where((int i) => !dismissedItems.contains(i)).toList(),
       itemBuilder: buildDismissableItem,
       scrollDirection: scrollDirection,
       itemExtent: itemExtent
@@ -49,8 +49,8 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
   assert(gestureDirection != DismissDirection.horizontal);
   assert(gestureDirection != DismissDirection.vertical);
 
-  Widget itemWidget = tester.findText(item.toString());
-  expect(itemWidget, isNotNull);
+  Element itemElement = tester.findText(item.toString());
+  expect(itemElement, isNotNull);
 
   Point downLocation;
   Point upLocation;
@@ -59,23 +59,23 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
       // Note: getTopRight() returns a point that's just beyond
       // itemWidget's right edge and outside the Dismissable event
       // listener's bounds.
-      downLocation = tester.getTopRight(itemWidget) + const Offset(-0.1, 0.0);
-      upLocation = tester.getTopLeft(itemWidget);
+      downLocation = tester.getTopRight(itemElement) + const Offset(-0.1, 0.0);
+      upLocation = tester.getTopLeft(itemElement);
       break;
     case DismissDirection.right:
-      downLocation = tester.getTopLeft(itemWidget);
-      upLocation = tester.getTopRight(itemWidget);
+      downLocation = tester.getTopLeft(itemElement);
+      upLocation = tester.getTopRight(itemElement);
       break;
     case DismissDirection.up:
       // Note: getBottomLeft() returns a point that's just below
       // itemWidget's bottom edge and outside the Dismissable event
       // listener's bounds.
-      downLocation = tester.getBottomLeft(itemWidget) + const Offset(0.0, -0.1);
-      upLocation = tester.getTopLeft(itemWidget);
+      downLocation = tester.getBottomLeft(itemElement) + const Offset(0.0, -0.1);
+      upLocation = tester.getTopLeft(itemElement);
       break;
     case DismissDirection.down:
-      downLocation = tester.getTopLeft(itemWidget);
-      upLocation = tester.getBottomLeft(itemWidget);
+      downLocation = tester.getTopLeft(itemElement);
+      upLocation = tester.getBottomLeft(itemElement);
       break;
     default:
       fail("unsupported gestureDirection");
@@ -88,10 +88,10 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
 
   double t0 = 0.0;
   new FakeAsync().run((async) {
-    tester.pumpFrame(widgetBuilder, t0); // start the resize animation
-    tester.pumpFrame(widgetBuilder, t0 + 1000.0); // finish the resize animation
+    tester.pumpFrame(widgetBuilder(), t0); // start the resize animation
+    tester.pumpFrame(widgetBuilder(), t0 + 1000.0); // finish the resize animation
     async.elapse(new Duration(seconds: 1));
-    tester.pumpFrame(widgetBuilder, t0 + 2000.0); // dismiss
+    tester.pumpFrame(widgetBuilder(), t0 + 2000.0); // dismiss
     async.elapse(new Duration(seconds: 1));
   });
 }
@@ -103,7 +103,7 @@ void main() {
     dismissDirection = DismissDirection.horizontal;
     dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.right);
@@ -121,7 +121,7 @@ void main() {
     dismissDirection = DismissDirection.vertical;
     dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.up);
@@ -139,7 +139,7 @@ void main() {
     dismissDirection = DismissDirection.left;
     dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.right);
@@ -157,7 +157,7 @@ void main() {
     dismissDirection = DismissDirection.right;
     dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.left);
@@ -175,7 +175,7 @@ void main() {
     dismissDirection = DismissDirection.up;
     dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.down);
@@ -193,7 +193,7 @@ void main() {
     dismissDirection = DismissDirection.down;
     dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.up);
@@ -211,21 +211,22 @@ void main() {
     WidgetTester tester = new WidgetTester();
     scrollDirection = ScrollDirection.horizontal;
     dismissDirection = DismissDirection.down;
+    dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder);
-    Widget itemWidget = tester.findText('0');
+    tester.pumpFrame(widgetBuilder());
+    Element itemElement = tester.findText('0');
 
     TestPointer pointer = new TestPointer(5);
-    Point location = tester.getTopLeft(itemWidget);
+    Point location = tester.getTopLeft(itemElement);
     Offset offset = new Offset(0.0, 5.0);
     tester.dispatchEvent(pointer.down(location), location);
     tester.dispatchEvent(pointer.move(location + offset), location);
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     tester.dispatchEvent(pointer.move(location + (offset * 2.0)), location);
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     tester.dispatchEvent(pointer.move(location + (offset * 3.0)), location);
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
     tester.dispatchEvent(pointer.move(location + (offset * 4.0)), location);
-    tester.pumpFrame(widgetBuilder);
+    tester.pumpFrame(widgetBuilder());
   });
 }
