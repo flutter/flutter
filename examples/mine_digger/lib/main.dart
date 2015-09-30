@@ -19,17 +19,20 @@ import 'package:sky/src/fn3.dart';
 // CoveredMineNode and ExposedMineNode, none of them holding state.
 
 // Colors for each mine count (0-8):
-const List<TextStyle> textStyles = const <TextStyle>[
-  const TextStyle(color: const Color(0xFF555555), fontWeight: bold),
-  const TextStyle(color: const Color(0xFF0094FF), fontWeight: bold), // blue
-  const TextStyle(color: const Color(0xFF13A023), fontWeight: bold), // green
-  const TextStyle(color: const Color(0xFFDA1414), fontWeight: bold), // red
-  const TextStyle(color: const Color(0xFF1E2347), fontWeight: bold), // black
-  const TextStyle(color: const Color(0xFF7F0037), fontWeight: bold), // dark red
-  const TextStyle(color: const Color(0xFF000000), fontWeight: bold),
-  const TextStyle(color: const Color(0xFF000000), fontWeight: bold),
-  const TextStyle(color: const Color(0xFF000000), fontWeight: bold),
+const List<Color> textColors = const <Color>[
+  const Color(0xFF555555),
+  const Color(0xFF0094FF), // blue
+  const Color(0xFF13A023), // green
+  const Color(0xFFDA1414), // red
+  const Color(0xFF1E2347), // black
+  const Color(0xFF7F0037), // dark red
+  const Color(0xFF000000),
+  const Color(0xFF000000),
+  const Color(0xFF000000),
 ];
+
+final List<TextStyle> textStyles = textColors.map((c) =>
+  new TextStyle(color: c, fontWeight: bold, textAlign: TextAlign.center)).toList();
 
 enum CellState { covered, exploded, cleared, flagged, shown }
 
@@ -235,11 +238,8 @@ class MineDiggerState extends State<MineDigger> {
 
   // Recursively uncovers cells whose totalMineCount is zero.
   void cull(int x, int y) {
-    if ((x < 0) || (x > rows - 1))
+    if (!inBoard(x, y))
       return;
-    if ((y < 0) || (y > cols - 1))
-      return;
-
     if (uiState[y][x] == CellState.cleared)
       return;
     uiState[y][x] = CellState.cleared;
@@ -259,25 +259,21 @@ class MineDiggerState extends State<MineDigger> {
 
   int mineCount(int x, int y) {
     int count = 0;
-    int my = cols - 1;
-    int mx = rows - 1;
-
-    count += x > 0 ? bombs(x - 1, y) : 0;
-    count += x < mx ? bombs(x + 1, y) : 0;
-    count += y > 0 ? bombs(x, y - 1) : 0;
-    count += y < my ? bombs(x, y + 1 ) : 0;
-
-    count += (x > 0) && (y > 0) ? bombs(x - 1, y - 1) : 0;
-    count += (x < mx) && (y < my) ? bombs(x + 1, y + 1) : 0;
-    count += (x < mx) && (y > 0) ? bombs(x + 1, y - 1) : 0;
-    count += (x > 0) && (y < my) ? bombs(x - 1, y + 1) : 0;
-
+    count += bombs(x - 1, y);
+    count += bombs(x + 1, y);
+    count += bombs(x, y - 1);
+    count += bombs(x, y + 1 );
+    count += bombs(x - 1, y - 1);
+    count += bombs(x + 1, y + 1);
+    count += bombs(x + 1, y - 1);
+    count += bombs(x - 1, y + 1);
     return count;
   }
 
-  int bombs(int x, int y) {
-    return cells[y][x] ? 1 : 0;
-  }
+  int bombs(int x, int y) => inBoard(x, y) && cells[y][x] ? 1 : 0;
+
+  bool inBoard(int x, int y) =>
+    (x > 0 && x < (cols - 1) && y > 0 && y < (rows -1));
 }
 
 Widget buildCell(Widget child) {
@@ -343,7 +339,6 @@ class ExposedMineNode extends StatelessComponent {
     }
     return buildCell(buildInnerCell(text));
   }
-
 }
 
 void main() {
