@@ -90,7 +90,8 @@ class SnackBarState extends AnimatedState<SnackBar> {
       ),
       child: new ClipRect(
         child: new OverflowBox(
-          height: kSnackHeight,
+          minHeight: kSnackHeight,
+          maxHeight: kSnackHeight,
           child: new Material(
             level: 2,
             color: kSnackBackground,
