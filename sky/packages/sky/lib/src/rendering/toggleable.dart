@@ -53,29 +53,30 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   }
 
   void _handleTap() {
-    _onChanged(!_value);
+    if (_onChanged != null)
+      _onChanged(!_value);
   }
 
-  bool _value;
   bool get value => _value;
-
+  bool _value;
   void set value(bool value) {
-    if (value == _value) return;
+    if (value == _value)
+      return;
     _value = value;
     performance.play(value ? Direction.forward : Direction.reverse);
   }
 
-  ValueChanged _onChanged;
   ValueChanged get onChanged => _onChanged;
+  ValueChanged _onChanged;
 
   void set onChanged(ValueChanged onChanged) {
     _onChanged = onChanged;
   }
 
+  AnimatedValue<double> get position => _position;
   final AnimatedValue<double> _position =
       new AnimatedValue<double>(0.0, end: 1.0, curve: easeIn, reverseCurve: easeOut);
-  AnimatedValue<double> get position => _position;
 
-  AnimationPerformance _performance;
   AnimationPerformance get performance => _performance;
+  AnimationPerformance _performance;
 }

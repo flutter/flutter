@@ -17,7 +17,6 @@ const sky.Color _kLightUncheckedColor = const sky.Color(0x8A000000);
 const sky.Color _kDarkUncheckedColor = const sky.Color(0xB2FFFFFF);
 const double _kEdgeSize = 20.0;
 const double _kEdgeRadius = 1.0;
-const Duration _kCheckDuration = const Duration(milliseconds: 200);
 
 /// A material design checkbox
 ///
