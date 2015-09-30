@@ -39,8 +39,8 @@ class NavigatorState extends State<Navigator> {
   Route get currentRoute => _history[_currentPosition];
   bool get hasPreviousRoute => _history.length > 1;
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     PageRoute route = new PageRoute(config.routes['/']);
     assert(route != null);
     assert(!route.ephemeral);
@@ -187,7 +187,7 @@ abstract class Route {
   /// ephemeral, modal, and opaque are ignored. This is useful if the route
   /// represents some state handled by another widget. See
   /// NavigatorState.pushState().
-  /// 
+  ///
   /// Set hasContent to false if you have nothing useful to return from build().
   ///
   /// modal must be false if hasContent is false, since otherwise any
@@ -229,7 +229,7 @@ abstract class Route {
   /// Set this to true if there's no reason to build and paint the route behind
   /// you when your transition is finished, and set it to false if you do not
   /// cover the entire application surface or are in any way semi-transparent.
-  bool get opaque => false; 
+  bool get opaque => false;
 
   /// If this is set to a non-zero [Duration], then an [AnimationPerformance]
   /// object, available via the performance field, will be created when the

@@ -306,8 +306,8 @@ abstract class State<T extends StatefulComponent> {
   /// object was inserted into the tree or on the widget configuration object.
   ///
   /// If you override this, make sure your method starts with a call to
-  /// super.initState(context).
-  void initState(BuildContext context) {
+  /// super.initState().
+  void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
     assert(() { _debugLifecycleState = _StateLifecycle.initialized; return true; });
   }
@@ -834,7 +834,7 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      _state.initState(this);
+      _state.initState();
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }

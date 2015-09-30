@@ -152,8 +152,8 @@ class FocusState extends State<Focus> {
     }
   }
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     if (config.autofocus)
       FocusState._moveScopeTo(context, config);
     _updateWidgetRemovalListener(_focusedWidget);

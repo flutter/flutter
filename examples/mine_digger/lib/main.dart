@@ -54,8 +54,8 @@ class MineDiggerState extends State<MineDigger> {
   // |uiState| keeps track of the visible player progess.
   List<List<CellState>> uiState;
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     resetGame();
   }
 

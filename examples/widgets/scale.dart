@@ -11,8 +11,8 @@ class ScaleApp extends StatefulComponent {
 }
 
 class ScaleAppState extends State<ScaleApp> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _offset = Offset.zero;
     _zoom = 1.0;
   }

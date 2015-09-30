@@ -47,8 +47,8 @@ abstract class Scrollable extends StatefulComponent {
 }
 
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     if (config.initialScrollOffset is double)
       _scrollOffset = config.initialScrollOffset;
     _toEndAnimation = new AnimatedSimulation(_setScrollOffset);
@@ -672,8 +672,8 @@ class ScrollableMixedWidgetList extends Scrollable {
 }
 
 class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidgetList> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     scrollBehavior.updateExtents(
       contentExtent: double.INFINITY
     );

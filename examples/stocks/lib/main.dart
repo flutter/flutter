@@ -34,8 +34,8 @@ class StocksAppState extends State<StocksApp> {
   final Map<String, Stock> _stocks = <String, Stock>{};
   final List<String> _symbols = <String>[];
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     new StockDataFetcher((StockData data) {
       setState(() {
         data.appendTo(_stocks, _symbols);

@@ -20,8 +20,8 @@ class Changer extends StatefulComponent {
 class ChangerState extends State<Changer> {
   bool _state = false;
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     changer = this;
   }
 

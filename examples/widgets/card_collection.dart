@@ -65,8 +65,8 @@ class CardCollectionAppState extends State<CardCollectionApp> {
       _initVariableSizedCardModels();
   }
 
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     _initCardModels();
   }
 
@@ -264,7 +264,6 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     })
     .toList();
 
-    double offset;
     for (int i = 0; i <  cumulativeHeights.length; i++) {
       if (cumulativeHeights[i] >= scrollOffset)
         return 12.0 + (margins + _cardModels[i].height) / 2.0 + ((i == 0) ? 0.0 : cumulativeHeights[i - 1]);

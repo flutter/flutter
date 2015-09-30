@@ -55,8 +55,8 @@ class GestureDetector extends StatefulComponent {
 }
 
 class GestureDetectorState extends State<GestureDetector> {
-  void initState(BuildContext context) {
-    super.initState(context);
+  void initState() {
+    super.initState();
     didUpdateConfig(null);
   }
 
