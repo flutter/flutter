@@ -125,7 +125,7 @@ abstract class Scrollable extends StatefulComponent {
 
   void _startToEndAnimation({ double velocity: 0.0 }) {
     _stopAnimations();
-    Simulation simulation = scrollBehavior.release(scrollOffset, velocity);
+    Simulation simulation = scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity);
     if (simulation != null)
       _toEndAnimation.start(simulation);
   }
