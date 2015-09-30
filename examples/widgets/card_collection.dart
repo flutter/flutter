@@ -70,6 +70,36 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     _initCardModels();
   }
 
+  double _variableSizeToSnapOffset(double scrollOffset) {
+    double cumulativeHeight = 0.0;
+    double  margins = 8.0;
+    List<double> cumulativeHeights = _cardModels.map((card) {
+      cumulativeHeight += card.height + margins;
+      return cumulativeHeight;
+    })
+    .toList();
+
+    double offsetForIndex(int i) {
+      return 12.0 + (margins + _cardModels[i].height) / 2.0 + ((i == 0) ? 0.0 : cumulativeHeights[i - 1]);
+    }
+
+    for (int i = 0; i <  cumulativeHeights.length; i++) {
+      if (cumulativeHeights[i] >= scrollOffset)
+        return offsetForIndex(i);
+    }
+    return offsetForIndex(cumulativeHeights.length - 1);
+  }
+
+  double _fixedSizeToSnapOffset(double scrollOffset) {
+    double cardHeight = _cardModels[0].height;
+    int cardIndex = (scrollOffset.clamp(0.0, cardHeight * (_cardModels.length - 1)) / cardHeight).floor();
+    return 12.0 + cardIndex * cardHeight + cardHeight * 0.5;
+  }
+
+  double _toSnapOffset(double scrollOffset) {
+    return _fixedSizeCards ? _fixedSizeToSnapOffset(scrollOffset) : _variableSizeToSnapOffset(scrollOffset);
+  }
+
   void dismissCard(CardModel card) {
     if (_cardModels.contains(card)) {
       setState(() {
@@ -155,7 +185,7 @@ class CardCollectionAppState extends State<CardCollectionApp> {
           new DrawerHeader(child: new Text('Options')),
           buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
           buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
-          new DrawerDivider(),//buildDrawerSpacerItem(),
+          new DrawerDivider(),
           buildDrawerRadioItem(DismissDirection.horizontal, 'action/code'),
           buildDrawerRadioItem(DismissDirection.left, 'navigation/arrow_back'),
           buildDrawerRadioItem(DismissDirection.right, 'navigation/arrow_forward'),
@@ -253,33 +283,6 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     setState(() {
       _cardCollectionSize = newSize;
     });
-  }
-
-  double _variableSizeToSnapOffset(double scrollOffset) {
-    double cumulativeHeight = 0.0;
-    double  margins = 8.0;
-    List<double> cumulativeHeights = _cardModels.map((card) {
-      cumulativeHeight += card.height + margins;
-      return cumulativeHeight;
-    })
-    .toList();
-
-    for (int i = 0; i <  cumulativeHeights.length; i++) {
-      if (cumulativeHeights[i] >= scrollOffset)
-        return 12.0 + (margins + _cardModels[i].height) / 2.0 + ((i == 0) ? 0.0 : cumulativeHeights[i - 1]);
-    }
-
-    assert(false);
-    return 0.0;
-  }
-
-  double _fixedSizeToSnapOffset(double scrollOffset) {
-    double cardHeight = _cardModels[0].height;
-    return 12.0 + (scrollOffset / cardHeight).floor() * cardHeight + cardHeight * 0.5;
-  }
-
-  double _toSnapOffset(double scrollOffset) {
-    return _fixedSizeCards ? _fixedSizeToSnapOffset(scrollOffset) : _variableSizeToSnapOffset(scrollOffset);
   }
 
   Widget build(BuildContext context) {
