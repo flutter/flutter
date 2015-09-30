@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include <string>
+#include <iostream>
+#include <iomanip>
+
 #include "sky/compositor/statistics_layer.h"
 
 namespace sky {
@@ -37,9 +40,13 @@ void StatisticsLayer::Paint(PaintContext::ScopedFrame& frame) {
 
   if (options_.isEnabled(CompositorOptions::Option::DisplayFrameStatistics)) {
     // Frame (2032): 3.26ms
+    double msPerFrame = context.frame_time().lastLap().InMillisecondsF();
+    double fps = 1e3 / msPerFrame;
+
     std::stringstream stream;
-    stream << "Frame (" << context.frame_count().count()
-           << "): " << context.frame_time().lastLap().InMillisecondsF() << "ms";
+    stream.setf(std::ios::fixed | std::ios::showpoint);
+    stream << std::setprecision(2);
+    stream << fps << " FPS | " << msPerFrame << "ms/frame";
     PaintContext_DrawStatisticsText(frame.canvas(), stream.str(), x, y);
     y += kLineSpacing;
   }
