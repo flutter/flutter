@@ -42,9 +42,13 @@ class StockData {
 
   StockData(this._data);
 
-  void appendTo(List<Stock> stocks) {
-    for (List<String> fields in _data)
-      stocks.add(new Stock.fromFields(fields));
+  void appendTo(Map<String, Stock> stocks, List<String> symbols) {
+    for (List<String> fields in _data) {
+      Stock stock = new Stock.fromFields(fields);
+      symbols.add(stock.symbol);
+      stocks[stock.symbol] = stock;
+    }
+    symbols.sort();
   }
 }
 

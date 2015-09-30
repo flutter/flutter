@@ -167,7 +167,7 @@ class MenuRoute extends Route {
     return result;
   }
 
-  bool get ephemeral => true;
+  bool get ephemeral => false; // we could make this true, but then we'd have to use popRoute(), not pop(), in menus
   bool get modal => true;
 
   Duration get transitionDuration => _kMenuDuration;
