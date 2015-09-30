@@ -195,13 +195,16 @@ class EditableTextState extends State<EditableText> {
     else if (!config.focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    return new _EditableTextWidget(
-      value: config.value,
-      style: config.style,
-      cursorColor: config.cursorColor,
-      showCursor: _showCursor,
-      onContentSizeChanged: config.onContentSizeChanged,
-      scrollOffset: config.scrollOffset
+    return new SizedBox(
+      width: double.INFINITY,
+      child: new _EditableTextWidget(
+        value: config.value,
+        style: config.style,
+        cursorColor: config.cursorColor,
+        showCursor: _showCursor,
+        onContentSizeChanged: config.onContentSizeChanged,
+        scrollOffset: config.scrollOffset
+      )
     );
   }
 }
