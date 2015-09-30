@@ -1,6 +1,6 @@
 name: sky_engine
 version: 0.0.29
-author: Chromium Authors <sky-dev@googlegroups.com>
+author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Dart SDK extensions for dart:sky
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
