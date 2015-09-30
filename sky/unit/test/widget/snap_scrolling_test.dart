@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:quiver/testing/async.dart';
 import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
@@ -49,11 +51,11 @@ void set scrollOffset(double value) {
   scrollableState.scrollTo(value);
 }
 
-void fling(double velocity) {
+Future fling(double velocity) {
   Offset velocityOffset = scrollDirection == ScrollDirection.vertical
     ? new Offset(0.0, velocity)
     : new Offset(velocity, 0.0);
-  scrollableState.fling(velocityOffset);
+  return scrollableState.fling(velocityOffset);
 }
 
 void main() {
@@ -66,7 +68,7 @@ void main() {
     expect(scrollOffset, 0.0);
 
     double t0 = 0.0;
-    int dt = 1000;
+    int dt = 2000;
     new FakeAsync().run((async) {
       fling(-800.0);
       tester.pumpFrameWithoutChange(t0); // Start the scheduler at 0.0
@@ -82,10 +84,10 @@ void main() {
     expect(scrollOffset, 0.0);
 
     double t0 = 0.0;
-    int dt = 1000;
+    int dt = 2000;
     new FakeAsync().run((async) {
       fling(-2000.0);
-      tester.pumpFrameWithoutChange(t0); // Start the scheduler at 0.0
+      tester.pumpFrameWithoutChange(t0);
       tester.pumpFrameWithoutChange(t0 + dt);
       async.elapse(new Duration(milliseconds: dt));
       expect(scrollOffset, closeTo(400.0, 1.0));
@@ -94,14 +96,14 @@ void main() {
 
   test('ScrollableList snap scrolling, fling(800)', () {
     scrollOffset = 400.0;
-    tester.pumpFrameWithoutChange(1000.0);
+    tester.pumpFrameWithoutChange();
     expect(scrollOffset, 400.0);
 
     double t0 = 0.0;
     int dt = 2000;
     new FakeAsync().run((async) {
       fling(800.0);
-      tester.pumpFrameWithoutChange(t0); // Start the scheduler at 0.0
+      tester.pumpFrameWithoutChange(t0);
       tester.pumpFrameWithoutChange(t0 + dt);
       async.elapse(new Duration(milliseconds: dt));
       expect(scrollOffset, closeTo(0.0, 1.0));
@@ -110,17 +112,37 @@ void main() {
 
   test('ScrollableList snap scrolling, fling(2000)', () {
     scrollOffset = 800.0;
-    tester.pumpFrameWithoutChange(1000.0);
+    tester.pumpFrameWithoutChange();
     expect(scrollOffset, 800.0);
 
     double t0 = 0.0;
-    int dt = 1500;
+    int dt = 2000;
     new FakeAsync().run((async) {
       fling(2000.0);
-      tester.pumpFrameWithoutChange(t0); // Start the scheduler at 0.0
+      tester.pumpFrameWithoutChange(t0);
       tester.pumpFrameWithoutChange(t0 + dt);
       async.elapse(new Duration(milliseconds: dt));
       expect(scrollOffset, closeTo(200.0, 1.0));
+    });
+  });
+
+  test('ScrollableList snap scrolling, fling(2000).then()', () {
+    scrollOffset = 800.0;
+    tester.pumpFrameWithoutChange();
+    expect(scrollOffset, 800.0);
+
+    double t0 = 0.0;
+    int dt = 2000;
+    bool completed = false;
+    new FakeAsync().run((async) {
+      fling(2000.0).then((_) {
+        completed = true;
+        expect(scrollOffset, closeTo(200.0, 1.0));
+      });
+      tester.pumpFrameWithoutChange(t0);
+      tester.pumpFrameWithoutChange(t0 + dt);
+      async.elapse(new Duration(milliseconds: dt));
+      expect(completed, true);
     });
   });
 
