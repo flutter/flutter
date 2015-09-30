@@ -25,15 +25,21 @@ class RootComponentState extends State<RootComponent> {
 
 class WidgetTester {
 
+  // See thttps://github.com/flutter/engine/issues/1084 regarding frameTimeMs vs FakeAsync
+
   void pumpFrame(Widget widget, [ double frameTimeMs = 0.0 ]) {
     runApp(widget);
-    scheduler.beginFrame(frameTimeMs); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+    scheduler.beginFrame(frameTimeMs);
   }
 
   void pumpFrameWithoutChange([ double frameTimeMs = 0.0 ]) {
-    scheduler.beginFrame(frameTimeMs); // TODO(ianh): https://github.com/flutter/engine/issues/1084
+    scheduler.beginFrame(frameTimeMs);
   }
 
+  void reset() {
+    runApp(new Container());
+    scheduler.beginFrame(0.0);
+  }
 
   List<Layer> _layers(Layer layer) {
     List<Layer> result = [layer];

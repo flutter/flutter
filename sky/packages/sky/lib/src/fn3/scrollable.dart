@@ -589,7 +589,7 @@ class PageableList<T> extends ScrollableList<T> {
     ItemBuilder<T> itemBuilder,
     bool itemsWrap: false,
     double itemExtent,
-    PageChangedCallback this.pageChanged,
+    this.onPageChanged,
     EdgeDims padding,
     this.duration: const Duration(milliseconds: 200),
     this.curve: ease
@@ -607,7 +607,7 @@ class PageableList<T> extends ScrollableList<T> {
 
   final Duration duration;
   final Curve curve;
-  final PageChangedCallback pageChanged;
+  final PageChangedCallback onPageChanged;
 
   PageableListState<T> createState() => new PageableListState();
 }
@@ -633,8 +633,8 @@ class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
   int get currentPage => (scrollOffset / config.itemExtent).floor() % itemCount;
 
   void _notifyPageChanged(_) {
-    if (config.pageChanged != null)
-      config.pageChanged(currentPage);
+    if (config.onPageChanged != null)
+      config.onPageChanged(currentPage);
   }
 
   void settleScrollOffset() {
