@@ -2,36 +2,44 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
 import '../engine/mock_events.dart';
 
-typedef Widget WidgetBuilder();
+class RootComponent extends StatefulComponent {
+  RootComponentState createState() => new RootComponentState();
+}
 
-class TestApp extends App {
-
-  WidgetBuilder _builder;
-  void set builder (WidgetBuilder value) {
-    setState(() {
-      _builder = value;
-    });
+class RootComponentState extends State<RootComponent> {
+  Widget _child = new DecoratedBox(decoration: new BoxDecoration());
+  Widget get child => _child;
+  void set child(Widget value) {
+    if (value != _child) {
+      setState(() {
+        _child = value;
+      });
+    }
   }
-
-  Widget build() {
-    if (_builder != null)
-      return _builder();
-    return new Container();
-  }
+  Widget build(BuildContext context) => child;
 }
 
 class WidgetTester {
-  WidgetTester() {
-    _app = new TestApp();
-    runApp(_app);
-    scheduler.beginFrame(0.0); // to initialise the app
+
+  // See thttps://github.com/flutter/engine/issues/1084 regarding frameTimeMs vs FakeAsync
+
+  void pumpFrame(Widget widget, [ double frameTimeMs = 0.0 ]) {
+    runApp(widget);
+    scheduler.beginFrame(frameTimeMs);
   }
 
-  TestApp _app;
+  void pumpFrameWithoutChange([ double frameTimeMs = 0.0 ]) {
+    scheduler.beginFrame(frameTimeMs);
+  }
+
+  void reset() {
+    runApp(new Container());
+    scheduler.beginFrame(0.0);
+  }
 
   List<Layer> _layers(Layer layer) {
     List<Layer> result = [layer];
@@ -47,70 +55,81 @@ class WidgetTester {
   }
   List<Layer> get layers => _layers(FlutterBinding.instance.renderView.layer);
 
-  void walkWidgets(WidgetTreeWalker walker) {
-    void walk(Widget widget) {
-      walker(widget);
-      widget.walkChildren(walk);
-    }
 
-    _app.walkChildren(walk);
+  void walkElements(ElementVisitor visitor) {
+    void walk(Element element) {
+      visitor(element);
+      element.visitChildren(walk);
+    }
+    WidgetFlutterBinding.instance.renderViewElement.visitChildren(walk);
   }
 
-  Widget findWidget(bool predicate(Widget widget)) {
+  Element findElement(bool predicate(Element element)) {
     try {
-      walkWidgets((Widget widget) {
-        if (predicate(widget))
-          throw widget;
+      walkElements((Element element) {
+        if (predicate(element))
+          throw element;
       });
-    } catch (e) {
-      if (e is Widget)
-        return e;
-      rethrow;
+    } on Element catch (e) {
+      return e;
     }
     return null;
   }
 
-  Text findText(String text) {
-    return findWidget((Widget widget) {
-      return widget is Text && widget.data == text;
+  Element findElementByKey(Key key) {
+    return findElement((Element element) => element.widget.key == key);
+  }
+
+  Element findText(String text) {
+    return findElement((Element element) {
+      return element.widget is Text && element.widget.data == text;
     });
   }
 
-  Point _getWidgetPoint(Widget widget, Function sizeToPoint) {
-    assert(widget != null);
-    RenderBox box = widget.renderObject as RenderBox;
+  State findStateOfType(Type type) {
+    StatefulComponentElement element = findElement((Element element) {
+      return element is StatefulComponentElement && element.state.runtimeType == type;
+    });
+    return element?.state;
+  }
+
+  State findStateByConfig(Widget config) {
+    StatefulComponentElement element = findElement((Element element) {
+      return element is StatefulComponentElement && element.state.config == config;
+    });
+    return element?.state;
+  }
+
+  Point getCenter(Element element) {
+    return _getElementPoint(element, (Size size) => size.center(Point.origin));
+  }
+
+  Point getTopLeft(Element element) {
+    return _getElementPoint(element, (_) => Point.origin);
+  }
+
+  Point getTopRight(Element element) {
+    return _getElementPoint(element, (Size size) => size.topRight(Point.origin));
+  }
+
+  Point getBottomLeft(Element element) {
+    return _getElementPoint(element, (Size size) => size.bottomLeft(Point.origin));
+  }
+
+  Point getBottomRight(Element element) {
+    return _getElementPoint(element, (Size size) => size.bottomRight(Point.origin));
+  }
+
+  Point _getElementPoint(Element element, Function sizeToPoint) {
+    assert(element != null);
+    RenderBox box = element.renderObject as RenderBox;
     assert(box != null);
     return box.localToGlobal(sizeToPoint(box.size));
   }
 
-  Point getCenter(Widget widget) {
-    return _getWidgetPoint(widget, (Size size) => size.center(Point.origin));
-  }
 
-  Point getTopLeft(Widget widget) {
-    return _getWidgetPoint(widget, (_) => Point.origin);
-  }
-
-  Point getTopRight(Widget widget) {
-    return _getWidgetPoint(widget, (Size size) => size.topRight(Point.origin));
-  }
-
-  Point getBottomLeft(Widget widget) {
-    return _getWidgetPoint(widget, (Size size) => size.bottomLeft(Point.origin));
-  }
-
-  Point getBottomRight(Widget widget) {
-    return _getWidgetPoint(widget, (Size size) => size.bottomRight(Point.origin));
-  }
-
-  HitTestResult _hitTest(Point location) => FlutterBinding.instance.hitTest(location);
-
-  void _dispatchEvent(sky.Event event, HitTestResult result) {
-    FlutterBinding.instance.dispatchEvent(event, result);
-  }
-
-  void tap(Widget widget, { int pointer: 1 }) {
-    tapAt(getCenter(widget), pointer: pointer);
+  void tap(Element element, { int pointer: 1 }) {
+    tapAt(getCenter(element), pointer: pointer);
   }
 
   void tapAt(Point location, { int pointer: 1 }) {
@@ -120,8 +139,8 @@ class WidgetTester {
     _dispatchEvent(p.up(), result);
   }
 
-  void scroll(Widget widget, Offset offset, { int pointer: 1 }) {
-    Point startLocation = getCenter(widget);
+  void scroll(Element element, Offset offset, { int pointer: 1 }) {
+    Point startLocation = getCenter(element);
     Point endLocation = startLocation + offset;
     TestPointer p = new TestPointer(pointer);
     // Events for the entire press-drag-release gesture are dispatched
@@ -136,13 +155,10 @@ class WidgetTester {
     _dispatchEvent(event, _hitTest(location));
   }
 
-  void pumpFrame(WidgetBuilder builder, [double frameTimeMs = 0.0]) {
-    _app.builder = builder;
-    scheduler.beginFrame(frameTimeMs);
-  }
+  HitTestResult _hitTest(Point location) => WidgetFlutterBinding.instance.hitTest(location);
 
-  void pumpFrameWithoutChange([double frameTimeMs = 0.0]) {
-    scheduler.beginFrame(frameTimeMs);
+  void _dispatchEvent(sky.Event event, HitTestResult result) {
+    WidgetFlutterBinding.instance.dispatchEvent(event, result);
   }
 
 }
