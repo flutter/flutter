@@ -26,6 +26,9 @@ class RaisedButton extends MaterialButton {
 }
 
 class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
+
+  int get level => config.enabled ? (highlight ? 2 : 1) : 0;
+
   Color getColor(BuildContext context) {
     if (config.enabled) {
       switch (Theme.of(context).brightness) {
@@ -36,16 +39,25 @@ class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
             return Colors.grey[300];
           break;
         case ThemeBrightness.dark:
+          Map<int, Color> swatch = Theme.of(context).primarySwatch ?? Colors.blue;
           if (highlight)
-            return Theme.of(context).primarySwatch[700];
+            return swatch[700];
           else
-            return Theme.of(context).primarySwatch[600];
+            return swatch[600];
           break;
       }
     } else {
-      return Colors.grey[350];
+      switch (Theme.of(context).brightness) {
+        case ThemeBrightness.light:
+          return Colors.black12;
+        case ThemeBrightness.dark:
+          return Colors.white12;
+      }
     }
   }
 
-  int get level => config.enabled ? (highlight ? 2 : 1) : 0;
+  ThemeBrightness getColorBrightness(BuildContext context) {
+    return Theme.of(context).brightness;
+  }
+
 }

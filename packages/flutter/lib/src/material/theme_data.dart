@@ -59,7 +59,11 @@ class ThemeData {
   factory ThemeData.dark() => new ThemeData(brightness: ThemeBrightness.dark);
   factory ThemeData.fallback() => new ThemeData.light();
 
+  /// The brightness of the overall theme of the application. Used by widgets
+  /// like buttons to determine what color to pick when not using the primary or
+  /// accent color.
   final ThemeBrightness brightness;
+
   final Map<int, Color> primarySwatch;
   final Color canvasColor;
   final Color cardColor;
@@ -70,14 +74,21 @@ class ThemeData {
   final double hintOpacity;
   final TextTheme text;
 
-  Color _primaryColor;
+  /// The background colour for major parts of the app (toolbars, tab bars, etc)
   Color get primaryColor => _primaryColor;
+  Color _primaryColor;
 
+  /// The brightness of the primaryColor. Used to determine the colour of text and
+  /// icons placed on top of the primary color (e.g. toolbar text).
   final ThemeBrightness primaryColorBrightness;
 
-  Color _accentColor;
+  /// The foreground color for widgets (knobs, text, etc)
   Color get accentColor => _accentColor;
+  Color _accentColor;
 
+  /// The brightness of the accentColor. Used to determine the colour of text
+  /// and icons placed on top of the accent color (e.g. the icons on a floating
+  /// action button).
   final ThemeBrightness accentColorBrightness;
 
   bool operator==(Object other) {

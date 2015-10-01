@@ -83,6 +83,29 @@ class StockHomeState extends State<StockHome> {
         ),
         new DrawerItem(
           icon: 'action/account_balance',
+          onPressed: () {
+            showDialog(config.navigator, (NavigatorState navigator) {
+              return new Dialog(
+                title: new Text('Not Implemented'),
+                content: new Text('This feature has not yet been implemented.'),
+                actions: [
+                  new FlatButton(
+                    child: new Text('USE IT'),
+                    enabled: false,
+                    onPressed: () {
+                      navigator.pop(false);
+                    }
+                  ),
+                  new FlatButton(
+                    child: new Text('OH WELL'),
+                    onPressed: () {
+                      navigator.pop(false);
+                    }
+                  ),
+                ]
+              );
+            });
+          },
           child: new Text('Account Balance')
         ),
         new DrawerItem(
