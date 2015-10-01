@@ -1,8 +1,8 @@
 name: playfair
-description: A simple charting library for Sky
-version: 0.0.8
-author: Chromium Authors <sky-dev@googlegroups.com>
-homepage: https://github.com/domokit/playfair
+description: A simple charting library for Flutter
+version: 0.0.9
+author: Flutter Authors <flutter-dev@googlegroups.com>
+homepage: https://github.com/flutter/playfair
 dependencies:
   sky: any
   sky_tools: any
