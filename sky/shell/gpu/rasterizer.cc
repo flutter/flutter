@@ -52,21 +52,24 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   if (surface_->GetSize() != size)
     surface_->Resize(size);
 
+  // There is no way for the compositor to know how long the layer tree
+  // construction took. Fortunately, the layer tree does. Grab that time
+  // for instrumentation.
+  paint_context_.engine_time().setLapTime(layer_tree->construction_time());
+
   // Use the canvas from the Ganesh Surface to render the current frame into
-
-  EnsureGLContext();
-  CHECK(context_->MakeCurrent(surface_.get()));
-  EnsureGaneshSurface(surface_->GetBackingFrameBufferObject(), size);
-  SkCanvas* canvas = ganesh_surface_->canvas();
-
-  canvas->clear(SK_ColorBLACK);
   {
+    EnsureGLContext();
+    CHECK(context_->MakeCurrent(surface_.get()));
+    EnsureGaneshSurface(surface_->GetBackingFrameBufferObject(), size);
+    SkCanvas* canvas = ganesh_surface_->canvas();
     sky::compositor::PaintContext::ScopedFrame frame =
         paint_context_.AcquireFrame(*canvas);
+    canvas->clear(SK_ColorBLACK);
     layer_tree->root_layer()->Paint(frame);
+    canvas->flush();
+    surface_->SwapBuffers();
   }
-  canvas->flush();
-  surface_->SwapBuffers();
 
   // Optionally, if the user has specified tracing the current scene to a file,
   // acquire another frame and draw into it to obtain an SkPicture to serialize

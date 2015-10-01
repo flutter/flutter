@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "base/macros.h"
+#include "base/time/time.h"
 #include "sky/compositor/layer.h"
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -29,9 +30,19 @@ class LayerTree {
 
   void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }
 
+  void set_construction_time(const base::TimeDelta& delta) {
+    construction_time_ = delta;
+  }
+
+  const base::TimeDelta& construction_time() const {
+    return construction_time_;
+  }
+
  private:
   SkISize frame_size_;  // Physical pixels.
   std::unique_ptr<Layer> root_layer_;
+
+  base::TimeDelta construction_time_;
 
   DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };

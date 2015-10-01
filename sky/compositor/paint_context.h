@@ -24,7 +24,7 @@ class PaintContext {
    public:
     SkCanvas& canvas() { return *canvas_; }
 
-    const PaintContext& context() const { return context_; }
+    PaintContext& context() const { return context_; }
 
     ScopedFrame(ScopedFrame&& frame);
 
@@ -59,9 +59,12 @@ class PaintContext {
 
   const instrumentation::Stopwatch& frame_time() const { return frame_time_; }
 
+  instrumentation::Stopwatch& engine_time() { return engine_time_; };
+
  private:
   instrumentation::Counter frame_count_;
   instrumentation::Stopwatch frame_time_;
+  instrumentation::Stopwatch engine_time_;
 
   void beginFrame(ScopedFrame& frame);
   void endFrame(ScopedFrame& frame);

@@ -36,6 +36,15 @@ void CompositorOptions::setEnabled(Option option, bool enabled) {
   }
 }
 
+bool CompositorOptions::anyEnabled() const {
+  for (auto enabled : options_) {
+    if (enabled) {
+      return true;
+    }
+  }
+  return false;
+}
+
 CompositorOptions::~CompositorOptions() {
 }
 

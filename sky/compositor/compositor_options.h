@@ -16,8 +16,10 @@ class CompositorOptions {
  public:
   using OptionType = unsigned int;
   enum class Option : OptionType {
-    DisplayFrameStatistics,
-    VisualizeFrameStatistics,
+    DisplayRasterizerStatistics,
+    VisualizeRasterizerStatistics,
+    DisplayEngineStatistics,
+    VisualizeEngineStatistics,
 
     TerminationSentinel,
   };
@@ -28,6 +30,8 @@ class CompositorOptions {
   ~CompositorOptions();
 
   bool isEnabled(Option option) const;
+
+  bool anyEnabled() const;
 
   void setEnabled(Option option, bool enabled);
 

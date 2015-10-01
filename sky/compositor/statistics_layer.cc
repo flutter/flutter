@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include <string>
+#include <iostream>
+#include <iomanip>
+
 #include "sky/compositor/statistics_layer.h"
 
 namespace sky {
@@ -23,26 +26,57 @@ static void PaintContext_DrawStatisticsText(SkCanvas& canvas,
   canvas.drawText(string.c_str(), string.size(), x, y, paint);
 }
 
-void StatisticsLayer::Paint(PaintContext::ScopedFrame& frame) {
+static void VisualizeStopWatch(SkCanvas& canvas,
+                               const instrumentation::Stopwatch& stopwatch,
+                               SkScalar width,
+                               bool show_graph,
+                               bool show_labels,
+                               std::string label_prefix) {
   const int x = 8;
-  int y = 70;
-  static const int kLineSpacing = 18;
+  const int y = 70;
+  const int height = 80;
 
-  const PaintContext& context = frame.context();
-
-  if (options_.isEnabled(CompositorOptions::Option::VisualizeFrameStatistics)) {
-    SkRect visualizationRect = SkRect::MakeWH(paint_bounds().width(), 80);
-    context.frame_time().visualize(frame.canvas(), visualizationRect);
+  if (show_graph) {
+    SkRect visualizationRect = SkRect::MakeWH(width, height);
+    stopwatch.visualize(canvas, visualizationRect);
   }
 
-  if (options_.isEnabled(CompositorOptions::Option::DisplayFrameStatistics)) {
-    // Frame (2032): 3.26ms
+  if (show_labels) {
+    double msPerFrame = stopwatch.lastLap().InMillisecondsF();
+    double fps = 1e3 / msPerFrame;
+
     std::stringstream stream;
-    stream << "Frame (" << context.frame_count().count()
-           << "): " << context.frame_time().lastLap().InMillisecondsF() << "ms";
-    PaintContext_DrawStatisticsText(frame.canvas(), stream.str(), x, y);
-    y += kLineSpacing;
+    stream.setf(std::ios::fixed | std::ios::showpoint);
+    stream << std::setprecision(2);
+    stream << label_prefix << " " << fps << " FPS | " << msPerFrame
+           << "ms/frame";
+    PaintContext_DrawStatisticsText(canvas, stream.str(), x, y);
   }
+
+  if (show_labels || show_graph) {
+    canvas.translate(0, height);
+  }
+}
+
+void StatisticsLayer::Paint(PaintContext::ScopedFrame& frame) {
+  if (!options_.anyEnabled()) {
+    return;
+  }
+
+  using Opt = CompositorOptions::Option;
+
+  SkScalar width = paint_bounds().width();
+  SkAutoCanvasRestore save(&frame.canvas(), false);
+
+  VisualizeStopWatch(frame.canvas(), frame.context().frame_time(), width,
+                     options_.isEnabled(Opt::VisualizeRasterizerStatistics),
+                     options_.isEnabled(Opt::DisplayRasterizerStatistics),
+                     "Rasterizer");
+
+  VisualizeStopWatch(frame.canvas(), frame.context().engine_time(), width,
+                     options_.isEnabled(Opt::VisualizeEngineStatistics),
+                     options_.isEnabled(Opt::DisplayEngineStatistics),
+                     "Engine");
 }
 
 }  // namespace compositor
