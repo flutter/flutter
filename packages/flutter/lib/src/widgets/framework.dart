@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:sky/rendering.dart';
@@ -118,17 +119,18 @@ abstract class GlobalKey extends Key {
     assert(removed);
   }
 
-  static void checkForDuplicatesAndNotifyListeners() {
-    assert(() {
-      String message = '';
-      for (GlobalKey key in _debugDuplicates.keys) {
-        message += 'Duplicate GlobalKey found amongst mounted elements: $key (${_debugDuplicates[key]} instances)\n';
-        message += 'Most recently registered instance is:\n${_registry[key]}\n';
-      }
-      if (!_debugDuplicates.isEmpty)
-        throw message;
-      return true;
-    });
+  static bool _debugCheckForDuplicates() {
+    String message = '';
+    for (GlobalKey key in _debugDuplicates.keys) {
+      message += 'Duplicate GlobalKey found amongst mounted elements: $key (${_debugDuplicates[key]} instances)\n';
+      message += 'Most recently registered instance is:\n${_registry[key]}\n';
+    }
+    if (!_debugDuplicates.isEmpty)
+      throw message;
+    return true;
+  }
+
+  static void _notifyListeners() {
     if (_removedKeys.isEmpty)
       return;
     try {
@@ -409,9 +411,54 @@ bool _canUpdate(Widget oldWidget, Widget newWidget) {
 
 enum _ElementLifecycle {
   initial,
-  mounted,
+  active,
+  inactive,
   defunct,
 }
+
+class _FreeElements {
+  bool _locked = false;
+  final Set<Element> _elements = new Set<Element>();
+
+  void _finalize(Element element) {
+    assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+    element.unmount();
+    assert(element._debugLifecycleState == _ElementLifecycle.defunct);
+    element.visitChildren((Element child) {
+      assert(child._parent == element);
+      _finalize(child);
+    });
+  }
+
+  void finalizeAll() {
+    BuildableElement.lockState(() {
+      try {
+        _locked = true;
+        for (Element element in _elements)
+          _finalize(element);
+      } finally {
+        _elements.clear();
+        _locked = false;
+      }
+    });
+  }
+
+  void add(Element element) {
+    assert(!_locked);
+    assert(!_elements.contains(element));
+    assert(element._parent == null);
+    void deactivate(Element element) {
+      assert(element._debugLifecycleState == _ElementLifecycle.active);
+      element.deactivate();
+      assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+      element.visitChildren(deactivate);
+    }
+    deactivate(element);
+    _elements.add(element);
+  }
+}
+
+final _FreeElements _freeElements = new _FreeElements();
 
 typedef void ElementVisitor(Element element);
 
@@ -468,15 +515,6 @@ abstract class Element<T extends Widget> implements BuildContext {
   /// Calls the argument for each child. Must be overridden by subclasses that support having children.
   void visitChildren(ElementVisitor visitor) { }
 
-  /// Calls the argument for each descendant, depth-first pre-order.
-  void visitDescendants(ElementVisitor visitor) {
-    void visit(Element element) {
-      visitor(element);
-      element.visitChildren(visit);
-    }
-    visitChildren(visit);
-  }
-
   /// This method is the core of the system.
   ///
   /// It is called each time we are to add, update, or remove a child based on
@@ -523,8 +561,14 @@ abstract class Element<T extends Widget> implements BuildContext {
     }
     child = newWidget.createElement();
     child.mount(this, newSlot);
-    assert(child._debugLifecycleState == _ElementLifecycle.mounted);
+    assert(child._debugLifecycleState == _ElementLifecycle.active);
     return child;
+  }
+
+  static void finalizeTree() {
+    _freeElements.finalizeAll();
+    assert(GlobalKey._debugCheckForDuplicates);
+    scheduleMicrotask(GlobalKey._notifyListeners);
   }
 
   /// Called when an Element is given a new parent shortly after having been
@@ -535,7 +579,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
     assert(widget != null);
     assert(_parent == null);
-    assert(parent == null || parent._debugLifecycleState == _ElementLifecycle.mounted);
+    assert(parent == null || parent._debugLifecycleState == _ElementLifecycle.active);
     assert(slot == null);
     assert(depth == null);
     _parent = parent;
@@ -545,12 +589,12 @@ abstract class Element<T extends Widget> implements BuildContext {
       final GlobalKey key = widget.key;
       key._register(this);
     }
-    assert(() { _debugLifecycleState = _ElementLifecycle.mounted; return true; });
+    assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
   }
 
   /// Called when an Element receives a new configuration widget.
   void update(T newWidget) {
-    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
     assert(newWidget != null);
     assert(depth != null);
@@ -562,7 +606,7 @@ abstract class Element<T extends Widget> implements BuildContext {
   /// subclasses that have multiple children, to update the slot of a particular
   /// child when the child is moved in its child list.
   void updateSlotForChild(Element child, dynamic newSlot) {
-    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(child != null);
     assert(child._parent == this);
     void visit(Element element) {
@@ -574,40 +618,40 @@ abstract class Element<T extends Widget> implements BuildContext {
   }
 
   void _updateSlot(dynamic newSlot) {
-    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
     assert(_parent != null);
-    assert(_parent._debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_parent._debugLifecycleState == _ElementLifecycle.active);
     assert(depth != null);
     _slot = newSlot;
+  }
+
+  void detachRenderObject() {
+    visitChildren((Element child) {
+      child.detachRenderObject();
+    });
+    _slot = null;
   }
 
   void _detachChild(Element child) {
     assert(child != null);
     assert(child._parent == this);
     child._parent = null;
+    child.detachRenderObject();
+    _freeElements.add(child);
+  }
 
-    bool haveDetachedRenderObject = false;
-    void detach(Element descendant) {
-      if (!haveDetachedRenderObject) {
-        descendant._slot = null;
-        if (descendant is RenderObjectElement) {
-          descendant.detachRenderObject();
-          haveDetachedRenderObject = true;
-        }
-      }
-      descendant.unmount();
-      assert(descendant._debugLifecycleState == _ElementLifecycle.defunct);
-    }
-
-    detach(child);
-    child.visitDescendants(detach);
+  void deactivate() {
+    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(widget != null);
+    assert(depth != null);
+    assert(() { _debugLifecycleState = _ElementLifecycle.inactive; return true; });
   }
 
   /// Called when an Element is removed from the tree.
   /// Currently, an Element removed from the tree never returns.
   void unmount() {
-    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
     assert(depth != null);
     if (widget.key is GlobalKey) {
@@ -689,6 +733,8 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   bool get dirty => _dirty;
   bool _dirty = true;
 
+  bool _active = false;
+
   // We to let component authors call setState from initState, didUpdateConfig,
   // and build even when state is locked because its convenient and a no-op
   // anyway. This flag ensures that this convenience is only allowed on the
@@ -703,6 +749,8 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     assert(_child == null);
+    assert(!_active);
+    _active = true;
     rebuild();
     assert(_child != null);
   }
@@ -716,9 +764,11 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// and by update() when the Widget has changed.
   void rebuild() {
     assert(_debugLifecycleState != _ElementLifecycle.initial);
-    if (!dirty)
+    if (!_active || !_dirty) {
+      _dirty = false;
       return;
-    assert(_debugLifecycleState == _ElementLifecycle.mounted);
+    }
+    assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(_debugStateLocked);
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
@@ -778,10 +828,12 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// the build itself.
   void markNeedsBuild() {
     assert(_debugLifecycleState != _ElementLifecycle.defunct);
+    if (!_active)
+      return;
+    assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(!_debugStateLocked || (_debugAllowIgnoredCallsToMarkNeedsBuild && dirty));
     if (dirty)
       return;
-    assert(_debugLifecycleState == _ElementLifecycle.mounted);
     assert(!_debugStateLocked);
     _dirty = true;
     assert(scheduleBuildFor != null);
@@ -793,9 +845,10 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
       visitor(_child);
   }
 
-  void unmount() {
-    super.unmount();
-    _dirty = false; // so that we don't get rebuilt even if we're already marked dirty
+  void deactivate() {
+    super.deactivate();
+    assert(_active == true);
+    _active = false;
   }
 
   void dependenciesChanged() {
@@ -1051,7 +1104,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
       Element oldChild = oldChildren[childrenTop];
       Widget newWidget = newWidgets[childrenTop];
-      assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
+      assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
       if (!_canUpdate(oldChild.widget, newWidget))
         break;
       childrenTop += 1;
@@ -1066,11 +1119,11 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
       Element oldChild = oldChildren[oldChildrenBottom];
       Widget newWidget = newWidgets[newChildrenBottom];
-      assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
+      assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
       if (!_canUpdate(oldChild.widget, newWidget))
         break;
       Element newChild = updateChild(oldChild, newWidget, nextSibling);
-      assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenBottom] = newChild;
       nextSibling = newChild;
       oldChildrenBottom -= 1;
@@ -1084,7 +1137,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
       oldKeyedChildren = new Map<Key, Element>();
       while (childrenTop <= oldChildrenBottom) {
         Element oldChild = oldChildren[oldChildrenBottom];
-        assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
+        assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
         if (oldChild.widget.key != null)
           oldKeyedChildren[oldChild.widget.key] = oldChild;
         else
@@ -1115,8 +1168,8 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
       }
       assert(oldChild == null || _canUpdate(oldChild.widget, newWidget));
       Element newChild = updateChild(oldChild, newWidget, nextSibling);
-      assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
-      assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.mounted);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
+      assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenBottom] = newChild;
       nextSibling = newChild;
       newChildrenBottom -= 1;
@@ -1128,12 +1181,12 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     while (childrenTop > 0) {
       childrenTop -= 1;
       Element oldChild = oldChildren[childrenTop];
-      assert(oldChild._debugLifecycleState == _ElementLifecycle.mounted);
+      assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
       Widget newWidget = newWidgets[childrenTop];
       assert(_canUpdate(oldChild.widget, newWidget));
       Element newChild = updateChild(oldChild, newWidget, nextSibling);
-      assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
-      assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.mounted);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
+      assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
       newChildren[childrenTop] = newChild;
       nextSibling = newChild;
     }
@@ -1146,6 +1199,11 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
 
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
     return newChildren;
+  }
+
+  void deactivate() {
+    super.deactivate();
+    assert(!renderObject.attached);
   }
 
   void unmount() {
@@ -1170,6 +1228,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
       _ancestorRenderObjectElement.removeChildRenderObject(renderObject);
       _ancestorRenderObjectElement = null;
     }
+    _slot = null;
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot);
@@ -1301,7 +1360,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
     for (int i = _children.length - 1; i >= 0; --i) {
       Element newChild = widget.children[i].createElement();
       newChild.mount(this, previousChild);
-      assert(newChild._debugLifecycleState == _ElementLifecycle.mounted);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       _children[i] = newChild;
       previousChild = newChild;
     }
