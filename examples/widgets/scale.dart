@@ -35,13 +35,16 @@ class ScaleAppState extends State<ScaleApp> {
 
   void _handleScaleUpdate(double scale, Point focalPoint) {
     setState(() {
-      _zoom = _previousZoom * scale;
-      _offset = _previousOffset + (focalPoint - _startingFocalPoint) / _zoom;
+      _zoom = (_previousZoom * scale);
+
+      // Ensure that item under the focal point stays in the same place despite zooming
+      Offset normalizedOffset = (_startingFocalPoint.toOffset() - _previousOffset) / _previousZoom;
+      _offset = focalPoint.toOffset() - normalizedOffset * _zoom;
     });
   }
 
   void paint(PaintingCanvas canvas, Size size) {
-    Point center = size.center(Point.origin) + _offset * _zoom;
+    Point center = (size.center(Point.origin).toOffset() * _zoom + _offset).toPoint();
     double radius = size.width / 2.0 * _zoom;
     Gradient gradient = new RadialGradient(
       center: center, radius: radius,
