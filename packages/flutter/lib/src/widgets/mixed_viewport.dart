@@ -487,7 +487,7 @@ class MixedViewportElement extends RenderObjectElement<MixedViewport> {
     assert(haveChildren != null);
     assert(haveChildren || _didReachLastChild || endOffset < 0.0);
     assert(startIndex >= 0);
-    assert(startIndex < _childExtents.length);
+    assert(!haveChildren || startIndex < _childExtents.length);
 
     // Build the other widgets that are visible.
     int index = startIndex;
