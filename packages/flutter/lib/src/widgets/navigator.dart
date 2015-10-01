@@ -10,7 +10,7 @@ import 'package:sky/src/widgets/transitions.dart';
 
 typedef Widget RouteBuilder(NavigatorState navigator, Route route);
 typedef RouteBuilder RouteGenerator(String name);
-typedef void RouteStateCallback(RouteState route);
+typedef void StateRouteCallback(StateRoute route);
 typedef void NotificationCallback();
 
 class Navigator extends StatefulComponent {
@@ -48,7 +48,7 @@ class NavigatorState extends State<Navigator> {
   }
 
   void pushState(State owner, Function callback) {
-    push(new RouteState(
+    push(new StateRoute(
       route: currentRoute,
       owner: owner,
       callback: callback
@@ -275,12 +275,12 @@ class PageRoute extends Route {
   }
 }
 
-class RouteState extends Route {
-  RouteState({ this.route, this.owner, this.callback });
+class StateRoute extends Route {
+  StateRoute({ this.route, this.owner, this.callback });
 
   Route route;
   State owner;
-  RouteStateCallback callback;
+  StateRouteCallback callback;
 
   bool get hasContent => false;
   bool get modal => false;
