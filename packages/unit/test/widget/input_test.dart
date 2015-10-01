@@ -5,7 +5,7 @@ import 'package:sky/services.dart';
 import 'package:sky/widgets_next.dart';
 import 'package:test/test.dart';
 
-import '../fn3/widget_tester.dart';
+import 'widget_tester.dart';
 import '../services/mock_services.dart';
 
 class MockKeyboard implements KeyboardService {
