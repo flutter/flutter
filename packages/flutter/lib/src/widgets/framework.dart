@@ -293,6 +293,10 @@ abstract class State<T extends StatefulComponent> {
   /// This is used to verify that State objects move through life in an orderly fashion.
   _StateLifecycle _debugLifecycleState = _StateLifecycle.created;
 
+  /// Verifies that the State that was created is one that expects to be created
+  /// for that particular Widget.
+  bool _debugTypesAreRight(widget) => widget is T;
+
   /// Pointer to the owner Element object
   StatefulComponentElement _element;
 
@@ -824,6 +828,7 @@ class StatelessComponentElement<T extends StatelessComponent> extends BuildableE
 class StatefulComponentElement extends BuildableElement<StatefulComponent> {
   StatefulComponentElement(StatefulComponent widget)
     : _state = widget.createState(), super(widget) {
+    assert(_state._debugTypesAreRight(widget));
     assert(_state._element == null);
     _state._element = this;
     assert(_builder == null);
