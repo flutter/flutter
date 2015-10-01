@@ -53,6 +53,8 @@ source_set("tonic") {
     "float32_list.cc",
     "float32_list.h",
     "mojo_converter.h",
+    "uint8_list.cc",
+    "uint8_list.h",
   ]
 
   deps = [

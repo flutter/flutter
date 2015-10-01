@@ -12,16 +12,21 @@
 namespace blink {
 
 PassRefPtr<CanvasImageDecoder> CanvasImageDecoder::create(
-    mojo::ScopedDataPipeConsumerHandle handle,
     PassOwnPtr<ImageDecoderCallback> callback) {
-  return adoptRef(new CanvasImageDecoder(handle.Pass(), callback));
+  return adoptRef(new CanvasImageDecoder(callback));
 }
 
-CanvasImageDecoder::CanvasImageDecoder(
-    mojo::ScopedDataPipeConsumerHandle handle,
-    PassOwnPtr<ImageDecoderCallback> callback)
+CanvasImageDecoder::CanvasImageDecoder(PassOwnPtr<ImageDecoderCallback> callback)
     : callback_(callback), weak_factory_(this) {
   CHECK(callback_);
+  buffer_ = SharedBuffer::create();
+}
+
+CanvasImageDecoder::~CanvasImageDecoder() {
+}
+
+void CanvasImageDecoder::initWithConsumer(mojo::ScopedDataPipeConsumerHandle handle) {
+  CHECK(!drainer_);
   if (!handle.is_valid()) {
     base::MessageLoop::current()->PostTask(
         FROM_HERE, base::Bind(&CanvasImageDecoder::RejectCallback,
@@ -29,11 +34,16 @@ CanvasImageDecoder::CanvasImageDecoder(
     return;
   }
 
-  buffer_ = SharedBuffer::create();
   drainer_ = adoptPtr(new mojo::common::DataPipeDrainer(this, handle.Pass()));
 }
 
-CanvasImageDecoder::~CanvasImageDecoder() {
+void CanvasImageDecoder::initWithList(const Uint8List& list) {
+  CHECK(!drainer_);
+
+  OnDataAvailable(list.data(), list.num_elements());
+  base::MessageLoop::current()->PostTask(
+      FROM_HERE, base::Bind(&CanvasImageDecoder::OnDataComplete,
+                            weak_factory_.GetWeakPtr()));
 }
 
 void CanvasImageDecoder::OnDataAvailable(const void* data, size_t num_bytes) {
