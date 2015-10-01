@@ -1,7 +1,7 @@
 import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/widgets_next.dart';
 import 'package:skysprites/skysprites.dart';
 
 AssetBundle _initBundle() {
@@ -14,7 +14,6 @@ final AssetBundle _bundle = _initBundle();
 
 ImageMap _images;
 SpriteSheet _spriteSheet;
-TestApp _app;
 
 main() async {
   _images = new ImageMap(_bundle);
@@ -26,12 +25,19 @@ main() async {
 
   assert(_images["assets/checker.png"] != null);
 
-  _app = new TestApp();
-  runApp(_app);
+  runApp(new TestApp());
 }
 
-class TestApp extends App {
+class TestApp extends StatefulComponent {
+  TestAppState createState() => new TestAppState();
+}
 
+final ThemeData _theme = new ThemeData(
+  brightness: ThemeBrightness.light,
+  primarySwatch: Colors.blue
+);
+
+class TestAppState extends State<TestApp> {
   TestApp() {
     _testBed = new TestBed(_labelTexts[_selectedLine]);
   }
@@ -46,22 +52,17 @@ class TestApp extends App {
     "Rocket Trail"
   ];
 
-  Widget build() {
-    ThemeData theme = new ThemeData(
-      brightness: ThemeBrightness.light,
-      primarySwatch: Colors.blue
-    );
-
-    return new Theme(
-      data: theme,
-      child: new Title(
-        title: 'EffectLine Demo',
-        child: _buildColumn()
-      )
+  Widget build(BuildContext context) {
+    return new App(
+      title: 'EffectLine Demo',
+      theme: _theme,
+      routes: {
+        '/': _buildColumn
+      }
     );
   }
 
-  Column _buildColumn() {
+  Column _buildColumn(NavigatorState navigator, Route route) {
     return new Column([
       new Flexible(child: _buildSpriteWidget()),
       _buildTabBar()
