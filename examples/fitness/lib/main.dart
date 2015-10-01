@@ -8,7 +8,7 @@ import 'package:playfair/playfair.dart' as playfair;
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/src/fn3.dart';
 
 import 'user_data.dart';
 import 'date_utils.dart';
@@ -85,63 +85,53 @@ class UserDataImpl extends UserData {
   }
 }
 
-class FitnessApp extends App {
-  NavigationState _navigationState;
+class FitnessApp extends StatefulComponent {
+  FitnessAppState createState() => new FitnessAppState();
+}
+
+class FitnessAppState extends State<FitnessApp> {
   UserDataImpl _userData;
 
-  void didMount() {
-    super.didMount();
+  Map<String, RouteBuilder> _routes;
+
+  void initState() {
+    super.initState();
     loadFitnessData().then((UserData data) {
       setState(() => _userData = data);
     }).catchError((e) {
       print("Failed to load data: $e");
       setState(() => _userData = new UserDataImpl());
     });
-  }
 
-  void initState() {
-    _navigationState = new NavigationState([
-      new Route(
-        name: '/',
-        builder: (navigator, route) => new FeedFragment(
+    _routes = {
+      '/': (NavigatorState navigator, Route route) {
+        return new FeedFragment(
           navigator: navigator,
           userData: _userData,
           onItemCreated: _handleItemCreated,
           onItemDeleted: _handleItemDeleted
-        )
-      ),
-      new Route(
-        name: '/meals/new',
-        builder: (navigator, route) => new MealFragment(
+        );
+      },
+      '/meals/new': (navigator, route) {
+        return new MealFragment(
           navigator: navigator,
           onCreated: _handleItemCreated
-        )
-      ),
-      new Route(
-        name: '/measurements/new',
-        builder: (navigator, route) => new MeasurementFragment(
+        );
+      },
+      '/measurements/new': (NavigatorState navigator, Route route) {
+        return new MeasurementFragment(
           navigator: navigator,
           onCreated: _handleItemCreated
-        )
-      ),
-      new Route(
-        name: '/settings',
-        builder: (navigator, route) => new SettingsFragment(
+        );
+      },
+      '/settings': (navigator, route) {
+        return new SettingsFragment(
           navigator: navigator,
           userData: _userData,
           updater: settingsUpdater
-        )
-      ),
-    ]);
-    super.initState();
-  }
-
-  void onBack() {
-    if (_navigationState.hasPrevious()) {
-      setState(() => _navigationState.pop());
-    } else {
-      super.onBack();
-    }
+        );
+      }
+    };
   }
 
   void _handleItemCreated(FitnessItem item) {
@@ -168,17 +158,17 @@ class FitnessApp extends App {
     });
   }
 
-  Widget build() {
-    return new Theme(
-      data: new ThemeData(
-        brightness: ThemeBrightness.light,
-        primarySwatch: Colors.indigo,
-        accentColor: Colors.pinkAccent[200]
-      ),
-      child: new Title(
-        title: 'Fitness',
-        child: new Navigator(_navigationState)
-      )
+  final ThemeData _theme = new ThemeData(
+    brightness: ThemeBrightness.light,
+    primarySwatch: Colors.indigo,
+    accentColor: Colors.pinkAccent[200]
+  );
+
+  Widget build(BuildContext) {
+    return new App(
+      theme: _theme,
+      title: 'Fitness',
+      routes: _routes
     );
   }
 }

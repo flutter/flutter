@@ -5,7 +5,7 @@
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/widgets_next.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)
@@ -138,7 +138,7 @@ List<SkyDemo> demos = [
 const double kCardHeight = 120.0;
 const EdgeDims kListPadding = const EdgeDims.all(4.0);
 
-class DemoList extends Component {
+class DemoList extends StatelessComponent {
   Widget buildCardContents(SkyDemo demo) {
       return new Container(
         decoration: demo.decoration,
@@ -158,7 +158,7 @@ class DemoList extends Component {
     );
   }
 
-  Widget buildDemo(SkyDemo demo) {
+  Widget buildDemo(BuildContext context, SkyDemo demo) {
     return new GestureDetector(
       key: demo.key,
       onTap: () => launch(demo.href, demo.bundle),
@@ -171,7 +171,7 @@ class DemoList extends Component {
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new ScrollableList<SkyDemo>(
       items: demos,
       itemExtent: kCardHeight,
@@ -181,27 +181,29 @@ class DemoList extends Component {
   }
 }
 
-class SkyHome extends App {
-  Widget build() {
-    return new Theme(
-      data: new ThemeData(
-        brightness: ThemeBrightness.light,
-        primarySwatch: Colors.teal
-      ),
-      child: new Title(
-        title: 'Sky Demos',
-        child: new Scaffold(
-          toolbar: new ToolBar(center: new Text('Sky Demos')),
-          body: new Material(
-            type: MaterialType.canvas,
-            child: new DemoList()
-          )
-        )
+final ThemeData _theme = new ThemeData(
+  brightness: ThemeBrightness.light,
+  primarySwatch: Colors.teal
+);
+
+class DemoHome extends StatelessComponent {
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      toolbar: new ToolBar(center: new Text('Sky Demos')),
+      body: new Material(
+        type: MaterialType.canvas,
+        child: new DemoList()
       )
     );
   }
 }
 
 void main() {
-  runApp(new SkyHome());
+  runApp(new App(
+    title: 'Sky Demos',
+    theme: _theme,
+    routes: {
+      '/': (NavigatorState navigator, Route route) => new DemoHome()
+    }
+  ));
 }
