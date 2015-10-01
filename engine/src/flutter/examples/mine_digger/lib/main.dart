@@ -8,7 +8,7 @@ import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/src/fn3.dart';
+import 'package:sky/widgets.dart';
 
 // Classic minesweeper-inspired game. The mouse controls are standard
 // except for left + right combo which is not implemented. For touch,
