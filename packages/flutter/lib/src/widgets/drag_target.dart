@@ -17,15 +17,50 @@ typedef void DragTargetAccept<T>(T data);
 typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 typedef void DragFinishedNotification();
 
+enum DragAnchor {
+  /// Display the feedback anchored at the position of the original child. If
+  /// feedback is identical to the child, then this means the feedback will
+  /// exactly overlap the original child when the drag starts.
+  child,
+
+  /// Display the feedback anchored at the position of the touch that started
+  /// the drag. If feedback is identical to the child, then this means the top
+  /// left of the feedback will be under the finger when the drag starts. This
+  /// will likely not exactly overlap the original child, e.g. if the child is
+  /// big and the touch was not centered. This mode is useful when the feedback
+  /// is transformed so as to move the feedback to the left by half its width,
+  /// and up by half its width plus the height of the finger, since then it
+  /// appears as if putting the finger down makes the touch feedback appear
+  /// above the finger. (It feels weird for it to appear offset from the
+  /// original child if it's anchored to the child and not the finger.)
+  pointer,
+}
+
 class Draggable extends StatefulComponent {
-  Draggable({ Key key, this.navigator, this.data, this.child, this.feedback }): super(key: key) {
+  Draggable({
+    Key key,
+    this.navigator,
+    this.data,
+    this.child,
+    this.feedback,
+    this.feedbackOffset: Offset.zero,
+    this.dragAnchor: DragAnchor.child
+  }): super(key: key) {
     assert(navigator != null);
+    assert(child != null);
+    assert(feedback != null);
   }
 
   final NavigatorState navigator;
   final dynamic data;
   final Widget child;
   final Widget feedback;
+
+  /// The feedbackOffset can be used to set the hit test target point for the
+  /// purposes of finding a drag target. It is especially useful if the feedback
+  /// is transformed compared to the child.
+  final Offset feedbackOffset;
+  final DragAnchor dragAnchor;
 
   DraggableState createState() => new DraggableState();
 }
@@ -36,12 +71,23 @@ class DraggableState extends State<Draggable> {
   void _startDrag(sky.PointerEvent event) {
     if (_route != null)
       return; // TODO(ianh): once we switch to using gestures, just hand the gesture to the route so it can do everything itself. then we can have multiple drags at the same time.
-    Point point = new Point(event.x, event.y);
-    RenderBox renderObject = context.findRenderObject();
+    final Point point = new Point(event.x, event.y);
+    Point dragStartPoint;
+    switch (config.dragAnchor) {
+      case DragAnchor.child:
+        final RenderBox renderObject = context.findRenderObject();
+        dragStartPoint = renderObject.globalToLocal(point);
+        break;
+      case DragAnchor.pointer:
+        dragStartPoint = Point.origin;
+        break;
+    }
+    assert(dragStartPoint != null);
     _route = new DragRoute(
       data: config.data,
-      dragStartPoint: renderObject.globalToLocal(point),
+      dragStartPoint: dragStartPoint,
       feedback: config.feedback,
+      feedbackOffset: config.feedbackOffset,
       onDragFinished: () {
         _route = null;
       }
@@ -149,11 +195,20 @@ class DragTargetState<T> extends State<DragTarget<T>> {
 enum DragEndKind { dropped, canceled }
 
 class DragRoute extends Route {
-  DragRoute({ this.data, this.dragStartPoint: Point.origin, this.feedback, this.onDragFinished });
+  DragRoute({
+    this.data,
+    this.dragStartPoint: Point.origin,
+    this.feedback,
+    this.feedbackOffset: Offset.zero,
+    this.onDragFinished
+  }) {
+    assert(feedbackOffset != null);
+  }
 
   final dynamic data;
   final Point dragStartPoint;
   final Widget feedback;
+  final Offset feedbackOffset;
   final DragFinishedNotification onDragFinished;
 
   DragTargetState _activeTarget;
@@ -162,7 +217,7 @@ class DragRoute extends Route {
 
   void update(Point globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
-    HitTestResult result = WidgetFlutterBinding.instance.hitTest(globalPosition);
+    HitTestResult result = WidgetFlutterBinding.instance.hitTest(globalPosition + feedbackOffset);
     DragTargetState target = _getDragTarget(result.path);
     if (target == _activeTarget)
       return;
@@ -208,10 +263,7 @@ class DragRoute extends Route {
       left: _lastOffset.dx,
       top: _lastOffset.dy,
       child: new IgnorePointer(
-        child: new Opacity(
-          opacity: 0.5,
-          child: feedback
-        )
+        child: feedback
       )
     );
   }
