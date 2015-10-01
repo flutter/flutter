@@ -92,10 +92,10 @@ abstract class GlobalKey extends Key {
     }
   }
 
-  Element get currentElement => _registry[this];
-  Widget get currentWidget => currentElement?.widget;
+  BuildContext get currentContext => _registry[this];
+  Widget get currentWidget => _registry[this]?.widget;
   State get currentState {
-    Element element = currentElement;
+    Element element = _registry[this];
     if (element is StatefulComponentElement)
       return element.state;
     return null;
@@ -414,7 +414,6 @@ typedef void ElementVisitor(Element element);
 abstract class BuildContext {
   InheritedWidget inheritedWidgetOfType(Type targetType);
   RenderObject findRenderObject();
-
   void visitAncestorElements(bool visitor(Element element));
 }
 
