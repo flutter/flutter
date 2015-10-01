@@ -70,7 +70,7 @@ class MojoAssetBundle extends AssetBundle {
     return _imageCache.putIfAbsent(key, () {
       Completer<sky.Image> completer = new Completer<sky.Image>();
       load(key).then((assetData) {
-        new sky.ImageDecoder(assetData.handle.h, completer.complete);
+        new sky.ImageDecoder.consume(assetData.handle.h, completer.complete);
       });
       return new ImageResource(completer.future);
     });
