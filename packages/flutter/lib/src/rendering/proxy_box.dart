@@ -8,7 +8,7 @@ import 'package:sky/src/painting/box_painter.dart';
 import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/box.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 export 'package:sky/src/painting/box_painter.dart';
 
@@ -256,10 +256,10 @@ class RenderOverflowBox extends RenderProxyBox {
   }
 
   String debugDescribeSettings(String prefix) {
-    return '${super.debugDescribeSettings(prefix)}' + 
+    return '${super.debugDescribeSettings(prefix)}' +
            '${prefix}minWidth: ${minWidth ?? "use parent minWidth constraint"}\n' +
            '${prefix}maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}\n' +
-           '${prefix}minHeight: ${minHeight ?? "use parent minHeight constraint"}\n' + 
+           '${prefix}minHeight: ${minHeight ?? "use parent minHeight constraint"}\n' +
            '${prefix}maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}\n';
   }
 }

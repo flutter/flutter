@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'package:sky/src/rendering/box.dart';
 import 'package:sky/src/rendering/object.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 /// Parent data for use with [RenderBlockBase]
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }

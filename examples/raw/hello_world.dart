@@ -23,7 +23,7 @@ sky.Picture paint(sky.Rect paintBounds) {
 sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
   final double devicePixelRatio = sky.view.devicePixelRatio;
   sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
-  Float32List deviceTransform = new Float32List(16)
+  Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
