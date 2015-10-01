@@ -4,9 +4,7 @@
 
 import 'package:sky/painting.dart';
 import 'package:sky/material.dart';
-import 'package:sky/src/widgets/animated_container.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/theme.dart';
 
@@ -19,7 +17,7 @@ const Map<MaterialType, double> edges = const {
   MaterialType.button: 2.0,
 };
 
-class Material extends Component {
+class Material extends StatelessComponent {
   Material({
     Key key,
     this.child,
@@ -35,24 +33,24 @@ class Material extends Component {
   final int level;
   final Color color;
 
-  Color get _backgroundColor {
+  Color getBackgroundColor(BuildContext context) {
     if (color != null)
       return color;
     switch (type) {
       case MaterialType.canvas:
-        return Theme.of(this).canvasColor;
+        return Theme.of(context).canvasColor;
       case MaterialType.card:
-        return Theme.of(this).cardColor;
+        return Theme.of(context).cardColor;
       default:
         return null;
     }
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Widget contents = child;
     if (child != null) {
       contents = new DefaultTextStyle(
-        style: Theme.of(this).text.body1,
+        style: Theme.of(context).text.body1,
         child: contents
       );
       if (edges[type] != null) {
@@ -63,15 +61,18 @@ class Material extends Component {
         );
       }
     }
-    return new AnimatedContainer(
-      behavior: implicitlyAnimate(const Duration(milliseconds: 200)),
-      decoration: new BoxDecoration(
-        backgroundColor: _backgroundColor,
-        borderRadius: edges[type],
-        boxShadow: level == 0 ? null : shadows[level],
-        shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
-      ),
-      child: contents
+    // TODO(abarth): This should use AnimatedContainer.
+    return new DefaultTextStyle(
+      style: Theme.of(context).text.body1,
+      child: new Container(
+        decoration: new BoxDecoration(
+          backgroundColor: getBackgroundColor(context),
+          borderRadius: edges[type],
+          boxShadow: level == 0 ? null : shadows[level],
+          shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
+        ),
+        child: contents
+      )
     );
   }
 }

@@ -6,37 +6,17 @@ import 'package:sky/animation.dart';
 import 'package:sky/src/widgets/framework.dart';
 
 abstract class AnimatedComponent extends StatefulComponent {
+  const AnimatedComponent({ Key key, this.direction, this.duration }) : super(key: key);
 
-  AnimatedComponent({ Key key, this.direction, this.duration }) : super(key: key);
+  final Duration duration;
+  final Direction direction;
+}
 
-  Duration duration;
-  Direction direction;
-
-  void syncConstructorArguments(AnimatedComponent source) {
-    bool resumePerformance = false;
-    if (duration != source.duration) {
-      duration = source.duration;
-      resumePerformance = true;
-    }
-    if (direction != source.direction) {
-      direction = source.direction;
-      resumePerformance = true;
-    }
-    if (resumePerformance)
-      performance.play(direction);
-  }
-
-  AnimationPerformance get performance => _performance;
-  AnimationPerformance _performance;
-
+abstract class AnimatedState<T extends AnimatedComponent> extends State<T> {
   void initState() {
-    _performance = new AnimationPerformance(duration: duration);
-    performance.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed)
-        handleCompleted();
-      else if (status == AnimationStatus.dismissed)
-        handleDismissed();
-    });
+    super.initState();
+    _performance = new AnimationPerformance(duration: config.duration);
+    performance.addStatusListener(_handleAnimationStatusChanged);
     if (buildDependsOnPerformance) {
       performance.addListener(() {
         setState(() {
@@ -45,11 +25,26 @@ abstract class AnimatedComponent extends StatefulComponent {
         });
       });
     }
-    performance.play(direction);
+    performance.play(config.direction);
+  }
+
+  void didUpdateConfig(T oldConfig) {
+    performance.duration = config.duration;
+    if (config.duration != oldConfig.duration || config.direction != oldConfig.direction)
+      performance.play(config.direction);
+  }
+
+  AnimationPerformance get performance => _performance;
+  AnimationPerformance _performance;
+
+  void _handleAnimationStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed)
+      handleCompleted();
+    else if (status == AnimationStatus.dismissed)
+      handleDismissed();
   }
 
   bool get buildDependsOnPerformance => false;
   void handleCompleted() { }
   void handleDismissed() { }
-
 }

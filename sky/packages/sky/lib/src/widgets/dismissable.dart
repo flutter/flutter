@@ -31,7 +31,6 @@ typedef void ResizedCallback();
 typedef void DismissedCallback();
 
 class Dismissable extends StatefulComponent {
-
   Dismissable({
     Key key,
     this.child,
@@ -45,14 +44,12 @@ class Dismissable extends StatefulComponent {
   DismissedCallback onDismissed;
   DismissDirection direction;
 
-  AnimationPerformance _fadePerformance;
-  AnimationPerformance _resizePerformance;
+  DismissableState createState() => new DismissableState();
+}
 
-  Size _size;
-  double _dragExtent = 0.0;
-  bool _dragUnderway = false;
-
+class DismissableState extends State<Dismissable> {
   void initState() {
+    super.initState();
     _fadePerformance = new AnimationPerformance(duration: _kCardDismissFadeout);
     _fadePerformance.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed)
@@ -60,18 +57,18 @@ class Dismissable extends StatefulComponent {
     });
   }
 
-  void syncConstructorArguments(Dismissable source) {
-    child = source.child;
-    onResized = source.onResized;
-    onDismissed = source.onDismissed;
-    direction = source.direction;
-  }
+  AnimationPerformance _fadePerformance;
+  AnimationPerformance _resizePerformance;
+
+  Size _size;
+  double _dragExtent = 0.0;
+  bool _dragUnderway = false;
 
   bool get _directionIsYAxis {
     return
-      direction == DismissDirection.vertical ||
-      direction == DismissDirection.up ||
-      direction == DismissDirection.down;
+      config.direction == DismissDirection.vertical ||
+      config.direction == DismissDirection.up ||
+      config.direction == DismissDirection.down;
   }
 
   void _handleFadeCompleted() {
@@ -84,13 +81,13 @@ class Dismissable extends StatefulComponent {
   }
 
   void _maybeCallOnResized() {
-    if (onResized != null)
-      onResized();
+    if (config.onResized != null)
+      config.onResized();
   }
 
   void _maybeCallOnDismissed() {
-    if (onDismissed != null)
-      onDismissed();
+    if (config.onDismissed != null)
+      config.onDismissed();
   }
 
   void _startResizePerformance() {
@@ -105,6 +102,11 @@ class Dismissable extends StatefulComponent {
         ..addListener(_handleResizeProgressChanged);
       _resizePerformance.play();
     });
+    // Our squash curve (ease) does not return v=0.0 for t=0.0, so we
+    // technically resize on the first frame. To make sure this doesn't confuse
+    // any other widgets (like MixedViewport, which checks for this kind of
+    // thing), we report a resize straight away.
+    _maybeCallOnResized();
   }
 
   void _handleResizeProgressChanged() {
@@ -129,7 +131,7 @@ class Dismissable extends StatefulComponent {
       return;
 
     double oldDragExtent = _dragExtent;
-    switch(direction) {
+    switch(config.direction) {
       case DismissDirection.horizontal:
       case DismissDirection.vertical:
         _dragExtent += delta;
@@ -166,7 +168,7 @@ class Dismissable extends StatefulComponent {
     if (_directionIsYAxis) {
       if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta)
         return false;
-      switch(direction) {
+      switch(config.direction) {
         case DismissDirection.vertical:
           return vy.abs() > _kMinFlingVelocity;
         case DismissDirection.up:
@@ -177,7 +179,7 @@ class Dismissable extends StatefulComponent {
     } else {
       if (vx.abs() - vy.abs() < _kMinFlingVelocityDelta)
         return false;
-      switch(direction) {
+      switch(config.direction) {
         case DismissDirection.horizontal:
           return vx.abs() > _kMinFlingVelocity;
         case DismissDirection.left:
@@ -221,8 +223,11 @@ class Dismissable extends StatefulComponent {
     return new Point(_dragExtent.sign * extent * _kDismissCardThreshold, 0.0);
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     if (_resizePerformance != null) {
+      // make sure you remove this widget once it's been dismissed!
+      assert(_resizePerformance.status == AnimationStatus.forward);
+
       AnimatedValue<double> squashAxisExtent = new AnimatedValue<double>(
         _directionIsYAxis ? _size.width : _size.height,
         end: 0.0,
@@ -252,7 +257,7 @@ class Dismissable extends StatefulComponent {
           child: new SlideTransition(
             performance: _fadePerformance.view,
             position: new AnimatedValue<Point>(Point.origin, end: _activeCardDragEndPoint),
-            child: child
+            child: config.child
           )
         )
       )

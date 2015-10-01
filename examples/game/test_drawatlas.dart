@@ -3,7 +3,7 @@ import 'dart:sky';
 import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets_next.dart';
+import 'package:sky/widgets.dart';
 import 'package:skysprites/skysprites.dart';
 
 AssetBundle _initBundle() {

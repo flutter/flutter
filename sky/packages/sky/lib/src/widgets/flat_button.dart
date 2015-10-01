@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/material.dart';
+import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/material_button.dart';
 import 'package:sky/src/widgets/theme.dart';
@@ -18,10 +19,14 @@ class FlatButton extends MaterialButton {
              enabled: enabled,
              onPressed: onPressed);
 
-  Color get color {
-    if (!enabled || !highlight)
+  FlatButtonState createState() => new FlatButtonState();
+}
+
+class FlatButtonState extends MaterialButtonState<FlatButton> {
+  Color getColor(BuildContext context) {
+    if (!config.enabled || !highlight)
       return null;
-    switch (Theme.of(this).brightness) {
+    switch (Theme.of(context).brightness) {
       case ThemeBrightness.light:
         return Colors.grey[400];
       case ThemeBrightness.dark:

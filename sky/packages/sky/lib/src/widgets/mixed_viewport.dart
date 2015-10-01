@@ -2,143 +2,146 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
-import 'package:sky/src/rendering/block.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/basic.dart';
 
-// return null if index is greater than index of last entry
-typedef Widget IndexedBuilder(int index);
+typedef Widget IndexedBuilder(BuildContext context, int index); // return null if index is greater than index of last entry
+typedef void ExtentsUpdateCallback(double newExtents);
+typedef void InvalidatorCallback(Iterable<int> indices);
+typedef void InvalidatorAvailableCallback(InvalidatorCallback invalidator);
 
-class _Key {
-  const _Key(this.type, this.key);
-  factory _Key.fromWidget(Widget widget) => new _Key(widget.runtimeType, widget.key);
+enum _ChangeDescription { none, scrolled, resized }
+
+class MixedViewport extends RenderObjectWidget {
+  MixedViewport({
+    Key key,
+    this.startOffset,
+    this.direction: ScrollDirection.vertical,
+    this.builder,
+    this.token,
+    this.onExtentsUpdate,
+    this.onInvalidatorAvailable
+  }): super(key: key);
+
+  final double startOffset;
+  final ScrollDirection direction;
+  final IndexedBuilder builder;
+  final Object token;
+  final ExtentsUpdateCallback onExtentsUpdate;
+  final InvalidatorAvailableCallback onInvalidatorAvailable;
+
+  MixedViewportElement createElement() => new MixedViewportElement(this);
+
+  // we don't pass constructor arguments to the RenderBlockViewport() because until
+  // we know our children, the constructor arguments we could give have no effect
+  RenderBlockViewport createRenderObject() => new RenderBlockViewport();
+
+  _ChangeDescription evaluateChangesFrom(MixedViewport oldWidget) {
+    if (direction != oldWidget.direction ||
+        builder != oldWidget.builder ||
+        token != oldWidget.token)
+      return _ChangeDescription.resized;
+    if (startOffset != oldWidget.startOffset)
+      return _ChangeDescription.scrolled;
+    return _ChangeDescription.none;
+  }
+
+  // all the actual work is done in the element
+}
+
+class _ChildKey {
+  const _ChildKey(this.type, this.key);
+  factory _ChildKey.fromWidget(Widget widget) => new _ChildKey(widget.runtimeType, widget.key);
   final Type type;
   final Key key;
-  bool operator ==(other) => other is _Key && other.type == type && other.key == key;
+  bool operator ==(other) => other is _ChildKey && other.type == type && other.key == key;
   int get hashCode => 373 * 37 * type.hashCode + key.hashCode;
-  String toString() => "_Key(type: $type, key: $key)";
+  String toString() => "_ChildKey(type: $type, key: $key)";
 }
 
-typedef void LayoutChangedCallback();
-
-class MixedViewportLayoutState {
-  MixedViewportLayoutState()
-    : _childOffsets = <double>[0.0],
-      _firstVisibleChildIndex = 0,
-      _visibleChildCount = 0,
-      _didReachLastChild = false
-  {
-    _readOnlyChildOffsets = new UnmodifiableListView<double>(_childOffsets);
+class MixedViewportElement extends RenderObjectElement<MixedViewport> {
+  MixedViewportElement(MixedViewport widget) : super(widget) {
+    if (widget.onInvalidatorAvailable != null)
+      widget.onInvalidatorAvailable(invalidate);
   }
 
-  bool _dirty = true;
+  /// _childExtents contains the extents of each child from the top of the list
+  /// up to the last one we've ever created.
+  final List<double> _childExtents = <double>[];
 
+  /// _childOffsets contains the offsets of the top of each child from the top
+  /// of the list up to the last one we've ever created, and the offset of the
+  /// end of the last one. The first value is always 0.0. If there are no
+  /// children, that is the only value. The offset of the end of the last child
+  /// created (the actual last child, if didReachLastChild is true), is also the
+  /// distance from the top (left) of the first child to the bottom (right) of
+  /// the last child created.
+  final List<double> _childOffsets = <double>[0.0];
+
+  /// Whether childOffsets includes the offset of the last child.
+  bool _didReachLastChild = false;
+
+  /// The index of the first child whose bottom edge is below the top of the
+  /// viewport.
   int _firstVisibleChildIndex;
-  int get firstVisibleChildIndex => _firstVisibleChildIndex;
 
-  int _visibleChildCount;
-  int get visibleChildCount => _visibleChildCount;
+  /// The currently visibly children.
+  Map<_ChildKey, Element> _childrenByKey = new Map<_ChildKey, Element>();
 
-  // childOffsets contains the offsets of each child from the top of the
-  // list up to the last one we've ever created, and the offset of the
-  // end of the last one. If there are no children, then the only offset
-  // is 0.0.
-  List<double> _childOffsets;
-  UnmodifiableListView<double> _readOnlyChildOffsets;
-  UnmodifiableListView<double> get childOffsets => _readOnlyChildOffsets;
-  double get contentsSize => _childOffsets.last;
+  /// The child offsets that we've been told are invalid.
+  final Set<int> _invalidIndices = new Set<int>();
 
-  bool _didReachLastChild;
-  bool get didReachLastChild => _didReachLastChild;
-
-  Set<int> _invalidIndices = new Set<int>();
+  /// Returns false if any of the previously-cached offsets have been marked as
+  /// invalid and need to be updated.
   bool get isValid => _invalidIndices.length == 0;
-  // Notify the BlockViewport that the children at indices have either
-  // changed size and/or changed type.
-  void invalidate(Iterable<int> indices) {
-    _invalidIndices.addAll(indices);
-  }
 
-  final List<Function> _listeners = new List<Function>();
-  void addListener(Function listener) {
-    _listeners.add(listener);
-  }
-  void removeListener(Function listener) {
-    _listeners.remove(listener);
-  }
-  void _notifyListeners() {
-    List<Function> localListeners = new List<Function>.from(_listeners);
-    for (Function listener in localListeners)
-      listener();
-  }
-}
+  /// The constraints for which the current offsets are valid.
+  BoxConstraints _lastLayoutConstraints;
 
-class MixedViewport extends RenderObjectWrapper {
-  MixedViewport({ this.startOffset, this.direction: ScrollDirection.vertical, this.builder, this.token, MixedViewportLayoutState layoutState })
-    : layoutState = layoutState, super(key: new ObjectKey(layoutState)) {
-    // using the layout state as the key is important to prevent us from being synced with someone with a different layout state
-    assert(this.layoutState != null);
-  }
-
-  double startOffset;
-  ScrollDirection direction;
-  IndexedBuilder builder;
-  Object token;
-  MixedViewportLayoutState layoutState;
-
-  Map<_Key, Widget> _childrenByKey = new Map<_Key, Widget>();
+  /// The last value that was sent to onExtentsUpdate.
+  double _lastReportedExtents;
 
   RenderBlockViewport get renderObject => super.renderObject;
 
-  RenderBlockViewport createNode() {
-    // we don't pass the direction or offset to the render object when we
-    // create it, because the render object is empty so it will not matter
-    RenderBlockViewport result = new RenderBlockViewport();
-    result.callback = layout;
-    result.totalExtentCallback = _noIntrinsicExtent;
-    result.maxCrossAxisExtentCallback = _noIntrinsicExtent;
-    result.minCrossAxisExtentCallback = _noIntrinsicExtent;
-    return result;
+  /// Notify the BlockViewport that the children at indices have, or might have,
+  /// changed size. Call this whenever the dimensions of a particular child
+  /// change, so that the rendering will be updated accordingly. A pointer to
+  /// this method is provided via the onInvalidatorAvailable callback.
+  void invalidate(Iterable<int> indices) {
+    assert(indices.length > 0);
+    _invalidIndices.addAll(indices);
+    renderObject.markNeedsLayout();
   }
 
-  void remove() {
+  /// Forget all the known child offsets.
+  void _resetCache() {
+    _childExtents.clear();
+    _childOffsets.clear();
+    _childOffsets.add(0.0);
+    _didReachLastChild = false;
+    _invalidIndices.clear();
+  }
+
+  void visitChildren(ElementVisitor visitor) {
+    for (Element child in _childrenByKey.values)
+      visitor(child);
+  }
+
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    renderObject.callback = layout;
+    renderObject.totalExtentCallback = _noIntrinsicExtent;
+    renderObject.maxCrossAxisExtentCallback = _noIntrinsicExtent;
+    renderObject.minCrossAxisExtentCallback = _noIntrinsicExtent;
+  }
+
+  void unmount() {
     renderObject.callback = null;
     renderObject.totalExtentCallback = null;
-    renderObject.maxCrossAxisExtentCallback = null;
     renderObject.minCrossAxisExtentCallback = null;
-    super.remove();
-    _childrenByKey.clear();
-    layoutState._dirty = true;
-  }
-
-  void walkChildren(WidgetTreeWalker walker) {
-    for (Widget child in _childrenByKey.values)
-      walker(child);
-  }
-
-  static const _omit = const Object(); // used as a slot when it's not yet time to attach the child
-
-  void insertChildRenderObject(RenderObjectWrapper child, dynamic slot) {
-    if (slot == _omit)
-      return;
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(slot == null || slot is RenderObject);
-    assert(renderObject is ContainerRenderObjectMixin);
-    renderObject.add(child.renderObject, before: slot);
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
-  }
-
-  void detachChildRenderObject(RenderObjectWrapper child) {
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(renderObject is ContainerRenderObjectMixin);
-    if (child.renderObject.parent != renderObject)
-      return; // probably had slot == _omit when inserted
-    renderObject.remove(child.renderObject);
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+    renderObject.maxCrossAxisExtentCallback = null;
+    super.unmount();
   }
 
   double _noIntrinsicExtent(BoxConstraints constraints) {
@@ -151,15 +154,67 @@ class MixedViewport extends RenderObjectWrapper {
     return null;
   }
 
+  static const Object _omit = const Object(); // used as a slot when it's not yet time to attach the child
+
+  void update(MixedViewport newWidget) {
+    _ChangeDescription changes = newWidget.evaluateChangesFrom(widget);
+    super.update(newWidget);
+    if (changes == _ChangeDescription.resized)
+      _resetCache();
+    if (changes != _ChangeDescription.none || !isValid) {
+      renderObject.markNeedsLayout();
+    } else {
+      // we just need to redraw our existing widgets as-is
+      if (_childrenByKey.length > 0) {
+        assert(_firstVisibleChildIndex >= 0);
+        assert(renderObject != null);
+        final int startIndex = _firstVisibleChildIndex;
+        int lastIndex = startIndex + _childrenByKey.length - 1;
+        Element nextSibling = null;
+        for (int index = lastIndex; index > startIndex; index -= 1) {
+          final Widget newWidget = _buildWidgetAt(index);
+          final _ChildKey key = new _ChildKey.fromWidget(newWidget);
+          final Element oldElement = _childrenByKey[key];
+          assert(oldElement != null);
+          final Element newElement = updateChild(oldElement, newWidget, nextSibling);
+          assert(newElement != null);
+          _childrenByKey[key] = newElement;
+          // Verify that it hasn't changed size.
+          // If this assertion fires, it means you didn't call "invalidate"
+          // before changing the size of one of your items.
+          assert(_debugIsSameSize(newElement, index, _lastLayoutConstraints));
+          nextSibling = newElement;
+        }
+      }
+    }
+  }
+
+  void layout(BoxConstraints constraints) {
+    if (constraints != _lastLayoutConstraints) {
+      _resetCache();
+      _lastLayoutConstraints = constraints;
+    }
+    BuildableElement.lockState(() {
+      _doLayout(constraints);
+    });
+    if (widget.onExtentsUpdate != null) {
+      final double newExtents = _didReachLastChild ? _childOffsets.last : null;
+      if (newExtents != _lastReportedExtents) {
+        _lastReportedExtents = newExtents;
+        widget.onExtentsUpdate(_lastReportedExtents);
+      }
+    }
+  }
+
+  /// Binary search to find the index of the child responsible for rendering a given pixel
   int _findIndexForOffsetBeforeOrAt(double offset) {
-    final List<double> offsets = layoutState._childOffsets;
     int left = 0;
-    int right = offsets.length - 1;
+    int right = _childOffsets.length - 1;
     while (right >= left) {
       int middle = left + ((right - left) ~/ 2);
-      if (offsets[middle] < offset) {
+      if (_childOffsets[middle] < offset) {
         left = middle + 1;
-      } else if (offsets[middle] > offset) {
+      } else if (_childOffsets[middle] > offset) {
         right = middle - 1;
       } else {
         return middle;
@@ -168,284 +223,310 @@ class MixedViewport extends RenderObjectWrapper {
     return right;
   }
 
-  bool retainStatefulNodeIfPossible(MixedViewport newNode) {
-    assert(layoutState == newNode.layoutState);
-    retainStatefulRenderObjectWrapper(newNode);
-    if (startOffset != newNode.startOffset) {
-      layoutState._dirty = true;
-      startOffset = newNode.startOffset;
-    }
-    if (direction != newNode.direction || builder != newNode.builder || token != newNode.token) {
-      layoutState._dirty = true;
-      layoutState._didReachLastChild = false;
-      layoutState._childOffsets = <double>[0.0];
-      layoutState._invalidIndices = new Set<int>();
-      direction = newNode.direction;
-      builder = newNode.builder;
-      token = newNode.token;
-    }
-    return true;
-  }
-
-  void syncRenderObject(MixedViewport old) {
-    super.syncRenderObject(old);
-    if (layoutState._dirty || !layoutState.isValid) {
-      renderObject.markNeedsLayout();
-    } else {
-      if (layoutState._visibleChildCount > 0) {
-        assert(layoutState.firstVisibleChildIndex >= 0);
-        assert(builder != null);
-        assert(renderObject != null);
-        final int startIndex = layoutState._firstVisibleChildIndex;
-        int lastIndex = startIndex + layoutState._visibleChildCount - 1;
-        for (int index = startIndex; index <= lastIndex; index += 1) {
-          Widget widget = builder(index);
-          assert(widget != null);
-          assert(widget.key != null);
-          assert(widget.isFromOldGeneration);
-          _Key key = new _Key.fromWidget(widget);
-          Widget oldWidget = _childrenByKey[key];
-          assert(oldWidget != null);
-          assert(() {
-            'One of the nodes that was in this MixedViewport was placed in another part of the tree, without the MixedViewport\'s token or builder being changed ' +
-            'and without the MixedViewport\'s MixedViewportLayoutState object being told about that any of the children were invalid.';
-            return oldWidget.isFromOldGeneration;
-          });
-          assert(oldWidget.renderObject.parent == renderObject);
-          widget = syncChild(widget, oldWidget, renderObject.childAfter(oldWidget.renderObject));
-          assert(widget != null);
-          _childrenByKey[key] = widget;
-        }
-      }
-    }
-  }
-
-  // Build the widget at index, and use its maxIntrinsicHeight to fix up
-  // the offsets from index+1 to endIndex. Return the newWidget.
-  Widget _getWidgetAndRecomputeOffsets(int index, int endIndex, BoxConstraints innerConstraints) {
-    final List<double> offsets = layoutState._childOffsets;
-    // Create the newWidget at index.
-    assert(index >= 0);
-    assert(endIndex > index);
-    assert(endIndex < offsets.length);
-    assert(builder != null);
-    Widget newWidget = builder(index);
-    assert(newWidget != null);
-    assert(newWidget.key != null);
-    assert(newWidget.isFromOldGeneration);
-    final _Key key = new _Key.fromWidget(newWidget);
-    Widget oldWidget = _childrenByKey[key];
-    if (oldWidget != null && !oldWidget.isFromOldGeneration)
-      oldWidget = null;
-    newWidget = syncChild(newWidget, oldWidget, _omit);
-    assert(newWidget != null);
-    // Update the offsets based on the newWidget's dimensions.
-    RenderBox widgetRoot = newWidget.renderObject;
-    assert(widgetRoot is RenderBox);
-    double newOffset;
-    if (direction == ScrollDirection.vertical) {
-      newOffset = widgetRoot.getMaxIntrinsicHeight(innerConstraints);
-    } else {
-      newOffset = widgetRoot.getMaxIntrinsicWidth(innerConstraints);
-    }
-    double oldOffset = offsets[index + 1] - offsets[index];
-    double offsetDelta = newOffset - oldOffset;
-    for (int i = index + 1; i <= endIndex; i++)
-      offsets[i] += offsetDelta;
+  /// Calls the builder. This is for the case where you don't know if you have a child at this index.
+  Widget _maybeBuildWidgetAt(int index) {
+    if (widget.builder == null)
+      return null;
+    final Widget newWidget = widget.builder(this, index);
+    assert(newWidget == null || newWidget.key != null); // every widget in a list must have a list-unique key
     return newWidget;
   }
 
-  Widget _getWidget(int index, BoxConstraints innerConstraints) {
-    final List<double> offsets = layoutState._childOffsets;
-    assert(index >= 0);
-    Widget widget = builder == null ? null : builder(index);
-    if (widget == null)
+  /// Calls the builder. This is for the case where you know that you should have a child there.
+  Widget _buildWidgetAt(int index) {
+    final Widget newWidget = widget.builder(this, index);
+    assert(newWidget != null);
+    assert(newWidget.key != null); // every widget in a list must have a list-unique key
+    return newWidget;
+  }
+
+  /// Given an element configuration, inflates the element, updating the existing one if there was one.
+  /// Returns the resulting element.
+  Element _inflateOrUpdateWidget(Widget newWidget) {
+    final _ChildKey key = new _ChildKey.fromWidget(newWidget);
+    final Element oldElement = _childrenByKey[key];
+    final Element newElement = updateChild(oldElement, newWidget, _omit);
+    assert(newElement != null);
+    return newElement;
+  }
+
+  // Build the widget at index.
+  Element _getElement(int index, BoxConstraints innerConstraints) {
+    assert(index <= _childOffsets.length - 1);
+    final Widget newWidget = _buildWidgetAt(index);
+    final Element newElement = _inflateOrUpdateWidget(newWidget);
+    return newElement;
+  }
+
+  // Build the widget at index.
+  Element _maybeGetElement(int index, BoxConstraints innerConstraints) {
+    assert(index <= _childOffsets.length - 1);
+    final Widget newWidget = _maybeBuildWidgetAt(index);
+    if (newWidget == null)
       return null;
-    assert(widget.key != null); // items in lists must have keys
-    final _Key key = new _Key.fromWidget(widget);
-    Widget oldWidget = _childrenByKey[key];
-    if (oldWidget != null && !oldWidget.isFromOldGeneration)
-      oldWidget = null;
-    widget = syncChild(widget, oldWidget, _omit);
-    if (index >= offsets.length - 1) {
-      assert(index == offsets.length - 1);
-      final double widgetStartOffset = offsets[index];
-      RenderBox widgetRoot = widget.renderObject;
-      assert(widgetRoot is RenderBox);
-      double widgetEndOffset;
-      if (direction == ScrollDirection.vertical) {
-        widgetEndOffset = widgetStartOffset + widgetRoot.getMaxIntrinsicHeight(innerConstraints);
-      } else {
-        widgetEndOffset = widgetStartOffset + widgetRoot.getMaxIntrinsicWidth(innerConstraints);
-      }
-      offsets.add(widgetEndOffset);
+    final Element newElement = _inflateOrUpdateWidget(newWidget);
+    return newElement;
+  }
+
+  // Build the widget at index, handling the case where there is no such widget.
+  // Update the offset for that widget.
+  Element _getElementAtLastKnownOffset(int index, BoxConstraints innerConstraints) {
+
+    // Inflate the new widget; if there isn't one, abort early.
+    assert(index == _childOffsets.length - 1);
+    final Widget newWidget = _maybeBuildWidgetAt(index);
+    if (newWidget == null)
+      return null;
+    final Element newElement = _inflateOrUpdateWidget(newWidget);
+
+    // Update the offsets based on the newElement's dimensions.
+    final double newExtent = _getElementExtent(newElement, innerConstraints);
+    _childExtents.add(newExtent);
+    _childOffsets.add(_childOffsets[index] + newExtent);
+    assert(_childExtents.length == _childOffsets.length - 1);
+
+    return newElement;
+  }
+
+  /// Returns the intrinsic size of the given element in the scroll direction
+  double _getElementExtent(Element element, BoxConstraints innerConstraints) {
+    final RenderBox childRenderObject = element.renderObject;
+    switch (widget.direction) {
+      case ScrollDirection.vertical:
+        return childRenderObject.getMaxIntrinsicHeight(innerConstraints);
+      case ScrollDirection.horizontal:
+        return childRenderObject.getMaxIntrinsicWidth(innerConstraints);
+      case ScrollDirection.both:
+        assert(false); // we don't support ScrollDirection.both, see issue 888
+        return double.NAN;
     }
-    return widget;
   }
 
-  void layout(BoxConstraints constraints) {
-    if (!layoutState._dirty && layoutState.isValid)
-      return;
-    layoutState._dirty = false;
-
-    LayoutCallbackBuilderHandle handle = enterLayoutCallbackBuilder();
-    try {
-      _doLayout(constraints);
-    } finally {
-      exitLayoutCallbackBuilder(handle);
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    switch (widget.direction) {
+      case ScrollDirection.vertical:
+        return new BoxConstraints.tightFor(width: constraints.constrainWidth());
+      case ScrollDirection.horizontal:
+        return new BoxConstraints.tightFor(height: constraints.constrainHeight());
+      case ScrollDirection.both:
+        assert(false); // we don't support ScrollDirection.both, see issue 888
+        return null;
     }
-
-    layoutState._notifyListeners();
   }
 
-  void _unsyncChild(Widget widget) {
-    assert(!widget.isFromOldGeneration);
-    // The following two lines are the equivalent of "syncChild(null,
-    // widget, null)", but actually doing that wouldn't work because
-    // widget is now from the new generation and so syncChild() would
-    // assume that that means someone else has already sync()ed with it
-    // and that it's wanted. But it's not wanted! We want to get rid of
-    // it. So we do it manually.
-    widget.detachRenderObject();
-    widget.remove();
+  /// This compares the offsets we had for an element with its current
+  /// intrinsic dimensions.
+  bool _debugIsSameSize(Element element, int index, BoxConstraints constraints) {
+    assert(_invalidIndices.isEmpty);
+    BoxConstraints innerConstraints = _getInnerConstraints(constraints);
+    double newExtent = _getElementExtent(element, innerConstraints);
+    bool result = _childExtents[index] == newExtent;
+    if (!result)
+      print("Element $element at index $index was size ${_childExtents[index]} but is now size ${newExtent} yet no invalidate() was received to that effect");
+    return result;
   }
 
+  /// This is the core lazy-build algorithm. It builds widgets incrementally
+  /// from index 0 until it has built enough widgets to cover itself, and
+  /// discards any widgets that are not displayed.
   void _doLayout(BoxConstraints constraints) {
-    Map<_Key, Widget> newChildren = new Map<_Key, Widget>();
-    Map<int, Widget> builtChildren = new Map<int, Widget>();
+    Map<_ChildKey, Element> newChildren = new Map<_ChildKey, Element>();
+    Map<int, Element> builtChildren = new Map<int, Element>();
 
-    final List<double> offsets = layoutState._childOffsets;
-    final Map<_Key, Widget> childrenByKey = _childrenByKey;
+    // Establish the start and end offsets based on our current constraints.
     double extent;
-    if (direction == ScrollDirection.vertical) {
-      extent = constraints.maxHeight;
-      assert(extent < double.INFINITY &&
-        'There is no point putting a lazily-built vertical MixedViewport inside a box with infinite internal ' +
-        'height (e.g. inside something else that scrolls vertically), because it would then just eagerly build ' +
-        'all the children. You probably want to put the MixedViewport inside a Container with a fixed height.' is String);
-    } else {
-      extent = constraints.maxWidth;
-      assert(extent < double.INFINITY &&
-        'There is no point putting a lazily-built horizontal MixedViewport inside a box with infinite internal ' +
-        'width (e.g. inside something else that scrolls horizontally), because it would then just eagerly build ' +
-        'all the children. You probably want to put the MixedViewport inside a Container with a fixed width.' is String);
+    switch (widget.direction) {
+      case ScrollDirection.vertical:
+        extent = constraints.maxHeight;
+        assert(extent < double.INFINITY &&
+          'There is no point putting a lazily-built vertical MixedViewport inside a box with infinite internal ' +
+          'height (e.g. inside something else that scrolls vertically), because it would then just eagerly build ' +
+          'all the children. You probably want to put the MixedViewport inside a Container with a fixed height.' is String);
+        break;
+      case ScrollDirection.horizontal:
+        extent = constraints.maxWidth;
+        assert(extent < double.INFINITY &&
+          'There is no point putting a lazily-built horizontal MixedViewport inside a box with infinite internal ' +
+          'width (e.g. inside something else that scrolls horizontally), because it would then just eagerly build ' +
+          'all the children. You probably want to put the MixedViewport inside a Container with a fixed width.' is String);
+        break;
+      case ScrollDirection.both: assert(false); // we don't support ScrollDirection.both, see issue 888
     }
-    final double endOffset = startOffset + extent;
+    final double endOffset = widget.startOffset + extent;
 
-    BoxConstraints innerConstraints;
-    if (direction == ScrollDirection.vertical) {
-      innerConstraints = new BoxConstraints.tightFor(width: constraints.constrainWidth());
-    } else {
-      innerConstraints = new BoxConstraints.tightFor(height: constraints.constrainHeight());
-    }
+    // Create the constraints that we will use to measure the children.
+    final BoxConstraints innerConstraints = _getInnerConstraints(constraints);
 
-    // Before doing the actual layout, fix the offsets for the widgets
-    // whose size or type has changed.
-    if (!layoutState.isValid && offsets.length > 0) {
-      List<int> invalidIndices = layoutState._invalidIndices.toList();
+    // Before doing the actual layout, fix the offsets for the widgets whose
+    // size has apparently changed.
+    if (!isValid) {
+      assert(_childOffsets.length > 0);
+      assert(_childOffsets.length == _childExtents.length + 1);
+      List<int> invalidIndices = _invalidIndices.toList();
       invalidIndices.sort();
-      // Ensure all of the offsets after invalidIndices[0] are updated.
-      if (invalidIndices.last < offsets.length - 1)
-        invalidIndices.add(offsets.length - 1);
-      for (int i = 0; i < invalidIndices.length - 1; i += 1) {
-        int index = invalidIndices[i];
-        int endIndex = invalidIndices[i + 1];
-        Widget widget = _getWidgetAndRecomputeOffsets(index, endIndex, innerConstraints);
-        _Key widgetKey = new _Key.fromWidget(widget);
-        bool isVisible = offsets[index] < endOffset && offsets[index + 1] >= startOffset;
-        if (isVisible) {
-          newChildren[widgetKey] = widget;
-          builtChildren[index] = widget;
-        } else {
-          childrenByKey.remove(widgetKey);
-          _unsyncChild(widget);
-        }
-      }
-    }
-    layoutState._invalidIndices.clear();
+      for (int i = 0; i < invalidIndices.length; i += 1) {
 
+        // Determine the indices for this pass.
+        final int widgetIndex = invalidIndices[i];
+        if (widgetIndex >= _childExtents.length)
+          break; // we don't have that child, so there's nothing to invalidate
+        int endIndex; // the last index into _childOffsets that we want to update this round
+        if (i == invalidIndices.length - 1) {
+          // This is the last invalid index. Update all the remaining entries in _childOffsets.
+          endIndex = _childOffsets.length - 1;
+        } else {
+          endIndex = invalidIndices[i + 1];
+          if (endIndex > _childOffsets.length - 1)
+            endIndex = _childOffsets.length - 1; // no point updating beyond the last offset we know of
+        }
+        assert(widgetIndex >= 0);
+        assert(endIndex < _childOffsets.length);
+        assert(widgetIndex < endIndex);
+
+        // Inflate the widget or update the existing element, as necessary.
+        final Element newElement = _getElement(widgetIndex, innerConstraints);
+
+        // Update the offsets based on the newElement's dimensions.
+        _childExtents[widgetIndex] = _getElementExtent(newElement, innerConstraints);
+        for (int j = widgetIndex + 1; j <= endIndex; j++)
+          _childOffsets[j] = _childOffsets[j - 1] + _childExtents[j - 1];
+        assert(_childOffsets.length == _childExtents.length + 1);
+
+        // Decide if it's visible.
+        final _ChildKey key = new _ChildKey.fromWidget(newElement.widget);
+        final bool isVisible = _childOffsets[widgetIndex] < endOffset && _childOffsets[widgetIndex + 1] >= widget.startOffset;
+        if (isVisible) {
+          // Keep it.
+          newChildren[key] = newElement;
+          builtChildren[widgetIndex] = newElement;
+        } else {
+          // Drop it.
+          _childrenByKey.remove(key);
+          updateChild(newElement, null, null);
+        }
+
+      }
+      _invalidIndices.clear();
+    }
+
+    // Decide what the first child to render should be (startIndex), if any (haveChildren).
     int startIndex;
     bool haveChildren;
-    if (startOffset <= 0.0) {
+    if (endOffset < 0.0) {
+      // We're so far scrolled up that nothing is visible.
+      haveChildren = false;
+    } else if (widget.startOffset <= 0.0) {
       startIndex = 0;
-      if (offsets.length > 1) {
+      // If we're scrolled up past the top, then our first visible widget, if
+      // any, is the first widget.
+      if (_childExtents.length > 0) {
         haveChildren = true;
       } else {
-        Widget widget = _getWidget(startIndex, innerConstraints);
-        if (widget != null) {
-          newChildren[new _Key.fromWidget(widget)] = widget;
-          builtChildren[startIndex] = widget;
+        final Element element = _getElementAtLastKnownOffset(startIndex, innerConstraints);
+        if (element != null) {
+          newChildren[new _ChildKey.fromWidget(element.widget)] = element;
+          builtChildren[startIndex] = element;
           haveChildren = true;
         } else {
           haveChildren = false;
-          layoutState._didReachLastChild = true;
+          _didReachLastChild = true;
         }
       }
     } else {
-      startIndex = _findIndexForOffsetBeforeOrAt(startOffset);
-      if (startIndex == offsets.length - 1) {
+      // We're at some sane (not higher than the top) scroll offset.
+      // See if we can already find the offset in our cache.
+      startIndex = _findIndexForOffsetBeforeOrAt(widget.startOffset);
+      if (startIndex < _childExtents.length) {
+        // We already know of a child that would be visible at this offset.
+        haveChildren = true;
+      } else {
         // We don't have an offset on the list that is beyond the start offset.
-        assert(offsets.last <= startOffset);
+        assert(_childOffsets.last <= widget.startOffset);
         // Fill the list until this isn't true or until we know that the
         // list is complete (and thus we are overscrolled).
         while (true) {
-          Widget widget = _getWidget(startIndex, innerConstraints);
-          if (widget == null) {
-            layoutState._didReachLastChild = true;
+          // Get the next element and cache its offset.
+          final Element element = _getElementAtLastKnownOffset(startIndex, innerConstraints);
+          if (element == null) {
+            // Reached the end of the list. We are so far overscrolled, there's nothing to show.
+            _didReachLastChild = true;
+            haveChildren = false;
             break;
           }
-          _Key widgetKey = new _Key.fromWidget(widget);
-          if (offsets.last > startOffset) {
-            // it's visible
-            newChildren[widgetKey] = widget;
-            builtChildren[startIndex] = widget;
+          final _ChildKey key = new _ChildKey.fromWidget(element.widget);
+          if (_childOffsets.last > widget.startOffset) {
+            // This element is visible! It must thus be our first visible child.
+            newChildren[key] = element;
+            builtChildren[startIndex] = element;
+            haveChildren = true;
             break;
           }
-          childrenByKey.remove(widgetKey);
-          _unsyncChild(widget);
+          // This element is not visible. Drop the inflated element.
+          // (We've already cached its offset for later use.)
+          _childrenByKey.remove(key);
+          updateChild(element, null, null);
           startIndex += 1;
-          assert(startIndex == offsets.length - 1);
+          assert(startIndex == _childExtents.length);
         }
-        if (offsets.last > startOffset) {
-          // If we're here, we have at least one child, so our list has
-          // at least two offsets, the top of the child and the bottom
-          // of the child.
-          assert(offsets.length >= 2);
-          assert(startIndex == offsets.length - 2);
-          haveChildren = true;
-        } else {
-          // If we're here, there are no children to show.
-          haveChildren = false;
-        }
-      } else {
-        haveChildren = true;
+        assert(haveChildren == _childOffsets.last > widget.startOffset);
+        assert(() {
+          if (haveChildren) {
+            // We found a child to render. It's the last one for which we have an
+            // offset in _childOffsets.
+            // If we're here, we have at least one child, so our list has
+            // at least two offsets, the top of the child and the bottom
+            // of the child.
+            assert(_childExtents.length >= 1);
+            assert(_childOffsets.length == _childExtents.length + 1);
+            assert(startIndex == _childExtents.length - 1);
+          }
+          return true;
+        });
       }
     }
     assert(haveChildren != null);
-    assert(haveChildren || layoutState._didReachLastChild);
-
+    assert(haveChildren || _didReachLastChild || endOffset < 0.0);
     assert(startIndex >= 0);
-    assert(startIndex < offsets.length);
+    assert(startIndex < _childExtents.length);
 
+    // Build the other widgets that are visible.
     int index = startIndex;
     if (haveChildren) {
       // Update the renderObject configuration
-      if (direction == ScrollDirection.vertical) {
-        renderObject.direction = BlockDirection.vertical;
-      } else {
-        renderObject.direction = BlockDirection.horizontal;
+      switch (widget.direction) {
+        case ScrollDirection.vertical:
+          renderObject.direction = BlockDirection.vertical;
+          break;
+        case ScrollDirection.horizontal:
+          renderObject.direction = BlockDirection.horizontal;
+          break;
+        case ScrollDirection.both: assert(false); // we don't support ScrollDirection.both, see issue 888
       }
-      renderObject.startOffset = offsets[index] - startOffset;
+      renderObject.startOffset = _childOffsets[index] - widget.startOffset;
       // Build all the widgets we still need.
-      while (offsets[index] < endOffset) {
+      while (_childOffsets[index] < endOffset) {
         if (!builtChildren.containsKey(index)) {
-          Widget widget = _getWidget(index, innerConstraints);
-          if (widget == null) {
-            layoutState._didReachLastChild = true;
+          Element element = _maybeGetElement(index, innerConstraints);
+          if (element == null) {
+            _didReachLastChild = true;
             break;
           }
-          newChildren[new _Key.fromWidget(widget)] = widget;
-          builtChildren[index] = widget;
+          if (index == _childExtents.length) {
+            // Remember this element's offset.
+            final double newExtent = _getElementExtent(element, innerConstraints);
+            _childExtents.add(newExtent);
+            _childOffsets.add(_childOffsets[index] + newExtent);
+            assert(_childOffsets.length == _childExtents.length + 1);
+          } else {
+            // Verify that it hasn't changed size.
+            // If this assertion fires, it means you didn't call "invalidate"
+            // before changing the size of one of your items.
+            assert(_debugIsSameSize(element, index, constraints));
+          }
+          // Remember the element for when we place the children.
+          final _ChildKey key = new _ChildKey.fromWidget(element.widget);
+          newChildren[key] = element;
+          builtChildren[index] = element;
         }
         assert(builtChildren[index] != null);
         index += 1;
@@ -453,33 +534,59 @@ class MixedViewport extends RenderObjectWrapper {
     }
 
     // Remove any old children.
-    for (_Key oldChildKey in childrenByKey.keys) {
+    for (_ChildKey oldChildKey in _childrenByKey.keys) {
       if (!newChildren.containsKey(oldChildKey))
-        syncChild(null, childrenByKey[oldChildKey], null); // calls detachChildRenderObject()
+        updateChild(_childrenByKey[oldChildKey], null, null);
     }
 
     if (haveChildren) {
       // Place all our children in our RenderObject.
       // All the children we are placing are in builtChildren and newChildren.
-      // We will walk them backwards so we can set the siblings at the same time.
-      RenderBox nextSibling = null;
+      // We will walk them backwards so we can set the slots at the same time.
+      Element nextSibling = null;
       while (index > startIndex) {
         index -= 1;
-        Widget widget = builtChildren[index];
-        if (widget.renderObject.parent == renderObject) {
-          renderObject.move(widget.renderObject, before: nextSibling);
-        } else {
-          assert(widget.renderObject.parent == null);
-          renderObject.add(widget.renderObject, before: nextSibling);
-        }
-        widget.updateSlot(nextSibling);
-        nextSibling = widget.renderObject;
+        final Element element = builtChildren[index];
+        if (element.slot != nextSibling)
+          updateSlotForChild(element, nextSibling);
+        nextSibling = element;
       }
     }
 
+    // Update our internal state.
     _childrenByKey = newChildren;
-    layoutState._firstVisibleChildIndex = startIndex;
-    layoutState._visibleChildCount = newChildren.length;
+    _firstVisibleChildIndex = startIndex;
+  }
+
+  void updateSlotForChild(Element element, dynamic newSlot) {
+    assert(newSlot == null || newSlot == _omit || newSlot is Element);
+    super.updateSlotForChild(element, newSlot);
+  }
+
+  void insertChildRenderObject(RenderObject child, dynamic slot) {
+    if (slot == _omit)
+      return;
+    assert(slot == null || slot is Element);
+    RenderObject nextSibling = slot?.renderObject;
+    renderObject.add(child, before: nextSibling);
+  }
+
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    if (slot == _omit)
+      return;
+    assert(slot == null || slot is Element);
+    RenderObject nextSibling = slot?.renderObject;
+    assert(nextSibling == null || nextSibling.parent == renderObject);
+    if (child.parent == renderObject)
+      renderObject.move(child, before: nextSibling);
+    else
+      renderObject.add(child, before: nextSibling);
+  }
+
+  void removeChildRenderObject(RenderObject child) {
+    if (child.parent != renderObject)
+      return; // probably had slot == _omit when inserted
+    renderObject.remove(child);
   }
 
 }

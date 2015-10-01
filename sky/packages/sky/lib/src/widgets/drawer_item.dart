@@ -4,39 +4,33 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/painting.dart';
+import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/button_base.dart';
-import 'package:sky/src/widgets/default_text_style.dart';
+import 'package:sky/src/widgets/button_state.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/icon.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/theme.dart';
 
-typedef void OnPressedFunction();
-
-class DrawerItem extends ButtonBase {
-  DrawerItem({ Key key, this.icon, this.child, this.onPressed, this.selected: false })
+class DrawerItem extends StatefulComponent {
+  const DrawerItem({ Key key, this.icon, this.child, this.onPressed, this.selected: false })
     : super(key: key);
 
-  String icon;
-  Widget child;
-  OnPressedFunction onPressed;
-  bool selected;
+  final String icon;
+  final Widget child;
+  final GestureTapListener onPressed;
+  final bool selected;
 
-  void syncConstructorArguments(DrawerItem source) {
-    icon = source.icon;
-    child = source.child;
-    onPressed = source.onPressed;
-    selected = source.selected;
-    super.syncConstructorArguments(source);
-  }
+  DrawerItemState createState() => new DrawerItemState();
+}
 
+class DrawerItemState extends ButtonState<DrawerItem> {
   TextStyle _getTextStyle(ThemeData themeData) {
     TextStyle result = themeData.text.body2;
-    if (selected)
+    if (config.selected)
       result = result.copyWith(color: themeData.primaryColor);
     return result;
   }
@@ -44,27 +38,27 @@ class DrawerItem extends ButtonBase {
   Color _getBackgroundColor(ThemeData themeData) {
     if (highlight)
       return themeData.highlightColor;
-    if (selected)
+    if (config.selected)
       return themeData.selectedColor;
     return Colors.transparent;
   }
 
   sky.ColorFilter _getColorFilter(ThemeData themeData) {
-    if (selected)
+    if (config.selected)
       return new sky.ColorFilter.mode(themeData.primaryColor, sky.TransferMode.srcATop);
     return new sky.ColorFilter.mode(const Color(0x73000000), sky.TransferMode.dstIn);
   }
 
-  Widget buildContent() {
-    ThemeData themeData = Theme.of(this);
+  Widget buildContent(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
 
     List<Widget> flexChildren = new List<Widget>();
-    if (icon != null) {
+    if (config.icon != null) {
       flexChildren.add(
         new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(
-            type: icon,
+            type: config.icon,
             size: 24,
             colorFilter: _getColorFilter(themeData))
         )
@@ -76,14 +70,14 @@ class DrawerItem extends ButtonBase {
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new DefaultTextStyle(
             style: _getTextStyle(themeData),
-            child: child
+            child: config.child
           )
         )
       )
     );
 
     return new GestureDetector(
-      onTap: onPressed,
+      onTap: config.onPressed,
       child: new Container(
         height: 48.0,
         decoration: new BoxDecoration(backgroundColor: _getBackgroundColor(themeData)),

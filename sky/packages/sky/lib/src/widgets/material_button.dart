@@ -3,58 +3,53 @@
 // found in the LICENSE file.
 
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/button_base.dart';
+import 'package:sky/src/widgets/button_state.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/material.dart';
 
 // Rather than using this class directly, please use FlatButton or RaisedButton.
-abstract class MaterialButton extends ButtonBase {
-
+abstract class MaterialButton extends StatefulComponent {
   MaterialButton({
     Key key,
     this.child,
     this.enabled: true,
     this.onPressed
-  }) : super(key: key);
-
-  Widget child;
-  bool enabled;
-  Function onPressed;
-
-  void syncConstructorArguments(MaterialButton source) {
-    child = source.child;
-    enabled = source.enabled;
-    onPressed = source.onPressed;
-    super.syncConstructorArguments(source);
+  }) : super(key: key) {
+    assert(enabled != null);
   }
 
-  Color get color;
+  final Widget child;
+  final bool enabled;
+  final Function onPressed;
+}
+
+abstract class MaterialButtonState<T extends MaterialButton> extends ButtonState<T> {
+  Color getColor(BuildContext context);
   int get level;
 
-  Widget buildContent() {
+  Widget buildContent(BuildContext context) {
     Widget contents = new Container(
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       child: new Center(
         shrinkWrap: ShrinkWrap.width,
-        child: child // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
+        child: config.child // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
       )
     );
     return new GestureDetector(
-      onTap: enabled ? onPressed : null,
+      onTap: config.enabled ? config.onPressed : null,
       child: new Container(
         height: 36.0,
         constraints: new BoxConstraints(minWidth: 88.0),
         margin: new EdgeDims.all(8.0),
         child: new Material(
           type: MaterialType.button,
-          child: enabled ? new InkWell(child: contents) : contents,
+          child: config.enabled ? new InkWell(child: contents) : contents,
           level: level,
-          color: color
+          color: getColor(context)
         )
       )
     );
   }
-
 }

@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:quiver/testing/async.dart';
-import 'package:sky/src/fn3.dart';
+import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';

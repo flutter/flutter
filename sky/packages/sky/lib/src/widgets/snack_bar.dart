@@ -8,7 +8,6 @@ import 'package:sky/painting.dart';
 import 'package:sky/material.dart';
 import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/material.dart';
@@ -18,9 +17,12 @@ import 'package:sky/src/widgets/transitions.dart';
 typedef void SnackBarDismissedCallback();
 
 const Duration _kSlideInDuration = const Duration(milliseconds: 200);
-// TODO(ianh): factor out some of the constants below
+const double kSnackHeight = 52.0;
+const double kSideMargins = 24.0;
+const double kVerticalPadding = 14.0;
+const Color kSnackBackground = const Color(0xFF323232);
 
-class SnackBarAction extends Component {
+class SnackBarAction extends StatelessComponent {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);
   }
@@ -28,12 +30,12 @@ class SnackBarAction extends Component {
   final String label;
   final Function onPressed;
 
-  Widget build() {
+  Widget build(BuildContext) {
     return new GestureDetector(
       onTap: onPressed,
       child: new Container(
-        margin: const EdgeDims.only(left: 24.0),
-        padding: const EdgeDims.only(top: 14.0, bottom: 14.0),
+        margin: const EdgeDims.only(left: kSideMargins),
+        padding: const EdgeDims.symmetric(vertical: kVerticalPadding),
         child: new Text(label)
       )
     );
@@ -41,10 +43,8 @@ class SnackBarAction extends Component {
 }
 
 class SnackBar extends AnimatedComponent {
-
   SnackBar({
     Key key,
-    this.transitionKey,
     this.content,
     this.actions,
     bool showing,
@@ -53,56 +53,56 @@ class SnackBar extends AnimatedComponent {
     assert(content != null);
   }
 
-  Key transitionKey;
-  Widget content;
-  List<SnackBarAction> actions;
-  SnackBarDismissedCallback onDismissed;
+  final Widget content;
+  final List<SnackBarAction> actions;
+  final SnackBarDismissedCallback onDismissed;
 
-  void syncConstructorArguments(SnackBar source) {
-    transitionKey = source.transitionKey;
-    content = source.content;
-    actions = source.actions;
-    onDismissed = source.onDismissed;
-    super.syncConstructorArguments(source);
-  }
+  SnackBarState createState() => new SnackBarState();
+}
 
+class SnackBarState extends AnimatedState<SnackBar> {
   void handleDismissed() {
-    if (onDismissed != null)
-      onDismissed();
+    if (config.onDismissed != null)
+      config.onDismissed();
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     List<Widget> children = [
       new Flexible(
         child: new Container(
-          margin: const EdgeDims.symmetric(vertical: 14.0),
+          margin: const EdgeDims.symmetric(vertical: kVerticalPadding),
           child: new DefaultTextStyle(
             style: Typography.white.subhead,
-            child: content
+            child: config.content
           )
         )
       )
     ];
-    if (actions != null)
-      children.addAll(actions);
-    return new SlideTransition(
-      key: transitionKey,
+    if (config.actions != null)
+      children.addAll(config.actions);
+    return new SquashTransition(
       performance: performance.view,
-      position: new AnimatedValue<Point>(
-        Point.origin,
-        end: const Point(0.0, -52.0),
+      height: new AnimatedValue<double>(
+        0.0,
+        end: kSnackHeight,
         curve: easeIn,
         reverseCurve: easeOut
       ),
-      child: new Material(
-        level: 2,
-        color: const Color(0xFF323232),
-        type: MaterialType.canvas,
-        child: new Container(
-          margin: const EdgeDims.symmetric(horizontal: 24.0),
-          child: new DefaultTextStyle(
-            style: new TextStyle(color: Theme.of(this).accentColor),
-            child: new Row(children)
+      child: new ClipRect(
+        child: new OverflowBox(
+          minHeight: kSnackHeight,
+          maxHeight: kSnackHeight,
+          child: new Material(
+            level: 2,
+            color: kSnackBackground,
+            type: MaterialType.canvas,
+            child: new Container(
+              margin: const EdgeDims.symmetric(horizontal: kSideMargins),
+              child: new DefaultTextStyle(
+                style: new TextStyle(color: Theme.of(context).accentColor),
+                child: new Row(children)
+              )
+            )
           )
         )
       )

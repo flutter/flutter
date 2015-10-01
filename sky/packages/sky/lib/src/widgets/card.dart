@@ -11,13 +11,13 @@ const EdgeDims _kCardMargins = const EdgeDims.all(4.0);
 /// A material design card
 ///
 /// <https://www.google.com/design/spec/components/cards.html>
-class Card extends Component {
-  Card({ Key key, this.child, this.color }) : super(key: key);
+class Card extends StatelessComponent {
+  const Card({ Key key, this.child, this.color }) : super(key: key);
 
   final Widget child;
   final Color color;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Container(
       margin: _kCardMargins,
       child: new Material(

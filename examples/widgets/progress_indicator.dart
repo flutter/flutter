@@ -4,7 +4,7 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
-import 'package:sky/src/fn3.dart';
+import 'package:sky/widgets.dart';
 
 class ProgressIndicatorApp extends StatefulComponent {
   ProgressIndicatorAppState createState() => new ProgressIndicatorAppState();

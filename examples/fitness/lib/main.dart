@@ -8,7 +8,7 @@ import 'package:playfair/playfair.dart' as playfair;
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/fn3.dart';
+import 'package:sky/widgets.dart';
 
 import 'user_data.dart';
 import 'date_utils.dart';

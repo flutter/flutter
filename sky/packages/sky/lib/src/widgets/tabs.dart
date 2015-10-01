@@ -11,7 +11,6 @@ import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/icon.dart';
@@ -260,8 +259,8 @@ class RenderTabBar extends RenderBox with
   }
 }
 
-class TabBarWrapper extends MultiChildRenderObjectWrapper {
-  TabBarWrapper({
+class _TabBarWrapper extends MultiChildRenderObjectWidget {
+  _TabBarWrapper({
     Key key,
     List<Widget> children,
     this.selectedIndex,
@@ -281,11 +280,13 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
   final bool isScrollable;
   final LayoutChanged onLayoutChanged;
 
-  RenderTabBar get renderObject => super.renderObject;
-  RenderTabBar createNode() => new RenderTabBar(onLayoutChanged);
+  RenderTabBar createRenderObject() {
+    RenderTabBar result = new RenderTabBar(onLayoutChanged);
+    updateRenderObject(result, null);
+    return result;
+  }
 
-  void syncRenderObject(Widget old) {
-    super.syncRenderObject(old);
+  void updateRenderObject(RenderTabBar renderObject, _TabBarWrapper oldWidget) {
     renderObject.selectedIndex = selectedIndex;
     renderObject.backgroundColor = backgroundColor;
     renderObject.indicatorColor = indicatorColor;
@@ -303,7 +304,7 @@ class TabLabel {
   final String icon;
 }
 
-class Tab extends Component {
+class Tab extends StatelessComponent {
   Tab({
     Key key,
     this.label,
@@ -332,7 +333,7 @@ class Tab extends Component {
     return new Icon(type: label.icon, size: _kTabIconSize, colorFilter: filter);
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Widget labelContent;
     if (label.icon == null) {
       labelContent = _buildLabelText();
@@ -391,33 +392,32 @@ class TabBar extends Scrollable {
     this.isScrollable: false
   }) : super(key: key, scrollDirection: ScrollDirection.horizontal);
 
-  Iterable<TabLabel> labels;
-  int selectedIndex;
-  SelectedIndexChanged onChanged;
-  bool isScrollable;
+  final Iterable<TabLabel> labels;
+  final int selectedIndex;
+  final SelectedIndexChanged onChanged;
+  final bool isScrollable;
+
+  TabBarState createState() => new TabBarState();
+}
+
+class TabBarState extends ScrollableState<TabBar> {
+  void initState() {
+    super.initState();
+    _indicatorAnimation = new ValueAnimation<Rect>()
+      ..duration = _kTabBarScroll
+      ..variable = new AnimatedRect(null, curve: ease);
+    scrollBehavior.isScrollable = config.isScrollable;
+  }
 
   Size _tabBarSize;
   Size _viewportSize = Size.zero;
   List<double> _tabWidths;
   ValueAnimation<Rect> _indicatorAnimation;
 
-  void initState() {
-    super.initState();
-    _indicatorAnimation = new ValueAnimation<Rect>()
-      ..duration = _kTabBarScroll
-      ..variable = new AnimatedRect(null, curve: ease);
-    scrollBehavior.isScrollable = isScrollable;
-  }
-
-  void syncConstructorArguments(TabBar source) {
-    super.syncConstructorArguments(source);
-    labels = source.labels;
-    selectedIndex = source.selectedIndex;
-    onChanged = source.onChanged;
-    isScrollable = source.isScrollable;
-    if (!isScrollable)
+  void didUpdateConfig(TabBar oldConfig) {
+    super.didUpdateConfig(oldConfig);
+    if (!config.isScrollable)
       scrollTo(0.0);
-    scrollBehavior.isScrollable = source.isScrollable;
   }
 
   AnimatedRect get _indicatorRect => _indicatorAnimation.variable;
@@ -459,14 +459,14 @@ class TabBar extends Scrollable {
   }
 
   void _handleTap(int tabIndex) {
-    if (tabIndex != selectedIndex) {
+    if (tabIndex != config.selectedIndex) {
       if (_tabWidths != null) {
-        if (isScrollable)
+        if (config.isScrollable)
           scrollTo(_centeredTabScrollOffset(tabIndex), duration: _kTabBarScroll);
-        _startIndicatorAnimation(selectedIndex, tabIndex);
+        _startIndicatorAnimation(config.selectedIndex, tabIndex);
       }
-      if (onChanged != null)
-        onChanged(tabIndex);
+      if (config.onChanged != null)
+        config.onChanged(tabIndex);
     }
   }
 
@@ -476,7 +476,7 @@ class TabBar extends Scrollable {
       child: new Tab(
         label: label,
         color: color,
-        selected: tabIndex == selectedIndex,
+        selected: tabIndex == config.selectedIndex,
         selectedColor: selectedColor
       )
     );
@@ -484,7 +484,7 @@ class TabBar extends Scrollable {
 
   void _updateScrollBehavior() {
     scrollBehavior.updateExtents(
-      containerExtent: scrollDirection == ScrollDirection.vertical ? _viewportSize.height : _viewportSize.width,
+      containerExtent: config.scrollDirection == ScrollDirection.vertical ? _viewportSize.height : _viewportSize.width,
       contentExtent: _tabWidths.reduce((sum, width) => sum + width)
     );
   }
@@ -502,10 +502,10 @@ class TabBar extends Scrollable {
     _updateScrollBehavior();
   }
 
-  Widget buildContent() {
-    assert(labels != null && labels.isNotEmpty);
+  Widget buildContent(BuildContext context) {
+    assert(config.labels != null && config.labels.isNotEmpty);
 
-    ThemeData themeData = Theme.of(this);
+    ThemeData themeData = Theme.of(context);
     Color backgroundColor = themeData.primaryColor;
     Color indicatorColor = themeData.accentColor;
     if (indicatorColor == backgroundColor) {
@@ -528,7 +528,7 @@ class TabBar extends Scrollable {
     List<Widget> tabs = <Widget>[];
     bool textAndIcons = false;
     int tabIndex = 0;
-    for (TabLabel label in labels) {
+    for (TabLabel label in config.labels) {
       tabs.add(_toTab(label, tabIndex++, textStyle.color, indicatorColor));
       if (label.text != null && label.icon != null)
         textAndIcons = true;
@@ -541,15 +541,15 @@ class TabBar extends Scrollable {
         child: new BuilderTransition(
           variables: [_indicatorRect],
           performance: _indicatorAnimation.view,
-          builder: () {
-            return new TabBarWrapper(
+          builder: (BuildContext context) {
+            return new _TabBarWrapper(
               children: tabs,
-              selectedIndex: selectedIndex,
+              selectedIndex: config.selectedIndex,
               backgroundColor: backgroundColor,
               indicatorColor: indicatorColor,
               indicatorRect: _indicatorRect.value,
               textAndIcons: textAndIcons,
-              isScrollable: isScrollable,
+              isScrollable: config.isScrollable,
               onLayoutChanged: _layoutChanged
             );
           }
@@ -557,7 +557,7 @@ class TabBar extends Scrollable {
       )
     );
 
-    if (!isScrollable)
+    if (!config.isScrollable)
       return tabBar;
 
     return new SizeObserver(
@@ -572,20 +572,19 @@ class TabBar extends Scrollable {
 }
 
 class TabNavigatorView {
-  TabNavigatorView({ this.label, this.builder });
+  TabNavigatorView({ this.label, this.builder }) {
+    assert(builder != null);
+  }
+
+  // this uses a builder for the contents, rather than a raw Widget child,
+  // because there might be many, many tabs and some might be relatively
+  // expensive to create up front. This way, the view is only created lazily.
 
   final TabLabel label;
-  final Builder builder;
-
-  Widget buildContent() {
-    assert(builder != null);
-    Widget content = builder();
-    assert(content != null);
-    return content;
-  }
+  final WidgetBuilder builder;
 }
 
-class TabNavigator extends Component {
+class TabNavigator extends StatelessComponent {
   TabNavigator({
     Key key,
     this.views,
@@ -604,18 +603,17 @@ class TabNavigator extends Component {
       onChanged(tabIndex);
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     assert(views != null && views.isNotEmpty);
     assert(selectedIndex >= 0 && selectedIndex < views.length);
-
-    TabBar tabBar = new TabBar(
-      labels: views.map((view) => view.label),
-      onChanged: _handleSelectedIndexChanged,
-      selectedIndex: selectedIndex,
-      isScrollable: isScrollable
-    );
-
-    Widget content = views[selectedIndex].buildContent();
-    return new Column([tabBar, new Flexible(child: content)]);
+    return new Column([
+      new TabBar(
+        labels: views.map((view) => view.label),
+        onChanged: _handleSelectedIndexChanged,
+        selectedIndex: selectedIndex,
+        isScrollable: isScrollable
+      ),
+      new Flexible(child: views[selectedIndex].builder(context))
+    ]);
   }
 }

@@ -4,7 +4,7 @@
 
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/fn3.dart';
+import 'package:sky/widgets.dart';
 
 class TabbedNavigatorApp extends StatefulComponent {
   TabbedNavigatorAppState createState() => new TabbedNavigatorAppState();

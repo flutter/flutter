@@ -9,7 +9,6 @@ import 'package:sky/src/widgets/material_button.dart';
 import 'package:sky/src/widgets/theme.dart';
 
 class RaisedButton extends MaterialButton {
-
   RaisedButton({
     Key key,
     Widget child,
@@ -18,11 +17,17 @@ class RaisedButton extends MaterialButton {
   }) : super(key: key,
              child: child,
              enabled: enabled,
-             onPressed: onPressed);
+             onPressed: onPressed) {
+    assert(enabled != null);
+  }
 
-  Color get color {
-    if (enabled) {
-      switch (Theme.of(this).brightness) {
+  RaisedButtonState createState() => new RaisedButtonState();
+}
+
+class RaisedButtonState extends MaterialButtonState<RaisedButton> {
+  Color getColor(BuildContext context) {
+    if (config.enabled) {
+      switch (Theme.of(context).brightness) {
         case ThemeBrightness.light:
           if (highlight)
             return Colors.grey[350];
@@ -31,9 +36,9 @@ class RaisedButton extends MaterialButton {
           break;
         case ThemeBrightness.dark:
           if (highlight)
-            return Theme.of(this).primarySwatch[700];
+            return Theme.of(context).primarySwatch[700];
           else
-            return Theme.of(this).primarySwatch[600];
+            return Theme.of(context).primarySwatch[600];
           break;
       }
     } else {
@@ -41,5 +46,5 @@ class RaisedButton extends MaterialButton {
     }
   }
 
-  int get level => enabled ? (highlight ? 2 : 1) : 0;
+  int get level => config.enabled ? (highlight ? 2 : 1) : 0;
 }
