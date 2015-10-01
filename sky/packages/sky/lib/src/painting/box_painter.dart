@@ -14,9 +14,8 @@ import 'package:sky/src/painting/shadows.dart';
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
 class EdgeDims {
-  // TODO(abarth): Remove this constructor or rename it to EdgeDims.fromTRBL.
   /// Constructs an EdgeDims from offsets from the top, right, bottom and left
-  const EdgeDims(this.top, this.right, this.bottom, this.left);
+  const EdgeDims.TRBL(this.top, this.right, this.bottom, this.left);
 
   /// Constructs an EdgeDims where all the offsets are value
   const EdgeDims.all(double value)
@@ -47,32 +46,89 @@ class EdgeDims {
 
   bool get isNonNegative => top >= 0.0 && right >= 0.0 && bottom >= 0.0 && left >= 0.0;
 
-  bool operator ==(other) {
-    if (identical(this, other))
-      return true;
-    return other is EdgeDims
-        && top == other.top
-        && right == other.right
-        && bottom == other.bottom
-        && left == other.left;
+  EdgeDims operator-(EdgeDims other) {
+    return new EdgeDims.TRBL(
+      top - other.top,
+      right - other.right,
+      bottom - other.bottom,
+      left - other.left
+    );
   }
 
   EdgeDims operator+(EdgeDims other) {
-    return new EdgeDims(top + other.top,
-                        right + other.right,
-                        bottom + other.bottom,
-                        left + other.left);
+    return new EdgeDims.TRBL(
+      top + other.top,
+      right + other.right,
+      bottom + other.bottom,
+      left + other.left
+    );
   }
 
-  EdgeDims operator-(EdgeDims other) {
-    return new EdgeDims(top - other.top,
-                        right - other.right,
-                        bottom - other.bottom,
-                        left - other.left);
+  EdgeDims operator*(double other) {
+    return new EdgeDims.TRBL(
+      top * other,
+      right * other,
+      bottom * other,
+      left * other
+    );
+  }
+
+  EdgeDims operator/(double other) {
+    return new EdgeDims.TRBL(
+      top / other,
+      right / other,
+      bottom / other,
+      left / other
+    );
+  }
+
+  EdgeDims operator~/(double other) {
+    return new EdgeDims.TRBL(
+      (top ~/ other).toDouble(),
+      (right ~/ other).toDouble(),
+      (bottom ~/ other).toDouble(),
+      (left ~/ other).toDouble()
+    );
+  }
+
+  EdgeDims operator%(double other) {
+    return new EdgeDims.TRBL(
+      top % other,
+      right % other,
+      bottom % other,
+      left % other
+    );
+  }
+
+  bool operator ==(other) {
+    return identical(this, other) ||
+      (other is EdgeDims &&
+       top == other.top &&
+       right == other.right &&
+       bottom == other.bottom &&
+       left == other.left);
+  }
+
+  /// Linearly interpolate between two EdgeDims
+  ///
+  /// If either is null, this function interpolates from [EdgeDims.zero].
+  static EdgeDims lerp(EdgeDims a, EdgeDims b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b * t;
+    if (b == null)
+      return a * (1.0 - t);
+    return new EdgeDims.TRBL(
+      sky.lerpDouble(a.top, b.top, t),
+      sky.lerpDouble(a.right, b.right, t),
+      sky.lerpDouble(a.bottom, b.bottom, t),
+      sky.lerpDouble(a.left, b.left, t)
+    );
   }
 
   /// An EdgeDims with zero offsets in each direction
-  static const EdgeDims zero = const EdgeDims(0.0, 0.0, 0.0, 0.0);
+  static const EdgeDims zero = const EdgeDims.TRBL(0.0, 0.0, 0.0, 0.0);
 
   int get hashCode {
     int value = 373;
@@ -142,7 +198,7 @@ class Border {
 
   /// The widths of the sides of this border represented as an EdgeDims
   EdgeDims get dimensions {
-    return new EdgeDims(top.width, right.width, bottom.width, left.width);
+    return new EdgeDims.TRBL(top.width, right.width, bottom.width, left.width);
   }
 
   int get hashCode {

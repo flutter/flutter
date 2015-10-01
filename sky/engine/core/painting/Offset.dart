@@ -45,6 +45,9 @@ class Offset extends OffsetBase {
   /// Returns the point at (0, 0) plus this offset.
   Point toPoint() => new Point(this.dx, this.dy);
 
+  /// Compares two Offsets for equality.
+  bool operator ==(other) => other is Offset && super == other;
+
   /// Linearly interpolate between two offsets
   ///
   /// If either offset is null, this function interpolates from [Offset.zero].
