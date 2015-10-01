@@ -150,16 +150,16 @@ class ElasticInOutCurve implements Curve {
 /// A linear animation curve
 const Linear linear = const Linear();
 
-/// A cubic animation cuve that speeds up quickly and ends slowly
+/// A cubic animation curve that speeds up quickly and ends slowly
 const Cubic ease = const Cubic(0.25, 0.1, 0.25, 1.0);
 
-/// A cubic animation cuve that starts slowly and ends quickly
+/// A cubic animation curve that starts slowly and ends quickly
 const Cubic easeIn = const Cubic(0.42, 0.0, 1.0, 1.0);
 
-/// A cubic animation cuve that starts quickly and ends slowly
+/// A cubic animation curve that starts quickly and ends slowly
 const Cubic easeOut = const Cubic(0.0, 0.0, 0.58, 1.0);
 
-/// A cubic animation cuve that starts slowly, speeds up, and then and ends slowly
+/// A cubic animation curve that starts slowly, speeds up, and then and ends slowly
 const Cubic easeInOut = const Cubic(0.42, 0.0, 0.58, 1.0);
 
 /// An oscillating curve that grows in magnitude
@@ -179,3 +179,6 @@ const ElasticOutCurve elasticOut = const ElasticOutCurve();
 
 /// An oscillating curve that grows and then shrinks in magnitude while overshootings its bounds
 const ElasticInOutCurve elasticInOut = const ElasticInOutCurve();
+
+/// A curve that starts quickly and eases into its final position. Over the course of the animation, the object spends more time near its final destination. As a result, the user isn’t left waiting for the animation to finish, and the negative effects of motion are minimized.
+const Curve fastOutSlowIn = const Cubic(0.4, 0.0, 0.2, 1.0);
