@@ -40,7 +40,7 @@ class WidgetFlutterBinding extends FlutterBinding {
   void beginFrame(double timeStamp) {
     buildDirtyElements();
     super.beginFrame(timeStamp);
-    scheduleMicrotask(GlobalKey.checkForDuplicatesAndNotifyListeners);
+    Element.finalizeTree();
   }
 
   List<BuildableElement> _dirtyElements = new List<BuildableElement>();
