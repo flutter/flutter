@@ -16,7 +16,7 @@ class IconThemeData {
   final IconThemeColor color;
 }
 
-class IconTheme extends Inherited {
+class IconTheme extends InheritedWidget {
 
   IconTheme({
     Key key,
@@ -29,12 +29,12 @@ class IconTheme extends Inherited {
 
   final IconThemeData data;
 
-  static IconThemeData of(Component component) {
-    IconTheme result = component.inheritedOfType(IconTheme);
+  static IconThemeData of(BuildContext context) {
+    IconTheme result = context.inheritedWidgetOfType(IconTheme);
     return result?.data;
   }
 
-  bool syncShouldNotify(IconTheme old) => data != old.data;
+  bool updateShouldNotify(IconTheme old) => data != old.data;
 
 }
 
@@ -47,7 +47,7 @@ AssetBundle _initIconBundle() {
 
 final AssetBundle _iconBundle = _initIconBundle();
 
-class Icon extends Component {
+class Icon extends StatelessComponent {
   Icon({
     Key key,
     this.size,
@@ -61,14 +61,14 @@ class Icon extends Component {
   final IconThemeColor color;
   final sky.ColorFilter colorFilter;
 
-  String get colorSuffix {
+  String getColorSuffix(BuildContext context) {
     IconThemeColor iconThemeColor = color;
     if (iconThemeColor == null) {
-      IconThemeData iconThemeData = IconTheme.of(this);
+      IconThemeData iconThemeData = IconTheme.of(context);
       iconThemeColor = iconThemeData == null ? null : iconThemeData.color;
     }
     if (iconThemeColor == null) {
-      ThemeBrightness themeBrightness = Theme.of(this).brightness;
+      ThemeBrightness themeBrightness = Theme.of(context).brightness;
       iconThemeColor = themeBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
     }
     switch(iconThemeColor) {
@@ -79,7 +79,7 @@ class Icon extends Component {
     }
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     String category = '';
     String subtype = '';
     List<String> parts = type.split('/');
@@ -90,6 +90,7 @@ class Icon extends Component {
     // TODO(eseidel): This clearly isn't correct.  Not sure what would be.
     // Should we use the ios images on ios?
     String density = 'drawable-xxhdpi';
+    String colorSuffix = getColorSuffix(context);
     return new AssetImage(
       bundle: _iconBundle,
       name: '${category}/${density}/ic_${subtype}_${colorSuffix}_${size}dp.png',

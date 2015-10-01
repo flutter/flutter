@@ -9,15 +9,14 @@ import 'package:sky/src/widgets/icon.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 
-class IconButton extends Component {
-
-  IconButton({ Key key, this.icon, this.onPressed, this.color }) : super(key: key);
+class IconButton extends StatelessComponent {
+  const IconButton({ Key key, this.icon, this.onPressed, this.color }) : super(key: key);
 
   final String icon;
   final Function onPressed;
   final Color color;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Widget child = new Icon(type: icon, size: 24);
     if (color != null) {
       child = new ColorFilter(
@@ -33,5 +32,4 @@ class IconButton extends Component {
         padding: const EdgeDims.all(8.0))
     );
   }
-
 }

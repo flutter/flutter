@@ -4,24 +4,22 @@
 
 import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/theme.dart';
 
 // TODO(jackson): This class should usually render the user's
 // preferred banner image rather than a solid background
 
-class DrawerHeader extends Component {
-
-  DrawerHeader({ Key key, this.child }) : super(key: key);
+class DrawerHeader extends StatelessComponent {
+  const DrawerHeader({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Container(
       height: kStatusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(
-        backgroundColor: Theme.of(this).cardColor,
+        backgroundColor: Theme.of(context).cardColor,
         border: const Border(
           bottom: const BorderSide(
             color: const Color(0xFFD1D9E1),
@@ -36,12 +34,11 @@ class DrawerHeader extends Component {
         new Container(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new DefaultTextStyle(
-            style: Theme.of(this).text.body2,
+            style: Theme.of(context).text.body2,
             child: child
           )
         )]
       )
     );
   }
-
 }

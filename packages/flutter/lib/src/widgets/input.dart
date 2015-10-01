@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation.dart';
 import 'package:sky/services.dart';
 import 'package:sky/painting.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/editable_text.dart';
 import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/theme.dart';
 
 export 'package:sky/services.dart' show KeyboardType;
@@ -18,36 +21,42 @@ typedef void StringValueChanged(String value);
 // http://www.google.com/design/spec/components/text-fields.html#text-fields-single-line-text-field
 const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
 
-class Input extends StatefulComponent {
-
+class Input extends Scrollable {
   Input({
     GlobalKey key,
-    String initialValue: '',
+    this.initialValue: '',
     this.placeholder,
     this.onChanged,
-    this.keyboardType : KeyboardType.TEXT
-  }): _value = initialValue, super(key: key);
+    this.keyboardType: KeyboardType.TEXT
+  }): super(
+    key: key,
+    initialScrollOffset: 0.0,
+    scrollDirection: ScrollDirection.horizontal
+  );
 
-  KeyboardType keyboardType;
-  String placeholder;
-  StringValueChanged onChanged;
+  final String initialValue;
+  final KeyboardType keyboardType;
+  final String placeholder;
+  final StringValueChanged onChanged;
 
+  InputState createState() => new InputState();
+}
+
+class InputState extends ScrollableState<Input> {
   String _value;
   EditableString _editableValue;
   KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
 
+  double _contentWidth = 0.0;
+  double _containerWidth = 0.0;
+
   void initState() {
+    super.initState();
+    _value = config.initialValue;
     _editableValue = new EditableString(
       text: _value,
       onUpdated: _handleTextUpdated
     );
-    super.initState();
-  }
-
-  void syncConstructorArguments(Input source) {
-    placeholder = source.placeholder;
-    onChanged = source.onChanged;
-    keyboardType = source.keyboardType;
   }
 
   void _handleTextUpdated() {
@@ -55,17 +64,17 @@ class Input extends StatefulComponent {
       setState(() {
         _value = _editableValue.text;
       });
-      if (onChanged != null)
-        onChanged(_value);
+      if (config.onChanged != null)
+        config.onChanged(_value);
     }
   }
 
-  Widget build() {
-    ThemeData themeData = Theme.of(this);
-    bool focused = Focus.at(this);
+  Widget buildContent(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
+    bool focused = FocusState.at(context, config);
 
     if (focused && !_keyboardHandle.attached) {
-      _keyboardHandle = keyboard.show(_editableValue.stub, keyboardType);
+      _keyboardHandle = keyboard.show(_editableValue.stub, config.keyboardType);
     } else if (!focused && _keyboardHandle.attached) {
       _keyboardHandle.release();
     }
@@ -73,10 +82,10 @@ class Input extends StatefulComponent {
     TextStyle textStyle = themeData.text.subhead;
     List<Widget> textChildren = <Widget>[];
 
-    if (placeholder != null && _value.isEmpty) {
+    if (config.placeholder != null && _value.isEmpty) {
       Widget child = new Opacity(
         key: const ValueKey<String>('placeholder'),
-        child: new Text(placeholder, style: textStyle),
+        child: new Text(config.placeholder, style: textStyle),
         opacity: themeData.hintOpacity
       );
       textChildren.add(child);
@@ -93,39 +102,63 @@ class Input extends StatefulComponent {
       value: _editableValue,
       focused: focused,
       style: textStyle,
-      cursorColor: cursorColor
+      cursorColor: cursorColor,
+      onContentSizeChanged: _handleContentSizeChanged,
+      scrollOffset: scrollOffsetVector
     ));
-
-    Border focusHighlight = new Border(bottom: new BorderSide(
-      color: focusHighlightColor,
-      width: focused ? 2.0 : 1.0
-    ));
-
-    Container input = new Container(
-      child: new Stack(textChildren),
-      padding: _kTextfieldPadding,
-      decoration: new BoxDecoration(border: focusHighlight)
-    );
 
     return new Listener(
-      child: input,
-      onPointerDown: focus
+      child: new SizeObserver(
+        callback: _handleContainerSizeChanged,
+        child: new Container(
+          child: new Stack(textChildren),
+          padding: _kTextfieldPadding,
+          decoration: new BoxDecoration(border: new Border(
+            bottom: new BorderSide(
+              color: focusHighlightColor,
+              width: focused ? 2.0 : 1.0
+            )
+          ))
+        )
+      ),
+      onPointerDown: (_) {
+        if (FocusState.at(context, config)) {
+          assert(_keyboardHandle.attached);
+          _keyboardHandle.showByRequest();
+        } else {
+          FocusState.moveTo(context, config);
+          // we'll get told to rebuild and we'll take care of the keyboard then
+        }
+      }
     );
   }
 
-  void focus(_) {
-    if (Focus.at(this)) {
-      assert(_keyboardHandle.attached);
-      _keyboardHandle.showByRequest();
-    } else {
-      Focus.moveTo(this);
-      // we'll get told to rebuild and we'll take care of the keyboard then
-    }
-  }
-
-  void didUnmount() {
+  void dispose() {
     if (_keyboardHandle.attached)
       _keyboardHandle.release();
-    super.didUnmount();
+    super.dispose();
+  }
+
+  ScrollBehavior createScrollBehavior() => new BoundedBehavior();
+  BoundedBehavior get scrollBehavior => super.scrollBehavior;
+
+  void _handleContainerSizeChanged(Size newSize) {
+    _containerWidth = newSize.width;
+    _updateScrollBehavior();
+  }
+
+  void _handleContentSizeChanged(Size newSize) {
+    _contentWidth = newSize.width;
+    _updateScrollBehavior();
+  }
+
+  void _updateScrollBehavior() {
+    // Set the scroll offset to match the content width so that the cursor
+    // (which is always at the end of the text) will be visible.
+    scrollTo(scrollBehavior.updateExtents(
+      contentExtent: _contentWidth,
+      containerExtent: _containerWidth,
+      scrollOffset: _contentWidth)
+    );
   }
 }

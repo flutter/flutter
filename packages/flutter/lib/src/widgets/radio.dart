@@ -4,9 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/button_base.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/theme.dart';
@@ -16,8 +14,7 @@ const sky.Color _kDarkOffColor = const sky.Color(0xB2FFFFFF);
 
 typedef RadioValueChanged(Object value);
 
-class Radio extends ButtonBase {
-
+class Radio extends StatefulComponent {
   Radio({
     Key key,
     this.value,
@@ -27,30 +24,27 @@ class Radio extends ButtonBase {
     assert(onChanged != null);
   }
 
-  Object value;
-  Object groupValue;
-  RadioValueChanged onChanged;
+  final Object value;
+  final Object groupValue;
+  final RadioValueChanged onChanged;
 
-  void syncConstructorArguments(Radio source) {
-    value = source.value;
-    groupValue = source.groupValue;
-    onChanged = source.onChanged;
-    super.syncConstructorArguments(source);
-  }
+  RadioState createState() => new RadioState();
+}
 
-  Color get color {
-    ThemeData themeData = Theme.of(this);
-    if (value == groupValue)
+class RadioState extends State<Radio> {
+  Color _getColor(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
+    if (config.value == config.groupValue)
       return themeData.accentColor;
     return themeData.brightness == ThemeBrightness.light ? _kLightOffColor : _kDarkOffColor;
   }
 
-  Widget buildContent() {
+  Widget build(BuildContext context) {
     const double kDiameter = 16.0;
     const double kOuterRadius = kDiameter / 2;
     const double kInnerRadius = 5.0;
     return new GestureDetector(
-      onTap: () => onChanged(value),
+      onTap: () => config.onChanged(config.value),
       child: new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
         width: kDiameter,
@@ -58,7 +52,7 @@ class Radio extends ButtonBase {
         child: new CustomPaint(
           callback: (sky.Canvas canvas, Size size) {
 
-            Paint paint = new Paint()..color = color;
+            Paint paint = new Paint()..color = _getColor(context);
 
             // Draw the outer circle
             paint.setStyle(sky.PaintingStyle.stroke);
@@ -66,7 +60,7 @@ class Radio extends ButtonBase {
             canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kOuterRadius, paint);
 
             // Draw the inner circle
-            if (value == groupValue) {
+            if (config.value == config.groupValue) {
               paint.setStyle(sky.PaintingStyle.fill);
               canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kInnerRadius, paint);
             }
@@ -75,5 +69,4 @@ class Radio extends ButtonBase {
       )
     );
   }
-
 }

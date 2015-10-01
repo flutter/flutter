@@ -7,12 +7,12 @@ import 'dart:sky' as sky;
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/services.dart';
-import 'package:sky/src/fn3/basic.dart';
-import 'package:sky/src/fn3/binding.dart';
-import 'package:sky/src/fn3/framework.dart';
-import 'package:sky/src/fn3/navigator.dart';
-import 'package:sky/src/fn3/theme.dart';
-import 'package:sky/src/fn3/title.dart';
+import 'package:sky/src/widgets/basic.dart';
+import 'package:sky/src/widgets/binding.dart';
+import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/widgets/navigator.dart';
+import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/src/widgets/title.dart';
 
 const TextStyle _errorTextStyle = const TextStyle(
   color: const Color(0xD0FF0000),

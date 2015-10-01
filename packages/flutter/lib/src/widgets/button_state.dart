@@ -2,17 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 
-abstract class ButtonBase extends StatefulComponent {
-
-  ButtonBase({ Key key, this.highlight: false }) : super(key: key);
-
-  bool highlight;
-
-  void syncConstructorArguments(ButtonBase source) {
-    highlight = source.highlight;
-  }
+abstract class ButtonState<T extends StatefulComponent> extends State<T> {
+  bool highlight = false;
 
   void _handlePointerDown(_) {
     setState(() {
@@ -32,15 +26,14 @@ abstract class ButtonBase extends StatefulComponent {
     });
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Listener(
-      child: buildContent(),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
-      onPointerCancel: _handlePointerCancel
+      onPointerCancel: _handlePointerCancel,
+      child: buildContent(context)
     );
   }
 
-  Widget buildContent();
-
+  Widget buildContent(BuildContext context);
 }

@@ -22,19 +22,28 @@ abstract class ProgressIndicator extends StatefulComponent {
     this.bufferValue
   }) : super(key: key);
 
-  double value; // Null for non-determinate progress indicator.
-  double bufferValue; // TODO(hansmuller) implement the support for this.
+  final double value; // Null for non-determinate progress indicator.
+  final double bufferValue; // TODO(hansmuller) implement the support for this.
 
-  AnimationPerformance _performance;
-  double get _performanceValue => (_performance.variable as AnimatedValue<double>).value;
-  Color get _backgroundColor => Theme.of(this).primarySwatch[200];
-  Color get _valueColor => Theme.of(this).primaryColor;
-  Object get _customPaintToken => value != null ? value : _performanceValue;
+  Color _getBackgroundColor(BuildContext context) => Theme.of(context).primarySwatch[200];
+  Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
+  Object _getCustomPaintToken(double performanceValue) => value != null ? value : performanceValue;
+
+  Widget _buildIndicator(BuildContext context, double performanceValue);
+
+  ProgressIndicatorState createState() => new ProgressIndicatorState();
+}
+
+class ProgressIndicatorState extends State<ProgressIndicator> {
+
+  ValueAnimation<double> _performance;
 
   void initState() {
-    _performance = new AnimationPerformance()
-      ..duration = const Duration(milliseconds: 1500)
-      ..variable = new AnimatedValue<double>(0.0, end: 1.0, curve: ease);
+    super.initState();
+    _performance = new ValueAnimation<double>(
+      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: ease),
+      duration: const Duration(milliseconds: 1500)
+    );
     _performance.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed)
         _restartAnimation();
@@ -42,28 +51,23 @@ abstract class ProgressIndicator extends StatefulComponent {
     _performance.play();
   }
 
-  void syncConstructorArguments(ProgressIndicator source) {
-    value = source.value;
-    bufferValue = source.bufferValue;
-  }
-
   void _restartAnimation() {
     _performance.progress = 0.0;
     _performance.play();
   }
 
-  Widget build() {
-    if (value != null)
-      return _buildIndicator();
+  Widget build(BuildContext context) {
+    if (config.value != null)
+      return config._buildIndicator(context, _performance.value);
 
     return new BuilderTransition(
       variables: [_performance.variable],
       performance: _performance.view,
-      builder: _buildIndicator
+      builder: (BuildContext context) {
+        return config._buildIndicator(context, _performance.value);
+      }
     );
   }
-
-  Widget _buildIndicator();
 }
 
 class LinearProgressIndicator extends ProgressIndicator {
@@ -73,18 +77,18 @@ class LinearProgressIndicator extends ProgressIndicator {
     double bufferValue
   }) : super(key: key, value: value, bufferValue: bufferValue);
 
-  void _paint(sky.Canvas canvas, Size size) {
+  void _paint(BuildContext context, double performanceValue, sky.Canvas canvas, Size size) {
     Paint paint = new Paint()
-      ..color = _backgroundColor
+      ..color = _getBackgroundColor(context)
       ..setStyle(sky.PaintingStyle.fill);
     canvas.drawRect(Point.origin & size, paint);
 
-    paint.color = _valueColor;
+    paint.color = _getValueColor(context);
     if (value != null) {
       double width = value.clamp(0.0, 1.0) * size.width;
       canvas.drawRect(Point.origin & new Size(width, size.height), paint);
     } else {
-      double startX = size.width * (1.5 * _performanceValue - 0.5);
+      double startX = size.width * (1.5 * performanceValue - 0.5);
       double endX = startX + 0.5 * size.width;
       double x = startX.clamp(0.0, size.width);
       double width = endX.clamp(0.0, size.width) - x;
@@ -92,12 +96,17 @@ class LinearProgressIndicator extends ProgressIndicator {
     }
   }
 
-  Widget _buildIndicator() {
+  Widget _buildIndicator(BuildContext context, double performanceValue) {
     return new Container(
-      child: new CustomPaint(callback: _paint, token: _customPaintToken),
       constraints: new BoxConstraints.tightFor(
         width: double.INFINITY,
         height: _kLinearProgressIndicatorHeight
+      ),
+      child: new CustomPaint(
+        token: _getCustomPaintToken(performanceValue),
+        callback: (sky.Canvas canvas, Size size) {
+          _paint(context, performanceValue, canvas, size);
+        }
       )
     );
   }
@@ -116,9 +125,9 @@ class CircularProgressIndicator extends ProgressIndicator {
     double bufferValue
   }) : super(key: key, value: value, bufferValue: bufferValue);
 
-  void _paint(sky.Canvas canvas, Size size) {
+  void _paint(BuildContext context, double performanceValue, sky.Canvas canvas, Size size) {
     Paint paint = new Paint()
-      ..color = _valueColor
+      ..color = _getValueColor(context)
       ..strokeWidth = _kCircularProgressIndicatorStrokeWidth
       ..setStyle(sky.PaintingStyle.stroke);
 
@@ -128,7 +137,7 @@ class CircularProgressIndicator extends ProgressIndicator {
         ..arcTo(Point.origin & size, _kStartAngle, angle, false);
       canvas.drawPath(path, paint);
     } else {
-      double startAngle = _kTwoPI * (1.75 * _performanceValue - 0.75);
+      double startAngle = _kTwoPI * (1.75 * performanceValue - 0.75);
       double endAngle = startAngle + _kTwoPI * 0.75;
       double arcAngle = startAngle.clamp(0.0, _kTwoPI);
       double arcSweep = endAngle.clamp(0.0, _kTwoPI) - arcAngle;
@@ -138,12 +147,17 @@ class CircularProgressIndicator extends ProgressIndicator {
     }
   }
 
-  Widget _buildIndicator() {
+  Widget _buildIndicator(BuildContext context, double performanceValue) {
     return new Container(
-      child: new CustomPaint(callback: _paint, token: _customPaintToken),
       constraints: new BoxConstraints(
         minWidth: _kMinCircularProgressIndicatorSize,
         minHeight: _kMinCircularProgressIndicatorSize
+      ),
+      child: new CustomPaint(
+        token: _getCustomPaintToken(performanceValue),
+        callback: (sky.Canvas canvas, Size size) {
+          _paint(context, performanceValue, canvas, size);
+        }
       )
     );
   }

@@ -5,74 +5,41 @@
 import 'package:sky/animation.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/global_key_watcher.dart';
 import 'package:vector_math/vector_math.dart';
 
 export 'package:sky/animation.dart' show Direction;
 
-class TransitionProxy extends GlobalKeyWatcher {
-
-  TransitionProxy({
-    Key key,
-    GlobalKey transitionKey,
-    this.child
-  }) : super(key: key, watchedKey: transitionKey);
-
-  Widget child;
-
-  void syncConstructorArguments(TransitionProxy source) {
-    child = source.child;
-    super.syncConstructorArguments(source);
-  }
-
-  bool debugValidateWatchedWidget(Widget candidate) {
-    return candidate is TransitionBaseWithChild;
-  }
-
-  TransitionBaseWithChild get transition => this.watchedWidget;
-
-  void startWatching() {
-    transition.performance.addListener(_performanceChanged);
-  }
-
-  void stopWatching() {
-    transition.performance.removeListener(_performanceChanged);
-  }
-
-  void _performanceChanged() {
-    setState(() {
-      // The performance changed, so we probably need to ask the transition
-      // we're watching for a rebuild.
-    });
-  }
-
-  Widget build() {
-    if (transition != null)
-      return transition.buildWithChild(child);
-    return child;
-  }
-
-}
-
-abstract class TransitionBase extends StatefulComponent {
-
-  TransitionBase({
+abstract class TransitionComponent extends StatefulComponent {
+  TransitionComponent({
     Key key,
     this.performance
   }) : super(key: key) {
     assert(performance != null);
   }
 
-  WatchableAnimationPerformance performance;
+  final WatchableAnimationPerformance performance;
 
-  void syncConstructorArguments(TransitionBase source) {
-    if (performance != source.performance) {
-      if (mounted)
-        performance.removeListener(_performanceChanged);
-      performance = source.performance;
-      if (mounted)
-        performance.addListener(_performanceChanged);
+  Widget build(BuildContext context);
+
+  TransitionState createState() => new TransitionState();
+}
+
+class TransitionState extends State<TransitionComponent> {
+  void initState() {
+    super.initState();
+    config.performance.addListener(_performanceChanged);
+  }
+
+  void didUpdateConfig(TransitionComponent oldConfig) {
+    if (config.performance != oldConfig.performance) {
+      oldConfig.performance.removeListener(_performanceChanged);
+      config.performance.addListener(_performanceChanged);
     }
+  }
+
+  void dispose() {
+    config.performance.removeListener(_performanceChanged);
+    super.dispose();
   }
 
   void _performanceChanged() {
@@ -81,42 +48,26 @@ abstract class TransitionBase extends StatefulComponent {
     });
   }
 
-  void didMount() {
-    performance.addListener(_performanceChanged);
-    super.didMount();
+  Widget build(BuildContext context) {
+    return config.build(context);
   }
-
-  void didUnmount() {
-    performance.removeListener(_performanceChanged);
-    super.didUnmount();
-  }
-
 }
 
-abstract class TransitionBaseWithChild extends TransitionBase {
-
-  TransitionBaseWithChild({
+abstract class TransitionWithChild extends TransitionComponent {
+  TransitionWithChild({
     Key key,
     this.child,
     WatchableAnimationPerformance performance
   }) : super(key: key, performance: performance);
 
-  Widget child;
+  final Widget child;
 
-  void syncConstructorArguments(TransitionBaseWithChild source) {
-    child = source.child;
-    super.syncConstructorArguments(source);
-  }
+  Widget build(BuildContext context) => buildWithChild(context, child);
 
-  Widget build() {
-    return buildWithChild(child);
-  }
-
-  Widget buildWithChild(Widget child);
-
+  Widget buildWithChild(BuildContext context, Widget child);
 }
 
-class SlideTransition extends TransitionBaseWithChild {
+class SlideTransition extends TransitionWithChild {
   SlideTransition({
     Key key,
     this.position,
@@ -126,14 +77,9 @@ class SlideTransition extends TransitionBaseWithChild {
              performance: performance,
              child: child);
 
-  AnimatedValue<Point> position;
+  final AnimatedValue<Point> position;
 
-  void syncConstructorArguments(SlideTransition source) {
-    position = source.position;
-    super.syncConstructorArguments(source);
-  }
-
-  Widget buildWithChild(Widget child) {
+  Widget buildWithChild(BuildContext context, Widget child) {
     performance.updateVariable(position);
     Matrix4 transform = new Matrix4.identity()
       ..translate(position.value.x, position.value.y);
@@ -141,7 +87,7 @@ class SlideTransition extends TransitionBaseWithChild {
   }
 }
 
-class FadeTransition extends TransitionBaseWithChild {
+class FadeTransition extends TransitionWithChild {
   FadeTransition({
     Key key,
     this.opacity,
@@ -151,20 +97,15 @@ class FadeTransition extends TransitionBaseWithChild {
              performance: performance,
              child: child);
 
-  AnimatedValue<double> opacity;
+  final AnimatedValue<double> opacity;
 
-  void syncConstructorArguments(FadeTransition source) {
-    opacity = source.opacity;
-    super.syncConstructorArguments(source);
-  }
-
-  Widget buildWithChild(Widget child) {
+  Widget buildWithChild(BuildContext context, Widget child) {
     performance.updateVariable(opacity);
     return new Opacity(opacity: opacity.value, child: child);
   }
 }
 
-class ColorTransition extends TransitionBaseWithChild {
+class ColorTransition extends TransitionWithChild {
   ColorTransition({
     Key key,
     this.color,
@@ -174,14 +115,9 @@ class ColorTransition extends TransitionBaseWithChild {
              performance: performance,
              child: child);
 
-  AnimatedColorValue color;
+  final AnimatedColorValue color;
 
-  void syncConstructorArguments(ColorTransition source) {
-    color = source.color;
-    super.syncConstructorArguments(source);
-  }
-
-  Widget buildWithChild(Widget child) {
+  Widget buildWithChild(BuildContext context, Widget child) {
     performance.updateVariable(color);
     return new DecoratedBox(
       decoration: new BoxDecoration(backgroundColor: color.value),
@@ -190,7 +126,7 @@ class ColorTransition extends TransitionBaseWithChild {
   }
 }
 
-class SquashTransition extends TransitionBaseWithChild {
+class SquashTransition extends TransitionWithChild {
   SquashTransition({
     Key key,
     this.width,
@@ -201,16 +137,10 @@ class SquashTransition extends TransitionBaseWithChild {
              performance: performance,
              child: child);
 
-  AnimatedValue<double> width;
-  AnimatedValue<double> height;
+  final AnimatedValue<double> width;
+  final AnimatedValue<double> height;
 
-  void syncConstructorArguments(SquashTransition source) {
-    width = source.width;
-    height = source.height;
-    super.syncConstructorArguments(source);
-  }
-
-  Widget buildWithChild(Widget child) {
+  Widget buildWithChild(BuildContext context, Widget child) {
     if (width != null)
       performance.updateVariable(width);
     if (height != null)
@@ -219,9 +149,9 @@ class SquashTransition extends TransitionBaseWithChild {
   }
 }
 
-typedef Widget BuilderFunction();
+typedef Widget BuilderFunction(BuildContext context);
 
-class BuilderTransition extends TransitionBase {
+class BuilderTransition extends TransitionComponent {
   BuilderTransition({
     Key key,
     this.variables,
@@ -230,18 +160,12 @@ class BuilderTransition extends TransitionBase {
   }) : super(key: key,
              performance: performance);
 
-  List<AnimatedValue> variables;
-  BuilderFunction builder;
+  final List<AnimatedValue> variables;
+  final BuilderFunction builder;
 
-  void syncConstructorArguments(BuilderTransition source) {
-    variables = source.variables;
-    builder = source.builder;
-    super.syncConstructorArguments(source);
-  }
-
-  Widget build() {
+  Widget build(BuildContext context) {
     for (int i = 0; i < variables.length; ++i)
       performance.updateVariable(variables[i]);
-    return builder();
+    return builder(context);
   }
 }

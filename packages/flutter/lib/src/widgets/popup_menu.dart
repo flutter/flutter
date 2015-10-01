@@ -6,14 +6,16 @@ import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
-import 'package:sky/painting.dart';
 import 'package:sky/material.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/navigator.dart';
 import 'package:sky/src/widgets/popup_menu_item.dart';
 import 'package:sky/src/widgets/scrollable.dart';
+import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
@@ -25,8 +27,9 @@ const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
-class PopupMenu extends StatefulComponent {
+typedef List<PopupMenuItem> PopupMenuItemsBuilder(NavigatorState navigator);
 
+class PopupMenu extends StatefulComponent {
   PopupMenu({
     Key key,
     this.items,
@@ -38,49 +41,30 @@ class PopupMenu extends StatefulComponent {
     assert(performance != null);
   }
 
-  List<PopupMenuItem> items;
-  int level;
-  Navigator navigator;
-  WatchableAnimationPerformance performance;
+  final List<PopupMenuItem> items;
+  final int level;
+  final NavigatorState navigator;
+  final WatchableAnimationPerformance performance;
 
-  BoxPainter _painter;
+  PopupMenuState createState() => new PopupMenuState();
+}
 
+class PopupMenuState extends State<PopupMenu> {
   void initState() {
-    _updateBoxPainter();
+    super.initState();
+    config.performance.addListener(_performanceChanged);
   }
 
-  void _updateBoxPainter() {
-    _painter = new BoxPainter(
-      new BoxDecoration(
-        backgroundColor: Colors.grey[50],
-        borderRadius: 2.0,
-        boxShadow: shadows[level]
-      )
-    );
-  }
-
-  void syncConstructorArguments(PopupMenu source) {
-    items = source.items;
-    if (level != source.level) {
-      level = source.level;
-      _updateBoxPainter();
+  void didUpdateConfig(PopupMenu oldConfig) {
+    if (config.performance != oldConfig.performance) {
+      oldConfig.performance.removeListener(_performanceChanged);
+      config.performance.addListener(_performanceChanged);
     }
-    navigator = source.navigator;
-    if (mounted)
-      performance.removeListener(_performanceChanged);
-    performance = source.performance;
-    if (mounted)
-      performance.addListener(_performanceChanged);
   }
 
-  void didMount() {
-    performance.addListener(_performanceChanged);
-    super.didMount();
-  }
-
-  void didUnmount() {
-    performance.removeListener(_performanceChanged);
-    super.didMount();
+  void dispose() {
+    config.performance.removeListener(_performanceChanged);
+    super.dispose();
   }
 
   void _performanceChanged() {
@@ -89,34 +73,44 @@ class PopupMenu extends StatefulComponent {
     });
   }
 
-  void itemPressed(PopupMenuItem item) {
-    if (navigator != null)
-      navigator.pop(item.value);
+  BoxPainter _painter;
+
+  void _updateBoxPainter(BoxDecoration decoration) {
+    if (_painter == null || _painter.decoration != decoration)
+      _painter = new BoxPainter(decoration);
   }
 
-  Widget build() {
-    double unit = 1.0 / (items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+  Widget build(BuildContext context) {
+    _updateBoxPainter(new BoxDecoration(
+      backgroundColor: Theme.of(context).canvasColor,
+      borderRadius: 2.0,
+      boxShadow: shadows[config.level]
+    ));
+    double unit = 1.0 / (config.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     List<Widget> children = [];
-    for (int i = 0; i < items.length; ++i) {
+    for (int i = 0; i < config.items.length; ++i) {
       double start = (i + 1) * unit;
       double end = (start + 1.5 * unit).clamp(0.0, 1.0);
       children.add(new FadeTransition(
-        performance: performance,
+        performance: config.performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(start, end)),
-        child: items[i])
+        child: new GestureDetector(
+          onTap: () { config.navigator.pop(config.items[i].value); },
+          child: config.items[i]
+        ))
       );
     }
     final width = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit));
-    final height = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit * items.length));
+    final height = new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, unit * config.items.length));
     return new FadeTransition(
-      performance: performance,
+      performance: config.performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(0.0, 1.0 / 3.0)),
       child: new Container(
         margin: new EdgeDims.all(_kMenuMargin),
         child: new BuilderTransition(
-          performance: performance,
+          performance: config.performance,
           variables: [width, height],
-          builder: () {
+          builder: (BuildContext context) {
             return new CustomPaint(
               callback: (sky.Canvas canvas, Size size) {
                 double widthValue = width.value * size.width;
@@ -147,7 +141,6 @@ class PopupMenu extends StatefulComponent {
       )
     );
   }
-
 }
 
 class MenuPosition {
@@ -158,7 +151,7 @@ class MenuPosition {
   final double left;
 }
 
-class MenuRoute extends RouteBase {
+class MenuRoute extends Route {
   MenuRoute({ this.completer, this.position, this.builder, this.level });
 
   final Completer completer;
@@ -174,9 +167,12 @@ class MenuRoute extends RouteBase {
     return result;
   }
 
+  bool get ephemeral => false; // we could make this true, but then we'd have to use popRoute(), not pop(), in menus
+  bool get modal => true;
+
   Duration get transitionDuration => _kMenuDuration;
-  bool get isOpaque => false;
-  Widget build(Key key, Navigator navigator, WatchableAnimationPerformance performance) {
+  bool get opaque => false;
+  Widget build(Key key, NavigatorState navigator) {
     return new Positioned(
       top: position?.top,
       right: position?.right,
@@ -196,14 +192,13 @@ class MenuRoute extends RouteBase {
     );
   }
 
-  void popState([dynamic result]) {
+  void didPop([dynamic result]) {
     completer.complete(result);
+    super.didPop(result);
   }
 }
 
-typedef List<PopupMenuItem> PopupMenuItemsBuilder(Navigator navigator);
-
-Future showMenu({ Navigator navigator, MenuPosition position, PopupMenuItemsBuilder builder, int level: 4 }) {
+Future showMenu({ NavigatorState navigator, MenuPosition position, PopupMenuItemsBuilder builder, int level: 4 }) {
   Completer completer = new Completer();
   navigator.push(new MenuRoute(
     completer: completer,

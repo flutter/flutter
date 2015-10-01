@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/src/widgets/theme.dart';
-
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/rendering/flex.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/icon.dart';
+import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/src/rendering/flex.dart';
 
-class ToolBar extends Component {
+class ToolBar extends StatelessComponent {
 
   ToolBar({
     Key key,
@@ -27,13 +25,13 @@ class ToolBar extends Component {
   final List<Widget> right;
   final Color backgroundColor;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     Color toolbarColor = backgroundColor;
     IconThemeData iconThemeData;
     TextStyle centerStyle = Typography.white.title;
     TextStyle sideStyle = Typography.white.body1;
     if (toolbarColor == null) {
-      ThemeData themeData = Theme.of(this);
+      ThemeData themeData = Theme.of(context);
       toolbarColor = themeData.primaryColor;
       if (themeData.primaryColorBrightness == ThemeBrightness.light) {
         centerStyle = Typography.black.title;

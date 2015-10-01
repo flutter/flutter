@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/default_text_style.dart';
 import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
@@ -17,12 +16,12 @@ import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
-typedef Widget DialogBuilder(Navigator navigator);
+typedef Widget DialogBuilder(NavigatorState navigator);
 
 /// A material design dialog
 ///
 /// <https://www.google.com/design/spec/components/dialogs.html>
-class Dialog extends Component {
+class Dialog extends StatelessComponent {
   Dialog({
     Key key,
     this.title,
@@ -55,8 +54,8 @@ class Dialog extends Component {
   /// An (optional) callback that is called when the dialog is dismissed.
   final Function onDismiss;
 
-  Color get _color {
-    switch (Theme.of(this).brightness) {
+  Color _getColor(BuildContext context) {
+    switch (Theme.of(context).brightness) {
       case ThemeBrightness.light:
         return Colors.white;
       case ThemeBrightness.dark:
@@ -64,7 +63,7 @@ class Dialog extends Component {
     }
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
 
     List<Widget> dialogBody = new List<Widget>();
 
@@ -75,7 +74,7 @@ class Dialog extends Component {
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
-          style: Theme.of(this).text.title,
+          style: Theme.of(context).text.title,
           child: title
         )
       ));
@@ -88,7 +87,7 @@ class Dialog extends Component {
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
-          style: Theme.of(this).text.subhead,
+          style: Theme.of(context).text.subhead,
           child: content
         )
       ));
@@ -118,7 +117,7 @@ class Dialog extends Component {
             constraints: new BoxConstraints(minWidth: 280.0),
             child: new Material(
               level: 4,
-              color: _color,
+              color: _getColor(context),
               child: new IntrinsicWidth(
                 child: new Block(dialogBody)
               )
@@ -133,15 +132,15 @@ class Dialog extends Component {
 
 const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 
-class DialogRoute extends RouteBase {
+class DialogRoute extends Route {
   DialogRoute({ this.completer, this.builder });
 
   final Completer completer;
   final RouteBuilder builder;
 
   Duration get transitionDuration => _kTransitionDuration;
-  bool get isOpaque => false;
-  Widget build(Key key, Navigator navigator, WatchableAnimationPerformance performance) {
+  bool get opaque => false;
+  Widget build(Key key, NavigatorState navigator) {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
@@ -149,12 +148,13 @@ class DialogRoute extends RouteBase {
     );
   }
 
-  void popState([dynamic result]) {
+  void didPop([dynamic result]) {
     completer.complete(result);
+    super.didPop(result);
   }
 }
 
-Future showDialog(Navigator navigator, DialogBuilder builder) {
+Future showDialog(NavigatorState navigator, DialogBuilder builder) {
   Completer completer = new Completer();
   navigator.push(new DialogRoute(
     completer: completer,

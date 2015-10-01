@@ -12,10 +12,10 @@ typedef void FocusChanged(GlobalKey key);
 // is focused and whichever is the first scope to ask for focus will get it.
 final GlobalKey _noFocusedScope = new GlobalKey();
 
-class _FocusScope extends Inherited {
-
+class _FocusScope extends InheritedWidget {
   _FocusScope({
     Key key,
+    this.focusState,
     this.scopeFocused: true, // are we focused in our ancestor scope?
     this.focusedScope, // which of our descendant scopes is focused, if any?
     this.focusedWidget,
@@ -23,8 +23,9 @@ class _FocusScope extends Inherited {
   }) : super(key: key, child: child);
 
   final bool scopeFocused;
+  final FocusState focusState;
 
-  // These are mutable because we implicitly changed them when they're null in
+  // These are mutable because we implicitly change them when they're null in
   // certain cases, basically pretending retroactively that we were constructed
   // with the right keys.
   GlobalKey focusedScope;
@@ -35,30 +36,27 @@ class _FocusScope extends Inherited {
   // our state is checked.
 
   void _setFocusedWidgetIfUnset(GlobalKey key) {
-    assert(parent is Focus);
-    (parent as Focus)._setFocusedWidgetIfUnset(key); // TODO(ianh): remove cast once analyzer is cleverer
-    focusedWidget = (parent as Focus)._focusedWidget;
-    focusedScope = (parent as Focus)._focusedScope == _noFocusedScope ? null : (parent as Focus)._focusedScope;
+    focusState._setFocusedWidgetIfUnset(key);
+    focusedWidget = focusState._focusedWidget;
+    focusedScope = focusState._focusedScope == _noFocusedScope ? null : focusState._focusedScope;
   }
 
   void _setFocusedScopeIfUnset(GlobalKey key) {
-    assert(parent is Focus);
-    (parent as Focus)._setFocusedScopeIfUnset(key); // TODO(ianh): remove cast once analyzer is cleverer
-    assert(focusedWidget == (parent as Focus)._focusedWidget);
-    focusedScope = (parent as Focus)._focusedScope == _noFocusedScope ? null : (parent as Focus)._focusedScope;
+    focusState._setFocusedScopeIfUnset(key);
+    assert(focusedWidget == focusState._focusedWidget);
+    focusedScope = focusState._focusedScope == _noFocusedScope ? null : focusState._focusedScope;
   }
 
-  bool syncShouldNotify(_FocusScope old) {
-    assert(parent is Focus);
-    if (scopeFocused != old.scopeFocused)
+  bool updateShouldNotify(_FocusScope oldWidget) {
+    if (scopeFocused != oldWidget.scopeFocused)
       return true;
     if (!scopeFocused)
       return false;
-    if (focusedScope != old.focusedScope)
+    if (focusedScope != oldWidget.focusedScope)
       return true;
     if (focusedScope != null)
       return false;
-    if (focusedWidget != old.focusedWidget)
+    if (focusedWidget != oldWidget.focusedWidget)
       return true;
     return false;
   }
@@ -66,7 +64,6 @@ class _FocusScope extends Inherited {
 }
 
 class Focus extends StatefulComponent {
-
   Focus({
     GlobalKey key, // key is required if this is a nested Focus scope
     this.autofocus: false,
@@ -75,15 +72,13 @@ class Focus extends StatefulComponent {
     assert(!autofocus || key != null);
   }
 
-  bool autofocus;
-  Widget child;
+  final bool autofocus;
+  final Widget child;
 
-  void syncConstructorArguments(Focus source) {
-    autofocus = source.autofocus;
-    child = source.child;
-  }
+  FocusState createState() => new FocusState();
+}
 
-
+class FocusState extends State<Focus> {
   GlobalKey _focusedWidget; // when null, the first component to ask if it's focused will get the focus
   GlobalKey _currentlyRegisteredWidgetRemovalListenerKey;
 
@@ -122,7 +117,6 @@ class Focus extends StatefulComponent {
     }
   }
 
-
   GlobalKey _focusedScope; // when null, the first scope to ask if it's focused will get the focus
   GlobalKey _currentlyRegisteredScopeRemovalListenerKey;
 
@@ -158,56 +152,53 @@ class Focus extends StatefulComponent {
     }
   }
 
-
-  bool _didAutoFocus = false;
-  void didMount() {
-    if (autofocus && !_didAutoFocus) {
-      _didAutoFocus = true;
-      Focus._moveScopeTo(this);
-    }
+  void initState() {
+    super.initState();
+    if (config.autofocus)
+      FocusState._moveScopeTo(context, config);
     _updateWidgetRemovalListener(_focusedWidget);
     _updateScopeRemovalListener(_focusedScope);
-    super.didMount();
   }
 
-  void didUnmount() {
+  void dispose() {
     _updateWidgetRemovalListener(null);
     _updateScopeRemovalListener(null);
-    super.didUnmount();
+    super.dispose();
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new _FocusScope(
-      scopeFocused: Focus._atScope(this),
+      focusState: this,
+      scopeFocused: FocusState._atScope(context, config),
       focusedScope: _focusedScope == _noFocusedScope ? null : _focusedScope,
       focusedWidget: _focusedWidget,
-      child: child
+      child: config.child
     );
   }
 
-  static bool at(Component component, { bool autofocus: true }) {
-    assert(component != null);
-    assert(component.key is GlobalKey);
-    _FocusScope focusScope = component.inheritedOfType(_FocusScope);
+  static bool at(BuildContext context, Widget widget, { bool autofocus: true }) {
+    assert(widget != null);
+    assert(widget.key is GlobalKey);
+    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
     if (focusScope != null) {
       if (autofocus)
-        focusScope._setFocusedWidgetIfUnset(component.key);
+        focusScope._setFocusedWidgetIfUnset(widget.key);
       return focusScope.scopeFocused &&
              focusScope.focusedScope == null &&
-             focusScope.focusedWidget == component.key;
+             focusScope.focusedWidget == widget.key;
     }
     return true;
   }
 
-  static bool _atScope(Focus component, { bool autofocus: true }) {
-    assert(component != null);
-    _FocusScope focusScope = component.inheritedOfType(_FocusScope);
+  static bool _atScope(BuildContext context, Widget widget, { bool autofocus: true }) {
+    assert(widget != null);
+    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
     if (focusScope != null) {
       if (autofocus)
-        focusScope._setFocusedScopeIfUnset(component.key);
-      assert(component.key != null);
+        focusScope._setFocusedScopeIfUnset(widget.key);
+      assert(widget.key != null);
       return focusScope.scopeFocused &&
-             focusScope.focusedScope == component.key;
+             focusScope.focusedScope == widget.key;
     }
     return true;
   }
@@ -215,30 +206,19 @@ class Focus extends StatefulComponent {
   // Don't call moveTo() from your build() function, it's intended to be called
   // from event listeners, e.g. in response to a finger tap or tab key.
 
-  static void moveTo(Component component) {
-    assert(component != null);
-    assert(component.key is GlobalKey);
-    _FocusScope focusScope = component.inheritedOfType(_FocusScope);
-    if (focusScope != null) {
-      assert(focusScope.parent is Focus);
-      (focusScope.parent as Focus)._setFocusedWidget(component.key); // TODO(ianh): remove cast once analyzer is cleverer
-    }
+  static void moveTo(BuildContext context, Widget widget) {
+    assert(widget != null);
+    assert(widget.key is GlobalKey);
+    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    if (focusScope != null)
+      focusScope.focusState._setFocusedWidget(widget.key);
   }
 
-  static void _moveScopeTo(Focus component) {
+  static void _moveScopeTo(BuildContext context, Focus component) {
     assert(component != null);
     assert(component.key != null);
-    _FocusScope focusScope = component.inheritedOfType(_FocusScope);
-    if (focusScope != null) {
-      assert(focusScope.parent is Focus);
-      (focusScope.parent as Focus)._setFocusedScope(component.key); // TODO(ianh): remove cast once analyzer is cleverer
-    }
+    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    if (focusScope != null)
+      focusScope.focusState._setFocusedScope(component.key);
   }
-
-  void debugAddDetails(List<String> details) {
-    super.debugAddDetails(details);
-    details.add('focusedScope=$_focusedScope');
-    details.add('focusedWidget=$_focusedWidget');
-  }
-
 }

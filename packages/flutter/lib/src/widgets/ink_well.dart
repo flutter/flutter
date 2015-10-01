@@ -30,11 +30,11 @@ class InkSplash {
     _radius = new AnimatedValue<double>(
         _kSplashInitialSize, end: _targetRadius, curve: easeOut);
 
-    _performance = new AnimationPerformance()
-      ..variable = _radius
-      ..duration = new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
-      ..addListener(_handleRadiusChange)
-      ..play();
+    _performance = new ValueAnimation<double>(
+      variable: _radius,
+      duration: new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
+    )..addListener(_handleRadiusChange)
+     ..play();
   }
 
   final int pointer;
@@ -125,10 +125,7 @@ class RenderInkWell extends RenderProxyBox {
   }
 }
 
-class InkWell extends OneChildRenderObjectWrapper {
-  InkWell({ Key key, Widget child })
-    : super(key: key, child: child);
-
-  RenderInkWell get renderObject => super.renderObject;
-  RenderInkWell createNode() => new RenderInkWell();
+class InkWell extends OneChildRenderObjectWidget {
+  InkWell({ Key key, Widget child }) : super(key: key, child: child);
+  RenderInkWell createRenderObject() => new RenderInkWell();
 }

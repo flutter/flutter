@@ -102,6 +102,7 @@ class RenderScaffold extends RenderBox {
   void performLayout() {
     double bodyHeight = size.height;
     double bodyPosition = 0.0;
+    double fabOffset = 0.0;
     if (_slots[ScaffoldSlots.statusBar] != null) {
       RenderBox statusBar = _slots[ScaffoldSlots.statusBar];
       statusBar.layout(new BoxConstraints.tight(new Size(size.width, kStatusBarHeight)));
@@ -127,18 +128,20 @@ class RenderScaffold extends RenderBox {
     if (_slots[ScaffoldSlots.snackBar] != null) {
       RenderBox snackBar = _slots[ScaffoldSlots.snackBar];
       // TODO(jackson): On tablet/desktop, minWidth = 288, maxWidth = 568
-      snackBar.layout(new BoxConstraints(minWidth: size.width, maxWidth: size.width, minHeight: 0.0, maxHeight: size.height),
-                      parentUsesSize: true);
+      snackBar.layout(
+        new BoxConstraints(minWidth: size.width, maxWidth: size.width, minHeight: 0.0, maxHeight: bodyHeight),
+        parentUsesSize: true
+      );
       assert(snackBar.parentData is BoxParentData);
-      // Position it off-screen. SnackBar slides in with an animation.
-      snackBar.parentData.position = new Point(0.0, size.height);
+      snackBar.parentData.position = new Point(0.0, bodyPosition + bodyHeight - snackBar.size.height);
+      fabOffset += snackBar.size.height;
     }
     if (_slots[ScaffoldSlots.floatingActionButton] != null) {
       RenderBox floatingActionButton = _slots[ScaffoldSlots.floatingActionButton];
       Size area = new Size(size.width - kButtonX, size.height - kButtonY);
       floatingActionButton.layout(new BoxConstraints.loose(area), parentUsesSize: true);
       assert(floatingActionButton.parentData is BoxParentData);
-      floatingActionButton.parentData.position = (area - floatingActionButton.size).toPoint();
+      floatingActionButton.parentData.position = (area - floatingActionButton.size).toPoint() + new Offset(0.0, -fabOffset);
     }
     if (_slots[ScaffoldSlots.drawer] != null) {
       RenderBox drawer = _slots[ScaffoldSlots.drawer];
@@ -174,8 +177,7 @@ class RenderScaffold extends RenderBox {
   }
 }
 
-class Scaffold extends RenderObjectWrapper {
-
+class Scaffold extends RenderObjectWidget {
   Scaffold({
     Key key,
     Widget body,
@@ -185,47 +187,66 @@ class Scaffold extends RenderObjectWrapper {
     Widget floatingActionButton,
     Widget drawer
   }) : super(key: key) {
-    _slots[ScaffoldSlots.body] = body;
-    _slots[ScaffoldSlots.statusBar] = statusBar;
-    _slots[ScaffoldSlots.toolbar] = toolbar;
-    _slots[ScaffoldSlots.snackBar] = snackBar;
-    _slots[ScaffoldSlots.floatingActionButton] = floatingActionButton;
-    _slots[ScaffoldSlots.drawer] = drawer;
+    _children[ScaffoldSlots.body] = body;
+    _children[ScaffoldSlots.statusBar] = statusBar;
+    _children[ScaffoldSlots.toolbar] = toolbar;
+    _children[ScaffoldSlots.snackBar] = snackBar;
+    _children[ScaffoldSlots.floatingActionButton] = floatingActionButton;
+    _children[ScaffoldSlots.drawer] = drawer;
   }
 
-  Map<ScaffoldSlots, Widget> _slots = new Map<ScaffoldSlots, Widget>();
+  final Map<ScaffoldSlots, Widget> _children = new Map<ScaffoldSlots, Widget>();
+
+  RenderScaffold createRenderObject() => new RenderScaffold();
+
+  ScaffoldElement createElement() => new ScaffoldElement(this);
+}
+
+class ScaffoldElement extends RenderObjectElement<Scaffold> {
+  ScaffoldElement(Scaffold widget) : super(widget);
+
+  Map<ScaffoldSlots, Element> _children;
 
   RenderScaffold get renderObject => super.renderObject;
-  RenderScaffold createNode() => new RenderScaffold();
 
-  void walkChildren(WidgetTreeWalker walker) {
+  void visitChildren(ElementVisitor visitor) {
     for (ScaffoldSlots slot in ScaffoldSlots.values) {
-      Widget widget = _slots[slot];
-      if (widget != null)
-        walker(widget);
+      Element element = _children[slot];
+      if (element != null)
+        visitor(element);
     }
   }
 
-  void insertChildRenderObject(RenderObjectWrapper child, ScaffoldSlots slot) {
-    renderObject[slot] = child?.renderObject;
-  }
-
-  void detachChildRenderObject(RenderObjectWrapper child) {
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(renderObject is RenderScaffold);
-    assert(renderObject == child.renderObject.parent);
-    renderObject.remove(child.renderObject);
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
-  }
-
-  void syncRenderObject(Widget old) {
-    super.syncRenderObject(old);
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    _children = new Map<ScaffoldSlots, Element>();
     for (ScaffoldSlots slot in ScaffoldSlots.values) {
-      Widget widget = _slots[slot];
-      _slots[slot] = syncChild(widget, old is Scaffold ? old._slots[slot] : null, slot);
-      assert((_slots[slot] == null) == (widget == null));
-      assert(_slots[slot] == null || _slots[slot].parent == this);
+      Element newChild = widget._children[slot]?.createElement();
+      _children[slot] = newChild;
+      newChild?.mount(this, slot);
     }
   }
 
+  void update(Scaffold newWidget) {
+    super.update(newWidget);
+    assert(widget == newWidget);
+    for (ScaffoldSlots slot in ScaffoldSlots.values) {
+      _children[slot] = updateChild(_children[slot], widget._children[slot], slot);
+      assert((_children[slot] == null) == (widget._children[slot] == null));
+    }
+  }
+
+  void insertChildRenderObject(RenderObject child, ScaffoldSlots slot) {
+    renderObject[slot] = child;
+  }
+
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    removeChildRenderObject(child);
+    insertChildRenderObject(child, slot);
+  }
+
+  void removeChildRenderObject(RenderObject child) {
+    assert(renderObject == child.parent);
+    renderObject.remove(child);
+  }
 }
