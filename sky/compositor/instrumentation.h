@@ -33,7 +33,7 @@ class Stopwatch {
   explicit Stopwatch();
   ~Stopwatch();
 
-  const base::TimeDelta& lastLap() const { return _lastLap; }
+  const base::TimeDelta& lastLap() const { return _laps[_current_sample]; }
 
   base::TimeDelta currentLap() const { return base::TimeTicks::Now() - _start; }
 
@@ -43,10 +43,11 @@ class Stopwatch {
 
   void stop();
 
+  void setLapTime(const base::TimeDelta& delta);
+
  private:
   base::TimeTicks _start;
   std::vector<base::TimeDelta> _laps;
-  base::TimeDelta _lastLap;
   size_t _current_sample;
 
   DISALLOW_COPY_AND_ASSIGN(Stopwatch);

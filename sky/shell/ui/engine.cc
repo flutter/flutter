@@ -8,6 +8,7 @@
 #include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/threading/worker_pool.h"
+#include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
@@ -102,11 +103,13 @@ std::unique_ptr<compositor::LayerTree> Engine::BeginFrame(
   if (!sky_view_)
     return nullptr;
 
+  auto begin_time = base::TimeTicks::Now();
   std::unique_ptr<compositor::LayerTree> layer_tree =
       sky_view_->BeginFrame(frame_time);
   if (layer_tree) {
-    layer_tree->set_frame_size(SkISize::Make(physical_size_.width(),
-                                             physical_size_.height()));
+    layer_tree->set_frame_size(
+        SkISize::Make(physical_size_.width(), physical_size_.height()));
+    layer_tree->set_construction_time(base::TimeTicks::Now() - begin_time);
   }
   return layer_tree;
 }

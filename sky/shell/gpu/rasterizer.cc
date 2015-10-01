@@ -52,6 +52,11 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   if (surface_->GetSize() != size)
     surface_->Resize(size);
 
+  // There is no way for the compositor to know how long the layer tree
+  // construction took. Fortunately, the layer tree does. Grab that time
+  // for instrumentation.
+  paint_context_.engine_time().setLapTime(layer_tree->construction_time());
+
   // Use the canvas from the Ganesh Surface to render the current frame into
   {
     EnsureGLContext();
