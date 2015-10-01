@@ -1,4 +1,3 @@
-import 'package:sky/animation.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
@@ -48,36 +47,35 @@ class SecondComponentState extends State<SecondComponent> {
 
 void main() {
   test('Can navigator navigate to and from a stateful component', () {
-    WidgetTester tester = new WidgetTester();
+    testWidgets((WidgetTester tester) {
+      final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
+        '/': (navigator, route) => new FirstComponent(navigator),
+        '/second': (navigator, route) => new SecondComponent(navigator),
+      };
 
-    final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-      '/': (navigator, route) => new FirstComponent(navigator),
-      '/second': (navigator, route) => new SecondComponent(navigator),
-    };
+      tester.pumpWidget(new Navigator(routes: routes));
 
-    tester.pumpFrame(new Navigator(routes: routes));
+      expect(tester.findText('X'), isNotNull);
+      expect(tester.findText('Y'), isNull);
 
-    expect(tester.findText('X'), isNotNull);
-    expect(tester.findText('Y'), isNull);
+      tester.tap(tester.findText('X'));
+      tester.pump(const Duration(milliseconds: 10));
 
-    tester.tap(tester.findText('X'));
-    scheduler.beginFrame(10.0);
+      expect(tester.findText('X'), isNotNull);
+      expect(tester.findText('Y'), isNotNull);
 
-    expect(tester.findText('X'), isNotNull);
-    expect(tester.findText('Y'), isNotNull);
+      tester.pump(const Duration(milliseconds: 10));
+      tester.pump(const Duration(milliseconds: 10));
+      tester.pump(const Duration(seconds: 1));
 
-    scheduler.beginFrame(20.0);
-    scheduler.beginFrame(30.0);
-    scheduler.beginFrame(1000.0);
+      tester.tap(tester.findText('Y'));
+      tester.pump(const Duration(milliseconds: 10));
+      tester.pump(const Duration(milliseconds: 10));
+      tester.pump(const Duration(milliseconds: 10));
+      tester.pump(const Duration(seconds: 1));
 
-    tester.tap(tester.findText('Y'));
-    scheduler.beginFrame(1010.0);
-    scheduler.beginFrame(1020.0);
-    scheduler.beginFrame(1030.0);
-    scheduler.beginFrame(2000.0);
-
-    expect(tester.findText('X'), isNotNull);
-    expect(tester.findText('Y'), isNull);
-
+      expect(tester.findText('X'), isNotNull);
+      expect(tester.findText('Y'), isNull);
+    });
   });
 }

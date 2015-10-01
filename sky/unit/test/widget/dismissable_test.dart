@@ -1,4 +1,3 @@
-import 'package:quiver/testing/async.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
@@ -86,147 +85,149 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
   tester.dispatchEvent(pointer.move(upLocation), downLocation);
   tester.dispatchEvent(pointer.up(), downLocation);
 
-  double t0 = 0.0;
-  new FakeAsync().run((async) {
-    tester.pumpFrame(widgetBuilder(), t0); // start the resize animation
-    tester.pumpFrame(widgetBuilder(), t0 + 1000.0); // finish the resize animation
-    async.elapse(new Duration(seconds: 1));
-    tester.pumpFrame(widgetBuilder(), t0 + 2000.0); // dismiss
-    async.elapse(new Duration(seconds: 1));
-  });
+  tester.pumpWidget(widgetBuilder()); // start the resize animation
+  tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the resize animation
+  tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // dismiss
 }
 
 void main() {
   test('Horizontal drag triggers dismiss scrollDirection=vertical', () {
-    WidgetTester tester = new WidgetTester();
-    scrollDirection = ScrollDirection.vertical;
-    dismissDirection = DismissDirection.horizontal;
-    dismissedItems = [];
+    testWidgets((WidgetTester tester) {
+      scrollDirection = ScrollDirection.vertical;
+      dismissDirection = DismissDirection.horizontal;
+      dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder());
-    expect(dismissedItems, isEmpty);
+      tester.pumpWidget(widgetBuilder());
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.right);
-    expect(tester.findText('0'), isNull);
-    expect(dismissedItems, equals([0]));
+      dismissItem(tester, 0, gestureDirection: DismissDirection.right);
+      expect(tester.findText('0'), isNull);
+      expect(dismissedItems, equals([0]));
 
-    dismissItem(tester, 1, gestureDirection: DismissDirection.left);
-    expect(tester.findText('1'), isNull);
-    expect(dismissedItems, equals([0, 1]));
+      dismissItem(tester, 1, gestureDirection: DismissDirection.left);
+      expect(tester.findText('1'), isNull);
+      expect(dismissedItems, equals([0, 1]));
+    });
   });
 
   test('Vertical drag triggers dismiss scrollDirection=horizontal', () {
-    WidgetTester tester = new WidgetTester();
-    scrollDirection = ScrollDirection.horizontal;
-    dismissDirection = DismissDirection.vertical;
-    dismissedItems = [];
+    testWidgets((WidgetTester tester) {
+      scrollDirection = ScrollDirection.horizontal;
+      dismissDirection = DismissDirection.vertical;
+      dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder());
-    expect(dismissedItems, isEmpty);
+      tester.pumpWidget(widgetBuilder());
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-    expect(tester.findText('0'), isNull);
-    expect(dismissedItems, equals([0]));
+      dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+      expect(tester.findText('0'), isNull);
+      expect(dismissedItems, equals([0]));
 
-    dismissItem(tester, 1, gestureDirection: DismissDirection.down);
-    expect(tester.findText('1'), isNull);
-    expect(dismissedItems, equals([0, 1]));
+      dismissItem(tester, 1, gestureDirection: DismissDirection.down);
+      expect(tester.findText('1'), isNull);
+      expect(dismissedItems, equals([0, 1]));
+    });
   });
 
   test('drag-left with DismissDirection.left triggers dismiss', () {
-    WidgetTester tester = new WidgetTester();
-    scrollDirection = ScrollDirection.vertical;
-    dismissDirection = DismissDirection.left;
-    dismissedItems = [];
+    testWidgets((WidgetTester tester) {
+      scrollDirection = ScrollDirection.vertical;
+      dismissDirection = DismissDirection.left;
+      dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder());
-    expect(dismissedItems, isEmpty);
+      tester.pumpWidget(widgetBuilder());
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.right);
-    expect(tester.findText('0'), isNotNull);
-    expect(dismissedItems, isEmpty);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.right);
+      expect(tester.findText('0'), isNotNull);
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.left);
-    expect(tester.findText('0'), isNull);
-    expect(dismissedItems, equals([0]));
+      dismissItem(tester, 0, gestureDirection: DismissDirection.left);
+      expect(tester.findText('0'), isNull);
+      expect(dismissedItems, equals([0]));
+    });
   });
 
   test('drag-right with DismissDirection.right triggers dismiss', () {
-    WidgetTester tester = new WidgetTester();
-    scrollDirection = ScrollDirection.vertical;
-    dismissDirection = DismissDirection.right;
-    dismissedItems = [];
+    testWidgets((WidgetTester tester) {
+      scrollDirection = ScrollDirection.vertical;
+      dismissDirection = DismissDirection.right;
+      dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder());
-    expect(dismissedItems, isEmpty);
+      tester.pumpWidget(widgetBuilder());
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.left);
-    expect(tester.findText('0'), isNotNull);
-    expect(dismissedItems, isEmpty);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.left);
+      expect(tester.findText('0'), isNotNull);
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.right);
-    expect(tester.findText('0'), isNull);
-    expect(dismissedItems, equals([0]));
+      dismissItem(tester, 0, gestureDirection: DismissDirection.right);
+      expect(tester.findText('0'), isNull);
+      expect(dismissedItems, equals([0]));
+    });
   });
 
   test('drag-up with DismissDirection.up triggers dismiss', () {
-    WidgetTester tester = new WidgetTester();
-    scrollDirection = ScrollDirection.horizontal;
-    dismissDirection = DismissDirection.up;
-    dismissedItems = [];
+    testWidgets((WidgetTester tester) {
+      scrollDirection = ScrollDirection.horizontal;
+      dismissDirection = DismissDirection.up;
+      dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder());
-    expect(dismissedItems, isEmpty);
+      tester.pumpWidget(widgetBuilder());
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.down);
-    expect(tester.findText('0'), isNotNull);
-    expect(dismissedItems, isEmpty);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.down);
+      expect(tester.findText('0'), isNotNull);
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-    expect(tester.findText('0'), isNull);
-    expect(dismissedItems, equals([0]));
+      dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+      expect(tester.findText('0'), isNull);
+      expect(dismissedItems, equals([0]));
+    });
   });
 
   test('drag-down with DismissDirection.down triggers dismiss', () {
-    WidgetTester tester = new WidgetTester();
-    scrollDirection = ScrollDirection.horizontal;
-    dismissDirection = DismissDirection.down;
-    dismissedItems = [];
+    testWidgets((WidgetTester tester) {
+      scrollDirection = ScrollDirection.horizontal;
+      dismissDirection = DismissDirection.down;
+      dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder());
-    expect(dismissedItems, isEmpty);
+      tester.pumpWidget(widgetBuilder());
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-    expect(tester.findText('0'), isNotNull);
-    expect(dismissedItems, isEmpty);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+      expect(tester.findText('0'), isNotNull);
+      expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.down);
-    expect(tester.findText('0'), isNull);
-    expect(dismissedItems, equals([0]));
+      dismissItem(tester, 0, gestureDirection: DismissDirection.down);
+      expect(tester.findText('0'), isNull);
+      expect(dismissedItems, equals([0]));
+    });
   });
 
   // This is a regression test for
   // https://github.com/domokit/sky_engine/issues/1068
   test('Verify that drag-move events do not assert', () {
-    WidgetTester tester = new WidgetTester();
-    scrollDirection = ScrollDirection.horizontal;
-    dismissDirection = DismissDirection.down;
-    dismissedItems = [];
+    testWidgets((WidgetTester tester) {
+      scrollDirection = ScrollDirection.horizontal;
+      dismissDirection = DismissDirection.down;
+      dismissedItems = [];
 
-    tester.pumpFrame(widgetBuilder());
-    Element itemElement = tester.findText('0');
+      tester.pumpWidget(widgetBuilder());
+      Element itemElement = tester.findText('0');
 
-    TestPointer pointer = new TestPointer(5);
-    Point location = tester.getTopLeft(itemElement);
-    Offset offset = new Offset(0.0, 5.0);
-    tester.dispatchEvent(pointer.down(location), location);
-    tester.dispatchEvent(pointer.move(location + offset), location);
-    tester.pumpFrame(widgetBuilder());
-    tester.dispatchEvent(pointer.move(location + (offset * 2.0)), location);
-    tester.pumpFrame(widgetBuilder());
-    tester.dispatchEvent(pointer.move(location + (offset * 3.0)), location);
-    tester.pumpFrame(widgetBuilder());
-    tester.dispatchEvent(pointer.move(location + (offset * 4.0)), location);
-    tester.pumpFrame(widgetBuilder());
+      TestPointer pointer = new TestPointer(5);
+      Point location = tester.getTopLeft(itemElement);
+      Offset offset = new Offset(0.0, 5.0);
+      tester.dispatchEvent(pointer.down(location), location);
+      tester.dispatchEvent(pointer.move(location + offset), location);
+      tester.pumpWidget(widgetBuilder());
+      tester.dispatchEvent(pointer.move(location + (offset * 2.0)), location);
+      tester.pumpWidget(widgetBuilder());
+      tester.dispatchEvent(pointer.move(location + (offset * 3.0)), location);
+      tester.pumpWidget(widgetBuilder());
+      tester.dispatchEvent(pointer.move(location + (offset * 4.0)), location);
+      tester.pumpWidget(widgetBuilder());
+    });
   });
 }

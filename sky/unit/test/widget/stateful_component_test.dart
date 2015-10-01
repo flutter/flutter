@@ -7,68 +7,69 @@ import 'test_widgets.dart';
 
 void main() {
   test('Stateful component smoke test', () {
-    WidgetTester tester = new WidgetTester();
+    testWidgets((WidgetTester tester) {
 
-    void checkTree(BoxDecoration expectedDecoration) {
-      OneChildRenderObjectElement element =
-          tester.findElement((element) => element is OneChildRenderObjectElement);
-      expect(element, isNotNull);
-      expect(element.renderObject is RenderDecoratedBox, isTrue);
-      RenderDecoratedBox renderObject = element.renderObject;
-      expect(renderObject.decoration, equals(expectedDecoration));
-    }
+      void checkTree(BoxDecoration expectedDecoration) {
+        OneChildRenderObjectElement element =
+            tester.findElement((element) => element is OneChildRenderObjectElement);
+        expect(element, isNotNull);
+        expect(element.renderObject is RenderDecoratedBox, isTrue);
+        RenderDecoratedBox renderObject = element.renderObject;
+        expect(renderObject.decoration, equals(expectedDecoration));
+      }
 
-    tester.pumpFrame(
-      new FlipComponent(
-        left: new DecoratedBox(decoration: kBoxDecorationA),
-        right: new DecoratedBox(decoration: kBoxDecorationB)
-      )
-    );
+      tester.pumpWidget(
+        new FlipComponent(
+          left: new DecoratedBox(decoration: kBoxDecorationA),
+          right: new DecoratedBox(decoration: kBoxDecorationB)
+        )
+      );
 
-    checkTree(kBoxDecorationA);
+      checkTree(kBoxDecorationA);
 
-    tester.pumpFrame(
-      new FlipComponent(
-        left: new DecoratedBox(decoration: kBoxDecorationB),
-        right: new DecoratedBox(decoration: kBoxDecorationA)
-      )
-    );
+      tester.pumpWidget(
+        new FlipComponent(
+          left: new DecoratedBox(decoration: kBoxDecorationB),
+          right: new DecoratedBox(decoration: kBoxDecorationA)
+        )
+      );
 
-    checkTree(kBoxDecorationB);
+      checkTree(kBoxDecorationB);
 
-    flipStatefulComponent(tester);
+      flipStatefulComponent(tester);
 
-    tester.pumpFrameWithoutChange();
+      tester.pump();
 
-    checkTree(kBoxDecorationA);
+      checkTree(kBoxDecorationA);
 
-    tester.pumpFrame(
-      new FlipComponent(
-        left: new DecoratedBox(decoration: kBoxDecorationA),
-        right: new DecoratedBox(decoration: kBoxDecorationB)
-      )
-    );
+      tester.pumpWidget(
+        new FlipComponent(
+          left: new DecoratedBox(decoration: kBoxDecorationA),
+          right: new DecoratedBox(decoration: kBoxDecorationB)
+        )
+      );
 
-    checkTree(kBoxDecorationB);
-
+      checkTree(kBoxDecorationB);
+    });
   });
 
   test('Don\'t rebuild subcomponents', () {
-    WidgetTester tester = new WidgetTester();
-    tester.pumpFrame(
-      new FlipComponent(
-        key: new Key('rebuild test'), // this is so we don't get the state from the TestComponentConfig in the last test, but instead instantiate a new element with a new state.
-        left: new TestBuildCounter(),
-        right: new DecoratedBox(decoration: kBoxDecorationB)
-      )
-    );
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(
+        new FlipComponent(
+          key: new Key('rebuild test'), // this is so we don't get the state from the TestComponentConfig in the last test, but instead instantiate a new element with a new state.
+          left: new TestBuildCounter(),
+          right: new DecoratedBox(decoration: kBoxDecorationB)
+        )
+      );
 
-    expect(TestBuildCounter.buildCount, equals(1));
+      expect(TestBuildCounter.buildCount, equals(1));
 
-    flipStatefulComponent(tester);
+      flipStatefulComponent(tester);
 
-    tester.pumpFrameWithoutChange();
+      tester.pump();
 
-    expect(TestBuildCounter.buildCount, equals(1));
+      expect(TestBuildCounter.buildCount, equals(1));
+    });
   });
 }

@@ -37,164 +37,160 @@ class TestWidgetState extends State<TestWidget> {
 void main() {
 
   test('no change', () {
-    WidgetTester tester = new WidgetTester();
-
-    tester.pumpFrame(
-      new Container(
-        child: new Container(
-          child: new TestWidget(
-            persistentState: 1,
-            child: new Container()
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(
+        new Container(
+          child: new Container(
+            child: new TestWidget(
+              persistentState: 1,
+              child: new Container()
+            )
           )
         )
-      )
-    );
+      );
 
-    TestWidgetState state = tester.findStateOfType(TestWidgetState);
+      TestWidgetState state = tester.findStateOfType(TestWidgetState);
 
-    expect(state.persistentState, equals(1));
-    expect(state.updates, equals(0));
+      expect(state.persistentState, equals(1));
+      expect(state.updates, equals(0));
 
-    tester.pumpFrame(
-      new Container(
-        child: new Container(
-          child: new TestWidget(
-            persistentState: 2,
-            child: new Container()
+      tester.pumpWidget(
+        new Container(
+          child: new Container(
+            child: new TestWidget(
+              persistentState: 2,
+              child: new Container()
+            )
           )
         )
-      )
-    );
+      );
 
-    expect(state.persistentState, equals(1));
-    expect(state.updates, equals(1));
+      expect(state.persistentState, equals(1));
+      expect(state.updates, equals(1));
 
-    tester.pumpFrame(new Container());
+      tester.pumpWidget(new Container());
+    });
   });
 
   test('remove one', () {
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(
+        new Container(
+          child: new Container(
+            child: new TestWidget(
+              persistentState: 10,
+              child: new Container()
+            )
+          )
+        )
+      );
 
-    WidgetTester tester = new WidgetTester();
+      TestWidgetState state = tester.findStateOfType(TestWidgetState);
 
-    tester.pumpFrame(
-      new Container(
-        child: new Container(
+      expect(state.persistentState, equals(10));
+      expect(state.updates, equals(0));
+
+      tester.pumpWidget(
+        new Container(
           child: new TestWidget(
-            persistentState: 10,
+            persistentState: 11,
             child: new Container()
           )
         )
-      )
-    );
+      );
 
-    TestWidgetState state = tester.findStateOfType(TestWidgetState);
+      state = tester.findStateOfType(TestWidgetState);
 
-    expect(state.persistentState, equals(10));
-    expect(state.updates, equals(0));
+      expect(state.persistentState, equals(11));
+      expect(state.updates, equals(0));
 
-    tester.pumpFrame(
-      new Container(
-        child: new TestWidget(
-          persistentState: 11,
-          child: new Container()
-        )
-      )
-    );
-
-    state = tester.findStateOfType(TestWidgetState);
-
-    expect(state.persistentState, equals(11));
-    expect(state.updates, equals(0));
-
-    tester.pumpFrame(new Container());
+      tester.pumpWidget(new Container());
+    });
   });
 
   test('swap instances around', () {
+    testWidgets((WidgetTester tester) {
+      Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
+      Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
+      tester.pumpWidget(new Column([]));
 
-    WidgetTester tester = new WidgetTester();
+      GlobalKey keyA = new GlobalKey();
+      GlobalKey keyB = new GlobalKey();
 
-    Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
-    Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
-    tester.pumpFrame(new Column([]));
+      tester.pumpWidget(
+        new Column([
+          new Container(
+            key: keyA,
+            child: a
+          ),
+          new Container(
+            key: keyB,
+            child: b
+          )
+        ])
+      );
 
-    GlobalKey keyA = new GlobalKey();
-    GlobalKey keyB = new GlobalKey();
+      TestWidgetState first, second;
 
-    tester.pumpFrame(
-      new Column([
-        new Container(
-          key: keyA,
-          child: a
-        ),
-        new Container(
-          key: keyB,
-          child: b
-        )
-      ])
-    );
+      first = tester.findStateByConfig(a);
+      second = tester.findStateByConfig(b);
 
-    TestWidgetState first, second;
+      expect(first.config, equals(a));
+      expect(first.persistentState, equals(0x61));
+      expect(first.syncedState, equals(0x41));
+      expect(second.config, equals(b));
+      expect(second.persistentState, equals(0x62));
+      expect(second.syncedState, equals(0x42));
 
-    first = tester.findStateByConfig(a);
-    second = tester.findStateByConfig(b);
+      tester.pumpWidget(
+        new Column([
+          new Container(
+            key: keyA,
+            child: a
+          ),
+          new Container(
+            key: keyB,
+            child: b
+          )
+        ])
+      );
 
-    expect(first.config, equals(a));
-    expect(first.persistentState, equals(0x61));
-    expect(first.syncedState, equals(0x41));
-    expect(second.config, equals(b));
-    expect(second.persistentState, equals(0x62));
-    expect(second.syncedState, equals(0x42));
+      first = tester.findStateByConfig(a);
+      second = tester.findStateByConfig(b);
 
-    tester.pumpFrame(
-      new Column([
-        new Container(
-          key: keyA,
-          child: a
-        ),
-        new Container(
-          key: keyB,
-          child: b
-        )
-      ])
-    );
+      // same as before
+      expect(first.config, equals(a));
+      expect(first.persistentState, equals(0x61));
+      expect(first.syncedState, equals(0x41));
+      expect(second.config, equals(b));
+      expect(second.persistentState, equals(0x62));
+      expect(second.syncedState, equals(0x42));
 
-    first = tester.findStateByConfig(a);
-    second = tester.findStateByConfig(b);
+      // now we swap the nodes over
+      // since they are both "old" nodes, they shouldn't sync with each other even though they look alike
 
-    // same as before
-    expect(first.config, equals(a));
-    expect(first.persistentState, equals(0x61));
-    expect(first.syncedState, equals(0x41));
-    expect(second.config, equals(b));
-    expect(second.persistentState, equals(0x62));
-    expect(second.syncedState, equals(0x42));
+      tester.pumpWidget(
+        new Column([
+          new Container(
+            key: keyA,
+            child: b
+          ),
+          new Container(
+            key: keyB,
+            child: a
+          )
+        ])
+      );
 
-    // now we swap the nodes over
-    // since they are both "old" nodes, they shouldn't sync with each other even though they look alike
+      first = tester.findStateByConfig(b);
+      second = tester.findStateByConfig(a);
 
-    tester.pumpFrame(
-      new Column([
-        new Container(
-          key: keyA,
-          child: b
-        ),
-        new Container(
-          key: keyB,
-          child: a
-        )
-      ])
-    );
-
-    first = tester.findStateByConfig(b);
-    second = tester.findStateByConfig(a);
-
-    expect(first.config, equals(b));
-    expect(first.persistentState, equals(0x61));
-    expect(first.syncedState, equals(0x42));
-    expect(second.config, equals(a));
-    expect(second.persistentState, equals(0x62));
-    expect(second.syncedState, equals(0x41));
-
+      expect(first.config, equals(b));
+      expect(first.persistentState, equals(0x61));
+      expect(first.syncedState, equals(0x42));
+      expect(second.config, equals(a));
+      expect(second.persistentState, equals(0x62));
+      expect(second.syncedState, equals(0x41));
+    });
   });
-
 }
