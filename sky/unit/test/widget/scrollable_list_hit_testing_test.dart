@@ -2,7 +2,7 @@ import 'package:sky/rendering.dart';
 import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import '../fn3/widget_tester.dart';
+import 'widget_tester.dart';
 
 const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 List<int> tapped = <int>[];

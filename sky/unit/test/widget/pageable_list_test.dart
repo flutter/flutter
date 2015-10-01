@@ -2,7 +2,7 @@ import 'package:quiver/testing/async.dart';
 import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import '../fn3/widget_tester.dart';
+import 'widget_tester.dart';
 
 const Size pageSize = const Size(800.0, 600.0);
 const List<int> pages = const <int>[0, 1, 2, 3, 4, 5];

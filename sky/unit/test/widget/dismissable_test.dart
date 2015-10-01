@@ -3,7 +3,7 @@ import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';
-import '../fn3/widget_tester.dart';
+import 'widget_tester.dart';
 
 const double itemExtent = 100.0;
 ScrollDirection scrollDirection = ScrollDirection.vertical;

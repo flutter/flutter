@@ -8,7 +8,7 @@ import 'package:quiver/testing/async.dart';
 import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import '../fn3/widget_tester.dart';
+import 'widget_tester.dart';
 
 const double itemExtent = 200.0;
 ScrollDirection scrollDirection = ScrollDirection.vertical;

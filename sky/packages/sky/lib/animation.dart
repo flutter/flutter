@@ -10,7 +10,6 @@ library animation;
 export 'src/animation/animated_simulation.dart';
 export 'src/animation/animated_value.dart';
 export 'src/animation/animation_performance.dart';
-export 'src/animation/clamped_simulation.dart';
 export 'src/animation/curves.dart';
 export 'src/animation/forces.dart';
 export 'src/animation/scheduler.dart';

@@ -1,8 +1,8 @@
 import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import '../fn3/widget_tester.dart';
-import '../fn3/test_widgets.dart';
+import 'widget_tester.dart';
+import 'test_widgets.dart';
 
 class ProbeWidget extends StatefulComponent {
   ProbeWidgetState createState() => new ProbeWidgetState();
