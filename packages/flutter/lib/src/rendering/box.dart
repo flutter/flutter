@@ -24,7 +24,7 @@ class _DebugSize extends Size {
 /// A size respects a BoxConstraints if, and only if, all of the following
 /// relations hold:
 ///
-/// * `minWidth <= size.width <= constraints.maxWidth`
+/// * `minWidth <= size.width <= maxWidth`
 /// * `minHeight <= size.height <= maxHeight`
 ///
 /// The constraints themselves must satisfy these relations:
@@ -70,17 +70,17 @@ class BoxConstraints extends Constraints {
       minHeight = 0.0,
       maxHeight = size.height;
 
-    /// Constructs box constraints that expand to fill another box contraints
-    ///
-    /// If width or height is given, the constraints will require exactly the
-    /// given value in the given dimension.
-    const BoxConstraints.expand({
-      double width,
-      double height
-    }): minWidth = width != null ? width : double.INFINITY,
-        maxWidth = width != null ? width : double.INFINITY,
-        minHeight = height != null ? height : double.INFINITY,
-        maxHeight = height != null ? height : double.INFINITY;
+  /// Constructs box constraints that expand to fill another box contraints
+  ///
+  /// If width or height is given, the constraints will require exactly the
+  /// given value in the given dimension.
+  const BoxConstraints.expand({
+    double width,
+    double height
+  }): minWidth = width != null ? width : double.INFINITY,
+      maxWidth = width != null ? width : double.INFINITY,
+      minHeight = height != null ? height : double.INFINITY,
+      maxHeight = height != null ? height : double.INFINITY;
 
   /// Returns new box constraints that are smaller by the given edge dimensions
   BoxConstraints deflate(EdgeDims edges) {
