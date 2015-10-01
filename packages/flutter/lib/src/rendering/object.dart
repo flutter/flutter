@@ -11,7 +11,7 @@ import 'package:sky/src/rendering/debug.dart';
 import 'package:sky/src/rendering/hit_test.dart';
 import 'package:sky/src/rendering/layer.dart';
 import 'package:sky/src/rendering/node.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/src/rendering/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;

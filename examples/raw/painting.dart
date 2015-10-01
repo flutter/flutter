@@ -32,7 +32,7 @@ sky.Picture paint(sky.Rect paintBounds) {
                    new sky.Paint()..setShader(yellowBlue));
 
   // Scale x and y by 0.5.
-  var scaleMatrix = new Float32List.fromList([
+  var scaleMatrix = new Float64List.fromList([
       0.5, 0.0, 0.0, 0.0,
       0.0, 0.5, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,

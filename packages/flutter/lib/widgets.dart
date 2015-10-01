@@ -52,4 +52,4 @@ export 'src/widgets/tool_bar.dart';
 export 'src/widgets/transitions.dart';
 export 'src/widgets/unique_component.dart';
 
-export 'package:vector_math/vector_math.dart' show Matrix4;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;

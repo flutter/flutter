@@ -8,7 +8,7 @@ import 'dart:sky' as sky;
 import 'package:sky/painting.dart';
 import 'package:sky/src/rendering/debug.dart';
 import 'package:sky/src/rendering/object.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 export 'package:sky/painting.dart' show TextBaseline;
 

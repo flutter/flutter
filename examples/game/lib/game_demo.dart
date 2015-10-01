@@ -6,7 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/rendering.dart';
 import 'package:skysprites/skysprites.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 part 'custom_actions.dart';
 part 'explosions.dart';
