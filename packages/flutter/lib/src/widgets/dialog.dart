@@ -70,7 +70,7 @@ class Dialog extends StatelessComponent {
     if (title != null) {
       EdgeDims padding = titlePadding;
       if (padding == null)
-        padding = new EdgeDims(24.0, 24.0, content == null ? 20.0 : 0.0, 24.0);
+        padding = new EdgeDims.TRBL(24.0, 24.0, content == null ? 20.0 : 0.0, 24.0);
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
@@ -83,7 +83,7 @@ class Dialog extends StatelessComponent {
     if (content != null) {
       EdgeDims padding = contentPadding;
       if (padding == null)
-        padding = const EdgeDims(20.0, 24.0, 24.0, 24.0);
+        padding = const EdgeDims.TRBL(20.0, 24.0, 24.0, 24.0);
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
