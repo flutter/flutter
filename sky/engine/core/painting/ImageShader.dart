@@ -5,7 +5,7 @@
 part of dart.sky;
 
 class ImageShader extends _ImageShader {
-  ImageShader(Image image, TileMode tmx, TileMode tmy, Float32List matrix4) {
+  ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {
     if (image == null)
       throw new ArgumentError("[image] argument cannot be null");
     if (tmx == null)

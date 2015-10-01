@@ -13,7 +13,7 @@ PassRefPtr<ImageShader> ImageShader::create() {
 void ImageShader::initWithImage(CanvasImage* image,
                                 SkShader::TileMode tmx,
                                 SkShader::TileMode tmy,
-                                const Float32List& matrix4,
+                                const Float64List& matrix4,
                                 ExceptionState& es) {
   ASSERT(image != NULL);
 

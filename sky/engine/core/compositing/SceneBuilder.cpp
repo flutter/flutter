@@ -28,7 +28,7 @@ SceneBuilder::~SceneBuilder()
 {
 }
 
-void SceneBuilder::pushTransform(const Float32List& matrix4, ExceptionState& es)
+void SceneBuilder::pushTransform(const Float64List& matrix4, ExceptionState& es)
 {
     SkMatrix sk_matrix = toSkMatrix(matrix4, es);
     if (es.had_exception())

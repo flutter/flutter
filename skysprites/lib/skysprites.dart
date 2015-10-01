@@ -17,7 +17,7 @@ import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 part 'action.dart';
 part 'action_spline.dart';
