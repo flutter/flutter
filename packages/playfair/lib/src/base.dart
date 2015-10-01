@@ -38,17 +38,26 @@ const double kIndicatorStrokeWidth = 2.0;
 const Color kIndicatorColor = const Color(0xFFFF4081);
 const double kIndicatorMargin = 2.0;
 
-class Chart extends LeafRenderObjectWrapper {
+class Chart extends StatelessComponent {
   Chart({ Key key, this.data }) : super(key: key);
 
   final ChartData data;
 
-  RenderChart createNode() => new RenderChart(data: data);
-  RenderChart get renderObject => super.renderObject;
+  Widget build(BuildContext context) {
+    return new _ChartWrapper(textTheme: Theme.of(context).text, data: data);
+  }
+}
 
-  void syncRenderObject(Widget old) {
-    super.syncRenderObject(old);
-    renderObject.textTheme = Theme.of(this).text;
+class _ChartWrapper extends LeafRenderObjectWidget {
+  _ChartWrapper({ Key key, this.textTheme, this.data }) : super(key: key);
+
+  final TextTheme textTheme;
+  final ChartData data;
+
+  RenderChart createRenderObject() => new RenderChart(textTheme: textTheme, data: data);
+
+  void updateRenderObject(RenderChart renderObject, _ChartWrapper oldWidget) {
+    renderObject.textTheme = textTheme;
     renderObject.data = data;
   }
 }
@@ -56,9 +65,10 @@ class Chart extends LeafRenderObjectWrapper {
 class RenderChart extends RenderConstrainedBox {
 
   RenderChart({
+    TextTheme textTheme,
     ChartData data
-  }) : _painter = new ChartPainter(data),
-       super(child: null, additionalConstraints: BoxConstraints.expand);
+  }) : _painter = new ChartPainter(textTheme: textTheme, data: data),
+       super(child: null, additionalConstraints: const BoxConstraints.expand());
 
   final ChartPainter _painter;
 
@@ -104,7 +114,7 @@ class Indicator {
 }
 
 class ChartPainter {
-  ChartPainter(this._data);
+  ChartPainter({ TextTheme textTheme, ChartData data }) : _data = data, _textTheme = textTheme;
 
   ChartData _data;
   ChartData get data => _data;
