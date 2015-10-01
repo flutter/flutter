@@ -1,7 +1,7 @@
 part of skysprites;
 
 /// A widget that uses a [SpriteBox] to render a sprite node tree to the screen.
-class SpriteWidget extends OneChildRenderObjectWrapper {
+class SpriteWidget extends OneChildRenderObjectWidget {
 
   /// The rootNode of the sprite node tree.
   ///
@@ -24,13 +24,9 @@ class SpriteWidget extends OneChildRenderObjectWrapper {
   ///     var mySpriteWidget = new SpriteWidget(mySpriteTree, SpriteBoxTransformMode.fixedHeight);
   SpriteWidget(this.rootNode, [this.transformMode = SpriteBoxTransformMode.letterbox]);
 
-  SpriteBox get renderObject => super.renderObject;
+  SpriteBox createRenderObject() => new SpriteBox(rootNode, transformMode);
 
-  SpriteBox createNode() => new SpriteBox(rootNode, transformMode);
-
-  void syncRenderObject(SpriteWidget old) {
-    super.syncRenderObject(old);
-
+  void updateRenderObject(SpriteBox renderObject, SpriteWidget oldWidget) {
     renderObject.rootNode = rootNode;
     renderObject.transformMode = transformMode;
   }

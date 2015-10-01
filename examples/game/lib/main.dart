@@ -8,7 +8,7 @@ import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:sky/widgets_next.dart';
 import 'package:skysprites/skysprites.dart';
 
 import 'game_demo.dart';
@@ -24,7 +24,6 @@ final AssetBundle _bundle = _initBundle();
 ImageMap _imageMap;
 SpriteSheet _spriteSheet;
 SpriteSheet _spriteSheetUI;
-GameDemoApp _app;
 Map<String,SoundEffect> _sounds = {};
 
 main() async {
@@ -58,55 +57,42 @@ main() async {
   json = await _bundle.loadString('assets/game_ui.json');
   _spriteSheetUI = new SpriteSheet(_imageMap['assets/game_ui.png'], json);
 
-  _app = new GameDemoApp();
-
   assert(_spriteSheet.image != null);
 
   SoundTrackPlayer stPlayer = SoundTrackPlayer.sharedInstance();
   SoundTrack music = await stPlayer.load(_bundle.load('assets/temp_music.aac'));
   stPlayer.play(music);
 
-  runApp(_app);
+  runApp(new GameDemo());
 }
 
-class GameDemoApp extends App {
+// TODO(viktork): The task bar purple is the wrong purple, we may need
+// a custom theme swatch to match the purples in the sprites.
+final ThemeData _theme = new ThemeData(
+  brightness: ThemeBrightness.light,
+  primarySwatch: Colors.purple
+);
 
-  NavigationState _navigationState;
+class GameDemo extends StatefulComponent {
+  GameDemoState createState() => new GameDemoState();
+}
+
+class GameDemoState extends State<GameDemo> {
   NodeWithSize _game;
   int _lastScore = 0;
 
-  void initState() {
-    _navigationState = new NavigationState([
-      new Route(
-        name: '/',
-        builder: _buildMainScene
-      ),
-      new Route(
-        name: '/game',
-        builder: _buildGameScene
-      ),
-    ]);
-    super.initState();
-  }
-
-  Widget build() {
-    // TODO(viktork): The task bar purple is the wrong purple, we may need
-    // a custom theme swatch to match the purples in the sprites.
-    ThemeData theme = new ThemeData(
-      brightness: ThemeBrightness.light,
-      primarySwatch: Colors.purple
-    );
-
-    return new Theme(
-      data: theme,
-      child: new Title(
-        title: 'Asteroids',
-        child: new Navigator(_navigationState)
-      )
+  Widget build(BuildContext context) {
+    return new App(
+      title: 'Asteroids',
+      theme: _theme,
+      routes: {
+        '/': _buildMainScene,
+        '/game': _buildGameScene
+      }
     );
   }
 
-  Widget _buildGameScene(navigator, route) {
+  Widget _buildGameScene(NavigatorState navigator, Route route) {
     return new SpriteWidget(_game, SpriteBoxTransformMode.fixedWidth);
   }
 
@@ -144,7 +130,7 @@ class GameDemoApp extends App {
   }
 }
 
-class TextureButton extends ButtonBase {
+class TextureButton extends StatefulComponent {
   TextureButton({
     Key key,
     this.onPressed,
@@ -160,41 +146,46 @@ class TextureButton extends ButtonBase {
   final double width;
   final double height;
 
-  Widget buildContent() {
+  TextureButtonState createState() => new TextureButtonState();
+}
+
+class TextureButtonState extends ButtonState<TextureButton> {
+  Widget buildContent(BuildContext context) {
     return new Listener(
       child: new Container(
-        width: width,
-        height: height,
+        width: config.width,
+        height: config.height,
         child: new CustomPaint(
           callback: paintCallback,
           token: new _TextureButtonToken(
             highlight,
-            texture,
-            textureDown,
-            width,
-            height
+            config.texture,
+            config.textureDown,
+            config.width,
+            config.height
           )
         )
       ),
       onPointerUp: (_) {
-        if (onPressed != null) onPressed();
+        if (config.onPressed != null)
+          config.onPressed();
       }
     );
   }
 
   void paintCallback(PaintingCanvas canvas, Size size) {
-    if (texture == null)
+    if (config.texture == null)
       return;
 
     canvas.save();
-    if (highlight && textureDown != null) {
+    if (highlight && config.textureDown != null) {
       // Draw down state
-      canvas.scale(size.width / textureDown.size.width, size.height / textureDown.size.height);
-      textureDown.drawTexture(canvas, Point.origin, new Paint());
+      canvas.scale(size.width / config.textureDown.size.width, size.height / config.textureDown.size.height);
+      config.textureDown.drawTexture(canvas, Point.origin, new Paint());
     } else {
       // Draw up state
-      canvas.scale(size.width / texture.size.width, size.height / texture.size.height);
-      texture.drawTexture(canvas, Point.origin, new Paint());
+      canvas.scale(size.width / config.texture.size.width, size.height / config.texture.size.height);
+      config.texture.drawTexture(canvas, Point.origin, new Paint());
     }
     canvas.restore();
   }
