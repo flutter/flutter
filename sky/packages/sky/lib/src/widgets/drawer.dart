@@ -123,8 +123,8 @@ class DrawerState extends State<Drawer> {
 
   void _handleDismissed() {
     if (config.navigator != null &&
-        config.navigator.currentRoute is RouteState &&
-        (config.navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
+        config.navigator.currentRoute is StateRoute &&
+        (config.navigator.currentRoute as StateRoute).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
       config.navigator.pop();
     if (config.onDismissed != null)
       config.onDismissed();
