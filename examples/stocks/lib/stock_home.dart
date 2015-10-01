@@ -41,8 +41,8 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleSearchEnd() {
-    assert(config.navigator.currentRoute is RouteState);
-    assert((config.navigator.currentRoute as RouteState).owner == this); // TODO(ianh): remove cast once analyzer is cleverer
+    assert(config.navigator.currentRoute is StateRoute);
+    assert((config.navigator.currentRoute as StateRoute).owner == this); // TODO(ianh): remove cast once analyzer is cleverer
     config.navigator.pop();
     setState(() {
       _isSearching = false;
