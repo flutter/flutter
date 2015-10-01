@@ -33,7 +33,7 @@ class Stopwatch {
   explicit Stopwatch();
   ~Stopwatch();
 
-  const base::TimeDelta& lastLap() const { return _laps[_current_sample]; }
+  const base::TimeDelta& lastLap() const;
 
   base::TimeDelta currentLap() const { return base::TimeTicks::Now() - _start; }
 

@@ -33,6 +33,10 @@ void Stopwatch::setLapTime(const base::TimeDelta& delta) {
   _laps[_current_sample] = delta;
 }
 
+const base::TimeDelta& Stopwatch::lastLap() const {
+  return _laps[(_current_sample - 1) % kMaxSamples];
+}
+
 static inline constexpr double UnitFrameInterval(double frameTimeMS) {
   return frameTimeMS * 60.0 * 1e-3;
 }
@@ -69,7 +73,7 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
   canvas.drawPath(path, paint);
 
   // Paint the marker
-  if (UnitFrameInterval(_laps[_current_sample].InMillisecondsF()) > 1.0) {
+  if (UnitFrameInterval(lastLap().InMillisecondsF()) > 1.0) {
     // budget exceeded
     paint.setColor(SK_ColorRED);
   } else {
