@@ -11,6 +11,7 @@
 #include "sky/engine/core/loader/ImageDecoderCallback.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/tonic/dart_wrappable.h"
+#include "sky/engine/tonic/uint8_list.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
@@ -21,15 +22,18 @@ class CanvasImageDecoder : public mojo::common::DataPipeDrainer::Client,
                            public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
-  static PassRefPtr<CanvasImageDecoder> create(mojo::ScopedDataPipeConsumerHandle handle, PassOwnPtr<ImageDecoderCallback> callback);
+  static PassRefPtr<CanvasImageDecoder> create(PassOwnPtr<ImageDecoderCallback> callback);
   virtual ~CanvasImageDecoder();
 
   // mojo::common::DataPipeDrainer::Client
   void OnDataAvailable(const void*, size_t) override;
   void OnDataComplete() override;
 
+  void initWithConsumer(mojo::ScopedDataPipeConsumerHandle handle);
+  void initWithList(const Uint8List& list);
+
  private:
-  CanvasImageDecoder(mojo::ScopedDataPipeConsumerHandle handle, PassOwnPtr<ImageDecoderCallback> callback);
+  CanvasImageDecoder(PassOwnPtr<ImageDecoderCallback> callback);
 
   void RejectCallback();
 

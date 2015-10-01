@@ -118,6 +118,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     # dart_value_to_cpp_value using CPP_SPECIAL_CONVERSION_RULES directly
     # instead of calling cpp_type.
     'Float32List': 'Float32List',
+    'Uint8List': 'Uint8List',
     'Offset': 'Offset',
     'Paint': 'Paint',
     'Point': 'Point',
@@ -379,6 +380,7 @@ DART_TO_CPP_VALUE = {
     # Pass-by-value types.
     'Color': pass_by_value_format('CanvasColor'),
     'Float32List': pass_by_value_format('Float32List'),
+    'Uint8List': pass_by_value_format('Uint8List'),
     'Offset': pass_by_value_format('Offset'),
     'Paint': pass_by_value_format('Paint'),
     'Point': pass_by_value_format('Point'),
@@ -664,6 +666,7 @@ DART_SET_RETURN_VALUE = {
     'TypedList': 'Dart_SetReturnValue(args, DartUtilities::arrayBufferViewToDart({cpp_value}))',
     'Color': 'DartConverter<CanvasColor>::SetReturnValue(args, {cpp_value})',
     'Float32List': 'DartConverter<Float32List>::SetReturnValue(args, {cpp_value})',
+    'Uint8List': 'DartConverter<Uint8List>::SetReturnValue(args, {cpp_value})',
 }
 
 

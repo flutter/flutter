@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 [
-  Constructor(MojoDataPipeConsumer consumer, ImageDecoderCallback callback),
+  Constructor(ImageDecoderCallback callback),
   ImplementedAs=CanvasImageDecoder,
 ] interface ImageDecoder {
+  void initWithConsumer(MojoDataPipeConsumer consumer);
+  void initWithList(Uint8List list);
 };
