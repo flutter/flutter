@@ -11,7 +11,7 @@ import 'package:sky/services.dart';
 double timeBase = null;
 
 sky.Image image = null;
-String url1 = "https://www.dartlang.org/logos/dart-logo.png";
+String url1 = "https://raw.githubusercontent.com/dart-lang/logos/master/logos_and_wordmarks/dart-logo.png";
 String url2 = "http://i2.kym-cdn.com/photos/images/facebook/000/581/296/c09.jpg";
 
 sky.Picture paint(sky.Rect paintBounds, double delta) {
