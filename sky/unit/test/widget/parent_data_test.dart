@@ -58,230 +58,230 @@ void main() {
   });
 
   test('ParentDataWidget control test', () {
-    WidgetTester tester = new WidgetTester();
+    testWidgets((WidgetTester tester) {
 
-    tester.pumpFrame(
-      new Stack([
-        new DecoratedBox(decoration: kBoxDecorationA),
-        new Positioned(
-          top: 10.0,
-          left: 10.0,
-          child: new DecoratedBox(decoration: kBoxDecorationB)
-        ),
-        new DecoratedBox(decoration: kBoxDecorationC),
-      ])
-    );
+      tester.pumpWidget(
+        new Stack([
+          new DecoratedBox(decoration: kBoxDecorationA),
+          new Positioned(
+            top: 10.0,
+            left: 10.0,
+            child: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ])
+      );
 
-    checkTree(tester, [
-      kNonPositioned,
-      new TestParentData(top: 10.0, left: 10.0),
-      kNonPositioned,
-    ]);
+      checkTree(tester, [
+        kNonPositioned,
+        new TestParentData(top: 10.0, left: 10.0),
+        kNonPositioned,
+      ]);
 
-    tester.pumpFrame(
-      new Stack([
-        new Positioned(
-          bottom: 5.0,
-          right: 7.0,
-          child: new DecoratedBox(decoration: kBoxDecorationA)
-        ),
-        new Positioned(
-          top: 10.0,
-          left: 10.0,
-          child: new DecoratedBox(decoration: kBoxDecorationB)
-        ),
-        new DecoratedBox(decoration: kBoxDecorationC),
-      ])
-    );
+      tester.pumpWidget(
+        new Stack([
+          new Positioned(
+            bottom: 5.0,
+            right: 7.0,
+            child: new DecoratedBox(decoration: kBoxDecorationA)
+          ),
+          new Positioned(
+            top: 10.0,
+            left: 10.0,
+            child: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ])
+      );
 
-    checkTree(tester, [
-      new TestParentData(bottom: 5.0, right: 7.0),
-      new TestParentData(top: 10.0, left: 10.0),
-      kNonPositioned,
-    ]);
+      checkTree(tester, [
+        new TestParentData(bottom: 5.0, right: 7.0),
+        new TestParentData(top: 10.0, left: 10.0),
+        kNonPositioned,
+      ]);
 
-    DecoratedBox kDecoratedBoxA = new DecoratedBox(decoration: kBoxDecorationA);
-    DecoratedBox kDecoratedBoxB = new DecoratedBox(decoration: kBoxDecorationB);
-    DecoratedBox kDecoratedBoxC = new DecoratedBox(decoration: kBoxDecorationC);
+      DecoratedBox kDecoratedBoxA = new DecoratedBox(decoration: kBoxDecorationA);
+      DecoratedBox kDecoratedBoxB = new DecoratedBox(decoration: kBoxDecorationB);
+      DecoratedBox kDecoratedBoxC = new DecoratedBox(decoration: kBoxDecorationC);
 
-    tester.pumpFrame(
-      new Stack([
-        new Positioned(
-          bottom: 5.0,
-          right: 7.0,
-          child: kDecoratedBoxA
-        ),
-        new Positioned(
-          top: 10.0,
-          left: 10.0,
-          child: kDecoratedBoxB
-        ),
-        kDecoratedBoxC,
-      ])
-    );
+      tester.pumpWidget(
+        new Stack([
+          new Positioned(
+            bottom: 5.0,
+            right: 7.0,
+            child: kDecoratedBoxA
+          ),
+          new Positioned(
+            top: 10.0,
+            left: 10.0,
+            child: kDecoratedBoxB
+          ),
+          kDecoratedBoxC,
+        ])
+      );
 
-    checkTree(tester, [
-      new TestParentData(bottom: 5.0, right: 7.0),
-      new TestParentData(top: 10.0, left: 10.0),
-      kNonPositioned,
-    ]);
+      checkTree(tester, [
+        new TestParentData(bottom: 5.0, right: 7.0),
+        new TestParentData(top: 10.0, left: 10.0),
+        kNonPositioned,
+      ]);
 
-    tester.pumpFrame(
-      new Stack([
-        new Positioned(
-          bottom: 6.0,
-          right: 8.0,
-          child: kDecoratedBoxA
-        ),
-        new Positioned(
-          left: 10.0,
-          right: 10.0,
-          child: kDecoratedBoxB
-        ),
-        kDecoratedBoxC,
-      ])
-    );
+      tester.pumpWidget(
+        new Stack([
+          new Positioned(
+            bottom: 6.0,
+            right: 8.0,
+            child: kDecoratedBoxA
+          ),
+          new Positioned(
+            left: 10.0,
+            right: 10.0,
+            child: kDecoratedBoxB
+          ),
+          kDecoratedBoxC,
+        ])
+      );
 
-    checkTree(tester, [
-      new TestParentData(bottom: 6.0, right: 8.0),
-      new TestParentData(left: 10.0, right: 10.0),
-      kNonPositioned,
-    ]);
+      checkTree(tester, [
+        new TestParentData(bottom: 6.0, right: 8.0),
+        new TestParentData(left: 10.0, right: 10.0),
+        kNonPositioned,
+      ]);
 
-    tester.pumpFrame(
-      new Stack([
-        kDecoratedBoxA,
-        new Positioned(
-          left: 11.0,
-          right: 12.0,
-          child: new Container(child: kDecoratedBoxB)
-        ),
-        kDecoratedBoxC,
-      ])
-    );
+      tester.pumpWidget(
+        new Stack([
+          kDecoratedBoxA,
+          new Positioned(
+            left: 11.0,
+            right: 12.0,
+            child: new Container(child: kDecoratedBoxB)
+          ),
+          kDecoratedBoxC,
+        ])
+      );
 
-    checkTree(tester, [
-      kNonPositioned,
-      new TestParentData(left: 11.0, right: 12.0),
-      kNonPositioned,
-    ]);
+      checkTree(tester, [
+        kNonPositioned,
+        new TestParentData(left: 11.0, right: 12.0),
+        kNonPositioned,
+      ]);
 
-    tester.pumpFrame(
-      new Stack([
-        kDecoratedBoxA,
-        new Positioned(
-          right: 10.0,
-          child: new Container(child: kDecoratedBoxB)
-        ),
-        new Container(
-          child: new Positioned(
-            top: 8.0,
-            child: kDecoratedBoxC
+      tester.pumpWidget(
+        new Stack([
+          kDecoratedBoxA,
+          new Positioned(
+            right: 10.0,
+            child: new Container(child: kDecoratedBoxB)
+          ),
+          new Container(
+            child: new Positioned(
+              top: 8.0,
+              child: kDecoratedBoxC
+            )
           )
-        )
-      ])
-    );
+        ])
+      );
 
-    checkTree(tester, [
-      kNonPositioned,
-      new TestParentData(right: 10.0),
-      new TestParentData(top: 8.0),
-    ]);
+      checkTree(tester, [
+        kNonPositioned,
+        new TestParentData(right: 10.0),
+        new TestParentData(top: 8.0),
+      ]);
 
-    tester.pumpFrame(
-      new Stack([
-        new Positioned(
-          right: 10.0,
-          child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
-        ),
-      ])
-    );
+      tester.pumpWidget(
+        new Stack([
+          new Positioned(
+            right: 10.0,
+            child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
+          ),
+        ])
+      );
 
-    checkTree(tester, [
-      new TestParentData(right: 10.0),
-    ]);
+      checkTree(tester, [
+        new TestParentData(right: 10.0),
+      ]);
 
-    flipStatefulComponent(tester);
-    tester.pumpFrameWithoutChange();
+      flipStatefulComponent(tester);
+      tester.pump();
 
-    checkTree(tester, [
-      new TestParentData(right: 10.0),
-    ]);
+      checkTree(tester, [
+        new TestParentData(right: 10.0),
+      ]);
 
-    tester.pumpFrame(
-      new Stack([
-        new Positioned(
-          top: 7.0,
-          child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
-        ),
-      ])
-    );
+      tester.pumpWidget(
+        new Stack([
+          new Positioned(
+            top: 7.0,
+            child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
+          ),
+        ])
+      );
 
-    checkTree(tester, [
-      new TestParentData(top: 7.0),
-    ]);
+      checkTree(tester, [
+        new TestParentData(top: 7.0),
+      ]);
 
-    flipStatefulComponent(tester);
-    tester.pumpFrameWithoutChange();
+      flipStatefulComponent(tester);
+      tester.pump();
 
-    checkTree(tester, [
-      new TestParentData(top: 7.0),
-    ]);
+      checkTree(tester, [
+        new TestParentData(top: 7.0),
+      ]);
 
-    tester.pumpFrame(
-      new Stack([])
-    );
+      tester.pumpWidget(
+        new Stack([])
+      );
 
-    checkTree(tester, []);
+      checkTree(tester, []);
+    });
   });
 
   test('ParentDataWidget conflicting data', () {
-    WidgetTester tester = new WidgetTester();
+    testWidgets((WidgetTester tester) {
+      expect(cachedException, isNull);
 
-    expect(cachedException, isNull);
-
-    tester.pumpFrame(
-      new Stack([
-        new Positioned(
-          top: 5.0,
-          bottom: 8.0,
-          child: new Positioned(
-            top: 6.0,
-            left: 7.0,
-            child: new DecoratedBox(decoration: kBoxDecorationB)
-          )
-        )
-      ])
-    );
-
-    expect(cachedException, isNotNull);
-    cachedException = null;
-
-    tester.pumpFrame(new Stack([]));
-
-    checkTree(tester, []);
-    expect(cachedException, isNull);
-
-    tester.pumpFrame(
-      new Container(
-        child: new Flex([
+      tester.pumpWidget(
+        new Stack([
           new Positioned(
-            top: 6.0,
-            left: 7.0,
-            child: new DecoratedBox(decoration: kBoxDecorationB)
+            top: 5.0,
+            bottom: 8.0,
+            child: new Positioned(
+              top: 6.0,
+              left: 7.0,
+              child: new DecoratedBox(decoration: kBoxDecorationB)
+            )
           )
         ])
-      )
-    );
+      );
 
-    expect(cachedException, isNotNull);
-    cachedException = null;
+      expect(cachedException, isNotNull);
+      cachedException = null;
 
-    tester.pumpFrame(
-      new Stack([])
-    );
+      tester.pumpWidget(new Stack([]));
 
-    checkTree(tester, []);
+      checkTree(tester, []);
+      expect(cachedException, isNull);
+
+      tester.pumpWidget(
+        new Container(
+          child: new Flex([
+            new Positioned(
+              top: 6.0,
+              left: 7.0,
+              child: new DecoratedBox(decoration: kBoxDecorationB)
+            )
+          ])
+        )
+      );
+
+      expect(cachedException, isNotNull);
+      cachedException = null;
+
+      tester.pumpWidget(
+        new Stack([])
+      );
+
+      checkTree(tester, []);
+    });
   });
-
 }

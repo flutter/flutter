@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:quiver/testing/async.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
@@ -59,91 +58,60 @@ Future fling(double velocity) {
 }
 
 void main() {
-  WidgetTester tester = new WidgetTester();
-  tester.pumpFrame(buildFrame());
-
   test('ScrollableList snap scrolling, fling(-800)', () {
-    scrollOffset = 0.0;
-    tester.pumpFrameWithoutChange();
-    expect(scrollOffset, 0.0);
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(buildFrame());
 
-    double t0 = 0.0;
-    int dt = 2000;
-    new FakeAsync().run((async) {
+      scrollOffset = 0.0;
+      tester.pump();
+      expect(scrollOffset, 0.0);
+
+      Duration dt = const Duration(seconds: 2);
+
       fling(-800.0);
-      tester.pumpFrameWithoutChange(t0); // Start the scheduler at 0.0
-      tester.pumpFrameWithoutChange(t0 + dt);
-      async.elapse(new Duration(milliseconds: dt));
+      tester.pump(); // Start the scheduler at 0.0
+      tester.pump(dt);
       expect(scrollOffset, closeTo(200.0, 1.0));
-    });
-  });
 
-  test('ScrollableList snap scrolling, fling(-2000)', () {
-    scrollOffset = 0.0;
-    tester.pumpFrameWithoutChange();
-    expect(scrollOffset, 0.0);
+      scrollOffset = 0.0;
+      tester.pump();
+      expect(scrollOffset, 0.0);
 
-    double t0 = 0.0;
-    int dt = 2000;
-    new FakeAsync().run((async) {
       fling(-2000.0);
-      tester.pumpFrameWithoutChange(t0);
-      tester.pumpFrameWithoutChange(t0 + dt);
-      async.elapse(new Duration(milliseconds: dt));
+      tester.pump();
+      tester.pump(dt);
       expect(scrollOffset, closeTo(400.0, 1.0));
-    });
-  });
 
-  test('ScrollableList snap scrolling, fling(800)', () {
-    scrollOffset = 400.0;
-    tester.pumpFrameWithoutChange();
-    expect(scrollOffset, 400.0);
+      scrollOffset = 400.0;
+      tester.pump();
+      expect(scrollOffset, 400.0);
 
-    double t0 = 0.0;
-    int dt = 2000;
-    new FakeAsync().run((async) {
       fling(800.0);
-      tester.pumpFrameWithoutChange(t0);
-      tester.pumpFrameWithoutChange(t0 + dt);
-      async.elapse(new Duration(milliseconds: dt));
+      tester.pump();
+      tester.pump(dt);
       expect(scrollOffset, closeTo(0.0, 1.0));
-    });
-  });
 
-  test('ScrollableList snap scrolling, fling(2000)', () {
-    scrollOffset = 800.0;
-    tester.pumpFrameWithoutChange();
-    expect(scrollOffset, 800.0);
+      scrollOffset = 800.0;
+      tester.pump();
+      expect(scrollOffset, 800.0);
 
-    double t0 = 0.0;
-    int dt = 2000;
-    new FakeAsync().run((async) {
       fling(2000.0);
-      tester.pumpFrameWithoutChange(t0);
-      tester.pumpFrameWithoutChange(t0 + dt);
-      async.elapse(new Duration(milliseconds: dt));
+      tester.pump();
+      tester.pump(dt);
       expect(scrollOffset, closeTo(200.0, 1.0));
-    });
-  });
 
-  test('ScrollableList snap scrolling, fling(2000).then()', () {
-    scrollOffset = 800.0;
-    tester.pumpFrameWithoutChange();
-    expect(scrollOffset, 800.0);
+      scrollOffset = 800.0;
+      tester.pump();
+      expect(scrollOffset, 800.0);
 
-    double t0 = 0.0;
-    int dt = 2000;
-    bool completed = false;
-    new FakeAsync().run((async) {
+      bool completed = false;
       fling(2000.0).then((_) {
         completed = true;
         expect(scrollOffset, closeTo(200.0, 1.0));
       });
-      tester.pumpFrameWithoutChange(t0);
-      tester.pumpFrameWithoutChange(t0 + dt);
-      async.elapse(new Duration(milliseconds: dt));
+      tester.pump();
+      tester.pump(dt);
       expect(completed, true);
     });
   });
-
 }

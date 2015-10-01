@@ -5,9 +5,8 @@ import 'widget_tester.dart';
 
 void main() {
   test('Can be placed in an infinte box', () {
-    WidgetTester tester = new WidgetTester();
-
-    tester.pumpFrame(new Block([new Center()]));
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Block([new Center()]));
+    });
   });
-
 }

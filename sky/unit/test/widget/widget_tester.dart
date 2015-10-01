@@ -3,6 +3,8 @@ import 'dart:sky' as sky;
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
+import 'package:quiver/testing/async.dart';
+import 'package:quiver/time.dart';
 
 import '../engine/mock_events.dart';
 
@@ -24,21 +26,24 @@ class RootComponentState extends State<RootComponent> {
 }
 
 class WidgetTester {
+  WidgetTester._(FakeAsync async)
+    : async = async,
+      clock = async.getClock(new DateTime.utc(2015, 1, 1)) {
+  }
 
-  // See thttps://github.com/flutter/engine/issues/1084 regarding frameTimeMs vs FakeAsync
+  final FakeAsync async;
+  final Clock clock;
 
-  void pumpFrame(Widget widget, [ double frameTimeMs = 0.0 ]) {
+  void pumpWidget(Widget widget, [ Duration duration ]) {
     runApp(widget);
-    scheduler.beginFrame(frameTimeMs);
+    pump(duration);
   }
 
-  void pumpFrameWithoutChange([ double frameTimeMs = 0.0 ]) {
-    scheduler.beginFrame(frameTimeMs);
-  }
-
-  void reset() {
-    runApp(new Container());
-    scheduler.beginFrame(0.0);
+  void pump([ Duration duration ]) {
+    if (duration != null)
+      async.elapse(duration);
+    scheduler.beginFrame(clock.now().millisecondsSinceEpoch.toDouble());
+    async.flushMicrotasks();
   }
 
   List<Layer> _layers(Layer layer) {
@@ -161,4 +166,10 @@ class WidgetTester {
     WidgetFlutterBinding.instance.dispatchEvent(event, result);
   }
 
+}
+
+void testWidgets(callback(WidgetTester tester)) {
+  new FakeAsync().run((FakeAsync async) {
+    callback(new WidgetTester._(async));
+  });
 }
