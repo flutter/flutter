@@ -16,7 +16,7 @@ import 'package:sky/src/fn3/scrollable.dart';
 import 'package:sky/src/fn3/theme.dart';
 import 'package:sky/src/fn3/transitions.dart';
 
-typedef Dialog DialogBuilder(NavigatorState navigator);
+typedef Widget DialogBuilder(NavigatorState navigator);
 
 /// A material design dialog
 ///

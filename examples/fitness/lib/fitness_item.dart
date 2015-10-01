@@ -26,7 +26,7 @@ abstract class FitnessItem {
   FitnessItemRow toRow({ FitnessItemHandler onDismissed });
 }
 
-abstract class FitnessItemRow extends Component {
+abstract class FitnessItemRow extends StatelessComponent {
 
   FitnessItemRow({ FitnessItem item, this.onDismissed })
    : this.item = item,
@@ -37,9 +37,9 @@ abstract class FitnessItemRow extends Component {
   final FitnessItem item;
   final FitnessItemHandler onDismissed;
 
-  Widget buildContent();
+  Widget buildContent(BuildContext context);
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Dismissable(
       onDismissed: () => onDismissed(item),
       child: new Container(
@@ -51,10 +51,10 @@ abstract class FitnessItemRow extends Component {
         // stay put even when the tile is dismissed!
         decoration: new BoxDecoration(
           border: new Border(
-            bottom: new BorderSide(color: Theme.of(this).dividerColor)
+            bottom: new BorderSide(color: Theme.of(context).dividerColor)
           )
         ),
-        child: buildContent()
+        child: buildContent(context)
       )
     );
   }

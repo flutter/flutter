@@ -4,7 +4,7 @@
 
 part of fitness;
 
-class FitnessItemList extends Component {
+class FitnessItemList extends StatelessComponent {
   FitnessItemList({ Key key, this.items, this.onDismissed }) : super(key: key) {
     assert(items != null);
     assert(onDismissed != null);
@@ -13,32 +13,26 @@ class FitnessItemList extends Component {
   final List<FitnessItem> items;
   final FitnessItemHandler onDismissed;
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Material(
       type: MaterialType.canvas,
       child: new ScrollableList<FitnessItem>(
         padding: const EdgeDims.all(4.0),
         items: items,
         itemExtent: kFitnessItemHeight,
-        itemBuilder: (item) => item.toRow(onDismissed: onDismissed)
+        itemBuilder: (_, item) => item.toRow(onDismissed: onDismissed)
       )
     );
   }
 }
 
-class DialogMenuItem extends ButtonBase {
+class DialogMenuItem extends StatelessComponent {
   DialogMenuItem(this.children, { Key key, this.onPressed }) : super(key: key);
 
   List<Widget> children;
   Function onPressed;
 
-  void syncConstructorArguments(DialogMenuItem source) {
-    children = source.children;
-    onPressed = source.onPressed;
-    super.syncConstructorArguments(source);
-  }
-
-  Widget buildContent() {
+  Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: onPressed,
       child: new Container(
@@ -57,25 +51,16 @@ class DialogMenuItem extends ButtonBase {
 class FeedFragment extends StatefulComponent {
   FeedFragment({ this.navigator, this.userData, this.onItemCreated, this.onItemDeleted });
 
-  Navigator navigator;
-  UserData userData;
-  FitnessItemHandler onItemCreated;
-  FitnessItemHandler onItemDeleted;
+  final NavigatorState navigator;
+  final UserData userData;
+  final FitnessItemHandler onItemCreated;
+  final FitnessItemHandler onItemDeleted;
 
+  FeedFragmentState createState() => new FeedFragmentState();
+}
+
+class FeedFragmentState extends State<FeedFragment> {
   FitnessMode _fitnessMode = FitnessMode.feed;
-
-  void initState() {
-    // if (debug)
-    //   new Timer(new Duration(seconds: 1), dumpState);
-    super.initState();
-  }
-
-  void syncConstructorArguments(FeedFragment source) {
-    navigator = source.navigator;
-    userData = source.userData;
-    onItemCreated = source.onItemCreated;
-    onItemDeleted = source.onItemDeleted;
-  }
 
   AnimationStatus _snackBarStatus = AnimationStatus.dismissed;
   bool _isShowingSnackBar = false;
@@ -94,7 +79,7 @@ class FeedFragment extends StatefulComponent {
       showing: _drawerShowing,
       level: 3,
       onDismissed: _handleDrawerDismissed,
-      navigator: navigator,
+      navigator: config.navigator,
       children: [
         new DrawerHeader(child: new Text('Fitness')),
         new DrawerItem(
@@ -136,8 +121,8 @@ class FeedFragment extends StatefulComponent {
   }
 
   void _handleShowSettings() {
-    navigator.pop();
-    navigator.pushNamed('/settings');
+    config.navigator.pop();
+    config.navigator.pushNamed('/settings');
   }
 
   // TODO(jackson): We should be localizing
@@ -160,7 +145,7 @@ class FeedFragment extends StatefulComponent {
   FitnessItem _undoItem;
 
   void _handleItemDismissed(FitnessItem item) {
-    onItemDeleted(item);
+    config.onItemDeleted(item);
     setState(() {
       _undoItem = item;
       _isShowingSnackBar = true;
@@ -174,7 +159,7 @@ class FeedFragment extends StatefulComponent {
     double startY;
     double endY;
     List<Point> dataSet = new List<Point>();
-    for (FitnessItem item in userData.items) {
+    for (FitnessItem item in config.userData.items) {
       if (item is Measurement) {
           double x = item.when.millisecondsSinceEpoch.toDouble();
           double y = item.weight;
@@ -189,9 +174,9 @@ class FeedFragment extends StatefulComponent {
           dataSet.add(new Point(x, y));
       }
     }
-    if (userData.goalWeight != null && userData.goalWeight > 0.0) {
-      startY = math.min(startY, userData.goalWeight);
-      endY = math.max(endY, userData.goalWeight);
+    if (config.userData.goalWeight != null && config.userData.goalWeight > 0.0) {
+      startY = math.min(startY, config.userData.goalWeight);
+      endY = math.max(endY, config.userData.goalWeight);
     }
     playfair.ChartData data = new playfair.ChartData(
       startX: startX,
@@ -201,17 +186,17 @@ class FeedFragment extends StatefulComponent {
       dataSet: dataSet,
       numHorizontalGridlines: 5,
       roundToPlaces: 1,
-      indicatorLine: userData.goalWeight,
+      indicatorLine: config.userData.goalWeight,
       indicatorText: "GOAL WEIGHT"
     );
     return new playfair.Chart(data: data);
   }
 
   Widget buildBody() {
-    TextStyle style = Theme.of(this).text.title;
-    if (userData == null)
+    TextStyle style = Theme.of(context).text.title;
+    if (config.userData == null)
       return new Material(type: MaterialType.canvas);
-    if (userData.items.length == 0)
+    if (config.userData.items.length == 0)
       return new Material(
         type: MaterialType.canvas,
         child: new Row(
@@ -222,7 +207,7 @@ class FeedFragment extends StatefulComponent {
     switch (_fitnessMode) {
       case FitnessMode.feed:
         return new FitnessItemList(
-          items: userData.items.reversed.toList(),
+          items: config.userData.items.reversed.toList(),
           onDismissed: _handleItemDismissed
         );
       case FitnessMode.chart:
@@ -237,7 +222,7 @@ class FeedFragment extends StatefulComponent {
   }
 
   void _handleUndo() {
-    onItemCreated(_undoItem);
+    config.onItemCreated(_undoItem);
     setState(() {
       _undoItem = null;
       _isShowingSnackBar = false;
@@ -256,9 +241,9 @@ class FeedFragment extends StatefulComponent {
   }
 
   void _handleActionButtonPressed() {
-    showDialog(navigator, (navigator) => new AddItemDialog(navigator)).then((routeName) {
+    showDialog(config.navigator, (NavigatorState navigator) => new AddItemDialog(navigator)).then((routeName) {
       if (routeName != null)
-        navigator.pushNamed(routeName);
+        config.navigator.pushNamed(routeName);
     });
   }
 
@@ -274,7 +259,7 @@ class FeedFragment extends StatefulComponent {
     }
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Scaffold(
       toolbar: buildToolBar(),
       body: buildBody(),
@@ -288,12 +273,12 @@ class FeedFragment extends StatefulComponent {
 class AddItemDialog extends StatefulComponent {
   AddItemDialog(this.navigator);
 
-  Navigator navigator;
+  final NavigatorState navigator;
 
-  void syncConstructorArguments(AddItemDialog source) {
-    this.navigator = source.navigator;
-  }
+  AddItemDialogState createState() => new AddItemDialogState();
+}
 
+class AddItemDialogState extends State<AddItemDialog> {
   // TODO(jackson): Internationalize
   static final Map<String, String> _labels = {
     '/measurements/new': 'Measure',
@@ -308,7 +293,7 @@ class AddItemDialog extends StatefulComponent {
     });
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     List<Widget> menuItems = [];
     for(String routeName in _labels.keys) {
       menuItems.add(new DialogMenuItem([
@@ -319,16 +304,16 @@ class AddItemDialog extends StatefulComponent {
     return new Dialog(
       title: new Text("What are you doing?"),
       content: new Block(menuItems),
-      onDismiss: navigator.pop,
+      onDismiss: config.navigator.pop,
       actions: [
         new FlatButton(
           child: new Text('CANCEL'),
-          onPressed: navigator.pop
+          onPressed: config.navigator.pop
         ),
         new FlatButton(
           child: new Text('ADD'),
           onPressed: () {
-            navigator.pop(_addItemRoute);
+            config.navigator.pop(_addItemRoute);
           }
         ),
       ]
