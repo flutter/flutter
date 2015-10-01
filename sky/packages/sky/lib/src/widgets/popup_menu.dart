@@ -169,10 +169,10 @@ class MenuRoute extends Route {
 
   bool get ephemeral => false; // we could make this true, but then we'd have to use popRoute(), not pop(), in menus
   bool get modal => true;
-
-  Duration get transitionDuration => _kMenuDuration;
   bool get opaque => false;
-  Widget build(Key key, NavigatorState navigator) {
+  Duration get transitionDuration => _kMenuDuration;
+
+  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
     return new Positioned(
       top: position?.top,
       right: position?.right,
@@ -182,7 +182,6 @@ class MenuRoute extends Route {
         key: new GlobalObjectKey(this),
         autofocus: true,
         child: new PopupMenu(
-          key: key,
           items: builder != null ? builder(navigator) : const <PopupMenuItem>[],
           level: level,
           navigator: navigator,

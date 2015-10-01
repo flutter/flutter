@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:sky' as sky;
 
+import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/binding.dart';
@@ -199,10 +200,10 @@ class DragRoute extends Route {
 
   bool get ephemeral => true;
   bool get modal => false;
-
-  Duration get transitionDuration => const Duration();
   bool get opaque => false;
-  Widget build(Key key, NavigatorState navigator) {
+  Duration get transitionDuration => const Duration();
+
+  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
     return new Positioned(
       left: _lastOffset.dx,
       top: _lastOffset.dy,
