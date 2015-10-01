@@ -6,5 +6,5 @@
     PrivateDart,
     Constructor()
 ] interface ImageShader : Shader {
-  [RaisesException] void initWithImage(Image image, TileMode tmx, TileMode tmy, Float32List matrix4);
+  [RaisesException] void initWithImage(Image image, TileMode tmx, TileMode tmy, Float64List matrix4);
 };

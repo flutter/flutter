@@ -19,7 +19,7 @@
 #include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/Size.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/tonic/float32_list.h"
+#include "sky/engine/tonic/float64_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 
@@ -34,7 +34,7 @@ public:
 
     ~SceneBuilder() override;
 
-    void pushTransform(const Float32List& matrix4, ExceptionState&);
+    void pushTransform(const Float64List& matrix4, ExceptionState&);
     void pushClipRect(const Rect& rect);
     void pushClipRRect(const RRect* rrect, const Rect& bounds);
     void pushClipPath(const CanvasPath* path, const Rect& bounds);

@@ -20,7 +20,7 @@
 #include "sky/engine/core/painting/VertexMode.h"
 #include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/tonic/float32_list.h"
+#include "sky/engine/tonic/float64_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -69,10 +69,10 @@ public:
     void scale(float sx, float sy);
     void rotate(float radians);
     void skew(float sx, float sy);
-    void concat(const Float32List& matrix4, ExceptionState&);
+    void concat(const Float64List& matrix4, ExceptionState&);
 
-    void setMatrix(const Float32List& matrix4, ExceptionState&);
-    Float32List getTotalMatrix() const;
+    void setMatrix(const Float64List& matrix4, ExceptionState&);
+    Float64List getTotalMatrix() const;
 
     void clipRect(const Rect& rect);
     void clipRRect(const RRect* rrect);

@@ -13,7 +13,7 @@ static const int kSkMatrixIndexToMatrix4Index[] = {
     3, 7, 15,
 };
 
-SkMatrix toSkMatrix(const Float32List& matrix4, ExceptionState& es)
+SkMatrix toSkMatrix(const Float64List& matrix4, ExceptionState& es)
 {
     ASSERT(matrix4.data());
     SkMatrix sk_matrix;
@@ -27,9 +27,9 @@ SkMatrix toSkMatrix(const Float32List& matrix4, ExceptionState& es)
     return sk_matrix;
 }
 
-Float32List toMatrix4(const SkMatrix& sk_matrix)
+Float64List toMatrix4(const SkMatrix& sk_matrix)
 {
-    Float32List matrix4(Dart_NewTypedData(Dart_TypedData_kFloat32, 16));
+    Float64List matrix4(Dart_NewTypedData(Dart_TypedData_kFloat64, 16));
     for (intptr_t i = 0; i < 9; ++i)
         matrix4[kSkMatrixIndexToMatrix4Index[i]] = sk_matrix[i];
     matrix4[10] = 1.0; // Identity along the z axis.

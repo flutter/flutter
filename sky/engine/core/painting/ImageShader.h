@@ -11,7 +11,7 @@
 #include "sky/engine/core/painting/Shader.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/painting/Matrix.h"
-#include "sky/engine/tonic/float32_list.h"
+#include "sky/engine/tonic/float64_list.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 
@@ -26,7 +26,7 @@ class ImageShader : public Shader {
   void initWithImage(CanvasImage* image,
                      SkShader::TileMode tmx,
                      SkShader::TileMode tmy,
-                     const Float32List& matrix4,
+                     const Float64List& matrix4,
                      ExceptionState& es);
 
  private:

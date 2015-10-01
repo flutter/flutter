@@ -5,7 +5,7 @@
 [
   Constructor(Rect bounds),
 ] interface SceneBuilder {
-  [RaisesException] void pushTransform(Float32List matrix4);
+  [RaisesException] void pushTransform(Float64List matrix4);
   void pushClipRect(Rect rect);
   void pushClipRRect(RRect rrect, Rect bounds);
   void pushClipPath(Path path, Rect bounds);

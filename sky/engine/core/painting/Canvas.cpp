@@ -82,7 +82,7 @@ void Canvas::skew(float sx, float sy)
     m_canvas->skew(sx, sy);
 }
 
-void Canvas::concat(const Float32List& matrix4, ExceptionState& es)
+void Canvas::concat(const Float64List& matrix4, ExceptionState& es)
 {
     if (!m_canvas)
         return es.ThrowTypeError("No canvas");
@@ -93,7 +93,7 @@ void Canvas::concat(const Float32List& matrix4, ExceptionState& es)
     m_canvas->concat(sk_matrix);
 }
 
-void Canvas::setMatrix(const Float32List& matrix4, ExceptionState& es)
+void Canvas::setMatrix(const Float64List& matrix4, ExceptionState& es)
 {
     if (!m_canvas)
         return es.ThrowTypeError("No canvas");
@@ -104,7 +104,7 @@ void Canvas::setMatrix(const Float32List& matrix4, ExceptionState& es)
     m_canvas->setMatrix(sk_matrix);
 }
 
-Float32List Canvas::getTotalMatrix() const
+Float64List Canvas::getTotalMatrix() const
 {
     // Maybe we should throw an exception instead of returning an empty matrix?
     SkMatrix sk_matrix;
