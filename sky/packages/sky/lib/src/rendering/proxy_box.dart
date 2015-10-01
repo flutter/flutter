@@ -145,6 +145,98 @@ class RenderConstrainedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: ${additionalConstraints}\n';
 }
 
+/// A render object that, for both width and height, imposes a tight constraint
+/// on its child that is a multiple (typically less than 1.0) of the maximum
+/// constraint it received from its parent on that axis. If the factor for a
+/// given axis is null, then the constraints from the parent are just passed
+/// through instead.
+///
+/// It then tries to size itself the size of its child.
+class RenderFractionallySizedBox extends RenderProxyBox {
+  RenderFractionallySizedBox({
+    RenderBox child,
+    double widthFactor,
+    double heightFactor
+  }) : _widthFactor = widthFactor, _heightFactor = heightFactor, super(child) {
+    assert(_widthFactor == null || _widthFactor > 0.0);
+    assert(_heightFactor == null || _heightFactor > 0.0);
+  }
+
+  /// The multiple to apply to the incoming maximum width constraint to use as
+  /// the tight width constraint for the child, or null to pass through the
+  /// constraints given by the parent.
+  double get widthFactor => _widthFactor;
+  double _widthFactor;
+  void set widthFactor (double value) {
+    assert(value == null || value > 0.0);
+    if (_widthFactor == value)
+      return;
+    _widthFactor = value;
+    markNeedsLayout();
+  }
+
+  /// The multiple to apply to the incoming maximum height constraint to use as
+  /// the tight height constraint for the child, or null to pass through the
+  /// constraints given by the parent.
+  double get heightFactor => _heightFactor;
+  double _heightFactor;
+  void set heightFactor (double value) {
+    assert(value == null || value > 0.0);
+    if (_heightFactor == value)
+      return;
+    _heightFactor = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints _computeChildConstraints(BoxConstraints constraints) {
+    return new BoxConstraints(
+      minWidth: _widthFactor == null ? constraints.minWidth : constraints.maxWidth * _widthFactor,
+      maxWidth: _widthFactor == null ? constraints.maxWidth : constraints.maxWidth * _widthFactor,
+      minHeight: _heightFactor == null ? constraints.minHeight : constraints.maxHeight * _heightFactor,
+      maxHeight: _heightFactor == null ? constraints.maxHeight : constraints.maxHeight * _heightFactor
+    );
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMinIntrinsicWidth(_computeChildConstraints(constraints));
+    return _computeChildConstraints(constraints).constrainWidth(0.0);
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicWidth(_computeChildConstraints(constraints));
+    return _computeChildConstraints(constraints).constrainWidth(0.0);
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMinIntrinsicHeight(_computeChildConstraints(constraints));
+    return _computeChildConstraints(constraints).constrainHeight(0.0);
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicHeight(_computeChildConstraints(constraints));
+    return _computeChildConstraints(constraints).constrainHeight(0.0);
+  }
+
+  void performLayout() {
+    if (child != null) {
+      child.layout(_computeChildConstraints(constraints), parentUsesSize: true);
+      size = child.size;
+    } else {
+      size = _computeChildConstraints(constraints).constrain(Size.zero);
+    }
+  }
+
+  String debugDescribeSettings(String prefix) {
+    return '${super.debugDescribeSettings(prefix)}' +
+           '${prefix}widthFactor: ${_widthFactor ?? "pass-through"}\n' +
+           '${prefix}heightFactor: ${_heightFactor ?? "pass-through"}\n';
+  }
+}
+
 /// A render object that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
