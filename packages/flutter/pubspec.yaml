@@ -1,5 +1,5 @@
 name: sky
-version: 0.0.51
+version: 0.0.52
 author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A framework for writing Flutter applications
 homepage: http://flutter.io
@@ -9,8 +9,8 @@ dependencies:
   mojo_services: '>=0.1.0 <0.2.0'
   mojo: '>=0.1.0 <0.2.0'
   newton: ^0.1.4
-  sky_engine: ^0.0.29
-  sky_services: ^0.0.29
+  sky_engine: ^0.0.30
+  sky_services: ^0.0.30
   sky_tools: ^0.0.15
   vector_math: ^1.4.3
   intl: ^0.12.4+2
