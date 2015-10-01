@@ -129,7 +129,7 @@ private:
     int findFace(FakedFont face, LayoutContext* ctx);
 
     // Lay out a single bidi run
-    void doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+    void doLayoutRunCached(const uint16_t* buf, size_t runStart, size_t runLength, size_t bufSize,
         bool isRtl, LayoutContext* ctx, size_t dstStart);
 
     // Lay out a single word

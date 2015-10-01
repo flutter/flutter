@@ -437,6 +437,148 @@ static bool isScriptOkForLetterspacing(hb_script_t script) {
             );
 }
 
+class BidiText {
+public:
+    class Iter {
+    public:
+        struct RunInfo {
+            int32_t mRunStart;
+            int32_t mRunLength;
+            bool mIsRtl;
+        };
+
+        Iter(UBiDi* bidi, size_t start, size_t end, size_t runIndex, size_t runCount, bool isRtl);
+
+        bool operator!= (const Iter& other) const {
+            return mIsEnd != other.mIsEnd || mNextRunIndex != other.mNextRunIndex
+                    || mBidi != other.mBidi;
+        }
+
+        const RunInfo& operator* () const {
+            return mRunInfo;
+        }
+
+        const Iter& operator++ () {
+            updateRunInfo();
+            return *this;
+        }
+
+    private:
+        UBiDi* const mBidi;
+        bool mIsEnd;
+        size_t mNextRunIndex;
+        const size_t mRunCount;
+        const int32_t mStart;
+        const int32_t mEnd;
+        RunInfo mRunInfo;
+
+        void updateRunInfo();
+    };
+
+    BidiText(const uint16_t* buf, size_t start, size_t count, size_t bufSize, int bidiFlags);
+
+    ~BidiText() {
+        if (mBidi) {
+            ubidi_close(mBidi);
+        }
+    }
+
+    Iter begin () const {
+        return Iter(mBidi, mStart, mEnd, 0, mRunCount, mIsRtl);
+    }
+
+    Iter end() const {
+        return Iter(mBidi, mStart, mEnd, mRunCount, mRunCount, mIsRtl);
+    }
+
+private:
+    const size_t mStart;
+    const size_t mEnd;
+    const size_t mBufSize;
+    UBiDi* mBidi;
+    size_t mRunCount;
+    bool mIsRtl;
+
+    DISALLOW_COPY_AND_ASSIGN(BidiText);
+};
+
+BidiText::Iter::Iter(UBiDi* bidi, size_t start, size_t end, size_t runIndex, size_t runCount,
+        bool isRtl)
+    : mBidi(bidi), mIsEnd(runIndex == runCount), mNextRunIndex(runIndex), mRunCount(runCount),
+      mStart(start), mEnd(end), mRunInfo() {
+    if (mRunCount == 1) {
+        mRunInfo.mRunStart = start;
+        mRunInfo.mRunLength = end - start;
+        mRunInfo.mIsRtl = isRtl;
+        mNextRunIndex = mRunCount;
+        return;
+    }
+    updateRunInfo();
+}
+
+void BidiText::Iter::updateRunInfo() {
+    if (mNextRunIndex == mRunCount) {
+        // All runs have been iterated.
+        mIsEnd = true;
+        return;
+    }
+    int32_t startRun = -1;
+    int32_t lengthRun = -1;
+    const UBiDiDirection runDir = ubidi_getVisualRun(mBidi, mNextRunIndex, &startRun, &lengthRun);
+    mNextRunIndex++;
+    if (startRun == -1 || lengthRun == -1) {
+        ALOGE("invalid visual run");
+        // skip the invalid run.
+        updateRunInfo();
+        return;
+    }
+    const int32_t runEnd = std::min(startRun + lengthRun, mEnd);
+    mRunInfo.mRunStart = std::max(startRun, mStart);
+    mRunInfo.mRunLength = runEnd - mRunInfo.mRunStart;
+    if (mRunInfo.mRunLength <= 0) {
+        // skip the empty run.
+        updateRunInfo();
+        return;
+    }
+    mRunInfo.mIsRtl = (runDir == UBIDI_RTL);
+}
+
+BidiText::BidiText(const uint16_t* buf, size_t start, size_t count, size_t bufSize, int bidiFlags)
+    : mStart(start), mEnd(start + count), mBufSize(bufSize), mBidi(NULL), mRunCount(1),
+      mIsRtl((bidiFlags & kDirection_Mask) != 0) {
+    if (bidiFlags == kBidi_Force_LTR || bidiFlags == kBidi_Force_RTL) {
+        // force single run.
+        return;
+    }
+    mBidi = ubidi_open();
+    if (!mBidi) {
+        ALOGE("error creating bidi object");
+        return;
+    }
+    UErrorCode status = U_ZERO_ERROR;
+    UBiDiLevel bidiReq = bidiFlags;
+    if (bidiFlags == kBidi_Default_LTR) {
+        bidiReq = UBIDI_DEFAULT_LTR;
+    } else if (bidiFlags == kBidi_Default_RTL) {
+        bidiReq = UBIDI_DEFAULT_RTL;
+    }
+    ubidi_setPara(mBidi, buf, mBufSize, bidiReq, NULL, &status);
+    if (!U_SUCCESS(status)) {
+        ALOGE("error calling ubidi_setPara, status = %d", status);
+        return;
+    }
+    const int paraDir = ubidi_getParaLevel(mBidi) & kDirection_Mask;
+    const ssize_t rc = ubidi_countRuns(mBidi, &status);
+    if (!U_SUCCESS(status) || rc < 0) {
+        ALOGW("error counting bidi runs, status = %d", status);
+    }
+    if (!U_SUCCESS(status) || rc <= 1) {
+        mIsRtl = (paraDir == kBidi_RTL);
+        return;
+    }
+    mRunCount = rc;
+}
+
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint) {
     AutoMutex _l(gMinikinLock);
@@ -445,63 +587,12 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
     ctx.style = style;
     ctx.paint = paint;
 
-    bool isRtl = (bidiFlags & kDirection_Mask) != 0;
-    bool doSingleRun = true;
-
     reset();
     mAdvances.resize(count, 0);
 
-    if (!(bidiFlags == kBidi_Force_LTR || bidiFlags == kBidi_Force_RTL)) {
-        UBiDi* bidi = ubidi_open();
-        if (bidi) {
-            UErrorCode status = U_ZERO_ERROR;
-            UBiDiLevel bidiReq = bidiFlags;
-            if (bidiFlags == kBidi_Default_LTR) {
-                bidiReq = UBIDI_DEFAULT_LTR;
-            } else if (bidiFlags == kBidi_Default_RTL) {
-                bidiReq = UBIDI_DEFAULT_RTL;
-            }
-            ubidi_setPara(bidi, buf, bufSize, bidiReq, NULL, &status);
-            if (U_SUCCESS(status)) {
-                int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask;
-                ssize_t rc = ubidi_countRuns(bidi, &status);
-                if (!U_SUCCESS(status) || rc < 0) {
-                    ALOGW("error counting bidi runs, status = %d", status);
-                }
-                if (!U_SUCCESS(status) || rc <= 1) {
-                    isRtl = (paraDir == kBidi_RTL);
-                } else {
-                    doSingleRun = false;
-                    // iterate through runs
-                    for (ssize_t i = 0; i < (ssize_t)rc; i++) {
-                        int32_t startRun = -1;
-                        int32_t lengthRun = -1;
-                        UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
-                        if (startRun == -1 || lengthRun == -1) {
-                            ALOGE("invalid visual run");
-                            // skip the invalid run
-                            continue;
-                        }
-                        int32_t endRun = std::min(startRun + lengthRun, int32_t(start + count));
-                        startRun = std::max(startRun, int32_t(start));
-                        lengthRun = endRun - startRun;
-                        if (lengthRun > 0) {
-                            isRtl = (runDir == UBIDI_RTL);
-                            doLayoutRunCached(buf, startRun, lengthRun, bufSize, isRtl, &ctx,
-                                start);
-                        }
-                    }
-                }
-            } else {
-                ALOGE("error calling ubidi_setPara, status = %d", status);
-            }
-            ubidi_close(bidi);
-        } else {
-            ALOGE("error creating bidi object");
-        }
-    }
-    if (doSingleRun) {
-        doLayoutRunCached(buf, start, count, bufSize, isRtl, &ctx, start);
+    for (const BidiText::Iter::RunInfo& runInfo : BidiText(buf, start, count, bufSize, bidiFlags)) {
+        doLayoutRunCached(buf, runInfo.mRunStart, runInfo.mRunLength, bufSize, runInfo.mIsRtl, &ctx,
+                start);
     }
     ctx.clearHbFonts();
 }
