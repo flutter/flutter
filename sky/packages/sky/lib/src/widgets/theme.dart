@@ -7,8 +7,7 @@ import 'package:sky/src/widgets/framework.dart';
 
 export 'package:sky/material.dart' show ThemeData, ThemeBrightness;
 
-class Theme extends Inherited {
-
+class Theme extends InheritedWidget {
   Theme({
     Key key,
     this.data,
@@ -22,11 +21,10 @@ class Theme extends Inherited {
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
-  static ThemeData of(Widget widget) {
-    Theme theme = widget.inheritedOfType(Theme);
+  static ThemeData of(BuildContext context) {
+    Theme theme = context.inheritedWidgetOfType(Theme);
     return theme == null ? _kFallbackTheme : theme.data;
   }
 
-  bool syncShouldNotify(Theme old) => data != old.data;
-
+  bool updateShouldNotify(Theme old) => data != old.data;
 }

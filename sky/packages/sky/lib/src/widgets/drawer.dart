@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
-import 'package:sky/src/widgets/animated_container.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
@@ -48,15 +47,18 @@ class Drawer extends StatefulComponent {
     this.navigator
   }) : super(key: key);
 
-  List<Widget> children;
-  bool showing;
-  int level;
-  DrawerDismissedCallback onDismissed;
-  Navigator navigator;
+  final List<Widget> children;
+  final bool showing;
+  final int level;
+  final DrawerDismissedCallback onDismissed;
+  final NavigatorState navigator;
 
-  AnimationPerformance _performance;
+  DrawerState createState() => new DrawerState();
+}
 
+class DrawerState extends State<Drawer> {
   void initState() {
+    super.initState();
     _performance = new AnimationPerformance(duration: _kBaseSettleDuration);
     _performance.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed)
@@ -66,30 +68,26 @@ class Drawer extends StatefulComponent {
     // this because we need a linear curve in order to track the user's finger
     // while dragging.
     _performance.attachedForce = kDefaultSpringForce;
-    if (navigator != null) {
+    if (config.navigator != null) {
       // TODO(ianh): This is crazy. We should convert drawer to use a pattern like openDialog().
       // https://github.com/domokit/sky_engine/pull/1186
       scheduleMicrotask(() {
-        navigator.pushState(this, (_) => _performance.reverse());
+        config.navigator.pushState(this, (_) => _performance.reverse());
       });
     }
     _performance.play(_direction);
   }
 
-  Direction get _direction => showing ? Direction.forward : Direction.reverse;
+  AnimationPerformance _performance;
 
-  void syncConstructorArguments(Drawer source) {
-    children = source.children;
-    if (showing != source.showing) {
-      showing = source.showing;
+  Direction get _direction => config.showing ? Direction.forward : Direction.reverse;
+
+  void didUpdateConfig(Drawer oldConfig) {
+    if (config.showing != oldConfig.showing)
       _performance.play(_direction);
-    }
-    level = source.level;
-    onDismissed = source.onDismissed;
-    navigator = source.navigator;
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     var mask = new GestureDetector(
       child: new ColorTransition(
         performance: _performance.view,
@@ -104,13 +102,14 @@ class Drawer extends StatefulComponent {
     Widget content = new SlideTransition(
       performance: _performance.view,
       position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
-      child: new AnimatedContainer(
-        behavior: implicitlyAnimate(const Duration(milliseconds: 200)),
+      // TODO(abarth): Use AnimatedContainer
+      child: new Container(
+        // behavior: implicitlyAnimate(const Duration(milliseconds: 200)),
         decoration: new BoxDecoration(
-          backgroundColor: Theme.of(this).canvasColor,
-          boxShadow: shadows[level]),
+          backgroundColor: Theme.of(context).canvasColor,
+          boxShadow: shadows[config.level]),
         width: _kWidth,
-        child: new Block(children)
+        child: new Block(config.children)
       )
     );
 
@@ -123,12 +122,12 @@ class Drawer extends StatefulComponent {
   }
 
   void _handleDismissed() {
-    if (navigator != null &&
-        navigator.currentRoute is RouteState &&
-        (navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
-      navigator.pop();
-    if (onDismissed != null)
-      onDismissed();
+    if (config.navigator != null &&
+        config.navigator.currentRoute is RouteState &&
+        (config.navigator.currentRoute as RouteState).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
+      config.navigator.pop();
+    if (config.onDismissed != null)
+      config.onDismissed();
   }
 
   bool get _isMostlyClosed => _performance.progress < 0.5;

@@ -5,7 +5,7 @@
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/fn3.dart';
+import 'package:sky/widgets.dart';
 
 class DragData {
   DragData(this.text);

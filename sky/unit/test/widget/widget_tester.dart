@@ -2,7 +2,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/fn3.dart';
+import 'package:sky/widgets.dart';
 
 import '../engine/mock_events.dart';
 

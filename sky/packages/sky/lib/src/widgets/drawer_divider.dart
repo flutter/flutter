@@ -6,16 +6,16 @@ import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/theme.dart';
 
-class DrawerDivider extends Component {
-  DrawerDivider({ Key key }) : super(key: key);
+class DrawerDivider extends StatelessComponent {
+  const DrawerDivider({ Key key }) : super(key: key);
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Container(
       height: 0.0,
       decoration: new BoxDecoration(
         border: new Border(
           bottom: new BorderSide(
-            color: Theme.of(this).dividerColor
+            color: Theme.of(context).dividerColor
           )
         )
       ),

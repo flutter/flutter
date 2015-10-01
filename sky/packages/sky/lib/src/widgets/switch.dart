@@ -11,9 +11,8 @@ import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/rendering/toggleable.dart';
 
-export 'package:sky/src/rendering/toggleable.dart' show ValueChanged;
+export 'package:sky/rendering.dart' show ValueChanged;
 
 const sky.Color _kThumbOffColor = const sky.Color(0xFFFAFAFA);
 const sky.Color _kTrackOffColor = const sky.Color(0x42000000);
@@ -24,29 +23,43 @@ const double _kTrackHeight = 14.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
 const double _kTrackWidth =
     _kSwitchWidth - (_kThumbRadius - _kTrackRadius) * 2.0;
-const Duration _kCheckDuration = const Duration(milliseconds: 200);
 const Size _kSwitchSize = const Size(_kSwitchWidth + 2.0, _kSwitchHeight + 2.0);
 const double _kReactionRadius = _kSwitchWidth / 2.0;
 
-class Switch extends LeafRenderObjectWrapper {
+class Switch extends StatelessComponent {
   Switch({ Key key, this.value, this.onChanged })
       : super(key: key);
 
   final bool value;
   final ValueChanged onChanged;
 
-  _RenderSwitch get renderObject => super.renderObject;
-  _RenderSwitch createNode() => new _RenderSwitch(
+  Widget build(BuildContext context) {
+    return new _SwitchWrapper(
+      value: value,
+      thumbColor: Theme.of(context).accentColor,
+      onChanged: onChanged
+    );
+  }
+}
+
+class _SwitchWrapper extends LeafRenderObjectWidget {
+  _SwitchWrapper({ Key key, this.value, this.thumbColor, this.onChanged })
+      : super(key: key);
+
+  final bool value;
+  final Color thumbColor;
+  final ValueChanged onChanged;
+
+  _RenderSwitch createRenderObject() => new _RenderSwitch(
     value: value,
-    thumbColor: null,
+    thumbColor: thumbColor,
     onChanged: onChanged
   );
 
-  void syncRenderObject(Switch old) {
-    super.syncRenderObject(old);
+  void updateRenderObject(_RenderSwitch renderObject, _SwitchWrapper oldWidget) {
     renderObject.value = value;
+    renderObject.thumbColor = thumbColor;
     renderObject.onChanged = onChanged;
-    renderObject.thumbColor = Theme.of(this).accentColor;
   }
 }
 
@@ -84,9 +97,9 @@ class _RenderSwitch extends RenderToggleable {
     _radialReaction = new RadialReaction(
       center: new Point(_kSwitchSize.width / 2.0, _kSwitchSize.height / 2.0),
       radius: _kReactionRadius,
-      startPosition: startLocation)
-      ..addListener(markNeedsPaint)
-      ..show();
+      startPosition: startLocation
+    )..addListener(markNeedsPaint)
+     ..show();
   }
 
   Future _hideRadialReaction() async {
@@ -127,10 +140,10 @@ class _RenderSwitch extends RenderToggleable {
     paint.drawLooper = builder.build();
 
     // The thumb contracts slightly during the animation
-    double inset = 2.0 - (position.value - 0.5).abs() * 2.0;
+    double inset = 2.0 - (position - 0.5).abs() * 2.0;
     Point thumbPos = new Point(offset.dx +
             _kTrackRadius +
-            position.value * (_kTrackWidth - _kTrackRadius * 2),
+            position * (_kTrackWidth - _kTrackRadius * 2),
         offset.dy + _kSwitchHeight / 2.0);
     canvas.drawCircle(thumbPos, _kThumbRadius - inset, paint);
   }

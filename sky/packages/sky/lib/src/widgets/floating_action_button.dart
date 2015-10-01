@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/gestures.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/button_base.dart';
+import 'package:sky/src/widgets/button_state.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/icon.dart';
@@ -15,31 +16,27 @@ import 'package:sky/src/widgets/theme.dart';
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double _kSize = 56.0;
 
-class FloatingActionButton extends ButtonBase {
-
-  FloatingActionButton({
+class FloatingActionButton extends StatefulComponent {
+  const FloatingActionButton({
     Key key,
     this.child,
     this.backgroundColor,
     this.onPressed
   }) : super(key: key);
 
-  Widget child;
-  Color backgroundColor;
-  Function onPressed;
+  final Widget child;
+  final Color backgroundColor;
+  final GestureTapListener onPressed;
 
-  void syncConstructorArguments(FloatingActionButton source) {
-    super.syncConstructorArguments(source);
-    child = source.child;
-    backgroundColor = source.backgroundColor;
-    onPressed = source.onPressed;
-  }
+  FloatingActionButtonState createState() => new FloatingActionButtonState();
+}
 
-  Widget buildContent() {
+class FloatingActionButtonState extends ButtonState<FloatingActionButton> {
+  Widget buildContent(BuildContext context) {
     IconThemeColor iconThemeColor = IconThemeColor.white;
-    Color materialColor = backgroundColor;
+    Color materialColor = config.backgroundColor;
     if (materialColor == null) {
-      ThemeData themeData = Theme.of(this);
+      ThemeData themeData = Theme.of(context);
       materialColor = themeData.accentColor;
       iconThemeColor = themeData.accentColorBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
     }
@@ -50,7 +47,7 @@ class FloatingActionButton extends ButtonBase {
       level: highlight ? 3 : 2,
       child: new ClipOval(
         child: new GestureDetector(
-          onTap: onPressed,
+          onTap: config.onPressed,
           child: new Container(
             width: _kSize,
             height: _kSize,
@@ -58,7 +55,7 @@ class FloatingActionButton extends ButtonBase {
               child: new Center(
                 child: new IconTheme(
                   data: new IconThemeData(color: iconThemeColor),
-                  child: child
+                  child: config.child
                 )
               )
             )
@@ -67,5 +64,4 @@ class FloatingActionButton extends ButtonBase {
       )
     );
   }
-
 }

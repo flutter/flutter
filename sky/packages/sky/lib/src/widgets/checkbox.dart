@@ -4,10 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/src/rendering/object.dart';
 import 'package:sky/src/rendering/toggleable.dart';
 
 export 'package:sky/src/rendering/toggleable.dart' show ValueChanged;
@@ -17,7 +17,6 @@ const sky.Color _kLightUncheckedColor = const sky.Color(0x8A000000);
 const sky.Color _kDarkUncheckedColor = const sky.Color(0xB2FFFFFF);
 const double _kEdgeSize = 20.0;
 const double _kEdgeRadius = 1.0;
-const Duration _kCheckDuration = const Duration(milliseconds: 200);
 
 /// A material design checkbox
 ///
@@ -28,48 +27,58 @@ const Duration _kCheckDuration = const Duration(milliseconds: 200);
 /// the checkbox.
 ///
 /// <https://www.google.com/design/spec/components/lists-controls.html#lists-controls-types-of-list-controls>
-class Checkbox extends Component {
+class Checkbox extends StatelessComponent {
   /// Constructs a checkbox
   ///
   /// * `value` determines whether the checkbox is checked.
   /// * `onChanged` is called whenever the state of the checkbox should change.
-  Checkbox({Key key, this.value, this.onChanged}) : super(key: key);
+  const Checkbox({Key key, this.value, this.onChanged}) : super(key: key);
 
   final bool value;
   final ValueChanged onChanged;
 
-  Widget build() {
-    ThemeData themeData = Theme.of(this);
+  Widget build(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
     Color uncheckedColor = themeData.brightness == ThemeBrightness.light
         ? _kLightUncheckedColor
         : _kDarkUncheckedColor;
     return new _CheckboxWrapper(
-        value: value,
-        onChanged: onChanged,
-        uncheckedColor: uncheckedColor,
-        accentColor: themeData.accentColor);
+      value: value,
+      onChanged: onChanged,
+      uncheckedColor: uncheckedColor,
+      accentColor: themeData.accentColor
+    );
   }
 }
 
 // This wrapper class exists only because Switch needs to be a Component in
 // order to get an accent color from a Theme but Components do not know how to
 // host RenderObjects.
-class _CheckboxWrapper extends LeafRenderObjectWrapper {
-  _CheckboxWrapper({Key key, this.value, this.onChanged, this.uncheckedColor,
-      this.accentColor})
-      : super(key: key);
+class _CheckboxWrapper extends LeafRenderObjectWidget {
+  _CheckboxWrapper({
+    Key key,
+    this.value,
+    this.onChanged,
+    this.uncheckedColor,
+    this.accentColor
+  }): super(key: key) {
+    assert(uncheckedColor != null);
+    assert(accentColor != null);
+  }
 
   final bool value;
   final ValueChanged onChanged;
   final Color uncheckedColor;
   final Color accentColor;
 
-  _RenderCheckbox get renderObject => super.renderObject;
-  _RenderCheckbox createNode() => new _RenderCheckbox(
-      value: value, uncheckedColor: uncheckedColor, onChanged: onChanged);
+  _RenderCheckbox createRenderObject() => new _RenderCheckbox(
+    value: value,
+    accentColor: accentColor,
+    uncheckedColor: uncheckedColor,
+    onChanged: onChanged
+  );
 
-  void syncRenderObject(_CheckboxWrapper old) {
-    super.syncRenderObject(old);
+  void updateRenderObject(_RenderCheckbox renderObject, _CheckboxWrapper oldWidget) {
     renderObject.value = value;
     renderObject.onChanged = onChanged;
     renderObject.uncheckedColor = uncheckedColor;
@@ -78,25 +87,38 @@ class _CheckboxWrapper extends LeafRenderObjectWrapper {
 }
 
 class _RenderCheckbox extends RenderToggleable {
-  _RenderCheckbox({bool value, Color uncheckedColor, ValueChanged onChanged})
-      : _uncheckedColor = uncheckedColor,
-        super(
-            value: value,
-            onChanged: onChanged,
-            size: new Size(_kEdgeSize, _kEdgeSize)) {}
+  _RenderCheckbox({
+    bool value,
+    Color uncheckedColor,
+    Color accentColor,
+    ValueChanged onChanged
+  }): _uncheckedColor = uncheckedColor,
+      _accentColor = accentColor,
+      super(
+        value: value,
+        onChanged: onChanged,
+        size: new Size(_kEdgeSize, _kEdgeSize)
+      ) {
+    assert(uncheckedColor != null);
+    assert(accentColor != null);
+  }
 
   Color _uncheckedColor;
   Color get uncheckedColor => _uncheckedColor;
 
   void set uncheckedColor(Color value) {
-    if (value == _uncheckedColor) return;
+    assert(value != null);
+    if (value == _uncheckedColor)
+      return;
     _uncheckedColor = value;
     markNeedsPaint();
   }
 
   Color _accentColor;
   void set accentColor(Color value) {
-    if (value == _accentColor) return;
+    assert(value != null);
+    if (value == _accentColor)
+      return;
     _accentColor = value;
     markNeedsPaint();
   }
@@ -109,7 +131,7 @@ class _RenderCheckbox extends RenderToggleable {
       ..color = uncheckedColor;
 
     // The rrect contracts slightly during the animation
-    double inset = 2.0 - (position.value - _kMidpoint).abs() * 2.0;
+    double inset = 2.0 - (position - _kMidpoint).abs() * 2.0;
     sky.Rect rect = new sky.Rect.fromLTWH(offset.dx + inset, offset.dy + inset,
         _kEdgeSize - inset, _kEdgeSize - inset);
     sky.RRect rrect = new sky.RRect()
@@ -120,19 +142,19 @@ class _RenderCheckbox extends RenderToggleable {
     canvas.drawRRect(rrect, paint);
 
     // Radial gradient that changes size
-    if (position.value > 0) {
+    if (position > 0) {
       paint.setStyle(sky.PaintingStyle.fill);
       paint.setShader(new sky.Gradient.radial(
           new Point(_kEdgeSize / 2.0, _kEdgeSize / 2.0),
-          _kEdgeSize * (_kMidpoint - position.value) * 8.0, [
+          _kEdgeSize * (_kMidpoint - position) * 8.0, [
         const sky.Color(0x00000000),
         uncheckedColor
       ]));
       canvas.drawRRect(rrect, paint);
     }
 
-    if (position.value > _kMidpoint) {
-      double t = (position.value - _kMidpoint) / (1.0 - _kMidpoint);
+    if (position > _kMidpoint) {
+      double t = (position - _kMidpoint) / (1.0 - _kMidpoint);
 
       // Solid filled rrect
       paint.setStyle(sky.PaintingStyle.strokeAndFill);

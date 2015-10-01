@@ -1,5 +1,5 @@
 import 'package:sky/animation.dart';
-import 'package:sky/src/fn3.dart';
+import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';

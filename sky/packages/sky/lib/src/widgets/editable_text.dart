@@ -3,17 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 import 'package:sky/painting.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 
 const _kCursorBlinkPeriod = 500; // milliseconds
-const _kCursorGap = 1.0;
-const _kCursorHeightOffset = 2.0;
-const _kCursorWidth = 1.0;
 
 typedef void StringUpdated();
 
@@ -133,26 +130,27 @@ class EditableString implements KeyboardClient {
 }
 
 class EditableText extends StatefulComponent {
-
   EditableText({
     Key key,
     this.value,
     this.focused: false,
     this.style,
-    this.cursorColor}) : super(key: key);
+    this.cursorColor,
+    this.onContentSizeChanged,
+    this.scrollOffset
+  }) : super(key: key);
 
-  EditableString value;
-  bool focused;
-  TextStyle style;
-  Color cursorColor;
+  final EditableString value;
+  final bool focused;
+  final TextStyle style;
+  final Color cursorColor;
+  final SizeChangedCallback onContentSizeChanged;
+  final Offset scrollOffset;
 
-  void syncConstructorArguments(EditableText source) {
-    value = source.value;
-    focused = source.focused;
-    style = source.style;
-    cursorColor = source.cursorColor;
-  }
+  EditableTextState createState() => new EditableTextState();
+}
 
+class EditableTextState extends State<EditableText> {
   Timer _cursorTimer;
   bool _showCursor = false;
 
@@ -175,10 +173,10 @@ class EditableText extends StatefulComponent {
       new Duration(milliseconds: _kCursorBlinkPeriod), _cursorTick);
   }
 
-  void didUnmount() {
+  void dispose() {
     if (_cursorTimer != null)
       _stopCursorTimer();
-    super.didUnmount();
+    super.dispose();
   }
 
   void _stopCursorTimer() {
@@ -187,50 +185,85 @@ class EditableText extends StatefulComponent {
     _showCursor = false;
   }
 
-  void _paintCursor(sky.Canvas canvas, Size size) {
-    if (!_showCursor)
-      return;
+  Widget build(BuildContext context) {
+    assert(config.style != null);
+    assert(config.focused != null);
+    assert(config.cursorColor != null);
 
-    double cursorHeight = style.fontSize + 2.0 * _kCursorHeightOffset;
-    Rect cursorRect =  new Rect.fromLTWH(
-      _kCursorGap,
-      (size.height - cursorHeight) / 2.0,
-      _kCursorWidth,
-      cursorHeight
-    );
-    canvas.drawRect(cursorRect, new Paint()..color = cursorColor);
-  }
-
-  Widget build() {
-    assert(style != null);
-    assert(focused != null);
-    assert(cursorColor != null);
-
-    if (focused && _cursorTimer == null)
+    if (config.focused && _cursorTimer == null)
       _startCursorTimer();
-    else if (!focused && _cursorTimer != null)
+    else if (!config.focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    Widget text;
+    return new SizedBox(
+      width: double.INFINITY,
+      child: new _EditableTextWidget(
+        value: config.value,
+        style: config.style,
+        cursorColor: config.cursorColor,
+        showCursor: _showCursor,
+        onContentSizeChanged: config.onContentSizeChanged,
+        scrollOffset: config.scrollOffset
+      )
+    );
+  }
+}
+
+class _EditableTextWidget extends LeafRenderObjectWidget {
+  _EditableTextWidget({
+    Key key,
+    this.value,
+    this.style,
+    this.cursorColor,
+    this.showCursor,
+    this.onContentSizeChanged,
+    this.scrollOffset
+  }) : super(key: key);
+
+  final EditableString value;
+  final TextStyle style;
+  final Color cursorColor;
+  final bool showCursor;
+  final SizeChangedCallback onContentSizeChanged;
+  final Offset scrollOffset;
+
+  RenderEditableParagraph createRenderObject() {
+    return new RenderEditableParagraph(
+      text: _buildTextSpan(),
+      cursorColor: cursorColor,
+      showCursor: showCursor,
+      onContentSizeChanged: onContentSizeChanged,
+      scrollOffset: scrollOffset
+    );
+  }
+
+  void updateRenderObject(RenderEditableParagraph renderObject,
+                          _EditableTextWidget oldWidget) {
+    renderObject.text = _buildTextSpan();
+    renderObject.cursorColor = cursorColor;
+    renderObject.showCursor = showCursor;
+    renderObject.onContentSizeChanged = onContentSizeChanged;
+    renderObject.scrollOffset = scrollOffset;
+  }
+
+  // Construct a TextSpan that renders the EditableString using the chosen style.
+  TextSpan _buildTextSpan() {
     if (value.composing.isValid) {
-      TextStyle composingStyle = style.merge(const TextStyle(decoration: underline));
-      text = new StyledText(elements: [
-        style,
-        value.textBefore(value.composing),
-        [composingStyle, value.textInside(value.composing)],
-        value.textAfter(value.composing)
+      TextStyle composingStyle = style.merge(
+        const TextStyle(decoration: underline)
+      );
+
+      return new StyledTextSpan(style, [
+        new PlainTextSpan(value.textBefore(value.composing)),
+        new StyledTextSpan(composingStyle, [
+          new PlainTextSpan(value.textInside(value.composing))
+        ]),
+        new PlainTextSpan(value.textAfter(value.composing))
       ]);
-    } else {
-      // TODO(eseidel): This is the wrong height if empty!
-      text = new Text(value.text, style: style);
     }
 
-    Widget cursor = new Container(
-      height: style.fontSize * style.height,
-      width: _kCursorGap + _kCursorWidth,
-      child: new CustomPaint(callback: _paintCursor, token: _showCursor)
-    );
-
-    return new Row([text, cursor]);
+    return new StyledTextSpan(style, [
+      new PlainTextSpan(value.text)
+    ]);
   }
 }

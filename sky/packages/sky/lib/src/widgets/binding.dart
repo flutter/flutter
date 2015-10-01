@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/fn3/framework.dart';
+import 'package:sky/src/widgets/framework.dart';
 
 class WidgetFlutterBinding extends FlutterBinding {
 

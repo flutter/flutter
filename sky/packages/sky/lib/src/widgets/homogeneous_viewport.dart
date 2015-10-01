@@ -4,15 +4,13 @@
 
 import 'dart:math' as math;
 
-import 'package:sky/src/rendering/block.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
+import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/basic.dart';
 
-typedef List<Widget> ListBuilder(int startIndex, int count);
+typedef List<Widget> ListBuilder(BuildContext context, int startIndex, int count);
 
-class HomogeneousViewport extends RenderObjectWrapper {
+class HomogeneousViewport extends RenderObjectWidget {
   HomogeneousViewport({
     Key key,
     this.builder,
@@ -25,118 +23,95 @@ class HomogeneousViewport extends RenderObjectWrapper {
     assert(itemExtent != null);
   }
 
-  ListBuilder builder;
-  bool itemsWrap;
-  double itemExtent;
-  int itemCount;
-  ScrollDirection direction;
-  double startOffset;
+  final ListBuilder builder;
+  final bool itemsWrap;
+  final double itemExtent;
+  final int itemCount;
+  final ScrollDirection direction;
+  final double startOffset;
 
-  List<Widget> _children;
-  bool _layoutDirty = true;
+  HomogeneousViewportElement createElement() => new HomogeneousViewportElement(this);
+
+  // we don't pass constructor arguments to the RenderBlockViewport() because until
+  // we know our children, the constructor arguments we could give have no effect
+  RenderBlockViewport createRenderObject() => new RenderBlockViewport();
+
+  bool isLayoutDifferentThan(HomogeneousViewport oldWidget) {
+    return itemsWrap != oldWidget.itemsWrap ||
+           itemsWrap != oldWidget.itemsWrap ||
+           itemExtent != oldWidget.itemExtent ||
+           itemCount != oldWidget.itemCount ||
+           direction != oldWidget.direction ||
+           startOffset != oldWidget.startOffset;
+  }
+
+  // all the actual work is done in the element
+}
+
+class HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewport> {
+  HomogeneousViewportElement(HomogeneousViewport widget) : super(widget);
+
+  List<Element> _children = const <Element>[];
   int _layoutFirstIndex;
   int _layoutItemCount;
 
   RenderBlockViewport get renderObject => super.renderObject;
 
-  RenderBlockViewport createNode() {
-    // we don't pass constructor arguments to the RenderBlockViewport() because until
-    // we know our children, the constructor arguments we could give have no effect
-    RenderBlockViewport result = new RenderBlockViewport();
-    result.callback = layout;
-    result.totalExtentCallback = getTotalExtent;
-    result.minCrossAxisExtentCallback = getMinCrossAxisExtent;
-    result.maxCrossAxisExtentCallback = getMaxCrossAxisExtent;
-    return result;
+  void visitChildren(ElementVisitor visitor) {
+    if (_children == null)
+      return;
+    for (Element child in _children)
+      visitor(child);
   }
 
-  void remove() {
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    renderObject.callback = layout;
+    renderObject.totalExtentCallback = getTotalExtent;
+    renderObject.minCrossAxisExtentCallback = getMinCrossAxisExtent;
+    renderObject.maxCrossAxisExtentCallback = getMaxCrossAxisExtent;
+  }
+
+  void unmount() {
     renderObject.callback = null;
     renderObject.totalExtentCallback = null;
     renderObject.minCrossAxisExtentCallback = null;
     renderObject.maxCrossAxisExtentCallback = null;
-    super.remove();
-    _children.clear();
-    _layoutDirty = true;
-    assert(() {
-      _layoutFirstIndex = null;
-      _layoutItemCount = null;
-      return true;
-    });
+    super.unmount();
   }
 
-  void walkChildren(WidgetTreeWalker walker) {
-    if (_children == null)
-      return;
-    for (Widget child in _children)
-      walker(child);
-  }
-
-  void insertChildRenderObject(RenderObjectWrapper child, Widget slot) {
-    RenderObject nextSibling = slot?.renderObject;
-    renderObject.add(child.renderObject, before: nextSibling);
-  }
-
-  void detachChildRenderObject(RenderObjectWrapper child) {
-    renderObject.remove(child.renderObject);
-  }
-
-  bool retainStatefulNodeIfPossible(HomogeneousViewport newNode) {
-    retainStatefulRenderObjectWrapper(newNode);
-    if (startOffset != newNode.startOffset) {
-      _layoutDirty = true;
-      startOffset = newNode.startOffset;
-    }
-    if (itemCount != newNode.itemCount) {
-      _layoutDirty = true;
-      itemCount = newNode.itemCount;
-    }
-    if (itemsWrap != newNode.itemsWrap) {
-      _layoutDirty = true;
-      itemsWrap = newNode.itemsWrap;
-    }
-    if (itemExtent != newNode.itemExtent) {
-      _layoutDirty = true;
-      itemExtent = newNode.itemExtent;
-    }
-    if (direction != newNode.direction) {
-      _layoutDirty = true;
-      direction = newNode.direction;
-    }
-    if (builder != newNode.builder) {
-      _layoutDirty = true;
-      builder = newNode.builder;
-    }
-    return true;
-  }
-
-  // This is called during the regular component build
-  void syncRenderObject(HomogeneousViewport old) {
-    super.syncRenderObject(old);
-    if (_layoutDirty) {
+  void update(HomogeneousViewport newWidget) {
+    bool needLayout = newWidget.isLayoutDifferentThan(widget);
+    super.update(newWidget);
+    if (needLayout)
       renderObject.markNeedsLayout();
-    } else {
-      assert(old != null); // if old was null, we'd be new, and therefore _layoutDirty would be true
+    else
       _updateChildren();
-    }
   }
 
   void layout(BoxConstraints constraints) {
-    LayoutCallbackBuilderHandle handle = enterLayoutCallbackBuilder();
-    try {
-      double mainAxisExtent = direction == ScrollDirection.vertical ? constraints.maxHeight : constraints.maxWidth;
+    // We enter a build scope (meaning that markNeedsBuild() is forbidden)
+    // because we are in the middle of layout and if we allowed people to set
+    // state, they'd expect to have that state reflected immediately, which, if
+    // we were to try to honour it, would potentially result in assertions
+    // because you can't normally mutate the render object tree during layout.
+    // (If there were a way to limit these writes to descendants of this, it'd
+    // be ok because we are exempt from that assert since we are still actively
+    // doing our own layout.)
+    BuildableElement.lockState(() {
+      double mainAxisExtent = widget.direction == ScrollDirection.vertical ? constraints.maxHeight : constraints.maxWidth;
       double offset;
-      if (startOffset <= 0.0 && !itemsWrap) {
+      if (widget.startOffset <= 0.0 && !widget.itemsWrap) {
         _layoutFirstIndex = 0;
-        offset = -startOffset;
+        offset = -widget.startOffset;
       } else {
-        _layoutFirstIndex = (startOffset / itemExtent).floor();
-        offset = -(startOffset % itemExtent);
+        _layoutFirstIndex = (widget.startOffset / widget.itemExtent).floor();
+        offset = -(widget.startOffset % widget.itemExtent);
       }
       if (mainAxisExtent < double.INFINITY) {
-        _layoutItemCount = ((mainAxisExtent - offset) / itemExtent).ceil();
-        if (itemCount != null && !itemsWrap)
-          _layoutItemCount = math.min(_layoutItemCount, itemCount - _layoutFirstIndex);
+        _layoutItemCount = ((mainAxisExtent - offset) / widget.itemExtent).ceil();
+        if (widget.itemCount != null && !widget.itemsWrap)
+          _layoutItemCount = math.min(_layoutItemCount, widget.itemCount - _layoutFirstIndex);
       } else {
         assert(() {
           'This HomogeneousViewport has no specified number of items (meaning it has infinite items), ' +
@@ -144,37 +119,34 @@ class HomogeneousViewport extends RenderObjectWrapper {
           'It is most likely that you have placed your HomogeneousViewport (which is an internal ' +
           'component of several scrollable widgets) inside either another scrolling box, a flexible ' +
           'box (Row, Column), or a Stack, without giving it a specific size.';
-          return itemCount != null;
+          return widget.itemCount != null;
         });
-        _layoutItemCount = itemCount - _layoutFirstIndex;
+        _layoutItemCount = widget.itemCount - _layoutFirstIndex;
       }
       _layoutItemCount = math.max(0, _layoutItemCount);
       _updateChildren();
       // Update the renderObject configuration
-      renderObject.direction = direction == ScrollDirection.vertical ? BlockDirection.vertical : BlockDirection.horizontal;
-      renderObject.itemExtent = itemExtent;
+      renderObject.direction = widget.direction == ScrollDirection.vertical ? BlockDirection.vertical : BlockDirection.horizontal;
+      renderObject.itemExtent = widget.itemExtent;
       renderObject.minExtent = getTotalExtent(null);
       renderObject.startOffset = offset;
-    } finally {
-      exitLayoutCallbackBuilder(handle);
-    }
+    });
   }
 
   void _updateChildren() {
     assert(_layoutFirstIndex != null);
     assert(_layoutItemCount != null);
-    List<Widget> newChildren;
+    List<Widget> newWidgets;
     if (_layoutItemCount > 0)
-      newChildren = builder(_layoutFirstIndex, _layoutItemCount);
+      newWidgets = widget.builder(this, _layoutFirstIndex, _layoutItemCount);
     else
-      newChildren = <Widget>[];
-    syncChildren(newChildren, _children == null ? <Widget>[] : _children);
-    _children = newChildren;
+      newWidgets = <Widget>[];
+    _children = updateChildren(_children, newWidgets);
   }
 
   double getTotalExtent(BoxConstraints constraints) {
     // constraints is null when called by layout() above
-    return itemCount != null ? itemCount * itemExtent : double.INFINITY;
+    return widget.itemCount != null ? widget.itemCount * widget.itemExtent : double.INFINITY;
   }
 
   double getMinCrossAxisExtent(BoxConstraints constraints) {
@@ -182,9 +154,25 @@ class HomogeneousViewport extends RenderObjectWrapper {
   }
 
   double getMaxCrossAxisExtent(BoxConstraints constraints) {
-    if (direction == ScrollDirection.vertical)
+    if (widget.direction == ScrollDirection.vertical)
       return constraints.maxWidth;
     return constraints.maxHeight;
+  }
+
+  void insertChildRenderObject(RenderObject child, Element slot) {
+    RenderObject nextSibling = slot?.renderObject;
+    renderObject.add(child, before: nextSibling);
+  }
+
+  void moveChildRenderObject(RenderObject child, Element slot) {
+    assert(child.parent == renderObject);
+    RenderObject nextSibling = slot?.renderObject;
+    renderObject.move(child, before: nextSibling);
+  }
+
+  void removeChildRenderObject(RenderObject child) {
+    assert(child.parent == renderObject);
+    renderObject.remove(child);
   }
 
 }

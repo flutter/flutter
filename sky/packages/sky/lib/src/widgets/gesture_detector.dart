@@ -5,11 +5,12 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/gestures.dart';
-import 'package:sky/src/rendering/binding.dart';
+import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/src/rendering/binding.dart';
 
 class GestureDetector extends StatefulComponent {
-  GestureDetector({
+  const GestureDetector({
     Key key,
     this.child,
     this.onTap,
@@ -29,45 +30,34 @@ class GestureDetector extends StatefulComponent {
     this.onScaleEnd
   }) : super(key: key);
 
-  Widget child;
-  GestureTapListener onTap;
-  GestureShowPressListener onShowPress;
-  GestureLongPressListener onLongPress;
+  final Widget child;
+  final GestureTapListener onTap;
+  final GestureShowPressListener onShowPress;
+  final GestureLongPressListener onLongPress;
 
-  GestureDragStartCallback onVerticalDragStart;
-  GestureDragUpdateCallback onVerticalDragUpdate;
-  GestureDragEndCallback onVerticalDragEnd;
+  final GestureDragStartCallback onVerticalDragStart;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
 
-  GestureDragStartCallback onHorizontalDragStart;
-  GestureDragUpdateCallback onHorizontalDragUpdate;
-  GestureDragEndCallback onHorizontalDragEnd;
+  final GestureDragStartCallback onHorizontalDragStart;
+  final GestureDragUpdateCallback onHorizontalDragUpdate;
+  final GestureDragEndCallback onHorizontalDragEnd;
 
-  GesturePanStartCallback onPanStart;
-  GesturePanUpdateCallback onPanUpdate;
-  GesturePanEndCallback onPanEnd;
+  final GesturePanStartCallback onPanStart;
+  final GesturePanUpdateCallback onPanUpdate;
+  final GesturePanEndCallback onPanEnd;
 
-  GestureScaleStartCallback onScaleStart;
-  GestureScaleUpdateCallback onScaleUpdate;
-  GestureScaleEndCallback onScaleEnd;
+  final GestureScaleStartCallback onScaleStart;
+  final GestureScaleUpdateCallback onScaleUpdate;
+  final GestureScaleEndCallback onScaleEnd;
 
-  void syncConstructorArguments(GestureDetector source) {
-    child = source.child;
-    onTap = source.onTap;
-    onShowPress = source.onShowPress;
-    onLongPress = source.onLongPress;
-    onVerticalDragStart = source.onVerticalDragStart;
-    onVerticalDragUpdate = source.onVerticalDragUpdate;
-    onVerticalDragEnd = source.onVerticalDragEnd;
-    onHorizontalDragStart = source.onHorizontalDragStart;
-    onHorizontalDragUpdate = source.onHorizontalDragUpdate;
-    onHorizontalDragEnd = source.onHorizontalDragEnd;
-    onPanStart = source.onPanStart;
-    onPanUpdate = source.onPanUpdate;
-    onPanEnd = source.onPanEnd;
-    onScaleStart = source.onScaleStart;
-    onScaleUpdate = source.onScaleUpdate;
-    onScaleEnd = source.onScaleEnd;
-    _syncGestureListeners();
+  GestureDetectorState createState() => new GestureDetectorState();
+}
+
+class GestureDetectorState extends State<GestureDetector> {
+  void initState() {
+    super.initState();
+    didUpdateConfig(null);
   }
 
   final PointerRouter _router = FlutterBinding.instance.pointerRouter;
@@ -123,13 +113,7 @@ class GestureDetector extends StatefulComponent {
     return _scale;
   }
 
-  void didMount() {
-    super.didMount();
-    _syncGestureListeners();
-  }
-
-  void didUnmount() {
-    super.didUnmount();
+  void dispose() {
     _tap = _ensureDisposed(_tap);
     _showPress = _ensureDisposed(_showPress);
     _longPress = _ensureDisposed(_longPress);
@@ -137,9 +121,10 @@ class GestureDetector extends StatefulComponent {
     _horizontalDrag = _ensureDisposed(_horizontalDrag);
     _pan = _ensureDisposed(_pan);
     _scale = _ensureDisposed(_scale);
+    super.dispose();
   }
 
-  void _syncGestureListeners() {
+  void didUpdateConfig(GestureDetector oldConfig) {
     _syncTap();
     _syncShowPress();
     _syncLongPress();
@@ -150,67 +135,67 @@ class GestureDetector extends StatefulComponent {
   }
 
   void _syncTap() {
-    if (onTap == null)
+    if (config.onTap == null)
       _tap = _ensureDisposed(_tap);
     else
-      _ensureTap().onTap = onTap;
+      _ensureTap().onTap = config.onTap;
   }
 
   void _syncShowPress() {
-    if (onShowPress == null)
+    if (config.onShowPress == null)
       _showPress = _ensureDisposed(_showPress);
     else
-      _ensureShowPress().onShowPress = onShowPress;
+      _ensureShowPress().onShowPress = config.onShowPress;
   }
 
   void _syncLongPress() {
-    if (onLongPress == null)
+    if (config.onLongPress == null)
       _longPress = _ensureDisposed(_longPress);
     else
-      _ensureLongPress().onLongPress = onLongPress;
+      _ensureLongPress().onLongPress = config.onLongPress;
   }
 
   void _syncVerticalDrag() {
-    if (onVerticalDragStart == null && onVerticalDragUpdate == null && onVerticalDragEnd == null) {
+    if (config.onVerticalDragStart == null && config.onVerticalDragUpdate == null && config.onVerticalDragEnd == null) {
       _verticalDrag = _ensureDisposed(_verticalDrag);
     } else {
       _ensureVerticalDrag()
-        ..onStart = onVerticalDragStart
-        ..onUpdate = onVerticalDragUpdate
-        ..onEnd = onVerticalDragEnd;
+        ..onStart = config.onVerticalDragStart
+        ..onUpdate = config.onVerticalDragUpdate
+        ..onEnd = config.onVerticalDragEnd;
     }
   }
 
   void _syncHorizontalDrag() {
-    if (onHorizontalDragStart == null && onHorizontalDragUpdate == null && onHorizontalDragEnd == null) {
+    if (config.onHorizontalDragStart == null && config.onHorizontalDragUpdate == null && config.onHorizontalDragEnd == null) {
       _horizontalDrag = _ensureDisposed(_horizontalDrag);
     } else {
       _ensureHorizontalDrag()
-        ..onStart = onHorizontalDragStart
-        ..onUpdate = onHorizontalDragUpdate
-        ..onEnd = onHorizontalDragEnd;
+        ..onStart = config.onHorizontalDragStart
+        ..onUpdate = config.onHorizontalDragUpdate
+        ..onEnd = config.onHorizontalDragEnd;
     }
   }
 
   void _syncPan() {
-    if (onPanStart == null && onPanUpdate == null && onPanEnd == null) {
+    if (config.onPanStart == null && config.onPanUpdate == null && config.onPanEnd == null) {
       _pan = _ensureDisposed(_pan);
     } else {
       _ensurePan()
-        ..onStart = onPanStart
-        ..onUpdate = onPanUpdate
-        ..onEnd = onPanEnd;
+        ..onStart = config.onPanStart
+        ..onUpdate = config.onPanUpdate
+        ..onEnd = config.onPanEnd;
     }
   }
 
   void _syncScale() {
-    if (onScaleStart == null && onScaleUpdate == null && onScaleEnd == null) {
+    if (config.onScaleStart == null && config.onScaleUpdate == null && config.onScaleEnd == null) {
       _scale = _ensureDisposed(_pan);
     } else {
       _ensureScale()
-        ..onStart = onScaleStart
-        ..onUpdate = onScaleUpdate
-        ..onEnd = onScaleEnd;
+        ..onStart = config.onScaleStart
+        ..onUpdate = config.onScaleUpdate
+        ..onEnd = config.onScaleEnd;
     }
   }
 
@@ -236,10 +221,10 @@ class GestureDetector extends StatefulComponent {
       _scale.addPointer(event);
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Listener(
       onPointerDown: _handlePointerDown,
-      child: child
+      child: config.child
     );
   }
 }
