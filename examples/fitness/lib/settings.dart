@@ -10,38 +10,35 @@ typedef void SettingsUpdater({
 });
 
 class SettingsFragment extends StatefulComponent {
-
   SettingsFragment({ this.navigator, this.userData, this.updater });
 
-  Navigator navigator;
-  UserData userData;
-  SettingsUpdater updater;
+  final NavigatorState navigator;
+  final UserData userData;
+  final SettingsUpdater updater;
 
-  void syncConstructorArguments(SettingsFragment source) {
-    navigator = source.navigator;
-    userData = source.userData;
-    updater = source.updater;
-  }
+  SettingsFragmentState createState() => new SettingsFragmentState();
+}
 
+class SettingsFragmentState extends State<SettingsFragment> {
   void _handleBackupChanged(bool value) {
-    assert(updater != null);
-    updater(backup: value ? BackupMode.enabled : BackupMode.disabled);
+    assert(config.updater != null);
+    config.updater(backup: value ? BackupMode.enabled : BackupMode.disabled);
   }
 
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/arrow_back",
-        onPressed: navigator.pop),
+        onPressed: config.navigator.pop
+      ),
       center: new Text('Settings')
     );
   }
 
   String get goalWeightText {
-    if (userData.goalWeight == null || userData.goalWeight == 0.0)
+    if (config.userData.goalWeight == null || config.userData.goalWeight == 0.0)
       return "None";
-    else
-      return "${userData.goalWeight}";
+    return "${config.userData.goalWeight}";
   }
 
   static final GlobalKey weightGoalKey = new GlobalKey();
@@ -51,7 +48,7 @@ class SettingsFragment extends StatefulComponent {
   void _handleGoalWeightChanged(String goalWeight) {
     // TODO(jackson): Looking for null characters to detect enter key is a hack
     if (goalWeight.endsWith("\u{0}")) {
-      navigator.pop(double.parse(goalWeight.replaceAll("\u{0}", "")));
+      config.navigator.pop(double.parse(goalWeight.replaceAll("\u{0}", "")));
     } else {
       setState(() {
         try {
@@ -64,7 +61,7 @@ class SettingsFragment extends StatefulComponent {
   }
 
   void _handleGoalWeightPressed() {
-    showDialog(navigator, (navigator) {
+    showDialog(config.navigator, (NavigatorState navigator) {
       return new Dialog(
         title: new Text("Goal Weight"),
         content: new Input(
@@ -91,10 +88,10 @@ class SettingsFragment extends StatefulComponent {
           ),
         ]
       );
-    }).then((double goalWeight) => updater(goalWeight: goalWeight));
+    }).then((double goalWeight) => config.updater(goalWeight: goalWeight));
   }
 
-  Widget buildSettingsPane() {
+  Widget buildSettingsPane(BuildContext context) {
     return new Material(
       type: MaterialType.canvas,
       child: new ScrollableViewport(
@@ -102,17 +99,17 @@ class SettingsFragment extends StatefulComponent {
           padding: const EdgeDims.symmetric(vertical: 20.0),
           child: new BlockBody([
             new DrawerItem(
-              onPressed: () { _handleBackupChanged(!(userData.backupMode == BackupMode.enabled)); },
+              onPressed: () { _handleBackupChanged(!(config.userData.backupMode == BackupMode.enabled)); },
               child: new Row([
                 new Flexible(child: new Text('Back up data to the cloud')),
-                new Switch(value: userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
+                new Switch(value: config.userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
               ])
             ),
             new DrawerItem(
               onPressed: () => _handleGoalWeightPressed(),
               child: new Column([
                   new Text('Goal Weight'),
-                  new Text(goalWeightText, style: Theme.of(this).text.caption),
+                  new Text(goalWeightText, style: Theme.of(context).text.caption),
                 ],
                 alignItems: FlexAlignItems.start
               )
@@ -123,10 +120,10 @@ class SettingsFragment extends StatefulComponent {
     );
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Scaffold(
       toolbar: buildToolBar(),
-      body: buildSettingsPane()
+      body: buildSettingsPane(context)
     );
   }
 }

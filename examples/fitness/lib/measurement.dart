@@ -30,26 +30,26 @@ class MeasurementRow extends FitnessItemRow {
   MeasurementRow({ Measurement measurement, FitnessItemHandler onDismissed })
     : super(item: measurement, onDismissed: onDismissed);
 
-  Widget buildContent() {
+  Widget buildContent(BuildContext context) {
     Measurement measurement = item;
     List<Widget> children = [
       new Flexible(
         child: new Text(
           measurement.displayWeight,
-          style: Theme.of(this).text.subhead
+          style: Theme.of(context).text.subhead
         )
       ),
       new Flexible(
         child: new Text(
           measurement.displayDate,
-          style: Theme.of(this).text.caption.copyWith(textAlign: TextAlign.right)
+          style: Theme.of(context).text.caption.copyWith(textAlign: TextAlign.right)
         )
       )
     ];
     return new Row(
       children,
       alignItems: FlexAlignItems.baseline,
-      textBaseline: DefaultTextStyle.of(this).textBaseline
+      textBaseline: DefaultTextStyle.of(context).textBaseline
     );
   }
 }
@@ -57,17 +57,16 @@ class MeasurementRow extends FitnessItemRow {
 class MeasurementDateDialog extends StatefulComponent {
   MeasurementDateDialog({ this.navigator, this.previousDate });
 
-  Navigator navigator;
-  DateTime previousDate;
+  final NavigatorState navigator;
+  final DateTime previousDate;
 
+  MeasurementDateDialogState createState() => new MeasurementDateDialogState();
+}
+
+class MeasurementDateDialogState extends State<MeasurementDateDialog> {
   @override
   void initState() {
-    _selectedDate = previousDate;
-  }
-
-  void syncConstructorArguments(MeasurementDateDialog source) {
-    navigator = source.navigator;
-    previousDate = source.previousDate;
+    _selectedDate = config.previousDate;
   }
 
   DateTime _selectedDate;
@@ -78,7 +77,7 @@ class MeasurementDateDialog extends StatefulComponent {
     });
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Dialog(
       content: new DatePicker(
         selectedDate: _selectedDate,
@@ -90,12 +89,12 @@ class MeasurementDateDialog extends StatefulComponent {
       actions: [
         new FlatButton(
           child: new Text('CANCEL'),
-          onPressed: navigator.pop
+          onPressed: config.navigator.pop
         ),
         new FlatButton(
           child: new Text('OK'),
           onPressed: () {
-            navigator.pop(_selectedDate);
+            config.navigator.pop(_selectedDate);
           }
         ),
       ]
@@ -104,17 +103,15 @@ class MeasurementDateDialog extends StatefulComponent {
 }
 
 class MeasurementFragment extends StatefulComponent {
-
   MeasurementFragment({ this.navigator, this.onCreated });
 
-  Navigator navigator;
-  FitnessItemHandler onCreated;
+  final NavigatorState navigator;
+  final FitnessItemHandler onCreated;
 
-  void syncConstructorArguments(MeasurementFragment source) {
-    navigator = source.navigator;
-    onCreated = source.onCreated;
-  }
+  MeasurementFragmentState createState() => new MeasurementFragmentState();
+}
 
+class MeasurementFragmentState extends State<MeasurementFragment> {
   String _weight = "";
   DateTime _when = new DateTime.now();
   String _errorMessage = null;
@@ -129,15 +126,15 @@ class MeasurementFragment extends StatefulComponent {
         _errorMessage = "Save failed";
       });
     }
-    onCreated(new Measurement(when: _when, weight: parsedWeight));
-    navigator.pop();
+    config.onCreated(new Measurement(when: _when, weight: parsedWeight));
+    config.navigator.pop();
   }
 
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/close",
-        onPressed: navigator.pop),
+        onPressed: config.navigator.pop),
       center: new Text('New Measurement'),
       right: [new InkWell(
         child: new GestureDetector(
@@ -157,7 +154,7 @@ class MeasurementFragment extends StatefulComponent {
   static final GlobalKey weightKey = new GlobalKey();
 
   void _handleDatePressed() {
-    showDialog(navigator, (navigator) {
+    showDialog(config.navigator, (NavigatorState navigator) {
       return new MeasurementDateDialog(navigator: navigator, previousDate: _when);
     }).then((DateTime value) {
       if (value == null)
@@ -168,7 +165,7 @@ class MeasurementFragment extends StatefulComponent {
     });
   }
 
-  Widget buildBody() {
+  Widget buildBody(BuildContext context) {
     Measurement measurement = new Measurement(when: _when);
     // TODO(jackson): Revisit the layout of this pane to be more maintainable
     return new Material(
@@ -182,7 +179,7 @@ class MeasurementFragment extends StatefulComponent {
               height: 50.0,
               child: new Column([
                 new Text('Measurement Date'),
-                new Text(measurement.displayDate, style: Theme.of(this).text.caption),
+                new Text(measurement.displayDate, style: Theme.of(context).text.caption),
               ], alignItems: FlexAlignItems.start)
             )
           ),
@@ -204,10 +201,10 @@ class MeasurementFragment extends StatefulComponent {
     return new SnackBar(content: new Text(_errorMessage), showing: true);
   }
 
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Scaffold(
       toolbar: buildToolBar(),
-      body: buildBody(),
+      body: buildBody(context),
       snackBar: buildSnackBar()
     );
   }
