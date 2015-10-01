@@ -676,6 +676,7 @@ core_idl_files = get_path_info([
                                "abspath")
 
 core_dart_files = get_path_info([
+                                  "loader/ImageDecoder.dart",
                                   "painting/Color.dart",
                                   "painting/ColorFilter.dart",
                                   "painting/DrawLooperLayerInfo.dart",

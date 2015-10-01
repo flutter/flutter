@@ -4,6 +4,7 @@
 
 [
   Constructor(ImageDecoderCallback callback),
+  PrivateDart,
   ImplementedAs=CanvasImageDecoder,
 ] interface ImageDecoder {
   void initWithConsumer(MojoDataPipeConsumer consumer);

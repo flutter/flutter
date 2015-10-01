@@ -41,7 +41,9 @@ void CanvasImageDecoder::initWithList(const Uint8List& list) {
   CHECK(!drainer_);
 
   OnDataAvailable(list.data(), list.num_elements());
-  OnDataComplete();
+  base::MessageLoop::current()->PostTask(
+      FROM_HERE, base::Bind(&CanvasImageDecoder::OnDataComplete,
+                            weak_factory_.GetWeakPtr()));
 }
 
 void CanvasImageDecoder::OnDataAvailable(const void* data, size_t num_bytes) {
