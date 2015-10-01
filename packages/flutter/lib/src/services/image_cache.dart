@@ -23,8 +23,7 @@ class _ImageCache {
           print("Failed (${response.statusCode}) to load image ${url}");
           completer.complete(null);
         } else {
-          new sky.ImageDecoder(completer.complete)
-                 ..initWithConsumer(response.body.handle.h);
+          new sky.ImageDecoder.consume(response.body.handle.h, completer.complete);
         }
       });
       return new ImageResource(completer.future);
