@@ -7,15 +7,15 @@ import 'widget_tester.dart';
 
 void main() {
   test('LinearProgressIndicator changes when its value changes', () {
-    WidgetTester tester = new WidgetTester();
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Block([new LinearProgressIndicator(value: 0.0)]));
 
-    tester.pumpFrame(new Block([new LinearProgressIndicator(value: 0.0)]));
+      List<Layer> layers1 = tester.layers;
 
-    List<Layer> layers1 = tester.layers;
+      tester.pumpWidget(new Block([new LinearProgressIndicator(value: 0.5)]));
 
-    tester.pumpFrame(new Block([new LinearProgressIndicator(value: 0.5)]));
-
-    List<Layer> layers2 = tester.layers;
-    expect(layers1, isNot(equals(layers2)));
+      List<Layer> layers2 = tester.layers;
+      expect(layers1, isNot(equals(layers2)));
+    });
   });
 }

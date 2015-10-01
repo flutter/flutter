@@ -1,5 +1,4 @@
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
-import 'package:quiver/testing/async.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
@@ -25,65 +24,63 @@ void main() {
   serviceMocker.registerMockService(KeyboardServiceName, mockKeyboard);
 
   test('Editable text has consistent width', () {
-    WidgetTester tester = new WidgetTester();
+    testWidgets((WidgetTester tester) {
+      GlobalKey inputKey = new GlobalKey();
+      String inputValue;
 
-    GlobalKey inputKey = new GlobalKey();
-    String inputValue;
+      Widget builder() {
+        return new Center(
+          child: new Input(
+            key: inputKey,
+            placeholder: 'Placeholder',
+            onChanged: (value) { inputValue = value; }
+          )
+        );
+      }
 
-    Widget builder() {
-      return new Center(
-        child: new Input(
-          key: inputKey,
-          placeholder: 'Placeholder',
-          onChanged: (value) { inputValue = value; }
-        )
-      );
-    }
+      tester.pumpWidget(builder());
 
-    tester.pumpFrame(builder());
+      Element input = tester.findElementByKey(inputKey);
+      Size emptyInputSize = (input.renderObject as RenderBox).size;
 
-    Element input = tester.findElementByKey(inputKey);
-    Size emptyInputSize = (input.renderObject as RenderBox).size;
+      // Simulate entry of text through the keyboard.
+      expect(mockKeyboard.client, isNotNull);
+      const String testValue = 'Test';
+      mockKeyboard.client.setComposingText(testValue, testValue.length);
 
-    // Simulate entry of text through the keyboard.
-    expect(mockKeyboard.client, isNotNull);
-    const String testValue = 'Test';
-    mockKeyboard.client.setComposingText(testValue, testValue.length);
+      // Check that the onChanged event handler fired.
+      expect(inputValue, equals(testValue));
 
-    // Check that the onChanged event handler fired.
-    expect(inputValue, equals(testValue));
+      tester.pumpWidget(builder());
 
-    tester.pumpFrame(builder());
-
-    // Check that the Input with text has the same size as the empty Input.
-    expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
+      // Check that the Input with text has the same size as the empty Input.
+      expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
+    });
   });
 
   test('Cursor blinks', () {
-    WidgetTester tester = new WidgetTester();
+    testWidgets((WidgetTester tester) {
+      GlobalKey inputKey = new GlobalKey();
 
-    GlobalKey inputKey = new GlobalKey();
+      Widget builder() {
+        return new Center(
+          child: new Input(
+            key: inputKey,
+            placeholder: 'Placeholder'
+          )
+        );
+      }
 
-    Widget builder() {
-      return new Center(
-        child: new Input(
-          key: inputKey,
-          placeholder: 'Placeholder'
-        )
-      );
-    }
-
-    new FakeAsync().run((async) {
-      tester.pumpFrame(builder());
+      tester.pumpWidget(builder());
 
       EditableTextState editableText = tester.findStateOfType(EditableTextState);
 
       // Check that the cursor visibility toggles after each blink interval.
       void checkCursorToggle() {
         bool initialShowCursor = editableText.test_showCursor;
-        async.elapse(editableText.test_cursorBlinkPeriod);
+        tester.async.elapse(editableText.test_cursorBlinkPeriod);
         expect(editableText.test_showCursor, equals(!initialShowCursor));
-        async.elapse(editableText.test_cursorBlinkPeriod);
+        tester.async.elapse(editableText.test_cursorBlinkPeriod);
         expect(editableText.test_showCursor, equals(initialShowCursor));
       }
 

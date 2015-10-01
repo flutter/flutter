@@ -54,13 +54,14 @@ class OutsideState extends State<Outside> {
 
 void main() {
   test('setState() smoke test', () {
-    WidgetTester tester = new WidgetTester();
-    tester.pumpFrame(new Outside());
-    TestPointer pointer = new TestPointer(1);
-    Point location = tester.getCenter(tester.findText('INSIDE'));
-    tester.dispatchEvent(pointer.down(location), location);
-    tester.pumpFrameWithoutChange();
-    tester.dispatchEvent(pointer.up(), location);
-    tester.pumpFrameWithoutChange();
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Outside());
+      TestPointer pointer = new TestPointer(1);
+      Point location = tester.getCenter(tester.findText('INSIDE'));
+      tester.dispatchEvent(pointer.down(location), location);
+      tester.pump();
+      tester.dispatchEvent(pointer.up(), location);
+      tester.pump();
+    });
   });
 }

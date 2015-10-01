@@ -37,45 +37,44 @@ class OuterContainerState extends State<OuterContainer> {
 
 void main() {
   test('resync stateful widget', () {
+    testWidgets((WidgetTester tester) {
+      Key innerKey = new Key('inner');
+      Key outerKey = new Key('outer');
 
-    WidgetTester tester = new WidgetTester();
+      InnerComponent inner1 = new InnerComponent(key: innerKey);
+      InnerComponent inner2;
+      OuterContainer outer1 = new OuterContainer(key: outerKey, child: inner1);
+      OuterContainer outer2;
 
-    Key innerKey = new Key('inner');
-    Key outerKey = new Key('outer');
+      tester.pumpWidget(outer1);
 
-    InnerComponent inner1 = new InnerComponent(key: innerKey);
-    InnerComponent inner2;
-    OuterContainer outer1 = new OuterContainer(key: outerKey, child: inner1);
-    OuterContainer outer2;
+      StatefulComponentElement innerElement = tester.findElementByKey(innerKey);
+      InnerComponentState innerElementState = innerElement.state;
+      expect(innerElementState.config, equals(inner1));
+      expect(innerElementState._didInitState, isTrue);
+      expect(innerElement.renderObject.attached, isTrue);
 
-    tester.pumpFrame(outer1);
+      inner2 = new InnerComponent(key: innerKey);
+      outer2 = new OuterContainer(key: outerKey, child: inner2);
 
-    StatefulComponentElement innerElement = tester.findElementByKey(innerKey);
-    InnerComponentState innerElementState = innerElement.state;
-    expect(innerElementState.config, equals(inner1));
-    expect(innerElementState._didInitState, isTrue);
-    expect(innerElement.renderObject.attached, isTrue);
+      tester.pumpWidget(outer2);
 
-    inner2 = new InnerComponent(key: innerKey);
-    outer2 = new OuterContainer(key: outerKey, child: inner2);
+      expect(tester.findElementByKey(innerKey), equals(innerElement));
+      expect(innerElement.state, equals(innerElementState));
 
-    tester.pumpFrame(outer2);
+      expect(innerElementState.config, equals(inner2));
+      expect(innerElementState._didInitState, isTrue);
+      expect(innerElement.renderObject.attached, isTrue);
 
-    expect(tester.findElementByKey(innerKey), equals(innerElement));
-    expect(innerElement.state, equals(innerElementState));
+      StatefulComponentElement outerElement = tester.findElementByKey(outerKey);
+      expect(outerElement.state.config, equals(outer2));
+      outerElement.state.setState(() {});
+      tester.pump();
 
-    expect(innerElementState.config, equals(inner2));
-    expect(innerElementState._didInitState, isTrue);
-    expect(innerElement.renderObject.attached, isTrue);
-
-    StatefulComponentElement outerElement = tester.findElementByKey(outerKey);
-    expect(outerElement.state.config, equals(outer2));
-    outerElement.state.setState(() {});
-    tester.pumpFrameWithoutChange(0.0);
-
-    expect(tester.findElementByKey(innerKey), equals(innerElement));
-    expect(innerElement.state, equals(innerElementState));
-    expect(innerElementState.config, equals(inner2));
-    expect(innerElement.renderObject.attached, isTrue);
+      expect(tester.findElementByKey(innerKey), equals(innerElement));
+      expect(innerElement.state, equals(innerElementState));
+      expect(innerElementState.config, equals(inner2));
+      expect(innerElement.renderObject.attached, isTrue);
+    });
   });
 }

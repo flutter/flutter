@@ -42,14 +42,15 @@ Widget builder() {
 
 void main() {
   test('duplicate key smoke test', () {
-    WidgetTester tester = new WidgetTester();
-    tester.pumpFrame(builder());
-    StatefulLeafState leaf = tester.findStateOfType(StatefulLeafState);
-    leaf.test();
-    tester.pumpFrameWithoutChange();
-    Item lastItem = items[1];
-    items.remove(lastItem);
-    items.insert(0, lastItem);
-    tester.pumpFrame(builder()); // this marks the app dirty and rebuilds it
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(builder());
+      StatefulLeafState leaf = tester.findStateOfType(StatefulLeafState);
+      leaf.test();
+      tester.pump();
+      Item lastItem = items[1];
+      items.remove(lastItem);
+      items.insert(0, lastItem);
+      tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it
+    });
   });
 }
