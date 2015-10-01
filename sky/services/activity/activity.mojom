@@ -56,10 +56,6 @@ interface Activity {
   SetTaskDescription(TaskDescription description);
   SetSystemUIVisibility(SystemUiVisibility visibility);
   SetRequestedOrientation(ScreenOrientation orientation);
-
-  // TODO(mpcomplete): moving to PathService. Remove these.
-  GetFilesDir() => (string path);
-  GetCacheDir() => (string path);
 };
 
 interface PathService {
