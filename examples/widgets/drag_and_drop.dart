@@ -50,13 +50,15 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatelessComponent {
-  Dot({ Key key, this.color }): super(key: key);
+  Dot({ Key key, this.color, this.size }): super(key: key);
   final Color color;
+  final double size;
   Widget build(BuildContext context) {
     return new Container(
-      width: 50.0,
-      height: 50.0,
+      width: size,
+      height: size,
       decoration: new BoxDecoration(
+        borderRadius: 10.0,
         backgroundColor: color
       )
     );
@@ -68,12 +70,24 @@ class ExampleDragSource extends StatelessComponent {
   final NavigatorState navigator;
   final String name;
   final Color color;
+
+  static const kDotSize = 50.0;
+  static const kFingerSize = 50.0;
+
   Widget build(BuildContext context) {
     return new Draggable(
       navigator: navigator,
       data: new DragData(name),
-      child: new Dot(color: color),
-      feedback: new Dot(color: color)
+      child: new Dot(color: color, size: kDotSize),
+      feedback: new Transform(
+        transform: new Matrix4.identity()..translate(-kDotSize / 2.0, -(kDotSize / 2.0 + kFingerSize)),
+        child: new Opacity(
+          opacity: 0.75,
+          child: new Dot(color: color, size: kDotSize)
+        )
+      ),
+      feedbackOffset: const Offset(0.0, -kFingerSize),
+      dragAnchor: DragAnchor.pointer
     );
   }
 }
