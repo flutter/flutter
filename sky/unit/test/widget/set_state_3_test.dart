@@ -5,7 +5,7 @@
 import 'package:sky/src/fn3.dart';
 import 'package:test/test.dart';
 
-import '../fn3/widget_tester.dart';
+import 'widget_tester.dart';
 
 ChangerState changer;
 
