@@ -47,7 +47,7 @@ class StockRow extends StatelessComponent {
       onLongPress: onLongPressed,
       child: new InkWell(
         child: new Container(
-          padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
+          padding: const EdgeDims.TRBL(16.0, 16.0, 20.0, 16.0),
           decoration: new BoxDecoration(
             border: new Border(
               bottom: new BorderSide(color: Theme.of(context).dividerColor)

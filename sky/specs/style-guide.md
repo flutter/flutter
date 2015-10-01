@@ -27,8 +27,9 @@ variables, constants, enum values, etc) is lowerCamelCase. Constant
 doubles and strings are prefixed with k. Prefer using a local const
 or a static const in a relevant class than using a global constant.
 
-Don't name your libraries (no ```library``` keyword). Name the files
-in ```lower_under_score.dart``` format.
+Don't name your libraries (no ```library``` keyword), unless it's a
+documented top-level library, like `painting.dart`. Name the files in
+```lower_under_score.dart``` format.
 
 
 Class constructors and methods should be ordered in the order that
@@ -38,6 +39,27 @@ declarations.
 
 The default (unnamed) constructor should come first, then the named
 constructors.
+
+If you call super() in your initialiser list, put a space between the
+constructor arguments closing parenthesis and the colon. If there's
+other things in the initialiser list, align the super() call with the
+other arguments. Don't call super if you have no arguments to pass up
+to the superclass.
+
+```dart
+class Foo extends Bar {
+  Foo({ this._argument, baz }) : super(baz: baz);
+}
+
+class Quuz extends Bar {
+  Quuz({
+    TheType argument, baz
+  }) : _argument = argument,
+       super(
+    baz: baz
+  );
+}
+```
 
 Fields should come before the methods that manipulate them, if they
 are specific to a particular group of methods.
@@ -83,6 +105,14 @@ When breaking a parameter list into multiple lines, do the same.
 
 Use `//` and `///`, not `/* */` and `/** */`.
 
+Prefer single quotes for strings. Use double quotes for nested
+strings.
+
+> Example:
+> ```dart
+>   print('Hello ${name.split(" ")[0]}');
+> ```
+
 Don't put the statement part of an "if" statement on the same line as
 the expression, even if it is short. (Doing so makes it unobvious that
 there is relevant code there. This is especially important for early
@@ -118,12 +148,44 @@ options.
 > ```
 > ...rather than:
 > ```dart
->    new EdgeDims(0.0, 8.0, 0.0, 8.0);
+>    new EdgeDims.TRBL(0.0, 8.0, 0.0, 8.0);
 > ```
 
 
 Use for-in loops rather than forEach() where possible, since that
 saves a stack frame per iteration.
+
+
+When naming callbacks, use `FooCallback` for the typedef, `onFoo` (or,
+if there's only one and the whole purpose of the class is this
+callback, `callback`) for the callback argument or property, and
+`handleFoo` for the method that is called.
+
+When defining mutable properties that mark a class dirty when set, use
+the following pattern:
+
+```dart
+/// Documentation here (don't wait for a later commit).
+TheType get theProperty => _theProperty;
+TheType _theProperty;
+void set theProperty(TheType value) {
+  assert(value != null);
+  if (_theProperty == value)
+    return;
+  _theProperty = value;
+  markNeedsWhatever(); // the method to mark the object dirty
+}
+```
+
+The argument is called 'value' for ease of copy-and-paste reuse of
+this pattern. If for some reason you don't want to use 'value', use
+'newTheProperty' (where 'theProperty' is the property name).
+
+Start the method with any asserts you need to validate the value.
+
+
+If you have variables or methods that are only used in release mode,
+prefix their names with `debug` or `_debug`.
 
 
 C++

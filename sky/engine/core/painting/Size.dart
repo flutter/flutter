@@ -45,5 +45,21 @@ class Size extends OffsetBase {
   Point bottomLeft(Point origin) => new Point(origin.x, origin.y + height);
   Point bottomRight(Point origin) => new Point(origin.x + width, origin.y + height);
 
+  /// Compares two Sizes for equality.
+  bool operator ==(other) => other is Size && super == other;
+
+  /// Linearly interpolate between two sizes
+  ///
+  /// If either size is null, this function interpolates from [Offset.zero].
+  static Size lerp(Size a, Size b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b * t;
+    if (b == null)
+      return a * (1.0 - t);
+    return new Size(lerpDouble(a.width, b.width, t), lerpDouble(a.height, b.height, t));
+  }
+
   String toString() => "Size($width, $height)";
 }

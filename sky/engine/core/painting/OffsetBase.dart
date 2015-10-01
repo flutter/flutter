@@ -19,7 +19,6 @@ abstract class OffsetBase {
 
   bool operator ==(other) {
     return other is OffsetBase &&
-           other.runtimeType == runtimeType &&
            other._dx == _dx &&
            other._dy == _dy;
   }
