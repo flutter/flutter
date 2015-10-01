@@ -61,6 +61,19 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
           content: new Text('This feature has not yet been implemented.'),
           actions: [
             new FlatButton(
+              child: new Row([
+                new Icon(
+                  type: 'device/dvr',
+                  size: 18
+                ),
+                new Container(
+                  width: 8.0
+                ),
+                new Text('DUMP APP TO CONSOLE'),
+              ]),
+              onPressed: () { debugDumpApp(); }
+            ),
+            new FlatButton(
               child: new Text('OH WELL'),
               onPressed: () {
                 navigator.pop(false);

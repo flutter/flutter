@@ -9,13 +9,17 @@ import 'dart:sky' show Color;
 class Colors {
   Colors._();
 
-  static const white = const Color(0xFFFFFFFF);
-  static const black = const Color(0xFF000000);
   static const transparent = const Color(0x00000000);
-  static const white54 = const Color(0x8AFFFFFF);
-  static const white87 = const Color(0xDDFFFFFF);
-  static const black54 = const Color(0x8A000000);
+
+  static const black   = const Color(0xFF000000);
   static const black87 = const Color(0xDD000000);
+  static const black54 = const Color(0x8A000000);
+  static const black26 = const Color(0x42000000); // text of disabled flat button in light theme
+  static const black12 = const Color(0x1F000000); // background of disabled raised buttons in light theme
+  static const white   = const Color(0xFFFFFFFF);
+  static const white70 = const Color(0xB3FFFFFF);
+  static const white30 = const Color(0x4DFFFFFF); // text of disabled flat button in dark theme
+  static const white12 = const Color(0x1FFFFFFF); // background of disabled raised buttons in dark theme
 
   static const Map<int, Color> red = const {
      50: const Color(0xFFFFEBEE),
@@ -355,7 +359,7 @@ class Colors {
     100: const Color(0xFFF5F5F5),
     200: const Color(0xFFEEEEEE),
     300: const Color(0xFFE0E0E0),
-    350: const Color(0xFFD6D6D6), // only for raised button while pressed or disabled
+    350: const Color(0xFFD6D6D6), // only for raised button while pressed in Light theme
     400: const Color(0xFFBDBDBD),
     500: const Color(0xFF9E9E9E),
     600: const Color(0xFF757575),

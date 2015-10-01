@@ -192,7 +192,7 @@ abstract class Widget {
     if (data.isEmpty)
       return '$name';
     return '$name(${data.join("; ")})';
-   }
+  }
 
   void debugFillDescription(List<String> description) { }
 }
@@ -798,7 +798,7 @@ abstract class Element<T extends Widget> implements BuildContext {
   String toString() {
     final List<String> data = <String>[];
     debugFillDescription(data);
-    final String name = widget != null ? '$widget' : '[$runtimeType]';
+    final String name = widget != null ? '${widget.runtimeType}' : '[$runtimeType]';
     return '$name(${data.join("; ")})';
   }
 
