@@ -416,7 +416,7 @@ def generate_hyb_file(hyph, ch_map, hyb_fn):
 
 # Verify that the file contains the same lines as the lines argument, in arbitrary order
 def verify_file_sorted(lines, fn):
-    file_lines = [l.strip() for l in io.open(fn)]
+    file_lines = [l.strip() for l in io.open(fn, encoding='UTF-8')]
     line_set = set(lines)
     file_set = set(file_lines)
     if line_set == file_set:
