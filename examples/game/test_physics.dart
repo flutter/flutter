@@ -34,7 +34,7 @@ main() async {
       primarySwatch: Colors.purple
     ),
     routes: {
-      '/': (navigator, route) {
+      '/': (RouteArguments args) {
         return new SpriteWidget(
           new TestBed(),
           SpriteBoxTransformMode.letterbox

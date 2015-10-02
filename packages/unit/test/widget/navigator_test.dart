@@ -49,8 +49,8 @@ void main() {
   test('Can navigator navigate to and from a stateful component', () {
     testWidgets((WidgetTester tester) {
       final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-        '/': (navigator, route) => new FirstComponent(navigator),
-        '/second': (navigator, route) => new SecondComponent(navigator),
+        '/': (RouteArguments args) => new FirstComponent(args.navigator),
+        '/second': (RouteArguments args) => new SecondComponent(args.navigator),
       };
 
       tester.pumpWidget(new Navigator(routes: routes));

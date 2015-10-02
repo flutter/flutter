@@ -145,7 +145,7 @@ class DialogRoute extends Route {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-      child: builder(navigator, this)
+      child: builder(new RouteArguments(navigator: navigator, previousPerformance: this.performance, nextPerformance: nextRoutePerformance))
     );
   }
 
@@ -159,11 +159,11 @@ Future showDialog(NavigatorState navigator, DialogBuilder builder) {
   Completer completer = new Completer();
   navigator.push(new DialogRoute(
     completer: completer,
-    builder: (navigator, route) {
+    builder: (RouteArguments args) {
       return new Focus(
-        key: new GlobalObjectKey(route),
+        key: new GlobalObjectKey(completer),
         autofocus: true,
-        child: builder(navigator)
+        child: builder(args.navigator)
       );
     }
   ));

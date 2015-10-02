@@ -36,7 +36,7 @@ main() async {
     title: 'Test drawAtlas',
     theme: _theme,
     routes: {
-      '/': (NavigatorState navigator, Route route) {
+      '/': (RouteArguments args) {
         return new SpriteWidget(
           new TestDrawAtlas(),
           SpriteBoxTransformMode.fixedWidth

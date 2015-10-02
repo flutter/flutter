@@ -165,7 +165,7 @@ void main() {
       accentColor: Colors.redAccent[200]
     ),
     routes: {
-      '/': (NavigatorState navigator, Route route) => new PageableListApp(navigator: navigator),
+      '/': (RouteArguments args) => new PageableListApp(navigator: args.navigator),
     }
   ));
 }

@@ -13,9 +13,9 @@ void main() {
 
       tester.pumpWidget(new Navigator(
         routes: {
-          '/': (NavigatorState navigator, Route route) { return new Column([
+          '/': (RouteArguments args) { return new Column([
               new Draggable(
-                navigator: navigator,
+                navigator: args.navigator,
                 data: 1,
                 child: new Text('Source'),
                 feedback: new Text('Dragging')

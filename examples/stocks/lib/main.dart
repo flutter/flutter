@@ -82,7 +82,7 @@ class StocksAppState extends State<StocksApp> {
       if (path.length != 3)
         return null;
       if (_stocks.containsKey(path[2]))
-        return (navigator, route) => new StockSymbolViewer(navigator, _stocks[path[2]]);
+        return (RouteArguments args) => new StockSymbolViewer(args.navigator, _stocks[path[2]]);
       return null;
     }
     return null;
@@ -93,8 +93,8 @@ class StocksAppState extends State<StocksApp> {
       title: 'Stocks',
       theme: theme,
       routes: <String, RouteBuilder>{
-         '/':         (navigator, route) => new StockHome(navigator, _stocks, _symbols, _optimismSetting, modeUpdater),
-         '/settings': (navigator, route) => new StockSettings(navigator, _optimismSetting, _backupSetting, settingsUpdater)
+         '/':         (RouteArguments args) => new StockHome(args.navigator, _stocks, _symbols, _optimismSetting, modeUpdater),
+         '/settings': (RouteArguments args) => new StockSettings(args.navigator, _optimismSetting, _backupSetting, settingsUpdater)
       },
       onGenerateRoute: _getRoute
     );

@@ -357,7 +357,7 @@ void main() {
       accentColor: Colors.redAccent[200]
     ),
     routes: {
-      '/': (NavigatorState navigator, Route route) => new CardCollection(navigator: navigator),
+      '/': (RouteArguments args) => new CardCollection(navigator: args.navigator),
     }
   ));
 }

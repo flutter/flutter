@@ -165,7 +165,7 @@ void main() {
     ),
     title: 'Cards',
     routes: {
-      '/': (navigator, route) => new OverlayGeometryApp()
+      '/': (RouteArguments args) => new OverlayGeometryApp()
     }
   ));
 }
