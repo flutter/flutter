@@ -92,8 +92,6 @@ class FitnessApp extends StatefulComponent {
 class FitnessAppState extends State<FitnessApp> {
   UserDataImpl _userData;
 
-  Map<String, RouteBuilder> _routes;
-
   void initState() {
     super.initState();
     loadFitnessData().then((UserData data) {
@@ -102,36 +100,6 @@ class FitnessAppState extends State<FitnessApp> {
       print("Failed to load data: $e");
       setState(() => _userData = new UserDataImpl());
     });
-
-    _routes = {
-      '/': (NavigatorState navigator, Route route) {
-        return new FeedFragment(
-          navigator: navigator,
-          userData: _userData,
-          onItemCreated: _handleItemCreated,
-          onItemDeleted: _handleItemDeleted
-        );
-      },
-      '/meals/new': (navigator, route) {
-        return new MealFragment(
-          navigator: navigator,
-          onCreated: _handleItemCreated
-        );
-      },
-      '/measurements/new': (NavigatorState navigator, Route route) {
-        return new MeasurementFragment(
-          navigator: navigator,
-          onCreated: _handleItemCreated
-        );
-      },
-      '/settings': (navigator, route) {
-        return new SettingsFragment(
-          navigator: navigator,
-          userData: _userData,
-          updater: settingsUpdater
-        );
-      }
-    };
   }
 
   void _handleItemCreated(FitnessItem item) {
@@ -158,17 +126,43 @@ class FitnessAppState extends State<FitnessApp> {
     });
   }
 
-  final ThemeData _theme = new ThemeData(
-    brightness: ThemeBrightness.light,
-    primarySwatch: Colors.indigo,
-    accentColor: Colors.pinkAccent[200]
-  );
-
   Widget build(BuildContext) {
     return new App(
-      theme: _theme,
+      theme: new ThemeData(
+        brightness: ThemeBrightness.light,
+        primarySwatch: Colors.indigo,
+        accentColor: Colors.pinkAccent[200]
+      ),
       title: 'Fitness',
-      routes: _routes
+      routes: {
+        '/': (RouteArguments args) {
+          return new FeedFragment(
+            navigator: args.navigator,
+            userData: _userData,
+            onItemCreated: _handleItemCreated,
+            onItemDeleted: _handleItemDeleted
+          );
+        },
+        '/meals/new': (RouteArguments args) {
+          return new MealFragment(
+            navigator: args.navigator,
+            onCreated: _handleItemCreated
+          );
+        },
+        '/measurements/new': (RouteArguments args) {
+          return new MeasurementFragment(
+            navigator: args.navigator,
+            onCreated: _handleItemCreated
+          );
+        },
+        '/settings': (RouteArguments args) {
+          return new SettingsFragment(
+            navigator: args.navigator,
+            userData: _userData,
+            updater: settingsUpdater
+          );
+        }
+      }
     );
   }
 }

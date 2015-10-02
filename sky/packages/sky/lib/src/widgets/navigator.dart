@@ -8,7 +8,14 @@ import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
-typedef Widget RouteBuilder(NavigatorState navigator, Route route);
+class RouteArguments {
+  const RouteArguments({ this.navigator, this.previousPerformance, this.nextPerformance });
+  final NavigatorState navigator;
+  final PerformanceView previousPerformance;
+  final PerformanceView nextPerformance;
+}
+
+typedef Widget RouteBuilder(RouteArguments args);
 typedef RouteBuilder RouteGenerator(String name);
 typedef void StateRouteCallback(StateRoute route);
 typedef void NotificationCallback();
@@ -154,6 +161,7 @@ class NavigatorState extends State<Navigator> {
     }
     return new Focus(child: new Stack(visibleRoutes.reversed.toList()));
   }
+
 }
 
 
@@ -272,7 +280,7 @@ class PageRoute extends Route {
       child: new FadeTransition(
         performance: performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-        child: builder(navigator, this)
+        child: builder(new RouteArguments(navigator: navigator, previousPerformance: this.performance, nextPerformance: nextRoutePerformance))
       )
     );
   }
