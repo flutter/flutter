@@ -16,7 +16,6 @@ final AssetBundle _bundle = _initBundle();
 
 ImageMap _images;
 SpriteSheet _spriteSheet;
-TestBedApp _app;
 
 main() async {
   _images = new ImageMap(_bundle);
@@ -28,29 +27,21 @@ main() async {
   String json = await _bundle.loadString('assets/sprites.json');
   _spriteSheet = new SpriteSheet(_images['assets/sprites.png'], json);
 
-  _app = new TestBedApp();
-  runApp(_app);
-}
-
-class TestBedApp extends App {
-
-  Widget build() {
-    ThemeData theme = new ThemeData(
+  runApp(new App(
+    title: 'Test Physics',
+    theme: new ThemeData(
       brightness: ThemeBrightness.light,
       primarySwatch: Colors.purple
-    );
-
-    return new Theme(
-      data: theme,
-      child: new Title(
-        title: 'Test Physics',
-        child: new SpriteWidget(
+    ),
+    routes: {
+      '/': (navigator, route) {
+        return new SpriteWidget(
           new TestBed(),
           SpriteBoxTransformMode.letterbox
-        )
-      )
-    );
-  }
+        );
+      }
+    }
+  ));
 }
 
 class TestBed extends NodeWithSize {
