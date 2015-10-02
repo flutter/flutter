@@ -181,7 +181,11 @@ abstract class Widget {
   /// Inflates this configuration to a concrete instance.
   Element createElement();
 
-  String toString() => '$runtimeType';
+  String toString() {
+    if (key == null)
+      return '$runtimeType';
+    return '$runtimeType-$key';
+  }
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
