@@ -10,5 +10,3 @@ dependencies:
 dependency_overrides:
   sky:
     path: ../sky/packages/sky
-  box2d:
-    path: ../../../box2d.dart
