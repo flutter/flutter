@@ -963,7 +963,7 @@ class RenderSizeObserver extends RenderProxyBox {
   SizeChangedCallback callback;
 
   void performLayout() {
-    Size oldSize = size;
+    Size oldSize = hasSize ? size : null;
     super.performLayout();
     if (oldSize != size)
       callback(size);
