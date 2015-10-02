@@ -1,3 +1,4 @@
+import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
@@ -29,7 +30,8 @@ void main() {
         )
       ));
       expect(detectedSize, equals(const Size(50.0, 25.0)));
-      expect(inner.currentContext.findRenderObject().localToGlobal(Point.origin), equals(const Point(25.0, 37.5)));
+      RenderBox box = inner.currentContext.findRenderObject();
+      expect(box.localToGlobal(Point.origin), equals(const Point(25.0, 37.5)));
     });
   });
 }
