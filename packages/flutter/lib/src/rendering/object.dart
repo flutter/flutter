@@ -130,6 +130,15 @@ class PaintingContext {
     }
   }
 
+  void paintStatistics(int optionsMask, Offset offset, Size size) {
+    StatisticsLayer statsLayer = new StatisticsLayer(
+      offset: offset,
+      paintBounds: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
+      optionsMask : optionsMask
+    );
+    _containerLayer.append(statsLayer);
+  }
+
   // Below we have various variants of the paintChild() method, which
   // do additional work, such as clipping or transforming, at the same
   // time as painting the children.

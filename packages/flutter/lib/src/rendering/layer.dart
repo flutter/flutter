@@ -87,6 +87,29 @@ class PictureLayer extends Layer {
 
 }
 
+/// A layer that indicates to the compositor that it should display
+/// certain statistics within it
+class StatisticsLayer extends Layer {
+  StatisticsLayer({
+    Offset offset: Offset.zero,
+    this.paintBounds,
+    this.optionsMask
+  }) : super(offset: offset);
+
+  /// The rectangle in this layer's coodinate system that bounds the recording
+  Rect paintBounds;
+
+  /// A mask specifying the statistics to display
+  int optionsMask;
+
+  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+    assert(optionsMask != null);
+    builder.addStatistics(optionsMask, paintBounds.shift(layerOffset));
+  }
+
+}
+
+
 /// A composited layer that has a list of children
 class ContainerLayer extends Layer {
   ContainerLayer({ Offset offset: Offset.zero }) : super(offset: offset);
