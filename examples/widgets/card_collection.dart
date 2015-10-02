@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
+
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
@@ -25,6 +27,9 @@ class CardCollectionAppState extends State<CardCollectionApp> {
   static const TextStyle cardLabelStyle =
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
 
+  // TODO(hansmuller): need a local image asset
+  static const _sunshineURL = "http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg";
+
   final TextStyle backgroundTextStyle =
     Typography.white.title.copyWith(textAlign: TextAlign.center);
 
@@ -33,6 +38,7 @@ class CardCollectionAppState extends State<CardCollectionApp> {
   bool _snapToCenter = false;
   bool _fixedSizeCards = false;
   bool _drawerShowing = false;
+  bool _sunshine = false;
   AnimationStatus _drawerStatus = AnimationStatus.dismissed;
   InvalidatorCallback _invalidator;
   Size _cardCollectionSize = new Size(200.0, 200.0);
@@ -139,6 +145,12 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     });
   }
 
+  void _toggleSunshine() {
+    setState(() {
+      _sunshine = !_sunshine;
+    });
+  }
+
   _changeDismissDirection(DismissDirection newDismissDirection) {
     setState(() {
       _dismissDirection = newDismissDirection;
@@ -185,6 +197,7 @@ class CardCollectionAppState extends State<CardCollectionApp> {
           new DrawerHeader(child: new Text('Options')),
           buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
           buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
+          buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
           new DrawerDivider(),
           buildDrawerRadioItem(DismissDirection.horizontal, 'action/code'),
           buildDrawerRadioItem(DismissDirection.left, 'navigation/arrow_back'),
@@ -285,6 +298,16 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     });
   }
 
+  sky.Shader _createShader(Rect bounds) {
+    return new LinearGradient(
+        begin: Point.origin,
+        end: new Point(0.0, bounds.height),
+        colors: [const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
+        stops: [0.1, 0.35]
+    )
+    .createShader();
+  }
+
   Widget build(BuildContext context) {
 
     Widget cardCollection;
@@ -305,6 +328,12 @@ class CardCollectionAppState extends State<CardCollectionApp> {
         onInvalidatorAvailable: (InvalidatorCallback callback) { _invalidator = callback; }
       );
     }
+
+    if (_sunshine)
+      cardCollection = new Stack([
+        new Column([new NetworkImage(src: _sunshineURL)]),
+        new ShaderMask(child: cardCollection, shaderCallback: _createShader)
+      ]);
 
     Widget body = new SizeObserver(
       callback: _updateCardCollectionSize,
