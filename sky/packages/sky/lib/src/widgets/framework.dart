@@ -93,10 +93,11 @@ abstract class GlobalKey extends Key {
     }
   }
 
-  BuildContext get currentContext => _registry[this];
-  Widget get currentWidget => _registry[this]?.widget;
+  Element get _currentElement => _registry[this];
+  BuildContext get currentContext => _currentElement;
+  Widget get currentWidget => _currentElement?.widget;
   State get currentState {
-    Element element = _registry[this];
+    Element element = _currentElement;
     if (element is StatefulComponentElement)
       return element.state;
     return null;
@@ -416,26 +417,26 @@ enum _ElementLifecycle {
   defunct,
 }
 
-class _FreeElements {
+class _InactiveElements {
   bool _locked = false;
   final Set<Element> _elements = new Set<Element>();
 
-  void _finalize(Element element) {
+  void _unmount(Element element) {
     assert(element._debugLifecycleState == _ElementLifecycle.inactive);
     element.unmount();
     assert(element._debugLifecycleState == _ElementLifecycle.defunct);
     element.visitChildren((Element child) {
       assert(child._parent == element);
-      _finalize(child);
+      _unmount(child);
     });
   }
 
-  void finalizeAll() {
+  void unmountAll() {
     BuildableElement.lockState(() {
       try {
         _locked = true;
         for (Element element in _elements)
-          _finalize(element);
+          _unmount(element);
       } finally {
         _elements.clear();
         _locked = false;
@@ -443,22 +444,40 @@ class _FreeElements {
     });
   }
 
+  void _deactivate(Element element) {
+    assert(element._debugLifecycleState == _ElementLifecycle.active);
+    element.deactivate();
+    assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+    element.visitChildren(_deactivate);
+  }
+
   void add(Element element) {
     assert(!_locked);
     assert(!_elements.contains(element));
     assert(element._parent == null);
-    void deactivate(Element element) {
-      assert(element._debugLifecycleState == _ElementLifecycle.active);
-      element.deactivate();
-      assert(element._debugLifecycleState == _ElementLifecycle.inactive);
-      element.visitChildren(deactivate);
-    }
-    deactivate(element);
+    if (element._active)
+      _deactivate(element);
     _elements.add(element);
+  }
+
+  void _reactivate(Element element) {
+    assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+    element.reactivate();
+    assert(element._debugLifecycleState == _ElementLifecycle.active);
+    element.visitChildren(_reactivate);
+  }
+
+  void remove(Element element) {
+    assert(!_locked);
+    assert(_elements.contains(element));
+    assert(element._parent == null);
+    _elements.remove(element);
+    assert(!element._active);
+    _reactivate(element);
   }
 }
 
-final _FreeElements _freeElements = new _FreeElements();
+final _InactiveElements _inactiveElements = new _InactiveElements();
 
 typedef void ElementVisitor(Element element);
 
@@ -496,6 +515,8 @@ abstract class Element<T extends Widget> implements BuildContext {
   T get widget => _widget;
   T _widget;
 
+  bool _active = false;
+
   RenderObject get renderObject {
     RenderObject result;
     void visit(Element element) {
@@ -514,6 +535,8 @@ abstract class Element<T extends Widget> implements BuildContext {
 
   /// Calls the argument for each child. Must be overridden by subclasses that support having children.
   void visitChildren(ElementVisitor visitor) { }
+
+  bool detachChild(Element child) => false;
 
   /// This method is the core of the system.
   ///
@@ -540,7 +563,7 @@ abstract class Element<T extends Widget> implements BuildContext {
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
     if (newWidget == null) {
       if (child != null)
-        _detachChild(child);
+        _deactivateChild(child);
       return null;
     }
     if (child != null) {
@@ -556,17 +579,14 @@ abstract class Element<T extends Widget> implements BuildContext {
         assert(child.widget == newWidget);
         return child;
       }
-      _detachChild(child);
+      _deactivateChild(child);
       assert(child._parent == null);
     }
-    child = newWidget.createElement();
-    child.mount(this, newSlot);
-    assert(child._debugLifecycleState == _ElementLifecycle.active);
-    return child;
+    return _inflateWidget(newWidget, newSlot);
   }
 
   static void finalizeTree() {
-    _freeElements.finalizeAll();
+    _inactiveElements.unmountAll();
     assert(GlobalKey._debugCheckForDuplicates);
     scheduleMicrotask(GlobalKey._notifyListeners);
   }
@@ -582,9 +602,11 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(parent == null || parent._debugLifecycleState == _ElementLifecycle.active);
     assert(slot == null);
     assert(depth == null);
+    assert(!_active);
     _parent = parent;
     _slot = newSlot;
     _depth = _parent != null ? _parent.depth + 1 : 1;
+    _active = true;
     if (widget.key is GlobalKey) {
       final GlobalKey key = widget.key;
       key._register(this);
@@ -598,6 +620,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(widget != null);
     assert(newWidget != null);
     assert(depth != null);
+    assert(_active);
     assert(_canUpdate(widget, newWidget));
     _widget = newWidget;
   }
@@ -626,6 +649,16 @@ abstract class Element<T extends Widget> implements BuildContext {
     _slot = newSlot;
   }
 
+  void _updateDepth() {
+    int expectedDepth = _parent.depth + 1;
+    if (_depth < expectedDepth) {
+      _depth = expectedDepth;
+      visitChildren((Element child) {
+        child._updateDepth();
+      });
+    }
+  }
+
   void detachRenderObject() {
     visitChildren((Element child) {
       child.detachRenderObject();
@@ -633,19 +666,71 @@ abstract class Element<T extends Widget> implements BuildContext {
     _slot = null;
   }
 
-  void _detachChild(Element child) {
+  void attachRenderObject(dynamic newSlot) {
+    assert(_slot == null);
+    visitChildren((Element child) {
+      child.attachRenderObject(newSlot);
+    });
+    _slot = newSlot;
+  }
+
+  Element _findAndActivateElement(GlobalKey key, Widget newWidget) {
+    Element element = key._currentElement;
+    if (element == null)
+      return null;
+    if (!_canUpdate(element.widget, newWidget))
+      return null;
+    if (element._parent != null && !element._parent.detachChild(element))
+      return null;
+    assert(element._parent == null);
+    _inactiveElements.remove(element);
+    return element;
+  }
+
+  Element _inflateWidget(Widget newWidget, dynamic newSlot) {
+    Key key = newWidget.key;
+    if (key is GlobalKey) {
+      Element newChild = _findAndActivateElement(key, newWidget);
+      if (newChild != null) {
+        assert(newChild._parent == null);
+        newChild._parent = this;
+        newChild._updateDepth();
+        newChild.attachRenderObject(newSlot);
+        Element updatedChild = updateChild(newChild, newWidget, newSlot);
+        assert(newChild == updatedChild);
+        return updatedChild;
+      }
+    }
+    Element newChild = newWidget.createElement();
+    newChild.mount(this, newSlot);
+    assert(newChild._debugLifecycleState == _ElementLifecycle.active);
+    return newChild;
+  }
+
+  void _deactivateChild(Element child) {
     assert(child != null);
     assert(child._parent == this);
     child._parent = null;
     child.detachRenderObject();
-    _freeElements.add(child);
+    _inactiveElements.add(child);
   }
 
   void deactivate() {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
     assert(depth != null);
+    assert(_active);
+    _active = false;
     assert(() { _debugLifecycleState = _ElementLifecycle.inactive; return true; });
+  }
+
+  void reactivate() {
+    assert(_debugLifecycleState == _ElementLifecycle.inactive);
+    assert(widget != null);
+    assert(depth != null);
+    assert(!_active);
+    _active = true;
+    assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
   }
 
   /// Called when an Element is removed from the tree.
@@ -654,6 +739,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
     assert(depth != null);
+    assert(!_active);
     if (widget.key is GlobalKey) {
       final GlobalKey key = widget.key;
       key._unregister(this);
@@ -733,8 +819,6 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   bool get dirty => _dirty;
   bool _dirty = true;
 
-  bool _active = false;
-
   // We to let component authors call setState from initState, didUpdateConfig,
   // and build even when state is locked because its convenient and a no-op
   // anyway. This flag ensures that this convenience is only allowed on the
@@ -749,8 +833,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     assert(_child == null);
-    assert(!_active);
-    _active = true;
+    assert(_active);
     rebuild();
     assert(_child != null);
   }
@@ -845,10 +928,11 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
       visitor(_child);
   }
 
-  void deactivate() {
-    super.deactivate();
-    assert(_active == true);
-    _active = false;
+  bool detachChild(Element child) {
+    assert(child == _child);
+    _deactivateChild(_child);
+    _child = null;
+    return true;
   }
 
   void dependenciesChanged() {
@@ -1039,9 +1123,8 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
 
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    assert(_ancestorRenderObjectElement == null);
-    _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
-    _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, newSlot);
+    assert(_slot == newSlot);
+    attachRenderObject(newSlot);
     ParentDataElement parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       updateParentData(parentDataElement.widget);
@@ -1141,7 +1224,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
         if (oldChild.widget.key != null)
           oldKeyedChildren[oldChild.widget.key] = oldChild;
         else
-          _detachChild(oldChild);
+          _deactivateChild(oldChild);
         oldChildrenBottom -= 1;
       }
     }
@@ -1194,7 +1277,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     // clean up any of the remaining middle nodes from the old list
     if (haveOldNodes && !oldKeyedChildren.isEmpty) {
       for (Element oldChild in oldKeyedChildren.values)
-        _detachChild(oldChild);
+        _deactivateChild(oldChild);
     }
 
     assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
@@ -1221,6 +1304,13 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     super._updateSlot(newSlot);
     assert(slot == newSlot);
     _ancestorRenderObjectElement.moveChildRenderObject(renderObject, slot);
+  }
+
+  void attachRenderObject(dynamic newSlot) {
+    assert(_ancestorRenderObjectElement == null);
+    _slot = newSlot;
+    _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
+    _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, newSlot);
   }
 
   void detachRenderObject() {
@@ -1268,6 +1358,13 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
   void visitChildren(ElementVisitor visitor) {
     if (_child != null)
       visitor(_child);
+  }
+
+  bool detachChild(Element child) {
+    assert(child == _child);
+    _deactivateChild(_child);
+    _child = null;
+    return true;
   }
 
   void mount(Element parent, dynamic newSlot) {
@@ -1358,9 +1455,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
     _children = new List<Element>(widget.children.length);
     Element previousChild;
     for (int i = _children.length - 1; i >= 0; --i) {
-      Element newChild = widget.children[i].createElement();
-      newChild.mount(this, previousChild);
-      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
+      Element newChild = _inflateWidget(widget.children[i], previousChild);
       _children[i] = newChild;
       previousChild = newChild;
     }
