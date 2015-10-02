@@ -333,7 +333,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     double newExtent = _getElementExtent(element, innerConstraints);
     bool result = _childExtents[index] == newExtent;
     if (!result)
-      print("Element $element at index $index was size ${_childExtents[index]} but is now size $newExtent yet no invalidate() was received to that effect");
+      debugPrint("Element $element at index $index was size ${_childExtents[index]} but is now size $newExtent yet no invalidate() was received to that effect");
     return result;
   }
 

@@ -94,8 +94,8 @@ void debugDumpApp() {
   assert(WidgetFlutterBinding.instance.renderViewElement != null);
   String mode = 'RELEASE MODE';
   assert(() { mode = 'CHECKED MODE'; return true; });
-  print('${WidgetFlutterBinding.instance.runtimeType} - $mode');
-  WidgetFlutterBinding.instance.renderViewElement.toStringDeep().split('\n').forEach(print);
+  debugPrint('${WidgetFlutterBinding.instance.runtimeType} - $mode');
+  debugPrint(WidgetFlutterBinding.instance.renderViewElement.toStringDeep());
 }
 
 /// This class provides a bridge from a RenderObject to an Element tree. The

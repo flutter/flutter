@@ -14,7 +14,7 @@ void main() {
           routes: <String, RouteBuilder>{
             '/': (RouteArguments args) {
               navigator = args.navigator;
-              new Container();
+              return new Container();
             }
           }
         )
@@ -43,7 +43,7 @@ void main() {
           routes: <String, RouteBuilder>{
             '/': (RouteArguments args) {
               navigator = args.navigator;
-              new Container();
+              return new Container();
             }
           }
         )
