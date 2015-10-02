@@ -4,14 +4,12 @@
 
 part of stocks;
 
-typedef void StockActionListener(Stock stock);
-
 class StockList extends StatelessComponent {
-  StockList({ Key key, this.stocks, this.onAction, this.onOpen }) : super(key: key);
+  StockList({ Key key, this.stocks, this.onOpen, this.onAction }) : super(key: key);
 
   final List<Stock> stocks;
-  final StockActionListener onAction;
-  final StockActionListener onOpen;
+  final StockRowActionCallback onOpen;
+  final StockRowActionCallback onAction;
 
   Widget build(BuildContext context) {
     return new Material(
@@ -22,8 +20,8 @@ class StockList extends StatelessComponent {
         itemBuilder: (BuildContext context, Stock stock) {
           return new StockRow(
             stock: stock,
-            onPressed: () { onAction(stock); },
-            onLongPressed: () { onOpen(stock); }
+            onPressed: onOpen,
+            onLongPressed: onAction
           );
         }
       )

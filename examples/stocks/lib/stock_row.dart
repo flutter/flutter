@@ -4,18 +4,50 @@
 
 part of stocks;
 
+enum StockRowPartKind { arrow, symbol, price }
+
+class StockRowPartGlobalKey extends GlobalKey {
+  const StockRowPartGlobalKey(this.stock, this.part) : super.constructor();
+  final Stock stock;
+  final StockRowPartKind part;
+  String toString() => '[StockRowPartGlobalKey ${stock.symbol}:${part.toString().split(".")[1]})]';
+  bool operator==(other) => other is StockRowPartGlobalKey && identical(other.stock, stock) && identical(other.part, part);
+  int get hashCode => 37 * (37 * (373) + identityHashCode(stock)) + identityHashCode(part);
+}
+
+typedef void StockRowActionCallback(Stock stock, GlobalKey row, GlobalKey arrowKey, GlobalKey symbolKey, GlobalKey priceKey);
+
 class StockRow extends StatelessComponent {
   StockRow({
     Stock stock,
     this.onPressed,
     this.onLongPressed
-  }) : this.stock = stock, super(key: new Key(stock.symbol));
+  }) : this.stock = stock,
+       arrowKey = new StockRowPartGlobalKey(stock, StockRowPartKind.arrow),
+       symbolKey = new StockRowPartGlobalKey(stock, StockRowPartKind.symbol),
+       priceKey = new StockRowPartGlobalKey(stock, StockRowPartKind.price),
+       super(key: new GlobalObjectKey(stock));
 
   final Stock stock;
-  final GestureTapListener onPressed;
-  final GestureLongPressListener onLongPressed;
+  final StockRowActionCallback onPressed;
+  final StockRowActionCallback onLongPressed;
+  final GlobalKey arrowKey;
+  final GlobalKey symbolKey;
+  final GlobalKey priceKey;
 
   static const double kHeight = 79.0;
+
+  GestureTapListener _getTapHandler(StockRowActionCallback callback) {
+    if (callback == null)
+      return null;
+    return () => callback(stock, key, arrowKey, symbolKey, priceKey);
+  }
+
+  GestureLongPressListener _getLongPressHandler(StockRowActionCallback callback) {
+    if (callback == null)
+      return null;
+    return () => callback(stock, key, arrowKey, symbolKey, priceKey);
+  }
 
   Widget build(BuildContext context) {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
@@ -23,28 +55,9 @@ class StockRow extends StatelessComponent {
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0) changeInPrice = "+" + changeInPrice;
 
-    List<Widget> children = [
-      new Flexible(
-        child: new Text(stock.symbol),
-        flex: 2
-      ),
-      new Flexible(
-        child: new Text(
-          lastSale,
-          style: const TextStyle(textAlign: TextAlign.right)
-        )
-      ),
-      new Flexible(
-        child: new Text(
-          changeInPrice,
-          style: Theme.of(context).text.caption.copyWith(textAlign: TextAlign.right)
-        )
-      )
-    ];
-
     return new GestureDetector(
-      onTap: onPressed,
-      onLongPress: onLongPressed,
+      onTap: _getTapHandler(onPressed),
+      onLongPress: _getLongPressHandler(onLongPressed),
       child: new InkWell(
         child: new Container(
           padding: const EdgeDims.TRBL(16.0, 16.0, 20.0, 16.0),
@@ -55,12 +68,33 @@ class StockRow extends StatelessComponent {
           ),
           child: new Row([
             new Container(
+              key: arrowKey,
               child: new StockArrow(percentChange: stock.percentChange),
               margin: const EdgeDims.only(right: 5.0)
             ),
             new Flexible(
-              child: new Row(
-                children,
+              child: new Row([
+                  new Flexible(
+                    flex: 2,
+                    child: new Text(
+                      stock.symbol,
+                      key: symbolKey
+                    )
+                  ),
+                  new Flexible(
+                    child: new Text(
+                      lastSale,
+                      style: const TextStyle(textAlign: TextAlign.right),
+                      key: priceKey
+                    )
+                  ),
+                  new Flexible(
+                    child: new Text(
+                      changeInPrice,
+                      style: Theme.of(context).text.caption.copyWith(textAlign: TextAlign.right)
+                    )
+                  ),
+                ],
                 alignItems: FlexAlignItems.baseline,
                 textBaseline: DefaultTextStyle.of(context).textBaseline
               )
