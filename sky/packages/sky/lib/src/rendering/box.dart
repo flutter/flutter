@@ -178,6 +178,60 @@ class BoxConstraints extends Constraints {
            (minHeight <= size.height) && (size.height <= math.max(minHeight, maxHeight));
   }
 
+  BoxConstraints operator*(double other) {
+    return new BoxConstraints(
+      minWidth: minWidth * other,
+      maxWidth: maxWidth * other,
+      minHeight: minHeight * other,
+      maxHeight: maxHeight * other
+    );
+  }
+
+  BoxConstraints operator/(double other) {
+    return new BoxConstraints(
+      minWidth: minWidth / other,
+      maxWidth: maxWidth / other,
+      minHeight: minHeight / other,
+      maxHeight: maxHeight / other
+    );
+  }
+
+  BoxConstraints operator~/(double other) {
+    return new BoxConstraints(
+      minWidth: (minWidth ~/ other).toDouble(),
+      maxWidth: (maxWidth ~/ other).toDouble(),
+      minHeight: (minHeight ~/ other).toDouble(),
+      maxHeight: (maxHeight ~/ other).toDouble()
+    );
+  }
+
+  BoxConstraints operator%(double other) {
+    return new BoxConstraints(
+      minWidth: minWidth % other,
+      maxWidth: maxWidth % other,
+      minHeight: minHeight % other,
+      maxHeight: maxHeight % other
+    );
+  }
+
+  /// Linearly interpolate between two BoxConstraints
+  ///
+  /// If either is null, this function interpolates from [BoxConstraints.zero].
+  static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b * t;
+    if (b == null)
+      return a * (1.0 - t);
+    return new BoxConstraints(
+      minWidth: sky.lerpDouble(a.minWidth, b.minWidth, t),
+      maxWidth: sky.lerpDouble(a.maxWidth, b.maxWidth, t),
+      minHeight: sky.lerpDouble(a.minHeight, b.minHeight, t),
+      maxHeight: sky.lerpDouble(a.maxHeight, b.maxHeight, t)
+    );
+  }
+
   bool operator ==(other) {
     if (identical(this, other))
       return true;
