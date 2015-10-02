@@ -16,15 +16,12 @@ class InstallCommand extends Command {
   final description = 'Install your Flutter app on attached devices.';
 
   AndroidDevice android = null;
+  IOSDevice ios;
 
-  InstallCommand([this.android]);
+  InstallCommand({this.android, this.ios});
 
   @override
   Future<int> run() async {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
-
     if (install()) {
       return 0;
     } else {
@@ -33,13 +30,26 @@ class InstallCommand extends Command {
   }
 
   bool install() {
+    if (android == null) {
+      android = new AndroidDevice();
+    }
+    if (ios == null) {
+      ios = new IOSDevice();
+    }
+
     bool installedSomewhere = false;
 
     Map<BuildPlatform, ApplicationPackage> packages =
         ApplicationPackageFactory.getAvailableApplicationPackages();
     ApplicationPackage androidApp = packages[BuildPlatform.android];
+    ApplicationPackage iosApp = packages[BuildPlatform.iOS];
+
     if (androidApp != null && android.isConnected()) {
       installedSomewhere = android.installApp(androidApp) || installedSomewhere;
+    }
+
+    if (iosApp != null && ios.isConnected()) {
+      installedSomewhere = ios.installApp(iosApp) || installedSomewhere;
     }
 
     return installedSomewhere;

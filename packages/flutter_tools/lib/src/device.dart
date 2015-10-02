@@ -24,6 +24,8 @@ abstract class _Device {
     if (id == null) {
       if (className == AndroidDevice.className) {
         id = AndroidDevice.defaultDeviceID;
+      } else if (className == IOSDevice.className) {
+        id = IOSDevice.defaultDeviceID;
       } else {
         throw 'Attempted to create a Device of unknown type $className';
       }
@@ -32,6 +34,10 @@ abstract class _Device {
     return _deviceCache.putIfAbsent(id, () {
       if (className == AndroidDevice.className) {
         final device = new AndroidDevice._(id);
+        _deviceCache[id] = device;
+        return device;
+      } else if (className == IOSDevice.className) {
+        final device = new IOSDevice._(id);
         _deviceCache[id] = device;
         return device;
       } else {
@@ -52,13 +58,120 @@ abstract class _Device {
   bool isAppInstalled(ApplicationPackage app);
 }
 
+class IOSDevice extends _Device {
+  static const String className = 'IOSDevice';
+  static final String defaultDeviceID = 'default_ios_id';
+
+  static const String _macInstructions =
+      'To work with iOS devices, please install ideviceinstaller. '
+      'If you use homebrew, you can install it with '
+      '"\$ brew install ideviceinstaller".';
+  static const String _linuxInstructions =
+      'To work with iOS devices, please install ideviceinstaller. '
+      'On Ubuntu or Debian, you can install it with '
+      '"\$ apt-get install ideviceinstaller".';
+
+  String _installerPath;
+  String get installerPath => _installerPath;
+
+  String _listerPath;
+  String get listerPath => _listerPath;
+
+  String _informerPath;
+  String get informerPath => _informerPath;
+
+  String _name;
+  String get name => _name;
+
+  factory IOSDevice({String id, String name}) {
+    IOSDevice device = new _Device(className, id);
+    device._name = name;
+    return device;
+  }
+
+  IOSDevice._(String id) : super._(id) {
+    _installerPath = _checkForCommand('ideviceinstaller');
+    _listerPath = _checkForCommand('idevice_id');
+    _informerPath = _checkForCommand('ideviceinfo');
+  }
+
+  static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
+    List<IOSDevice> devices = [];
+    for (String id in _getAttachedDeviceIDs(mockIOS)) {
+      String name = _getDeviceName(id, mockIOS);
+      devices.add(new IOSDevice(id: id, name: name));
+    }
+    return devices;
+  }
+
+  static List<String> _getAttachedDeviceIDs([IOSDevice mockIOS]) {
+    String listerPath =
+        (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
+    return runSync([listerPath, '-l']).trim().split('\n');
+  }
+
+  static String _getDeviceName(String deviceID, [IOSDevice mockIOS]) {
+    String informerPath = (mockIOS != null)
+        ? mockIOS.informerPath
+        : _checkForCommand('ideviceinfo');
+    return runSync([informerPath, '-k', 'DeviceName', '-u', deviceID]);
+  }
+
+  static final Map<String, String> _commandMap = {};
+  static String _checkForCommand(String command,
+      [String macInstructions = _macInstructions,
+      String linuxInstructions = _linuxInstructions]) {
+    return _commandMap.putIfAbsent(command, () {
+      try {
+        command = runCheckedSync(['which', command]).trim();
+      } catch (e) {
+        if (Platform.isMacOS) {
+          _logging.severe(macInstructions);
+        } else if (Platform.isLinux) {
+          _logging.severe(linuxInstructions);
+        } else {
+          _logging.severe('$command is not available on your platform.');
+        }
+        exit(2);
+      }
+      return command;
+    });
+  }
+
+  @override
+  bool installApp(ApplicationPackage app) {
+    if (id == defaultDeviceID) {
+      runCheckedSync([installerPath, '-i', app.appPath]);
+    } else {
+      runCheckedSync([installerPath, '-u', id, '-i', app.appPath]);
+    }
+    return false;
+  }
+
+  @override
+  bool isConnected() {
+    List<String> ids = _getAttachedDeviceIDs();
+    for (String id in ids) {
+      if (id == this.id || this.id == defaultDeviceID) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  bool isAppInstalled(ApplicationPackage app) {
+    return false;
+  }
+}
+
 class AndroidDevice extends _Device {
   static const String _ADB_PATH = 'adb';
   static const String _observatoryPort = '8181';
   static const String _serverPort = '9888';
 
   static const String className = 'AndroidDevice';
-  static final String defaultDeviceID = 'default';
+  static final String defaultDeviceID = 'default_android_device';
 
   String productID;
   String modelID;
@@ -85,10 +198,8 @@ class AndroidDevice extends _Device {
   /// we don't have to rely on the test setup having adb available to it.
   static List<AndroidDevice> getAttachedDevices([AndroidDevice mockAndroid]) {
     List<AndroidDevice> devices = [];
-    String adbPath = _getAdbPath();
-    if (mockAndroid != null) {
-      adbPath = mockAndroid.adbPath;
-    }
+    String adbPath =
+        (mockAndroid != null) ? mockAndroid.adbPath : _getAdbPath();
     List<String> output =
         runSync([adbPath, 'devices', '-l']).trim().split('\n');
     RegExp deviceInfo = new RegExp(

@@ -16,8 +16,9 @@ class ListCommand extends Command {
   final name = 'list';
   final description = 'List all connected devices.';
   AndroidDevice android;
+  IOSDevice ios;
 
-  ListCommand([this.android]) {
+  ListCommand({this.android, this.ios}) {
     argParser.addFlag('details',
         abbr: 'd',
         negatable: false,
@@ -40,6 +41,18 @@ class ListCommand extends Command {
         print(device.id);
       }
     }
+
+    if (details) {
+      print('iOS Devices:');
+    }
+    for (IOSDevice device in IOSDevice.getAttachedDevices(ios)) {
+      if (details) {
+        print('${device.id}\t${device.name}');
+      } else {
+        print(device.id);
+      }
+    }
+
     return 0;
   }
 }

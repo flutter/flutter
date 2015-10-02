@@ -16,12 +16,21 @@ main() => defineTests();
 defineTests() {
   group('list', () {
     test('returns 0 when called', () {
+      applicationPackageSetup();
+
       MockAndroidDevice android = new MockAndroidDevice();
       // Avoid relying on adb being installed on the test system.
       // Instead, cause the test to run the echo command.
       when(android.adbPath).thenReturn('echo');
 
-      ListCommand command = new ListCommand(android);
+      MockIOSDevice ios = new MockIOSDevice();
+      // Avoid relying on idevice* being installed on the test system.
+      // Instead, cause the test to run the echo command.
+      when(ios.informerPath).thenReturn('echo');
+      when(ios.installerPath).thenReturn('echo');
+      when(ios.listerPath).thenReturn('echo');
+
+      ListCommand command = new ListCommand(android: android, ios: ios);
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
       runner.run(['list']).then((int code) => expect(code, equals(0)));

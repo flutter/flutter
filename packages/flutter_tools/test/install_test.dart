@@ -6,7 +6,6 @@ library install_test;
 
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/application_package.dart';
 import 'package:sky_tools/src/install.dart';
 import 'package:test/test.dart';
 
@@ -17,19 +16,39 @@ main() => defineTests();
 defineTests() {
   group('install', () {
     test('returns 0 when Android is connected and ready for an install', () {
-      ApplicationPackageFactory.srcPath = './';
-      ApplicationPackageFactory.setBuildPath(
-          BuildType.prebuilt, BuildPlatform.android, './');
+      applicationPackageSetup();
 
       MockAndroidDevice android = new MockAndroidDevice();
       when(android.isConnected()).thenReturn(true);
       when(android.installApp(any)).thenReturn(true);
-      InstallCommand command = new InstallCommand(android);
+
+      MockIOSDevice ios = new MockIOSDevice();
+      when(ios.isConnected()).thenReturn(false);
+      when(ios.installApp(any)).thenReturn(false);
+
+      InstallCommand command = new InstallCommand(android: android, ios: ios);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
-          ..addCommand(command);
-      runner.run(['install'])
-          .then((int code) => expect(code, equals(0)));
+        ..addCommand(command);
+      runner.run(['install']).then((int code) => expect(code, equals(0)));
+    });
+
+    test('returns 0 when iOS is connected and ready for an install', () {
+      applicationPackageSetup();
+
+      MockAndroidDevice android = new MockAndroidDevice();
+      when(android.isConnected()).thenReturn(false);
+      when(android.installApp(any)).thenReturn(false);
+
+      MockIOSDevice ios = new MockIOSDevice();
+      when(ios.isConnected()).thenReturn(true);
+      when(ios.installApp(any)).thenReturn(true);
+
+      InstallCommand command = new InstallCommand(android: android, ios: ios);
+
+      CommandRunner runner = new CommandRunner('test_flutter', '')
+        ..addCommand(command);
+      runner.run(['install']).then((int code) => expect(code, equals(0)));
     });
   });
 }

@@ -20,8 +20,9 @@ class StartCommand extends Command {
   final name = 'start';
   final description = 'Start your Flutter app on attached devices.';
   AndroidDevice android = null;
+  IOSDevice ios = null;
 
-  StartCommand([this.android]) {
+  StartCommand({this.android, this.ios}) {
     argParser.addFlag('poke',
         negatable: false,
         help: 'Restart the connection to the server (Android only).');
@@ -48,7 +49,7 @@ class StartCommand extends Command {
       stopper.stop();
 
       // Only install if the user did not specify a poke
-      InstallCommand installer = new InstallCommand(android);
+      InstallCommand installer = new InstallCommand(android: android, ios: ios);
       startedSomewhere = installer.install();
     }
 
