@@ -359,9 +359,11 @@ abstract class RenderBox extends RenderObject {
         final _DebugSize _size = this._size;
         assert(_size._owner == this);
         if (RenderObject.debugActiveLayout != null) {
-          // we are always allowed to access our own size (for print debugging and asserts if nothing else)
-          // other than us, the only object that's allowed to read our size is our parent, if they're said they will
-          // if you hit this assert trying to access a child's size, pass parentUsesSize: true in layout()
+          // We are always allowed to access our own size (for print debugging
+          // and asserts if nothing else). Other than us, the only object that's
+          // allowed to read our size is our parent, if they've said they will.
+          // If you hit this assert trying to access a child's size, pass
+          // "parentUsesSize: true" to that child's layout().
           assert(debugDoingThisResize || debugDoingThisLayout ||
                  (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
         }
@@ -377,8 +379,12 @@ abstract class RenderBox extends RenderObject {
     assert((sizedByParent && debugDoingThisResize) ||
            (!sizedByParent && debugDoingThisLayout));
     assert(() {
-      if (value is _DebugSize)
-        return value._canBeUsedByParent && value._owner.parent == this;
+      if (value is _DebugSize) {
+        if (value._owner != this) {
+          assert(value._owner.parent == this);
+          assert(value._canBeUsedByParent);
+        }
+      }
       return true;
     });
     _size = value;
@@ -387,6 +393,11 @@ abstract class RenderBox extends RenderObject {
       return true;
     });
     assert(debugDoesMeetConstraints());
+  }
+
+  void debugResetSize() {
+    // updates the value of size._canBeUsedByParent if necessary
+    size = size;
   }
 
   Map<TextBaseline, double> _cachedBaselines;
@@ -473,7 +484,7 @@ abstract class RenderBox extends RenderObject {
     });
     bool result = constraints.isSatisfiedBy(_size);
     if (!result)
-      print("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
+      debugPrint("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
     return result;
   }
 

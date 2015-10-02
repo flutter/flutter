@@ -31,6 +31,8 @@ typedef void PerformanceStatusListener(PerformanceStatus status);
 /// want to watch a performance but should not be able to change the
 /// performance's state.
 abstract class PerformanceView {
+  const PerformanceView();
+
   /// Update the given variable according to the current progress of the performance
   void updateVariable(Animatable variable);
   /// Calls the listener every time the progress of the performance changes
@@ -44,6 +46,10 @@ abstract class PerformanceView {
 
   /// The current status of this animation
   PerformanceStatus get status;
+
+  /// The current progress of this animation (a value from 0.0 to 1.0).
+  /// This is the value that is used to update any variables when using updateVariable().
+  double get progress;
 
   /// Whether this animation is stopped at the beginning
   bool get isDismissed => status == PerformanceStatus.dismissed;
@@ -61,11 +67,15 @@ abstract class PerformanceView {
 /// [fling] the timeline causing a physics-based simulation to take over the
 /// progression.
 class Performance extends PerformanceView {
-  Performance({ this.duration, double progress }) {
+  Performance({ this.duration, double progress, this.debugLabel }) {
     _timeline = new SimulationStepper(_tick);
     if (progress != null)
       _timeline.value = progress.clamp(0.0, 1.0);
   }
+
+  /// A label that is used in the toString() output. Intended to aid with
+  /// identifying performance instances in debug output.
+  final String debugLabel;
 
   /// Returns a [PerformanceView] for this performance,
   /// so that a pointer to this object can be passed around without
@@ -219,6 +229,12 @@ class Performance extends PerformanceView {
   void didTick(double t) {
     _notifyListeners();
     _checkStatusChanged();
+  }
+
+  String toString() {
+    if (debugLabel != null)
+      return '$runtimeType at $progress for $debugLabel';
+    return '$runtimeType at $progress';
   }
 }
 

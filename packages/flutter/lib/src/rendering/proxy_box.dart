@@ -1018,7 +1018,7 @@ class RenderTransform extends RenderProxyBox {
   String debugDescribeSettings(String prefix) {
     List<String> result = _transform.toString().split('\n').map((String s) => '$prefix  $s\n').toList();
     result.removeLast();
-    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\nalignment: $alignment\n';
+    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\n${prefix}alignment: $alignment\n';
   }
 }
 
