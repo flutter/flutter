@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'focus.dart';
 import 'framework.dart';
+import 'heroes.dart';
 import 'transitions.dart';
 import 'gridpaper.dart';
 
@@ -51,6 +52,40 @@ class Navigator extends StatefulComponent {
 
 // The navigator tracks which "page" we are on.
 // It also animates between these pages.
+// Pages can have "heroes", which are UI elements that animate from point to point.
+// These animations are called journeys.
+// 
+// Journeys can start in two conditions:
+//  - Everything is calm, and we have no heroes in flight. In this case, we will
+//    have to collect the heroes from the route we're starting at and the route
+//    we're going to, and try to transition from one set to the other.
+//  - We already have heroes in flight. In that case, we just want to look at
+//    the heroes of our destination, and then try to transition to them from the
+//    in-flight heroes.
+
+class _HeroTransitionInstruction {
+  Route from;
+  Route to;
+  void update(Route newFrom, Route newTo) {
+    assert(newFrom != null);
+    assert(newTo != null);
+    if (!newFrom.canHaveHeroes || !newTo.canHaveHeroes)
+      return;
+    assert(newFrom.performance != null);
+    assert(newTo.performance != null);
+    if (from == null)
+      from = newFrom;
+    to = newTo;
+    if (from == to)
+      reset();
+  }
+  void reset() {
+    assert(hasInstructions);
+    from = null;
+    to = null;
+  }
+  bool get hasInstructions => from != null || to != null;
+}
 
 class NavigatorState extends State<Navigator> {
 
@@ -62,6 +97,7 @@ class NavigatorState extends State<Navigator> {
 
   void initState() {
     super.initState();
+    _activeHeroes = new HeroParty(onQuestFinished: _handleHeroQuestFinished);
     PageRoute route = new PageRoute(config.routes[kDefaultRouteName], name: kDefaultRouteName);
     assert(route.hasContent);
     assert(!route.ephemeral);
@@ -76,14 +112,22 @@ class NavigatorState extends State<Navigator> {
     ));
   }
 
-  void pushNamed(String name) {
+  void pushNamed(String name, { Set<Key> mostValuableKeys }) {
     RouteBuilder generateRoute() {
       assert(config.onGenerateRoute != null);
       return config.onGenerateRoute(name);
     }
     final RouteBuilder builder = config.routes[name] ?? generateRoute() ?? config.onUnknownRoute;
     assert(builder != null); // 404 getting your 404!
-    push(new PageRoute(builder, name: name));
+    push(new PageRoute(builder, name: name, mostValuableKeys: mostValuableKeys));
+  }
+
+  final _HeroTransitionInstruction _desiredHeroes = new _HeroTransitionInstruction();
+  HeroParty _activeHeroes;
+
+  void _handleHeroQuestFinished() {
+    for (Route route in _history)
+      route._hasActiveHeroes = false;
   }
 
   void push(Route route) {
@@ -93,6 +137,14 @@ class NavigatorState extends State<Navigator> {
       while (currentRoute.ephemeral) {
         currentRoute.didPop(null);
         _currentPosition -= 1;
+      }
+      // find the most recent active route that might have heroes
+      if (route.hasContent) {
+        int index = _currentPosition;
+        while (index > 0 && !_history[index].hasContent)
+          index -= 1;
+        assert(_history[index].hasContent);
+        _desiredHeroes.update(_history[index], route);
       }
       // add the new route
       _currentPosition += 1;
@@ -118,6 +170,14 @@ class NavigatorState extends State<Navigator> {
   void pop([dynamic result]) {
     setState(() {
       assert(_currentPosition > 0);
+      // find the most recent previous route that might have heroes
+      if (currentRoute.hasContent) {
+        int index = _currentPosition - 1;
+        while (index > 0 && !_history[index].hasContent)
+          index -= 1;
+        assert(_history[index].hasContent);
+        _desiredHeroes.update(currentRoute, _history[index]);
+      }
       // pop the route
       currentRoute.didPop(result);
       _currentPosition -= 1;
@@ -153,11 +213,17 @@ class NavigatorState extends State<Navigator> {
   void _removeRoute(Route route) {
     assert(_history.contains(route));
     setState(() {
+      if (_desiredHeroes.hasInstructions) {
+        if (_desiredHeroes.from == route || _desiredHeroes.to == route)
+          _desiredHeroes.reset();
+      }
       _history.remove(route);
     });
   }
 
-   Widget build(BuildContext context) {
+  PerformanceView _currentHeroPerformance;
+
+  Widget build(BuildContext context) {
     List<Widget> visibleRoutes = <Widget>[];
 
     assert(() {
@@ -166,22 +232,35 @@ class NavigatorState extends State<Navigator> {
       return true;
     });
 
+
+    bool alreadyInsertedHeroes = false;
     bool alreadyInsertedModalBarrier = false;
     Route nextContentRoute;
+    PerformanceView nextHeroPerformance;
     for (int i = _history.length-1; i >= 0; i -= 1) {
-      Route route = _history[i];
+      final Route route = _history[i];
       if (!route.hasContent) {
         assert(!route.modal);
+        assert(!_desiredHeroes.hasInstructions || (_desiredHeroes.from != route && _desiredHeroes.to != route));
+        assert(!route._hasActiveHeroes);
         continue;
       }
-      visibleRoutes.add(
-        new KeyedSubtree(
-          key: new ObjectKey(route),
-          child: route._internalBuild(nextContentRoute)
-        )
-      );
-      if (route.isActuallyOpaque)
+      if (route._hasActiveHeroes && !alreadyInsertedHeroes) {
+        visibleRoutes.addAll(_activeHeroes.getWidgets(context, _currentHeroPerformance));
+        alreadyInsertedHeroes = true;
+      }
+      if (_desiredHeroes.hasInstructions) {
+        if ((_desiredHeroes.to == route || _desiredHeroes.from == route) && nextHeroPerformance == null)
+          nextHeroPerformance = route.performance;
+        visibleRoutes.add(route._internalBuild(nextContentRoute, buildTargetHeroes: _desiredHeroes.to == route));
+      } else {
+        visibleRoutes.add(route._internalBuild(nextContentRoute));
+      }
+      if (route.isActuallyOpaque) {
+        assert(!_desiredHeroes.hasInstructions ||
+               (_history.indexOf(_desiredHeroes.from) >= i && _history.indexOf(_desiredHeroes.to) >= i));
         break;
+      }
       assert(route.modal || route.ephemeral);
       if (route.modal && i > 0 && !alreadyInsertedModalBarrier) {
         visibleRoutes.add(new Listener(
@@ -192,12 +271,54 @@ class NavigatorState extends State<Navigator> {
       }
       nextContentRoute = route;
     }
+
+    if (_desiredHeroes.hasInstructions) {
+      assert(nextHeroPerformance != null);
+      scheduler.requestPostFrameCallback((Duration timestamp) {
+        Map<Object, HeroHandle> heroesFrom;
+        Map<Object, HeroHandle> heroesTo;
+        Set<Key> mostValuableKeys = new Set<Key>();
+        if (_desiredHeroes.from.mostValuableKeys != null)
+          mostValuableKeys.addAll(_desiredHeroes.from.mostValuableKeys);
+        if (_desiredHeroes.to.mostValuableKeys != null)
+          mostValuableKeys.addAll(_desiredHeroes.to.mostValuableKeys);
+        if (_activeHeroes.isEmpty) {
+          assert(!_desiredHeroes.from._hasActiveHeroes);
+          heroesFrom = _desiredHeroes.from.getHeroesToAnimate(mostValuableKeys);
+          _desiredHeroes.from._hasActiveHeroes = heroesFrom.length > 0;
+        } else {
+          assert(_desiredHeroes.from._hasActiveHeroes);
+          heroesFrom = _activeHeroes.getHeroesToAnimate();
+        }
+        heroesTo = _desiredHeroes.to.getHeroesToAnimate(mostValuableKeys);
+        _desiredHeroes.to._hasActiveHeroes = heroesTo.length > 0;
+        _desiredHeroes.reset();
+        setState(() {
+          final RenderBox renderObject = context.findRenderObject();
+          final Point animationTopLeft = renderObject.localToGlobal(Point.origin);
+          final Point animationBottomRight = renderObject.localToGlobal(renderObject.size.bottomRight(Point.origin));
+          final Rect animationArea = new Rect.fromLTRB(animationTopLeft.x, animationTopLeft.y, animationBottomRight.x, animationBottomRight.y);
+          Curve curve = Curves.ease;
+          if (nextHeroPerformance.status == PerformanceStatus.reverse) {
+            nextHeroPerformance = new ReversePerformance(nextHeroPerformance);
+            curve = new Interval(nextHeroPerformance.progress, 1.0, curve: curve);
+          }
+          _activeHeroes.animate(heroesFrom, heroesTo, animationArea, curve);
+          _currentHeroPerformance = nextHeroPerformance;
+        });
+      });
+    }
+
     return new Focus(child: new Stack(visibleRoutes.reversed.toList()));
   }
 
 }
 
 abstract class Route {
+  Route() {
+    _subtreeKey = new GlobalKey(label: debugLabel);
+  }
+
   /// If hasContent is true, then the route represents some on-screen state.
   ///
   /// If hasContent is false, then no performance will be created, and the values of
@@ -284,20 +405,55 @@ abstract class Route {
 
   /// Called by the navigator.build() function if hasContent is true, to get the
   /// subtree for this route.
-  Widget _internalBuild(Route nextRoute) {
+  ///
+  /// If buildTargetHeroes is true, then getHeroesToAnimate() will be called
+  /// after this build, before the next build, and this build should render the
+  /// route off-screen, at the end of its animation. Next frame, the argument
+  /// will be false, and the tree should be built at the first frame of the
+  /// transition animation, whatever that is.
+  Widget _internalBuild(Route nextRoute, { bool buildTargetHeroes: false }) {
     assert(navigator != null);
-    return build(new RouteArguments(
+    return keySubtree(build(new RouteArguments(
       navigator,
       previousPerformance: performance,
       nextPerformance: nextRoute?.performance
-    ));
+    )));
   }
 
+  bool get canHaveHeroes => hasContent && modal && opaque;
+  Set<Key> get mostValuableKeys => null;
+
+  /// Return a party of heroes (one per tag) to animate. This is called by the
+  /// navigator when hasContent is true just after this route, the previous
+  /// route, or the next route, has been pushed or popped, to figure out which
+  /// heroes it should be trying to animate.
+  Map<Object, HeroHandle> getHeroesToAnimate([Set<Key> mostValuableKeys]) => const <Object, HeroHandle>{};
+  bool _hasActiveHeroes = false;
+
+  /// Returns the BuildContext for the root of the subtree built for this route,
+  /// assuming that internalBuild used keySubtree to build that subtree.
+  /// This is only valid after a build phase.
+  BuildContext get context => _subtreeKey.currentContext;
+
+  GlobalKey _subtreeKey;
+
+  /// Wraps the given subtree in a route-specific GlobalKey.
+  Widget keySubtree(Widget child) {
+    return new KeyedSubtree(
+      key: _subtreeKey,
+      child: child
+    );
+  }
+
+  /// Called by internalBuild. This is the method to override if you want to
+  /// change what subtree is built for this route.
   Widget build(RouteArguments args);
 
   String get debugLabel => '$runtimeType';
-  String toString() => '$runtimeType(performance: $performance)';
+
+  String toString() => '$runtimeType(performance: $performance; key: $_subtreeKey)';
 }
+
 
 abstract class PerformanceRoute extends Route {
   PerformanceRoute() {
@@ -315,6 +471,22 @@ abstract class PerformanceRoute extends Route {
 
   Duration get transitionDuration;
 
+  Widget _internalBuild(Route nextRoute, { bool buildTargetHeroes: false }) {
+    assert(hasContent);
+    assert(transitionDuration > Duration.ZERO);
+    if (buildTargetHeroes && performance.progress != 1.0) {
+      Performance fakePerformance = createPerformance();
+      assert(fakePerformance != null);
+      fakePerformance.progress = 1.0;
+      return new OffStage(
+        child: keySubtree(
+          build(new RouteArguments(navigator, previousPerformance: fakePerformance))
+        )
+      );
+    }
+    return super._internalBuild(nextRoute, buildTargetHeroes: buildTargetHeroes);
+  }
+
   void didPush(NavigatorState navigator) {
     super.didPush(navigator);
     _performance?.forward();
@@ -330,27 +502,39 @@ const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 const Point _kTransitionStartPoint = const Point(0.0, 75.0);
 
 /// A route that represents a page in an application.
+///
+/// PageRoutes try to animate between themselves in a fashion that is aware of
+/// any Heroes.
 class PageRoute extends PerformanceRoute {
   PageRoute(this._builder, {
-    this.name: '<anonymous>'
-  }) {
+    this.name: '<anonymous>',
+    Set<Key> mostValuableKeys
+  }) : _mostValuableKeys = mostValuableKeys {
     assert(_builder != null);
   }
 
   final RouteBuilder _builder;
   final String name;
+  final Set<Key> _mostValuableKeys;
+
+  Set<Key> get mostValuableKeys => _mostValuableKeys;
 
   bool get opaque => true;
   Duration get transitionDuration => _kTransitionDuration;
 
+  Map<Object, HeroHandle> getHeroesToAnimate([Set<Key> mostValuableKeys]) {
+    return Hero.of(context, mostValuableKeys);
+  }
+
   Widget build(RouteArguments args) {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
+    // TODO(ianh): Support having different transitions, e.g. when heroes are around.
     return new SlideTransition(
-      performance: performance,
+      performance: args.previousPerformance,
       position: new AnimatedValue<Point>(_kTransitionStartPoint, end: Point.origin, curve: Curves.easeOut),
       child: new FadeTransition(
-        performance: performance,
+        performance: args.previousPerformance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
         child: invokeBuilder(args)
       )
