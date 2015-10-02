@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
+import 'package:sky/src/widgets/animated_container.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
@@ -102,9 +103,9 @@ class DrawerState extends State<Drawer> {
     Widget content = new SlideTransition(
       performance: _performance.view,
       position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
-      // TODO(abarth): Use AnimatedContainer
-      child: new Container(
-        // behavior: implicitlyAnimate(const Duration(milliseconds: 200)),
+      child: new AnimatedContainer(
+        curve: ease,
+        duration: const Duration(milliseconds: 200),
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(context).canvasColor,
           boxShadow: shadows[config.level]),
