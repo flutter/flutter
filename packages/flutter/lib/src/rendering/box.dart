@@ -280,6 +280,53 @@ abstract class RenderBox extends RenderObject {
     return constraints.constrainHeight(0.0);
   }
 
+  /// The size of this render box computed during layout
+  ///
+  /// This value is stale whenever this object is marked as needing layout.
+  /// During [performLayout], do not read the size of a child unless you pass
+  /// true for parentUsesSize when calling the child's [layout] function.
+  ///
+  /// The size of a box should be set only during the box's [performLayout] or
+  /// [performResize] functions. If you wish to change the size of a box outside
+  /// of those functins, call [markNeedsLayout] instead to schedule a layout of
+  /// the box.
+  Size get size {
+    assert(hasSize);
+    assert(() {
+      if (_size is _DebugSize) {
+        final _DebugSize _size = this._size; // TODO(ianh): Remove this once the analyzer is cleverer
+        assert(_size._owner == this);
+        if (RenderObject.debugActiveLayout != null) {
+          // we are always allowed to access our own size (for print debugging and asserts if nothing else)
+          // other than us, the only object that's allowed to read our size is our parent, if they're said they will
+          // if you hit this assert trying to access a child's size, pass parentUsesSize: true in layout()
+          assert(debugDoingThisResize || debugDoingThisLayout ||
+                 (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
+        }
+        assert(_size == this._size); // TODO(ianh): Remove this once the analyzer is cleverer
+      }
+      return true;
+    });
+    return _size;
+  }
+  bool get hasSize => _size != null;
+  Size _size;
+  void set size(Size value) {
+    assert((sizedByParent && debugDoingThisResize) ||
+           (!sizedByParent && debugDoingThisLayout));
+    assert(() {
+      if (value is _DebugSize)
+        return value._canBeUsedByParent && value._owner.parent == this;
+      return true;
+    });
+    _size = value;
+    assert(() {
+      _size = new _DebugSize(_size, this, debugCanParentUseSize);
+      return true;
+    });
+    assert(debugDoesMeetConstraints());
+  }
+
   Map<TextBaseline, double> _cachedBaselines;
   bool _ancestorUsesBaseline = false;
   static bool _debugDoingBaseline = false;
@@ -426,56 +473,6 @@ abstract class RenderBox extends RenderObject {
   /// hit tests at locations where children overlap hit the child that is
   /// visually "on top" (i.e., paints later).
   void hitTestChildren(HitTestResult result, { Point position }) { }
-
-  // TODO(ianh): move size up to before constraints
-  // TODO(ianh): In non-debug builds, this should all just be:
-  // Size size = Size.zero;
-  // In debug builds, however:
-  Size _size = Size.zero;
-
-  /// The size of this render box computed during layout
-  ///
-  /// This value is stale whenever this object is marked as needing layout.
-  /// During [performLayout], do not read the size of a child unless you pass
-  /// true for parentUsesSize when calling the child's [layout] function.
-  ///
-  /// The size of a box should be set only during the box's [performLayout] or
-  /// [performResize] functions. If you wish to change the size of a box outside
-  /// of those functins, call [markNeedsLayout] instead to schedule a layout of
-  /// the box.
-  Size get size {
-    assert(() {
-      if (_size is _DebugSize) {
-        final _DebugSize _size = this._size; // TODO(ianh): Remove this once the analyzer is cleverer
-        assert(_size._owner == this);
-        if (RenderObject.debugActiveLayout != null) {
-          // we are always allowed to access our own size (for print debugging and asserts if nothing else)
-          // other than us, the only object that's allowed to read our size is our parent, if they're said they will
-          // if you hit this assert trying to access a child's size, pass parentUsesSize: true in layout()
-          assert(debugDoingThisResize || debugDoingThisLayout ||
-                 (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
-        }
-        assert(_size == this._size); // TODO(ianh): Remove this once the analyzer is cleverer
-      }
-      return true;
-    });
-    return _size;
-  }
-  void set size(Size value) {
-    assert((sizedByParent && debugDoingThisResize) ||
-           (!sizedByParent && debugDoingThisLayout));
-    assert(() {
-      if (value is _DebugSize)
-        return value._canBeUsedByParent && value._owner.parent == this;
-      return true;
-    });
-    _size = value;
-    assert(() {
-      _size = new _DebugSize(_size, this, debugCanParentUseSize);
-      return true;
-    });
-    assert(debugDoesMeetConstraints());
-  }
 
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform
