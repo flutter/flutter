@@ -244,6 +244,24 @@ class ConstrainedBox extends OneChildRenderObjectWidget {
   }
 }
 
+class FractionallySizedBox extends OneChildRenderObjectWidget {
+  FractionallySizedBox({ Key key, this.width, this.height, Widget child })
+    : super(key: key, child: child);
+
+  final double width;
+  final double height;
+
+  RenderFractionallySizedBox createRenderObject() => new RenderFractionallySizedBox(
+    widthFactor: width,
+    heightFactor: height
+  );
+
+  void updateRenderObject(RenderFractionallySizedBox renderObject, SizedBox oldWidget) {
+    renderObject.widthFactor = width;
+    renderObject.heightFactor = height;
+  }
+}
+
 class OverflowBox extends OneChildRenderObjectWidget {
   OverflowBox({ Key key, this.minWidth, this.maxWidth, this.minHeight, this.maxHeight, Widget child })
     : super(key: key, child: child);
