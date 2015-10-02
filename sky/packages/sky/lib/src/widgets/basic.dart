@@ -22,6 +22,7 @@ export 'package:sky/rendering.dart' show
     FlexAlignItems,
     FlexDirection,
     FlexJustifyContent,
+    Matrix4,
     Offset,
     Paint,
     Path,
@@ -392,11 +393,11 @@ class Container extends StatelessComponent {
     this.constraints,
     this.decoration,
     this.foregroundDecoration,
-    this.width,
-    this.height,
     this.margin,
     this.padding,
-    this.transform
+    this.transform,
+    this.width,
+    this.height
   }) : super(key: key) {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
