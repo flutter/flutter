@@ -186,13 +186,13 @@ class StockHomeState extends State<StockHome> {
   Widget buildStockList(BuildContext context, Iterable<Stock> stocks) {
     return new StockList(
       stocks: stocks.toList(),
-      onAction: (Stock stock) {
+      onAction: (Stock stock, GlobalKey row, GlobalKey arrowKey, GlobalKey symbolKey, GlobalKey priceKey) {
         setState(() {
           stock.percentChange = 100.0 * (1.0 / stock.lastSale);
           stock.lastSale += 1.0;
         });
       },
-      onOpen: (Stock stock) {
+      onOpen: (Stock stock, GlobalKey row, GlobalKey arrowKey, GlobalKey symbolKey, GlobalKey priceKey) {
         config.navigator.pushNamed('/stock/${stock.symbol}');
       }
     );
