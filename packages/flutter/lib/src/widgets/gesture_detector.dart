@@ -190,7 +190,7 @@ class GestureDetectorState extends State<GestureDetector> {
 
   void _syncScale() {
     if (config.onScaleStart == null && config.onScaleUpdate == null && config.onScaleEnd == null) {
-      _scale = _ensureDisposed(_pan);
+      _scale = _ensureDisposed(_scale);
     } else {
       _ensureScale()
         ..onStart = config.onScaleStart
