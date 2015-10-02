@@ -70,6 +70,33 @@ class ColorFilter extends OneChildRenderObjectWidget {
   }
 }
 
+class ShaderMask extends OneChildRenderObjectWidget {
+  ShaderMask({
+    Key key,
+    this.shaderCallback,
+    this.transferMode: sky.TransferMode.modulate,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(shaderCallback != null);
+    assert(transferMode != null);
+  }
+
+  final ShaderCallback shaderCallback;
+  final sky.TransferMode transferMode;
+
+  RenderShaderMask createRenderObject() {
+    return new RenderShaderMask(
+      shaderCallback: shaderCallback,
+      transferMode: transferMode
+    );
+  }
+
+  void updateRenderObject(RenderShaderMask renderObject, ShaderMask oldWidget) {
+    renderObject.shaderCallback = shaderCallback;
+    renderObject.transferMode = transferMode;
+  }
+}
+
 class DecoratedBox extends OneChildRenderObjectWidget {
   DecoratedBox({
     Key key,
