@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:newton/newton.dart';
 import 'package:sky/src/animation/scheduler.dart';
 
-typedef _TickerCallback(Duration timeStamp);
+typedef _TickerCallback(Duration elapsed);
 
 /// Calls its callback once per animation frame
 class Ticker {
@@ -18,12 +18,14 @@ class Ticker {
 
   Completer _completer;
   int _animationId;
+  Duration _startTime;
 
   /// Start calling onTick once per animation frame
   ///
   /// The returned future resolves once the ticker stops ticking.
   Future start() {
     assert(!isTicking);
+    assert(_startTime == null);
     _completer = new Completer();
     _scheduleTick();
     return _completer.future;
@@ -35,6 +37,8 @@ class Ticker {
   void stop() {
     if (!isTicking)
       return;
+
+    _startTime = null;
 
     if (_animationId != null) {
       scheduler.cancelAnimationFrame(_animationId);
@@ -58,7 +62,10 @@ class Ticker {
     assert(_animationId != null);
     _animationId = null;
 
-    _onTick(timeStamp);
+    if (_startTime == null)
+      _startTime = timeStamp;
+
+    _onTick(timeStamp - _startTime);
 
     // The onTick callback may have scheduled another tick already.
     if (isTicking && _animationId == null)
@@ -83,7 +90,6 @@ class AnimatedSimulation {
   Ticker _ticker;
 
   Simulation _simulation;
-  Duration _startTime;
 
   double _value = 0.0;
   /// The current value of the simulation
@@ -101,7 +107,6 @@ class AnimatedSimulation {
     assert(simulation != null);
     assert(!_ticker.isTicking);
     _simulation = simulation;
-    _startTime = null;
     _value = simulation.x(0.0);
     return _ticker.start();
   }
@@ -109,23 +114,18 @@ class AnimatedSimulation {
   /// Stop ticking the current simulation
   void stop() {
     _simulation = null;
-    _startTime = null;
     _ticker.stop();
   }
 
   /// Whether this object is currently ticking a simulation
   bool get isAnimating => _ticker.isTicking;
 
-  void _tick(Duration timeStamp) {
-    if (_startTime == null)
-      _startTime = timeStamp;
+  void _tick(Duration elapsed) {
 
-    double timeInMicroseconds = (timeStamp - _startTime).inMicroseconds.toDouble();
-    double timeInSeconds =  timeInMicroseconds / Duration.MICROSECONDS_PER_SECOND;
-    _value = _simulation.x(timeInSeconds);
-    final bool isLastTick = _simulation.isDone(timeInSeconds);
+    double elapsedInSeconds =  elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
+    _value = _simulation.x(elapsedInSeconds);
 
-    if (isLastTick)
+    if (_simulation.isDone(elapsedInSeconds))
       stop();
 
     _onTick(_value);
