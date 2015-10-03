@@ -45,7 +45,7 @@ class Draggable extends StatefulComponent {
     this.feedback,
     this.feedbackOffset: Offset.zero,
     this.dragAnchor: DragAnchor.child
-  }): super(key: key) {
+  }) : super(key: key) {
     assert(navigator != null);
     assert(child != null);
     assert(feedback != null);

@@ -32,7 +32,7 @@ class App extends StatefulComponent {
     this.theme,
     this.routes,
     this.onGenerateRoute
-  }): super(key: key) {
+  }) : super(key: key) {
     assert(() {
       'The "routes" argument to App() is required.';
       'This might be a sign that you have not upgraded to our new Widgets framework.';
