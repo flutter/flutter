@@ -35,7 +35,7 @@ class WidgetFlutterBinding extends FlutterBinding {
     );
   }
 
-  void beginFrame(double timeStamp) {
+  void beginFrame(Duration timeStamp) {
     buildDirtyElements();
     super.beginFrame(timeStamp);
     Element.finalizeTree();

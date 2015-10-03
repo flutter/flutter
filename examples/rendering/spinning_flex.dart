@@ -9,7 +9,7 @@ import 'package:sky/rendering.dart';
 
 import 'solid_color_box.dart';
 
-double timeBase;
+Duration timeBase;
 RenderTransform transformBox;
 
 void main() {
@@ -34,10 +34,10 @@ void main() {
   scheduler.addPersistentFrameCallback(rotate);
 }
 
-void rotate(double timeStamp) {
+void rotate(Duration timeStamp) {
   if (timeBase == null)
     timeBase = timeStamp;
-  double delta = (timeStamp - timeBase) / 1000; // radians
+  double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND; // radians
 
   transformBox.setIdentity();
   transformBox.translate(transformBox.size.width / 2.0, transformBox.size.height / 2.0);
