@@ -51,7 +51,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     );
   }
 
-  void detatch() {
+  void detach() {
     _tap.dispose();
     _tap = null;
     super.detach();

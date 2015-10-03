@@ -10,7 +10,6 @@ import 'package:sky/painting.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/button_state.dart';
 import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/icon.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/theme.dart';
@@ -76,14 +75,12 @@ class DrawerItemState extends ButtonState<DrawerItem> {
       )
     );
 
-    return new GestureDetector(
-      onTap: config.onPressed,
-      child: new Container(
-        height: 48.0,
-        decoration: new BoxDecoration(backgroundColor: _getBackgroundColor(themeData)),
-        child: new InkWell(
-          child: new Row(flexChildren)
-        )
+    return new Container(
+      height: 48.0,
+      decoration: new BoxDecoration(backgroundColor: _getBackgroundColor(themeData)),
+      child: new InkWell(
+        onTap: config.onPressed,
+        child: new Row(flexChildren)
       )
     );
   }

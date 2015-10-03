@@ -14,11 +14,26 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     : super(router: router);
 
   GestureTapCallback onTap;
+  GestureTapCallback onTapDown;
+  GestureTapCallback onTapCancel;
 
   void handlePrimaryPointer(sky.PointerEvent event) {
-    if (event.type == 'pointerup') {
+    if (event.type == 'pointerdown') {
+      if (onTapDown != null)
+        onTapDown();
+    } else if (event.type == 'pointerup') {
       resolve(GestureDisposition.accepted);
-      onTap();
+      if (onTap != null)
+        onTap();
+    }
+  }
+
+  void rejectGesture(int pointer) {
+    super.rejectGesture(pointer);
+    if (pointer == primaryPointer) {
+      assert(state == GestureRecognizerState.defunct);
+      if (onTapCancel != null)
+        onTapCancel();
     }
   }
 }

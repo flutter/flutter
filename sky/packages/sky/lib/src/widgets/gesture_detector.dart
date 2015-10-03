@@ -14,6 +14,8 @@ class GestureDetector extends StatefulComponent {
     Key key,
     this.child,
     this.onTap,
+    this.onTapDown,
+    this.onTapCancel,
     this.onShowPress,
     this.onLongPress,
     this.onVerticalDragStart,
@@ -33,6 +35,9 @@ class GestureDetector extends StatefulComponent {
   final Widget child;
 
   final GestureTapCallback onTap;
+  final GestureTapCallback onTapDown;
+  final GestureTapCallback onTapCancel;
+
   final GestureShowPressCallback onShowPress;
   final GestureLongPressCallback onLongPress;
 
@@ -97,11 +102,14 @@ class GestureDetectorState extends State<GestureDetector> {
   }
 
   void _syncTap() {
-    if (config.onTap == null) {
+    if (config.onTap == null && config.onTapDown == null && config.onTapCancel == null) {
       _tap = _ensureDisposed(_tap);
     } else {
       _tap ??= new TapGestureRecognizer(router: _router);
-      _tap.onTap = config.onTap;
+      _tap
+        ..onTap = config.onTap
+        ..onTapDown = config.onTapDown
+        ..onTapCancel = config.onTapCancel;
     }
   }
 
