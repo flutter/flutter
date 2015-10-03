@@ -37,13 +37,13 @@ class StockRow extends StatelessComponent {
 
   static const double kHeight = 79.0;
 
-  GestureTapListener _getTapHandler(StockRowActionCallback callback) {
+  GestureTapCallback _getTapHandler(StockRowActionCallback callback) {
     if (callback == null)
       return null;
     return () => callback(stock, key, arrowKey, symbolKey, priceKey);
   }
 
-  GestureLongPressListener _getLongPressHandler(StockRowActionCallback callback) {
+  GestureLongPressCallback _getLongPressHandler(StockRowActionCallback callback) {
     if (callback == null)
       return null;
     return () => callback(stock, key, arrowKey, symbolKey, priceKey);

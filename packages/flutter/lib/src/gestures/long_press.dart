@@ -9,13 +9,13 @@ import 'package:sky/src/gestures/constants.dart';
 import 'package:sky/src/gestures/pointer_router.dart';
 import 'package:sky/src/gestures/recognizer.dart';
 
-typedef void GestureLongPressListener();
+typedef void GestureLongPressCallback();
 
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   LongPressGestureRecognizer({ PointerRouter router, this.onLongPress })
     : super(router: router, deadline: kTapTimeout + kLongPressTimeout);
 
-  GestureLongPressListener onLongPress;
+  GestureLongPressCallback onLongPress;
 
   void didExceedDeadline() {
     resolve(GestureDisposition.accepted);

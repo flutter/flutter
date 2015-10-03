@@ -127,5 +127,6 @@ class RenderInkWell extends RenderProxyBox {
 
 class InkWell extends OneChildRenderObjectWidget {
   InkWell({ Key key, Widget child }) : super(key: key, child: child);
+
   RenderInkWell createRenderObject() => new RenderInkWell();
 }

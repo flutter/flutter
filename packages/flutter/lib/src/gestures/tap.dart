@@ -7,13 +7,13 @@ import 'dart:sky' as sky;
 import 'package:sky/src/gestures/arena.dart';
 import 'package:sky/src/gestures/recognizer.dart';
 
-typedef void GestureTapListener();
+typedef void GestureTapCallback();
 
 class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   TapGestureRecognizer({ PointerRouter router, this.onTap })
     : super(router: router);
 
-  GestureTapListener onTap;
+  GestureTapCallback onTap;
 
   void handlePrimaryPointer(sky.PointerEvent event) {
     if (event.type == 'pointerup') {

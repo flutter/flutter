@@ -21,7 +21,7 @@ class DrawerItem extends StatefulComponent {
 
   final String icon;
   final Widget child;
-  final GestureTapListener onPressed;
+  final GestureTapCallback onPressed;
   final bool selected;
 
   DrawerItemState createState() => new DrawerItemState();
