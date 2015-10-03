@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:sky/animation.dart';
-import 'package:sky/painting.dart';
+import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
+import 'package:sky/painting.dart';
 import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
@@ -28,7 +28,7 @@ class SnackBarAction extends StatelessComponent {
   }
 
   final String label;
-  final Function onPressed;
+  final GestureTapCallback onPressed;
 
   Widget build(BuildContext) {
     return new GestureDetector(

@@ -65,12 +65,13 @@ class MealFragmentState extends State<MealFragment> {
         icon: "navigation/close",
         onPressed: config.navigator.pop),
       center: new Text('New Meal'),
-      right: [new InkWell(
-        child: new GestureDetector(
+      right: [
+        // TODO(abarth): Should this be a FlatButton?
+        new InkWell(
           onTap: _handleSave,
           child: new Text('SAVE')
         )
-      )]
+      ]
     );
   }
 

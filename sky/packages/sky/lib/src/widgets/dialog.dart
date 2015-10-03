@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:sky/animation.dart';
+import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/focus.dart';
@@ -52,7 +53,7 @@ class Dialog extends StatelessComponent {
   final List<Widget> actions;
 
   /// An (optional) callback that is called when the dialog is dismissed.
-  final Function onDismiss;
+  final GestureTapCallback onDismiss;
 
   Color _getColor(BuildContext context) {
     switch (Theme.of(context).brightness) {

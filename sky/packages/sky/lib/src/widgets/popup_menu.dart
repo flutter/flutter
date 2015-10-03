@@ -11,7 +11,7 @@ import 'package:sky/painting.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
+import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/navigator.dart';
 import 'package:sky/src/widgets/popup_menu_item.dart';
 import 'package:sky/src/widgets/scrollable.dart';
@@ -94,7 +94,7 @@ class PopupMenuState extends State<PopupMenu> {
       children.add(new FadeTransition(
         performance: config.performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, interval: new Interval(start, end)),
-        child: new GestureDetector(
+        child: new InkWell(
           onTap: () { config.navigator.pop(config.items[i].value); },
           child: config.items[i]
         ))

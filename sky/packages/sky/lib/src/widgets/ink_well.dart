@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
+import 'package:sky/gestures.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 
 const int _kSplashInitialOpacity = 0x30;
-const double _kSplashCancelledVelocity = 0.7;
+const double _kSplashCanceledVelocity = 0.7;
 const double _kSplashConfirmedVelocity = 0.7;
 const double _kSplashInitialSize = 0.0;
 const double _kSplashUnconfirmedVelocity = 0.2;
@@ -25,7 +27,7 @@ double _getSplashTargetSize(Size bounds, Point position) {
 }
 
 class InkSplash {
-  InkSplash(this.pointer, this.position, this.well) {
+  InkSplash(this.position, this.well) {
     _targetRadius = _getSplashTargetSize(well.size, position);
     _radius = new AnimatedValue<double>(
         _kSplashInitialSize, end: _targetRadius, curve: easeOut);
@@ -33,11 +35,12 @@ class InkSplash {
     _performance = new ValueAnimation<double>(
       variable: _radius,
       duration: new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
-    )..addListener(_handleRadiusChange)
-     ..play();
+    )..addListener(_handleRadiusChange);
+
+    // Wait kTapTimeout to avoid creating tiny splashes during scrolls.
+    _startTimer = new Timer(kTapTimeout, _play);
   }
 
-  final int pointer;
   final Point position;
   final RenderInkWell well;
 
@@ -45,20 +48,39 @@ class InkSplash {
   double _pinnedRadius;
   AnimatedValue<double> _radius;
   AnimationPerformance _performance;
+  Timer _startTimer;
+
+  bool _cancelStartTimer() {
+    if (_startTimer != null) {
+      _startTimer.cancel();
+      _startTimer = null;
+      return true;
+    }
+    return false;
+  }
+
+  void _play() {
+    _cancelStartTimer();
+    _performance.play();
+  }
 
   void _updateVelocity(double velocity) {
     int duration = (_targetRadius / velocity).floor();
-    _performance
-      ..duration = new Duration(milliseconds: duration)
-      ..play();
+    _performance.duration = new Duration(milliseconds: duration);
+    _play();
   }
 
   void confirm() {
+    if (_cancelStartTimer())
+      return;
     _updateVelocity(_kSplashConfirmedVelocity);
+    _pinnedRadius = null;
   }
 
   void cancel() {
-    _updateVelocity(_kSplashCancelledVelocity);
+    if (_cancelStartTimer())
+      return;
+    _updateVelocity(_kSplashCanceledVelocity);
     _pinnedRadius = _radius.value;
   }
 
@@ -77,38 +99,95 @@ class InkSplash {
 }
 
 class RenderInkWell extends RenderProxyBox {
-  RenderInkWell({ RenderBox child }) : super(child);
+  RenderInkWell({
+    RenderBox child,
+    GestureTapCallback onTap,
+    GestureLongPressCallback onLongPress
+  }) : super(child) {
+    this.onTap = onTap;
+    this.onLongPress = onLongPress;
+  }
+
+  GestureTapCallback get onTap => _onTap;
+  GestureTapCallback _onTap;
+  void set onTap (GestureTapCallback value) {
+    _onTap = value;
+    _syncTapRecognizer();
+  }
+
+  GestureTapCallback get onLongPress => _onLongPress;
+  GestureTapCallback _onLongPress;
+  void set onLongPress (GestureTapCallback value) {
+    _onLongPress = value;
+    _syncLongPressRecognizer();
+  }
 
   final List<InkSplash> _splashes = new List<InkSplash>();
 
+  TapGestureRecognizer _tap;
+  LongPressGestureRecognizer _longPress;
+
   void handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    // TODO(abarth): We should trigger these effects based on gestures.
-    // https://github.com/flutter/engine/issues/1271
-    if (event is sky.PointerEvent) {
-      switch (event.type) {
-        case 'pointerdown':
-          _startSplash(event.pointer, entry.localPosition);
-          break;
-        case 'pointerup':
-          _confirmSplash(event.pointer);
-          break;
-      }
+    if (event.type == 'pointerdown' && (_tap != null || _longPress != null)) {
+      _tap?.addPointer(event);
+      _longPress?.addPointer(event);
+      _splashes.add(new InkSplash(entry.localPosition, this));
     }
   }
 
-  void _startSplash(int pointer, Point position) {
-    _splashes.add(new InkSplash(pointer, position, this));
-    markNeedsPaint();
+  void attach() {
+    super.attach();
+    _syncTapRecognizer();
+    _syncLongPressRecognizer();
   }
 
-  void _forEachSplash(int pointer, Function callback) {
-    _splashes.where((splash) => splash.pointer == pointer)
-             .forEach(callback);
+  void detach() {
+    _disposeTapRecognizer();
+    _disposeLongPressRecognizer();
+    super.detach();
   }
 
-  void _confirmSplash(int pointer) {
-    _forEachSplash(pointer, (splash) { splash.confirm(); });
-    markNeedsPaint();
+  void _syncTapRecognizer() {
+    if (onTap == null) {
+      _disposeTapRecognizer();
+    } else {
+      _tap ??= new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
+        ..onTap = _handleTap
+        ..onTapCancel = _handleTapCancel;
+    }
+  }
+
+  void _disposeTapRecognizer() {
+    _tap?.dispose();
+    _tap = null;
+  }
+
+  void _syncLongPressRecognizer() {
+    if (onLongPress == null) {
+      _disposeLongPressRecognizer();
+    } else {
+      _longPress ??= new LongPressGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
+        ..onLongPress = _handleLongPress;
+    }
+  }
+
+  void _disposeLongPressRecognizer() {
+    _longPress?.dispose();
+    _longPress = null;
+  }
+
+  void _handleTap() {
+    _splashes.last?.confirm();
+    onTap();
+  }
+
+  void _handleTapCancel() {
+    _splashes.last?.cancel();
+  }
+
+  void _handleLongPress() {
+    _splashes.last?.confirm();
+    onLongPress();
   }
 
   void paint(PaintingContext context, Offset offset) {
@@ -126,7 +205,20 @@ class RenderInkWell extends RenderProxyBox {
 }
 
 class InkWell extends OneChildRenderObjectWidget {
-  InkWell({ Key key, Widget child }) : super(key: key, child: child);
+  InkWell({
+    Key key,
+    Widget child,
+    this.onTap,
+    this.onLongPress
+  }) : super(key: key, child: child);
 
-  RenderInkWell createRenderObject() => new RenderInkWell();
+  final GestureTapCallback onTap;
+  final GestureLongPressCallback onLongPress;
+
+  RenderInkWell createRenderObject() => new RenderInkWell(onTap: onTap, onLongPress: onLongPress);
+
+  void updateRenderObject(RenderInkWell renderObject, InkWell oldWidget) {
+    renderObject.onTap = onTap;
+    renderObject.onLongPress = onLongPress;
+  }
 }
