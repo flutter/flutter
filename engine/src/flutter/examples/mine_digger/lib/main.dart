@@ -66,10 +66,10 @@ class MineDiggerState extends State<MineDigger> {
     detectedCount = 0;
     // Initialize matrices.
     cells = new List<List>.generate(rows, (int row) {
-        return new List<bool>.filled(cols, false);
+      return new List<bool>.filled(cols, false);
     });
     uiState = new List<List>.generate(rows, (int row) {
-      return new List<CellState>.filled(cols,  CellState.covered);
+      return new List<CellState>.filled(cols, CellState.covered);
     });
     // Place the mines.
     Random random = new Random();
