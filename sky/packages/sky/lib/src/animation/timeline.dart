@@ -5,30 +5,28 @@
 import 'dart:async';
 
 import 'package:newton/newton.dart';
-
+import 'package:sky/src/animation/curves.dart';
+import 'package:sky/src/animation/animated_value.dart';
 import 'package:sky/src/animation/animated_simulation.dart';
 
 /// A simulation that linearly varies from [begin] to [end] over [duration]
-class TweenSimulation extends Simulation {
+class _TweenSimulation extends Simulation {
   final double _durationInSeconds;
+  final AnimatedValue<double> _tween;
 
-  /// The initial value of the simulation
-  final double begin;
-
-  /// The terminal value of the simulation
-  final double end;
-
-  TweenSimulation(Duration duration, this.begin, this.end) :
-      _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
+  _TweenSimulation(double begin, double end, Duration duration, Curve curve)
+    : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND,
+      _tween = new AnimatedValue<double>(begin, end: end, curve: curve) {
     assert(_durationInSeconds > 0.0);
-    assert(begin != null && begin >= 0.0 && begin <= 1.0);
-    assert(end != null && end >= 0.0 && end <= 1.0);
+    assert(begin != null);
+    assert(end != null);
   }
 
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
-    final double t = timeInSeconds / _durationInSeconds;
-    return t >= 1.0 ? end : begin + (end - begin) * t;
+    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
+    _tween.setProgress(t, Direction.forward);
+    return _tween.value;
   }
 
   double dx(double timeInSeconds) => 1.0;
@@ -45,9 +43,9 @@ class Timeline {
   AnimatedSimulation _animation;
 
   /// The current value of the timeline
-  double get value => _animation.value.clamp(0.0, 1.0);
+  double get value => _animation.value;
   void set value(double newValue) {
-    assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
+    assert(newValue != null);
     assert(!isAnimating);
     _animation.value = newValue;
   }
@@ -55,23 +53,14 @@ class Timeline {
   /// Whether the timeline is currently animating
   bool get isAnimating => _animation.isAnimating;
 
-  Future _start({
-    Duration duration,
-    double begin: 0.0,
-    double end: 1.0
-  }) {
-    assert(!_animation.isAnimating);
-    assert(duration > Duration.ZERO);
-    return _animation.start(new TweenSimulation(duration, begin, end));
-  }
-
   /// Animate value of the timeline to the given target over the given duration
   ///
   /// Returns a future that resolves when the timeline stops animating,
   /// typically when the timeline arives at the target value.
-  Future animateTo(double target, { Duration duration }) {
+  Future animateTo(double target, { Duration duration, Curve curve: linear }) {
     assert(duration > Duration.ZERO);
-    return _start(duration: duration, begin: value, end: target);
+    assert(!_animation.isAnimating);
+    return _animation.start(new _TweenSimulation(value, target, duration, curve));
   }
 
   /// Stop animating the timeline
@@ -79,7 +68,7 @@ class Timeline {
     _animation.stop();
   }
 
-  // Gives the given simulation control over the timeline
+  /// Gives the given simulation control over the timeline
   Future fling(Simulation simulation) {
     stop();
     return _animation.start(simulation);

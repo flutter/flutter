@@ -85,7 +85,7 @@ class AnimationPerformance implements WatchableAnimationPerformance {
   /// The progress of this performance along the timeline
   ///
   /// Note: Setting this value stops the current animation.
-  double get progress => _timeline.value;
+  double get progress => _timeline.value.clamp(0.0, 1.0);
   void set progress(double t) {
     // TODO(mpcomplete): should this affect |direction|?
     stop();

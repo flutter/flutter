@@ -14,7 +14,7 @@ double timeDilation = 1.0;
 /// scheduler's epoch. Use timeStamp to determine how far to advance animation
 /// timelines so that all the animations in the system are synchronized to a
 /// common time base.
-typedef void SchedulerCallback(double timeStamp);
+typedef void SchedulerCallback(Duration timeStamp);
 
 /// Schedules callbacks to run in concert with the engine's animation system
 class Scheduler {
@@ -35,8 +35,10 @@ class Scheduler {
   /// This function first calls all the callbacks registered by
   /// [requestAnimationFrame] and then calls all the callbacks registered by
   /// [addPersistentFrameCallback], which typically drive the rendering pipeline.
-  void beginFrame(double timeStamp) {
-    timeStamp /= timeDilation;
+  void beginFrame(double timeStampMS) {
+    timeStampMS /= timeDilation;
+
+    Duration timeStamp = new Duration(microseconds: (timeStampMS * Duration.MICROSECONDS_PER_MILLISECOND).round());
 
     _haveScheduledVisualUpdate = false;
 
