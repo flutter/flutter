@@ -659,6 +659,37 @@ class RenderColorFilter extends RenderProxyBox {
   }
 }
 
+class RenderShaderMask extends RenderProxyBox {
+  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, sky.TransferMode transferMode })
+    : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child) {
+  }
+
+  ShaderCallback get shaderCallback => _shaderCallback;
+  ShaderCallback _shaderCallback;
+  void set shaderCallback (ShaderCallback newShaderCallback) {
+    assert(newShaderCallback != null);
+    if (_shaderCallback == newShaderCallback)
+      return;
+    _shaderCallback = newShaderCallback;
+    markNeedsPaint();
+  }
+
+  sky.TransferMode get transferMode => _transferMode;
+  sky.TransferMode _transferMode;
+  void set transferMode (sky.TransferMode newTransferMode) {
+    assert(newTransferMode != null);
+    if (_transferMode == newTransferMode)
+      return;
+    _transferMode = newTransferMode;
+    markNeedsPaint();
+  }
+
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChildWithShaderMask(child, offset.toPoint(), offset & size, _shaderCallback, _transferMode);
+  }
+}
+
 /// Clips its child using a rectangle
 ///
 /// Prevents its child from painting outside its bounds.
