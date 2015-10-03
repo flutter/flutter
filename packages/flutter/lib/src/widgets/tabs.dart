@@ -7,9 +7,10 @@ import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';
+import 'package:sky/gestures.dart';
+import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
@@ -307,6 +308,7 @@ class TabLabel {
 class Tab extends StatelessComponent {
   Tab({
     Key key,
+    this.onSelected,
     this.label,
     this.color,
     this.selected: false,
@@ -315,6 +317,7 @@ class Tab extends StatelessComponent {
     assert(label.text != null || label.icon != null);
   }
 
+  final GestureTapCallback onSelected;
   final TabLabel label;
   final Color color;
   final bool selected;
@@ -359,7 +362,10 @@ class Tab extends StatelessComponent {
       padding: _kTabLabelPadding
     );
 
-    return new InkWell(child: centeredLabel);
+    return new InkWell(
+      onTap: onSelected,
+      child: centeredLabel
+    );
   }
 }
 
@@ -458,7 +464,7 @@ class TabBarState extends ScrollableState<TabBar> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  void _handleTap(int tabIndex) {
+  void _handleTabSelected(int tabIndex) {
     if (tabIndex != config.selectedIndex) {
       if (_tabWidths != null) {
         if (config.isScrollable)
@@ -471,14 +477,12 @@ class TabBarState extends ScrollableState<TabBar> {
   }
 
   Widget _toTab(TabLabel label, int tabIndex, Color color, Color selectedColor) {
-    return new GestureDetector(
-      onTap: () => _handleTap(tabIndex),
-      child: new Tab(
-        label: label,
-        color: color,
-        selected: tabIndex == config.selectedIndex,
-        selectedColor: selectedColor
-      )
+    return new Tab(
+      onSelected: () => _handleTabSelected(tabIndex),
+      label: label,
+      color: color,
+      selected: tabIndex == config.selectedIndex,
+      selectedColor: selectedColor
     );
   }
 

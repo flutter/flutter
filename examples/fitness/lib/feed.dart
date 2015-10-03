@@ -33,15 +33,13 @@ class DialogMenuItem extends StatelessComponent {
   Function onPressed;
 
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTap: onPressed,
-      child: new Container(
-        height: 48.0,
-        child: new InkWell(
-          child: new Padding(
-            padding: const EdgeDims.symmetric(horizontal: 16.0),
-            child: new Row(children)
-          )
+    return new Container(
+      height: 48.0,
+      child: new InkWell(
+        onTap: onPressed,
+        child: new Padding(
+          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          child: new Row(children)
         )
       )
     );

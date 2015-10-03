@@ -136,12 +136,13 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
         icon: "navigation/close",
         onPressed: config.navigator.pop),
       center: new Text('New Measurement'),
-      right: [new InkWell(
-        child: new GestureDetector(
+      right: [
+        // TODO(abarth): Should this be a FlatButton?
+        new InkWell(
           onTap: _handleSave,
           child: new Text('SAVE')
         )
-      )]
+      ]
     );
   }
 

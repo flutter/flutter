@@ -4,6 +4,7 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/gestures.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/icon.dart';
 import 'package:sky/src/widgets/framework.dart';
@@ -13,8 +14,8 @@ class IconButton extends StatelessComponent {
   const IconButton({ Key key, this.icon, this.onPressed, this.color }) : super(key: key);
 
   final String icon;
-  final Function onPressed;
   final Color color;
+  final GestureTapCallback onPressed;
 
   Widget build(BuildContext context) {
     Widget child = new Icon(type: icon, size: 24);
