@@ -78,7 +78,7 @@ class FlutterBinding extends HitTestTarget {
   }
 
   /// Pump the rendering pipeline to generate a frame for the given time stamp
-  void beginFrame(double timeStamp) {
+  void beginFrame(Duration timeStamp) {
     RenderObject.flushLayout();
     _renderView.updateCompositingBits();
     RenderObject.flushPaint();

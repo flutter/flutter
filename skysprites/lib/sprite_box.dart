@@ -47,7 +47,7 @@ class SpriteBox extends RenderBox {
   }
 
   // Tracking of frame rate and updates
-  double _lastTimeStamp;
+  Duration _lastTimeStamp;
   double _frameRate = 0.0;
 
   double get frameRate => _frameRate;
@@ -349,13 +349,14 @@ class SpriteBox extends RenderBox {
     scheduler.requestAnimationFrame(_tick);
   }
 
-  void _tick(double timeStamp) {
+  void _tick(Duration timeStamp) {
     if (!attached)
       return;
 
     // Calculate delta and frame rate
-    if (_lastTimeStamp == null) _lastTimeStamp = timeStamp;
-    double delta = (timeStamp - _lastTimeStamp) / 1000;
+    if (_lastTimeStamp == null)
+      _lastTimeStamp = timeStamp;
+    double delta = (timeStamp - _lastTimeStamp).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
     _lastTimeStamp = timeStamp;
 
     _frameRate = 1.0/delta;

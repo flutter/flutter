@@ -7,10 +7,7 @@ import 'dart:async';
 import 'package:newton/newton.dart';
 import 'package:sky/src/animation/scheduler.dart';
 
-const double _kSecondsPerMillisecond = 1000.0;
-
-// TODO(abarth): Change from double to Duration.
-typedef _TickerCallback(double timeStamp);
+typedef _TickerCallback(Duration timeStamp);
 
 /// Calls its callback once per animation frame
 class Ticker {
@@ -56,7 +53,7 @@ class Ticker {
   /// Whether this ticker has scheduled a call to onTick
   bool get isTicking => _completer != null;
 
-  void _tick(double timeStamp) {
+  void _tick(Duration timeStamp) {
     assert(isTicking);
     assert(_animationId != null);
     _animationId = null;
@@ -86,7 +83,7 @@ class AnimatedSimulation {
   Ticker _ticker;
 
   Simulation _simulation;
-  double _startTime;
+  Duration _startTime;
 
   double _value = 0.0;
   /// The current value of the simulation
@@ -119,11 +116,12 @@ class AnimatedSimulation {
   /// Whether this object is currently ticking a simulation
   bool get isAnimating => _ticker.isTicking;
 
-  void _tick(double timeStamp) {
+  void _tick(Duration timeStamp) {
     if (_startTime == null)
       _startTime = timeStamp;
 
-    double timeInSeconds = (timeStamp - _startTime) / _kSecondsPerMillisecond;
+    double timeInMicroseconds = (timeStamp - _startTime).inMicroseconds.toDouble();
+    double timeInSeconds =  timeInMicroseconds / Duration.MICROSECONDS_PER_SECOND;
     _value = _simulation.x(timeInSeconds);
     final bool isLastTick = _simulation.isDone(timeInSeconds);
 
