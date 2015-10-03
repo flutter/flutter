@@ -28,7 +28,7 @@ class Input extends Scrollable {
     this.placeholder,
     this.onChanged,
     this.keyboardType: KeyboardType.TEXT
-  }): super(
+  }) : super(
     key: key,
     initialScrollOffset: 0.0,
     scrollDirection: ScrollDirection.horizontal

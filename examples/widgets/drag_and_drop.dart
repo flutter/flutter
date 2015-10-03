@@ -50,7 +50,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatelessComponent {
-  Dot({ Key key, this.color, this.size }): super(key: key);
+  Dot({ Key key, this.color, this.size }) : super(key: key);
   final Color color;
   final double size;
   Widget build(BuildContext context) {
@@ -66,7 +66,7 @@ class Dot extends StatelessComponent {
 }
 
 class ExampleDragSource extends StatelessComponent {
-  ExampleDragSource({ Key key, this.navigator, this.name, this.color }): super(key: key);
+  ExampleDragSource({ Key key, this.navigator, this.name, this.color }) : super(key: key);
   final NavigatorState navigator;
   final String name;
   final Color color;
