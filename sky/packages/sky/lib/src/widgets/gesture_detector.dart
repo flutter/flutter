@@ -100,8 +100,8 @@ class GestureDetectorState extends State<GestureDetector> {
     if (config.onTap == null) {
       _tap = _ensureDisposed(_tap);
     } else {
-      _tap ??= new TapGestureRecognizer(router: _router)
-        ..onTap = config.onTap;
+      _tap ??= new TapGestureRecognizer(router: _router);
+      _tap.onTap = config.onTap;
     }
   }
 
@@ -109,8 +109,8 @@ class GestureDetectorState extends State<GestureDetector> {
     if (config.onShowPress == null) {
       _showPress = _ensureDisposed(_showPress);
     } else {
-      _showPress ??= new ShowPressGestureRecognizer(router: _router)
-        ..onShowPress = config.onShowPress;
+      _showPress ??= new ShowPressGestureRecognizer(router: _router);
+      _showPress.onShowPress = config.onShowPress;
     }
   }
 
@@ -118,8 +118,8 @@ class GestureDetectorState extends State<GestureDetector> {
     if (config.onLongPress == null) {
       _longPress = _ensureDisposed(_longPress);
     } else {
-      _longPress ??= new LongPressGestureRecognizer(router: _router)
-        ..onLongPress = config.onLongPress;
+      _longPress ??= new LongPressGestureRecognizer(router: _router);
+      _longPress.onLongPress = config.onLongPress;
     }
   }
 
@@ -127,7 +127,8 @@ class GestureDetectorState extends State<GestureDetector> {
     if (config.onVerticalDragStart == null && config.onVerticalDragUpdate == null && config.onVerticalDragEnd == null) {
       _verticalDrag = _ensureDisposed(_verticalDrag);
     } else {
-      _verticalDrag ??= new VerticalDragGestureRecognizer(router: _router)
+      _verticalDrag ??= new VerticalDragGestureRecognizer(router: _router);
+      _verticalDrag
         ..onStart = config.onVerticalDragStart
         ..onUpdate = config.onVerticalDragUpdate
         ..onEnd = config.onVerticalDragEnd;
@@ -138,7 +139,8 @@ class GestureDetectorState extends State<GestureDetector> {
     if (config.onHorizontalDragStart == null && config.onHorizontalDragUpdate == null && config.onHorizontalDragEnd == null) {
       _horizontalDrag = _ensureDisposed(_horizontalDrag);
     } else {
-      _horizontalDrag ??= new HorizontalDragGestureRecognizer(router: _router)
+      _horizontalDrag ??= new HorizontalDragGestureRecognizer(router: _router);
+      _horizontalDrag
         ..onStart = config.onHorizontalDragStart
         ..onUpdate = config.onHorizontalDragUpdate
         ..onEnd = config.onHorizontalDragEnd;
@@ -150,7 +152,8 @@ class GestureDetectorState extends State<GestureDetector> {
       _pan = _ensureDisposed(_pan);
     } else {
       assert(_scale == null);  // Scale is a superset of pan; just use scale
-      _pan ??= new PanGestureRecognizer(router: _router)
+      _pan ??= new PanGestureRecognizer(router: _router);
+      _pan
         ..onStart = config.onPanStart
         ..onUpdate = config.onPanUpdate
         ..onEnd = config.onPanEnd;
@@ -162,7 +165,8 @@ class GestureDetectorState extends State<GestureDetector> {
       _scale = _ensureDisposed(_scale);
     } else {
       assert(_pan == null);  // Scale is a superset of pan; just use scale
-      _scale ??= new ScaleGestureRecognizer(router: _router)
+      _scale ??= new ScaleGestureRecognizer(router: _router);
+      _scale
         ..onStart = config.onScaleStart
         ..onUpdate = config.onScaleUpdate
         ..onEnd = config.onScaleEnd;
