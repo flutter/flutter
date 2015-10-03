@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import "dart:sky";
+import 'dart:sky' show Color, Rect;
 
 import 'package:sky/src/animation/curves.dart';
 
@@ -16,8 +16,8 @@ enum Direction {
 }
 
 /// An interface describing a variable that changes as an animation progresses.
-/// 
-/// AnimatedVariables, by convention, must be cheap to create. This allows them to be used in 
+///
+/// AnimatedVariables, by convention, must be cheap to create. This allows them to be used in
 /// build functions in Widgets.
 abstract class AnimatedVariable {
   /// Update the variable to a given time in an animation that is running in the given direction
@@ -57,12 +57,12 @@ class AnimationTiming {
     Interval interval = _getInterval(direction);
     if (interval != null)
       t = interval.transform(t);
-    if (t == 1.0) // Or should we support inverse curves?
+    assert(t >= 0.0 && t <= 1.0);
+    if (t == 0.0 || t == 1.0) {
+      assert(t == _applyCurve(t, direction).round().toDouble());
       return t;
-    Curve curve = _getCurve(direction);
-    if (curve != null)
-      t = curve.transform(t);
-    return t;
+    }
+    return _applyCurve(t, direction);
   }
 
   Interval _getInterval(Direction direction) {
@@ -75,6 +75,13 @@ class AnimationTiming {
     if (direction == Direction.forward || reverseCurve == null)
       return curve;
     return reverseCurve;
+  }
+
+  double _applyCurve(double t, Direction direction) {
+    Curve curve = _getCurve(direction);
+    if (curve == null)
+      return t;
+    return curve.transform(t);
   }
 }
 
@@ -101,7 +108,12 @@ class AnimatedValue<T extends dynamic> extends AnimationTiming implements Animat
   void setProgress(double t, Direction direction) {
     if (end != null) {
       t = transform(t, direction);
-      value = (t == 1.0) ? end : lerp(t);
+      if (t == 0.0)
+        value = begin;
+      else if (t == 1.0)
+        value = end;
+      else
+        value = lerp(t);
     }
   }
 
