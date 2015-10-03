@@ -8,6 +8,7 @@ library gestures;
 export 'src/gestures/arena.dart';
 export 'src/gestures/constants.dart';
 export 'src/gestures/drag.dart';
+export 'src/gestures/double_tap.dart';
 export 'src/gestures/long_press.dart';
 export 'src/gestures/pointer_router.dart';
 export 'src/gestures/recognizer.dart';
