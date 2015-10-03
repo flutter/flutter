@@ -31,9 +31,10 @@ class GestureDetector extends StatefulComponent {
   }) : super(key: key);
 
   final Widget child;
-  final GestureTapListener onTap;
-  final GestureShowPressListener onShowPress;
-  final GestureLongPressListener onLongPress;
+
+  final GestureTapCallback onTap;
+  final GestureShowPressCallback onShowPress;
+  final GestureLongPressCallback onLongPress;
 
   final GestureDragStartCallback onVerticalDragStart;
   final GestureDragUpdateCallback onVerticalDragUpdate;
@@ -55,62 +56,23 @@ class GestureDetector extends StatefulComponent {
 }
 
 class GestureDetectorState extends State<GestureDetector> {
-  void initState() {
-    super.initState();
-    didUpdateConfig(null);
-  }
-
   final PointerRouter _router = FlutterBinding.instance.pointerRouter;
 
   TapGestureRecognizer _tap;
-  TapGestureRecognizer _ensureTap() {
-    if (_tap == null)
-      _tap = new TapGestureRecognizer(router: _router);
-    return _tap;
-  }
-
   ShowPressGestureRecognizer _showPress;
-  ShowPressGestureRecognizer _ensureShowPress() {
-    if (_showPress == null)
-      _showPress = new ShowPressGestureRecognizer(router: _router);
-    return _showPress;
-  }
-
   LongPressGestureRecognizer _longPress;
-  LongPressGestureRecognizer _ensureLongPress() {
-    if (_longPress == null)
-      _longPress = new LongPressGestureRecognizer(router: _router);
-    return _longPress;
-  }
-
   VerticalDragGestureRecognizer _verticalDrag;
-  VerticalDragGestureRecognizer _ensureVerticalDrag() {
-    if (_verticalDrag == null)
-      _verticalDrag = new VerticalDragGestureRecognizer(router: _router);
-    return _verticalDrag;
-  }
-
   HorizontalDragGestureRecognizer _horizontalDrag;
-  HorizontalDragGestureRecognizer _ensureHorizontalDrag() {
-    if (_horizontalDrag == null)
-      _horizontalDrag = new HorizontalDragGestureRecognizer(router: _router);
-    return _horizontalDrag;
-  }
-
   PanGestureRecognizer _pan;
-  PanGestureRecognizer _ensurePan() {
-    assert(_scale == null);  // Scale is a superset of pan; just use scale
-    if (_pan == null)
-      _pan = new PanGestureRecognizer(router: _router);
-    return _pan;
+  ScaleGestureRecognizer _scale;
+
+  void initState() {
+    super.initState();
+    _syncAll();
   }
 
-  ScaleGestureRecognizer _scale;
-  ScaleGestureRecognizer _ensureScale() {
-    assert(_pan == null);  // Scale is a superset of pan; just use scale
-    if (_scale == null)
-      _scale = new ScaleGestureRecognizer(router: _router);
-    return _scale;
+  void didUpdateConfig(GestureDetector oldConfig) {
+    _syncAll();
   }
 
   void dispose() {
@@ -124,7 +86,7 @@ class GestureDetectorState extends State<GestureDetector> {
     super.dispose();
   }
 
-  void didUpdateConfig(GestureDetector oldConfig) {
+  void _syncAll() {
     _syncTap();
     _syncShowPress();
     _syncLongPress();
@@ -135,31 +97,37 @@ class GestureDetectorState extends State<GestureDetector> {
   }
 
   void _syncTap() {
-    if (config.onTap == null)
+    if (config.onTap == null) {
       _tap = _ensureDisposed(_tap);
-    else
-      _ensureTap().onTap = config.onTap;
+    } else {
+      _tap ??= new TapGestureRecognizer(router: _router)
+        ..onTap = config.onTap;
+    }
   }
 
   void _syncShowPress() {
-    if (config.onShowPress == null)
+    if (config.onShowPress == null) {
       _showPress = _ensureDisposed(_showPress);
-    else
-      _ensureShowPress().onShowPress = config.onShowPress;
+    } else {
+      _showPress ??= new ShowPressGestureRecognizer(router: _router)
+        ..onShowPress = config.onShowPress;
+    }
   }
 
   void _syncLongPress() {
-    if (config.onLongPress == null)
+    if (config.onLongPress == null) {
       _longPress = _ensureDisposed(_longPress);
-    else
-      _ensureLongPress().onLongPress = config.onLongPress;
+    } else {
+      _longPress ??= new LongPressGestureRecognizer(router: _router)
+        ..onLongPress = config.onLongPress;
+    }
   }
 
   void _syncVerticalDrag() {
     if (config.onVerticalDragStart == null && config.onVerticalDragUpdate == null && config.onVerticalDragEnd == null) {
       _verticalDrag = _ensureDisposed(_verticalDrag);
     } else {
-      _ensureVerticalDrag()
+      _verticalDrag ??= new VerticalDragGestureRecognizer(router: _router)
         ..onStart = config.onVerticalDragStart
         ..onUpdate = config.onVerticalDragUpdate
         ..onEnd = config.onVerticalDragEnd;
@@ -170,7 +138,7 @@ class GestureDetectorState extends State<GestureDetector> {
     if (config.onHorizontalDragStart == null && config.onHorizontalDragUpdate == null && config.onHorizontalDragEnd == null) {
       _horizontalDrag = _ensureDisposed(_horizontalDrag);
     } else {
-      _ensureHorizontalDrag()
+      _horizontalDrag ??= new HorizontalDragGestureRecognizer(router: _router)
         ..onStart = config.onHorizontalDragStart
         ..onUpdate = config.onHorizontalDragUpdate
         ..onEnd = config.onHorizontalDragEnd;
@@ -181,7 +149,8 @@ class GestureDetectorState extends State<GestureDetector> {
     if (config.onPanStart == null && config.onPanUpdate == null && config.onPanEnd == null) {
       _pan = _ensureDisposed(_pan);
     } else {
-      _ensurePan()
+      assert(_scale == null);  // Scale is a superset of pan; just use scale
+      _pan ??= new PanGestureRecognizer(router: _router)
         ..onStart = config.onPanStart
         ..onUpdate = config.onPanUpdate
         ..onEnd = config.onPanEnd;
@@ -192,7 +161,8 @@ class GestureDetectorState extends State<GestureDetector> {
     if (config.onScaleStart == null && config.onScaleUpdate == null && config.onScaleEnd == null) {
       _scale = _ensureDisposed(_scale);
     } else {
-      _ensureScale()
+      assert(_pan == null);  // Scale is a superset of pan; just use scale
+      _scale ??= new ScaleGestureRecognizer(router: _router)
         ..onStart = config.onScaleStart
         ..onUpdate = config.onScaleUpdate
         ..onEnd = config.onScaleEnd;
