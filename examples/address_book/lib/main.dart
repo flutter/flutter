@@ -11,7 +11,7 @@ class Field extends StatelessComponent {
     this.inputKey,
     this.icon,
     this.placeholder
-  }): super(key: key);
+  }) : super(key: key);
 
   final GlobalKey inputKey;
   final String icon;

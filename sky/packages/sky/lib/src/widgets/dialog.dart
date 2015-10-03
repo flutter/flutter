@@ -30,7 +30,7 @@ class Dialog extends StatelessComponent {
     this.contentPadding,
     this.actions,
     this.onDismiss
-  }): super(key: key);
+  }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.

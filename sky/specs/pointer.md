@@ -360,7 +360,7 @@ abstract class PointerEvent<T> extends Event<T> {
                  this.distance, this.minDistance, this.maxDistance,
                  this.radiusMajor, this.radiusMinor, this.minRadius, this.maxRadius,
                  this.orientation, this.tilt
-               }): super();
+               }) : super();
 
   final int pointer;
   final PointerKind kind;
@@ -477,7 +477,7 @@ class WheelEvent extends Event {
                this.delta: 0.0,
                this.pointer,
                this.x, this.y
-             }): super();
+             }) : super();
 
   final int wheel;
   final double delta; // revolutions (or fractions thereof)

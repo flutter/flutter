@@ -910,7 +910,7 @@ class Listener extends OneChildRenderObjectWidget {
     this.onPointerMove,
     this.onPointerUp,
     this.onPointerCancel
-  }): super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   final PointerEventListener onPointerDown;
   final PointerEventListener onPointerMove;
