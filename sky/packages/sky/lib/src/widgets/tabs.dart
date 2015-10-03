@@ -13,7 +13,6 @@ import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/icon.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/scrollable.dart';
