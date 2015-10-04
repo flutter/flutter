@@ -107,10 +107,6 @@ class NavigatorState extends State<Navigator> {
 
   void pop([dynamic result]) {
     setState(() {
-      while (currentRoute.ephemeral) {
-        currentRoute.didPop(null);
-        _currentPosition -= 1;
-      }
       assert(_currentPosition > 0);
       currentRoute.didPop(result);
       _currentPosition -= 1;

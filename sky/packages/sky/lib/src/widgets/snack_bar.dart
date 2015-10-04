@@ -6,21 +6,20 @@ import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/widgets/animated_component.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/material.dart';
+import 'package:sky/src/widgets/navigator.dart';
+import 'package:sky/src/widgets/placeholder.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
-typedef void SnackBarDismissedCallback();
-
 const Duration _kSlideInDuration = const Duration(milliseconds: 200);
-const double kSnackHeight = 52.0;
-const double kSideMargins = 24.0;
-const double kVerticalPadding = 14.0;
-const Color kSnackBackground = const Color(0xFF323232);
+const double _kSnackHeight = 52.0;
+const double _kSideMargins = 24.0;
+const double _kVerticalPadding = 14.0;
+const Color _kSnackBackground = const Color(0xFF323232);
 
 class SnackBarAction extends StatelessComponent {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
@@ -34,70 +33,60 @@ class SnackBarAction extends StatelessComponent {
     return new GestureDetector(
       onTap: onPressed,
       child: new Container(
-        margin: const EdgeDims.only(left: kSideMargins),
-        padding: const EdgeDims.symmetric(vertical: kVerticalPadding),
+        margin: const EdgeDims.only(left: _kSideMargins),
+        padding: const EdgeDims.symmetric(vertical: _kVerticalPadding),
         child: new Text(label)
       )
     );
   }
 }
 
-class SnackBar extends AnimatedComponent {
+class SnackBar extends StatelessComponent {
   SnackBar({
     Key key,
     this.content,
     this.actions,
-    bool showing,
-    this.onDismissed
-  }) : super(key: key, direction: showing ? AnimationDirection.forward : AnimationDirection.reverse, duration: _kSlideInDuration) {
+    this.performance
+  }) : super(key: key) {
     assert(content != null);
   }
 
   final Widget content;
   final List<SnackBarAction> actions;
-  final SnackBarDismissedCallback onDismissed;
-
-  SnackBarState createState() => new SnackBarState();
-}
-
-class SnackBarState extends AnimatedState<SnackBar> {
-  void handleDismissed() {
-    if (config.onDismissed != null)
-      config.onDismissed();
-  }
+  final PerformanceView performance;
 
   Widget build(BuildContext context) {
     List<Widget> children = [
       new Flexible(
         child: new Container(
-          margin: const EdgeDims.symmetric(vertical: kVerticalPadding),
+          margin: const EdgeDims.symmetric(vertical: _kVerticalPadding),
           child: new DefaultTextStyle(
             style: Typography.white.subhead,
-            child: config.content
+            child: content
           )
         )
       )
     ];
-    if (config.actions != null)
-      children.addAll(config.actions);
+    if (actions != null)
+      children.addAll(actions);
     return new SquashTransition(
-      performance: performance.view,
+      performance: performance,
       height: new AnimatedValue<double>(
         0.0,
-        end: kSnackHeight,
+        end: _kSnackHeight,
         curve: easeIn,
         reverseCurve: easeOut
       ),
       child: new ClipRect(
         child: new OverflowBox(
-          minHeight: kSnackHeight,
-          maxHeight: kSnackHeight,
+          minHeight: _kSnackHeight,
+          maxHeight: _kSnackHeight,
           child: new Material(
             level: 2,
-            color: kSnackBackground,
+            color: _kSnackBackground,
             type: MaterialType.canvas,
             child: new Container(
-              margin: const EdgeDims.symmetric(horizontal: kSideMargins),
+              margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
               child: new DefaultTextStyle(
                 style: new TextStyle(color: Theme.of(context).accentColor),
                 child: new Row(children)
@@ -108,4 +97,29 @@ class SnackBarState extends AnimatedState<SnackBar> {
       )
     );
   }
+}
+
+class _SnackBarRoute extends Route {
+  _SnackBarRoute({ this.content, this.actions });
+
+  final Widget content;
+  final List<SnackBarAction> actions;
+
+  bool get hasContent => false;
+  bool get ephemeral => true;
+  bool get modal => false;
+  Duration get transitionDuration => _kSlideInDuration;
+
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) => null;
+}
+
+void showSnackBar({ NavigatorState navigator, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
+  Route route = new _SnackBarRoute();
+  SnackBar snackBar = new SnackBar(
+    content: content,
+    actions: actions,
+    performance: route.performance
+  );
+  placeholderKey.currentState.child = snackBar;
+  navigator.push(route);
 }

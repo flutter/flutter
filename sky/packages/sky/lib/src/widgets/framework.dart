@@ -50,7 +50,7 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 /// A GlobalKey is one that must be unique across the entire application. It is
 /// used by components that need to communicate with other components across the
 /// application's element tree.
-abstract class GlobalKey extends Key {
+abstract class GlobalKey<T extends State> extends Key {
   const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
 
   /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
@@ -96,9 +96,9 @@ abstract class GlobalKey extends Key {
   Element get _currentElement => _registry[this];
   BuildContext get currentContext => _currentElement;
   Widget get currentWidget => _currentElement?.widget;
-  State get currentState {
+  T get currentState {
     Element element = _currentElement;
-    if (element is StatefulComponentElement)
+    if (element is StatefulComponentElement<dynamic, T>)
       return element.state;
     return null;
   }

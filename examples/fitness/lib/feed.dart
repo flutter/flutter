@@ -58,10 +58,8 @@ class FeedFragment extends StatefulComponent {
 }
 
 class FeedFragmentState extends State<FeedFragment> {
+  final GlobalKey<PlaceholderState> _snackBarPlaceholderKey = new GlobalKey<PlaceholderState>();
   FitnessMode _fitnessMode = FitnessMode.feed;
-
-  PerformanceStatus _snackBarStatus = PerformanceStatus.dismissed;
-  bool _isShowingSnackBar = false;
 
   void _handleFitnessModeChange(FitnessMode value) {
     setState(() {
@@ -119,15 +117,17 @@ class FeedFragmentState extends State<FeedFragment> {
     );
   }
 
-  FitnessItem _undoItem;
-
   void _handleItemDismissed(FitnessItem item) {
     config.onItemDeleted(item);
-    setState(() {
-      _undoItem = item;
-      _isShowingSnackBar = true;
-      _snackBarStatus = PerformanceStatus.forward;
-    });
+    showSnackBar(
+      navigator: config.navigator,
+      placeholderKey: _snackBarPlaceholderKey,
+      content: new Text("Item deleted."),
+      actions: [new SnackBarAction(label: "UNDO", onPressed: () {
+        config.onItemCreated(item);
+        config.navigator.pop();
+      })]
+    );
   }
 
   Widget buildChart() {
@@ -198,25 +198,6 @@ class FeedFragmentState extends State<FeedFragment> {
     }
   }
 
-  void _handleUndo() {
-    config.onItemCreated(_undoItem);
-    setState(() {
-      _undoItem = null;
-      _isShowingSnackBar = false;
-    });
-  }
-
-  Widget buildSnackBar() {
-    if (_snackBarStatus == PerformanceStatus.dismissed)
-      return null;
-    return new SnackBar(
-      showing: _isShowingSnackBar,
-      content: new Text("Item deleted."),
-      actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
-      onDismissed: () { setState(() { _snackBarStatus = PerformanceStatus.dismissed; }); }
-    );
-  }
-
   void _handleActionButtonPressed() {
     showDialog(config.navigator, (NavigatorState navigator) => new AddItemDialog(navigator)).then((routeName) {
       if (routeName != null)
@@ -240,7 +221,7 @@ class FeedFragmentState extends State<FeedFragment> {
     return new Scaffold(
       toolbar: buildToolBar(),
       body: buildBody(),
-      snackBar: buildSnackBar(),
+      snackBar: new Placeholder(key: _snackBarPlaceholderKey),
       floatingActionButton: buildFloatingActionButton()
     );
   }
