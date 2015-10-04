@@ -79,9 +79,6 @@ class AnimationPerformance implements WatchableAnimationPerformance {
   /// If non-null, animate with this timing instead of a linear timing
   AnimationTiming timing;
 
-  /// If non-null, animate with this force instead of a zero-to-one timeline.
-  Force attachedForce;
-
   /// The progress of this performance along the timeline
   ///
   /// Note: Setting this value stops the current animation.
@@ -136,12 +133,6 @@ class AnimationPerformance implements WatchableAnimationPerformance {
 
   /// Start running this animation in the most recently direction
   Future resume() {
-    if (attachedForce != null) {
-      return fling(
-        velocity: _direction == Direction.forward ? 1.0 : -1.0,
-        force: attachedForce
-      );
-    }
     return _animateTo(_direction == Direction.forward ? 1.0 : 0.0);
   }
 

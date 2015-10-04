@@ -14,6 +14,7 @@ import 'package:sky/src/widgets/navigator.dart';
 import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
+import 'package:sky/src/widgets/focus.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://www.google.com/design/spec/layout/structure.html#structure-side-nav
@@ -36,22 +37,16 @@ const Duration _kThemeChangeDuration = const Duration(milliseconds: 200);
 const Point _kOpenPosition = Point.origin;
 const Point _kClosedPosition = const Point(-_kWidth, 0.0);
 
-typedef void DrawerDismissedCallback();
-
 class Drawer extends StatefulComponent {
   Drawer({
     Key key,
-    this.children,
-    this.showing: false,
-    this.level: 0,
-    this.onDismissed,
+    this.child,
+    this.level: 3,
     this.navigator
   }) : super(key: key);
 
-  final List<Widget> children;
-  final bool showing;
+  final Widget child;
   final int level;
-  final DrawerDismissedCallback onDismissed;
   final NavigatorState navigator;
 
   DrawerState createState() => new DrawerState();
@@ -60,44 +55,24 @@ class Drawer extends StatefulComponent {
 class DrawerState extends State<Drawer> {
   void initState() {
     super.initState();
-    _performance = new AnimationPerformance(duration: _kBaseSettleDuration);
-    _performance.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed)
-        _handleDismissed();
-    });
-    // Use a spring force for animating the drawer. We can't use curves for
-    // this because we need a linear curve in order to track the user's finger
-    // while dragging.
-    _performance.attachedForce = kDefaultSpringForce;
-    if (config.navigator != null) {
-      // TODO(ianh): This is crazy. We should convert drawer to use a pattern like openDialog().
-      // https://github.com/domokit/sky_engine/pull/1186
-      scheduleMicrotask(() {
-        config.navigator.pushState(this, (_) => _performance.reverse());
+    _performance = new AnimationPerformance(duration: _kBaseSettleDuration)
+      ..addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.dismissed)
+          config.navigator.pop();
       });
-    }
-    _performance.play(_direction);
+    _open();
   }
 
   AnimationPerformance _performance;
 
-  Direction get _direction => config.showing ? Direction.forward : Direction.reverse;
-
-  void didUpdateConfig(Drawer oldConfig) {
-    if (config.showing != oldConfig.showing)
-      _performance.play(_direction);
-  }
-
   Widget build(BuildContext context) {
-    var mask = new GestureDetector(
+    Widget mask = new GestureDetector(
+      onTap: _close,
       child: new ColorTransition(
         performance: _performance.view,
-        color: new AnimatedColorValue(Colors.transparent, end: const Color(0x7F000000)),
+        color: new AnimatedColorValue(Colors.transparent, end: Colors.black54),
         child: new Container()
-      ),
-      onTap: () {
-        _performance.reverse();
-      }
+      )
     );
 
     Widget content = new SlideTransition(
@@ -105,12 +80,12 @@ class DrawerState extends State<Drawer> {
       position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
       child: new AnimatedContainer(
         curve: ease,
-        duration: const Duration(milliseconds: 200),
+        duration: _kThemeChangeDuration,
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(context).canvasColor,
           boxShadow: shadows[config.level]),
         width: _kWidth,
-        child: new Block(config.children)
+        child: config.child
       )
     );
 
@@ -118,33 +93,64 @@ class DrawerState extends State<Drawer> {
       onHorizontalDragStart: _performance.stop,
       onHorizontalDragUpdate: _handleDragUpdate,
       onHorizontalDragEnd: _handleDragEnd,
-      child: new Stack([ mask, content ])
+      child: new Stack([
+        mask,
+        new Positioned(
+          top: 0.0,
+          left: 0.0,
+          bottom: 0.0,
+          child: content
+        )
+      ])
     );
   }
 
-  void _handleDismissed() {
-    if (config.navigator != null &&
-        config.navigator.currentRoute is StateRoute &&
-        (config.navigator.currentRoute as StateRoute).owner == this) // TODO(ianh): remove cast once analyzer is cleverer
-      config.navigator.pop();
-    if (config.onDismissed != null)
-      config.onDismissed();
-  }
-
   bool get _isMostlyClosed => _performance.progress < 0.5;
-
-  void _settle() { _isMostlyClosed ? _performance.reverse() : _performance.play(); }
 
   void _handleDragUpdate(double delta) {
     _performance.progress += delta / _kWidth;
   }
 
+  void _open() {
+    _performance.fling(velocity: 1.0);
+  }
+
+  void _close() {
+    _performance.fling(velocity: -1.0);
+  }
+
   void _handleDragEnd(Offset velocity) {
     if (velocity.dx.abs() >= _kMinFlingVelocity) {
       _performance.fling(velocity: velocity.dx * _kFlingVelocityScale);
+    } else if (_isMostlyClosed) {
+      _close();
     } else {
-      _settle();
+      _open();
     }
   }
+}
 
+class DrawerRoute extends Route {
+  DrawerRoute({ this.child, this.level });
+
+  final Widget child;
+  final int level;
+
+  bool get opaque => false;
+
+  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
+    return new Focus(
+      key: new GlobalObjectKey(this),
+      autofocus: true,
+      child: new Drawer(
+        child: child,
+        level: level,
+        navigator: navigator
+      )
+    );
+  }
+}
+
+void showDrawer({ NavigatorState navigator, Widget child, int level: 3 }) {
+  navigator.push(new DrawerRoute(child: child, level: level));
 }

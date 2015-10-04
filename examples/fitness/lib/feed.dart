@@ -66,19 +66,14 @@ class FeedFragmentState extends State<FeedFragment> {
   void _handleFitnessModeChange(FitnessMode value) {
     setState(() {
       _fitnessMode = value;
-      _drawerShowing = false;
     });
+    config.navigator.pop();
   }
 
-  Drawer buildDrawer() {
-    if (_drawerStatus == AnimationStatus.dismissed)
-      return null;
-    return new Drawer(
-      showing: _drawerShowing,
-      level: 3,
-      onDismissed: _handleDrawerDismissed,
+  void _showDrawer() {
+    showDrawer(
       navigator: config.navigator,
-      children: [
+      child: new Block([
         new DrawerHeader(child: new Text('Fitness')),
         new DrawerItem(
           icon: 'action/view_list',
@@ -98,24 +93,8 @@ class FeedFragmentState extends State<FeedFragment> {
         new DrawerItem(
           icon: 'action/help',
           child: new Text('Help & Feedback'))
-      ]
+      ])
     );
-  }
-
-  bool _drawerShowing = false;
-  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
-
-  void _handleOpenDrawer() {
-    setState(() {
-      _drawerShowing = true;
-      _drawerStatus = AnimationStatus.forward;
-    });
-  }
-
-  void _handleDrawerDismissed() {
-    setState(() {
-      _drawerStatus = AnimationStatus.dismissed;
-    });
   }
 
   void _handleShowSettings() {
@@ -135,7 +114,7 @@ class FeedFragmentState extends State<FeedFragment> {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/menu",
-        onPressed: _handleOpenDrawer),
+        onPressed: _showDrawer),
       center: new Text(fitnessModeTitle)
     );
   }
@@ -262,8 +241,7 @@ class FeedFragmentState extends State<FeedFragment> {
       toolbar: buildToolBar(),
       body: buildBody(),
       snackBar: buildSnackBar(),
-      floatingActionButton: buildFloatingActionButton(),
-      drawer: buildDrawer()
+      floatingActionButton: buildFloatingActionButton()
     );
   }
 }
