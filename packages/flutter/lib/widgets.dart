@@ -37,6 +37,7 @@ export 'src/widgets/material_button.dart';
 export 'src/widgets/mimic.dart';
 export 'src/widgets/mixed_viewport.dart';
 export 'src/widgets/navigator.dart';
+export 'src/widgets/placeholder.dart';
 export 'src/widgets/popup_menu.dart';
 export 'src/widgets/popup_menu_item.dart';
 export 'src/widgets/progress_indicator.dart';
