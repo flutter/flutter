@@ -64,33 +64,25 @@ class MineDiggerState extends State<MineDigger> {
     alive = true;
     hasWon = false;
     detectedCount = 0;
-    // Build the arrays.
-    cells = new List<List<bool>>();
-    uiState = new List<List<CellState>>();
-    for (int iy = 0; iy != rows; iy++) {
-      cells.add(new List<bool>());
-      uiState.add(new List<CellState>());
-      for (int ix = 0; ix != cols; ix++) {
-        cells[iy].add(false);
-        uiState[iy].add(CellState.covered);
-      }
-    }
+    // Initialize matrices.
+    cells = new List<List>.generate(rows, (int row) {
+      return new List<bool>.filled(cols, false);
+    });
+    uiState = new List<List>.generate(rows, (int row) {
+      return new List<CellState>.filled(cols, CellState.covered);
+    });
     // Place the mines.
     Random random = new Random();
-    int cellsRemaining = rows * cols;
     int minesRemaining = totalMineCount;
-    for (int x = 0; x < cols; x += 1) {
-      for (int y = 0; y < rows; y += 1) {
-        if (random.nextInt(cellsRemaining) < minesRemaining) {
-          cells[y][x] = true;
-          minesRemaining -= 1;
-          if (minesRemaining <= 0)
-            return;
-        }
-        cellsRemaining -= 1;
+    while (minesRemaining > 0) {
+      int pos = random.nextInt(rows * cols);
+      int row = pos ~/ rows;
+      int col = pos % cols;
+      if (!cells[row][col]) {
+        cells[row][col] = true;
+        minesRemaining--;
       }
     }
-    assert(false);
   }
 
   PointerEventListener _pointerDownHandlerFor(int posX, int posY) {
@@ -106,9 +98,9 @@ class MineDiggerState extends State<MineDigger> {
   Widget buildBoard() {
     bool hasCoveredCell = false;
     List<Row> flexRows = <Row>[];
-    for (int iy = 0; iy != 9; iy++) {
+    for (int iy = 0; iy < rows; iy++) {
       List<Widget> row = <Widget>[];
-      for (int ix = 0; ix != 9; ix++) {
+      for (int ix = 0; ix < cols; ix++) {
         CellState state = uiState[iy][ix];
         int count = mineCount(ix, iy);
         if (!alive) {
