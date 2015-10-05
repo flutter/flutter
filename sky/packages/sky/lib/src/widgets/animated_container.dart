@@ -9,29 +9,29 @@ import 'package:sky/src/widgets/framework.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 class AnimatedBoxConstraintsValue extends AnimatedValue<BoxConstraints> {
-  AnimatedBoxConstraintsValue(BoxConstraints begin, { BoxConstraints end, Curve curve: linear })
-    : super(begin, end: end, curve: curve);
+  AnimatedBoxConstraintsValue(BoxConstraints begin, { BoxConstraints end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
 
   BoxConstraints lerp(double t) => BoxConstraints.lerp(begin, end, t);
 }
 
 class AnimatedBoxDecorationValue extends AnimatedValue<BoxDecoration> {
-  AnimatedBoxDecorationValue(BoxDecoration begin, { BoxDecoration end, Curve curve: linear })
-    : super(begin, end: end, curve: curve);
+  AnimatedBoxDecorationValue(BoxDecoration begin, { BoxDecoration end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
 
   BoxDecoration lerp(double t) => BoxDecoration.lerp(begin, end, t);
 }
 
 class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
-  AnimatedEdgeDimsValue(EdgeDims begin, { EdgeDims end, Curve curve: linear })
-    : super(begin, end: end, curve: curve);
+  AnimatedEdgeDimsValue(EdgeDims begin, { EdgeDims end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
 
   EdgeDims lerp(double t) => EdgeDims.lerp(begin, end, t);
 }
 
 class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
-  AnimatedMatrix4Value(Matrix4 begin, { Matrix4 end, Curve curve: linear })
-    : super(begin, end: end, curve: curve);
+  AnimatedMatrix4Value(Matrix4 begin, { Matrix4 end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
 
   Matrix4 lerp(double t) {
     // TODO(mpcomplete): Animate the full matrix. Will animating the cells
