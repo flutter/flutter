@@ -30,13 +30,13 @@ class RadialReaction {
     _outerOpacity = new AnimatedValue<double>(0.0, end: _kMaxOpacity, curve: easeOut);
     _innerCenter = new AnimatedValue<Point>(startPosition, end: center, curve: easeOut);
     _innerRadius = new AnimatedValue<double>(0.0, end: radius, curve: easeOut);
-    _showPerformance = new AnimationPerformance(duration: _kShowDuration)
+    _showPerformance = new Performance(duration: _kShowDuration)
       ..addListener(() {
         _showPerformance.updateVariable(_outerOpacity);
         _showPerformance.updateVariable(_innerCenter);
         _showPerformance.updateVariable(_innerRadius);
       });
-    _fade = new ValueAnimation<double>(
+    _fade = new ValuePerformance<double>(
       variable: new AnimatedValue(1.0, end: 0.0, curve: easeIn),
       duration: _kHideDuration
     );
@@ -48,14 +48,14 @@ class RadialReaction {
   /// The radius of the circle in which the reaction occurs
   final double radius;
 
-  AnimationPerformance _showPerformance;
+  Performance _showPerformance;
   AnimatedValue<double> _outerOpacity;
   AnimatedValue<Point> _innerCenter;
   AnimatedValue<double> _innerRadius;
 
   Future _showComplete;
 
-  ValueAnimation<double> _fade;
+  ValuePerformance<double> _fade;
 
   /// Show the reaction
   ///

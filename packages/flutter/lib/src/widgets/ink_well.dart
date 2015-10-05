@@ -32,7 +32,7 @@ class InkSplash {
     _radius = new AnimatedValue<double>(
         _kSplashInitialSize, end: _targetRadius, curve: easeOut);
 
-    _performance = new ValueAnimation<double>(
+    _performance = new ValuePerformance<double>(
       variable: _radius,
       duration: new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
     )..addListener(_handleRadiusChange);
@@ -47,7 +47,7 @@ class InkSplash {
   double _targetRadius;
   double _pinnedRadius;
   AnimatedValue<double> _radius;
-  AnimationPerformance _performance;
+  Performance _performance;
   Timer _startTimer;
 
   bool _cancelStartTimer() {

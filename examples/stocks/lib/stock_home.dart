@@ -25,7 +25,7 @@ class StockHomeState extends State<StockHome> {
   bool _isSearching = false;
   String _searchQuery;
 
-  AnimationStatus _snackBarStatus = AnimationStatus.dismissed;
+  PerformanceStatus _snackBarStatus = PerformanceStatus.dismissed;
   bool _isSnackBarShowing = false;
 
   void _handleSearchBegin() {
@@ -224,20 +224,20 @@ class StockHomeState extends State<StockHome> {
 
   GlobalKey snackBarKey = new GlobalKey(label: 'snackbar');
   Widget buildSnackBar() {
-    if (_snackBarStatus == AnimationStatus.dismissed)
+    if (_snackBarStatus == PerformanceStatus.dismissed)
       return null;
     return new SnackBar(
       showing: _isSnackBarShowing,
       content: new Text("Stock purchased!"),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
-      onDismissed: () { setState(() { _snackBarStatus = AnimationStatus.dismissed; }); }
+      onDismissed: () { setState(() { _snackBarStatus = PerformanceStatus.dismissed; }); }
     );
   }
 
   void _handleStockPurchased() {
     setState(() {
       _isSnackBarShowing = true;
-      _snackBarStatus = AnimationStatus.forward;
+      _snackBarStatus = PerformanceStatus.forward;
     });
   }
 

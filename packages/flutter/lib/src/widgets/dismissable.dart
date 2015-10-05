@@ -50,15 +50,15 @@ class Dismissable extends StatefulComponent {
 class DismissableState extends State<Dismissable> {
   void initState() {
     super.initState();
-    _fadePerformance = new AnimationPerformance(duration: _kCardDismissFadeout);
-    _fadePerformance.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed)
+    _fadePerformance = new Performance(duration: _kCardDismissFadeout);
+    _fadePerformance.addStatusListener((PerformanceStatus status) {
+      if (status == PerformanceStatus.completed)
         _handleFadeCompleted();
     });
   }
 
-  AnimationPerformance _fadePerformance;
-  AnimationPerformance _resizePerformance;
+  Performance _fadePerformance;
+  Performance _resizePerformance;
 
   Size _size;
   double _dragExtent = 0.0;
@@ -97,7 +97,7 @@ class DismissableState extends State<Dismissable> {
     assert(_resizePerformance == null);
 
     setState(() {
-      _resizePerformance = new AnimationPerformance()
+      _resizePerformance = new Performance()
         ..duration = _kCardDismissResize
         ..addListener(_handleResizeProgressChanged);
       _resizePerformance.play();
@@ -221,7 +221,7 @@ class DismissableState extends State<Dismissable> {
   Widget build(BuildContext context) {
     if (_resizePerformance != null) {
       // make sure you remove this widget once it's been dismissed!
-      assert(_resizePerformance.status == AnimationStatus.forward);
+      assert(_resizePerformance.status == PerformanceStatus.forward);
 
       AnimatedValue<double> squashAxisExtent = new AnimatedValue<double>(
         _directionIsYAxis ? _size.width : _size.height,

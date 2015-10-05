@@ -141,7 +141,7 @@ class DialogRoute extends Route {
 
   Duration get transitionDuration => _kTransitionDuration;
   bool get opaque => false;
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),

@@ -118,7 +118,7 @@ class NavigatorState extends State<Navigator> {
   Widget build(BuildContext context) {
     List<Widget> visibleRoutes = new List<Widget>();
     bool alreadyInsertModalBarrier = false;
-    WatchableAnimationPerformance nextPerformance;
+    PerformanceView nextPerformance;
     for (int i = _history.length-1; i >= 0; i -= 1) {
       Route route = _history[i];
       if (!route.hasContent) {
@@ -126,7 +126,7 @@ class NavigatorState extends State<Navigator> {
         continue;
       }
       route.ensurePerformance(
-        direction: (i <= _currentPosition) ? Direction.forward : Direction.reverse
+        direction: (i <= _currentPosition) ? AnimationDirection.forward : AnimationDirection.reverse
       );
       route._onDismissed = () {
         setState(() {
@@ -159,28 +159,28 @@ class NavigatorState extends State<Navigator> {
 
 abstract class Route {
 
-  WatchableAnimationPerformance get performance => _performance?.view;
-  AnimationPerformance _performance;
+  PerformanceView get performance => _performance?.view;
+  Performance _performance;
   NotificationCallback _onDismissed;
 
-  AnimationPerformance createPerformance() {
+  Performance createPerformance() {
     Duration duration = transitionDuration;
     if (duration > Duration.ZERO) {
-      return new AnimationPerformance(duration: duration)
-        ..addStatusListener((AnimationStatus status) {
-          if (status == AnimationStatus.dismissed && _onDismissed != null)
+      return new Performance(duration: duration)
+        ..addStatusListener((PerformanceStatus status) {
+          if (status == PerformanceStatus.dismissed && _onDismissed != null)
             _onDismissed();
         });
     }
     return null;
   }
 
-  void ensurePerformance({ Direction direction }) {
+  void ensurePerformance({ AnimationDirection direction }) {
     assert(direction != null);
     if (_performance == null)
       _performance = createPerformance();
     if (_performance != null) {
-      AnimationStatus desiredStatus = direction == Direction.forward ? AnimationStatus.forward : AnimationStatus.reverse;
+      PerformanceStatus desiredStatus = direction == AnimationDirection.forward ? PerformanceStatus.forward : PerformanceStatus.reverse;
       if (_performance.status != desiredStatus)
         _performance.play(direction);
     }
@@ -236,14 +236,14 @@ abstract class Route {
   /// cover the entire application surface or are in any way semi-transparent.
   bool get opaque => false;
 
-  /// If this is set to a non-zero [Duration], then an [AnimationPerformance]
+  /// If this is set to a non-zero [Duration], then an [Performance]
   /// object, available via the performance field, will be created when the
   /// route is first built, using the duration described here.
   Duration get transitionDuration => Duration.ZERO;
 
   bool get isActuallyOpaque => (performance == null || _performance.isCompleted) && opaque;
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance);
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
   void didPop([dynamic result]) {
     if (performance == null && _onDismissed != null)
       _onDismissed();
@@ -263,7 +263,7 @@ class PageRoute extends Route {
   bool get opaque => true;
   Duration get transitionDuration => _kTransitionDuration;
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
     return new SlideTransition(
@@ -296,5 +296,5 @@ class StateRoute extends Route {
     super.didPop(result);
   }
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) => null;
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) => null;
 }
