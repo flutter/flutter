@@ -88,4 +88,38 @@ void main() {
       tester.pumpWidget(new Container());
     });
   });
+
+  test('Pan doesn\'t crash', () {
+    testWidgets((WidgetTester tester) {
+      bool didStartPan = false;
+      Offset panDelta;
+      bool didEndPan = false;
+
+      tester.pumpWidget(
+        new GestureDetector(
+          onPanStart: () {
+            didStartPan = true;
+          },
+          onPanUpdate: (Offset delta) {
+            panDelta = delta;
+          },
+          onPanEnd: (_) {
+            didEndPan = true;
+          },
+          child: new Container()
+        )
+      );
+
+      expect(didStartPan, isFalse);
+      expect(panDelta, isNull);
+      expect(didEndPan, isFalse);
+
+      tester.scrollAt(new Point(10.0, 10.0), new Offset(20.0, 30.0));
+
+      expect(didStartPan, isTrue);
+      expect(panDelta.dx, 20.0);
+      expect(panDelta.dy, 30.0);
+      expect(didEndPan, isTrue);
+    });
+  });
 }

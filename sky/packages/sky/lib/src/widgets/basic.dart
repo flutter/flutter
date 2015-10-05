@@ -22,6 +22,7 @@ export 'package:sky/rendering.dart' show
     FlexAlignItems,
     FlexDirection,
     FlexJustifyContent,
+    Matrix4,
     Offset,
     Paint,
     Path,
@@ -65,6 +66,33 @@ class ColorFilter extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderColorFilter renderObject, ColorFilter oldWidget) {
     renderObject.color = color;
+    renderObject.transferMode = transferMode;
+  }
+}
+
+class ShaderMask extends OneChildRenderObjectWidget {
+  ShaderMask({
+    Key key,
+    this.shaderCallback,
+    this.transferMode: sky.TransferMode.modulate,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(shaderCallback != null);
+    assert(transferMode != null);
+  }
+
+  final ShaderCallback shaderCallback;
+  final sky.TransferMode transferMode;
+
+  RenderShaderMask createRenderObject() {
+    return new RenderShaderMask(
+      shaderCallback: shaderCallback,
+      transferMode: transferMode
+    );
+  }
+
+  void updateRenderObject(RenderShaderMask renderObject, ShaderMask oldWidget) {
+    renderObject.shaderCallback = shaderCallback;
     renderObject.transferMode = transferMode;
   }
 }
@@ -392,11 +420,11 @@ class Container extends StatelessComponent {
     this.constraints,
     this.decoration,
     this.foregroundDecoration,
-    this.width,
-    this.height,
     this.margin,
     this.padding,
-    this.transform
+    this.transform,
+    this.width,
+    this.height
   }) : super(key: key) {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
@@ -684,6 +712,11 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   bool updateShouldNotify(DefaultTextStyle old) => style != old.style;
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    '$style'.split('\n').forEach(description.add);
+  }
 }
 
 class Text extends StatelessComponent {
@@ -709,6 +742,13 @@ class Text extends StatelessComponent {
     if (combinedStyle != null)
       text = new StyledTextSpan(combinedStyle, [text]);
     return new Paragraph(text: text);
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('"$data"');
+    if (style != null)
+      '$style'.split('\n').forEach(description.add);
   }
 }
 
@@ -882,7 +922,7 @@ class Listener extends OneChildRenderObjectWidget {
     this.onPointerMove,
     this.onPointerUp,
     this.onPointerCancel
-  }): super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   final PointerEventListener onPointerDown;
   final PointerEventListener onPointerMove;

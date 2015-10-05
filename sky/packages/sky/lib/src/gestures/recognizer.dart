@@ -12,7 +12,9 @@ import 'package:sky/src/gestures/pointer_router.dart';
 export 'package:sky/src/gestures/pointer_router.dart' show PointerRouter;
 
 abstract class GestureRecognizer extends GestureArenaMember {
-  GestureRecognizer({ PointerRouter router }) : _router = router;
+  GestureRecognizer({ PointerRouter router }) : _router = router {
+    assert(_router != null);
+  }
 
   PointerRouter _router;
 

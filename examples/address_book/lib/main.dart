@@ -11,7 +11,7 @@ class Field extends StatelessComponent {
     this.inputKey,
     this.icon,
     this.placeholder
-  }): super(key: key);
+  }) : super(key: key);
 
   final GlobalKey inputKey;
   final String icon;
@@ -101,7 +101,7 @@ void main() {
     title: 'Address Book',
     theme: theme,
     routes: <String, RouteBuilder>{
-      '/': (NavigatorState navigator, Route route) => new AddressBookHome(navigator: navigator)
+      '/': (RouteArguments args) => new AddressBookHome(navigator: args.navigator)
     }
   ));
 }

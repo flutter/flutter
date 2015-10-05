@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/gestures.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/button_state.dart';
 import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/material.dart';
 
@@ -22,7 +22,7 @@ abstract class MaterialButton extends StatefulComponent {
 
   final Widget child;
   final bool enabled;
-  final Function onPressed;
+  final GestureTapCallback onPressed;
 }
 
 abstract class MaterialButtonState<T extends MaterialButton> extends ButtonState<T> {
@@ -37,17 +37,17 @@ abstract class MaterialButtonState<T extends MaterialButton> extends ButtonState
         child: config.child // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
       )
     );
-    return new GestureDetector(
-      onTap: config.enabled ? config.onPressed : null,
-      child: new Container(
-        height: 36.0,
-        constraints: new BoxConstraints(minWidth: 88.0),
-        margin: new EdgeDims.all(8.0),
-        child: new Material(
-          type: MaterialType.button,
-          child: config.enabled ? new InkWell(child: contents) : contents,
-          level: level,
-          color: getColor(context)
+    return new Container(
+      height: 36.0,
+      constraints: new BoxConstraints(minWidth: 88.0),
+      margin: new EdgeDims.all(8.0),
+      child: new Material(
+        type: MaterialType.button,
+        level: level,
+        color: getColor(context),
+        child: new InkWell(
+          onTap: config.enabled ? config.onPressed : null,
+          child: contents
         )
       )
     );

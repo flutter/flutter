@@ -61,7 +61,7 @@ class _CheckboxWrapper extends LeafRenderObjectWidget {
     this.onChanged,
     this.uncheckedColor,
     this.accentColor
-  }): super(key: key) {
+  }) : super(key: key) {
     assert(uncheckedColor != null);
     assert(accentColor != null);
   }

@@ -37,13 +37,13 @@ class StockRow extends StatelessComponent {
 
   static const double kHeight = 79.0;
 
-  GestureTapListener _getTapHandler(StockRowActionCallback callback) {
+  GestureTapCallback _getTapHandler(StockRowActionCallback callback) {
     if (callback == null)
       return null;
     return () => callback(stock, key, arrowKey, symbolKey, priceKey);
   }
 
-  GestureLongPressListener _getLongPressHandler(StockRowActionCallback callback) {
+  GestureLongPressCallback _getLongPressHandler(StockRowActionCallback callback) {
     if (callback == null)
       return null;
     return () => callback(stock, key, arrowKey, symbolKey, priceKey);
@@ -55,52 +55,50 @@ class StockRow extends StatelessComponent {
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0) changeInPrice = "+" + changeInPrice;
 
-    return new GestureDetector(
+    return new InkWell(
       onTap: _getTapHandler(onPressed),
       onLongPress: _getLongPressHandler(onLongPressed),
-      child: new InkWell(
-        child: new Container(
-          padding: const EdgeDims.TRBL(16.0, 16.0, 20.0, 16.0),
-          decoration: new BoxDecoration(
-            border: new Border(
-              bottom: new BorderSide(color: Theme.of(context).dividerColor)
-            )
+      child: new Container(
+        padding: const EdgeDims.TRBL(16.0, 16.0, 20.0, 16.0),
+        decoration: new BoxDecoration(
+          border: new Border(
+            bottom: new BorderSide(color: Theme.of(context).dividerColor)
+          )
+        ),
+        child: new Row([
+          new Container(
+            key: arrowKey,
+            child: new StockArrow(percentChange: stock.percentChange),
+            margin: const EdgeDims.only(right: 5.0)
           ),
-          child: new Row([
-            new Container(
-              key: arrowKey,
-              child: new StockArrow(percentChange: stock.percentChange),
-              margin: const EdgeDims.only(right: 5.0)
-            ),
-            new Flexible(
-              child: new Row([
-                  new Flexible(
-                    flex: 2,
-                    child: new Text(
-                      stock.symbol,
-                      key: symbolKey
-                    )
-                  ),
-                  new Flexible(
-                    child: new Text(
-                      lastSale,
-                      style: const TextStyle(textAlign: TextAlign.right),
-                      key: priceKey
-                    )
-                  ),
-                  new Flexible(
-                    child: new Text(
-                      changeInPrice,
-                      style: Theme.of(context).text.caption.copyWith(textAlign: TextAlign.right)
-                    )
-                  ),
-                ],
-                alignItems: FlexAlignItems.baseline,
-                textBaseline: DefaultTextStyle.of(context).textBaseline
-              )
+          new Flexible(
+            child: new Row([
+                new Flexible(
+                  flex: 2,
+                  child: new Text(
+                    stock.symbol,
+                    key: symbolKey
+                  )
+                ),
+                new Flexible(
+                  child: new Text(
+                    lastSale,
+                    style: const TextStyle(textAlign: TextAlign.right),
+                    key: priceKey
+                  )
+                ),
+                new Flexible(
+                  child: new Text(
+                    changeInPrice,
+                    style: Theme.of(context).text.caption.copyWith(textAlign: TextAlign.right)
+                  )
+                ),
+              ],
+              alignItems: FlexAlignItems.baseline,
+              textBaseline: DefaultTextStyle.of(context).textBaseline
             )
-          ])
-        )
+          )
+        ])
       )
     );
   }

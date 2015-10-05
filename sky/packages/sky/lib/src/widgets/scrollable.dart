@@ -51,16 +51,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     super.initState();
     if (config.initialScrollOffset is double)
       _scrollOffset = config.initialScrollOffset;
-    _toEndAnimation = new AnimatedSimulation(_setScrollOffset);
-    _toOffsetAnimation = new ValueAnimation<double>()
-      ..addListener(() {
-        AnimatedValue<double> offset = _toOffsetAnimation.variable;
-        _setScrollOffset(offset.value);
-      });
+    _animation = new SimulationStepper(_setScrollOffset);
   }
 
-  AnimatedSimulation _toEndAnimation; // See _startToEndAnimation()
-  ValueAnimation<double> _toOffsetAnimation; // Started by scrollTo()
+  SimulationStepper _animation;
 
   double _scrollOffset = 0.0;
   double get scrollOffset => _scrollOffset;
@@ -106,23 +100,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   Widget buildContent(BuildContext context);
 
-  Future _startToOffsetAnimation(double newScrollOffset, Duration duration, Curve curve) {
-    _stopAnimations();
-    _toOffsetAnimation
-      ..variable = new AnimatedValue<double>(scrollOffset,
-        end: newScrollOffset,
-        curve: curve
-      )
-      ..progress = 0.0
-      ..duration = duration;
-    return _toOffsetAnimation.play();
-  }
-
-  void _stopAnimations() {
-    if (_toOffsetAnimation.isAnimating)
-      _toOffsetAnimation.stop();
-    if (_toEndAnimation.isAnimating)
-      _toEndAnimation.stop();
+  Future _animateTo(double newScrollOffset, Duration duration, Curve curve) {
+    _animation.stop();
+    _animation.value = scrollOffset;
+    return _animation.animateTo(newScrollOffset, duration: duration, curve: curve);
   }
 
   bool _scrollOffsetIsInBounds(double offset) {
@@ -165,16 +146,16 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Future _startToEndAnimation({ double velocity }) {
-    _stopAnimations();
+    _animation.stop();
     Simulation simulation =
       _createSnapSimulation(velocity) ?? _createFlingSimulation(velocity ?? 0.0);
     if (simulation == null)
       return new Future.value();
-    return _toEndAnimation.start(simulation);
+    return _animation.animateWith(simulation);
   }
 
   void dispose() {
-    _stopAnimations();
+    _animation.stop();
     super.dispose();
   }
 
@@ -193,12 +174,12 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       return new Future.value();
 
     if (duration == null) {
-      _stopAnimations();
+      _animation.stop();
       _setScrollOffset(newScrollOffset);
       return new Future.value();
     }
 
-    return _startToOffsetAnimation(newScrollOffset, duration, curve);
+    return _animateTo(newScrollOffset, duration, curve);
   }
 
   Future scrollBy(double scrollDelta, { Duration duration, Curve curve }) {
@@ -209,7 +190,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   Future fling(Offset velocity) {
     if (velocity != Offset.zero)
       return _startToEndAnimation(velocity: _scrollVelocity(velocity));
-    if (!_toEndAnimation.isAnimating && (_toOffsetAnimation == null || !_toOffsetAnimation.isAnimating))
+    if (!_animation.isAnimating)
       return settleScrollOffset();
     return new Future.value();
   }
@@ -226,7 +207,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handlePointerDown(_) {
-    _stopAnimations();
+    _animation.stop();
   }
 
   void _handleDragUpdate(double delta) {
@@ -337,7 +318,7 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     });
   }
   void _updateScrollBehaviour() {
-    // if you don't call this from build() or syncConstructorArguments(), you must call it from setState().
+    // if you don't call this from build(), you must call it from setState().
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: _childSize,
       containerExtent: _viewportSize,

@@ -8,18 +8,18 @@ void main() {
     bool firstCallbackRan = false;
     bool secondCallbackRan = false;
 
-    void firstCallback(double timeStamp) {
+    void firstCallback(Duration timeStamp) {
       expect(firstCallbackRan, isFalse);
       expect(secondCallbackRan, isFalse);
-      expect(timeStamp, equals(16.0));
+      expect(timeStamp.inMilliseconds, equals(16));
       firstCallbackRan = true;
       scheduler.cancelAnimationFrame(secondId);
     }
 
-    void secondCallback(double timeStamp) {
+    void secondCallback(Duration timeStamp) {
       expect(firstCallbackRan, isTrue);
       expect(secondCallbackRan, isFalse);
-      expect(timeStamp, equals(16.0));
+      expect(timeStamp.inMilliseconds, equals(16));
       secondCallbackRan = true;
     }
 

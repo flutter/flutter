@@ -12,7 +12,7 @@ import 'package:sky/src/widgets/gesture_detector.dart';
 
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const Duration _kCardDismissResize = const Duration(milliseconds: 300);
-final Interval _kCardDismissResizeInterval = new Interval(0.4, 1.0);
+const Curve _kCardDismissResizeCurve = const Interval(0.4, 1.0, curve: ease);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
@@ -50,15 +50,15 @@ class Dismissable extends StatefulComponent {
 class DismissableState extends State<Dismissable> {
   void initState() {
     super.initState();
-    _fadePerformance = new AnimationPerformance(duration: _kCardDismissFadeout);
-    _fadePerformance.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed)
+    _fadePerformance = new Performance(duration: _kCardDismissFadeout);
+    _fadePerformance.addStatusListener((PerformanceStatus status) {
+      if (status == PerformanceStatus.completed)
         _handleFadeCompleted();
     });
   }
 
-  AnimationPerformance _fadePerformance;
-  AnimationPerformance _resizePerformance;
+  Performance _fadePerformance;
+  Performance _resizePerformance;
 
   Size _size;
   double _dragExtent = 0.0;
@@ -97,16 +97,11 @@ class DismissableState extends State<Dismissable> {
     assert(_resizePerformance == null);
 
     setState(() {
-      _resizePerformance = new AnimationPerformance()
+      _resizePerformance = new Performance()
         ..duration = _kCardDismissResize
         ..addListener(_handleResizeProgressChanged);
       _resizePerformance.play();
     });
-    // Our squash curve (ease) does not return v=0.0 for t=0.0, so we
-    // technically resize on the first frame. To make sure this doesn't confuse
-    // any other widgets (like MixedViewport, which checks for this kind of
-    // thing), we report a resize straight away.
-    _maybeCallOnResized();
   }
 
   void _handleResizeProgressChanged() {
@@ -226,13 +221,12 @@ class DismissableState extends State<Dismissable> {
   Widget build(BuildContext context) {
     if (_resizePerformance != null) {
       // make sure you remove this widget once it's been dismissed!
-      assert(_resizePerformance.status == AnimationStatus.forward);
+      assert(_resizePerformance.status == PerformanceStatus.forward);
 
       AnimatedValue<double> squashAxisExtent = new AnimatedValue<double>(
         _directionIsYAxis ? _size.width : _size.height,
         end: 0.0,
-        curve: ease,
-        interval: _kCardDismissResizeInterval
+        curve: _kCardDismissResizeCurve
       );
 
       return new SquashTransition(

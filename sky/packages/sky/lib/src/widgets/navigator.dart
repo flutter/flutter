@@ -8,7 +8,14 @@ import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
-typedef Widget RouteBuilder(NavigatorState navigator, Route route);
+class RouteArguments {
+  const RouteArguments({ this.navigator, this.previousPerformance, this.nextPerformance });
+  final NavigatorState navigator;
+  final PerformanceView previousPerformance;
+  final PerformanceView nextPerformance;
+}
+
+typedef Widget RouteBuilder(RouteArguments args);
 typedef RouteBuilder RouteGenerator(String name);
 typedef void StateRouteCallback(StateRoute route);
 typedef void NotificationCallback();
@@ -118,7 +125,7 @@ class NavigatorState extends State<Navigator> {
   Widget build(BuildContext context) {
     List<Widget> visibleRoutes = new List<Widget>();
     bool alreadyInsertModalBarrier = false;
-    WatchableAnimationPerformance nextPerformance;
+    PerformanceView nextPerformance;
     for (int i = _history.length-1; i >= 0; i -= 1) {
       Route route = _history[i];
       if (!route.hasContent) {
@@ -126,11 +133,16 @@ class NavigatorState extends State<Navigator> {
         continue;
       }
       route.ensurePerformance(
-        direction: (i <= _currentPosition) ? Direction.forward : Direction.reverse
+        direction: (i <= _currentPosition) ? AnimationDirection.forward : AnimationDirection.reverse
       );
       route._onDismissed = () {
+        assert(_history.contains(route));
+        if (_history.lastIndexOf(route) <= _currentPosition)
+          popRoute(route);
+      };
+      route._onRemoveRoute = () {
+        assert(_history.contains(route));
         setState(() {
-          assert(_history.contains(route));
           _history.remove(route);
         });
       };
@@ -154,33 +166,39 @@ class NavigatorState extends State<Navigator> {
     }
     return new Focus(child: new Stack(visibleRoutes.reversed.toList()));
   }
+
 }
 
 
 abstract class Route {
 
-  WatchableAnimationPerformance get performance => _performance?.view;
-  AnimationPerformance _performance;
+  PerformanceView get performance => _performance?.view;
+  Performance _performance;
   NotificationCallback _onDismissed;
+  NotificationCallback _onRemoveRoute;
 
-  AnimationPerformance createPerformance() {
+  Performance createPerformance() {
     Duration duration = transitionDuration;
     if (duration > Duration.ZERO) {
-      return new AnimationPerformance(duration: duration)
-        ..addStatusListener((AnimationStatus status) {
-          if (status == AnimationStatus.dismissed && _onDismissed != null)
-            _onDismissed();
+      return new Performance(duration: duration)
+        ..addStatusListener((PerformanceStatus status) {
+          if (status == PerformanceStatus.dismissed) {
+            if (_onDismissed != null)
+              _onDismissed();
+            if (_onRemoveRoute != null)
+              _onRemoveRoute();
+          }
         });
     }
     return null;
   }
 
-  void ensurePerformance({ Direction direction }) {
+  void ensurePerformance({ AnimationDirection direction }) {
     assert(direction != null);
     if (_performance == null)
       _performance = createPerformance();
     if (_performance != null) {
-      AnimationStatus desiredStatus = direction == Direction.forward ? AnimationStatus.forward : AnimationStatus.reverse;
+      PerformanceStatus desiredStatus = direction == AnimationDirection.forward ? PerformanceStatus.forward : PerformanceStatus.reverse;
       if (_performance.status != desiredStatus)
         _performance.play(direction);
     }
@@ -236,17 +254,17 @@ abstract class Route {
   /// cover the entire application surface or are in any way semi-transparent.
   bool get opaque => false;
 
-  /// If this is set to a non-zero [Duration], then an [AnimationPerformance]
+  /// If this is set to a non-zero [Duration], then an [Performance]
   /// object, available via the performance field, will be created when the
   /// route is first built, using the duration described here.
   Duration get transitionDuration => Duration.ZERO;
 
   bool get isActuallyOpaque => (performance == null || _performance.isCompleted) && opaque;
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance);
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
   void didPop([dynamic result]) {
-    if (performance == null && _onDismissed != null)
-      _onDismissed();
+    if (performance == null && _onRemoveRoute != null)
+      _onRemoveRoute();
   }
 
   String toString() => '$runtimeType()';
@@ -263,7 +281,7 @@ class PageRoute extends Route {
   bool get opaque => true;
   Duration get transitionDuration => _kTransitionDuration;
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
     return new SlideTransition(
@@ -272,7 +290,7 @@ class PageRoute extends Route {
       child: new FadeTransition(
         performance: performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-        child: builder(navigator, this)
+        child: builder(new RouteArguments(navigator: navigator, previousPerformance: this.performance, nextPerformance: nextRoutePerformance))
       )
     );
   }
@@ -296,5 +314,5 @@ class StateRoute extends Route {
     super.didPop(result);
   }
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) => null;
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) => null;
 }

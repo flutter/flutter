@@ -6,7 +6,6 @@ import 'package:sky/gestures.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/button_state.dart';
 import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/icon.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/material.dart';
@@ -26,7 +25,7 @@ class FloatingActionButton extends StatefulComponent {
 
   final Widget child;
   final Color backgroundColor;
-  final GestureTapListener onPressed;
+  final GestureTapCallback onPressed;
 
   FloatingActionButtonState createState() => new FloatingActionButtonState();
 }
@@ -46,17 +45,15 @@ class FloatingActionButtonState extends ButtonState<FloatingActionButton> {
       type: MaterialType.circle,
       level: highlight ? 3 : 2,
       child: new ClipOval(
-        child: new GestureDetector(
-          onTap: config.onPressed,
-          child: new Container(
-            width: _kSize,
-            height: _kSize,
-            child: new InkWell(
-              child: new Center(
-                child: new IconTheme(
-                  data: new IconThemeData(color: iconThemeColor),
-                  child: config.child
-                )
+        child: new Container(
+          width: _kSize,
+          height: _kSize,
+          child: new InkWell(
+            onTap: config.onPressed,
+            child: new Center(
+              child: new IconTheme(
+                data: new IconThemeData(color: iconThemeColor),
+                child: config.child
               )
             )
           )

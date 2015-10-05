@@ -4,7 +4,6 @@
 
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/theme.dart';
 
 const double _kMenuItemHeight = 48.0;
@@ -21,15 +20,13 @@ class PopupMenuItem extends StatelessComponent {
   final dynamic value;
 
   Widget build(BuildContext context) {
-    return new InkWell(
-      child: new Container(
-        height: _kMenuItemHeight,
-        child: new DefaultTextStyle(
-          style: Theme.of(context).text.subhead,
-          child: new Baseline(
-            baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
-            child: child
-          )
+    return new Container(
+      height: _kMenuItemHeight,
+      child: new DefaultTextStyle(
+        style: Theme.of(context).text.subhead,
+        child: new Baseline(
+          baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
+          child: child
         )
       )
     );

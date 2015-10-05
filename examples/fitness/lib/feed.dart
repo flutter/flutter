@@ -33,15 +33,13 @@ class DialogMenuItem extends StatelessComponent {
   Function onPressed;
 
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTap: onPressed,
-      child: new Container(
-        height: 48.0,
-        child: new InkWell(
-          child: new Padding(
-            padding: const EdgeDims.symmetric(horizontal: 16.0),
-            child: new Row(children)
-          )
+    return new Container(
+      height: 48.0,
+      child: new InkWell(
+        onTap: onPressed,
+        child: new Padding(
+          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          child: new Row(children)
         )
       )
     );
@@ -62,25 +60,20 @@ class FeedFragment extends StatefulComponent {
 class FeedFragmentState extends State<FeedFragment> {
   FitnessMode _fitnessMode = FitnessMode.feed;
 
-  AnimationStatus _snackBarStatus = AnimationStatus.dismissed;
+  PerformanceStatus _snackBarStatus = PerformanceStatus.dismissed;
   bool _isShowingSnackBar = false;
 
   void _handleFitnessModeChange(FitnessMode value) {
     setState(() {
       _fitnessMode = value;
-      _drawerShowing = false;
     });
+    config.navigator.pop();
   }
 
-  Drawer buildDrawer() {
-    if (_drawerStatus == AnimationStatus.dismissed)
-      return null;
-    return new Drawer(
-      showing: _drawerShowing,
-      level: 3,
-      onDismissed: _handleDrawerDismissed,
+  void _showDrawer() {
+    showDrawer(
       navigator: config.navigator,
-      children: [
+      child: new Block([
         new DrawerHeader(child: new Text('Fitness')),
         new DrawerItem(
           icon: 'action/view_list',
@@ -100,24 +93,8 @@ class FeedFragmentState extends State<FeedFragment> {
         new DrawerItem(
           icon: 'action/help',
           child: new Text('Help & Feedback'))
-      ]
+      ])
     );
-  }
-
-  bool _drawerShowing = false;
-  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
-
-  void _handleOpenDrawer() {
-    setState(() {
-      _drawerShowing = true;
-      _drawerStatus = AnimationStatus.forward;
-    });
-  }
-
-  void _handleDrawerDismissed() {
-    setState(() {
-      _drawerStatus = AnimationStatus.dismissed;
-    });
   }
 
   void _handleShowSettings() {
@@ -137,7 +114,7 @@ class FeedFragmentState extends State<FeedFragment> {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/menu",
-        onPressed: _handleOpenDrawer),
+        onPressed: _showDrawer),
       center: new Text(fitnessModeTitle)
     );
   }
@@ -149,7 +126,7 @@ class FeedFragmentState extends State<FeedFragment> {
     setState(() {
       _undoItem = item;
       _isShowingSnackBar = true;
-      _snackBarStatus = AnimationStatus.forward;
+      _snackBarStatus = PerformanceStatus.forward;
     });
   }
 
@@ -230,13 +207,13 @@ class FeedFragmentState extends State<FeedFragment> {
   }
 
   Widget buildSnackBar() {
-    if (_snackBarStatus == AnimationStatus.dismissed)
+    if (_snackBarStatus == PerformanceStatus.dismissed)
       return null;
     return new SnackBar(
       showing: _isShowingSnackBar,
       content: new Text("Item deleted."),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
-      onDismissed: () { setState(() { _snackBarStatus = AnimationStatus.dismissed; }); }
+      onDismissed: () { setState(() { _snackBarStatus = PerformanceStatus.dismissed; }); }
     );
   }
 
@@ -264,8 +241,7 @@ class FeedFragmentState extends State<FeedFragment> {
       toolbar: buildToolBar(),
       body: buildBody(),
       snackBar: buildSnackBar(),
-      floatingActionButton: buildFloatingActionButton(),
-      drawer: buildDrawer()
+      floatingActionButton: buildFloatingActionButton()
     );
   }
 }

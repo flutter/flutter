@@ -32,7 +32,15 @@ class App extends StatefulComponent {
     this.theme,
     this.routes,
     this.onGenerateRoute
-  }): super(key: key);
+  }) : super(key: key) {
+    assert(() {
+      'The "routes" argument to App() is required.';
+      'This might be a sign that you have not upgraded to our new Widgets framework.';
+      'For more details see: https://groups.google.com/forum/#!topic/flutter-dev/hcX3OvLws9c';
+      '...or look at our examples: https://github.com/flutter/engine/tree/master/examples';
+      return routes != null;      
+    });
+  }
 
   final String title;
   final ThemeData theme;

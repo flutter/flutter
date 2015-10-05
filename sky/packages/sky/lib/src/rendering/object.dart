@@ -16,6 +16,8 @@ import 'package:vector_math/vector_math_64.dart';
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/src/rendering/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
 
+typedef sky.Shader ShaderCallback(Rect bounds);
+
 /// Base class for data associated with a [RenderObject] by its parent
 ///
 /// Some render objects wish to store data on their children, such as their
@@ -128,6 +130,15 @@ class PaintingContext {
     } else {
       compositeChild(child, childOffset: childOffset, parentLayer: _containerLayer);
     }
+  }
+
+  void paintStatistics(int optionsMask, Offset offset, Size size) {
+    StatisticsLayer statsLayer = new StatisticsLayer(
+      offset: offset,
+      paintBounds: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
+      optionsMask : optionsMask
+    );
+    _containerLayer.append(statsLayer);
   }
 
   // Below we have various variants of the paintChild() method, which
@@ -297,6 +308,34 @@ class PaintingContext {
           transferMode: transferMode);
       _containerLayer.append(paintLayer);
       compositeChild(child, parentLayer: paintLayer);
+    }
+  }
+
+  static Paint _getPaintForShaderMask(Rect bounds,
+                                      ShaderCallback shaderCallback,
+                                      sky.TransferMode transferMode) {
+    return new Paint()
+     ..transferMode = transferMode
+     ..shader = shaderCallback(bounds);
+  }
+
+  void paintChildWithShaderMask(RenderObject child,
+                                Point childPosition,
+                                Rect bounds,
+                                ShaderCallback shaderCallback,
+                                sky.TransferMode transferMode) {
+    assert(debugCanPaintChild(child));
+    final Offset childOffset = childPosition.toOffset();
+    if (!child.needsCompositing) {
+      canvas.saveLayer(bounds, new Paint());
+      canvas.translate(childOffset.dx, childOffset.dy);
+      insertChild(child, Offset.zero);
+      Paint shaderPaint = _getPaintForShaderMask(bounds, shaderCallback, transferMode);
+      canvas.drawRect(Offset.zero & new Size(bounds.width, bounds.height), shaderPaint);
+      canvas.restore();
+    } else {
+      // TODO(hansmuller) support compositing ShaderMasks
+      assert('Support for compositing ShaderMasks is TBD' is String);
     }
   }
 

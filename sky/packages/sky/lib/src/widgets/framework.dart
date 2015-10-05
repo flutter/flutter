@@ -181,7 +181,16 @@ abstract class Widget {
   /// Inflates this configuration to a concrete instance.
   Element createElement();
 
-  String toString() => '$runtimeType';
+  String toString() {
+    final String name = key == null ? '$runtimeType' : '$runtimeType-$key';
+    final List<String> data = <String>[];
+    debugFillDescription(data);
+    if (data.isEmpty)
+      return 'name';
+    return 'name(${data.join("; ")})';
+   }
+
+  void debugFillDescription(List<String> description) { }
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -482,9 +491,11 @@ final _InactiveElements _inactiveElements = new _InactiveElements();
 typedef void ElementVisitor(Element element);
 
 abstract class BuildContext {
-  InheritedWidget inheritedWidgetOfType(Type targetType);
+  Widget get widget;
   RenderObject findRenderObject();
+  InheritedWidget inheritedWidgetOfType(Type targetType);
   void visitAncestorElements(bool visitor(Element element));
+  void visitChildElements(void visitor(Element element));
 }
 
 /// Elements are the instantiations of Widget configurations.
@@ -535,6 +546,13 @@ abstract class Element<T extends Widget> implements BuildContext {
 
   /// Calls the argument for each child. Must be overridden by subclasses that support having children.
   void visitChildren(ElementVisitor visitor) { }
+
+  /// Wrapper around visitChildren for BuildContext.
+  void visitChildElements(void visitor(Element element)) {
+    // don't allow visitChildElements() during build, since children aren't necessarily built yet
+    assert(BuildableElement._debugStateLockLevel == 0);
+    visitChildren(visitor);
+  }
 
   bool detachChild(Element child) => false;
 
@@ -782,6 +800,8 @@ abstract class Element<T extends Widget> implements BuildContext {
       description.add('no depth');
     if (widget == null)
       description.add('no widget');
+    else
+      widget.debugFillDescription(description);
   }
 
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
@@ -948,11 +968,11 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
 
 /// Instantiation of StatelessComponent widgets.
 class StatelessComponentElement<T extends StatelessComponent> extends BuildableElement<T> {
-  StatelessComponentElement(StatelessComponent widget) : super(widget) {
+  StatelessComponentElement(T widget) : super(widget) {
     _builder = widget.build;
   }
 
-  void update(StatelessComponent newWidget) {
+  void update(T newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _builder = widget.build;
@@ -962,10 +982,10 @@ class StatelessComponentElement<T extends StatelessComponent> extends BuildableE
 }
 
 /// Instantiation of StatefulComponent widgets.
-class StatefulComponentElement extends BuildableElement<StatefulComponent> {
-  StatefulComponentElement(StatefulComponent widget)
+class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> extends BuildableElement<T> {
+  StatefulComponentElement(T widget)
     : _state = widget.createState(), super(widget) {
-    assert(_state._debugTypesAreRight(widget));
+    assert(_state._debugTypesAreRight(widget)); // can't use T and U, since normally we don't actually set those
     assert(_state._element == null);
     _state._element = this;
     assert(_builder == null);
@@ -988,10 +1008,10 @@ class StatefulComponentElement extends BuildableElement<StatefulComponent> {
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
   }
 
-  State get state => _state;
-  State _state;
+  U get state => _state;
+  U _state;
 
-  void update(StatefulComponent newWidget) {
+  void update(T newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     StatefulComponent oldConfig = _state._config;

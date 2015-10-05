@@ -145,7 +145,10 @@ class WidgetTester {
   }
 
   void scroll(Element element, Offset offset, { int pointer: 1 }) {
-    Point startLocation = getCenter(element);
+    scrollAt(getCenter(element), offset, pointer: pointer);
+  }
+
+  void scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
     Point endLocation = startLocation + offset;
     TestPointer p = new TestPointer(pointer);
     // Events for the entire press-drag-release gesture are dispatched

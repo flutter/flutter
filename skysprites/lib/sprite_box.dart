@@ -47,7 +47,7 @@ class SpriteBox extends RenderBox {
   }
 
   // Tracking of frame rate and updates
-  double _lastTimeStamp;
+  Duration _lastTimeStamp;
   double _frameRate = 0.0;
 
   double get frameRate => _frameRate;
@@ -76,6 +76,8 @@ class SpriteBox extends RenderBox {
 
   List<Node> _constrainedNodes;
 
+  List<PhysicsNode> _physicsNodes;
+
   Rect _visibleArea;
 
   Rect get visibleArea {
@@ -83,6 +85,8 @@ class SpriteBox extends RenderBox {
       _calcTransformMatrix();
     return _visibleArea;
   }
+
+  bool _initialized = false;
 
   // Setup
 
@@ -134,19 +138,22 @@ class SpriteBox extends RenderBox {
     size = constraints.biggest;
     _invalidateTransformMatrix();
     _callSpriteBoxPerformedLayout(_rootNode);
+    _initialized = true;
   }
 
   // Adding and removing nodes
 
-  _registerNode(Node node) {
+  void _registerNode(Node node) {
     _actionControllers = null;
     _eventTargets = null;
+    _physicsNodes = null;
     if (node == null || node.constraints != null) _constrainedNodes = null;
   }
 
-  _deregisterNode(Node node) {
+  void _deregisterNode(Node node) {
     _actionControllers = null;
     _eventTargets = null;
+    _physicsNodes = null;
     if (node == null || node.constraints != null) _constrainedNodes = null;
   }
 
@@ -345,21 +352,25 @@ class SpriteBox extends RenderBox {
     scheduler.requestAnimationFrame(_tick);
   }
 
-  void _tick(double timeStamp) {
+  void _tick(Duration timeStamp) {
     if (!attached)
       return;
 
     // Calculate delta and frame rate
-    if (_lastTimeStamp == null) _lastTimeStamp = timeStamp;
-    double delta = (timeStamp - _lastTimeStamp) / 1000;
+    if (_lastTimeStamp == null)
+      _lastTimeStamp = timeStamp;
+    double delta = (timeStamp - _lastTimeStamp).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
     _lastTimeStamp = timeStamp;
 
     _frameRate = 1.0/delta;
 
-    _callConstraintsPreUpdate(delta);
-    _runActions(delta);
-    _callUpdate(_rootNode, delta);
-    _callConstraintsConstrain(delta);
+    if (_initialized) {
+      _callConstraintsPreUpdate(delta);
+      _runActions(delta);
+      _callUpdate(_rootNode, delta);
+      _callStepPhysics(delta);
+      _callConstraintsConstrain(delta);
+    }
 
     // Schedule next update
     _scheduleTick();
@@ -370,20 +381,26 @@ class SpriteBox extends RenderBox {
 
   void _runActions(double dt) {
     if (_actionControllers == null) {
-      _actionControllers = [];
-      _addActionControllers(_rootNode, _actionControllers);
+      _rebuildActionControllersAndPhysicsNodes();
     }
     for (ActionController actions in _actionControllers) {
       actions.step(dt);
     }
   }
 
-  void _addActionControllers(Node node, List<ActionController> controllers) {
-    if (node._actions != null) controllers.add(node._actions);
+  void _rebuildActionControllersAndPhysicsNodes() {
+    _actionControllers = [];
+    _physicsNodes = [];
+    _addActionControllersAndPhysicsNodes(_rootNode);
+  }
+
+  void _addActionControllersAndPhysicsNodes(Node node) {
+    if (node._actions != null) _actionControllers.add(node._actions);
+    if (node is PhysicsNode) _physicsNodes.add(node);
 
     for (int i = node.children.length - 1; i >= 0; i--) {
       Node child = node.children[i];
-      _addActionControllers(child, controllers);
+      _addActionControllersAndPhysicsNodes(child);
     }
   }
 
@@ -394,6 +411,15 @@ class SpriteBox extends RenderBox {
       if (!child.paused) {
         _callUpdate(child, dt);
       }
+    }
+  }
+
+  void _callStepPhysics(double dt) {
+    if (_physicsNodes == null)
+      _rebuildActionControllersAndPhysicsNodes();
+
+    for (PhysicsNode physicsNode in _physicsNodes) {
+      physicsNode._stepPhysics(dt);
     }
   }
 

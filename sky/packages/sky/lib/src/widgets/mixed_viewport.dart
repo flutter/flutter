@@ -22,7 +22,7 @@ class MixedViewport extends RenderObjectWidget {
     this.token,
     this.onExtentsUpdate,
     this.onInvalidatorAvailable
-  }): super(key: key);
+  }) : super(key: key);
 
   final double startOffset;
   final ScrollDirection direction;
