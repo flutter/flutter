@@ -375,22 +375,20 @@ class YearPickerState extends ScrollableWidgetListState<YearPicker> {
     for(int i = start; i < start + count; i++) {
       int year = config.firstDate.year + i;
       String label = year.toString();
-      Widget item = new GestureDetector(
+      Widget item = new InkWell(
         key: new Key(label),
         onTap: () {
           DateTime result = new DateTime(year, config.selectedDate.month, config.selectedDate.day);
           config.onChanged(result);
         },
-        child: new InkWell(
-          child: new Container(
-            height: config.itemExtent,
-            decoration: year == config.selectedDate.year ? new BoxDecoration(
-              backgroundColor: Theme.of(context).primarySwatch[100],
-              shape: Shape.circle
-            ) : null,
-            child: new Center(
-              child: new Text(label, style: style)
-            )
+        child: new Container(
+          height: config.itemExtent,
+          decoration: year == config.selectedDate.year ? new BoxDecoration(
+            backgroundColor: Theme.of(context).primarySwatch[100],
+            shape: Shape.circle
+          ) : null,
+          child: new Center(
+            child: new Text(label, style: style)
           )
         )
       );

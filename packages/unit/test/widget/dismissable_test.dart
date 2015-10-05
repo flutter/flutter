@@ -1,3 +1,4 @@
+import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
 import 'package:test/test.dart';
 
@@ -44,12 +45,10 @@ Widget widgetBuilder() {
   );
 }
 
-void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirection }) {
+void dismissElement(WidgetTester tester, Element itemElement, { DismissDirection gestureDirection }) {
+  assert(itemElement != null);
   assert(gestureDirection != DismissDirection.horizontal);
   assert(gestureDirection != DismissDirection.vertical);
-
-  Element itemElement = tester.findText(item.toString());
-  expect(itemElement, isNotNull);
 
   Point downLocation;
   Point upLocation;
@@ -84,10 +83,33 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
   tester.dispatchEvent(pointer.down(downLocation), downLocation);
   tester.dispatchEvent(pointer.move(upLocation), downLocation);
   tester.dispatchEvent(pointer.up(), downLocation);
+}
+
+void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirection }) {
+  assert(gestureDirection != DismissDirection.horizontal);
+  assert(gestureDirection != DismissDirection.vertical);
+
+  Element itemElement = tester.findText(item.toString());
+  expect(itemElement, isNotNull);
+
+  dismissElement(tester, itemElement, gestureDirection: gestureDirection);
 
   tester.pumpWidget(widgetBuilder()); // start the resize animation
   tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the resize animation
   tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // dismiss
+}
+
+class Test1215DismissableComponent extends StatelessComponent {
+  Test1215DismissableComponent(this.text);
+  final String text;
+  Widget build(BuildContext context) {
+    return new Dismissable(
+      child: new AspectRatio(
+        aspectRatio: 1.0,
+        child: new Text(this.text)
+      )
+    );
+  }
 }
 
 void main() {
@@ -228,6 +250,33 @@ void main() {
       tester.pumpWidget(widgetBuilder());
       tester.dispatchEvent(pointer.move(location + (offset * 4.0)), location);
       tester.pumpWidget(widgetBuilder());
+    });
+  });
+
+  // This one is for
+  // https://github.com/flutter/engine/issues/1215
+  test('dismissing bottom then top (smoketest)', () {
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Center(
+        child: new Container(
+          width: 100.0,
+          height: 1000.0,
+          child: new Column([
+            new Test1215DismissableComponent('1'),
+            new Test1215DismissableComponent('2')
+          ])
+        )
+      ));
+      expect(tester.findText('1'), isNotNull);
+      expect(tester.findText('2'), isNotNull);
+      dismissElement(tester, tester.findText('2'), gestureDirection: DismissDirection.right);
+      tester.pump(new Duration(seconds: 1));
+      expect(tester.findText('1'), isNotNull);
+      expect(tester.findText('2'), isNull);
+      dismissElement(tester, tester.findText('1'), gestureDirection: DismissDirection.right);
+      tester.pump(new Duration(seconds: 1));
+      expect(tester.findText('1'), isNull);
+      expect(tester.findText('2'), isNull);
     });
   });
 }

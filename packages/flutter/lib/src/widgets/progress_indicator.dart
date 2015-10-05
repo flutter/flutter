@@ -36,16 +36,16 @@ abstract class ProgressIndicator extends StatefulComponent {
 
 class ProgressIndicatorState extends State<ProgressIndicator> {
 
-  ValueAnimation<double> _performance;
+  ValuePerformance<double> _performance;
 
   void initState() {
     super.initState();
-    _performance = new ValueAnimation<double>(
+    _performance = new ValuePerformance<double>(
       variable: new AnimatedValue<double>(0.0, end: 1.0, curve: ease),
       duration: const Duration(milliseconds: 1500)
     );
-    _performance.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed)
+    _performance.addStatusListener((PerformanceStatus status) {
+      if (status == PerformanceStatus.completed)
         _restartAnimation();
     });
     _performance.play();

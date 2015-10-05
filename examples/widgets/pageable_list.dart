@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/widgets.dart';
@@ -17,6 +16,10 @@ class CardModel {
 }
 
 class PageableListApp extends StatefulComponent {
+  PageableListApp({ this.navigator });
+
+  final NavigatorState navigator;
+
   PageableListAppState createState() => new PageableListAppState();
 }
 
@@ -85,31 +88,10 @@ class PageableListAppState extends State<PageableListApp> {
     });
   }
 
-  bool _drawerShowing = false;
-  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
-
-  void _handleOpenDrawer() {
-    setState(() {
-      _drawerShowing = true;
-      _drawerStatus = AnimationStatus.forward;
-    });
-  }
-
-  void _handleDrawerDismissed() {
-    setState(() {
-      _drawerStatus = AnimationStatus.dismissed;
-    });
-  }
-
-  Drawer buildDrawer() {
-    if (_drawerStatus == AnimationStatus.dismissed)
-      return null;
-
-    return new Drawer(
-      level: 3,
-      showing: _drawerShowing,
-      onDismissed: _handleDrawerDismissed,
-      children: [
+  void _showDrawer() {
+    showDrawer(
+      navigator: config.navigator,
+      child: new Block([
         new DrawerHeader(child: new Text('Options')),
         new DrawerItem(
           icon: 'navigation/more_horiz',
@@ -130,14 +112,13 @@ class PageableListAppState extends State<PageableListApp> {
             new Checkbox(value: itemsWrap)
           ])
         )
-      ]
+      ])
     );
-
   }
 
   Widget buildToolBar() {
     return new ToolBar(
-      left: new IconButton(icon: "navigation/menu", onPressed: _handleOpenDrawer),
+      left: new IconButton(icon: "navigation/menu", onPressed: _showDrawer),
       center: new Text('PageableList'),
       right: [
         new Text(scrollDirection == ScrollDirection.horizontal ? "horizontal" : "vertical")
@@ -167,25 +148,24 @@ class PageableListAppState extends State<PageableListApp> {
   Widget build(BuildContext context) {
     return new IconTheme(
       data: const IconThemeData(color: IconThemeColor.white),
-      child: new Theme(
-        data: new ThemeData(
-          brightness: ThemeBrightness.light,
-          primarySwatch: Colors.blue,
-          accentColor: Colors.redAccent[200]
-        ),
-        child: new Title(
-          title: 'PageableList',
-          child: new Scaffold(
-            drawer: buildDrawer(),
-            toolbar: buildToolBar(),
-            body: buildBody(context)
-          )
-        )
+      child: new Scaffold(
+        toolbar: buildToolBar(),
+        body: buildBody(context)
       )
     );
   }
 }
 
 void main() {
-  runApp(new PageableListApp());
+  runApp(new App(
+    title: 'PageableList',
+    theme: new ThemeData(
+      brightness: ThemeBrightness.light,
+      primarySwatch: Colors.blue,
+      accentColor: Colors.redAccent[200]
+    ),
+    routes: {
+      '/': (RouteArguments args) => new PageableListApp(navigator: args.navigator),
+    }
+  ));
 }

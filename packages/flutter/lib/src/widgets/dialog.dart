@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:sky/animation.dart';
+import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/focus.dart';
@@ -30,7 +31,7 @@ class Dialog extends StatelessComponent {
     this.contentPadding,
     this.actions,
     this.onDismiss
-  }): super(key: key);
+  }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -52,7 +53,7 @@ class Dialog extends StatelessComponent {
   final List<Widget> actions;
 
   /// An (optional) callback that is called when the dialog is dismissed.
-  final Function onDismiss;
+  final GestureTapCallback onDismiss;
 
   Color _getColor(BuildContext context) {
     switch (Theme.of(context).brightness) {
@@ -140,11 +141,11 @@ class DialogRoute extends Route {
 
   Duration get transitionDuration => _kTransitionDuration;
   bool get opaque => false;
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-      child: builder(navigator, this)
+      child: builder(new RouteArguments(navigator: navigator, previousPerformance: this.performance, nextPerformance: nextRoutePerformance))
     );
   }
 
@@ -158,11 +159,11 @@ Future showDialog(NavigatorState navigator, DialogBuilder builder) {
   Completer completer = new Completer();
   navigator.push(new DialogRoute(
     completer: completer,
-    builder: (navigator, route) {
+    builder: (RouteArguments args) {
       return new Focus(
-        key: new GlobalObjectKey(route),
+        key: new GlobalObjectKey(completer),
         autofocus: true,
-        child: builder(navigator)
+        child: builder(args.navigator)
       );
     }
   ));

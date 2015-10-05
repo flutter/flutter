@@ -8,13 +8,13 @@ import 'package:sky/src/gestures/arena.dart';
 import 'package:sky/src/gestures/constants.dart';
 import 'package:sky/src/gestures/recognizer.dart';
 
-typedef void GestureShowPressListener();
+typedef void GestureShowPressCallback();
 
 class ShowPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ShowPressGestureRecognizer({ PointerRouter router, this.onShowPress })
     : super(router: router, deadline: kTapTimeout);
 
-  GestureShowPressListener onShowPress;
+  GestureShowPressCallback onShowPress;
 
   void didExceedDeadline() {
     // Show press isn't an exclusive gesture. We can recognize a show press

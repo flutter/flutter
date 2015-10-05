@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation.dart';
+import 'dart:sky' as sky;
+
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/widgets.dart';
@@ -16,14 +17,21 @@ class CardModel {
   Key get key => new ObjectKey(this);
 }
 
-class CardCollectionApp extends StatefulComponent {
-  CardCollectionAppState createState() => new CardCollectionAppState();
+class CardCollection extends StatefulComponent {
+  CardCollection({ this.navigator });
+
+  final NavigatorState navigator;
+
+  CardCollectionState createState() => new CardCollectionState();
 }
 
-class CardCollectionAppState extends State<CardCollectionApp> {
+class CardCollectionState extends State<CardCollection> {
 
   static const TextStyle cardLabelStyle =
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
+
+  // TODO(hansmuller): need a local image asset
+  static const _sunshineURL = "http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg";
 
   final TextStyle backgroundTextStyle =
     Typography.white.title.copyWith(textAlign: TextAlign.center);
@@ -32,8 +40,7 @@ class CardCollectionAppState extends State<CardCollectionApp> {
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   bool _snapToCenter = false;
   bool _fixedSizeCards = false;
-  bool _drawerShowing = false;
-  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
+  bool _sunshine = false;
   InvalidatorCallback _invalidator;
   Size _cardCollectionSize = new Size(200.0, 200.0);
 
@@ -108,17 +115,23 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     }
   }
 
-  void _handleOpenDrawer() {
-    setState(() {
-      _drawerShowing = true;
-      _drawerStatus = AnimationStatus.forward;
-    });
-  }
-
-  void _handleDrawerDismissed() {
-    setState(() {
-      _drawerStatus = AnimationStatus.dismissed;
-    });
+  void _showDrawer() {
+    showDrawer(
+      navigator: config.navigator,
+      child: new IconTheme(
+        data: const IconThemeData(color: IconThemeColor.black),
+        child: new Block([
+          new DrawerHeader(child: new Text('Options')),
+          buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
+          buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
+          buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
+          new DrawerDivider(),
+          buildDrawerRadioItem(DismissDirection.horizontal, 'action/code'),
+          buildDrawerRadioItem(DismissDirection.left, 'navigation/arrow_back'),
+          buildDrawerRadioItem(DismissDirection.right, 'navigation/arrow_forward'),
+        ])
+      )
+    );
   }
 
   String _dismissDirectionText(DismissDirection direction) {
@@ -139,64 +152,47 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     });
   }
 
-  _changeDismissDirection(DismissDirection newDismissDirection) {
+  void _toggleSunshine() {
     setState(() {
-      _dismissDirection = newDismissDirection;
-      _drawerStatus = AnimationStatus.dismissed;
+      _sunshine = !_sunshine;
     });
   }
 
-  Widget buildDrawer() {
-    if (_drawerStatus == AnimationStatus.dismissed)
-      return null;
+  void _changeDismissDirection(DismissDirection newDismissDirection) {
+    setState(() {
+      _dismissDirection = newDismissDirection;
+    });
+    config.navigator.pop();
+  }
 
-    Widget buildDrawerCheckbox(String label, bool value, Function callback) {
-      return new DrawerItem(
-        onPressed: callback,
-        child: new Row([
-          new Flexible(child: new Text(label)),
-          new Checkbox(value: value, onChanged: (_) { callback(); })
-        ])
-      );
-    }
+  Widget buildDrawerCheckbox(String label, bool value, Function callback) {
+    return new DrawerItem(
+      onPressed: callback,
+      child: new Row([
+        new Flexible(child: new Text(label)),
+        new Checkbox(value: value, onChanged: (_) { callback(); })
+      ])
+    );
+  }
 
-    Widget buildDrawerRadioItem(DismissDirection direction, String icon) {
-      return new DrawerItem(
-        icon: icon,
-        onPressed: () { _changeDismissDirection(direction); },
-        child: new Row([
-          new Flexible(child: new Text(_dismissDirectionText(direction))),
-          new Radio(
-            value: direction,
-            onChanged: _changeDismissDirection,
-            groupValue: _dismissDirection
-          )
-        ])
-      );
-    }
-
-    return new IconTheme(
-      data: const IconThemeData(color: IconThemeColor.black),
-      child: new Drawer(
-        level: 3,
-        showing: _drawerShowing,
-        onDismissed: _handleDrawerDismissed,
-        children: [
-          new DrawerHeader(child: new Text('Options')),
-          buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
-          buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
-          new DrawerDivider(),
-          buildDrawerRadioItem(DismissDirection.horizontal, 'action/code'),
-          buildDrawerRadioItem(DismissDirection.left, 'navigation/arrow_back'),
-          buildDrawerRadioItem(DismissDirection.right, 'navigation/arrow_forward'),
-        ]
-      )
+  Widget buildDrawerRadioItem(DismissDirection direction, String icon) {
+    return new DrawerItem(
+      icon: icon,
+      onPressed: () { _changeDismissDirection(direction); },
+      child: new Row([
+        new Flexible(child: new Text(_dismissDirectionText(direction))),
+        new Radio(
+          value: direction,
+          onChanged: _changeDismissDirection,
+          groupValue: _dismissDirection
+        )
+      ])
     );
   }
 
   Widget buildToolBar() {
     return new ToolBar(
-      left: new IconButton(icon: "navigation/menu", onPressed: _handleOpenDrawer),
+      left: new IconButton(icon: "navigation/menu", onPressed: _showDrawer),
       center: new Text('Swipe Away'),
       right: [
         new Text(_dismissDirectionText(_dismissDirection))
@@ -285,6 +281,16 @@ class CardCollectionAppState extends State<CardCollectionApp> {
     });
   }
 
+  sky.Shader _createShader(Rect bounds) {
+    return new LinearGradient(
+        begin: Point.origin,
+        end: new Point(0.0, bounds.height),
+        colors: [const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
+        stops: [0.1, 0.35]
+    )
+    .createShader();
+  }
+
   Widget build(BuildContext context) {
 
     Widget cardCollection;
@@ -305,6 +311,12 @@ class CardCollectionAppState extends State<CardCollectionApp> {
         onInvalidatorAvailable: (InvalidatorCallback callback) { _invalidator = callback; }
       );
     }
+
+    if (_sunshine)
+      cardCollection = new Stack([
+        new Column([new NetworkImage(src: _sunshineURL)]),
+        new ShaderMask(child: cardCollection, shaderCallback: _createShader)
+      ]);
 
     Widget body = new SizeObserver(
       callback: _updateCardCollectionSize,
@@ -329,24 +341,23 @@ class CardCollectionAppState extends State<CardCollectionApp> {
       body = new Stack([body, indicator]);
     }
 
-    return new Theme(
-      data: new ThemeData(
-        brightness: ThemeBrightness.light,
-        primarySwatch: Colors.blue,
-        accentColor: Colors.redAccent[200]
-      ),
-      child: new Title(
-        title: 'Cards',
-        child: new Scaffold(
-          toolbar: buildToolBar(),
-          drawer: buildDrawer(),
-          body: body
-        )
-      )
+    return new Scaffold(
+      toolbar: buildToolBar(),
+      body: body
     );
   }
 }
 
 void main() {
-  runApp(new CardCollectionApp());
+  runApp(new App(
+    title: 'Cards',
+    theme: new ThemeData(
+      brightness: ThemeBrightness.light,
+      primarySwatch: Colors.blue,
+      accentColor: Colors.redAccent[200]
+    ),
+    routes: {
+      '/': (RouteArguments args) => new CardCollection(navigator: args.navigator),
+    }
+  ));
 }

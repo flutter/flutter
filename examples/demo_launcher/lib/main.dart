@@ -42,8 +42,8 @@ void launch(String relativeUrl, String bundle) {
   activity.startActivity(intent);
 }
 
-class SkyDemo {
-  SkyDemo({
+class FlutterDemo {
+  FlutterDemo({
     name,
     this.href,
     this.bundle,
@@ -60,8 +60,8 @@ class SkyDemo {
   final BoxDecoration decoration;
 }
 
-List<SkyDemo> demos = [
-  new SkyDemo(
+List<FlutterDemo> demos = [
+  new FlutterDemo(
     name: 'Stocks',
     href: '../../stocks/lib/main.dart',
     bundle: 'stocks.skyx',
@@ -74,7 +74,7 @@ List<SkyDemo> demos = [
       )
     )
   ),
-  new SkyDemo(
+  new FlutterDemo(
     name: 'Asteroids',
     href: '../../game/lib/main.dart',
     bundle: 'game.skyx',
@@ -87,7 +87,7 @@ List<SkyDemo> demos = [
       )
     )
   ),
-  new SkyDemo(
+  new FlutterDemo(
     name: 'Fitness',
     href: '../../fitness/lib/main.dart',
     bundle: 'fitness.skyx',
@@ -97,7 +97,7 @@ List<SkyDemo> demos = [
       backgroundColor: Colors.indigo[500]
     )
   ),
-  new SkyDemo(
+  new FlutterDemo(
     name: 'Swipe Away',
     href: '../../widgets/card_collection.dart',
     bundle: 'cards.skyx',
@@ -107,7 +107,7 @@ List<SkyDemo> demos = [
       backgroundColor: Colors.redAccent[200]
     )
   ),
-  new SkyDemo(
+  new FlutterDemo(
     name: 'Interactive Text',
     href: '../../rendering/interactive_flex.dart',
     bundle: 'interactive_flex.skyx',
@@ -120,7 +120,7 @@ List<SkyDemo> demos = [
   // new SkyDemo(
 
   //   'Touch Demo', '../../rendering/touch_demo.dart', 'Simple example showing handling of touch events at a low level'),
-  new SkyDemo(
+  new FlutterDemo(
     name: 'Minedigger Game',
     href: '../../mine_digger/lib/main.dart',
     bundle: 'mine_digger.skyx',
@@ -138,44 +138,47 @@ List<SkyDemo> demos = [
 const double kCardHeight = 120.0;
 const EdgeDims kListPadding = const EdgeDims.all(4.0);
 
-class DemoList extends StatelessComponent {
-  Widget buildCardContents(SkyDemo demo) {
-      return new Container(
-        decoration: demo.decoration,
-        child: new InkWell(
-          child: new Container(
-            margin: const EdgeDims.only(top: 24.0, left: 24.0),
-            child: new Column([
-                new Text(demo.name, style: demo.textTheme.title),
-                new Flexible(
-                  child: new Text(demo.description, style: demo.textTheme.subhead)
-                )
-              ],
-              alignItems: FlexAlignItems.start
+class DemoCard extends StatelessComponent {
+  DemoCard({ Key key, this.demo }) : super(key: key);
+
+  final FlutterDemo demo;
+
+  Widget build(BuildContext context) {
+    return new Container(
+      height: kCardHeight,
+      child: new Card(
+        child: new Container(
+          decoration: demo.decoration,
+          child: new InkWell(
+            onTap: () => launch(demo.href, demo.bundle),
+            child: new Container(
+              margin: const EdgeDims.only(top: 24.0, left: 24.0),
+              child: new Column([
+                  new Text(demo.name, style: demo.textTheme.title),
+                  new Flexible(
+                    child: new Text(demo.description, style: demo.textTheme.subhead)
+                  )
+                ],
+                alignItems: FlexAlignItems.start
+              )
             )
           )
-        )
-    );
-  }
-
-  Widget buildDemo(BuildContext context, SkyDemo demo) {
-    return new GestureDetector(
-      key: demo.key,
-      onTap: () => launch(demo.href, demo.bundle),
-      child: new Container(
-        height: kCardHeight,
-        child: new Card(
-          child: buildCardContents(demo)
         )
       )
     );
   }
+}
+
+class DemoList extends StatelessComponent {
+  Widget _buildDemoCard(BuildContext context, FlutterDemo demo) {
+    return new DemoCard(key: demo.key, demo: demo);
+  }
 
   Widget build(BuildContext context) {
-    return new ScrollableList<SkyDemo>(
+    return new ScrollableList<FlutterDemo>(
       items: demos,
       itemExtent: kCardHeight,
-      itemBuilder: buildDemo,
+      itemBuilder: _buildDemoCard,
       padding: kListPadding
     );
   }
@@ -200,10 +203,10 @@ class DemoHome extends StatelessComponent {
 
 void main() {
   runApp(new App(
-    title: 'Sky Demos',
+    title: 'Flutter Demos',
     theme: _theme,
     routes: {
-      '/': (NavigatorState navigator, Route route) => new DemoHome()
+      '/': (RouteArguments args) => new DemoHome()
     }
   ));
 }

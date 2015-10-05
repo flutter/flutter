@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/material.dart';
+import 'package:sky/src/widgets/animated_container.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/theme.dart';
@@ -61,10 +63,11 @@ class Material extends StatelessComponent {
         );
       }
     }
-    // TODO(abarth): This should use AnimatedContainer.
     return new DefaultTextStyle(
       style: Theme.of(context).text.body1,
-      child: new Container(
+      child: new AnimatedContainer(
+        curve: ease,
+        duration: const Duration(milliseconds: 200),
         decoration: new BoxDecoration(
           backgroundColor: getBackgroundColor(context),
           borderRadius: edges[type],

@@ -92,11 +92,11 @@ class GameDemoState extends State<GameDemo> {
     );
   }
 
-  Widget _buildGameScene(NavigatorState navigator, Route route) {
+  Widget _buildGameScene(RouteArguments args) {
     return new SpriteWidget(_game, SpriteBoxTransformMode.fixedWidth);
   }
 
-  Widget _buildMainScene(navigator, route) {
+  Widget _buildMainScene(RouteArguments args) {
     return new Stack([
       new SpriteWidget(new MainScreenBackground(), SpriteBoxTransformMode.fixedWidth),
       new Column([
@@ -109,10 +109,10 @@ class GameDemoState extends State<GameDemo> {
                 _sounds,
                 (lastScore) {
                   setState(() {_lastScore = lastScore;});
-                  navigator.pop();
+                  args.navigator.pop();
                 }
               );
-              navigator.pushNamed('/game');
+              args.navigator.pushNamed('/game');
             },
             texture: _spriteSheetUI['btn_play_up.png'],
             textureDown: _spriteSheetUI['btn_play_down.png'],

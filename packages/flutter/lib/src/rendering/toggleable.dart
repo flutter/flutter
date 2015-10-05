@@ -24,15 +24,15 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       : _value = value,
         _onChanged = onChanged,
         super(additionalConstraints: new BoxConstraints.tight(size)) {
-    _performance = new ValueAnimation<double>(
+    _performance = new ValuePerformance<double>(
       variable: new AnimatedValue<double>(0.0, end: 1.0, curve: easeIn, reverseCurve: easeOut),
       duration: _kToggleDuration,
       progress: _value ? 1.0 : 0.0
     )..addListener(markNeedsPaint);
   }
 
-  ValueAnimation<double> get performance => _performance;
-  ValueAnimation<double> _performance;
+  ValuePerformance<double> get performance => _performance;
+  ValuePerformance<double> _performance;
 
   double get position => _performance.value;
 
@@ -51,7 +51,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     );
   }
 
-  void detatch() {
+  void detach() {
     _tap.dispose();
     _tap = null;
     super.detach();
@@ -68,7 +68,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (value == _value)
       return;
     _value = value;
-    performance.play(value ? Direction.forward : Direction.reverse);
+    performance.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
   }
 
   ValueChanged get onChanged => _onChanged;
