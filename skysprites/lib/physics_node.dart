@@ -31,6 +31,8 @@ class PhysicsNode extends Node {
 
   _ContactHandler _contactHandler;
 
+  List<box2d.Body> _bodiesScheduledForDestruction = [];
+
   double b2WorldToNodeConversionFactor = 500.0;
 
   Offset get gravity {
@@ -57,6 +59,9 @@ class PhysicsNode extends Node {
   }
 
   void _stepPhysics(double dt) {
+    // Remove bodies that were marked for destruction during the update phase
+    _removeBodiesScheduledForDestruction();
+
     // Calculate a step in the simulation
     b2World.stepDt(dt, 10, 10);
 
@@ -71,6 +76,16 @@ class PhysicsNode extends Node {
 
       body._node._setRotationFromPhysics(degrees(b2Body.getAngle()));
     }
+
+    // Remove bodies that were marked for destruction during the simulation
+    _removeBodiesScheduledForDestruction();
+  }
+
+  void _removeBodiesScheduledForDestruction() {
+    for (box2d.Body b2Body in _bodiesScheduledForDestruction) {
+      b2World.destroyBody(b2Body);
+    }
+    _bodiesScheduledForDestruction.clear();
   }
 
   void _updatePosition(PhysicsBody body, Point position) {
@@ -257,6 +272,11 @@ class _ContactHandler extends box2d.ContactListener {
           b2Contact.isTouching(),
           b2Contact.isEnabled()
         );
+
+        if (type == PhysicsContactType.postSolve) {
+
+        }
+
         // Make callback
         info.callback(type, contact);
 

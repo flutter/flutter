@@ -83,6 +83,7 @@ class TestBed extends NodeWithSize {
 
   void myCallback(PhysicsContactType type, PhysicsContact contact) {
     print("CONTACT type: $type");
+    contact.nodeB.removeFromParent();
   }
 
   bool handleEvent(SpriteBoxEvent event) {
