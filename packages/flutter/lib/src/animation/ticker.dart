@@ -4,17 +4,16 @@
 
 import 'dart:async';
 
-import 'package:newton/newton.dart';
 import 'package:sky/src/animation/scheduler.dart';
 
-typedef _TickerCallback(Duration elapsed);
+typedef TickerCallback(Duration elapsed);
 
 /// Calls its callback once per animation frame
 class Ticker {
   /// Constructs a ticker that will call onTick once per frame while running
-  Ticker(_TickerCallback onTick) : _onTick = onTick;
+  Ticker(TickerCallback onTick) : _onTick = onTick;
 
-  final _TickerCallback _onTick;
+  final TickerCallback _onTick;
 
   Completer _completer;
   int _animationId;
@@ -45,7 +44,7 @@ class Ticker {
       _animationId = null;
     }
 
-    // We take the _completer into a local variable so that !isTicking
+    // We take the _completer into a local variable so that isTicking is false
     // when we actually complete the future (isTicking uses _completer
     // to determine its state).
     Completer localCompleter = _completer;
@@ -77,58 +76,4 @@ class Ticker {
     assert(_animationId == null);
     _animationId = scheduler.requestAnimationFrame(_tick);
   }
-}
-
-/// Ticks a simulation once per frame
-class AnimatedSimulation {
-
-  AnimatedSimulation(Function onTick) : _onTick = onTick {
-    _ticker = new Ticker(_tick);
-  }
-
-  final Function _onTick;
-  Ticker _ticker;
-
-  Simulation _simulation;
-
-  double _value = 0.0;
-  /// The current value of the simulation
-  double get value => _value;
-  void set value(double newValue) {
-    assert(!_ticker.isTicking);
-    _value = newValue;
-    _onTick(_value);
-  }
-
-  /// Start ticking the given simulation once per frame
-  ///
-  /// Returns a future that resolves when the simulation stops ticking.
-  Future start(Simulation simulation) {
-    assert(simulation != null);
-    assert(!_ticker.isTicking);
-    _simulation = simulation;
-    _value = simulation.x(0.0);
-    return _ticker.start();
-  }
-
-  /// Stop ticking the current simulation
-  void stop() {
-    _simulation = null;
-    _ticker.stop();
-  }
-
-  /// Whether this object is currently ticking a simulation
-  bool get isAnimating => _ticker.isTicking;
-
-  void _tick(Duration elapsed) {
-
-    double elapsedInSeconds =  elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
-    _value = _simulation.x(elapsedInSeconds);
-
-    if (_simulation.isDone(elapsedInSeconds))
-      stop();
-
-    _onTick(_value);
-  }
-
 }

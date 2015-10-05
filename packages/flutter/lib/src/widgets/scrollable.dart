@@ -51,10 +51,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     super.initState();
     if (config.initialScrollOffset is double)
       _scrollOffset = config.initialScrollOffset;
-    _animation = new Timeline(_setScrollOffset);
+    _animation = new SimulationStepper(_setScrollOffset);
   }
 
-  Timeline _animation;
+  SimulationStepper _animation;
 
   double _scrollOffset = 0.0;
   double get scrollOffset => _scrollOffset;
@@ -151,7 +151,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       _createSnapSimulation(velocity) ?? _createFlingSimulation(velocity ?? 0.0);
     if (simulation == null)
       return new Future.value();
-    return _animation.fling(simulation);
+    return _animation.animateWith(simulation);
   }
 
   void dispose() {

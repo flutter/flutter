@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:sky/src/animation/animated_value.dart';
 import 'package:sky/src/animation/forces.dart';
-import 'package:sky/src/animation/timeline.dart';
+import 'package:sky/src/animation/simulation_stepper.dart';
 
 /// The status of an animation
 enum AnimationStatus {
@@ -53,7 +53,7 @@ abstract class WatchableAnimationPerformance {
 /// progression.
 class AnimationPerformance implements WatchableAnimationPerformance {
   AnimationPerformance({ this.duration, double progress }) {
-    _timeline = new Timeline(_tick);
+    _timeline = new SimulationStepper(_tick);
     if (progress != null)
       _timeline.value = progress.clamp(0.0, 1.0);
   }
@@ -66,7 +66,7 @@ class AnimationPerformance implements WatchableAnimationPerformance {
   /// The length of time this performance should last
   Duration duration;
 
-  Timeline _timeline;
+  SimulationStepper _timeline;
   Direction _direction;
 
   /// The direction used to select the current curve
@@ -159,7 +159,7 @@ class AnimationPerformance implements WatchableAnimationPerformance {
     if (force == null)
       force = kDefaultSpringForce;
     _direction = velocity < 0.0 ? Direction.reverse : Direction.forward;
-    return _timeline.fling(force.release(progress, velocity));
+    return _timeline.animateWith(force.release(progress, velocity));
   }
 
   final List<AnimationPerformanceListener> _listeners = new List<AnimationPerformanceListener>();
