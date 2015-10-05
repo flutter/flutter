@@ -141,9 +141,18 @@ dev_dependencies:
 const _libMain = r'''
 import 'package:sky/widgets.dart';
 
-void main() => runApp(new HelloWorldApp());
+void main() {
+  runApp(
+    new App(
+      title: "Flutter Demo",
+      routes: <String, RouteBuilder>{
+        '/': (RouteArguments args) => new FlutterDemoHome()
+      }
+    )
+  );
+}
 
-class HelloWorldApp extends StatelessComponent {
+class FlutterDemoHome extends StatelessComponent {
   Widget build(BuildContext context)  {
     return new Scaffold(
       toolbar: new ToolBar(center: new Text("Flutter Demo")),
