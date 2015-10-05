@@ -712,6 +712,11 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   bool updateShouldNotify(DefaultTextStyle old) => style != old.style;
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    '$style'.split('\n').forEach(description.add);
+  }
 }
 
 class Text extends StatelessComponent {
@@ -737,6 +742,13 @@ class Text extends StatelessComponent {
     if (combinedStyle != null)
       text = new StyledTextSpan(combinedStyle, [text]);
     return new Paragraph(text: text);
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('"$data"');
+    if (style != null)
+      '$style'.split('\n').forEach(description.add);
   }
 }
 

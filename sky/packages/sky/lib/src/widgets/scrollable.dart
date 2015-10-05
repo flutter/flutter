@@ -318,7 +318,7 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     });
   }
   void _updateScrollBehaviour() {
-    // if you don't call this from build() or syncConstructorArguments(), you must call it from setState().
+    // if you don't call this from build(), you must call it from setState().
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: _childSize,
       containerExtent: _viewportSize,
