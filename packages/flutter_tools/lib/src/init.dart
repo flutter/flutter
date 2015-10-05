@@ -146,20 +146,21 @@ void main() {
     new App(
       title: "Flutter Demo",
       routes: <String, RouteBuilder>{
-        '/': (RouteArguments args) => new FlutterDemoHome()
+        '/': (RouteArguments args) => new HelloWorldComponent()
       }
     )
   );
 }
 
-class FlutterDemoHome extends StatelessComponent {
+class HelloWorldComponent extends StatelessComponent {
   Widget build(BuildContext context)  {
     return new Scaffold(
       toolbar: new ToolBar(center: new Text("Flutter Demo")),
       body: new Material(child: new Center(child: new Text("Hello world!"))),
       floatingActionButton: new FloatingActionButton(
-        child: new Icon(type: 'content/add', size: 24))
-      );
+        child: new Icon(type: 'content/add', size: 24)
+      )
+    );
   }
 }
 
