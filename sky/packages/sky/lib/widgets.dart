@@ -44,6 +44,7 @@ export 'src/widgets/radio.dart';
 export 'src/widgets/raised_button.dart';
 export 'src/widgets/scaffold.dart';
 export 'src/widgets/scrollable.dart';
+export 'src/widgets/statistics_overlay.dart';
 export 'src/widgets/snack_bar.dart';
 export 'src/widgets/switch.dart';
 export 'src/widgets/tabs.dart';
