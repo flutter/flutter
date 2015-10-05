@@ -129,8 +129,13 @@ class NavigatorState extends State<Navigator> {
         direction: (i <= _currentPosition) ? AnimationDirection.forward : AnimationDirection.reverse
       );
       route._onDismissed = () {
+        assert(_history.contains(route));
+        if (_history.lastIndexOf(route) <= _currentPosition)
+          popRoute(route);
+      };
+      route._onRemoveRoute = () {
+        assert(_history.contains(route));
         setState(() {
-          assert(_history.contains(route));
           _history.remove(route);
         });
       };
@@ -162,14 +167,19 @@ abstract class Route {
   PerformanceView get performance => _performance?.view;
   Performance _performance;
   NotificationCallback _onDismissed;
+  NotificationCallback _onRemoveRoute;
 
   Performance createPerformance() {
     Duration duration = transitionDuration;
     if (duration > Duration.ZERO) {
       return new Performance(duration: duration)
         ..addStatusListener((PerformanceStatus status) {
-          if (status == PerformanceStatus.dismissed && _onDismissed != null)
-            _onDismissed();
+          if (status == PerformanceStatus.dismissed) {
+            if (_onDismissed != null)
+              _onDismissed();
+            if (_onRemoveRoute != null)
+              _onRemoveRoute();
+          }
         });
     }
     return null;
@@ -245,8 +255,8 @@ abstract class Route {
 
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
   void didPop([dynamic result]) {
-    if (performance == null && _onDismissed != null)
-      _onDismissed();
+    if (performance == null && _onRemoveRoute != null)
+      _onRemoveRoute();
   }
 
   String toString() => '$runtimeType()';
