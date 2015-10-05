@@ -408,16 +408,16 @@ class TabBar extends Scrollable {
 class TabBarState extends ScrollableState<TabBar> {
   void initState() {
     super.initState();
-    _indicatorAnimation = new ValueAnimation<Rect>()
+    _indicatorAnimation = new ValuePerformance<Rect>()
       ..duration = _kTabBarScroll
-      ..variable = new AnimatedRect(null, curve: ease);
+      ..variable = new AnimatedRectValue(null, curve: ease);
     scrollBehavior.isScrollable = config.isScrollable;
   }
 
   Size _tabBarSize;
   Size _viewportSize = Size.zero;
   List<double> _tabWidths;
-  ValueAnimation<Rect> _indicatorAnimation;
+  ValuePerformance<Rect> _indicatorAnimation;
 
   void didUpdateConfig(TabBar oldConfig) {
     super.didUpdateConfig(oldConfig);
@@ -425,7 +425,7 @@ class TabBarState extends ScrollableState<TabBar> {
       scrollTo(0.0);
   }
 
-  AnimatedRect get _indicatorRect => _indicatorAnimation.variable;
+  AnimatedRectValue get _indicatorRect => _indicatorAnimation.variable;
 
   void _startIndicatorAnimation(int fromTabIndex, int toTabIndex) {
     _indicatorRect

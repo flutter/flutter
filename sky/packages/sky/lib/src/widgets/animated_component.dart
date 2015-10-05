@@ -9,13 +9,13 @@ abstract class AnimatedComponent extends StatefulComponent {
   const AnimatedComponent({ Key key, this.direction, this.duration }) : super(key: key);
 
   final Duration duration;
-  final Direction direction;
+  final AnimationDirection direction;
 }
 
 abstract class AnimatedState<T extends AnimatedComponent> extends State<T> {
   void initState() {
     super.initState();
-    _performance = new AnimationPerformance(duration: config.duration);
+    _performance = new Performance(duration: config.duration);
     performance.addStatusListener(_handleAnimationStatusChanged);
     if (buildDependsOnPerformance) {
       performance.addListener(() {
@@ -34,13 +34,13 @@ abstract class AnimatedState<T extends AnimatedComponent> extends State<T> {
       performance.play(config.direction);
   }
 
-  AnimationPerformance get performance => _performance;
-  AnimationPerformance _performance;
+  Performance get performance => _performance;
+  Performance _performance;
 
-  void _handleAnimationStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed)
+  void _handleAnimationStatusChanged(PerformanceStatus status) {
+    if (status == PerformanceStatus.completed)
       handleCompleted();
-    else if (status == AnimationStatus.dismissed)
+    else if (status == PerformanceStatus.dismissed)
       handleDismissed();
   }
 

@@ -90,11 +90,11 @@ class AnimatedContainerState extends State<AnimatedContainer> {
   AnimatedValue<double> _width;
   AnimatedValue<double> _height;
 
-  AnimationPerformance _performance;
+  Performance _performance;
 
   void initState() {
     super.initState();
-    _performance = new AnimationPerformance(duration: config.duration)
+    _performance = new Performance(duration: config.duration)
       ..timing = new AnimationTiming(curve: config.curve)
       ..addListener(_updateAllVariables);
     _configAllVariables();
@@ -115,7 +115,7 @@ class AnimatedContainerState extends State<AnimatedContainer> {
     super.dispose();
   }
 
-  void _updateVariable(AnimatedVariable variable) {
+  void _updateVariable(Animatable variable) {
     if (variable != null)
       _performance.updateVariable(variable);
   }

@@ -60,7 +60,7 @@ class FeedFragment extends StatefulComponent {
 class FeedFragmentState extends State<FeedFragment> {
   FitnessMode _fitnessMode = FitnessMode.feed;
 
-  AnimationStatus _snackBarStatus = AnimationStatus.dismissed;
+  PerformanceStatus _snackBarStatus = PerformanceStatus.dismissed;
   bool _isShowingSnackBar = false;
 
   void _handleFitnessModeChange(FitnessMode value) {
@@ -126,7 +126,7 @@ class FeedFragmentState extends State<FeedFragment> {
     setState(() {
       _undoItem = item;
       _isShowingSnackBar = true;
-      _snackBarStatus = AnimationStatus.forward;
+      _snackBarStatus = PerformanceStatus.forward;
     });
   }
 
@@ -207,13 +207,13 @@ class FeedFragmentState extends State<FeedFragment> {
   }
 
   Widget buildSnackBar() {
-    if (_snackBarStatus == AnimationStatus.dismissed)
+    if (_snackBarStatus == PerformanceStatus.dismissed)
       return null;
     return new SnackBar(
       showing: _isShowingSnackBar,
       content: new Text("Item deleted."),
       actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
-      onDismissed: () { setState(() { _snackBarStatus = AnimationStatus.dismissed; }); }
+      onDismissed: () { setState(() { _snackBarStatus = PerformanceStatus.dismissed; }); }
     );
   }
 
