@@ -141,15 +141,6 @@ dev_dependencies:
 const _libMain = r'''
 import 'package:sky/widgets.dart';
 
-void main() => runApp(new HelloWorldApp());
+void main() => runApp(new Center(child: new Text('Hello, world!')));
 
-class HelloWorldApp extends App {
-  Widget build() {
-    return new Scaffold(
-        toolbar: new ToolBar(center: new Text("Flutter Demo")),
-        body: new Material(child: new Center(child: new Text("Hello world!"))),
-        floatingActionButton: new FloatingActionButton(
-            child: new Icon(type: 'content/add', size: 24)));
-  }
-}
 ''';
