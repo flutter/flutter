@@ -12,7 +12,7 @@ import 'package:sky/src/widgets/gesture_detector.dart';
 
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const Duration _kCardDismissResize = const Duration(milliseconds: 300);
-final Interval _kCardDismissResizeInterval = new Interval(0.4, 1.0);
+const Curve _kCardDismissResizeCurve = const Interval(0.4, 1.0, curve: ease);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
@@ -226,8 +226,7 @@ class DismissableState extends State<Dismissable> {
       AnimatedValue<double> squashAxisExtent = new AnimatedValue<double>(
         _directionIsYAxis ? _size.width : _size.height,
         end: 0.0,
-        curve: ease,
-        interval: _kCardDismissResizeInterval
+        curve: _kCardDismissResizeCurve
       );
 
       return new SquashTransition(
