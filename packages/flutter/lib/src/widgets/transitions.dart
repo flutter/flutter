@@ -7,7 +7,7 @@ import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-export 'package:sky/animation.dart' show Direction;
+export 'package:sky/animation.dart' show AnimationDirection;
 
 abstract class TransitionComponent extends StatefulComponent {
   TransitionComponent({
@@ -17,7 +17,7 @@ abstract class TransitionComponent extends StatefulComponent {
     assert(performance != null);
   }
 
-  final WatchableAnimationPerformance performance;
+  final PerformanceView performance;
 
   Widget build(BuildContext context);
 
@@ -57,7 +57,7 @@ abstract class TransitionWithChild extends TransitionComponent {
   TransitionWithChild({
     Key key,
     this.child,
-    WatchableAnimationPerformance performance
+    PerformanceView performance
   }) : super(key: key, performance: performance);
 
   final Widget child;
@@ -71,7 +71,7 @@ class SlideTransition extends TransitionWithChild {
   SlideTransition({
     Key key,
     this.position,
-    WatchableAnimationPerformance performance,
+    PerformanceView performance,
     Widget child
   }) : super(key: key,
              performance: performance,
@@ -91,7 +91,7 @@ class FadeTransition extends TransitionWithChild {
   FadeTransition({
     Key key,
     this.opacity,
-    WatchableAnimationPerformance performance,
+    PerformanceView performance,
     Widget child
   }) : super(key: key,
              performance: performance,
@@ -109,7 +109,7 @@ class ColorTransition extends TransitionWithChild {
   ColorTransition({
     Key key,
     this.color,
-    WatchableAnimationPerformance performance,
+    PerformanceView performance,
     Widget child
   }) : super(key: key,
              performance: performance,
@@ -131,7 +131,7 @@ class SquashTransition extends TransitionWithChild {
     Key key,
     this.width,
     this.height,
-    WatchableAnimationPerformance performance,
+    PerformanceView performance,
     Widget child
   }) : super(key: key,
              performance: performance,
@@ -156,7 +156,7 @@ class BuilderTransition extends TransitionComponent {
     Key key,
     this.variables,
     this.builder,
-    WatchableAnimationPerformance performance
+    PerformanceView performance
   }) : super(key: key,
              performance: performance);
 

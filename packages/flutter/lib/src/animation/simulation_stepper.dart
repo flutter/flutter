@@ -28,7 +28,7 @@ class _TweenSimulation extends Simulation {
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
     final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
-    _tween.setProgress(t, Direction.forward);
+    _tween.setProgress(t, AnimationDirection.forward);
     return _tween.value;
   }
 
