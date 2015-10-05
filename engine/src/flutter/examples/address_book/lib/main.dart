@@ -101,7 +101,7 @@ void main() {
     title: 'Address Book',
     theme: theme,
     routes: <String, RouteBuilder>{
-      '/': (NavigatorState navigator, Route route) => new AddressBookHome(navigator: navigator)
+      '/': (RouteArguments args) => new AddressBookHome(navigator: args.navigator)
     }
   ));
 }
