@@ -120,7 +120,7 @@ class PhysicsBody {
 
   void _detach() {
     if (_attached) {
-      _physicsNode.b2World.destroyBody(_body);
+      _physicsNode._bodiesScheduledForDestruction.add(_body);
       _attached = false;
     }
   }
