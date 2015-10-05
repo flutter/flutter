@@ -86,6 +86,8 @@ class SpriteBox extends RenderBox {
     return _visibleArea;
   }
 
+  bool _initialized = false;
+
   // Setup
 
   /// Creates a new SpriteBox with a node as its content, by default uses letterboxing.
@@ -136,6 +138,7 @@ class SpriteBox extends RenderBox {
     size = constraints.biggest;
     _invalidateTransformMatrix();
     _callSpriteBoxPerformedLayout(_rootNode);
+    _initialized = true;
   }
 
   // Adding and removing nodes
@@ -361,11 +364,13 @@ class SpriteBox extends RenderBox {
 
     _frameRate = 1.0/delta;
 
-    _callConstraintsPreUpdate(delta);
-    _runActions(delta);
-    _callUpdate(_rootNode, delta);
-    _callStepPhysics(delta);
-    _callConstraintsConstrain(delta);
+    if (_initialized) {
+      _callConstraintsPreUpdate(delta);
+      _runActions(delta);
+      _callUpdate(_rootNode, delta);
+      _callStepPhysics(delta);
+      _callConstraintsConstrain(delta);
+    }
 
     // Schedule next update
     _scheduleTick();
