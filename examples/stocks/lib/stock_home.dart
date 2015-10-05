@@ -56,22 +56,6 @@ class StockHomeState extends State<StockHome> {
     });
   }
 
-  bool _drawerShowing = false;
-  AnimationStatus _drawerStatus = AnimationStatus.dismissed;
-
-  void _handleOpenDrawer() {
-    setState(() {
-      _drawerShowing = true;
-      _drawerStatus = AnimationStatus.forward;
-    });
-  }
-
-  void _handleDrawerDismissed() {
-    setState(() {
-      _drawerStatus = AnimationStatus.dismissed;
-    });
-  }
-
   bool _autorefresh = false;
   void _handleAutorefreshChanged(bool value) {
     setState(() {
@@ -91,16 +75,10 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  Drawer buildDrawer() {
-    if (_drawerStatus == AnimationStatus.dismissed)
-      return null;
-    assert(_drawerShowing); // TODO(mpcomplete): this is always true
-    return new Drawer(
-      level: 3,
-      showing: _drawerShowing,
-      onDismissed: _handleDrawerDismissed,
+  void _showDrawer() {
+    showDrawer(
       navigator: config.navigator,
-      children: [
+      child: new Block([
         new DrawerHeader(child: new Text('Stocks')),
         new DrawerItem(
           icon: 'action/assessment',
@@ -141,7 +119,7 @@ class StockHomeState extends State<StockHome> {
         new DrawerItem(
           icon: 'action/help',
           child: new Text('Help & Feedback'))
-     ]
+      ])
     );
   }
 
@@ -154,7 +132,7 @@ class StockHomeState extends State<StockHome> {
     return new ToolBar(
         left: new IconButton(
           icon: "navigation/menu",
-          onPressed: _handleOpenDrawer
+          onPressed: _showDrawer
         ),
         center: new Text('Stocks'),
         right: [
@@ -276,8 +254,7 @@ class StockHomeState extends State<StockHome> {
       toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
       body: buildTabNavigator(),
       snackBar: buildSnackBar(),
-      floatingActionButton: buildFloatingActionButton(),
-      drawer: buildDrawer()
+      floatingActionButton: buildFloatingActionButton()
     );
   }
 }
