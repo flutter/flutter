@@ -182,10 +182,15 @@ abstract class Widget {
   Element createElement();
 
   String toString() {
-    if (key == null)
-      return '$runtimeType';
-    return '$runtimeType-$key';
-  }
+    final String name = key == null ? '$runtimeType' : '$runtimeType-$key';
+    final List<String> data = <String>[];
+    debugFillDescription(data);
+    if (data.isEmpty)
+      return 'name';
+    return 'name(${data.join("; ")})';
+   }
+
+  void debugFillDescription(List<String> description) { }
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -795,6 +800,8 @@ abstract class Element<T extends Widget> implements BuildContext {
       description.add('no depth');
     if (widget == null)
       description.add('no widget');
+    else
+      widget.debugFillDescription(description);
   }
 
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
