@@ -49,7 +49,7 @@ class SnackBar extends AnimatedComponent {
     this.actions,
     bool showing,
     this.onDismissed
-  }) : super(key: key, direction: showing ? Direction.forward : Direction.reverse, duration: _kSlideInDuration) {
+  }) : super(key: key, direction: showing ? AnimationDirection.forward : AnimationDirection.reverse, duration: _kSlideInDuration) {
     assert(content != null);
   }
 

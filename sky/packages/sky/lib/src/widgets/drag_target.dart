@@ -258,7 +258,7 @@ class DragRoute extends Route {
   bool get opaque => false;
   Duration get transitionDuration => const Duration();
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new Positioned(
       left: _lastOffset.dx,
       top: _lastOffset.dy,

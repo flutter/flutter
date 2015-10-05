@@ -13,7 +13,7 @@ class ProgressIndicatorApp extends StatefulComponent {
 class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
   void initState() {
     super.initState();
-    valueAnimation = new ValueAnimation<double>()
+    valueAnimation = new ValuePerformance<double>()
       ..duration = const Duration(milliseconds: 1500)
       ..variable = new AnimatedValue<double>(
         0.0,
@@ -22,15 +22,15 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
         reverseCurve: ease,
         interval: new Interval(0.0, 0.9)
       );
-    valueAnimation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed || status == AnimationStatus.completed)
+    valueAnimation.addStatusListener((PerformanceStatus status) {
+      if (status == PerformanceStatus.dismissed || status == PerformanceStatus.completed)
         reverseValueAnimationDirection();
     });
     valueAnimation.play(valueAnimationDirection);
   }
 
-  ValueAnimation<double> valueAnimation;
-  Direction valueAnimationDirection = Direction.forward;
+  ValuePerformance<double> valueAnimation;
+  AnimationDirection valueAnimationDirection = AnimationDirection.forward;
 
   void handleTap() {
     setState(() {
@@ -43,9 +43,9 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
   }
 
   void reverseValueAnimationDirection() {
-    valueAnimationDirection = (valueAnimationDirection == Direction.forward)
-      ? Direction.reverse
-      : Direction.forward;
+    valueAnimationDirection = (valueAnimationDirection == AnimationDirection.forward)
+      ? AnimationDirection.reverse
+      : AnimationDirection.forward;
     valueAnimation.play(valueAnimationDirection);
   }
 

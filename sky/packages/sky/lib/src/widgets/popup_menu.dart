@@ -44,7 +44,7 @@ class PopupMenu extends StatefulComponent {
   final List<PopupMenuItem> items;
   final int level;
   final NavigatorState navigator;
-  final WatchableAnimationPerformance performance;
+  final PerformanceView performance;
 
   PopupMenuState createState() => new PopupMenuState();
 }
@@ -159,8 +159,8 @@ class MenuRoute extends Route {
   final PopupMenuItemsBuilder builder;
   final int level;
 
-  AnimationPerformance createPerformance() {
-    AnimationPerformance result = super.createPerformance();
+  Performance createPerformance() {
+    Performance result = super.createPerformance();
     AnimationTiming timing = new AnimationTiming();
     timing.reverseInterval = new Interval(0.0, _kMenuCloseIntervalEnd);
     result.timing = timing;
@@ -172,7 +172,7 @@ class MenuRoute extends Route {
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new Positioned(
       top: position?.top,
       right: position?.right,

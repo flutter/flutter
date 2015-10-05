@@ -55,15 +55,15 @@ class Drawer extends StatefulComponent {
 class DrawerState extends State<Drawer> {
   void initState() {
     super.initState();
-    _performance = new AnimationPerformance(duration: _kBaseSettleDuration)
-      ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.dismissed)
+    _performance = new Performance(duration: _kBaseSettleDuration)
+      ..addStatusListener((PerformanceStatus status) {
+        if (status == PerformanceStatus.dismissed)
           config.navigator.pop();
       });
     _open();
   }
 
-  AnimationPerformance _performance;
+  Performance _performance;
 
   Widget build(BuildContext context) {
     Widget mask = new GestureDetector(
@@ -138,7 +138,7 @@ class DrawerRoute extends Route {
 
   bool get opaque => false;
 
-  Widget build(NavigatorState navigator, WatchableAnimationPerformance nextRoutePerformance) {
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new Focus(
       key: new GlobalObjectKey(this),
       autofocus: true,

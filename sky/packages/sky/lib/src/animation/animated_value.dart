@@ -7,7 +7,7 @@ import 'dart:sky' show Color, Rect;
 import 'package:sky/src/animation/curves.dart';
 
 /// The direction in which an animation is running
-enum Direction {
+enum AnimationDirection {
   /// The animation is running from beginning to end
   forward,
 
@@ -17,11 +17,11 @@ enum Direction {
 
 /// An interface describing a variable that changes as an animation progresses.
 ///
-/// AnimatedVariables, by convention, must be cheap to create. This allows them to be used in
-/// build functions in Widgets.
-abstract class AnimatedVariable {
+/// Animatable objects, by convention, must be cheap to create. This allows them
+/// to be used in build functions in Widgets.
+abstract class Animatable {
   /// Update the variable to a given time in an animation that is running in the given direction
-  void setProgress(double t, Direction direction);
+  void setProgress(double t, AnimationDirection direction);
   String toString();
 }
 
@@ -53,7 +53,7 @@ class AnimationTiming {
   Curve reverseCurve;
 
   /// Applies this timing to the given animation clock value in the given direction
-  double transform(double t, Direction direction) {
+  double transform(double t, AnimationDirection direction) {
     Interval interval = _getInterval(direction);
     if (interval != null)
       t = interval.transform(t);
@@ -65,19 +65,19 @@ class AnimationTiming {
     return _applyCurve(t, direction);
   }
 
-  Interval _getInterval(Direction direction) {
-    if (direction == Direction.forward || reverseInterval == null)
+  Interval _getInterval(AnimationDirection direction) {
+    if (direction == AnimationDirection.forward || reverseInterval == null)
       return interval;
     return reverseInterval;
   }
 
-  Curve _getCurve(Direction direction) {
-    if (direction == Direction.forward || reverseCurve == null)
+  Curve _getCurve(AnimationDirection direction) {
+    if (direction == AnimationDirection.forward || reverseCurve == null)
       return curve;
     return reverseCurve;
   }
 
-  double _applyCurve(double t, Direction direction) {
+  double _applyCurve(double t, AnimationDirection direction) {
     Curve curve = _getCurve(direction);
     if (curve == null)
       return t;
@@ -86,7 +86,7 @@ class AnimationTiming {
 }
 
 /// An animated variable with a concrete type
-class AnimatedValue<T extends dynamic> extends AnimationTiming implements AnimatedVariable {
+class AnimatedValue<T extends dynamic> extends AnimationTiming implements Animatable {
   AnimatedValue(this.begin, { this.end, Interval interval, Interval reverseInterval, Curve curve, Curve reverseCurve })
     : super(interval: interval, reverseInterval: reverseInterval, curve: curve, reverseCurve: reverseCurve) {
     value = begin;
@@ -105,7 +105,7 @@ class AnimatedValue<T extends dynamic> extends AnimationTiming implements Animat
   T lerp(double t) => begin + (end - begin) * t;
 
   /// Updates the value of this variable according to the given animation clock value and direction
-  void setProgress(double t, Direction direction) {
+  void setProgress(double t, AnimationDirection direction) {
     if (end != null) {
       t = transform(t, direction);
       if (t == 0.0)
@@ -118,24 +118,6 @@ class AnimatedValue<T extends dynamic> extends AnimationTiming implements Animat
   }
 
   String toString() => 'AnimatedValue(begin=$begin, end=$end, value=$value)';
-}
-
-/// A list of animated variables
-class AnimatedList extends AnimationTiming implements AnimatedVariable {
-  /// The list of variables contained in the list
-  List<AnimatedVariable> variables;
-
-  AnimatedList(this.variables, { Interval interval, Interval reverseInterval, Curve curve, Curve reverseCurve })
-    : super(interval: interval, reverseInterval: reverseInterval, curve: curve, reverseCurve: reverseCurve);
-
-  // Updates the value of all the variables in the list according to the given animation clock value and direction
-  void setProgress(double t, Direction direction) {
-    double adjustedTime = transform(t, direction);
-    for (AnimatedVariable variable in variables)
-      variable.setProgress(adjustedTime, direction);
-  }
-
-  String toString() => 'AnimatedList([$variables])';
 }
 
 /// An animated variable containing a color
@@ -153,8 +135,8 @@ class AnimatedColorValue extends AnimatedValue<Color> {
 ///
 /// This class specializes the interpolation of AnimatedValue<Rect> to be
 /// appropriate for rectangles.
-class AnimatedRect extends AnimatedValue<Rect> {
-  AnimatedRect(Rect begin, { Rect end, Interval interval, Interval reverseInterval, Curve curve, Curve reverseCurve })
+class AnimatedRectValue extends AnimatedValue<Rect> {
+  AnimatedRectValue(Rect begin, { Rect end, Interval interval, Interval reverseInterval, Curve curve, Curve reverseCurve })
     : super(begin, end: end, interval: interval, reverseInterval: reverseInterval, curve: curve, reverseCurve: reverseCurve);
 
   Rect lerp(double t) => Rect.lerp(begin, end, t);
