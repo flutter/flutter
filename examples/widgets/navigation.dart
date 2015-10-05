@@ -6,46 +6,46 @@ import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
 final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-  '/': (NavigatorState navigator, Route route) => new Container(
+  '/': (RouteArguments args) => new Container(
     padding: const EdgeDims.all(30.0),
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
     child: new Column([
       new Text("You are at home"),
       new RaisedButton(
         child: new Text('GO SHOPPING'),
-        onPressed: () => navigator.pushNamed('/shopping')
+        onPressed: () => args.navigator.pushNamed('/shopping')
       ),
       new RaisedButton(
         child: new Text('START ADVENTURE'),
-        onPressed: () => navigator.pushNamed('/adventure')
+        onPressed: () => args.navigator.pushNamed('/adventure')
       )],
       justifyContent: FlexJustifyContent.center
     )
   ),
-  '/shopping': (NavigatorState navigator, Route route) => new Container(
+  '/shopping': (RouteArguments args) => new Container(
     padding: const EdgeDims.all(20.0),
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFBF5FFF)),
     child: new Column([
       new Text("Village Shop"),
       new RaisedButton(
         child: new Text('RETURN HOME'),
-        onPressed: () => navigator.pop()
+        onPressed: () => args.navigator.pop()
       ),
       new RaisedButton(
         child: new Text('GO TO DUNGEON'),
-        onPressed: () => navigator.pushNamed('/adventure')
+        onPressed: () => args.navigator.pushNamed('/adventure')
       )],
       justifyContent: FlexJustifyContent.center
     )
   ),
-  '/adventure': (NavigatorState navigator, Route route) => new Container(
+  '/adventure': (RouteArguments args) => new Container(
     padding: const EdgeDims.all(20.0),
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFDC143C)),
     child: new Column([
       new Text("Monster's Lair"),
       new RaisedButton(
         child: new Text('RUN!!!'),
-        onPressed: () => navigator.pop()
+        onPressed: () => args.navigator.pop()
       )],
       justifyContent: FlexJustifyContent.center
     )

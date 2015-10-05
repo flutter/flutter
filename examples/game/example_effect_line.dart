@@ -62,7 +62,7 @@ class TestAppState extends State<TestApp> {
     );
   }
 
-  Column _buildColumn(NavigatorState navigator, Route route) {
+  Column _buildColumn(RouteArguments args) {
     return new Column([
       new Flexible(child: _buildSpriteWidget()),
       _buildTabBar()

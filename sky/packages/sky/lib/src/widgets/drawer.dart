@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
 import 'package:sky/src/widgets/animated_container.dart';
@@ -11,7 +9,6 @@ import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/navigator.dart';
-import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
 import 'package:sky/src/widgets/focus.dart';

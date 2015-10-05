@@ -133,7 +133,7 @@ void main() {
   runApp(new App(
     title: 'Drag and Drop Flutter Demo',
     routes: {
-     '/': (NavigatorState navigator, Route route) => new DragAndDropApp(navigator: navigator)
+     '/': (RouteArguments args) => new DragAndDropApp(navigator: args.navigator)
     }
   ));
 }

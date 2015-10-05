@@ -206,7 +206,7 @@ void main() {
     title: 'Flutter Demos',
     theme: _theme,
     routes: {
-      '/': (NavigatorState navigator, Route route) => new DemoHome()
+      '/': (RouteArguments args) => new DemoHome()
     }
   ));
 }
