@@ -149,7 +149,7 @@ class PageableListAppState extends State<PageableListApp> {
     return new IconTheme(
       data: const IconThemeData(color: IconThemeColor.white),
       child: new Scaffold(
-        toolbar: buildToolBar(),
+        toolBar: buildToolBar(),
         body: buildBody(context)
       )
     );

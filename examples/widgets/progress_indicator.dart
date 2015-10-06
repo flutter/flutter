@@ -103,7 +103,7 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
         child: new Title(
           title: 'Progress Indicators',
           child: new Scaffold(
-            toolbar: new ToolBar(center: new Text('Progress Indicators')),
+            toolBar: new ToolBar(center: new Text('Progress Indicators')),
             body: new DefaultTextStyle(
               style: Theme.of(context).text.title,
               child: body
