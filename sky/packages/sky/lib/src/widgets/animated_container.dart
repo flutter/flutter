@@ -77,10 +77,10 @@ class AnimatedContainer extends StatefulComponent {
   final Curve curve;
   final Duration duration;
 
-  AnimatedContainerState createState() => new AnimatedContainerState();
+  _AnimatedContainerState createState() => new _AnimatedContainerState();
 }
 
-class AnimatedContainerState extends State<AnimatedContainer> {
+class _AnimatedContainerState extends State<AnimatedContainer> {
   AnimatedBoxConstraintsValue _constraints;
   AnimatedBoxDecorationValue _decoration;
   AnimatedBoxDecorationValue _foregroundDecoration;

@@ -15,7 +15,6 @@ import 'package:sky/src/widgets/placeholder.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
-const Duration _kSlideInDuration = const Duration(milliseconds: 200);
 const double _kSnackHeight = 52.0;
 const double _kSideMargins = 24.0;
 const double _kVerticalPadding = 14.0;
@@ -108,7 +107,7 @@ class _SnackBarRoute extends Route {
   bool get hasContent => false;
   bool get ephemeral => true;
   bool get modal => false;
-  Duration get transitionDuration => _kSlideInDuration;
+  Duration get transitionDuration => const Duration(milliseconds: 200);
 
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) => null;
 }

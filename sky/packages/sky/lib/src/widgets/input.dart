@@ -39,10 +39,10 @@ class Input extends Scrollable {
   final String placeholder;
   final StringValueChanged onChanged;
 
-  InputState createState() => new InputState();
+  _InputState createState() => new _InputState();
 }
 
-class InputState extends ScrollableState<Input> {
+class _InputState extends ScrollableState<Input> {
   String _value;
   EditableString _editableValue;
   KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;

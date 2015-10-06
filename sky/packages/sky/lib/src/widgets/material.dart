@@ -12,7 +12,7 @@ import 'package:sky/src/widgets/theme.dart';
 
 enum MaterialType { canvas, card, circle, button }
 
-const Map<MaterialType, double> edges = const {
+const Map<MaterialType, double> _kEdges = const <MaterialType, double>{
   MaterialType.canvas: null,
   MaterialType.card: 2.0,
   MaterialType.circle: null,
@@ -35,7 +35,7 @@ class Material extends StatelessComponent {
   final int level;
   final Color color;
 
-  Color getBackgroundColor(BuildContext context) {
+  Color _getBackgroundColor(BuildContext context) {
     if (color != null)
       return color;
     switch (type) {
@@ -55,10 +55,10 @@ class Material extends StatelessComponent {
         style: Theme.of(context).text.body1,
         child: contents
       );
-      if (edges[type] != null) {
+      if (_kEdges[type] != null) {
         contents = new ClipRRect(
-          xRadius: edges[type],
-          yRadius: edges[type],
+          xRadius: _kEdges[type],
+          yRadius: _kEdges[type],
           child: contents
         );
       }
@@ -69,8 +69,8 @@ class Material extends StatelessComponent {
         curve: ease,
         duration: const Duration(milliseconds: 200),
         decoration: new BoxDecoration(
-          backgroundColor: getBackgroundColor(context),
-          borderRadius: edges[type],
+          backgroundColor: _getBackgroundColor(context),
+          borderRadius: _kEdges[type],
           boxShadow: level == 0 ? null : shadows[level],
           shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
         ),

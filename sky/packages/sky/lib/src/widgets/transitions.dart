@@ -21,10 +21,10 @@ abstract class TransitionComponent extends StatefulComponent {
 
   Widget build(BuildContext context);
 
-  TransitionState createState() => new TransitionState();
+  _TransitionState createState() => new _TransitionState();
 }
 
-class TransitionState extends State<TransitionComponent> {
+class _TransitionState extends State<TransitionComponent> {
   void initState() {
     super.initState();
     config.performance.addListener(_performanceChanged);
