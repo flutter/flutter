@@ -36,6 +36,10 @@ defineTests() {
       ProcessResult exec = Process.runSync(
           'dartanalyzer', ['--fatal-warnings', path],
           workingDirectory: temp.path);
+      if (exec.exitCode != 0) {
+        print(exec.stdout);
+        print(exec.stderr);
+      }
       expect(exec.exitCode, 0);
     });
   });
