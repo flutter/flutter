@@ -119,8 +119,10 @@ class GameDemoState extends State<GameDemo> {
             width: 128.0,
             height: 128.0
           ),
-          new Text(
-            "Last Score: $_lastScore",
+          new DefaultTextStyle(
+            child: new Text(
+              "Last Score: $_lastScore"
+            ),
             style: new TextStyle(fontSize:20.0)
           )
         ],
