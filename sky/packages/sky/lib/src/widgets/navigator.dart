@@ -18,7 +18,7 @@ class RouteArguments {
 typedef Widget RouteBuilder(RouteArguments args);
 typedef RouteBuilder RouteGenerator(String name);
 typedef void StateRouteCallback(StateRoute route);
-typedef void NotificationCallback();
+typedef void _RouteCallback(Route route);
 
 class Navigator extends StatefulComponent {
   Navigator({
@@ -51,7 +51,7 @@ class NavigatorState extends State<Navigator> {
     PageRoute route = new PageRoute(config.routes['/']);
     assert(route != null);
     assert(!route.ephemeral);
-    _history.add(route);
+    _insertRoute(route);
   }
 
   void pushState(State owner, Function callback) {
@@ -76,6 +76,13 @@ class NavigatorState extends State<Navigator> {
     push(new PageRoute(builder));
   }
 
+  void _insertRoute(Route route) {
+    _history.insert(_currentPosition, route);
+    route._onDismissed = _handleRouteDismissed;
+    route._onRemoveRoute = _handleRemoveRoute;
+    route.didPush();
+  }
+
   void push(Route route) {
     assert(!_debugCurrentlyHaveRoute(route));
     setState(() {
@@ -84,8 +91,8 @@ class NavigatorState extends State<Navigator> {
         currentRoute.didPop(null);
         _currentPosition -= 1;
       }
-      _history.insert(_currentPosition + 1, route);
       _currentPosition += 1;
+      _insertRoute(route);
     });
   }
 
@@ -122,6 +129,19 @@ class NavigatorState extends State<Navigator> {
     return index >= 0 && index <= _currentPosition;
   }
 
+  void _handleRouteDismissed(Route route) {
+    assert(_history.contains(route));
+    if (_history.lastIndexOf(route) <= _currentPosition)
+      popRoute(route);
+  }
+
+  void _handleRemoveRoute(Route route) {
+    assert(_history.contains(route));
+    setState(() {
+      _history.remove(route);
+    });
+  }
+
   Widget build(BuildContext context) {
     List<Widget> visibleRoutes = new List<Widget>();
     bool alreadyInsertModalBarrier = false;
@@ -132,20 +152,6 @@ class NavigatorState extends State<Navigator> {
         assert(!route.modal);
         continue;
       }
-      route.ensurePerformance(
-        direction: (i <= _currentPosition) ? AnimationDirection.forward : AnimationDirection.reverse
-      );
-      route._onDismissed = () {
-        assert(_history.contains(route));
-        if (_history.lastIndexOf(route) <= _currentPosition)
-          popRoute(route);
-      };
-      route._onRemoveRoute = () {
-        assert(_history.contains(route));
-        setState(() {
-          _history.remove(route);
-        });
-      };
       visibleRoutes.add(
         new KeyedSubtree(
           key: new ObjectKey(route),
@@ -171,11 +177,14 @@ class NavigatorState extends State<Navigator> {
 
 
 abstract class Route {
+  Route() {
+    _performance = createPerformance();
+  }
 
   PerformanceView get performance => _performance?.view;
   Performance _performance;
-  NotificationCallback _onDismissed;
-  NotificationCallback _onRemoveRoute;
+  _RouteCallback _onDismissed;
+  _RouteCallback _onRemoveRoute;
 
   Performance createPerformance() {
     Duration duration = transitionDuration;
@@ -184,24 +193,13 @@ abstract class Route {
         ..addStatusListener((PerformanceStatus status) {
           if (status == PerformanceStatus.dismissed) {
             if (_onDismissed != null)
-              _onDismissed();
+              _onDismissed(this);
             if (_onRemoveRoute != null)
-              _onRemoveRoute();
+              _onRemoveRoute(this);
           }
         });
     }
     return null;
-  }
-
-  void ensurePerformance({ AnimationDirection direction }) {
-    assert(direction != null);
-    if (_performance == null)
-      _performance = createPerformance();
-    if (_performance != null) {
-      PerformanceStatus desiredStatus = direction == AnimationDirection.forward ? PerformanceStatus.forward : PerformanceStatus.reverse;
-      if (_performance.status != desiredStatus)
-        _performance.play(direction);
-    }
   }
 
   /// If hasContent is true, then the route represents some on-screen state.
@@ -262,9 +260,15 @@ abstract class Route {
   bool get isActuallyOpaque => (performance == null || _performance.isCompleted) && opaque;
 
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
+
+  void didPush() {
+    _performance?.forward();
+  }
+
   void didPop([dynamic result]) {
+    _performance?.reverse();
     if (performance == null && _onRemoveRoute != null)
-      _onRemoveRoute();
+      _onRemoveRoute(this);
   }
 
   String toString() => '$runtimeType()';
