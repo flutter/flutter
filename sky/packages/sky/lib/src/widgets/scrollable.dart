@@ -575,7 +575,7 @@ typedef void PageChangedCallback(int newPage);
 class PageableList<T> extends ScrollableList<T> {
   PageableList({
     Key key,
-    double initialScrollOffset,
+    int initialPage,
     ScrollDirection scrollDirection: ScrollDirection.horizontal,
     ScrollListener onScroll,
     List<T> items,
@@ -588,7 +588,7 @@ class PageableList<T> extends ScrollableList<T> {
     this.curve: ease
   }) : super(
     key: key,
-    initialScrollOffset: initialScrollOffset,
+    initialScrollOffset: initialPage == null ? null : initialPage * itemExtent,
     scrollDirection: scrollDirection,
     onScroll: onScroll,
     items: items,
