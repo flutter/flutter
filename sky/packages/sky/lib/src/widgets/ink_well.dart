@@ -26,8 +26,8 @@ double _getSplashTargetSize(Size bounds, Point position) {
   return math.max(math.max(d1, d2), math.max(d3, d4)).ceil().toDouble();
 }
 
-class InkSplash {
-  InkSplash(this.position, this.well) {
+class _InkSplash {
+  _InkSplash(this.position, this.well) {
     _targetRadius = _getSplashTargetSize(well.size, position);
     _radius = new AnimatedValue<double>(
         _kSplashInitialSize, end: _targetRadius, curve: easeOut);
@@ -42,7 +42,7 @@ class InkSplash {
   }
 
   final Point position;
-  final RenderInkWell well;
+  final _RenderInkWell well;
 
   double _targetRadius;
   double _pinnedRadius;
@@ -98,8 +98,8 @@ class InkSplash {
   }
 }
 
-class RenderInkWell extends RenderProxyBox {
-  RenderInkWell({
+class _RenderInkWell extends RenderProxyBox {
+  _RenderInkWell({
     RenderBox child,
     GestureTapCallback onTap,
     GestureLongPressCallback onLongPress
@@ -122,7 +122,7 @@ class RenderInkWell extends RenderProxyBox {
     _syncLongPressRecognizer();
   }
 
-  final List<InkSplash> _splashes = new List<InkSplash>();
+  final List<_InkSplash> _splashes = new List<_InkSplash>();
 
   TapGestureRecognizer _tap;
   LongPressGestureRecognizer _longPress;
@@ -131,7 +131,7 @@ class RenderInkWell extends RenderProxyBox {
     if (event.type == 'pointerdown' && (_tap != null || _longPress != null)) {
       _tap?.addPointer(event);
       _longPress?.addPointer(event);
-      _splashes.add(new InkSplash(entry.localPosition, this));
+      _splashes.add(new _InkSplash(entry.localPosition, this));
     }
   }
 
@@ -196,7 +196,7 @@ class RenderInkWell extends RenderProxyBox {
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Point.origin & size);
-      for (InkSplash splash in _splashes)
+      for (_InkSplash splash in _splashes)
         splash.paint(canvas);
       canvas.restore();
     }
@@ -215,9 +215,9 @@ class InkWell extends OneChildRenderObjectWidget {
   final GestureTapCallback onTap;
   final GestureLongPressCallback onLongPress;
 
-  RenderInkWell createRenderObject() => new RenderInkWell(onTap: onTap, onLongPress: onLongPress);
+  _RenderInkWell createRenderObject() => new _RenderInkWell(onTap: onTap, onLongPress: onLongPress);
 
-  void updateRenderObject(RenderInkWell renderObject, InkWell oldWidget) {
+  void updateRenderObject(_RenderInkWell renderObject, InkWell oldWidget) {
     renderObject.onTap = onTap;
     renderObject.onLongPress = onLongPress;
   }

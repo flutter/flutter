@@ -6,12 +6,14 @@ part of stocks;
 
 enum _MenuItems { autorefresh, autorefreshCheckbox, add, remove }
 
+const double _kMenuMargin = 16.0; // 24.0 on tablet
+
 Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged onAutorefreshChanged }) async {
   switch (await showMenu(
     navigator: navigator,
     position: new MenuPosition(
-      right: sky.view.paddingRight,
-      top: sky.view.paddingTop
+      right: sky.view.paddingRight + _kMenuMargin,
+      top: sky.view.paddingTop + _kMenuMargin
     ),
     builder: (NavigatorState navigator) {
       return <PopupMenuItem>[

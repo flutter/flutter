@@ -192,7 +192,7 @@ final ThemeData _theme = new ThemeData(
 class DemoHome extends StatelessComponent {
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: new ToolBar(center: new Text('Sky Demos')),
+      toolBar: new ToolBar(center: new Text('Sky Demos')),
       body: new Material(
         type: MaterialType.canvas,
         child: new DemoList()

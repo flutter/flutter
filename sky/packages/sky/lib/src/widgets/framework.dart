@@ -50,7 +50,7 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 /// A GlobalKey is one that must be unique across the entire application. It is
 /// used by components that need to communicate with other components across the
 /// application's element tree.
-abstract class GlobalKey extends Key {
+abstract class GlobalKey<T extends State> extends Key {
   const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
 
   /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
@@ -96,9 +96,9 @@ abstract class GlobalKey extends Key {
   Element get _currentElement => _registry[this];
   BuildContext get currentContext => _currentElement;
   Widget get currentWidget => _currentElement?.widget;
-  State get currentState {
+  T get currentState {
     Element element = _currentElement;
-    if (element is StatefulComponentElement)
+    if (element is StatefulComponentElement<dynamic, T>)
       return element.state;
     return null;
   }
@@ -186,8 +186,8 @@ abstract class Widget {
     final List<String> data = <String>[];
     debugFillDescription(data);
     if (data.isEmpty)
-      return 'name';
-    return 'name(${data.join("; ")})';
+      return '$name';
+    return '$name(${data.join("; ")})';
    }
 
   void debugFillDescription(List<String> description) { }
@@ -550,7 +550,7 @@ abstract class Element<T extends Widget> implements BuildContext {
   /// Wrapper around visitChildren for BuildContext.
   void visitChildElements(void visitor(Element element)) {
     // don't allow visitChildElements() during build, since children aren't necessarily built yet
-    assert(BuildableElement._debugStateLockLevel == 0);
+    assert(!BuildableElement._debugStateLocked);
     visitChildren(visitor);
   }
 
@@ -858,6 +858,8 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     assert(_child != null);
   }
 
+  static BuildableElement _debugCurrentBuildTarget;
+
   /// Reinvokes the build() method of the StatelessComponent object (for
   /// stateless components) or the State object (for stateful components) and
   /// then updates the widget tree.
@@ -874,6 +876,12 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(_debugStateLocked);
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
+    BuildableElement debugPreviousBuildTarget;
+    assert(() {
+      debugPreviousBuildTarget = _debugCurrentBuildTarget;
+      _debugCurrentBuildTarget = this;
+     return true;
+    });
     Widget built;
     try {
       built = _builder(this);
@@ -896,12 +904,19 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
       built = new ErrorWidget();
       _child = updateChild(null, built, slot);
     }
+
+    assert(() {
+      assert(_debugCurrentBuildTarget == this);
+      _debugCurrentBuildTarget = debugPreviousBuildTarget;
+      return true;
+    });
   }
 
   static BuildScheduler scheduleBuildFor;
 
   static int _debugStateLockLevel = 0;
   static bool get _debugStateLocked => _debugStateLockLevel > 0;
+  static bool _debugBuilding = false;
 
   /// Establishes a scope in which component build functions can run.
   ///
@@ -913,13 +928,31 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// After unwinding the last build scope on the stack, the framework verifies
   /// that each global key is used at most once and notifies listeners about
   /// changes to global keys.
-  static void lockState(void callback()) {
-    _debugStateLockLevel += 1;
+  static void lockState(void callback(), { bool building: false }) {
+    assert(_debugStateLockLevel >= 0);
+    assert(() {
+      if (building) {
+        assert(!_debugBuilding);
+        assert(_debugCurrentBuildTarget == null);
+        _debugBuilding = true;
+      }
+      _debugStateLockLevel += 1;
+      return true;
+    });
     try {
       callback();
     } finally {
-      _debugStateLockLevel -= 1;
+      assert(() {
+        _debugStateLockLevel -= 1;
+        if (building) {
+          assert(_debugBuilding);
+          assert(_debugCurrentBuildTarget == null);
+          _debugBuilding = false;
+        }
+        return true;
+      });
     }
+    assert(_debugStateLockLevel >= 0);
   }
 
   /// Marks the element as dirty and adds it to the global list of widgets to
@@ -934,10 +967,23 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     if (!_active)
       return;
     assert(_debugLifecycleState == _ElementLifecycle.active);
-    assert(!_debugStateLocked || (_debugAllowIgnoredCallsToMarkNeedsBuild && dirty));
+    assert(() {
+      if (_debugBuilding) {
+        bool foundTarget = false;
+        visitAncestorElements((Element element) {
+          if (element == _debugCurrentBuildTarget) {
+            foundTarget = true;
+            return false;
+          }
+          return true;
+        });
+        if (foundTarget)
+          return true;
+      }
+      return !_debugStateLocked || (_debugAllowIgnoredCallsToMarkNeedsBuild && dirty);
+    });
     if (dirty)
       return;
-    assert(!_debugStateLocked);
     _dirty = true;
     assert(scheduleBuildFor != null);
     scheduleBuildFor(this);
@@ -1101,11 +1147,12 @@ class InheritedElement extends StatelessComponentElement<InheritedWidget> {
   }
 
   void _notifyDescendants() {
-    final Type ourRuntimeType = runtimeType;
+    final Type ourRuntimeType = widget.runtimeType;
     void notifyChildren(Element child) {
       if (child._dependencies != null &&
-          child._dependencies.contains(ourRuntimeType))
+          child._dependencies.contains(ourRuntimeType)) {
         child.dependenciesChanged();
+      }
       if (child.runtimeType != ourRuntimeType)
         child.visitChildren(notifyChildren);
     }

@@ -59,10 +59,10 @@ class GestureDetector extends StatefulComponent {
   final GestureScaleUpdateCallback onScaleUpdate;
   final GestureScaleEndCallback onScaleEnd;
 
-  GestureDetectorState createState() => new GestureDetectorState();
+  _GestureDetectorState createState() => new _GestureDetectorState();
 }
 
-class GestureDetectorState extends State<GestureDetector> {
+class _GestureDetectorState extends State<GestureDetector> {
   final PointerRouter _router = FlutterBinding.instance.pointerRouter;
 
   TapGestureRecognizer _tap;

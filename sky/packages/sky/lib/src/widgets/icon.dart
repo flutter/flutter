@@ -61,7 +61,7 @@ class Icon extends StatelessComponent {
   final IconThemeColor color;
   final sky.ColorFilter colorFilter;
 
-  String getColorSuffix(BuildContext context) {
+  String _getColorSuffix(BuildContext context) {
     IconThemeColor iconThemeColor = color;
     if (iconThemeColor == null) {
       IconThemeData iconThemeData = IconTheme.of(context);
@@ -90,7 +90,7 @@ class Icon extends StatelessComponent {
     // TODO(eseidel): This clearly isn't correct.  Not sure what would be.
     // Should we use the ios images on ios?
     String density = 'drawable-xxhdpi';
-    String colorSuffix = getColorSuffix(context);
+    String colorSuffix = _getColorSuffix(context);
     return new AssetImage(
       bundle: _iconBundle,
       name: '${category}/${density}/ic_${subtype}_${colorSuffix}_${size}dp.png',

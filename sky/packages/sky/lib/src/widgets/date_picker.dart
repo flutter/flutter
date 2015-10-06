@@ -39,10 +39,10 @@ class DatePicker extends StatefulComponent {
   final DateTime firstDate;
   final DateTime lastDate;
 
-  DatePickerState createState() => new DatePickerState();
+  _DatePickerState createState() => new _DatePickerState();
 }
 
-class DatePickerState extends State<DatePicker> {
+class _DatePickerState extends State<DatePicker> {
   DatePickerMode _mode = DatePickerMode.day;
 
   void _handleModeChanged(DatePickerMode mode) {
@@ -70,7 +70,7 @@ class DatePickerState extends State<DatePicker> {
   static const double _calendarHeight = 210.0;
 
   Widget build(BuildContext context) {
-    Widget header = new DatePickerHeader(
+    Widget header = new _DatePickerHeader(
       selectedDate: config.selectedDate,
       mode: _mode,
       onModeChanged: _handleModeChanged
@@ -107,8 +107,8 @@ class DatePickerState extends State<DatePicker> {
 }
 
 // Shows the selected date in large font and toggles between year and day mode
-class DatePickerHeader extends StatelessComponent {
-  DatePickerHeader({ this.selectedDate, this.mode, this.onModeChanged }) {
+class _DatePickerHeader extends StatelessComponent {
+  _DatePickerHeader({ this.selectedDate, this.mode, this.onModeChanged }) {
     assert(selectedDate != null);
     assert(mode != null);
   }
@@ -290,10 +290,10 @@ class MonthPicker extends ScrollableWidgetList {
   final DateTime firstDate;
   final DateTime lastDate;
 
-  MonthPickerState createState() => new MonthPickerState();
+  _MonthPickerState createState() => new _MonthPickerState();
 }
 
-class MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
+class _MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
   void initState() {
     super.initState();
     _updateCurrentDate();
@@ -363,10 +363,10 @@ class YearPicker extends ScrollableWidgetList {
   final DateTime firstDate;
   final DateTime lastDate;
 
-  YearPickerState createState() => new YearPickerState();
+  _YearPickerState createState() => new _YearPickerState();
 }
 
-class YearPickerState extends ScrollableWidgetListState<YearPicker> {
+class _YearPickerState extends ScrollableWidgetListState<YearPicker> {
   int get itemCount => config.lastDate.year - config.firstDate.year + 1;
 
   List<Widget> buildItems(BuildContext context, int start, int count) {

@@ -11,6 +11,7 @@ import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
+import 'package:sky/src/widgets/animated_container.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/icon.dart';
@@ -19,8 +20,8 @@ import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
-typedef void SelectedIndexChanged(int selectedIndex);
-typedef void LayoutChanged(Size size, List<double> widths);
+typedef void TabSelectedIndexChanged(int selectedIndex);
+typedef void TabLayoutChanged(Size size, List<double> widths);
 
 // See https://www.google.com/design/spec/components/tabs.html#tabs-specs
 const double _kTabHeight = 46.0;
@@ -33,29 +34,20 @@ const int _kTabIconSize = 24;
 const double _kTabBarScrollDrag = 0.025;
 const Duration _kTabBarScroll = const Duration(milliseconds: 200);
 
-class TabBarParentData extends BoxParentData with
+class _TabBarParentData extends BoxParentData with
     ContainerParentDataMixin<RenderBox> { }
 
-class RenderTabBar extends RenderBox with
-    ContainerRenderObjectMixin<RenderBox, TabBarParentData>,
-    RenderBoxContainerDefaultsMixin<RenderBox, TabBarParentData> {
+class _RenderTabBar extends RenderBox with
+    ContainerRenderObjectMixin<RenderBox, _TabBarParentData>,
+    RenderBoxContainerDefaultsMixin<RenderBox, _TabBarParentData> {
 
-  RenderTabBar(this.onLayoutChanged);
+  _RenderTabBar(this.onLayoutChanged);
 
   int _selectedIndex;
   int get selectedIndex => _selectedIndex;
   void set selectedIndex(int value) {
     if (_selectedIndex != value) {
       _selectedIndex = value;
-      markNeedsPaint();
-    }
-  }
-
-  Color _backgroundColor;
-  Color get backgroundColor => _backgroundColor;
-  void set backgroundColor(Color value) {
-    if (_backgroundColor != value) {
-      _backgroundColor = value;
       markNeedsPaint();
     }
   }
@@ -97,8 +89,8 @@ class RenderTabBar extends RenderBox with
   }
 
   void setupParentData(RenderBox child) {
-    if (child.parentData is! TabBarParentData)
-      child.parentData = new TabBarParentData();
+    if (child.parentData is! _TabBarParentData)
+      child.parentData = new _TabBarParentData();
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
@@ -109,7 +101,7 @@ class RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       maxWidth = math.max(maxWidth, child.getMinIntrinsicWidth(widthConstraints));
-      assert(child.parentData is TabBarParentData);
+      assert(child.parentData is _TabBarParentData);
       child = child.parentData.nextSibling;
     }
     double width = isScrollable ? maxWidth : maxWidth * childCount;
@@ -124,7 +116,7 @@ class RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       maxWidth = math.max(maxWidth, child.getMaxIntrinsicWidth(widthConstraints));
-      assert(child.parentData is TabBarParentData);
+      assert(child.parentData is _TabBarParentData);
       child = child.parentData.nextSibling;
     }
     double width = isScrollable ? maxWidth : maxWidth * childCount;
@@ -148,7 +140,7 @@ class RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(tabConstraints);
-      assert(child.parentData is TabBarParentData);
+      assert(child.parentData is _TabBarParentData);
       child.parentData.position = new Point(x, 0.0);
       x += tabWidth;
       child = child.parentData.nextSibling;
@@ -166,7 +158,7 @@ class RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(tabConstraints, parentUsesSize: true);
-      assert(child.parentData is TabBarParentData);
+      assert(child.parentData is _TabBarParentData);
       child.parentData.position = new Point(x, 0.0);
       x += child.size.width;
       child = child.parentData.nextSibling;
@@ -176,7 +168,7 @@ class RenderTabBar extends RenderBox with
 
   Size layoutSize;
   List<double> layoutWidths;
-  LayoutChanged onLayoutChanged;
+  TabLayoutChanged onLayoutChanged;
 
   void reportLayoutChangedIfNeeded() {
     assert(onLayoutChanged != null);
@@ -240,17 +232,10 @@ class RenderTabBar extends RenderBox with
   }
 
   void paint(PaintingContext context, Offset offset) {
-    if (backgroundColor != null) {
-      double width = layoutWidths != null
-        ? layoutWidths.reduce((sum, width) => sum + width)
-        : size.width;
-      Rect rect = offset & new Size(width, size.height);
-      context.canvas.drawRect(rect, new Paint()..color = backgroundColor);
-    }
     int index = 0;
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is TabBarParentData);
+      assert(child.parentData is _TabBarParentData);
       context.paintChild(child, child.parentData.position + offset);
       if (index++ == selectedIndex)
         _paintIndicator(context.canvas, child, offset);
@@ -264,7 +249,6 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
     Key key,
     List<Widget> children,
     this.selectedIndex,
-    this.backgroundColor,
     this.indicatorColor,
     this.indicatorRect,
     this.textAndIcons,
@@ -273,22 +257,20 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   }) : super(key: key, children: children);
 
   final int selectedIndex;
-  final Color backgroundColor;
   final Color indicatorColor;
   final Rect indicatorRect;
   final bool textAndIcons;
   final bool isScrollable;
-  final LayoutChanged onLayoutChanged;
+  final TabLayoutChanged onLayoutChanged;
 
-  RenderTabBar createRenderObject() {
-    RenderTabBar result = new RenderTabBar(onLayoutChanged);
+  _RenderTabBar createRenderObject() {
+    _RenderTabBar result = new _RenderTabBar(onLayoutChanged);
     updateRenderObject(result, null);
     return result;
   }
 
-  void updateRenderObject(RenderTabBar renderObject, _TabBarWrapper oldWidget) {
+  void updateRenderObject(_RenderTabBar renderObject, _TabBarWrapper oldWidget) {
     renderObject.selectedIndex = selectedIndex;
-    renderObject.backgroundColor = backgroundColor;
     renderObject.indicatorColor = indicatorColor;
     renderObject.indicatorRect = indicatorRect;
     renderObject.textAndIcons = textAndIcons;
@@ -399,13 +381,13 @@ class TabBar extends Scrollable {
 
   final Iterable<TabLabel> labels;
   final int selectedIndex;
-  final SelectedIndexChanged onChanged;
+  final TabSelectedIndexChanged onChanged;
   final bool isScrollable;
 
-  TabBarState createState() => new TabBarState();
+  _TabBarState createState() => new _TabBarState();
 }
 
-class TabBarState extends ScrollableState<TabBar> {
+class _TabBarState extends ScrollableState<TabBar> {
   void initState() {
     super.initState();
     _indicatorAnimation = new ValuePerformance<Rect>()
@@ -537,7 +519,7 @@ class TabBarState extends ScrollableState<TabBar> {
         textAndIcons = true;
     }
 
-    Widget tabBar = new IconTheme(
+    Widget content = new IconTheme(
       data: new IconThemeData(color: iconThemeColor),
       child: new DefaultTextStyle(
         style: textStyle,
@@ -548,7 +530,6 @@ class TabBarState extends ScrollableState<TabBar> {
             return new _TabBarWrapper(
               children: tabs,
               selectedIndex: config.selectedIndex,
-              backgroundColor: backgroundColor,
               indicatorColor: indicatorColor,
               indicatorRect: _indicatorRect.value,
               textAndIcons: textAndIcons,
@@ -560,16 +541,23 @@ class TabBarState extends ScrollableState<TabBar> {
       )
     );
 
-    if (!config.isScrollable)
-      return tabBar;
+    if (config.isScrollable) {
+      content = new SizeObserver(
+        callback: _handleViewportSizeChanged,
+        child: new Viewport(
+          scrollDirection: ScrollDirection.horizontal,
+          scrollOffset: new Offset(scrollOffset, 0.0),
+          child: content
+        )
+      );
+    }
 
-    return new SizeObserver(
-      callback: _handleViewportSizeChanged,
-      child: new Viewport(
-        scrollDirection: ScrollDirection.horizontal,
-        scrollOffset: new Offset(scrollOffset, 0.0),
-        child: tabBar
-      )
+    return new AnimatedContainer(
+      decoration: new BoxDecoration(
+        backgroundColor: backgroundColor
+      ),
+      duration: kThemeChangeDuration,
+      child: content
     );
   }
 }
@@ -598,13 +586,8 @@ class TabNavigator extends StatelessComponent {
 
   final List<TabNavigatorView> views;
   final int selectedIndex;
-  final SelectedIndexChanged onChanged;
+  final TabSelectedIndexChanged onChanged;
   final bool isScrollable;
-
-  void _handleSelectedIndexChanged(int tabIndex) {
-    if (onChanged != null)
-      onChanged(tabIndex);
-  }
 
   Widget build(BuildContext context) {
     assert(views != null && views.isNotEmpty);
@@ -612,7 +595,7 @@ class TabNavigator extends StatelessComponent {
     return new Column([
       new TabBar(
         labels: views.map((view) => view.label),
-        onChanged: _handleSelectedIndexChanged,
+        onChanged: onChanged,
         selectedIndex: selectedIndex,
         isScrollable: isScrollable
       ),

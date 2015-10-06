@@ -31,7 +31,7 @@ class MixedViewport extends RenderObjectWidget {
   final ExtentsUpdateCallback onExtentsUpdate;
   final InvalidatorAvailableCallback onInvalidatorAvailable;
 
-  MixedViewportElement createElement() => new MixedViewportElement(this);
+  _MixedViewportElement createElement() => new _MixedViewportElement(this);
 
   // we don't pass constructor arguments to the RenderBlockViewport() because until
   // we know our children, the constructor arguments we could give have no effect
@@ -60,8 +60,8 @@ class _ChildKey {
   String toString() => "_ChildKey(type: $type, key: $key)";
 }
 
-class MixedViewportElement extends RenderObjectElement<MixedViewport> {
-  MixedViewportElement(MixedViewport widget) : super(widget) {
+class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
+  _MixedViewportElement(MixedViewport widget) : super(widget) {
     if (widget.onInvalidatorAvailable != null)
       widget.onInvalidatorAvailable(invalidate);
   }

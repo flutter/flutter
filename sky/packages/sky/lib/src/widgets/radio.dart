@@ -14,7 +14,7 @@ const sky.Color _kDarkOffColor = const sky.Color(0xB2FFFFFF);
 
 typedef RadioValueChanged(Object value);
 
-class Radio extends StatefulComponent {
+class Radio extends StatelessComponent {
   Radio({
     Key key,
     this.value,
@@ -28,13 +28,9 @@ class Radio extends StatefulComponent {
   final Object groupValue;
   final RadioValueChanged onChanged;
 
-  RadioState createState() => new RadioState();
-}
-
-class RadioState extends State<Radio> {
   Color _getColor(BuildContext context) {
     ThemeData themeData = Theme.of(context);
-    if (config.value == config.groupValue)
+    if (value == groupValue)
       return themeData.accentColor;
     return themeData.brightness == ThemeBrightness.light ? _kLightOffColor : _kDarkOffColor;
   }
@@ -44,7 +40,7 @@ class RadioState extends State<Radio> {
     const double kOuterRadius = kDiameter / 2;
     const double kInnerRadius = 5.0;
     return new GestureDetector(
-      onTap: () => config.onChanged(config.value),
+      onTap: () => onChanged(value),
       child: new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
         width: kDiameter,
@@ -60,7 +56,7 @@ class RadioState extends State<Radio> {
             canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kOuterRadius, paint);
 
             // Draw the inner circle
-            if (config.value == config.groupValue) {
+            if (value == groupValue) {
               paint.setStyle(sky.PaintingStyle.fill);
               canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kInnerRadius, paint);
             }

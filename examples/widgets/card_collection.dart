@@ -342,7 +342,7 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     return new Scaffold(
-      toolbar: buildToolBar(),
+      toolBar: buildToolBar(),
       body: body
     );
   }

@@ -89,7 +89,7 @@ class EnsureVisibleApp extends App {
         child: new Title(
           title: 'Cards',
           child: new Scaffold(
-            toolbar: new ToolBar(center: new Text('Tap a Card')),
+            toolBar: new ToolBar(center: new Text('Tap a Card')),
             body: cardCollection
           )
         )
