@@ -6,8 +6,6 @@ part of stocks;
 
 typedef void ModeUpdater(StockMode mode);
 
-const Duration _kSnackbarSlideDuration = const Duration(milliseconds: 200);
-
 class StockHome extends StatefulComponent {
   StockHome(this.navigator, this.stocks, this.symbols, this.stockMode, this.modeUpdater);
 
@@ -22,11 +20,9 @@ class StockHome extends StatefulComponent {
 
 class StockHomeState extends State<StockHome> {
 
+  final GlobalKey<PlaceholderState> _snackBarPlaceholderKey = new GlobalKey<PlaceholderState>();
   bool _isSearching = false;
   String _searchQuery;
-
-  PerformanceStatus _snackBarStatus = PerformanceStatus.dismissed;
-  bool _isSnackBarShowing = false;
 
   void _handleSearchBegin() {
     config.navigator.pushState(this, (_) {
@@ -217,28 +213,18 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleUndo() {
-    setState(() {
-      _isSnackBarShowing = false;
-    });
-  }
-
-  GlobalKey snackBarKey = new GlobalKey(label: 'snackbar');
-  Widget buildSnackBar() {
-    if (_snackBarStatus == PerformanceStatus.dismissed)
-      return null;
-    return new SnackBar(
-      showing: _isSnackBarShowing,
-      content: new Text("Stock purchased!"),
-      actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)],
-      onDismissed: () { setState(() { _snackBarStatus = PerformanceStatus.dismissed; }); }
-    );
+    config.navigator.pop();
   }
 
   void _handleStockPurchased() {
-    setState(() {
-      _isSnackBarShowing = true;
-      _snackBarStatus = PerformanceStatus.forward;
-    });
+    showSnackBar(
+      navigator: config.navigator,
+      placeholderKey: _snackBarPlaceholderKey,
+      content: new Text("Stock purchased!"),
+      actions: [
+        new SnackBarAction(label: "UNDO", onPressed: _handleUndo)
+      ]
+    );
   }
 
   Widget buildFloatingActionButton() {
@@ -253,7 +239,7 @@ class StockHomeState extends State<StockHome> {
     return new Scaffold(
       toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
       body: buildTabNavigator(),
-      snackBar: buildSnackBar(),
+      snackBar: new Placeholder(key: _snackBarPlaceholderKey),
       floatingActionButton: buildFloatingActionButton()
     );
   }
