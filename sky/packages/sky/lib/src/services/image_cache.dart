@@ -7,8 +7,18 @@ import 'dart:collection';
 import 'dart:sky' as sky;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
-import 'package:sky/src/services/image_resource.dart';
 import 'package:sky/src/services/fetch.dart';
+import 'package:sky/src/services/image_decoder.dart';
+import 'package:sky/src/services/image_resource.dart';
+
+Future<sky.Image> _fetchImage(String url) async {
+  UrlResponse response = await fetchUrl(url);
+  if (response.statusCode >= 400) {
+    print("Failed (${response.statusCode}) to load image ${url}");
+    return null;
+  }
+  return await decodeImageFromDataPipe(response.body);
+}
 
 class _ImageCache {
   _ImageCache._();
@@ -17,16 +27,7 @@ class _ImageCache {
 
   ImageResource load(String url) {
     return _cache.putIfAbsent(url, () {
-      Completer<sky.Image> completer = new Completer<sky.Image>();
-      fetchUrl(url).then((UrlResponse response) {
-        if (response.statusCode >= 400) {
-          print("Failed (${response.statusCode}) to load image ${url}");
-          completer.complete(null);
-        } else {
-          new sky.ImageDecoder.consume(response.body.handle.h, completer.complete);
-        }
-      });
-      return new ImageResource(completer.future);
+      return new ImageResource(_fetchImage(url));
     });
   }
 }
