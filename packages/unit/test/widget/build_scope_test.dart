@@ -66,6 +66,10 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 void main() {
   dynamic cachedException;
 
+  // ** WARNING **
+  // THIS TEST OVERRIDES THE NORMAL EXCEPTION HANDLING
+  // AND DOES NOT REPORT EXCEPTIONS FROM THE FRAMEWORK
+
   setUp(() {
     assert(cachedException == null);
     debugWidgetsExceptionHandler = (String context, dynamic exception, StackTrace stack) {

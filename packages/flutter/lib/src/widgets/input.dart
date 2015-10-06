@@ -71,7 +71,7 @@ class InputState extends ScrollableState<Input> {
 
   Widget buildContent(BuildContext context) {
     ThemeData themeData = Theme.of(context);
-    bool focused = FocusState.at(context, config);
+    bool focused = Focus.at(context, config);
 
     if (focused && !_keyboardHandle.attached) {
       _keyboardHandle = keyboard.show(_editableValue.stub, config.keyboardType);
@@ -122,11 +122,11 @@ class InputState extends ScrollableState<Input> {
         )
       ),
       onPointerDown: (_) {
-        if (FocusState.at(context, config)) {
+        if (Focus.at(context, config)) {
           assert(_keyboardHandle.attached);
           _keyboardHandle.showByRequest();
         } else {
-          FocusState.moveTo(context, config);
+          Focus.moveTo(context, config);
           // we'll get told to rebuild and we'll take care of the keyboard then
         }
       }
