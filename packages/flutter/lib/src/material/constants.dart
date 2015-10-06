@@ -14,6 +14,7 @@ const double kStatusBarHeight = 50.0;
 // Mobile Portrait: 56dp
 // Tablet/Desktop: 64dp
 const double kToolBarHeight = 56.0;
+const double kSnackBarHeight = 52.0;
 
 const double kMaterialDrawerHeight = 140.0;
 const double kScrollbarSize = 10.0;
