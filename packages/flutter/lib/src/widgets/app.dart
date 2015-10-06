@@ -38,7 +38,7 @@ class App extends StatefulComponent {
       'This might be a sign that you have not upgraded to our new Widgets framework.';
       'For more details see: https://groups.google.com/forum/#!topic/flutter-dev/hcX3OvLws9c';
       '...or look at our examples: https://github.com/flutter/engine/tree/master/examples';
-      return routes != null;      
+      return routes != null;
     });
   }
 
@@ -47,10 +47,10 @@ class App extends StatefulComponent {
   final Map<String, RouteBuilder> routes;
   final RouteGenerator onGenerateRoute;
 
-  AppState createState() => new AppState();
+  _AppState createState() => new _AppState();
 }
 
-class AppState extends State<App> {
+class _AppState extends State<App> {
 
   GlobalObjectKey _navigator;
 

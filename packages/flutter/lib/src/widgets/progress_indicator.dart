@@ -31,10 +31,10 @@ abstract class ProgressIndicator extends StatefulComponent {
 
   Widget _buildIndicator(BuildContext context, double performanceValue);
 
-  ProgressIndicatorState createState() => new ProgressIndicatorState();
+  _ProgressIndicatorState createState() => new _ProgressIndicatorState();
 }
 
-class ProgressIndicatorState extends State<ProgressIndicator> {
+class _ProgressIndicatorState extends State<ProgressIndicator> {
 
   ValuePerformance<double> _performance;
 

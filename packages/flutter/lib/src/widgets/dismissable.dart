@@ -39,15 +39,15 @@ class Dismissable extends StatefulComponent {
     this.direction: DismissDirection.horizontal
   }) : super(key: key);
 
-  Widget child;
-  ResizedCallback onResized;
-  DismissedCallback onDismissed;
-  DismissDirection direction;
+  final Widget child;
+  final ResizedCallback onResized;
+  final DismissedCallback onDismissed;
+  final DismissDirection direction;
 
-  DismissableState createState() => new DismissableState();
+  _DismissableState createState() => new _DismissableState();
 }
 
-class DismissableState extends State<Dismissable> {
+class _DismissableState extends State<Dismissable> {
   void initState() {
     super.initState();
     _fadePerformance = new Performance(duration: _kCardDismissFadeout);

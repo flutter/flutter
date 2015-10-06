@@ -23,10 +23,10 @@ class DrawerItem extends StatefulComponent {
   final GestureTapCallback onPressed;
   final bool selected;
 
-  DrawerItemState createState() => new DrawerItemState();
+  _DrawerItemState createState() => new _DrawerItemState();
 }
 
-class DrawerItemState extends ButtonState<DrawerItem> {
+class _DrawerItemState extends ButtonState<DrawerItem> {
   TextStyle _getTextStyle(ThemeData themeData) {
     TextStyle result = themeData.text.body2;
     if (config.selected)
