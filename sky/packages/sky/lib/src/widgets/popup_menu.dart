@@ -121,8 +121,8 @@ class MenuPosition {
   final double left;
 }
 
-class MenuRoute extends Route {
-  MenuRoute({ this.completer, this.position, this.builder, this.level });
+class _MenuRoute extends Route {
+  _MenuRoute({ this.completer, this.position, this.builder, this.level });
 
   final Completer completer;
   final MenuPosition position;
@@ -169,7 +169,7 @@ class MenuRoute extends Route {
 
 Future showMenu({ NavigatorState navigator, MenuPosition position, PopupMenuItemsBuilder builder, int level: 4 }) {
   Completer completer = new Completer();
-  navigator.push(new MenuRoute(
+  navigator.push(new _MenuRoute(
     completer: completer,
     position: position,
     builder: builder,

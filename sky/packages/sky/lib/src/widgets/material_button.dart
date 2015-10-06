@@ -9,7 +9,7 @@ import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/material.dart';
 
-// Rather than using this class directly, please use FlatButton or RaisedButton.
+/// Rather than using this class directly, please use FlatButton or RaisedButton.
 abstract class MaterialButton extends StatefulComponent {
   MaterialButton({
     Key key,

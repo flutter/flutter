@@ -9,7 +9,7 @@ import 'package:sky/src/widgets/framework.dart';
 class MimicableKey {
   MimicableKey._(this._state);
 
-  final MimicableState _state;
+  final _MimicableState _state;
 
   Rect get globalBounds => _state._globalBounds;
 
@@ -35,10 +35,10 @@ class Mimicable extends StatefulComponent {
 
   final Widget child;
 
-  MimicableState createState() => new MimicableState();
+  _MimicableState createState() => new _MimicableState();
 }
 
-class MimicableState extends State<Mimicable> {
+class _MimicableState extends State<Mimicable> {
   Size _size;
   bool _beingMimicked = false;
 

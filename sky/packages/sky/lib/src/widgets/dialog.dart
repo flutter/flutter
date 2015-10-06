@@ -131,16 +131,15 @@ class Dialog extends StatelessComponent {
   }
 }
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 150);
-
-class DialogRoute extends Route {
-  DialogRoute({ this.completer, this.builder });
+class _DialogRoute extends Route {
+  _DialogRoute({ this.completer, this.builder });
 
   final Completer completer;
   final RouteBuilder builder;
 
-  Duration get transitionDuration => _kTransitionDuration;
   bool get opaque => false;
+  Duration get transitionDuration => const Duration(milliseconds: 150);
+
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new FadeTransition(
       performance: performance,
@@ -157,7 +156,7 @@ class DialogRoute extends Route {
 
 Future showDialog(NavigatorState navigator, DialogBuilder builder) {
   Completer completer = new Completer();
-  navigator.push(new DialogRoute(
+  navigator.push(new _DialogRoute(
     completer: completer,
     builder: (RouteArguments args) {
       return new Focus(

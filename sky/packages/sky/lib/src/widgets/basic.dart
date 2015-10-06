@@ -808,10 +808,10 @@ class ImageListener extends StatefulComponent {
   final ImageFit fit;
   final ImageRepeat repeat;
 
-  ImageListenerState createState() => new ImageListenerState();
+  _ImageListenerState createState() => new _ImageListenerState();
 }
 
-class ImageListenerState extends State<ImageListener> {
+class _ImageListenerState extends State<ImageListener> {
   void initState() {
     super.initState();
     config.image.addListener(_handleImageChanged);

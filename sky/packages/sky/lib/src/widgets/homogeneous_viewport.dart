@@ -30,7 +30,7 @@ class HomogeneousViewport extends RenderObjectWidget {
   final ScrollDirection direction;
   final double startOffset;
 
-  HomogeneousViewportElement createElement() => new HomogeneousViewportElement(this);
+  _HomogeneousViewportElement createElement() => new _HomogeneousViewportElement(this);
 
   // we don't pass constructor arguments to the RenderBlockViewport() because until
   // we know our children, the constructor arguments we could give have no effect
@@ -48,8 +48,8 @@ class HomogeneousViewport extends RenderObjectWidget {
   // all the actual work is done in the element
 }
 
-class HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewport> {
-  HomogeneousViewportElement(HomogeneousViewport widget) : super(widget);
+class _HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewport> {
+  _HomogeneousViewportElement(HomogeneousViewport widget) : super(widget);
 
   List<Element> _children = const <Element>[];
   int _layoutFirstIndex;
