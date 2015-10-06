@@ -34,7 +34,7 @@ class DatePickerDemoState extends State<DatePickerDemo> {
       ),
       child: new Stack([
         new Scaffold(
-          toolbar: new ToolBar(center: new Text("Date Picker")),
+          toolBar: new ToolBar(center: new Text("Date Picker")),
           body: new Material(
             child: new Row(
               [new Text(_dateTime.toString())],

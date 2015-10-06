@@ -101,7 +101,7 @@ class DragAndDropApp extends StatefulComponent {
 class DragAndDropAppState extends State<DragAndDropApp> {
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: new ToolBar(
+      toolBar: new ToolBar(
         center: new Text('Drag and Drop Flutter Demo')
       ),
       body: new Material(

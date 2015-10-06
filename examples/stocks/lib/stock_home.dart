@@ -237,7 +237,7 @@ class StockHomeState extends State<StockHome> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
+      toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
       body: buildTabNavigator(),
       snackBar: new Placeholder(key: _snackBarPlaceholderKey),
       floatingActionButton: buildFloatingActionButton()

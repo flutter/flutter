@@ -59,7 +59,7 @@ class ScaleAppState extends State<ScaleApp> {
     return new Theme(
       data: new ThemeData.dark(),
       child: new Scaffold(
-        toolbar: new ToolBar(
+        toolBar: new ToolBar(
             center: new Text('Scale Demo')),
         body: new Material(
           type: MaterialType.canvas,

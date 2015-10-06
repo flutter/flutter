@@ -15,7 +15,6 @@ import 'package:sky/src/widgets/placeholder.dart';
 import 'package:sky/src/widgets/theme.dart';
 import 'package:sky/src/widgets/transitions.dart';
 
-const double _kSnackHeight = 52.0;
 const double _kSideMargins = 24.0;
 const double _kVerticalPadding = 14.0;
 const Color _kSnackBackground = const Color(0xFF323232);
@@ -72,14 +71,14 @@ class SnackBar extends StatelessComponent {
       performance: performance,
       height: new AnimatedValue<double>(
         0.0,
-        end: _kSnackHeight,
+        end: kSnackBarHeight,
         curve: easeIn,
         reverseCurve: easeOut
       ),
       child: new ClipRect(
         child: new OverflowBox(
-          minHeight: _kSnackHeight,
-          maxHeight: _kSnackHeight,
+          minHeight: kSnackBarHeight,
+          maxHeight: kSnackBarHeight,
           child: new Material(
             level: 2,
             color: _kSnackBackground,
