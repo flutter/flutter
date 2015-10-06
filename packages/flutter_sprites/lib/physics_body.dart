@@ -17,11 +17,11 @@ class PhysicsBody {
     double angularVelocity: 0.0,
     this.linearDampening: 0.0,
     double awakeangularDampening: 0.0,
-    this.allowSleep: true,
-    this.awake: true,
-    this.fixedRotation: false,
-    this.bullet: false,
-    this.active: true,
+    bool allowSleep: true,
+    bool awake: true,
+    bool fixedRotation: false,
+    bool bullet: false,
+    bool active: true,
     this.gravityScale: 1.0
   }) {
     this.density = density;
@@ -32,6 +32,12 @@ class PhysicsBody {
     this.linearVelocity = linearVelocity;
     this.angularVelocity = angularVelocity;
     this.angularDampening = angularDampening;
+
+    this.allowSleep = allowSleep;
+    this.awake = awake;
+    this.fixedRotation = fixedRotation;
+    this.bullet = bullet;
+    this.active = active;
   }
 
   Object tag;
@@ -151,15 +157,71 @@ class PhysicsBody {
       _body.angularDamping = angularDampening;
   }
 
-  bool allowSleep;
+  bool _allowSleep;
 
-  bool awake;
+  bool get allowSleep => _allowSleep;
 
-  bool fixedRotation;
+  set allowSleep(bool allowSleep) {
+    _allowSleep = allowSleep;
 
-  bool bullet;
+    if (_body != null)
+      _body.setSleepingAllowed(allowSleep);
+  }
 
-  bool active;
+  bool _awake;
+
+  bool get awake {
+    if (_body != null)
+      return _body.isAwake();
+    else
+      return _awake;
+  }
+
+  set awake(bool awake) {
+    _awake = awake;
+
+    if (_body != null)
+      _body.setAwake(awake);
+  }
+
+  bool _fixedRotation;
+
+  bool get fixedRotation => _fixedRotation;
+
+  set fixedRotation(bool fixedRotation) {
+    _fixedRotation = fixedRotation;
+
+    if (_body != null)
+      _body.setFixedRotation(fixedRotation);
+  }
+
+  bool _bullet;
+
+  bool get bullet => _bullet;
+
+  set bullet(bool bullet) {
+    _bullet = bullet;
+
+    if (_body != null) {
+      _body.setBullet(bullet);
+    }
+  }
+
+  bool _active;
+
+  bool get active {
+    if (_body != null)
+      return _body.isActive();
+    else
+      return _active;
+  }
+
+  set active(bool active) {
+    _active = active;
+
+    if (_body != null)
+      _body.setActive(active);
+  }
 
   double gravityScale;
 
