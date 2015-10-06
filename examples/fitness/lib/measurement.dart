@@ -200,7 +200,7 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(),
+      toolBar: buildToolBar(),
       body: buildBody(context),
       snackBar: new Placeholder(key: _snackBarPlaceholderKey)
     );

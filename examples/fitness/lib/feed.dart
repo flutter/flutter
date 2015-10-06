@@ -219,7 +219,7 @@ class FeedFragmentState extends State<FeedFragment> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(),
+      toolBar: buildToolBar(),
       body: buildBody(),
       snackBar: new Placeholder(key: _snackBarPlaceholderKey),
       floatingActionButton: buildFloatingActionButton()

@@ -122,7 +122,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(),
+      toolBar: buildToolBar(),
       body: buildSettingsPane(context)
     );
   }

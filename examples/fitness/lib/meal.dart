@@ -105,7 +105,7 @@ class MealFragmentState extends State<MealFragment> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(),
+      toolBar: buildToolBar(),
       body: buildBody()
     );
   }
