@@ -34,14 +34,14 @@ class ListenCommand extends Command {
         defaultsTo: '.',
         abbr: 't',
         help: 'Target app path or filename to start.');
-
-    if (android == null) {
-      android = new AndroidDevice();
-    }
   }
 
   @override
   Future<int> run() async {
+    if (android == null) {
+      android = new AndroidDevice();
+    }
+
     if (argResults.rest.length > 0) {
       watchCommand = _initWatchCommand(argResults.rest);
     } else {

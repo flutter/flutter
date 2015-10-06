@@ -27,13 +27,14 @@ class TraceCommand extends Command {
     argParser.addFlag('stop', negatable: false, help: 'Stop tracing.');
     argParser.addOption('duration',
         defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
-    if (android == null) {
-      android = new AndroidDevice();
-    }
   }
 
   @override
   Future<int> run() async {
+    if (android == null) {
+      android = new AndroidDevice();
+    }
+
     if (!android.isConnected()) {
       _logging.warning('No device connected, so no trace was completed.');
       return 1;

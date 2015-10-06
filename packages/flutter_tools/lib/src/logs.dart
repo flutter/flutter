@@ -21,13 +21,14 @@ class LogsCommand extends Command {
     argParser.addFlag('clear',
         negatable: false,
         help: 'Clear log history before reading from logs (Android only).');
-    if (android == null) {
-      android = new AndroidDevice();
-    }
   }
 
   @override
   Future<int> run() async {
+    if (android == null) {
+      android = new AndroidDevice();
+    }
+
     Future<int> androidLogProcess = null;
     if (android.isConnected()) {
       androidLogProcess = android.logs(clear: argResults['clear']);

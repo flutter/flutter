@@ -18,14 +18,14 @@ class StopCommand extends Command {
   final description = 'Stop your Flutter app on all attached devices.';
   AndroidDevice android = null;
 
-  StopCommand([this.android]) {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
-  }
+  StopCommand([this.android]);
 
   @override
   Future<int> run() async {
+    if (android == null) {
+      android = new AndroidDevice();
+    }
+
     if (stop()) {
       return 0;
     } else {

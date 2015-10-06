@@ -14,15 +14,17 @@ import 'device.dart';
 class InstallCommand extends Command {
   final name = 'install';
   final description = 'Install your Flutter app on attached devices.';
+
   AndroidDevice android = null;
-  InstallCommand([this.android]) {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
-  }
+
+  InstallCommand([this.android]);
 
   @override
   Future<int> run() async {
+    if (android == null) {
+      android = new AndroidDevice();
+    }
+
     if (install()) {
       return 0;
     } else {
