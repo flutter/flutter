@@ -13,10 +13,10 @@ class PhysicsBody {
     double friction: 0.0,
     double restitution: 0.0,
     bool isSensor: false,
-    this.linearVelocity: Offset.zero,
-    this.angularVelocity: 0.0,
+    Offset linearVelocity: Offset.zero,
+    double angularVelocity: 0.0,
     this.linearDampening: 0.0,
-    this.angularDampening: 0.0,
+    double awakeangularDampening: 0.0,
     this.allowSleep: true,
     this.awake: true,
     this.fixedRotation: false,
@@ -28,11 +28,15 @@ class PhysicsBody {
     this.friction = friction;
     this.restitution = restitution;
     this.isSensor = isSensor;
+
+    this.linearVelocity = linearVelocity;
+    this.angularVelocity = angularVelocity;
+    this.angularDampening = angularDampening;
   }
 
   Object tag;
 
-  PhysicsShape shape;
+  final PhysicsShape shape;
 
   PhysicsBodyType type;
 
@@ -45,7 +49,7 @@ class PhysicsBody {
 
     if (_body == null)
       return;
-    for(box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+    for (box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
       f.setDensity(density);
     }
   }
@@ -59,7 +63,7 @@ class PhysicsBody {
 
     if (_body == null)
       return;
-    for(box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+    for (box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
       f.setFriction(friction);
     }
   }
@@ -73,7 +77,7 @@ class PhysicsBody {
 
     if (_body == null)
       return;
-    for(box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+    for (box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
       f.setRestitution(restitution);
     }
   }
@@ -87,17 +91,65 @@ class PhysicsBody {
 
     if (_body == null)
       return;
-    for(box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+    for (box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
       f.setSensor(isSensor);
     }
   }
 
-  Offset linearVelocity;
-  double angularVelocity;
+  Offset _linearVelocity;
 
-  double linearDampening;
+  Offset get linearVelocity {
+    if (_body == null)
+      return _linearVelocity;
+    else {
+      double dx = _body.linearVelocity.x * _physicsNode.b2WorldToNodeConversionFactor;
+      double dy = _body.linearVelocity.y * _physicsNode.b2WorldToNodeConversionFactor;
+      return new Offset(dx, dy);
+    }
+  }
 
-  double angularDampening;
+  set linearVelocity(Offset linearVelocity) {
+    _linearVelocity = linearVelocity;
+
+    if (_body != null) {
+      Vector2 vec = new Vector2(
+        linearVelocity.dx / _physicsNode.b2WorldToNodeConversionFactor,
+        linearVelocity.dy / _physicsNode.b2WorldToNodeConversionFactor
+      );
+      _body.linearVelocity = vec;
+    }
+  }
+
+  double _angularVelocity;
+
+  double get angularVelocity {
+    if (_body == null)
+      return _angularVelocity;
+    else
+      return _body.angularVelocity;
+  }
+
+  set angularVelocity(double angularVelocity) {
+    _angularVelocity = angularVelocity;
+
+    if (_body != null) {
+      _body.angularVelocity = angularVelocity;
+    }
+  }
+
+  // TODO: Should this be editable in box2d.Body ?
+  final double linearDampening;
+
+  double _angularDampening;
+
+  double get angularDampening => _angularDampening;
+
+  set angularDampening(double angularDampening) {
+    _angularDampening = angularDampening;
+
+    if (_body != null)
+      _body.angularDamping = angularDampening;
+  }
 
   bool allowSleep;
 
