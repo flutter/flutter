@@ -11,6 +11,7 @@ import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
 import 'package:sky/src/services/fetch.dart';
 import 'package:sky/src/services/image_cache.dart';
+import 'package:sky/src/services/image_decoder.dart';
 import 'package:sky/src/services/image_resource.dart';
 import 'package:sky/src/services/shell.dart';
 
@@ -66,13 +67,13 @@ class MojoAssetBundle extends AssetBundle {
     _imageCache = null;
   }
 
+  Future<sky.Image> _fetchImage(String key) async {
+    return await decodeImageFromDataPipe(await load(key));
+  }
+
   ImageResource loadImage(String key) {
     return _imageCache.putIfAbsent(key, () {
-      Completer<sky.Image> completer = new Completer<sky.Image>();
-      load(key).then((assetData) {
-        new sky.ImageDecoder.consume(assetData.handle.h, completer.complete);
-      });
-      return new ImageResource(completer.future);
+      return new ImageResource(_fetchImage(key));
     });
   }
 
