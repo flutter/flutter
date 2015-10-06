@@ -112,9 +112,10 @@ class MeasurementFragment extends StatefulComponent {
 }
 
 class MeasurementFragmentState extends State<MeasurementFragment> {
+  final GlobalKey<PlaceholderState> _snackBarPlaceholderKey = new GlobalKey<PlaceholderState>();
+
   String _weight = "";
   DateTime _when = new DateTime.now();
-  String _errorMessage = null;
 
   void _handleSave() {
     double parsedWeight;
@@ -122,9 +123,11 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
       parsedWeight = double.parse(_weight);
     } on FormatException catch(e) {
       print("Exception $e");
-      setState(() {
-        _errorMessage = "Save failed";
-      });
+      showSnackBar(
+        navigator: config.navigator,
+        placeholderKey: _snackBarPlaceholderKey,
+        content: new Text('Save failed')
+      );
     }
     config.onCreated(new Measurement(when: _when, weight: parsedWeight));
     config.navigator.pop();
@@ -195,18 +198,11 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
     );
   }
 
-  Widget buildSnackBar() {
-    if (_errorMessage == null)
-      return null;
-    // TODO(jackson): This doesn't show up, unclear why.
-    return new SnackBar(content: new Text(_errorMessage), showing: true);
-  }
-
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(),
+      toolBar: buildToolBar(),
       body: buildBody(context),
-      snackBar: buildSnackBar()
+      snackBar: new Placeholder(key: _snackBarPlaceholderKey)
     );
   }
 }

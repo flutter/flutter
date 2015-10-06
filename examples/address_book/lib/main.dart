@@ -53,14 +53,12 @@ class AddressBookHome extends StatelessComponent {
     );
   }
 
-  static final GlobalKey nameKey = new GlobalKey();
-  static final GlobalKey phoneKey = new GlobalKey();
-  static final GlobalKey emailKey = new GlobalKey();
-  static final GlobalKey addressKey = new GlobalKey();
-  static final GlobalKey ringtoneKey = new GlobalKey();
-  static final GlobalKey noteKey = new GlobalKey();
-  static final GlobalKey fillKey = new GlobalKey();
-  static final GlobalKey emoticonKey = new GlobalKey();
+  static final GlobalKey nameKey = new GlobalKey(label: 'name field');
+  static final GlobalKey phoneKey = new GlobalKey(label: 'phone field');
+  static final GlobalKey emailKey = new GlobalKey(label: 'email field');
+  static final GlobalKey addressKey = new GlobalKey(label: 'address field');
+  static final GlobalKey ringtoneKey = new GlobalKey(label: 'ringtone field');
+  static final GlobalKey noteKey = new GlobalKey(label: 'note field');
 
   Widget buildBody(BuildContext context) {
     return new Material(
@@ -83,7 +81,7 @@ class AddressBookHome extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(context),
+      toolBar: buildToolBar(context),
       body: buildBody(context),
       floatingActionButton: buildFloatingActionButton(context)
     );

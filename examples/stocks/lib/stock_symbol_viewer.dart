@@ -25,7 +25,7 @@ class StockSymbolViewerState extends State<StockSymbolViewer> {
     TextStyle headings = Theme.of(context).text.body2;
 
     return new Scaffold(
-      toolbar: new ToolBar(
+      toolBar: new ToolBar(
         left: new IconButton(
           icon: 'navigation/arrow_back',
           onPressed: config.navigator.pop

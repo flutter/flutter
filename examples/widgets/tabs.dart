@@ -131,7 +131,7 @@ class TabbedNavigatorAppState extends State<TabbedNavigatorApp> {
     );
 
     return new Scaffold(
-      toolbar: toolbar,
+      toolBar: toolbar,
       body: tabNavigator
     );
   }

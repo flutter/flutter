@@ -124,7 +124,7 @@ class SectorApp extends App {
       child: new Title(
         title: 'Sector Layout',
         child: new Scaffold(
-          toolbar: new ToolBar(
+          toolBar: new ToolBar(
             center: new Text('Sector Layout in a Widget Tree')
           ),
           body: buildBody()

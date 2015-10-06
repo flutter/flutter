@@ -41,7 +41,7 @@ class WidgetFlutterBinding extends FlutterBinding {
     Element.finalizeTree();
   }
 
-  List<BuildableElement> _dirtyElements = new List<BuildableElement>();
+  List<BuildableElement> _dirtyElements = <BuildableElement>[];
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when buildDirtyElements is called.
@@ -62,10 +62,19 @@ class WidgetFlutterBinding extends FlutterBinding {
       return;
     BuildableElement.lockState(() {
       _dirtyElements.sort((BuildableElement a, BuildableElement b) => a.depth - b.depth);
-      for (BuildableElement element in _dirtyElements)
-        element.rebuild();
+      int dirtyCount = _dirtyElements.length;
+      int index = 0;
+      while (index < dirtyCount) {
+        _dirtyElements[index].rebuild();
+        index += 1;
+        if (dirtyCount < _dirtyElements.length) {
+          _dirtyElements.sort((BuildableElement a, BuildableElement b) => a.depth - b.depth);
+          dirtyCount = _dirtyElements.length;
+        }
+      }
+      assert(!_dirtyElements.any((BuildableElement element) => element.dirty));
       _dirtyElements.clear();
-    });
+    }, building: true);
     assert(_dirtyElements.isEmpty);
   }
 }
@@ -76,7 +85,7 @@ void runApp(Widget app) {
     WidgetFlutterBinding.instance.renderViewElement.update(
       WidgetFlutterBinding.instance.describeApp(app)
     );
-  });
+  }, building: true);
 }
 
 void debugDumpApp() {

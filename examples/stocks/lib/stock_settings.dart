@@ -119,7 +119,7 @@ class StockSettingsState extends State<StockSettings> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(context),
+      toolBar: buildToolBar(context),
       body: buildSettingsPane(context)
     );
   }

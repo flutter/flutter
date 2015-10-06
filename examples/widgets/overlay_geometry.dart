@@ -138,7 +138,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   Widget build(BuildContext context) {
     List<Widget> layers = <Widget>[
       new Scaffold(
-        toolbar: new ToolBar(center: new Text('Tap a Card')),
+        toolBar: new ToolBar(center: new Text('Tap a Card')),
         body: new Container(
           padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
           decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),

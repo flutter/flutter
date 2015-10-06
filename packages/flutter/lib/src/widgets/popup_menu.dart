@@ -21,7 +21,6 @@ import 'package:sky/src/widgets/transitions.dart';
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
 const double _kMenuWidthStep = 56.0;
-const double _kMenuMargin = 16.0; // 24.0 on tablet
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
 const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
@@ -75,39 +74,36 @@ class PopupMenu extends StatelessComponent {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, 1.0 / 3.0)),
-      child: new Container(
-        margin: new EdgeDims.all(_kMenuMargin),
-        child: new BuilderTransition(
-          performance: performance,
-          variables: [width, height],
-          builder: (BuildContext context) {
-            return new CustomPaint(
-              callback: (sky.Canvas canvas, Size size) {
-                double widthValue = width.value * size.width;
-                double heightValue = height.value * size.height;
-                painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
-              },
-              child: new ConstrainedBox(
-                constraints: new BoxConstraints(
-                  minWidth: _kMenuMinWidth,
-                  maxWidth: _kMenuMaxWidth
-                ),
-                child: new IntrinsicWidth(
-                  stepWidth: _kMenuWidthStep,
-                  child: new ScrollableViewport(
-                    child: new Container(
-                      padding: const EdgeDims.symmetric(
-                        horizontal: _kMenuHorizontalPadding,
-                        vertical: _kMenuVerticalPadding
-                      ),
-                      child: new BlockBody(children)
-                    )
+      child: new BuilderTransition(
+        performance: performance,
+        variables: [width, height],
+        builder: (BuildContext context) {
+          return new CustomPaint(
+            callback: (sky.Canvas canvas, Size size) {
+              double widthValue = width.value * size.width;
+              double heightValue = height.value * size.height;
+              painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
+            },
+            child: new ConstrainedBox(
+              constraints: new BoxConstraints(
+                minWidth: _kMenuMinWidth,
+                maxWidth: _kMenuMaxWidth
+              ),
+              child: new IntrinsicWidth(
+                stepWidth: _kMenuWidthStep,
+                child: new ScrollableViewport(
+                  child: new Container(
+                    padding: const EdgeDims.symmetric(
+                      horizontal: _kMenuHorizontalPadding,
+                      vertical: _kMenuVerticalPadding
+                    ),
+                    child: new BlockBody(children)
                   )
                 )
               )
-            );
-          }
-        )
+            )
+          );
+        }
       )
     );
   }
@@ -121,8 +117,8 @@ class MenuPosition {
   final double left;
 }
 
-class MenuRoute extends Route {
-  MenuRoute({ this.completer, this.position, this.builder, this.level });
+class _MenuRoute extends Route {
+  _MenuRoute({ this.completer, this.position, this.builder, this.level });
 
   final Completer completer;
   final MenuPosition position;
@@ -137,7 +133,7 @@ class MenuRoute extends Route {
     return result;
   }
 
-  bool get ephemeral => false; // we could make this true, but then we'd have to use popRoute(), not pop(), in menus
+  bool get ephemeral => true;
   bool get modal => true;
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
@@ -169,7 +165,7 @@ class MenuRoute extends Route {
 
 Future showMenu({ NavigatorState navigator, MenuPosition position, PopupMenuItemsBuilder builder, int level: 4 }) {
   Completer completer = new Completer();
-  navigator.push(new MenuRoute(
+  navigator.push(new _MenuRoute(
     completer: completer,
     position: position,
     builder: builder,

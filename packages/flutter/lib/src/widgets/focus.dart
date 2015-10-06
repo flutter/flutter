@@ -75,6 +75,52 @@ class Focus extends StatefulComponent {
   final bool autofocus;
   final Widget child;
 
+  static bool at(BuildContext context, Widget widget, { bool autofocus: true }) {
+    assert(widget != null);
+    assert(widget.key is GlobalKey);
+    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    if (focusScope != null) {
+      if (autofocus)
+        focusScope._setFocusedWidgetIfUnset(widget.key);
+      return focusScope.scopeFocused &&
+             focusScope.focusedScope == null &&
+             focusScope.focusedWidget == widget.key;
+    }
+    return true;
+  }
+
+  static bool _atScope(BuildContext context, Widget widget, { bool autofocus: true }) {
+    assert(widget != null);
+    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    if (focusScope != null) {
+      if (autofocus)
+        focusScope._setFocusedScopeIfUnset(widget.key);
+      assert(widget.key != null);
+      return focusScope.scopeFocused &&
+             focusScope.focusedScope == widget.key;
+    }
+    return true;
+  }
+
+  // Don't call moveTo() from your build() function, it's intended to be called
+  // from event listeners, e.g. in response to a finger tap or tab key.
+
+  static void moveTo(BuildContext context, Widget widget) {
+    assert(widget != null);
+    assert(widget.key is GlobalKey);
+    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    if (focusScope != null)
+      focusScope.focusState._setFocusedWidget(widget.key);
+  }
+
+  static void _moveScopeTo(BuildContext context, Focus component) {
+    assert(component != null);
+    assert(component.key != null);
+    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    if (focusScope != null)
+      focusScope.focusState._setFocusedScope(component.key);
+  }
+
   FocusState createState() => new FocusState();
 }
 
@@ -155,7 +201,7 @@ class FocusState extends State<Focus> {
   void initState() {
     super.initState();
     if (config.autofocus)
-      FocusState._moveScopeTo(context, config);
+      Focus._moveScopeTo(context, config);
     _updateWidgetRemovalListener(_focusedWidget);
     _updateScopeRemovalListener(_focusedScope);
   }
@@ -169,56 +215,10 @@ class FocusState extends State<Focus> {
   Widget build(BuildContext context) {
     return new _FocusScope(
       focusState: this,
-      scopeFocused: FocusState._atScope(context, config),
+      scopeFocused: Focus._atScope(context, config),
       focusedScope: _focusedScope == _noFocusedScope ? null : _focusedScope,
       focusedWidget: _focusedWidget,
       child: config.child
     );
-  }
-
-  static bool at(BuildContext context, Widget widget, { bool autofocus: true }) {
-    assert(widget != null);
-    assert(widget.key is GlobalKey);
-    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
-    if (focusScope != null) {
-      if (autofocus)
-        focusScope._setFocusedWidgetIfUnset(widget.key);
-      return focusScope.scopeFocused &&
-             focusScope.focusedScope == null &&
-             focusScope.focusedWidget == widget.key;
-    }
-    return true;
-  }
-
-  static bool _atScope(BuildContext context, Widget widget, { bool autofocus: true }) {
-    assert(widget != null);
-    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
-    if (focusScope != null) {
-      if (autofocus)
-        focusScope._setFocusedScopeIfUnset(widget.key);
-      assert(widget.key != null);
-      return focusScope.scopeFocused &&
-             focusScope.focusedScope == widget.key;
-    }
-    return true;
-  }
-
-  // Don't call moveTo() from your build() function, it's intended to be called
-  // from event listeners, e.g. in response to a finger tap or tab key.
-
-  static void moveTo(BuildContext context, Widget widget) {
-    assert(widget != null);
-    assert(widget.key is GlobalKey);
-    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
-    if (focusScope != null)
-      focusScope.focusState._setFocusedWidget(widget.key);
-  }
-
-  static void _moveScopeTo(BuildContext context, Focus component) {
-    assert(component != null);
-    assert(component.key != null);
-    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
-    if (focusScope != null)
-      focusScope.focusState._setFocusedScope(component.key);
   }
 }

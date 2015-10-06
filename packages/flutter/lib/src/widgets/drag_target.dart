@@ -62,10 +62,10 @@ class Draggable extends StatefulComponent {
   final Offset feedbackOffset;
   final DragAnchor dragAnchor;
 
-  DraggableState createState() => new DraggableState();
+  _DraggableState createState() => new _DraggableState();
 }
 
-class DraggableState extends State<Draggable> {
+class _DraggableState extends State<Draggable> {
   DragRoute _route;
 
   void _startDrag(sky.PointerEvent event) {

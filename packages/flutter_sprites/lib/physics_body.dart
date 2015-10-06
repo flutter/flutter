@@ -9,49 +9,219 @@ class PhysicsBody {
   PhysicsBody(this.shape, {
     this.tag: null,
     this.type: PhysicsBodyType.dynamic,
-    this.density: 1.0,
-    this.friction: 0.0,
-    this.restitution: 0.0,
-    this.isSensor: false,
-    this.linearVelocity: Offset.zero,
-    this.angularVelocity: 0.0,
+    double density: 1.0,
+    double friction: 0.0,
+    double restitution: 0.0,
+    bool isSensor: false,
+    Offset linearVelocity: Offset.zero,
+    double angularVelocity: 0.0,
     this.linearDampening: 0.0,
-    this.angularDampening: 0.0,
-    this.allowSleep: true,
-    this.awake: true,
-    this.fixedRotation: false,
-    this.bullet: false,
-    this.active: true,
+    double awakeangularDampening: 0.0,
+    bool allowSleep: true,
+    bool awake: true,
+    bool fixedRotation: false,
+    bool bullet: false,
+    bool active: true,
     this.gravityScale: 1.0
-  });
+  }) {
+    this.density = density;
+    this.friction = friction;
+    this.restitution = restitution;
+    this.isSensor = isSensor;
+
+    this.linearVelocity = linearVelocity;
+    this.angularVelocity = angularVelocity;
+    this.angularDampening = angularDampening;
+
+    this.allowSleep = allowSleep;
+    this.awake = awake;
+    this.fixedRotation = fixedRotation;
+    this.bullet = bullet;
+    this.active = active;
+  }
 
   Object tag;
 
-  PhysicsShape shape;
+  final PhysicsShape shape;
 
   PhysicsBodyType type;
 
-  double density;
-  double friction;
-  double restitution;
-  bool isSensor;
+  double _density;
 
-  Offset linearVelocity;
-  double angularVelocity;
+  double get density => _density;
 
-  double linearDampening;
+  set density(double density) {
+    _density = density;
 
-  double angularDampening;
+    if (_body == null)
+      return;
+    for (box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+      f.setDensity(density);
+    }
+  }
 
-  bool allowSleep;
+  double _friction;
 
-  bool awake;
+  double get friction => _friction;
 
-  bool fixedRotation;
+  set friction(double friction) {
+    _friction = friction;
 
-  bool bullet;
+    if (_body == null)
+      return;
+    for (box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+      f.setFriction(friction);
+    }
+  }
 
-  bool active;
+  double _restitution;
+
+  double get restitution => _restitution;
+
+  set restitution(double restitution) {
+    _restitution = restitution;
+
+    if (_body == null)
+      return;
+    for (box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+      f.setRestitution(restitution);
+    }
+  }
+
+  bool _isSensor;
+
+  bool get isSensor => _isSensor;
+
+  set isSensor(bool isSensor) {
+    _isSensor = isSensor;
+
+    if (_body == null)
+      return;
+    for (box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+      f.setSensor(isSensor);
+    }
+  }
+
+  Offset _linearVelocity;
+
+  Offset get linearVelocity {
+    if (_body == null)
+      return _linearVelocity;
+    else {
+      double dx = _body.linearVelocity.x * _physicsNode.b2WorldToNodeConversionFactor;
+      double dy = _body.linearVelocity.y * _physicsNode.b2WorldToNodeConversionFactor;
+      return new Offset(dx, dy);
+    }
+  }
+
+  set linearVelocity(Offset linearVelocity) {
+    _linearVelocity = linearVelocity;
+
+    if (_body != null) {
+      Vector2 vec = new Vector2(
+        linearVelocity.dx / _physicsNode.b2WorldToNodeConversionFactor,
+        linearVelocity.dy / _physicsNode.b2WorldToNodeConversionFactor
+      );
+      _body.linearVelocity = vec;
+    }
+  }
+
+  double _angularVelocity;
+
+  double get angularVelocity {
+    if (_body == null)
+      return _angularVelocity;
+    else
+      return _body.angularVelocity;
+  }
+
+  set angularVelocity(double angularVelocity) {
+    _angularVelocity = angularVelocity;
+
+    if (_body != null) {
+      _body.angularVelocity = angularVelocity;
+    }
+  }
+
+  // TODO: Should this be editable in box2d.Body ?
+  final double linearDampening;
+
+  double _angularDampening;
+
+  double get angularDampening => _angularDampening;
+
+  set angularDampening(double angularDampening) {
+    _angularDampening = angularDampening;
+
+    if (_body != null)
+      _body.angularDamping = angularDampening;
+  }
+
+  bool _allowSleep;
+
+  bool get allowSleep => _allowSleep;
+
+  set allowSleep(bool allowSleep) {
+    _allowSleep = allowSleep;
+
+    if (_body != null)
+      _body.setSleepingAllowed(allowSleep);
+  }
+
+  bool _awake;
+
+  bool get awake {
+    if (_body != null)
+      return _body.isAwake();
+    else
+      return _awake;
+  }
+
+  set awake(bool awake) {
+    _awake = awake;
+
+    if (_body != null)
+      _body.setAwake(awake);
+  }
+
+  bool _fixedRotation;
+
+  bool get fixedRotation => _fixedRotation;
+
+  set fixedRotation(bool fixedRotation) {
+    _fixedRotation = fixedRotation;
+
+    if (_body != null)
+      _body.setFixedRotation(fixedRotation);
+  }
+
+  bool _bullet;
+
+  bool get bullet => _bullet;
+
+  set bullet(bool bullet) {
+    _bullet = bullet;
+
+    if (_body != null) {
+      _body.setBullet(bullet);
+    }
+  }
+
+  bool _active;
+
+  bool get active {
+    if (_body != null)
+      return _body.isActive();
+    else
+      return _active;
+  }
+
+  set active(bool active) {
+    _active = active;
+
+    if (_body != null)
+      _body.setActive(active);
+  }
 
   double gravityScale;
 
