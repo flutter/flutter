@@ -63,16 +63,11 @@ class NavigatorState extends State<Navigator> {
   }
 
   void pushNamed(String name) {
-    RouteBuilder builder;
-    if (!config.routes.containsKey(name)) {
+    RouteBuilder generateRoute() {
       assert(config.onGenerateRoute != null);
-      builder = config.onGenerateRoute(name);
-    } else {
-      builder = config.routes[name];
+      return config.onGenerateRoute(name);
     }
-    if (builder == null)
-      builder = config.onUnknownRoute; // 404!
-    assert(builder != null); // 404 getting your 404!
+    RouteBuilder builder = config.routes[name] ?? generateRoute() ?? config.onUnknownRoute;
     push(new PageRoute(builder));
   }
 
@@ -87,7 +82,6 @@ class NavigatorState extends State<Navigator> {
     assert(!_debugCurrentlyHaveRoute(route));
     setState(() {
       while (currentRoute.ephemeral) {
-        assert(currentRoute.ephemeral);
         currentRoute.didPop(null);
         _currentPosition -= 1;
       }
