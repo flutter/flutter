@@ -9,10 +9,10 @@ class PhysicsBody {
   PhysicsBody(this.shape, {
     this.tag: null,
     this.type: PhysicsBodyType.dynamic,
-    this.density: 1.0,
-    this.friction: 0.0,
-    this.restitution: 0.0,
-    this.isSensor: false,
+    double density: 1.0,
+    double friction: 0.0,
+    double restitution: 0.0,
+    bool isSensor: false,
     this.linearVelocity: Offset.zero,
     this.angularVelocity: 0.0,
     this.linearDampening: 0.0,
@@ -23,7 +23,12 @@ class PhysicsBody {
     this.bullet: false,
     this.active: true,
     this.gravityScale: 1.0
-  });
+  }) {
+    this.density = density;
+    this.friction = friction;
+    this.restitution = restitution;
+    this.isSensor = isSensor;
+  }
 
   Object tag;
 
@@ -31,10 +36,61 @@ class PhysicsBody {
 
   PhysicsBodyType type;
 
-  double density;
-  double friction;
-  double restitution;
-  bool isSensor;
+  double _density;
+
+  double get density => _density;
+
+  set density(double density) {
+    _density = density;
+
+    if (_body == null)
+      return;
+    for(box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+      f.setDensity(density);
+    }
+  }
+
+  double _friction;
+
+  double get friction => _friction;
+
+  set friction(double friction) {
+    _friction = friction;
+
+    if (_body == null)
+      return;
+    for(box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+      f.setFriction(friction);
+    }
+  }
+
+  double _restitution;
+
+  double get restitution => _restitution;
+
+  set restitution(double restitution) {
+    _restitution = restitution;
+
+    if (_body == null)
+      return;
+    for(box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+      f.setRestitution(restitution);
+    }
+  }
+
+  bool _isSensor;
+
+  bool get isSensor => _isSensor;
+
+  set isSensor(bool isSensor) {
+    _isSensor = isSensor;
+
+    if (_body == null)
+      return;
+    for(box2d.Fixture f = _body.getFixtureList(); f != null; f = f.getNext()) {
+      f.setSensor(isSensor);
+    }
+  }
 
   Offset linearVelocity;
   double angularVelocity;
