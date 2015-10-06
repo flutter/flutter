@@ -182,7 +182,7 @@ class MineDiggerState extends State<MineDigger> {
     return new Title(
       title: 'Mine Digger',
       child: new Scaffold(
-        toolbar: buildToolBar(context),
+        toolBar: buildToolBar(context),
         body: new Container(
           child: new Center(child: board),
           decoration: new BoxDecoration(backgroundColor: Colors.grey[50])
