@@ -126,22 +126,23 @@ class StockHomeState extends State<StockHome> {
 
   Widget buildToolBar() {
     return new ToolBar(
-        left: new IconButton(
-          icon: "navigation/menu",
-          onPressed: _showDrawer
+      level: 0,
+      left: new IconButton(
+        icon: "navigation/menu",
+        onPressed: _showDrawer
+      ),
+      center: new Text('Stocks'),
+      right: [
+        new IconButton(
+          icon: "action/search",
+          onPressed: _handleSearchBegin
         ),
-        center: new Text('Stocks'),
-        right: [
-          new IconButton(
-            icon: "action/search",
-            onPressed: _handleSearchBegin
-          ),
-          new IconButton(
-            icon: "navigation/more_vert",
-            onPressed: _handleMenuShow
-          )
-        ]
-      );
+        new IconButton(
+          icon: "navigation/more_vert",
+          onPressed: _handleMenuShow
+        )
+      ]
+    );
   }
 
   int selectedTabIndex = 0;

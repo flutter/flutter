@@ -11,6 +11,7 @@ import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
+import 'package:sky/src/widgets/animated_container.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/icon.dart';
@@ -47,15 +48,6 @@ class _RenderTabBar extends RenderBox with
   void set selectedIndex(int value) {
     if (_selectedIndex != value) {
       _selectedIndex = value;
-      markNeedsPaint();
-    }
-  }
-
-  Color _backgroundColor;
-  Color get backgroundColor => _backgroundColor;
-  void set backgroundColor(Color value) {
-    if (_backgroundColor != value) {
-      _backgroundColor = value;
       markNeedsPaint();
     }
   }
@@ -240,13 +232,6 @@ class _RenderTabBar extends RenderBox with
   }
 
   void paint(PaintingContext context, Offset offset) {
-    if (backgroundColor != null) {
-      double width = layoutWidths != null
-        ? layoutWidths.reduce((sum, width) => sum + width)
-        : size.width;
-      Rect rect = offset & new Size(width, size.height);
-      context.canvas.drawRect(rect, new Paint()..color = backgroundColor);
-    }
     int index = 0;
     RenderBox child = firstChild;
     while (child != null) {
@@ -264,7 +249,6 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
     Key key,
     List<Widget> children,
     this.selectedIndex,
-    this.backgroundColor,
     this.indicatorColor,
     this.indicatorRect,
     this.textAndIcons,
@@ -273,7 +257,6 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   }) : super(key: key, children: children);
 
   final int selectedIndex;
-  final Color backgroundColor;
   final Color indicatorColor;
   final Rect indicatorRect;
   final bool textAndIcons;
@@ -288,7 +271,6 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
 
   void updateRenderObject(_RenderTabBar renderObject, _TabBarWrapper oldWidget) {
     renderObject.selectedIndex = selectedIndex;
-    renderObject.backgroundColor = backgroundColor;
     renderObject.indicatorColor = indicatorColor;
     renderObject.indicatorRect = indicatorRect;
     renderObject.textAndIcons = textAndIcons;
@@ -537,7 +519,7 @@ class _TabBarState extends ScrollableState<TabBar> {
         textAndIcons = true;
     }
 
-    Widget tabBar = new IconTheme(
+    Widget content = new IconTheme(
       data: new IconThemeData(color: iconThemeColor),
       child: new DefaultTextStyle(
         style: textStyle,
@@ -548,7 +530,6 @@ class _TabBarState extends ScrollableState<TabBar> {
             return new _TabBarWrapper(
               children: tabs,
               selectedIndex: config.selectedIndex,
-              backgroundColor: backgroundColor,
               indicatorColor: indicatorColor,
               indicatorRect: _indicatorRect.value,
               textAndIcons: textAndIcons,
@@ -560,16 +541,23 @@ class _TabBarState extends ScrollableState<TabBar> {
       )
     );
 
-    if (!config.isScrollable)
-      return tabBar;
+    if (config.isScrollable) {
+      content = new SizeObserver(
+        callback: _handleViewportSizeChanged,
+        child: new Viewport(
+          scrollDirection: ScrollDirection.horizontal,
+          scrollOffset: new Offset(scrollOffset, 0.0),
+          child: content
+        )
+      );
+    }
 
-    return new SizeObserver(
-      callback: _handleViewportSizeChanged,
-      child: new Viewport(
-        scrollDirection: ScrollDirection.horizontal,
-        scrollOffset: new Offset(scrollOffset, 0.0),
-        child: tabBar
-      )
+    return new AnimatedContainer(
+      decoration: new BoxDecoration(
+        backgroundColor: backgroundColor
+      ),
+      duration: kThemeChangeDuration,
+      child: content
     );
   }
 }
@@ -601,18 +589,13 @@ class TabNavigator extends StatelessComponent {
   final TabSelectedIndexChanged onChanged;
   final bool isScrollable;
 
-  void _handleSelectedIndexChanged(int tabIndex) {
-    if (onChanged != null)
-      onChanged(tabIndex);
-  }
-
   Widget build(BuildContext context) {
     assert(views != null && views.isNotEmpty);
     assert(selectedIndex >= 0 && selectedIndex < views.length);
     return new Column([
       new TabBar(
         labels: views.map((view) => view.label),
-        onChanged: _handleSelectedIndexChanged,
+        onChanged: onChanged,
         selectedIndex: selectedIndex,
         isScrollable: isScrollable
       ),
