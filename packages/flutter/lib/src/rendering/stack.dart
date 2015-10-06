@@ -44,32 +44,14 @@ class StackParentData extends BoxParentData with ContainerParentDataMixin<Render
   String toString() => '${super.toString()}; top=$top; right=$right; bottom=$bottom, left=$left';
 }
 
-/// Implements the stack layout algorithm
-///
-/// In a stack layout, the children are positioned on top of each other in the
-/// order in which they appear in the child list. First, the non-positioned
-/// children (those with null values for top, right, bottom, and left) are
-/// layed out and placed in the upper-left corner of the stack. The stack is
-/// then sized to enclose all of the non-positioned children. If there are no
-/// non-positioned children, the stack becomes as large as possible.
-///
-/// Next, the positioned children are laid out. If a child has top and bottom
-/// values that are both non-null, the child is given a fixed height determined
-/// by deflating the width of the stack by the sum of the top and bottom values.
-/// Similarly, if the child has rigth and left values that are both non-null,
-/// the child is given a fixed width. Otherwise, the child is given unbounded
-/// space in the non-fixed dimensions.
-///
-/// Once the child is laid out, the stack positions the child according to the
-/// top, right, bottom, and left offsets. For example, if the top value is 10.0,
-/// the top edge of the child will be placed 10.0 pixels from the top edge of
-/// the stack. If the child extends beyond the bounds of the stack, the stack
-/// will clip the child's painting to the bounds of the stack.
-class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>,
-                                         RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
-  RenderStack({
-    List<RenderBox> children
-  }) {
+abstract class RenderStackBase extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, StackParentData>,
+         RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
+  RenderStackBase({
+    List<RenderBox> children,
+    double horizontalAlignment: 0.0,
+    double verticalAlignment: 0.0
+  }) : _horizontalAlignment = horizontalAlignment, _verticalAlignment = verticalAlignment {
     addAll(children);
   }
 
@@ -78,6 +60,24 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData)
       child.parentData = new StackParentData();
+  }
+
+  double get horizontalAlignment => _horizontalAlignment;
+  double _horizontalAlignment;
+  void set horizontalAlignment (double value) {
+    if (_horizontalAlignment != value) {
+      _horizontalAlignment = value;
+      markNeedsLayout();
+    }
+  }
+
+  double get verticalAlignment => _verticalAlignment;
+  double _verticalAlignment;
+  void set verticalAlignment (double value) {
+    if (_verticalAlignment != value) {
+      _verticalAlignment = value;
+      markNeedsLayout();
+    }
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
@@ -186,7 +186,11 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
       assert(child.parentData is StackParentData);
       final StackParentData childData = child.parentData;
 
-      if (childData.isPositioned) {
+      if (!childData.isPositioned) {
+        double x = (size.width - child.size.width) * horizontalAlignment;
+        double y = (size.height - child.size.height) * verticalAlignment;
+        childData.position = new Point(x, y);
+      } else {
         BoxConstraints childConstraints = const BoxConstraints();
 
         if (childData.left != null && childData.right != null)
@@ -226,14 +230,118 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     defaultHitTestChildren(result, position: position);
   }
 
+  void paintStack(PaintingContext context, Offset offset);
+
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow) {
       context.canvas.save();
       context.canvas.clipRect(offset & size);
-      defaultPaint(context, offset);
+      paintStack(context, offset);
       context.canvas.restore();
     } else {
-      defaultPaint(context, offset);
+      paintStack(context, offset);
     }
+  }
+}
+
+/// Implements the stack layout algorithm
+///
+/// In a stack layout, the children are positioned on top of each other in the
+/// order in which they appear in the child list. First, the non-positioned
+/// children (those with null values for top, right, bottom, and left) are
+/// initially layed out and placed in the upper-left corner of the stack. The
+/// stack is then sized to enclose all of the non-positioned children. If there
+/// are no non-positioned children, the stack becomes as large as possible.
+///
+/// The final location of non-positioned children is determined by the alignment
+/// parameters. The left of each non-positioned child becomes the
+/// difference between the child's width and the stack's width scaled by
+/// horizontalAlignment. The top of each non-positioned child is computed
+/// similarly and scaled by verticalAlignement. So if the alignment parameters
+/// are 0.0 (the default) then the non-positioned children remain in the
+/// upper-left corner. If the alignment parameters are 0.5 then the
+/// non-positioned children are centered within the stack.
+///
+/// Next, the positioned children are laid out. If a child has top and bottom
+/// values that are both non-null, the child is given a fixed height determined
+/// by deflating the width of the stack by the sum of the top and bottom values.
+/// Similarly, if the child has rigth and left values that are both non-null,
+/// the child is given a fixed width. Otherwise, the child is given unbounded
+/// space in the non-fixed dimensions.
+///
+/// Once the child is laid out, the stack positions the child according to the
+/// top, right, bottom, and left offsets. For example, if the top value is 10.0,
+/// the top edge of the child will be placed 10.0 pixels from the top edge of
+/// the stack. If the child extends beyond the bounds of the stack, the stack
+/// will clip the child's painting to the bounds of the stack.
+class RenderStack extends RenderStackBase {
+  RenderStack({
+    List<RenderBox> children,
+    double horizontalAlignment: 0.0,
+    double verticalAlignment: 0.0
+  }) : super(
+   children: children,
+   horizontalAlignment: horizontalAlignment,
+   verticalAlignment: verticalAlignment
+ );
+
+  void paintStack(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
+  }
+}
+
+/// Implements the same layout algorithm as RenderStack but only paints the child
+/// specified by index.
+/// Note: although only one child is displayed, the cost of the layout algorithm is
+/// still O(N), like an ordinary stack.
+class RenderIndexedStack extends RenderStackBase {
+  RenderIndexedStack({
+    List<RenderBox> children,
+    double horizontalAlignment: 0.0,
+    double verticalAlignment: 0.0,
+    int index: 0
+  }) : _index = index, super(
+   children: children,
+   horizontalAlignment: horizontalAlignment,
+   verticalAlignment: verticalAlignment
+  );
+
+  int get index => _index;
+  int _index;
+  void set index (int value) {
+    if (_index != value) {
+      _index = value;
+      markNeedsLayout();
+    }
+  }
+
+  RenderBox _childAtIndex() {
+    RenderBox child = firstChild;
+    int i = 0;
+    while (child != null && i < index) {
+      assert(child.parentData is StackParentData);
+      child = child.parentData.nextSibling;
+      i += 1;
+    }
+    assert(i == index);
+    assert(child != null);
+    return child;
+  }
+
+  void hitTestChildren(HitTestResult result, { Point position }) {
+    if (firstChild == null)
+      return;
+    assert(position != null);
+    RenderBox child = _childAtIndex();
+    Point transformed = new Point(position.x - child.parentData.position.x,
+                                  position.y - child.parentData.position.y);
+    child.hitTest(result, position: transformed);
+  }
+
+  void paintStack(PaintingContext context, Offset offset) {
+    if (firstChild == null)
+      return;
+    RenderBox child = _childAtIndex();
+    context.paintChild(child, child.parentData.position + offset);
   }
 }
