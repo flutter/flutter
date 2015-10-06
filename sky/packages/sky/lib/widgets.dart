@@ -5,7 +5,6 @@
 /// The Flutter widget framework.
 library widgets;
 
-export 'src/widgets/animated_component.dart';
 export 'src/widgets/animated_container.dart';
 export 'src/widgets/app.dart';
 export 'src/widgets/basic.dart';
