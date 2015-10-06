@@ -132,7 +132,6 @@ class IOSDevice extends _Device {
         } else {
           _logging.severe('$command is not available on your platform.');
         }
-        exit(2);
       }
       return command;
     });
