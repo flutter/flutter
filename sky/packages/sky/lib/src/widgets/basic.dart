@@ -513,8 +513,57 @@ class BlockBody extends MultiChildRenderObjectWidget {
 }
 
 class Stack extends MultiChildRenderObjectWidget {
-  Stack(List<Widget> children, { Key key }) : super(key: key, children: children);
-  RenderStack createRenderObject() => new RenderStack();
+  Stack(List<Widget> children, {
+    Key key,
+    this.horizontalAlignment: 0.0,
+    this.verticalAlignment: 0.0
+  }) : super(key: key, children: children) {
+    assert(horizontalAlignment != null);
+    assert(verticalAlignment != null);
+  }
+
+  final double horizontalAlignment;
+  final double verticalAlignment;
+
+  RenderStack createRenderObject() {
+    return new RenderStack(
+      horizontalAlignment: horizontalAlignment,
+      verticalAlignment: verticalAlignment
+    );
+  }
+
+  void updateRenderObject(RenderStack renderObject, Stack oldWidget) {
+    renderObject.horizontalAlignment = horizontalAlignment;
+    renderObject.verticalAlignment = verticalAlignment;
+  }
+}
+
+class IndexedStack extends MultiChildRenderObjectWidget {
+  IndexedStack(List<Widget> children, {
+    Key key,
+    this.horizontalAlignment: 0.0,
+    this.verticalAlignment: 0.0,
+    this.index: 0
+  }) : super(key: key, children: children);
+
+  final int index;
+  final double horizontalAlignment;
+  final double verticalAlignment;
+
+  RenderIndexedStack createRenderObject() {
+    return new RenderIndexedStack(
+      index: index,
+      verticalAlignment: verticalAlignment,
+      horizontalAlignment: horizontalAlignment
+    );
+  }
+
+  void updateRenderObject(RenderIndexedStack renderObject, IndexedStack oldWidget) {
+    super.updateRenderObject(renderObject, oldWidget);
+    renderObject.index = index;
+    renderObject.horizontalAlignment = horizontalAlignment;
+    renderObject.verticalAlignment = verticalAlignment;
+  }
 }
 
 class Positioned extends ParentDataWidget {
