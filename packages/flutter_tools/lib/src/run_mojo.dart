@@ -95,6 +95,7 @@ class RunMojoCommand extends Command {
     _MojoConfig mojoConfig = argResults['mojo-debug'] ? _MojoConfig.Debug : _MojoConfig.Release;
     String appPath = await _makePathAbsolute(argResults['app']);
 
+    args.addAll(argResults.rest);
     if (argResults['android']) {
       return _runAndroid(mojoPath, mojoConfig, appPath, args);
     } else {
