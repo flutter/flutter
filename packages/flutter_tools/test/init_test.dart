@@ -4,6 +4,8 @@
 
 // This test can take a while due to network requests
 @Timeout(const Duration(seconds: 60))
+library init_test;
+
 import 'dart:io';
 
 import 'package:args/command_runner.dart';

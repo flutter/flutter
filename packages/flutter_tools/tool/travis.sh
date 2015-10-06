@@ -12,4 +12,4 @@ pub global activate tuneup
 pub global run tuneup check
 
 # And run our tests.
-pub run test
+pub run test -j1
