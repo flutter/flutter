@@ -81,7 +81,7 @@ class AddressBookHome extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolbar: buildToolBar(context),
+      toolBar: buildToolBar(context),
       body: buildBody(context),
       floatingActionButton: buildFloatingActionButton(context)
     );
