@@ -6,7 +6,6 @@ library trace_test;
 
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/application_package.dart';
 import 'package:sky_tools/src/trace.dart';
 import 'package:test/test.dart';
 
@@ -17,9 +16,7 @@ main() => defineTests();
 defineTests() {
   group('trace', () {
     test('returns 1 when no Android device is connected', () {
-      ApplicationPackageFactory.srcPath = './';
-      ApplicationPackageFactory.setBuildPath(
-          BuildType.prebuilt, BuildPlatform.android, './');
+      applicationPackageSetup();
 
       MockAndroidDevice android = new MockAndroidDevice();
       when(android.isConnected()).thenReturn(false);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This test can take a while due to network requests
+@Timeout(const Duration(seconds: 60))
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -27,7 +29,7 @@ defineTests() {
     test('init flutter-simple', () async {
       InitCommand command = new InitCommand();
       CommandRunner runner = new CommandRunner('test_flutter', '')
-          ..addCommand(command);
+        ..addCommand(command);
       await runner.run(['init', '--out', temp.path])
           .then((int code) => expect(code, equals(0)));
 

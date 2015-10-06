@@ -42,6 +42,15 @@ class AndroidApk extends ApplicationPackage {
       : super(path.join(appDir, 'apks'), appPackageID, appFileName);
 }
 
+class IOSApp extends ApplicationPackage {
+  static const String _appName = 'SkyShell.app';
+  static const String _packageID = 'com.google.SkyShell';
+
+  IOSApp(String appDir,
+      {String appPackageID: _packageID, String appFileName: _appName})
+      : super(appDir, appPackageID, appFileName);
+}
+
 enum BuildType { prebuilt, release, debug, }
 
 enum BuildPlatform { android, iOS, iOSSimulator, mac, linux, }
@@ -62,7 +71,10 @@ class ApplicationPackageFactory {
   static BuildType defaultBuildType = BuildType.prebuilt;
 
   /// Default BuildPlatforms chosen if no BuildPlatforms are specified.
-  static List<BuildPlatform> defaultBuildPlatforms = [BuildPlatform.android];
+  static List<BuildPlatform> defaultBuildPlatforms = [
+    BuildPlatform.android,
+    BuildPlatform.iOS,
+  ];
 
   static Map<BuildPlatform, ApplicationPackage> getAvailableApplicationPackages(
       {BuildType requestedType, List<BuildPlatform> requestedPlatforms}) {
@@ -79,6 +91,9 @@ class ApplicationPackageFactory {
       switch (platform) {
         case BuildPlatform.android:
           packages[platform] = new AndroidApk(buildPath);
+          break;
+        case BuildPlatform.iOS:
+          packages[platform] = new IOSApp(buildPath);
           break;
         default:
           // TODO(iansf): Add other platforms
