@@ -67,7 +67,7 @@ class Material extends StatelessComponent {
       style: Theme.of(context).text.body1,
       child: new AnimatedContainer(
         curve: ease,
-        duration: const Duration(milliseconds: 200),
+        duration: kThemeChangeDuration,
         decoration: new BoxDecoration(
           backgroundColor: _getBackgroundColor(context),
           borderRadius: _kEdges[type],

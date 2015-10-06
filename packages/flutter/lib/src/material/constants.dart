@@ -17,7 +17,8 @@ const double kToolBarHeight = 56.0;
 
 const double kMaterialDrawerHeight = 140.0;
 const double kScrollbarSize = 10.0;
-const double kScrollbarFadeDuration = 250.0;
-const double kScrollbarFadeDelay = 300.0;
+const Duration kScrollbarFadeDuration = const Duration(milliseconds: 250);
+const Duration kScrollbarFadeDelay = const Duration(milliseconds: 300);
 const double kFadingEdgeLength = 12.0;
-const double kPressedStateDuration = 64.0;
+const double kPressedStateDuration = 64.0; // units?
+const Duration kThemeChangeDuration = const Duration(milliseconds: 200);
