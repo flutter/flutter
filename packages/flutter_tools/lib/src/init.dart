@@ -163,5 +163,4 @@ class HelloWorldComponent extends StatelessComponent {
     );
   }
 }
-
 ''';
