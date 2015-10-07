@@ -20,8 +20,31 @@ defineTests() {
 
       MockAndroidDevice android = new MockAndroidDevice();
       when(android.isConnected()).thenReturn(true);
-      when(android.stop(any)).thenReturn(true);
-      StopCommand command = new StopCommand(android);
+      when(android.stopApp(any)).thenReturn(true);
+
+      MockIOSDevice ios = new MockIOSDevice();
+      when(ios.isConnected()).thenReturn(false);
+      when(ios.stopApp(any)).thenReturn(false);
+
+      StopCommand command = new StopCommand(android: android, ios: ios);
+
+      CommandRunner runner = new CommandRunner('test_flutter', '')
+        ..addCommand(command);
+      runner.run(['stop']).then((int code) => expect(code, equals(0)));
+    });
+
+    test('returns 0 when iOS is connected and ready to be stopped', () {
+      applicationPackageSetup();
+
+      MockAndroidDevice android = new MockAndroidDevice();
+      when(android.isConnected()).thenReturn(false);
+      when(android.stopApp(any)).thenReturn(false);
+
+      MockIOSDevice ios = new MockIOSDevice();
+      when(ios.isConnected()).thenReturn(true);
+      when(ios.stopApp(any)).thenReturn(true);
+
+      StopCommand command = new StopCommand(android: android, ios: ios);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);

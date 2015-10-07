@@ -28,6 +28,18 @@ Future<int> runCommandAndStreamOutput(List<String> cmd,
   return proc.exitCode;
 }
 
+Future runAndKill(List<String> cmd, Duration timeout) async {
+  _logging.info(cmd.join(' '));
+  Future<Process> proc = Process.start(
+      cmd[0], cmd.getRange(1, cmd.length).toList(),
+      mode: ProcessStartMode.DETACHED);
+
+  return new Future.delayed(timeout, () async {
+    _logging.info('Intentionally killing ${cmd[0]}');
+    Process.killPid((await proc).pid);
+  });
+}
+
 /// Run cmd and return stdout.
 /// Throws an error if cmd exits with a non-zero value.
 String runCheckedSync(List<String> cmd) =>
