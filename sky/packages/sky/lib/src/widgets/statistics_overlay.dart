@@ -40,10 +40,10 @@ class StatisticsOverlay extends LeafRenderObjectWidget {
   /// Create a statistics overlay that only displays specific statistics. The
   /// mask is created by shifting 1 by the index of the specific StatisticOption
   /// to enable.
-  StatisticsOverlay({ this.optionsMask, Key key }) : super(key: key);
+  StatisticsOverlay({ this.optionsMask, this.rasterizerThreshold: 0, Key key }) : super(key: key);
 
   /// Create a statistics overaly that displays all available statistics
-  StatisticsOverlay.allEnabled({ Key key }) : super(key: key), optionsMask = (
+  StatisticsOverlay.allEnabled({ Key key, this.rasterizerThreshold: 0 }) : super(key: key), optionsMask = (
     1 << StatisticsOption.displayRasterizerStatistics.index |
     1 << StatisticsOption.visualizeRasterizerStatistics.index |
     1 << StatisticsOption.displayEngineStatistics.index |
@@ -51,10 +51,15 @@ class StatisticsOverlay extends LeafRenderObjectWidget {
   );
 
   final int optionsMask;
+  final int rasterizerThreshold;
 
-  StatisticsBox createRenderObject() => new StatisticsBox(optionsMask: optionsMask);
+  StatisticsBox createRenderObject() => new StatisticsBox(
+    optionsMask: optionsMask,
+    rasterizerThreshold: rasterizerThreshold
+  );
 
   void updateRenderObject(StatisticsBox renderObject, RenderObjectWidget oldWidget) {
     renderObject.optionsMask = optionsMask;
+    renderObject.rasterizerThreshold = rasterizerThreshold;
   }
 }

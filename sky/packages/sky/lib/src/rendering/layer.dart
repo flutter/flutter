@@ -93,18 +93,22 @@ class StatisticsLayer extends Layer {
   StatisticsLayer({
     Offset offset: Offset.zero,
     this.paintBounds,
-    this.optionsMask
+    this.optionsMask,
+    this.rasterizerThreshold
   }) : super(offset: offset);
 
   /// The rectangle in this layer's coodinate system that bounds the recording
   Rect paintBounds;
 
   /// A mask specifying the statistics to display
-  int optionsMask;
+  final int optionsMask;
+
+  final int rasterizerThreshold;
 
   void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
     builder.addStatistics(optionsMask, paintBounds.shift(layerOffset));
+    builder.setRasterizerTracingThreshold(rasterizerThreshold);
   }
 
 }
