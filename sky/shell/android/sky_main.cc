@@ -47,10 +47,9 @@ void InitializeTracing() {
   base::FilePath path;
   bool result = ::PathService::Get(base::DIR_ANDROID_APP_DATA, &path);
   DCHECK(result);
-  base::FilePath picturesDirectory = path.AppendASCII("cache");
   sky::shell::Shell::Shared()
       .tracing_controller()
-      .set_picture_tracing_base_path(picturesDirectory);
+      .set_picture_tracing_base_path(path);
 }
 
 }  // namespace
