@@ -751,8 +751,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
   }
 
-  /// Called when an Element is removed from the tree.
-  /// Currently, an Element removed from the tree never returns.
+  /// Called when an Element is removed from the tree permanently.
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
@@ -824,25 +823,21 @@ class ErrorWidget extends LeafRenderObjectWidget {
   RenderBox createRenderObject() => new RenderErrorBox();
 }
 
-typedef Widget WidgetBuilder(BuildContext context);
 typedef void BuildScheduler(BuildableElement element);
 
-/// Base class for the instantiation of StatelessComponent and StatefulComponent
-/// widgets.
+/// Base class for instantiations of widgets that have builders and can be
+/// marked dirty.
 abstract class BuildableElement<T extends Widget> extends Element<T> {
   BuildableElement(T widget) : super(widget);
-
-  WidgetBuilder _builder;
-  Element _child;
 
   /// Returns true if the element has been marked as needing rebuilding.
   bool get dirty => _dirty;
   bool _dirty = true;
 
-  // We to let component authors call setState from initState, didUpdateConfig,
-  // and build even when state is locked because its convenient and a no-op
-  // anyway. This flag ensures that this convenience is only allowed on the
-  // element currently undergoing initState, didUpdateConfig, or build.
+  // We let component authors call setState from initState, didUpdateConfig, and
+  // build even when state is locked because its convenient and a no-op anyway.
+  // This flag ensures that this convenience is only allowed on the element
+  // currently undergoing initState, didUpdateConfig, or build.
   bool _debugAllowIgnoredCallsToMarkNeedsBuild = false;
   bool _debugSetAllowIgnoredCallsToMarkNeedsBuild(bool value) {
     assert(_debugAllowIgnoredCallsToMarkNeedsBuild == !value);
@@ -850,73 +845,12 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     return true;
   }
 
-  void mount(Element parent, dynamic newSlot) {
-    super.mount(parent, newSlot);
-    assert(_child == null);
-    assert(_active);
-    rebuild();
-    assert(_child != null);
-  }
-
-  static BuildableElement _debugCurrentBuildTarget;
-
-  /// Reinvokes the build() method of the StatelessComponent object (for
-  /// stateless components) or the State object (for stateful components) and
-  /// then updates the widget tree.
-  ///
-  /// Called automatically during mount() to generate the first build, by the
-  /// binding when scheduleBuild() has been called to mark this element dirty,
-  /// and by update() when the Widget has changed.
-  void rebuild() {
-    assert(_debugLifecycleState != _ElementLifecycle.initial);
-    if (!_active || !_dirty) {
-      _dirty = false;
-      return;
-    }
-    assert(_debugLifecycleState == _ElementLifecycle.active);
-    assert(_debugStateLocked);
-    assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
-    BuildableElement debugPreviousBuildTarget;
-    assert(() {
-      debugPreviousBuildTarget = _debugCurrentBuildTarget;
-      _debugCurrentBuildTarget = this;
-     return true;
-    });
-    Widget built;
-    try {
-      built = _builder(this);
-      assert(built != null);
-    } catch (e, stack) {
-      _debugReportException('building ${_widget}', e, stack);
-      built = new ErrorWidget();
-    } finally {
-      // We delay marking the element as clean until after calling _builder so
-      // that attempts to markNeedsBuild() during build() will be ignored.
-      _dirty = false;
-      assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(false));
-    }
-
-    try {
-      _child = updateChild(_child, built, slot);
-      assert(_child != null);
-    } catch (e, stack) {
-      _debugReportException('building ${_widget}', e, stack);
-      built = new ErrorWidget();
-      _child = updateChild(null, built, slot);
-    }
-
-    assert(() {
-      assert(_debugCurrentBuildTarget == this);
-      _debugCurrentBuildTarget = debugPreviousBuildTarget;
-      return true;
-    });
-  }
-
   static BuildScheduler scheduleBuildFor;
 
   static int _debugStateLockLevel = 0;
   static bool get _debugStateLocked => _debugStateLockLevel > 0;
   static bool _debugBuilding = false;
+  static BuildableElement _debugCurrentBuildTarget;
 
   /// Establishes a scope in which component build functions can run.
   ///
@@ -989,17 +923,39 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
     scheduleBuildFor(this);
   }
 
-  void visitChildren(ElementVisitor visitor) {
-    if (_child != null)
-      visitor(_child);
+  /// Called by the binding when scheduleBuild() has been called to mark this
+  /// element dirty, and, in Components, by update() when the Widget has
+  /// changed.
+  void rebuild() {
+    assert(_debugLifecycleState != _ElementLifecycle.initial);
+    if (!_active || !_dirty) {
+      _dirty = false;
+      return;
+    }
+    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(_debugStateLocked);
+    BuildableElement debugPreviousBuildTarget;
+    assert(() {
+      debugPreviousBuildTarget = _debugCurrentBuildTarget;
+      _debugCurrentBuildTarget = this;
+     return true;
+    });
+    try {
+      performRebuild();
+    } catch (e, stack) {
+      _debugReportException('rebuilding $this', e, stack);
+    } finally {
+      assert(() {
+        assert(_debugCurrentBuildTarget == this);
+        _debugCurrentBuildTarget = debugPreviousBuildTarget;
+        return true;
+      });
+    }
+    assert(!_dirty);
   }
 
-  bool detachChild(Element child) {
-    assert(child == _child);
-    _deactivateChild(_child);
-    _child = null;
-    return true;
-  }
+  /// Called by rebuild() after the appropriate checks have been made.
+  void performRebuild();
 
   void dependenciesChanged() {
     markNeedsBuild();
@@ -1012,8 +968,70 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   }
 }
 
+typedef Widget WidgetBuilder(BuildContext context);
+
+/// Base class for the instantiation of StatelessComponent and StatefulComponent
+/// widgets.
+abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
+  ComponentElement(T widget) : super(widget);
+
+  WidgetBuilder _builder;
+  Element _child;
+
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    assert(_child == null);
+    assert(_active);
+    rebuild();
+    assert(_child != null);
+  }
+
+  /// Reinvokes the build() method of the StatelessComponent object (for
+  /// stateless components) or the State object (for stateful components) and
+  /// then updates the widget tree.
+  ///
+  /// Called automatically during mount() to generate the first build, and by
+  /// rebuild() when the element needs updating.
+  void performRebuild() {
+    assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
+    Widget built;
+    try {
+      built = _builder(this);
+      assert(built != null);
+    } catch (e, stack) {
+      _debugReportException('building ${_widget}', e, stack);
+      built = new ErrorWidget();
+    } finally {
+      // We delay marking the element as clean until after calling _builder so
+      // that attempts to markNeedsBuild() during build() will be ignored.
+      _dirty = false;
+      assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(false));
+    }
+    try {
+      _child = updateChild(_child, built, slot);
+      assert(_child != null);
+    } catch (e, stack) {
+      _debugReportException('building ${_widget}', e, stack);
+      built = new ErrorWidget();
+      _child = updateChild(null, built, slot);
+    }
+  }
+
+  void visitChildren(ElementVisitor visitor) {
+    if (_child != null)
+      visitor(_child);
+  }
+
+  bool detachChild(Element child) {
+    assert(child == _child);
+    _deactivateChild(_child);
+    _child = null;
+    return true;
+  }
+}
+
 /// Instantiation of StatelessComponent widgets.
-class StatelessComponentElement<T extends StatelessComponent> extends BuildableElement<T> {
+class StatelessComponentElement<T extends StatelessComponent> extends ComponentElement<T> {
   StatelessComponentElement(T widget) : super(widget) {
     _builder = widget.build;
   }
@@ -1028,7 +1046,7 @@ class StatelessComponentElement<T extends StatelessComponent> extends BuildableE
 }
 
 /// Instantiation of StatefulComponent widgets.
-class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> extends BuildableElement<T> {
+class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> extends ComponentElement<T> {
   StatefulComponentElement(T widget)
     : _state = widget.createState(), super(widget) {
     assert(_state._debugTypesAreRight(widget)); // can't use T and U, since normally we don't actually set those
@@ -1142,8 +1160,10 @@ class InheritedElement extends StatelessComponentElement<InheritedWidget> {
     InheritedWidget oldWidget = widget;
     super.update(newWidget);
     assert(widget == newWidget);
-    if (widget.updateShouldNotify(oldWidget))
+    if (widget.updateShouldNotify(oldWidget)) {
+      assert(widget != oldWidget);
       _notifyDescendants();
+    }
   }
 
   void _notifyDescendants() {
@@ -1161,7 +1181,7 @@ class InheritedElement extends StatelessComponentElement<InheritedWidget> {
 }
 
 /// Base class for instantiations of RenderObjectWidget subclasses
-abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element<T> {
+abstract class RenderObjectElement<T extends RenderObjectWidget> extends BuildableElement<T> {
   RenderObjectElement(T widget)
     : _renderObject = widget.createRenderObject(), super(widget);
 
@@ -1195,6 +1215,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     ParentDataElement parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       updateParentData(parentDataElement.widget);
+    _dirty = false;
   }
 
   void update(T newWidget) {
@@ -1202,6 +1223,26 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element
     super.update(newWidget);
     assert(widget == newWidget);
     widget.updateRenderObject(renderObject, oldWidget);
+    _dirty = false;
+  }
+
+  void performRebuild() {
+    reinvokeBuilders();
+    _dirty = false;
+  }
+
+  void reinvokeBuilders() {
+    // There's no way to mark a normal RenderObjectElement dirty.
+    // We inherit from BuildableElement so that subclasses can themselves
+    // implement reinvokeBuilders() if they do provide a way to mark themeselves
+    // dirty, e.g. if they have a builder callback. (Builder callbacks have a
+    // 'BuildContext' argument which you can pass to Theme.of() and other
+    // InheritedWidget APIs which eventually trigger a rebuild.)
+    print('${runtimeType} failed to implement reinvokeBuilders(), but got marked dirty');
+    assert(() {
+      'reinvokeBuilders() not implemented';
+      return false;
+    });
   }
 
   /// Utility function for subclasses that have one or more lists of children.

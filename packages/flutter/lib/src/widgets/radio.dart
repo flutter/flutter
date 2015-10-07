@@ -12,7 +12,7 @@ import 'package:sky/src/widgets/theme.dart';
 const sky.Color _kLightOffColor = const sky.Color(0x8A000000);
 const sky.Color _kDarkOffColor = const sky.Color(0xB2FFFFFF);
 
-typedef RadioValueChanged(Object value);
+typedef void RadioValueChanged(Object value);
 
 class Radio extends StatelessComponent {
   Radio({
