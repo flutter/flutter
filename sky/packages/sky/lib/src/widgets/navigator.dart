@@ -18,7 +18,6 @@ class RouteArguments {
 typedef Widget RouteBuilder(RouteArguments args);
 typedef RouteBuilder RouteGenerator(String name);
 typedef void StateRouteCallback(StateRoute route);
-typedef void _RouteCallback(Route route);
 
 class Navigator extends StatefulComponent {
   Navigator({
