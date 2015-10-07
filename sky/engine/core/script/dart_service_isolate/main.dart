@@ -8,7 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:vmservice';
+import 'dart:_vmservice';
 
 part 'loader.dart';
 part 'resources.dart';
