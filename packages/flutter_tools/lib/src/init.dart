@@ -155,7 +155,7 @@ void main() {
 class HelloWorldComponent extends StatelessComponent {
   Widget build(BuildContext context)  {
     return new Scaffold(
-      toolbar: new ToolBar(center: new Text("Flutter Demo")),
+      toolBar: new ToolBar(center: new Text("Flutter Demo")),
       body: new Material(child: new Center(child: new Text("Hello world!"))),
       floatingActionButton: new FloatingActionButton(
         child: new Icon(type: 'content/add', size: 24)
