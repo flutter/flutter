@@ -117,7 +117,7 @@ class MenuPosition {
   final double left;
 }
 
-class _MenuRoute extends Route {
+class _MenuRoute extends PerformanceRoute {
   _MenuRoute({ this.completer, this.position, this.builder, this.level });
 
   final Completer completer;

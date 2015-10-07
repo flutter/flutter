@@ -256,7 +256,6 @@ class DragRoute extends Route {
   bool get ephemeral => true;
   bool get modal => false;
   bool get opaque => false;
-  Duration get transitionDuration => const Duration();
 
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new Positioned(
