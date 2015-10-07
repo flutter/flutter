@@ -71,13 +71,6 @@ class NavigatorState extends State<Navigator> {
     push(new PageRoute(builder));
   }
 
-  void _insertRoute(Route route) {
-    _history.insert(_currentPosition, route);
-    route._onDismissed = _handleRouteDismissed;
-    route._onRemoveRoute = _handleRemoveRoute;
-    route.didPush();
-  }
-
   void push(Route route) {
     assert(!_debugCurrentlyHaveRoute(route));
     setState(() {
@@ -119,13 +112,18 @@ class NavigatorState extends State<Navigator> {
     return index >= 0 && index <= _currentPosition;
   }
 
-  void _handleRouteDismissed(Route route) {
+  void _didDismissRoute(Route route) {
     assert(_history.contains(route));
     if (_history.lastIndexOf(route) <= _currentPosition)
       popRoute(route);
   }
 
-  void _handleRemoveRoute(Route route) {
+  void _insertRoute(Route route) {
+    _history.insert(_currentPosition, route);
+    route.didPush(this);
+  }
+
+  void _removeRoute(Route route) {
     assert(_history.contains(route));
     setState(() {
       _history.remove(route);
@@ -165,33 +163,7 @@ class NavigatorState extends State<Navigator> {
 
 }
 
-
 abstract class Route {
-  Route() {
-    _performance = createPerformance();
-  }
-
-  PerformanceView get performance => _performance?.view;
-  Performance _performance;
-  _RouteCallback _onDismissed;
-  _RouteCallback _onRemoveRoute;
-
-  Performance createPerformance() {
-    Duration duration = transitionDuration;
-    if (duration > Duration.ZERO) {
-      return new Performance(duration: duration)
-        ..addStatusListener((PerformanceStatus status) {
-          if (status == PerformanceStatus.dismissed) {
-            if (_onDismissed != null)
-              _onDismissed(this);
-            if (_onRemoveRoute != null)
-              _onRemoveRoute(this);
-          }
-        });
-    }
-    return null;
-  }
-
   /// If hasContent is true, then the route represents some on-screen state.
   ///
   /// If hasContent is false, then no performance will be created, and the values of
@@ -242,32 +214,69 @@ abstract class Route {
   /// cover the entire application surface or are in any way semi-transparent.
   bool get opaque => false;
 
-  /// If this is set to a non-zero [Duration], then an [Performance]
-  /// object, available via the performance field, will be created when the
-  /// route is first built, using the duration described here.
-  Duration get transitionDuration => Duration.ZERO;
-
-  bool get isActuallyOpaque => (performance == null || _performance.isCompleted) && opaque;
+  PerformanceView get performance => null;
+  bool get isActuallyOpaque => (performance == null || performance.isCompleted) && opaque;
 
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
 
-  void didPush() {
-    _performance?.forward();
+  NavigatorState _navigator;
+
+  void didPush(NavigatorState navigator) {
+    assert(_navigator == null);
+    _navigator = navigator;
+    assert(_navigator != null);
+    performance?.addStatusListener(_handlePerformanceStatusChanged);
   }
 
   void didPop([dynamic result]) {
-    _performance?.reverse();
-    if (performance == null && _onRemoveRoute != null)
-      _onRemoveRoute(this);
+    assert(_navigator != null);
+    if (performance == null)
+      _navigator._removeRoute(this);
+  }
+
+  void _handlePerformanceStatusChanged(PerformanceStatus status) {
+    if (status == PerformanceStatus.dismissed) {
+      _navigator._didDismissRoute(this);
+      _navigator._removeRoute(this);
+      _navigator = null;
+    }
   }
 
   String toString() => '$runtimeType()';
 }
 
+abstract class PerformanceRoute extends Route {
+  PerformanceView get performance => _performance?.view;
+  Performance _performance;
+
+  Performance createPerformance() {
+    Duration duration = transitionDuration;
+    assert(duration >= Duration.ZERO);
+    return new Performance(duration: duration);
+  }
+
+  Duration get transitionDuration;
+
+  bool get isActuallyOpaque => (performance == null || _performance.isCompleted) && opaque;
+
+  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
+
+  void didPush(NavigatorState navigator) {
+    _performance = createPerformance();
+    super.didPush(navigator);
+    _performance?.forward();
+  }
+
+  void didPop([dynamic result]) {
+    _performance?.reverse();
+    super.didPop(result);
+  }
+}
+
 const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 const Point _kTransitionStartPoint = const Point(0.0, 75.0);
 
-class PageRoute extends Route {
+class PageRoute extends PerformanceRoute {
   PageRoute(this.builder);
 
   final RouteBuilder builder;
