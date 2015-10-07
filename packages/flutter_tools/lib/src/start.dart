@@ -41,27 +41,37 @@ class StartCommand extends Command {
     if (android == null) {
       android = new AndroidDevice();
     }
+    if (ios == null) {
+      ios = new IOSDevice();
+    }
 
     bool startedSomewhere = false;
     bool poke = argResults['poke'];
     if (!poke) {
-      StopCommand stopper = new StopCommand(android);
+      StopCommand stopper = new StopCommand(android: android, ios: ios);
       stopper.stop();
 
       // Only install if the user did not specify a poke
       InstallCommand installer = new InstallCommand(android: android, ios: ios);
-      startedSomewhere = installer.install();
+      installer.install();
     }
+
+    Map<BuildPlatform, ApplicationPackage> packages =
+        ApplicationPackageFactory.getAvailableApplicationPackages();
 
     bool startedOnAndroid = false;
     if (android.isConnected()) {
-      Map<BuildPlatform, ApplicationPackage> packages =
-          ApplicationPackageFactory.getAvailableApplicationPackages();
       ApplicationPackage androidApp = packages[BuildPlatform.android];
 
       String target = path.absolute(argResults['target']);
       startedOnAndroid = await android.startServer(
           target, poke, argResults['checked'], androidApp);
+    }
+
+    if (ios.isConnected()) {
+      ApplicationPackage iosApp = packages[BuildPlatform.iOS];
+
+      startedSomewhere = await ios.startApp(iosApp) || startedSomewhere;
     }
 
     if (startedSomewhere || startedOnAndroid) {

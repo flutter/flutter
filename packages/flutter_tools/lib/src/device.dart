@@ -56,6 +56,12 @@ abstract class _Device {
 
   /// Check if the current version of the given app is already installed
   bool isAppInstalled(ApplicationPackage app);
+
+  /// Start an app package on the current device
+  Future<bool> startApp(ApplicationPackage app);
+
+  /// Stop an app package on the current device
+  Future<bool> stopApp(ApplicationPackage app);
 }
 
 class IOSDevice extends _Device {
@@ -80,6 +86,9 @@ class IOSDevice extends _Device {
   String _informerPath;
   String get informerPath => _informerPath;
 
+  String _debuggerPath;
+  String get debuggerPath => _debuggerPath;
+
   String _name;
   String get name => _name;
 
@@ -93,6 +102,7 @@ class IOSDevice extends _Device {
     _installerPath = _checkForCommand('ideviceinstaller');
     _listerPath = _checkForCommand('idevice_id');
     _informerPath = _checkForCommand('ideviceinfo');
+    _debuggerPath = _checkForCommand('idevicedebug');
   }
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
@@ -160,6 +170,37 @@ class IOSDevice extends _Device {
 
   @override
   bool isAppInstalled(ApplicationPackage app) {
+    try {
+      String apps = runCheckedSync([installerPath, '-l']);
+      if (new RegExp(app.appPackageID, multiLine: true).hasMatch(apps)) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  @override
+  Future<bool> startApp(ApplicationPackage app) async {
+    if (!isAppInstalled(app)) {
+      return false;
+    }
+    // idevicedebug hangs forever after launching the app, so kill it after
+    // giving it plenty of time to send the launch command.
+    return runAndKill(
+        [debuggerPath, 'run', app.appPackageID], new Duration(seconds: 3)).then(
+        (_) {
+      return true;
+    }, onError: (e) {
+      _logging.info('Failure running $debuggerPath: ', e);
+      return false;
+    });
+  }
+
+  @override
+  Future<bool> stopApp(ApplicationPackage app) async {
+    // Currently we don't have a way to stop an app running on iOS.
     return false;
   }
 }
@@ -458,7 +499,14 @@ class AndroidDevice extends _Device {
     return true;
   }
 
-  bool stop(AndroidApk apk) {
+  @override
+  Future<bool> startApp(AndroidApk apk) async {
+    // Android currently has to be started with startServer(...).
+    assert(false);
+    return false;
+  }
+
+  Future<bool> stopApp(AndroidApk apk) async {
     // Turn off reverse port forwarding
     runSync([adbPath, 'reverse', '--remove', 'tcp:$_serverPort']);
     // Stop the app

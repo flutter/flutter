@@ -17,29 +17,39 @@ class StopCommand extends Command {
   final name = 'stop';
   final description = 'Stop your Flutter app on all attached devices.';
   AndroidDevice android = null;
+  IOSDevice ios = null;
 
-  StopCommand([this.android]);
+  StopCommand({this.android, this.ios});
 
   @override
   Future<int> run() async {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
-
-    if (stop()) {
+    if (await stop()) {
       return 0;
     } else {
       return 2;
     }
   }
 
-  bool stop() {
+  Future<bool> stop() async {
+    if (android == null) {
+      android = new AndroidDevice();
+    }
+    if (ios == null) {
+      ios = new IOSDevice();
+    }
+
     bool stoppedSomething = false;
+    Map<BuildPlatform, ApplicationPackage> packages =
+        ApplicationPackageFactory.getAvailableApplicationPackages();
+
     if (android.isConnected()) {
-      Map<BuildPlatform, ApplicationPackage> packages =
-          ApplicationPackageFactory.getAvailableApplicationPackages();
       ApplicationPackage androidApp = packages[BuildPlatform.android];
-      stoppedSomething = android.stop(androidApp) || stoppedSomething;
+      stoppedSomething = await android.stopApp(androidApp) || stoppedSomething;
+    }
+
+    if (ios.isConnected()) {
+      ApplicationPackage iosApp = packages[BuildPlatform.iOS];
+      stoppedSomething = await ios.stopApp(iosApp) || stoppedSomething;
     }
 
     return stoppedSomething;
