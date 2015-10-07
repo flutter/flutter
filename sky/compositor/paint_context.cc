@@ -14,13 +14,17 @@ namespace compositor {
 PaintContext::PaintContext() {
 }
 
-void PaintContext::beginFrame(ScopedFrame& frame) {
-  frame_count_.increment();
-  frame_time_.start();
+void PaintContext::beginFrame(ScopedFrame& frame, bool enableInstrumentation) {
+  if (enableInstrumentation) {
+    frame_count_.increment();
+    frame_time_.start();
+  }
 }
 
-void PaintContext::endFrame(ScopedFrame& frame) {
-  frame_time_.stop();
+void PaintContext::endFrame(ScopedFrame& frame, bool enableInstrumentation) {
+  if (enableInstrumentation) {
+    frame_time_.stop();
+  }
 }
 
 PaintContext::ScopedFrame PaintContext::AcquireFrame(SkCanvas& canvas) {
@@ -34,8 +38,8 @@ PaintContext::ScopedFrame PaintContext::AcquireFrame(
 }
 
 PaintContext::ScopedFrame::ScopedFrame(PaintContext& context, SkCanvas& canvas)
-    : context_(context), canvas_(&canvas) {
-  context_.beginFrame(*this);
+    : context_(context), canvas_(&canvas), instrumentation_enabled_(true) {
+  context_.beginFrame(*this, instrumentation_enabled_);
 }
 
 PaintContext::ScopedFrame::ScopedFrame(ScopedFrame&& frame) = default;
@@ -45,16 +49,18 @@ PaintContext::ScopedFrame::ScopedFrame(PaintContext& context,
                                        gfx::Size frame_size)
     : context_(context),
       trace_file_name_(trace_file_name),
-      trace_recorder_(new SkPictureRecorder()) {
+      trace_recorder_(new SkPictureRecorder()),
+      instrumentation_enabled_(false) {
   trace_recorder_->beginRecording(
       SkRect::MakeWH(frame_size.width(), frame_size.height()));
   canvas_ = trace_recorder_->getRecordingCanvas();
   DCHECK(canvas_);
-  context_.beginFrame(*this);
+  DCHECK(trace_file_name.length() > 0);
+  context_.beginFrame(*this, instrumentation_enabled_);
 }
 
 PaintContext::ScopedFrame::~ScopedFrame() {
-  context_.endFrame(*this);
+  context_.endFrame(*this, instrumentation_enabled_);
 
   if (trace_file_name_.length() > 0) {
     RefPtr<SkPicture> picture =

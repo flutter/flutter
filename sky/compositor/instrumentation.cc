@@ -97,7 +97,7 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
 
   paint.setStrokeWidth(1);
   paint.setStyle(SkPaint::Style::kStroke_Style);
-  paint.setColor(SK_ColorWHITE);
+  paint.setColor(0xAAFFFFFF);
 
   if (maxInterval > kOneFrameMS) {
     // Paint the horizontal markers
