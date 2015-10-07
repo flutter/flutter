@@ -5,6 +5,7 @@
 #ifndef SKY_COMPOSITOR_LAYER_TREE_H_
 #define SKY_COMPOSITOR_LAYER_TREE_H_
 
+#include <stdint.h>
 #include <memory>
 
 #include "base/macros.h"
@@ -38,11 +39,23 @@ class LayerTree {
     return construction_time_;
   }
 
+  // The number of frame intervals missed after which the compositor must
+  // trace the rasterized picture to a trace file. Specify 0 to disable all
+  // tracing
+  void set_rasterizer_tracing_threshold(uint32_t interval) {
+    rasterizer_tracing_threashold_ = interval;
+  }
+
+  uint32_t rasterizer_tracing_threshold() const {
+    return rasterizer_tracing_threashold_;
+  }
+
  private:
   SkISize frame_size_;  // Physical pixels.
   std::unique_ptr<Layer> root_layer_;
 
   base::TimeDelta construction_time_;
+  uint32_t rasterizer_tracing_threashold_;
 
   DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };

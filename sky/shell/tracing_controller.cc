@@ -10,6 +10,7 @@
 #include "sky/shell/tracing_controller.h"
 
 #include <string>
+#include <sstream>
 
 namespace sky {
 namespace shell {
@@ -120,21 +121,11 @@ void TracingController::UnregisterShellView(ShellView* view) {
   view_ = nullptr;
 }
 
-TracingController::SkPictureTracingOptions
-TracingController::picture_tracing_options() const {
-  return SkPictureTracingOptions(
-      picture_tracing_path_.length() == 0 ? false : picture_tracing_enabled_,
-      picture_tracing_path_ +
-          std::to_string((base::TimeTicks::Now() - trace_controller_start_)
-                             .InMillisecondsRoundedUp()));
-}
-
-void TracingController::set_picture_tracing_path(const std::string& path) {
-  picture_tracing_path_ = path;
-}
-
-void TracingController::set_picture_tracing_enabled(bool enabled) {
-  picture_tracing_enabled_ = enabled;
+base::FilePath TracingController::PictureTracingPathForCurrentTime() const {
+  base::TimeDelta duration = base::TimeTicks::Now() - trace_controller_start_;
+  std::stringstream stream;
+  stream << "trace_" << duration.InMillisecondsRoundedUp() << ".skp";
+  return picture_tracing_base_path_.Append(stream.str());
 }
 
 }  // namespace shell

@@ -50,6 +50,7 @@ PaintContext::ScopedFrame::ScopedFrame(PaintContext& context,
       SkRect::MakeWH(frame_size.width(), frame_size.height()));
   canvas_ = trace_recorder_->getRecordingCanvas();
   DCHECK(canvas_);
+  DCHECK(trace_file_name.length() > 0);
   context_.beginFrame(*this);
 }
 

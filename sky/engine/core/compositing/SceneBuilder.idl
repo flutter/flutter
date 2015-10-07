@@ -15,6 +15,7 @@
 
   void addPicture(Offset offset, Picture picture, Rect bounds);
   void addStatistics(unsigned long enabledOptions, Rect bounds);
+  void setRasterizerTracingThreshold(unsigned long frameInterval);
 
   Scene build();
 };

@@ -101,20 +101,17 @@ class TouchMapper {
 static std::string SkPictureTracingPath() {
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
-
-  char* temp = reinterpret_cast<char*>(calloc(256, sizeof(char)));
-  snprintf(temp, 256, "%s/layers.skp", [paths.firstObject UTF8String]);
-  std::string path(temp);
-  free(temp);
-
-  return path;
+  return [paths.firstObject UTF8String];
 }
 
 -(instancetype) initWithShellView:(sky::shell::ShellView *) shellView {
   self = [super init];
   if (self) {
-    sky::shell::Shell::Shared().tracing_controller().set_picture_tracing_path(
-        SkPictureTracingPath());
+    base::FilePath pictureTracingPath =
+        base::FilePath::FromUTF8Unsafe(SkPictureTracingPath());
+    sky::shell::Shell::Shared()
+        .tracing_controller()
+        .set_picture_tracing_base_path(pictureTracingPath);
 
     _shell_view.reset(shellView);
     self.multipleTouchEnabled = YES;
