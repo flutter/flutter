@@ -97,7 +97,7 @@ class SnackBar extends StatelessComponent {
   }
 }
 
-class _SnackBarRoute extends Route {
+class _SnackBarRoute extends PerformanceRoute {
   _SnackBarRoute({ this.content, this.actions });
 
   final Widget content;

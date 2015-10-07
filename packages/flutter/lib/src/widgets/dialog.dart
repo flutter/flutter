@@ -131,7 +131,7 @@ class Dialog extends StatelessComponent {
   }
 }
 
-class _DialogRoute extends Route {
+class _DialogRoute extends PerformanceRoute {
   _DialogRoute({ this.completer, this.builder });
 
   final Completer completer;
