@@ -164,27 +164,31 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     if (changes != _ChangeDescription.none || !isValid) {
       renderObject.markNeedsLayout();
     } else {
-      // we just need to redraw our existing widgets as-is
-      if (_childrenByKey.length > 0) {
-        assert(_firstVisibleChildIndex >= 0);
-        assert(renderObject != null);
-        final int startIndex = _firstVisibleChildIndex;
-        int lastIndex = startIndex + _childrenByKey.length - 1;
-        Element nextSibling = null;
-        for (int index = lastIndex; index > startIndex; index -= 1) {
-          final Widget newWidget = _buildWidgetAt(index);
-          final _ChildKey key = new _ChildKey.fromWidget(newWidget);
-          final Element oldElement = _childrenByKey[key];
-          assert(oldElement != null);
-          final Element newElement = updateChild(oldElement, newWidget, nextSibling);
-          assert(newElement != null);
-          _childrenByKey[key] = newElement;
-          // Verify that it hasn't changed size.
-          // If this assertion fires, it means you didn't call "invalidate"
-          // before changing the size of one of your items.
-          assert(_debugIsSameSize(newElement, index, _lastLayoutConstraints));
-          nextSibling = newElement;
-        }
+      reinvokeBuilders();
+    }
+  }
+
+  void reinvokeBuilders() {
+    // we just need to redraw our existing widgets as-is
+    if (_childrenByKey.length > 0) {
+      assert(_firstVisibleChildIndex >= 0);
+      assert(renderObject != null);
+      final int startIndex = _firstVisibleChildIndex;
+      int lastIndex = startIndex + _childrenByKey.length - 1;
+      Element nextSibling = null;
+      for (int index = lastIndex; index >= startIndex; index -= 1) {
+        final Widget newWidget = _buildWidgetAt(index);
+        final _ChildKey key = new _ChildKey.fromWidget(newWidget);
+        final Element oldElement = _childrenByKey[key];
+        assert(oldElement != null);
+        final Element newElement = updateChild(oldElement, newWidget, nextSibling);
+        assert(newElement != null);
+        _childrenByKey[key] = newElement;
+        // Verify that it hasn't changed size.
+        // If this assertion fires, it means you didn't call "invalidate"
+        // before changing the size of one of your items.
+        assert(_debugIsSameSize(newElement, index, _lastLayoutConstraints));
+        nextSibling = newElement;
       }
     }
   }

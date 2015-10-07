@@ -37,8 +37,8 @@ class HomogeneousViewport extends RenderObjectWidget {
   RenderBlockViewport createRenderObject() => new RenderBlockViewport();
 
   bool isLayoutDifferentThan(HomogeneousViewport oldWidget) {
+    // changing the builder doesn't imply the layout changed
     return itemsWrap != oldWidget.itemsWrap ||
-           itemsWrap != oldWidget.itemsWrap ||
            itemExtent != oldWidget.itemExtent ||
            itemCount != oldWidget.itemCount ||
            direction != oldWidget.direction ||
@@ -87,6 +87,10 @@ class _HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewpor
       renderObject.markNeedsLayout();
     else
       _updateChildren();
+  }
+
+  void reinvokeBuilders() {
+    _updateChildren();
   }
 
   void layout(BoxConstraints constraints) {

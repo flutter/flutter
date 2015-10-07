@@ -9,11 +9,13 @@ import 'package:sky/painting.dart';
 import 'package:sky/widgets.dart';
 
 class CardModel {
-  CardModel(this.value, this.height, this.color);
+  CardModel(this.value, this.height) {
+    label = "Item $value";
+  }
   int value;
   double height;
-  Color color;
-  String get label => "Item $value";
+  int get color => ((value % 9) + 1) * 100;
+  String label;
   Key get key => new ObjectKey(this);
 }
 
@@ -36,6 +38,7 @@ class CardCollectionState extends State<CardCollection> {
   final TextStyle backgroundTextStyle =
     Typography.white.title.copyWith(textAlign: TextAlign.center);
 
+  Map<int, Color> _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   bool _snapToCenter = false;
@@ -50,19 +53,13 @@ class CardCollectionState extends State<CardCollection> {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
     ];
-    _cardModels = new List.generate(cardHeights.length, (i) {
-      Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardHeights.length);
-      return new CardModel(i, cardHeights[i], color);
-    });
+    _cardModels = new List.generate(cardHeights.length, (i) => new CardModel(i, cardHeights[i]));
   }
 
   void _initFixedSizedCardModels() {
     const int cardCount = 27;
     const double cardHeight = 100.0;
-    _cardModels = new List.generate(cardCount, (i) {
-      Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardCount);
-      return new CardModel(i, cardHeight, color);
-    });
+    _cardModels = new List.generate(cardCount, (i) => new CardModel(i, cardHeight));
   }
 
   void _initCardModels() {
@@ -126,9 +123,14 @@ class CardCollectionState extends State<CardCollection> {
           buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
           buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
           new DrawerDivider(),
-          buildDrawerRadioItem(DismissDirection.horizontal, 'action/code'),
-          buildDrawerRadioItem(DismissDirection.left, 'navigation/arrow_back'),
-          buildDrawerRadioItem(DismissDirection.right, 'navigation/arrow_forward'),
+          buildDrawerRadioItem("Deep Purple", Colors.deepPurple, _primaryColor, _selectColor),
+          buildDrawerRadioItem("Green", Colors.green, _primaryColor, _selectColor),
+          buildDrawerRadioItem("Amber", Colors.amber, _primaryColor, _selectColor),
+          buildDrawerRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
+          new DrawerDivider(),
+          buildDrawerRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: 'action/code'),
+          buildDrawerRadioItem("Dismiss left", DismissDirection.left, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_back'),
+          buildDrawerRadioItem("Dismiss right", DismissDirection.right, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_forward'),
         ])
       )
     );
@@ -158,6 +160,12 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
+  void _selectColor(selection) {
+    setState(() {
+      _primaryColor = selection;
+    });
+  }
+
   void _changeDismissDirection(DismissDirection newDismissDirection) {
     setState(() {
       _dismissDirection = newDismissDirection;
@@ -175,16 +183,16 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerRadioItem(DismissDirection direction, String icon) {
+  Widget buildDrawerRadioItem(String label, itemValue, currentValue, RadioValueChanged onChanged, { String icon }) {
     return new DrawerItem(
       icon: icon,
-      onPressed: () { _changeDismissDirection(direction); },
+      onPressed: () { onChanged(itemValue); },
       child: new Row([
-        new Flexible(child: new Text(_dismissDirectionText(direction))),
+        new Flexible(child: new Text(label)),
         new Radio(
-          value: direction,
-          onChanged: _changeDismissDirection,
-          groupValue: _dismissDirection
+          value: itemValue,
+          groupValue: currentValue,
+          onChanged: onChanged
         )
       ])
     );
@@ -210,11 +218,22 @@ class CardCollectionState extends State<CardCollection> {
       onResized: () { _invalidator([index]); },
       onDismissed: () { dismissCard(cardModel); },
       child: new Card(
-        color: cardModel.color,
+        color: Theme.of(context).primarySwatch[cardModel.color],
         child: new Container(
           height: cardModel.height,
           padding: const EdgeDims.all(8.0),
-          child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
+          child: new Center(
+            child: new DefaultTextStyle(
+              style: cardLabelStyle,
+              child: new Input(
+                key: new GlobalObjectKey(cardModel),
+                initialValue: cardModel.label,
+                onChanged: (String value) {
+                  cardModel.label = value;
+                }
+              )
+            )
+          )
         )
       )
     );
@@ -341,9 +360,14 @@ class CardCollectionState extends State<CardCollection> {
       body = new Stack([body, indicator]);
     }
 
-    return new Scaffold(
-      toolBar: buildToolBar(),
-      body: body
+    return new Theme(
+      data: new ThemeData(
+        primarySwatch: _primaryColor
+      ),
+      child: new Scaffold(
+        toolBar: buildToolBar(),
+        body: body
+      )
     );
   }
 }
@@ -351,11 +375,6 @@ class CardCollectionState extends State<CardCollection> {
 void main() {
   runApp(new App(
     title: 'Cards',
-    theme: new ThemeData(
-      brightness: ThemeBrightness.light,
-      primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent[200]
-    ),
     routes: {
       '/': (RouteArguments args) => new CardCollection(navigator: args.navigator),
     }

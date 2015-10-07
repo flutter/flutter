@@ -79,4 +79,38 @@ class ThemeData {
   Color get accentColor => _accentColor;
 
   final ThemeBrightness accentColorBrightness;
+
+  bool operator==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    ThemeData otherData = other;
+    return (otherData.brightness == brightness) &&
+           (otherData.primarySwatch == primarySwatch) &&
+           (otherData.canvasColor == canvasColor) &&
+           (otherData.cardColor == cardColor) &&
+           (otherData.dividerColor == dividerColor) &&
+           (otherData.hintColor == hintColor) &&
+           (otherData.highlightColor == highlightColor) &&
+           (otherData.selectedColor == selectedColor) &&
+           (otherData.hintOpacity == hintOpacity) &&
+           (otherData.text == text) &&
+           (otherData.primaryColorBrightness == primaryColorBrightness) &&
+           (otherData.accentColorBrightness == accentColorBrightness);
+  }
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + brightness.hashCode;
+    value = 37 * value + primarySwatch.hashCode;
+    value = 37 * value + canvasColor.hashCode;
+    value = 37 * value + cardColor.hashCode;
+    value = 37 * value + dividerColor.hashCode;
+    value = 37 * value + hintColor.hashCode;
+    value = 37 * value + highlightColor.hashCode;
+    value = 37 * value + selectedColor.hashCode;
+    value = 37 * value + hintOpacity.hashCode;
+    value = 37 * value + text.hashCode;
+    value = 37 * value + primaryColorBrightness.hashCode;
+    value = 37 * value + accentColorBrightness.hashCode;
+    return value;
+  }
 }
