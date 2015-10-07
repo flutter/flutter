@@ -16,7 +16,7 @@ class PhysicsBody {
     Offset linearVelocity: Offset.zero,
     double angularVelocity: 0.0,
     this.linearDampening: 0.0,
-    double awakeangularDampening: 0.0,
+    double angularDampening: 0.0,
     bool allowSleep: true,
     bool awake: true,
     bool fixedRotation: false,
