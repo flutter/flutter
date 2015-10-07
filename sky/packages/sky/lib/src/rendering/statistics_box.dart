@@ -7,7 +7,9 @@ import 'package:sky/src/rendering/object.dart';
 
 class StatisticsBox extends RenderBox {
 
-  StatisticsBox({int optionsMask: 0}) : _optionsMask = optionsMask;
+  StatisticsBox({int optionsMask: 0, int rasterizerThreshold: 0})
+    : _optionsMask = optionsMask,
+      _rasterizerThreshold = rasterizerThreshold;
 
   int _optionsMask;
   int get optionsMask => _optionsMask;
@@ -16,6 +18,16 @@ class StatisticsBox extends RenderBox {
       return;
     }
     _optionsMask = mask;
+    markNeedsPaint();
+  }
+
+  int _rasterizerThreshold;
+  int get rasterizerThreshold => _rasterizerThreshold;
+  void set rasterizerThreshold (int threshold) {
+    if  (threshold == _rasterizerThreshold) {
+      return;
+    }
+    _rasterizerThreshold = threshold;
     markNeedsPaint();
   }
 
@@ -42,6 +54,6 @@ class StatisticsBox extends RenderBox {
   }
 
   void paint(PaintingContext context, Offset offset) {
-    context.paintStatistics(optionsMask, offset, size);
+    context.paintStatistics(optionsMask, rasterizerThreshold, offset, size);
   }
 }

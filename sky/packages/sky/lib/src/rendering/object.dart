@@ -132,11 +132,12 @@ class PaintingContext {
     }
   }
 
-  void paintStatistics(int optionsMask, Offset offset, Size size) {
+  void paintStatistics(int optionsMask, int rasterizerThreshold, Offset offset, Size size) {
     StatisticsLayer statsLayer = new StatisticsLayer(
       offset: offset,
       paintBounds: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
-      optionsMask : optionsMask
+      optionsMask : optionsMask,
+      rasterizerThreshold : rasterizerThreshold
     );
     _containerLayer.append(statsLayer);
   }
