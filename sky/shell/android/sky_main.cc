@@ -10,10 +10,12 @@
 #include "base/at_exit.h"
 #include "base/bind.h"
 #include "base/command_line.h"
+#include "base/files/file_path.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/message_loop/message_loop.h"
+#include "base/path_service.h"
 #include "base/run_loop.h"
 #include "base/threading/simple_thread.h"
 #include "jni/SkyMain_jni.h"
@@ -41,6 +43,15 @@ void InitializeLogging() {
                        false);  // Tick count
 }
 
+void InitializeTracing() {
+  base::FilePath path;
+  bool result = ::PathService::Get(base::DIR_ANDROID_APP_DATA, &path);
+  DCHECK(result);
+  sky::shell::Shell::Shared()
+      .tracing_controller()
+      .set_picture_tracing_base_path(path);
+}
+
 }  // namespace
 
 static void Init(JNIEnv* env,
@@ -64,6 +75,8 @@ static void Init(JNIEnv* env,
 
   Shell::Init(make_scoped_ptr(new ServiceProviderContext(
       g_java_message_loop.Get()->task_runner())));
+
+  InitializeTracing();
 }
 
 bool RegisterSkyMain(JNIEnv* env) {
