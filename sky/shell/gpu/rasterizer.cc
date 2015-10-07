@@ -75,9 +75,10 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
 
   // Trace to a file if necessary
   bool frameExceededThreshold = false;
-
-  if (layer_tree->rasterizer_tracing_threshold() * kOneFrameDuration >
-      paint_context_.frame_time().lastLap().InMillisecondsF()) {
+  uint32_t thresholdInterval = layer_tree->rasterizer_tracing_threshold();
+  if (thresholdInterval != 0 &&
+      paint_context_.frame_time().lastLap().InMillisecondsF() >
+          thresholdInterval * kOneFrameDuration) {
     // While rendering the last frame, if we exceeded the tracing threshold
     // specified in the layer tree, we force a trace to disk.
     frameExceededThreshold = true;
