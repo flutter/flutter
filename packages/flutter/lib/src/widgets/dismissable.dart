@@ -64,6 +64,12 @@ class _DismissableState extends State<Dismissable> {
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
 
+  void dispose() {
+    _fadePerformance?.stop();
+    _resizePerformance?.stop();
+    super.dispose();
+  }
+
   bool get _directionIsYAxis {
     return
       config.direction == DismissDirection.vertical ||
