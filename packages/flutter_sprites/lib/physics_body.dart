@@ -16,7 +16,7 @@ class PhysicsBody {
     Offset linearVelocity: Offset.zero,
     double angularVelocity: 0.0,
     this.linearDampening: 0.0,
-    double awakeangularDampening: 0.0,
+    double angularDampening: 0.0,
     bool allowSleep: true,
     bool awake: true,
     bool fixedRotation: false,
@@ -231,6 +231,58 @@ class PhysicsBody {
   box2d.Body _body;
 
   bool _attached = false;
+
+  void applyForce(Offset force, Point worldPoint) {
+    assert(_body != null);
+
+    Vector2 b2Force = new Vector2(
+      force.dx / _physicsNode.b2WorldToNodeConversionFactor,
+      force.dy / _physicsNode.b2WorldToNodeConversionFactor);
+
+    Vector2 b2Point = new Vector2(
+      worldPoint.x / _physicsNode.b2WorldToNodeConversionFactor,
+      worldPoint.y / _physicsNode.b2WorldToNodeConversionFactor
+    );
+
+    _body.applyForce(b2Force, b2Point);
+  }
+
+  void applyForceToCenter(Offset force) {
+    assert(_body != null);
+
+    Vector2 b2Force = new Vector2(
+      force.dx / _physicsNode.b2WorldToNodeConversionFactor,
+      force.dy / _physicsNode.b2WorldToNodeConversionFactor);
+
+    _body.applyForceToCenter(b2Force);
+  }
+
+  void applyTorque(double torque) {
+    assert(_body != null);
+
+    _body.applyTorque(torque / _physicsNode.b2WorldToNodeConversionFactor);
+  }
+
+  void applyLinearImpulse(Offset impulse, Point worldPoint, [bool wake = true]) {
+    assert(_body != null);
+
+    Vector2 b2Impulse = new Vector2(
+      impulse.dx / _physicsNode.b2WorldToNodeConversionFactor,
+      impulse.dy / _physicsNode.b2WorldToNodeConversionFactor);
+
+    Vector2 b2Point = new Vector2(
+      worldPoint.x / _physicsNode.b2WorldToNodeConversionFactor,
+      worldPoint.y / _physicsNode.b2WorldToNodeConversionFactor
+    );
+
+    _body.applyLinearImpulse(b2Impulse, b2Point, wake);
+  }
+
+  void applyAngularImpulse(double impulse) {
+    assert(_body != null);
+
+    _body.applyAngularImpulse(impulse / _physicsNode.b2WorldToNodeConversionFactor);
+  }
 
   void _attach(PhysicsNode physicsNode, Node node) {
     assert(_attached == false);
