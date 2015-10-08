@@ -20,11 +20,11 @@ const char kBaseTraceEnd[] = "]}";
 const char kSentinel[] = "\0";
 
 TracingController::TracingController()
-    : view_(nullptr),
-      picture_tracing_enabled_(false),
-      trace_controller_start_(base::TimeTicks::Now()) {}
+    : view_(nullptr), picture_tracing_enabled_(false) {
+}
 
-TracingController::~TracingController() {}
+TracingController::~TracingController() {
+}
 
 void TracingController::StartTracing() {
   DLOG(INFO) << "Collecting Traces";
@@ -122,9 +122,17 @@ void TracingController::UnregisterShellView(ShellView* view) {
 }
 
 base::FilePath TracingController::PictureTracingPathForCurrentTime() const {
-  base::TimeDelta duration = base::TimeTicks::Now() - trace_controller_start_;
+  base::Time::Exploded exploded;
+  base::Time now = base::Time::Now();
+
+  now.LocalExplode(&exploded);
+
   std::stringstream stream;
-  stream << "trace_" << duration.InMillisecondsRoundedUp() << ".skp";
+  // Example: trace_2015-10-08_at_11.38.25.121_.skp
+  stream << "trace_" << exploded.year << "-" << exploded.month << "-"
+         << exploded.day_of_month << "_at_" << exploded.hour << "."
+         << exploded.minute << "." << exploded.second << "."
+         << exploded.millisecond << ".skp";
   return picture_tracing_base_path_.Append(stream.str());
 }
 
