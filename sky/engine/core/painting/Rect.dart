@@ -76,6 +76,9 @@ class Rect {
   /// The distance between upper-left corner and the lower-right corner of this rectangle
   Size get size => new Size(width, height);
 
+  /// Whether this rectangle encloses a non-zero area
+  bool get isEmpty => r.left >= r.right || r.top >= r.bottom;
+
   /// The lesser of the width and the height of this rectangle
   double get shortestSide {
     double w = width.abs();
