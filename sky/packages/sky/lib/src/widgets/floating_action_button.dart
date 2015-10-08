@@ -30,8 +30,16 @@ class FloatingActionButton extends StatefulComponent {
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
 }
 
-class _FloatingActionButtonState extends ButtonState<FloatingActionButton> {
-  Widget buildContent(BuildContext context) {
+class _FloatingActionButtonState extends State<FloatingActionButton> {
+  bool _highlight = false;
+
+  void _handleHighlightChanged(bool value) {
+    setState(() {
+      _highlight = value;
+    });
+  }
+
+  Widget build(BuildContext context) {
     IconThemeColor iconThemeColor = IconThemeColor.white;
     Color materialColor = config.backgroundColor;
     if (materialColor == null) {
@@ -43,13 +51,14 @@ class _FloatingActionButtonState extends ButtonState<FloatingActionButton> {
     return new Material(
       color: materialColor,
       type: MaterialType.circle,
-      level: highlight ? 3 : 2,
+      level: _highlight ? 3 : 2,
       child: new ClipOval(
         child: new Container(
           width: _kSize,
           height: _kSize,
           child: new InkWell(
             onTap: config.onPressed,
+            onHighlightChanged: _handleHighlightChanged,
             child: new Center(
               child: new IconTheme(
                 data: new IconThemeData(color: iconThemeColor),
