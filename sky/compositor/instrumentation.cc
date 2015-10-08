@@ -70,6 +70,9 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
 
   if (maxInterval < kOneFrameMS) {
     maxInterval = kOneFrameMS;
+  } else {
+    maxInterval =
+        kOneFrameMS * (static_cast<size_t>(maxInterval / kOneFrameMS) + 1);
   }
 
   const double maxUnitInterval = UnitFrameInterval(maxInterval);
