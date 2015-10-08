@@ -34,104 +34,64 @@ const Duration _kThemeChangeDuration = const Duration(milliseconds: 200);
 const Point _kOpenPosition = Point.origin;
 const Point _kClosedPosition = const Point(-_kWidth, 0.0);
 
-class Drawer extends StatefulComponent {
-  Drawer({
+class _Drawer extends StatelessComponent {
+  _Drawer({
     Key key,
     this.child,
     this.level: 3,
-    this.navigator
+    this.performance,
+    this.route
   }) : super(key: key);
 
   final Widget child;
   final int level;
-  final NavigatorState navigator;
-
-  DrawerState createState() => new DrawerState();
-}
-
-class DrawerState extends State<Drawer> {
-  void initState() {
-    super.initState();
-    _performance = new Performance(duration: _kBaseSettleDuration)
-      ..addStatusListener((PerformanceStatus status) {
-        if (status == PerformanceStatus.dismissed)
-          config.navigator.pop();
-      });
-    _open();
-  }
-
-  Performance _performance;
+  final PerformanceView performance;
+  final _DrawerRoute route;
 
   Widget build(BuildContext context) {
     Widget mask = new GestureDetector(
-      onTap: _close,
+      onTap: route.close,
       child: new ColorTransition(
-        performance: _performance.view,
+        performance: performance,
         color: new AnimatedColorValue(Colors.transparent, end: Colors.black54),
         child: new Container()
       )
     );
 
     Widget content = new SlideTransition(
-      performance: _performance.view,
+      performance: performance,
       position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
       child: new AnimatedContainer(
         curve: ease,
         duration: _kThemeChangeDuration,
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(context).canvasColor,
-          boxShadow: shadows[config.level]),
+          boxShadow: shadows[level]),
         width: _kWidth,
-        child: config.child
+        child: child
       )
     );
 
-    return new GestureDetector(
-      onHorizontalDragStart: _performance.stop,
-      onHorizontalDragUpdate: _handleDragUpdate,
-      onHorizontalDragEnd: _handleDragEnd,
-      child: new Stack([
-        mask,
-        new Positioned(
-          top: 0.0,
-          left: 0.0,
-          bottom: 0.0,
-          child: content
-        )
-      ])
-    );
-  }
-
-  bool get _isMostlyClosed => _performance.progress < 0.5;
-
-  void _handleDragUpdate(double delta) {
-    _performance.progress += delta / _kWidth;
-  }
-
-  void _open() {
-    _performance.fling(velocity: 1.0);
-  }
-
-  void _close() {
-    _performance.fling(velocity: -1.0);
-  }
-
-  void _handleDragEnd(Offset velocity) {
-    if (velocity.dx.abs() >= _kMinFlingVelocity) {
-      _performance.fling(velocity: velocity.dx * _kFlingVelocityScale);
-    } else if (_isMostlyClosed) {
-      _close();
-    } else {
-      _open();
-    }
+    return new Stack([
+      mask,
+      new Positioned(
+        top: 0.0,
+        left: 0.0,
+        bottom: 0.0,
+        child: content
+      )
+    ]);
   }
 }
 
-class DrawerRoute extends Route {
-  DrawerRoute({ this.child, this.level });
+class _DrawerRoute extends Route {
+  _DrawerRoute({ this.child, this.level });
 
   final Widget child;
   final int level;
+
+  PerformanceView get performance => _performance?.view;
+  Performance _performance = new Performance(duration: _kBaseSettleDuration);
 
   bool get opaque => false;
 
@@ -139,15 +99,49 @@ class DrawerRoute extends Route {
     return new Focus(
       key: new GlobalObjectKey(this),
       autofocus: true,
-      child: new Drawer(
-        child: child,
-        level: level,
-        navigator: navigator
+      child: new GestureDetector(
+        onHorizontalDragStart: () {
+          _performance?.stop();
+        },
+        onHorizontalDragUpdate: (double delta) {
+          _performance?.progress = delta / _kWidth;
+        },
+        onHorizontalDragEnd: _settle,
+        child: new _Drawer(
+          child: child,
+          level: level,
+          performance: performance
+        )
       )
     );
+  }
+
+  void didPush(NavigatorState navigator) {
+    super.didPush(navigator);
+    _performance.forward();
+  }
+
+  void didPop([dynamic result]) {
+    super.didPop(result);
+    _performance.reverse();
+    _performance = null;
+  }
+
+  void _settle(Offset velocity) {
+    if (velocity.dx.abs() >= _kMinFlingVelocity) {
+      _performance?.fling(velocity: velocity.dx * _kFlingVelocityScale);
+    } else if (_performance?.progress < 0.5) {
+      close();
+    } else {
+      _performance?.fling(velocity: 1.0);
+    }
+  }
+
+  void close() {
+    _performance?.fling(velocity: -1.0);
   }
 }
 
 void showDrawer({ NavigatorState navigator, Widget child, int level: 3 }) {
-  navigator.push(new DrawerRoute(child: child, level: level));
+  navigator.push(new _DrawerRoute(child: child, level: level));
 }
