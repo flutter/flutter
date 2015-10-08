@@ -15,15 +15,27 @@ final Logger _logging = new Logger('sky_tools.process');
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr.
 Future<int> runCommandAndStreamOutput(List<String> cmd,
-    {String prefix: ''}) async {
+    {String prefix: '', RegExp filter}) async {
   _logging.info(cmd.join(' '));
   Process proc =
       await Process.start(cmd[0], cmd.getRange(1, cmd.length).toList());
-  proc.stdout.transform(UTF8.decoder).listen((data) {
-    stdout.write('$prefix${data.trimRight().split('\n').join('\n$prefix')}\n');
+  proc.stdout.transform(UTF8.decoder).listen((String data) {
+    List<String> dataLines = data.trimRight().split('\n');
+    if (filter != null) {
+      dataLines = dataLines.where((String s) => filter.hasMatch(s));
+    }
+    if (dataLines.length > 0) {
+      stdout.write('$prefix${dataLines.join('\n$prefix')}\n');
+    }
   });
-  proc.stderr.transform(UTF8.decoder).listen((data) {
-    stderr.write('$prefix${data.trimRight().split('\n').join('\n$prefix')}\n');
+  proc.stderr.transform(UTF8.decoder).listen((String data) {
+    List<String> dataLines = data.trimRight().split('\n');
+    if (filter != null) {
+      dataLines = dataLines.where((String s) => filter.hasMatch(s));
+    }
+    if (dataLines.length > 0) {
+      stderr.write('$prefix${dataLines.join('\n$prefix')}\n');
+    }
   });
   return proc.exitCode;
 }

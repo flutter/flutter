@@ -89,6 +89,9 @@ class IOSDevice extends _Device {
   String _debuggerPath;
   String get debuggerPath => _debuggerPath;
 
+  String _loggerPath;
+  String get loggerPath => _loggerPath;
+
   String _name;
   String get name => _name;
 
@@ -103,6 +106,7 @@ class IOSDevice extends _Device {
     _listerPath = _checkForCommand('idevice_id');
     _informerPath = _checkForCommand('ideviceinfo');
     _debuggerPath = _checkForCommand('idevicedebug');
+    _loggerPath = _checkForCommand('idevicesyslog');
   }
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
@@ -202,6 +206,11 @@ class IOSDevice extends _Device {
   Future<bool> stopApp(ApplicationPackage app) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
+  }
+
+  Future<int> logs({bool clear: false}) {
+    return runCommandAndStreamOutput([loggerPath],
+        prefix: 'IOS DEV: ', filter: new RegExp(r'.*SkyShell.*'));
   }
 }
 

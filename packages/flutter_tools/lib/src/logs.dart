@@ -15,9 +15,10 @@ final Logger _logging = new Logger('sky_tools.logs');
 class LogsCommand extends Command {
   final name = 'logs';
   final description = 'Show logs for running Sky apps.';
-  AndroidDevice android = null;
+  AndroidDevice android;
+  IOSDevice ios;
 
-  LogsCommand([this.android]) {
+  LogsCommand({this.android, this.ios}) {
     argParser.addFlag('clear',
         negatable: false,
         help: 'Clear log history before reading from logs (Android only).');
@@ -28,14 +29,26 @@ class LogsCommand extends Command {
     if (android == null) {
       android = new AndroidDevice();
     }
+    if (ios == null) {
+      ios = new IOSDevice();
+    }
 
     Future<int> androidLogProcess = null;
     if (android.isConnected()) {
       androidLogProcess = android.logs(clear: argResults['clear']);
     }
 
+    Future<int> iosLogProcess = null;
+    if (ios.isConnected()) {
+      iosLogProcess = ios.logs(clear: argResults['clear']);
+    }
+
     if (androidLogProcess != null) {
       await androidLogProcess;
+    }
+
+    if (iosLogProcess != null) {
+      await iosLogProcess;
     }
 
     return 0;
