@@ -83,6 +83,13 @@ class PhysicsNode extends Node {
 
   void _removeBodiesScheduledForDestruction() {
     for (box2d.Body b2Body in _bodiesScheduledForDestruction) {
+      // Destroy any joints before destroying the body
+      PhysicsBody body = b2Body.userData;
+      for (PhysicsJoint joint in body._joints) {
+        joint._detach();
+      }
+
+      // Destroy the body
       b2World.destroyBody(b2Body);
     }
     _bodiesScheduledForDestruction.clear();
