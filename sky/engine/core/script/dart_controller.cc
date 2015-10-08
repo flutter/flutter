@@ -80,8 +80,10 @@ void DartController::DidLoadMainLibrary(String name) {
   CHECK(!LogIfError(Dart_FinalizeLoading(true)));
 
   Dart_Handle library = Dart_LookupLibrary(StringToDart(dart_state(), name));
-  CHECK(!LogIfError(library));
-  CHECK(!DartInvokeAppField(library, ToDart("main"), 0, nullptr));
+  if (LogIfError(library))
+    exit(1);
+  if (DartInvokeAppField(library, ToDart("main"), 0, nullptr))
+    exit(1);
 }
 
 void DartController::DidLoadSnapshot() {
