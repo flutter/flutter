@@ -250,7 +250,7 @@ class BoxConstraints extends Constraints {
     return value;
   }
 
-  String toString() => "BoxConstraints($minWidth<=w<$maxWidth, $minHeight<=h<$maxHeight)";
+  String toString() => "BoxConstraints($minWidth<=w<=$maxWidth, $minHeight<=h<=$maxHeight)";
 }
 
 /// A hit test entry used by [RenderBox]
