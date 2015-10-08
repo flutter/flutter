@@ -230,6 +230,8 @@ class PhysicsBody {
 
   box2d.Body _body;
 
+  List<PhysicsJoint> _joints = [];
+
   bool _attached = false;
 
   void applyForce(Offset force, Point worldPoint) {
@@ -338,6 +340,13 @@ class PhysicsBody {
     _node = node;
 
     _attached = true;
+
+    // Attach any joints
+    for (PhysicsJoint joint in _joints) {
+      if (joint.bodyA._attached && joint.bodyB._attached) {
+        joint._attach(physicsNode);
+      }
+    }
   }
 
   void _detach() {
