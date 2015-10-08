@@ -220,6 +220,11 @@ abstract class Route {
 
   NavigatorState _navigator;
 
+  void setState(void fn()) {
+    assert(_navigator != null);
+    _navigator.setState(fn);
+  }
+
   void didPush(NavigatorState navigator) {
     assert(_navigator == null);
     _navigator = navigator;
