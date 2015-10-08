@@ -151,16 +151,18 @@ class TextureButton extends StatefulComponent {
   TextureButtonState createState() => new TextureButtonState();
 }
 
-class TextureButtonState extends ButtonState<TextureButton> {
-  Widget buildContent(BuildContext context) {
-    return new Listener(
+class TextureButtonState extends State<TextureButton> {
+  bool _highlight = false;
+
+  Widget build(BuildContext context) {
+    return new GestureDetector(
       child: new Container(
         width: config.width,
         height: config.height,
         child: new CustomPaint(
           callback: paintCallback,
           token: new _TextureButtonToken(
-            highlight,
+            _highlight,
             config.texture,
             config.textureDown,
             config.width,
@@ -168,9 +170,22 @@ class TextureButtonState extends ButtonState<TextureButton> {
           )
         )
       ),
-      onPointerUp: (_) {
+      onTapDown: () {
+        setState(() {
+          _highlight = true;
+        });
+      },
+      onTap: () {
+        setState(() {
+          _highlight = false;
+        });
         if (config.onPressed != null)
           config.onPressed();
+      },
+      onTapCancel: () {
+        setState(() {
+          _highlight = false;
+        });
       }
     );
   }
@@ -180,7 +195,7 @@ class TextureButtonState extends ButtonState<TextureButton> {
       return;
 
     canvas.save();
-    if (highlight && config.textureDown != null) {
+    if (_highlight && config.textureDown != null) {
       // Draw down state
       canvas.scale(size.width / config.textureDown.size.width, size.height / config.textureDown.size.height);
       config.textureDown.drawTexture(canvas, Point.origin, new Paint());
