@@ -7,6 +7,8 @@ import 'dart:collection';
 
 import 'package:sky/rendering.dart';
 
+// KEYS
+
 /// A Key is an identifier for [Widget]s and [Element]s. A new Widget will only
 /// be used to reconfigure an existing Element if its Key is the same as its
 /// original Widget's Key.
@@ -171,6 +173,8 @@ class GlobalObjectKey extends GlobalKey {
 }
 
 
+// WIDGETS
+
 /// A Widget object describes the configuration for an [Element].
 /// Widget subclasses should be immutable with const constructors.
 /// Widgets form a tree that is then inflated into an Element tree.
@@ -192,6 +196,8 @@ abstract class Widget {
 
   void debugFillDescription(List<String> description) { }
 }
+
+// TODO(ianh): move the next four classes to below InheritedWidget
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
 /// which wrap [RenderObject]s, which provide the actual rendering of the
@@ -382,16 +388,14 @@ abstract class State<T extends StatefulComponent> {
   }
 }
 
-abstract class ProxyWidget extends StatelessComponent {
-  const ProxyWidget({ Key key, Widget this.child }) : super(key: key);
+abstract class ProxyComponent extends Widget {
+  const ProxyComponent({ Key key, this.child }) : super(key: key);
 
   final Widget child;
-
-  Widget build(BuildContext context) => child;
 }
 
-abstract class ParentDataWidget extends ProxyWidget {
-  ParentDataWidget({ Key key, Widget child })
+abstract class ParentDataWidget extends ProxyComponent {
+  const ParentDataWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
   ParentDataElement createElement() => new ParentDataElement(this);
@@ -405,7 +409,7 @@ abstract class ParentDataWidget extends ProxyWidget {
   void applyParentData(RenderObject renderObject);
 }
 
-abstract class InheritedWidget extends ProxyWidget {
+abstract class InheritedWidget extends ProxyComponent {
   const InheritedWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -413,6 +417,9 @@ abstract class InheritedWidget extends ProxyWidget {
 
   bool updateShouldNotify(InheritedWidget oldWidget);
 }
+
+
+// ELEMENTS
 
 bool _canUpdate(Widget oldWidget, Widget newWidget) {
   return oldWidget.runtimeType == newWidget.runtimeType &&
@@ -637,6 +644,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
     assert(newWidget != null);
+    assert(newWidget != widget);
     assert(depth != null);
     assert(_active);
     assert(_canUpdate(widget, newWidget));
@@ -970,8 +978,8 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
 
 typedef Widget WidgetBuilder(BuildContext context);
 
-/// Base class for the instantiation of StatelessComponent and StatefulComponent
-/// widgets.
+/// Base class for the instantiation of StatelessComponent, StatefulComponent,
+/// and ProxyComponent widgets.
 abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
   ComponentElement(T widget) : super(widget);
 
@@ -1114,7 +1122,26 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
   }
 }
 
-class ParentDataElement extends StatelessComponentElement<ParentDataWidget> {
+abstract class ProxyElement<T extends ProxyComponent> extends ComponentElement<T> {
+  ProxyElement(T widget) : super(widget) {
+    _builder = (BuildContext context) => this.widget.child;
+  }
+
+  void update(T newWidget) {
+    T oldWidget = widget;
+    assert(widget != null);
+    assert(widget != newWidget);
+    super.update(newWidget);
+    assert(widget == newWidget);
+    notifyDescendants(oldWidget);
+    _dirty = true;
+    rebuild();
+  }
+
+  void notifyDescendants(T oldWidget);
+}
+
+class ParentDataElement extends ProxyElement<ParentDataWidget> {
   ParentDataElement(ParentDataWidget widget) : super(widget);
 
   void mount(Element parent, dynamic slot) {
@@ -1134,15 +1161,7 @@ class ParentDataElement extends StatelessComponentElement<ParentDataWidget> {
     super.mount(parent, slot);
   }
 
-  void update(ParentDataWidget newWidget) {
-    ParentDataWidget oldWidget = widget;
-    super.update(newWidget);
-    assert(widget == newWidget);
-    if (widget != oldWidget)
-      _notifyDescendants();
-  }
-
-  void _notifyDescendants() {
+  void notifyDescendants(ParentDataWidget oldWidget) {
     void notifyChildren(Element child) {
       if (child is RenderObjectElement)
         child.updateParentData(widget);
@@ -1153,20 +1172,14 @@ class ParentDataElement extends StatelessComponentElement<ParentDataWidget> {
   }
 }
 
-class InheritedElement extends StatelessComponentElement<InheritedWidget> {
+
+
+class InheritedElement extends ProxyElement<InheritedWidget> {
   InheritedElement(InheritedWidget widget) : super(widget);
 
-  void update(StatelessComponent newWidget) {
-    InheritedWidget oldWidget = widget;
-    super.update(newWidget);
-    assert(widget == newWidget);
-    if (widget.updateShouldNotify(oldWidget)) {
-      assert(widget != oldWidget);
-      _notifyDescendants();
-    }
-  }
-
-  void _notifyDescendants() {
+  void notifyDescendants(InheritedWidget oldWidget) {
+    if (!widget.updateShouldNotify(oldWidget))
+      return;
     final Type ourRuntimeType = widget.runtimeType;
     void notifyChildren(Element child) {
       if (child._dependencies != null &&
