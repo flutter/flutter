@@ -57,7 +57,6 @@ class TracingController : public mojo::common::DataPipeDrainer::Client {
   ShellView* view_;
   base::FilePath picture_tracing_base_path_;
   bool picture_tracing_enabled_;
-  base::TimeTicks trace_controller_start_;
 
   void StartDartTracing();
   void StartBaseTracing();
