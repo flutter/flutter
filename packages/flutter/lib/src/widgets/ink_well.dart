@@ -98,13 +98,17 @@ class _InkSplash {
   }
 }
 
+typedef _HighlightChangedCallback(bool value);
+
 class _RenderInkWell extends RenderProxyBox {
   _RenderInkWell({
     RenderBox child,
     GestureTapCallback onTap,
-    GestureLongPressCallback onLongPress
+    GestureLongPressCallback onLongPress,
+    _HighlightChangedCallback onHighlightChanged
   }) : super(child) {
     this.onTap = onTap;
+    this.onHighlightChanged = onHighlightChanged;
     this.onLongPress = onLongPress;
   }
 
@@ -112,6 +116,13 @@ class _RenderInkWell extends RenderProxyBox {
   GestureTapCallback _onTap;
   void set onTap (GestureTapCallback value) {
     _onTap = value;
+    _syncTapRecognizer();
+  }
+
+  _HighlightChangedCallback get onHighlightChanged => _onHighlightChanged;
+  _HighlightChangedCallback _onHighlightChanged;
+  void set onHighlightChanged (_HighlightChangedCallback value) {
+    _onHighlightChanged = value;
     _syncTapRecognizer();
   }
 
@@ -148,10 +159,11 @@ class _RenderInkWell extends RenderProxyBox {
   }
 
   void _syncTapRecognizer() {
-    if (onTap == null) {
+    if (onTap == null && onHighlightChanged == null) {
       _disposeTapRecognizer();
     } else {
       _tap ??= new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
+        ..onTapDown = _handleTapDown
         ..onTap = _handleTap
         ..onTapCancel = _handleTapCancel;
     }
@@ -176,13 +188,26 @@ class _RenderInkWell extends RenderProxyBox {
     _longPress = null;
   }
 
+  void _handleTapDown() {
+    if (onHighlightChanged != null)
+      onHighlightChanged(true);
+  }
+
   void _handleTap() {
-    _splashes.last?.confirm();
-    onTap();
+    if (_splashes.isNotEmpty)
+      _splashes.last.confirm();
+
+    if (onHighlightChanged != null)
+      onHighlightChanged(false);
+
+    if (onTap != null)
+      onTap();
   }
 
   void _handleTapCancel() {
     _splashes.last?.cancel();
+    if (onHighlightChanged != null)
+      onHighlightChanged(false);
   }
 
   void _handleLongPress() {
@@ -209,16 +234,19 @@ class InkWell extends OneChildRenderObjectWidget {
     Key key,
     Widget child,
     this.onTap,
+    this.onHighlightChanged,
     this.onLongPress
   }) : super(key: key, child: child);
 
   final GestureTapCallback onTap;
+  final _HighlightChangedCallback onHighlightChanged;
   final GestureLongPressCallback onLongPress;
 
-  _RenderInkWell createRenderObject() => new _RenderInkWell(onTap: onTap, onLongPress: onLongPress);
+  _RenderInkWell createRenderObject() => new _RenderInkWell(onTap: onTap, onHighlightChanged: onHighlightChanged, onLongPress: onLongPress);
 
   void updateRenderObject(_RenderInkWell renderObject, InkWell oldWidget) {
     renderObject.onTap = onTap;
+    renderObject.onHighlightChanged = onHighlightChanged;
     renderObject.onLongPress = onLongPress;
   }
 }

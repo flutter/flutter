@@ -26,7 +26,15 @@ class DrawerItem extends StatefulComponent {
   _DrawerItemState createState() => new _DrawerItemState();
 }
 
-class _DrawerItemState extends ButtonState<DrawerItem> {
+class _DrawerItemState extends State<DrawerItem> {
+  bool _highlight = false;
+
+  void _handleHighlightChanged(bool value) {
+    setState(() {
+      _highlight = value;
+    });
+  }
+
   TextStyle _getTextStyle(ThemeData themeData) {
     TextStyle result = themeData.text.body2;
     if (config.selected)
@@ -35,7 +43,7 @@ class _DrawerItemState extends ButtonState<DrawerItem> {
   }
 
   Color _getBackgroundColor(ThemeData themeData) {
-    if (highlight)
+    if (_highlight)
       return themeData.highlightColor;
     if (config.selected)
       return themeData.selectedColor;
@@ -48,7 +56,7 @@ class _DrawerItemState extends ButtonState<DrawerItem> {
     return new sky.ColorFilter.mode(const Color(0x73000000), sky.TransferMode.dstIn);
   }
 
-  Widget buildContent(BuildContext context) {
+  Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
 
     List<Widget> flexChildren = new List<Widget>();
@@ -80,6 +88,7 @@ class _DrawerItemState extends ButtonState<DrawerItem> {
       decoration: new BoxDecoration(backgroundColor: _getBackgroundColor(themeData)),
       child: new InkWell(
         onTap: config.onPressed,
+        onHighlightChanged: _handleHighlightChanged,
         child: new Row(flexChildren)
       )
     );
