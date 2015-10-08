@@ -14,6 +14,9 @@ enum IconThemeColor { white, black }
 class IconThemeData {
   const IconThemeData({ this.color });
   final IconThemeColor color;
+
+  bool operator==(other) => other.runtimeType == runtimeType && other.color == color;
+  int get hashCode => color.hashCode;
 }
 
 class IconTheme extends InheritedWidget {
