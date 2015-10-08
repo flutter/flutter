@@ -25,11 +25,19 @@ abstract class MaterialButton extends StatefulComponent {
   final GestureTapCallback onPressed;
 }
 
-abstract class MaterialButtonState<T extends MaterialButton> extends ButtonState<T> {
+abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
+  bool highlight = false;
+
   Color getColor(BuildContext context);
   int get level;
 
-  Widget buildContent(BuildContext context) {
+  void _handleHighlightChanged(bool value) {
+    setState(() {
+      highlight = value;
+    });
+  }
+
+  Widget build(BuildContext context) {
     Widget contents = new Container(
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       child: new Center(
@@ -47,6 +55,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends ButtonState
         color: getColor(context),
         child: new InkWell(
           onTap: config.enabled ? config.onPressed : null,
+          onHighlightChanged: config.enabled ? _handleHighlightChanged : null,
           child: contents
         )
       )
