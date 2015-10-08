@@ -183,7 +183,57 @@ class PhysicsNode extends Node {
           }
         }
       }
+
       canvas.restore();
+
+      // Draw contacts
+      for (box2d.ContactEdge edge = body.getContactList(); edge != null; edge = edge.next) {
+        box2d.Contact contact = edge.contact;
+        Vector2 cA = new Vector2.zero();
+        Vector2 cB = new Vector2.zero();
+
+        box2d.Fixture fixtureA = contact.fixtureA;
+        box2d.Fixture fixtureB = contact.fixtureB;
+
+        fixtureA.getAABB(contact.getChildIndexA()).getCenterToOut(cA);
+        fixtureB.getAABB(contact.getChildIndexB()).getCenterToOut(cB);
+
+        Point p1 = new Point(
+          cA.x * b2WorldToNodeConversionFactor,
+          cA.y * b2WorldToNodeConversionFactor
+        );
+
+        Point p2 = new Point(
+          cB.x * b2WorldToNodeConversionFactor,
+          cB.y * b2WorldToNodeConversionFactor
+        );
+
+        shapePaint.color = new Color(0x33ffffff);
+        canvas.drawLine(p1, p2, shapePaint);
+
+        box2d.WorldManifold worldManifold = new box2d.WorldManifold();
+        contact.getWorldManifold(worldManifold);
+
+        shapePaint.color = new Color(0xffffffff);
+
+        for (Vector2 pt in worldManifold.points) {
+          Point pCenter = new Point(
+            pt.x * b2WorldToNodeConversionFactor,
+            pt.y * b2WorldToNodeConversionFactor
+          );
+          Offset offset = new Offset(
+            worldManifold.normal.x * 5.0,
+            worldManifold.normal.y * 5.0
+          );
+
+          Point p2 = pCenter + offset;
+          Point p1 = new Point(pCenter.x - offset.dx, pCenter.y - offset.dy);
+          canvas.drawLine(p1, p2, shapePaint);
+          canvas.drawCircle(pCenter, 5.0, shapePaint);
+        }
+      }
+
+
     }
   }
 }
@@ -195,7 +245,9 @@ class PhysicsContact {
     this.shapeA,
     this.shapeB,
     this.isTouching,
-    this.isEnabled
+    this.isEnabled,
+    this.touchingPoints,
+    this.touchingNormal
   );
 
   final Node nodeA;
@@ -204,6 +256,8 @@ class PhysicsContact {
   final PhysicsShape shapeB;
   final isTouching;
   bool isEnabled;
+  final List<Point> touchingPoints;
+  final Offset touchingNormal;
 }
 
 class _ContactCallbackInfo {
@@ -264,18 +318,34 @@ class _ContactHandler extends box2d.ContactListener {
 
       if (match) {
         // We have contact and a matched callback, setup contact info
+        List<Point> touchingPoints = null;
+        Offset touchingNormal = null;
+
+        // Fetch touching points, if any
+        if (b2Contact.isTouching()) {
+          box2d.WorldManifold manifold = new box2d.WorldManifold();
+          b2Contact.getWorldManifold(manifold);
+          touchingNormal = new Offset(manifold.normal.x, manifold.normal.y);
+          touchingPoints = [];
+          for (Vector2 vec in manifold.points) {
+            touchingPoints.add(new Point(
+              vec.x * physicsNode.b2WorldToNodeConversionFactor,
+              vec.y * physicsNode.b2WorldToNodeConversionFactor
+            ));
+          }
+        }
+
+        // Create the contact
         PhysicsContact contact = new PhysicsContact(
           bodyA._node,
           bodyB._node,
           fixtureA.userData,
           fixtureB.userData,
           b2Contact.isTouching(),
-          b2Contact.isEnabled()
+          b2Contact.isEnabled(),
+          touchingPoints,
+          touchingNormal
         );
-
-        if (type == PhysicsContactType.postSolve) {
-
-        }
 
         // Make callback
         info.callback(type, contact);
