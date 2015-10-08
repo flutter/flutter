@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "base/bind.h"
+#include "base/trace_event/trace_event.h"
 #include "base/message_loop/message_loop.h"
 #include "sky/engine/core/loader/CanvasImageDecoder.h"
 #include "sky/engine/core/painting/CanvasImage.h"
@@ -51,6 +52,7 @@ void CanvasImageDecoder::OnDataAvailable(const void* data, size_t num_bytes) {
 }
 
 void CanvasImageDecoder::OnDataComplete() {
+  TRACE_EVENT0("blink", "CanvasImageDecoder::OnDataComplete");
   OwnPtr<ImageDecoder> decoder =
       ImageDecoder::create(*buffer_.get(), ImageSource::AlphaPremultiplied,
                            ImageSource::GammaAndColorProfileIgnored);
