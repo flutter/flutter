@@ -172,14 +172,15 @@ abstract class RenderStackBase extends RenderBox
       child = parentData.nextSibling;
     }
 
-    if (hasNonPositionedChildren)
+    if (hasNonPositionedChildren) {
       size = new Size(width, height);
-    else
+      assert(size.width == constraints.constrainWidth(width));
+      assert(size.height == constraints.constrainHeight(height));
+    } else {
       size = constraints.biggest;
+    }
 
     assert(!size.isInfinite);
-    assert(size.width == constraints.constrainWidth(width));
-    assert(size.height == constraints.constrainHeight(height));
 
     child = firstChild;
     while (child != null) {
