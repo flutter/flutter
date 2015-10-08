@@ -9,7 +9,6 @@ export 'src/widgets/animated_container.dart';
 export 'src/widgets/app.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
-export 'src/widgets/button_state.dart';
 export 'src/widgets/card.dart';
 export 'src/widgets/checkbox.dart';
 export 'src/widgets/date_picker.dart';
