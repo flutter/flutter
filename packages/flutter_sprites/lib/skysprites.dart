@@ -33,6 +33,7 @@ part 'node3d.dart';
 part 'node_with_size.dart';
 part 'particle_system.dart';
 part 'physics_body.dart';
+part 'physics_joint.dart';
 part 'physics_node.dart';
 part 'physics_shape.dart';
 part 'sound.dart';
