@@ -61,7 +61,7 @@ class PaintingContext {
     _startRecording(paintBounds);
   }
 
-  /// Construct a painting context for paiting into the given layer with the given bounds
+  /// Construct a painting context for painting into the given layer with the given bounds
   PaintingContext.withLayer(ContainerLayer containerLayer, Rect paintBounds) {
     _containerLayer = containerLayer;
     _startRecording(paintBounds);
