@@ -10,6 +10,12 @@ void main() {
     });
   });
 
+  test('Can construct an empty Centered Stack', () {
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Center(child: new Stack([])));
+    });
+  });
+
   test('Can change position data', () {
     testWidgets((WidgetTester tester) {
       Key key = new Key('container');
@@ -105,6 +111,12 @@ void main() {
   test('Can construct an empty IndexedStack', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new IndexedStack([]));
+    });
+  });
+
+  test('Can construct an empty Centered IndexedStack', () {
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Center(child: new IndexedStack([])));
     });
   });
 
