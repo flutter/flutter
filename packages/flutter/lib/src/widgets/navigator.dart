@@ -245,6 +245,10 @@ abstract class Route {
 }
 
 abstract class PerformanceRoute extends Route {
+  PerformanceRoute() {
+    _performance = createPerformance();
+  }
+
   PerformanceView get performance => _performance?.view;
   Performance _performance;
 
@@ -261,7 +265,6 @@ abstract class PerformanceRoute extends Route {
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
 
   void didPush(NavigatorState navigator) {
-    _performance = createPerformance();
     super.didPush(navigator);
     _performance?.forward();
   }
