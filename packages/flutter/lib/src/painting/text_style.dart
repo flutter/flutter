@@ -152,6 +152,9 @@ class TextStyle {
     return toCSS[decorationStyle];
   }
 
+  sky.TextStyle get textStyle => null;
+  sky.ParagraphStyle get paragraphStyle => null;
+
   /// Program this text style into the engine
   ///
   /// Note: This function will likely be removed when we refactor the interface
