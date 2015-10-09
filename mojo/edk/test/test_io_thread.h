@@ -17,8 +17,8 @@ namespace test {
 // Class to help create/run threads with I/O |MessageLoop|s in tests.
 class TestIOThread {
  public:
-  enum Mode { kAutoStart, kManualStart };
-  explicit TestIOThread(Mode mode);
+  enum class StartMode { AUTO, MANUAL };
+  explicit TestIOThread(StartMode start_mode);
   // Stops the I/O thread if necessary.
   ~TestIOThread();
 

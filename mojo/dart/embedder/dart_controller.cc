@@ -40,6 +40,16 @@ static const char* kInternalLibURL = "dart:_internal";
 static const char* kIsolateLibURL = "dart:isolate";
 static const char* kCoreLibURL = "dart:core";
 
+// Notes on isolate startup order:
+// 1) vm-service isolate is spawned by the VM when Dart_Initialize is called.
+// 2) mojo-handle-watcher is spawned by from the vm-service isolate.
+// 3) ... application isolates ...
+// 4) stop-handle-watcher is spawned to shutdown the handle watcher isolate
+//    before the controller exits.
+static const char* kVmServiceIsolateUri = "vm-service";
+static const char* kStopHandleWatcherIsolateUri = "stop-handle-watcher";
+static const char* kHandleWatcherIsolateUri = "mojo-handle-watcher";
+
 static uint8_t snapshot_magic_number[] = { 0xf5, 0xf5, 0xdc, 0xdc };
 
 static Dart_Handle SetWorkingDirectory(Dart_Handle builtin_lib) {
@@ -267,10 +277,15 @@ Dart_Isolate DartController::CreateIsolateHelper(
     void* dart_app,
     bool strict_compilation,
     IsolateCallbacks callbacks,
-    const std::string& script_uri,
+    std::string script_uri,
     const std::string& package_root,
     char** error,
     bool use_network_loader) {
+  if ((script_uri == kVmServiceIsolateUri) && service_isolate_spawned_) {
+    // Rewrite the uri so that it is easier to differentiate the actual service
+    // isolate from the handle watcher isolate.
+    script_uri = kHandleWatcherIsolateUri;
+  }
   auto isolate_data = new MojoDartState(dart_app,
                                         strict_compilation,
                                         callbacks,
@@ -326,6 +341,7 @@ Dart_Isolate DartController::CreateIsolateHelper(
 
     // The VM is creating the service isolate.
     if (Dart_IsServiceIsolate(isolate)) {
+      service_isolate_spawned_ = true;
       const intptr_t port = SupportDartMojoIo() ? 0 : -1;
       InitializeDartMojoIo();
       StartHandleWatcherIsolate();
@@ -336,7 +352,8 @@ Dart_Isolate DartController::CreateIsolateHelper(
       return isolate;
     }
 
-    if ((script_uri == "vm-service") || (script_uri == "stop-handle-watcher")) {
+    if ((script_uri == kHandleWatcherIsolateUri) ||
+        (script_uri == kStopHandleWatcherIsolateUri)) {
       // Special case for starting and stopping the the handle watcher isolate.
       LoadEmptyScript(script_uri);
     } else {
@@ -397,7 +414,7 @@ Dart_Isolate DartController::IsolateCreateCallback(const char* script_uri,
   }
   // Inherit parameters from parent isolate (if any).
   void* dart_app = nullptr;
-  bool strict_compilation = true;
+  bool strict_compilation = false;
   // TODO(johnmccutchan): Use parent's setting?
   bool use_network_loader = false;
   IsolateCallbacks callbacks;
@@ -444,6 +461,7 @@ void DartController::UnhandledExceptionCallback(Dart_Handle error) {
 
 bool DartController::initialized_ = false;
 bool DartController::service_isolate_running_ = false;
+bool DartController::service_isolate_spawned_ = false;
 bool DartController::strict_compilation_ = false;
 DartControllerServiceConnector* DartController::service_connector_ = nullptr;
 base::Lock DartController::lock_;
@@ -531,7 +549,13 @@ void DartController::StopHandleWatcherIsolate() {
   IsolateCallbacks callbacks;
   char* error;
   Dart_Isolate shutdown_isolate = CreateIsolateHelper(
-      nullptr, false, callbacks, "stop-handle-watcher", "", &error, false);
+      nullptr,
+      false,
+      callbacks,
+      kStopHandleWatcherIsolateUri,
+      "",
+      &error,
+      false);
   CHECK(shutdown_isolate);
 
   Dart_EnterIsolate(shutdown_isolate);
@@ -594,15 +618,17 @@ void DartController::InitVmIfNeeded(Dart_EntropySource entropy,
   // This should be called before calling Dart_Initialize.
   tonic::DartDebugger::InitDebugger();
 
-  result = Dart_Initialize(vm_isolate_snapshot_buffer,
-                           IsolateCreateCallback,
-                           nullptr,  // Isolate interrupt callback.
-                           UnhandledExceptionCallback,
-                           IsolateShutdownCallback,
-                           // File IO callbacks.
-                           nullptr, nullptr, nullptr, nullptr,
-                           entropy);
-  CHECK(result);
+  const char* error = Dart_Initialize(
+      vm_isolate_snapshot_buffer,
+      nullptr, // Precompiled instructions
+      IsolateCreateCallback,
+      nullptr,  // Isolate interrupt callback.
+      UnhandledExceptionCallback,
+      IsolateShutdownCallback,
+      // File IO callbacks.
+      nullptr, nullptr, nullptr, nullptr,
+      entropy);
+  CHECK(error == nullptr);
   initialized_ = true;
 }
 

@@ -372,7 +372,7 @@ class IPCSupportTest : public testing::Test {
  public:
   // Note: Run master process delegate methods on the I/O thread.
   IPCSupportTest()
-      : test_io_thread_(TestIOThread::kAutoStart),
+      : test_io_thread_(TestIOThread::StartMode::AUTO),
         master_ipc_support_(&platform_support_,
                             embedder::ProcessType::MASTER,
                             test_io_thread_.task_runner(),
@@ -686,7 +686,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlaveInternal) {
   ASSERT_TRUE(client_platform_handle.is_valid());
 
   embedder::SimplePlatformSupport platform_support;
-  TestIOThread test_io_thread(TestIOThread::kAutoStart);
+  TestIOThread test_io_thread(TestIOThread::StartMode::AUTO);
   TestSlaveProcessDelegate slave_process_delegate;
   // Note: Run process delegate methods on the I/O thread.
   IPCSupport ipc_support(&platform_support, embedder::ProcessType::SLAVE,

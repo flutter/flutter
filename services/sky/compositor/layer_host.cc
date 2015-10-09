@@ -119,7 +119,7 @@ void LayerHost::Upload(TextureLayer* layer) {
       resource_manager_.CreateTransferableResource(layer);
 
   mojo::QuadPtr quad = mojo::Quad::New();
-  quad->material = mojo::MATERIAL_TEXTURE_CONTENT;
+  quad->material = mojo::Material::TEXTURE_CONTENT;
 
   mojo::RectPtr rect = mojo::Rect::New();
   rect->width = size.width();

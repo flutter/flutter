@@ -11,9 +11,9 @@
 
 #include <stdint.h>
 
-#include "base/threading/simple_thread.h"
 #include "mojo/edk/system/mutex.h"
 #include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/test/simple_test_thread.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -23,11 +23,10 @@ namespace {
 
 const unsigned kPollTimeMs = 10;
 
-class WaitingThread : public base::SimpleThread {
+class WaitingThread : public mojo::test::SimpleTestThread {
  public:
   explicit WaitingThread(MojoDeadline deadline)
-      : base::SimpleThread("waiting_thread"),
-        deadline_(deadline),
+      : deadline_(deadline),
         done_(false),
         result_(MOJO_RESULT_UNKNOWN),
         context_(static_cast<uint32_t>(-1)) {

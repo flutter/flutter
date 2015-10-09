@@ -214,7 +214,7 @@ void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
       *viewport_metrics_->size));
 
   mojo::QuadPtr quad = mojo::Quad::New();
-  quad->material = mojo::MATERIAL_SURFACE_CONTENT;
+  quad->material = mojo::Material::SURFACE_CONTENT;
   quad->rect = bounds.Clone();
   quad->opaque_rect = bounds.Clone();
   quad->visible_rect = bounds.Clone();

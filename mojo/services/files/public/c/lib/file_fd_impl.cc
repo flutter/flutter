@@ -31,7 +31,7 @@ bool FileFDImpl::Close() {
   ErrnoImpl::Setter errno_setter(errno_impl());
   MOJO_DCHECK(file_);
 
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   file_->Close(Capture(&error));
   if (!file_.WaitForIncomingResponse())
     return errno_setter.Set(ESTALE);
@@ -43,7 +43,7 @@ std::unique_ptr<FDImpl> FileFDImpl::Dup() {
   MOJO_DCHECK(file_);
 
   mojo::files::FilePtr new_file;
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   file_->Dup(mojo::GetProxy(&new_file), Capture(&error));
   if (!file_.WaitForIncomingResponse()) {
     errno_setter.Set(ESTALE);
@@ -62,7 +62,7 @@ bool FileFDImpl::Ftruncate(mojio_off_t length) {
   if (length < 0)
     return errno_setter.Set(EINVAL);
 
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   file_->Truncate(static_cast<int64_t>(length), Capture(&error));
   if (!file_.WaitForIncomingResponse())
     return errno_setter.Set(ESTALE);
@@ -76,20 +76,20 @@ mojio_off_t FileFDImpl::Lseek(mojio_off_t offset, int whence) {
   mojo::files::Whence mojo_whence;
   switch (whence) {
     case MOJIO_SEEK_SET:
-      mojo_whence = mojo::files::WHENCE_FROM_START;
+      mojo_whence = mojo::files::Whence::FROM_START;
       break;
     case MOJIO_SEEK_CUR:
-      mojo_whence = mojo::files::WHENCE_FROM_CURRENT;
+      mojo_whence = mojo::files::Whence::FROM_CURRENT;
       break;
     case MOJIO_SEEK_END:
-      mojo_whence = mojo::files::WHENCE_FROM_END;
+      mojo_whence = mojo::files::Whence::FROM_END;
       break;
     default:
       errno_setter.Set(EINVAL);
       return -1;
   }
 
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   int64_t position = -1;
   file_->Seek(static_cast<int64_t>(offset), mojo_whence,
               Capture(&error, &position));
@@ -137,9 +137,10 @@ mojio_ssize_t FileFDImpl::Read(void* buf, size_t count) {
     return -1;
   }
 
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   mojo::Array<uint8_t> bytes_read;
-  file_->Read(static_cast<uint32_t>(count), 0, mojo::files::WHENCE_FROM_CURRENT,
+  file_->Read(static_cast<uint32_t>(count), 0,
+              mojo::files::Whence::FROM_CURRENT,
               Capture(&error, &bytes_read));
   if (!file_.WaitForIncomingResponse()) {
     errno_setter.Set(ESTALE);
@@ -184,9 +185,9 @@ mojio_ssize_t FileFDImpl::Write(const void* buf, size_t count) {
   if (count > 0)
     memcpy(&bytes_to_write[0], buf, count);
 
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   uint32_t num_bytes_written = 0;
-  file_->Write(bytes_to_write.Pass(), 0, mojo::files::WHENCE_FROM_CURRENT,
+  file_->Write(bytes_to_write.Pass(), 0, mojo::files::Whence::FROM_CURRENT,
                Capture(&error, &num_bytes_written));
   if (!file_.WaitForIncomingResponse()) {
     errno_setter.Set(ESTALE);
@@ -216,7 +217,7 @@ bool FileFDImpl::Fstat(struct mojio_stat* buf) {
   }
 
   mojo::files::FileInformationPtr file_info;
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   file_->Stat(Capture(&error, &file_info));
   if (!file_.WaitForIncomingResponse()) {
     errno_setter.Set(ESTALE);
@@ -239,12 +240,12 @@ bool FileFDImpl::Fstat(struct mojio_stat* buf) {
   // Leave |st_ino| zero.
   buf->st_mode = MOJIO_S_IRWXU;
   switch (file_info->type) {
-    case mojo::files::FILE_TYPE_UNKNOWN:
+    case mojo::files::FileType::UNKNOWN:
       break;
-    case mojo::files::FILE_TYPE_REGULAR_FILE:
+    case mojo::files::FileType::REGULAR_FILE:
       buf->st_mode |= MOJIO_S_IFREG;
       break;
-    case mojo::files::FILE_TYPE_DIRECTORY:
+    case mojo::files::FileType::DIRECTORY:
       buf->st_mode |= MOJIO_S_IFDIR;
       break;
     default:

@@ -71,7 +71,7 @@ TEST_F(SurfaceLibQuadTest, ColorQuad) {
 
   QuadPtr mojo_quad = Quad::From<cc::DrawQuad>(*color_quad);
   ASSERT_FALSE(mojo_quad.is_null());
-  EXPECT_EQ(MATERIAL_SOLID_COLOR, mojo_quad->material);
+  EXPECT_EQ(Material::SOLID_COLOR, mojo_quad->material);
   EXPECT_EQ(Rect::From(rect), mojo_quad->rect);
   EXPECT_EQ(Rect::From(opaque_rect), mojo_quad->opaque_rect);
   EXPECT_EQ(Rect::From(visible_rect), mojo_quad->visible_rect);
@@ -91,7 +91,7 @@ TEST_F(SurfaceLibQuadTest, SurfaceQuad) {
 
   QuadPtr mojo_quad = Quad::From<cc::DrawQuad>(*surface_quad);
   ASSERT_FALSE(mojo_quad.is_null());
-  EXPECT_EQ(MATERIAL_SURFACE_CONTENT, mojo_quad->material);
+  EXPECT_EQ(Material::SURFACE_CONTENT, mojo_quad->material);
   ASSERT_TRUE(mojo_quad->surface_quad_state);
   SurfaceQuadStatePtr& mojo_surface_state = mojo_quad->surface_quad_state;
   EXPECT_EQ(SurfaceId::From(arbitrary_id),
@@ -125,7 +125,7 @@ TEST_F(SurfaceLibQuadTest, TextureQuad) {
 
   QuadPtr mojo_quad = Quad::From<cc::DrawQuad>(*texture_quad);
   ASSERT_FALSE(mojo_quad.is_null());
-  EXPECT_EQ(MATERIAL_TEXTURE_CONTENT, mojo_quad->material);
+  EXPECT_EQ(Material::TEXTURE_CONTENT, mojo_quad->material);
   ASSERT_TRUE(mojo_quad->texture_quad_state);
   TextureQuadStatePtr& mojo_texture_state = mojo_quad->texture_quad_state;
   EXPECT_EQ(resource_id, mojo_texture_state->resource_id);
@@ -142,7 +142,7 @@ TEST_F(SurfaceLibQuadTest, TextureQuad) {
 
 TEST_F(SurfaceLibQuadTest, TextureQuadEmptyVertexOpacity) {
   QuadPtr mojo_texture_quad = Quad::New();
-  mojo_texture_quad->material = MATERIAL_TEXTURE_CONTENT;
+  mojo_texture_quad->material = Material::TEXTURE_CONTENT;
   TextureQuadStatePtr mojo_texture_state = TextureQuadState::New();
   mojo_texture_state->background_color = Color::New();
   mojo_texture_quad->texture_quad_state = mojo_texture_state.Pass();
@@ -158,7 +158,7 @@ TEST_F(SurfaceLibQuadTest, TextureQuadEmptyVertexOpacity) {
 
 TEST_F(SurfaceLibQuadTest, TextureQuadEmptyBackgroundColor) {
   QuadPtr mojo_texture_quad = Quad::New();
-  mojo_texture_quad->material = MATERIAL_TEXTURE_CONTENT;
+  mojo_texture_quad->material = Material::TEXTURE_CONTENT;
   TextureQuadStatePtr mojo_texture_state = TextureQuadState::New();
   mojo_texture_state->vertex_opacity = mojo::Array<float>::New(4);
   mojo_texture_quad->texture_quad_state = mojo_texture_state.Pass();

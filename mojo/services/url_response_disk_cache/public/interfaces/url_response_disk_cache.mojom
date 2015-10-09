@@ -24,10 +24,17 @@ interface URLResponseDiskCache {
    // to store content. This service guarantee that |cache_dir_path| will be
    // emptied when |file_path| content changes. For example, a content handler
    // that is backed by a VM that compiles files could have the VM use this
-   // directory to cache the compiled files.
+   // directory to cache the compiled files. After |Get| has been called and a
+   // response is returned, the caller must call |Validate| or |Update| to
+   // revalidate the entry. If this is not done, a future call to |Get| may
+   // return null.
    Get(string url) => (mojo.URLResponse? response,
                        array<uint8>? file_path,
                        array<uint8>? cache_dir_path);
+
+   // Validate the cache for the given |url|. This will enforce that |Get| will
+   // return an entry if it exists.
+   Validate(string url);
 
    // Update the cache with the given response.
    Update(mojo.URLResponse response);

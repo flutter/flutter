@@ -45,7 +45,7 @@ mojo::FramePtr TextureUploader::GetUploadFrame(
 
   mojo::TransferableResourcePtr resource = mojo::TransferableResource::New();
   resource->id = resource_id;
-  resource->format = mojo::RESOURCE_FORMAT_RGBA_8888;
+  resource->format = mojo::ResourceFormat::RGBA_8888;
   resource->filter = GL_LINEAR;
   resource->size = size.Clone();
   mojo::MailboxHolderPtr mailbox_holder = mojo::MailboxHolder::New();
@@ -59,7 +59,7 @@ mojo::FramePtr TextureUploader::GetUploadFrame(
   resource->is_software = false;
 
   mojo::QuadPtr quad = mojo::Quad::New();
-  quad->material = mojo::MATERIAL_TEXTURE_CONTENT;
+  quad->material = mojo::Material::TEXTURE_CONTENT;
 
   mojo::RectPtr rect = mojo::Rect::New();
   rect->width = size.width;

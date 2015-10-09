@@ -9,10 +9,10 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_vector.h"
 #include "base/synchronization/waitable_event.h"
-#include "base/threading/simple_thread.h"
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/waiter.h"
+#include "mojo/edk/test/simple_test_thread.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -115,7 +115,7 @@ TEST(DispatcherTest, Basic) {
   EXPECT_EQ(0u, hss.satisfiable_signals);
 }
 
-class ThreadSafetyStressThread : public base::SimpleThread {
+class ThreadSafetyStressThread : public mojo::test::SimpleTestThread {
  public:
   enum DispatcherOp {
     CLOSE = 0,
@@ -137,10 +137,7 @@ class ThreadSafetyStressThread : public base::SimpleThread {
   ThreadSafetyStressThread(base::WaitableEvent* event,
                            scoped_refptr<Dispatcher> dispatcher,
                            DispatcherOp op)
-      : base::SimpleThread("thread_safety_stress_thread"),
-        event_(event),
-        dispatcher_(dispatcher),
-        op_(op) {
+      : event_(event), dispatcher_(dispatcher), op_(op) {
     CHECK_LE(0, op_);
     CHECK_LT(op_, DISPATCHER_OP_COUNT);
   }

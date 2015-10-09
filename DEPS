@@ -19,7 +19,7 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'mojo_sdk_revision': '033ebba671eced78b155862a1484ec1087b111e0',
+  'mojo_sdk_revision': '56e62e2ecf2052becf04a321fdc80e90600a75bd',
   'mojo_devtools_revision': '49879d78ce4486e10c2214a101d9b2e82794b2f4',
   'skia_revision': '0d39d37ddcfb3847795639eaef513f1112eba627',
 
@@ -29,7 +29,7 @@ vars = {
   'dart_observatory_packages_revision': 'a731d3b1caf27b45aecdce9378b87a510240264d',
   'dart_root_certificates_revision': 'c3a41df63afacec62fcb8135196177e35fe72f71',
 
-  'buildtools_revision': '5215ee866bc3e8eb4a7f124212845abf4029e60b',
+  'buildtools_revision': '565d04e8741429fb1b4f26d102f2c6c3b849edeb',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.

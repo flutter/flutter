@@ -16,7 +16,6 @@
 #include "base/logging.h"
 #include "base/memory/scoped_vector.h"
 #include "base/synchronization/waitable_event.h"
-#include "base/threading/simple_thread.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/platform_handle.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
@@ -25,6 +24,7 @@
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/transport_data.h"
 #include "mojo/edk/test/scoped_test_dir.h"
+#include "mojo/edk/test/simple_test_thread.h"
 #include "mojo/edk/test/test_io_thread.h"
 #include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/make_unique.h"
@@ -73,7 +73,7 @@ bool WriteTestMessageToHandle(const embedder::PlatformHandle& handle,
 
 class RawChannelTest : public testing::Test {
  public:
-  RawChannelTest() : io_thread_(mojo::test::TestIOThread::kManualStart) {}
+  RawChannelTest() : io_thread_(mojo::test::TestIOThread::StartMode::MANUAL) {}
   ~RawChannelTest() override {}
 
   void SetUp() override {
@@ -308,12 +308,10 @@ TEST_F(RawChannelTest, OnReadMessage) {
 
 // RawChannelTest.WriteMessageAndOnReadMessage ---------------------------------
 
-class RawChannelWriterThread : public base::SimpleThread {
+class RawChannelWriterThread : public mojo::test::SimpleTestThread {
  public:
   RawChannelWriterThread(RawChannel* raw_channel, size_t write_count)
-      : base::SimpleThread("raw_channel_writer_thread"),
-        raw_channel_(raw_channel),
-        left_to_write_(write_count) {}
+      : raw_channel_(raw_channel), left_to_write_(write_count) {}
 
   ~RawChannelWriterThread() override { Join(); }
 

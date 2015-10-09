@@ -25,10 +25,10 @@ void MojioImplTestBase::SetUp() {
   mojo::files::FilesPtr files;
   application_impl()->ConnectToService("mojo:files", &files);
 
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   files->OpenFileSystem(nullptr, mojo::GetProxy(&directory_), Capture(&error));
   MOJO_CHECK(files.WaitForIncomingResponse());
-  MOJO_CHECK(error == mojo::files::ERROR_OK);
+  MOJO_CHECK(error == mojo::files::Error::OK);
 }
 
 }  // namespace test

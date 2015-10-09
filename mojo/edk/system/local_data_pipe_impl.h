@@ -31,9 +31,9 @@ class LocalDataPipeImpl final : public DataPipeImpl {
                                UserPointer<uint32_t> num_bytes,
                                uint32_t max_num_bytes_to_write,
                                uint32_t min_num_bytes_to_write) override;
-  MojoResult ProducerBeginWriteData(UserPointer<void*> buffer,
-                                    UserPointer<uint32_t> buffer_num_bytes,
-                                    uint32_t min_num_bytes_to_write) override;
+  MojoResult ProducerBeginWriteData(
+      UserPointer<void*> buffer,
+      UserPointer<uint32_t> buffer_num_bytes) override;
   MojoResult ProducerEndWriteData(uint32_t num_bytes_written) override;
   HandleSignalsState ProducerGetHandleSignalsState() const override;
   void ProducerStartSerialize(Channel* channel,
@@ -54,9 +54,9 @@ class LocalDataPipeImpl final : public DataPipeImpl {
                                  uint32_t max_num_bytes_to_discard,
                                  uint32_t min_num_bytes_to_discard) override;
   MojoResult ConsumerQueryData(UserPointer<uint32_t> num_bytes) override;
-  MojoResult ConsumerBeginReadData(UserPointer<const void*> buffer,
-                                   UserPointer<uint32_t> buffer_num_bytes,
-                                   uint32_t min_num_bytes_to_read) override;
+  MojoResult ConsumerBeginReadData(
+      UserPointer<const void*> buffer,
+      UserPointer<uint32_t> buffer_num_bytes) override;
   MojoResult ConsumerEndReadData(uint32_t num_bytes_read) override;
   HandleSignalsState ConsumerGetHandleSignalsState() const override;
   void ConsumerStartSerialize(Channel* channel,

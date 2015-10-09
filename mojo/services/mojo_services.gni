@@ -8,12 +8,12 @@
 # //mojo/services/X/public/interfaces to this list.
 
 mojo_services = [
-  "//mojo/services/accessibility/public/interfaces",
   "//mojo/services/asset_bundle/public/interfaces",
   "//mojo/services/authenticating_url_loader_interceptor/public/interfaces",
   "//mojo/services/authentication/public/interfaces",
-  "//mojo/services/camera_roll/public/interfaces",
+  "//mojo/services/camera/public/interfaces",
   "//mojo/services/clipboard/public/interfaces",
+  "//mojo/services/contacts/public/interfaces",
   "//mojo/services/content_handler/public/interfaces",
   "//mojo/services/device_info/public/interfaces",
   "//mojo/services/files/public/interfaces",
@@ -24,6 +24,7 @@ mojo_services = [
   "//mojo/services/input_events/public/interfaces",
   "//mojo/services/keyboard/public/interfaces",
   "//mojo/services/location/public/interfaces",
+  "//mojo/services/native_support/public/interfaces",
   "//mojo/services/native_viewport/public/interfaces",
   "//mojo/services/navigation/public/interfaces",
   "//mojo/services/network/public/interfaces",

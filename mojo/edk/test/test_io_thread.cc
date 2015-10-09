@@ -21,13 +21,13 @@ void PostTaskAndWaitHelper(base::WaitableEvent* event,
 
 }  // namespace
 
-TestIOThread::TestIOThread(Mode mode)
+TestIOThread::TestIOThread(StartMode start_mode)
     : io_thread_("test_io_thread"), io_thread_started_(false) {
-  switch (mode) {
-    case kAutoStart:
+  switch (start_mode) {
+    case StartMode::AUTO:
       Start();
       return;
-    case kManualStart:
+    case StartMode::MANUAL:
       return;
   }
   CHECK(false) << "Invalid mode";

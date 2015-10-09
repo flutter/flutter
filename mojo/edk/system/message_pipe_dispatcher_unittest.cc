@@ -15,11 +15,11 @@
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_vector.h"
-#include "base/threading/simple_thread.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/system/waiter_test_utils.h"
+#include "mojo/edk/test/simple_test_thread.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -472,15 +472,14 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
 
 const size_t kMaxMessageSize = 2000;
 
-class WriterThread : public base::SimpleThread {
+class WriterThread : public mojo::test::SimpleTestThread {
  public:
   // |*messages_written| and |*bytes_written| belong to the thread while it's
   // alive.
   WriterThread(scoped_refptr<Dispatcher> write_dispatcher,
                size_t* messages_written,
                size_t* bytes_written)
-      : base::SimpleThread("writer_thread"),
-        write_dispatcher_(write_dispatcher),
+      : write_dispatcher_(write_dispatcher),
         messages_written_(messages_written),
         bytes_written_(bytes_written) {
     *messages_written_ = 0;
@@ -523,14 +522,13 @@ class WriterThread : public base::SimpleThread {
   MOJO_DISALLOW_COPY_AND_ASSIGN(WriterThread);
 };
 
-class ReaderThread : public base::SimpleThread {
+class ReaderThread : public mojo::test::SimpleTestThread {
  public:
   // |*messages_read| and |*bytes_read| belong to the thread while it's alive.
   ReaderThread(scoped_refptr<Dispatcher> read_dispatcher,
                size_t* messages_read,
                size_t* bytes_read)
-      : base::SimpleThread("reader_thread"),
-        read_dispatcher_(read_dispatcher),
+      : read_dispatcher_(read_dispatcher),
         messages_read_(messages_read),
         bytes_read_(bytes_read) {
     *messages_read_ = 0;

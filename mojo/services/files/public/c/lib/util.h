@@ -11,7 +11,7 @@
 namespace mojio {
 
 // Converts a |mojo::files::Error| to an errno value. (Note that this converts
-// |mojo::files::ERROR_OK| to 0, which is not a valid errno value.
+// |mojo::files::Error::OK| to 0, which is not a valid errno value.
 int ErrorToErrno(mojo::files::Error error);
 
 }  // namespace mojio

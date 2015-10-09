@@ -8,10 +8,10 @@
 #include <stdint.h>
 
 #include "base/memory/ref_counted.h"
-#include "base/threading/simple_thread.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/waiter.h"
+#include "mojo/edk/test/simple_test_thread.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -43,7 +43,7 @@ namespace test {
 // code). (We accept this unrealism for simplicity, since |AwakableList| is
 // thread-unsafe so making it more realistic would require adding nontrivial
 // synchronization machinery.)
-class SimpleWaiterThread : public base::SimpleThread {
+class SimpleWaiterThread : public mojo::test::SimpleTestThread {
  public:
   // For the duration of the lifetime of this object, |*result| belongs to it
   // (in the sense that it will write to it whenever it wants).
@@ -65,7 +65,7 @@ class SimpleWaiterThread : public base::SimpleThread {
 // This is a more complex and realistic thread that has a |Waiter|, on which it
 // waits for the given deadline (with the given flags). Unlike
 // |SimpleWaiterThread|, it requires the machinery of |Dispatcher|.
-class WaiterThread : public base::SimpleThread {
+class WaiterThread : public mojo::test::SimpleTestThread {
  public:
   // Note: |*did_wait_out|, |*result_out|, |*context_out| and
   // |*signals_state_out| "belong" to this object (i.e., may be modified by, on
