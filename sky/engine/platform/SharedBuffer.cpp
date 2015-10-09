@@ -126,7 +126,7 @@ static void didCreateSharedBuffer(SharedBuffer* buffer)
     MutexLocker locker(statsMutex());
     liveBuffers().add(buffer);
 
-    Platform::current()->mainThreadTaskRunner()->PostTask(FROM_HERE, base::Bind(&printStats));
+    Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE, base::Bind(&printStats));
 }
 
 static void willDestroySharedBuffer(SharedBuffer* buffer)

@@ -54,7 +54,7 @@ void CallHandleMessage(base::WeakPtr<DartState> dart_state) {
 
 void MessageNotifyCallback(Dart_Isolate dest_isolate) {
   DCHECK(Platform::current());
-  Platform::current()->mainThreadTaskRunner()->PostTask(FROM_HERE,
+  Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
       base::Bind(&CallHandleMessage, DartState::From(dest_isolate)->GetWeakPtr()));
 }
 
