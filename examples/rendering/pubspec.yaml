@@ -1,4 +1,4 @@
-name: rendering
+name: flutter_rendering_examples
 dependencies:
   flutter: ">=0.0.3 <0.1.0"
   sky_tools: any
