@@ -128,15 +128,20 @@ class Rect {
     );
   }
 
-  bool operator ==(other) {
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
     if (other is! Rect)
       return false;
+    final Rect typedOther = other;
     for (var i = 0; i < 4; ++i) {
-      if (_value[i] != other._value[i])
+      if (_value[i] != typedOther._value[i])
         return false;
     }
     return true;
   }
+
   int get hashCode =>_value.fold(373, (value, item) => (37 * value + item.hashCode));
+
   String toString() => "Rect.fromLTRB($left, $top, $right, $bottom)";
 }

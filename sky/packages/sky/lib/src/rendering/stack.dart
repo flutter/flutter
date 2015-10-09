@@ -8,7 +8,7 @@ import 'box.dart';
 import 'object.dart';
 
 /// Parent data for use with [RenderStack]
-class StackParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
+class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// The offset of the child's top edge from the top of the stack
   double top;
 
@@ -84,10 +84,11 @@ abstract class RenderStackBase extends RenderBox
     double width = constraints.minWidth;
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is StackParentData);
-      if (!child.parentData.isPositioned)
+      final StackParentData childParentData = child.parentData;
+      if (!childParentData.isPositioned)
         width = math.max(width, child.getMinIntrinsicWidth(constraints));
-      child = child.parentData.nextSibling;
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
     }
     assert(width == constraints.constrainWidth(width));
     return width;
@@ -98,12 +99,13 @@ abstract class RenderStackBase extends RenderBox
     double width = constraints.minWidth;
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is StackParentData);
-      if (!child.parentData.isPositioned) {
+      final StackParentData childParentData = child.parentData;
+      if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
         width = math.max(width, child.getMaxIntrinsicWidth(constraints));
       }
-      child = child.parentData.nextSibling;
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
     }
     if (!hasNonPositionedChildren)
       return constraints.constrainWidth();
@@ -115,10 +117,11 @@ abstract class RenderStackBase extends RenderBox
     double height = constraints.minHeight;
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is StackParentData);
-      if (!child.parentData.isPositioned)
+      final StackParentData childParentData = child.parentData;
+      if (!childParentData.isPositioned)
         height = math.max(height, child.getMinIntrinsicHeight(constraints));
-      child = child.parentData.nextSibling;
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
     }
     assert(height == constraints.constrainHeight(height));
     return height;
@@ -129,12 +132,13 @@ abstract class RenderStackBase extends RenderBox
     double height = constraints.minHeight;
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is StackParentData);
-      if (!child.parentData.isPositioned) {
+      final StackParentData childParentData = child.parentData;
+      if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
         height = math.max(height, child.getMaxIntrinsicHeight(constraints));
       }
-      child = child.parentData.nextSibling;
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
     }
     if (!hasNonPositionedChildren)
       return constraints.constrainHeight();
@@ -155,21 +159,20 @@ abstract class RenderStackBase extends RenderBox
 
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is StackParentData);
-      final StackParentData parentData = child.parentData;
+      final StackParentData childParentData = child.parentData;
 
-      if (!parentData.isPositioned) {
+      if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
 
         child.layout(constraints, parentUsesSize: true);
-        parentData.position = Point.origin;
+        childParentData.position = Point.origin;
 
         final Size childSize = child.size;
         width = math.max(width, childSize.width);
         height = math.max(height, childSize.height);
       }
 
-      child = parentData.nextSibling;
+      child = childParentData.nextSibling;
     }
 
     if (hasNonPositionedChildren) {
@@ -184,46 +187,46 @@ abstract class RenderStackBase extends RenderBox
 
     child = firstChild;
     while (child != null) {
-      assert(child.parentData is StackParentData);
-      final StackParentData childData = child.parentData;
+      final StackParentData childParentData = child.parentData;
 
-      if (!childData.isPositioned) {
+      if (!childParentData.isPositioned) {
         double x = (size.width - child.size.width) * horizontalAlignment;
         double y = (size.height - child.size.height) * verticalAlignment;
-        childData.position = new Point(x, y);
+        childParentData.position = new Point(x, y);
       } else {
         BoxConstraints childConstraints = const BoxConstraints();
 
-        if (childData.left != null && childData.right != null)
-          childConstraints = childConstraints.tightenWidth(size.width - childData.right - childData.left);
+        if (childParentData.left != null && childParentData.right != null)
+          childConstraints = childConstraints.tightenWidth(size.width - childParentData.right - childParentData.left);
 
-        if (childData.top != null && childData.bottom != null)
-          childConstraints = childConstraints.tightenHeight(size.height - childData.bottom - childData.top);
+        if (childParentData.top != null && childParentData.bottom != null)
+          childConstraints = childConstraints.tightenHeight(size.height - childParentData.bottom - childParentData.top);
 
         child.layout(childConstraints, parentUsesSize: true);
 
         double x = 0.0;
-        if (childData.left != null)
-          x = childData.left;
-        else if (childData.right != null)
-          x = size.width - childData.right - child.size.width;
+        if (childParentData.left != null)
+          x = childParentData.left;
+        else if (childParentData.right != null)
+          x = size.width - childParentData.right - child.size.width;
 
         if (x < 0.0 || x + child.size.width > size.width)
           _hasVisualOverflow = true;
 
         double y = 0.0;
-        if (childData.top != null)
-          y = childData.top;
-        else if (childData.bottom != null)
-          y = size.height - childData.bottom - child.size.height;
+        if (childParentData.top != null)
+          y = childParentData.top;
+        else if (childParentData.bottom != null)
+          y = size.height - childParentData.bottom - child.size.height;
 
         if (y < 0.0 || y + child.size.height > size.height)
           _hasVisualOverflow = true;
 
-        childData.position = new Point(x, y);
+        childParentData.position = new Point(x, y);
       }
 
-      child = childData.nextSibling;
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
     }
   }
 
@@ -320,8 +323,8 @@ class RenderIndexedStack extends RenderStackBase {
     RenderBox child = firstChild;
     int i = 0;
     while (child != null && i < index) {
-      assert(child.parentData is StackParentData);
-      child = child.parentData.nextSibling;
+      final StackParentData childParentData = child.parentData;
+      child = childParentData.nextSibling;
       i += 1;
     }
     assert(i == index);
@@ -334,8 +337,9 @@ class RenderIndexedStack extends RenderStackBase {
       return;
     assert(position != null);
     RenderBox child = _childAtIndex();
-    Point transformed = new Point(position.x - child.parentData.position.x,
-                                  position.y - child.parentData.position.y);
+    final StackParentData childParentData = child.parentData;
+    Point transformed = new Point(position.x - childParentData.position.x,
+                                  position.y - childParentData.position.y);
     child.hitTest(result, position: transformed);
   }
 
@@ -343,6 +347,7 @@ class RenderIndexedStack extends RenderStackBase {
     if (firstChild == null)
       return;
     RenderBox child = _childAtIndex();
-    context.paintChild(child, child.parentData.position + offset);
+    final StackParentData childParentData = child.parentData;
+    context.paintChild(child, childParentData.position + offset);
   }
 }

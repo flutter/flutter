@@ -19,7 +19,7 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
       return <PopupMenuItem>[
         new PopupMenuItem(
           value: _MenuItems.autorefresh,
-          child: new Row([
+          child: new Row(<Widget>[
               new Flexible(child: new Text('Autorefresh')),
               new Checkbox(
                 value: autorefresh,
@@ -59,9 +59,9 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
         return new Dialog(
           title: new Text('Not Implemented'),
           content: new Text('This feature has not yet been implemented.'),
-          actions: [
+          actions: <Widget>[
             new FlatButton(
-              child: new Row([
+              child: new Row(<Widget>[
                 new Icon(
                   type: 'device/dvr',
                   size: 18

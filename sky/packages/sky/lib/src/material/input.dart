@@ -119,6 +119,7 @@ class _InputState extends ScrollableState<Input> {
         )
       ),
       onPointerDown: (_) {
+        // TODO(ianh): https://github.com/flutter/engine/issues/1530
         if (Focus.at(context, config)) {
           assert(_keyboardHandle.attached);
           _keyboardHandle.showByRequest();

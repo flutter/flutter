@@ -53,7 +53,7 @@ Future<UrlResponse> fetchUrl(String relativeUrl) async {
   UrlRequest request = new UrlRequest()
     ..url = url
     ..autoFollowRedirects = true;
-  return fetch(request);
+  return await fetch(request);
 }
 
 Future<Response> fetchBody(String relativeUrl) async {

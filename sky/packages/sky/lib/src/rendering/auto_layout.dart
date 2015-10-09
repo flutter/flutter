@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:cassowary/cassowary.dart' as al;
+import 'package:cassowary/cassowary.dart' as al; // "auto layout"
 
 import 'box.dart';
 import 'object.dart';
@@ -40,11 +40,12 @@ abstract class _AutoLayoutParamMixin {
   }
 
   void _setupEditVariablesInSolver(al.Solver solver, double priority) {
-    solver.addEditVariables([
+    solver.addEditVariables(<al.Variable>[
         _leftEdge.variable,
         _rightEdge.variable,
         _topEdge.variable,
-        _bottomEdge.variable], priority);
+        _bottomEdge.variable
+      ], priority);
   }
 
   void _applyEditsAtSize(al.Solver solver, Size size) {
@@ -90,8 +91,7 @@ abstract class _AutoLayoutParamMixin {
   }
 }
 
-class AutoLayoutParentData extends BoxParentData
-    with ContainerParentDataMixin<RenderBox>, _AutoLayoutParamMixin {
+class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> with _AutoLayoutParamMixin {
 
   AutoLayoutParentData(this._renderBox) {
     _setupLayoutParameters(this);
@@ -103,8 +103,10 @@ class AutoLayoutParentData extends BoxParentData
     // This is called by the parent's layout function
     // to lay our box out.
     assert(_renderBox.parentData == this);
-    assert(_renderBox.parent is RenderAutoLayout);
-    assert((_renderBox.parent as RenderAutoLayout).debugDoingThisLayout); // TODO(ianh): Remove cast once the analyzer is cleverer
+    assert(() {
+      final RenderAutoLayout parent = _renderBox.parent;
+      assert(parent.debugDoingThisLayout);
+    });
     BoxConstraints size = new BoxConstraints.tightFor(
       width: _rightEdge.value - _leftEdge.value,
       height: _bottomEdge.value - _topEdge.value
@@ -114,7 +116,7 @@ class AutoLayoutParentData extends BoxParentData
   }
 
   List<al.Constraint> _constructImplicitConstraints() {
-    return [
+    return <al.Constraint>[
       _leftEdge >= al.cm(0.0), // The left edge must be positive.
       _rightEdge >= _leftEdge, // Width must be positive.
     ];
@@ -174,11 +176,15 @@ class RenderAutoLayout extends RenderBox
   void adoptChild(RenderObject child) {
     // Make sure to call super first to setup the parent data
     super.adoptChild(child);
-    child.parentData._setupImplicitConstraints(_solver);
+    final AutoLayoutParentData childParentData = child.parentData;
+    childParentData._setupImplicitConstraints(_solver);
+    assert(child.parentData == childParentData);
   }
 
   void dropChild(RenderObject child) {
-    child.parentData._removeImplicitConstraints(_solver);
+    final AutoLayoutParentData childParentData = child.parentData;
+    childParentData._removeImplicitConstraints(_solver);
+    assert(child.parentData == childParentData);
     super.dropChild(child);
   }
 

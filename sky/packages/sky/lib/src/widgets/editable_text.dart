@@ -11,21 +11,21 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-const _kCursorBlinkPeriod = 500; // milliseconds
+const _kCursorBlinkHalfPeriod = 500; // milliseconds
 
 typedef void StringUpdated();
 
 class TextRange {
+  const TextRange({ this.start, this.end });
+  const TextRange.collapsed(int position)
+    : start = position,
+      end = position;
+  const TextRange.empty()
+    : start = -1,
+      end = -1;
+
   final int start;
   final int end;
-
-  TextRange({this.start, this.end});
-  TextRange.collapsed(int position)
-      : start = position,
-        end = position;
-  const TextRange.empty()
-      : start = -1,
-        end = -1;
 
   bool get isValid => start >= 0 && end >= 0;
   bool get isCollapsed => start == end;
@@ -155,12 +155,14 @@ class EditableTextState extends State<EditableText> {
   Timer _cursorTimer;
   bool _showCursor = false;
 
-  /// Whether the blinking cursor is visible (exposed for testing).
-  bool get test_showCursor => _showCursor;
+  /// Whether the blinking cursor is actually visible at this precise moment
+  /// (it's hidden half the time, since it blinks).
+  bool get cursorCurrentlyVisible => _showCursor;
 
-  /// The cursor blink interval (exposed for testing).
-  Duration get test_cursorBlinkPeriod =>
-      new Duration(milliseconds: _kCursorBlinkPeriod);
+  /// The cursor blink interval (the amount of time the cursor is in the "on"
+  /// state or the "off" state). A complete cursor blink period is twice this
+  /// value (half on, half off).
+  Duration get cursorBlinkInterval => new Duration(milliseconds: _kCursorBlinkHalfPeriod);
 
   void _cursorTick(Timer timer) {
     setState(() {
@@ -171,7 +173,9 @@ class EditableTextState extends State<EditableText> {
   void _startCursorTimer() {
     _showCursor = true;
     _cursorTimer = new Timer.periodic(
-      new Duration(milliseconds: _kCursorBlinkPeriod), _cursorTick);
+      new Duration(milliseconds: _kCursorBlinkHalfPeriod),
+      _cursorTick
+    );
   }
 
   void dispose() {
@@ -254,16 +258,16 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
         const TextStyle(decoration: underline)
       );
 
-      return new StyledTextSpan(style, [
+      return new StyledTextSpan(style, <TextSpan>[
         new PlainTextSpan(value.textBefore(value.composing)),
-        new StyledTextSpan(composingStyle, [
+        new StyledTextSpan(composingStyle, <TextSpan>[
           new PlainTextSpan(value.textInside(value.composing))
         ]),
         new PlainTextSpan(value.textAfter(value.composing))
       ]);
     }
 
-    return new StyledTextSpan(style, [
+    return new StyledTextSpan(style, <TextSpan>[
       new PlainTextSpan(value.text)
     ]);
   }

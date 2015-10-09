@@ -174,5 +174,5 @@ class RenderImage extends RenderBox {
     );
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}width: ${width}\n${prefix}height: ${height}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}width: $width\n${prefix}height: $height\n';
 }

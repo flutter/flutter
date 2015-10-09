@@ -77,11 +77,17 @@ void main() {
 
       // Check that the cursor visibility toggles after each blink interval.
       void checkCursorToggle() {
-        bool initialShowCursor = editableText.test_showCursor;
-        tester.async.elapse(editableText.test_cursorBlinkPeriod);
-        expect(editableText.test_showCursor, equals(!initialShowCursor));
-        tester.async.elapse(editableText.test_cursorBlinkPeriod);
-        expect(editableText.test_showCursor, equals(initialShowCursor));
+        bool initialShowCursor = editableText.cursorCurrentlyVisible;
+        tester.async.elapse(editableText.cursorBlinkInterval);
+        expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
+        tester.async.elapse(editableText.cursorBlinkInterval);
+        expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+        tester.async.elapse(editableText.cursorBlinkInterval ~/ 10);
+        expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+        tester.async.elapse(editableText.cursorBlinkInterval);
+        expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
+        tester.async.elapse(editableText.cursorBlinkInterval);
+        expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
       }
 
       checkCursorToggle();

@@ -42,7 +42,7 @@ class StockSettingsState extends State<StockSettings> {
             onDismiss: () {
               navigator.pop(false);
             },
-            actions: [
+            actions: <Widget>[
               new FlatButton(
                 child: new Text('NO THANKS'),
                 onPressed: () {
@@ -87,22 +87,22 @@ class StockSettingsState extends State<StockSettings> {
       child: new ScrollableViewport(
         child: new Container(
           padding: const EdgeDims.symmetric(vertical: 20.0),
-          child: new BlockBody([
+          child: new BlockBody(<Widget>[
             new DrawerItem(
               icon: 'action/thumb_up',
               onPressed: () => _confirmOptimismChange(),
-              child: new Row([
+              child: new Row(<Widget>[
                 new Flexible(child: new Text('Everything is awesome')),
                 new Checkbox(
                   value: config.optimism == StockMode.optimistic,
-                  onChanged: (_) => _confirmOptimismChange()
+                  onChanged: (bool value) => _confirmOptimismChange()
                 ),
               ])
             ),
             new DrawerItem(
               icon: 'action/backup',
               onPressed: () { _handleBackupChanged(!(config.backup == BackupMode.enabled)); },
-              child: new Row([
+              child: new Row(<Widget>[
                 new Flexible(child: new Text('Back up stock list to the cloud')),
                 new Switch(
                   value: config.backup == BackupMode.enabled,

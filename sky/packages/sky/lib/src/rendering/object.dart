@@ -445,7 +445,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///   used between the parent and child. For example, in box layout, the
   ///   parent data is completely opaque but in sector layout the child is
   ///   permitted to read some fields of the parent data.
-  dynamic parentData; // TODO(ianh): change the type of this back to ParentData once the analyzer is cleverer
+  ParentData parentData;
 
   /// Override to setup parent data correctly for your children
   ///
@@ -493,13 +493,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   dynamic debugExceptionContext = '';
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     print('-- EXCEPTION --');
-    print('The following exception was raised during ${method}():');
+    print('The following exception was raised during $method():');
     print('$exception');
     print('Stack trace:');
     print('$stack');
     print('The following RenderObject was being processed when the exception was fired:\n${this}');
     if (debugExceptionContext != '')
-      'That RenderObject had the following exception context:\n${debugExceptionContext}'.split('\n').forEach(print);
+      'That RenderObject had the following exception context:\n$debugExceptionContext'.split('\n').forEach(print);
     if (debugRenderingExceptionHandler != null)
       debugRenderingExceptionHandler(this, method, exception, stack);
   }
@@ -577,14 +577,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _needsLayout = true;
     assert(_relayoutSubtreeRoot != null);
     if (_relayoutSubtreeRoot != this) {
-      final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
-      assert(parent is RenderObject);
+      final RenderObject parent = this.parent;
       if (!_doingThisLayoutWithCallback) {
         parent.markNeedsLayout();
       } else {
         assert(parent._debugDoingThisLayout);
       }
-      assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
+      assert(parent == this.parent);
     } else {
       _nodesNeedingLayout.add(this);
       scheduler.ensureVisualUpdate();
@@ -635,7 +634,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       while(_nodesNeedingLayout.isNotEmpty) {
         List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = new List<RenderObject>();
-        dirtyNodes..sort((a, b) => a.depth - b.depth)..forEach((node) {
+        dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)..forEach((RenderObject node) {
           if (node._needsLayout && node.attached)
             node._layoutWithoutResize();
         });
@@ -696,13 +695,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
-    final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
+    final RenderObject parent = this.parent;
     RenderObject relayoutSubtreeRoot;
     if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject)
       relayoutSubtreeRoot = this;
     else
       relayoutSubtreeRoot = parent._relayoutSubtreeRoot;
-    assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(parent == this.parent);
     if (!needsLayout && constraints == _constraints && relayoutSubtreeRoot == _relayoutSubtreeRoot)
       return;
     _constraints = constraints;
@@ -745,7 +744,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     _needsLayout = false;
     markNeedsPaint();
-    assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(parent == this.parent);
   }
 
   /// Whether the constraints are the only input to the sizing algorithm (in
@@ -866,9 +865,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (_needsCompositingBitsUpdate)
       return;
     _needsCompositingBitsUpdate = true;
-    final AbstractNode parent = this.parent; // TODO(ianh): remove the once the analyzer is cleverer
+    final AbstractNode parent = this.parent;
     if (parent is RenderObject)
       parent._markNeedsCompositingBitsUpdate();
+    assert(parent == this.parent);
   }
   bool _needsCompositing = false;
   /// Whether we or one of our descendants has a compositing layer
@@ -930,7 +930,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // care of updating the layer we're in and when they do that
       // we'll get our paint() method called.
       assert(_layer == null);
-      (parent as RenderObject).markNeedsPaint(); // TODO(ianh): remove the cast once the analyzer is cleverer
+      final RenderObject parent = this.parent;
+      parent.markNeedsPaint();
+      assert(parent == this.parent);
     } else {
       // If we're the root of the render tree (probably a RenderView),
       // then we have to paint ourselves, since nobody else can paint
@@ -955,7 +957,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = new List<RenderObject>();
       // Sort the dirty nodes in reverse order (deepest first).
-      for (RenderObject node in dirtyNodes..sort((a, b) => b.depth - a.depth)) {
+      for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._needsPaint);
         if (node.attached)
           node._repaint();
@@ -1095,7 +1097,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// Returns a human understandable name
   String toString() {
-    String header = '${runtimeType}';
+    String header = '$runtimeType';
     if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
       int count = 1;
       RenderObject target = parent;
@@ -1127,7 +1129,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a string describing the current node's fields, one field per line,
   /// with each line prefixed by the prefix argument. Subclasses should override
   /// this to have their information included in toStringDeep().
-  String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n${prefix}constraints: ${constraints}\n';
+  String debugDescribeSettings(String prefix) => '${prefix}parentData: $parentData\n${prefix}constraints: $constraints\n';
 
   /// Returns a string describing the current node's descendants. Each line of
   /// the subtree in the output should be indented by the prefix argument.
@@ -1190,16 +1192,16 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> implemen
   void detach() {
     super.detach();
     if (previousSibling != null) {
-      assert(previousSibling.parentData is ContainerParentDataMixin<ChildType>);
+      final ContainerParentDataMixin<ChildType> previousSiblingParentData = previousSibling.parentData;
       assert(previousSibling != this);
-      assert(previousSibling.parentData.nextSibling == this);
-      previousSibling.parentData.nextSibling = nextSibling;
+      assert(previousSiblingParentData.nextSibling == this);
+      previousSiblingParentData.nextSibling = nextSibling;
     }
     if (nextSibling != null) {
-      assert(nextSibling.parentData is ContainerParentDataMixin<ChildType>);
+      final ContainerParentDataMixin<ChildType> nextSiblingParentData = nextSibling.parentData;
       assert(nextSibling != this);
-      assert(nextSibling.parentData.previousSibling == this);
-      nextSibling.parentData.previousSibling = previousSibling;
+      assert(nextSiblingParentData.previousSibling == this);
+      nextSiblingParentData.previousSibling = previousSibling;
     }
     previousSibling = null;
     nextSibling = null;
@@ -1213,20 +1215,20 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> implemen
 abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> implements RenderObject {
 
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
-    assert(child.parentData is ParentDataType);
-    while (child.parentData.previousSibling != null) {
-      assert(child.parentData.previousSibling != child);
-      child = child.parentData.previousSibling;
-      assert(child.parentData is ParentDataType);
+    ParentDataType childParentData = child.parentData;
+    while (childParentData.previousSibling != null) {
+      assert(childParentData.previousSibling != child);
+      child = childParentData.previousSibling;
+      childParentData = child.parentData;
     }
     return child == equals;
   }
   bool _debugUltimateNextSiblingOf(ChildType child, { ChildType equals }) {
-    assert(child.parentData is ParentDataType);
-    while (child.parentData.nextSibling != null) {
-      assert(child.parentData.nextSibling != child);
-      child = child.parentData.nextSibling;
-      assert(child.parentData is ParentDataType);
+    ParentDataType childParentData = child.parentData;
+    while (childParentData.nextSibling != null) {
+      assert(childParentData.nextSibling != child);
+      child = childParentData.nextSibling;
+      childParentData = child.parentData;
     }
     return child == equals;
   }
@@ -1238,17 +1240,17 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   ChildType _firstChild;
   ChildType _lastChild;
   void _addToChildList(ChildType child, { ChildType before }) {
-    assert(child.parentData is ParentDataType);
-    assert(child.parentData.nextSibling == null);
-    assert(child.parentData.previousSibling == null);
+    final ParentDataType childParentData = child.parentData;
+    assert(childParentData.nextSibling == null);
+    assert(childParentData.previousSibling == null);
     _childCount += 1;
     assert(_childCount > 0);
     if (before == null) {
       // append at the end (_lastChild)
-      child.parentData.previousSibling = _lastChild;
+      childParentData.previousSibling = _lastChild;
       if (_lastChild != null) {
-        assert(_lastChild.parentData is ParentDataType);
-        _lastChild.parentData.nextSibling = child;
+        final ParentDataType _lastChildParentData = _lastChild.parentData;
+        _lastChildParentData.nextSibling = child;
       }
       _lastChild = child;
       if (_firstChild == null)
@@ -1258,24 +1260,24 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
       assert(_lastChild != null);
       assert(_debugUltimatePreviousSiblingOf(before, equals: _firstChild));
       assert(_debugUltimateNextSiblingOf(before, equals: _lastChild));
-      assert(before.parentData is ParentDataType);
-      if (before.parentData.previousSibling == null) {
+      final ParentDataType beforeParentData = before.parentData;
+      if (beforeParentData.previousSibling == null) {
         // insert at the start (_firstChild); we'll end up with two or more children
         assert(before == _firstChild);
-        child.parentData.nextSibling = before;
-        before.parentData.previousSibling = child;
+        childParentData.nextSibling = before;
+        beforeParentData.previousSibling = child;
         _firstChild = child;
       } else {
         // insert in the middle; we'll end up with three or more children
         // set up links from child to siblings
-        child.parentData.previousSibling = before.parentData.previousSibling;
-        child.parentData.nextSibling = before;
+        childParentData.previousSibling = beforeParentData.previousSibling;
+        childParentData.nextSibling = before;
         // set up links from siblings to child
-        assert(child.parentData.previousSibling.parentData is ParentDataType);
-        assert(child.parentData.nextSibling.parentData is ParentDataType);
-        child.parentData.previousSibling.parentData.nextSibling = child;
-        child.parentData.nextSibling.parentData.previousSibling = child;
-        assert(before.parentData.previousSibling == child);
+        final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling.parentData;
+        final ParentDataType childNextSiblingParentData = childParentData.nextSibling.parentData;
+        childPreviousSiblingParentData.nextSibling = child;
+        childNextSiblingParentData.previousSibling = child;
+        assert(beforeParentData.previousSibling == child);
       }
     }
   }
@@ -1300,26 +1302,26 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   }
 
   void _removeFromChildList(ChildType child) {
-    assert(child.parentData is ParentDataType);
+    final ParentDataType childParentData = child.parentData;
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
     assert(_childCount >= 0);
-    if (child.parentData.previousSibling == null) {
+    if (childParentData.previousSibling == null) {
       assert(_firstChild == child);
-      _firstChild = child.parentData.nextSibling;
+      _firstChild = childParentData.nextSibling;
     } else {
-      assert(child.parentData.previousSibling.parentData is ParentDataType);
-      child.parentData.previousSibling.parentData.nextSibling = child.parentData.nextSibling;
+      final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling.parentData;
+      childPreviousSiblingParentData.nextSibling = childParentData.nextSibling;
     }
-    if (child.parentData.nextSibling == null) {
+    if (childParentData.nextSibling == null) {
       assert(_lastChild == child);
-      _lastChild = child.parentData.previousSibling;
+      _lastChild = childParentData.previousSibling;
     } else {
-      assert(child.parentData.nextSibling.parentData is ParentDataType);
-      child.parentData.nextSibling.parentData.previousSibling = child.parentData.previousSibling;
+      final ParentDataType childNextSiblingParentData = childParentData.nextSibling.parentData;
+      childNextSiblingParentData.previousSibling = childParentData.previousSibling;
     }
-    child.parentData.previousSibling = null;
-    child.parentData.nextSibling = null;
+    childParentData.previousSibling = null;
+    childParentData.nextSibling = null;
     _childCount -= 1;
   }
 
@@ -1337,10 +1339,10 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   void removeAll() {
     ChildType child = _firstChild;
     while (child != null) {
-      assert(child.parentData is ParentDataType);
-      ChildType next = child.parentData.nextSibling;
-      child.parentData.previousSibling = null;
-      child.parentData.nextSibling = null;
+      final ParentDataType childParentData = child.parentData;
+      ChildType next = childParentData.nextSibling;
+      childParentData.previousSibling = null;
+      childParentData.nextSibling = null;
       dropChild(child);
       child = next;
     }
@@ -1359,8 +1361,8 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     assert(before != this);
     assert(child != before);
     assert(child.parent == this);
-    assert(child.parentData is ParentDataType);
-    if (child.parentData.nextSibling == before)
+    final ParentDataType childParentData = child.parentData;
+    if (childParentData.nextSibling == before)
       return;
     _removeFromChildList(child);
     _addToChildList(child, before: before);
@@ -1371,8 +1373,8 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     ChildType child = _firstChild;
     while (child != null) {
       child.attach();
-      assert(child.parentData is ParentDataType);
-      child = child.parentData.nextSibling;
+      final ParentDataType childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
   }
 
@@ -1381,8 +1383,8 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     ChildType child = _firstChild;
     while (child != null) {
       child.detach();
-      assert(child.parentData is ParentDataType);
-      child = child.parentData.nextSibling;
+      final ParentDataType childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
   }
 
@@ -1390,8 +1392,8 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     ChildType child = _firstChild;
     while (child != null) {
       redepthChild(child);
-      assert(child.parentData is ParentDataType);
-      child = child.parentData.nextSibling;
+      final ParentDataType childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
   }
 
@@ -1399,8 +1401,8 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     ChildType child = _firstChild;
     while (child != null) {
       visitor(child);
-      assert(child.parentData is ParentDataType);
-      child = child.parentData.nextSibling;
+      final ParentDataType childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
   }
 
@@ -1412,8 +1414,8 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
 
   /// The next child after the given child in the child list
   ChildType childAfter(ChildType child) {
-    assert(child.parentData is ParentDataType);
-    return child.parentData.nextSibling;
+    final ParentDataType childParentData = child.parentData;
+    return childParentData.nextSibling;
   }
 
   String debugDescribeChildren(String prefix) {
@@ -1421,9 +1423,10 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     int count = 1;
     ChildType child = _firstChild;
     while (child != null) {
-      result += '${prefix}child ${count}: ${child.toStringDeep(prefix)}';
+      result += '${prefix}child $count: ${child.toStringDeep(prefix)}';
       count += 1;
-      child = child.parentData.nextSibling;
+      final ParentDataType childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
     return result;
   }

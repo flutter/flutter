@@ -142,7 +142,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: ${additionalConstraints}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: $additionalConstraints\n';
 }
 
 /// A render object that, for both width and height, imposes a tight constraint
@@ -376,7 +376,7 @@ class RenderAspectRatio extends RenderProxyBox {
   RenderAspectRatio({
     RenderBox child,
     double aspectRatio
-  }) : super(child), _aspectRatio = aspectRatio {
+  }) : _aspectRatio = aspectRatio, super(child) {
     assert(_aspectRatio != null);
   }
 
@@ -419,7 +419,7 @@ class RenderAspectRatio extends RenderProxyBox {
       child.layout(new BoxConstraints.tight(size));
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}aspectRatio: ${aspectRatio}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}aspectRatio: $aspectRatio\n';
 }
 
 /// Sizes its child to the child's intrinsic width
@@ -514,7 +514,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}stepWidth: ${stepWidth}\n${prefix}stepHeight: ${stepHeight}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}stepWidth: $stepWidth\n${prefix}stepHeight: $stepHeight\n';
 
 }
 
@@ -628,8 +628,7 @@ class RenderOpacity extends RenderProxyBox {
 /// child into an intermediate buffer.
 class RenderColorFilter extends RenderProxyBox {
   RenderColorFilter({ RenderBox child, Color color, ui.TransferMode transferMode })
-    : _color = color, _transferMode = transferMode, super(child) {
-  }
+    : _color = color, _transferMode = transferMode, super(child);
 
   /// The color to use as input to the color filter
   Color get color => _color;
@@ -661,8 +660,7 @@ class RenderColorFilter extends RenderProxyBox {
 
 class RenderShaderMask extends RenderProxyBox {
   RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, ui.TransferMode transferMode })
-    : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child) {
-  }
+    : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child);
 
   ShaderCallback get shaderCallback => _shaderCallback;
   ShaderCallback _shaderCallback;
@@ -969,9 +967,9 @@ class RenderTransform extends RenderProxyBox {
   }
 
   String debugDescribeSettings(String prefix) {
-    List<String> result = _transform.toString().split('\n').map((s) => '$prefix  $s\n').toList();
+    List<String> result = _transform.toString().split('\n').map((String s) => '$prefix  $s\n').toList();
     result.removeLast();
-    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: ${origin}\n';
+    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\n';
   }
 }
 

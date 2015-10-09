@@ -60,7 +60,7 @@ class _ProgressIndicatorState extends State<ProgressIndicator> {
       return config._buildIndicator(context, _performance.value);
 
     return new BuilderTransition(
-      variables: [_performance.variable],
+      variables: <AnimatedValue<double>>[_performance.variable],
       performance: _performance.view,
       builder: (BuildContext context) {
         return config._buildIndicator(context, _performance.value);

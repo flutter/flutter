@@ -10,8 +10,11 @@ SKY_SHELL=../../out/sky_shell ../../third_party/dart-sdk/dart-sdk/bin/pub run sk
 popd
 
 # Analyze the code.
+pushd sky/packages/workbench
+../../../third_party/dart-sdk/dart-sdk/bin/pub get
+popd
 pushd sky/packages/sky
-../../../third_party/dart-sdk/dart-sdk/bin/dartanalyzer --supermixin lib/widgets.dart
+../../tools/skyanalyzer --congratulate lib/widgets.dart
 popd
 
 # Generate docs.

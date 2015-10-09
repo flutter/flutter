@@ -45,7 +45,7 @@ class Scheduler {
     Map<int, SchedulerCallback> callbacks = _transientCallbacks;
     _transientCallbacks = new Map<int, SchedulerCallback>();
 
-    callbacks.forEach((id, callback) {
+    callbacks.forEach((int id, SchedulerCallback callback) {
       if (!_removedIds.contains(id))
         callback(timeStamp);
     });

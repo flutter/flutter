@@ -56,7 +56,13 @@ class _ChildKey {
   factory _ChildKey.fromWidget(Widget widget) => new _ChildKey(widget.runtimeType, widget.key);
   final Type type;
   final Key key;
-  bool operator ==(other) => other is _ChildKey && other.type == type && other.key == key;
+  bool operator ==(dynamic other) {
+    if (other is! _ChildKey)
+      return false;
+    final _ChildKey typedOther = other;
+    return type == typedOther.type &&
+           key == typedOther.key;
+  }
   int get hashCode => 373 * 37 * type.hashCode + key.hashCode;
   String toString() => "_ChildKey(type: $type, key: $key)";
 }
@@ -327,7 +333,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     double newExtent = _getElementExtent(element, innerConstraints);
     bool result = _childExtents[index] == newExtent;
     if (!result)
-      print("Element $element at index $index was size ${_childExtents[index]} but is now size ${newExtent} yet no invalidate() was received to that effect");
+      print("Element $element at index $index was size ${_childExtents[index]} but is now size $newExtent yet no invalidate() was received to that effect");
     return result;
   }
 

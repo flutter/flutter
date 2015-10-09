@@ -6,23 +6,24 @@ import 'dart:ui' as ui;
 
 /// A helper class to build a [ui.DrawLooper] for drawing shadows
 class ShadowDrawLooperBuilder {
-  var builder_ = new ui.LayerDrawLooperBuilder();
+  ui.LayerDrawLooperBuilder _builder = new ui.LayerDrawLooperBuilder();
 
   /// Add a shadow with the given parameters
   void addShadow(ui.Offset offset, ui.Color color, double blur) {
-    builder_.addLayerOnTop(
-          new ui.DrawLooperLayerInfo()
-            ..setPaintBits(ui.PaintBits.all)
-            ..setOffset(offset)
-            ..setColorMode(ui.TransferMode.src),
-          new ui.Paint()
-            ..color = color
-            ..maskFilter = new ui.MaskFilter.blur(ui.BlurStyle.normal, blur));
+    _builder.addLayerOnTop(
+      new ui.DrawLooperLayerInfo()
+        ..setPaintBits(ui.PaintBits.all)
+        ..setOffset(offset)
+        ..setColorMode(ui.TransferMode.src),
+      new ui.Paint()
+        ..color = color
+        ..maskFilter = new ui.MaskFilter.blur(ui.BlurStyle.normal, blur)
+    );
   }
 
   /// Returns the draw looper built for the added shadows
   ui.DrawLooper build() {
-    builder_.addLayerOnTop(new ui.DrawLooperLayerInfo(), new ui.Paint());
-    return builder_.build();
+    _builder.addLayerOnTop(new ui.DrawLooperLayerInfo(), new ui.Paint());
+    return _builder.build();
   }
 }

@@ -33,8 +33,7 @@ const int _kTabIconSize = 24;
 const double _kTabBarScrollDrag = 0.025;
 const Duration _kTabBarScroll = const Duration(milliseconds: 200);
 
-class _TabBarParentData extends BoxParentData with
-    ContainerParentDataMixin<RenderBox> { }
+class _TabBarParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
 class _RenderTabBar extends RenderBox with
     ContainerRenderObjectMixin<RenderBox, _TabBarParentData>,
@@ -100,8 +99,8 @@ class _RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       maxWidth = math.max(maxWidth, child.getMinIntrinsicWidth(widthConstraints));
-      assert(child.parentData is _TabBarParentData);
-      child = child.parentData.nextSibling;
+      final _TabBarParentData childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
     double width = isScrollable ? maxWidth : maxWidth * childCount;
     return constraints.constrainWidth(width);
@@ -115,8 +114,8 @@ class _RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       maxWidth = math.max(maxWidth, child.getMaxIntrinsicWidth(widthConstraints));
-      assert(child.parentData is _TabBarParentData);
-      child = child.parentData.nextSibling;
+      final _TabBarParentData childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
     double width = isScrollable ? maxWidth : maxWidth * childCount;
     return constraints.constrainWidth(width);
@@ -139,10 +138,10 @@ class _RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(tabConstraints);
-      assert(child.parentData is _TabBarParentData);
-      child.parentData.position = new Point(x, 0.0);
+      final _TabBarParentData childParentData = child.parentData;
+      childParentData.position = new Point(x, 0.0);
       x += tabWidth;
-      child = child.parentData.nextSibling;
+      child = childParentData.nextSibling;
     }
   }
 
@@ -157,10 +156,10 @@ class _RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(tabConstraints, parentUsesSize: true);
-      assert(child.parentData is _TabBarParentData);
-      child.parentData.position = new Point(x, 0.0);
+      final _TabBarParentData childParentData = child.parentData;
+      childParentData.position = new Point(x, 0.0);
       x += child.size.width;
-      child = child.parentData.nextSibling;
+      child = childParentData.nextSibling;
     }
     return x;
   }
@@ -180,7 +179,8 @@ class _RenderTabBar extends RenderBox with
       int childIndex = 0;
       while (child != null) {
         widths[childIndex++] = child.size.width;
-        child = child.parentData.nextSibling;
+        final _TabBarParentData childParentData = child.parentData;
+        child = childParentData.nextSibling;
       }
       assert(childIndex == widths.length);
     }
@@ -221,24 +221,24 @@ class _RenderTabBar extends RenderBox with
       return;
     }
 
-    var size = new Size(selectedTab.size.width, _kTabIndicatorHeight);
-    var point = new Point(
-      selectedTab.parentData.position.x,
+    final Size size = new Size(selectedTab.size.width, _kTabIndicatorHeight);
+    final _TabBarParentData selectedTabParentData = selectedTab.parentData;
+    final Point point = new Point(
+      selectedTabParentData.position.x,
       _tabBarHeight - _kTabIndicatorHeight
     );
-    Rect rect = (point + offset) & size;
-    canvas.drawRect(rect, new Paint()..color = indicatorColor);
+    canvas.drawRect((point + offset) & size, new Paint()..color = indicatorColor);
   }
 
   void paint(PaintingContext context, Offset offset) {
     int index = 0;
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is _TabBarParentData);
-      context.paintChild(child, child.parentData.position + offset);
+      final _TabBarParentData childParentData = child.parentData;
+      context.paintChild(child, childParentData.position + offset);
       if (index++ == selectedIndex)
         _paintIndicator(context.canvas, child, offset);
-      child = child.parentData.nextSibling;
+      child = childParentData.nextSibling;
     }
   }
 }
@@ -426,7 +426,7 @@ class _TabBarState extends ScrollableState<TabBar> {
     assert(tabIndex >= 0 && tabIndex < _tabWidths.length);
     double tabLeft = 0.0;
     if (tabIndex > 0)
-      tabLeft = _tabWidths.take(tabIndex).reduce((sum, width) => sum + width);
+      tabLeft = _tabWidths.take(tabIndex).reduce((double sum, double width) => sum + width);
     double tabTop = 0.0;
     double tabBottom = _tabBarSize.height - _kTabIndicatorHeight;
     double tabRight = tabLeft + _tabWidths[tabIndex];
@@ -469,7 +469,7 @@ class _TabBarState extends ScrollableState<TabBar> {
   void _updateScrollBehavior() {
     scrollBehavior.updateExtents(
       containerExtent: config.scrollDirection == ScrollDirection.vertical ? _viewportSize.height : _viewportSize.width,
-      contentExtent: _tabWidths.reduce((sum, width) => sum + width)
+      contentExtent: _tabWidths.reduce((double sum, double width) => sum + width)
     );
   }
 
@@ -523,7 +523,7 @@ class _TabBarState extends ScrollableState<TabBar> {
       child: new DefaultTextStyle(
         style: textStyle,
         child: new BuilderTransition(
-          variables: [_indicatorRect],
+          variables: <AnimatedValue<Rect>>[_indicatorRect],
           performance: _indicatorAnimation.view,
           builder: (BuildContext context) {
             return new _TabBarWrapper(
@@ -591,9 +591,9 @@ class TabNavigator extends StatelessComponent {
   Widget build(BuildContext context) {
     assert(views != null && views.isNotEmpty);
     assert(selectedIndex >= 0 && selectedIndex < views.length);
-    return new Column([
+    return new Column(<Widget>[
       new TabBar(
-        labels: views.map((view) => view.label),
+        labels: views.map((TabNavigatorView view) => view.label),
         onChanged: onChanged,
         selectedIndex: selectedIndex,
         isScrollable: isScrollable

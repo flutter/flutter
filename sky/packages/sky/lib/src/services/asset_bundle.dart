@@ -50,7 +50,7 @@ Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async 
 }
 
 class MojoAssetBundle extends AssetBundle {
-  MojoAssetBundle(AssetBundleProxy this._bundle);
+  MojoAssetBundle(this._bundle);
 
   factory MojoAssetBundle.fromNetwork(String relativeUrl) {
     AssetBundleProxy bundle = new AssetBundleProxy.unbound();
