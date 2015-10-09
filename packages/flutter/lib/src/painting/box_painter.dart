@@ -456,7 +456,7 @@ void paintImage({
       break;
   }
   // TODO(abarth): Implement |repeat|.
-  Paint paint = new Paint();
+  Paint paint = new Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   double dx = (bounds.width - destinationSize.width) * positionX;
