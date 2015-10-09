@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/flutter/tools.svg)](https://travis-ci.org/flutter/tools)
 
-Tools for building Sky applications.
+Tools for building Flutter applications.
 
 ## Installing
 
