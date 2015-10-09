@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/painting.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/box.dart';
+
+import 'box.dart';
+import 'object.dart';
 
 abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
 

@@ -7,9 +7,10 @@ import 'dart:collection';
 import 'dart:sky' as sky;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
-import 'package:sky/src/services/fetch.dart';
-import 'package:sky/src/services/image_decoder.dart';
-import 'package:sky/src/services/image_resource.dart';
+
+import 'fetch.dart';
+import 'image_decoder.dart';
+import 'image_resource.dart';
 
 Future<sky.Image> _fetchImage(String url) async {
   UrlResponse response = await fetchUrl(url);

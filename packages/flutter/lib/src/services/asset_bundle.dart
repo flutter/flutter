@@ -9,11 +9,12 @@ import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
-import 'package:sky/src/services/fetch.dart';
-import 'package:sky/src/services/image_cache.dart';
-import 'package:sky/src/services/image_decoder.dart';
-import 'package:sky/src/services/image_resource.dart';
-import 'package:sky/src/services/shell.dart';
+
+import 'fetch.dart';
+import 'image_cache.dart';
+import 'image_decoder.dart';
+import 'image_resource.dart';
+import 'shell.dart';
 
 abstract class AssetBundle {
   void close();

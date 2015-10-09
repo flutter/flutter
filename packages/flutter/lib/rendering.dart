@@ -5,26 +5,26 @@
 /// The Flutter rendering tree.
 library rendering;
 
-export 'package:sky/src/rendering/auto_layout.dart';
-export 'package:sky/src/rendering/block.dart';
-export 'package:sky/src/rendering/box.dart';
-export 'package:sky/src/rendering/debug.dart';
-export 'package:sky/src/rendering/editable_paragraph.dart';
-export 'package:sky/src/rendering/error.dart';
-export 'package:sky/src/rendering/flex.dart';
-export 'package:sky/src/rendering/grid.dart';
-export 'package:sky/src/rendering/hit_test.dart';
-export 'package:sky/src/rendering/image.dart';
-export 'package:sky/src/rendering/layer.dart';
-export 'package:sky/src/rendering/node.dart';
-export 'package:sky/src/rendering/object.dart';
-export 'package:sky/src/rendering/paragraph.dart';
-export 'package:sky/src/rendering/proxy_box.dart';
-export 'package:sky/src/rendering/shifted_box.dart';
-export 'package:sky/src/rendering/binding.dart';
-export 'package:sky/src/rendering/stack.dart';
-export 'package:sky/src/rendering/toggleable.dart';
-export 'package:sky/src/rendering/view.dart';
-export 'package:sky/src/rendering/viewport.dart';
+export 'src/rendering/auto_layout.dart';
+export 'src/rendering/block.dart';
+export 'src/rendering/box.dart';
+export 'src/rendering/debug.dart';
+export 'src/rendering/editable_paragraph.dart';
+export 'src/rendering/error.dart';
+export 'src/rendering/flex.dart';
+export 'src/rendering/grid.dart';
+export 'src/rendering/hit_test.dart';
+export 'src/rendering/image.dart';
+export 'src/rendering/layer.dart';
+export 'src/rendering/node.dart';
+export 'src/rendering/object.dart';
+export 'src/rendering/paragraph.dart';
+export 'src/rendering/proxy_box.dart';
+export 'src/rendering/shifted_box.dart';
+export 'src/rendering/binding.dart';
+export 'src/rendering/stack.dart';
+export 'src/rendering/toggleable.dart';
+export 'src/rendering/view.dart';
+export 'src/rendering/viewport.dart';
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;

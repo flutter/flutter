@@ -4,9 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/painting/text_style.dart';
+import 'text_style.dart';
 
-export 'package:sky/src/painting/text_style.dart';
+export 'text_style.dart';
 
 /// An immutable span of text
 abstract class TextSpan {

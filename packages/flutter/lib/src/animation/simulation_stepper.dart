@@ -5,9 +5,9 @@
 import 'dart:async';
 
 import 'package:newton/newton.dart';
-import 'package:sky/src/animation/animated_value.dart';
-import 'package:sky/src/animation/curves.dart';
-import 'package:sky/src/animation/ticker.dart';
+import 'animated_value.dart';
+import 'curves.dart';
+import 'ticker.dart';
 
 /// A simulation that varies from [begin] to [end] over [duration] using [curve]
 ///

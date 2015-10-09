@@ -6,10 +6,11 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/hit_test.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/view.dart';
+
+import 'box.dart';
+import 'hit_test.dart';
+import 'object.dart';
+import 'view.dart';
 
 int _hammingWeight(int value) {
   if (value == 0)
