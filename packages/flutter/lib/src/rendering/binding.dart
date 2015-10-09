@@ -167,6 +167,8 @@ class FlutterBinding extends HitTestTarget {
       pointerRouter.route(event);
       if (event.type == 'pointerdown')
         GestureArena.instance.close(event.pointer);
+      else if (event.type == 'pointerup')
+        GestureArena.instance.sweep(event.pointer);
     }
   }
 }
