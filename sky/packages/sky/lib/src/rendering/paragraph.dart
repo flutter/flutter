@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/src/painting/text_painter.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
+import 'package:sky/painting.dart';
+
+import 'box.dart';
+import 'object.dart';
 
 export 'package:sky/src/painting/text_painter.dart';
 

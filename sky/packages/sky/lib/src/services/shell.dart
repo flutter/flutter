@@ -7,7 +7,8 @@ import 'dart:sky.internals' as internals;
 import 'package:mojo/application.dart';
 import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/service_provider.mojom.dart';
-import 'package:sky/src/services/embedder.dart';
+
+import 'embedder.dart';
 
 ApplicationConnection _initConnection() {
   int rawHandle = internals.takeServicesProvidedByEmbedder();

@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:cassowary/cassowary.dart' as al;
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
+
+import 'box.dart';
+import 'object.dart';
 
 /// Hosts the edge parameters and vends useful methods to construct expressions
 /// for constraints. Also sets up and manages implicit constraints and edit

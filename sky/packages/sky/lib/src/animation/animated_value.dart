@@ -4,7 +4,7 @@
 
 import 'dart:sky' show Color, Rect;
 
-import 'package:sky/src/animation/curves.dart';
+import 'curves.dart';
 
 /// The direction in which an animation is running
 enum AnimationDirection {

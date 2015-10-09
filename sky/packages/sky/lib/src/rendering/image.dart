@@ -5,8 +5,9 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/painting.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/box.dart';
+
+import 'box.dart';
+import 'object.dart';
 
 /// An image in the render tree
 ///

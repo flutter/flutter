@@ -4,9 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/gestures/arena.dart';
-import 'package:sky/src/gestures/recognizer.dart';
-import 'package:sky/src/gestures/constants.dart';
+import 'arena.dart';
+import 'recognizer.dart';
+import 'constants.dart';
 
 enum DragState {
   ready,

@@ -5,10 +5,11 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
-import 'package:sky/src/rendering/layer.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/box.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'box.dart';
+import 'layer.dart';
+import 'object.dart';
 
 /// The layout constraints for the root render object
 class ViewConstraints {
