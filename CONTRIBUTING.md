@@ -114,6 +114,11 @@ To send us a pull request:
  * `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or go to `https://github.com/<your_name_here>/sky_engine` and click the
    "Compare & pull request" button
 
+Please peruse our [style guides](sky/specs/style-guide.md) and
+[design principles](sky/specs/design.md) before working on anything
+non-trivial. These guidelines are intended to keep the code consistent
+and avoid common pitfalls.
+
 Please make sure all your checkins have detailed commit messages explaining the patch.
 If you made multiple commits for a single pull request, either make sure each one has a detailed
 message explaining that specific commit, or squash your commits into one single checkin with a
