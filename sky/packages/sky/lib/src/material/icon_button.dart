@@ -5,10 +5,9 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/gestures.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/icon.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
+import 'package:sky/widgets.dart';
+
+import 'icon.dart';
 
 class IconButton extends StatelessComponent {
   const IconButton({ Key key, this.icon, this.onPressed, this.color }) : super(key: key);

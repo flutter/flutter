@@ -5,7 +5,6 @@
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)

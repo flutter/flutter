@@ -4,7 +4,8 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/framework.dart';
+
+import 'framework.dart';
 
 class WidgetFlutterBinding extends FlutterBinding {
 

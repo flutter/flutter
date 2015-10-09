@@ -4,10 +4,10 @@
 
 import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/material_button.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'material_button.dart';
+import 'theme.dart';
 
 class RaisedButton extends MaterialButton {
   RaisedButton({

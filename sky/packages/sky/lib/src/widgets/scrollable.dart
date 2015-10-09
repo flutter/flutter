@@ -10,11 +10,12 @@ import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
-import 'package:sky/src/widgets/homogeneous_viewport.dart';
-import 'package:sky/src/widgets/mixed_viewport.dart';
+
+import 'basic.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
+import 'homogeneous_viewport.dart';
+import 'mixed_viewport.dart';
 
 // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
 const double _kMillisecondsPerSecond = 1000.0;

@@ -6,12 +6,9 @@ import 'package:sky/animation.dart';
 import 'package:sky/services.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/editable_text.dart';
-import 'package:sky/src/widgets/focus.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/scrollable.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'theme.dart';
 
 export 'package:sky/services.dart' show KeyboardType;
 

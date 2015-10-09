@@ -7,10 +7,11 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/binding.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/navigator.dart';
+
+import 'basic.dart';
+import 'binding.dart';
+import 'framework.dart';
+import 'navigator.dart';
 
 typedef bool DragTargetWillAccept<T>(T data);
 typedef void DragTargetAccept<T>(T data);

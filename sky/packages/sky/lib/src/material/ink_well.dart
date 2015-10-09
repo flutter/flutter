@@ -9,8 +9,7 @@ import 'dart:sky' as sky;
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/widgets.dart';
 
 const int _kSplashInitialOpacity = 0x30;
 const double _kSplashCanceledVelocity = 0.7;

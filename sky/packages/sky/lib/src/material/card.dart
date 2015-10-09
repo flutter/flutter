@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/material.dart';
+import 'package:sky/widgets.dart';
+
+import 'material.dart';
 
 const EdgeDims _kCardMargins = const EdgeDims.all(4.0);
 

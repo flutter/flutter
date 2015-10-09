@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/animation.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
+
+import 'basic.dart';
+import 'framework.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 

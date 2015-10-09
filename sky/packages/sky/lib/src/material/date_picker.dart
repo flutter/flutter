@@ -9,12 +9,10 @@ import 'package:intl/intl.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/services.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
-import 'package:sky/src/widgets/ink_well.dart';
-import 'package:sky/src/widgets/scrollable.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'ink_well.dart';
+import 'theme.dart';
 
 typedef void DatePickerValueChanged(DateTime dateTime);
 

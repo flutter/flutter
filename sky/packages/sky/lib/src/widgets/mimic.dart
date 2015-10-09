@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
+
+import 'basic.dart';
+import 'framework.dart';
 
 class MimicableKey {
   MimicableKey._(this._state);

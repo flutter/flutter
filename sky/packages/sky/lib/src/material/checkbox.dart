@@ -4,13 +4,12 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/toggleable.dart';
+import 'package:sky/rendering.dart';
+import 'package:sky/widgets.dart';
 
-export 'package:sky/src/rendering/toggleable.dart' show ValueChanged;
+import 'theme.dart';
+
+export 'package:sky/rendering.dart' show ValueChanged;
 
 const double _kMidpoint = 0.5;
 const sky.Color _kLightUncheckedColor = const sky.Color(0x8A000000);
