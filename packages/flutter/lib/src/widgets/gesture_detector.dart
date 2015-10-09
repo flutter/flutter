@@ -119,10 +119,12 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 
   void _syncDoubleTap() {
-    if (config.onDoubleTap == null)
+    if (config.onDoubleTap == null) {
       _doubleTap = _ensureDisposed(_doubleTap);
-    else
-      _ensureDoubleTap().onDoubleTap = config.onDoubleTap;
+    } else {
+      _doubleTap = new DoubleTapGestureRecognizer(router: _router);
+      _doubleTap.onDoubleTap = config.onDoubleTap;
+    }
   }
 
   void _syncShowPress() {
