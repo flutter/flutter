@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
 
 final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
   '/': (RouteArguments args) => new Container(

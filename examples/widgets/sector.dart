@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
 
 import '../rendering/sector_layout.dart';
 

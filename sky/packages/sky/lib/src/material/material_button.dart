@@ -4,11 +4,11 @@
 
 import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/ink_well.dart';
-import 'package:sky/src/widgets/material.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'ink_well.dart';
+import 'material.dart';
+import 'theme.dart';
 
 enum ButtonColor { normal, accent }
 

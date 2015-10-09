@@ -6,14 +6,10 @@ import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
-import 'package:sky/src/widgets/material.dart';
-import 'package:sky/src/widgets/navigator.dart';
-import 'package:sky/src/widgets/placeholder.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/transitions.dart';
+import 'package:sky/widgets.dart';
+
+import 'material.dart';
+import 'theme.dart';
 
 const double _kSideMargins = 24.0;
 const double _kVerticalPadding = 14.0;

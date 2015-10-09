@@ -5,10 +5,11 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/transitions.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
+
+import 'basic.dart';
+import 'transitions.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
 
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const Duration _kCardDismissResize = const Duration(milliseconds: 300);

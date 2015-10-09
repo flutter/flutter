@@ -4,11 +4,10 @@
 
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/widgets/animated_container.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/icon.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'icon.dart';
+import 'theme.dart';
 
 class ToolBar extends StatelessComponent {
   ToolBar({

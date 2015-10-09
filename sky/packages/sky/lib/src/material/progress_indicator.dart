@@ -6,10 +6,9 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/transitions.dart';
+import 'package:sky/widgets.dart';
+
+import 'theme.dart';
 
 const double _kLinearProgressIndicatorHeight = 6.0;
 const double _kMinCircularProgressIndicatorSize = 15.0;

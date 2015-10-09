@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:sky/animation.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'basic.dart';
+import 'framework.dart';
 
 export 'package:sky/animation.dart' show AnimationDirection;
 
