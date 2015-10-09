@@ -13,6 +13,7 @@ namespace compositor {
 namespace instrumentation {
 
 static const size_t kMaxSamples = 120;
+static const size_t kMaxFrameMarkers = 8;
 static const double kOneFrameMS = 1e3 / 60.0;
 
 Stopwatch::Stopwatch() : _start(base::TimeTicks::Now()), _current_sample(0) {
@@ -104,10 +105,17 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
 
   if (maxInterval > kOneFrameMS) {
     // Paint the horizontal markers
-    for (size_t frameIndex = 1; (frameIndex * kOneFrameMS) < maxInterval;
-         frameIndex++) {
+    size_t frameMarkerCount = static_cast<size_t>(maxInterval / kOneFrameMS);
+
+    // Limit the number of markers displayed. After a certain point, the graph
+    // becomes crowded
+    if (frameMarkerCount > kMaxFrameMarkers) {
+      frameMarkerCount = 1;
+    }
+
+    for (size_t frameIndex = 0; frameIndex < frameMarkerCount; frameIndex++) {
       const double frameHeight =
-          height * (1.0 - (UnitFrameInterval(frameIndex * kOneFrameMS) /
+          height * (1.0 - (UnitFrameInterval((frameIndex + 1) * kOneFrameMS) /
                            maxUnitInterval));
       canvas.drawLine(0, frameHeight, width, frameHeight, paint);
     }
