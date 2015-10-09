@@ -39,7 +39,7 @@ void CanvasImageDecoder::initWithConsumer(mojo::ScopedDataPipeConsumerHandle han
 }
 
 void CanvasImageDecoder::initWithList(const Uint8List& list) {
-  RefPtr<SharedBuffer> buffer = SharedBuffer::create(list.num_elements());
+  RefPtr<SharedBuffer> buffer = SharedBuffer::create();
   buffer->append(reinterpret_cast<const char*>(list.data()),
                  list.num_elements());
   base::MessageLoop::current()->PostTask(
