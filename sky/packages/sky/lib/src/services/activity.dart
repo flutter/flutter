@@ -5,8 +5,9 @@
 import 'dart:sky';
 import 'dart:async';
 
-import 'package:sky/src/services/shell.dart';
 import 'package:sky_services/activity/activity.mojom.dart';
+
+import 'shell.dart';
 
 export 'package:sky_services/activity/activity.mojom.dart';
 

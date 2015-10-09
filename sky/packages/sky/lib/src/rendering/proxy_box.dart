@@ -4,11 +4,11 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/painting/box_painter.dart';
-import 'package:sky/src/painting/text_style.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/box.dart';
+import 'package:sky/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'box.dart';
+import 'object.dart';
 
 export 'package:sky/src/painting/box_painter.dart';
 

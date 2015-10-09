@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
+import 'box.dart';
+import 'object.dart';
 
 /// Parent data for use with [RenderFlex]
 class FlexParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {

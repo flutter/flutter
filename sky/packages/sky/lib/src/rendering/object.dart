@@ -7,14 +7,15 @@ import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:sky/animation.dart';
-import 'package:sky/src/rendering/debug.dart';
-import 'package:sky/src/rendering/hit_test.dart';
-import 'package:sky/src/rendering/layer.dart';
-import 'package:sky/src/rendering/node.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'debug.dart';
+import 'hit_test.dart';
+import 'layer.dart';
+import 'node.dart';
+
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'package:sky/src/rendering/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
+export 'hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
 
 typedef sky.Shader ShaderCallback(Rect bounds);
 

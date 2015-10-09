@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/debug.dart';
-import 'package:sky/src/rendering/object.dart';
+import 'box.dart';
+import 'debug.dart';
+import 'object.dart';
 
 const double _kMaxWidth = 100000.0;
 const double _kMaxHeight = 100000.0;

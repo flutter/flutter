@@ -6,10 +6,11 @@ import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
-import 'package:sky/src/rendering/binding.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/proxy_box.dart';
+
+import 'binding.dart';
+import 'box.dart';
+import 'object.dart';
+import 'proxy_box.dart';
 
 typedef void ValueChanged(bool value);
 

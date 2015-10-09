@@ -4,9 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/box.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'box.dart';
+import 'object.dart';
 
 /// The direction in which to scroll
 enum ScrollDirection {

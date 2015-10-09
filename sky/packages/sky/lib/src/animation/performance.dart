@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:sky/src/animation/animated_value.dart';
-import 'package:sky/src/animation/forces.dart';
-import 'package:sky/src/animation/simulation_stepper.dart';
+import 'animated_value.dart';
+import 'forces.dart';
+import 'simulation_stepper.dart';
 
 /// The status of an animation
 enum PerformanceStatus {
