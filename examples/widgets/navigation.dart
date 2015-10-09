@@ -57,7 +57,7 @@ final ThemeData theme = new ThemeData(
 );
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Navigation Example',
     theme: theme,
     routes: routes

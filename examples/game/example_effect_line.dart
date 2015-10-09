@@ -53,7 +53,7 @@ class TestAppState extends State<TestApp> {
   ];
 
   Widget build(BuildContext context) {
-    return new App(
+    return new MaterialApp(
       title: 'EffectLine Demo',
       theme: _theme,
       routes: {

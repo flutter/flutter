@@ -13,7 +13,7 @@ class CardModel {
   Key get key => new ObjectKey(this);
 }
 
-class EnsureVisibleApp extends App {
+class EnsureVisibleApp extends MaterialApp {
 
   static const TextStyle cardLabelStyle =
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);

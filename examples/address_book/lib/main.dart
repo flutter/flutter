@@ -94,7 +94,7 @@ final ThemeData theme = new ThemeData(
 );
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Address Book',
     theme: theme,
     routes: <String, RouteBuilder>{

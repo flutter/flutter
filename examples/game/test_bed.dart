@@ -32,7 +32,7 @@ main() async {
   runApp(_app);
 }
 
-class TestBedApp extends App {
+class TestBedApp extends MaterialApp {
 
   Widget build() {
     ThemeData theme = new ThemeData(

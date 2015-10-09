@@ -87,7 +87,7 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Widget build(BuildContext context) {
-    return new App(
+    return new MaterialApp(
       title: 'Stocks',
       theme: theme,
       routes: <String, RouteBuilder>{
