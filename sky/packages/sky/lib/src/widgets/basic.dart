@@ -961,6 +961,22 @@ class AssetImage extends StatelessComponent {
   }
 }
 
+class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
+  WidgetToRenderBoxAdapter(RenderBox renderBox)
+    : renderBox = renderBox,
+      // WidgetToRenderBoxAdapter objects are keyed to their render box. This
+      // prevents the widget being used in the widget hierarchy in two different
+      // places, which would cause the RenderBox to get inserted in multiple
+      // places in the RenderObject tree.
+      super(key: new GlobalObjectKey(renderBox)) {
+    assert(renderBox != null);
+  }
+
+  final RenderBox renderBox;
+
+  RenderBox createRenderObject() => renderBox;
+}
+
 
 // EVENT HANDLING
 
