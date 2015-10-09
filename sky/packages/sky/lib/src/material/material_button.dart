@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/gestures.dart';
-import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
+import 'colors.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';

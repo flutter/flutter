@@ -4,12 +4,13 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
-import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/widgets.dart';
 
+import 'constants.dart';
 import 'material.dart';
 import 'theme.dart';
+import 'typography.dart';
 
 const double _kSideMargins = 24.0;
 const double _kVerticalPadding = 14.0;

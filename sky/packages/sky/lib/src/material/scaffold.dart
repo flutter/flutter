@@ -4,9 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
+
+import 'constants.dart';
 
 class Scaffold extends StatelessComponent {
   Scaffold({
