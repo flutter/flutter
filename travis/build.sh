@@ -11,7 +11,7 @@ popd
 
 # Analyze the code.
 pushd sky/packages/sky
-../../../third_party/dart-sdk/dart-sdk/bin/dartanalyzer lib/widgets.dart
+../../../third_party/dart-sdk/dart-sdk/bin/dartanalyzer --supermixin lib/widgets.dart
 popd
 
 # Generate docs.
