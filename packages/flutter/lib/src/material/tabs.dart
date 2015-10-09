@@ -8,17 +8,16 @@ import 'dart:sky' as sky;
 import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
-import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/animated_container.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/icon.dart';
-import 'package:sky/src/widgets/ink_well.dart';
-import 'package:sky/src/widgets/scrollable.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/transitions.dart';
+import 'package:sky/widgets.dart';
+
+import 'colors.dart';
+import 'constants.dart';
+import 'icon.dart';
+import 'ink_well.dart';
+import 'theme.dart';
+import 'typography.dart';
 
 typedef void TabSelectedIndexChanged(int selectedIndex);
 typedef void TabLayoutChanged(Size size, List<double> widths);

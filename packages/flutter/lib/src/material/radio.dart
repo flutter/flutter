@@ -4,10 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'theme.dart';
 
 const sky.Color _kLightOffColor = const sky.Color(0x8A000000);
 const sky.Color _kDarkOffColor = const sky.Color(0xB2FFFFFF);

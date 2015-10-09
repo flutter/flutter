@@ -5,9 +5,9 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/services.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/widgets.dart';
+
+import 'theme.dart';
 
 enum IconThemeColor { white, black }
 

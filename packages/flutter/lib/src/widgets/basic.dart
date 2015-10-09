@@ -6,7 +6,8 @@ import 'dart:sky' as sky;
 
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/src/widgets/framework.dart';
+
+import 'framework.dart';
 
 export 'package:sky/rendering.dart' show
     BackgroundImage,

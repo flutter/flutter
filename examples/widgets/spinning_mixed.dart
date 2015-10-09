@@ -5,8 +5,8 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
+import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
 
 import '../rendering/solid_color_box.dart';
 

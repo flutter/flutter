@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
 
 class Field extends StatelessComponent {
   Field({

@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/basic.dart';
+
+import 'framework.dart';
+import 'basic.dart';
 
 typedef Widget IndexedBuilder(BuildContext context, int index); // return null if index is greater than index of last entry
 typedef void ExtentsUpdateCallback(double newExtents);

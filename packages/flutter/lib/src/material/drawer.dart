@@ -4,14 +4,9 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
-import 'package:sky/src/widgets/animated_container.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
-import 'package:sky/src/widgets/navigator.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/transitions.dart';
-import 'package:sky/src/widgets/focus.dart';
+import 'package:sky/widgets.dart';
+
+import 'theme.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://www.google.com/design/spec/layout/structure.html#structure-side-nav

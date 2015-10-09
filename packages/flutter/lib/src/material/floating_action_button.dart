@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:sky/gestures.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/icon.dart';
-import 'package:sky/src/widgets/ink_well.dart';
-import 'package:sky/src/widgets/material.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'icon.dart';
+import 'ink_well.dart';
+import 'material.dart';
+import 'theme.dart';
 
 // TODO(eseidel): This needs to change based on device size?
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
