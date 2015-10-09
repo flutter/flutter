@@ -10,26 +10,31 @@ import 'package:sky/widgets.dart';
 import 'icon.dart';
 
 class IconButton extends StatelessComponent {
-  const IconButton({ Key key, this.icon, this.onPressed, this.color }) : super(key: key);
+  const IconButton({
+    Key key,
+    this.icon,
+    this.color,
+    this.colorFilter,
+    this.onPressed
+  }) : super(key: key);
 
   final String icon;
-  final Color color;
+  final IconThemeColor color;
+  final sky.ColorFilter colorFilter;
   final GestureTapCallback onPressed;
 
   Widget build(BuildContext context) {
-    Widget child = new Icon(type: icon, size: 24);
-    if (color != null) {
-      child = new ColorFilter(
-        color: color,
-        transferMode: sky.TransferMode.srcATop,
-        child: child
-      );
-    }
     return new GestureDetector(
       onTap: onPressed,
       child: new Padding(
-        child: child,
-        padding: const EdgeDims.all(8.0))
+        padding: const EdgeDims.all(8.0),
+        child: new Icon(
+          type: icon,
+          size: 24,
+          color: color,
+          colorFilter: colorFilter
+        )
+      )
     );
   }
 }
