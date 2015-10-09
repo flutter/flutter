@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
-import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
-import 'material.dart';
+import 'colors.dart';
 import 'material_button.dart';
+import 'material.dart';
 import 'theme.dart';
 
 typedef Widget DialogBuilder(NavigatorState navigator);

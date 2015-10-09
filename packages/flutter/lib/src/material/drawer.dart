@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:sky/animation.dart';
-import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
+import 'colors.dart';
+import 'shadows.dart';
 import 'theme.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:

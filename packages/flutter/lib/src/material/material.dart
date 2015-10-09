@@ -4,9 +4,10 @@
 
 import 'package:sky/animation.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/material.dart';
 import 'package:sky/widgets.dart';
 
+import 'constants.dart';
+import 'shadows.dart';
 import 'theme.dart';
 
 enum MaterialType { canvas, card, circle, button }
