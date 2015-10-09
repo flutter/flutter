@@ -68,31 +68,19 @@ class AbstractNode {
 
   /// Mark this node as attached.
   ///
-  /// Typically called only from overrides of [attachChildren] and to mark the
-  /// root of a tree attached.
+  /// Typically called only from the parent's attach(), and to mark the root of
+  /// a tree attached.
   void attach() {
     _attached = true;
-    attachChildren();
   }
-
-  /// Override this function in subclasses with child to call attach() for each
-  /// child. Do not call directly.
-  attachChildren() { }
 
   /// Mark this node as detached.
   ///
-  /// Typically called only from overrides for [detachChildren] and to mark the
-  /// root of a tree detached.
+  /// Typically called only from the parent's detach(), and to mark the root of
+  /// a tree detached.
   void detach() {
     _attached = false;
-    detachChildren();
   }
-
-  /// Override this function in subclasses with child to call detach() for each
-  /// child. Do not call directly.
-  detachChildren() { }
-
-  // TODO(ianh): remove attachChildren()/detachChildren() workaround once mixins can use super.
 
   AbstractNode _parent;
   /// The parent of this node in the tree.
