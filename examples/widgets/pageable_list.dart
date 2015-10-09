@@ -156,7 +156,7 @@ class PageableListAppState extends State<PageableListApp> {
 }
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'PageableList',
     theme: new ThemeData(
       brightness: ThemeBrightness.light,

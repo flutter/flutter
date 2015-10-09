@@ -23,21 +23,15 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationStyle: TextDecorationStyle.double
 );
 
-class App extends StatefulComponent {
-  App({
+class MaterialApp extends StatefulComponent {
+  MaterialApp({
     Key key,
     this.title,
     this.theme,
     this.routes,
     this.onGenerateRoute
   }) : super(key: key) {
-    assert(() {
-      'The "routes" argument to App() is required.';
-      'This might be a sign that you have not upgraded to our new Widgets framework.';
-      'For more details see: https://groups.google.com/forum/#!topic/flutter-dev/hcX3OvLws9c';
-      '...or look at our examples: https://github.com/flutter/engine/tree/master/examples';
-      return routes != null;
-    });
+    assert(routes != null);
   }
 
   final String title;
@@ -45,10 +39,10 @@ class App extends StatefulComponent {
   final Map<String, RouteBuilder> routes;
   final RouteGenerator onGenerateRoute;
 
-  _AppState createState() => new _AppState();
+  _MaterialAppState createState() => new _MaterialAppState();
 }
 
-class _AppState extends State<App> {
+class _MaterialAppState extends State<MaterialApp> {
 
   GlobalObjectKey _navigator;
 

@@ -10,7 +10,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       NavigatorState navigator;
       tester.pumpWidget(
-        new App(
+        new MaterialApp(
           routes: {
             '/': (RouteArguments args) {
               navigator = args.navigator;
@@ -39,7 +39,7 @@ void main() {
       NavigatorState navigator;
       tester.pumpWidget(new Container()); // throw away the old App and its Navigator
       tester.pumpWidget(
-        new App(
+        new MaterialApp(
           routes: {
             '/': (RouteArguments args) {
               navigator = args.navigator;

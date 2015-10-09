@@ -13,7 +13,6 @@
 library painting;
 
 export 'src/painting/box_painter.dart';
-export 'src/painting/radial_reaction.dart';
 export 'src/painting/shadows.dart';
 export 'src/painting/text_painter.dart';
 export 'src/painting/text_style.dart';
