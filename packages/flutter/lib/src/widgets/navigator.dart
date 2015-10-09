@@ -112,6 +112,16 @@ class NavigatorState extends State<Navigator> {
     return index >= 0 && index <= _currentPosition;
   }
 
+  void _didCompleteRoute(Route route) {
+    assert(_history.contains(route));
+    if (route.isActuallyOpaque) {
+      setState(() {
+        // we need to rebuild because our build function depends on
+        // whether the route is opaque or not.
+      });
+    }
+  }
+
   void _didDismissRoute(Route route) {
     assert(_history.contains(route));
     if (_history.lastIndexOf(route) <= _currentPosition)
@@ -240,7 +250,9 @@ abstract class Route {
   }
 
   void _handlePerformanceStatusChanged(PerformanceStatus status) {
-    if (status == PerformanceStatus.dismissed) {
+    if (status == PerformanceStatus.completed) {
+      _navigator._didCompleteRoute(this);
+    } else if (status == PerformanceStatus.dismissed) {
       _navigator._didDismissRoute(this);
       _navigator._removeRoute(this);
       _navigator = null;
@@ -265,8 +277,6 @@ abstract class PerformanceRoute extends Route {
   }
 
   Duration get transitionDuration;
-
-  bool get isActuallyOpaque => (performance == null || _performance.isCompleted) && opaque;
 
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
 
