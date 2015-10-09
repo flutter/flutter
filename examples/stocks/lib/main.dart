@@ -11,7 +11,6 @@ import 'dart:sky' as sky;
 import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
 
 import 'stock_data.dart';
 

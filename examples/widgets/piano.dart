@@ -7,7 +7,6 @@ import 'package:sky_services/media/media.mojom.dart';
 import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
 
 // All of these sounds are marked as public domain at soundbible.
 const String chimes = "http://soundbible.com/grab.php?id=2030&type=wav";

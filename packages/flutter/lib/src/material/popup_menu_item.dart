@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'theme.dart';
 
 const double _kMenuItemHeight = 48.0;
 const double _kBaselineOffsetFromBottom = 20.0;

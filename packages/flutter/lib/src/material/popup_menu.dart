@@ -8,15 +8,11 @@ import 'dart:sky' as sky;
 import 'package:sky/animation.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/focus.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/ink_well.dart';
-import 'package:sky/src/widgets/navigator.dart';
-import 'package:sky/src/widgets/popup_menu_item.dart';
-import 'package:sky/src/widgets/scrollable.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/transitions.dart';
+import 'package:sky/widgets.dart';
+
+import 'ink_well.dart';
+import 'popup_menu_item.dart';
+import 'theme.dart';
 
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;

@@ -8,9 +8,9 @@ import 'dart:sky' as sky;
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:sky/widgets.dart';
+
+import 'theme.dart';
 
 export 'package:sky/rendering.dart' show ValueChanged;
 

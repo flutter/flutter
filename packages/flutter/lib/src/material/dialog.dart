@@ -7,16 +7,11 @@ import 'dart:async';
 import 'package:sky/animation.dart';
 import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/focus.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
-import 'package:sky/src/widgets/material.dart';
-import 'package:sky/src/widgets/material_button.dart';
-import 'package:sky/src/widgets/navigator.dart';
-import 'package:sky/src/widgets/scrollable.dart';
-import 'package:sky/src/widgets/theme.dart';
-import 'package:sky/src/widgets/transitions.dart';
+import 'package:sky/widgets.dart';
+
+import 'material.dart';
+import 'material_button.dart';
+import 'theme.dart';
 
 typedef Widget DialogBuilder(NavigatorState navigator);
 

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/material.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'theme.dart';
 
 // TODO(jackson): This class should usually render the user's
 // preferred banner image rather than a solid background

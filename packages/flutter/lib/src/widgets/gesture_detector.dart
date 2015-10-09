@@ -5,9 +5,10 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/gestures.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/rendering/binding.dart';
+import 'package:sky/rendering.dart';
+
+import 'basic.dart';
+import 'framework.dart';
 
 class GestureDetector extends StatefulComponent {
   const GestureDetector({

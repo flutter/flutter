@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:sky/animation.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/focus.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/transitions.dart';
+
+import 'basic.dart';
+import 'focus.dart';
+import 'framework.dart';
+import 'transitions.dart';
 
 class RouteArguments {
   const RouteArguments({ this.navigator, this.previousPerformance, this.nextPerformance });

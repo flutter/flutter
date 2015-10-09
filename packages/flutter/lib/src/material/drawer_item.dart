@@ -7,11 +7,11 @@ import 'dart:sky' as sky;
 import 'package:sky/gestures.dart';
 import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/icon.dart';
-import 'package:sky/src/widgets/ink_well.dart';
-import 'package:sky/src/widgets/theme.dart';
+import 'package:sky/widgets.dart';
+
+import 'icon.dart';
+import 'ink_well.dart';
+import 'theme.dart';
 
 class DrawerItem extends StatefulComponent {
   const DrawerItem({ Key key, this.icon, this.child, this.onPressed, this.selected: false })

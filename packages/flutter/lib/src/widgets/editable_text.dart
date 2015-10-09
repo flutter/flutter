@@ -7,8 +7,9 @@ import 'dart:async';
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
+
+import 'basic.dart';
+import 'framework.dart';
 
 const _kCursorBlinkPeriod = 500; // milliseconds
 
