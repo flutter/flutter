@@ -70,7 +70,7 @@ class ToolBar extends StatelessComponent {
       ),
       child: new DefaultTextStyle(
         style: sideStyle,
-        child: new Column([
+        child: new Column(<Widget>[
             new Container(
               child: new Row(children),
               height: kToolBarHeight

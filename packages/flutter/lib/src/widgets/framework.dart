@@ -30,9 +30,14 @@ abstract class Key {
 class ValueKey<T> extends Key {
   const ValueKey(this.value) : super.constructor();
   final T value;
-  String toString() => '[\'${value}\']';
-  bool operator==(other) => other is ValueKey<T> && other.value == value;
+  bool operator ==(dynamic other) {
+    if (other is! ValueKey<T>)
+      return false;
+    final ValueKey<T> typedOther = other;
+    return value == typedOther.value;
+  }
   int get hashCode => value.hashCode;
+  String toString() => '[\'$value\']';
 }
 
 /// A kind of [Key] that takes its identity from the object used as its value.
@@ -42,9 +47,14 @@ class ValueKey<T> extends Key {
 class ObjectKey extends Key {
   const ObjectKey(this.value) : super.constructor();
   final Object value;
-  String toString() => '[${value.runtimeType}(${value.hashCode})]';
-  bool operator==(other) => other is ObjectKey && identical(other.value, value);
+  bool operator ==(dynamic other) {
+    if (other is! ObjectKey)
+      return false;
+    final ObjectKey typedOther = other;
+    return identical(value, typedOther.value);
+  }
   int get hashCode => identityHashCode(value);
+  String toString() => '[${value.runtimeType}(${value.hashCode})]';
 }
 
 typedef void GlobalKeyRemoveListener(GlobalKey key);
@@ -57,7 +67,7 @@ abstract class GlobalKey<T extends State> extends Key {
 
   /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
   /// The label is not used for comparing the identity of the key.
-  factory GlobalKey({ String label }) => new LabeledGlobalKey(label); // the label is purely for debugging purposes and is otherwise ignored
+  factory GlobalKey({ String label }) => new LabeledGlobalKey<T>(label); // the label is purely for debugging purposes and is otherwise ignored
 
   static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
   static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
@@ -154,7 +164,7 @@ abstract class GlobalKey<T extends State> extends Key {
 /// Each LabeledGlobalKey instance is a unique key.
 /// The optional label can be used for documentary purposes. It does not affect
 /// the key's identity.
-class LabeledGlobalKey extends GlobalKey {
+class LabeledGlobalKey<T extends State> extends GlobalKey<T> {
   const LabeledGlobalKey(this._label) : super.constructor();
   final String _label;
   String toString() => '[GlobalKey ${_label != null ? _label : hashCode}]';
@@ -167,9 +177,14 @@ class LabeledGlobalKey extends GlobalKey {
 class GlobalObjectKey extends GlobalKey {
   const GlobalObjectKey(this.value) : super.constructor();
   final Object value;
-  String toString() => '[GlobalKey ${value.runtimeType}(${value.hashCode})]';
-  bool operator==(other) => other is GlobalObjectKey && identical(other.value, value);
+  bool operator ==(dynamic other) {
+    if (other is! GlobalObjectKey)
+      return false;
+    final GlobalObjectKey typedOther = other;
+    return identical(value, typedOther.value);
+  }
   int get hashCode => identityHashCode(value);
+  String toString() => '[GlobalKey ${value.runtimeType}(${value.hashCode})]';
 }
 
 
@@ -233,7 +248,7 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 /// that have a single child slot. (This superclass only provides the storage
 /// for that child, it doesn't actually provide the updating logic.)
 abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
-  const OneChildRenderObjectWidget({ Key key, Widget this.child }) : super(key: key);
+  const OneChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
@@ -245,7 +260,7 @@ abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
-  const MultiChildRenderObjectWidget({ Key key, List<Widget> this.children })
+  const MultiChildRenderObjectWidget({ Key key, this.children })
     : super(key: key);
 
   final List<Widget> children;
@@ -812,7 +827,7 @@ abstract class Element<T extends Widget> implements BuildContext {
   }
 
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    String result = '${prefixLineOne}$this\n';
+    String result = '$prefixLineOne$this\n';
     List<Element> children = <Element>[];
     visitChildren((Element child) {
       children.add(child);
@@ -1007,7 +1022,7 @@ abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
       built = _builder(this);
       assert(built != null);
     } catch (e, stack) {
-      _debugReportException('building ${_widget}', e, stack);
+      _debugReportException('building $_widget', e, stack);
       built = new ErrorWidget();
     } finally {
       // We delay marking the element as clean until after calling _builder so
@@ -1019,7 +1034,7 @@ abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
       _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
-      _debugReportException('building ${_widget}', e, stack);
+      _debugReportException('building $_widget', e, stack);
       built = new ErrorWidget();
       _child = updateChild(null, built, slot);
     }
@@ -1251,7 +1266,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     // dirty, e.g. if they have a builder callback. (Builder callbacks have a
     // 'BuildContext' argument which you can pass to Theme.of() and other
     // InheritedWidget APIs which eventually trigger a rebuild.)
-    print('${runtimeType} failed to implement reinvokeBuilders(), but got marked dirty');
+    print('$runtimeType failed to implement reinvokeBuilders(), but got marked dirty');
     assert(() {
       'reinvokeBuilders() not implemented';
       return false;
@@ -1296,9 +1311,6 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     // 5. Walk the top list again but backwards, syncing the nodes.
     // 6. Sync null with any items in the list of keys that are still
     //    mounted.
-
-    final ContainerRenderObjectMixin renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(renderObject is ContainerRenderObjectMixin);
 
     int childrenTop = 0;
     int newChildrenBottom = newWidgets.length - 1;
@@ -1401,7 +1413,6 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
         _deactivateChild(oldChild);
     }
 
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
     return newChildren;
   }
 
@@ -1500,11 +1511,10 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot) {
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(renderObject is RenderObjectWithChildMixin);
+    final RenderObjectWithChildMixin renderObject = this.renderObject;
     assert(slot == null);
     renderObject.child = child;
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject == this.renderObject);
   }
 
   void moveChildRenderObject(RenderObject child, dynamic slot) {
@@ -1512,11 +1522,10 @@ class OneChildRenderObjectElement<T extends OneChildRenderObjectWidget> extends 
   }
 
   void removeChildRenderObject(RenderObject child) {
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(renderObject is RenderObjectWithChildMixin);
+    final RenderObjectWithChildMixin renderObject = this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject == this.renderObject);
   }
 }
 
@@ -1529,27 +1538,24 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
   List<Element> _children;
 
   void insertChildRenderObject(RenderObject child, Element slot) {
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    RenderObject nextSibling = slot?.renderObject;
-    assert(renderObject is ContainerRenderObjectMixin);
+    final ContainerRenderObjectMixin renderObject = this.renderObject;
+    final RenderObject nextSibling = slot?.renderObject;
     renderObject.add(child, before: nextSibling);
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject == this.renderObject);
   }
 
   void moveChildRenderObject(RenderObject child, dynamic slot) {
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    RenderObject nextSibling = slot?.renderObject;
-    assert(renderObject is ContainerRenderObjectMixin);
+    final ContainerRenderObjectMixin renderObject = this.renderObject;
+    final RenderObject nextSibling = slot?.renderObject;
     renderObject.move(child, before: nextSibling);
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject == this.renderObject);
   }
 
   void removeChildRenderObject(RenderObject child) {
-    final renderObject = this.renderObject; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(renderObject is ContainerRenderObjectMixin);
+    final ContainerRenderObjectMixin renderObject = this.renderObject;
     assert(child.parent == renderObject);
     renderObject.remove(child);
-    assert(renderObject == this.renderObject); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(renderObject == this.renderObject);
   }
 
   bool _debugHasDuplicateIds() {

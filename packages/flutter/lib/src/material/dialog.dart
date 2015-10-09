@@ -101,7 +101,7 @@ class Dialog extends StatelessComponent {
       ));
     }
 
-    return new Stack([
+    return new Stack(<Widget>[
       new GestureDetector(
         onTap: onDismiss,
         child: new Container(

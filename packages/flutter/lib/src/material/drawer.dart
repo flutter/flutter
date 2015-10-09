@@ -61,7 +61,7 @@ class _Drawer extends StatelessComponent {
         if (interactive)
           route._settle(velocity);
       },
-      child: new Stack([
+      child: new Stack(<Widget>[
         // mask
         new GestureDetector(
           onTap: () {

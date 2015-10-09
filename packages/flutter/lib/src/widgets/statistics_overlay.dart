@@ -44,12 +44,14 @@ class StatisticsOverlay extends LeafRenderObjectWidget {
   StatisticsOverlay({ this.optionsMask, this.rasterizerThreshold: 0, Key key }) : super(key: key);
 
   /// Create a statistics overaly that displays all available statistics
-  StatisticsOverlay.allEnabled({ Key key, this.rasterizerThreshold: 0 }) : super(key: key), optionsMask = (
-    1 << StatisticsOption.displayRasterizerStatistics.index |
-    1 << StatisticsOption.visualizeRasterizerStatistics.index |
-    1 << StatisticsOption.displayEngineStatistics.index |
-    1 << StatisticsOption.visualizeEngineStatistics.index
-  );
+  StatisticsOverlay.allEnabled({ Key key, this.rasterizerThreshold: 0 })
+    : optionsMask = (
+        1 << StatisticsOption.displayRasterizerStatistics.index |
+        1 << StatisticsOption.visualizeRasterizerStatistics.index |
+        1 << StatisticsOption.displayEngineStatistics.index |
+        1 << StatisticsOption.visualizeEngineStatistics.index
+      ),
+      super(key: key);
 
   final int optionsMask;
 

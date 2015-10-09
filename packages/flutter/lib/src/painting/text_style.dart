@@ -137,7 +137,7 @@ class TextStyle {
       TextDecoration.overline: 'overline',
       TextDecoration.lineThrough: 'lineThrough'
     };
-    return decoration.map((d) => toCSS[d]).join(' ');
+    return decoration.map((TextDecoration d) => toCSS[d]).join(' ');
   }
 
   static String _decorationStyleToCSSString(TextDecorationStyle decorationStyle) {
@@ -210,24 +210,26 @@ class TextStyle {
       }[textAlign];
     }
     if (height != null) {
-      cssStyle['line-height'] = '${height}';
+      cssStyle['line-height'] = '$height';
     }
   }
 
-  bool operator ==(other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    return other is TextStyle &&
-      color == other.color &&
-      fontFamily == other.fontFamily &&
-      fontSize == other.fontSize &&
-      fontWeight == other.fontWeight &&
-      fontStyle == other.fontStyle &&
-      textAlign == other.textAlign &&
-      textBaseline == other.textBaseline &&
-      decoration == other.decoration &&
-      decorationColor == other.decorationColor &&
-      decorationStyle == other.decorationStyle;
+    if (other is! TextStyle)
+      return false;
+    final TextStyle typedOther = other;
+    return color == typedOther.color &&
+           fontFamily == typedOther.fontFamily &&
+           fontSize == typedOther.fontSize &&
+           fontWeight == typedOther.fontWeight &&
+           fontStyle == typedOther.fontStyle &&
+           textAlign == typedOther.textAlign &&
+           textBaseline == typedOther.textBaseline &&
+           decoration == typedOther.decoration &&
+           decorationColor == typedOther.decorationColor &&
+           decorationStyle == typedOther.decorationStyle;
   }
 
   int get hashCode {
@@ -247,12 +249,12 @@ class TextStyle {
   }
 
   String toString([String prefix = '']) {
-    List<String> result = [];
+    List<String> result = <String>[];
     if (color != null)
       result.add('${prefix}color: $color');
     // TODO(hansmuller): escape the fontFamily string.
     if (fontFamily != null)
-      result.add('${prefix}fontFamily: "${fontFamily}"');
+      result.add('${prefix}fontFamily: "$fontFamily"');
     if (fontSize != null)
       result.add('${prefix}fontSize: $fontSize');
     if (fontWeight != null)
@@ -270,7 +272,7 @@ class TextStyle {
     if (decorationStyle != null)
       result.add('${prefix}decorationStyle: $decorationStyle');
     if (result.isEmpty)
-      return '${prefix}<no style specified>';
+      return '$prefix<no style specified>';
     return result.join('\n');
   }
 }

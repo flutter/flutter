@@ -24,7 +24,7 @@ class SnackBarAction extends StatelessComponent {
   final String label;
   final GestureTapCallback onPressed;
 
-  Widget build(BuildContext) {
+  Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: onPressed,
       child: new Container(
@@ -51,7 +51,7 @@ class SnackBar extends StatelessComponent {
   final PerformanceView performance;
 
   Widget build(BuildContext context) {
-    List<Widget> children = [
+    List<Widget> children = <Widget>[
       new Flexible(
         child: new Container(
           margin: const EdgeDims.symmetric(vertical: _kVerticalPadding),

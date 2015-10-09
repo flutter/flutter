@@ -511,7 +511,7 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
 
   List<Widget> _buildItems(BuildContext context, int start, int count) {
     List<Widget> result = buildItems(context, start, count);
-    assert(result.every((item) => item.key != null));
+    assert(result.every((Widget item) => item.key != null));
     return result;
   }
 
@@ -603,7 +603,7 @@ class PageableList<T> extends ScrollableList<T> {
   final Curve curve;
   final PageChangedCallback onPageChanged;
 
-  PageableListState<T> createState() => new PageableListState();
+  PageableListState<T> createState() => new PageableListState<T>();
 }
 
 class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {

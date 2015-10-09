@@ -770,7 +770,7 @@ class DefaultTextStyle extends InheritedWidget {
 }
 
 class Text extends StatelessComponent {
-  Text(this.data, { Key key, TextStyle this.style }) : super(key: key) {
+  Text(this.data, { Key key, this.style }) : super(key: key) {
     assert(data != null);
   }
 
@@ -790,7 +790,7 @@ class Text extends StatelessComponent {
       combinedStyle = style;
     }
     if (combinedStyle != null)
-      text = new StyledTextSpan(combinedStyle, [text]);
+      text = new StyledTextSpan(combinedStyle, <TextSpan>[text]);
     return new Paragraph(text: text);
   }
 

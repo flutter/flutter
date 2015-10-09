@@ -10,7 +10,7 @@ import 'box.dart';
 import 'object.dart';
 
 /// Parent data for use with [RenderBlockBase]
-class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
+class BlockParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
 /// The direction in which the block should lay out
 enum BlockDirection {
@@ -106,10 +106,11 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(innerConstraints, parentUsesSize: true);
-      assert(child.parentData is BlockParentData);
-      child.parentData.position = isVertical ? new Point(0.0, position) : new Point(position, 0.0);
+      final BlockParentData childParentData = child.parentData;
+      childParentData.position = isVertical ? new Point(0.0, position) : new Point(position, 0.0);
       position += isVertical ? child.size.height : child.size.width;
-      child = child.parentData.nextSibling;
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
     }
     size = isVertical ?
         constraints.constrain(new Size(constraints.maxWidth, _mainAxisExtent)) :
@@ -117,7 +118,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     assert(!size.isInfinite);
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}direction: ${direction}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}direction: $direction\n';
 }
 
 /// A block layout with a concrete set of children
@@ -136,8 +137,8 @@ class RenderBlock extends RenderBlockBase {
     RenderBox child = firstChild;
     while (child != null) {
       extent = math.max(extent, childSize(child, innerConstraints));
-      assert(child.parentData is BlockParentData);
-      child = child.parentData.nextSibling;
+      final BlockParentData childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
     return extent;
   }
@@ -156,24 +157,28 @@ class RenderBlock extends RenderBlockBase {
         return childExtent == child.getMaxIntrinsicWidth(innerConstraints);
       });
       extent += childExtent;
-      assert(child.parentData is BlockParentData);
-      child = child.parentData.nextSibling;
+      final BlockParentData childParentData = child.parentData;
+      child = childParentData.nextSibling;
     }
     return math.max(extent, minExtent);
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (isVertical) {
-      return _getIntrinsicCrossAxis(constraints,
-        (c, innerConstraints) => c.getMinIntrinsicWidth(innerConstraints));
+      return _getIntrinsicCrossAxis(
+        constraints,
+        (RenderBox child, BoxConstraints innerConstraints) => child.getMinIntrinsicWidth(innerConstraints)
+      );
     }
     return _getIntrinsicMainAxis(constraints);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (isVertical) {
-      return _getIntrinsicCrossAxis(constraints,
-          (c, innerConstraints) => c.getMaxIntrinsicWidth(innerConstraints));
+      return _getIntrinsicCrossAxis(
+        constraints,
+        (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicWidth(innerConstraints)
+      );
     }
     return _getIntrinsicMainAxis(constraints);
   }
@@ -181,15 +186,19 @@ class RenderBlock extends RenderBlockBase {
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     if (isVertical)
       return _getIntrinsicMainAxis(constraints);
-    return _getIntrinsicCrossAxis(constraints,
-        (c, innerConstraints) => c.getMinIntrinsicWidth(innerConstraints));
+    return _getIntrinsicCrossAxis(
+      constraints,
+      (RenderBox child, BoxConstraints innerConstraints) => child.getMinIntrinsicWidth(innerConstraints)
+    );
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (isVertical)
       return _getIntrinsicMainAxis(constraints);
-    return _getIntrinsicCrossAxis(constraints,
-        (c, innerConstraints) => c.getMaxIntrinsicWidth(innerConstraints));
+    return _getIntrinsicCrossAxis(
+      constraints,
+      (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicWidth(innerConstraints)
+    );
   }
 
   double computeDistanceToActualBaseline(TextBaseline baseline) {
@@ -391,5 +400,5 @@ class RenderBlockViewport extends RenderBlockBase {
       defaultHitTestChildren(result, position: position + new Offset(-startOffset, 0.0));
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}startOffset: ${startOffset}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}startOffset: $startOffset\n';
 }

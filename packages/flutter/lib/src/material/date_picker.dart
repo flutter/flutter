@@ -94,7 +94,7 @@ class _DatePickerState extends State<DatePicker> {
         );
         break;
     }
-    return new Column([
+    return new Column(<Widget>[
       header,
       new Container(
         height: _calendarHeight,
@@ -145,7 +145,7 @@ class _DatePickerHeader extends StatelessComponent {
     return new Container(
       padding: new EdgeDims.all(10.0),
       decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
-      child: new Column([
+      child: new Column(<Widget>[
         new GestureDetector(
           onTap: () => _handleChangeMode(DatePickerMode.day),
           child: new Text(new DateFormat("MMM").format(selectedDate).toUpperCase(), style: monthStyle)
@@ -190,11 +190,11 @@ class DayPicker extends StatelessComponent {
     DateFormat dateFormat = new DateFormat();
     DateSymbols symbols = dateFormat.dateSymbols;
 
-    List<Text> headers = [];
+    List<Text> headers = <Text>[];
     for (String weekDay in symbols.NARROWWEEKDAYS) {
       headers.add(new Text(weekDay, style: headerStyle));
     }
-    List<Widget> rows = [
+    List<Widget> rows = <Widget>[
       new Text(new DateFormat("MMMM y").format(displayedMonth), style: monthStyle),
       new Flex(
         headers,
@@ -208,7 +208,7 @@ class DayPicker extends StatelessComponent {
     int daysInMonth = new DateTime(year, month + 1).difference(new DateTime(year, month)).inDays;
     int firstDay =  new DateTime(year, month).day;
     int weeksShown = 6;
-    List<int> days = [
+    List<int> days = <int>[
       DateTime.SUNDAY,
       DateTime.MONDAY,
       DateTime.TUESDAY,
@@ -218,7 +218,7 @@ class DayPicker extends StatelessComponent {
       DateTime.SATURDAY
     ];
     int daySlots = weeksShown * days.length;
-    List<Widget> labels = [];
+    List<Widget> labels = <Widget>[];
     for (int i = 0; i < daySlots; i++) {
       // This assumes a start day of SUNDAY, but could be changed.
       int day = i - firstDay + 1;

@@ -30,7 +30,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
   void didStopTrackingLastPointer(int pointer);
 
   void resolve(GestureDisposition disposition) {
-    List<GestureArenaEntry> localEntries = new List.from(_entries);
+    List<GestureArenaEntry> localEntries = new List<GestureArenaEntry>.from(_entries);
     _entries.clear();
     for (GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);

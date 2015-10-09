@@ -70,7 +70,7 @@ class _RenderSwitch extends RenderToggleable {
     Color thumbColor: _kThumbOffColor,
     ValueChanged onChanged
   }) : _thumbColor = thumbColor,
-        super(value: value, onChanged: onChanged, size: _kSwitchSize) {}
+        super(value: value, onChanged: onChanged, size: _kSwitchSize);
 
   Color _thumbColor;
   Color get thumbColor => _thumbColor;

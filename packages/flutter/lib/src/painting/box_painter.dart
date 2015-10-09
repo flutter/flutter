@@ -101,15 +101,6 @@ class EdgeDims {
     );
   }
 
-  bool operator ==(other) {
-    return identical(this, other) ||
-      (other is EdgeDims &&
-       top == other.top &&
-       right == other.right &&
-       bottom == other.bottom &&
-       left == other.left);
-  }
-
   /// Linearly interpolate between two EdgeDims
   ///
   /// If either is null, this function interpolates from [EdgeDims.zero].
@@ -131,6 +122,18 @@ class EdgeDims {
   /// An EdgeDims with zero offsets in each direction
   static const EdgeDims zero = const EdgeDims.TRBL(0.0, 0.0, 0.0, 0.0);
 
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! EdgeDims)
+      return false;
+    final EdgeDims typedOther = other;
+    return top == typedOther.top &&
+           right == typedOther.right &&
+           bottom == typedOther.bottom &&
+           left == typedOther.left;
+  }
+
   int get hashCode {
     int value = 373;
     value = 37 * value + top.hashCode;
@@ -139,6 +142,7 @@ class EdgeDims {
     value = 37 * value + right.hashCode;
     return value;
   }
+
   String toString() => "EdgeDims($top, $right, $bottom, $left)";
 }
 
@@ -322,8 +326,7 @@ class LinearGradient extends Gradient {
   final ui.TileMode tileMode;
 
   ui.Shader createShader() {
-    return new ui.Gradient.linear([begin, end], this.colors,
-                                   this.stops, this.tileMode);
+    return new ui.Gradient.linear(<Point>[begin, end], this.colors, this.stops, this.tileMode);
   }
 
   String toString() {
@@ -612,7 +615,7 @@ class BoxDecoration {
   }
 
   String toString([String prefix = '']) {
-    List<String> result = [];
+    List<String> result = <String>[];
     if (backgroundColor != null)
       result.add('${prefix}backgroundColor: $backgroundColor');
     if (backgroundImage != null)
@@ -622,13 +625,13 @@ class BoxDecoration {
     if (borderRadius != null)
       result.add('${prefix}borderRadius: $borderRadius');
     if (boxShadow != null)
-      result.add('${prefix}boxShadow: ${boxShadow.map((shadow) => shadow.toString())}');
+      result.add('${prefix}boxShadow: ${boxShadow.map((BoxShadow shadow) => shadow.toString())}');
     if (gradient != null)
       result.add('${prefix}gradient: $gradient');
     if (shape != Shape.rectangle)
       result.add('${prefix}shape: $shape');
     if (result.isEmpty)
-      return '${prefix}<no decorations specified>';
+      return '$prefix<no decorations specified>';
     return result.join('\n');
   }
 }
