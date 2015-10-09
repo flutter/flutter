@@ -7,7 +7,7 @@
 #define SKY_ENGINE_CORE_LOADER_CANVASIMAGELOADER_H_
 
 #include "base/memory/weak_ptr.h"
-#include "mojo/data_pipe_utils/data_pipe_drainer.h"
+#include "mojo/public/cpp/system/core.h"
 #include "sky/engine/core/loader/ImageDecoderCallback.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/tonic/dart_wrappable.h"
@@ -17,28 +17,22 @@
 
 namespace blink {
 
-class CanvasImageDecoder : public mojo::common::DataPipeDrainer::Client,
-                           public RefCounted<CanvasImageDecoder>,
+class CanvasImageDecoder : public RefCounted<CanvasImageDecoder>,
                            public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   static PassRefPtr<CanvasImageDecoder> create(PassOwnPtr<ImageDecoderCallback> callback);
   virtual ~CanvasImageDecoder();
 
-  // mojo::common::DataPipeDrainer::Client
-  void OnDataAvailable(const void*, size_t) override;
-  void OnDataComplete() override;
-
   void initWithConsumer(mojo::ScopedDataPipeConsumerHandle handle);
   void initWithList(const Uint8List& list);
 
  private:
-  CanvasImageDecoder(PassOwnPtr<ImageDecoderCallback> callback);
+  explicit CanvasImageDecoder(PassOwnPtr<ImageDecoderCallback> callback);
 
+  void Decode(PassRefPtr<SharedBuffer> buffer);
   void RejectCallback();
 
-  OwnPtr<mojo::common::DataPipeDrainer> drainer_;
-  RefPtr<SharedBuffer> buffer_;
   OwnPtr<ImageDecoderCallback> callback_;
 
   base::WeakPtrFactory<CanvasImageDecoder> weak_factory_;

@@ -4,11 +4,12 @@
 
 #include "sky/shell/ui/platform_impl.h"
 
+#include "sky/shell/shell.h"
+
 namespace sky {
 namespace shell {
 
-PlatformImpl::PlatformImpl()
-    : main_thread_task_runner_(base::MessageLoop::current()->task_runner()) {
+PlatformImpl::PlatformImpl() {
 }
 
 PlatformImpl::~PlatformImpl() {
@@ -18,8 +19,12 @@ blink::WebString PlatformImpl::defaultLocale() {
   return blink::WebString::fromUTF8("en-US");
 }
 
-base::SingleThreadTaskRunner* PlatformImpl::mainThreadTaskRunner() {
-  return main_thread_task_runner_.get();
+base::SingleThreadTaskRunner* PlatformImpl::GetUITaskRunner() {
+  return Shell::Shared().ui_task_runner();
+}
+
+base::SingleThreadTaskRunner* PlatformImpl::GetIOTaskRunner() {
+  return Shell::Shared().io_task_runner();
 }
 
 }  // namespace shell

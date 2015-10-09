@@ -25,12 +25,16 @@ class Shell {
       scoped_ptr<ServiceProviderContext> service_provider_context);
   static Shell& Shared();
 
-  scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner() const {
-    return gpu_thread_->message_loop()->task_runner();
+  base::SingleThreadTaskRunner* gpu_task_runner() const {
+    return gpu_task_runner_.get();
   }
 
-  scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner() const {
-    return ui_thread_->message_loop()->task_runner();
+  base::SingleThreadTaskRunner* ui_task_runner() const {
+    return ui_task_runner_.get();
+  }
+
+  base::SingleThreadTaskRunner* io_task_runner() const {
+    return io_task_runner_.get();
   }
 
   ServiceProviderContext* service_provider_context() const {
@@ -47,6 +51,12 @@ class Shell {
 
   scoped_ptr<base::Thread> gpu_thread_;
   scoped_ptr<base::Thread> ui_thread_;
+  scoped_ptr<base::Thread> io_thread_;
+
+  scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner_;
+  scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner_;
+  scoped_refptr<base::SingleThreadTaskRunner> io_task_runner_;
+
   scoped_ptr<ServiceProviderContext> service_provider_context_;
   TracingController tracing_controller_;
 

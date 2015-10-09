@@ -170,8 +170,8 @@ public:
     // Returns a value such as "en-US".
     virtual WebString defaultLocale() { return WebString(); }
 
-    virtual base::SingleThreadTaskRunner* mainThreadTaskRunner() { return 0; }
-
+    virtual base::SingleThreadTaskRunner* GetUITaskRunner() { return 0; }
+    virtual base::SingleThreadTaskRunner* GetIOTaskRunner() { return 0; }
 
     // Vibration -----------------------------------------------------------
 
