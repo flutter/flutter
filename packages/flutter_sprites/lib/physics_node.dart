@@ -240,7 +240,56 @@ class PhysicsNode extends Node {
         }
       }
 
+      // Draw joints
+      shapePaint.color = new Color(0xff0000ff);
 
+      for (box2d.JointEdge edge = body.getJointList(); edge != null; edge = edge.next) {
+        box2d.Joint joint = edge.joint;
+
+        // Make sure we only draw each joint once
+        if (joint.getBodyB() == body)
+          continue;
+
+        // Get anchor A
+        Vector2 anchorA = new Vector2.zero();
+        joint.getAnchorA(anchorA);
+
+        Point ptAnchorA = new Point(
+          anchorA.x * b2WorldToNodeConversionFactor,
+          anchorA.y * b2WorldToNodeConversionFactor
+        );
+
+        // Get anchor B
+        Vector2 anchorB = new Vector2.zero();
+        joint.getAnchorB(anchorB);
+
+        Point ptAnchorB = new Point(
+          anchorB.x * b2WorldToNodeConversionFactor,
+          anchorB.y * b2WorldToNodeConversionFactor
+        );
+
+        // Get body A position
+        Point ptBodyA = new Point(
+          joint.getBodyA().position.x * b2WorldToNodeConversionFactor,
+          joint.getBodyA().position.y * b2WorldToNodeConversionFactor
+        );
+
+        Point ptBodyB = new Point(
+          joint.getBodyB().position.x * b2WorldToNodeConversionFactor,
+          joint.getBodyB().position.y * b2WorldToNodeConversionFactor
+        );
+
+        // Draw the joint depending on type
+        box2d.JointType type = joint.getType();
+
+        if (type == box2d.JointType.WELD) {
+          // Draw weld joint
+          canvas.drawCircle(ptAnchorA, 5.0, shapePaint);
+
+          canvas.drawLine(ptBodyA, ptAnchorA, shapePaint);
+          canvas.drawLine(ptAnchorB, ptBodyB, shapePaint);
+        }
+      }
     }
   }
 }
