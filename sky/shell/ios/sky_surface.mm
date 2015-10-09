@@ -186,13 +186,13 @@ static std::string SkPictureTracingPath() {
 }
 
 - (NSString*)skyInitialBundleURL {
-  NSString *skyxBundlePath = [[NSBundle mainBundle] pathForResource:@"app" ofType:@"skyx"];
+  NSString *flxBundlePath = [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"];
 #ifndef NDEBUG
   NSFileManager *fileManager = [NSFileManager defaultManager];
   NSError *error = nil;
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *documentsDirectory = [paths objectAtIndex:0];
-  NSString *skyxDocsPath = [documentsDirectory stringByAppendingPathComponent:@"app.skyx"];
+  NSString *flxDocsPath = [documentsDirectory stringByAppendingPathComponent:@"app.flx"];
 
   // Write an empty file to help identify the correct simulator app by its bundle id. See sky_tool for its use.
   NSString *bundleIDPath = [documentsDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
@@ -201,16 +201,16 @@ static std::string SkPictureTracingPath() {
       NSLog(@"Couldn't write the bundle id file %@: auto reloading on the iOS simulator won't work\n%@", bundleIDPath, error);
   }
 
-  if (skyxBundlePath != nil && [fileManager fileExistsAtPath:skyxDocsPath] == NO) {
-    if ([fileManager copyItemAtPath:skyxBundlePath toPath:skyxDocsPath error:&error]) {
-      return skyxDocsPath;
+  if (flxBundlePath != nil && [fileManager fileExistsAtPath:flxDocsPath] == NO) {
+    if ([fileManager copyItemAtPath:flxBundlePath toPath:flxDocsPath error:&error]) {
+      return flxDocsPath;
     }
-    NSLog(@"Error encountered copying app.skyx from the Bundle to the Documents directory. Dynamic reloading will not be possible. %@", error);
-    return skyxBundlePath;
+    NSLog(@"Error encountered copying app.flx from the Bundle to the Documents directory. Dynamic reloading will not be possible. %@", error);
+    return flxBundlePath;
   }
-  return skyxDocsPath;
+  return flxDocsPath;
 #endif
-  return skyxBundlePath;
+  return flxBundlePath;
 }
 
 - (void)connectToEngineAndLoad {

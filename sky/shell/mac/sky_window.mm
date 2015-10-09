@@ -73,13 +73,13 @@ static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
 }
 
 - (NSString*)skyInitialBundleURL {
-  return [[NSBundle mainBundle] pathForResource:@"app" ofType:@"skyx"];
+  return [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"];
 }
 
 // TODO(eseidel): This does not belong in sky_window!
 // Probably belongs in NSApplicationDelegate didFinishLaunching.
 // We also want a separate setup for normal apps vs SkyShell
-// normal apps only use a skyx vs. SkyShell which always pulls from network.
+// normal apps only use a flx vs. SkyShell which always pulls from network.
 - (void)setupAndLoadDart {
   auto interface_request = mojo::GetProxy(&_sky_engine);
   self.platformView->ConnectToEngine(interface_request.Pass());
