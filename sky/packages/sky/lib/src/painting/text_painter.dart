@@ -16,6 +16,9 @@ abstract class TextSpan {
 
   void _applyStyleToContainer(sky.Element container) {
   }
+
+  void build(sky.ParagraphBuilder builder);
+  sky.ParagraphStyle get paragraphStyle => null;
 }
 
 /// An immutable span of unstyled text
@@ -29,6 +32,10 @@ class PlainTextSpan extends TextSpan {
 
   sky.Node _toDOM(sky.Document owner) {
     return owner.createText(text);
+  }
+
+  void build(sky.ParagraphBuilder builder) {
+    builder.addText(text);
   }
 
   bool operator ==(other) => other is PlainTextSpan && text == other.text;
@@ -58,6 +65,15 @@ class StyledTextSpan extends TextSpan {
     }
     return parent;
   }
+
+  void build(sky.ParagraphBuilder builder) {
+    builder.pushStyle(style.textStyle);
+    for (TextSpan child in children)
+      child.build(builder);
+    builder.pop();
+  }
+
+  sky.ParagraphStyle get paragraphStyle => style.paragraphStyle;
 
   void _applyStyleToContainer(sky.Element container) {
     style.applyToContainerCSSStyle(container.style);
@@ -97,13 +113,23 @@ class StyledTextSpan extends TextSpan {
   }
 }
 
+const bool _kEnableNewTextPainter = false;
+
 /// An object that paints a [TextSpan] into a canvas
 class TextPainter {
-  TextPainter(TextSpan text) {
+  factory TextPainter(TextSpan text) {
+    if (_kEnableNewTextPainter)
+      return new _NewTextPainter(text);
+    return new TextPainter._(text);
+  }
+
+  TextPainter._(TextSpan text) {
     _layoutRoot.rootElement = _document.createElement('p');
     assert(text != null);
     this.text = text;
   }
+
+  sky.Paragraph _paragraph;
 
   final sky.Document _document = new sky.Document();
   final sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
@@ -212,5 +238,116 @@ class TextPainter {
     canvas.translate(offset.dx, offset.dy);
     _layoutRoot.paint(canvas);
     canvas.translate(-offset.dx, -offset.dy);
+  }
+}
+
+class _NewTextPainter implements TextPainter {
+  _NewTextPainter(TextSpan text) {
+    this.text = text;
+  }
+
+  sky.Paragraph _paragraph;
+  bool _needsLayout = true;
+
+  TextSpan _text;
+  /// The (potentially styled) text to paint
+  TextSpan get text => _text;
+  void set text(TextSpan value) {
+    if (_text == value)
+      return;
+    _text = value;
+    sky.ParagraphBuilder builder = new sky.ParagraphBuilder();
+    _text.build(builder);
+    _paragraph = builder.build(_text.paragraphStyle);
+    _needsLayout = true;
+  }
+
+  /// The minimum width at which to layout the text
+  double get minWidth => _paragraph.minWidth;
+  void set minWidth(value) {
+    if (_paragraph.minWidth == value)
+      return;
+    _paragraph.minWidth = value;
+    _needsLayout = true;
+  }
+
+  /// The maximum width at which to layout the text
+  double get maxWidth => _paragraph.maxWidth;
+  void set maxWidth(value) {
+    if (_paragraph.maxWidth == value)
+      return;
+    _paragraph.maxWidth = value;
+    _needsLayout = true;
+  }
+
+  /// The minimum height at which to layout the text
+  double get minHeight => _paragraph.minHeight;
+  void set minHeight(value) {
+    if (_paragraph.minHeight == value)
+      return;
+    _paragraph.minHeight = value;
+    _needsLayout = true;
+  }
+
+  /// The maximum height at which to layout the text
+  double get maxHeight => _paragraph.maxHeight;
+  void set maxHeight(value) {
+    if (_paragraph.maxHeight == value)
+      return;
+    _paragraph.maxHeight = value;
+  }
+
+  // Unfortunately, using full precision floating point here causes bad layouts
+  // because floating point math isn't associative. If we add and subtract
+  // padding, for example, we'll get different values when we estimate sizes and
+  // when we actually compute layout because the operations will end up associated
+  // differently. To work around this problem for now, we round fractional pixel
+  // values up to the nearest whole pixel value. The right long-term fix is to do
+  // layout using fixed precision arithmetic.
+  double _applyFloatingPointHack(double layoutValue) {
+    return layoutValue.ceilToDouble();
+  }
+
+  /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds
+  double get minContentWidth {
+    assert(!_needsLayout);
+    return _applyFloatingPointHack(_paragraph.minIntrinsicWidth);
+  }
+
+  /// The width at which increasing the width of the text no longer decreases the height
+  double get maxContentWidth {
+    assert(!_needsLayout);
+    return _applyFloatingPointHack(_paragraph.maxIntrinsicWidth);
+  }
+
+  /// The height required to paint the text completely within its bounds
+  double get height {
+    assert(!_needsLayout);
+    return _applyFloatingPointHack(_paragraph.height);
+  }
+
+  /// The distance from the top of the text to the first baseline of the given type
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    assert(!_needsLayout);
+    switch (baseline) {
+      case TextBaseline.alphabetic:
+        return _paragraph.alphabeticBaseline;
+      case TextBaseline.ideographic:
+        return _paragraph.ideographicBaseline;
+    }
+  }
+
+  /// Compute the visual position of the glyphs for painting the text
+  void layout() {
+    if (!_needsLayout)
+      return;
+    _paragraph.layout();
+    _needsLayout = false;
+  }
+
+  /// Paint the text onto the given canvas at the given offset
+  void paint(sky.Canvas canvas, sky.Offset offset) {
+    assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
+    _paragraph.paint(canvas, offset);
   }
 }
