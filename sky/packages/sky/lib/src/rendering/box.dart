@@ -631,7 +631,8 @@ abstract class RenderBox extends RenderObject {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }
 
-/// A mixin that provides useful default behaviors for boxes with children managed by the [ContainerRenderObjectMixin] mixin
+/// A mixin that provides useful default behaviors for boxes with children
+/// managed by the [ContainerRenderObjectMixin] mixin.
 ///
 /// By convention, this class doesn't override any members of the superclass.
 /// Instead, it provides helpful functions that subclasses can call as

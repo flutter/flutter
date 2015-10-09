@@ -25,15 +25,15 @@ typedef sky.Shader ShaderCallback(Rect bounds);
 /// input parameters to the parent's layout algorithm or their position relative
 /// to other children.
 class ParentData {
-  void detach() {
-    detachSiblings();
-  }
-  void detachSiblings() { } // workaround for lack of inter-class mixins in Dart
+  /// Called when the RenderObject is removed from the tree.
+  void detach() { }
 
-  /// Override this function in subclasses to merge in data from other instance into this instance
+  /// Override this function in subclasses to merge in data from other instance
+  /// into this instance.
   void merge(ParentData other) {
     assert(other.runtimeType == this.runtimeType);
   }
+
   String toString() => '<none>';
 }
 
@@ -1158,11 +1158,13 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
     if (_child != null)
       adoptChild(_child);
   }
-  void attachChildren() {
+  void attach() {
+    super.attach();
     if (_child != null)
       _child.attach();
   }
-  void detachChildren() {
+  void detach() {
+    super.detach();
     if (_child != null)
       _child.detach();
   }
@@ -1178,14 +1180,15 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
 }
 
 /// Parent data to support a doubly-linked list of children
-abstract class ContainerParentDataMixin<ChildType extends RenderObject> {
+abstract class ContainerParentDataMixin<ChildType extends RenderObject> implements ParentData {
   /// The previous sibling in the parent's child list
   ChildType previousSibling;
   /// The next sibling in the parent's child list
   ChildType nextSibling;
 
   /// Clear the sibling pointers.
-  void detachSiblings() {
+  void detach() {
+    super.detach();
     if (previousSibling != null) {
       assert(previousSibling.parentData is ContainerParentDataMixin<ChildType>);
       assert(previousSibling != this);
@@ -1362,6 +1365,27 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     _removeFromChildList(child);
     _addToChildList(child, before: before);
   }
+
+  void attach() {
+    super.attach();
+    ChildType child = _firstChild;
+    while (child != null) {
+      child.attach();
+      assert(child.parentData is ParentDataType);
+      child = child.parentData.nextSibling;
+    }
+  }
+
+  void detach() {
+    super.detach();
+    ChildType child = _firstChild;
+    while (child != null) {
+      child.detach();
+      assert(child.parentData is ParentDataType);
+      child = child.parentData.nextSibling;
+    }
+  }
+
   void redepthChildren() {
     ChildType child = _firstChild;
     while (child != null) {
@@ -1370,22 +1394,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
       child = child.parentData.nextSibling;
     }
   }
-  void attachChildren() {
-    ChildType child = _firstChild;
-    while (child != null) {
-      child.attach();
-      assert(child.parentData is ParentDataType);
-      child = child.parentData.nextSibling;
-    }
-  }
-  void detachChildren() {
-    ChildType child = _firstChild;
-    while (child != null) {
-      child.detach();
-      assert(child.parentData is ParentDataType);
-      child = child.parentData.nextSibling;
-    }
-  }
+
   void visitChildren(RenderObjectVisitor visitor) {
     ChildType child = _firstChild;
     while (child != null) {
