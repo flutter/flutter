@@ -24,6 +24,9 @@ class FlatButton extends MaterialButton {
 }
 
 class _FlatButtonState extends MaterialButtonState<FlatButton> {
+
+  int get level => 0;
+
   Color getColor(BuildContext context) {
     if (!config.enabled || !highlight)
       return null;
@@ -35,5 +38,8 @@ class _FlatButtonState extends MaterialButtonState<FlatButton> {
     }
   }
 
-  int get level => 0;
+  ThemeBrightness getColorBrightness(BuildContext context) {
+    return Theme.of(context).brightness;
+  }
+
 }

@@ -25,7 +25,8 @@ class Material extends StatelessComponent {
     this.child,
     this.type: MaterialType.card,
     this.level: 0,
-    this.color
+    this.color,
+    this.textStyle
   }) : super(key: key) {
     assert(level != null);
   }
@@ -34,6 +35,7 @@ class Material extends StatelessComponent {
   final MaterialType type;
   final int level;
   final Color color;
+  final TextStyle textStyle;
 
   Color _getBackgroundColor(BuildContext context) {
     if (color != null)
@@ -52,7 +54,7 @@ class Material extends StatelessComponent {
     Widget contents = child;
     if (child != null) {
       contents = new DefaultTextStyle(
-        style: Theme.of(context).text.body1,
+        style: textStyle ?? Theme.of(context).text.body1,
         child: contents
       );
       if (_kEdges[type] != null) {

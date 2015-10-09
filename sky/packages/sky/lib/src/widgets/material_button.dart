@@ -3,17 +3,42 @@
 // found in the LICENSE file.
 
 import 'package:sky/gestures.dart';
+import 'package:sky/material.dart';
 import 'package:sky/src/widgets/basic.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/ink_well.dart';
 import 'package:sky/src/widgets/material.dart';
+import 'package:sky/src/widgets/theme.dart';
 
+enum ButtonColor { normal, accent }
+
+class ButtonTheme extends InheritedWidget {
+  ButtonTheme({
+    Key key,
+    this.color,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(child != null);
+  }
+
+  final ButtonColor color;
+
+  static ButtonColor of(BuildContext context) {
+    ButtonTheme result = context.inheritedWidgetOfType(ButtonTheme);
+    return result?.color ?? ButtonColor.normal;
+  }
+
+  bool updateShouldNotify(ButtonTheme old) => color != old.color;
+}
+
+/// Base class for buttons in the Material theme.
 /// Rather than using this class directly, please use FlatButton or RaisedButton.
 abstract class MaterialButton extends StatefulComponent {
   MaterialButton({
     Key key,
     this.child,
     this.enabled: true,
+    this.textColor,
     this.onPressed
   }) : super(key: key) {
     assert(enabled != null);
@@ -21,14 +46,39 @@ abstract class MaterialButton extends StatefulComponent {
 
   final Widget child;
   final bool enabled;
+  final ButtonColor textColor;
   final GestureTapCallback onPressed;
 }
 
 abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
   bool highlight = false;
 
-  Color getColor(BuildContext context);
   int get level;
+
+  Color getColor(BuildContext context);
+  ThemeBrightness getColorBrightness(BuildContext context);
+
+  Color getTextColor(BuildContext context) {
+    if (config.enabled) {
+      switch (config.textColor ?? ButtonTheme.of(context)) {
+        case ButtonColor.accent:
+          return Theme.of(context).accentColor;
+        case ButtonColor.normal:
+          switch (getColorBrightness(context)) {
+            case ThemeBrightness.light:
+              return Colors.black87;
+            case ThemeBrightness.dark:
+              return Colors.white;
+          }
+      }
+    }
+    switch (getColorBrightness(context)) {
+      case ThemeBrightness.light:
+        return Colors.black26;
+      case ThemeBrightness.dark:
+        return Colors.white30;
+    }
+  }
 
   void _handleHighlightChanged(bool value) {
     setState(() {
@@ -41,7 +91,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       child: new Center(
         shrinkWrap: ShrinkWrap.width,
-        child: config.child // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
+        child: config.child
       )
     );
     return new Container(
@@ -52,6 +102,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
         type: MaterialType.button,
         level: level,
         color: getColor(context),
+        textStyle: Theme.of(context).text.button.copyWith(color: getTextColor(context)),
         child: new InkWell(
           onTap: config.enabled ? config.onPressed : null,
           onHighlightChanged: config.enabled ? _handleHighlightChanged : null,

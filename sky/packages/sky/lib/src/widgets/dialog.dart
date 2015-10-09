@@ -12,6 +12,7 @@ import 'package:sky/src/widgets/focus.dart';
 import 'package:sky/src/widgets/framework.dart';
 import 'package:sky/src/widgets/gesture_detector.dart';
 import 'package:sky/src/widgets/material.dart';
+import 'package:sky/src/widgets/material_button.dart';
 import 'package:sky/src/widgets/navigator.dart';
 import 'package:sky/src/widgets/scrollable.dart';
 import 'package:sky/src/widgets/theme.dart';
@@ -95,9 +96,12 @@ class Dialog extends StatelessComponent {
     }
 
     if (actions != null) {
-      dialogBody.add(new Container(
-        child: new Row(actions,
-          justifyContent: FlexJustifyContent.end
+      dialogBody.add(new ButtonTheme(
+        color: ButtonColor.accent,
+        child: new Container(
+          child: new Row(actions,
+            justifyContent: FlexJustifyContent.end
+          )
         )
       ));
     }

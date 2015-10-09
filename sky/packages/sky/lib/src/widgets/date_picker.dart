@@ -135,8 +135,8 @@ class _DatePickerHeader extends StatelessComponent {
         break;
       case ThemeBrightness.dark:
         headerTheme = Typography.white;
-        dayColor = mode == DatePickerMode.day ? Colors.white87 : Colors.white54;
-        yearColor = mode == DatePickerMode.year ? Colors.white87 : Colors.white54;
+        dayColor = mode == DatePickerMode.day ? Colors.white : Colors.white70;
+        yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
     TextStyle dayStyle = headerTheme.display3.copyWith(color: dayColor, height: 1.0, fontSize: 100.0);
