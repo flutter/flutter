@@ -176,7 +176,7 @@ if (is_android) {
     native_libs = [ "libsky_shell.so" ]
     asset_location = "$root_build_dir/sky_shell/assets"
 
-    extensions_to_not_compress = ".skyx"
+    extensions_to_not_compress = ".flx"
 
     deps = [
       ":assets",
