@@ -10,7 +10,7 @@ void main() {
       GlobalKey<PlaceholderState> placeholderKey = new GlobalKey<PlaceholderState>();
       Key tapTarget = new Key('tap-target');
 
-      tester.pumpWidget(new App(
+      tester.pumpWidget(new MaterialApp(
         routes: {
           '/': (RouteArguments args) {
             return new GestureDetector(

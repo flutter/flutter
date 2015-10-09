@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'framework.dart';
+import 'package:sky/rendering.dart';
 
-import 'package:sky/src/rendering/statistics_box.dart';
+import 'framework.dart';
 
 /// The options that control whether the statistics overlay displays certain
 /// aspects of the compositor

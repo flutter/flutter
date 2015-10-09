@@ -156,7 +156,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
 }
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     theme: new ThemeData(
       brightness: ThemeBrightness.light,
       primarySwatch: Colors.blue,

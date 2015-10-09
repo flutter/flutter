@@ -7,7 +7,6 @@
 /// See https://www.google.com/design/spec/material-design/introduction.html
 library material;
 
-export 'src/material/app.dart';
 export 'src/material/card.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/colors.dart';
@@ -25,10 +24,11 @@ export 'src/material/icon_button.dart';
 export 'src/material/icon.dart';
 export 'src/material/ink_well.dart';
 export 'src/material/input.dart';
-export 'src/material/material_button.dart';
 export 'src/material/material.dart';
-export 'src/material/popup_menu.dart';
+export 'src/material/material_app.dart';
+export 'src/material/material_button.dart';
 export 'src/material/popup_menu_item.dart';
+export 'src/material/popup_menu.dart';
 export 'src/material/progress_indicator.dart';
 export 'src/material/radio.dart';
 export 'src/material/raised_button.dart';
@@ -37,10 +37,11 @@ export 'src/material/shadows.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/switch.dart';
 export 'src/material/tabs.dart';
-export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
+export 'src/material/theme.dart';
 export 'src/material/title.dart';
 export 'src/material/tool_bar.dart';
 export 'src/material/typography.dart';
+export 'src/material/radial_reaction.dart';
 
 export 'widgets.dart';

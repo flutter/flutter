@@ -125,7 +125,7 @@ class FitnessAppState extends State<FitnessApp> {
   }
 
   Widget build(BuildContext) {
-    return new App(
+    return new MaterialApp(
       theme: new ThemeData(
         brightness: ThemeBrightness.light,
         primarySwatch: Colors.indigo,

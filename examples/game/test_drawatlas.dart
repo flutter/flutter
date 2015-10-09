@@ -32,7 +32,7 @@ main() async {
   String json = await _bundle.loadString('assets/sprites.json');
   _spriteSheet = new SpriteSheet(_images['assets/sprites.png'], json);
 
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Test drawAtlas',
     theme: _theme,
     routes: {

@@ -5,11 +5,12 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 
-import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
 import 'package:sky/widgets.dart';
 
+import 'radial_reaction.dart';
+import 'shadows.dart';
 import 'theme.dart';
 
 export 'package:sky/rendering.dart' show ValueChanged;

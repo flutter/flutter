@@ -81,7 +81,7 @@ class GameDemoState extends State<GameDemo> {
   int _lastScore = 0;
 
   Widget build(BuildContext context) {
-    return new App(
+    return new MaterialApp(
       title: 'Asteroids',
       theme: _theme,
       routes: {

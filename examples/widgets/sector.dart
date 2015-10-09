@@ -16,7 +16,7 @@ RenderBox initCircle() {
   );
 }
 
-class SectorApp extends App {
+class SectorApp extends MaterialApp {
 
   RenderBoxToRenderSectorAdapter sectors = initCircle();
   math.Random rand = new math.Random(1);

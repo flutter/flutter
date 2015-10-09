@@ -201,7 +201,7 @@ class DemoHome extends StatelessComponent {
 }
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Flutter Demos',
     theme: _theme,
     routes: {

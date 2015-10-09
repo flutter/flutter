@@ -56,7 +56,7 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
 }
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'IndexedStackDemo',
     theme: new ThemeData(
       brightness: ThemeBrightness.light,

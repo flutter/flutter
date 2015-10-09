@@ -372,7 +372,7 @@ class CardCollectionState extends State<CardCollection> {
 }
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Cards',
     routes: {
       '/': (RouteArguments args) => new CardCollection(navigator: args.navigator),
