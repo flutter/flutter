@@ -19,27 +19,23 @@ class ListenCommand extends Command {
   final name = 'listen';
   final description = 'Listen for changes to files and reload the running app '
       'on all connected devices.';
-  AndroidDevice android = null;
+  AndroidDevice android;
+  IOSDevice ios;
   List<String> watchCommand;
 
   /// Only run once.  Used for testing.
   bool singleRun;
 
-  ListenCommand({this.android, this.singleRun: false}) {
-    argParser.addFlag('checked',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Toggle Dart\'s checked mode.');
-    argParser.addOption('target',
-        defaultsTo: '.',
-        abbr: 't',
-        help: 'Target app path or filename to start.');
-  }
+  ListenCommand({this.android, this.ios, this.singleRun: false}) {}
 
   @override
   Future<int> run() async {
     if (android == null) {
       android = new AndroidDevice();
+    }
+
+    if (ios == null) {
+      ios = new IOSDevice();
     }
 
     if (argResults.rest.length > 0) {
@@ -51,9 +47,36 @@ class ListenCommand extends Command {
     Map<BuildPlatform, ApplicationPackage> packages =
         ApplicationPackageFactory.getAvailableApplicationPackages();
     ApplicationPackage androidApp = packages[BuildPlatform.android];
+    ApplicationPackage iosApp = packages[BuildPlatform.iOS];
 
     while (true) {
       _logging.info('Updating running Sky apps...');
+
+      // TODO(iansf): refactor build command so that this doesn't have
+      //              to call out like this.
+      List<String> command = ['pub', 'run', 'sky_tools', 'build',];
+
+      try {
+        // In testing, sky-src-path isn't added to the options, and
+        // the ArgParser module throws an exception, so we have to
+        // catch and ignore the error in order to test.
+        if (globalResults.wasParsed('sky-src-path')) {
+          command.addAll([
+            // TODO(iansf): Don't rely on sky-src-path for the snapshotter.
+            '--compiler',
+            '${globalResults['sky-src-path']}'
+                '/out/ios_Debug/clang_x64/sky_snapshot'
+          ]);
+        }
+      } catch (e) {}
+      runSync(command);
+
+      String localFLXPath = 'app.flx';
+      String remoteFLXPath = 'Documents/app.flx';
+
+      if (ios.isConnected()) {
+        await ios.pushFile(iosApp, localFLXPath, remoteFLXPath);
+      }
 
       if (android.isConnected()) {
         await android.startServer(

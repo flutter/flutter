@@ -92,6 +92,9 @@ class IOSDevice extends _Device {
   String _loggerPath;
   String get loggerPath => _loggerPath;
 
+  String _pusherPath;
+  String get pusherPath => _pusherPath;
+
   String _name;
   String get name => _name;
 
@@ -107,6 +110,13 @@ class IOSDevice extends _Device {
     _informerPath = _checkForCommand('ideviceinfo');
     _debuggerPath = _checkForCommand('idevicedebug');
     _loggerPath = _checkForCommand('idevicesyslog');
+    _pusherPath = _checkForCommand(
+        'ios-deploy',
+        'To copy files to iOS devices, please install ios-deploy. '
+        'You can do this using homebrew as follows:\n'
+        '\$ brew tap flutter/flutter\n'
+        '\$ brew install ios-deploy',
+        'Copying files to iOS devices is not currently supported on Linux.');
   }
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
@@ -208,6 +218,33 @@ class IOSDevice extends _Device {
     return false;
   }
 
+  Future<bool> pushFile(
+      ApplicationPackage app, String localFile, String targetFile) async {
+    if (Platform.isMacOS) {
+      runSync([
+        pusherPath,
+        '-t',
+        '1',
+        '--bundle_id',
+        app.appPackageID,
+        '--upload',
+        localFile,
+        '--to',
+        targetFile
+      ]);
+      return true;
+    } else {
+      // TODO(iansf): It may be possible to make this work on Linux. Since this
+      //              functionality appears to be the only that prevents us from
+      //              supporting iOS on Linux, it may be worth putting some time
+      //              into investigating this.
+      //              See https://bbs.archlinux.org/viewtopic.php?id=192655
+      return false;
+    }
+    return false;
+  }
+
+  /// Note that clear is not supported on iOS at this time.
   Future<int> logs({bool clear: false}) {
     return runCommandAndStreamOutput([loggerPath],
         prefix: 'IOS DEV: ', filter: new RegExp(r'.*SkyShell.*'));

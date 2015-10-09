@@ -20,8 +20,10 @@ defineTests() {
 
       MockAndroidDevice android = new MockAndroidDevice();
       when(android.isConnected()).thenReturn(false);
+      MockIOSDevice ios = new MockIOSDevice();
+      when(ios.isConnected()).thenReturn(false);
       ListenCommand command =
-          new ListenCommand(android: android, singleRun: true);
+          new ListenCommand(android: android, ios: ios, singleRun: true);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
