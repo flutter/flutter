@@ -6,13 +6,14 @@ import 'dart:async';
 
 import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
-import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/services.dart';
 import 'package:sky/widgets.dart';
 
+import 'colors.dart';
 import 'ink_well.dart';
 import 'theme.dart';
+import 'typography.dart';
 
 typedef void DatePickerValueChanged(DateTime dateTime);
 

@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:sky/animation.dart';
-import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/widgets.dart';
 
 import 'ink_well.dart';
 import 'popup_menu_item.dart';
+import 'shadows.dart';
 import 'theme.dart';
 
 const Duration _kMenuDuration = const Duration(milliseconds: 300);

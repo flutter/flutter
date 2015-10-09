@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/material.dart';
 import 'package:sky/painting.dart';
 import 'package:sky/widgets.dart';
 
+import 'constants.dart';
 import 'icon.dart';
+import 'shadows.dart';
 import 'theme.dart';
+import 'typography.dart';
 
 class ToolBar extends StatelessComponent {
   ToolBar({
