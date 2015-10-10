@@ -1,8 +1,8 @@
 name: sky_tools
-version: 0.0.17
-description: Tools for building Sky applications
-homepage: https://github.com/domokit/sky_tools
-author: Chromium Authors <sky-dev@googlegroups.com>
+version: 0.0.18
+description: Tools for building Flutter applications
+homepage: http://flutter.io
+author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:
   sdk: ">=1.8.0 <2.0.0"
