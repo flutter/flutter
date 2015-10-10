@@ -1,6 +1,6 @@
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
-export 'dart:sky' show Point;
+export 'dart:ui' show Point;
 
 class TestPointerEvent extends sky.PointerEvent {
   TestPointerEvent({

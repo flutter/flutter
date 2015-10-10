@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/gestures.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'box.dart';
 import 'hit_test.dart';

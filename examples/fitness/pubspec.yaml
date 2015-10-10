@@ -1,11 +1,11 @@
 name: fitness
 dependencies:
-  sky: any
+  flutter: any
   sky_tools: any
   playfair: ^0.0.9
   path: ^1.3.6
 dependency_overrides:
   material_design_icons:
     path: ../../sky/packages/material_design_icons
-  sky:
+  flutter:
     path: ../../sky/packages/sky

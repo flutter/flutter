@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
 import 'package:newton/newton.dart';
-import 'package:sky/animation.dart';
-import 'package:sky/gestures.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';

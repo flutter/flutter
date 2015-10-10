@@ -1,4 +1,4 @@
-import 'package:sky/painting.dart';
+import 'package:flutter/painting.dart';
 
 import 'package:test/test.dart';
 

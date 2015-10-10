@@ -1,8 +1,8 @@
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 

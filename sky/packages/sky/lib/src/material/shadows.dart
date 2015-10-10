@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' show Color, Offset;
+import 'dart:ui' show Color, Offset;
 
-import 'package:sky/painting.dart';
+import 'package:flutter/painting.dart';
 
 const Map<int, List<BoxShadow>> shadows = const {
   1: const [

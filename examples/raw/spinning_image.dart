@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 import 'dart:typed_data';
 
-import 'package:sky/services.dart';
+import 'package:flutter/services.dart';
 
 double timeBase = null;
 

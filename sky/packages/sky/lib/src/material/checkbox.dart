@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-export 'package:sky/rendering.dart' show ValueChanged;
+export 'package:flutter/rendering.dart' show ValueChanged;
 
 const double _kMidpoint = 0.5;
 const sky.Color _kLightUncheckedColor = const sky.Color(0x8A000000);

@@ -4,12 +4,12 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
 import 'package:newton/newton.dart';
-import 'package:sky/animation.dart';
-import 'package:sky/gestures.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';

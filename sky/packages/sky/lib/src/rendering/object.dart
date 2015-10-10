@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
-import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
+import 'dart:ui' as sky;
+import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
-import 'package:sky/animation.dart';
+import 'package:flutter/animation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -14,7 +14,7 @@ import 'hit_test.dart';
 import 'layer.dart';
 import 'node.dart';
 
-export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
+export 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
 
 typedef sky.Shader ShaderCallback(Rect bounds);

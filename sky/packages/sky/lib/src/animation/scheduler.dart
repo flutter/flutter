@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
 /// Slows down animations by this factor to help in development.
 double timeDilation = 1.0;

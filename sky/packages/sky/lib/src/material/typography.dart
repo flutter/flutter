@@ -4,10 +4,10 @@
 
 // See http://www.google.com/design/spec/style/typography.html
 
-import 'dart:sky' show Color;
+import 'dart:ui' show Color;
 
-import 'package:sky/painting.dart';
-import 'package:sky/src/material/colors.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/src/material/colors.dart';
 
 // TODO(eseidel): Font weights are supposed to be language relative!
 // TODO(jackson): Baseline should be language relative!

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
-import 'dart:sky.internals' as internals;
+import 'dart:ui' as sky;
+import 'dart:ui_internals' as internals;
 import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;

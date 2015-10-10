@@ -1,5 +1,5 @@
-import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';

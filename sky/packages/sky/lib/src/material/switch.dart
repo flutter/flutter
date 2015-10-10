@@ -3,17 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'radial_reaction.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-export 'package:sky/rendering.dart' show ValueChanged;
+export 'package:flutter/rendering.dart' show ValueChanged;
 
 const sky.Color _kThumbOffColor = const sky.Color(0xFFFAFAFA);
 const sky.Color _kTrackOffColor = const sky.Color(0x42000000);

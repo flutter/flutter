@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 

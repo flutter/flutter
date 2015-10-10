@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
-import 'dart:sky' show Point, Offset, Color, Paint;
+import 'dart:ui' as sky;
+import 'dart:ui' show Point, Offset, Color, Paint;
 
-import 'package:sky/animation.dart';
+import 'package:flutter/animation.dart';
 
 const Duration _kShowDuration = const Duration(milliseconds: 300);
 const Duration _kHideDuration = const Duration(milliseconds: 200);

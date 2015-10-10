@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
-import 'package:sky/painting.dart';
+import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'object.dart';
 
-export 'package:sky/src/painting/box_painter.dart';
+export 'package:flutter/src/painting/box_painter.dart';
 
 /// A base class for render objects that resemble their children
 ///

@@ -1,4 +1,4 @@
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
 
 const Size _kTestViewSize = const Size(800.0, 600.0);
 

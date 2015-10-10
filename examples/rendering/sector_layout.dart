@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
 
 const double kTwoPi = 2 * math.PI;
 

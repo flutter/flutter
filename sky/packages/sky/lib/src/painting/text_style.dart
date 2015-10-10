@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path, FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
+import 'dart:ui' as sky;
+import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path, FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
 
-export 'dart:sky' show FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
+export 'dart:ui' show FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
 
 /// A normal font weight
 const normal = FontWeight.w400;

@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
 
