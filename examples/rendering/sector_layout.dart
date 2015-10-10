@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as sky;
 
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
 
 const double kTwoPi = 2 * math.PI;
 

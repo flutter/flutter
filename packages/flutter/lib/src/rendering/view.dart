@@ -4,7 +4,7 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
+import 'package:flutter/animation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';

@@ -4,8 +4,8 @@
 
 import 'dart:ui';
 
-import 'package:sky/rendering.dart';
-import 'package:sky/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   var coloredBox = new RenderDecoratedBox(

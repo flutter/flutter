@@ -4,8 +4,8 @@
 
 import 'dart:ui';
 
-import 'package:sky/src/material/typography.dart';
-import 'package:sky/src/material/colors.dart';
+import 'package:flutter/src/material/typography.dart';
+import 'package:flutter/src/material/colors.dart';
 
 enum ThemeBrightness { dark, light }
 

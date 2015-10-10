@@ -13,11 +13,11 @@ import 'dart:ui' as sky;
 import 'package:box2d/box2d.dart' as box2d;
 import 'package:mojo/core.dart';
 import 'package:sky_services/media/media.mojom.dart';
-import 'package:sky/animation.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 part 'action.dart';

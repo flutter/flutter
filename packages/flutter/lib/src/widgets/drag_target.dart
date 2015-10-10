@@ -5,8 +5,8 @@
 import 'dart:collection';
 import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'binding.dart';

@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/gestures.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 const int _kSplashInitialOpacity = 0x30;
 const double _kSplashCanceledVelocity = 0.7;

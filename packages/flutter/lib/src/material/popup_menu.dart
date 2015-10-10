@@ -5,9 +5,9 @@
 import 'dart:async';
 import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
 import 'popup_menu_item.dart';

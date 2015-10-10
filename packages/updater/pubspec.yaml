@@ -5,12 +5,12 @@ description: The autoupdater for flutter
 homepage: http://flutter.io
 dependencies:
   mojo: '>=0.2.0 <0.3.0'
-  sky: any
+  flutter: any
   sky_services: any
   path: any
   yaml: any
 dependency_overrides:
-  sky:
+  flutter:
     path: ../sky
 environment:
   sdk: '>=1.12.0 <2.0.0'

@@ -4,8 +4,8 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/gestures.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';

@@ -4,8 +4,8 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/gestures.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'box.dart';
 import 'hit_test.dart';

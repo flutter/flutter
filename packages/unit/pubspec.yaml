@@ -1,11 +1,11 @@
 name: sky_unit_tests
 dependencies:
-  sky: any
+  flutter: any
   sky_tools: any
   test: any
   quiver: any
 dependency_overrides:
   material_design_icons:
     path: ../packages/material_design_icons
-  sky:
+  flutter:
     path: ../packages/sky

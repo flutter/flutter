@@ -4,7 +4,7 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
+import 'package:flutter/animation.dart';
 
 import 'basic.dart';
 import 'transitions.dart';

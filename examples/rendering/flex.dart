@@ -4,7 +4,7 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
 import 'solid_color_box.dart';
 
 RenderBox buildFlexExample() {

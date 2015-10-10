@@ -4,9 +4,9 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/gestures.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icon.dart';

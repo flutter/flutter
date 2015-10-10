@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'ink_well.dart';
