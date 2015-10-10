@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
 
@@ -12,7 +12,7 @@ import 'fetch.dart';
 import 'image_decoder.dart';
 import 'image_resource.dart';
 
-Future<sky.Image> _fetchImage(String url) async {
+Future<ui.Image> _fetchImage(String url) async {
   UrlResponse response = await fetchUrl(url);
   if (response.statusCode >= 400) {
     print("Failed (${response.statusCode}) to load image ${url}");

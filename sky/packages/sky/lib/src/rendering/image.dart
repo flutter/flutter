@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 
@@ -15,10 +15,10 @@ import 'object.dart';
 /// constraints and preserves the image's intrinisc aspect ratio.
 class RenderImage extends RenderBox {
   RenderImage({
-    sky.Image image,
+    ui.Image image,
     double width,
     double height,
-    sky.ColorFilter colorFilter,
+    ui.ColorFilter colorFilter,
     fit: ImageFit.scaleDown,
     repeat: ImageRepeat.noRepeat
   }) : _image = image,
@@ -28,10 +28,10 @@ class RenderImage extends RenderBox {
       _fit = fit,
       _repeat = repeat;
 
-  sky.Image _image;
+  ui.Image _image;
   /// The image to display
-  sky.Image get image => _image;
-  void set image (sky.Image value) {
+  ui.Image get image => _image;
+  void set image (ui.Image value) {
     if (value == _image)
       return;
     _image = value;
@@ -60,10 +60,10 @@ class RenderImage extends RenderBox {
     markNeedsLayout();
   }
 
-  sky.ColorFilter _colorFilter;
+  ui.ColorFilter _colorFilter;
   /// If non-null, apply this color filter to the image before painint.
-  sky.ColorFilter get colorFilter => _colorFilter;
-  void set colorFilter (sky.ColorFilter value) {
+  ui.ColorFilter get colorFilter => _colorFilter;
+  void set colorFilter (ui.ColorFilter value) {
     if (value == _colorFilter)
       return;
     _colorFilter = value;

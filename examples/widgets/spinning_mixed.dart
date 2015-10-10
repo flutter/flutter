@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 import '../rendering/solid_color_box.dart';
 
 // Solid colour, RenderObject version
-void addFlexChildSolidColor(RenderFlex parent, sky.Color backgroundColor, { int flex: 0 }) {
+void addFlexChildSolidColor(RenderFlex parent, ui.Color backgroundColor, { int flex: 0 }) {
   RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
   parent.add(child);
   child.parentData.flex = flex;
@@ -81,9 +81,9 @@ void main() {
   new RenderBoxToWidgetAdapter(proxy, builder); // adds itself to proxy
 
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
-  addFlexChildSolidColor(flexRoot, const sky.Color(0xFFFF00FF), flex: 1);
+  addFlexChildSolidColor(flexRoot, const ui.Color(0xFFFF00FF), flex: 1);
   flexRoot.add(proxy);
-  addFlexChildSolidColor(flexRoot, const sky.Color(0xFF0000FF), flex: 1);
+  addFlexChildSolidColor(flexRoot, const ui.Color(0xFF0000FF), flex: 1);
 
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);

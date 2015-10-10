@@ -3,46 +3,46 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 double timeBase = null;
 
 void beginFrame(double timeStamp) {
-  sky.tracing.begin('beginFrame');
+  ui.tracing.begin('beginFrame');
   if (timeBase == null)
     timeBase = timeStamp;
   double delta = timeStamp - timeBase;
 
   // paint
-  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
-  sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
   canvas.translate(paintBounds.width / 2.0, paintBounds.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
-  canvas.drawRect(new sky.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
-                  new sky.Paint()..color = const sky.Color.fromARGB(255, 0, 255, 0));
-  sky.Picture picture = recorder.endRecording();
+  canvas.drawRect(new ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
+                  new ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
+  ui.Picture picture = recorder.endRecording();
 
   // composite
-  final double devicePixelRatio = sky.view.devicePixelRatio;
-  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+  final double devicePixelRatio = ui.view.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
-    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..addPicture(ui.Offset.zero, picture, paintBounds)
     ..pop();
-  sky.view.scene = sceneBuilder.build();
+  ui.view.scene = sceneBuilder.build();
 
-  sky.tracing.end('beginFrame');
-  sky.view.scheduleFrame();
+  ui.tracing.end('beginFrame');
+  ui.view.scheduleFrame();
 }
 
 void main() {
-  sky.view.setFrameCallback(beginFrame);
-  sky.view.scheduleFrame();
+  ui.view.setFrameCallback(beginFrame);
+  ui.view.scheduleFrame();
 }

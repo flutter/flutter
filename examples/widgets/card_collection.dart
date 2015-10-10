@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -299,7 +299,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  sky.Shader _createShader(Rect bounds) {
+  ui.Shader _createShader(Rect bounds) {
     return new LinearGradient(
         begin: Point.origin,
         end: new Point(0.0, bounds.height),

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -31,14 +31,14 @@ class Marker extends StatelessComponent {
   final double size;
   final MarkerType type;
 
-  void paintMarker(sky.Canvas canvas, _) {
+  void paintMarker(ui.Canvas canvas, _) {
     Paint paint = new Paint()..color = const Color(0x8000FF00);
-    paint.setStyle(sky.PaintingStyle.fill);
+    paint.setStyle(ui.PaintingStyle.fill);
     double r = size / 2.0;
     canvas.drawCircle(new Point(r, r), r, paint);
 
     paint.color = const Color(0xFFFFFFFF);
-    paint.setStyle(sky.PaintingStyle.stroke);
+    paint.setStyle(ui.PaintingStyle.stroke);
     paint.strokeWidth = 1.0;
     if (type == MarkerType.topLeft) {
       canvas.drawLine(new Point(r, r), new Point(r + r - 1.0, r), paint);
@@ -103,7 +103,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  void handlePointerDown(GlobalKey target, sky.PointerEvent event) {
+  void handlePointerDown(GlobalKey target, ui.PointerEvent event) {
     setState(() {
       markers[MarkerType.touch] = new Point(event.x, event.y);
       final RenderBox box = target.currentContext.findRenderObject();

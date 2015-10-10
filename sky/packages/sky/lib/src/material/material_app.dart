@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
@@ -56,7 +56,7 @@ class _MaterialAppState extends State<MaterialApp> {
     super.dispose();
   }
 
-  void _backHandler(sky.Event event) {
+  void _backHandler(ui.Event event) {
     assert(mounted);
     if (event.type == 'back') {
       NavigatorState navigator = _navigator.currentState;

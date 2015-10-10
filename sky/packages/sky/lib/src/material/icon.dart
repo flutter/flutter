@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -62,7 +62,7 @@ class Icon extends StatelessComponent {
   final int size;
   final String type;
   final IconThemeColor color;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
 
   String _getColorSuffix(BuildContext context) {
     IconThemeColor iconThemeColor = color;

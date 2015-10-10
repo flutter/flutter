@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -37,7 +37,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   double get position => _performance.value;
 
-  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
+  void handleEvent(ui.Event event, BoxHitTestEntry entry) {
     if (event.type == 'pointerdown')
       _tap.addPointer(event);
   }

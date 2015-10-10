@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -29,7 +29,7 @@ class _PointerState {
   Point lastPosition;
 }
 
-typedef void EventListener(sky.Event event);
+typedef void EventListener(ui.Event event);
 
 /// A hit test entry used by [FlutterBinding]
 class BindingHitTestEntry extends HitTestEntry {
@@ -46,9 +46,9 @@ class FlutterBinding extends HitTestTarget {
     assert(_instance == null);
     _instance = this;
 
-    sky.view.setEventCallback(_handleEvent);
+    ui.view.setEventCallback(_handleEvent);
 
-    sky.view.setMetricsChangedCallback(_handleMetricsChanged);
+    ui.view.setMetricsChangedCallback(_handleMetricsChanged);
     if (renderViewOverride == null) {
       _renderView = new RenderView(child: root);
       _renderView.attach();
@@ -72,7 +72,7 @@ class FlutterBinding extends HitTestTarget {
   RenderView _renderView;
 
   ViewConstraints _createConstraints() {
-    return new ViewConstraints(size: new Size(sky.view.width, sky.view.height));
+    return new ViewConstraints(size: new Size(ui.view.width, ui.view.height));
   }
   void _handleMetricsChanged() {
     _renderView.rootConstraints = _createConstraints();
@@ -94,8 +94,8 @@ class FlutterBinding extends HitTestTarget {
   /// Stops calling listener for every event that isn't localized to a given view coordinate
   bool removeEventListener(EventListener listener) => _eventListeners.remove(listener);
 
-  void _handleEvent(sky.Event event) {
-    if (event is sky.PointerEvent) {
+  void _handleEvent(ui.Event event) {
+    if (event is ui.PointerEvent) {
       _handlePointerEvent(event);
     } else {
       for (EventListener listener in _eventListeners)
@@ -111,7 +111,7 @@ class FlutterBinding extends HitTestTarget {
   /// to hit-test them on each movement.
   Map<int, _PointerState> _stateForPointer = new Map<int, _PointerState>();
 
-  void _handlePointerEvent(sky.PointerEvent event) {
+  void _handlePointerEvent(ui.PointerEvent event) {
     Point position = new Point(event.x, event.y);
 
     _PointerState state = _stateForPointer[event.pointer];
@@ -155,15 +155,15 @@ class FlutterBinding extends HitTestTarget {
   }
 
   /// Dispatch the given event to the path of the given hit test result
-  void dispatchEvent(sky.Event event, HitTestResult result) {
+  void dispatchEvent(ui.Event event, HitTestResult result) {
     assert(result != null);
     for (HitTestEntry entry in result.path)
       entry.target.handleEvent(event, entry);
   }
 
-  void handleEvent(sky.Event e, BindingHitTestEntry entry) {
-    if (e is sky.PointerEvent) {
-      sky.PointerEvent event = e;
+  void handleEvent(ui.Event e, BindingHitTestEntry entry) {
+    if (e is ui.PointerEvent) {
+      ui.PointerEvent event = e;
       pointerRouter.route(event);
       if (event.type == 'pointerdown')
         GestureArena.instance.close(event.pointer);

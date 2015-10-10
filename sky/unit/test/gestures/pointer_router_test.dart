@@ -1,4 +1,4 @@
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
@@ -8,7 +8,7 @@ import '../engine/mock_events.dart';
 void main() {
   test('Should route pointers', () {
     bool callbackRan = false;
-    void callback(sky.PointerEvent event) {
+    void callback(ui.PointerEvent event) {
       callbackRan = true;
     }
 

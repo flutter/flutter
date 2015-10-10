@@ -8,7 +8,7 @@ part of skysprites;
 /// the sprite sheet definition are used to reference the different textures.
 class SpriteSheet {
 
-  sky.Image _image;
+  ui.Image _image;
   Map<String, Texture> _textures = new Map();
 
   /// Creates a new sprite sheet from an [_image] and a sprite sheet [jsonDefinition].
@@ -65,7 +65,7 @@ class SpriteSheet {
   /// The image used by the sprite sheet.
   ///
   ///     var spriteSheetImage = mySpriteSheet.image;
-  sky.Image get image => _image;
+  ui.Image get image => _image;
 
   /// Returns a texture by its name.
   ///

@@ -26,7 +26,7 @@ class GameDemoNode extends NodeWithSize {
     addChild(_starField);
 
     // Add nebula
-    _nebula = new RepeatedImage(_images["assets/nebula.png"], sky.TransferMode.plus);
+    _nebula = new RepeatedImage(_images["assets/nebula.png"], ui.TransferMode.plus);
     addChild(_nebula);
 
     // Setup game screen, it will always be anchored to the bottom of the screen

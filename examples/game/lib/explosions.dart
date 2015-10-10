@@ -49,7 +49,7 @@ class ExplosionBig extends Explosion {
 
     // Add ring
     Sprite sprtRing = new Sprite(sheet["explosion_ring.png"]);
-    sprtRing.transferMode = sky.TransferMode.plus;
+    sprtRing.transferMode = ui.TransferMode.plus;
     addChild(sprtRing);
 
     Action scale = new ActionTween( (a) => sprtRing.scale = a, 0.2, 1.0, 0.75);
@@ -63,7 +63,7 @@ class ExplosionBig extends Explosion {
       Sprite sprtFlare = new Sprite(sheet["explosion_flare.png"]);
       sprtFlare.pivot = new Point(0.3, 1.0);
       sprtFlare.scaleX = 0.3;
-      sprtFlare.transferMode = sky.TransferMode.plus;
+      sprtFlare.transferMode = ui.TransferMode.plus;
       sprtFlare.rotation = randomDouble() * 360.0;
       addChild(sprtFlare);
 
@@ -86,7 +86,7 @@ class ExplosionMini extends Explosion {
       Sprite star = new Sprite(sheet["star_0.png"]);
       star.scale = 0.5;
       star.colorOverlay = new Color(0xff95f4fb);
-      star.transferMode = sky.TransferMode.plus;
+      star.transferMode = ui.TransferMode.plus;
       addChild(star);
 
       double rotationStart = randomDouble() * 90.0;

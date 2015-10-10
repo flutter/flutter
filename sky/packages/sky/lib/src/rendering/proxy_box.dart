@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -627,7 +627,7 @@ class RenderOpacity extends RenderProxyBox {
 /// Note: This class is relatively expensive because it requires painting the
 /// child into an intermediate buffer.
 class RenderColorFilter extends RenderProxyBox {
-  RenderColorFilter({ RenderBox child, Color color, sky.TransferMode transferMode })
+  RenderColorFilter({ RenderBox child, Color color, ui.TransferMode transferMode })
     : _color = color, _transferMode = transferMode, super(child) {
   }
 
@@ -643,9 +643,9 @@ class RenderColorFilter extends RenderProxyBox {
   }
 
   /// The transfer mode to use when combining the child's painting and the [color]
-  sky.TransferMode get transferMode => _transferMode;
-  sky.TransferMode _transferMode;
-  void set transferMode (sky.TransferMode newTransferMode) {
+  ui.TransferMode get transferMode => _transferMode;
+  ui.TransferMode _transferMode;
+  void set transferMode (ui.TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
       return;
@@ -660,7 +660,7 @@ class RenderColorFilter extends RenderProxyBox {
 }
 
 class RenderShaderMask extends RenderProxyBox {
-  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, sky.TransferMode transferMode })
+  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, ui.TransferMode transferMode })
     : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child) {
   }
 
@@ -674,9 +674,9 @@ class RenderShaderMask extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  sky.TransferMode get transferMode => _transferMode;
-  sky.TransferMode _transferMode;
-  void set transferMode (sky.TransferMode newTransferMode) {
+  ui.TransferMode get transferMode => _transferMode;
+  ui.TransferMode _transferMode;
+  void set transferMode (ui.TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
       return;
@@ -745,7 +745,7 @@ class RenderClipRRect extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      sky.RRect rrect = new sky.RRect()..setRectXY(rect, xRadius, yRadius);
+      ui.RRect rrect = new ui.RRect()..setRectXY(rect, xRadius, yRadius);
       context.paintChildWithClipRRect(child, offset.toPoint(), rect, rrect);
     }
   }
@@ -1056,7 +1056,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 }
 
-typedef void PointerEventListener(sky.PointerEvent e);
+typedef void PointerEventListener(ui.PointerEvent e);
 
 /// Invokes the callbacks in response to pointer events.
 class RenderPointerListener extends RenderProxyBox {
@@ -1073,7 +1073,7 @@ class RenderPointerListener extends RenderProxyBox {
   PointerEventListener onPointerUp;
   PointerEventListener onPointerCancel;
 
-  void handleEvent(sky.Event event, HitTestEntry entry) {
+  void handleEvent(ui.Event event, HitTestEntry entry) {
     if (onPointerDown != null && event.type == 'pointerdown')
       return onPointerDown(event);
     if (onPointerMove != null && event.type == 'pointermove')

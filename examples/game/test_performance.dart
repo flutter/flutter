@@ -1,4 +1,4 @@
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -202,7 +202,7 @@ class TestPerformanceAtlas extends PerformanceTest {
   double rotation = 0.0;
   List<Rect> rects = [];
   Paint cachedPaint = new Paint()
-    ..filterQuality = sky.FilterQuality.low
+    ..filterQuality = ui.FilterQuality.low
     ..isAntiAlias = false;
 
   TestPerformanceAtlas() {
@@ -216,7 +216,7 @@ class TestPerformanceAtlas extends PerformanceTest {
 
   void paint(PaintingCanvas canvas) {
     // Setup transforms
-    List<sky.RSTransform> transforms = [];
+    List<ui.RSTransform> transforms = [];
 
     for (int x = 0; x < grid; x++) {
       for (int y = 0; y < grid; y++) {
@@ -238,12 +238,12 @@ class TestPerformanceAtlas extends PerformanceTest {
     rotation += 1.0;
   }
 
-  sky.RSTransform createTransform(double x, double y, double ax, double ay, double rot, double scale) {
+  ui.RSTransform createTransform(double x, double y, double ax, double ay, double rot, double scale) {
     double scos = math.cos(convertDegrees2Radians(rot)) * scale;
     double ssin = math.sin(convertDegrees2Radians(rot)) * scale;
     double tx = x + -scos * ax + ssin * ay;
     double ty = y + -ssin * ax - scos * ay;
-    return new sky.RSTransform(scos, ssin, tx, ty);
+    return new ui.RSTransform(scos, ssin, tx, ty);
   }
 }
 
@@ -255,7 +255,7 @@ class TestPerformanceAtlas2 extends PerformanceTest {
   double rotation = 0.0;
   List<Rect> rects = [];
   Paint cachedPaint = new Paint()
-    ..filterQuality = sky.FilterQuality.low
+    ..filterQuality = ui.FilterQuality.low
     ..isAntiAlias = false;
 
   TestPerformanceAtlas2() {
@@ -269,7 +269,7 @@ class TestPerformanceAtlas2 extends PerformanceTest {
 
   void paint(PaintingCanvas canvas) {
     // Setup transforms
-    List<sky.RSTransform> transforms = [];
+    List<ui.RSTransform> transforms = [];
 
     for (int x = 12; x < grid - 12; x++) {
       for (int y = 0; y < grid; y++) {
@@ -291,11 +291,11 @@ class TestPerformanceAtlas2 extends PerformanceTest {
     rotation += 1.0;
   }
 
-  sky.RSTransform createTransform(double x, double y, double ax, double ay, double rot, double scale) {
+  ui.RSTransform createTransform(double x, double y, double ax, double ay, double rot, double scale) {
     double scos = math.cos(convertDegrees2Radians(rot)) * scale;
     double ssin = math.sin(convertDegrees2Radians(rot)) * scale;
     double tx = x + -scos * ax + ssin * ay;
     double ty = y + -ssin * ax - scos * ay;
-    return new sky.RSTransform(scos, ssin, tx, ty);
+    return new ui.RSTransform(scos, ssin, tx, ty);
   }
 }

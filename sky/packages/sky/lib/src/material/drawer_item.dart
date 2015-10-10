@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
@@ -49,10 +49,10 @@ class _DrawerItemState extends State<DrawerItem> {
     return Colors.transparent;
   }
 
-  sky.ColorFilter _getColorFilter(ThemeData themeData) {
+  ui.ColorFilter _getColorFilter(ThemeData themeData) {
     if (config.selected)
-      return new sky.ColorFilter.mode(themeData.primaryColor, sky.TransferMode.srcATop);
-    return new sky.ColorFilter.mode(const Color(0x73000000), sky.TransferMode.dstIn);
+      return new ui.ColorFilter.mode(themeData.primaryColor, ui.TransferMode.srcATop);
+    return new ui.ColorFilter.mode(const Color(0x73000000), ui.TransferMode.dstIn);
   }
 
   Widget build(BuildContext context) {

@@ -1,4 +1,4 @@
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:ui' show Rect, Color, Paint;
 
 import 'package:test/test.dart';
@@ -6,8 +6,8 @@ import 'package:vector_math/vector_math_64.dart';
 
 void main() {
 
-  sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, new Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
+  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  ui.Canvas canvas = new ui.Canvas(recorder, new Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
 
   test("matrix access should work", () {
     // Matrix equality doesn't work!

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'text_style.dart';
 
@@ -11,14 +11,14 @@ export 'text_style.dart';
 /// An immutable span of text
 abstract class TextSpan {
   // This class must be immutable, because we won't notice when it changes
-  sky.Node _toDOM(sky.Document owner);
+  ui.Node _toDOM(ui.Document owner);
   String toString([String prefix = '']);
 
-  void _applyStyleToContainer(sky.Element container) {
+  void _applyStyleToContainer(ui.Element container) {
   }
 
-  void build(sky.ParagraphBuilder builder);
-  sky.ParagraphStyle get paragraphStyle => null;
+  void build(ui.ParagraphBuilder builder);
+  ui.ParagraphStyle get paragraphStyle => null;
 }
 
 /// An immutable span of unstyled text
@@ -30,11 +30,11 @@ class PlainTextSpan extends TextSpan {
   /// The text contained in the span
   final String text;
 
-  sky.Node _toDOM(sky.Document owner) {
+  ui.Node _toDOM(ui.Document owner) {
     return owner.createText(text);
   }
 
-  void build(sky.ParagraphBuilder builder) {
+  void build(ui.ParagraphBuilder builder) {
     builder.addText(text);
   }
 
@@ -57,8 +57,8 @@ class StyledTextSpan extends TextSpan {
   /// The children to which the style is applied
   final List<TextSpan> children;
 
-  sky.Node _toDOM(sky.Document owner) {
-    sky.Element parent = owner.createElement('t');
+  ui.Node _toDOM(ui.Document owner) {
+    ui.Element parent = owner.createElement('t');
     style.applyToCSSStyle(parent.style);
     for (TextSpan child in children) {
       parent.appendChild(child._toDOM(owner));
@@ -66,16 +66,16 @@ class StyledTextSpan extends TextSpan {
     return parent;
   }
 
-  void build(sky.ParagraphBuilder builder) {
+  void build(ui.ParagraphBuilder builder) {
     builder.pushStyle(style.textStyle);
     for (TextSpan child in children)
       child.build(builder);
     builder.pop();
   }
 
-  sky.ParagraphStyle get paragraphStyle => style.paragraphStyle;
+  ui.ParagraphStyle get paragraphStyle => style.paragraphStyle;
 
-  void _applyStyleToContainer(sky.Element container) {
+  void _applyStyleToContainer(ui.Element container) {
     style.applyToContainerCSSStyle(container.style);
   }
 
@@ -129,10 +129,10 @@ class TextPainter {
     this.text = text;
   }
 
-  sky.Paragraph _paragraph;
+  ui.Paragraph _paragraph;
 
-  final sky.Document _document = new sky.Document();
-  final sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
+  final ui.Document _document = new ui.Document();
+  final ui.LayoutRoot _layoutRoot = new ui.LayoutRoot();
   bool _needsLayout = true;
 
   TextSpan _text;
@@ -215,7 +215,7 @@ class TextPainter {
   /// The distance from the top of the text to the first baseline of the given type
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!_needsLayout);
-    sky.Element root = _layoutRoot.rootElement;
+    ui.Element root = _layoutRoot.rootElement;
     switch (baseline) {
       case TextBaseline.alphabetic: return root.alphabeticBaseline;
       case TextBaseline.ideographic: return root.ideographicBaseline;
@@ -231,7 +231,7 @@ class TextPainter {
   }
 
   /// Paint the text onto the given canvas at the given offset
-  void paint(sky.Canvas canvas, sky.Offset offset) {
+  void paint(ui.Canvas canvas, ui.Offset offset) {
     assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
     // TODO(ianh): Make LayoutRoot support a paint offset so we don't
     // need to translate for each span of text.
@@ -246,7 +246,7 @@ class _NewTextPainter implements TextPainter {
     this.text = text;
   }
 
-  sky.Paragraph _paragraph;
+  ui.Paragraph _paragraph;
   bool _needsLayout = true;
 
   TextSpan _text;
@@ -256,7 +256,7 @@ class _NewTextPainter implements TextPainter {
     if (_text == value)
       return;
     _text = value;
-    sky.ParagraphBuilder builder = new sky.ParagraphBuilder();
+    ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
     _text.build(builder);
     _paragraph = builder.build(_text.paragraphStyle);
     _needsLayout = true;
@@ -346,7 +346,7 @@ class _NewTextPainter implements TextPainter {
   }
 
   /// Paint the text onto the given canvas at the given offset
-  void paint(sky.Canvas canvas, sky.Offset offset) {
+  void paint(ui.Canvas canvas, ui.Offset offset) {
     assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
     _paragraph.paint(canvas, offset);
   }

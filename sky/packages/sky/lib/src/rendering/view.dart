@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -60,7 +60,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   Matrix4 get _logicalToDeviceTransform {
-    double devicePixelRatio = sky.view.devicePixelRatio;
+    double devicePixelRatio = ui.view.devicePixelRatio;
     return new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
 
@@ -114,15 +114,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
-    sky.tracing.begin('RenderView.compositeFrame');
+    ui.tracing.begin('RenderView.compositeFrame');
     try {
       (layer as TransformLayer).transform = _logicalToDeviceTransform;
-      Rect bounds = Point.origin & (size * sky.view.devicePixelRatio);
-      sky.SceneBuilder builder = new sky.SceneBuilder(bounds);
+      Rect bounds = Point.origin & (size * ui.view.devicePixelRatio);
+      ui.SceneBuilder builder = new ui.SceneBuilder(bounds);
       layer.addToScene(builder, Offset.zero);
-      sky.view.scene = builder.build();
+      ui.view.scene = builder.build();
     } finally {
-      sky.tracing.end('RenderView.compositeFrame');
+      ui.tracing.end('RenderView.compositeFrame');
     }
   }
 

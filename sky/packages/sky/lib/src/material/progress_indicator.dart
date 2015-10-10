@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
@@ -76,10 +76,10 @@ class LinearProgressIndicator extends ProgressIndicator {
     double bufferValue
   }) : super(key: key, value: value, bufferValue: bufferValue);
 
-  void _paint(BuildContext context, double performanceValue, sky.Canvas canvas, Size size) {
+  void _paint(BuildContext context, double performanceValue, ui.Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = _getBackgroundColor(context)
-      ..setStyle(sky.PaintingStyle.fill);
+      ..setStyle(ui.PaintingStyle.fill);
     canvas.drawRect(Point.origin & size, paint);
 
     paint.color = _getValueColor(context);
@@ -103,7 +103,7 @@ class LinearProgressIndicator extends ProgressIndicator {
       ),
       child: new CustomPaint(
         token: _getCustomPaintToken(performanceValue),
-        callback: (sky.Canvas canvas, Size size) {
+        callback: (ui.Canvas canvas, Size size) {
           _paint(context, performanceValue, canvas, size);
         }
       )
@@ -124,15 +124,15 @@ class CircularProgressIndicator extends ProgressIndicator {
     double bufferValue
   }) : super(key: key, value: value, bufferValue: bufferValue);
 
-  void _paint(BuildContext context, double performanceValue, sky.Canvas canvas, Size size) {
+  void _paint(BuildContext context, double performanceValue, ui.Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = _getValueColor(context)
       ..strokeWidth = _kCircularProgressIndicatorStrokeWidth
-      ..setStyle(sky.PaintingStyle.stroke);
+      ..setStyle(ui.PaintingStyle.stroke);
 
     if (value != null) {
       double angle = value.clamp(0.0, 1.0) * _kSweep;
-      sky.Path path = new sky.Path()
+      ui.Path path = new ui.Path()
         ..arcTo(Point.origin & size, _kStartAngle, angle, false);
       canvas.drawPath(path, paint);
     } else {
@@ -140,7 +140,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       double endAngle = startAngle + _kTwoPI * 0.75;
       double arcAngle = startAngle.clamp(0.0, _kTwoPI);
       double arcSweep = endAngle.clamp(0.0, _kTwoPI) - arcAngle;
-      sky.Path path = new sky.Path()
+      ui.Path path = new ui.Path()
         ..arcTo(Point.origin & size, _kStartAngle + arcAngle, arcSweep, false);
       canvas.drawPath(path, paint);
     }
@@ -154,7 +154,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       ),
       child: new CustomPaint(
         token: _getCustomPaintToken(performanceValue),
-        callback: (sky.Canvas canvas, Size size) {
+        callback: (ui.Canvas canvas, Size size) {
           _paint(context, performanceValue, canvas, size);
         }
       )

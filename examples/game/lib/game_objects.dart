@@ -16,7 +16,7 @@ abstract class GameObject extends Node {
   Paint _paintDebug = new Paint()
     ..color=new Color(0xffff0000)
     ..strokeWidth = 1.0
-    ..setStyle(sky.PaintingStyle.stroke);
+    ..setStyle(ui.PaintingStyle.stroke);
 
   bool collidingWith(GameObject obj) {
     return (GameMath.distanceBetweenPoints(position, obj.position)
@@ -111,7 +111,7 @@ class Ship extends GameObject {
 
     _sprtShield = new Sprite(f.sheet["shield.png"]);
     _sprtShield.scale = 0.35;
-    _sprtShield.transferMode = sky.TransferMode.plus;
+    _sprtShield.transferMode = ui.TransferMode.plus;
     addChild(_sprtShield);
 
     radius = 20.0;
@@ -188,7 +188,7 @@ class Laser extends GameObject {
       Sprite sprt = new Sprite(f.sheet["explosion_particle.png"]);
       sprt.scale = 0.5;
       sprt.colorOverlay = laserColor;
-      sprt.transferMode = sky.TransferMode.plus;
+      sprt.transferMode = ui.TransferMode.plus;
       addChild(sprt);
       sprites.add(sprt);
     }

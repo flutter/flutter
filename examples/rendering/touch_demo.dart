@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -24,7 +24,7 @@ class Dot {
 
   Dot({ Color color }) : _paint = new Paint()..color = color;
 
-  void update(sky.PointerEvent event) {
+  void update(ui.PointerEvent event) {
     position = new Point(event.x, event.y);
     radius = 5 + (95 * event.pressure);
   }
@@ -39,8 +39,8 @@ class RenderTouchDemo extends RenderBox {
 
   RenderTouchDemo();
 
-  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event is sky.PointerEvent) {
+  void handleEvent(ui.Event event, BoxHitTestEntry entry) {
+    if (event is ui.PointerEvent) {
       switch (event.type) {
         case 'pointerdown':
           Color color = kColors[event.pointer.remainder(kColors.length)];

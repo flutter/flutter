@@ -2,31 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 /// Causes each RenderBox to paint a box around its bounds.
 bool debugPaintSizeEnabled = false;
 
 /// The color to use when painting RenderObject bounds.
-sky.Color debugPaintSizeColor = const sky.Color(0xFF00FFFF);
+ui.Color debugPaintSizeColor = const ui.Color(0xFF00FFFF);
 
 /// Causes each RenderBox to paint a line at each of its baselines.
 bool debugPaintBaselinesEnabled = false;
 
 /// The color to use when painting alphabetic baselines.
-sky.Color debugPaintAlphabeticBaselineColor = const sky.Color(0xFF00FF00);
+ui.Color debugPaintAlphabeticBaselineColor = const ui.Color(0xFF00FF00);
 
 /// The color ot use when painting ideographic baselines.
-sky.Color debugPaintIdeographicBaselineColor = const sky.Color(0xFFFFD000);
+ui.Color debugPaintIdeographicBaselineColor = const ui.Color(0xFFFFD000);
 
 /// Causes each Layer to paint a box around its bounds.
 bool debugPaintLayerBordersEnabled = false;
 
 /// The color to use when painting Layer borders.
-sky.Color debugPaintLayerBordersColor = const sky.Color(0xFFFF9800);
+ui.Color debugPaintLayerBordersColor = const ui.Color(0xFFFF9800);
 
 /// Causes RenderObjects to paint warnings when painting outside their bounds.
 bool debugPaintBoundsEnabled = false;
 
 /// The color to use when painting RenderError boxes in checked mode.
-sky.Color debugErrorBoxColor = const sky.Color(0xFFFF0000);
+ui.Color debugErrorBoxColor = const ui.Color(0xFFFF0000);

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
@@ -75,7 +75,7 @@ class PopupMenu extends StatelessComponent {
         variables: [width, height],
         builder: (BuildContext context) {
           return new CustomPaint(
-            callback: (sky.Canvas canvas, Size size) {
+            callback: (ui.Canvas canvas, Size size) {
               double widthValue = width.value * size.width;
               double heightValue = height.value * size.height;
               painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));

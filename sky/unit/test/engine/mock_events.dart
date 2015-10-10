@@ -1,8 +1,8 @@
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 export 'dart:ui' show Point;
 
-class TestPointerEvent extends sky.PointerEvent {
+class TestPointerEvent extends ui.PointerEvent {
   TestPointerEvent({
     this.type,
     this.pointer,
@@ -64,9 +64,9 @@ class TestPointer {
 
   int pointer;
   bool isDown = false;
-  sky.Point location;
+  ui.Point location;
 
-  sky.PointerEvent down([sky.Point newLocation = sky.Point.origin ]) {
+  ui.PointerEvent down([ui.Point newLocation = ui.Point.origin ]) {
     assert(!isDown);
     isDown = true;
     location = newLocation;
@@ -78,9 +78,9 @@ class TestPointer {
     );
   }
 
-  sky.PointerEvent move([sky.Point newLocation = sky.Point.origin ]) {
+  ui.PointerEvent move([ui.Point newLocation = ui.Point.origin ]) {
     assert(isDown);
-    sky.Offset delta = newLocation - location;
+    ui.Offset delta = newLocation - location;
     location = newLocation;
     return new TestPointerEvent(
       type: 'pointermove',
@@ -92,7 +92,7 @@ class TestPointer {
     );
   }
 
-  sky.PointerEvent up() {
+  ui.PointerEvent up() {
     assert(isDown);
     isDown = false;
     return new TestPointerEvent(
@@ -103,7 +103,7 @@ class TestPointer {
     );
   }
 
-  sky.PointerEvent cancel() {
+  ui.PointerEvent cancel() {
     assert(isDown);
     isDown = false;
     return new TestPointerEvent(

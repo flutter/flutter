@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'arena.dart';
 import 'recognizer.dart';
@@ -15,8 +15,8 @@ enum ScaleState {
   started
 }
 
-typedef void GestureScaleStartCallback(sky.Point focalPoint);
-typedef void GestureScaleUpdateCallback(double scale, sky.Point focalPoint);
+typedef void GestureScaleStartCallback(ui.Point focalPoint);
+typedef void GestureScaleUpdateCallback(double scale, ui.Point focalPoint);
 typedef void GestureScaleEndCallback();
 
 class ScaleGestureRecognizer extends GestureRecognizer {
@@ -31,21 +31,21 @@ class ScaleGestureRecognizer extends GestureRecognizer {
 
   double _initialSpan;
   double _currentSpan;
-  Map<int, sky.Point> _pointerLocations;
+  Map<int, ui.Point> _pointerLocations;
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
-  void addPointer(sky.PointerEvent event) {
+  void addPointer(ui.PointerEvent event) {
     startTrackingPointer(event.pointer);
     if (_state == ScaleState.ready) {
       _state = ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
-      _pointerLocations = new Map<int, sky.Point>();
+      _pointerLocations = new Map<int, ui.Point>();
     }
   }
 
-  void handleEvent(sky.PointerEvent event) {
+  void handleEvent(ui.PointerEvent event) {
     assert(_state != ScaleState.ready);
     bool configChanged = false;
     switch(event.type) {
@@ -55,10 +55,10 @@ class ScaleGestureRecognizer extends GestureRecognizer {
         break;
       case 'pointerdown':
         configChanged = true;
-        _pointerLocations[event.pointer] = new sky.Point(event.x, event.y);
+        _pointerLocations[event.pointer] = new ui.Point(event.x, event.y);
         break;
       case 'pointermove':
-        _pointerLocations[event.pointer] = new sky.Point(event.x, event.y);
+        _pointerLocations[event.pointer] = new ui.Point(event.x, event.y);
         break;
     }
 
@@ -71,10 +71,10 @@ class ScaleGestureRecognizer extends GestureRecognizer {
     int count = _pointerLocations.keys.length;
 
     // Compute the focal point
-    sky.Point focalPoint = sky.Point.origin;
+    ui.Point focalPoint = ui.Point.origin;
     for (int pointer in _pointerLocations.keys)
       focalPoint += _pointerLocations[pointer].toOffset();
-    focalPoint = new sky.Point(focalPoint.x / count, focalPoint.y / count);
+    focalPoint = new ui.Point(focalPoint.x / count, focalPoint.y / count);
 
     // Span is the average deviation from focal point
     double totalDeviation = 0.0;

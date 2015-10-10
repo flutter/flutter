@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/animation.dart';
@@ -312,7 +312,7 @@ class Tab extends StatelessComponent {
   Widget _buildLabelIcon() {
     assert(label.icon != null);
     Color iconColor = selected ? selectedColor : color;
-    sky.ColorFilter filter = new sky.ColorFilter.mode(iconColor, sky.TransferMode.srcATop);
+    ui.ColorFilter filter = new ui.ColorFilter.mode(iconColor, ui.TransferMode.srcATop);
     return new Icon(type: label.icon, size: _kTabIconSize, colorFilter: filter);
   }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -20,7 +20,7 @@ class IconButton extends StatelessComponent {
 
   final String icon;
   final IconThemeColor color;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final GestureTapCallback onPressed;
 
   Widget build(BuildContext context) {

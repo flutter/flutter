@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-const sky.Color _kLightOffColor = const sky.Color(0x8A000000);
-const sky.Color _kDarkOffColor = const sky.Color(0xB2FFFFFF);
+const ui.Color _kLightOffColor = const ui.Color(0x8A000000);
+const ui.Color _kDarkOffColor = const ui.Color(0xB2FFFFFF);
 
 typedef void RadioValueChanged(Object value);
 
@@ -45,18 +45,18 @@ class Radio extends StatelessComponent {
         width: kDiameter,
         height: kDiameter,
         child: new CustomPaint(
-          callback: (sky.Canvas canvas, Size size) {
+          callback: (ui.Canvas canvas, Size size) {
 
             Paint paint = new Paint()..color = _getColor(context);
 
             // Draw the outer circle
-            paint.setStyle(sky.PaintingStyle.stroke);
+            paint.setStyle(ui.PaintingStyle.stroke);
             paint.strokeWidth = 2.0;
             canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kOuterRadius, paint);
 
             // Draw the inner circle
             if (value == groupValue) {
-              paint.setStyle(sky.PaintingStyle.fill);
+              paint.setStyle(ui.PaintingStyle.fill);
               canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kInnerRadius, paint);
             }
           }

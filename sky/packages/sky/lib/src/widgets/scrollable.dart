@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/animation.dart';
@@ -200,7 +200,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return _startToEndAnimation();
   }
 
-  double _scrollVelocity(sky.Offset velocity) {
+  double _scrollVelocity(ui.Offset velocity) {
     double scrollVelocity = config.scrollDirection == ScrollDirection.horizontal
       ? -velocity.dx
       : -velocity.dy;
@@ -616,7 +616,7 @@ class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  Future fling(sky.Offset velocity) {
+  Future fling(ui.Offset velocity) {
     double scrollVelocity = _scrollVelocity(velocity);
     double newScrollOffset = _snapScrollOffset(scrollOffset + scrollVelocity.sign * config.itemExtent)
       .clamp(_snapScrollOffset(scrollOffset - config.itemExtent / 2.0),

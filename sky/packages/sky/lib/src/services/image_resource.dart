@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 /// A callback for when the image is available.
-typedef void ImageListener(sky.Image image);
+typedef void ImageListener(ui.Image image);
 
 /// A handle to an image resource
 ///
-/// ImageResource represents a handle to a [sky.Image] object. The underlying
+/// ImageResource represents a handle to a [ui.Image] object. The underlying
 /// image object might change over time, either because the image is animating
 /// or because the underlying image resource was mutated.
 class ImageResource {
@@ -19,17 +19,17 @@ class ImageResource {
   }
 
   bool _resolved = false;
-  Future<sky.Image> _futureImage;
-  sky.Image _image;
+  Future<ui.Image> _futureImage;
+  ui.Image _image;
   final List<ImageListener> _listeners = new List<ImageListener>();
 
-  /// The first concrete [sky.Image] object represented by this handle.
+  /// The first concrete [ui.Image] object represented by this handle.
   ///
   /// Instead of receivingly only the first image, most clients will want to
   /// [addListener] to be notified whenever a a concrete image is available.
-  Future<sky.Image> get first => _futureImage;
+  Future<ui.Image> get first => _futureImage;
 
-  /// Adds a listener callback that is called whenever a concrete [sky.Image]
+  /// Adds a listener callback that is called whenever a concrete [ui.Image]
   /// object is available. Note: If a concrete image is available currently,
   /// this object will call the listener synchronously.
   void addListener(ImageListener listener) {
@@ -38,12 +38,12 @@ class ImageResource {
       listener(_image);
   }
 
-  /// Stop listening for new concrete [sky.Image] objects.
+  /// Stop listening for new concrete [ui.Image] objects.
   void removeListener(ImageListener listener) {
     _listeners.remove(listener);
   }
 
-  void _handleImageLoaded(sky.Image image) {
+  void _handleImageLoaded(ui.Image image) {
     _image = image;
     _resolved = true;
     _notifyListeners();

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
@@ -69,7 +69,7 @@ class Draggable extends StatefulComponent {
 class _DraggableState extends State<Draggable> {
   DragRoute _route;
 
-  void _startDrag(sky.PointerEvent event) {
+  void _startDrag(ui.PointerEvent event) {
     if (_route != null)
       return; // TODO(ianh): once we switch to using gestures, just hand the gesture to the route so it can do everything itself. then we can have multiple drags at the same time.
     final Point point = new Point(event.x, event.y);
@@ -97,7 +97,7 @@ class _DraggableState extends State<Draggable> {
     config.navigator.push(_route);
   }
 
-  void _updateDrag(sky.PointerEvent event) {
+  void _updateDrag(ui.PointerEvent event) {
     if (_route != null) {
       config.navigator.setState(() {
         _route.update(new Point(event.x, event.y));
@@ -105,14 +105,14 @@ class _DraggableState extends State<Draggable> {
     }
   }
 
-  void _cancelDrag(sky.PointerEvent event) {
+  void _cancelDrag(ui.PointerEvent event) {
     if (_route != null) {
       config.navigator.popRoute(_route, DragEndKind.canceled);
       assert(_route == null);
     }
   }
 
-  void _drop(sky.PointerEvent event) {
+  void _drop(ui.PointerEvent event) {
     if (_route != null) {
       _route.update(new Point(event.x, event.y));
       config.navigator.popRoute(_route, DragEndKind.dropped);

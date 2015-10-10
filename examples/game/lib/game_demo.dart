@@ -2,7 +2,7 @@ library game;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:skysprites/skysprites.dart';
