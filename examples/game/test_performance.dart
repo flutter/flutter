@@ -1,4 +1,4 @@
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 import 'dart:math' as math;
 
 import 'package:sky/material.dart';

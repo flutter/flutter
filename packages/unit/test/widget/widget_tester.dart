@@ -1,4 +1,4 @@
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
 import 'package:sky/animation.dart';
 import 'package:sky/rendering.dart';
