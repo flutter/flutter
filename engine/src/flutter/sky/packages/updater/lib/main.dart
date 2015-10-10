@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:mojo/core.dart';
-import 'package:sky/services.dart';
+import 'package:flutter/services.dart';
 import 'package:sky_services/updater/update_service.mojom.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;

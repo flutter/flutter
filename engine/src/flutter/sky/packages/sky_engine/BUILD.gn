@@ -48,12 +48,12 @@ dart_pkg("sky_engine") {
 
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
   sdk_ext_files = [
-    "//sky/engine/bindings/sky_internals.dart",
+    "//sky/engine/bindings/internals.dart",
     "//sky/engine/bindings/builtin_natives.dart",
   ]
   sdk_ext_mappings = [
-    "dart:sky,dart_sky.dart",
-    "dart:sky.internals,sky_internals.dart",
-    "dart:sky_builtin_natives,builtin_natives.dart",
+    "dart:ui,dart_ui.dart",
+    "dart:ui_internals,internals.dart",
+    "dart:ui_builtin_natives,builtin_natives.dart",
   ]
 }
