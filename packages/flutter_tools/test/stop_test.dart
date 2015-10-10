@@ -6,7 +6,7 @@ library stop_test;
 
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/stop.dart';
+import 'package:sky_tools/src/commands/stop.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';

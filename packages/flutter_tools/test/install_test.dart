@@ -6,7 +6,7 @@ library install_test;
 
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/install.dart';
+import 'package:sky_tools/src/commands/install.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';

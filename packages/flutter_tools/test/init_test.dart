@@ -10,7 +10,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
-import 'package:sky_tools/src/init.dart';
+import 'package:sky_tools/src/commands/init.dart';
 import 'package:test/test.dart';
 
 main() => defineTests();

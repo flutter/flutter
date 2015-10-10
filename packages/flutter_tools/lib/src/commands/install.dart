@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 
-import 'application_package.dart';
-import 'device.dart';
+import '../application_package.dart';
+import '../device.dart';
 
 class InstallCommand extends Command {
   final name = 'install';

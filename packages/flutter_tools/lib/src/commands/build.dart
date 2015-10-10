@@ -11,7 +11,7 @@ import 'package:archive/archive.dart';
 import 'package:args/command_runner.dart';
 import 'package:yaml/yaml.dart';
 
-import 'artifacts.dart';
+import '../artifacts.dart';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const List<String> _kDensities = const ['drawable-xxhdpi'];
