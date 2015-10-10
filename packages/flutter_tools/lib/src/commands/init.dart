@@ -140,7 +140,6 @@ dev_dependencies:
 
 const _libMain = r'''
 import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
 
 void main() {
   runApp(
