@@ -8,7 +8,8 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
-import 'package:sky_tools/src/device.dart';
+
+import '../device.dart';
 
 final Logger _logging = new Logger('sky_tools.logs');
 

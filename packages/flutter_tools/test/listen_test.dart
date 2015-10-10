@@ -6,7 +6,7 @@ library listen_test;
 
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/listen.dart';
+import 'package:sky_tools/src/commands/listen.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';

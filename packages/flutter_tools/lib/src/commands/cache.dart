@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 
-import 'artifacts.dart';
+import '../artifacts.dart';
 
 final Logger _logging = new Logger('sky_tools.cache');
 

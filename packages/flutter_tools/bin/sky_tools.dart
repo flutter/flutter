@@ -9,17 +9,17 @@ import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:sky_tools/src/application_package.dart';
 import 'package:sky_tools/src/artifacts.dart';
-import 'package:sky_tools/src/build.dart';
-import 'package:sky_tools/src/cache.dart';
-import 'package:sky_tools/src/init.dart';
-import 'package:sky_tools/src/install.dart';
-import 'package:sky_tools/src/list.dart';
-import 'package:sky_tools/src/listen.dart';
-import 'package:sky_tools/src/logs.dart';
-import 'package:sky_tools/src/run_mojo.dart';
-import 'package:sky_tools/src/start.dart';
-import 'package:sky_tools/src/stop.dart';
-import 'package:sky_tools/src/trace.dart';
+import 'package:sky_tools/src/commands/build.dart';
+import 'package:sky_tools/src/commands/cache.dart';
+import 'package:sky_tools/src/commands/init.dart';
+import 'package:sky_tools/src/commands/install.dart';
+import 'package:sky_tools/src/commands/list.dart';
+import 'package:sky_tools/src/commands/listen.dart';
+import 'package:sky_tools/src/commands/logs.dart';
+import 'package:sky_tools/src/commands/run_mojo.dart';
+import 'package:sky_tools/src/commands/start.dart';
+import 'package:sky_tools/src/commands/stop.dart';
+import 'package:sky_tools/src/commands/trace.dart';
 
 class FlutterCommandRunner extends CommandRunner {
   FlutterCommandRunner()

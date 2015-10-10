@@ -11,8 +11,8 @@ import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
-import 'artifacts.dart';
-import 'process.dart';
+import '../artifacts.dart';
+import '../process.dart';
 
 final Logger _logging = new Logger('sky_tools.run_mojo');
 

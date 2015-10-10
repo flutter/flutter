@@ -9,10 +9,11 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
-import 'package:sky_tools/src/application_package.dart';
-import 'package:sky_tools/src/device.dart';
-import 'package:sky_tools/src/install.dart';
-import 'package:sky_tools/src/stop.dart';
+
+import '../application_package.dart';
+import '../device.dart';
+import 'install.dart';
+import 'stop.dart';
 
 final Logger _logging = new Logger('sky_tools.start');
 

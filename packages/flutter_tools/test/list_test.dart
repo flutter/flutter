@@ -6,7 +6,7 @@ library list_test;
 
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/list.dart';
+import 'package:sky_tools/src/commands/list.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';

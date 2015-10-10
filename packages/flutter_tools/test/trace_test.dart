@@ -6,7 +6,7 @@ library trace_test;
 
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/trace.dart';
+import 'package:sky_tools/src/commands/trace.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
