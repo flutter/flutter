@@ -14,7 +14,7 @@ import 'package:yaml/yaml.dart' as yaml;
 import 'version.dart';
 import 'pipe_to_file.dart';
 
-const String kManifestFile = 'sky.yaml';
+const String kManifestFile = 'ui.yaml';
 const String kBundleFile = 'app.skyx';
 
 UpdateServiceProxy _initUpdateService() {
