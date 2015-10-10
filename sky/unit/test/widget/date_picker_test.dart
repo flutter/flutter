@@ -1,4 +1,4 @@
-import 'package:sky/material.dart';
+import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';

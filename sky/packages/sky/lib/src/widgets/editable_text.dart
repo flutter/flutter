@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';

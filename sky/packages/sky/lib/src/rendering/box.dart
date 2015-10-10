@@ -5,13 +5,13 @@
 import 'dart:math' as math;
 import 'dart:ui' as sky;
 
-import 'package:sky/painting.dart';
+import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 import 'object.dart';
 
-export 'package:sky/painting.dart' show TextBaseline;
+export 'package:flutter/painting.dart' show TextBaseline;
 
 // This class should only be used in debug builds
 class _DebugSize extends Size {

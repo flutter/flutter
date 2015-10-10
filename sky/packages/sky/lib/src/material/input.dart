@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation.dart';
-import 'package:sky/services.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-export 'package:sky/services.dart' show KeyboardType;
+export 'package:flutter/services.dart' show KeyboardType;
 
 typedef void StringValueChanged(String value);
 

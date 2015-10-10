@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 import 'package:cassowary/cassowary.dart' as al;
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
 
 void main() {
   RenderDecoratedBox c1 = new RenderDecoratedBox(

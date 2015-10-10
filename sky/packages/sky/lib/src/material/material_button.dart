@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/gestures.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'ink_well.dart';

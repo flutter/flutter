@@ -4,7 +4,7 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/widgets.dart';
+import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 

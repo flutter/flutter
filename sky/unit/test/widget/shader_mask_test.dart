@@ -1,7 +1,7 @@
 import 'dart:ui' as sky;
 
-import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';

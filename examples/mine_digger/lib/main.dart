@@ -4,10 +4,10 @@
 import 'dart:ui' as sky;
 import 'dart:math';
 
-import 'package:sky/material.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 // Classic minesweeper-inspired game. The mouse controls are standard
 // except for left + right combo which is not implemented. For touch,

@@ -4,9 +4,9 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/material.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../rendering/solid_color_box.dart';
 

@@ -8,9 +8,9 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as sky;
 
-import 'package:sky/gestures.dart';
-import 'package:sky/material.dart';
-import 'package:sky/painting.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import 'stock_data.dart';
 

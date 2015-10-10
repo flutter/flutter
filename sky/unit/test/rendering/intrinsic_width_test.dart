@@ -1,4 +1,4 @@
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
 import 'rendering_tester.dart';

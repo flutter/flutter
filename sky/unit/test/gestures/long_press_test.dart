@@ -1,5 +1,5 @@
 import 'package:quiver/testing/async.dart';
-import 'package:sky/gestures.dart';
+import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';

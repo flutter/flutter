@@ -4,7 +4,7 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/painting.dart';
+import 'package:flutter/painting.dart';
 
 import 'box.dart';
 import 'object.dart';

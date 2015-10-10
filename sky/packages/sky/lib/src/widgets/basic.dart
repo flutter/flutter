@@ -4,12 +4,12 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'framework.dart';
 
-export 'package:sky/rendering.dart' show
+export 'package:flutter/rendering.dart' show
     BackgroundImage,
     BlockDirection,
     Border,

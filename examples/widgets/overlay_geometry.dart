@@ -4,8 +4,8 @@
 
 import 'dart:ui' as sky;
 
-import 'package:sky/material.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class CardModel {
   CardModel(this.value, this.height, this.color);

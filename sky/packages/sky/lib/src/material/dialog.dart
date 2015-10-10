@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:sky/animation.dart';
-import 'package:sky/gestures.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'material_button.dart';

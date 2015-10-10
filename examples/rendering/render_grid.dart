@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:sky/material.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'solid_color_box.dart';
 
