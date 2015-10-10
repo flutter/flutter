@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
 import 'package:newton/newton.dart';
 import 'package:sky/animation.dart';

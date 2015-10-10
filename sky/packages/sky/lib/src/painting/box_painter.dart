@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
-import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
+import 'dart:ui' as sky;
+import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:sky/services.dart';
 

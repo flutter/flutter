@@ -8,7 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
 import 'package:box2d/box2d.dart' as box2d;
 import 'package:mojo/core.dart';

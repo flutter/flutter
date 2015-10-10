@@ -25,11 +25,11 @@ struct LibraryDescriptor {
 
 const LibraryDescriptor kBuiltinLibraries[] = {
     /* { url_, has_natives_, native_symbol_, native_resolver_ } */
-    {"dart:sky_builtin_natives",
+    {"dart:ui_builtin_natives",
      true,
      BuiltinNatives::NativeSymbol,
      BuiltinNatives::NativeLookup},
-    {"dart:sky", true, skySnapshotSymbolizer, skySnapshotResolver},
+    {"dart:ui", true, skySnapshotSymbolizer, skySnapshotResolver},
     {"dart:mojo.internal", true, MojoNativeSymbol, MojoNativeLookup},
     {"dart:io", true, dart::bin::IONativeSymbol, dart::bin::IONativeLookup },
 };

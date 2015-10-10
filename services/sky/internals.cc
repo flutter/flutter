@@ -76,7 +76,7 @@ const uint8_t* Symbolizer(Dart_NativeFunction native_function) {
   return GetBuiltin().Symbolizer(native_function);
 }
 
-const char kLibraryName[] = "dart:sky.internals";
+const char kLibraryName[] = "dart:ui_internals";
 
 }  // namespace
 

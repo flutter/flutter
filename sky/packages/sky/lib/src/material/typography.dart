@@ -4,7 +4,7 @@
 
 // See http://www.google.com/design/spec/style/typography.html
 
-import 'dart:sky' show Color;
+import 'dart:ui' show Color;
 
 import 'package:sky/painting.dart';
 import 'package:sky/src/material/colors.dart';

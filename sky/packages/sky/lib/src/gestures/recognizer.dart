@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
+import 'dart:ui' as sky;
 
 import 'arena.dart';
 import 'constants.dart';
