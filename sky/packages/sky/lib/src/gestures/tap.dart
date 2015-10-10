@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'arena.dart';
 import 'recognizer.dart';
@@ -17,7 +17,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   GestureTapCallback onTapDown;
   GestureTapCallback onTapCancel;
 
-  void handlePrimaryPointer(sky.PointerEvent event) {
+  void handlePrimaryPointer(ui.PointerEvent event) {
     if (event.type == 'pointerdown') {
       if (onTapDown != null)
         onTapDown();

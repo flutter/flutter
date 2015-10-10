@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 
@@ -164,7 +164,7 @@ class _DismissableState extends State<Dismissable> {
       _fadePerformance.progress = _dragExtent.abs() / (_size.width * _kDismissCardThreshold);
   }
 
-  bool _isFlingGesture(sky.Offset velocity) {
+  bool _isFlingGesture(ui.Offset velocity) {
     double vx = velocity.dx;
     double vy = velocity.dy;
     if (_directionIsYAxis) {
@@ -193,7 +193,7 @@ class _DismissableState extends State<Dismissable> {
     return false;
   }
 
-  void _handleDragEnd(sky.Offset velocity) {
+  void _handleDragEnd(ui.Offset velocity) {
     if (!_isActive || _fadePerformance.isAnimating)
       return;
 

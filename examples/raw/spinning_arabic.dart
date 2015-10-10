@@ -3,20 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 double timeBase = null;
-sky.LayoutRoot layoutRoot = new sky.LayoutRoot();
+ui.LayoutRoot layoutRoot = new ui.LayoutRoot();
 
-sky.Picture paint(sky.Rect paintBounds, double delta) {
-  sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+ui.Picture paint(ui.Rect paintBounds, double delta) {
+  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
 
-  canvas.translate(sky.view.width / 2.0, sky.view.height / 2.0);
+  canvas.translate(ui.view.width / 2.0, ui.view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
-  canvas.drawRect(new sky.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
-                  new sky.Paint()..color = const sky.Color.fromARGB(255, 0, 255, 0));
+  canvas.drawRect(new ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
+                  new ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
 
   double sin = math.sin(delta / 200);
   layoutRoot.maxWidth = 150.0 + (50 * sin);
@@ -28,17 +28,17 @@ sky.Picture paint(sky.Rect paintBounds, double delta) {
   return recorder.endRecording();
 }
 
-sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
-  final double devicePixelRatio = sky.view.devicePixelRatio;
-  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
+  final double devicePixelRatio = ui.view.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
-    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..addPicture(ui.Offset.zero, picture, paintBounds)
     ..pop();
   return sceneBuilder.build();
 }
@@ -47,15 +47,15 @@ void beginFrame(double timeStamp) {
   if (timeBase == null)
     timeBase = timeStamp;
   double delta = timeStamp - timeBase;
-  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
-  sky.Picture picture = paint(paintBounds, delta);
-  sky.Scene scene = composite(picture, paintBounds);
-  sky.view.scene = scene;
-  sky.view.scheduleFrame();
+  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+  ui.Picture picture = paint(paintBounds, delta);
+  ui.Scene scene = composite(picture, paintBounds);
+  ui.view.scene = scene;
+  ui.view.scheduleFrame();
 }
 
 void main() {
-  var document = new sky.Document();
+  var document = new ui.Document();
   var arabic = document.createText("هذا هو قليلا طويلة من النص الذي يجب التفاف .");
   var more = document.createText(" و أكثر قليلا لجعله أطول. ");
   var block = document.createElement('p');
@@ -68,6 +68,6 @@ void main() {
 
   layoutRoot.rootElement = block;
 
-  sky.view.setFrameCallback(beginFrame);
-  sky.view.scheduleFrame();
+  ui.view.setFrameCallback(beginFrame);
+  ui.view.scheduleFrame();
 }

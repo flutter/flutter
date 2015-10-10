@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
-/// A callback that receives a [sky.PointerEvent]
-typedef void PointerRoute(sky.PointerEvent event);
+/// A callback that receives a [ui.PointerEvent]
+typedef void PointerRoute(ui.PointerEvent event);
 
-/// A routing table for [sky.PointerEvent] events.
+/// A routing table for [ui.PointerEvent] events.
 class PointerRouter {
   final Map<int, List<PointerRoute>> _routeMap = new Map<int, List<PointerRoute>>();
 
   /// Adds a route to the routing table
   ///
-  /// Whenever this object routes a [sky.PointerEvent] corresponding to
+  /// Whenever this object routes a [ui.PointerEvent] corresponding to
   /// pointer, call route.
   void addRoute(int pointer, PointerRoute route) {
     List<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => new List<PointerRoute>());
@@ -23,7 +23,7 @@ class PointerRouter {
 
   /// Removes a route from the routing table
   ///
-  /// No longer call route when routing a [sky.PointerEvent] corresponding to
+  /// No longer call route when routing a [ui.PointerEvent] corresponding to
   /// pointer. Requires that this route was previously added to the router.
   void removeRoute(int pointer, PointerRoute route) {
     assert(_routeMap.containsKey(pointer));
@@ -37,7 +37,7 @@ class PointerRouter {
   /// Call the routes registed for this pointer event.
   ///
   /// Calls the routes in the order in which they were added to the route.
-  void route(sky.PointerEvent event) {
+  void route(ui.PointerEvent event) {
     List<PointerRoute> routes = _routeMap[event.pointer];
     if (routes == null)
       return;

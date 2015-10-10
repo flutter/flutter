@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -28,7 +28,7 @@ class Scaffold extends StatelessComponent {
   Widget build(BuildContext context) {
     double toolBarHeight = 0.0;
     if (toolBar != null)
-      toolBarHeight = kToolBarHeight + sky.view.paddingTop;
+      toolBarHeight = kToolBarHeight + ui.view.paddingTop;
 
     double statusBarHeight = 0.0;
     if (statusBar != null)

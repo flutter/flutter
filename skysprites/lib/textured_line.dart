@@ -38,8 +38,8 @@ class TexturedLinePainter {
       _cachedPaint = new Paint();
     } else {
       Matrix4 matrix = new Matrix4.identity();
-      sky.ImageShader shader = new sky.ImageShader(texture.image,
-        sky.TileMode.repeated, sky.TileMode.repeated, matrix.storage);
+      ui.ImageShader shader = new ui.ImageShader(texture.image,
+        ui.TileMode.repeated, ui.TileMode.repeated, matrix.storage);
 
       _cachedPaint = new Paint();
       _cachedPaint.setShader(shader);
@@ -77,7 +77,7 @@ class TexturedLinePainter {
 
   bool removeArtifacts = true;
 
-  sky.TransferMode transferMode = sky.TransferMode.srcOver;
+  ui.TransferMode transferMode = ui.TransferMode.srcOver;
 
   Paint _cachedPaint = new Paint();
 
@@ -169,7 +169,7 @@ class TexturedLinePainter {
       lastMiter = currentMiter;
     }
 
-    canvas.drawVertices(sky.VertexMode.triangles, vertices, textureCoordinates, verticeColors, sky.TransferMode.modulate, indicies, _cachedPaint);
+    canvas.drawVertices(ui.VertexMode.triangles, vertices, textureCoordinates, verticeColors, ui.TransferMode.modulate, indicies, _cachedPaint);
   }
 
   double _xPosForStop(double stop) {

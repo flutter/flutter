@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:flutter/services.dart';
@@ -121,10 +121,10 @@ class EdgeDims {
     if (b == null)
       return a * (1.0 - t);
     return new EdgeDims.TRBL(
-      sky.lerpDouble(a.top, b.top, t),
-      sky.lerpDouble(a.right, b.right, t),
-      sky.lerpDouble(a.bottom, b.bottom, t),
-      sky.lerpDouble(a.left, b.left, t)
+      ui.lerpDouble(a.top, b.top, t),
+      ui.lerpDouble(a.right, b.right, t),
+      ui.lerpDouble(a.bottom, b.bottom, t),
+      ui.lerpDouble(a.left, b.left, t)
     );
   }
 
@@ -257,7 +257,7 @@ class BoxShadow {
     return new BoxShadow(
       color: Color.lerp(a.color, b.color, t),
       offset: Offset.lerp(a.offset, b.offset, t),
-      blur: sky.lerpDouble(a.blur, b.blur, t)
+      blur: ui.lerpDouble(a.blur, b.blur, t)
     );
   }
 
@@ -287,7 +287,7 @@ class BoxShadow {
 
 /// A 2D gradient
 abstract class Gradient {
-  sky.Shader createShader();
+  ui.Shader createShader();
 }
 
 /// A 2D linear gradient
@@ -297,7 +297,7 @@ class LinearGradient extends Gradient {
     this.end,
     this.colors,
     this.stops,
-    this.tileMode: sky.TileMode.clamp
+    this.tileMode: ui.TileMode.clamp
   }) {
     assert(colors.length == stops.length);
   }
@@ -319,10 +319,10 @@ class LinearGradient extends Gradient {
   final List<double> stops;
 
   /// How this gradient should tile the plane
-  final sky.TileMode tileMode;
+  final ui.TileMode tileMode;
 
-  sky.Shader createShader() {
-    return new sky.Gradient.linear([begin, end], this.colors,
+  ui.Shader createShader() {
+    return new ui.Gradient.linear([begin, end], this.colors,
                                    this.stops, this.tileMode);
   }
 
@@ -338,7 +338,7 @@ class RadialGradient extends Gradient {
     this.radius,
     this.colors,
     this.stops,
-    this.tileMode: sky.TileMode.clamp
+    this.tileMode: ui.TileMode.clamp
   });
 
   /// The center of the gradient
@@ -361,10 +361,10 @@ class RadialGradient extends Gradient {
   final List<double> stops;
 
   /// How this gradient should tile the plane
-  final sky.TileMode tileMode;
+  final ui.TileMode tileMode;
 
-  sky.Shader createShader() {
-    return new sky.Gradient.radial(center, radius, colors, stops, tileMode);
+  ui.Shader createShader() {
+    return new ui.Gradient.radial(center, radius, colors, stops, tileMode);
   }
 
   String toString() {
@@ -409,10 +409,10 @@ enum ImageRepeat {
 
 /// Paint an image into the given rectangle in the canvas
 void paintImage({
-  sky.Canvas canvas,
+  ui.Canvas canvas,
   Rect rect,
-  sky.Image image,
-  sky.ColorFilter colorFilter,
+  ui.Image image,
+  ui.ColorFilter colorFilter,
   fit: ImageFit.scaleDown,
   repeat: ImageRepeat.noRepeat,
   double positionX: 0.5,
@@ -476,7 +476,7 @@ class BackgroundImage {
   final ImageRepeat repeat;
 
   /// A color filter to apply to the background image before painting it
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
 
   BackgroundImage({
     ImageResource image,
@@ -485,9 +485,9 @@ class BackgroundImage {
     this.colorFilter
   }) : _imageResource = image;
 
-  sky.Image _image;
+  ui.Image _image;
   /// The image to be painted into the background
-  sky.Image get image => _image;
+  ui.Image get image => _image;
 
   ImageResource _imageResource;
 
@@ -513,7 +513,7 @@ class BackgroundImage {
       _imageResource.removeListener(_handleImageChanged);
   }
 
-  void _handleImageChanged(sky.Image resolvedImage) {
+  void _handleImageChanged(ui.Image resolvedImage) {
     if (resolvedImage == null)
       return;
     _image = resolvedImage;
@@ -582,7 +582,7 @@ class BoxDecoration {
       backgroundColor: Color.lerp(null, backgroundColor, factor),
       backgroundImage: backgroundImage,
       border: border,
-      borderRadius: sky.lerpDouble(null, borderRadius, factor),
+      borderRadius: ui.lerpDouble(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
       shape: shape
@@ -604,7 +604,7 @@ class BoxDecoration {
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       backgroundImage: b.backgroundImage,
       border: b.border,
-      borderRadius: sky.lerpDouble(a.borderRadius, b.borderRadius, t),
+      borderRadius: ui.lerpDouble(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: b.gradient,
       shape: b.shape
@@ -697,11 +697,11 @@ class BoxPainter {
     double shortestSide = rect.shortestSide;
     // In principle, we should use shortestSide / 2.0, but we don't want to
     // run into floating point rounding errors. Instead, we just use
-    // shortestSide and let sky.Canvas do any remaining clamping.
+    // shortestSide and let ui.Canvas do any remaining clamping.
     return _decoration.borderRadius > shortestSide ? shortestSide : _decoration.borderRadius;
   }
 
-  void _paintBackgroundColor(sky.Canvas canvas, Rect rect) {
+  void _paintBackgroundColor(ui.Canvas canvas, Rect rect) {
     if (_decoration.backgroundColor != null ||
         _decoration.boxShadow != null ||
         _decoration.gradient != null) {
@@ -717,18 +717,18 @@ class BoxPainter {
             canvas.drawRect(rect, _backgroundPaint);
           } else {
             double radius = _getEffectiveBorderRadius(rect);
-            canvas.drawRRect(new sky.RRect()..setRectXY(rect, radius, radius), _backgroundPaint);
+            canvas.drawRRect(new ui.RRect()..setRectXY(rect, radius, radius), _backgroundPaint);
           }
           break;
       }
     }
   }
 
-  void _paintBackgroundImage(sky.Canvas canvas, Rect rect) {
+  void _paintBackgroundImage(ui.Canvas canvas, Rect rect) {
     final BackgroundImage backgroundImage = _decoration.backgroundImage;
     if (backgroundImage == null)
       return;
-    sky.Image image = backgroundImage.image;
+    ui.Image image = backgroundImage.image;
     if (image == null)
       return;
     paintImage(
@@ -741,7 +741,7 @@ class BoxPainter {
     );
   }
 
-  void _paintBorder(sky.Canvas canvas, Rect rect) {
+  void _paintBorder(ui.Canvas canvas, Rect rect) {
     if (_decoration.border == null)
       return;
 
@@ -804,19 +804,19 @@ class BoxPainter {
     canvas.drawPath(path, paint);
   }
 
-  void _paintBorderWithRadius(sky.Canvas canvas, Rect rect) {
+  void _paintBorderWithRadius(ui.Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
     assert(_decoration.shape == Shape.rectangle);
     Color color = _decoration.border.top.color;
     double width = _decoration.border.top.width;
     double radius = _getEffectiveBorderRadius(rect);
 
-    sky.RRect outer = new sky.RRect()..setRectXY(rect, radius, radius);
-    sky.RRect inner = new sky.RRect()..setRectXY(rect.deflate(width), radius - width, radius - width);
+    ui.RRect outer = new ui.RRect()..setRectXY(rect, radius, radius);
+    ui.RRect inner = new ui.RRect()..setRectXY(rect.deflate(width), radius - width, radius - width);
     canvas.drawDRRect(outer, inner, new Paint()..color = color);
   }
 
-  void _paintBorderWithCircle(sky.Canvas canvas, Rect rect) {
+  void _paintBorderWithCircle(ui.Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
     assert(_decoration.shape == Shape.circle);
     assert(_decoration.borderRadius == null);
@@ -827,14 +827,14 @@ class BoxPainter {
     Paint paint = new Paint()
       ..color = _decoration.border.top.color
       ..strokeWidth = width
-      ..setStyle(sky.PaintingStyle.stroke);
+      ..setStyle(ui.PaintingStyle.stroke);
     Point center = rect.center;
     double radius = (rect.shortestSide - width) / 2.0;
     canvas.drawCircle(center, radius, paint);
   }
 
   /// Paint the box decoration into the given location on the given canvas
-  void paint(sky.Canvas canvas, Rect rect) {
+  void paint(ui.Canvas canvas, Rect rect) {
     _paintBackgroundColor(canvas, rect);
     _paintBackgroundImage(canvas, rect);
     _paintBorder(canvas, rect);

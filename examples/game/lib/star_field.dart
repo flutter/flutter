@@ -1,7 +1,7 @@
 part of game;
 
 class StarField extends NodeWithSize {
-  sky.Image _image;
+  ui.Image _image;
   SpriteSheet _spriteSheet;
   int _numStars;
   bool _autoScroll;
@@ -15,9 +15,9 @@ class StarField extends NodeWithSize {
   Size _paddedSize = Size.zero;
 
   Paint _paint = new Paint()
-    ..filterQuality = sky.FilterQuality.low
+    ..filterQuality = ui.FilterQuality.low
     ..isAntiAlias = false
-    ..transferMode = sky.TransferMode.plus;
+    ..transferMode = ui.TransferMode.plus;
 
   StarField(this._spriteSheet, this._numStars, [this._autoScroll = false]) : super(Size.zero) {
     _image = _spriteSheet.image;
@@ -48,9 +48,9 @@ class StarField extends NodeWithSize {
 
   void paint(PaintingCanvas canvas) {
     // Create a transform for each star
-    List<sky.RSTransform> transforms = [];
+    List<ui.RSTransform> transforms = [];
     for (int i = 0; i < _numStars; i++) {
-      sky.RSTransform transform = new sky.RSTransform(
+      ui.RSTransform transform = new ui.RSTransform(
         _starScales[i],
         0.0,
         _starPositions[i].x - _padding,
@@ -60,7 +60,7 @@ class StarField extends NodeWithSize {
     }
 
     // Draw the stars
-    canvas.drawAtlas(_image, transforms, _rects, _colors, sky.TransferMode.modulate, null, _paint);
+    canvas.drawAtlas(_image, transforms, _rects, _colors, ui.TransferMode.modulate, null, _paint);
   }
 
   void move(double dx, double dy) {

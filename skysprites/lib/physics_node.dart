@@ -137,7 +137,7 @@ class PhysicsNode extends Node {
 
   void paintDebug(PaintingCanvas canvas) {
     Paint shapePaint = new Paint();
-    shapePaint.setStyle(sky.PaintingStyle.stroke);
+    shapePaint.setStyle(ui.PaintingStyle.stroke);
     shapePaint.strokeWidth = 1.0;
 
     for (box2d.Body body = b2World.bodyList; body != null; body = body.getNext()) {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 
@@ -15,7 +15,7 @@ void main() {
           additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
           child: new RenderDecoratedBox(
             decoration: new BoxDecoration(
-              backgroundColor: new sky.Color(0xFFFFFF00)
+              backgroundColor: new ui.Color(0xFFFFFF00)
             )
           )
         )
@@ -27,12 +27,12 @@ void main() {
           child: new RenderDecoratedBox(
             decoration: new BoxDecoration(
               border: new Border(
-                top: new BorderSide(color: new sky.Color(0xFFF00000), width: 5.0),
-                right: new BorderSide(color: new sky.Color(0xFFFF9000), width: 10.0),
-                bottom: new BorderSide(color: new sky.Color(0xFFFFF000), width: 15.0),
-                left: new BorderSide(color: new sky.Color(0xFF00FF00), width: 20.0)
+                top: new BorderSide(color: new ui.Color(0xFFF00000), width: 5.0),
+                right: new BorderSide(color: new ui.Color(0xFFFF9000), width: 10.0),
+                bottom: new BorderSide(color: new ui.Color(0xFFFFF000), width: 15.0),
+                left: new BorderSide(color: new ui.Color(0xFF00FF00), width: 20.0)
               ),
-              backgroundColor: new sky.Color(0xFFDDDDDD)
+              backgroundColor: new ui.Color(0xFFDDDDDD)
             )
           )
         )
@@ -43,7 +43,7 @@ void main() {
           additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
           child: new RenderDecoratedBox(
             decoration: new BoxDecoration(
-              backgroundColor: new sky.Color(0xFFFFFF00)
+              backgroundColor: new ui.Color(0xFFFFFF00)
             )
           )
         )
@@ -54,7 +54,7 @@ void main() {
           additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
           child: new RenderDecoratedBox(
             decoration: new BoxDecoration(
-              backgroundColor: new sky.Color(0xFFFFFF00)
+              backgroundColor: new ui.Color(0xFFFFFF00)
             )
           )
         )
@@ -65,7 +65,7 @@ void main() {
           additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
           child: new RenderDecoratedBox(
             decoration: new BoxDecoration(
-              backgroundColor: new sky.Color(0xFFFFFF00)
+              backgroundColor: new ui.Color(0xFFFFFF00)
             )
           )
         )

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -15,8 +15,8 @@ import 'theme.dart';
 
 export 'package:flutter/rendering.dart' show ValueChanged;
 
-const sky.Color _kThumbOffColor = const sky.Color(0xFFFAFAFA);
-const sky.Color _kTrackOffColor = const sky.Color(0x42000000);
+const ui.Color _kThumbOffColor = const ui.Color(0xFFFAFAFA);
+const ui.Color _kTrackOffColor = const ui.Color(0x42000000);
 const double _kSwitchWidth = 35.0;
 const double _kThumbRadius = 10.0;
 const double _kSwitchHeight = _kThumbRadius * 2.0;
@@ -82,8 +82,8 @@ class _RenderSwitch extends RenderToggleable {
 
   RadialReaction _radialReaction;
 
-  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
-    if (event is sky.PointerEvent) {
+  void handleEvent(ui.Event event, BoxHitTestEntry entry) {
+    if (event is ui.PointerEvent) {
       if (event.type == 'pointerdown')
         _showRadialReaction(entry.localPosition);
       else if (event.type == 'pointerup')
@@ -112,21 +112,21 @@ class _RenderSwitch extends RenderToggleable {
 
   void paint(PaintingContext context, Offset offset) {
     final PaintingCanvas canvas = context.canvas;
-    sky.Color thumbColor = _kThumbOffColor;
-    sky.Color trackColor = _kTrackOffColor;
+    ui.Color thumbColor = _kThumbOffColor;
+    ui.Color trackColor = _kTrackOffColor;
     if (value) {
       thumbColor = _thumbColor;
-      trackColor = new sky.Color(_thumbColor.value & 0x80FFFFFF);
+      trackColor = new ui.Color(_thumbColor.value & 0x80FFFFFF);
     }
 
     // Draw the track rrect
-    sky.Paint paint = new sky.Paint()
+    ui.Paint paint = new ui.Paint()
       ..color = trackColor
-      ..style = sky.PaintingStyle.fill;
-    sky.Rect rect = new sky.Rect.fromLTWH(offset.dx,
+      ..style = ui.PaintingStyle.fill;
+    ui.Rect rect = new ui.Rect.fromLTWH(offset.dx,
         offset.dy + _kSwitchHeight / 2.0 - _kTrackHeight / 2.0, _kTrackWidth,
         _kTrackHeight);
-    sky.RRect rrect = new sky.RRect()
+    ui.RRect rrect = new ui.RRect()
       ..setRectXY(rect, _kTrackRadius, _kTrackRadius);
     canvas.drawRRect(rrect, paint);
 

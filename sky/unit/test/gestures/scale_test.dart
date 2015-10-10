@@ -1,4 +1,4 @@
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
@@ -12,14 +12,14 @@ void main() {
     TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
 
     bool didStartScale = false;
-    sky.Point updatedFocalPoint;
-    scale.onStart = (sky.Point focalPoint) {
+    ui.Point updatedFocalPoint;
+    scale.onStart = (ui.Point focalPoint) {
       didStartScale = true;
       updatedFocalPoint = focalPoint;
     };
 
     double updatedScale;
-    scale.onUpdate = (double scale, sky.Point focalPoint) {
+    scale.onUpdate = (double scale, ui.Point focalPoint) {
       updatedScale = scale;
       updatedFocalPoint = focalPoint;
     };
@@ -36,7 +36,7 @@ void main() {
 
     TestPointer pointer1 = new TestPointer(1);
 
-    sky.PointerEvent down = pointer1.down(new Point(10.0, 10.0));
+    ui.PointerEvent down = pointer1.down(new Point(10.0, 10.0));
     scale.addPointer(down);
     tap.addPointer(down);
 
@@ -58,7 +58,7 @@ void main() {
     router.route(pointer1.move(new Point(20.0, 30.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, new sky.Point(20.0, 30.0));
+    expect(updatedFocalPoint, new ui.Point(20.0, 30.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
@@ -67,7 +67,7 @@ void main() {
 
     // Two-finger scaling
     TestPointer pointer2 = new TestPointer(2);
-    sky.PointerEvent down2 = pointer2.down(new Point(10.0, 20.0));
+    ui.PointerEvent down2 = pointer2.down(new Point(10.0, 20.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
     GestureArena.instance.close(2);
@@ -83,7 +83,7 @@ void main() {
     router.route(pointer2.move(new Point(0.0, 10.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, new sky.Point(10.0, 20.0));
+    expect(updatedFocalPoint, new ui.Point(10.0, 20.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     updatedScale = null;
@@ -92,7 +92,7 @@ void main() {
 
     // Zoom out
     router.route(pointer2.move(new Point(15.0, 25.0)));
-    expect(updatedFocalPoint, new sky.Point(17.5, 27.5));
+    expect(updatedFocalPoint, new ui.Point(17.5, 27.5));
     updatedFocalPoint = null;
     expect(updatedScale, 0.5);
     updatedScale = null;
@@ -100,7 +100,7 @@ void main() {
 
     // Three-finger scaling
     TestPointer pointer3 = new TestPointer(3);
-    sky.PointerEvent down3 = pointer3.down(new Point(25.0, 35.0));
+    ui.PointerEvent down3 = pointer3.down(new Point(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);
     GestureArena.instance.close(3);
@@ -116,7 +116,7 @@ void main() {
     router.route(pointer3.move(new Point(55.0, 65.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, new sky.Point(30.0, 40.0));
+    expect(updatedFocalPoint, new ui.Point(30.0, 40.0));
     updatedFocalPoint = null;
     expect(updatedScale, 5.0);
     updatedScale = null;
@@ -128,7 +128,7 @@ void main() {
     router.route(pointer2.move(new Point(20.0, 30.0)));
     router.route(pointer3.move(new Point(15.0, 25.0)));
     expect(didStartScale, isFalse);
-    expect(updatedFocalPoint, new sky.Point(20.0, 30.0));
+    expect(updatedFocalPoint, new ui.Point(20.0, 30.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
@@ -147,7 +147,7 @@ void main() {
     router.route(pointer3.move(new Point(10.0, 20.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, new sky.Point(15.0, 25.0));
+    expect(updatedFocalPoint, new ui.Point(15.0, 25.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     updatedScale = null;
@@ -164,7 +164,7 @@ void main() {
     router.route(pointer3.move(new Point(0.0, 0.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, new sky.Point(0.0, 0.0));
+    expect(updatedFocalPoint, new ui.Point(0.0, 0.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;

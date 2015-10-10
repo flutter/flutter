@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 
@@ -528,7 +528,7 @@ class RenderSolidColor extends RenderDecoratedSector {
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
   }
 
-  void handleEvent(sky.Event event, HitTestEntry entry) {
+  void handleEvent(ui.Event event, HitTestEntry entry) {
     if (event.type == 'pointerdown')
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
     else if (event.type == 'pointerup')

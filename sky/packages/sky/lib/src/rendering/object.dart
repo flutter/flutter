@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:flutter/animation.dart';
@@ -17,7 +17,7 @@ import 'node.dart';
 export 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
 
-typedef sky.Shader ShaderCallback(Rect bounds);
+typedef ui.Shader ShaderCallback(Rect bounds);
 
 /// Base class for data associated with a [RenderObject] by its parent
 ///
@@ -38,9 +38,9 @@ class ParentData {
 }
 
 /// Obsolete class that will be removed eventually
-class PaintingCanvas extends sky.Canvas {
-  PaintingCanvas(sky.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
-  // TODO(ianh): Just use sky.Canvas everywhere instead
+class PaintingCanvas extends ui.Canvas {
+  PaintingCanvas(ui.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
+  // TODO(ianh): Just use ui.Canvas everywhere instead
 }
 
 /// A place to paint
@@ -76,7 +76,7 @@ class PaintingContext {
   ContainerLayer get containerLayer => _containerLayer;
 
   PictureLayer _currentLayer;
-  sky.PictureRecorder _recorder;
+  ui.PictureRecorder _recorder;
   PaintingCanvas _canvas;
   /// The canvas on which to paint
   ///
@@ -90,7 +90,7 @@ class PaintingContext {
     assert(_recorder == null);
     assert(_canvas == null);
     _currentLayer = new PictureLayer(paintBounds: paintBounds);
-    _recorder = new sky.PictureRecorder();
+    _recorder = new ui.PictureRecorder();
     _canvas = new PaintingCanvas(_recorder, paintBounds);
     _containerLayer.append(_currentLayer);
   }
@@ -186,7 +186,7 @@ class PaintingContext {
   /// compositing layer. Otherwise, the clip will be applied by the canvas.
   ///
   /// Note: clipRRect is in the parent's coordinate space
-  void paintChildWithClipRRect(RenderObject child, Point childPosition, Rect bounds, sky.RRect clipRRect) {
+  void paintChildWithClipRRect(RenderObject child, Point childPosition, Rect bounds, ui.RRect clipRRect) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
@@ -246,7 +246,7 @@ class PaintingContext {
   static Paint _getPaintForAlpha(int alpha) {
     return new Paint()
       ..color = new Color.fromARGB(alpha, 0, 0, 0)
-      ..setTransferMode(sky.TransferMode.srcOver)
+      ..setTransferMode(ui.TransferMode.srcOver)
       ..isAntiAlias = false;
   }
 
@@ -276,9 +276,9 @@ class PaintingContext {
     }
   }
 
-  static Paint _getPaintForColorFilter(Color color, sky.TransferMode transferMode) {
+  static Paint _getPaintForColorFilter(Color color, ui.TransferMode transferMode) {
     return new Paint()
-      ..colorFilter = new sky.ColorFilter.mode(color, transferMode)
+      ..colorFilter = new ui.ColorFilter.mode(color, transferMode)
       ..isAntiAlias = false;
   }
 
@@ -294,7 +294,7 @@ class PaintingContext {
                                  Point childPosition,
                                  Rect bounds,
                                  Color color,
-                                 sky.TransferMode transferMode) {
+                                 ui.TransferMode transferMode) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
@@ -315,7 +315,7 @@ class PaintingContext {
 
   static Paint _getPaintForShaderMask(Rect bounds,
                                       ShaderCallback shaderCallback,
-                                      sky.TransferMode transferMode) {
+                                      ui.TransferMode transferMode) {
     return new Paint()
      ..transferMode = transferMode
      ..shader = shaderCallback(bounds);
@@ -325,7 +325,7 @@ class PaintingContext {
                                 Point childPosition,
                                 Rect bounds,
                                 ShaderCallback shaderCallback,
-                                sky.TransferMode transferMode) {
+                                ui.TransferMode transferMode) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
@@ -628,7 +628,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// See [FlutterBinding] for an example of how this function is used.
   static void flushLayout() {
-    sky.tracing.begin('RenderObject.flushLayout');
+    ui.tracing.begin('RenderObject.flushLayout');
     _debugDoingLayout = true;
     try {
       // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
@@ -642,7 +642,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
     } finally {
       _debugDoingLayout = false;
-      sky.tracing.end('RenderObject.flushLayout');
+      ui.tracing.end('RenderObject.flushLayout');
     }
   }
   void _layoutWithoutResize() {
@@ -949,7 +949,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// See [FlutterBinding] for an example of how this function is used.
   static void flushPaint() {
-    sky.tracing.begin('RenderObject.flushPaint');
+    ui.tracing.begin('RenderObject.flushPaint');
     _debugDoingPaint = true;
     try {
       List<RenderObject> dirtyNodes = _nodesNeedingPaint;
@@ -963,7 +963,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(_nodesNeedingPaint.length == 0);
     } finally {
       _debugDoingPaint = false;
-      sky.tracing.end('RenderObject.flushPaint');
+      ui.tracing.end('RenderObject.flushPaint');
     }
   }
 
@@ -1069,7 +1069,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // EVENTS
 
   /// Override this function to handle events that hit this render object
-  void handleEvent(sky.Event event, HitTestEntry entry) {
+  void handleEvent(ui.Event event, HitTestEntry entry) {
   }
 
 
