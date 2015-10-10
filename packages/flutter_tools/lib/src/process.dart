@@ -22,7 +22,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd,
   proc.stdout.transform(UTF8.decoder).listen((String data) {
     List<String> dataLines = data.trimRight().split('\n');
     if (filter != null) {
-      dataLines = dataLines.where((String s) => filter.hasMatch(s));
+      dataLines = dataLines.where((String s) => filter.hasMatch(s)).toList();
     }
     if (dataLines.length > 0) {
       stdout.write('$prefix${dataLines.join('\n$prefix')}\n');
@@ -41,15 +41,19 @@ Future<int> runCommandAndStreamOutput(List<String> cmd,
 }
 
 Future runAndKill(List<String> cmd, Duration timeout) async {
-  _logging.info(cmd.join(' '));
-  Future<Process> proc = Process.start(
-      cmd[0], cmd.getRange(1, cmd.length).toList(),
-      mode: ProcessStartMode.DETACHED);
-
+  Future<Process> proc = runDetached(cmd);
   return new Future.delayed(timeout, () async {
     _logging.info('Intentionally killing ${cmd[0]}');
     Process.killPid((await proc).pid);
   });
+}
+
+Future<Process> runDetached(List<String> cmd) async {
+  _logging.info(cmd.join(' '));
+  Future<Process> proc = Process.start(
+      cmd[0], cmd.getRange(1, cmd.length).toList(),
+      mode: ProcessStartMode.DETACHED);
+  return proc;
 }
 
 /// Run cmd and return stdout.

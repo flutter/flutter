@@ -26,6 +26,8 @@ abstract class _Device {
         id = AndroidDevice.defaultDeviceID;
       } else if (className == IOSDevice.className) {
         id = IOSDevice.defaultDeviceID;
+      } else if (className == IOSSimulator.className) {
+        id = IOSSimulator.defaultDeviceID;
       } else {
         throw 'Attempted to create a Device of unknown type $className';
       }
@@ -38,6 +40,10 @@ abstract class _Device {
         return device;
       } else if (className == IOSDevice.className) {
         final device = new IOSDevice._(id);
+        _deviceCache[id] = device;
+        return device;
+      } else if (className == IOSSimulator.className) {
+        final device = new IOSSimulator._(id);
         _deviceCache[id] = device;
         return device;
       } else {
@@ -128,10 +134,13 @@ class IOSDevice extends _Device {
     return devices;
   }
 
-  static List<String> _getAttachedDeviceIDs([IOSDevice mockIOS]) {
+  static Iterable<String> _getAttachedDeviceIDs([IOSDevice mockIOS]) {
     String listerPath =
         (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
-    return runSync([listerPath, '-l']).trim().split('\n');
+    return runSync([listerPath, '-l'])
+        .trim()
+        .split('\n')
+        .where((String s) => s != null && s.length > 0);
   }
 
   static String _getDeviceName(String deviceID, [IOSDevice mockIOS]) {
@@ -163,17 +172,22 @@ class IOSDevice extends _Device {
 
   @override
   bool installApp(ApplicationPackage app) {
-    if (id == defaultDeviceID) {
-      runCheckedSync([installerPath, '-i', app.appPath]);
-    } else {
-      runCheckedSync([installerPath, '-u', id, '-i', app.appPath]);
+    try {
+      if (id == defaultDeviceID) {
+        runCheckedSync([installerPath, '-i', app.appPath]);
+      } else {
+        runCheckedSync([installerPath, '-u', id, '-i', app.appPath]);
+      }
+      return true;
+    } catch (e) {
+      return false;
     }
     return false;
   }
 
   @override
   bool isConnected() {
-    List<String> ids = _getAttachedDeviceIDs();
+    Iterable<String> ids = _getAttachedDeviceIDs();
     for (String id in ids) {
       if (id == this.id || this.id == defaultDeviceID) {
         return true;
@@ -245,9 +259,231 @@ class IOSDevice extends _Device {
   }
 
   /// Note that clear is not supported on iOS at this time.
-  Future<int> logs({bool clear: false}) {
+  Future<int> logs({bool clear: false}) async {
+    if (!isConnected()) {
+      return 2;
+    }
     return runCommandAndStreamOutput([loggerPath],
         prefix: 'IOS DEV: ', filter: new RegExp(r'.*SkyShell.*'));
+  }
+}
+
+class IOSSimulator extends _Device {
+  static const String className = 'IOSSimulator';
+  static final String defaultDeviceID = 'default_ios_sim_id';
+
+  static const String _macInstructions =
+      'To work with iOS devices, please install ideviceinstaller. '
+      'If you use homebrew, you can install it with '
+      '"\$ brew install ideviceinstaller".';
+
+  static String _xcrunPath = path.join('/usr', 'bin', 'xcrun');
+
+  String _iOSSimPath;
+  String get iOSSimPath => _iOSSimPath;
+
+  String get xcrunPath => _xcrunPath;
+
+  String _name;
+  String get name => _name;
+
+  factory IOSSimulator({String id, String name, String iOSSimulatorPath}) {
+    IOSSimulator device = new _Device(className, id);
+    device._name = name;
+    if (iOSSimulatorPath == null) {
+      iOSSimulatorPath = path.join('/Applications', 'iOS Simulator.app',
+          'Contents', 'MacOS', 'iOS Simulator');
+    }
+    device._iOSSimPath = iOSSimulatorPath;
+    return device;
+  }
+
+  IOSSimulator._(String id) : super._(id) {}
+
+  static String _getRunningSimulatorID([IOSSimulator mockIOS]) {
+    String xcrunPath = mockIOS != null ? mockIOS.xcrunPath : _xcrunPath;
+    String output = runCheckedSync([xcrunPath, 'simctl', 'list', 'devices']);
+
+    Match match;
+    Iterable<Match> matches = new RegExp(r'[^\(]+\(([^\)]+)\) \(Booted\)',
+        multiLine: true).allMatches(output);
+    if (matches.length > 1) {
+      // More than one simulator is listed as booted, which is not allowed but
+      // sometimes happens erroneously.  Kill them all because we don't know
+      // which one is actually running.
+      _logging.warning('Multiple running simulators were detected, '
+          'which is not supposed to happen.');
+      for (Match m in matches) {
+        if (m.groupCount > 0) {
+          _logging.warning('Killing simulator ${m.group(1)}');
+          runSync([xcrunPath, 'simctl', 'shutdown', m.group(1)]);
+        }
+      }
+    } else if (matches.length == 1) {
+      match = matches.first;
+    }
+
+    if (match != null && match.groupCount > 0) {
+      return match.group(1);
+    } else {
+      _logging.info('No running simulators found');
+      return null;
+    }
+  }
+
+  String _getSimulatorPath() {
+    String deviceID = id == defaultDeviceID ? _getRunningSimulatorID() : id;
+    String homeDirectory = path.absolute(Platform.environment['HOME']);
+    if (deviceID == null) {
+      return null;
+    }
+    return path.join(homeDirectory, 'Library', 'Developer', 'CoreSimulator',
+        'Devices', deviceID);
+  }
+
+  String _getSimulatorAppHomeDirectory(ApplicationPackage app) {
+    String simulatorPath = _getSimulatorPath();
+    if (simulatorPath == null) {
+      return null;
+    }
+    return path.join(simulatorPath, 'data');
+  }
+
+  static List<IOSSimulator> getAttachedDevices([IOSSimulator mockIOS]) {
+    List<IOSSimulator> devices = [];
+    String id = _getRunningSimulatorID(mockIOS);
+    if (id != null) {
+      // TODO(iansf): get the simulator's name
+      // String name = _getDeviceName(id, mockIOS);
+      devices.add(new IOSSimulator(id: id));
+    }
+    return devices;
+  }
+
+  Future<bool> boot() async {
+    if (!Platform.isMacOS) {
+      return false;
+    }
+    if (isConnected()) {
+      return true;
+    }
+    if (id == defaultDeviceID) {
+      runDetached([iOSSimPath]);
+
+      Future<bool> checkConnection([int attempts = 20]) async {
+        if (attempts == 0) {
+          _logging.info('Timed out waiting for iOS Simulator $id to boot.');
+          return false;
+        }
+        if (!isConnected()) {
+          _logging.info('Waiting for iOS Simulator $id to boot...');
+          return new Future.delayed(new Duration(milliseconds: 500),
+              () => checkConnection(attempts - 1));
+        }
+        return true;
+      }
+      return checkConnection();
+    } else {
+      try {
+        runCheckedSync([xcrunPath, 'simctl', 'boot', id]);
+      } catch (e) {
+        _logging.warning('Unable to boot iOS Simulator $id: ', e);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  @override
+  bool installApp(ApplicationPackage app) {
+    if (!isConnected()) {
+      return false;
+    }
+    try {
+      if (id == defaultDeviceID) {
+        runCheckedSync([xcrunPath, 'simctl', 'install', 'booted', app.appPath]);
+      } else {
+        runCheckedSync([xcrunPath, 'simctl', 'install', id, app.appPath]);
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  bool isConnected() {
+    if (!Platform.isMacOS) {
+      return false;
+    }
+    String simulatorID = _getRunningSimulatorID();
+    if (simulatorID == null) {
+      return false;
+    } else if (id == defaultDeviceID) {
+      return true;
+    } else {
+      return _getRunningSimulatorID() == id;
+    }
+  }
+
+  @override
+  bool isAppInstalled(ApplicationPackage app) {
+    try {
+      String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
+      return FileSystemEntity.isDirectorySync(simulatorHomeDirectory);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> startApp(ApplicationPackage app) async {
+    if (!isAppInstalled(app)) {
+      return false;
+    }
+    try {
+      if (id == defaultDeviceID) {
+        runCheckedSync(
+            [xcrunPath, 'simctl', 'launch', 'booted', app.appPackageID]);
+      } else {
+        runCheckedSync([xcrunPath, 'simctl', 'launch', id, app.appPackageID]);
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> stopApp(ApplicationPackage app) async {
+    // Currently we don't have a way to stop an app running on iOS.
+    return false;
+  }
+
+  Future<bool> pushFile(
+      ApplicationPackage app, String localFile, String targetFile) async {
+    if (Platform.isMacOS) {
+      String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
+      runCheckedSync(
+          ['cp', localFile, path.join(simulatorHomeDirectory, targetFile)]);
+      return true;
+    }
+    return false;
+  }
+
+  Future<int> logs({bool clear: false}) async {
+    if (!isConnected()) {
+      return 2;
+    }
+    String homeDirectory = path.absolute(Platform.environment['HOME']);
+    String simulatorDeviceID = _getRunningSimulatorID();
+    String logFilePath = path.join(homeDirectory, 'Library', 'Logs',
+        'CoreSimulator', simulatorDeviceID, 'system.log');
+    if (clear) {
+      runSync(['rm', logFilePath]);
+    }
+    return runCommandAndStreamOutput(['tail', '-f', logFilePath],
+        prefix: 'IOS SIM: ', filter: new RegExp(r'.*SkyShell.*'));
   }
 }
 
@@ -576,7 +812,11 @@ class AndroidDevice extends _Device {
     runSync([adbPath, 'logcat', '-c']);
   }
 
-  Future<int> logs({bool clear: false}) {
+  Future<int> logs({bool clear: false}) async {
+    if (!isConnected()) {
+      return 2;
+    }
+
     if (clear) {
       clearLogs();
     }

@@ -16,10 +16,17 @@ class MockIOSDevice extends Mock implements IOSDevice {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class MockIOSSimulator extends Mock implements IOSSimulator {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void applicationPackageSetup() {
   ApplicationPackageFactory.srcPath = './';
   ApplicationPackageFactory.setBuildPath(
       BuildType.prebuilt, BuildPlatform.android, './');
   ApplicationPackageFactory.setBuildPath(
       BuildType.prebuilt, BuildPlatform.iOS, './');
+  ApplicationPackageFactory.setBuildPath(
+      BuildType.prebuilt, BuildPlatform.iOSSimulator, './');
 }

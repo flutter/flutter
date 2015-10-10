@@ -17,10 +17,11 @@ final Logger _logging = new Logger('sky_tools.stop');
 class StopCommand extends Command {
   final name = 'stop';
   final description = 'Stop your Flutter app on all attached devices.';
-  AndroidDevice android = null;
-  IOSDevice ios = null;
+  AndroidDevice android;
+  IOSDevice ios;
+  IOSSimulator iosSim;
 
-  StopCommand({this.android, this.ios});
+  StopCommand({this.android, this.ios, this.iosSim});
 
   @override
   Future<int> run() async {
@@ -38,6 +39,9 @@ class StopCommand extends Command {
     if (ios == null) {
       ios = new IOSDevice();
     }
+    if (iosSim == null) {
+      iosSim = new IOSSimulator();
+    }
 
     bool stoppedSomething = false;
     Map<BuildPlatform, ApplicationPackage> packages =
@@ -51,6 +55,11 @@ class StopCommand extends Command {
     if (ios.isConnected()) {
       ApplicationPackage iosApp = packages[BuildPlatform.iOS];
       stoppedSomething = await ios.stopApp(iosApp) || stoppedSomething;
+    }
+
+    if (iosSim.isConnected()) {
+      ApplicationPackage iosApp = packages[BuildPlatform.iOSSimulator];
+      stoppedSomething = await iosSim.stopApp(iosApp) || stoppedSomething;
     }
 
     return stoppedSomething;

@@ -28,9 +28,16 @@ defineTests() {
       when(ios.isConnected()).thenReturn(false);
       when(ios.installApp(any)).thenReturn(false);
       when(ios.startApp(any)).thenReturn(false);
-      when(ios.startApp(any)).thenReturn(false);
+      when(ios.stopApp(any)).thenReturn(false);
 
-      StartCommand command = new StartCommand(android: android, ios: ios);
+      MockIOSSimulator iosSim = new MockIOSSimulator();
+      when(iosSim.isConnected()).thenReturn(false);
+      when(iosSim.installApp(any)).thenReturn(false);
+      when(iosSim.startApp(any)).thenReturn(false);
+      when(iosSim.stopApp(any)).thenReturn(false);
+
+      StartCommand command =
+          new StartCommand(android: android, ios: ios, iosSim: iosSim);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
@@ -52,7 +59,14 @@ defineTests() {
       when(ios.startApp(any)).thenReturn(true);
       when(ios.stopApp(any)).thenReturn(false);
 
-      StartCommand command = new StartCommand(android: android, ios: ios);
+      MockIOSSimulator iosSim = new MockIOSSimulator();
+      when(iosSim.isConnected()).thenReturn(false);
+      when(iosSim.installApp(any)).thenReturn(false);
+      when(iosSim.startApp(any)).thenReturn(false);
+      when(iosSim.stopApp(any)).thenReturn(false);
+
+      StartCommand command =
+          new StartCommand(android: android, ios: ios, iosSim: iosSim);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);

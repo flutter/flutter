@@ -30,7 +30,13 @@ defineTests() {
       when(ios.installerPath).thenReturn('echo');
       when(ios.listerPath).thenReturn('echo');
 
-      ListCommand command = new ListCommand(android: android, ios: ios);
+      MockIOSSimulator iosSim = new MockIOSSimulator();
+      // Avoid relying on xcrun being installed on the test system.
+      // Instead, cause the test to run the echo command.
+      when(iosSim.xcrunPath).thenReturn('echo');
+
+      ListCommand command =
+          new ListCommand(android: android, ios: ios, iosSim: iosSim);
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
       runner.run(['list']).then((int code) => expect(code, equals(0)));

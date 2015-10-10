@@ -74,6 +74,7 @@ class ApplicationPackageFactory {
   static List<BuildPlatform> defaultBuildPlatforms = [
     BuildPlatform.android,
     BuildPlatform.iOS,
+    BuildPlatform.iOSSimulator,
   ];
 
   static Map<BuildPlatform, ApplicationPackage> getAvailableApplicationPackages(
@@ -93,6 +94,9 @@ class ApplicationPackageFactory {
           packages[platform] = new AndroidApk(buildPath);
           break;
         case BuildPlatform.iOS:
+          packages[platform] = new IOSApp(buildPath);
+          break;
+        case BuildPlatform.iOSSimulator:
           packages[platform] = new IOSApp(buildPath);
           break;
         default:

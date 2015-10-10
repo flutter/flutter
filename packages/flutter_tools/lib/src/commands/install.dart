@@ -15,26 +15,37 @@ class InstallCommand extends Command {
   final name = 'install';
   final description = 'Install your Flutter app on attached devices.';
 
-  AndroidDevice android = null;
+  AndroidDevice android;
   IOSDevice ios;
+  IOSSimulator iosSim;
 
-  InstallCommand({this.android, this.ios});
+  InstallCommand({this.android, this.ios, this.iosSim}) {
+    argParser.addFlag('boot',
+        help: 'Boot the iOS Simulator if it isn\'t already running.');
+  }
 
   @override
   Future<int> run() async {
-    if (install()) {
+    if (install(argResults['boot'])) {
       return 0;
     } else {
       return 2;
     }
   }
 
-  bool install() {
+  bool install([bool boot = false]) {
     if (android == null) {
       android = new AndroidDevice();
     }
     if (ios == null) {
       ios = new IOSDevice();
+    }
+    if (iosSim == null) {
+      iosSim = new IOSSimulator();
+    }
+
+    if (boot) {
+      iosSim.boot();
     }
 
     bool installedSomewhere = false;
@@ -43,6 +54,7 @@ class InstallCommand extends Command {
         ApplicationPackageFactory.getAvailableApplicationPackages();
     ApplicationPackage androidApp = packages[BuildPlatform.android];
     ApplicationPackage iosApp = packages[BuildPlatform.iOS];
+    ApplicationPackage iosSimApp = packages[BuildPlatform.iOSSimulator];
 
     if (androidApp != null && android.isConnected()) {
       installedSomewhere = android.installApp(androidApp) || installedSomewhere;
@@ -50,6 +62,10 @@ class InstallCommand extends Command {
 
     if (iosApp != null && ios.isConnected()) {
       installedSomewhere = ios.installApp(iosApp) || installedSomewhere;
+    }
+
+    if (iosSimApp != null && iosSim.isConnected()) {
+      installedSomewhere = iosSim.installApp(iosSimApp) || installedSomewhere;
     }
 
     return installedSomewhere;

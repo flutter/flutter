@@ -18,8 +18,9 @@ class ListCommand extends Command {
   final description = 'List all connected devices.';
   AndroidDevice android;
   IOSDevice ios;
+  IOSSimulator iosSim;
 
-  ListCommand({this.android, this.ios}) {
+  ListCommand({this.android, this.ios, this.iosSim}) {
     argParser.addFlag('details',
         abbr: 'd',
         negatable: false,
@@ -47,6 +48,17 @@ class ListCommand extends Command {
       print('iOS Devices:');
     }
     for (IOSDevice device in IOSDevice.getAttachedDevices(ios)) {
+      if (details) {
+        print('${device.id}\t${device.name}');
+      } else {
+        print(device.id);
+      }
+    }
+
+    if (details) {
+      print('iOS Simulators:');
+    }
+    for (IOSSimulator device in IOSSimulator.getAttachedDevices(iosSim)) {
       if (details) {
         print('${device.id}\t${device.name}');
       } else {

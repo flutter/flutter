@@ -21,7 +21,7 @@ class TraceCommand extends Command {
       'To start a trace, wait, and then stop the trace, don\'t set any flags '
       'except (optionally) duration.\n'
       'Otherwise, specify either start or stop to manually control the trace.';
-  AndroidDevice android = null;
+  AndroidDevice android;
 
   TraceCommand([this.android]) {
     argParser.addFlag('start', negatable: false, help: 'Start tracing.');

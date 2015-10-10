@@ -18,8 +18,9 @@ class LogsCommand extends Command {
   final description = 'Show logs for running Sky apps.';
   AndroidDevice android;
   IOSDevice ios;
+  IOSSimulator iosSim;
 
-  LogsCommand({this.android, this.ios}) {
+  LogsCommand({this.android, this.ios, this.iosSim}) {
     argParser.addFlag('clear',
         negatable: false,
         help: 'Clear log history before reading from logs (Android only).');
@@ -33,6 +34,9 @@ class LogsCommand extends Command {
     if (ios == null) {
       ios = new IOSDevice();
     }
+    if (iosSim == null) {
+      iosSim = new IOSSimulator();
+    }
 
     Future<int> androidLogProcess = null;
     if (android.isConnected()) {
@@ -44,12 +48,21 @@ class LogsCommand extends Command {
       iosLogProcess = ios.logs(clear: argResults['clear']);
     }
 
+    Future<int> iosSimLogProcess = null;
+    if (iosSim.isConnected()) {
+      iosSimLogProcess = iosSim.logs(clear: argResults['clear']);
+    }
+
     if (androidLogProcess != null) {
       await androidLogProcess;
     }
 
     if (iosLogProcess != null) {
       await iosLogProcess;
+    }
+
+    if (iosSimLogProcess != null) {
+      await iosSimLogProcess;
     }
 
     return 0;

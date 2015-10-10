@@ -22,21 +22,24 @@ class ListenCommand extends Command {
       'on all connected devices.';
   AndroidDevice android;
   IOSDevice ios;
+  IOSSimulator iosSim;
   List<String> watchCommand;
 
   /// Only run once.  Used for testing.
   bool singleRun;
 
-  ListenCommand({this.android, this.ios, this.singleRun: false}) {}
+  ListenCommand({this.android, this.ios, this.iosSim, this.singleRun: false}) {}
 
   @override
   Future<int> run() async {
     if (android == null) {
       android = new AndroidDevice();
     }
-
     if (ios == null) {
       ios = new IOSDevice();
+    }
+    if (iosSim == null) {
+      iosSim = new IOSSimulator();
     }
 
     if (argResults.rest.length > 0) {
@@ -49,6 +52,7 @@ class ListenCommand extends Command {
         ApplicationPackageFactory.getAvailableApplicationPackages();
     ApplicationPackage androidApp = packages[BuildPlatform.android];
     ApplicationPackage iosApp = packages[BuildPlatform.iOS];
+    ApplicationPackage iosSimApp = packages[BuildPlatform.iOSSimulator];
 
     while (true) {
       _logging.info('Updating running Sky apps...');
@@ -66,7 +70,7 @@ class ListenCommand extends Command {
             // TODO(iansf): Don't rely on sky-src-path for the snapshotter.
             '--compiler',
             '${globalResults['sky-src-path']}'
-                '/out/ios_Debug/clang_x64/sky_snapshot'
+                '/out/ios_sim_Debug/clang_x64/sky_snapshot'
           ]);
         }
       } catch (e) {}
@@ -77,6 +81,10 @@ class ListenCommand extends Command {
 
       if (ios.isConnected()) {
         await ios.pushFile(iosApp, localFLXPath, remoteFLXPath);
+      }
+
+      if (iosSim.isConnected()) {
+        await iosSim.pushFile(iosSimApp, localFLXPath, remoteFLXPath);
       }
 
       if (android.isConnected()) {

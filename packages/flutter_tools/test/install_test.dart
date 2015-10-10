@@ -26,6 +26,10 @@ defineTests() {
       when(ios.isConnected()).thenReturn(false);
       when(ios.installApp(any)).thenReturn(false);
 
+      MockIOSSimulator iosSim = new MockIOSSimulator();
+      when(iosSim.isConnected()).thenReturn(false);
+      when(iosSim.installApp(any)).thenReturn(false);
+
       InstallCommand command = new InstallCommand(android: android, ios: ios);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
@@ -44,7 +48,12 @@ defineTests() {
       when(ios.isConnected()).thenReturn(true);
       when(ios.installApp(any)).thenReturn(true);
 
-      InstallCommand command = new InstallCommand(android: android, ios: ios);
+      MockIOSSimulator iosSim = new MockIOSSimulator();
+      when(iosSim.isConnected()).thenReturn(false);
+      when(iosSim.installApp(any)).thenReturn(false);
+
+      InstallCommand command =
+          new InstallCommand(android: android, ios: ios, iosSim: iosSim);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
