@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:vector_math/vector_math_64.dart';
@@ -62,7 +62,7 @@ abstract class Layer {
   ///
   /// The layerOffset is the accumulated offset of this layer's parent from the
   /// origin of the builder's coordinate system.
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset);
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset);
 }
 
 /// A composited layer containing a [Picture]
@@ -79,9 +79,9 @@ class PictureLayer extends Layer {
   /// The picture recorded for this layer
   ///
   /// The picture's coodinate system matches this layer's coodinate system
-  sky.Picture picture;
+  ui.Picture picture;
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.addPicture(offset + layerOffset, picture, paintBounds);
   }
 
@@ -105,7 +105,7 @@ class StatisticsLayer extends Layer {
 
   final int rasterizerThreshold;
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
     builder.addStatistics(optionsMask, paintBounds.shift(layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
@@ -194,12 +194,12 @@ class ContainerLayer extends Layer {
     _lastChild = null;
   }
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     addChildrenToScene(builder, offset + layerOffset);
   }
 
   /// Uploads all of this layer's children to the engine
-  void addChildrenToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addChildrenToScene(ui.SceneBuilder builder, Offset layerOffset) {
     Layer child = _firstChild;
     while (child != null) {
       child.addToScene(builder, layerOffset);
@@ -218,7 +218,7 @@ class ClipRectLayer extends ContainerLayer {
   // TODO(abarth): Why is the rectangle in the parent's coordinate system
   // instead of in the coordinate system of this layer?
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipRect(clipRect.shift(layerOffset));
     addChildrenToScene(builder, offset + layerOffset);
     builder.pop();
@@ -235,11 +235,11 @@ class ClipRRectLayer extends ContainerLayer {
   // TODO(abarth): Remove.
 
   /// The rounded-rect to clip in the parent's coordinate system
-  sky.RRect clipRRect;
+  ui.RRect clipRRect;
   // TODO(abarth): Why is the rounded-rect in the parent's coordinate system
   // instead of in the coordinate system of this layer?
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipRRect(clipRRect.shift(layerOffset), bounds.shift(layerOffset));
     addChildrenToScene(builder, offset + layerOffset);
     builder.pop();
@@ -260,7 +260,7 @@ class ClipPathLayer extends ContainerLayer {
   // TODO(abarth): Why is the path in the parent's coordinate system instead of
   // in the coordinate system of this layer?
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipPath(clipPath.shift(layerOffset), bounds.shift(layerOffset));
     addChildrenToScene(builder, offset + layerOffset);
     builder.pop();
@@ -275,7 +275,7 @@ class TransformLayer extends ContainerLayer {
   /// The matrix to apply
   Matrix4 transform;
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     Matrix4 offsetTransform = new Matrix4.identity();
     offsetTransform.translate(offset.dx + layerOffset.dx, offset.dy + layerOffset.dy);
     builder.pushTransform((offsetTransform * transform).storage);
@@ -298,7 +298,7 @@ class OpacityLayer extends ContainerLayer {
   /// transparent and 255 is fully opaque.
   int alpha;
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushOpacity(alpha, bounds?.shift(layerOffset));
     addChildrenToScene(builder, offset + layerOffset);
     builder.pop();
@@ -322,9 +322,9 @@ class ColorFilterLayer extends ContainerLayer {
   Color color;
 
   /// The transfer mode to use to combine [color] with the children's painting
-  sky.TransferMode transferMode;
+  ui.TransferMode transferMode;
 
-  void addToScene(sky.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushColorFilter(color, transferMode, bounds.shift(offset));
     addChildrenToScene(builder, offset + layerOffset);
     builder.pop();

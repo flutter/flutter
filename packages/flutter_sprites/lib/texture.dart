@@ -7,7 +7,7 @@ class Texture {
   /// The image that this texture is a part of.
   ///
   ///     var textureImage = myTexture.image;
-  final sky.Image image;
+  final ui.Image image;
 
   /// The logical size of the texture, before being trimmed by the texture packer.
   ///
@@ -51,7 +51,7 @@ class Texture {
   /// Creates a new texture from an [Image] object.
   ///
   ///     var myTexture = new Texture(myImage);
-  Texture(sky.Image image) :
+  Texture(ui.Image image) :
     size = new Size(image.width.toDouble(), image.height.toDouble()),
     image = image,
     trimmed = false,

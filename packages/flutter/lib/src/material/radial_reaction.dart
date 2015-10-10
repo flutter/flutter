@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:ui' show Point, Offset, Color, Paint;
 
 import 'package:flutter/animation.dart';
@@ -82,7 +82,7 @@ class RadialReaction {
   final Paint _innerPaint = new Paint();
 
   /// Paint the reaction onto the given canvas at the given offset
-  void paint(sky.Canvas canvas, Offset offset) {
+  void paint(ui.Canvas canvas, Offset offset) {
     _outerPaint.color = _kOuterColor.withAlpha(_roundOpacity(_outerOpacity.value * _fade.value));
     canvas.drawCircle(center + offset, radius, _outerPaint);
 

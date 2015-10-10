@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:ui_internals' as internals;
 import 'dart:typed_data';
 
@@ -68,7 +68,7 @@ class MojoAssetBundle extends AssetBundle {
     _imageCache = null;
   }
 
-  Future<sky.Image> _fetchImage(String key) async {
+  Future<ui.Image> _fetchImage(String key) async {
     return await decodeImageFromDataPipe(await load(key));
   }
 

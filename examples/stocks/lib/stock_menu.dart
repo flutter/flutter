@@ -12,8 +12,8 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
   switch (await showMenu(
     navigator: navigator,
     position: new MenuPosition(
-      right: sky.view.paddingRight + _kMenuMargin,
-      top: sky.view.paddingTop + _kMenuMargin
+      right: ui.view.paddingRight + _kMenuMargin,
+      top: ui.view.paddingTop + _kMenuMargin
     ),
     builder: (NavigatorState navigator) {
       return <PopupMenuItem>[

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -136,7 +136,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   }
 
   Offset get _scrollOffsetRoundedToIntegerDevicePixels {
-    double devicePixelRatio = sky.view.devicePixelRatio;
+    double devicePixelRatio = ui.view.devicePixelRatio;
     int dxInDevicePixels = (scrollOffset.dx * devicePixelRatio).round();
     int dyInDevicePixels = (scrollOffset.dy * devicePixelRatio).round();
     return new Offset(dxInDevicePixels / devicePixelRatio,

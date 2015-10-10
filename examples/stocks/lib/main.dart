@@ -6,7 +6,7 @@ library stocks;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

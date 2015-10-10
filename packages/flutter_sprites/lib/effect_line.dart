@@ -15,7 +15,7 @@ class EffectLine extends Node {
 
   EffectLine({
     this.texture: null,
-    this.transferMode: sky.TransferMode.dstOver,
+    this.transferMode: ui.TransferMode.dstOver,
     List<Point> points,
     this.widthMode : EffectLineWidthMode.linear,
     this.minWidth: 10.0,
@@ -47,7 +47,7 @@ class EffectLine extends Node {
 
   final Texture texture;
 
-  final sky.TransferMode transferMode;
+  final ui.TransferMode transferMode;
 
   final EffectLineWidthMode widthMode;
   final double minWidth;

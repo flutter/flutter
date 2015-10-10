@@ -144,7 +144,7 @@ class ParticleSystem extends Node {
 
   /// The transfer mode used to draw the particle system. Default is
   /// [TransferMode.plus].
-  sky.TransferMode transferMode;
+  ui.TransferMode transferMode;
 
   List<_Particle> _particles;
 
@@ -152,7 +152,7 @@ class ParticleSystem extends Node {
   int _numEmittedParticles = 0;
 
   static Paint _paint = new Paint()
-    ..filterQuality = sky.FilterQuality.low
+    ..filterQuality = ui.FilterQuality.low
     ..isAntiAlias = false;
 
   ParticleSystem(this.texture,
@@ -184,7 +184,7 @@ class ParticleSystem extends Node {
                   this.redVar: 0,
                   this.greenVar: 0,
                   this.blueVar: 0,
-                  this.transferMode: sky.TransferMode.plus,
+                  this.transferMode: ui.TransferMode.plus,
                   this.numParticlesToEmit: 0,
                   this.autoRemoveOnFinish: true}) {
     _particles = new List<_Particle>();
@@ -359,7 +359,7 @@ class ParticleSystem extends Node {
 
   void paint(PaintingCanvas canvas) {
 
-    List<sky.RSTransform> transforms = [];
+    List<ui.RSTransform> transforms = [];
     List<Rect> rects = [];
     List<Color> colors = [];
 
@@ -388,7 +388,7 @@ class ParticleSystem extends Node {
       double ay = rect.height / 2;
       double tx = particle.pos[0] + -scos * ax + ssin * ay;
       double ty = particle.pos[1] + -ssin * ax - scos * ay;
-      sky.RSTransform transform = new sky.RSTransform(scos, ssin, tx, ty);
+      ui.RSTransform transform = new ui.RSTransform(scos, ssin, tx, ty);
       transforms.add(transform);
 
       // Color
@@ -411,7 +411,7 @@ class ParticleSystem extends Node {
     }
 
     canvas.drawAtlas(texture.image, transforms, rects, colors,
-      sky.TransferMode.modulate, null, _paint);
+      ui.TransferMode.modulate, null, _paint);
   }
 }
 

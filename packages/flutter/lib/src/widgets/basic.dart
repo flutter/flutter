@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -61,7 +61,7 @@ class ColorFilter extends OneChildRenderObjectWidget {
   }
 
   final Color color;
-  final sky.TransferMode transferMode;
+  final ui.TransferMode transferMode;
 
   RenderColorFilter createRenderObject() => new RenderColorFilter(color: color, transferMode: transferMode);
 
@@ -75,7 +75,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   ShaderMask({
     Key key,
     this.shaderCallback,
-    this.transferMode: sky.TransferMode.modulate,
+    this.transferMode: ui.TransferMode.modulate,
     Widget child
   }) : super(key: key, child: child) {
     assert(shaderCallback != null);
@@ -83,7 +83,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   }
 
   final ShaderCallback shaderCallback;
-  final sky.TransferMode transferMode;
+  final ui.TransferMode transferMode;
 
   RenderShaderMask createRenderObject() {
     return new RenderShaderMask(
@@ -813,10 +813,10 @@ class Image extends LeafRenderObjectWidget {
     this.repeat: ImageRepeat.noRepeat
   }) : super(key: key);
 
-  final sky.Image image;
+  final ui.Image image;
   final double width;
   final double height;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
 
@@ -854,7 +854,7 @@ class ImageListener extends StatefulComponent {
   final ImageResource image;
   final double width;
   final double height;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
 
@@ -867,9 +867,9 @@ class _ImageListenerState extends State<ImageListener> {
     config.image.addListener(_handleImageChanged);
   }
 
-  sky.Image _resolvedImage;
+  ui.Image _resolvedImage;
 
-  void _handleImageChanged(sky.Image resolvedImage) {
+  void _handleImageChanged(ui.Image resolvedImage) {
     setState(() {
       _resolvedImage = resolvedImage;
     });
@@ -913,7 +913,7 @@ class NetworkImage extends StatelessComponent {
   final String src;
   final double width;
   final double height;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
 
@@ -945,7 +945,7 @@ class AssetImage extends StatelessComponent {
   final AssetBundle bundle;
   final double width;
   final double height;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
 

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -226,10 +226,10 @@ class BoxConstraints extends Constraints {
     if (b == null)
       return a * (1.0 - t);
     return new BoxConstraints(
-      minWidth: sky.lerpDouble(a.minWidth, b.minWidth, t),
-      maxWidth: sky.lerpDouble(a.maxWidth, b.maxWidth, t),
-      minHeight: sky.lerpDouble(a.minHeight, b.minHeight, t),
-      maxHeight: sky.lerpDouble(a.maxHeight, b.maxHeight, t)
+      minWidth: ui.lerpDouble(a.minWidth, b.minWidth, t),
+      maxWidth: ui.lerpDouble(a.maxWidth, b.maxWidth, t),
+      minHeight: ui.lerpDouble(a.minHeight, b.minHeight, t),
+      maxHeight: ui.lerpDouble(a.maxHeight, b.maxHeight, t)
     );
   }
 
@@ -598,14 +598,14 @@ abstract class RenderBox extends RenderObject {
   }
   void debugPaintSize(PaintingContext context, Offset offset) {
     Paint paint = new Paint();
-    paint.setStyle(sky.PaintingStyle.stroke);
+    paint.setStyle(ui.PaintingStyle.stroke);
     paint.strokeWidth = 1.0;
     paint.color = debugPaintSizeColor;
     context.canvas.drawRect(offset & size, paint);
   }
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     Paint paint = new Paint();
-    paint.setStyle(sky.PaintingStyle.stroke);
+    paint.setStyle(ui.PaintingStyle.stroke);
     paint.strokeWidth = 0.25;
     Path path;
     // ideographic baseline

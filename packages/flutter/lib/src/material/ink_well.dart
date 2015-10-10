@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -91,7 +91,7 @@ class _InkSplash {
 
   void paint(PaintingCanvas canvas) {
     int opacity = (_kSplashInitialOpacity * (1.1 - (_radius.value / _targetRadius))).floor();
-    sky.Paint paint = new sky.Paint()..color = new sky.Color(opacity << 24);
+    ui.Paint paint = new ui.Paint()..color = new ui.Color(opacity << 24);
     double radius = _pinnedRadius == null ? _radius.value : _pinnedRadius;
     canvas.drawCircle(position, radius, paint);
   }
@@ -137,7 +137,7 @@ class _RenderInkWell extends RenderProxyBox {
   TapGestureRecognizer _tap;
   LongPressGestureRecognizer _longPress;
 
-  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
+  void handleEvent(ui.Event event, BoxHitTestEntry entry) {
     if (event.type == 'pointerdown' && (_tap != null || _longPress != null)) {
       _tap?.addPointer(event);
       _longPress?.addPointer(event);

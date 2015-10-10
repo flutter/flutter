@@ -1,11 +1,11 @@
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:test/test.dart';
 
 void main() {
   test('should be settable using "style" attribute', () {
-    sky.LayoutRoot layoutRoot = new sky.LayoutRoot();
-    var document = new sky.Document();
+    ui.LayoutRoot layoutRoot = new ui.LayoutRoot();
+    var document = new ui.Document();
     var foo = document.createElement('foo');
     layoutRoot.rootElement = foo;
 
@@ -16,8 +16,8 @@ void main() {
   });
 
   test('should not crash when setting style to null', () {
-    sky.LayoutRoot layoutRoot = new sky.LayoutRoot();
-    var document = new sky.Document();
+    ui.LayoutRoot layoutRoot = new ui.LayoutRoot();
+    var document = new ui.Document();
     var foo = document.createElement('foo');
     layoutRoot.rootElement = foo;
 

@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 
 void main() {
   RenderDecoratedBox green = new RenderDecoratedBox(
-    decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00))
+    decoration: new BoxDecoration(backgroundColor: const ui.Color(0xFF00FF00))
   );
   RenderConstrainedBox box = new RenderConstrainedBox(
-    additionalConstraints: new BoxConstraints.tight(const sky.Size(200.0, 200.0)),
+    additionalConstraints: new BoxConstraints.tight(const ui.Size(200.0, 200.0)),
     child: green
   );
 

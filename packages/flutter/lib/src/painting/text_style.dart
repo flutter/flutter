@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as sky;
+import 'dart:ui' as ui;
 import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path, FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
 
 export 'dart:ui' show FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
@@ -152,14 +152,14 @@ class TextStyle {
     return toCSS[decorationStyle];
   }
 
-  sky.TextStyle get textStyle => null;
-  sky.ParagraphStyle get paragraphStyle => null;
+  ui.TextStyle get textStyle => null;
+  ui.ParagraphStyle get paragraphStyle => null;
 
   /// Program this text style into the engine
   ///
   /// Note: This function will likely be removed when we refactor the interface
   /// between the framework and the engine
-  void applyToCSSStyle(sky.CSSStyleDeclaration cssStyle) {
+  void applyToCSSStyle(ui.CSSStyleDeclaration cssStyle) {
     if (color != null) {
       cssStyle['color'] = _colorToCSSString(color);
     }
@@ -201,7 +201,7 @@ class TextStyle {
   ///
   /// Note: This function will likely be removed when we refactor the interface
   /// between the framework and the engine
-  void applyToContainerCSSStyle(sky.CSSStyleDeclaration cssStyle) {
+  void applyToContainerCSSStyle(ui.CSSStyleDeclaration cssStyle) {
     if (textAlign != null) {
       cssStyle['text-align'] = const {
         TextAlign.left: 'left',
