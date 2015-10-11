@@ -41,12 +41,7 @@ class InitCommand extends Command {
 
   cd ${out.path}
   ./packages/flutter/sky_tool start
-
-Or if the Flutter APK is not already on your device, run:
-
-  ./packages/flutter/sky_tool start --install
-
-  ''';
+''';
 
     if (argResults['pub']) {
       print("Running pub get...");
