@@ -40,11 +40,11 @@ class InitCommand extends Command {
     String message = '''All done! To run your application:
 
   cd ${out.path}
-  ./packages/sky/sky_tool start
+  ./packages/flutter/sky_tool start
 
-Or if the Sky APK is not already on your device, run:
+Or if the Flutter APK is not already on your device, run:
 
-  ./packages/sky/sky_tool start --install
+  ./packages/flutter/sky_tool start --install
 
   ''';
 
@@ -108,7 +108,7 @@ String _normalizeProjectName(String name) {
   return name;
 }
 
-const _gitignore = r'''
+const String _gitignore = r'''
 .DS_Store
 .idea
 .packages
@@ -118,7 +118,7 @@ packages
 pubspec.lock
 ''';
 
-const _readme = r'''
+const String _readme = r'''
 # {{projectName}}
 
 {{description}}
@@ -129,36 +129,45 @@ For help getting started with Flutter, view our online
 [documentation](http://flutter.io/).
 ''';
 
-const _pubspec = r'''
+const String _pubspec = r'''
 name: {{projectName}}
 description: {{description}}
 dependencies:
-  sky: any
+  flutter: ">=0.0.2 <0.1.0"
 dev_dependencies:
   sky_tools: any
 ''';
 
-const _libMain = r'''
-import 'package:sky/material.dart';
+const String _libMain = r'''
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(
     new MaterialApp(
       title: "Flutter Demo",
-      routes: <String, RouteBuilder>{
-        '/': (RouteArguments args) => new HelloWorldComponent()
+      routes: {
+        '/': (RouteArguments args) => new FlutterDemo()
       }
     )
   );
 }
 
-class HelloWorldComponent extends StatelessComponent {
+class FlutterDemo extends StatelessComponent {
   Widget build(BuildContext context)  {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Flutter Demo")),
-      body: new Material(child: new Center(child: new Text("Hello world!"))),
+      toolBar: new ToolBar(
+        center: new Text("Flutter Demo")
+      ),
+      body: new Material(
+        child: new Center(
+          child: new Text("Hello world!")
+        )
+       ),
       floatingActionButton: new FloatingActionButton(
-        child: new Icon(type: 'content/add', size: 24)
+        child: new Icon(
+          type: 'content/add',
+          size: 24
+        )
       )
     );
   }
