@@ -6,12 +6,13 @@
 #include <UIKit/UIKit.h>
 
 static inline UIKeyboardType ToUIKeyboardType(::keyboard::KeyboardType type) {
+  using Type = ::keyboard::KeyboardType;
   switch (type) {
-    case ::keyboard::KEYBOARD_TYPE_TEXT:
+    case Type::TEXT:
       return UIKeyboardTypeDefault;
-    case ::keyboard::KEYBOARD_TYPE_NUMBER:
+    case Type::NUMBER:
       return UIKeyboardTypeDecimalPad;
-    case ::keyboard::KEYBOARD_TYPE_PHONE:
+    case Type::PHONE:
       return UIKeyboardTypePhonePad;
     default:
       break;
