@@ -8,7 +8,7 @@
 #include "base/memory/scoped_ptr.h"
 #include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
+#include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "mojo/services/network/public/interfaces/url_loader.mojom.h"
 
 namespace mojo {

@@ -6,7 +6,7 @@
 
 #include "mojo/icu/constants.h"
 #include "mojo/public/cpp/application/application_impl.h"
-#include "mojo/services/icu_data/public/interfaces/icu_data.mojom.h"
+#include "mojo/services/icu_data/interfaces/icu_data.mojom.h"
 #include "third_party/icu/source/common/unicode/putil.h"
 #include "third_party/icu/source/common/unicode/udata.h"
 

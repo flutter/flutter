@@ -11,9 +11,10 @@
 #include <X11/Xlib.h>
 #endif
 
+#include "base/time/time.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/converters/input_events/mojo_extended_key_event_data.h"
-#include "mojo/services/input_events/public/interfaces/input_events.mojom.h"
+#include "mojo/services/input_events/interfaces/input_events.mojom.h"
 #include "ui/events/keycodes/keyboard_codes.h"
 
 namespace mojo {

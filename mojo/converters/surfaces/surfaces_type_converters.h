@@ -11,9 +11,9 @@
 #include "cc/surfaces/surface_id.h"
 #include "gpu/command_buffer/common/mailbox.h"
 #include "gpu/command_buffer/common/mailbox_holder.h"
-#include "mojo/services/surfaces/public/interfaces/quads.mojom.h"
-#include "mojo/services/surfaces/public/interfaces/surface_id.mojom.h"
-#include "mojo/services/surfaces/public/interfaces/surfaces.mojom.h"
+#include "mojo/services/surfaces/interfaces/quads.mojom.h"
+#include "mojo/services/surfaces/interfaces/surface_id.mojom.h"
+#include "mojo/services/surfaces/interfaces/surfaces.mojom.h"
 #include "third_party/skia/include/core/SkColor.h"
 
 namespace cc {

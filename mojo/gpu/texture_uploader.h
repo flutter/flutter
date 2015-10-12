@@ -9,7 +9,7 @@
 #include "base/memory/weak_ptr.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/gpu/gl_texture.h"
-#include "mojo/services/surfaces/public/interfaces/surfaces.mojom.h"
+#include "mojo/services/surfaces/interfaces/surfaces.mojom.h"
 
 namespace mojo {
 

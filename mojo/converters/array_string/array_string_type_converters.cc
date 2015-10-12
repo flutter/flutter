@@ -21,7 +21,7 @@ std::string TypeConverter<std::string, Array<uint8_t>>::Convert(
 
 Array<uint8_t> TypeConverter<Array<uint8_t>, std::string>::Convert(
     const std::string& input) {
-  Array<uint8_t> result(input.size());
+  auto result = Array<uint8_t>::New(input.size());
   memcpy(&result.front(), input.c_str(), input.size());
   return result.Pass();
 }

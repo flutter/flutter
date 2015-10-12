@@ -15,6 +15,6 @@ android_library("keyboard") {
   deps = [
     "//mojo/public/java:bindings",
     "//mojo/public/java:system",
-    "//mojo/services/keyboard/public/interfaces:interfaces_java",
+    "//mojo/services/keyboard/interfaces:interfaces_java",
   ]
 }

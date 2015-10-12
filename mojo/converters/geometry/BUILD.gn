@@ -14,7 +14,7 @@ component("geometry") {
     "//ui/gfx/geometry",
     "//mojo/environment:chromium",
     "//mojo/public/c/system",
-    "//mojo/services/geometry/public/interfaces",
+    "//mojo/services/geometry/interfaces",
   ]
 
   sources = [

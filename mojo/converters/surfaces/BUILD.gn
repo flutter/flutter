@@ -22,7 +22,7 @@ component("surfaces") {
     "//gpu",
     "//mojo/environment:chromium",
     "//mojo/public/c/system",
-    "//mojo/services/surfaces/public/interfaces",
-    "//mojo/services/surfaces/public/interfaces:surface_id",
+    "//mojo/services/surfaces/interfaces",
+    "//mojo/services/surfaces/interfaces:surface_id",
   ]
 }

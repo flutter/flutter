@@ -10,7 +10,7 @@
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
+#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 
 namespace mojo {
 namespace asset_bundle {

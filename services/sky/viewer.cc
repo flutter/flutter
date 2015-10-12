@@ -13,7 +13,7 @@
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
-#include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
+#include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "services/sky/content_handler_impl.h"
 #include "services/sky/document_view.h"
 #include "services/sky/platform_impl.h"

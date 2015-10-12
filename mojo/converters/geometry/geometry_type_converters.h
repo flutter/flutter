@@ -5,7 +5,7 @@
 #ifndef MOJO_CONVERTERS_GEOMETRY_GEOMETRY_TYPE_CONVERTERS_H_
 #define MOJO_CONVERTERS_GEOMETRY_GEOMETRY_TYPE_CONVERTERS_H_
 
-#include "mojo/services/geometry/public/interfaces/geometry.mojom.h"
+#include "mojo/services/geometry/interfaces/geometry.mojom.h"
 #include "ui/gfx/geometry/point.h"
 #include "ui/gfx/geometry/point_f.h"
 #include "ui/gfx/geometry/rect.h"
