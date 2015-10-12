@@ -173,7 +173,6 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
     Measurement measurement = new Measurement(when: _when);
     // TODO(jackson): Revisit the layout of this pane to be more maintainable
     return new Material(
-      type: MaterialType.canvas,
       child: new Container(
         padding: const EdgeDims.all(20.0),
         child: new Column([

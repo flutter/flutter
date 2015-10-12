@@ -65,7 +65,6 @@ class SectorApp extends MaterialApp {
 
   Widget buildBody() {
     return new Material(
-      type: MaterialType.canvas,
       child: new Column([
           new Container(
             padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),

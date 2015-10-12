@@ -23,7 +23,7 @@ class Material extends StatelessComponent {
   Material({
     Key key,
     this.child,
-    this.type: MaterialType.card,
+    this.type: MaterialType.canvas,
     this.level: 0,
     this.color,
     this.textStyle
