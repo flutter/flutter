@@ -33,7 +33,7 @@ class PhysicsNode extends Node {
 
   List<box2d.Body> _bodiesScheduledForDestruction = [];
 
-  double b2WorldToNodeConversionFactor = 500.0;
+  double b2WorldToNodeConversionFactor = 10.0;
 
   Offset get gravity {
     Vector2 g = b2World.getGravity();
@@ -282,7 +282,7 @@ class PhysicsNode extends Node {
         // Draw the joint depending on type
         box2d.JointType type = joint.getType();
 
-        if (type == box2d.JointType.WELD) {
+        if (type == box2d.JointType.WELD || type == box2d.JointType.REVOLUTE) {
           // Draw weld joint
           canvas.drawCircle(ptAnchorA, 5.0, shapePaint);
 
