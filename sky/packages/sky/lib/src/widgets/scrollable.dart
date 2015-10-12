@@ -166,8 +166,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     setState(() {
       _scrollOffset = newScrollOffset;
     });
-    if (config.onScroll != null)
-      config.onScroll(_scrollOffset);
+    dispatchOnScroll();
   }
 
   Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: ease }) {
@@ -198,6 +197,12 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   Future settleScrollOffset() {
     return _startToEndAnimation();
+  }
+
+  // Derived classes can override this method and call super.dispatchOnScroll()
+  void dispatchOnScroll() {
+    if (config.onScroll != null)
+      config.onScroll(_scrollOffset);
   }
 
   double _scrollVelocity(ui.Offset velocity) {
