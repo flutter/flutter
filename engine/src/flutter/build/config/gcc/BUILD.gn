@@ -40,5 +40,7 @@ config("executable_ldconfig") {
 }
 
 config("no_exceptions") {
-  cflags_cc = [ "-fno-exceptions" ]
+  no_exceptions_flags = [ "-fno-exceptions" ]
+  cflags_cc = no_exceptions_flags
+  cflags_objcc = no_exceptions_flags
 }

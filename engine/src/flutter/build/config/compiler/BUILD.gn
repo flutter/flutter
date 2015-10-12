@@ -98,6 +98,7 @@ config("compiler") {
   cflags = []
   cflags_c = []
   cflags_cc = []
+  cflags_objcc = []
   ldflags = []
   defines = []
 
@@ -151,7 +152,7 @@ config("compiler") {
     # Common GCC compiler flags setup.
     # --------------------------------
     cflags += [ "-fno-strict-aliasing" ]  # See http://crbug.com/32204
-    cflags_cc += [
+    common_flags = [
       "-fno-threadsafe-statics",
 
       # Not exporting C++ inline functions can generally be applied anywhere
@@ -159,6 +160,8 @@ config("compiler") {
       # //build/config/gcc:symbol_visibility_hidden.
       "-fvisibility-inlines-hidden",
     ]
+    cflags_cc += common_flags
+    cflags_objcc += common_flags
 
     # Stack protection.
     if (is_mac) {
@@ -231,10 +234,12 @@ config("compiler") {
     # in debug builds. Technically, these can never be null in
     # well-defined C/C++ and Clang can optimize such checks away in
     # release builds, but they may be used in asserts in debug builds.
-    cflags_cc += [
+    extra_flags = [
       "-Wno-undefined-bool-conversion",
       "-Wno-tautological-undefined-compare",
     ]
+    cflags_cc += extra_flags
+    cflags_objcc += extra_flags
   }
 
   if (is_clang && !is_nacl) {
@@ -285,7 +290,7 @@ config("compiler") {
 
     # Without this, the constructors and destructors of a C++ object inside
     # an Objective C struct won't be called, which is very bad.
-    cflags_objcc = [ "-fobjc-call-cxx-cdtors" ]
+    cflags_objcc += [ "-fobjc-call-cxx-cdtors" ]
 
     cflags_c += [ "-std=c99" ]
 
@@ -514,7 +519,9 @@ config("compiler") {
     # http://crbug.com/427584
     cflags_cc += [ "-std=gnu++11" ]
   } else if (!is_win) {
-    cflags_cc += [ "-std=c++11" ]
+    cc_std = [ "-std=c++11" ]
+    cflags_cc += cc_std
+    cflags_objcc += cc_std
   }
 
   # Android-specific flags setup.
@@ -1039,7 +1046,9 @@ config("no_rtti") {
   if (is_win) {
     cflags_cc = [ "/GR-" ]
   } else {
-    cflags_cc = [ "-fno-rtti" ]
+    rtti_flags = [ "-fno-rtti" ]
+    cflags_cc = rtti_flags
+    cflags_objcc = rtti_flags
   }
 }
 
