@@ -38,10 +38,16 @@ class PlainTextSpan extends TextSpan {
     builder.addText(text);
   }
 
-  bool operator ==(other) => other is PlainTextSpan && text == other.text;
+  bool operator ==(dynamic other) {
+    if (other is! PlainTextSpan)
+      return false;
+    final PlainTextSpan typedOther = other;
+    return text == typedOther.text;
+  }
+
   int get hashCode => text.hashCode;
 
-  String toString([String prefix = '']) => '${prefix}${runtimeType}: "${text}"';
+  String toString([String prefix = '']) => '$prefix$runtimeType: "$text"';
 }
 
 /// An immutable text span that applies a style to a list of children
@@ -79,15 +85,17 @@ class StyledTextSpan extends TextSpan {
     style.applyToContainerCSSStyle(container.style);
   }
 
-  bool operator ==(other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! StyledTextSpan
-        || style != other.style
-        || children.length != other.children.length)
+    if (other is! StyledTextSpan)
+      return false;
+    final StyledTextSpan typedOther = other;
+    if (style != typedOther.style ||
+        children.length != typedOther.children.length)
       return false;
     for (int i = 0; i < children.length; ++i) {
-      if (children[i] != other.children[i])
+      if (children[i] != typedOther.children[i])
         return false;
     }
     return true;
@@ -102,28 +110,72 @@ class StyledTextSpan extends TextSpan {
   }
 
   String toString([String prefix = '']) {
-    List<String> result = [];
-    result.add('${prefix}${runtimeType}:');
-    var indent = '${prefix}  ';
+    List<String> result = <String>[];
+    result.add('$prefix$runtimeType:');
+    var indent = '$prefix  ';
     result.add('${style.toString(indent)}');
-    for (TextSpan child in children) {
+    for (TextSpan child in children)
       result.add(child.toString(indent));
-    }
     return result.join('\n');
   }
 }
 
 const bool _kEnableNewTextPainter = false;
 
-/// An object that paints a [TextSpan] into a canvas
-class TextPainter {
+abstract class TextPainter {
+
   factory TextPainter(TextSpan text) {
     if (_kEnableNewTextPainter)
       return new _NewTextPainter(text);
-    return new TextPainter._(text);
+    return new _OldTextPainter(text);
   }
 
-  TextPainter._(TextSpan text) {
+  /// The (potentially styled) text to paint
+  TextSpan get text;
+  void set text(TextSpan value);
+
+  /// The minimum width at which to layout the text
+  double get minWidth;
+  void set minWidth(double value);
+
+  /// The maximum width at which to layout the text
+  double get maxWidth;
+  void set maxWidth(double value);
+
+  /// The minimum height at which to layout the text
+  double get minHeight;
+  void set minHeight(double value);
+
+  /// The maximum height at which to layout the text
+  double get maxHeight;
+  void set maxHeight(double value);
+
+  /// The width at which decreasing the width of the text would prevent it from
+  /// painting itself completely within its bounds
+  double get minContentWidth;
+
+  /// The width at which increasing the width of the text no longer decreases
+  /// the height
+  double get maxContentWidth;
+
+  /// The height required to paint the text completely within its bounds
+  double get height;
+
+  /// The distance from the top of the text to the first baseline of the given
+  /// type
+  double computeDistanceToActualBaseline(TextBaseline baseline);
+
+  /// Compute the visual position of the glyphs for painting the text
+  void layout();
+
+  /// Paint the text onto the given canvas at the given offset
+  void paint(ui.Canvas canvas, ui.Offset offset);
+
+}
+
+/// An object that paints a [TextSpan] into a canvas
+class _OldTextPainter implements TextPainter {
+  _OldTextPainter(TextSpan text) {
     _layoutRoot.rootElement = _document.createElement('p');
     assert(text != null);
     this.text = text;

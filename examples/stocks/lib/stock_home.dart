@@ -37,8 +37,10 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleSearchEnd() {
-    assert(config.navigator.currentRoute is StateRoute);
-    assert((config.navigator.currentRoute as StateRoute).owner == this); // TODO(ianh): remove cast once analyzer is cleverer
+    assert(() {
+      final StateRoute currentRoute = config.navigator.currentRoute;
+      assert(currentRoute.owner == this);
+    });
     config.navigator.pop();
     setState(() {
       _isSearching = false;
@@ -74,7 +76,7 @@ class StockHomeState extends State<StockHome> {
   void _showDrawer() {
     showDrawer(
       navigator: config.navigator,
-      child: new Block([
+      child: new Block(<Widget>[
         new DrawerHeader(child: new Text('Stocks')),
         new DrawerItem(
           icon: 'action/assessment',
@@ -88,7 +90,7 @@ class StockHomeState extends State<StockHome> {
               return new Dialog(
                 title: new Text('Not Implemented'),
                 content: new Text('This feature has not yet been implemented.'),
-                actions: [
+                actions: <Widget>[
                   new FlatButton(
                     child: new Text('USE IT'),
                     enabled: false,
@@ -117,7 +119,7 @@ class StockHomeState extends State<StockHome> {
         new DrawerItem(
           icon: 'action/thumb_up',
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
-          child: new Row([
+          child: new Row(<Widget>[
             new Flexible(child: new Text('Optimistic')),
             new Radio(value: StockMode.optimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
           ])
@@ -125,7 +127,7 @@ class StockHomeState extends State<StockHome> {
         new DrawerItem(
           icon: 'action/thumb_down',
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
-          child: new Row([
+          child: new Row(<Widget>[
             new Flexible(child: new Text('Pessimistic')),
             new Radio(value: StockMode.pessimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
           ])
@@ -155,7 +157,7 @@ class StockHomeState extends State<StockHome> {
         onPressed: _showDrawer
       ),
       center: new Text('Stocks'),
-      right: [
+      right: <Widget>[
         new IconButton(
           icon: "action/search",
           onPressed: _handleSearchBegin
@@ -171,14 +173,14 @@ class StockHomeState extends State<StockHome> {
   int selectedTabIndex = 0;
 
   Iterable<Stock> _getStockList(Iterable<String> symbols) {
-    return symbols.map((symbol) => config.stocks[symbol]);
+    return symbols.map((String symbol) => config.stocks[symbol]);
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
     if (_searchQuery == null)
       return stocks;
     RegExp regexp = new RegExp(_searchQuery, caseSensitive: false);
-    return stocks.where((stock) => stock.symbol.contains(regexp));
+    return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }
 
   Widget buildStockList(BuildContext context, Iterable<Stock> stocks) {
@@ -211,7 +213,7 @@ class StockHomeState extends State<StockHome> {
         )
       ],
       selectedIndex: selectedTabIndex,
-      onChanged: (tabIndex) {
+      onChanged: (int tabIndex) {
         setState(() { selectedTabIndex = tabIndex; } );
       }
     );
@@ -245,7 +247,7 @@ class StockHomeState extends State<StockHome> {
       navigator: config.navigator,
       placeholderKey: _snackBarPlaceholderKey,
       content: new Text("Stock purchased!"),
-      actions: [
+      actions: <SnackBarAction>[
         new SnackBarAction(label: "UNDO", onPressed: _handleUndo)
       ]
     );

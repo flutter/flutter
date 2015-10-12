@@ -45,9 +45,6 @@ class Offset extends OffsetBase {
   /// Returns the point at (0, 0) plus this offset.
   Point toPoint() => new Point(this.dx, this.dy);
 
-  /// Compares two Offsets for equality.
-  bool operator ==(other) => other is Offset && super == other;
-
   /// Linearly interpolate between two offsets
   ///
   /// If either offset is null, this function interpolates from [Offset.zero].
@@ -60,6 +57,9 @@ class Offset extends OffsetBase {
       return a * (1.0 - t);
     return new Offset(lerpDouble(a.dx, b.dx, t), lerpDouble(a.dy, b.dy, t));
   }
+
+  /// Compares two Offsets for equality.
+  bool operator ==(dynamic other) => other is Offset && super == other;
 
   String toString() => "Offset($dx, $dy)";
 }

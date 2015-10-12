@@ -10,9 +10,15 @@ class StockRowPartGlobalKey extends GlobalKey {
   const StockRowPartGlobalKey(this.stock, this.part) : super.constructor();
   final Stock stock;
   final StockRowPartKind part;
-  String toString() => '[StockRowPartGlobalKey ${stock.symbol}:${part.toString().split(".")[1]})]';
-  bool operator==(other) => other is StockRowPartGlobalKey && identical(other.stock, stock) && identical(other.part, part);
+  bool operator ==(dynamic other) {
+    if (other is! StockRowPartGlobalKey)
+      return false;
+    final StockRowPartGlobalKey typedOther = other;
+    return stock == typedOther.stock &&
+           part == typedOther.part;
+  }
   int get hashCode => 37 * (37 * (373) + identityHashCode(stock)) + identityHashCode(part);
+  String toString() => '[StockRowPartGlobalKey ${stock.symbol}:${part.toString().split(".")[1]})]';
 }
 
 typedef void StockRowActionCallback(Stock stock, GlobalKey row, GlobalKey arrowKey, GlobalKey symbolKey, GlobalKey priceKey);
@@ -65,14 +71,14 @@ class StockRow extends StatelessComponent {
             bottom: new BorderSide(color: Theme.of(context).dividerColor)
           )
         ),
-        child: new Row([
+        child: new Row(<Widget>[
           new Container(
             key: arrowKey,
             child: new StockArrow(percentChange: stock.percentChange),
             margin: const EdgeDims.only(right: 5.0)
           ),
           new Flexible(
-            child: new Row([
+            child: new Row(<Widget>[
                 new Flexible(
                   flex: 2,
                   child: new Text(

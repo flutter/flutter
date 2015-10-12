@@ -37,7 +37,7 @@ class RadialReaction {
         _showPerformance.updateVariable(_innerRadius);
       });
     _fade = new ValuePerformance<double>(
-      variable: new AnimatedValue(1.0, end: 0.0, curve: easeIn),
+      variable: new AnimatedValue<double>(1.0, end: 0.0, curve: easeIn),
       duration: _kHideDuration
     );
   }

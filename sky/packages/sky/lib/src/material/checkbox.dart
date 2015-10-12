@@ -151,7 +151,7 @@ class _RenderCheckbox extends RenderToggleable {
       paint.setStyle(ui.PaintingStyle.fill);
       paint.setShader(new ui.Gradient.radial(
           new Point(_kEdgeSize / 2.0, _kEdgeSize / 2.0),
-          _kEdgeSize * (_kMidpoint - position) * 8.0, [
+          _kEdgeSize * (_kMidpoint - position) * 8.0, <Color>[
         const ui.Color(0x00000000),
         uncheckedColor
       ]));

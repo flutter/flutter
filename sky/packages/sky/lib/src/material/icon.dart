@@ -15,7 +15,13 @@ class IconThemeData {
   const IconThemeData({ this.color });
   final IconThemeColor color;
 
-  bool operator==(other) => other.runtimeType == runtimeType && other.color == color;
+  bool operator ==(dynamic other) {
+    if (other is! IconThemeData)
+      return false;
+    final IconThemeData typedOther = other;
+    return color == typedOther;
+  }
+
   int get hashCode => color.hashCode;
 }
 
@@ -96,7 +102,7 @@ class Icon extends StatelessComponent {
     String colorSuffix = _getColorSuffix(context);
     return new AssetImage(
       bundle: _iconBundle,
-      name: '${category}/${density}/ic_${subtype}_${colorSuffix}_${size}dp.png',
+      name: '$category/$density/ic_${subtype}_${colorSuffix}_${size}dp.png',
       width: size.toDouble(),
       height: size.toDouble(),
       colorFilter: colorFilter

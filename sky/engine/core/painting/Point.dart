@@ -13,7 +13,6 @@ class Point {
 
   static const Point origin = const Point(0.0, 0.0);
 
-  bool operator ==(other) => other is Point && x == other.x && y == other.y;
   Point operator -() => new Point(-x, -y);
   Offset operator -(Point other) => new Offset(x - other.x, y - other.y);
   Point operator +(Offset other) => new Point(x + other.dx, y + other.dy);
@@ -22,11 +21,20 @@ class Point {
   // does the equivalent of "return this - Point.origin"
   Offset toOffset() => new Offset(x, y);
 
+  bool operator ==(dynamic other) {
+    if (other is! Point)
+      return false;
+    final Point typedOther = other;
+    return x == typedOther.x &&
+           y == typedOther.y;
+  }
+
   int get hashCode {
     int result = 373;
     result = 37 * result + x.hashCode;
     result = 37 * result + y.hashCode;
     return result;
   }
+
   String toString() => "Point($x, $y)";
 }

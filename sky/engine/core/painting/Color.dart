@@ -46,8 +46,6 @@ class Color {
   /// The blue channel of this color in an 8 bit value
   int get blue => (0x000000ff & _value) >> 0;
 
-  bool operator ==(other) => other is Color && _value == other._value;
-
   /// Returns a new color that matches this color with the alpha channel replaced with a.
   Color withAlpha(int a) {
     return new Color.fromARGB(a, red, green, blue);
@@ -87,6 +85,14 @@ class Color {
     );
   }
 
+  bool operator ==(dynamic other) {
+    if (other is! Color)
+      return false;
+    final Color typedOther = other;
+    return value == typedOther.value;
+  }
+
   int get hashCode => _value.hashCode;
+
   String toString() => "Color(0x${_value.toRadixString(16).padLeft(8, '0')})";
 }

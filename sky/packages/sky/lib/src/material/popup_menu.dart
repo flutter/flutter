@@ -49,7 +49,7 @@ class PopupMenu extends StatelessComponent {
     ));
 
     double unit = 1.0 / (items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    List<Widget> children = [];
+    List<Widget> children = <Widget>[];
 
     for (int i = 0; i < items.length; ++i) {
       double start = (i + 1) * unit;
@@ -64,15 +64,15 @@ class PopupMenu extends StatelessComponent {
       );
     }
 
-    final width = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit));
-    final height = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit * items.length));
+    final AnimatedValue<double> width = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit));
+    final AnimatedValue<double> height = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit * items.length));
 
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, 1.0 / 3.0)),
       child: new BuilderTransition(
         performance: performance,
-        variables: [width, height],
+        variables: <AnimatedValue<double>>[width, height],
         builder: (BuildContext context) {
           return new CustomPaint(
             callback: (ui.Canvas canvas, Size size) {
