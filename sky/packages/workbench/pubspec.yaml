@@ -4,7 +4,7 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A workspace to host pub packages
 homepage: https://github.com/flutter/engine/tree/master/sky/packages/workbench
 dependencies:
-  flutter: any
+  flutter: ">=0.0.3 <0.1.0"
   sky_tools: any
 dependency_overrides:
   material_design_icons:

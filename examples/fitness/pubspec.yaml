@@ -1,9 +1,9 @@
 name: fitness
 dependencies:
-  flutter: any
-  sky_tools: any
-  playfair: ^0.0.9
+  flutter: ">=0.0.3 <0.1.0"
+  playfair: ^0.0.10
   path: ^1.3.6
+  sky_tools: any
 dependency_overrides:
   material_design_icons:
     path: ../../sky/packages/material_design_icons

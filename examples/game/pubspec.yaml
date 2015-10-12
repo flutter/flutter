@@ -1,6 +1,6 @@
 name: asteroids
 dependencies:
-  flutter: any
+  flutter: ">=0.0.3 <0.1.0"
   sky_tools: any
   skysprites: any
   box2d: any
