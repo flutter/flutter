@@ -78,29 +78,33 @@ class TestBed extends NodeWithSize {
 
       Sprite shipA;
       shipA = new Sprite(_spriteSheet["ship.png"]);
+      shipA.opacity = 0.3;
       shipA.position = new Point(pos.x - 40.0, pos.y);
       shipA.size = new Size(64.0, 64.0);
       shipA.physicsBody = new PhysicsBody(new PhysicsShapeCircle(Point.origin, 32.0),
         friction: 0.5,
+        restitution: 0.5,
         tag: "ship"
       );
       _physicsNode.addChild(shipA);
       shipA.physicsBody.applyLinearImpulse(
-        new Offset(randomSignedDouble() * 5.0, randomSignedDouble() * 5.0),
+        new Offset(randomSignedDouble() * 5000.0, randomSignedDouble() * 5000.0),
         shipA.position
       );
 
       Sprite shipB;
       shipB = new Sprite(_spriteSheet["ship.png"]);
+      shipB.opacity = 0.3;
       shipB.position = new Point(pos.x + 40.0, pos.y);
       shipB.size = new Size(64.0, 64.0);
       shipB.physicsBody = new PhysicsBody(new PhysicsShapePolygon([new Point(-25.0, -25.0), new Point(25.0, -25.0), new Point(25.0, 25.0), new Point(-25.0, 25.0)]),
         friction: 0.5,
+        restitution: 0.5,
         tag: "ship"
       );
       _physicsNode.addChild(shipB);
 
-      new PhysicsJointWeld(shipA.physicsBody, shipB.physicsBody);
+      new PhysicsJointRevolute(shipA.physicsBody, shipB.physicsBody, pos);
     }
     return true;
   }
