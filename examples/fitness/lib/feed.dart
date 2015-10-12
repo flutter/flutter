@@ -15,7 +15,6 @@ class FitnessItemList extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Material(
-      type: MaterialType.canvas,
       child: new ScrollableList<FitnessItem>(
         padding: const EdgeDims.all(4.0),
         items: items,
@@ -172,10 +171,9 @@ class FeedFragmentState extends State<FeedFragment> {
   Widget buildBody() {
     TextStyle style = Theme.of(context).text.title;
     if (config.userData == null)
-      return new Material(type: MaterialType.canvas);
+      return new Material();
     if (config.userData.items.length == 0)
       return new Material(
-        type: MaterialType.canvas,
         child: new Row(
           [new Text("No data yet.\nAdd some!", style: style)],
           justifyContent: FlexJustifyContent.center
@@ -189,7 +187,6 @@ class FeedFragmentState extends State<FeedFragment> {
         );
       case FitnessMode.chart:
         return new Material(
-          type: MaterialType.canvas,
           child: new Container(
             padding: const EdgeDims.all(20.0),
             child: buildChart()

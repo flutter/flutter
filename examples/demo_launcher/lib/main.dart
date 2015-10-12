@@ -193,7 +193,6 @@ class DemoHome extends StatelessComponent {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Sky Demos')),
       body: new Material(
-        type: MaterialType.canvas,
         child: new DemoList()
       )
     );

@@ -13,7 +13,6 @@ class StockList extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Material(
-      type: MaterialType.canvas,
       child: new ScrollableList<Stock>(
         items: stocks,
         itemExtent: StockRow.kHeight,
