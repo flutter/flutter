@@ -33,7 +33,6 @@ class StockSymbolViewerState extends State<StockSymbolViewer> {
         center: new Text('${config.stock.name} (${config.stock.symbol})')
       ),
       body: new Material(
-        type: MaterialType.canvas,
         child: new Block([
           new Container(
             padding: new EdgeDims.all(20.0),

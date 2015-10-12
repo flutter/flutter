@@ -86,7 +86,6 @@ class MealFragmentState extends State<MealFragment> {
   Widget buildBody() {
     Meal meal = new Meal(when: new DateTime.now());
     return new Material(
-      type: MaterialType.canvas,
       child: new ScrollableViewport(
         child: new Container(
           padding: const EdgeDims.all(20.0),

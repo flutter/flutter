@@ -79,7 +79,6 @@ class SnackBar extends StatelessComponent {
           child: new Material(
             level: 2,
             color: _kSnackBackground,
-            type: MaterialType.canvas,
             child: new Container(
               margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
               child: new DefaultTextStyle(

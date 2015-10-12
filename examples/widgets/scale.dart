@@ -61,7 +61,6 @@ class ScaleAppState extends State<ScaleApp> {
         toolBar: new ToolBar(
             center: new Text('Scale Demo')),
         body: new Material(
-          type: MaterialType.canvas,
           child: new GestureDetector(
             onScaleStart: _handleScaleStart,
             onScaleUpdate: _handleScaleUpdate,
