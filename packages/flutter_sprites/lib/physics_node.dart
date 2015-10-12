@@ -79,6 +79,11 @@ class PhysicsNode extends Node {
       body._node._setRotationFromPhysics(degrees(b2Body.getAngle()));
     }
 
+    // Break joints
+    for (PhysicsJoint joint in _joints) {
+      joint._checkBreakingForce(dt);
+    }
+
     // Remove bodies that were marked for destruction during the simulation
     _removeBodiesScheduledForDestruction();
   }
