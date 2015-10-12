@@ -83,7 +83,7 @@ ui.Picture paint(ui.Rect paintBounds) {
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = ui.view.devicePixelRatio;
   ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
-  Float32List deviceTransform = new Float32List(16)
+  Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0

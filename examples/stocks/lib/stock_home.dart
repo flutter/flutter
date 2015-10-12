@@ -224,7 +224,7 @@ class StockHomeState extends State<StockHome> {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/arrow_back",
-        color: Theme.of(context).accentColor,
+        colorFilter: new ui.ColorFilter.mode(Theme.of(context).accentColor, ui.TransferMode.srcATop),
         onPressed: _handleSearchEnd
       ),
       center: new Input(
