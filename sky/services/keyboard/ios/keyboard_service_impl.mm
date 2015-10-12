@@ -7,11 +7,11 @@
 
 static inline UIKeyboardType ToUIKeyboardType(::keyboard::KeyboardType type) {
   switch (type) {
-    case ::keyboard::KEYBOARD_TYPE_TEXT:
+    case keyboard::KeyboardType::TEXT:
       return UIKeyboardTypeDefault;
-    case ::keyboard::KEYBOARD_TYPE_NUMBER:
+    case keyboard::KeyboardType::NUMBER:
       return UIKeyboardTypeDecimalPad;
-    case ::keyboard::KEYBOARD_TYPE_PHONE:
+    case keyboard::KeyboardType::PHONE:
       return UIKeyboardTypePhonePad;
     default:
       break;

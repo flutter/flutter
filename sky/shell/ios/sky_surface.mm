@@ -32,23 +32,23 @@ static inline EventTypeMapperPhase EventTypePhaseFromUITouchPhase(
     UITouchPhase phase) {
   switch (phase) {
     case UITouchPhaseBegan:
-      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_DOWN,
+      return EventTypeMapperPhase(sky::EventType::POINTER_DOWN,
                                   MapperPhase::Added);
     case UITouchPhaseMoved:
     case UITouchPhaseStationary:
       // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
       // with the same coordinates
-      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_MOVE,
+      return EventTypeMapperPhase(sky::EventType::POINTER_MOVE,
                                   MapperPhase::Accessed);
     case UITouchPhaseEnded:
-      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_UP,
+      return EventTypeMapperPhase(sky::EventType::POINTER_UP,
                                   MapperPhase::Removed);
     case UITouchPhaseCancelled:
-      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_CANCEL,
+      return EventTypeMapperPhase(sky::EventType::POINTER_CANCEL,
                                   MapperPhase::Removed);
   }
 
-  return EventTypeMapperPhase(sky::EVENT_TYPE_UNKNOWN, MapperPhase::Accessed);
+  return EventTypeMapperPhase(sky::EventType::UNKNOWN, MapperPhase::Accessed);
 }
 
 static inline int64 InputEventTimestampFromNSTimeInterval(
@@ -266,7 +266,7 @@ static std::string SkPictureTracingPath() {
     input->time_stamp = InputEventTimestampFromNSTimeInterval(touch.timestamp);
 
     input->pointer_data = sky::PointerData::New();
-    input->pointer_data->kind = sky::POINTER_KIND_TOUCH;
+    input->pointer_data->kind = sky::PointerKind::TOUCH;
 
     int touch_identifier = 0;
     uintptr_t touch_ptr = reinterpret_cast<uintptr_t>(touch);
