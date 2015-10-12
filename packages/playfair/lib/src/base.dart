@@ -236,7 +236,7 @@ class ChartPainter {
     return new Point(x, y);
   }
 
-  void _paintGrid(sky.Canvas canvas) {
+  void _paintGrid(ui.Canvas canvas) {
     Paint paint = new Paint()
       ..strokeWidth = kGridStrokeWidth
       ..color = kGridColor;
@@ -246,21 +246,21 @@ class ChartPainter {
     }
   }
 
-  void _paintChart(sky.Canvas canvas) {
+  void _paintChart(ui.Canvas canvas) {
     Paint paint = new Paint()
       ..strokeWidth = kMarkerStrokeWidth
       ..color = kMarkerColor;
-    Path path = new sky.Path();
+    Path path = new Path();
     path.moveTo(_markers[0].x, _markers[0].y);
     for (Point marker in _markers) {
       canvas.drawCircle(marker, kMarkerRadius, paint);
       path.lineTo(marker.x, marker.y);
     }
-    paint.setStyle(sky.PaintingStyle.stroke);
+    paint.setStyle(ui.PaintingStyle.stroke);
     canvas.drawPath(path, paint);
   }
 
-  void _paintIndicator(sky.Canvas canvas) {
+  void _paintIndicator(ui.Canvas canvas) {
     if (_indicator == null)
       return;
     Paint paint = new Paint()
@@ -271,7 +271,7 @@ class ChartPainter {
       _indicator.labelPainter.paint(canvas, _indicator.labelPosition.toOffset());
   }
 
-  void paint(sky.Canvas canvas, Rect rect) {
+  void paint(ui.Canvas canvas, Rect rect) {
     if (rect != _rect)
       _needsLayout = true;
     _rect = rect;
