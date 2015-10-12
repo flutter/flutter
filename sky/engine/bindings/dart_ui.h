@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_BUILTIN_SKY_H_
-#define SKY_ENGINE_BINDINGS_BUILTIN_SKY_H_
+#ifndef SKY_ENGINE_BINDINGS_DART_UI_H_
+#define SKY_ENGINE_BINDINGS_DART_UI_H_
 
 #include "base/macros.h"
 #include "dart/runtime/include/dart_api.h"
@@ -14,10 +14,15 @@ namespace blink {
 class DOMDartState;
 class View;
 
-class BuiltinSky : public DartClassProvider {
+class DartUI : public DartClassProvider {
  public:
-  explicit BuiltinSky(DOMDartState* dart_state);
-  ~BuiltinSky();
+  explicit DartUI(DOMDartState* dart_state);
+  ~DartUI();
+
+  static Dart_NativeFunction NativeLookup(Dart_Handle name,
+                                          int argument_count,
+                                          bool* auto_setup_scope);
+  static const uint8_t* NativeSymbol(Dart_NativeFunction native_function);
 
   void InstallView(View* view);
 
@@ -27,9 +32,9 @@ class BuiltinSky : public DartClassProvider {
  private:
   DartPersistentValue library_;
 
-  DISALLOW_COPY_AND_ASSIGN(BuiltinSky);
+  DISALLOW_COPY_AND_ASSIGN(DartUI);
 };
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_BUILTIN_SKY_H_
+#endif  // SKY_ENGINE_BINDINGS_DART_UI_H_

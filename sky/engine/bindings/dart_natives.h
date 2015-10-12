@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_BUILTIN_NATIVES_H_
-#define SKY_ENGINE_BINDINGS_BUILTIN_NATIVES_H_
+#ifndef SKY_ENGINE_BINDINGS_DART_NATIVES_H_
+#define SKY_ENGINE_BINDINGS_DART_NATIVES_H_
 
 #include "base/macros.h"
 #include "dart/runtime/include/dart_api.h"
 
 namespace blink {
 
-class BuiltinNatives {
+class DartNatives {
  public:
   enum IsolateType {
     MainIsolate,
@@ -25,9 +25,9 @@ class BuiltinNatives {
   static void Init(IsolateType isolate_type);
 
  private:
-  DISALLOW_IMPLICIT_CONSTRUCTORS(BuiltinNatives);
+  DISALLOW_IMPLICIT_CONSTRUCTORS(DartNatives);
 };
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_BUILTIN_NATIVES_H_
+#endif  // SKY_ENGINE_BINDINGS_DART_NATIVES_H_

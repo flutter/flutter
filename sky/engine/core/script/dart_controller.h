@@ -16,7 +16,7 @@
 
 namespace blink {
 class AbstractModule;
-class BuiltinSky;
+class DartUI;
 class DOMDartState;
 class DartLibraryProvider;
 class DartSnapshotLoader;
@@ -50,7 +50,7 @@ class DartController {
   void DidLoadSnapshot();
 
   OwnPtr<DOMDartState> dom_dart_state_;
-  OwnPtr<BuiltinSky> builtin_sky_;
+  OwnPtr<DartUI> dart_ui_;
   OwnPtr<DartSnapshotLoader> snapshot_loader_;
 
   base::WeakPtrFactory<DartController> weak_factory_;

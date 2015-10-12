@@ -6,6 +6,7 @@
 // WARNING: Do not edit - generated code.
 library dart_ui;
 
+import 'dart:async';
 import 'dart:nativewrappers';
 import 'dart:typed_data';
 import 'dart:math' as math;
