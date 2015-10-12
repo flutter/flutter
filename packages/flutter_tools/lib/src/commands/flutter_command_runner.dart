@@ -88,6 +88,18 @@ class FlutterCommandRunner extends CommandRunner {
       Logger.root.level = Level.FINE;
 
     ArtifactStore.packageRoot = globalResults['package-root'];
+    if (!FileSystemEntity.isDirectorySync(ArtifactStore.packageRoot)) {
+      String message = '${ArtifactStore.packageRoot} is not a valid directory.';
+      if (ArtifactStore.packageRoot == 'packages') {
+        if (FileSystemEntity.isFileSync('pubspec.yaml'))
+          message += '\nDid you run `pub get` in this directory?';
+        else
+          message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
+      }
+      _logging.severe(message);
+      return 2;
+    }
+
     buildConfigurations = _createBuildConfigurations(globalResults);
 
     return super.runCommand(globalResults);

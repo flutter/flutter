@@ -23,8 +23,11 @@ class ArtifactStore {
   static String _engineRevision;
 
   static String get engineRevision {
-    if (_engineRevision == null)
-      _engineRevision = new File(path.join(packageRoot, 'sky_engine', 'REVISION')).readAsStringSync();
+    if (_engineRevision == null) {
+      File revisionFile = new File(path.join(packageRoot, 'sky_engine', 'REVISION'));
+      if (revisionFile.existsSync())
+        _engineRevision = revisionFile.readAsStringSync();
+    }
     return _engineRevision;
   }
 
