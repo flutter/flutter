@@ -653,6 +653,12 @@ class AndroidDevice extends Device {
       //   * daemon started successfully *
       runCheckedSync([adbPath, 'start-server']);
 
+      String ready = runSync([adbPath, 'shell', 'echo', 'ready']);
+      if (ready.trim() != 'ready') {
+        _logging.info('Android device not found.');
+        return false;
+      }
+
       // Sample output: '22'
       String sdkVersion =
           runCheckedSync([adbPath, 'shell', 'getprop', 'ro.build.version.sdk'])
@@ -670,8 +676,8 @@ class AndroidDevice extends Device {
         return false;
       }
       return true;
-    } catch (e, stack) {
-      _logging.severe('Unexpected failure from adb: ', e, stack);
+    } catch (e) {
+      _logging.severe('Unexpected failure from adb: ', e);
     }
     return false;
   }
