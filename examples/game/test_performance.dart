@@ -37,7 +37,7 @@ main() async {
     title: 'Test Sprite Performance',
     theme: _theme,
     routes: {
-      '/': (NavigatorState navigator, RouteState route) {
+      '/': (RouteArguments args) {
         return new SpriteWidget(new TestPerformance());
       }
     }
