@@ -10,7 +10,7 @@ import 'flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
   final String name = 'install';
-  final String description = 'Install your Flutter app on attached devices.';
+  final String description = 'Install Flutter apps on attached devices.';
 
   InstallCommand() {
     argParser.addFlag('boot',
@@ -31,7 +31,7 @@ class InstallCommand extends FlutterCommand {
 
     for (Device device in devices.all) {
       ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-      if (package == null || !device.isConnected())
+      if (package == null || !device.isConnected() || device.isAppInstalled(package))
         continue;
       if (device.installApp(package))
         installedSomewhere = true;

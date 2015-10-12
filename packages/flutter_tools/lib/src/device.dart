@@ -142,10 +142,15 @@ class IOSDevice extends Device {
   static Iterable<String> _getAttachedDeviceIDs([IOSDevice mockIOS]) {
     String listerPath =
         (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
-    return runSync([listerPath, '-l'])
-        .trim()
-        .split('\n')
-        .where((String s) => s != null && s.length > 0);
+    String output;
+    try {
+      output = runSync([listerPath, '-l']);
+    } catch (e) {
+      return [];
+    }
+    return output.trim()
+                 .split('\n')
+                 .where((String s) => s != null && s.length > 0);
   }
 
   static String _getDeviceName(String deviceID, [IOSDevice mockIOS]) {
@@ -805,6 +810,10 @@ class AndroidDevice extends Device {
     // Kill the server
     if (Platform.isMacOS) {
       String pid = runSync(['lsof', '-i', ':$_serverPort', '-t']);
+      if (pid.isEmpty) {
+        _logging.fine('No process to kill for port $_serverPort');
+        return true;
+      }
       // Killing a pid with a shell command from within dart is hard,
       // so use a library command, but it's still nice to give the
       // equivalent command when doing verbose logging.

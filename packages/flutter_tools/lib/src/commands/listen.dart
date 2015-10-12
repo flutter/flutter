@@ -22,7 +22,16 @@ class ListenCommand extends FlutterCommand {
   /// Only run once.  Used for testing.
   bool singleRun;
 
-  ListenCommand({ this.singleRun: false });
+  ListenCommand({ this.singleRun: false }) {
+    argParser.addFlag('checked',
+        negatable: true,
+        defaultsTo: true,
+        help: 'Toggle Dart\'s checked mode.');
+    argParser.addOption('target',
+        defaultsTo: '.',
+        abbr: 't',
+        help: 'Target app path or filename to start.');
+  }
 
   @override
   Future<int> run() async {
