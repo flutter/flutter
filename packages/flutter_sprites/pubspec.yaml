@@ -4,8 +4,8 @@ version: 0.0.1
 author: Flutter Authors <flutter-dev@googlegroups.com>
 homepage: http://flutter.io
 dependencies:
-  flutter: ">=0.0.36 < 0.1.0"
-  sky_tools: ">=0.0.10 < 0.1.0"
+  flutter: ">=0.0.3 <0.1.0"
+  sky_tools: ">=0.0.18 <0.1.0"
   box2d: any
 dependency_overrides:
   flutter:

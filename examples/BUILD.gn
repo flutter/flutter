@@ -7,7 +7,7 @@ group("examples") {
 
   deps = [
     "//examples/demo_launcher",
-    #"//examples/fitness",
+    "//examples/fitness",
     "//examples/game",
     "//examples/mine_digger",
     "//examples/rendering",
