@@ -1,7 +1,7 @@
 part of skysprites;
 
 abstract class PhysicsJoint {
-  PhysicsJoint(this.bodyA, this.bodyB) {
+  PhysicsJoint(this.bodyA, this.bodyB, this.breakingForce) {
     bodyA._joints.add(this);
     bodyB._joints.add(this);
   }
@@ -67,8 +67,9 @@ class PhysicsJointRevolute extends PhysicsJoint {
     this.worldAnchor, {
       this.lowerAngle: 0.0,
       this.upperAngle: 0.0,
-      this.enableLimit: false
-    }) : super(bodyA, bodyB) {
+      this.enableLimit: false,
+      double breakingForce
+    }) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
 
@@ -99,8 +100,10 @@ class PhysicsJointPrismatic extends PhysicsJoint {
   PhysicsJointPrismatic(
     PhysicsBody bodyA,
     PhysicsBody bodyB,
-    this.axis
-  ) : super(bodyA, bodyB) {
+    this.axis, {
+      double breakingForce
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
 
@@ -116,8 +119,10 @@ class PhysicsJointPrismatic extends PhysicsJoint {
 class PhysicsJointWeld extends PhysicsJoint {
   PhysicsJointWeld(
     PhysicsBody bodyA,
-    PhysicsBody bodyB
-  ) : super(bodyA, bodyB) {
+    PhysicsBody bodyB, {
+      double breakingForce
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
 
@@ -140,8 +145,10 @@ class PhysicsJointPulley extends PhysicsJoint {
     this.groundAnchorB,
     this.anchorA,
     this.anchorB,
-    this.ratio
-  ) : super(bodyA, bodyB) {
+    this.ratio, {
+      double breakingForce
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
 
