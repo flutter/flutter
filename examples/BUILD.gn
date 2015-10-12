@@ -6,12 +6,9 @@ group("examples") {
   testonly = true
 
   deps = [
-    "//examples/demo_launcher",
     "//examples/fitness",
     "//examples/game",
     "//examples/mine_digger",
-    "//examples/rendering",
     "//examples/stocks",
-    "//examples/widgets",
   ]
 }
