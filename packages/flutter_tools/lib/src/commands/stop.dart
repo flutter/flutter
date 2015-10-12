@@ -2,64 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.stop;
-
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 
 import '../application_package.dart';
 import '../device.dart';
+import 'flutter_command.dart';
 
 final Logger _logging = new Logger('sky_tools.stop');
 
-class StopCommand extends Command {
-  final name = 'stop';
-  final description = 'Stop your Flutter app on all attached devices.';
-  AndroidDevice android;
-  IOSDevice ios;
-  IOSSimulator iosSim;
-
-  StopCommand({this.android, this.ios, this.iosSim});
+class StopCommand extends FlutterCommand {
+  final String name = 'stop';
+  final String description = 'Stop your Flutter app on all attached devices.';
 
   @override
   Future<int> run() async {
-    if (await stop()) {
-      return 0;
-    } else {
-      return 2;
-    }
+    await downloadApplicationPackagesAndConnectToDevices();
+    return await stop() ? 0 : 2;
   }
 
   Future<bool> stop() async {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
-    if (ios == null) {
-      ios = new IOSDevice();
-    }
-    if (iosSim == null) {
-      iosSim = new IOSSimulator();
-    }
-
     bool stoppedSomething = false;
-    Map<BuildPlatform, ApplicationPackage> packages =
-        ApplicationPackageFactory.getAvailableApplicationPackages();
 
-    if (android.isConnected()) {
-      ApplicationPackage androidApp = packages[BuildPlatform.android];
-      stoppedSomething = await android.stopApp(androidApp) || stoppedSomething;
-    }
-
-    if (ios.isConnected()) {
-      ApplicationPackage iosApp = packages[BuildPlatform.iOS];
-      stoppedSomething = await ios.stopApp(iosApp) || stoppedSomething;
-    }
-
-    if (iosSim.isConnected()) {
-      ApplicationPackage iosApp = packages[BuildPlatform.iOSSimulator];
-      stoppedSomething = await iosSim.stopApp(iosApp) || stoppedSomething;
+    for (Device device in devices.all) {
+      ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+      if (package == null || !device.isConnected())
+        continue;
+      if (await device.stopApp(package))
+        stoppedSomething = true;
     }
 
     return stoppedSomething;

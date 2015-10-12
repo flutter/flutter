@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.run_mojo;
-
 import 'dart:async';
 import 'dart:io';
 
@@ -19,8 +17,9 @@ final Logger _logging = new Logger('sky_tools.run_mojo');
 enum _MojoConfig { Debug, Release }
 
 class RunMojoCommand extends Command {
-  final name = 'run_mojo';
-  final description = 'Run a Flutter app in mojo.';
+  final String name = 'run_mojo';
+  final String description = 'Run a Flutter app in mojo.';
+
   RunMojoCommand() {
     argParser.addFlag('android', negatable: false, help: 'Run on an Android device');
     argParser.addFlag('checked', negatable: false, help: 'Run Flutter in checked mode');
@@ -31,6 +30,7 @@ class RunMojoCommand extends Command {
     argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services');
   }
 
+  // TODO(abarth): Why not use path.absolute?
   Future<String> _makePathAbsolute(String relativePath) async {
     File file = new File(relativePath);
     if (!await file.exists()) {
@@ -65,7 +65,7 @@ class RunMojoCommand extends Command {
   }
 
   Future<int> _runLinux(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) async {
-    String viewerPath = await _makePathAbsolute(await ArtifactStore.getPath(Artifact.SkyViewerMojo));
+    String viewerPath = await _makePathAbsolute(await ArtifactStore.getPath(Artifact.skyViewerMojo));
     String mojoBuildType = mojoConfig == _MojoConfig.Debug ? 'Debug' : 'Release';
     String mojoShellPath = await _makePathAbsolute(path.join(mojoPath, 'out', mojoBuildType, 'mojo_shell'));
     List<String> cmd = [

@@ -2,45 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.listen;
-
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 
+import 'flutter_command.dart';
 import '../application_package.dart';
 import '../device.dart';
 import '../process.dart';
 
 final Logger _logging = new Logger('sky_tools.listen');
 
-class ListenCommand extends Command {
-  final name = 'listen';
-  final description = 'Listen for changes to files and reload the running app '
-      'on all connected devices.';
-  AndroidDevice android;
-  IOSDevice ios;
-  IOSSimulator iosSim;
+class ListenCommand extends FlutterCommand {
+  final String name = 'listen';
+  final String description = 'Listen for changes to files and reload the running app on all connected devices.';
   List<String> watchCommand;
 
   /// Only run once.  Used for testing.
   bool singleRun;
 
-  ListenCommand({this.android, this.ios, this.iosSim, this.singleRun: false}) {}
+  ListenCommand({ this.singleRun: false });
 
   @override
   Future<int> run() async {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
-    if (ios == null) {
-      ios = new IOSDevice();
-    }
-    if (iosSim == null) {
-      iosSim = new IOSSimulator();
-    }
+    await downloadApplicationPackagesAndConnectToDevices();
 
     if (argResults.rest.length > 0) {
       watchCommand = _initWatchCommand(argResults.rest);
@@ -48,14 +34,8 @@ class ListenCommand extends Command {
       watchCommand = _initWatchCommand(['.']);
     }
 
-    Map<BuildPlatform, ApplicationPackage> packages =
-        ApplicationPackageFactory.getAvailableApplicationPackages();
-    ApplicationPackage androidApp = packages[BuildPlatform.android];
-    ApplicationPackage iosApp = packages[BuildPlatform.iOS];
-    ApplicationPackage iosSimApp = packages[BuildPlatform.iOSSimulator];
-
     while (true) {
-      _logging.info('Updating running Sky apps...');
+      _logging.info('Updating running Flutter apps...');
 
       // TODO(iansf): refactor build command so that this doesn't have
       //              to call out like this.
@@ -76,25 +56,29 @@ class ListenCommand extends Command {
       } catch (e) {}
       runSync(command);
 
-      String localFLXPath = 'app.flx';
-      String remoteFLXPath = 'Documents/app.flx';
+      String localFlutterBundle = 'app.flx';
+      String remoteFlutterBundle = 'Documents/app.flx';
 
-      if (ios.isConnected()) {
-        await ios.pushFile(iosApp, localFLXPath, remoteFLXPath);
+      for (Device device in devices.all) {
+        ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+        if (package == null || !device.isConnected())
+          continue;
+        if (device is AndroidDevice) {
+          await devices.android.startServer(
+              argResults['target'], true, argResults['checked'], package);
+        } else if (device is IOSDevice) {
+          device.pushFile(package, localFlutterBundle, remoteFlutterBundle);
+        } else if (device is IOSSimulator) {
+          // TODO(abarth): Move pushFile up to Device once Android supports
+          // pushing new bundles.
+          device.pushFile(package, localFlutterBundle, remoteFlutterBundle);
+        } else {
+          assert(false);
+        }
       }
 
-      if (iosSim.isConnected()) {
-        await iosSim.pushFile(iosSimApp, localFLXPath, remoteFLXPath);
-      }
-
-      if (android.isConnected()) {
-        await android.startServer(
-            argResults['target'], true, argResults['checked'], androidApp);
-      }
-
-      if (singleRun || !watchDirectory()) {
+      if (singleRun || !watchDirectory())
         break;
-      }
     }
 
     return 0;
@@ -135,9 +119,8 @@ class ListenCommand extends Command {
   }
 
   bool watchDirectory() {
-    if (watchCommand == null) {
+    if (watchCommand == null)
       return false;
-    }
 
     try {
       runCheckedSync(watchCommand);
@@ -145,6 +128,7 @@ class ListenCommand extends Command {
       _logging.warning('Watching directories failed.', e);
       return false;
     }
+
     return true;
   }
 }

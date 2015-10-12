@@ -12,7 +12,11 @@ import 'package:path/path.dart' as path;
 
 final Logger _logging = new Logger('sky_tools.artifacts');
 
-enum Artifact { FlutterCompiler, SkyViewerMojo, }
+enum Artifact {
+  flutterCompiler,
+  flutterShell,
+  skyViewerMojo,
+}
 
 class ArtifactStore {
   static String packageRoot;
@@ -66,20 +70,27 @@ class ArtifactStore {
 
   // Whether the artifact needs to be marked as executable on disk.
   static bool _needsToBeExecutable(Artifact artifact) {
-    return artifact == Artifact.FlutterCompiler;
+    return artifact == Artifact.flutterCompiler;
   }
 
   static Future<String> getPath(Artifact artifact) async {
     Directory cacheDir = await _engineSpecificCacheDir();
 
-    String category, name;
+    String category;
+    String platform;
+    String name;
 
     switch (artifact) {
-      case Artifact.FlutterCompiler:
+      case Artifact.flutterCompiler:
         category = 'shell';
         name = 'sky_snapshot';
         break;
-      case Artifact.SkyViewerMojo:
+      case Artifact.flutterShell:
+        category = 'shell';
+        platform = 'android-arm';
+        name = 'SkyShell.apk';
+        break;
+      case Artifact.skyViewerMojo:
         category = 'viewer';
         name = 'sky_viewer.mojo';
         break;
@@ -88,9 +99,12 @@ class ArtifactStore {
     File cachedFile = new File(path.join(cacheDir.path, name));
     if (!await cachedFile.exists()) {
       _logging.info('Downloading ${name} from the cloud, one moment please...');
-      if (!Platform.isLinux)
-        throw new Exception('Platform unsupported.');
-      String url = googleStorageUrl(category, 'linux-x64') + name;
+      if (platform == null) {
+        if (!Platform.isLinux)
+          throw new Exception('Platform unsupported.');
+        platform = 'linux-x64';
+      }
+      String url = googleStorageUrl(category, platform) + name;
       await _downloadFile(url, cachedFile);
       if (_needsToBeExecutable(artifact)) {
         ProcessResult result = await Process.run('chmod', ['u+x', cachedFile.path]);

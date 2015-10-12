@@ -2,70 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.install;
-
 import 'dart:async';
-
-import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
 import '../device.dart';
+import 'flutter_command.dart';
 
-class InstallCommand extends Command {
-  final name = 'install';
-  final description = 'Install your Flutter app on attached devices.';
+class InstallCommand extends FlutterCommand {
+  final String name = 'install';
+  final String description = 'Install your Flutter app on attached devices.';
 
-  AndroidDevice android;
-  IOSDevice ios;
-  IOSSimulator iosSim;
-
-  InstallCommand({this.android, this.ios, this.iosSim}) {
+  InstallCommand() {
     argParser.addFlag('boot',
         help: 'Boot the iOS Simulator if it isn\'t already running.');
   }
 
   @override
   Future<int> run() async {
-    if (install(argResults['boot'])) {
-      return 0;
-    } else {
-      return 2;
-    }
+    await downloadApplicationPackagesAndConnectToDevices();
+    return install(boot: argResults['boot']) ? 0 : 2;
   }
 
-  bool install([bool boot = false]) {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
-    if (ios == null) {
-      ios = new IOSDevice();
-    }
-    if (iosSim == null) {
-      iosSim = new IOSSimulator();
-    }
-
-    if (boot) {
-      iosSim.boot();
-    }
+  bool install({ bool boot: false }) {
+    if (boot)
+      devices.iOSSimulator?.boot();
 
     bool installedSomewhere = false;
 
-    Map<BuildPlatform, ApplicationPackage> packages =
-        ApplicationPackageFactory.getAvailableApplicationPackages();
-    ApplicationPackage androidApp = packages[BuildPlatform.android];
-    ApplicationPackage iosApp = packages[BuildPlatform.iOS];
-    ApplicationPackage iosSimApp = packages[BuildPlatform.iOSSimulator];
-
-    if (androidApp != null && android.isConnected()) {
-      installedSomewhere = android.installApp(androidApp) || installedSomewhere;
-    }
-
-    if (iosApp != null && ios.isConnected()) {
-      installedSomewhere = ios.installApp(iosApp) || installedSomewhere;
-    }
-
-    if (iosSimApp != null && iosSim.isConnected()) {
-      installedSomewhere = iosSim.installApp(iosSimApp) || installedSomewhere;
+    for (Device device in devices.all) {
+      ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+      if (package == null || !device.isConnected())
+        continue;
+      if (device.installApp(package))
+        installedSomewhere = true;
     }
 
     return installedSomewhere;

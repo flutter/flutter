@@ -2,35 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library install_test;
-
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sky_tools/src/commands/install.dart';
 import 'package:test/test.dart';
 
-import 'src/common.dart';
+import 'src/mocks.dart';
 
 main() => defineTests();
 
 defineTests() {
   group('install', () {
     test('returns 0 when Android is connected and ready for an install', () {
-      applicationPackageSetup();
+      InstallCommand command = new InstallCommand();
+      applyMocksToCommand(command);
+      MockDeviceStore mockDevices = command.devices;
 
-      MockAndroidDevice android = new MockAndroidDevice();
-      when(android.isConnected()).thenReturn(true);
-      when(android.installApp(any)).thenReturn(true);
+      when(mockDevices.android.isConnected()).thenReturn(true);
+      when(mockDevices.android.installApp(any)).thenReturn(true);
 
-      MockIOSDevice ios = new MockIOSDevice();
-      when(ios.isConnected()).thenReturn(false);
-      when(ios.installApp(any)).thenReturn(false);
+      when(mockDevices.iOS.isConnected()).thenReturn(false);
+      when(mockDevices.iOS.installApp(any)).thenReturn(false);
 
-      MockIOSSimulator iosSim = new MockIOSSimulator();
-      when(iosSim.isConnected()).thenReturn(false);
-      when(iosSim.installApp(any)).thenReturn(false);
+      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
+      when(mockDevices.iOSSimulator.installApp(any)).thenReturn(false);
 
-      InstallCommand command = new InstallCommand(android: android, ios: ios);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
@@ -38,22 +34,18 @@ defineTests() {
     });
 
     test('returns 0 when iOS is connected and ready for an install', () {
-      applicationPackageSetup();
+      InstallCommand command = new InstallCommand();
+      applyMocksToCommand(command);
+      MockDeviceStore mockDevices = command.devices;
 
-      MockAndroidDevice android = new MockAndroidDevice();
-      when(android.isConnected()).thenReturn(false);
-      when(android.installApp(any)).thenReturn(false);
+      when(mockDevices.android.isConnected()).thenReturn(false);
+      when(mockDevices.android.installApp(any)).thenReturn(false);
 
-      MockIOSDevice ios = new MockIOSDevice();
-      when(ios.isConnected()).thenReturn(true);
-      when(ios.installApp(any)).thenReturn(true);
+      when(mockDevices.iOS.isConnected()).thenReturn(true);
+      when(mockDevices.iOS.installApp(any)).thenReturn(true);
 
-      MockIOSSimulator iosSim = new MockIOSSimulator();
-      when(iosSim.isConnected()).thenReturn(false);
-      when(iosSim.installApp(any)).thenReturn(false);
-
-      InstallCommand command =
-          new InstallCommand(android: android, ios: ios, iosSim: iosSim);
+      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
+      when(mockDevices.iOSSimulator.installApp(any)).thenReturn(false);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);

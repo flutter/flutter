@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library android_device_test;
-
 import 'package:sky_tools/src/device.dart';
 import 'package:test/test.dart';
 
@@ -17,9 +15,9 @@ defineTests() {
     });
 
     test('stores the requested id', () {
-      String deviceID = '1234';
-      AndroidDevice android = new AndroidDevice(id: deviceID);
-      expect(android.id, equals(deviceID));
+      String deviceId = '1234';
+      AndroidDevice android = new AndroidDevice(id: deviceId);
+      expect(android.id, equals(deviceId));
     });
 
     test('correctly creates only one of each requested device id', () {

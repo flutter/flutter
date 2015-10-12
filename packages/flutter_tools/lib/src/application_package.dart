@@ -2,137 +2,119 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.application_package;
-
-import 'dart:io';
+import 'dart:async';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
+import 'artifacts.dart';
+import 'build_configuration.dart';
+
 final Logger _logging = new Logger('sky_tools.application_package');
 
 abstract class ApplicationPackage {
-  /// Path to the directory the apk or bundle lives in.
-  String appDir;
-
   /// Path to the actual apk or bundle.
-  String get appPath => path.join(appDir, appFileName);
+  final String localPath;
 
   /// Package ID from the Android Manifest or equivalent.
-  String appPackageID;
+  final String id;
 
   /// File name of the apk or bundle.
-  String appFileName;
+  final String name;
 
-  ApplicationPackage(this.appDir, this.appPackageID, this.appFileName);
+  ApplicationPackage({
+    String localPath,
+    this.id
+  }) : localPath = localPath, name = path.basename(localPath) {
+    assert(localPath != null);
+    assert(id != null);
+  }
 }
 
 class AndroidApk extends ApplicationPackage {
-  static const String _apkName = 'SkyShell.apk';
-  static const String _packageID = 'org.domokit.sky.shell';
-  static const String _componentID = '$_packageID/$_packageID.SkyActivity';
+  static const String _defaultName = 'SkyShell.apk';
+  static const String _defaultId = 'org.domokit.sky.shell';
+  static const String _defaultLaunchActivity = '$_defaultId/$_defaultId.SkyActivity';
 
   /// The path to the activity that should be launched.
   /// Defaults to 'org.domokit.sky.shell/org.domokit.sky.shell.SkyActivity'
-  String component;
-  AndroidApk(String appDir,
-      {String appPackageID: _packageID,
-      String appFileName: _apkName,
-      this.component: _componentID})
-      : super(path.join(appDir, 'apks'), appPackageID, appFileName);
+  final String launchActivity;
+
+  AndroidApk({
+    String localPath,
+    String id: _defaultId,
+    this.launchActivity: _defaultLaunchActivity
+  }) : super(localPath: localPath, id: id) {
+    assert(launchActivity != null);
+  }
 }
 
 class IOSApp extends ApplicationPackage {
-  static const String _appName = 'SkyShell.app';
-  static const String _packageID = 'com.google.SkyShell';
+  static const String _defaultName = 'SkyShell.app';
+  static const String _defaultId = 'com.google.SkyShell';
 
-  IOSApp(String appDir,
-      {String appPackageID: _packageID, String appFileName: _appName})
-      : super(appDir, appPackageID, appFileName);
+  IOSApp({
+    String localPath,
+    String id: _defaultId
+  }) : super(localPath: localPath, id: id);
 }
 
-enum BuildType { prebuilt, release, debug, }
+class ApplicationPackageStore {
+  final AndroidApk android;
+  final IOSApp iOS;
+  final IOSApp iOSSimulator;
 
-enum BuildPlatform { android, iOS, iOSSimulator, mac, linux, }
+  ApplicationPackageStore({ this.android, this.iOS, this.iOSSimulator });
 
-class ApplicationPackageFactory {
-  static final Map<BuildPlatform, Map<BuildType, String>> _buildPaths =
-      _initBuildPaths();
-
-  /// Path to your Sky src directory, if you are building Sky locally.
-  /// Required if you are requesting release or debug BuildTypes.
-  static String _srcPath = null;
-  static String get srcPath => _srcPath;
-  static void set srcPath(String newPath) {
-    _srcPath = path.normalize(newPath);
+  ApplicationPackage getPackageForPlatform(BuildPlatform platform) {
+    switch (platform) {
+      case BuildPlatform.android:
+        return android;
+      case BuildPlatform.iOS:
+        return iOS;
+      case BuildPlatform.iOSSimulator:
+        return iOSSimulator;
+      case BuildPlatform.mac:
+      case BuildPlatform.linux:
+        return null;
+    }
   }
 
-  /// Default BuildType chosen if no BuildType is specified.
-  static BuildType defaultBuildType = BuildType.prebuilt;
+  static Future<ApplicationPackageStore> forConfigs(List<BuildConfiguration> configs) async {
+    AndroidApk android;
+    IOSApp iOS;
+    IOSApp iOSSimulator;
 
-  /// Default BuildPlatforms chosen if no BuildPlatforms are specified.
-  static List<BuildPlatform> defaultBuildPlatforms = [
-    BuildPlatform.android,
-    BuildPlatform.iOS,
-    BuildPlatform.iOSSimulator,
-  ];
-
-  static Map<BuildPlatform, ApplicationPackage> getAvailableApplicationPackages(
-      {BuildType requestedType, List<BuildPlatform> requestedPlatforms}) {
-    if (requestedType == null) {
-      requestedType = defaultBuildType;
-    }
-    if (requestedPlatforms == null) {
-      requestedPlatforms = defaultBuildPlatforms;
-    }
-
-    Map<BuildPlatform, ApplicationPackage> packages = {};
-    for (BuildPlatform platform in requestedPlatforms) {
-      String buildPath = _getBuildPath(requestedType, platform);
-      switch (platform) {
+    for (BuildConfiguration config in configs) {
+      switch (config.platform) {
         case BuildPlatform.android:
-          packages[platform] = new AndroidApk(buildPath);
+          assert(android == null);
+          String localPath = config.type == BuildType.prebuilt ?
+            await ArtifactStore.getPath(Artifact.flutterShell) :
+            path.join(config.buildDir, 'apks', AndroidApk._defaultName);
+          android = new AndroidApk(localPath: localPath);
           break;
+
         case BuildPlatform.iOS:
-          packages[platform] = new IOSApp(buildPath);
+          assert(iOS == null);
+          assert(config.type != BuildType.prebuilt);
+          iOS = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
           break;
+
         case BuildPlatform.iOSSimulator:
-          packages[platform] = new IOSApp(buildPath);
+          assert(iOSSimulator == null);
+          assert(config.type != BuildType.prebuilt);
+          iOSSimulator = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
           break;
-        default:
-          // TODO(iansf): Add other platforms
+
+        case BuildPlatform.mac:
+        case BuildPlatform.linux:
+          // TODO(abarth): Support mac and linux targets.
           assert(false);
+          break;
       }
     }
-    return packages;
-  }
 
-  static Map<BuildPlatform, Map<BuildType, String>> _initBuildPaths() {
-    Map<BuildPlatform, Map<BuildType, String>> buildPaths = {};
-    for (BuildPlatform platform in BuildPlatform.values) {
-      buildPaths[platform] = {};
-    }
-    return buildPaths;
-  }
-
-  static String _getBuildPath(BuildType type, BuildPlatform platform) {
-    String path = _buildPaths[platform][type];
-    // You must set paths before getting them
-    assert(path != null);
-    return path;
-  }
-
-  static void setBuildPath(
-      BuildType type, BuildPlatform platform, String buildPath) {
-    // You must set srcPath before attempting to set a BuildPath for
-    // non prebuilt ApplicationPackages.
-    assert(type != BuildType.prebuilt || srcPath != null);
-    if (type != BuildType.prebuilt) {
-      buildPath = path.join(srcPath, buildPath);
-    }
-    if (!FileSystemEntity.isDirectorySync(buildPath)) {
-      _logging.warning('$buildPath is not a valid directory');
-    }
-    _buildPaths[platform][type] = path.normalize(buildPath);
+    return new ApplicationPackageStore(android: android, iOS: iOS, iOSSimulator: iOSSimulator);
   }
 }

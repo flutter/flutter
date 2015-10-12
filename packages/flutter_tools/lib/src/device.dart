@@ -12,15 +12,16 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'application_package.dart';
+import 'build_configuration.dart';
 import 'process.dart';
 
 final Logger _logging = new Logger('sky_tools.device');
 
-abstract class _Device {
+abstract class Device {
   final String id;
-  static Map<String, _Device> _deviceCache = {};
+  static Map<String, Device> _deviceCache = {};
 
-  factory _Device(String className, [String id = null]) {
+  factory Device._unique(String className, [String id = null]) {
     if (id == null) {
       if (className == AndroidDevice.className) {
         id = AndroidDevice.defaultDeviceID;
@@ -52,7 +53,7 @@ abstract class _Device {
     });
   }
 
-  _Device._(this.id);
+  Device._(this.id);
 
   /// Install an app package on the current device
   bool installApp(ApplicationPackage app);
@@ -63,6 +64,10 @@ abstract class _Device {
   /// Check if the current version of the given app is already installed
   bool isAppInstalled(ApplicationPackage app);
 
+  BuildPlatform get platform;
+
+  Future<int> logs({bool clear: false});
+
   /// Start an app package on the current device
   Future<bool> startApp(ApplicationPackage app);
 
@@ -70,7 +75,7 @@ abstract class _Device {
   Future<bool> stopApp(ApplicationPackage app);
 }
 
-class IOSDevice extends _Device {
+class IOSDevice extends Device {
   static const String className = 'IOSDevice';
   static final String defaultDeviceID = 'default_ios_id';
 
@@ -105,7 +110,7 @@ class IOSDevice extends _Device {
   String get name => _name;
 
   factory IOSDevice({String id, String name}) {
-    IOSDevice device = new _Device(className, id);
+    IOSDevice device = new Device._unique(className, id);
     device._name = name;
     return device;
   }
@@ -174,9 +179,9 @@ class IOSDevice extends _Device {
   bool installApp(ApplicationPackage app) {
     try {
       if (id == defaultDeviceID) {
-        runCheckedSync([installerPath, '-i', app.appPath]);
+        runCheckedSync([installerPath, '-i', app.localPath]);
       } else {
-        runCheckedSync([installerPath, '-u', id, '-i', app.appPath]);
+        runCheckedSync([installerPath, '-u', id, '-i', app.localPath]);
       }
       return true;
     } catch (e) {
@@ -200,7 +205,7 @@ class IOSDevice extends _Device {
   bool isAppInstalled(ApplicationPackage app) {
     try {
       String apps = runCheckedSync([installerPath, '-l']);
-      if (new RegExp(app.appPackageID, multiLine: true).hasMatch(apps)) {
+      if (new RegExp(app.id, multiLine: true).hasMatch(apps)) {
         return true;
       }
     } catch (e) {
@@ -217,7 +222,7 @@ class IOSDevice extends _Device {
     // idevicedebug hangs forever after launching the app, so kill it after
     // giving it plenty of time to send the launch command.
     return runAndKill(
-        [debuggerPath, 'run', app.appPackageID], new Duration(seconds: 3)).then(
+        [debuggerPath, 'run', app.id], new Duration(seconds: 3)).then(
         (_) {
       return true;
     }, onError: (e) {
@@ -240,7 +245,7 @@ class IOSDevice extends _Device {
         '-t',
         '1',
         '--bundle_id',
-        app.appPackageID,
+        app.id,
         '--upload',
         localFile,
         '--to',
@@ -258,6 +263,9 @@ class IOSDevice extends _Device {
     return false;
   }
 
+  @override
+  BuildPlatform get platform => BuildPlatform.iOS;
+
   /// Note that clear is not supported on iOS at this time.
   Future<int> logs({bool clear: false}) async {
     if (!isConnected()) {
@@ -268,7 +276,7 @@ class IOSDevice extends _Device {
   }
 }
 
-class IOSSimulator extends _Device {
+class IOSSimulator extends Device {
   static const String className = 'IOSSimulator';
   static final String defaultDeviceID = 'default_ios_sim_id';
 
@@ -288,7 +296,7 @@ class IOSSimulator extends _Device {
   String get name => _name;
 
   factory IOSSimulator({String id, String name, String iOSSimulatorPath}) {
-    IOSSimulator device = new _Device(className, id);
+    IOSSimulator device = new Device._unique(className, id);
     device._name = name;
     if (iOSSimulatorPath == null) {
       iOSSimulatorPath = path.join('/Applications', 'iOS Simulator.app',
@@ -401,9 +409,9 @@ class IOSSimulator extends _Device {
     }
     try {
       if (id == defaultDeviceID) {
-        runCheckedSync([xcrunPath, 'simctl', 'install', 'booted', app.appPath]);
+        runCheckedSync([xcrunPath, 'simctl', 'install', 'booted', app.localPath]);
       } else {
-        runCheckedSync([xcrunPath, 'simctl', 'install', id, app.appPath]);
+        runCheckedSync([xcrunPath, 'simctl', 'install', id, app.localPath]);
       }
       return true;
     } catch (e) {
@@ -444,9 +452,9 @@ class IOSSimulator extends _Device {
     try {
       if (id == defaultDeviceID) {
         runCheckedSync(
-            [xcrunPath, 'simctl', 'launch', 'booted', app.appPackageID]);
+            [xcrunPath, 'simctl', 'launch', 'booted', app.id]);
       } else {
-        runCheckedSync([xcrunPath, 'simctl', 'launch', id, app.appPackageID]);
+        runCheckedSync([xcrunPath, 'simctl', 'launch', id, app.id]);
       }
       return true;
     } catch (e) {
@@ -471,6 +479,9 @@ class IOSSimulator extends _Device {
     return false;
   }
 
+  @override
+  BuildPlatform get platform => BuildPlatform.iOSSimulator;
+
   Future<int> logs({bool clear: false}) async {
     if (!isConnected()) {
       return 2;
@@ -487,7 +498,7 @@ class IOSSimulator extends _Device {
   }
 }
 
-class AndroidDevice extends _Device {
+class AndroidDevice extends Device {
   static const String _ADB_PATH = 'adb';
   static const String _observatoryPort = '8181';
   static const String _serverPort = '9888';
@@ -509,7 +520,7 @@ class AndroidDevice extends _Device {
       String productID: null,
       String modelID: null,
       String deviceCodeName: null}) {
-    AndroidDevice device = new _Device(className, id);
+    AndroidDevice device = new Device._unique(className, id);
     device.productID = productID;
     device.modelID = modelID;
     device.deviceCodeName = deviceCodeName;
@@ -553,15 +564,13 @@ class AndroidDevice extends _Device {
     _adbPath = _getAdbPath();
     _hasAdb = _checkForAdb();
 
-    if (isConnected()) {
-      // Checking for lollipop only needs to be done if we are starting an
-      // app, but it has an important side effect, which is to discard any
-      // progress messages if the adb server is restarted.
-      _hasValidAndroid = _checkForLollipopOrLater();
+    // Checking for lollipop only needs to be done if we are starting an
+    // app, but it has an important side effect, which is to discard any
+    // progress messages if the adb server is restarted.
+    _hasValidAndroid = _checkForLollipopOrLater();
 
-      if (!_hasAdb || !_hasValidAndroid) {
-        _logging.severe('Unable to run on Android.');
-      }
+    if (!_hasAdb || !_hasValidAndroid) {
+      _logging.severe('Unable to run on Android.');
     }
   }
 
@@ -663,7 +672,7 @@ class AndroidDevice extends _Device {
   }
 
   String _getDeviceSha1Path(ApplicationPackage app) {
-    return '/sdcard/${app.appPackageID}/${app.appFileName}.sha1';
+    return '/sdcard/${app.id}/${app.name}.sha1';
   }
 
   String _getDeviceApkSha1(ApplicationPackage app) {
@@ -672,7 +681,7 @@ class AndroidDevice extends _Device {
 
   String _getSourceSha1(ApplicationPackage app) {
     String sha1 =
-        runCheckedSync(['shasum', '-a', '1', '-p', app.appPath]).split(' ')[0];
+        runCheckedSync(['shasum', '-a', '1', '-p', app.localPath]).split(' ')[0];
     return sha1;
   }
 
@@ -681,15 +690,15 @@ class AndroidDevice extends _Device {
     if (!isConnected()) {
       return false;
     }
-    if (runCheckedSync([adbPath, 'shell', 'pm', 'path', app.appPackageID]) ==
+    if (runCheckedSync([adbPath, 'shell', 'pm', 'path', app.id]) ==
         '') {
       _logging.info(
-          'TODO(iansf): move this log to the caller. ${app.appFileName} is not on the device. Installing now...');
+          'TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
       return false;
     }
     if (_getDeviceApkSha1(app) != _getSourceSha1(app)) {
       _logging.info(
-          'TODO(iansf): move this log to the caller. ${app.appFileName} is out of date. Installing now...');
+          'TODO(iansf): move this log to the caller. ${app.name} is out of date. Installing now...');
       return false;
     }
     return true;
@@ -701,16 +710,16 @@ class AndroidDevice extends _Device {
       _logging.info('Android device not connected. Not installing.');
       return false;
     }
-    if (!FileSystemEntity.isFileSync(app.appPath)) {
-      _logging.severe('"${app.appPath}" does not exist.');
+    if (!FileSystemEntity.isFileSync(app.localPath)) {
+      _logging.severe('"${app.localPath}" does not exist.');
       return false;
     }
 
-    runCheckedSync([adbPath, 'install', '-r', app.appPath]);
+    runCheckedSync([adbPath, 'install', '-r', app.localPath]);
 
     Directory tempDir = Directory.systemTemp;
     String sha1Path = path.join(
-        tempDir.path, (app.appPath + '.sha1').replaceAll(path.separator, '_'));
+        tempDir.path, (app.localPath + '.sha1').replaceAll(path.separator, '_'));
     File sha1TempFile = new File(sha1Path);
     sha1TempFile.writeAsStringSync(_getSourceSha1(app), flush: true);
     runCheckedSync([adbPath, 'push', sha1Path, _getDeviceSha1Path(app)]);
@@ -774,7 +783,7 @@ class AndroidDevice extends _Device {
     if (checked) {
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
     }
-    cmd.add(apk.component);
+    cmd.add(apk.launchActivity);
 
     runCheckedSync(cmd);
 
@@ -792,7 +801,7 @@ class AndroidDevice extends _Device {
     // Turn off reverse port forwarding
     runSync([adbPath, 'reverse', '--remove', 'tcp:$_serverPort']);
     // Stop the app
-    runSync([adbPath, 'shell', 'am', 'force-stop', apk.appPackageID]);
+    runSync([adbPath, 'shell', 'am', 'force-stop', apk.id]);
     // Kill the server
     if (Platform.isMacOS) {
       String pid = runSync(['lsof', '-i', ':$_serverPort', '-t']);
@@ -807,6 +816,9 @@ class AndroidDevice extends _Device {
 
     return true;
   }
+
+  @override
+  BuildPlatform get platform => BuildPlatform.android;
 
   void clearLogs() {
     runSync([adbPath, 'logcat', '-c']);
@@ -839,7 +851,7 @@ class AndroidDevice extends _Device {
       'am',
       'broadcast',
       '-a',
-      '${apk.appPackageID}.TRACING_START'
+      '${apk.id}.TRACING_START'
     ]);
   }
 
@@ -851,7 +863,7 @@ class AndroidDevice extends _Device {
       'am',
       'broadcast',
       '-a',
-      '${apk.appPackageID}.TRACING_STOP'
+      '${apk.id}.TRACING_STOP'
     ]);
 
     RegExp traceRegExp = new RegExp(r'Saving trace to (\S+)', multiLine: true);
@@ -890,4 +902,58 @@ class AndroidDevice extends _Device {
 
   @override
   bool isConnected() => _hasValidAndroid;
+}
+
+class DeviceStore {
+  final AndroidDevice android;
+  final IOSDevice iOS;
+  final IOSSimulator iOSSimulator;
+
+  List<Device> get all {
+    List<Device> result = <Device>[];
+    if (android != null)
+      result.add(android);
+    if (iOS != null)
+      result.add(iOS);
+    if (iOSSimulator != null)
+      result.add(iOSSimulator);
+    return result;
+  }
+
+  DeviceStore({
+    this.android,
+    this.iOS,
+    this.iOSSimulator
+  });
+
+  factory DeviceStore.forConfigs(List<BuildConfiguration> configs) {
+    AndroidDevice android;
+    IOSDevice iOS;
+    IOSSimulator iOSSimulator;
+
+    for (BuildConfiguration config in configs) {
+      switch (config.platform) {
+        case BuildPlatform.android:
+          assert(android == null);
+          android = new AndroidDevice();
+          break;
+        case BuildPlatform.iOS:
+          assert(iOS == null);
+          iOS = new IOSDevice();
+          break;
+        case BuildPlatform.iOSSimulator:
+          assert(iOSSimulator == null);
+          iOSSimulator = new IOSSimulator();
+          break;
+
+        case BuildPlatform.mac:
+        case BuildPlatform.linux:
+          // TODO(abarth): Support mac and linux targets.
+          assert(false);
+          break;
+      }
+    }
+
+    return new DeviceStore(android: android, iOS: iOS, iOSSimulator: iOSSimulator);
+  }
 }

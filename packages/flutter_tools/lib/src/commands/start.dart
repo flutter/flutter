@@ -2,29 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.start;
-
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../device.dart';
+import 'flutter_command.dart';
 import 'install.dart';
 import 'stop.dart';
 
 final Logger _logging = new Logger('sky_tools.start');
 
-class StartCommand extends Command {
-  final name = 'start';
-  final description = 'Start your Flutter app on attached devices.';
-  AndroidDevice android;
-  IOSDevice ios;
-  IOSSimulator iosSim;
+class StartCommand extends FlutterCommand {
+  final String name = 'start';
+  final String description = 'Start your Flutter app on attached devices.';
 
-  StartCommand({this.android, this.ios, this.iosSim}) {
+  StartCommand() {
     argParser.addFlag('poke',
         negatable: false,
         help: 'Restart the connection to the server (Android only).');
@@ -42,53 +37,36 @@ class StartCommand extends Command {
 
   @override
   Future<int> run() async {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
-    if (ios == null) {
-      ios = new IOSDevice();
-    }
-    if (iosSim == null) {
-      iosSim = new IOSSimulator();
-    }
+    await downloadApplicationPackagesAndConnectToDevices();
 
-    bool startedSomewhere = false;
     bool poke = argResults['poke'];
     if (!poke) {
-      StopCommand stopper = new StopCommand(android: android, ios: ios);
+      StopCommand stopper = new StopCommand();
+      stopper.inheritFromParent(this);
       stopper.stop();
 
       // Only install if the user did not specify a poke
-      InstallCommand installer =
-          new InstallCommand(android: android, ios: ios, iosSim: iosSim);
-      installer.install(argResults['boot']);
+      InstallCommand installer = new InstallCommand();
+      installer.inheritFromParent(this);
+      installer.install(boot: argResults['boot']);
     }
 
-    Map<BuildPlatform, ApplicationPackage> packages =
-        ApplicationPackageFactory.getAvailableApplicationPackages();
-    ApplicationPackage androidApp = packages[BuildPlatform.android];
-    ApplicationPackage iosApp = packages[BuildPlatform.iOS];
-    ApplicationPackage iosSimApp = packages[BuildPlatform.iOSSimulator];
+    bool startedSomething = false;
 
-    bool startedOnAndroid = false;
-    if (androidApp != null && android.isConnected()) {
-      String target = path.absolute(argResults['target']);
-      startedOnAndroid = await android.startServer(
-          target, poke, argResults['checked'], androidApp);
+    for (Device device in devices.all) {
+      ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+      if (package == null || !device.isConnected())
+        continue;
+      if (device is AndroidDevice) {
+        String target = path.absolute(argResults['target']);
+        if (await device.startServer(target, poke, argResults['checked'], package))
+          startedSomething = true;
+      } else {
+        if (await device.startApp(package))
+          startedSomething = true;
+      }
     }
 
-    if (iosApp != null && ios.isConnected()) {
-      startedSomewhere = await ios.startApp(iosApp) || startedSomewhere;
-    }
-
-    if (iosSimApp != null && iosSim.isConnected()) {
-      startedSomewhere = await iosSim.startApp(iosSimApp) || startedSomewhere;
-    }
-
-    if (startedSomewhere || startedOnAndroid) {
-      return 0;
-    } else {
-      return 2;
-    }
+    return startedSomething ? 0 : 2;
   }
 }

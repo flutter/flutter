@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.init;
-
 import 'dart:async';
 import 'dart:io';
 
@@ -12,8 +10,8 @@ import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as p;
 
 class InitCommand extends Command {
-  final name = 'init';
-  final description = 'Create a new Flutter project.';
+  final String name = 'init';
+  final String description = 'Create a new Flutter project.';
 
   InitCommand() {
     argParser.addOption('out', abbr: 'o', help: 'The output directory.');

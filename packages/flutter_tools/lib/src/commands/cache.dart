@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.cache;
-
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -14,8 +12,8 @@ import '../artifacts.dart';
 final Logger _logging = new Logger('sky_tools.cache');
 
 class CacheCommand extends Command {
-  final name = 'cache';
-  final description = 'Manages sky_tools\' cache of binary artifacts.';
+  final String name = 'cache';
+  final String description = 'Manages sky_tools\' cache of binary artifacts.';
   CacheCommand() {
     addSubcommand(new _ClearCommand());
     addSubcommand(new _PopulateCommand());
@@ -23,8 +21,8 @@ class CacheCommand extends Command {
 }
 
 class _ClearCommand extends Command {
-  final name = 'clear';
-  final description = 'Clears all artifacts from the cache.';
+  final String name = 'clear';
+  final String description = 'Clears all artifacts from the cache.';
 
   @override
   Future<int> run() async {
@@ -34,8 +32,8 @@ class _ClearCommand extends Command {
 }
 
 class _PopulateCommand extends Command {
-  final name = 'populate';
-  final description = 'Populates the cache with all known artifacts.';
+  final String name = 'populate';
+  final String description = 'Populates the cache with all known artifacts.';
 
   @override
   Future<int> run() async {

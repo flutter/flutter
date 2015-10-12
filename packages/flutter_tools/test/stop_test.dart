@@ -9,29 +9,25 @@ import 'package:mockito/mockito.dart';
 import 'package:sky_tools/src/commands/stop.dart';
 import 'package:test/test.dart';
 
-import 'src/common.dart';
+import 'src/mocks.dart';
 
 main() => defineTests();
 
 defineTests() {
   group('stop', () {
     test('returns 0 when Android is connected and ready to be stopped', () {
-      applicationPackageSetup();
+      StopCommand command = new StopCommand();
+      applyMocksToCommand(command);
+      MockDeviceStore mockDevices = command.devices;
 
-      MockAndroidDevice android = new MockAndroidDevice();
-      when(android.isConnected()).thenReturn(true);
-      when(android.stopApp(any)).thenReturn(true);
+      when(mockDevices.android.isConnected()).thenReturn(true);
+      when(mockDevices.android.stopApp(any)).thenReturn(true);
 
-      MockIOSDevice ios = new MockIOSDevice();
-      when(ios.isConnected()).thenReturn(false);
-      when(ios.stopApp(any)).thenReturn(false);
+      when(mockDevices.iOS.isConnected()).thenReturn(false);
+      when(mockDevices.iOS.stopApp(any)).thenReturn(false);
 
-      MockIOSSimulator iosSim = new MockIOSSimulator();
-      when(iosSim.isConnected()).thenReturn(false);
-      when(iosSim.stopApp(any)).thenReturn(false);
-
-      StopCommand command =
-          new StopCommand(android: android, ios: ios, iosSim: iosSim);
+      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
+      when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
@@ -39,22 +35,18 @@ defineTests() {
     });
 
     test('returns 0 when iOS is connected and ready to be stopped', () {
-      applicationPackageSetup();
+      StopCommand command = new StopCommand();
+      applyMocksToCommand(command);
+      MockDeviceStore mockDevices = command.devices;
 
-      MockAndroidDevice android = new MockAndroidDevice();
-      when(android.isConnected()).thenReturn(false);
-      when(android.stopApp(any)).thenReturn(false);
+      when(mockDevices.android.isConnected()).thenReturn(false);
+      when(mockDevices.android.stopApp(any)).thenReturn(false);
 
-      MockIOSDevice ios = new MockIOSDevice();
-      when(ios.isConnected()).thenReturn(true);
-      when(ios.stopApp(any)).thenReturn(true);
+      when(mockDevices.iOS.isConnected()).thenReturn(true);
+      when(mockDevices.iOS.stopApp(any)).thenReturn(true);
 
-      MockIOSSimulator iosSim = new MockIOSSimulator();
-      when(iosSim.isConnected()).thenReturn(false);
-      when(iosSim.stopApp(any)).thenReturn(false);
-
-      StopCommand command =
-          new StopCommand(android: android, ios: ios, iosSim: iosSim);
+      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
+      when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);

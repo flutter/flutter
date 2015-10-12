@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.trace;
-
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 
+import 'flutter_command.dart';
 import '../application_package.dart';
 import '../device.dart';
 
 final Logger _logging = new Logger('sky_tools.trace');
 
-class TraceCommand extends Command {
-  final name = 'trace';
-  final description = 'Start and stop tracing a running Flutter app '
+class TraceCommand extends FlutterCommand {
+  final String name = 'trace';
+  final String description = 'Start and stop tracing a running Flutter app '
       '(Android only, requires root).\n'
       'To start a trace, wait, and then stop the trace, don\'t set any flags '
       'except (optionally) duration.\n'
       'Otherwise, specify either start or stop to manually control the trace.';
-  AndroidDevice android;
 
-  TraceCommand([this.android]) {
+  TraceCommand() {
     argParser.addFlag('start', negatable: false, help: 'Start tracing.');
     argParser.addFlag('stop', negatable: false, help: 'Stop tracing.');
     argParser.addOption('duration',
@@ -32,35 +29,32 @@ class TraceCommand extends Command {
 
   @override
   Future<int> run() async {
-    if (android == null) {
-      android = new AndroidDevice();
-    }
+    await downloadApplicationPackagesAndConnectToDevices();
 
-    if (!android.isConnected()) {
+    if (!devices.android.isConnected()) {
       _logging.warning('No device connected, so no trace was completed.');
       return 1;
     }
-    Map<BuildPlatform, ApplicationPackage> packages =
-        ApplicationPackageFactory.getAvailableApplicationPackages();
-    ApplicationPackage androidApp = packages[BuildPlatform.android];
+
+    ApplicationPackage androidApp = applicationPackages.android;
 
     if ((!argResults['start'] && !argResults['stop']) ||
         (argResults['start'] && argResults['stop'])) {
       // Setting neither flags or both flags means do both commands and wait
       // duration seconds in between.
-      android.startTracing(androidApp);
+      devices.android.startTracing(androidApp);
       await new Future.delayed(
           new Duration(seconds: int.parse(argResults['duration'])),
-          () => _stopTracing(androidApp));
+          () => _stopTracing(devices.android, androidApp));
     } else if (argResults['stop']) {
-      _stopTracing(androidApp);
+      _stopTracing(devices.android, androidApp);
     } else {
-      android.startTracing(androidApp);
+      devices.android.startTracing(androidApp);
     }
     return 0;
   }
 
-  void _stopTracing(AndroidApk androidApp) {
+  void _stopTracing(AndroidDevice android, AndroidApk androidApp) {
     String tracePath = android.stopTracing(androidApp);
     if (tracePath == null) {
       _logging.warning('No trace file saved.');

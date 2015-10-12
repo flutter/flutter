@@ -2,25 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.list;
-
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 
+import 'flutter_command.dart';
 import '../device.dart';
 
 final Logger _logging = new Logger('sky_tools.list');
 
-class ListCommand extends Command {
-  final name = 'list';
-  final description = 'List all connected devices.';
-  AndroidDevice android;
-  IOSDevice ios;
-  IOSSimulator iosSim;
+class ListCommand extends FlutterCommand {
+  final String name = 'list';
+  final String description = 'List all connected devices.';
 
-  ListCommand({this.android, this.ios, this.iosSim}) {
+  ListCommand() {
     argParser.addFlag('details',
         abbr: 'd',
         negatable: false,
@@ -29,11 +24,14 @@ class ListCommand extends Command {
 
   @override
   Future<int> run() async {
+    connectToDevices();
+
     bool details = argResults['details'];
-    if (details) {
+
+    if (details)
       print('Android Devices:');
-    }
-    for (AndroidDevice device in AndroidDevice.getAttachedDevices(android)) {
+
+    for (AndroidDevice device in AndroidDevice.getAttachedDevices(devices.android)) {
       if (details) {
         print('${device.id}\t'
             '${device.modelID}\t'
@@ -44,10 +42,10 @@ class ListCommand extends Command {
       }
     }
 
-    if (details) {
+    if (details)
       print('iOS Devices:');
-    }
-    for (IOSDevice device in IOSDevice.getAttachedDevices(ios)) {
+
+    for (IOSDevice device in IOSDevice.getAttachedDevices(devices.iOS)) {
       if (details) {
         print('${device.id}\t${device.name}');
       } else {
@@ -58,7 +56,7 @@ class ListCommand extends Command {
     if (details) {
       print('iOS Simulators:');
     }
-    for (IOSSimulator device in IOSSimulator.getAttachedDevices(iosSim)) {
+    for (IOSSimulator device in IOSSimulator.getAttachedDevices(devices.iOSSimulator)) {
       if (details) {
         print('${device.id}\t${device.name}');
       } else {

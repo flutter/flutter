@@ -9,18 +9,18 @@ import 'package:mockito/mockito.dart';
 import 'package:sky_tools/src/commands/trace.dart';
 import 'package:test/test.dart';
 
-import 'src/common.dart';
+import 'src/mocks.dart';
 
 main() => defineTests();
 
 defineTests() {
   group('trace', () {
     test('returns 1 when no Android device is connected', () {
-      applicationPackageSetup();
+      TraceCommand command = new TraceCommand();
+      applyMocksToCommand(command);
+      MockDeviceStore mockDevices = command.devices;
 
-      MockAndroidDevice android = new MockAndroidDevice();
-      when(android.isConnected()).thenReturn(false);
-      TraceCommand command = new TraceCommand(android);
+      when(mockDevices.android.isConnected()).thenReturn(false);
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);

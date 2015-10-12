@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.build;
-
 import 'dart:async';
 import 'dart:io';
 
@@ -105,7 +103,7 @@ Future _compileSnapshot({
   String snapshotPath
 }) async {
   if (compilerPath == null) {
-    compilerPath = await ArtifactStore.getPath(Artifact.FlutterCompiler);
+    compilerPath = await ArtifactStore.getPath(Artifact.flutterCompiler);
   }
   ProcessResult result = await Process.run(compilerPath, [
     mainPath,
