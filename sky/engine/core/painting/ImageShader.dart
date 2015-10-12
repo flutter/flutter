@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart.sky;
+part of dart_ui;
 
 class ImageShader extends _ImageShader {
   ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {

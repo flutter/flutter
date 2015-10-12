@@ -111,10 +111,6 @@ LocalDOMWindow::~LocalDOMWindow()
 
 }
 
-void LocalDOMWindow::AcceptDartGCVisitor(DartGCVisitor& visitor) const {
-    visitor.AddToSetForRoot(document(), dart_wrapper());
-}
-
 PassRefPtr<MediaQueryList> LocalDOMWindow::matchMedia(const String& media)
 {
     return document() ? document()->mediaQueryMatcher().matchMedia(media) : nullptr;

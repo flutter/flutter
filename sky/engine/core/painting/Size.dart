@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart.sky;
+part of dart_ui;
 
 /// Holds a 2D floating-point size.
 /// Think of this as a vector from Point(0,0) to Point(size.width, size.height)

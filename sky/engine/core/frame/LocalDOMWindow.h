@@ -64,8 +64,7 @@ enum PageshowEventPersistence {
     PageshowEventPersisted = 1
 };
 
-class LocalDOMWindow final : public DartWrappable, public RefCounted<LocalDOMWindow>, public DOMWindowBase64, public FrameDestructionObserver, public Supplementable<LocalDOMWindow> {
-    DEFINE_WRAPPERTYPEINFO();
+class LocalDOMWindow final : public RefCounted<LocalDOMWindow>, public DOMWindowBase64, public FrameDestructionObserver, public Supplementable<LocalDOMWindow> {
 public:
     static PassRefPtr<LocalDOMWindow> create(LocalFrame& frame)
     {
@@ -74,8 +73,6 @@ public:
     virtual ~LocalDOMWindow();
 
     PassRefPtr<Document> installNewDocument(const DocumentInit&);
-
-    void AcceptDartGCVisitor(DartGCVisitor& visitor) const override;
 
     void registerProperty(DOMWindowProperty*);
     void unregisterProperty(DOMWindowProperty*);
