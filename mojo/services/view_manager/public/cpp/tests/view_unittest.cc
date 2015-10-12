@@ -492,11 +492,11 @@ TEST_F(ViewObserverTest, Order) {
     ASSERT_EQ(2U, changes.size());
     EXPECT_EQ(&v11, changes[0].view);
     EXPECT_EQ(&v13, changes[0].relative_view);
-    EXPECT_EQ(ORDER_DIRECTION_ABOVE, changes[0].direction);
+    EXPECT_EQ(OrderDirection::ABOVE, changes[0].direction);
 
     EXPECT_EQ(&v11, changes[1].view);
     EXPECT_EQ(&v13, changes[1].relative_view);
-    EXPECT_EQ(ORDER_DIRECTION_ABOVE, changes[1].direction);
+    EXPECT_EQ(OrderDirection::ABOVE, changes[1].direction);
   }
 
   {
@@ -512,11 +512,11 @@ TEST_F(ViewObserverTest, Order) {
     ASSERT_EQ(2U, changes.size());
     EXPECT_EQ(&v11, changes[0].view);
     EXPECT_EQ(&v12, changes[0].relative_view);
-    EXPECT_EQ(ORDER_DIRECTION_BELOW, changes[0].direction);
+    EXPECT_EQ(OrderDirection::BELOW, changes[0].direction);
 
     EXPECT_EQ(&v11, changes[1].view);
     EXPECT_EQ(&v12, changes[1].relative_view);
-    EXPECT_EQ(ORDER_DIRECTION_BELOW, changes[1].direction);
+    EXPECT_EQ(OrderDirection::BELOW, changes[1].direction);
   }
 
   {
@@ -524,7 +524,7 @@ TEST_F(ViewObserverTest, Order) {
 
     // Move v11 above v12.
     // Resulting order: v12. v11, v13
-    v11.Reorder(&v12, ORDER_DIRECTION_ABOVE);
+    v11.Reorder(&v12, OrderDirection::ABOVE);
     EXPECT_EQ(&v12, v1.children().front());
     EXPECT_EQ(&v13, v1.children().back());
 
@@ -532,11 +532,11 @@ TEST_F(ViewObserverTest, Order) {
     ASSERT_EQ(2U, changes.size());
     EXPECT_EQ(&v11, changes[0].view);
     EXPECT_EQ(&v12, changes[0].relative_view);
-    EXPECT_EQ(ORDER_DIRECTION_ABOVE, changes[0].direction);
+    EXPECT_EQ(OrderDirection::ABOVE, changes[0].direction);
 
     EXPECT_EQ(&v11, changes[1].view);
     EXPECT_EQ(&v12, changes[1].relative_view);
-    EXPECT_EQ(ORDER_DIRECTION_ABOVE, changes[1].direction);
+    EXPECT_EQ(OrderDirection::ABOVE, changes[1].direction);
   }
 
   {
@@ -544,7 +544,7 @@ TEST_F(ViewObserverTest, Order) {
 
     // Move v11 below v12.
     // Resulting order: v11, v12, v13
-    v11.Reorder(&v12, ORDER_DIRECTION_BELOW);
+    v11.Reorder(&v12, OrderDirection::BELOW);
     EXPECT_EQ(&v11, v1.children().front());
     EXPECT_EQ(&v13, v1.children().back());
 
@@ -552,11 +552,11 @@ TEST_F(ViewObserverTest, Order) {
     ASSERT_EQ(2U, changes.size());
     EXPECT_EQ(&v11, changes[0].view);
     EXPECT_EQ(&v12, changes[0].relative_view);
-    EXPECT_EQ(ORDER_DIRECTION_BELOW, changes[0].direction);
+    EXPECT_EQ(OrderDirection::BELOW, changes[0].direction);
 
     EXPECT_EQ(&v11, changes[1].view);
     EXPECT_EQ(&v12, changes[1].relative_view);
-    EXPECT_EQ(ORDER_DIRECTION_BELOW, changes[1].direction);
+    EXPECT_EQ(OrderDirection::BELOW, changes[1].direction);
   }
 }
 

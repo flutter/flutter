@@ -18,15 +18,15 @@ TEST(UtilTest, ErrorToErrno) {
     mojo::files::Error from;
     int to;
   } kExpectedMappings[] = {
-      {mojo::files::ERROR_OK, 0},
-      {mojo::files::ERROR_UNKNOWN, EIO},
-      {mojo::files::ERROR_INVALID_ARGUMENT, EINVAL},
-      {mojo::files::ERROR_PERMISSION_DENIED, EACCES},
-      {mojo::files::ERROR_OUT_OF_RANGE, EINVAL},
-      {mojo::files::ERROR_UNIMPLEMENTED, ENOSYS},
-      {mojo::files::ERROR_CLOSED, EBADF},
-      {mojo::files::ERROR_UNAVAILABLE, EACCES},
-      {mojo::files::ERROR_INTERNAL, EIO},
+      {mojo::files::Error::OK, 0},
+      {mojo::files::Error::UNKNOWN, EIO},
+      {mojo::files::Error::INVALID_ARGUMENT, EINVAL},
+      {mojo::files::Error::PERMISSION_DENIED, EACCES},
+      {mojo::files::Error::OUT_OF_RANGE, EINVAL},
+      {mojo::files::Error::UNIMPLEMENTED, ENOSYS},
+      {mojo::files::Error::CLOSED, EBADF},
+      {mojo::files::Error::UNAVAILABLE, EACCES},
+      {mojo::files::Error::INTERNAL, EIO},
   };
 
   for (size_t i = 0; i < MOJO_ARRAYSIZE(kExpectedMappings); i++) {

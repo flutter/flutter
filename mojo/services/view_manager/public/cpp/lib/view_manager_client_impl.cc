@@ -242,7 +242,7 @@ Id ViewManagerClientImpl::CreateViewOnServer() {
   DCHECK(service_);
   const Id view_id = MakeTransportId(connection_id_, ++next_id_);
   service_->CreateView(view_id, [this](ErrorCode code) {
-    OnActionCompleted(code == ERROR_CODE_NONE);
+    OnActionCompleted(code == ErrorCode::NONE);
   });
   return view_id;
 }

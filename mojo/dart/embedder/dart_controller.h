@@ -147,7 +147,7 @@ class DartController {
   static Dart_Isolate CreateIsolateHelper(void* dart_app,
                                           bool strict_compilation,
                                           IsolateCallbacks callbacks,
-                                          const std::string& script_uri,
+                                          std::string script_uri,
                                           const std::string& package_root,
                                           char** error,
                                           bool use_network_loader);
@@ -166,6 +166,7 @@ class DartController {
   static bool initialized_;
   static bool strict_compilation_;
   static bool service_isolate_running_;
+  static bool service_isolate_spawned_;
   static DartControllerServiceConnector* service_connector_;
 };
 

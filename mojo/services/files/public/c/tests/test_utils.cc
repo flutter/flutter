@@ -17,13 +17,13 @@ void MakeDirAt(mojo::files::DirectoryPtr* root, const char* path) {
   MOJO_CHECK(path);
   mojo::files::DirectoryPtr& dir = *root;
 
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   dir->OpenDirectory(path, nullptr,
                      mojo::files::kOpenFlagRead | mojo::files::kOpenFlagWrite |
                          mojo::files::kOpenFlagCreate,
                      Capture(&error));
   MOJO_CHECK(dir.WaitForIncomingResponse());
-  MOJO_CHECK(error == mojo::files::ERROR_OK);
+  MOJO_CHECK(error == mojo::files::Error::OK);
 }
 
 mojo::files::FilePtr OpenFileAt(mojo::files::DirectoryPtr* root,
@@ -34,10 +34,10 @@ mojo::files::FilePtr OpenFileAt(mojo::files::DirectoryPtr* root,
   mojo::files::DirectoryPtr& dir = *root;
 
   mojo::files::FilePtr file;
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   dir->OpenFile(path, mojo::GetProxy(&file), open_flags, Capture(&error));
   MOJO_CHECK(dir.WaitForIncomingResponse());
-  if (error != mojo::files::ERROR_OK)
+  if (error != mojo::files::Error::OK)
     return nullptr;
 
   return file.Pass();
@@ -57,13 +57,13 @@ void CreateTestFileAt(mojo::files::DirectoryPtr* root,
   std::vector<uint8_t> bytes_to_write(size);
   for (size_t i = 0; i < size; i++)
     bytes_to_write[i] = static_cast<uint8_t>(i);
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   uint32_t num_bytes_written = 0;
   file->Write(mojo::Array<uint8_t>::From(bytes_to_write), 0,
-              mojo::files::WHENCE_FROM_CURRENT,
+              mojo::files::Whence::FROM_CURRENT,
               Capture(&error, &num_bytes_written));
   MOJO_CHECK(file.WaitForIncomingResponse());
-  MOJO_CHECK(error == mojo::files::ERROR_OK);
+  MOJO_CHECK(error == mojo::files::Error::OK);
   MOJO_CHECK(num_bytes_written == bytes_to_write.size());
 }
 
@@ -74,11 +74,11 @@ int64_t GetFileSize(mojo::files::DirectoryPtr* root, const char* path) {
     return -1;
 
   // Seek to the end to get the file size (we could also stat).
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   int64_t position = -1;
-  file->Seek(0, mojo::files::WHENCE_FROM_END, Capture(&error, &position));
+  file->Seek(0, mojo::files::Whence::FROM_END, Capture(&error, &position));
   MOJO_CHECK(file.WaitForIncomingResponse());
-  MOJO_CHECK(error == mojo::files::ERROR_OK);
+  MOJO_CHECK(error == mojo::files::Error::OK);
   MOJO_CHECK(position >= 0);
   return position;
 }
@@ -89,8 +89,8 @@ std::string GetFileContents(mojo::files::DirectoryPtr* root, const char* path) {
   MOJO_CHECK(file);
 
   mojo::Array<uint8_t> bytes_read;
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
-  file->Read(1024 * 1024, 0, mojo::files::WHENCE_FROM_START,
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
+  file->Read(1024 * 1024, 0, mojo::files::Whence::FROM_START,
              Capture(&error, &bytes_read));
   MOJO_CHECK(file.WaitForIncomingResponse());
   if (!bytes_read.size())

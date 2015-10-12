@@ -71,7 +71,7 @@ std::unique_ptr<FDImpl> DirectoryWrapper::Open(const char* path,
   // with it?
 
   mojo::files::FilePtr file;
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   directory_->OpenFile(path, mojo::GetProxy(&file), mojo_open_flags,
                        Capture(&error));
   if (!directory_.WaitForIncomingResponse()) {
@@ -93,7 +93,7 @@ bool DirectoryWrapper::Chdir(const char* path) {
     return errno_setter.Set(EFAULT);
 
   mojo::files::DirectoryPtr new_directory;
-  mojo::files::Error error = mojo::files::ERROR_INTERNAL;
+  mojo::files::Error error = mojo::files::Error::INTERNAL;
   directory_->OpenDirectory(
       path, mojo::GetProxy(&new_directory),
       mojo::files::kOpenFlagRead | mojo::files::kOpenFlagWrite,

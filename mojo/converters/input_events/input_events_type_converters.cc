@@ -21,23 +21,24 @@ namespace {
 
 ui::EventType MojoMouseEventTypeToUIEvent(const EventPtr& event) {
   DCHECK(!event->pointer_data.is_null());
-  DCHECK_EQ(POINTER_KIND_MOUSE, event->pointer_data->kind);
+  DCHECK_EQ(PointerKind::MOUSE, event->pointer_data->kind);
   switch (event->action) {
-    case EVENT_TYPE_POINTER_DOWN:
+    case EventType::POINTER_DOWN:
       return ui::ET_MOUSE_PRESSED;
 
-    case EVENT_TYPE_POINTER_UP:
+    case EventType::POINTER_UP:
       return ui::ET_MOUSE_RELEASED;
 
-    case EVENT_TYPE_POINTER_MOVE:
+    case EventType::POINTER_MOVE:
       DCHECK(event->pointer_data);
       if (event->pointer_data->horizontal_wheel != 0 ||
           event->pointer_data->vertical_wheel != 0) {
         return ui::ET_MOUSEWHEEL;
       }
-      if (event->flags &
-          (EVENT_FLAGS_LEFT_MOUSE_BUTTON | EVENT_FLAGS_MIDDLE_MOUSE_BUTTON |
-           EVENT_FLAGS_RIGHT_MOUSE_BUTTON)) {
+      if (static_cast<uint32_t>(event->flags) &
+          (static_cast<uint32_t>(EventFlags::LEFT_MOUSE_BUTTON) |
+           static_cast<uint32_t>(EventFlags::MIDDLE_MOUSE_BUTTON) |
+           static_cast<uint32_t>(EventFlags::RIGHT_MOUSE_BUTTON))) {
         return ui::ET_MOUSE_DRAGGED;
       }
       return ui::ET_MOUSE_MOVED;
@@ -51,18 +52,18 @@ ui::EventType MojoMouseEventTypeToUIEvent(const EventPtr& event) {
 
 ui::EventType MojoTouchEventTypeToUIEvent(const EventPtr& event) {
   DCHECK(!event->pointer_data.is_null());
-  DCHECK_EQ(POINTER_KIND_TOUCH, event->pointer_data->kind);
+  DCHECK_EQ(PointerKind::TOUCH, event->pointer_data->kind);
   switch (event->action) {
-    case EVENT_TYPE_POINTER_DOWN:
+    case EventType::POINTER_DOWN:
       return ui::ET_TOUCH_PRESSED;
 
-    case EVENT_TYPE_POINTER_UP:
+    case EventType::POINTER_UP:
       return ui::ET_TOUCH_RELEASED;
 
-    case EVENT_TYPE_POINTER_MOVE:
+    case EventType::POINTER_MOVE:
       return ui::ET_TOUCH_MOVED;
 
-    case EVENT_TYPE_POINTER_CANCEL:
+    case EventType::POINTER_CANCEL:
       return ui::ET_TOUCH_CANCELLED;
 
     default:
@@ -82,43 +83,43 @@ void SetPointerDataLocationFromEvent(const ui::LocatedEvent& located_event,
 
 }  // namespace
 
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_NONE) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::NONE) ==
                static_cast<int32>(ui::EF_NONE),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_CAPS_LOCK_DOWN) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::CAPS_LOCK_DOWN) ==
                static_cast<int32>(ui::EF_CAPS_LOCK_DOWN),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_SHIFT_DOWN) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::SHIFT_DOWN) ==
                static_cast<int32>(ui::EF_SHIFT_DOWN),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_CONTROL_DOWN) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::CONTROL_DOWN) ==
                static_cast<int32>(ui::EF_CONTROL_DOWN),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_ALT_DOWN) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::ALT_DOWN) ==
                static_cast<int32>(ui::EF_ALT_DOWN),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_LEFT_MOUSE_BUTTON) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::LEFT_MOUSE_BUTTON) ==
                static_cast<int32>(ui::EF_LEFT_MOUSE_BUTTON),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_MIDDLE_MOUSE_BUTTON) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::MIDDLE_MOUSE_BUTTON) ==
                static_cast<int32>(ui::EF_MIDDLE_MOUSE_BUTTON),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_RIGHT_MOUSE_BUTTON) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::RIGHT_MOUSE_BUTTON) ==
                static_cast<int32>(ui::EF_RIGHT_MOUSE_BUTTON),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_COMMAND_DOWN) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::COMMAND_DOWN) ==
                static_cast<int32>(ui::EF_COMMAND_DOWN),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_EXTENDED) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::EXTENDED) ==
                static_cast<int32>(ui::EF_EXTENDED),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_IS_SYNTHESIZED) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::IS_SYNTHESIZED) ==
                static_cast<int32>(ui::EF_IS_SYNTHESIZED),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_ALTGR_DOWN) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::ALTGR_DOWN) ==
                static_cast<int32>(ui::EF_ALTGR_DOWN),
                event_flags_should_match);
-COMPILE_ASSERT(static_cast<int32>(EVENT_FLAGS_MOD3_DOWN) ==
+COMPILE_ASSERT(static_cast<int32>(EventFlags::MOD3_DOWN) ==
                static_cast<int32>(ui::EF_MOD3_DOWN),
                event_flags_should_match);
 
@@ -128,7 +129,7 @@ EventType TypeConverter<EventType, ui::EventType>::Convert(ui::EventType type) {
   switch (type) {
     case ui::ET_MOUSE_PRESSED:
     case ui::ET_TOUCH_PRESSED:
-      return EVENT_TYPE_POINTER_DOWN;
+      return EventType::POINTER_DOWN;
 
     case ui::ET_MOUSE_DRAGGED:
     case ui::ET_MOUSE_MOVED:
@@ -136,30 +137,30 @@ EventType TypeConverter<EventType, ui::EventType>::Convert(ui::EventType type) {
     case ui::ET_MOUSE_EXITED:
     case ui::ET_TOUCH_MOVED:
     case ui::ET_MOUSEWHEEL:
-      return EVENT_TYPE_POINTER_MOVE;
+      return EventType::POINTER_MOVE;
 
     case ui::ET_MOUSE_RELEASED:
     case ui::ET_TOUCH_RELEASED:
-      return EVENT_TYPE_POINTER_UP;
+      return EventType::POINTER_UP;
 
     case ui::ET_TOUCH_CANCELLED:
-      return EVENT_TYPE_POINTER_CANCEL;
+      return EventType::POINTER_CANCEL;
 
     case ui::ET_KEY_PRESSED:
-      return EVENT_TYPE_KEY_PRESSED;
+      return EventType::KEY_PRESSED;
 
     case ui::ET_KEY_RELEASED:
-      return EVENT_TYPE_KEY_RELEASED;
+      return EventType::KEY_RELEASED;
 
     default:
       break;
   }
-  return EVENT_TYPE_UNKNOWN;
+  return EventType::UNKNOWN;
 }
 
 EventPtr TypeConverter<EventPtr, ui::Event>::Convert(const ui::Event& input) {
   const EventType type = ConvertTo<EventType>(input.type());
-  if (type == EVENT_TYPE_UNKNOWN)
+  if (type == EventType::UNKNOWN)
     return nullptr;
 
   EventPtr event = Event::New();
@@ -174,7 +175,7 @@ EventPtr TypeConverter<EventPtr, ui::Event>::Convert(const ui::Event& input) {
     PointerDataPtr pointer_data(PointerData::New());
     // TODO(sky): come up with a better way to handle this.
     pointer_data->pointer_id = std::numeric_limits<int32>::max();
-    pointer_data->kind = POINTER_KIND_MOUSE;
+    pointer_data->kind = PointerKind::MOUSE;
     SetPointerDataLocationFromEvent(*located_event, pointer_data.get());
     if (input.IsMouseWheelEvent()) {
       const ui::MouseWheelEvent* wheel_event =
@@ -192,7 +193,7 @@ EventPtr TypeConverter<EventPtr, ui::Event>::Convert(const ui::Event& input) {
         static_cast<const ui::TouchEvent*>(&input);
     PointerDataPtr pointer_data(PointerData::New());
     pointer_data->pointer_id = touch_event->touch_id();
-    pointer_data->kind = POINTER_KIND_TOUCH;
+    pointer_data->kind = PointerKind::TOUCH;
     SetPointerDataLocationFromEvent(*touch_event, pointer_data.get());
     pointer_data->radius_major = touch_event->radius_x();
     pointer_data->radius_minor = touch_event->radius_y();
@@ -244,22 +245,26 @@ scoped_ptr<ui::Event> TypeConverter<scoped_ptr<ui::Event>, EventPtr>::Convert(
   }
 
   switch (input->action) {
-    case EVENT_TYPE_KEY_PRESSED:
-    case EVENT_TYPE_KEY_RELEASED: {
+    case EventType::KEY_PRESSED:
+    case EventType::KEY_RELEASED: {
       scoped_ptr<ui::KeyEvent> key_event;
       if (input->key_data->is_char) {
+        // TODO(johngro) : Need to verify that input->flags (a mojom generated
+        // enum) is a valid set of flags for a ui::KeyEvent
         key_event.reset(new ui::KeyEvent(
             static_cast<base::char16>(input->key_data->character),
             static_cast<ui::KeyboardCode>(
                 input->key_data->key_code),
-            input->flags));
+            static_cast<int32_t>(input->flags)));
       } else {
+        // TODO(johngro) : Need to verify that input->flags (a mojom generated
+        // enum) is a valid set of flags for a ui::KeyEvent
         key_event.reset(new ui::KeyEvent(
-            input->action == EVENT_TYPE_KEY_PRESSED ? ui::ET_KEY_PRESSED
+            input->action == EventType::KEY_PRESSED ? ui::ET_KEY_PRESSED
                                                     : ui::ET_KEY_RELEASED,
 
             static_cast<ui::KeyboardCode>(input->key_data->key_code),
-            input->flags));
+            static_cast<int32_t>(input->flags)));
       }
       key_event->SetExtendedKeyEventData(scoped_ptr<ui::ExtendedKeyEventData>(
           new MojoExtendedKeyEventData(
@@ -269,11 +274,11 @@ scoped_ptr<ui::Event> TypeConverter<scoped_ptr<ui::Event>, EventPtr>::Convert(
       key_event->set_platform_keycode(input->key_data->native_key_code);
       return key_event.Pass();
     }
-    case EVENT_TYPE_POINTER_DOWN:
-    case EVENT_TYPE_POINTER_UP:
-    case EVENT_TYPE_POINTER_MOVE:
-    case EVENT_TYPE_POINTER_CANCEL: {
-      if (input->pointer_data->kind == POINTER_KIND_MOUSE) {
+    case EventType::POINTER_DOWN:
+    case EventType::POINTER_UP:
+    case EventType::POINTER_MOVE:
+    case EventType::POINTER_CANCEL: {
+      if (input->pointer_data->kind == PointerKind::MOUSE) {
         // TODO: last flags isn't right. Need to send changed_flags.
         scoped_ptr<ui::MouseEvent> event(new ui::MouseEvent(
             MojoMouseEventTypeToUIEvent(input), location, screen_location,

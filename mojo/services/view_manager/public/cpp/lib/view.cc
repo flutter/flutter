@@ -129,14 +129,14 @@ bool ReorderImpl(View::Children* children,
   const size_t target_i =
       std::find(children->begin(), children->end(), relative) -
       children->begin();
-  if ((direction == ORDER_DIRECTION_ABOVE && child_i == target_i + 1) ||
-      (direction == ORDER_DIRECTION_BELOW && child_i + 1 == target_i)) {
+  if ((direction == OrderDirection::ABOVE && child_i == target_i + 1) ||
+      (direction == OrderDirection::BELOW && child_i + 1 == target_i)) {
     return false;
   }
 
   ScopedOrderChangedNotifier notifier(view, relative, direction);
 
-  const size_t dest_i = direction == ORDER_DIRECTION_ABOVE
+  const size_t dest_i = direction == OrderDirection::ABOVE
                             ? (child_i < target_i ? target_i : target_i + 1)
                             : (child_i < target_i ? target_i - 1 : target_i);
   children->erase(children->begin() + child_i);
@@ -309,13 +309,13 @@ void View::RemoveChild(View* child) {
 void View::MoveToFront() {
   if (!parent_ || parent_->children_.back() == this)
     return;
-  Reorder(parent_->children_.back(), ORDER_DIRECTION_ABOVE);
+  Reorder(parent_->children_.back(), OrderDirection::ABOVE);
 }
 
 void View::MoveToBack() {
   if (!parent_ || parent_->children_.front() == this)
     return;
-  Reorder(parent_->children_.front(), ORDER_DIRECTION_BELOW);
+  Reorder(parent_->children_.front(), OrderDirection::BELOW);
 }
 
 void View::Reorder(View* relative, OrderDirection direction) {

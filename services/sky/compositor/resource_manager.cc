@@ -54,7 +54,7 @@ mojo::TransferableResourcePtr ResourceManager::CreateTransferableResource(
   mojo::TransferableResourcePtr resource = mojo::TransferableResource::New();
   resource->id = next_resource_id_++;
   resource_to_texture_map_[resource->id] = texture.release();
-  resource->format = mojo::RESOURCE_FORMAT_RGBA_8888;
+  resource->format = mojo::ResourceFormat::RGBA_8888;
   resource->filter = GL_LINEAR;
   resource->size = size.Clone();
   resource->is_repeated = false;

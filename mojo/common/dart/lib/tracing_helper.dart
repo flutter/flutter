@@ -24,6 +24,7 @@ const traceEventPhaseBegin = "B";
 const traceEventPhaseEnd = "E";
 const traceEventPhaseAsyncBegin = "S";
 const traceEventPhaseAsyncEnd = "F";
+const traceEventDuration = "X";
 
 // TracingHelper is used by Dart code running in the Mojo shell in order
 // to perform tracing.
@@ -36,8 +37,10 @@ class TracingHelper {
   // for use in trace messages. If |appName| is longer than 20 characters then
   // only the last 20 characters of |appName| will be used.
   TracingHelper.fromApplication(Application app, String appName) {
-    _tid = [appName, Isolate.current].fold(7,
-        (hash, element) => 31 * hash + element.hashCode);
+    // Masked because the tid is expected to be a 32-bit int.
+    _tid = [appName, Isolate.current]
+            .fold(7, (hash, element) => 31 * hash + element.hashCode) &
+        0x7fffffff;
     _impl = new TraceProviderImpl();
     ApplicationConnection connection = app.connectToApplication("mojo:tracing");
     connection.provideService(TraceProviderName, (e) {
@@ -80,33 +83,44 @@ class TracingHelper {
     _sendTraceMessage(name, categories, traceEventInstant, 0, args: args);
   }
 
-  FunctionTrace _beginFunction(String functionName, String categories,
-      String phase, {Map<String, String> args}) {
+  void traceDuration(String name, String categories, int start, int end,
+      {Map<String, String> args}) {
+    _sendTraceMessage(name, categories, traceEventDuration, 0,
+        args: args, start: start, duration: end - start);
+  }
+
+  FunctionTrace _beginFunction(
+      String functionName, String categories, String phase,
+      {Map<String, String> args}) {
     assert(functionName != null);
-    final trace =
-        new _FunctionTraceImpl(this, isActive() ? functionName : null,
-            categories, phase);
+    final trace = new _FunctionTraceImpl(
+        this, isActive() ? functionName : null, categories, phase);
     _sendTraceMessage(functionName, categories, phase, trace.hashCode,
         args: args);
     return trace;
   }
 
-  void _endFunction(String functionName, String categories, String phase,
-      int traceId) {
+  void _endFunction(
+      String functionName, String categories, String phase, int traceId) {
     _sendTraceMessage(functionName, categories, phase, traceId);
   }
 
-  void _sendTraceMessage(String name, String categories, String phase,
-      int traceId, {Map<String, String> args}) {
+  void _sendTraceMessage(
+      String name, String categories, String phase, int traceId,
+      {Map<String, String> args, int start, int duration}) {
     if (isActive()) {
+      var time = (start != null) ? start : getTimeTicksNow();
       var map = {};
       map["name"] = name;
       map["cat"] = categories;
       map["ph"] = phase;
-      map["ts"] = getTimeTicksNow();
+      map["ts"] = time;
       map["pid"] = pid;
       map["tid"] = _tid;
       map["id"] = traceId;
+      if (duration != null) {
+        map["dur"] = duration;
+      }
       if (args != null) {
         map["args"] = args;
       }
@@ -148,8 +162,8 @@ class _FunctionTraceImpl implements FunctionTrace {
   String _categories;
   String _beginPhase;
 
-  _FunctionTraceImpl(this._tracing, this._functionName, this._categories,
-      this._beginPhase) {
+  _FunctionTraceImpl(
+      this._tracing, this._functionName, this._categories, this._beginPhase) {
     assert(_beginPhase == traceEventPhaseBegin ||
         _beginPhase == traceEventPhaseAsyncBegin);
   }
@@ -158,11 +172,11 @@ class _FunctionTraceImpl implements FunctionTrace {
   void end() {
     if (_functionName != null) {
       if (_beginPhase == traceEventPhaseBegin) {
-        _tracing._endFunction(_functionName, _categories, traceEventPhaseEnd,
-            hashCode);
+        _tracing._endFunction(
+            _functionName, _categories, traceEventPhaseEnd, hashCode);
       } else if (_beginPhase == traceEventPhaseAsyncBegin) {
-        _tracing._endFunction(_functionName, _categories,
-            traceEventPhaseAsyncEnd, hashCode);
+        _tracing._endFunction(
+            _functionName, _categories, traceEventPhaseAsyncEnd, hashCode);
       }
     }
   }

@@ -15,6 +15,7 @@ import 'package:mojom/mojo/test/test_structs.mojom.dart' as structs;
 import 'package:mojom/mojo/test/test_unions.mojom.dart' as unions;
 import 'package:mojom/mojo/test/rect.mojom.dart' as rect;
 import 'package:mojom/mojo/test/serialization_test_structs.mojom.dart' as serialization;
+import 'package:mojom/regression_tests/regression_tests.mojom.dart' as regression;
 
 class ProviderImpl implements sample.Provider {
   sample.ProviderStub _stub;
@@ -51,8 +52,9 @@ Future<bool> testCallResponse() {
       client.ptr.echoStrings("hello", "mojo!").then((echoStringsResponse) {
         Expect.equals("hello", echoStringsResponse.a);
         Expect.equals("mojo!", echoStringsResponse.b);
-        client.close();
-        c.complete(true);
+        client.close().then((_) {
+          c.complete(true);
+        });
       });
     });
   });
@@ -71,7 +73,7 @@ Future testAwaitCallResponse() async {
   Expect.equals("hello", echoStringsResponse.a);
   Expect.equals("mojo!", echoStringsResponse.b);
 
-  client.close();
+  await client.close();
 }
 
 bindings.ServiceMessage messageOfStruct(bindings.Struct s) =>
@@ -250,6 +252,35 @@ testUnions() {
   testUnionsToString();
 }
 
+class CheckEnumCapsImpl implements regression.CheckEnumCaps {
+  regression.CheckEnumCapsStub _stub;
+
+  CheckEnumCapsImpl(core.MojoMessagePipeEndpoint endpoint) {
+    _stub = new regression.CheckEnumCapsStub.fromEndpoint(endpoint, this);
+  }
+
+  setEnumWithInternalAllCaps(regression.EnumWithInternalAllCaps e) {}
+}
+
+checkEnumCapsIsolate(core.MojoMessagePipeEndpoint endpoint) {
+  new CheckEnumCapsImpl(endpoint);
+}
+
+testCheckEnumCapsImpl() {
+  var pipe = new core.MojoMessagePipe();
+  var client =
+      new regression.CheckEnumCapsProxy.fromEndpoint(pipe.endpoints[0]);
+  var c = new Completer();
+  Isolate.spawn(checkEnumCapsIsolate, pipe.endpoints[1]).then((_) {
+    client.ptr.setEnumWithInternalAllCaps(
+        regression.EnumWithInternalAllCaps.STANDARD);
+    client.close().then((_) {
+      c.complete(null);
+    });
+  });
+  return c.future;
+}
+
 testSerializeEnum() {
   var constants = new structs.ScopedConstants();
   constants.f4 = structs.ScopedConstantsEType.E0;
@@ -258,8 +289,9 @@ testSerializeEnum() {
   Expect.equals(constants.f4.value, constants2.f4.value);
 }
 
-testEnums() {
+testEnums() async {
   testSerializeEnum();
+  await testCheckEnumCapsImpl();
 }
 
 void closingProviderIsolate(core.MojoMessagePipeEndpoint endpoint) {
@@ -281,7 +313,7 @@ Future<bool> runOnClosedTest() {
 main() async {
   testSerializeStructs();
   testUnions();
-  testEnums();
+  await testEnums();
   await testCallResponse();
   await testAwaitCallResponse();
   await runOnClosedTest();

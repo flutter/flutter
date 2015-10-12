@@ -45,7 +45,8 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 
 class RemoteMessagePipeTest : public testing::Test {
  public:
-  RemoteMessagePipeTest() : io_thread_(mojo::test::TestIOThread::kAutoStart) {}
+  RemoteMessagePipeTest()
+      : io_thread_(mojo::test::TestIOThread::StartMode::AUTO) {}
   ~RemoteMessagePipeTest() override {}
 
   void SetUp() override {

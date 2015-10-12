@@ -15,6 +15,8 @@ mojo_edk_source_set("test_support") {
     "scoped_ipc_support.h",
     "scoped_test_dir.cc",
     "scoped_test_dir.h",
+    "simple_test_thread.cc",
+    "simple_test_thread.h",
     "test_io_thread.cc",
     "test_io_thread.h",
     "test_utils.h",

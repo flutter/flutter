@@ -31,7 +31,7 @@ SharedQuadStatePtr CreateDefaultSQS(const Size& size) {
   sqs->clip_rect = rect.Clone();
   sqs->is_clipped = false;
   sqs->opacity = 1.f;
-  sqs->blend_mode = mojo::SK_XFERMODE_kSrc_Mode;
+  sqs->blend_mode = mojo::SkXfermode::kSrc_Mode;
   sqs->sorting_context_id = 0;
   return sqs.Pass();
 }

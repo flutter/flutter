@@ -245,46 +245,6 @@ class _MojoRawServerSocket extends Stream<RawSocket>
       _resume();
     }
   }
-
-  RawServerSocketReference get reference {
-    if (_referencePort == null) {
-      _referencePort = new ReceivePort();
-      _referencePort.listen((sendPort) {
-        sendPort.send(
-          [_socket.address,
-           _socket.port,
-           _v6Only]);
-      });
-    }
-    return new _MojoRawServerSocketReference(_referencePort.sendPort);
-  }
-
-  Map _toJSON(bool ref) => {};
-}
-
-class _MojoRawServerSocketReference implements RawServerSocketReference {
-  final SendPort _sendPort;
-
-  _MojoRawServerSocketReference(this._sendPort);
-
-  Future<RawServerSocket> create() {
-    var port = new ReceivePort();
-    _sendPort.send(port.sendPort);
-    return port.first.then((List args) {
-      port.close();
-
-      InternetAddress address = args[0];
-      int tcpPort = args[1];
-      bool v6Only = args[2];
-      return
-          RawServerSocket.bind(address, tcpPort, v6Only: v6Only, shared: true);
-    });
-  }
-
-  int get hashCode => _sendPort.hashCode;
-
-  bool operator==(Object other)
-      => other is _MojoServerSocketReference && _sendPort == other._sendPort;
 }
 
 class _MojoServerSocket extends Stream<Socket>
@@ -323,21 +283,7 @@ class _MojoServerSocket extends Stream<Socket>
 
   Future close() => _socket.close().then((_) => this);
 
-  ServerSocketReference get reference {
-    return new _MojoServerSocketReference(_socket.reference);
-  }
-
   Map _toJSON(bool ref) => _socket._toJSON(ref);
 
   void set _owner(owner) { _socket._owner = owner; }
-}
-
-class _MojoServerSocketReference implements ServerSocketReference {
-  final RawServerSocketReference _rawReference;
-
-  _MojoServerSocketReference(this._rawReference);
-
-  Future<ServerSocket> create() {
-    return _rawReference.create().then((raw) => new _MojoServerSocket(raw));
-  }
 }
