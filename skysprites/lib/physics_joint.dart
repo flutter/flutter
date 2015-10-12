@@ -25,6 +25,7 @@ abstract class PhysicsJoint {
     if (_joint == null) {
       _physicsNode = physicsNode;
       _joint = _createB2Joint(physicsNode);
+      _physicsNode._joints.add(this);
     }
   }
 
@@ -32,6 +33,7 @@ abstract class PhysicsJoint {
     if (_joint != null && _active) {
       _physicsNode.b2World.destroyJoint(_joint);
       _joint = null;
+      _physicsNode._joints.remove(this);
     }
     _active = false;
   }
