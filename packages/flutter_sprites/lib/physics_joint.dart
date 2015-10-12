@@ -8,6 +8,7 @@ abstract class PhysicsJoint {
 
   final PhysicsBody bodyA;
   final PhysicsBody bodyB;
+  final double breakingForce;
 
   bool _active = true;
   box2d.Joint _joint;
@@ -36,6 +37,25 @@ abstract class PhysicsJoint {
   }
 
   box2d.Joint _createB2Joint(PhysicsNode physicsNode);
+
+  void destroy() {
+    _detach();
+  }
+
+  void _checkBreakingForce(double dt) {
+    if (breakingForce == null) return;
+
+    if (_joint != null && _active) {
+      Vector2 reactionForce = new Vector2.zero();
+      _joint.getReactionForce(1.0 / dt, reactionForce);
+
+      if (breakingForce * breakingForce < reactionForce.length2) {
+        // TODO: Add callback
+
+        destroy();
+      }
+    }
+  }
 }
 
 class PhysicsJointRevolute extends PhysicsJoint {
