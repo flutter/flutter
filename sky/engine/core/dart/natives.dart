@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library builtin_natives;
-
-import "dart:async";
+part of dart_ui;
 
 // Corelib 'print' implementation.
 void _print(arg) {

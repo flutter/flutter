@@ -13,5 +13,4 @@ import 'dart:mojo.internal';
 import 'dart:mirrors';
 import 'dart:ui';
 import 'dart:ui_internals';
-import 'dart:ui_builtin_natives';
 import 'dart:typed_data';

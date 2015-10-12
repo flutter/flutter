@@ -12,8 +12,8 @@
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/bindings/builtin.h"
-#include "sky/engine/bindings/builtin_natives.h"
-#include "sky/engine/bindings/builtin_sky.h"
+#include "sky/engine/bindings/dart_natives.h"
+#include "sky/engine/bindings/dart_ui.h"
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/core/script/dom_dart_state.h"
@@ -121,10 +121,10 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
     {
       DartApiScope apiScope;
-      Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
+      Builtin::SetNativeResolver(Builtin::kUILibrary);
       Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
       Builtin::SetNativeResolver(Builtin::kIOLibrary);
-      BuiltinNatives::Init(BuiltinNatives::DartIOIsolate);
+      DartNatives::Init(DartNatives::DartIOIsolate);
       // Start the handle watcher from the service isolate so it isn't available
       // for debugging or general Observatory interaction.
       EnsureHandleWatcherStarted();
@@ -154,7 +154,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   {
     DartApiScope apiScope;
-    Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
+    Builtin::SetNativeResolver(Builtin::kUILibrary);
     Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
     Builtin::SetNativeResolver(Builtin::kIOLibrary);
 

@@ -10,7 +10,6 @@ class URLMappings(object):
             'dart:mojo.internal': os.path.join(src_root, 'mojo/public/dart/sdk_ext/internal.dart'),
             'dart:ui': os.path.join(build_dir, 'gen/sky/bindings/dart_ui.dart'),
             'dart:ui_internals': os.path.join(src_root, 'sky/engine/bindings/internals.dart'),
-            'dart:ui_builtin_natives': os.path.join(src_root, 'sky/engine/bindings/builtin_natives.dart'),
         }
         self.packages_root = os.path.join(build_dir, 'gen/dart-pkg/packages')
 

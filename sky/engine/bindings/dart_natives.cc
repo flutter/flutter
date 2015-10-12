@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/bindings/builtin_natives.h"
+#include "sky/engine/bindings/dart_natives.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,7 +61,7 @@ static struct NativeEntries {
   int argument_count;
 } BuiltinEntries[] = {BUILTIN_NATIVE_LIST(REGISTER_FUNCTION)};
 
-Dart_NativeFunction BuiltinNatives::NativeLookup(Dart_Handle name,
+Dart_NativeFunction DartNatives::NativeLookup(Dart_Handle name,
                                                  int argument_count,
                                                  bool* auto_setup_scope) {
   const char* function_name = nullptr;
@@ -81,7 +81,7 @@ Dart_NativeFunction BuiltinNatives::NativeLookup(Dart_Handle name,
   return nullptr;
 }
 
-const uint8_t* BuiltinNatives::NativeSymbol(Dart_NativeFunction native_function) {
+const uint8_t* DartNatives::NativeSymbol(Dart_NativeFunction native_function) {
   size_t num_entries = arraysize(BuiltinEntries);
   for (size_t i = 0; i < num_entries; i++) {
     const struct NativeEntries& entry = BuiltinEntries[i];
@@ -100,7 +100,7 @@ static Dart_Handle GetClosure(Dart_Handle builtin_library, const char* name) {
 }
 
 static void InitDartInternal(Dart_Handle builtin_library,
-                             BuiltinNatives::IsolateType isolate_type) {
+                             DartNatives::IsolateType isolate_type) {
   Dart_Handle print = GetClosure(builtin_library, "_getPrintClosure");
   Dart_Handle timer = GetClosure(builtin_library, "_getCreateTimerClosure");
 
@@ -109,14 +109,14 @@ static void InitDartInternal(Dart_Handle builtin_library,
   DART_CHECK_VALID(Dart_SetField(
       internal_library, ToDart("_printClosure"), print));
 
-  if (isolate_type == BuiltinNatives::MainIsolate) {
+  if (isolate_type == DartNatives::MainIsolate) {
     Dart_Handle vm_hooks_name = ToDart("VMLibraryHooks");
     Dart_Handle vm_hooks = Dart_GetClass(internal_library, vm_hooks_name);
     DART_CHECK_VALID(vm_hooks);
     Dart_Handle timer_name = ToDart("timerFactory");
     DART_CHECK_VALID(Dart_SetField(vm_hooks, timer_name, timer));
   } else {
-    CHECK(isolate_type == BuiltinNatives::DartIOIsolate);
+    CHECK(isolate_type == DartNatives::DartIOIsolate);
     Dart_Handle io_lib = DartBuiltin::LookupLibrary("dart:io");
     Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
     DART_CHECK_VALID(Dart_Invoke(io_lib, setup_hooks, 0, NULL));
@@ -126,7 +126,7 @@ static void InitDartInternal(Dart_Handle builtin_library,
 }
 
 static void InitDartCore(Dart_Handle builtin,
-                         BuiltinNatives::IsolateType isolate_type) {
+                         DartNatives::IsolateType isolate_type) {
   Dart_Handle get_base_url = GetClosure(builtin, "_getGetBaseURLClosure");
   Dart_Handle core_library = DartBuiltin::LookupLibrary("dart:core");
   DART_CHECK_VALID(Dart_SetField(core_library,
@@ -134,13 +134,13 @@ static void InitDartCore(Dart_Handle builtin,
 }
 
 static void InitDartAsync(Dart_Handle builtin_library,
-                          BuiltinNatives::IsolateType isolate_type) {
+                          DartNatives::IsolateType isolate_type) {
   Dart_Handle schedule_microtask;
-  if (isolate_type == BuiltinNatives::MainIsolate) {
+  if (isolate_type == DartNatives::MainIsolate) {
     schedule_microtask =
         GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
   } else {
-    CHECK(isolate_type == BuiltinNatives::DartIOIsolate);
+    CHECK(isolate_type == DartNatives::DartIOIsolate);
     Dart_Handle isolate_lib = DartBuiltin::LookupLibrary("dart:isolate");
     Dart_Handle method_name =
         Dart_NewStringFromCString("_getIsolateScheduleImmediateClosure");
@@ -152,8 +152,8 @@ static void InitDartAsync(Dart_Handle builtin_library,
                                &schedule_microtask));
 }
 
-void BuiltinNatives::Init(IsolateType isolate_type) {
-  Dart_Handle builtin = Builtin::LoadAndCheckLibrary(Builtin::kBuiltinLibrary);
+void DartNatives::Init(IsolateType isolate_type) {
+  Dart_Handle builtin = Builtin::LoadAndCheckLibrary(Builtin::kUILibrary);
   DART_CHECK_VALID(builtin);
   InitDartInternal(builtin, isolate_type);
   InitDartCore(builtin, isolate_type);

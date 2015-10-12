@@ -676,6 +676,7 @@ core_idl_files = get_path_info([
 
 core_dart_files = get_path_info([
                                   "dart/hooks.dart",
+                                  "dart/natives.dart",
                                   "dart/lerp.dart",
                                   "dart/view.dart",
                                   "dart/window.dart",
