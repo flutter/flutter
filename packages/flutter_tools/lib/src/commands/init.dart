@@ -37,8 +37,8 @@ class InitCommand extends Command {
 
     String message = '''All done! To run your application:
 
-  cd ${out.path}
-  ./packages/flutter/sky_tool start
+  \$ cd ${out.path}
+  \$ flutter start --checked
 ''';
 
     if (argResults['pub']) {

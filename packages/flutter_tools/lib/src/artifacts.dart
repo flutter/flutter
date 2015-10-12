@@ -34,7 +34,7 @@ class ArtifactStore {
   }
 
   static Future _downloadFile(String url, File file) async {
-    _logging.fine('Downloading $url to ${file.path}');
+    print('Downloading $url to ${file.path}.');
     HttpClient httpClient = new HttpClient();
     HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
     HttpClientResponse response = await request.close();

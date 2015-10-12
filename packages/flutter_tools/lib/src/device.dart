@@ -720,6 +720,7 @@ class AndroidDevice extends Device {
       return false;
     }
 
+    print('Installing ${app.name} on device.');
     runCheckedSync([adbPath, 'install', '-r', app.localPath]);
 
     Directory tempDir = Directory.systemTemp;
