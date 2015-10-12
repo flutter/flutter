@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -1071,7 +1072,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // EVENTS
 
   /// Override this function to handle events that hit this render object
-  void handleEvent(ui.Event event, HitTestEntry entry) {
+  void handleEvent(InputEvent event, HitTestEntry entry) {
   }
 
 

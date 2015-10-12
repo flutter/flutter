@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -187,7 +185,7 @@ class _GestureDetectorState extends State<GestureDetector> {
     return null;
   }
 
-  void _handlePointerDown(ui.PointerEvent event) {
+  void _handlePointerDown(PointerInputEvent event) {
     if (_tap != null)
       _tap.addPointer(event);
     if (_showPress != null)

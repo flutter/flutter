@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'arena.dart';
 import 'constants.dart';
+import 'events.dart';
 import 'pointer_router.dart';
 import 'recognizer.dart';
 
@@ -22,7 +21,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     onLongPress();
   }
 
-  void handlePrimaryPointer(ui.PointerEvent event) {
+  void handlePrimaryPointer(PointerInputEvent event) {
     if (event.type == 'pointerup')
       resolve(GestureDisposition.rejected);
   }
