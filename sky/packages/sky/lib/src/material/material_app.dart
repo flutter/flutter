@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -56,7 +55,7 @@ class _MaterialAppState extends State<MaterialApp> {
     super.dispose();
   }
 
-  void _backHandler(ui.Event event) {
+  void _backHandler(InputEvent event) {
     assert(mounted);
     if (event.type == 'back') {
       NavigatorState navigator = _navigator.currentState;

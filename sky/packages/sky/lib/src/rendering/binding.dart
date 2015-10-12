@@ -29,7 +29,7 @@ class _PointerState {
   Point lastPosition;
 }
 
-typedef void EventListener(ui.Event event);
+typedef void EventListener(InputEvent event);
 
 /// A hit test entry used by [FlutterBinding]
 class BindingHitTestEntry extends HitTestEntry {
@@ -95,11 +95,12 @@ class FlutterBinding extends HitTestTarget {
   bool removeEventListener(EventListener listener) => _eventListeners.remove(listener);
 
   void _handleEvent(ui.Event event) {
-    if (event is ui.PointerEvent) {
-      _handlePointerEvent(event);
+    InputEvent ourEvent = new InputEvent.fromSkyEvent(event);
+    if (ourEvent is PointerInputEvent) {
+      _handlePointerInputEvent(ourEvent);
     } else {
       for (EventListener listener in _eventListeners)
-        listener(event);
+        listener(ourEvent);
     }
   }
 
@@ -111,7 +112,7 @@ class FlutterBinding extends HitTestTarget {
   /// to hit-test them on each movement.
   Map<int, _PointerState> _stateForPointer = new Map<int, _PointerState>();
 
-  void _handlePointerEvent(ui.PointerEvent event) {
+  void _handlePointerInputEvent(PointerInputEvent event) {
     Point position = new Point(event.x, event.y);
 
     _PointerState state = _stateForPointer[event.pointer];
@@ -155,15 +156,15 @@ class FlutterBinding extends HitTestTarget {
   }
 
   /// Dispatch the given event to the path of the given hit test result
-  void dispatchEvent(ui.Event event, HitTestResult result) {
+  void dispatchEvent(InputEvent event, HitTestResult result) {
     assert(result != null);
     for (HitTestEntry entry in result.path)
       entry.target.handleEvent(event, entry);
   }
 
-  void handleEvent(ui.Event e, BindingHitTestEntry entry) {
-    if (e is ui.PointerEvent) {
-      ui.PointerEvent event = e;
+  void handleEvent(InputEvent e, BindingHitTestEntry entry) {
+    if (e is PointerInputEvent) {
+      PointerInputEvent event = e;
       pointerRouter.route(event);
       if (event.type == 'pointerdown')
         GestureArena.instance.close(event.pointer);
