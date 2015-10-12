@@ -6,8 +6,8 @@ abstract class PhysicsJoint {
     bodyB._joints.add(this);
   }
 
-  PhysicsBody bodyA;
-  PhysicsBody bodyB;
+  final PhysicsBody bodyA;
+  final PhysicsBody bodyB;
 
   bool _active = true;
   box2d.Joint _joint;
@@ -43,21 +43,17 @@ class PhysicsJointRevolute extends PhysicsJoint {
     PhysicsBody bodyA,
     PhysicsBody bodyB,
     this.worldAnchor, {
-      double lowerAngle: 0.0,
-      double upperAngle: 0.0,
-      bool enableLimit: false
+      this.lowerAngle: 0.0,
+      this.upperAngle: 0.0,
+      this.enableLimit: false
     }) : super(bodyA, bodyB) {
-    this.lowerAngle = lowerAngle;
-    this.upperAngle = upperAngle;
-    this.enableLimit = enableLimit;
-
     _completeCreation();
   }
 
-  Point worldAnchor;
-  double lowerAngle;
-  double upperAngle;
-  bool enableLimit;
+  final Point worldAnchor;
+  final double lowerAngle;
+  final double upperAngle;
+  final bool enableLimit;
 
   box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
     // Create Joint Definition
@@ -81,7 +77,8 @@ class PhysicsJointPrismatic extends PhysicsJoint {
   PhysicsJointPrismatic(
     PhysicsBody bodyA,
     PhysicsBody bodyB,
-    this.axis) : super(bodyA, bodyB) {
+    this.axis
+  ) : super(bodyA, bodyB) {
     _completeCreation();
   }
 
@@ -97,7 +94,8 @@ class PhysicsJointPrismatic extends PhysicsJoint {
 class PhysicsJointWeld extends PhysicsJoint {
   PhysicsJointWeld(
     PhysicsBody bodyA,
-    PhysicsBody bodyB) : super(bodyA, bodyB) {
+    PhysicsBody bodyB
+  ) : super(bodyA, bodyB) {
     _completeCreation();
   }
 
@@ -110,4 +108,45 @@ class PhysicsJointWeld extends PhysicsJoint {
     b2Def.initialize(bodyA._body, bodyB._body, middle);
     return physicsNode.b2World.createJoint(b2Def);
   }
+}
+
+class PhysicsJointPulley extends PhysicsJoint {
+  PhysicsJointPulley(
+    PhysicsBody bodyA,
+    PhysicsBody bodyB,
+    this.groundAnchorA,
+    this.groundAnchorB,
+    this.anchorA,
+    this.anchorB,
+    this.ratio
+  ) : super(bodyA, bodyB) {
+    _completeCreation();
+  }
+
+  final Point groundAnchorA;
+  final Point groundAnchorB;
+  final Point anchorA;
+  final Point anchorB;
+  final double ratio;
+
+  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+    box2d.PulleyJointDef b2Def = new box2d.PulleyJointDef();
+    b2Def.initialize(
+      bodyA._body,
+      bodyB._body,
+      _convertPosToVec(groundAnchorA, physicsNode),
+      _convertPosToVec(groundAnchorB, physicsNode),
+      _convertPosToVec(anchorA, physicsNode),
+      _convertPosToVec(anchorB, physicsNode),
+      ratio
+    );
+    return physicsNode.b2World.createJoint(b2Def);
+  }
+}
+
+Vector2 _convertPosToVec(Point pt, PhysicsNode physicsNode) {
+  return new Vector2(
+    pt.x / physicsNode.b2WorldToNodeConversionFactor,
+    pt.y / physicsNode.b2WorldToNodeConversionFactor
+  );
 }
