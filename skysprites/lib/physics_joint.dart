@@ -4,10 +4,6 @@ abstract class PhysicsJoint {
   PhysicsJoint(this.bodyA, this.bodyB) {
     bodyA._joints.add(this);
     bodyB._joints.add(this);
-
-    if (bodyA._attached && bodyB._attached) {
-      _attach(bodyA._physicsNode);
-    }
   }
 
   PhysicsBody bodyA;
@@ -17,6 +13,12 @@ abstract class PhysicsJoint {
   box2d.Joint _joint;
 
   PhysicsNode _physicsNode;
+
+  void _completeCreation() {
+    if (bodyA._attached && bodyB._attached) {
+      _attach(bodyA._physicsNode);
+    }
+  }
 
   void _attach(PhysicsNode physicsNode) {
     if (_joint == null) {
@@ -40,7 +42,7 @@ class PhysicsJointRevolute extends PhysicsJoint {
   PhysicsJointRevolute(
     PhysicsBody bodyA,
     PhysicsBody bodyB,
-    this.anchorWorld, {
+    this.worldAnchor, {
       double lowerAngle: 0.0,
       double upperAngle: 0.0,
       bool enableLimit: false
@@ -48,9 +50,11 @@ class PhysicsJointRevolute extends PhysicsJoint {
     this.lowerAngle = lowerAngle;
     this.upperAngle = upperAngle;
     this.enableLimit = enableLimit;
+
+    _completeCreation();
   }
 
-  Point anchorWorld;
+  Point worldAnchor;
   double lowerAngle;
   double upperAngle;
   bool enableLimit;
@@ -58,8 +62,8 @@ class PhysicsJointRevolute extends PhysicsJoint {
   box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
     // Create Joint Definition
     Vector2 vecAnchor = new Vector2(
-      anchorWorld.x / physicsNode.b2WorldToNodeConversionFactor,
-      anchorWorld.y / physicsNode.b2WorldToNodeConversionFactor
+      worldAnchor.x / physicsNode.b2WorldToNodeConversionFactor,
+      worldAnchor.y / physicsNode.b2WorldToNodeConversionFactor
     );
 
     box2d.RevoluteJointDef b2Def = new box2d.RevoluteJointDef();
@@ -73,18 +77,37 @@ class PhysicsJointRevolute extends PhysicsJoint {
   }
 }
 
+class PhysicsJointPrismatic extends PhysicsJoint {
+  PhysicsJointPrismatic(
+    PhysicsBody bodyA,
+    PhysicsBody bodyB,
+    this.axis) : super(bodyA, bodyB) {
+    _completeCreation();
+  }
+
+  Offset axis;
+
+  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+    box2d.PrismaticJointDef b2Def = new box2d.PrismaticJointDef();
+    b2Def.initialize(bodyA._body, bodyB._body, bodyA._body.position, new Vector2(axis.dx, axis.dy));
+    return physicsNode.b2World.createJoint(b2Def);
+  }
+}
+
 class PhysicsJointWeld extends PhysicsJoint {
   PhysicsJointWeld(
     PhysicsBody bodyA,
-    PhysicsBody bodyB) : super(bodyA, bodyB);
+    PhysicsBody bodyB) : super(bodyA, bodyB) {
+    _completeCreation();
+  }
 
-    box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
-      box2d.WeldJointDef b2Def = new box2d.WeldJointDef();
-      Vector2 middle = new Vector2(
-        (bodyA._body.position.x + bodyB._body.position.x) / 2.0,
-        (bodyA._body.position.y + bodyB._body.position.y) / 2.0
-      );
-      b2Def.initialize(bodyA._body, bodyB._body, middle);
-      return physicsNode.b2World.createJoint(b2Def);
-    }
+  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+    box2d.WeldJointDef b2Def = new box2d.WeldJointDef();
+    Vector2 middle = new Vector2(
+      (bodyA._body.position.x + bodyB._body.position.x) / 2.0,
+      (bodyA._body.position.y + bodyB._body.position.y) / 2.0
+    );
+    b2Def.initialize(bodyA._body, bodyB._body, middle);
+    return physicsNode.b2World.createJoint(b2Def);
+  }
 }
