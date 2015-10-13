@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 // TODO: The sound effects should probably use Android's SoundPool instead of
 // MediaPlayer as it is more efficient and flexible for playing back sound effects
