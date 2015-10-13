@@ -1,13 +1,19 @@
 part of skysprites;
 
 abstract class PhysicsJoint {
-  PhysicsJoint(this.bodyA, this.bodyB, this.breakingForce) {
+  PhysicsJoint(this._bodyA, this._bodyB, this.breakingForce) {
     bodyA._joints.add(this);
     bodyB._joints.add(this);
   }
 
-  final PhysicsBody bodyA;
-  final PhysicsBody bodyB;
+  PhysicsBody _bodyA;
+
+  PhysicsBody get bodyA => _bodyA;
+
+  PhysicsBody _bodyB;
+
+  PhysicsBody get bodyB => _bodyB;
+
   final double breakingForce;
 
   bool _active = true;
@@ -176,6 +182,160 @@ class PhysicsJointPulley extends PhysicsJoint {
       _convertPosToVec(anchorB, physicsNode),
       ratio
     );
+    return physicsNode.b2World.createJoint(b2Def);
+  }
+}
+
+class PhysicsJointGear extends PhysicsJoint {
+  PhysicsJointGear(
+    PhysicsBody bodyA,
+    PhysicsBody bodyB, {
+      double breakingForce,
+      this.ratio: 0.0
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
+    _completeCreation();
+  }
+
+  final double ratio;
+
+  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+    box2d.GearJointDef b2Def = new box2d.GearJointDef();
+    b2Def.bodyA = bodyA._body;
+    b2Def.bodyB = bodyB._body;
+    b2Def.ratio = ratio;
+
+    return physicsNode.b2World.createJoint(b2Def);
+  }
+}
+
+class PhysicsJointDistance extends PhysicsJoint {
+  PhysicsJointDistance(
+    PhysicsBody bodyA,
+    PhysicsBody bodyB,
+    this.anchorA,
+    this.anchorB, {
+      double breakingForce,
+      this.length,
+      this.dampening: 0.0,
+      this.frequency: 0.0
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
+    _completeCreation();
+  }
+
+  final Point anchorA;
+  final Point anchorB;
+  final double length;
+  final double dampening;
+  final double frequency;
+
+  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+    box2d.DistanceJointDef b2Def = new box2d.DistanceJointDef();
+    b2Def.initialize(
+      bodyA._body,
+      bodyB._body,
+      _convertPosToVec(anchorA, physicsNode),
+      _convertPosToVec(anchorB, physicsNode)
+    );
+    b2Def.dampingRatio = dampening;
+    b2Def.frequencyHz = frequency;
+    if (length != null)
+      b2Def.length = length / physicsNode.b2WorldToNodeConversionFactor;
+
+    return physicsNode.b2World.createJoint(b2Def);
+  }
+}
+
+class PhysicsJointWheel extends PhysicsJoint {
+  PhysicsJointWheel(
+    PhysicsBody bodyA,
+    PhysicsBody bodyB,
+    this.anchor,
+    this.axis, {
+      double breakingForce,
+      this.dampening: 0.0,
+      this.frequency: 0.0
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
+    _completeCreation();
+  }
+
+  final Point anchor;
+  final Offset axis;
+  final double dampening;
+  final double frequency;
+
+  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+    box2d.WheelJointDef b2Def = new box2d.WheelJointDef();
+    b2Def.initialize(
+      bodyA._body,
+      bodyB._body,
+      _convertPosToVec(anchor, physicsNode),
+      new Vector2(axis.dx, axis.dy)
+    );
+    b2Def.dampingRatio = dampening;
+    b2Def.frequencyHz = frequency;
+
+    return physicsNode.b2World.createJoint(b2Def);
+  }
+}
+
+class PhysicsJointFriction extends PhysicsJoint {
+  PhysicsJointFriction(
+    PhysicsBody bodyA,
+    PhysicsBody bodyB,
+    this.anchor, {
+      double breakingForce,
+      this.maxForce: 0.0,
+      this.maxTorque: 0.0
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
+    _completeCreation();
+  }
+
+  final Point anchor;
+  final double maxForce;
+  final double maxTorque;
+
+  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+    box2d.FrictionJointDef b2Def = new box2d.FrictionJointDef();
+    b2Def.initialize(
+      bodyA._body,
+      bodyB._body,
+      _convertPosToVec(anchor, physicsNode)
+    );
+    b2Def.maxForce = maxForce / physicsNode.b2WorldToNodeConversionFactor;
+    b2Def.maxTorque = maxTorque / physicsNode.b2WorldToNodeConversionFactor;
+    return physicsNode.b2World.createJoint(b2Def);
+  }
+}
+
+class PhysicsJointConstantVolume extends PhysicsJoint {
+  PhysicsJointConstantVolume(
+    this.bodies, {
+      double breakingForce,
+      this.dampening,
+      this.frequency
+    }
+  ) : super(null, null, breakingForce) {
+    assert(bodies.length > 2);
+    _bodyA = bodies[0];
+    _bodyB = bodies[1];
+    _completeCreation();
+  }
+
+  final List<PhysicsBody> bodies;
+  final double dampening;
+  final double frequency;
+
+  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+    box2d.ConstantVolumeJointDef b2Def = new box2d.ConstantVolumeJointDef();
+    for (PhysicsBody body in bodies) {
+      b2Def.addBody(body._body);
+    }
+    b2Def.dampingRatio = dampening;
+    b2Def.frequencyHz = frequency;
     return physicsNode.b2World.createJoint(b2Def);
   }
 }
