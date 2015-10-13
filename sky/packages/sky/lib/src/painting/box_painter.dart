@@ -10,42 +10,46 @@ import 'package:flutter/services.dart';
 
 import 'shadows.dart';
 
-/// An immutable set of offsets in each of the four cardinal directions
+/// An immutable set of offsets in each of the four cardinal directions.
 ///
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
 class EdgeDims {
-  /// Constructs an EdgeDims from offsets from the top, right, bottom and left
+  /// Constructs an EdgeDims from offsets from the top, right, bottom and left.
   const EdgeDims.TRBL(this.top, this.right, this.bottom, this.left);
 
-  /// Constructs an EdgeDims where all the offsets are value
+  /// Constructs an EdgeDims where all the offsets are value.
   const EdgeDims.all(double value)
       : top = value, right = value, bottom = value, left = value;
 
-  /// Constructs an EdgeDims with only the given values non-zero
+  /// Constructs an EdgeDims with only the given values non-zero.
   const EdgeDims.only({ this.top: 0.0,
                         this.right: 0.0,
                         this.bottom: 0.0,
                         this.left: 0.0 });
 
-  /// Constructs an EdgeDims with symmetrical vertical and horizontal offsets
+  /// Constructs an EdgeDims with symmetrical vertical and horizontal offsets.
   const EdgeDims.symmetric({ double vertical: 0.0,
                              double horizontal: 0.0 })
     : top = vertical, left = horizontal, bottom = vertical, right = horizontal;
 
-  /// The offset from the top
+  /// The offset from the top.
   final double top;
 
-  /// The offset from the right
+  /// The offset from the right.
   final double right;
 
-  /// The offset from the bottom
+  /// The offset from the bottom.
   final double bottom;
 
-  /// The offset from the left
+  /// The offset from the left.
   final double left;
 
+  /// Whether every dimension is non-negative.
   bool get isNonNegative => top >= 0.0 && right >= 0.0 && bottom >= 0.0 && left >= 0.0;
+
+  /// The size that this edge dims would occupy with an empty interior.
+  Size get collapsedSize => new Size(left + right, top + bottom);
 
   EdgeDims operator-(EdgeDims other) {
     return new EdgeDims.TRBL(
@@ -101,7 +105,7 @@ class EdgeDims {
     );
   }
 
-  /// Linearly interpolate between two EdgeDims
+  /// Linearly interpolate between two EdgeDims.
   ///
   /// If either is null, this function interpolates from [EdgeDims.zero].
   static EdgeDims lerp(EdgeDims a, EdgeDims b, double t) {
@@ -119,7 +123,7 @@ class EdgeDims {
     );
   }
 
-  /// An EdgeDims with zero offsets in each direction
+  /// An EdgeDims with zero offsets in each direction.
   static const EdgeDims zero = const EdgeDims.TRBL(0.0, 0.0, 0.0, 0.0);
 
   bool operator ==(dynamic other) {
@@ -416,88 +420,121 @@ void paintImage({
   Rect rect,
   ui.Image image,
   ui.ColorFilter colorFilter,
-  fit: ImageFit.scaleDown,
+  ImageFit fit,
   repeat: ImageRepeat.noRepeat,
+  Rect centerSlice,
   double positionX: 0.5,
   double positionY: 0.5
 }) {
-  Size bounds = rect.size;
-  Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
+  Size outputSize = rect.size;
+  Size inputSize = new Size(image.width.toDouble(), image.height.toDouble());
+  Offset sliceBorder;
+  if (centerSlice != null) {
+    sliceBorder = new Offset(
+      centerSlice.left + inputSize.width - centerSlice.right,
+      centerSlice.top + inputSize.height - centerSlice.bottom
+    );
+    outputSize -= sliceBorder;
+    inputSize -= sliceBorder;
+  }
   Size sourceSize;
   Size destinationSize;
-  switch(fit) {
+  fit ??= centerSlice == null ? ImageFit.scaleDown : ImageFit.fill;
+  assert(centerSlice == null || (fit != ImageFit.none && fit != ImageFit.cover));
+  switch (fit) {
     case ImageFit.fill:
-      sourceSize = imageSize;
-      destinationSize = bounds;
+      sourceSize = inputSize;
+      destinationSize = outputSize;
       break;
     case ImageFit.contain:
-      sourceSize = imageSize;
-      if (bounds.width / bounds.height > sourceSize.width / sourceSize.height)
-        destinationSize = new Size(sourceSize.width * bounds.height / sourceSize.height, bounds.height);
+      sourceSize = inputSize;
+      if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height)
+        destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
       else
-        destinationSize = new Size(bounds.width, sourceSize.height * bounds.width / sourceSize.width);
+        destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
       break;
     case ImageFit.cover:
-      if (bounds.width / bounds.height > imageSize.width / imageSize.height)
-        sourceSize = new Size(imageSize.width, imageSize.width * bounds.height / bounds.width);
+      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height)
+        sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
       else
-        sourceSize = new Size(imageSize.height * bounds.width / bounds.height, imageSize.height);
-      destinationSize = bounds;
+        sourceSize = new Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
+      destinationSize = outputSize;
       break;
     case ImageFit.none:
-      sourceSize = new Size(math.min(imageSize.width, bounds.width),
-                            math.min(imageSize.height, bounds.height));
+      sourceSize = new Size(math.min(inputSize.width, outputSize.width),
+                            math.min(inputSize.height, outputSize.height));
       destinationSize = sourceSize;
       break;
     case ImageFit.scaleDown:
-      sourceSize = imageSize;
-      destinationSize = bounds;
+      sourceSize = inputSize;
+      destinationSize = outputSize;
       if (sourceSize.height > destinationSize.height)
         destinationSize = new Size(sourceSize.width * destinationSize.height / sourceSize.height, sourceSize.height);
       if (sourceSize.width > destinationSize.width)
         destinationSize = new Size(destinationSize.width, sourceSize.height * destinationSize.width / sourceSize.width);
       break;
   }
+  if (centerSlice != null) {
+    outputSize += sliceBorder;
+    destinationSize += sliceBorder;
+    // We don't have the ability to draw a subset of the image at the same time
+    // as we apply a nine-patch stretch.
+    assert(sourceSize == inputSize);
+  }
   // TODO(abarth): Implement |repeat|.
   Paint paint = new Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
-  double dx = (bounds.width - destinationSize.width) * positionX;
-  double dy = (bounds.height - destinationSize.height) * positionY;
+  double dx = (outputSize.width - destinationSize.width) * positionX;
+  double dy = (outputSize.height - destinationSize.height) * positionY;
   Point destinationPosition = rect.topLeft + new Offset(dx, dy);
-  canvas.drawImageRect(image, Point.origin & sourceSize, destinationPosition & destinationSize, paint);
+  Rect destinationRect = destinationPosition & destinationSize;
+  if (centerSlice == null)
+    canvas.drawImageRect(image, Point.origin & sourceSize, destinationRect, paint);
+  else
+    canvas.drawImageNine(image, centerSlice, destinationRect, paint);
 }
 
 typedef void BackgroundImageChangeListener();
 
-/// A background image for a box
+/// A background image for a box.
 class BackgroundImage {
-  /// How the background image should be inscribed into the box
+  /// How the background image should be inscribed into the box.
   final ImageFit fit;
 
-  /// How to paint any portions of the box not covered by the background image
+  /// How to paint any portions of the box not covered by the background image.
   final ImageRepeat repeat;
 
-  /// A color filter to apply to the background image before painting it
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
+  final Rect centerSlice;
+
+  /// A color filter to apply to the background image before painting it.
   final ui.ColorFilter colorFilter;
 
   BackgroundImage({
     ImageResource image,
-    this.fit: ImageFit.scaleDown,
+    this.fit,
     this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice,
     this.colorFilter
   }) : _imageResource = image;
 
-  ui.Image _image;
-  /// The image to be painted into the background
+  /// The image to be painted into the background.
   ui.Image get image => _image;
+  ui.Image _image;
 
   ImageResource _imageResource;
 
   final List<BackgroundImageChangeListener> _listeners =
       new List<BackgroundImageChangeListener>();
 
-  /// Call listener when the background images changes (e.g., arrives from the network)
+  /// Call listener when the background images changes (e.g., arrives from the network).
   void addChangeListener(BackgroundImageChangeListener listener) {
     // We add the listener to the _imageResource first so that the first change
     // listener doesn't get callback synchronously if the image resource is
@@ -507,7 +544,7 @@ class BackgroundImage {
     _listeners.add(listener);
   }
 
-  /// No longer call listener when the background image changes
+  /// No longer call listener when the background image changes.
   void removeChangeListener(BackgroundImageChangeListener listener) {
     _listeners.remove(listener);
     // We need to remove ourselves as listeners from the _imageResource so that

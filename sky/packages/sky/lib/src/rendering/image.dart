@@ -9,7 +9,7 @@ import 'package:flutter/painting.dart';
 import 'box.dart';
 import 'object.dart';
 
-/// An image in the render tree
+/// An image in the render tree.
 ///
 /// The render image attempts to find a size for itself that fits in the given
 /// constraints and preserves the image's intrinisc aspect ratio.
@@ -19,18 +19,20 @@ class RenderImage extends RenderBox {
     double width,
     double height,
     ui.ColorFilter colorFilter,
-    fit: ImageFit.scaleDown,
-    repeat: ImageRepeat.noRepeat
+    ImageFit fit,
+    repeat: ImageRepeat.noRepeat,
+    Rect centerSlice
   }) : _image = image,
       _width = width,
       _height = height,
       _colorFilter = colorFilter,
       _fit = fit,
-      _repeat = repeat;
+      _repeat = repeat,
+      _centerSlice = centerSlice;
 
-  ui.Image _image;
-  /// The image to display
+  /// The image to display.
   ui.Image get image => _image;
+  ui.Image _image;
   void set image (ui.Image value) {
     if (value == _image)
       return;
@@ -40,9 +42,9 @@ class RenderImage extends RenderBox {
       markNeedsLayout();
   }
 
-  double _width;
-  /// If non-null, requires the image to have this width
+  /// If non-null, requires the image to have this width.
   double get width => _width;
+  double _width;
   void set width (double value) {
     if (value == _width)
       return;
@@ -50,9 +52,9 @@ class RenderImage extends RenderBox {
     markNeedsLayout();
   }
 
-  double _height;
-  /// If non-null, requires the image to have this height
+  /// If non-null, requires the image to have this height.
   double get height => _height;
+  double _height;
   void set height (double value) {
     if (value == _height)
       return;
@@ -60,9 +62,9 @@ class RenderImage extends RenderBox {
     markNeedsLayout();
   }
 
-  ui.ColorFilter _colorFilter;
   /// If non-null, apply this color filter to the image before painint.
   ui.ColorFilter get colorFilter => _colorFilter;
+  ui.ColorFilter _colorFilter;
   void set colorFilter (ui.ColorFilter value) {
     if (value == _colorFilter)
       return;
@@ -70,9 +72,9 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
-  ImageFit _fit;
-  /// How to inscribe the image into the place allocated during layout
+  /// How to inscribe the image into the place allocated during layout.
   ImageFit get fit => _fit;
+  ImageFit _fit;
   void set fit (ImageFit value) {
     if (value == _fit)
       return;
@@ -80,9 +82,9 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
-  ImageRepeat _repeat;
-  /// Not yet implemented
+  /// Not yet implemented.
   ImageRepeat get repeat => _repeat;
+  ImageRepeat _repeat;
   void set repeat (ImageRepeat value) {
     if (value == _repeat)
       return;
@@ -90,7 +92,23 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
-  /// Find a size for the render image within the given constraints
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
+  Rect get centerSlice => _centerSlice;
+  Rect _centerSlice;
+  void set centerSlice (Rect value) {
+    if (value == _centerSlice)
+      return;
+    _centerSlice = value;
+    markNeedsPaint();
+  }
+
+  /// Find a size for the render image within the given constraints.
   ///
   ///  - The dimensions of the RenderImage must fit within the constraints.
   ///  - The aspect ratio of the RenderImage matches the instrinsic aspect
@@ -170,6 +188,7 @@ class RenderImage extends RenderBox {
       image: _image,
       colorFilter: _colorFilter,
       fit: _fit,
+      centerSlice: _centerSlice,
       repeat: _repeat
     );
   }
