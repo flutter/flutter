@@ -7,12 +7,22 @@ import 'package:sky_tools/src/application_package.dart';
 import 'package:sky_tools/src/build_configuration.dart';
 import 'package:sky_tools/src/commands/flutter_command.dart';
 import 'package:sky_tools/src/device.dart';
+import 'package:sky_tools/src/toolchain.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: new AndroidApk(localPath: '/mock/path/to/android/SkyShell.apk'),
     iOS: new IOSApp(localPath: '/mock/path/to/iOS/SkyShell.app'),
     iOSSimulator: new IOSApp(localPath: '/mock/path/to/iOSSimulator/SkyShell.app'));
+}
+
+class MockCompiler extends Mock implements Compiler {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class MockToolchain extends Toolchain {
+  MockToolchain() : super(compiler: new MockCompiler());
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
@@ -46,5 +56,6 @@ class MockDeviceStore extends DeviceStore {
 void applyMocksToCommand(FlutterCommand command) {
   command
     ..applicationPackages = new MockApplicationPackageStore()
+    ..toolchain = new MockToolchain()
     ..devices = new MockDeviceStore();
 }

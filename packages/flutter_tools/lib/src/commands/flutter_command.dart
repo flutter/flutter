@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
 import '../device.dart';
+import '../toolchain.dart';
 import 'flutter_command_runner.dart';
 
 abstract class FlutterCommand extends Command {
@@ -16,6 +17,11 @@ abstract class FlutterCommand extends Command {
   Future downloadApplicationPackages() async {
     if (applicationPackages == null)
       applicationPackages = await ApplicationPackageStore.forConfigs(runner.buildConfigurations);
+  }
+
+  Future downloadToolchain() async {
+    if (toolchain == null)
+      toolchain = await Toolchain.forConfigs(runner.buildConfigurations);
   }
 
   void connectToDevices() {
@@ -30,9 +36,11 @@ abstract class FlutterCommand extends Command {
 
   void inheritFromParent(FlutterCommand other) {
     applicationPackages = other.applicationPackages;
+    toolchain = other.toolchain;
     devices = other.devices;
   }
 
   ApplicationPackageStore applicationPackages;
+  Toolchain toolchain;
   DeviceStore devices;
 }

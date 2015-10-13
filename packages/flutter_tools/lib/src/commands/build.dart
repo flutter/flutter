@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:args/command_runner.dart';
 import 'package:yaml/yaml.dart';
 
-import '../artifacts.dart';
+import '../toolchain.dart';
+import 'flutter_command.dart';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const List<String> _kDensities = const ['drawable-xxhdpi'];
@@ -96,74 +96,80 @@ Future<ArchiveFile> _createFile(String key, String assetBase) async {
   return new ArchiveFile.noCompress(key, content.length, content);
 }
 
-Future _compileSnapshot({
-  String compilerPath,
-  String mainPath,
-  String packageRoot,
-  String snapshotPath
-}) async {
-  if (compilerPath == null) {
-    compilerPath = await ArtifactStore.getPath(Artifact.flutterCompiler);
-  }
-  ProcessResult result = await Process.run(compilerPath, [
-    mainPath,
-    '--package-root=$packageRoot',
-    '--snapshot=$snapshotPath'
-  ]);
-  if (result.exitCode != 0) {
-    print(result.stdout);
-    print(result.stderr);
-    exit(result.exitCode);
-  }
-}
-
 Future<ArchiveFile> _createSnapshotFile(String snapshotPath) async {
   File file = new File(snapshotPath);
   List<int> content = await file.readAsBytes();
   return new ArchiveFile(_kSnapshotKey, content.length, content);
 }
 
-class BuildCommand extends Command {
-  final name = 'build';
-  final description = 'Create a Flutter app.';
+const String _kDefaultAssetBase = 'packages/material_design_icons/icons';
+const String _kDefaultMainPath = 'lib/main.dart';
+const String _kDefaultOutputPath = 'app.flx';
+const String _kDefaultSnapshotPath = 'snapshot_blob.bin';
+
+class BuildCommand extends FlutterCommand {
+  final String name = 'build';
+  final String description = 'Create a Flutter app.';
+
   BuildCommand() {
-    argParser.addOption('asset-base', defaultsTo: 'packages/material_design_icons/icons');
+    argParser.addOption('asset-base', defaultsTo: _kDefaultAssetBase);
     argParser.addOption('compiler');
-    argParser.addOption('main', defaultsTo: 'lib/main.dart');
+    argParser.addOption('main', defaultsTo: _kDefaultMainPath);
     argParser.addOption('manifest');
-    argParser.addOption('output-file', abbr: 'o', defaultsTo: 'app.flx');
-    argParser.addOption('snapshot', defaultsTo: 'snapshot_blob.bin');
+    argParser.addOption('output-file', abbr: 'o', defaultsTo: _kDefaultOutputPath);
+    argParser.addOption('snapshot', defaultsTo: _kDefaultSnapshotPath);
   }
 
   @override
   Future<int> run() async {
-    String manifestPath = argResults['manifest'];
+    String compilerPath = argResults['compiler'];
+
+    if (compilerPath == null)
+      await downloadToolchain();
+    else
+      toolchain = new Toolchain(compiler: new Compiler(compilerPath));
+
+    return await build(
+      assetBase: argResults['asset-base'],
+      mainPath: argResults['main'],
+      manifestPath: argResults['manifest'],
+      outputPath: argResults['output-file'],
+      snapshotPath: argResults['snapshot']
+    );
+  }
+
+  Future<int> build({
+    String assetBase: _kDefaultAssetBase,
+    String mainPath: _kDefaultMainPath,
+    String manifestPath,
+    String outputPath: _kDefaultOutputPath,
+    String snapshotPath: _kDefaultSnapshotPath
+  }) async {
     Map manifestDescriptor = await _loadManifest(manifestPath);
+
     Iterable<_Asset> assets = _parseAssets(manifestDescriptor, manifestPath);
     Iterable<_MaterialAsset> materialAssets = _parseMaterialAssets(manifestDescriptor);
 
     Archive archive = new Archive();
 
-    String snapshotPath = argResults['snapshot'];
-    await _compileSnapshot(
-      compilerPath: argResults['compiler'],
-      mainPath: argResults['main'],
-      packageRoot: globalResults['package-root'],
-      snapshotPath: snapshotPath);
+    int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath);
+    if (result != 0)
+      return result;
+
     archive.addFile(await _createSnapshotFile(snapshotPath));
 
     for (_Asset asset in assets)
       archive.addFile(await _createFile(asset.key, asset.base));
 
     for (_MaterialAsset asset in materialAssets) {
-      ArchiveFile file = await _createFile(asset.key, argResults['asset-base']);
+      ArchiveFile file = await _createFile(asset.key, assetBase);
       if (file != null)
         archive.addFile(file);
     }
 
-    File outputFile = new File(argResults['output-file']);
+    File outputFile = new File(outputPath);
     await outputFile.writeAsString('#!mojo mojo:sky_viewer\n');
-    await outputFile.writeAsBytes(new ZipEncoder().encode(archive), mode: FileMode.APPEND);
+    await outputFile.writeAsBytes(new ZipEncoder().encode(archive), mode: FileMode.APPEND, flush: true);
     return 0;
   }
 }

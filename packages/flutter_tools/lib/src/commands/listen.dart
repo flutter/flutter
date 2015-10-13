@@ -7,10 +7,11 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 
-import 'flutter_command.dart';
 import '../application_package.dart';
 import '../device.dart';
 import '../process.dart';
+import 'build.dart';
+import 'flutter_command.dart';
 
 final Logger _logging = new Logger('sky_tools.listen');
 
@@ -33,9 +34,13 @@ class ListenCommand extends FlutterCommand {
         help: 'Target app path or filename to start.');
   }
 
+  static const String _localFlutterBundle = 'app.flx';
+  static const String _remoteFlutterBundle = 'Documents/app.flx';
+
   @override
   Future<int> run() async {
     await downloadApplicationPackagesAndConnectToDevices();
+    await downloadToolchain();
 
     if (argResults.rest.length > 0) {
       watchCommand = _initWatchCommand(argResults.rest);
@@ -46,27 +51,9 @@ class ListenCommand extends FlutterCommand {
     while (true) {
       _logging.info('Updating running Flutter apps...');
 
-      // TODO(iansf): refactor build command so that this doesn't have
-      //              to call out like this.
-      List<String> command = ['pub', 'run', 'sky_tools', 'build',];
-
-      try {
-        // In testing, sky-src-path isn't added to the options, and
-        // the ArgParser module throws an exception, so we have to
-        // catch and ignore the error in order to test.
-        if (globalResults.wasParsed('sky-src-path')) {
-          command.addAll([
-            // TODO(iansf): Don't rely on sky-src-path for the snapshotter.
-            '--compiler',
-            '${globalResults['sky-src-path']}'
-                '/out/ios_sim_Debug/clang_x64/sky_snapshot'
-          ]);
-        }
-      } catch (e) {}
-      runSync(command);
-
-      String localFlutterBundle = 'app.flx';
-      String remoteFlutterBundle = 'Documents/app.flx';
+      BuildCommand builder = new BuildCommand();
+      builder.inheritFromParent(this);
+      builder.build(outputPath: _localFlutterBundle);
 
       for (Device device in devices.all) {
         ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
@@ -76,11 +63,11 @@ class ListenCommand extends FlutterCommand {
           await devices.android.startServer(
               argResults['target'], true, argResults['checked'], package);
         } else if (device is IOSDevice) {
-          device.pushFile(package, localFlutterBundle, remoteFlutterBundle);
+          device.pushFile(package, _localFlutterBundle, _remoteFlutterBundle);
         } else if (device is IOSSimulator) {
           // TODO(abarth): Move pushFile up to Device once Android supports
           // pushing new bundles.
-          device.pushFile(package, localFlutterBundle, remoteFlutterBundle);
+          device.pushFile(package, _localFlutterBundle, _remoteFlutterBundle);
         } else {
           assert(false);
         }
