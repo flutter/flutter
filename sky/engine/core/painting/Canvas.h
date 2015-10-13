@@ -89,6 +89,7 @@ public:
     void drawPath(const CanvasPath* path, const Paint& paint);
     void drawImage(const CanvasImage* image, const Point& p, const Paint& paint);
     void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint);
+    void drawImageNine(const CanvasImage* image, Rect& center, Rect& dst, const Paint& paint);
     void drawPicture(Picture* picture);
     void drawDrawable(Drawable* drawable);
 
