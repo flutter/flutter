@@ -64,7 +64,7 @@ class PhysicsJointRevolute extends PhysicsJoint {
   PhysicsJointRevolute(
     PhysicsBody bodyA,
     PhysicsBody bodyB,
-    this.worldAnchor, {
+    this._worldAnchor, {
       this.lowerAngle: 0.0,
       this.upperAngle: 0.0,
       this.enableLimit: false,
@@ -73,7 +73,7 @@ class PhysicsJointRevolute extends PhysicsJoint {
     _completeCreation();
   }
 
-  final Point worldAnchor;
+  final Point _worldAnchor;
   final double lowerAngle;
   final double upperAngle;
   final bool enableLimit;
@@ -81,8 +81,8 @@ class PhysicsJointRevolute extends PhysicsJoint {
   box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
     // Create Joint Definition
     Vector2 vecAnchor = new Vector2(
-      worldAnchor.x / physicsNode.b2WorldToNodeConversionFactor,
-      worldAnchor.y / physicsNode.b2WorldToNodeConversionFactor
+      _worldAnchor.x / physicsNode.b2WorldToNodeConversionFactor,
+      _worldAnchor.y / physicsNode.b2WorldToNodeConversionFactor
     );
 
     box2d.RevoluteJointDef b2Def = new box2d.RevoluteJointDef();
@@ -120,11 +120,16 @@ class PhysicsJointWeld extends PhysicsJoint {
   PhysicsJointWeld(
     PhysicsBody bodyA,
     PhysicsBody bodyB, {
-      double breakingForce
+      double breakingForce,
+      this.dampening: 0.0,
+      this.frequency: 0.0
     }
   ) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
+
+  final double dampening;
+  final double frequency;
 
   box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
     box2d.WeldJointDef b2Def = new box2d.WeldJointDef();
@@ -133,6 +138,8 @@ class PhysicsJointWeld extends PhysicsJoint {
       (bodyA._body.position.y + bodyB._body.position.y) / 2.0
     );
     b2Def.initialize(bodyA._body, bodyB._body, middle);
+    b2Def.dampingRatio = dampening;
+    b2Def.frequencyHz = frequency;
     return physicsNode.b2World.createJoint(b2Def);
   }
 }
