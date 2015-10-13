@@ -1,7 +1,9 @@
 part of skysprites;
 
+typedef void PhysicsJointBreakCallback(PhysicsJoint joint);
+
 abstract class PhysicsJoint {
-  PhysicsJoint(this._bodyA, this._bodyB, this.breakingForce) {
+  PhysicsJoint(this._bodyA, this._bodyB, this.breakingForce, this.breakCallback) {
     bodyA._joints.add(this);
     bodyB._joints.add(this);
   }
@@ -15,6 +17,8 @@ abstract class PhysicsJoint {
   PhysicsBody get bodyB => _bodyB;
 
   final double breakingForce;
+
+  final PhysicsJointBreakCallback breakCallback;
 
   bool _active = true;
   box2d.Joint _joint;
@@ -58,9 +62,12 @@ abstract class PhysicsJoint {
       _joint.getReactionForce(1.0 / dt, reactionForce);
 
       if (breakingForce * breakingForce < reactionForce.length2) {
-        // TODO: Add callback
-
+        // Destroy the joint
         destroy();
+
+        // Notify any observer
+        if (breakCallback != null)
+          breakCallback(this);
       }
     }
   }
@@ -74,8 +81,9 @@ class PhysicsJointRevolute extends PhysicsJoint {
       this.lowerAngle: 0.0,
       this.upperAngle: 0.0,
       this.enableLimit: false,
+      PhysicsJointBreakCallback breakCallback,
       double breakingForce
-    }) : super(bodyA, bodyB, breakingForce) {
+    }) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
@@ -107,9 +115,10 @@ class PhysicsJointPrismatic extends PhysicsJoint {
     PhysicsBody bodyA,
     PhysicsBody bodyB,
     this.axis, {
-      double breakingForce
+      double breakingForce,
+      PhysicsJointBreakCallback breakCallback
     }
-  ) : super(bodyA, bodyB, breakingForce) {
+  ) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
@@ -127,10 +136,11 @@ class PhysicsJointWeld extends PhysicsJoint {
     PhysicsBody bodyA,
     PhysicsBody bodyB, {
       double breakingForce,
+      PhysicsJointBreakCallback breakCallback,
       this.dampening: 0.0,
       this.frequency: 0.0
     }
-  ) : super(bodyA, bodyB, breakingForce) {
+  ) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
@@ -159,9 +169,10 @@ class PhysicsJointPulley extends PhysicsJoint {
     this.anchorA,
     this.anchorB,
     this.ratio, {
-      double breakingForce
+      double breakingForce,
+      PhysicsJointBreakCallback breakCallback
     }
-  ) : super(bodyA, bodyB, breakingForce) {
+  ) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
@@ -191,9 +202,10 @@ class PhysicsJointGear extends PhysicsJoint {
     PhysicsBody bodyA,
     PhysicsBody bodyB, {
       double breakingForce,
+      PhysicsJointBreakCallback breakCallback,
       this.ratio: 0.0
     }
-  ) : super(bodyA, bodyB, breakingForce) {
+  ) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
@@ -216,11 +228,12 @@ class PhysicsJointDistance extends PhysicsJoint {
     this.anchorA,
     this.anchorB, {
       double breakingForce,
+      PhysicsJointBreakCallback breakCallback,
       this.length,
       this.dampening: 0.0,
       this.frequency: 0.0
     }
-  ) : super(bodyA, bodyB, breakingForce) {
+  ) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
@@ -254,10 +267,11 @@ class PhysicsJointWheel extends PhysicsJoint {
     this.anchor,
     this.axis, {
       double breakingForce,
+      PhysicsJointBreakCallback breakCallback,
       this.dampening: 0.0,
       this.frequency: 0.0
     }
-  ) : super(bodyA, bodyB, breakingForce) {
+  ) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
@@ -287,10 +301,11 @@ class PhysicsJointFriction extends PhysicsJoint {
     PhysicsBody bodyB,
     this.anchor, {
       double breakingForce,
+      PhysicsJointBreakCallback breakCallback,
       this.maxForce: 0.0,
       this.maxTorque: 0.0
     }
-  ) : super(bodyA, bodyB, breakingForce) {
+  ) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
@@ -315,10 +330,11 @@ class PhysicsJointConstantVolume extends PhysicsJoint {
   PhysicsJointConstantVolume(
     this.bodies, {
       double breakingForce,
+      PhysicsJointBreakCallback breakCallback,
       this.dampening,
       this.frequency
     }
-  ) : super(null, null, breakingForce) {
+  ) : super(null, null, breakingForce, breakCallback) {
     assert(bodies.length > 2);
     _bodyA = bodies[0];
     _bodyB = bodies[1];
