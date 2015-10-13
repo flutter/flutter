@@ -809,8 +809,9 @@ class Image extends LeafRenderObjectWidget {
     this.width,
     this.height,
     this.colorFilter,
-    this.fit: ImageFit.scaleDown,
-    this.repeat: ImageRepeat.noRepeat
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
   }) : super(key: key);
 
   final ui.Image image;
@@ -819,6 +820,7 @@ class Image extends LeafRenderObjectWidget {
   final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
+  final Rect centerSlice;
 
   RenderImage createRenderObject() => new RenderImage(
     image: image,
@@ -826,7 +828,8 @@ class Image extends LeafRenderObjectWidget {
     height: height,
     colorFilter: colorFilter,
     fit: fit,
-    repeat: repeat);
+    repeat: repeat,
+    centerSlice: centerSlice);
 
   void updateRenderObject(RenderImage renderObject, Image oldWidget) {
     renderObject.image = image;
@@ -835,6 +838,7 @@ class Image extends LeafRenderObjectWidget {
     renderObject.colorFilter = colorFilter;
     renderObject.fit = fit;
     renderObject.repeat = repeat;
+    renderObject.centerSlice = centerSlice;
   }
 }
 
@@ -845,8 +849,9 @@ class ImageListener extends StatefulComponent {
     this.width,
     this.height,
     this.colorFilter,
-    this.fit: ImageFit.scaleDown,
-    this.repeat: ImageRepeat.noRepeat
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
   }) : super(key: key) {
     assert(image != null);
   }
@@ -857,6 +862,7 @@ class ImageListener extends StatefulComponent {
   final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
+  final Rect centerSlice;
 
   _ImageListenerState createState() => new _ImageListenerState();
 }
@@ -894,7 +900,8 @@ class _ImageListenerState extends State<ImageListener> {
       height: config.height,
       colorFilter: config.colorFilter,
       fit: config.fit,
-      repeat: config.repeat
+      repeat: config.repeat,
+      centerSlice: config.centerSlice
     );
   }
 }
@@ -906,8 +913,9 @@ class NetworkImage extends StatelessComponent {
     this.width,
     this.height,
     this.colorFilter,
-    this.fit: ImageFit.scaleDown,
-    this.repeat: ImageRepeat.noRepeat
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
   }) : super(key: key);
 
   final String src;
@@ -916,6 +924,7 @@ class NetworkImage extends StatelessComponent {
   final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
+  final Rect centerSlice;
 
   Widget build(BuildContext context) {
     return new ImageListener(
@@ -924,7 +933,8 @@ class NetworkImage extends StatelessComponent {
       height: height,
       colorFilter: colorFilter,
       fit: fit,
-      repeat: repeat
+      repeat: repeat,
+      centerSlice: centerSlice
     );
   }
 }
@@ -937,8 +947,9 @@ class AssetImage extends StatelessComponent {
     this.width,
     this.height,
     this.colorFilter,
-    this.fit: ImageFit.scaleDown,
-    this.repeat: ImageRepeat.noRepeat
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
   }) : super(key: key);
 
   final String name;
@@ -948,6 +959,7 @@ class AssetImage extends StatelessComponent {
   final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
+  final Rect centerSlice;
 
   Widget build(BuildContext context) {
     return new ImageListener(
@@ -956,9 +968,26 @@ class AssetImage extends StatelessComponent {
       height: height,
       colorFilter: colorFilter,
       fit: fit,
-      repeat: repeat
+      repeat: repeat,
+      centerSlice: centerSlice
     );
   }
+}
+
+class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
+  WidgetToRenderBoxAdapter(RenderBox renderBox)
+    : renderBox = renderBox,
+      // WidgetToRenderBoxAdapter objects are keyed to their render box. This
+      // prevents the widget being used in the widget hierarchy in two different
+      // places, which would cause the RenderBox to get inserted in multiple
+      // places in the RenderObject tree.
+      super(key: new GlobalObjectKey(renderBox)) {
+    assert(renderBox != null);
+  }
+
+  final RenderBox renderBox;
+
+  RenderBox createRenderObject() => renderBox;
 }
 
 

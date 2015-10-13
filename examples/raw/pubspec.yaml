@@ -1,4 +1,4 @@
-name: raw
+name: sky_raw_examples
 dependencies:
   flutter: ">=0.0.3 <0.1.0"
   sky_tools: any
