@@ -26,7 +26,7 @@ void main() {
       longPressRecognized = true;
     };
 
-    new FakeAsync().run((async) {
+    new FakeAsync().run((FakeAsync async) {
       longPress.addPointer(down);
       GestureArena.instance.close(5);
       expect(longPressRecognized, isFalse);
@@ -50,7 +50,7 @@ void main() {
       longPressRecognized = true;
     };
 
-    new FakeAsync().run((async) {
+    new FakeAsync().run((FakeAsync async) {
       longPress.addPointer(down);
       GestureArena.instance.close(5);
       expect(longPressRecognized, isFalse);
@@ -82,7 +82,7 @@ void main() {
       longPressRecognized = true;
     };
 
-    new FakeAsync().run((async) {
+    new FakeAsync().run((FakeAsync async) {
       showPress.addPointer(down);
       longPress.addPointer(down);
       GestureArena.instance.close(5);

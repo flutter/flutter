@@ -5,36 +5,36 @@ import 'package:test/test.dart';
 import 'dom_utils.dart';
 
 void main() {
-  var document = new Document();
+  Document document = new Document();
 
   test("should replace elements", () {
-    var parent = document.createElement("div");
-    var oldChild = parent.appendChild(document.createElement("div"));
-    var newChild = document.createElement("div");
-    oldChild.replaceWith([newChild]);
+    Element parent = document.createElement("div");
+    Element oldChild = parent.appendChild(document.createElement("div"));
+    Element newChild = document.createElement("div");
+    oldChild.replaceWith(<Node>[newChild]);
     expect(oldChild.parentNode, isNull);
     expect(newChild.parentNode, equals(parent));
   });
 
   test("should replace text", () {
-    var parent = document.createElement("div");
-    var oldChild = parent.appendChild(document.createText(" it's a text "));
-    var newChild = document.createElement("div");
-    oldChild.replaceWith([newChild]);
+    Element parent = document.createElement("div");
+    Node oldChild = parent.appendChild(document.createText(" it's a text "));
+    Element newChild = document.createElement("div");
+    oldChild.replaceWith(<Node>[newChild]);
     expect(oldChild.parentNode, isNull);
     expect(newChild.parentNode, equals(parent));
   });
 
   test("should replace children with a fragment", () {
-    var fragment = document.createDocumentFragment();
-    var child1 = fragment.appendChild(document.createElement("div"));
-    var child2 = fragment.appendChild(document.createText(" text "));
-    var child3 = fragment.appendChild(document.createText(" "));
-    var child4 = fragment.appendChild(document.createElement("div"));
-    var parent = document.createElement("div");
-    var oldChild = parent.appendChild(document.createElement("div"));
-    var lastChild = parent.appendChild(document.createElement("div"));
-    oldChild.replaceWith([fragment]);
+    DocumentFragment fragment = document.createDocumentFragment();
+    Element child1 = fragment.appendChild(document.createElement("div"));
+    Node child2 = fragment.appendChild(document.createText(" text "));
+    Node child3 = fragment.appendChild(document.createText(" "));
+    Element child4 = fragment.appendChild(document.createElement("div"));
+    Element parent = document.createElement("div");
+    Element oldChild = parent.appendChild(document.createElement("div"));
+    Element lastChild = parent.appendChild(document.createElement("div"));
+    oldChild.replaceWith(<Node>[fragment]);
     expect(child1.parentNode, equals(parent));
     expect(child2.parentNode, equals(parent));
     expect(child3.parentNode, equals(parent));

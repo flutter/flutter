@@ -8,7 +8,7 @@ class Item {
   GlobalKey key2 = new GlobalKey();
   String toString() => "Item($key1, $key2)";
 }
-List<Item> items = [new Item(), new Item()];
+List<Item> items = <Item>[new Item(), new Item()];
 
 class StatefulLeaf extends StatefulComponent {
   StatefulLeaf({ GlobalKey key }) : super(key: key);
@@ -34,7 +34,7 @@ class KeyedWrapper extends StatelessComponent {
 }
 
 Widget builder() {
-  return new Column([
+  return new Column(<Widget>[
     new KeyedWrapper(items[1].key1, items[1].key2),
     new KeyedWrapper(items[0].key1, items[0].key2)
   ]);
