@@ -1,25 +1,27 @@
 import 'dart:ui' as ui;
 
-/// Dart-layer version of ui.Event
+/// Base class for input events.
 class InputEvent {
 
-  InputEvent({ this.type }) : timeStamp = 0.0;
+  const InputEvent({ this.type, this.timeStamp: 0.0 });
 
-  factory InputEvent.fromSkyEvent(ui.Event event) {
+  factory InputEvent.fromUiEvent(ui.Event event) {
     if (event is ui.PointerEvent)
       return new PointerInputEvent.fromUiEvent(event);
 
     // Default event
-    InputEvent result = new InputEvent();
-    result.type = event.type;
-    result.timeStamp = event.timeStamp;
+    return new InputEvent(
+      type: event.type,
+      timeStamp: event.timeStamp
+    );
   }
 
-  String type;
-  double timeStamp;
+  final String type;
+  final double timeStamp;
+
 }
 
-/// Dart-layer version of ui.PointerInputEvent
+/// Input event
 class PointerInputEvent extends InputEvent {
 
   // Map actual input pointer value to a unique value
@@ -27,8 +29,9 @@ class PointerInputEvent extends InputEvent {
   static Map<int, int> _pointerMap = new Map<int, int>();
   static int _pointerCount = 0;
 
-  PointerInputEvent({
+  const PointerInputEvent({
     String type,
+    double timeStamp: 0.0,
     this.pointer,
     this.kind,
     this.x,
@@ -51,64 +54,63 @@ class PointerInputEvent extends InputEvent {
     this.radiusMax,
     this.orientation,
     this.tilt
-  }) : super(type: type);
+  }) : super(type: type, timeStamp: timeStamp);
 
-  PointerInputEvent.fromUiEvent(ui.PointerEvent event) {
-    type = event.type;
-    timeStamp = event.timeStamp;
-
-    if (type == 'pointerdown') {
-      pointer = _pointerCount;
-      _pointerMap[event.pointer] = _pointerCount;
-      _pointerCount++;
-    } else {
-      pointer = _pointerMap[event.pointer];
-    }
-
-    kind = event.kind;
-    x = event.x;
-    y = event.y;
-    dx = event.dx;
-    dy = event.dy;
-    buttons = event.buttons;
-    down = event.down;
-    primary = event.primary;
-    obscured = event.obscured;
-    pressure = event.pressure;
-    pressureMin = event.pressureMin;
-    pressureMax = event.pressureMax;
-    distance = event.distance;
-    distanceMin = event.distanceMin;
-    distanceMax = event.distanceMax;
-    radiusMajor = event.radiusMajor;
-    radiusMinor = event.radiusMinor;
-    radiusMin = event.radiusMin;
-    radiusMax = event.radiusMax;
-    orientation = event.orientation;
-    tilt = event.tilt;
-
+  factory PointerInputEvent.fromUiEvent(ui.PointerEvent event) {
+     PointerInputEvent result = new PointerInputEvent(
+        type: event.type,
+        timeStamp: event.timeStamp,
+        pointer: (event.type == 'pointerDown') ? _pointerCount : _pointerMap[event.pointer],
+        kind: event.kind,
+        x: event.x,
+        y: event.y,
+        dx: event.dx,
+        dy: event.dy,
+        buttons: event.buttons,
+        down: event.down,
+        primary: event.primary,
+        obscured: event.obscured,
+        pressure: event.pressure,
+        pressureMin: event.pressureMin,
+        pressureMax: event.pressureMax,
+        distance: event.distance,
+        distanceMin: event.distanceMin,
+        distanceMax: event.distanceMax,
+        radiusMajor: event.radiusMajor,
+        radiusMinor: event.radiusMinor,
+        radiusMin: event.radiusMin,
+        radiusMax: event.radiusMax,
+        orientation: event.orientation,
+        tilt: event.tilt
+      );
+      if (event.type == 'pointerdown') {
+        _pointerMap[event.pointer] = _pointerCount;
+        _pointerCount++;
+      }
+      return result;
   }
 
-  int pointer;
-  String kind;
-  double x;
-  double y;
-  double dx;
-  double dy;
-  int buttons;
-  bool down;
-  bool primary;
-  bool obscured;
-  double pressure;
-  double pressureMin;
-  double pressureMax;
-  double distance;
-  double distanceMin;
-  double distanceMax;
-  double radiusMajor;
-  double radiusMinor;
-  double radiusMin;
-  double radiusMax;
-  double orientation;
-  double tilt;
+  final int pointer;
+  final String kind;
+  final double x;
+  final double y;
+  final double dx;
+  final double dy;
+  final int buttons;
+  final bool down;
+  final bool primary;
+  final bool obscured;
+  final double pressure;
+  final double pressureMin;
+  final double pressureMax;
+  final double distance;
+  final double distanceMin;
+  final double distanceMax;
+  final double radiusMajor;
+  final double radiusMinor;
+  final double radiusMin;
+  final double radiusMax;
+  final double orientation;
+  final double tilt;
+
 }
