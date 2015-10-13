@@ -50,7 +50,7 @@ class StatisticsBox extends RenderBox {
   }
 
   void performResize() {
-    size = constraints.constrain(Size.infinite);
+    size = constraints.biggest;
   }
 
   void paint(PaintingContext context, Offset offset) {
