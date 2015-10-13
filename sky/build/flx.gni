@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-template("skyx") {
+template("flx") {
   bundle_prefix = target_name
-  bundle = "$target_gen_dir/${bundle_prefix}.skyx"
+  bundle = "$target_gen_dir/${bundle_prefix}.flx"
   snapshot = "$target_gen_dir/${bundle_prefix}_snapshot.bin"
 
   action("gen_${bundle_prefix}_bundle") {
