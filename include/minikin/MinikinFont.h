@@ -96,8 +96,6 @@ class MinikinFontFreeType;
 
 class MinikinFont : public MinikinRefCounted {
 public:
-    virtual bool GetGlyph(uint32_t codepoint, uint32_t *glyph) const = 0;
-
     virtual float GetHorizontalAdvance(uint32_t glyph_id,
         const MinikinPaint &paint) const = 0;
 

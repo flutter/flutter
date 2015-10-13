@@ -35,11 +35,6 @@ public:
     MockMinikinFont(int32_t id) : mId(id) {
     }
 
-    virtual bool GetGlyph(uint32_t codepoint, uint32_t *glyph) const {
-        LOG_ALWAYS_FATAL("MockMinikinFont::GetGlyph is not implemented.");
-        return false;
-    }
-
     virtual float GetHorizontalAdvance(
             uint32_t glyph_id, const MinikinPaint &paint) const {
         LOG_ALWAYS_FATAL("MockMinikinFont::GetHorizontalAdvance is not implemented.");
