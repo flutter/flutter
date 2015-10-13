@@ -237,6 +237,7 @@ class RenderBlockViewport extends RenderBlockBase {
     ExtentCallback totalExtentCallback,
     ExtentCallback maxCrossAxisDimensionCallback,
     ExtentCallback minCrossAxisDimensionCallback,
+    Painter overlayPainter,
     BlockDirection direction: BlockDirection.vertical,
     double itemExtent,
     double minExtent: 0.0,
@@ -246,6 +247,7 @@ class RenderBlockViewport extends RenderBlockBase {
        _totalExtentCallback = totalExtentCallback,
        _maxCrossAxisExtentCallback = maxCrossAxisDimensionCallback,
        _minCrossAxisExtentCallback = minCrossAxisDimensionCallback,
+       _overlayPainter = overlayPainter,
        _startOffset = startOffset,
        super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
 
@@ -296,6 +298,27 @@ class RenderBlockViewport extends RenderBlockBase {
       return;
     _maxCrossAxisExtentCallback = value;
     markNeedsLayout();
+  }
+
+  Painter get overlayPainter => _overlayPainter;
+  Painter _overlayPainter;
+  void set overlayPainter(Painter value) {
+    if (_overlayPainter == value)
+      return;
+    _overlayPainter?.detach();
+    _overlayPainter = value;
+    _overlayPainter?.attach(this);
+    markNeedsPaint();
+  }
+
+  void attach() {
+    super.attach();
+    _overlayPainter?.attach(this);
+  }
+
+  void detach() {
+    super.detach();
+    _overlayPainter?.detach();
   }
 
   /// The offset at which to paint the first child
@@ -377,11 +400,15 @@ class RenderBlockViewport extends RenderBlockBase {
 
   void paint(PaintingContext context, Offset offset) {
     context.canvas.save();
+
     context.canvas.clipRect(offset & size);
     if (isVertical)
       defaultPaint(context, offset.translate(0.0, startOffset));
     else
       defaultPaint(context, offset.translate(startOffset, 0.0));
+
+    overlayPainter?.paint(context, offset);
+
     context.canvas.restore();
   }
 

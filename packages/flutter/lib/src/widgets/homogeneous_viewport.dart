@@ -18,7 +18,8 @@ class HomogeneousViewport extends RenderObjectWidget {
     this.itemExtent, // required
     this.itemCount, // optional, but you cannot shrink-wrap this class or otherwise use its intrinsic dimensions if you don't specify it
     this.direction: ScrollDirection.vertical,
-    this.startOffset: 0.0
+    this.startOffset: 0.0,
+    this.overlayPainter
   }) : super(key: key) {
     assert(itemExtent != null);
   }
@@ -29,6 +30,7 @@ class HomogeneousViewport extends RenderObjectWidget {
   final int itemCount;
   final ScrollDirection direction;
   final double startOffset;
+  final Painter overlayPainter;
 
   _HomogeneousViewportElement createElement() => new _HomogeneousViewportElement(this);
 
@@ -70,6 +72,7 @@ class _HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewpor
     renderObject.totalExtentCallback = getTotalExtent;
     renderObject.minCrossAxisExtentCallback = getMinCrossAxisExtent;
     renderObject.maxCrossAxisExtentCallback = getMaxCrossAxisExtent;
+    renderObject.overlayPainter = widget.overlayPainter;
   }
 
   void unmount() {
@@ -77,6 +80,7 @@ class _HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewpor
     renderObject.totalExtentCallback = null;
     renderObject.minCrossAxisExtentCallback = null;
     renderObject.maxCrossAxisExtentCallback = null;
+    renderObject.overlayPainter = null;
     super.unmount();
   }
 
@@ -134,6 +138,7 @@ class _HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewpor
       renderObject.itemExtent = widget.itemExtent;
       renderObject.minExtent = getTotalExtent(null);
       renderObject.startOffset = offset;
+      renderObject.overlayPainter = widget.overlayPainter;
     });
   }
 

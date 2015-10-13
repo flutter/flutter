@@ -33,6 +33,7 @@ export 'src/material/progress_indicator.dart';
 export 'src/material/radio.dart';
 export 'src/material/raised_button.dart';
 export 'src/material/scaffold.dart';
+export 'src/material/scrollbar_painter.dart';
 export 'src/material/shadows.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/switch.dart';
