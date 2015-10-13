@@ -27,7 +27,7 @@ class ChangerState extends State<Changer> {
 
   void test() { setState(() { _state = true; }); }
 
-  Widget build(BuildContext) => _state ? new Wrapper(config.child) : config.child;
+  Widget build(BuildContext context) => _state ? new Wrapper(config.child) : config.child;
 }
 
 class Wrapper extends StatelessComponent {

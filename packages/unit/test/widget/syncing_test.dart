@@ -112,13 +112,13 @@ void main() {
     testWidgets((WidgetTester tester) {
       Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
       Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
-      tester.pumpWidget(new Column([]));
+      tester.pumpWidget(new Column(<Widget>[]));
 
       GlobalKey keyA = new GlobalKey();
       GlobalKey keyB = new GlobalKey();
 
       tester.pumpWidget(
-        new Column([
+        new Column(<Widget>[
           new Container(
             key: keyA,
             child: a
@@ -143,7 +143,7 @@ void main() {
       expect(second.syncedState, equals(0x42));
 
       tester.pumpWidget(
-        new Column([
+        new Column(<Widget>[
           new Container(
             key: keyA,
             child: a
@@ -170,7 +170,7 @@ void main() {
       // since they are both "old" nodes, they shouldn't sync with each other even though they look alike
 
       tester.pumpWidget(
-        new Column([
+        new Column(<Widget>[
           new Container(
             key: keyA,
             child: b

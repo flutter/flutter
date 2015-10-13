@@ -12,11 +12,11 @@ void main() {
           decoration: const BoxDecoration(
             backgroundColor: const Color(0xFF00FF00)
           ),
-          child: new Stack([
+          child: new Stack(<Widget>[
             new Positioned(
               top: 10.0,
               left: 10.0,
-              child: new Column([
+              child: new Column(<Widget>[
                 new GestureDetector(
                   onTap: () {
                     didReceiveTap = true;

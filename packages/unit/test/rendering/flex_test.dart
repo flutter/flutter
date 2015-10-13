@@ -6,7 +6,7 @@ import 'rendering_tester.dart';
 void main() {
   test('Overconstrained flex', () {
     RenderDecoratedBox box = new RenderDecoratedBox(decoration: new BoxDecoration());
-    RenderFlex flex = new RenderFlex(children: [ box ]);
+    RenderFlex flex = new RenderFlex(children: <RenderBox>[box]);
     layout(flex, constraints: const BoxConstraints(
       minWidth: 200.0, maxWidth: 100.0, minHeight: 200.0, maxHeight: 100.0)
     );
@@ -24,7 +24,7 @@ void main() {
   test('Parent data', () {
     RenderDecoratedBox box1 = new RenderDecoratedBox(decoration: new BoxDecoration());
     RenderDecoratedBox box2 = new RenderDecoratedBox(decoration: new BoxDecoration());
-    RenderFlex flex = new RenderFlex(children: [ box1, box2 ]);
+    RenderFlex flex = new RenderFlex(children: <RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
       minWidth: 0.0, maxWidth: 100.0, minHeight: 0.0, maxHeight: 100.0)
     );
@@ -33,7 +33,8 @@ void main() {
     expect(box2.size.width, equals(0.0));
     expect(box2.size.height, equals(0.0));
 
-    box2.parentData.flex = 1;
+    final FlexParentData box2ParentData = box2.parentData;
+    box2ParentData.flex = 1;
     flex.markNeedsLayout();
     pumpFrame();
     expect(box1.size.width, equals(0.0));
@@ -47,8 +48,9 @@ void main() {
     RenderDecoratedBox box2 = new RenderDecoratedBox(decoration: new BoxDecoration());
     RenderFlex flex = new RenderFlex();
     flex.setupParentData(box2);
-    box2.parentData.flex = 2;
-    flex.addAll([box1, box2]);
+    final FlexParentData box2ParentData = box2.parentData;
+    box2ParentData.flex = 2;
+    flex.addAll(<RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
       minWidth: 0.0, maxWidth: 100.0, minHeight: 0.0, maxHeight: 100.0)
     );

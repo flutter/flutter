@@ -8,7 +8,7 @@ import 'widget_tester.dart';
 const double itemExtent = 100.0;
 ScrollDirection scrollDirection = ScrollDirection.vertical;
 DismissDirection dismissDirection = DismissDirection.horizontal;
-List<int> dismissedItems = [];
+List<int> dismissedItems = <int>[];
 
 void handleOnResized(item) {
   expect(dismissedItems.contains(item), isFalse);
@@ -117,7 +117,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = ScrollDirection.vertical;
       dismissDirection = DismissDirection.horizontal;
-      dismissedItems = [];
+      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -136,7 +136,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = ScrollDirection.horizontal;
       dismissDirection = DismissDirection.vertical;
-      dismissedItems = [];
+      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -155,7 +155,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = ScrollDirection.vertical;
       dismissDirection = DismissDirection.left;
-      dismissedItems = [];
+      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -174,7 +174,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = ScrollDirection.vertical;
       dismissDirection = DismissDirection.right;
-      dismissedItems = [];
+      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -193,7 +193,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = ScrollDirection.horizontal;
       dismissDirection = DismissDirection.up;
-      dismissedItems = [];
+      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -212,7 +212,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = ScrollDirection.horizontal;
       dismissDirection = DismissDirection.down;
-      dismissedItems = [];
+      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -233,7 +233,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = ScrollDirection.horizontal;
       dismissDirection = DismissDirection.down;
-      dismissedItems = [];
+      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       Element itemElement = tester.findText('0');
@@ -261,7 +261,7 @@ void main() {
         child: new Container(
           width: 100.0,
           height: 1000.0,
-          child: new Column([
+          child: new Column(<Widget>[
             new Test1215DismissableComponent('1'),
             new Test1215DismissableComponent('2')
           ])

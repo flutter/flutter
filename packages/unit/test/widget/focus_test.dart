@@ -23,7 +23,7 @@ void main() {
       GlobalKey keyB = new GlobalKey();
       tester.pumpWidget(
         new Focus(
-          child: new Column([
+          child: new Column(<Widget>[
             // reverse these when you fix https://github.com/flutter/engine/issues/1495
             new TestFocusable('b', 'B FOCUSED', keyB),
             new TestFocusable('a', 'A FOCUSED', keyA),

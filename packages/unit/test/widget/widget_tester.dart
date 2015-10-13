@@ -24,11 +24,12 @@ class RootComponentState extends State<RootComponent> {
   Widget build(BuildContext context) => child;
 }
 
+typedef Point SizeToPointFunction(Size size);
+
 class WidgetTester {
   WidgetTester._(FakeAsync async)
     : async = async,
-      clock = async.getClock(new DateTime.utc(2015, 1, 1)) {
-  }
+      clock = async.getClock(new DateTime.utc(2015, 1, 1));
 
   final FakeAsync async;
   final Clock clock;
@@ -46,7 +47,7 @@ class WidgetTester {
   }
 
   List<Layer> _layers(Layer layer) {
-    List<Layer> result = [layer];
+    List<Layer> result = <Layer>[layer];
     if (layer is ContainerLayer) {
       ContainerLayer root = layer;
       Layer child = root.firstChild;
@@ -124,7 +125,7 @@ class WidgetTester {
     return _getElementPoint(element, (Size size) => size.bottomRight(Point.origin));
   }
 
-  Point _getElementPoint(Element element, Function sizeToPoint) {
+  Point _getElementPoint(Element element, SizeToPointFunction sizeToPoint) {
     assert(element != null);
     RenderBox box = element.renderObject as RenderBox;
     assert(box != null);
