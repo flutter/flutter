@@ -1,12 +1,9 @@
-name: skysprites
+name: flutter_sprites
 description: A sprite toolkit built on top of Flutter
-version: 0.0.1
+version: 0.0.2
 author: Flutter Authors <flutter-dev@googlegroups.com>
 homepage: http://flutter.io
 dependencies:
   flutter: ">=0.0.3 <0.1.0"
   sky_tools: ">=0.0.18 <0.1.0"
-  box2d: any
-dependency_overrides:
-  flutter:
-    path: ../sky/packages/sky
+  box2d: ">=0.2.0 <0.3.0"
