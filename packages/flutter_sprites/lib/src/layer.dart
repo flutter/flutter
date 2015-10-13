@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// A [Node] that provides an intermediate rendering surface in the sprite
 /// rendering tree. A [Layer] can be used to change the opacity, color, or to

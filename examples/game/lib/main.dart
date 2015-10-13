@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sprites/skysprites.dart';
+import 'package:flutter_sprites/flutter_sprites.dart';
 
 import 'game_demo.dart';
 

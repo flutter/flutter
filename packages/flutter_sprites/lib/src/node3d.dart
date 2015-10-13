@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// An node that transforms its children using a 3D perspective projection. This
 /// node type can be used to create 3D flips and other similar effects.

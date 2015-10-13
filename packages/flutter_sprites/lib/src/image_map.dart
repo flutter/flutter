@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of skysprites;
+part of flutter_sprites;
 
 class ImageMap {
   ImageMap(AssetBundle bundle) : _bundle = bundle;

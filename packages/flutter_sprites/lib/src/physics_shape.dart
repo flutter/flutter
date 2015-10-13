@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 abstract class PhysicsShape {
 

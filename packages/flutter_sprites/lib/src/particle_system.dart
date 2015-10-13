@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 class _Particle {
   Vector2 pos;
