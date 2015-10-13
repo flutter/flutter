@@ -596,15 +596,37 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
 
     for (const BidiText::Iter::RunInfo& runInfo : BidiText(buf, start, count, bufSize, bidiFlags)) {
         doLayoutRunCached(buf, runInfo.mRunStart, runInfo.mRunLength, bufSize, runInfo.mIsRtl, &ctx,
-                start);
+                start, mCollection, this, NULL);
     }
     ctx.clearHbFonts();
     mCollection->purgeFontFamilyHbFontCache();
 }
 
-void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx, size_t dstStart) {
+float Layout::measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
+        const FontCollection* collection, float* advances) {
+    AutoMutex _l(gMinikinLock);
+
+    LayoutContext ctx;
+    ctx.style = style;
+    ctx.paint = paint;
+
+    float advance = 0;
+    for (const BidiText::Iter::RunInfo& runInfo : BidiText(buf, start, count, bufSize, bidiFlags)) {
+        float* advancesForRun = advances ? advances + (runInfo.mRunStart - start) : advances;
+        advance += doLayoutRunCached(buf, runInfo.mRunStart, runInfo.mRunLength, bufSize,
+                runInfo.mIsRtl, &ctx, 0, collection, NULL, advancesForRun);
+    }
+
+    ctx.clearHbFonts();
+    return advance;
+}
+
+float Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        bool isRtl, LayoutContext* ctx, size_t dstStart, const FontCollection* collection,
+        Layout* layout, float* advances) {
     HyphenEdit hyphen = ctx->paint.hyphenEdit;
+    float advance = 0;
     if (!isRtl) {
         // left to right
         size_t wordstart =
@@ -615,8 +637,9 @@ void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, 
             // Only apply hyphen to the last word in the string.
             ctx->paint.hyphenEdit = wordend >= start + count ? hyphen : HyphenEdit();
             size_t wordcount = std::min(start + count, wordend) - iter;
-            doLayoutWord(buf + wordstart, iter - wordstart, wordcount, wordend - wordstart,
-                    isRtl, ctx, iter - dstStart);
+            advance += doLayoutWord(buf + wordstart, iter - wordstart, wordcount,
+                    wordend - wordstart, isRtl, ctx, iter - dstStart, collection, layout,
+                    advances ? advances + (iter - start) : advances);
             wordstart = wordend;
         }
     } else {
@@ -629,25 +652,40 @@ void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, 
             // Only apply hyphen to the last (leftmost) word in the string.
             ctx->paint.hyphenEdit = iter == end ? hyphen : HyphenEdit();
             size_t bufStart = std::max(start, wordstart);
-            doLayoutWord(buf + wordstart, bufStart - wordstart, iter - bufStart,
-                    wordend - wordstart, isRtl, ctx, bufStart - dstStart);
+            advance += doLayoutWord(buf + wordstart, bufStart - wordstart, iter - bufStart,
+                    wordend - wordstart, isRtl, ctx, bufStart - dstStart, collection, layout,
+                    advances ? advances + (bufStart - start) : advances);
             wordend = wordstart;
         }
     }
+    return advance;
 }
 
-void Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx, size_t bufStart) {
+float Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        bool isRtl, LayoutContext* ctx, size_t bufStart, const FontCollection* collection,
+        Layout* layout, float* advances) {
     LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
-    LayoutCacheKey key(mCollection, ctx->paint, ctx->style, buf, start, count, bufSize, isRtl);
+    LayoutCacheKey key(collection, ctx->paint, ctx->style, buf, start, count, bufSize, isRtl);
     bool skipCache = ctx->paint.skipCache();
     if (skipCache) {
-        Layout layout;
-        key.doLayout(&layout, ctx, mCollection);
-        appendLayout(&layout, bufStart);
+        Layout layoutForWord;
+        key.doLayout(&layoutForWord, ctx, collection);
+        if (layout) {
+            layout->appendLayout(&layoutForWord, bufStart);
+        }
+        if (advances) {
+            layoutForWord.getAdvances(advances);
+        }
+        return layoutForWord.getAdvance();
     } else {
-        Layout* layout = cache.get(key, ctx, mCollection);
-        appendLayout(layout, bufStart);
+        Layout* layoutForWord = cache.get(key, ctx, collection);
+        if (layout) {
+            layout->appendLayout(layoutForWord, bufStart);
+        }
+        if (advances) {
+            layoutForWord->getAdvances(advances);
+        }
+        return layoutForWord->getAdvance();
     }
 }
 
