@@ -42,8 +42,6 @@ public:
 
     ~MinikinFontFreeType();
 
-    bool GetGlyph(uint32_t codepoint, uint32_t *glyph) const;
-
     float GetHorizontalAdvance(uint32_t glyph_id,
         const MinikinPaint &paint) const;
 
