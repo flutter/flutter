@@ -1,13 +1,14 @@
 part of skysprites;
 
 abstract class PhysicsJoint {
-  PhysicsJoint(this.bodyA, this.bodyB) {
+  PhysicsJoint(this.bodyA, this.bodyB, this.breakingForce) {
     bodyA._joints.add(this);
     bodyB._joints.add(this);
   }
 
   final PhysicsBody bodyA;
   final PhysicsBody bodyB;
+  final double breakingForce;
 
   bool _active = true;
   box2d.Joint _joint;
@@ -24,6 +25,7 @@ abstract class PhysicsJoint {
     if (_joint == null) {
       _physicsNode = physicsNode;
       _joint = _createB2Joint(physicsNode);
+      _physicsNode._joints.add(this);
     }
   }
 
@@ -31,11 +33,31 @@ abstract class PhysicsJoint {
     if (_joint != null && _active) {
       _physicsNode.b2World.destroyJoint(_joint);
       _joint = null;
+      _physicsNode._joints.remove(this);
     }
     _active = false;
   }
 
   box2d.Joint _createB2Joint(PhysicsNode physicsNode);
+
+  void destroy() {
+    _detach();
+  }
+
+  void _checkBreakingForce(double dt) {
+    if (breakingForce == null) return;
+
+    if (_joint != null && _active) {
+      Vector2 reactionForce = new Vector2.zero();
+      _joint.getReactionForce(1.0 / dt, reactionForce);
+
+      if (breakingForce * breakingForce < reactionForce.length2) {
+        // TODO: Add callback
+
+        destroy();
+      }
+    }
+  }
 }
 
 class PhysicsJointRevolute extends PhysicsJoint {
@@ -45,8 +67,9 @@ class PhysicsJointRevolute extends PhysicsJoint {
     this.worldAnchor, {
       this.lowerAngle: 0.0,
       this.upperAngle: 0.0,
-      this.enableLimit: false
-    }) : super(bodyA, bodyB) {
+      this.enableLimit: false,
+      double breakingForce
+    }) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
 
@@ -77,8 +100,10 @@ class PhysicsJointPrismatic extends PhysicsJoint {
   PhysicsJointPrismatic(
     PhysicsBody bodyA,
     PhysicsBody bodyB,
-    this.axis
-  ) : super(bodyA, bodyB) {
+    this.axis, {
+      double breakingForce
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
 
@@ -94,8 +119,10 @@ class PhysicsJointPrismatic extends PhysicsJoint {
 class PhysicsJointWeld extends PhysicsJoint {
   PhysicsJointWeld(
     PhysicsBody bodyA,
-    PhysicsBody bodyB
-  ) : super(bodyA, bodyB) {
+    PhysicsBody bodyB, {
+      double breakingForce
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
 
@@ -118,8 +145,10 @@ class PhysicsJointPulley extends PhysicsJoint {
     this.groundAnchorB,
     this.anchorA,
     this.anchorB,
-    this.ratio
-  ) : super(bodyA, bodyB) {
+    this.ratio, {
+      double breakingForce
+    }
+  ) : super(bodyA, bodyB, breakingForce) {
     _completeCreation();
   }
 

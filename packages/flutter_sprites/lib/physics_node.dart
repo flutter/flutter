@@ -31,6 +31,8 @@ class PhysicsNode extends Node {
 
   _ContactHandler _contactHandler;
 
+  List<PhysicsJoint> _joints = [];
+
   List<box2d.Body> _bodiesScheduledForDestruction = [];
 
   double b2WorldToNodeConversionFactor = 10.0;
@@ -75,6 +77,11 @@ class PhysicsNode extends Node {
       ));
 
       body._node._setRotationFromPhysics(degrees(b2Body.getAngle()));
+    }
+
+    // Break joints
+    for (PhysicsJoint joint in _joints) {
+      joint._checkBreakingForce(dt);
     }
 
     // Remove bodies that were marked for destruction during the simulation
