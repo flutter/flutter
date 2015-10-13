@@ -93,6 +93,10 @@ public:
     void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint);
 
+    static float measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
+        const FontCollection* collection, float* advances);
+
     void draw(minikin::Bitmap*, int x0, int y0, float size) const;
 
     // Deprecated. Nont needed. Remove when callers are removed.
@@ -129,12 +133,16 @@ private:
     int findFace(FakedFont face, LayoutContext* ctx);
 
     // Lay out a single bidi run
-    void doLayoutRunCached(const uint16_t* buf, size_t runStart, size_t runLength, size_t bufSize,
-        bool isRtl, LayoutContext* ctx, size_t dstStart);
+    // When layout is not null, layout info will be stored in the object.
+    // When advances is not null, measurement results will be stored in the array.
+    static float doLayoutRunCached(const uint16_t* buf, size_t runStart, size_t runLength,
+        size_t bufSize, bool isRtl, LayoutContext* ctx, size_t dstStart,
+        const FontCollection* collection, Layout* layout, float* advances);
 
     // Lay out a single word
-    void doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx, size_t bufStart);
+    static float doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        bool isRtl, LayoutContext* ctx, size_t bufStart, const FontCollection* collection,
+        Layout* layout, float* advances);
 
     // Lay out a single bidi run
     void doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
