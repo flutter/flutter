@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:io';
+
+import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 
 import 'src/commands/flutter_command_runner.dart';
@@ -20,7 +24,7 @@ import 'src/commands/trace.dart';
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the [flutter] command line tool.
-void main(List<String> args) {
+Future main(List<String> args) async {
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((LogRecord record) {
     print('${record.level.name}: ${record.message}');
@@ -30,7 +34,7 @@ void main(List<String> args) {
       print(record.stackTrace);
   });
 
-  new FlutterCommandRunner()
+  FlutterCommandRunner runner = new FlutterCommandRunner()
     ..addCommand(new BuildCommand())
     ..addCommand(new CacheCommand())
     ..addCommand(new InitCommand())
@@ -41,6 +45,12 @@ void main(List<String> args) {
     ..addCommand(new RunMojoCommand())
     ..addCommand(new StartCommand())
     ..addCommand(new StopCommand())
-    ..addCommand(new TraceCommand())
-    ..run(args);
+    ..addCommand(new TraceCommand());
+
+  try {
+    await runner.run(args);
+  } on UsageException catch (e) {
+    print(e);
+    exit(1);
+  }
 }
