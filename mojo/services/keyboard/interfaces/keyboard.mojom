@@ -18,6 +18,10 @@ struct CorrectionData {
   string new_text;
 };
 
+enum SubmitAction {
+  DONE,
+};
+
 interface KeyboardClient {
   CommitCompletion(CompletionData completion);
   CommitCorrection(CorrectionData correction);
@@ -26,6 +30,7 @@ interface KeyboardClient {
   SetComposingRegion(int32 start, int32 end);
   SetComposingText(string text, int32 newCursorPosition);
   SetSelection(int32 start, int32 end);
+  Submit(SubmitAction action);
 };
 
 // Loosely modeled on Android InputType:
@@ -41,4 +46,6 @@ interface KeyboardService {
   Show(KeyboardClient client, KeyboardType type);
   ShowByRequest();
   Hide();
+  SetText(string text);
+  SetSelection(int32 start, int32 end);
 };
