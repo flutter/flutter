@@ -19,7 +19,7 @@ source_set("lib") {
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/bindings:callback",
     "//mojo/public/cpp/system",
-    "//mojo/services/asset_bundle/public/interfaces",
+    "//mojo/services/asset_bundle/interfaces",
     "//third_party/zlib:zip",
   ]
 }
@@ -35,7 +35,7 @@ mojo_native_application("asset_bundle") {
     "//mojo/public/cpp/application",
     "//mojo/public/cpp/bindings:callback",
     "//mojo/public/cpp/system",
-    "//mojo/services/asset_bundle/public/interfaces",
+    "//mojo/services/asset_bundle/interfaces",
     ":lib",
   ]
 }
@@ -55,7 +55,7 @@ mojo_native_application("apptests") {
     "//mojo/application:test_support",
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/bindings",
-    "//mojo/services/asset_bundle/public/interfaces",
+    "//mojo/services/asset_bundle/interfaces",
     "//third_party/zlib:zip",
   ]
 

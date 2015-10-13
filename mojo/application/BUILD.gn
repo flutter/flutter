@@ -30,7 +30,7 @@ source_set("content_handler") {
     "//mojo/environment:chromium",
     "//mojo/message_pump",
     "//mojo/public/interfaces/application",
-    "//mojo/services/content_handler/public/interfaces",
+    "//mojo/services/content_handler/interfaces",
     "//mojo/services/network/public/interfaces",
   ]
 }

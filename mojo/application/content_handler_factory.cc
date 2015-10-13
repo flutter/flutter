@@ -19,7 +19,7 @@
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
-#include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
+#include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 
 namespace mojo {
 

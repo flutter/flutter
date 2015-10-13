@@ -10,7 +10,7 @@
 #include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
-#include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
+#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 
 namespace mojo {
 class ApplicationConnection;

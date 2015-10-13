@@ -96,7 +96,7 @@ dart_to_cpp::EchoArgsPtr BuildSampleEchoArgs() {
   args->double_inf = kExpectedDoubleInf;
   args->double_nan = kExpectedDoubleNan;
   args->name = "coming";
-  Array<String> string_array(3);
+  auto string_array = Array<String>::New(3);
   string_array[0] = "one";
   string_array[1] = "two";
   string_array[2] = "three";

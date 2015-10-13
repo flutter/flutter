@@ -14,6 +14,6 @@ source_set("ozone_drm_gpu") {
     "//mojo/converters/geometry",
     "//mojo/environment:chromium",
     "//mojo/public/c/system",
-    "//mojo/services/ozone_drm_gpu/public/interfaces",
+    "//mojo/services/ozone_drm_gpu/interfaces",
   ]
 }

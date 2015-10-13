@@ -723,20 +723,33 @@ void MojoMessagePipe_Read(Dart_NativeArguments arguments) {
 }
 
 struct MojoWaitManyState {
+  MojoWaitManyState() {}
+
   std::vector<uint32_t> handles;
   std::vector<uint32_t> signals;
   std::vector<uint32_t> out_index;
   std::vector<MojoHandleSignalsState> out_signals;
+
+  static MojoWaitManyState* GetInstance();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MojoWaitManyState);
 };
 
 // This global is safe because it is only accessed by the single handle watcher
 // isolate. If multiple handle watcher isolates are ever needed, it will need
 // to be replicated.
-static MojoWaitManyState handle_watcher_wait_state;
+MojoWaitManyState* MojoWaitManyState::GetInstance() {
+  static MojoWaitManyState* state = new MojoWaitManyState;
+  return state;
+}
 
 void MojoHandleWatcher_GrowStateArrays(Dart_NativeArguments arguments) {
   int64_t new_length;
   CHECK_INTEGER_ARGUMENT(arguments, 0, &new_length, InvalidArgument);
+
+  MojoWaitManyState& handle_watcher_wait_state =
+      *MojoWaitManyState::GetInstance();
 
   handle_watcher_wait_state.handles.resize(new_length);
   handle_watcher_wait_state.signals.resize(new_length);
@@ -800,6 +813,9 @@ void MojoHandleWatcher_WaitMany(Dart_NativeArguments arguments) {
   int64_t deadline = 0;
   CHECK_INTEGER_ARGUMENT(arguments, 0, &handles_len, InvalidArgument);
   CHECK_INTEGER_ARGUMENT(arguments, 1, &deadline, InvalidArgument);
+
+  MojoWaitManyState& handle_watcher_wait_state =
+      *MojoWaitManyState::GetInstance();
 
   uint32_t* handles = handle_watcher_wait_state.handles.data();
   uint32_t* signals = handle_watcher_wait_state.signals.data();

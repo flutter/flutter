@@ -8,7 +8,7 @@
 #include "base/trace_event/trace_event.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_context.h"
-#include "mojo/services/surfaces/public/cpp/surfaces_utils.h"
+#include "mojo/services/surfaces/cpp/surfaces_utils.h"
 #include "mojo/skia/ganesh_context.h"
 #include "services/sky/compositor/texture_layer.h"
 

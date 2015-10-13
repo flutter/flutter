@@ -30,12 +30,12 @@ source_set("gpu") {
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
     "//mojo/public/interfaces/application",
-    "//mojo/services/geometry/public/cpp",
-    "//mojo/services/geometry/public/interfaces",
-    "//mojo/services/gpu/public/interfaces",
-    "//mojo/services/surfaces/public/cpp",
-    "//mojo/services/surfaces/public/interfaces",
-    "//mojo/services/surfaces/public/interfaces:surface_id",
+    "//mojo/services/geometry/cpp",
+    "//mojo/services/geometry/interfaces",
+    "//mojo/services/gpu/interfaces",
+    "//mojo/services/surfaces/cpp",
+    "//mojo/services/surfaces/interfaces",
+    "//mojo/services/surfaces/interfaces:surface_id",
   ]
 }
 
@@ -55,8 +55,8 @@ mojo_native_application("apptests") {
     "//mojo/application",
     "//mojo/application:test_support",
     "//mojo/public/cpp/bindings:callback",
-    "//mojo/services/geometry/public/interfaces",
-    "//mojo/services/surfaces/public/interfaces:surface_id",
+    "//mojo/services/geometry/interfaces",
+    "//mojo/services/surfaces/interfaces:surface_id",
     "//testing/gtest",
   ]
 }

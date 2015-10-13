@@ -13,6 +13,6 @@ component("native_viewport") {
     "//ui/gl",
     "//mojo/environment:chromium",
     "//mojo/public/c/system",
-    "//mojo/services/native_viewport/public/interfaces",
+    "//mojo/services/native_viewport/interfaces",
   ]
 }

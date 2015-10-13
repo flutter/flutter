@@ -299,7 +299,7 @@ QuadPtr TypeConverter<QuadPtr, cc::DrawQuad>::Convert(
           PointF::From(texture_quad->uv_bottom_right);
       texture_state->background_color =
           Color::From(texture_quad->background_color);
-      Array<float> vertex_opacity(4);
+      auto vertex_opacity = Array<float>::New(4);
       for (size_t i = 0; i < 4; ++i) {
         vertex_opacity[i] = texture_quad->vertex_opacity[i];
       }
@@ -367,9 +367,9 @@ PassPtr TypeConverter<PassPtr, cc::RenderPass>::Convert(
   pass->transform_to_root_target =
       Transform::From(input.transform_to_root_target);
   pass->has_transparent_background = input.has_transparent_background;
-  Array<QuadPtr> quads(input.quad_list.size());
-  Array<SharedQuadStatePtr> shared_quad_state(
-      input.shared_quad_state_list.size());
+  auto quads = Array<QuadPtr>::New(input.quad_list.size());
+  auto shared_quad_state =
+      Array<SharedQuadStatePtr>::New(input.shared_quad_state_list.size());
   const cc::SharedQuadState* last_sqs = nullptr;
   cc::SharedQuadStateList::ConstIterator next_sqs_iter =
       input.shared_quad_state_list.begin();
@@ -424,7 +424,7 @@ TypeConverter<scoped_ptr<cc::RenderPass>, PassPtr>::Convert(
 // static
 MailboxPtr TypeConverter<MailboxPtr, gpu::Mailbox>::Convert(
     const gpu::Mailbox& input) {
-  Array<int8_t> name(64);
+  auto name = Array<int8_t>::New(64);
   for (int i = 0; i < 64; ++i) {
     name[i] = input.name[i];
   }
@@ -497,7 +497,7 @@ Array<TransferableResourcePtr> TypeConverter<
     Array<TransferableResourcePtr>,
     cc::TransferableResourceArray>::Convert(const cc::TransferableResourceArray&
                                                 input) {
-  Array<TransferableResourcePtr> resources(input.size());
+  auto resources = Array<TransferableResourcePtr>::New(input.size());
   for (size_t i = 0; i < input.size(); ++i) {
     resources[i] = TransferableResource::From(input[i]);
   }
@@ -543,7 +543,7 @@ TypeConverter<cc::ReturnedResource, ReturnedResourcePtr>::Convert(
 Array<ReturnedResourcePtr>
 TypeConverter<Array<ReturnedResourcePtr>, cc::ReturnedResourceArray>::Convert(
     const cc::ReturnedResourceArray& input) {
-  Array<ReturnedResourcePtr> resources(input.size());
+  auto resources = Array<ReturnedResourcePtr>::New(input.size());
   for (size_t i = 0; i < input.size(); ++i) {
     resources[i] = ReturnedResource::From(input[i]);
   }

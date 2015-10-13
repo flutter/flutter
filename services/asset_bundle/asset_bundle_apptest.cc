@@ -10,7 +10,7 @@
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/application_test_base.h"
-#include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
+#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "third_party/zlib/google/zip.h"
 
 namespace asset_bundle {
