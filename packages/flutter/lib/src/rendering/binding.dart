@@ -95,7 +95,7 @@ class FlutterBinding extends HitTestTarget {
   bool removeEventListener(EventListener listener) => _eventListeners.remove(listener);
 
   void _handleEvent(ui.Event event) {
-    InputEvent ourEvent = new InputEvent.fromSkyEvent(event);
+    InputEvent ourEvent = new InputEvent.fromUiEvent(event);
     if (ourEvent is PointerInputEvent) {
       _handlePointerInputEvent(ourEvent);
     } else {

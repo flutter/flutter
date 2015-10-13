@@ -36,7 +36,7 @@ void main() {
 
     TestPointer pointer1 = new TestPointer(1);
 
-    PointerInputEvent down = pointer1.down(new ui.Point(10.0, 10.0));
+    PointerInputEvent down = pointer1.down(new Point(10.0, 10.0));
     scale.addPointer(down);
     tap.addPointer(down);
 
@@ -55,7 +55,7 @@ void main() {
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
-    router.route(pointer1.move(new ui.Point(20.0, 30.0)));
+    router.route(pointer1.move(new Point(20.0, 30.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedFocalPoint, new ui.Point(20.0, 30.0));
@@ -67,7 +67,7 @@ void main() {
 
     // Two-finger scaling
     TestPointer pointer2 = new TestPointer(2);
-    PointerInputEvent down2 = pointer2.down(new ui.Point(10.0, 20.0));
+    PointerInputEvent down2 = pointer2.down(new Point(10.0, 20.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
     GestureArena.instance.close(2);
@@ -80,7 +80,7 @@ void main() {
     expect(didStartScale, isFalse);
 
     // Zoom in
-    router.route(pointer2.move(new ui.Point(0.0, 10.0)));
+    router.route(pointer2.move(new Point(0.0, 10.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedFocalPoint, new ui.Point(10.0, 20.0));
@@ -91,7 +91,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Zoom out
-    router.route(pointer2.move(new ui.Point(15.0, 25.0)));
+    router.route(pointer2.move(new Point(15.0, 25.0)));
     expect(updatedFocalPoint, new ui.Point(17.5, 27.5));
     updatedFocalPoint = null;
     expect(updatedScale, 0.5);
@@ -100,7 +100,7 @@ void main() {
 
     // Three-finger scaling
     TestPointer pointer3 = new TestPointer(3);
-    PointerInputEvent down3 = pointer3.down(new ui.Point(25.0, 35.0));
+    PointerInputEvent down3 = pointer3.down(new Point(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);
     GestureArena.instance.close(3);
@@ -113,7 +113,7 @@ void main() {
     expect(didStartScale, isFalse);
 
     // Zoom in
-    router.route(pointer3.move(new ui.Point(55.0, 65.0)));
+    router.route(pointer3.move(new Point(55.0, 65.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedFocalPoint, new ui.Point(30.0, 40.0));
@@ -124,9 +124,9 @@ void main() {
     expect(didTap, isFalse);
 
     // Return to original positions but with different fingers
-    router.route(pointer1.move(new ui.Point(25.0, 35.0)));
-    router.route(pointer2.move(new ui.Point(20.0, 30.0)));
-    router.route(pointer3.move(new ui.Point(15.0, 25.0)));
+    router.route(pointer1.move(new Point(25.0, 35.0)));
+    router.route(pointer2.move(new Point(20.0, 30.0)));
+    router.route(pointer3.move(new Point(15.0, 25.0)));
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, new ui.Point(20.0, 30.0));
     updatedFocalPoint = null;
@@ -144,7 +144,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Continue scaling with two fingers
-    router.route(pointer3.move(new ui.Point(10.0, 20.0)));
+    router.route(pointer3.move(new Point(10.0, 20.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedFocalPoint, new ui.Point(15.0, 25.0));
@@ -161,7 +161,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Continue panning with one finger
-    router.route(pointer3.move(new ui.Point(0.0, 0.0)));
+    router.route(pointer3.move(new Point(0.0, 0.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedFocalPoint, new ui.Point(0.0, 0.0));

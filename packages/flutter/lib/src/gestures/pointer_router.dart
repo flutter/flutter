@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/gestures/events.dart';
+import 'events.dart';
 
 /// A callback that receives a [PointerInputEvent]
 typedef void PointerRoute(PointerInputEvent event);
