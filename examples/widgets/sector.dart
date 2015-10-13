@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../rendering/sector_layout.dart';
+import 'package:flutter_rendering_examples/sector_layout.dart';
 
 RenderBox initCircle() {
   return new RenderBoxToRenderSectorAdapter(
@@ -16,10 +16,14 @@ RenderBox initCircle() {
   );
 }
 
-class SectorApp extends MaterialApp {
+class SectorApp extends StatefulComponent {
+  SectorAppState createState() => new SectorAppState();
+}
 
-  RenderBoxToRenderSectorAdapter sectors = initCircle();
-  math.Random rand = new math.Random(1);
+class SectorAppState extends State<SectorApp> {
+
+  final RenderBoxToRenderSectorAdapter sectors = initCircle();
+  final math.Random rand = new math.Random(1);
 
   void addSector() {
     double deltaTheta;
@@ -52,27 +56,27 @@ class SectorApp extends MaterialApp {
   RenderBoxToRenderSectorAdapter sectorAddIcon = initSector(const Color(0xFF00DD00));
   RenderBoxToRenderSectorAdapter sectorRemoveIcon = initSector(const Color(0xFFDD0000));
 
-  bool enabledAdd = true;
-  bool enabledRemove = false;
+  bool _enabledAdd = true;
+  bool _enabledRemove = false;
   void updateEnabledState() {
     setState(() {
       var ring = (sectors.child as RenderSectorRing);
       SectorDimensions currentSize = ring.getIntrinsicDimensions(const SectorConstraints(), ring.deltaRadius);
-      enabledAdd = currentSize.deltaTheta < kTwoPi;
-      enabledRemove = ring.firstChild != null;
+      _enabledAdd = currentSize.deltaTheta < kTwoPi;
+      _enabledRemove = ring.firstChild != null;
     });
   }
 
   Widget buildBody() {
     return new Material(
-      child: new Column([
+      child: new Column(<Widget>[
           new Container(
             padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
-            child: new Row([
+            child: new Row(<Widget>[
                 new RaisedButton(
-                  enabled: enabledAdd,
+                  enabled: _enabledAdd,
                   child: new IntrinsicWidth(
-                    child: new Row([
+                    child: new Row(<Widget>[
                       new Container(
                         padding: new EdgeDims.all(4.0),
                         margin: new EdgeDims.only(right: 10.0),
@@ -84,9 +88,9 @@ class SectorApp extends MaterialApp {
                   onPressed: addSector
                 ),
                 new RaisedButton(
-                  enabled: enabledRemove,
+                  enabled: _enabledRemove,
                   child: new IntrinsicWidth(
-                    child: new Row([
+                    child: new Row(<Widget>[
                       new Container(
                         padding: new EdgeDims.all(4.0),
                         margin: new EdgeDims.only(right: 10.0),
@@ -117,18 +121,20 @@ class SectorApp extends MaterialApp {
     );
   }
 
-  Widget build() {
-    return new Theme(
-      data: new ThemeData.light(),
-      child: new Title(
-        title: 'Sector Layout',
-        child: new Scaffold(
-          toolBar: new ToolBar(
-            center: new Text('Sector Layout in a Widget Tree')
-          ),
-          body: buildBody()
-        )
-      )
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      theme: new ThemeData.light(),
+      title: 'Sector Layout',
+      routes: <String, RouteBuilder>{
+        '/': (RouteArguments args) {
+          return new Scaffold(
+            toolBar: new ToolBar(
+              center: new Text('Sector Layout in a Widget Tree')
+            ),
+            body: buildBody()
+          );
+        }
+      }
     );
   }
 }

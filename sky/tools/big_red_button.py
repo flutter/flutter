@@ -102,6 +102,7 @@ def main():
     android_dist_root = os.path.join(sky_engine_root, 'out/android_Release/dist')
     linux_dist_root = os.path.join(sky_engine_root, 'out/Release/dist')
     sky_package_root = os.path.join(sky_engine_root, 'sky/packages/sky')
+    flutter_sprites_package_root = os.path.join(sky_engine_root, 'skysprites')
     sky_engine_package_root = os.path.join(android_dist_root, 'packages/sky_engine/sky_engine')
     sky_services_package_root = os.path.join(android_dist_root, 'packages/sky_services/sky_services')
     sky_engine_revision_file = os.path.join(sky_engine_package_root, 'lib', 'REVISION')
@@ -133,6 +134,7 @@ def main():
     def stage_two():
         if args.publish:
             run(sky_package_root, [pub_path, 'publish', '--force'])
+            run(flutter_sprites_package_root, [pub_path, 'publish', '--force'])
 
     if args.stage_two:
         stage_two()
