@@ -215,6 +215,15 @@ void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const
     m_canvas->drawImageRect(image->image(), src.sk_rect, dst.sk_rect, paint.paint());
 }
 
+void Canvas::drawImageNine(const CanvasImage* image, Rect& center, Rect& dst, const Paint& paint) {
+    if (!m_canvas)
+        return;
+    ASSERT(image);
+    SkIRect icenter;
+    center.sk_rect.round(&icenter);
+    m_canvas->drawImageNine(image->image(), icenter, dst.sk_rect, paint.paint());
+}
+
 void Canvas::drawPicture(Picture* picture)
 {
     if (!m_canvas)
