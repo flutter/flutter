@@ -1,9 +1,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
 import 'dart:math';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -85,7 +85,7 @@ class MineDiggerState extends State<MineDigger> {
   }
 
   PointerEventListener _pointerDownHandlerFor(int posX, int posY) {
-    return (ui.PointerEvent event) {
+    return (PointerInputEvent event) {
       if (event.buttons == 1) {
         probe(posX, posY);
       } else if (event.buttons == 2) {
@@ -190,7 +190,7 @@ class MineDiggerState extends State<MineDigger> {
     );
   }
 
-  void handleToolbarPointerDown(ui.PointerEvent event) {
+  void handleToolbarPointerDown(PointerInputEvent event) {
     setState(() {
       resetGame();
     });

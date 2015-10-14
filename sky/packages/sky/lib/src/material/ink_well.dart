@@ -137,7 +137,7 @@ class _RenderInkWell extends RenderProxyBox {
   TapGestureRecognizer _tap;
   LongPressGestureRecognizer _longPress;
 
-  void handleEvent(ui.Event event, BoxHitTestEntry entry) {
+  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
     if (event.type == 'pointerdown' && (_tap != null || _longPress != null)) {
       _tap?.addPointer(event);
       _longPress?.addPointer(event);

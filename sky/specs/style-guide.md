@@ -1,5 +1,5 @@
-Sky Style Guide
-===============
+Flutter Style Guide
+===================
 
 In general, follow our [Design Principles](design.md) for all code.
 
@@ -8,6 +8,22 @@ that everyone, whether reading the code for the first time or
 maintaining it for years, can quickly determine what the code does. A
 secondary goal is avoiding arguments when there are disagreements.
 
+All languages
+-------------
+
+Avoid checking in commented-out code. It will bitrot too fast to be
+useful, and will confuse people maintaining the code.
+
+Avoid checking in comments that ask questions (like "What should this
+be?"). Find the answers to the questions, or describe the confusion,
+including references to where you found answers. ("According to this
+specification, this should be 2.0, but according to that
+specification, it should be 3.0. We split the difference and went with
+2.5, because we didn't know what else to do.")
+
+
+
+
 Dart
 ----
 
@@ -15,10 +31,12 @@ In general, follow the [Dart style
 guide](https://www.dartlang.org/articles/style-guide/) for Dart code,
 except where that would contradict this page.
 
-Always use the Dart Analyzer. Do not check in code that increases the
-output of the analyzer unless you've filed a bug with the Dart team.
+Always use the Dart Analyzer. Avoid checking in code that increases
+the output of the analyzer unless you've filed a bug with the Dart
+team. (Use "skyanalyzer" to run the analyzer on Flutter code.)
 
-Use assert()s liberally.
+Use assert()s liberally to describe the contracts that you expect your
+code to follow.
 
 
 Types (i.e. classes, typedefs (function signature definitions) and
@@ -27,7 +45,21 @@ variables, constants, enum values, etc) is lowerCamelCase. Constant
 doubles and strings are prefixed with k. Prefer using a local const
 or a static const in a relevant class than using a global constant.
 
-Don't name your libraries (no ```library``` keyword), unless it's a
+When naming callbacks, use `FooCallback` for the typedef, `onFoo` (or,
+if there's only one and the whole purpose of the class is this
+callback, `callback`) for the callback argument or property, and
+`handleFoo` for the method that is called.
+
+If you have a callback with arguments but you want to ignore the
+arguments, name them `_`, `__`, `___`, etc. If you name any of them,
+name all of them. Always be explicit with the types of variables in
+callbacks unless you are ignoring them (and have named them with
+underscores).
+
+If you have variables or methods that are only used in checked mode,
+prefix their names with `debug` or `_debug`.
+
+Avoid naming your libraries (no ```library``` keyword), unless it's a
 documented top-level library, like `painting.dart`. Name the files in
 ```lower_under_score.dart``` format.
 
@@ -76,19 +108,24 @@ any code that operates on all of them should operate on them in the
 same order (unless the order matters).
 
 
-All variables and arguments are typed; don't use "var", "dynamic", or
-"Object" in any case where you could figure out the actual type.
-Always specialise generic types where possible.
+All variables and arguments are typed; avoid "dynamic" or "Object" in
+any case where you could figure out the actual type. Always specialise
+generic types where possible. Explicitly type all array and map
+literals.
+
+Always avoid "var". Use "dynamic" if you are being explicit that the
+type is unknown. Use "Object" if you are being explicit that you want
+an object that implements == and hashCode.
+
+Avoid using "as". If you know the type is correct, use an assertion or
+assign to a more narrowly-typed variable (this avoids the type check
+in release mode; "as" is not compiled out in release mode). If you
+don't know whether the type is correct, check using "is" (this avoids
+the exception that "as" raises).
+
 
 Aim for a line length of 80 characters, but go over if breaking the
 line would make it less readable.
-
-Only use => when the result fits on a single line.
-
-When using ```{ }``` braces, put a space or a newline after the open
-brace and before the closing brace. (If the block is empty, the same
-space will suffice for both.) Use spaces if the whole block fits on
-one line, and newlines if you need to break it over multiple lines.
 
 When breaking an argument list into multiple lines, indent the
 arguments two characters from the previous line.
@@ -113,14 +150,22 @@ strings.
 >   print('Hello ${name.split(" ")[0]}');
 > ```
 
+Only use => when the result fits on a single line.
+
+When using ```{ }``` braces, put a space or a newline after the open
+brace and before the closing brace. (If the block is empty, the same
+space will suffice for both.) Use spaces if the whole block fits on
+one line, and newlines if you need to break it over multiple lines.
+
 Don't put the statement part of an "if" statement on the same line as
 the expression, even if it is short. (Doing so makes it unobvious that
 there is relevant code there. This is especially important for early
 returns.)
 
 If a flow control structure's statement is one line long, then don't
-use braces around it. (Keeping the code free of boilerplate or
-redundant punctuation keeps it concise and readable.)
+use braces around it, unless it's part of an "if" chain and any of the
+other blocks have more than one line. (Keeping the code free of
+boilerplate or redundant punctuation keeps it concise and readable.)
 
 > For example,
 > ```dart
@@ -138,6 +183,30 @@ redundant punctuation keeps it concise and readable.)
 >   }
 > ```
 
+> For example:
+> ```dart
+>   if (a != null)
+>     a()
+>   else if (b != null)
+>     b()
+>   else
+>     c()
+> ```
+> ...but:
+> ```dart
+>   if (a != null) {
+>     a()
+>   } else if (b != null) {
+>     b()
+>   } else {
+>     c()
+>     d()
+>   }
+> ```
+
+Use a switch if you are examining an enum (and avoid using "if" chains
+with enums), since the analyzer will warn you if you missed any of the
+values when you use a switch.
 
 Use the most relevant constructor or method, when there are multiple
 options.
@@ -155,11 +224,6 @@ options.
 Use for-in loops rather than forEach() where possible, since that
 saves a stack frame per iteration.
 
-
-When naming callbacks, use `FooCallback` for the typedef, `onFoo` (or,
-if there's only one and the whole purpose of the class is this
-callback, `callback`) for the callback argument or property, and
-`handleFoo` for the method that is called.
 
 When defining mutable properties that mark a class dirty when set, use
 the following pattern:
@@ -184,10 +248,6 @@ this pattern. If for some reason you don't want to use 'value', use
 Start the method with any asserts you need to validate the value.
 
 
-If you have variables or methods that are only used in release mode,
-prefix their names with `debug` or `_debug`.
-
-
 C++
 ---
 
@@ -197,3 +257,6 @@ Put spaces around operators in expressions.
 Java
 ----
 
+
+Objective C
+-----------

@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// The super class of any [Node] that has a size.
 ///

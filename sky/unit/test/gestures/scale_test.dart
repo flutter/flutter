@@ -36,7 +36,7 @@ void main() {
 
     TestPointer pointer1 = new TestPointer(1);
 
-    ui.PointerEvent down = pointer1.down(new Point(10.0, 10.0));
+    PointerInputEvent down = pointer1.down(new Point(10.0, 10.0));
     scale.addPointer(down);
     tap.addPointer(down);
 
@@ -67,7 +67,7 @@ void main() {
 
     // Two-finger scaling
     TestPointer pointer2 = new TestPointer(2);
-    ui.PointerEvent down2 = pointer2.down(new Point(10.0, 20.0));
+    PointerInputEvent down2 = pointer2.down(new Point(10.0, 20.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
     GestureArena.instance.close(2);
@@ -100,7 +100,7 @@ void main() {
 
     // Three-finger scaling
     TestPointer pointer3 = new TestPointer(3);
-    ui.PointerEvent down3 = pointer3.down(new Point(25.0, 35.0));
+    PointerInputEvent down3 = pointer3.down(new Point(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);
     GestureArena.instance.close(3);

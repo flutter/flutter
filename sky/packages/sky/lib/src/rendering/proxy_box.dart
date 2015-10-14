@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -1054,7 +1055,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 }
 
-typedef void PointerEventListener(ui.PointerEvent e);
+typedef void PointerEventListener(PointerInputEvent e);
 
 /// Invokes the callbacks in response to pointer events.
 class RenderPointerListener extends RenderProxyBox {
@@ -1071,7 +1072,7 @@ class RenderPointerListener extends RenderProxyBox {
   PointerEventListener onPointerUp;
   PointerEventListener onPointerCancel;
 
-  void handleEvent(ui.Event event, HitTestEntry entry) {
+  void handleEvent(InputEvent event, HitTestEntry entry) {
     if (onPointerDown != null && event.type == 'pointerdown')
       return onPointerDown(event);
     if (onPointerMove != null && event.type == 'pointermove')

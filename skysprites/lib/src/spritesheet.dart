@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// A sprite sheet packs a number of smaller images into a single large image.
 ///

@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'arena.dart';
 import 'recognizer.dart';
 import 'constants.dart';
+import 'events.dart';
 
 enum ScaleState {
   ready,
@@ -35,7 +36,7 @@ class ScaleGestureRecognizer extends GestureRecognizer {
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
-  void addPointer(ui.PointerEvent event) {
+  void addPointer(PointerInputEvent event) {
     startTrackingPointer(event.pointer);
     if (_state == ScaleState.ready) {
       _state = ScaleState.possible;
@@ -45,7 +46,7 @@ class ScaleGestureRecognizer extends GestureRecognizer {
     }
   }
 
-  void handleEvent(ui.PointerEvent event) {
+  void handleEvent(PointerInputEvent event) {
     assert(_state != ScaleState.ready);
     bool configChanged = false;
     switch(event.type) {

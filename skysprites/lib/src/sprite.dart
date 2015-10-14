@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// A Sprite is a [Node] that renders a bitmap image to the screen.
 class Sprite extends NodeWithSize with SpritePaint {

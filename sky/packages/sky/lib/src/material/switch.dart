@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -82,8 +83,8 @@ class _RenderSwitch extends RenderToggleable {
 
   RadialReaction _radialReaction;
 
-  void handleEvent(ui.Event event, BoxHitTestEntry entry) {
-    if (event is ui.PointerEvent) {
+  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
+    if (event is PointerInputEvent) {
       if (event.type == 'pointerdown')
         _showRadialReaction(entry.localPosition);
       else if (event.type == 'pointerup')

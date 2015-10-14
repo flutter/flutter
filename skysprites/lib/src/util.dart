@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 
 math.Random _random = new math.Random();
