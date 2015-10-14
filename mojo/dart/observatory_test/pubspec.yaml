@@ -1,3 +1,0 @@
-name: observatory_test
-dependencies:
- mojo: any

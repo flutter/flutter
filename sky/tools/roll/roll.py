@@ -74,7 +74,7 @@ dirs_from_mojo = [
     'mojo/application',
     'mojo/common',
     'mojo/converters',
-    'mojo/dart',
+    'mojo/dart/embedder',
     'mojo/data_pipe_utils',
     'mojo/edk',
     'mojo/environment',
