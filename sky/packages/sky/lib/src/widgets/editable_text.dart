@@ -14,6 +14,7 @@ import 'framework.dart';
 const _kCursorBlinkHalfPeriod = 500; // milliseconds
 
 typedef void StringUpdated();
+typedef void StringSubmitted();
 
 class TextRange {
   const TextRange({ this.start, this.end });
@@ -32,17 +33,21 @@ class TextRange {
 }
 
 class EditableString implements KeyboardClient {
+  EditableString({this.text: '', this.onUpdated, this.onSubmitted}) {
+    assert(onUpdated != null);
+    assert(onSubmitted != null);
+    stub = new KeyboardClientStub.unbound()..impl = this;
+    selection = new TextRange(start: text.length, end: text.length);
+  }
+
   String text;
   TextRange composing = const TextRange.empty();
-  TextRange selection = const TextRange.empty();
+  TextRange selection;
 
   final StringUpdated onUpdated;
+  final StringSubmitted onSubmitted;
 
   KeyboardClientStub stub;
-
-  EditableString({this.text: '', this.onUpdated}) {
-    stub = new KeyboardClientStub.unbound()..impl = this;
-  }
 
   String textBefore(TextRange range) {
     return text.substring(0, range.start);
@@ -129,7 +134,9 @@ class EditableString implements KeyboardClient {
     onUpdated();
   }
 
-  void submit(SubmitAction action) {}
+  void submit(SubmitAction action) {
+    onSubmitted();
+  }
 }
 
 class EditableText extends StatefulComponent {

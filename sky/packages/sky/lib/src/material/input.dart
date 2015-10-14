@@ -13,6 +13,7 @@ import 'theme.dart';
 export 'package:flutter/services.dart' show KeyboardType;
 
 typedef void StringValueChanged(String value);
+typedef void StringValueSubmitted(String value);
 
 // TODO(eseidel): This isn't right, it's 16px on the bottom:
 // http://www.google.com/design/spec/components/text-fields.html#text-fields-single-line-text-field
@@ -24,7 +25,8 @@ class Input extends Scrollable {
     this.initialValue: '',
     this.placeholder,
     this.onChanged,
-    this.keyboardType: KeyboardType.TEXT
+    this.keyboardType: KeyboardType.TEXT,
+    this.onSubmitted
   }) : super(
     key: key,
     initialScrollOffset: 0.0,
@@ -35,6 +37,7 @@ class Input extends Scrollable {
   final KeyboardType keyboardType;
   final String placeholder;
   final StringValueChanged onChanged;
+  final StringValueSubmitted onSubmitted;
 
   _InputState createState() => new _InputState();
 }
@@ -52,7 +55,8 @@ class _InputState extends ScrollableState<Input> {
     _value = config.initialValue;
     _editableValue = new EditableString(
       text: _value,
-      onUpdated: _handleTextUpdated
+      onUpdated: _handleTextUpdated,
+      onSubmitted: _handleTextSubmitted
     );
   }
 
@@ -66,12 +70,20 @@ class _InputState extends ScrollableState<Input> {
     }
   }
 
+  void _handleTextSubmitted() {
+    if (config.onSubmitted != null)
+      config.onSubmitted(_value);
+  }
+
   Widget buildContent(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     bool focused = Focus.at(context, config);
 
     if (focused && !_keyboardHandle.attached) {
       _keyboardHandle = keyboard.show(_editableValue.stub, config.keyboardType);
+      _keyboardHandle.setText(_editableValue.text);
+      _keyboardHandle.setSelection(_editableValue.selection.start,
+                                   _editableValue.selection.end);
     } else if (!focused && _keyboardHandle.attached) {
       _keyboardHandle.release();
     }
