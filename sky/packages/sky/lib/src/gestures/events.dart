@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui' as ui;
 
 /// Base class for input events.
@@ -21,13 +25,8 @@ class InputEvent {
 
 }
 
-/// Input event
+/// Input event representing a touch or button.
 class PointerInputEvent extends InputEvent {
-
-  // Map actual input pointer value to a unique value
-  // Since events are serialized we can just use a counter
-  static Map<int, int> _pointerMap = new Map<int, int>();
-  static int _pointerCount = 0;
 
   const PointerInputEvent({
     String type,
@@ -60,7 +59,7 @@ class PointerInputEvent extends InputEvent {
      PointerInputEvent result = new PointerInputEvent(
         type: event.type,
         timeStamp: event.timeStamp,
-        pointer: (event.type == 'pointerDown') ? _pointerCount : _pointerMap[event.pointer],
+        pointer: _getPointerValue(event.type, event.pointer),
         kind: event.kind,
         x: event.x,
         y: event.y,
@@ -83,11 +82,24 @@ class PointerInputEvent extends InputEvent {
         orientation: event.orientation,
         tilt: event.tilt
       );
-      if (event.type == 'pointerdown') {
-        _pointerMap[event.pointer] = _pointerCount;
-        _pointerCount++;
-      }
       return result;
+  }
+
+  // Map actual input pointer value to a unique value
+  // Since events are serialized we can just use a counter
+  static Map<int, int> _pointerMap = new Map<int, int>();
+  static int _pointerCount = 0;
+
+  static int _getPointerValue(String eventType, int pointer) {
+    int result;
+    if (eventType == 'pointerdown') {
+      result = pointer;
+      _pointerMap[pointer] = _pointerCount;
+      _pointerCount++;
+    } else {
+      result = _pointerMap[pointer];
+    }
+    return result;
   }
 
   final int pointer;

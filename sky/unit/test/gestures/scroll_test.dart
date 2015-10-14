@@ -32,7 +32,7 @@ void main() {
     };
 
     TestPointer pointer = new TestPointer(5);
-    PointerInputEvent down = pointer.down(new ui.Point(10.0, 10.0));
+    PointerInputEvent down = pointer.down(new Point(10.0, 10.0));
     pan.addPointer(down);
     tap.addPointer(down);
     GestureArena.instance.close(5);
@@ -47,7 +47,7 @@ void main() {
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
-    router.route(pointer.move(new ui.Point(20.0, 20.0)));
+    router.route(pointer.move(new Point(20.0, 20.0)));
     expect(didStartPan, isTrue);
     didStartPan = false;
     expect(updatedScrollDelta, new ui.Offset(10.0, 10.0));
@@ -55,7 +55,7 @@ void main() {
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
-    router.route(pointer.move(new ui.Point(20.0, 25.0)));
+    router.route(pointer.move(new Point(20.0, 25.0)));
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, new ui.Offset(0.0, 5.0));
     updatedScrollDelta = null;
