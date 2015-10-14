@@ -682,8 +682,12 @@ class AndroidDevice extends Device {
     return false;
   }
 
+  String _getDeviceDataPath(ApplicationPackage app) {
+    return '/data/data/${app.id}';
+  }
+
   String _getDeviceSha1Path(ApplicationPackage app) {
-    return '/sdcard/${app.id}/${app.name}.sha1';
+    return '${_getDeviceDataPath(app)}/${app.name}.sha1';
   }
 
   String _getDeviceApkSha1(ApplicationPackage app) {
@@ -728,14 +732,8 @@ class AndroidDevice extends Device {
 
     print('Installing ${app.name} on device.');
     runCheckedSync([adbPath, 'install', '-r', app.localPath]);
-
-    Directory tempDir = Directory.systemTemp;
-    String sha1Path = path.join(
-        tempDir.path, (app.localPath + '.sha1').replaceAll(path.separator, '_'));
-    File sha1TempFile = new File(sha1Path);
-    sha1TempFile.writeAsStringSync(_getSourceSha1(app), flush: true);
-    runCheckedSync([adbPath, 'push', sha1Path, _getDeviceSha1Path(app)]);
-    sha1TempFile.deleteSync();
+    runCheckedSync([adbPath, 'shell', 'run-as', app.id, 'chmod', '777', _getDeviceDataPath(app)]);
+    runCheckedSync([adbPath, 'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]);
     return true;
   }
 
@@ -897,16 +895,7 @@ class AndroidDevice extends Device {
     }
 
     if (tracePath != null) {
-      // adb root exits with 0 even if the command fails,
-      // so check the output string
-      String output = runSync([adbPath, 'root']);
-      if (new RegExp(r'.*cannot run as root.*').hasMatch(output)) {
-        _logging
-            .severe('Unable to download trace "${path.basename(tracePath)}"\n'
-                'You need to be able to run adb as root '
-                'on your android device');
-        return null;
-      }
+      runSync([adbPath, 'shell', 'run-as', apk.id, 'chmod', '777', tracePath]);
       runSync([adbPath, 'pull', tracePath]);
       runSync([adbPath, 'shell', 'rm', tracePath]);
       return path.basename(tracePath);
