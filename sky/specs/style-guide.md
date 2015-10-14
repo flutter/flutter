@@ -56,7 +56,7 @@ name all of them. Always be explicit with the types of variables in
 callbacks unless you are ignoring them (and have named them with
 underscores).
 
-If you have variables or methods that are only used in release mode,
+If you have variables or methods that are only used in checked mode,
 prefix their names with `debug` or `_debug`.
 
 Avoid naming your libraries (no ```library``` keyword), unless it's a
