@@ -61,3 +61,23 @@ class SpringSimulation extends Simulation {
       _nearEqual(x(time), _endPosition, this.tolerance.distance) &&
           _nearZero(dx(time), this.tolerance.velocity);
 }
+
+/// A SpringSimulation where the value of x() is guaranteed to have exactly the
+/// end value when the simulation isDone().
+class ScrollSpringSimulation extends SpringSimulation {
+  ScrollSpringSimulation(SpringDescription desc, double start, double end, double velocity)
+    : super(desc, start, end, velocity);
+
+  bool _isDone(double position, double velocity) {
+    return _nearEqual(position, _endPosition, tolerance.distance) && _nearZero(velocity, tolerance.velocity);
+  }
+
+  @override
+  double x(double time) {
+    double xAtTime = super.x(time);
+    return _isDone(xAtTime, dx(time)) ? _endPosition : xAtTime;
+  }
+
+  @override
+  bool isDone(double time) => _isDone(x(time), dx(time));
+}

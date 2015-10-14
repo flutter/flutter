@@ -194,14 +194,16 @@ void main() {
         mass: 1.0, springConstant: 50.0, ratio: 0.5);
 
     var scroll = new ScrollSimulation(100.0, 800.0, 0.0, 300.0, spring, 0.3);
-
-    scroll.tolerance = const Tolerance(velocity: 0.01, distance: 0.01);
-
+    scroll.tolerance = const Tolerance(velocity: 0.5, distance: 0.1);
     expect(scroll.isDone(0.0), false);
+    expect(scroll.isDone(0.5), false); // switch from friction to spring
     expect(scroll.isDone(3.5), true);
 
     var scroll2 = new ScrollSimulation(100.0, -800.0, 0.0, 300.0, spring, 0.3);
-    expect(scroll2.isDone(4.5), true);
+    scroll2.tolerance = const Tolerance(velocity: 0.5, distance: 0.1);
+    expect(scroll2.isDone(0.0), false);
+    expect(scroll2.isDone(0.5), false); // switch from friction to spring
+    expect(scroll2.isDone(3.5), true);
   });
 
   test('scroll_with_inf_edge_ends', () {
@@ -228,5 +230,23 @@ void main() {
 
     // We should never switch
     expect(scroll.currentIntervalOffset, 0.0);
+  });
+
+  test('over/under scroll spring', () {
+    var spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
+    var scroll = new ScrollSimulation(500.0, -7500.0, 0.0, 1000.0, spring, 0.025);
+    scroll.tolerance = new Tolerance(velocity: 45.0, distance: 1.5);
+
+    expect(scroll.isDone(0.0), false);
+    expect(scroll.x(0.0), closeTo(500.0, .0001));
+    expect(scroll.dx(0.0), closeTo(-7500.0, .0001));
+
+    expect(scroll.isDone(0.025), false);
+    expect(scroll.x(0.025), closeTo(320.0, 1.0));
+    expect(scroll.dx(0.25), closeTo(-2982, 1.0));
+
+    expect(scroll.isDone(2.0), true);
+    expect(scroll.x(2.0), 0.0);
+    expect(scroll.dx(2.0), closeTo(0.0, 45.0));
   });
 }

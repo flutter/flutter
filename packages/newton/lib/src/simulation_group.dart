@@ -41,7 +41,7 @@ abstract class SimulationGroup extends Simulation {
   @override
   bool isDone(double time) {
     _stepIfNecessary(time);
-    return currentSimulation.isDone(time);
+    return currentSimulation.isDone(time - currentIntervalOffset);
   }
 
   double _lastStep = -1.0;

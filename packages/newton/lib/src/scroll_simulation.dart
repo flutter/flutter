@@ -47,12 +47,12 @@ class ScrollSimulation extends SimulationGroup {
       if (position > _trailingExtent) {
         _isSpringing = true;
         _offset = intervalOffset;
-        _currentSimulation = new SpringSimulation(_spring, position, _trailingExtent, velocity);
+        _currentSimulation = new ScrollSpringSimulation(_spring, position, _trailingExtent, velocity);
         return true;
       } else if (position < _leadingExtent) {
         _isSpringing = true;
         _offset = intervalOffset;
-        _currentSimulation = new SpringSimulation(_spring, position, _leadingExtent, velocity);
+        _currentSimulation = new ScrollSpringSimulation(_spring, position, _leadingExtent, velocity);
         return true;
       }
     }
