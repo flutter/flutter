@@ -23,6 +23,7 @@ export 'package:flutter/rendering.dart' show
     FlexAlignItems,
     FlexDirection,
     FlexJustifyContent,
+    FractionalOffset,
     Matrix4,
     Offset,
     Paint,
@@ -171,19 +172,21 @@ class ClipOval extends OneChildRenderObjectWidget {
 // POSITIONING AND SIZING NODES
 
 class Transform extends OneChildRenderObjectWidget {
-  Transform({ Key key, this.transform, this.origin, Widget child })
+  Transform({ Key key, this.transform, this.origin, this.alignment, Widget child })
     : super(key: key, child: child) {
     assert(transform != null);
   }
 
   final Matrix4 transform;
   final Offset origin;
+  final FractionalOffset alignment;
 
-  RenderTransform createRenderObject() => new RenderTransform(transform: transform, origin: origin);
+  RenderTransform createRenderObject() => new RenderTransform(transform: transform, origin: origin, alignment: alignment);
 
   void updateRenderObject(RenderTransform renderObject, Transform oldWidget) {
     renderObject.transform = transform;
     renderObject.origin = origin;
+    renderObject.alignment = alignment;
   }
 }
 
