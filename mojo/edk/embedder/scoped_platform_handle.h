@@ -14,8 +14,6 @@ namespace embedder {
 
 // Scoper for |PlatformHandle|s, which are just file descriptors.
 class ScopedPlatformHandle {
-  MOJO_MOVE_ONLY_TYPE(ScopedPlatformHandle)
-
  public:
   ScopedPlatformHandle() {}
   explicit ScopedPlatformHandle(PlatformHandle handle) : handle_(handle) {}
@@ -54,6 +52,8 @@ class ScopedPlatformHandle {
 
  private:
   PlatformHandle handle_;
+
+  MOJO_MOVE_ONLY_TYPE(ScopedPlatformHandle);
 };
 
 }  // namespace embedder
