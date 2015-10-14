@@ -85,7 +85,14 @@ class FlutterCommandRunner extends CommandRunner {
         help: 'Path to your packages directory.', defaultsTo: 'packages');
   }
 
-  List<BuildConfiguration> buildConfigurations;
+  List<BuildConfiguration> get buildConfigurations {
+    if (_buildConfigurations == null)
+      _buildConfigurations = _createBuildConfigurations(_globalResults);
+    return _buildConfigurations;
+  }
+  List<BuildConfiguration> _buildConfigurations;
+
+  ArgResults _globalResults;
 
   Future<int> runCommand(ArgResults globalResults) async {
     if (globalResults['verbose'])
@@ -94,6 +101,11 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults['very-verbose'])
       Logger.root.level = Level.FINE;
 
+    _globalResults = globalResults;
+    return super.runCommand(globalResults);
+  }
+
+  List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {
     ArtifactStore.packageRoot = globalResults['package-root'];
     if (!FileSystemEntity.isDirectorySync(ArtifactStore.packageRoot)) {
       String message = '${ArtifactStore.packageRoot} is not a valid directory.';
@@ -104,15 +116,9 @@ class FlutterCommandRunner extends CommandRunner {
           message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
       }
       _logging.severe(message);
-      return 2;
+      exit(2);
     }
 
-    buildConfigurations = _createBuildConfigurations(globalResults);
-
-    return super.runCommand(globalResults);
-  }
-
-  List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {
     String enginePath = globalResults['engine-src-path'];
     bool isDebug = globalResults['debug'];
     bool isRelease = globalResults['release'];
