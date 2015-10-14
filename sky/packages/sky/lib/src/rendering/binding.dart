@@ -23,12 +23,6 @@ int _hammingWeight(int value) {
   return weight;
 }
 
-class _PointerState {
-  _PointerState({ this.result, this.lastPosition });
-  HitTestResult result;
-  Point lastPosition;
-}
-
 typedef void EventListener(InputEvent event);
 
 /// A hit test entry used by [FlutterBinding]
@@ -37,6 +31,93 @@ class BindingHitTestEntry extends HitTestEntry {
 
   /// The result of the hit test
   final HitTestResult result;
+}
+
+/// State used in converting ui.Event to InputEvent
+class _PointerState {
+  _PointerState({ this.pointer, this.lastPosition });
+  int pointer;
+  Point lastPosition;
+}
+
+class _UiEventConverter {
+  static InputEvent convert(ui.Event event) {
+    if (event is ui.PointerEvent)
+      return convertPointerEvent(event);
+
+    // Default event
+    return new InputEvent(
+      type: event.type,
+      timeStamp: event.timeStamp
+    );
+  }
+
+  // Map actual input pointer value to a unique value
+  // Since events are serialized we can just use a counter
+  static Map<int, _PointerState> _stateForPointer = new Map<int, _PointerState>();
+  static int _pointerCount = 0;
+
+  static PointerInputEvent convertPointerEvent(ui.PointerEvent event) {
+    Point position = new Point(event.x, event.y);
+
+    _PointerState state = _stateForPointer[event.pointer];
+    double dx, dy;
+    switch (event.type) {
+      case 'pointerdown':
+        if (state == null) {
+          state = new _PointerState(lastPosition: position);
+          _stateForPointer[event.pointer] = state;
+        }
+        state.pointer = _pointerCount;
+        _pointerCount++;
+        break;
+      case 'pointermove':
+        // state == null means the pointer is hovering
+        if (state != null) {
+          dx = position.x - state.lastPosition.x;
+          dy = position.y - state.lastPosition.y;
+          state.lastPosition = position;
+        }
+        break;
+      case 'pointerup':
+      case 'pointercancel':
+        // state == null indicates spurious events
+        if (state != null) {
+          // Only remove the pointer state when the last button has been released.
+          if (_hammingWeight(event.buttons) <= 1)
+            _stateForPointer.remove(event.pointer);
+        }
+        break;
+    }
+
+    return new PointerInputEvent(
+       type: event.type,
+       timeStamp: event.timeStamp,
+       pointer: state.pointer,
+       kind: event.kind,
+       x: event.x,
+       y: event.y,
+       dx: dx,
+       dy: dy,
+       buttons: event.buttons,
+       down: event.down,
+       primary: event.primary,
+       obscured: event.obscured,
+       pressure: event.pressure,
+       pressureMin: event.pressureMin,
+       pressureMax: event.pressureMax,
+       distance: event.distance,
+       distanceMin: event.distanceMin,
+       distanceMax: event.distanceMax,
+       radiusMajor: event.radiusMajor,
+       radiusMinor: event.radiusMinor,
+       radiusMin: event.radiusMin,
+       radiusMax: event.radiusMax,
+       orientation: event.orientation,
+       tilt: event.tilt
+     );
+  }
+
 }
 
 /// The glue between the render tree and the Flutter engine
@@ -95,7 +176,7 @@ class FlutterBinding extends HitTestTarget {
   bool removeEventListener(EventListener listener) => _eventListeners.remove(listener);
 
   void _handleEvent(ui.Event event) {
-    InputEvent ourEvent = new InputEvent.fromUiEvent(event);
+    InputEvent ourEvent = _UiEventConverter.convert(event);
     if (ourEvent is PointerInputEvent) {
       _handlePointerInputEvent(ourEvent);
     } else {
@@ -110,41 +191,36 @@ class FlutterBinding extends HitTestTarget {
   /// State for all pointers which are currently down.
   /// We do not track the state of hovering pointers because we need
   /// to hit-test them on each movement.
-  Map<int, _PointerState> _stateForPointer = new Map<int, _PointerState>();
+  Map<int, HitTestResult> _resultForPointer = new Map<int, HitTestResult>();
 
   void _handlePointerInputEvent(PointerInputEvent event) {
-    Point position = new Point(event.x, event.y);
-
-    _PointerState state = _stateForPointer[event.pointer];
+    HitTestResult result = _resultForPointer[event.pointer];
     switch (event.type) {
       case 'pointerdown':
-        if (state == null) {
-          state = new _PointerState(result: hitTest(position), lastPosition: position);
-          _stateForPointer[event.pointer] = state;
+        if (result == null) {
+          result = hitTest(new Point(event.x, event.y));
+          _resultForPointer[event.pointer] = result;
         }
         break;
       case 'pointermove':
-        if (state == null) {
+        if (result == null) {
           // The pointer is hovering, ignore it for now since we don't
           // know what to do with it yet.
           return;
         }
-        event.dx = position.x - state.lastPosition.x;
-        event.dy = position.y - state.lastPosition.y;
-        state.lastPosition = position;
         break;
       case 'pointerup':
       case 'pointercancel':
-        if (state == null) {
+        if (result == null) {
           // This seems to be a spurious event.  Ignore it.
           return;
         }
-        // Only remove the pointer state when the last button has been released.
+        // Only remove the hit test result when the last button has been released.
         if (_hammingWeight(event.buttons) <= 1)
-          _stateForPointer.remove(event.pointer);
+          _resultForPointer.remove(event.pointer);
         break;
     }
-    dispatchEvent(event, state.result);
+    dispatchEvent(event, result);
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position

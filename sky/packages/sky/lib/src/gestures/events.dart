@@ -2,25 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 /// Base class for input events.
 class InputEvent {
 
   const InputEvent({ this.type, this.timeStamp: 0.0 });
 
-  factory InputEvent.fromUiEvent(ui.Event event) {
-    if (event is ui.PointerEvent)
-      return new PointerInputEvent.fromUiEvent(event);
-
-    // Default event
-    return new InputEvent(
-      type: event.type,
-      timeStamp: event.timeStamp
-    );
-  }
-
   final String type;
+  // TODO: Should timeStamp be a DateTime object instead of double?
+  // Some client code (e.g. drag.dart) does math on the time stamp.
   final double timeStamp;
 
 }
@@ -54,53 +43,6 @@ class PointerInputEvent extends InputEvent {
     this.orientation,
     this.tilt
   }) : super(type: type, timeStamp: timeStamp);
-
-  factory PointerInputEvent.fromUiEvent(ui.PointerEvent event) {
-     PointerInputEvent result = new PointerInputEvent(
-        type: event.type,
-        timeStamp: event.timeStamp,
-        pointer: _getPointerValue(event.type, event.pointer),
-        kind: event.kind,
-        x: event.x,
-        y: event.y,
-        dx: event.dx,
-        dy: event.dy,
-        buttons: event.buttons,
-        down: event.down,
-        primary: event.primary,
-        obscured: event.obscured,
-        pressure: event.pressure,
-        pressureMin: event.pressureMin,
-        pressureMax: event.pressureMax,
-        distance: event.distance,
-        distanceMin: event.distanceMin,
-        distanceMax: event.distanceMax,
-        radiusMajor: event.radiusMajor,
-        radiusMinor: event.radiusMinor,
-        radiusMin: event.radiusMin,
-        radiusMax: event.radiusMax,
-        orientation: event.orientation,
-        tilt: event.tilt
-      );
-      return result;
-  }
-
-  // Map actual input pointer value to a unique value
-  // Since events are serialized we can just use a counter
-  static Map<int, int> _pointerMap = new Map<int, int>();
-  static int _pointerCount = 0;
-
-  static int _getPointerValue(String eventType, int pointer) {
-    int result;
-    if (eventType == 'pointerdown') {
-      result = pointer;
-      _pointerMap[pointer] = _pointerCount;
-      _pointerCount++;
-    } else {
-      result = _pointerMap[pointer];
-    }
-    return result;
-  }
 
   final int pointer;
   final String kind;
