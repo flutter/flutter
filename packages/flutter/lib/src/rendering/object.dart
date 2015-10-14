@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -392,6 +393,27 @@ class PaintingContext {
     _startRecording(originalLayer.paintBounds);
   }
 
+}
+
+/// An encapsulation of a renderer and a paint() method.
+///
+/// A renderer may allow its paint() method to be augmented or redefined by
+/// providing a Painter. See for example overlayPainter in BlockViewport.
+abstract class Painter {
+  RenderObject get renderObject => _renderObject;
+  RenderObject _renderObject;
+
+  void attach(RenderObject renderObject) {
+    assert(_renderObject == null);
+    _renderObject = renderObject;
+  }
+
+  void detach() {
+    assert(_renderObject != null);
+    _renderObject = null;
+  }
+
+  void paint(PaintingContext context, Offset offset);
 }
 
 /// An abstract set of layout constraints
@@ -1071,7 +1093,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // EVENTS
 
   /// Override this function to handle events that hit this render object
-  void handleEvent(ui.Event event, HitTestEntry entry) {
+  void handleEvent(InputEvent event, HitTestEntry entry) {
   }
 
 

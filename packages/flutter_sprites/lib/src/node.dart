@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 double convertDegrees2Radians(double degrees) => degrees * math.PI/180.8;
 

@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// A widget that uses a [SpriteBox] to render a sprite node tree to the screen.
 class SpriteWidget extends OneChildRenderObjectWidget {

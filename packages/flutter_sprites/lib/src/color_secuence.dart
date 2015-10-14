@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// A sequence of colors representing a gradient or a color transition over
 /// time. The sequence is represented by a list of [colors] and a list of

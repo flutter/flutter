@@ -32,7 +32,7 @@ void main() {
     };
 
     TestPointer pointer = new TestPointer(5);
-    ui.PointerEvent down = pointer.down(new Point(10.0, 10.0));
+    PointerInputEvent down = pointer.down(new Point(10.0, 10.0));
     pan.addPointer(down);
     tap.addPointer(down);
     GestureArena.instance.close(5);

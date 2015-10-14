@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'arena.dart';
+import 'events.dart';
 import 'recognizer.dart';
 
 typedef void GestureTapCallback();
@@ -17,7 +16,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   GestureTapCallback onTapDown;
   GestureTapCallback onTapCancel;
 
-  void handlePrimaryPointer(ui.PointerEvent event) {
+  void handlePrimaryPointer(PointerInputEvent event) {
     if (event.type == 'pointerdown') {
       if (onTapDown != null)
         onTapDown();

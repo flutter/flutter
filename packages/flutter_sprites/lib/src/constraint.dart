@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// A constraint limits or otherwise controls a [Node]'s properties, such as
 /// position or rotation. Add a list of constraints by setting the [Node]'s

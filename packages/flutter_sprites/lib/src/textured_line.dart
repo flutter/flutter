@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 class TexturedLine extends Node {
   TexturedLine(List<Point> points, List<Color> colors, List<double> widths, [Texture texture, List<double> textureStops]) {

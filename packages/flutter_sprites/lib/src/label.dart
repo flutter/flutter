@@ -1,4 +1,4 @@
-part of skysprites;
+part of flutter_sprites;
 
 /// Labels are used to display a string of text in a the node tree. To align
 /// the label, the textAlign property of the [TextStyle] can be set.
