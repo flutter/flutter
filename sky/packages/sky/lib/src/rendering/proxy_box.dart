@@ -862,15 +862,41 @@ class RenderDecoratedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
 }
 
+/// An offset that's expressed as a fraction of a Size.
+///
+/// FractionalOffset(0.0, 0.0) represents the top left of the Size,
+/// FractionalOffset(1.0, 1.0) represents the bottom right of the Size.
+class FractionalOffset {
+  const FractionalOffset(this.x, this.y);
+  final double x;
+  final double y;
+  bool operator ==(dynamic other) {
+    if (other is! FractionalOffset)
+      return false;
+    final FractionalOffset typedOther = other;
+    return x == typedOther.x &&
+           y == typedOther.y;
+  }
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + x.hashCode;
+    value = 37 * value + y.hashCode;
+    return value;
+  }
+}
+
 /// Applies a transformation before painting its child
 class RenderTransform extends RenderProxyBox {
   RenderTransform({
     Matrix4 transform,
     Offset origin,
+    FractionalOffset alignment,
     RenderBox child
   }) : super(child) {
     assert(transform != null);
+    assert(alignment == null || (alignment.x != null && alignment.y != null));
     this.transform = transform;
+    this.alignment = alignment;
     this.origin = origin;
   }
 
@@ -885,6 +911,20 @@ class RenderTransform extends RenderProxyBox {
     if (_origin == newOrigin)
       return;
     _origin = newOrigin;
+    markNeedsPaint();
+  }
+
+  /// The alignment of the origin, relative to the size of the box.
+  ///
+  /// This is equivalent to setting an origin based on the size of the box.
+  /// If it is specificed at the same time as an offset, both are applied.
+  FractionalOffset get alignment => _alignment;
+  FractionalOffset _alignment;
+  void set alignment (FractionalOffset newAlignment) {
+    assert(newAlignment == null || (newAlignment.x != null && newAlignment.y != null));
+    if (_alignment == newAlignment)
+      return;
+    _alignment = newAlignment;
     markNeedsPaint();
   }
 
@@ -937,13 +977,19 @@ class RenderTransform extends RenderProxyBox {
   }
 
   Matrix4 get _effectiveTransform {
-    if (_origin == null)
+    if (_origin == null && _alignment == null)
       return _transform;
-    return new Matrix4
-      .identity()
-      .translate(_origin.dx, _origin.dy)
-      .multiply(_transform)
-      .translate(-_origin.dx, -_origin.dy);
+    Matrix4 result = new Matrix4.identity();
+    if (_origin != null)
+      result.translate(_origin.dx, _origin.dy);
+    if (_alignment != null)
+      result.translate(_alignment.x * size.width, _alignment.y * size.height);
+    result.multiply(_transform);
+    if (_alignment != null)
+      result.translate(-_alignment.x * size.width, -_alignment.y * size.height);
+    if (_origin != null)
+      result.translate(-_origin.dx, -_origin.dy);
+    return result;
   }
 
   bool hitTest(HitTestResult result, { Point position }) {
