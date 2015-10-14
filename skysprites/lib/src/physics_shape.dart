@@ -32,7 +32,6 @@ class PhysicsShapeCircle extends PhysicsShape {
 }
 
 class PhysicsShapePolygon extends PhysicsShape {
-
   PhysicsShapePolygon(this.points);
 
   final List<Point> points;
@@ -49,6 +48,81 @@ class PhysicsShapePolygon extends PhysicsShape {
 
     box2d.PolygonShape shape = new box2d.PolygonShape();
     shape.set(vectors, vectors.length);
+    return shape;
+  }
+}
+
+class PhysicsShapeBox extends PhysicsShape {
+  PhysicsShapeBox(
+    this.width,
+    this.height, [
+      this.center = Point.origin,
+      this.rotation = 0.0
+  ]);
+
+  final double width;
+  final double height;
+  final Point center;
+  final double rotation;
+
+  box2d.Shape _createB2Shape(PhysicsNode node) {
+    box2d.PolygonShape shape = new box2d.PolygonShape();
+    shape.setAsBox(
+      width / node.b2WorldToNodeConversionFactor,
+      height / node.b2WorldToNodeConversionFactor,
+      new Vector2(
+        center.x / node.b2WorldToNodeConversionFactor,
+        center.y / node.b2WorldToNodeConversionFactor
+      ),
+      radians(rotation)
+    );
+    return shape;
+  }
+}
+
+class PhysicsShapeChain extends PhysicsShape {
+  PhysicsShapeChain(this.points, [this.loop=false]);
+
+  final List<Point> points;
+  final bool loop;
+
+  box2d.Shape _createB2Shape(PhysicsNode node) {
+    List<Vector2> vectors = [];
+    for (Point point in points) {
+      Vector2 vec = new Vector2(
+        point.x / node.b2WorldToNodeConversionFactor,
+        point.y / node.b2WorldToNodeConversionFactor
+      );
+      vectors.add(vec);
+    }
+
+    box2d.ChainShape shape = new box2d.ChainShape();
+    if (loop)
+      shape.createLoop(vectors, vectors.length);
+    else
+      shape.createChain(vectors, vectors.length);
+    return shape;
+  }
+}
+
+class PhysicsShapeEdge extends PhysicsShape {
+  PhysicsShapeEdge(this.pointA, this.pointB);
+
+  final Point pointA;
+  final Point pointB;
+
+  box2d.Shape _createB2Shape(PhysicsNode node) {
+    box2d.EdgeShape shape = new box2d.EdgeShape();
+    shape.set(
+      new Vector2(
+        pointA.x / node.b2WorldToNodeConversionFactor,
+        pointA.y / node.b2WorldToNodeConversionFactor
+      ),
+      new Vector2(
+        pointB.x / node.b2WorldToNodeConversionFactor,
+        pointB.y / node.b2WorldToNodeConversionFactor
+      )
+    );
     return shape;
   }
 }
