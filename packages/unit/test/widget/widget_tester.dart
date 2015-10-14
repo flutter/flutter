@@ -1,6 +1,5 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
@@ -159,13 +158,13 @@ class WidgetTester {
     _dispatchEvent(p.up(), result);
   }
 
-  void dispatchEvent(ui.Event event, Point location) {
+  void dispatchEvent(InputEvent event, Point location) {
     _dispatchEvent(event, _hitTest(location));
   }
 
   HitTestResult _hitTest(Point location) => WidgetFlutterBinding.instance.hitTest(location);
 
-  void _dispatchEvent(ui.Event event, HitTestResult result) {
+  void _dispatchEvent(InputEvent event, HitTestResult result) {
     WidgetFlutterBinding.instance.dispatchEvent(event, result);
   }
 

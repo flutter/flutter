@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 
 import 'arena.dart';
 import 'constants.dart';
+import 'events.dart';
 import 'pointer_router.dart';
 
 export 'pointer_router.dart' show PointerRouter;
@@ -22,9 +23,9 @@ abstract class GestureRecognizer extends GestureArenaMember {
   final Set<int> _trackedPointers = new Set<int>();
 
   /// The primary entry point for users of this class.
-  void addPointer(ui.PointerEvent event);
+  void addPointer(PointerInputEvent event);
 
-  void handleEvent(ui.PointerEvent event);
+  void handleEvent(PointerInputEvent event);
   void acceptGesture(int pointer) { }
   void rejectGesture(int pointer) { }
   void didStopTrackingLastPointer(int pointer);
@@ -58,7 +59,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
       didStopTrackingLastPointer(pointer);
   }
 
-  void stopTrackingIfPointerNoLongerDown(ui.PointerEvent event) {
+  void stopTrackingIfPointerNoLongerDown(PointerInputEvent event) {
     if (event.type == 'pointerup' || event.type == 'pointercancel')
       stopTrackingPointer(event.pointer);
   }
@@ -71,7 +72,7 @@ enum GestureRecognizerState {
   defunct
 }
 
-ui.Point _getPoint(ui.PointerEvent event) {
+ui.Point _getPoint(PointerInputEvent event) {
   return new ui.Point(event.x, event.y);
 }
 
@@ -86,7 +87,7 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
   ui.Point initialPosition;
   Timer _timer;
 
-  void addPointer(ui.PointerEvent event) {
+  void addPointer(PointerInputEvent event) {
     startTrackingPointer(event.pointer);
     if (state == GestureRecognizerState.ready) {
       state = GestureRecognizerState.possible;
@@ -97,7 +98,7 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
     }
   }
 
-  void handleEvent(ui.PointerEvent event) {
+  void handleEvent(PointerInputEvent event) {
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
       // TODO(abarth): Maybe factor the slop handling out into a separate class?
@@ -110,7 +111,7 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
   }
 
   /// Override to provide behavior for the primary pointer when the gesture is still possible.
-  void handlePrimaryPointer(ui.PointerEvent event);
+  void handlePrimaryPointer(PointerInputEvent event);
 
   /// Override to be notified with [deadline] is exceeded.
   ///
@@ -143,7 +144,7 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
     }
   }
 
-  double _getDistance(ui.PointerEvent event) {
+  double _getDistance(PointerInputEvent event) {
     ui.Offset offset = _getPoint(event) - initialPosition;
     return offset.distance;
   }
