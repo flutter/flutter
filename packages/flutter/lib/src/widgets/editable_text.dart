@@ -128,6 +128,8 @@ class EditableString implements KeyboardClient {
     selection = new TextRange(start: start, end: end);
     onUpdated();
   }
+
+  void submit(SubmitAction action) {}
 }
 
 class EditableText extends StatefulComponent {
