@@ -17,6 +17,10 @@ class MockKeyboard implements KeyboardService {
   void showByRequest() {}
 
   void hide() {}
+
+  void setText(String text) {}
+
+  void setSelection(int start, int end) {}
 }
 
 void main() {
