@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 
 const double kTwoPi = 2 * math.PI;
 
@@ -518,7 +518,7 @@ class RenderSolidColor extends RenderDecoratedSector {
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
   }
 
-  void handleEvent(ui.Event event, HitTestEntry entry) {
+  void handleEvent(InputEvent event, HitTestEntry entry) {
     if (event.type == 'pointerdown')
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
     else if (event.type == 'pointerup')
