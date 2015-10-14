@@ -14,6 +14,7 @@ import 'package:box2d/box2d.dart' as box2d;
 import 'package:mojo/core.dart';
 import 'package:sky_services/media/media.mojom.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
