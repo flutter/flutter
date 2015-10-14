@@ -104,11 +104,12 @@ bool IsServiceIsolateURL(const char* url_name) {
 // watcher isolate and the service isolate. Presumably, we'll want application
 // isolates to spawn their own isolates.
 Dart_Isolate IsolateCreateCallback(const char* script_uri,
-                                          const char* main,
-                                          const char* package_root,
-                                          Dart_IsolateFlags* flags,
-                                          void* callback_data,
-                                          char** error) {
+                                   const char* main,
+                                   const char* package_root,
+                                   const char** package_map,
+                                   Dart_IsolateFlags* flags,
+                                   void* callback_data,
+                                   char** error) {
   if (IsServiceIsolateURL(script_uri)) {
     CHECK(kDartIsolateSnapshotBuffer);
     DartState* dart_state = new DartState();
