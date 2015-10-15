@@ -32,8 +32,10 @@ class SpriteBox extends RenderBox {
     if (value == _rootNode) return;
 
     // Ensure that the root node has a size
-    assert(value.size.width > 0);
-    assert(value.size.height > 0);
+    assert(_transformMode == SpriteBoxTransformMode.nativePoints
+      || value.size.width > 0);
+    assert(_transformMode == SpriteBoxTransformMode.nativePoints
+      || value.size.height > 0);
 
     // Remove sprite box references
     if (_rootNode != null) _removeSpriteBoxReference(_rootNode);
@@ -101,11 +103,11 @@ class SpriteBox extends RenderBox {
     assert(rootNode != null);
     assert(rootNode._spriteBox == null);
 
-    // Setup root node
-    this.rootNode = rootNode;
-
     // Setup transform mode
     this.transformMode = mode;
+
+    // Setup root node
+    this.rootNode = rootNode;
   }
 
   void _removeSpriteBoxReference(Node node) {
@@ -310,6 +312,8 @@ class SpriteBox extends RenderBox {
         rootNode.size = new Size(systemWidth, systemHeight);
         break;
       case SpriteBoxTransformMode.nativePoints:
+        systemWidth = size.width;
+        systemHeight = size.height;
         break;
       default:
         assert(false);
