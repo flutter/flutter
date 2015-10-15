@@ -135,7 +135,7 @@ class TextStyle {
       TextDecoration.none: 'none',
       TextDecoration.underline: 'underline',
       TextDecoration.overline: 'overline',
-      TextDecoration.lineThrough: 'lineThrough'
+      TextDecoration.lineThrough: 'line-through'
     };
     return decoration.map((TextDecoration d) => toCSS[d]).join(' ');
   }
