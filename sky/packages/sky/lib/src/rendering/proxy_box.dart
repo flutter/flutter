@@ -883,6 +883,7 @@ class FractionalOffset {
     value = 37 * value + y.hashCode;
     return value;
   }
+  String toString() => '$runtimeType($x, $y)';
 }
 
 /// Applies a transformation before painting its child
@@ -1016,7 +1017,7 @@ class RenderTransform extends RenderProxyBox {
   String debugDescribeSettings(String prefix) {
     List<String> result = _transform.toString().split('\n').map((String s) => '$prefix  $s\n').toList();
     result.removeLast();
-    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\n';
+    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\nalignment: $alignment\n';
   }
 }
 
