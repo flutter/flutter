@@ -4,14 +4,22 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
   _PhysicsDebugDraw(
     box2d.ViewportTransform transform,
     this.physicsNode
-  ) : super(transform);
+  ) : super(transform) {
+    appendFlags(
+      box2d.DebugDraw.JOINT_BIT |
+      box2d.DebugDraw.CENTER_OF_MASS_BIT |
+      box2d.DebugDraw.WIREFRAME_DRAWING_BIT
+    );
+  }
 
   PhysicsNode physicsNode;
 
   PaintingCanvas canvas;
 
   void drawSegment(Vector2 p1, Vector2 p2, box2d.Color3i color) {
-    Paint paint = new Paint()..color = _toColor(color);
+    Paint paint = new Paint()
+      ..color = _toColor(color)
+      ..strokeWidth = 1.0;
     canvas.drawLine(_toPoint(p1), _toPoint(p2), paint);
   }
 
@@ -33,7 +41,6 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
   }
 
   void drawCircle(Vector2 center, num radius, box2d.Color3i color, [Vector2 axis]) {
-    print("drawCircle: $center");
     Paint paint = new Paint()
       ..color = _toColor(color)
       ..setStyle(ui.PaintingStyle.stroke)
