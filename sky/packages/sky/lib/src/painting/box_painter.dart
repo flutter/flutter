@@ -306,9 +306,7 @@ class LinearGradient extends Gradient {
     this.colors,
     this.stops,
     this.tileMode: ui.TileMode.clamp
-  }) {
-    assert(colors.length == stops.length);
-  }
+  });
 
   /// The point at which stop 0.0 of the gradient is placed
   final Point begin;
@@ -323,7 +321,8 @@ class LinearGradient extends Gradient {
 
   /// A list of values from 0.0 to 1.0 that denote fractions of the vector from start to end
   ///
-  /// Note: This list must have the same length as [colors].
+  /// Note: If specified, this list must have the same length as [colors]. Otherwise the colors
+  /// are distributed evenly between [begin] and [end].
   final List<double> stops;
 
   /// How this gradient should tile the plane
