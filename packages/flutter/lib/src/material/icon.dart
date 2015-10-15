@@ -8,50 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
-
-enum IconThemeColor { white, black }
-
-class IconThemeData {
-  const IconThemeData({ this.color });
-  final IconThemeColor color;
-
-  bool operator ==(dynamic other) {
-    if (other is! IconThemeData)
-      return false;
-    final IconThemeData typedOther = other;
-    return color == typedOther;
-  }
-
-  int get hashCode => color.hashCode;
-
-  String toString() => '$color';
-}
-
-class IconTheme extends InheritedWidget {
-
-  IconTheme({
-    Key key,
-    this.data,
-    Widget child
-  }) : super(key: key, child: child) {
-    assert(data != null);
-    assert(child != null);
-  }
-
-  final IconThemeData data;
-
-  static IconThemeData of(BuildContext context) {
-    IconTheme result = context.inheritedWidgetOfType(IconTheme);
-    return result?.data;
-  }
-
-  bool updateShouldNotify(IconTheme old) => data != old.data;
-
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$data');
-  }
-}
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 
 AssetBundle _initIconBundle() {
   if (rootBundle != null)

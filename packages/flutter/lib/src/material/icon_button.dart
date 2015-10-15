@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 
 import 'icon.dart';
+import 'icon_theme_data.dart';
 
 class IconButton extends StatelessComponent {
   const IconButton({
