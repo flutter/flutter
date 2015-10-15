@@ -12,14 +12,14 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
   switch (await showMenu(
     navigator: navigator,
     position: new MenuPosition(
-      right: sky.view.paddingRight + _kMenuMargin,
-      top: sky.view.paddingTop + _kMenuMargin
+      right: ui.view.paddingRight + _kMenuMargin,
+      top: ui.view.paddingTop + _kMenuMargin
     ),
     builder: (NavigatorState navigator) {
       return <PopupMenuItem>[
         new PopupMenuItem(
           value: _MenuItems.autorefresh,
-          child: new Row([
+          child: new Row(<Widget>[
               new Flexible(child: new Text('Autorefresh')),
               new Checkbox(
                 value: autorefresh,
@@ -59,7 +59,20 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
         return new Dialog(
           title: new Text('Not Implemented'),
           content: new Text('This feature has not yet been implemented.'),
-          actions: [
+          actions: <Widget>[
+            new FlatButton(
+              child: new Row(<Widget>[
+                new Icon(
+                  type: 'device/dvr',
+                  size: 18
+                ),
+                new Container(
+                  width: 8.0
+                ),
+                new Text('DUMP APP TO CONSOLE'),
+              ]),
+              onPressed: () { debugDumpApp(); }
+            ),
             new FlatButton(
               child: new Text('OH WELL'),
               onPressed: () {

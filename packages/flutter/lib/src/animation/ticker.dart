@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky/src/animation/scheduler.dart';
+import 'scheduler.dart';
 
 typedef TickerCallback(Duration elapsed);
 

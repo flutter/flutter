@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/basic.dart';
+import 'package:flutter/rendering.dart';
+
+import 'framework.dart';
+import 'basic.dart';
 
 typedef Widget IndexedBuilder(BuildContext context, int index); // return null if index is greater than index of last entry
 typedef void ExtentsUpdateCallback(double newExtents);
@@ -55,7 +56,13 @@ class _ChildKey {
   factory _ChildKey.fromWidget(Widget widget) => new _ChildKey(widget.runtimeType, widget.key);
   final Type type;
   final Key key;
-  bool operator ==(other) => other is _ChildKey && other.type == type && other.key == key;
+  bool operator ==(dynamic other) {
+    if (other is! _ChildKey)
+      return false;
+    final _ChildKey typedOther = other;
+    return type == typedOther.type &&
+           key == typedOther.key;
+  }
   int get hashCode => 373 * 37 * type.hashCode + key.hashCode;
   String toString() => "_ChildKey(type: $type, key: $key)";
 }
@@ -164,27 +171,31 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     if (changes != _ChangeDescription.none || !isValid) {
       renderObject.markNeedsLayout();
     } else {
-      // we just need to redraw our existing widgets as-is
-      if (_childrenByKey.length > 0) {
-        assert(_firstVisibleChildIndex >= 0);
-        assert(renderObject != null);
-        final int startIndex = _firstVisibleChildIndex;
-        int lastIndex = startIndex + _childrenByKey.length - 1;
-        Element nextSibling = null;
-        for (int index = lastIndex; index > startIndex; index -= 1) {
-          final Widget newWidget = _buildWidgetAt(index);
-          final _ChildKey key = new _ChildKey.fromWidget(newWidget);
-          final Element oldElement = _childrenByKey[key];
-          assert(oldElement != null);
-          final Element newElement = updateChild(oldElement, newWidget, nextSibling);
-          assert(newElement != null);
-          _childrenByKey[key] = newElement;
-          // Verify that it hasn't changed size.
-          // If this assertion fires, it means you didn't call "invalidate"
-          // before changing the size of one of your items.
-          assert(_debugIsSameSize(newElement, index, _lastLayoutConstraints));
-          nextSibling = newElement;
-        }
+      reinvokeBuilders();
+    }
+  }
+
+  void reinvokeBuilders() {
+    // we just need to redraw our existing widgets as-is
+    if (_childrenByKey.length > 0) {
+      assert(_firstVisibleChildIndex >= 0);
+      assert(renderObject != null);
+      final int startIndex = _firstVisibleChildIndex;
+      int lastIndex = startIndex + _childrenByKey.length - 1;
+      Element nextSibling = null;
+      for (int index = lastIndex; index >= startIndex; index -= 1) {
+        final Widget newWidget = _buildWidgetAt(index);
+        final _ChildKey key = new _ChildKey.fromWidget(newWidget);
+        final Element oldElement = _childrenByKey[key];
+        assert(oldElement != null);
+        final Element newElement = updateChild(oldElement, newWidget, nextSibling);
+        assert(newElement != null);
+        _childrenByKey[key] = newElement;
+        // Verify that it hasn't changed size.
+        // If this assertion fires, it means you didn't call "invalidate"
+        // before changing the size of one of your items.
+        assert(_debugIsSameSize(newElement, index, _lastLayoutConstraints));
+        nextSibling = newElement;
       }
     }
   }
@@ -322,7 +333,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     double newExtent = _getElementExtent(element, innerConstraints);
     bool result = _childExtents[index] == newExtent;
     if (!result)
-      print("Element $element at index $index was size ${_childExtents[index]} but is now size ${newExtent} yet no invalidate() was received to that effect");
+      print("Element $element at index $index was size ${_childExtents[index]} but is now size $newExtent yet no invalidate() was received to that effect");
     return result;
   }
 

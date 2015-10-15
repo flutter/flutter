@@ -4,10 +4,9 @@
 
 import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:sky_services/media/media.mojom.dart';
-import 'package:sky/material.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 // All of these sounds are marked as public domain at soundbible.
 const String chimes = "http://soundbible.com/grab.php?id=2030&type=wav";

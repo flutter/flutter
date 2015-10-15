@@ -1,8 +1,7 @@
-import 'dart:sky' as sky;
-
-import 'package:sky/animation.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 
@@ -159,13 +158,13 @@ class WidgetTester {
     _dispatchEvent(p.up(), result);
   }
 
-  void dispatchEvent(sky.Event event, Point location) {
+  void dispatchEvent(InputEvent event, Point location) {
     _dispatchEvent(event, _hitTest(location));
   }
 
   HitTestResult _hitTest(Point location) => WidgetFlutterBinding.instance.hitTest(location);
 
-  void _dispatchEvent(sky.Event event, HitTestResult result) {
+  void _dispatchEvent(InputEvent event, HitTestResult result) {
     WidgetFlutterBinding.instance.dispatchEvent(event, result);
   }
 

@@ -10,7 +10,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:sky/services.dart';
+import 'package:flutter/services.dart';
 
 final math.Random _rng = new math.Random();
 
@@ -57,8 +57,8 @@ const _kChunkCount = 30;
 
 String _urlToFetch(int chunk) {
   if (rootBundle == null)
-    return '../data/stock_data_${chunk}.json';
-  return 'https://domokit.github.io/examples/stocks/data/stock_data_${chunk}.json';
+    return '../data/stock_data_$chunk.json';
+  return 'https://domokit.github.io/examples/stocks/data/stock_data_$chunk.json';
 }
 
 class StockDataFetcher {
@@ -81,9 +81,7 @@ class StockDataFetcher {
         return;
       }
       JsonDecoder decoder = new JsonDecoder();
-
       callback(new StockData(decoder.convert(json)));
-
       if (_nextChunk < _kChunkCount)
         _fetchNextChunk();
     });

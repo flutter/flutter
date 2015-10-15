@@ -4,7 +4,7 @@ class RepeatedImage extends Node {
   Sprite _sprt0;
   Sprite _sprt1;
 
-  RepeatedImage(sky.Image image, [sky.TransferMode mode = null]) {
+  RepeatedImage(ui.Image image, [ui.TransferMode mode = null]) {
     _sprt0 = new Sprite.fromImage(image);
     _sprt0.size = new Size(1024.0, 1024.0);
     _sprt0.pivot = Point.origin;

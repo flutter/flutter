@@ -1,4 +1,4 @@
-import 'package:sky/animation.dart';
+import 'package:flutter/animation.dart';
 import 'package:test/test.dart';
 
 void main() {

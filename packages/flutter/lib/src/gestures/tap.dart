@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/src/gestures/arena.dart';
-import 'package:sky/src/gestures/constants.dart';
+import 'arena.dart';
+import 'constants.dart';
+import 'events.dart';
+import 'recognizer.dart';
 
 typedef void GestureTapCallback();
 
@@ -16,7 +18,7 @@ enum TapResolution {
 }
 
 class _TapGesture {
-  _TapGesture({ this.gestureRecognizer, sky.PointerEvent event }) {
+  _TapGesture({ this.gestureRecognizer, PointerInputEvent event }) {
     assert(event.type == 'pointerdown');
     _pointer = event.pointer;
     _isTrackingPointer = false;
@@ -32,13 +34,13 @@ class _TapGesture {
 
   int _pointer;
   bool _isTrackingPointer;
-  sky.Point _initialPosition;
+  ui.Point _initialPosition;
   GestureArenaEntry _entry;
   Timer _deadline;
   bool _wonArena;
   bool _didTap;
 
-  void handleEvent(sky.PointerEvent event) {
+  void handleEvent(PointerInputEvent event) {
     print("Tap gesture handleEvent");
     assert(event.pointer == _pointer);
     if (event.type == 'pointermove' && !_isWithinTolerance(event)) {
@@ -105,18 +107,18 @@ class _TapGesture {
     }
   }
 
-  sky.Point _getPoint(sky.PointerEvent event) {
-    return new sky.Point(event.x, event.y);
+  ui.Point _getPoint(PointerInputEvent event) {
+    return new ui.Point(event.x, event.y);
   }
 
-  bool _isWithinTolerance(sky.PointerEvent event) {
-    sky.Offset offset = _getPoint(event) - _initialPosition;
+  bool _isWithinTolerance(PointerInputEvent event) {
+    ui.Offset offset = _getPoint(event) - _initialPosition;
     return offset.distance <= kTouchSlop;
   }
 
 }
 
-class TapGestureRecognizer extends GestureArenaMember {
+class TapGestureRecognizer extends DisposableArenaMember {
   TapGestureRecognizer({ this.router, this.onTap, this.onTapDown, this.onTapCancel });
 
   PointerRouter router;
@@ -126,7 +128,7 @@ class TapGestureRecognizer extends GestureArenaMember {
 
   Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();
 
-  void addPointer(sky.PointerEvent event) {
+  void addPointer(PointerInputEvent event) {
     _gestureMap[event.pointer] = new _TapGesture(
       gestureRecognizer: this,
       event: event
@@ -153,7 +155,7 @@ class TapGestureRecognizer extends GestureArenaMember {
   void dispose() {
     List<_TapGesture> localGestures = new List.from(_gestureMap.values);
     for (_TapGesture gesture in localGestures)
-      entry.abort();
+      gesture.abort();
     // Rejection of each gesture should cause it to be removed from our map
     assert(_gestureMap.isEmpty);
     router = null;

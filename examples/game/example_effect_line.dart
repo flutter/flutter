@@ -1,8 +1,8 @@
-import 'package:sky/material.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
-import 'package:skysprites/skysprites.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_sprites/flutter_sprites.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)
@@ -53,7 +53,7 @@ class TestAppState extends State<TestApp> {
   ];
 
   Widget build(BuildContext context) {
-    return new App(
+    return new MaterialApp(
       title: 'EffectLine Demo',
       theme: _theme,
       routes: {

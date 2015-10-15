@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/animation.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/transitions.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/gesture_detector.dart';
+import 'package:flutter/animation.dart';
+
+import 'basic.dart';
+import 'transitions.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
 
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 200);
 const Duration _kCardDismissResize = const Duration(milliseconds: 300);
@@ -63,6 +64,12 @@ class _DismissableState extends State<Dismissable> {
   Size _size;
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
+
+  void dispose() {
+    _fadePerformance?.stop();
+    _resizePerformance?.stop();
+    super.dispose();
+  }
 
   bool get _directionIsYAxis {
     return
@@ -157,7 +164,7 @@ class _DismissableState extends State<Dismissable> {
       _fadePerformance.progress = _dragExtent.abs() / (_size.width * _kDismissCardThreshold);
   }
 
-  bool _isFlingGesture(sky.Offset velocity) {
+  bool _isFlingGesture(ui.Offset velocity) {
     double vx = velocity.dx;
     double vy = velocity.dy;
     if (_directionIsYAxis) {
@@ -186,7 +193,7 @@ class _DismissableState extends State<Dismissable> {
     return false;
   }
 
-  void _handleDragEnd(sky.Offset velocity) {
+  void _handleDragEnd(ui.Offset velocity) {
     if (!_isActive || _fadePerformance.isAnimating)
       return;
 

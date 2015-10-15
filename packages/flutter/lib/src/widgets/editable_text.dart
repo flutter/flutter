@@ -5,43 +5,49 @@
 import 'dart:async';
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 
-const _kCursorBlinkPeriod = 500; // milliseconds
+import 'basic.dart';
+import 'framework.dart';
+
+const _kCursorBlinkHalfPeriod = 500; // milliseconds
 
 typedef void StringUpdated();
+typedef void StringSubmitted();
 
 class TextRange {
+  const TextRange({ this.start, this.end });
+  const TextRange.collapsed(int position)
+    : start = position,
+      end = position;
+  const TextRange.empty()
+    : start = -1,
+      end = -1;
+
   final int start;
   final int end;
-
-  TextRange({this.start, this.end});
-  TextRange.collapsed(int position)
-      : start = position,
-        end = position;
-  const TextRange.empty()
-      : start = -1,
-        end = -1;
 
   bool get isValid => start >= 0 && end >= 0;
   bool get isCollapsed => start == end;
 }
 
 class EditableString implements KeyboardClient {
+  EditableString({this.text: '', this.onUpdated, this.onSubmitted}) {
+    assert(onUpdated != null);
+    assert(onSubmitted != null);
+    stub = new KeyboardClientStub.unbound()..impl = this;
+    selection = new TextRange(start: text.length, end: text.length);
+  }
+
   String text;
   TextRange composing = const TextRange.empty();
-  TextRange selection = const TextRange.empty();
+  TextRange selection;
 
   final StringUpdated onUpdated;
+  final StringSubmitted onSubmitted;
 
   KeyboardClientStub stub;
-
-  EditableString({this.text: '', this.onUpdated}) {
-    stub = new KeyboardClientStub.unbound()..impl = this;
-  }
 
   String textBefore(TextRange range) {
     return text.substring(0, range.start);
@@ -127,6 +133,10 @@ class EditableString implements KeyboardClient {
     selection = new TextRange(start: start, end: end);
     onUpdated();
   }
+
+  void submit(SubmitAction action) {
+    onSubmitted();
+  }
 }
 
 class EditableText extends StatefulComponent {
@@ -154,12 +164,14 @@ class EditableTextState extends State<EditableText> {
   Timer _cursorTimer;
   bool _showCursor = false;
 
-  /// Whether the blinking cursor is visible (exposed for testing).
-  bool get test_showCursor => _showCursor;
+  /// Whether the blinking cursor is actually visible at this precise moment
+  /// (it's hidden half the time, since it blinks).
+  bool get cursorCurrentlyVisible => _showCursor;
 
-  /// The cursor blink interval (exposed for testing).
-  Duration get test_cursorBlinkPeriod =>
-      new Duration(milliseconds: _kCursorBlinkPeriod);
+  /// The cursor blink interval (the amount of time the cursor is in the "on"
+  /// state or the "off" state). A complete cursor blink period is twice this
+  /// value (half on, half off).
+  Duration get cursorBlinkInterval => new Duration(milliseconds: _kCursorBlinkHalfPeriod);
 
   void _cursorTick(Timer timer) {
     setState(() {
@@ -170,7 +182,9 @@ class EditableTextState extends State<EditableText> {
   void _startCursorTimer() {
     _showCursor = true;
     _cursorTimer = new Timer.periodic(
-      new Duration(milliseconds: _kCursorBlinkPeriod), _cursorTick);
+      new Duration(milliseconds: _kCursorBlinkHalfPeriod),
+      _cursorTick
+    );
   }
 
   void dispose() {
@@ -253,16 +267,16 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
         const TextStyle(decoration: underline)
       );
 
-      return new StyledTextSpan(style, [
+      return new StyledTextSpan(style, <TextSpan>[
         new PlainTextSpan(value.textBefore(value.composing)),
-        new StyledTextSpan(composingStyle, [
+        new StyledTextSpan(composingStyle, <TextSpan>[
           new PlainTextSpan(value.textInside(value.composing))
         ]),
         new PlainTextSpan(value.textAfter(value.composing))
       ]);
     }
 
-    return new StyledTextSpan(style, [
+    return new StyledTextSpan(style, <TextSpan>[
       new PlainTextSpan(value.text)
     ]);
   }

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' show Color, Offset;
+import 'dart:ui' show Color, Offset;
 
-import 'package:sky/painting.dart';
+import 'package:flutter/painting.dart';
 
-const Map<int, List<BoxShadow>> shadows = const {
-  1: const [
+const Map<int, List<BoxShadow>> shadows = const <int, List<BoxShadow>>{
+  1: const <BoxShadow>[
     const BoxShadow(
       color: const Color(0x1F000000),
       offset: const Offset(0.0, 1.0),
@@ -17,7 +17,7 @@ const Map<int, List<BoxShadow>> shadows = const {
       offset: const Offset(0.0, 1.0),
       blur: 2.0),
     ],
-  2: const [
+  2: const <BoxShadow>[
     const BoxShadow(
       color: const Color(0x29000000),
       offset: const Offset(0.0, 3.0),
@@ -27,7 +27,7 @@ const Map<int, List<BoxShadow>> shadows = const {
       offset: const Offset(0.0, 3.0),
       blur: 6.0),
   ],
-  3: const [
+  3: const <BoxShadow>[
     const BoxShadow(
       color: const Color(0x30000000),
       offset: const Offset(0.0, 10.0),
@@ -37,7 +37,7 @@ const Map<int, List<BoxShadow>> shadows = const {
       offset: const Offset(0.0, 6.0),
       blur: 6.0),
   ],
-  4: const [
+  4: const <BoxShadow>[
     const BoxShadow(
       color: const Color(0x40000000),
       offset: const Offset(0.0, 14.0),
@@ -47,7 +47,7 @@ const Map<int, List<BoxShadow>> shadows = const {
       offset: const Offset(0.0, 10.0),
       blur: 10.0),
   ],
-  5: const [
+  5: const <BoxShadow>[
     const BoxShadow(
       color: const Color(0x4E000000),
       offset: const Offset(0.0, 19.0),

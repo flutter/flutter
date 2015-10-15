@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/box.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'box.dart';
+import 'object.dart';
 
 /// The direction in which to scroll
 enum ScrollDirection {
@@ -127,15 +128,15 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     if (child != null) {
       child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = constraints.constrain(child.size);
-      assert(child.parentData is BoxParentData);
-      child.parentData.position = Point.origin;
+      final BoxParentData childParentData = child.parentData;
+      childParentData.position = Point.origin;
     } else {
       performResize();
     }
   }
 
   Offset get _scrollOffsetRoundedToIntegerDevicePixels {
-    double devicePixelRatio = sky.view.devicePixelRatio;
+    double devicePixelRatio = ui.view.devicePixelRatio;
     int dxInDevicePixels = (scrollOffset.dx * devicePixelRatio).round();
     int dyInDevicePixels = (scrollOffset.dy * devicePixelRatio).round();
     return new Offset(dxInDevicePixels / devicePixelRatio,

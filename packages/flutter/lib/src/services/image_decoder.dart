@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' show Image, ImageDecoder, ImageDecoderCallback;
+import 'dart:ui' show Image, ImageDecoder, ImageDecoderCallback;
 import 'dart:typed_data';
 
 import 'package:mojo/core.dart' show MojoDataPipeConsumer;

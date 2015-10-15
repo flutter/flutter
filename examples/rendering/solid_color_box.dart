@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 
 class RenderSolidColorBox extends RenderDecoratedBox {
   final Size desiredSize;
@@ -42,7 +41,7 @@ class RenderSolidColorBox extends RenderDecoratedBox {
     size = constraints.constrain(desiredSize);
   }
 
-  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
+  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
     if (event.type == 'pointerdown')
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
     else if (event.type == 'pointerup')

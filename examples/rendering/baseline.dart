@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
 
 RenderBox getBox(double lh) {
   RenderParagraph paragraph = new RenderParagraph(
@@ -50,7 +50,7 @@ RenderBox getBox(double lh) {
               path.lineTo(w, h);
               Paint paint = new Paint();
               paint.color = const Color(0xFFFF9000);
-              paint.setStyle(sky.PaintingStyle.stroke);
+              paint.setStyle(ui.PaintingStyle.stroke);
               paint.strokeWidth = 3.0;
               canvas.drawPath(path, paint);
             }

@@ -2,34 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-sky.Picture paint(sky.Rect paintBounds) {
-  sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
-  sky.Size size = paintBounds.size;
+ui.Picture paint(ui.Rect paintBounds) {
+  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
+  ui.Size size = paintBounds.size;
 
-  sky.Paint paint = new sky.Paint();
-  sky.Point mid = size.center(sky.Point.origin);
+  ui.Paint paint = new ui.Paint();
+  ui.Point mid = size.center(ui.Point.origin);
   double radius = size.shortestSide / 2.0;
-  canvas.drawPaint(new sky.Paint()..color = const sky.Color(0xFFFFFFFF));
+  canvas.drawPaint(new ui.Paint()..color = const ui.Color(0xFFFFFFFF));
 
   canvas.save();
-  canvas.translate(-mid.x/2.0, sky.view.height*2.0);
+  canvas.translate(-mid.x/2.0, ui.view.height*2.0);
   canvas.clipRect(
-      new sky.Rect.fromLTRB(0.0, -sky.view.height, sky.view.width, radius));
+      new ui.Rect.fromLTRB(0.0, -ui.view.height, ui.view.width, radius));
 
   canvas.translate(mid.x, mid.y);
-  paint.color = const sky.Color.fromARGB(128, 255, 0, 255);
+  paint.color = const ui.Color.fromARGB(128, 255, 0, 255);
   canvas.rotate(math.PI/4.0);
 
-  sky.Gradient yellowBlue = new sky.Gradient.linear(
-      [new sky.Point(-radius, -radius), new sky.Point(0.0, 0.0)],
-      [const sky.Color(0xFFFFFF00), const sky.Color(0xFF0000FF)]);
-  canvas.drawRect(new sky.Rect.fromLTRB(-radius, -radius, radius, radius),
-                   new sky.Paint()..setShader(yellowBlue));
+  ui.Gradient yellowBlue = new ui.Gradient.linear(
+      [new ui.Point(-radius, -radius), new ui.Point(0.0, 0.0)],
+      [const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)]);
+  canvas.drawRect(new ui.Rect.fromLTRB(-radius, -radius, radius, radius),
+                   new ui.Paint()..setShader(yellowBlue));
 
   // Scale x and y by 0.5.
   var scaleMatrix = new Float64List.fromList([
@@ -39,70 +39,70 @@ sky.Picture paint(sky.Rect paintBounds) {
       0.0, 0.0, 0.0, 1.0,
   ]);
   canvas.concat(scaleMatrix);
-  paint.color = const sky.Color.fromARGB(128, 0, 255, 0);
-  canvas.drawCircle(sky.Point.origin, radius, paint);
+  paint.color = const ui.Color.fromARGB(128, 0, 255, 0);
+  canvas.drawCircle(ui.Point.origin, radius, paint);
 
   canvas.restore();
 
   canvas.translate(0.0, 50.0);
-  var builder = new sky.LayerDrawLooperBuilder()
+  var builder = new ui.LayerDrawLooperBuilder()
       ..addLayerOnTop(
-          new sky.DrawLooperLayerInfo()
-            ..setOffset(const sky.Offset(150.0, 0.0))
-            ..setColorMode(sky.TransferMode.src)
-            ..setPaintBits(sky.PaintBits.all),
-          new sky.Paint()
-            ..color = const sky.Color.fromARGB(128, 255, 255, 0)
-            ..colorFilter = new sky.ColorFilter.mode(
-              const sky.Color.fromARGB(128, 0, 0, 255), sky.TransferMode.srcIn)
-            ..maskFilter = new sky.MaskFilter.blur(
-              sky.BlurStyle.normal, 3.0, highQuality: true))
+          new ui.DrawLooperLayerInfo()
+            ..setOffset(const ui.Offset(150.0, 0.0))
+            ..setColorMode(ui.TransferMode.src)
+            ..setPaintBits(ui.PaintBits.all),
+          new ui.Paint()
+            ..color = const ui.Color.fromARGB(128, 255, 255, 0)
+            ..colorFilter = new ui.ColorFilter.mode(
+              const ui.Color.fromARGB(128, 0, 0, 255), ui.TransferMode.srcIn)
+            ..maskFilter = new ui.MaskFilter.blur(
+              ui.BlurStyle.normal, 3.0, highQuality: true))
       ..addLayerOnTop(
-          new sky.DrawLooperLayerInfo()
-            ..setOffset(const sky.Offset(75.0, 75.0))
-            ..setColorMode(sky.TransferMode.src)
-            ..setPaintBits(sky.PaintBits.shader),
-          new sky.Paint()
-            ..shader = new sky.Gradient.radial(
-                new sky.Point(0.0, 0.0), radius/3.0,
-                [const sky.Color(0xFFFFFF00), const sky.Color(0xFFFF0000)],
-                null, sky.TileMode.mirror)
-            // Since we're don't set sky.PaintBits.maskFilter, this has no effect.
-            ..maskFilter = new sky.MaskFilter.blur(
-                sky.BlurStyle.normal, 50.0, highQuality: true))
+          new ui.DrawLooperLayerInfo()
+            ..setOffset(const ui.Offset(75.0, 75.0))
+            ..setColorMode(ui.TransferMode.src)
+            ..setPaintBits(ui.PaintBits.shader),
+          new ui.Paint()
+            ..shader = new ui.Gradient.radial(
+                new ui.Point(0.0, 0.0), radius/3.0,
+                [const ui.Color(0xFFFFFF00), const ui.Color(0xFFFF0000)],
+                null, ui.TileMode.mirror)
+            // Since we're don't set ui.PaintBits.maskFilter, this has no effect.
+            ..maskFilter = new ui.MaskFilter.blur(
+                ui.BlurStyle.normal, 50.0, highQuality: true))
       ..addLayerOnTop(
-          new sky.DrawLooperLayerInfo()..setOffset(const sky.Offset(225.0, 75.0)),
+          new ui.DrawLooperLayerInfo()..setOffset(const ui.Offset(225.0, 75.0)),
           // Since this layer uses a DST color mode, this has no effect.
-          new sky.Paint()..color = const sky.Color.fromARGB(128, 255, 0, 0));
+          new ui.Paint()..color = const ui.Color.fromARGB(128, 255, 0, 0));
   paint.drawLooper = builder.build();
-  canvas.drawCircle(sky.Point.origin, radius, paint);
+  canvas.drawCircle(ui.Point.origin, radius, paint);
 
   return recorder.endRecording();
 }
 
-sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
-  final double devicePixelRatio = sky.view.devicePixelRatio;
-  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
-  Float32List deviceTransform = new Float32List(16)
+ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
+  final double devicePixelRatio = ui.view.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
+  Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
-    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..addPicture(ui.Offset.zero, picture, paintBounds)
     ..pop();
   return sceneBuilder.build();
 }
 
 void beginFrame(double timeStamp) {
-  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
-  sky.Picture picture = paint(paintBounds);
-  sky.Scene scene = composite(picture, paintBounds);
-  sky.view.scene = scene;
+  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+  ui.Picture picture = paint(paintBounds);
+  ui.Scene scene = composite(picture, paintBounds);
+  ui.view.scene = scene;
 }
 
 void main() {
-  sky.view.setFrameCallback(beginFrame);
-  sky.view.scheduleFrame();
+  ui.view.setFrameCallback(beginFrame);
+  ui.view.scheduleFrame();
 }

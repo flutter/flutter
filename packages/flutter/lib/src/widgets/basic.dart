@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
-export 'package:sky/rendering.dart' show
+import 'framework.dart';
+
+export 'package:flutter/rendering.dart' show
     BackgroundImage,
     BlockDirection,
     Border,
@@ -22,6 +23,7 @@ export 'package:sky/rendering.dart' show
     FlexAlignItems,
     FlexDirection,
     FlexJustifyContent,
+    FractionalOffset,
     Matrix4,
     Offset,
     Paint,
@@ -60,7 +62,7 @@ class ColorFilter extends OneChildRenderObjectWidget {
   }
 
   final Color color;
-  final sky.TransferMode transferMode;
+  final ui.TransferMode transferMode;
 
   RenderColorFilter createRenderObject() => new RenderColorFilter(color: color, transferMode: transferMode);
 
@@ -74,7 +76,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   ShaderMask({
     Key key,
     this.shaderCallback,
-    this.transferMode: sky.TransferMode.modulate,
+    this.transferMode: ui.TransferMode.modulate,
     Widget child
   }) : super(key: key, child: child) {
     assert(shaderCallback != null);
@@ -82,7 +84,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   }
 
   final ShaderCallback shaderCallback;
-  final sky.TransferMode transferMode;
+  final ui.TransferMode transferMode;
 
   RenderShaderMask createRenderObject() {
     return new RenderShaderMask(
@@ -170,19 +172,21 @@ class ClipOval extends OneChildRenderObjectWidget {
 // POSITIONING AND SIZING NODES
 
 class Transform extends OneChildRenderObjectWidget {
-  Transform({ Key key, this.transform, this.origin, Widget child })
+  Transform({ Key key, this.transform, this.origin, this.alignment, Widget child })
     : super(key: key, child: child) {
     assert(transform != null);
   }
 
   final Matrix4 transform;
   final Offset origin;
+  final FractionalOffset alignment;
 
-  RenderTransform createRenderObject() => new RenderTransform(transform: transform, origin: origin);
+  RenderTransform createRenderObject() => new RenderTransform(transform: transform, origin: origin, alignment: alignment);
 
   void updateRenderObject(RenderTransform renderObject, Transform oldWidget) {
     renderObject.transform = transform;
     renderObject.origin = origin;
+    renderObject.alignment = alignment;
   }
 }
 
@@ -513,8 +517,57 @@ class BlockBody extends MultiChildRenderObjectWidget {
 }
 
 class Stack extends MultiChildRenderObjectWidget {
-  Stack(List<Widget> children, { Key key }) : super(key: key, children: children);
-  RenderStack createRenderObject() => new RenderStack();
+  Stack(List<Widget> children, {
+    Key key,
+    this.horizontalAlignment: 0.0,
+    this.verticalAlignment: 0.0
+  }) : super(key: key, children: children) {
+    assert(horizontalAlignment != null);
+    assert(verticalAlignment != null);
+  }
+
+  final double horizontalAlignment;
+  final double verticalAlignment;
+
+  RenderStack createRenderObject() {
+    return new RenderStack(
+      horizontalAlignment: horizontalAlignment,
+      verticalAlignment: verticalAlignment
+    );
+  }
+
+  void updateRenderObject(RenderStack renderObject, Stack oldWidget) {
+    renderObject.horizontalAlignment = horizontalAlignment;
+    renderObject.verticalAlignment = verticalAlignment;
+  }
+}
+
+class IndexedStack extends MultiChildRenderObjectWidget {
+  IndexedStack(List<Widget> children, {
+    Key key,
+    this.horizontalAlignment: 0.0,
+    this.verticalAlignment: 0.0,
+    this.index: 0
+  }) : super(key: key, children: children);
+
+  final int index;
+  final double horizontalAlignment;
+  final double verticalAlignment;
+
+  RenderIndexedStack createRenderObject() {
+    return new RenderIndexedStack(
+      index: index,
+      verticalAlignment: verticalAlignment,
+      horizontalAlignment: horizontalAlignment
+    );
+  }
+
+  void updateRenderObject(RenderIndexedStack renderObject, IndexedStack oldWidget) {
+    super.updateRenderObject(renderObject, oldWidget);
+    renderObject.index = index;
+    renderObject.horizontalAlignment = horizontalAlignment;
+    renderObject.verticalAlignment = verticalAlignment;
+  }
 }
 
 class Positioned extends ParentDataWidget {
@@ -720,7 +773,7 @@ class DefaultTextStyle extends InheritedWidget {
 }
 
 class Text extends StatelessComponent {
-  Text(this.data, { Key key, TextStyle this.style }) : super(key: key) {
+  Text(this.data, { Key key, this.style }) : super(key: key) {
     assert(data != null);
   }
 
@@ -740,7 +793,7 @@ class Text extends StatelessComponent {
       combinedStyle = style;
     }
     if (combinedStyle != null)
-      text = new StyledTextSpan(combinedStyle, [text]);
+      text = new StyledTextSpan(combinedStyle, <TextSpan>[text]);
     return new Paragraph(text: text);
   }
 
@@ -759,16 +812,18 @@ class Image extends LeafRenderObjectWidget {
     this.width,
     this.height,
     this.colorFilter,
-    this.fit: ImageFit.scaleDown,
-    this.repeat: ImageRepeat.noRepeat
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
   }) : super(key: key);
 
-  final sky.Image image;
+  final ui.Image image;
   final double width;
   final double height;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
+  final Rect centerSlice;
 
   RenderImage createRenderObject() => new RenderImage(
     image: image,
@@ -776,7 +831,8 @@ class Image extends LeafRenderObjectWidget {
     height: height,
     colorFilter: colorFilter,
     fit: fit,
-    repeat: repeat);
+    repeat: repeat,
+    centerSlice: centerSlice);
 
   void updateRenderObject(RenderImage renderObject, Image oldWidget) {
     renderObject.image = image;
@@ -785,6 +841,7 @@ class Image extends LeafRenderObjectWidget {
     renderObject.colorFilter = colorFilter;
     renderObject.fit = fit;
     renderObject.repeat = repeat;
+    renderObject.centerSlice = centerSlice;
   }
 }
 
@@ -795,8 +852,9 @@ class ImageListener extends StatefulComponent {
     this.width,
     this.height,
     this.colorFilter,
-    this.fit: ImageFit.scaleDown,
-    this.repeat: ImageRepeat.noRepeat
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
   }) : super(key: key) {
     assert(image != null);
   }
@@ -804,9 +862,10 @@ class ImageListener extends StatefulComponent {
   final ImageResource image;
   final double width;
   final double height;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
+  final Rect centerSlice;
 
   _ImageListenerState createState() => new _ImageListenerState();
 }
@@ -817,9 +876,9 @@ class _ImageListenerState extends State<ImageListener> {
     config.image.addListener(_handleImageChanged);
   }
 
-  sky.Image _resolvedImage;
+  ui.Image _resolvedImage;
 
-  void _handleImageChanged(sky.Image resolvedImage) {
+  void _handleImageChanged(ui.Image resolvedImage) {
     setState(() {
       _resolvedImage = resolvedImage;
     });
@@ -844,7 +903,8 @@ class _ImageListenerState extends State<ImageListener> {
       height: config.height,
       colorFilter: config.colorFilter,
       fit: config.fit,
-      repeat: config.repeat
+      repeat: config.repeat,
+      centerSlice: config.centerSlice
     );
   }
 }
@@ -856,16 +916,18 @@ class NetworkImage extends StatelessComponent {
     this.width,
     this.height,
     this.colorFilter,
-    this.fit: ImageFit.scaleDown,
-    this.repeat: ImageRepeat.noRepeat
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
   }) : super(key: key);
 
   final String src;
   final double width;
   final double height;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
+  final Rect centerSlice;
 
   Widget build(BuildContext context) {
     return new ImageListener(
@@ -874,7 +936,8 @@ class NetworkImage extends StatelessComponent {
       height: height,
       colorFilter: colorFilter,
       fit: fit,
-      repeat: repeat
+      repeat: repeat,
+      centerSlice: centerSlice
     );
   }
 }
@@ -887,17 +950,19 @@ class AssetImage extends StatelessComponent {
     this.width,
     this.height,
     this.colorFilter,
-    this.fit: ImageFit.scaleDown,
-    this.repeat: ImageRepeat.noRepeat
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
   }) : super(key: key);
 
   final String name;
   final AssetBundle bundle;
   final double width;
   final double height;
-  final sky.ColorFilter colorFilter;
+  final ui.ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
+  final Rect centerSlice;
 
   Widget build(BuildContext context) {
     return new ImageListener(
@@ -906,9 +971,26 @@ class AssetImage extends StatelessComponent {
       height: height,
       colorFilter: colorFilter,
       fit: fit,
-      repeat: repeat
+      repeat: repeat,
+      centerSlice: centerSlice
     );
   }
+}
+
+class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
+  WidgetToRenderBoxAdapter(RenderBox renderBox)
+    : renderBox = renderBox,
+      // WidgetToRenderBoxAdapter objects are keyed to their render box. This
+      // prevents the widget being used in the widget hierarchy in two different
+      // places, which would cause the RenderBox to get inserted in multiple
+      // places in the RenderObject tree.
+      super(key: new GlobalObjectKey(renderBox)) {
+    assert(renderBox != null);
+  }
+
+  final RenderBox renderBox;
+
+  RenderBox createRenderObject() => renderBox;
 }
 
 

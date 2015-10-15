@@ -2,22 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' show Color;
+import 'dart:ui' show Color;
 
 /// [Color] constants which represent Material design's
 /// [color palette](http://www.google.com/design/spec/style/color.html).
 class Colors {
   Colors._();
 
-  static const white = const Color(0xFFFFFFFF);
-  static const black = const Color(0xFF000000);
   static const transparent = const Color(0x00000000);
-  static const white54 = const Color(0x8AFFFFFF);
-  static const white87 = const Color(0xDDFFFFFF);
-  static const black54 = const Color(0x8A000000);
-  static const black87 = const Color(0xDD000000);
 
-  static const Map<int, Color> red = const {
+  static const black   = const Color(0xFF000000);
+  static const black87 = const Color(0xDD000000);
+  static const black54 = const Color(0x8A000000);
+  static const black26 = const Color(0x42000000); // text of disabled flat button in light theme
+  static const black12 = const Color(0x1F000000); // background of disabled raised buttons in light theme
+  static const white   = const Color(0xFFFFFFFF);
+  static const white70 = const Color(0xB3FFFFFF);
+  static const white30 = const Color(0x4DFFFFFF); // text of disabled flat button in dark theme
+  static const white12 = const Color(0x1FFFFFFF); // background of disabled raised buttons in dark theme
+
+  static const Map<int, Color> red = const <int, Color>{
      50: const Color(0xFFFFEBEE),
     100: const Color(0xFFFFCDD2),
     200: const Color(0xFFEF9A9A),
@@ -30,14 +34,14 @@ class Colors {
     900: const Color(0xFFB71C1C),
   };
 
-  static const Map<int, Color> redAccent = const {
+  static const Map<int, Color> redAccent = const <int, Color>{
     100: const Color(0xFFFF8A80),
     200: const Color(0xFFFF5252),
     400: const Color(0xFFFF1744),
     700: const Color(0xFFD50000),
   };
 
-  static const Map<int, Color> pink = const {
+  static const Map<int, Color> pink = const <int, Color>{
      50: const Color(0xFFFCE4EC),
     100: const Color(0xFFF8BBD0),
     200: const Color(0xFFF48FB1),
@@ -50,14 +54,14 @@ class Colors {
     900: const Color(0xFF880E4F),
   };
 
-  static const Map<int, Color> pinkAccent = const {
+  static const Map<int, Color> pinkAccent = const <int, Color>{
     100: const Color(0xFFFF80AB),
     200: const Color(0xFFFF4081),
     400: const Color(0xFFF50057),
     700: const Color(0xFFC51162),
   };
 
-  static const Map<int, Color> purple = const {
+  static const Map<int, Color> purple = const <int, Color>{
      50: const Color(0xFFF3E5F5),
     100: const Color(0xFFE1BEE7),
     200: const Color(0xFFCE93D8),
@@ -70,14 +74,14 @@ class Colors {
     900: const Color(0xFF4A148C),
   };
 
-  static const Map<int, Color> purpleAccent = const {
+  static const Map<int, Color> purpleAccent = const <int, Color>{
     100: const Color(0xFFEA80FC),
     200: const Color(0xFFE040FB),
     400: const Color(0xFFD500F9),
     700: const Color(0xFFAA00FF),
   };
 
-  static const Map<int, Color> deepPurple = const {
+  static const Map<int, Color> deepPurple = const <int, Color>{
      50: const Color(0xFFEDE7F6),
     100: const Color(0xFFD1C4E9),
     200: const Color(0xFFB39DDB),
@@ -90,14 +94,14 @@ class Colors {
     900: const Color(0xFF311B92),
   };
 
-  static const Map<int, Color> deepPurpleAccent = const {
+  static const Map<int, Color> deepPurpleAccent = const <int, Color>{
     100: const Color(0xFFB388FF),
     200: const Color(0xFF7C4DFF),
     400: const Color(0xFF651FFF),
     700: const Color(0xFF6200EA),
   };
 
-  static const Map<int, Color> indigo = const {
+  static const Map<int, Color> indigo = const <int, Color>{
      50: const Color(0xFFE8EAF6),
     100: const Color(0xFFC5CAE9),
     200: const Color(0xFF9FA8DA),
@@ -110,14 +114,14 @@ class Colors {
     900: const Color(0xFF1A237E),
   };
 
-  static const Map<int, Color> indigoAccent = const {
+  static const Map<int, Color> indigoAccent = const <int, Color>{
     100: const Color(0xFF8C9EFF),
     200: const Color(0xFF536DFE),
     400: const Color(0xFF3D5AFE),
     700: const Color(0xFF304FFE),
   };
 
-  static const Map<int, Color> blue = const {
+  static const Map<int, Color> blue = const <int, Color>{
      50: const Color(0xFFE3F2FD),
     100: const Color(0xFFBBDEFB),
     200: const Color(0xFF90CAF9),
@@ -130,14 +134,14 @@ class Colors {
     900: const Color(0xFF0D47A1),
   };
 
-  static const Map<int, Color> blueAccent = const {
+  static const Map<int, Color> blueAccent = const <int, Color>{
     100: const Color(0xFF82B1FF),
     200: const Color(0xFF448AFF),
     400: const Color(0xFF2979FF),
     700: const Color(0xFF2962FF),
   };
 
-  static const Map<int, Color> lightBlue = const {
+  static const Map<int, Color> lightBlue = const <int, Color>{
      50: const Color(0xFFE1F5FE),
     100: const Color(0xFFB3E5FC),
     200: const Color(0xFF81D4FA),
@@ -150,14 +154,14 @@ class Colors {
     900: const Color(0xFF01579B),
   };
 
-  static const Map<int, Color> lightBlueAccent = const {
+  static const Map<int, Color> lightBlueAccent = const <int, Color>{
     100: const Color(0xFF80D8FF),
     200: const Color(0xFF40C4FF),
     400: const Color(0xFF00B0FF),
     700: const Color(0xFF0091EA),
   };
 
-  static const Map<int, Color> cyan = const {
+  static const Map<int, Color> cyan = const <int, Color>{
      50: const Color(0xFFE0F7FA),
     100: const Color(0xFFB2EBF2),
     200: const Color(0xFF80DEEA),
@@ -170,14 +174,14 @@ class Colors {
     900: const Color(0xFF006064),
   };
 
-  static const Map<int, Color> cyanAccent = const {
+  static const Map<int, Color> cyanAccent = const <int, Color>{
     100: const Color(0xFF84FFFF),
     200: const Color(0xFF18FFFF),
     400: const Color(0xFF00E5FF),
     700: const Color(0xFF00B8D4),
   };
 
-  static const Map<int, Color> teal = const {
+  static const Map<int, Color> teal = const <int, Color>{
      50: const Color(0xFFE0F2F1),
     100: const Color(0xFFB2DFDB),
     200: const Color(0xFF80CBC4),
@@ -190,14 +194,14 @@ class Colors {
     900: const Color(0xFF004D40),
   };
 
-  static const Map<int, Color> tealAccent = const {
+  static const Map<int, Color> tealAccent = const <int, Color>{
     100: const Color(0xFFA7FFEB),
     200: const Color(0xFF64FFDA),
     400: const Color(0xFF1DE9B6),
     700: const Color(0xFF00BFA5),
   };
 
-  static const Map<int, Color> green = const {
+  static const Map<int, Color> green = const <int, Color>{
      50: const Color(0xFFE8F5E9),
     100: const Color(0xFFC8E6C9),
     200: const Color(0xFFA5D6A7),
@@ -210,14 +214,14 @@ class Colors {
     900: const Color(0xFF1B5E20),
   };
 
-  static const Map<int, Color> greenAccent = const {
+  static const Map<int, Color> greenAccent = const <int, Color>{
     100: const Color(0xFFB9F6CA),
     200: const Color(0xFF69F0AE),
     400: const Color(0xFF00E676),
     700: const Color(0xFF00C853),
   };
 
-  static const Map<int, Color> lightGreen = const {
+  static const Map<int, Color> lightGreen = const <int, Color>{
      50: const Color(0xFFF1F8E9),
     100: const Color(0xFFDCEDC8),
     200: const Color(0xFFC5E1A5),
@@ -230,14 +234,14 @@ class Colors {
     900: const Color(0xFF33691E),
   };
 
-  static const Map<int, Color> lightGreenAccent = const {
+  static const Map<int, Color> lightGreenAccent = const <int, Color>{
     100: const Color(0xFFCCFF90),
     200: const Color(0xFFB2FF59),
     400: const Color(0xFF76FF03),
     700: const Color(0xFF64DD17),
   };
 
-  static const Map<int, Color> lime = const {
+  static const Map<int, Color> lime = const <int, Color>{
      50: const Color(0xFFF9FBE7),
     100: const Color(0xFFF0F4C3),
     200: const Color(0xFFE6EE9C),
@@ -250,14 +254,14 @@ class Colors {
     900: const Color(0xFF827717),
   };
 
-  static const Map<int, Color> limeAccent = const {
+  static const Map<int, Color> limeAccent = const <int, Color>{
     100: const Color(0xFFF4FF81),
     200: const Color(0xFFEEFF41),
     400: const Color(0xFFC6FF00),
     700: const Color(0xFFAEEA00),
   };
 
-  static const Map<int, Color> yellow = const {
+  static const Map<int, Color> yellow = const <int, Color>{
      50: const Color(0xFFFFFDE7),
     100: const Color(0xFFFFF9C4),
     200: const Color(0xFFFFF59D),
@@ -270,14 +274,14 @@ class Colors {
     900: const Color(0xFFF57F17),
   };
 
-  static const Map<int, Color> yellowAccent = const {
+  static const Map<int, Color> yellowAccent = const <int, Color>{
     100: const Color(0xFFFFFF8D),
     200: const Color(0xFFFFFF00),
     400: const Color(0xFFFFEA00),
     700: const Color(0xFFFFD600),
   };
 
-  static const Map<int, Color> amber = const {
+  static const Map<int, Color> amber = const <int, Color>{
      50: const Color(0xFFFFF8E1),
     100: const Color(0xFFFFECB3),
     200: const Color(0xFFFFE082),
@@ -290,14 +294,14 @@ class Colors {
     900: const Color(0xFFFF6F00),
   };
 
-  static const Map<int, Color> amberAccent = const {
+  static const Map<int, Color> amberAccent = const <int, Color>{
     100: const Color(0xFFFFE57F),
     200: const Color(0xFFFFD740),
     400: const Color(0xFFFFC400),
     700: const Color(0xFFFFAB00),
   };
 
-  static const Map<int, Color> orange = const {
+  static const Map<int, Color> orange = const <int, Color>{
      50: const Color(0xFFFFF3E0),
     100: const Color(0xFFFFE0B2),
     200: const Color(0xFFFFCC80),
@@ -310,14 +314,14 @@ class Colors {
     900: const Color(0xFFE65100),
   };
 
-  static const Map<int, Color> orangeAccent = const {
+  static const Map<int, Color> orangeAccent = const <int, Color>{
     100: const Color(0xFFFFD180),
     200: const Color(0xFFFFAB40),
     400: const Color(0xFFFF9100),
     700: const Color(0xFFFF6D00),
   };
 
-  static const Map<int, Color> deepOrange = const {
+  static const Map<int, Color> deepOrange = const <int, Color>{
      50: const Color(0xFFFBE9E7),
     100: const Color(0xFFFFCCBC),
     200: const Color(0xFFFFAB91),
@@ -330,14 +334,14 @@ class Colors {
     900: const Color(0xFFBF360C),
   };
 
-  static const Map<int, Color> deepOrangeAccent = const {
+  static const Map<int, Color> deepOrangeAccent = const <int, Color>{
     100: const Color(0xFFFF9E80),
     200: const Color(0xFFFF6E40),
     400: const Color(0xFFFF3D00),
     700: const Color(0xFFDD2C00),
   };
 
-  static const Map<int, Color> brown = const {
+  static const Map<int, Color> brown = const <int, Color>{
      50: const Color(0xFFEFEBE9),
     100: const Color(0xFFD7CCC8),
     200: const Color(0xFFBCAAA4),
@@ -350,12 +354,12 @@ class Colors {
     900: const Color(0xFF3E2723),
   };
 
-  static const Map<int, Color> grey = const {
+  static const Map<int, Color> grey = const <int, Color>{
      50: const Color(0xFFFAFAFA),
     100: const Color(0xFFF5F5F5),
     200: const Color(0xFFEEEEEE),
     300: const Color(0xFFE0E0E0),
-    350: const Color(0xFFD6D6D6), // only for raised button while pressed or disabled
+    350: const Color(0xFFD6D6D6), // only for raised button while pressed in Light theme
     400: const Color(0xFFBDBDBD),
     500: const Color(0xFF9E9E9E),
     600: const Color(0xFF757575),
@@ -365,7 +369,7 @@ class Colors {
     900: const Color(0xFF212121),
   };
 
-  static const Map<int, Color> blueGrey = const {
+  static const Map<int, Color> blueGrey = const <int, Color>{
      50: const Color(0xFFECEFF1),
     100: const Color(0xFFCFD8DC),
     200: const Color(0xFFB0BEC5),

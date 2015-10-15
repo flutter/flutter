@@ -1,21 +1,21 @@
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/rendering.dart';
+import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
 
-class SquareImage implements sky.Image {
+class SquareImage implements ui.Image {
   int get width => 10;
   int get height => 10;
 }
 
-class WideImage implements sky.Image {
+class WideImage implements ui.Image {
   int get width => 20;
   int get height => 10;
 }
 
-class TallImage implements sky.Image {
+class TallImage implements ui.Image {
   int get width => 10;
   int get height => 20;
 }

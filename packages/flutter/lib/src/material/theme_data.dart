@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky';
+import 'dart:ui';
 
-import 'package:sky/src/material/typography.dart';
-import 'package:sky/src/material/colors.dart';
+import 'package:flutter/src/material/typography.dart';
+import 'package:flutter/src/material/colors.dart';
 
 enum ThemeBrightness { dark, light }
 
@@ -59,7 +59,11 @@ class ThemeData {
   factory ThemeData.dark() => new ThemeData(brightness: ThemeBrightness.dark);
   factory ThemeData.fallback() => new ThemeData.light();
 
+  /// The brightness of the overall theme of the application. Used by widgets
+  /// like buttons to determine what color to pick when not using the primary or
+  /// accent color.
   final ThemeBrightness brightness;
+
   final Map<int, Color> primarySwatch;
   final Color canvasColor;
   final Color cardColor;
@@ -70,13 +74,54 @@ class ThemeData {
   final double hintOpacity;
   final TextTheme text;
 
-  Color _primaryColor;
+  /// The background colour for major parts of the app (toolbars, tab bars, etc)
   Color get primaryColor => _primaryColor;
+  Color _primaryColor;
 
+  /// The brightness of the primaryColor. Used to determine the colour of text and
+  /// icons placed on top of the primary color (e.g. toolbar text).
   final ThemeBrightness primaryColorBrightness;
 
-  Color _accentColor;
+  /// The foreground color for widgets (knobs, text, etc)
   Color get accentColor => _accentColor;
+  Color _accentColor;
 
+  /// The brightness of the accentColor. Used to determine the colour of text
+  /// and icons placed on top of the accent color (e.g. the icons on a floating
+  /// action button).
   final ThemeBrightness accentColorBrightness;
+
+  bool operator==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    ThemeData otherData = other;
+    return (otherData.brightness == brightness) &&
+           (otherData.primarySwatch == primarySwatch) &&
+           (otherData.canvasColor == canvasColor) &&
+           (otherData.cardColor == cardColor) &&
+           (otherData.dividerColor == dividerColor) &&
+           (otherData.hintColor == hintColor) &&
+           (otherData.highlightColor == highlightColor) &&
+           (otherData.selectedColor == selectedColor) &&
+           (otherData.hintOpacity == hintOpacity) &&
+           (otherData.text == text) &&
+           (otherData.primaryColorBrightness == primaryColorBrightness) &&
+           (otherData.accentColorBrightness == accentColorBrightness);
+  }
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + brightness.hashCode;
+    value = 37 * value + primarySwatch.hashCode;
+    value = 37 * value + canvasColor.hashCode;
+    value = 37 * value + cardColor.hashCode;
+    value = 37 * value + dividerColor.hashCode;
+    value = 37 * value + hintColor.hashCode;
+    value = 37 * value + highlightColor.hashCode;
+    value = 37 * value + selectedColor.hashCode;
+    value = 37 * value + hintOpacity.hashCode;
+    value = 37 * value + text.hashCode;
+    value = 37 * value + primaryColorBrightness.hashCode;
+    value = 37 * value + accentColorBrightness.hashCode;
+    return value;
+  }
 }

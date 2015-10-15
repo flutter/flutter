@@ -3,18 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
-import 'package:sky/src/services/fetch.dart';
-import 'package:sky/src/services/image_decoder.dart';
-import 'package:sky/src/services/image_resource.dart';
 
-Future<sky.Image> _fetchImage(String url) async {
+import 'fetch.dart';
+import 'image_decoder.dart';
+import 'image_resource.dart';
+
+Future<ui.Image> _fetchImage(String url) async {
   UrlResponse response = await fetchUrl(url);
   if (response.statusCode >= 400) {
-    print("Failed (${response.statusCode}) to load image ${url}");
+    print("Failed (${response.statusCode}) to load image $url");
     return null;
   }
   return await decodeImageFromDataPipe(response.body);
@@ -23,7 +23,7 @@ Future<sky.Image> _fetchImage(String url) async {
 class _ImageCache {
   _ImageCache._();
 
-  final HashMap<String, ImageResource> _cache = new Map<String, ImageResource>();
+  final Map<String, ImageResource> _cache = new Map<String, ImageResource>();
 
   ImageResource load(String url) {
     return _cache.putIfAbsent(url, () {

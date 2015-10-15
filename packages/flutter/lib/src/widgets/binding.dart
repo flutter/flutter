@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/rendering.dart';
+
+import 'framework.dart';
 
 class WidgetFlutterBinding extends FlutterBinding {
 

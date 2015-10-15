@@ -1,7 +1,7 @@
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';
@@ -17,6 +17,10 @@ class MockKeyboard implements KeyboardService {
   void showByRequest() {}
 
   void hide() {}
+
+  void setText(String text) {}
+
+  void setSelection(int start, int end) {}
 }
 
 void main() {
@@ -77,11 +81,17 @@ void main() {
 
       // Check that the cursor visibility toggles after each blink interval.
       void checkCursorToggle() {
-        bool initialShowCursor = editableText.test_showCursor;
-        tester.async.elapse(editableText.test_cursorBlinkPeriod);
-        expect(editableText.test_showCursor, equals(!initialShowCursor));
-        tester.async.elapse(editableText.test_cursorBlinkPeriod);
-        expect(editableText.test_showCursor, equals(initialShowCursor));
+        bool initialShowCursor = editableText.cursorCurrentlyVisible;
+        tester.async.elapse(editableText.cursorBlinkInterval);
+        expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
+        tester.async.elapse(editableText.cursorBlinkInterval);
+        expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+        tester.async.elapse(editableText.cursorBlinkInterval ~/ 10);
+        expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+        tester.async.elapse(editableText.cursorBlinkInterval);
+        expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
+        tester.async.elapse(editableText.cursorBlinkInterval);
+        expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
       }
 
       checkCursorToggle();

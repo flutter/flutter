@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky.internals' as internals;
+import 'dart:ui_internals' as internals;
 
 import 'package:mojo/application.dart';
 import 'package:mojo/bindings.dart' as bindings;

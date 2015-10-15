@@ -6,12 +6,11 @@ library stocks;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/gestures.dart';
-import 'package:sky/material.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import 'stock_data.dart';
 
@@ -88,7 +87,7 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Widget build(BuildContext context) {
-    return new App(
+    return new MaterialApp(
       title: 'Stocks',
       theme: theme,
       routes: <String, RouteBuilder>{

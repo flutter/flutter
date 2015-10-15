@@ -1,4 +1,4 @@
-import 'package:sky/src/services/shell.dart' as shell;
+import 'package:flutter/src/services/shell.dart' as shell;
 
 // Tests can use ServiceMocker to register replacement implementations
 // of Mojo services.

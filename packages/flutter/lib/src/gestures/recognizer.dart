@@ -3,15 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/src/gestures/arena.dart';
-import 'package:sky/src/gestures/constants.dart';
-import 'package:sky/src/gestures/pointer_router.dart';
+import 'arena.dart';
+import 'constants.dart';
+import 'events.dart';
+import 'pointer_router.dart';
 
-export 'package:sky/src/gestures/pointer_router.dart' show PointerRouter;
+export 'pointer_router.dart' show PointerRouter;
 
-abstract class GestureRecognizer extends GestureArenaMember {
+abstract class DisposableArenaMember extends GestureArenaMember {
+    void dispose();
+}
+
+abstract class GestureRecognizer extends DisposableArenaMember {
   GestureRecognizer({ PointerRouter router }) : _router = router {
     assert(_router != null);
   }
@@ -22,15 +27,15 @@ abstract class GestureRecognizer extends GestureArenaMember {
   final Set<int> _trackedPointers = new Set<int>();
 
   /// The primary entry point for users of this class.
-  void addPointer(sky.PointerEvent event);
+  void addPointer(PointerInputEvent event);
 
-  void handleEvent(sky.PointerEvent event);
+  void handleEvent(PointerInputEvent event);
   void acceptGesture(int pointer) { }
   void rejectGesture(int pointer) { }
   void didStopTrackingLastPointer(int pointer);
 
   void resolve(GestureDisposition disposition) {
-    List<GestureArenaEntry> localEntries = new List.from(_entries);
+    List<GestureArenaEntry> localEntries = new List<GestureArenaEntry>.from(_entries);
     _entries.clear();
     for (GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);
@@ -58,7 +63,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
       didStopTrackingLastPointer(pointer);
   }
 
-  void stopTrackingIfPointerNoLongerDown(sky.PointerEvent event) {
+  void stopTrackingIfPointerNoLongerDown(PointerInputEvent event) {
     if (event.type == 'pointerup' || event.type == 'pointercancel')
       stopTrackingPointer(event.pointer);
   }
@@ -71,8 +76,8 @@ enum GestureRecognizerState {
   defunct
 }
 
-sky.Point _getPoint(sky.PointerEvent event) {
-  return new sky.Point(event.x, event.y);
+ui.Point _getPoint(PointerInputEvent event) {
+  return new ui.Point(event.x, event.y);
 }
 
 abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
@@ -83,10 +88,10 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
 
   GestureRecognizerState state = GestureRecognizerState.ready;
   int primaryPointer;
-  sky.Point initialPosition;
+  ui.Point initialPosition;
   Timer _timer;
 
-  void addPointer(sky.PointerEvent event) {
+  void addPointer(PointerInputEvent event) {
     startTrackingPointer(event.pointer);
     if (state == GestureRecognizerState.ready) {
       state = GestureRecognizerState.possible;
@@ -97,7 +102,7 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
     }
   }
 
-  void handleEvent(sky.PointerEvent event) {
+  void handleEvent(PointerInputEvent event) {
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
       // TODO(abarth): Maybe factor the slop handling out into a separate class?
@@ -112,7 +117,7 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
   }
 
   /// Override to provide behavior for the primary pointer when the gesture is still possible.
-  void handlePrimaryPointer(sky.PointerEvent event);
+  void handlePrimaryPointer(PointerInputEvent event);
 
   /// Override to be notified with [deadline] is exceeded.
   ///
@@ -145,8 +150,8 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
     }
   }
 
-  double _getDistance(sky.PointerEvent event) {
-    sky.Offset offset = _getPoint(event) - initialPosition;
+  double _getDistance(PointerInputEvent event) {
+    ui.Offset offset = _getPoint(event) - initialPosition;
     return offset.distance;
   }
 

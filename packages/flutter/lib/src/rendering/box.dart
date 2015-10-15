@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/painting.dart';
-import 'package:sky/src/rendering/debug.dart';
-import 'package:sky/src/rendering/object.dart';
+import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-export 'package:sky/painting.dart' show TextBaseline;
+import 'debug.dart';
+import 'object.dart';
+
+export 'package:flutter/painting.dart' show TextBaseline;
 
 // This class should only be used in debug builds
 class _DebugSize extends Size {
@@ -225,22 +226,25 @@ class BoxConstraints extends Constraints {
     if (b == null)
       return a * (1.0 - t);
     return new BoxConstraints(
-      minWidth: sky.lerpDouble(a.minWidth, b.minWidth, t),
-      maxWidth: sky.lerpDouble(a.maxWidth, b.maxWidth, t),
-      minHeight: sky.lerpDouble(a.minHeight, b.minHeight, t),
-      maxHeight: sky.lerpDouble(a.maxHeight, b.maxHeight, t)
+      minWidth: ui.lerpDouble(a.minWidth, b.minWidth, t),
+      maxWidth: ui.lerpDouble(a.maxWidth, b.maxWidth, t),
+      minHeight: ui.lerpDouble(a.minHeight, b.minHeight, t),
+      maxHeight: ui.lerpDouble(a.maxHeight, b.maxHeight, t)
     );
   }
 
-  bool operator ==(other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    return other is BoxConstraints &&
-           minWidth == other.minWidth &&
-           maxWidth == other.maxWidth &&
-           minHeight == other.minHeight &&
-           maxHeight == other.maxHeight;
+    if (other is! BoxConstraints)
+      return false;
+    final BoxConstraints typedOther = other;
+    return minWidth == typedOther.minWidth &&
+           maxWidth == typedOther.maxWidth &&
+           minHeight == typedOther.minHeight &&
+           maxHeight == typedOther.maxHeight;
   }
+
   int get hashCode {
     int value = 373;
     value = 37 * value + minWidth.hashCode;
@@ -250,7 +254,7 @@ class BoxConstraints extends Constraints {
     return value;
   }
 
-  String toString() => "BoxConstraints($minWidth<=w<$maxWidth, $minHeight<=h<$maxHeight)";
+  String toString() => "BoxConstraints($minWidth<=w<=$maxWidth, $minHeight<=h<=$maxHeight)";
 }
 
 /// A hit test entry used by [RenderBox]
@@ -272,6 +276,10 @@ class BoxParentData extends ParentData {
   }
   String toString() => 'position=$position';
 }
+
+/// Abstract ParentData subclass for RenderBox subclasses that want the
+/// ContainerRenderObjectMixin.
+abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
 /// A render object in a 2D cartesian coordinate system
 ///
@@ -348,7 +356,7 @@ abstract class RenderBox extends RenderObject {
     assert(hasSize);
     assert(() {
       if (_size is _DebugSize) {
-        final _DebugSize _size = this._size; // TODO(ianh): Remove this once the analyzer is cleverer
+        final _DebugSize _size = this._size;
         assert(_size._owner == this);
         if (RenderObject.debugActiveLayout != null) {
           // we are always allowed to access our own size (for print debugging and asserts if nothing else)
@@ -357,7 +365,7 @@ abstract class RenderBox extends RenderObject {
           assert(debugDoingThisResize || debugDoingThisLayout ||
                  (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
         }
-        assert(_size == this._size); // TODO(ianh): Remove this once the analyzer is cleverer
+        assert(_size == this._size);
       }
       return true;
     });
@@ -405,8 +413,7 @@ abstract class RenderBox extends RenderObject {
   double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
     assert(!needsLayout);
     assert(!_debugDoingBaseline);
-    final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
-    assert(parent is RenderObject);
+    final RenderObject parent = this.parent;
     assert(() {
       if (RenderObject.debugDoingLayout)
         return (RenderObject.debugActiveLayout == parent) && parent.debugDoingThisLayout;
@@ -418,7 +425,7 @@ abstract class RenderBox extends RenderObject {
     assert(_debugSetDoingBaseline(true));
     double result = getDistanceToActualBaseline(baseline);
     assert(_debugSetDoingBaseline(false));
-    assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(parent == this.parent);
     if (result == null && !onlyReal)
       return size.height;
     return result;
@@ -474,10 +481,9 @@ abstract class RenderBox extends RenderObject {
     if (_cachedBaselines != null && _cachedBaselines.isNotEmpty) {
       // if we have cached data, then someone must have used our data
       assert(_ancestorUsesBaseline);
-      final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
-      assert(parent is RenderObject);
+      final RenderObject parent = this.parent;
       parent.markNeedsLayout();
-      assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
+      assert(parent == this.parent);
       // Now that they're dirty, we can forget that they used the
       // baseline. If they use it again, then we'll set the bit
       // again, and if we get dirty again, we'll notify them again.
@@ -597,14 +603,14 @@ abstract class RenderBox extends RenderObject {
   }
   void debugPaintSize(PaintingContext context, Offset offset) {
     Paint paint = new Paint();
-    paint.setStyle(sky.PaintingStyle.stroke);
+    paint.setStyle(ui.PaintingStyle.stroke);
     paint.strokeWidth = 1.0;
     paint.color = debugPaintSizeColor;
     context.canvas.drawRect(offset & size, paint);
   }
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     Paint paint = new Paint();
-    paint.setStyle(sky.PaintingStyle.stroke);
+    paint.setStyle(ui.PaintingStyle.stroke);
     paint.strokeWidth = 0.25;
     Path path;
     // ideographic baseline
@@ -627,15 +633,16 @@ abstract class RenderBox extends RenderObject {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${ hasSize ? size : "MISSING" }\n';
 }
 
-/// A mixin that provides useful default behaviors for boxes with children managed by the [ContainerRenderObjectMixin] mixin
+/// A mixin that provides useful default behaviors for boxes with children
+/// managed by the [ContainerRenderObjectMixin] mixin.
 ///
 /// By convention, this class doesn't override any members of the superclass.
 /// Instead, it provides helpful functions that subclasses can call as
 /// appropriate.
-abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
 
   /// Returns the baseline of the first child with a baseline
   ///
@@ -645,11 +652,11 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     assert(!needsLayout);
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is ParentDataType);
+      final ParentDataType childParentData = child.parentData;
       double result = child.getDistanceToActualBaseline(baseline);
       if (result != null)
-        return result + child.parentData.position.y;
-      child = child.parentData.nextSibling;
+        return result + childParentData.position.y;
+      child = childParentData.nextSibling;
     }
     return null;
   }
@@ -663,16 +670,16 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     double result;
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is ParentDataType);
+      final ParentDataType childParentData = child.parentData;
       double candidate = child.getDistanceToActualBaseline(baseline);
       if (candidate != null) {
-        candidate += child.parentData.position.y;
+        candidate += childParentData.position.y;
         if (result != null)
           result = math.min(result, candidate);
         else
           result = candidate;
       }
-      child = child.parentData.nextSibling;
+      child = childParentData.nextSibling;
     }
     return result;
   }
@@ -685,12 +692,12 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
-      assert(child.parentData is ParentDataType);
-      Point transformed = new Point(position.x - child.parentData.position.x,
-                                    position.y - child.parentData.position.y);
+      final ParentDataType childParentData = child.parentData;
+      Point transformed = new Point(position.x - childParentData.position.x,
+                                    position.y - childParentData.position.y);
       if (child.hitTest(result, position: transformed))
         return true;
-      child = child.parentData.previousSibling;
+      child = childParentData.previousSibling;
     }
     return false;
   }
@@ -699,9 +706,9 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   void defaultPaint(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
-      assert(child.parentData is ParentDataType);
-      context.paintChild(child, child.parentData.position + offset);
-      child = child.parentData.nextSibling;
+      final ParentDataType childParentData = child.parentData;
+      context.paintChild(child, childParentData.position + offset);
+      child = childParentData.nextSibling;
     }
   }
 }

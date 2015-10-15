@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 import 'dart:math' as math;
 
-import 'package:sky/services.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 
 import 'solid_color_box.dart';
 
@@ -19,7 +19,7 @@ class Touch {
 class RenderImageGrow extends RenderImage {
   final Size _startingSize;
 
-  RenderImageGrow(sky.Image image, Size size)
+  RenderImageGrow(ui.Image image, Size size)
     : _startingSize = size, super(image: image, width: size.width, height: size.height);
 
   double _growth = 0.0;
@@ -35,7 +35,7 @@ RenderImageGrow image;
 
 Map<int, Touch> touches = new Map();
 void handleEvent(event) {
-  if (event is sky.PointerEvent) {
+  if (event is ui.PointerEvent) {
     if (event.type == 'pointermove')
       image.growth = math.max(0.0, image.growth + event.x - touches[event.pointer].x);
     touches[event.pointer] = new Touch(event.x, event.y);
@@ -59,7 +59,7 @@ void main() {
 
   // Resizeable image
   image = new RenderImageGrow(null, new Size(100.0, null));
-  imageCache.load("https://www.dartlang.org/logos/dart-logo.png").first.then((sky.Image dartLogo) {
+  imageCache.load("https://www.dartlang.org/logos/dart-logo.png").first.then((ui.Image dartLogo) {
     image.image = dartLogo;
   });
 
@@ -99,5 +99,5 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
 
   updateTaskDescription('Interactive Flex', topColor);
   new FlutterBinding(root: root);
-  sky.view.setEventCallback(handleEvent);
+  ui.view.setEventCallback(handleEvent);
 }

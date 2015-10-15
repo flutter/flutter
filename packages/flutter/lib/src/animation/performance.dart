@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:sky/src/animation/animated_value.dart';
-import 'package:sky/src/animation/forces.dart';
-import 'package:sky/src/animation/simulation_stepper.dart';
+import 'animated_value.dart';
+import 'forces.dart';
+import 'simulation_stepper.dart';
 
 /// The status of an animation
 enum PerformanceStatus {
@@ -41,6 +41,15 @@ abstract class PerformanceView {
   void addStatusListener(PerformanceStatusListener listener);
   /// Stops calling the listener every time the status of the performance changes
   void removeStatusListener(PerformanceStatusListener listener);
+
+  /// The current status of this animation
+  PerformanceStatus get status;
+
+  /// Whether this animation is stopped at the beginning
+  bool get isDismissed => status == PerformanceStatus.dismissed;
+
+  /// Whether this animation is stopped at the end
+  bool get isCompleted => status == PerformanceStatus.completed;
 }
 
 /// A timeline that can be reversed and used to update [Animatable]s.
@@ -51,7 +60,7 @@ abstract class PerformanceView {
 /// may also take direct control of the timeline by manipulating [progress], or
 /// [fling] the timeline causing a physics-based simulation to take over the
 /// progression.
-class Performance implements PerformanceView {
+class Performance extends PerformanceView {
   Performance({ this.duration, double progress }) {
     _timeline = new SimulationStepper(_tick);
     if (progress != null)
@@ -94,16 +103,9 @@ class Performance implements PerformanceView {
     return timing != null ? timing.transform(progress, _curveDirection) : progress;
   }
 
-  /// Whether this animation is stopped at the beginning
-  bool get isDismissed => status == PerformanceStatus.dismissed;
-
-  /// Whether this animation is stopped at the end
-  bool get isCompleted => status == PerformanceStatus.completed;
-
   /// Whether this animation is currently animating in either the forward or reverse direction
   bool get isAnimating => _timeline.isAnimating;
 
-  /// The current status of this animation
   PerformanceStatus get status {
     if (!isAnimating && progress == 1.0)
       return PerformanceStatus.completed;

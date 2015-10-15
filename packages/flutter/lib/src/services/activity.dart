@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky';
+import 'dart:ui';
 import 'dart:async';
 
-import 'package:sky/src/services/shell.dart';
 import 'package:sky_services/activity/activity.mojom.dart';
+
+import 'shell.dart';
 
 export 'package:sky_services/activity/activity.mojom.dart';
 

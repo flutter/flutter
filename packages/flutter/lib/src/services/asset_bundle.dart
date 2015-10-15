@@ -3,17 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
-import 'dart:sky.internals' as internals;
+import 'dart:ui' as ui;
+import 'dart:ui_internals' as internals;
 import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
-import 'package:sky/src/services/fetch.dart';
-import 'package:sky/src/services/image_cache.dart';
-import 'package:sky/src/services/image_decoder.dart';
-import 'package:sky/src/services/image_resource.dart';
-import 'package:sky/src/services/shell.dart';
+
+import 'fetch.dart';
+import 'image_cache.dart';
+import 'image_decoder.dart';
+import 'image_resource.dart';
+import 'shell.dart';
 
 abstract class AssetBundle {
   void close();
@@ -49,7 +50,7 @@ Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async 
 }
 
 class MojoAssetBundle extends AssetBundle {
-  MojoAssetBundle(AssetBundleProxy this._bundle);
+  MojoAssetBundle(this._bundle);
 
   factory MojoAssetBundle.fromNetwork(String relativeUrl) {
     AssetBundleProxy bundle = new AssetBundleProxy.unbound();
@@ -67,7 +68,7 @@ class MojoAssetBundle extends AssetBundle {
     _imageCache = null;
   }
 
-  Future<sky.Image> _fetchImage(String key) async {
+  Future<ui.Image> _fetchImage(String key) async {
     return await decodeImageFromDataPipe(await load(key));
   }
 

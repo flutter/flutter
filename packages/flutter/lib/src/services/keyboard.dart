@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
-import 'package:sky/src/services/shell.dart';
+
+import 'shell.dart';
 
 export 'package:mojo_services/keyboard/keyboard.mojom.dart';
 
@@ -74,6 +75,18 @@ class KeyboardHandle {
       _keyboard._currentHandle = null;
     }
     assert(_keyboard._currentHandle != this);
+  }
+
+  void setText(String text) {
+    assert(_attached);
+    assert(_keyboard._currentHandle == this);
+    _keyboard.service.setText(text);
+  }
+
+  void setSelection(int start, int end) {
+    assert(_attached);
+    assert(_keyboard._currentHandle == this);
+    _keyboard.service.setSelection(start, end);
   }
 
 }
