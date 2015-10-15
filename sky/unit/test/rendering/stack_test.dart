@@ -19,7 +19,7 @@ void main() {
         backgroundColor: const Color(0xFFFF0000)
       ));
 
-    RenderBox stack = new RenderStack(children: [red, green]);
+    RenderBox stack = new RenderStack(children: <RenderBox>[red, green]);
     (green.parentData as StackParentData)
       ..top = 0.0
       ..right = 0.0

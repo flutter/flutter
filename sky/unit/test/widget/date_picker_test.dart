@@ -8,7 +8,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       DateTime currentValue;
 
-      Widget widget = new Block([
+      Widget widget = new Block(<Widget>[
         new DatePicker(
           selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),
           firstDate: new DateTime.utc(2013),

@@ -19,7 +19,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationA));
       OneChildRenderObjectElement element =
-          tester.findElement((element) => element is OneChildRenderObjectElement);
+          tester.findElement((Element element) => element is OneChildRenderObjectElement);
       expect(element, isNotNull);
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       RenderDecoratedBox renderObject = element.renderObject;
@@ -27,7 +27,7 @@ void main() {
       expect(renderObject.position, equals(BoxDecorationPosition.background));
 
       tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationB));
-      element = tester.findElement((element) => element is OneChildRenderObjectElement);
+      element = tester.findElement((Element element) => element is OneChildRenderObjectElement);
       expect(element, isNotNull);
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       renderObject = element.renderObject;
@@ -41,7 +41,7 @@ void main() {
 
       void checkFullTree() {
         OneChildRenderObjectElement element =
-            tester.findElement((element) => element is OneChildRenderObjectElement);
+            tester.findElement((Element element) => element is OneChildRenderObjectElement);
         expect(element, isNotNull);
         expect(element.renderObject is RenderDecoratedBox, isTrue);
         RenderDecoratedBox renderObject = element.renderObject;
@@ -57,7 +57,7 @@ void main() {
 
       void childBareTree() {
         OneChildRenderObjectElement element =
-            tester.findElement((element) => element is OneChildRenderObjectElement);
+            tester.findElement((Element element) => element is OneChildRenderObjectElement);
         expect(element, isNotNull);
         expect(element.renderObject is RenderDecoratedBox, isTrue);
         RenderDecoratedBox renderObject = element.renderObject;
@@ -136,7 +136,7 @@ void main() {
       ));
 
       OneChildRenderObjectElement element =
-          tester.findElement((element) => element is OneChildRenderObjectElement);
+          tester.findElement((Element element) => element is OneChildRenderObjectElement);
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       RenderDecoratedBox parent = element.renderObject;
       expect(parent.child is RenderDecoratedBox, isTrue);
@@ -152,7 +152,7 @@ void main() {
       ));
 
       element =
-          tester.findElement((element) => element is OneChildRenderObjectElement);
+          tester.findElement((Element element) => element is OneChildRenderObjectElement);
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       expect(element.renderObject, equals(parent));
       expect(parent.child, isNull);

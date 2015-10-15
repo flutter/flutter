@@ -32,10 +32,12 @@ _IGNORED_PATTERNS = [
   re.compile(r'^\[hint\] .+ requires dynamic invoke'), # too many false positives, e.g. https://github.com/dart-lang/sdk/issues/24564
   re.compile(r'^\[hint\] Runtime check on non-ground type .+ may throw StrongModeError'), # https://github.com/dart-lang/sdk/issues/24565
   re.compile(r'^\[hint] \([_, ]+\) .+ has inferred type '), # ignore underscore-only arguments
+  re.compile(r'^\[error\] Type check failed: .*\(dynamic\) is not of type'), # allow unchecked casts from dynamic
 
   # Disable the lint checks that will be caught by code review
   re.compile(r'^\[lint\] Avoid defining a one-member abstract class when a simple function will do'),
   re.compile(r'^\[lint\] Prefer using lowerCamelCase for constant names.'),
+  re.compile(r'^\[lint\] Name non-constant identifiers using lowerCamelCase.'),
 
   # TODO: Fix all the warnings in the mojo packages
   re.compile(r'.*pub-cache.*\.mojom\.dart'),

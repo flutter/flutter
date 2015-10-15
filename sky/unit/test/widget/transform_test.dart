@@ -8,7 +8,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             top: 100.0,
             left: 100.0,
@@ -53,7 +53,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             top: 100.0,
             left: 100.0,
@@ -98,7 +98,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             top: 100.0,
             left: 100.0,

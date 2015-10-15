@@ -12,8 +12,8 @@ void main() {
       List accepted = [];
 
       tester.pumpWidget(new Navigator(
-        routes: {
-          '/': (RouteArguments args) { return new Column([
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) { return new Column(<Widget>[
               new Draggable(
                 navigator: args.navigator,
                 data: 1,
