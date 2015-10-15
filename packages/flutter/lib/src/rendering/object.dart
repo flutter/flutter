@@ -1139,11 +1139,18 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a description of the tree rooted at this node.
   /// If the prefix argument is provided, then every line in the output
   /// will be prefixed by that string.
-  String toStringDeep([String prefix = '']) {
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
-    prefix += '  ';
-    String result = '$this\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
+    String result = '$prefixLineOne$this\n';
+    final String childrenDescription = debugDescribeChildren(prefixOtherLines);
+    final String settingsPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
+    result += debugDescribeSettings(settingsPrefix);
+    if (childrenDescription != '')
+      result += '$prefixOtherLines \u2502\n';
+    else
+      result += '$prefixOtherLines\n';
+    result += childrenDescription;
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
   }
@@ -1198,7 +1205,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
   }
   String debugDescribeChildren(String prefix) {
     if (child != null)
-      return '${prefix}child: ${child.toStringDeep(prefix)}';
+      return '${child.toStringDeep("$prefix \u2514\u2500child: ", "$prefix  ")}';
     return '';
   }
 }
@@ -1442,13 +1449,19 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
 
   String debugDescribeChildren(String prefix) {
     String result = '';
-    int count = 1;
-    ChildType child = _firstChild;
-    while (child != null) {
-      result += '${prefix}child $count: ${child.toStringDeep(prefix)}';
-      count += 1;
-      final ParentDataType childParentData = child.parentData;
-      child = childParentData.nextSibling;
+    if (_firstChild != null) {
+      ChildType child = _firstChild;
+      int count = 1;
+      while (child != _lastChild) {
+        result += '${child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502")}';
+        count += 1;
+        final ParentDataType childParentData = child.parentData;
+        child = childParentData.nextSibling;
+      }
+      if (child != null) {
+        assert(child == _lastChild);
+        result += '${child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  ")}';
+      }
     }
     return result;
   }
