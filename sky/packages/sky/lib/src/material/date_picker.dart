@@ -122,17 +122,15 @@ class _DatePickerHeader extends StatelessComponent {
 
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    TextTheme headerTheme;
+    TextTheme headerTheme = theme.primaryTextTheme;
     Color dayColor;
     Color yearColor;
     switch(theme.primaryColorBrightness) {
       case ThemeBrightness.light:
-        headerTheme = Typography.black;
         dayColor = mode == DatePickerMode.day ? Colors.black87 : Colors.black54;
         yearColor = mode == DatePickerMode.year ? Colors.black87 : Colors.black54;
         break;
       case ThemeBrightness.dark:
-        headerTheme = Typography.white;
         dayColor = mode == DatePickerMode.day ? Colors.white : Colors.white70;
         yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
         break;

@@ -5,7 +5,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
-import 'constants.dart';
 
 class ListItem extends StatelessComponent {
   ListItem({
@@ -42,14 +41,12 @@ class ListItem extends StatelessComponent {
 
     if (right != null) {
       children.add(new Container(
-        margin: new EdgeDims.only(left: 8.0),
-        width: 40.0,
+        margin: new EdgeDims.only(left: 16.0),
         child: right
       ));
     }
 
-    return new Container(
-      height: kListItemHeight,
+    return new Padding(
       padding: const EdgeDims.symmetric(horizontal: 16.0),
       child: new InkWell(
         onTap: onTap,

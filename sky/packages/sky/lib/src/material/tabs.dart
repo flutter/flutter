@@ -13,9 +13,10 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'icon.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 typedef void TabSelectedIndexChanged(int selectedIndex);
 typedef void TabLayoutChanged(Size size, List<double> widths);
@@ -509,18 +510,8 @@ class _TabBarState extends ScrollableState<TabBar> {
       indicatorColor = Colors.white;
     }
 
-    TextStyle textStyle;
-    IconThemeColor iconThemeColor;
-    switch (themeData.primaryColorBrightness) {
-      case ThemeBrightness.light:
-        textStyle = Typography.black.body1;
-        iconThemeColor = IconThemeColor.black;
-        break;
-      case ThemeBrightness.dark:
-        textStyle = Typography.white.body1;
-        iconThemeColor = IconThemeColor.white;
-        break;
-    }
+    TextStyle textStyle = themeData.primaryTextTheme.body1;
+    IconThemeData iconTheme = themeData.primaryIconTheme;
 
     List<Widget> tabs = <Widget>[];
     bool textAndIcons = false;
@@ -532,7 +523,7 @@ class _TabBarState extends ScrollableState<TabBar> {
     }
 
     Widget content = new IconTheme(
-      data: new IconThemeData(color: iconThemeColor),
+      data: iconTheme,
       child: new DefaultTextStyle(
         style: textStyle,
         child: new BuilderTransition(
