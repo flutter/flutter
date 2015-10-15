@@ -185,11 +185,11 @@ class SpriteBox extends RenderBox {
     }
   }
 
-  void handleEvent(ui.Event event, _SpriteBoxHitTestEntry entry) {
+  void handleEvent(InputEvent event, _SpriteBoxHitTestEntry entry) {
     if (!attached)
       return;
 
-    if (event is ui.PointerEvent) {
+    if (event is PointerInputEvent) {
 
       if (event.type == 'pointerdown') {
         // Build list of event targets
