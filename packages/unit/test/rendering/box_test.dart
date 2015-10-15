@@ -11,7 +11,7 @@ void main() {
         backgroundColor: const Color(0xFF00FF00),
         gradient: new RadialGradient(
           center: Point.origin, radius: 500.0,
-          colors: [Colors.yellow[500], Colors.blue[500]]),
+          colors: <Color>[Colors.yellow[500], Colors.blue[500]]),
         boxShadow: shadows[3])
     );
     layout(root);
@@ -34,7 +34,7 @@ void main() {
       child: inner
     );
     RenderBox flex = new RenderFlex(
-      children: [padding],
+      children: <RenderBox>[padding],
       direction: FlexDirection.vertical,
       alignItems: FlexAlignItems.stretch
     );

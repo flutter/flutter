@@ -394,8 +394,11 @@ abstract class State<T extends StatefulComponent> {
 
   void debugFillDescription(List<String> description) {
     description.add('$hashCode');
-    if (_debugLifecycleState != _StateLifecycle.ready)
-      description.add('$_debugLifecycleState');
+    assert(() {
+      if (_debugLifecycleState != _StateLifecycle.ready)
+        description.add('$_debugLifecycleState');
+      return true;
+    });
     if (_config == null)
       description.add('no config');
     if (_element == null)
@@ -829,9 +832,7 @@ abstract class Element<T extends Widget> implements BuildContext {
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     String result = '$prefixLineOne$this\n';
     List<Element> children = <Element>[];
-    visitChildren((Element child) {
-      children.add(child);
-    });
+    visitChildren(children.add);
     if (children.length > 0) {
       Element last = children.removeLast();
       for (Element child in children)

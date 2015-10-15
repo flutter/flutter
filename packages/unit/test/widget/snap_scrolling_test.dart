@@ -35,7 +35,7 @@ Widget buildFrame() {
         key: scrollableListKey,
         snapOffsetCallback: snapOffsetCallback,
         scrollDirection: scrollDirection,
-        items: [0, 1, 2, 3, 4, 5, 7, 8, 9],
+        items: <int>[0, 1, 2, 3, 4, 5, 7, 8, 9],
         itemBuilder: buildItem,
         itemExtent: itemExtent
       )

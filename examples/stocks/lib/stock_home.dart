@@ -112,7 +112,7 @@ class StockHomeState extends State<StockHome> {
         ),
         new DrawerItem(
           icon: 'device/dvr',
-          onPressed: () { debugDumpApp(); },
+          onPressed: () { debugDumpApp(); debugDumpRenderTree(); },
           child: new Text('Dump App to Console')
         ),
         new DrawerDivider(),
