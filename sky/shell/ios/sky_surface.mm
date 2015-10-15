@@ -32,23 +32,23 @@ static inline EventTypeMapperPhase EventTypePhaseFromUITouchPhase(
     UITouchPhase phase) {
   switch (phase) {
     case UITouchPhaseBegan:
-      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_DOWN,
+      return EventTypeMapperPhase(sky::EventType::POINTER_DOWN,
                                   MapperPhase::Added);
     case UITouchPhaseMoved:
     case UITouchPhaseStationary:
       // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
       // with the same coordinates
-      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_MOVE,
+      return EventTypeMapperPhase(sky::EventType::POINTER_MOVE,
                                   MapperPhase::Accessed);
     case UITouchPhaseEnded:
-      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_UP,
+      return EventTypeMapperPhase(sky::EventType::POINTER_UP,
                                   MapperPhase::Removed);
     case UITouchPhaseCancelled:
-      return EventTypeMapperPhase(sky::EVENT_TYPE_POINTER_CANCEL,
+      return EventTypeMapperPhase(sky::EventType::POINTER_CANCEL,
                                   MapperPhase::Removed);
   }
 
-  return EventTypeMapperPhase(sky::EVENT_TYPE_UNKNOWN, MapperPhase::Accessed);
+  return EventTypeMapperPhase(sky::EventType::UNKNOWN, MapperPhase::Accessed);
 }
 
 static inline int64 InputEventTimestampFromNSTimeInterval(
@@ -101,20 +101,17 @@ class TouchMapper {
 static std::string SkPictureTracingPath() {
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
-
-  char* temp = reinterpret_cast<char*>(calloc(256, sizeof(char)));
-  snprintf(temp, 256, "%s/layers.skp", [paths.firstObject UTF8String]);
-  std::string path(temp);
-  free(temp);
-
-  return path;
+  return [paths.firstObject UTF8String];
 }
 
 -(instancetype) initWithShellView:(sky::shell::ShellView *) shellView {
   self = [super init];
   if (self) {
-    sky::shell::Shell::Shared().tracing_controller().set_picture_tracing_path(
-        SkPictureTracingPath());
+    base::FilePath pictureTracingPath =
+        base::FilePath::FromUTF8Unsafe(SkPictureTracingPath());
+    sky::shell::Shell::Shared()
+        .tracing_controller()
+        .set_picture_tracing_base_path(pictureTracingPath);
 
     _shell_view.reset(shellView);
     self.multipleTouchEnabled = YES;
@@ -189,13 +186,13 @@ static std::string SkPictureTracingPath() {
 }
 
 - (NSString*)skyInitialBundleURL {
-  NSString *skyxBundlePath = [[NSBundle mainBundle] pathForResource:@"app" ofType:@"skyx"];
+  NSString *flxBundlePath = [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"];
 #ifndef NDEBUG
   NSFileManager *fileManager = [NSFileManager defaultManager];
   NSError *error = nil;
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *documentsDirectory = [paths objectAtIndex:0];
-  NSString *skyxDocsPath = [documentsDirectory stringByAppendingPathComponent:@"app.skyx"];
+  NSString *flxDocsPath = [documentsDirectory stringByAppendingPathComponent:@"app.flx"];
 
   // Write an empty file to help identify the correct simulator app by its bundle id. See sky_tool for its use.
   NSString *bundleIDPath = [documentsDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
@@ -204,16 +201,16 @@ static std::string SkPictureTracingPath() {
       NSLog(@"Couldn't write the bundle id file %@: auto reloading on the iOS simulator won't work\n%@", bundleIDPath, error);
   }
 
-  if (skyxBundlePath != nil && [fileManager fileExistsAtPath:skyxDocsPath] == NO) {
-    if ([fileManager copyItemAtPath:skyxBundlePath toPath:skyxDocsPath error:&error]) {
-      return skyxDocsPath;
+  if (flxBundlePath != nil && [fileManager fileExistsAtPath:flxDocsPath] == NO) {
+    if ([fileManager copyItemAtPath:flxBundlePath toPath:flxDocsPath error:&error]) {
+      return flxDocsPath;
     }
-    NSLog(@"Error encountered copying app.skyx from the Bundle to the Documents directory. Dynamic reloading will not be possible. %@", error);
-    return skyxBundlePath;
+    NSLog(@"Error encountered copying app.flx from the Bundle to the Documents directory. Dynamic reloading will not be possible. %@", error);
+    return flxBundlePath;
   }
-  return skyxDocsPath;
+  return flxDocsPath;
 #endif
-  return skyxBundlePath;
+  return flxBundlePath;
 }
 
 - (void)connectToEngineAndLoad {
@@ -269,7 +266,7 @@ static std::string SkPictureTracingPath() {
     input->time_stamp = InputEventTimestampFromNSTimeInterval(touch.timestamp);
 
     input->pointer_data = sky::PointerData::New();
-    input->pointer_data->kind = sky::POINTER_KIND_TOUCH;
+    input->pointer_data->kind = sky::PointerKind::TOUCH;
 
     int touch_identifier = 0;
     uintptr_t touch_ptr = reinterpret_cast<uintptr_t>(touch);

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/box.dart';
+import 'package:flutter/painting.dart';
+
+import 'box.dart';
+import 'object.dart';
 
 abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
 
@@ -43,9 +44,9 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
     if (child != null) {
       assert(!needsLayout);
       result = child.getDistanceToActualBaseline(baseline);
-      assert(child.parentData is BoxParentData);
+      final BoxParentData childParentData = child.parentData;
       if (result != null)
-        result += child.parentData.position.y;
+        result += childParentData.position.y;
     } else {
       result = super.computeDistanceToActualBaseline(baseline);
     }
@@ -53,15 +54,17 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   }
 
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child, child.parentData.position + offset);
+    if (child != null) {
+      final BoxParentData childParentData = child.parentData;
+      context.paintChild(child, childParentData.position + offset);
+    }
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
-      assert(child.parentData is BoxParentData);
-      child.hitTest(result, position: new Point(position.x - child.parentData.position.x,
-                                                position.y - child.parentData.position.y));
+      final BoxParentData childParentData = child.parentData;
+      child.hitTest(result, position: new Point(position.x - childParentData.position.x,
+                                                position.y - childParentData.position.y));
     }
   }
 
@@ -124,15 +127,15 @@ class RenderPadding extends RenderShiftedBox {
     }
     BoxConstraints innerConstraints = constraints.deflate(padding);
     child.layout(innerConstraints, parentUsesSize: true);
-    assert(child.parentData is BoxParentData);
-    child.parentData.position = new Point(padding.left, padding.top);
+    final BoxParentData childParentData = child.parentData;
+    childParentData.position = new Point(padding.left, padding.top);
     size = constraints.constrain(new Size(
       padding.left + child.size.width + padding.right,
       padding.top + child.size.height + padding.bottom
     ));
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}padding: ${padding}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}padding: $padding\n';
 }
 
 enum ShrinkWrap {
@@ -203,16 +206,16 @@ class RenderPositionedBox extends RenderShiftedBox {
       child.layout(constraints.loosen(), parentUsesSize: true);
       size = constraints.constrain(new Size(_shinkWrapWidth ? child.size.width : double.INFINITY,
                                             _shinkWrapHeight ? child.size.height : double.INFINITY));
-      assert(child.parentData is BoxParentData);
       Offset delta = size - child.size;
-      child.parentData.position = (delta.scale(horizontal, vertical)).toPoint();
+      final BoxParentData childParentData = child.parentData;
+      childParentData.position = (delta.scale(horizontal, vertical)).toPoint();
     } else {
       size = constraints.constrain(new Size(_shinkWrapWidth ? 0.0 : double.INFINITY,
                                             _shinkWrapHeight ? 0.0 : double.INFINITY));
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}horizontal: ${horizontal}\n${prefix}vertical: ${vertical}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}horizontal: $horizontal\n${prefix}vertical: $vertical\n';
 }
 
 class RenderBaseline extends RenderShiftedBox {
@@ -252,13 +255,13 @@ class RenderBaseline extends RenderShiftedBox {
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
       size = constraints.constrain(child.size);
-      assert(child.parentData is BoxParentData);
       double delta = baseline - child.getDistanceToBaseline(baselineType);
-      child.parentData.position = new Point(0.0, delta);
+      final BoxParentData childParentData = child.parentData;
+      childParentData.position = new Point(0.0, delta);
     } else {
       performResize();
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}baseline: ${baseline}\nbaselineType: ${baselineType}';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}baseline: $baseline\nbaselineType: $baselineType';
 }

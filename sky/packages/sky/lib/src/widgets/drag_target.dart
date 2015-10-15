@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:sky' as sky;
 
-import 'package:sky/animation.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/binding.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/widgets/navigator.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
+import 'binding.dart';
+import 'framework.dart';
+import 'navigator.dart';
 
 typedef bool DragTargetWillAccept<T>(T data);
 typedef void DragTargetAccept<T>(T data);
@@ -68,7 +69,7 @@ class Draggable extends StatefulComponent {
 class _DraggableState extends State<Draggable> {
   DragRoute _route;
 
-  void _startDrag(sky.PointerEvent event) {
+  void _startDrag(PointerInputEvent event) {
     if (_route != null)
       return; // TODO(ianh): once we switch to using gestures, just hand the gesture to the route so it can do everything itself. then we can have multiple drags at the same time.
     final Point point = new Point(event.x, event.y);
@@ -96,7 +97,7 @@ class _DraggableState extends State<Draggable> {
     config.navigator.push(_route);
   }
 
-  void _updateDrag(sky.PointerEvent event) {
+  void _updateDrag(PointerInputEvent event) {
     if (_route != null) {
       config.navigator.setState(() {
         _route.update(new Point(event.x, event.y));
@@ -104,14 +105,14 @@ class _DraggableState extends State<Draggable> {
     }
   }
 
-  void _cancelDrag(sky.PointerEvent event) {
+  void _cancelDrag(PointerInputEvent event) {
     if (_route != null) {
       config.navigator.popRoute(_route, DragEndKind.canceled);
       assert(_route == null);
     }
   }
 
-  void _drop(sky.PointerEvent event) {
+  void _drop(PointerInputEvent event) {
     if (_route != null) {
       _route.update(new Point(event.x, event.y));
       config.navigator.popRoute(_route, DragEndKind.dropped);
@@ -256,7 +257,6 @@ class DragRoute extends Route {
   bool get ephemeral => true;
   bool get modal => false;
   bool get opaque => false;
-  Duration get transitionDuration => const Duration();
 
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new Positioned(

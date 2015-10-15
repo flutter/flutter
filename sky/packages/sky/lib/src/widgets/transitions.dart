@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/animation.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
+import 'package:flutter/animation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-export 'package:sky/animation.dart' show AnimationDirection;
+import 'basic.dart';
+import 'framework.dart';
+
+export 'package:flutter/animation.dart' show AnimationDirection;
 
 abstract class TransitionComponent extends StatefulComponent {
   TransitionComponent({

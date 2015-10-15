@@ -1,2 +1,0 @@
-- No longer crashes on Android M Developer Preview
-- 3x scrolling speed improvement.

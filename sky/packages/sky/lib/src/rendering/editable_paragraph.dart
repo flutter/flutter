@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/painting.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/paragraph.dart';
-import 'package:sky/src/rendering/proxy_box.dart' show SizeChangedCallback;
+import 'package:flutter/painting.dart';
+
+import 'box.dart';
+import 'object.dart';
+import 'paragraph.dart';
+import 'proxy_box.dart' show SizeChangedCallback;
 
 const _kCursorGap = 1.0; // pixels
 const _kCursorHeightOffset = 2.0; // pixels

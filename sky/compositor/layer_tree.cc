@@ -9,7 +9,7 @@
 namespace sky {
 namespace compositor {
 
-LayerTree::LayerTree() {
+LayerTree::LayerTree() : rasterizer_tracing_threashold_(0) {
 }
 
 LayerTree::~LayerTree() {

@@ -21,6 +21,7 @@ namespace blink {
 SceneBuilder::SceneBuilder(const Rect& bounds)
     : m_rootPaintBounds(bounds.sk_rect)
     , m_currentLayer(nullptr)
+    , m_currentRasterizerTracingThreshold(0)
 {
 }
 
@@ -120,10 +121,17 @@ void SceneBuilder::addStatistics(uint64_t enabledOptions, const Rect& bounds)
     m_currentLayer->Add(std::move(layer));
 }
 
+void SceneBuilder::setRasterizerTracingThreshold(uint32_t frameInterval)
+{
+    m_currentRasterizerTracingThreshold = frameInterval;
+}
+
 PassRefPtr<Scene> SceneBuilder::build()
 {
     m_currentLayer = nullptr;
-    return Scene::create(std::move(m_rootLayer));
+    int32_t threshold = m_currentRasterizerTracingThreshold;
+    m_currentRasterizerTracingThreshold = 0;
+    return Scene::create(std::move(m_rootLayer), threshold);
 }
 
 } // namespace blink

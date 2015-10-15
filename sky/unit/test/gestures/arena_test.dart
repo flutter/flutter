@@ -1,4 +1,4 @@
-import 'package:sky/gestures.dart';
+import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 
 typedef void GestureArenaCallback(Object key);

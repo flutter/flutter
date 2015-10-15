@@ -1,0 +1,60 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+template("flx") {
+  bundle_prefix = target_name
+  bundle = "$target_gen_dir/${bundle_prefix}.flx"
+  snapshot = "$target_gen_dir/${bundle_prefix}_snapshot.bin"
+
+  action("gen_${bundle_prefix}_bundle") {
+    main_dart = invoker.main_dart
+    asset_base = "//sky/packages/material_design_icons/lib/icons"
+
+    inputs = [
+      main_dart,
+    ]
+    outputs = [
+      bundle,
+    ]
+
+    if (defined(invoker.sources)) {
+      inputs += sources
+    }
+
+    sky_snapshot_dir =
+        get_label_info("//sky/tools/sky_snapshot($host_toolchain)", "root_out_dir")
+
+    script = "//sky/tools/sky_build.py"
+
+    args = [
+      "--asset-base", rebase_path(asset_base, root_build_dir),
+      "--compiler", rebase_path("$sky_snapshot_dir/sky_snapshot", root_build_dir),
+      "--main", rebase_path(main_dart, root_build_dir),
+      "--package-root", rebase_path("packages", root_build_dir),
+      "--snapshot", rebase_path(snapshot, root_build_dir),
+      "--output-file", rebase_path(bundle, root_build_dir),
+    ]
+
+    if (defined(invoker.manifest)) {
+      inputs += [ invoker.manifest ]
+      args += [
+        "--manifest", rebase_path(invoker.manifest, root_build_dir),
+      ]
+    }
+
+    deps = [
+      "//sky/tools/sky_snapshot($host_toolchain)",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+
+  group(target_name) {
+    deps = [
+      ":gen_${bundle_prefix}_bundle",
+    ]
+  }
+}

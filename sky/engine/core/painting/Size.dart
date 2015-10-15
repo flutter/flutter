@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart.sky;
+part of dart_ui;
 
 /// Holds a 2D floating-point size.
 /// Think of this as a vector from Point(0,0) to Point(size.width, size.height)
@@ -45,9 +45,6 @@ class Size extends OffsetBase {
   Point bottomLeft(Point origin) => new Point(origin.x, origin.y + height);
   Point bottomRight(Point origin) => new Point(origin.x + width, origin.y + height);
 
-  /// Compares two Sizes for equality.
-  bool operator ==(other) => other is Size && super == other;
-
   /// Linearly interpolate between two sizes
   ///
   /// If either size is null, this function interpolates from [Offset.zero].
@@ -60,6 +57,9 @@ class Size extends OffsetBase {
       return a * (1.0 - t);
     return new Size(lerpDouble(a.width, b.width, t), lerpDouble(a.height, b.height, t));
   }
+
+  /// Compares two Sizes for equality.
+  bool operator ==(dynamic other) => other is Size && super == other;
 
   String toString() => "Size($width, $height)";
 }

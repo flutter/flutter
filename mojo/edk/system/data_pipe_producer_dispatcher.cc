@@ -84,8 +84,11 @@ MojoResult DataPipeProducerDispatcher::BeginWriteDataImplNoLock(
     MojoWriteDataFlags flags) {
   mutex().AssertHeld();
 
-  return data_pipe_->ProducerBeginWriteData(
-      buffer, buffer_num_bytes, (flags & MOJO_WRITE_DATA_FLAG_ALL_OR_NONE));
+  // This flag may not be used in two-phase mode.
+  if ((flags & MOJO_WRITE_DATA_FLAG_ALL_OR_NONE))
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  return data_pipe_->ProducerBeginWriteData(buffer, buffer_num_bytes);
 }
 
 MojoResult DataPipeProducerDispatcher::EndWriteDataImplNoLock(

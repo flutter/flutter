@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/material.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/material.dart';
 
 class Field extends StatelessComponent {
   Field({
@@ -95,7 +94,7 @@ final ThemeData theme = new ThemeData(
 );
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Address Book',
     theme: theme,
     routes: <String, RouteBuilder>{

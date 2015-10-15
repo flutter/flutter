@@ -10,7 +10,8 @@ import 'package:mojo/mojo/url_request.mojom.dart';
 import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:mojo_services/mojo/network_service.mojom.dart';
 import 'package:mojo_services/mojo/url_loader.mojom.dart';
-import 'package:sky/src/services/shell.dart';
+
+import 'shell.dart';
 
 export 'package:mojo/mojo/url_response.mojom.dart' show UrlResponse;
 
@@ -52,7 +53,7 @@ Future<UrlResponse> fetchUrl(String relativeUrl) async {
   UrlRequest request = new UrlRequest()
     ..url = url
     ..autoFollowRedirects = true;
-  return fetch(request);
+  return await fetch(request);
 }
 
 Future<Response> fetchBody(String relativeUrl) async {

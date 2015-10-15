@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/src/gestures/arena.dart';
-import 'package:sky/src/gestures/constants.dart';
-import 'package:sky/src/gestures/recognizer.dart';
-import 'package:sky/src/gestures/tap.dart';
+import 'arena.dart';
+import 'constants.dart';
+import 'events.dart';
+import 'recognizer.dart';
+import 'tap.dart';
 
-class DoubleTapGestureRecognizer extends GestureArenaMember {
+class DoubleTapGestureRecognizer extends DisposableArenaMember {
   static int sInstances = 0;
 
   DoubleTapGestureRecognizer({ this.router, this.onDoubleTap }) {
@@ -18,18 +19,18 @@ class DoubleTapGestureRecognizer extends GestureArenaMember {
   }
 
   PointerRouter router;
-  GestureTapListener onDoubleTap;
+  GestureTapCallback onDoubleTap;
 
   int _numTaps = 0;
   int _instance = 0;
   bool _isTrackingPointer = false;
   int _pointer;
-  sky.Point _initialPosition;
+  ui.Point _initialPosition;
   Timer _tapTimer;
   Timer _doubleTapTimer;
   GestureArenaEntry _entry = null;
 
-  void addPointer(sky.PointerEvent event) {
+  void addPointer(PointerInputEvent event) {
     message("add pointer");
     if (_initialPosition != null && !_isWithinTolerance(event)) {
       message("reset");
@@ -51,7 +52,7 @@ class DoubleTapGestureRecognizer extends GestureArenaMember {
     print("Double tap " + _instance.toString() + ": " + s);
   }
 
-  void handleEvent(sky.PointerEvent event) {
+  void handleEvent(PointerInputEvent event) {
     message("handle event");
     if (event.type == 'pointerup') {
       _numTaps++;
@@ -147,12 +148,12 @@ class DoubleTapGestureRecognizer extends GestureArenaMember {
     }
   }
 
-  sky.Point _getPoint(sky.PointerEvent event) {
-    return new sky.Point(event.x, event.y);
+  ui.Point _getPoint(PointerInputEvent event) {
+    return new ui.Point(event.x, event.y);
   }
 
-  bool _isWithinTolerance(sky.PointerEvent event) {
-    sky.Offset offset = _getPoint(event) - _initialPosition;
+  bool _isWithinTolerance(PointerInputEvent event) {
+    ui.Offset offset = _getPoint(event) - _initialPosition;
     return offset.distance <= kDoubleTapTouchSlop;
   }
 

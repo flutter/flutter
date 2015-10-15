@@ -23,6 +23,8 @@
 namespace sky {
 namespace shell {
 
+static const double kOneFrameDuration = 1e3 / 60.0;
+
 Rasterizer::Rasterizer()
     : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
 }
@@ -71,13 +73,23 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
     surface_->SwapBuffers();
   }
 
-  // Optionally, if the user has specified tracing the current scene to a file,
-  // acquire another frame and draw into it to obtain an SkPicture to serialize
+  // Trace to a file if necessary
+  bool frameExceededThreshold = false;
+  uint32_t thresholdInterval = layer_tree->rasterizer_tracing_threshold();
+  if (thresholdInterval != 0 &&
+      paint_context_.frame_time().lastLap().InMillisecondsF() >
+          thresholdInterval * kOneFrameDuration) {
+    // While rendering the last frame, if we exceeded the tracing threshold
+    // specified in the layer tree, we force a trace to disk.
+    frameExceededThreshold = true;
+  }
 
-  auto options = Shell::Shared().tracing_controller().picture_tracing_options();
-  if (options.first) {
+  const auto& tracingController = Shell::Shared().tracing_controller();
+
+  if (frameExceededThreshold || tracingController.picture_tracing_enabled()) {
+    base::FilePath path = tracingController.PictureTracingPathForCurrentTime();
     sky::compositor::PaintContext::ScopedFrame to_file_frame =
-        paint_context_.AcquireFrame(options.second, size);
+        paint_context_.AcquireFrame(path.AsUTF8Unsafe(), size);
     layer_tree->root_layer()->Paint(to_file_frame);
   }
 }

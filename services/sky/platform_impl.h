@@ -7,6 +7,7 @@
 
 #include "base/message_loop/message_loop.h"
 #include "sky/engine/public/platform/Platform.h"
+#include "base/threading/thread.h"
 
 namespace sky {
 
@@ -17,10 +18,14 @@ class PlatformImpl : public blink::Platform {
 
   // blink::Platform methods:
   blink::WebString defaultLocale() override;
-  base::SingleThreadTaskRunner* mainThreadTaskRunner() override;
+  base::SingleThreadTaskRunner* GetUITaskRunner() override;
+  base::SingleThreadTaskRunner* GetIOTaskRunner() override;
 
  private:
-  scoped_refptr<base::SingleThreadTaskRunner> main_thread_task_runner_;
+  scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner_;
+  scoped_refptr<base::SingleThreadTaskRunner> io_task_runner_;
+
+  scoped_ptr<base::Thread> io_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };

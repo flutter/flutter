@@ -93,7 +93,6 @@ class SettingsFragmentState extends State<SettingsFragment> {
 
   Widget buildSettingsPane(BuildContext context) {
     return new Material(
-      type: MaterialType.canvas,
       child: new ScrollableViewport(
         child: new Container(
           padding: const EdgeDims.symmetric(vertical: 20.0),

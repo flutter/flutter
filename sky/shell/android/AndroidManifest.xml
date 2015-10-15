@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
 
-    <application android:label="Sky Shell" android:name="SkyApplication">
+    <application android:label="Sky Shell" android:name="SkyApplication" android:debuggable="true">
         <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
                   android:hardwareAccelerated="true"
                   android:launchMode="standard"

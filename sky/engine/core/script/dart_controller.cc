@@ -12,8 +12,8 @@
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/bindings/builtin.h"
-#include "sky/engine/bindings/builtin_natives.h"
-#include "sky/engine/bindings/builtin_sky.h"
+#include "sky/engine/bindings/dart_natives.h"
+#include "sky/engine/bindings/dart_ui.h"
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
@@ -54,7 +54,7 @@ void CallHandleMessage(base::WeakPtr<DartState> dart_state) {
 
 void MessageNotifyCallback(Dart_Isolate dest_isolate) {
   DCHECK(Platform::current());
-  Platform::current()->mainThreadTaskRunner()->PostTask(FROM_HERE,
+  Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
       base::Bind(&CallHandleMessage, DartState::From(dest_isolate)->GetWeakPtr()));
 }
 
@@ -80,8 +80,10 @@ void DartController::DidLoadMainLibrary(String name) {
   CHECK(!LogIfError(Dart_FinalizeLoading(true)));
 
   Dart_Handle library = Dart_LookupLibrary(StringToDart(dart_state(), name));
-  CHECK(!LogIfError(library));
-  CHECK(!DartInvokeAppField(library, ToDart("main"), 0, nullptr));
+  if (LogIfError(library))
+    exit(1);
+  if (DartInvokeAppField(library, ToDart("main"), 0, nullptr))
+    exit(1);
 }
 
 void DartController::DidLoadSnapshot() {
@@ -145,13 +147,13 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
   {
     DartApiScope apiScope;
 
-    Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
+    Builtin::SetNativeResolver(Builtin::kUILibrary);
     Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
     Builtin::SetNativeResolver(Builtin::kIOLibrary);
-    BuiltinNatives::Init(BuiltinNatives::MainIsolate);
+    DartNatives::Init(DartNatives::MainIsolate);
 
-    builtin_sky_ = adoptPtr(new BuiltinSky(dart_state()));
-    dart_state()->class_library().set_provider(builtin_sky_.get());
+    dart_ui_ = adoptPtr(new DartUI(dart_state()));
+    dart_state()->class_library().set_provider(dart_ui_.get());
 
     EnsureHandleWatcherStarted();
   }
@@ -162,7 +164,7 @@ void DartController::InstallView(View* view) {
   DartIsolateScope isolate_scope(dart_state()->isolate());
   DartApiScope dart_api_scope;
 
-  builtin_sky_->InstallView(view);
+  dart_ui_->InstallView(view);
 }
 
 static void DartController_DartStreamConsumer(

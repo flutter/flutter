@@ -2,63 +2,63 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 
-sky.Picture paint(sky.Rect paintBounds) {
-  sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+ui.Picture paint(ui.Rect paintBounds) {
+  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
 
   double size = 100.0;
   canvas.translate(size + 10.0, size + 10.0);
 
-  sky.Paint paint = new sky.Paint();
-  paint.color = const sky.Color.fromARGB(255, 0, 255, 0);
-  var builder = new sky.LayerDrawLooperBuilder()
+  ui.Paint paint = new ui.Paint();
+  paint.color = const ui.Color.fromARGB(255, 0, 255, 0);
+  var builder = new ui.LayerDrawLooperBuilder()
     // Shadow layer.
     ..addLayerOnTop(
-        new sky.DrawLooperLayerInfo()
-          ..setPaintBits(sky.PaintBits.all)
-          ..setOffset(const sky.Offset(5.0, 5.0))
-          ..setColorMode(sky.TransferMode.src),
-        new sky.Paint()
-          ..color = const sky.Color.fromARGB(128, 55, 55, 55)
-          ..maskFilter = new sky.MaskFilter.blur(sky.BlurStyle.normal, 5.0)
+        new ui.DrawLooperLayerInfo()
+          ..setPaintBits(ui.PaintBits.all)
+          ..setOffset(const ui.Offset(5.0, 5.0))
+          ..setColorMode(ui.TransferMode.src),
+        new ui.Paint()
+          ..color = const ui.Color.fromARGB(128, 55, 55, 55)
+          ..maskFilter = new ui.MaskFilter.blur(ui.BlurStyle.normal, 5.0)
     )
     // Main layer.
-    ..addLayerOnTop(new sky.DrawLooperLayerInfo(), new sky.Paint());
+    ..addLayerOnTop(new ui.DrawLooperLayerInfo(), new ui.Paint());
   paint.drawLooper = builder.build();
 
   canvas.drawPaint(
-      new sky.Paint()..color = const sky.Color.fromARGB(255, 255, 255, 255));
-  canvas.drawRect(new sky.Rect.fromLTRB(-size, -size, size, size), paint);
+      new ui.Paint()..color = const ui.Color.fromARGB(255, 255, 255, 255));
+  canvas.drawRect(new ui.Rect.fromLTRB(-size, -size, size, size), paint);
 
   return recorder.endRecording();
 }
 
-sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
-  final double devicePixelRatio = sky.view.devicePixelRatio;
-  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
+  final double devicePixelRatio = ui.view.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
-    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..addPicture(ui.Offset.zero, picture, paintBounds)
     ..pop();
   return sceneBuilder.build();
 }
 
 void beginFrame(double timeStamp) {
-  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
-  sky.Picture picture = paint(paintBounds);
-  sky.Scene scene = composite(picture, paintBounds);
-  sky.view.scene = scene;
+  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+  ui.Picture picture = paint(paintBounds);
+  ui.Scene scene = composite(picture, paintBounds);
+  ui.view.scene = scene;
 }
 
 void main() {
-  sky.view.setFrameCallback(beginFrame);
-  sky.view.scheduleFrame();
+  ui.view.setFrameCallback(beginFrame);
+  ui.view.scheduleFrame();
 }

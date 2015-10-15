@@ -9,7 +9,7 @@
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
-#include "mojo/services/tracing/public/interfaces/tracing.mojom.h"
+#include "mojo/services/tracing/interfaces/tracing.mojom.h"
 
 namespace mojo {
 

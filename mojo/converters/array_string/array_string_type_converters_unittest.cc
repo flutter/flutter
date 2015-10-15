@@ -12,7 +12,7 @@ namespace test {
 namespace {
 
 TEST(CommonTypeConvertersTest, ArrayUint8ToStdString) {
-  Array<uint8_t> data(4);
+  auto data = Array<uint8_t>::New(4);
   data[0] = 'd';
   data[1] = 'a';
   data[2] = 't';

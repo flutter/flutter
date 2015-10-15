@@ -1,4 +1,4 @@
-# skysprites
+# Flutter Sprites
 
 A sprite toolkit built on top of Flutter.
 

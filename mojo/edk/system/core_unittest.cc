@@ -997,12 +997,12 @@ TEST_F(CoreTest, DataPipe) {
                                   MakeUserPointer(&num_bytes),
                                   MOJO_READ_DATA_FLAG_PEEK));
 
-  // Read the remaining two characters, in two-phase mode (all-or-none).
+  // Read the remaining two characters, in two-phase mode.
   num_bytes = 2;
   ASSERT_EQ(MOJO_RESULT_OK,
             core()->BeginReadData(ch, MakeUserPointer(&read_ptr),
                                   MakeUserPointer(&num_bytes),
-                                  MOJO_READ_DATA_FLAG_ALL_OR_NONE));
+                                  MOJO_READ_DATA_FLAG_NONE));
   // Note: Count on still being able to do the contiguous read here.
   ASSERT_EQ(2u, num_bytes);
 
@@ -1236,7 +1236,7 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing2) {
   ASSERT_EQ(MOJO_RESULT_OK,
             core()->BeginReadData(ch, MakeUserPointer(&read_ptr),
                                   MakeUserPointer(&num_bytes),
-                                  MOJO_READ_DATA_FLAG_ALL_OR_NONE));
+                                  MOJO_READ_DATA_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_BUSY,
             core()->WriteMessage(h_passing[0], UserPointer<const void>(kHello),
                                  kHelloSize, MakeUserPointer(&ch), 1,

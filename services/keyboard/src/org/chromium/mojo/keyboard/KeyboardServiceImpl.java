@@ -75,4 +75,17 @@ public class KeyboardServiceImpl implements KeyboardService {
         imm.hideSoftInputFromWindow(sViewState.getView().getApplicationWindowToken(), 0);
         close();
     }
+
+    @Override
+    public void setText(String text) {
+        sViewState.setText(text);
+        InputMethodManager imm =
+                (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.restartInput(sViewState.getView());
+    }
+
+    @Override
+    public void setSelection(int start, int end) {
+        sViewState.setSelection(start, end);
+    }
 }

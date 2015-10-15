@@ -37,7 +37,8 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 
 class RemoteDataPipeImplTest : public testing::Test {
  public:
-  RemoteDataPipeImplTest() : io_thread_(mojo::test::TestIOThread::kAutoStart) {}
+  RemoteDataPipeImplTest()
+      : io_thread_(mojo::test::TestIOThread::StartMode::AUTO) {}
   ~RemoteDataPipeImplTest() override {}
 
   void SetUp() override {
@@ -290,11 +291,11 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
       DataPipeConsumerDispatcher::Create();
   consumer->Init(dp);
 
-  uint32_t num_bytes = static_cast<uint32_t>(10u * sizeof(int32_t));
   void* write_ptr = nullptr;
+  uint32_t num_bytes = 0u;
   EXPECT_EQ(MOJO_RESULT_OK,
             dp->ProducerBeginWriteData(MakeUserPointer(&write_ptr),
-                                       MakeUserPointer(&num_bytes), false));
+                                       MakeUserPointer(&num_bytes)));
   ASSERT_GE(num_bytes, 1u * sizeof(int32_t));
 
   // Write the consumer to MP 0 (port 0). Wait and receive on MP 1 (port 0).
@@ -400,21 +401,21 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
       DataPipeConsumerDispatcher::Create();
   consumer->Init(dp);
 
-  uint32_t num_bytes = static_cast<uint32_t>(10u * sizeof(int32_t));
   void* write_ptr = nullptr;
+  uint32_t num_bytes = 0u;
   EXPECT_EQ(MOJO_RESULT_OK,
             dp->ProducerBeginWriteData(MakeUserPointer(&write_ptr),
-                                       MakeUserPointer(&num_bytes), false));
+                                       MakeUserPointer(&num_bytes)));
   ASSERT_GE(num_bytes, 1u * sizeof(int32_t));
   *static_cast<int32_t*>(write_ptr) = 123456;
   EXPECT_EQ(MOJO_RESULT_OK, dp->ProducerEndWriteData(
                                 static_cast<uint32_t>(1u * sizeof(int32_t))));
 
-  num_bytes = static_cast<uint32_t>(10u * sizeof(int32_t));
   write_ptr = nullptr;
+  num_bytes = 0u;
   EXPECT_EQ(MOJO_RESULT_OK,
             dp->ProducerBeginWriteData(MakeUserPointer(&write_ptr),
-                                       MakeUserPointer(&num_bytes), false));
+                                       MakeUserPointer(&num_bytes)));
   ASSERT_GE(num_bytes, 1u * sizeof(int32_t));
 
   // Write the consumer to MP 0 (port 0). Wait and receive on MP 1 (port 0).

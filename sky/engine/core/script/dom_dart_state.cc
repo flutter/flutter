@@ -32,7 +32,7 @@ void DOMDartState::DidSetIsolate() {
   dy_handle_.Set(this, ToDart("_dy"));
   value_handle_.Set(this, ToDart("_value"));
 
-  Dart_Handle sky_library = DartBuiltin::LookupLibrary("dart:sky");
+  Dart_Handle sky_library = DartBuiltin::LookupLibrary("dart:ui");
   color_class_.Set(this, Dart_GetType(sky_library, ToDart("Color"), 0, 0));
 }
 

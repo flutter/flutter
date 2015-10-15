@@ -642,7 +642,6 @@ core_idl_files = get_path_info([
                                  "events/VelocityTracker.idl",
                                  "events/WheelEvent.idl",
                                  "frame/Tracing.idl",
-                                 "frame/Window.idl",
                                  "html/HTMLElement.idl",
                                  "html/ImageData.idl",
                                  "html/TextMetrics.idl",
@@ -676,6 +675,11 @@ core_idl_files = get_path_info([
                                "abspath")
 
 core_dart_files = get_path_info([
+                                  "dart/hooks.dart",
+                                  "dart/natives.dart",
+                                  "dart/lerp.dart",
+                                  "dart/view.dart",
+                                  "dart/window.dart",
                                   "loader/ImageDecoder.dart",
                                   "painting/Color.dart",
                                   "painting/ColorFilter.dart",

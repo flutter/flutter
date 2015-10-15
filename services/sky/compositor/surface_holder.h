@@ -9,8 +9,8 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/binding.h"
-#include "mojo/services/surfaces/public/interfaces/surface_id.mojom.h"
-#include "mojo/services/surfaces/public/interfaces/surfaces.mojom.h"
+#include "mojo/services/surfaces/interfaces/surface_id.mojom.h"
+#include "mojo/services/surfaces/interfaces/surfaces.mojom.h"
 #include "ui/gfx/geometry/rect.h"
 
 namespace mojo {

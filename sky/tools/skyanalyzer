@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -23,9 +24,18 @@ _IGNORED_PATTERNS = [
   re.compile(r'^$'),
   re.compile(r'^Analyzing \['),
   re.compile(r'^No issues found'),
-
-  # Ignore analyzer status output.
   re.compile(r'^[0-9]+ (error|warning|hint).*found[.]'),
+
+  # Disable the Strong checks that we don't care about.
+  re.compile(r'^\[error\] Invalid override\. The type of [^ ]+ \(.+\) is not a subtype of [^ ]+ \(.+\)\.'), # we allow type narrowing
+  re.compile(r'^\[(warning|hint)\] .+ will need runtime check to cast to type .+'), # https://github.com/dart-lang/sdk/issues/24542
+  re.compile(r'^\[hint\] .+ requires dynamic invoke'), # too many false positives, e.g. https://github.com/dart-lang/sdk/issues/24564
+  re.compile(r'^\[hint\] Runtime check on non-ground type .+ may throw StrongModeError'), # https://github.com/dart-lang/sdk/issues/24565
+  re.compile(r'^\[hint] \([_, ]+\) .+ has inferred type '), # ignore underscore-only arguments
+
+  # Disable the lint checks that will be caught by code review
+  re.compile(r'^\[lint\] Avoid defining a one-member abstract class when a simple function will do'),
+  re.compile(r'^\[lint\] Prefer using lowerCamelCase for constant names.'),
 
   # TODO: Fix all the warnings in the mojo packages
   re.compile(r'.*pub-cache.*\.mojom\.dart'),
@@ -54,7 +64,15 @@ def main():
       subprocess.check_output([
           DARTANALYZER, "--package-warnings",
           "--package-root", os.path.join(WORKBENCH, "packages"),
-          "--fatal-warnings"
+          "--ignore-unrecognized-flags",
+          "--fatal-hints",
+          "--fatal-warnings",
+          "--lints",
+          "--strong",
+          "--strong-hints",
+          "--enable-strict-call-checks",
+          "--enable_type_checks",
+          "--supermixin",
       ] + app_paths, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
       errors = [l for l in e.output.split('\n')

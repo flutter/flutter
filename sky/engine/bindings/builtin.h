@@ -15,8 +15,7 @@ class Builtin {
   // Note: Changes to this enum should be accompanied with changes to
   // the builtin_libraries_ array in builtin.cc.
   enum BuiltinLibraryId {
-    kBuiltinLibrary,
-    kSkyLibrary,
+    kUILibrary,
     kMojoInternalLibrary,
     kIOLibrary,
     kInvalidLibrary,

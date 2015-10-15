@@ -1,10 +1,10 @@
-import 'dart:sky';
+import 'dart:ui';
 
-import 'package:sky/material.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
-import 'package:skysprites/skysprites.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_sprites/flutter_sprites.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)
@@ -27,7 +27,7 @@ main() async {
   String json = await _bundle.loadString('assets/sprites.json');
   _spriteSheet = new SpriteSheet(_images['assets/sprites.png'], json);
 
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Test Physics',
     theme: new ThemeData(
       brightness: ThemeBrightness.light,
@@ -45,24 +45,11 @@ main() async {
 }
 
 class TestBed extends NodeWithSize {
-  Sprite _ship;
   Sprite _obstacle;
+  PhysicsNode _physicsNode;
 
   TestBed() : super(new Size(1024.0, 1024.0)) {
-    PhysicsNode physicsNode = new PhysicsNode(new Offset(0.0, 100.0));
-
-    _ship = new Sprite(_spriteSheet["ship.png"]);
-    _ship.position = new Point(512.0, 512.0);
-    _ship.size = new Size(64.0, 64.0);
-    _ship.physicsBody = new PhysicsBody(
-      new PhysicsShapeGroup([
-        new PhysicsShapeCircle(Point.origin, 32.0),
-        new PhysicsShapePolygon([new Point(0.0, 0.0), new Point(50.0, 0.0), new Point(50.0, 50.0), new Point(0.0, 50.0)])
-      ]),
-      friction: 0.5,
-      tag: "ship"
-    );
-    physicsNode.addChild(_ship);
+    _physicsNode = new PhysicsNode(new Offset(0.0, 100.0));
 
     _obstacle = new Sprite(_spriteSheet["ship.png"]);
     _obstacle.position = new Point(532.0, 800.0);
@@ -73,23 +60,51 @@ class TestBed extends NodeWithSize {
       friction: 0.5,
       tag: "obstacle"
     );
-    physicsNode.addChild(_obstacle);
-    physicsNode.addContactCallback(myCallback, "obstacle", "ship", PhysicsContactType.begin);
+    _physicsNode.addChild(_obstacle);
+    _physicsNode.addContactCallback(myCallback, "obstacle", "ship", PhysicsContactType.begin);
 
-    addChild(physicsNode);
+    addChild(_physicsNode);
 
     userInteractionEnabled = true;
   }
 
   void myCallback(PhysicsContactType type, PhysicsContact contact) {
     print("CONTACT type: $type");
-    contact.nodeB.removeFromParent();
   }
 
   bool handleEvent(SpriteBoxEvent event) {
     if (event.type == "pointerdown") {
       Point pos = convertPointToNodeSpace(event.boxPosition);
-      _ship.position = pos;
+
+      Sprite shipA;
+      shipA = new Sprite(_spriteSheet["ship.png"]);
+      shipA.opacity = 0.3;
+      shipA.position = new Point(pos.x - 40.0, pos.y);
+      shipA.size = new Size(64.0, 64.0);
+      shipA.physicsBody = new PhysicsBody(new PhysicsShapeCircle(Point.origin, 32.0),
+        friction: 0.5,
+        restitution: 0.5,
+        tag: "ship"
+      );
+      _physicsNode.addChild(shipA);
+      shipA.physicsBody.applyLinearImpulse(
+        new Offset(randomSignedDouble() * 5000.0, randomSignedDouble() * 5000.0),
+        shipA.position
+      );
+
+      Sprite shipB;
+      shipB = new Sprite(_spriteSheet["ship.png"]);
+      shipB.opacity = 0.3;
+      shipB.position = new Point(pos.x + 40.0, pos.y);
+      shipB.size = new Size(64.0, 64.0);
+      shipB.physicsBody = new PhysicsBody(new PhysicsShapePolygon([new Point(-25.0, -25.0), new Point(25.0, -25.0), new Point(25.0, 25.0), new Point(-25.0, 25.0)]),
+        friction: 0.5,
+        restitution: 0.5,
+        tag: "ship"
+      );
+      _physicsNode.addChild(shipB);
+
+      new PhysicsJointRevolute(shipA.physicsBody, shipB.physicsBody, pos);
     }
     return true;
   }

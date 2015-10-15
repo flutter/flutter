@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets.dart';
+import 'framework.dart';
 
 abstract class UniqueComponent<T extends State> extends StatefulComponent {
   UniqueComponent({ GlobalKey key }) : super(key: key) {

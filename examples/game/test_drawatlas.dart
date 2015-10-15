@@ -1,10 +1,10 @@
-import 'dart:sky';
+import 'dart:ui';
 
-import 'package:sky/material.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
-import 'package:skysprites/skysprites.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_sprites/flutter_sprites.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)
@@ -32,7 +32,7 @@ main() async {
   String json = await _bundle.loadString('assets/sprites.json');
   _spriteSheet = new SpriteSheet(_images['assets/sprites.png'], json);
 
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Test drawAtlas',
     theme: _theme,
     routes: {

@@ -11,7 +11,7 @@
 #include "base/task_runner.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
-#include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
+#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 
 namespace mojo {
 namespace asset_bundle {

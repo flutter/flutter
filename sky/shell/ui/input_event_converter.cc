@@ -18,16 +18,16 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
   web_event->timeStampMS = event->time_stamp;
 
   switch (event->type) {
-    case EVENT_TYPE_POINTER_DOWN:
+    case EventType::POINTER_DOWN:
       web_event->type = blink::WebInputEvent::PointerDown;
       break;
-    case EVENT_TYPE_POINTER_UP:
+    case EventType::POINTER_UP:
       web_event->type = blink::WebInputEvent::PointerUp;
       break;
-    case EVENT_TYPE_POINTER_MOVE:
+    case EventType::POINTER_MOVE:
       web_event->type = blink::WebInputEvent::PointerMove;
       break;
-    case EVENT_TYPE_POINTER_CANCEL:
+    case EventType::POINTER_CANCEL:
       web_event->type = blink::WebInputEvent::PointerCancel;
       break;
     default:
@@ -36,7 +36,7 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
   }
 
   if (event->pointer_data) {
-    if (event->pointer_data->kind == POINTER_KIND_TOUCH)
+    if (event->pointer_data->kind == PointerKind::TOUCH)
         web_event->kind = blink::WebPointerEvent::Touch;
     web_event->pointer = event->pointer_data->pointer;
     web_event->x = event->pointer_data->x / device_pixel_ratio;
@@ -60,15 +60,15 @@ scoped_ptr<blink::WebInputEvent> BuildWebBackEvent(const InputEventPtr& event) {
 scoped_ptr<blink::WebInputEvent> ConvertEvent(const InputEventPtr& event,
                                               float device_pixel_ratio) {
   switch (event->type) {
-    case EVENT_TYPE_POINTER_DOWN:
-    case EVENT_TYPE_POINTER_UP:
-    case EVENT_TYPE_POINTER_MOVE:
-    case EVENT_TYPE_POINTER_CANCEL:
+    case EventType::POINTER_DOWN:
+    case EventType::POINTER_UP:
+    case EventType::POINTER_MOVE:
+    case EventType::POINTER_CANCEL:
       return BuildWebPointerEvent(event, device_pixel_ratio);
-    case EVENT_TYPE_BACK:
+    case EventType::BACK:
       return BuildWebBackEvent(event);
-    case EVENT_TYPE_UNKNOWN:
-      NOTIMPLEMENTED() << "ConvertEvent received unexpected EVENT_TYPE_UNKNOWN";
+    case EventType::UNKNOWN:
+      NOTIMPLEMENTED() << "ConvertEvent received unexpected EventType::UNKNOWN";
   }
 
   return scoped_ptr<blink::WebInputEvent>();

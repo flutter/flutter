@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
 /// Slows down animations by this factor to help in development.
 double timeDilation = 1.0;
@@ -20,7 +20,7 @@ typedef void SchedulerCallback(Duration timeStamp);
 class Scheduler {
   /// Requires clients to use the [scheduler] singleton
   Scheduler._() {
-    sky.view.setFrameCallback(beginFrame);
+    ui.view.setFrameCallback(beginFrame);
   }
 
   bool _haveScheduledVisualUpdate = false;
@@ -45,7 +45,7 @@ class Scheduler {
     Map<int, SchedulerCallback> callbacks = _transientCallbacks;
     _transientCallbacks = new Map<int, SchedulerCallback>();
 
-    callbacks.forEach((id, callback) {
+    callbacks.forEach((int id, SchedulerCallback callback) {
       if (!_removedIds.contains(id))
         callback(timeStamp);
     });
@@ -88,7 +88,7 @@ class Scheduler {
   void ensureVisualUpdate() {
     if (_haveScheduledVisualUpdate)
       return;
-    sky.view.scheduleFrame();
+    ui.view.scheduleFrame();
     _haveScheduledVisualUpdate = true;
   }
 }

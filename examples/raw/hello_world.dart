@@ -2,56 +2,56 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 
-sky.Color color;
+ui.Color color;
 
-sky.Picture paint(sky.Rect paintBounds) {
-  sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
-  sky.Size size = paintBounds.size;
+ui.Picture paint(ui.Rect paintBounds) {
+  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
+  ui.Size size = paintBounds.size;
 
   double radius = size.shortestSide * 0.45;
-  sky.Paint paint = new sky.Paint()
+  ui.Paint paint = new ui.Paint()
     ..color = color;
-  canvas.drawCircle(size.center(sky.Point.origin), radius, paint);
+  canvas.drawCircle(size.center(ui.Point.origin), radius, paint);
 
   return recorder.endRecording();
 }
 
-sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
-  final double devicePixelRatio = sky.view.devicePixelRatio;
-  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
+  final double devicePixelRatio = ui.view.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
-    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..addPicture(ui.Offset.zero, picture, paintBounds)
     ..pop();
   return sceneBuilder.build();
 }
 
 void beginFrame(double timeStamp) {
-  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
-  sky.Picture picture = paint(paintBounds);
-  sky.Scene scene = composite(picture, paintBounds);
-  sky.view.scene = scene;
+  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+  ui.Picture picture = paint(paintBounds);
+  ui.Scene scene = composite(picture, paintBounds);
+  ui.view.scene = scene;
 }
 
-bool handleEvent(sky.Event event) {
+bool handleEvent(ui.Event event) {
   if (event.type == 'pointerdown') {
-    color = new sky.Color.fromARGB(255, 0, 0, 255);
-    sky.view.scheduleFrame();
+    color = new ui.Color.fromARGB(255, 0, 0, 255);
+    ui.view.scheduleFrame();
     return true;
   }
 
   if (event.type == 'pointerup') {
-    color = new sky.Color.fromARGB(255, 0, 255, 0);
-    sky.view.scheduleFrame();
+    color = new ui.Color.fromARGB(255, 0, 255, 0);
+    ui.view.scheduleFrame();
     return true;
   }
 
@@ -65,8 +65,8 @@ bool handleEvent(sky.Event event) {
 
 void main() {
   print('Hello, world');
-  color = new sky.Color.fromARGB(255, 0, 255, 0);
-  sky.view.setFrameCallback(beginFrame);
-  sky.view.setEventCallback(handleEvent);
-  sky.view.scheduleFrame();
+  color = new ui.Color.fromARGB(255, 0, 255, 0);
+  ui.view.setFrameCallback(beginFrame);
+  ui.view.setEventCallback(handleEvent);
+  ui.view.scheduleFrame();
 }

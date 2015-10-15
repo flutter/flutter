@@ -15,8 +15,8 @@
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "mojo/services/surfaces/public/cpp/surfaces_utils.h"
-#include "mojo/services/surfaces/public/interfaces/quads.mojom.h"
+#include "mojo/services/surfaces/cpp/surfaces_utils.h"
+#include "mojo/services/surfaces/interfaces/quads.mojom.h"
 #include "services/asset_bundle/asset_unpacker_job.h"
 #include "services/sky/compositor/layer_host.h"
 #include "services/sky/compositor/rasterizer_bitmap.h"
@@ -214,7 +214,7 @@ void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
       *viewport_metrics_->size));
 
   mojo::QuadPtr quad = mojo::Quad::New();
-  quad->material = mojo::MATERIAL_SURFACE_CONTENT;
+  quad->material = mojo::Material::SURFACE_CONTENT;
   quad->rect = bounds.Clone();
   quad->opaque_rect = bounds.Clone();
   quad->visible_rect = bounds.Clone();

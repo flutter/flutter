@@ -18,11 +18,11 @@ class PlatformImpl : public blink::Platform {
 
   // blink::Platform methods:
   blink::WebString defaultLocale() override;
-  base::SingleThreadTaskRunner* mainThreadTaskRunner() override;
+
+  base::SingleThreadTaskRunner* GetUITaskRunner() override;
+  base::SingleThreadTaskRunner* GetIOTaskRunner() override;
 
  private:
-  scoped_refptr<base::SingleThreadTaskRunner> main_thread_task_runner_;
-
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };
 

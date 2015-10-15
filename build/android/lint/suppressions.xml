@@ -41,6 +41,9 @@ Still reading?
   <issue id="HandlerLeak">
     <ignore path="remoting/android/java/src/org/chromium/chromoting/TapGestureDetector.java"/>
   </issue>
+  <issue id="HardcodedDebugMode" severity="Fatal">
+    <ignore path="AndroidManifest.xml"/>
+  </issue>
   <issue id="IconDensities">
     <!-- crbug.com/457918 is tracking missing assets -->
     <ignore path="components/web_contents_delegate_android/android/java/res/drawable-xxhdpi"/>

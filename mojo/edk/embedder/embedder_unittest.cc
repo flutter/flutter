@@ -131,7 +131,7 @@ class ScopedTestChannel {
 
 class EmbedderTest : public testing::Test {
  public:
-  EmbedderTest() : test_io_thread_(TestIOThread::kAutoStart) {}
+  EmbedderTest() : test_io_thread_(TestIOThread::StartMode::AUTO) {}
   ~EmbedderTest() override {}
 
  protected:
@@ -477,7 +477,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   EXPECT_TRUE(client_platform_handle.is_valid());
 
-  TestIOThread test_io_thread(TestIOThread::kAutoStart);
+  TestIOThread test_io_thread(TestIOThread::StartMode::AUTO);
   test::InitWithSimplePlatformSupport();
 
   {
@@ -672,7 +672,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessChannelsClient) {
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   EXPECT_TRUE(client_platform_handle.is_valid());
 
-  TestIOThread test_io_thread(TestIOThread::kAutoStart);
+  TestIOThread test_io_thread(TestIOThread::StartMode::AUTO);
   test::InitWithSimplePlatformSupport();
 
   {

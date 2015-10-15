@@ -62,9 +62,15 @@ Shell::Shell(scoped_ptr<ServiceProviderContext> service_provider_context)
 
   gpu_thread_.reset(new base::Thread("gpu_thread"));
   gpu_thread_->StartWithOptions(options);
+  gpu_task_runner_ = gpu_thread_->message_loop()->task_runner();
 
   ui_thread_.reset(new base::Thread("ui_thread"));
   ui_thread_->StartWithOptions(options);
+  ui_task_runner_ = ui_thread_->message_loop()->task_runner();
+
+  io_thread_.reset(new base::Thread("io_thread"));
+  io_thread_->StartWithOptions(options);
+  io_task_runner_ = io_thread_->message_loop()->task_runner();
 
   ui_task_runner()->PostTask(FROM_HERE, base::Bind(&Engine::Init));
 }

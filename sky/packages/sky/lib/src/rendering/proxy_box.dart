@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/src/painting/box_painter.dart';
-import 'package:sky/src/painting/text_style.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/box.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-export 'package:sky/src/painting/box_painter.dart';
+import 'box.dart';
+import 'object.dart';
+
+export 'package:flutter/src/painting/box_painter.dart';
 
 /// A base class for render objects that resemble their children
 ///
@@ -142,7 +143,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: ${additionalConstraints}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: $additionalConstraints\n';
 }
 
 /// A render object that, for both width and height, imposes a tight constraint
@@ -376,7 +377,7 @@ class RenderAspectRatio extends RenderProxyBox {
   RenderAspectRatio({
     RenderBox child,
     double aspectRatio
-  }) : super(child), _aspectRatio = aspectRatio {
+  }) : _aspectRatio = aspectRatio, super(child) {
     assert(_aspectRatio != null);
   }
 
@@ -419,7 +420,7 @@ class RenderAspectRatio extends RenderProxyBox {
       child.layout(new BoxConstraints.tight(size));
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}aspectRatio: ${aspectRatio}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}aspectRatio: $aspectRatio\n';
 }
 
 /// Sizes its child to the child's intrinsic width
@@ -514,7 +515,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}stepWidth: ${stepWidth}\n${prefix}stepHeight: ${stepHeight}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}stepWidth: $stepWidth\n${prefix}stepHeight: $stepHeight\n';
 
 }
 
@@ -627,9 +628,8 @@ class RenderOpacity extends RenderProxyBox {
 /// Note: This class is relatively expensive because it requires painting the
 /// child into an intermediate buffer.
 class RenderColorFilter extends RenderProxyBox {
-  RenderColorFilter({ RenderBox child, Color color, sky.TransferMode transferMode })
-    : _color = color, _transferMode = transferMode, super(child) {
-  }
+  RenderColorFilter({ RenderBox child, Color color, ui.TransferMode transferMode })
+    : _color = color, _transferMode = transferMode, super(child);
 
   /// The color to use as input to the color filter
   Color get color => _color;
@@ -643,9 +643,9 @@ class RenderColorFilter extends RenderProxyBox {
   }
 
   /// The transfer mode to use when combining the child's painting and the [color]
-  sky.TransferMode get transferMode => _transferMode;
-  sky.TransferMode _transferMode;
-  void set transferMode (sky.TransferMode newTransferMode) {
+  ui.TransferMode get transferMode => _transferMode;
+  ui.TransferMode _transferMode;
+  void set transferMode (ui.TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
       return;
@@ -660,9 +660,8 @@ class RenderColorFilter extends RenderProxyBox {
 }
 
 class RenderShaderMask extends RenderProxyBox {
-  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, sky.TransferMode transferMode })
-    : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child) {
-  }
+  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, ui.TransferMode transferMode })
+    : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child);
 
   ShaderCallback get shaderCallback => _shaderCallback;
   ShaderCallback _shaderCallback;
@@ -674,9 +673,9 @@ class RenderShaderMask extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  sky.TransferMode get transferMode => _transferMode;
-  sky.TransferMode _transferMode;
-  void set transferMode (sky.TransferMode newTransferMode) {
+  ui.TransferMode get transferMode => _transferMode;
+  ui.TransferMode _transferMode;
+  void set transferMode (ui.TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
       return;
@@ -745,7 +744,7 @@ class RenderClipRRect extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      sky.RRect rrect = new sky.RRect()..setRectXY(rect, xRadius, yRadius);
+      ui.RRect rrect = new ui.RRect()..setRectXY(rect, xRadius, yRadius);
       context.paintChildWithClipRRect(child, offset.toPoint(), rect, rrect);
     }
   }
@@ -863,15 +862,41 @@ class RenderDecoratedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
 }
 
+/// An offset that's expressed as a fraction of a Size.
+///
+/// FractionalOffset(0.0, 0.0) represents the top left of the Size,
+/// FractionalOffset(1.0, 1.0) represents the bottom right of the Size.
+class FractionalOffset {
+  const FractionalOffset(this.x, this.y);
+  final double x;
+  final double y;
+  bool operator ==(dynamic other) {
+    if (other is! FractionalOffset)
+      return false;
+    final FractionalOffset typedOther = other;
+    return x == typedOther.x &&
+           y == typedOther.y;
+  }
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + x.hashCode;
+    value = 37 * value + y.hashCode;
+    return value;
+  }
+}
+
 /// Applies a transformation before painting its child
 class RenderTransform extends RenderProxyBox {
   RenderTransform({
     Matrix4 transform,
     Offset origin,
+    FractionalOffset alignment,
     RenderBox child
   }) : super(child) {
     assert(transform != null);
+    assert(alignment == null || (alignment.x != null && alignment.y != null));
     this.transform = transform;
+    this.alignment = alignment;
     this.origin = origin;
   }
 
@@ -886,6 +911,20 @@ class RenderTransform extends RenderProxyBox {
     if (_origin == newOrigin)
       return;
     _origin = newOrigin;
+    markNeedsPaint();
+  }
+
+  /// The alignment of the origin, relative to the size of the box.
+  ///
+  /// This is equivalent to setting an origin based on the size of the box.
+  /// If it is specificed at the same time as an offset, both are applied.
+  FractionalOffset get alignment => _alignment;
+  FractionalOffset _alignment;
+  void set alignment (FractionalOffset newAlignment) {
+    assert(newAlignment == null || (newAlignment.x != null && newAlignment.y != null));
+    if (_alignment == newAlignment)
+      return;
+    _alignment = newAlignment;
     markNeedsPaint();
   }
 
@@ -938,13 +977,19 @@ class RenderTransform extends RenderProxyBox {
   }
 
   Matrix4 get _effectiveTransform {
-    if (_origin == null)
+    if (_origin == null && _alignment == null)
       return _transform;
-    return new Matrix4
-      .identity()
-      .translate(_origin.dx, _origin.dy)
-      .multiply(_transform)
-      .translate(-_origin.dx, -_origin.dy);
+    Matrix4 result = new Matrix4.identity();
+    if (_origin != null)
+      result.translate(_origin.dx, _origin.dy);
+    if (_alignment != null)
+      result.translate(_alignment.x * size.width, _alignment.y * size.height);
+    result.multiply(_transform);
+    if (_alignment != null)
+      result.translate(-_alignment.x * size.width, -_alignment.y * size.height);
+    if (_origin != null)
+      result.translate(-_origin.dx, -_origin.dy);
+    return result;
   }
 
   bool hitTest(HitTestResult result, { Point position }) {
@@ -969,9 +1014,9 @@ class RenderTransform extends RenderProxyBox {
   }
 
   String debugDescribeSettings(String prefix) {
-    List<String> result = _transform.toString().split('\n').map((s) => '$prefix  $s\n').toList();
+    List<String> result = _transform.toString().split('\n').map((String s) => '$prefix  $s\n').toList();
     result.removeLast();
-    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: ${origin}\n';
+    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\n';
   }
 }
 
@@ -1056,7 +1101,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 }
 
-typedef void PointerEventListener(sky.PointerEvent e);
+typedef void PointerEventListener(PointerInputEvent e);
 
 /// Invokes the callbacks in response to pointer events.
 class RenderPointerListener extends RenderProxyBox {
@@ -1073,7 +1118,7 @@ class RenderPointerListener extends RenderProxyBox {
   PointerEventListener onPointerUp;
   PointerEventListener onPointerCancel;
 
-  void handleEvent(sky.Event event, HitTestEntry entry) {
+  void handleEvent(InputEvent event, HitTestEntry entry) {
     if (onPointerDown != null && event.type == 'pointerdown')
       return onPointerDown(event);
     if (onPointerMove != null && event.type == 'pointermove')

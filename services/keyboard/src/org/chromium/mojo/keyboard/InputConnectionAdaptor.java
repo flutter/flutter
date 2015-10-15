@@ -4,10 +4,9 @@
 
 package org.chromium.mojo.keyboard;
 
-import java.lang.StringBuilder;
-
-import android.view.View;
+import android.text.Editable;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -16,19 +15,29 @@ import android.view.inputmethod.EditorInfo;
 import org.chromium.mojom.keyboard.CompletionData;
 import org.chromium.mojom.keyboard.CorrectionData;
 import org.chromium.mojom.keyboard.KeyboardClient;
+import org.chromium.mojom.keyboard.SubmitAction;
 
 /**
  * An adaptor between InputConnection and KeyboardClient.
  */
 public class InputConnectionAdaptor extends BaseInputConnection {
     private KeyboardClient mClient;
+    private Editable mEditable;
 
-    public InputConnectionAdaptor(View view, KeyboardClient client, EditorInfo outAttrs) {
+    public InputConnectionAdaptor(View view, KeyboardClient client, Editable editable,
+                                  EditorInfo outAttrs) {
         super(view, true);
         assert client != null;
         mClient = client;
+        mEditable = editable;
         outAttrs.initialSelStart = -1;
         outAttrs.initialSelEnd = -1;
+        outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE;
+    }
+
+    @Override
+    public Editable getEditable() {
+        return mEditable;
     }
 
     @Override
@@ -83,5 +92,11 @@ public class InputConnectionAdaptor extends BaseInputConnection {
             mClient.commitText(String.valueOf(event.getNumber()), 1);
         }
         return super.sendKeyEvent(event);
+    }
+
+    @Override
+    public boolean performEditorAction(int actionCode) {
+        mClient.submit(SubmitAction.DONE);
+        return true;
     }
 }

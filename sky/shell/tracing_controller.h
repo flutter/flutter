@@ -36,13 +36,17 @@ class TracingController : public mojo::common::DataPipeDrainer::Client {
   // be merged before viewing in the trace viewer
   void StopTracing(const base::FilePath& path);
 
-  using SkPictureTracingOptions =
-      std::pair<bool /* enabled */, std::string /* path */>;
-  SkPictureTracingOptions picture_tracing_options() const;
+  base::FilePath PictureTracingPathForCurrentTime() const;
 
-  void set_picture_tracing_path(const std::string& path);
+  void set_picture_tracing_base_path(const base::FilePath& base_path) {
+    picture_tracing_base_path_ = base_path;
+  }
 
-  void set_picture_tracing_enabled(bool enabled);
+  void set_picture_tracing_enabled(bool enabled) {
+    picture_tracing_enabled_ = enabled;
+  }
+
+  bool picture_tracing_enabled() const { return picture_tracing_enabled_; }
 
  private:
   std::unique_ptr<mojo::common::DataPipeDrainer> drainer_;
@@ -51,9 +55,8 @@ class TracingController : public mojo::common::DataPipeDrainer::Client {
   // the ability to host multiple shell views, references to each must be stored
   // instead and trace data from each serialized to the output trace.
   ShellView* view_;
-  std::string picture_tracing_path_;
+  base::FilePath picture_tracing_base_path_;
   bool picture_tracing_enabled_;
-  base::TimeTicks trace_controller_start_;
 
   void StartDartTracing();
   void StartBaseTracing();

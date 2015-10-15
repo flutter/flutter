@@ -4,10 +4,10 @@
 
 // See http://www.google.com/design/spec/style/typography.html
 
-import 'dart:sky' show Color;
+import 'dart:ui' show Color;
 
-import 'package:sky/painting.dart';
-import 'package:sky/src/material/colors.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/src/material/colors.dart';
 
 // TODO(eseidel): Font weights are supposed to be language relative!
 // TODO(jackson): Baseline should be language relative!
@@ -28,17 +28,17 @@ class TextTheme {
       button   = const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
 
   const TextTheme._white()
-    : display4 = const TextStyle(fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white54, textBaseline: TextBaseline.alphabetic),
-      display3 = const TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white54, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white54, height: 48.0 / 45.0, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white54, height: 40.0 / 34.0, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white87, height: 32.0 / 24.0, textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white87, height: 28.0 / 20.0, textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white87, height: 24.0 / 16.0, textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white87, height: 24.0 / 14.0, textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white87, height: 20.0 / 14.0, textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white54, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white87, textBaseline: TextBaseline.alphabetic);
+    : display4 = const TextStyle(fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      display3 = const TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      display2 = const TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, height: 48.0 / 45.0, textBaseline: TextBaseline.alphabetic),
+      display1 = const TextStyle(fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, height: 40.0 / 34.0, textBaseline: TextBaseline.alphabetic),
+      headline = const TextStyle(fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white, height: 32.0 / 24.0, textBaseline: TextBaseline.alphabetic),
+      title    = const TextStyle(fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white, height: 28.0 / 20.0, textBaseline: TextBaseline.alphabetic),
+      subhead  = const TextStyle(fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white, height: 24.0 / 16.0, textBaseline: TextBaseline.alphabetic),
+      body2    = const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white, height: 24.0 / 14.0, textBaseline: TextBaseline.alphabetic),
+      body1    = const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white, height: 20.0 / 14.0, textBaseline: TextBaseline.alphabetic),
+      caption  = const TextStyle(fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      button   = const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white, textBaseline: TextBaseline.alphabetic);
 
   final TextStyle display4;
   final TextStyle display3;

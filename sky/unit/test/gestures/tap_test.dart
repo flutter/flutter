@@ -1,7 +1,5 @@
-import 'package:sky/gestures.dart';
+import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
-
-import '../engine/mock_events.dart';
 
 void main() {
   test('Should recognize tap', () {
@@ -13,7 +11,7 @@ void main() {
       tapRecognized = true;
     };
 
-    TestPointerEvent down = new TestPointerEvent(
+    PointerInputEvent down = new PointerInputEvent(
       pointer: 5,
       type: 'pointerdown',
       x: 10.0,
@@ -26,7 +24,7 @@ void main() {
     router.route(down);
     expect(tapRecognized, isFalse);
 
-    TestPointerEvent up = new TestPointerEvent(
+    PointerInputEvent up = new PointerInputEvent(
       pointer: 5,
       type: 'pointerup',
       x: 11.0,

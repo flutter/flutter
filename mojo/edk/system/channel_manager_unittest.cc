@@ -9,12 +9,12 @@
 #include "base/run_loop.h"
 #include "base/task_runner.h"
 #include "base/thread_task_runner_handle.h"
-#include "base/threading/simple_thread.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
+#include "mojo/edk/test/simple_test_thread.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -102,7 +102,7 @@ TEST_F(ChannelManagerTest, TwoChannels) {
   EXPECT_EQ(MOJO_RESULT_OK, d2->Close());
 }
 
-class OtherThread : public base::SimpleThread {
+class OtherThread : public mojo::test::SimpleTestThread {
  public:
   // Note: There should be no other refs to the channel identified by
   // |channel_id| outside the channel manager.
@@ -110,8 +110,7 @@ class OtherThread : public base::SimpleThread {
               ChannelManager* channel_manager,
               ChannelId channel_id,
               const base::Closure& quit_closure)
-      : base::SimpleThread("other_thread"),
-        task_runner_(task_runner),
+      : task_runner_(task_runner),
         channel_manager_(channel_manager),
         channel_id_(channel_id),
         quit_closure_(quit_closure) {}

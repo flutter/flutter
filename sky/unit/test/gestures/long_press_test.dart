@@ -1,17 +1,15 @@
 import 'package:quiver/testing/async.dart';
-import 'package:sky/gestures.dart';
+import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 
-import '../engine/mock_events.dart';
-
-final TestPointerEvent down = new TestPointerEvent(
+final PointerInputEvent down = new PointerInputEvent(
   pointer: 5,
   type: 'pointerdown',
   x: 10.0,
   y: 10.0
 );
 
-final TestPointerEvent up = new TestPointerEvent(
+final PointerInputEvent up = new PointerInputEvent(
   pointer: 5,
   type: 'pointerup',
   x: 11.0,

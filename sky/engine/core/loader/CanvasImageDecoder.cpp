@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 #include "base/bind.h"
+#include "base/trace_event/trace_event.h"
 #include "base/message_loop/message_loop.h"
 #include "sky/engine/core/loader/CanvasImageDecoder.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/image-decoders/ImageDecoder.h"
+#include "sky/engine/platform/mojo/data_pipe.h"
 
 namespace blink {
 
@@ -19,14 +21,12 @@ PassRefPtr<CanvasImageDecoder> CanvasImageDecoder::create(
 CanvasImageDecoder::CanvasImageDecoder(PassOwnPtr<ImageDecoderCallback> callback)
     : callback_(callback), weak_factory_(this) {
   CHECK(callback_);
-  buffer_ = SharedBuffer::create();
 }
 
 CanvasImageDecoder::~CanvasImageDecoder() {
 }
 
 void CanvasImageDecoder::initWithConsumer(mojo::ScopedDataPipeConsumerHandle handle) {
-  CHECK(!drainer_);
   if (!handle.is_valid()) {
     base::MessageLoop::current()->PostTask(
         FROM_HERE, base::Bind(&CanvasImageDecoder::RejectCallback,
@@ -34,25 +34,23 @@ void CanvasImageDecoder::initWithConsumer(mojo::ScopedDataPipeConsumerHandle han
     return;
   }
 
-  drainer_ = adoptPtr(new mojo::common::DataPipeDrainer(this, handle.Pass()));
+  DrainDataPipeInBackground(handle.Pass(),
+      base::Bind(&CanvasImageDecoder::Decode, weak_factory_.GetWeakPtr()));
 }
 
 void CanvasImageDecoder::initWithList(const Uint8List& list) {
-  CHECK(!drainer_);
-
-  OnDataAvailable(list.data(), list.num_elements());
+  RefPtr<SharedBuffer> buffer = SharedBuffer::create();
+  buffer->append(reinterpret_cast<const char*>(list.data()),
+                 list.num_elements());
   base::MessageLoop::current()->PostTask(
-      FROM_HERE, base::Bind(&CanvasImageDecoder::OnDataComplete,
-                            weak_factory_.GetWeakPtr()));
+      FROM_HERE, base::Bind(&CanvasImageDecoder::Decode,
+                            weak_factory_.GetWeakPtr(), buffer.release()));
 }
 
-void CanvasImageDecoder::OnDataAvailable(const void* data, size_t num_bytes) {
-  buffer_->append(static_cast<const char*>(data), num_bytes);
-}
-
-void CanvasImageDecoder::OnDataComplete() {
+void CanvasImageDecoder::Decode(PassRefPtr<SharedBuffer> buffer) {
+  TRACE_EVENT0("blink", "CanvasImageDecoder::Decode");
   OwnPtr<ImageDecoder> decoder =
-      ImageDecoder::create(*buffer_.get(), ImageSource::AlphaPremultiplied,
+      ImageDecoder::create(*buffer.get(), ImageSource::AlphaPremultiplied,
                            ImageSource::GammaAndColorProfileIgnored);
   // decoder can be null if the buffer we was empty and we couldn't even guess
   // what type of image to decode.
@@ -60,7 +58,7 @@ void CanvasImageDecoder::OnDataComplete() {
     callback_->handleEvent(nullptr);
     return;
   }
-  decoder->setData(buffer_.get(), true);
+  decoder->setData(buffer.get(), true);
   if (decoder->failed() || decoder->frameCount() == 0) {
     callback_->handleEvent(nullptr);
     return;

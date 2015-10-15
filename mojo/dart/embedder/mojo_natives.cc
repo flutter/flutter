@@ -39,6 +39,8 @@ namespace dart {
   V(MojoHandle_Wait, 3)                    \
   V(MojoHandle_Register, 2)                \
   V(MojoHandle_WaitMany, 3)                \
+  V(MojoHandleWatcher_GrowStateArrays, 1)  \
+  V(MojoHandleWatcher_WaitMany, 2)         \
   V(MojoHandleWatcher_SendControlData, 4)  \
   V(MojoHandleWatcher_RecvControlData, 1)  \
   V(MojoHandleWatcher_SetControlHandle, 1) \
@@ -718,6 +720,115 @@ void MojoMessagePipe_Read(Dart_NativeArguments arguments) {
   Dart_ListSetAt(list, 1, Dart_NewInteger(blen));
   Dart_ListSetAt(list, 2, Dart_NewInteger(hlen));
   Dart_SetReturnValue(arguments, list);
+}
+
+struct MojoWaitManyState {
+  MojoWaitManyState() {}
+
+  std::vector<uint32_t> handles;
+  std::vector<uint32_t> signals;
+  std::vector<uint32_t> out_index;
+  std::vector<MojoHandleSignalsState> out_signals;
+
+  static MojoWaitManyState* GetInstance();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MojoWaitManyState);
+};
+
+// This global is safe because it is only accessed by the single handle watcher
+// isolate. If multiple handle watcher isolates are ever needed, it will need
+// to be replicated.
+MojoWaitManyState* MojoWaitManyState::GetInstance() {
+  static MojoWaitManyState* state = new MojoWaitManyState;
+  return state;
+}
+
+void MojoHandleWatcher_GrowStateArrays(Dart_NativeArguments arguments) {
+  int64_t new_length;
+  CHECK_INTEGER_ARGUMENT(arguments, 0, &new_length, InvalidArgument);
+
+  MojoWaitManyState& handle_watcher_wait_state =
+      *MojoWaitManyState::GetInstance();
+
+  handle_watcher_wait_state.handles.resize(new_length);
+  handle_watcher_wait_state.signals.resize(new_length);
+  handle_watcher_wait_state.out_index.resize(1);
+  handle_watcher_wait_state.out_signals.resize(new_length);
+
+  Dart_Handle dart_handles = Dart_NewExternalTypedData(
+      Dart_TypedData_kUint32, handle_watcher_wait_state.handles.data(),
+      handle_watcher_wait_state.handles.size());
+  if (Dart_IsError(dart_handles)) {
+    Dart_PropagateError(dart_handles);
+  }
+  if (Dart_IsNull(dart_handles)) {
+    SetNullReturn(arguments);
+    return;
+  }
+
+  Dart_Handle dart_signals = Dart_NewExternalTypedData(
+      Dart_TypedData_kUint32, handle_watcher_wait_state.signals.data(),
+      handle_watcher_wait_state.signals.size());
+  if (Dart_IsError(dart_signals)) {
+    Dart_PropagateError(dart_signals);
+  }
+  if (Dart_IsNull(dart_signals)) {
+    SetNullReturn(arguments);
+    return;
+  }
+
+  Dart_Handle dart_out_index = Dart_NewExternalTypedData(
+      Dart_TypedData_kUint32, handle_watcher_wait_state.out_index.data(),
+      handle_watcher_wait_state.out_index.size());
+  if (Dart_IsError(dart_out_index)) {
+    Dart_PropagateError(dart_out_index);
+  }
+  if (Dart_IsNull(dart_out_index)) {
+    SetNullReturn(arguments);
+    return;
+  }
+
+  Dart_Handle dart_out_signals = Dart_NewExternalTypedData(
+      Dart_TypedData_kUint64, handle_watcher_wait_state.out_signals.data(),
+      handle_watcher_wait_state.out_signals.size());
+  if (Dart_IsError(dart_out_signals)) {
+    Dart_PropagateError(dart_out_signals);
+  }
+  if (Dart_IsNull(dart_out_signals)) {
+    SetNullReturn(arguments);
+    return;
+  }
+
+  Dart_Handle list = Dart_NewList(4);
+  Dart_ListSetAt(list, 0, dart_handles);
+  Dart_ListSetAt(list, 1, dart_signals);
+  Dart_ListSetAt(list, 2, dart_out_index);
+  Dart_ListSetAt(list, 3, dart_out_signals);
+  Dart_SetReturnValue(arguments, list);
+}
+
+void MojoHandleWatcher_WaitMany(Dart_NativeArguments arguments) {
+  int64_t handles_len = 0;
+  int64_t deadline = 0;
+  CHECK_INTEGER_ARGUMENT(arguments, 0, &handles_len, InvalidArgument);
+  CHECK_INTEGER_ARGUMENT(arguments, 1, &deadline, InvalidArgument);
+
+  MojoWaitManyState& handle_watcher_wait_state =
+      *MojoWaitManyState::GetInstance();
+
+  uint32_t* handles = handle_watcher_wait_state.handles.data();
+  uint32_t* signals = handle_watcher_wait_state.signals.data();
+  uint32_t* out_index = handle_watcher_wait_state.out_index.data();
+  MojoHandleSignalsState* out_signals =
+      handle_watcher_wait_state.out_signals.data();
+
+  Dart_IsolateBlocked();
+  MojoResult mojo_result = MojoWaitMany(handles, signals, handles_len, deadline,
+                                        out_index, out_signals);
+  Dart_IsolateUnblocked();
+
+  Dart_SetIntegerReturnValue(arguments, static_cast<int64_t>(mojo_result));
 }
 
 struct ControlData {

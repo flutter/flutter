@@ -1,12 +1,12 @@
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';
 
-sky.Shader createShader(Rect bounds) {
+ui.Shader createShader(Rect bounds) {
   return new LinearGradient(
       begin: Point.origin,
       end: new Point(0.0, bounds.height),

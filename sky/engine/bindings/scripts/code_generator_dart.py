@@ -194,7 +194,7 @@ class CodeGeneratorDart(object):
             for filename in file_list:
                 if os.path.splitext(filename)[1] == '.dart':
                     # Special case: any .dart files in the list should be added
-                    # to dart_sky.dart directly, but don't need to be processed.
+                    # to dart_ui.dart directly, but don't need to be processed.
                     interface_name = os.path.splitext(os.path.basename(filename))[0]
                     world['interfaces'].append({'name': "Custom" + interface_name})
                     continue

@@ -6,27 +6,28 @@
 
 #include "base/logging.h"
 #include "base/time/time.h"
-#include "mojo/services/input_events/public/interfaces/input_event_constants.mojom.h"
+#include "mojo/services/input_events/interfaces/input_event_constants.mojom.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 
 namespace sky {
 namespace {
 
-int EventFlagsToWebInputEventModifiers(int flags) {
+int EventFlagsToWebInputEventModifiers(mojo::EventFlags event_flags) {
+  int flags = static_cast<int>(event_flags);
   return
-      (flags & mojo::EVENT_FLAGS_SHIFT_DOWN ?
+      (flags & static_cast<int>(mojo::EventFlags::SHIFT_DOWN) ?
        blink::WebInputEvent::ShiftKey : 0) |
-      (flags & mojo::EVENT_FLAGS_CONTROL_DOWN ?
+      (flags & static_cast<int>(mojo::EventFlags::CONTROL_DOWN) ?
        blink::WebInputEvent::ControlKey : 0) |
-      (flags & mojo::EVENT_FLAGS_CAPS_LOCK_DOWN ?
+      (flags & static_cast<int>(mojo::EventFlags::CAPS_LOCK_DOWN) ?
        blink::WebInputEvent::CapsLockOn : 0) |
-      (flags & mojo::EVENT_FLAGS_ALT_DOWN ?
+      (flags & static_cast<int>(mojo::EventFlags::ALT_DOWN) ?
        blink::WebInputEvent::AltKey : 0) |
-      (flags & mojo::EVENT_FLAGS_LEFT_MOUSE_BUTTON ?
+      (flags & static_cast<int>(mojo::EventFlags::LEFT_MOUSE_BUTTON) ?
        blink::WebInputEvent::LeftButtonDown : 0) |
-      (flags & mojo::EVENT_FLAGS_MIDDLE_MOUSE_BUTTON ?
+      (flags & static_cast<int>(mojo::EventFlags::MIDDLE_MOUSE_BUTTON) ?
        blink::WebInputEvent::MiddleButtonDown : 0) |
-      (flags & mojo::EVENT_FLAGS_RIGHT_MOUSE_BUTTON ?
+      (flags & static_cast<int>(mojo::EventFlags::RIGHT_MOUSE_BUTTON) ?
        blink::WebInputEvent::RightButtonDown : 0);
 }
 
@@ -39,16 +40,16 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
       base::TimeDelta::FromInternalValue(event->time_stamp).InMillisecondsF();
 
   switch (event->action) {
-    case mojo::EVENT_TYPE_POINTER_DOWN:
+    case mojo::EventType::POINTER_DOWN:
       web_event->type = blink::WebInputEvent::PointerDown;
       break;
-    case mojo::EVENT_TYPE_POINTER_MOVE:
+    case mojo::EventType::POINTER_MOVE:
       web_event->type = blink::WebInputEvent::PointerMove;
       break;
-    case mojo::EVENT_TYPE_POINTER_UP:
+    case mojo::EventType::POINTER_UP:
       web_event->type = blink::WebInputEvent::PointerUp;
       break;
-    case mojo::EVENT_TYPE_POINTER_CANCEL:
+    case mojo::EventType::POINTER_CANCEL:
       // FIXME: What mouse event should we listen to in order to learn when the
       // mouse moves out of the mojo::View?
       web_event->type = blink::WebInputEvent::PointerCancel;
@@ -58,7 +59,7 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
       break;
   }
 
-  if (event->pointer_data->kind == mojo::POINTER_KIND_TOUCH) {
+  if (event->pointer_data->kind == mojo::PointerKind::TOUCH) {
     web_event->kind = blink::WebPointerEvent::Touch;
     web_event->pointer = event->pointer_data->pointer_id;
   } else {
@@ -92,18 +93,18 @@ scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
       base::TimeDelta::FromInternalValue(event->time_stamp).InMillisecondsF();
 
   switch (event->action) {
-    case mojo::EVENT_TYPE_KEY_PRESSED:
+    case mojo::EventType::KEY_PRESSED:
       web_event->type = event->key_data->is_char ? blink::WebInputEvent::Char :
           blink::WebInputEvent::KeyDown;
       break;
-    case mojo::EVENT_TYPE_KEY_RELEASED:
+    case mojo::EventType::KEY_RELEASED:
       web_event->type = blink::WebInputEvent::KeyUp;
       break;
     default:
       NOTREACHED();
   }
 
-  web_event->key = event->key_data->windows_key_code;
+  web_event->key = static_cast<int>(event->key_data->windows_key_code);
   web_event->charCode = event->key_data->text;
   web_event->unmodifiedCharCode = event->key_data->unmodified_text;
 
@@ -136,17 +137,17 @@ scoped_ptr<blink::WebInputEvent> BuildWebWheelEvent(
 
 scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
                                               float device_pixel_ratio) {
-  if (event->action == mojo::EVENT_TYPE_POINTER_DOWN ||
-      event->action == mojo::EVENT_TYPE_POINTER_UP ||
-      event->action == mojo::EVENT_TYPE_POINTER_CANCEL ||
-      event->action == mojo::EVENT_TYPE_POINTER_MOVE) {
+  if (event->action == mojo::EventType::POINTER_DOWN ||
+      event->action == mojo::EventType::POINTER_UP ||
+      event->action == mojo::EventType::POINTER_CANCEL ||
+      event->action == mojo::EventType::POINTER_MOVE) {
     if (event->pointer_data->horizontal_wheel != 0 ||
         event->pointer_data->vertical_wheel != 0) {
       return BuildWebWheelEvent(event, device_pixel_ratio);
     }
     return BuildWebPointerEvent(event, device_pixel_ratio);
-  } else if ((event->action == mojo::EVENT_TYPE_KEY_PRESSED ||
-              event->action == mojo::EVENT_TYPE_KEY_RELEASED) &&
+  } else if ((event->action == mojo::EventType::KEY_PRESSED ||
+              event->action == mojo::EventType::KEY_RELEASED) &&
              event->key_data) {
     return BuildWebKeyboardEvent(event, device_pixel_ratio);
   }

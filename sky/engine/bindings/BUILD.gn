@@ -9,10 +9,10 @@ source_set("bindings") {
   sources = [
     "builtin.cc",
     "builtin.h",
-    "builtin_natives.cc",
-    "builtin_natives.h",
-    "builtin_sky.cc",
-    "builtin_sky.h",
+    "dart_natives.cc",
+    "dart_natives.h",
+    "dart_ui.cc",
+    "dart_ui.h",
     "dart_callback.cc",
     "dart_callback.h",
     "exception_messages.cc",
@@ -54,7 +54,7 @@ source_set("bindings") {
 action("generate_snapshot_bin") {
   deps = [
     "//dart/runtime/bin:gen_snapshot($host_toolchain)",
-    ":generate_dart_sky",
+    ":generate_dart_ui",
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
@@ -62,8 +62,7 @@ action("generate_snapshot_bin") {
     "//mojo/public/dart/mojo/sdk_ext/src/handle_watcher.dart",
     "//mojo/public/dart/mojo/sdk_ext/src/natives.dart",
     "//mojo/public/dart/mojo/sdk_ext/src/timer_queue.dart",
-    "//sky/engine/bindings/builtin_natives.dart",
-    "//sky/engine/bindings/sky_internals.dart",
+    "//sky/engine/bindings/internals.dart",
     "snapshot.dart",
   ]
   vm_isolate_snapshot = "$target_gen_dir/vm_isolate_snapshot.bin"
@@ -75,11 +74,9 @@ action("generate_snapshot_bin") {
 
   dart_mojo_internal_path =
       rebase_path("//mojo/public/dart/mojo/sdk_ext/internal.dart")
-  dart_sky_builtin_natives_path =
-      rebase_path("//sky/engine/bindings/builtin_natives.dart")
-  dart_sky_internals_path =
-      rebase_path("//sky/engine/bindings/sky_internals.dart")
-  dart_sky_path = rebase_path("$bindings_output_dir/dart_sky.dart")
+  dart_ui_internals_path =
+      rebase_path("//sky/engine/bindings/internals.dart")
+  dart_ui_path = rebase_path("$bindings_output_dir/dart_ui.dart")
 
   gen_snapshot_dir =
       get_label_info("//dart/runtime/bin:gen_snapshot($host_toolchain)",
@@ -100,9 +97,8 @@ action("generate_snapshot_bin") {
     "--target_os",
     target_os,
     "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
-    "--url_mapping=dart:sky,$dart_sky_path",
-    "--url_mapping=dart:sky.internals,$dart_sky_internals_path",
-    "--url_mapping=dart:sky_builtin_natives,$dart_sky_builtin_natives_path",
+    "--url_mapping=dart:ui,$dart_ui_path",
+    "--url_mapping=dart:ui_internals,$dart_ui_internals_path",
   ]
 }
 
@@ -374,7 +370,7 @@ copy("copy_core_dart_files") {
   ]
 }
 
-action("generate_dart_sky") {
+action("generate_dart_ui") {
   sources = core_idl_files + core_dart_files
   script = "$bindings_scripts_dir/compiler.py"
 
@@ -386,7 +382,7 @@ action("generate_dart_sky") {
 
   outputs = [
     file_list,
-    "$bindings_output_dir/dart_sky.dart",
+    "$bindings_output_dir/dart_ui.dart",
   ]
 
   args = [

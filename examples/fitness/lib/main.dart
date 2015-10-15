@@ -5,9 +5,8 @@
 library fitness;
 
 import 'package:playfair/playfair.dart' as playfair;
-import 'package:sky/material.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import 'user_data.dart';
 import 'date_utils.dart';
@@ -126,7 +125,7 @@ class FitnessAppState extends State<FitnessApp> {
   }
 
   Widget build(BuildContext) {
-    return new App(
+    return new MaterialApp(
       theme: new ThemeData(
         brightness: ThemeBrightness.light,
         primarySwatch: Colors.indigo,

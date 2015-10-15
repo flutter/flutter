@@ -50,6 +50,8 @@ class Stopwatch {
   std::vector<base::TimeDelta> _laps;
   size_t _current_sample;
 
+  base::TimeDelta maxDelta() const;
+
   DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };
 

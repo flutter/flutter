@@ -52,7 +52,6 @@ source_set("dart_to_cpp_unittests") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/interfaces/bindings/tests:test_interfaces",
-    "//mojo/public/interfaces/bindings/tests:test_interfaces_experimental",
     "//testing/gtest",
   ]
 }

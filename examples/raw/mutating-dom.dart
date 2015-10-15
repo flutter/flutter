@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 const kMaxIterations = 100;
@@ -14,9 +14,9 @@ void report(String s) {
   // print("$s\n");
 }
 
-sky.LayoutRoot layoutRoot = new sky.LayoutRoot();
-sky.Document document = new sky.Document();
-sky.Element root;
+ui.LayoutRoot layoutRoot = new ui.LayoutRoot();
+ui.Document document = new ui.Document();
+ui.Element root;
 math.Random random = new math.Random();
 
 bool pickThis(double odds) {
@@ -29,19 +29,19 @@ String generateCharacter(int min, int max) {
   return result;
 }
 
-String colorToCSSString(sky.Color color) {
+String colorToCSSString(ui.Color color) {
   return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
 }
 
-void mutate(sky.Canvas canvas) {
+void mutate(ui.Canvas canvas) {
   // mutate the DOM randomly
   int iterationsLeft = kMaxIterations;
-  sky.Node node = root;
-  sky.Node other = null;
+  ui.Node node = root;
+  ui.Node other = null;
   while (node != null && iterationsLeft > 0) {
     iterationsLeft -= 1;
-    if (node is sky.Element && pickThis(0.4)) {
-      node = (node as sky.Element).firstChild;
+    if (node is ui.Element && pickThis(0.4)) {
+      node = (node as ui.Element).firstChild;
     } else if (node.nextSibling != null && pickThis(0.5)) {
       node = node.nextSibling;
     } else if (other == null && node != root && pickThis(0.1)) {
@@ -57,7 +57,7 @@ void mutate(sky.Canvas canvas) {
     } else if (node != root && pickThis(0.001)) {
       report("remove()");
       node.remove();
-    } else if (node is sky.Element) {
+    } else if (node is ui.Element) {
       if (pickThis(0.1)) {
         report("appending a new text node (ASCII)");
         node.appendChild(document.createText(generateCharacter(0x20, 0x7F)));
@@ -80,7 +80,7 @@ void mutate(sky.Canvas canvas) {
         break;
       } else if (pickThis(0.1)) {
         report("styling: color");
-        node.style['color'] = colorToCSSString(new sky.Color(random.nextInt(0xFFFFFFFF) | 0xC0808080));
+        node.style['color'] = colorToCSSString(new ui.Color(random.nextInt(0xFFFFFFFF) | 0xC0808080));
         break;
       } else if (pickThis(0.1)) {
         report("styling: font-size");
@@ -148,12 +148,12 @@ void mutate(sky.Canvas canvas) {
         break;
       } else if (pickThis(0.1)) {
         report("styling: text-decoration-color");
-        node.style['text-decoration-color'] = colorToCSSString(new sky.Color(random.nextInt(0xFFFFFFFF)));
+        node.style['text-decoration-color'] = colorToCSSString(new ui.Color(random.nextInt(0xFFFFFFFF)));
         break;
       }
     } else {
-      assert(node is sky.Text);
-      final sky.Text text = node;
+      assert(node is ui.Text);
+      final ui.Text text = node;
       if (pickThis(0.1)) {
         report("appending a new text node (ASCII)");
         text.appendData(generateCharacter(0x20, 0x7F));
@@ -182,8 +182,8 @@ void mutate(sky.Canvas canvas) {
   node = root;
   int count = 1;
   while (node != null) {
-    if (node is sky.Element && node.firstChild != null) {
-      node = (node as sky.Element).firstChild;
+    if (node is ui.Element && node.firstChild != null) {
+      node = (node as ui.Element).firstChild;
       count += 1;
     } else {
       while (node != null && node.nextSibling == null)
@@ -202,40 +202,40 @@ void mutate(sky.Canvas canvas) {
 
   // draw the result
   report("recording...");
-  layoutRoot.maxWidth = sky.view.width;
+  layoutRoot.maxWidth = ui.view.width;
   layoutRoot.layout();
   layoutRoot.paint(canvas);
   report("painting...");
 }
 
-sky.Picture paint(sky.Rect paintBounds) {
-  sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, paintBounds);
+ui.Picture paint(ui.Rect paintBounds) {
+  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
   mutate(canvas);
   return recorder.endRecording();
 }
 
-sky.Scene composite(sky.Picture picture, sky.Rect paintBounds) {
-  final double devicePixelRatio = sky.view.devicePixelRatio;
-  sky.Rect sceneBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width * devicePixelRatio, sky.view.height * devicePixelRatio);
+ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
+  final double devicePixelRatio = ui.view.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  sky.SceneBuilder sceneBuilder = new sky.SceneBuilder(sceneBounds)
+  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
-    ..addPicture(sky.Offset.zero, picture, paintBounds)
+    ..addPicture(ui.Offset.zero, picture, paintBounds)
     ..pop();
   return sceneBuilder.build();
 }
 
 void beginFrame(double timeStamp) {
-  sky.Rect paintBounds = new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height);
-  sky.Picture picture = paint(paintBounds);
-  sky.Scene scene = composite(picture, paintBounds);
-  sky.view.scene = scene;
-  sky.view.scheduleFrame();
+  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+  ui.Picture picture = paint(paintBounds);
+  ui.Scene scene = composite(picture, paintBounds);
+  ui.view.scene = scene;
+  ui.view.scheduleFrame();
 }
 
 void main() {
@@ -243,6 +243,6 @@ void main() {
   root.style['display'] = 'paragraph';
   root.style['color'] = '#FFFFFF';
   layoutRoot.rootElement = root;
-  sky.view.setFrameCallback(beginFrame);
-  sky.view.scheduleFrame();
+  ui.view.setFrameCallback(beginFrame);
+  ui.view.scheduleFrame();
 }

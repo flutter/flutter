@@ -21,9 +21,9 @@
 
 namespace mojo {
 
-#define ASSERT_ENUM_VALUES_EQUAL(value)                                      \
-  COMPILE_ASSERT(cc::DrawQuad::value == static_cast<cc::DrawQuad::Material>( \
-                                            MATERIAL_##value),     \
+#define ASSERT_ENUM_VALUES_EQUAL(value)                       \
+  COMPILE_ASSERT(static_cast<int32_t>(cc::DrawQuad::value) == \
+                 static_cast<int32_t>(Material::value),       \
                  value##_enum_value_matches)
 
 ASSERT_ENUM_VALUES_EQUAL(CHECKERBOARD);
@@ -39,11 +39,11 @@ ASSERT_ENUM_VALUES_EQUAL(YUV_VIDEO_CONTENT);
 
 COMPILE_ASSERT(
     cc::YUVVideoDrawQuad::REC_601 ==
-        static_cast<cc::YUVVideoDrawQuad::ColorSpace>(YUV_COLOR_SPACE_REC_601),
+        static_cast<cc::YUVVideoDrawQuad::ColorSpace>(YUVColorSpace::REC_601),
     rec_601_enum_matches);
 COMPILE_ASSERT(cc::YUVVideoDrawQuad::JPEG ==
                    static_cast<cc::YUVVideoDrawQuad::ColorSpace>(
-                       YUV_COLOR_SPACE_JPEG),
+                       YUVColorSpace::JPEG),
                rec_601_jpeg_enum_matches);
 
 namespace {
@@ -66,7 +66,7 @@ bool ConvertDrawQuad(const QuadPtr& input,
                      cc::SharedQuadState* sqs,
                      cc::RenderPass* render_pass) {
   switch (input->material) {
-    case MATERIAL_RENDER_PASS: {
+    case Material::RENDER_PASS: {
       cc::RenderPassDrawQuad* render_pass_quad =
           render_pass->CreateAndAppendDrawQuad<cc::RenderPassDrawQuad>();
       RenderPassQuadState* render_pass_quad_state =
@@ -90,7 +90,7 @@ bool ConvertDrawQuad(const QuadPtr& input,
           cc::FilterOperations());  // TODO(jamesr): background_filters
       break;
     }
-    case MATERIAL_SOLID_COLOR: {
+    case Material::SOLID_COLOR: {
       if (input->solid_color_quad_state.is_null())
         return false;
       cc::SolidColorDrawQuad* color_quad =
@@ -105,7 +105,7 @@ bool ConvertDrawQuad(const QuadPtr& input,
           input->solid_color_quad_state->force_anti_aliasing_off);
       break;
     }
-    case MATERIAL_SURFACE_CONTENT: {
+    case Material::SURFACE_CONTENT: {
       if (input->surface_quad_state.is_null())
         return false;
       cc::SurfaceDrawQuad* surface_quad =
@@ -119,7 +119,7 @@ bool ConvertDrawQuad(const QuadPtr& input,
           input->surface_quad_state->surface.To<cc::SurfaceId>());
       break;
     }
-    case MATERIAL_TEXTURE_CONTENT: {
+    case Material::TEXTURE_CONTENT: {
       TextureQuadStatePtr& texture_quad_state =
           input->texture_quad_state;
       if (texture_quad_state.is_null() ||
@@ -144,7 +144,7 @@ bool ConvertDrawQuad(const QuadPtr& input,
           texture_quad_state->nearest_neighbor);
       break;
     }
-    case MATERIAL_TILED_CONTENT: {
+    case Material::TILED_CONTENT: {
       TileQuadStatePtr& tile_state = input->tile_quad_state;
       if (tile_state.is_null())
         return false;
@@ -162,7 +162,7 @@ bool ConvertDrawQuad(const QuadPtr& input,
                         tile_state->nearest_neighbor);
       break;
     }
-    case MATERIAL_YUV_VIDEO_CONTENT: {
+    case Material::YUV_VIDEO_CONTENT: {
       YUVVideoQuadStatePtr& yuv_state = input->yuv_video_quad_state;
       if (yuv_state.is_null())
         return false;
@@ -299,7 +299,7 @@ QuadPtr TypeConverter<QuadPtr, cc::DrawQuad>::Convert(
           PointF::From(texture_quad->uv_bottom_right);
       texture_state->background_color =
           Color::From(texture_quad->background_color);
-      Array<float> vertex_opacity(4);
+      auto vertex_opacity = Array<float>::New(4);
       for (size_t i = 0; i < 4; ++i) {
         vertex_opacity[i] = texture_quad->vertex_opacity[i];
       }
@@ -367,9 +367,9 @@ PassPtr TypeConverter<PassPtr, cc::RenderPass>::Convert(
   pass->transform_to_root_target =
       Transform::From(input.transform_to_root_target);
   pass->has_transparent_background = input.has_transparent_background;
-  Array<QuadPtr> quads(input.quad_list.size());
-  Array<SharedQuadStatePtr> shared_quad_state(
-      input.shared_quad_state_list.size());
+  auto quads = Array<QuadPtr>::New(input.quad_list.size());
+  auto shared_quad_state =
+      Array<SharedQuadStatePtr>::New(input.shared_quad_state_list.size());
   const cc::SharedQuadState* last_sqs = nullptr;
   cc::SharedQuadStateList::ConstIterator next_sqs_iter =
       input.shared_quad_state_list.begin();
@@ -424,7 +424,7 @@ TypeConverter<scoped_ptr<cc::RenderPass>, PassPtr>::Convert(
 // static
 MailboxPtr TypeConverter<MailboxPtr, gpu::Mailbox>::Convert(
     const gpu::Mailbox& input) {
-  Array<int8_t> name(64);
+  auto name = Array<int8_t>::New(64);
   for (int i = 0; i < 64; ++i) {
     name[i] = input.name[i];
   }
@@ -497,7 +497,7 @@ Array<TransferableResourcePtr> TypeConverter<
     Array<TransferableResourcePtr>,
     cc::TransferableResourceArray>::Convert(const cc::TransferableResourceArray&
                                                 input) {
-  Array<TransferableResourcePtr> resources(input.size());
+  auto resources = Array<TransferableResourcePtr>::New(input.size());
   for (size_t i = 0; i < input.size(); ++i) {
     resources[i] = TransferableResource::From(input[i]);
   }
@@ -543,7 +543,7 @@ TypeConverter<cc::ReturnedResource, ReturnedResourcePtr>::Convert(
 Array<ReturnedResourcePtr>
 TypeConverter<Array<ReturnedResourcePtr>, cc::ReturnedResourceArray>::Convert(
     const cc::ReturnedResourceArray& input) {
-  Array<ReturnedResourcePtr> resources(input.size());
+  auto resources = Array<ReturnedResourcePtr>::New(input.size());
   for (size_t i = 0; i < input.size(); ++i) {
     resources[i] = ReturnedResource::From(input[i]);
   }

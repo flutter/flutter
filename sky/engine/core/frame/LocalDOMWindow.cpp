@@ -29,7 +29,7 @@
 #include <algorithm>
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "gen/sky/core/EventTypeNames.h"
-#include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
+#include "mojo/services/navigation/interfaces/navigation.mojom.h"
 #include "sky/engine/bindings/exception_messages.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
@@ -109,10 +109,6 @@ LocalDOMWindow::~LocalDOMWindow()
     ASSERT(m_document->isStopped());
     clearDocument();
 
-}
-
-void LocalDOMWindow::AcceptDartGCVisitor(DartGCVisitor& visitor) const {
-    visitor.AddToSetForRoot(document(), dart_wrapper());
 }
 
 PassRefPtr<MediaQueryList> LocalDOMWindow::matchMedia(const String& media)

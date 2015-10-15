@@ -6,7 +6,7 @@
 #define MOJO_CONVERTERS_NATIVE_VIEWPORT_SURFACE_CONFIGURATION_TYPE_CONVERTERS_H_
 
 #include "base/memory/scoped_ptr.h"
-#include "mojo/services/native_viewport/public/interfaces/native_viewport.mojom.h"
+#include "mojo/services/native_viewport/interfaces/native_viewport.mojom.h"
 #include "ui/gl/gl_surface.h"
 
 namespace mojo {

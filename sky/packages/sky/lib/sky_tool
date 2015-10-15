@@ -1255,15 +1255,15 @@ class SkyShellRunner(object):
 
         # Also make sure that args is consistent with machine state for local builds
         if args.local_build and args.sky_src_path is None:
-            real_sky_path = os.path.realpath(os.path.join(PACKAGES_DIR, 'sky'))
-            match = re.match(r'pub.dartlang.org/sky', real_sky_path)
+            real_flutter_path = os.path.realpath(os.path.join(PACKAGES_DIR, 'flutter'))
+            match = re.match(r'pub.dartlang.org/flutter', real_flutter_path)
             if match is not None:
                 args.local_build = False
             else:
                 sky_src_path = os.path.dirname(
                     os.path.dirname(
                         os.path.dirname(
-                            os.path.dirname(real_sky_path))))
+                            os.path.dirname(real_flutter_path))))
                 if sky_src_path == '/' or sky_src_path == '':
                     args.local_build = False
                 else:
@@ -1275,9 +1275,9 @@ class SkyShellRunner(object):
                                 'to your pubspec.yaml file and then run pub get again:\n'
                                 'dependency_overrides:\n'
                                 '  material_design_icons:\n'
-                                '    path: /path/to/sky_engine/src/sky/packages/material_design_icons\n'
-                                '  sky:\n'
-                                '    path: /path/to/sky_engine/src/sky/packages/sky\n')
+                                '    path: /path/to/flutter/engine/src/sky/packages/material_design_icons\n'
+                                '  flutter:\n'
+                                '    path: /path/to/flutter/engine/src/sky/packages/sky\n')
         if args.local_build:
             if not os.path.isdir(args.sky_src_path):
                 logging.warning('The selected sky-src-path (' + args.sky_src_path + ') does not exist.'

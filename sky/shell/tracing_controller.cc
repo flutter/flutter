@@ -10,6 +10,7 @@
 #include "sky/shell/tracing_controller.h"
 
 #include <string>
+#include <sstream>
 
 namespace sky {
 namespace shell {
@@ -19,11 +20,11 @@ const char kBaseTraceEnd[] = "]}";
 const char kSentinel[] = "\0";
 
 TracingController::TracingController()
-    : view_(nullptr),
-      picture_tracing_enabled_(false),
-      trace_controller_start_(base::TimeTicks::Now()) {}
+    : view_(nullptr), picture_tracing_enabled_(false) {
+}
 
-TracingController::~TracingController() {}
+TracingController::~TracingController() {
+}
 
 void TracingController::StartTracing() {
   DLOG(INFO) << "Collecting Traces";
@@ -120,21 +121,19 @@ void TracingController::UnregisterShellView(ShellView* view) {
   view_ = nullptr;
 }
 
-TracingController::SkPictureTracingOptions
-TracingController::picture_tracing_options() const {
-  return SkPictureTracingOptions(
-      picture_tracing_path_.length() == 0 ? false : picture_tracing_enabled_,
-      picture_tracing_path_ +
-          std::to_string((base::TimeTicks::Now() - trace_controller_start_)
-                             .InMillisecondsRoundedUp()));
-}
+base::FilePath TracingController::PictureTracingPathForCurrentTime() const {
+  base::Time::Exploded exploded;
+  base::Time now = base::Time::Now();
 
-void TracingController::set_picture_tracing_path(const std::string& path) {
-  picture_tracing_path_ = path;
-}
+  now.LocalExplode(&exploded);
 
-void TracingController::set_picture_tracing_enabled(bool enabled) {
-  picture_tracing_enabled_ = enabled;
+  std::stringstream stream;
+  // Example: trace_2015-10-08_at_11.38.25.121_.skp
+  stream << "trace_" << exploded.year << "-" << exploded.month << "-"
+         << exploded.day_of_month << "_at_" << exploded.hour << "."
+         << exploded.minute << "." << exploded.second << "."
+         << exploded.millisecond << ".skp";
+  return picture_tracing_base_path_.Append(stream.str());
 }
 
 }  // namespace shell

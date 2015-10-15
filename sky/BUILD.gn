@@ -24,7 +24,6 @@ group("sky_dev") {
 
   deps = [
     "//sky/packages",
-    "//examples/demo_launcher",
     "//sky/shell",
   ]
 

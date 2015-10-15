@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
+import 'box.dart';
+import 'object.dart';
 
 class _GridMetrics {
   // Grid is width-in, height-out.  We fill the max width and adjust height
@@ -42,7 +42,7 @@ class _GridMetrics {
 }
 
 /// Parent data for use with [RenderGrid]
-class GridParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {}
+class GridParentData extends ContainerBoxParentDataMixin<RenderBox> {}
 
 /// Implements the grid layout algorithm
 ///
@@ -120,14 +120,17 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
 
       double x = (column + 1) * metrics.childPadding + (column * metrics.childSize.width);
       double y = (row + 1) * metrics.childPadding + (row * metrics.childSize.height);
-      child.parentData.position = new Point(x, y);
+      final GridParentData childParentData = child.parentData;
+      childParentData.position = new Point(x, y);
 
       column += 1;
       if (column >= metrics.childrenPerRow) {
         row += 1;
         column = 0;
       }
-      child = child.parentData.nextSibling;
+
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
     }
   }
 

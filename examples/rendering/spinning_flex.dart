@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:ui' as ui;
 
-import 'package:sky/animation.dart';
-import 'package:sky/rendering.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'solid_color_box.dart';
 
@@ -15,15 +15,15 @@ RenderTransform transformBox;
 void main() {
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
 
-  void addFlexChildSolidColor(RenderFlex parent, sky.Color backgroundColor, { int flex: 0 }) {
+  void addFlexChildSolidColor(RenderFlex parent, ui.Color backgroundColor, { int flex: 0 }) {
     RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
     parent.add(child);
     child.parentData.flex = flex;
   }
 
-  addFlexChildSolidColor(flexRoot, const sky.Color(0xFFFF00FF), flex: 1);
-  addFlexChildSolidColor(flexRoot, const sky.Color(0xFFFFFF00), flex: 2);
-  addFlexChildSolidColor(flexRoot, const sky.Color(0xFF00FFFF), flex: 1);
+  addFlexChildSolidColor(flexRoot, const ui.Color(0xFFFF00FF), flex: 1);
+  addFlexChildSolidColor(flexRoot, const ui.Color(0xFFFFFF00), flex: 2);
+  addFlexChildSolidColor(flexRoot, const ui.Color(0xFF00FFFF), flex: 1);
 
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
 

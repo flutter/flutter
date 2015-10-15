@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/material.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 class CardModel {
   CardModel(this.value, this.size, this.color);
@@ -157,7 +156,7 @@ class PageableListAppState extends State<PageableListApp> {
 }
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'PageableList',
     theme: new ThemeData(
       brightness: ThemeBrightness.light,

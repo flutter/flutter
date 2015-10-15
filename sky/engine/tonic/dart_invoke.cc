@@ -21,8 +21,10 @@ bool DartInvokeAppClosure(Dart_Handle closure,
                           int number_of_arguments,
                           Dart_Handle* arguments) {
   TRACE_EVENT0("sky", "DartInvoke::DartInvokeAppClosure");
-  return LogIfError(
-      Dart_InvokeClosure(closure, number_of_arguments, arguments));
+  Dart_Handle handle = Dart_InvokeClosure(closure, number_of_arguments, arguments);
+  bool result = LogIfError(handle);
+  CHECK(!Dart_IsCompilationError(handle));
+  return result;
 }
 
 }  // namespace blink

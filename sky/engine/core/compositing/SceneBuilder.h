@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_COMPOSITING_SCENEBUILDER_H_
 #define SKY_ENGINE_CORE_COMPOSITING_SCENEBUILDER_H_
 
+#include <stdint.h>
 #include <memory>
 
 #include "sky/compositor/layer.h"
@@ -45,6 +46,8 @@ public:
     void addPicture(const Offset& offset, Picture* picture, const Rect& bounds);
     void addStatistics(uint64_t enabledOptions, const Rect& bounds);
 
+    void setRasterizerTracingThreshold(uint32_t frameInterval);
+
     PassRefPtr<Scene> build();
 
 private:
@@ -55,6 +58,7 @@ private:
     SkRect m_rootPaintBounds;
     std::unique_ptr<sky::compositor::ContainerLayer> m_rootLayer;
     sky::compositor::ContainerLayer* m_currentLayer;
+    int32_t m_currentRasterizerTracingThreshold;
 };
 
 } // namespace blink

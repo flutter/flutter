@@ -11,7 +11,7 @@
 #include "mojo/gpu/gl_context.h"
 #include "mojo/gpu/gl_texture.h"
 #include "mojo/gpu/texture_cache.h"
-#include "mojo/services/geometry/public/interfaces/geometry.mojom.h"
+#include "mojo/services/geometry/interfaces/geometry.mojom.h"
 
 namespace mojo {
 

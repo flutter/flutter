@@ -177,8 +177,7 @@ MojoResult RemoteConsumerDataPipeImpl::ProducerWriteData(
 
 MojoResult RemoteConsumerDataPipeImpl::ProducerBeginWriteData(
     UserPointer<void*> buffer,
-    UserPointer<uint32_t> buffer_num_bytes,
-    uint32_t min_num_bytes_to_write) {
+    UserPointer<uint32_t> buffer_num_bytes) {
   DCHECK(consumer_open());
   DCHECK(channel_endpoint_);
 
@@ -186,12 +185,6 @@ MojoResult RemoteConsumerDataPipeImpl::ProducerBeginWriteData(
   DCHECK_EQ(consumer_num_bytes_ % element_num_bytes(), 0u);
 
   size_t max_num_bytes_to_write = capacity_num_bytes() - consumer_num_bytes_;
-  if (min_num_bytes_to_write > max_num_bytes_to_write) {
-    // Don't return "should wait" since you can't wait for a specified amount
-    // of data.
-    return MOJO_RESULT_OUT_OF_RANGE;
-  }
-
   // Don't go into a two-phase write if there's no room.
   if (max_num_bytes_to_write == 0)
     return MOJO_RESULT_SHOULD_WAIT;
@@ -343,8 +336,7 @@ MojoResult RemoteConsumerDataPipeImpl::ConsumerQueryData(
 
 MojoResult RemoteConsumerDataPipeImpl::ConsumerBeginReadData(
     UserPointer<const void*> /*buffer*/,
-    UserPointer<uint32_t> /*buffer_num_bytes*/,
-    uint32_t /*min_num_bytes_to_read*/) {
+    UserPointer<uint32_t> /*buffer_num_bytes*/) {
   NOTREACHED();
   return MOJO_RESULT_INTERNAL;
 }

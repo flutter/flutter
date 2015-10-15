@@ -1,14 +1,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
 import 'dart:math';
 
-import 'package:sky/material.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 // Classic minesweeper-inspired game. The mouse controls are standard
 // except for left + right combo which is not implemented. For touch,
@@ -86,7 +85,7 @@ class MineDiggerState extends State<MineDigger> {
   }
 
   PointerEventListener _pointerDownHandlerFor(int posX, int posY) {
-    return (sky.PointerEvent event) {
+    return (PointerInputEvent event) {
       if (event.buttons == 1) {
         probe(posX, posY);
       } else if (event.buttons == 2) {
@@ -191,7 +190,7 @@ class MineDiggerState extends State<MineDigger> {
     );
   }
 
-  void handleToolbarPointerDown(sky.PointerEvent event) {
+  void handleToolbarPointerDown(PointerInputEvent event) {
     setState(() {
       resetGame();
     });

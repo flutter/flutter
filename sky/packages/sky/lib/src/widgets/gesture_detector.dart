@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
-import 'package:sky/gestures.dart';
-import 'package:sky/src/widgets/basic.dart';
-import 'package:sky/src/widgets/framework.dart';
-import 'package:sky/src/rendering/binding.dart';
+import 'basic.dart';
+import 'framework.dart';
 
 class GestureDetector extends StatefulComponent {
   const GestureDetector({
@@ -38,7 +37,7 @@ class GestureDetector extends StatefulComponent {
   final GestureTapCallback onTap;
   final GestureTapCallback onTapDown;
   final GestureTapCallback onTapCancel;
-  final GestureTapListener onDoubleTap;
+  final GestureTapCallback onDoubleTap;
 
   final GestureShowPressCallback onShowPress;
   final GestureLongPressCallback onLongPress;
@@ -195,12 +194,12 @@ class _GestureDetectorState extends State<GestureDetector> {
     }
   }
 
-  GestureRecognizer _ensureDisposed(GestureRecognizer recognizer) {
+  DisposableArenaMember _ensureDisposed(DisposableArenaMember recognizer) {
     recognizer?.dispose();
     return null;
   }
 
-  void _handlePointerDown(sky.PointerEvent event) {
+  void _handlePointerDown(PointerInputEvent event) {
     if (_tap != null)
       _tap.addPointer(event);
     if (_doubleTap != null)

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart.sky;
+part of dart_ui;
 
 /// An immutable 2D, axis-aligned, floating-point rectangle
 class Rect {
@@ -76,6 +76,9 @@ class Rect {
   /// The distance between upper-left corner and the lower-right corner of this rectangle
   Size get size => new Size(width, height);
 
+  /// Whether this rectangle encloses a non-zero area
+  bool get isEmpty => r.left >= r.right || r.top >= r.bottom;
+
   /// The lesser of the width and the height of this rectangle
   double get shortestSide {
     double w = width.abs();
@@ -125,15 +128,20 @@ class Rect {
     );
   }
 
-  bool operator ==(other) {
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
     if (other is! Rect)
       return false;
+    final Rect typedOther = other;
     for (var i = 0; i < 4; ++i) {
-      if (_value[i] != other._value[i])
+      if (_value[i] != typedOther._value[i])
         return false;
     }
     return true;
   }
+
   int get hashCode =>_value.fold(373, (value, item) => (37 * value + item.hashCode));
+
   String toString() => "Rect.fromLTRB($left, $top, $right, $bottom)";
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart.sky;
+part of dart_ui;
 
 abstract class OffsetBase {
   const OffsetBase(this._dx, this._dy);
@@ -17,10 +17,12 @@ abstract class OffsetBase {
   bool operator >(OffsetBase other) => _dx > other._dx && _dy > other._dy;
   bool operator >=(OffsetBase other) => _dx > other._dx && _dy >= other._dy;
 
-  bool operator ==(other) {
-    return other is OffsetBase &&
-           other._dx == _dx &&
-           other._dy == _dy;
+  bool operator ==(dynamic other) {
+    if (other is! OffsetBase)
+      return false;
+    final OffsetBase typedOther = other;
+    return _dx == typedOther._dx &&
+           _dy == typedOther._dy;
   }
 
   int get hashCode {

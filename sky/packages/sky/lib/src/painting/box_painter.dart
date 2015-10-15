@@ -3,48 +3,53 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
-import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
+import 'dart:ui' as ui;
+import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
-import 'package:sky/services.dart';
-import 'package:sky/src/painting/shadows.dart';
+import 'package:flutter/services.dart';
 
-/// An immutable set of offsets in each of the four cardinal directions
+import 'shadows.dart';
+
+/// An immutable set of offsets in each of the four cardinal directions.
 ///
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
 class EdgeDims {
-  /// Constructs an EdgeDims from offsets from the top, right, bottom and left
+  /// Constructs an EdgeDims from offsets from the top, right, bottom and left.
   const EdgeDims.TRBL(this.top, this.right, this.bottom, this.left);
 
-  /// Constructs an EdgeDims where all the offsets are value
+  /// Constructs an EdgeDims where all the offsets are value.
   const EdgeDims.all(double value)
       : top = value, right = value, bottom = value, left = value;
 
-  /// Constructs an EdgeDims with only the given values non-zero
+  /// Constructs an EdgeDims with only the given values non-zero.
   const EdgeDims.only({ this.top: 0.0,
                         this.right: 0.0,
                         this.bottom: 0.0,
                         this.left: 0.0 });
 
-  /// Constructs an EdgeDims with symmetrical vertical and horizontal offsets
+  /// Constructs an EdgeDims with symmetrical vertical and horizontal offsets.
   const EdgeDims.symmetric({ double vertical: 0.0,
                              double horizontal: 0.0 })
     : top = vertical, left = horizontal, bottom = vertical, right = horizontal;
 
-  /// The offset from the top
+  /// The offset from the top.
   final double top;
 
-  /// The offset from the right
+  /// The offset from the right.
   final double right;
 
-  /// The offset from the bottom
+  /// The offset from the bottom.
   final double bottom;
 
-  /// The offset from the left
+  /// The offset from the left.
   final double left;
 
+  /// Whether every dimension is non-negative.
   bool get isNonNegative => top >= 0.0 && right >= 0.0 && bottom >= 0.0 && left >= 0.0;
+
+  /// The size that this edge dims would occupy with an empty interior.
+  Size get collapsedSize => new Size(left + right, top + bottom);
 
   EdgeDims operator-(EdgeDims other) {
     return new EdgeDims.TRBL(
@@ -100,16 +105,7 @@ class EdgeDims {
     );
   }
 
-  bool operator ==(other) {
-    return identical(this, other) ||
-      (other is EdgeDims &&
-       top == other.top &&
-       right == other.right &&
-       bottom == other.bottom &&
-       left == other.left);
-  }
-
-  /// Linearly interpolate between two EdgeDims
+  /// Linearly interpolate between two EdgeDims.
   ///
   /// If either is null, this function interpolates from [EdgeDims.zero].
   static EdgeDims lerp(EdgeDims a, EdgeDims b, double t) {
@@ -120,15 +116,27 @@ class EdgeDims {
     if (b == null)
       return a * (1.0 - t);
     return new EdgeDims.TRBL(
-      sky.lerpDouble(a.top, b.top, t),
-      sky.lerpDouble(a.right, b.right, t),
-      sky.lerpDouble(a.bottom, b.bottom, t),
-      sky.lerpDouble(a.left, b.left, t)
+      ui.lerpDouble(a.top, b.top, t),
+      ui.lerpDouble(a.right, b.right, t),
+      ui.lerpDouble(a.bottom, b.bottom, t),
+      ui.lerpDouble(a.left, b.left, t)
     );
   }
 
-  /// An EdgeDims with zero offsets in each direction
+  /// An EdgeDims with zero offsets in each direction.
   static const EdgeDims zero = const EdgeDims.TRBL(0.0, 0.0, 0.0, 0.0);
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! EdgeDims)
+      return false;
+    final EdgeDims typedOther = other;
+    return top == typedOther.top &&
+           right == typedOther.right &&
+           bottom == typedOther.bottom &&
+           left == typedOther.left;
+  }
 
   int get hashCode {
     int value = 373;
@@ -138,6 +146,7 @@ class EdgeDims {
     value = 37 * value + right.hashCode;
     return value;
   }
+
   String toString() => "EdgeDims($top, $right, $bottom, $left)";
 }
 
@@ -256,7 +265,7 @@ class BoxShadow {
     return new BoxShadow(
       color: Color.lerp(a.color, b.color, t),
       offset: Offset.lerp(a.offset, b.offset, t),
-      blur: sky.lerpDouble(a.blur, b.blur, t)
+      blur: ui.lerpDouble(a.blur, b.blur, t)
     );
   }
 
@@ -286,7 +295,7 @@ class BoxShadow {
 
 /// A 2D gradient
 abstract class Gradient {
-  sky.Shader createShader();
+  ui.Shader createShader();
 }
 
 /// A 2D linear gradient
@@ -296,7 +305,7 @@ class LinearGradient extends Gradient {
     this.end,
     this.colors,
     this.stops,
-    this.tileMode: sky.TileMode.clamp
+    this.tileMode: ui.TileMode.clamp
   }) {
     assert(colors.length == stops.length);
   }
@@ -318,11 +327,10 @@ class LinearGradient extends Gradient {
   final List<double> stops;
 
   /// How this gradient should tile the plane
-  final sky.TileMode tileMode;
+  final ui.TileMode tileMode;
 
-  sky.Shader createShader() {
-    return new sky.Gradient.linear([begin, end], this.colors,
-                                   this.stops, this.tileMode);
+  ui.Shader createShader() {
+    return new ui.Gradient.linear(<Point>[begin, end], this.colors, this.stops, this.tileMode);
   }
 
   String toString() {
@@ -337,7 +345,7 @@ class RadialGradient extends Gradient {
     this.radius,
     this.colors,
     this.stops,
-    this.tileMode: sky.TileMode.clamp
+    this.tileMode: ui.TileMode.clamp
   });
 
   /// The center of the gradient
@@ -360,10 +368,10 @@ class RadialGradient extends Gradient {
   final List<double> stops;
 
   /// How this gradient should tile the plane
-  final sky.TileMode tileMode;
+  final ui.TileMode tileMode;
 
-  sky.Shader createShader() {
-    return new sky.Gradient.radial(center, radius, colors, stops, tileMode);
+  ui.Shader createShader() {
+    return new ui.Gradient.radial(center, radius, colors, stops, tileMode);
   }
 
   String toString() {
@@ -408,92 +416,125 @@ enum ImageRepeat {
 
 /// Paint an image into the given rectangle in the canvas
 void paintImage({
-  sky.Canvas canvas,
+  ui.Canvas canvas,
   Rect rect,
-  sky.Image image,
-  sky.ColorFilter colorFilter,
-  fit: ImageFit.scaleDown,
+  ui.Image image,
+  ui.ColorFilter colorFilter,
+  ImageFit fit,
   repeat: ImageRepeat.noRepeat,
+  Rect centerSlice,
   double positionX: 0.5,
   double positionY: 0.5
 }) {
-  Size bounds = rect.size;
-  Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
+  Size outputSize = rect.size;
+  Size inputSize = new Size(image.width.toDouble(), image.height.toDouble());
+  Offset sliceBorder;
+  if (centerSlice != null) {
+    sliceBorder = new Offset(
+      centerSlice.left + inputSize.width - centerSlice.right,
+      centerSlice.top + inputSize.height - centerSlice.bottom
+    );
+    outputSize -= sliceBorder;
+    inputSize -= sliceBorder;
+  }
   Size sourceSize;
   Size destinationSize;
-  switch(fit) {
+  fit ??= centerSlice == null ? ImageFit.scaleDown : ImageFit.fill;
+  assert(centerSlice == null || (fit != ImageFit.none && fit != ImageFit.cover));
+  switch (fit) {
     case ImageFit.fill:
-      sourceSize = imageSize;
-      destinationSize = bounds;
+      sourceSize = inputSize;
+      destinationSize = outputSize;
       break;
     case ImageFit.contain:
-      sourceSize = imageSize;
-      if (bounds.width / bounds.height > sourceSize.width / sourceSize.height)
-        destinationSize = new Size(sourceSize.width * bounds.height / sourceSize.height, bounds.height);
+      sourceSize = inputSize;
+      if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height)
+        destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
       else
-        destinationSize = new Size(bounds.width, sourceSize.height * bounds.width / sourceSize.width);
+        destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
       break;
     case ImageFit.cover:
-      if (bounds.width / bounds.height > imageSize.width / imageSize.height)
-        sourceSize = new Size(imageSize.width, imageSize.width * bounds.height / bounds.width);
+      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height)
+        sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
       else
-        sourceSize = new Size(imageSize.height * bounds.width / bounds.height, imageSize.height);
-      destinationSize = bounds;
+        sourceSize = new Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
+      destinationSize = outputSize;
       break;
     case ImageFit.none:
-      sourceSize = new Size(math.min(imageSize.width, bounds.width),
-                            math.min(imageSize.height, bounds.height));
+      sourceSize = new Size(math.min(inputSize.width, outputSize.width),
+                            math.min(inputSize.height, outputSize.height));
       destinationSize = sourceSize;
       break;
     case ImageFit.scaleDown:
-      sourceSize = imageSize;
-      destinationSize = bounds;
+      sourceSize = inputSize;
+      destinationSize = outputSize;
       if (sourceSize.height > destinationSize.height)
         destinationSize = new Size(sourceSize.width * destinationSize.height / sourceSize.height, sourceSize.height);
       if (sourceSize.width > destinationSize.width)
         destinationSize = new Size(destinationSize.width, sourceSize.height * destinationSize.width / sourceSize.width);
       break;
   }
+  if (centerSlice != null) {
+    outputSize += sliceBorder;
+    destinationSize += sliceBorder;
+    // We don't have the ability to draw a subset of the image at the same time
+    // as we apply a nine-patch stretch.
+    assert(sourceSize == inputSize);
+  }
   // TODO(abarth): Implement |repeat|.
-  Paint paint = new Paint();
+  Paint paint = new Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
-  double dx = (bounds.width - destinationSize.width) * positionX;
-  double dy = (bounds.height - destinationSize.height) * positionY;
+  double dx = (outputSize.width - destinationSize.width) * positionX;
+  double dy = (outputSize.height - destinationSize.height) * positionY;
   Point destinationPosition = rect.topLeft + new Offset(dx, dy);
-  canvas.drawImageRect(image, Point.origin & sourceSize, destinationPosition & destinationSize, paint);
+  Rect destinationRect = destinationPosition & destinationSize;
+  if (centerSlice == null)
+    canvas.drawImageRect(image, Point.origin & sourceSize, destinationRect, paint);
+  else
+    canvas.drawImageNine(image, centerSlice, destinationRect, paint);
 }
 
 typedef void BackgroundImageChangeListener();
 
-/// A background image for a box
+/// A background image for a box.
 class BackgroundImage {
-  /// How the background image should be inscribed into the box
+  /// How the background image should be inscribed into the box.
   final ImageFit fit;
 
-  /// How to paint any portions of the box not covered by the background image
+  /// How to paint any portions of the box not covered by the background image.
   final ImageRepeat repeat;
 
-  /// A color filter to apply to the background image before painting it
-  final sky.ColorFilter colorFilter;
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
+  final Rect centerSlice;
+
+  /// A color filter to apply to the background image before painting it.
+  final ui.ColorFilter colorFilter;
 
   BackgroundImage({
     ImageResource image,
-    this.fit: ImageFit.scaleDown,
+    this.fit,
     this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice,
     this.colorFilter
   }) : _imageResource = image;
 
-  sky.Image _image;
-  /// The image to be painted into the background
-  sky.Image get image => _image;
+  /// The image to be painted into the background.
+  ui.Image get image => _image;
+  ui.Image _image;
 
   ImageResource _imageResource;
 
   final List<BackgroundImageChangeListener> _listeners =
       new List<BackgroundImageChangeListener>();
 
-  /// Call listener when the background images changes (e.g., arrives from the network)
+  /// Call listener when the background images changes (e.g., arrives from the network).
   void addChangeListener(BackgroundImageChangeListener listener) {
     // We add the listener to the _imageResource first so that the first change
     // listener doesn't get callback synchronously if the image resource is
@@ -503,7 +544,7 @@ class BackgroundImage {
     _listeners.add(listener);
   }
 
-  /// No longer call listener when the background image changes
+  /// No longer call listener when the background image changes.
   void removeChangeListener(BackgroundImageChangeListener listener) {
     _listeners.remove(listener);
     // We need to remove ourselves as listeners from the _imageResource so that
@@ -512,7 +553,7 @@ class BackgroundImage {
       _imageResource.removeListener(_handleImageChanged);
   }
 
-  void _handleImageChanged(sky.Image resolvedImage) {
+  void _handleImageChanged(ui.Image resolvedImage) {
     if (resolvedImage == null)
       return;
     _image = resolvedImage;
@@ -581,7 +622,7 @@ class BoxDecoration {
       backgroundColor: Color.lerp(null, backgroundColor, factor),
       backgroundImage: backgroundImage,
       border: border,
-      borderRadius: sky.lerpDouble(null, borderRadius, factor),
+      borderRadius: ui.lerpDouble(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
       shape: shape
@@ -603,7 +644,7 @@ class BoxDecoration {
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       backgroundImage: b.backgroundImage,
       border: b.border,
-      borderRadius: sky.lerpDouble(a.borderRadius, b.borderRadius, t),
+      borderRadius: ui.lerpDouble(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: b.gradient,
       shape: b.shape
@@ -611,7 +652,7 @@ class BoxDecoration {
   }
 
   String toString([String prefix = '']) {
-    List<String> result = [];
+    List<String> result = <String>[];
     if (backgroundColor != null)
       result.add('${prefix}backgroundColor: $backgroundColor');
     if (backgroundImage != null)
@@ -621,13 +662,13 @@ class BoxDecoration {
     if (borderRadius != null)
       result.add('${prefix}borderRadius: $borderRadius');
     if (boxShadow != null)
-      result.add('${prefix}boxShadow: ${boxShadow.map((shadow) => shadow.toString())}');
+      result.add('${prefix}boxShadow: ${boxShadow.map((BoxShadow shadow) => shadow.toString())}');
     if (gradient != null)
       result.add('${prefix}gradient: $gradient');
     if (shape != Shape.rectangle)
       result.add('${prefix}shape: $shape');
     if (result.isEmpty)
-      return '${prefix}<no decorations specified>';
+      return '$prefix<no decorations specified>';
     return result.join('\n');
   }
 }
@@ -696,11 +737,11 @@ class BoxPainter {
     double shortestSide = rect.shortestSide;
     // In principle, we should use shortestSide / 2.0, but we don't want to
     // run into floating point rounding errors. Instead, we just use
-    // shortestSide and let sky.Canvas do any remaining clamping.
+    // shortestSide and let ui.Canvas do any remaining clamping.
     return _decoration.borderRadius > shortestSide ? shortestSide : _decoration.borderRadius;
   }
 
-  void _paintBackgroundColor(sky.Canvas canvas, Rect rect) {
+  void _paintBackgroundColor(ui.Canvas canvas, Rect rect) {
     if (_decoration.backgroundColor != null ||
         _decoration.boxShadow != null ||
         _decoration.gradient != null) {
@@ -716,18 +757,18 @@ class BoxPainter {
             canvas.drawRect(rect, _backgroundPaint);
           } else {
             double radius = _getEffectiveBorderRadius(rect);
-            canvas.drawRRect(new sky.RRect()..setRectXY(rect, radius, radius), _backgroundPaint);
+            canvas.drawRRect(new ui.RRect()..setRectXY(rect, radius, radius), _backgroundPaint);
           }
           break;
       }
     }
   }
 
-  void _paintBackgroundImage(sky.Canvas canvas, Rect rect) {
+  void _paintBackgroundImage(ui.Canvas canvas, Rect rect) {
     final BackgroundImage backgroundImage = _decoration.backgroundImage;
     if (backgroundImage == null)
       return;
-    sky.Image image = backgroundImage.image;
+    ui.Image image = backgroundImage.image;
     if (image == null)
       return;
     paintImage(
@@ -740,7 +781,7 @@ class BoxPainter {
     );
   }
 
-  void _paintBorder(sky.Canvas canvas, Rect rect) {
+  void _paintBorder(ui.Canvas canvas, Rect rect) {
     if (_decoration.border == null)
       return;
 
@@ -803,19 +844,19 @@ class BoxPainter {
     canvas.drawPath(path, paint);
   }
 
-  void _paintBorderWithRadius(sky.Canvas canvas, Rect rect) {
+  void _paintBorderWithRadius(ui.Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
     assert(_decoration.shape == Shape.rectangle);
     Color color = _decoration.border.top.color;
     double width = _decoration.border.top.width;
     double radius = _getEffectiveBorderRadius(rect);
 
-    sky.RRect outer = new sky.RRect()..setRectXY(rect, radius, radius);
-    sky.RRect inner = new sky.RRect()..setRectXY(rect.deflate(width), radius - width, radius - width);
+    ui.RRect outer = new ui.RRect()..setRectXY(rect, radius, radius);
+    ui.RRect inner = new ui.RRect()..setRectXY(rect.deflate(width), radius - width, radius - width);
     canvas.drawDRRect(outer, inner, new Paint()..color = color);
   }
 
-  void _paintBorderWithCircle(sky.Canvas canvas, Rect rect) {
+  void _paintBorderWithCircle(ui.Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
     assert(_decoration.shape == Shape.circle);
     assert(_decoration.borderRadius == null);
@@ -826,14 +867,14 @@ class BoxPainter {
     Paint paint = new Paint()
       ..color = _decoration.border.top.color
       ..strokeWidth = width
-      ..setStyle(sky.PaintingStyle.stroke);
+      ..setStyle(ui.PaintingStyle.stroke);
     Point center = rect.center;
     double radius = (rect.shortestSide - width) / 2.0;
     canvas.drawCircle(center, radius, paint);
   }
 
   /// Paint the box decoration into the given location on the given canvas
-  void paint(sky.Canvas canvas, Rect rect) {
+  void paint(ui.Canvas canvas, Rect rect) {
     _paintBackgroundColor(canvas, rect);
     _paintBackgroundImage(canvas, rect);
     _paintBorder(canvas, rect);

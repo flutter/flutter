@@ -309,8 +309,7 @@ MojoResult DataPipe::ProducerWriteData(UserPointer<const void> elements,
 
 MojoResult DataPipe::ProducerBeginWriteData(
     UserPointer<void*> buffer,
-    UserPointer<uint32_t> buffer_num_bytes,
-    bool all_or_none) {
+    UserPointer<uint32_t> buffer_num_bytes) {
   MutexLocker locker(&mutex_);
   DCHECK(has_local_producer_no_lock());
 
@@ -319,15 +318,7 @@ MojoResult DataPipe::ProducerBeginWriteData(
   if (!consumer_open_no_lock())
     return MOJO_RESULT_FAILED_PRECONDITION;
 
-  uint32_t min_num_bytes_to_write = 0;
-  if (all_or_none) {
-    min_num_bytes_to_write = buffer_num_bytes.Get();
-    if (min_num_bytes_to_write % element_num_bytes() != 0)
-      return MOJO_RESULT_INVALID_ARGUMENT;
-  }
-
-  MojoResult rv = impl_->ProducerBeginWriteData(buffer, buffer_num_bytes,
-                                                min_num_bytes_to_write);
+  MojoResult rv = impl_->ProducerBeginWriteData(buffer, buffer_num_bytes);
   if (rv != MOJO_RESULT_OK)
     return rv;
   // Note: No need to awake producer awakables, even though we're going from
@@ -533,23 +524,14 @@ MojoResult DataPipe::ConsumerQueryData(UserPointer<uint32_t> num_bytes) {
 
 MojoResult DataPipe::ConsumerBeginReadData(
     UserPointer<const void*> buffer,
-    UserPointer<uint32_t> buffer_num_bytes,
-    bool all_or_none) {
+    UserPointer<uint32_t> buffer_num_bytes) {
   MutexLocker locker(&mutex_);
   DCHECK(has_local_consumer_no_lock());
 
   if (consumer_in_two_phase_read_no_lock())
     return MOJO_RESULT_BUSY;
 
-  uint32_t min_num_bytes_to_read = 0;
-  if (all_or_none) {
-    min_num_bytes_to_read = buffer_num_bytes.Get();
-    if (min_num_bytes_to_read % element_num_bytes() != 0)
-      return MOJO_RESULT_INVALID_ARGUMENT;
-  }
-
-  MojoResult rv = impl_->ConsumerBeginReadData(buffer, buffer_num_bytes,
-                                               min_num_bytes_to_read);
+  MojoResult rv = impl_->ConsumerBeginReadData(buffer, buffer_num_bytes);
   if (rv != MOJO_RESULT_OK)
     return rv;
   DCHECK(consumer_in_two_phase_read_no_lock());
@@ -563,6 +545,8 @@ MojoResult DataPipe::ConsumerEndReadData(uint32_t num_bytes_read) {
   if (!consumer_in_two_phase_read_no_lock())
     return MOJO_RESULT_FAILED_PRECONDITION;
 
+  HandleSignalsState old_consumer_state =
+      impl_->ConsumerGetHandleSignalsState();
   HandleSignalsState old_producer_state =
       impl_->ProducerGetHandleSignalsState();
   MojoResult rv;
@@ -579,7 +563,7 @@ MojoResult DataPipe::ConsumerEndReadData(uint32_t num_bytes_read) {
   // during the two-phase read), so awake consumer awakables.
   HandleSignalsState new_consumer_state =
       impl_->ConsumerGetHandleSignalsState();
-  if (new_consumer_state.satisfies(MOJO_HANDLE_SIGNAL_READABLE))
+  if (!new_consumer_state.equals(old_consumer_state))
     AwakeConsumerAwakablesForStateChangeNoLock(new_consumer_state);
   HandleSignalsState new_producer_state =
       impl_->ProducerGetHandleSignalsState();

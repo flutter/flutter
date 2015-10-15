@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
 
-import 'package:sky/animation.dart';
-import 'package:sky/gestures.dart';
-import 'package:sky/src/rendering/binding.dart';
-import 'package:sky/src/rendering/box.dart';
-import 'package:sky/src/rendering/object.dart';
-import 'package:sky/src/rendering/proxy_box.dart';
+import 'binding.dart';
+import 'box.dart';
+import 'object.dart';
+import 'proxy_box.dart';
 
 typedef void ValueChanged(bool value);
 
@@ -36,7 +35,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   double get position => _performance.value;
 
-  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
+  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
     if (event.type == 'pointerdown')
       _tap.addPointer(event);
   }

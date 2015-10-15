@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/material.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 
 class DragData {
   DragData(this.text);
@@ -130,7 +129,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
 }
 
 void main() {
-  runApp(new App(
+  runApp(new MaterialApp(
     title: 'Drag and Drop Flutter Demo',
     routes: {
      '/': (RouteArguments args) => new DragAndDropApp(navigator: args.navigator)

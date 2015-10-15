@@ -35,6 +35,7 @@ class PaintContext {
     SkCanvas* canvas_;
     std::string trace_file_name_;
     std::unique_ptr<SkPictureRecorder> trace_recorder_;
+    const bool instrumentation_enabled_;
 
     ScopedFrame(PaintContext& context, SkCanvas& canvas);
 
@@ -66,8 +67,8 @@ class PaintContext {
   instrumentation::Stopwatch frame_time_;
   instrumentation::Stopwatch engine_time_;
 
-  void beginFrame(ScopedFrame& frame);
-  void endFrame(ScopedFrame& frame);
+  void beginFrame(ScopedFrame& frame, bool enableInstrumentation);
+  void endFrame(ScopedFrame& frame, bool enableInstrumentation);
 
   DISALLOW_COPY_AND_ASSIGN(PaintContext);
 };

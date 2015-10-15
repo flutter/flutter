@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
-import 'package:sky/material.dart';
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/services.dart';
-import 'package:sky/widgets.dart';
-import 'package:skysprites/skysprites.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_sprites/flutter_sprites.dart';
 
 import 'game_demo.dart';
 
@@ -82,7 +81,7 @@ class GameDemoState extends State<GameDemo> {
   int _lastScore = 0;
 
   Widget build(BuildContext context) {
-    return new App(
+    return new MaterialApp(
       title: 'Asteroids',
       theme: _theme,
       routes: {
@@ -151,16 +150,18 @@ class TextureButton extends StatefulComponent {
   TextureButtonState createState() => new TextureButtonState();
 }
 
-class TextureButtonState extends ButtonState<TextureButton> {
-  Widget buildContent(BuildContext context) {
-    return new Listener(
+class TextureButtonState extends State<TextureButton> {
+  bool _highlight = false;
+
+  Widget build(BuildContext context) {
+    return new GestureDetector(
       child: new Container(
         width: config.width,
         height: config.height,
         child: new CustomPaint(
           callback: paintCallback,
           token: new _TextureButtonToken(
-            highlight,
+            _highlight,
             config.texture,
             config.textureDown,
             config.width,
@@ -168,9 +169,22 @@ class TextureButtonState extends ButtonState<TextureButton> {
           )
         )
       ),
-      onPointerUp: (_) {
+      onTapDown: () {
+        setState(() {
+          _highlight = true;
+        });
+      },
+      onTap: () {
+        setState(() {
+          _highlight = false;
+        });
         if (config.onPressed != null)
           config.onPressed();
+      },
+      onTapCancel: () {
+        setState(() {
+          _highlight = false;
+        });
       }
     );
   }
@@ -180,7 +194,7 @@ class TextureButtonState extends ButtonState<TextureButton> {
       return;
 
     canvas.save();
-    if (highlight && config.textureDown != null) {
+    if (_highlight && config.textureDown != null) {
       // Draw down state
       canvas.scale(size.width / config.textureDown.size.width, size.height / config.textureDown.size.height);
       config.textureDown.drawTexture(canvas, Point.origin, new Paint());

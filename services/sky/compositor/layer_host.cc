@@ -8,7 +8,7 @@
 #include "base/trace_event/trace_event.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_context.h"
-#include "mojo/services/surfaces/public/cpp/surfaces_utils.h"
+#include "mojo/services/surfaces/cpp/surfaces_utils.h"
 #include "mojo/skia/ganesh_context.h"
 #include "services/sky/compositor/texture_layer.h"
 
@@ -119,7 +119,7 @@ void LayerHost::Upload(TextureLayer* layer) {
       resource_manager_.CreateTransferableResource(layer);
 
   mojo::QuadPtr quad = mojo::Quad::New();
-  quad->material = mojo::MATERIAL_TEXTURE_CONTENT;
+  quad->material = mojo::Material::TEXTURE_CONTENT;
 
   mojo::RectPtr rect = mojo::Rect::New();
   rect->width = size.width();

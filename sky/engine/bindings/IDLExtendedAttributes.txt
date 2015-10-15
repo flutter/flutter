@@ -59,7 +59,7 @@ NotScriptWrappable
 OverrideBuiltins
 PartialInterfaceImplementedAs=*
 # If present, the generated interface will be prefixed with underscores so
-# that it's private to the dart:sky module.
+# that it's private to the dart:ui module.
 PrivateDart
 PutForwards=*
 RaisesException=|Getter|Setter|Constructor

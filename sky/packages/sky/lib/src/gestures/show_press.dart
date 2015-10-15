@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
-import 'package:sky/src/gestures/arena.dart';
-import 'package:sky/src/gestures/constants.dart';
-import 'package:sky/src/gestures/recognizer.dart';
+import 'arena.dart';
+import 'constants.dart';
+import 'events.dart';
+import 'recognizer.dart';
 
 typedef void GestureShowPressCallback();
 
@@ -23,7 +22,7 @@ class ShowPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     onShowPress();
   }
 
-  void handlePrimaryPointer(sky.PointerEvent event) {
+  void handlePrimaryPointer(PointerInputEvent event) {
     if (event.type == 'pointerup')
       resolve(GestureDisposition.rejected);
   }
