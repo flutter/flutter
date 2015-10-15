@@ -24,6 +24,7 @@ export 'src/material/icon_button.dart';
 export 'src/material/icon.dart';
 export 'src/material/ink_well.dart';
 export 'src/material/input.dart';
+export 'src/material/list_item.dart';
 export 'src/material/material.dart';
 export 'src/material/material_app.dart';
 export 'src/material/material_button.dart';
