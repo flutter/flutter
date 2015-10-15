@@ -46,6 +46,7 @@ class _GestureArenaState {
   final List<GestureArenaMember> members = new List<GestureArenaMember>();
   bool isOpen = true;
   bool isHeld = false;
+  bool hasPendingSweep = false;
 
   void add(GestureArenaMember member) {
     assert(isOpen);
@@ -79,8 +80,11 @@ class GestureArena {
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     assert(!state.isOpen);
-    if (state.isHeld)
+    if (state.isHeld) {
+      state.hasPendingSweep = true;
       return;  // This arena is being held for a long-lived member
+    }
+    _arenas.remove(key);
     if (!state.members.isEmpty) {
       // First member wins
       state.members.first.acceptGesture(key);
@@ -88,7 +92,6 @@ class GestureArena {
       for (int i = 1; i < state.members.length; i++)
         state.members[i].rejectGesture(key);
     }
-    _arenas.remove(key);
   }
 
   /// Prevent the arena from being swept
@@ -97,6 +100,18 @@ class GestureArena {
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     state.isHeld = true;
+  }
+
+  /// Release a hold, allowing the arena to be swept
+  /// If a sweep was attempted on a held arena, the sweep will be done
+  /// on release
+  void release(Object key) {
+    _GestureArenaState state = _arenas[key];
+    if (state == null)
+      return;  // This arena either never existed or has been resolved.
+    state.isHeld = false;
+    if (state.hasPendingSweep)
+      sweep(key);
   }
 
   void _tryToResolveArena(Object key, _GestureArenaState state) {
