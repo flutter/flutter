@@ -25,6 +25,14 @@ class PhysicsNode extends Node {
   void _init() {
     _contactHandler = new _ContactHandler(this);
     b2World.setContactListener(_contactHandler);
+
+    box2d.ViewportTransform transform = new box2d.ViewportTransform(
+      new Vector2.zero(),
+      new Vector2.zero(),
+      1.0
+    );
+    _debugDraw = new _PhysicsDebugDraw(transform, this);
+    b2World.debugDraw = _debugDraw;
   }
 
   box2d.World b2World;
@@ -34,6 +42,8 @@ class PhysicsNode extends Node {
   List<PhysicsJoint> _joints = [];
 
   List<box2d.Body> _bodiesScheduledForDestruction = [];
+
+  _PhysicsDebugDraw _debugDraw;
 
   double b2WorldToNodeConversionFactor = 10.0;
 
@@ -143,161 +153,8 @@ class PhysicsNode extends Node {
   }
 
   void paintDebug(PaintingCanvas canvas) {
-    Paint shapePaint = new Paint();
-    shapePaint.setStyle(ui.PaintingStyle.stroke);
-    shapePaint.strokeWidth = 1.0;
-
-    for (box2d.Body body = b2World.bodyList; body != null; body = body.getNext()) {
-      canvas.save();
-
-      Point point = new Point(
-        body.position.x * b2WorldToNodeConversionFactor,
-        body.position.y * b2WorldToNodeConversionFactor);
-
-      canvas.translate(point.x, point.y);
-      canvas.rotate(body.getAngle());
-
-      if (body.getType() == box2d.BodyType.DYNAMIC) {
-        if (body.isAwake())
-          shapePaint.color = new Color(0xff00ff00);
-        else
-          shapePaint.color = new Color(0xff666666);
-      }
-      else if (body.getType() == box2d.BodyType.STATIC)
-        shapePaint.color = new Color(0xffff0000);
-      else if (body.getType() == box2d.BodyType.KINEMATIC)
-        shapePaint.color = new Color(0xffff9900);
-
-      for (box2d.Fixture fixture = body.getFixtureList(); fixture != null; fixture = fixture.getNext()) {
-        box2d.Shape shape = fixture.getShape();
-
-        if (shape.shapeType == box2d.ShapeType.CIRCLE) {
-          box2d.CircleShape circle = shape;
-          Point cp = new Point(
-            circle.p.x * b2WorldToNodeConversionFactor,
-            circle.p.y * b2WorldToNodeConversionFactor
-          );
-          double radius = circle.radius * b2WorldToNodeConversionFactor;
-          canvas.drawCircle(cp, radius, shapePaint);
-        } else if (shape.shapeType == box2d.ShapeType.POLYGON) {
-          box2d.PolygonShape poly = shape;
-          List<Point> points = [];
-          for (int i = 0; i < poly.getVertexCount(); i++) {
-            Vector2 vertex = poly.getVertex(i);
-            Point pt = new Point(
-              vertex.x * b2WorldToNodeConversionFactor,
-              vertex.y * b2WorldToNodeConversionFactor
-            );
-            points.add(pt);
-          }
-          if (points.length >= 2) {
-            for (int i = 0; i < points.length; i++) {
-              canvas.drawLine(points[i], points[(i + 1) % points.length], shapePaint);
-            }
-          }
-        }
-      }
-
-      canvas.restore();
-
-      // Draw contacts
-      for (box2d.ContactEdge edge = body.getContactList(); edge != null; edge = edge.next) {
-        box2d.Contact contact = edge.contact;
-        Vector2 cA = new Vector2.zero();
-        Vector2 cB = new Vector2.zero();
-
-        box2d.Fixture fixtureA = contact.fixtureA;
-        box2d.Fixture fixtureB = contact.fixtureB;
-
-        fixtureA.getAABB(contact.getChildIndexA()).getCenterToOut(cA);
-        fixtureB.getAABB(contact.getChildIndexB()).getCenterToOut(cB);
-
-        Point p1 = new Point(
-          cA.x * b2WorldToNodeConversionFactor,
-          cA.y * b2WorldToNodeConversionFactor
-        );
-
-        Point p2 = new Point(
-          cB.x * b2WorldToNodeConversionFactor,
-          cB.y * b2WorldToNodeConversionFactor
-        );
-
-        shapePaint.color = new Color(0x33ffffff);
-        canvas.drawLine(p1, p2, shapePaint);
-
-        box2d.WorldManifold worldManifold = new box2d.WorldManifold();
-        contact.getWorldManifold(worldManifold);
-
-        shapePaint.color = new Color(0xffffffff);
-
-        for (Vector2 pt in worldManifold.points) {
-          Point pCenter = new Point(
-            pt.x * b2WorldToNodeConversionFactor,
-            pt.y * b2WorldToNodeConversionFactor
-          );
-          Offset offset = new Offset(
-            worldManifold.normal.x * 5.0,
-            worldManifold.normal.y * 5.0
-          );
-
-          Point p2 = pCenter + offset;
-          Point p1 = new Point(pCenter.x - offset.dx, pCenter.y - offset.dy);
-          canvas.drawLine(p1, p2, shapePaint);
-          canvas.drawCircle(pCenter, 5.0, shapePaint);
-        }
-      }
-
-      // Draw joints
-      shapePaint.color = new Color(0xff0000ff);
-
-      for (box2d.JointEdge edge = body.getJointList(); edge != null; edge = edge.next) {
-        box2d.Joint joint = edge.joint;
-
-        // Make sure we only draw each joint once
-        if (joint.getBodyB() == body)
-          continue;
-
-        // Get anchor A
-        Vector2 anchorA = new Vector2.zero();
-        joint.getAnchorA(anchorA);
-
-        Point ptAnchorA = new Point(
-          anchorA.x * b2WorldToNodeConversionFactor,
-          anchorA.y * b2WorldToNodeConversionFactor
-        );
-
-        // Get anchor B
-        Vector2 anchorB = new Vector2.zero();
-        joint.getAnchorB(anchorB);
-
-        Point ptAnchorB = new Point(
-          anchorB.x * b2WorldToNodeConversionFactor,
-          anchorB.y * b2WorldToNodeConversionFactor
-        );
-
-        // Get body A position
-        Point ptBodyA = new Point(
-          joint.getBodyA().position.x * b2WorldToNodeConversionFactor,
-          joint.getBodyA().position.y * b2WorldToNodeConversionFactor
-        );
-
-        Point ptBodyB = new Point(
-          joint.getBodyB().position.x * b2WorldToNodeConversionFactor,
-          joint.getBodyB().position.y * b2WorldToNodeConversionFactor
-        );
-
-        // Draw the joint depending on type
-        box2d.JointType type = joint.getType();
-
-        if (type == box2d.JointType.WELD || type == box2d.JointType.REVOLUTE) {
-          // Draw weld joint
-          canvas.drawCircle(ptAnchorA, 5.0, shapePaint);
-
-          canvas.drawLine(ptBodyA, ptAnchorA, shapePaint);
-          canvas.drawLine(ptAnchorB, ptBodyB, shapePaint);
-        }
-      }
-    }
+    _debugDraw.canvas = canvas;
+    b2World.drawDebugData();
   }
 }
 
