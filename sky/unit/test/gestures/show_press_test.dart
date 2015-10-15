@@ -26,7 +26,7 @@ void main() {
       showPressRecognized = true;
     };
 
-    new FakeAsync().run((async) {
+    new FakeAsync().run((FakeAsync async) {
       showPress.addPointer(down);
       GestureArena.instance.close(5);
       expect(showPressRecognized, isFalse);
@@ -48,7 +48,7 @@ void main() {
       showPressRecognized = true;
     };
 
-    new FakeAsync().run((async) {
+    new FakeAsync().run((FakeAsync async) {
       showPress.addPointer(down);
       GestureArena.instance.close(5);
       expect(showPressRecognized, isFalse);

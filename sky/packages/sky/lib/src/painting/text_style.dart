@@ -252,25 +252,131 @@ class TextStyle {
     List<String> result = <String>[];
     if (color != null)
       result.add('${prefix}color: $color');
-    // TODO(hansmuller): escape the fontFamily string.
     if (fontFamily != null)
-      result.add('${prefix}fontFamily: "$fontFamily"');
+      result.add('${prefix}family: "$fontFamily"');
     if (fontSize != null)
-      result.add('${prefix}fontSize: $fontSize');
-    if (fontWeight != null)
-      result.add('${prefix}fontWeight: $fontWeight');
-    if (fontStyle != null)
-      result.add('${prefix}fontStyle: $fontStyle');
-    if (textAlign != null)
-      result.add('${prefix}textAlign: $textAlign');
-    if (textBaseline != null)
-      result.add('${prefix}textBaseline: $textBaseline');
-    if (decoration != null)
-      result.add('${prefix}decoration: $decoration');
-    if (decorationColor != null)
-      result.add('${prefix}decorationColor: $decorationColor');
-    if (decorationStyle != null)
-      result.add('${prefix}decorationStyle: $decorationStyle');
+      result.add('${prefix}size: $fontSize');
+    if (fontWeight != null) {
+      switch (fontWeight) {
+        case FontWeight.w100:
+          result.add('${prefix}weight: 100');
+          break;
+        case FontWeight.w200:
+          result.add('${prefix}weight: 200');
+          break;
+        case FontWeight.w300:
+          result.add('${prefix}weight: 300');
+          break;
+        case FontWeight.w400:
+          result.add('${prefix}weight: 400');
+          break;
+        case FontWeight.w500:
+          result.add('${prefix}weight: 500');
+          break;
+        case FontWeight.w600:
+          result.add('${prefix}weight: 600');
+          break;
+        case FontWeight.w700:
+          result.add('${prefix}weight: 700');
+          break;
+        case FontWeight.w800:
+          result.add('${prefix}weight: 800');
+          break;
+        case FontWeight.w900:
+          result.add('${prefix}weight: 900');
+          break;
+      }
+    }
+    if (fontStyle != null) {
+      switch (fontStyle) {
+        case FontStyle.normal:
+          result.add('${prefix}style: normal');
+          break;
+        case FontStyle.italic:
+          result.add('${prefix}style: italic');
+          break;
+      }
+    }
+    if (textAlign != null) {
+      switch (textAlign) {
+        case TextAlign.left:
+          result.add('${prefix}align: left');
+          break;
+        case TextAlign.right:
+          result.add('${prefix}align: right');
+          break;
+        case TextAlign.center:
+          result.add('${prefix}align: center');
+          break;
+      }
+    }
+    if (textBaseline != null) {
+      switch (textBaseline) {
+        case TextBaseline.alphabetic:
+          result.add('${prefix}baseline: alphabetic');
+          break;
+        case TextBaseline.ideographic:
+          result.add('${prefix}baseline: ideographic');
+          break;
+      }
+    }
+    if (decoration != null || decorationColor != null || decorationStyle != null) {
+      String decorationDescription = '${prefix}decoration: ';
+      bool haveDecorationDescription = false;
+      if (decorationStyle != null) {
+        switch (decorationStyle) {
+          case TextDecorationStyle.solid:
+            decorationDescription += 'solid';
+            break;
+          case TextDecorationStyle.double:
+            decorationDescription += 'double';
+            break;
+          case TextDecorationStyle.dotted:
+            decorationDescription += 'dotted';
+            break;
+          case TextDecorationStyle.dashed:
+            decorationDescription += 'dashed';
+            break;
+          case TextDecorationStyle.wavy:
+            decorationDescription += 'wavy';
+            break;
+        }
+        haveDecorationDescription = true;
+      }
+      if (decorationColor != null) {
+        if (haveDecorationDescription)
+          decorationDescription += ' ';
+        decorationDescription += '$decorationColor';
+        haveDecorationDescription = true;
+      }
+      if (decoration != null) {
+        if (haveDecorationDescription)
+          decorationDescription += ' ';
+        bool multipleDecorations = false;
+        for (TextDecoration value in decoration) {
+          if (multipleDecorations)
+            decorationDescription += '+';
+          switch (value) {
+            case TextDecoration.none:
+              decorationDescription += 'none';
+              break;
+            case TextDecoration.underline:
+              decorationDescription += 'underline';
+              break;
+            case TextDecoration.overline:
+              decorationDescription += 'overline';
+              break;
+            case TextDecoration.lineThrough:
+              decorationDescription += 'line-through';
+              break;
+          }
+          multipleDecorations = true;
+        }
+        haveDecorationDescription = true;
+      }
+      assert(haveDecorationDescription);
+      result.add(decorationDescription);
+    }
     if (result.isEmpty)
       return '$prefix<no style specified>';
     return result.join('\n');

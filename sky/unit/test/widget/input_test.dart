@@ -37,7 +37,7 @@ void main() {
           child: new Input(
             key: inputKey,
             placeholder: 'Placeholder',
-            onChanged: (value) { inputValue = value; }
+            onChanged: (String value) { inputValue = value; }
           )
         );
       }

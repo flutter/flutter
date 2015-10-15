@@ -11,7 +11,7 @@ void main() {
       Key tapTarget = new Key('tap-target');
 
       tester.pumpWidget(new MaterialApp(
-        routes: {
+        routes: <String, RouteBuilder>{
           '/': (RouteArguments args) {
             return new GestureDetector(
               onTap: () {

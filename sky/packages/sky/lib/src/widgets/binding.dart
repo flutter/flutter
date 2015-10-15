@@ -92,6 +92,9 @@ void runApp(Widget app) {
 void debugDumpApp() {
   assert(WidgetFlutterBinding.instance != null);
   assert(WidgetFlutterBinding.instance.renderViewElement != null);
+  String mode = 'RELEASE MODE';
+  assert(() { mode = 'CHECKED MODE'; return true; });
+  print('${WidgetFlutterBinding.instance.runtimeType} - $mode');
   WidgetFlutterBinding.instance.renderViewElement.toStringDeep().split('\n').forEach(print);
 }
 
