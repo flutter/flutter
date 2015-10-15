@@ -77,6 +77,18 @@ class KeyboardHandle {
     assert(_keyboard._currentHandle != this);
   }
 
+  void setText(String text) {
+    assert(_attached);
+    assert(_keyboard._currentHandle == this);
+    _keyboard.service.setText(text);
+  }
+
+  void setSelection(int start, int end) {
+    assert(_attached);
+    assert(_keyboard._currentHandle == this);
+    _keyboard.service.setSelection(start, end);
+  }
+
 }
 
 final Keyboard keyboard = new Keyboard(_KeyboardConnection.instance.keyboardService);
