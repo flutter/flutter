@@ -113,6 +113,9 @@ class PhysicsNode extends Node {
   }
 
   void _updatePosition(PhysicsBody body, Point position) {
+    if (body._lastPosition == null)
+      body._lastPosition = body._body.position;
+
     Vector2 newPos = new Vector2(
       position.x / b2WorldToNodeConversionFactor,
       position.y / b2WorldToNodeConversionFactor
@@ -123,6 +126,9 @@ class PhysicsNode extends Node {
   }
 
   void _updateRotation(PhysicsBody body, double rotation) {
+    if (body._lastRotation == null)
+      body._lastRotation = body._body.getAngle();
+    
     Vector2 pos = body._body.position;
     double newAngle = radians(rotation);
     body._body.setTransform(pos, newAngle);
