@@ -11,7 +11,7 @@ void main() {
       NavigatorState navigator;
       tester.pumpWidget(
         new MaterialApp(
-          routes: {
+          routes: <String, RouteBuilder>{
             '/': (RouteArguments args) {
               navigator = args.navigator;
               new Container();
@@ -40,7 +40,7 @@ void main() {
       tester.pumpWidget(new Container()); // throw away the old App and its Navigator
       tester.pumpWidget(
         new MaterialApp(
-          routes: {
+          routes: <String, RouteBuilder>{
             '/': (RouteArguments args) {
               navigator = args.navigator;
               new Container();

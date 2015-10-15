@@ -33,7 +33,7 @@ void main() {
 
       StateMarker grandchild = new StateMarker();
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Container(
             child: new StateMarker(key: left)
           ),
@@ -55,7 +55,7 @@ void main() {
 
       StateMarker newGrandchild = new StateMarker();
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Container(
             child: new StateMarker(
               key: right,
@@ -101,7 +101,7 @@ void main() {
       (key.currentState as StateMarkerState).marker = "marked";
 
       tester.pumpWidget(new ScrollableList<int>(
-        items: [0],
+        items: <int>[0],
         itemExtent: 100.0,
         itemBuilder: (BuildContext context, int item) {
           return new Container(

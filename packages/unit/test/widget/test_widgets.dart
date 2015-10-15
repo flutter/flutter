@@ -49,7 +49,7 @@ class TestBuildCounter extends StatelessComponent {
 
 void flipStatefulComponent(WidgetTester tester) {
   StatefulComponentElement stateElement =
-      tester.findElement((element) => element is StatefulComponentElement);
+      tester.findElement((Element element) => element is StatefulComponentElement);
   expect(stateElement, isNotNull);
   expect(stateElement.state is FlipComponentState, isTrue);
   FlipComponentState state = stateElement.state;

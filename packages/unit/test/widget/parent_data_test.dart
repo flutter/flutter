@@ -16,7 +16,7 @@ class TestParentData {
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   MultiChildRenderObjectElement element =
-      tester.findElement((element) => element is MultiChildRenderObjectElement);
+      tester.findElement((Element element) => element is MultiChildRenderObjectElement);
   expect(element, isNotNull);
   expect(element.renderObject is RenderStack, isTrue);
   RenderStack renderObject = element.renderObject;
@@ -31,7 +31,7 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      child = decoratedBox.parentData.nextSibling;
+      child = (decoratedBox.parentData as StackParentData).nextSibling;
     }
     expect(child, isNull);
   } catch (e) {
@@ -61,7 +61,7 @@ void main() {
     testWidgets((WidgetTester tester) {
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new DecoratedBox(decoration: kBoxDecorationA),
           new Positioned(
             top: 10.0,
@@ -72,14 +72,14 @@ void main() {
         ])
       );
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         kNonPositioned,
         new TestParentData(top: 10.0, left: 10.0),
         kNonPositioned,
       ]);
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             bottom: 5.0,
             right: 7.0,
@@ -94,7 +94,7 @@ void main() {
         ])
       );
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         new TestParentData(bottom: 5.0, right: 7.0),
         new TestParentData(top: 10.0, left: 10.0),
         kNonPositioned,
@@ -105,7 +105,7 @@ void main() {
       DecoratedBox kDecoratedBoxC = new DecoratedBox(decoration: kBoxDecorationC);
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             bottom: 5.0,
             right: 7.0,
@@ -120,14 +120,14 @@ void main() {
         ])
       );
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         new TestParentData(bottom: 5.0, right: 7.0),
         new TestParentData(top: 10.0, left: 10.0),
         kNonPositioned,
       ]);
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             bottom: 6.0,
             right: 8.0,
@@ -142,14 +142,14 @@ void main() {
         ])
       );
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         new TestParentData(bottom: 6.0, right: 8.0),
         new TestParentData(left: 10.0, right: 10.0),
         kNonPositioned,
       ]);
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           kDecoratedBoxA,
           new Positioned(
             left: 11.0,
@@ -160,14 +160,14 @@ void main() {
         ])
       );
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         kNonPositioned,
         new TestParentData(left: 11.0, right: 12.0),
         kNonPositioned,
       ]);
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           kDecoratedBoxA,
           new Positioned(
             right: 10.0,
@@ -182,14 +182,14 @@ void main() {
         ])
       );
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         kNonPositioned,
         new TestParentData(right: 10.0),
         new TestParentData(top: 8.0),
       ]);
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             right: 10.0,
             child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
@@ -197,19 +197,19 @@ void main() {
         ])
       );
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         new TestParentData(right: 10.0),
       ]);
 
       flipStatefulComponent(tester);
       tester.pump();
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         new TestParentData(right: 10.0),
       ]);
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             top: 7.0,
             child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
@@ -217,22 +217,22 @@ void main() {
         ])
       );
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         new TestParentData(top: 7.0),
       ]);
 
       flipStatefulComponent(tester);
       tester.pump();
 
-      checkTree(tester, [
+      checkTree(tester, <TestParentData>[
         new TestParentData(top: 7.0),
       ]);
 
       tester.pumpWidget(
-        new Stack([])
+        new Stack(<Widget>[])
       );
 
-      checkTree(tester, []);
+      checkTree(tester, <TestParentData>[]);
     });
   });
 
@@ -241,7 +241,7 @@ void main() {
       expect(cachedException, isNull);
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             top: 5.0,
             bottom: 8.0,
@@ -257,14 +257,14 @@ void main() {
       expect(cachedException, isNotNull);
       cachedException = null;
 
-      tester.pumpWidget(new Stack([]));
+      tester.pumpWidget(new Stack(<Widget>[]));
 
-      checkTree(tester, []);
+      checkTree(tester, <TestParentData>[]);
       expect(cachedException, isNull);
 
       tester.pumpWidget(
         new Container(
-          child: new Flex([
+          child: new Flex(<Widget>[
             new Positioned(
               top: 6.0,
               left: 7.0,
@@ -278,10 +278,10 @@ void main() {
       cachedException = null;
 
       tester.pumpWidget(
-        new Stack([])
+        new Stack(<Widget>[])
       );
 
-      checkTree(tester, []);
+      checkTree(tester, <TestParentData>[]);
     });
   });
 }

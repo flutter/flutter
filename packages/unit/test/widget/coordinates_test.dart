@@ -11,7 +11,7 @@ void main() {
       Key keyB = new GlobalKey();
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             top: 100.0,
             left: 100.0,

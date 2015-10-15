@@ -10,8 +10,8 @@ ui.Shader createShader(Rect bounds) {
   return new LinearGradient(
       begin: Point.origin,
       end: new Point(0.0, bounds.height),
-      colors: [const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
-      stops: [0.1, 0.35]
+      colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
+      stops: <double>[0.1, 0.35]
   )
   .createShader();
 }

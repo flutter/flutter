@@ -5,7 +5,7 @@ import 'rendering_tester.dart';
 
 void main() {
   test('Basic grid layout test', () {
-    List<RenderBox> children = [
+    List<RenderBox> children = <RenderBox>[
       new RenderDecoratedBox(decoration: new BoxDecoration()),
       new RenderDecoratedBox(decoration: new BoxDecoration()),
       new RenderDecoratedBox(decoration: new BoxDecoration()),
@@ -15,7 +15,7 @@ void main() {
     RenderGrid grid = new RenderGrid(children: children, maxChildExtent: 100.0);
     layout(grid, constraints: const BoxConstraints(maxWidth: 200.0));
 
-    children.forEach((child) {
+    children.forEach((RenderBox child) {
       expect(child.size.width, equals(100.0), reason: "child width");
       expect(child.size.height, equals(100.0), reason: "child height");
     });
@@ -29,7 +29,7 @@ void main() {
 
     pumpFrame();
 
-    children.forEach((child) {
+    children.forEach((RenderBox child) {
       expect(child.size.width, equals(50.0), reason: "child width");
       expect(child.size.height, equals(50.0), reason: "child height");
     });

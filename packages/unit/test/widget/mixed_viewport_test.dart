@@ -31,7 +31,7 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      StatefulComponentElement element = tester.findElement((element) => element.widget is FlipComponent);
+      StatefulComponentElement element = tester.findElement((Element element) => element.widget is FlipComponent);
       FlipComponentState testComponent = element.state;
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));

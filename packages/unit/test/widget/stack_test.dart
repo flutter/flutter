@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -6,13 +7,13 @@ import 'widget_tester.dart';
 void main() {
   test('Can construct an empty Stack', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Stack([]));
+      tester.pumpWidget(new Stack(<Widget>[]));
     });
   });
 
   test('Can construct an empty Centered Stack', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Center(child: new Stack([])));
+      tester.pumpWidget(new Center(child: new Stack(<Widget>[])));
     });
   });
 
@@ -21,7 +22,7 @@ void main() {
       Key key = new Key('container');
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             left: 10.0,
             child: new Container(
@@ -33,14 +34,18 @@ void main() {
         ])
       );
 
-      Element container = tester.findElementByKey(key);
-      expect(container.renderObject.parentData.top, isNull);
-      expect(container.renderObject.parentData.right, isNull);
-      expect(container.renderObject.parentData.bottom, isNull);
-      expect(container.renderObject.parentData.left, equals(10.0));
+      Element container;
+      StackParentData parentData;
+
+      container = tester.findElementByKey(key);
+      parentData = container.renderObject.parentData;
+      expect(parentData.top, isNull);
+      expect(parentData.right, isNull);
+      expect(parentData.bottom, isNull);
+      expect(parentData.left, equals(10.0));
 
       tester.pumpWidget(
-        new Stack([
+        new Stack(<Widget>[
           new Positioned(
             right: 10.0,
             child: new Container(
@@ -53,10 +58,11 @@ void main() {
       );
 
       container = tester.findElementByKey(key);
-      expect(container.renderObject.parentData.top, isNull);
-      expect(container.renderObject.parentData.right, equals(10.0));
-      expect(container.renderObject.parentData.bottom, isNull);
-      expect(container.renderObject.parentData.left, isNull);
+      parentData = container.renderObject.parentData;
+      expect(parentData.top, isNull);
+      expect(parentData.right, equals(10.0));
+      expect(parentData.bottom, isNull);
+      expect(parentData.left, isNull);
     });
   });
 
@@ -65,21 +71,24 @@ void main() {
       Key key = new Key('container');
       Container container = new Container(key: key, width: 10.0, height: 10.0);
 
-      tester.pumpWidget(new Stack([ new Positioned(left: 10.0, child: container) ]));
+      tester.pumpWidget(new Stack(<Widget>[ new Positioned(left: 10.0, child: container) ]));
       Element containerElement = tester.findElementByKey(key);
 
-      expect(containerElement.renderObject.parentData.top, isNull);
-      expect(containerElement.renderObject.parentData.right, isNull);
-      expect(containerElement.renderObject.parentData.bottom, isNull);
-      expect(containerElement.renderObject.parentData.left, equals(10.0));
+      StackParentData parentData;
+      parentData = containerElement.renderObject.parentData;
+      expect(parentData.top, isNull);
+      expect(parentData.right, isNull);
+      expect(parentData.bottom, isNull);
+      expect(parentData.left, equals(10.0));
 
-      tester.pumpWidget(new Stack([ container ]));
+      tester.pumpWidget(new Stack(<Widget>[ container ]));
       containerElement = tester.findElementByKey(key);
 
-      expect(containerElement.renderObject.parentData.top, isNull);
-      expect(containerElement.renderObject.parentData.right, isNull);
-      expect(containerElement.renderObject.parentData.bottom, isNull);
-      expect(containerElement.renderObject.parentData.left, isNull);
+      parentData = containerElement.renderObject.parentData;
+      expect(parentData.top, isNull);
+      expect(parentData.right, isNull);
+      expect(parentData.bottom, isNull);
+      expect(parentData.left, isNull);
     });
   });
 
@@ -90,7 +99,7 @@ void main() {
 
       tester.pumpWidget(
         new Center(
-          child: new Stack([
+          child: new Stack(<Widget>[
               new Container(key: child0Key, width: 20.0, height: 20.0),
               new Container(key: child1Key, width: 10.0, height: 10.0)
             ],
@@ -101,22 +110,24 @@ void main() {
       );
 
       Element child0 = tester.findElementByKey(child0Key);
-      expect(child0.renderObject.parentData.position, equals(const Point(0.0, 0.0)));
+      final StackParentData child0RenderObjectParentData = child0.renderObject.parentData;
+      expect(child0RenderObjectParentData.position, equals(const Point(0.0, 0.0)));
 
       Element child1 = tester.findElementByKey(child1Key);
-      expect(child1.renderObject.parentData.position, equals(const Point(5.0, 5.0)));
+      final StackParentData child1RenderObjectParentData = child1.renderObject.parentData;
+      expect(child1RenderObjectParentData.position, equals(const Point(5.0, 5.0)));
     });
   });
 
   test('Can construct an empty IndexedStack', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new IndexedStack([]));
+      tester.pumpWidget(new IndexedStack(<Widget>[]));
     });
   });
 
   test('Can construct an empty Centered IndexedStack', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Center(child: new IndexedStack([])));
+      tester.pumpWidget(new Center(child: new IndexedStack(<Widget>[])));
     });
   });
 
@@ -126,9 +137,9 @@ void main() {
       List<int> itemsPainted;
 
       Widget buildFrame(int index) {
-        itemsPainted = [];
-        List<Widget> items = new List.generate(itemCount, (i) {
-          return new CustomPaint(child: new Text('$i'), callback: (_0, _1) { itemsPainted.add(i); });
+        itemsPainted = <int>[];
+        List<Widget> items = new List<Widget>.generate(itemCount, (i) {
+          return new CustomPaint(child: new Text('$i'), callback: (_, __) { itemsPainted.add(i); });
         });
         return new Center(child: new IndexedStack(items, index: index));
       }
@@ -154,8 +165,8 @@ void main() {
       List<int> itemsTapped;
 
       Widget buildFrame(int index) {
-        itemsTapped = [];
-        List<Widget> items = new List.generate(itemCount, (i) {
+        itemsTapped = <int>[];
+        List<Widget> items = new List<Widget>.generate(itemCount, (i) {
           return new GestureDetector(child: new Text('$i'), onTap: () { itemsTapped.add(i); });
         });
         return new Center(child: new IndexedStack(items, key: key, index: index));
