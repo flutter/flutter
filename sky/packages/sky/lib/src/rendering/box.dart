@@ -602,16 +602,16 @@ abstract class RenderBox extends RenderObject {
       debugPaintBaselines(context, offset);
   }
   void debugPaintSize(PaintingContext context, Offset offset) {
-    Paint paint = new Paint();
-    paint.setStyle(ui.PaintingStyle.stroke);
-    paint.strokeWidth = 1.0;
-    paint.color = debugPaintSizeColor;
+    Paint paint = new Paint()
+     ..style = ui.PaintingStyle.stroke
+     ..strokeWidth = 1.0
+     ..color = debugPaintSizeColor;
     context.canvas.drawRect(offset & size, paint);
   }
   void debugPaintBaselines(PaintingContext context, Offset offset) {
-    Paint paint = new Paint();
-    paint.setStyle(ui.PaintingStyle.stroke);
-    paint.strokeWidth = 0.25;
+    Paint paint = new Paint()
+     ..style = ui.PaintingStyle.stroke
+     ..strokeWidth = 0.25;
     Path path;
     // ideographic baseline
     double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);

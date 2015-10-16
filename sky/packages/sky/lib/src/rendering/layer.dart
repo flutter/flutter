@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
-import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:vector_math/vector_math_64.dart';
+
+import 'basic_types.dart';
+
+export 'basic_types.dart';
 
 /// A composited layer
 ///
@@ -322,7 +325,7 @@ class ColorFilterLayer extends ContainerLayer {
   Color color;
 
   /// The transfer mode to use to combine [color] with the children's painting
-  ui.TransferMode transferMode;
+  TransferMode transferMode;
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushColorFilter(color, transferMode, bounds.shift(offset));

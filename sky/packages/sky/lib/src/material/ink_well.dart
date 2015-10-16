@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -91,7 +90,7 @@ class _InkSplash {
 
   void paint(PaintingCanvas canvas) {
     int opacity = (_kSplashInitialOpacity * (1.1 - (_radius.value / _targetRadius))).floor();
-    ui.Paint paint = new ui.Paint()..color = new ui.Color(opacity << 24);
+    Paint paint = new Paint()..color = new Color(opacity << 24);
     double radius = _pinnedRadius == null ? _radius.value : _pinnedRadius;
     canvas.drawCircle(position, radius, paint);
   }

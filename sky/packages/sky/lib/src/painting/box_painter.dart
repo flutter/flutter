@@ -4,10 +4,10 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:flutter/services.dart';
 
+import 'basic_types.dart';
 import 'shadows.dart';
 
 /// An immutable set of offsets in each of the four cardinal directions.

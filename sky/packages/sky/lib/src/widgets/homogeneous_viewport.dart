@@ -5,8 +5,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/basic.dart';
+
+import 'framework.dart';
+import 'basic.dart';
 
 typedef List<Widget> ListBuilder(BuildContext context, int startIndex, int count);
 

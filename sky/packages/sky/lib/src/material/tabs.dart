@@ -7,8 +7,6 @@ import 'dart:ui' as ui;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/animation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -312,7 +310,7 @@ class Tab extends StatelessComponent {
   Widget _buildLabelIcon() {
     assert(label.icon != null);
     Color iconColor = selected ? selectedColor : color;
-    ui.ColorFilter filter = new ui.ColorFilter.mode(iconColor, ui.TransferMode.srcATop);
+    ui.ColorFilter filter = new ui.ColorFilter.mode(iconColor, TransferMode.srcATop);
     return new Icon(type: label.icon, size: _kTabIconSize, colorFilter: filter);
   }
 

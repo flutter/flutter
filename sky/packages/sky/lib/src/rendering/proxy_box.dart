@@ -629,7 +629,7 @@ class RenderOpacity extends RenderProxyBox {
 /// Note: This class is relatively expensive because it requires painting the
 /// child into an intermediate buffer.
 class RenderColorFilter extends RenderProxyBox {
-  RenderColorFilter({ RenderBox child, Color color, ui.TransferMode transferMode })
+  RenderColorFilter({ RenderBox child, Color color, TransferMode transferMode })
     : _color = color, _transferMode = transferMode, super(child);
 
   /// The color to use as input to the color filter
@@ -644,9 +644,9 @@ class RenderColorFilter extends RenderProxyBox {
   }
 
   /// The transfer mode to use when combining the child's painting and the [color]
-  ui.TransferMode get transferMode => _transferMode;
-  ui.TransferMode _transferMode;
-  void set transferMode (ui.TransferMode newTransferMode) {
+  TransferMode get transferMode => _transferMode;
+  TransferMode _transferMode;
+  void set transferMode (TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
       return;
@@ -661,7 +661,7 @@ class RenderColorFilter extends RenderProxyBox {
 }
 
 class RenderShaderMask extends RenderProxyBox {
-  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, ui.TransferMode transferMode })
+  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, TransferMode transferMode })
     : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child);
 
   ShaderCallback get shaderCallback => _shaderCallback;
@@ -674,9 +674,9 @@ class RenderShaderMask extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  ui.TransferMode get transferMode => _transferMode;
-  ui.TransferMode _transferMode;
-  void set transferMode (ui.TransferMode newTransferMode) {
+  TransferMode get transferMode => _transferMode;
+  TransferMode _transferMode;
+  void set transferMode (TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
       return;
