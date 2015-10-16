@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -52,7 +53,7 @@ class TestBed extends NodeWithSize {
     _physicsNode = new PhysicsNode(new Offset(0.0, 100.0));
 
     _obstacle = new Sprite(_spriteSheet["ship.png"]);
-    _obstacle.position = new Point(532.0, 800.0);
+    _obstacle.position = new Point(512.0, 800.0);
     _obstacle.size = new Size(64.0, 64.0);
     _obstacle.physicsBody = new PhysicsBody(
       new PhysicsShapeCircle(Point.origin, 32.0),
@@ -62,6 +63,13 @@ class TestBed extends NodeWithSize {
     );
     _physicsNode.addChild(_obstacle);
     _physicsNode.addContactCallback(myCallback, "obstacle", "ship", PhysicsContactType.begin);
+
+    // Animate obstacle
+    ActionSequence seq = new ActionSequence([
+      new ActionTween((a) => _obstacle.position = a, new Point(256.0, 800.0), new Point(768.0, 800.0), 1.0, easeInOut),
+      new ActionTween((a) => _obstacle.position = a, new Point(768.0, 800.0), new Point(256.0, 800.0), 1.0, easeInOut)
+    ]);
+    _obstacle.actions.run(new ActionRepeatForever(seq));
 
     addChild(_physicsNode);
 
