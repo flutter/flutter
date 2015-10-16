@@ -102,11 +102,12 @@ class FlutterCommandRunner extends CommandRunner {
       Logger.root.level = Level.FINE;
 
     _globalResults = globalResults;
+    ArtifactStore.packageRoot = globalResults['package-root'];
+
     return super.runCommand(globalResults);
   }
 
   List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {
-    ArtifactStore.packageRoot = globalResults['package-root'];
     if (!FileSystemEntity.isDirectorySync(ArtifactStore.packageRoot)) {
       String message = '${ArtifactStore.packageRoot} is not a valid directory.';
       if (ArtifactStore.packageRoot == 'packages') {
