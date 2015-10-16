@@ -434,7 +434,6 @@ abstract class ScrollableListPainter extends Painter {
   double _scrollOffset = 0.0;
   void set scrollOffset (double value) {
     assert(value != null);
-    assert(value >= 0.0 && value <= 1.0);
     if (_scrollOffset == value)
       return;
     _scrollOffset = value;
