@@ -42,6 +42,8 @@ class PhysicsBody {
 
   Vector2 _lastPosition;
   double _lastRotation;
+  Vector2 _targetPosition;
+  double _targetAngle;
 
   Object tag;
 
