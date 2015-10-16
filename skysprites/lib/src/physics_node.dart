@@ -74,6 +74,37 @@ class PhysicsNode extends Node {
     // Remove bodies that were marked for destruction during the update phase
     _removeBodiesScheduledForDestruction();
 
+    // Assign velocities and momentum to static and kinetic bodies
+    for (box2d.Body b2Body = b2World.bodyList; b2Body != null; b2Body = b2Body.getNext()) {
+      // Fetch body
+      PhysicsBody body = b2Body.userData;
+
+      // Skip all dynamic bodies
+      if (b2Body.getType() == box2d.BodyType.DYNAMIC) {
+        body._lastPosition = null;
+        body._lastRotation = null;
+        continue;
+      }
+
+      // Update linear velocity
+      if (body._lastPosition == null) {
+        b2Body.linearVelocity.setZero();
+      } else {
+        Vector2 velocity = (body._targetPosition - body._lastPosition) / dt;
+        b2Body.linearVelocity = velocity;
+        body._lastPosition = null;
+      }
+
+      // Update angular velocity
+      if (body._lastRotation == null) {
+        b2Body.angularVelocity = 0.0;
+      } else {
+        double angularVelocity = (body._targetAngle - body._lastRotation) / dt;
+        b2Body.angularVelocity = angularVelocity;
+        body._lastRotation = 0.0;
+      }
+    }
+
     // Calculate a step in the simulation
     b2World.stepDt(dt, 10, 10);
 
@@ -113,22 +144,30 @@ class PhysicsNode extends Node {
   }
 
   void _updatePosition(PhysicsBody body, Point position) {
-    if (body._lastPosition == null)
-      body._lastPosition = body._body.position;
+    if (body._lastPosition == null && body.type == PhysicsBodyType.static) {
+      body._lastPosition = new Vector2.copy(body._body.position);
+      body._body.setType(box2d.BodyType.KINEMATIC);
+    }
 
     Vector2 newPos = new Vector2(
       position.x / b2WorldToNodeConversionFactor,
       position.y / b2WorldToNodeConversionFactor
     );
     double angle = body._body.getAngle();
-    body._body.setTransform(newPos, angle);
+
+    if (body.type == PhysicsBodyType.dynamic) {
+      body._body.setTransform(newPos, angle);
+    } else {
+      body._targetPosition = newPos;
+      body._targetAngle = angle;
+    }
     body._body.setAwake(true);
   }
 
   void _updateRotation(PhysicsBody body, double rotation) {
     if (body._lastRotation == null)
       body._lastRotation = body._body.getAngle();
-    
+
     Vector2 pos = body._body.position;
     double newAngle = radians(rotation);
     body._body.setTransform(pos, newAngle);
