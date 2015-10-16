@@ -112,6 +112,13 @@ class PhysicsNode extends Node {
     for (box2d.Body b2Body = b2World.bodyList; b2Body != null; b2Body = b2Body.getNext()) {
       // Update visual position and rotation
       PhysicsBody body = b2Body.userData;
+
+      if (b2Body.getType() == box2d.BodyType.KINEMATIC) {
+        body._targetPosition = null;
+        body._targetAngle = null;
+      }
+
+      // Update visual position and rotation
       body._node._setPositionFromPhysics(new Point(
         b2Body.position.x * b2WorldToNodeConversionFactor,
         b2Body.position.y * b2WorldToNodeConversionFactor

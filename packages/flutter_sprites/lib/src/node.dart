@@ -148,6 +148,16 @@ class Node {
     invalidateTransformMatrix();
   }
 
+  void teleportRotation(double rotation) {
+    assert(rotation != null);
+    if (_physicsBody != null && parent is PhysicsNode) {
+      _physicsBody._body.setTransform(_physicsBody._body.position, radians(rotation));
+      _physicsBody._body.angularVelocity = 0.0;
+      _physicsBody._body.setType(box2d.BodyType.STATIC);
+    }
+    _setRotationFromPhysics(rotation);
+  }
+
   /// The position of this node relative to its parent.
   ///
   ///     myNode.position = new Point(42.0, 42.0);
@@ -170,6 +180,23 @@ class Node {
     assert(position != null);
     _position = position;
     invalidateTransformMatrix();
+  }
+
+  void teleportPosition(Point position) {
+    assert(position != null);
+    if (_physicsBody != null && parent is PhysicsNode) {
+      PhysicsNode physicsNode = parent;
+      _physicsBody._body.setTransform(
+        new Vector2(
+          position.x / physicsNode.b2WorldToNodeConversionFactor,
+          position.y / physicsNode.b2WorldToNodeConversionFactor
+        ),
+        _physicsBody._body.getAngle()
+      );
+      _physicsBody._body.linearVelocity = new Vector2.zero();
+      _physicsBody._body.setType(box2d.BodyType.STATIC);
+    }
+    _setPositionFromPhysics(position);
   }
 
   /// The skew along the x-axis of this node in degrees.
