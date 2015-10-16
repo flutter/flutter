@@ -40,6 +40,11 @@ class PhysicsBody {
     this.active = active;
   }
 
+  Vector2 _lastPosition;
+  double _lastRotation;
+  Vector2 _targetPosition;
+  double _targetAngle;
+
   Object tag;
 
   final PhysicsShape shape;
