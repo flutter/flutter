@@ -335,7 +335,7 @@ class Tab extends StatelessComponent {
     }
 
     Container centeredLabel = new Container(
-      child: new Center(child: labelContent),
+      child: new Center(child: labelContent, shrinkWrap: ShrinkWrap.both),
       constraints: new BoxConstraints(minWidth: _kMinTabWidth),
       padding: _kTabLabelPadding
     );
