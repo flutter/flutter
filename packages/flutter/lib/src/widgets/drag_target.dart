@@ -5,7 +5,6 @@
 import 'dart:collection';
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';

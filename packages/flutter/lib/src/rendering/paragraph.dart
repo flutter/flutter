@@ -7,7 +7,22 @@ import 'package:flutter/painting.dart';
 import 'box.dart';
 import 'object.dart';
 
-export 'package:flutter/src/painting/text_painter.dart';
+export 'package:flutter/painting.dart' show
+  FontStyle,
+  FontWeight,
+  PlainTextSpan,
+  StyledTextSpan,
+  TextAlign,
+  TextBaseline,
+  TextDecoration,
+  TextDecorationStyle,
+  TextSpan,
+  TextStyle,
+  normal,
+  bold,
+  underline,
+  overline,
+  lineThrough;
 
 /// A render object that displays a paragraph of text
 class RenderParagraph extends RenderBox {

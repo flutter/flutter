@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+import 'dart:ui' show Color;
 
-import 'package:flutter/src/material/typography.dart';
-import 'package:flutter/src/material/colors.dart';
+import 'typography.dart';
+import 'colors.dart';
 
 enum ThemeBrightness { dark, light }
 

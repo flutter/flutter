@@ -18,25 +18,47 @@ export 'package:flutter/rendering.dart' show
     BoxDecoration,
     BoxDecorationPosition,
     BoxShadow,
+    Canvas,
     Color,
     EdgeDims,
     FlexAlignItems,
     FlexDirection,
     FlexJustifyContent,
+    FontStyle,
+    FontWeight,
     FractionalOffset,
+    Gradient,
+    ImageFit,
+    ImageRepeat,
     InputEvent,
+    LinearGradient,
     Matrix4,
     Offset,
     Paint,
     Path,
+    PlainTextSpan,
     Point,
     PointerInputEvent,
+    RadialGradient,
     Rect,
     ScrollDirection,
     Shape,
     ShrinkWrap,
     Size,
-    ValueChanged;
+    StyledTextSpan,
+    TextAlign,
+    TextBaseline,
+    TextDecoration,
+    TextDecorationStyle,
+    TextSpan,
+    TextStyle,
+    TransferMode,
+    ValueChanged,
+    normal,
+    bold,
+    underline,
+    overline,
+    lineThrough;
 
 
 // PAINTING NODES
@@ -64,7 +86,7 @@ class ColorFilter extends OneChildRenderObjectWidget {
   }
 
   final Color color;
-  final ui.TransferMode transferMode;
+  final TransferMode transferMode;
 
   RenderColorFilter createRenderObject() => new RenderColorFilter(color: color, transferMode: transferMode);
 
@@ -78,7 +100,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   ShaderMask({
     Key key,
     this.shaderCallback,
-    this.transferMode: ui.TransferMode.modulate,
+    this.transferMode: TransferMode.modulate,
     Widget child
   }) : super(key: key, child: child) {
     assert(shaderCallback != null);
@@ -86,7 +108,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   }
 
   final ShaderCallback shaderCallback;
-  final ui.TransferMode transferMode;
+  final TransferMode transferMode;
 
   RenderShaderMask createRenderObject() {
     return new RenderShaderMask(

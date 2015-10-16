@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
-import 'dart:ui' show Point, Offset, Color, Paint;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
 
 const Duration _kShowDuration = const Duration(milliseconds: 300);
 const Duration _kHideDuration = const Duration(milliseconds: 200);
@@ -82,7 +81,7 @@ class RadialReaction {
   final Paint _innerPaint = new Paint();
 
   /// Paint the reaction onto the given canvas at the given offset
-  void paint(ui.Canvas canvas, Offset offset) {
+  void paint(Canvas canvas, Offset offset) {
     _outerPaint.color = _kOuterColor.withAlpha(_roundOpacity(_outerOpacity.value * _fade.value));
     canvas.drawCircle(center + offset, radius, _outerPaint);
 

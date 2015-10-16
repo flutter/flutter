@@ -7,7 +7,8 @@
 import 'dart:ui' show Color;
 
 import 'package:flutter/painting.dart';
-import 'package:flutter/src/material/colors.dart';
+
+import 'colors.dart';
 
 // TODO(eseidel): Font weights are supposed to be language relative!
 // TODO(jackson): Baseline should be language relative!
