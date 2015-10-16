@@ -31,9 +31,8 @@ class Marker extends StatelessComponent {
   final double size;
   final MarkerType type;
 
-  void paintMarker(ui.Canvas canvas, _) {
+  void paintMarker(PaintingCanvas canvas, _) {
     Paint paint = new Paint()..color = const Color(0x8000FF00);
-    paint.setStyle(ui.PaintingStyle.fill);
     double r = size / 2.0;
     canvas.drawCircle(new Point(r, r), r, paint);
 
@@ -103,7 +102,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  void handlePointerDown(GlobalKey target, ui.PointerEvent event) {
+  void handlePointerDown(GlobalKey target, PointerInputEvent event) {
     setState(() {
       markers[MarkerType.touch] = new Point(event.x, event.y);
       final RenderBox box = target.currentContext.findRenderObject();
