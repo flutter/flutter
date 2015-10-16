@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -15,8 +14,8 @@ import 'hit_test.dart';
 import 'layer.dart';
 import 'node.dart';
 
-export 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
+export 'layer.dart';
+export 'hit_test.dart';
 
 typedef ui.Shader ShaderCallback(Rect bounds);
 
@@ -39,7 +38,7 @@ class ParentData {
 }
 
 /// Obsolete class that will be removed eventually
-class PaintingCanvas extends ui.Canvas {
+class PaintingCanvas extends Canvas {
   PaintingCanvas(ui.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
   // TODO(ianh): Just use ui.Canvas everywhere instead
 }
@@ -247,7 +246,7 @@ class PaintingContext {
   static Paint _getPaintForAlpha(int alpha) {
     return new Paint()
       ..color = new Color.fromARGB(alpha, 0, 0, 0)
-      ..setTransferMode(ui.TransferMode.srcOver)
+      ..setTransferMode(TransferMode.srcOver)
       ..isAntiAlias = false;
   }
 
@@ -277,7 +276,7 @@ class PaintingContext {
     }
   }
 
-  static Paint _getPaintForColorFilter(Color color, ui.TransferMode transferMode) {
+  static Paint _getPaintForColorFilter(Color color, TransferMode transferMode) {
     return new Paint()
       ..colorFilter = new ui.ColorFilter.mode(color, transferMode)
       ..isAntiAlias = false;
@@ -295,7 +294,7 @@ class PaintingContext {
                                  Point childPosition,
                                  Rect bounds,
                                  Color color,
-                                 ui.TransferMode transferMode) {
+                                 TransferMode transferMode) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
@@ -316,7 +315,7 @@ class PaintingContext {
 
   static Paint _getPaintForShaderMask(Rect bounds,
                                       ShaderCallback shaderCallback,
-                                      ui.TransferMode transferMode) {
+                                      TransferMode transferMode) {
     return new Paint()
      ..transferMode = transferMode
      ..shader = shaderCallback(bounds);
@@ -326,7 +325,7 @@ class PaintingContext {
                                 Point childPosition,
                                 Rect bounds,
                                 ShaderCallback shaderCallback,
-                                ui.TransferMode transferMode) {
+                                TransferMode transferMode) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {

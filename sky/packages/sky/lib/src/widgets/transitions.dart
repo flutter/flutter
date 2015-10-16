@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
 import 'framework.dart';

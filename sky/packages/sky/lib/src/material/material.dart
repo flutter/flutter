@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';

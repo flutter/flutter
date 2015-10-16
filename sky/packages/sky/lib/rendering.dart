@@ -6,6 +6,7 @@
 library rendering;
 
 export 'src/rendering/auto_layout.dart';
+export 'src/rendering/basic_types.dart';
 export 'src/rendering/block.dart';
 export 'src/rendering/box.dart';
 export 'src/rendering/debug.dart';

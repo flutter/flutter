@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -16,8 +15,8 @@ import 'theme.dart';
 
 export 'package:flutter/rendering.dart' show ValueChanged;
 
-const ui.Color _kThumbOffColor = const ui.Color(0xFFFAFAFA);
-const ui.Color _kTrackOffColor = const ui.Color(0x42000000);
+const Color _kThumbOffColor = const Color(0xFFFAFAFA);
+const Color _kTrackOffColor = const Color(0x42000000);
 const double _kSwitchWidth = 35.0;
 const double _kThumbRadius = 10.0;
 const double _kSwitchHeight = _kThumbRadius * 2.0;
@@ -113,18 +112,18 @@ class _RenderSwitch extends RenderToggleable {
 
   void paint(PaintingContext context, Offset offset) {
     final PaintingCanvas canvas = context.canvas;
-    ui.Color thumbColor = _kThumbOffColor;
-    ui.Color trackColor = _kTrackOffColor;
+    Color thumbColor = _kThumbOffColor;
+    Color trackColor = _kTrackOffColor;
     if (value) {
       thumbColor = _thumbColor;
-      trackColor = new ui.Color(_thumbColor.value & 0x80FFFFFF);
+      trackColor = new Color(_thumbColor.value & 0x80FFFFFF);
     }
 
     // Draw the track rrect
-    ui.Paint paint = new ui.Paint()
+    Paint paint = new Paint()
       ..color = trackColor
       ..style = ui.PaintingStyle.fill;
-    ui.Rect rect = new ui.Rect.fromLTWH(offset.dx,
+    Rect rect = new Rect.fromLTWH(offset.dx,
         offset.dy + _kSwitchHeight / 2.0 - _kTrackHeight / 2.0, _kTrackWidth,
         _kTrackHeight);
     ui.RRect rrect = new ui.RRect()

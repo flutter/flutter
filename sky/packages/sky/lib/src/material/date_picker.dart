@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 

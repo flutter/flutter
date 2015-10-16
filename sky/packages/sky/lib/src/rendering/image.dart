@@ -9,6 +9,10 @@ import 'package:flutter/painting.dart';
 import 'box.dart';
 import 'object.dart';
 
+export 'package:flutter/painting.dart' show
+  ImageFit,
+  ImageRepeat;
+
 /// An image in the render tree.
 ///
 /// The render image attempts to find a size for itself that fits in the given

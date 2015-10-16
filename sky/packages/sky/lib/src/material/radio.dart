@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-const ui.Color _kLightOffColor = const ui.Color(0x8A000000);
-const ui.Color _kDarkOffColor = const ui.Color(0xB2FFFFFF);
+const Color _kLightOffColor = const Color(0x8A000000);
+const Color _kDarkOffColor = const Color(0xB2FFFFFF);
 
 typedef void RadioValueChanged(Object value);
 
@@ -45,18 +45,18 @@ class Radio extends StatelessComponent {
         width: kDiameter,
         height: kDiameter,
         child: new CustomPaint(
-          callback: (ui.Canvas canvas, Size size) {
-
-            Paint paint = new Paint()..color = _getColor(context);
+          callback: (Canvas canvas, Size size) {
 
             // Draw the outer circle
-            paint.setStyle(ui.PaintingStyle.stroke);
-            paint.strokeWidth = 2.0;
+            Paint paint = new Paint()
+              ..color = _getColor(context)
+              ..style = ui.PaintingStyle.stroke
+              ..strokeWidth = 2.0;
             canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kOuterRadius, paint);
 
             // Draw the inner circle
             if (value == groupValue) {
-              paint.setStyle(ui.PaintingStyle.fill);
+              paint.style = ui.PaintingStyle.fill;
               canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kInnerRadius, paint);
             }
           }
