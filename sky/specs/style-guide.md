@@ -248,6 +248,21 @@ this pattern. If for some reason you don't want to use 'value', use
 Start the method with any asserts you need to validate the value.
 
 
+### Packages
+
+As per normal Dart conventions, a package should have a single import that reexports all of its API.
+
+> For example, [rendering.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/rendering.dart) exports all of lib/src/rendering/*.dart
+
+If a package uses, as part of its exposed API, types that it imports from a lower layer, it should reexport those types.
+
+> For example, [material.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/material.dart) reexports everything from [widgets.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/widgets.dart). Similarly, the latter [reexports](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/src/widgets/basic.dart) many types from [rendering.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/rendering.dart), such as `BoxConstraints`, that it uses in its API. On the other hand, it does not reexport, say, `RenderProxyBox`, since that is not part of the widgets API.
+
+By convention, `dart:ui` is always imported using `import 'dart:ui' as ui;`. Other Flutter packages are imported undecorated.
+
+As a general rule, when you have a lot of constants, wrap them in a class. For examples of this, see [lib/src/material/colors.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/src/material/colors.dart)
+
+
 C++
 ---
 
