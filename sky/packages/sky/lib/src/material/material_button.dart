@@ -47,6 +47,12 @@ abstract class MaterialButton extends StatefulComponent {
   final bool enabled;
   final ButtonColor textColor;
   final GestureTapCallback onPressed;
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (!enabled)
+      description.add('disabled');
+  }
 }
 
 abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {

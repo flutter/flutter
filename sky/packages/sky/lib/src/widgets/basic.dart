@@ -314,7 +314,7 @@ class ConstrainedBox extends OneChildRenderObjectWidget {
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('constraints: $constraints');
+    description.add('$constraints');
   }
 }
 
@@ -547,6 +547,26 @@ class Container extends StatelessComponent {
       current = new Transform(transform: transform, child: current);
 
     return current;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (constraints != null)
+      description.add('$constraints');
+    if (decoration != null)
+      description.add('has background');
+    if (foregroundDecoration != null)
+      description.add('has foreground');
+    if (margin != null)
+      description.add('margin: $margin');
+    if (padding != null)
+      description.add('padding: $padding');
+    if (transform != null)
+      description.add('has transform');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
   }
 
 }

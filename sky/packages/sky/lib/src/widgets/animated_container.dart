@@ -124,7 +124,6 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
   void _updateAllVariables() {
     setState(() {
       _updateVariable(_constraints);
-      _updateVariable(_constraints);
       _updateVariable(_decoration);
       _updateVariable(_foregroundDecoration);
       _updateVariable(_margin);
@@ -223,5 +222,25 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
       width: _width?.value,
       height: _height?.value
     );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (_constraints != null)
+      description.add('has constraints');
+    if (_decoration != null)
+      description.add('has background');
+    if (_foregroundDecoration != null)
+      description.add('has foreground');
+    if (_margin != null)
+      description.add('has margin');
+    if (_padding != null)
+      description.add('has padding');
+    if (_transform != null)
+      description.add('has transform');
+    if (_width != null)
+      description.add('has width');
+    if (_height != null)
+      description.add('has height');
   }
 }

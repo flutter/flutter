@@ -281,6 +281,16 @@ class TabLabel {
 
   final String text;
   final String icon;
+
+  String toString() {
+    if (text != null && icon != null)
+      return '"$text" ($icon)';
+    if (text != null)
+      return '"$text"';
+    if (icon != null)
+      return '$icon';
+    return 'EMPTY TAB LABEL';
+  }
 }
 
 class Tab extends StatelessComponent {
@@ -344,6 +354,11 @@ class Tab extends StatelessComponent {
       onTap: onSelected,
       child: centeredLabel
     );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$label');
   }
 }
 
