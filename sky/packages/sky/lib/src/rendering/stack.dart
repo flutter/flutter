@@ -3,9 +3,137 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'box.dart';
 import 'object.dart';
+
+/// An immutable 2D, axis-aligned, floating-point rectangle whose coordinates
+/// are given relative to another rectangle's edges, known as the container.
+/// Since the dimensions of the rectangle are relative to those of the
+/// container, this class has no width and height members. To determine the
+/// width or height of the rectangle, convert it to a [Rect] using [toRect()]
+/// (passing the container's own Rect), and then examine that object.
+class RelativeRect {
+
+  /// Creates a RelativeRect with the given values.
+  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
+
+  /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
+  /// and the RelativeRect (the output) are in the coordinate space of the
+  /// rectangle described by the Size, with 0,0 being at the top left.
+  factory RelativeRect.fromSize(Rect rect, Size container) {
+    return new RelativeRect.fromLTRB(rect.left, rect.top, container.width - rect.right, container.height - rect.bottom);
+  }
+
+  /// Creates a RelativeRect from two Rects. The second Rect provides the
+  /// container, the first provides the rectangle, in the same coordinate space,
+  /// that is to be converted to a RelativeRect. The output will be in the
+  /// container's coordinate space.
+  ///
+  /// For example, if the top left of the rect is at 0,0, and the top left of
+  /// the container is at 100,100, then the top left of the output will be at
+  /// -100,-100.
+  ///
+  /// If the first rect is actually in the container's coordinate space, then
+  /// use [RelativeRect.fromSize] and pass the container's size as the second
+  /// argument instead.
+  factory RelativeRect.fromRect(Rect rect, Rect container) {
+    return new RelativeRect.fromLTRB(
+      rect.left - container.left,
+      rect.top - container.top,
+      container.right - rect.left + rect.width,
+      container.bottom - rect.top + rect.height
+    );
+  }
+
+  static final RelativeRect fill = new RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0);
+
+  /// Distance from the left side of the container to the left side of this rectangle.
+  final double left;
+
+  /// Distance from the top side of the container to the top side of this rectangle.
+  final double top;
+
+  /// Distance from the right side of the container to the right side of this rectangle.
+  final double right;
+
+  /// Distance from the bottom side of the container to the bottom side of this rectangle.
+  final double bottom;
+
+  /// Returns a new rectangle object translated by the given offset.
+  RelativeRect shift(Offset offset) {
+    return new RelativeRect.fromLTRB(left + offset.dx, top + offset.dy, right + offset.dx, bottom + offset.dy);
+  }
+
+  /// Returns a new rectangle with edges moved outwards by the given delta.
+  RelativeRect inflate(double delta) {
+    return new RelativeRect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
+  }
+
+  /// Returns a new rectangle with edges moved inwards by the given delta.
+  RelativeRect deflate(double delta) {
+    return inflate(-delta);
+  }
+
+  /// Returns a new rectangle that is the intersection of the given rectangle and this rectangle.
+  RelativeRect intersect(RelativeRect other) {
+    return new RelativeRect.fromLTRB(
+      math.max(left, other.left),
+      math.max(top, other.top),
+      math.max(right, other.right),
+      math.max(bottom, other.bottom)
+    );
+  }
+
+  /// Convert this RelativeRect to a Rect, in the coordinate space of the container.
+  Rect toRect(Rect container) {
+    return new Rect.fromLTRB(left, top, container.width - right, container.height - bottom);
+  }
+
+  /// Linearly interpolate between two RelativeRects.
+  ///
+  /// If either rect is null, this function interpolates from [RelativeRect.fill].
+  static RelativeRect lerp(RelativeRect a, RelativeRect b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return new RelativeRect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
+    if (b == null) {
+      double k = 1.0 - t;
+      return new RelativeRect.fromLTRB(b.left * k, b.top * k, b.right * k, b.bottom * k);
+    }
+    return new RelativeRect.fromLTRB(
+      lerpDouble(a.left, b.left, t),
+      lerpDouble(a.top, b.top, t),
+      lerpDouble(a.right, b.right, t),
+      lerpDouble(a.bottom, b.bottom, t)
+    );
+  }
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! RelativeRect)
+      return false;
+    final RelativeRect typedOther = other;
+    return left == typedOther.left &&
+           top == typedOther.top &&
+           right == typedOther.right &&
+           bottom == typedOther.bottom;
+  }
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + left.hashCode;
+    value = 37 * value + top.hashCode;
+    value = 37 * value + right.hashCode;
+    value = 37 * value + bottom.hashCode;
+    return value;
+  }
+
+  String toString() => "RelativeRect.fromLTRB($left, $top, $right, $bottom)";
+}
 
 /// Parent data for use with [RenderStack]
 class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
@@ -20,6 +148,15 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
 
   /// The offset of the child's left edge from the left of the stack
   double left;
+
+  /// Get or set the current values in terms of a RelativeRect object.
+  RelativeRect get rect => new RelativeRect.fromLTRB(left, top, right, bottom);
+  void set rect(RelativeRect value) {
+    left = value.left;
+    top = value.top;
+    right = value.right;
+    bottom = value.bottom;
+  }
 
   void merge(StackParentData other) {
     if (other.top != null)
