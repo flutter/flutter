@@ -47,11 +47,18 @@ void debugPrint(String message) {
     _debugPrintTask();
 }
 int _debugPrintedCharacters = 0;
-int _kDebugPrintCapacity = 32 * 1024;
+int _kDebugPrintCapacity = 16 * 1024;
+Duration _kDebugPrintPauseTime = const Duration(seconds: 1);
 Queue<String> _debugPrintBuffer = new Queue<String>();
+Stopwatch _debugPrintStopwatch = new Stopwatch();
 bool _debugPrintScheduled = false;
 void _debugPrintTask() {
   _debugPrintScheduled = false;
+  if (_debugPrintStopwatch.elapsed > _kDebugPrintPauseTime) {
+    _debugPrintStopwatch.stop();
+    _debugPrintStopwatch.reset();
+    _debugPrintedCharacters = 0;
+  }
   while (_debugPrintedCharacters < _kDebugPrintCapacity && _debugPrintBuffer.length > 0) {
     String line = _debugPrintBuffer.removeFirst();
     _debugPrintedCharacters += line.length; // TODO(ianh): Use the UTF-8 byte length instead
@@ -60,6 +67,8 @@ void _debugPrintTask() {
   if (_debugPrintBuffer.length > 0) {
     _debugPrintScheduled = true;
     _debugPrintedCharacters = 0;
-    new Timer(new Duration(seconds: 1), _debugPrintTask);
+    new Timer(_kDebugPrintPauseTime, _debugPrintTask);
+  } else {
+    _debugPrintStopwatch.start();
   }
 }
