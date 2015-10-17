@@ -106,7 +106,7 @@ class _DrawerRoute extends Route {
   final int level;
 
   PerformanceView get performance => _performance?.view;
-  Performance _performance = new Performance(duration: _kBaseSettleDuration);
+  Performance _performance = new Performance(duration: _kBaseSettleDuration, debugLabel: 'Drawer');
 
   bool get opaque => false;
 

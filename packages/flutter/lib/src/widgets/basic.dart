@@ -76,6 +76,11 @@ class Opacity extends OneChildRenderObjectWidget {
   void updateRenderObject(RenderOpacity renderObject, Opacity oldWidget) {
     renderObject.opacity = opacity;
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('opacity: $opacity');
+  }
 }
 
 class ColorFilter extends OneChildRenderObjectWidget {
@@ -283,6 +288,14 @@ class SizedBox extends OneChildRenderObjectWidget {
   void updateRenderObject(RenderConstrainedBox renderObject, SizedBox oldWidget) {
     renderObject.additionalConstraints = _additionalConstraints;
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+  }
 }
 
 class ConstrainedBox extends OneChildRenderObjectWidget {
@@ -297,6 +310,11 @@ class ConstrainedBox extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderConstrainedBox renderObject, ConstrainedBox oldWidget) {
     renderObject.additionalConstraints = constraints;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('constraints: $constraints');
   }
 }
 
@@ -315,6 +333,14 @@ class FractionallySizedBox extends OneChildRenderObjectWidget {
   void updateRenderObject(RenderFractionallySizedBox renderObject, SizedBox oldWidget) {
     renderObject.widthFactor = width;
     renderObject.heightFactor = height;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
   }
 }
 
@@ -354,6 +380,11 @@ class AspectRatio extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderAspectRatio renderObject, AspectRatio oldWidget) {
     renderObject.aspectRatio = aspectRatio;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('aspectRatio: $aspectRatio');
   }
 }
 
@@ -644,6 +675,18 @@ class Positioned extends ParentDataWidget {
     if (needsLayout)
       renderObject.markNeedsLayout();
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (left != null)
+      description.add('left: $left');
+    if (top != null)
+      description.add('top: $top');
+    if (right != null)
+      description.add('right: $right');
+    if (bottom != null)
+      description.add('bottom: $bottom');
+  }
 }
 
 class Grid extends MultiChildRenderObjectWidget {
@@ -727,6 +770,11 @@ class Flexible extends ParentDataWidget {
       parentData.flex = flex;
       renderObject.markNeedsLayout();
     }
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('flex: $flex');
   }
 }
 
@@ -1076,6 +1124,11 @@ class MetaData extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderMetaData renderObject, MetaData oldWidget) {
     renderObject.metaData = metaData;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$metaData');
   }
 }
 
