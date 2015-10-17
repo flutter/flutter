@@ -513,14 +513,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   dynamic debugExceptionContext = '';
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
-    print('-- EXCEPTION --');
-    print('The following exception was raised during $method():');
-    print('$exception');
-    print('Stack trace:');
-    print('$stack');
-    print('The following RenderObject was being processed when the exception was fired:\n${this}');
+    debugPrint('-- EXCEPTION --');
+    debugPrint('The following exception was raised during $method():');
+    debugPrint('$exception');
+    debugPrint('Stack trace:');
+    debugPrint('$stack');
+    debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
     if (debugExceptionContext != '')
-      'That RenderObject had the following exception context:\n$debugExceptionContext'.split('\n').forEach(print);
+      debugPrint('That RenderObject had the following exception context:\n$debugExceptionContext');
     if (debugRenderingExceptionHandler != null)
       debugRenderingExceptionHandler(this, method, exception, stack);
   }
@@ -723,15 +723,30 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     else
       relayoutSubtreeRoot = parent._relayoutSubtreeRoot;
     assert(parent == this.parent);
-    if (!needsLayout && constraints == _constraints && relayoutSubtreeRoot == _relayoutSubtreeRoot)
+    assert(() {
+      _debugCanParentUseSize = parentUsesSize;
+      return true;
+    });
+    if (!needsLayout && constraints == _constraints && relayoutSubtreeRoot == _relayoutSubtreeRoot) {
+      assert(() {
+        // in case parentUsesSize changed since the last invocation, set size
+        // to itself, so it has the right internal debug values.
+        _debugDoingThisLayout = true;
+        RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+        _debugActiveLayout = this;
+        debugResetSize();
+        _debugActiveLayout = debugPreviousActiveLayout;
+        _debugDoingThisLayout = false;
+        return true;
+      });
       return;
+    }
     _constraints = constraints;
     _relayoutSubtreeRoot = relayoutSubtreeRoot;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
     assert(() {
       _debugMutationsLocked = true;
-      _debugCanParentUseSize = parentUsesSize;
       return true;
     });
     if (sizedByParent) {
@@ -767,6 +782,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     markNeedsPaint();
     assert(parent == this.parent);
   }
+
+  /// If a subclass has a "size" (the state controlled by "parentUsesSize",
+  /// whatever it is in the subclass, e.g. the actual "size" property of
+  /// RenderBox), and the subclass verifies that in checked mode this "size"
+  /// property isn't used when debugCanParentUseSize isn't set, then that
+  /// subclass should override debugResetSize() to reapply the current values of
+  /// debugCanParentUseSize to that state.
+  void debugResetSize() { }
 
   /// Whether the constraints are the only input to the sizing algorithm (in
   /// particular, child nodes have no impact)

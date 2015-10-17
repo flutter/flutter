@@ -7,6 +7,7 @@ library rendering;
 
 export 'src/rendering/auto_layout.dart';
 export 'src/rendering/basic_types.dart';
+export 'src/rendering/binding.dart';
 export 'src/rendering/block.dart';
 export 'src/rendering/box.dart';
 export 'src/rendering/debug.dart';
@@ -22,7 +23,6 @@ export 'src/rendering/object.dart';
 export 'src/rendering/paragraph.dart';
 export 'src/rendering/proxy_box.dart';
 export 'src/rendering/shifted_box.dart';
-export 'src/rendering/binding.dart';
 export 'src/rendering/stack.dart';
 export 'src/rendering/statistics_box.dart';
 export 'src/rendering/toggleable.dart';

@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'box.dart';
 import 'hit_test.dart';
@@ -252,5 +253,5 @@ class FlutterBinding extends HitTestTarget {
 
 /// Prints a textual representation of the entire render tree
 void debugDumpRenderTree() {
-  FlutterBinding.instance.renderView.toStringDeep().split('\n').forEach(print);
+  debugPrint(FlutterBinding.instance.renderView.toStringDeep());
 }
