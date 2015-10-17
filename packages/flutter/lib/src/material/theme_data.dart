@@ -124,4 +124,6 @@ class ThemeData {
     value = 37 * value + accentColorBrightness.hashCode;
     return value;
   }
+
+  String toString() => '$primaryColor $brightness etc...';
 }

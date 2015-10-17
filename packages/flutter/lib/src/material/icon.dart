@@ -23,6 +23,8 @@ class IconThemeData {
   }
 
   int get hashCode => color.hashCode;
+
+  String toString() => '$color';
 }
 
 class IconTheme extends InheritedWidget {
@@ -45,6 +47,10 @@ class IconTheme extends InheritedWidget {
 
   bool updateShouldNotify(IconTheme old) => data != old.data;
 
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$data');
+  }
 }
 
 AssetBundle _initIconBundle() {
@@ -63,7 +69,10 @@ class Icon extends StatelessComponent {
     this.type: '',
     this.color,
     this.colorFilter
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(size != null);
+    assert(type != null);
+  }
 
   final int size;
   final String type;
@@ -107,5 +116,11 @@ class Icon extends StatelessComponent {
       height: size.toDouble(),
       colorFilter: colorFilter
     );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$type');
+    description.add('size: $size');
   }
 }

@@ -14,15 +14,15 @@ const double _kLinearProgressIndicatorHeight = 6.0;
 const double _kMinCircularProgressIndicatorSize = 15.0;
 const double _kCircularProgressIndicatorStrokeWidth = 3.0;
 
+// TODO(hansmuller) implement the support for buffer indicator
+
 abstract class ProgressIndicator extends StatefulComponent {
   ProgressIndicator({
     Key key,
-    this.value,
-    this.bufferValue
+    this.value
   }) : super(key: key);
 
   final double value; // Null for non-determinate progress indicator.
-  final double bufferValue; // TODO(hansmuller) implement the support for this.
 
   Color _getBackgroundColor(BuildContext context) => Theme.of(context).primarySwatch[200];
   Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
@@ -31,6 +31,11 @@ abstract class ProgressIndicator extends StatefulComponent {
   Widget _buildIndicator(BuildContext context, double performanceValue);
 
   _ProgressIndicatorState createState() => new _ProgressIndicatorState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%');
+  }
 }
 
 class _ProgressIndicatorState extends State<ProgressIndicator> {
@@ -72,9 +77,8 @@ class _ProgressIndicatorState extends State<ProgressIndicator> {
 class LinearProgressIndicator extends ProgressIndicator {
   LinearProgressIndicator({
     Key key,
-    double value,
-    double bufferValue
-  }) : super(key: key, value: value, bufferValue: bufferValue);
+    double value
+  }) : super(key: key, value: value);
 
   void _paint(BuildContext context, double performanceValue, Canvas canvas, Size size) {
     Paint paint = new Paint()
@@ -120,9 +124,8 @@ class CircularProgressIndicator extends ProgressIndicator {
 
   CircularProgressIndicator({
     Key key,
-    double value,
-    double bufferValue
-  }) : super(key: key, value: value, bufferValue: bufferValue);
+    double value
+  }) : super(key: key, value: value);
 
   void _paint(BuildContext context, double performanceValue, Canvas canvas, Size size) {
     Paint paint = new Paint()

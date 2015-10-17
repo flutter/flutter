@@ -36,4 +36,9 @@ class IconButton extends StatelessComponent {
       )
     );
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$icon');
+  }
 }
