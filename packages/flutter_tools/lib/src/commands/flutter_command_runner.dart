@@ -94,7 +94,7 @@ class FlutterCommandRunner extends CommandRunner {
 
   ArgResults _globalResults;
 
-  Future<int> runCommand(ArgResults globalResults) async {
+  Future<int> runCommand(ArgResults globalResults) {
     if (globalResults['verbose'])
       Logger.root.level = Level.INFO;
 

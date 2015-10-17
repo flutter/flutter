@@ -81,24 +81,24 @@ Iterable<_MaterialAsset> _parseMaterialAssets(Map manifestDescriptor) sync* {
   }
 }
 
-Future _loadManifest(String manifestPath) async {
+dynamic _loadManifest(String manifestPath) {
   if (manifestPath == null)
     return null;
-  String manifestDescriptor = await new File(manifestPath).readAsString();
+  String manifestDescriptor = new File(manifestPath).readAsStringSync();
   return loadYaml(manifestDescriptor);
 }
 
-Future<ArchiveFile> _createFile(String key, String assetBase) async {
+ArchiveFile _createFile(String key, String assetBase) {
   File file = new File('${assetBase}/${key}');
-  if (!await file.exists())
+  if (!file.existsSync())
     return null;
-  List<int> content = await file.readAsBytes();
+  List<int> content = file.readAsBytesSync();
   return new ArchiveFile.noCompress(key, content.length, content);
 }
 
-Future<ArchiveFile> _createSnapshotFile(String snapshotPath) async {
+ArchiveFile _createSnapshotFile(String snapshotPath) {
   File file = new File(snapshotPath);
-  List<int> content = await file.readAsBytes();
+  List<int> content = file.readAsBytesSync();
   return new ArchiveFile(_kSnapshotKey, content.length, content);
 }
 
@@ -145,7 +145,7 @@ class BuildCommand extends FlutterCommand {
     String outputPath: _kDefaultOutputPath,
     String snapshotPath: _kDefaultSnapshotPath
   }) async {
-    Map manifestDescriptor = await _loadManifest(manifestPath);
+    Map manifestDescriptor = _loadManifest(manifestPath);
 
     Iterable<_Asset> assets = _parseAssets(manifestDescriptor, manifestPath);
     Iterable<_MaterialAsset> materialAssets = _parseMaterialAssets(manifestDescriptor);
@@ -156,20 +156,21 @@ class BuildCommand extends FlutterCommand {
     if (result != 0)
       return result;
 
-    archive.addFile(await _createSnapshotFile(snapshotPath));
+    archive.addFile(_createSnapshotFile(snapshotPath));
 
     for (_Asset asset in assets)
-      archive.addFile(await _createFile(asset.key, asset.base));
+      archive.addFile(_createFile(asset.key, asset.base));
 
     for (_MaterialAsset asset in materialAssets) {
-      ArchiveFile file = await _createFile(asset.key, assetBase);
+      ArchiveFile file = _createFile(asset.key, assetBase);
       if (file != null)
         archive.addFile(file);
     }
 
     File outputFile = new File(outputPath);
-    await outputFile.writeAsString('#!mojo mojo:sky_viewer\n');
-    await outputFile.writeAsBytes(new ZipEncoder().encode(archive), mode: FileMode.APPEND, flush: true);
+    outputFile.writeAsStringSync('#!mojo mojo:sky_viewer\n');
+    outputFile.writeAsBytesSync(
+        new ZipEncoder().encode(archive), mode: FileMode.APPEND, flush: true);
     return 0;
   }
 }

@@ -8,9 +8,9 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 
-import 'src/commands/flutter_command_runner.dart';
 import 'src/commands/build.dart';
 import 'src/commands/cache.dart';
+import 'src/commands/flutter_command_runner.dart';
 import 'src/commands/init.dart';
 import 'src/commands/install.dart';
 import 'src/commands/list.dart';
@@ -25,13 +25,18 @@ import 'src/commands/trace.dart';
 ///
 /// This function is intended to be used from the [flutter] command line tool.
 Future main(List<String> args) async {
-  Logger.root.level = Level.WARNING;
+  // This level can be adjusted by users through the `--verbose` option.
+  Logger.root.level = Level.SEVERE;
   Logger.root.onRecord.listen((LogRecord record) {
-    print('${record.level.name}: ${record.message}');
+    if (record.level >= Level.WARNING) {
+      stderr.writeln(record.message);
+    } else {
+      print(record.message);
+    }
     if (record.error != null)
-      print(record.error);
+      stderr.writeln(record.error);
     if (record.stackTrace != null)
-      print(record.stackTrace);
+      stderr.writeln(record.stackTrace);
   });
 
   FlutterCommandRunner runner = new FlutterCommandRunner()
@@ -48,9 +53,11 @@ Future main(List<String> args) async {
     ..addCommand(new TraceCommand());
 
   try {
-    await runner.run(args);
+    dynamic result = await runner.run(args);
+    if (result is int)
+      exit(result);
   } on UsageException catch (e) {
-    print(e);
-    exit(1);
+    stderr.writeln(e);
+    exit(4);
   }
 }

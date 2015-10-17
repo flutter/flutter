@@ -67,6 +67,14 @@ class StartCommand extends FlutterCommand {
       }
     }
 
+    if (!startedSomething) {
+      if (!devices.all.any((device) => device.isConnected())) {
+        _logging.severe('Unable to run application - no connected devices.');
+      } else {
+        _logging.severe('Unable to run application.');
+      }
+    }
+
     return startedSomething ? 0 : 2;
   }
 }

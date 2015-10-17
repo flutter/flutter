@@ -31,17 +31,17 @@ class RunMojoCommand extends Command {
   }
 
   // TODO(abarth): Why not use path.absolute?
-  Future<String> _makePathAbsolute(String relativePath) async {
+  String _makePathAbsolute(String relativePath) {
     File file = new File(relativePath);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       throw new Exception("Path \"${relativePath}\" does not exist");
     }
     return file.absolute.path;
   }
 
-  Future<int> _runAndroid(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) async {
+  Future<int> _runAndroid(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) {
     String skyViewerUrl = ArtifactStore.googleStorageUrl('viewer', 'android-arm');
-    String command = await _makePathAbsolute(path.join(mojoPath, 'mojo', 'devtools', 'common', 'mojo_run'));
+    String command = _makePathAbsolute(path.join(mojoPath, 'mojo', 'devtools', 'common', 'mojo_run'));
     String appName = path.basename(appPath);
     String appDir = path.dirname(appPath);
     String buildFlag = mojoConfig == _MojoConfig.Debug ? '--debug' : '--release';
@@ -65,9 +65,9 @@ class RunMojoCommand extends Command {
   }
 
   Future<int> _runLinux(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) async {
-    String viewerPath = await _makePathAbsolute(await ArtifactStore.getPath(Artifact.skyViewerMojo));
+    String viewerPath = _makePathAbsolute(await ArtifactStore.getPath(Artifact.skyViewerMojo));
     String mojoBuildType = mojoConfig == _MojoConfig.Debug ? 'Debug' : 'Release';
-    String mojoShellPath = await _makePathAbsolute(path.join(mojoPath, 'out', mojoBuildType, 'mojo_shell'));
+    String mojoShellPath = _makePathAbsolute(path.join(mojoPath, 'out', mojoBuildType, 'mojo_shell'));
     List<String> cmd = [
       mojoShellPath,
       'file://${appPath}',
@@ -93,7 +93,7 @@ class RunMojoCommand extends Command {
     }
     String mojoPath = argResults['mojo-path'];
     _MojoConfig mojoConfig = argResults['mojo-debug'] ? _MojoConfig.Debug : _MojoConfig.Release;
-    String appPath = await _makePathAbsolute(argResults['app']);
+    String appPath = _makePathAbsolute(argResults['app']);
 
     args.addAll(argResults.rest);
     if (argResults['android']) {

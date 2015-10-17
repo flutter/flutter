@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:logging/logging.dart';
 
-import 'flutter_command.dart';
 import '../device.dart';
+import 'flutter_command.dart';
 
 final Logger _logging = new Logger('sky_tools.logs');
 

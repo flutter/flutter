@@ -5,10 +5,10 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:shelf_static/shelf_static.dart';
-import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_route/shelf_route.dart' as shelf_route;
+import 'package:shelf_static/shelf_static.dart';
 
 void printUsage(parser) {
   print('Usage: sky_server [-v] PORT');

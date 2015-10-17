@@ -277,7 +277,7 @@ class IOSDevice extends Device {
       return 2;
     }
     return runCommandAndStreamOutput([loggerPath],
-        prefix: 'IOS DEV: ', filter: new RegExp(r'.*SkyShell.*'));
+        prefix: 'iOS dev: ', filter: new RegExp(r'.*SkyShell.*'));
   }
 }
 
@@ -499,7 +499,7 @@ class IOSSimulator extends Device {
       runSync(['rm', logFilePath]);
     }
     return runCommandAndStreamOutput(['tail', '-f', logFilePath],
-        prefix: 'IOS SIM: ', filter: new RegExp(r'.*SkyShell.*'));
+        prefix: 'iOS sim: ', filter: new RegExp(r'.*SkyShell.*'));
   }
 }
 
@@ -575,7 +575,7 @@ class AndroidDevice extends Device {
     _hasValidAndroid = _checkForLollipopOrLater();
 
     if (!_hasAdb || !_hasValidAndroid) {
-      _logging.severe('Unable to run on Android.');
+      _logging.warning('Unable to run on Android.');
     }
   }
 
@@ -855,7 +855,7 @@ class AndroidDevice extends Device {
       '-s',
       'sky',
       'chromium',
-    ], prefix: 'ANDROID: ');
+    ], prefix: 'android: ');
   }
 
   void startTracing(AndroidApk apk) {
