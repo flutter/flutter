@@ -61,5 +61,5 @@ class Offset extends OffsetBase {
   /// Compares two Offsets for equality.
   bool operator ==(dynamic other) => other is Offset && super == other;
 
-  String toString() => "Offset($dx, $dy)";
+  String toString() => "Offset(${dx.toStringAsFixed(1)}, ${dy.toStringAsFixed(1)})";
 }

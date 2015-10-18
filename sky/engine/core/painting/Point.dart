@@ -36,5 +36,5 @@ class Point {
     return result;
   }
 
-  String toString() => "Point($x, $y)";
+  String toString() => "Point(${x.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})";
 }

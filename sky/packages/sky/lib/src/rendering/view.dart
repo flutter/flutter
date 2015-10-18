@@ -23,6 +23,8 @@ class ViewConstraints {
 
   /// The orientation of the output surface (aspirational)
   final int orientation;
+
+  String toString() => '$size';
 }
 
 /// The root of the render tree
@@ -53,7 +55,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ViewConstraints get rootConstraints => _rootConstraints;
   ViewConstraints _rootConstraints;
   void set rootConstraints(ViewConstraints value) {
-    if (_rootConstraints == value)
+    if (rootConstraints == value)
       return;
     _rootConstraints = value;
     markNeedsLayout();
@@ -80,12 +82,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void performLayout() {
-    if (_rootConstraints.orientation != _orientation) {
+    if (rootConstraints.orientation != _orientation) {
       if (_orientation != null && child != null)
-        child.rotate(oldAngle: _orientation, newAngle: _rootConstraints.orientation, time: timeForRotation);
-      _orientation = _rootConstraints.orientation;
+        child.rotate(oldAngle: _orientation, newAngle: rootConstraints.orientation, time: timeForRotation);
+      _orientation = rootConstraints.orientation;
     }
-    _size = _rootConstraints.size;
+    _size = rootConstraints.size;
     assert(!_size.isInfinite);
 
     if (child != null)
@@ -127,4 +129,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   Rect get paintBounds => Point.origin & size;
+
+  String debugDescribeSettings(String prefix) => '${prefix}view width: ${ui.view.width} (in device pixels)\n${prefix}view height: ${ui.view.height} (in device pixels)\n${prefix}device pixel ratio: ${ui.view.devicePixelRatio} (device pixels per logical pixel)\n${prefix}root constraints: $rootConstraints (in logical pixels)\n';
+  // call to ${super.debugDescribeSettings(prefix)} is omitted because the root superclasses don't include any interesting information for this class
 }
