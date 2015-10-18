@@ -42,8 +42,8 @@ class RelativeRect {
     return new RelativeRect.fromLTRB(
       rect.left - container.left,
       rect.top - container.top,
-      container.right - rect.left + rect.width,
-      container.bottom - rect.top + rect.height
+      container.right - rect.right,
+      container.bottom - rect.bottom
     );
   }
 
