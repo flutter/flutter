@@ -1,6 +1,7 @@
 # tools
 
 [![Build Status](https://travis-ci.org/flutter/tools.svg)](https://travis-ci.org/flutter/tools)
+[![pub package](https://img.shields.io/pub/v/sky_tools.svg)](https://pub.dartlang.org/packages/sky_tools)
 
 Tools for building Flutter applications.
 
@@ -13,7 +14,7 @@ To install, run:
 or, depend on this package in your pubspec:
 
 ```yaml
-dependencies:
+dev_dependencies:
   sky_tools: any
 ```
 
