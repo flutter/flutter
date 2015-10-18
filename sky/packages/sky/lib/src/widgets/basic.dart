@@ -692,8 +692,11 @@ class Positioned extends ParentDataWidget {
       needsLayout = true;
     }
 
-    if (needsLayout)
-      renderObject.markNeedsLayout();
+    if (needsLayout) {
+      AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsLayout();
+    }
   }
 
   void debugFillDescription(List<String> description) {
@@ -788,7 +791,9 @@ class Flexible extends ParentDataWidget {
     final FlexParentData parentData = renderObject.parentData;
     if (parentData.flex != flex) {
       parentData.flex = flex;
-      renderObject.markNeedsLayout();
+      AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsLayout();
     }
   }
 
