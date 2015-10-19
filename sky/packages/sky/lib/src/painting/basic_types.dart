@@ -5,6 +5,7 @@
 export 'dart:ui' show
   Canvas,
   Color,
+  ColorFilter,
   FontStyle,
   FontWeight,
   Offset,

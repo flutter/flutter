@@ -35,7 +35,7 @@ class Icon extends StatelessComponent {
   final int size;
   final String type;
   final IconThemeColor color;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
 
   String _getColorSuffix(BuildContext context) {
     IconThemeColor iconThemeColor = color;
