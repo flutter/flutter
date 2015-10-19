@@ -4,10 +4,14 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:cipher/cipher.dart';
+import 'package:cipher/impl/client.dart';
 import 'package:yaml/yaml.dart';
 
+import '../signing.dart';
 import '../toolchain.dart';
 import 'flutter_command.dart';
 
@@ -96,6 +100,16 @@ ArchiveFile _createFile(String key, String assetBase) {
   return new ArchiveFile.noCompress(key, content.length, content);
 }
 
+// Writes a 32-bit length followed by the content of [bytes].
+void _writeBytesWithLength(File outputFile, List<int> bytes) {
+  if (bytes == null)
+    bytes = new Uint8List(0);
+  assert(bytes.length < 0xffffffff);
+  ByteData length = new ByteData(4)..setUint32(0, bytes.length, Endianness.LITTLE_ENDIAN);
+  outputFile.writeAsBytesSync(length.buffer.asUint8List(), mode: FileMode.APPEND);
+  outputFile.writeAsBytesSync(bytes, mode: FileMode.APPEND);
+}
+
 ArchiveFile _createSnapshotFile(String snapshotPath) {
   File file = new File(snapshotPath);
   List<int> content = file.readAsBytesSync();
@@ -106,6 +120,7 @@ const String _kDefaultAssetBase = 'packages/material_design_icons/icons';
 const String _kDefaultMainPath = 'lib/main.dart';
 const String _kDefaultOutputPath = 'app.flx';
 const String _kDefaultSnapshotPath = 'snapshot_blob.bin';
+const String _kDefaultPrivateKeyPath = 'privatekey.der';
 
 class BuildCommand extends FlutterCommand {
   final String name = 'build';
@@ -113,15 +128,18 @@ class BuildCommand extends FlutterCommand {
 
   BuildCommand() {
     argParser.addOption('asset-base', defaultsTo: _kDefaultAssetBase);
+
     argParser.addOption('compiler');
     argParser.addOption('main', defaultsTo: _kDefaultMainPath);
     argParser.addOption('manifest');
+    argParser.addOption('private-key', defaultsTo: _kDefaultPrivateKeyPath);
     argParser.addOption('output-file', abbr: 'o', defaultsTo: _kDefaultOutputPath);
     argParser.addOption('snapshot', defaultsTo: _kDefaultSnapshotPath);
   }
 
   @override
   Future<int> run() async {
+    initCipher();
     String compilerPath = argResults['compiler'];
 
     if (compilerPath == null)
@@ -134,7 +152,8 @@ class BuildCommand extends FlutterCommand {
       mainPath: argResults['main'],
       manifestPath: argResults['manifest'],
       outputPath: argResults['output-file'],
-      snapshotPath: argResults['snapshot']
+      snapshotPath: argResults['snapshot'],
+      privateKeyPath: argResults['private-key']
     );
   }
 
@@ -143,7 +162,8 @@ class BuildCommand extends FlutterCommand {
     String mainPath: _kDefaultMainPath,
     String manifestPath,
     String outputPath: _kDefaultOutputPath,
-    String snapshotPath: _kDefaultSnapshotPath
+    String snapshotPath: _kDefaultSnapshotPath,
+    String privateKeyPath: _kDefaultPrivateKeyPath
   }) async {
     Map manifestDescriptor = _loadManifest(manifestPath);
 
@@ -167,10 +187,16 @@ class BuildCommand extends FlutterCommand {
         archive.addFile(file);
     }
 
+    ECPrivateKey privateKey = await loadPrivateKey(privateKeyPath);
+    ECPublicKey publicKey = publicKeyFromPrivateKey(privateKey);
+
     File outputFile = new File(outputPath);
     outputFile.writeAsStringSync('#!mojo mojo:sky_viewer\n');
-    outputFile.writeAsBytesSync(
-        new ZipEncoder().encode(archive), mode: FileMode.APPEND, flush: true);
+    Uint8List zipBytes = new Uint8List.fromList(new ZipEncoder().encode(archive));
+    Uint8List manifestBytes = serializeManifest(manifestDescriptor, publicKey, zipBytes);
+    _writeBytesWithLength(outputFile, signManifest(manifestBytes, privateKey));
+    _writeBytesWithLength(outputFile, manifestBytes);
+    outputFile.writeAsBytesSync(zipBytes, mode: FileMode.APPEND, flush: true);
     return 0;
   }
 }
