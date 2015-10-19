@@ -14,7 +14,7 @@ class VirtualJoystick extends NodeWithSize {
     _paintControl = new Paint()
       ..color=new Color(0xffffffff)
       ..strokeWidth = 1.0
-      ..setStyle(ui.PaintingStyle.stroke);
+      ..style = ui.PaintingStyle.stroke;
   }
 
   Point _value = Point.origin;

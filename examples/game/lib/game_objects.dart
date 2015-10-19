@@ -16,7 +16,7 @@ abstract class GameObject extends Node {
   Paint _paintDebug = new Paint()
     ..color=new Color(0xffff0000)
     ..strokeWidth = 1.0
-    ..setStyle(ui.PaintingStyle.stroke);
+    ..style = ui.PaintingStyle.stroke;
 
   bool collidingWith(GameObject obj) {
     return (GameMath.distanceBetweenPoints(position, obj.position)

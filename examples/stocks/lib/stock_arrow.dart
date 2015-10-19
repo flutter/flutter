@@ -49,11 +49,11 @@ class StockArrow extends StatelessComponent {
       path.lineTo(centerX + w, arrowY + h);
       path.lineTo(centerX - w, arrowY + h);
       path.close();
-      paint.setStyle(ui.PaintingStyle.fill);
+      paint.style = ui.PaintingStyle.fill;
       canvas.drawPath(path, paint);
 
       // Draw a circle that circumscribes the arrow.
-      paint.setStyle(ui.PaintingStyle.stroke);
+      paint.style = ui.PaintingStyle.stroke;
       canvas.drawCircle(new Point(centerX, centerY), r, paint);
     });
 
