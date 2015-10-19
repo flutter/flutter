@@ -6,6 +6,8 @@ homepage: https://github.com/flutter/engine/tree/master/sky/packages/workbench
 dependencies:
   flutter: ">=0.0.3 <0.1.0"
   sky_tools: any
+  cipher: any
+  asn1lib: any
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
