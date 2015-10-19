@@ -6,13 +6,13 @@ Contributing to Sky
 Things you will need
 --------------------
 
- * git (used for source version control)
- * [Dart](https://www.dartlang.org/downloads/linux.html).
+ * git (used for source version control).
  * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
- * Python (used by many of our tools)
- * An ssh client (used to authenticate with GitHub)
- * curl (used by `gclient sync`)
+ * An ssh client (used to authenticate with GitHub).
  * Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools) (make sure it's in your path). We use the 'gclient' tool from depot_tools.
+ * Python (used by many of our tools, including 'gclient').
+ * curl (used by `gclient sync`).
+ * [Dart](https://www.dartlang.org/downloads/linux.html).
 
 Getting the code
 ----------------
