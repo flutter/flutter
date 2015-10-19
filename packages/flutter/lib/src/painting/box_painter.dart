@@ -561,10 +561,10 @@ enum ImageRepeat {
 
 /// Paint an image into the given rectangle in the canvas
 void paintImage({
-  ui.Canvas canvas,
+  Canvas canvas,
   Rect rect,
   ui.Image image,
-  ui.ColorFilter colorFilter,
+  ColorFilter colorFilter,
   ImageFit fit,
   repeat: ImageRepeat.noRepeat,
   Rect centerSlice,
@@ -668,7 +668,7 @@ class BackgroundImage {
   final Rect centerSlice;
 
   /// A color filter to apply to the background image before painting it.
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
 
   /// The image to be painted into the background.
   ui.Image get image => _image;

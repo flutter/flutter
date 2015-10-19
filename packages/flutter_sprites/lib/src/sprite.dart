@@ -113,7 +113,7 @@ abstract class SpritePaint {
     paint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
 
     if (colorOverlay != null) {
-      paint.colorFilter = new ui.ColorFilter.mode(colorOverlay, ui.TransferMode.srcATop);
+      paint.colorFilter = new ColorFilter.mode(colorOverlay, ui.TransferMode.srcATop);
     }
 
     if (transferMode != null) {

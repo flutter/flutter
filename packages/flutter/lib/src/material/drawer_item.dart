@@ -47,10 +47,10 @@ class _DrawerItemState extends State<DrawerItem> {
     return Colors.transparent;
   }
 
-  ui.ColorFilter _getColorFilter(ThemeData themeData) {
+  ColorFilter _getColorFilter(ThemeData themeData) {
     if (config.selected)
-      return new ui.ColorFilter.mode(themeData.primaryColor, TransferMode.srcATop);
-    return new ui.ColorFilter.mode(const Color(0x73000000), TransferMode.dstIn);
+      return new ColorFilter.mode(themeData.primaryColor, TransferMode.srcATop);
+    return new ColorFilter.mode(const Color(0x73000000), TransferMode.dstIn);
   }
 
   Widget build(BuildContext context) {

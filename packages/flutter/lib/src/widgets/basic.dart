@@ -20,6 +20,7 @@ export 'package:flutter/rendering.dart' show
     BoxShadow,
     Canvas,
     Color,
+    ColorFilter,
     EdgeDims,
     FlexAlignItems,
     FlexDirection,
@@ -894,7 +895,7 @@ class Image extends LeafRenderObjectWidget {
   final ui.Image image;
   final double width;
   final double height;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
   final Rect centerSlice;
@@ -936,7 +937,7 @@ class ImageListener extends StatefulComponent {
   final ImageResource image;
   final double width;
   final double height;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
   final Rect centerSlice;
@@ -998,7 +999,7 @@ class NetworkImage extends StatelessComponent {
   final String src;
   final double width;
   final double height;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
   final Rect centerSlice;
@@ -1033,7 +1034,7 @@ class AssetImage extends StatelessComponent {
   final AssetBundle bundle;
   final double width;
   final double height;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
   final Rect centerSlice;

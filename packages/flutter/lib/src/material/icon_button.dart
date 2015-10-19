@@ -20,7 +20,7 @@ class IconButton extends StatelessComponent {
 
   final String icon;
   final IconThemeColor color;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final GestureTapCallback onPressed;
 
   Widget build(BuildContext context) {
