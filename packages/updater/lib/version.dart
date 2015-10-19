@@ -9,7 +9,7 @@ import 'dart:math';
 // Usage: assert(new Version('1.1.0') < new Version('1.2.1'));
 class Version {
   Version(String versionStr) :
-    _parts = versionStr.split('.').map((val) => int.parse(val)).toList();
+    _parts = versionStr.split('.').map((String val) => int.parse(val)).toList();
 
   List<int> _parts;
 
@@ -28,5 +28,5 @@ class Version {
     return _parts.length - other._parts.length;  // results in 1.0 < 1.0.0
   }
 
-  int get hashCode => _parts.fold(373, (acc, part) => 37*acc + part);
+  int get hashCode => _parts.fold(373, (int acc, int part) => 37*acc + part);
 }
