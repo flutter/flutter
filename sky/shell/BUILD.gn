@@ -221,21 +221,9 @@ if (is_android) {
            ]
   }
 
-  ios_app("shell") {
-    app_name = "SkyShell"
-    info_plist = "ios/Info.plist"
-    entitlements_path = "ios/Entitlements.xcent"
-    code_signing_identity = ios_code_signing_identity
-
-    resource_copy_ios("sky_resources") {
-      resources = [ "//third_party/icu/android/icudtl.dat" ]
-      bundle_directory = "."
-    }
-
-    deps = [
-      ":ios_scaffolding",
-      ":sky_resources",
-    ]
+  group("shell") {
+    # iOS only supports application bundles with a precompiled instruction
+    # buffer. There is not Shell target for the same.
   }
 } else if (is_linux) {
   executable("shell") {

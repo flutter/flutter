@@ -74,6 +74,7 @@ class Engine : public UIDelegate,
   void RunFromNetwork(const mojo::String& url) override;
   void RunFromFile(const mojo::String& main,
                    const mojo::String& package_root) override;
+  void RunFromPrecompiledSnapshot() override;
   void RunFromSnapshot(const mojo::String& path) override;
   void RunFromBundle(const mojo::String& path) override;
 

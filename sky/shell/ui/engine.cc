@@ -181,6 +181,13 @@ void Engine::RunFromSnapshotStream(
   sky_view_->SetDisplayMetrics(display_metrics_);
 }
 
+void Engine::RunFromPrecompiledSnapshot() {
+  sky_view_ = blink::SkyView::Create(this);
+  sky_view_->CreateView("Sky");
+  sky_view_->RunFromPrecompiledSnapshot();
+  sky_view_->SetDisplayMetrics(display_metrics_);
+}
+
 void Engine::RunFromNetwork(const mojo::String& url) {
   dart_library_provider_.reset(
       new DartLibraryProviderNetwork(network_service_.get()));

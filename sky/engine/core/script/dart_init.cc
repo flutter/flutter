@@ -4,6 +4,8 @@
 
 #include "sky/engine/core/script/dart_init.h"
 
+#include <dlfcn.h>
+
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/single_thread_task_runner.h"
@@ -76,8 +78,14 @@ void CreateEmptyRootLibraryIfNeeded() {
 static const char* kDartArgs[] = {
     "--enable_mirrors=false",
 #if WTF_OS_IOS || WTF_OS_MACOSX
-    "--no-profile"
+    "--no-profile",
 #endif
+};
+
+static const char* kInstructionsSnapshotSymbolName = "kInstructionsSnapshot";
+
+static const char* kDartPrecompilationArgs[] {
+  "--precompilation",
 };
 
 static const char* kDartCheckedModeArgs[] = {
@@ -98,6 +106,16 @@ void IsolateShutdownCallback(void* callback_data) {
 bool IsServiceIsolateURL(const char* url_name) {
   return url_name != nullptr &&
       String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
+}
+
+static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
+  dlerror();  // clear previous errors on thread
+  void * sym = dlsym(RTLD_SELF, kInstructionsSnapshotSymbolName);
+  return (dlerror() != nullptr) ? nullptr : reinterpret_cast<uint8_t * >(sym);
+}
+
+static bool IsRunningPrecompiledCode() {
+  return PrecompiledInstructionsSymbolIfPresent() != nullptr;
 }
 
 // TODO(rafaelw): Right now this only supports the creation of the handle
@@ -129,7 +147,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       // Start the handle watcher from the service isolate so it isn't available
       // for debugging or general Observatory interaction.
       EnsureHandleWatcherStarted();
-      if (RuntimeEnabledFeatures::observatoryEnabled()) {
+      if (!IsRunningPrecompiledCode() &&
+          RuntimeEnabledFeatures::observatoryEnabled()) {
         std::string ip = "127.0.0.1";
         const intptr_t port = 8181;
         const bool service_isolate_booted =
@@ -181,6 +200,10 @@ void InitDartVM() {
 
   Vector<const char*> args;
   args.append(kDartArgs, arraysize(kDartArgs));
+
+  if (IsRunningPrecompiledCode())
+    args.append(kDartPrecompilationArgs, arraysize(kDartPrecompilationArgs));
+
   if (enable_checked_mode)
     args.append(kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
 
@@ -189,7 +212,7 @@ void InitDartVM() {
   DartDebugger::InitDebugger();
   CHECK(Dart_Initialize(
       kDartVmIsolateSnapshotBuffer,
-      nullptr,
+      PrecompiledInstructionsSymbolIfPresent(),
       IsolateCreateCallback,
       nullptr,  // Isolate interrupt callback.
       UnhandledExceptionCallback, IsolateShutdownCallback,

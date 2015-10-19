@@ -10,7 +10,6 @@ group("sky") {
     "//sky/engine/wtf:unittests($host_toolchain)",
     "//examples",
     "//sky/tools/imagediff($host_toolchain)",
-    "//sky/tools/sky_snapshot($host_toolchain)",
     ":sky_dev",
   ]
 

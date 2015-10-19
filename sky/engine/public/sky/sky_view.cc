@@ -59,6 +59,11 @@ void SkyView::RunFromLibrary(const WebString& name,
   dart_controller_->RunFromLibrary(name, library_provider);
 }
 
+void SkyView::RunFromPrecompiledSnapshot() {
+  DCHECK(view_);
+  dart_controller_->RunFromPrecompiledSnapshot();
+}
+
 void SkyView::RunFromSnapshot(const WebString& name,
                               mojo::ScopedDataPipeConsumerHandle snapshot) {
   DCHECK(view_);

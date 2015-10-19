@@ -17,10 +17,6 @@
 #include "sky/shell/ui_delegate.h"
 #include <strings.h>
 
-#ifndef NDEBUG
-#include "document_watcher.h"
-#endif
-
 enum MapperPhase {
   Accessed,
   Added,
@@ -92,10 +88,6 @@ class TouchMapper {
   sky::SkyEnginePtr _sky_engine;
   scoped_ptr<sky::shell::ShellView> _shell_view;
   TouchMapper _touch_mapper;
-
-#ifndef NDEBUG
-  DocumentWatcher *_document_watcher;
-#endif
 }
 
 static std::string SkPictureTracingPath() {
@@ -104,7 +96,7 @@ static std::string SkPictureTracingPath() {
   return [paths.firstObject UTF8String];
 }
 
--(instancetype) initWithShellView:(sky::shell::ShellView *) shellView {
+- (instancetype)initWithShellView:(sky::shell::ShellView*)shellView {
   self = [super init];
   if (self) {
     base::FilePath pictureTracingPath =
@@ -140,7 +132,9 @@ static std::string SkPictureTracingPath() {
   metrics->padding_top =
       [UIApplication sharedApplication].statusBarFrame.size.height;
 
-  [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
+  [[UIApplication sharedApplication]
+      setStatusBarStyle:UIStatusBarStyleLightContent
+               animated:NO];
   _sky_engine->OnViewportMetricsChanged(metrics.Pass());
 }
 
@@ -175,84 +169,15 @@ static std::string SkPictureTracingPath() {
   self.platformView->SurfaceCreated(self.acceleratedWidget);
 }
 
-- (NSString*)skyInitialLoadURL {
-  NSUserDefaults *standardDefaults = [NSUserDefaults standardUserDefaults];
-  NSString *target = [standardDefaults stringForKey:@"target"];
-  NSString *server = [standardDefaults stringForKey:@"server"];
-  if (server && target) {
-    return [NSString stringWithFormat:@"http://%@/%@", server, target];
-  }
-  return [NSBundle mainBundle].infoDictionary[@"org.domokit.sky.load_url"];
-}
-
-- (NSString*)skyInitialBundleURL {
-  NSString *flxBundlePath = [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"];
-#ifndef NDEBUG
-  NSFileManager *fileManager = [NSFileManager defaultManager];
-  NSError *error = nil;
-  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-  NSString *documentsDirectory = [paths objectAtIndex:0];
-  NSString *flxDocsPath = [documentsDirectory stringByAppendingPathComponent:@"app.flx"];
-
-  // Write an empty file to help identify the correct simulator app by its bundle id. See sky_tool for its use.
-  NSString *bundleIDPath = [documentsDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-  NSData *data = [[NSData alloc] initWithBytes:"" length:0];
-  if (![data writeToFile:bundleIDPath options:NSDataWritingAtomic error:&error]) {
-      NSLog(@"Couldn't write the bundle id file %@: auto reloading on the iOS simulator won't work\n%@", bundleIDPath, error);
-  }
-
-  if (flxBundlePath != nil && [fileManager fileExistsAtPath:flxDocsPath] == NO) {
-    if ([fileManager copyItemAtPath:flxBundlePath toPath:flxDocsPath error:&error]) {
-      return flxDocsPath;
-    }
-    NSLog(@"Error encountered copying app.flx from the Bundle to the Documents directory. Dynamic reloading will not be possible. %@", error);
-    return flxBundlePath;
-  }
-  return flxDocsPath;
-#endif
-  return flxBundlePath;
-}
-
 - (void)connectToEngineAndLoad {
   auto interface_request = mojo::GetProxy(&_sky_engine);
   self.platformView->ConnectToEngine(interface_request.Pass());
-
-  NSString *endpoint = self.skyInitialBundleURL;
-  if (endpoint.length > 0) {
-#ifndef NDEBUG
-    _document_watcher = [[DocumentWatcher alloc] initWithDocumentPath:endpoint callbackBlock:^{
-      mojo::String string(endpoint.UTF8String);
-      _sky_engine->RunFromBundle(string);
-    }];
-#endif
-    // Load from bundle
-    mojo::String string(endpoint.UTF8String);
-    _sky_engine->RunFromBundle(string);
-    return;
-  }
-
-  endpoint = self.skyInitialLoadURL;
-  if (endpoint.length > 0) {
-    // Load from URL
-    mojo::String string(endpoint.UTF8String);
-    _sky_engine->RunFromNetwork(string);
-    return;
-  }
+  _sky_engine->RunFromPrecompiledSnapshot();
 }
 
 - (void)notifySurfaceDestruction {
   self.platformView->SurfaceDestroyed();
 }
-
-#ifndef NDEBUG
-- (void)didMoveToWindow {
-  if (self.window == nil) {
-    [_document_watcher cancel];
-    [_document_watcher release];
-    _document_watcher = nil;
-  }
-}
-#endif
 
 #pragma mark - UIResponder overrides for raw touches
 

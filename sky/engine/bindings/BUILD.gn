@@ -41,9 +41,18 @@ source_set("bindings") {
     "//sky/engine/tonic",
     "//sky/engine/wtf",
     ":generated_bindings",
-    ":snapshot_cc",
-    ":updater_snapshot_cc",
   ]
+
+  # On iOS, precompiled snapshots contain the instruction buffer. Generation
+  # of the same requires all application specific script code to be specified
+  # up front. In such cases, there can be no updater or generic snapshotter
+  if (!is_ios) {
+    deps += [
+      ":snapshot_cc",
+      ":updater_snapshot_cc",
+    ]
+  }
+
   include_dirs = [
     "..",
     "$root_build_dir",

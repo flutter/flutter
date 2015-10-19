@@ -27,7 +27,7 @@ copy("sky_shell") {
     deps = [
       "//sky/shell",
     ]
-  } else if (is_ios || is_mac) {
+  } else if (is_mac) {
     sources = [
       "$root_build_dir/SkyShell.app",
     ]
@@ -35,7 +35,7 @@ copy("sky_shell") {
     deps = [
       "//sky/shell:shell_struct",
     ]
-  } else {
+  } else if(!is_ios) {
     sources = [
       "$root_build_dir/sky_shell",
       "$root_build_dir/icudtl.dat",
@@ -45,6 +45,9 @@ copy("sky_shell") {
       "//sky/shell",
       "//third_party/icu:icudata",
     ]
+  } else {
+    sources = []
+    deps = []
   }
 
   sky_snapshot_dir =
