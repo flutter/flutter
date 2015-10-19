@@ -18,7 +18,8 @@ void main() {
   void addFlexChildSolidColor(RenderFlex parent, ui.Color backgroundColor, { int flex: 0 }) {
     RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
     parent.add(child);
-    child.parentData.flex = flex;
+    final FlexParentData childParentData = child.parentData;
+    childParentData.flex = flex;
   }
 
   addFlexChildSolidColor(flexRoot, const ui.Color(0xFFFF00FF), flex: 1);

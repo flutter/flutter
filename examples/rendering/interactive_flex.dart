@@ -49,7 +49,8 @@ void main() {
   void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex: 0 }) {
     RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
     parent.add(child);
-    child.parentData.flex = flex;
+    final FlexParentData childParentData = child.parentData;
+    childParentData.flex = flex;
   }
 
   var row = new RenderFlex(direction: FlexDirection.horizontal);
@@ -90,7 +91,8 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
   addFlexChildSolidColor(column, const Color(0xFF0081C6), flex: 2);
 
   row.add(column);
-  column.parentData.flex = 8;
+  final FlexParentData childParentData = column.parentData;
+  childParentData.flex = 8;
 
   RenderDecoratedBox root = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF)),
