@@ -16,7 +16,8 @@ void main() {
 
   RenderObject child = new RenderSolidColorBox(const Color(0xFFFFFF00));
   flexRoot.add(child);
-  child.parentData.flex = 2;
+  FlexParentData childParentData = child.parentData;
+  childParentData.flex = 2;
 
   // The internet is a beautiful place.  https://baconipsum.com/
   String meatyString = """Bacon ipsum dolor amet ham fatback tri-tip, prosciutto
@@ -33,7 +34,8 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
     child: new RenderParagraph(text)
   );
   flexRoot.add(child);
-  child.parentData.flex = 1;
+  childParentData = child.parentData;
+  childParentData.flex = 1;
 
   new FlutterBinding(root: root);
 }
