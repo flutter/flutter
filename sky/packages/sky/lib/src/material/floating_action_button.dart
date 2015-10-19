@@ -4,7 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'icon.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';

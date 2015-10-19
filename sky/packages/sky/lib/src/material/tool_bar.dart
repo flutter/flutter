@@ -5,7 +5,8 @@
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
-import 'icon.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'shadows.dart';
 import 'theme.dart';
 import 'typography.dart';
@@ -17,7 +18,8 @@ class ToolBar extends StatelessComponent {
     this.center,
     this.right,
     this.level: 2,
-    this.backgroundColor
+    this.backgroundColor,
+    this.textTheme
   }) : super(key: key);
 
   final Widget left;
@@ -25,22 +27,22 @@ class ToolBar extends StatelessComponent {
   final List<Widget> right;
   final int level;
   final Color backgroundColor;
+  final TextTheme textTheme;
 
   Widget build(BuildContext context) {
     Color color = backgroundColor;
     IconThemeData iconThemeData;
-    TextStyle centerStyle = Typography.white.title;
-    TextStyle sideStyle = Typography.white.body1;
-    if (color == null) {
+    TextStyle centerStyle = textTheme?.title;
+    TextStyle sideStyle = textTheme?.body1;
+
+    if (color == null || iconThemeData == null || textTheme == null) {
       ThemeData themeData = Theme.of(context);
-      color = themeData.primaryColor;
-      if (themeData.primaryColorBrightness == ThemeBrightness.light) {
-        centerStyle = Typography.black.title;
-        sideStyle = Typography.black.body2;
-        iconThemeData = const IconThemeData(color: IconThemeColor.black);
-      } else {
-        iconThemeData = const IconThemeData(color: IconThemeColor.white);
-      }
+      color ??= themeData.primaryColor;
+      iconThemeData ??= themeData.primaryIconTheme;
+
+      TextTheme primaryTextTheme = themeData.primaryTextTheme;
+      centerStyle ??= primaryTextTheme.title;
+      sideStyle ??= primaryTextTheme.body2;
     }
 
     List<Widget> children = new List<Widget>();
