@@ -33,6 +33,7 @@ def main():
         '--output-file', os.path.abspath(args.output_file),
         '--package-root', os.path.abspath(args.package_root),
         '--snapshot', os.path.abspath(args.snapshot),
+        '--private-key', os.path.abspath(os.path.join(args.package_root, '..', 'privatekey.der')),
     ]
 
     if args.manifest:

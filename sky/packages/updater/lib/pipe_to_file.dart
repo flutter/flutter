@@ -30,13 +30,13 @@ class PipeToFile {
     return _consumer.endRead(thisRead.lengthInBytes);
   }
 
-  Future<MojoResult> drain() async {
-    var completer = new Completer();
+  Future drain() async {
+    Completer completer = new Completer();
     // TODO(mpcomplete): Is it legit to pass an async callback to listen?
     _eventStream.listen((List<int> event) async {
-      var mojoSignals = new MojoHandleSignals(event[1]);
+      MojoHandleSignals mojoSignals = new MojoHandleSignals(event[1]);
       if (mojoSignals.isReadable) {
-        var result = await _doRead();
+        MojoResult result = await _doRead();
         if (!result.isOk) {
           _eventStream.close();
           _eventStream = null;
@@ -58,7 +58,7 @@ class PipeToFile {
   }
 
   static Future<MojoResult> copyToFile(MojoDataPipeConsumer consumer, String outputPath) {
-    var drainer = new PipeToFile(consumer, outputPath);
+    PipeToFile drainer = new PipeToFile(consumer, outputPath);
     return drainer.drain();
   }
 }
