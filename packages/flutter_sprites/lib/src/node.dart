@@ -251,6 +251,12 @@ class Node {
 
   void set scale(double scale) {
     assert(scale != null);
+
+    if (_physicsBody != null && parent is PhysicsNode) {
+      PhysicsNode physicsNode = parent;
+      physicsNode._updateScale(this.physicsBody, scale);
+    }
+
     _scaleX = _scaleY = scale;
     invalidateTransformMatrix();
   }
@@ -262,6 +268,8 @@ class Node {
 
   void set scaleX(double scaleX) {
     assert(scaleX != null);
+    assert(physicsBody == null);
+
     _scaleX = scaleX;
     invalidateTransformMatrix();
   }
@@ -273,6 +281,8 @@ class Node {
 
   void set scaleY(double scaleY) {
     assert(scaleY != null);
+    assert(physicsBody == null);
+
     _scaleY = scaleY;
     invalidateTransformMatrix();
   }
