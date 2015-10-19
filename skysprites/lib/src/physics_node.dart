@@ -181,6 +181,14 @@ class PhysicsNode extends Node {
     body._body.setAwake(true);
   }
 
+  void _updateScale(PhysicsBody body, double scale) {
+    body._scale = scale;
+
+    if (body._attached) {
+      body._updateScale(this);
+    }
+  }
+
   void addChild(Node node) {
     super.addChild(node);
     if (node.physicsBody != null) {

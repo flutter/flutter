@@ -55,6 +55,7 @@ class TestBed extends NodeWithSize {
     _obstacle = new Sprite(_spriteSheet["ship.png"]);
     _obstacle.position = new Point(512.0, 800.0);
     _obstacle.size = new Size(64.0, 64.0);
+    _obstacle.scale = 2.0;
     _obstacle.physicsBody = new PhysicsBody(
       new PhysicsShapeCircle(Point.origin, 32.0),
       type: PhysicsBodyType.static,
@@ -68,6 +69,12 @@ class TestBed extends NodeWithSize {
     ActionSequence seq = new ActionSequence([
       new ActionTween((a) => _obstacle.position = a, new Point(256.0, 800.0), new Point(768.0, 800.0), 1.0, easeInOut),
       new ActionTween((a) => _obstacle.position = a, new Point(768.0, 800.0), new Point(256.0, 800.0), 1.0, easeInOut)
+    ]);
+    _obstacle.actions.run(new ActionRepeatForever(seq));
+
+    seq = new ActionSequence([
+      new ActionTween((a) => _obstacle.scale = a, 1.0, 2.0, 2.0, easeInOut),
+      new ActionTween((a) => _obstacle.scale = a, 2.0, 1.0, 2.0, easeInOut)
     ]);
     _obstacle.actions.run(new ActionRepeatForever(seq));
 
