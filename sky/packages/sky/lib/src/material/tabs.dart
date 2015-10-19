@@ -321,7 +321,7 @@ class Tab extends StatelessComponent {
   Widget _buildLabelIcon() {
     assert(label.icon != null);
     Color iconColor = selected ? selectedColor : color;
-    ui.ColorFilter filter = new ui.ColorFilter.mode(iconColor, TransferMode.srcATop);
+    ColorFilter filter = new ColorFilter.mode(iconColor, TransferMode.srcATop);
     return new Icon(type: label.icon, size: _kTabIconSize, colorFilter: filter);
   }
 
