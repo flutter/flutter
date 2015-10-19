@@ -62,7 +62,8 @@ class _UiEventConverter {
     Point position = new Point(event.x, event.y);
 
     _PointerState state = _stateForPointer[event.pointer];
-    double dx, dy;
+    double dx = 0.0;
+    double dy = 0.0;
     switch (event.type) {
       case 'pointerdown':
         if (state == null) {
