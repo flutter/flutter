@@ -9,16 +9,14 @@ void main() {
       tester.pumpWidget(
         new Align(
           child: new Container(),
-          horizontal: 0.75,
-          vertical: 0.75
+          alignment: const FractionalOffset(0.75, 0.75)
         )
       );
 
       tester.pumpWidget(
         new Align(
           child: new Container(),
-          horizontal: 0.5,
-          vertical: 0.5
+          alignment: const FractionalOffset(0.5, 0.5)
         )
       );
     });

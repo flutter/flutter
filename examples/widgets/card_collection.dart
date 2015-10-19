@@ -348,8 +348,7 @@ class CardCollectionState extends State<CardCollection> {
     if (_snapToCenter) {
       Widget indicator = new IgnorePointer(
         child: new Align(
-          horizontal: 0.0,
-          vertical: 0.5,
+          alignment: const FractionalOffset(0.0, 0.5),
           child: new Container(
             height: 1.0,
             decoration: new BoxDecoration(backgroundColor: const Color(0x80FFFFFF))

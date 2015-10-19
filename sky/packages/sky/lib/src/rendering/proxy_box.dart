@@ -863,30 +863,6 @@ class RenderDecoratedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
 }
 
-/// An offset that's expressed as a fraction of a Size.
-///
-/// FractionalOffset(0.0, 0.0) represents the top left of the Size,
-/// FractionalOffset(1.0, 1.0) represents the bottom right of the Size.
-class FractionalOffset {
-  const FractionalOffset(this.x, this.y);
-  final double x;
-  final double y;
-  bool operator ==(dynamic other) {
-    if (other is! FractionalOffset)
-      return false;
-    final FractionalOffset typedOther = other;
-    return x == typedOther.x &&
-           y == typedOther.y;
-  }
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + x.hashCode;
-    value = 37 * value + y.hashCode;
-    return value;
-  }
-  String toString() => '$runtimeType($x, $y)';
-}
-
 /// Applies a transformation before painting its child
 class RenderTransform extends RenderProxyBox {
   RenderTransform({

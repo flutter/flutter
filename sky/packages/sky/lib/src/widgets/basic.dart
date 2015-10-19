@@ -237,25 +237,20 @@ class Padding extends OneChildRenderObjectWidget {
 class Align extends OneChildRenderObjectWidget {
   Align({
     Key key,
-    this.horizontal: 0.5,
-    this.vertical: 0.5,
+    this.alignment: const FractionalOffset(0.5, 0.5),
     this.shrinkWrap: ShrinkWrap.none,
     Widget child
   }) : super(key: key, child: child) {
-    assert(horizontal != null);
-    assert(vertical != null);
     assert(shrinkWrap != null);
   }
 
-  final double horizontal;
-  final double vertical;
+  final FractionalOffset alignment;
   final ShrinkWrap shrinkWrap;
 
-  RenderPositionedBox createRenderObject() => new RenderPositionedBox(horizontal: horizontal, vertical: vertical, shrinkWrap: shrinkWrap);
+  RenderPositionedBox createRenderObject() => new RenderPositionedBox(alignment: alignment, shrinkWrap: shrinkWrap);
 
   void updateRenderObject(RenderPositionedBox renderObject, Align oldWidget) {
-    renderObject.horizontal = horizontal;
-    renderObject.vertical = vertical;
+    renderObject.alignment = alignment;
     renderObject.shrinkWrap = shrinkWrap;
   }
 }
