@@ -12,7 +12,8 @@ Things you will need
  * Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools) (make sure it's in your path). We use the 'gclient' tool from depot_tools.
  * Python (used by many of our tools, including 'gclient').
  * curl (used by `gclient sync`).
- * [Dart](https://www.dartlang.org/downloads/linux.html).
+
+You do not need [Dart](https://www.dartlang.org/downloads/linux.html) installed, as a Dart tool chain is automatically downloaded as part of the "getting the code" step.
 
 Getting the code
 ----------------
