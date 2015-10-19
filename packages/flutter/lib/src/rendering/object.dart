@@ -246,7 +246,7 @@ class PaintingContext {
   static Paint _getPaintForAlpha(int alpha) {
     return new Paint()
       ..color = new Color.fromARGB(alpha, 0, 0, 0)
-      ..setTransferMode(TransferMode.srcOver)
+      ..transferMode = TransferMode.srcOver
       ..isAntiAlias = false;
   }
 

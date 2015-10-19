@@ -10,7 +10,7 @@ class PowerBar extends NodeWithSize {
   Paint _paintOutline = new Paint()
     ..color = new Color(0xffffffff)
     ..strokeWidth = 1.0
-    ..setStyle(ui.PaintingStyle.stroke);
+    ..style = ui.PaintingStyle.stroke;
 
   void paint(PaintingCanvas canvas) {
     applyTransformForPivot(canvas);
