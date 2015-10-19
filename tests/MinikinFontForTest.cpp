@@ -29,11 +29,6 @@ MinikinFontForTest::MinikinFontForTest(const std::string& font_path) : mFontPath
 MinikinFontForTest::~MinikinFontForTest() {
 }
 
-bool MinikinFontForTest::GetGlyph(uint32_t codepoint, uint32_t *glyph) const {
-    LOG_ALWAYS_FATAL("MinikinFontForTest::GetGlyph is not yet implemented");
-    return false;
-}
-
 float MinikinFontForTest::GetHorizontalAdvance(
         uint32_t glyph_id, const android::MinikinPaint &paint) const {
     LOG_ALWAYS_FATAL("MinikinFontForTest::GetHorizontalAdvance is not yet implemented");

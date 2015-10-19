@@ -38,12 +38,6 @@ MinikinFontFreeType::~MinikinFontFreeType() {
     FT_Done_Face(mTypeface);
 }
 
-bool MinikinFontFreeType::GetGlyph(uint32_t codepoint, uint32_t *glyph) const {
-    FT_UInt glyph_index = FT_Get_Char_Index(mTypeface, codepoint);
-    *glyph = glyph_index;
-    return !!glyph_index;
-}
-
 float MinikinFontFreeType::GetHorizontalAdvance(uint32_t glyph_id,
     const MinikinPaint &paint) const {
     FT_Set_Pixel_Sizes(mTypeface, 0, paint.size);
