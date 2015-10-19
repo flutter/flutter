@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
-#include "mojo/services/keyboard/public/interfaces/keyboard.mojom.h"
+#include "mojo/services/keyboard/interfaces/keyboard.mojom.h"
 
 #if __OBJC__
 @class KeyboardClient;
@@ -29,6 +29,8 @@ class KeyboardServiceImpl : public ::keyboard::KeyboardService {
             ::keyboard::KeyboardType type) override;
   void ShowByRequest() override;
   void Hide() override;
+  void SetText(const mojo::String& text) override;
+  void SetSelection(int32_t start, int32_t end) override;
 
  private:
   mojo::StrongBinding<::keyboard::KeyboardService> binding_;
