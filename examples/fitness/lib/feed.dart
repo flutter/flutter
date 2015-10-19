@@ -14,13 +14,11 @@ class FitnessItemList extends StatelessComponent {
   final FitnessItemHandler onDismissed;
 
   Widget build(BuildContext context) {
-    return new Material(
-      child: new ScrollableList<FitnessItem>(
-        padding: const EdgeDims.all(4.0),
-        items: items,
-        itemExtent: kFitnessItemHeight,
-        itemBuilder: (_, item) => item.toRow(onDismissed: onDismissed)
-      )
+    return new ScrollableList<FitnessItem>(
+      padding: const EdgeDims.all(4.0),
+      items: items,
+      itemExtent: kFitnessItemHeight,
+      itemBuilder: (_, item) => item.toRow(onDismissed: onDismissed)
     );
   }
 }
@@ -171,14 +169,13 @@ class FeedFragmentState extends State<FeedFragment> {
   Widget buildBody() {
     TextStyle style = Theme.of(context).text.title;
     if (config.userData == null)
-      return new Material();
-    if (config.userData.items.length == 0)
-      return new Material(
-        child: new Row(
-          [new Text("No data yet.\nAdd some!", style: style)],
-          justifyContent: FlexJustifyContent.center
-        )
+      return new Container();
+    if (config.userData.items.length == 0) {
+      return new Row(
+        [new Text("No data yet.\nAdd some!", style: style)],
+        justifyContent: FlexJustifyContent.center
       );
+    }
     switch (_fitnessMode) {
       case FitnessMode.feed:
         return new FitnessItemList(
@@ -186,11 +183,9 @@ class FeedFragmentState extends State<FeedFragment> {
           onDismissed: _handleItemDismissed
         );
       case FitnessMode.chart:
-        return new Material(
-          child: new Container(
-            padding: const EdgeDims.all(20.0),
-            child: buildChart()
-          )
+        return new Container(
+          padding: const EdgeDims.all(20.0),
+          child: buildChart()
         );
     }
   }

@@ -32,24 +32,22 @@ class StockSymbolViewerState extends State<StockSymbolViewer> {
         ),
         center: new Text('${config.stock.name} (${config.stock.symbol})')
       ),
-      body: new Material(
-        child: new Block(<Widget>[
-          new Container(
-            padding: new EdgeDims.all(20.0),
-            child: new Column(<Widget>[
-                new Text('Last Sale', style: headings),
-                new Text('$lastSale ($changeInPrice)'),
-                new Container(
-                  height: 8.0
-                ),
-                new Text('Market Cap', style: headings),
-                new Text('${config.stock.marketCap}'),
-              ],
-              alignItems: FlexAlignItems.stretch
-            )
+      body: new Block(<Widget>[
+        new Container(
+          padding: new EdgeDims.all(20.0),
+          child: new Column(<Widget>[
+              new Text('Last Sale', style: headings),
+              new Text('$lastSale ($changeInPrice)'),
+              new Container(
+                height: 8.0
+              ),
+              new Text('Market Cap', style: headings),
+              new Text('${config.stock.marketCap}'),
+            ],
+            alignItems: FlexAlignItems.stretch
           )
-        ])
-      )
+        )
+      ])
     );
   }
 

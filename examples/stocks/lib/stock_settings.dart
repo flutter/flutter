@@ -83,35 +83,33 @@ class StockSettingsState extends State<StockSettings> {
   Widget buildSettingsPane(BuildContext context) {
     // TODO(ianh): Once we have the gesture API hooked up, fix https://github.com/domokit/mojo/issues/281
     // (whereby tapping the widgets below causes both the widget and the menu item to fire their callbacks)
-    return new Material(
-      child: new ScrollableViewport(
-        child: new Container(
-          padding: const EdgeDims.symmetric(vertical: 20.0),
-          child: new BlockBody(<Widget>[
-            new DrawerItem(
-              icon: 'action/thumb_up',
-              onPressed: () => _confirmOptimismChange(),
-              child: new Row(<Widget>[
-                new Flexible(child: new Text('Everything is awesome')),
-                new Checkbox(
-                  value: config.optimism == StockMode.optimistic,
-                  onChanged: (bool value) => _confirmOptimismChange()
-                ),
-              ])
-            ),
-            new DrawerItem(
-              icon: 'action/backup',
-              onPressed: () { _handleBackupChanged(!(config.backup == BackupMode.enabled)); },
-              child: new Row(<Widget>[
-                new Flexible(child: new Text('Back up stock list to the cloud')),
-                new Switch(
-                  value: config.backup == BackupMode.enabled,
-                  onChanged: _handleBackupChanged
-                ),
-              ])
-            ),
-          ])
-        )
+    return new ScrollableViewport(
+      child: new Container(
+        padding: const EdgeDims.symmetric(vertical: 20.0),
+        child: new BlockBody(<Widget>[
+          new DrawerItem(
+            icon: 'action/thumb_up',
+            onPressed: () => _confirmOptimismChange(),
+            child: new Row(<Widget>[
+              new Flexible(child: new Text('Everything is awesome')),
+              new Checkbox(
+                value: config.optimism == StockMode.optimistic,
+                onChanged: (bool value) => _confirmOptimismChange()
+              ),
+            ])
+          ),
+          new DrawerItem(
+            icon: 'action/backup',
+            onPressed: () { _handleBackupChanged(!(config.backup == BackupMode.enabled)); },
+            child: new Row(<Widget>[
+              new Flexible(child: new Text('Back up stock list to the cloud')),
+              new Switch(
+                value: config.backup == BackupMode.enabled,
+                onChanged: _handleBackupChanged
+              ),
+            ])
+          ),
+        ])
       )
     );
   }
