@@ -36,9 +36,10 @@ class Marker extends StatelessComponent {
     double r = size / 2.0;
     canvas.drawCircle(new Point(r, r), r, paint);
 
-    paint.color = const Color(0xFFFFFFFF);
-    paint.setStyle(ui.PaintingStyle.stroke);
-    paint.strokeWidth = 1.0;
+    paint
+      ..color = const Color(0xFFFFFFFF)
+      ..style = ui.PaintingStyle.stroke
+      ..strokeWidth = 1.0;
     if (type == MarkerType.topLeft) {
       canvas.drawLine(new Point(r, r), new Point(r + r - 1.0, r), paint);
       canvas.drawLine(new Point(r, r), new Point(r, r + r - 1.0), paint);

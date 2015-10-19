@@ -363,7 +363,7 @@ class ParticleSystem extends Node {
     List<Rect> rects = [];
     List<Color> colors = [];
 
-    _paint.setTransferMode(transferMode);
+    _paint.transferMode = transferMode;
 
     for (_Particle particle in _particles) {
       // Rect

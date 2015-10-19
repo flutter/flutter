@@ -866,7 +866,7 @@ class BoxPainter {
     Paint paint = new Paint()
       ..color = _decoration.border.top.color
       ..strokeWidth = width
-      ..setStyle(ui.PaintingStyle.stroke);
+      ..style = ui.PaintingStyle.stroke;
     Point center = rect.center;
     double radius = (rect.shortestSide - width) / 2.0;
     canvas.drawCircle(center, radius, paint);

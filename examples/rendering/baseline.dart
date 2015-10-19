@@ -48,10 +48,10 @@ RenderBox getBox(double lh) {
               path.lineTo(w, baseline);
               path.moveTo(0.0, h);
               path.lineTo(w, h);
-              Paint paint = new Paint();
-              paint.color = const Color(0xFFFF9000);
-              paint.setStyle(ui.PaintingStyle.stroke);
-              paint.strokeWidth = 3.0;
+              Paint paint = new Paint()
+               ..color = const Color(0xFFFF9000)
+               ..style = ui.PaintingStyle.stroke
+               ..strokeWidth = 3.0;
               canvas.drawPath(path, paint);
             }
           )
