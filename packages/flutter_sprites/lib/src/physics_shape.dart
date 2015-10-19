@@ -6,14 +6,14 @@ abstract class PhysicsShape {
 
   Object userObject;
 
-  box2d.Shape getB2Shape(PhysicsNode node, double scale) {
+  box2d.Shape getB2Shape(PhysicsWorld node, double scale) {
     if (_b2Shape == null) {
       _b2Shape = _createB2Shape(node, scale);
     }
     return _b2Shape;
   }
 
-  box2d.Shape _createB2Shape(PhysicsNode node, double scale);
+  box2d.Shape _createB2Shape(PhysicsWorld node, double scale);
 
   void _invalidate() {
     _b2Shape = null;
@@ -26,7 +26,7 @@ class PhysicsShapeCircle extends PhysicsShape {
   final Point point;
   final double radius;
 
-  box2d.Shape _createB2Shape(PhysicsNode node, double scale) {
+  box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     box2d.CircleShape shape = new box2d.CircleShape();
     shape.p.x = scale * point.x / node.b2WorldToNodeConversionFactor;
     shape.p.y = scale * point.y / node.b2WorldToNodeConversionFactor;
@@ -40,7 +40,7 @@ class PhysicsShapePolygon extends PhysicsShape {
 
   final List<Point> points;
 
-  box2d.Shape _createB2Shape(PhysicsNode node, double scale) {
+  box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     List<Vector2> vectors = [];
     for (Point point in points) {
       Vector2 vec = new Vector2(
@@ -69,7 +69,7 @@ class PhysicsShapeBox extends PhysicsShape {
   final Point center;
   final double rotation;
 
-  box2d.Shape _createB2Shape(PhysicsNode node, double scale) {
+  box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     box2d.PolygonShape shape = new box2d.PolygonShape();
     shape.setAsBox(
       scale * width / node.b2WorldToNodeConversionFactor,
@@ -90,7 +90,7 @@ class PhysicsShapeChain extends PhysicsShape {
   final List<Point> points;
   final bool loop;
 
-  box2d.Shape _createB2Shape(PhysicsNode node, double scale) {
+  box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     List<Vector2> vectors = [];
     for (Point point in points) {
       Vector2 vec = new Vector2(
@@ -115,7 +115,7 @@ class PhysicsShapeEdge extends PhysicsShape {
   final Point pointA;
   final Point pointB;
 
-  box2d.Shape _createB2Shape(PhysicsNode node, double scale) {
+  box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     box2d.EdgeShape shape = new box2d.EdgeShape();
     shape.set(
       new Vector2(
@@ -137,7 +137,7 @@ class PhysicsShapeGroup extends PhysicsShape {
 
   final List<PhysicsShape> shapes;
 
-  box2d.Shape _createB2Shape(PhysicsNode node, double scale) {
+  box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     return null;
   }
 
