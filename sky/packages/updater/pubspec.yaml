@@ -9,6 +9,8 @@ dependencies:
   sky_services: any
   path: any
   yaml: any
+  cipher: any
+  asn1lib: any
 dependency_overrides:
   flutter:
     path: ../sky

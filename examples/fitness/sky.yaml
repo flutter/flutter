@@ -1,6 +1,6 @@
 name: fitness
 version: 0.0.1
-update_url: http://localhost:9888/examples/fitness/
+update-url: http://localhost:9888/examples/fitness/
 material-design-icons:
   - name: action/assessment
   - name: action/help
