@@ -7,7 +7,7 @@ Things you will need
 --------------------
 
  * git (used for source version control)
- * Dart.
+ * [Dart](https://www.dartlang.org/downloads/linux.html).
  * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
  * Python (used by many of our tools)
  * An ssh client (used to authenticate with GitHub)
