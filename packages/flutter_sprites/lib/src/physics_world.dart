@@ -9,8 +9,8 @@ enum PhysicsContactType {
 
 typedef void PhysicsContactCallback(PhysicsContactType type, PhysicsContact contact);
 
-class PhysicsNode extends Node {
-  PhysicsNode(Offset gravity) {
+class PhysicsWorld extends Node {
+  PhysicsWorld(Offset gravity) {
     b2World = new box2d.World.withGravity(
       new Vector2(
         gravity.dx / b2WorldToNodeConversionFactor,
@@ -18,7 +18,7 @@ class PhysicsNode extends Node {
     _init();
   }
 
-  PhysicsNode.fromB2World(this.b2World, this.b2WorldToNodeConversionFactor) {
+  PhysicsWorld.fromB2World(this.b2World, this.b2WorldToNodeConversionFactor) {
     _init();
   }
 
@@ -252,7 +252,7 @@ class _ContactCallbackInfo {
 class _ContactHandler extends box2d.ContactListener {
   _ContactHandler(this.physicsNode);
 
-  PhysicsNode physicsNode;
+  PhysicsWorld physicsNode;
 
   List<_ContactCallbackInfo> callbackInfos = [];
 

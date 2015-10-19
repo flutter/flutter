@@ -132,8 +132,8 @@ class Node {
   void set rotation(double rotation) {
     assert(rotation != null);
 
-    if (_physicsBody != null && parent is PhysicsNode) {
-      PhysicsNode physicsNode = parent;
+    if (_physicsBody != null && parent is PhysicsWorld) {
+      PhysicsWorld physicsNode = parent;
       physicsNode._updateRotation(this.physicsBody, rotation);
       return;
     }
@@ -150,7 +150,7 @@ class Node {
 
   void teleportRotation(double rotation) {
     assert(rotation != null);
-    if (_physicsBody != null && parent is PhysicsNode) {
+    if (_physicsBody != null && parent is PhysicsWorld) {
       _physicsBody._body.setTransform(_physicsBody._body.position, radians(rotation));
       _physicsBody._body.angularVelocity = 0.0;
       _physicsBody._body.setType(box2d.BodyType.STATIC);
@@ -166,8 +166,8 @@ class Node {
   void set position(Point position) {
     assert(position != null);
 
-    if (_physicsBody != null && parent is PhysicsNode) {
-      PhysicsNode physicsNode = parent;
+    if (_physicsBody != null && parent is PhysicsWorld) {
+      PhysicsWorld physicsNode = parent;
       physicsNode._updatePosition(this.physicsBody, position);
       return;
     }
@@ -184,8 +184,8 @@ class Node {
 
   void teleportPosition(Point position) {
     assert(position != null);
-    if (_physicsBody != null && parent is PhysicsNode) {
-      PhysicsNode physicsNode = parent;
+    if (_physicsBody != null && parent is PhysicsWorld) {
+      PhysicsWorld physicsNode = parent;
       _physicsBody._body.setTransform(
         new Vector2(
           position.x / physicsNode.b2WorldToNodeConversionFactor,
@@ -252,8 +252,8 @@ class Node {
   void set scale(double scale) {
     assert(scale != null);
 
-    if (_physicsBody != null && parent is PhysicsNode) {
-      PhysicsNode physicsNode = parent;
+    if (_physicsBody != null && parent is PhysicsWorld) {
+      PhysicsWorld physicsNode = parent;
       physicsNode._updateScale(this.physicsBody, scale);
     }
 
@@ -681,7 +681,7 @@ class Node {
 
   set physicsBody(PhysicsBody physicsBody) {
     if (parent != null) {
-      assert(parent is PhysicsNode);
+      assert(parent is PhysicsWorld);
 
       if (physicsBody == null) {
         physicsBody._detach();

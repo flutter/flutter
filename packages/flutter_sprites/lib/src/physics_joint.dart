@@ -23,7 +23,7 @@ abstract class PhysicsJoint {
   bool _active = true;
   box2d.Joint _joint;
 
-  PhysicsNode _physicsNode;
+  PhysicsWorld _physicsNode;
 
   void _completeCreation() {
     if (bodyA._attached && bodyB._attached) {
@@ -31,7 +31,7 @@ abstract class PhysicsJoint {
     }
   }
 
-  void _attach(PhysicsNode physicsNode) {
+  void _attach(PhysicsWorld physicsNode) {
     if (_joint == null) {
       _physicsNode = physicsNode;
       _joint = _createB2Joint(physicsNode);
@@ -48,7 +48,7 @@ abstract class PhysicsJoint {
     _active = false;
   }
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode);
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode);
 
   void destroy() {
     _detach();
@@ -92,7 +92,7 @@ class PhysicsJointRevolute extends PhysicsJoint {
   final double upperAngle;
   final bool enableLimit;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     // Create Joint Definition
     Vector2 vecAnchor = new Vector2(
       _worldAnchor.x / physicsNode.b2WorldToNodeConversionFactor,
@@ -124,7 +124,7 @@ class PhysicsJointPrismatic extends PhysicsJoint {
 
   Offset axis;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.PrismaticJointDef b2Def = new box2d.PrismaticJointDef();
     b2Def.initialize(bodyA._body, bodyB._body, bodyA._body.position, new Vector2(axis.dx, axis.dy));
     return physicsNode.b2World.createJoint(b2Def);
@@ -147,7 +147,7 @@ class PhysicsJointWeld extends PhysicsJoint {
   final double dampening;
   final double frequency;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.WeldJointDef b2Def = new box2d.WeldJointDef();
     Vector2 middle = new Vector2(
       (bodyA._body.position.x + bodyB._body.position.x) / 2.0,
@@ -182,7 +182,7 @@ class PhysicsJointPulley extends PhysicsJoint {
   final Point anchorB;
   final double ratio;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.PulleyJointDef b2Def = new box2d.PulleyJointDef();
     b2Def.initialize(
       bodyA._body,
@@ -211,7 +211,7 @@ class PhysicsJointGear extends PhysicsJoint {
 
   final double ratio;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.GearJointDef b2Def = new box2d.GearJointDef();
     b2Def.bodyA = bodyA._body;
     b2Def.bodyB = bodyB._body;
@@ -243,7 +243,7 @@ class PhysicsJointDistance extends PhysicsJoint {
   final double dampening;
   final double frequency;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.DistanceJointDef b2Def = new box2d.DistanceJointDef();
     b2Def.initialize(
       bodyA._body,
@@ -280,7 +280,7 @@ class PhysicsJointWheel extends PhysicsJoint {
   final double dampening;
   final double frequency;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.WheelJointDef b2Def = new box2d.WheelJointDef();
     b2Def.initialize(
       bodyA._body,
@@ -313,7 +313,7 @@ class PhysicsJointFriction extends PhysicsJoint {
   final double maxForce;
   final double maxTorque;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.FrictionJointDef b2Def = new box2d.FrictionJointDef();
     b2Def.initialize(
       bodyA._body,
@@ -345,7 +345,7 @@ class PhysicsJointConstantVolume extends PhysicsJoint {
   final double dampening;
   final double frequency;
 
-  box2d.Joint _createB2Joint(PhysicsNode physicsNode) {
+  box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.ConstantVolumeJointDef b2Def = new box2d.ConstantVolumeJointDef();
     for (PhysicsBody body in bodies) {
       b2Def.addBody(body._body);
@@ -356,7 +356,7 @@ class PhysicsJointConstantVolume extends PhysicsJoint {
   }
 }
 
-Vector2 _convertPosToVec(Point pt, PhysicsNode physicsNode) {
+Vector2 _convertPosToVec(Point pt, PhysicsWorld physicsNode) {
   return new Vector2(
     pt.x / physicsNode.b2WorldToNodeConversionFactor,
     pt.y / physicsNode.b2WorldToNodeConversionFactor

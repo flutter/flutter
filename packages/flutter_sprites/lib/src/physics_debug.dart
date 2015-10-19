@@ -12,7 +12,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
     );
   }
 
-  PhysicsNode physicsNode;
+  PhysicsWorld physicsNode;
 
   PaintingCanvas canvas;
 
