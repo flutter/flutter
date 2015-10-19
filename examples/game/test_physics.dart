@@ -47,10 +47,10 @@ main() async {
 
 class TestBed extends NodeWithSize {
   Sprite _obstacle;
-  PhysicsNode _physicsNode;
+  PhysicsWorld _physicsNode;
 
   TestBed() : super(new Size(1024.0, 1024.0)) {
-    _physicsNode = new PhysicsNode(new Offset(0.0, 100.0));
+    _physicsNode = new PhysicsWorld(new Offset(0.0, 100.0));
 
     _obstacle = new Sprite(_spriteSheet["ship.png"]);
     _obstacle.position = new Point(512.0, 800.0);
