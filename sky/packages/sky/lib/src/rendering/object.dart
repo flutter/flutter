@@ -276,43 +276,6 @@ class PaintingContext {
     }
   }
 
-  static Paint _getPaintForColorFilter(Color color, TransferMode transferMode) {
-    return new Paint()
-      ..colorFilter = new ui.ColorFilter.mode(color, transferMode)
-      ..isAntiAlias = false;
-  }
-
-  /// Paint a child with a color filter
-  ///
-  /// The color filter is constructed by combining the given color and the given
-  /// transfer mode, as if they were passed to the [ColorFilter.mode] constructor.
-  ///
-  /// If the child needs compositing, the blending operation will be applied by
-  /// a compositing layer. Otherwise, the blending operation will be applied by
-  /// the canvas.
-  void paintChildWithColorFilter(RenderObject child,
-                                 Point childPosition,
-                                 Rect bounds,
-                                 Color color,
-                                 TransferMode transferMode) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, _getPaintForColorFilter(color, transferMode));
-      canvas.translate(childOffset.dx, childOffset.dy);
-      insertChild(child, Offset.zero);
-      canvas.restore();
-    } else {
-      ColorFilterLayer paintLayer = new ColorFilterLayer(
-          offset: childOffset,
-          bounds: bounds,
-          color: color,
-          transferMode: transferMode);
-      _containerLayer.append(paintLayer);
-      compositeChild(child, parentLayer: paintLayer);
-    }
-  }
-
   static Paint _getPaintForShaderMask(Rect bounds,
                                       ShaderCallback shaderCallback,
                                       TransferMode transferMode) {
