@@ -22,6 +22,9 @@ def main():
     parser.add_argument('--output-file', type=str)
     parser.add_argument('--package-root', type=str)
     parser.add_argument('--snapshot', type=str)
+    parser.add_argument('--precompiled', dest='precompiled', action='store_true')
+    parser.set_defaults(precompiled=False)
+
     args = parser.parse_args()
 
     command = [
@@ -35,6 +38,11 @@ def main():
         '--snapshot', os.path.abspath(args.snapshot),
         '--private-key', os.path.abspath(os.path.join(args.package_root, '..', 'privatekey.der')),
     ]
+
+    if args.precompiled:
+        command += [
+            '--precompiled'
+        ]
 
     if args.manifest:
         command += ['--manifest', os.path.abspath(args.manifest)]
