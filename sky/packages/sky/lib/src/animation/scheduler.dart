@@ -30,6 +30,8 @@ class Scheduler {
   Map<int, SchedulerCallback> _transientCallbacks = new LinkedHashMap<int, SchedulerCallback>();
   final Set<int> _removedIds = new Set<int>();
 
+  int get transientCallbackCount => _transientCallbacks.length;
+
   /// Called by the engine to produce a new frame.
   ///
   /// This function first calls all the callbacks registered by

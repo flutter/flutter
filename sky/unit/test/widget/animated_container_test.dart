@@ -1,3 +1,4 @@
+import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
@@ -43,6 +44,53 @@ void main() {
 
       expect(box.decoration.backgroundColor, equals(decorationB.backgroundColor));
 
+    });
+  });
+
+  test('AnimatedContainer overanimate test', () {
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(
+        new AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: new BoxDecoration(
+            backgroundColor: new Color(0xFF00FF00)
+          )
+        )
+      );
+      expect(scheduler.transientCallbackCount, 0);
+      tester.pump(new Duration(seconds: 1));
+      expect(scheduler.transientCallbackCount, 0);
+      tester.pumpWidget(
+        new AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: new BoxDecoration(
+            backgroundColor: new Color(0xFF00FF00)
+          )
+        )
+      );
+      expect(scheduler.transientCallbackCount, 0);
+      tester.pump(new Duration(seconds: 1));
+      expect(scheduler.transientCallbackCount, 0);
+      tester.pumpWidget(
+        new AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: new BoxDecoration(
+            backgroundColor: new Color(0xFF0000FF)
+          )
+        )
+      );
+      expect(scheduler.transientCallbackCount, 1); // this is the only time an animation should have started!
+      tester.pump(new Duration(seconds: 1));
+      expect(scheduler.transientCallbackCount, 0);
+      tester.pumpWidget(
+        new AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: new BoxDecoration(
+            backgroundColor: new Color(0xFF0000FF)
+          )
+        )
+      );
+      expect(scheduler.transientCallbackCount, 0);
     });
   });
 }
