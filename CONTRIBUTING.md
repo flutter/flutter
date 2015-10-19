@@ -3,6 +3,12 @@ Contributing to Sky
 
 [![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
 
+Things you will need
+--------------------
+
+ * git
+ * an IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
+
 Getting the code
 ----------------
 
