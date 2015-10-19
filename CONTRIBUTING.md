@@ -6,8 +6,11 @@ Contributing to Sky
 Things you will need
 --------------------
 
- * git
+ * git (used for source version control)
  * an IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
+ * python (used by many of our tools)
+ * ssh (used to authenticate with GitHub)
+ * curl (used by `gclient sync`)
 
 Getting the code
 ----------------
