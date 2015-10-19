@@ -155,35 +155,22 @@ class RenderPositionedBox extends RenderShiftedBox {
 
   RenderPositionedBox({
     RenderBox child,
-    double horizontal: 0.5,
-    double vertical: 0.5,
+    FractionalOffset alignment: const FractionalOffset(0.5, 0.5),
     ShrinkWrap shrinkWrap: ShrinkWrap.none
-  }) : _horizontal = horizontal,
-       _vertical = vertical,
+  }) : _alignment = alignment,
        _shrinkWrap = shrinkWrap,
        super(child) {
-    assert(horizontal != null);
-    assert(vertical != null);
+    assert(alignment != null);
     assert(shrinkWrap != null);
   }
 
-  double _horizontal;
-  double get horizontal => _horizontal;
-  void set horizontal (double value) {
-    assert(value != null);
-    if (_horizontal == value)
+  FractionalOffset get alignment => _alignment;
+  FractionalOffset _alignment;
+  void set alignment (FractionalOffset newAlignment) {
+    assert(newAlignment == null || (newAlignment.x != null && newAlignment.y != null));
+    if (_alignment == newAlignment)
       return;
-    _horizontal = value;
-    markNeedsLayout();
-  }
-
-  double _vertical;
-  double get vertical => _vertical;
-  void set vertical (double value) {
-    assert(value != null);
-    if (_vertical == value)
-      return;
-    _vertical = value;
+    _alignment = newAlignment;
     markNeedsLayout();
   }
 
@@ -208,14 +195,14 @@ class RenderPositionedBox extends RenderShiftedBox {
                                             _shinkWrapHeight ? child.size.height : double.INFINITY));
       Offset delta = size - child.size;
       final BoxParentData childParentData = child.parentData;
-      childParentData.position = (delta.scale(horizontal, vertical)).toPoint();
+      childParentData.position = (delta.scale(_alignment.x, _alignment.y)).toPoint();
     } else {
       size = constraints.constrain(new Size(_shinkWrapWidth ? 0.0 : double.INFINITY,
                                             _shinkWrapHeight ? 0.0 : double.INFINITY));
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}horizontal: $horizontal\n${prefix}vertical: $vertical\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}alignment: $alignment\n';
 }
 
 class RenderBaseline extends RenderShiftedBox {
