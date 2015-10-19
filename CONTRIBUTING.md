@@ -7,9 +7,10 @@ Things you will need
 --------------------
 
  * git (used for source version control)
- * an IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
- * python (used by many of our tools)
- * ssh (used to authenticate with GitHub)
+ * Dart.
+ * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
+ * Python (used by many of our tools)
+ * An ssh client (used to authenticate with GitHub)
  * curl (used by `gclient sync`)
 
 Getting the code
@@ -40,10 +41,10 @@ solutions = [
 ]
 target_os = ["android"]
 ```
- * `cd flutter`
- * `gclient sync`
- * `cd src`
- * `git remote add upstream git@github.com:flutter/engine.git`
+ * `cd flutter` (Change to the directory in which you put the `.gclient` file)
+ * `gclient sync` This will fetch all the source code that Flutter depends on. Avoid interrupting this script, it can leave your repository in an inconsistent state that is tedious to clean up.
+ * `cd src` (Change to the directory that `gclient sync` created in your `flutter` directory)
+ * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master repository, not your clone, when running `git fetch` et al)
 
 Building the code
 -----------------
