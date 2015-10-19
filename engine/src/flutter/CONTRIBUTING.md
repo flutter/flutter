@@ -45,6 +45,7 @@ target_os = ["android"]
  * `gclient sync` This will fetch all the source code that Flutter depends on. Avoid interrupting this script, it can leave your repository in an inconsistent state that is tedious to clean up.
  * `cd src` (Change to the directory that `gclient sync` created in your `flutter` directory)
  * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master repository, not your clone, when running `git fetch` et al)
+ * Add `.../flutter/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
 
 Building the code
 -----------------
