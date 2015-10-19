@@ -129,8 +129,10 @@ class FlutterCommandRunner extends CommandRunner {
       String realFlutterPath = flutterDir.resolveSymbolicLinksSync();
 
       enginePath = path.dirname(path.dirname(path.dirname(path.dirname(realFlutterPath))));
-      if (enginePath == '/' || enginePath.isEmpty)
-        enginePath = null;
+      if (enginePath == '/' || enginePath.isEmpty || !FileSystemEntity.isDirectorySync(path.join(enginePath, 'out'))) {
+        _logging.severe('Unable to detect local build in $enginePath.\nDo you have a dependency override for the flutter package?');
+        exit(2);
+      }
     }
 
     List<BuildConfiguration> configs = <BuildConfiguration>[];
