@@ -16,7 +16,7 @@ To get the code:
 
  * Fork `https://github.com/flutter/engine` into your own GitHub account.
  * [Download depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
-   and make sure it is in your path.
+   and make sure it is in your path. We use the 'gclient' tool from depot_tools.
  * If you haven't configured your machine with an SSH key that's shared by github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
  * Create an empty directory for your copy of the repository. Call it what you like. For
