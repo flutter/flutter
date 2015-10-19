@@ -621,45 +621,6 @@ class RenderOpacity extends RenderProxyBox {
   }
 }
 
-/// Applies a color filter when painting its child
-///
-/// This class paints its child into an intermediate buffer and then blends the
-/// child back into the scene using a color filter.
-///
-/// Note: This class is relatively expensive because it requires painting the
-/// child into an intermediate buffer.
-class RenderColorFilter extends RenderProxyBox {
-  RenderColorFilter({ RenderBox child, Color color, TransferMode transferMode })
-    : _color = color, _transferMode = transferMode, super(child);
-
-  /// The color to use as input to the color filter
-  Color get color => _color;
-  Color _color;
-  void set color (Color newColor) {
-    assert(newColor != null);
-    if (_color == newColor)
-      return;
-    _color = newColor;
-    markNeedsPaint();
-  }
-
-  /// The transfer mode to use when combining the child's painting and the [color]
-  TransferMode get transferMode => _transferMode;
-  TransferMode _transferMode;
-  void set transferMode (TransferMode newTransferMode) {
-    assert(newTransferMode != null);
-    if (_transferMode == newTransferMode)
-      return;
-    _transferMode = newTransferMode;
-    markNeedsPaint();
-  }
-
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChildWithColorFilter(child, offset.toPoint(), offset & size, _color, _transferMode);
-  }
-}
-
 class RenderShaderMask extends RenderProxyBox {
   RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, TransferMode transferMode })
     : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child);

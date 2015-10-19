@@ -83,24 +83,6 @@ class Opacity extends OneChildRenderObjectWidget {
   }
 }
 
-class ColorFilter extends OneChildRenderObjectWidget {
-  ColorFilter({ Key key, this.color, this.transferMode, Widget child })
-    : super(key: key, child: child) {
-    assert(color != null);
-    assert(transferMode != null);
-  }
-
-  final Color color;
-  final TransferMode transferMode;
-
-  RenderColorFilter createRenderObject() => new RenderColorFilter(color: color, transferMode: transferMode);
-
-  void updateRenderObject(RenderColorFilter renderObject, ColorFilter oldWidget) {
-    renderObject.color = color;
-    renderObject.transferMode = transferMode;
-  }
-}
-
 class ShaderMask extends OneChildRenderObjectWidget {
   ShaderMask({
     Key key,

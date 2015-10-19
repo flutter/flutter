@@ -307,29 +307,3 @@ class OpacityLayer extends ContainerLayer {
     builder.pop();
   }
 }
-
-/// A composited layer that applies a color filter to its children
-class ColorFilterLayer extends ContainerLayer {
-  ColorFilterLayer({
-    Offset offset: Offset.zero,
-    this.bounds,
-    this.color,
-    this.transferMode
-  }) : super(offset: offset);
-
-  /// Unused
-  Rect bounds;
-  // TODO(abarth): Remove.
-
-  /// The color to use as input to the color filter
-  Color color;
-
-  /// The transfer mode to use to combine [color] with the children's painting
-  TransferMode transferMode;
-
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushColorFilter(color, transferMode, bounds.shift(offset));
-    addChildrenToScene(builder, offset + layerOffset);
-    builder.pop();
-  }
-}
