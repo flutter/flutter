@@ -78,7 +78,7 @@ class SpriteBox extends RenderBox {
 
   List<Node> _constrainedNodes;
 
-  List<PhysicsNode> _physicsNodes;
+  List<PhysicsWorld> _physicsNodes;
 
   Rect _visibleArea;
 
@@ -400,7 +400,7 @@ class SpriteBox extends RenderBox {
 
   void _addActionControllersAndPhysicsNodes(Node node) {
     if (node._actions != null) _actionControllers.add(node._actions);
-    if (node is PhysicsNode) _physicsNodes.add(node);
+    if (node is PhysicsWorld) _physicsNodes.add(node);
 
     for (int i = node.children.length - 1; i >= 0; i--) {
       Node child = node.children[i];
@@ -422,7 +422,7 @@ class SpriteBox extends RenderBox {
     if (_physicsNodes == null)
       _rebuildActionControllersAndPhysicsNodes();
 
-    for (PhysicsNode physicsNode in _physicsNodes) {
+    for (PhysicsWorld physicsNode in _physicsNodes) {
       physicsNode._stepPhysics(dt);
     }
   }
