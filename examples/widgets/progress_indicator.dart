@@ -82,7 +82,6 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
       onTap: handleTap,
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-        decoration: new BoxDecoration(backgroundColor: Theme.of(context).cardColor),
         child: new BuilderTransition(
           variables: [valueAnimation.variable],
           performance: valueAnimation.view,

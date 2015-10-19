@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'material.dart';
 
 class Scaffold extends StatelessComponent {
   Scaffold({
@@ -38,7 +39,9 @@ class Scaffold extends StatelessComponent {
     if (body != null) {
       children.add(new Positioned(
         top: toolBarHeight, right: 0.0, bottom: statusBarHeight, left: 0.0,
-        child: body
+        child: new Material(
+          child: body
+        )
       ));
     }
 

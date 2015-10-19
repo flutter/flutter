@@ -96,9 +96,8 @@ class TabbedNavigatorAppState extends State<TabbedNavigatorApp> {
 
   Container _buildCard(BuildContext context, TabNavigator tabNavigator) {
     return new Container(
-     child: new Card(child: new Padding(child: tabNavigator, padding: const EdgeDims.all(8.0))),
-     padding: const EdgeDims.all(12.0),
-     decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[100])
+      padding: const EdgeDims.all(12.0),
+      child: new Card(child: new Padding(child: tabNavigator, padding: const EdgeDims.all(8.0)))
     );
   }
 

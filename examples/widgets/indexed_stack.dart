@@ -40,14 +40,11 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
       toolBar: new ToolBar(center: new Text('IndexedStackDemo Demo')),
       body: new GestureDetector(
         onTap: _handleTap,
-        child: new Container(
-          decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
-          child: new Center(
-            child: new Container(
-              child: indexedStack,
-              padding: const EdgeDims.all(8.0),
-              decoration: new BoxDecoration(border: new Border.all(color: Theme.of(context).accentColor))
-            )
+        child: new Center(
+          child: new Container(
+            child: indexedStack,
+            padding: const EdgeDims.all(8.0),
+            decoration: new BoxDecoration(border: new Border.all(color: Theme.of(context).accentColor))
           )
         )
       )

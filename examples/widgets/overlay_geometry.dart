@@ -139,7 +139,6 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         toolBar: new ToolBar(center: new Text('Tap a Card')),
         body: new Container(
           padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-          decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
           child: new ScrollableMixedWidgetList(
             builder: builder,
             token: cardModels.length,
