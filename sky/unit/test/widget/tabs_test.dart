@@ -11,7 +11,7 @@ Widget buildFrame({ List<String> tabs, bool isScrollable: false }) {
     labels: tabs.map((String tab) => new TabLabel(text: tab)).toList(),
     selectedIndex: selectedIndex,
     isScrollable: isScrollable,
-    onChanged: (tabIndex) {
+    onChanged: (int tabIndex) {
       selectedIndex = tabIndex;
     }
   );
