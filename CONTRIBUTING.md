@@ -12,6 +12,7 @@ Things you will need
  * Python (used by many of our tools)
  * An ssh client (used to authenticate with GitHub)
  * curl (used by `gclient sync`)
+ * Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools) (make sure it's in your path). We use the 'gclient' tool from depot_tools.
 
 Getting the code
 ----------------
@@ -19,8 +20,6 @@ Getting the code
 To get the code:
 
  * Fork `https://github.com/flutter/engine` into your own GitHub account.
- * [Download and install](http://www.chromium.org/developers/how-tos/install-depot-tools) Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
-   and make sure it is in your path. We use the 'gclient' tool from depot_tools.
  * If you haven't configured your machine with an SSH key that's shared by github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
  * Create an empty directory for your copy of the repository. Call it what you like. For
