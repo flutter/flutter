@@ -60,22 +60,20 @@ class AddressBookHome extends StatelessComponent {
   static final GlobalKey noteKey = new GlobalKey(label: 'note field');
 
   Widget buildBody(BuildContext context) {
-    return new Material(
-      child: new Block([
-        new AspectRatio(
-          aspectRatio: 16.0 / 9.0,
-          child: new Container(
-            decoration: new BoxDecoration(backgroundColor: Colors.purple[300])
-          )
-        ),
-        new Field(inputKey: nameKey, icon: "social/person", placeholder: "Name"),
-        new Field(inputKey: phoneKey, icon: "communication/phone", placeholder: "Phone"),
-        new Field(inputKey: emailKey, icon: "communication/email", placeholder: "Email"),
-        new Field(inputKey: addressKey, icon: "maps/place", placeholder: "Address"),
-        new Field(inputKey: ringtoneKey, icon: "av/volume_up", placeholder: "Ringtone"),
-        new Field(inputKey: noteKey, icon: "content/add", placeholder: "Add note"),
-      ])
-    );
+    return new Block([
+      new AspectRatio(
+        aspectRatio: 16.0 / 9.0,
+        child: new Container(
+          decoration: new BoxDecoration(backgroundColor: Colors.purple[300])
+        )
+      ),
+      new Field(inputKey: nameKey, icon: "social/person", placeholder: "Name"),
+      new Field(inputKey: phoneKey, icon: "communication/phone", placeholder: "Phone"),
+      new Field(inputKey: emailKey, icon: "communication/email", placeholder: "Email"),
+      new Field(inputKey: addressKey, icon: "maps/place", placeholder: "Address"),
+      new Field(inputKey: ringtoneKey, icon: "av/volume_up", placeholder: "Ringtone"),
+      new Field(inputKey: noteKey, icon: "content/add", placeholder: "Add note"),
+    ]);
   }
 
   Widget build(BuildContext context) {
