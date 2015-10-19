@@ -16,7 +16,7 @@ android_library("oknet") {
     "//mojo/public/interfaces/network:network_java",
     "//mojo/public/java:bindings",
     "//mojo/public/java:system",
-    "//mojo/services/network/public/interfaces:interfaces_java",
+    "//mojo/services/network/interfaces:interfaces_java",
     "//third_party/okhttp",
     "//third_party/okhttp:okio",
   ]

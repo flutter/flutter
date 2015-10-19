@@ -550,7 +550,7 @@ source_set("platform") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
-    "//mojo/services/network/public/interfaces",
+    "//mojo/services/network/interfaces",
     "//skia",
     "//sky/engine/wtf",
     "//third_party/harfbuzz-ng",

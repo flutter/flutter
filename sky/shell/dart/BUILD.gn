@@ -16,7 +16,7 @@ source_set("dart") {
     "//dart/runtime:libdart",
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/application",
-    "//mojo/services/network/public/interfaces",
+    "//mojo/services/network/interfaces",
     "//sky/engine/tonic",
     "//sky/engine/wtf",
     "//url",

@@ -5,7 +5,7 @@
 #ifndef SKY_SHELL_DART_DART_LIBRARY_PROVIDER_NETWORK_H_
 #define SKY_SHELL_DART_DART_LIBRARY_PROVIDER_NETWORK_H_
 
-#include "mojo/services/network/public/interfaces/network_service.mojom.h"
+#include "mojo/services/network/interfaces/network_service.mojom.h"
 #include "sky/engine/tonic/dart_library_provider.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"

@@ -8,7 +8,7 @@
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/cpp/utility/run_loop.h"
-#include "mojo/services/network/public/interfaces/network_service.mojom.h"
+#include "mojo/services/network/interfaces/network_service.mojom.h"
 #include "services/sky/document_view.h"
 
 namespace sky {
