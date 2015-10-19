@@ -202,8 +202,12 @@ abstract class Widget {
   /// Inflates this configuration to a concrete instance.
   Element createElement();
 
+  String toStringShort() {
+    return key == null ? '$runtimeType' : '$runtimeType-$key';
+  }
+
   String toString() {
-    final String name = key == null ? '$runtimeType' : '$runtimeType-$key';
+    final String name = toStringShort();
     final List<String> data = <String>[];
     debugFillDescription(data);
     if (data.isEmpty)

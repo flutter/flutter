@@ -66,6 +66,7 @@ class AnimatedContainer extends StatefulComponent {
   }
 
   final Widget child;
+
   final BoxConstraints constraints;
   final BoxDecoration decoration;
   final BoxDecoration foregroundDecoration;
@@ -95,7 +96,7 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
 
   void initState() {
     super.initState();
-    _performance = new Performance(duration: config.duration)
+    _performance = new Performance(duration: config.duration, debugLabel: '${config.toStringShort()}')
       ..timing = new AnimationTiming(curve: config.curve)
       ..addListener(_updateAllVariables);
     _configAllVariables();
