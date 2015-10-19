@@ -575,8 +575,8 @@ TEST(RefCountedTest, PublicCtorAndDtor) {
 
 #ifndef NDEBUG
 #if defined(OS_ANDROID)
-// TODO(vtl) On Android, death tests don't seem to work properly with |assert()|
-// (which presumably calls |abort()|.
+// TODO(vtl): On Android, death tests don't seem to work properly with
+// |assert()| (which presumably calls |abort()|.
 #define MAYBE_DebugChecks DISABLED_DebugChecks
 #else
 #define MAYBE_DebugChecks DebugChecks

@@ -8,6 +8,7 @@
 #include "base/memory/ref_counted.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/memory.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -41,7 +42,7 @@ class MessagePipeDispatcher final : public Dispatcher {
       MojoCreateMessagePipeOptions* out_options);
 
   // Must be called before any other methods. (This method is not thread-safe.)
-  void Init(scoped_refptr<MessagePipe> message_pipe,
+  void Init(RefPtr<MessagePipe>&& message_pipe,
             unsigned port) MOJO_NOT_THREAD_SAFE;
 
   // |Dispatcher| public methods:
@@ -53,7 +54,7 @@ class MessagePipeDispatcher final : public Dispatcher {
   // TODO(vtl): This currently uses |kDefaultCreateOptions|, which is okay since
   // there aren't any options, but eventually options should be plumbed through.
   static scoped_refptr<MessagePipeDispatcher> CreateRemoteMessagePipe(
-      scoped_refptr<ChannelEndpoint>* channel_endpoint);
+      RefPtr<ChannelEndpoint>* channel_endpoint);
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
@@ -109,7 +110,7 @@ class MessagePipeDispatcher final : public Dispatcher {
       MOJO_NOT_THREAD_SAFE;
 
   // This will be null if closed.
-  scoped_refptr<MessagePipe> message_pipe_ MOJO_GUARDED_BY(mutex());
+  RefPtr<MessagePipe> message_pipe_ MOJO_GUARDED_BY(mutex());
   unsigned port_ MOJO_GUARDED_BY(mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MessagePipeDispatcher);

@@ -163,6 +163,15 @@ class RefPtr {
     r.ptr_ = p;
   }
 
+  // Returns a new |RefPtr<T>| with the same contents as this pointer. Useful
+  // when a function takes a |RefPtr<T>&&| argument and the caller wants to
+  // retain its reference (rather than moving it).
+  RefPtr<T> Clone() const { return *this; }
+
+  // For compatibility with base.
+  // TODO(vtl): Remove this when we can.
+  RefPtr<T>&& Pass() MOJO_WARN_UNUSED_RESULT { return std::move(*this); }
+
   explicit operator bool() const { return !!ptr_; }
 
   template <typename U>
@@ -209,7 +218,9 @@ inline RefPtr<T> AdoptRef(T* ptr) {
 // Creates an intrusively reference counted |T|, producing a |RefPtr<T>| (and
 // performing the required adoption). Use like:
 //
-//   RefPtr<Foo> my_foo = MakeRefCounted<Foo>(ctor_arg1, ctor_arg2);
+//   auto my_foo = MakeRefCounted<Foo>(ctor_arg1, ctor_arg2);
+//
+// (|my_foo| will be of type |RefPtr<Foo>|.)
 template <typename T, typename... Args>
 RefPtr<T> MakeRefCounted(Args&&... args) {
   return internal::MakeRefCountedHelper<T>::MakeRefCounted(

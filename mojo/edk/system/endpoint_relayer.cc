@@ -13,23 +13,20 @@
 namespace mojo {
 namespace system {
 
-EndpointRelayer::EndpointRelayer() {
-}
-
 // static
 unsigned EndpointRelayer::GetPeerPort(unsigned port) {
   DCHECK(port == 0 || port == 1);
   return port ^ 1;
 }
 
-void EndpointRelayer::Init(ChannelEndpoint* endpoint0,
-                           ChannelEndpoint* endpoint1) {
+void EndpointRelayer::Init(RefPtr<ChannelEndpoint>&& endpoint0,
+                           RefPtr<ChannelEndpoint>&& endpoint1) {
   DCHECK(endpoint0);
   DCHECK(endpoint1);
   DCHECK(!endpoints_[0]);
   DCHECK(!endpoints_[1]);
-  endpoints_[0] = endpoint0;
-  endpoints_[1] = endpoint1;
+  endpoints_[0] = std::move(endpoint0);
+  endpoints_[1] = std::move(endpoint1);
 }
 
 void EndpointRelayer::SetFilter(std::unique_ptr<Filter> filter) {
@@ -76,6 +73,8 @@ void EndpointRelayer::OnDetachFromChannel(unsigned port) {
     endpoints_[peer_port] = nullptr;
   }
 }
+
+EndpointRelayer::EndpointRelayer() {}
 
 EndpointRelayer::~EndpointRelayer() {
   DCHECK(!endpoints_[0]);

@@ -6,7 +6,7 @@
 module http_server;
 
 import "http_server/interfaces/http_server.mojom";
-import "network/public/interfaces/net_address.mojom";
+import "network/interfaces/net_address.mojom";
 
 interface HttpServerFactory {
   // Creates an http server running on the specified local network address.  If

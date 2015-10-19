@@ -27,7 +27,7 @@ mojo_services = [
   "//mojo/services/native_support/interfaces",
   "//mojo/services/native_viewport/interfaces",
   "//mojo/services/navigation/interfaces",
-  "//mojo/services/network/public/interfaces",
+  "//mojo/services/network/interfaces",
   "//mojo/services/nfc/interfaces",
   "//mojo/services/notifications/interfaces",
   "//mojo/services/ozone_drm_gpu/interfaces",

@@ -5,7 +5,7 @@
 [DartPackage="mojo_services"]
 module mojo;
 
-import "network/public/interfaces/http_connection.mojom";
+import "network/interfaces/http_connection.mojom";
 
 interface HttpServerDelegate {
   // Called when a connection is established.

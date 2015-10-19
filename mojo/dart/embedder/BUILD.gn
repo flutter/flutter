@@ -38,7 +38,8 @@ source_set("dart_controller_no_snapshot") {
     "//mojo/message_pump",
     "//mojo/public/c/system",
     "//mojo/public/cpp/system",
-    "//mojo/services/network/public/interfaces",
+    "//mojo/services/network/interfaces",
+    "//tonic",
   ]
 
   defines = []
@@ -90,7 +91,7 @@ dart_embedder_package("dart_embedder_package_network") {
 }
 
 dart_embedder_package("dart_embedder_package_network_service") {
-  package = "mojo/services/network/public/interfaces"
+  package = "mojo/services/network/interfaces"
   destination = "mojo_services/mojo"
 }
 
@@ -333,8 +334,7 @@ action("generate_snapshot_bin") {
   application_mojoms = rebase_path("//mojo/public/interfaces/application")
   bindings_mojoms = rebase_path("//mojo/public/interfaces/bindings")
   network_mojoms = rebase_path("//mojo/public/interfaces/network")
-  network_service_mojoms =
-      rebase_path("//mojo/services/network/public/interfaces")
+  network_service_mojoms = rebase_path("//mojo/services/network/interfaces")
 
   # This script generates --url_mapping command line arguments for all
   # generated mojom.dart bindings files. See HACKING.md for more information.

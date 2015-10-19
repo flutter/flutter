@@ -4,13 +4,14 @@
 
 library tracing;
 
-import 'trace_provider_impl.dart';
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:isolate';
+
+import 'package:common/src/trace_provider_impl.dart';
+export 'package:common/src/trace_provider_impl.dart' show TraceSendTiming;
 
 import 'package:mojo/application.dart';
 import 'package:mojo/core.dart';
@@ -36,12 +37,13 @@ class TracingHelper {
   // |initialize()| method. |appName| will be used to form a thread identifier
   // for use in trace messages. If |appName| is longer than 20 characters then
   // only the last 20 characters of |appName| will be used.
-  TracingHelper.fromApplication(Application app, String appName) {
+  TracingHelper.fromApplication(Application app, String appName,
+      [TraceSendTiming timing = TraceSendTiming.IMMEDIATE]) {
     // Masked because the tid is expected to be a 32-bit int.
     _tid = [appName, Isolate.current]
             .fold(7, (hash, element) => 31 * hash + element.hashCode) &
         0x7fffffff;
-    _impl = new TraceProviderImpl();
+    _impl = new TraceProviderImpl(timing);
     ApplicationConnection connection = app.connectToApplication("mojo:tracing");
     connection.provideService(TraceProviderName, (e) {
       _impl.connect(e);

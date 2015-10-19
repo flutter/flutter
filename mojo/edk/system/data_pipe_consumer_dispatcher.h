@@ -7,6 +7,7 @@
 
 #include "base/memory/ref_counted.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -24,7 +25,7 @@ class DataPipeConsumerDispatcher final : public Dispatcher {
   }
 
   // Must be called before any other methods.
-  void Init(scoped_refptr<DataPipe> data_pipe) MOJO_NOT_THREAD_SAFE;
+  void Init(RefPtr<DataPipe>&& data_pipe) MOJO_NOT_THREAD_SAFE;
 
   // |Dispatcher| public methods:
   Type GetType() const override;
@@ -73,7 +74,7 @@ class DataPipeConsumerDispatcher final : public Dispatcher {
   bool IsBusyNoLock() const override;
 
   // This will be null if closed.
-  scoped_refptr<DataPipe> data_pipe_ MOJO_GUARDED_BY(mutex());
+  RefPtr<DataPipe> data_pipe_ MOJO_GUARDED_BY(mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(DataPipeConsumerDispatcher);
 };

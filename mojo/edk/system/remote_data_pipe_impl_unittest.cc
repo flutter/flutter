@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#include <utility>
+
 #include "base/bind.h"
 #include "base/location.h"
 #include "base/logging.h"
@@ -21,6 +23,7 @@
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/raw_channel.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/test/test_io_thread.h"
@@ -42,13 +45,14 @@ class RemoteDataPipeImplTest : public testing::Test {
   ~RemoteDataPipeImplTest() override {}
 
   void SetUp() override {
-    scoped_refptr<ChannelEndpoint> ep[2];
+    RefPtr<ChannelEndpoint> ep[2];
     message_pipes_[0] = MessagePipe::CreateLocalProxy(&ep[0]);
     message_pipes_[1] = MessagePipe::CreateLocalProxy(&ep[1]);
 
     io_thread_.PostTaskAndWait(
         FROM_HERE, base::Bind(&RemoteDataPipeImplTest::SetUpOnIOThread,
-                              base::Unretained(this), ep[0], ep[1]));
+                              base::Unretained(this), base::Passed(&ep[0]),
+                              base::Passed(&ep[1])));
   }
 
   void TearDown() override {
@@ -60,7 +64,8 @@ class RemoteDataPipeImplTest : public testing::Test {
   }
 
  protected:
-  static DataPipe* CreateLocal(size_t element_size, size_t num_elements) {
+  static RefPtr<DataPipe> CreateLocal(size_t element_size,
+                                      size_t num_elements) {
     const MojoCreateDataPipeOptions options = {
         static_cast<uint32_t>(sizeof(MojoCreateDataPipeOptions)),
         MOJO_CREATE_DATA_PIPE_OPTIONS_FLAG_NONE,
@@ -73,9 +78,7 @@ class RemoteDataPipeImplTest : public testing::Test {
     return DataPipe::CreateLocal(validated_options);
   }
 
-  scoped_refptr<MessagePipe> message_pipe(size_t i) {
-    return message_pipes_[i];
-  }
+  RefPtr<MessagePipe> message_pipe(size_t i) { return message_pipes_[i]; }
 
   void EnsureMessagePipeClosed(size_t i) {
     if (!message_pipes_[i])
@@ -85,17 +88,19 @@ class RemoteDataPipeImplTest : public testing::Test {
   }
 
  private:
-  void SetUpOnIOThread(scoped_refptr<ChannelEndpoint> ep0,
-                       scoped_refptr<ChannelEndpoint> ep1) {
+  // TODO(vtl): The arguments should be rvalue references, but that doesn't
+  // currently work correctly with base::Bind.
+  void SetUpOnIOThread(RefPtr<ChannelEndpoint> ep0,
+                       RefPtr<ChannelEndpoint> ep1) {
     CHECK_EQ(base::MessageLoop::current(), io_thread_.message_loop());
 
     embedder::PlatformChannelPair channel_pair;
-    channels_[0] = new Channel(&platform_support_);
+    channels_[0] = MakeRefCounted<Channel>(&platform_support_);
     channels_[0]->Init(RawChannel::Create(channel_pair.PassServerHandle()));
-    channels_[0]->SetBootstrapEndpoint(ep0);
-    channels_[1] = new Channel(&platform_support_);
+    channels_[0]->SetBootstrapEndpoint(std::move(ep0));
+    channels_[1] = MakeRefCounted<Channel>(&platform_support_);
     channels_[1]->Init(RawChannel::Create(channel_pair.PassClientHandle()));
-    channels_[1]->SetBootstrapEndpoint(ep1);
+    channels_[1]->SetBootstrapEndpoint(std::move(ep1));
   }
 
   void TearDownOnIOThread() {
@@ -113,8 +118,8 @@ class RemoteDataPipeImplTest : public testing::Test {
 
   embedder::SimplePlatformSupport platform_support_;
   mojo::test::TestIOThread io_thread_;
-  scoped_refptr<Channel> channels_[2];
-  scoped_refptr<MessagePipe> message_pipes_[2];
+  RefPtr<Channel> channels_[2];
+  RefPtr<MessagePipe> message_pipes_[2];
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RemoteDataPipeImplTest);
 };
@@ -167,11 +172,11 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
+  RefPtr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
   // This is the consumer dispatcher we'll send.
   scoped_refptr<DataPipeConsumerDispatcher> consumer =
       DataPipeConsumerDispatcher::Create();
-  consumer->Init(dp);
+  consumer->Init(dp.Clone());
 
   // Write to the producer and close it, before sending the consumer.
   int32_t elements[10] = {123};
@@ -285,11 +290,11 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
+  RefPtr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
   // This is the consumer dispatcher we'll send.
   scoped_refptr<DataPipeConsumerDispatcher> consumer =
       DataPipeConsumerDispatcher::Create();
-  consumer->Init(dp);
+  consumer->Init(dp.Clone());
 
   void* write_ptr = nullptr;
   uint32_t num_bytes = 0u;
@@ -395,11 +400,11 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
+  RefPtr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
   // This is the consumer dispatcher we'll send.
   scoped_refptr<DataPipeConsumerDispatcher> consumer =
       DataPipeConsumerDispatcher::Create();
-  consumer->Init(dp);
+  consumer->Init(dp.Clone());
 
   void* write_ptr = nullptr;
   uint32_t num_bytes = 0u;

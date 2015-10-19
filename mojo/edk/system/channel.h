@@ -10,7 +10,6 @@
 #include <memory>
 #include <unordered_map>
 
-#include "base/memory/ref_counted.h"
 #include "base/threading/thread_checker.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/channel_endpoint.h"
@@ -19,6 +18,8 @@
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/mutex.h"
 #include "mojo/edk/system/raw_channel.h"
+#include "mojo/edk/system/ref_counted.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -49,11 +50,10 @@ class MessageInTransitQueue;
 // |ChannelEndpointClient| (e.g., |MessagePipe|), |ChannelEndpoint|, |Channel|.
 // Thus |Channel| may not call into |ChannelEndpoint| with |Channel|'s lock
 // held.
-class Channel final : public base::RefCountedThreadSafe<Channel>,
+class Channel final : public RefCountedThreadSafe<Channel>,
                       public RawChannel::Delegate {
  public:
-  // |platform_support| must remain alive until after |Shutdown()| is called.
-  explicit Channel(embedder::PlatformSupport* platform_support);
+  // Note: Use |MakeRefCounted<Channel>()|.
 
   // This must be called on the creation thread before any other methods are
   // called, and before references to this object are given to any other
@@ -85,7 +85,7 @@ class Channel final : public base::RefCountedThreadSafe<Channel>,
   //
   // (Bootstrapping is symmetric: Both sides call this, which will establish the
   // first connection across a channel.)
-  void SetBootstrapEndpoint(scoped_refptr<ChannelEndpoint> endpoint);
+  void SetBootstrapEndpoint(RefPtr<ChannelEndpoint>&& endpoint);
 
   // Like |SetBootstrapEndpoint()|, but with explicitly-specified local and
   // remote IDs.
@@ -93,7 +93,7 @@ class Channel final : public base::RefCountedThreadSafe<Channel>,
   // (Bootstrapping is still symmetric, though the sides should obviously
   // interchange local and remote IDs. This can be used to allow multiple
   // "bootstrap" endpoints, though this is really most useful for testing.)
-  void SetBootstrapEndpointWithIds(scoped_refptr<ChannelEndpoint> endpoint,
+  void SetBootstrapEndpointWithIds(RefPtr<ChannelEndpoint>&& endpoint,
                                    ChannelEndpointId local_id,
                                    ChannelEndpointId remote_id);
 
@@ -149,15 +149,14 @@ class Channel final : public base::RefCountedThreadSafe<Channel>,
                                        MessageInTransitQueue* message_queue);
   // This one returns the |ChannelEndpoint| for the serialized endpoint (which
   // can be used by, e.g., a |ProxyMessagePipeEndpoint|.
-  scoped_refptr<ChannelEndpoint> SerializeEndpointWithLocalPeer(
+  RefPtr<ChannelEndpoint> SerializeEndpointWithLocalPeer(
       void* destination,
       MessageInTransitQueue* message_queue,
-      ChannelEndpointClient* endpoint_client,
+      RefPtr<ChannelEndpointClient>&& endpoint_client,
       unsigned endpoint_client_port);
-  void SerializeEndpointWithRemotePeer(
-      void* destination,
-      MessageInTransitQueue* message_queue,
-      scoped_refptr<ChannelEndpoint> peer_endpoint);
+  void SerializeEndpointWithRemotePeer(void* destination,
+                                       MessageInTransitQueue* message_queue,
+                                       RefPtr<ChannelEndpoint>&& peer_endpoint);
 
   // Deserializes an endpoint that was sent from the peer |Channel| (using
   // |SerializeEndpoint...()|. |source| should be (a copy of) the data that
@@ -165,7 +164,7 @@ class Channel final : public base::RefCountedThreadSafe<Channel>,
   // |GetSerializedEndpointSize()| bytes. This returns the deserialized
   // |IncomingEndpoint| (which can be converted into a |MessagePipe|) or null on
   // error.
-  scoped_refptr<IncomingEndpoint> DeserializeEndpoint(const void* source);
+  RefPtr<IncomingEndpoint> DeserializeEndpoint(const void* source);
 
   // See |RawChannel::GetSerializedPlatformHandleSize()|.
   size_t GetSerializedPlatformHandleSize() const;
@@ -175,7 +174,11 @@ class Channel final : public base::RefCountedThreadSafe<Channel>,
   }
 
  private:
-  friend class base::RefCountedThreadSafe<Channel>;
+  FRIEND_REF_COUNTED_THREAD_SAFE(Channel);
+  FRIEND_MAKE_REF_COUNTED(Channel);
+
+  // |platform_support| must remain alive until after |Shutdown()| is called.
+  explicit Channel(embedder::PlatformSupport* platform_support);
   ~Channel() override;
 
   // Helper for |DetachEndpoint()| (returns true if a "remove" should be sent).
@@ -221,8 +224,7 @@ class Channel final : public base::RefCountedThreadSafe<Channel>,
   // for which |is_remote()| returns true).
   //
   // TODO(vtl): Maybe limit the number of attached message pipes.
-  ChannelEndpointId AttachAndRunEndpoint(
-      scoped_refptr<ChannelEndpoint> endpoint);
+  ChannelEndpointId AttachAndRunEndpoint(RefPtr<ChannelEndpoint>&& endpoint);
 
   // Helper to send channel control messages. Returns true on success. Callable
   // from any thread.
@@ -255,7 +257,7 @@ class Channel final : public base::RefCountedThreadSafe<Channel>,
   ChannelManager* channel_manager_ MOJO_GUARDED_BY(mutex_);
 
   using IdToEndpointMap =
-      std::unordered_map<ChannelEndpointId, scoped_refptr<ChannelEndpoint>>;
+      std::unordered_map<ChannelEndpointId, RefPtr<ChannelEndpoint>>;
   // Map from local IDs to endpoints. If the endpoint is null, this means that
   // we're just waiting for the remove ack before removing the entry.
   IdToEndpointMap local_id_to_endpoint_map_ MOJO_GUARDED_BY(mutex_);
@@ -263,7 +265,7 @@ class Channel final : public base::RefCountedThreadSafe<Channel>,
   LocalChannelEndpointIdGenerator local_id_generator_ MOJO_GUARDED_BY(mutex_);
 
   using IdToIncomingEndpointMap =
-      std::unordered_map<ChannelEndpointId, scoped_refptr<IncomingEndpoint>>;
+      std::unordered_map<ChannelEndpointId, RefPtr<IncomingEndpoint>>;
   // Map from local IDs to incoming endpoints (i.e., those received inside other
   // messages, but not yet claimed via |DeserializeEndpoint()|).
   IdToIncomingEndpointMap incoming_endpoints_ MOJO_GUARDED_BY(mutex_);

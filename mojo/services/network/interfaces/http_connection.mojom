@@ -6,8 +6,8 @@
 module mojo;
 
 import "mojo/public/interfaces/network/network_error.mojom";
-import "network/public/interfaces/http_message.mojom";
-import "network/public/interfaces/web_socket.mojom";
+import "network/interfaces/http_message.mojom";
+import "network/interfaces/web_socket.mojom";
 
 interface HttpConnection {
   // Sets the OS send buffer size (in bytes) for the underlying socket.

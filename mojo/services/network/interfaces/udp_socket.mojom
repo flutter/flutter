@@ -6,7 +6,7 @@
 module mojo;
 
 import "mojo/public/interfaces/network/network_error.mojom";
-import "network/public/interfaces/net_address.mojom";
+import "network/interfaces/net_address.mojom";
 
 // UDPSocket and UDPSocketReceiver represent a UDP socket and its client. The
 // typical flow of using the interfaces is:

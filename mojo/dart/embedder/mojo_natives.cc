@@ -34,6 +34,7 @@ namespace dart {
   V(MojoMessagePipe_Create, 1)             \
   V(MojoMessagePipe_Write, 5)              \
   V(MojoMessagePipe_Read, 5)               \
+  V(MojoMessagePipe_QueryAndRead, 5)       \
   V(Mojo_GetTimeTicksNow, 0)               \
   V(MojoHandle_Close, 1)                   \
   V(MojoHandle_Wait, 3)                    \
@@ -720,6 +721,69 @@ void MojoMessagePipe_Read(Dart_NativeArguments arguments) {
   Dart_ListSetAt(list, 1, Dart_NewInteger(blen));
   Dart_ListSetAt(list, 2, Dart_NewInteger(hlen));
   Dart_SetReturnValue(arguments, list);
+}
+
+void MojoMessagePipe_QueryAndRead(Dart_NativeArguments arguments) {
+  int64_t dart_handle;
+  int64_t flags = 0;
+  CHECK_INTEGER_ARGUMENT(arguments, 0, &dart_handle, Null);
+  CHECK_INTEGER_ARGUMENT(arguments, 1, &flags, Null);
+
+  Dart_Handle data = Dart_GetNativeArgument(arguments, 2);
+  Dart_Handle handles = Dart_GetNativeArgument(arguments, 3);
+  Dart_Handle result = Dart_GetNativeArgument(arguments, 4);
+
+  // Query the number of bytes and handles available.
+  uint32_t blen = 0;
+  uint32_t hlen = 0;
+  MojoResult res =
+      MojoReadMessage(static_cast<MojoHandle>(dart_handle), nullptr, &blen,
+                      nullptr, &hlen, static_cast<MojoReadMessageFlags>(flags));
+
+  if ((res != MOJO_RESULT_OK) && (res != MOJO_RESULT_RESOURCE_EXHAUSTED)) {
+    Dart_ListSetAt(result, 0, Dart_NewInteger(res));
+    Dart_ListSetAt(result, 1, data);
+    Dart_ListSetAt(result, 2, handles);
+    Dart_ListSetAt(result, 3, Dart_NewInteger(0));
+    Dart_ListSetAt(result, 4, Dart_NewInteger(0));
+    return;
+  }
+
+  MojoDartState* state = MojoDartState::Current();
+
+  if ((blen > 0) &&
+      (Dart_IsNull(data) || (state->message_data().size() < blen))) {
+    state->message_data().resize(blen);
+    data = Dart_NewExternalTypedData(Dart_TypedData_kByteData,
+                                     state->message_data().data(), blen);
+  }
+
+  if ((hlen > 0) &&
+      (Dart_IsNull(handles) || (state->message_handles().size() < hlen))) {
+    state->message_handles().resize(hlen);
+    handles = Dart_NewExternalTypedData(Dart_TypedData_kUint32,
+                                        state->message_handles().data(), hlen);
+  }
+
+  void* bytes = nullptr;
+  if (blen > 0) {
+    bytes = state->message_data().data();
+  }
+
+  void* handle_bytes = nullptr;
+  if (hlen > 0) {
+    handle_bytes = state->message_handles().data();
+  }
+
+  res = MojoReadMessage(static_cast<MojoHandle>(dart_handle), bytes, &blen,
+                        reinterpret_cast<MojoHandle*>(handle_bytes), &hlen,
+                        static_cast<MojoReadMessageFlags>(flags));
+
+  Dart_ListSetAt(result, 0, Dart_NewInteger(res));
+  Dart_ListSetAt(result, 1, data);
+  Dart_ListSetAt(result, 2, handles);
+  Dart_ListSetAt(result, 3, Dart_NewInteger(blen));
+  Dart_ListSetAt(result, 4, Dart_NewInteger(hlen));
 }
 
 struct MojoWaitManyState {

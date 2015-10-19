@@ -29,7 +29,7 @@ void ChannelTestBase::CreateChannelOnIOThread(unsigned i) {
   CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
 
   CHECK(!channels_[i]);
-  channels_[i] = new Channel(&platform_support_);
+  channels_[i] = MakeRefCounted<Channel>(&platform_support_);
 }
 
 void ChannelTestBase::InitChannelOnIOThread(unsigned i) {

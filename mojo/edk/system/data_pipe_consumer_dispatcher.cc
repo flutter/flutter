@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/data_pipe_consumer_dispatcher.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/memory.h"
@@ -11,9 +13,9 @@
 namespace mojo {
 namespace system {
 
-void DataPipeConsumerDispatcher::Init(scoped_refptr<DataPipe> data_pipe) {
+void DataPipeConsumerDispatcher::Init(RefPtr<DataPipe>&& data_pipe) {
   DCHECK(data_pipe);
-  data_pipe_ = data_pipe;
+  data_pipe_ = std::move(data_pipe);
 }
 
 Dispatcher::Type DataPipeConsumerDispatcher::GetType() const {
@@ -25,13 +27,13 @@ scoped_refptr<DataPipeConsumerDispatcher>
 DataPipeConsumerDispatcher::Deserialize(Channel* channel,
                                         const void* source,
                                         size_t size) {
-  scoped_refptr<DataPipe> data_pipe;
+  RefPtr<DataPipe> data_pipe;
   if (!DataPipe::ConsumerDeserialize(channel, source, size, &data_pipe))
     return nullptr;
   DCHECK(data_pipe);
 
   scoped_refptr<DataPipeConsumerDispatcher> dispatcher = Create();
-  dispatcher->Init(data_pipe);
+  dispatcher->Init(std::move(data_pipe));
   return dispatcher;
 }
 
@@ -64,8 +66,7 @@ DataPipeConsumerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   mutex().AssertHeld();
 
   scoped_refptr<DataPipeConsumerDispatcher> rv = Create();
-  rv->Init(data_pipe_);
-  data_pipe_ = nullptr;
+  rv->Init(std::move(data_pipe_));
   return scoped_refptr<Dispatcher>(rv.get());
 }
 

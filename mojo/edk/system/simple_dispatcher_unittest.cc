@@ -62,7 +62,6 @@ class MockSimpleDispatcher final : public SimpleDispatcher {
   Type GetType() const override { return Type::UNKNOWN; }
 
  private:
-  friend class base::RefCountedThreadSafe<MockSimpleDispatcher>;
   ~MockSimpleDispatcher() override {}
 
   scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()

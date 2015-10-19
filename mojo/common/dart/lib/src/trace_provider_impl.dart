@@ -7,6 +7,12 @@ import 'dart:async';
 import 'package:mojo/core.dart';
 import 'package:mojo_services/tracing/tracing.mojom.dart';
 
+enum TraceSendTiming {
+  IMMEDIATE,
+  // TODO: Add BATCHED?
+  AT_END,
+}
+
 class TraceProviderImpl implements TraceProvider {
   // Any messages sent before the tracing service connects to us will be
   // recorded and kept until one second after construction of the trace
@@ -23,14 +29,17 @@ class TraceProviderImpl implements TraceProvider {
   // TODO(rudominer) We currently ignore _categories.
   String _categories;
 
-  TraceProviderImpl() {
+  TraceSendTiming _timing;
+
+  TraceProviderImpl([TraceSendTiming timing = TraceSendTiming.IMMEDIATE]) {
     _message_queue = [];
     _enqueuing = true;
-    new Future(() {
-      new Future.delayed(const Duration(seconds: 1), () {
-      _enqueuing = false;
-      _message_queue.clear();
-      });
+    _timing = timing;
+    new Future.delayed(const Duration(seconds: 1), () {
+      if (_enqueuing) {
+        _enqueuing = false;
+        _message_queue.clear();
+      }
     });
   }
 
@@ -44,17 +53,24 @@ class TraceProviderImpl implements TraceProvider {
     assert(_recorder == null);
     _recorder = recorder;
     _categories = categories;
-
-    for (String message in _message_queue) {
-      _recorder.ptr.record(message);
-    }
     _enqueuing = false;
-    _message_queue.clear();
+    if (_timing == TraceSendTiming.IMMEDIATE) {
+      for (String message in _message_queue) {
+        _recorder.ptr.record(message);
+      }
+      _message_queue.clear();
+    }
   }
 
   @override
   void stopTracing() {
     assert(_recorder != null);
+    if (_timing == TraceSendTiming.AT_END) {
+      for (String message in _message_queue) {
+        _recorder.ptr.record(message);
+      }
+      _message_queue.clear();
+    }
     _recorder.close();
     _recorder = null;
   }
@@ -64,10 +80,19 @@ class TraceProviderImpl implements TraceProvider {
   }
 
   void sendTraceMessage(String message) {
-    if (_recorder != null) {
-      _recorder.ptr.record(message);
-    } else if (_enqueuing) {
-      _message_queue.add(message);
+    switch (_timing) {
+      case TraceSendTiming.IMMEDIATE:
+        if (_recorder != null) {
+          _recorder.ptr.record(message);
+        } else if (_enqueuing) {
+          _message_queue.add(message);
+        }
+        break;
+      case TraceSendTiming.AT_END:
+        if (isActive()) {
+          _message_queue.add(message);
+        }
+        break;
     }
   }
 }

@@ -28,7 +28,6 @@ class TrivialDispatcher final : public Dispatcher {
   Type GetType() const override { return Type::UNKNOWN; }
 
  private:
-  friend class base::RefCountedThreadSafe<TrivialDispatcher>;
   ~TrivialDispatcher() override {}
 
   scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()

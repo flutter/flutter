@@ -222,9 +222,9 @@ MojoResult Core::CreateMessagePipe(
     return MOJO_RESULT_RESOURCE_EXHAUSTED;
   }
 
-  scoped_refptr<MessagePipe> message_pipe(MessagePipe::CreateLocalLocal());
-  dispatcher0->Init(message_pipe, 0);
-  dispatcher1->Init(message_pipe, 1);
+  auto message_pipe = MessagePipe::CreateLocalLocal();
+  dispatcher0->Init(message_pipe.Clone(), 0);
+  dispatcher1->Init(std::move(message_pipe), 1);
 
   message_pipe_handle0.Put(handle_pair.first);
   message_pipe_handle1.Put(handle_pair.second);
@@ -390,9 +390,9 @@ MojoResult Core::CreateDataPipe(
   }
   DCHECK_NE(handle_pair.second, MOJO_HANDLE_INVALID);
 
-  scoped_refptr<DataPipe> data_pipe(DataPipe::CreateLocal(validated_options));
-  producer_dispatcher->Init(data_pipe);
-  consumer_dispatcher->Init(data_pipe);
+  auto data_pipe = DataPipe::CreateLocal(validated_options);
+  producer_dispatcher->Init(data_pipe.Clone());
+  consumer_dispatcher->Init(std::move(data_pipe));
 
   data_pipe_producer_handle.Put(handle_pair.first);
   data_pipe_consumer_handle.Put(handle_pair.second);

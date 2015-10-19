@@ -389,6 +389,7 @@ Dart_Isolate DartController::CreateIsolateHelper(
 Dart_Isolate DartController::IsolateCreateCallback(const char* script_uri,
                                                    const char* main,
                                                    const char* package_root,
+                                                   const char** package_map,
                                                    Dart_IsolateFlags* flags,
                                                    void* callback_data,
                                                    char** error) {

@@ -181,14 +181,15 @@ bool LocalDataPipeImpl::ProducerEndSerialize(
 
   s->consumer_num_bytes = current_num_bytes_;
   // Note: We don't use |port|.
-  scoped_refptr<ChannelEndpoint> channel_endpoint =
-      channel->SerializeEndpointWithLocalPeer(destination_for_endpoint, nullptr,
-                                              channel_endpoint_client(), 0);
+  RefPtr<ChannelEndpoint> channel_endpoint =
+      channel->SerializeEndpointWithLocalPeer(
+          destination_for_endpoint, nullptr,
+          RefPtr<ChannelEndpointClient>(channel_endpoint_client()), 0);
   // Note: Keep |*this| alive until the end of this method, to make things
   // slightly easier on ourselves.
   std::unique_ptr<DataPipeImpl> self(
       ReplaceImpl(util::MakeUnique<RemoteProducerDataPipeImpl>(
-          channel_endpoint.get(), std::move(buffer_), start_index_,
+          std::move(channel_endpoint), std::move(buffer_), start_index_,
           current_num_bytes_)));
 
   *actual_size = sizeof(SerializedDataPipeProducerDispatcher) +
@@ -359,15 +360,15 @@ bool LocalDataPipeImpl::ConsumerEndSerialize(
   // |RemoteConsumerDataPipeImpl|.
 
   // Note: We don't use |port|.
-  scoped_refptr<ChannelEndpoint> channel_endpoint =
-      channel->SerializeEndpointWithLocalPeer(destination_for_endpoint,
-                                              &message_queue,
-                                              channel_endpoint_client(), 0);
+  RefPtr<ChannelEndpoint> channel_endpoint =
+      channel->SerializeEndpointWithLocalPeer(
+          destination_for_endpoint, &message_queue,
+          RefPtr<ChannelEndpointClient>(channel_endpoint_client()), 0);
   // Note: Keep |*this| alive until the end of this method, to make things
   // slightly easier on ourselves.
   std::unique_ptr<DataPipeImpl> self(
       ReplaceImpl(util::MakeUnique<RemoteConsumerDataPipeImpl>(
-          channel_endpoint.get(), old_num_bytes, std::move(buffer_),
+          std::move(channel_endpoint), old_num_bytes, std::move(buffer_),
           start_index_)));
   DestroyBuffer();
 

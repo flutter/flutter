@@ -20,6 +20,6 @@ mojom("interfaces") {
 
   deps = [
     "../../authentication/interfaces",
-    "$mojo_network_service_root/network/public/interfaces",
+    "$mojo_network_service_root/network/interfaces",
   ]
 }

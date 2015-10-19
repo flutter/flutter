@@ -6,8 +6,8 @@
 module mojo;
 
 import "mojo/public/interfaces/network/network_error.mojom";
-import "network/public/interfaces/net_address.mojom";
-import "network/public/interfaces/tcp_connected_socket.mojom";
+import "network/interfaces/net_address.mojom";
+import "network/interfaces/tcp_connected_socket.mojom";
 
 // Represents a TCP server socket listening for incoming requests.
 interface TCPServerSocket {

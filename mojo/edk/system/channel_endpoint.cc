@@ -15,19 +15,6 @@
 namespace mojo {
 namespace system {
 
-ChannelEndpoint::ChannelEndpoint(ChannelEndpointClient* client,
-                                 unsigned client_port,
-                                 MessageInTransitQueue* message_queue)
-    : state_(State::PAUSED),
-      client_(client),
-      client_port_(client_port),
-      channel_(nullptr) {
-  DCHECK(client_ || message_queue);
-
-  if (message_queue)
-    channel_message_queue_.Swap(message_queue);
-}
-
 bool ChannelEndpoint::EnqueueMessage(
     std::unique_ptr<MessageInTransit> message) {
   DCHECK(message);
@@ -48,14 +35,14 @@ bool ChannelEndpoint::EnqueueMessage(
   return false;
 }
 
-bool ChannelEndpoint::ReplaceClient(ChannelEndpointClient* client,
+bool ChannelEndpoint::ReplaceClient(RefPtr<ChannelEndpointClient>&& client,
                                     unsigned client_port) {
   DCHECK(client);
 
   MutexLocker locker(&mutex_);
   DCHECK(client_);
-  DCHECK(client != client_.get() || client_port != client_port_);
-  client_ = client;
+  DCHECK(client != client_ || client_port != client_port_);
+  client_ = std::move(client);
   client_port_ = client_port;
   return state_ != State::DEAD;
 }
@@ -115,7 +102,7 @@ void ChannelEndpoint::OnReadMessage(std::unique_ptr<MessageInTransit> message) {
 }
 
 void ChannelEndpoint::DetachFromChannel() {
-  scoped_refptr<ChannelEndpointClient> client;
+  RefPtr<ChannelEndpointClient> client;
   unsigned client_port = 0;
   {
     MutexLocker locker(&mutex_);
@@ -142,6 +129,19 @@ void ChannelEndpoint::DetachFromChannel() {
   // |OnDetachFromChannel()|.)
   if (client)
     client->OnDetachFromChannel(client_port);
+}
+
+ChannelEndpoint::ChannelEndpoint(RefPtr<ChannelEndpointClient>&& client,
+                                 unsigned client_port,
+                                 MessageInTransitQueue* message_queue)
+    : state_(State::PAUSED),
+      client_(std::move(client)),
+      client_port_(client_port),
+      channel_(nullptr) {
+  DCHECK(client_ || message_queue);
+
+  if (message_queue)
+    channel_message_queue_.Swap(message_queue);
 }
 
 ChannelEndpoint::~ChannelEndpoint() {
@@ -171,7 +171,7 @@ void ChannelEndpoint::OnReadMessageForClient(
     std::unique_ptr<MessageInTransit> message) {
   DCHECK_EQ(message->type(), MessageInTransit::Type::ENDPOINT_CLIENT);
 
-  scoped_refptr<ChannelEndpointClient> client;
+  RefPtr<ChannelEndpointClient> client;
   unsigned client_port = 0;
 
   // This loop is to make |ReplaceClient()| work. We can't call the client's

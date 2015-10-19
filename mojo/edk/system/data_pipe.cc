@@ -94,17 +94,17 @@ MojoResult DataPipe::ValidateCreateOptions(
 }
 
 // static
-DataPipe* DataPipe::CreateLocal(
+RefPtr<DataPipe> DataPipe::CreateLocal(
     const MojoCreateDataPipeOptions& validated_options) {
-  return new DataPipe(true, true, validated_options,
-                      util::MakeUnique<LocalDataPipeImpl>());
+  return AdoptRef(new DataPipe(true, true, validated_options,
+                               util::MakeUnique<LocalDataPipeImpl>()));
 }
 
 // static
-DataPipe* DataPipe::CreateRemoteProducerFromExisting(
+RefPtr<DataPipe> DataPipe::CreateRemoteProducerFromExisting(
     const MojoCreateDataPipeOptions& validated_options,
     MessageInTransitQueue* message_queue,
-    ChannelEndpoint* channel_endpoint) {
+    RefPtr<ChannelEndpoint>&& channel_endpoint) {
   std::unique_ptr<char, base::AlignedFreeDeleter> buffer;
   size_t buffer_num_bytes = 0;
   if (!RemoteProducerDataPipeImpl::ProcessMessagesFromIncomingEndpoint(
@@ -118,12 +118,12 @@ DataPipe* DataPipe::CreateRemoteProducerFromExisting(
   // ongoing call to |IncomingEndpoint::OnReadMessage()| return false. This will
   // make |ChannelEndpoint::OnReadMessage()| retry, until its |ReplaceClient()|
   // is called.
-  DataPipe* data_pipe = new DataPipe(
+  RefPtr<DataPipe> data_pipe = AdoptRef(new DataPipe(
       false, true, validated_options,
       util::MakeUnique<RemoteProducerDataPipeImpl>(
-          channel_endpoint, std::move(buffer), 0, buffer_num_bytes));
+          channel_endpoint.Clone(), std::move(buffer), 0, buffer_num_bytes)));
   if (channel_endpoint) {
-    if (!channel_endpoint->ReplaceClient(data_pipe, 0))
+    if (!channel_endpoint->ReplaceClient(data_pipe.Clone(), 0))
       data_pipe->OnDetachFromChannel(0);
   } else {
     data_pipe->SetProducerClosed();
@@ -132,11 +132,11 @@ DataPipe* DataPipe::CreateRemoteProducerFromExisting(
 }
 
 // static
-DataPipe* DataPipe::CreateRemoteConsumerFromExisting(
+RefPtr<DataPipe> DataPipe::CreateRemoteConsumerFromExisting(
     const MojoCreateDataPipeOptions& validated_options,
     size_t consumer_num_bytes,
     MessageInTransitQueue* message_queue,
-    ChannelEndpoint* channel_endpoint) {
+    RefPtr<ChannelEndpoint>&& channel_endpoint) {
   if (!RemoteConsumerDataPipeImpl::ProcessMessagesFromIncomingEndpoint(
           validated_options, &consumer_num_bytes, message_queue))
     return nullptr;
@@ -148,12 +148,12 @@ DataPipe* DataPipe::CreateRemoteConsumerFromExisting(
   // ongoing call to |IncomingEndpoint::OnReadMessage()| return false. This will
   // make |ChannelEndpoint::OnReadMessage()| retry, until its |ReplaceClient()|
   // is called.
-  DataPipe* data_pipe =
-      new DataPipe(true, false, validated_options,
-                   util::MakeUnique<RemoteConsumerDataPipeImpl>(
-                       channel_endpoint, consumer_num_bytes, nullptr, 0));
+  RefPtr<DataPipe> data_pipe = AdoptRef(new DataPipe(
+      true, false, validated_options,
+      util::MakeUnique<RemoteConsumerDataPipeImpl>(
+          channel_endpoint.Clone(), consumer_num_bytes, nullptr, 0)));
   if (channel_endpoint) {
-    if (!channel_endpoint->ReplaceClient(data_pipe, 0))
+    if (!channel_endpoint->ReplaceClient(data_pipe.Clone(), 0))
       data_pipe->OnDetachFromChannel(0);
   } else {
     data_pipe->SetConsumerClosed();
@@ -165,7 +165,7 @@ DataPipe* DataPipe::CreateRemoteConsumerFromExisting(
 bool DataPipe::ProducerDeserialize(Channel* channel,
                                    const void* source,
                                    size_t size,
-                                   scoped_refptr<DataPipe>* data_pipe) {
+                                   RefPtr<DataPipe>* data_pipe) {
   DCHECK(!*data_pipe);  // Not technically wrong, but unlikely.
 
   bool consumer_open = false;
@@ -196,9 +196,9 @@ bool DataPipe::ProducerDeserialize(Channel* channel,
       return false;
     }
 
-    *data_pipe = new DataPipe(
+    *data_pipe = AdoptRef(new DataPipe(
         true, false, revalidated_options,
-        util::MakeUnique<RemoteConsumerDataPipeImpl>(nullptr, 0, nullptr, 0));
+        util::MakeUnique<RemoteConsumerDataPipeImpl>(nullptr, 0, nullptr, 0)));
     (*data_pipe)->SetConsumerClosed();
 
     return true;
@@ -213,7 +213,7 @@ bool DataPipe::ProducerDeserialize(Channel* channel,
 
   const void* endpoint_source = static_cast<const char*>(source) +
                                 sizeof(SerializedDataPipeProducerDispatcher);
-  scoped_refptr<IncomingEndpoint> incoming_endpoint =
+  RefPtr<IncomingEndpoint> incoming_endpoint =
       channel->DeserializeEndpoint(endpoint_source);
   if (!incoming_endpoint)
     return false;
@@ -230,7 +230,7 @@ bool DataPipe::ProducerDeserialize(Channel* channel,
 bool DataPipe::ConsumerDeserialize(Channel* channel,
                                    const void* source,
                                    size_t size,
-                                   scoped_refptr<DataPipe>* data_pipe) {
+                                   RefPtr<DataPipe>* data_pipe) {
   DCHECK(!*data_pipe);  // Not technically wrong, but unlikely.
 
   if (size !=
@@ -251,7 +251,7 @@ bool DataPipe::ConsumerDeserialize(Channel* channel,
 
   const void* endpoint_source = static_cast<const char*>(source) +
                                 sizeof(SerializedDataPipeConsumerDispatcher);
-  scoped_refptr<IncomingEndpoint> incoming_endpoint =
+  RefPtr<IncomingEndpoint> incoming_endpoint =
       channel->DeserializeEndpoint(endpoint_source);
   if (!incoming_endpoint)
     return false;

@@ -7,7 +7,7 @@ import("//mojo/public/dart/rules.gni")
 dart_pkg("dart") {
   libs = [ "lib/tracing_helper.dart" ]
   sources = [
-    "lib/trace_provider_impl.dart",
+    "lib/src/trace_provider_impl.dart",
     "pubspec.yaml",
   ]
   deps = [

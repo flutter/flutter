@@ -424,9 +424,9 @@ MessagePipeDispatcherPair CreateMessagePipe() {
       MessagePipeDispatcher::kDefaultCreateOptions);
   rv.second = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
-  rv.first->Init(mp, 0);
-  rv.second->Init(mp, 1);
+  auto mp = MessagePipe::CreateLocalLocal();
+  rv.first->Init(mp.Clone(), 0);
+  rv.second->Init(std::move(mp), 1);
   return rv;
 }
 

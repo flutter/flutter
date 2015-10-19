@@ -75,13 +75,13 @@ class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
   RefCountedThreadSafe() {}
   ~RefCountedThreadSafe() {}
 
+ private:
 #ifndef NDEBUG
   template <typename U>
   friend RefPtr<U> AdoptRef(U*);
   void Adopt() { internal::RefCountedThreadSafeBase::Adopt(); }
 #endif
 
- private:
   MOJO_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafe);
 };
 

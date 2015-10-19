@@ -6,7 +6,7 @@
 module mojo;
 
 import "authentication/interfaces/authentication.mojom";
-import "network/public/interfaces/url_loader_interceptor.mojom";
+import "network/interfaces/url_loader_interceptor.mojom";
 
 interface AuthenticatingURLLoaderInterceptorMetaFactory {
   // Creates a URLLoaderInterceptorFactory whose interceptors authenticate via

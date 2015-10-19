@@ -4,7 +4,6 @@
 
 #include "mojo/edk/system/message_pipe.h"
 
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/system/waiter_test_utils.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -30,7 +29,7 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 //  - writing a message to a port, closing the other (would be the source) port,
 //    and reading it
 TEST(MessagePipeTest, Basic) {
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
+  auto mp = MessagePipe::CreateLocalLocal();
 
   int32_t buffer[2];
   const uint32_t kBufferSize = static_cast<uint32_t>(sizeof(buffer));
@@ -192,7 +191,7 @@ TEST(MessagePipeTest, Basic) {
 }
 
 TEST(MessagePipeTest, CloseWithQueuedIncomingMessages) {
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
+  auto mp = MessagePipe::CreateLocalLocal();
 
   int32_t buffer[1];
   const uint32_t kBufferSize = static_cast<uint32_t>(sizeof(buffer));
@@ -219,7 +218,7 @@ TEST(MessagePipeTest, CloseWithQueuedIncomingMessages) {
 }
 
 TEST(MessagePipeTest, DiscardMode) {
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
+  auto mp = MessagePipe::CreateLocalLocal();
 
   int32_t buffer[2];
   const uint32_t kBufferSize = static_cast<uint32_t>(sizeof(buffer));
@@ -323,7 +322,7 @@ TEST(MessagePipeTest, DiscardMode) {
 }
 
 TEST(MessagePipeTest, BasicWaiting) {
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
+  auto mp = MessagePipe::CreateLocalLocal();
   Waiter waiter;
   HandleSignalsState hss;
 
@@ -465,7 +464,7 @@ TEST(MessagePipeTest, ThreadedWaiting) {
 
   // Write to wake up waiter waiting for read.
   {
-    scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
+    auto mp = MessagePipe::CreateLocalLocal();
     test::SimpleWaiterThread thread(&result, &context);
 
     thread.waiter()->Init();
@@ -495,7 +494,7 @@ TEST(MessagePipeTest, ThreadedWaiting) {
 
   // Close to cancel waiter.
   {
-    scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
+    auto mp = MessagePipe::CreateLocalLocal();
     test::SimpleWaiterThread thread(&result, &context);
 
     thread.waiter()->Init();
@@ -518,7 +517,7 @@ TEST(MessagePipeTest, ThreadedWaiting) {
 
   // Close to cancel waiter using peer closed signal.
   {
-    scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
+    auto mp = MessagePipe::CreateLocalLocal();
     test::SimpleWaiterThread thread(&result, &context);
 
     thread.waiter()->Init();
@@ -541,7 +540,7 @@ TEST(MessagePipeTest, ThreadedWaiting) {
 
   // Close to make waiter un-wake-up-able.
   {
-    scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
+    auto mp = MessagePipe::CreateLocalLocal();
     test::SimpleWaiterThread thread(&result, &context);
 
     thread.waiter()->Init();

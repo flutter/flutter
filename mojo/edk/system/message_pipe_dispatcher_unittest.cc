@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include <limits>
+#include <utility>
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_vector.h"
@@ -45,9 +46,9 @@ TEST(MessagePipeDispatcherTest, Basic) {
     scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     {
-      scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
-      d0->Init(mp, i);      // 0, 1.
-      d1->Init(mp, i ^ 1);  // 1, 0.
+      auto mp = MessagePipe::CreateLocalLocal();
+      d0->Init(mp.Clone(), i);         // 0, 1.
+      d1->Init(std::move(mp), i ^ 1);  // 1, 0.
     }
     Waiter w;
     uint32_t context = 0;
@@ -156,9 +157,9 @@ TEST(MessagePipeDispatcherTest, InvalidParams) {
   scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
   {
-    scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
-    d0->Init(mp, 0);
-    d1->Init(mp, 1);
+    auto mp = MessagePipe::CreateLocalLocal();
+    d0->Init(mp.Clone(), 0);
+    d1->Init(std::move(mp), 1);
   }
 
   // |WriteMessage|:
@@ -186,9 +187,9 @@ TEST(MessagePipeDispatcherTest, InvalidParamsDeath) {
   scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
   {
-    scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
-    d0->Init(mp, 0);
-    d1->Init(mp, 1);
+    auto mp = MessagePipe::CreateLocalLocal();
+    d0->Init(mp.Clone(), 0);
+    d1->Init(std::move(mp), 1);
   }
 
   // |WriteMessage|:
@@ -226,9 +227,9 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
     scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     {
-      scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
-      d0->Init(mp, i);      // 0, 1.
-      d1->Init(mp, i ^ 1);  // 1, 0.
+      auto mp = MessagePipe::CreateLocalLocal();
+      d0->Init(mp.Clone(), i);         // 0, 1.
+      d1->Init(std::move(mp), i ^ 1);  // 1, 0.
     }
     Waiter w;
     HandleSignalsState hss;
@@ -356,9 +357,9 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
     scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     {
-      scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
-      d0->Init(mp, i);      // 0, 1.
-      d1->Init(mp, i ^ 1);  // 1, 0.
+      auto mp = MessagePipe::CreateLocalLocal();
+      d0->Init(mp.Clone(), i);         // 0, 1.
+      d1->Init(std::move(mp), i ^ 1);  // 1, 0.
     }
 
     // Wait for readable on |d1|, which will become readable after some time.
@@ -439,9 +440,9 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
     scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     {
-      scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
-      d0->Init(mp, i);      // 0, 1.
-      d1->Init(mp, i ^ 1);  // 1, 0.
+      auto mp = MessagePipe::CreateLocalLocal();
+      d0->Init(mp.Clone(), i);         // 0, 1.
+      d1->Init(std::move(mp), i ^ 1);  // 1, 0.
     }
 
     // Wait for readable on |d1| and close |d1| after some time, which should
@@ -617,9 +618,9 @@ TEST(MessagePipeDispatcherTest, Stress) {
   scoped_refptr<MessagePipeDispatcher> d_read = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
   {
-    scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalLocal());
-    d_write->Init(mp, 0);
-    d_read->Init(mp, 1);
+    auto mp = MessagePipe::CreateLocalLocal();
+    d_write->Init(mp.Clone(), 0);
+    d_read->Init(std::move(mp), 1);
   }
 
   size_t messages_written[kNumWriters];

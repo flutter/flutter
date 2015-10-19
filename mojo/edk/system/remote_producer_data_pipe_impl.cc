@@ -60,19 +60,19 @@ bool ValidateIncomingMessage(size_t element_num_bytes,
 }  // namespace
 
 RemoteProducerDataPipeImpl::RemoteProducerDataPipeImpl(
-    ChannelEndpoint* channel_endpoint)
-    : channel_endpoint_(channel_endpoint),
+    RefPtr<ChannelEndpoint>&& channel_endpoint)
+    : channel_endpoint_(std::move(channel_endpoint)),
       start_index_(0),
       current_num_bytes_(0) {
   // Note: |buffer_| is lazily allocated.
 }
 
 RemoteProducerDataPipeImpl::RemoteProducerDataPipeImpl(
-    ChannelEndpoint* channel_endpoint,
+    RefPtr<ChannelEndpoint>&& channel_endpoint,
     std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
     size_t start_index,
     size_t current_num_bytes)
-    : channel_endpoint_(channel_endpoint),
+    : channel_endpoint_(std::move(channel_endpoint)),
       buffer_(std::move(buffer)),
       start_index_(start_index),
       current_num_bytes_(current_num_bytes) {
@@ -327,10 +327,10 @@ bool RemoteProducerDataPipeImpl::ConsumerEndSerialize(
   // |Channel|. There's no reason for us to continue to exist afterwards.
 
   // Note: We don't use |port|.
-  scoped_refptr<ChannelEndpoint> channel_endpoint;
+  RefPtr<ChannelEndpoint> channel_endpoint;
   channel_endpoint.swap(channel_endpoint_);
-  channel->SerializeEndpointWithRemotePeer(destination_for_endpoint,
-                                           &message_queue, channel_endpoint);
+  channel->SerializeEndpointWithRemotePeer(
+      destination_for_endpoint, &message_queue, std::move(channel_endpoint));
   SetProducerClosed();
 
   *actual_size = sizeof(SerializedDataPipeConsumerDispatcher) +

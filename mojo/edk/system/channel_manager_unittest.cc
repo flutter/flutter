@@ -52,18 +52,14 @@ TEST_F(ChannelManagerTest, Basic) {
       channel_manager().CreateChannelOnIOThread(
           id, channel_pair.PassServerHandle());
 
-  scoped_refptr<Channel> ch = channel_manager().GetChannel(id);
+  RefPtr<Channel> ch = channel_manager().GetChannel(id);
   EXPECT_TRUE(ch);
-  // |ChannelManager| should have a ref.
-  EXPECT_FALSE(ch->HasOneRef());
 
   channel_manager().WillShutdownChannel(id);
-  // |ChannelManager| should still have a ref.
-  EXPECT_FALSE(ch->HasOneRef());
 
   channel_manager().ShutdownChannelOnIOThread(id);
   // |ChannelManager| should have given up its ref.
-  EXPECT_TRUE(ch->HasOneRef());
+  ch->AssertHasOneRef();
 
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
 }
@@ -81,22 +77,21 @@ TEST_F(ChannelManagerTest, TwoChannels) {
       channel_manager().CreateChannelOnIOThread(
           id2, channel_pair.PassClientHandle());
 
-  scoped_refptr<Channel> ch1 = channel_manager().GetChannel(id1);
+  RefPtr<Channel> ch1 = channel_manager().GetChannel(id1);
   EXPECT_TRUE(ch1);
 
-  scoped_refptr<Channel> ch2 = channel_manager().GetChannel(id2);
+  RefPtr<Channel> ch2 = channel_manager().GetChannel(id2);
   EXPECT_TRUE(ch2);
 
   // Calling |WillShutdownChannel()| multiple times (on |id1|) is okay.
   channel_manager().WillShutdownChannel(id1);
   channel_manager().WillShutdownChannel(id1);
-  EXPECT_FALSE(ch1->HasOneRef());
   // Not calling |WillShutdownChannel()| (on |id2|) is okay too.
 
   channel_manager().ShutdownChannelOnIOThread(id1);
-  EXPECT_TRUE(ch1->HasOneRef());
+  ch1->AssertHasOneRef();
   channel_manager().ShutdownChannelOnIOThread(id2);
-  EXPECT_TRUE(ch2->HasOneRef());
+  ch2->AssertHasOneRef();
 
   EXPECT_EQ(MOJO_RESULT_OK, d1->Close());
   EXPECT_EQ(MOJO_RESULT_OK, d2->Close());
@@ -122,13 +117,9 @@ class OtherThread : public mojo::test::SimpleTestThread {
     // thread, do that here instead.
 
     // You can use any unique, nonzero value as the ID.
-    scoped_refptr<Channel> ch = channel_manager_->GetChannel(channel_id_);
-    // |ChannelManager| should have a ref.
-    EXPECT_FALSE(ch->HasOneRef());
+    RefPtr<Channel> ch = channel_manager_->GetChannel(channel_id_);
 
     channel_manager_->WillShutdownChannel(channel_id_);
-    // |ChannelManager| should still have a ref.
-    EXPECT_FALSE(ch->HasOneRef());
 
     {
       base::MessageLoop message_loop;

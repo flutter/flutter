@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "base/bind.h"
@@ -22,6 +23,7 @@
 #include "mojo/edk/system/message_pipe_test_utils.h"
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/system/raw_channel.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/test/scoped_test_dir.h"
@@ -46,9 +48,9 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(EchoEcho) {
   embedder::ScopedPlatformHandle client_platform_handle =
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   CHECK(client_platform_handle.is_valid());
-  scoped_refptr<ChannelEndpoint> ep;
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalProxy(&ep));
-  channel_thread.Start(client_platform_handle.Pass(), ep);
+  RefPtr<ChannelEndpoint> ep;
+  auto mp = MessagePipe::CreateLocalProxy(&ep);
+  channel_thread.Start(client_platform_handle.Pass(), std::move(ep));
 
   const std::string quitquitquit("quitquitquit");
   int rv = 0;
@@ -56,7 +58,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(EchoEcho) {
     // Wait for our end of the message pipe to be readable.
     HandleSignalsState hss;
     MojoResult result =
-        test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss);
+        test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss);
     if (result != MOJO_RESULT_OK) {
       // It was closed, probably.
       CHECK_EQ(result, MOJO_RESULT_FAILED_PRECONDITION);
@@ -103,9 +105,9 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(EchoEcho) {
 TEST_F(MultiprocessMessagePipeTest, MAYBE_Basic) {
   helper()->StartChild("EchoEcho");
 
-  scoped_refptr<ChannelEndpoint> ep;
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalProxy(&ep));
-  Init(ep);
+  RefPtr<ChannelEndpoint> ep;
+  auto mp = MessagePipe::CreateLocalProxy(&ep);
+  Init(std::move(ep));
 
   std::string hello("hello");
   EXPECT_EQ(MOJO_RESULT_OK,
@@ -115,7 +117,7 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_Basic) {
 
   HandleSignalsState hss;
   EXPECT_EQ(MOJO_RESULT_OK,
-            test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss));
+            test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
   // The child may or may not have closed its end of the message pipe and died
   // (and we may or may not know it yet), so our end may or may not appear as
   // writable.
@@ -149,9 +151,9 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_Basic) {
 TEST_F(MultiprocessMessagePipeTest, DISABLED_QueueMessages) {
   helper()->StartChild("EchoEcho");
 
-  scoped_refptr<ChannelEndpoint> ep;
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalProxy(&ep));
-  Init(ep);
+  RefPtr<ChannelEndpoint> ep;
+  auto mp = MessagePipe::CreateLocalProxy(&ep);
+  Init(std::move(ep));
 
   static const size_t kNumMessages = 1001;
   for (size_t i = 0; i < kNumMessages; i++) {
@@ -170,8 +172,8 @@ TEST_F(MultiprocessMessagePipeTest, DISABLED_QueueMessages) {
 
   for (size_t i = 0; i < kNumMessages; i++) {
     HandleSignalsState hss;
-    EXPECT_EQ(MOJO_RESULT_OK,
-              test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss));
+    EXPECT_EQ(MOJO_RESULT_OK, test::WaitIfNecessary(
+                                  mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
     // The child may or may not have closed its end of the message pipe and died
     // (and we may or may not know it yet), so our end may or may not appear as
     // writable.
@@ -193,7 +195,7 @@ TEST_F(MultiprocessMessagePipeTest, DISABLED_QueueMessages) {
   // "quitquitquit").
   HandleSignalsState hss;
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
-            test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss));
+            test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
 
@@ -209,13 +211,13 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckSharedBuffer) {
   embedder::ScopedPlatformHandle client_platform_handle =
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   CHECK(client_platform_handle.is_valid());
-  scoped_refptr<ChannelEndpoint> ep;
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalProxy(&ep));
-  channel_thread.Start(client_platform_handle.Pass(), ep);
+  RefPtr<ChannelEndpoint> ep;
+  auto mp = MessagePipe::CreateLocalProxy(&ep);
+  channel_thread.Start(client_platform_handle.Pass(), std::move(ep));
 
   // Wait for the first message from our parent.
   HandleSignalsState hss;
-  CHECK_EQ(test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss),
+  CHECK_EQ(test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss),
            MOJO_RESULT_OK);
   // In this test, the parent definitely doesn't close its end of the message
   // pipe before we do.
@@ -267,7 +269,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckSharedBuffer) {
 
   // Now wait for our parent to send us a message.
   hss = HandleSignalsState();
-  CHECK_EQ(test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss),
+  CHECK_EQ(test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss),
            MOJO_RESULT_OK);
   CHECK_EQ(hss.satisfied_signals,
            MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE);
@@ -303,9 +305,9 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckSharedBuffer) {
 TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
   helper()->StartChild("CheckSharedBuffer");
 
-  scoped_refptr<ChannelEndpoint> ep;
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalProxy(&ep));
-  Init(ep);
+  RefPtr<ChannelEndpoint> ep;
+  auto mp = MessagePipe::CreateLocalProxy(&ep);
+  Init(std::move(ep));
 
   // Make a shared buffer.
   scoped_refptr<SharedBufferDispatcher> dispatcher;
@@ -343,7 +345,7 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
   // Wait for a message from the child.
   HandleSignalsState hss;
   EXPECT_EQ(MOJO_RESULT_OK,
-            test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss));
+            test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
   EXPECT_TRUE((hss.satisfied_signals & MOJO_HANDLE_SIGNAL_READABLE));
   EXPECT_TRUE((hss.satisfiable_signals & MOJO_HANDLE_SIGNAL_READABLE));
 
@@ -375,7 +377,7 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
   // Wait for |mp| to become readable, which should fail.
   hss = HandleSignalsState();
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
-            test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss));
+            test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
 
@@ -390,12 +392,12 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckPlatformHandleFile) {
   embedder::ScopedPlatformHandle client_platform_handle =
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   CHECK(client_platform_handle.is_valid());
-  scoped_refptr<ChannelEndpoint> ep;
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalProxy(&ep));
-  channel_thread.Start(client_platform_handle.Pass(), ep);
+  RefPtr<ChannelEndpoint> ep;
+  auto mp = MessagePipe::CreateLocalProxy(&ep);
+  channel_thread.Start(client_platform_handle.Pass(), std::move(ep));
 
   HandleSignalsState hss;
-  CHECK_EQ(test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss),
+  CHECK_EQ(test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss),
            MOJO_RESULT_OK);
   CHECK_EQ(hss.satisfied_signals,
            MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE);
@@ -450,9 +452,9 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
 
   helper()->StartChild("CheckPlatformHandleFile");
 
-  scoped_refptr<ChannelEndpoint> ep;
-  scoped_refptr<MessagePipe> mp(MessagePipe::CreateLocalProxy(&ep));
-  Init(ep);
+  RefPtr<ChannelEndpoint> ep;
+  auto mp = MessagePipe::CreateLocalProxy(&ep);
+  Init(std::move(ep));
 
   std::vector<scoped_refptr<PlatformHandleDispatcher>> dispatchers;
   std::vector<DispatcherTransport> transports;
@@ -492,7 +494,7 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
   // Wait for it to become readable, which should fail.
   HandleSignalsState hss;
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
-            test::WaitIfNecessary(mp, MOJO_HANDLE_SIGNAL_READABLE, &hss));
+            test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
 

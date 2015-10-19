@@ -25,5 +25,8 @@ mojom("interfaces") {
 
   mojo_sdk_deps = [ "mojo/public/interfaces/network" ]
 
-  import_dirs = [ get_path_info("../../../", "abspath") ]
+  import_dirs = [
+    get_path_info("../../", "abspath"),
+    "$mojo_sdk_root",
+  ]
 }

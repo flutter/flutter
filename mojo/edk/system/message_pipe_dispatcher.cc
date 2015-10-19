@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/local_message_pipe_endpoint.h"
@@ -53,12 +55,12 @@ MojoResult MessagePipeDispatcher::ValidateCreateOptions(
   return MOJO_RESULT_OK;
 }
 
-void MessagePipeDispatcher::Init(scoped_refptr<MessagePipe> message_pipe,
+void MessagePipeDispatcher::Init(RefPtr<MessagePipe>&& message_pipe,
                                  unsigned port) {
   DCHECK(message_pipe);
   DCHECK(port == 0 || port == 1);
 
-  message_pipe_ = message_pipe;
+  message_pipe_ = std::move(message_pipe);
   port_ = port;
 }
 
@@ -69,12 +71,11 @@ Dispatcher::Type MessagePipeDispatcher::GetType() const {
 // static
 scoped_refptr<MessagePipeDispatcher>
 MessagePipeDispatcher::CreateRemoteMessagePipe(
-    scoped_refptr<ChannelEndpoint>* channel_endpoint) {
-  scoped_refptr<MessagePipe> message_pipe(
-      MessagePipe::CreateLocalProxy(channel_endpoint));
+    RefPtr<ChannelEndpoint>* channel_endpoint) {
+  auto message_pipe = MessagePipe::CreateLocalProxy(channel_endpoint);
   scoped_refptr<MessagePipeDispatcher> dispatcher =
       Create(kDefaultCreateOptions);
-  dispatcher->Init(message_pipe, 0);
+  dispatcher->Init(std::move(message_pipe), 0);
   return dispatcher;
 }
 
@@ -84,7 +85,7 @@ scoped_refptr<MessagePipeDispatcher> MessagePipeDispatcher::Deserialize(
     const void* source,
     size_t size) {
   unsigned port = kInvalidPort;
-  scoped_refptr<MessagePipe> message_pipe;
+  RefPtr<MessagePipe> message_pipe;
   if (!MessagePipe::Deserialize(channel, source, size, &message_pipe, &port))
     return nullptr;
   DCHECK(message_pipe);
@@ -92,7 +93,7 @@ scoped_refptr<MessagePipeDispatcher> MessagePipeDispatcher::Deserialize(
 
   scoped_refptr<MessagePipeDispatcher> dispatcher =
       Create(kDefaultCreateOptions);
-  dispatcher->Init(message_pipe, port);
+  dispatcher->Init(std::move(message_pipe), port);
   return dispatcher;
 }
 
@@ -134,8 +135,7 @@ MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   // |kDefaultCreateOptions|. Eventually, we'll have to duplicate the options
   // too.
   scoped_refptr<MessagePipeDispatcher> rv = Create(kDefaultCreateOptions);
-  rv->Init(message_pipe_, port_);
-  message_pipe_ = nullptr;
+  rv->Init(std::move(message_pipe_), port_);
   port_ = kInvalidPort;
   return scoped_refptr<Dispatcher>(rv.get());
 }

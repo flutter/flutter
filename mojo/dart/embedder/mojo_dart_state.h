@@ -7,12 +7,13 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 #include "base/callback.h"
 #include "base/macros.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/message_pipe.h"
-#include "mojo/services/network/public/interfaces/network_service.mojom.h"
+#include "mojo/services/network/interfaces/network_service.mojom.h"
 #include "tonic/dart_library_provider.h"
 #include "tonic/dart_state.h"
 
@@ -44,9 +45,9 @@ class MojoDartState : public tonic::DartState {
   const IsolateCallbacks& callbacks() const { return callbacks_; }
   const std::string& script_uri() const { return script_uri_; }
   const std::string& package_root() const { return package_root_; }
-  std::set<MojoHandle>& unclosed_handles() {
-    return unclosed_handles_;
-  }
+  std::set<MojoHandle>& unclosed_handles() { return unclosed_handles_; }
+  std::vector<uint8_t>& message_data() { return message_data_; }
+  std::vector<uint32_t>& message_handles() { return message_handles_; }
 
   const std::set<MojoHandle>& unclosed_handles() const {
     return unclosed_handles_;
@@ -103,6 +104,10 @@ class MojoDartState : public tonic::DartState {
   std::set<MojoHandle> unclosed_handles_;
   std::unique_ptr<tonic::DartLibraryProvider> library_provider_;
   mojo::NetworkServicePtr network_service_;
+
+  // Buffers for sending/receiving messages.
+  std::vector<uint8_t> message_data_;
+  std::vector<uint32_t> message_handles_;
 };
 
 }  // namespace dart
