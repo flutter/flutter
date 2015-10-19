@@ -36,9 +36,10 @@ void drawText(ui.Canvas canvas, String lh) {
   path.lineTo(block.maxContentWidth, block.alphabeticBaseline);
   path.moveTo(0.0, block.height);
   path.lineTo(block.maxContentWidth, block.height);
-  paint.color = const ui.Color(0xFFFF9000);
-  paint.setStyle(ui.PaintingStyle.stroke);
-  paint.strokeWidth = 3.0;
+  paint
+    ..color = const ui.Color(0xFFFF9000)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 3.0;
   canvas.drawPath(path, paint);
 
   // paint the text
@@ -49,9 +50,9 @@ ui.Picture paint(ui.Rect paintBounds) {
   ui.PictureRecorder recorder = new ui.PictureRecorder();
   ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
 
-  ui.Paint paint = new ui.Paint();
-  paint.color = const ui.Color(0xFFFFFFFF);
-  paint.setStyle(ui.PaintingStyle.fill);
+  ui.Paint paint = new ui.Paint()
+    ..color = const ui.Color(0xFFFFFFFF)
+    ..style = ui.PaintingStyle.fill;
   canvas.drawRect(new ui.Rect.fromLTRB(0.0, 0.0, ui.view.width, ui.view.height), paint);
 
   canvas.translate(10.0, 0.0);

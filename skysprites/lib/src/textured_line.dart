@@ -41,8 +41,8 @@ class TexturedLinePainter {
       ui.ImageShader shader = new ui.ImageShader(texture.image,
         ui.TileMode.repeated, ui.TileMode.repeated, matrix.storage);
 
-      _cachedPaint = new Paint();
-      _cachedPaint.setShader(shader);
+      _cachedPaint = new Paint()
+        ..shader = shader;
     }
   }
 

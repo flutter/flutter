@@ -5,34 +5,6 @@
 part of dart_ui;
 
 class Paint {
-  void setColorFilter(ColorFilter colorFilter) {
-    this.colorFilter = colorFilter;
-  }
-
-  void setDrawLooper(DrawLooper drawLooper) {
-    this.drawLooper = drawLooper;
-  }
-
-  void setFilterQuality(FilterQuality filterQuality) {
-    this.filterQuality = filterQuality;
-  }
-
-  void setMaskFilter(MaskFilter maskFilter) {
-    this.maskFilter = maskFilter;
-  }
-
-  void setStyle(PaintingStyle style) {
-    this.style = style;
-  }
-
-  void setShader(Shader shader) {
-    this.shader = shader;
-  }
-
-  void setTransferMode(TransferMode transferMode) {
-    this.transferMode = transferMode;
-  }
-
   double strokeWidth;
   bool isAntiAlias = true;
   Color color = const Color(0xFF000000);
