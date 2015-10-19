@@ -34,12 +34,10 @@ class DatePickerDemoState extends State<DatePickerDemo> {
       child: new Stack([
         new Scaffold(
           toolBar: new ToolBar(center: new Text("Date Picker")),
-          body: new Material(
-            child: new Row(
-              [new Text(_dateTime.toString())],
-              alignItems: FlexAlignItems.end,
-              justifyContent: FlexJustifyContent.center
-            )
+          body: new Row(
+            [new Text(_dateTime.toString())],
+            alignItems: FlexAlignItems.end,
+            justifyContent: FlexJustifyContent.center
           )
         ),
         new Dialog(

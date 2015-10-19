@@ -49,7 +49,6 @@ class ScrollbarAppState extends State<ScrollbarApp> {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Scrollbar Demo')),
       body: new Container(
-        decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
         padding: new EdgeDims.all(12.0),
         child: new Center(child: new Card(child: scrollable))
       )

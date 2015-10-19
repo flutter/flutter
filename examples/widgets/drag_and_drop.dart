@@ -103,26 +103,24 @@ class DragAndDropAppState extends State<DragAndDropApp> {
       toolBar: new ToolBar(
         center: new Text('Drag and Drop Flutter Demo')
       ),
-      body: new Material(
-        child: new DefaultTextStyle(
-          style: Theme.of(context).text.body1.copyWith(textAlign: TextAlign.center),
-          child: new Column([
-            new Flexible(child: new Row([
-                new ExampleDragSource(navigator: config.navigator, name: 'Orange', color: const Color(0xFFFF9000)),
-                new ExampleDragSource(navigator: config.navigator, name: 'Teal', color: const Color(0xFF00FFFF)),
-                new ExampleDragSource(navigator: config.navigator, name: 'Yellow', color: const Color(0xFFFFF000)),
-              ],
-              alignItems: FlexAlignItems.center,
-              justifyContent: FlexJustifyContent.spaceAround
-            )),
-            new Flexible(child: new Row([
-              new Flexible(child: new ExampleDragTarget()),
-              new Flexible(child: new ExampleDragTarget()),
-              new Flexible(child: new ExampleDragTarget()),
-              new Flexible(child: new ExampleDragTarget()),
-            ])),
-          ])
-        )
+      body: new DefaultTextStyle(
+        style: Theme.of(context).text.body1.copyWith(textAlign: TextAlign.center),
+        child: new Column([
+          new Flexible(child: new Row([
+              new ExampleDragSource(navigator: config.navigator, name: 'Orange', color: const Color(0xFFFF9000)),
+              new ExampleDragSource(navigator: config.navigator, name: 'Teal', color: const Color(0xFF00FFFF)),
+              new ExampleDragSource(navigator: config.navigator, name: 'Yellow', color: const Color(0xFFFFF000)),
+            ],
+            alignItems: FlexAlignItems.center,
+            justifyContent: FlexJustifyContent.spaceAround
+          )),
+          new Flexible(child: new Row([
+            new Flexible(child: new ExampleDragTarget()),
+            new Flexible(child: new ExampleDragTarget()),
+            new Flexible(child: new ExampleDragTarget()),
+            new Flexible(child: new ExampleDragTarget()),
+          ])),
+        ])
       )
     );
   }

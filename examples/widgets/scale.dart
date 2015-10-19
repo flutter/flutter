@@ -60,12 +60,10 @@ class ScaleAppState extends State<ScaleApp> {
       child: new Scaffold(
         toolBar: new ToolBar(
             center: new Text('Scale Demo')),
-        body: new Material(
-          child: new GestureDetector(
-            onScaleStart: _handleScaleStart,
-            onScaleUpdate: _handleScaleUpdate,
-            child: new CustomPaint(callback: paint, token: "$_zoom $_offset")
-          )
+        body: new GestureDetector(
+          onScaleStart: _handleScaleStart,
+          onScaleUpdate: _handleScaleUpdate,
+          child: new CustomPaint(callback: paint, token: "$_zoom $_offset")
         )
       )
     );

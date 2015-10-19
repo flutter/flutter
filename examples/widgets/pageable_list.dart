@@ -137,10 +137,7 @@ class PageableListAppState extends State<PageableListApp> {
     );
     return new SizeObserver(
       callback: updatePageSize,
-      child: new Container(
-        child: list,
-        decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50])
-      )
+      child: list
     );
   }
 
