@@ -103,7 +103,7 @@ FontCollection::~FontCollection() {
 // 3. If a font matches just language, it gets a score of 2.
 // 4. Matching the "compact" or "elegant" variant adds one to the score.
 // 5. Highest score wins, with ties resolved to the first font.
-FontFamily* FontCollection::getFamilyForChar(uint32_t ch,
+FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
             FontLanguage lang, int variant) const {
     if (ch >= mMaxChar) {
         return NULL;
@@ -112,11 +112,11 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch,
 #ifdef VERBOSE_DEBUG
     ALOGD("querying range %d:%d\n", range.start, range.end);
 #endif
-    FontFamily* bestFamily = NULL;
+    FontFamily* bestFamily = nullptr;
     int bestScore = -1;
     for (size_t i = range.start; i < range.end; i++) {
         FontFamily* family = mFamilyVec[i];
-        if (family->getCoverage()->get(ch)) {
+        if (vs == 0 ? family->getCoverage()->get(ch) : family->hasVariationSelector(ch, vs)) {
             // First font family in collection always matches
             if (mFamilies[0] == family) {
                 return family;
@@ -131,7 +131,13 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch,
             }
         }
     }
-    if (bestFamily == NULL && !mFamilyVec.empty()) {
+    if (bestFamily == nullptr && vs != 0) {
+        // If no fonts support the codepoint and variation selector pair,
+        // fallback to select a font family that supports just the base
+        // character, ignoring the variation selector.
+        return getFamilyForChar(ch, 0, lang, variant);
+    }
+    if (bestFamily == nullptr && !mFamilyVec.empty()) {
         UErrorCode errorCode = U_ZERO_ERROR;
         const UNormalizer2* normalizer = unorm2_getNFDInstance(&errorCode);
         if (U_SUCCESS(errorCode)) {
@@ -140,7 +146,7 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch,
             if (U_SUCCESS(errorCode) && len > 0) {
                 int off = 0;
                 U16_NEXT_UNSAFE(decomposed, off, ch);
-                return getFamilyForChar(ch, lang, variant);
+                return getFamilyForChar(ch, vs, lang, variant);
             }
         }
         bestFamily = mFamilies[0];
@@ -167,35 +173,61 @@ static bool isStickyWhitelisted(uint32_t c) {
     return false;
 }
 
+static bool isVariationSelector(uint32_t c) {
+    return (0xFE00 <= c && c <= 0xFE0F) || (0xE0100 <= c && c <= 0xE01EF);
+}
+
 void FontCollection::itemize(const uint16_t *string, size_t string_size, FontStyle style,
         vector<Run>* result) const {
     FontLanguage lang = style.getLanguage();
     int variant = style.getVariant();
     FontFamily* lastFamily = NULL;
     Run* run = NULL;
-    int nShorts;
-    for (size_t i = 0; i < string_size; i += nShorts) {
-        nShorts = 1;
-        uint32_t ch = string[i];
-        // sigh, decode UTF-16 by hand here
-        if ((ch & 0xfc00) == 0xd800) {
-            if ((i + 1) < string_size) {
-                ch = 0x10000 + ((ch & 0x3ff) << 10) + (string[i + 1] & 0x3ff);
-                nShorts = 2;
+
+    if (string_size == 0) {
+        return;
+    }
+
+    const uint32_t kEndOfString = 0xFFFFFFFF;
+
+    uint32_t nextCh = 0;
+    uint32_t prevCh = 0;
+    size_t nextUtf16Pos = 0;
+    size_t readLength = 0;
+    U16_NEXT(string, readLength, string_size, nextCh);
+
+    do {
+        const uint32_t ch = nextCh;
+        const size_t utf16Pos = nextUtf16Pos;
+        nextUtf16Pos = readLength;
+        if (readLength < string_size) {
+            U16_NEXT(string, readLength, string_size, nextCh);
+        } else {
+            nextCh = kEndOfString;
+        }
+
+        bool shouldContinueRun = false;
+        if (lastFamily != nullptr) {
+            if (isStickyWhitelisted(ch)) {
+                // Continue using existing font as long as it has coverage and is whitelisted
+                shouldContinueRun = lastFamily->getCoverage()->get(ch);
+            } else if (isVariationSelector(ch)) {
+                // Always continue if the character is a variation selector.
+                shouldContinueRun = true;
             }
         }
-        // Continue using existing font as long as it has coverage and is whitelisted
-        if (lastFamily == NULL
-                || !(isStickyWhitelisted(ch) && lastFamily->getCoverage()->get(ch))) {
-            FontFamily* family = getFamilyForChar(ch, lang, variant);
-            if (i == 0 || family != lastFamily) {
-                size_t start = i;
+
+        if (!shouldContinueRun) {
+            FontFamily* family =
+                    getFamilyForChar(ch, isVariationSelector(nextCh) ? nextCh : 0, lang, variant);
+            if (utf16Pos == 0 || family != lastFamily) {
+                size_t start = utf16Pos;
                 // Workaround for Emoji keycap until we implement per-cluster font
                 // selection: if keycap is found in a different font that also
                 // supports previous char, attach previous char to the new run.
                 // Only handles non-surrogate characters.
                 // Bug 7557244.
-                if (ch == KEYCAP && i && family && family->getCoverage()->get(string[i - 1])) {
+                if (ch == KEYCAP && utf16Pos != 0 && family && family->getCoverage()->get(prevCh)) {
                     run->end--;
                     if (run->start == run->end) {
                         result->pop_back();
@@ -214,8 +246,9 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 run->start = start;
             }
         }
-        run->end = i + nShorts;
-    }
+        prevCh = ch;
+        run->end = nextUtf16Pos;  // exclusive
+    } while (nextCh != kEndOfString);
 }
 
 MinikinFont* FontCollection::baseFont(FontStyle style) {

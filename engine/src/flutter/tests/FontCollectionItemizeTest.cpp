@@ -277,6 +277,255 @@ TEST(FontCollectionItemizeTest, itemize_mixed) {
     EXPECT_FALSE(runs[4].fakedFont.fakery.isFakeItalic());
 }
 
+TEST(FontCollectionItemizeTest, itemize_variationSelector) {
+    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::vector<FontCollection::Run> runs;
+
+    // A glyph for U+4FAE is provided by both Japanese font and Simplified
+    // Chinese font. Also a glyph for U+242EE is provided by both Japanese and
+    // Traditional Chinese font.  To avoid effects of device default locale,
+    // explicitly specify the locale.
+    FontStyle kZH_HansStyle = FontStyle(FontLanguage("zh_Hans", 7));
+    FontStyle kZH_HantStyle = FontStyle(FontLanguage("zh_Hant", 7));
+
+    // U+4FAE is available in both zh_Hans and ja font, but U+4FAE,U+FE00 is
+    // only available in ja font.
+    itemize(collection.get(), "U+4FAE", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+4FAE U+FE00", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+4FAE U+4FAE U+FE00", kZH_HansStyle, &runs);
+    ASSERT_EQ(2U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+    EXPECT_EQ(1, runs[1].start);
+    EXPECT_EQ(3, runs[1].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+
+    itemize(collection.get(), "U+4FAE U+4FAE U+FE00 U+4FAE", kZH_HansStyle, &runs);
+    ASSERT_EQ(3U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+    EXPECT_EQ(1, runs[1].start);
+    EXPECT_EQ(3, runs[1].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+    EXPECT_EQ(3, runs[2].start);
+    EXPECT_EQ(4, runs[2].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[2]));
+
+    // Validation selector after validation selector.
+    itemize(collection.get(), "U+4FAE U+FE00 U+FE00", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(3, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+
+    // No font supports U+242EE U+FE0E.
+    itemize(collection.get(), "U+4FAE U+FE0E", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+
+    // Surrogate pairs handling.
+    // U+242EE is available in ja font and zh_Hant font.
+    // U+242EE U+FE00 is available only in ja font.
+    itemize(collection.get(), "U+242EE", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+242EE U+FE00", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(3, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+242EE U+242EE U+FE00", kZH_HantStyle, &runs);
+    ASSERT_EQ(2U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+    EXPECT_EQ(2, runs[1].start);
+    EXPECT_EQ(5, runs[1].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+
+    itemize(collection.get(), "U+242EE U+242EE U+FE00 U+242EE", kZH_HantStyle, &runs);
+    ASSERT_EQ(3U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+    EXPECT_EQ(2, runs[1].start);
+    EXPECT_EQ(5, runs[1].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+    EXPECT_EQ(5, runs[2].start);
+    EXPECT_EQ(7, runs[2].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[2]));
+
+    // Validation selector after validation selector.
+    itemize(collection.get(), "U+242EE U+FE00 U+FE00", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(4, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
+
+    // No font supports U+242EE U+FE0E
+    itemize(collection.get(), "U+242EE U+FE0E", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(3, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+
+    // Isolated variation selector supplement.
+    itemize(collection.get(), "U+FE00", FontStyle(), &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+FE00", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
+}
+
+TEST(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
+    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::vector<FontCollection::Run> runs;
+
+    // A glyph for U+845B is provided by both Japanese font and Simplified
+    // Chinese font. Also a glyph for U+242EE is provided by both Japanese and
+    // Traditional Chinese font.  To avoid effects of device default locale,
+    // explicitly specify the locale.
+    FontStyle kZH_HansStyle = FontStyle(FontLanguage("zh_Hans", 7));
+    FontStyle kZH_HantStyle = FontStyle(FontLanguage("zh_Hant", 7));
+
+    // U+845B is available in both zh_Hans and ja font, but U+845B,U+E0100 is
+    // only available in ja font.
+    itemize(collection.get(), "U+845B", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+845B U+E0100", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(3, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+845B U+845B U+E0100", kZH_HansStyle, &runs);
+    ASSERT_EQ(2U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+    EXPECT_EQ(1, runs[1].start);
+    EXPECT_EQ(4, runs[1].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+
+    itemize(collection.get(), "U+845B U+845B U+E0100 U+845B", kZH_HansStyle, &runs);
+    ASSERT_EQ(3U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+    EXPECT_EQ(1, runs[1].start);
+    EXPECT_EQ(4, runs[1].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+    EXPECT_EQ(4, runs[2].start);
+    EXPECT_EQ(5, runs[2].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[2]));
+
+    // Validation selector after validation selector.
+    itemize(collection.get(), "U+845B U+E0100 U+E0100", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(5, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
+
+    // No font supports U+845B U+E01E0.
+    itemize(collection.get(), "U+845B U+E01E0", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(3, runs[0].end);
+    EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+
+    // Isolated variation selector supplement
+    // Surrogate pairs handling.
+    // U+242EE is available in ja font and zh_Hant font.
+    // U+242EE U+E0100 is available only in ja font.
+    itemize(collection.get(), "U+242EE", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+242EE U+E0101", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(4, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+242EE U+242EE U+E0101", kZH_HantStyle, &runs);
+    ASSERT_EQ(2U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+    EXPECT_EQ(2, runs[1].start);
+    EXPECT_EQ(6, runs[1].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+
+    itemize(collection.get(), "U+242EE U+242EE U+E0101 U+242EE", kZH_HantStyle, &runs);
+    ASSERT_EQ(3U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+    EXPECT_EQ(2, runs[1].start);
+    EXPECT_EQ(6, runs[1].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[1]));
+    EXPECT_EQ(6, runs[2].start);
+    EXPECT_EQ(8, runs[2].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[2]));
+
+    // Validation selector after validation selector.
+    itemize(collection.get(), "U+242EE U+E0100 U+E0100", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(6, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
+
+    // No font supports U+242EE U+E01E0.
+    itemize(collection.get(), "U+242EE U+E01E0", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(4, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+
+    // Isolated variation selector supplement.
+    itemize(collection.get(), "U+E0100", FontStyle(), &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+E0100", kZH_HantStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
+}
+
 TEST(FontCollectionItemizeTest, itemize_no_crash) {
     std::unique_ptr<FontCollection> collection = getFontCollection();
     std::vector<FontCollection::Run> runs;
@@ -340,4 +589,3 @@ TEST(FontCollectionItemizeTest, itemize_fakery) {
     EXPECT_TRUE(runs[0].fakedFont.fakery.isFakeItalic());
 }
 
-// TODO(11256006): Add Variation Selector test cases once it is supported.
