@@ -190,7 +190,7 @@ class RenderFractionallySizedBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  BoxConstraints _computeChildConstraints(BoxConstraints constraints) {
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return new BoxConstraints(
       minWidth: _widthFactor == null ? constraints.minWidth : constraints.maxWidth * _widthFactor,
       maxWidth: _widthFactor == null ? constraints.maxWidth : constraints.maxWidth * _widthFactor,
@@ -201,34 +201,34 @@ class RenderFractionallySizedBox extends RenderProxyBox {
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      return child.getMinIntrinsicWidth(_computeChildConstraints(constraints));
-    return _computeChildConstraints(constraints).constrainWidth(0.0);
+      return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
+    return _getInnerConstraints(constraints).constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      return child.getMaxIntrinsicWidth(_computeChildConstraints(constraints));
-    return _computeChildConstraints(constraints).constrainWidth(0.0);
+      return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
+    return _getInnerConstraints(constraints).constrainWidth(0.0);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
-      return child.getMinIntrinsicHeight(_computeChildConstraints(constraints));
-    return _computeChildConstraints(constraints).constrainHeight(0.0);
+      return child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
+    return _getInnerConstraints(constraints).constrainHeight(0.0);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
-      return child.getMaxIntrinsicHeight(_computeChildConstraints(constraints));
-    return _computeChildConstraints(constraints).constrainHeight(0.0);
+      return child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
+    return _getInnerConstraints(constraints).constrainHeight(0.0);
   }
 
   void performLayout() {
     if (child != null) {
-      child.layout(_computeChildConstraints(constraints), parentUsesSize: true);
+      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = child.size;
     } else {
-      size = _computeChildConstraints(constraints).constrain(Size.zero);
+      size = _getInnerConstraints(constraints).constrain(Size.zero);
     }
   }
 
@@ -313,7 +313,7 @@ class RenderOverflowBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  BoxConstraints childConstraints(BoxConstraints constraints) {
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return new BoxConstraints(
       minWidth: _minWidth ?? constraints.minWidth,
       maxWidth: _maxWidth ?? constraints.maxWidth,
@@ -346,7 +346,7 @@ class RenderOverflowBox extends RenderProxyBox {
 
   void performLayout() {
     if (child != null)
-      child.layout(childConstraints(constraints));
+      child.layout(_getInnerConstraints(constraints));
   }
 
   String debugDescribeSettings(String prefix) {
