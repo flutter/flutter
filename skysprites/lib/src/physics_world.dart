@@ -43,6 +43,8 @@ class PhysicsWorld extends Node {
 
   List<box2d.Body> _bodiesScheduledForDestruction = [];
 
+  List<PhysicsBody> _bodiesScheduledForUpdate = [];
+
   _PhysicsDebugDraw _debugDraw;
 
   double b2WorldToNodeConversionFactor = 10.0;
@@ -71,6 +73,14 @@ class PhysicsWorld extends Node {
   }
 
   void _stepPhysics(double dt) {
+    // Update transformations of bodies whose groups have moved
+    for (PhysicsBody body in _bodiesScheduledForUpdate) {
+      Node node = body._node;
+      node._updatePhysicsPosition(body, node.position, node.parent);
+      node._updatePhysicsRotation(body, node.rotation, node.parent);
+    }
+    _bodiesScheduledForUpdate.clear();
+
     // Remove bodies that were marked for destruction during the update phase
     _removeBodiesScheduledForDestruction();
 
