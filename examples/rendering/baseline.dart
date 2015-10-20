@@ -37,7 +37,7 @@ RenderBox getBox(double lh) {
           padding: new EdgeDims.all(10.0),
           child: new RenderCustomPaint(
             child: paragraph,
-            onPaint: (canvas, size) {
+            onPaint: (PaintingCanvas canvas, Size size) {
               double baseline = paragraph.getDistanceToBaseline(TextBaseline.alphabetic);
               double w = paragraph.getMaxIntrinsicWidth(new BoxConstraints.loose(size));
               double h = paragraph.getMaxIntrinsicHeight(new BoxConstraints.loose(size));
