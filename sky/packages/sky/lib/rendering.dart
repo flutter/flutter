@@ -20,6 +20,7 @@ export 'src/rendering/image.dart';
 export 'src/rendering/layer.dart';
 export 'src/rendering/node.dart';
 export 'src/rendering/object.dart';
+export 'src/rendering/overflow.dart';
 export 'src/rendering/paragraph.dart';
 export 'src/rendering/proxy_box.dart';
 export 'src/rendering/shifted_box.dart';

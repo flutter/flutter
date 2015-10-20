@@ -346,6 +346,13 @@ class OverflowBox extends OneChildRenderObjectWidget {
   }
 }
 
+class OffStage extends OneChildRenderObjectWidget {
+  OffStage({ Key key, Widget child })
+    : super(key: key, child: child);
+
+  RenderOffStage createRenderObject() => new RenderOffStage();
+}
+
 class AspectRatio extends OneChildRenderObjectWidget {
   AspectRatio({ Key key, this.aspectRatio, Widget child })
     : super(key: key, child: child) {
