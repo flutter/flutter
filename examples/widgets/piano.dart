@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:sky_services/media/media.mojom.dart';
 import 'package:flutter/material.dart';
@@ -21,19 +23,30 @@ class Key {
 
   final Color color;
   final String soundUrl;
-  MediaPlayerProxy player;
+  final MediaPlayerProxy player = new MediaPlayerProxy.unbound();
+
+  bool get isPlayerOpen => player.impl.isOpen;
 
   void down() {
-    if (player == null)
-      return;
+    if (!isPlayerOpen) return;
     player.ptr.seekTo(0);
     player.ptr.start();
   }
 
   void up() {
-    if (player == null)
-      return;
+    if (!isPlayerOpen) return;
     player.ptr.pause();
+  }
+
+  Future load(MediaServiceProxy mediaService) async {
+    try {
+      mediaService.ptr.createPlayer(player);
+      UrlResponse response = await fetchUrl(soundUrl);
+      await player.ptr.prepare(response.body);
+    } catch (e) {
+      print("Error: failed to load sound file $soundUrl");
+      player.close();
+    }
   }
 }
 
@@ -47,47 +60,70 @@ class PianoApp extends StatelessComponent {
     new Key(Colors.purple[500], iLoveYou),
   ];
 
-  PianoApp() {
-    loadSounds();
+  Future connect() {
+    return _loadSounds();
   }
 
-  loadSounds() async {
+  Future _loadSounds() async {
     MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
-    shell.requestService(null, mediaService);
-
-    for (Key key in keys) {
-      MediaPlayerProxy player = new MediaPlayerProxy.unbound();
-      mediaService.ptr.createPlayer(player);
-
-      UrlResponse response = await fetchUrl(key.soundUrl);
-      await player.ptr.prepare(response.body);
-      key.player = player;
+    try {
+      shell.requestService(null, mediaService);
+      List<Future> pending = [];
+      for (Key key in keys) {
+        pending.add(key.load(mediaService));
+      }
+      await Future.wait(pending);
+    } finally {
+      mediaService.close();
     }
-    mediaService.close();
-    // Are we leaking all the player connections?
   }
 
   Widget build(BuildContext context) {
     List<Widget> children = [];
     for (Key key in keys) {
-      children.add(
-        new Flexible(
+      children.add(new Flexible(
           child: new Listener(
-            child: new Container(
-              decoration: new BoxDecoration(backgroundColor: key.color)
-            ),
-            onPointerCancel: (_) => key.up(),
-            onPointerDown: (_) => key.down(),
-            onPointerUp: (_) => key.up()
-          )
-        )
-      );
+              child: new Container(
+                  decoration: new BoxDecoration(backgroundColor: key.color)),
+              onPointerCancel: (_) => key.up(),
+              onPointerDown: (_) => key.down(),
+              onPointerUp: (_) => key.up())));
     }
 
     return new Column(children);
   }
 }
 
-void main() {
-  runApp(new PianoApp());
+Widget statusBox(Widget child) {
+  const mediumGray = const Color(0xff555555);
+  const darkGray = const Color(0xff222222);
+  return new Center(
+      child: new Container(
+          decoration: const BoxDecoration(boxShadow: const [
+            const BoxShadow(
+                color: mediumGray, offset: const Offset(6.0, 6.0), blur: 5.0)
+          ], backgroundColor: darkGray),
+          height: 90.0,
+          padding: const EdgeDims.all(8.0),
+          margin: const EdgeDims.symmetric(horizontal: 50.0),
+          child: new Center(child: child)));
+}
+
+Widget splashScreen() {
+  return statusBox(
+      new Text('Loading sound files!', style: new TextStyle(fontSize: 18.0)));
+}
+
+main() async {
+  runApp(splashScreen());
+
+  PianoApp app = new PianoApp();
+  // use "await" to make sure the sound files are loaded before we show the ui.
+  await app.connect();
+  runApp(app);
+  // runApp() returns immediately so you can't put application cleanup code
+  // here.  Android apps can be killed at any time, so there's also no way to
+  // catch a close event to do cleanup. Therefore, although we appear to be
+  // leaking the "player" handles, this is working as intended and the operating
+  // system will clean up when the activity is killed.
 }
