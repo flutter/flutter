@@ -36,24 +36,25 @@ class Response {
 }
 
 Future<UrlResponse> fetch(UrlRequest request) async {
+  UrlLoaderProxy loader = new UrlLoaderProxy.unbound();
   try {
-    UrlLoaderProxy loader = new UrlLoaderProxy.unbound();
     _networkService.ptr.createUrlLoader(loader);
     UrlResponse response = (await loader.ptr.start(request)).response;
-    loader.close();
     return response;
   } catch (e) {
     print("NetworkService unavailable $e");
     return new UrlResponse()..statusCode = 500;
+  } finally {
+    loader.close();
   }
 }
 
-Future<UrlResponse> fetchUrl(String relativeUrl) async {
+Future<UrlResponse> fetchUrl(String relativeUrl) {
   String url = Uri.base.resolve(relativeUrl).toString();
   UrlRequest request = new UrlRequest()
     ..url = url
     ..autoFollowRedirects = true;
-  return await fetch(request);
+  return fetch(request);
 }
 
 Future<Response> fetchBody(String relativeUrl) async {
