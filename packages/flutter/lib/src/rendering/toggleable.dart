@@ -24,7 +24,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
         _onChanged = onChanged,
         super(additionalConstraints: new BoxConstraints.tight(size)) {
     _performance = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: easeIn, reverseCurve: easeOut),
+      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeIn, reverseCurve: Curves.easeOut),
       duration: _kToggleDuration,
       progress: _value ? 1.0 : 0.0
     )..addListener(markNeedsPaint);

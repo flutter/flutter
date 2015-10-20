@@ -83,7 +83,7 @@ class _Drawer extends StatelessComponent {
             performance: performance,
             position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
             child: new AnimatedContainer(
-              curve: ease,
+              curve: Curves.ease,
               duration: _kThemeChangeDuration,
               decoration: new BoxDecoration(
                 backgroundColor: Theme.of(context).canvasColor,

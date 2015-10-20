@@ -45,7 +45,7 @@ class _ProgressIndicatorState extends State<ProgressIndicator> {
   void initState() {
     super.initState();
     _performance = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: ease),
+      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.ease),
       duration: const Duration(milliseconds: 1500)
     );
     _performance.addStatusListener((PerformanceStatus status) {

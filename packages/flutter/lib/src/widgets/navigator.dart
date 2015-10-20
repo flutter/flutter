@@ -307,10 +307,10 @@ class PageRoute extends PerformanceRoute {
     // TODO(jackson): Block input unless content is interactive
     return new SlideTransition(
       performance: performance,
-      position: new AnimatedValue<Point>(_kTransitionStartPoint, end: Point.origin, curve: easeOut),
+      position: new AnimatedValue<Point>(_kTransitionStartPoint, end: Point.origin, curve: Curves.easeOut),
       child: new FadeTransition(
         performance: performance,
-        opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
+        opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
         child: builder(new RouteArguments(navigator: navigator, previousPerformance: this.performance, nextPerformance: nextRoutePerformance))
       )
     );

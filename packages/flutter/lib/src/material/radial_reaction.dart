@@ -26,9 +26,9 @@ class RadialReaction {
     this.radius,
     Point startPosition
   }) {
-    _outerOpacity = new AnimatedValue<double>(0.0, end: _kMaxOpacity, curve: easeOut);
-    _innerCenter = new AnimatedValue<Point>(startPosition, end: center, curve: easeOut);
-    _innerRadius = new AnimatedValue<double>(0.0, end: radius, curve: easeOut);
+    _outerOpacity = new AnimatedValue<double>(0.0, end: _kMaxOpacity, curve: Curves.easeOut);
+    _innerCenter = new AnimatedValue<Point>(startPosition, end: center, curve: Curves.easeOut);
+    _innerRadius = new AnimatedValue<double>(0.0, end: radius, curve: Curves.easeOut);
     _showPerformance = new Performance(duration: _kShowDuration)
       ..addListener(() {
         _showPerformance.updateVariable(_outerOpacity);
@@ -36,7 +36,7 @@ class RadialReaction {
         _showPerformance.updateVariable(_innerRadius);
       });
     _fade = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(1.0, end: 0.0, curve: easeIn),
+      variable: new AnimatedValue<double>(1.0, end: 0.0, curve: Curves.easeIn),
       duration: _kHideDuration
     );
   }

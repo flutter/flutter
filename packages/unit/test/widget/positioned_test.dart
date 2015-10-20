@@ -19,7 +19,7 @@ void main() {
           new Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
           new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0)
         ),
-        curve: linear
+        curve: Curves.linear
       );
       final Performance performance = new Performance(
         duration: const Duration(seconds: 10)
