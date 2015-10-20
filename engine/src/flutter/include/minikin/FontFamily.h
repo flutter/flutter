@@ -35,6 +35,7 @@ class MinikinFont;
 // font rendering.
 class FontLanguage {
     friend class FontStyle;
+    friend class FontLanguages;
 public:
     FontLanguage() : mBits(0) { }
 
@@ -45,6 +46,8 @@ public:
         return mBits != kUnsupportedLanguage && mBits == other.mBits;
     }
     operator bool() const { return mBits != 0; }
+
+    bool isUnsupported() const { return mBits == kUnsupportedLanguage; }
 
     std::string getString() const;
 
@@ -64,6 +67,23 @@ private:
     uint32_t mBits;
 };
 
+// A list of zero or more instances of FontLanguage, in the order of
+// preference. Used for further resolution of rendering results.
+class FontLanguages {
+public:
+    FontLanguages() { mLangs.clear(); }
+
+    // Parse from string, which is a comma-separated list of languages
+    FontLanguages(const char* buf, size_t size);
+
+    const FontLanguage& operator[](size_t index) const { return mLangs.at(index); }
+
+    size_t size() const { return mLangs.size(); }
+
+private:
+    std::vector<FontLanguage> mLangs;
+};
+
 // FontStyle represents all style information needed to select an actual font
 // from a collection. The implementation is packed into a single 32-bit word
 // so it can be efficiently copied, embedded in other objects, etc.
@@ -76,6 +96,9 @@ public:
         bits = (weight & kWeightMask) | (italic ? kItalicMask : 0)
                 | (variant << kVariantShift) | (lang.bits() << kLangShift);
     }
+    FontStyle(FontLanguages langs, int variant = 0, int weight = 4, bool italic = false) :
+        // TODO: Use all the languages in langs
+        FontStyle(langs[0], variant, weight, italic) { }
     int getWeight() const { return bits & kWeightMask; }
     bool getItalic() const { return (bits & kItalicMask) != 0; }
     int getVariant() const { return (bits >> kVariantShift) & kVariantMask; }

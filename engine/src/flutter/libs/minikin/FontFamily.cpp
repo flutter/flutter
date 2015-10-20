@@ -16,9 +16,12 @@
 
 #define LOG_TAG "Minikin"
 
+#include <unordered_set>
+
 #include <cutils/log.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <hb.h>
 #include <hb-ot.h>
@@ -113,6 +116,36 @@ int FontLanguage::match(const FontLanguage other) const {
         }
     }
     return result;
+}
+
+FontLanguages::FontLanguages(const char* buf, size_t size) {
+    std::unordered_set<uint32_t> seen;
+    mLangs.clear();
+    const char* bufEnd = buf + size;
+    const char* lastStart = buf;
+    bool isLastLang = false;
+    while (true) {
+        const char* commaLoc = static_cast<const char*>(
+                memchr(lastStart, ',', bufEnd - lastStart));
+        if (commaLoc == NULL) {
+            commaLoc = bufEnd;
+            isLastLang = true;
+        }
+        FontLanguage lang(lastStart, commaLoc - lastStart);
+        if (isLastLang && mLangs.size() == 0) {
+            // Make sure the list has at least one member
+            mLangs.push_back(lang);
+            return;
+        }
+        uint32_t bits = lang.bits();
+        if (bits != FontLanguage::kUnsupportedLanguage && seen.count(bits) == 0) {
+            mLangs.push_back(lang);
+            if (isLastLang) return;
+            seen.insert(bits);
+        }
+        if (isLastLang) return;
+        lastStart = commaLoc + 1;
+    }
 }
 
 FontFamily::~FontFamily() {
