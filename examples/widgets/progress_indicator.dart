@@ -17,8 +17,8 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
       ..variable = new AnimatedValue<double>(
         0.0,
         end: 1.0,
-        curve: new Interval(0.0, 0.9, curve: ease),
-        reverseCurve: ease
+        curve: new Interval(0.0, 0.9, curve: Curves.ease),
+        reverseCurve: Curves.ease
       );
     valueAnimation.addStatusListener((PerformanceStatus status) {
       if (status == PerformanceStatus.dismissed || status == PerformanceStatus.completed)

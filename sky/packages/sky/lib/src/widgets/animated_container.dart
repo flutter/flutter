@@ -56,7 +56,7 @@ class AnimatedContainer extends StatefulComponent {
     this.transform,
     this.width,
     this.height,
-    this.curve: linear,
+    this.curve: Curves.linear,
     this.duration
   }) : super(key: key) {
     assert(margin == null || margin.isNonNegative);

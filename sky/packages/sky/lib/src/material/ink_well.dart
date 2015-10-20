@@ -28,7 +28,7 @@ class _InkSplash {
   _InkSplash(this.position, this.well) {
     _targetRadius = _getSplashTargetSize(well.size, position);
     _radius = new AnimatedValue<double>(
-        _kSplashInitialSize, end: _targetRadius, curve: easeOut);
+        _kSplashInitialSize, end: _targetRadius, curve: Curves.easeOut);
 
     _performance = new ValuePerformance<double>(
       variable: _radius,

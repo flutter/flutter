@@ -404,7 +404,7 @@ class _TabBarState extends ScrollableState<TabBar> {
     super.initState();
     _indicatorAnimation = new ValuePerformance<Rect>()
       ..duration = _kTabBarScroll
-      ..variable = new AnimatedRectValue(null, curve: ease);
+      ..variable = new AnimatedRectValue(null, curve: Curves.ease);
     scrollBehavior.isScrollable = config.isScrollable;
   }
 
