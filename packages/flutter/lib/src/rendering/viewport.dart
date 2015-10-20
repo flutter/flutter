@@ -32,7 +32,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
   RenderViewport({
     RenderBox child,
-    Offset scrollOffset,
+    Offset scrollOffset: Offset.zero,
     ScrollDirection scrollDirection: ScrollDirection.vertical
   }) : _scrollOffset = scrollOffset,
        _scrollDirection = scrollDirection {
