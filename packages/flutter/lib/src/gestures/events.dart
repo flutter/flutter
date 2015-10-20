@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
+export 'dart:ui' show Point;
+
 /// Base class for input events.
 class InputEvent {
 
@@ -67,4 +71,5 @@ class PointerInputEvent extends InputEvent {
   final double orientation;
   final double tilt;
 
+  ui.Point get position => new ui.Point(x, y);
 }

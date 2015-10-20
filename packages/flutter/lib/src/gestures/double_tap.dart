@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'arena.dart';
 import 'constants.dart';
@@ -14,117 +13,145 @@ import 'tap.dart';
 class DoubleTapGestureRecognizer extends DisposableArenaMember {
   static int sInstances = 0;
 
-  DoubleTapGestureRecognizer({ this.router, this.onDoubleTap }) {
-    _instance = sInstances++;
-  }
+  DoubleTapGestureRecognizer({ this.router, this.onDoubleTap });
+
+  // Implementation notes:
+  // The double tap recognizer can be in one of four states. There's no
+  // explicit enum for the states, because they are already captured by
+  // the state of existing fields.  Specifically:
+  // Waiting on first tap: In this state, the _trackers list is empty, and
+  // _firstTap is null.
+  // First tap in progress: In this state, the _trackers list contains all
+  // the states for taps that have begun but not completed. This list can
+  // have more than one entry if two pointers begin to tap.
+  // Waiting on second tap: In this state, one of the in-progress taps has
+  // completed successfully. The _trackers list is again empty, and
+  // _firstTap records the successful tap.
+  // Second tap in progress: Much like the "first tap in progress" state, but
+  // _firstTap is non-null.  If a tap completes successfully while in this
+  // state, the callback is invoked and the state is reset.
+  // There are various other scenarios that cause the state to reset:
+  // - All in-progress taps are rejected (by time, distance, pointercancel, etc)
+  // - The long timer between taps expires
+  // - The gesture arena decides we have been rejected wholesale
 
   PointerRouter router;
   GestureTapCallback onDoubleTap;
 
-  int _numTaps = 0;
-  int _instance = 0;
-  bool _isTrackingPointer = false;
-  int _pointer;
-  ui.Point _initialPosition;
-  Timer _tapTimer;
   Timer _doubleTapTimer;
-  GestureArenaEntry _entry = null;
+  TapTracker _firstTap;
+  Map<int, TapTracker> _trackers = new Map<int, TapTracker>();
 
   void addPointer(PointerInputEvent event) {
-    message("add pointer");
-    if (_initialPosition != null && !_isWithinTolerance(event)) {
-      message("reset");
-      _reset();
-    }
-    _pointer = event.pointer;
-    _initialPosition = _getPoint(event);
-    _isTrackingPointer = false;
-    _startTapTimer();
+    // Ignore out-of-bounds second taps
+    if (_firstTap != null &&
+        !_firstTap.isWithinTolerance(event, kDoubleTapTouchSlop))
+      return;
     _stopDoubleTapTimer();
-    _startTrackingPointer();
-    if (_entry == null) {
-      message("register entry");
-      _entry = GestureArena.instance.add(event.pointer, this);
-    }
-  }
-
-  void message(String s) {
-    print("Double tap " + _instance.toString() + ": " + s);
+    TapTracker tracker = new TapTracker(
+      event: event,
+      entry: GestureArena.instance.add(event.pointer, this)
+    );
+    _trackers[event.pointer] = tracker;
+    tracker.startTimer(() => _reject(tracker));
+    tracker.startTrackingPointer(router, handleEvent);
   }
 
   void handleEvent(PointerInputEvent event) {
-    message("handle event");
+    TapTracker tracker = _trackers[event.pointer];
+    assert(tracker != null);
     if (event.type == 'pointerup') {
-      _numTaps++;
-      _stopTapTimer();
-      _stopTrackingPointer();
-      if (_numTaps == 1) {
-        message("start long timer");
-        _startDoubleTapTimer();
-      } else if (_numTaps == 2) {
-        message("start found second tap");
-        _entry.resolve(GestureDisposition.accepted);
-      }
-    } else if (event.type == 'pointermove' && !_isWithinTolerance(event)) {
-      message("outside tap tolerance");
-      _entry.resolve(GestureDisposition.rejected);
+      if (_firstTap == null)
+        _registerFirstTap(tracker);
+      else
+        _registerSecondTap(tracker);
+    } else if (event.type == 'pointermove' &&
+        !tracker.isWithinTolerance(event, kTouchSlop)) {
+      _reject(tracker);
     } else if (event.type == 'pointercancel') {
-      message("cancel");
-      _entry.resolve(GestureDisposition.rejected);
+      _reject(tracker);
     }
   }
 
-  void acceptGesture(int pointer) {
-    message("accepted");
-    _reset();
-    _entry = null;
-    print ("Entry is assigned null");
-    onDoubleTap?.call();
-  }
+  void acceptGesture(int pointer) {}
 
   void rejectGesture(int pointer) {
-    message("rejected");
-    _reset();
-    _entry = null;
-    print ("Entry is assigned null");
+    TapTracker tracker = _trackers[pointer];
+    // If tracker isn't in the list, check if this is the first tap tracker
+    if (tracker == null &&
+        _firstTap != null &&
+        _firstTap.pointer == pointer)
+      tracker = _firstTap;
+    // If tracker is still null, we rejected ourselves already
+    if (tracker != null)
+      _reject(tracker);
+  }
+
+  void _reject(TapTracker tracker) {
+    _trackers.remove(tracker.pointer);
+    tracker.entry.resolve(GestureDisposition.rejected);
+    _freezeTracker(tracker);
+    // If the first tap is in progress, and we've run out of taps to track,
+    // reset won't have any work to do.  But if we're in the second tap, we need
+    // to clear intermediate state.
+    if (_firstTap != null &&
+        (_trackers.isEmpty || tracker == _firstTap))
+      _reset();
   }
 
   void dispose() {
-    _entry?.resolve(GestureDisposition.rejected);
+    _reset();
     router = null;
   }
 
   void _reset() {
-    _numTaps = 0;
-    _initialPosition = null;
-    _stopTapTimer();
     _stopDoubleTapTimer();
-    _stopTrackingPointer();
+    if (_firstTap != null) {
+      // Note, order is important below in order for the resolve -> reject logic
+      // to work properly
+      TapTracker tracker = _firstTap;
+      _firstTap = null;
+      _reject(tracker);
+      GestureArena.instance.release(tracker.pointer);
+    }
+    _clearTrackers();
   }
 
-  void _startTapTimer() {
-    if (_tapTimer == null) {
-      _tapTimer = new Timer(
-        kTapTimeout,
-        () => _entry.resolve(GestureDisposition.rejected)
-      );
-    }
+  void _registerFirstTap(TapTracker tracker) {
+    _startDoubleTapTimer();
+    GestureArena.instance.hold(tracker.pointer);
+    // Note, order is important below in order for the clear -> reject logic to
+    // work properly.
+    _freezeTracker(tracker);
+    _trackers.remove(tracker.pointer);
+    _clearTrackers();
+    _firstTap = tracker;
   }
 
-  void _stopTapTimer() {
-    if (_tapTimer != null) {
-      _tapTimer.cancel();
-      _tapTimer = null;
-    }
+  void _registerSecondTap(TapTracker tracker) {
+    _firstTap.entry.resolve(GestureDisposition.accepted);
+    tracker.entry.resolve(GestureDisposition.accepted);
+    _freezeTracker(tracker);
+    _trackers.remove(tracker.pointer);
+    onDoubleTap?.call();
+    _reset();
+  }
+
+  void _clearTrackers() {
+    List<TapTracker> localTrackers = new List.from(_trackers.values);
+    for (TapTracker tracker in localTrackers)
+      _reject(tracker);
+    assert(_trackers.isEmpty);
+  }
+
+  void _freezeTracker(TapTracker tracker) {
+    tracker.stopTimer();
+    tracker.stopTrackingPointer(router, handleEvent);
   }
 
   void _startDoubleTapTimer() {
-    if (_doubleTapTimer == null) {
-      _doubleTapTimer = new Timer(
-        kDoubleTapTimeout,
-        () => _entry.resolve(GestureDisposition.rejected)
-      );
-    }
+    if (_doubleTapTimer == null)
+      _doubleTapTimer = new Timer(kDoubleTapTimeout, () => _reset());
   }
 
   void _stopDoubleTapTimer() {
@@ -132,29 +159,6 @@ class DoubleTapGestureRecognizer extends DisposableArenaMember {
       _doubleTapTimer.cancel();
       _doubleTapTimer = null;
     }
-  }
-
-  void _startTrackingPointer() {
-    if (!_isTrackingPointer) {
-      _isTrackingPointer = true;
-      router.addRoute(_pointer, handleEvent);
-    }
-  }
-
-  void _stopTrackingPointer() {
-    if (_isTrackingPointer) {
-      _isTrackingPointer = false;
-      router.removeRoute(_pointer, handleEvent);
-    }
-  }
-
-  ui.Point _getPoint(PointerInputEvent event) {
-    return new ui.Point(event.x, event.y);
-  }
-
-  bool _isWithinTolerance(PointerInputEvent event) {
-    ui.Offset offset = _getPoint(event) - _initialPosition;
-    return offset.distance <= kDoubleTapTouchSlop;
   }
 
 }
