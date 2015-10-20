@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
+import 'pointer_router.dart';
 import 'recognizer.dart';
 
 typedef void GestureTapCallback();
@@ -17,103 +18,113 @@ enum TapResolution {
   cancel
 }
 
-class _TapGesture {
-  _TapGesture({ this.gestureRecognizer, PointerInputEvent event }) {
-    assert(event.type == 'pointerdown');
-    _pointer = event.pointer;
-    _isTrackingPointer = false;
-    _initialPosition = _getPoint(event);
-    _entry = GestureArena.instance.add(_pointer, gestureRecognizer);
-    _wonArena = false;
-    _didTap = false;
-    _startTimer();
-    _startTrackingPointer();
+/// TapTracker helps track individual tap sequences as part of a
+/// larger gesture.
+class TapTracker {
+
+  TapTracker({ PointerInputEvent event, this.entry })
+  : pointer = event.pointer,
+    initialPosition = event.position,
+    isTrackingPointer = false {
+      assert(event.type == 'pointerdown');
+    }
+
+  int pointer;
+  ui.Point initialPosition;
+  bool isTrackingPointer;
+  Timer timer;
+  GestureArenaEntry entry;
+
+  void startTimer(void callback()) {
+    if (timer == null) {
+      timer = new Timer(kTapTimeout, callback);
+    }
   }
+
+  void stopTimer() {
+    if (timer != null) {
+      timer.cancel();
+      timer = null;
+    }
+  }
+
+  void startTrackingPointer(PointerRouter router, PointerRoute route) {
+    if (!isTrackingPointer) {
+      isTrackingPointer = true;
+      router.addRoute(pointer, route);
+    }
+  }
+
+  void stopTrackingPointer(PointerRouter router, PointerRoute route) {
+    if (isTrackingPointer) {
+      isTrackingPointer = false;
+      router.removeRoute(pointer, route);
+    }
+  }
+
+  bool isWithinTolerance(PointerInputEvent event, double tolerance) {
+    ui.Offset offset = event.position - initialPosition;
+    return offset.distance <= tolerance;
+  }
+
+}
+
+/// TapGesture represents a full gesture resulting from a single tap
+/// sequence. Tap gestures are passive, meaning that they will not
+/// pre-empt any other arena member in play.
+class TapGesture extends TapTracker {
+
+  TapGesture({ this.gestureRecognizer, PointerInputEvent event })
+  : super(event: event) {
+      entry = GestureArena.instance.add(event.pointer, gestureRecognizer);
+      _wonArena = false;
+      _didTap = false;
+      startTimer(() => cancel());
+      startTrackingPointer(gestureRecognizer.router, handleEvent);
+    }
 
   TapGestureRecognizer gestureRecognizer;
 
-  int _pointer;
-  bool _isTrackingPointer;
-  ui.Point _initialPosition;
-  GestureArenaEntry _entry;
-  Timer _deadline;
   bool _wonArena;
   bool _didTap;
 
   void handleEvent(PointerInputEvent event) {
-    print("Tap gesture handleEvent");
-    assert(event.pointer == _pointer);
-    if (event.type == 'pointermove' && !_isWithinTolerance(event)) {
-      _entry.resolve(GestureDisposition.rejected);
+    assert(event.pointer == pointer);
+    if (event.type == 'pointermove' && !isWithinTolerance(event, kTouchSlop)) {
+      cancel();
     } else if (event.type == 'pointercancel') {
-      _entry.resolve(GestureDisposition.rejected);
+      cancel();
     } else if (event.type == 'pointerup') {
-      _stopTimer();
-      _stopTrackingPointer();
+      stopTimer();
+      stopTrackingPointer(gestureRecognizer.router, handleEvent);
       _didTap = true;
       _check();
     }
   }
 
   void accept() {
-    print("Tap gesture accept");
     _wonArena = true;
     _check();
   }
 
   void reject() {
-    print("Tap gesture reject");
-    _stopTimer();
-    _stopTrackingPointer();
-    gestureRecognizer._resolveTap(_pointer, TapResolution.cancel);
+    stopTimer();
+    stopTrackingPointer(gestureRecognizer.router, handleEvent);
+    gestureRecognizer._resolveTap(pointer, TapResolution.cancel);
   }
 
-  void abort() {
-    _entry.resolve(GestureDisposition.rejected);
+  void cancel() {
+    // If we won the arena already, then _entry is resolved, so resolving
+    // again is a no-op. But we still need to clean up our own state.
+    if (_wonArena)
+      reject();
+    else
+      entry.resolve(GestureDisposition.rejected);
   }
 
   void _check() {
     if (_wonArena && _didTap)
-      gestureRecognizer._resolveTap(_pointer, TapResolution.tap);
-  }
-
-  void _startTimer() {
-    if (_deadline == null) {
-      _deadline = new Timer(
-        kTapTimeout,
-        () => _entry.resolve(GestureDisposition.rejected)
-      );
-    }
-  }
-
-  void _stopTimer() {
-    if (_deadline != null) {
-      _deadline.cancel();
-      _deadline = null;
-    }
-  }
-
-  void _startTrackingPointer() {
-    if (!_isTrackingPointer) {
-      _isTrackingPointer = true;
-      gestureRecognizer.router.addRoute(_pointer, handleEvent);
-    }
-  }
-
-  void _stopTrackingPointer() {
-    if (_isTrackingPointer) {
-      _isTrackingPointer = false;
-      gestureRecognizer.router.removeRoute(_pointer, handleEvent);
-    }
-  }
-
-  ui.Point _getPoint(PointerInputEvent event) {
-    return new ui.Point(event.x, event.y);
-  }
-
-  bool _isWithinTolerance(PointerInputEvent event) {
-    ui.Offset offset = _getPoint(event) - _initialPosition;
-    return offset.distance <= kTouchSlop;
+      gestureRecognizer._resolveTap(pointer, TapResolution.tap);
   }
 
 }
@@ -126,10 +137,10 @@ class TapGestureRecognizer extends DisposableArenaMember {
   GestureTapCallback onTapDown;
   GestureTapCallback onTapCancel;
 
-  Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();
+  Map<int, TapGesture> _gestureMap = new Map<int, TapGesture>();
 
   void addPointer(PointerInputEvent event) {
-    _gestureMap[event.pointer] = new _TapGesture(
+    _gestureMap[event.pointer] = new TapGesture(
       gestureRecognizer: this,
       event: event
     );
@@ -153,9 +164,9 @@ class TapGestureRecognizer extends DisposableArenaMember {
   }
 
   void dispose() {
-    List<_TapGesture> localGestures = new List.from(_gestureMap.values);
-    for (_TapGesture gesture in localGestures)
-      gesture.abort();
+    List<TapGesture> localGestures = new List.from(_gestureMap.values);
+    for (TapGesture gesture in localGestures)
+      gesture.cancel();
     // Rejection of each gesture should cause it to be removed from our map
     assert(_gestureMap.isEmpty);
     router = null;
