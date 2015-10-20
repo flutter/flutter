@@ -9,7 +9,7 @@ Things you will need
  * git (used for source version control).
  * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
  * An ssh client (used to authenticate with GitHub).
- * Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools) (make sure it's in your path). We use the 'gclient' tool from depot_tools.
+ * Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools) (make sure it's in your path). We use the `gclient` tool from depot_tools.
  * Python (used by many of our tools, including 'gclient').
  * curl (used by `gclient sync`).
 
@@ -25,7 +25,7 @@ Getting the code and configuring your environment
  * Create an empty directory for your copy of the repository. Call it what you like. For
    the sake of the instructions that follow, we'll call it `flutter`.
  * Create a `.gclient` file in the `flutter` directory with the following contents, replacing
-   `<your_name_here`> with your GitHub account name:
+   `<your_name_here>` with your GitHub account name:
 
 ```
 solutions = [
@@ -45,8 +45,8 @@ target_os = ["android"]
  * `cd src` (Change to the directory that `gclient sync` created in your `flutter` directory.)
  * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master repository, not your clone, when running `git fetch` et al.)
  * Add `.../flutter/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
- * Add `.../flutter/src/third_party/android_tools/sdk/platform-tools/adb` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run flutter apps.
- * Add `~/.pub-cache/bin` to your path if it's not already there. (It will already be there if you've ever set up Dart's `pub` tool before.)
+ * Add `.../flutter/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
+ * Add `$HOME/.pub-cache/bin` to your path if it's not already there. (It will already be there if you've ever set up Dart's `pub` tool before.)
  * Make sure you are still in the 'src' directory that the `gclient sync` step created earlier.
  * Run `./tools/android/download_android_tools.py` .
  * If you're on Linux, run `sudo ./build/install-build-deps-android.sh` .
@@ -58,9 +58,6 @@ target_os = ["android"]
 
 Building and running the code
 -----------------------------
-
-Currently we support building on Linux only, for an Android target and, for running tests, a headless Linux
-target. Building on MacOS for Android, iOS, and a headless MacOS target is coming soon.
 
 ### Android (cross-compiling from Mac or Linux)
 
