@@ -15,11 +15,10 @@ Things you will need
 
 You do not need [Dart](https://www.dartlang.org/downloads/linux.html) installed, as a Dart tool chain is automatically downloaded as part of the "getting the code" step. Similarly for the Android SDK, it's downloaded by the build step below where you run `download_android_tools.py`.
 
-Getting the code
-----------------
+Getting the code and configuring your environment
+-------------------------------------------------
 
-To get the code:
-
+ * Ensure all the dependencies described in the previous section, in particular git, ssh, depot_tools, python, and curl, are installed.
  * Fork `https://github.com/flutter/engine` into your own GitHub account. If you already have a fork, and are now installing a development environment on a new machine, make sure you've updated your fork so that you don't use stale configuration options from long ago.
  * If you haven't configured your machine with an SSH key that's known to github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
@@ -46,6 +45,16 @@ target_os = ["android"]
  * `cd src` (Change to the directory that `gclient sync` created in your `flutter` directory.)
  * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master repository, not your clone, when running `git fetch` et al.)
  * Add `.../flutter/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
+ * Add `.../flutter/src/third_party/android_tools/sdk/platform-tools/adb` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run flutter apps.
+ * Add `~/.pub-cache/bin` to your path if it's not already there. (It will already be there if you've ever set up Dart's `pub` tool before.)
+ * Make sure you are still in the 'src' directory that the `gclient sync` step created earlier.
+ * Run `./tools/android/download_android_tools.py` .
+ * If you're on Linux, run `sudo ./build/install-build-deps-android.sh` .
+ * If you're on Linux, run `sudo ./build/install-build-deps.sh` .
+ * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
+ * If you're on Mac, install "ant": `brew install ant` .
+* Run `pub global activate flutter` . This installs the 'flutter' tool.
+
 
 Building the code
 -----------------
@@ -55,25 +64,13 @@ target. Building on MacOS for Android, iOS, and a head-less MacOS target is comi
 
 ### Android (cross-compiling from Mac or Linux)
 
-#### The first time
-
-From the 'src' directory that the `gclient sync` step created earlier:
-
-* Run `./tools/android/download_android_tools.py`
-* On Linux: Run `sudo ./build/install-build-deps-android.sh`
-* On Mac: Install Oracle's Java JDK, version 1.7 or later.
-* On Mac: Install "ant": `brew install ant`.
-
-#### Building
-
-Run the following steps, again from the aforementioned 'src' directory:
+Run the following steps, from the 'src' directory created in the steps above:
 * `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
 * `./sky/tools/shelldb start out/android_Debug/ examples/hello_world/lib/main.dart`
 
 ### Desktop (Mac and Linux)
 
-* (Linux, only the first time) `sudo ./build/install-build-deps.sh`
 * `./sky/tools/gn`
 * `ninja -C out/Debug`
 
