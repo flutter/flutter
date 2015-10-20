@@ -45,7 +45,7 @@ class Radio extends StatelessComponent {
         width: kDiameter,
         height: kDiameter,
         child: new CustomPaint(
-          callback: (Canvas canvas, Size size) {
+          onPaint: (Canvas canvas, Size size) {
 
             // Draw the outer circle
             Paint paint = new Paint()

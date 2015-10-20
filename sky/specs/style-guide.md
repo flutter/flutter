@@ -45,10 +45,9 @@ variables, constants, enum values, etc) is lowerCamelCase. Constant
 doubles and strings are prefixed with k. Prefer using a local const
 or a static const in a relevant class than using a global constant.
 
-When naming callbacks, use `FooCallback` for the typedef, `onFoo` (or,
-if there's only one and the whole purpose of the class is this
-callback, `callback`) for the callback argument or property, and
-`handleFoo` for the method that is called.
+When naming callbacks, use `FooCallback` for the typedef, `onFoo` for
+the callback argument or property, and `handleFoo` for the method
+that is called.
 
 If you have a callback with arguments but you want to ignore the
 arguments, name them `_`, `__`, `___`, etc. If you name any of them,

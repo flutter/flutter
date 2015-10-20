@@ -545,7 +545,7 @@ class _TabBarState extends ScrollableState<TabBar> {
 
     if (config.isScrollable) {
       content = new SizeObserver(
-        callback: _handleViewportSizeChanged,
+        onSizeChanged: _handleViewportSizeChanged,
         child: new Viewport(
           scrollDirection: ScrollDirection.horizontal,
           scrollOffset: new Offset(scrollOffset, 0.0),

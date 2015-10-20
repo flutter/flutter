@@ -75,7 +75,7 @@ class PopupMenu extends StatelessComponent {
         variables: <AnimatedValue<double>>[width, height],
         builder: (BuildContext context) {
           return new CustomPaint(
-            callback: (ui.Canvas canvas, Size size) {
+            onPaint: (ui.Canvas canvas, Size size) {
               double widthValue = width.value * size.width;
               double heightValue = height.value * size.height;
               painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));

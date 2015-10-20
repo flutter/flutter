@@ -63,7 +63,7 @@ class ScaleAppState extends State<ScaleApp> {
         body: new GestureDetector(
           onScaleStart: _handleScaleStart,
           onScaleUpdate: _handleScaleUpdate,
-          child: new CustomPaint(callback: paint, token: "$_zoom $_offset")
+          child: new CustomPaint(onPaint: paint, token: "$_zoom $_offset")
         )
       )
     );
