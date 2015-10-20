@@ -139,7 +139,7 @@ void main() {
       Widget buildFrame(int index) {
         itemsPainted = <int>[];
         List<Widget> items = new List<Widget>.generate(itemCount, (i) {
-          return new CustomPaint(child: new Text('$i'), callback: (_, __) { itemsPainted.add(i); });
+          return new CustomPaint(child: new Text('$i'), onPaint: (_, __) { itemsPainted.add(i); });
         });
         return new Center(child: new IndexedStack(items, index: index));
       }

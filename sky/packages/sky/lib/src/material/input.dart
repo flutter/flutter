@@ -116,7 +116,7 @@ class _InputState extends ScrollableState<Input> {
 
     return new Listener(
       child: new SizeObserver(
-        callback: _handleContainerSizeChanged,
+        onSizeChanged: _handleContainerSizeChanged,
         child: new Container(
           child: new Stack(textChildren),
           padding: _kTextfieldPadding,

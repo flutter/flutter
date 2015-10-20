@@ -251,7 +251,7 @@ class _DismissableState extends State<Dismissable> {
       onVerticalDragUpdate: _directionIsYAxis ? _handleDragUpdate : null,
       onVerticalDragEnd: _directionIsYAxis ? _handleDragEnd : null,
       child: new SizeObserver(
-        callback: _handleSizeChanged,
+        onSizeChanged: _handleSizeChanged,
         child: new FadeTransition(
           performance: _fadePerformance.view,
           opacity: new AnimatedValue<double>(1.0, end: 0.0),
