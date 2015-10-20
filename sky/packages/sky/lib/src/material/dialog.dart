@@ -142,7 +142,7 @@ class _DialogRoute extends PerformanceRoute {
   Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
     return new FadeTransition(
       performance: performance,
-      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
+      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
       child: builder(new RouteArguments(navigator: navigator, previousPerformance: this.performance, nextPerformance: nextRoutePerformance))
     );
   }

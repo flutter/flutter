@@ -66,7 +66,7 @@ class SimulationStepper {
   ///
   /// Returns a future that resolves when the timeline stops animating,
   /// typically when the timeline arives at the target value.
-  Future animateTo(double target, { Duration duration, Curve curve: linear }) {
+  Future animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     assert(duration > Duration.ZERO);
     assert(!isAnimating);
     return _start(new _TweenSimulation(value, target, duration, curve));

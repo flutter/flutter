@@ -67,8 +67,8 @@ class SnackBar extends StatelessComponent {
       height: new AnimatedValue<double>(
         0.0,
         end: kSnackBarHeight,
-        curve: easeIn,
-        reverseCurve: easeOut
+        curve: Curves.easeIn,
+        reverseCurve: Curves.easeOut
       ),
       child: new ClipRect(
         child: new OverflowBox(

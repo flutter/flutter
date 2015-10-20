@@ -181,7 +181,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     dispatchOnScroll();
   }
 
-  Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: ease }) {
+  Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
     if (newScrollOffset == _scrollOffset)
       return new Future.value();
 
@@ -692,7 +692,7 @@ class PageableList<T> extends ScrollableList<T> {
     this.onPageChanged,
     EdgeDims padding,
     this.duration: const Duration(milliseconds: 200),
-    this.curve: ease
+    this.curve: Curves.ease
   }) : super(
     key: key,
     initialScrollOffset: initialPage == null ? null : initialPage * itemExtent,

@@ -67,7 +67,7 @@ class Material extends StatelessComponent {
     return new DefaultTextStyle(
       style: Theme.of(context).text.body1,
       child: new AnimatedContainer(
-        curve: ease,
+        curve: Curves.ease,
         duration: kThemeChangeDuration,
         decoration: new BoxDecoration(
           backgroundColor: _getBackgroundColor(context),
