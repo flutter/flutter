@@ -78,7 +78,7 @@ You can also specify a particular Dart file to run if you want to run an example
 
  * `flutter start --engine-src-path ../../ -t tabs.dart`
 
-When running code from the `src/examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `src/sky/packages/sky` directory and subdirectories will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
+When running code from the `src/examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `src/sky/packages/sky` directory and subdirectories, will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
 
 You can also use `flutter listen` in the various example directories (or your own Sky apps) to listen for changes you are making to the app and automatically update the running SkyShell instance on your Android device.  iOS device and simulator support for this are coming soon.
 
