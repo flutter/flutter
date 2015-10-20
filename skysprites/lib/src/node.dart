@@ -277,13 +277,25 @@ class Node {
   void set scale(double scale) {
     assert(scale != null);
 
-    if (_physicsBody != null && parent is PhysicsWorld) {
-      PhysicsWorld physicsNode = parent;
-      physicsNode._updateScale(this.physicsBody, scale);
+    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
+      _updatePhysicsScale(physicsBody, scale, parent);
     }
 
     _scaleX = _scaleY = scale;
     invalidateTransformMatrix();
+  }
+
+  void _updatePhysicsScale(PhysicsBody body, double scale, Node physicsParent) {
+    if (physicsParent == null) return;
+
+    if (physicsParent is PhysicsWorld) {
+      PhysicsWorld world = physicsParent;
+      world._updateScale(body, scale);
+    } else if (physicsParent is PhysicsGroup) {
+      _updatePhysicsScale(body, scale * physicsParent.scale, physicsParent.parent);
+    } else {
+      assert(false);
+    }
   }
 
   /// The horizontal scale of this node relative its parent.
