@@ -53,70 +53,66 @@ target_os = ["android"]
  * If you're on Linux, run `sudo ./build/install-build-deps.sh` .
  * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
  * If you're on Mac, install "ant": `brew install ant` .
-* Run `pub global activate flutter` . This installs the 'flutter' tool.
+ * Run `pub global activate flutter` . This installs the 'flutter' tool.
 
 
-Building the code
------------------
+Building and running the code
+-----------------------------
 
-Currently we support building on Linux only, for an Android target and for a headless Linux
-target. Building on MacOS for Android, iOS, and a head-less MacOS target is coming soon.
+Currently we support building on Linux only, for an Android target and for, for testing, a headless Linux
+target. Building on MacOS for Android, iOS, and a headless MacOS target is coming soon.
 
 ### Android (cross-compiling from Mac or Linux)
 
 Run the following steps, from the 'src' directory created in the steps above:
-* `./sky/tools/gn --android`
-* `ninja -C out/android_Debug`
-* `./sky/tools/shelldb start out/android_Debug/ examples/hello_world/lib/main.dart`
 
-### Desktop (Mac and Linux)
+ * `gclient sync` to update your dependencies.
+ * `./sky/tools/gn --android` to prepare your build files.
+ * `ninja -C out/android_Debug` to build an Android Debug binary.
 
-* `./sky/tools/gn`
-* `ninja -C out/Debug`
+To run an example with your locally built minary, switch to that example's directory, run `pub get` to make sure its dependencies have been downloaded, and use `flutter start` with an explicit `--engine-src-path` pointing at the `src` directory. Make sure you have a device connected over USB and debugging enabled on that device.
 
-Running the tests
------------------
+ * `cd examples/hello_world/; flutter start --engine-src-path ../../`
 
-* `./sky/tools/run_tests --debug` runs the tests on the host machine using `out/Debug`.
-* If you want to run the run a test directly:
-  - (Linux) `./out/Debug/sky_shell --package-root=sky/unit/packages sky/unit/test/harness/trivial_test.dart`
-  - (Mac) `./sky/tools/run_tests --debug test/harness/trivial_test.dart`
+You can also specify a particular Dart file to run if you want to run an example that doesn't have a `lib/main.dart` file using the `-t` command-line option. For example, to run the `tabs.dart` example in the `examples/widgets` directory on a connected Android device, from that directory you would run:
+
+ * `flutter start --engine-src-path ../../ -t tabs.dart`
+
+When running code from the `src/examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `src/sky/packages/sky` directory and subdirectories will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
+
+You can also use `flutter listen` in the various example directories (or your own Sky apps) to listen for changes you are making to the app and automatically update the running SkyShell instance on your Android device.  iOS device and simulator support for this are coming soon.
+
+The `flutter` tool also lets you run release builds, upload the binary without running it, and various other things. Run `flutter -h` for further information.
+
+
+### Desktop (Mac and Linux), for tests
+
+ * `gclient sync` to update your dependencies.
+ * `./sky/tools/gn` to prepare your build files.
+ * `ninja -C out/Debug` to build an Android Debug binary.
+
+To run the tests:
+
+ * `./sky/tools/run_tests --debug` runs the tests on the host machine using `out/Debug`.
+
+If you want to run the run a test directly:
+ * Linux: `./out/Debug/sky_shell --package-root=sky/unit/packages sky/unit/test/harness/trivial_test.dart`
+ * Mac: `./sky/tools/run_tests --debug test/harness/trivial_test.dart`
 
 Note: The tests are headless, you won't see any UI. You can use `print` to generate console output or you can interact with the DartVM via observatory at [http://localhost:8181/](http://localhost:8181/).
-
-Adding a test
--------------
-
-To add a test, simply create a file whose name ends with `_test.dart` in the `sky/unit/test` directory.
-The test should have a `main` function and use `package:test`.
-
-Running the examples
---------------------
-
-* Before running the examples, you'll need to set up your path to include the Dart SDK directory, like so (starting in the src directory of your code tree):
- - ``$ export PATH=$PATH:`pwd`/third_party/dart-sdk/dart-sdk/bin``
-* You can find example code in subdirectories of the `examples` directory, for example `examples/stocks`.
-* Once you have a local build, run `pub get` from the example folder of your choice to make sure that you have all of the Dart dependencies.
-* Then, to run the current example locally, you can run:
- - `$ ./packages/sky/sky_tool --local-build start`
-* The `--local-build` parameter attempts to determine the location of your local build directory. You can override it by specifying the `--sky-src-path` and `--android-debug-build-path` parameters. These parameters should not normally be needed, though. Run `$ ./packages/sky/sky_tool -h` to see details about the parameters.
-* You can also specify a particular Dart file to run if you want to run an example that doesn't have a `lib/main.dart` file.  For example, to run the `tabs.dart` example in the `examples/widgets` directory on a connected Android device, from that directory you would run:
- - `$ ./packages/sky/sky_tool --local-build start tabs.dart`
-* When running code from the `examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `sky` directory and subdirectories will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
-* You can also use `$ ./packages/sky/sky_tool --local-build listen` in the various example directories (or your own Sky apps) to listen for changes you are making to the app and automatically update the running SkyShell instance on your Android device.  iOS device and simulator support are coming soon.
-* You can replace `--local-build` in any of the above commands with `--release` if you have made release builds and want to test with them.  E.g., `$ ./packages/sky/sky_tool --release start` will attempt to use your release build of the Android SkyShell.apk.
-* If you just need to install SkyShell on a device, you can run `$ ./packages/sky/sky_tool --local-build install`.
 
 Contributing code
 -----------------
 
-The Sky engine repository gladly accepts contributions via GitHub pull requests.
+The Flutter engine repository gladly accepts contributions via GitHub pull requests.
 
 To start working on a patch:
 
  * `git fetch upstream`
  * `git checkout upstream/master -b name_of_your_branch`
- * Hack away
+ * Hack away. Please peruse our [style guides](sky/specs/style-guide.md) and [design
+   principles](sky/specs/design.md) before working on anything non-trivial. These
+   guidelines are intended to keep the code consistent and avoid common pitfalls.
  * `git commit -a -m "<your brief but informative commit message>"`
  * `git push origin name_of_your_branch`
 
@@ -124,11 +120,6 @@ To send us a pull request:
 
  * `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or go to `https://github.com/<your_name_here>/sky_engine` and click the
    "Compare & pull request" button
-
-Please peruse our [style guides](sky/specs/style-guide.md) and
-[design principles](sky/specs/design.md) before working on anything
-non-trivial. These guidelines are intended to keep the code consistent
-and avoid common pitfalls.
 
 Please make sure all your checkins have detailed commit messages explaining the patch.
 If you made multiple commits for a single pull request, either make sure each one has a detailed
@@ -140,3 +131,9 @@ You must complete the
 You can do this online, and it only takes a minute.
 If you've never submitted code before, you must add your (or your
 organization's) name and contact info to the [AUTHORS](AUTHORS) file.
+
+Adding a test
+-------------
+
+To add a test, simply create a file whose name ends with `_test.dart` in the `sky/unit/test` directory.
+The test should have a `main` function and use `package:test`.
