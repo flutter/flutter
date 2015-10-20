@@ -146,6 +146,67 @@ class RenderOverflowBox extends RenderBox with RenderObjectWithChildMixin<Render
   }
 }
 
+/// A render box that's a specific size but passes its original constraints through to its child, which will probably overflow
+class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  RenderSizedOverflowBox({
+    RenderBox child,
+    Size requestedSize
+  }) : _requestedSize = requestedSize {
+    assert(requestedSize != null);
+    this.child = child;
+  }
+
+  /// The size this render box should attempt to be.
+  Size get requestedSize => _requestedSize;
+  Size _requestedSize;
+  void set requestedSize (Size value) {
+    assert(value != null);
+    if (_requestedSize == value)
+      return;
+    _requestedSize = value;
+    markNeedsLayout();
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.constrainWidth(_requestedSize.width);
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.constrainWidth(_requestedSize.width);
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    return constraints.constrainWidth(_requestedSize.height);
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    return constraints.constrainWidth(_requestedSize.height);
+  }
+
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    if (child != null)
+      return child.getDistanceToActualBaseline(baseline);
+    return super.computeDistanceToActualBaseline(baseline);
+  }
+
+  void performLayout() {
+    size = constraints.constrain(_requestedSize);
+    if (child != null)
+      child.layout(constraints);
+  }
+
+  void hitTestChildren(HitTestResult result, { Point position }) {
+    if (child != null)
+      child.hitTest(result, position: position);
+    else
+      super.hitTestChildren(result, position: position);
+  }
+
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChild(child, offset.toPoint());
+  }
+}
 
 /// Lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any
