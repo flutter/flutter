@@ -51,6 +51,8 @@ class TestBed extends NodeWithSize {
 
   TestBed() : super(new Size(1024.0, 1024.0)) {
     _physicsNode = new PhysicsWorld(new Offset(0.0, 100.0));
+    PhysicsGroup group = new PhysicsGroup();
+    _physicsNode.addChild(group);
 
     _obstacle = new Sprite(_spriteSheet["ship.png"]);
     _obstacle.position = new Point(512.0, 800.0);
@@ -62,7 +64,7 @@ class TestBed extends NodeWithSize {
       friction: 0.5,
       tag: "obstacle"
     );
-    _physicsNode.addChild(_obstacle);
+    group.addChild(_obstacle);
     _physicsNode.addContactCallback(myCallback, "obstacle", "ship", PhysicsContactType.begin);
 
     // Animate obstacle
