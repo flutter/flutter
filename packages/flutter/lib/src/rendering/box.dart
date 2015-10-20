@@ -740,8 +740,8 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
 
 /// An offset that's expressed as a fraction of a Size.
 ///
-/// FractionalOffset(0.0, 0.0) represents the top left of the Size,
-/// FractionalOffset(1.0, 1.0) represents the bottom right of the Size.
+/// FractionalOffset(1.0, 0.0) represents the top right of the Size,
+/// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
 class FractionalOffset {
   const FractionalOffset(this.x, this.y);
   final double x;
