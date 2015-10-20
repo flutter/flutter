@@ -59,7 +59,7 @@ target_os = ["android"]
 Building and running the code
 -----------------------------
 
-Currently we support building on Linux only, for an Android target and for, for testing, a headless Linux
+Currently we support building on Linux only, for an Android target and, for running tests, a headless Linux
 target. Building on MacOS for Android, iOS, and a headless MacOS target is coming soon.
 
 ### Android (cross-compiling from Mac or Linux)
