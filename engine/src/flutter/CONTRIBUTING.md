@@ -1,5 +1,5 @@
-Contributing to Sky
-===================
+Contributing to Flutter
+=======================
 
 [![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
 
@@ -80,7 +80,7 @@ You can also specify a particular Dart file to run if you want to run an example
 
 When running code from the `src/examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `src/sky/packages/sky` directory and subdirectories, will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
 
-You can also use `flutter listen` in the various example directories (or your own Sky apps) to listen for changes you are making to the app and automatically update the running SkyShell instance on your Android device.  iOS device and simulator support for this are coming soon.
+You can also use `flutter listen` in the various example directories (or your own Flutter apps) to listen for changes you are making to the app and automatically update the running SkyShell instance on your Android device.  iOS device and simulator support for this are coming soon.
 
 The `flutter` tool also lets you run release builds, upload the binary without running it, and various other things. Run `flutter -h` for further information.
 
