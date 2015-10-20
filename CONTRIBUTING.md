@@ -6,6 +6,7 @@ Contributing to Flutter
 Things you will need
 --------------------
 
+ * Linux or Mac OS X. (Windows is not yet supported.)
  * git (used for source version control).
  * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
  * An ssh client (used to authenticate with GitHub).
