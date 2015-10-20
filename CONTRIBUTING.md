@@ -25,7 +25,7 @@ To get the code:
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
  * Create an empty directory for your copy of the repository. Call it what you like. For
    the sake of the instructions that follow, we'll call it `flutter`.
- * Create a `.gclient` in the `flutter` directory with the following contents, replacing
+ * Create a `.gclient` file in the `flutter` directory with the following contents, replacing
    `<your_name_here`> with your GitHub account name:
 
 ```
