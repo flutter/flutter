@@ -346,6 +346,19 @@ class OverflowBox extends OneChildRenderObjectWidget {
   }
 }
 
+class SizedOverflowBox extends OneChildRenderObjectWidget {
+  SizedOverflowBox({ Key key, this.size, Widget child })
+    : super(key: key, child: child);
+
+  final Size size;
+
+  RenderSizedOverflowBox createRenderObject() => new RenderSizedOverflowBox(requestedSize: size);
+
+  void updateRenderObject(RenderSizedOverflowBox renderObject, SizedOverflowBox oldWidget) {
+    renderObject.requestedSize = size;
+  }
+}
+
 class OffStage extends OneChildRenderObjectWidget {
   OffStage({ Key key, Widget child })
     : super(key: key, child: child);

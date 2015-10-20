@@ -861,8 +861,12 @@ class RenderSizeObserver extends RenderProxyBox {
   void performLayout() {
     Size oldSize = hasSize ? size : null;
     super.performLayout();
-    if (oldSize != size)
-      onSizeChanged(size);
+    if (oldSize != size) {
+      // We make a copy of the Size object here because if we leak a _DebugSize
+      // object out of the render tree, we can get confused later if it comes
+      // back and gets set as the size property of a RenderBox.
+      onSizeChanged(new Size(size.width, size.height));
+    }
   }
 }
 
