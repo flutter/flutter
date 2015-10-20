@@ -108,6 +108,12 @@ class RenderOverflowBox extends RenderBox with RenderObjectWithChildMixin<Render
     return constraints.constrainHeight();
   }
 
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    if (child != null)
+      return child.getDistanceToActualBaseline(baseline);
+    return super.computeDistanceToActualBaseline(baseline);
+  }
+
   bool get sizedByParent => true;
 
   void performResize() {
