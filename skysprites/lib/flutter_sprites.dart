@@ -35,6 +35,7 @@ part 'src/node_with_size.dart';
 part 'src/particle_system.dart';
 part 'src/physics_body.dart';
 part 'src/physics_debug.dart';
+part 'src/physics_group.dart';
 part 'src/physics_joint.dart';
 part 'src/physics_shape.dart';
 part 'src/physics_world.dart';

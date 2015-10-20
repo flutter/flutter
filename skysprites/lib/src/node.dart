@@ -132,14 +132,26 @@ class Node {
   void set rotation(double rotation) {
     assert(rotation != null);
 
-    if (_physicsBody != null && parent is PhysicsWorld) {
-      PhysicsWorld physicsNode = parent;
-      physicsNode._updateRotation(this.physicsBody, rotation);
+    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
+      _updatePhysicsRotation(physicsBody, rotation, parent);
       return;
     }
 
     _rotation = rotation;
     invalidateTransformMatrix();
+  }
+
+  void _updatePhysicsRotation(PhysicsBody body, double rotation, Node physicsParent) {
+    if (physicsParent == null) return;
+
+    if (physicsParent is PhysicsWorld) {
+      PhysicsWorld world = physicsParent;
+      world._updateRotation(body, rotation);
+    } else if (physicsParent is PhysicsGroup) {
+      _updatePhysicsRotation(body, rotation + physicsParent.rotation, physicsParent.parent);
+    } else {
+      assert(false);
+    }
   }
 
   void _setRotationFromPhysics(double rotation) {
@@ -166,14 +178,27 @@ class Node {
   void set position(Point position) {
     assert(position != null);
 
-    if (_physicsBody != null && parent is PhysicsWorld) {
-      PhysicsWorld physicsNode = parent;
-      physicsNode._updatePosition(this.physicsBody, position);
+    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
+      _updatePhysicsPosition(this.physicsBody, position, parent);
       return;
     }
 
     _position = position;
     invalidateTransformMatrix();
+  }
+
+  void _updatePhysicsPosition(PhysicsBody body, Point position, Node physicsParent) {
+    if (physicsParent == null) return;
+
+    if (physicsParent is PhysicsWorld) {
+      PhysicsWorld world = physicsParent;
+      world._updatePosition(body, position);
+    } else if (physicsParent is PhysicsGroup) {
+      Vector4 parentPos = physicsParent.transformMatrix.transform(new Vector4(position.x, position.y, 0.0, 1.0));
+      _updatePhysicsPosition(body, new Point(parentPos.x, parentPos.y), physicsParent.parent);
+    } else {
+      assert(false);
+    }
   }
 
   void _setPositionFromPhysics(Point position) {
@@ -252,13 +277,25 @@ class Node {
   void set scale(double scale) {
     assert(scale != null);
 
-    if (_physicsBody != null && parent is PhysicsWorld) {
-      PhysicsWorld physicsNode = parent;
-      physicsNode._updateScale(this.physicsBody, scale);
+    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
+      _updatePhysicsScale(physicsBody, scale, parent);
     }
 
     _scaleX = _scaleY = scale;
     invalidateTransformMatrix();
+  }
+
+  void _updatePhysicsScale(PhysicsBody body, double scale, Node physicsParent) {
+    if (physicsParent == null) return;
+
+    if (physicsParent is PhysicsWorld) {
+      PhysicsWorld world = physicsParent;
+      world._updateScale(body, scale);
+    } else if (physicsParent is PhysicsGroup) {
+      _updatePhysicsScale(body, scale * physicsParent.scale, physicsParent.parent);
+    } else {
+      assert(false);
+    }
   }
 
   /// The horizontal scale of this node relative its parent.
@@ -310,6 +347,7 @@ class Node {
   void addChild(Node child) {
     assert(child != null);
     assert(child._parent == null);
+    assert(!(child is PhysicsGroup) || this is PhysicsGroup || this is PhysicsWorld);
 
     _childrenNeedSorting = true;
     _children.add(child);
@@ -318,6 +356,10 @@ class Node {
     _childrenLastAddedOrder += 1;
     child._addedOrder = _childrenLastAddedOrder;
     if (_spriteBox != null) _spriteBox._registerNode(child);
+
+    if (child is PhysicsGroup) {
+      child._attachGroup(child, child._world);
+    }
   }
 
   /// Removes a child from this node.
@@ -329,6 +371,10 @@ class Node {
       child._parent = null;
       child._spriteBox = null;
       if (_spriteBox != null) _spriteBox._deregisterNode(child);
+    }
+
+    if (child is PhysicsGroup) {
+      child._detachGroup(child);
     }
   }
 
