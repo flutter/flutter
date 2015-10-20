@@ -21,7 +21,7 @@ Getting the code
 To get the code:
 
  * Fork `https://github.com/flutter/engine` into your own GitHub account. If you already have a fork, and are now installing a development environment on a new machine, make sure you've updated your fork so that you don't use stale configuration options from long ago.
- * If you haven't configured your machine with an SSH key that's shared by github then
+ * If you haven't configured your machine with an SSH key that's known to github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
  * Create an empty directory for your copy of the repository. Call it what you like. For
    the sake of the instructions that follow, we'll call it `flutter`.
