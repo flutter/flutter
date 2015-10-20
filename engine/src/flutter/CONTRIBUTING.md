@@ -13,7 +13,7 @@ Things you will need
  * Python (used by many of our tools, including 'gclient').
  * curl (used by `gclient sync`).
 
-You do not need [Dart](https://www.dartlang.org/downloads/linux.html) installed, as a Dart tool chain is automatically downloaded as part of the "getting the code" step.
+You do not need [Dart](https://www.dartlang.org/downloads/linux.html) installed, as a Dart tool chain is automatically downloaded as part of the "getting the code" step. Similarly for the Android SDK, it's downloaded by the build step below where you run `download_android_tools.py`.
 
 Getting the code
 ----------------
@@ -57,13 +57,16 @@ target. Building on MacOS for Android, iOS, and a head-less MacOS target is comi
 
 #### The first time
 
-* `./tools/android/download_android_tools.py`
-* On Linux: `sudo ./build/install-build-deps-android.sh`
+From the 'src' directory that the `gclient sync` step created earlier:
+
+* Run `./tools/android/download_android_tools.py`
+* On Linux: Run `sudo ./build/install-build-deps-android.sh`
 * On Mac: Install Oracle's Java JDK, version 1.7 or later.
 * On Mac: Install "ant": `brew install ant`.
 
 #### Building
 
+Run the following steps, again from the aforementioned 'src' directory:
 * `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
 * `./sky/tools/shelldb start out/android_Debug/ examples/hello_world/lib/main.dart`
