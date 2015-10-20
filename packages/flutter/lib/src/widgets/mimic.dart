@@ -81,7 +81,7 @@ class MimicableState extends State<Mimicable> {
       );
     }
     return new SizeObserver(
-      callback: _handleSizeChanged,
+      onSizeChanged: _handleSizeChanged,
       child: config.child
     );
   }

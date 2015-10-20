@@ -337,7 +337,7 @@ class CardCollectionState extends State<CardCollection> {
       ]);
 
     Widget body = new SizeObserver(
-      callback: _updateCardCollectionSize,
+      onSizeChanged: _updateCardCollectionSize,
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
         decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),

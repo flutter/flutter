@@ -962,33 +962,33 @@ class RenderTransform extends RenderProxyBox {
 /// Called when a size changes
 typedef void SizeChangedCallback(Size newSize);
 
-/// Calls [callback] whenever the child's layout size changes
+/// Calls [onSizeChanged] whenever the child's layout size changes
 ///
 /// Note: Size observer calls its callback during layout, which means you cannot
 /// dirty layout information during the callback.
 class RenderSizeObserver extends RenderProxyBox {
   RenderSizeObserver({
-    this.callback,
+    this.onSizeChanged,
     RenderBox child
   }) : super(child) {
-    assert(callback != null);
+    assert(onSizeChanged != null);
   }
 
   /// The callback to call whenever the child's layout size changes
-  SizeChangedCallback callback;
+  SizeChangedCallback onSizeChanged;
 
   void performLayout() {
     Size oldSize = hasSize ? size : null;
     super.performLayout();
     if (oldSize != size)
-      callback(size);
+      onSizeChanged(size);
   }
 }
 
 /// Called when its time to paint into the given canvas
 typedef void CustomPaintCallback(PaintingCanvas canvas, Size size);
 
-/// Delegates its painting to [callback]
+/// Delegates its painting to [onPaint]
 ///
 /// When asked to paint, custom paint first calls its callback with the current
 /// canvas and then paints its children. The coodinate system of the canvas
@@ -1003,36 +1003,36 @@ typedef void CustomPaintCallback(PaintingCanvas canvas, Size size);
 class RenderCustomPaint extends RenderProxyBox {
 
   RenderCustomPaint({
-    CustomPaintCallback callback,
+    CustomPaintCallback onPaint,
     RenderBox child
   }) : super(child) {
-    assert(callback != null);
-    _callback = callback;
+    assert(onPaint != null);
+    _onPaint = onPaint;
   }
 
   /// The callback to which this render object delegates its painting
   ///
   /// The callback must be non-null whenever the render object is attached to
   /// the render tree.
-  CustomPaintCallback get callback => _callback;
-  CustomPaintCallback _callback;
-  void set callback (CustomPaintCallback newCallback) {
+  CustomPaintCallback get onPaint => _onPaint;
+  CustomPaintCallback _onPaint;
+  void set onPaint (CustomPaintCallback newCallback) {
     assert(newCallback != null || !attached);
-    if (_callback == newCallback)
+    if (_onPaint == newCallback)
       return;
-    _callback = newCallback;
+    _onPaint = newCallback;
     markNeedsPaint();
   }
 
   void attach() {
-    assert(_callback != null);
+    assert(_onPaint != null);
     super.attach();
   }
 
   void paint(PaintingContext context, Offset offset) {
-    assert(_callback != null);
+    assert(_onPaint != null);
     context.canvas.translate(offset.dx, offset.dy);
-    _callback(context.canvas, size);
+    _onPaint(context.canvas, size);
     // TODO(abarth): We should translate back before calling super because in
     // the future, super.paint might switch our compositing layer.
     super.paint(context, Offset.zero);

@@ -159,7 +159,7 @@ class TextureButtonState extends State<TextureButton> {
         width: config.width,
         height: config.height,
         child: new CustomPaint(
-          callback: paintCallback,
+          onPaint: paintCallback,
           token: new _TextureButtonToken(
             _highlight,
             config.texture,

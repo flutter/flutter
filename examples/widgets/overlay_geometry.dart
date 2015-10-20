@@ -58,7 +58,7 @@ class Marker extends StatelessComponent {
         child: new Container(
           width: size,
           height: size,
-          child: new CustomPaint(callback: paintMarker)
+          child: new CustomPaint(onPaint: paintMarker)
         )
       )
     );

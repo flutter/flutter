@@ -25,7 +25,7 @@ class StockArrow extends StatelessComponent {
     // TODO(jackson): This should change colors with the theme
     Color color = _colorForPercentChange(percentChange);
     const double kSize = 40.0;
-    var arrow = new CustomPaint(callback: (ui.Canvas canvas, Size size) {
+    var arrow = new CustomPaint(onPaint: (ui.Canvas canvas, Size size) {
       Paint paint = new Paint()..color = color;
       paint.strokeWidth = 1.0;
       const double padding = 2.0;

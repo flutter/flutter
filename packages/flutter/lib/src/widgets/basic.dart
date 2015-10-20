@@ -134,24 +134,24 @@ class DecoratedBox extends OneChildRenderObjectWidget {
 }
 
 class CustomPaint extends OneChildRenderObjectWidget {
-  CustomPaint({ Key key, this.callback, this.token, Widget child })
+  CustomPaint({ Key key, this.onPaint, this.token, Widget child })
     : super(key: key, child: child) {
-    assert(callback != null);
+    assert(onPaint != null);
   }
 
-  final CustomPaintCallback callback;
+  final CustomPaintCallback onPaint;
   final Object token; // set this to be repainted automatically when the token changes
 
-  RenderCustomPaint createRenderObject() => new RenderCustomPaint(callback: callback);
+  RenderCustomPaint createRenderObject() => new RenderCustomPaint(onPaint: onPaint);
 
   void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
     if (oldWidget != null && oldWidget.token != token)
       renderObject.markNeedsPaint();
-    renderObject.callback = callback;
+    renderObject.onPaint = onPaint;
   }
 
   void didUnmountRenderObject(RenderCustomPaint renderObject) {
-    renderObject.callback = null;
+    renderObject.onPaint = null;
   }
 }
 
@@ -428,21 +428,21 @@ class Viewport extends OneChildRenderObjectWidget {
 }
 
 class SizeObserver extends OneChildRenderObjectWidget {
-  SizeObserver({ Key key, this.callback, Widget child })
+  SizeObserver({ Key key, this.onSizeChanged, Widget child })
     : super(key: key, child: child) {
-    assert(callback != null);
+    assert(onSizeChanged != null);
   }
 
-  final SizeChangedCallback callback;
+  final SizeChangedCallback onSizeChanged;
 
-  RenderSizeObserver createRenderObject() => new RenderSizeObserver(callback: callback);
+  RenderSizeObserver createRenderObject() => new RenderSizeObserver(onSizeChanged: onSizeChanged);
 
   void updateRenderObject(RenderSizeObserver renderObject, SizeObserver oldWidget) {
-    renderObject.callback = callback;
+    renderObject.onSizeChanged = onSizeChanged;
   }
 
   void didUnmountRenderObject(RenderSizeObserver renderObject) {
-    renderObject.callback = null;
+    renderObject.onSizeChanged = null;
   }
 }
 

@@ -136,7 +136,7 @@ class PageableListAppState extends State<PageableListApp> {
           : pageSize.width
     );
     return new SizeObserver(
-      callback: updatePageSize,
+      onSizeChanged: updatePageSize,
       child: list
     );
   }

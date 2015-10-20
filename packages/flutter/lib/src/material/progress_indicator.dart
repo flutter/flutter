@@ -107,7 +107,7 @@ class LinearProgressIndicator extends ProgressIndicator {
       ),
       child: new CustomPaint(
         token: _getCustomPaintToken(performanceValue),
-        callback: (Canvas canvas, Size size) {
+        onPaint: (Canvas canvas, Size size) {
           _paint(context, performanceValue, canvas, size);
         }
       )
@@ -157,7 +157,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       ),
       child: new CustomPaint(
         token: _getCustomPaintToken(performanceValue),
-        callback: (Canvas canvas, Size size) {
+        onPaint: (Canvas canvas, Size size) {
           _paint(context, performanceValue, canvas, size);
         }
       )

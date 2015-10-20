@@ -54,11 +54,11 @@ class NavigatorState extends State<Navigator> {
     _insertRoute(route);
   }
 
-  void pushState(State owner, Function callback) {
+  void pushState(State owner, StateRouteCallback onPop) {
     push(new StateRoute(
       route: currentRoute,
       owner: owner,
-      callback: callback
+      onPop: onPop
     ));
   }
 
@@ -318,11 +318,11 @@ class PageRoute extends PerformanceRoute {
 }
 
 class StateRoute extends Route {
-  StateRoute({ this.route, this.owner, this.callback });
+  StateRoute({ this.route, this.owner, this.onPop });
 
   Route route;
   State owner;
-  StateRouteCallback callback;
+  StateRouteCallback onPop;
 
   bool get hasContent => false;
   bool get modal => false;
@@ -330,8 +330,8 @@ class StateRoute extends Route {
 
   void didPop([dynamic result]) {
     assert(result == null);
-    if (callback != null)
-      callback(this);
+    if (onPop != null)
+      onPop(this);
     super.didPop(result);
   }
 

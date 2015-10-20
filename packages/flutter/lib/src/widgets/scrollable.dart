@@ -362,12 +362,12 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 
   Widget buildContent(BuildContext context) {
     return new SizeObserver(
-      callback: _handleViewportSizeChanged,
+      onSizeChanged: _handleViewportSizeChanged,
       child: new Viewport(
         scrollOffset: scrollOffsetVector,
         scrollDirection: config.scrollDirection,
         child: new SizeObserver(
-          callback: _handleChildSizeChanged,
+          onSizeChanged: _handleChildSizeChanged,
           child: config.child
         )
       )
@@ -596,7 +596,7 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
     }
 
     return new SizeObserver(
-      callback: _handleSizeChanged,
+      onSizeChanged: _handleSizeChanged,
       child: new Container(
         padding: _crossAxisPadding,
         child: new HomogeneousViewport(
@@ -820,7 +820,7 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
 
   Widget buildContent(BuildContext context) {
     return new SizeObserver(
-      callback: _handleSizeChanged,
+      onSizeChanged: _handleSizeChanged,
       child: new MixedViewport(
         startOffset: scrollOffset,
         builder: config.builder,
