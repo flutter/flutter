@@ -22,6 +22,54 @@
 
 namespace android {
 
+TEST(FontLanguagesTest, basicTests) {
+    FontLanguages emptyLangs;
+    EXPECT_EQ(0u, emptyLangs.size());
+
+    FontLanguage english("en", 2);
+    FontLanguages singletonLangs("en", 2);
+    EXPECT_EQ(1u, singletonLangs.size());
+    EXPECT_EQ(english, singletonLangs[0]);
+
+    FontLanguage french("fr", 2);
+    FontLanguages twoLangs("en,fr", 5);
+    EXPECT_EQ(2u, twoLangs.size());
+    EXPECT_EQ(english, twoLangs[0]);
+    EXPECT_EQ(french, twoLangs[1]);
+}
+
+TEST(FontLanguagesTest, unsupportedLanguageTests) {
+    FontLanguage unsupportedLang("x-example", 9);
+    ASSERT_TRUE(unsupportedLang.isUnsupported());
+
+    FontLanguages oneUnsupported("x-example", 9);
+    EXPECT_EQ(1u, oneUnsupported.size());
+    EXPECT_TRUE(oneUnsupported[0].isUnsupported());
+
+    FontLanguages twoUnsupporteds("x-example,x-example", 19);
+    EXPECT_EQ(1u, twoUnsupporteds.size());
+    EXPECT_TRUE(twoUnsupporteds[0].isUnsupported());
+
+    FontLanguage english("en", 2);
+    FontLanguages firstUnsupported("x-example,en", 12);
+    EXPECT_EQ(1u, firstUnsupported.size());
+    EXPECT_EQ(english, firstUnsupported[0]);
+
+    FontLanguages lastUnsupported("en,x-example", 12);
+    EXPECT_EQ(1u, lastUnsupported.size());
+    EXPECT_EQ(english, lastUnsupported[0]);
+}
+
+TEST(FontLanguagesTest, repeatedLanguageTests) {
+    FontLanguage english("en", 2);
+    FontLanguage englishInLatn("en-Latn", 2);
+    ASSERT_TRUE(english == englishInLatn);
+
+    FontLanguages langs("en,en-Latn", 10);
+    EXPECT_EQ(1u, langs.size());
+    EXPECT_EQ(english, langs[0]);
+}
+
 // The test font has following glyphs.
 // U+82A6
 // U+82A6 U+FE00 (VS1)
