@@ -4,7 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 
-import 'solid_color_box.dart';
+import 'lib/solid_color_box.dart';
 
 void main() {
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);

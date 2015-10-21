@@ -8,7 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 
-import 'solid_color_box.dart';
+import 'lib/solid_color_box.dart';
 
 class Touch {
   final double x;

@@ -4,7 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 
-import 'solid_color_box.dart';
+import 'lib/solid_color_box.dart';
 
 const TextStyle style = const TextStyle(color: const Color(0xFF000000));
 

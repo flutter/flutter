@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'solid_color_box.dart';
+import 'lib/solid_color_box.dart';
 
 Duration timeBase;
 RenderTransform transformBox;
