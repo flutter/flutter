@@ -42,6 +42,12 @@ class ValueKey<T> extends Key {
   String toString() => '[\'$value\']';
 }
 
+/// A [Key] that is only equal to itself.
+class UniqueKey extends Key {
+  const UniqueKey() : super.constructor();
+  String toString() => '[$hashCode]';
+}
+
 /// A kind of [Key] that takes its identity from the object used as its value.
 ///
 /// Used to tie the identity of a Widget to the identity of an object used to
