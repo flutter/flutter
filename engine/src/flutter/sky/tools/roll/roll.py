@@ -74,7 +74,8 @@ dirs_from_mojo = [
     'mojo/application',
     'mojo/common',
     'mojo/converters',
-    'mojo/dart/embedder',
+    ('mojo/dart/embedder', ['embedder.gni']),
+    'mojo/dart/observatory',
     'mojo/data_pipe_utils',
     'mojo/edk',
     'mojo/environment',
@@ -102,15 +103,25 @@ files_not_to_roll = [
 
 
 def rev(source_dir, dest_dir, dirs_to_rev, name):
-    for d in dirs_to_rev:
+    for dir_to_rev in dirs_to_rev:
+      if type(dir_to_rev) is tuple:
+          d, file_subset = dir_to_rev
+      else:
+          d = dir_to_rev
+          file_subset = None
       print "removing directory %s" % d
       try:
           system(["git", "rm", "-r", d], cwd=dest_dir)
       except subprocess.CalledProcessError:
           print "Could not remove %s" % d
       print "cloning directory %s" % d
-      files = system(["git", "ls-files", d], cwd=source_dir)
-      for f in files.splitlines():
+
+      if file_subset is None:
+          files = system(["git", "ls-files", d], cwd=source_dir).splitlines()
+      else:
+          files = [os.path.join(d, f) for f in file_subset]
+
+      for f in files:
           source_path = os.path.join(source_dir, f)
           if not os.path.isfile(source_path):
               continue
