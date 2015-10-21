@@ -39,6 +39,7 @@ LOCAL_STATIC_LIBRARIES += \
     libxml2
 
 LOCAL_SRC_FILES += \
+    FontCollectionTest.cpp \
     FontCollectionItemizeTest.cpp \
     FontFamilyTest.cpp \
     FontTestUtils.cpp \
