@@ -3,11 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'focus.dart';
 import 'framework.dart';
 import 'transitions.dart';
+import 'gridpaper.dart';
+
+/// Set this to true to overlay a pixel grid on the screen, with every 100
+/// pixels marked with a thick maroon line and every 10 pixels marked with a
+/// thin maroon line. This can help with verifying widget positions.
+bool debugShowGrid = false;
+Color debugGridColor = const Color(0x7F7F2020);
 
 const String kDefaultRouteName = '/';
 
@@ -149,8 +157,15 @@ class NavigatorState extends State<Navigator> {
     });
   }
 
-  Widget build(BuildContext context) {
-    List<Widget> visibleRoutes = new List<Widget>();
+   Widget build(BuildContext context) {
+    List<Widget> visibleRoutes = <Widget>[];
+
+    assert(() {
+      if (debugShowGrid)
+        visibleRoutes.add(new GridPaper(color: debugGridColor));
+      return true;
+    });
+
     bool alreadyInsertedModalBarrier = false;
     Route nextContentRoute;
     for (int i = _history.length-1; i >= 0; i -= 1) {
