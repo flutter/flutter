@@ -16,14 +16,12 @@ namespace sky {
 namespace shell {
 
 static void StartTracing(JNIEnv* env, jclass clazz) {
-  LOG(INFO) << "Starting trace";
   Shell::Shared().tracing_controller().StartTracing();
 }
 
 static void StopTracing(JNIEnv* env, jclass clazz, jstring path) {
   base::FilePath file_path(base::android::ConvertJavaStringToUTF8(env, path));
   Shell::Shared().tracing_controller().StopTracing(file_path);
-  LOG(INFO) << "Saving trace to " << file_path.LossyDisplayName();
 }
 
 bool RegisterTracingController(JNIEnv* env) {
