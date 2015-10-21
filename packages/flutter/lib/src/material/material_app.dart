@@ -26,9 +26,7 @@ class MaterialApp extends StatefulComponent {
     this.theme,
     this.routes,
     this.onGenerateRoute
-  }) : super(key: key) {
-    assert(routes != null);
-  }
+  }) : super(key: key);
 
   final String title;
   final ThemeData theme;

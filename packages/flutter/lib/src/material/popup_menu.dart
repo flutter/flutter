@@ -134,7 +134,7 @@ class _MenuRoute extends PerformanceRoute {
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
+  Widget build(RouteArguments args) {
     return new Positioned(
       top: position?.top,
       right: position?.right,
