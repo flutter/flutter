@@ -67,6 +67,10 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         "Font collection must have at least one valid typeface");
     size_t nPages = (mMaxChar + kPageMask) >> kLogCharsPerPage;
     size_t offset = 0;
+    // TODO: Use variation selector map for mRanges construction.
+    // A font can have a glyph for a base code point and variation selector pair but no glyph for
+    // the base code point without variation selector. The family won't be listed in the range in
+    // this case.
     for (size_t i = 0; i < nPages; i++) {
         Range dummy;
         mRanges.push_back(dummy);
@@ -175,6 +179,24 @@ static bool isStickyWhitelisted(uint32_t c) {
 
 static bool isVariationSelector(uint32_t c) {
     return (0xFE00 <= c && c <= 0xFE0F) || (0xE0100 <= c && c <= 0xE01EF);
+}
+
+bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
+        uint32_t variationSelector) const {
+    if (!isVariationSelector(variationSelector)) {
+        return false;
+    }
+    if (baseCodepoint >= mMaxChar) {
+        return false;
+    }
+    // Currently mRanges can not be used here since it isn't aware of the variation sequence.
+    // TODO: Use mRanges for narrowing down the search range.
+    for (size_t i = 0; i < mFamilies.size(); i++) {
+        if (mFamilies[i]->hasVariationSelector(baseCodepoint, variationSelector)) {
+          return true;
+        }
+    }
+    return false;
 }
 
 void FontCollection::itemize(const uint16_t *string, size_t string_size, FontStyle style,

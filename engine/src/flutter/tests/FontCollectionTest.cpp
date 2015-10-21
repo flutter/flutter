@@ -1,0 +1,78 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+
+#include <minikin/FontCollection.h>
+#include "MinikinFontForTest.h"
+#include "MinikinInternal.h"
+
+namespace android {
+
+// The test font has following glyphs.
+// U+82A6
+// U+82A6 U+FE00 (VS1)
+// U+82A6 U+E0100 (VS17)
+// U+82A6 U+E0101 (VS18)
+// U+82A6 U+E0102 (VS19)
+// U+845B
+// U+845B U+FE01 (VS2)
+// U+845B U+E0101 (VS18)
+// U+845B U+E0102 (VS19)
+// U+845B U+E0103 (VS20)
+// U+537F
+// U+717D U+FE02 (VS3)
+// U+717D U+E0102 (VS19)
+// U+717D U+E0103 (VS20)
+const char kVsTestFont[] = "/data/minikin/test/data/VarioationSelectorTest-Regular.ttf";
+
+void expectVSGlyphs(const FontCollection& fc, uint32_t codepoint, const std::set<uint32_t>& vsSet) {
+    for (uint32_t vs = 0xFE00; vs <= 0xE01EF; ++vs) {
+        // Move to variation selectors supplements after variation selectors.
+        if (vs == 0xFF00) {
+            vs = 0xE0100;
+        }
+        if (vsSet.find(vs) == vsSet.end()) {
+            EXPECT_FALSE(fc.hasVariationSelector(codepoint, vs))
+                << "Glyph for U+" << std::hex << codepoint << " U+" << vs;
+        } else {
+            EXPECT_TRUE(fc.hasVariationSelector(codepoint, vs))
+                << "Glyph for U+" << std::hex << codepoint << " U+" << vs;
+        }
+    }
+}
+
+TEST(FontCollectionTest, hasVariationSelectorTest) {
+  FontFamily* family = new FontFamily();
+  family->addFont(new MinikinFontForTest(kVsTestFont));
+  std::vector<FontFamily*> families({family});
+  FontCollection fc(families);
+  family->Unref();
+
+  EXPECT_FALSE(fc.hasVariationSelector(0x82A6, 0));
+  expectVSGlyphs(fc, 0x82A6, std::set<uint32_t>({0xFE00, 0xE0100, 0xE0101, 0xE0102}));
+
+  EXPECT_FALSE(fc.hasVariationSelector(0x845B, 0));
+  expectVSGlyphs(fc, 0x845B, std::set<uint32_t>({0xFE01, 0xE0101, 0xE0102, 0xE0103}));
+
+  EXPECT_FALSE(fc.hasVariationSelector(0x537F, 0));
+  expectVSGlyphs(fc, 0x537F, std::set<uint32_t>({}));
+
+  EXPECT_FALSE(fc.hasVariationSelector(0x717D, 0));
+  expectVSGlyphs(fc, 0x717D, std::set<uint32_t>({0xFE02, 0xE0102, 0xE0103}));
+}
+
+}  // namespace android
