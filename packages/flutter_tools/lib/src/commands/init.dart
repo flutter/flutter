@@ -24,7 +24,7 @@ class InitCommand extends Command {
   Future<int> run() async {
     if (!argResults.wasParsed('out')) {
       print('No option specified for the output directory.');
-      print(argParser.getUsage());
+      print(argParser.usage);
       return 2;
     }
 
