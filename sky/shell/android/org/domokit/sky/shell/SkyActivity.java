@@ -143,6 +143,11 @@ public class SkyActivity extends Activity {
             return true;
         }
 
+        if (Intent.ACTION_RUN.equals(action)) {
+            mView.getEngine().runFromBundle(intent.getDataString());
+            return true;
+        }
+
         return false;
     }
 
