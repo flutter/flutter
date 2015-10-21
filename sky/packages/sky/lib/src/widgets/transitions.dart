@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/animation.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'package:flutter/rendering.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -87,6 +89,29 @@ class SlideTransition extends TransitionWithChild {
     Matrix4 transform = new Matrix4.identity()
       ..translate(position.value.x, position.value.y);
     return new Transform(transform: transform, child: child);
+  }
+}
+
+class RotationTransition extends TransitionWithChild {
+  RotationTransition({
+    Key key,
+    this.turns,
+    PerformanceView performance,
+    Widget child
+  }) : super(key: key,
+             performance: performance,
+             child: child);
+
+  final AnimatedValue<double> turns;
+
+  Widget buildWithChild(BuildContext context, Widget child) {
+    performance.updateVariable(turns);
+    Matrix4 transform = new Matrix4.rotationZ(turns.value * math.PI * 2.0);
+    return new Transform(
+      transform: transform,
+      alignment: const FractionalOffset(0.5, 0.5),
+      child: child
+    );
   }
 }
 
