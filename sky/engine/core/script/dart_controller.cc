@@ -180,9 +180,14 @@ static void DartController_DartStreamConsumer(
   }
 
   if (state == Dart_StreamConsumer_kData) {
-    const std::string data(reinterpret_cast<const char*>(buffer),
-                           buffer_length);
-    mojo::common::BlockingCopyFromString(data, *handle);
+    // Trim trailing null characters.
+    if (buffer[buffer_length - 1] == 0)
+      --buffer_length;
+    if (buffer_length) {
+      const std::string data(reinterpret_cast<const char*>(buffer),
+                             buffer_length);
+      mojo::common::BlockingCopyFromString(data, *handle);
+    }
   }
 }
 

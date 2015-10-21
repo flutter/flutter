@@ -8,6 +8,7 @@
 #include "base/files/file.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted_memory.h"
+#include "base/memory/weak_ptr.h"
 #include "base/time/time.h"
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 #include "mojo/public/cpp/system/data_pipe.h"
@@ -64,9 +65,12 @@ class TracingController : public mojo::common::DataPipeDrainer::Client {
   void StopBaseTracing();
   void OnDataAvailable(const void* data, size_t num_bytes) override;
   void OnDataComplete() override;
-  static void OnBaseTraceChunk(
-      const scoped_refptr<base::RefCountedString>& chunk,
-      bool has_more_events);
+  void FinalizeTraceFile();
+
+  void OnBaseTraceChunk(const scoped_refptr<base::RefCountedString>& chunk,
+                        bool has_more_events);
+
+  base::WeakPtrFactory<TracingController> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(TracingController);
 };
