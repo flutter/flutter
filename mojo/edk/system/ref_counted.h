@@ -66,19 +66,40 @@ namespace system {
 template <typename T>
 class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
  public:
+  // Adds a reference to this object.
+  // Inherited from the internal superclass:
+  //   void AddRef() const;
+
+  // Releases a reference to this object. This will destroy this object once the
+  // last reference is released.
   void Release() const {
     if (internal::RefCountedThreadSafeBase::Release())
       delete static_cast<const T*>(this);
   }
 
+  // Asserts that there is exactly one reference to this object; does nothing in
+  // Release builds (when |NDEBUG| is defined).
+  // Inherited from the internal superclass:
+  //   void AssertHasOneRef();
+
  protected:
+  // Constructor. Note that the object is constructed with a reference count of
+  // 1, and then must be adopted (see |AdoptRef()| in ref_ptr.h).
   RefCountedThreadSafe() {}
+
+  // Destructor. Note that this object should only be destroyed via |Release()|
+  // (see above), or something that calls |Release()| (see, e.g., |RefPtr<>| in
+  // ref_ptr.h).
   ~RefCountedThreadSafe() {}
 
  private:
 #ifndef NDEBUG
   template <typename U>
   friend RefPtr<U> AdoptRef(U*);
+  // Marks the initial reference (assumed on construction) as adopted. This is
+  // only required for Debug builds (when |NDEBUG| is not defined).
+  // TODO(vtl): Should this really be private? This makes manual ref-counting
+  // and also writing one's own ref pointer class impossible.
   void Adopt() { internal::RefCountedThreadSafeBase::Adopt(); }
 #endif
 

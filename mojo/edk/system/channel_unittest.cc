@@ -25,10 +25,8 @@ void DoNothing() {}
 // ChannelTest.InitShutdown ----------------------------------------------------
 
 TEST_F(ChannelTest, InitShutdown) {
-  PostMethodToIOThreadAndWait(FROM_HERE,
-                              &ChannelTest::CreateAndInitChannelOnIOThread, 0);
-  PostMethodToIOThreadAndWait(FROM_HERE,
-                              &ChannelTest::ShutdownChannelOnIOThread, 0);
+  PostMethodToIOThreadAndWait(&ChannelTest::CreateAndInitChannelOnIOThread, 0);
+  PostMethodToIOThreadAndWait(&ChannelTest::ShutdownChannelOnIOThread, 0);
 
   // Okay to destroy |Channel| on not-the-I/O-thread.
   channel(0)->AssertHasOneRef();
@@ -38,8 +36,7 @@ TEST_F(ChannelTest, InitShutdown) {
 // ChannelTest.CloseBeforeAttachAndRun -----------------------------------------
 
 TEST_F(ChannelTest, CloseBeforeRun) {
-  PostMethodToIOThreadAndWait(FROM_HERE,
-                              &ChannelTest::CreateAndInitChannelOnIOThread, 0);
+  PostMethodToIOThreadAndWait(&ChannelTest::CreateAndInitChannelOnIOThread, 0);
 
   RefPtr<ChannelEndpoint> channel_endpoint;
   auto mp = MessagePipe::CreateLocalProxy(&channel_endpoint);
@@ -48,8 +45,7 @@ TEST_F(ChannelTest, CloseBeforeRun) {
 
   channel(0)->SetBootstrapEndpoint(std::move(channel_endpoint));
 
-  PostMethodToIOThreadAndWait(FROM_HERE,
-                              &ChannelTest::ShutdownChannelOnIOThread, 0);
+  PostMethodToIOThreadAndWait(&ChannelTest::ShutdownChannelOnIOThread, 0);
 
   channel(0)->AssertHasOneRef();
 }
@@ -57,8 +53,7 @@ TEST_F(ChannelTest, CloseBeforeRun) {
 // ChannelTest.ShutdownAfterAttachAndRun ---------------------------------------
 
 TEST_F(ChannelTest, ShutdownAfterAttach) {
-  PostMethodToIOThreadAndWait(FROM_HERE,
-                              &ChannelTest::CreateAndInitChannelOnIOThread, 0);
+  PostMethodToIOThreadAndWait(&ChannelTest::CreateAndInitChannelOnIOThread, 0);
 
   RefPtr<ChannelEndpoint> channel_endpoint;
   auto mp = MessagePipe::CreateLocalProxy(&channel_endpoint);
@@ -72,8 +67,7 @@ TEST_F(ChannelTest, ShutdownAfterAttach) {
       mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
 
   // Don't wait for the shutdown to run ...
-  PostMethodToIOThreadAndWait(FROM_HERE,
-                              &ChannelTest::ShutdownChannelOnIOThread, 0);
+  PostMethodToIOThreadAndWait(&ChannelTest::ShutdownChannelOnIOThread, 0);
 
   // ... since this |Wait()| should fail once the channel is shut down.
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
@@ -91,16 +85,14 @@ TEST_F(ChannelTest, ShutdownAfterAttach) {
 // ChannelTest.WaitAfterAttachRunAndShutdown -----------------------------------
 
 TEST_F(ChannelTest, WaitAfterAttachRunAndShutdown) {
-  PostMethodToIOThreadAndWait(FROM_HERE,
-                              &ChannelTest::CreateAndInitChannelOnIOThread, 0);
+  PostMethodToIOThreadAndWait(&ChannelTest::CreateAndInitChannelOnIOThread, 0);
 
   RefPtr<ChannelEndpoint> channel_endpoint;
   auto mp = MessagePipe::CreateLocalProxy(&channel_endpoint);
 
   channel(0)->SetBootstrapEndpoint(std::move(channel_endpoint));
 
-  PostMethodToIOThreadAndWait(FROM_HERE,
-                              &ChannelTest::ShutdownChannelOnIOThread, 0);
+  PostMethodToIOThreadAndWait(&ChannelTest::ShutdownChannelOnIOThread, 0);
 
   Waiter waiter;
   waiter.Init();
@@ -124,8 +116,8 @@ TEST_F(ChannelTest, EndpointChannelShutdownRace) {
   for (size_t i = 0; i < kIterations; i++) {
     // Need a new set of |RawChannel|s on every iteration.
     SetUp();
-    PostMethodToIOThreadAndWait(
-        FROM_HERE, &ChannelTest::CreateAndInitChannelOnIOThread, 0);
+    PostMethodToIOThreadAndWait(&ChannelTest::CreateAndInitChannelOnIOThread,
+                                0);
 
     RefPtr<ChannelEndpoint> channel_endpoint;
     auto mp = MessagePipe::CreateLocalProxy(&channel_endpoint);
@@ -133,12 +125,12 @@ TEST_F(ChannelTest, EndpointChannelShutdownRace) {
     channel(0)->SetBootstrapEndpoint(std::move(channel_endpoint));
 
     io_thread()->PostTask(
-        FROM_HERE, base::Bind(&ChannelTest::ShutdownAndReleaseChannelOnIOThread,
-                              base::Unretained(this), 0));
+        base::Bind(&ChannelTest::ShutdownAndReleaseChannelOnIOThread,
+                   base::Unretained(this), 0));
     mp->Close(0);
 
     // Wait for the IO thread to finish shutting down the channel.
-    io_thread()->PostTaskAndWait(FROM_HERE, base::Bind(&DoNothing));
+    io_thread()->PostTaskAndWait(base::Bind(&DoNothing));
     EXPECT_FALSE(channel(0));
   }
 }

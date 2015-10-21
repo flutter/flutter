@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/waiter_test_utils.h"
 
+#include <utility>
+
 namespace mojo {
 namespace system {
 namespace test {
@@ -23,7 +25,7 @@ void SimpleWaiterThread::Run() {
   *result_ = waiter_.Wait(MOJO_DEADLINE_INDEFINITE, context_);
 }
 
-WaiterThread::WaiterThread(scoped_refptr<Dispatcher> dispatcher,
+WaiterThread::WaiterThread(RefPtr<Dispatcher>&& dispatcher,
                            MojoHandleSignals handle_signals,
                            MojoDeadline deadline,
                            uint32_t context,
@@ -31,7 +33,7 @@ WaiterThread::WaiterThread(scoped_refptr<Dispatcher> dispatcher,
                            MojoResult* result_out,
                            uint32_t* context_out,
                            HandleSignalsState* signals_state_out)
-    : dispatcher_(dispatcher),
+    : dispatcher_(std::move(dispatcher)),
       handle_signals_(handle_signals),
       deadline_(deadline),
       context_(context),

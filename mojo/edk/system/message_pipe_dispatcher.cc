@@ -69,18 +69,16 @@ Dispatcher::Type MessagePipeDispatcher::GetType() const {
 }
 
 // static
-scoped_refptr<MessagePipeDispatcher>
-MessagePipeDispatcher::CreateRemoteMessagePipe(
+RefPtr<MessagePipeDispatcher> MessagePipeDispatcher::CreateRemoteMessagePipe(
     RefPtr<ChannelEndpoint>* channel_endpoint) {
   auto message_pipe = MessagePipe::CreateLocalProxy(channel_endpoint);
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      Create(kDefaultCreateOptions);
+  auto dispatcher = MessagePipeDispatcher::Create(kDefaultCreateOptions);
   dispatcher->Init(std::move(message_pipe), 0);
   return dispatcher;
 }
 
 // static
-scoped_refptr<MessagePipeDispatcher> MessagePipeDispatcher::Deserialize(
+RefPtr<MessagePipeDispatcher> MessagePipeDispatcher::Deserialize(
     Channel* channel,
     const void* source,
     size_t size) {
@@ -91,8 +89,7 @@ scoped_refptr<MessagePipeDispatcher> MessagePipeDispatcher::Deserialize(
   DCHECK(message_pipe);
   DCHECK(port == 0 || port == 1);
 
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      Create(kDefaultCreateOptions);
+  auto dispatcher = MessagePipeDispatcher::Create(kDefaultCreateOptions);
   dispatcher->Init(std::move(message_pipe), port);
   return dispatcher;
 }
@@ -127,17 +124,17 @@ void MessagePipeDispatcher::CloseImplNoLock() {
   port_ = kInvalidPort;
 }
 
-scoped_refptr<Dispatcher>
+RefPtr<Dispatcher>
 MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   mutex().AssertHeld();
 
   // TODO(vtl): Currently, there are no options, so we just use
   // |kDefaultCreateOptions|. Eventually, we'll have to duplicate the options
   // too.
-  scoped_refptr<MessagePipeDispatcher> rv = Create(kDefaultCreateOptions);
-  rv->Init(std::move(message_pipe_), port_);
+  auto dispatcher = MessagePipeDispatcher::Create(kDefaultCreateOptions);
+  dispatcher->Init(std::move(message_pipe_), port_);
   port_ = kInvalidPort;
-  return scoped_refptr<Dispatcher>(rv.get());
+  return dispatcher;
 }
 
 MojoResult MessagePipeDispatcher::WriteMessageImplNoLock(
@@ -196,7 +193,7 @@ void MessagePipeDispatcher::StartSerializeImplNoLock(
     Channel* channel,
     size_t* max_size,
     size_t* max_platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   return message_pipe_->StartSerialize(port_, channel, max_size,
                                        max_platform_handles);
 }
@@ -206,7 +203,7 @@ bool MessagePipeDispatcher::EndSerializeAndCloseImplNoLock(
     void* destination,
     size_t* actual_size,
     embedder::PlatformHandleVector* platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
 
   bool rv = message_pipe_->EndSerialize(port_, channel, destination,
                                         actual_size, platform_handles);

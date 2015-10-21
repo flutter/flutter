@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "base/memory/ref_counted.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -20,7 +20,7 @@ class Core;
 class Dispatcher;
 class DispatcherTransport;
 
-using DispatcherVector = std::vector<scoped_refptr<Dispatcher>>;
+using DispatcherVector = std::vector<RefPtr<Dispatcher>>;
 
 // Test-only function (defined/used in embedder/test_embedder.cc). Declared here
 // so it can be friended.
@@ -46,7 +46,7 @@ class HandleTable {
   // handle.
   // WARNING: For efficiency, this returns a dumb pointer. If you're going to
   // use the result outside |Core|'s lock, you MUST take a reference (e.g., by
-  // storing the result inside a |scoped_refptr|).
+  // storing the result inside a |RefPtr|).
   Dispatcher* GetDispatcher(MojoHandle handle);
 
   // On success, gets the dispatcher for a given handle (which should not be
@@ -55,19 +55,18 @@ class HandleTable {
   // |MOJO_RESULT_INVALID_ARGUMENT| if there's no dispatcher for the given
   // handle or |MOJO_RESULT_BUSY| if the handle is marked as busy.)
   MojoResult GetAndRemoveDispatcher(MojoHandle handle,
-                                    scoped_refptr<Dispatcher>* dispatcher);
+                                    RefPtr<Dispatcher>* dispatcher);
 
   // Adds a dispatcher (which must be valid), returning the handle for it.
   // Returns |MOJO_HANDLE_INVALID| on failure (if the handle table is full).
-  MojoHandle AddDispatcher(const scoped_refptr<Dispatcher>& dispatcher);
+  MojoHandle AddDispatcher(Dispatcher* dispatcher);
 
   // Adds a pair of dispatchers (which must be valid), return a pair of handles
   // for them. On failure (if the handle table is full), the first (and second)
   // handles will be |MOJO_HANDLE_INVALID|, and neither dispatcher will be
   // added.
-  std::pair<MojoHandle, MojoHandle> AddDispatcherPair(
-      const scoped_refptr<Dispatcher>& dispatcher0,
-      const scoped_refptr<Dispatcher>& dispatcher1);
+  std::pair<MojoHandle, MojoHandle> AddDispatcherPair(Dispatcher* dispatcher0,
+                                                      Dispatcher* dispatcher1);
 
   // Adds the given vector of dispatchers (of size at most
   // |kMaxMessageNumHandles|). |handles| must point to an array of size at least
@@ -119,17 +118,16 @@ class HandleTable {
   // closed (or learning about this too late).
   struct Entry {
     Entry();
-    explicit Entry(const scoped_refptr<Dispatcher>& dispatcher);
+    explicit Entry(RefPtr<Dispatcher>&& dispatcher);
     ~Entry();
 
-    scoped_refptr<Dispatcher> dispatcher;
+    RefPtr<Dispatcher> dispatcher;
     bool busy;
   };
   using HandleToEntryMap = std::unordered_map<MojoHandle, Entry>;
 
   // Adds the given dispatcher to the handle table, not doing any size checks.
-  MojoHandle AddDispatcherNoSizeCheck(
-      const scoped_refptr<Dispatcher>& dispatcher);
+  MojoHandle AddDispatcherNoSizeCheck(RefPtr<Dispatcher>&& dispatcher);
 
   HandleToEntryMap handle_to_entry_map_;
   MojoHandle next_handle_;  // Invariant: never |MOJO_HANDLE_INVALID|.

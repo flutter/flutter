@@ -5,7 +5,6 @@
 #ifndef MOJO_EDK_SYSTEM_DATA_PIPE_PRODUCER_DISPATCHER_H_
 #define MOJO_EDK_SYSTEM_DATA_PIPE_PRODUCER_DISPATCHER_H_
 
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -20,8 +19,8 @@ class DataPipe;
 // thread-safe.
 class DataPipeProducerDispatcher final : public Dispatcher {
  public:
-  static scoped_refptr<DataPipeProducerDispatcher> Create() {
-    return make_scoped_refptr(new DataPipeProducerDispatcher());
+  static RefPtr<DataPipeProducerDispatcher> Create() {
+    return AdoptRef(new DataPipeProducerDispatcher());
   }
 
   // Must be called before any other methods.
@@ -32,8 +31,9 @@ class DataPipeProducerDispatcher final : public Dispatcher {
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
-  static scoped_refptr<DataPipeProducerDispatcher>
-  Deserialize(Channel* channel, const void* source, size_t size);
+  static RefPtr<DataPipeProducerDispatcher> Deserialize(Channel* channel,
+                                                        const void* source,
+                                                        size_t size);
 
   // Get access to the |DataPipe| for testing.
   DataPipe* GetDataPipeForTest();
@@ -45,8 +45,7 @@ class DataPipeProducerDispatcher final : public Dispatcher {
   // |Dispatcher| protected methods:
   void CancelAllAwakablesNoLock() override;
   void CloseImplNoLock() override;
-  scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
-      override;
+  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override;
   MojoResult WriteDataImplNoLock(UserPointer<const void> elements,
                                  UserPointer<uint32_t> num_bytes,
                                  MojoWriteDataFlags flags) override;

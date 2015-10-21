@@ -31,7 +31,7 @@ Dispatcher::Type PlatformHandleDispatcher::GetType() const {
 }
 
 // static
-scoped_refptr<PlatformHandleDispatcher> PlatformHandleDispatcher::Deserialize(
+RefPtr<PlatformHandleDispatcher> PlatformHandleDispatcher::Deserialize(
     Channel* channel,
     const void* source,
     size_t size,
@@ -77,7 +77,7 @@ void PlatformHandleDispatcher::CloseImplNoLock() {
   platform_handle_.reset();
 }
 
-scoped_refptr<Dispatcher>
+RefPtr<Dispatcher>
 PlatformHandleDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   mutex().AssertHeld();
   return Create(platform_handle_.Pass());
@@ -87,7 +87,7 @@ void PlatformHandleDispatcher::StartSerializeImplNoLock(
     Channel* /*channel*/,
     size_t* max_size,
     size_t* max_platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   *max_size = sizeof(SerializedPlatformHandleDispatcher);
   *max_platform_handles = 1;
 }
@@ -97,7 +97,7 @@ bool PlatformHandleDispatcher::EndSerializeAndCloseImplNoLock(
     void* destination,
     size_t* actual_size,
     embedder::PlatformHandleVector* platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
 
   SerializedPlatformHandleDispatcher* serialization =
       static_cast<SerializedPlatformHandleDispatcher*>(destination);

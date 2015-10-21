@@ -12,11 +12,12 @@
 #include <ostream>
 #include <vector>
 
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/mutex.h"
+#include "mojo/edk/system/ref_counted.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/c/system/buffer.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/message_pipe.h"
@@ -41,7 +42,7 @@ class ProxyMessagePipeEndpoint;
 class TransportData;
 class Awakable;
 
-using DispatcherVector = std::vector<scoped_refptr<Dispatcher>>;
+using DispatcherVector = std::vector<RefPtr<Dispatcher>>;
 
 namespace test {
 
@@ -55,7 +56,7 @@ DispatcherTransport DispatcherTryStartTransport(Dispatcher* dispatcher);
 // object is thread-safe, with its state being protected by a single mutex
 // |mutex_|, which is also made available to implementation subclasses (via the
 // |mutex()| method).
-class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
+class Dispatcher : public RefCountedThreadSafe<Dispatcher> {
  public:
   enum class Type {
     UNKNOWN = 0,
@@ -113,7 +114,7 @@ class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
   // new handle on success).
   MojoResult DuplicateBufferHandle(
       UserPointer<const MojoDuplicateBufferHandleOptions> options,
-      scoped_refptr<Dispatcher>* new_dispatcher);
+      RefPtr<Dispatcher>* new_dispatcher);
   MojoResult MapBuffer(
       uint64_t offset,
       uint64_t num_bytes,
@@ -203,7 +204,7 @@ class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
     // Deserialization API.
     // Note: This "clears" (i.e., reset to the invalid handle) any platform
     // handles that it takes ownership of.
-    static scoped_refptr<Dispatcher> Deserialize(
+    static RefPtr<Dispatcher> Deserialize(
         Channel* channel,
         int32_t type,
         const void* source,
@@ -212,8 +213,6 @@ class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
   };
 
  protected:
-  friend class base::RefCountedThreadSafe<Dispatcher>;
-
   Dispatcher();
   virtual ~Dispatcher();
 
@@ -223,8 +222,7 @@ class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
   virtual void CancelAllAwakablesNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual void CloseImplNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
-  virtual scoped_refptr<Dispatcher>
-  CreateEquivalentDispatcherAndCloseImplNoLock()
+  virtual RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_) = 0;
 
   // These are to be overridden by subclasses (if necessary). They are never
@@ -263,8 +261,7 @@ class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual MojoResult DuplicateBufferHandleImplNoLock(
       UserPointer<const MojoDuplicateBufferHandleOptions> options,
-      scoped_refptr<Dispatcher>* new_dispatcher)
-      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+      RefPtr<Dispatcher>* new_dispatcher) MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual MojoResult MapBufferImplNoLock(
       uint64_t offset,
       uint64_t num_bytes,
@@ -314,6 +311,7 @@ class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
   Mutex& mutex() const MOJO_LOCK_RETURNED(mutex_) { return mutex_; }
 
  private:
+  FRIEND_REF_COUNTED_THREAD_SAFE(Dispatcher);
   friend class DispatcherTransport;
 
   // Closes the dispatcher. This must be done under lock, and unlike |Close()|,
@@ -327,7 +325,7 @@ class Dispatcher : public base::RefCountedThreadSafe<Dispatcher> {
   // dispatcher will look as though it was closed, but the resource it
   // represents will be assigned to the new dispatcher. This must be called
   // under the dispatcher's lock.
-  scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndCloseNoLock()
+  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseNoLock()
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   // API to serialize dispatchers to a |Channel|, exposed to only
@@ -398,8 +396,7 @@ class DispatcherTransport {
     return dispatcher_->IsBusyNoLock();
   }
   void Close() MOJO_NOT_THREAD_SAFE { dispatcher_->CloseNoLock(); }
-  scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndClose()
-      MOJO_NOT_THREAD_SAFE {
+  RefPtr<Dispatcher> CreateEquivalentDispatcherAndClose() MOJO_NOT_THREAD_SAFE {
     return dispatcher_->CreateEquivalentDispatcherAndCloseNoLock();
   }
 

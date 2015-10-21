@@ -10,13 +10,14 @@
 #include "base/callback_forward.h"
 #include "base/gtest_prod_util.h"
 #include "base/memory/ref_counted.h"
-#include "base/task_runner.h"
+#include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/process_type.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/embedder/slave_info.h"
 #include "mojo/edk/system/channel_id.h"
 #include "mojo/edk/system/connection_identifier.h"
 #include "mojo/edk/system/process_identifier.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -64,9 +65,9 @@ class IPCSupport {
   // called.
   IPCSupport(embedder::PlatformSupport* platform_support,
              embedder::ProcessType process_type,
-             scoped_refptr<base::TaskRunner> delegate_thread_task_runner,
+             embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
              embedder::ProcessDelegate* process_delegate,
-             scoped_refptr<base::TaskRunner> io_thread_task_runner,
+             embedder::PlatformTaskRunnerRefPtr io_thread_task_runner,
              embedder::ScopedPlatformHandle platform_handle);
   // Note: This object must be shut down before destruction (see
   // |ShutdownOnIOThread()|).
@@ -99,12 +100,12 @@ class IPCSupport {
   //
   // TODO(vtl): Add some more channel management functionality to this class.
   // Maybe make this callback interface more sane.
-  scoped_refptr<system::MessagePipeDispatcher> ConnectToSlave(
+  RefPtr<MessagePipeDispatcher> ConnectToSlave(
       const ConnectionIdentifier& connection_id,
       embedder::SlaveInfo slave_info,
       embedder::ScopedPlatformHandle platform_handle,
       const base::Closure& callback,
-      scoped_refptr<base::TaskRunner> callback_thread_task_runner,
+      embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner,
       ChannelId* channel_id);
 
   // Called in a slave process to connect it to the master process and thus the
@@ -115,20 +116,20 @@ class IPCSupport {
   // |ConnectToSlave()|.
   //
   // TODO(vtl): |ConnectToSlave()|'s channel management TODO also applies here.
-  scoped_refptr<system::MessagePipeDispatcher> ConnectToMaster(
+  RefPtr<MessagePipeDispatcher> ConnectToMaster(
       const ConnectionIdentifier& connection_id,
       const base::Closure& callback,
-      scoped_refptr<base::TaskRunner> callback_thread_task_runner,
+      embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner,
       ChannelId* channel_id);
 
   embedder::ProcessType process_type() const { return process_type_; }
   embedder::ProcessDelegate* process_delegate() const {
     return process_delegate_;
   }
-  base::TaskRunner* delegate_thread_task_runner() const {
+  embedder::PlatformTaskRunner* delegate_thread_task_runner() const {
     return delegate_thread_task_runner_.get();
   }
-  base::TaskRunner* io_thread_task_runner() const {
+  embedder::PlatformTaskRunner* io_thread_task_runner() const {
     return io_thread_task_runner_.get();
   }
   // TODO(vtl): The things that use the following should probably be moved into
@@ -165,9 +166,9 @@ class IPCSupport {
 
   // These are all set on construction and reset by |ShutdownOnIOThread()|.
   embedder::ProcessType process_type_;
-  scoped_refptr<base::TaskRunner> delegate_thread_task_runner_;
+  embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner_;
   embedder::ProcessDelegate* process_delegate_;
-  scoped_refptr<base::TaskRunner> io_thread_task_runner_;
+  embedder::PlatformTaskRunnerRefPtr io_thread_task_runner_;
 
   std::unique_ptr<ConnectionManager> connection_manager_;
   std::unique_ptr<ChannelManager> channel_manager_;

@@ -7,11 +7,11 @@
 #include <vector>
 
 #include "base/logging.h"
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/memory.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -24,9 +24,8 @@ namespace {
 
 class MockDispatcher : public Dispatcher {
  public:
-  static scoped_refptr<MockDispatcher> Create(
-      CoreTestBase::MockHandleInfo* info) {
-    return make_scoped_refptr(new MockDispatcher(info));
+  static RefPtr<MockDispatcher> Create(CoreTestBase::MockHandleInfo* info) {
+    return AdoptRef(new MockDispatcher(info));
   }
 
   // |Dispatcher| private methods:
@@ -156,8 +155,7 @@ class MockDispatcher : public Dispatcher {
     mutex().AssertHeld();
   }
 
-  scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
-      override {
+  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override {
     return Create(info_);
   }
 
@@ -187,8 +185,10 @@ void CoreTestBase::TearDown() {
 
 MojoHandle CoreTestBase::CreateMockHandle(CoreTestBase::MockHandleInfo* info) {
   CHECK(core_);
-  scoped_refptr<MockDispatcher> dispatcher = MockDispatcher::Create(info);
-  return core_->AddDispatcher(dispatcher);
+  auto dispatcher = MockDispatcher::Create(info);
+  MojoHandle rv = core_->AddDispatcher(dispatcher.get());
+  CHECK_NE(rv, MOJO_HANDLE_INVALID);
+  return rv;
 }
 
 // CoreTestBase_MockHandleInfo -------------------------------------------------

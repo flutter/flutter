@@ -5,14 +5,15 @@
 #include "mojo/edk/system/dispatcher.h"
 
 #include <memory>
+#include <vector>
 
-#include "base/memory/ref_counted.h"
-#include "base/memory/scoped_vector.h"
 #include "base/synchronization/waitable_event.h"
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/system/memory.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/test/simple_test_thread.h"
+#include "mojo/edk/util/make_unique.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -23,24 +24,26 @@ namespace {
 // Trivial subclass that makes the constructor public.
 class TrivialDispatcher final : public Dispatcher {
  public:
-  TrivialDispatcher() {}
+  // Note: Use |MakeRefCounted<TrivialDispatcher>()|.
 
   Type GetType() const override { return Type::UNKNOWN; }
 
  private:
+  FRIEND_MAKE_REF_COUNTED(TrivialDispatcher);
+
+  TrivialDispatcher() {}
   ~TrivialDispatcher() override {}
 
-  scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
-      override {
+  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override {
     mutex().AssertHeld();
-    return scoped_refptr<Dispatcher>(new TrivialDispatcher());
+    return AdoptRef(new TrivialDispatcher());
   }
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TrivialDispatcher);
 };
 
 TEST(DispatcherTest, Basic) {
-  scoped_refptr<Dispatcher> d(new TrivialDispatcher());
+  auto d = MakeRefCounted<TrivialDispatcher>();
 
   EXPECT_EQ(Dispatcher::Type::UNKNOWN, d->GetType());
 
@@ -134,7 +137,7 @@ class ThreadSafetyStressThread : public mojo::test::SimpleTestThread {
   };
 
   ThreadSafetyStressThread(base::WaitableEvent* event,
-                           scoped_refptr<Dispatcher> dispatcher,
+                           RefPtr<Dispatcher> dispatcher,
                            DispatcherOp op)
       : event_(event), dispatcher_(dispatcher), op_(op) {
     CHECK_LE(0, op_);
@@ -195,7 +198,7 @@ class ThreadSafetyStressThread : public mojo::test::SimpleTestThread {
         EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, dispatcher_->EndReadData(0));
         break;
       case DUPLICATE_BUFFER_HANDLE: {
-        scoped_refptr<Dispatcher> unused;
+        RefPtr<Dispatcher> unused;
         EXPECT_EQ(
             MOJO_RESULT_INVALID_ARGUMENT,
             dispatcher_->DuplicateBufferHandle(NullUserPointer(), &unused));
@@ -238,7 +241,7 @@ class ThreadSafetyStressThread : public mojo::test::SimpleTestThread {
   }
 
   base::WaitableEvent* const event_;
-  const scoped_refptr<Dispatcher> dispatcher_;
+  const RefPtr<Dispatcher> dispatcher_;
   const DispatcherOp op_;
 
   Waiter waiter_;
@@ -253,15 +256,16 @@ TEST(DispatcherTest, ThreadSafetyStress) {
   for (size_t i = 0; i < kRepeatCount; i++) {
     // Manual reset, not initially signalled.
     base::WaitableEvent event(true, false);
-    scoped_refptr<Dispatcher> d(new TrivialDispatcher());
+    auto d = MakeRefCounted<TrivialDispatcher>();
 
     {
-      ScopedVector<ThreadSafetyStressThread> threads;
+      std::vector<std::unique_ptr<ThreadSafetyStressThread>> threads;
       for (size_t j = 0; j < kNumThreads; j++) {
         ThreadSafetyStressThread::DispatcherOp op =
             static_cast<ThreadSafetyStressThread::DispatcherOp>(
                 (i + j) % ThreadSafetyStressThread::DISPATCHER_OP_COUNT);
-        threads.push_back(new ThreadSafetyStressThread(&event, d, op));
+        threads.push_back(
+            util::MakeUnique<ThreadSafetyStressThread>(&event, d, op));
         threads.back()->Start();
       }
       // Kicks off real work on the threads:
@@ -280,16 +284,17 @@ TEST(DispatcherTest, ThreadSafetyStressNoClose) {
   for (size_t i = 0; i < kRepeatCount; i++) {
     // Manual reset, not initially signalled.
     base::WaitableEvent event(true, false);
-    scoped_refptr<Dispatcher> d(new TrivialDispatcher());
+    auto d = MakeRefCounted<TrivialDispatcher>();
 
     {
-      ScopedVector<ThreadSafetyStressThread> threads;
+      std::vector<std::unique_ptr<ThreadSafetyStressThread>> threads;
       for (size_t j = 0; j < kNumThreads; j++) {
         ThreadSafetyStressThread::DispatcherOp op =
             static_cast<ThreadSafetyStressThread::DispatcherOp>(
                 (i + j) % (ThreadSafetyStressThread::DISPATCHER_OP_COUNT - 1) +
                 1);
-        threads.push_back(new ThreadSafetyStressThread(&event, d, op));
+        threads.push_back(
+            util::MakeUnique<ThreadSafetyStressThread>(&event, d, op));
         threads.back()->Start();
       }
       // Kicks off real work on the threads:

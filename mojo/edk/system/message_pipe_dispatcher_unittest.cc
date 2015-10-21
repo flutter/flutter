@@ -12,15 +12,17 @@
 #include <string.h>
 
 #include <limits>
+#include <memory>
 #include <utility>
+#include <vector>
 
-#include "base/memory/ref_counted.h"
-#include "base/memory/scoped_vector.h"
 #include "mojo/edk/system/message_pipe.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/system/waiter_test_utils.h"
 #include "mojo/edk/test/simple_test_thread.h"
+#include "mojo/edk/util/make_unique.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -40,10 +42,10 @@ TEST(MessagePipeDispatcherTest, Basic) {
 
   // Run this test both with |d0| as port 0, |d1| as port 1 and vice versa.
   for (unsigned i = 0; i < 2; i++) {
-    scoped_refptr<MessagePipeDispatcher> d0 = MessagePipeDispatcher::Create(
+    auto d0 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, d0->GetType());
-    scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
+    auto d1 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     {
       auto mp = MessagePipe::CreateLocalLocal();
@@ -152,9 +154,9 @@ TEST(MessagePipeDispatcherTest, Basic) {
 TEST(MessagePipeDispatcherTest, InvalidParams) {
   char buffer[1];
 
-  scoped_refptr<MessagePipeDispatcher> d0 = MessagePipeDispatcher::Create(
+  auto d0 = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
-  scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
+  auto d1 = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
   {
     auto mp = MessagePipe::CreateLocalLocal();
@@ -182,9 +184,9 @@ TEST(MessagePipeDispatcherTest, InvalidParams) {
 TEST(MessagePipeDispatcherTest, InvalidParamsDeath) {
   const char kMemoryCheckFailedRegex[] = "Check failed";
 
-  scoped_refptr<MessagePipeDispatcher> d0 = MessagePipeDispatcher::Create(
+  auto d0 = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
-  scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
+  auto d1 = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
   {
     auto mp = MessagePipe::CreateLocalLocal();
@@ -222,9 +224,9 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
 
   // Run this test both with |d0| as port 0, |d1| as port 1 and vice versa.
   for (unsigned i = 0; i < 2; i++) {
-    scoped_refptr<MessagePipeDispatcher> d0 = MessagePipeDispatcher::Create(
+    auto d0 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
-    scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
+    auto d1 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     {
       auto mp = MessagePipe::CreateLocalLocal();
@@ -352,9 +354,9 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
 
   // Run this test both with |d0| as port 0, |d1| as port 1 and vice versa.
   for (unsigned i = 0; i < 2; i++) {
-    scoped_refptr<MessagePipeDispatcher> d0 = MessagePipeDispatcher::Create(
+    auto d0 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
-    scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
+    auto d1 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     {
       auto mp = MessagePipe::CreateLocalLocal();
@@ -435,9 +437,9 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
   }
 
   for (unsigned i = 0; i < 2; i++) {
-    scoped_refptr<MessagePipeDispatcher> d0 = MessagePipeDispatcher::Create(
+    auto d0 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
-    scoped_refptr<MessagePipeDispatcher> d1 = MessagePipeDispatcher::Create(
+    auto d1 = MessagePipeDispatcher::Create(
         MessagePipeDispatcher::kDefaultCreateOptions);
     {
       auto mp = MessagePipe::CreateLocalLocal();
@@ -477,7 +479,7 @@ class WriterThread : public mojo::test::SimpleTestThread {
  public:
   // |*messages_written| and |*bytes_written| belong to the thread while it's
   // alive.
-  WriterThread(scoped_refptr<Dispatcher> write_dispatcher,
+  WriterThread(RefPtr<Dispatcher> write_dispatcher,
                size_t* messages_written,
                size_t* bytes_written)
       : write_dispatcher_(write_dispatcher),
@@ -516,7 +518,7 @@ class WriterThread : public mojo::test::SimpleTestThread {
                                   MOJO_WRITE_MESSAGE_FLAG_NONE));
   }
 
-  const scoped_refptr<Dispatcher> write_dispatcher_;
+  const RefPtr<Dispatcher> write_dispatcher_;
   size_t* const messages_written_;
   size_t* const bytes_written_;
 
@@ -526,7 +528,7 @@ class WriterThread : public mojo::test::SimpleTestThread {
 class ReaderThread : public mojo::test::SimpleTestThread {
  public:
   // |*messages_read| and |*bytes_read| belong to the thread while it's alive.
-  ReaderThread(scoped_refptr<Dispatcher> read_dispatcher,
+  ReaderThread(RefPtr<Dispatcher> read_dispatcher,
                size_t* messages_read,
                size_t* bytes_read)
       : read_dispatcher_(read_dispatcher),
@@ -602,7 +604,7 @@ class ReaderThread : public mojo::test::SimpleTestThread {
     return true;
   }
 
-  const scoped_refptr<Dispatcher> read_dispatcher_;
+  const RefPtr<Dispatcher> read_dispatcher_;
   size_t* const messages_read_;
   size_t* const bytes_read_;
 
@@ -613,9 +615,9 @@ TEST(MessagePipeDispatcherTest, Stress) {
   static const size_t kNumWriters = 30;
   static const size_t kNumReaders = kNumWriters;
 
-  scoped_refptr<MessagePipeDispatcher> d_write = MessagePipeDispatcher::Create(
+  auto d_write = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
-  scoped_refptr<MessagePipeDispatcher> d_read = MessagePipeDispatcher::Create(
+  auto d_read = MessagePipeDispatcher::Create(
       MessagePipeDispatcher::kDefaultCreateOptions);
   {
     auto mp = MessagePipe::CreateLocalLocal();
@@ -629,17 +631,17 @@ TEST(MessagePipeDispatcherTest, Stress) {
   size_t bytes_read[kNumReaders];
   {
     // Make writers.
-    ScopedVector<WriterThread> writers;
+    std::vector<std::unique_ptr<WriterThread>> writers;
     for (size_t i = 0; i < kNumWriters; i++) {
-      writers.push_back(
-          new WriterThread(d_write, &messages_written[i], &bytes_written[i]));
+      writers.push_back(util::MakeUnique<WriterThread>(
+          d_write, &messages_written[i], &bytes_written[i]));
     }
 
     // Make readers.
-    ScopedVector<ReaderThread> readers;
+    std::vector<std::unique_ptr<ReaderThread>> readers;
     for (size_t i = 0; i < kNumReaders; i++) {
-      readers.push_back(
-          new ReaderThread(d_read, &messages_read[i], &bytes_read[i]));
+      readers.push_back(util::MakeUnique<ReaderThread>(
+          d_read, &messages_read[i], &bytes_read[i]));
     }
 
     // Start writers.
