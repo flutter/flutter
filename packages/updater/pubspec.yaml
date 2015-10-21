@@ -4,7 +4,7 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: The autoupdater for flutter
 homepage: http://flutter.io
 dependencies:
-  mojo: '>=0.2.0 <0.3.0'
+  mojo: 0.3.0
   flutter: ">=0.0.3 <0.1.0"
   sky_services: any
   path: any
