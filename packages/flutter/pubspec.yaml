@@ -9,8 +9,8 @@ dependencies:
   mojo_services: 0.4.0
   mojo: 0.3.0
   newton: '>=0.1.4 <0.2.0'
-  sky_engine: 0.0.39
-  sky_services: 0.0.39
+  sky_engine: 0.0.40
+  sky_services: 0.0.40
   sky_tools: '>=0.0.25 <0.1.0'
   vector_math: '>=1.4.3 <2.0.0'
   intl: '>=0.12.4+2 <0.13.0'
