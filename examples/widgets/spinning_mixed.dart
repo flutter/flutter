@@ -8,20 +8,21 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../rendering/solid_color_box.dart';
+import 'package:flutter_rendering_examples/solid_color_box.dart';
 
 // Solid colour, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, ui.Color backgroundColor, { int flex: 0 }) {
   RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
   parent.add(child);
-  child.parentData.flex = flex;
+  FlexParentData childParentData = child.parentData;
+  childParentData.flex = flex;
 }
 
 // Solid colour, Widget version
-class Rectangle extends Component {
+class Rectangle extends StatelessComponent {
   Rectangle(this.color, { Key key }) : super(key: key);
   final Color color;
-  Widget build() {
+  Widget build(BuildContext context) {
     return new Flexible(
       child: new Container(
         decoration: new BoxDecoration(backgroundColor: color)
@@ -30,28 +31,42 @@ class Rectangle extends Component {
   }
 }
 
-Widget builder() {
-  return new Container(
-    height: 300.0,
-    child: new Column([
-        new Rectangle(const Color(0xFF00FFFF)),
-        new Container(
-          padding: new EdgeDims.all(10.0),
-          margin: new EdgeDims.all(10.0),
-          decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
-          child: new RaisedButton(
-            child: new Row([
-              new NetworkImage(src: "https://www.dartlang.org/logos/dart-logo.png"),
-              new Text('PRESS ME'),
-            ]),
-            onPressed: () => print("Hello World")
-          )
-        ),
-        new Rectangle(const Color(0xFFFFFF00)),
-      ],
-      justifyContent: FlexJustifyContent.spaceBetween
+double value;
+RenderObjectToWidgetElement<RenderBox> element;
+void attachWidgetTreeToRenderTree(RenderProxyBox container) {
+  element = new RenderObjectToWidgetAdapter<RenderBox>(
+    container: container,
+    child: new Container(
+      height: 300.0,
+      child: new Column(<Widget>[
+          new Rectangle(const Color(0xFF00FFFF)),
+          new Container(
+            padding: new EdgeDims.all(10.0),
+            margin: new EdgeDims.all(10.0),
+            decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
+            child: new Row(<Widget>[
+                new RaisedButton(
+                  child: new Row(<Widget>[
+                      new NetworkImage(src: "http://flutter.io/favicon.ico"),
+                      new Text('PRESS ME'),
+                    ]
+                  ),
+                  onPressed: () {
+                    value = value == null ? 0.1 : (value + 0.1) % 1.0;
+                    attachWidgetTreeToRenderTree(container);
+                  }
+                ),
+                new CircularProgressIndicator(value: value),
+              ],
+              justifyContent: FlexJustifyContent.spaceAround
+            )
+          ),
+          new Rectangle(const Color(0xFFFFFF00)),
+        ],
+        justifyContent: FlexJustifyContent.spaceBetween
+      )
     )
-  );
+  ).attachToRenderTree(element);
 }
 
 Duration timeBase;
@@ -69,16 +84,13 @@ void rotate(Duration timeStamp) {
 }
 
 void main() {
-  // Because we're going to use Widgets, we want to initialise its
-  // FlutterBinding, not use the default one. We don't really need to do
-  // this, because RenderBoxToWidgetAdapter does it for us, but
-  // it's good practice in case we happen to not have a
-  // RenderBoxToWidgetAdapter in our tree at startup, or in case we
-  // want a renderViewOverride.
-  WidgetFlutterBinding.initWidgetFlutterBinding();
+  // Because we're going to use Widgets, we want to ensure we're using a
+  // WidgetFlutterBinding rather than some other kind of binding (e.g. a
+  // straight rendering library FlutterBinding).
+  WidgetFlutterBinding.ensureInitialized();
 
   RenderProxyBox proxy = new RenderProxyBox();
-  new RenderBoxToWidgetAdapter(proxy, builder); // adds itself to proxy
+  attachWidgetTreeToRenderTree(proxy);
 
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
   addFlexChildSolidColor(flexRoot, const ui.Color(0xFFFF00FF), flex: 1);

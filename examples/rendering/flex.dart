@@ -5,7 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'solid_color_box.dart';
+import 'lib/solid_color_box.dart';
 
 RenderBox buildFlexExample() {
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);

@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'solid_color_box.dart';
+import 'lib/solid_color_box.dart';
 
 Color randomColor() {
   final List<Color> allColors = [
