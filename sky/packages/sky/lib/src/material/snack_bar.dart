@@ -102,7 +102,7 @@ class _SnackBarRoute extends PerformanceRoute {
   bool get modal => false;
   Duration get transitionDuration => const Duration(milliseconds: 200);
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) => null;
+  Widget build(RouteArguments args) => null;
 }
 
 void showSnackBar({ NavigatorState navigator, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
