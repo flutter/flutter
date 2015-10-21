@@ -127,8 +127,8 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Create a Flutter app.';
 
   BuildCommand() {
+    argParser.addFlag('precompiled', negatable: false);
     argParser.addOption('asset-base', defaultsTo: _kDefaultAssetBase);
-
     argParser.addOption('compiler');
     argParser.addOption('main', defaultsTo: _kDefaultMainPath);
     argParser.addOption('manifest');
@@ -153,7 +153,8 @@ class BuildCommand extends FlutterCommand {
       manifestPath: argResults['manifest'],
       outputPath: argResults['output-file'],
       snapshotPath: argResults['snapshot'],
-      privateKeyPath: argResults['private-key']
+      privateKeyPath: argResults['private-key'],
+      precompiledSnapshot: argResults['precompiled']
     );
   }
 
@@ -163,7 +164,8 @@ class BuildCommand extends FlutterCommand {
     String manifestPath,
     String outputPath: _kDefaultOutputPath,
     String snapshotPath: _kDefaultSnapshotPath,
-    String privateKeyPath: _kDefaultPrivateKeyPath
+    String privateKeyPath: _kDefaultPrivateKeyPath,
+    bool precompiledSnapshot: false
   }) async {
     Map manifestDescriptor = _loadManifest(manifestPath);
 
@@ -172,11 +174,15 @@ class BuildCommand extends FlutterCommand {
 
     Archive archive = new Archive();
 
-    int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath);
-    if (result != 0)
-      return result;
+    if (!precompiledSnapshot) {
+      // In a precompiled snapshot, the instruction buffer contains script
+      // content equivalents
+      int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath);
+      if (result != 0)
+        return result;
 
-    archive.addFile(_createSnapshotFile(snapshotPath));
+      archive.addFile(_createSnapshotFile(snapshotPath));
+    }
 
     for (_Asset asset in assets)
       archive.addFile(_createFile(asset.key, asset.base));
