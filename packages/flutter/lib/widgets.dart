@@ -15,6 +15,7 @@ export 'src/widgets/enter_exit_transition.dart';
 export 'src/widgets/focus.dart';
 export 'src/widgets/framework.dart';
 export 'src/widgets/gesture_detector.dart';
+export 'src/widgets/gridpaper.dart';
 export 'src/widgets/homogeneous_viewport.dart';
 export 'src/widgets/mimic.dart';
 export 'src/widgets/mixed_viewport.dart';
