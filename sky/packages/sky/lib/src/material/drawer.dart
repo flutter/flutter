@@ -112,7 +112,7 @@ class _DrawerRoute extends Route {
 
   bool _interactive = true;
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
+  Widget build(RouteArguments args) {
     return new Focus(
       key: new GlobalObjectKey(this),
       autofocus: true,

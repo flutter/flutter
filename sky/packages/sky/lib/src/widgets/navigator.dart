@@ -9,8 +9,10 @@ import 'focus.dart';
 import 'framework.dart';
 import 'transitions.dart';
 
+const String kDefaultRouteName = '/';
+
 class RouteArguments {
-  const RouteArguments({ this.navigator, this.previousPerformance, this.nextPerformance });
+  const RouteArguments(this.navigator, { this.previousPerformance, this.nextPerformance });
   final NavigatorState navigator;
   final PerformanceView previousPerformance;
   final PerformanceView nextPerformance;
@@ -28,7 +30,8 @@ class Navigator extends StatefulComponent {
     this.onUnknownRoute // 404 generator. You only need to implement this if you have a way to navigate to arbitrary names.
   }) : super(key: key) {
     // To use a navigator, you must at a minimum define the route with the name '/'.
-    assert(routes.containsKey('/'));
+    assert(routes != null);
+    assert(routes.containsKey(kDefaultRouteName));
   }
 
   final Map<String, RouteBuilder> routes;
@@ -38,18 +41,21 @@ class Navigator extends StatefulComponent {
   NavigatorState createState() => new NavigatorState();
 }
 
+// The navigator tracks which "page" we are on.
+// It also animates between these pages.
+
 class NavigatorState extends State<Navigator> {
 
   List<Route> _history = new List<Route>();
-  int _currentPosition = 0;
+  int _currentPosition = 0; // which route is "current"
 
   Route get currentRoute => _history[_currentPosition];
   bool get hasPreviousRoute => _history.length > 1;
 
   void initState() {
     super.initState();
-    PageRoute route = new PageRoute(config.routes['/']);
-    assert(route != null);
+    PageRoute route = new PageRoute(config.routes[kDefaultRouteName], name: kDefaultRouteName);
+    assert(route.hasContent);
     assert(!route.ephemeral);
     _insertRoute(route);
   }
@@ -67,17 +73,20 @@ class NavigatorState extends State<Navigator> {
       assert(config.onGenerateRoute != null);
       return config.onGenerateRoute(name);
     }
-    RouteBuilder builder = config.routes[name] ?? generateRoute() ?? config.onUnknownRoute;
-    push(new PageRoute(builder));
+    final RouteBuilder builder = config.routes[name] ?? generateRoute() ?? config.onUnknownRoute;
+    assert(builder != null); // 404 getting your 404!
+    push(new PageRoute(builder, name: name));
   }
 
   void push(Route route) {
     assert(!_debugCurrentlyHaveRoute(route));
     setState(() {
+      // pop ephemeral routes (like popup menus)
       while (currentRoute.ephemeral) {
         currentRoute.didPop(null);
         _currentPosition -= 1;
       }
+      // add the new route
       _currentPosition += 1;
       _insertRoute(route);
     });
@@ -87,21 +96,21 @@ class NavigatorState extends State<Navigator> {
     assert(_debugCurrentlyHaveRoute(route));
     assert(_currentPosition > 0);
     setState(() {
+      // pop any routes above this one (they must be ephemeral, otherwise there's an error)
       while (currentRoute != route) {
         assert(currentRoute.ephemeral);
         currentRoute.didPop(null);
         _currentPosition -= 1;
       }
-      assert(_currentPosition > 0);
-      currentRoute.didPop(result);
-      _currentPosition -= 1;
     });
+    pop(result);
     assert(!_debugCurrentlyHaveRoute(route));
   }
 
   void pop([dynamic result]) {
     setState(() {
       assert(_currentPosition > 0);
+      // pop the route
       currentRoute.didPop(result);
       _currentPosition -= 1;
     });
@@ -142,8 +151,8 @@ class NavigatorState extends State<Navigator> {
 
   Widget build(BuildContext context) {
     List<Widget> visibleRoutes = new List<Widget>();
-    bool alreadyInsertModalBarrier = false;
-    PerformanceView nextPerformance;
+    bool alreadyInsertedModalBarrier = false;
+    Route nextContentRoute;
     for (int i = _history.length-1; i >= 0; i -= 1) {
       Route route = _history[i];
       if (!route.hasContent) {
@@ -153,20 +162,20 @@ class NavigatorState extends State<Navigator> {
       visibleRoutes.add(
         new KeyedSubtree(
           key: new ObjectKey(route),
-          child: route.build(this, nextPerformance)
+          child: route._internalBuild(nextContentRoute)
         )
       );
       if (route.isActuallyOpaque)
         break;
       assert(route.modal || route.ephemeral);
-      if (route.modal && i > 0 && !alreadyInsertModalBarrier) {
+      if (route.modal && i > 0 && !alreadyInsertedModalBarrier) {
         visibleRoutes.add(new Listener(
           onPointerDown: (_) { pop(); },
           child: new Container()
         ));
-        alreadyInsertModalBarrier = true;
+        alreadyInsertedModalBarrier = true;
       }
-      nextPerformance = route.performance;
+      nextContentRoute = route;
     }
     return new Focus(child: new Stack(visibleRoutes.reversed.toList()));
   }
@@ -227,13 +236,12 @@ abstract class Route {
   PerformanceView get performance => null;
   bool get isActuallyOpaque => (performance == null || performance.isCompleted) && opaque;
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
-
+  NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
 
   void setState(void fn()) {
-    assert(_navigator != null);
-    _navigator.setState(fn);
+    assert(navigator != null);
+    navigator.setState(fn);
   }
 
   void didPush(NavigatorState navigator) {
@@ -244,22 +252,36 @@ abstract class Route {
   }
 
   void didPop([dynamic result]) {
-    assert(_navigator != null);
+    assert(navigator != null);
     if (performance == null)
-      _navigator._removeRoute(this);
+      navigator._removeRoute(this);
   }
 
   void _handlePerformanceStatusChanged(PerformanceStatus status) {
     if (status == PerformanceStatus.completed) {
-      _navigator._didCompleteRoute(this);
+      navigator._didCompleteRoute(this);
     } else if (status == PerformanceStatus.dismissed) {
-      _navigator._didDismissRoute(this);
-      _navigator._removeRoute(this);
+      navigator._didDismissRoute(this);
+      navigator._removeRoute(this);
       _navigator = null;
     }
   }
 
-  String toString() => '$runtimeType()';
+  /// Called by the navigator.build() function if hasContent is true, to get the
+  /// subtree for this route.
+  Widget _internalBuild(Route nextRoute) {
+    assert(navigator != null);
+    return build(new RouteArguments(
+      navigator,
+      previousPerformance: performance,
+      nextPerformance: nextRoute?.performance
+    ));
+  }
+
+  Widget build(RouteArguments args);
+
+  String get debugLabel => '$runtimeType';
+  String toString() => '$runtimeType(performance: $performance)';
 }
 
 abstract class PerformanceRoute extends Route {
@@ -272,13 +294,11 @@ abstract class PerformanceRoute extends Route {
 
   Performance createPerformance() {
     Duration duration = transitionDuration;
-    assert(duration >= Duration.ZERO);
-    return new Performance(duration: duration);
+    assert(duration != null && duration >= Duration.ZERO);
+    return new Performance(duration: duration, debugLabel: debugLabel);
   }
 
   Duration get transitionDuration;
-
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance);
 
   void didPush(NavigatorState navigator) {
     super.didPush(navigator);
@@ -294,15 +314,21 @@ abstract class PerformanceRoute extends Route {
 const Duration _kTransitionDuration = const Duration(milliseconds: 150);
 const Point _kTransitionStartPoint = const Point(0.0, 75.0);
 
+/// A route that represents a page in an application.
 class PageRoute extends PerformanceRoute {
-  PageRoute(this.builder);
+  PageRoute(this._builder, {
+    this.name: '<anonymous>'
+  }) {
+    assert(_builder != null);
+  }
 
-  final RouteBuilder builder;
+  final RouteBuilder _builder;
+  final String name;
 
   bool get opaque => true;
   Duration get transitionDuration => _kTransitionDuration;
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
+  Widget build(RouteArguments args) {
     // TODO(jackson): Hit testing should ignore transform
     // TODO(jackson): Block input unless content is interactive
     return new SlideTransition(
@@ -311,10 +337,23 @@ class PageRoute extends PerformanceRoute {
       child: new FadeTransition(
         performance: performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
-        child: builder(new RouteArguments(navigator: navigator, previousPerformance: this.performance, nextPerformance: nextRoutePerformance))
+        child: invokeBuilder(args)
       )
     );
   }
+
+  Widget invokeBuilder(RouteArguments args) {
+    Widget result = _builder(args);
+    assert(() {
+      if (result == null)
+        debugPrint('The builder for route \'$name\' returned null. RouteBuilders must never return null.');
+      assert(result != null && 'A RouteBuilder returned null. See the previous log message for details.' is String);
+      return true;
+    });
+    return result;
+  }
+
+  String get debugLabel => '${super.debugLabel}($name)';
 }
 
 class StateRoute extends Route {
@@ -335,5 +374,5 @@ class StateRoute extends Route {
     super.didPop(result);
   }
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) => null;
+  Widget build(RouteArguments args) => null;
 }
