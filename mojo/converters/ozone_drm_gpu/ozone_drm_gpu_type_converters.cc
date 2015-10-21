@@ -30,31 +30,31 @@ DisplayModePtr TypeConverter<DisplayModePtr, ui::DisplayMode_Params>::Convert(
 }
 
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_NONE) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_NONE),
+                  static_cast<int>(mojo::DisplayType::NONE),
               "Enum value mismatch");
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_UNKNOWN) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_UNKNOWN),
+                  static_cast<int>(mojo::DisplayType::UNKNOWN),
               "Enum value mismatch");
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_INTERNAL) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_INTERNAL),
+                  static_cast<int>(mojo::DisplayType::INTERNAL),
               "Enum value mismatch");
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_VGA) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_VGA),
+                  static_cast<int>(mojo::DisplayType::VGA),
               "Enum value mismatch");
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_HDMI) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_HDMI),
+                  static_cast<int>(mojo::DisplayType::HDMI),
               "Enum value mismatch");
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_DVI) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_DVI),
+                  static_cast<int>(mojo::DisplayType::DVI),
               "Enum value mismatch");
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_DISPLAYPORT) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_DISPLAYPORT),
+                  static_cast<int>(mojo::DisplayType::DISPLAYPORT),
               "Enum value mismatch");
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_NETWORK) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_NETWORK),
+                  static_cast<int>(mojo::DisplayType::NETWORK),
               "Enum value mismatch");
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_LAST) ==
-                  static_cast<int>(mojo::DisplayType::DISPLAY_TYPE_LAST),
+                  static_cast<int>(mojo::DisplayType::LAST),
               "Enum value mismatch");
 
 // static
@@ -88,7 +88,7 @@ TypeConverter<DisplaySnapshotPtr, ui::DisplaySnapshot_Params>::Convert(
   out->origin = Point::From<gfx::Point>(in.origin);
   out->physical_size = Size::From<gfx::Size>(in.physical_size);
   out->type = static_cast<mojo::DisplayType>(in.type);
-  assert(out->type <= mojo::DisplayType::DISPLAY_TYPE_LAST);
+  assert(out->type <= mojo::DisplayType::LAST);
   auto modes = Array<DisplayModePtr>::New(in.modes.size());
   for (size_t i = 0; i < in.modes.size(); ++i) {
     auto mode = DisplayMode::From<ui::DisplayMode_Params>(in.modes[i]);

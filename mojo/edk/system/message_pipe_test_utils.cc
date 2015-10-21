@@ -47,7 +47,6 @@ void ChannelThread::Start(embedder::ScopedPlatformHandle platform_handle,
                           RefPtr<ChannelEndpoint>&& channel_endpoint) {
   test_io_thread_.Start();
   test_io_thread_.PostTaskAndWait(
-      FROM_HERE,
       base::Bind(&ChannelThread::InitChannelOnIOThread, base::Unretained(this),
                  base::Passed(&platform_handle),
                  base::Passed(&channel_endpoint)));
@@ -61,9 +60,8 @@ void ChannelThread::Stop() {
     while (!channel_->IsWriteBufferEmpty())
       test::Sleep(test::DeadlineFromMilliseconds(20));
 
-    test_io_thread_.PostTaskAndWait(
-        FROM_HERE, base::Bind(&ChannelThread::ShutdownChannelOnIOThread,
-                              base::Unretained(this)));
+    test_io_thread_.PostTaskAndWait(base::Bind(
+        &ChannelThread::ShutdownChannelOnIOThread, base::Unretained(this)));
   }
   test_io_thread_.Stop();
 }

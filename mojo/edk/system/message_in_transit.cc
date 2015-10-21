@@ -116,7 +116,7 @@ MessageInTransit::~MessageInTransit() {
       if (!(*dispatchers_)[i])
         continue;
 
-      DCHECK((*dispatchers_)[i]->HasOneRef());
+      (*dispatchers_)[i]->AssertHasOneRef();
       (*dispatchers_)[i]->Close();
     }
   }
@@ -151,8 +151,10 @@ void MessageInTransit::SetDispatchers(
 
   dispatchers_ = std::move(dispatchers);
 #ifndef NDEBUG
-  for (size_t i = 0; i < dispatchers_->size(); i++)
-    DCHECK(!(*dispatchers_)[i] || (*dispatchers_)[i]->HasOneRef());
+  for (size_t i = 0; i < dispatchers_->size(); i++) {
+    if ((*dispatchers_)[i])
+      (*dispatchers_)[i]->AssertHasOneRef();
+  }
 #endif
 }
 

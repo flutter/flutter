@@ -338,7 +338,7 @@ MasterConnectionManager::~MasterConnectionManager() {
 }
 
 void MasterConnectionManager::Init(
-    scoped_refptr<base::TaskRunner> delegate_thread_task_runner,
+    embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
     embedder::MasterProcessDelegate* master_process_delegate) {
   DCHECK(delegate_thread_task_runner);
   DCHECK(master_process_delegate);
@@ -722,10 +722,11 @@ void MasterConnectionManager::CallOnSlaveDisconnect(
     embedder::SlaveInfo slave_info) {
   AssertOnPrivateThread();
   DCHECK(master_process_delegate_);
-  delegate_thread_task_runner_->PostTask(
-      FROM_HERE, base::Bind(&embedder::MasterProcessDelegate::OnSlaveDisconnect,
-                            base::Unretained(master_process_delegate_),
-                            base::Unretained(slave_info)));
+  embedder::PlatformPostTask(
+      delegate_thread_task_runner_.get(),
+      base::Bind(&embedder::MasterProcessDelegate::OnSlaveDisconnect,
+                 base::Unretained(master_process_delegate_),
+                 base::Unretained(slave_info)));
 }
 
 void MasterConnectionManager::AssertNotOnPrivateThread() const {

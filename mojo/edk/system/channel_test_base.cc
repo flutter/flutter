@@ -22,7 +22,7 @@ ChannelTestBase::~ChannelTestBase() {
 }
 
 void ChannelTestBase::SetUp() {
-  PostMethodToIOThreadAndWait(FROM_HERE, &ChannelTestBase::SetUpOnIOThread);
+  PostMethodToIOThreadAndWait(&ChannelTestBase::SetUpOnIOThread);
 }
 
 void ChannelTestBase::CreateChannelOnIOThread(unsigned i) {

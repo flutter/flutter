@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "base/bind.h"
-#include "base/location.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
@@ -232,18 +231,17 @@ class RemoteDataPipeImplTestHelper : public DataPipeImplTestHelper {
     message_pipes_[0] = MessagePipe::CreateLocalProxy(&ep[0]);
     message_pipes_[1] = MessagePipe::CreateLocalProxy(&ep[1]);
 
-    io_thread_.PostTaskAndWait(
-        FROM_HERE, base::Bind(&RemoteDataPipeImplTestHelper::SetUpOnIOThread,
-                              base::Unretained(this), base::Passed(&ep[0]),
-                              base::Passed(&ep[1])));
+    io_thread_.PostTaskAndWait(base::Bind(
+        &RemoteDataPipeImplTestHelper::SetUpOnIOThread, base::Unretained(this),
+        base::Passed(&ep[0]), base::Passed(&ep[1])));
   }
 
   void TearDown() override {
     EnsureMessagePipeClosed(0);
     EnsureMessagePipeClosed(1);
     io_thread_.PostTaskAndWait(
-        FROM_HERE, base::Bind(&RemoteDataPipeImplTestHelper::TearDownOnIOThread,
-                              base::Unretained(this)));
+        base::Bind(&RemoteDataPipeImplTestHelper::TearDownOnIOThread,
+                   base::Unretained(this)));
   }
 
   void Create(const MojoCreateDataPipeOptions& validated_options) override {
@@ -255,8 +253,8 @@ class RemoteDataPipeImplTestHelper : public DataPipeImplTestHelper {
 
  protected:
   void SendDispatcher(size_t source_i,
-                      scoped_refptr<Dispatcher> to_send,
-                      scoped_refptr<Dispatcher>* to_receive) {
+                      RefPtr<Dispatcher> to_send,
+                      RefPtr<Dispatcher>* to_receive) {
     DCHECK(source_i == 0 || source_i == 1);
     size_t dest_i = source_i ^ 1;
 
@@ -301,7 +299,7 @@ class RemoteDataPipeImplTestHelper : public DataPipeImplTestHelper {
     ASSERT_EQ(1u, read_dispatchers.size());
     ASSERT_EQ(1u, read_num_dispatchers);
     ASSERT_TRUE(read_dispatchers[0]);
-    EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+    read_dispatchers[0]->AssertHasOneRef();
 
     *to_receive = read_dispatchers[0];
   }
@@ -368,19 +366,18 @@ class RemoteProducerDataPipeImplTestHelper
 
   void DoTransfer() override {
     // This is the producer dispatcher we'll send.
-    scoped_refptr<DataPipeProducerDispatcher> to_send =
-        DataPipeProducerDispatcher::Create();
+    auto to_send = DataPipeProducerDispatcher::Create();
     to_send->Init(dp());
-    scoped_refptr<Dispatcher> to_receive;
+    RefPtr<Dispatcher> to_receive;
     SendDispatcher(0, to_send, &to_receive);
     // |to_send| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    EXPECT_TRUE(to_send->HasOneRef());
+    to_send->AssertHasOneRef();
     to_send = nullptr;
 
     ASSERT_EQ(Dispatcher::Type::DATA_PIPE_PRODUCER, to_receive->GetType());
-    producer_dispatcher_ =
-        static_cast<DataPipeProducerDispatcher*>(to_receive.get());
+    producer_dispatcher_ = RefPtr<DataPipeProducerDispatcher>(
+        static_cast<DataPipeProducerDispatcher*>(to_receive.get()));
   }
 
   DataPipe* DataPipeForProducer() override {
@@ -399,7 +396,7 @@ class RemoteProducerDataPipeImplTestHelper
   void ConsumerClose() override { dp()->ConsumerClose(); }
 
  protected:
-  scoped_refptr<DataPipeProducerDispatcher> producer_dispatcher_;
+  RefPtr<DataPipeProducerDispatcher> producer_dispatcher_;
 
  private:
   MOJO_DISALLOW_COPY_AND_ASSIGN(RemoteProducerDataPipeImplTestHelper);
@@ -418,19 +415,18 @@ class RemoteConsumerDataPipeImplTestHelper
 
   void DoTransfer() override {
     // This is the consumer dispatcher we'll send.
-    scoped_refptr<DataPipeConsumerDispatcher> to_send =
-        DataPipeConsumerDispatcher::Create();
+    auto to_send = DataPipeConsumerDispatcher::Create();
     to_send->Init(dp());
-    scoped_refptr<Dispatcher> to_receive;
+    RefPtr<Dispatcher> to_receive;
     SendDispatcher(0, to_send, &to_receive);
     // |to_send| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    EXPECT_TRUE(to_send->HasOneRef());
+    to_send->AssertHasOneRef();
     to_send = nullptr;
 
     ASSERT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER, to_receive->GetType());
-    consumer_dispatcher_ =
-        static_cast<DataPipeConsumerDispatcher*>(to_receive.get());
+    consumer_dispatcher_ = RefPtr<DataPipeConsumerDispatcher>(
+        static_cast<DataPipeConsumerDispatcher*>(to_receive.get()));
   }
 
   DataPipe* DataPipeForProducer() override { return dp().get(); }
@@ -449,7 +445,7 @@ class RemoteConsumerDataPipeImplTestHelper
   }
 
  protected:
-  scoped_refptr<DataPipeConsumerDispatcher> consumer_dispatcher_;
+  RefPtr<DataPipeConsumerDispatcher> consumer_dispatcher_;
 
  private:
   MOJO_DISALLOW_COPY_AND_ASSIGN(RemoteConsumerDataPipeImplTestHelper);
@@ -473,29 +469,29 @@ class RemoteProducerDataPipeImplTestHelper2
 
   void DoTransfer() override {
     // This is the producer dispatcher we'll send.
-    scoped_refptr<DataPipeProducerDispatcher> to_send =
-        DataPipeProducerDispatcher::Create();
+    auto to_send = DataPipeProducerDispatcher::Create();
     to_send->Init(dp());
-    scoped_refptr<Dispatcher> to_receive;
+    RefPtr<Dispatcher> to_receive;
     SendDispatcher(0, to_send, &to_receive);
     // |to_send| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    EXPECT_TRUE(to_send->HasOneRef());
+    to_send->AssertHasOneRef();
     to_send = nullptr;
     ASSERT_EQ(Dispatcher::Type::DATA_PIPE_PRODUCER, to_receive->GetType());
-    to_send = static_cast<DataPipeProducerDispatcher*>(to_receive.get());
+    to_send = RefPtr<DataPipeProducerDispatcher>(
+        static_cast<DataPipeProducerDispatcher*>(to_receive.get()));
     to_receive = nullptr;
 
     // Now send it back the other way.
     SendDispatcher(1, to_send, &to_receive);
     // |producer_dispatcher_| should have been closed. This is |DCHECK()|ed when
     // it is destroyed.
-    EXPECT_TRUE(to_send->HasOneRef());
+    to_send->AssertHasOneRef();
     to_send = nullptr;
 
     ASSERT_EQ(Dispatcher::Type::DATA_PIPE_PRODUCER, to_receive->GetType());
-    producer_dispatcher_ =
-        static_cast<DataPipeProducerDispatcher*>(to_receive.get());
+    producer_dispatcher_ = RefPtr<DataPipeProducerDispatcher>(
+        static_cast<DataPipeProducerDispatcher*>(to_receive.get()));
   }
 
  private:
@@ -520,29 +516,29 @@ class RemoteConsumerDataPipeImplTestHelper2
 
   void DoTransfer() override {
     // This is the consumer dispatcher we'll send.
-    scoped_refptr<DataPipeConsumerDispatcher> to_send =
-        DataPipeConsumerDispatcher::Create();
+    auto to_send = DataPipeConsumerDispatcher::Create();
     to_send->Init(dp());
-    scoped_refptr<Dispatcher> to_receive;
+    RefPtr<Dispatcher> to_receive;
     SendDispatcher(0, to_send, &to_receive);
     // |to_send| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    EXPECT_TRUE(to_send->HasOneRef());
+    to_send->AssertHasOneRef();
     to_send = nullptr;
     ASSERT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER, to_receive->GetType());
-    to_send = static_cast<DataPipeConsumerDispatcher*>(to_receive.get());
+    to_send = RefPtr<DataPipeConsumerDispatcher>(
+        static_cast<DataPipeConsumerDispatcher*>(to_receive.get()));
     to_receive = nullptr;
 
     // Now send it back the other way.
     SendDispatcher(1, to_send, &to_receive);
     // |consumer_dispatcher_| should have been closed. This is |DCHECK()|ed when
     // it is destroyed.
-    EXPECT_TRUE(to_send->HasOneRef());
+    to_send->AssertHasOneRef();
     to_send = nullptr;
 
     ASSERT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER, to_receive->GetType());
-    consumer_dispatcher_ =
-        static_cast<DataPipeConsumerDispatcher*>(to_receive.get());
+    consumer_dispatcher_ = RefPtr<DataPipeConsumerDispatcher>(
+        static_cast<DataPipeConsumerDispatcher*>(to_receive.get()));
   }
 
  private:

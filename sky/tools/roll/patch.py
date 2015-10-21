@@ -14,10 +14,6 @@ def patch_and_filter(dest_dir, relative_patches_dir):
       lambda line: not "gyp_environment" in line)
   utils.commit("filter gyp_environment out of build/landmines.py")
 
-  utils.filter_file("mojo/dart/embedder/BUILD.gn",
-      lambda line: not "tonic" in line)
-  utils.commit("filter tonic out of mojo/dart/embedder/BUILD.gn")
-
   patch(dest_dir, relative_patches_dir)
 
 

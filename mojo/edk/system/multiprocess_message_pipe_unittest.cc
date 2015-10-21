@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "base/bind.h"
-#include "base/location.h"
 #include "base/logging.h"
 #include "build/build_config.h"  // TODO(vtl): Remove this.
 #include "mojo/edk/embedder/platform_shared_buffer.h"
@@ -242,7 +241,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckSharedBuffer) {
 
   CHECK_EQ(dispatchers[0]->GetType(), Dispatcher::Type::SHARED_BUFFER);
 
-  scoped_refptr<SharedBufferDispatcher> dispatcher(
+  RefPtr<SharedBufferDispatcher> dispatcher(
       static_cast<SharedBufferDispatcher*>(dispatchers[0].get()));
 
   // Make a mapping.
@@ -310,11 +309,11 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
   Init(std::move(ep));
 
   // Make a shared buffer.
-  scoped_refptr<SharedBufferDispatcher> dispatcher;
-  EXPECT_EQ(MOJO_RESULT_OK, SharedBufferDispatcher::Create(
-                                platform_support(),
-                                SharedBufferDispatcher::kDefaultCreateOptions,
-                                100, &dispatcher));
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
   ASSERT_TRUE(dispatcher);
 
   // Make a mapping.
@@ -339,7 +338,7 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
                              MOJO_WRITE_MESSAGE_FLAG_NONE));
   transport.End();
 
-  EXPECT_TRUE(dispatcher->HasOneRef());
+  dispatcher->AssertHasOneRef();
   dispatcher = nullptr;
 
   // Wait for a message from the child.
@@ -425,7 +424,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckPlatformHandleFile) {
   for (int i = 0; i < num_handles; ++i) {
     CHECK_EQ(dispatchers[i]->GetType(), Dispatcher::Type::PLATFORM_HANDLE);
 
-    scoped_refptr<PlatformHandleDispatcher> dispatcher(
+    RefPtr<PlatformHandleDispatcher> dispatcher(
         static_cast<PlatformHandleDispatcher*>(dispatchers[i].get()));
     embedder::ScopedPlatformHandle h = dispatcher->PassPlatformHandle().Pass();
     CHECK(h.is_valid());
@@ -456,7 +455,7 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
   auto mp = MessagePipe::CreateLocalProxy(&ep);
   Init(std::move(ep));
 
-  std::vector<scoped_refptr<PlatformHandleDispatcher>> dispatchers;
+  std::vector<RefPtr<PlatformHandleDispatcher>> dispatchers;
   std::vector<DispatcherTransport> transports;
 
   size_t pipe_count = GetParam();
@@ -467,7 +466,7 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
     fflush(fp.get());
     rewind(fp.get());
 
-    scoped_refptr<PlatformHandleDispatcher> dispatcher =
+    auto dispatcher =
         PlatformHandleDispatcher::Create(embedder::ScopedPlatformHandle(
             mojo::test::PlatformHandleFromFILE(fp.Pass())));
     dispatchers.push_back(dispatcher);
@@ -486,7 +485,7 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
 
   for (size_t i = 0; i < pipe_count; ++i) {
     transports[i].End();
-    EXPECT_TRUE(dispatchers[i]->HasOneRef());
+    dispatchers[i]->AssertHasOneRef();
   }
 
   dispatchers.clear();

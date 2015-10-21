@@ -8,8 +8,6 @@
 
 #include "base/bind.h"
 #include "base/bind_helpers.h"
-#include "base/location.h"
-#include "base/task_runner.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
@@ -24,11 +22,10 @@ namespace {
 void ShutdownChannelHelper(
     RefPtr<Channel> channel,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   channel->Shutdown();
   if (callback_thread_task_runner) {
-    bool ok = callback_thread_task_runner->PostTask(FROM_HERE, callback);
-    DCHECK(ok);
+    embedder::PlatformPostTask(callback_thread_task_runner.get(), callback);
   } else {
     callback.Run();
   }
@@ -38,7 +35,7 @@ void ShutdownChannelHelper(
 
 ChannelManager::ChannelManager(
     embedder::PlatformSupport* platform_support,
-    scoped_refptr<base::TaskRunner> io_thread_task_runner,
+    embedder::PlatformTaskRunnerRefPtr io_thread_task_runner,
     ConnectionManager* connection_manager)
     : platform_support_(platform_support),
       io_thread_task_runner_(io_thread_task_runner),
@@ -71,21 +68,19 @@ void ChannelManager::ShutdownOnIOThread() {
 
 void ChannelManager::Shutdown(
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
-  bool ok = io_thread_task_runner_->PostTask(
-      FROM_HERE,
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
+  embedder::PlatformPostTask(
+      io_thread_task_runner_.get(),
       base::Bind(&ChannelManager::ShutdownHelper, base::Unretained(this),
                  callback, callback_thread_task_runner));
-  DCHECK(ok);
 }
 
-scoped_refptr<MessagePipeDispatcher> ChannelManager::CreateChannelOnIOThread(
+RefPtr<MessagePipeDispatcher> ChannelManager::CreateChannelOnIOThread(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle) {
   RefPtr<ChannelEndpoint> bootstrap_channel_endpoint;
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      MessagePipeDispatcher::CreateRemoteMessagePipe(
-          &bootstrap_channel_endpoint);
+  auto dispatcher = MessagePipeDispatcher::CreateRemoteMessagePipe(
+      &bootstrap_channel_endpoint);
   CreateChannelOnIOThreadHelper(channel_id, platform_handle.Pass(),
                                 std::move(bootstrap_channel_endpoint));
   return dispatcher;
@@ -98,25 +93,23 @@ RefPtr<Channel> ChannelManager::CreateChannelWithoutBootstrapOnIOThread(
                                        nullptr);
 }
 
-scoped_refptr<MessagePipeDispatcher> ChannelManager::CreateChannel(
+RefPtr<MessagePipeDispatcher> ChannelManager::CreateChannel(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   DCHECK(!callback.is_null());
   // (|callback_thread_task_runner| may be null.)
 
   RefPtr<ChannelEndpoint> bootstrap_channel_endpoint;
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      MessagePipeDispatcher::CreateRemoteMessagePipe(
-          &bootstrap_channel_endpoint);
-  bool ok = io_thread_task_runner_->PostTask(
-      FROM_HERE,
+  auto dispatcher = MessagePipeDispatcher::CreateRemoteMessagePipe(
+      &bootstrap_channel_endpoint);
+  embedder::PlatformPostTask(
+      io_thread_task_runner_.get(),
       base::Bind(&ChannelManager::CreateChannelHelper, base::Unretained(this),
                  channel_id, base::Passed(&platform_handle),
                  base::Passed(&bootstrap_channel_endpoint), callback,
                  callback_thread_task_runner));
-  DCHECK(ok);
   return dispatcher;
 }
 
@@ -146,7 +139,7 @@ void ChannelManager::ShutdownChannelOnIOThread(ChannelId channel_id) {
 void ChannelManager::ShutdownChannel(
     ChannelId channel_id,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   RefPtr<Channel> channel;
   {
     MutexLocker locker(&mutex_);
@@ -156,22 +149,20 @@ void ChannelManager::ShutdownChannel(
     channels_.erase(it);
   }
   channel->WillShutdownSoon();
-  bool ok = io_thread_task_runner_->PostTask(
-      FROM_HERE, base::Bind(&ShutdownChannelHelper, base::Passed(&channel),
-                            callback, callback_thread_task_runner));
-  DCHECK(ok);
+  embedder::PlatformPostTask(
+      io_thread_task_runner_.get(),
+      base::Bind(&ShutdownChannelHelper, base::Passed(&channel), callback,
+                 callback_thread_task_runner));
 }
 
 void ChannelManager::ShutdownHelper(
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   ShutdownOnIOThread();
-  if (callback_thread_task_runner) {
-    bool ok = callback_thread_task_runner->PostTask(FROM_HERE, callback);
-    DCHECK(ok);
-  } else {
+  if (callback_thread_task_runner)
+    embedder::PlatformPostTask(callback_thread_task_runner.get(), callback);
+  else
     callback.Run();
-  }
 }
 
 RefPtr<Channel> ChannelManager::CreateChannelOnIOThreadHelper(
@@ -201,15 +192,13 @@ void ChannelManager::CreateChannelHelper(
     embedder::ScopedPlatformHandle platform_handle,
     RefPtr<ChannelEndpoint> bootstrap_channel_endpoint,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   CreateChannelOnIOThreadHelper(channel_id, platform_handle.Pass(),
                                 std::move(bootstrap_channel_endpoint));
-  if (callback_thread_task_runner) {
-    bool ok = callback_thread_task_runner->PostTask(FROM_HERE, callback);
-    DCHECK(ok);
-  } else {
+  if (callback_thread_task_runner)
+    embedder::PlatformPostTask(callback_thread_task_runner.get(), callback);
+  else
     callback.Run();
-  }
 }
 
 }  // namespace system

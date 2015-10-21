@@ -51,7 +51,7 @@ source_set("prerequisites") {
 
 dart_embedder_resources("generate_sky_embedder_service_isolate_resources_cc") {
   deps = [
-    "//mojo/dart/embedder:deploy_observatory",
+    "//mojo/dart/observatory:deploy_observatory",
   ]
   inputs = [
     "//sky/engine/core/script/dart_service_isolate/loader.dart",

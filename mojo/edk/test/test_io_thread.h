@@ -29,12 +29,10 @@ class TestIOThread {
   void Stop();
 
   // Post |task| to the IO thread.
-  void PostTask(const tracked_objects::Location& from_here,
-                const base::Closure& task);
+  void PostTask(const base::Closure& task);
   // Posts |task| to the IO-thread with an WaitableEvent associated blocks on
   // it until the posted |task| is executed, then returns.
-  void PostTaskAndWait(const tracked_objects::Location& from_here,
-                       const base::Closure& task);
+  void PostTaskAndWait(const base::Closure& task);
 
   base::MessageLoopForIO* message_loop() {
     return static_cast<base::MessageLoopForIO*>(io_thread_.message_loop());

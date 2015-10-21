@@ -335,6 +335,15 @@ base::ScopedFILE BlockingCopyToTempFile(ScopedDataPipeConsumerHandle source) {
   return fp;
 }
 
+bool BlockingCopyToFile(ScopedDataPipeConsumerHandle source, FILE* fp) {
+  if (!BlockingCopyHelper(source.Pass(),
+                          base::Bind(&CopyToFileHelper, fp))) {
+    LOG(ERROR) << "Could not copy source to file";
+    return false;
+  }
+  return true;
+}
+
 void CopyToFile(ScopedDataPipeConsumerHandle source,
                 const base::FilePath& destination,
                 base::TaskRunner* task_runner,

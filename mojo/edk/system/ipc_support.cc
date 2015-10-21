@@ -20,9 +20,9 @@ namespace system {
 IPCSupport::IPCSupport(
     embedder::PlatformSupport* platform_support,
     embedder::ProcessType process_type,
-    scoped_refptr<base::TaskRunner> delegate_thread_task_runner,
+    embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
     embedder::ProcessDelegate* process_delegate,
-    scoped_refptr<base::TaskRunner> io_thread_task_runner,
+    embedder::PlatformTaskRunnerRefPtr io_thread_task_runner,
     embedder::ScopedPlatformHandle platform_handle)
     : process_type_(process_type),
       delegate_thread_task_runner_(delegate_thread_task_runner.Pass()),
@@ -88,12 +88,12 @@ ConnectionIdentifier IPCSupport::GenerateConnectionIdentifier() {
   return connection_manager()->GenerateConnectionIdentifier();
 }
 
-scoped_refptr<system::MessagePipeDispatcher> IPCSupport::ConnectToSlave(
+RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToSlave(
     const ConnectionIdentifier& connection_id,
     embedder::SlaveInfo slave_info,
     embedder::ScopedPlatformHandle platform_handle,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner,
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner,
     ChannelId* channel_id) {
   DCHECK(channel_id);
 
@@ -109,10 +109,10 @@ scoped_refptr<system::MessagePipeDispatcher> IPCSupport::ConnectToSlave(
       callback_thread_task_runner);
 }
 
-scoped_refptr<system::MessagePipeDispatcher> IPCSupport::ConnectToMaster(
+RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToMaster(
     const ConnectionIdentifier& connection_id,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner,
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner,
     ChannelId* channel_id) {
   DCHECK(channel_id);
 

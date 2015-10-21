@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "base/bind.h"
-#include "base/location.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/ref_ptr.h"
@@ -32,11 +31,9 @@ class ChannelTestBase : public testing::Test {
   void SetUp() override;
 
   template <typename Functor, typename... Args>
-  void PostMethodToIOThreadAndWait(const tracked_objects::Location& from_here,
-                                   Functor functor,
-                                   const Args&... args) {
+  void PostMethodToIOThreadAndWait(Functor functor, const Args&... args) {
     io_thread_.PostTaskAndWait(
-        from_here, base::Bind(functor, base::Unretained(this), args...));
+        base::Bind(functor, base::Unretained(this), args...));
   }
 
   // These should only be called from |io_thread()|:

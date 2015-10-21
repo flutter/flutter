@@ -10,6 +10,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/threading/thread.h"
+#include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/embedder/slave_process_delegate.h"
 #include "mojo/edk/system/connection_manager.h"
@@ -49,7 +50,7 @@ class SlaveConnectionManager final : public ConnectionManager,
   // |delegate_thread_task_runner| should be the task runner for the "delegate
   // thread", on which |slave_process_delegate|'s methods will be called. Both
   // must stay alive at least until after |Shutdown()| has been called.
-  void Init(scoped_refptr<base::TaskRunner> delegate_thread_task_runner,
+  void Init(embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
             embedder::SlaveProcessDelegate* slave_process_delegate,
             embedder::ScopedPlatformHandle platform_handle);
 

@@ -7,6 +7,7 @@
 
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/system/memory.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/simple_dispatcher.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -38,30 +39,29 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
       MojoCreateSharedBufferOptions* out_options);
 
   // Static factory method: |validated_options| must be validated (obviously).
-  // On failure, |*result| will be left as-is.
-  // TODO(vtl): This should probably be made to return a scoped_refptr and have
-  // a MojoResult out parameter instead.
-  static MojoResult Create(
+  // Returns null on error; |*result| will be set to an appropriate result
+  // code).
+  static RefPtr<SharedBufferDispatcher> Create(
       embedder::PlatformSupport* platform_support,
       const MojoCreateSharedBufferOptions& validated_options,
       uint64_t num_bytes,
-      scoped_refptr<SharedBufferDispatcher>* result);
+      MojoResult* result);
 
   // |Dispatcher| public methods:
   Type GetType() const override;
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
-  static scoped_refptr<SharedBufferDispatcher> Deserialize(
+  static RefPtr<SharedBufferDispatcher> Deserialize(
       Channel* channel,
       const void* source,
       size_t size,
       embedder::PlatformHandleVector* platform_handles);
 
  private:
-  static scoped_refptr<SharedBufferDispatcher> CreateInternal(
+  static RefPtr<SharedBufferDispatcher> CreateInternal(
       scoped_refptr<embedder::PlatformSharedBuffer> shared_buffer) {
-    return make_scoped_refptr(new SharedBufferDispatcher(shared_buffer.Pass()));
+    return AdoptRef(new SharedBufferDispatcher(shared_buffer.Pass()));
   }
 
   explicit SharedBufferDispatcher(
@@ -79,11 +79,10 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
 
   // |Dispatcher| protected methods:
   void CloseImplNoLock() override;
-  scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
-      override;
+  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override;
   MojoResult DuplicateBufferHandleImplNoLock(
       UserPointer<const MojoDuplicateBufferHandleOptions> options,
-      scoped_refptr<Dispatcher>* new_dispatcher) override;
+      RefPtr<Dispatcher>* new_dispatcher) override;
   MojoResult MapBufferImplNoLock(
       uint64_t offset,
       uint64_t num_bytes,

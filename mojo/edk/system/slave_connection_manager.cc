@@ -43,7 +43,7 @@ SlaveConnectionManager::~SlaveConnectionManager() {
 }
 
 void SlaveConnectionManager::Init(
-    scoped_refptr<base::TaskRunner> delegate_thread_task_runner,
+    embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
     embedder::SlaveProcessDelegate* slave_process_delegate,
     embedder::ScopedPlatformHandle platform_handle) {
   DCHECK(delegate_thread_task_runner);
@@ -322,9 +322,10 @@ void SlaveConnectionManager::OnError(Error error) {
   raw_channel_.reset();
 
   DCHECK(slave_process_delegate_);
-  delegate_thread_task_runner_->PostTask(
-      FROM_HERE, base::Bind(&embedder::SlaveProcessDelegate::OnMasterDisconnect,
-                            base::Unretained(slave_process_delegate_)));
+  embedder::PlatformPostTask(
+      delegate_thread_task_runner_.get(),
+      base::Bind(&embedder::SlaveProcessDelegate::OnMasterDisconnect,
+                 base::Unretained(slave_process_delegate_)));
 }
 
 void SlaveConnectionManager::AssertNotOnPrivateThread() const {

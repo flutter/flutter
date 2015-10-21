@@ -6,6 +6,7 @@
 
 #include "base/bind.h"
 #include "base/callback.h"
+#include "base/location.h"
 #include "base/synchronization/waitable_event.h"
 
 namespace mojo {
@@ -50,15 +51,13 @@ void TestIOThread::Stop() {
   io_thread_started_ = false;
 }
 
-void TestIOThread::PostTask(const tracked_objects::Location& from_here,
-                            const base::Closure& task) {
-  task_runner()->PostTask(from_here, task);
+void TestIOThread::PostTask(const base::Closure& task) {
+  task_runner()->PostTask(tracked_objects::Location(), task);
 }
 
-void TestIOThread::PostTaskAndWait(const tracked_objects::Location& from_here,
-                                   const base::Closure& task) {
+void TestIOThread::PostTaskAndWait(const base::Closure& task) {
   base::WaitableEvent event(false, false);
-  task_runner()->PostTask(from_here,
+  task_runner()->PostTask(tracked_objects::Location(),
                           base::Bind(&PostTaskAndWaitHelper, &event, task));
   event.Wait();
 }
