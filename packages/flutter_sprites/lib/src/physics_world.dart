@@ -97,7 +97,7 @@ class PhysicsWorld extends Node {
       }
 
       // Update linear velocity
-      if (body._lastPosition == null) {
+      if (body._lastPosition == null || body._targetPosition == null) {
         b2Body.linearVelocity.setZero();
       } else {
         Vector2 velocity = (body._targetPosition - body._lastPosition) / dt;
@@ -106,7 +106,7 @@ class PhysicsWorld extends Node {
       }
 
       // Update angular velocity
-      if (body._lastRotation == null) {
+      if (body._lastRotation == null || body._targetAngle == null) {
         b2Body.angularVelocity = 0.0;
       } else {
         double angularVelocity = (body._targetAngle - body._lastRotation) / dt;
@@ -129,12 +129,20 @@ class PhysicsWorld extends Node {
       }
 
       // Update visual position and rotation
-      body._node._setPositionFromPhysics(new Point(
-        b2Body.position.x * b2WorldToNodeConversionFactor,
-        b2Body.position.y * b2WorldToNodeConversionFactor
-      ));
+      if (body.type == PhysicsBodyType.dynamic) {
+        body._node._setPositionFromPhysics(
+          new Point(
+            b2Body.position.x * b2WorldToNodeConversionFactor,
+            b2Body.position.y * b2WorldToNodeConversionFactor
+          ),
+          body._node.parent
+        );
 
-      body._node._setRotationFromPhysics(degrees(b2Body.getAngle()));
+        body._node._setRotationFromPhysics(
+          degrees(b2Body.getAngle()),
+          body._node.parent
+        );
+      }
     }
 
     // Break joints

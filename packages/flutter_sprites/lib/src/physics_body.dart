@@ -296,8 +296,13 @@ class PhysicsBody {
   void _attach(PhysicsWorld physicsNode, Node node) {
     assert(_attached == false);
 
+    // Account for physics groups
+    Point positionWorld = node._positionToPhysics(node.position, node.parent);
+    double rotationWorld = node._rotationToPhysics(node.rotation, node.parent);
+    double scaleWorld = node._scaleToPhysics(node.scale, node.parent);
+
     // Update scale
-    _scale = node.scale;
+    _scale = scaleWorld;
 
     // Create BodyDef
     box2d.BodyDef bodyDef = new box2d.BodyDef();
@@ -316,9 +321,10 @@ class PhysicsBody {
     else
       bodyDef.type = box2d.BodyType.STATIC;
 
+    // Convert to world coordinates and set position and angle
     double conv = physicsNode.b2WorldToNodeConversionFactor;
-    bodyDef.position = new Vector2(node.position.x / conv, node.position.y / conv);
-    bodyDef.angle = radians(node.rotation);
+    bodyDef.position = new Vector2(positionWorld.x / conv, positionWorld.y / conv);
+    bodyDef.angle = radians(rotationWorld);
 
     // Create Body
     _body = physicsNode.b2World.createBody(bodyDef);
