@@ -1,18 +1,13 @@
-name: updater
+name: flx
 version: 0.0.1
 author: Flutter Authors <flutter-dev@googlegroups.com>
-description: The autoupdater for flutter
+description: Library for dealing with Flutter bundle (.flx) files
 homepage: http://flutter.io
 dependencies:
-  mojo: '>=0.2.0 <0.3.0'
-  flutter: ">=0.0.3 <0.1.0"
-  sky_services: any
-  path: any
-  yaml: any
-  cipher: any
-  asn1lib: any
-dependency_overrides:
-  flutter:
-    path: ../sky
+  sky_services: 0.0.38
+  yaml: ^2.1.3
+  asn1lib: ^0.4.1
+  cipher: ^0.7.1
+  path: ^1.3.0
 environment:
   sdk: '>=1.12.0 <2.0.0'
