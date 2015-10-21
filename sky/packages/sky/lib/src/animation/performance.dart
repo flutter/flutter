@@ -44,8 +44,18 @@ abstract class PerformanceView {
   /// Stops calling the listener every time the status of the performance changes
   void removeStatusListener(PerformanceStatusListener listener);
 
-  /// The current status of this animation
+  /// The current status of this animation.
   PerformanceStatus get status;
+
+  /// The current direction of the animation.
+  AnimationDirection get direction;
+
+  /// The direction used to select the current curve.
+  ///
+  /// The curve direction is only reset when we hit the beginning or the end of
+  /// the timeline to avoid discontinuities in the value of any variables this
+  /// performance is used to animate.
+  AnimationDirection get curveDirection;
 
   /// The current progress of this animation (a value from 0.0 to 1.0).
   /// This is the value that is used to update any variables when using updateVariable().
@@ -57,6 +67,85 @@ abstract class PerformanceView {
   /// Whether this animation is stopped at the end
   bool get isCompleted => status == PerformanceStatus.completed;
 }
+
+class AlwaysCompletePerformance extends PerformanceView {
+  const AlwaysCompletePerformance();
+
+  void updateVariable(Animatable variable) {
+    variable.setProgress(1.0, AnimationDirection.forward);
+  }
+
+  // this performance never changes state
+  void addListener(PerformanceListener listener) { }
+  void removeListener(PerformanceListener listener) { }
+  void addStatusListener(PerformanceStatusListener listener) { }
+  void removeStatusListener(PerformanceStatusListener listener) { }
+  PerformanceStatus get status => PerformanceStatus.completed;
+  AnimationDirection get direction => AnimationDirection.forward;
+  AnimationDirection get curveDirection => AnimationDirection.forward;
+  double get progress => 1.0;
+}
+const AlwaysCompletePerformance alwaysCompletePerformance = const AlwaysCompletePerformance();
+
+class ReversePerformance extends PerformanceView {
+  ReversePerformance(this.masterPerformance) {
+    masterPerformance.addStatusListener(_statusChangeHandler);
+  }
+
+  final PerformanceView masterPerformance;
+
+  void updateVariable(Animatable variable) {
+    variable.setProgress(progress, curveDirection);
+  }
+
+  void addListener(PerformanceListener listener) {
+    masterPerformance.addListener(listener);
+  }
+  void removeListener(PerformanceListener listener) {
+    masterPerformance.removeListener(listener);
+  }
+
+  final List<PerformanceStatusListener> _statusListeners = new List<PerformanceStatusListener>();
+
+  /// Calls listener every time the status of this performance changes
+  void addStatusListener(PerformanceStatusListener listener) {
+    _statusListeners.add(listener);
+  }
+
+  /// Stops calling the listener every time the status of this performance changes
+  void removeStatusListener(PerformanceStatusListener listener) {
+    _statusListeners.remove(listener);
+  }
+
+  void _statusChangeHandler(PerformanceStatus status) {
+    status = _reverseStatus(status);
+    List<PerformanceStatusListener> localListeners = new List<PerformanceStatusListener>.from(_statusListeners);
+    for (PerformanceStatusListener listener in localListeners)
+      listener(status);
+  }
+
+  PerformanceStatus get status => _reverseStatus(masterPerformance.status);
+  AnimationDirection get direction => _reverseDirection(masterPerformance.direction);
+  AnimationDirection get curveDirection => _reverseDirection(masterPerformance.curveDirection);
+  double get progress => 1.0 - masterPerformance.progress;
+
+  PerformanceStatus _reverseStatus(PerformanceStatus status) {
+    switch (status) {
+      case PerformanceStatus.forward: return PerformanceStatus.reverse;
+      case PerformanceStatus.reverse: return PerformanceStatus.forward;
+      case PerformanceStatus.completed: return PerformanceStatus.dismissed;
+      case PerformanceStatus.dismissed: return PerformanceStatus.completed;
+    }
+  }
+
+  AnimationDirection _reverseDirection(AnimationDirection direction) {
+    switch (direction) {
+      case AnimationDirection.forward: return AnimationDirection.reverse;
+      case AnimationDirection.reverse: return AnimationDirection.forward;
+    }
+  }
+}
+
 
 /// A timeline that can be reversed and used to update [Animatable]s.
 ///
@@ -86,13 +175,9 @@ class Performance extends PerformanceView {
   Duration duration;
 
   SimulationStepper _timeline;
+  AnimationDirection get direction => _direction;
   AnimationDirection _direction;
-
-  /// The direction used to select the current curve
-  ///
-  /// Curve direction is only reset when we hit the beginning or the end of the
-  /// timeline to avoid discontinuities in the value of any variables this
-  /// performance is used to animate.
+  AnimationDirection get curveDirection => _curveDirection;
   AnimationDirection _curveDirection;
 
   /// If non-null, animate with this timing instead of a linear timing
@@ -103,7 +188,6 @@ class Performance extends PerformanceView {
   /// Note: Setting this value stops the current animation.
   double get progress => _timeline.value.clamp(0.0, 1.0);
   void set progress(double t) {
-    // TODO(mpcomplete): should this affect |direction|?
     stop();
     _timeline.value = t.clamp(0.0, 1.0);
     _checkStatusChanged();
