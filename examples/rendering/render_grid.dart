@@ -19,7 +19,7 @@ Color randomColor() {
 }
 
 RenderBox buildGridExample() {
-  List<RenderBox> children = new List.generate(30, (_) => new RenderSolidColorBox(randomColor()));
+  List<RenderBox> children = new List<RenderBox>.generate(30, (_) => new RenderSolidColorBox(randomColor()));
   return new RenderGrid(children: children, maxChildExtent: 100.0);
 }
 

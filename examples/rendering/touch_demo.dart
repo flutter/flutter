@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 // Material design colors. :p
-List<Color> kColors = [
+List<Color> kColors = <Color>[
   Colors.teal[500],
   Colors.amber[500],
   Colors.purple[500],
@@ -34,9 +34,7 @@ class Dot {
 }
 
 class RenderTouchDemo extends RenderBox {
-  Map<int, Dot> dots = new Map();
-
-  RenderTouchDemo();
+  final Map<int, Dot> dots = <int, Dot>{};
 
   void handleEvent(InputEvent event, BoxHitTestEntry entry) {
     if (event is PointerInputEvent) {
@@ -49,7 +47,7 @@ class RenderTouchDemo extends RenderBox {
           dots.remove(event.pointer);
           break;
         case 'pointercancel':
-          dots = new Map();
+          dots.clear();
           break;
         case 'pointermove':
           dots[event.pointer].update(event);
@@ -74,14 +72,15 @@ class RenderTouchDemo extends RenderBox {
 }
 
 void main() {
-  var paragraph = new RenderParagraph(new PlainTextSpan("Touch me!"));
-  var stack = new RenderStack(children: [
+  RenderParagraph paragraph = new RenderParagraph(new PlainTextSpan("Touch me!"));
+  RenderStack stack = new RenderStack(children: <RenderBox>[
     new RenderTouchDemo(),
     paragraph,
   ]);
   // Prevent the RenderParagraph from filling the whole screen so
   // that it doesn't eat events.
-  paragraph.parentData..top = 40.0
-                      ..left = 20.0;
+  final StackParentData paragraphParentData = paragraph.parentData;
+  paragraphParentData..top = 40.0
+                     ..left = 20.0;
   new FlutterBinding(root: stack);
 }

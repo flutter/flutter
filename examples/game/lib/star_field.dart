@@ -24,10 +24,10 @@ class StarField extends NodeWithSize {
   }
 
   void addStars() {
-    _starPositions = [];
-    _starScales = [];
-    _colors = [];
-    _rects = [];
+    _starPositions = <Point>[];
+    _starScales = <double>[];
+    _colors = <Color>[];
+    _rects = <Rect>[];
 
     size = spriteBox.visibleArea.size;
     _paddedSize = new Size(size.width + _padding * 2.0,
@@ -48,7 +48,7 @@ class StarField extends NodeWithSize {
 
   void paint(PaintingCanvas canvas) {
     // Create a transform for each star
-    List<ui.RSTransform> transforms = [];
+    List<ui.RSTransform> transforms = <ui.RSTransform>[];
     for (int i = 0; i < _numStars; i++) {
       ui.RSTransform transform = new ui.RSTransform(
         _starScales[i],

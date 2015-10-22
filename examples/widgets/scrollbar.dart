@@ -60,7 +60,7 @@ void main() {
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent[200]
     ),
-    routes: {
+    routes: <String, RouteBuilder>{
       '/': (RouteArguments args) => new ScrollbarApp(),
     }
   ));

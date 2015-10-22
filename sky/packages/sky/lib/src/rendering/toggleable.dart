@@ -10,7 +10,7 @@ import 'box.dart';
 import 'object.dart';
 import 'proxy_box.dart';
 
-typedef void ValueChanged(bool value);
+typedef void ValueChanged<T>(T value);
 
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
 
@@ -19,7 +19,7 @@ const Duration _kToggleDuration = const Duration(milliseconds: 200);
 // ValueChanged on a tap gesture and driving a changed animation. Subclasses are
 // responsible for painting.
 abstract class RenderToggleable extends RenderConstrainedBox {
-  RenderToggleable({bool value, Size size, ValueChanged onChanged})
+  RenderToggleable({bool value, Size size, ValueChanged<bool> onChanged})
       : _value = value,
         _onChanged = onChanged,
         super(additionalConstraints: new BoxConstraints.tight(size)) {
@@ -70,9 +70,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     performance.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
   }
 
-  ValueChanged get onChanged => _onChanged;
-  ValueChanged _onChanged;
-  void set onChanged(ValueChanged onChanged) {
+  ValueChanged<bool> get onChanged => _onChanged;
+  ValueChanged<bool> _onChanged;
+  void set onChanged(ValueChanged<bool> onChanged) {
     _onChanged = onChanged;
   }
 }

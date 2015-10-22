@@ -2,8 +2,8 @@ part of game;
 
 class Flash extends NodeWithSize {
   Flash(Size size, this.duration) : super(size) {
-    ActionTween fade = new ActionTween((a) => _opacity = a, 1.0, 0.0, duration);
-    ActionSequence seq = new ActionSequence([fade, new ActionRemoveNode(this)]);
+    ActionTween fade = new ActionTween((double a) { _opacity = a; }, 1.0, 0.0, duration);
+    ActionSequence seq = new ActionSequence(<Action>[fade, new ActionRemoveNode(this)]);
     actions.run(seq);
   }
 

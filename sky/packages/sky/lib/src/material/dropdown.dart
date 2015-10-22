@@ -203,7 +203,7 @@ class DropdownButton<T> extends StatelessComponent {
 
   final List<DropdownMenuItem<T>> items;
   final T value;
-  final ValueChanged onChanged;
+  final ValueChanged<T> onChanged;
   final int level;
 
   void _showDropdown(BuildContext context, int selectedIndex, GlobalKey indexedStackKey) {
@@ -217,7 +217,7 @@ class DropdownButton<T> extends StatelessComponent {
       rect: rect,
       level: level
     ));
-    completer.future.then((dynamic newValue) {
+    completer.future.then((T newValue) {
       if (onChanged != null)
         onChanged(newValue);
     });

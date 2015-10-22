@@ -46,7 +46,8 @@ RenderBox buildFlexExample() {
   );
 
   flexRoot.add(decoratedRow);
-  decoratedRow.parentData.flex = 3;
+  final FlexParentData decoratedRowParentData = decoratedRow.parentData;
+  decoratedRowParentData.flex = 3;
 
   return root;
 }

@@ -32,7 +32,7 @@ class Switch extends StatelessComponent {
       : super(key: key);
 
   final bool value;
-  final ValueChanged onChanged;
+  final ValueChanged<bool> onChanged;
 
   Widget build(BuildContext context) {
     return new _SwitchWrapper(
@@ -49,7 +49,7 @@ class _SwitchWrapper extends LeafRenderObjectWidget {
 
   final bool value;
   final Color thumbColor;
-  final ValueChanged onChanged;
+  final ValueChanged<bool> onChanged;
 
   _RenderSwitch createRenderObject() => new _RenderSwitch(
     value: value,
@@ -68,7 +68,7 @@ class _RenderSwitch extends RenderToggleable {
   _RenderSwitch({
     bool value,
     Color thumbColor: _kThumbOffColor,
-    ValueChanged onChanged
+    ValueChanged<bool> onChanged
   }) : _thumbColor = thumbColor,
         super(value: value, onChanged: onChanged, size: _kSwitchSize);
 

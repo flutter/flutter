@@ -74,7 +74,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
         onDismiss: () {
           Navigator.of(context).pop();
         },
-        actions: [
+        actions: <Widget>[
           new FlatButton(
             child: new Text('CANCEL'),
             onPressed: () {
@@ -94,20 +94,21 @@ class SettingsFragmentState extends State<SettingsFragment> {
   }
 
   Widget buildSettingsPane(BuildContext context) {
+    // TODO(ianh): Make Block capable of doing this
     return new ScrollableViewport(
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 20.0),
-        child: new BlockBody([
+        child: new BlockBody(<Widget>[
           new DrawerItem(
             onPressed: () { _handleBackupChanged(!(config.userData.backupMode == BackupMode.enabled)); },
-            child: new Row([
+            child: new Row(<Widget>[
               new Flexible(child: new Text('Back up data to the cloud')),
               new Switch(value: config.userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
             ])
           ),
           new DrawerItem(
             onPressed: () => _handleGoalWeightPressed(),
-            child: new Column([
+            child: new Column(<Widget>[
                 new Text('Goal Weight'),
                 new Text(goalWeightText, style: Theme.of(context).text.caption),
               ],

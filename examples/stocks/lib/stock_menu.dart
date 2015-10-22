@@ -8,7 +8,7 @@ enum _MenuItems { autorefresh, autorefreshCheckbox, add, remove }
 
 const double _kMenuMargin = 16.0; // 24.0 on tablet
 
-Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged onAutorefreshChanged }) async {
+Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool> onAutorefreshChanged }) async {
   switch (await showMenu(
     context: context,
     position: new MenuPosition(

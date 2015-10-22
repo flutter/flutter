@@ -196,12 +196,12 @@ class SpriteBox extends RenderBox {
       if (event.type == 'pointerdown') {
         // Build list of event targets
         if (_eventTargets == null) {
-          _eventTargets = [];
+          _eventTargets = <Node>[];
           _addEventTargets(_rootNode, _eventTargets);
         }
 
         // Find the once that are hit by the pointer
-        List<Node> nodeTargets = [];
+        List<Node> nodeTargets = <Node>[];
         for (int i = _eventTargets.length - 1; i >= 0; i--) {
           Node node = _eventTargets[i];
 
@@ -393,8 +393,8 @@ class SpriteBox extends RenderBox {
   }
 
   void _rebuildActionControllersAndPhysicsNodes() {
-    _actionControllers = [];
-    _physicsNodes = [];
+    _actionControllers = <ActionController>[];
+    _physicsNodes = <PhysicsWorld>[];
     _addActionControllersAndPhysicsNodes(_rootNode);
   }
 
@@ -429,7 +429,7 @@ class SpriteBox extends RenderBox {
 
   void _callConstraintsPreUpdate(double dt) {
     if (_constrainedNodes == null) {
-      _constrainedNodes = [];
+      _constrainedNodes = <Node>[];
       _addConstrainedNodes(_rootNode, _constrainedNodes);
     }
 
@@ -442,7 +442,7 @@ class SpriteBox extends RenderBox {
 
   void _callConstraintsConstrain(double dt) {
     if (_constrainedNodes == null) {
-      _constrainedNodes = [];
+      _constrainedNodes = <Node>[];
       _addConstrainedNodes(_rootNode, _constrainedNodes);
     }
 
@@ -481,7 +481,7 @@ class SpriteBox extends RenderBox {
   List<Node> findNodesAtPosition(Point position) {
     assert(position != null);
 
-    List<Node> nodes = [];
+    List<Node> nodes = <Node>[];
 
     // Traverse the render tree and find objects at the position
     _addNodesAtPosition(_rootNode, position, nodes);

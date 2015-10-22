@@ -17,6 +17,8 @@ Point _cardinalSplineAt(Point p0, Point p1, Point p2, Point p3, double tension, 
   return new Point(x, y);
 }
 
+typedef void PointSetterCallback(Point value);
+
 /// The spline action is used to animate a point along a spline definied by
 /// a set of points.
 class ActionSpline extends ActionInterval {
@@ -30,7 +32,7 @@ class ActionSpline extends ActionInterval {
   }
 
   /// The callback used to update a point when the action is run.
-  final Function setter;
+  final PointSetterCallback setter;
 
   /// A list of points that define the spline.
   final List<Point> points;

@@ -18,7 +18,7 @@ enum SoundEventMinimumOverlapPolicy {
 
 class SoundEvent {
   SoundEvent(SoundEffect effect) {
-    effects = [effect];
+    effects = <SoundEffect>[effect];
   }
 
   SoundEvent.withList(this.effects);
@@ -61,7 +61,7 @@ class SoundManager {
     new Timer.periodic(new Duration(milliseconds:10), _update);
   }
 
-  Map<SoundEvent, List<_PlayingSoundEvent>> _playingEvents = {};
+  Map<SoundEvent, List<_PlayingSoundEvent>> _playingEvents = <SoundEvent, List<_PlayingSoundEvent>>{};
   SoundTrack _backgroundMusicTrack;
 
   SoundEffectPlayer _effectPlayer = SoundEffectPlayer.sharedInstance();
@@ -75,7 +75,7 @@ class SoundManager {
 
   void playEvent(SoundEvent evt, [double volume = 1.0, double pitch = 1.0, double pan = 0.0]) {
     List<_PlayingSoundEvent> playingList = _playingEvents[evt];
-    if (playingList == null) playingList = [];
+    if (playingList == null) playingList = <_PlayingSoundEvent>[];
 
     // Check simultaneousLimit
     if (evt.simultaneousLimit != 0 && evt.simultaneousLimit >= playingList.length) {
@@ -131,13 +131,13 @@ class SoundManager {
   }
 
   void stopAllEvents([double fadeDuration]) {
-    for (List<_PlayingSoundEvent> playingList in _playingEvents) {
+    for (List<_PlayingSoundEvent> playingList in _playingEvents.values) {
       for (_PlayingSoundEvent playing in playingList) {
         if (fadeDuration > 0.0) {
           // Fade out and stop
           ActionTween fadeOut = new ActionTween((a) => playing.stream.volume = a, playing.stream.volume, 0.0, fadeDuration);
           ActionCallFunction stop = new ActionCallFunction(() { _effectPlayer.stop(playing.stream); });
-          ActionSequence seq = new ActionSequence([fadeOut, stop]);
+          ActionSequence seq = new ActionSequence(<Action>[fadeOut, stop]);
           actions.run(seq);
         }
         else {
@@ -175,7 +175,7 @@ class SoundManager {
       } else {
         ActionTween fadeOut = new ActionTween((a) => _backgroundMusicTrack.volume = a, _backgroundMusicTrack.volume, 0.0, fadeOutDuration);
         ActionCallFunction stop = new ActionCallFunction(() { _trackPlayer.stop(_backgroundMusicTrack); });
-        ActionSequence seq = new ActionSequence([fadeOut, stop]);
+        ActionSequence seq = new ActionSequence(<Action>[fadeOut, stop]);
         actions.run(seq);
       }
     } else {
@@ -190,7 +190,7 @@ class SoundManager {
       ActionCallFunction fadeInCall = new ActionCallFunction(() {
         _fadeInTrack(track, fadeInDuration);
       });
-      ActionSequence seq = new ActionSequence([delay, fadeInCall]);
+      ActionSequence seq = new ActionSequence(<Action>[delay, fadeInCall]);
       actions.run(seq);
     }
   }
@@ -216,7 +216,7 @@ class SoundManager {
       ActionCallFunction stopCall = new ActionCallFunction(() {
         _trackPlayer.stop(_backgroundMusicTrack);
       });
-      ActionSequence seq = new ActionSequence([fadeOut, stopCall]);
+      ActionSequence seq = new ActionSequence(<Action>[fadeOut, stopCall]);
       actions.run(seq);
     }
 

@@ -6,7 +6,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-final List<Map<int, Color>> _kColors = [
+final List<Map<int, Color>> _kColors = <Map<int, Color>>[
   Colors.amber,
   Colors.yellow,
   Colors.blue,
@@ -42,7 +42,7 @@ class CardTransition extends StatelessComponent {
 
     return new BuilderTransition(
       performance: performance,
-      variables: [x, opacity, scale],
+      variables: <AnimatedValue<double>>[x, opacity, scale],
       builder: (BuildContext context) {
         Matrix4 transform = new Matrix4.identity()
           ..translate(x.value)

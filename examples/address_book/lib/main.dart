@@ -17,7 +17,7 @@ class Field extends StatelessComponent {
   final String placeholder;
 
   Widget build(BuildContext context) {
-    return new Row([
+    return new Row(<Widget>[
         new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(type: icon, size: 24)
@@ -37,7 +37,7 @@ class AddressBookHome extends StatelessComponent {
   Widget buildToolBar(BuildContext context) {
     return new ToolBar(
         left: new IconButton(icon: "navigation/arrow_back"),
-        right: [new IconButton(icon: "navigation/check")]
+        right: <Widget>[new IconButton(icon: "navigation/check")]
       );
   }
 
@@ -56,7 +56,7 @@ class AddressBookHome extends StatelessComponent {
   static final GlobalKey noteKey = new GlobalKey(label: 'note field');
 
   Widget buildBody(BuildContext context) {
-    return new Block([
+    return new Block(<Widget>[
       new AspectRatio(
         aspectRatio: 16.0 / 9.0,
         child: new Container(

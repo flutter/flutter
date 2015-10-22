@@ -359,9 +359,9 @@ class ParticleSystem extends Node {
 
   void paint(PaintingCanvas canvas) {
 
-    List<ui.RSTransform> transforms = [];
-    List<Rect> rects = [];
-    List<Color> colors = [];
+    List<ui.RSTransform> transforms = <ui.RSTransform>[];
+    List<Rect> rects = <Rect>[];
+    List<Color> colors = <Color>[];
 
     _paint.transferMode = transferMode;
 

@@ -21,8 +21,9 @@ class NodeWithSize extends Node {
   /// The default [size] is zero and the default [pivot] point is the origin. Subclasses may change the default values.
   ///
   ///     var myNodeWithSize = new NodeWithSize(new Size(1024.0, 1024.0));
-  NodeWithSize(Size this.size) {
-    if (size == null) size = Size.zero;
+  NodeWithSize(this.size) {
+    if (size == null)
+      size = Size.zero;
     pivot = Point.origin;
   }
 

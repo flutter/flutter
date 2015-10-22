@@ -14,7 +14,7 @@ pushd sky/packages/workbench
 ../../../third_party/dart-sdk/dart-sdk/bin/pub get
 popd
 pushd sky/packages/sky
-../../tools/skyanalyzer --congratulate lib/widgets.dart
+../../tools/skyanalyzer --congratulate
 popd
 
 # Generate docs.

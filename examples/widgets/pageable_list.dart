@@ -27,7 +27,7 @@ class PageableListAppState extends State<PageableListApp> {
     .map((args) => new Size(args[0], args[1]))
     .toList();
 
-    cardModels = new List.generate(cardSizes.length, (i) {
+    cardModels = new List<CardModel>.generate(cardSizes.length, (int i) {
       Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardSizes.length);
       return new CardModel(i, cardSizes[i], color);
     });
@@ -86,7 +86,7 @@ class PageableListAppState extends State<PageableListApp> {
   void _showDrawer() {
     showDrawer(
       context: context,
-      child: new Block([
+      child: new Block(<Widget>[
         new DrawerHeader(child: new Text('Options')),
         new DrawerItem(
           icon: 'navigation/more_horiz',
@@ -102,7 +102,7 @@ class PageableListAppState extends State<PageableListApp> {
         ),
         new DrawerItem(
           onPressed: toggleItemsWrap,
-          child: new Row([
+          child: new Row(<Widget>[
             new Flexible(child: new Text('Scrolling wraps around')),
             new Checkbox(value: itemsWrap)
           ])
@@ -115,7 +115,7 @@ class PageableListAppState extends State<PageableListApp> {
     return new ToolBar(
       left: new IconButton(icon: "navigation/menu", onPressed: _showDrawer),
       center: new Text('PageableList'),
-      right: [
+      right: <Widget>[
         new Text(scrollDirection == ScrollDirection.horizontal ? "horizontal" : "vertical")
       ]
     );
@@ -156,7 +156,7 @@ void main() {
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent[200]
     ),
-    routes: {
+    routes: <String, RouteBuilder>{
       '/': (RouteArguments args) => new PageableListApp(),
     }
   ));

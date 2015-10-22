@@ -71,7 +71,7 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
     ];
     return new Column(
       indicators
-        .map((c) => new Container(child: c, margin: const EdgeDims.symmetric(vertical: 15.0, horizontal: 20.0)))
+        .map((Widget c) => new Container(child: c, margin: const EdgeDims.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
       justifyContent: FlexJustifyContent.center
     );
@@ -83,7 +83,7 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
         child: new BuilderTransition(
-          variables: [valueAnimation.variable],
+          variables: <AnimatedValue<double>>[valueAnimation.variable],
           performance: valueAnimation.view,
           builder: buildIndicators
         )

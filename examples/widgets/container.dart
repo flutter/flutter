@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 class ContainerApp extends StatelessComponent {
   Widget build(BuildContext context) {
-    return new Column([
+    return new Column(<Widget>[
         new Container(
           padding: new EdgeDims.all(10.0),
           margin: new EdgeDims.all(10.0),
@@ -20,7 +20,7 @@ class ContainerApp extends StatelessComponent {
         new Container(
           decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFF00)),
           padding: new EdgeDims.symmetric(horizontal: 50.0, vertical: 75.0),
-          child: new Row([
+          child: new Row(<Widget>[
             new RaisedButton(
               child: new Text('PRESS ME'),
               onPressed: () => print("Hello World")

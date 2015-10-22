@@ -19,10 +19,10 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
     });
   }
 
-  List <PopupMenuItem> _buildMenu() {
+  List<PopupMenuItem> _buildMenu() {
     TextStyle style = const TextStyle(fontSize: 18.0, fontWeight: bold);
     String pad = '';
-    return new List.generate(_itemCount, (int i) {
+    return new List<PopupMenuItem>.generate(_itemCount, (int i) {
       pad += '-';
       return new PopupMenuItem(value: i, child: new Text('$pad Hello World $i $pad', style: style));
     });
@@ -30,7 +30,7 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
 
   Widget build(BuildContext context) {
     List <PopupMenuItem> items = _buildMenu();
-    IndexedStack indexedStack = new IndexedStack(items, index: _itemIndex, horizontalAlignment: 0.5);
+    IndexedStack indexedStack = new IndexedStack(items, index: _itemIndex, alignment: const FractionalOffset(0.5, 0.0));
 
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('IndexedStackDemo Demo')),
@@ -56,7 +56,7 @@ void main() {
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent[200]
     ),
-    routes: {
+    routes: <String, RouteBuilder>{
       '/': (RouteArguments args) => new IndexedStackDemo(),
     }
   ));

@@ -24,7 +24,7 @@ void main() {
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF))
   );
 
-  RenderAutoLayout root = new RenderAutoLayout(children: [c1, c2, c3, c4]);
+  RenderAutoLayout root = new RenderAutoLayout(children: <RenderBox>[c1, c2, c3, c4]);
 
   AutoLayoutParentData p1 = c1.parentData;
   AutoLayoutParentData p2 = c2.parentData;

@@ -14,9 +14,11 @@ void main() {
     child: flexRoot
   );
 
+  FlexParentData childParentData;
+
   RenderObject child = new RenderSolidColorBox(const Color(0xFFFFFF00));
   flexRoot.add(child);
-  FlexParentData childParentData = child.parentData;
+  childParentData = child.parentData;
   childParentData.flex = 2;
 
   // The internet is a beautiful place.  https://baconipsum.com/
@@ -26,9 +28,10 @@ andouille leberkas capicola meatloaf. Chicken pig ball tip pork picanha bresaola
 alcatra. Pork pork belly alcatra, flank chuck drumstick biltong doner jowl.
 Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
 
-  var text = new StyledTextSpan(
-      new TextStyle(color:  const Color(0xFF009900)),
-      [new PlainTextSpan(meatyString)]);
+  StyledTextSpan text = new StyledTextSpan(
+    new TextStyle(color: const Color(0xFF009900)),
+    <TextSpan>[new PlainTextSpan(meatyString)]
+  );
   child = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF)),
     child: new RenderParagraph(text)

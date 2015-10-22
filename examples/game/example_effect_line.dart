@@ -18,7 +18,7 @@ SpriteSheet _spriteSheet;
 main() async {
   _images = new ImageMap(_bundle);
 
-  await _images.load([
+  await _images.load(<String>[
     'assets/checker.png',
     'assets/line_effects.png'
   ]);
@@ -45,7 +45,7 @@ class TestAppState extends State<TestApp> {
   TestBed _testBed;
   int _selectedLine = 0;
 
-  List<String> _labelTexts = [
+  List<String> _labelTexts = <String>[
     "Colored",
     "Smoke",
     "Electric",
@@ -56,14 +56,14 @@ class TestAppState extends State<TestApp> {
     return new MaterialApp(
       title: 'EffectLine Demo',
       theme: _theme,
-      routes: {
+      routes: <String, RouteBuilder>{
         '/': _buildColumn
       }
     );
   }
 
   Column _buildColumn(RouteArguments args) {
-    return new Column([
+    return new Column(<Widget>[
       new Flexible(child: _buildSpriteWidget()),
       _buildTabBar()
     ]);
@@ -82,10 +82,9 @@ class TestAppState extends State<TestApp> {
   }
 
   List<TabLabel> _buildTabLabels() {
-    List<TabLabel> labels = [];
-    for(String text in _labelTexts) {
+    List<TabLabel> labels = <TabLabel>[];
+    for (String text in _labelTexts)
       labels.add(new TabLabel(text: text));
-    }
     return labels;
   }
 
@@ -168,7 +167,8 @@ class TestBed extends NodeWithSize {
   }
 
   bool handleEvent(SpriteBoxEvent event) {
-    if (event.type == "pointerdown") _line.points = [];
+    if (event.type == "pointerdown")
+       _line.points = <Point>[];
 
     if (event.type == "pointerdown" || event.type == "pointermove") {
       Point pos = convertPointToNodeSpace(event.boxPosition);

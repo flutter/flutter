@@ -48,13 +48,19 @@ class CardCollectionState extends State<CardCollection> {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
     ];
-    _cardModels = new List.generate(cardHeights.length, (i) => new CardModel(i, cardHeights[i]));
+    _cardModels = new List<CardModel>.generate(
+      cardHeights.length,
+      (int i) => new CardModel(i, cardHeights[i])
+    );
   }
 
   void _initFixedSizedCardModels() {
     const int cardCount = 27;
     const double cardHeight = 100.0;
-    _cardModels = new List.generate(cardCount, (i) => new CardModel(i, cardHeight));
+    _cardModels = new List<CardModel>.generate(
+      cardCount,
+      (int i) => new CardModel(i, cardHeight)
+    );
   }
 
   void _initCardModels() {
@@ -72,7 +78,7 @@ class CardCollectionState extends State<CardCollection> {
   double _variableSizeToSnapOffset(double scrollOffset) {
     double cumulativeHeight = 0.0;
     double  margins = 8.0;
-    List<double> cumulativeHeights = _cardModels.map((card) {
+    List<double> cumulativeHeights = _cardModels.map((CardModel card) {
       cumulativeHeight += card.height + margins;
       return cumulativeHeight;
     })
@@ -112,7 +118,7 @@ class CardCollectionState extends State<CardCollection> {
       context: context,
       child: new IconTheme(
         data: const IconThemeData(color: IconThemeColor.black),
-        child: new Block([
+        child: new Block(<Widget>[
           new DrawerHeader(child: new Text('Options')),
           buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
           buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
@@ -168,10 +174,10 @@ class CardCollectionState extends State<CardCollection> {
     Navigator.of(context).pop();
   }
 
-  Widget buildDrawerCheckbox(String label, bool value, Function callback) {
+  Widget buildDrawerCheckbox(String label, bool value, void callback()) {
     return new DrawerItem(
       onPressed: callback,
-      child: new Row([
+      child: new Row(<Widget>[
         new Flexible(child: new Text(label)),
         new Checkbox(value: value, onChanged: (_) { callback(); })
       ])
@@ -182,7 +188,7 @@ class CardCollectionState extends State<CardCollection> {
     return new DrawerItem(
       icon: icon,
       onPressed: () { onChanged(itemValue); },
-      child: new Row([
+      child: new Row(<Widget>[
         new Flexible(child: new Text(label)),
         new Radio(
           value: itemValue,
@@ -197,7 +203,7 @@ class CardCollectionState extends State<CardCollection> {
     return new ToolBar(
       left: new IconButton(icon: "navigation/menu", onPressed: _showDrawer),
       center: new Text('Swipe Away'),
-      right: [
+      right: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
       ]
     );
@@ -210,7 +216,7 @@ class CardCollectionState extends State<CardCollection> {
     CardModel cardModel = _cardModels[index];
     Widget card = new Dismissable(
       direction: _dismissDirection,
-      onResized: () { _invalidator([index]); },
+      onResized: () { _invalidator(<int>[index]); },
       onDismissed: () { dismissCard(cardModel); },
       child: new Card(
         color: Theme.of(context).primarySwatch[cardModel.color],
@@ -272,7 +278,7 @@ class CardCollectionState extends State<CardCollection> {
           child: new Container(
             height: cardModel.height,
             decoration: new BoxDecoration(backgroundColor: Theme.of(context).primaryColor),
-            child: new Row([
+            child: new Row(<Widget>[
               leftArrowIcon,
               new Flexible(child: new Text(backgroundMessage, style: backgroundTextStyle)),
               rightArrowIcon
@@ -285,7 +291,7 @@ class CardCollectionState extends State<CardCollection> {
     return new IconTheme(
       key: cardModel.key,
       data: const IconThemeData(color: IconThemeColor.white),
-      child: new Stack([background, card])
+      child: new Stack(<Widget>[background, card])
     );
   }
 
@@ -299,8 +305,8 @@ class CardCollectionState extends State<CardCollection> {
     return new LinearGradient(
         begin: Point.origin,
         end: new Point(0.0, bounds.height),
-        colors: [const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
-        stops: [0.1, 0.35]
+        colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
+        stops: <double>[0.1, 0.35]
     )
     .createShader();
   }
@@ -327,8 +333,8 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     if (_sunshine)
-      cardCollection = new Stack([
-        new Column([new NetworkImage(src: _sunshineURL)]),
+      cardCollection = new Stack(<Widget>[
+        new Column(<Widget>[new NetworkImage(src: _sunshineURL)]),
         new ShaderMask(child: cardCollection, shaderCallback: _createShader)
       ]);
 
@@ -351,7 +357,7 @@ class CardCollectionState extends State<CardCollection> {
           )
         )
       );
-      body = new Stack([body, indicator]);
+      body = new Stack(<Widget>[body, indicator]);
     }
 
     return new Theme(
@@ -369,7 +375,7 @@ class CardCollectionState extends State<CardCollection> {
 void main() {
   runApp(new MaterialApp(
     title: 'Cards',
-    routes: {
+    routes: <String, RouteBuilder>{
       '/': (RouteArguments args) => new CardCollection(),
     }
   ));
