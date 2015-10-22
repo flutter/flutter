@@ -36,7 +36,11 @@ class StockSymbolViewer extends StatelessComponent {
                         '${stock.symbol}',
                         style: Theme.of(context).text.display2
                       ),
-                      new StockArrow(percentChange: stock.percentChange)
+                      new Hero(
+                        tag: StockRowPartKind.arrow,
+                        turns: 2,
+                        child: new StockArrow(percentChange: stock.percentChange)
+                      ),
                     ],
                     justifyContent: FlexJustifyContent.spaceBetween
                   ),
@@ -51,7 +55,8 @@ class StockSymbolViewer extends StatelessComponent {
               )
             )
           )
-      ])
+        ]
+      )
     );
   }
 

@@ -6,7 +6,7 @@ part of stocks;
 
 enum StockRowPartKind { arrow }
 
-class StockRowPartKey extends GlobalKey {
+class StockRowPartKey extends Key {
   const StockRowPartKey(this.stock, this.part) : super.constructor();
   final Stock stock;
   final StockRowPartKind part;
@@ -21,7 +21,7 @@ class StockRowPartKey extends GlobalKey {
   String toString() => '[StockRowPartKey ${stock.symbol}:${part.toString().split(".")[1]})]';
 }
 
-typedef void StockRowActionCallback(Stock stock, GlobalKey arrowKey);
+typedef void StockRowActionCallback(Stock stock, Key arrowKey);
 
 class StockRow extends StatelessComponent {
   StockRow({
@@ -30,7 +30,7 @@ class StockRow extends StatelessComponent {
     this.onLongPressed
   }) : this.stock = stock,
        _arrowKey = new StockRowPartKey(stock, StockRowPartKind.arrow),
-       super(key: new GlobalObjectKey(stock));
+       super(key: new ObjectKey(stock));
 
   final Stock stock;
   final StockRowActionCallback onPressed;
@@ -53,7 +53,7 @@ class StockRow extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
+    final String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0)
       changeInPrice = "+" + changeInPrice;
@@ -69,9 +69,12 @@ class StockRow extends StatelessComponent {
         ),
         child: new Row(<Widget>[
             new Container(
-              key: _arrowKey,
-              child: new StockArrow(percentChange: stock.percentChange),
-              margin: const EdgeDims.only(right: 5.0)
+              margin: const EdgeDims.only(right: 5.0),
+              child: new Hero(
+                tag: StockRowPartKind.arrow,
+                key: _arrowKey,
+                child: new StockArrow(percentChange: stock.percentChange)
+              )
             ),
             new Flexible(
               child: new Row(<Widget>[
