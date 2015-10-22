@@ -11,8 +11,6 @@ class WidgetFlutterBinding extends FlutterBinding {
 
   WidgetFlutterBinding() {
     BuildableElement.scheduleBuildFor = scheduleBuildFor;
-    _renderViewElement = new RenderObjectToWidgetElement<RenderBox>(describeApp(null));
-    _renderViewElement.mount(null, null);
   }
 
   /// Ensures that there is a FlutterBinding object instantiated.
@@ -23,18 +21,6 @@ class WidgetFlutterBinding extends FlutterBinding {
   }
 
   static WidgetFlutterBinding get instance => FlutterBinding.instance;
-
-  /// The [Element] that is at the root of the hierarchy (and which wraps the
-  /// [RenderView] object at the root of the rendering hierarchy).
-  Element get renderViewElement => _renderViewElement;
-  Element _renderViewElement;
-
-  RenderObjectToWidgetAdapter<RenderBox> describeApp(Widget app) {
-    return new RenderObjectToWidgetAdapter<RenderBox>(
-      container: instance.renderView,
-      child: app
-    );
-  }
 
   void beginFrame(Duration timeStamp) {
     buildDirtyElements();
@@ -78,15 +64,22 @@ class WidgetFlutterBinding extends FlutterBinding {
     }, building: true);
     assert(_dirtyElements.isEmpty);
   }
+
+  /// The [Element] that is at the root of the hierarchy (and which wraps the
+  /// [RenderView] object at the root of the rendering hierarchy).
+  Element get renderViewElement => _renderViewElement;
+  Element _renderViewElement;
+  void _runApp(Widget app) {
+    _renderViewElement = new RenderObjectToWidgetAdapter<RenderBox>(
+      container: renderView,
+      child: app
+    ).attachToRenderTree(_renderViewElement);
+  }
 }
 
 void runApp(Widget app) {
   WidgetFlutterBinding.ensureInitialized();
-  BuildableElement.lockState(() {
-    WidgetFlutterBinding.instance.renderViewElement.update(
-      WidgetFlutterBinding.instance.describeApp(app)
-    );
-  }, building: true);
+  WidgetFlutterBinding.instance._runApp(app);
 }
 
 void debugDumpApp() {
@@ -115,6 +108,18 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   RenderObjectWithChildMixin<T> createRenderObject() => container;
 
   void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
+
+  RenderObjectToWidgetElement<T> attachToRenderTree([RenderObjectToWidgetElement<T> element]) {
+    BuildableElement.lockState(() {
+      if (element == null) {
+        element = createElement();
+        element.mount(null, null);
+      } else {
+        element.update(this);
+      }
+    }, building: true);
+    return element;
+  }
 }
 
 /// This element class is the instantiation of a [RenderObjectToWidgetAdapter].
