@@ -18,7 +18,6 @@ namespace shell {
 
 const char kBaseTraceStart[] = "{\"traceEvents\":[";
 const char kBaseTraceEnd[] = "]}";
-const char kSentinel[] = "\0";
 
 TracingController::TracingController()
     : view_(nullptr), picture_tracing_enabled_(false), weak_factory_(this) {
