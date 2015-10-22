@@ -70,6 +70,7 @@ class _HeroManifest {
 }
 
 abstract class HeroHandle {
+  bool get alwaysAnimate;
   _HeroManifest _takeChild(Rect animationArea);
 }
 
@@ -78,7 +79,8 @@ class Hero extends StatefulComponent {
     Key key,
     this.tag,
     this.child,
-    this.turns: 1
+    this.turns: 1,
+    this.alwaysAnimate: false
   }) : super(key: key) {
     assert(tag != null);
   }
@@ -86,6 +88,12 @@ class Hero extends StatefulComponent {
   final Object tag;
   final Widget child;
   final int turns;
+
+  /// If true, the hero will always animate, even if it has no matching hero to
+  /// animate to or from. (This only applies if the hero is relevant; if there
+  /// are multiple heroes with the same tag, only the one whose key matches the
+  /// "most valuable keys" will be used.)
+  final bool alwaysAnimate;
 
   static Map<Object, HeroHandle> of(BuildContext context, Set<Key> mostValuableKeys) {
     mostValuableKeys ??= new Set<Key>();
@@ -142,6 +150,8 @@ class HeroState extends State<Hero> implements HeroHandle {
 
   _HeroMode _mode = _HeroMode.constructing;
   Size _size;
+
+  bool get alwaysAnimate => config.alwaysAnimate;
 
   _HeroManifest _takeChild(Rect animationArea) {
     assert(_mode == _HeroMode.measured || _mode == _HeroMode.taken);
@@ -235,6 +245,8 @@ class _HeroQuestState implements HeroHandle {
   final AnimatedRelativeRectValue currentRect;
   final AnimatedValue<double> currentTurns;
 
+  bool get alwaysAnimate => true;
+
   bool get taken => _taken;
   bool _taken = false;
   _HeroManifest _takeChild(Rect animationArea) {
@@ -319,6 +331,9 @@ class HeroParty {
     final List<_HeroQuestState> _newHeroes = <_HeroQuestState>[];
     for (_HeroMatch heroPair in heroes.values) {
       assert(heroPair.from != null || heroPair.to != null);
+      if ((heroPair.from == null && !heroPair.to.alwaysAnimate) ||
+          (heroPair.to == null && !heroPair.from.alwaysAnimate))
+        continue;
       _HeroManifest from = heroPair.from?._takeChild(animationArea);
       assert(heroPair.to == null || heroPair.to is HeroState);
       _HeroManifest to = heroPair.to?._takeChild(animationArea);
