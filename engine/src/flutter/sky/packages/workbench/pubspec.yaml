@@ -8,10 +8,17 @@ dependencies:
   sky_tools: ">=0.0.26"
   cipher: any
   asn1lib: any
+  flutter_rendering_examples: any
+  flutter_sprites: any
+  playfair: any
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
   flutter:
     path: ../sky
+  flutter_rendering_examples:
+    path: ../../../examples/rendering
+  flutter_sprites:
+    path: ../../../skysprites
 environment:
   sdk: '>=1.8.0 <2.0.0'
