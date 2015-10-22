@@ -54,6 +54,11 @@ public:
         m_path.close();
     }
 
+    void reset()
+    {
+        m_path.reset();
+    }
+
     const SkPath& path() const { return m_path; }
 
     PassRefPtr<CanvasPath> shift(const Offset& offset);
