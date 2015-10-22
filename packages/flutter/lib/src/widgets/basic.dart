@@ -592,54 +592,34 @@ class BlockBody extends MultiChildRenderObjectWidget {
 class Stack extends MultiChildRenderObjectWidget {
   Stack(List<Widget> children, {
     Key key,
-    this.horizontalAlignment: 0.0,
-    this.verticalAlignment: 0.0
-  }) : super(key: key, children: children) {
-    assert(horizontalAlignment != null);
-    assert(verticalAlignment != null);
-  }
+    this.alignment: const FractionalOffset(0.0, 0.0)
+  }) : super(key: key, children: children);
 
-  final double horizontalAlignment;
-  final double verticalAlignment;
+  final FractionalOffset alignment;
 
-  RenderStack createRenderObject() {
-    return new RenderStack(
-      horizontalAlignment: horizontalAlignment,
-      verticalAlignment: verticalAlignment
-    );
-  }
+  RenderStack createRenderObject() => new RenderStack(alignment: alignment);
 
   void updateRenderObject(RenderStack renderObject, Stack oldWidget) {
-    renderObject.horizontalAlignment = horizontalAlignment;
-    renderObject.verticalAlignment = verticalAlignment;
+    renderObject.alignment = alignment;
   }
 }
 
 class IndexedStack extends MultiChildRenderObjectWidget {
   IndexedStack(List<Widget> children, {
     Key key,
-    this.horizontalAlignment: 0.0,
-    this.verticalAlignment: 0.0,
+    this.alignment: const FractionalOffset(0.0, 0.0),
     this.index: 0
   }) : super(key: key, children: children);
 
   final int index;
-  final double horizontalAlignment;
-  final double verticalAlignment;
+  final FractionalOffset alignment;
 
-  RenderIndexedStack createRenderObject() {
-    return new RenderIndexedStack(
-      index: index,
-      verticalAlignment: verticalAlignment,
-      horizontalAlignment: horizontalAlignment
-    );
-  }
+  RenderIndexedStack createRenderObject() => new RenderIndexedStack(index: index, alignment: alignment);
 
   void updateRenderObject(RenderIndexedStack renderObject, IndexedStack oldWidget) {
     super.updateRenderObject(renderObject, oldWidget);
     renderObject.index = index;
-    renderObject.horizontalAlignment = horizontalAlignment;
-    renderObject.verticalAlignment = verticalAlignment;
+    renderObject.alignment = alignment;
   }
 }
 
