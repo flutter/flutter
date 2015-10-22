@@ -12,7 +12,7 @@ class IconThemeData {
     if (other is! IconThemeData)
       return false;
     final IconThemeData typedOther = other;
-    return color == typedOther;
+    return color == typedOther.color;
   }
 
   int get hashCode => color.hashCode;
