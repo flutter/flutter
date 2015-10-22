@@ -4,9 +4,8 @@
 
 import 'dart:ui' as ui;
 
+import 'basic_types.dart';
 import 'text_style.dart';
-
-export 'text_style.dart';
 
 /// An immutable span of text
 abstract class TextSpan {

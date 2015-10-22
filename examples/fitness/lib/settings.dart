@@ -60,9 +60,10 @@ class SettingsFragmentState extends State<SettingsFragment> {
     }
   }
 
-  void _handleGoalWeightPressed() {
-    showDialog(config.navigator, (NavigatorState navigator) {
-      return new Dialog(
+  Future _handleGoalWeightPressed() async {
+    double goalWeight = await showDialog(
+      context: context,
+      child: new Dialog(
         title: new Text("Goal Weight"),
         content: new Input(
           key: weightGoalKey,
@@ -71,50 +72,49 @@ class SettingsFragmentState extends State<SettingsFragment> {
           onChanged: _handleGoalWeightChanged
         ),
         onDismiss: () {
-          navigator.pop();
+          Navigator.of(context).pop();
         },
         actions: [
           new FlatButton(
             child: new Text('CANCEL'),
             onPressed: () {
-              navigator.pop();
+              Navigator.of(context).pop();
             }
           ),
           new FlatButton(
             child: new Text('SAVE'),
             onPressed: () {
-              navigator.pop(_goalWeight);
+              Navigator.of(context).pop(_goalWeight);
             }
           ),
         ]
-      );
-    }).then((double goalWeight) => config.updater(goalWeight: goalWeight));
+      )
+    );
+    config.updater(goalWeight: goalWeight);
   }
 
   Widget buildSettingsPane(BuildContext context) {
-    return new Material(
-      child: new ScrollableViewport(
-        child: new Container(
-          padding: const EdgeDims.symmetric(vertical: 20.0),
-          child: new BlockBody([
-            new DrawerItem(
-              onPressed: () { _handleBackupChanged(!(config.userData.backupMode == BackupMode.enabled)); },
-              child: new Row([
-                new Flexible(child: new Text('Back up data to the cloud')),
-                new Switch(value: config.userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
-              ])
-            ),
-            new DrawerItem(
-              onPressed: () => _handleGoalWeightPressed(),
-              child: new Column([
-                  new Text('Goal Weight'),
-                  new Text(goalWeightText, style: Theme.of(context).text.caption),
-                ],
-                alignItems: FlexAlignItems.start
-              )
-            ),
-          ])
-        )
+    return new ScrollableViewport(
+      child: new Container(
+        padding: const EdgeDims.symmetric(vertical: 20.0),
+        child: new BlockBody([
+          new DrawerItem(
+            onPressed: () { _handleBackupChanged(!(config.userData.backupMode == BackupMode.enabled)); },
+            child: new Row([
+              new Flexible(child: new Text('Back up data to the cloud')),
+              new Switch(value: config.userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
+            ])
+          ),
+          new DrawerItem(
+            onPressed: () => _handleGoalWeightPressed(),
+            child: new Column([
+                new Text('Goal Weight'),
+                new Text(goalWeightText, style: Theme.of(context).text.caption),
+              ],
+              alignItems: FlexAlignItems.start
+            )
+          ),
+        ])
       )
     );
   }

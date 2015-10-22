@@ -181,7 +181,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     dispatchOnScroll();
   }
 
-  Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: ease }) {
+  Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
     if (newScrollOffset == _scrollOffset)
       return new Future.value();
 
@@ -362,12 +362,12 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 
   Widget buildContent(BuildContext context) {
     return new SizeObserver(
-      callback: _handleViewportSizeChanged,
+      onSizeChanged: _handleViewportSizeChanged,
       child: new Viewport(
         scrollOffset: scrollOffsetVector,
         scrollDirection: config.scrollDirection,
         child: new SizeObserver(
-          callback: _handleChildSizeChanged,
+          onSizeChanged: _handleChildSizeChanged,
           child: config.child
         )
       )
@@ -434,7 +434,6 @@ abstract class ScrollableListPainter extends Painter {
   double _scrollOffset = 0.0;
   void set scrollOffset (double value) {
     assert(value != null);
-    assert(value >= 0.0 && value <= 1.0);
     if (_scrollOffset == value)
       return;
     _scrollOffset = value;
@@ -597,7 +596,7 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
     }
 
     return new SizeObserver(
-      callback: _handleSizeChanged,
+      onSizeChanged: _handleSizeChanged,
       child: new Container(
         padding: _crossAxisPadding,
         child: new HomogeneousViewport(
@@ -693,7 +692,7 @@ class PageableList<T> extends ScrollableList<T> {
     this.onPageChanged,
     EdgeDims padding,
     this.duration: const Duration(milliseconds: 200),
-    this.curve: ease
+    this.curve: Curves.ease
   }) : super(
     key: key,
     initialScrollOffset: initialPage == null ? null : initialPage * itemExtent,
@@ -821,7 +820,7 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
 
   Widget buildContent(BuildContext context) {
     return new SizeObserver(
-      callback: _handleSizeChanged,
+      onSizeChanged: _handleSizeChanged,
       child: new MixedViewport(
         startOffset: scrollOffset,
         builder: config.builder,

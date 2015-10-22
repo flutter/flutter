@@ -4,10 +4,10 @@
 
 #include "mojo/edk/system/channel_manager.h"
 
+#include <utility>
+
 #include "base/bind.h"
 #include "base/bind_helpers.h"
-#include "base/location.h"
-#include "base/task_runner.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
@@ -17,14 +17,15 @@ namespace system {
 
 namespace {
 
+// TODO(vtl): |channel| should be an rvalue reference, but that currently
+// doesn't work with base::Bind.
 void ShutdownChannelHelper(
-    scoped_refptr<Channel> channel,
+    RefPtr<Channel> channel,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   channel->Shutdown();
   if (callback_thread_task_runner) {
-    bool ok = callback_thread_task_runner->PostTask(FROM_HERE, callback);
-    DCHECK(ok);
+    embedder::PlatformPostTask(callback_thread_task_runner.get(), callback);
   } else {
     callback.Run();
   }
@@ -34,7 +35,7 @@ void ShutdownChannelHelper(
 
 ChannelManager::ChannelManager(
     embedder::PlatformSupport* platform_support,
-    scoped_refptr<base::TaskRunner> io_thread_task_runner,
+    embedder::PlatformTaskRunnerRefPtr io_thread_task_runner,
     ConnectionManager* connection_manager)
     : platform_support_(platform_support),
       io_thread_task_runner_(io_thread_task_runner),
@@ -67,56 +68,52 @@ void ChannelManager::ShutdownOnIOThread() {
 
 void ChannelManager::Shutdown(
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
-  bool ok = io_thread_task_runner_->PostTask(
-      FROM_HERE,
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
+  embedder::PlatformPostTask(
+      io_thread_task_runner_.get(),
       base::Bind(&ChannelManager::ShutdownHelper, base::Unretained(this),
                  callback, callback_thread_task_runner));
-  DCHECK(ok);
 }
 
-scoped_refptr<MessagePipeDispatcher> ChannelManager::CreateChannelOnIOThread(
+RefPtr<MessagePipeDispatcher> ChannelManager::CreateChannelOnIOThread(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle) {
-  scoped_refptr<system::ChannelEndpoint> bootstrap_channel_endpoint;
-  scoped_refptr<system::MessagePipeDispatcher> dispatcher =
-      system::MessagePipeDispatcher::CreateRemoteMessagePipe(
-          &bootstrap_channel_endpoint);
+  RefPtr<ChannelEndpoint> bootstrap_channel_endpoint;
+  auto dispatcher = MessagePipeDispatcher::CreateRemoteMessagePipe(
+      &bootstrap_channel_endpoint);
   CreateChannelOnIOThreadHelper(channel_id, platform_handle.Pass(),
-                                bootstrap_channel_endpoint);
+                                std::move(bootstrap_channel_endpoint));
   return dispatcher;
 }
 
-scoped_refptr<Channel> ChannelManager::CreateChannelWithoutBootstrapOnIOThread(
+RefPtr<Channel> ChannelManager::CreateChannelWithoutBootstrapOnIOThread(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle) {
   return CreateChannelOnIOThreadHelper(channel_id, platform_handle.Pass(),
                                        nullptr);
 }
 
-scoped_refptr<MessagePipeDispatcher> ChannelManager::CreateChannel(
+RefPtr<MessagePipeDispatcher> ChannelManager::CreateChannel(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   DCHECK(!callback.is_null());
   // (|callback_thread_task_runner| may be null.)
 
-  scoped_refptr<system::ChannelEndpoint> bootstrap_channel_endpoint;
-  scoped_refptr<system::MessagePipeDispatcher> dispatcher =
-      system::MessagePipeDispatcher::CreateRemoteMessagePipe(
-          &bootstrap_channel_endpoint);
-  bool ok = io_thread_task_runner_->PostTask(
-      FROM_HERE,
+  RefPtr<ChannelEndpoint> bootstrap_channel_endpoint;
+  auto dispatcher = MessagePipeDispatcher::CreateRemoteMessagePipe(
+      &bootstrap_channel_endpoint);
+  embedder::PlatformPostTask(
+      io_thread_task_runner_.get(),
       base::Bind(&ChannelManager::CreateChannelHelper, base::Unretained(this),
                  channel_id, base::Passed(&platform_handle),
-                 bootstrap_channel_endpoint, callback,
+                 base::Passed(&bootstrap_channel_endpoint), callback,
                  callback_thread_task_runner));
-  DCHECK(ok);
   return dispatcher;
 }
 
-scoped_refptr<Channel> ChannelManager::GetChannel(ChannelId channel_id) const {
+RefPtr<Channel> ChannelManager::GetChannel(ChannelId channel_id) const {
   MutexLocker locker(&mutex_);
   auto it = channels_.find(channel_id);
   DCHECK(it != channels_.end());
@@ -128,12 +125,12 @@ void ChannelManager::WillShutdownChannel(ChannelId channel_id) {
 }
 
 void ChannelManager::ShutdownChannelOnIOThread(ChannelId channel_id) {
-  scoped_refptr<Channel> channel;
+  RefPtr<Channel> channel;
   {
     MutexLocker locker(&mutex_);
     auto it = channels_.find(channel_id);
     DCHECK(it != channels_.end());
-    channel.swap(it->second);
+    channel = std::move(it->second);
     channels_.erase(it);
   }
   channel->Shutdown();
@@ -142,8 +139,8 @@ void ChannelManager::ShutdownChannelOnIOThread(ChannelId channel_id) {
 void ChannelManager::ShutdownChannel(
     ChannelId channel_id,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
-  scoped_refptr<Channel> channel;
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
+  RefPtr<Channel> channel;
   {
     MutexLocker locker(&mutex_);
     auto it = channels_.find(channel_id);
@@ -152,37 +149,34 @@ void ChannelManager::ShutdownChannel(
     channels_.erase(it);
   }
   channel->WillShutdownSoon();
-  bool ok = io_thread_task_runner_->PostTask(
-      FROM_HERE, base::Bind(&ShutdownChannelHelper, channel, callback,
-                            callback_thread_task_runner));
-  DCHECK(ok);
+  embedder::PlatformPostTask(
+      io_thread_task_runner_.get(),
+      base::Bind(&ShutdownChannelHelper, base::Passed(&channel), callback,
+                 callback_thread_task_runner));
 }
 
 void ChannelManager::ShutdownHelper(
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   ShutdownOnIOThread();
-  if (callback_thread_task_runner) {
-    bool ok = callback_thread_task_runner->PostTask(FROM_HERE, callback);
-    DCHECK(ok);
-  } else {
+  if (callback_thread_task_runner)
+    embedder::PlatformPostTask(callback_thread_task_runner.get(), callback);
+  else
     callback.Run();
-  }
 }
 
-scoped_refptr<Channel> ChannelManager::CreateChannelOnIOThreadHelper(
+RefPtr<Channel> ChannelManager::CreateChannelOnIOThreadHelper(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle,
-    scoped_refptr<system::ChannelEndpoint> bootstrap_channel_endpoint) {
+    RefPtr<ChannelEndpoint>&& bootstrap_channel_endpoint) {
   DCHECK_NE(channel_id, kInvalidChannelId);
   DCHECK(platform_handle.is_valid());
 
-  // Create and initialize a |system::Channel|.
-  scoped_refptr<system::Channel> channel =
-      new system::Channel(platform_support_);
-  channel->Init(system::RawChannel::Create(platform_handle.Pass()));
+  // Create and initialize a |Channel|.
+  auto channel = MakeRefCounted<Channel>(platform_support_);
+  channel->Init(RawChannel::Create(platform_handle.Pass()));
   if (bootstrap_channel_endpoint)
-    channel->SetBootstrapEndpoint(bootstrap_channel_endpoint);
+    channel->SetBootstrapEndpoint(std::move(bootstrap_channel_endpoint));
 
   {
     MutexLocker locker(&mutex_);
@@ -196,17 +190,15 @@ scoped_refptr<Channel> ChannelManager::CreateChannelOnIOThreadHelper(
 void ChannelManager::CreateChannelHelper(
     ChannelId channel_id,
     embedder::ScopedPlatformHandle platform_handle,
-    scoped_refptr<system::ChannelEndpoint> bootstrap_channel_endpoint,
+    RefPtr<ChannelEndpoint> bootstrap_channel_endpoint,
     const base::Closure& callback,
-    scoped_refptr<base::TaskRunner> callback_thread_task_runner) {
+    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner) {
   CreateChannelOnIOThreadHelper(channel_id, platform_handle.Pass(),
-                                bootstrap_channel_endpoint);
-  if (callback_thread_task_runner) {
-    bool ok = callback_thread_task_runner->PostTask(FROM_HERE, callback);
-    DCHECK(ok);
-  } else {
+                                std::move(bootstrap_channel_endpoint));
+  if (callback_thread_task_runner)
+    embedder::PlatformPostTask(callback_thread_task_runner.get(), callback);
+  else
     callback.Run();
-  }
 }
 
 }  // namespace system

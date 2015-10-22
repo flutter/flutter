@@ -69,10 +69,6 @@ interface PathService {
   GetCacheDir() => (string path);
 };
 
-interface UpdateService {
-  NotifyUpdateCheckComplete();
-};
-
 enum HapticFeedbackType {
   LONG_PRESS,
   VIRTUAL_KEY,

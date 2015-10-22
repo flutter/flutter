@@ -107,6 +107,14 @@ void KeyboardServiceImpl::Hide() {
   [client_ hide];
 }
 
+void KeyboardServiceImpl::SetText(const mojo::String&) {
+  // TODO(jackson): Implement SetText
+}
+
+void KeyboardServiceImpl::SetSelection(int32_t start, int32_t end) {
+  // TODO(jackson): Implement SetSelection
+}
+
 void KeyboardServiceFactory::Create(
     mojo::ApplicationConnection* connection,
     mojo::InterfaceRequest<::keyboard::KeyboardService> request) {

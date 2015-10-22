@@ -12,6 +12,7 @@
 #include "mojo/edk/system/channel_test_base.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
 #include "mojo/edk/system/message_in_transit_test_utils.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/test_channel_endpoint_client.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -28,16 +29,16 @@ class ChannelEndpointTest : public test::ChannelTestBase {
     test::ChannelTestBase::SetUp();
 
     PostMethodToIOThreadAndWait(
-        FROM_HERE, &ChannelEndpointTest::CreateAndInitChannelOnIOThread, 0);
+        &ChannelEndpointTest::CreateAndInitChannelOnIOThread, 0);
     PostMethodToIOThreadAndWait(
-        FROM_HERE, &ChannelEndpointTest::CreateAndInitChannelOnIOThread, 1);
+        &ChannelEndpointTest::CreateAndInitChannelOnIOThread, 1);
   }
 
   void TearDown() override {
-    PostMethodToIOThreadAndWait(
-        FROM_HERE, &ChannelEndpointTest::ShutdownChannelOnIOThread, 0);
-    PostMethodToIOThreadAndWait(
-        FROM_HERE, &ChannelEndpointTest::ShutdownChannelOnIOThread, 1);
+    PostMethodToIOThreadAndWait(&ChannelEndpointTest::ShutdownChannelOnIOThread,
+                                0);
+    PostMethodToIOThreadAndWait(&ChannelEndpointTest::ShutdownChannelOnIOThread,
+                                1);
 
     test::ChannelTestBase::TearDown();
   }
@@ -47,19 +48,15 @@ class ChannelEndpointTest : public test::ChannelTestBase {
 };
 
 TEST_F(ChannelEndpointTest, Basic) {
-  scoped_refptr<test::TestChannelEndpointClient> client0(
-      new test::TestChannelEndpointClient());
-  scoped_refptr<ChannelEndpoint> endpoint0(
-      new ChannelEndpoint(client0.get(), 0));
-  client0->Init(0, endpoint0.get());
-  channel(0)->SetBootstrapEndpoint(endpoint0);
+  auto client0 = MakeRefCounted<test::TestChannelEndpointClient>();
+  auto endpoint0 = MakeRefCounted<ChannelEndpoint>(client0.Clone(), 0);
+  client0->Init(0, endpoint0.Clone());
+  channel(0)->SetBootstrapEndpoint(std::move(endpoint0));
 
-  scoped_refptr<test::TestChannelEndpointClient> client1(
-      new test::TestChannelEndpointClient());
-  scoped_refptr<ChannelEndpoint> endpoint1(
-      new ChannelEndpoint(client1.get(), 1));
-  client1->Init(1, endpoint1.get());
-  channel(1)->SetBootstrapEndpoint(endpoint1);
+  auto client1 = MakeRefCounted<test::TestChannelEndpointClient>();
+  auto endpoint1 = MakeRefCounted<ChannelEndpoint>(client1.Clone(), 1);
+  client1->Init(1, endpoint1.Clone());
+  channel(1)->SetBootstrapEndpoint(endpoint1.Clone());
 
   // We'll receive a message on channel/client 0.
   base::WaitableEvent read_event(true, false);
@@ -93,27 +90,24 @@ TEST_F(ChannelEndpointTest, Basic) {
 // are all sent/received (and in the correct order). (Note: Due to the way
 // bootstrap endpoints work, the receiving side has to be set up first.)
 TEST_F(ChannelEndpointTest, Prequeued) {
-  scoped_refptr<test::TestChannelEndpointClient> client0(
-      new test::TestChannelEndpointClient());
-  scoped_refptr<ChannelEndpoint> endpoint0(
-      new ChannelEndpoint(client0.get(), 0));
-  client0->Init(0, endpoint0.get());
+  auto client0 = MakeRefCounted<test::TestChannelEndpointClient>();
+  auto endpoint0 = MakeRefCounted<ChannelEndpoint>(client0.Clone(), 0);
+  client0->Init(0, endpoint0.Clone());
 
-  channel(0)->SetBootstrapEndpoint(endpoint0);
+  channel(0)->SetBootstrapEndpoint(std::move(endpoint0));
   MessageInTransitQueue prequeued_messages;
   prequeued_messages.AddMessage(test::MakeTestMessage(1));
   prequeued_messages.AddMessage(test::MakeTestMessage(2));
 
-  scoped_refptr<test::TestChannelEndpointClient> client1(
-      new test::TestChannelEndpointClient());
-  scoped_refptr<ChannelEndpoint> endpoint1(
-      new ChannelEndpoint(client1.get(), 1, &prequeued_messages));
-  client1->Init(1, endpoint1.get());
+  auto client1 = MakeRefCounted<test::TestChannelEndpointClient>();
+  auto endpoint1 =
+      MakeRefCounted<ChannelEndpoint>(client1.Clone(), 1, &prequeued_messages);
+  client1->Init(1, endpoint1.Clone());
 
   EXPECT_TRUE(endpoint1->EnqueueMessage(test::MakeTestMessage(3)));
   EXPECT_TRUE(endpoint1->EnqueueMessage(test::MakeTestMessage(4)));
 
-  channel(1)->SetBootstrapEndpoint(endpoint1);
+  channel(1)->SetBootstrapEndpoint(endpoint1.Clone());
 
   EXPECT_TRUE(endpoint1->EnqueueMessage(test::MakeTestMessage(5)));
   EXPECT_TRUE(endpoint1->EnqueueMessage(test::MakeTestMessage(6)));

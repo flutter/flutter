@@ -67,7 +67,7 @@ bool Dispatcher::TransportDataAccess::EndSerializeAndClose(
 }
 
 // static
-scoped_refptr<Dispatcher> Dispatcher::TransportDataAccess::Deserialize(
+RefPtr<Dispatcher> Dispatcher::TransportDataAccess::Deserialize(
     Channel* channel,
     int32_t type,
     const void* source,
@@ -78,20 +78,17 @@ scoped_refptr<Dispatcher> Dispatcher::TransportDataAccess::Deserialize(
       DVLOG(2) << "Deserializing invalid handle";
       return nullptr;
     case Type::MESSAGE_PIPE:
-      return scoped_refptr<Dispatcher>(
-          MessagePipeDispatcher::Deserialize(channel, source, size));
+      return MessagePipeDispatcher::Deserialize(channel, source, size);
     case Type::DATA_PIPE_PRODUCER:
-      return scoped_refptr<Dispatcher>(
-          DataPipeProducerDispatcher::Deserialize(channel, source, size));
+      return DataPipeProducerDispatcher::Deserialize(channel, source, size);
     case Type::DATA_PIPE_CONSUMER:
-      return scoped_refptr<Dispatcher>(
-          DataPipeConsumerDispatcher::Deserialize(channel, source, size));
+      return DataPipeConsumerDispatcher::Deserialize(channel, source, size);
     case Type::SHARED_BUFFER:
-      return scoped_refptr<Dispatcher>(SharedBufferDispatcher::Deserialize(
-          channel, source, size, platform_handles));
+      return SharedBufferDispatcher::Deserialize(channel, source, size,
+                                                 platform_handles);
     case Type::PLATFORM_HANDLE:
-      return scoped_refptr<Dispatcher>(PlatformHandleDispatcher::Deserialize(
-          channel, source, size, platform_handles));
+      return PlatformHandleDispatcher::Deserialize(channel, source, size,
+                                                   platform_handles);
   }
   LOG(WARNING) << "Unknown dispatcher type " << type;
   return nullptr;
@@ -196,7 +193,7 @@ MojoResult Dispatcher::EndReadData(uint32_t num_bytes_read) {
 
 MojoResult Dispatcher::DuplicateBufferHandle(
     UserPointer<const MojoDuplicateBufferHandleOptions> options,
-    scoped_refptr<Dispatcher>* new_dispatcher) {
+    RefPtr<Dispatcher>* new_dispatcher) {
   MutexLocker locker(&mutex_);
   if (is_closed_)
     return MOJO_RESULT_INVALID_ARGUMENT;
@@ -349,7 +346,7 @@ MojoResult Dispatcher::EndReadDataImplNoLock(uint32_t /*num_bytes_read*/) {
 
 MojoResult Dispatcher::DuplicateBufferHandleImplNoLock(
     UserPointer<const MojoDuplicateBufferHandleOptions> /*options*/,
-    scoped_refptr<Dispatcher>* /*new_dispatcher*/) {
+    RefPtr<Dispatcher>* /*new_dispatcher*/) {
   mutex_.AssertHeld();
   DCHECK(!is_closed_);
   // By default, not supported. Only needed for buffer dispatchers.
@@ -402,7 +399,7 @@ void Dispatcher::RemoveAwakableImplNoLock(Awakable* /*awakable*/,
 void Dispatcher::StartSerializeImplNoLock(Channel* /*channel*/,
                                           size_t* max_size,
                                           size_t* max_platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   DCHECK(!is_closed_);
   *max_size = 0;
   *max_platform_handles = 0;
@@ -413,7 +410,7 @@ bool Dispatcher::EndSerializeAndCloseImplNoLock(
     void* /*destination*/,
     size_t* /*actual_size*/,
     embedder::PlatformHandleVector* /*platform_handles*/) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   DCHECK(is_closed_);
   // By default, serializing isn't supported, so just close.
   CloseImplNoLock();
@@ -437,8 +434,7 @@ void Dispatcher::CloseNoLock() {
   CloseImplNoLock();
 }
 
-scoped_refptr<Dispatcher>
-Dispatcher::CreateEquivalentDispatcherAndCloseNoLock() {
+RefPtr<Dispatcher> Dispatcher::CreateEquivalentDispatcherAndCloseNoLock() {
   mutex_.AssertHeld();
   DCHECK(!is_closed_);
 
@@ -453,7 +449,7 @@ void Dispatcher::StartSerialize(Channel* channel,
   DCHECK(channel);
   DCHECK(max_size);
   DCHECK(max_platform_handles);
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   DCHECK(!is_closed_);
   StartSerializeImplNoLock(channel, max_size, max_platform_handles);
 }
@@ -465,7 +461,7 @@ bool Dispatcher::EndSerializeAndClose(
     embedder::PlatformHandleVector* platform_handles) {
   DCHECK(channel);
   DCHECK(actual_size);
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   DCHECK(!is_closed_);
 
   // Like other |...Close()| methods, we mark ourselves as closed before calling

@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/local_message_pipe_endpoint.h"
@@ -53,12 +55,12 @@ MojoResult MessagePipeDispatcher::ValidateCreateOptions(
   return MOJO_RESULT_OK;
 }
 
-void MessagePipeDispatcher::Init(scoped_refptr<MessagePipe> message_pipe,
+void MessagePipeDispatcher::Init(RefPtr<MessagePipe>&& message_pipe,
                                  unsigned port) {
   DCHECK(message_pipe);
   DCHECK(port == 0 || port == 1);
 
-  message_pipe_ = message_pipe;
+  message_pipe_ = std::move(message_pipe);
   port_ = port;
 }
 
@@ -67,32 +69,28 @@ Dispatcher::Type MessagePipeDispatcher::GetType() const {
 }
 
 // static
-scoped_refptr<MessagePipeDispatcher>
-MessagePipeDispatcher::CreateRemoteMessagePipe(
-    scoped_refptr<ChannelEndpoint>* channel_endpoint) {
-  scoped_refptr<MessagePipe> message_pipe(
-      MessagePipe::CreateLocalProxy(channel_endpoint));
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      Create(kDefaultCreateOptions);
-  dispatcher->Init(message_pipe, 0);
+RefPtr<MessagePipeDispatcher> MessagePipeDispatcher::CreateRemoteMessagePipe(
+    RefPtr<ChannelEndpoint>* channel_endpoint) {
+  auto message_pipe = MessagePipe::CreateLocalProxy(channel_endpoint);
+  auto dispatcher = MessagePipeDispatcher::Create(kDefaultCreateOptions);
+  dispatcher->Init(std::move(message_pipe), 0);
   return dispatcher;
 }
 
 // static
-scoped_refptr<MessagePipeDispatcher> MessagePipeDispatcher::Deserialize(
+RefPtr<MessagePipeDispatcher> MessagePipeDispatcher::Deserialize(
     Channel* channel,
     const void* source,
     size_t size) {
   unsigned port = kInvalidPort;
-  scoped_refptr<MessagePipe> message_pipe;
+  RefPtr<MessagePipe> message_pipe;
   if (!MessagePipe::Deserialize(channel, source, size, &message_pipe, &port))
     return nullptr;
   DCHECK(message_pipe);
   DCHECK(port == 0 || port == 1);
 
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      Create(kDefaultCreateOptions);
-  dispatcher->Init(message_pipe, port);
+  auto dispatcher = MessagePipeDispatcher::Create(kDefaultCreateOptions);
+  dispatcher->Init(std::move(message_pipe), port);
   return dispatcher;
 }
 
@@ -126,18 +124,17 @@ void MessagePipeDispatcher::CloseImplNoLock() {
   port_ = kInvalidPort;
 }
 
-scoped_refptr<Dispatcher>
+RefPtr<Dispatcher>
 MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   mutex().AssertHeld();
 
   // TODO(vtl): Currently, there are no options, so we just use
   // |kDefaultCreateOptions|. Eventually, we'll have to duplicate the options
   // too.
-  scoped_refptr<MessagePipeDispatcher> rv = Create(kDefaultCreateOptions);
-  rv->Init(message_pipe_, port_);
-  message_pipe_ = nullptr;
+  auto dispatcher = MessagePipeDispatcher::Create(kDefaultCreateOptions);
+  dispatcher->Init(std::move(message_pipe_), port_);
   port_ = kInvalidPort;
-  return scoped_refptr<Dispatcher>(rv.get());
+  return dispatcher;
 }
 
 MojoResult MessagePipeDispatcher::WriteMessageImplNoLock(
@@ -196,7 +193,7 @@ void MessagePipeDispatcher::StartSerializeImplNoLock(
     Channel* channel,
     size_t* max_size,
     size_t* max_platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   return message_pipe_->StartSerialize(port_, channel, max_size,
                                        max_platform_handles);
 }
@@ -206,7 +203,7 @@ bool MessagePipeDispatcher::EndSerializeAndCloseImplNoLock(
     void* destination,
     size_t* actual_size,
     embedder::PlatformHandleVector* platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
 
   bool rv = message_pipe_->EndSerialize(port_, channel, destination,
                                         actual_size, platform_handles);

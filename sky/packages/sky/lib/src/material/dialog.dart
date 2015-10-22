@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -140,11 +139,11 @@ class _DialogRoute extends PerformanceRoute {
   bool get opaque => false;
   Duration get transitionDuration => const Duration(milliseconds: 150);
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
+  Widget build(RouteArguments args) {
     return new FadeTransition(
-      performance: performance,
-      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: easeOut),
-      child: builder(new RouteArguments(navigator: navigator, previousPerformance: this.performance, nextPerformance: nextRoutePerformance))
+      performance: args.previousPerformance,
+      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
+      child: builder(args)
     );
   }
 
@@ -154,15 +153,15 @@ class _DialogRoute extends PerformanceRoute {
   }
 }
 
-Future showDialog(NavigatorState navigator, DialogBuilder builder) {
+Future showDialog({ BuildContext context, Widget child }) {
   Completer completer = new Completer();
-  navigator.push(new _DialogRoute(
+  Navigator.of(context).push(new _DialogRoute(
     completer: completer,
     builder: (RouteArguments args) {
       return new Focus(
         key: new GlobalObjectKey(completer),
         autofocus: true,
-        child: builder(args.navigator)
+        child: child
       );
     }
   ));

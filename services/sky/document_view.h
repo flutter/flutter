@@ -15,7 +15,7 @@
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "mojo/services/native_viewport/interfaces/native_viewport.mojom.h"
 #include "mojo/services/navigation/interfaces/navigation.mojom.h"
-#include "mojo/services/network/public/interfaces/url_loader.mojom.h"
+#include "mojo/services/network/interfaces/url_loader.mojom.h"
 #include "mojo/services/service_registry/interfaces/service_registry.mojom.h"
 #include "mojo/services/surfaces/interfaces/display.mojom.h"
 #include "services/sky/compositor/layer_client.h"

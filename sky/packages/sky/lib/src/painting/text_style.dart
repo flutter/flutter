@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
-import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path, FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
 
-export 'dart:ui' show FontWeight, FontStyle, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle;
+import 'basic_types.dart';
 
 /// A normal font weight
 const normal = FontWeight.w400;

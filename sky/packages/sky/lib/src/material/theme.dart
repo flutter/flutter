@@ -28,4 +28,9 @@ class Theme extends InheritedWidget {
   }
 
   bool updateShouldNotify(Theme old) => data != old.data;
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$data');
+  }
 }

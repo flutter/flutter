@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+import 'dart:ui' show Color;
 
-import 'package:flutter/src/material/typography.dart';
-import 'package:flutter/src/material/colors.dart';
+import 'colors.dart';
+import 'icon_theme_data.dart';
+import 'typography.dart';
 
 enum ThemeBrightness { dark, light }
 
@@ -82,6 +83,19 @@ class ThemeData {
   /// icons placed on top of the primary color (e.g. toolbar text).
   final ThemeBrightness primaryColorBrightness;
 
+  /// A text theme that contrasts with the primary color.
+  TextTheme get primaryTextTheme {
+    if (primaryColorBrightness == ThemeBrightness.dark)
+      return Typography.white;
+    return Typography.black;
+  }
+
+  IconThemeData get primaryIconTheme {
+    if (primaryColorBrightness == ThemeBrightness.dark)
+      return const IconThemeData(color: IconThemeColor.white);
+    return const IconThemeData(color: IconThemeColor.black);
+  }
+
   /// The foreground color for widgets (knobs, text, etc)
   Color get accentColor => _accentColor;
   Color _accentColor;
@@ -124,4 +138,6 @@ class ThemeData {
     value = 37 * value + accentColorBrightness.hashCode;
     return value;
   }
+
+  String toString() => '$primaryColor $brightness etc...';
 }

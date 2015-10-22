@@ -254,7 +254,21 @@ class BoxConstraints extends Constraints {
     return value;
   }
 
-  String toString() => "BoxConstraints($minWidth<=w<=$maxWidth, $minHeight<=h<=$maxHeight)";
+  String toString() {
+    if (minWidth == double.INFINITY && minHeight == double.INFINITY)
+      return 'BoxConstraints(biggest)';
+    if (minWidth == 0 && maxWidth == double.INFINITY &&
+        minHeight == 0 && maxHeight == double.INFINITY)
+      return 'BoxConstraints(unconstrained)';
+    String describe(double min, double max, String dim) {
+      if (min == max)
+        return '$dim=${min.toStringAsFixed(1)}';
+      return '${min.toStringAsFixed(1)}<=$dim<=${max.toStringAsFixed(1)}';
+    }
+    final String width = describe(minWidth, maxWidth, 'w');
+    final String height = describe(minHeight, maxHeight, 'h');
+    return 'BoxConstraints($width, $height)';
+  }
 }
 
 /// A hit test entry used by [RenderBox]
@@ -359,9 +373,11 @@ abstract class RenderBox extends RenderObject {
         final _DebugSize _size = this._size;
         assert(_size._owner == this);
         if (RenderObject.debugActiveLayout != null) {
-          // we are always allowed to access our own size (for print debugging and asserts if nothing else)
-          // other than us, the only object that's allowed to read our size is our parent, if they're said they will
-          // if you hit this assert trying to access a child's size, pass parentUsesSize: true in layout()
+          // We are always allowed to access our own size (for print debugging
+          // and asserts if nothing else). Other than us, the only object that's
+          // allowed to read our size is our parent, if they've said they will.
+          // If you hit this assert trying to access a child's size, pass
+          // "parentUsesSize: true" to that child's layout().
           assert(debugDoingThisResize || debugDoingThisLayout ||
                  (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
         }
@@ -377,8 +393,12 @@ abstract class RenderBox extends RenderObject {
     assert((sizedByParent && debugDoingThisResize) ||
            (!sizedByParent && debugDoingThisLayout));
     assert(() {
-      if (value is _DebugSize)
-        return value._canBeUsedByParent && value._owner.parent == this;
+      if (value is _DebugSize) {
+        if (value._owner != this) {
+          assert(value._owner.parent == this);
+          assert(value._canBeUsedByParent);
+        }
+      }
       return true;
     });
     _size = value;
@@ -387,6 +407,11 @@ abstract class RenderBox extends RenderObject {
       return true;
     });
     assert(debugDoesMeetConstraints());
+  }
+
+  void debugResetSize() {
+    // updates the value of size._canBeUsedByParent if necessary
+    size = size;
   }
 
   Map<TextBaseline, double> _cachedBaselines;
@@ -473,7 +498,7 @@ abstract class RenderBox extends RenderObject {
     });
     bool result = constraints.isSatisfiedBy(_size);
     if (!result)
-      print("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
+      debugPrint("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
     return result;
   }
 
@@ -602,16 +627,16 @@ abstract class RenderBox extends RenderObject {
       debugPaintBaselines(context, offset);
   }
   void debugPaintSize(PaintingContext context, Offset offset) {
-    Paint paint = new Paint();
-    paint.setStyle(ui.PaintingStyle.stroke);
-    paint.strokeWidth = 1.0;
-    paint.color = debugPaintSizeColor;
+    Paint paint = new Paint()
+     ..style = ui.PaintingStyle.stroke
+     ..strokeWidth = 1.0
+     ..color = debugPaintSizeColor;
     context.canvas.drawRect(offset & size, paint);
   }
   void debugPaintBaselines(PaintingContext context, Offset offset) {
-    Paint paint = new Paint();
-    paint.setStyle(ui.PaintingStyle.stroke);
-    paint.strokeWidth = 0.25;
+    Paint paint = new Paint()
+     ..style = ui.PaintingStyle.stroke
+     ..strokeWidth = 0.25;
     Path path;
     // ideographic baseline
     double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
@@ -711,4 +736,28 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
       child = childParentData.nextSibling;
     }
   }
+}
+
+/// An offset that's expressed as a fraction of a Size.
+///
+/// FractionalOffset(1.0, 0.0) represents the top right of the Size,
+/// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
+class FractionalOffset {
+  const FractionalOffset(this.x, this.y);
+  final double x;
+  final double y;
+  bool operator ==(dynamic other) {
+    if (other is! FractionalOffset)
+      return false;
+    final FractionalOffset typedOther = other;
+    return x == typedOther.x &&
+           y == typedOther.y;
+  }
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + x.hashCode;
+    value = 37 * value + y.hashCode;
+    return value;
+  }
+  String toString() => '$runtimeType($x, $y)';
 }

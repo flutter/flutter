@@ -1,3 +1,4 @@
+import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -75,12 +76,14 @@ void main() {
     debugWidgetsExceptionHandler = (String context, dynamic exception, StackTrace stack) {
       cachedException = exception;
     };
+    debugSchedulerExceptionHandler = (dynamic exception, StackTrace stack) { throw exception; };
   });
 
   tearDown(() {
     assert(cachedException == null);
     cachedException = null;
     debugWidgetsExceptionHandler = null;
+    debugSchedulerExceptionHandler = null;
   });
 
   test('Legal times for setState', () {

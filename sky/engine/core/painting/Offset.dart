@@ -8,7 +8,7 @@ part of dart_ui;
 ///
 /// An Offset represents a vector from an unspecified point
 class Offset extends OffsetBase {
-  const Offset(dx, dy) : super(dx, dy);
+  const Offset(double dx, double dy) : super(dx, dy);
 
   /// The x component of the offset
   double get dx => _dx;
@@ -43,7 +43,7 @@ class Offset extends OffsetBase {
   Rect operator &(Size other) => new Rect.fromLTWH(dx, dy, other.width, other.height);
 
   /// Returns the point at (0, 0) plus this offset.
-  Point toPoint() => new Point(this.dx, this.dy);
+  Point toPoint() => new Point(dx, dy);
 
   /// Linearly interpolate between two offsets
   ///
@@ -61,5 +61,5 @@ class Offset extends OffsetBase {
   /// Compares two Offsets for equality.
   bool operator ==(dynamic other) => other is Offset && super == other;
 
-  String toString() => "Offset($dx, $dy)";
+  String toString() => "Offset(${dx.toStringAsFixed(1)}, ${dy.toStringAsFixed(1)})";
 }

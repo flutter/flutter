@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
-import 'dart:ui' show Point, Offset, Color, Paint;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
 
 const Duration _kShowDuration = const Duration(milliseconds: 300);
 const Duration _kHideDuration = const Duration(milliseconds: 200);
@@ -27,9 +26,9 @@ class RadialReaction {
     this.radius,
     Point startPosition
   }) {
-    _outerOpacity = new AnimatedValue<double>(0.0, end: _kMaxOpacity, curve: easeOut);
-    _innerCenter = new AnimatedValue<Point>(startPosition, end: center, curve: easeOut);
-    _innerRadius = new AnimatedValue<double>(0.0, end: radius, curve: easeOut);
+    _outerOpacity = new AnimatedValue<double>(0.0, end: _kMaxOpacity, curve: Curves.easeOut);
+    _innerCenter = new AnimatedValue<Point>(startPosition, end: center, curve: Curves.easeOut);
+    _innerRadius = new AnimatedValue<double>(0.0, end: radius, curve: Curves.easeOut);
     _showPerformance = new Performance(duration: _kShowDuration)
       ..addListener(() {
         _showPerformance.updateVariable(_outerOpacity);
@@ -37,7 +36,7 @@ class RadialReaction {
         _showPerformance.updateVariable(_innerRadius);
       });
     _fade = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(1.0, end: 0.0, curve: easeIn),
+      variable: new AnimatedValue<double>(1.0, end: 0.0, curve: Curves.easeIn),
       duration: _kHideDuration
     );
   }
@@ -82,7 +81,7 @@ class RadialReaction {
   final Paint _innerPaint = new Paint();
 
   /// Paint the reaction onto the given canvas at the given offset
-  void paint(ui.Canvas canvas, Offset offset) {
+  void paint(Canvas canvas, Offset offset) {
     _outerPaint.color = _kOuterColor.withAlpha(_roundOpacity(_outerOpacity.value * _fade.value));
     canvas.drawCircle(center + offset, radius, _outerPaint);
 

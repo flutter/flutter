@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/trace_event/trace_config.h"
@@ -17,56 +18,57 @@ namespace shell {
 
 const char kBaseTraceStart[] = "{\"traceEvents\":[";
 const char kBaseTraceEnd[] = "]}";
-const char kSentinel[] = "\0";
 
 TracingController::TracingController()
-    : view_(nullptr), picture_tracing_enabled_(false) {
+    : view_(nullptr), picture_tracing_enabled_(false), weak_factory_(this) {
 }
 
 TracingController::~TracingController() {
 }
 
 void TracingController::StartTracing() {
-  DLOG(INFO) << "Collecting Traces";
+  LOG(INFO) << "Starting trace";
 
   StartDartTracing();
   StartBaseTracing();
 }
 
 void TracingController::StopTracing(const base::FilePath& path) {
-  DLOG(INFO) << "Stopping trace collection";
+  LOG(INFO) << "Saving trace to " << path.LossyDisplayName();
 
   trace_file_ = std::unique_ptr<base::File>(new base::File(
       path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE));
-
+  base::SetPosixFilePermissions(path, base::FILE_PERMISSION_MASK);
   StopBaseTracing();
 }
 
 void TracingController::OnDataAvailable(const void* data, size_t size) {
-  if (trace_file_ == nullptr) {
-    return;
-  }
-
-  trace_file_->WriteAtCurrentPos(reinterpret_cast<const char*>(data), size);
+  if (trace_file_)
+    trace_file_->WriteAtCurrentPos(reinterpret_cast<const char*>(data), size);
 }
 
 void TracingController::OnDataComplete() {
-  trace_file_ = nullptr;
   drainer_ = nullptr;
+  FinalizeTraceFile();
+  LOG(INFO) << "Trace complete";
 }
 
 void TracingController::StartDartTracing() {
-  if (view_ != nullptr) {
+  if (view_)
     view_->StartDartTracing();
-  }
 }
 
 void TracingController::StopDartTracing() {
-  mojo::DataPipe pipe;
-  drainer_ = std::unique_ptr<mojo::common::DataPipeDrainer>(
-      new mojo::common::DataPipeDrainer(this, pipe.consumer_handle.Pass()));
-  if (view_ != nullptr) {
+  if (view_) {
+    if (trace_file_)
+      trace_file_->WriteAtCurrentPos(",", 1);
+
+    mojo::DataPipe pipe;
+    drainer_ = std::unique_ptr<mojo::common::DataPipeDrainer>(
+        new mojo::common::DataPipeDrainer(this, pipe.consumer_handle.Pass()));
     view_->StopDartTracing(pipe.producer_handle.Pass());
+  } else {
+    FinalizeTraceFile();
   }
 }
 
@@ -80,37 +82,33 @@ void TracingController::StopBaseTracing() {
   base::trace_event::TraceLog* log = base::trace_event::TraceLog::GetInstance();
   log->SetDisabled();
 
-  if (trace_file_ != nullptr) {
+  if (trace_file_) {
     trace_file_->WriteAtCurrentPos(kBaseTraceStart,
                                    sizeof(kBaseTraceStart) - 1);
   }
-  log->Flush(base::Bind(&TracingController::OnBaseTraceChunk));
+  log->Flush(base::Bind(
+      &TracingController::OnBaseTraceChunk, weak_factory_.GetWeakPtr()));
+}
+
+void TracingController::FinalizeTraceFile() {
+  if (trace_file_) {
+    trace_file_->WriteAtCurrentPos(kBaseTraceEnd, sizeof(kBaseTraceEnd) - 1);
+    trace_file_ = nullptr;
+  }
 }
 
 void TracingController::OnBaseTraceChunk(
     const scoped_refptr<base::RefCountedString>& chunk,
     bool has_more_events) {
-  // Unfortunately, there does not seem to be a way to pass a user args
-  // reference to the callback. So we make this static and use the |Shared()|
-  // accessor
-  TracingController& controller = Shell::Shared().tracing_controller();
-
-  if (controller.trace_file_ != nullptr) {
+  if (trace_file_) {
     std::string& str = chunk->data();
-    controller.trace_file_->WriteAtCurrentPos(str.data(), str.size());
-    if (has_more_events) {
-      controller.trace_file_->WriteAtCurrentPos(",", 1);
-    } else {
-      controller.trace_file_->WriteAtCurrentPos(kBaseTraceEnd,
-                                                sizeof(kBaseTraceEnd) - 1);
-      controller.trace_file_->WriteAtCurrentPos(kSentinel,
-                                                sizeof(kSentinel) - 1);
-    }
+    trace_file_->WriteAtCurrentPos(str.data(), str.size());
+    if (has_more_events)
+      trace_file_->WriteAtCurrentPos(",", 1);
   }
 
-  if (!has_more_events) {
-    controller.StopDartTracing();
-  }
+  if (!has_more_events)
+    StopDartTracing();
 }
 
 void TracingController::RegisterShellView(ShellView* view) {

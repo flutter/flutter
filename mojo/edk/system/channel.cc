@@ -29,13 +29,6 @@ struct SerializedEndpoint {
 
 }  // namespace
 
-Channel::Channel(embedder::PlatformSupport* platform_support)
-    : platform_support_(platform_support),
-      is_running_(false),
-      is_shutting_down_(false),
-      channel_manager_(nullptr) {
-}
-
 void Channel::Init(std::unique_ptr<RawChannel> raw_channel) {
   DCHECK(creation_thread_checker_.CalledOnValidThread());
   DCHECK(raw_channel);
@@ -97,16 +90,15 @@ void Channel::WillShutdownSoon() {
   channel_manager_ = nullptr;
 }
 
-void Channel::SetBootstrapEndpoint(scoped_refptr<ChannelEndpoint> endpoint) {
+void Channel::SetBootstrapEndpoint(RefPtr<ChannelEndpoint>&& endpoint) {
   // Used for both local and remote IDs.
   ChannelEndpointId bootstrap_id = ChannelEndpointId::GetBootstrap();
-  SetBootstrapEndpointWithIds(endpoint.Pass(), bootstrap_id, bootstrap_id);
+  SetBootstrapEndpointWithIds(std::move(endpoint), bootstrap_id, bootstrap_id);
 }
 
-void Channel::SetBootstrapEndpointWithIds(
-    scoped_refptr<ChannelEndpoint> endpoint,
-    ChannelEndpointId local_id,
-    ChannelEndpointId remote_id) {
+void Channel::SetBootstrapEndpointWithIds(RefPtr<ChannelEndpoint>&& endpoint,
+                                          ChannelEndpointId local_id,
+                                          ChannelEndpointId remote_id) {
   DCHECK(endpoint);
 
   {
@@ -149,11 +141,11 @@ void Channel::DetachEndpoint(ChannelEndpoint* endpoint,
                              ChannelEndpointId local_id,
                              ChannelEndpointId remote_id) {
   // Keep a reference to |this| to prevent this |Channel| from being deleted
-  // while this function is running.  Without this, if |Shutdown()| is started
-  // on the IO thread immediately after |mutex_| is released below and finishes
+  // while this function is running. Without this, if |Shutdown()| is started on
+  // the I/O thread immediately after |mutex_| is released below and finishes
   // before |SendControlMessage()| gets to run, |this| could be deleted while
   // this function is still running.
-  scoped_refptr<Channel> self(this);
+  RefPtr<Channel> self(this);
 
   if (!DetachEndpointInternal(endpoint, local_id, remote_id))
     return;
@@ -181,20 +173,20 @@ void Channel::SerializeEndpointWithClosedPeer(
   SerializeEndpointWithLocalPeer(destination, message_queue, nullptr, 0);
 }
 
-scoped_refptr<ChannelEndpoint> Channel::SerializeEndpointWithLocalPeer(
+RefPtr<ChannelEndpoint> Channel::SerializeEndpointWithLocalPeer(
     void* destination,
     MessageInTransitQueue* message_queue,
-    ChannelEndpointClient* endpoint_client,
+    RefPtr<ChannelEndpointClient>&& endpoint_client,
     unsigned endpoint_client_port) {
   DCHECK(destination);
   // Allow |endpoint_client| to be null, for use by
   // |SerializeEndpointWithClosedPeer()|.
 
-  scoped_refptr<ChannelEndpoint> endpoint(new ChannelEndpoint(
-      endpoint_client, endpoint_client_port, message_queue));
+  auto endpoint = MakeRefCounted<ChannelEndpoint>(
+      std::move(endpoint_client), endpoint_client_port, message_queue);
 
   SerializedEndpoint* s = static_cast<SerializedEndpoint*>(destination);
-  s->receiver_endpoint_id = AttachAndRunEndpoint(endpoint);
+  s->receiver_endpoint_id = AttachAndRunEndpoint(endpoint.Clone());
   DVLOG(2) << "Serializing endpoint with local or closed peer (remote ID = "
            << s->receiver_endpoint_id << ")";
 
@@ -204,7 +196,7 @@ scoped_refptr<ChannelEndpoint> Channel::SerializeEndpointWithLocalPeer(
 void Channel::SerializeEndpointWithRemotePeer(
     void* destination,
     MessageInTransitQueue* message_queue,
-    scoped_refptr<ChannelEndpoint> peer_endpoint) {
+    RefPtr<ChannelEndpoint>&& peer_endpoint) {
   DCHECK(destination);
   DCHECK(peer_endpoint);
 
@@ -214,20 +206,19 @@ void Channel::SerializeEndpointWithRemotePeer(
   // TODO(vtl): If we were to own/track the relayer directly (rather than owning
   // it via its |ChannelEndpoint|s), then we might be able to make
   // |ChannelEndpoint|'s |client_| pointer a raw pointer.
-  scoped_refptr<EndpointRelayer> relayer(new EndpointRelayer());
-  scoped_refptr<ChannelEndpoint> endpoint(
-      new ChannelEndpoint(relayer.get(), 0, message_queue));
-  relayer->Init(endpoint.get(), peer_endpoint.get());
-  peer_endpoint->ReplaceClient(relayer.get(), 1);
+  auto relayer = MakeRefCounted<EndpointRelayer>();
+  auto endpoint =
+      MakeRefCounted<ChannelEndpoint>(relayer.Clone(), 0, message_queue);
+  relayer->Init(endpoint.Clone(), peer_endpoint.Clone());
+  peer_endpoint->ReplaceClient(std::move(relayer), 1);
 
   SerializedEndpoint* s = static_cast<SerializedEndpoint*>(destination);
-  s->receiver_endpoint_id = AttachAndRunEndpoint(endpoint);
+  s->receiver_endpoint_id = AttachAndRunEndpoint(std::move(endpoint));
   DVLOG(2) << "Serializing endpoint with remote peer (remote ID = "
            << s->receiver_endpoint_id << ")";
 }
 
-scoped_refptr<IncomingEndpoint> Channel::DeserializeEndpoint(
-    const void* source) {
+RefPtr<IncomingEndpoint> Channel::DeserializeEndpoint(const void* source) {
   const SerializedEndpoint* s = static_cast<const SerializedEndpoint*>(source);
   ChannelEndpointId local_id = s->receiver_endpoint_id;
   // No need to check the validity of |local_id| -- if it's not valid, it simply
@@ -245,8 +236,7 @@ scoped_refptr<IncomingEndpoint> Channel::DeserializeEndpoint(
 
   DVLOG(2) << "Deserializing endpoint (new local ID = " << local_id << ")";
 
-  scoped_refptr<IncomingEndpoint> rv;
-  rv.swap(it->second);
+  RefPtr<IncomingEndpoint> rv = std::move(it->second);
   incoming_endpoints_.erase(it);
   return rv;
 }
@@ -257,6 +247,12 @@ size_t Channel::GetSerializedPlatformHandleSize() const {
   MutexLocker locker(&mutex_);
   return raw_channel_->GetSerializedPlatformHandleSize();
 }
+
+Channel::Channel(embedder::PlatformSupport* platform_support)
+    : platform_support_(platform_support),
+      is_running_(false),
+      is_shutting_down_(false),
+      channel_manager_(nullptr) {}
 
 Channel::~Channel() {
   // The channel should have been shut down first.
@@ -355,7 +351,7 @@ void Channel::OnReadMessageForEndpoint(
     return;
   }
 
-  scoped_refptr<ChannelEndpoint> endpoint;
+  RefPtr<ChannelEndpoint> endpoint;
   {
     MutexLocker locker(&mutex_);
 
@@ -471,8 +467,8 @@ bool Channel::OnAttachAndRunEndpoint(ChannelEndpointId local_id,
 
   // Create/initialize an |IncomingEndpoint| and thus an endpoint (outside the
   // lock).
-  scoped_refptr<IncomingEndpoint> incoming_endpoint(new IncomingEndpoint());
-  scoped_refptr<ChannelEndpoint> endpoint = incoming_endpoint->Init();
+  auto incoming_endpoint = MakeRefCounted<IncomingEndpoint>();
+  RefPtr<ChannelEndpoint> endpoint = incoming_endpoint->Init();
 
   bool success = true;
   {
@@ -505,7 +501,7 @@ bool Channel::OnRemoveEndpoint(ChannelEndpointId local_id,
                                ChannelEndpointId remote_id) {
   DCHECK(creation_thread_checker_.CalledOnValidThread());
 
-  scoped_refptr<ChannelEndpoint> endpoint;
+  RefPtr<ChannelEndpoint> endpoint;
   {
     MutexLocker locker(&mutex_);
 
@@ -520,7 +516,7 @@ bool Channel::OnRemoveEndpoint(ChannelEndpointId local_id,
       return true;
     }
 
-    endpoint = it->second;
+    endpoint = std::move(it->second);
     local_id_to_endpoint_map_.erase(it);
     // Detach and send the remove ack message outside the lock.
   }
@@ -575,12 +571,10 @@ void Channel::HandleLocalError(const char* error_message) {
   LOG(WARNING) << error_message;
 }
 
-// Note: |endpoint| being a |scoped_refptr| makes this function safe, since it
-// keeps the endpoint alive even after the lock is released. Otherwise, there's
-// the temptation to simply pass the result of |new ChannelEndpoint(...)|
-// directly to this function, which wouldn't be sufficient for safety.
+// Note: |endpoint| being a |RefPtr| makes this function safe, since it keeps
+// the endpoint alive even after the lock is released.
 ChannelEndpointId Channel::AttachAndRunEndpoint(
-    scoped_refptr<ChannelEndpoint> endpoint) {
+    RefPtr<ChannelEndpoint>&& endpoint) {
   DCHECK(endpoint);
 
   ChannelEndpointId local_id;

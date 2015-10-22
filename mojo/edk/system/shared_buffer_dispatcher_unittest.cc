@@ -113,11 +113,12 @@ TEST_F(SharedBufferDispatcherTest, ValidateCreateOptionsInvalid) {
 }
 
 TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
-  scoped_refptr<SharedBufferDispatcher> dispatcher;
-  EXPECT_EQ(MOJO_RESULT_OK, SharedBufferDispatcher::Create(
-                                platform_support(),
-                                SharedBufferDispatcher::kDefaultCreateOptions,
-                                100, &dispatcher));
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
+
   ASSERT_TRUE(dispatcher);
   EXPECT_EQ(Dispatcher::Type::SHARED_BUFFER, dispatcher->GetType());
 
@@ -148,11 +149,11 @@ TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
 }
 
 TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {
-  scoped_refptr<SharedBufferDispatcher> dispatcher1;
-  EXPECT_EQ(MOJO_RESULT_OK, SharedBufferDispatcher::Create(
-                                platform_support(),
-                                SharedBufferDispatcher::kDefaultCreateOptions,
-                                100, &dispatcher1));
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher1 = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
 
   // Map and write something.
   std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
@@ -162,7 +163,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {
   mapping.reset();
 
   // Duplicate |dispatcher1| and then close it.
-  scoped_refptr<Dispatcher> dispatcher2;
+  RefPtr<Dispatcher> dispatcher2;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher1->DuplicateBufferHandle(
                                 NullUserPointer(), &dispatcher2));
   ASSERT_TRUE(dispatcher2);
@@ -179,18 +180,18 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {
 }
 
 TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsValid) {
-  scoped_refptr<SharedBufferDispatcher> dispatcher1;
-  EXPECT_EQ(MOJO_RESULT_OK, SharedBufferDispatcher::Create(
-                                platform_support(),
-                                SharedBufferDispatcher::kDefaultCreateOptions,
-                                100, &dispatcher1));
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher1 = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
 
   MojoDuplicateBufferHandleOptions options[] = {
       {sizeof(MojoDuplicateBufferHandleOptions),
        MOJO_DUPLICATE_BUFFER_HANDLE_OPTIONS_FLAG_NONE},
       {sizeof(MojoDuplicateBufferHandleOptionsFlags), ~0u}};
   for (size_t i = 0; i < MOJO_ARRAYSIZE(options); i++) {
-    scoped_refptr<Dispatcher> dispatcher2;
+    RefPtr<Dispatcher> dispatcher2;
     EXPECT_EQ(MOJO_RESULT_OK, dispatcher1->DuplicateBufferHandle(
                                   MakeUserPointer(&options[i]), &dispatcher2));
     ASSERT_TRUE(dispatcher2);
@@ -202,17 +203,17 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsValid) {
 }
 
 TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsInvalid) {
-  scoped_refptr<SharedBufferDispatcher> dispatcher1;
-  EXPECT_EQ(MOJO_RESULT_OK, SharedBufferDispatcher::Create(
-                                platform_support(),
-                                SharedBufferDispatcher::kDefaultCreateOptions,
-                                100, &dispatcher1));
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher1 = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
 
   // Invalid |struct_size|.
   {
     MojoDuplicateBufferHandleOptions options = {
         1u, MOJO_DUPLICATE_BUFFER_HANDLE_OPTIONS_FLAG_NONE};
-    scoped_refptr<Dispatcher> dispatcher2;
+    RefPtr<Dispatcher> dispatcher2;
     EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
               dispatcher1->DuplicateBufferHandle(MakeUserPointer(&options),
                                                  &dispatcher2));
@@ -223,7 +224,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsInvalid) {
   {
     MojoDuplicateBufferHandleOptions options = {
         sizeof(MojoDuplicateBufferHandleOptions), ~0u};
-    scoped_refptr<Dispatcher> dispatcher2;
+    RefPtr<Dispatcher> dispatcher2;
     EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED,
               dispatcher1->DuplicateBufferHandle(MakeUserPointer(&options),
                                                  &dispatcher2));
@@ -235,28 +236,28 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsInvalid) {
 
 TEST_F(SharedBufferDispatcherTest, CreateInvalidNumBytes) {
   // Size too big.
-  scoped_refptr<SharedBufferDispatcher> dispatcher;
-  EXPECT_EQ(
-      MOJO_RESULT_RESOURCE_EXHAUSTED,
-      SharedBufferDispatcher::Create(
-          platform_support(), SharedBufferDispatcher::kDefaultCreateOptions,
-          std::numeric_limits<uint64_t>::max(), &dispatcher));
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions,
+      std::numeric_limits<uint64_t>::max(), &result);
+  EXPECT_EQ(MOJO_RESULT_RESOURCE_EXHAUSTED, result);
   EXPECT_FALSE(dispatcher);
 
   // Zero size.
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
-            SharedBufferDispatcher::Create(
-                platform_support(),
-                SharedBufferDispatcher::kDefaultCreateOptions, 0, &dispatcher));
+  result = MOJO_RESULT_INTERNAL;
+  dispatcher = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 0,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, result);
   EXPECT_FALSE(dispatcher);
 }
 
 TEST_F(SharedBufferDispatcherTest, MapBufferInvalidArguments) {
-  scoped_refptr<SharedBufferDispatcher> dispatcher;
-  EXPECT_EQ(MOJO_RESULT_OK, SharedBufferDispatcher::Create(
-                                platform_support(),
-                                SharedBufferDispatcher::kDefaultCreateOptions,
-                                100, &dispatcher));
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
 
   std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,

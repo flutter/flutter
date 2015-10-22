@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/data_pipe_producer_dispatcher.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/memory.h"
@@ -11,9 +13,9 @@
 namespace mojo {
 namespace system {
 
-void DataPipeProducerDispatcher::Init(scoped_refptr<DataPipe> data_pipe) {
+void DataPipeProducerDispatcher::Init(RefPtr<DataPipe>&& data_pipe) {
   DCHECK(data_pipe);
-  data_pipe_ = data_pipe;
+  data_pipe_ = std::move(data_pipe);
 }
 
 Dispatcher::Type DataPipeProducerDispatcher::GetType() const {
@@ -21,17 +23,17 @@ Dispatcher::Type DataPipeProducerDispatcher::GetType() const {
 }
 
 // static
-scoped_refptr<DataPipeProducerDispatcher>
-DataPipeProducerDispatcher::Deserialize(Channel* channel,
-                                        const void* source,
-                                        size_t size) {
-  scoped_refptr<DataPipe> data_pipe;
+RefPtr<DataPipeProducerDispatcher> DataPipeProducerDispatcher::Deserialize(
+    Channel* channel,
+    const void* source,
+    size_t size) {
+  RefPtr<DataPipe> data_pipe;
   if (!DataPipe::ProducerDeserialize(channel, source, size, &data_pipe))
     return nullptr;
   DCHECK(data_pipe);
 
-  scoped_refptr<DataPipeProducerDispatcher> dispatcher = Create();
-  dispatcher->Init(data_pipe);
+  auto dispatcher = DataPipeProducerDispatcher::Create();
+  dispatcher->Init(std::move(data_pipe));
   return dispatcher;
 }
 
@@ -59,14 +61,13 @@ void DataPipeProducerDispatcher::CloseImplNoLock() {
   data_pipe_ = nullptr;
 }
 
-scoped_refptr<Dispatcher>
+RefPtr<Dispatcher>
 DataPipeProducerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   mutex().AssertHeld();
 
-  scoped_refptr<DataPipeProducerDispatcher> rv = Create();
-  rv->Init(data_pipe_);
-  data_pipe_ = nullptr;
-  return scoped_refptr<Dispatcher>(rv.get());
+  auto dispatcher = DataPipeProducerDispatcher::Create();
+  dispatcher->Init(std::move(data_pipe_));
+  return dispatcher;
 }
 
 MojoResult DataPipeProducerDispatcher::WriteDataImplNoLock(
@@ -125,7 +126,7 @@ void DataPipeProducerDispatcher::StartSerializeImplNoLock(
     Channel* channel,
     size_t* max_size,
     size_t* max_platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   data_pipe_->ProducerStartSerialize(channel, max_size, max_platform_handles);
 }
 
@@ -134,7 +135,7 @@ bool DataPipeProducerDispatcher::EndSerializeAndCloseImplNoLock(
     void* destination,
     size_t* actual_size,
     embedder::PlatformHandleVector* platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
 
   bool rv = data_pipe_->ProducerEndSerialize(channel, destination, actual_size,
                                              platform_handles);

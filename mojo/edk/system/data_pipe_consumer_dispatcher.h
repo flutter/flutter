@@ -5,8 +5,8 @@
 #ifndef MOJO_EDK_SYSTEM_DATA_PIPE_CONSUMER_DISPATCHER_H_
 #define MOJO_EDK_SYSTEM_DATA_PIPE_CONSUMER_DISPATCHER_H_
 
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -19,20 +19,21 @@ class DataPipe;
 // thread-safe.
 class DataPipeConsumerDispatcher final : public Dispatcher {
  public:
-  static scoped_refptr<DataPipeConsumerDispatcher> Create() {
-    return make_scoped_refptr(new DataPipeConsumerDispatcher());
+  static RefPtr<DataPipeConsumerDispatcher> Create() {
+    return AdoptRef(new DataPipeConsumerDispatcher());
   }
 
   // Must be called before any other methods.
-  void Init(scoped_refptr<DataPipe> data_pipe) MOJO_NOT_THREAD_SAFE;
+  void Init(RefPtr<DataPipe>&& data_pipe) MOJO_NOT_THREAD_SAFE;
 
   // |Dispatcher| public methods:
   Type GetType() const override;
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
-  static scoped_refptr<DataPipeConsumerDispatcher>
-  Deserialize(Channel* channel, const void* source, size_t size);
+  static RefPtr<DataPipeConsumerDispatcher> Deserialize(Channel* channel,
+                                                        const void* source,
+                                                        size_t size);
 
   // Get access to the |DataPipe| for testing.
   DataPipe* GetDataPipeForTest();
@@ -44,8 +45,7 @@ class DataPipeConsumerDispatcher final : public Dispatcher {
   // |Dispatcher| protected methods:
   void CancelAllAwakablesNoLock() override;
   void CloseImplNoLock() override;
-  scoped_refptr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
-      override;
+  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override;
   MojoResult ReadDataImplNoLock(UserPointer<void> elements,
                                 UserPointer<uint32_t> num_bytes,
                                 MojoReadDataFlags flags) override;
@@ -73,7 +73,7 @@ class DataPipeConsumerDispatcher final : public Dispatcher {
   bool IsBusyNoLock() const override;
 
   // This will be null if closed.
-  scoped_refptr<DataPipe> data_pipe_ MOJO_GUARDED_BY(mutex());
+  RefPtr<DataPipe> data_pipe_ MOJO_GUARDED_BY(mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(DataPipeConsumerDispatcher);
 };

@@ -5,6 +5,7 @@
 #ifndef MOJO_DATA_PIPE_UTILS_DATA_PIPE_UTILS_H_
 #define MOJO_DATA_PIPE_UTILS_DATA_PIPE_UTILS_H_
 
+#include <stdio.h>
 #include <string>
 
 #include "base/callback_forward.h"
@@ -48,6 +49,11 @@ bool BlockingCopyFromString(const std::string& source,
 // immediately so that it is only accessible by file pointer (and removed once
 // closed or the creating process dies).
 base::ScopedFILE BlockingCopyToTempFile(ScopedDataPipeConsumerHandle source);
+
+// Similar to BlockingCopyToTempFile, but use a pre-defined file pointer
+// (rather than a newly created temp file) and do not unlink the file.
+// Returns true on success, false on failure.
+bool BlockingCopyToFile(ScopedDataPipeConsumerHandle source, FILE* fp);
 
 }  // namespace common
 }  // namespace mojo

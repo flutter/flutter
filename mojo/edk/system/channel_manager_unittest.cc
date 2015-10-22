@@ -7,9 +7,9 @@
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
 #include "base/run_loop.h"
-#include "base/task_runner.h"
 #include "base/thread_task_runner_handle.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
+#include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
@@ -48,22 +48,17 @@ TEST_F(ChannelManagerTest, Basic) {
   embedder::PlatformChannelPair channel_pair;
 
   const ChannelId id = 1;
-  scoped_refptr<MessagePipeDispatcher> d =
-      channel_manager().CreateChannelOnIOThread(
-          id, channel_pair.PassServerHandle());
+  RefPtr<MessagePipeDispatcher> d = channel_manager().CreateChannelOnIOThread(
+      id, channel_pair.PassServerHandle());
 
-  scoped_refptr<Channel> ch = channel_manager().GetChannel(id);
+  RefPtr<Channel> ch = channel_manager().GetChannel(id);
   EXPECT_TRUE(ch);
-  // |ChannelManager| should have a ref.
-  EXPECT_FALSE(ch->HasOneRef());
 
   channel_manager().WillShutdownChannel(id);
-  // |ChannelManager| should still have a ref.
-  EXPECT_FALSE(ch->HasOneRef());
 
   channel_manager().ShutdownChannelOnIOThread(id);
   // |ChannelManager| should have given up its ref.
-  EXPECT_TRUE(ch->HasOneRef());
+  ch->AssertHasOneRef();
 
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
 }
@@ -72,31 +67,28 @@ TEST_F(ChannelManagerTest, TwoChannels) {
   embedder::PlatformChannelPair channel_pair;
 
   const ChannelId id1 = 1;
-  scoped_refptr<MessagePipeDispatcher> d1 =
-      channel_manager().CreateChannelOnIOThread(
-          id1, channel_pair.PassServerHandle());
+  RefPtr<MessagePipeDispatcher> d1 = channel_manager().CreateChannelOnIOThread(
+      id1, channel_pair.PassServerHandle());
 
   const ChannelId id2 = 2;
-  scoped_refptr<MessagePipeDispatcher> d2 =
-      channel_manager().CreateChannelOnIOThread(
-          id2, channel_pair.PassClientHandle());
+  RefPtr<MessagePipeDispatcher> d2 = channel_manager().CreateChannelOnIOThread(
+      id2, channel_pair.PassClientHandle());
 
-  scoped_refptr<Channel> ch1 = channel_manager().GetChannel(id1);
+  RefPtr<Channel> ch1 = channel_manager().GetChannel(id1);
   EXPECT_TRUE(ch1);
 
-  scoped_refptr<Channel> ch2 = channel_manager().GetChannel(id2);
+  RefPtr<Channel> ch2 = channel_manager().GetChannel(id2);
   EXPECT_TRUE(ch2);
 
   // Calling |WillShutdownChannel()| multiple times (on |id1|) is okay.
   channel_manager().WillShutdownChannel(id1);
   channel_manager().WillShutdownChannel(id1);
-  EXPECT_FALSE(ch1->HasOneRef());
   // Not calling |WillShutdownChannel()| (on |id2|) is okay too.
 
   channel_manager().ShutdownChannelOnIOThread(id1);
-  EXPECT_TRUE(ch1->HasOneRef());
+  ch1->AssertHasOneRef();
   channel_manager().ShutdownChannelOnIOThread(id2);
-  EXPECT_TRUE(ch2->HasOneRef());
+  ch2->AssertHasOneRef();
 
   EXPECT_EQ(MOJO_RESULT_OK, d1->Close());
   EXPECT_EQ(MOJO_RESULT_OK, d2->Close());
@@ -106,7 +98,7 @@ class OtherThread : public mojo::test::SimpleTestThread {
  public:
   // Note: There should be no other refs to the channel identified by
   // |channel_id| outside the channel manager.
-  OtherThread(scoped_refptr<base::TaskRunner> task_runner,
+  OtherThread(embedder::PlatformTaskRunnerRefPtr task_runner,
               ChannelManager* channel_manager,
               ChannelId channel_id,
               const base::Closure& quit_closure)
@@ -122,13 +114,9 @@ class OtherThread : public mojo::test::SimpleTestThread {
     // thread, do that here instead.
 
     // You can use any unique, nonzero value as the ID.
-    scoped_refptr<Channel> ch = channel_manager_->GetChannel(channel_id_);
-    // |ChannelManager| should have a ref.
-    EXPECT_FALSE(ch->HasOneRef());
+    RefPtr<Channel> ch = channel_manager_->GetChannel(channel_id_);
 
     channel_manager_->WillShutdownChannel(channel_id_);
-    // |ChannelManager| should still have a ref.
-    EXPECT_FALSE(ch->HasOneRef());
 
     {
       base::MessageLoop message_loop;
@@ -138,12 +126,12 @@ class OtherThread : public mojo::test::SimpleTestThread {
       run_loop.Run();
     }
 
-    CHECK(task_runner_->PostTask(FROM_HERE, quit_closure_));
+    embedder::PlatformPostTask(task_runner_.get(), quit_closure_);
   }
 
-  scoped_refptr<base::TaskRunner> task_runner_;
-  ChannelManager* channel_manager_;
-  ChannelId channel_id_;
+  const embedder::PlatformTaskRunnerRefPtr task_runner_;
+  ChannelManager* const channel_manager_;
+  const ChannelId channel_id_;
   base::Closure quit_closure_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(OtherThread);
@@ -153,9 +141,8 @@ TEST_F(ChannelManagerTest, CallsFromOtherThread) {
   embedder::PlatformChannelPair channel_pair;
 
   const ChannelId id = 1;
-  scoped_refptr<MessagePipeDispatcher> d =
-      channel_manager().CreateChannelOnIOThread(
-          id, channel_pair.PassServerHandle());
+  RefPtr<MessagePipeDispatcher> d = channel_manager().CreateChannelOnIOThread(
+      id, channel_pair.PassServerHandle());
 
   base::RunLoop run_loop;
   OtherThread thread(base::ThreadTaskRunnerHandle::Get(), &channel_manager(),

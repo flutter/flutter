@@ -4,7 +4,7 @@
 
 #include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
-#include "mojo/services/network/public/interfaces/network_service.mojom.h"
+#include "mojo/services/network/interfaces/network_service.mojom.h"
 
 namespace mojo {
 

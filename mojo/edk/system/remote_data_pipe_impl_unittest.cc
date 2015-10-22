@@ -7,8 +7,9 @@
 
 #include <stdint.h>
 
+#include <utility>
+
 #include "base/bind.h"
-#include "base/location.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
@@ -21,6 +22,7 @@
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/raw_channel.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/test/test_io_thread.h"
@@ -42,25 +44,25 @@ class RemoteDataPipeImplTest : public testing::Test {
   ~RemoteDataPipeImplTest() override {}
 
   void SetUp() override {
-    scoped_refptr<ChannelEndpoint> ep[2];
+    RefPtr<ChannelEndpoint> ep[2];
     message_pipes_[0] = MessagePipe::CreateLocalProxy(&ep[0]);
     message_pipes_[1] = MessagePipe::CreateLocalProxy(&ep[1]);
 
-    io_thread_.PostTaskAndWait(
-        FROM_HERE, base::Bind(&RemoteDataPipeImplTest::SetUpOnIOThread,
-                              base::Unretained(this), ep[0], ep[1]));
+    io_thread_.PostTaskAndWait(base::Bind(
+        &RemoteDataPipeImplTest::SetUpOnIOThread, base::Unretained(this),
+        base::Passed(&ep[0]), base::Passed(&ep[1])));
   }
 
   void TearDown() override {
     EnsureMessagePipeClosed(0);
     EnsureMessagePipeClosed(1);
-    io_thread_.PostTaskAndWait(
-        FROM_HERE, base::Bind(&RemoteDataPipeImplTest::TearDownOnIOThread,
-                              base::Unretained(this)));
+    io_thread_.PostTaskAndWait(base::Bind(
+        &RemoteDataPipeImplTest::TearDownOnIOThread, base::Unretained(this)));
   }
 
  protected:
-  static DataPipe* CreateLocal(size_t element_size, size_t num_elements) {
+  static RefPtr<DataPipe> CreateLocal(size_t element_size,
+                                      size_t num_elements) {
     const MojoCreateDataPipeOptions options = {
         static_cast<uint32_t>(sizeof(MojoCreateDataPipeOptions)),
         MOJO_CREATE_DATA_PIPE_OPTIONS_FLAG_NONE,
@@ -73,9 +75,7 @@ class RemoteDataPipeImplTest : public testing::Test {
     return DataPipe::CreateLocal(validated_options);
   }
 
-  scoped_refptr<MessagePipe> message_pipe(size_t i) {
-    return message_pipes_[i];
-  }
+  RefPtr<MessagePipe> message_pipe(size_t i) { return message_pipes_[i]; }
 
   void EnsureMessagePipeClosed(size_t i) {
     if (!message_pipes_[i])
@@ -85,17 +85,19 @@ class RemoteDataPipeImplTest : public testing::Test {
   }
 
  private:
-  void SetUpOnIOThread(scoped_refptr<ChannelEndpoint> ep0,
-                       scoped_refptr<ChannelEndpoint> ep1) {
+  // TODO(vtl): The arguments should be rvalue references, but that doesn't
+  // currently work correctly with base::Bind.
+  void SetUpOnIOThread(RefPtr<ChannelEndpoint> ep0,
+                       RefPtr<ChannelEndpoint> ep1) {
     CHECK_EQ(base::MessageLoop::current(), io_thread_.message_loop());
 
     embedder::PlatformChannelPair channel_pair;
-    channels_[0] = new Channel(&platform_support_);
+    channels_[0] = MakeRefCounted<Channel>(&platform_support_);
     channels_[0]->Init(RawChannel::Create(channel_pair.PassServerHandle()));
-    channels_[0]->SetBootstrapEndpoint(ep0);
-    channels_[1] = new Channel(&platform_support_);
+    channels_[0]->SetBootstrapEndpoint(std::move(ep0));
+    channels_[1] = MakeRefCounted<Channel>(&platform_support_);
     channels_[1]->Init(RawChannel::Create(channel_pair.PassClientHandle()));
-    channels_[1]->SetBootstrapEndpoint(ep1);
+    channels_[1]->SetBootstrapEndpoint(std::move(ep1));
   }
 
   void TearDownOnIOThread() {
@@ -113,8 +115,8 @@ class RemoteDataPipeImplTest : public testing::Test {
 
   embedder::SimplePlatformSupport platform_support_;
   mojo::test::TestIOThread io_thread_;
-  scoped_refptr<Channel> channels_[2];
-  scoped_refptr<MessagePipe> message_pipes_[2];
+  RefPtr<Channel> channels_[2];
+  RefPtr<MessagePipe> message_pipes_[2];
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RemoteDataPipeImplTest);
 };
@@ -167,11 +169,10 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
+  RefPtr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
   // This is the consumer dispatcher we'll send.
-  scoped_refptr<DataPipeConsumerDispatcher> consumer =
-      DataPipeConsumerDispatcher::Create();
-  consumer->Init(dp);
+  auto consumer = DataPipeConsumerDispatcher::Create();
+  consumer->Init(dp.Clone());
 
   // Write to the producer and close it, before sending the consumer.
   int32_t elements[10] = {123};
@@ -203,7 +204,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
 
     // |consumer| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    EXPECT_TRUE(consumer->HasOneRef());
+    consumer->AssertHasOneRef();
     consumer = nullptr;
   }
   EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
@@ -222,12 +223,12 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_dispatchers[0]->GetType());
-  consumer =
-      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get());
+  consumer = RefPtr<DataPipeConsumerDispatcher>(
+      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get()));
   read_dispatchers.clear();
 
   waiter.Init();
@@ -285,11 +286,10 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
+  RefPtr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
   // This is the consumer dispatcher we'll send.
-  scoped_refptr<DataPipeConsumerDispatcher> consumer =
-      DataPipeConsumerDispatcher::Create();
-  consumer->Init(dp);
+  auto consumer = DataPipeConsumerDispatcher::Create();
+  consumer->Init(dp.Clone());
 
   void* write_ptr = nullptr;
   uint32_t num_bytes = 0u;
@@ -319,7 +319,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
 
     // |consumer| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    EXPECT_TRUE(consumer->HasOneRef());
+    consumer->AssertHasOneRef();
     consumer = nullptr;
   }
   EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
@@ -338,12 +338,12 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_dispatchers[0]->GetType());
-  consumer =
-      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get());
+  consumer = RefPtr<DataPipeConsumerDispatcher>(
+      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get()));
   read_dispatchers.clear();
 
   // Now actually write the data, complete the two-phase write, and close the
@@ -395,11 +395,10 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
+  RefPtr<DataPipe> dp(CreateLocal(sizeof(int32_t), 1000));
   // This is the consumer dispatcher we'll send.
-  scoped_refptr<DataPipeConsumerDispatcher> consumer =
-      DataPipeConsumerDispatcher::Create();
-  consumer->Init(dp);
+  auto consumer = DataPipeConsumerDispatcher::Create();
+  consumer->Init(dp.Clone());
 
   void* write_ptr = nullptr;
   uint32_t num_bytes = 0u;
@@ -439,7 +438,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
 
     // |consumer| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    EXPECT_TRUE(consumer->HasOneRef());
+    consumer->AssertHasOneRef();
     consumer = nullptr;
   }
   EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
@@ -458,12 +457,12 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_dispatchers[0]->GetType());
-  consumer =
-      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get());
+  consumer = RefPtr<DataPipeConsumerDispatcher>(
+      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get()));
   read_dispatchers.clear();
 
   // Now actually write the data, complete the two-phase write, and close the

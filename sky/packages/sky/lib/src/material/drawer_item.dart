@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -49,10 +45,10 @@ class _DrawerItemState extends State<DrawerItem> {
     return Colors.transparent;
   }
 
-  ui.ColorFilter _getColorFilter(ThemeData themeData) {
+  ColorFilter _getColorFilter(ThemeData themeData) {
     if (config.selected)
-      return new ui.ColorFilter.mode(themeData.primaryColor, ui.TransferMode.srcATop);
-    return new ui.ColorFilter.mode(const Color(0x73000000), ui.TransferMode.dstIn);
+      return new ColorFilter.mode(themeData.primaryColor, TransferMode.srcATop);
+    return new ColorFilter.mode(const Color(0x73000000), TransferMode.dstIn);
   }
 
   Widget build(BuildContext context) {

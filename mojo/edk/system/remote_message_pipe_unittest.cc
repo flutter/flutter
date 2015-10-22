@@ -7,10 +7,10 @@
 #include <string.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "base/bind.h"
-#include "base/location.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
@@ -25,6 +25,7 @@
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/system/raw_channel.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 #include "mojo/edk/system/test_utils.h"
 #include "mojo/edk/system/waiter.h"
@@ -50,43 +51,39 @@ class RemoteMessagePipeTest : public testing::Test {
   ~RemoteMessagePipeTest() override {}
 
   void SetUp() override {
-    io_thread_.PostTaskAndWait(
-        FROM_HERE, base::Bind(&RemoteMessagePipeTest::SetUpOnIOThread,
-                              base::Unretained(this)));
+    io_thread_.PostTaskAndWait(base::Bind(
+        &RemoteMessagePipeTest::SetUpOnIOThread, base::Unretained(this)));
   }
 
   void TearDown() override {
-    io_thread_.PostTaskAndWait(
-        FROM_HERE, base::Bind(&RemoteMessagePipeTest::TearDownOnIOThread,
-                              base::Unretained(this)));
+    io_thread_.PostTaskAndWait(base::Bind(
+        &RemoteMessagePipeTest::TearDownOnIOThread, base::Unretained(this)));
   }
 
  protected:
   // This connects the two given |ChannelEndpoint|s. It assumes/requires that
   // this is the bootstrap case (i.e., no other message pipes have ever been
   // hosted on the channel).
-  void BootstrapChannelEndpoints(scoped_refptr<ChannelEndpoint> ep0,
-                                 scoped_refptr<ChannelEndpoint> ep1) {
+  void BootstrapChannelEndpoints(RefPtr<ChannelEndpoint>&& ep0,
+                                 RefPtr<ChannelEndpoint>&& ep1) {
     io_thread_.PostTaskAndWait(
-        FROM_HERE,
         base::Bind(&RemoteMessagePipeTest::BootstrapChannelEndpointsOnIOThread,
-                   base::Unretained(this), ep0, ep1));
+                   base::Unretained(this), base::Passed(ep0),
+                   base::Passed(ep1)));
   }
 
   // This bootstraps |ep| on |channels_[channel_index]|. It assumes/requires
   // that this is the bootstrap case (i.e., no message pipes have ever been
   // hosted on the channel). This returns *without* waiting.
   void BootstrapChannelEndpointNoWait(unsigned channel_index,
-                                      scoped_refptr<ChannelEndpoint> ep) {
+                                      RefPtr<ChannelEndpoint>&& ep) {
     io_thread_.PostTask(
-        FROM_HERE,
         base::Bind(&RemoteMessagePipeTest::BootstrapChannelEndpointOnIOThread,
-                   base::Unretained(this), channel_index, ep));
+                   base::Unretained(this), channel_index, base::Passed(&ep)));
   }
 
   void RestoreInitialState() {
     io_thread_.PostTaskAndWait(
-        FROM_HERE,
         base::Bind(&RemoteMessagePipeTest::RestoreInitialStateOnIOThread,
                    base::Unretained(this)));
   }
@@ -124,13 +121,15 @@ class RemoteMessagePipeTest : public testing::Test {
     CHECK(channel_index == 0 || channel_index == 1);
     CHECK(!channels_[channel_index]);
 
-    channels_[channel_index] = new Channel(&platform_support_);
+    channels_[channel_index] = MakeRefCounted<Channel>(&platform_support_);
     channels_[channel_index]->Init(
         RawChannel::Create(platform_handles_[channel_index].Pass()));
   }
 
-  void BootstrapChannelEndpointsOnIOThread(scoped_refptr<ChannelEndpoint> ep0,
-                                           scoped_refptr<ChannelEndpoint> ep1) {
+  // TODO(vtl): The arguments should be rvalue references, but that doesn't
+  // currently work correctly with base::Bind.
+  void BootstrapChannelEndpointsOnIOThread(RefPtr<ChannelEndpoint> ep0,
+                                           RefPtr<ChannelEndpoint> ep1) {
     CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
 
     if (!channels_[0])
@@ -138,17 +137,19 @@ class RemoteMessagePipeTest : public testing::Test {
     if (!channels_[1])
       CreateAndInitChannel(1);
 
-    channels_[0]->SetBootstrapEndpoint(ep0);
-    channels_[1]->SetBootstrapEndpoint(ep1);
+    channels_[0]->SetBootstrapEndpoint(std::move(ep0));
+    channels_[1]->SetBootstrapEndpoint(std::move(ep1));
   }
 
+  // TODO(vtl): |ep| should be an rvalue reference, but that doesn't currently
+  // work correctly with base::Bind.
   void BootstrapChannelEndpointOnIOThread(unsigned channel_index,
-                                          scoped_refptr<ChannelEndpoint> ep) {
+                                          RefPtr<ChannelEndpoint> ep) {
     CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
     CHECK(channel_index == 0 || channel_index == 1);
 
     CreateAndInitChannel(channel_index);
-    channels_[channel_index]->SetBootstrapEndpoint(ep);
+    channels_[channel_index]->SetBootstrapEndpoint(std::move(ep));
   }
 
   void RestoreInitialStateOnIOThread() {
@@ -161,7 +162,7 @@ class RemoteMessagePipeTest : public testing::Test {
   embedder::SimplePlatformSupport platform_support_;
   mojo::test::TestIOThread io_thread_;
   embedder::ScopedPlatformHandle platform_handles_[2];
-  scoped_refptr<Channel> channels_[2];
+  RefPtr<Channel> channels_[2];
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RemoteMessagePipeTest);
 };
@@ -179,11 +180,11 @@ TEST_F(RemoteMessagePipeTest, Basic) {
   // connected to MP 1, port 0, which will be attached to channel 1. This leaves
   // MP 0, port 0 and MP 1, port 1 as the "user-facing" endpoints.
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-  BootstrapChannelEndpoints(ep0, ep1);
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+  BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   // Write in one direction: MP 0, port 0 -> ... -> MP 1, port 1.
 
@@ -278,11 +279,11 @@ TEST_F(RemoteMessagePipeTest, PeerClosed) {
   // connected to MP 1, port 0, which will be attached to channel 1. This leaves
   // MP 0, port 0 and MP 1, port 1 as the "user-facing" endpoints.
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-  BootstrapChannelEndpoints(ep0, ep1);
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+  BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   // Close MP 0, port 0.
   mp0->Close(0);
@@ -316,11 +317,11 @@ TEST_F(RemoteMessagePipeTest, Multiplex) {
 
   // Connect message pipes as in the |Basic| test.
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-  BootstrapChannelEndpoints(ep0, ep1);
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+  BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   // Now put another message pipe on the channel.
 
@@ -329,7 +330,7 @@ TEST_F(RemoteMessagePipeTest, Multiplex) {
   // via |ep0| (i.e., sent using |mp0|, port 0) with this remote ID. Upon
   // receiving this message, |PassIncomingMessagePipe()| is used to obtain the
   // message pipe on the other side.
-  scoped_refptr<MessagePipe> mp2(MessagePipe::CreateLocalLocal());
+  auto mp2 = MessagePipe::CreateLocalLocal();
   ASSERT_TRUE(channels(0));
   size_t max_endpoint_info_size;
   size_t max_platform_handle_count;
@@ -373,10 +374,10 @@ TEST_F(RemoteMessagePipeTest, Multiplex) {
                       endpoint_info_size));
 
   // Warning: The local side of mp3 is port 0, not port 1.
-  scoped_refptr<IncomingEndpoint> incoming_endpoint =
+  RefPtr<IncomingEndpoint> incoming_endpoint =
       channels(1)->DeserializeEndpoint(received_endpoint_info.get());
   ASSERT_TRUE(incoming_endpoint);
-  scoped_refptr<MessagePipe> mp3 = incoming_endpoint->ConvertToMessagePipe();
+  RefPtr<MessagePipe> mp3 = incoming_endpoint->ConvertToMessagePipe();
   ASSERT_TRUE(mp3);
 
   // Write: MP 2, port 0 -> MP 3, port 1.
@@ -489,8 +490,8 @@ TEST_F(RemoteMessagePipeTest, CloseBeforeAttachAndRun) {
   // connected to MP 1, port 0, which will be attached to channel 1. This leaves
   // MP 0, port 0 and MP 1, port 1 as the "user-facing" endpoints.
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
 
   // Write to MP 0, port 0.
   EXPECT_EQ(
@@ -501,10 +502,10 @@ TEST_F(RemoteMessagePipeTest, CloseBeforeAttachAndRun) {
   // Close MP 0, port 0 before it's even been attached to the channel and run.
   mp0->Close(0);
 
-  BootstrapChannelEndpointNoWait(0, ep0);
+  BootstrapChannelEndpointNoWait(0, std::move(ep0));
 
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
 
   // Prepare to wait on MP 1, port 1. (Add the waiter now. Otherwise, if we do
   // it later, it might already be readable.)
@@ -513,7 +514,7 @@ TEST_F(RemoteMessagePipeTest, CloseBeforeAttachAndRun) {
       MOJO_RESULT_OK,
       mp1->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
 
-  BootstrapChannelEndpointNoWait(1, ep1);
+  BootstrapChannelEndpointNoWait(1, std::move(ep1));
 
   // Wait.
   EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(MOJO_DEADLINE_INDEFINITE, &context));
@@ -551,8 +552,8 @@ TEST_F(RemoteMessagePipeTest, CloseBeforeConnect) {
   // connected to MP 1, port 0, which will be attached to channel 1. This leaves
   // MP 0, port 0 and MP 1, port 1 as the "user-facing" endpoints.
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
 
   // Write to MP 0, port 0.
   EXPECT_EQ(
@@ -560,13 +561,13 @@ TEST_F(RemoteMessagePipeTest, CloseBeforeConnect) {
       mp0->WriteMessage(0, UserPointer<const void>(kHello), sizeof(kHello),
                         nullptr, MOJO_WRITE_MESSAGE_FLAG_NONE));
 
-  BootstrapChannelEndpointNoWait(0, ep0);
+  BootstrapChannelEndpointNoWait(0, std::move(ep0));
 
   // Close MP 0, port 0 before channel 1 is even connected.
   mp0->Close(0);
 
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
 
   // Prepare to wait on MP 1, port 1. (Add the waiter now. Otherwise, if we do
   // it later, it might already be readable.)
@@ -575,7 +576,7 @@ TEST_F(RemoteMessagePipeTest, CloseBeforeConnect) {
       MOJO_RESULT_OK,
       mp1->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
 
-  BootstrapChannelEndpointNoWait(1, ep1);
+  BootstrapChannelEndpointNoWait(1, std::move(ep1));
 
   // Wait.
   EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(MOJO_DEADLINE_INDEFINITE, &context));
@@ -607,18 +608,17 @@ TEST_F(RemoteMessagePipeTest, HandlePassing) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-  BootstrapChannelEndpoints(ep0, ep1);
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+  BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   // We'll try to pass this dispatcher.
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      MessagePipeDispatcher::Create(
-          MessagePipeDispatcher::kDefaultCreateOptions);
-  scoped_refptr<MessagePipe> local_mp(MessagePipe::CreateLocalLocal());
-  dispatcher->Init(local_mp, 0);
+  auto dispatcher = MessagePipeDispatcher::Create(
+      MessagePipeDispatcher::kDefaultCreateOptions);
+  auto local_mp = MessagePipe::CreateLocalLocal();
+  dispatcher->Init(local_mp.Clone(), 0);
 
   // Prepare to wait on MP 1, port 1. (Add the waiter now. Otherwise, if we do
   // it later, it might already be readable.)
@@ -643,7 +643,7 @@ TEST_F(RemoteMessagePipeTest, HandlePassing) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    EXPECT_TRUE(dispatcher->HasOneRef());
+    dispatcher->AssertHasOneRef();
     dispatcher = nullptr;
   }
 
@@ -671,10 +671,11 @@ TEST_F(RemoteMessagePipeTest, HandlePassing) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, read_dispatchers[0]->GetType());
-  dispatcher = static_cast<MessagePipeDispatcher*>(read_dispatchers[0].get());
+  dispatcher = RefPtr<MessagePipeDispatcher>(
+      static_cast<MessagePipeDispatcher*>(read_dispatchers[0].get()));
 
   // Add the waiter now, before it becomes readable to avoid a race.
   waiter.Init();
@@ -759,11 +760,10 @@ TEST_F(RemoteMessagePipeTest, HandlePassingHalfClosed) {
   uint32_t context = 0;
 
   // We'll try to pass this dispatcher.
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      MessagePipeDispatcher::Create(
-          MessagePipeDispatcher::kDefaultCreateOptions);
-  scoped_refptr<MessagePipe> local_mp(MessagePipe::CreateLocalLocal());
-  dispatcher->Init(local_mp, 0);
+  auto dispatcher = MessagePipeDispatcher::Create(
+      MessagePipeDispatcher::kDefaultCreateOptions);
+  auto local_mp = MessagePipe::CreateLocalLocal();
+  dispatcher->Init(local_mp.Clone(), 0);
 
   hss = local_mp->GetHandleSignalsState(0);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_WRITABLE, hss.satisfied_signals);
@@ -789,11 +789,11 @@ TEST_F(RemoteMessagePipeTest, HandlePassingHalfClosed) {
   // Then close it.
   local_mp->Close(1);
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-  BootstrapChannelEndpoints(ep0, ep1);
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+  BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   // Prepare to wait on MP 1, port 1. (Add the waiter now. Otherwise, if we do
   // it later, it might already be readable.)
@@ -818,7 +818,7 @@ TEST_F(RemoteMessagePipeTest, HandlePassingHalfClosed) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    EXPECT_TRUE(dispatcher->HasOneRef());
+    dispatcher->AssertHasOneRef();
     dispatcher = nullptr;
   }
 
@@ -846,10 +846,11 @@ TEST_F(RemoteMessagePipeTest, HandlePassingHalfClosed) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, read_dispatchers[0]->GetType());
-  dispatcher = static_cast<MessagePipeDispatcher*>(read_dispatchers[0].get());
+  dispatcher = RefPtr<MessagePipeDispatcher>(
+      static_cast<MessagePipeDispatcher*>(read_dispatchers[0].get()));
 
   // |dispatcher| should already be readable and not writable.
   hss = dispatcher->GetHandleSignalsState();
@@ -898,18 +899,18 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-  BootstrapChannelEndpoints(ep0, ep1);
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+  BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   // We'll try to pass this dispatcher.
-  scoped_refptr<SharedBufferDispatcher> dispatcher;
-  EXPECT_EQ(MOJO_RESULT_OK, SharedBufferDispatcher::Create(
-                                platform_support(),
-                                SharedBufferDispatcher::kDefaultCreateOptions,
-                                100, &dispatcher));
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
   ASSERT_TRUE(dispatcher);
 
   // Make a mapping.
@@ -946,7 +947,7 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    EXPECT_TRUE(dispatcher->HasOneRef());
+    dispatcher->AssertHasOneRef();
     dispatcher = nullptr;
   }
 
@@ -974,10 +975,11 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::SHARED_BUFFER, read_dispatchers[0]->GetType());
-  dispatcher = static_cast<SharedBufferDispatcher*>(read_dispatchers[0].get());
+  dispatcher = RefPtr<SharedBufferDispatcher>(
+      static_cast<SharedBufferDispatcher*>(read_dispatchers[0].get()));
 
   // Make another mapping.
   std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping1;
@@ -1019,19 +1021,18 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
   uint32_t context = 0;
   HandleSignalsState hss;
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-  BootstrapChannelEndpoints(ep0, ep1);
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+  BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   util::ScopedFILE fp(test_dir.CreateFile());
   EXPECT_EQ(sizeof(kHello), fwrite(kHello, 1, sizeof(kHello), fp.get()));
   // We'll try to pass this dispatcher, which will cause a |PlatformHandle| to
   // be passed.
-  scoped_refptr<PlatformHandleDispatcher> dispatcher =
-      PlatformHandleDispatcher::Create(
-          mojo::test::PlatformHandleFromFILE(fp.Pass()));
+  auto dispatcher = PlatformHandleDispatcher::Create(
+      mojo::test::PlatformHandleFromFILE(fp.Pass()));
 
   // Prepare to wait on MP 1, port 1. (Add the waiter now. Otherwise, if we do
   // it later, it might already be readable.)
@@ -1056,7 +1057,7 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    EXPECT_TRUE(dispatcher->HasOneRef());
+    dispatcher->AssertHasOneRef();
     dispatcher = nullptr;
   }
 
@@ -1084,11 +1085,11 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::PLATFORM_HANDLE, read_dispatchers[0]->GetType());
-  dispatcher =
-      static_cast<PlatformHandleDispatcher*>(read_dispatchers[0].get());
+  dispatcher = RefPtr<PlatformHandleDispatcher>(
+      static_cast<PlatformHandleDispatcher*>(read_dispatchers[0].get()));
 
   embedder::ScopedPlatformHandle h = dispatcher->PassPlatformHandle().Pass();
   EXPECT_TRUE(h.is_valid());
@@ -1118,17 +1119,16 @@ TEST_F(RemoteMessagePipeTest, RacingClosesStress) {
 
   for (unsigned i = 0; i < 256; i++) {
     DVLOG(2) << "---------------------------------------- " << i;
-    scoped_refptr<ChannelEndpoint> ep0;
-    scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-    BootstrapChannelEndpointNoWait(0, ep0);
+    RefPtr<ChannelEndpoint> ep0;
+    auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+    BootstrapChannelEndpointNoWait(0, std::move(ep0));
 
-    scoped_refptr<ChannelEndpoint> ep1;
-    scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-    BootstrapChannelEndpointNoWait(1, ep1);
+    RefPtr<ChannelEndpoint> ep1;
+    auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+    BootstrapChannelEndpointNoWait(1, std::move(ep1));
 
     if (i & 1u) {
-      io_thread()->task_runner()->PostTask(FROM_HERE,
-                                           base::Bind(&test::Sleep, delay));
+      io_thread()->PostTask(base::Bind(&test::Sleep, delay));
     }
     if (i & 2u)
       test::Sleep(delay);
@@ -1136,8 +1136,7 @@ TEST_F(RemoteMessagePipeTest, RacingClosesStress) {
     mp0->Close(0);
 
     if (i & 4u) {
-      io_thread()->task_runner()->PostTask(FROM_HERE,
-                                           base::Bind(&test::Sleep, delay));
+      io_thread()->PostTask(base::Bind(&test::Sleep, delay));
     }
     if (i & 8u)
       test::Sleep(delay);
@@ -1158,18 +1157,17 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
   HandleSignalsState hss;
   uint32_t context = 0;
 
-  scoped_refptr<ChannelEndpoint> ep0;
-  scoped_refptr<MessagePipe> mp0(MessagePipe::CreateLocalProxy(&ep0));
-  scoped_refptr<ChannelEndpoint> ep1;
-  scoped_refptr<MessagePipe> mp1(MessagePipe::CreateProxyLocal(&ep1));
-  BootstrapChannelEndpoints(ep0, ep1);
+  RefPtr<ChannelEndpoint> ep0;
+  auto mp0 = MessagePipe::CreateLocalProxy(&ep0);
+  RefPtr<ChannelEndpoint> ep1;
+  auto mp1 = MessagePipe::CreateProxyLocal(&ep1);
+  BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   // We'll try to pass this dispatcher.
-  scoped_refptr<MessagePipeDispatcher> dispatcher =
-      MessagePipeDispatcher::Create(
-          MessagePipeDispatcher::kDefaultCreateOptions);
-  scoped_refptr<MessagePipe> local_mp(MessagePipe::CreateLocalLocal());
-  dispatcher->Init(local_mp, 0);
+  auto dispatcher = MessagePipeDispatcher::Create(
+      MessagePipeDispatcher::kDefaultCreateOptions);
+  auto local_mp = MessagePipe::CreateLocalLocal();
+  dispatcher->Init(local_mp.Clone(), 0);
 
   // Prepare to wait on MP 1, port 1. (Add the waiter now. Otherwise, if we do
   // it later, it might already be readable.)
@@ -1194,7 +1192,7 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    EXPECT_TRUE(dispatcher->HasOneRef());
+    dispatcher->AssertHasOneRef();
     dispatcher = nullptr;
   }
 
@@ -1222,10 +1220,11 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, read_dispatchers[0]->GetType());
-  dispatcher = static_cast<MessagePipeDispatcher*>(read_dispatchers[0].get());
+  dispatcher = RefPtr<MessagePipeDispatcher>(
+      static_cast<MessagePipeDispatcher*>(read_dispatchers[0].get()));
   read_dispatchers.clear();
 
   // Now pass it back.
@@ -1253,7 +1252,7 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    EXPECT_TRUE(dispatcher->HasOneRef());
+    dispatcher->AssertHasOneRef();
     dispatcher = nullptr;
   }
 
@@ -1279,10 +1278,11 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  read_dispatchers[0]->AssertHasOneRef();
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, read_dispatchers[0]->GetType());
-  dispatcher = static_cast<MessagePipeDispatcher*>(read_dispatchers[0].get());
+  dispatcher = RefPtr<MessagePipeDispatcher>(
+      static_cast<MessagePipeDispatcher*>(read_dispatchers[0].get()));
   read_dispatchers.clear();
 
   // Add the waiter now, before it becomes readable to avoid a race.

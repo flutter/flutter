@@ -4,8 +4,6 @@
 
 import 'dart:collection';
 
-import 'package:flutter/animation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -258,7 +256,7 @@ class DragRoute extends Route {
   bool get modal => false;
   bool get opaque => false;
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
+  Widget build(RouteArguments args) {
     return new Positioned(
       left: _lastOffset.dx,
       top: _lastOffset.dy,

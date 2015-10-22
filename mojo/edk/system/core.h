@@ -8,11 +8,11 @@
 #include <stdint.h>
 
 #include "base/callback.h"
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/system/handle_table.h"
 #include "mojo/edk/system/mapping_table.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/mutex.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/c/system/buffer.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/message_pipe.h"
@@ -44,11 +44,11 @@ class Core {
 
   // Adds |dispatcher| to the handle table, returning the handle for it. Returns
   // |MOJO_HANDLE_INVALID| on failure, namely if the handle table is full.
-  MojoHandle AddDispatcher(const scoped_refptr<Dispatcher>& dispatcher);
+  MojoHandle AddDispatcher(Dispatcher* dispatcher);
 
   // Looks up the dispatcher for the given handle. Returns null if the handle is
   // invalid.
-  scoped_refptr<Dispatcher> GetDispatcher(MojoHandle handle);
+  RefPtr<Dispatcher> GetDispatcher(MojoHandle handle);
 
   // Like |GetDispatcher()|, but also removes the handle from the handle table.
   // On success, gets the dispatcher for a given handle (which should not be
@@ -57,7 +57,7 @@ class Core {
   // |MOJO_RESULT_INVALID_ARGUMENT| if there's no dispatcher for the given
   // handle or |MOJO_RESULT_BUSY| if the handle is marked as busy.)
   MojoResult GetAndRemoveDispatcher(MojoHandle handle,
-                                    scoped_refptr<Dispatcher>* dispatcher);
+                                    RefPtr<Dispatcher>* dispatcher);
 
   // Watches on the given handle for the given signals, calling |callback| when
   // a signal is satisfied or when all signals become unsatisfiable. |callback|

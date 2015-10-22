@@ -8,10 +8,9 @@
 #include <memory>
 
 #include "base/bind.h"
-#include "base/location.h"
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/test/test_io_thread.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -32,11 +31,9 @@ class ChannelTestBase : public testing::Test {
   void SetUp() override;
 
   template <typename Functor, typename... Args>
-  void PostMethodToIOThreadAndWait(const tracked_objects::Location& from_here,
-                                   Functor functor,
-                                   const Args&... args) {
+  void PostMethodToIOThreadAndWait(Functor functor, const Args&... args) {
     io_thread_.PostTaskAndWait(
-        from_here, base::Bind(functor, base::Unretained(this), args...));
+        base::Bind(functor, base::Unretained(this), args...));
   }
 
   // These should only be called from |io_thread()|:
@@ -48,7 +45,7 @@ class ChannelTestBase : public testing::Test {
 
   mojo::test::TestIOThread* io_thread() { return &io_thread_; }
   Channel* channel(unsigned i) { return channels_[i].get(); }
-  scoped_refptr<Channel>* mutable_channel(unsigned i) { return &channels_[i]; }
+  RefPtr<Channel>* mutable_channel(unsigned i) { return &channels_[i]; }
 
  private:
   void SetUpOnIOThread();
@@ -56,7 +53,7 @@ class ChannelTestBase : public testing::Test {
   embedder::SimplePlatformSupport platform_support_;
   mojo::test::TestIOThread io_thread_;
   std::unique_ptr<RawChannel> raw_channels_[2];
-  scoped_refptr<Channel> channels_[2];
+  RefPtr<Channel> channels_[2];
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ChannelTestBase);
 };

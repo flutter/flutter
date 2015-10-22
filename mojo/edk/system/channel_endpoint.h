@@ -7,10 +7,11 @@
 
 #include <memory>
 
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/system/channel_endpoint_id.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
 #include "mojo/edk/system/mutex.h"
+#include "mojo/edk/system/ref_counted.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -108,20 +109,9 @@ class MessageInTransit;
 //         simultaneously, and both sides send "remove" messages). In that
 //         case, it must still remain alive until it receives the "remove
 //         ack" (and it must ack the "remove" message that it received).
-class ChannelEndpoint final
-    : public base::RefCountedThreadSafe<ChannelEndpoint> {
+class ChannelEndpoint final : public RefCountedThreadSafe<ChannelEndpoint> {
  public:
-  // Constructor for a |ChannelEndpoint| with the given client (specified by
-  // |client| and |client_port|). Optionally takes messages from
-  // |*message_queue| if |message_queue| is non-null.
-  //
-  // |client| may be null if this endpoint will never need to receive messages,
-  // in which case |message_queue| should not be null. In that case, this
-  // endpoint will simply send queued messages upon being attached to a
-  // |Channel| and immediately detach itself.
-  ChannelEndpoint(ChannelEndpointClient* client,
-                  unsigned client_port,
-                  MessageInTransitQueue* message_queue = nullptr);
+  // Note: Use |MakeRefCounted<ChannelEndpoint>()|.
 
   // Methods called by |ChannelEndpointClient|:
 
@@ -137,7 +127,8 @@ class ChannelEndpoint final
   // This returns true in the typical case, and false if this endpoint has been
   // detached from the channel, in which case the caller should probably call
   // its (new) client's |OnDetachFromChannel()|.
-  bool ReplaceClient(ChannelEndpointClient* client, unsigned client_port);
+  bool ReplaceClient(RefPtr<ChannelEndpointClient>&& client,
+                     unsigned client_port);
 
   // Called before the |ChannelEndpointClient| gives up its reference to this
   // object.
@@ -159,7 +150,21 @@ class ChannelEndpoint final
   void DetachFromChannel();
 
  private:
-  friend class base::RefCountedThreadSafe<ChannelEndpoint>;
+  FRIEND_REF_COUNTED_THREAD_SAFE(ChannelEndpoint);
+  FRIEND_MAKE_REF_COUNTED(ChannelEndpoint);
+
+  // Constructor for a |ChannelEndpoint| with the given client (specified by
+  // |client| and |client_port|). Optionally takes messages from
+  // |*message_queue| if |message_queue| is non-null.
+  //
+  // |client| may be null if this endpoint will never need to receive messages,
+  // in which case |message_queue| should not be null. In that case, this
+  // endpoint will simply send queued messages upon being attached to a
+  // |Channel| and immediately detach itself.
+  ChannelEndpoint(RefPtr<ChannelEndpointClient>&& client,
+                  unsigned client_port,
+                  MessageInTransitQueue* message_queue = nullptr);
+
   ~ChannelEndpoint();
 
   bool WriteMessageNoLock(std::unique_ptr<MessageInTransit> message)
@@ -187,10 +192,9 @@ class ChannelEndpoint final
 
   // |client_| must be valid whenever it is non-null. Before |*client_| gives up
   // its reference to this object, it must call |DetachFromClient()|.
-  // NOTE: This is a |scoped_refptr<>|, rather than a raw pointer, since the
-  // |Channel| needs to keep the |MessagePipe| alive for the "proxy-proxy" case.
-  // Possibly we'll be able to eliminate that case when we have full
-  // multiprocess support.
+  // NOTE: This is a |RefPtr<>|, rather than a raw pointer, since the |Channel|
+  // needs to keep the client (e.g., |MessagePipe|) alive for the "proxy-proxy"
+  // case.
   // WARNING: |ChannelEndpointClient| methods must not be called under |mutex_|.
   // Thus to make such a call, a reference must first be taken under |mutex_|
   // and the lock released.
@@ -200,7 +204,7 @@ class ChannelEndpoint final
   // WARNING: Beware of interactions with |ReplaceClient()|. By the time the
   // call is made, the client may have changed. This must be detected and dealt
   // with.
-  scoped_refptr<ChannelEndpointClient> client_ MOJO_GUARDED_BY(mutex_);
+  RefPtr<ChannelEndpointClient> client_ MOJO_GUARDED_BY(mutex_);
   unsigned client_port_ MOJO_GUARDED_BY(mutex_);
 
   // |channel_| must be valid whenever it is non-null. Before |*channel_| gives

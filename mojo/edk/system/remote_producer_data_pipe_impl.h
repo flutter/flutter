@@ -8,9 +8,9 @@
 #include <memory>
 
 #include "base/memory/aligned_memory.h"
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/data_pipe_impl.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -23,9 +23,10 @@ class MessageInTransitQueue;
 // |DataPipeImpl| for more details.
 class RemoteProducerDataPipeImpl final : public DataPipeImpl {
  public:
-  explicit RemoteProducerDataPipeImpl(ChannelEndpoint* channel_endpoint);
+  explicit RemoteProducerDataPipeImpl(
+      RefPtr<ChannelEndpoint>&& channel_endpoint);
   RemoteProducerDataPipeImpl(
-      ChannelEndpoint* channel_endpoint,
+      RefPtr<ChannelEndpoint>&& channel_endpoint,
       std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
       size_t start_index,
       size_t current_num_bytes);
@@ -105,7 +106,7 @@ class RemoteProducerDataPipeImpl final : public DataPipeImpl {
   void Disconnect();
 
   // Should be valid if and only if |producer_open()| returns true.
-  scoped_refptr<ChannelEndpoint> channel_endpoint_;
+  RefPtr<ChannelEndpoint> channel_endpoint_;
 
   std::unique_ptr<char, base::AlignedFreeDeleter> buffer_;
   // Circular buffer.

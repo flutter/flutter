@@ -18,7 +18,8 @@ RenderBox buildFlexExample() {
   void addFlexChildSolidColor(RenderFlex parent, ui.Color backgroundColor, { int flex: 0 }) {
     RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
     parent.add(child);
-    child.parentData.flex = flex;
+    final FlexParentData childParentData = child.parentData;
+    childParentData.flex = flex;
   }
 
   // Yellow bar at top

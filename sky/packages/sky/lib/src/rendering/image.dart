@@ -9,6 +9,10 @@ import 'package:flutter/painting.dart';
 import 'box.dart';
 import 'object.dart';
 
+export 'package:flutter/painting.dart' show
+  ImageFit,
+  ImageRepeat;
+
 /// An image in the render tree.
 ///
 /// The render image attempts to find a size for itself that fits in the given
@@ -18,7 +22,7 @@ class RenderImage extends RenderBox {
     ui.Image image,
     double width,
     double height,
-    ui.ColorFilter colorFilter,
+    ColorFilter colorFilter,
     ImageFit fit,
     repeat: ImageRepeat.noRepeat,
     Rect centerSlice
@@ -63,9 +67,9 @@ class RenderImage extends RenderBox {
   }
 
   /// If non-null, apply this color filter to the image before painint.
-  ui.ColorFilter get colorFilter => _colorFilter;
-  ui.ColorFilter _colorFilter;
-  void set colorFilter (ui.ColorFilter value) {
+  ColorFilter get colorFilter => _colorFilter;
+  ColorFilter _colorFilter;
+  void set colorFilter (ColorFilter value) {
     if (value == _colorFilter)
       return;
     _colorFilter = value;

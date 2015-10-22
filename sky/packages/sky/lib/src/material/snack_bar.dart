@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -69,8 +67,8 @@ class SnackBar extends StatelessComponent {
       height: new AnimatedValue<double>(
         0.0,
         end: kSnackBarHeight,
-        curve: easeIn,
-        reverseCurve: easeOut
+        curve: Curves.easeIn,
+        reverseCurve: Curves.easeOut
       ),
       child: new ClipRect(
         child: new OverflowBox(
@@ -104,10 +102,10 @@ class _SnackBarRoute extends PerformanceRoute {
   bool get modal => false;
   Duration get transitionDuration => const Duration(milliseconds: 200);
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) => null;
+  Widget build(RouteArguments args) => null;
 }
 
-void showSnackBar({ NavigatorState navigator, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
+void showSnackBar({ BuildContext context, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
   Route route = new _SnackBarRoute();
   SnackBar snackBar = new SnackBar(
     content: content,
@@ -115,5 +113,5 @@ void showSnackBar({ NavigatorState navigator, GlobalKey<PlaceholderState> placeh
     performance: route.performance
   );
   placeholderKey.currentState.child = snackBar;
-  navigator.push(route);
+  Navigator.of(context).push(route);
 }

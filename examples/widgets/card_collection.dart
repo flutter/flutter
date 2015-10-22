@@ -19,10 +19,6 @@ class CardModel {
 }
 
 class CardCollection extends StatefulComponent {
-  CardCollection({ this.navigator });
-
-  final NavigatorState navigator;
-
   CardCollectionState createState() => new CardCollectionState();
 }
 
@@ -113,7 +109,7 @@ class CardCollectionState extends State<CardCollection> {
 
   void _showDrawer() {
     showDrawer(
-      navigator: config.navigator,
+      context: context,
       child: new IconTheme(
         data: const IconThemeData(color: IconThemeColor.black),
         child: new Block([
@@ -169,7 +165,7 @@ class CardCollectionState extends State<CardCollection> {
     setState(() {
       _dismissDirection = newDismissDirection;
     });
-    config.navigator.pop();
+    Navigator.of(context).pop();
   }
 
   Widget buildDrawerCheckbox(String label, bool value, Function callback) {
@@ -337,7 +333,7 @@ class CardCollectionState extends State<CardCollection> {
       ]);
 
     Widget body = new SizeObserver(
-      callback: _updateCardCollectionSize,
+      onSizeChanged: _updateCardCollectionSize,
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
         decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
@@ -348,8 +344,7 @@ class CardCollectionState extends State<CardCollection> {
     if (_snapToCenter) {
       Widget indicator = new IgnorePointer(
         child: new Align(
-          horizontal: 0.0,
-          vertical: 0.5,
+          alignment: const FractionalOffset(0.0, 0.5),
           child: new Container(
             height: 1.0,
             decoration: new BoxDecoration(backgroundColor: const Color(0x80FFFFFF))
@@ -375,7 +370,7 @@ void main() {
   runApp(new MaterialApp(
     title: 'Cards',
     routes: {
-      '/': (RouteArguments args) => new CardCollection(navigator: args.navigator),
+      '/': (RouteArguments args) => new CardCollection(),
     }
   ));
 }

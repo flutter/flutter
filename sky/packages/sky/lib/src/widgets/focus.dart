@@ -22,8 +22,8 @@ class _FocusScope extends InheritedWidget {
     Widget child
   }) : super(key: key, child: child);
 
-  final bool scopeFocused;
   final FocusState focusState;
+  final bool scopeFocused;
 
   // These are mutable because we implicitly change them when they're null in
   // certain cases, basically pretending retroactively that we were constructed
@@ -61,6 +61,15 @@ class _FocusScope extends InheritedWidget {
     return false;
   }
 
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (scopeFocused)
+      description.add('this scope has focus');
+    if (focusedScope != null)
+      description.add('focused subscope: $focusedScope');
+    if (focusedWidget != null)
+      description.add('focused widget: $focusedWidget');
+  }
 }
 
 class Focus extends StatefulComponent {

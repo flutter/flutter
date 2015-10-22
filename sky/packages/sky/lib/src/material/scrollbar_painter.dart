@@ -62,7 +62,7 @@ class ScrollbarPainter extends ScrollableListPainter {
   Future scrollStarted() {
     _fade ??= new ValuePerformance<double>()
       ..duration = _kScrollbarThumbFadeDuration
-      ..variable = new AnimatedValue<double>(0.0, end: 1.0, curve: ease)
+      ..variable = new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.ease)
       ..addListener(() {
         _opacity = _fade.value;
         renderer?.markNeedsPaint();

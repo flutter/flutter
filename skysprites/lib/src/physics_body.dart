@@ -40,6 +40,13 @@ class PhysicsBody {
     this.active = active;
   }
 
+  Vector2 _lastPosition;
+  double _lastRotation;
+  Vector2 _targetPosition;
+  double _targetAngle;
+
+  double _scale;
+
   Object tag;
 
   final PhysicsShape shape;
@@ -225,7 +232,7 @@ class PhysicsBody {
 
   double gravityScale;
 
-  PhysicsNode _physicsNode;
+  PhysicsWorld _physicsNode;
   Node _node;
 
   box2d.Body _body;
@@ -286,8 +293,11 @@ class PhysicsBody {
     _body.applyAngularImpulse(impulse / _physicsNode.b2WorldToNodeConversionFactor);
   }
 
-  void _attach(PhysicsNode physicsNode, Node node) {
+  void _attach(PhysicsWorld physicsNode, Node node) {
     assert(_attached == false);
+
+    // Update scale
+    _scale = node.scale;
 
     // Create BodyDef
     box2d.BodyDef bodyDef = new box2d.BodyDef();
@@ -313,6 +323,24 @@ class PhysicsBody {
     // Create Body
     _body = physicsNode.b2World.createBody(bodyDef);
 
+    _createFixtures(physicsNode);
+
+    _body.userData = this;
+
+    _physicsNode = physicsNode;
+    _node = node;
+
+    _attached = true;
+
+    // Attach any joints
+    for (PhysicsJoint joint in _joints) {
+      if (joint.bodyA._attached && joint.bodyB._attached) {
+        joint._attach(physicsNode);
+      }
+    }
+  }
+
+  void _createFixtures(PhysicsWorld physicsNode) {
     // Create FixtureDef
     box2d.FixtureDef fixtureDef = new box2d.FixtureDef();
     fixtureDef.friction = friction;
@@ -334,19 +362,6 @@ class PhysicsBody {
       box2d.Fixture fixture = _body.createFixtureFromFixtureDef(fixtureDef);
       fixture.userData = physicsShape;
     }
-    _body.userData = this;
-
-    _physicsNode = physicsNode;
-    _node = node;
-
-    _attached = true;
-
-    // Attach any joints
-    for (PhysicsJoint joint in _joints) {
-      if (joint.bodyA._attached && joint.bodyB._attached) {
-        joint._attach(physicsNode);
-      }
-    }
   }
 
   void _detach() {
@@ -356,13 +371,26 @@ class PhysicsBody {
     }
   }
 
-  void _addB2Shapes(PhysicsNode physicsNode, PhysicsShape shape, List<box2d.Shape> b2Shapes, List<PhysicsShape> physicsShapes) {
+  void _updateScale(PhysicsWorld physicsNode) {
+    // Destroy old fixtures
+    for (box2d.Fixture fixture = _body.getFixtureList(); fixture != null; fixture = fixture.getNext()) {
+      _body.destroyFixture(fixture);
+    }
+
+    // Make sure we create new b2Shapes
+    shape._invalidate();
+
+    // Create new fixtures
+    _createFixtures(physicsNode);
+  }
+
+  void _addB2Shapes(PhysicsWorld physicsNode, PhysicsShape shape, List<box2d.Shape> b2Shapes, List<PhysicsShape> physicsShapes) {
     if (shape is PhysicsShapeGroup) {
       for (PhysicsShape child in shape.shapes) {
         _addB2Shapes(physicsNode, child, b2Shapes, physicsShapes);
       }
     } else {
-      b2Shapes.add(shape.getB2Shape(physicsNode));
+      b2Shapes.add(shape.getB2Shape(physicsNode, _scale));
       physicsShapes.add(shape);
     }
   }

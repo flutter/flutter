@@ -5,6 +5,7 @@
 #include "mojo/edk/system/handle_table.h"
 
 #include <limits>
+#include <utility>
 
 #include "base/logging.h"
 #include "mojo/edk/system/configuration.h"
@@ -16,9 +17,8 @@ namespace system {
 HandleTable::Entry::Entry() : busy(false) {
 }
 
-HandleTable::Entry::Entry(const scoped_refptr<Dispatcher>& dispatcher)
-    : dispatcher(dispatcher), busy(false) {
-}
+HandleTable::Entry::Entry(RefPtr<Dispatcher>&& dispatcher)
+    : dispatcher(std::move(dispatcher)), busy(false) {}
 
 HandleTable::Entry::~Entry() {
   DCHECK(!busy);
@@ -41,9 +41,8 @@ Dispatcher* HandleTable::GetDispatcher(MojoHandle handle) {
   return it->second.dispatcher.get();
 }
 
-MojoResult HandleTable::GetAndRemoveDispatcher(
-    MojoHandle handle,
-    scoped_refptr<Dispatcher>* dispatcher) {
+MojoResult HandleTable::GetAndRemoveDispatcher(MojoHandle handle,
+                                               RefPtr<Dispatcher>* dispatcher) {
   DCHECK_NE(handle, MOJO_HANDLE_INVALID);
   DCHECK(dispatcher);
 
@@ -52,27 +51,27 @@ MojoResult HandleTable::GetAndRemoveDispatcher(
     return MOJO_RESULT_INVALID_ARGUMENT;
   if (it->second.busy)
     return MOJO_RESULT_BUSY;
-  *dispatcher = it->second.dispatcher;
+  *dispatcher = std::move(it->second.dispatcher);
   handle_to_entry_map_.erase(it);
 
   return MOJO_RESULT_OK;
 }
 
-MojoHandle HandleTable::AddDispatcher(
-    const scoped_refptr<Dispatcher>& dispatcher) {
+MojoHandle HandleTable::AddDispatcher(Dispatcher* dispatcher) {
   if (handle_to_entry_map_.size() >= GetConfiguration().max_handle_table_size)
     return MOJO_HANDLE_INVALID;
-  return AddDispatcherNoSizeCheck(dispatcher);
+  return AddDispatcherNoSizeCheck(RefPtr<Dispatcher>(dispatcher));
 }
 
 std::pair<MojoHandle, MojoHandle> HandleTable::AddDispatcherPair(
-    const scoped_refptr<Dispatcher>& dispatcher0,
-    const scoped_refptr<Dispatcher>& dispatcher1) {
+    Dispatcher* dispatcher0,
+    Dispatcher* dispatcher1) {
   if (handle_to_entry_map_.size() + 1 >=
       GetConfiguration().max_handle_table_size)
     return std::make_pair(MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID);
-  return std::make_pair(AddDispatcherNoSizeCheck(dispatcher0),
-                        AddDispatcherNoSizeCheck(dispatcher1));
+  return std::make_pair(
+      AddDispatcherNoSizeCheck(RefPtr<Dispatcher>(dispatcher0)),
+      AddDispatcherNoSizeCheck(RefPtr<Dispatcher>(dispatcher1)));
 }
 
 bool HandleTable::AddDispatcherVector(const DispatcherVector& dispatchers,
@@ -92,7 +91,7 @@ bool HandleTable::AddDispatcherVector(const DispatcherVector& dispatchers,
 
   for (size_t i = 0; i < dispatchers.size(); i++) {
     if (dispatchers[i]) {
-      handles[i] = AddDispatcherNoSizeCheck(dispatchers[i]);
+      handles[i] = AddDispatcherNoSizeCheck(dispatchers[i].Clone());
     } else {
       LOG(WARNING) << "Invalid dispatcher at index " << i;
       handles[i] = MOJO_HANDLE_INVALID;
@@ -187,7 +186,7 @@ MojoResult HandleTable::MarkBusyAndStartTransport(
 }
 
 MojoHandle HandleTable::AddDispatcherNoSizeCheck(
-    const scoped_refptr<Dispatcher>& dispatcher) {
+    RefPtr<Dispatcher>&& dispatcher) {
   DCHECK(dispatcher);
   DCHECK_LT(handle_to_entry_map_.size(),
             GetConfiguration().max_handle_table_size);
@@ -203,7 +202,7 @@ MojoHandle HandleTable::AddDispatcherNoSizeCheck(
   }
 
   MojoHandle new_handle = next_handle_;
-  handle_to_entry_map_[new_handle] = Entry(dispatcher);
+  handle_to_entry_map_[new_handle] = Entry(std::move(dispatcher));
 
   next_handle_++;
   if (next_handle_ == MOJO_HANDLE_INVALID)

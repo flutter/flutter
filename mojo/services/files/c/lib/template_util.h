@@ -5,33 +5,11 @@
 #ifndef SERVICES_FILES_C_LIB_TEMPLATE_UTIL_H_
 #define SERVICES_FILES_C_LIB_TEMPLATE_UTIL_H_
 
+#include <type_traits>
+
 namespace mojio {
 
 // TODO(vtl): Stuff copied from mojo/public/cpp/bindings/lib/template_util.h.
-template <class T, T v>
-struct IntegralConstant {
-  static const T value = v;
-};
-
-template <class T, T v>
-const T IntegralConstant<T, v>::value;
-
-typedef IntegralConstant<bool, true> TrueType;
-typedef IntegralConstant<bool, false> FalseType;
-
-template <class T>
-struct IsConst : FalseType {};
-template <class T>
-struct IsConst<const T> : TrueType {};
-
-template <bool B, typename T = void>
-struct EnableIf {};
-
-template <typename T>
-struct EnableIf<true, T> {
-  typedef T type;
-};
-
 typedef char YesType;
 
 struct NoType {
@@ -47,16 +25,16 @@ struct IsMoveOnlyType {
   static NoType Test(...);
 
   static const bool value =
-      sizeof(Test<T>(0)) == sizeof(YesType) && !IsConst<T>::value;
+      sizeof(Test<T>(0)) == sizeof(YesType) && !std::is_const<T>::value;
 };
 
 template <typename T>
-typename EnableIf<!IsMoveOnlyType<T>::value, T>::type& Forward(T& t) {
+typename std::enable_if<!IsMoveOnlyType<T>::value, T>::type& Forward(T& t) {
   return t;
 }
 
 template <typename T>
-typename EnableIf<IsMoveOnlyType<T>::value, T>::type Forward(T& t) {
+typename std::enable_if<IsMoveOnlyType<T>::value, T>::type Forward(T& t) {
   return t.Pass();
 }
 // TODO(vtl): (End of stuff copied from template_util.h.)

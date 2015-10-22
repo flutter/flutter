@@ -18,23 +18,48 @@ export 'package:flutter/rendering.dart' show
     BoxDecoration,
     BoxDecorationPosition,
     BoxShadow,
+    Canvas,
     Color,
+    ColorFilter,
     EdgeDims,
     FlexAlignItems,
     FlexDirection,
     FlexJustifyContent,
+    FontStyle,
+    FontWeight,
     FractionalOffset,
+    Gradient,
+    ImageFit,
+    ImageRepeat,
+    InputEvent,
+    LinearGradient,
     Matrix4,
     Offset,
     Paint,
     Path,
+    PlainTextSpan,
     Point,
+    PointerInputEvent,
+    RadialGradient,
     Rect,
     ScrollDirection,
     Shape,
     ShrinkWrap,
     Size,
-    ValueChanged;
+    StyledTextSpan,
+    TextAlign,
+    TextBaseline,
+    TextDecoration,
+    TextDecorationStyle,
+    TextSpan,
+    TextStyle,
+    TransferMode,
+    ValueChanged,
+    normal,
+    bold,
+    underline,
+    overline,
+    lineThrough;
 
 
 // PAINTING NODES
@@ -52,23 +77,10 @@ class Opacity extends OneChildRenderObjectWidget {
   void updateRenderObject(RenderOpacity renderObject, Opacity oldWidget) {
     renderObject.opacity = opacity;
   }
-}
 
-class ColorFilter extends OneChildRenderObjectWidget {
-  ColorFilter({ Key key, this.color, this.transferMode, Widget child })
-    : super(key: key, child: child) {
-    assert(color != null);
-    assert(transferMode != null);
-  }
-
-  final Color color;
-  final ui.TransferMode transferMode;
-
-  RenderColorFilter createRenderObject() => new RenderColorFilter(color: color, transferMode: transferMode);
-
-  void updateRenderObject(RenderColorFilter renderObject, ColorFilter oldWidget) {
-    renderObject.color = color;
-    renderObject.transferMode = transferMode;
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('opacity: $opacity');
   }
 }
 
@@ -76,7 +88,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   ShaderMask({
     Key key,
     this.shaderCallback,
-    this.transferMode: ui.TransferMode.modulate,
+    this.transferMode: TransferMode.modulate,
     Widget child
   }) : super(key: key, child: child) {
     assert(shaderCallback != null);
@@ -84,7 +96,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   }
 
   final ShaderCallback shaderCallback;
-  final ui.TransferMode transferMode;
+  final TransferMode transferMode;
 
   RenderShaderMask createRenderObject() {
     return new RenderShaderMask(
@@ -122,24 +134,24 @@ class DecoratedBox extends OneChildRenderObjectWidget {
 }
 
 class CustomPaint extends OneChildRenderObjectWidget {
-  CustomPaint({ Key key, this.callback, this.token, Widget child })
+  CustomPaint({ Key key, this.onPaint, this.token, Widget child })
     : super(key: key, child: child) {
-    assert(callback != null);
+    assert(onPaint != null);
   }
 
-  final CustomPaintCallback callback;
+  final CustomPaintCallback onPaint;
   final Object token; // set this to be repainted automatically when the token changes
 
-  RenderCustomPaint createRenderObject() => new RenderCustomPaint(callback: callback);
+  RenderCustomPaint createRenderObject() => new RenderCustomPaint(onPaint: onPaint);
 
   void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
     if (oldWidget != null && oldWidget.token != token)
       renderObject.markNeedsPaint();
-    renderObject.callback = callback;
+    renderObject.onPaint = onPaint;
   }
 
   void didUnmountRenderObject(RenderCustomPaint renderObject) {
-    renderObject.callback = null;
+    renderObject.onPaint = null;
   }
 }
 
@@ -208,25 +220,20 @@ class Padding extends OneChildRenderObjectWidget {
 class Align extends OneChildRenderObjectWidget {
   Align({
     Key key,
-    this.horizontal: 0.5,
-    this.vertical: 0.5,
+    this.alignment: const FractionalOffset(0.5, 0.5),
     this.shrinkWrap: ShrinkWrap.none,
     Widget child
   }) : super(key: key, child: child) {
-    assert(horizontal != null);
-    assert(vertical != null);
     assert(shrinkWrap != null);
   }
 
-  final double horizontal;
-  final double vertical;
+  final FractionalOffset alignment;
   final ShrinkWrap shrinkWrap;
 
-  RenderPositionedBox createRenderObject() => new RenderPositionedBox(horizontal: horizontal, vertical: vertical, shrinkWrap: shrinkWrap);
+  RenderPositionedBox createRenderObject() => new RenderPositionedBox(alignment: alignment, shrinkWrap: shrinkWrap);
 
   void updateRenderObject(RenderPositionedBox renderObject, Align oldWidget) {
-    renderObject.horizontal = horizontal;
-    renderObject.vertical = vertical;
+    renderObject.alignment = alignment;
     renderObject.shrinkWrap = shrinkWrap;
   }
 }
@@ -259,6 +266,14 @@ class SizedBox extends OneChildRenderObjectWidget {
   void updateRenderObject(RenderConstrainedBox renderObject, SizedBox oldWidget) {
     renderObject.additionalConstraints = _additionalConstraints;
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+  }
 }
 
 class ConstrainedBox extends OneChildRenderObjectWidget {
@@ -273,6 +288,11 @@ class ConstrainedBox extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderConstrainedBox renderObject, ConstrainedBox oldWidget) {
     renderObject.additionalConstraints = constraints;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$constraints');
   }
 }
 
@@ -291,6 +311,14 @@ class FractionallySizedBox extends OneChildRenderObjectWidget {
   void updateRenderObject(RenderFractionallySizedBox renderObject, SizedBox oldWidget) {
     renderObject.widthFactor = width;
     renderObject.heightFactor = height;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
   }
 }
 
@@ -318,6 +346,26 @@ class OverflowBox extends OneChildRenderObjectWidget {
   }
 }
 
+class SizedOverflowBox extends OneChildRenderObjectWidget {
+  SizedOverflowBox({ Key key, this.size, Widget child })
+    : super(key: key, child: child);
+
+  final Size size;
+
+  RenderSizedOverflowBox createRenderObject() => new RenderSizedOverflowBox(requestedSize: size);
+
+  void updateRenderObject(RenderSizedOverflowBox renderObject, SizedOverflowBox oldWidget) {
+    renderObject.requestedSize = size;
+  }
+}
+
+class OffStage extends OneChildRenderObjectWidget {
+  OffStage({ Key key, Widget child })
+    : super(key: key, child: child);
+
+  RenderOffStage createRenderObject() => new RenderOffStage();
+}
+
 class AspectRatio extends OneChildRenderObjectWidget {
   AspectRatio({ Key key, this.aspectRatio, Widget child })
     : super(key: key, child: child) {
@@ -330,6 +378,11 @@ class AspectRatio extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderAspectRatio renderObject, AspectRatio oldWidget) {
     renderObject.aspectRatio = aspectRatio;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('aspectRatio: $aspectRatio');
   }
 }
 
@@ -395,21 +448,21 @@ class Viewport extends OneChildRenderObjectWidget {
 }
 
 class SizeObserver extends OneChildRenderObjectWidget {
-  SizeObserver({ Key key, this.callback, Widget child })
+  SizeObserver({ Key key, this.onSizeChanged, Widget child })
     : super(key: key, child: child) {
-    assert(callback != null);
+    assert(onSizeChanged != null);
   }
 
-  final SizeChangedCallback callback;
+  final SizeChangedCallback onSizeChanged;
 
-  RenderSizeObserver createRenderObject() => new RenderSizeObserver(callback: callback);
+  RenderSizeObserver createRenderObject() => new RenderSizeObserver(onSizeChanged: onSizeChanged);
 
   void updateRenderObject(RenderSizeObserver renderObject, SizeObserver oldWidget) {
-    renderObject.callback = callback;
+    renderObject.onSizeChanged = onSizeChanged;
   }
 
   void didUnmountRenderObject(RenderSizeObserver renderObject) {
-    renderObject.callback = null;
+    renderObject.onSizeChanged = null;
   }
 }
 
@@ -492,6 +545,26 @@ class Container extends StatelessComponent {
       current = new Transform(transform: transform, child: current);
 
     return current;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (constraints != null)
+      description.add('$constraints');
+    if (decoration != null)
+      description.add('has background');
+    if (foregroundDecoration != null)
+      description.add('has foreground');
+    if (margin != null)
+      description.add('margin: $margin');
+    if (padding != null)
+      description.add('padding: $padding');
+    if (transform != null)
+      description.add('has transform');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
   }
 
 }
@@ -617,8 +690,23 @@ class Positioned extends ParentDataWidget {
       needsLayout = true;
     }
 
-    if (needsLayout)
-      renderObject.markNeedsLayout();
+    if (needsLayout) {
+      AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsLayout();
+    }
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (left != null)
+      description.add('left: $left');
+    if (top != null)
+      description.add('top: $top');
+    if (right != null)
+      description.add('right: $right');
+    if (bottom != null)
+      description.add('bottom: $bottom');
   }
 }
 
@@ -701,8 +789,15 @@ class Flexible extends ParentDataWidget {
     final FlexParentData parentData = renderObject.parentData;
     if (parentData.flex != flex) {
       parentData.flex = flex;
-      renderObject.markNeedsLayout();
+      AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsLayout();
     }
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('flex: $flex');
   }
 }
 
@@ -820,7 +915,7 @@ class Image extends LeafRenderObjectWidget {
   final ui.Image image;
   final double width;
   final double height;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
   final Rect centerSlice;
@@ -862,7 +957,7 @@ class ImageListener extends StatefulComponent {
   final ImageResource image;
   final double width;
   final double height;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
   final Rect centerSlice;
@@ -924,7 +1019,7 @@ class NetworkImage extends StatelessComponent {
   final String src;
   final double width;
   final double height;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
   final Rect centerSlice;
@@ -959,7 +1054,7 @@ class AssetImage extends StatelessComponent {
   final AssetBundle bundle;
   final double width;
   final double height;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final ImageFit fit;
   final ImageRepeat repeat;
   final Rect centerSlice;
@@ -1052,6 +1147,11 @@ class MetaData extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderMetaData renderObject, MetaData oldWidget) {
     renderObject.metaData = metaData;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$metaData');
   }
 }
 

@@ -5,6 +5,7 @@
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/c/system/buffer.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/functions.h"
@@ -15,6 +16,7 @@ using mojo::embedder::internal::g_core;
 using mojo::system::Core;
 using mojo::system::Dispatcher;
 using mojo::system::MakeUserPointer;
+using mojo::system::RefPtr;
 
 // Definitions of the system functions, but with an explicit parameter for the
 // core object rather than using the default singleton. Also includes functions
@@ -48,12 +50,12 @@ MojoResult MojoSystemImplTransferHandle(MojoSystemImpl from_system,
   if (result_handle == nullptr)
     return MOJO_RESULT_INVALID_ARGUMENT;
 
-  scoped_refptr<Dispatcher> d;
+  RefPtr<Dispatcher> d;
   MojoResult result = from_core->GetAndRemoveDispatcher(handle, &d);
   if (result != MOJO_RESULT_OK)
     return result;
 
-  MojoHandle created_handle = to_core->AddDispatcher(d);
+  MojoHandle created_handle = to_core->AddDispatcher(d.get());
   if (created_handle == MOJO_HANDLE_INVALID) {
     // The handle has been lost, unfortunately. There's no guarentee we can put
     // it back where it came from, or get the original ID back. Holding locks

@@ -7,6 +7,8 @@ import 'dart:collection';
 
 import 'package:flutter/rendering.dart';
 
+export 'package:flutter/rendering.dart' show debugPrint;
+
 // KEYS
 
 /// A Key is an identifier for [Widget]s and [Element]s. A new Widget will only
@@ -38,6 +40,12 @@ class ValueKey<T> extends Key {
   }
   int get hashCode => value.hashCode;
   String toString() => '[\'$value\']';
+}
+
+/// A [Key] that is only equal to itself.
+class UniqueKey extends Key {
+  const UniqueKey() : super.constructor();
+  String toString() => '[$hashCode]';
 }
 
 /// A kind of [Key] that takes its identity from the object used as its value.
@@ -184,7 +192,7 @@ class GlobalObjectKey extends GlobalKey {
     return identical(value, typedOther.value);
   }
   int get hashCode => identityHashCode(value);
-  String toString() => '[GlobalKey ${value.runtimeType}(${value.hashCode})]';
+  String toString() => '[$runtimeType ${value.runtimeType}(${value.hashCode})]';
 }
 
 
@@ -200,8 +208,12 @@ abstract class Widget {
   /// Inflates this configuration to a concrete instance.
   Element createElement();
 
+  String toStringShort() {
+    return key == null ? '$runtimeType' : '$runtimeType-$key';
+  }
+
   String toString() {
-    final String name = key == null ? '$runtimeType' : '$runtimeType-$key';
+    final String name = toStringShort();
     final List<String> data = <String>[];
     debugFillDescription(data);
     if (data.isEmpty)
@@ -823,10 +835,13 @@ abstract class Element<T extends Widget> implements BuildContext {
   void debugFillDescription(List<String> description) {
     if (depth == null)
       description.add('no depth');
-    if (widget == null)
+    if (widget == null) {
       description.add('no widget');
-    else
+    } else {
+      if (widget.key != null)
+        description.add('${widget.key}');
       widget.debugFillDescription(description);
+    }
   }
 
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
@@ -1090,7 +1105,7 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
     assert(() {
       if (_state._debugLifecycleState == _StateLifecycle.initialized)
         return true;
-      print('${_state.runtimeType}.initState failed to call super.initState');
+      debugPrint('${_state.runtimeType}.initState failed to call super.initState');
       return false;
     });
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
@@ -1123,7 +1138,7 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
     assert(() {
       if (_state._debugLifecycleState == _StateLifecycle.defunct)
         return true;
-      print('${_state.runtimeType}.dispose failed to call super.dispose');
+      debugPrint('${_state.runtimeType}.dispose failed to call super.dispose');
       return false;
     });
     assert(!dirty); // See BuildableElement.unmount for why this is important.
@@ -1267,7 +1282,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     // dirty, e.g. if they have a builder callback. (Builder callbacks have a
     // 'BuildContext' argument which you can pass to Theme.of() and other
     // InheritedWidget APIs which eventually trigger a rebuild.)
-    print('$runtimeType failed to implement reinvokeBuilders(), but got marked dirty');
+    debugPrint('$runtimeType failed to implement reinvokeBuilders(), but got marked dirty');
     assert(() {
       'reinvokeBuilders() not implemented';
       return false;
@@ -1609,11 +1624,11 @@ void _debugReportException(String context, dynamic exception, StackTrace stack) 
   if (debugWidgetsExceptionHandler != null) {
     debugWidgetsExceptionHandler(context, exception, stack);
   } else {
-    print('------------------------------------------------------------------------');
-    'Exception caught while $context'.split('\n').forEach(print);
-    print('$exception');
-    print('Stack trace:');
-    '$stack'.split('\n').forEach(print);
-    print('------------------------------------------------------------------------');
+    debugPrint('------------------------------------------------------------------------');
+    debugPrint('Exception caught while $context');
+    debugPrint('$exception');
+    debugPrint('Stack trace:');
+    debugPrint('$stack');
+    debugPrint('------------------------------------------------------------------------');
   }
 }

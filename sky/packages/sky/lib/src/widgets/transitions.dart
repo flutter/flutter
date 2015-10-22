@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/animation.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:flutter/rendering.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
 import 'framework.dart';
 
 export 'package:flutter/animation.dart' show AnimationDirection;
+export 'package:flutter/rendering.dart' show RelativeRect;
 
 abstract class TransitionComponent extends StatefulComponent {
   TransitionComponent({
@@ -88,6 +92,29 @@ class SlideTransition extends TransitionWithChild {
   }
 }
 
+class RotationTransition extends TransitionWithChild {
+  RotationTransition({
+    Key key,
+    this.turns,
+    PerformanceView performance,
+    Widget child
+  }) : super(key: key,
+             performance: performance,
+             child: child);
+
+  final AnimatedValue<double> turns;
+
+  Widget buildWithChild(BuildContext context, Widget child) {
+    performance.updateVariable(turns);
+    Matrix4 transform = new Matrix4.rotationZ(turns.value * math.PI * 2.0);
+    return new Transform(
+      transform: transform,
+      alignment: const FractionalOffset(0.5, 0.5),
+      child: child
+    );
+  }
+}
+
 class FadeTransition extends TransitionWithChild {
   FadeTransition({
     Key key,
@@ -149,6 +176,47 @@ class SquashTransition extends TransitionWithChild {
     return new SizedBox(width: width?.value, height: height?.value, child: child);
   }
 }
+
+/// An animated variable containing a RelativeRectangle
+///
+/// This class specializes the interpolation of AnimatedValue<RelativeRect> to
+/// be appropriate for rectangles that are described in terms of offsets from
+/// other rectangles.
+class AnimatedRelativeRectValue extends AnimatedValue<RelativeRect> {
+  AnimatedRelativeRectValue(RelativeRect begin, { RelativeRect end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+
+  RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
+}
+
+/// Animated version of [Positioned].
+/// Only works if it's the child of a [Stack].
+class PositionedTransition extends TransitionWithChild {
+  PositionedTransition({
+    Key key,
+    this.rect,
+    PerformanceView performance,
+    Widget child
+  }) : super(key: key,
+             performance: performance,
+             child: child) {
+    assert(rect != null);
+  }
+
+  final AnimatedRelativeRectValue rect;
+
+  Widget buildWithChild(BuildContext context, Widget child) {
+    performance.updateVariable(rect);
+    return new Positioned(
+      top: rect.value.top,
+      right: rect.value.right,
+      bottom: rect.value.bottom,
+      left: rect.value.left,
+      child: child
+    );
+  }
+}
+
 
 typedef Widget BuilderFunction(BuildContext context);
 

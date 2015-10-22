@@ -68,11 +68,11 @@ bool ValidateIncomingMessage(size_t element_num_bytes,
 }  // namespace
 
 RemoteConsumerDataPipeImpl::RemoteConsumerDataPipeImpl(
-    ChannelEndpoint* channel_endpoint,
+    RefPtr<ChannelEndpoint>&& channel_endpoint,
     size_t consumer_num_bytes,
     std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
     size_t start_index)
-    : channel_endpoint_(channel_endpoint),
+    : channel_endpoint_(std::move(channel_endpoint)),
       consumer_num_bytes_(consumer_num_bytes),
       buffer_(std::move(buffer)),
       start_index_(start_index) {
@@ -295,10 +295,10 @@ bool RemoteConsumerDataPipeImpl::ProducerEndSerialize(
 
   s->consumer_num_bytes = consumer_num_bytes_;
   // Note: We don't use |port|.
-  scoped_refptr<ChannelEndpoint> channel_endpoint;
+  RefPtr<ChannelEndpoint> channel_endpoint;
   channel_endpoint.swap(channel_endpoint_);
   channel->SerializeEndpointWithRemotePeer(destination_for_endpoint, nullptr,
-                                           channel_endpoint);
+                                           std::move(channel_endpoint));
   SetConsumerClosed();
 
   *actual_size = sizeof(SerializedDataPipeProducerDispatcher) +

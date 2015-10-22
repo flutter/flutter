@@ -68,56 +68,54 @@ class SectorAppState extends State<SectorApp> {
   }
 
   Widget buildBody() {
-    return new Material(
-      child: new Column(<Widget>[
-          new Container(
-            padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
-            child: new Row(<Widget>[
-                new RaisedButton(
-                  enabled: _enabledAdd,
-                  child: new IntrinsicWidth(
-                    child: new Row(<Widget>[
-                      new Container(
-                        padding: new EdgeDims.all(4.0),
-                        margin: new EdgeDims.only(right: 10.0),
-                        child: new WidgetToRenderBoxAdapter(sectorAddIcon)
-                      ),
-                      new Text('ADD SECTOR'),
-                    ])
-                  ),
-                  onPressed: addSector
+    return new Column(<Widget>[
+        new Container(
+          padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
+          child: new Row(<Widget>[
+              new RaisedButton(
+                enabled: _enabledAdd,
+                child: new IntrinsicWidth(
+                  child: new Row(<Widget>[
+                    new Container(
+                      padding: new EdgeDims.all(4.0),
+                      margin: new EdgeDims.only(right: 10.0),
+                      child: new WidgetToRenderBoxAdapter(sectorAddIcon)
+                    ),
+                    new Text('ADD SECTOR'),
+                  ])
                 ),
-                new RaisedButton(
-                  enabled: _enabledRemove,
-                  child: new IntrinsicWidth(
-                    child: new Row(<Widget>[
-                      new Container(
-                        padding: new EdgeDims.all(4.0),
-                        margin: new EdgeDims.only(right: 10.0),
-                        child: new WidgetToRenderBoxAdapter(sectorRemoveIcon)
-                      ),
-                      new Text('REMOVE SECTOR'),
-                    ])
-                  ),
-                  onPressed: removeSector
-                )
-              ],
-              justifyContent: FlexJustifyContent.spaceAround
-            )
-          ),
-          new Flexible(
-            child: new Container(
-              margin: new EdgeDims.all(8.0),
-              decoration: new BoxDecoration(
-                border: new Border.all(color: new Color(0xFF000000))
+                onPressed: addSector
               ),
-              padding: new EdgeDims.all(8.0),
-              child: new WidgetToRenderBoxAdapter(sectors)
-            )
-          ),
-        ],
-        justifyContent: FlexJustifyContent.spaceBetween
-      )
+              new RaisedButton(
+                enabled: _enabledRemove,
+                child: new IntrinsicWidth(
+                  child: new Row(<Widget>[
+                    new Container(
+                      padding: new EdgeDims.all(4.0),
+                      margin: new EdgeDims.only(right: 10.0),
+                      child: new WidgetToRenderBoxAdapter(sectorRemoveIcon)
+                    ),
+                    new Text('REMOVE SECTOR'),
+                  ])
+                ),
+                onPressed: removeSector
+              )
+            ],
+            justifyContent: FlexJustifyContent.spaceAround
+          )
+        ),
+        new Flexible(
+          child: new Container(
+            margin: new EdgeDims.all(8.0),
+            decoration: new BoxDecoration(
+              border: new Border.all(color: new Color(0xFF000000))
+            ),
+            padding: new EdgeDims.all(8.0),
+            child: new WidgetToRenderBoxAdapter(sectors)
+          )
+        ),
+      ],
+      justifyContent: FlexJustifyContent.spaceBetween
     );
   }
 

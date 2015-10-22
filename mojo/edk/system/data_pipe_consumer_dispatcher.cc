@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/data_pipe_consumer_dispatcher.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/memory.h"
@@ -11,9 +13,9 @@
 namespace mojo {
 namespace system {
 
-void DataPipeConsumerDispatcher::Init(scoped_refptr<DataPipe> data_pipe) {
+void DataPipeConsumerDispatcher::Init(RefPtr<DataPipe>&& data_pipe) {
   DCHECK(data_pipe);
-  data_pipe_ = data_pipe;
+  data_pipe_ = std::move(data_pipe);
 }
 
 Dispatcher::Type DataPipeConsumerDispatcher::GetType() const {
@@ -21,17 +23,17 @@ Dispatcher::Type DataPipeConsumerDispatcher::GetType() const {
 }
 
 // static
-scoped_refptr<DataPipeConsumerDispatcher>
-DataPipeConsumerDispatcher::Deserialize(Channel* channel,
-                                        const void* source,
-                                        size_t size) {
-  scoped_refptr<DataPipe> data_pipe;
+RefPtr<DataPipeConsumerDispatcher> DataPipeConsumerDispatcher::Deserialize(
+    Channel* channel,
+    const void* source,
+    size_t size) {
+  RefPtr<DataPipe> data_pipe;
   if (!DataPipe::ConsumerDeserialize(channel, source, size, &data_pipe))
     return nullptr;
   DCHECK(data_pipe);
 
-  scoped_refptr<DataPipeConsumerDispatcher> dispatcher = Create();
-  dispatcher->Init(data_pipe);
+  auto dispatcher = DataPipeConsumerDispatcher::Create();
+  dispatcher->Init(std::move(data_pipe));
   return dispatcher;
 }
 
@@ -59,14 +61,13 @@ void DataPipeConsumerDispatcher::CloseImplNoLock() {
   data_pipe_ = nullptr;
 }
 
-scoped_refptr<Dispatcher>
+RefPtr<Dispatcher>
 DataPipeConsumerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   mutex().AssertHeld();
 
-  scoped_refptr<DataPipeConsumerDispatcher> rv = Create();
-  rv->Init(data_pipe_);
-  data_pipe_ = nullptr;
-  return scoped_refptr<Dispatcher>(rv.get());
+  auto dispatcher = DataPipeConsumerDispatcher::Create();
+  dispatcher->Init(std::move(data_pipe_));
+  return dispatcher;
 }
 
 MojoResult DataPipeConsumerDispatcher::ReadDataImplNoLock(
@@ -149,7 +150,7 @@ void DataPipeConsumerDispatcher::StartSerializeImplNoLock(
     Channel* channel,
     size_t* max_size,
     size_t* max_platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
   data_pipe_->ConsumerStartSerialize(channel, max_size, max_platform_handles);
 }
 
@@ -158,7 +159,7 @@ bool DataPipeConsumerDispatcher::EndSerializeAndCloseImplNoLock(
     void* destination,
     size_t* actual_size,
     embedder::PlatformHandleVector* platform_handles) {
-  DCHECK(HasOneRef());  // Only one ref => no need to take the lock.
+  AssertHasOneRef();  // Only one ref => no need to take the lock.
 
   bool rv = data_pipe_->ConsumerEndSerialize(channel, destination, actual_size,
                                              platform_handles);

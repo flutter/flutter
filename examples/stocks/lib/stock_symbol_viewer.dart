@@ -4,51 +4,59 @@
 
 part of stocks;
 
-class StockSymbolViewer extends StatefulComponent {
-  StockSymbolViewer(this.navigator, this.stock);
+class StockSymbolViewer extends StatelessComponent {
+  StockSymbolViewer(this.stock);
 
-  final NavigatorState navigator;
   final Stock stock;
 
-  StockSymbolViewerState createState() => new StockSymbolViewerState();
-}
-
-class StockSymbolViewerState extends State<StockSymbolViewer> {
-
   Widget build(BuildContext context) {
-
-    String lastSale = "\$${config.stock.lastSale.toStringAsFixed(2)}";
-
-    String changeInPrice = "${config.stock.percentChange.toStringAsFixed(2)}%";
-    if (config.stock.percentChange > 0) changeInPrice = "+" + changeInPrice;
-
+    String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
+    String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
+    if (stock.percentChange > 0)
+      changeInPrice = "+" + changeInPrice;
     TextStyle headings = Theme.of(context).text.body2;
-
     return new Scaffold(
       toolBar: new ToolBar(
         left: new IconButton(
           icon: 'navigation/arrow_back',
-          onPressed: config.navigator.pop
+          onPressed: () {
+            Navigator.of(context).pop();
+          }
         ),
-        center: new Text('${config.stock.name} (${config.stock.symbol})')
+        center: new Text(stock.name)
       ),
-      body: new Material(
-        child: new Block(<Widget>[
+      body: new Block(<Widget>[
           new Container(
-            padding: new EdgeDims.all(20.0),
-            child: new Column(<Widget>[
-                new Text('Last Sale', style: headings),
-                new Text('$lastSale ($changeInPrice)'),
-                new Container(
-                  height: 8.0
-                ),
-                new Text('Market Cap', style: headings),
-                new Text('${config.stock.marketCap}'),
-              ],
-              alignItems: FlexAlignItems.stretch
+            margin: new EdgeDims.all(20.0),
+            child: new Card(
+              child: new Container(
+                padding: new EdgeDims.all(20.0),
+                child: new Column(<Widget>[
+                    new Row(<Widget>[
+                      new Text(
+                        '${stock.symbol}',
+                        style: Theme.of(context).text.display2
+                      ),
+                      new Hero(
+                        tag: StockRowPartKind.arrow,
+                        turns: 2,
+                        child: new StockArrow(percentChange: stock.percentChange)
+                      ),
+                    ],
+                    justifyContent: FlexJustifyContent.spaceBetween
+                  ),
+                  new Text('Last Sale', style: headings),
+                  new Text('$lastSale ($changeInPrice)'),
+                  new Container(
+                    height: 8.0
+                  ),
+                  new Text('Market Cap', style: headings),
+                  new Text('${stock.marketCap}'),
+                ])
+              )
             )
           )
-        ])
+        ]
       )
     );
   }

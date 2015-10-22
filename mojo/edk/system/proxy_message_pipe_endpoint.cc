@@ -17,20 +17,16 @@ namespace mojo {
 namespace system {
 
 ProxyMessagePipeEndpoint::ProxyMessagePipeEndpoint(
-    ChannelEndpoint* channel_endpoint)
-    : channel_endpoint_(channel_endpoint) {
-}
+    RefPtr<ChannelEndpoint>&& channel_endpoint)
+    : channel_endpoint_(std::move(channel_endpoint)) {}
 
 ProxyMessagePipeEndpoint::~ProxyMessagePipeEndpoint() {
   DCHECK(!channel_endpoint_);
 }
 
-scoped_refptr<ChannelEndpoint>
-ProxyMessagePipeEndpoint::ReleaseChannelEndpoint() {
+RefPtr<ChannelEndpoint> ProxyMessagePipeEndpoint::ReleaseChannelEndpoint() {
   DCHECK(channel_endpoint_);
-  scoped_refptr<ChannelEndpoint> rv;
-  rv.swap(channel_endpoint_);
-  return rv;
+  return std::move(channel_endpoint_);
 }
 
 MessagePipeEndpoint::Type ProxyMessagePipeEndpoint::GetType() const {

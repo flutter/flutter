@@ -10,7 +10,6 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
-#include "base/location.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "base/synchronization/waitable_event.h"
@@ -136,7 +135,7 @@ class EmbedderTest : public testing::Test {
 
  protected:
   TestIOThread& test_io_thread() { return test_io_thread_; }
-  scoped_refptr<base::TaskRunner> test_io_task_runner() {
+  PlatformTaskRunnerRefPtr test_io_task_runner() {
     return test_io_thread_.task_runner();
   }
 
@@ -243,8 +242,7 @@ TEST_F(EmbedderTest, AsyncWait) {
                       base::Bind(&TestAsyncWaiter::Awake,
                                  base::Unretained(&waiter))));
 
-  test_io_task_runner()->PostTask(FROM_HERE,
-                                  base::Bind(&WriteHello, server_mp.get()));
+  test_io_thread().PostTask(base::Bind(&WriteHello, server_mp.get()));
   EXPECT_TRUE(waiter.TryWait());
   EXPECT_EQ(MOJO_RESULT_OK, waiter.wait_result());
 
@@ -267,8 +265,7 @@ TEST_F(EmbedderTest, AsyncWait) {
                       base::Bind(&TestAsyncWaiter::Awake,
                                  base::Unretained(&unsatisfiable_waiter))));
 
-  test_io_task_runner()->PostTask(
-      FROM_HERE,
+  test_io_thread().PostTask(
       base::Bind(&CloseScopedHandle, base::Passed(server_mp.Pass())));
 
   EXPECT_TRUE(unsatisfiable_waiter.TryWait());
@@ -446,7 +443,6 @@ TEST_F(EmbedderTest, MAYBE_MultiprocessMasterSlave) {
 
   EXPECT_TRUE(event.TimedWait(TestTimeouts::action_timeout()));
   test_io_thread().PostTaskAndWait(
-      FROM_HERE,
       base::Bind(&DestroyChannelOnIOThread, base::Unretained(channel_info)));
 }
 
@@ -521,7 +517,6 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
 
     EXPECT_TRUE(event.TimedWait(TestTimeouts::action_timeout()));
     test_io_thread.PostTaskAndWait(
-        FROM_HERE,
         base::Bind(&DestroyChannelOnIOThread, base::Unretained(channel_info)));
   }
 

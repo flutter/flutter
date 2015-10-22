@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'box.dart';
 import 'hit_test.dart';
@@ -61,7 +62,8 @@ class _UiEventConverter {
     Point position = new Point(event.x, event.y);
 
     _PointerState state = _stateForPointer[event.pointer];
-    double dx, dy;
+    double dx = 0.0;
+    double dy = 0.0;
     switch (event.type) {
       case 'pointerdown':
         if (state == null) {
@@ -252,5 +254,5 @@ class FlutterBinding extends HitTestTarget {
 
 /// Prints a textual representation of the entire render tree
 void debugDumpRenderTree() {
-  FlutterBinding.instance.renderView.toStringDeep().split('\n').forEach(print);
+  debugPrint(FlutterBinding.instance.renderView.toStringDeep());
 }

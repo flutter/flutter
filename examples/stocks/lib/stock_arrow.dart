@@ -25,7 +25,7 @@ class StockArrow extends StatelessComponent {
     // TODO(jackson): This should change colors with the theme
     Color color = _colorForPercentChange(percentChange);
     const double kSize = 40.0;
-    var arrow = new CustomPaint(callback: (ui.Canvas canvas, Size size) {
+    var arrow = new CustomPaint(onPaint: (ui.Canvas canvas, Size size) {
       Paint paint = new Paint()..color = color;
       paint.strokeWidth = 1.0;
       const double padding = 2.0;
@@ -49,11 +49,11 @@ class StockArrow extends StatelessComponent {
       path.lineTo(centerX + w, arrowY + h);
       path.lineTo(centerX - w, arrowY + h);
       path.close();
-      paint.setStyle(ui.PaintingStyle.fill);
+      paint.style = ui.PaintingStyle.fill;
       canvas.drawPath(path, paint);
 
       // Draw a circle that circumscribes the arrow.
-      paint.setStyle(ui.PaintingStyle.stroke);
+      paint.style = ui.PaintingStyle.stroke;
       canvas.drawCircle(new Point(centerX, centerY), r, paint);
     });
 

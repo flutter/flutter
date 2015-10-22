@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'icon.dart';
+import 'icon_theme_data.dart';
 
 class IconButton extends StatelessComponent {
   const IconButton({
@@ -20,7 +18,7 @@ class IconButton extends StatelessComponent {
 
   final String icon;
   final IconThemeColor color;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
   final GestureTapCallback onPressed;
 
   Widget build(BuildContext context) {
@@ -36,5 +34,10 @@ class IconButton extends StatelessComponent {
         )
       )
     );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$icon');
   }
 }

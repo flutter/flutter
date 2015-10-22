@@ -7,9 +7,9 @@
 
 #include <memory>
 
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/mutex.h"
+#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -61,14 +61,14 @@ class EndpointRelayer final : public ChannelEndpointClient {
     MOJO_DISALLOW_COPY_AND_ASSIGN(Filter);
   };
 
-  EndpointRelayer();
+  // Note: Use |MakeRefCounted<EndpointRelayer>()|.
 
   // Gets the other port number (i.e., 0 -> 1, 1 -> 0).
   static unsigned GetPeerPort(unsigned port);
 
   // Initialize this object. This must be called before any other method.
-  void Init(ChannelEndpoint* endpoint0,
-            ChannelEndpoint* endpoint1) MOJO_NOT_THREAD_SAFE;
+  void Init(RefPtr<ChannelEndpoint>&& endpoint0,
+            RefPtr<ChannelEndpoint>&& endpoint1) MOJO_NOT_THREAD_SAFE;
 
   // Sets (or resets) the filter, which can (optionally) handle/filter
   // |Type::ENDPOINT_CLIENT| messages (see |Filter| above).
@@ -79,10 +79,13 @@ class EndpointRelayer final : public ChannelEndpointClient {
   void OnDetachFromChannel(unsigned port) override;
 
  private:
+  FRIEND_MAKE_REF_COUNTED(EndpointRelayer);
+
+  EndpointRelayer();
   ~EndpointRelayer() override;
 
   Mutex mutex_;
-  scoped_refptr<ChannelEndpoint> endpoints_[2] MOJO_GUARDED_BY(mutex_);
+  RefPtr<ChannelEndpoint> endpoints_[2] MOJO_GUARDED_BY(mutex_);
   std::unique_ptr<Filter> filter_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(EndpointRelayer);

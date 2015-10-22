@@ -29,7 +29,9 @@ Dart
 
 In general, follow the [Dart style
 guide](https://www.dartlang.org/articles/style-guide/) for Dart code,
-except where that would contradict this page.
+except where that would contradict this page. (`dartfmt` [doesn't yet
+support](https://github.com/dart-lang/dart_style/issues/442) our style
+rules, so avoid using that for now.)
 
 Always use the Dart Analyzer. Avoid checking in code that increases
 the output of the analyzer unless you've filed a bug with the Dart
@@ -45,10 +47,9 @@ variables, constants, enum values, etc) is lowerCamelCase. Constant
 doubles and strings are prefixed with k. Prefer using a local const
 or a static const in a relevant class than using a global constant.
 
-When naming callbacks, use `FooCallback` for the typedef, `onFoo` (or,
-if there's only one and the whole purpose of the class is this
-callback, `callback`) for the callback argument or property, and
-`handleFoo` for the method that is called.
+When naming callbacks, use `FooCallback` for the typedef, `onFoo` for
+the callback argument or property, and `handleFoo` for the method
+that is called.
 
 If you have a callback with arguments but you want to ignore the
 arguments, name them `_`, `__`, `___`, etc. If you name any of them,
@@ -115,7 +116,7 @@ literals.
 
 Always avoid "var". Use "dynamic" if you are being explicit that the
 type is unknown. Use "Object" if you are being explicit that you want
-an object that implements == and hashCode.
+an object that implements `==` and `hashCode`.
 
 Avoid using "as". If you know the type is correct, use an assertion or
 assign to a more narrowly-typed variable (this avoids the type check
@@ -125,7 +126,9 @@ the exception that "as" raises).
 
 
 Aim for a line length of 80 characters, but go over if breaking the
-line would make it less readable.
+line would make it less readable. When wrapping lines, avoid doing so
+around assignment operators. Indent the next line by two characters
+or align the expressions, whichever makes the code more readable.
 
 When breaking an argument list into multiple lines, indent the
 arguments two characters from the previous line.
@@ -156,6 +159,8 @@ When using ```{ }``` braces, put a space or a newline after the open
 brace and before the closing brace. (If the block is empty, the same
 space will suffice for both.) Use spaces if the whole block fits on
 one line, and newlines if you need to break it over multiple lines.
+Use the `{}` expression (without a space in the middle) for the empty Map
+literal (but type it, so it looks like `<Foo, Bar>{}`).
 
 Don't put the statement part of an "if" statement on the same line as
 the expression, even if it is short. (Doing so makes it unobvious that
@@ -246,6 +251,21 @@ this pattern. If for some reason you don't want to use 'value', use
 'newTheProperty' (where 'theProperty' is the property name).
 
 Start the method with any asserts you need to validate the value.
+
+
+### Packages
+
+As per normal Dart conventions, a package should have a single import that reexports all of its API.
+
+> For example, [rendering.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/rendering.dart) exports all of lib/src/rendering/*.dart
+
+If a package uses, as part of its exposed API, types that it imports from a lower layer, it should reexport those types.
+
+> For example, [material.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/material.dart) reexports everything from [widgets.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/widgets.dart). Similarly, the latter [reexports](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/src/widgets/basic.dart) many types from [rendering.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/rendering.dart), such as `BoxConstraints`, that it uses in its API. On the other hand, it does not reexport, say, `RenderProxyBox`, since that is not part of the widgets API.
+
+By convention, `dart:ui` is always imported using `import 'dart:ui' as ui;`. Other Flutter packages are imported undecorated.
+
+As a general rule, when you have a lot of constants, wrap them in a class. For examples of this, see [lib/src/material/colors.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/src/material/colors.dart)
 
 
 C++

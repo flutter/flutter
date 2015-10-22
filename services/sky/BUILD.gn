@@ -41,7 +41,7 @@ mojo_native_application("sky") {
     "//mojo/services/gpu/interfaces",
     "//mojo/services/input_events/interfaces",
     "//mojo/services/navigation/interfaces",
-    "//mojo/services/network/public/interfaces",
+    "//mojo/services/network/interfaces",
     "//mojo/services/service_registry/interfaces",
     "//mojo/services/surfaces/interfaces",
     "//mojo/services/view_manager/cpp",
