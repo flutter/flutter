@@ -186,9 +186,8 @@ abstract class RenderStackBase extends RenderBox
          RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
   RenderStackBase({
     List<RenderBox> children,
-    double horizontalAlignment: 0.0,
-    double verticalAlignment: 0.0
-  }) : _horizontalAlignment = horizontalAlignment, _verticalAlignment = verticalAlignment {
+    alignment: const FractionalOffset(0.0, 0.0)
+  }) : _alignment = alignment {
     addAll(children);
   }
 
@@ -199,20 +198,11 @@ abstract class RenderStackBase extends RenderBox
       child.parentData = new StackParentData();
   }
 
-  double get horizontalAlignment => _horizontalAlignment;
-  double _horizontalAlignment;
-  void set horizontalAlignment (double value) {
-    if (_horizontalAlignment != value) {
-      _horizontalAlignment = value;
-      markNeedsLayout();
-    }
-  }
-
-  double get verticalAlignment => _verticalAlignment;
-  double _verticalAlignment;
-  void set verticalAlignment (double value) {
-    if (_verticalAlignment != value) {
-      _verticalAlignment = value;
+  FractionalOffset get alignment => _alignment;
+  FractionalOffset _alignment;
+  void set alignment (FractionalOffset value) {
+    if (_alignment != value) {
+      _alignment = value;
       markNeedsLayout();
     }
   }
@@ -327,8 +317,8 @@ abstract class RenderStackBase extends RenderBox
       final StackParentData childParentData = child.parentData;
 
       if (!childParentData.isPositioned) {
-        double x = (size.width - child.size.width) * horizontalAlignment;
-        double y = (size.height - child.size.height) * verticalAlignment;
+        double x = (size.width - child.size.width) * alignment.x;
+        double y = (size.height - child.size.height) * alignment.y;
         childParentData.position = new Point(x, y);
       } else {
         BoxConstraints childConstraints = const BoxConstraints();
@@ -395,12 +385,12 @@ abstract class RenderStackBase extends RenderBox
 /// are no non-positioned children, the stack becomes as large as possible.
 ///
 /// The final location of non-positioned children is determined by the alignment
-/// parameters. The left of each non-positioned child becomes the
+/// parameter. The left of each non-positioned child becomes the
 /// difference between the child's width and the stack's width scaled by
-/// horizontalAlignment. The top of each non-positioned child is computed
-/// similarly and scaled by verticalAlignement. So if the alignment parameters
+/// alignment.x. The top of each non-positioned child is computed
+/// similarly and scaled by alignement.y. So if the alignment x and y properties
 /// are 0.0 (the default) then the non-positioned children remain in the
-/// upper-left corner. If the alignment parameters are 0.5 then the
+/// upper-left corner. If the alignment x and y properties are 0.5 then the
 /// non-positioned children are centered within the stack.
 ///
 /// Next, the positioned children are laid out. If a child has top and bottom
@@ -418,12 +408,10 @@ abstract class RenderStackBase extends RenderBox
 class RenderStack extends RenderStackBase {
   RenderStack({
     List<RenderBox> children,
-    double horizontalAlignment: 0.0,
-    double verticalAlignment: 0.0
+    alignment: const FractionalOffset(0.0, 0.0)
   }) : super(
    children: children,
-   horizontalAlignment: horizontalAlignment,
-   verticalAlignment: verticalAlignment
+   alignment: alignment
  );
 
   void paintStack(PaintingContext context, Offset offset) {
@@ -438,13 +426,11 @@ class RenderStack extends RenderStackBase {
 class RenderIndexedStack extends RenderStackBase {
   RenderIndexedStack({
     List<RenderBox> children,
-    double horizontalAlignment: 0.0,
-    double verticalAlignment: 0.0,
+    alignment: const FractionalOffset(0.0, 0.0),
     int index: 0
   }) : _index = index, super(
    children: children,
-   horizontalAlignment: horizontalAlignment,
-   verticalAlignment: verticalAlignment
+   alignment: alignment
   );
 
   int get index => _index;
