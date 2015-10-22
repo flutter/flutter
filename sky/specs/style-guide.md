@@ -29,7 +29,9 @@ Dart
 
 In general, follow the [Dart style
 guide](https://www.dartlang.org/articles/style-guide/) for Dart code,
-except where that would contradict this page.
+except where that would contradict this page. (`dartfmt` [doesn't yet
+support](https://github.com/dart-lang/dart_style/issues/442) our style
+rules, so avoid using that for now.)
 
 Always use the Dart Analyzer. Avoid checking in code that increases
 the output of the analyzer unless you've filed a bug with the Dart
@@ -114,7 +116,7 @@ literals.
 
 Always avoid "var". Use "dynamic" if you are being explicit that the
 type is unknown. Use "Object" if you are being explicit that you want
-an object that implements == and hashCode.
+an object that implements `==` and `hashCode`.
 
 Avoid using "as". If you know the type is correct, use an assertion or
 assign to a more narrowly-typed variable (this avoids the type check
@@ -124,7 +126,9 @@ the exception that "as" raises).
 
 
 Aim for a line length of 80 characters, but go over if breaking the
-line would make it less readable.
+line would make it less readable. When wrapping lines, avoid doing so
+around assignment operators. Indent the next line by two characters
+or align the expressions, whichever makes the code more readable.
 
 When breaking an argument list into multiple lines, indent the
 arguments two characters from the previous line.
@@ -155,6 +159,8 @@ When using ```{ }``` braces, put a space or a newline after the open
 brace and before the closing brace. (If the block is empty, the same
 space will suffice for both.) Use spaces if the whole block fits on
 one line, and newlines if you need to break it over multiple lines.
+Use the `{}` expression (without a space in the middle) for the empty Map
+literal (but type it, so it looks like `<Foo, Bar>{}`).
 
 Don't put the statement part of an "if" statement on the same line as
 the expression, even if it is short. (Doing so makes it unobvious that
