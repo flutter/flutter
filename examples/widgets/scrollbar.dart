@@ -6,10 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 class ScrollbarApp extends StatefulComponent {
-  ScrollbarApp({ this.navigator });
-
-  final NavigatorState navigator;
-
   ScrollbarAppState createState() => new ScrollbarAppState();
 }
 
@@ -65,7 +61,7 @@ void main() {
       accentColor: Colors.redAccent[200]
     ),
     routes: {
-      '/': (RouteArguments args) => new ScrollbarApp(navigator: args.navigator),
+      '/': (RouteArguments args) => new ScrollbarApp(),
     }
   ));
 }

@@ -169,7 +169,6 @@ class _DrawerRoute extends Route {
   }
 }
 
-void showDrawer({ NavigatorState navigator, Widget child, int level: 3 }) {
-  assert(navigator != null);
-  navigator.push(new _DrawerRoute(child: child, level: level));
+void showDrawer({ BuildContext context, Widget child, int level: 3 }) {
+  Navigator.of(context).push(new _DrawerRoute(child: child, level: level));
 }

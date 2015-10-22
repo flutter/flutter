@@ -5,9 +5,8 @@
 part of stocks;
 
 class StockSymbolViewer extends StatelessComponent {
-  StockSymbolViewer(this.navigator, this.stock);
+  StockSymbolViewer(this.stock);
 
-  final NavigatorState navigator;
   final Stock stock;
 
   Widget build(BuildContext context) {
@@ -20,7 +19,9 @@ class StockSymbolViewer extends StatelessComponent {
       toolBar: new ToolBar(
         left: new IconButton(
           icon: 'navigation/arrow_back',
-          onPressed: navigator.pop
+          onPressed: () {
+            Navigator.of(context).pop();
+          }
         ),
         center: new Text(stock.name)
       ),

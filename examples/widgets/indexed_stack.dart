@@ -6,10 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class IndexedStackDemo extends StatefulComponent {
-  IndexedStackDemo({ this.navigator });
-
-  final NavigatorState navigator;
-
   IndexedStackDemoState createState() => new IndexedStackDemoState();
 }
 
@@ -23,7 +19,7 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
     });
   }
 
-  List <PopupMenuItem> _buildMenu(NavigatorState navigator) {
+  List <PopupMenuItem> _buildMenu() {
     TextStyle style = const TextStyle(fontSize: 18.0, fontWeight: bold);
     String pad = '';
     return new List.generate(_itemCount, (int i) {
@@ -33,7 +29,7 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
   }
 
   Widget build(BuildContext context) {
-    List <PopupMenuItem> items = _buildMenu(config.navigator);
+    List <PopupMenuItem> items = _buildMenu();
     IndexedStack indexedStack = new IndexedStack(items, index: _itemIndex, horizontalAlignment: 0.5);
 
     return new Scaffold(
@@ -61,7 +57,7 @@ void main() {
       accentColor: Colors.redAccent[200]
     ),
     routes: {
-      '/': (RouteArguments args) => new IndexedStackDemo(navigator: args.navigator),
+      '/': (RouteArguments args) => new IndexedStackDemo(),
     }
   ));
 }

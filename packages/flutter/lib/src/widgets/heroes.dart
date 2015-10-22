@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'navigator.dart';
 import 'transitions.dart';
 
 // Heroes are the parts of an application's screen-to-screen transitions where a
@@ -51,7 +50,7 @@ import 'transitions.dart';
 // TODO(ianh): If the widgets use Inherited properties, they are taken from the
 // Navigator's position in the widget hierarchy, not the source or target. We
 // should interpolate the inherited properties from their value at the source to
-// their value at the target. See: https://github.com/flutter/engine/issues/1698 
+// their value at the target. See: https://github.com/flutter/engine/issues/1698
 
 final Object centerOfAttentionHeroTag = new Object();
 
@@ -77,7 +76,6 @@ abstract class HeroHandle {
 class Hero extends StatefulComponent {
   Hero({
     Key key,
-    this.navigator,
     this.tag,
     this.child,
     this.turns: 1
@@ -85,7 +83,6 @@ class Hero extends StatefulComponent {
     assert(tag != null);
   }
 
-  final NavigatorState navigator;
   final Object tag;
   final Widget child;
   final int turns;
@@ -205,7 +202,7 @@ class HeroState extends State<Hero> implements HeroHandle {
             child: config.child
           )
         );
-      case _HeroMode.taken: 
+      case _HeroMode.taken:
         return new SizedBox(width: _size.width, height: _size.height);
     }
   }

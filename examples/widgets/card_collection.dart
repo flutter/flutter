@@ -19,10 +19,6 @@ class CardModel {
 }
 
 class CardCollection extends StatefulComponent {
-  CardCollection({ this.navigator });
-
-  final NavigatorState navigator;
-
   CardCollectionState createState() => new CardCollectionState();
 }
 
@@ -113,7 +109,7 @@ class CardCollectionState extends State<CardCollection> {
 
   void _showDrawer() {
     showDrawer(
-      navigator: config.navigator,
+      context: context,
       child: new IconTheme(
         data: const IconThemeData(color: IconThemeColor.black),
         child: new Block([
@@ -169,7 +165,7 @@ class CardCollectionState extends State<CardCollection> {
     setState(() {
       _dismissDirection = newDismissDirection;
     });
-    config.navigator.pop();
+    Navigator.of(context).pop();
   }
 
   Widget buildDrawerCheckbox(String label, bool value, Function callback) {
@@ -374,7 +370,7 @@ void main() {
   runApp(new MaterialApp(
     title: 'Cards',
     routes: {
-      '/': (RouteArguments args) => new CardCollection(navigator: args.navigator),
+      '/': (RouteArguments args) => new CardCollection(),
     }
   ));
 }
