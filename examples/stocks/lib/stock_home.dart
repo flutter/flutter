@@ -67,7 +67,8 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleMenuShow() {
-    showStockMenu(config.navigator,
+    showStockMenu(
+      context: context,
       autorefresh: _autorefresh,
       onAutorefreshChanged: _handleAutorefreshChanged
     );
@@ -75,7 +76,7 @@ class StockHomeState extends State<StockHome> {
 
   void _showDrawer() {
     showDrawer(
-      navigator: config.navigator,
+      context: context,
       child: new Block(<Widget>[
         new DrawerHeader(child: new Text('Stocks')),
         new DrawerItem(
@@ -86,8 +87,9 @@ class StockHomeState extends State<StockHome> {
         new DrawerItem(
           icon: 'action/account_balance',
           onPressed: () {
-            showDialog(config.navigator, (NavigatorState navigator) {
-              return new Dialog(
+            showDialog(
+              context: context,
+              child: new Dialog(
                 title: new Text('Not Implemented'),
                 content: new Text('This feature has not yet been implemented.'),
                 actions: <Widget>[
@@ -95,18 +97,18 @@ class StockHomeState extends State<StockHome> {
                     child: new Text('USE IT'),
                     enabled: false,
                     onPressed: () {
-                      navigator.pop(false);
+                      config.navigator.pop(false);
                     }
                   ),
                   new FlatButton(
                     child: new Text('OH WELL'),
                     onPressed: () {
-                      navigator.pop(false);
+                      config.navigator.pop(false);
                     }
                   ),
                 ]
-              );
-            });
+              )
+            );
           },
           child: new Text('Account Balance')
         ),
@@ -246,7 +248,7 @@ class StockHomeState extends State<StockHome> {
 
   void _handleStockPurchased() {
     showSnackBar(
-      navigator: config.navigator,
+      context: context,
       placeholderKey: _snackBarPlaceholderKey,
       content: new Text("Stock purchased!"),
       actions: <SnackBarAction>[

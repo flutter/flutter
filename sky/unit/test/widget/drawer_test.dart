@@ -21,7 +21,7 @@ void main() {
       );
       tester.pump(); // no effect
       expect(tester.findText('drawer'), isNull);
-      showDrawer(navigator: navigator, child: new Text('drawer'));
+      showDrawer(context: navigator.context, child: new Text('drawer'));
       tester.pump(); // drawer should be starting to animate in
       expect(tester.findText('drawer'), isNotNull);
       tester.pump(new Duration(seconds: 1)); // animation done
@@ -50,7 +50,7 @@ void main() {
       );
       tester.pump(); // no effect
       expect(tester.findText('drawer'), isNull);
-      showDrawer(navigator: navigator, child: new Text('drawer'));
+      showDrawer(context: navigator.context, child: new Text('drawer'));
       tester.pump(); // drawer should be starting to animate in
       expect(tester.findText('drawer'), isNotNull);
       tester.pump(new Duration(seconds: 1)); // animation done

@@ -105,7 +105,7 @@ class _SnackBarRoute extends PerformanceRoute {
   Widget build(RouteArguments args) => null;
 }
 
-void showSnackBar({ NavigatorState navigator, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
+void showSnackBar({ BuildContext context, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
   Route route = new _SnackBarRoute();
   SnackBar snackBar = new SnackBar(
     content: content,
@@ -113,5 +113,5 @@ void showSnackBar({ NavigatorState navigator, GlobalKey<PlaceholderState> placeh
     performance: route.performance
   );
   placeholderKey.currentState.child = snackBar;
-  navigator.push(route);
+  Navigator.of(context).push(route);
 }

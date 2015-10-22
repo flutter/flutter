@@ -35,29 +35,30 @@ class StockSettingsState extends State<StockSettings> {
         _handleOptimismChanged(false);
         break;
       case StockMode.pessimistic:
-        showDialog(config.navigator, (NavigatorState navigator) {
-          return new Dialog(
+        showDialog(
+          context: context,
+          child: new Dialog(
             title: new Text("Change mode?"),
             content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
             onDismiss: () {
-              navigator.pop(false);
+              config.navigator.pop(false);
             },
             actions: <Widget>[
               new FlatButton(
                 child: new Text('NO THANKS'),
                 onPressed: () {
-                  navigator.pop(false);
+                  config.navigator.pop(false);
                 }
               ),
               new FlatButton(
                 child: new Text('AGREE'),
                 onPressed: () {
-                  navigator.pop(true);
+                  config.navigator.pop(true);
                 }
               ),
             ]
-          );
-        }).then(_handleOptimismChanged);
+          )
+        ).then(_handleOptimismChanged);
         break;
     }
   }
