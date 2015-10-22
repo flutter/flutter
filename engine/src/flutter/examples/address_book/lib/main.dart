@@ -34,10 +34,6 @@ class Field extends StatelessComponent {
 }
 
 class AddressBookHome extends StatelessComponent {
-  AddressBookHome({ this.navigator });
-
-  final NavigatorState navigator;
-
   Widget buildToolBar(BuildContext context) {
     return new ToolBar(
         left: new IconButton(icon: "navigation/arrow_back"),
@@ -96,7 +92,7 @@ void main() {
     title: 'Address Book',
     theme: theme,
     routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) => new AddressBookHome(navigator: args.navigator)
+      '/': (RouteArguments args) => new AddressBookHome()
     }
   ));
 }
