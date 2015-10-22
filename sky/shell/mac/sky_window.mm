@@ -23,22 +23,22 @@
 static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
   switch (phase) {
     case NSEventPhaseNone:
-      return sky::EVENT_TYPE_UNKNOWN;
+      return sky::EventType::UNKNOWN;
     case NSEventPhaseBegan:
-      return sky::EVENT_TYPE_POINTER_DOWN;
+      return sky::EventType::POINTER_DOWN;
     case NSEventPhaseStationary:
     // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
     // with the same coordinates
     case NSEventPhaseChanged:
-      return sky::EVENT_TYPE_POINTER_MOVE;
+      return sky::EventType::POINTER_MOVE;
     case NSEventPhaseEnded:
-      return sky::EVENT_TYPE_POINTER_UP;
+      return sky::EventType::POINTER_UP;
     case NSEventPhaseCancelled:
-      return sky::EVENT_TYPE_POINTER_CANCEL;
+      return sky::EventType::POINTER_CANCEL;
     case NSEventPhaseMayBegin:
-      return sky::EVENT_TYPE_UNKNOWN;
+      return sky::EventType::UNKNOWN;
   }
-  return sky::EVENT_TYPE_UNKNOWN;
+  return sky::EventType::UNKNOWN;
 }
 
 @implementation SkyWindow {
@@ -160,7 +160,7 @@ static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
       base::TimeDelta::FromSecondsD(event.timestamp).InMilliseconds();
 
   input->pointer_data = sky::PointerData::New();
-  input->pointer_data->kind = sky::POINTER_KIND_TOUCH;
+  input->pointer_data->kind = sky::PointerKind::TOUCH;
 
   input->pointer_data->x = location.x;
   input->pointer_data->y = location.y;
