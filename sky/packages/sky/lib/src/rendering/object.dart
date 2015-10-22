@@ -679,6 +679,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
+    assert(!_debugDoingThisResize);
+    assert(!_debugDoingThisLayout);
     final RenderObject parent = this.parent;
     RenderObject relayoutSubtreeRoot;
     if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject)
@@ -694,12 +696,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
         // to itself, so it has the right internal debug values.
-        _debugDoingThisLayout = true;
+        _debugDoingThisResize = sizedByParent;
+        _debugDoingThisLayout = !sizedByParent;
         RenderObject debugPreviousActiveLayout = _debugActiveLayout;
         _debugActiveLayout = this;
         debugResetSize();
         _debugActiveLayout = debugPreviousActiveLayout;
         _debugDoingThisLayout = false;
+        _debugDoingThisResize = false;
         return true;
       });
       return;
