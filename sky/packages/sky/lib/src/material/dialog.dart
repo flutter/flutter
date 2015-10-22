@@ -153,15 +153,15 @@ class _DialogRoute extends PerformanceRoute {
   }
 }
 
-Future showDialog(NavigatorState navigator, DialogBuilder builder) {
+Future showDialog({ BuildContext context, Widget child }) {
   Completer completer = new Completer();
-  navigator.push(new _DialogRoute(
+  Navigator.of(context).push(new _DialogRoute(
     completer: completer,
     builder: (RouteArguments args) {
       return new Focus(
         key: new GlobalObjectKey(completer),
         autofocus: true,
-        child: builder(args.navigator)
+        child: child
       );
     }
   ));

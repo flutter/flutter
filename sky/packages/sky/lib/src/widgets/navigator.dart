@@ -47,6 +47,22 @@ class Navigator extends StatefulComponent {
   final RouteGenerator onGenerateRoute;
   final RouteBuilder onUnknownRoute;
 
+  static NavigatorState of(BuildContext context) {
+    NavigatorState result;
+    bool visitor(Element element) {
+      if (element is StatefulComponentElement) {
+        if (element.state is NavigatorState) {
+          result = element.state;
+          return false;
+        }
+      }
+      return true;
+    }
+    if (visitor(context))
+      context.visitAncestorElements(visitor);
+    return result;
+  }
+
   NavigatorState createState() => new NavigatorState();
 }
 
@@ -54,7 +70,7 @@ class Navigator extends StatefulComponent {
 // It also animates between these pages.
 // Pages can have "heroes", which are UI elements that animate from point to point.
 // These animations are called journeys.
-// 
+//
 // Journeys can start in two conditions:
 //  - Everything is calm, and we have no heroes in flight. In this case, we will
 //    have to collect the heroes from the route we're starting at and the route

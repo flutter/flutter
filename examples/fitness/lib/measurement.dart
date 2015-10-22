@@ -55,9 +55,8 @@ class MeasurementRow extends FitnessItemRow {
 }
 
 class MeasurementDateDialog extends StatefulComponent {
-  MeasurementDateDialog({ this.navigator, this.previousDate });
+  MeasurementDateDialog({ this.previousDate });
 
-  final NavigatorState navigator;
   final DateTime previousDate;
 
   MeasurementDateDialogState createState() => new MeasurementDateDialogState();
@@ -89,12 +88,14 @@ class MeasurementDateDialogState extends State<MeasurementDateDialog> {
       actions: [
         new FlatButton(
           child: new Text('CANCEL'),
-          onPressed: config.navigator.pop
+          onPressed: () {
+            Navigator.of(context).pop();
+          }
         ),
         new FlatButton(
           child: new Text('OK'),
           onPressed: () {
-            config.navigator.pop(_selectedDate);
+            Navigator.of(context).pop(_selectedDate);
           }
         ),
       ]
@@ -124,7 +125,7 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
     } on FormatException catch(e) {
       print("Exception $e");
       showSnackBar(
-        navigator: config.navigator,
+        context: context,
         placeholderKey: _snackBarPlaceholderKey,
         content: new Text('Save failed')
       );
@@ -157,16 +158,16 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
 
   static final GlobalKey weightKey = new GlobalKey();
 
-  void _handleDatePressed() {
-    showDialog(config.navigator, (NavigatorState navigator) {
-      return new MeasurementDateDialog(navigator: navigator, previousDate: _when);
-    }).then((DateTime value) {
-      if (value == null)
-        return;
+  Future _handleDatePressed() async {
+    DateTime value = await showDialog(
+      context: context,
+      child: new MeasurementDateDialog(previousDate: _when)
+    );
+    if (value != null) {
       setState(() {
         _when = value;
       });
-    });
+    }
   }
 
   Widget buildBody(BuildContext context) {
