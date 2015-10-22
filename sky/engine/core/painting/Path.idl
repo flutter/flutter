@@ -12,5 +12,7 @@
     void addOval(Rect oval);
     void close();
 
+    void reset();
+
     Path shift(Offset offset);
 };
