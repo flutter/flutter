@@ -33,7 +33,7 @@ class RenderImageGrow extends RenderImage {
 
 RenderImageGrow image;
 
-Map<int, Touch> touches = new Map();
+final Map<int, Touch> touches = <int, Touch>{};
 void handleEvent(event) {
   if (event is ui.PointerEvent) {
     if (event.type == 'pointermove')
@@ -64,8 +64,7 @@ void main() {
     image.image = dartLogo;
   });
 
-  var padding = new RenderPadding(padding: const EdgeDims.all(10.0), child: image);
-  row.add(padding);
+  row.add(new RenderPadding(padding: const EdgeDims.all(10.0), child: image));
 
   RenderFlex column = new RenderFlex(direction: FlexDirection.vertical);
 
@@ -79,13 +78,14 @@ porchetta bacon kevin meatball meatloaf pig beef ribs chicken. Brisket ribeye
 andouille leberkas capicola meatloaf. Chicken pig ball tip pork picanha bresaola
 alcatra. Pork pork belly alcatra, flank chuck drumstick biltong doner jowl.
 Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
-  var text = new StyledTextSpan(
-      new TextStyle(color:  const Color(0xFF009900)),
-      [new PlainTextSpan(meatyString)]);
-  padding = new RenderPadding(
-      padding: const EdgeDims.all(10.0),
-      child: new RenderParagraph(text));
-  column.add(padding);
+  TextSpan text = new StyledTextSpan(
+    new TextStyle(color:  const Color(0xFF009900)),
+    <TextSpan>[new PlainTextSpan(meatyString)]
+  );
+  column.add(new RenderPadding(
+    padding: const EdgeDims.all(10.0),
+    child: new RenderParagraph(text)
+  ));
 
   // Bottom cell
   addFlexChildSolidColor(column, const Color(0xFF0081C6), flex: 2);

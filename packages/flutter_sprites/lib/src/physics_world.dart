@@ -39,11 +39,11 @@ class PhysicsWorld extends Node {
 
   _ContactHandler _contactHandler;
 
-  List<PhysicsJoint> _joints = [];
+  List<PhysicsJoint> _joints = <PhysicsJoint>[];
 
-  List<box2d.Body> _bodiesScheduledForDestruction = [];
+  List<box2d.Body> _bodiesScheduledForDestruction = <box2d.Body>[];
 
-  List<PhysicsBody> _bodiesScheduledForUpdate = [];
+  List<PhysicsBody> _bodiesScheduledForUpdate = <PhysicsBody>[];
 
   _PhysicsDebugDraw _debugDraw;
 
@@ -272,7 +272,7 @@ class _ContactHandler extends box2d.ContactListener {
 
   PhysicsWorld physicsNode;
 
-  List<_ContactCallbackInfo> callbackInfos = [];
+  List<_ContactCallbackInfo> callbackInfos = <_ContactCallbackInfo>[];
 
   void addContactCallback(PhysicsContactCallback callback, Object tagA, Object tagB, PhysicsContactType type) {
     callbackInfos.add(new _ContactCallbackInfo(callback, tagA, tagB, type));
@@ -324,7 +324,7 @@ class _ContactHandler extends box2d.ContactListener {
           box2d.WorldManifold manifold = new box2d.WorldManifold();
           b2Contact.getWorldManifold(manifold);
           touchingNormal = new Offset(manifold.normal.x, manifold.normal.y);
-          touchingPoints = [];
+          touchingPoints = <Point>[];
           for (Vector2 vec in manifold.points) {
             touchingPoints.add(new Point(
               vec.x * physicsNode.b2WorldToNodeConversionFactor,

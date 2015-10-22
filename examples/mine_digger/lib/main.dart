@@ -30,8 +30,8 @@ const List<Color> textColors = const <Color>[
   const Color(0xFF000000),
 ];
 
-final List<TextStyle> textStyles = textColors.map((color) {
-    return new TextStyle(color: color, fontWeight: bold, textAlign: TextAlign.center);
+final List<TextStyle> textStyles = textColors.map((Color color) {
+  return new TextStyle(color: color, fontWeight: bold, textAlign: TextAlign.center);
 }).toList();
 
 enum CellState { covered, exploded, cleared, flagged, shown }
@@ -64,10 +64,10 @@ class MineDiggerState extends State<MineDigger> {
     hasWon = false;
     detectedCount = 0;
     // Initialize matrices.
-    cells = new List<List>.generate(rows, (int row) {
+    cells = new List<List<bool>>.generate(rows, (int row) {
       return new List<bool>.filled(cols, false);
     });
-    uiState = new List<List>.generate(rows, (int row) {
+    uiState = new List<List<CellState>>.generate(rows, (int row) {
       return new List<CellState>.filled(cols, CellState.covered);
     });
     // Place the mines.

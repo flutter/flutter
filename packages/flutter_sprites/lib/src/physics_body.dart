@@ -237,7 +237,7 @@ class PhysicsBody {
 
   box2d.Body _body;
 
-  List<PhysicsJoint> _joints = [];
+  List<PhysicsJoint> _joints = <PhysicsJoint>[];
 
   bool _attached = false;
 
@@ -355,8 +355,8 @@ class PhysicsBody {
     fixtureDef.isSensor = isSensor;
 
     // Get shapes
-    List<box2d.Shape> b2Shapes = [];
-    List<PhysicsShape> physicsShapes = [];
+    List<box2d.Shape> b2Shapes = <box2d.Shape>[];
+    List<PhysicsShape> physicsShapes = <PhysicsShape>[];
     _addB2Shapes(physicsNode, shape, b2Shapes, physicsShapes);
 
     // Create fixtures

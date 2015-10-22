@@ -37,6 +37,8 @@ abstract class Action {
   double get duration => 0.0;
 }
 
+typedef void SetterCallback(dynamic value);
+
 /// The abstract class for an action that changes properties over a time
 /// interval, optionally using an easing curve.
 abstract class ActionInterval extends Action {
@@ -351,17 +353,6 @@ class ActionRemoveNode extends ActionInstant {
 /// type [Point], [Size], [Rect], [double], or [Color].
 class ActionTween extends ActionInterval {
 
-  /// The setter method used to set the property being animated.
-  final Function setter;
-
-  /// The start value of the animation.
-  final startVal;
-
-  /// The end value of the animation.
-  final endVal;
-
-  var _delta;
-
   /// Creates a new tween action. The [setter] will be called to update the
   /// animated property from [startVal] to [endVal] over the [duration] time in
   /// seconds. Optionally an animation [curve] can be passed in for easing the
@@ -380,6 +371,17 @@ class ActionTween extends ActionInterval {
   ActionTween(this.setter, this.startVal, this.endVal, double duration, [Curve curve]) : super(duration, curve) {
     _computeDelta();
   }
+
+  /// The setter method used to set the property being animated.
+  final SetterCallback setter;
+
+  /// The start value of the animation.
+  final dynamic startVal;
+
+  /// The end value of the animation.
+  final dynamic endVal;
+
+  dynamic _delta;
 
   void _computeDelta() {
     if (startVal is Point) {
@@ -474,7 +476,7 @@ class ActionTween extends ActionInterval {
 /// itself is typically a property of a [Node] and powered by the [SpriteBox].
 class ActionController {
 
-  List<Action> _actions = [];
+  List<Action> _actions = <Action>[];
 
   /// Creates a new [ActionController]. However, for most uses a reference to
   /// an [ActionController] is acquired through the [Node.actions] property.

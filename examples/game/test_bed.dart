@@ -21,7 +21,7 @@ TestBedApp _app;
 main() async {
   _images = new ImageMap(_bundle);
 
-  await _images.load([
+  await _images.load(<String>[
     'assets/sprites.png'
   ]);
 
@@ -54,6 +54,5 @@ class TestBedApp extends MaterialApp {
 }
 
 class TestBed extends NodeWithSize {
-  TestBed() : super(new Size(1024.0, 1024.0)) {
-  }
+  TestBed() : super(new Size(1024.0, 1024.0));
 }

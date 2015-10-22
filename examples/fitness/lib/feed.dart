@@ -18,7 +18,7 @@ class FitnessItemList extends StatelessComponent {
       padding: const EdgeDims.all(4.0),
       items: items,
       itemExtent: kFitnessItemHeight,
-      itemBuilder: (_, item) => item.toRow(onDismissed: onDismissed)
+      itemBuilder: (BuildContext context, FitnessItem item) => item.toRow(onDismissed: onDismissed)
     );
   }
 }
@@ -68,7 +68,7 @@ class FeedFragmentState extends State<FeedFragment> {
   void _showDrawer() {
     showDrawer(
       context: context,
-      child: new Block([
+      child: new Block(<Widget>[
         new DrawerHeader(child: new Text('Fitness')),
         new DrawerItem(
           icon: 'action/view_list',
@@ -120,7 +120,7 @@ class FeedFragmentState extends State<FeedFragment> {
       context: context,
       placeholderKey: _snackBarPlaceholderKey,
       content: new Text("Item deleted."),
-      actions: [new SnackBarAction(label: "UNDO", onPressed: () {
+      actions: <SnackBarAction>[new SnackBarAction(label: "UNDO", onPressed: () {
         config.onItemCreated(item);
         config.navigator.pop();
       })]
@@ -172,7 +172,7 @@ class FeedFragmentState extends State<FeedFragment> {
       return new Container();
     if (config.userData.items.length == 0) {
       return new Row(
-        [new Text("No data yet.\nAdd some!", style: style)],
+        <Widget>[new Text("No data yet.\nAdd some!", style: style)],
         justifyContent: FlexJustifyContent.center
       );
     }
@@ -225,7 +225,7 @@ class AddItemDialog extends StatefulComponent {
 
 class AddItemDialogState extends State<AddItemDialog> {
   // TODO(jackson): Internationalize
-  static final Map<String, String> _labels = {
+  static final Map<String, String> _labels = <String, String>{
     '/measurements/new': 'Measure',
     '/meals/new': 'Eat',
   };
@@ -239,9 +239,9 @@ class AddItemDialogState extends State<AddItemDialog> {
   }
 
   Widget build(BuildContext context) {
-    List<Widget> menuItems = [];
-    for(String routeName in _labels.keys) {
-      menuItems.add(new DialogMenuItem([
+    List<Widget> menuItems = <Widget>[];
+    for (String routeName in _labels.keys) {
+      menuItems.add(new DialogMenuItem(<Widget>[
         new Flexible(child: new Text(_labels[routeName])),
         new Radio(value: routeName, groupValue: _addItemRoute, onChanged: _handleAddItemRouteChanged),
       ], onPressed: () => _handleAddItemRouteChanged(routeName)));
@@ -252,7 +252,7 @@ class AddItemDialogState extends State<AddItemDialog> {
       onDismiss: () {
         Navigator.of(context).pop();
       },
-      actions: [
+      actions: <Widget>[
         new FlatButton(
           child: new Text('CANCEL'),
           onPressed: () {

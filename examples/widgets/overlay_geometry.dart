@@ -86,7 +86,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
     ];
-    cardModels = new List.generate(cardHeights.length, (i) {
+    cardModels = new List<CardModel>.generate(cardHeights.length, (int i) {
       Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
@@ -121,7 +121,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     CardModel cardModel = cardModels[index];
     return new Listener(
       key: cardModel.key,
-      onPointerDown: (e) { return handlePointerDown(cardModel.targetKey, e); },
+      onPointerDown: (PointerInputEvent e) { return handlePointerDown(cardModel.targetKey, e); },
       child: new Card(
         key: cardModel.targetKey,
         color: cardModel.color,
@@ -162,7 +162,7 @@ void main() {
       accentColor: Colors.redAccent[200]
     ),
     title: 'Cards',
-    routes: {
+    routes: <String, RouteBuilder>{
       '/': (RouteArguments args) => new OverlayGeometryApp()
     }
   ));

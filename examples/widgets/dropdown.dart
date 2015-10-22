@@ -13,7 +13,7 @@ class DropdownDemo extends StatefulComponent {
 class DropdownDemoState extends State<DropdownDemo> {
   String _value = "Free";
 
-  List <DropdownMenuItem> _buildItems() {
+  List<DropdownMenuItem> _buildItems() {
     return ["One", "Two", "Free", "Four"].map((String value) {
       return new DropdownMenuItem<String>(value: value, child: new Text(value));
     })
@@ -24,7 +24,7 @@ class DropdownDemoState extends State<DropdownDemo> {
     Widget dropdown = new DropdownButton<String>(
       items: _buildItems(),
       value: _value,
-      onChanged: (dynamic newValue) {
+      onChanged: (String newValue) {
         setState(() {
           if (newValue != null)
             _value = newValue;
@@ -50,7 +50,7 @@ void main() {
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent[200]
     ),
-    routes: {
+    routes: <String, RouteBuilder>{
       '/': (RouteArguments args) => new DropdownDemo(),
     }
   ));

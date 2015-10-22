@@ -23,7 +23,7 @@ class Circle extends StatelessComponent {
 
 class HorizontalScrollingApp extends StatelessComponent {
   Widget build(BuildContext context) {
-    List<Widget> circles = [
+    List<Widget> circles = <Widget>[
       new Circle(margin: new EdgeDims.only(left: 10.0)),
       new Circle(),
       new Circle(),

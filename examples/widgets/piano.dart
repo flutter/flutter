@@ -18,11 +18,12 @@ const String frogs = "http://soundbible.com/grab.php?id=2033&type=wav";
 const String rattle = "http://soundbible.com/grab.php?id=2037&type=wav";
 const String iLoveYou = "http://soundbible.com/grab.php?id=2045&type=wav";
 
-class Key {
-  Key(this.color, this.soundUrl);
+class PianoKey {
+  PianoKey(this.color, this.soundUrl);
 
   final Color color;
   final String soundUrl;
+
   final MediaPlayerProxy player = new MediaPlayerProxy.unbound();
 
   bool get isPlayerOpen => player.impl.isOpen;
@@ -51,13 +52,13 @@ class Key {
 }
 
 class PianoApp extends StatelessComponent {
-  final List<Key> keys = [
-    new Key(Colors.red[500], chimes),
-    new Key(Colors.orange[500], chainsaw),
-    new Key(Colors.yellow[500], stag),
-    new Key(Colors.green[500], frogs),
-    new Key(Colors.blue[500], rattle),
-    new Key(Colors.purple[500], iLoveYou),
+  final List<PianoKey> keys = <PianoKey>[
+    new PianoKey(Colors.red[500], chimes),
+    new PianoKey(Colors.orange[500], chainsaw),
+    new PianoKey(Colors.yellow[500], stag),
+    new PianoKey(Colors.green[500], frogs),
+    new PianoKey(Colors.blue[500], rattle),
+    new PianoKey(Colors.purple[500], iLoveYou),
   ];
 
   Future connect() {
@@ -68,10 +69,9 @@ class PianoApp extends StatelessComponent {
     MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
     try {
       shell.requestService(null, mediaService);
-      List<Future> pending = [];
-      for (Key key in keys) {
+      List<Future<MediaPlayerPrepareResponseParams>> pending = <Future<MediaPlayerPrepareResponseParams>>[];
+      for (PianoKey key in keys)
         pending.add(key.load(mediaService));
-      }
       await Future.wait(pending);
     } finally {
       mediaService.close();
@@ -79,8 +79,8 @@ class PianoApp extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    List<Widget> children = [];
-    for (Key key in keys) {
+    List<Widget> children = <Widget>[];
+    for (PianoKey key in keys) {
       children.add(new Flexible(
           child: new Listener(
               child: new Container(
@@ -99,7 +99,7 @@ Widget statusBox(Widget child) {
   const darkGray = const Color(0xff222222);
   return new Center(
       child: new Container(
-          decoration: const BoxDecoration(boxShadow: const [
+          decoration: const BoxDecoration(boxShadow: const <BoxShadow>[
             const BoxShadow(
                 color: mediumGray, offset: const Offset(6.0, 6.0), blur: 5.0)
           ], backgroundColor: darkGray),

@@ -20,7 +20,7 @@ class MealRow extends FitnessItemRow {
 
   Widget buildContent(BuildContext context) {
     Meal meal = item;
-    List<Widget> children = [
+    List<Widget> children = <Widget>[
       new Flexible(
         child: new Text(
           meal.description,
@@ -65,7 +65,7 @@ class MealFragmentState extends State<MealFragment> {
         icon: "navigation/close",
         onPressed: config.navigator.pop),
       center: new Text('New Meal'),
-      right: [
+      right: <Widget>[
         // TODO(abarth): Should this be a FlatButton?
         new InkWell(
           onTap: _handleSave,
@@ -85,10 +85,11 @@ class MealFragmentState extends State<MealFragment> {
 
   Widget buildBody() {
     Meal meal = new Meal(when: new DateTime.now());
+    // TODO(ianh): Fix Block such that we could use that here instead of rolling our own
     return new ScrollableViewport(
       child: new Container(
         padding: const EdgeDims.all(20.0),
-        child: new BlockBody([
+        child: new BlockBody(<Widget>[
           new Text(meal.displayDate),
           new Input(
             key: descriptionKey,

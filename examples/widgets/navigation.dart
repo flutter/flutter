@@ -8,7 +8,7 @@ final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
   '/': (RouteArguments args) => new Container(
     padding: const EdgeDims.all(30.0),
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
-    child: new Column([
+    child: new Column(<Widget>[
       new Text("You are at home"),
       new RaisedButton(
         child: new Text('GO SHOPPING'),
@@ -24,7 +24,7 @@ final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
   '/shopping': (RouteArguments args) => new Container(
     padding: const EdgeDims.all(20.0),
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFBF5FFF)),
-    child: new Column([
+    child: new Column(<Widget>[
       new Text("Village Shop"),
       new RaisedButton(
         child: new Text('RETURN HOME'),
@@ -40,7 +40,7 @@ final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
   '/adventure': (RouteArguments args) => new Container(
     padding: const EdgeDims.all(20.0),
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFDC143C)),
-    child: new Column([
+    child: new Column(<Widget>[
       new Text("Monster's Lair"),
       new RaisedButton(
         child: new Text('RUN!!!'),

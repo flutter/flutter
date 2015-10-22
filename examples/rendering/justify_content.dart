@@ -14,15 +14,16 @@ void main() {
   var table = new RenderFlex(direction: FlexDirection.vertical);
 
   void addRow(FlexJustifyContent justify) {
-    RenderParagraph paragraph = new RenderParagraph(new StyledTextSpan(style, [new PlainTextSpan("${justify}")]));
+    RenderParagraph paragraph = new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan("$justify")]));
     table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
-    var row = new RenderFlex(direction: FlexDirection.horizontal);
+    RenderFlex row = new RenderFlex(direction: FlexDirection.horizontal);
     row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: new Size(80.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: new Size(64.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: new Size(160.0, 60.0)));
     row.justifyContent = justify;
     table.add(row);
-    row.parentData.flex = 1;
+    final FlexParentData rowParentData = row.parentData;
+    rowParentData.flex = 1;
   }
 
   addRow(FlexJustifyContent.start);

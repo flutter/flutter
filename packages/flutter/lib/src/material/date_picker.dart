@@ -368,7 +368,7 @@ class _YearPickerState extends ScrollableWidgetListState<YearPicker> {
   List<Widget> buildItems(BuildContext context, int start, int count) {
     TextStyle style = Theme.of(context).text.body1.copyWith(color: Colors.black54);
     List<Widget> items = new List<Widget>();
-    for(int i = start; i < start + count; i++) {
+    for (int i = start; i < start + count; i++) {
       int year = config.firstDate.year + i;
       String label = year.toString();
       Widget item = new InkWell(

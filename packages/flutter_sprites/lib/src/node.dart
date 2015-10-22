@@ -61,7 +61,7 @@ class Node {
   bool handleMultiplePointers = false;
   int _handlingPointer;
 
-  List<Node>_children = [];
+  List<Node> _children = <Node>[];
 
   ActionController _actions;
 
@@ -104,9 +104,8 @@ class Node {
 
   /// Creates a new [Node] without any transformation.
   ///
-  ///     var myNode = new Node();
-  Node() {
-  }
+  ///     Node myNode = new Node();
+  Node();
 
   // Property setters and getters
 
@@ -115,7 +114,7 @@ class Node {
   /// For most applications it's not necessary to access the [SpriteBox] directly.
   ///
   ///     // Get the transformMode of the sprite box
-  ///     var transformMode = myNode.spriteBox.transformMode;
+  ///     SpriteBoxTransformMode transformMode = myNode.spriteBox.transformMode;
   SpriteBox get spriteBox => _spriteBox;
 
   /// The parent of this node, or null if it doesn't have a parent.
@@ -450,7 +449,7 @@ class Node {
       child._parent = null;
       child._spriteBox = null;
     }
-    _children = [];
+    _children = <Node>[];
     _childrenNeedSorting = false;
     if (_spriteBox != null) _spriteBox._deregisterNode(null);
   }
