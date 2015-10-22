@@ -139,7 +139,8 @@ class _MenuRoute extends PerformanceRoute {
   Duration get transitionDuration => _kMenuDuration;
 
   Widget build(RouteArguments args) {
-    final Size navigatorSize = navigator.context.findRenderObject().size;
+    final RenderBox renderBox = navigator.context.findRenderObject();
+    final Size navigatorSize = renderBox.size;
     final RelativeRect menuRect = new RelativeRect.fromSize(rect, navigatorSize);
 
     return new Positioned(
@@ -166,7 +167,7 @@ class _MenuRoute extends PerformanceRoute {
   }
 }
 
-class DropdownMenuItem extends StatelessComponent {
+class DropdownMenuItem<T> extends StatelessComponent {
   DropdownMenuItem({
     Key key,
     this.value,
@@ -174,7 +175,7 @@ class DropdownMenuItem extends StatelessComponent {
   }) : super(key: key);
 
   final Widget child;
-  final dynamic value;
+  final T value;
 
   Widget build(BuildContext context) {
     return new Container(
@@ -191,7 +192,7 @@ class DropdownMenuItem extends StatelessComponent {
   }
 }
 
-class DropdownButton extends StatelessComponent {
+class DropdownButton<T> extends StatelessComponent {
   DropdownButton({
     Key key,
     this.items,
@@ -200,8 +201,8 @@ class DropdownButton extends StatelessComponent {
     this.level: 4
   }) : super(key: key);
 
-  final List<DropdownMenuItem> items;
-  final dynamic value;
+  final List<DropdownMenuItem<T>> items;
+  final T value;
   final ValueChanged onChanged;
   final int level;
 

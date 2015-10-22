@@ -11,17 +11,17 @@ class DropdownDemo extends StatefulComponent {
 }
 
 class DropdownDemoState extends State<DropdownDemo> {
-  dynamic _value = 0;
+  String _value = "Free";
 
   List <DropdownMenuItem> _buildItems() {
-    return ["One", "Two", "Free", "Four"].map((String label) {
-      return new DropdownMenuItem(value: label, child: new Text(label));
+    return ["One", "Two", "Free", "Four"].map((String value) {
+      return new DropdownMenuItem<String>(value: value, child: new Text(value));
     })
     .toList();
   }
 
   Widget build(BuildContext context) {
-    Widget dropdown = new DropdownButton(
+    Widget dropdown = new DropdownButton<String>(
       items: _buildItems(),
       value: _value,
       onChanged: (dynamic newValue) {
