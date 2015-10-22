@@ -241,7 +241,7 @@ class DropdownButton<T> extends StatelessComponent {
             new IndexedStack(items,
               key: indexedStackKey,
               index: selectedIndex,
-              horizontalAlignment: 0.5
+              alignment: const FractionalOffset(0.5, 0.0)
             ),
             new Container(
               child: new Icon(type: 'navigation/arrow_drop_down', size: 36),

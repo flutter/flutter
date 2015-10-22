@@ -103,8 +103,7 @@ void main() {
               new Container(key: child0Key, width: 20.0, height: 20.0),
               new Container(key: child1Key, width: 10.0, height: 10.0)
             ],
-            horizontalAlignment: 0.5,
-            verticalAlignment: 0.5
+            alignment: const FractionalOffset(0.5, 0.5)
           )
         )
       );
