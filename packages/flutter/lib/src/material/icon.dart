@@ -2,50 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
-
-enum IconThemeColor { white, black }
-
-class IconThemeData {
-  const IconThemeData({ this.color });
-  final IconThemeColor color;
-
-  bool operator ==(dynamic other) {
-    if (other is! IconThemeData)
-      return false;
-    final IconThemeData typedOther = other;
-    return color == typedOther;
-  }
-
-  int get hashCode => color.hashCode;
-}
-
-class IconTheme extends InheritedWidget {
-
-  IconTheme({
-    Key key,
-    this.data,
-    Widget child
-  }) : super(key: key, child: child) {
-    assert(data != null);
-    assert(child != null);
-  }
-
-  final IconThemeData data;
-
-  static IconThemeData of(BuildContext context) {
-    IconTheme result = context.inheritedWidgetOfType(IconTheme);
-    return result?.data;
-  }
-
-  bool updateShouldNotify(IconTheme old) => data != old.data;
-
-}
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 
 AssetBundle _initIconBundle() {
   if (rootBundle != null)
@@ -63,12 +25,15 @@ class Icon extends StatelessComponent {
     this.type: '',
     this.color,
     this.colorFilter
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(size != null);
+    assert(type != null);
+  }
 
   final int size;
   final String type;
   final IconThemeColor color;
-  final ui.ColorFilter colorFilter;
+  final ColorFilter colorFilter;
 
   String _getColorSuffix(BuildContext context) {
     IconThemeColor iconThemeColor = color;
@@ -107,5 +72,11 @@ class Icon extends StatelessComponent {
       height: size.toDouble(),
       colorFilter: colorFilter
     );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$type');
+    description.add('size: $size');
   }
 }

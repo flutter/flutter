@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -46,22 +47,38 @@ main() async {
 
 class TestBed extends NodeWithSize {
   Sprite _obstacle;
-  PhysicsNode _physicsNode;
+  PhysicsWorld _physicsNode;
 
   TestBed() : super(new Size(1024.0, 1024.0)) {
-    _physicsNode = new PhysicsNode(new Offset(0.0, 100.0));
+    _physicsNode = new PhysicsWorld(new Offset(0.0, 100.0));
+    PhysicsGroup group = new PhysicsGroup();
+    _physicsNode.addChild(group);
 
     _obstacle = new Sprite(_spriteSheet["ship.png"]);
-    _obstacle.position = new Point(532.0, 800.0);
+    _obstacle.position = new Point(512.0, 800.0);
     _obstacle.size = new Size(64.0, 64.0);
+    _obstacle.scale = 2.0;
     _obstacle.physicsBody = new PhysicsBody(
       new PhysicsShapeCircle(Point.origin, 32.0),
       type: PhysicsBodyType.static,
       friction: 0.5,
       tag: "obstacle"
     );
-    _physicsNode.addChild(_obstacle);
+    group.addChild(_obstacle);
     _physicsNode.addContactCallback(myCallback, "obstacle", "ship", PhysicsContactType.begin);
+
+    // Animate obstacle
+    ActionSequence seq = new ActionSequence([
+      new ActionTween((a) => _obstacle.position = a, new Point(256.0, 800.0), new Point(768.0, 800.0), 1.0, Curves.easeInOut),
+      new ActionTween((a) => _obstacle.position = a, new Point(768.0, 800.0), new Point(256.0, 800.0), 1.0, Curves.easeInOut)
+    ]);
+    _obstacle.actions.run(new ActionRepeatForever(seq));
+
+    seq = new ActionSequence([
+      new ActionTween((a) => _obstacle.scale = a, 1.0, 2.0, 2.0, Curves.easeInOut),
+      new ActionTween((a) => _obstacle.scale = a, 2.0, 1.0, 2.0, Curves.easeInOut)
+    ]);
+    _obstacle.actions.run(new ActionRepeatForever(seq));
 
     addChild(_physicsNode);
 

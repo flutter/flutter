@@ -29,7 +29,7 @@ ui.Picture paint(ui.Rect paintBounds) {
       [new ui.Point(-radius, -radius), new ui.Point(0.0, 0.0)],
       [const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)]);
   canvas.drawRect(new ui.Rect.fromLTRB(-radius, -radius, radius, radius),
-                   new ui.Paint()..setShader(yellowBlue));
+                   new ui.Paint()..shader = yellowBlue);
 
   // Scale x and y by 0.5.
   var scaleMatrix = new Float64List.fromList([

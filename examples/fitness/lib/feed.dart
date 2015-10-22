@@ -14,13 +14,11 @@ class FitnessItemList extends StatelessComponent {
   final FitnessItemHandler onDismissed;
 
   Widget build(BuildContext context) {
-    return new Material(
-      child: new ScrollableList<FitnessItem>(
-        padding: const EdgeDims.all(4.0),
-        items: items,
-        itemExtent: kFitnessItemHeight,
-        itemBuilder: (_, item) => item.toRow(onDismissed: onDismissed)
-      )
+    return new ScrollableList<FitnessItem>(
+      padding: const EdgeDims.all(4.0),
+      items: items,
+      itemExtent: kFitnessItemHeight,
+      itemBuilder: (_, item) => item.toRow(onDismissed: onDismissed)
     );
   }
 }
@@ -69,7 +67,7 @@ class FeedFragmentState extends State<FeedFragment> {
 
   void _showDrawer() {
     showDrawer(
-      navigator: config.navigator,
+      context: context,
       child: new Block([
         new DrawerHeader(child: new Text('Fitness')),
         new DrawerItem(
@@ -119,7 +117,7 @@ class FeedFragmentState extends State<FeedFragment> {
   void _handleItemDismissed(FitnessItem item) {
     config.onItemDeleted(item);
     showSnackBar(
-      navigator: config.navigator,
+      context: context,
       placeholderKey: _snackBarPlaceholderKey,
       content: new Text("Item deleted."),
       actions: [new SnackBarAction(label: "UNDO", onPressed: () {
@@ -171,14 +169,13 @@ class FeedFragmentState extends State<FeedFragment> {
   Widget buildBody() {
     TextStyle style = Theme.of(context).text.title;
     if (config.userData == null)
-      return new Material();
-    if (config.userData.items.length == 0)
-      return new Material(
-        child: new Row(
-          [new Text("No data yet.\nAdd some!", style: style)],
-          justifyContent: FlexJustifyContent.center
-        )
+      return new Container();
+    if (config.userData.items.length == 0) {
+      return new Row(
+        [new Text("No data yet.\nAdd some!", style: style)],
+        justifyContent: FlexJustifyContent.center
       );
+    }
     switch (_fitnessMode) {
       case FitnessMode.feed:
         return new FitnessItemList(
@@ -186,17 +183,15 @@ class FeedFragmentState extends State<FeedFragment> {
           onDismissed: _handleItemDismissed
         );
       case FitnessMode.chart:
-        return new Material(
-          child: new Container(
-            padding: const EdgeDims.all(20.0),
-            child: buildChart()
-          )
+        return new Container(
+          padding: const EdgeDims.all(20.0),
+          child: buildChart()
         );
     }
   }
 
   void _handleActionButtonPressed() {
-    showDialog(config.navigator, (NavigatorState navigator) => new AddItemDialog(navigator)).then((routeName) {
+    showDialog(context: context, child: new AddItemDialog()).then((routeName) {
       if (routeName != null)
         config.navigator.pushNamed(routeName);
     });
@@ -225,10 +220,6 @@ class FeedFragmentState extends State<FeedFragment> {
 }
 
 class AddItemDialog extends StatefulComponent {
-  AddItemDialog(this.navigator);
-
-  final NavigatorState navigator;
-
   AddItemDialogState createState() => new AddItemDialogState();
 }
 
@@ -258,16 +249,20 @@ class AddItemDialogState extends State<AddItemDialog> {
     return new Dialog(
       title: new Text("What are you doing?"),
       content: new Block(menuItems),
-      onDismiss: config.navigator.pop,
+      onDismiss: () {
+        Navigator.of(context).pop();
+      },
       actions: [
         new FlatButton(
           child: new Text('CANCEL'),
-          onPressed: config.navigator.pop
+          onPressed: () {
+            Navigator.of(context).pop();
+          }
         ),
         new FlatButton(
           child: new Text('ADD'),
           onPressed: () {
-            config.navigator.pop(_addItemRoute);
+            Navigator.of(context).pop(_addItemRoute);
           }
         ),
       ]

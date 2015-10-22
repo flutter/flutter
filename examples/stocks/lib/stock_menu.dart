@@ -8,44 +8,42 @@ enum _MenuItems { autorefresh, autorefreshCheckbox, add, remove }
 
 const double _kMenuMargin = 16.0; // 24.0 on tablet
 
-Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged onAutorefreshChanged }) async {
+Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged onAutorefreshChanged }) async {
   switch (await showMenu(
-    navigator: navigator,
+    context: context,
     position: new MenuPosition(
       right: ui.view.paddingRight + _kMenuMargin,
       top: ui.view.paddingTop + _kMenuMargin
     ),
-    builder: (NavigatorState navigator) {
-      return <PopupMenuItem>[
-        new PopupMenuItem(
-          value: _MenuItems.autorefresh,
-          child: new Row(<Widget>[
-              new Flexible(child: new Text('Autorefresh')),
-              new Checkbox(
-                value: autorefresh,
-                onChanged: (bool value) {
-                  navigator.setState(() {
-                    autorefresh = value;
-                  });
-                  navigator.pop(_MenuItems.autorefreshCheckbox);
-                }
-              )
-            ]
-          )
-        ),
-        new PopupMenuItem(
-          value: _MenuItems.add,
-          child: new Text('Add stock')
-        ),
-        new PopupMenuItem(
-          value: _MenuItems.remove,
-          child: new Text('Remove stock')
-        ),
-      ];
-    }
+    items: <PopupMenuItem>[
+      new PopupMenuItem(
+        value: _MenuItems.autorefresh,
+        child: new Row(<Widget>[
+            new Flexible(child: new Text('Autorefresh')),
+            new Checkbox(
+              value: autorefresh,
+              onChanged: (bool value) {
+                Navigator.of(context).setState(() {
+                  autorefresh = value;
+                });
+                Navigator.of(context).pop(_MenuItems.autorefreshCheckbox);
+              }
+            )
+          ]
+        )
+      ),
+      new PopupMenuItem(
+        value: _MenuItems.add,
+        child: new Text('Add stock')
+      ),
+      new PopupMenuItem(
+        value: _MenuItems.remove,
+        child: new Text('Remove stock')
+      ),
+    ]
   )) {
     case _MenuItems.autorefresh:
-      navigator.setState(() {
+      Navigator.of(context).setState(() {
         autorefresh = !autorefresh;
       });
       continue autorefreshNotify;
@@ -55,8 +53,9 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
       break;
     case _MenuItems.add:
     case _MenuItems.remove:
-      await showDialog(navigator, (NavigatorState navigator) {
-        return new Dialog(
+      await showDialog(
+        context: context,
+        child: new Dialog(
           title: new Text('Not Implemented'),
           content: new Text('This feature has not yet been implemented.'),
           actions: <Widget>[
@@ -76,12 +75,12 @@ Future showStockMenu(NavigatorState navigator, { bool autorefresh, ValueChanged 
             new FlatButton(
               child: new Text('OH WELL'),
               onPressed: () {
-                navigator.pop(false);
+                Navigator.of(context).pop(false);
               }
             ),
           ]
-        );
-      });
+        )
+      );
       break;
     default:
       // menu was canceled.

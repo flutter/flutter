@@ -12,6 +12,7 @@ import 'box.dart';
 import 'object.dart';
 
 export 'package:flutter/src/painting/box_painter.dart';
+export 'package:flutter/gestures.dart' show InputEvent, PointerInputEvent;
 
 /// A base class for render objects that resemble their children
 ///
@@ -189,7 +190,7 @@ class RenderFractionallySizedBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  BoxConstraints _computeChildConstraints(BoxConstraints constraints) {
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return new BoxConstraints(
       minWidth: _widthFactor == null ? constraints.minWidth : constraints.maxWidth * _widthFactor,
       maxWidth: _widthFactor == null ? constraints.maxWidth : constraints.maxWidth * _widthFactor,
@@ -200,34 +201,34 @@ class RenderFractionallySizedBox extends RenderProxyBox {
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      return child.getMinIntrinsicWidth(_computeChildConstraints(constraints));
-    return _computeChildConstraints(constraints).constrainWidth(0.0);
+      return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
+    return _getInnerConstraints(constraints).constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      return child.getMaxIntrinsicWidth(_computeChildConstraints(constraints));
-    return _computeChildConstraints(constraints).constrainWidth(0.0);
+      return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
+    return _getInnerConstraints(constraints).constrainWidth(0.0);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
-      return child.getMinIntrinsicHeight(_computeChildConstraints(constraints));
-    return _computeChildConstraints(constraints).constrainHeight(0.0);
+      return child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
+    return _getInnerConstraints(constraints).constrainHeight(0.0);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
-      return child.getMaxIntrinsicHeight(_computeChildConstraints(constraints));
-    return _computeChildConstraints(constraints).constrainHeight(0.0);
+      return child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
+    return _getInnerConstraints(constraints).constrainHeight(0.0);
   }
 
   void performLayout() {
     if (child != null) {
-      child.layout(_computeChildConstraints(constraints), parentUsesSize: true);
+      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = child.size;
     } else {
-      size = _computeChildConstraints(constraints).constrain(Size.zero);
+      size = _getInnerConstraints(constraints).constrain(Size.zero);
     }
   }
 
@@ -235,125 +236,6 @@ class RenderFractionallySizedBox extends RenderProxyBox {
     return '${super.debugDescribeSettings(prefix)}' +
            '${prefix}widthFactor: ${_widthFactor ?? "pass-through"}\n' +
            '${prefix}heightFactor: ${_heightFactor ?? "pass-through"}\n';
-  }
-}
-
-/// A render object that imposes different constraints on its child than it gets
-/// from its parent, possibly allowing the child to overflow the parent.
-///
-/// A render overflow box proxies most functions in the render box protocol to
-/// its child, except that when laying out its child, it passes constraints
-/// based on the minWidth, maxWidth, minHeight, and maxHeight fields instead of
-/// just passing the parent's constraints in. Specifically, it overrides any of
-/// the equivalent fields on the constraints given by the parent with the
-/// constraints given by these fields for each such field that is not null. It
-/// then sizes itself based on the parent's constraints' maxWidth and maxHeight,
-/// ignoring the child's dimensions.
-///
-/// For example, if you wanted a box to always render 50 pixels high, regardless
-/// of where it was rendered, you would wrap it in a RenderOverflow with
-/// minHeight and maxHeight set to 50.0. Generally speaking, to avoid confusing
-/// behaviour around hit testing, a RenderOverflowBox should usually be wrapped
-/// in a RenderClipRect.
-///
-/// The child is positioned at the top left of the box. To position a smaller
-/// child inside a larger parent, use [RenderPositionedBox] and
-/// [RenderConstrainedBox] rather than RenderOverflowBox.
-class RenderOverflowBox extends RenderProxyBox {
-  RenderOverflowBox({
-    RenderBox child,
-    double minWidth,
-    double maxWidth,
-    double minHeight,
-    double maxHeight
-  }) : _minWidth = minWidth, _maxWidth = maxWidth, _minHeight = minHeight, _maxHeight = maxHeight, super(child);
-
-  /// The minimum width constraint to give the child. Set this to null (the
-  /// default) to use the constraint from the parent instead.
-  double get minWidth => _minWidth;
-  double _minWidth;
-  void set minWidth (double value) {
-    if (_minWidth == value)
-      return;
-    _minWidth = value;
-    markNeedsLayout();
-  }
-
-  /// The maximum width constraint to give the child. Set this to null (the
-  /// default) to use the constraint from the parent instead.
-  double get maxWidth => _maxWidth;
-  double _maxWidth;
-  void set maxWidth (double value) {
-    if (_maxWidth == value)
-      return;
-    _maxWidth = value;
-    markNeedsLayout();
-  }
-
-  /// The minimum height constraint to give the child. Set this to null (the
-  /// default) to use the constraint from the parent instead.
-  double get minHeight => _minHeight;
-  double _minHeight;
-  void set minHeight (double value) {
-    if (_minHeight == value)
-      return;
-    _minHeight = value;
-    markNeedsLayout();
-  }
-
-  /// The maximum height constraint to give the child. Set this to null (the
-  /// default) to use the constraint from the parent instead.
-  double get maxHeight => _maxHeight;
-  double _maxHeight;
-  void set maxHeight (double value) {
-    if (_maxHeight == value)
-      return;
-    _maxHeight = value;
-    markNeedsLayout();
-  }
-
-  BoxConstraints childConstraints(BoxConstraints constraints) {
-    return new BoxConstraints(
-      minWidth: _minWidth ?? constraints.minWidth,
-      maxWidth: _maxWidth ?? constraints.maxWidth,
-      minHeight: _minHeight ?? constraints.minHeight,
-      maxHeight: _maxHeight ?? constraints.maxHeight
-    );
-  }
-
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth();
-  }
-
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth();
-  }
-
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight();
-  }
-
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight();
-  }
-
-  bool get sizedByParent => true;
-
-  void performResize() {
-    size = constraints.biggest;
-  }
-
-  void performLayout() {
-    if (child != null)
-      child.layout(childConstraints(constraints));
-  }
-
-  String debugDescribeSettings(String prefix) {
-    return '${super.debugDescribeSettings(prefix)}' +
-           '${prefix}minWidth: ${minWidth ?? "use parent minWidth constraint"}\n' +
-           '${prefix}maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}\n' +
-           '${prefix}minHeight: ${minHeight ?? "use parent minHeight constraint"}\n' +
-           '${prefix}maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}\n';
   }
 }
 
@@ -620,47 +502,8 @@ class RenderOpacity extends RenderProxyBox {
   }
 }
 
-/// Applies a color filter when painting its child
-///
-/// This class paints its child into an intermediate buffer and then blends the
-/// child back into the scene using a color filter.
-///
-/// Note: This class is relatively expensive because it requires painting the
-/// child into an intermediate buffer.
-class RenderColorFilter extends RenderProxyBox {
-  RenderColorFilter({ RenderBox child, Color color, ui.TransferMode transferMode })
-    : _color = color, _transferMode = transferMode, super(child);
-
-  /// The color to use as input to the color filter
-  Color get color => _color;
-  Color _color;
-  void set color (Color newColor) {
-    assert(newColor != null);
-    if (_color == newColor)
-      return;
-    _color = newColor;
-    markNeedsPaint();
-  }
-
-  /// The transfer mode to use when combining the child's painting and the [color]
-  ui.TransferMode get transferMode => _transferMode;
-  ui.TransferMode _transferMode;
-  void set transferMode (ui.TransferMode newTransferMode) {
-    assert(newTransferMode != null);
-    if (_transferMode == newTransferMode)
-      return;
-    _transferMode = newTransferMode;
-    markNeedsPaint();
-  }
-
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChildWithColorFilter(child, offset.toPoint(), offset & size, _color, _transferMode);
-  }
-}
-
 class RenderShaderMask extends RenderProxyBox {
-  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, ui.TransferMode transferMode })
+  RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, TransferMode transferMode })
     : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child);
 
   ShaderCallback get shaderCallback => _shaderCallback;
@@ -673,9 +516,9 @@ class RenderShaderMask extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  ui.TransferMode get transferMode => _transferMode;
-  ui.TransferMode _transferMode;
-  void set transferMode (ui.TransferMode newTransferMode) {
+  TransferMode get transferMode => _transferMode;
+  TransferMode _transferMode;
+  void set transferMode (TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
       return;
@@ -862,30 +705,6 @@ class RenderDecoratedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
 }
 
-/// An offset that's expressed as a fraction of a Size.
-///
-/// FractionalOffset(0.0, 0.0) represents the top left of the Size,
-/// FractionalOffset(1.0, 1.0) represents the bottom right of the Size.
-class FractionalOffset {
-  const FractionalOffset(this.x, this.y);
-  final double x;
-  final double y;
-  bool operator ==(dynamic other) {
-    if (other is! FractionalOffset)
-      return false;
-    final FractionalOffset typedOther = other;
-    return x == typedOther.x &&
-           y == typedOther.y;
-  }
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + x.hashCode;
-    value = 37 * value + y.hashCode;
-    return value;
-  }
-  String toString() => '$runtimeType($x, $y)';
-}
-
 /// Applies a transformation before painting its child
 class RenderTransform extends RenderProxyBox {
   RenderTransform({
@@ -1017,40 +836,44 @@ class RenderTransform extends RenderProxyBox {
   String debugDescribeSettings(String prefix) {
     List<String> result = _transform.toString().split('\n').map((String s) => '$prefix  $s\n').toList();
     result.removeLast();
-    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\nalignment: $alignment\n';
+    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\n${prefix}alignment: $alignment\n';
   }
 }
 
 /// Called when a size changes
 typedef void SizeChangedCallback(Size newSize);
 
-/// Calls [callback] whenever the child's layout size changes
+/// Calls [onSizeChanged] whenever the child's layout size changes
 ///
 /// Note: Size observer calls its callback during layout, which means you cannot
 /// dirty layout information during the callback.
 class RenderSizeObserver extends RenderProxyBox {
   RenderSizeObserver({
-    this.callback,
+    this.onSizeChanged,
     RenderBox child
   }) : super(child) {
-    assert(callback != null);
+    assert(onSizeChanged != null);
   }
 
   /// The callback to call whenever the child's layout size changes
-  SizeChangedCallback callback;
+  SizeChangedCallback onSizeChanged;
 
   void performLayout() {
     Size oldSize = hasSize ? size : null;
     super.performLayout();
-    if (oldSize != size)
-      callback(size);
+    if (oldSize != size) {
+      // We make a copy of the Size object here because if we leak a _DebugSize
+      // object out of the render tree, we can get confused later if it comes
+      // back and gets set as the size property of a RenderBox.
+      onSizeChanged(new Size(size.width, size.height));
+    }
   }
 }
 
 /// Called when its time to paint into the given canvas
 typedef void CustomPaintCallback(PaintingCanvas canvas, Size size);
 
-/// Delegates its painting to [callback]
+/// Delegates its painting to [onPaint]
 ///
 /// When asked to paint, custom paint first calls its callback with the current
 /// canvas and then paints its children. The coodinate system of the canvas
@@ -1065,36 +888,36 @@ typedef void CustomPaintCallback(PaintingCanvas canvas, Size size);
 class RenderCustomPaint extends RenderProxyBox {
 
   RenderCustomPaint({
-    CustomPaintCallback callback,
+    CustomPaintCallback onPaint,
     RenderBox child
   }) : super(child) {
-    assert(callback != null);
-    _callback = callback;
+    assert(onPaint != null);
+    _onPaint = onPaint;
   }
 
   /// The callback to which this render object delegates its painting
   ///
   /// The callback must be non-null whenever the render object is attached to
   /// the render tree.
-  CustomPaintCallback get callback => _callback;
-  CustomPaintCallback _callback;
-  void set callback (CustomPaintCallback newCallback) {
+  CustomPaintCallback get onPaint => _onPaint;
+  CustomPaintCallback _onPaint;
+  void set onPaint (CustomPaintCallback newCallback) {
     assert(newCallback != null || !attached);
-    if (_callback == newCallback)
+    if (_onPaint == newCallback)
       return;
-    _callback = newCallback;
+    _onPaint = newCallback;
     markNeedsPaint();
   }
 
   void attach() {
-    assert(_callback != null);
+    assert(_onPaint != null);
     super.attach();
   }
 
   void paint(PaintingContext context, Offset offset) {
-    assert(_callback != null);
+    assert(_onPaint != null);
     context.canvas.translate(offset.dx, offset.dy);
-    _callback(context.canvas, size);
+    _onPaint(context.canvas, size);
     // TODO(abarth): We should translate back before calling super because in
     // the future, super.paint might switch our compositing layer.
     super.paint(context, Offset.zero);

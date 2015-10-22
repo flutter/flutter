@@ -4,10 +4,10 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:flutter/services.dart';
 
+import 'basic_types.dart';
 import 'shadows.dart';
 
 /// An immutable set of offsets in each of the four cardinal directions.
@@ -51,7 +51,7 @@ class EdgeDims {
   /// The size that this edge dims would occupy with an empty interior.
   Size get collapsedSize => new Size(left + right, top + bottom);
 
-  EdgeDims operator-(EdgeDims other) {
+  EdgeDims operator -(EdgeDims other) {
     return new EdgeDims.TRBL(
       top - other.top,
       right - other.right,
@@ -60,7 +60,7 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator+(EdgeDims other) {
+  EdgeDims operator +(EdgeDims other) {
     return new EdgeDims.TRBL(
       top + other.top,
       right + other.right,
@@ -69,7 +69,7 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator*(double other) {
+  EdgeDims operator *(double other) {
     return new EdgeDims.TRBL(
       top * other,
       right * other,
@@ -78,7 +78,7 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator/(double other) {
+  EdgeDims operator /(double other) {
     return new EdgeDims.TRBL(
       top / other,
       right / other,
@@ -87,7 +87,7 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator~/(double other) {
+  EdgeDims operator ~/(double other) {
     return new EdgeDims.TRBL(
       (top ~/ other).toDouble(),
       (right ~/ other).toDouble(),
@@ -96,7 +96,7 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator%(double other) {
+  EdgeDims operator %(double other) {
     return new EdgeDims.TRBL(
       top % other,
       right % other,
@@ -166,12 +166,23 @@ class BorderSide {
   /// A black border side of zero width
   static const none = const BorderSide(width: 0.0);
 
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! BorderSide)
+      return false;
+    final BorderSide typedOther = other;
+    return color == typedOther.color &&
+           width == typedOther.width;
+  }
+
   int get hashCode {
     int value = 373;
-    value = 37 * value * color.hashCode;
-    value = 37 * value * width.hashCode;
+    value = 37 * value + color.hashCode;
+    value = 37 * value + width.hashCode;
     return value;
   }
+
   String toString() => 'BorderSide($color, $width)';
 }
 
@@ -210,14 +221,27 @@ class Border {
     return new EdgeDims.TRBL(top.width, right.width, bottom.width, left.width);
   }
 
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! Border)
+      return false;
+    final Border typedOther = other;
+    return top == typedOther.top &&
+           right == typedOther.right &&
+           bottom == typedOther.bottom &&
+           left == typedOther.left;
+  }
+
   int get hashCode {
     int value = 373;
-    value = 37 * value * top.hashCode;
-    value = 37 * value * right.hashCode;
-    value = 37 * value * bottom.hashCode;
-    value = 37 * value * left.hashCode;
+    value = 37 * value + top.hashCode;
+    value = 37 * value + right.hashCode;
+    value = 37 * value + bottom.hashCode;
+    value = 37 * value + left.hashCode;
     return value;
   }
+
   String toString() => 'Border($top, $right, $bottom, $left)';
 }
 
@@ -290,25 +314,43 @@ class BoxShadow {
     return result;
   }
 
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! BoxShadow)
+      return false;
+    final BoxShadow typedOther = other;
+    return color == typedOther.color &&
+           offset == typedOther.offset &&
+           blur == typedOther.blur;
+  }
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + color.hashCode;
+    value = 37 * value + offset.hashCode;
+    value = 37 * value + blur.hashCode;
+    return value;
+  }
+
   String toString() => 'BoxShadow($color, $offset, $blur)';
 }
 
 /// A 2D gradient
 abstract class Gradient {
+  const Gradient();
   ui.Shader createShader();
 }
 
 /// A 2D linear gradient
 class LinearGradient extends Gradient {
-  LinearGradient({
+  const LinearGradient({
     this.begin,
     this.end,
     this.colors,
     this.stops,
     this.tileMode: ui.TileMode.clamp
-  }) {
-    assert(colors.length == stops.length);
-  }
+  });
 
   /// The point at which stop 0.0 of the gradient is placed
   final Point begin;
@@ -323,7 +365,8 @@ class LinearGradient extends Gradient {
 
   /// A list of values from 0.0 to 1.0 that denote fractions of the vector from start to end
   ///
-  /// Note: This list must have the same length as [colors].
+  /// Note: If specified, this list must have the same length as [colors]. Otherwise the colors
+  /// are distributed evenly between [begin] and [end].
   final List<double> stops;
 
   /// How this gradient should tile the plane
@@ -333,6 +376,57 @@ class LinearGradient extends Gradient {
     return new ui.Gradient.linear(<Point>[begin, end], this.colors, this.stops, this.tileMode);
   }
 
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! LinearGradient)
+      return false;
+    final LinearGradient typedOther = other;
+    if (begin != typedOther.begin ||
+        end != typedOther.end ||
+        tileMode != typedOther.tileMode ||
+        colors?.length != typedOther.colors?.length ||
+        stops?.length != typedOther.stops?.length)
+      return false;
+    if (colors != null) {
+      assert(typedOther.colors != null);
+      assert(colors.length == typedOther.colors.length);
+      for (int i = 0; i < colors.length; i += 1) {
+        if (colors[i] != typedOther.colors[i])
+          return false;
+      }
+    }
+    if (stops != null) {
+      assert(typedOther.stops != null);
+      assert(stops.length == typedOther.stops.length);
+      for (int i = 0; i < stops.length; i += 1) {
+        if (stops[i] != typedOther.stops[i])
+          return false;
+      }
+    }
+    return true;
+  }
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + begin.hashCode;
+    value = 37 * value + end.hashCode;
+    value = 37 * value + tileMode.hashCode;
+    if (colors != null) {
+      for (int i = 0; i < colors.length; i += 1)
+        value = 37 * value + colors[i].hashCode;
+    } else {
+      value = 37 * value + null.hashCode;
+    }
+    if (stops != null) {
+      for (int i = 0; i < stops.length; i += 1)
+        value = 37 * value + stops[i].hashCode;
+    } else {
+      value = 37 * value + null.hashCode;
+    }
+    return value;
+  }
+
   String toString() {
     return 'LinearGradient($begin, $end, $colors, $stops, $tileMode)';
   }
@@ -340,7 +434,7 @@ class LinearGradient extends Gradient {
 
 /// A 2D radial gradient
 class RadialGradient extends Gradient {
-  RadialGradient({
+  const RadialGradient({
     this.center,
     this.radius,
     this.colors,
@@ -372,6 +466,57 @@ class RadialGradient extends Gradient {
 
   ui.Shader createShader() {
     return new ui.Gradient.radial(center, radius, colors, stops, tileMode);
+  }
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! RadialGradient)
+      return false;
+    final RadialGradient typedOther = other;
+    if (center != typedOther.center ||
+        radius != typedOther.radius ||
+        tileMode != typedOther.tileMode ||
+        colors?.length != typedOther.colors?.length ||
+        stops?.length != typedOther.stops?.length)
+      return false;
+    if (colors != null) {
+      assert(typedOther.colors != null);
+      assert(colors.length == typedOther.colors.length);
+      for (int i = 0; i < colors.length; i += 1) {
+        if (colors[i] != typedOther.colors[i])
+          return false;
+      }
+    }
+    if (stops != null) {
+      assert(typedOther.stops != null);
+      assert(stops.length == typedOther.stops.length);
+      for (int i = 0; i < stops.length; i += 1) {
+        if (stops[i] != typedOther.stops[i])
+          return false;
+      }
+    }
+    return true;
+  }
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + center.hashCode;
+    value = 37 * value + radius.hashCode;
+    value = 37 * value + tileMode.hashCode;
+    if (colors != null) {
+      for (int i = 0; i < colors.length; i += 1)
+        value = 37 * value + colors[i].hashCode;
+    } else {
+      value = 37 * value + null.hashCode;
+    }
+    if (stops != null) {
+      for (int i = 0; i < stops.length; i += 1)
+        value = 37 * value + stops[i].hashCode;
+    } else {
+      value = 37 * value + null.hashCode;
+    }
+    return value;
   }
 
   String toString() {
@@ -416,10 +561,10 @@ enum ImageRepeat {
 
 /// Paint an image into the given rectangle in the canvas
 void paintImage({
-  ui.Canvas canvas,
+  Canvas canvas,
   Rect rect,
   ui.Image image,
-  ui.ColorFilter colorFilter,
+  ColorFilter colorFilter,
   ImageFit fit,
   repeat: ImageRepeat.noRepeat,
   Rect centerSlice,
@@ -499,6 +644,14 @@ typedef void BackgroundImageChangeListener();
 
 /// A background image for a box.
 class BackgroundImage {
+  BackgroundImage({
+    ImageResource image,
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice,
+    this.colorFilter
+  }) : _imageResource = image;
+
   /// How the background image should be inscribed into the box.
   final ImageFit fit;
 
@@ -515,24 +668,16 @@ class BackgroundImage {
   final Rect centerSlice;
 
   /// A color filter to apply to the background image before painting it.
-  final ui.ColorFilter colorFilter;
-
-  BackgroundImage({
-    ImageResource image,
-    this.fit,
-    this.repeat: ImageRepeat.noRepeat,
-    this.centerSlice,
-    this.colorFilter
-  }) : _imageResource = image;
+  final ColorFilter colorFilter;
 
   /// The image to be painted into the background.
   ui.Image get image => _image;
   ui.Image _image;
 
-  ImageResource _imageResource;
+  final ImageResource _imageResource;
 
   final List<BackgroundImageChangeListener> _listeners =
-      new List<BackgroundImageChangeListener>();
+    new List<BackgroundImageChangeListener>();
 
   /// Call listener when the background images changes (e.g., arrives from the network).
   void addChangeListener(BackgroundImageChangeListener listener) {
@@ -558,10 +703,32 @@ class BackgroundImage {
       return;
     _image = resolvedImage;
     final List<BackgroundImageChangeListener> localListeners =
-        new List<BackgroundImageChangeListener>.from(_listeners);
-    for (BackgroundImageChangeListener listener in localListeners) {
+      new List<BackgroundImageChangeListener>.from(_listeners);
+    for (BackgroundImageChangeListener listener in localListeners)
       listener();
-    }
+  }
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! BackgroundImage)
+      return false;
+    final BackgroundImage typedOther = other;
+    return fit == typedOther.fit &&
+           repeat == typedOther.repeat &&
+           centerSlice == typedOther.centerSlice &&
+           colorFilter == typedOther.colorFilter &&
+           _imageResource == typedOther._imageResource;
+  }
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + fit.hashCode;
+    value = 37 * value + repeat.hashCode;
+    value = 37 * value + centerSlice.hashCode;
+    value = 37 * value + colorFilter.hashCode;
+    value = 37 * value + _imageResource.hashCode;
+    return value;
   }
 
   String toString() => 'BackgroundImage($fit, $repeat)';
@@ -649,6 +816,33 @@ class BoxDecoration {
       gradient: b.gradient,
       shape: b.shape
     );
+  }
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! BoxDecoration)
+      return false;
+    final BoxDecoration typedOther = other;
+    return backgroundColor == typedOther.backgroundColor &&
+           backgroundImage == typedOther.backgroundImage &&
+           border == typedOther.border &&
+           borderRadius == typedOther.borderRadius &&
+           boxShadow == typedOther.boxShadow &&
+           gradient == typedOther.gradient &&
+           shape == typedOther.shape;
+  }
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + backgroundColor.hashCode;
+    value = 37 * value + backgroundImage.hashCode;
+    value = 37 * value + border.hashCode;
+    value = 37 * value + borderRadius.hashCode;
+    value = 37 * value + boxShadow.hashCode;
+    value = 37 * value + gradient.hashCode;
+    value = 37 * value + shape.hashCode;
+    return value;
   }
 
   String toString([String prefix = '']) {
@@ -867,7 +1061,7 @@ class BoxPainter {
     Paint paint = new Paint()
       ..color = _decoration.border.top.color
       ..strokeWidth = width
-      ..setStyle(ui.PaintingStyle.stroke);
+      ..style = ui.PaintingStyle.stroke;
     Point center = rect.center;
     double radius = (rect.shortestSide - width) / 2.0;
     canvas.drawCircle(center, radius, paint);

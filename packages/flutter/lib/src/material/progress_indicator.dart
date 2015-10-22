@@ -14,15 +14,15 @@ const double _kLinearProgressIndicatorHeight = 6.0;
 const double _kMinCircularProgressIndicatorSize = 15.0;
 const double _kCircularProgressIndicatorStrokeWidth = 3.0;
 
+// TODO(hansmuller) implement the support for buffer indicator
+
 abstract class ProgressIndicator extends StatefulComponent {
   ProgressIndicator({
     Key key,
-    this.value,
-    this.bufferValue
+    this.value
   }) : super(key: key);
 
   final double value; // Null for non-determinate progress indicator.
-  final double bufferValue; // TODO(hansmuller) implement the support for this.
 
   Color _getBackgroundColor(BuildContext context) => Theme.of(context).primarySwatch[200];
   Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
@@ -31,6 +31,11 @@ abstract class ProgressIndicator extends StatefulComponent {
   Widget _buildIndicator(BuildContext context, double performanceValue);
 
   _ProgressIndicatorState createState() => new _ProgressIndicatorState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%');
+  }
 }
 
 class _ProgressIndicatorState extends State<ProgressIndicator> {
@@ -40,7 +45,7 @@ class _ProgressIndicatorState extends State<ProgressIndicator> {
   void initState() {
     super.initState();
     _performance = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: ease),
+      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.ease),
       duration: const Duration(milliseconds: 1500)
     );
     _performance.addStatusListener((PerformanceStatus status) {
@@ -72,14 +77,13 @@ class _ProgressIndicatorState extends State<ProgressIndicator> {
 class LinearProgressIndicator extends ProgressIndicator {
   LinearProgressIndicator({
     Key key,
-    double value,
-    double bufferValue
-  }) : super(key: key, value: value, bufferValue: bufferValue);
+    double value
+  }) : super(key: key, value: value);
 
-  void _paint(BuildContext context, double performanceValue, ui.Canvas canvas, Size size) {
+  void _paint(BuildContext context, double performanceValue, Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = _getBackgroundColor(context)
-      ..setStyle(ui.PaintingStyle.fill);
+      ..style = ui.PaintingStyle.fill;
     canvas.drawRect(Point.origin & size, paint);
 
     paint.color = _getValueColor(context);
@@ -103,7 +107,7 @@ class LinearProgressIndicator extends ProgressIndicator {
       ),
       child: new CustomPaint(
         token: _getCustomPaintToken(performanceValue),
-        callback: (ui.Canvas canvas, Size size) {
+        onPaint: (Canvas canvas, Size size) {
           _paint(context, performanceValue, canvas, size);
         }
       )
@@ -120,19 +124,18 @@ class CircularProgressIndicator extends ProgressIndicator {
 
   CircularProgressIndicator({
     Key key,
-    double value,
-    double bufferValue
-  }) : super(key: key, value: value, bufferValue: bufferValue);
+    double value
+  }) : super(key: key, value: value);
 
-  void _paint(BuildContext context, double performanceValue, ui.Canvas canvas, Size size) {
+  void _paint(BuildContext context, double performanceValue, Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = _getValueColor(context)
       ..strokeWidth = _kCircularProgressIndicatorStrokeWidth
-      ..setStyle(ui.PaintingStyle.stroke);
+      ..style = ui.PaintingStyle.stroke;
 
     if (value != null) {
       double angle = value.clamp(0.0, 1.0) * _kSweep;
-      ui.Path path = new ui.Path()
+      Path path = new Path()
         ..arcTo(Point.origin & size, _kStartAngle, angle, false);
       canvas.drawPath(path, paint);
     } else {
@@ -140,7 +143,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       double endAngle = startAngle + _kTwoPI * 0.75;
       double arcAngle = startAngle.clamp(0.0, _kTwoPI);
       double arcSweep = endAngle.clamp(0.0, _kTwoPI) - arcAngle;
-      ui.Path path = new ui.Path()
+      Path path = new Path()
         ..arcTo(Point.origin & size, _kStartAngle + arcAngle, arcSweep, false);
       canvas.drawPath(path, paint);
     }
@@ -154,7 +157,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       ),
       child: new CustomPaint(
         token: _getCustomPaintToken(performanceValue),
-        callback: (ui.Canvas canvas, Size size) {
+        onPaint: (Canvas canvas, Size size) {
           _paint(context, performanceValue, canvas, size);
         }
       )

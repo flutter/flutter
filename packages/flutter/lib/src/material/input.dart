@@ -4,8 +4,6 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -118,7 +116,7 @@ class _InputState extends ScrollableState<Input> {
 
     return new Listener(
       child: new SizeObserver(
-        callback: _handleContainerSizeChanged,
+        onSizeChanged: _handleContainerSizeChanged,
         child: new Container(
           child: new Stack(textChildren),
           padding: _kTextfieldPadding,

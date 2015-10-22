@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Rect;
+import 'dart:ui' show Color, Size, Rect;
 
 import 'curves.dart';
 
@@ -102,6 +102,17 @@ class AnimatedColorValue extends AnimatedValue<Color> {
     : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
 
   Color lerp(double t) => Color.lerp(begin, end, t);
+}
+
+/// An animated variable containing a rectangle
+///
+/// This class specializes the interpolation of AnimatedValue<Rect> to be
+/// appropriate for rectangles.
+class AnimatedSizeValue extends AnimatedValue<Size> {
+  AnimatedSizeValue(Size begin, { Size end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+
+  Size lerp(double t) => Size.lerp(begin, end, t);
 }
 
 /// An animated variable containing a rectangle

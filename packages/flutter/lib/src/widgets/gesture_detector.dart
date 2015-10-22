@@ -8,6 +8,25 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
+export 'package:flutter/gestures.dart' show
+  GestureTapCallback,
+  GestureTapCallback,
+  GestureTapCallback,
+  GestureShowPressCallback,
+  GestureLongPressCallback,
+  GestureDragStartCallback,
+  GestureDragUpdateCallback,
+  GestureDragEndCallback,
+  GestureDragStartCallback,
+  GestureDragUpdateCallback,
+  GestureDragEndCallback,
+  GesturePanStartCallback,
+  GesturePanUpdateCallback,
+  GesturePanEndCallback,
+  GestureScaleStartCallback,
+  GestureScaleUpdateCallback,
+  GestureScaleEndCallback;
+
 class GestureDetector extends StatefulComponent {
   const GestureDetector({
     Key key,

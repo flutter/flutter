@@ -9,8 +9,8 @@ enum PhysicsContactType {
 
 typedef void PhysicsContactCallback(PhysicsContactType type, PhysicsContact contact);
 
-class PhysicsNode extends Node {
-  PhysicsNode(Offset gravity) {
+class PhysicsWorld extends Node {
+  PhysicsWorld(Offset gravity) {
     b2World = new box2d.World.withGravity(
       new Vector2(
         gravity.dx / b2WorldToNodeConversionFactor,
@@ -18,7 +18,7 @@ class PhysicsNode extends Node {
     _init();
   }
 
-  PhysicsNode.fromB2World(this.b2World, this.b2WorldToNodeConversionFactor) {
+  PhysicsWorld.fromB2World(this.b2World, this.b2WorldToNodeConversionFactor) {
     _init();
   }
 
@@ -42,6 +42,8 @@ class PhysicsNode extends Node {
   List<PhysicsJoint> _joints = [];
 
   List<box2d.Body> _bodiesScheduledForDestruction = [];
+
+  List<PhysicsBody> _bodiesScheduledForUpdate = [];
 
   _PhysicsDebugDraw _debugDraw;
 
@@ -71,8 +73,47 @@ class PhysicsNode extends Node {
   }
 
   void _stepPhysics(double dt) {
+    // Update transformations of bodies whose groups have moved
+    for (PhysicsBody body in _bodiesScheduledForUpdate) {
+      Node node = body._node;
+      node._updatePhysicsPosition(body, node.position, node.parent);
+      node._updatePhysicsRotation(body, node.rotation, node.parent);
+    }
+    _bodiesScheduledForUpdate.clear();
+
     // Remove bodies that were marked for destruction during the update phase
     _removeBodiesScheduledForDestruction();
+
+    // Assign velocities and momentum to static and kinetic bodies
+    for (box2d.Body b2Body = b2World.bodyList; b2Body != null; b2Body = b2Body.getNext()) {
+      // Fetch body
+      PhysicsBody body = b2Body.userData;
+
+      // Skip all dynamic bodies
+      if (b2Body.getType() == box2d.BodyType.DYNAMIC) {
+        body._lastPosition = null;
+        body._lastRotation = null;
+        continue;
+      }
+
+      // Update linear velocity
+      if (body._lastPosition == null) {
+        b2Body.linearVelocity.setZero();
+      } else {
+        Vector2 velocity = (body._targetPosition - body._lastPosition) / dt;
+        b2Body.linearVelocity = velocity;
+        body._lastPosition = null;
+      }
+
+      // Update angular velocity
+      if (body._lastRotation == null) {
+        b2Body.angularVelocity = 0.0;
+      } else {
+        double angularVelocity = (body._targetAngle - body._lastRotation) / dt;
+        b2Body.angularVelocity = angularVelocity;
+        body._lastRotation = 0.0;
+      }
+    }
 
     // Calculate a step in the simulation
     b2World.stepDt(dt, 10, 10);
@@ -81,6 +122,13 @@ class PhysicsNode extends Node {
     for (box2d.Body b2Body = b2World.bodyList; b2Body != null; b2Body = b2Body.getNext()) {
       // Update visual position and rotation
       PhysicsBody body = b2Body.userData;
+
+      if (b2Body.getType() == box2d.BodyType.KINEMATIC) {
+        body._targetPosition = null;
+        body._targetAngle = null;
+      }
+
+      // Update visual position and rotation
       body._node._setPositionFromPhysics(new Point(
         b2Body.position.x * b2WorldToNodeConversionFactor,
         b2Body.position.y * b2WorldToNodeConversionFactor
@@ -113,20 +161,42 @@ class PhysicsNode extends Node {
   }
 
   void _updatePosition(PhysicsBody body, Point position) {
+    if (body._lastPosition == null && body.type == PhysicsBodyType.static) {
+      body._lastPosition = new Vector2.copy(body._body.position);
+      body._body.setType(box2d.BodyType.KINEMATIC);
+    }
+
     Vector2 newPos = new Vector2(
       position.x / b2WorldToNodeConversionFactor,
       position.y / b2WorldToNodeConversionFactor
     );
     double angle = body._body.getAngle();
-    body._body.setTransform(newPos, angle);
+
+    if (body.type == PhysicsBodyType.dynamic) {
+      body._body.setTransform(newPos, angle);
+    } else {
+      body._targetPosition = newPos;
+      body._targetAngle = angle;
+    }
     body._body.setAwake(true);
   }
 
   void _updateRotation(PhysicsBody body, double rotation) {
+    if (body._lastRotation == null)
+      body._lastRotation = body._body.getAngle();
+
     Vector2 pos = body._body.position;
     double newAngle = radians(rotation);
     body._body.setTransform(pos, newAngle);
     body._body.setAwake(true);
+  }
+
+  void _updateScale(PhysicsBody body, double scale) {
+    body._scale = scale;
+
+    if (body._attached) {
+      body._updateScale(this);
+    }
   }
 
   void addChild(Node node) {
@@ -192,7 +262,7 @@ class _ContactCallbackInfo {
 class _ContactHandler extends box2d.ContactListener {
   _ContactHandler(this.physicsNode);
 
-  PhysicsNode physicsNode;
+  PhysicsWorld physicsNode;
 
   List<_ContactCallbackInfo> callbackInfos = [];
 

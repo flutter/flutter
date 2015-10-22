@@ -83,7 +83,7 @@ class _Drawer extends StatelessComponent {
             performance: performance,
             position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
             child: new AnimatedContainer(
-              curve: ease,
+              curve: Curves.ease,
               duration: _kThemeChangeDuration,
               decoration: new BoxDecoration(
                 backgroundColor: Theme.of(context).canvasColor,
@@ -106,13 +106,13 @@ class _DrawerRoute extends Route {
   final int level;
 
   PerformanceView get performance => _performance?.view;
-  Performance _performance = new Performance(duration: _kBaseSettleDuration);
+  Performance _performance = new Performance(duration: _kBaseSettleDuration, debugLabel: 'Drawer');
 
   bool get opaque => false;
 
   bool _interactive = true;
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
+  Widget build(RouteArguments args) {
     return new Focus(
       key: new GlobalObjectKey(this),
       autofocus: true,
@@ -169,7 +169,6 @@ class _DrawerRoute extends Route {
   }
 }
 
-void showDrawer({ NavigatorState navigator, Widget child, int level: 3 }) {
-  assert(navigator != null);
-  navigator.push(new _DrawerRoute(child: child, level: level));
+void showDrawer({ BuildContext context, Widget child, int level: 3 }) {
+  Navigator.of(context).push(new _DrawerRoute(child: child, level: level));
 }

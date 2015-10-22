@@ -17,4 +17,9 @@ class Title extends StatelessComponent {
     updateTaskDescription(title, Theme.of(context).primaryColor);
     return child;
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('"$title"');
+  }
 }

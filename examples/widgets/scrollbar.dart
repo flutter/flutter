@@ -6,10 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 class ScrollbarApp extends StatefulComponent {
-  ScrollbarApp({ this.navigator });
-
-  final NavigatorState navigator;
-
   ScrollbarAppState createState() => new ScrollbarAppState();
 }
 
@@ -23,7 +19,12 @@ class ScrollbarAppState extends State<ScrollbarApp> {
     return new ScrollableList<int>(
       items: new List<int>.generate(_itemCount, (int i) => i),
       itemExtent: _itemExtent,
-      itemBuilder: (BuildContext _, int i) => new Text('Item ${dd.format(i)}', style: Theme.of(context).text.title),
+      itemBuilder: (_, int i) {
+        return new Text('Item ${dd.format(i)}',
+          key: new ValueKey<int>(i),
+          style: Theme.of(context).text.title
+        );
+      },
       scrollableListPainter: _scrollbarPainter
     );
   }
@@ -44,7 +45,6 @@ class ScrollbarAppState extends State<ScrollbarApp> {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Scrollbar Demo')),
       body: new Container(
-        decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
         padding: new EdgeDims.all(12.0),
         child: new Center(child: new Card(child: scrollable))
       )
@@ -61,7 +61,7 @@ void main() {
       accentColor: Colors.redAccent[200]
     ),
     routes: {
-      '/': (RouteArguments args) => new ScrollbarApp(navigator: args.navigator),
+      '/': (RouteArguments args) => new ScrollbarApp(),
     }
   ));
 }

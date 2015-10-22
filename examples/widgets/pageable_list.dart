@@ -15,10 +15,6 @@ class CardModel {
 }
 
 class PageableListApp extends StatefulComponent {
-  PageableListApp({ this.navigator });
-
-  final NavigatorState navigator;
-
   PageableListAppState createState() => new PageableListAppState();
 }
 
@@ -89,7 +85,7 @@ class PageableListAppState extends State<PageableListApp> {
 
   void _showDrawer() {
     showDrawer(
-      navigator: config.navigator,
+      context: context,
       child: new Block([
         new DrawerHeader(child: new Text('Options')),
         new DrawerItem(
@@ -136,11 +132,8 @@ class PageableListAppState extends State<PageableListApp> {
           : pageSize.width
     );
     return new SizeObserver(
-      callback: updatePageSize,
-      child: new Container(
-        child: list,
-        decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50])
-      )
+      onSizeChanged: updatePageSize,
+      child: list
     );
   }
 
@@ -164,7 +157,7 @@ void main() {
       accentColor: Colors.redAccent[200]
     ),
     routes: {
-      '/': (RouteArguments args) => new PageableListApp(navigator: args.navigator),
+      '/': (RouteArguments args) => new PageableListApp(),
     }
   ));
 }

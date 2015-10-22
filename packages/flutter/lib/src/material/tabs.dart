@@ -3,21 +3,19 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/animation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
 import 'icon.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 typedef void TabSelectedIndexChanged(int selectedIndex);
 typedef void TabLayoutChanged(Size size, List<double> widths);
@@ -283,6 +281,16 @@ class TabLabel {
 
   final String text;
   final String icon;
+
+  String toString() {
+    if (text != null && icon != null)
+      return '"$text" ($icon)';
+    if (text != null)
+      return '"$text"';
+    if (icon != null)
+      return '$icon';
+    return 'EMPTY TAB LABEL';
+  }
 }
 
 class Tab extends StatelessComponent {
@@ -312,7 +320,7 @@ class Tab extends StatelessComponent {
   Widget _buildLabelIcon() {
     assert(label.icon != null);
     Color iconColor = selected ? selectedColor : color;
-    ui.ColorFilter filter = new ui.ColorFilter.mode(iconColor, ui.TransferMode.srcATop);
+    ColorFilter filter = new ColorFilter.mode(iconColor, TransferMode.srcATop);
     return new Icon(type: label.icon, size: _kTabIconSize, colorFilter: filter);
   }
 
@@ -337,7 +345,7 @@ class Tab extends StatelessComponent {
     }
 
     Container centeredLabel = new Container(
-      child: new Center(child: labelContent),
+      child: new Center(child: labelContent, shrinkWrap: ShrinkWrap.both),
       constraints: new BoxConstraints(minWidth: _kMinTabWidth),
       padding: _kTabLabelPadding
     );
@@ -346,6 +354,11 @@ class Tab extends StatelessComponent {
       onTap: onSelected,
       child: centeredLabel
     );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$label');
   }
 }
 
@@ -391,7 +404,7 @@ class _TabBarState extends ScrollableState<TabBar> {
     super.initState();
     _indicatorAnimation = new ValuePerformance<Rect>()
       ..duration = _kTabBarScroll
-      ..variable = new AnimatedRectValue(null, curve: ease);
+      ..variable = new AnimatedRectValue(null, curve: Curves.ease);
     scrollBehavior.isScrollable = config.isScrollable;
   }
 
@@ -496,18 +509,8 @@ class _TabBarState extends ScrollableState<TabBar> {
       indicatorColor = Colors.white;
     }
 
-    TextStyle textStyle;
-    IconThemeColor iconThemeColor;
-    switch (themeData.primaryColorBrightness) {
-      case ThemeBrightness.light:
-        textStyle = Typography.black.body1;
-        iconThemeColor = IconThemeColor.black;
-        break;
-      case ThemeBrightness.dark:
-        textStyle = Typography.white.body1;
-        iconThemeColor = IconThemeColor.white;
-        break;
-    }
+    TextStyle textStyle = themeData.primaryTextTheme.body1;
+    IconThemeData iconTheme = themeData.primaryIconTheme;
 
     List<Widget> tabs = <Widget>[];
     bool textAndIcons = false;
@@ -519,7 +522,7 @@ class _TabBarState extends ScrollableState<TabBar> {
     }
 
     Widget content = new IconTheme(
-      data: new IconThemeData(color: iconThemeColor),
+      data: iconTheme,
       child: new DefaultTextStyle(
         style: textStyle,
         child: new BuilderTransition(
@@ -542,7 +545,7 @@ class _TabBarState extends ScrollableState<TabBar> {
 
     if (config.isScrollable) {
       content = new SizeObserver(
-        callback: _handleViewportSizeChanged,
+        onSizeChanged: _handleViewportSizeChanged,
         child: new Viewport(
           scrollDirection: ScrollDirection.horizontal,
           scrollOffset: new Offset(scrollOffset, 0.0),

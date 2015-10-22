@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -48,6 +47,12 @@ abstract class MaterialButton extends StatefulComponent {
   final bool enabled;
   final ButtonColor textColor;
   final GestureTapCallback onPressed;
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (!enabled)
+      description.add('disabled');
+  }
 }
 
 abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {

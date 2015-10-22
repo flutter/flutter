@@ -19,7 +19,7 @@ void main() {
             width: 0.5,
             height: 0.25,
             child: new SizeObserver(
-              callback: (Size size) {
+              onSizeChanged: (Size size) {
                 detectedSize = size;
               },
               child: new Container(

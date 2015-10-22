@@ -12,18 +12,16 @@ class StockList extends StatelessComponent {
   final StockRowActionCallback onAction;
 
   Widget build(BuildContext context) {
-    return new Material(
-      child: new ScrollableList<Stock>(
-        items: stocks,
-        itemExtent: StockRow.kHeight,
-        itemBuilder: (BuildContext context, Stock stock) {
-          return new StockRow(
-            stock: stock,
-            onPressed: onOpen,
-            onLongPressed: onAction
-          );
-        }
-      )
+    return new ScrollableList<Stock>(
+      items: stocks,
+      itemExtent: StockRow.kHeight,
+      itemBuilder: (BuildContext context, Stock stock) {
+        return new StockRow(
+          stock: stock,
+          onPressed: onOpen,
+          onLongPressed: onAction
+        );
+      }
     );
   }
 }

@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -15,8 +14,8 @@ import 'hit_test.dart';
 import 'layer.dart';
 import 'node.dart';
 
-export 'dart:ui' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
+export 'layer.dart';
+export 'hit_test.dart';
 
 typedef ui.Shader ShaderCallback(Rect bounds);
 
@@ -39,7 +38,7 @@ class ParentData {
 }
 
 /// Obsolete class that will be removed eventually
-class PaintingCanvas extends ui.Canvas {
+class PaintingCanvas extends Canvas {
   PaintingCanvas(ui.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
   // TODO(ianh): Just use ui.Canvas everywhere instead
 }
@@ -247,7 +246,7 @@ class PaintingContext {
   static Paint _getPaintForAlpha(int alpha) {
     return new Paint()
       ..color = new Color.fromARGB(alpha, 0, 0, 0)
-      ..setTransferMode(ui.TransferMode.srcOver)
+      ..transferMode = TransferMode.srcOver
       ..isAntiAlias = false;
   }
 
@@ -277,46 +276,9 @@ class PaintingContext {
     }
   }
 
-  static Paint _getPaintForColorFilter(Color color, ui.TransferMode transferMode) {
-    return new Paint()
-      ..colorFilter = new ui.ColorFilter.mode(color, transferMode)
-      ..isAntiAlias = false;
-  }
-
-  /// Paint a child with a color filter
-  ///
-  /// The color filter is constructed by combining the given color and the given
-  /// transfer mode, as if they were passed to the [ColorFilter.mode] constructor.
-  ///
-  /// If the child needs compositing, the blending operation will be applied by
-  /// a compositing layer. Otherwise, the blending operation will be applied by
-  /// the canvas.
-  void paintChildWithColorFilter(RenderObject child,
-                                 Point childPosition,
-                                 Rect bounds,
-                                 Color color,
-                                 ui.TransferMode transferMode) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, _getPaintForColorFilter(color, transferMode));
-      canvas.translate(childOffset.dx, childOffset.dy);
-      insertChild(child, Offset.zero);
-      canvas.restore();
-    } else {
-      ColorFilterLayer paintLayer = new ColorFilterLayer(
-          offset: childOffset,
-          bounds: bounds,
-          color: color,
-          transferMode: transferMode);
-      _containerLayer.append(paintLayer);
-      compositeChild(child, parentLayer: paintLayer);
-    }
-  }
-
   static Paint _getPaintForShaderMask(Rect bounds,
                                       ShaderCallback shaderCallback,
-                                      ui.TransferMode transferMode) {
+                                      TransferMode transferMode) {
     return new Paint()
      ..transferMode = transferMode
      ..shader = shaderCallback(bounds);
@@ -326,7 +288,7 @@ class PaintingContext {
                                 Point childPosition,
                                 Rect bounds,
                                 ShaderCallback shaderCallback,
-                                ui.TransferMode transferMode) {
+                                TransferMode transferMode) {
     assert(debugCanPaintChild(child));
     final Offset childOffset = childPosition.toOffset();
     if (!child.needsCompositing) {
@@ -514,14 +476,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   dynamic debugExceptionContext = '';
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
-    print('-- EXCEPTION --');
-    print('The following exception was raised during $method():');
-    print('$exception');
-    print('Stack trace:');
-    print('$stack');
-    print('The following RenderObject was being processed when the exception was fired:\n${this}');
+    debugPrint('-- EXCEPTION --');
+    debugPrint('The following exception was raised during $method():');
+    debugPrint('$exception');
+    debugPrint('Stack trace:');
+    debugPrint('$stack');
+    debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
     if (debugExceptionContext != '')
-      'That RenderObject had the following exception context:\n$debugExceptionContext'.split('\n').forEach(print);
+      debugPrint('That RenderObject had the following exception context:\n$debugExceptionContext');
     if (debugRenderingExceptionHandler != null)
       debugRenderingExceptionHandler(this, method, exception, stack);
   }
@@ -724,15 +686,30 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     else
       relayoutSubtreeRoot = parent._relayoutSubtreeRoot;
     assert(parent == this.parent);
-    if (!needsLayout && constraints == _constraints && relayoutSubtreeRoot == _relayoutSubtreeRoot)
+    assert(() {
+      _debugCanParentUseSize = parentUsesSize;
+      return true;
+    });
+    if (!needsLayout && constraints == _constraints && relayoutSubtreeRoot == _relayoutSubtreeRoot) {
+      assert(() {
+        // in case parentUsesSize changed since the last invocation, set size
+        // to itself, so it has the right internal debug values.
+        _debugDoingThisLayout = true;
+        RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+        _debugActiveLayout = this;
+        debugResetSize();
+        _debugActiveLayout = debugPreviousActiveLayout;
+        _debugDoingThisLayout = false;
+        return true;
+      });
       return;
+    }
     _constraints = constraints;
     _relayoutSubtreeRoot = relayoutSubtreeRoot;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
     assert(() {
       _debugMutationsLocked = true;
-      _debugCanParentUseSize = parentUsesSize;
       return true;
     });
     if (sizedByParent) {
@@ -768,6 +745,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     markNeedsPaint();
     assert(parent == this.parent);
   }
+
+  /// If a subclass has a "size" (the state controlled by "parentUsesSize",
+  /// whatever it is in the subclass, e.g. the actual "size" property of
+  /// RenderBox), and the subclass verifies that in checked mode this "size"
+  /// property isn't used when debugCanParentUseSize isn't set, then that
+  /// subclass should override debugResetSize() to reapply the current values of
+  /// debugCanParentUseSize to that state.
+  void debugResetSize() { }
 
   /// Whether the constraints are the only input to the sizing algorithm (in
   /// particular, child nodes have no impact)

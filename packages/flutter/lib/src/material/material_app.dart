@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -28,9 +26,7 @@ class MaterialApp extends StatefulComponent {
     this.theme,
     this.routes,
     this.onGenerateRoute
-  }) : super(key: key) {
-    assert(routes != null);
-  }
+  }) : super(key: key);
 
   final String title;
   final ThemeData theme;

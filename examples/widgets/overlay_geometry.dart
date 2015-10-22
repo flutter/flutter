@@ -31,15 +31,15 @@ class Marker extends StatelessComponent {
   final double size;
   final MarkerType type;
 
-  void paintMarker(ui.Canvas canvas, _) {
+  void paintMarker(PaintingCanvas canvas, _) {
     Paint paint = new Paint()..color = const Color(0x8000FF00);
-    paint.setStyle(ui.PaintingStyle.fill);
     double r = size / 2.0;
     canvas.drawCircle(new Point(r, r), r, paint);
 
-    paint.color = const Color(0xFFFFFFFF);
-    paint.setStyle(ui.PaintingStyle.stroke);
-    paint.strokeWidth = 1.0;
+    paint
+      ..color = const Color(0xFFFFFFFF)
+      ..style = ui.PaintingStyle.stroke
+      ..strokeWidth = 1.0;
     if (type == MarkerType.topLeft) {
       canvas.drawLine(new Point(r, r), new Point(r + r - 1.0, r), paint);
       canvas.drawLine(new Point(r, r), new Point(r, r + r - 1.0), paint);
@@ -58,7 +58,7 @@ class Marker extends StatelessComponent {
         child: new Container(
           width: size,
           height: size,
-          child: new CustomPaint(callback: paintMarker)
+          child: new CustomPaint(onPaint: paintMarker)
         )
       )
     );
@@ -103,7 +103,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  void handlePointerDown(GlobalKey target, ui.PointerEvent event) {
+  void handlePointerDown(GlobalKey target, PointerInputEvent event) {
     setState(() {
       markers[MarkerType.touch] = new Point(event.x, event.y);
       final RenderBox box = target.currentContext.findRenderObject();
@@ -140,7 +140,6 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         toolBar: new ToolBar(center: new Text('Tap a Card')),
         body: new Container(
           padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-          decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
           child: new ScrollableMixedWidgetList(
             builder: builder,
             token: cardModels.length,

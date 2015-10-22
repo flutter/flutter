@@ -22,14 +22,11 @@ const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
-typedef List<PopupMenuItem> PopupMenuItemsBuilder(NavigatorState navigator);
-
 class PopupMenu extends StatelessComponent {
   PopupMenu({
     Key key,
     this.items,
     this.level: 4,
-    this.navigator,
     this.performance
   }) : super(key: key) {
     assert(items != null);
@@ -38,7 +35,6 @@ class PopupMenu extends StatelessComponent {
 
   final List<PopupMenuItem> items;
   final int level;
-  final NavigatorState navigator;
   final PerformanceView performance;
 
   Widget build(BuildContext context) {
@@ -58,7 +54,7 @@ class PopupMenu extends StatelessComponent {
         performance: performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(start, end)),
         child: new InkWell(
-          onTap: () { navigator.pop(items[i].value); },
+          onTap: () { Navigator.of(context).pop(items[i].value); },
           child: items[i]
         ))
       );
@@ -75,7 +71,7 @@ class PopupMenu extends StatelessComponent {
         variables: <AnimatedValue<double>>[width, height],
         builder: (BuildContext context) {
           return new CustomPaint(
-            callback: (ui.Canvas canvas, Size size) {
+            onPaint: (ui.Canvas canvas, Size size) {
               double widthValue = width.value * size.width;
               double heightValue = height.value * size.height;
               painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
@@ -114,11 +110,11 @@ class MenuPosition {
 }
 
 class _MenuRoute extends PerformanceRoute {
-  _MenuRoute({ this.completer, this.position, this.builder, this.level });
+  _MenuRoute({ this.completer, this.position, this.items, this.level });
 
   final Completer completer;
   final MenuPosition position;
-  final PopupMenuItemsBuilder builder;
+  final List<PopupMenuItem> items;
   final int level;
 
   Performance createPerformance() {
@@ -134,7 +130,7 @@ class _MenuRoute extends PerformanceRoute {
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  Widget build(NavigatorState navigator, PerformanceView nextRoutePerformance) {
+  Widget build(RouteArguments args) {
     return new Positioned(
       top: position?.top,
       right: position?.right,
@@ -144,9 +140,8 @@ class _MenuRoute extends PerformanceRoute {
         key: new GlobalObjectKey(this),
         autofocus: true,
         child: new PopupMenu(
-          items: builder != null ? builder(navigator) : const <PopupMenuItem>[],
+          items: items,
           level: level,
-          navigator: navigator,
           performance: performance
         )
       )
@@ -159,12 +154,12 @@ class _MenuRoute extends PerformanceRoute {
   }
 }
 
-Future showMenu({ NavigatorState navigator, MenuPosition position, PopupMenuItemsBuilder builder, int level: 4 }) {
+Future showMenu({ BuildContext context, MenuPosition position, List<PopupMenuItem> items, int level: 4 }) {
   Completer completer = new Completer();
-  navigator.push(new _MenuRoute(
+  Navigator.of(context).push(new _MenuRoute(
     completer: completer,
     position: position,
-    builder: builder,
+    items: items,
     level: level
   ));
   return completer.future;
