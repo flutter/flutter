@@ -3,8 +3,14 @@ import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 
 class TestGestureArenaMember extends GestureArenaMember {
-  void acceptGesture(Object key) {}
-  void rejectGesture(Object key) {}
+  void acceptGesture(Object key) {
+    accepted = true;
+  }
+  void rejectGesture(Object key) {
+    rejected = true;
+  }
+  bool accepted = false;
+  bool rejected = false;
 }
 
 void main() {
@@ -354,6 +360,7 @@ void main() {
     router.route(up1);
     expect(doubleTapRecognized, isFalse);
     entry.resolve(GestureDisposition.accepted);
+    expect(member.accepted, isTrue);
     expect(doubleTapRecognized, isFalse);
     GestureArena.instance.sweep(1);
     expect(doubleTapRecognized, isFalse);
@@ -395,6 +402,7 @@ void main() {
     expect(doubleTapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.accepted);
+    expect(member.accepted, isTrue);
 
     tap.addPointer(down2);
     GestureArena.instance.close(2);
@@ -439,11 +447,45 @@ void main() {
     expect(doubleTapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.accepted);
+    expect(member.accepted, isTrue);
 
     router.route(up2);
     expect(doubleTapRecognized, isFalse);
     GestureArena.instance.sweep(2);
     expect(doubleTapRecognized, isFalse);
+
+    tap.dispose();
+  });
+
+  test('Passive gesture should trigger on double tap cancel', () {
+    PointerRouter router = new PointerRouter();
+    DoubleTapGestureRecognizer tap = new DoubleTapGestureRecognizer(router: router);
+
+    bool doubleTapRecognized = false;
+    tap.onDoubleTap = () {
+      doubleTapRecognized = true;
+    };
+
+    new FakeAsync().run((FakeAsync async) {
+      tap.addPointer(down1);
+      TestGestureArenaMember member = new TestGestureArenaMember();
+      GestureArena.instance.add(1, member);
+      GestureArena.instance.close(1);
+      expect(doubleTapRecognized, isFalse);
+      router.route(down1);
+      expect(doubleTapRecognized, isFalse);
+
+      router.route(up1);
+      expect(doubleTapRecognized, isFalse);
+      GestureArena.instance.sweep(1);
+      expect(doubleTapRecognized, isFalse);
+
+      expect(member.accepted, isFalse);
+
+      async.elapse(new Duration(milliseconds: 5000));
+
+      expect(member.accepted, isTrue);
+    });
 
     tap.dispose();
   });
