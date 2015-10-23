@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -49,14 +52,19 @@ class _MaterialAppState extends State<MaterialApp> {
 
   GlobalObjectKey _navigator;
 
+  Size _size;
+
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey(this);
     WidgetFlutterBinding.instance.addEventListener(_backHandler);
+    _size = ui.window.size;
+    FlutterBinding.instance.addMetricListener(_metricHandler);
   }
 
   void dispose() {
     WidgetFlutterBinding.instance.removeEventListener(_backHandler);
+    FlutterBinding.instance.removeMetricListener(_metricHandler);
     super.dispose();
   }
 
@@ -72,19 +80,24 @@ class _MaterialAppState extends State<MaterialApp> {
     }
   }
 
+  void _metricHandler(Size size) => setState(() { _size = size; });
+
   Widget build(BuildContext context) {
-    return new Theme(
-      data: config.theme ?? new ThemeData.fallback(),
-      child: new DefaultTextStyle(
-        style: _errorTextStyle,
-        child: new DefaultAssetBundle(
-          bundle: _defaultBundle,
-          child: new Title(
-            title: config.title,
-            child: new Navigator(
-              key: _navigator,
-              routes: config.routes,
-              onGenerateRoute: config.onGenerateRoute
+    return new MediaQuery(
+      data: new MediaQueryData(size: _size),
+      child: new Theme(
+        data: config.theme ?? new ThemeData.fallback(),
+        child: new DefaultTextStyle(
+          style: _errorTextStyle,
+          child: new DefaultAssetBundle(
+            bundle: _defaultBundle,
+            child: new Title(
+              title: config.title,
+              child: new Navigator(
+                key: _navigator,
+                routes: config.routes,
+                onGenerateRoute: config.onGenerateRoute
+              )
             )
           )
         )
