@@ -64,6 +64,12 @@ String runCheckedSync(List<String> cmd) =>
 /// Run cmd and return stdout.
 String runSync(List<String> cmd) => _runWithLoggingSync(cmd);
 
+/// Return the platform specific name for the given Dart SDK binary. So, `pub`
+/// ==> `pub.bat`.
+String sdkBinaryName(String name) {
+  return Platform.isWindows ? '${name}.bat' : name;
+}
+
 String _runWithLoggingSync(List<String> cmd, {bool checked: false}) {
   _logging.info(cmd.join(' '));
   ProcessResult results =

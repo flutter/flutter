@@ -9,6 +9,8 @@ import 'package:args/command_runner.dart';
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as p;
 
+import '../process.dart';
+
 class InitCommand extends Command {
   final String name = 'init';
   final String description = 'Create a new Flutter project.';
@@ -43,8 +45,8 @@ class InitCommand extends Command {
 
     if (argResults['pub']) {
       print("Running pub get...");
-      Process process =
-          await Process.start('pub', ['get'], workingDirectory: out.path);
+      Process process = await Process.start(
+          sdkBinaryName('pub'), ['get'], workingDirectory: out.path);
       stdout.addStream(process.stdout);
       stderr.addStream(process.stderr);
       int code = await process.exitCode;

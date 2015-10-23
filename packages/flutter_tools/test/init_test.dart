@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 import 'package:sky_tools/src/commands/init.dart';
+import 'package:sky_tools/src/process.dart';
 import 'package:test/test.dart';
 
 main() => defineTests();
@@ -38,7 +39,7 @@ defineTests() {
       String path = p.join(temp.path, 'lib', 'main.dart');
       expect(new File(path).existsSync(), true);
       ProcessResult exec = Process.runSync(
-          'dartanalyzer', ['--fatal-warnings', path],
+          sdkBinaryName('dartanalyzer'), ['--fatal-warnings', path],
           workingDirectory: temp.path);
       if (exec.exitCode != 0) {
         print(exec.stdout);

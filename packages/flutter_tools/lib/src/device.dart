@@ -773,8 +773,8 @@ class AndroidDevice extends Device {
           [adbPath, 'forward', observatoryPortString, observatoryPortString]);
 
       // Actually start the server.
-      await Process.start('pub', ['run', 'sky_tools:sky_server', _serverPort],
-          workingDirectory: serverRoot, mode: ProcessStartMode.DETACHED, runInShell: Platform.isWindows);
+      await Process.start(sdkBinaryName('pub'), ['run', 'sky_tools:sky_server', _serverPort],
+          workingDirectory: serverRoot, mode: ProcessStartMode.DETACHED);
 
       // Set up reverse port-forwarding so that the Android app can reach the
       // server running on localhost.
