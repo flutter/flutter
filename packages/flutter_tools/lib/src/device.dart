@@ -767,7 +767,7 @@ class AndroidDevice extends Device {
 
       // Actually start the server.
       await Process.start('pub', ['run', 'sky_tools:sky_server', _serverPort],
-          workingDirectory: serverRoot, mode: ProcessStartMode.DETACHED);
+          workingDirectory: serverRoot, mode: ProcessStartMode.DETACHED, runInShell: Platform.isWindows);
 
       // Set up reverse port-forwarding so that the Android app can reach the
       // server running on localhost.
@@ -826,6 +826,26 @@ class AndroidDevice extends Device {
       // equivalent command when doing verbose logging.
       _logging.info('kill $pid');
       Process.killPid(int.parse(pid));
+    } else if (Platform.isWindows) {
+      //Get list of network processes and split on newline
+      List<String> processes = runSync(['netstat.exe','-ano']).split("\r");
+
+      //List entries from netstat is formatted like so
+      // TCP    192.168.2.11:50945     192.30.252.90:443      LISTENING     1304
+      //This regexp is to find process where the the port exactly matches
+      RegExp pattern = new RegExp(':$_serverPort[ ]+');
+
+      //Split the columns by 1 or more spaces
+      RegExp columnPattern = new RegExp('[ ]+');
+      processes.forEach((String process){
+        if (process.contains(pattern)) {
+          //The last column is the Process ID
+          String processId = process.split(columnPattern).last;
+          //Force and Tree kill the process
+          _logging.info('kill $processId');
+          runSync(['TaskKill.exe', '/F', '/T', '/PID', processId]);
+        }
+      });
     } else {
       runSync(['fuser', '-k', '$_serverPort/tcp']);
     }
