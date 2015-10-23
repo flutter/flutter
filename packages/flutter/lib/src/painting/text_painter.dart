@@ -309,7 +309,7 @@ class _NewTextPainter implements TextPainter {
     _text = value;
     ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
     _text.build(builder);
-    _paragraph = builder.build(_text.paragraphStyle);
+    _paragraph = builder.build(_text.paragraphStyle ?? new ui.ParagraphStyle());
     _needsLayout = true;
   }
 
