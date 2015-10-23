@@ -181,9 +181,14 @@ void Engine::RunFromSnapshotStream(
   sky_view_->SetDisplayMetrics(display_metrics_);
 }
 
-void Engine::RunFromPrecompiledSnapshot() {
+void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
+  AssetUnpackerJob* unpacker = new AssetUnpackerJob(
+      mojo::GetProxy(&root_bundle_), base::WorkerPool::GetTaskRunner(true));
+  std::string path_str = bundle_path;
+  unpacker->Unpack(Fetch(base::FilePath(path_str)));
+
   sky_view_ = blink::SkyView::Create(this);
-  sky_view_->CreateView("Sky");
+  sky_view_->CreateView("http://localhost");
   sky_view_->RunFromPrecompiledSnapshot();
   sky_view_->SetDisplayMetrics(display_metrics_);
 }

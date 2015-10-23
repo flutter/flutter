@@ -172,7 +172,9 @@ static std::string SkPictureTracingPath() {
 - (void)connectToEngineAndLoad {
   auto interface_request = mojo::GetProxy(&_sky_engine);
   self.platformView->ConnectToEngine(interface_request.Pass());
-  _sky_engine->RunFromPrecompiledSnapshot();
+  mojo::String bundle_path(
+      [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"].UTF8String);
+  _sky_engine->RunFromPrecompiledSnapshot(bundle_path);
 }
 
 - (void)notifySurfaceDestruction {
