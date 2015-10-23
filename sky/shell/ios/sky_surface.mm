@@ -132,9 +132,6 @@ static std::string SkPictureTracingPath() {
   metrics->padding_top =
       [UIApplication sharedApplication].statusBarFrame.size.height;
 
-  [[UIApplication sharedApplication]
-      setStatusBarStyle:UIStatusBarStyleLightContent
-               animated:NO];
   _sky_engine->OnViewportMetricsChanged(metrics.Pass());
 }
 
