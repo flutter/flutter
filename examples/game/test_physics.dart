@@ -85,7 +85,6 @@ class TestBed extends NodeWithSize {
   }
 
   void myCallback(PhysicsContactType type, PhysicsContact contact) {
-    print("CONTACT type: $type");
   }
 
   bool handleEvent(SpriteBoxEvent event) {

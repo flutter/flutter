@@ -155,7 +155,7 @@ class Node {
       return _physicsWorld(parent.parent);
     }
     else {
-      print("physics not found");
+      assert(false);
       return null;
     }
   }
