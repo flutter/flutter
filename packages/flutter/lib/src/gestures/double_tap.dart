@@ -150,8 +150,7 @@ class DoubleTapGestureRecognizer extends DisposableArenaMember {
   }
 
   void _startDoubleTapTimer() {
-    if (_doubleTapTimer == null)
-      _doubleTapTimer = new Timer(kDoubleTapTimeout, () => _reset());
+    _doubleTapTimer ??= new Timer(kDoubleTapTimeout, () => _reset());
   }
 
   void _stopDoubleTapTimer() {
