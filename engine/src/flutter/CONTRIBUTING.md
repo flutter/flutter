@@ -45,11 +45,11 @@ target_os = ["android"]
  * `gclient sync` This will fetch all the source code that Flutter depends on. Avoid interrupting this script, it can leave your repository in an inconsistent state that is tedious to clean up.
  * `cd src` (Change to the directory that `gclient sync` created in your `flutter` directory.)
  * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master repository, not your clone, when running `git fetch` et al.)
+ * Run `./tools/android/download_android_tools.py` .
  * Add `.../flutter/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
  * Add `.../flutter/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
  * Add `$HOME/.pub-cache/bin` to your path if it's not already there. (It will already be there if you've ever set up Dart's `pub` tool before.)
  * Make sure you are still in the 'src' directory that the `gclient sync` step created earlier.
- * Run `./tools/android/download_android_tools.py` .
  * If you're on Linux, run `sudo ./build/install-build-deps-android.sh` .
  * If you're on Linux, run `sudo ./build/install-build-deps.sh` .
  * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
