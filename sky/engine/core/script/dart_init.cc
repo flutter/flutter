@@ -82,8 +82,6 @@ static const char* kDartArgs[] = {
 #endif
 };
 
-static const char* kInstructionsSnapshotSymbolName = "kInstructionsSnapshot";
-
 static const char* kDartPrecompilationArgs[] {
   "--precompilation",
 };
@@ -110,7 +108,11 @@ bool IsServiceIsolateURL(const char* url_name) {
 
 static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
   dlerror();  // clear previous errors on thread
-  void * sym = dlsym(RTLD_SELF, kInstructionsSnapshotSymbolName);
+  void* sym = nullptr;
+#ifdef RTLD_SELF
+  static const char kInstructionsSnapshotSymbolName[] = "kInstructionsSnapshot";
+  sym = dlsym(RTLD_SELF, kInstructionsSnapshotSymbolName);
+#endif
   return (dlerror() != nullptr) ? nullptr : reinterpret_cast<uint8_t * >(sym);
 }
 
