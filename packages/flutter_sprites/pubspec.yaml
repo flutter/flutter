@@ -4,6 +4,6 @@ version: 0.0.7
 author: Flutter Authors <flutter-dev@googlegroups.com>
 homepage: http://flutter.io
 dependencies:
-  flutter: ">=0.0.10 <0.1.0"
+  flutter: ">=0.0.11 <0.1.0"
   sky_tools: ">=0.0.20 <0.1.0"
   box2d: ">=0.2.0 <0.3.0"
