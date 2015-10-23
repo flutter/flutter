@@ -7,6 +7,7 @@
 /// See https://www.google.com/design/spec/material-design/introduction.html
 library material;
 
+export 'src/material/bottom_sheet.dart';
 export 'src/material/card.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/circle_avatar.dart';
