@@ -79,8 +79,6 @@ def upload_artifacts(dist_root, config, commit_hash):
 def main():
     parser = argparse.ArgumentParser(description='Deploy!')
     parser.add_argument('sky_engine_root', help='Path to sky_engine/src')
-    parser.add_argument('--stage-two', action='store_true', default=False,
-        help='Publish the sky package')
     parser.add_argument('--dry-run', action='store_true', default=False,
         help='Just print commands w/o executing.')
     parser.add_argument('--no-pub-publish', dest='publish',
@@ -110,36 +108,25 @@ def main():
     run(sky_engine_root, ['git', 'fetch', 'upstream'])
     run(sky_engine_root, ['git', 'reset', 'upstream/master', '--hard'])
 
-    def stage_one():
-        run(sky_engine_root, ['gclient', 'sync'])
+    commit_hash = git_revision(sky_engine_root)
 
-        commit_hash = git_revision(sky_engine_root)
+    run(sky_engine_root, ['sky/tools/gn', '--android', '--release'])
+    run(sky_engine_root, ['ninja', '-C', 'out/android_Release', ':dist'])
 
-        run(sky_engine_root, ['sky/tools/gn', '--android', '--release'])
-        run(sky_engine_root, ['ninja', '-C', 'out/android_Release', ':dist'])
+    run(sky_engine_root, ['sky/tools/gn', '--release'])
+    run(sky_engine_root, ['ninja', '-C', 'out/Release', ':dist'])
 
-        run(sky_engine_root, ['sky/tools/gn', '--release'])
-        run(sky_engine_root, ['ninja', '-C', 'out/Release', ':dist'])
+    with open(sky_engine_revision_file, 'w') as stream:
+        stream.write(commit_hash)
 
-        with open(sky_engine_revision_file, 'w') as stream:
-            stream.write(commit_hash)
+    upload_artifacts(android_dist_root, 'android-arm', commit_hash)
+    upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
 
-        upload_artifacts(android_dist_root, 'android-arm', commit_hash)
-        upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
-
-        if args.publish:
-            run(sky_engine_package_root, [pub_path, 'publish', '--force'])
-            run(sky_services_package_root, [pub_path, 'publish', '--force'])
-
-    def stage_two():
-        if args.publish:
-            run(sky_package_root, [pub_path, 'publish', '--force'])
-            run(flutter_sprites_package_root, [pub_path, 'publish', '--force'])
-
-    if args.stage_two:
-        stage_two()
-    else:
-        stage_one()
+    if args.publish:
+        run(sky_engine_package_root, [pub_path, 'publish', '--force'])
+        run(sky_services_package_root, [pub_path, 'publish', '--force'])
+        run(sky_package_root, [pub_path, 'publish', '--force'])
+        run(flutter_sprites_package_root, [pub_path, 'publish', '--force'])
 
 
 if __name__ == '__main__':
