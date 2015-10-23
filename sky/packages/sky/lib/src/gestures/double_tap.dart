@@ -39,7 +39,7 @@ class DoubleTapGestureRecognizer extends DisposableArenaMember {
 
   Timer _doubleTapTimer;
   TapTracker _firstTap;
-  Map<int, TapTracker> _trackers = new Map<int, TapTracker>();
+  final Map<int, TapTracker> _trackers = new Map<int, TapTracker>();
 
   void addPointer(PointerInputEvent event) {
     // Ignore out-of-bounds second taps
