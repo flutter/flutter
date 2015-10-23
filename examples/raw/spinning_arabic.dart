@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 double timeBase = null;
-ui.LayoutRoot layoutRoot = new ui.LayoutRoot();
+ui.Paragraph paragraph;
 
 ui.Picture paint(ui.Rect paintBounds, double delta) {
   ui.PictureRecorder recorder = new ui.PictureRecorder();
@@ -19,11 +19,11 @@ ui.Picture paint(ui.Rect paintBounds, double delta) {
                   new ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
 
   double sin = math.sin(delta / 200);
-  layoutRoot.maxWidth = 150.0 + (50 * sin);
-  layoutRoot.layout();
+  paragraph.maxWidth = 150.0 + (50 * sin);
+  paragraph.layout();
 
-  canvas.translate(layoutRoot.maxWidth / -2.0, (layoutRoot.maxWidth / 2.0) - 125);
-  layoutRoot.paint(canvas);
+  canvas.translate(paragraph.maxWidth / -2.0, (paragraph.maxWidth / 2.0) - 125);
+  paragraph.paint(canvas, ui.Offset.zero);
 
   return recorder.endRecording();
 }
@@ -55,18 +55,13 @@ void beginFrame(double timeStamp) {
 }
 
 void main() {
-  var document = new ui.Document();
-  var arabic = document.createText("هذا هو قليلا طويلة من النص الذي يجب التفاف .");
-  var more = document.createText(" و أكثر قليلا لجعله أطول. ");
-  var block = document.createElement('p');
-  block.style['display'] = 'paragraph';
-  block.style['direction'] = 'rtl';
-  block.style['unicode-bidi'] = 'plaintext';
-  block.style['color'] = 'black';
-  block.appendChild(arabic);
-  block.appendChild(more);
-
-  layoutRoot.rootElement = block;
+  // TODO(abarth): We're missing some bidi style information:
+  //   block.style['direction'] = 'rtl';
+  //   block.style['unicode-bidi'] = 'plaintext';
+  ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
+  builder.addText("هذا هو قليلا طويلة من النص الذي يجب التفاف .");
+  builder.addText(" و أكثر قليلا لجعله أطول. ");
+  paragraph = builder.build(new ui.ParagraphStyle());
 
   ui.view.setFrameCallback(beginFrame);
   ui.view.scheduleFrame();
