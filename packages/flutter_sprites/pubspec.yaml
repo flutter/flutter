@@ -1,6 +1,6 @@
 name: flutter_sprites
 description: A sprite toolkit built on top of Flutter
-version: 0.0.7
+version: 0.0.8
 author: Flutter Authors <flutter-dev@googlegroups.com>
 homepage: http://flutter.io
 dependencies:
