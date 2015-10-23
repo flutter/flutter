@@ -5,7 +5,7 @@
 [
   Constructor(),
 ] interface VelocityTracker {
-  void addPosition(long timeStamp, long pointerId, float x, float y);
-  GestureVelocity getVelocity(long pointerId);
+  void addPosition(long timeStamp, float x, float y);
+  GestureVelocity getVelocity();
   void reset();
 };

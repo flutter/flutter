@@ -49,10 +49,11 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
   T _getDragDelta(PointerInputEvent event);
   bool get _hasSufficientPendingDragDeltaToAccept;
 
-  final ui.VelocityTracker _velocityTracker = new ui.VelocityTracker();
+  Map<int, ui.VelocityTracker> _velocityTrackers = new Map<int, ui.VelocityTracker>();
 
   void addPointer(PointerInputEvent event) {
     startTrackingPointer(event.pointer);
+    _velocityTrackers[event.pointer] = new ui.VelocityTracker();
     if (_state == DragState.ready) {
       _state = DragState.possible;
       _pendingDragDelta = _initialPendingDragDelta;
@@ -62,7 +63,9 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
   void handleEvent(PointerInputEvent event) {
     assert(_state != DragState.ready);
     if (event.type == 'pointermove') {
-      _velocityTracker.addPosition(_eventTime(event), event.pointer, event.x, event.y);
+      ui.VelocityTracker tracker = _velocityTrackers[event.pointer];
+      assert(tracker != null);
+      tracker.addPosition(_eventTime(event), event.x, event.y);
       T delta = _getDragDelta(event);
       if (_state == DragState.accepted) {
         if (onUpdate != null)
@@ -97,17 +100,20 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
     bool wasAccepted = (_state == DragState.accepted);
     _state = DragState.ready;
     if (wasAccepted && onEnd != null) {
-      ui.GestureVelocity gestureVelocity = _velocityTracker.getVelocity(pointer);
+      ui.VelocityTracker tracker = _velocityTrackers[pointer];
+      assert(tracker != null);
+
+      ui.GestureVelocity gestureVelocity = tracker.getVelocity();
       ui.Offset velocity = ui.Offset.zero;
       if (_isFlingGesture(gestureVelocity))
         velocity = new ui.Offset(gestureVelocity.x, gestureVelocity.y);
       onEnd(velocity);
     }
-    _velocityTracker.reset();
+    _velocityTrackers.clear();
   }
 
   void dispose() {
-    _velocityTracker.reset();
+    _velocityTrackers.clear();
     super.dispose();
   }
 }
