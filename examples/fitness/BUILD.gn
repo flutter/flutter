@@ -14,11 +14,6 @@ sky_app("fitness") {
     deps = [
       "//examples/fitness/apk:resources",
     ]
-  } else if (is_ios) {
-    info_plist = "ios/Info.plist"
-    launcher_resources = [
-      "ios/LaunchScreen.storyboardc",
-    ]
   } else if (is_mac) {
     info_plist = "mac/Info.plist"
     xibs = [ "mac/sky_mac.xib" ]
