@@ -47,12 +47,17 @@ main() async {
 
 class TestBed extends NodeWithSize {
   Sprite _obstacle;
-  PhysicsWorld _physicsNode;
+  PhysicsWorld _world;
+  PhysicsGroup _group;
+  PhysicsGroup _group2;
 
   TestBed() : super(new Size(1024.0, 1024.0)) {
-    _physicsNode = new PhysicsWorld(new Offset(0.0, 100.0));
-    PhysicsGroup group = new PhysicsGroup();
-    _physicsNode.addChild(group);
+    _world = new PhysicsWorld(new Offset(0.0, 100.0));
+    _group = new PhysicsGroup();
+    _group2 = new PhysicsGroup();
+    _group2.position = new Point(50.0, 50.0);
+    _world.addChild(_group);
+    _world.addChild(_group2);
 
     _obstacle = new Sprite(_spriteSheet["ship.png"]);
     _obstacle.position = new Point(512.0, 800.0);
@@ -64,64 +69,58 @@ class TestBed extends NodeWithSize {
       friction: 0.5,
       tag: "obstacle"
     );
-    group.addChild(_obstacle);
-    _physicsNode.addContactCallback(myCallback, "obstacle", "ship", PhysicsContactType.begin);
+    _group.addChild(_obstacle);
+    _world.addContactCallback(myCallback, "obstacle", "ship", PhysicsContactType.begin);
 
-    // Animate obstacle
+    // Animate group
     ActionSequence seq = new ActionSequence([
-      new ActionTween((a) => _obstacle.position = a, new Point(256.0, 800.0), new Point(768.0, 800.0), 1.0, Curves.easeInOut),
-      new ActionTween((a) => _obstacle.position = a, new Point(768.0, 800.0), new Point(256.0, 800.0), 1.0, Curves.easeInOut)
+      new ActionTween((a) => _group.position = a, new Point(-256.0, 0.0), new Point(256.0, 0.0), 1.0, Curves.easeInOut),
+      new ActionTween((a) => _group.position = a, new Point(256.0, 0.0), new Point(-256.0, 0.0), 1.0, Curves.easeInOut)
     ]);
-    _obstacle.actions.run(new ActionRepeatForever(seq));
+    _group.actions.run(new ActionRepeatForever(seq));
 
-    seq = new ActionSequence([
-      new ActionTween((a) => _obstacle.scale = a, 1.0, 2.0, 2.0, Curves.easeInOut),
-      new ActionTween((a) => _obstacle.scale = a, 2.0, 1.0, 2.0, Curves.easeInOut)
-    ]);
-    _obstacle.actions.run(new ActionRepeatForever(seq));
-
-    addChild(_physicsNode);
+    addChild(_world);
 
     userInteractionEnabled = true;
   }
 
   void myCallback(PhysicsContactType type, PhysicsContact contact) {
-    print("CONTACT type: $type");
   }
 
   bool handleEvent(SpriteBoxEvent event) {
     if (event.type == "pointerdown") {
       Point pos = convertPointToNodeSpace(event.boxPosition);
 
+      print("ADDING SHIPS");
+      PhysicsGroup group = new PhysicsGroup();
+      group.position = pos;
+      group.rotation = 10.0;
+      group.scale = 0.5;
+      _world.addChild(group);
+
       Sprite shipA;
       shipA = new Sprite(_spriteSheet["ship.png"]);
       shipA.opacity = 0.3;
-      shipA.position = new Point(pos.x - 40.0, pos.y);
+      shipA.position = new Point(-40.0, 0.0);
       shipA.size = new Size(64.0, 64.0);
       shipA.physicsBody = new PhysicsBody(new PhysicsShapeCircle(Point.origin, 32.0),
         friction: 0.5,
         restitution: 0.5,
         tag: "ship"
       );
-      _physicsNode.addChild(shipA);
-      shipA.physicsBody.applyLinearImpulse(
-        new Offset(randomSignedDouble() * 5000.0, randomSignedDouble() * 5000.0),
-        shipA.position
-      );
+      group.addChild(shipA);
 
       Sprite shipB;
       shipB = new Sprite(_spriteSheet["ship.png"]);
       shipB.opacity = 0.3;
-      shipB.position = new Point(pos.x + 40.0, pos.y);
+      shipB.position = new Point(40.0, 0.0);
       shipB.size = new Size(64.0, 64.0);
       shipB.physicsBody = new PhysicsBody(new PhysicsShapePolygon([new Point(-25.0, -25.0), new Point(25.0, -25.0), new Point(25.0, 25.0), new Point(-25.0, 25.0)]),
         friction: 0.5,
         restitution: 0.5,
         tag: "ship"
       );
-      _physicsNode.addChild(shipB);
-
-      new PhysicsJointRevolute(shipA.physicsBody, shipB.physicsBody, pos);
+      group.addChild(shipB);
     }
     return true;
   }
