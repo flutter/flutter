@@ -54,6 +54,8 @@ source_set("tonic") {
     "float32_list.h",
     "float64_list.cc",
     "float64_list.h",
+    "int32_list.cc",
+    "int32_list.h",
     "mojo_converter.h",
     "uint8_list.cc",
     "uint8_list.h",

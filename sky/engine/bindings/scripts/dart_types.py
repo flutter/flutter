@@ -120,6 +120,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'Float32List': 'Float32List',
     'Float64List': 'Float64List',
     'Uint8List': 'Uint8List',
+    'Int32List': 'Int32List',
     'Offset': 'Offset',
     'Paint': 'Paint',
     'Point': 'Point',
@@ -383,6 +384,7 @@ DART_TO_CPP_VALUE = {
     'Float32List': pass_by_value_format('Float32List'),
     'Float64List': pass_by_value_format('Float64List'),
     'Uint8List': pass_by_value_format('Uint8List'),
+    'Int32List': pass_by_value_format('Int32List'),
     'Offset': pass_by_value_format('Offset'),
     'Paint': pass_by_value_format('Paint'),
     'Point': pass_by_value_format('Point'),
@@ -670,6 +672,7 @@ DART_SET_RETURN_VALUE = {
     'Float32List': 'DartConverter<Float32List>::SetReturnValue(args, {cpp_value})',
     'Float64List': 'DartConverter<Float64List>::SetReturnValue(args, {cpp_value})',
     'Uint8List': 'DartConverter<Uint8List>::SetReturnValue(args, {cpp_value})',
+    'Int32List': 'DartConverter<Int32List>::SetReturnValue(args, {cpp_value})',
 }
 
 

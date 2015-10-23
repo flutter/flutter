@@ -60,11 +60,17 @@ void Paragraph::layout()
 void Paragraph::paint(Canvas* canvas, const Offset& offset)
 {
     // Very simplified painting to allow painting an arbitrary (layer-less) subtree.
+    RenderBox* box = firstChildBox();
     GraphicsContext context(canvas->skCanvas());
+
     Vector<RenderBox*> layers;
-    PaintInfo paintInfo(&context, m_renderView->absoluteBoundingBoxRect(), m_renderView.get());
     LayoutPoint paintOffset(offset.sk_size.width(), offset.sk_size.height());
-    m_renderView->RenderBox::paint(paintInfo, paintOffset, layers);
+    LayoutRect bounds = box->absoluteBoundingBoxRect();
+    DCHECK(bounds.x() == 0 && bounds.y() == 0);
+    bounds.setLocation(paintOffset);
+    PaintInfo paintInfo(&context, enclosingIntRect(bounds), box);
+    box->paint(paintInfo, paintOffset, layers);
+
     // Note we're ignoring any layers encountered.
     // TODO(abarth): Remove the concept of RenderLayers.
 }

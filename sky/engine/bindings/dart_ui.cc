@@ -43,7 +43,7 @@ void DartUI::InstallView(View* view) {
 Dart_Handle DartUI::GetClassByName(const char* class_name) {
   Dart_Handle name_handle = ToDart(class_name);
   Dart_Handle class_handle = Dart_GetType(library_.value(), name_handle, 0, nullptr);
-  DCHECK(!Dart_IsError(class_handle)) << class_name;
+  DCHECK(!Dart_IsError(class_handle)) << class_name << ": " << Dart_GetError(class_handle);
   return class_handle;
 }
 

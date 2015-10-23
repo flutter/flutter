@@ -32,7 +32,6 @@ dart:ui,LayoutRoot,LayoutRoot.
 dart:ui,Node,Node.
 dart:ui,Paragraph,Paragraph.
 dart:ui,ParagraphBuilder,ParagraphBuilder.
-dart:ui,ParagraphStyle,ParagraphStyle.
 dart:ui,ParentNode,ParentNode.
 dart:ui,Path,Path.
 dart:ui,Picture,Picture.
@@ -46,7 +45,6 @@ dart:ui,SceneBuilder,SceneBuilder.
 dart:ui,Shader,Shader.
 dart:ui,Text,Text.
 dart:ui,TextMetrics,TextMetrics.
-dart:ui,TextStyle,TextStyle.
 dart:ui,Tracing,Tracing.
 dart:ui,VelocityTracker,VelocityTracker.
 dart:ui,View,View.

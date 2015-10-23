@@ -2,60 +2,62 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_TONIC_UINT8_LIST_H_
-#define SKY_ENGINE_TONIC_UINT8_LIST_H_
+#ifndef SKY_ENGINE_TONIC_INT32_LIST_H_
+#define SKY_ENGINE_TONIC_INT32_LIST_H_
 
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_converter.h"
 
 namespace blink {
 
-// A simple wrapper around a Dart Uint8List. It uses Dart_TypedDataAcquireData
+// A simple wrapper around a Dart Int32List. It uses Dart_TypedDataAcquireData
 // to obtain a raw pointer to the data, which is released when this object is
 // destroyed.
 //
 // This is designed to be used with DartConverter only.
-class Uint8List {
+class Int32List {
  public:
-  explicit Uint8List(Dart_Handle list);
-  Uint8List(Uint8List&& other);
-  ~Uint8List();
+  explicit Int32List(Dart_Handle list);
+  Int32List(Int32List&& other);
+  ~Int32List();
 
-  uint8& at(intptr_t i)
+  int32_t& at(intptr_t i)
   {
       CHECK(i < num_elements_);
       return data_[i];
   }
-  const uint8& at(intptr_t i) const
+  const int32_t& at(intptr_t i) const
   {
       CHECK(i < num_elements_);
       return data_[i];
   }
 
-  uint8& operator[](intptr_t i) { return at(i); }
-  const uint8& operator[](intptr_t i) const { return at(i); }
+  int32_t& operator[](intptr_t i) { return at(i); }
+  const int32_t& operator[](intptr_t i) const { return at(i); }
 
-  const uint8* data() const { return data_; }
+  const int32_t* data() const { return data_; }
   intptr_t num_elements() const { return num_elements_; }
   Dart_Handle dart_handle() const { return dart_handle_; }
 
+  void Release();
+
  private:
-  uint8* data_;
+  int32_t* data_;
   intptr_t num_elements_;
   Dart_Handle dart_handle_;
 
-  Uint8List(const Uint8List& other) = delete;
+  Int32List(const Int32List& other) = delete;
 };
 
 template <>
-struct DartConverter<Uint8List> {
-  static void SetReturnValue(Dart_NativeArguments args, Uint8List val);
+struct DartConverter<Int32List> {
+  static void SetReturnValue(Dart_NativeArguments args, Int32List val);
 
-  static Uint8List FromArgumentsWithNullCheck(Dart_NativeArguments args,
+  static Int32List FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                               int index,
                                               Dart_Handle& exception);
 };
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_TONIC_UINT8_LIST_H_
+#endif  // SKY_ENGINE_TONIC_INT32_LIST_H_

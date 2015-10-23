@@ -5,10 +5,11 @@
 #ifndef SKY_ENGINE_CORE_TEXT_PARAGRAPHBUILDER_H_
 #define SKY_ENGINE_CORE_TEXT_PARAGRAPHBUILDER_H_
 
+#include "sky/engine/core/css/CSSFontSelector.h"
+#include "sky/engine/core/css/resolver/FontBuilder.h"
 #include "sky/engine/core/text/Paragraph.h"
-#include "sky/engine/core/text/ParagraphStyle.h"
-#include "sky/engine/core/text/TextStyle.h"
 #include "sky/engine/tonic/dart_wrappable.h"
+#include "sky/engine/tonic/int32_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 
@@ -23,20 +24,22 @@ public:
 
     ~ParagraphBuilder() override;
 
-    void pushStyle(TextStyle* style);
+    void pushStyle(Int32List& encoded, const String& fontFamily, double fontSize);
     void pop();
 
     void addText(const String& text);
 
-    PassRefPtr<Paragraph> build(ParagraphStyle* style);
+    PassRefPtr<Paragraph> build(Int32List& encoded, double lineHeight);
 
 private:
     explicit ParagraphBuilder();
 
-    OwnPtr<RenderView> m_renderView;
+    void createRenderView();
 
-    RefPtr<RenderStyle> m_parentStyle;
-    RenderParagraph* m_renderParagraph;
+    RefPtr<CSSFontSelector> m_fontSelector;
+    OwnPtr<RenderView> m_renderView;
+    RenderObject* m_renderParagraph;
+    RenderObject* m_currentRenderObject;
 };
 
 } // namespace blink
