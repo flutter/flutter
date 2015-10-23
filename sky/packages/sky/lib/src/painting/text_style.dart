@@ -151,8 +151,27 @@ class TextStyle {
     return toCSS[decorationStyle];
   }
 
-  ui.TextStyle get textStyle => null;
-  ui.ParagraphStyle get paragraphStyle => null;
+  ui.TextStyle get textStyle {
+    return new ui.TextStyle(
+      color: color,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationStyle: decorationStyle,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      fontFamily: fontFamily,
+      fontSize: fontSize
+    );
+  }
+
+  ui.ParagraphStyle get paragraphStyle {
+    return new ui.ParagraphStyle(
+      // TODO(abarth): Restore once the analyzer can see the new dart:ui interface.
+      // textAlign: textAlign,
+      textBaseline: textBaseline,
+      lineHeight: height
+    );
+  }
 
   /// Program this text style into the engine
   ///

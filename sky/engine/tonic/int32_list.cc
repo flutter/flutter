@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 #include "sky/engine/tonic/dart_error.h"
-#include "sky/engine/tonic/uint8_list.h"
+#include "sky/engine/tonic/int32_list.h"
 
 namespace blink {
 
-Uint8List::Uint8List(Dart_Handle list)
+Int32List::Int32List(Dart_Handle list)
     : data_(nullptr), num_elements_(0), dart_handle_(list) {
   if (Dart_IsNull(list))
     return;
@@ -16,10 +16,10 @@ Uint8List::Uint8List(Dart_Handle list)
   Dart_TypedDataAcquireData(
       list, &type, reinterpret_cast<void**>(&data_), &num_elements_);
   DCHECK(!LogIfError(list));
-  ASSERT(type == Dart_TypedData_kUint8);
+  ASSERT(type == Dart_TypedData_kInt32);
 }
 
-Uint8List::Uint8List(Uint8List&& other)
+Int32List::Int32List(Int32List&& other)
     : data_(other.data_),
       num_elements_(other.num_elements_),
       dart_handle_(other.dart_handle_) {
@@ -27,24 +27,31 @@ Uint8List::Uint8List(Uint8List&& other)
   other.dart_handle_ = nullptr;
 }
 
-Uint8List::~Uint8List() {
-  if (data_)
-    Dart_TypedDataReleaseData(dart_handle_);
+Int32List::~Int32List() {
+  Release();
 }
 
-Uint8List DartConverter<Uint8List>::FromArgumentsWithNullCheck(
+void Int32List::Release() {
+  if (data_) {
+    Dart_TypedDataReleaseData(dart_handle_);
+    data_ = nullptr;
+  }
+}
+
+
+Int32List DartConverter<Int32List>::FromArgumentsWithNullCheck(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {
   Dart_Handle list = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(list));
 
-  Uint8List result(list);
+  Int32List result(list);
   return result;
 }
 
-void DartConverter<Uint8List>::SetReturnValue(Dart_NativeArguments args,
-                                              Uint8List val) {
+void DartConverter<Int32List>::SetReturnValue(Dart_NativeArguments args,
+                                              Int32List val) {
   Dart_SetReturnValue(args, val.dart_handle());
 }
 
