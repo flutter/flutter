@@ -112,7 +112,7 @@ class TapGesture extends TapTracker {
   }
 
   void cancel() {
-    // If we won the arena already, then _entry is resolved, so resolving
+    // If we won the arena already, then entry is resolved, so resolving
     // again is a no-op. But we still need to clean up our own state.
     if (_wonArena)
       reject();
@@ -138,6 +138,7 @@ class TapGestureRecognizer extends DisposableArenaMember {
   Map<int, TapGesture> _gestureMap = new Map<int, TapGesture>();
 
   void addPointer(PointerInputEvent event) {
+    assert(!_gestureMap.containsKey(event.pointer));
     _gestureMap[event.pointer] = new TapGesture(
       gestureRecognizer: this,
       event: event
@@ -147,10 +148,12 @@ class TapGestureRecognizer extends DisposableArenaMember {
   }
 
   void acceptGesture(int pointer) {
+    assert(_gestureMap.containsKey(pointer));
     _gestureMap[pointer]?.accept();
   }
 
   void rejectGesture(int pointer) {
+    assert(_gestureMap.containsKey(pointer));
     _gestureMap[pointer]?.reject();
   }
 
