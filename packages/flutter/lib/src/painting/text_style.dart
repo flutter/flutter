@@ -166,8 +166,7 @@ class TextStyle {
 
   ui.ParagraphStyle get paragraphStyle {
     return new ui.ParagraphStyle(
-      // TODO(abarth): Restore once the analyzer can see the new dart:ui interface.
-      // textAlign: textAlign,
+      textAlign: textAlign,
       textBaseline: textBaseline,
       lineHeight: height
     );
