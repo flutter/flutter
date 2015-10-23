@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 
 import 'shell.dart';
@@ -32,6 +34,8 @@ class Keyboard {
 
   KeyboardHandle _currentHandle;
 
+  bool _hidePending = false;
+
   KeyboardHandle show(KeyboardClientStub stub, KeyboardType keyboardType) {
     assert(stub != null);
     if (_currentHandle != null) {
@@ -41,6 +45,20 @@ class Keyboard {
     }
     _currentHandle = new KeyboardHandle._show(this, stub, keyboardType);
     return _currentHandle;
+  }
+
+  void _scheduleHide() {
+    if (_hidePending) return;
+    _hidePending = true;
+
+    // Schedule a deferred task that hides the keyboard.  If someone else shows
+    // the keyboard during this update cycle, then the task will do nothing.
+    scheduleMicrotask(() {
+      _hidePending = false;
+      if (_currentHandle == null) {
+        service.hide();
+      }
+    });
   }
 
 }
@@ -70,9 +88,9 @@ class KeyboardHandle {
   void release() {
     if (_attached) {
       assert(_keyboard._currentHandle == this);
-      _keyboard.service.hide();
       _attached = false;
       _keyboard._currentHandle = null;
+      _keyboard._scheduleHide();
     }
     assert(_keyboard._currentHandle != this);
   }
