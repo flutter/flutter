@@ -260,12 +260,14 @@ class Node {
 
   void teleportPosition(Point position) {
     assert(position != null);
+    PhysicsWorld world = _physicsWorld(parent);
+
     if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
       position = _positionToPhysics(position, parent);
       _physicsBody._body.setTransform(
         new Vector2(
-          position.x / physicsNode.b2WorldToNodeConversionFactor,
-          position.y / physicsNode.b2WorldToNodeConversionFactor
+          position.x / world.b2WorldToNodeConversionFactor,
+          position.y / world.b2WorldToNodeConversionFactor
         ),
         _physicsBody._body.getAngle()
       );
