@@ -134,8 +134,11 @@ Int32List _encodeTextStyle(Color color,
   }
   if (decoration != null) {
     result[0] |= 1 << 2;
-    for (TextDecoration value in decoration)
-      result[2] |= 1 << value.index;
+    for (TextDecoration value in decoration) {
+      int shift = value.index - 1;
+      if (shift != 0)
+        result[2] |= 1 << shift;
+    }
   }
   if (decorationColor != null) {
     result[0] |= 1 << 3;
