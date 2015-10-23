@@ -702,6 +702,13 @@ class AndroidDevice extends Device {
     return CryptoUtils.bytesToHex(sha1.close());
   }
 
+  /**
+   * Since Window's paths have backslashes, we need to convert those to forward slashes to make a valid URL
+   */
+  String _convertToURL(String path) {
+    return path.replaceAll('\\', '/');
+  }
+
   @override
   bool isAppInstalled(ApplicationPackage app) {
     if (!isConnected()) {
@@ -775,7 +782,7 @@ class AndroidDevice extends Device {
       runCheckedSync([adbPath, 'reverse', serverPortString, serverPortString]);
     }
 
-    String relativeDartMain = path.relative(mainDart, from: serverRoot);
+    String relativeDartMain = _convertToURL(path.relative(mainDart, from: serverRoot));
     String url = 'http://localhost:$_serverPort/$relativeDartMain';
     if (poke) {
       url += '?rand=${new Random().nextDouble()}';
@@ -837,7 +844,7 @@ class AndroidDevice extends Device {
 
       //Split the columns by 1 or more spaces
       RegExp columnPattern = new RegExp('[ ]+');
-      processes.forEach((String process){
+      processes.forEach((String process) {
         if (process.contains(pattern)) {
           //The last column is the Process ID
           String processId = process.split(columnPattern).last;
