@@ -37,16 +37,18 @@ class Input extends Scrollable {
   final StringValueChanged onChanged;
   final StringValueSubmitted onSubmitted;
 
-  _InputState createState() => new _InputState();
+  InputState createState() => new InputState();
 }
 
-class _InputState extends ScrollableState<Input> {
+class InputState extends ScrollableState<Input> {
   String _value;
   EditableString _editableValue;
   KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
 
   double _contentWidth = 0.0;
   double _containerWidth = 0.0;
+
+  EditableString get editableValue => _editableValue;
 
   void initState() {
     super.initState();
