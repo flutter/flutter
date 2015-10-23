@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 import 'package:flutter/painting.dart';
@@ -112,8 +113,9 @@ class EditableString implements KeyboardClient {
     _delete(afterRange);
     _delete(beforeRange);
     selection = new TextRange(
-        start: selection.start - beforeLength,
-        end: selection.end - beforeLength);
+      start: math.max(selection.start - beforeLength, 0),
+      end: math.max(selection.end - beforeLength, 0)
+    );
     onUpdated();
   }
 
