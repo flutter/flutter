@@ -12,7 +12,11 @@ import 'pointer_router.dart';
 
 export 'pointer_router.dart' show PointerRouter;
 
-abstract class GestureRecognizer extends GestureArenaMember {
+abstract class DisposableArenaMember extends GestureArenaMember {
+    void dispose();
+}
+
+abstract class GestureRecognizer extends DisposableArenaMember {
   GestureRecognizer({ PointerRouter router }) : _router = router {
     assert(_router != null);
   }
@@ -102,10 +106,12 @@ abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
       // TODO(abarth): Maybe factor the slop handling out into a separate class?
-      if (event.type == 'pointermove' && _getDistance(event) > kTouchSlop)
+      if (event.type == 'pointermove' && _getDistance(event) > kTouchSlop) {
         resolve(GestureDisposition.rejected);
-      else
+        stopTrackingPointer(event.pointer);
+      } else {
         handlePrimaryPointer(event);
+      }
     }
     stopTrackingIfPointerNoLongerDown(event);
   }
