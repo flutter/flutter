@@ -2,21 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
-
-AssetBundle _initIconBundle() {
-  if (rootBundle != null)
-    return rootBundle;
-  const String _kAssetBase = '/packages/material_design_icons/icons/';
-  return new NetworkAssetBundle(Uri.base.resolve(_kAssetBase));
-}
-
-final AssetBundle _iconBundle = _initIconBundle();
 
 class Icon extends StatelessComponent {
   Icon({
@@ -66,7 +56,6 @@ class Icon extends StatelessComponent {
     String density = 'drawable-xxhdpi';
     String colorSuffix = _getColorSuffix(context);
     return new AssetImage(
-      bundle: _iconBundle,
       name: '$category/$density/ic_${subtype}_${colorSuffix}_${size}dp.png',
       width: size.toDouble(),
       height: size.toDouble(),

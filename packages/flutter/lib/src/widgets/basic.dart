@@ -1017,6 +1017,26 @@ class NetworkImage extends StatelessComponent {
   }
 }
 
+class DefaultAssetBundle extends InheritedWidget {
+  DefaultAssetBundle({
+    Key key,
+    this.bundle,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(bundle != null);
+    assert(child != null);
+  }
+
+  final AssetBundle bundle;
+
+  static AssetBundle of(BuildContext context) {
+    DefaultAssetBundle result = context.inheritedWidgetOfType(DefaultAssetBundle);
+    return result?.bundle;
+  }
+
+  bool updateShouldNotify(DefaultAssetBundle old) => bundle != old.bundle;
+}
+
 class AssetImage extends StatelessComponent {
   AssetImage({
     Key key,
@@ -1041,7 +1061,7 @@ class AssetImage extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new ImageListener(
-      image: bundle.loadImage(name),
+      image: (bundle ?? DefaultAssetBundle.of(context)).loadImage(name),
       width: width,
       height: height,
       colorFilter: colorFilter,
