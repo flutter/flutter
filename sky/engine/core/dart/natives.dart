@@ -53,3 +53,10 @@ _getPrintClosure() => _print;
 _getScheduleMicrotaskClosure() => _scheduleMicrotask;
 _getGetBaseURLClosure() =>_getBaseURL;
 _getCreateTimerClosure() => _createTimer;
+
+// Though the "main" symbol is not included in any of the libraries imported
+// above, the builtin library will be included manually during VM setup. This
+// symbol is only necessary for precompilation. It is marked as a stanalone
+// entry point into the VM. This prevents the precompiler from tree shaking
+// away "main"
+_getMainClosure() => main;

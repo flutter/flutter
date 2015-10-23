@@ -95,6 +95,7 @@ template("sky_app") {
   } else if (is_ios && defined(invoker.info_plist)) {
     import("//build/config/ios/rules.gni")
     import("//build/config/ios/ios_sdk.gni")
+    import("//sky/engine/bindings/bindings.gni")
 
     ios_app(target_name) {
       app_name = target_name + "_app"
@@ -124,10 +125,17 @@ template("sky_app") {
         deps = [ ":app" ]
       }
 
+      precompiled_gen_target = target_name + "_precompiled"
+      dart_precompile(precompiled_gen_target) {
+        dart_package_root = rebase_path("packages", root_build_dir)
+        dart_script = invoker.main_dart
+      }
+
       deps = [
         "//sky/shell:ios_scaffolding",
         ":$resources_gen_target_name",
         ":$flx_target_name",
+        ":$precompiled_gen_target",
       ]
 
       if (defined(invoker.deps)) {

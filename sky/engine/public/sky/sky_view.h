@@ -42,6 +42,7 @@ class SkyView {
 
   void RunFromLibrary(const WebString& name,
                       DartLibraryProvider* library_provider);
+  void RunFromPrecompiledSnapshot();
   void RunFromSnapshot(const WebString& name,
                        mojo::ScopedDataPipeConsumerHandle snapshot);
 

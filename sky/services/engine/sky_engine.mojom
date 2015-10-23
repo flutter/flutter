@@ -27,6 +27,7 @@ interface SkyEngine {
 
   RunFromNetwork(string url);
   RunFromFile(string main, string package_root);
+  RunFromPrecompiledSnapshot();
   RunFromSnapshot(string path);
   RunFromBundle(string path);
 };

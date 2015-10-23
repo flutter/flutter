@@ -48,6 +48,7 @@ def to_gn_args(args):
         if args.simulator:
             gn_args['use_libjpeg_turbo'] = False
         gn_args['use_ios_simulator'] = args.simulator
+        gn_args['dart_target_arch'] = "arm64"
     else:
         gn_args['use_aura'] = False
         gn_args['use_glib'] = False

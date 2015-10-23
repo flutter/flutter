@@ -118,9 +118,11 @@ static void InitDartInternal(Dart_Handle builtin_library,
   } else {
     CHECK(isolate_type == DartNatives::DartIOIsolate);
     Dart_Handle io_lib = DartBuiltin::LookupLibrary("dart:io");
+    DART_CHECK_VALID(io_lib);
     Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
     DART_CHECK_VALID(Dart_Invoke(io_lib, setup_hooks, 0, NULL));
     Dart_Handle isolate_lib = DartBuiltin::LookupLibrary("dart:isolate");
+    DART_CHECK_VALID(isolate_lib);
     DART_CHECK_VALID(Dart_Invoke(isolate_lib, setup_hooks, 0, NULL));
   }
 }

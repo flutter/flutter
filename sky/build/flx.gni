@@ -36,6 +36,11 @@ template("flx") {
       "--output-file", rebase_path(bundle, root_build_dir),
     ]
 
+    if(is_ios) {
+      # This makes the tools bypass the script snapshot compiler
+      args += [ "--precompiled" ]
+    }
+
     if (defined(invoker.manifest)) {
       inputs += [ invoker.manifest ]
       args += [

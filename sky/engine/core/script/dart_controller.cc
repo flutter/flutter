@@ -95,9 +95,12 @@ void DartController::DidLoadSnapshot() {
   DartApiScope dart_api_scope;
 
   Dart_Handle library = Dart_RootLibrary();
-  if (LogIfError(library))
-    return;
+  DART_CHECK_VALID(library);
   DartInvokeAppField(library, ToDart("main"), 0, nullptr);
+}
+
+void DartController::RunFromPrecompiledSnapshot() {
+  DidLoadSnapshot();
 }
 
 void DartController::RunFromSnapshot(

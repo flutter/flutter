@@ -48,3 +48,118 @@ idl_compiler_files = [
   "scripts/v8_types.py",
   "scripts/v8_utilities.py",
 ]
+
+template("dart_precompile") {
+  assert(defined(invoker.dart_package_root),
+         "The dart package root must be defined")
+  assert(defined(invoker.dart_script),
+         "The dart script must be specified")
+
+  vm_isolate_snapshot_name = target_name + "_vm_isolate.bin"
+  vm_isolate_snapshot = "$target_gen_dir/$vm_isolate_snapshot_name"
+  isolate_snapshot_name = target_name + "_isolate.bin"
+  isolate_snapshot = "$target_gen_dir/$isolate_snapshot_name"
+  
+  assembly_path =
+      "$target_gen_dir/" + target_name + "_instructions.S"
+  instructions_gen_target_name = target_name + "_instructions"
+  action(instructions_gen_target_name) {
+    deps = [
+      "//dart/runtime/bin:gen_snapshot($host_toolchain)",
+    ]
+    embedder_entry_points_manifest =
+        "//sky/engine/bindings/dart_vm_entry_points.txt"
+    inputs = [
+      "//dart/runtime/tools/create_snapshot_bin.py",
+      "//mojo/public/dart/mojo/sdk_ext/internal.dart",
+      "//mojo/public/dart/mojo/sdk_ext/src/handle_watcher.dart",
+      "//mojo/public/dart/mojo/sdk_ext/src/natives.dart",
+      "//mojo/public/dart/mojo/sdk_ext/src/timer_queue.dart",
+      "//sky/engine/bindings/internals.dart",
+      embedder_entry_points_manifest,
+    ]
+    outputs = [
+      vm_isolate_snapshot,
+      isolate_snapshot,
+      assembly_path
+    ]
+
+    dart_mojo_internal_path =
+        rebase_path("//mojo/public/dart/mojo/sdk_ext/internal.dart")
+    dart_ui_internals_path =
+        rebase_path("//sky/engine/bindings/internals.dart")
+    dart_ui_path =
+        rebase_path("$root_build_dir/clang_x64/gen/sky/bindings/dart_ui.dart")
+
+    gen_snapshot_dir =
+        get_label_info("//dart/runtime/bin:gen_snapshot($host_toolchain)",
+                       "root_out_dir")
+    script = "//dart/runtime/tools/create_snapshot_bin.py"
+
+    args = [
+      "--executable",
+      rebase_path("$gen_snapshot_dir/gen_snapshot"),
+      "--package_root",
+      rebase_path(invoker.dart_package_root, root_build_dir),
+      "--script",
+      rebase_path(invoker.dart_script, root_build_dir),
+      "--vm_output_bin",
+      rebase_path(vm_isolate_snapshot, root_build_dir),
+      "--output_bin",
+      rebase_path(isolate_snapshot, root_build_dir),
+      "--instructions_bin",
+      rebase_path(assembly_path, root_build_dir),
+      "--embedder_entry_points_manifest",
+      rebase_path(embedder_entry_points_manifest, root_build_dir),
+      "--target_os",
+      target_os,
+      "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
+      "--url_mapping=dart:ui,$dart_ui_path",
+      "--url_mapping=dart:ui_internals,$dart_ui_internals_path",
+    ]
+  }
+
+  snapshot_cc = "$target_gen_dir/" + target_name + "_precompiled_snapshot.cc"
+  snapshot_cc_gen_target_name = target_name + "_snapshot_cc"
+  action(snapshot_cc_gen_target_name) {
+    deps = [
+      ":$instructions_gen_target_name",
+    ]
+
+    template_file = "//sky/engine/bindings/snapshot.cc.tmpl"
+
+    inputs = [
+      template_file,
+      vm_isolate_snapshot,
+      isolate_snapshot,
+    ]
+
+    outputs = [
+      snapshot_cc,
+    ]
+
+    script = "//dart/runtime/tools/create_snapshot_file.py"
+    args = [
+      "--vm_input_bin",
+      rebase_path(vm_isolate_snapshot, root_build_dir),
+      "--input_bin",
+      rebase_path(isolate_snapshot, root_build_dir),
+      "--input_cc",
+      rebase_path(template_file, root_build_dir),
+      "--output",
+      rebase_path(snapshot_cc),
+    ]
+  }
+
+  source_set(target_name) {
+    sources = [
+      assembly_path,
+      snapshot_cc,
+    ]
+
+    deps = [
+      ":$instructions_gen_target_name",
+      ":$snapshot_cc_gen_target_name",
+    ]
+  }
+}
