@@ -10,6 +10,7 @@ import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+import 'package:crypto/crypto.dart';
 
 import 'application_package.dart';
 import 'build_configuration.dart';
@@ -695,9 +696,10 @@ class AndroidDevice extends Device {
   }
 
   String _getSourceSha1(ApplicationPackage app) {
-    String sha1 =
-        runCheckedSync(['shasum', '-a', '1', '-p', app.localPath]).split(' ')[0];
-    return sha1;
+    var sha1 = new SHA1();
+    var file = new File(app.localPath);
+    sha1.add(file.readAsBytesSync());
+    return CryptoUtils.bytesToHex(sha1.close());
   }
 
   @override
