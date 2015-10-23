@@ -11,7 +11,6 @@ import 'recognizer.dart';
 import 'tap.dart';
 
 class DoubleTapGestureRecognizer extends DisposableArenaMember {
-  static int sInstances = 0;
 
   DoubleTapGestureRecognizer({ this.router, this.onDoubleTap });
 
@@ -133,12 +132,13 @@ class DoubleTapGestureRecognizer extends DisposableArenaMember {
     tracker.entry.resolve(GestureDisposition.accepted);
     _freezeTracker(tracker);
     _trackers.remove(tracker.pointer);
-    onDoubleTap?.call();
+    if (onDoubleTap != null)
+      onDoubleTap();
     _reset();
   }
 
   void _clearTrackers() {
-    List<TapTracker> localTrackers = new List.from(_trackers.values);
+    List<TapTracker> localTrackers = new List<TapTracker>.from(_trackers.values);
     for (TapTracker tracker in localTrackers)
       _reject(tracker);
     assert(_trackers.isEmpty);
