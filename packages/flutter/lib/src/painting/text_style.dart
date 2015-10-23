@@ -119,38 +119,6 @@ class TextStyle {
     );
   }
 
-  static String _colorToCSSString(Color color) {
-    return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
-  }
-
-  static String _fontFamilyToCSSString(String fontFamily) {
-    // TODO(hansmuller): escape the fontFamily string.
-    return fontFamily;
-  }
-
-  static String _decorationToCSSString(List<TextDecoration> decoration) {
-    assert(decoration != null);
-    const toCSS = const <TextDecoration, String>{
-      TextDecoration.none: 'none',
-      TextDecoration.underline: 'underline',
-      TextDecoration.overline: 'overline',
-      TextDecoration.lineThrough: 'line-through'
-    };
-    return decoration.map((TextDecoration d) => toCSS[d]).join(' ');
-  }
-
-  static String _decorationStyleToCSSString(TextDecorationStyle decorationStyle) {
-    assert(decorationStyle != null);
-    const toCSS = const <TextDecorationStyle, String>{
-      TextDecorationStyle.solid: 'solid',
-      TextDecorationStyle.double: 'double',
-      TextDecorationStyle.dotted: 'dotted',
-      TextDecorationStyle.dashed: 'dashed',
-      TextDecorationStyle.wavy: 'wavy'
-    };
-    return toCSS[decorationStyle];
-  }
-
   ui.TextStyle get textStyle {
     return new ui.TextStyle(
       color: color,
@@ -170,65 +138,6 @@ class TextStyle {
       textBaseline: textBaseline,
       lineHeight: height
     );
-  }
-
-  /// Program this text style into the engine
-  ///
-  /// Note: This function will likely be removed when we refactor the interface
-  /// between the framework and the engine
-  void applyToCSSStyle(ui.CSSStyleDeclaration cssStyle) {
-    if (color != null) {
-      cssStyle['color'] = _colorToCSSString(color);
-    }
-    if (fontFamily != null) {
-      cssStyle['font-family'] = _fontFamilyToCSSString(fontFamily);
-    }
-    if (fontSize != null) {
-      cssStyle['font-size'] = '${fontSize}px';
-    }
-    if (fontWeight != null) {
-      cssStyle['font-weight'] = const {
-        FontWeight.w100: '100',
-        FontWeight.w200: '200',
-        FontWeight.w300: '300',
-        FontWeight.w400: '400',
-        FontWeight.w500: '500',
-        FontWeight.w600: '600',
-        FontWeight.w700: '700',
-        FontWeight.w800: '800',
-        FontWeight.w900: '900'
-      }[fontWeight];
-    }
-    if (fontStyle != null) {
-      cssStyle['font-style'] = const {
-        FontStyle.normal: 'normal',
-        FontStyle.italic: 'italic',
-      }[fontStyle];
-    }
-    if (decoration != null) {
-      cssStyle['text-decoration'] = _decorationToCSSString(decoration);
-      if (decorationColor != null)
-        cssStyle['text-decoration-color'] = _colorToCSSString(decorationColor);
-      if (decorationStyle != null)
-        cssStyle['text-decoration-style'] = _decorationStyleToCSSString(decorationStyle);
-    }
-  }
-
-  /// Program the container aspects of this text style into the engine
-  ///
-  /// Note: This function will likely be removed when we refactor the interface
-  /// between the framework and the engine
-  void applyToContainerCSSStyle(ui.CSSStyleDeclaration cssStyle) {
-    if (textAlign != null) {
-      cssStyle['text-align'] = const {
-        TextAlign.left: 'left',
-        TextAlign.right: 'right',
-        TextAlign.center: 'center',
-      }[textAlign];
-    }
-    if (height != null) {
-      cssStyle['line-height'] = '$height';
-    }
   }
 
   bool operator ==(dynamic other) {
