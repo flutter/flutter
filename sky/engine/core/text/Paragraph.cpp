@@ -6,6 +6,7 @@
 
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 
 namespace blink {
@@ -51,6 +52,8 @@ double Paragraph::ideographicBaseline()
 
 void Paragraph::layout()
 {
+    FontCachePurgePreventer fontCachePurgePreventer;
+
     LayoutUnit maxWidth = std::max(m_minWidth, m_maxWidth);
     LayoutUnit maxHeight = std::max(m_minHeight, m_maxHeight);
     m_renderView->setFrameViewSize(IntSize(maxWidth, maxHeight));
@@ -59,6 +62,8 @@ void Paragraph::layout()
 
 void Paragraph::paint(Canvas* canvas, const Offset& offset)
 {
+    FontCachePurgePreventer fontCachePurgePreventer;
+
     // Very simplified painting to allow painting an arbitrary (layer-less) subtree.
     RenderBox* box = firstChildBox();
     GraphicsContext context(canvas->skCanvas());
