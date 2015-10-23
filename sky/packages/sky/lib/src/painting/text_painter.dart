@@ -119,7 +119,7 @@ class StyledTextSpan extends TextSpan {
   }
 }
 
-const bool _kEnableNewTextPainter = false;
+const bool _kEnableNewTextPainter = true;
 
 abstract class TextPainter {
 
