@@ -19,6 +19,15 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationStyle: TextDecorationStyle.double
 );
 
+AssetBundle _initDefaultBundle() {
+  if (rootBundle != null)
+    return rootBundle;
+  const String _kAssetBase = '/packages/material_design_icons/icons/';
+  return new NetworkAssetBundle(Uri.base.resolve(_kAssetBase));
+}
+
+final AssetBundle _defaultBundle = _initDefaultBundle();
+
 class MaterialApp extends StatefulComponent {
   MaterialApp({
     Key key,
@@ -68,12 +77,15 @@ class _MaterialAppState extends State<MaterialApp> {
       data: config.theme ?? new ThemeData.fallback(),
       child: new DefaultTextStyle(
         style: _errorTextStyle,
-        child: new Title(
-          title: config.title,
-          child: new Navigator(
-            key: _navigator,
-            routes: config.routes,
-            onGenerateRoute: config.onGenerateRoute
+        child: new DefaultAssetBundle(
+          bundle: _defaultBundle,
+          child: new Title(
+            title: config.title,
+            child: new Navigator(
+              key: _navigator,
+              routes: config.routes,
+              onGenerateRoute: config.onGenerateRoute
+            )
           )
         )
       )
