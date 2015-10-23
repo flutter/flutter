@@ -4,9 +4,10 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
+#include "sky/engine/core/css/FontSize.h"
+#include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderText.h"
-#include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
@@ -41,7 +42,7 @@ const int kTextDecorationStyleIndex = 4;
 const int kFontWeightIndex = 5;
 const int kFontStyleIndex = 6;
 const int kFontFamilyIndex = 7;
-const int kFontDescriptionIndex = 8;
+const int kFontSizeIndex = 8;
 
 const int kColorMask = 1 << kColorIndex;
 const int kTextDecorationMask = 1 << kTextDecorationIndex;
@@ -50,7 +51,7 @@ const int kTextDecorationStyleMask = 1 << kTextDecorationStyleIndex;
 const int kFontWeightMask = 1 << kFontWeightIndex;
 const int kFontStyleMask = 1 << kFontStyleIndex;
 const int kFontFamilyMask = 1 << kFontFamilyIndex;
-const int kFontDescriptionMask = 1 << kFontDescriptionIndex;
+const int kFontSizeMask = 1 << kFontSizeIndex;
 
 // ParagraphStyle
 
@@ -88,8 +89,10 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, d
     if (mask & kColorMask)
       style->setColor(getColorFromARGB(encoded[kColorIndex]));
 
-    if (mask & kTextDecorationMask)
+    if (mask & kTextDecorationMask) {
       style->setTextDecoration(static_cast<TextDecoration>(encoded[kTextDecorationIndex]));
+      style->applyTextDecorations();
+    }
 
     if (mask & kTextDecorationColorMask)
       style->setTextDecorationColor(StyleColor(getColorFromARGB(encoded[kTextDecorationColorIndex])));
@@ -97,7 +100,7 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, d
     if (mask & kTextDecorationStyleMask)
       style->setTextDecorationStyle(static_cast<TextDecorationStyle>(encoded[kTextDecorationStyleIndex]));
 
-    if (mask & (kFontWeightMask | kFontStyleMask | kFontFamilyMask | kFontDescriptionMask)) {
+    if (mask & (kFontWeightMask | kFontStyleMask | kFontFamilyMask | kFontSizeMask)) {
       FontDescription fontDescription = style->fontDescription();
 
       if (mask & kFontWeightMask)
@@ -112,8 +115,11 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, d
         fontDescription.setFamily(family);
       }
 
-      if (mask & kFontDescriptionMask)
+      if (mask & kFontSizeMask)  {
         fontDescription.setSpecifiedSize(fontSize);
+        fontDescription.setIsAbsoluteSize(true);
+        fontDescription.setComputedSize(FontSize::getComputedSizeFromSpecifiedSize(true, fontSize));
+      }
 
       style->setFontDescription(fontDescription);
       style->font().update(m_fontSelector);
