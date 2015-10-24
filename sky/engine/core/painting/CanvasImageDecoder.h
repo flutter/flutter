@@ -3,17 +3,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_LOADER_CANVASIMAGELOADER_H_
-#define SKY_ENGINE_CORE_LOADER_CANVASIMAGELOADER_H_
+#ifndef SKY_ENGINE_CORE_PAINTING_CANVASIMAGELOADER_H_
+#define SKY_ENGINE_CORE_PAINTING_CANVASIMAGELOADER_H_
 
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/system/core.h"
-#include "sky/engine/core/loader/ImageDecoderCallback.h"
+#include "sky/engine/core/painting/ImageDecoderCallback.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/uint8_list.h"
 #include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 
@@ -40,4 +39,4 @@ class CanvasImageDecoder : public RefCounted<CanvasImageDecoder>,
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_CORE_LOADER_CANVASIMAGELOADER_H_
+#endif  // SKY_ENGINE_CORE_PAINTING_CANVASIMAGELOADER_H_

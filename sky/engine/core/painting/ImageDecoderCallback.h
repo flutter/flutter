@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_LOADER_IMAGELOADERCALLBACK_H_
-#define SKY_ENGINE_CORE_LOADER_IMAGELOADERCALLBACK_H_
+#ifndef SKY_ENGINE_CORE_PAINTING_IMAGELOADERCALLBACK_H_
+#define SKY_ENGINE_CORE_PAINTING_IMAGELOADERCALLBACK_H_
 
 #include "sky/engine/core/painting/CanvasImage.h"
 
@@ -17,4 +17,4 @@ public:
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_LOADER_IMAGELOADERCALLBACK_H_
+#endif  // SKY_ENGINE_CORE_PAINTING_IMAGELOADERCALLBACK_H_

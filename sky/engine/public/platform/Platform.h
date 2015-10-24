@@ -47,14 +47,11 @@ class SingleThreadTaskRunner;
 namespace blink {
 
 class WebBlobRegistry;
-class WebClipboard;
 class WebDiscardableMemory;
 class WebFallbackThemeEngine;
 class WebGraphicsContext3DProvider;
 class WebSandboxSupport;
 struct WebFloatPoint;
-class WebURL;
-class WebUnitTestSupport;
 struct WebLocalizedString;
 struct WebSize;
 
@@ -67,9 +64,6 @@ public:
     BLINK_PLATFORM_EXPORT static void shutdown();
     BLINK_PLATFORM_EXPORT static Platform* current();
 
-    // Must return non-null.
-    virtual WebClipboard* clipboard() { return 0; }
-
     // May return null if sandbox support is not necessary
     virtual WebSandboxSupport* sandboxSupport() { return 0; }
 
@@ -78,16 +72,6 @@ public:
 
     // Must return non-null.
     virtual WebBlobRegistry* blobRegistry() { return 0; }
-
-    // Keygen --------------------------------------------------------------
-
-    // Handle the <keygen> tag for generating client certificates
-    // Returns a base64 encoded signed copy of a public key from a newly
-    // generated key pair and the supplied challenge string. keySizeindex
-    // specifies the strength of the key.
-    virtual WebString signedPublicKeyAndChallengeString(unsigned keySizeIndex,
-                                                        const WebString& challenge,
-                                                        const WebURL& url) { return WebString(); }
 
 
     // Memory --------------------------------------------------------------
@@ -181,12 +165,6 @@ public:
 
     // Cancels the current vibration, if there is one.
     virtual void cancelVibration() { }
-
-
-    // Testing -------------------------------------------------------------
-
-    // Get a pointer to testing support interfaces. Will not be available in production builds.
-    virtual WebUnitTestSupport* unitTestSupport() { return 0; }
 
 
     // Tracing -------------------------------------------------------------

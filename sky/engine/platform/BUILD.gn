@@ -166,7 +166,6 @@ source_set("platform") {
     "exported/WebData.cpp",
     "exported/WebImageSkia.cpp",
     "exported/WebString.cpp",
-    "exported/WebURL.cpp",
     "exported/linux/WebFontInfo.cpp",
     "exported/linux/WebFontRenderStyle.cpp",
     "fonts/AlternateFontFamily.h",
@@ -499,15 +498,6 @@ source_set("platform") {
     "transforms/TransformationMatrix.h",
     "transforms/TranslateTransformOperation.cpp",
     "transforms/TranslateTransformOperation.h",
-    "weborigin/KURL.cpp",
-    "weborigin/KURL.h",
-    "weborigin/KURLHash.h",
-    "weborigin/KnownPorts.cpp",
-    "weborigin/KnownPorts.h",
-    "weborigin/Referrer.h",
-    "weborigin/ReferrerPolicy.h",
-    "weborigin/SecurityPolicy.cpp",
-    "weborigin/SecurityPolicy.h",
   ]
 
   if (!is_mac) {
@@ -623,8 +613,6 @@ test("platform_unittests") {
     "text/UnicodeUtilitiesTest.cpp",
     "transforms/TransformOperationsTest.cpp",
     "transforms/TransformationMatrixTest.cpp",
-    "weborigin/KURLTest.cpp",
-    "weborigin/SecurityPolicyTest.cpp",
   ]
 
   configs += [ "//sky/engine:config" ]

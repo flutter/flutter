@@ -5,10 +5,8 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_CANVASIMAGE_H_
 #define SKY_ENGINE_CORE_PAINTING_CANVASIMAGE_H_
 
-#include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/text/AtomicString.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace blink {

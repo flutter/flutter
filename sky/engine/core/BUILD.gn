@@ -97,21 +97,6 @@ static_library("core") {
   ]
 }
 
-source_set("testing") {
-  deps = [
-    ":core",
-    ":core_generated",
-    ":prerequisites",
-    "//sky/engine/platform",
-    "//sky/engine/wtf",
-  ]
-
-  sources = [
-    "testing/URLTestHelpers.cpp",
-    "testing/URLTestHelpers.h",
-  ]
-}
-
 source_set("core_generated") {
   configs += [ "..:inside_blink" ]
 

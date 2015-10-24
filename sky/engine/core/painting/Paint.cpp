@@ -13,7 +13,6 @@
 #include "sky/engine/core/painting/Shader.h"
 #include "sky/engine/core/painting/TransferMode.h"
 #include "sky/engine/core/script/dom_dart_state.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"

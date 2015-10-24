@@ -13,7 +13,7 @@
 #include "mojo/services/network/interfaces/url_loader.mojom.h"
 #include "sky/compositor/layer_tree.h"
 #include "sky/engine/public/platform/WebCommon.h"
-#include "sky/engine/public/platform/WebURL.h"
+#include "sky/engine/public/platform/WebString.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/RefPtr.h"

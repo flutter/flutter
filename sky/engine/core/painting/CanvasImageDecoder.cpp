@@ -5,7 +5,7 @@
 #include "base/bind.h"
 #include "base/trace_event/trace_event.h"
 #include "base/message_loop/message_loop.h"
-#include "sky/engine/core/loader/CanvasImageDecoder.h"
+#include "sky/engine/core/painting/CanvasImageDecoder.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/image-decoders/ImageDecoder.h"

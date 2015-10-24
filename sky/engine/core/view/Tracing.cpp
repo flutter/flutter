@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/frame/Tracing.h"
+#include "sky/engine/core/view/Tracing.h"
 
 #include "base/trace_event/trace_event.h"
 #include "sky/engine/wtf/text/StringUTF8Adaptor.h"

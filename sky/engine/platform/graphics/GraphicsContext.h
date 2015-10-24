@@ -366,7 +366,6 @@ public:
     // ---------- End transformation methods -----------------
 
     // URL drawing
-    void setURLForRect(const KURL&, const IntRect&);
     void setURLFragmentForRect(const String& name, const IntRect&);
     void addURLTargetAtPoint(const String& name, const IntPoint&);
 

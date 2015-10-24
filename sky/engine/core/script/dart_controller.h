@@ -21,7 +21,6 @@ class DOMDartState;
 class DartLibraryProvider;
 class DartSnapshotLoader;
 class DartValue;
-class KURL;
 class View;
 
 class DartController {
