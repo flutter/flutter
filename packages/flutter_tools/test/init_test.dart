@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This test can take a while due to network requests.
-@Timeout(const Duration(minutes: 2))
-library init_test;
-
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -46,6 +42,8 @@ defineTests() {
         print(exec.stderr);
       }
       expect(exec.exitCode, 0);
-    });
+    },
+    // This test can take a while due to network requests.
+    timeout: new Timeout(new Duration(minutes: 2)));
   });
 }
