@@ -4,8 +4,8 @@
 
 #include "sky/engine/core/script/dom_dart_state.h"
 
-#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/tonic/dart_builtin.h"
+#include "sky/engine/tonic/dart_converter.h"
 
 namespace blink {
 

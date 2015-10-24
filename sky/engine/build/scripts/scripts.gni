@@ -23,9 +23,6 @@ scripts_for_in_files = [
   "$_scripts_dir/templates/macros.tmpl",
 ]
 
-css_properties_files =
-    scripts_for_in_files + [ "$_scripts_dir/css_properties.py" ]
-
 make_event_factory_files =
     scripts_for_in_files + [ "$_scripts_dir/make_event_factory.py" ]
 
@@ -34,18 +31,6 @@ make_names_files = scripts_for_in_files + [
                      "$_scripts_dir/templates/MakeNames.cpp.tmpl",
                      "$_scripts_dir/templates/MakeNames.h.tmpl",
                    ]
-
-make_qualified_names_files =
-    scripts_for_in_files + [
-      "$_scripts_dir/make_qualified_names.py",
-      "$_scripts_dir/templates/MakeQualifiedNames.cpp.tmpl",
-      "$_scripts_dir/templates/MakeQualifiedNames.h.tmpl",
-    ]
-
-make_element_factory_files =
-    make_qualified_names_files + [
-      "$_scripts_dir/make_element_factory.py",
-    ]
 
 # The executables are relative to the build directory. Don't rebase it because
 # on Posix we want to run the system one on the path.
@@ -67,7 +52,6 @@ _sky_gen_dir = "$root_gen_dir/sky"
 # on these deps, so for GYP compatibility, all of the below actions should
 # depend on the following deps.
 make_core_generated_deps = [
-  "//sky/engine/core:generated_testing_idls",
   "//sky/engine/core:core_event_interfaces",
 ]
 
@@ -128,33 +112,6 @@ template("process_in_files") {
   }
 }
 
-# Template for scripts using css_properties.py. This is a special case of
-# process_in_files.
-#   outputs: expected results
-template("css_properties") {
-  process_in_files(target_name) {
-    script = invoker.script
-    in_files = [ "css/CSSProperties.in" ]
-    other_inputs = css_properties_files
-    if (defined(invoker.other_inputs)) {
-      other_inputs += invoker.other_inputs
-    }
-    other_args = [
-      "--gperf",
-      gperf_exe,
-    ]
-    outputs = invoker.outputs
-
-    deps = [
-      "//sky/engine/wtf",
-    ]
-
-    if (defined(invoker.deps)) {
-      deps += invoker.deps
-    }
-  }
-}
-
 # Template to run the make_names script. This is a special case of
 # process_in_files.
 #   in_files: files to pass to the script
@@ -164,27 +121,6 @@ template("make_names") {
     script = "//sky/engine/build/scripts/make_names.py"
     in_files = invoker.in_files
     other_inputs = make_names_files
-    outputs = invoker.outputs
-
-    deps = [
-      "//sky/engine/wtf",
-    ]
-
-    if (defined(invoker.deps)) {
-      deps += invoker.deps
-    }
-  }
-}
-
-# Template to run the make_qualified_names script. This is a special case of
-# process_in_files.
-#   in_files: list of ".in" files to process.
-#   outputs: list of output files
-template("make_qualified_names") {
-  process_in_files(target_name) {
-    script = "//sky/engine/build/scripts/make_qualified_names.py"
-    in_files = invoker.in_files
-    other_inputs = make_qualified_names_files
     outputs = invoker.outputs
 
     deps = [

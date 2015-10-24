@@ -27,7 +27,6 @@
 
 #include "sky/engine/core/css/StyleColor.h"
 #include "sky/engine/core/rendering/ClipPathOperation.h"
-#include "sky/engine/core/rendering/style/BasicShapes.h"
 #include "sky/engine/core/rendering/style/CounterDirectives.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
 #include "sky/engine/core/rendering/style/FillLayer.h"

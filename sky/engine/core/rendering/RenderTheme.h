@@ -30,8 +30,6 @@
 
 namespace blink {
 
-class Element;
-
 class RenderTheme : public RefCounted<RenderTheme> {
 protected:
     RenderTheme();
@@ -41,8 +39,6 @@ public:
     // appropriate platform theme.
     static RenderTheme& theme();
 
-    virtual void systemFont(CSSValueID, FontDescription&) const;
-    virtual Color systemColor(CSSValueID) const;
     Color focusRingColor() const;
     virtual double caretBlinkInterval() const { return 0.5; }
 

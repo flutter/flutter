@@ -280,6 +280,17 @@ enum TextIndentType { TextIndentNormal, TextIndentHanging };
 
 enum CSSBoxType { BoxMissing = 0, MarginBox, BorderBox, PaddingBox, ContentBox };
 
+enum LineBoxContainFlags {
+    LineBoxContainNone = 0x0,
+    LineBoxContainBlock = 0x1,
+    LineBoxContainInline = 0x2,
+    LineBoxContainFont = 0x4,
+    LineBoxContainGlyphs = 0x8,
+    LineBoxContainReplaced = 0x10,
+    LineBoxContainInlineBox = 0x20
+};
+typedef unsigned LineBoxContain;
+
 } // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLECONSTANTS_H_

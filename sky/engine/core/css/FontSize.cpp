@@ -28,9 +28,7 @@
 
 #include "sky/engine/core/css/FontSize.h"
 
-#include "gen/sky/core/CSSValueKeywords.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/frame/Settings.h"
+#include <algorithm>
 
 namespace blink {
 
@@ -69,61 +67,7 @@ float FontSize::getComputedSizeFromSpecifiedSize(bool isAbsoluteSize, float spec
 
     // Also clamp to a reasonable maximum to prevent insane font sizes from causing crashes on various
     // platforms (I'm looking at you, Windows.)
-    return std::min(maximumAllowedFontSize, specifiedSize);
-}
-
-const int fontSizeTableMax = 16;
-const int fontSizeTableMin = 9;
-const int totalKeywords = 8;
-
-// Using 14px default to match Material Design English Body1:
-// http://www.google.com/design/spec/style/typography.html#typography-typeface
-const int defaultFontSize = 14;
-const int defaultFixedFontSize = 14;
-
-// Strict mode table matches MacIE and Mozilla's settings exactly.
-static const int strictFontSizeTable[fontSizeTableMax - fontSizeTableMin + 1][totalKeywords] =
-{
-    { 9,    9,     9,     9,    11,    14,    18,    27 },
-    { 9,    9,     9,    10,    12,    15,    20,    30 },
-    { 9,    9,    10,    11,    13,    17,    22,    33 },
-    { 9,    9,    10,    12,    14,    18,    24,    36 },
-    { 9,   10,    12,    13,    16,    20,    26,    39 }, // fixed font default (13)
-    { 9,   10,    12,    14,    17,    21,    28,    42 },
-    { 9,   10,    13,    15,    18,    23,    30,    45 },
-    { 9,   10,    13,    16,    18,    24,    32,    48 } // proportional font default (16)
-};
-// HTML       1      2      3      4      5      6      7
-// CSS  xxs   xs     s      m      l     xl     xxl
-//                          |
-//                      user pref
-
-// For values outside the range of the table, we use Todd Fahrner's suggested scale
-// factors for each keyword value.
-static const float fontSizeFactors[totalKeywords] = { 0.60f, 0.75f, 0.89f, 1.0f, 1.2f, 1.5f, 2.0f, 3.0f };
-
-static int inline rowFromMediumFontSizeInRange(FixedPitchFontType fixedPitchFontType, int& mediumSize)
-{
-    mediumSize = fixedPitchFontType == FixedPitchFont ? defaultFixedFontSize : defaultFontSize;
-    if (mediumSize >= fontSizeTableMin && mediumSize <= fontSizeTableMax)
-        return mediumSize - fontSizeTableMin;
-    return -1;
-}
-
-float FontSize::fontSizeForKeyword(CSSValueID keyword, FixedPitchFontType fixedPitchFontType)
-{
-    ASSERT(keyword >= CSSValueXxSmall && keyword <= CSSValueWebkitXxxLarge);
-
-    int mediumSize = 0;
-    int row = rowFromMediumFontSizeInRange(fixedPitchFontType, mediumSize);
-    if (row >= 0) {
-        int col = (keyword - CSSValueXxSmall);
-        return strictFontSizeTable[row][col];
-    }
-
-    // Value is outside the range of the table. Apply the scale factor instead.
-    float minLogicalSize = 1;
-    return std::max(fontSizeFactors[keyword - CSSValueXxSmall] * mediumSize, minLogicalSize);
+    return specifiedSize;
 }
 
 } // namespace blink

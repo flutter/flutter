@@ -25,7 +25,6 @@
 #include "gen/sky/core/EventHeaders.h"
 #include "gen/sky/core/EventInterfaces.h"
 #include "gen/sky/core/EventNames.h"
-#include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {

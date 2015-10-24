@@ -24,13 +24,6 @@
 
 #include "sky/engine/core/rendering/RenderText.h"
 
-#include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/editing/PositionWithAffinity.h"
-#include "sky/engine/core/editing/TextIterator.h"
-#include "sky/engine/core/editing/VisiblePosition.h"
-#include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/rendering/EllipsisBox.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
@@ -61,9 +54,8 @@ struct SameSizeAsRenderText : public RenderObject {
 
 COMPILE_ASSERT(sizeof(RenderText) == sizeof(SameSizeAsRenderText), RenderText_should_stay_small);
 
-RenderText::RenderText(Node* node, PassRefPtr<StringImpl> str)
-    : RenderObject(node)
-    , m_hasTab(false)
+RenderText::RenderText(PassRefPtr<StringImpl> str)
+    : m_hasTab(false)
     , m_linesDirty(false)
     , m_containsReversedText(false)
     , m_knownToHaveNoOverflowAndNoFallbackFonts(false)
@@ -76,7 +68,6 @@ RenderText::RenderText(Node* node, PassRefPtr<StringImpl> str)
     , m_lastTextBox(0)
 {
     ASSERT(m_text);
-    ASSERT(!node || !node->isDocumentNode());
 
     m_isAllASCII = m_text.containsOnlyASCII();
     m_canUseSimpleFontCodePath = computeCanUseSimpleFontCodePath();
@@ -197,28 +188,6 @@ void RenderText::deleteTextBoxes()
     }
 }
 
-PassRefPtr<StringImpl> RenderText::originalText() const
-{
-    Node* e = node();
-    return (e && e->isTextNode()) ? toText(e)->dataImpl() : 0;
-}
-
-String RenderText::plainText() const
-{
-    if (node())
-        return blink::plainText(rangeOfContents(node()).get());
-
-    // FIXME: this is just a stopgap until TextIterator is adapted to support generated text.
-    StringBuilder plainTextBuilder;
-    for (InlineTextBox* textBox = firstTextBox(); textBox; textBox = textBox->nextTextBox()) {
-        String text = m_text.substring(textBox->start(), textBox->len()).simplifyWhiteSpace(WTF::DoNotStripWhiteSpace);
-        plainTextBuilder.append(text);
-        if (textBox->nextTextBox() && textBox->nextTextBox()->start() > textBox->end() && text.length() && !text.right(1).containsOnlyWhitespace())
-            plainTextBuilder.append(space);
-    }
-    return plainTextBuilder.toString();
-}
-
 static FloatRect localQuadForTextBox(InlineTextBox* box, unsigned start, unsigned end, bool useSelectionHeight)
 {
     unsigned realEnd = std::min(box->end() + 1, end);
@@ -266,41 +235,10 @@ void RenderText::absoluteRectsForRange(Vector<IntRect>& rects, unsigned start, u
     }
 }
 
-static IntRect ellipsisRectForBox(InlineTextBox* box, unsigned startPos, unsigned endPos)
-{
-    if (!box)
-        return IntRect();
-
-    unsigned short truncation = box->truncation();
-    if (truncation == cNoTruncation)
-        return IntRect();
-
-    IntRect rect;
-    if (EllipsisBox* ellipsis = box->root().ellipsisBox()) {
-        int ellipsisStartPosition = std::max<int>(startPos - box->start(), 0);
-        int ellipsisEndPosition = std::min<int>(endPos - box->start(), box->len());
-
-        // The ellipsis should be considered to be selected if the end of
-        // the selection is past the beginning of the truncation and the
-        // beginning of the selection is before or at the beginning of the truncation.
-        if (ellipsisEndPosition >= truncation && ellipsisStartPosition <= truncation)
-            return ellipsis->selectionRect();
-    }
-
-    return IntRect();
-}
-
 void RenderText::absoluteQuads(Vector<FloatQuad>& quads, ClippingOption option) const
 {
     for (InlineTextBox* box = firstTextBox(); box; box = box->nextTextBox()) {
         FloatRect boundaries = box->calculateBoundaries();
-
-        // Shorten the width of this text box if it ends in an ellipsis.
-        // FIXME: ellipsisRectForBox should switch to return FloatRect soon with the subpixellayout branch.
-        IntRect ellipsisRect = (option == ClipToEllipsis) ? ellipsisRectForBox(box, 0, textLength()) : IntRect();
-        if (!ellipsisRect.isEmpty()) {
-            boundaries.setWidth(ellipsisRect.maxX() - boundaries.x());
-        }
         quads.append(localToAbsoluteQuad(boundaries, 0));
     }
 }
@@ -341,169 +279,6 @@ void RenderText::absoluteQuadsForRange(Vector<FloatQuad>& quads, unsigned start,
 }
 
 enum ShouldAffinityBeDownstream { AlwaysDownstream, AlwaysUpstream, UpstreamIfPositionIsNotAtStart };
-
-static bool lineDirectionPointFitsInBox(int pointLineDirection, InlineTextBox* box, ShouldAffinityBeDownstream& shouldAffinityBeDownstream)
-{
-    shouldAffinityBeDownstream = AlwaysDownstream;
-
-    // the x coordinate is equal to the left edge of this box
-    // the affinity must be downstream so the position doesn't jump back to the previous line
-    // except when box is the first box in the line
-    if (pointLineDirection <= box->logicalLeft()) {
-        shouldAffinityBeDownstream = !box->prevLeafChild() ? UpstreamIfPositionIsNotAtStart : AlwaysDownstream;
-        return true;
-    }
-
-    // and the x coordinate is to the left of the right edge of this box
-    // check to see if position goes in this box
-    if (pointLineDirection < box->logicalRight()) {
-        shouldAffinityBeDownstream = UpstreamIfPositionIsNotAtStart;
-        return true;
-    }
-
-    // box is first on line
-    // and the x coordinate is to the left of the first text box left edge
-    if (!box->prevLeafChildIgnoringLineBreak() && pointLineDirection < box->logicalLeft())
-        return true;
-
-    if (!box->nextLeafChildIgnoringLineBreak()) {
-        // box is last on line
-        // and the x coordinate is to the right of the last text box right edge
-        // generate VisiblePosition, use UPSTREAM affinity if possible
-        shouldAffinityBeDownstream = UpstreamIfPositionIsNotAtStart;
-        return true;
-    }
-
-    return false;
-}
-
-static PositionWithAffinity createPositionWithAffinityForBox(const InlineBox* box, int offset, ShouldAffinityBeDownstream shouldAffinityBeDownstream)
-{
-    EAffinity affinity = VP_DEFAULT_AFFINITY;
-    switch (shouldAffinityBeDownstream) {
-    case AlwaysDownstream:
-        affinity = DOWNSTREAM;
-        break;
-    case AlwaysUpstream:
-        affinity = VP_UPSTREAM_IF_POSSIBLE;
-        break;
-    case UpstreamIfPositionIsNotAtStart:
-        affinity = offset > box->caretMinOffset() ? VP_UPSTREAM_IF_POSSIBLE : DOWNSTREAM;
-        break;
-    }
-    int textStartOffset = box->renderer().isText() ? toRenderText(box->renderer()).textStartOffset() : 0;
-    return box->renderer().createPositionWithAffinity(offset + textStartOffset, affinity);
-}
-
-static PositionWithAffinity createPositionWithAffinityForBoxAfterAdjustingOffsetForBiDi(const InlineTextBox* box, int offset, ShouldAffinityBeDownstream shouldAffinityBeDownstream)
-{
-    ASSERT(box);
-    ASSERT(offset >= 0);
-
-    if (offset && static_cast<unsigned>(offset) < box->len())
-        return createPositionWithAffinityForBox(box, box->start() + offset, shouldAffinityBeDownstream);
-
-    bool positionIsAtStartOfBox = !offset;
-    if (positionIsAtStartOfBox == box->isLeftToRightDirection()) {
-        // offset is on the left edge
-
-        const InlineBox* prevBox = box->prevLeafChildIgnoringLineBreak();
-        if ((prevBox && prevBox->bidiLevel() == box->bidiLevel())
-            || box->renderer().containingBlock()->style()->direction() == box->direction()) // FIXME: left on 12CBA
-            return createPositionWithAffinityForBox(box, box->caretLeftmostOffset(), shouldAffinityBeDownstream);
-
-        if (prevBox && prevBox->bidiLevel() > box->bidiLevel()) {
-            // e.g. left of B in aDC12BAb
-            const InlineBox* leftmostBox;
-            do {
-                leftmostBox = prevBox;
-                prevBox = leftmostBox->prevLeafChildIgnoringLineBreak();
-            } while (prevBox && prevBox->bidiLevel() > box->bidiLevel());
-            return createPositionWithAffinityForBox(leftmostBox, leftmostBox->caretRightmostOffset(), shouldAffinityBeDownstream);
-        }
-
-        if (!prevBox || prevBox->bidiLevel() < box->bidiLevel()) {
-            // e.g. left of D in aDC12BAb
-            const InlineBox* rightmostBox;
-            const InlineBox* nextBox = box;
-            do {
-                rightmostBox = nextBox;
-                nextBox = rightmostBox->nextLeafChildIgnoringLineBreak();
-            } while (nextBox && nextBox->bidiLevel() >= box->bidiLevel());
-            return createPositionWithAffinityForBox(rightmostBox,
-                box->isLeftToRightDirection() ? rightmostBox->caretMaxOffset() : rightmostBox->caretMinOffset(), shouldAffinityBeDownstream);
-        }
-
-        return createPositionWithAffinityForBox(box, box->caretRightmostOffset(), shouldAffinityBeDownstream);
-    }
-
-    const InlineBox* nextBox = box->nextLeafChildIgnoringLineBreak();
-    if ((nextBox && nextBox->bidiLevel() == box->bidiLevel())
-        || box->renderer().containingBlock()->style()->direction() == box->direction())
-        return createPositionWithAffinityForBox(box, box->caretRightmostOffset(), shouldAffinityBeDownstream);
-
-    // offset is on the right edge
-    if (nextBox && nextBox->bidiLevel() > box->bidiLevel()) {
-        // e.g. right of C in aDC12BAb
-        const InlineBox* rightmostBox;
-        do {
-            rightmostBox = nextBox;
-            nextBox = rightmostBox->nextLeafChildIgnoringLineBreak();
-        } while (nextBox && nextBox->bidiLevel() > box->bidiLevel());
-        return createPositionWithAffinityForBox(rightmostBox, rightmostBox->caretLeftmostOffset(), shouldAffinityBeDownstream);
-    }
-
-    if (!nextBox || nextBox->bidiLevel() < box->bidiLevel()) {
-        // e.g. right of A in aDC12BAb
-        const InlineBox* leftmostBox;
-        const InlineBox* prevBox = box;
-        do {
-            leftmostBox = prevBox;
-            prevBox = leftmostBox->prevLeafChildIgnoringLineBreak();
-        } while (prevBox && prevBox->bidiLevel() >= box->bidiLevel());
-        return createPositionWithAffinityForBox(leftmostBox,
-            box->isLeftToRightDirection() ? leftmostBox->caretMinOffset() : leftmostBox->caretMaxOffset(), shouldAffinityBeDownstream);
-    }
-
-    return createPositionWithAffinityForBox(box, box->caretLeftmostOffset(), shouldAffinityBeDownstream);
-}
-
-PositionWithAffinity RenderText::positionForPoint(const LayoutPoint& point)
-{
-    if (!firstTextBox() || textLength() == 0)
-        return createPositionWithAffinity(0, DOWNSTREAM);
-
-    LayoutUnit pointLineDirection = point.x();
-    LayoutUnit pointBlockDirection = point.y();
-
-    InlineTextBox* lastBox = 0;
-    for (InlineTextBox* box = firstTextBox(); box; box = box->nextTextBox()) {
-        if (box->isLineBreak() && !box->prevLeafChild() && box->nextLeafChild() && !box->nextLeafChild()->isLineBreak())
-            box = box->nextTextBox();
-
-        RootInlineBox& rootBox = box->root();
-        LayoutUnit top = std::min(rootBox.selectionTop(), rootBox.lineTop());
-        if (pointBlockDirection > top || pointBlockDirection == top) {
-            LayoutUnit bottom = rootBox.selectionBottom();
-            if (rootBox.nextRootBox())
-                bottom = std::min(bottom, rootBox.nextRootBox()->lineTop());
-
-            if (pointBlockDirection < bottom) {
-                ShouldAffinityBeDownstream shouldAffinityBeDownstream;
-                if (lineDirectionPointFitsInBox(pointLineDirection, box, shouldAffinityBeDownstream))
-                    return createPositionWithAffinityForBoxAfterAdjustingOffsetForBiDi(box, box->offsetForPosition(pointLineDirection.toFloat()), shouldAffinityBeDownstream);
-            }
-        }
-        lastBox = box;
-    }
-
-    if (lastBox) {
-        ShouldAffinityBeDownstream shouldAffinityBeDownstream;
-        lineDirectionPointFitsInBox(pointLineDirection, lastBox, shouldAffinityBeDownstream);
-        return createPositionWithAffinityForBoxAfterAdjustingOffsetForBiDi(lastBox, lastBox->offsetForPosition(pointLineDirection.toFloat()) + lastBox->start(), shouldAffinityBeDownstream);
-    }
-    return createPositionWithAffinity(0, DOWNSTREAM);
-}
 
 LayoutRect RenderText::localCaretRect(InlineBox* inlineBox, int caretOffset, LayoutUnit* extraWidthToEndOfLine)
 {

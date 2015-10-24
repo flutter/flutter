@@ -28,8 +28,8 @@ namespace blink {
 
 class RenderReplaced : public RenderBox {
 public:
-    RenderReplaced(Element*);
-    RenderReplaced(Element*, const LayoutSize& intrinsicSize);
+    RenderReplaced();
+    RenderReplaced(const LayoutSize& intrinsicSize);
     virtual ~RenderReplaced();
 
     virtual LayoutUnit computeReplacedLogicalWidth(ShouldComputePreferred  = ComputeActual) const override;
@@ -77,8 +77,6 @@ private:
 
     virtual void computePreferredLogicalWidths() override final;
     virtual void paintReplaced(PaintInfo&, const LayoutPoint&) { }
-
-    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override final;
 
     virtual bool canBeSelectionLeaf() const override { return true; }
 

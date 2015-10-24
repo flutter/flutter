@@ -32,11 +32,7 @@
 
 #include "gen/sky/core/EventNames.h"
 #include "gen/sky/core/EventTypeNames.h"
-#include "gen/sky/core/HTMLNames.h"
-#include "gen/sky/core/MediaFeatureNames.h"
-#include "gen/sky/core/MediaTypeNames.h"
 #include "gen/sky/platform/FontFamilyNames.h"
-#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/PlatformThreadData.h"
 #include "sky/engine/wtf/text/StringStatics.h"
@@ -48,19 +44,14 @@ void CoreInitializer::init()
     ASSERT(!m_isInited);
     m_isInited = true;
 
-    HTMLNames::init();
-
     EventNames::init();
     EventTypeNames::init();
     FontFamilyNames::init();
-    MediaFeatureNames::init();
-    MediaTypeNames::init();
 
     // It would make logical sense to do this in WTF::initialize() but there are
     // ordering dependencies, e.g. about "xmlns".
     WTF::StringStatics::init();
 
-    QualifiedName::init();
     Partitions::init();
 
     // Ensure that the main thread's thread-local data is initialized before

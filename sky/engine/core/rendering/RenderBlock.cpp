@@ -23,13 +23,6 @@
 
 #include "sky/engine/core/rendering/RenderBlock.h"
 
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/Element.h"
-#include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestLocation.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/InlineIterator.h"
@@ -68,9 +61,8 @@ static TrackedDescendantsMap* gPercentHeightDescendantsMap = 0;
 static TrackedContainerMap* gPositionedContainerMap = 0;
 static TrackedContainerMap* gPercentHeightContainerMap = 0;
 
-RenderBlock::RenderBlock(ContainerNode* node)
-    : RenderBox(node)
-    , m_hasMarginBeforeQuirk(false)
+RenderBlock::RenderBlock()
+    : m_hasMarginBeforeQuirk(false)
     , m_hasMarginAfterQuirk(false)
     , m_beingDestroyed(false)
     , m_hasBorderOrPaddingLogicalWidthChanged(false)
@@ -128,16 +120,8 @@ void RenderBlock::willBeDestroyed()
     children()->destroyLeftoverChildren();
 
     if (!documentBeingDestroyed()) {
-        if (firstLineBox()) {
-            // We can't wait for RenderBox::destroy to clear the selection,
-            // because by then we will have nuked the line boxes.
-            // FIXME: The FrameSelection should be responsible for this when it
-            // is notified of DOM mutations.
-            if (isSelectionBorder())
-                view()->clearSelection();
-        } else if (parent()) {
+        if (!firstLineBox() && parent())
             parent()->dirtyLinesFromChangedChild(this);
-        }
     }
 
     m_lineBoxes.deleteLineBoxes();
@@ -422,9 +406,6 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
 
     paintChildren(paintInfo, paintOffset, layers);
     paintSelection(paintInfo, paintOffset); // Fill in gaps in selection on lines and between blocks.
-
-    if (style()->hasOutline() && !style()->outlineStyleIsAuto())
-        paintOutline(paintInfo, LayoutRect(paintOffset, size()));
 }
 
 bool RenderBlock::shouldPaintSelectionGaps() const
@@ -434,24 +415,6 @@ bool RenderBlock::shouldPaintSelectionGaps() const
 
 bool RenderBlock::isSelectionRoot() const
 {
-    ASSERT(node());
-
-    if (node() && node()->parentNode() == document())
-        return true;
-
-    if (hasOverflowClip()
-        || isPositioned()
-        || isInlineBlock()
-        || hasTransform()
-        || isFlexItem())
-        return true;
-
-    if (view() && view()->selectionStart()) {
-        Node* startElement = view()->selectionStart()->node();
-        if (startElement && startElement->rootEditableElement() == node())
-            return true;
-    }
-
     return false;
 }
 
@@ -936,13 +899,8 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
 
     if (style()->clipPath()) {
         switch (style()->clipPath()->type()) {
-        case ClipPathOperation::SHAPE: {
-            ShapeClipPathOperation* clipPath = toShapeClipPathOperation(style()->clipPath());
-            // FIXME: handle marginBox etc.
-            if (!clipPath->path(borderBoxRect()).contains(locationInContainer.point() - localOffset, clipPath->windRule()))
-                return false;
+        case ClipPathOperation::SHAPE:
             break;
-        }
         case ClipPathOperation::REFERENCE:
             break;
         }
@@ -978,8 +936,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
     LayoutRect boundsRect(adjustedLocation, size());
     if (visibleToHitTestRequest(request) && locationInContainer.intersects(boundsRect)) {
         updateHitTestResult(result, locationInContainer.point() - localOffset);
-        if (!result.addNodeToRectBasedTestResult(node(), request, locationInContainer, boundsRect))
-            return true;
+        return true;
     }
 
     return false;
@@ -993,182 +950,6 @@ bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& 
     }
 
     return false;
-}
-
-Position RenderBlock::positionForBox(InlineBox *box, bool start) const
-{
-    if (!box)
-        return Position();
-
-    if (!box->renderer().node())
-        return createLegacyEditingPosition(node(), start ? caretMinOffset() : caretMaxOffset());
-
-    if (!box->isInlineTextBox())
-        return createLegacyEditingPosition(box->renderer().node(), start ? box->renderer().caretMinOffset() : box->renderer().caretMaxOffset());
-
-    InlineTextBox* textBox = toInlineTextBox(box);
-    return createLegacyEditingPosition(box->renderer().node(), start ? textBox->start() : textBox->start() + textBox->len());
-}
-
-static inline bool isEditingBoundary(RenderObject* ancestor, RenderObject* child)
-{
-    ASSERT(!ancestor || ancestor->node());
-    ASSERT(child && child->node());
-    return !ancestor || !ancestor->parent() || (ancestor->hasLayer() && ancestor->parent()->isRenderView())
-        || ancestor->node()->hasEditableStyle() == child->node()->hasEditableStyle();
-}
-
-// FIXME: This function should go on RenderObject as an instance method. Then
-// all cases in which positionForPoint recurs could call this instead to
-// prevent crossing editable boundaries. This would require many tests.
-static PositionWithAffinity positionForPointRespectingEditingBoundaries(RenderBlock* parent, RenderBox* child, const LayoutPoint& pointInParentCoordinates)
-{
-    LayoutPoint childLocation = child->location();
-
-    // FIXME: This is wrong if the child's writing-mode is different from the parent's.
-    LayoutPoint pointInChildCoordinates(toLayoutPoint(pointInParentCoordinates - childLocation));
-
-    // If this is an anonymous renderer, we just recur normally
-    Node* childNode = child->node();
-    if (!childNode)
-        return child->positionForPoint(pointInChildCoordinates);
-
-    // Otherwise, first make sure that the editability of the parent and child agree.
-    // If they don't agree, then we return a visible position just before or after the child
-    RenderObject* ancestor = parent;
-    while (ancestor && !ancestor->node())
-        ancestor = ancestor->parent();
-
-    // If we can't find an ancestor to check editability on, or editability is unchanged, we recur like normal
-    if (isEditingBoundary(ancestor, child))
-        return child->positionForPoint(pointInChildCoordinates);
-
-    // Otherwise return before or after the child, depending on if the click was to the logical left or logical right of the child
-    LayoutUnit childMiddle = parent->logicalWidthForChild(child) / 2;
-    LayoutUnit logicalLeft = pointInChildCoordinates.x();
-    if (logicalLeft < childMiddle)
-        return ancestor->createPositionWithAffinity(childNode->nodeIndex(), DOWNSTREAM);
-    return ancestor->createPositionWithAffinity(childNode->nodeIndex() + 1, UPSTREAM);
-}
-
-PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const LayoutPoint& pointInLogicalContents)
-{
-    ASSERT(isRenderParagraph());
-
-    if (!firstRootBox())
-        return createPositionWithAffinity(0, DOWNSTREAM);
-
-    // look for the closest line box in the root box which is at the passed-in y coordinate
-    InlineBox* closestBox = 0;
-    RootInlineBox* firstRootBoxWithChildren = 0;
-    RootInlineBox* lastRootBoxWithChildren = 0;
-    for (RootInlineBox* root = firstRootBox(); root; root = root->nextRootBox()) {
-        if (!root->firstLeafChild())
-            continue;
-        if (!firstRootBoxWithChildren)
-            firstRootBoxWithChildren = root;
-
-        lastRootBoxWithChildren = root;
-
-        // check if this root line box is located at this y coordinate
-        if (pointInLogicalContents.y() < root->selectionBottom()) {
-            closestBox = root->closestLeafChildForLogicalLeftPosition(pointInLogicalContents.x());
-            if (closestBox)
-                break;
-        }
-    }
-
-    bool moveCaretToBoundary = false; // TODO(ianh): expose whether we should move the caret to a horizontal boundary when past the top or bottom
-
-    if (!moveCaretToBoundary && !closestBox && lastRootBoxWithChildren) {
-        // y coordinate is below last root line box, pretend we hit it
-        closestBox = lastRootBoxWithChildren->closestLeafChildForLogicalLeftPosition(pointInLogicalContents.x());
-    }
-
-    if (closestBox) {
-        if (moveCaretToBoundary) {
-            LayoutUnit firstRootBoxWithChildrenTop = std::min<LayoutUnit>(firstRootBoxWithChildren->selectionTop(), firstRootBoxWithChildren->logicalTop());
-            if (pointInLogicalContents.y() < firstRootBoxWithChildrenTop) {
-                InlineBox* box = firstRootBoxWithChildren->firstLeafChild();
-                if (box->isLineBreak()) {
-                    if (InlineBox* newBox = box->nextLeafChildIgnoringLineBreak())
-                        box = newBox;
-                }
-                // y coordinate is above first root line box, so return the start of the first
-                return PositionWithAffinity(positionForBox(box, true), DOWNSTREAM);
-            }
-        }
-
-        // pass the box a top position that is inside it
-        LayoutPoint point(pointInLogicalContents.x(), closestBox->root().blockDirectionPointInLine());
-        if (closestBox->renderer().isReplaced())
-            return positionForPointRespectingEditingBoundaries(this, &toRenderBox(closestBox->renderer()), point);
-        return closestBox->renderer().positionForPoint(point);
-    }
-
-    if (lastRootBoxWithChildren) {
-        // We hit this case for Mac behavior when the Y coordinate is below the last box.
-        ASSERT(moveCaretToBoundary);
-        InlineBox* logicallyLastBox;
-        if (lastRootBoxWithChildren->getLogicalEndBoxWithNode(logicallyLastBox))
-            return PositionWithAffinity(positionForBox(logicallyLastBox, false), DOWNSTREAM);
-    }
-
-    // Can't reach this. We have a root line box, but it has no kids.
-    // FIXME: This should ASSERT_NOT_REACHED(), but clicking on placeholder text
-    // seems to hit this code path.
-    return createPositionWithAffinity(0, DOWNSTREAM);
-}
-
-static inline bool isChildHitTestCandidate(RenderBox* box)
-{
-    return box->height() && !box->isFloatingOrOutOfFlowPositioned();
-}
-
-PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
-{
-    if (isReplaced()) {
-        // FIXME: This seems wrong when the object's writing-mode doesn't match the line's writing-mode.
-        LayoutUnit pointLogicalLeft = point.x();
-        LayoutUnit pointLogicalTop = point.y();
-
-        if (pointLogicalLeft < 0)
-            return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
-        if (pointLogicalLeft >= logicalWidth())
-            return createPositionWithAffinity(caretMaxOffset(), DOWNSTREAM);
-        if (pointLogicalTop < 0)
-            return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
-        if (pointLogicalTop >= logicalHeight())
-            return createPositionWithAffinity(caretMaxOffset(), DOWNSTREAM);
-    }
-
-    LayoutPoint pointInContents = point;
-    LayoutPoint pointInLogicalContents(pointInContents);
-
-    if (isRenderParagraph())
-        return positionForPointWithInlineChildren(pointInLogicalContents);
-
-    RenderBox* lastCandidateBox = lastChildBox();
-    while (lastCandidateBox && !isChildHitTestCandidate(lastCandidateBox))
-        lastCandidateBox = lastCandidateBox->previousSiblingBox();
-
-    if (lastCandidateBox) {
-        if (pointInLogicalContents.y() > logicalTopForChild(lastCandidateBox)
-            || (pointInLogicalContents.y() == logicalTopForChild(lastCandidateBox)))
-            return positionForPointRespectingEditingBoundaries(this, lastCandidateBox, pointInContents);
-
-        for (RenderBox* childBox = firstChildBox(); childBox; childBox = childBox->nextSiblingBox()) {
-            if (!isChildHitTestCandidate(childBox))
-                continue;
-            LayoutUnit childLogicalBottom = logicalTopForChild(childBox) + logicalHeightForChild(childBox);
-            // We hit child if our click is above the bottom of its padding box (like IE6/7 and FF3).
-            if (isChildHitTestCandidate(childBox) && (pointInLogicalContents.y() < childLogicalBottom))
-                return positionForPointRespectingEditingBoundaries(this, childBox, pointInContents);
-        }
-    }
-
-    // We only get here if there are no hit test candidate children below the click.
-    return RenderBox::positionForPoint(point);
 }
 
 LayoutUnit RenderBlock::availableLogicalWidth() const
@@ -1261,7 +1042,7 @@ void RenderBlock::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, Lay
 
 bool RenderBlock::hasLineIfEmpty() const
 {
-    return node() && node()->isRootEditableElement();
+    return false;
 }
 
 LayoutUnit RenderBlock::lineHeight(bool firstLine, LineDirectionMode direction, LinePositionMode linePositionMode) const
@@ -1458,15 +1239,6 @@ void RenderBlock::absoluteQuads(Vector<FloatQuad>& quads) const
 
 void RenderBlock::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
 {
-    if (result.innerNode())
-        return;
-
-    if (Node* n = node()) {
-        result.setInnerNode(n);
-        if (!result.innerNonSharedNode())
-            result.setInnerNonSharedNode(n);
-        result.setLocalPoint(point);
-    }
 }
 
 LayoutRect RenderBlock::localCaretRect(InlineBox* inlineBox, int caretOffset, LayoutUnit* extraWidthToEndOfLine)

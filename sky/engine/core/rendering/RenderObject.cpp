@@ -28,17 +28,7 @@
 
 #include <algorithm>
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/css/resolver/StyleResolver.h"
-#include "sky/engine/core/dom/ElementTraversal.h"
-#include "sky/engine/core/dom/Range.h"
-#include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/editing/EditingBoundary.h"
-#include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLElement.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderFlexibleBox.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
@@ -81,7 +71,7 @@ RenderObject::SetLayoutNeededForbiddenScope::~SetLayoutNeededForbiddenScope()
 
 struct SameSizeAsRenderObject {
     virtual ~SameSizeAsRenderObject() { } // Allocate vtable pointer.
-    void* pointers[5];
+    void* pointers[4];
 #if ENABLE(ASSERT)
     unsigned m_debugBitfields : 2;
 #if ENABLE(OILPAN)
@@ -109,31 +99,11 @@ void RenderObject::operator delete(void* ptr)
 }
 #endif
 
-RenderObject* RenderObject::createObject(Element* element, RenderStyle* style)
-{
-    ASSERT(isAllowedToModifyRenderTreeStructure(element->document()));
-
-    switch (style->display()) {
-    case NONE:
-        return 0;
-    case INLINE:
-        return new RenderInline(element);
-    case PARAGRAPH:
-        return new RenderParagraph(element);
-    case FLEX:
-    case INLINE_FLEX:
-        return new RenderFlexibleBox(element);
-    }
-
-    return 0;
-}
-
 DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, renderObjectCounter, ("RenderObject"));
 unsigned RenderObject::s_instanceCount = 0;
 
-RenderObject::RenderObject(Node* node)
+RenderObject::RenderObject()
     : m_style(nullptr)
-    , m_node(node)
     , m_parent(nullptr)
     , m_previous(nullptr)
     , m_next(nullptr)
@@ -143,7 +113,6 @@ RenderObject::RenderObject(Node* node)
     , m_didCallDestroy(false)
 #endif
 #endif
-    , m_bitfields(node)
 {
 #ifndef NDEBUG
     renderObjectCounter.increment();
@@ -164,15 +133,7 @@ RenderObject::~RenderObject()
 
 String RenderObject::debugName() const
 {
-    StringBuilder name;
-    name.append(renderName());
-
-    if (Node* node = this->node()) {
-        name.append(' ');
-        name.append(node->debugName());
-    }
-
-    return name.toString();
+    return renderName();
 }
 
 bool RenderObject::isDescendantOf(const RenderObject* obj) const
@@ -186,8 +147,6 @@ bool RenderObject::isDescendantOf(const RenderObject* obj) const
 
 void RenderObject::addChild(RenderObject* newChild, RenderObject* beforeChild)
 {
-    ASSERT(!m_node || isAllowedToModifyRenderTreeStructure(document()));
-
     RenderObjectChildList* children = virtualChildren();
     ASSERT(children);
     children->insertChildNode(this, newChild, beforeChild);
@@ -195,8 +154,6 @@ void RenderObject::addChild(RenderObject* newChild, RenderObject* beforeChild)
 
 void RenderObject::removeChild(RenderObject* oldChild)
 {
-  ASSERT(!m_node || isAllowedToModifyRenderTreeStructure(document()));
-
     RenderObjectChildList* children = virtualChildren();
     ASSERT(children);
     if (!children)
@@ -850,77 +807,6 @@ void RenderObject::drawSolidBoxSide(GraphicsContext* graphicsContext, int x1, in
     graphicsContext->setStrokeStyle(oldStrokeStyle);
 }
 
-void RenderObject::paintFocusRing(PaintInfo& paintInfo, const LayoutPoint& paintOffset, RenderStyle* style)
-{
-    Vector<IntRect> focusRingRects;
-    addFocusRingRects(focusRingRects, paintOffset, paintInfo.paintContainer());
-    ASSERT(style->outlineStyleIsAuto());
-    paintInfo.context->drawFocusRing(focusRingRects, style->outlineWidth(), style->outlineOffset(), resolveColor(style, CSSPropertyOutlineColor));
-}
-
-void RenderObject::paintOutline(PaintInfo& paintInfo, const LayoutRect& paintRect)
-{
-    RenderStyle* styleToUse = style();
-    if (!styleToUse->hasOutline())
-        return;
-
-    LayoutUnit outlineWidth = styleToUse->outlineWidth();
-
-    int outlineOffset = styleToUse->outlineOffset();
-
-    if (styleToUse->outlineStyleIsAuto())
-        return;
-
-    if (styleToUse->outlineStyle() == BNONE)
-        return;
-
-    IntRect inner = pixelSnappedIntRect(paintRect);
-    inner.inflate(outlineOffset);
-
-    IntRect outer = pixelSnappedIntRect(inner);
-    outer.inflate(outlineWidth);
-
-    // FIXME: This prevents outlines from painting inside the object. See bug 12042
-    if (outer.isEmpty())
-        return;
-
-    EBorderStyle outlineStyle = styleToUse->outlineStyle();
-    Color outlineColor = resolveColor(styleToUse, CSSPropertyOutlineColor);
-
-    GraphicsContext* graphicsContext = paintInfo.context;
-    bool useTransparencyLayer = outlineColor.hasAlpha();
-    if (useTransparencyLayer) {
-        if (outlineStyle == SOLID) {
-            Path path;
-            path.addRect(outer);
-            path.addRect(inner);
-            graphicsContext->setFillRule(RULE_EVENODD);
-            graphicsContext->setFillColor(outlineColor);
-            graphicsContext->fillPath(path);
-            return;
-        }
-        graphicsContext->beginTransparencyLayer(static_cast<float>(outlineColor.alpha()) / 255);
-        outlineColor = Color(outlineColor.red(), outlineColor.green(), outlineColor.blue());
-    }
-
-    int leftOuter = outer.x();
-    int leftInner = inner.x();
-    int rightOuter = outer.maxX();
-    int rightInner = inner.maxX();
-    int topOuter = outer.y();
-    int topInner = inner.y();
-    int bottomOuter = outer.maxY();
-    int bottomInner = inner.maxY();
-
-    drawLineForBoxSide(graphicsContext, leftOuter, topOuter, leftInner, bottomOuter, BSLeft, outlineColor, outlineStyle, outlineWidth, outlineWidth);
-    drawLineForBoxSide(graphicsContext, leftOuter, topOuter, rightOuter, topInner, BSTop, outlineColor, outlineStyle, outlineWidth, outlineWidth);
-    drawLineForBoxSide(graphicsContext, rightInner, topOuter, rightOuter, bottomOuter, BSRight, outlineColor, outlineStyle, outlineWidth, outlineWidth);
-    drawLineForBoxSide(graphicsContext, leftOuter, bottomInner, rightOuter, bottomOuter, BSBottom, outlineColor, outlineStyle, outlineWidth, outlineWidth);
-
-    if (useTransparencyLayer)
-        graphicsContext->endLayer();
-}
-
 void RenderObject::addChildFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderBox* paintContainer) const
 {
     for (RenderObject* current = slowFirstChild(); current; current = current->nextSibling()) {
@@ -967,33 +853,6 @@ IntRect RenderObject::absoluteBoundingBoxRect() const
     return result;
 }
 
-void RenderObject::absoluteFocusRingQuads(Vector<FloatQuad>& quads)
-{
-    Vector<IntRect> rects;
-    const RenderBox* container = containerForPaintInvalidation();
-    addFocusRingRects(rects, LayoutPoint(localToContainerPoint(FloatPoint(), container)), container);
-    size_t count = rects.size();
-    for (size_t i = 0; i < count; ++i)
-        quads.append(container->localToAbsoluteQuad(FloatQuad(rects[i])));
-}
-
-FloatRect RenderObject::absoluteBoundingBoxRectForRange(const Range* range)
-{
-    if (!range || !range->startContainer())
-        return FloatRect();
-
-    range->ownerDocument().updateLayout();
-
-    Vector<FloatQuad> quads;
-    range->textQuads(quads);
-
-    FloatRect result;
-    for (size_t i = 0; i < quads.size(); ++i)
-        result.unite(quads[i].boundingBox());
-
-    return result;
-}
-
 void RenderObject::addAbsoluteRectForLayer(LayoutRect& result)
 {
     if (hasLayer())
@@ -1006,19 +865,6 @@ void RenderObject::paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& lay
 {
 }
 
-const RenderView* RenderObject::containerForPaintInvalidation() const
-{
-    return isRooted() ? view() : 0;
-}
-
-const RenderBox* RenderObject::adjustCompositedContainerForSpecialAncestors(const RenderBox* paintInvalidationContainer) const
-{
-    // FIXME(sky): We shouldn't have any special ancestors and we don't have composited containers
-    if (paintInvalidationContainer)
-        return paintInvalidationContainer;
-    return view();
-}
-
 void RenderObject::dirtyLinesFromChangedChild(RenderObject*)
 {
 }
@@ -1027,8 +873,6 @@ void RenderObject::dirtyLinesFromChangedChild(RenderObject*)
 
 void RenderObject::showTreeForThis() const
 {
-    if (node())
-        node()->showTreeForThis();
 }
 
 void RenderObject::showRenderTreeForThis() const
@@ -1050,15 +894,7 @@ void RenderObject::showRenderObject() const
 void RenderObject::showRenderObject(int printedCharacters) const
 {
     printedCharacters += fprintf(stderr, "%s %p", renderName(), this);
-
-    if (node()) {
-        if (printedCharacters)
-            for (; printedCharacters < showTreeCharacterOffset; printedCharacters++)
-                fputc(' ', stderr);
-        fputc('\t', stderr);
-        node()->showNode();
-    } else
-        fputc('\n', stderr);
+    fputc('\n', stderr);
 }
 
 void RenderObject::showRenderTreeAndMark(const RenderObject* markedObject1, const char* markedLabel1, const RenderObject* markedObject2, const char* markedLabel2, int depth) const
@@ -1097,34 +933,26 @@ Color RenderObject::selectionBackgroundColor() const
         RenderTheme::theme().inactiveSelectionBackgroundColor();
 }
 
-Color RenderObject::selectionColor(int colorProperty) const
+Color RenderObject::selectionColor() const
 {
     ASSERT_NOT_REACHED();
-    // TODO(ianh): if we expose selection painting, we should expose a way to set the text colour
-    // TODO(ianh): need to be able to configure whether to consider the selection focused and active or not
-    if (!isSelectable())
-        return resolveColor(colorProperty);
-    if (!RenderTheme::theme().supportsSelectionForegroundColors())
-        return resolveColor(colorProperty);
-    bool isFocusedAndActive = true;
-    return isFocusedAndActive ?
-        RenderTheme::theme().activeSelectionForegroundColor() :
-        RenderTheme::theme().inactiveSelectionForegroundColor();
+    return style()->color();
 }
 
 Color RenderObject::selectionForegroundColor() const
 {
-    return selectionColor(CSSPropertyWebkitTextFillColor);
+    return selectionColor();
 }
 
 Color RenderObject::selectionEmphasisMarkColor() const
 {
-    return selectionColor(CSSPropertyWebkitTextEmphasisColor);
+    return selectionColor();
 }
 
 void RenderObject::selectionStartEnd(int& spos, int& epos) const
 {
-    view()->selectionStartEnd(spos, epos);
+    spos = -1;
+    epos = -1;
 }
 
 StyleDifference RenderObject::adjustStyleDifference(StyleDifference diff) const
@@ -1295,11 +1123,6 @@ void RenderObject::updateImage(StyleImage* oldImage, StyleImage* newImage)
         if (newImage)
             newImage->addClient(this);
     }
-}
-
-LayoutRect RenderObject::viewRect() const
-{
-    return view()->viewRect();
 }
 
 FloatPoint RenderObject::localToAbsolute(const FloatPoint& localPoint, MapCoordinatesFlags mode) const
@@ -1518,18 +1341,6 @@ bool RenderObject::isSelectionBorder() const
 
 inline void RenderObject::clearLayoutRootIfNeeded() const
 {
-    if (frame()) {
-        if (FrameView* view = frame()->view()) {
-            if (view->layoutRoot() == this) {
-                if (!documentBeingDestroyed())
-                    ASSERT_NOT_REACHED();
-                // This indicates a failure to layout the child, which is why
-                // the layout root is still set to |this|. Make sure to clear it
-                // since we are getting destroyed.
-                view->clearLayoutSubtreeRoot();
-            }
-        }
-    }
 }
 
 void RenderObject::willBeDestroyed()
@@ -1594,11 +1405,6 @@ void RenderObject::postDestroy()
     delete this;
 }
 
-PositionWithAffinity RenderObject::positionForPoint(const LayoutPoint&)
-{
-    return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
-}
-
 // FIXME(sky): Change the callers to use nodeAtPoint direclty and remove this function.
 // Or, rename nodeAtPoint to hitTest?
 bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
@@ -1608,17 +1414,6 @@ bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result,
 
 void RenderObject::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
 {
-    if (result.innerNode())
-        return;
-
-    Node* node = this->node();
-
-    if (node) {
-        result.setInnerNode(node);
-        if (!result.innerNonSharedNode())
-            result.setInnerNonSharedNode(node);
-        result.setLocalPoint(point);
-    }
 }
 
 bool RenderObject::nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& /*locationInContainer*/, const LayoutPoint& /*accumulatedOffset*/)
@@ -1628,18 +1423,6 @@ bool RenderObject::nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitT
 
 void RenderObject::scheduleRelayout()
 {
-    if (isRenderView()) {
-        FrameView* view = toRenderView(this)->frameView();
-        if (view)
-            view->scheduleRelayout();
-    } else {
-        if (isRooted()) {
-            if (RenderView* renderView = view()) {
-                if (FrameView* frameView = renderView->frameView())
-                    frameView->scheduleRelayoutOfSubtree(this);
-            }
-        }
-    }
 }
 
 void RenderObject::forceLayout()
@@ -1717,7 +1500,7 @@ int RenderObject::caretMinOffset() const
 int RenderObject::caretMaxOffset() const
 {
     if (isReplaced())
-        return node() ? std::max(1U, node()->countChildren()) : 1;
+        return 1;
     return 0;
 }
 
@@ -1747,83 +1530,6 @@ bool RenderObject::supportsTouchAction() const
     return true;
 }
 
-Element* RenderObject::offsetParent() const
-{
-    Node* node = 0;
-    for (RenderObject* ancestor = parent(); ancestor; ancestor = ancestor->parent()) {
-        // Spec: http://www.w3.org/TR/cssom-view/#offset-attributes
-        node = ancestor->node();
-        if (!node)
-            continue;
-
-        if (ancestor->isPositioned())
-            break;
-    }
-
-    return node && node->isElementNode() ? toElement(node) : 0;
-}
-
-PositionWithAffinity RenderObject::createPositionWithAffinity(int offset, EAffinity affinity)
-{
-    // If this is a non-anonymous renderer in an editable area, then it's simple.
-    if (Node* node = this->node()) {
-        if (!node->hasEditableStyle()) {
-            // If it can be found, we prefer a visually equivalent position that is editable.
-            Position position = createLegacyEditingPosition(node, offset);
-            Position candidate = position.downstream(CanCrossEditingBoundary);
-            if (candidate.deprecatedNode()->hasEditableStyle())
-                return PositionWithAffinity(candidate, affinity);
-            candidate = position.upstream(CanCrossEditingBoundary);
-            if (candidate.deprecatedNode()->hasEditableStyle())
-                return PositionWithAffinity(candidate, affinity);
-        }
-        // FIXME: Eliminate legacy editing positions
-        return PositionWithAffinity(createLegacyEditingPosition(node, offset), affinity);
-    }
-
-    // We don't want to cross the boundary between editable and non-editable
-    // regions of the document, but that is either impossible or at least
-    // extremely unlikely in any normal case because we stop as soon as we
-    // find a single non-anonymous renderer.
-
-    // Find a nearby non-anonymous renderer.
-    RenderObject* child = this;
-    while (RenderObject* parent = child->parent()) {
-        // Find non-anonymous content after.
-        for (RenderObject* renderer = child->nextInPreOrder(parent); renderer; renderer = renderer->nextInPreOrder(parent)) {
-            if (Node* node = renderer->node())
-                return PositionWithAffinity(firstPositionInOrBeforeNode(node), DOWNSTREAM);
-        }
-
-        // Find non-anonymous content before.
-        for (RenderObject* renderer = child->previousInPreOrder(); renderer; renderer = renderer->previousInPreOrder()) {
-            if (renderer == parent)
-                break;
-            if (Node* node = renderer->node())
-                return PositionWithAffinity(lastPositionInOrAfterNode(node), DOWNSTREAM);
-        }
-
-        // Use the parent itself unless it too is anonymous.
-        if (Node* node = parent->node())
-            return PositionWithAffinity(firstPositionInOrBeforeNode(node), DOWNSTREAM);
-
-        // Repeat at the next level up.
-        child = parent;
-    }
-
-    // Everything was anonymous. Give up.
-    return PositionWithAffinity();
-}
-
-PositionWithAffinity RenderObject::createPositionWithAffinity(const Position& position)
-{
-    if (position.isNotNull())
-        return PositionWithAffinity(position);
-
-    ASSERT(!node());
-    return createPositionWithAffinity(0, DOWNSTREAM);
-}
-
 bool RenderObject::canUpdateSelectionOnRootLineBoxes()
 {
     if (needsLayout())
@@ -1837,11 +1543,6 @@ bool RenderObject::nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const
 {
     ASSERT_NOT_REACHED();
     return false;
-}
-
-bool RenderObject::isAllowedToModifyRenderTreeStructure(Document& document)
-{
-    return true;
 }
 
 } // namespace blink

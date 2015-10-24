@@ -22,27 +22,20 @@
 #ifndef SKY_ENGINE_CORE_CSS_FONTSIZE_H_
 #define SKY_ENGINE_CORE_CSS_FONTSIZE_H_
 
-#include "gen/sky/core/CSSValueKeywords.h"
+#include <limits>
+#include <math.h>
 #include "sky/engine/platform/fonts/FixedPitchFontType.h"
 
 namespace blink {
-
-class Document;
 
 enum ESmartMinimumForFontSize { DoNotUseSmartMinimumForFontSize, UseSmartMinimumForFontFize };
 
 class FontSize {
 private:
-    FontSize()
-    {
-    }
+    FontSize() { }
 
 public:
     static float getComputedSizeFromSpecifiedSize(bool isAbsoluteSize, float specifiedSize, ESmartMinimumForFontSize = UseSmartMinimumForFontFize);
-
-    // Given a CSS keyword in the range (xx-small to -webkit-xxx-large), this function will return
-    // the correct font size scaled relative to the user's default (medium).
-    static float fontSizeForKeyword(CSSValueID keyword, FixedPitchFontType);
 };
 
 } // namespace blink

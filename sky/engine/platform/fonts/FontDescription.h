@@ -74,7 +74,6 @@ public:
         , m_discretionaryLigaturesState(NormalLigaturesState)
         , m_historicalLigaturesState(NormalLigaturesState)
         , m_contextualLigaturesState(NormalLigaturesState)
-        , m_keywordSize(0)
         , m_fontSmoothing(AutoSmoothing)
         , m_textRendering(AutoTextRendering)
         , m_script(USCRIPT_COMMON)
@@ -130,7 +129,6 @@ public:
     LigaturesState discretionaryLigaturesState() const { return static_cast<LigaturesState>(m_discretionaryLigaturesState); }
     LigaturesState historicalLigaturesState() const { return static_cast<LigaturesState>(m_historicalLigaturesState); }
     LigaturesState contextualLigaturesState() const { return static_cast<LigaturesState>(m_contextualLigaturesState); }
-    unsigned keywordSize() const { return m_keywordSize; }
     FontSmoothingMode fontSmoothing() const { return static_cast<FontSmoothingMode>(m_fontSmoothing); }
     TextRenderingMode textRendering() const { return static_cast<TextRenderingMode>(m_textRendering); }
     UScriptCode script() const { return static_cast<UScriptCode>(m_script); }
@@ -161,7 +159,6 @@ public:
     void setStretch(FontStretch s) { m_stretch = s; }
     void setGenericFamily(GenericFamilyType genericFamily) { m_genericFamily = genericFamily; }
     void setKerning(Kerning kerning) { m_kerning = kerning; updateTypesettingFeatures(); }
-    void setKeywordSize(unsigned s) { m_keywordSize = s; }
     void setFontSmoothing(FontSmoothingMode smoothing) { m_fontSmoothing = smoothing; }
     void setTextRendering(TextRenderingMode rendering) { m_textRendering = rendering; updateTypesettingFeatures(); }
     void setOrientation(FontOrientation orientation) { m_orientation = orientation; }
@@ -218,10 +215,6 @@ private:
     unsigned m_historicalLigaturesState : 2;
     unsigned m_contextualLigaturesState : 2;
 
-    unsigned m_keywordSize : 4; // We cache whether or not a font is currently represented by a CSS keyword (e.g., medium).  If so,
-                           // then we can accurately translate across different generic families to adjust for different preference settings
-                           // (e.g., 13px monospace vs. 16px everything else).  Sizes are 1-8 (like the HTML size values for <font>).
-
     unsigned m_fontSmoothing : 2; // FontSmoothingMode
     unsigned m_textRendering : 2; // TextRenderingMode
     unsigned m_script : 7; // Used to help choose an appropriate font for generic font families.
@@ -254,7 +247,6 @@ inline bool FontDescription::operator==(const FontDescription& other) const
         && m_discretionaryLigaturesState == other.m_discretionaryLigaturesState
         && m_historicalLigaturesState == other.m_historicalLigaturesState
         && m_contextualLigaturesState == other.m_contextualLigaturesState
-        && m_keywordSize == other.m_keywordSize
         && m_fontSmoothing == other.m_fontSmoothing
         && m_textRendering == other.m_textRendering
         && m_orientation == other.m_orientation

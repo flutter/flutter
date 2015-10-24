@@ -25,7 +25,6 @@
 #ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLPARSERIDIOMS_H_
 #define SKY_ENGINE_CORE_HTML_PARSER_HTMLPARSERIDIOMS_H_
 
-#include "sky/engine/core/dom/QualifiedName.h"
 #include "sky/engine/platform/Decimal.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -99,9 +98,6 @@ inline bool isNotHTMLSpace(CharType character)
 {
     return !isHTMLSpace<CharType>(character);
 }
-
-bool threadSafeMatch(const QualifiedName&, const QualifiedName&);
-bool threadSafeMatch(const String&, const QualifiedName&);
 
 enum CharacterWidth {
     Likely8Bit,

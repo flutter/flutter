@@ -331,9 +331,6 @@ public:
     void setDrawLooper(PassOwnPtr<DrawLooperBuilder>);
     void clearDrawLooper();
 
-    void drawFocusRing(const Vector<IntRect>&, int width, int offset, const Color&);
-    void drawFocusRing(const Path&, int width, int offset, const Color&);
-
     enum Edge {
         NoEdge = 0,
         TopEdge = 1 << 1,

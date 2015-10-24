@@ -22,8 +22,6 @@
 
 #include "sky/engine/core/rendering/RenderInline.h"
 
-#include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
@@ -32,6 +30,7 @@
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
+#include "sky/engine/platform/geometry/Region.h"
 #include "sky/engine/platform/geometry/TransformState.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 
@@ -45,8 +44,7 @@ struct SameSizeAsRenderInline : public RenderBoxModelObject {
 
 COMPILE_ASSERT(sizeof(RenderInline) == sizeof(SameSizeAsRenderInline), RenderInline_should_stay_small);
 
-RenderInline::RenderInline(Element* element)
-    : RenderBoxModelObject(element)
+RenderInline::RenderInline()
 {
 }
 
@@ -58,13 +56,6 @@ void RenderInline::willBeDestroyed()
 
     if (!documentBeingDestroyed()) {
         if (firstLineBox()) {
-            // We can't wait for RenderBoxModelObject::destroy to clear the selection,
-            // because by then we will have nuked the line boxes.
-            // FIXME: The FrameSelection should be responsible for this when it
-            // is notified of DOM mutations.
-            if (isSelectionBorder())
-                view()->clearSelection();
-
             // If line boxes are contained inside a root, that means we're an inline.
             // In that case, we need to remove all the line boxes so that the parent
             // lines aren't pointing to deleted children. If the first line box does
@@ -374,29 +365,9 @@ bool RenderInline::hitTestCulledInline(const HitTestRequest& request, HitTestRes
 
     if (context.intersected()) {
         updateHitTestResult(result, tmpLocation.point());
-        // We can not use addNodeToRectBasedTestResult to determine if we fully enclose the hit-test area
-        // because it can only handle rectangular targets.
-        result.addNodeToRectBasedTestResult(node(), request, locationInContainer);
         return regionResult.contains(tmpLocation.boundingBox());
     }
     return false;
-}
-
-PositionWithAffinity RenderInline::positionForPoint(const LayoutPoint& point)
-{
-    // FIXME(sky): Now that we don't have continuations, can this whole function just be the following?
-    // return containingBlock()->positionForPoint(point);
-
-    // FIXME: Does not deal with relative positioned inlines (should it?)
-    RenderBlock* cb = containingBlock();
-    if (firstLineBox()) {
-        // This inline actually has a line box.  We must have clicked in the border/padding of one of these boxes.  We
-        // should try to find a result by asking our containing block.
-        return cb->positionForPoint(point);
-    }
-
-    // Translate the coords from the pre-anonymous block to the post-anonymous block.
-    return RenderBoxModelObject::positionForPoint(point);
 }
 
 namespace {
@@ -595,17 +566,6 @@ void RenderInline::mapLocalToContainer(const RenderBox* paintInvalidationContain
 
 void RenderInline::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
 {
-    if (result.innerNode())
-        return;
-
-    Node* n = node();
-    LayoutPoint localPoint(point);
-    if (n) {
-        result.setInnerNode(n);
-        if (!result.innerNonSharedNode())
-            result.setInnerNonSharedNode(n);
-        result.setLocalPoint(localPoint);
-    }
 }
 
 void RenderInline::dirtyLineBoxes(bool fullLayout)

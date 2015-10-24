@@ -22,7 +22,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_
 
-#include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/rendering/RenderFlexibleBox.h"
 #include "sky/engine/wtf/OwnPtr.h"
 
@@ -34,7 +33,7 @@ namespace blink {
 // relative to the document (and so isn't necessarily in view).
 class RenderView final : public RenderFlexibleBox {
 public:
-    explicit RenderView(Document*);
+    explicit RenderView();
     virtual ~RenderView();
 
     bool hitTest(const HitTestRequest&, HitTestResult&);
@@ -62,8 +61,6 @@ public:
     int viewLogicalHeight() const;
     LayoutUnit viewLogicalHeightForPercentages() const;
 
-    FrameView* frameView() const { return m_frameView; }
-
     virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override;
     virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&) override;
 
@@ -76,7 +73,6 @@ public:
 
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
-    virtual LayoutRect viewRect() const override;
     void setFrameViewSize(const IntSize& frameViewSize) { m_frameViewSize = frameViewSize; }
 
     IntRect unscaledDocumentRect() const;
@@ -95,7 +91,6 @@ private:
     void positionDialog(RenderBox*);
     void positionDialogs();
 
-    FrameView* m_frameView;
     IntSize m_frameViewSize;
 
     RawPtr<RenderObject> m_selectionStart;

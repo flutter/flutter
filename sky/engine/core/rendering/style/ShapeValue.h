@@ -30,7 +30,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_
 
-#include "sky/engine/core/rendering/style/BasicShapes.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/StyleImage.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -41,15 +40,9 @@ class ShapeValue : public RefCounted<ShapeValue> {
 public:
     enum ShapeValueType {
         // The Auto value is defined by a null ShapeValue*
-        Shape,
         Box,
         Image
     };
-
-    static PassRefPtr<ShapeValue> createShapeValue(PassRefPtr<BasicShape> shape, CSSBoxType cssBox)
-    {
-        return adoptRef(new ShapeValue(shape, cssBox));
-    }
 
     static PassRefPtr<ShapeValue> createBoxShapeValue(CSSBoxType cssBox)
     {
@@ -62,7 +55,6 @@ public:
     }
 
     ShapeValueType type() const { return m_type; }
-    BasicShape* shape() const { return m_shape.get(); }
 
     StyleImage* image() const { return m_image.get(); }
     bool isImageValid() const
@@ -82,12 +74,6 @@ public:
     bool operator==(const ShapeValue& other) const;
 
 private:
-    ShapeValue(PassRefPtr<BasicShape> shape, CSSBoxType cssBox)
-        : m_type(Shape)
-        , m_shape(shape)
-        , m_cssBox(cssBox)
-    {
-    }
     ShapeValue(ShapeValueType type)
         : m_type(type)
         , m_cssBox(BoxMissing)
@@ -105,9 +91,7 @@ private:
     {
     }
 
-
     ShapeValueType m_type;
-    RefPtr<BasicShape> m_shape;
     RefPtr<StyleImage> m_image;
     CSSBoxType m_cssBox;
 };
@@ -118,8 +102,6 @@ inline bool ShapeValue::operator==(const ShapeValue& other) const
         return false;
 
     switch (type()) {
-    case Shape:
-        return shape() == other.shape() && cssBox() == other.cssBox();
     case Box:
         return cssBox() == other.cssBox();
     case Image:

@@ -198,9 +198,6 @@ def includes_for_cpp_class(class_name, relative_dir_posix):
 INCLUDES_FOR_TYPE = {
     'object': set(),
     'CompareHow': set(),
-    'NodeList': set(['bindings/core/v8/V8NodeList.h',
-                     'core/dom/NodeList.h',
-                     'core/dom/StaticNodeList.h']),
     'Promise': set(['bindings/core/v8/ScriptPromise.h']),
     'SerializedScriptValue': set(['bindings/core/v8/SerializedScriptValue.h']),
     'ScriptValue': set(['bindings/core/v8/ScriptValue.h']),

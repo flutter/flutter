@@ -43,13 +43,7 @@
 
 #include "sky/engine/core/rendering/RenderLayer.h"
 
-#include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/HitTestingTransformState.h"
@@ -384,20 +378,6 @@ void RenderLayer::convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutR
     rect.move(-delta.x(), -delta.y());
 }
 
-static bool inContainingBlockChain(RenderLayer* startLayer, RenderLayer* endLayer)
-{
-    if (startLayer == endLayer)
-        return true;
-
-    RenderView* view = startLayer->renderer()->view();
-    for (RenderBlock* currentBlock = startLayer->renderer()->containingBlock(); currentBlock && currentBlock != view; currentBlock = currentBlock->containingBlock()) {
-        if (currentBlock->layer() == endLayer)
-            return true;
-    }
-
-    return false;
-}
-
 void RenderLayer::clipToRect(const LayerPaintingInfo& localPaintingInfo, GraphicsContext* context, const ClipRect& clipRect,
     BorderRadiusClippingRule rule)
 {
@@ -405,23 +385,6 @@ void RenderLayer::clipToRect(const LayerPaintingInfo& localPaintingInfo, Graphic
         return;
     context->save();
     context->clip(pixelSnappedIntRect(clipRect.rect()));
-
-    if (!clipRect.hasRadius())
-        return;
-
-    // If the clip rect has been tainted by a border radius, then we have to walk up our layer chain applying the clips from
-    // any layers with overflow. The condition for being able to apply these clips is that the overflow object be in our
-    // containing block chain so we check that also.
-    for (RenderLayer* layer = rule == IncludeSelfForBorderRadius ? this : parent(); layer; layer = layer->parent()) {
-        if (layer->renderer()->hasOverflowClip() && layer->renderer()->style()->hasBorderRadius() && inContainingBlockChain(this, layer)) {
-                LayoutPoint delta;
-                layer->convertToLayerCoords(localPaintingInfo.rootLayer, delta);
-                context->clipRoundedRect(layer->renderer()->style()->getRoundedInnerBorderFor(LayoutRect(delta, layer->size())));
-        }
-
-        if (layer == localPaintingInfo.rootLayer)
-            break;
-    }
 }
 
 void RenderLayer::restoreClip(GraphicsContext* context, const LayoutRect& paintDirtyRect, const ClipRect& clipRect)
@@ -436,15 +399,6 @@ bool RenderLayer::intersectsDamageRect(const LayoutRect& layerBounds, const Layo
     // Always examine the canvas and the root.
     if (isRootLayer())
         return true;
-
-    // If we aren't an inline flow, and our layer bounds do intersect the damage rect, then we
-    // can go ahead and return true.
-    RenderView* view = renderer()->view();
-    ASSERT(view);
-    if (view && !renderer()->isRenderInline()) {
-        if (layerBounds.intersects(damageRect))
-            return true;
-    }
 
     // Otherwise we need to compute the bounding box of this single layer and see if it intersects
     // the damage rect.
@@ -471,7 +425,6 @@ LayoutRect RenderLayer::logicalBoundingBox() const
         result.unite(box->visualOverflowRect());
     }
 
-    ASSERT(renderer()->view());
     return result;
 }
 
@@ -522,10 +475,6 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
 
     if (!ancestorLayer)
         ancestorLayer = this;
-
-    // The root layer is always just the size of the document.
-    if (isRootLayer())
-        return m_renderer->view()->unscaledDocumentRect();
 
     LayoutRect localClipRect = clipper().localClipRect();
     if (localClipRect != PaintInfo::infiniteRect()) {

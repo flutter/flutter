@@ -31,9 +31,7 @@
 
 namespace blink {
 
-class Element;
 class LayoutRect;
-class LocalFrame;
 class Node;
 class RenderLayer;
 class RenderObject;
@@ -52,8 +50,6 @@ enum RenderAsTextBehaviorFlags {
 typedef unsigned RenderAsTextBehavior;
 
 // You don't need pageWidthInPixels if you don't specify RenderAsTextInPrintingMode.
-String externalRepresentation(LocalFrame*, RenderAsTextBehavior = RenderAsTextBehaviorNormal);
-String externalRepresentation(Element*, RenderAsTextBehavior = RenderAsTextBehaviorNormal);
 void write(TextStream&, const RenderObject&, int indent = 0, RenderAsTextBehavior = RenderAsTextBehaviorNormal);
 
 class RenderTreeAsText {

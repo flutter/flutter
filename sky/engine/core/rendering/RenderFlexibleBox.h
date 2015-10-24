@@ -38,7 +38,7 @@ namespace blink {
 
 class RenderFlexibleBox : public RenderBlock {
 public:
-    RenderFlexibleBox(ContainerNode*);
+    RenderFlexibleBox();
     virtual ~RenderFlexibleBox();
 
     virtual const char* renderName() const override;

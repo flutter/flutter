@@ -36,7 +36,6 @@
 
 namespace blink {
 
-class CSSFontFace;
 class CSSFontSelector;
 class FontData;
 class FontDescription;
@@ -54,14 +53,11 @@ public:
     CSSFontSelector* fontSelector() const { return m_fontSelector; }
     FontTraits traits() const { return m_traits; }
 
-    void addFontFace(PassRefPtr<FontFace>, bool cssConnected);
-    void removeFontFace(PassRefPtr<FontFace>);
-    bool isEmpty() const { return m_fontFaces.isEmpty(); }
+    bool isEmpty() const { return true; }
 
     PassRefPtr<FontData> getFontData(const FontDescription&);
 
     bool checkFont(const String&) const;
-    void match(const String&, Vector<RefPtr<FontFace> >&) const;
     void willUseFontData(const FontDescription&, UChar32);
 
 private:
@@ -72,14 +68,9 @@ private:
     bool isLoading() const;
     bool isLoaded() const;
 
-    typedef ListHashSet<RefPtr<FontFace> > FontFaceList;
-
     RawPtr<CSSFontSelector> m_fontSelector;
     FontTraits m_traits;
     HashMap<unsigned, RefPtr<SegmentedFontData> > m_fontDataTable;
-    // All non-CSS-connected FontFaces are stored after the CSS-connected ones.
-    FontFaceList m_fontFaces;
-    FontFaceList::iterator m_firstNonCssConnectedFace;
 };
 
 } // namespace blink

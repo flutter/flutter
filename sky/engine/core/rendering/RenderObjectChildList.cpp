@@ -34,13 +34,8 @@ namespace blink {
 
 void RenderObjectChildList::destroyLeftoverChildren()
 {
-    while (firstChild()) {
-        // Destroy any anonymous children remaining in the render tree, as well as implicit (shadow) DOM elements like those used in the engine-based text fields.
-        // FIXME(sky): This should never happen now.
-        if (firstChild()->node())
-            firstChild()->node()->setRenderer(0);
+    while (firstChild())
         firstChild()->destroy();
-    }
 }
 
 RenderObject* RenderObjectChildList::removeChildNode(RenderObject* owner, RenderObject* oldChild, bool notifyRenderer)
@@ -59,13 +54,6 @@ RenderObject* RenderObjectChildList::removeChildNode(RenderObject* owner, Render
     // If we have a line box wrapper, delete it.
     if (oldChild->isBox())
         toRenderBox(oldChild)->deleteLineBoxWrapper();
-
-    // If oldChild is the start or end of the selection, then clear the selection to
-    // avoid problems of invalid pointers.
-    // FIXME: The FrameSelection should be responsible for this when it
-    // is notified of DOM mutations.
-    if (!owner->documentBeingDestroyed() && oldChild->isSelectionBorder())
-        owner->view()->clearSelection();
 
     if (!owner->documentBeingDestroyed() && notifyRenderer)
         oldChild->willBeRemovedFromTree();

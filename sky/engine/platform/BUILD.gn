@@ -150,8 +150,6 @@ source_set("platform") {
     "Timer.h",
     "TraceEvent.h",
     "WebThread.cpp",
-    "Widget.cpp",
-    "Widget.h",
     "WindowsKeyboardCodes.h",
     "animation/AnimationUtilities.h",
     "animation/AnimationValue.h",

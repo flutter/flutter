@@ -25,9 +25,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLE_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLE_H_
 
-#include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/core/css/CSSLineBoxContainValue.h"
-#include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/core/rendering/style/BorderValue.h"
 #include "sky/engine/core/rendering/style/CounterDirectives.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
@@ -287,7 +284,7 @@ public:
 
     bool hasBackground() const
     {
-        Color color = colorIncludingFallback(CSSPropertyBackgroundColor);
+        Color color = resolveColor(backgroundColor());
         if (color.alpha())
             return true;
         return hasBackgroundImage();
@@ -1074,7 +1071,19 @@ public:
     static Color initialTapHighlightColor();
     static const FilterOperations& initialFilter() { DEFINE_STATIC_LOCAL(FilterOperations, ops, ()); return ops; }
 
-    Color colorIncludingFallback(int colorProperty) const;
+    Color resolveColor(StyleColor unresolvedColor) const {
+      return unresolvedColor.resolve(color());
+    }
+
+    StyleColor borderLeftColor() const { return surround->border.left().color(); }
+    StyleColor borderRightColor() const { return surround->border.right().color(); }
+    StyleColor borderTopColor() const { return surround->border.top().color(); }
+    StyleColor borderBottomColor() const { return surround->border.bottom().color(); }
+    StyleColor backgroundColor() const { return m_background->color(); }
+    Color color() const;
+    StyleColor textEmphasisColor() const { return rareInheritedData->textEmphasisColor(); }
+    StyleColor textFillColor() const { return rareInheritedData->textFillColor(); }
+    StyleColor textStrokeColor() const { return rareInheritedData->textStrokeColor(); }
 
 private:
     void inheritUnicodeBidiFrom(const RenderStyle* parent) { noninherited_flags.unicodeBidi = parent->noninherited_flags.unicodeBidi; }
@@ -1105,18 +1114,6 @@ private:
     {
         return display == INLINE || isDisplayReplacedType(display);
     }
-
-    // Color accessors are all private to make sure callers use colorIncludingFallback instead to access them.
-    StyleColor borderLeftColor() const { return surround->border.left().color(); }
-    StyleColor borderRightColor() const { return surround->border.right().color(); }
-    StyleColor borderTopColor() const { return surround->border.top().color(); }
-    StyleColor borderBottomColor() const { return surround->border.bottom().color(); }
-    StyleColor backgroundColor() const { return m_background->color(); }
-    Color color() const;
-    StyleColor outlineColor() const { return m_background->outline().color(); }
-    StyleColor textEmphasisColor() const { return rareInheritedData->textEmphasisColor(); }
-    StyleColor textFillColor() const { return rareInheritedData->textFillColor(); }
-    StyleColor textStrokeColor() const { return rareInheritedData->textStrokeColor(); }
 
     StyleColor textDecorationColor() const { return rareNonInheritedData->m_textDecorationColor; }
 

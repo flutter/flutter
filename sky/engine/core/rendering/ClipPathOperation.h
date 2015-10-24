@@ -30,7 +30,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_CLIPPATHOPERATION_H_
 #define SKY_ENGINE_CORE_RENDERING_CLIPPATHOPERATION_H_
 
-#include "sky/engine/core/rendering/style/BasicShapes.h"
 #include "sky/engine/platform/graphics/Path.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -62,50 +61,6 @@ protected:
 
     OperationType m_type;
 };
-
-class ShapeClipPathOperation final : public ClipPathOperation {
-public:
-    static PassRefPtr<ShapeClipPathOperation> create(PassRefPtr<BasicShape> shape)
-    {
-        return adoptRef(new ShapeClipPathOperation(shape));
-    }
-
-    const BasicShape* basicShape() const { return m_shape.get(); }
-    bool isValid() const { return m_shape.get(); }
-    WindRule windRule() const { return m_shape->windRule(); }
-    const Path& path(const FloatRect& boundingRect)
-    {
-        ASSERT(m_shape);
-        m_path.clear();
-        m_path = adoptPtr(new Path);
-        m_shape->path(*m_path, boundingRect);
-        return *m_path;
-    }
-
-private:
-    virtual bool operator==(const ClipPathOperation&) const override;
-
-    ShapeClipPathOperation(PassRefPtr<BasicShape> shape)
-        : ClipPathOperation(SHAPE)
-        , m_shape(shape)
-    {
-    }
-
-    RefPtr<BasicShape> m_shape;
-    OwnPtr<Path> m_path;
-};
-
-DEFINE_TYPE_CASTS(ShapeClipPathOperation, ClipPathOperation, op, op->type() == ClipPathOperation::SHAPE, op.type() == ClipPathOperation::SHAPE);
-
-inline bool ShapeClipPathOperation::operator==(const ClipPathOperation& o) const
-{
-    if (!isSameType(o))
-        return false;
-    BasicShape* otherShape = toShapeClipPathOperation(o).m_shape.get();
-    if (!m_shape.get() || !otherShape)
-        return static_cast<bool>(m_shape.get()) == static_cast<bool>(otherShape);
-    return *m_shape == *otherShape;
-}
 
 }
 

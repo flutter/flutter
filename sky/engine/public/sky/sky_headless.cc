@@ -6,6 +6,7 @@
 
 #include "sky/engine/core/script/dart_controller.h"
 #include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

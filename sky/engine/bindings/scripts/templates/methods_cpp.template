@@ -95,13 +95,6 @@ static void {{static_method_name(method.name, overload_index)}}(Dart_NativeArgum
             goto fail;
         }
         {% endif %}
-        {% if method.is_call_with_execution_context %}
-        ExecutionContext* context = DOMDartState::CurrentDocument();
-        if (!context) {
-            exception = ToDart("Failed to retrieve a context");
-            goto fail;
-        }
-        {% endif %}
         {% if method.is_call_with_script_arguments %}
         {# Last parameter is the customArgument #}
         Dart_Handle customArgument = Dart_GetNativeArgument(args, Dart_GetNativeArgumentCount(args) - 1);
@@ -312,21 +305,6 @@ static void {{static_method_name(constructor.name, overload_index)}}(Dart_Native
     Dart_Handle exception = nullptr;
 {% endif %}
     {
-{% if is_constructor_call_with_execution_context %}
-        ExecutionContext* context = DOMDartState::CurrentDocument();
-        if (!context) {
-            exception = ToDart("Failed to retrieve a context");
-            goto fail;
-        }
-{% endif %}
-{% if is_constructor_call_with_document or (constructor == named_constructor) %}
-        LocalDOMWindow* domWindow = DOMDartState::CurrentWindow();
-        if (!domWindow) {
-            exception = ToDart("Failed to fetch domWindow");
-            goto fail;
-        }
-        Document& document = *domWindow->document();
-{% endif %}
         int argCount /* FIXME(vsm): Remove this. */ ALLOW_UNUSED = Dart_GetNativeArgumentCount(args);
 {% if constructor.has_exception_state %}
         ExceptionState es;

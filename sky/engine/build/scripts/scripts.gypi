@@ -15,11 +15,6 @@
             'template_expander.py',
             'templates/macros.tmpl',
         ],
-        'css_properties_files': [
-            '<@(scripts_for_in_files)',
-            'css_properties.py',
-            '../../core/css/CSSProperties.in',
-        ],
         'make_event_factory_files': [
             '<@(scripts_for_in_files)',
             'make_event_factory.py',
@@ -29,17 +24,6 @@
             'make_names.py',
             'templates/MakeNames.cpp.tmpl',
             'templates/MakeNames.h.tmpl',
-        ],
-        'make_qualified_names_files': [
-            '<@(scripts_for_in_files)',
-            'make_qualified_names.py',
-            'templates/MakeQualifiedNames.cpp.tmpl',
-            'templates/MakeQualifiedNames.h.tmpl',
-        ],
-        'make_element_type_helpers_files': [
-            '<@(make_qualified_names_files)',
-            'make_element_type_helpers.py',
-            'templates/ElementTypeHelpers.h.tmpl',
         ],
         'conditions': [
             ['OS=="win"', {

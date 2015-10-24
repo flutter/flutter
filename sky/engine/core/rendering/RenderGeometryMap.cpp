@@ -25,7 +25,6 @@
 
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 
-#include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/geometry/TransformState.h"
@@ -192,7 +191,7 @@ void RenderGeometryMap::pushMappingsToAncestor(const RenderLayer* layer, const R
 {
     const RenderObject* renderer = layer->renderer();
 
-    bool crossDocument = ancestorLayer && layer->renderer()->frame() != ancestorLayer->renderer()->frame();
+    bool crossDocument = false;
     ASSERT(!crossDocument || m_mapCoordinatesFlags & TraverseDocumentBoundaries);
 
     // We have to visit all the renderers to detect flipped blocks. This might defeat the gains

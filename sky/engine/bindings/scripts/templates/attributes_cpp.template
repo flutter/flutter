@@ -5,13 +5,6 @@ static void {{static_attribute_name(attribute, 'Getter')}}(Dart_NativeArguments 
     Dart_Handle exception = nullptr;
 {% endif %}
   {
-{% if attribute.is_call_with_execution_context %}
-    ExecutionContext* context = DOMDartState::CurrentDocument();
-    if (!context) {
-      exception = ToDart("Failed to retrieve a context");
-      goto fail;
-    }
-{% endif %}
 {% if attribute.is_call_with_script_state %}
     DartState* dart_state = DartState::Current();
     DCHECK(state);
@@ -86,17 +79,6 @@ static void {{static_attribute_name(attribute, 'Setter')}}(Dart_NativeArguments 
         {{attribute.local_cpp_type}} {{attribute.setter_lvalue}} = {{attribute.dart_value_to_local_cpp_value}};
         if (exception)
             goto fail;
-{% if attribute.is_call_with_execution_context or
-      attribute.is_setter_call_with_execution_context %}
-
-        ExecutionContext* context = DOMDartState::CurrentDocument();
-        if (!context) {
-            exception = ToDart("Failed to retrieve a context");
-            goto fail;
-        }
-
-{% endif %}
-
 {% if attribute.is_call_with_script_state %}
         ScriptState* state = DartUtilities::currentScriptState();
         if (!state) {

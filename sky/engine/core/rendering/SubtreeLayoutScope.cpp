@@ -30,7 +30,6 @@
 
 #include "sky/engine/core/rendering/SubtreeLayoutScope.h"
 
-#include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
@@ -38,7 +37,6 @@ namespace blink {
 SubtreeLayoutScope::SubtreeLayoutScope(RenderObject& root)
     : m_root(root)
 {
-    RELEASE_ASSERT(!m_root.node() || m_root.document().view()->isInPerformLayout());
 }
 
 SubtreeLayoutScope::~SubtreeLayoutScope()
