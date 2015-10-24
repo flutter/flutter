@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This test can take a while due to network requests
-@Timeout(const Duration(seconds: 60))
+// This test can take a while due to network requests.
+@Timeout(const Duration(minutes: 2))
 library init_test;
 
 import 'dart:io';
