@@ -128,10 +128,6 @@ def interface_context(interface):
                     interface.name, None, 'Constructor', False, 2)],
         }
 
-    if (context['constructors'] or custom_constructors or context['has_event_constructor'] or
-        named_constructor):
-        includes.add('core/frame/LocalDOMWindow.h')
-
     context.update({
         'constructors': constructors,
         'custom_constructors': custom_constructors,
@@ -139,8 +135,6 @@ def interface_context(interface):
         'has_custom_constructor': bool(custom_constructors),
         'interface_length':
             v8_interface.interface_length(interface, constructors + custom_constructors),
-        'is_constructor_call_with_document': DartUtilities.has_extended_attribute_value(
-            interface, 'ConstructorCallWith', 'Document'),  # [ConstructorCallWith=Document]
         'is_constructor_call_with_execution_context': DartUtilities.has_extended_attribute_value(
             interface, 'ConstructorCallWith', 'ExecutionContext'),  # [ConstructorCallWith=ExeuctionContext]
         'named_constructor': named_constructor,

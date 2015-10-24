@@ -23,16 +23,8 @@
 #include "sky/engine/core/rendering/InlineTextBox.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/DocumentMarkerController.h"
-#include "sky/engine/core/dom/RenderedDocumentMarker.h"
-#include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/editing/CompositionUnderline.h"
 #include "sky/engine/core/editing/CompositionUnderlineRangeFilter.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/rendering/EllipsisBox.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
@@ -61,8 +53,6 @@ COMPILE_ASSERT(sizeof(InlineTextBox) == sizeof(SameSizeAsInlineTextBox), InlineT
 
 typedef WTF::HashMap<const InlineTextBox*, LayoutRect> InlineTextBoxOverflowMap;
 static InlineTextBoxOverflowMap* gTextBoxesWithOverflow;
-
-static const int misspellingLineThickness = 3;
 
 void InlineTextBox::destroy()
 {
@@ -162,22 +152,6 @@ RenderObject::SelectionState InlineTextBox::selectionState()
             state = RenderObject::SelectionNone;
     }
 
-    // If there are ellipsis following, make sure their selection is updated.
-    if (m_truncation != cNoTruncation && root().ellipsisBox()) {
-        EllipsisBox* ellipsis = root().ellipsisBox();
-        if (state != RenderObject::SelectionNone) {
-            int start, end;
-            selectionStartEnd(start, end);
-            // The ellipsis should be considered to be selected if the end of
-            // the selection is past the beginning of the truncation and the
-            // beginning of the selection is before or at the beginning of the
-            // truncation.
-            ellipsis->setSelectionState(end >= m_truncation && start <= m_truncation ?
-                RenderObject::SelectionInside : RenderObject::SelectionNone);
-        } else
-            ellipsis->setSelectionState(RenderObject::SelectionNone);
-    }
-
     return state;
 }
 
@@ -239,74 +213,6 @@ void InlineTextBox::attachLine()
     renderer().attachTextBox(this);
 }
 
-float InlineTextBox::placeEllipsisBox(bool flowIsLTR, float visibleLeftEdge, float visibleRightEdge, float ellipsisWidth, float &truncatedWidth, bool& foundBox)
-{
-    if (foundBox) {
-        m_truncation = cFullTruncation;
-        return -1;
-    }
-
-    // For LTR this is the left edge of the box, for RTL, the right edge in parent coordinates.
-    float ellipsisX = flowIsLTR ? visibleRightEdge - ellipsisWidth : visibleLeftEdge + ellipsisWidth;
-
-    // Criteria for full truncation:
-    // LTR: the left edge of the ellipsis is to the left of our text run.
-    // RTL: the right edge of the ellipsis is to the right of our text run.
-    bool ltrFullTruncation = flowIsLTR && ellipsisX <= logicalLeft();
-    bool rtlFullTruncation = !flowIsLTR && ellipsisX >= logicalLeft() + logicalWidth();
-    if (ltrFullTruncation || rtlFullTruncation) {
-        // Too far.  Just set full truncation, but return -1 and let the ellipsis just be placed at the edge of the box.
-        m_truncation = cFullTruncation;
-        foundBox = true;
-        return -1;
-    }
-
-    bool ltrEllipsisWithinBox = flowIsLTR && (ellipsisX < logicalRight());
-    bool rtlEllipsisWithinBox = !flowIsLTR && (ellipsisX > logicalLeft());
-    if (ltrEllipsisWithinBox || rtlEllipsisWithinBox) {
-        foundBox = true;
-
-        // The inline box may have different directionality than it's parent.  Since truncation
-        // behavior depends both on both the parent and the inline block's directionality, we
-        // must keep track of these separately.
-        bool ltr = isLeftToRightDirection();
-        if (ltr != flowIsLTR) {
-            // Width in pixels of the visible portion of the box, excluding the ellipsis.
-            int visibleBoxWidth = visibleRightEdge - visibleLeftEdge  - ellipsisWidth;
-            ellipsisX = ltr ? logicalLeft() + visibleBoxWidth : logicalRight() - visibleBoxWidth;
-        }
-
-        int offset = offsetForPosition(ellipsisX, false);
-        if (offset == 0) {
-            // No characters should be rendered.  Set ourselves to full truncation and place the ellipsis at the min of our start
-            // and the ellipsis edge.
-            m_truncation = cFullTruncation;
-            truncatedWidth += ellipsisWidth;
-            return std::min(ellipsisX, logicalLeft());
-        }
-
-        // Set the truncation index on the text run.
-        m_truncation = offset;
-
-        // If we got here that means that we were only partially truncated and we need to return the pixel offset at which
-        // to place the ellipsis.
-        float widthOfVisibleText = renderer().width(m_start, offset, textPos(), flowIsLTR ? LTR : RTL, isFirstLineStyle());
-
-        // The ellipsis needs to be placed just after the last visible character.
-        // Where "after" is defined by the flow directionality, not the inline
-        // box directionality.
-        // e.g. In the case of an LTR inline box truncated in an RTL flow then we can
-        // have a situation such as |Hello| -> |...He|
-        truncatedWidth += widthOfVisibleText + ellipsisWidth;
-        if (flowIsLTR)
-            return logicalLeft() + widthOfVisibleText;
-        else
-            return logicalRight() - widthOfVisibleText - ellipsisWidth;
-    }
-    truncatedWidth += logicalWidth();
-    return -1;
-}
-
 bool InlineTextBox::isLineBreak() const
 {
     return renderer().style()->preserveNewline() && len() == 1 && (*renderer().text().impl())[start()] == '\n';
@@ -322,8 +228,7 @@ bool InlineTextBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& re
     FloatRect rect(boxOrigin, size());
     if (m_truncation != cFullTruncation && visibleToHitTestRequest(request) && locationInContainer.intersects(rect)) {
         renderer().updateHitTestResult(result, locationInContainer.point() - toLayoutSize(accumulatedOffset));
-        if (!result.addNodeToRectBasedTestResult(renderer().node(), request, locationInContainer, rect))
-            return true;
+        return true;
     }
     return false;
 }
@@ -360,9 +265,9 @@ struct TextPaintingStyle {
 TextPaintingStyle textPaintingStyle(RenderText& renderer, RenderStyle* style)
 {
     TextPaintingStyle textStyle;
-    textStyle.fillColor = renderer.resolveColor(style, CSSPropertyWebkitTextFillColor);
-    textStyle.strokeColor = renderer.resolveColor(style, CSSPropertyWebkitTextStrokeColor);
-    textStyle.emphasisMarkColor = renderer.resolveColor(style, CSSPropertyWebkitTextEmphasisColor);
+    textStyle.fillColor = style->resolveColor(style->textFillColor());
+    textStyle.strokeColor = style->resolveColor(style->textStrokeColor());
+    textStyle.emphasisMarkColor = style->resolveColor(style->textEmphasisColor());
     textStyle.strokeWidth = style->textStrokeWidth();
     textStyle.shadow = style->textShadow();
     return textStyle;
@@ -537,7 +442,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     FloatPoint textOrigin = FloatPoint(boxOrigin.x(), boxOrigin.y() + font.fontMetrics().ascent());
 
     // 1. Paint backgrounds behind text if needed. Examples of such backgrounds include selection.
-    paintDocumentMarkers(context, boxOrigin, styleToUse, font, true);
     if (haveSelection)
         paintSelection(context, boxOrigin, styleToUse, font, selectionStyle.fillColor);
 
@@ -604,9 +508,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
         updateGraphicsContext(context, textStyle, stateSaver);
         paintDecoration(context, boxOrigin, textDecorations);
     }
-
-    paintDocumentMarkers(context, boxOrigin, styleToUse, font, false);
-
 }
 
 void InlineTextBox::selectionStartEnd(int& sPos, int& ePos)
@@ -965,81 +866,6 @@ void InlineTextBox::paintDecoration(GraphicsContext* context, const FloatPoint& 
     }
 }
 
-static GraphicsContext::DocumentMarkerLineStyle lineStyleForMarkerType(DocumentMarker::MarkerType markerType)
-{
-    switch (markerType) {
-    case DocumentMarker::Spelling:
-        return GraphicsContext::DocumentMarkerSpellingLineStyle;
-    case DocumentMarker::Grammar:
-        return GraphicsContext::DocumentMarkerGrammarLineStyle;
-    default:
-        ASSERT_NOT_REACHED();
-        return GraphicsContext::DocumentMarkerSpellingLineStyle;
-    }
-}
-
-void InlineTextBox::paintDocumentMarker(GraphicsContext* pt, const FloatPoint& boxOrigin, DocumentMarker* marker, RenderStyle* style, const Font& font, bool grammar)
-{
-    if (m_truncation == cFullTruncation)
-        return;
-
-    float start = 0; // start of line to draw, relative to tx
-    float width = m_logicalWidth; // how much line to draw
-
-    // Determine whether we need to measure text
-    bool markerSpansWholeBox = true;
-    if (m_start <= (int)marker->startOffset())
-        markerSpansWholeBox = false;
-    if ((end() + 1) != marker->endOffset()) // end points at the last char, not past it
-        markerSpansWholeBox = false;
-    if (m_truncation != cNoTruncation)
-        markerSpansWholeBox = false;
-
-    if (!markerSpansWholeBox || grammar) {
-        int startPosition = std::max<int>(marker->startOffset() - m_start, 0);
-        int endPosition = std::min<int>(marker->endOffset() - m_start, m_len);
-
-        if (m_truncation != cNoTruncation)
-            endPosition = std::min<int>(endPosition, m_truncation);
-
-        // Calculate start & width
-        int deltaY = logicalTop() - selectionTop();
-        int selHeight = selectionHeight();
-        FloatPoint startPoint(boxOrigin.x(), boxOrigin.y() - deltaY);
-        TextRun run = constructTextRun(style, font);
-
-        // FIXME: Convert the document markers to float rects.
-        IntRect markerRect = enclosingIntRect(font.selectionRectForText(run, startPoint, selHeight, startPosition, endPosition));
-        start = markerRect.x() - startPoint.x();
-        width = markerRect.width();
-    }
-
-    // IMPORTANT: The misspelling underline is not considered when calculating the text bounds, so we have to
-    // make sure to fit within those bounds.  This means the top pixel(s) of the underline will overlap the
-    // bottom pixel(s) of the glyphs in smaller font sizes.  The alternatives are to increase the line spacing (bad!!)
-    // or decrease the underline thickness.  The overlap is actually the most useful, and matches what AppKit does.
-    // So, we generally place the underline at the bottom of the text, but in larger fonts that's not so good so
-    // we pin to two pixels under the baseline.
-    int lineThickness = misspellingLineThickness;
-    int baseline = renderer().style(isFirstLineStyle())->fontMetrics().ascent();
-    int descent = logicalHeight() - baseline;
-    int underlineOffset;
-    if (descent <= (2 + lineThickness)) {
-        // Place the underline at the very bottom of the text in small/medium fonts.
-        underlineOffset = logicalHeight() - lineThickness;
-    } else {
-        // In larger fonts, though, place the underline up near the baseline to prevent a big gap.
-        underlineOffset = baseline + 2;
-    }
-    pt->drawLineForDocumentMarker(FloatPoint(boxOrigin.x() + start, boxOrigin.y() + underlineOffset), width, lineStyleForMarkerType(marker->type()));
-}
-
-void InlineTextBox::paintTextMatchMarker(GraphicsContext* pt, const FloatPoint& boxOrigin, DocumentMarker* marker, RenderStyle* style, const Font& font)
-{
-    // FIXME(sky): This function didn't seem to actually paint.
-    // Do we even have TextMatch markers in sky? What are they for?
-}
-
 void InlineTextBox::paintCompositionBackgrounds(GraphicsContext* pt, const FloatPoint& boxOrigin, RenderStyle* style, const Font& font, bool useCustomUnderlines)
 {
     ASSERT_NOT_REACHED(); // TODO(ianh): this is unused right now, but we should probably expose it if it's useful
@@ -1057,61 +883,6 @@ void InlineTextBox::paintCompositionBackgrounds(GraphicsContext* pt, const Float
         unsigned start = 0; // TODO(ianh): if we expose this function, provide a way to let authors set this
         unsigned end = 0; // TODO(ianh): if we expose this function, provide a way to let authors set this
         paintSingleCompositionBackgroundRun(pt, boxOrigin, style, font, RenderTheme::theme().platformDefaultCompositionBackgroundColor(), start, end);
-    }
-}
-
-void InlineTextBox::paintDocumentMarkers(GraphicsContext* pt, const FloatPoint& boxOrigin, RenderStyle* style, const Font& font, bool background)
-{
-    if (!renderer().node())
-        return;
-
-    DocumentMarkerVector markers = renderer().document().markers().markersFor(renderer().node());
-    DocumentMarkerVector::const_iterator markerIt = markers.begin();
-
-    // Give any document markers that touch this run a chance to draw before the text has been drawn.
-    // Note end() points at the last char, not one past it like endOffset and ranges do.
-    for ( ; markerIt != markers.end(); ++markerIt) {
-        DocumentMarker* marker = *markerIt;
-
-        // Paint either the background markers or the foreground markers, but not both
-        switch (marker->type()) {
-            case DocumentMarker::Grammar:
-            case DocumentMarker::Spelling:
-                if (background)
-                    continue;
-                break;
-            case DocumentMarker::TextMatch:
-                if (!background)
-                    continue;
-                break;
-            default:
-                continue;
-        }
-
-        if (marker->endOffset() <= start())
-            // marker is completely before this run.  This might be a marker that sits before the
-            // first run we draw, or markers that were within runs we skipped due to truncation.
-            continue;
-
-        if (marker->startOffset() > end())
-            // marker is completely after this run, bail.  A later run will paint it.
-            break;
-
-        // marker intersects this run.  Paint it.
-        switch (marker->type()) {
-            case DocumentMarker::Spelling:
-                paintDocumentMarker(pt, boxOrigin, marker, style, font, false);
-                break;
-            case DocumentMarker::Grammar:
-                paintDocumentMarker(pt, boxOrigin, marker, style, font, true);
-                break;
-            case DocumentMarker::TextMatch:
-                paintTextMatchMarker(pt, boxOrigin, marker, style, font);
-                break;
-            default:
-                ASSERT_NOT_REACHED();
-        }
-
     }
 }
 

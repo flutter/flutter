@@ -25,7 +25,6 @@
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 
 #include <limits>
-#include "gen/sky/core/HTMLNames.h"
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
@@ -315,25 +314,6 @@ enum Mode {
     Charset,
     Pragma,
 };
-
-static bool threadSafeEqual(const StringImpl* a, const StringImpl* b)
-{
-    if (a == b)
-        return true;
-    if (a->hash() != b->hash())
-        return false;
-    return equalNonNull(a, b);
-}
-
-bool threadSafeMatch(const QualifiedName& a, const QualifiedName& b)
-{
-    return threadSafeEqual(a.localName().impl(), b.localName().impl());
-}
-
-bool threadSafeMatch(const String& localName, const QualifiedName& qName)
-{
-    return threadSafeEqual(localName.impl(), qName.localName().impl());
-}
 
 template<typename CharType>
 inline StringImpl* findStringIfStatic(const CharType* characters, unsigned length)

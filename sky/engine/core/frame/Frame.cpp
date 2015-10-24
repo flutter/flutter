@@ -30,12 +30,6 @@
 #include "sky/engine/core/frame/Frame.h"
 
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/frame/FrameHost.h"
-#include "sky/engine/core/frame/LocalDOMWindow.h"
-#include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/public/platform/WebLayer.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -45,12 +39,9 @@ namespace blink {
 
 DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, frameCounter, ("Frame"));
 
-Frame::Frame(FrameClient* client, FrameHost* host)
-    : m_host(host)
-    , m_client(client)
+Frame::Frame(FrameClient* client)
+    : m_client(client)
 {
-    // ASSERT(page());
-
 #ifndef NDEBUG
     frameCounter.increment();
 #endif
@@ -58,10 +49,6 @@ Frame::Frame(FrameClient* client, FrameHost* host)
 
 Frame::~Frame()
 {
-    setDOMWindow(nullptr);
-
-    // FIXME: We should not be doing all this work inside the destructor
-
 #ifndef NDEBUG
     frameCounter.decrement();
 #endif
@@ -70,32 +57,6 @@ Frame::~Frame()
 void Frame::detachChildren()
 {
     // FIXME(sky): remove
-}
-
-FrameHost* Frame::host() const
-{
-    return m_host;
-}
-
-Page* Frame::page() const
-{
-    if (m_host)
-        return &m_host->page();
-    return 0;
-}
-
-Settings* Frame::settings() const
-{
-    if (m_host)
-        return &m_host->settings();
-    return 0;
-}
-
-void Frame::setDOMWindow(PassRefPtr<LocalDOMWindow> domWindow)
-{
-    if (m_domWindow)
-        m_domWindow->reset();
-    m_domWindow = domWindow;
 }
 
 } // namespace blink

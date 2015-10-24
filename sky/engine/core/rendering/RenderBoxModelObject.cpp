@@ -25,7 +25,6 @@
 
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 
-#include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderInline.h"
@@ -61,8 +60,7 @@ void RenderBoxModelObject::setSelectionState(SelectionState state)
         containingBlock->setSelectionState(state);
 }
 
-RenderBoxModelObject::RenderBoxModelObject(ContainerNode* node)
-    : RenderObject(node)
+RenderBoxModelObject::RenderBoxModelObject()
 {
 }
 
@@ -140,31 +138,7 @@ LayoutPoint RenderBoxModelObject::adjustedPositionRelativeToOffsetParent(const L
     if (!parent())
         return LayoutPoint();
 
-    LayoutPoint referencePoint = startPoint;
-
-    // If the offsetParent of the element is null, or is the HTML body element,
-    // return the distance between the canvas origin and the left border edge
-    // of the element and stop this algorithm.
-    Element* element = offsetParent();
-    if (!element)
-        return referencePoint;
-
-    if (const RenderBoxModelObject* offsetParent = element->renderBoxModelObject()) {
-        if (offsetParent->isBox())
-            referencePoint.move(-toRenderBox(offsetParent)->borderLeft(), -toRenderBox(offsetParent)->borderTop());
-        if (!isOutOfFlowPositioned()) {
-            RenderObject* current;
-            for (current = parent(); current != offsetParent && current->parent(); current = current->parent()) {
-                // FIXME: What are we supposed to do inside SVG content?
-                if (!isOutOfFlowPositioned()) {
-                    if (current->isBox())
-                        referencePoint.moveBy(toRenderBox(current)->location());
-                }
-            }
-        }
-    }
-
-    return referencePoint;
+    return startPoint;
 }
 
 LayoutUnit RenderBoxModelObject::offsetLeft() const
@@ -412,24 +386,6 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
                 context->fillRect(backgroundRect, bgColor, context->compositeOperation());
         }
     }
-
-    // no progressive loading of the background image
-    if (shouldPaintBackgroundImage) {
-        BackgroundImageGeometry geometry;
-        calculateBackgroundImageGeometry(paintInfo.paintContainer(), bgLayer, scrolledPaintRect, geometry, backgroundObject);
-        geometry.clip(paintInfo.rect);
-        if (!geometry.destRect().isEmpty()) {
-            // FIXME(sky): Is it possible for the bgLayer to be something other that CompositeSourceOver?
-            CompositeOperator compositeOp = bgLayer.composite();
-            RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
-            RefPtr<Image> image = bgImage->image(clientForBackgroundImage, geometry.tileSize());
-            InterpolationQuality previousInterpolationQuality = context->imageInterpolationQuality();
-            context->setImageInterpolationQuality(InterpolationLow);
-            context->drawTiledImage(image.get(), geometry.destRect(), geometry.relativePhase(), geometry.tileSize(),
-                compositeOp, bgLayer.blendMode(), geometry.spaceSize());
-            context->setImageInterpolationQuality(previousInterpolationQuality);
-        }
-    }
 }
 
 static inline int resolveWidthForRatio(int height, const FloatSize& intrinsicRatio)
@@ -620,150 +576,6 @@ IntPoint RenderBoxModelObject::BackgroundImageGeometry::relativePhase() const
     IntPoint phase = m_phase;
     phase += m_destRect.location() - m_destOrigin;
     return phase;
-}
-
-static inline int getSpace(int areaSize, int tileSize)
-{
-    int numberOfTiles = areaSize / tileSize;
-    int space = -1;
-
-    if (numberOfTiles > 1)
-        space = lroundf((float)(areaSize - numberOfTiles * tileSize) / (numberOfTiles - 1));
-
-    return space;
-}
-
-void RenderBoxModelObject::calculateBackgroundImageGeometry(const RenderBox* paintContainer, const FillLayer& fillLayer, const LayoutRect& paintRect,
-    BackgroundImageGeometry& geometry, RenderObject* backgroundObject) const
-{
-    LayoutUnit left = 0;
-    LayoutUnit top = 0;
-    IntSize positioningAreaSize;
-    IntRect snappedPaintRect = pixelSnappedIntRect(paintRect);
-
-    // Determine the background positioning area and set destRect to the background painting area.
-    // destRect will be adjusted later if the background is non-repeating.
-    // FIXME: transforms spec says that fixed backgrounds behave like scroll inside transforms.
-    bool fixedAttachment = fillLayer.attachment() == FixedBackgroundAttachment;
-    if (!fixedAttachment) {
-        geometry.setDestRect(snappedPaintRect);
-
-        LayoutUnit right = 0;
-        LayoutUnit bottom = 0;
-        // Scroll and Local.
-        if (fillLayer.origin() != BorderFillBox) {
-            left = borderLeft();
-            right = borderRight();
-            top = borderTop();
-            bottom = borderBottom();
-            if (fillLayer.origin() == ContentFillBox) {
-                left += paddingLeft();
-                right += paddingRight();
-                top += paddingTop();
-                bottom += paddingBottom();
-            }
-        }
-
-        positioningAreaSize = pixelSnappedIntSize(paintRect.size() - LayoutSize(left + right, top + bottom), paintRect.location());
-    } else {
-        geometry.setHasNonLocalGeometry();
-
-        IntRect viewportRect = pixelSnappedIntRect(viewRect());
-
-        if (paintContainer) {
-            IntPoint absoluteContainerOffset = roundedIntPoint(paintContainer->localToAbsolute(FloatPoint()));
-            viewportRect.moveBy(-absoluteContainerOffset);
-        }
-
-        geometry.setDestRect(pixelSnappedIntRect(viewportRect));
-        positioningAreaSize = geometry.destRect().size();
-    }
-
-    const RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
-    IntSize fillTileSize = calculateFillTileSize(fillLayer, positioningAreaSize);
-    fillLayer.image()->setContainerSizeForRenderer(clientForBackgroundImage, fillTileSize);
-    geometry.setTileSize(fillTileSize);
-
-    EFillRepeat backgroundRepeatX = fillLayer.repeatX();
-    EFillRepeat backgroundRepeatY = fillLayer.repeatY();
-    int availableWidth = positioningAreaSize.width() - geometry.tileSize().width();
-    int availableHeight = positioningAreaSize.height() - geometry.tileSize().height();
-
-    LayoutUnit computedXPosition = roundedMinimumValueForLength(fillLayer.xPosition(), availableWidth);
-    if (backgroundRepeatX == RoundFill && positioningAreaSize.width() > 0 && fillTileSize.width() > 0) {
-        long nrTiles = std::max(1l, lroundf((float)positioningAreaSize.width() / fillTileSize.width()));
-
-        if (fillLayer.size().size.height().isAuto() && backgroundRepeatY != RoundFill) {
-            fillTileSize.setHeight(fillTileSize.height() * positioningAreaSize.width() / (nrTiles * fillTileSize.width()));
-        }
-
-        fillTileSize.setWidth(positioningAreaSize.width() / nrTiles);
-        geometry.setTileSize(fillTileSize);
-        geometry.setPhaseX(geometry.tileSize().width() ? geometry.tileSize().width() - roundToInt(computedXPosition + left) % geometry.tileSize().width() : 0);
-        geometry.setSpaceSize(IntSize());
-    }
-
-    LayoutUnit computedYPosition = roundedMinimumValueForLength(fillLayer.yPosition(), availableHeight);
-    if (backgroundRepeatY == RoundFill && positioningAreaSize.height() > 0 && fillTileSize.height() > 0) {
-        long nrTiles = std::max(1l, lroundf((float)positioningAreaSize.height() / fillTileSize.height()));
-
-        if (fillLayer.size().size.width().isAuto() && backgroundRepeatX != RoundFill) {
-            fillTileSize.setWidth(fillTileSize.width() * positioningAreaSize.height() / (nrTiles * fillTileSize.height()));
-        }
-
-        fillTileSize.setHeight(positioningAreaSize.height() / nrTiles);
-        geometry.setTileSize(fillTileSize);
-        geometry.setPhaseY(geometry.tileSize().height() ? geometry.tileSize().height() - roundToInt(computedYPosition + top) % geometry.tileSize().height() : 0);
-        geometry.setSpaceSize(IntSize());
-    }
-
-    if (backgroundRepeatX == RepeatFill) {
-        geometry.setPhaseX(geometry.tileSize().width() ? geometry.tileSize().width() - roundToInt(computedXPosition + left) % geometry.tileSize().width() : 0);
-        geometry.setSpaceSize(IntSize());
-    } else if (backgroundRepeatX == SpaceFill && fillTileSize.width() > 0) {
-        int space = getSpace(positioningAreaSize.width(), geometry.tileSize().width());
-        int actualWidth = geometry.tileSize().width() + space;
-
-        if (space >= 0) {
-            computedXPosition = roundedMinimumValueForLength(Length(), availableWidth);
-            geometry.setSpaceSize(IntSize(space, 0));
-            geometry.setPhaseX(actualWidth ? actualWidth - roundToInt(computedXPosition + left) % actualWidth : 0);
-        } else {
-            backgroundRepeatX = NoRepeatFill;
-        }
-    }
-    if (backgroundRepeatX == NoRepeatFill) {
-        int xOffset = fillLayer.backgroundXOrigin() == RightEdge ? availableWidth - computedXPosition : computedXPosition;
-        geometry.setNoRepeatX(left + xOffset);
-        geometry.setSpaceSize(IntSize(0, geometry.spaceSize().height()));
-    }
-
-    if (backgroundRepeatY == RepeatFill) {
-        geometry.setPhaseY(geometry.tileSize().height() ? geometry.tileSize().height() - roundToInt(computedYPosition + top) % geometry.tileSize().height() : 0);
-        geometry.setSpaceSize(IntSize(geometry.spaceSize().width(), 0));
-    } else if (backgroundRepeatY == SpaceFill && fillTileSize.height() > 0) {
-        int space = getSpace(positioningAreaSize.height(), geometry.tileSize().height());
-        int actualHeight = geometry.tileSize().height() + space;
-
-        if (space >= 0) {
-            computedYPosition = roundedMinimumValueForLength(Length(), availableHeight);
-            geometry.setSpaceSize(IntSize(geometry.spaceSize().width(), space));
-            geometry.setPhaseY(actualHeight ? actualHeight - roundToInt(computedYPosition + top) % actualHeight : 0);
-        } else {
-            backgroundRepeatY = NoRepeatFill;
-        }
-    }
-    if (backgroundRepeatY == NoRepeatFill) {
-        int yOffset = fillLayer.backgroundYOrigin() == BottomEdge ? availableHeight - computedYPosition : computedYPosition;
-        geometry.setNoRepeatY(top + yOffset);
-        geometry.setSpaceSize(IntSize(geometry.spaceSize().width(), 0));
-    }
-
-    if (fixedAttachment)
-        geometry.useFixedAttachment(snappedPaintRect.location());
-
-    geometry.clip(snappedPaintRect);
-    geometry.setDestOrigin(geometry.destRect().location());
 }
 
 class BorderEdge {
@@ -1808,25 +1620,25 @@ void RenderBoxModelObject::clipBorderSideForComplexInnerPath(GraphicsContext* gr
 void RenderBoxModelObject::getBorderEdgeInfo(BorderEdge edges[], const RenderStyle* style, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
 {
     edges[BSTop] = BorderEdge(style->borderTopWidth(),
-        resolveColor(style, CSSPropertyBorderTopColor),
+        style->resolveColor(style->borderTopColor()),
         style->borderTopStyle(),
         style->borderTopIsTransparent(),
         true);
 
     edges[BSRight] = BorderEdge(style->borderRightWidth(),
-        resolveColor(style, CSSPropertyBorderRightColor),
+        style->resolveColor(style->borderRightColor()),
         style->borderRightStyle(),
         style->borderRightIsTransparent(),
         includeLogicalRightEdge);
 
     edges[BSBottom] = BorderEdge(style->borderBottomWidth(),
-        resolveColor(style, CSSPropertyBorderBottomColor),
+        style->resolveColor(style->borderBottomColor()),
         style->borderBottomStyle(),
         style->borderBottomIsTransparent(),
         true);
 
     edges[BSLeft] = BorderEdge(style->borderLeftWidth(),
-        resolveColor(style, CSSPropertyBorderLeftColor),
+        style->resolveColor(style->borderLeftColor()),
         style->borderLeftStyle(),
         style->borderLeftIsTransparent(),
         includeLogicalLeftEdge);
@@ -1892,7 +1704,7 @@ bool RenderBoxModelObject::boxShadowShouldBeAppliedToBackground(BackgroundBleedA
     if (!hasOneNormalBoxShadow)
         return false;
 
-    Color backgroundColor = resolveColor(CSSPropertyBackgroundColor);
+    Color backgroundColor = style()->resolveColor(style()->backgroundColor());
     if (backgroundColor.hasAlpha())
         return false;
 
@@ -1926,7 +1738,7 @@ void RenderBoxModelObject::paintBoxShadow(const PaintInfo& info, const LayoutRec
         : s->getRoundedBorderFor(paintRect, includeLogicalLeftEdge, includeLogicalRightEdge);
 
     bool hasBorderRadius = s->hasBorderRadius();
-    bool hasOpaqueBackground = s->colorIncludingFallback(CSSPropertyBackgroundColor).alpha() == 255;
+    bool hasOpaqueBackground = s->resolveColor(s->backgroundColor()).alpha() == 255;
 
     GraphicsContextStateSaver stateSaver(*context, false);
 

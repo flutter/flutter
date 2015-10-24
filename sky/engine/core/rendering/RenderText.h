@@ -23,7 +23,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERTEXT_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERTEXT_H_
 
-#include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/platform/LengthFunctions.h"
 #include "sky/engine/platform/text/TextPath.h"
@@ -39,14 +38,12 @@ public:
     // FIXME: If the node argument is not a Text node or the string argument is
     // not the content of the Text node, updating text-transform property
     // doesn't re-transform the string.
-    RenderText(Node*, PassRefPtr<StringImpl>);
+    RenderText(PassRefPtr<StringImpl>);
 #if ENABLE(ASSERT)
     virtual ~RenderText();
 #endif
 
     virtual const char* renderName() const override;
-
-    virtual PassRefPtr<StringImpl> originalText() const;
 
     void extractTextBox(InlineTextBox*);
     void attachTextBox(InlineTextBox*);
@@ -54,7 +51,6 @@ public:
 
     const String& text() const { return m_text; }
     virtual unsigned textStartOffset() const { return 0; }
-    String plainText() const;
 
     InlineTextBox* createInlineTextBox();
     void dirtyLineBoxes(bool fullLayout);
@@ -66,8 +62,6 @@ public:
 
     enum ClippingOption { NoClipping, ClipToEllipsis };
     void absoluteQuads(Vector<FloatQuad>&, ClippingOption = NoClipping) const;
-
-    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override;
 
     bool is8Bit() const { return m_text.is8Bit(); }
     const LChar* characters8() const { return m_text.impl()->characters8(); }
@@ -213,11 +207,6 @@ inline void RenderText::checkConsistency() const
 {
 }
 #endif
-
-inline RenderText* Text::renderer() const
-{
-    return toRenderText(CharacterData::renderer());
-}
 
 } // namespace blink
 

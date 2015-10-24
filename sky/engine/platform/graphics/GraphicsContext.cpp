@@ -484,41 +484,6 @@ void GraphicsContext::drawFocusRingRect(const SkRect& rect, const Color& color, 
     drawRRect(rrect, paint);
 }
 
-void GraphicsContext::drawFocusRing(const Path& focusRingPath, int width, int offset, const Color& color)
-{
-    // FIXME: Implement support for offset.
-    if (contextDisabled())
-        return;
-
-    drawFocusRingPath(focusRingPath.skPath(), color, width);
-}
-
-void GraphicsContext::drawFocusRing(const Vector<IntRect>& rects, int width, int offset, const Color& color)
-{
-    if (contextDisabled())
-        return;
-
-    unsigned rectCount = rects.size();
-    if (!rectCount)
-        return;
-
-    SkRegion focusRingRegion;
-    const int outset = focusRingOutset(offset);
-    for (unsigned i = 0; i < rectCount; i++) {
-        SkIRect r = rects[i];
-        r.inset(-outset, -outset);
-        focusRingRegion.op(r, SkRegion::kUnion_Op);
-    }
-
-    if (focusRingRegion.isRect()) {
-        drawFocusRingRect(SkRect::MakeFromIRect(focusRingRegion.getBounds()), color, width);
-    } else {
-        SkPath path;
-        if (focusRingRegion.getBoundaryPath(&path))
-            drawFocusRingPath(path, color, width);
-    }
-}
-
 static inline IntRect areaCastingShadowInHole(const IntRect& holeRect, int shadowBlur, int shadowSpread, const IntSize& shadowOffset)
 {
     IntRect bounds(holeRect);

@@ -268,9 +268,6 @@ def includes_for_cpp_class(class_name, relative_dir_posix):
 INCLUDES_FOR_TYPE = {
     'object': set(),
     'CompareHow': set(),
-    'MediaQueryListListener': set(['sky/engine/core/css/MediaQueryListListener.h']),
-    'NodeList': set(['sky/engine/core/dom/NodeList.h',
-                     'sky/engine/core/dom/StaticNodeList.h']),
     'DartValue': set(['sky/engine/tonic/dart_value.h']),
     'MojoDataPipeConsumer': set(['sky/engine/tonic/mojo_converter.h']),
 }

@@ -19,7 +19,7 @@ RenderParagraph* createRenderParagraph(RenderStyle* parentStyle)
     style->inheritFrom(parentStyle);
     style->setDisplay(PARAGRAPH);
 
-    RenderParagraph* renderParagraph = new RenderParagraph(nullptr);
+    RenderParagraph* renderParagraph = new RenderParagraph();
     renderParagraph->setStyle(style.release());
     return renderParagraph;
 }
@@ -67,7 +67,7 @@ const int kLineHeightMask = 1 << kLineHeightIndex;
 
 ParagraphBuilder::ParagraphBuilder()
 {
-    m_fontSelector = CSSFontSelector::create(nullptr);
+    m_fontSelector = CSSFontSelector::create();
     createRenderView();
     m_renderParagraph = createRenderParagraph(m_renderView->style());
     m_currentRenderObject = m_renderParagraph;
@@ -127,7 +127,7 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, d
 
     encoded.Release();
 
-    RenderObject* span = new RenderInline(nullptr);
+    RenderObject* span = new RenderInline();
     span->setStyle(style.release());
     m_currentRenderObject->addChild(span);
     m_currentRenderObject = span;
@@ -143,7 +143,7 @@ void ParagraphBuilder::addText(const String& text)
 {
     if (!m_currentRenderObject)
         return;
-    RenderText* renderText = new RenderText(nullptr, text.impl());
+    RenderText* renderText = new RenderText(text.impl());
     RefPtr<RenderStyle> style = RenderStyle::create();
     style->inheritFrom(m_currentRenderObject->style());
     renderText->setStyle(style.release());
@@ -186,10 +186,10 @@ void ParagraphBuilder::createRenderView()
     style->setUserModify(READ_ONLY);
 
     FontBuilder fontBuilder;
-    fontBuilder.initForStyleResolve(nullptr, style.get());
+    fontBuilder.initForStyleResolve(style.get());
     fontBuilder.createFontForDocument(m_fontSelector.get(), style.get());
 
-    m_renderView = adoptPtr(new RenderView(nullptr));
+    m_renderView = adoptPtr(new RenderView());
     m_renderView->setStyle(style.release());
 }
 

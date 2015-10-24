@@ -27,68 +27,31 @@
 #include "sky/engine/core/css/CSSFontSelector.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/css/CSSFontSelectorClient.h"
 #include "sky/engine/core/css/CSSSegmentedFontFace.h"
-#include "sky/engine/core/css/CSSValueList.h"
-#include "sky/engine/core/css/FontFace.h"
-#include "sky/engine/core/css/resolver/StyleResolver.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 
-CSSFontSelector::CSSFontSelector(Document* document)
-    : m_document(document)
+CSSFontSelector::CSSFontSelector()
 {
-    if (m_document)
-        m_genericFontFamilySettings = document->frame()->settings()->genericFontFamilySettings();
-    // FIXME: An old comment used to say there was no need to hold a reference to m_document
-    // because "we are guaranteed to be destroyed before the document". But there does not
-    // seem to be any such guarantee.
-
     FontCache::fontCache()->addClient(this);
 }
 
 CSSFontSelector::~CSSFontSelector()
 {
 #if !ENABLE(OILPAN)
-    clearDocument();
     FontCache::fontCache()->removeClient(this);
 #endif
 }
 
-void CSSFontSelector::registerForInvalidationCallbacks(CSSFontSelectorClient* client)
-{
-    m_clients.add(client);
-}
-
-#if !ENABLE(OILPAN)
-void CSSFontSelector::unregisterForInvalidationCallbacks(CSSFontSelectorClient* client)
-{
-    m_clients.remove(client);
-}
-#endif
-
-void CSSFontSelector::dispatchInvalidationCallbacks()
-{
-    Vector<RawPtr<CSSFontSelectorClient> > clients;
-    copyToVector(m_clients, clients);
-    for (size_t i = 0; i < clients.size(); ++i)
-        clients[i]->fontsNeedUpdate(this);
-}
-
 void CSSFontSelector::fontFaceInvalidated()
 {
-    dispatchInvalidationCallbacks();
 }
 
 void CSSFontSelector::fontCacheInvalidated()
 {
-    dispatchInvalidationCallbacks();
 }
 
 static AtomicString familyNameFromSettings(const GenericFontFamilySettings& settings, const FontDescription& fontDescription, const AtomicString& genericFamilyName)
@@ -148,23 +111,6 @@ bool CSSFontSelector::isPlatformFontAvailable(const FontDescription& fontDescrip
     if (family.isEmpty())
         family = passedFamily;
     return FontCache::fontCache()->isPlatformFontAvailable(fontDescription, family);
-}
-
-#if !ENABLE(OILPAN)
-void CSSFontSelector::clearDocument()
-{
-    m_document = nullptr;
-    m_fontFaceCache.clearAll();
-}
-#endif
-
-void CSSFontSelector::updateGenericFontFamilySettings(Document& document)
-{
-    if (!document.settings())
-        return;
-    m_genericFontFamilySettings = document.settings()->genericFontFamilySettings();
-    // Need to increment FontFaceCache version to update RenderStyles.
-    m_fontFaceCache.incrementVersion();
 }
 
 }

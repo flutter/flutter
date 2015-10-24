@@ -87,15 +87,6 @@ public:
 
     void childRemoved(InlineBox* box);
 
-    bool lineCanAccommodateEllipsis(bool ltr, int blockEdge, int lineBoxEdge, int ellipsisWidth);
-    // Return the truncatedWidth, the width of the truncated text + ellipsis.
-    float placeEllipsis(const AtomicString& ellipsisStr, bool ltr, float blockLeftEdge, float blockRightEdge, float ellipsisWidth, InlineBox* markupBox = 0);
-    // Return the position of the EllipsisBox or -1.
-    virtual float placeEllipsisBox(bool ltr, float blockLeftEdge, float blockRightEdge, float ellipsisWidth, float &truncatedWidth, bool& foundBox) override final;
-
-    using InlineBox::hasEllipsisBox;
-    EllipsisBox* ellipsisBox() const;
-
     void paintEllipsisBox(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom, Vector<RenderBox*>& layers) const;
 
     virtual void clearTruncation() override final;
@@ -159,9 +150,6 @@ public:
 
     // Used to calculate the underline offset for TextUnderlinePositionUnder.
     float maxLogicalTop() const;
-
-    Node* getLogicalStartBoxWithNode(InlineBox*&) const;
-    Node* getLogicalEndBoxWithNode(InlineBox*&) const;
 
 #ifndef NDEBUG
     virtual const char* boxName() const override;

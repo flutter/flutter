@@ -30,9 +30,6 @@
 #include "gen/sky/platform/FontFamilyNames.h"
 #include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/CSSSegmentedFontFace.h"
-#include "sky/engine/core/css/CSSValueList.h"
-#include "sky/engine/core/css/FontFace.h"
-#include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
@@ -43,84 +40,16 @@ FontFaceCache::FontFaceCache()
 {
 }
 
-void FontFaceCache::add(CSSFontSelector* cssFontSelector, const StyleRuleFontFace* fontFaceRule, PassRefPtr<FontFace> prpFontFace)
-{
-    RefPtr<FontFace> fontFace = prpFontFace;
-    if (!m_styleRuleToFontFace.add(fontFaceRule, fontFace).isNewEntry)
-        return;
-    addFontFace(cssFontSelector, fontFace, true);
-}
-
-void FontFaceCache::addFontFace(CSSFontSelector* cssFontSelector, PassRefPtr<FontFace> prpFontFace, bool cssConnected)
-{
-    RefPtr<FontFace> fontFace = prpFontFace;
-
-    FamilyToTraitsMap::AddResult traitsResult = m_fontFaces.add(fontFace->family(), nullptr);
-    if (!traitsResult.storedValue->value)
-        traitsResult.storedValue->value = adoptPtr(new TraitsMap);
-
-    TraitsMap::AddResult segmentedFontFaceResult = traitsResult.storedValue->value->add(fontFace->traits().bitfield(), nullptr);
-    if (!segmentedFontFaceResult.storedValue->value)
-        segmentedFontFaceResult.storedValue->value = CSSSegmentedFontFace::create(cssFontSelector, fontFace->traits());
-
-    segmentedFontFaceResult.storedValue->value->addFontFace(fontFace, cssConnected);
-    if (cssConnected)
-        m_cssConnectedFontFaces.add(fontFace);
-
-    ++m_version;
-}
-
 void FontFaceCache::remove(const StyleRuleFontFace* fontFaceRule)
 {
-    StyleRuleToFontFace::iterator it = m_styleRuleToFontFace.find(fontFaceRule);
-    if (it != m_styleRuleToFontFace.end()) {
-        removeFontFace(it->value.get(), true);
-        m_styleRuleToFontFace.remove(it);
-    }
 }
 
 void FontFaceCache::removeFontFace(FontFace* fontFace, bool cssConnected)
 {
-    FamilyToTraitsMap::iterator fontFacesIter = m_fontFaces.find(fontFace->family());
-    if (fontFacesIter == m_fontFaces.end())
-        return;
-    TraitsMap* familyFontFaces = fontFacesIter->value.get();
-
-    TraitsMap::iterator familyFontFacesIter = familyFontFaces->find(fontFace->traits().bitfield());
-    if (familyFontFacesIter == familyFontFaces->end())
-        return;
-    RefPtr<CSSSegmentedFontFace> segmentedFontFace = familyFontFacesIter->value;
-
-    segmentedFontFace->removeFontFace(fontFace);
-    if (segmentedFontFace->isEmpty()) {
-        familyFontFaces->remove(familyFontFacesIter);
-        if (familyFontFaces->isEmpty())
-            m_fontFaces.remove(fontFacesIter);
-    }
-    m_fonts.clear();
-    if (cssConnected)
-        m_cssConnectedFontFaces.remove(fontFace);
-
-    ++m_version;
-}
-
-void FontFaceCache::clearCSSConnected()
-{
-    for (StyleRuleToFontFace::iterator it = m_styleRuleToFontFace.begin(); it != m_styleRuleToFontFace.end(); ++it)
-        removeFontFace(it->value.get(), true);
-    m_styleRuleToFontFace.clear();
 }
 
 void FontFaceCache::clearAll()
 {
-    if (m_fontFaces.isEmpty())
-        return;
-
-    m_fontFaces.clear();
-    m_fonts.clear();
-    m_styleRuleToFontFace.clear();
-    m_cssConnectedFontFaces.clear();
-    ++m_version;
 }
 
 static inline bool compareFontFaces(CSSSegmentedFontFace* first, CSSSegmentedFontFace* second, FontTraits desiredTraits)

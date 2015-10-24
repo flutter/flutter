@@ -202,9 +202,6 @@ public:
 
     virtual RenderObject::SelectionState selectionState() override;
 
-    virtual bool canAccommodateEllipsis(bool ltr, int blockEdge, int ellipsisWidth) const override final;
-    virtual float placeEllipsisBox(bool ltr, float blockLeftEdge, float blockRightEdge, float ellipsisWidth, float &truncatedWidth, bool&) override;
-
     bool hasTextChildren() const { return m_hasTextChildren; }
     bool hasTextDescendants() const { return m_hasTextDescendants; }
     void setHasTextChildren() { m_hasTextChildren = true; setHasTextDescendants(); }

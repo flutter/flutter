@@ -24,7 +24,6 @@
 #include "sky/engine/core/rendering/RenderReplaced.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/editing/PositionWithAffinity.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -36,16 +35,14 @@ namespace blink {
 const int RenderReplaced::defaultWidth = 300;
 const int RenderReplaced::defaultHeight = 150;
 
-RenderReplaced::RenderReplaced(Element* element)
-    : RenderBox(element)
-    , m_intrinsicSize(defaultWidth, defaultHeight)
+RenderReplaced::RenderReplaced()
+    : m_intrinsicSize(defaultWidth, defaultHeight)
 {
     setReplaced(true);
 }
 
-RenderReplaced::RenderReplaced(Element* element, const LayoutSize& intrinsicSize)
-    : RenderBox(element)
-    , m_intrinsicSize(intrinsicSize)
+RenderReplaced::RenderReplaced(const LayoutSize& intrinsicSize)
+    : m_intrinsicSize(intrinsicSize)
 {
     setReplaced(true);
 }
@@ -95,8 +92,6 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset,
         paintBoxDecorationBackground(paintInfo, adjustedPaintOffset);
 
     LayoutRect paintRect = LayoutRect(adjustedPaintOffset, size());
-    if (style()->outlineWidth())
-        paintOutline(paintInfo, paintRect);
 
     bool completelyClippedOut = false;
     if (style()->hasBorderRadius()) {
@@ -383,33 +378,6 @@ void RenderReplaced::computePreferredLogicalWidths()
     clearPreferredLogicalWidthsDirty();
 }
 
-PositionWithAffinity RenderReplaced::positionForPoint(const LayoutPoint& point)
-{
-    // FIXME: This code is buggy if the replaced element is relative positioned.
-    InlineBox* box = inlineBoxWrapper();
-    RootInlineBox* rootBox = box ? &box->root() : 0;
-
-    LayoutUnit top = rootBox ? rootBox->selectionTop() : logicalTop();
-    LayoutUnit bottom = rootBox ? rootBox->selectionBottom() : logicalBottom();
-
-    LayoutUnit blockDirectionPosition = point.y() + y();
-    LayoutUnit lineDirectionPosition = point.x() + x();
-
-    if (blockDirectionPosition < top)
-        return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM); // coordinates are above
-
-    if (blockDirectionPosition >= bottom)
-        return createPositionWithAffinity(caretMaxOffset(), DOWNSTREAM); // coordinates are below
-
-    if (node()) {
-        if (lineDirectionPosition <= logicalLeft() + (logicalWidth() / 2))
-            return createPositionWithAffinity(0, DOWNSTREAM);
-        return createPositionWithAffinity(1, DOWNSTREAM);
-    }
-
-    return RenderBox::positionForPoint(point);
-}
-
 LayoutRect RenderReplaced::localSelectionRect(bool checkWhetherSelected) const
 {
     if (checkWhetherSelected && !isSelected())
@@ -438,24 +406,6 @@ void RenderReplaced::setSelectionState(SelectionState state)
 
 bool RenderReplaced::isSelected() const
 {
-    SelectionState s = selectionState();
-    if (s == SelectionNone)
-        return false;
-    if (s == SelectionInside)
-        return true;
-
-    int selectionStart, selectionEnd;
-    selectionStartEnd(selectionStart, selectionEnd);
-    if (s == SelectionStart)
-        return selectionStart == 0;
-
-    int end = node()->hasChildren() ? node()->countChildren() : 1;
-    if (s == SelectionEnd)
-        return selectionEnd == end;
-    if (s == SelectionBoth)
-        return selectionStart == 0 && selectionEnd == end;
-
-    ASSERT(0);
     return false;
 }
 

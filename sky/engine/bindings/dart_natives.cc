@@ -18,6 +18,7 @@
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_builtin.h"
+#include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"

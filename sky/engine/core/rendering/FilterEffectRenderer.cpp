@@ -28,8 +28,6 @@
 #include "sky/engine/core/rendering/FilterEffectRenderer.h"
 
 #include <algorithm>
-#include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/FloatConversion.h"

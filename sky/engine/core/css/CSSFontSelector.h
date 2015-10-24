@@ -37,17 +37,15 @@ namespace blink {
 
 class CSSFontFace;
 class CSSFontFaceRule;
-class CSSFontSelectorClient;
 class CSSSegmentedFontFace;
-class Document;
 class FontDescription;
 class StyleRuleFontFace;
 
 class CSSFontSelector final : public FontSelector {
 public:
-    static PassRefPtr<CSSFontSelector> create(Document* document)
+    static PassRefPtr<CSSFontSelector> create()
     {
-        return adoptRef(new CSSFontSelector(document));
+        return adoptRef(new CSSFontSelector());
     }
     virtual ~CSSFontSelector();
 
@@ -57,34 +55,21 @@ public:
     virtual void willUseFontData(const FontDescription&, const AtomicString& family, UChar32) override;
     bool isPlatformFontAvailable(const FontDescription&, const AtomicString& family);
 
-    void clearDocument();
-
     void fontFaceInvalidated();
 
     // FontCacheClient implementation
     virtual void fontCacheInvalidated() override;
 
-    void registerForInvalidationCallbacks(CSSFontSelectorClient*);
-    void unregisterForInvalidationCallbacks(CSSFontSelectorClient*);
-
-    Document* document() const { return m_document; }
     FontFaceCache* fontFaceCache() { return &m_fontFaceCache; }
 
     const GenericFontFamilySettings& genericFontFamilySettings() const { return m_genericFontFamilySettings; }
-    void updateGenericFontFamilySettings(Document&);
 
 private:
-    explicit CSSFontSelector(Document*);
+    explicit CSSFontSelector();
 
     void dispatchInvalidationCallbacks();
 
-    // FIXME: Oilpan: Ideally this should just be a traced Member but that will
-    // currently leak because RenderStyle and its data are not on the heap.
-    // See crbug.com/383860 for details.
-    RawPtr<Document> m_document;
-    // FIXME: Move to Document or StyleEngine.
     FontFaceCache m_fontFaceCache;
-    HashSet<RawPtr<CSSFontSelectorClient> > m_clients;
 
     GenericFontFamilySettings m_genericFontFamilySettings;
 };

@@ -21,11 +21,6 @@
 
 #include "sky/engine/core/rendering/HitTestResult.h"
 
-#include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/core/dom/DocumentMarkerController.h"
-#include "sky/engine/core/editing/PositionWithAffinity.h"
-#include "sky/engine/core/editing/VisiblePosition.h"
-#include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/rendering/RenderBox.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 
@@ -55,14 +50,8 @@ HitTestResult::HitTestResult(const HitTestLocation& other)
 
 HitTestResult::HitTestResult(const HitTestResult& other)
     : m_hitTestLocation(other.m_hitTestLocation)
-    , m_innerNode(other.innerNode())
-    , m_innerPossiblyPseudoNode(other.m_innerPossiblyPseudoNode)
-    , m_innerNonSharedNode(other.innerNonSharedNode())
-    , m_pointInInnerNodeFrame(other.m_pointInInnerNodeFrame)
     , m_localPoint(other.localPoint())
 {
-    // Only copy the NodeSet in case of rect hit test.
-    m_rectBasedTestResult = adoptPtr(other.m_rectBasedTestResult ? new NodeSet(*other.m_rectBasedTestResult) : 0);
 }
 
 HitTestResult::~HitTestResult()
@@ -72,52 +61,13 @@ HitTestResult::~HitTestResult()
 HitTestResult& HitTestResult::operator=(const HitTestResult& other)
 {
     m_hitTestLocation = other.m_hitTestLocation;
-    m_innerNode = other.innerNode();
-    m_innerPossiblyPseudoNode = other.innerPossiblyPseudoNode();
-    m_innerNonSharedNode = other.innerNonSharedNode();
     m_pointInInnerNodeFrame = other.m_pointInInnerNodeFrame;
     m_localPoint = other.localPoint();
-
-    // Only copy the NodeSet in case of rect hit test.
-    m_rectBasedTestResult = adoptPtr(other.m_rectBasedTestResult ? new NodeSet(*other.m_rectBasedTestResult) : 0);
-
     return *this;
-}
-
-PositionWithAffinity HitTestResult::position() const
-{
-    if (!m_innerPossiblyPseudoNode)
-        return PositionWithAffinity();
-    RenderObject* renderer = this->renderer();
-    if (!renderer)
-        return PositionWithAffinity();
-    return renderer->positionForPoint(localPoint());
 }
 
 RenderObject* HitTestResult::renderer() const
 {
-    if (!m_innerNode)
-        return 0;
-    return m_innerNode->renderer();
-}
-
-void HitTestResult::setInnerNode(Node* n)
-{
-    m_innerPossiblyPseudoNode = n;
-    m_innerNode = n;
-}
-
-void HitTestResult::setInnerNonSharedNode(Node* n)
-{
-    m_innerNonSharedNode = n;
-}
-
-LocalFrame* HitTestResult::innerNodeFrame() const
-{
-    if (m_innerNonSharedNode)
-        return m_innerNonSharedNode->document().frame();
-    if (m_innerNode)
-        return m_innerNode->document().frame();
     return 0;
 }
 
@@ -133,20 +83,12 @@ Image* HitTestResult::image() const
 
 IntRect HitTestResult::imageRect() const
 {
-    if (!image())
-        return IntRect();
-    return m_innerNonSharedNode->renderBox()->absoluteContentQuad().enclosingBoundingBox();
+    return IntRect();
 }
 
 bool HitTestResult::isMisspelled() const
 {
-    if (!targetNode() || !targetNode()->renderer())
-        return false;
-    VisiblePosition pos(targetNode()->renderer()->positionForPoint(localPoint()));
-    if (pos.isNull())
-        return false;
-    return m_innerNonSharedNode->document().markers().markersInRange(
-        makeRange(pos, pos).get(), DocumentMarker::MisspellingMarkers()).size() > 0;
+    return false;
 }
 
 // FIXME: This function needs a better name and may belong in a different class. It's not
@@ -155,100 +97,11 @@ bool HitTestResult::isMisspelled() const
 // hooks into it. Anyway, we should architect this better.
 bool HitTestResult::isContentEditable() const
 {
-    if (!m_innerNonSharedNode)
-        return false;
-    return m_innerNonSharedNode->hasEditableStyle();
-}
-
-bool HitTestResult::addNodeToRectBasedTestResult(Node* node, const HitTestRequest& request, const HitTestLocation& locationInContainer, const LayoutRect& rect)
-{
-    // If it is not a rect-based hit test, this method has to be no-op.
-    // Return false, so the hit test stops.
-    if (!isRectBasedTest())
-        return false;
-
-    // If node is null, return true so the hit test can continue.
-    if (!node)
-        return true;
-
-    mutableRectBasedTestResult().add(node);
-
-    bool regionFilled = rect.contains(locationInContainer.boundingBox());
-    return !regionFilled;
-}
-
-bool HitTestResult::addNodeToRectBasedTestResult(Node* node, const HitTestRequest& request, const HitTestLocation& locationInContainer, const FloatRect& rect)
-{
-    // If it is not a rect-based hit test, this method has to be no-op.
-    // Return false, so the hit test stops.
-    if (!isRectBasedTest())
-        return false;
-
-    // If node is null, return true so the hit test can continue.
-    if (!node)
-        return true;
-
-    mutableRectBasedTestResult().add(node);
-
-    bool regionFilled = rect.contains(locationInContainer.boundingBox());
-    return !regionFilled;
+    return false;
 }
 
 void HitTestResult::append(const HitTestResult& other)
 {
-    ASSERT(isRectBasedTest() && other.isRectBasedTest());
-
-    if (!m_innerNode && other.innerNode()) {
-        m_innerNode = other.innerNode();
-        m_innerPossiblyPseudoNode = other.innerPossiblyPseudoNode();
-        m_innerNonSharedNode = other.innerNonSharedNode();
-        m_localPoint = other.localPoint();
-        m_pointInInnerNodeFrame = other.m_pointInInnerNodeFrame;
-    }
-
-    if (other.m_rectBasedTestResult) {
-        NodeSet& set = mutableRectBasedTestResult();
-        for (NodeSet::const_iterator it = other.m_rectBasedTestResult->begin(), last = other.m_rectBasedTestResult->end(); it != last; ++it)
-            set.add(it->get());
-    }
-}
-
-const HitTestResult::NodeSet& HitTestResult::rectBasedTestResult() const
-{
-    if (!m_rectBasedTestResult)
-        m_rectBasedTestResult = adoptPtr(new NodeSet);
-    return *m_rectBasedTestResult;
-}
-
-HitTestResult::NodeSet& HitTestResult::mutableRectBasedTestResult()
-{
-    if (!m_rectBasedTestResult)
-        m_rectBasedTestResult = adoptPtr(new NodeSet);
-    return *m_rectBasedTestResult;
-}
-
-void HitTestResult::resolveRectBasedTest(Node* resolvedInnerNode, const LayoutPoint& resolvedPointInMainFrame)
-{
-    // FIXME: For maximum fidelity with point-based hit tests we should probably make use
-    // of RenderObject::updateHitTestResult here. See http://crbug.com/398914.
-    ASSERT(isRectBasedTest());
-    ASSERT(m_hitTestLocation.containsPoint(resolvedPointInMainFrame));
-    setInnerNode(resolvedInnerNode);
-    setInnerNonSharedNode(resolvedInnerNode);
-    m_hitTestLocation = HitTestLocation(resolvedPointInMainFrame);
-    m_pointInInnerNodeFrame = resolvedPointInMainFrame;
-    m_rectBasedTestResult = nullptr;
-    ASSERT(!isRectBasedTest());
-}
-
-Element* HitTestResult::innerElement() const
-{
-    for (Node* node = m_innerNode.get(); node; node = node->parentNode()) {
-        if (node->isElementNode())
-            return toElement(node);
-    }
-
-    return 0;
 }
 
 } // namespace blink

@@ -7,7 +7,6 @@
 #include "gen/sky/bindings/DartGlobal.h"
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/bindings/dart_natives.h"
-#include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/core/view/View.h"
 #include "sky/engine/tonic/dart_error.h"

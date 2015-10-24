@@ -19,8 +19,6 @@
 
 #include "sky/engine/core/rendering/InlineFlowBox.h"
 
-#include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
@@ -957,12 +955,6 @@ bool InlineFlowBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& re
     LayoutRect rect(roundedFrameRect());
     rect.moveBy(accumulatedOffset);
 
-    if (visibleToHitTestRequest(request) && locationInContainer.intersects(rect)) {
-        renderer().updateHitTestResult(result, locationInContainer.point() - toLayoutSize(accumulatedOffset)); // Don't add in m_x or m_y here, we want coords in the containing block's space.
-        if (!result.addNodeToRectBasedTestResult(renderer().node(), request, locationInContainer, rect))
-            return true;
-    }
-
     return false;
 }
 
@@ -1079,7 +1071,7 @@ void InlineFlowBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const Lay
     if (!boxModelObject()->boxShadowShouldBeAppliedToBackground(BackgroundBleedNone, this))
         paintBoxShadow(paintInfo, styleToUse, Normal, paintRect);
 
-    Color backgroundColor = renderer().resolveColor(styleToUse, CSSPropertyBackgroundColor);
+    Color backgroundColor = styleToUse->resolveColor(styleToUse->backgroundColor());
     paintFillLayers(paintInfo, backgroundColor, styleToUse->backgroundLayers(), paintRect);
     paintBoxShadow(paintInfo, styleToUse, Inset, paintRect);
 
@@ -1109,45 +1101,6 @@ InlineBox* InlineFlowBox::lastLeafChild() const
 RenderObject::SelectionState InlineFlowBox::selectionState()
 {
     return RenderObject::SelectionNone;
-}
-
-bool InlineFlowBox::canAccommodateEllipsis(bool ltr, int blockEdge, int ellipsisWidth) const
-{
-    for (InlineBox *box = firstChild(); box; box = box->nextOnLine()) {
-        if (!box->canAccommodateEllipsis(ltr, blockEdge, ellipsisWidth))
-            return false;
-    }
-    return true;
-}
-
-float InlineFlowBox::placeEllipsisBox(bool ltr, float blockLeftEdge, float blockRightEdge, float ellipsisWidth, float &truncatedWidth, bool& foundBox)
-{
-    float result = -1;
-    // We iterate over all children, the foundBox variable tells us when we've found the
-    // box containing the ellipsis.  All boxes after that one in the flow are hidden.
-    // If our flow is ltr then iterate over the boxes from left to right, otherwise iterate
-    // from right to left. Varying the order allows us to correctly hide the boxes following the ellipsis.
-    InlineBox* box = ltr ? firstChild() : lastChild();
-
-    // NOTE: these will cross after foundBox = true.
-    int visibleLeftEdge = blockLeftEdge;
-    int visibleRightEdge = blockRightEdge;
-
-    while (box) {
-        int currResult = box->placeEllipsisBox(ltr, visibleLeftEdge, visibleRightEdge, ellipsisWidth, truncatedWidth, foundBox);
-        if (currResult != -1 && result == -1)
-            result = currResult;
-
-        if (ltr) {
-            visibleLeftEdge += box->logicalWidth();
-            box = box->nextOnLine();
-        }
-        else {
-            visibleRightEdge -= box->logicalWidth();
-            box = box->prevOnLine();
-        }
-    }
-    return result;
 }
 
 void InlineFlowBox::clearTruncation()

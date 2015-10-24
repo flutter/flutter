@@ -21,13 +21,8 @@
 
 #include "sky/engine/core/rendering/RenderTheme.h"
 
-#include "gen/sky/core/CSSValueKeywords.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
@@ -94,12 +89,6 @@ Color RenderTheme::platformInactiveSelectionForegroundColor() const
     return Color::black;
 }
 
-Color RenderTheme::systemColor(CSSValueID cssValueId) const
-{
-    // FIXME(sky): remove
-    return Color();
-}
-
 void RenderTheme::setCustomFocusRingColor(const Color& c)
 {
     m_customFocusRingColor = c;
@@ -109,18 +98,6 @@ void RenderTheme::setCustomFocusRingColor(const Color& c)
 Color RenderTheme::focusRingColor() const
 {
     return m_hasCustomFocusRingColor ? m_customFocusRingColor : theme().platformFocusRingColor();
-}
-
-void RenderTheme::systemFont(CSSValueID valueID, FontDescription& fontDescription) const
-{
-    DEFINE_STATIC_LOCAL(const AtomicString, defaultGUIFont, ("Arial", AtomicString::ConstructFromLiteral));
-
-    fontDescription.firstFamily().setFamily(defaultGUIFont);
-    fontDescription.setSpecifiedSize(12);
-    fontDescription.setIsAbsoluteSize(true);
-    fontDescription.setGenericFamily(FontDescription::NoFamily);
-    fontDescription.setWeight(FontWeightNormal);
-    fontDescription.setStyle(FontStyleNormal);
 }
 
 Color RenderTheme::tapHighlightColor()

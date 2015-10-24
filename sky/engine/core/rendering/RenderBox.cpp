@@ -27,14 +27,6 @@
 
 #include <math.h>
 #include <algorithm>
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/frame/FrameHost.h"
-#include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLElement.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/HitTestingTransformState.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
@@ -50,9 +42,8 @@
 
 namespace blink {
 
-RenderBox::RenderBox(ContainerNode* node)
-    : RenderBoxModelObject(node)
-    , m_intrinsicContentLogicalHeight(-1)
+RenderBox::RenderBox()
+    : m_intrinsicContentLogicalHeight(-1)
     , m_minPreferredLogicalWidth(-1)
     , m_maxPreferredLogicalWidth(-1)
 {
@@ -495,8 +486,7 @@ bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result
     boundsRect.moveBy(adjustedLocation);
     if (visibleToHitTestRequest(request) && locationInContainer.intersects(boundsRect)) {
         updateHitTestResult(result, locationInContainer.point() - toLayoutSize(adjustedLocation));
-        if (!result.addNodeToRectBasedTestResult(node(), request, locationInContainer, boundsRect))
-            return true;
+        return true;
     }
 
     return false;
@@ -719,34 +709,7 @@ bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer
 bool RenderBox::hitTestNonLayerDescendants(const HitTestRequest& request, HitTestResult& result,
     const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation)
 {
-    if (!hitTest(request, result, hitTestLocation, toLayoutPoint(layerBounds.location() - location()))) {
-        // It's wrong to set innerNode, but then claim that you didn't hit anything, unless it is
-        // a rect-based test.
-        ASSERT(!result.innerNode() || (result.isRectBasedTest() && result.rectBasedTestResult().size()));
-        return false;
-    }
-
-    // For positioned generated content, we might still not have a
-    // node by the time we get to the layer level, since none of
-    // the content in the layer has an element. So just walk up
-    // the tree.
-    if (!result.innerNode() || !result.innerNonSharedNode()) {
-        Node* enclosingElement = 0;
-        for (RenderObject* r = this; r; r = r->parent()) {
-            if (Node* element = r->node()) {
-                enclosingElement = element;
-                break;
-            }
-        }
-        ASSERT(enclosingElement);
-
-        if (!result.innerNode())
-            result.setInnerNode(enclosingElement);
-        if (!result.innerNonSharedNode())
-            result.setInnerNonSharedNode(enclosingElement);
-    }
-
-    return true;
+    return hitTest(request, result, hitTestLocation, toLayoutPoint(layerBounds.location() - location()));
 }
 
 // --------------------- painting stuff -------------------------------
@@ -852,7 +815,7 @@ static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLaye
 
 void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo)
 {
-    float deviceScaleFactor = blink::deviceScaleFactor(frame());
+    float deviceScaleFactor = 1.0f;
     context->setDeviceScaleFactor(deviceScaleFactor);
 
     LayoutPoint offsetFromRoot;
@@ -881,17 +844,7 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
     if (hasClipPath()) {
         ASSERT(style()->clipPath());
         if (style()->clipPath()->type() == ClipPathOperation::SHAPE) {
-            ShapeClipPathOperation* clipPath = toShapeClipPathOperation(style()->clipPath());
-            if (clipPath->isValid()) {
-                clipStateSaver.save();
-
-                if (!rootRelativeBoundsComputed) {
-                    rootRelativeBounds = layer()->physicalBoundingBoxIncludingReflectionAndStackingChildren(paintingInfo.rootLayer, offsetFromRoot);
-                    rootRelativeBoundsComputed = true;
-                }
-
-                context->clipPath(clipPath->path(rootRelativeBounds), clipPath->windRule());
-            }
+            // Removed.
         }
     }
 
@@ -944,14 +897,6 @@ void RenderBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vect
         child->paint(paintInfo, adjustedPaintOffset, layers);
 }
 
-void RenderBox::paintRootBoxFillLayers(const PaintInfo& paintInfo)
-{
-    const FillLayer& bgLayer = style()->backgroundLayers();
-    Color bgColor = resolveColor(CSSPropertyBackgroundColor);
-
-    paintFillLayers(paintInfo, bgColor, bgLayer, view()->backgroundRect(this), BackgroundBleedNone, this);
-}
-
 BackgroundBleedAvoidance RenderBox::determineBackgroundBleedAvoidance(GraphicsContext* context, const BoxDecorationData& boxDecorationData) const
 {
     if (!boxDecorationData.hasBackground || !boxDecorationData.hasBorder || !style()->hasBorderRadius())
@@ -984,22 +929,11 @@ BackgroundBleedAvoidance RenderBox::determineBackgroundBleedAvoidance(GraphicsCo
     return BackgroundBleedClipBackground;
 }
 
-void RenderBox::paintCustomPainting(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    LayoutRect paintRect = borderBoxRect();
-    paintRect.moveBy(paintOffset);
-    // TODO(abarth): Currently we only draw m_customPainting if we happen to
-    // have a box decoration or a background.
-    if (m_customPainting)
-        paintInfo.context->drawDisplayList(m_customPainting.get(), paintRect.location());
-}
-
 void RenderBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     LayoutRect paintRect = borderBoxRect();
     paintRect.moveBy(paintOffset);
     paintBoxDecorationBackgroundWithRect(paintInfo, paintOffset, paintRect);
-    paintCustomPainting(paintInfo, paintOffset);
 }
 
 void RenderBox::paintBoxDecorationBackgroundWithRect(PaintInfo& paintInfo, const LayoutPoint& paintOffset, const LayoutRect& paintRect)
@@ -1047,7 +981,7 @@ bool RenderBox::backgroundHasOpaqueTopLayer() const
 
     // If there is only one layer and no image, check whether the background color is opaque
     if (!fillLayer.next() && !fillLayer.hasImage()) {
-        Color bgColor = resolveColor(CSSPropertyBackgroundColor);
+        Color bgColor = style()->resolveColor(style()->backgroundColor());
         if (bgColor.alpha() == 255)
             return true;
     }
@@ -1289,10 +1223,6 @@ void RenderBox::computeLogicalWidth(LogicalExtentComputedValues& computedValues)
         computePositionedLogicalWidth(computedValues);
         return;
     }
-
-    // If layout is limited to a subtree, the subtree root's logical width does not change.
-    if (node() && view()->frameView() && view()->frameView()->layoutRoot(true) == this)
-        return;
 
     if (hasOverrideWidth()) {
         computedValues.m_extent = overrideLogicalContentWidth() + borderAndPaddingLogicalWidth();
@@ -1594,8 +1524,6 @@ LayoutUnit RenderBox::computeContentLogicalHeightUsing(const Length& height, Lay
     }
     if (height.isFixed())
         return height.value();
-    if (height.isPercent())
-        return computePercentageLogicalHeight(height);
     return -1;
 }
 
@@ -1603,60 +1531,6 @@ LayoutUnit RenderBox::computeContentLogicalHeightUsing(const Length& height, Lay
 bool RenderBox::skipContainingBlockForPercentHeightCalculation(const RenderBox* containingBlock) const
 {
     return false;
-}
-
-LayoutUnit RenderBox::computePercentageLogicalHeight(const Length& height) const
-{
-    LayoutUnit availableHeight = -1;
-
-    bool skippedAutoHeightContainingBlock = false;
-    RenderBlock* cb = containingBlock();
-    const RenderBox* containingBlockChild = this;
-    LayoutUnit rootMarginBorderPaddingHeight = 0;
-    while (!cb->isRenderView() && skipContainingBlockForPercentHeightCalculation(cb)) {
-        skippedAutoHeightContainingBlock = true;
-        containingBlockChild = cb;
-        cb = cb->containingBlock();
-    }
-    cb->addPercentHeightDescendant(const_cast<RenderBox*>(this));
-
-    RenderStyle* cbstyle = cb->style();
-
-    // A positioned element that specified both top/bottom or that specifies height should be treated as though it has a height
-    // explicitly specified that can be used for any percentage computations.
-    bool isOutOfFlowPositionedWithSpecifiedHeight = cb->isOutOfFlowPositioned() && (!cbstyle->logicalHeight().isAuto() || (!cbstyle->logicalTop().isAuto() && !cbstyle->logicalBottom().isAuto()));
-
-    if (cbstyle->logicalHeight().isFixed()) {
-        LayoutUnit contentBoxHeight = cb->adjustContentBoxLogicalHeightForBoxSizing(cbstyle->logicalHeight().value());
-        availableHeight = std::max<LayoutUnit>(0, cb->constrainContentBoxLogicalHeightByMinMax(contentBoxHeight, -1));
-    } else if (cbstyle->logicalHeight().isPercent() && !isOutOfFlowPositionedWithSpecifiedHeight) {
-        // We need to recur and compute the percentage height for our containing block.
-        LayoutUnit heightWithScrollbar = cb->computePercentageLogicalHeight(cbstyle->logicalHeight());
-        if (heightWithScrollbar != -1) {
-            LayoutUnit contentBoxHeightWithScrollbar = cb->adjustContentBoxLogicalHeightForBoxSizing(heightWithScrollbar);
-            // We need to adjust for min/max height because this method does not
-            // handle the min/max of the current block, its caller does. So the
-            // return value from the recursive call will not have been adjusted
-            // yet.
-            LayoutUnit contentBoxHeight = cb->constrainContentBoxLogicalHeightByMinMax(contentBoxHeightWithScrollbar, -1);
-            availableHeight = std::max<LayoutUnit>(0, contentBoxHeight);
-        }
-    } else if (isOutOfFlowPositionedWithSpecifiedHeight) {
-        // Don't allow this to affect the block' height() member variable, since this
-        // can get called while the block is still laying out its kids.
-        LogicalExtentComputedValues computedValues;
-        cb->computeLogicalHeight(cb->logicalHeight(), 0, computedValues);
-        availableHeight = computedValues.m_extent - cb->borderAndPaddingLogicalHeight();
-    } else if (cb->isRenderView())
-        availableHeight = view()->viewLogicalHeightForPercentages();
-
-    if (availableHeight == -1)
-        return availableHeight;
-
-    availableHeight -= rootMarginBorderPaddingHeight;
-
-    LayoutUnit result = valueForLength(height, availableHeight);
-    return result;
 }
 
 LayoutUnit RenderBox::computeReplacedLogicalWidth(ShouldComputePreferred shouldComputePreferred) const
@@ -1808,8 +1682,10 @@ LayoutUnit RenderBox::availableLogicalHeight(AvailableLogicalHeightType heightTy
 
 LayoutUnit RenderBox::availableLogicalHeightUsing(const Length& h, AvailableLogicalHeightType heightType) const
 {
-    if (isRenderView())
-        return toRenderView(this)->frameView()->unscaledVisibleContentSize().height();
+    if (isRenderView()) {
+        ASSERT_NOT_REACHED();
+        return LayoutUnit();
+    }
 
     if (h.isPercent() && isOutOfFlowPositioned()) {
         // FIXME: This is wrong if the containingBlock has a perpendicular writing mode.
@@ -2735,82 +2611,7 @@ LayoutRect RenderBox::localCaretRect(InlineBox* box, int caretOffset, LayoutUnit
     // Move to local coords
     rect.moveBy(-location());
 
-    // FIXME: Border/padding should be added for all elements but this workaround
-    // is needed because we use offsets inside an "atomic" element to represent
-    // positions before and after the element in deprecated editing offsets.
-    if (node() && !(editingIgnoresContent(node()) || isRenderedTableElement(node()))) {
-        rect.setX(rect.x() + borderLeft() + paddingLeft());
-        rect.setY(rect.y() + paddingTop() + borderTop());
-    }
-
     return rect;
-}
-
-PositionWithAffinity RenderBox::positionForPoint(const LayoutPoint& point)
-{
-    // no children...return this render object's element, if there is one, and offset 0
-    RenderObject* firstChild = slowFirstChild();
-    if (!firstChild)
-        return createPositionWithAffinity(node() ? firstPositionInOrBeforeNode(node()) : Position());
-
-    // Pass off to the closest child.
-    LayoutUnit minDist = LayoutUnit::max();
-    RenderBox* closestRenderer = 0;
-    LayoutPoint adjustedPoint = point;
-
-    for (RenderObject* renderObject = firstChild; renderObject; renderObject = renderObject->nextSibling()) {
-        if (!renderObject->slowFirstChild() && !renderObject->isInline() && !renderObject->isRenderParagraph())
-            continue;
-
-        if (!renderObject->isBox())
-            continue;
-
-        RenderBox* renderer = toRenderBox(renderObject);
-
-        LayoutUnit top = renderer->borderTop() + renderer->paddingTop() + renderer->y();
-        LayoutUnit bottom = top + renderer->contentHeight();
-        LayoutUnit left = renderer->borderLeft() + renderer->paddingLeft() + renderer->x();
-        LayoutUnit right = left + renderer->contentWidth();
-
-        if (point.x() <= right && point.x() >= left && point.y() <= top && point.y() >= bottom)
-            return renderer->positionForPoint(point - renderer->locationOffset());
-
-        // Find the distance from (x, y) to the box.  Split the space around the box into 8 pieces
-        // and use a different compare depending on which piece (x, y) is in.
-        LayoutPoint cmp;
-        if (point.x() > right) {
-            if (point.y() < top)
-                cmp = LayoutPoint(right, top);
-            else if (point.y() > bottom)
-                cmp = LayoutPoint(right, bottom);
-            else
-                cmp = LayoutPoint(right, point.y());
-        } else if (point.x() < left) {
-            if (point.y() < top)
-                cmp = LayoutPoint(left, top);
-            else if (point.y() > bottom)
-                cmp = LayoutPoint(left, bottom);
-            else
-                cmp = LayoutPoint(left, point.y());
-        } else {
-            if (point.y() < top)
-                cmp = LayoutPoint(point.x(), top);
-            else
-                cmp = LayoutPoint(point.x(), bottom);
-        }
-
-        LayoutSize difference = cmp - point;
-
-        LayoutUnit dist = difference.width() * difference.width() + difference.height() * difference.height();
-        if (dist < minDist) {
-            closestRenderer = renderer;
-            minDist = dist;
-        }
-    }
-
-    if (closestRenderer)
-        return closestRenderer->positionForPoint(adjustedPoint - closestRenderer->locationOffset());
-    return createPositionWithAffinity(firstPositionInOrBeforeNode(node()));
 }
 
 void RenderBox::addVisualEffectOverflow()
@@ -2965,27 +2766,6 @@ void RenderBox::clearLayoutOverflow()
     m_overflow->setLayoutOverflow(paddingBoxRect());
 }
 
-bool RenderBox::percentageLogicalHeightIsResolvableFromBlock(const RenderBlock* containingBlock, bool isOutOfFlowPositioned)
-{
-    const RenderBlock* cb = containingBlock;
-
-    // A positioned element that specified both top/bottom or that specifies height should be treated as though it has a height
-    // explicitly specified that can be used for any percentage computations.
-    // FIXME: We can't just check top/bottom here.
-    // https://bugs.webkit.org/show_bug.cgi?id=46500
-    bool isOutOfFlowPositionedWithSpecifiedHeight = cb->isOutOfFlowPositioned() && (!cb->style()->logicalHeight().isAuto() || (!cb->style()->top().isAuto() && !cb->style()->bottom().isAuto()));
-
-    // Otherwise we only use our percentage height if our containing block had a specified
-    // height.
-    if (cb->style()->logicalHeight().isFixed())
-        return true;
-    if (cb->style()->logicalHeight().isPercent() && !isOutOfFlowPositionedWithSpecifiedHeight)
-        return percentageLogicalHeightIsResolvableFromBlock(cb->containingBlock(), cb->isOutOfFlowPositioned());
-    if (cb->isRenderView() || isOutOfFlowPositionedWithSpecifiedHeight)
-        return true;
-    return false;
-}
-
 LayoutUnit RenderBox::lineHeight(bool /*firstLine*/, LineDirectionMode direction, LinePositionMode /*linePositionMode*/) const
 {
     if (isReplaced())
@@ -3052,7 +2832,7 @@ bool RenderBox::hasRelativeLogicalHeight() const
 
 RenderBox::BoxDecorationData::BoxDecorationData(const RenderStyle& style)
 {
-    backgroundColor = style.colorIncludingFallback(CSSPropertyBackgroundColor);
+    backgroundColor = style.resolveColor(style.backgroundColor());
     hasBackground = backgroundColor.alpha() || style.hasBackgroundImage();
     ASSERT(hasBackground == style.hasBackground());
     hasBorder = style.hasBorder();

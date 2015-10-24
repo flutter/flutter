@@ -57,7 +57,6 @@ INTERFACE_H_INCLUDES = frozenset([
 
 INTERFACE_CPP_INCLUDES = frozenset([
     'sky/engine/bindings/exception_state.h',
-    'core/dom/Document.h',
     'base/trace_event/trace_event.h',
     'wtf/GetPtr.h',
     'wtf/RefPtr.h',
@@ -88,11 +87,6 @@ def interface_context(interface):
         iterator_method = v8_methods.method_context(interface,
                                                     iterator_operation)
 
-    # [SetWrapperReferenceFrom]
-    reachable_node_function = extended_attributes.get('SetWrapperReferenceFrom')
-    if reachable_node_function:
-        includes.update(['core/dom/Element.h'])
-
     # [SetWrapperReferenceTo]
     set_wrapper_reference_to_list = [{
         'name': argument.name,
@@ -118,10 +112,7 @@ def interface_context(interface):
         v8_types.add_includes_for_interface(special_wrap_interface)
 
     # [Custom=Wrap], [SetWrapperReferenceFrom]
-    has_visit_dom_wrapper = (
-        has_extended_attribute_value(interface, 'Custom', 'VisitDOMWrapper') or
-        reachable_node_function or
-        set_wrapper_reference_to_list)
+    has_visit_dom_wrapper = False
 
     wrapper_class_id = ('NodeClassId' if inherits_interface(interface.name, 'Node') else 'ObjectClassId')
 
@@ -140,7 +131,6 @@ def interface_context(interface):
                 is_dependent_lifetime)
             else 'Independent',
         'parent_interface': parent_interface,
-        'reachable_node_function': reachable_node_function,
         'set_wrapper_reference_to_list': set_wrapper_reference_to_list,
         'special_wrap_for': special_wrap_for,
         'wrapper_class_id': wrapper_class_id,
@@ -169,10 +159,6 @@ def interface_context(interface):
 
     # [NamedConstructor]
     named_constructor = named_constructor_context(interface)
-
-    if (constructors or custom_constructors or has_event_constructor or
-        named_constructor):
-        includes.add('core/frame/LocalDOMWindow.h')
 
     context.update({
         'any_type_attributes': any_type_attributes,
@@ -647,10 +633,6 @@ def constructor_context(interface, constructor):
             any(argument for argument in constructor.arguments
                 if argument.idl_type.name == 'SerializedScriptValue' or
                    argument.idl_type.may_raise_exception_on_conversion),
-        'is_call_with_document':
-            # [ConstructorCallWith=Document]
-            has_extended_attribute_value(interface,
-                'ConstructorCallWith', 'Document'),
         'is_call_with_execution_context':
             # [ConstructorCallWith=ExecutionContext]
             has_extended_attribute_value(interface,

@@ -24,7 +24,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEIMAGE_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEIMAGE_H_
 
-#include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/platform/geometry/IntSize.h"
 #include "sky/engine/platform/geometry/LayoutSize.h"
 #include "sky/engine/platform/graphics/Image.h"
@@ -34,7 +33,6 @@
 
 namespace blink {
 
-class CSSValue;
 class RenderObject;
 
 typedef void* WrappedImagePtr;
@@ -47,8 +45,6 @@ public:
     {
         return data() == other.data();
     }
-
-    virtual PassRefPtr<CSSValue> cssValue() const = 0;
 
     virtual bool canRender(const RenderObject&) const { return true; }
     virtual bool isLoaded() const { return true; }

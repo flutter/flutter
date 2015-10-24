@@ -28,8 +28,7 @@ namespace blink {
 
 using namespace WTF::Unicode;
 
-RenderParagraph::RenderParagraph(ContainerNode* node)
-    : RenderBlock(node)
+RenderParagraph::RenderParagraph()
 {
 }
 
@@ -160,9 +159,6 @@ GapRects RenderParagraph::inlineSelectionGaps(RenderBlock* rootBlock, const Layo
 void RenderParagraph::addOverflowFromChildren()
 {
     LayoutUnit endPadding = hasOverflowClip() ? paddingEnd() : LayoutUnit();
-    // FIXME: Need to find another way to do this, since scrollbars could show when we don't want them to.
-    if (hasOverflowClip() && !endPadding && node() && node()->isRootEditableElement() && style()->isLeftToRightDirection())
-        endPadding = 1;
     for (RootInlineBox* curr = firstRootBox(); curr; curr = curr->nextRootBox()) {
         addLayoutOverflow(curr->paddedLayoutOverflowRect(endPadding));
         LayoutRect visualOverflow = curr->visualOverflowRect(curr->lineTop(), curr->lineBottom());
@@ -548,34 +544,7 @@ ETextAlign RenderParagraph::textAlignmentForLine(bool endsWithSoftBreak) const
     ETextAlign alignment = style()->textAlign();
     if (endsWithSoftBreak)
         return alignment;
-
-    if (!RuntimeEnabledFeatures::css3TextEnabled())
-        return (alignment == JUSTIFY) ? TASTART : alignment;
-
-    if (alignment != JUSTIFY)
-        return alignment;
-
-    TextAlignLast alignmentLast = style()->textAlignLast();
-    switch (alignmentLast) {
-    case TextAlignLastStart:
-        return TASTART;
-    case TextAlignLastEnd:
-        return TAEND;
-    case TextAlignLastLeft:
-        return LEFT;
-    case TextAlignLastRight:
-        return RIGHT;
-    case TextAlignLastCenter:
-        return CENTER;
-    case TextAlignLastJustify:
-        return JUSTIFY;
-    case TextAlignLastAuto:
-        if (style()->textJustify() == TextJustifyDistribute)
-            return JUSTIFY;
-        return TASTART;
-    }
-
-    return alignment;
+    return (alignment == JUSTIFY) ? TASTART : alignment;
 }
 
 static inline void setLogicalWidthForTextRun(RootInlineBox* lineBox, BidiRun* run, RenderText* renderer, float xPos, const LineInfo& lineInfo,
@@ -1429,18 +1398,6 @@ void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
     if (isFullLayout)
         lineBoxes()->deleteLineBoxes();
 
-    // Text truncation kicks in in two cases:
-    //     1) If your overflow isn't visible and your text-overflow-mode isn't clip.
-    //     2) If you're an anonymous paragraph with a parent that satisfies #1.
-    // FIXME: CSS3 says that descendants that are clipped must also know how to truncate.  This is insanely
-    // difficult to figure out in general (especially in the middle of doing layout), so we only handle the
-    // simple case of an anonymous block truncating when it's parent is clipped.
-    bool hasTextOverflow = style()->textOverflow() && hasOverflowClip();
-
-    // Walk all the lines and delete our ellipsis line boxes if they exist.
-    if (hasTextOverflow)
-         deleteEllipsisLineBoxes();
-
     if (firstChild()) {
         // In full layout mode, clear the line boxes of children upfront. Otherwise,
         // siblings can run into stale root lineboxes during layout. Then layout
@@ -1496,11 +1453,6 @@ void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
 
     if (!firstLineBox() && hasLineIfEmpty())
         setLogicalHeight(logicalHeight() + lineHeight(true, HorizontalLine, PositionOfInteriorLineBoxes));
-
-    // See if we have any lines that spill out of our block.  If we do, then we will possibly need to
-    // truncate text.
-    if (hasTextOverflow)
-        checkLinesForTextOverflow();
 }
 
 RootInlineBox* RenderParagraph::determineStartPosition(LineLayoutState& layoutState, InlineBidiResolver& resolver)
@@ -1633,78 +1585,6 @@ bool RenderParagraph::matchedEndLine(LineLayoutState& layoutState, const InlineB
     }
 
     return false;
-}
-
-void RenderParagraph::deleteEllipsisLineBoxes()
-{
-    ETextAlign textAlign = style()->textAlign();
-    bool ltr = style()->isLeftToRightDirection();
-    bool firstLine = true;
-    for (RootInlineBox* curr = firstRootBox(); curr; curr = curr->nextRootBox()) {
-        if (curr->hasEllipsisBox()) {
-            curr->clearTruncation();
-
-            // Shift the line back where it belongs if we cannot accomodate an ellipsis.
-            float logicalLeft = logicalLeftOffsetForLine(firstLine).toFloat();
-            float availableLogicalWidth = logicalRightOffsetForLine(false) - logicalLeft;
-            float totalLogicalWidth = curr->logicalWidth();
-            updateLogicalWidthForAlignment(textAlign, curr, 0, logicalLeft, totalLogicalWidth, availableLogicalWidth, 0);
-
-            if (ltr)
-                curr->adjustLogicalPosition((logicalLeft - curr->logicalLeft()), 0);
-            else
-                curr->adjustLogicalPosition(-(curr->logicalLeft() - logicalLeft), 0);
-        }
-        firstLine = false;
-    }
-}
-
-void RenderParagraph::checkLinesForTextOverflow()
-{
-    // Determine the width of the ellipsis using the current font.
-    // FIXME: CSS3 says this is configurable, also need to use 0x002E (FULL STOP) if horizontal ellipsis is "not renderable"
-    const Font& font = style()->font();
-    DEFINE_STATIC_LOCAL(AtomicString, ellipsisStr, (&horizontalEllipsis, 1));
-    const Font& firstLineFont = firstLineStyle()->font();
-    // FIXME: We should probably not hard-code the direction here. https://crbug.com/333004
-    TextDirection ellipsisDirection = LTR;
-    float firstLineEllipsisWidth = firstLineFont.width(constructTextRun(this, firstLineFont, &horizontalEllipsis, 1, firstLineStyle(), ellipsisDirection));
-    float ellipsisWidth = (font == firstLineFont) ? firstLineEllipsisWidth : font.width(constructTextRun(this, font, &horizontalEllipsis, 1, style(), ellipsisDirection));
-
-    // For LTR text truncation, we want to get the right edge of our padding box, and then we want to see
-    // if the right edge of a line box exceeds that.  For RTL, we use the left edge of the padding box and
-    // check the left edge of the line box to see if it is less
-    // Include the scrollbar for overflow blocks, which means we want to use "contentWidth()"
-    bool ltr = style()->isLeftToRightDirection();
-    ETextAlign textAlign = style()->textAlign();
-    bool firstLine = true;
-    for (RootInlineBox* curr = firstRootBox(); curr; curr = curr->nextRootBox()) {
-        float currLogicalLeft = curr->logicalLeft();
-        LayoutUnit blockRightEdge = logicalRightOffsetForLine(firstLine);
-        LayoutUnit blockLeftEdge = logicalLeftOffsetForLine(firstLine);
-        LayoutUnit lineBoxEdge = ltr ? currLogicalLeft + curr->logicalWidth() : currLogicalLeft;
-        if ((ltr && lineBoxEdge > blockRightEdge) || (!ltr && lineBoxEdge < blockLeftEdge)) {
-            // This line spills out of our box in the appropriate direction.  Now we need to see if the line
-            // can be truncated.  In order for truncation to be possible, the line must have sufficient space to
-            // accommodate our truncation string, and no replaced elements (images, tables) can overlap the ellipsis
-            // space.
-
-            LayoutUnit width = firstLine ? firstLineEllipsisWidth : ellipsisWidth;
-            LayoutUnit blockEdge = ltr ? blockRightEdge : blockLeftEdge;
-            if (curr->lineCanAccommodateEllipsis(ltr, blockEdge, lineBoxEdge, width)) {
-                float totalLogicalWidth = curr->placeEllipsis(ellipsisStr, ltr, blockLeftEdge.toFloat(), blockRightEdge.toFloat(), width.toFloat());
-
-                float logicalLeft = 0; // We are only intersted in the delta from the base position.
-                float availableLogicalWidth = (blockRightEdge - blockLeftEdge).toFloat();
-                updateLogicalWidthForAlignment(textAlign, curr, 0, logicalLeft, totalLogicalWidth, availableLogicalWidth, 0);
-                if (ltr)
-                    curr->adjustLogicalPosition(logicalLeft, 0);
-                else
-                    curr->adjustLogicalPosition(logicalLeft - (availableLogicalWidth - totalLogicalWidth), 0);
-            }
-        }
-        firstLine = false;
-    }
 }
 
 } // namespace blink

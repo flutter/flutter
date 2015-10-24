@@ -276,24 +276,6 @@ RenderObject::SelectionState InlineBox::selectionState()
     return renderer().selectionState();
 }
 
-bool InlineBox::canAccommodateEllipsis(bool ltr, int blockEdge, int ellipsisWidth) const
-{
-    // Non-replaced elements can always accommodate an ellipsis.
-    if (!renderer().isReplaced())
-        return true;
-
-    IntRect boxRect(left(), 0, m_logicalWidth, 10);
-    IntRect ellipsisRect(ltr ? blockEdge - ellipsisWidth : blockEdge, 0, ellipsisWidth, 10);
-    return !(boxRect.intersects(ellipsisRect));
-}
-
-float InlineBox::placeEllipsisBox(bool, float, float, float, float& truncatedWidth, bool&)
-{
-    // Use -1 to mean "we didn't set the position."
-    truncatedWidth += logicalWidth();
-    return -1;
-}
-
 void InlineBox::clearKnownToHaveNoOverflow()
 {
     m_bitfields.setKnownToHaveNoOverflow(false);

@@ -8,8 +8,6 @@ import("//mojo/dart/embedder/embedder.gni")
 
 visibility = [ "//sky/engine/*" ]
 
-rel_sky_core_gen_dir = rebase_path(sky_core_output_dir, root_build_dir)
-
 source_set("libraries") {
   public_deps = [
     "//base",
@@ -109,25 +107,12 @@ source_set("testing") {
   ]
 
   sources = [
-    "testing/DummyPageHolder.cpp",
-    "testing/DummyPageHolder.h",
     "testing/URLTestHelpers.cpp",
     "testing/URLTestHelpers.h",
   ]
 }
 
 source_set("core_generated") {
-  sources = [
-    # Generated from CSSTokenizer-in.cpp
-    "$sky_core_output_dir/CSSTokenizer.cpp",
-
-    # Generated from BisonCSSParser-in.cpp
-    "$sky_core_output_dir/BisonCSSParser.cpp",
-
-    # Additional .cpp files from the make_core_generated rules.
-    "$sky_core_output_dir/CSSGrammar.cpp",
-  ]
-
   configs += [ "..:inside_blink" ]
 
   deps = [
@@ -193,162 +178,19 @@ generate_event_interfaces("core_event_interfaces") {
   output_file = "core/EventInterfaces.in"
 }
 
-# generated_testing_idls -------------------------------------------------------
-
-group("generated_testing_idls") {
-  deps = [
-    ":generated_testing_idls_settings",
-  ]
-}
-
-action("generated_testing_idls_settings") {
-  script = "../build/scripts/make_settings.py"
-
-  inputs = scripts_for_in_files + [
-             "../build/scripts/make_settings.py",
-             "../build/scripts/templates/SettingsMacros.h.tmpl",
-             "frame/Settings.in",
-           ]
-  outputs = [
-    "$sky_core_output_dir/SettingsMacros.h",
-  ]
-
-  args = [
-    rebase_path("frame/Settings.in", root_build_dir),
-    "--output_dir",
-    rel_sky_core_gen_dir,
-  ]
-}
-
 # make_core_generated ----------------------------------------------------------
 
 group("core_names") {
   deps = [
-    ":make_core_generated_css_property_names",
     ":make_core_generated_event_names",
     ":make_core_generated_event_type_names",
-    ":make_core_generated_html_element_factory",
-    ":make_core_generated_media_type_names",
   ]
 }
 
 group("make_core_generated") {
   deps = [
     ":core_names",
-    ":make_core_generated_bison",
-    ":make_core_generated_css_property_metadata",
-    ":make_core_generated_css_value_keywords",
     ":make_core_generated_event_factory",
-    ":make_core_generated_make_parser",
-    ":make_core_generated_make_token_matcher",
-    ":make_core_generated_media_feature_names",
-    ":make_core_generated_media_features",
-    ":make_core_generated_media_query_tokenizer_codepoints",
-    ":make_core_generated_style_builder",
-    ":make_core_generated_style_property_shorthand",
-  ]
-}
-
-css_properties("make_core_generated_css_property_names") {
-  script = "../build/scripts/make_css_property_names.py"
-  outputs = [
-    "$sky_core_output_dir/CSSPropertyNames.cpp",
-    "$sky_core_output_dir/CSSPropertyNames.h",
-  ]
-}
-
-process_in_files("make_core_generated_media_features") {
-  script = "../build/scripts/make_media_features.py"
-  in_files = [ "css/MediaFeatureNames.in" ]
-  other_inputs = [
-    "../build/scripts/make_media_features.py",
-    "../build/scripts/templates/MediaFeatures.h.tmpl",
-  ]
-  outputs = [
-    "$sky_core_output_dir/MediaFeatures.h",
-  ]
-}
-
-css_properties("make_core_generated_style_property_shorthand") {
-  script = "../build/scripts/make_style_shorthands.py"
-  other_inputs = [
-    "../build/scripts/templates/StylePropertyShorthand.cpp.tmpl",
-    "../build/scripts/templates/StylePropertyShorthand.h.tmpl",
-  ]
-  outputs = [
-    "$sky_core_output_dir/StylePropertyShorthand.cpp",
-    "$sky_core_output_dir/StylePropertyShorthand.h",
-  ]
-  deps = [
-    ":core_names",
-  ]
-}
-
-css_properties("make_core_generated_style_builder") {
-  script = "../build/scripts/make_style_builder.py"
-  other_inputs = [
-    "../build/scripts/templates/StyleBuilder.cpp.tmpl",
-    "../build/scripts/templates/StyleBuilderFunctions.cpp.tmpl",
-    "../build/scripts/templates/StyleBuilderFunctions.h.tmpl",
-  ]
-  outputs = [
-    "$sky_core_output_dir/StyleBuilder.cpp",
-    "$sky_core_output_dir/StyleBuilderFunctions.h",
-    "$sky_core_output_dir/StyleBuilderFunctions.cpp",
-  ]
-
-  deps = [
-    ":core_names",
-    ":libraries",
-  ]
-}
-
-css_properties("make_core_generated_css_property_metadata") {
-  script = "../build/scripts/make_css_property_metadata.py"
-  other_inputs = [ "../build/scripts/templates/CSSPropertyMetadata.cpp.tmpl" ]
-  outputs = [
-    "$sky_core_output_dir/CSSPropertyMetadata.cpp",
-  ]
-
-  deps = [
-    ":core_names",
-  ]
-}
-
-process_in_files("make_core_generated_css_value_keywords") {
-  script = "../build/scripts/make_css_value_keywords.py"
-
-  in_files = [
-    "css/CSSValueKeywords.in",
-    "css/SVGCSSValueKeywords.in",
-  ]
-  outputs = [
-    "$sky_core_output_dir/CSSValueKeywords.cpp",
-    "$sky_core_output_dir/CSSValueKeywords.h",
-  ]
-  other_args = [
-    "--gperf",
-    gperf_exe,
-  ]
-
-  deps = [
-    "//sky/engine/wtf",
-  ]
-}
-
-process_in_files("make_core_generated_html_element_factory") {
-  script = "../build/scripts/make_element_factory.py"
-
-  in_files = [
-    "html/HTMLAttributeNames.in",
-  ]
-  other_inputs = make_element_factory_files
-  outputs = [
-    "$sky_core_output_dir/HTMLNames.cpp",
-    "$sky_core_output_dir/HTMLNames.h",
-  ]
-  deps = [
-    ":libraries",
   ]
 }
 
@@ -370,28 +212,7 @@ process_in_files("make_core_generated_event_factory") {
   ]
 }
 
-process_in_files("make_core_generated_media_feature_names") {
-  script = "../build/scripts/make_media_feature_names.py"
-  in_files = [ "css/MediaFeatureNames.in" ]
-  other_inputs = make_names_files
-  outputs = [
-    "$sky_core_output_dir/MediaFeatureNames.cpp",
-    "$sky_core_output_dir/MediaFeatureNames.h",
-  ]
-  deps = [
-    ":libraries",
-  ]
-}
-
 # make_names -------------------------------------------------------------------
-
-make_names("make_core_generated_media_type_names") {
-  in_files = [ "css/MediaTypeNames.in" ]
-  outputs = [
-    "$sky_core_output_dir/MediaTypeNames.cpp",
-    "$sky_core_output_dir/MediaTypeNames.h",
-  ]
-}
 
 make_names("make_core_generated_event_names") {
   in_files = [ "$sky_core_output_dir/EventInterfaces.in" ]
@@ -407,51 +228,4 @@ make_names("make_core_generated_event_type_names") {
     "$sky_core_output_dir/EventTypeNames.cpp",
     "$sky_core_output_dir/EventTypeNames.h",
   ]
-}
-
-# make_token_matcher -----------------------------------------------------------
-
-make_token_matcher("make_core_generated_make_token_matcher") {
-  input_file = "css/parser/CSSTokenizer-in.cpp"
-  output_file = "$sky_core_output_dir/CSSTokenizer.cpp"
-}
-
-make_token_matcher("make_core_generated_make_parser") {
-  input_file = "css/parser/BisonCSSParser-in.cpp"
-  output_file = "$sky_core_output_dir/BisonCSSParser.cpp"
-}
-
-# One-off scripts --------------------------------------------------------------
-
-action("make_core_generated_media_query_tokenizer_codepoints") {
-  script = "../build/scripts/make_mediaquery_tokenizer_codepoints.py"
-
-  outputs = [
-    "$sky_core_output_dir/MediaQueryTokenizerCodepoints.cpp",
-  ]
-
-  args = [
-    "--output_dir",
-    rel_sky_core_gen_dir,
-  ]
-
-  deps = make_core_generated_deps
-}
-
-action_foreach("make_core_generated_bison") {
-  script = "../build/scripts/rule_bison.py"
-  sources = [
-    "css/parser/CSSGrammar.y",
-  ]
-  outputs = [
-    "$sky_core_output_dir/{{source_name_part}}.cpp",
-    "$sky_core_output_dir/{{source_name_part}}.h",
-  ]
-  args = [
-    "{{source}}",
-    rel_sky_core_gen_dir,
-    bison_exe,
-  ]
-
-  deps = make_core_generated_deps
 }

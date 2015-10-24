@@ -23,7 +23,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERINLINE_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERINLINE_H_
 
-#include "sky/engine/core/editing/PositionWithAffinity.h"
 #include "sky/engine/core/rendering/InlineFlowBox.h"
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 #include "sky/engine/core/rendering/RenderLineBoxList.h"
@@ -32,7 +31,7 @@ namespace blink {
 
 class RenderInline : public RenderBoxModelObject {
 public:
-    explicit RenderInline(Element*);
+    explicit RenderInline();
 
     RenderObject* firstChild() const { ASSERT(children() == virtualChildren()); return children()->firstChild(); }
     RenderObject* lastChild() const { ASSERT(children() == virtualChildren()); return children()->lastChild(); }
@@ -42,8 +41,6 @@ public:
     void slowLastChild() const = delete;
 
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
-
-    Element* node() const { return toElement(RenderBoxModelObject::node()); }
 
     virtual LayoutUnit marginLeft() const override final;
     virtual LayoutUnit marginRight() const override final;
@@ -118,8 +115,6 @@ private:
     virtual LayoutUnit offsetHeight() const override final { return linesBoundingBox().height(); }
 
     virtual void mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
-
-    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override final;
 
     virtual IntRect borderBoundingBox() const override final
     {

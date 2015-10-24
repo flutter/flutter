@@ -6,8 +6,6 @@
 
 #include "sky/engine/core/painting/Canvas.h"
 
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Matrix.h"
 #include "sky/engine/platform/geometry/IntRect.h"

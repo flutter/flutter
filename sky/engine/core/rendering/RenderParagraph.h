@@ -5,20 +5,18 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_
 
-#include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/line/TrailingObjects.h"
 
 namespace blink {
 
 struct BidiRun;
-class ContainerNode;
 // class InlineBidiResolver;
 class InlineIterator;
 
 class RenderParagraph final : public RenderBlock {
 public:
-    explicit RenderParagraph(ContainerNode*);
+    explicit RenderParagraph();
     virtual ~RenderParagraph();
 
     bool isRenderParagraph() const final { return true; }
@@ -105,8 +103,6 @@ private:
     void determineEndPosition(LineLayoutState&, RootInlineBox* startBox, InlineIterator& cleanLineStart, BidiStatus& cleanLineBidiStatus);
     bool checkPaginationAndFloatsAtEndLine(LineLayoutState&);
     bool matchedEndLine(LineLayoutState&, const InlineBidiResolver&, const InlineIterator& endLineStart, const BidiStatus& endLineStatus);
-    void deleteEllipsisLineBoxes();
-    void checkLinesForTextOverflow();
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderParagraph, isRenderParagraph());

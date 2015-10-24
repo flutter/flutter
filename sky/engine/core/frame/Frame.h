@@ -38,13 +38,7 @@ class WebLayer;
 
 namespace blink {
 
-class ChromeClient;
-class Document;
 class FrameClient;
-class FrameHost;
-class LocalDOMWindow;
-class Page;
-class Settings;
 
 class Frame : public RefCounted<Frame> {
 public:
@@ -56,26 +50,8 @@ public:
     FrameClient* client() const;
     void clearClient();
 
-    // NOTE: Page is moving out of Blink up into the browser process as
-    // part of the site-isolation (out of process iframes) work.
-    // FrameHost should be used instead where possible.
-    Page* page() const;
-    FrameHost* host() const; // Null when the frame is detached.
-
-    // FIXME: LocalDOMWindow and Document should both be moved to LocalFrame
-    // after RemoteFrame is complete enough to exist without them.
-    virtual void setDOMWindow(PassRefPtr<LocalDOMWindow>);
-    LocalDOMWindow* domWindow() const;
-
-    Settings* settings() const; // can be null
-
 protected:
-    Frame(FrameClient*, FrameHost*);
-
-    FrameHost* m_host;
-    Document* m_document;
-
-    RefPtr<LocalDOMWindow> m_domWindow;
+    Frame(FrameClient*);
 
 private:
     FrameClient* m_client;
@@ -89,11 +65,6 @@ inline FrameClient* Frame::client() const
 inline void Frame::clearClient()
 {
     m_client = 0;
-}
-
-inline LocalDOMWindow* Frame::domWindow() const
-{
-    return m_domWindow.get();
 }
 
 // Allow equality comparisons of Frames by reference or pointer, interchangeably.

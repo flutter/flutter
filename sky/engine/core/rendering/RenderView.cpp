@@ -21,10 +21,6 @@
 #include "sky/engine/core/rendering/RenderView.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/Element.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
@@ -35,10 +31,8 @@
 
 namespace blink {
 
-RenderView::RenderView(Document* document)
-    : RenderFlexibleBox(document)
-    , m_frameView(document ? document->view() : nullptr)
-    , m_selectionStart(nullptr)
+RenderView::RenderView()
+    : m_selectionStart(nullptr)
     , m_selectionEnd(nullptr)
     , m_selectionStartPos(-1)
     , m_selectionEndPos(-1)
@@ -70,24 +64,9 @@ bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& l
     TRACE_EVENT0("blink", "RenderView::hitTest");
     m_hitTestCount++;
 
-    if (!m_frameView->visibleContentRect().contains(location.roundedPoint()))
-        return false;
-
-    // We have to recursively update layout/style here because otherwise, when the hit test recurses
-    // into a child document, it could trigger a layout on the parent document, which can destroy RenderLayers
-    // that are higher up in the call stack, leading to crashes.
-    // Note that Document::updateLayout calls its parent's updateLayout.
-    // FIXME: It should be the caller's responsibility to ensure an up-to-date layout.
-    frameView()->updateLayoutAndStyleIfNeededRecursive();
-
-    // RenderView should make sure to update layout before entering hit testing
-    ASSERT(!frame()->view()->layoutPending());
-    ASSERT(!document().renderView()->needsLayout());
-
     // TODO(ojan): Does any of this intersection stuff make sense for Sky?
-    LayoutRect hitTestArea = view()->documentRect();
-    if (!request.ignoreClipping())
-        hitTestArea.intersect(frame()->view()->visibleContentRect());
+    LayoutRect hitTestArea;
+    hitTestArea.setSize(m_frameViewSize);
 
     bool insideLayer = hitTestLayer(layer(), 0, request, result, hitTestArea, location);
     if (!insideLayer) {
@@ -187,34 +166,11 @@ void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vec
     // RenderViews should never be called to paint with an offset not on device pixels.
     ASSERT(LayoutPoint(IntPoint(paintOffset.x(), paintOffset.y())) == paintOffset);
 
-    // This avoids painting garbage between columns if there is a column gap.
-    if (m_frameView && style()->isOverflowPaged())
-        paintInfo.context->fillRect(paintInfo.rect, m_frameView->baseBackgroundColor());
-
     paintObject(paintInfo, paintOffset, layers);
 }
 
 void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (!view())
-        return;
-
-    // This code typically only executes if the root element's visibility has been set to hidden,
-    // if there is a transform on the <html>, or if there is a page scale factor less than 1.
-    // Only fill with the base background color (typically white) if we're the root document,
-    // since iframes/frames with no background in the child document should show the parent's background.
-    if (!frameView()->isTransparent()) {
-        Color baseColor = frameView()->baseBackgroundColor();
-        if (baseColor.alpha()) {
-            CompositeOperator previousOperator = paintInfo.context->compositeOperation();
-            paintInfo.context->setCompositeOperation(CompositeCopy);
-            paintInfo.context->fillRect(paintInfo.rect, baseColor);
-            paintInfo.context->setCompositeOperation(previousOperator);
-        } else {
-            paintInfo.context->clearRect(paintInfo.rect);
-        }
-    }
-    paintCustomPainting(paintInfo, paintOffset);
 }
 
 void RenderView::absoluteQuads(Vector<FloatQuad>& quads) const
@@ -324,13 +280,6 @@ void RenderView::selectionStartEnd(int& startPos, int& endPos) const
 {
     startPos = m_selectionStartPos;
     endPos = m_selectionEndPos;
-}
-
-LayoutRect RenderView::viewRect() const
-{
-    if (m_frameView)
-        return m_frameView->visibleContentRect();
-    return LayoutRect();
 }
 
 IntRect RenderView::unscaledDocumentRect() const

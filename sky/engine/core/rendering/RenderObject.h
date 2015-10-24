@@ -26,10 +26,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
 
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/editing/TextAffinity.h"
-#include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/RenderObjectChildList.h"
 #include "sky/engine/core/rendering/SubtreeLayoutScope.h"
@@ -42,13 +39,11 @@
 namespace blink {
 
 class AffineTransform;
-class Document;
 class HitTestLocation;
 class HitTestResult;
 class InlineBox;
 class InlineFlowBox;
 class Position;
-class PositionWithAffinity;
 class RenderBlock;
 class RenderBox;
 class RenderBoxModelObject;
@@ -106,7 +101,7 @@ class RenderObject {
     WTF_MAKE_NONCOPYABLE(RenderObject);
 public:
     // TODO(ojan): Pass in a reference since the node can no longer be null.
-    explicit RenderObject(Node*);
+    explicit RenderObject();
     virtual ~RenderObject();
 
     virtual const char* renderName() const = 0;
@@ -234,7 +229,6 @@ public:
     void showRenderTreeAndMark(const RenderObject* markedObject1 = 0, const char* markedLabel1 = 0, const RenderObject* markedObject2 = 0, const char* markedLabel2 = 0, int depth = 0) const;
 #endif
 
-    static RenderObject* createObject(Element*, RenderStyle*);
     static unsigned instanceCount() { return s_instanceCount; }
 
 #if !ENABLE(OILPAN)
@@ -336,26 +330,12 @@ public:
 
     inline bool preservesNewline() const;
 
-    RenderView* view() const { return document().renderView(); };
-    FrameView* frameView() const { return document().view(); };
-
     bool isRooted() const;
-
-    // TODO(ojan): Make this a reference now that it can't be null.
-    Node* node() const
-    {
-        return m_node.get();
-    }
-
-    Document& document() const { return m_node->document(); }
-    LocalFrame* frame() const { return document().frame(); }
 
     // Returns the object containing this one. Can be different from parent for positioned elements.
     // If paintInvalidationContainer and paintInvalidationContainerSkipped are not null, on return *paintInvalidationContainerSkipped
     // is true if the renderer returned is an ancestor of paintInvalidationContainer.
     RenderObject* container(const RenderBox* paintInvalidationContainer = 0, bool* paintInvalidationContainerSkipped = 0) const;
-
-    Element* offsetParent() const;
 
     void markContainingBlocksForLayout(bool scheduleRelayout = true, RenderObject* newRoot = 0, SubtreeLayoutScope* = 0);
     void setNeedsLayout(MarkingBehavior = MarkContainingBlockChain, SubtreeLayoutScope* = 0);
@@ -411,10 +391,6 @@ public:
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&);
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset);
 
-    virtual PositionWithAffinity positionForPoint(const LayoutPoint&);
-    PositionWithAffinity createPositionWithAffinity(int offset, EAffinity);
-    PositionWithAffinity createPositionWithAffinity(const Position&);
-
     virtual void dirtyLinesFromChangedChild(RenderObject*);
 
     // Set the style of the object and update the state of the object accordingly.
@@ -455,10 +431,6 @@ public:
     // Build an array of quads in absolute coords for line boxes
     virtual void absoluteQuads(Vector<FloatQuad>&) const { }
 
-    virtual void absoluteFocusRingQuads(Vector<FloatQuad>&);
-
-    static FloatRect absoluteBoundingBoxRectForRange(const Range*);
-
     virtual LayoutUnit minPreferredLogicalWidth() const { return 0; }
     virtual LayoutUnit maxPreferredLogicalWidth() const { return 0; }
 
@@ -468,16 +440,6 @@ public:
     RenderStyle* firstLineStyle() const;
     RenderStyle* style(bool firstLine) const;
 
-    inline Color resolveColor(const RenderStyle* styleToUse, int colorProperty) const
-    {
-        return styleToUse->colorIncludingFallback(colorProperty);
-    }
-
-    inline Color resolveColor(int colorProperty) const
-    {
-        return style()->colorIncludingFallback(colorProperty);
-    }
-
     struct AppliedTextDecoration {
         Color color;
         TextDecorationStyle style;
@@ -485,12 +447,6 @@ public:
     };
 
     void getTextDecorations(unsigned decorations, AppliedTextDecoration& underline, AppliedTextDecoration& overline, AppliedTextDecoration& linethrough, bool quirksMode = false, bool firstlineStyle = false);
-
-    // Return the RenderBox in the container chain which is responsible for painting this object, or 0
-    // if painting is root-relative. This is the container that should be passed to the 'forPaintInvalidation'
-    // methods.
-    const RenderView* containerForPaintInvalidation() const;
-    const RenderBox* adjustCompositedContainerForSpecialAncestors(const RenderBox* paintInvalidationContainer) const;
 
     // Overriden by RenderText for character length, used in line layout code.
     virtual unsigned length() const { return 1; }
@@ -608,11 +564,7 @@ protected:
     void drawSolidBoxSide(GraphicsContext*, int x1, int y1, int x2, int y2,
         BoxSide, Color, int adjacentWidth1, int adjacentWidth2, bool antialias);
 
-    void paintFocusRing(PaintInfo&, const LayoutPoint&, RenderStyle*);
-    void paintOutline(PaintInfo&, const LayoutRect&);
     void addChildFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderBox* paintContainer) const;
-
-    virtual LayoutRect viewRect() const;
 
     void clearLayoutRootIfNeeded() const;
     virtual void willBeDestroyed();
@@ -626,7 +578,7 @@ private:
 
     StyleDifference adjustStyleDifference(StyleDifference) const;
 
-    Color selectionColor(int colorProperty) const;
+    Color selectionColor() const;
 
 #if ENABLE(ASSERT)
     void checkBlockPositionedObjectsNeedLayout();
@@ -639,11 +591,7 @@ private:
         return isRenderView() || (hasTransform() && isRenderBlock());
     }
 
-    static bool isAllowedToModifyRenderTreeStructure(Document&);
-
     RefPtr<RenderStyle> m_style;
-
-    RawPtr<Node> m_node;
 
     RawPtr<RenderObject> m_parent;
     RawPtr<RenderObject> m_previous;
@@ -673,7 +621,7 @@ private:
         };
 
     public:
-        RenderObjectBitfields(Node* node)
+        RenderObjectBitfields()
             : m_selfNeedsLayout(false)
             , m_onlyNeededPositionedMovementLayout(false)
             , m_neededLayoutBecauseOfChildren(false)
@@ -774,7 +722,7 @@ DEFINE_COMPARISON_OPERATORS_WITH_REFERENCES(RenderObject)
 
 inline bool RenderObject::documentBeingDestroyed() const
 {
-    return m_node && !document().isActive();
+    return false;
 }
 
 // setNeedsLayout() won't cause full paint invalidations as

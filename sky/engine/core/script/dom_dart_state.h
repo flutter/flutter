@@ -6,13 +6,11 @@
 #define SKY_ENGINE_CORE_SCRIPT_DOM_DART_STATE_H_
 
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
-class LocalFrame;
-class LocalDOMWindow;
 
 class DOMDartState : public DartState {
  public:

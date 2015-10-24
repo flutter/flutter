@@ -67,7 +67,6 @@ _CALL_WITH_ARGUMENTS = {
     'ScriptArguments': 'scriptArguments.release()',
     'ActiveWindow': 'DOMDartState::CurrentWindow()',
     'FirstWindow': 'DOMDartState::CurrentWindow()',
-    'Document': 'document',
 }
 
 # List because key order matters, as we want arguments in deterministic order
@@ -77,7 +76,6 @@ _CALL_WITH_VALUES = [
     'ScriptArguments',
     'ActiveWindow',
     'FirstWindow',
-    'Document',
 ]
 
 

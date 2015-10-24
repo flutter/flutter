@@ -83,7 +83,7 @@ struct FontBaselineOrAuto {
 
 class RenderBox : public RenderBoxModelObject {
 public:
-    explicit RenderBox(ContainerNode*);
+    explicit RenderBox();
 
     // hasAutoZIndex only returns true if the element is positioned or a flex-item since
     // position:static elements that are not flex-items get their z-index coerced to auto.
@@ -403,9 +403,6 @@ public:
     virtual LayoutUnit computeReplacedLogicalWidth(ShouldComputePreferred  = ComputeActual) const;
     virtual LayoutUnit computeReplacedLogicalHeight() const;
 
-    static bool percentageLogicalHeightIsResolvableFromBlock(const RenderBlock* containingBlock, bool outOfFlowPositioned);
-    LayoutUnit computePercentageLogicalHeight(const Length& height) const;
-
     // Block flows subclass availableWidth/Height to handle multi column layout (shrinking the width/height available to children when laying out.)
     virtual LayoutUnit availableLogicalWidth() const { return contentLogicalWidth(); }
     virtual LayoutUnit availableLogicalHeight(AvailableLogicalHeightType) const;
@@ -438,8 +435,6 @@ public:
         return true;
     }
 
-    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override;
-
     void removeFloatingOrPositionedChildFromBlockLists();
 
     RenderLayer* enclosingFloatPaintingLayer() const;
@@ -466,8 +461,6 @@ public:
     virtual bool hasRelativeLogicalHeight() const;
 
     bool hasSameDirectionAs(const RenderBox* object) const { return style()->direction() == object->style()->direction(); }
-
-    void setCustomPainting(PassRefPtr<DisplayList> customPainting) { m_customPainting = customPainting; }
 
 protected:
     virtual void willBeDestroyed() override;
@@ -502,11 +495,7 @@ protected:
 
     virtual void mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
 
-    void paintRootBoxFillLayers(const PaintInfo&);
-
     void updateIntrinsicContentLogicalHeight(LayoutUnit intrinsicContentLogicalHeight) const { m_intrinsicContentLogicalHeight = intrinsicContentLogicalHeight; }
-
-    void paintCustomPainting(PaintInfo& paintInfo, const LayoutPoint& paintOffset);
 
 private:
     void updateTransformationMatrix();
@@ -588,7 +577,6 @@ protected:
     OwnPtr<TransformationMatrix> m_transform;
 
 private:
-    RefPtr<DisplayList> m_customPainting;
     OwnPtr<RenderLayer> m_layer;
     OwnPtr<RenderBoxRareData> m_rareData;
 };

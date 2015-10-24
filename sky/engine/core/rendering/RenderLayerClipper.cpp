@@ -248,7 +248,6 @@ void RenderLayerClipper::calculateClipRects(const ClipRectsContext& context, Cli
 ClipRect RenderLayerClipper::backgroundClipRect(const ClipRectsContext& context) const
 {
     ASSERT(m_renderer.layer()->parent());
-    ASSERT(m_renderer.view());
 
     ClipRects parentClipRects;
     if (m_renderer.layer() == context.rootLayer)

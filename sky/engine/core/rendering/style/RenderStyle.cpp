@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/rendering/RenderTheme.h"
 #include "sky/engine/core/rendering/style/AppliedTextDecoration.h"
 #include "sky/engine/core/rendering/style/DataEquivalency.h"
@@ -727,8 +726,6 @@ void RenderStyle::setFontSize(float size)
     ASSERT(std::isfinite(size));
     if (!std::isfinite(size) || size < 0)
         size = 0;
-    else
-        size = std::min(maximumAllowedFontSize, size);
 
     FontSelector* currentFontSelector = font().fontSelector();
     FontDescription desc(fontDescription());
@@ -905,63 +902,6 @@ StyleColor RenderStyle::decorationStyleColor() const
 Color RenderStyle::decorationColor() const
 {
     return decorationStyleColor().resolve(color());
-}
-
-Color RenderStyle::colorIncludingFallback(int colorProperty) const
-{
-    StyleColor result(StyleColor::currentColor());
-    EBorderStyle borderStyle = BNONE;
-    switch (colorProperty) {
-    case CSSPropertyBackgroundColor:
-        result = backgroundColor();
-        break;
-    case CSSPropertyBorderLeftColor:
-        result = borderLeftColor();
-        borderStyle = borderLeftStyle();
-        break;
-    case CSSPropertyBorderRightColor:
-        result = borderRightColor();
-        borderStyle = borderRightStyle();
-        break;
-    case CSSPropertyBorderTopColor:
-        result = borderTopColor();
-        borderStyle = borderTopStyle();
-        break;
-    case CSSPropertyBorderBottomColor:
-        result = borderBottomColor();
-        borderStyle = borderBottomStyle();
-        break;
-    case CSSPropertyColor:
-        result = color();
-        break;
-    case CSSPropertyOutlineColor:
-        result = outlineColor();
-        break;
-    case CSSPropertyWebkitTextEmphasisColor:
-        result = textEmphasisColor();
-        break;
-    case CSSPropertyWebkitTextFillColor:
-        result = textFillColor();
-        break;
-    case CSSPropertyWebkitTextStrokeColor:
-        result = textStrokeColor();
-        break;
-    case CSSPropertyWebkitTapHighlightColor:
-        result = tapHighlightColor();
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-        break;
-    }
-
-    if (!result.isCurrentColor())
-        return result.color();
-
-    // FIXME: Treating styled borders with initial color differently causes problems
-    // See crbug.com/316559, crbug.com/276231
-    if ((borderStyle == INSET || borderStyle == OUTSET || borderStyle == RIDGE || borderStyle == GROOVE))
-        return Color(238, 238, 238);
-    return color();
 }
 
 const BorderValue& RenderStyle::borderBefore() const

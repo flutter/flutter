@@ -248,10 +248,6 @@ public:
 
     virtual RenderObject::SelectionState selectionState();
 
-    virtual bool canAccommodateEllipsis(bool ltr, int blockEdge, int ellipsisWidth) const;
-    // visibleLeftEdge, visibleRightEdge are in the parent's coordinate system.
-    virtual float placeEllipsisBox(bool ltr, float visibleLeftEdge, float visibleRightEdge, float ellipsisWidth, float &truncatedWidth, bool&);
-
 #if ENABLE(ASSERT)
     void setHasBadParent();
 #endif

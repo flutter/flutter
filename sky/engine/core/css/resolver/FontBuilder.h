@@ -23,15 +23,12 @@
 #ifndef SKY_ENGINE_CORE_CSS_RESOLVER_FONTBUILDER_H_
 #define SKY_ENGINE_CORE_CSS_RESOLVER_FONTBUILDER_H_
 
-#include "gen/sky/core/CSSValueKeywords.h"
-
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 
-class CSSValue;
 class FontSelector;
 class RenderStyle;
 
@@ -44,22 +41,16 @@ public:
     FontBuilder();
 
     // FIXME: The name is probably wrong, but matches StyleResolverState callsite for consistency.
-    void initForStyleResolve(Document*, RenderStyle*);
-
-    void setInitial();
+    void initForStyleResolve(RenderStyle*);
 
     void didChangeFontParameters(bool);
 
     void inheritFrom(const FontDescription&);
-    void fromSystemFont(CSSValueID);
 
     void setFontFamilyInitial();
     void setFontFamilyInherit(const FontDescription&);
-    void setFontFamilyValue(CSSValue*);
 
-    void setFontSizeInitial();
     void setFontSizeInherit(const FontDescription&);
-    void setFontSizeValue(CSSValue*, RenderStyle* parentStyle);
 
     void setWeight(FontWeight);
     void setStretch(FontStretch);
@@ -107,7 +98,6 @@ private:
 
     float getComputedSizeFromSpecifiedSize(FontDescription&, float specifiedSize);
 
-    RawPtr<const Document> m_document;
     bool m_fontSizehasViewportUnits;
     // FIXME: This member is here on a short-term lease. The plan is to remove
     // any notion of RenderStyle from here, allowing FontBuilder to build Font objects

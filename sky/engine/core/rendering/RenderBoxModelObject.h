@@ -53,7 +53,7 @@ enum ContentChangeType {
 
 class RenderBoxModelObject : public RenderObject {
 public:
-    RenderBoxModelObject(ContainerNode*);
+    RenderBoxModelObject();
     virtual ~RenderBoxModelObject();
 
     LayoutSize relativePositionOffset() const;
@@ -229,7 +229,6 @@ protected:
 
     LayoutPoint adjustedPositionRelativeToOffsetParent(const LayoutPoint&) const;
 
-    void calculateBackgroundImageGeometry(const RenderBox* paintContainer, const FillLayer&, const LayoutRect& paintRect, BackgroundImageGeometry&, RenderObject* = 0) const;
     void getBorderEdgeInfo(class BorderEdge[], const RenderStyle*, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true) const;
     bool borderObscuresBackgroundEdge(const FloatSize& contextScale) const;
     bool borderObscuresBackground() const;
