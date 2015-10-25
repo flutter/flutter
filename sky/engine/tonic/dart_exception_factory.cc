@@ -5,7 +5,6 @@
 #include "sky/engine/tonic/dart_exception_factory.h"
 
 #include "sky/engine/tonic/dart_converter.h"
-#include "sky/engine/tonic/dart_builtin.h"
 
 namespace blink {
 
@@ -109,7 +108,7 @@ Dart_Handle DartExceptionFactory::CreateException(const std::string& class_name,
 Dart_Handle DartExceptionFactory::CreateException(const std::string& class_name,
                                                   Dart_Handle message) {
   if (core_library_.is_empty()) {
-    Dart_Handle library = DartBuiltin::LookupLibrary("dart:core");
+    Dart_Handle library = Dart_LookupLibrary(ToDart("dart:core"));
     core_library_.Set(dart_state_, library);
   }
 

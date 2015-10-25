@@ -5,45 +5,41 @@
 #include "sky/engine/bindings/dart_ui.h"
 
 #include "gen/sky/bindings/DartGlobal.h"
-#include "sky/engine/bindings/builtin.h"
-#include "sky/engine/bindings/dart_natives.h"
-#include "sky/engine/core/script/dom_dart_state.h"
-#include "sky/engine/core/view/View.h"
+#include "sky/engine/bindings/dart_runtime_hooks.h"
+#include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 
 namespace blink {
+namespace {
 
-DartUI::DartUI(DOMDartState* dart_state) {
-  library_.Set(dart_state, Builtin::LoadAndCheckLibrary(Builtin::kUILibrary));
-}
+static DartLibraryNatives* g_natives;
 
-DartUI::~DartUI() {
-}
-
-Dart_NativeFunction DartUI::NativeLookup(Dart_Handle name,
+Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                          int argument_count,
                                          bool* auto_setup_scope) {
-  if (auto result = DartNatives::NativeLookup(name, argument_count, auto_setup_scope))
+  if (auto result = g_natives->GetNativeFunction(name,
+                                                 argument_count,
+                                                 auto_setup_scope))
     return result;
   return skySnapshotResolver(name, argument_count, auto_setup_scope);
 }
 
-const uint8_t* DartUI::NativeSymbol(Dart_NativeFunction native_function) {
-  if (auto result = DartNatives::NativeSymbol(native_function))
+const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
+  if (auto result = g_natives->GetSymbol(native_function))
     return result;
   return skySnapshotSymbolizer(native_function);
 }
 
-void DartUI::InstallView(View* view) {
-  CHECK(!LogIfError(
-      Dart_SetField(library_.value(), ToDart("view"), ToDart(view))));
-}
+}  // namespace
 
-Dart_Handle DartUI::GetClassByName(const char* class_name) {
-  Dart_Handle name_handle = ToDart(class_name);
-  Dart_Handle class_handle = Dart_GetType(library_.value(), name_handle, 0, nullptr);
-  DCHECK(!Dart_IsError(class_handle)) << class_name << ": " << Dart_GetError(class_handle);
-  return class_handle;
+void DartUI::InitForIsolate() {
+  if (!g_natives) {
+    g_natives = new DartLibraryNatives();
+    DartRuntimeHooks::RegisterNatives(g_natives);
+  }
+
+  DART_CHECK_VALID(Dart_SetNativeResolver(
+      Dart_LookupLibrary(ToDart("dart:ui")), GetNativeFunction, GetSymbol));
 }
 
 }  // namespace blink

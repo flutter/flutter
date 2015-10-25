@@ -85,6 +85,7 @@ component("wtf") {
     "Locker.h",
     "MainThread.cpp",
     "MainThread.h",
+    "MakeUnique.h",
     "MallocZoneSupport.h",
     "MathExtras.h",
     "MessageQueue.h",

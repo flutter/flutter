@@ -9,7 +9,7 @@
 
 namespace blink {
 
-DartClassLibrary::DartClassLibrary() : provider_(nullptr) {
+DartClassLibrary::DartClassLibrary() {
 }
 
 DartClassLibrary::~DartClassLibrary() {

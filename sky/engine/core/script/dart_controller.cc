@@ -11,13 +11,14 @@
 #include "dart/runtime/include/dart_tools_api.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "sky/engine/bindings/builtin.h"
-#include "sky/engine/bindings/dart_natives.h"
+#include "sky/engine/bindings/dart_mojo_internal.h"
+#include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/bindings/dart_ui.h"
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/view/View.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_class_library.h"
@@ -25,11 +26,13 @@
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_gc_controller.h"
 #include "sky/engine/tonic/dart_invoke.h"
+#include "sky/engine/tonic/dart_io.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_library_loader.h"
 #include "sky/engine/tonic/dart_snapshot_loader.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrappable.h"
+#include "sky/engine/wtf/MakeUnique.h"
 
 namespace blink {
 namespace {
@@ -48,7 +51,7 @@ void CallHandleMessage(base::WeakPtr<DartState> dart_state) {
     return;
 
   DartIsolateScope scope(dart_state->isolate());
-  DartApiScope api_scope;
+  DartApiScope dart_api_scope;
   LogIfError(Dart_HandleMessage());
 }
 
@@ -148,15 +151,14 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
 
   {
-    DartApiScope apiScope;
+    DartApiScope dart_api_scope;
+    DartIO::InitForIsolate();
+    DartUI::InitForIsolate();
+    DartMojoInternal::InitForIsolate();
+    DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate);
 
-    Builtin::SetNativeResolver(Builtin::kUILibrary);
-    Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
-    Builtin::SetNativeResolver(Builtin::kIOLibrary);
-    DartNatives::Init(DartNatives::MainIsolate);
-
-    dart_ui_ = adoptPtr(new DartUI(dart_state()));
-    dart_state()->class_library().set_provider(dart_ui_.get());
+    dart_state()->class_library().set_provider(
+      WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:ui"));
 
     EnsureHandleWatcherStarted();
   }
@@ -167,7 +169,8 @@ void DartController::InstallView(View* view) {
   DartIsolateScope isolate_scope(dart_state()->isolate());
   DartApiScope dart_api_scope;
 
-  dart_ui_->InstallView(view);
+  Dart_Handle library = Dart_LookupLibrary(ToDart("dart:ui"));
+  CHECK(!LogIfError(Dart_SetField(library, ToDart("view"), ToDart(view))));
 }
 
 static void DartController_DartStreamConsumer(
