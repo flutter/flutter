@@ -5,6 +5,8 @@
 #ifndef SKY_ENGINE_CORE_SCRIPT_DART_CONTROLLER_H_
 #define SKY_ENGINE_CORE_SCRIPT_DART_CONTROLLER_H_
 
+#include <memory>
+
 #include "base/callback_forward.h"
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
@@ -36,7 +38,7 @@ class DartController {
   void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
   void RunFromSnapshotBuffer(const uint8_t* buffer, size_t size);
 
-  void CreateIsolateFor(PassOwnPtr<DOMDartState> dom_dart_state);
+  void CreateIsolateFor(std::unique_ptr<DOMDartState> dom_dart_state);
   void Shutdown();
   void InstallView(View* view);
 
@@ -49,9 +51,8 @@ class DartController {
   void DidLoadMainLibrary(String url);
   void DidLoadSnapshot();
 
-  OwnPtr<DOMDartState> dom_dart_state_;
-  OwnPtr<DartUI> dart_ui_;
-  OwnPtr<DartSnapshotLoader> snapshot_loader_;
+  std::unique_ptr<DOMDartState> dom_dart_state_;
+  std::unique_ptr<DartSnapshotLoader> snapshot_loader_;
 
   base::WeakPtrFactory<DartController> weak_factory_;
 

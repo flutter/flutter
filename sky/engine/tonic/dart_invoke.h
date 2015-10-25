@@ -5,13 +5,15 @@
 #ifndef SKY_ENGINE_TONIC_DART_INVOKE_H_
 #define SKY_ENGINE_TONIC_DART_INVOKE_H_
 
+#include <initializer_list>
+
 #include "dart/runtime/include/dart_api.h"
 
 namespace blink {
 
-bool DartInvokeAppField(Dart_Handle target, Dart_Handle name,
-                        int number_of_arguments,
-                        Dart_Handle* arguments);
+bool DartInvokeField(Dart_Handle target,
+                     const char* name,
+                     std::initializer_list<Dart_Handle> args);
 
 bool DartInvokeAppClosure(Dart_Handle closure,
                           int number_of_arguments,
@@ -20,4 +22,3 @@ bool DartInvokeAppClosure(Dart_Handle closure,
 }  // namespace blink
 
 #endif  // SKY_ENGINE_TONIC_DART_INVOKE_H_
-

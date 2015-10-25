@@ -5,20 +5,24 @@
 #ifndef SKY_ENGINE_CORE_SCRIPT_DOM_DART_STATE_H_
 #define SKY_ENGINE_CORE_SCRIPT_DOM_DART_STATE_H_
 
+#include <memory>
+
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
+class Window;
 
 class DOMDartState : public DartState {
  public:
-  explicit DOMDartState(const String& url);
+  DOMDartState(std::unique_ptr<Window> window, const String& url);
   ~DOMDartState() override;
 
   virtual void DidSetIsolate();
 
+  Window* window() const { return window_.get(); }
   const String& url() const { return url_; }
 
   static DOMDartState* Current();
@@ -32,6 +36,7 @@ class DOMDartState : public DartState {
   Dart_Handle color_class() { return color_class_.value(); }
 
  private:
+  std::unique_ptr<Window> window_;
   String url_;
 
   DartPersistentValue x_handle_;

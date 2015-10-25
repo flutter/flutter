@@ -5,7 +5,10 @@
 #ifndef SKY_ENGINE_PUBLIC_SKY_SKY_HEADLESS_H_
 #define SKY_ENGINE_PUBLIC_SKY_SKY_HEADLESS_H_
 
+#include <memory>
+
 #include "base/basictypes.h"
+#include "sky/engine/core/window/window.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -13,9 +16,10 @@ typedef struct _Dart_Isolate* Dart_Isolate;
 
 namespace blink {
 class DartController;
+class Scene;
 
 // This class provides a way to run Dart script without a View.
-class SkyHeadless {
+class SkyHeadless : public WindowClient {
  public:
   class Client {
    public:
@@ -32,7 +36,10 @@ class SkyHeadless {
   void RunFromSnapshotBuffer(const uint8_t* buffer, size_t size);
 
  private:
-  OwnPtr<DartController> dart_controller_;
+  void ScheduleFrame() override;
+  void Render(Scene* scene) override;
+
+  std::unique_ptr<DartController> dart_controller_;
   Client* client_;
 
   DISALLOW_COPY_AND_ASSIGN(SkyHeadless);
