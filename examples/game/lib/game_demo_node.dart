@@ -8,6 +8,8 @@ final int _chunksPerLevel = 9;
 
 final bool _drawDebug = false;
 
+typedef void GameOverCallback(int score);
+
 class GameDemoNode extends NodeWithSize {
 
   GameDemoNode(
@@ -66,7 +68,7 @@ class GameDemoNode extends NodeWithSize {
   SoundEffectPlayer _effectPlayer = SoundEffectPlayer.sharedInstance();
 
   // Callback
-  Function _gameOverCallback;
+  GameOverCallback _gameOverCallback;
 
   // Game screen nodes
   Node _gameScreen;
@@ -133,12 +135,12 @@ class GameDemoNode extends NodeWithSize {
     if (_gameOver) return;
 
     // Check for collisions between lasers and objects that can take damage
-    List<Laser> lasers = [];
+    List<Laser> lasers = <Laser>[];
     for (Node node in _level.children) {
       if (node is Laser) lasers.add(node);
     }
 
-    List<GameObject> damageables = [];
+    List<GameObject> damageables = <GameObject>[];
     for (Node node in _level.children) {
       if (node is GameObject && node.canBeDamaged) damageables.add(node);
     }
@@ -154,7 +156,7 @@ class GameDemoNode extends NodeWithSize {
     }
 
     // Check for collsions between ship and objects that can damage the ship
-    List<Node> nodes = new List.from(_level.children);
+    List<Node> nodes = new List<Node>.from(_level.children);
     for (Node node in nodes) {
       if (node is GameObject && node.canDamageShip) {
         if (node.collidingWith(_level.ship)) {

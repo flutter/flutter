@@ -29,7 +29,7 @@ abstract class UserData {
 class UserDataImpl extends UserData {
   UserDataImpl();
 
-  List<FitnessItem> _items = [];
+  List<FitnessItem> _items = <FitnessItem>[];
 
   BackupMode _backupMode;
   BackupMode get backupMode => _backupMode;
@@ -46,7 +46,7 @@ class UserDataImpl extends UserData {
   List<FitnessItem> get items => _items;
 
   void sort() {
-    _items.sort((a, b) => a.when.compareTo(b.when));
+    _items.sort((FitnessItem a, FitnessItem b) => a.when.compareTo(b.when));
   }
 
   void add(FitnessItem item) {
@@ -69,14 +69,14 @@ class UserDataImpl extends UserData {
         return mode.toString() == json['backupMode'];
       });
     } catch(e) {
-      print("Failed to load backup mode: ${e}");
+      print("Failed to load backup mode: $e");
     }
     _goalWeight = json['goalWeight'];
   }
 
   Map toJson() {
     Map json = new Map();
-    json['items'] = _items.map((item) => item.toJson()).toList();
+    json['items'] = _items.map((FitnessItem item) => item.toJson()).toList();
     json['backupMode'] = _backupMode.toString();
     json['goalWeight'] = _goalWeight;
     return json;
@@ -132,7 +132,7 @@ class FitnessAppState extends State<FitnessApp> {
         accentColor: Colors.pinkAccent[200]
       ),
       title: 'Fitness',
-      routes: {
+      routes: <String, RouteBuilder>{
         '/': (RouteArguments args) {
           return new FeedFragment(
             navigator: args.navigator,

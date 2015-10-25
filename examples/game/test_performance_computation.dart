@@ -15,10 +15,9 @@ void runTest() {
   timeStart = new DateTime.now().millisecondsSinceEpoch;
 
   // Create systems
-  List<TestParticleSystem> systems = [];
-  for (int i = 0; i < numSystems; i++) {
+  List<TestParticleSystem> systems = <TestParticleSystem>[];
+  for (int i = 0; i < numSystems; i++)
     systems.add(new TestParticleSystem());
-  }
 
   int timeAfterCreate = new DateTime.now().millisecondsSinceEpoch;
   print("TIME creation ${(timeAfterCreate - timeStart) / 1000.0}");

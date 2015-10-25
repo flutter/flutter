@@ -59,10 +59,10 @@ class SoundEffectPlayer {
   }
 
   MediaServiceProxy _mediaService;
-  List<SoundEffectStream> _soundEffectStreams = [];
+  List<SoundEffectStream> _soundEffectStreams = <SoundEffectStream>[];
 
   // TODO: This should no longer be needed when moving to SoundPool backing
-  Map<SoundEffect,MediaPlayerProxy> _mediaPlayers = {};
+  Map<SoundEffect,MediaPlayerProxy> _mediaPlayers = <SoundEffect, MediaPlayerProxy>{};
 
   Future _prepare(SoundEffectStream playingSound) async {
     await playingSound._player.ptr.prepare(playingSound.sound._data);
@@ -133,7 +133,7 @@ class SoundEffectPlayer {
     for (SoundEffectStream playingSound in _soundEffectStreams) {
       playingSound._player.ptr.pause();
     }
-    _soundEffectStreams = [];
+    _soundEffectStreams = <SoundEffectStream>[];
   }
 }
 
@@ -154,7 +154,7 @@ class SoundTrack {
 SoundTrackPlayer _sharedSoundTrackPlayer;
 
 class SoundTrackPlayer {
-  List<SoundTrack> _soundTracks = [];
+  List<SoundTrack> _soundTracks = <SoundTrack>[];
 
   static sharedInstance() {
     if (_sharedSoundTrackPlayer == null) {

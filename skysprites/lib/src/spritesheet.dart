@@ -9,7 +9,7 @@ part of flutter_sprites;
 class SpriteSheet {
 
   ui.Image _image;
-  Map<String, Texture> _textures = new Map();
+  Map<String, Texture> _textures = new Map<String, Texture>();
 
   /// Creates a new sprite sheet from an [_image] and a sprite sheet [jsonDefinition].
   ///

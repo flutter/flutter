@@ -31,11 +31,11 @@ class DatePickerDemoState extends State<DatePickerDemo> {
         brightness: ThemeBrightness.light,
         primarySwatch: Colors.teal
       ),
-      child: new Stack([
+      child: new Stack(<Widget>[
         new Scaffold(
           toolBar: new ToolBar(center: new Text("Date Picker")),
           body: new Row(
-            [new Text(_dateTime.toString())],
+            <Widget>[new Text(_dateTime.toString())],
             alignItems: FlexAlignItems.end,
             justifyContent: FlexJustifyContent.center
           )
@@ -48,7 +48,7 @@ class DatePickerDemoState extends State<DatePickerDemo> {
             onChanged: _handleDateChanged
           ),
           contentPadding: EdgeDims.zero,
-          actions: [
+          actions: <Widget>[
             new FlatButton(
               child: new Text('CANCEL')
             ),

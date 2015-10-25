@@ -26,7 +26,7 @@ final ThemeData _theme = new ThemeData(
 main() async {
   _images = new ImageMap(_bundle);
 
-  await _images.load([
+  await _images.load(<String>[
     'assets/sprites.png'
   ]);
 
@@ -36,20 +36,18 @@ main() async {
   runApp(new MaterialApp(
     title: 'Test Sprite Performance',
     theme: _theme,
-    routes: {
-      '/': (RouteArguments args) {
-        return new SpriteWidget(new TestPerformance());
-      }
+    routes: <String, RouteBuilder>{
+      '/': (RouteArguments args) => new SpriteWidget(new TestPerformance())
     }
   ));
 }
 
 class TestPerformance extends NodeWithSize {
+
+  TestPerformance() : super(new Size(1024.0, 1024.0));
+
   final int numFramesPerTest = 100;
   final int numTests = 5;
-
-  TestPerformance() : super(new Size(1024.0, 1024.0)) {
-  }
 
   int test = 0;
   int frame = 0;
@@ -116,18 +114,18 @@ class TestPerformanceParticles extends PerformanceTest {
     for (int x = 0; x < grid; x++) {
       for (int y = 0; y < grid; y++) {
         ParticleSystem particles = new ParticleSystem(
-            _spriteSheet["explosion_particle.png"],
-            rotateToMovement: true,
-            startRotation:90.0,
-            startRotationVar: 0.0,
-            endRotation: 90.0,
-            startSize: 0.3,
-            startSizeVar: 0.1,
-            endSize: 0.3,
-            endSizeVar: 0.1,
-            emissionRate:100.0,
-            greenVar: 127,
-            redVar: 127
+          _spriteSheet["explosion_particle.png"],
+          rotateToMovement: true,
+          startRotation:90.0,
+          startRotationVar: 0.0,
+          endRotation: 90.0,
+          startSize: 0.3,
+          startSizeVar: 0.1,
+          endSize: 0.3,
+          endSizeVar: 0.1,
+          emissionRate:100.0,
+          greenVar: 127,
+          redVar: 127
         );
         particles.position = new Point(x * 1024.0 / (grid - 1), y * 1024.0 / (grid - 1));
         addChild(particles);
@@ -144,23 +142,22 @@ class TestPerformanceSprites extends PerformanceTest {
   TestPerformanceSprites() {
     for (int x = 0; x < grid; x++) {
       for (int y = 0; y < grid; y++) {
-        Sprite sprt = new Sprite(_spriteSheet["asteroid_big_1.png"]);
-        sprt.scale = 1.0;
-        sprt.position = new Point(x * 1024.0 / (grid - 1), y * 1024.0 / (grid - 1));
-        addChild(sprt);
-
-        //sprt.actions.run(new ActionRepeatForever(new ActionTween((a) => sprt.rotation = a, 0.0, 360.0, 1.0)));
+        Sprite sprite = new Sprite(_spriteSheet["asteroid_big_1.png"]);
+        sprite.scale = 1.0;
+        sprite.position = new Point(x * 1024.0 / (grid - 1), y * 1024.0 / (grid - 1));
+        addChild(sprite);
       }
     }
 
-    Sprite sprt = new Sprite(_spriteSheet["asteroid_big_1.png"]);
-    sprt.position = new Point(512.0, 512.0);
-    addChild(sprt);
+    Sprite sprite = new Sprite(_spriteSheet["asteroid_big_1.png"]);
+    sprite.position = new Point(512.0, 512.0);
+    addChild(sprite);
   }
 
   void update(double dt) {
-    for (Sprite sprt in children) {
-      sprt.rotation += 1;
+    for (Node child in children) {
+      final Sprite sprite = child;
+      sprite.rotation += 1;
     }
   }
 }
@@ -173,23 +170,22 @@ class TestPerformanceSprites2 extends PerformanceTest {
   TestPerformanceSprites2() {
     for (int x = 12; x < grid - 12; x++) {
       for (int y = 0; y < grid; y++) {
-        Sprite sprt = new Sprite(_spriteSheet["asteroid_big_1.png"]);
-        sprt.scale = 1.0;
-        sprt.position = new Point(x * 1024.0 / (grid - 1), y * 1024.0 / (grid - 1));
-        addChild(sprt);
-
-        //sprt.actions.run(new ActionRepeatForever(new ActionTween((a) => sprt.rotation = a, 0.0, 360.0, 1.0)));
+        Sprite sprite = new Sprite(_spriteSheet["asteroid_big_1.png"]);
+        sprite.scale = 1.0;
+        sprite.position = new Point(x * 1024.0 / (grid - 1), y * 1024.0 / (grid - 1));
+        addChild(sprite);
       }
     }
 
-    Sprite sprt = new Sprite(_spriteSheet["asteroid_big_1.png"]);
-    sprt.position = new Point(512.0, 512.0);
-    addChild(sprt);
+    Sprite sprite = new Sprite(_spriteSheet["asteroid_big_1.png"]);
+    sprite.position = new Point(512.0, 512.0);
+    addChild(sprite);
   }
 
   void update(double dt) {
-    for (Sprite sprt in children) {
-      sprt.rotation += 1;
+    for (Node child in children) {
+      final Sprite sprite = child;
+      sprite.rotation += 1;
     }
   }
 }
@@ -200,7 +196,7 @@ class TestPerformanceAtlas extends PerformanceTest {
   final int grid = 100;
 
   double rotation = 0.0;
-  List<Rect> rects = [];
+  List<Rect> rects = <Rect>[];
   Paint cachedPaint = new Paint()
     ..filterQuality = ui.FilterQuality.low
     ..isAntiAlias = false;
@@ -216,7 +212,7 @@ class TestPerformanceAtlas extends PerformanceTest {
 
   void paint(PaintingCanvas canvas) {
     // Setup transforms
-    List<ui.RSTransform> transforms = [];
+    List<ui.RSTransform> transforms = <ui.RSTransform>[];
 
     for (int x = 0; x < grid; x++) {
       for (int y = 0; y < grid; y++) {
@@ -253,7 +249,7 @@ class TestPerformanceAtlas2 extends PerformanceTest {
   final int grid = 100;
 
   double rotation = 0.0;
-  List<Rect> rects = [];
+  List<Rect> rects = <Rect>[];
   Paint cachedPaint = new Paint()
     ..filterQuality = ui.FilterQuality.low
     ..isAntiAlias = false;
@@ -269,7 +265,7 @@ class TestPerformanceAtlas2 extends PerformanceTest {
 
   void paint(PaintingCanvas canvas) {
     // Setup transforms
-    List<ui.RSTransform> transforms = [];
+    List<ui.RSTransform> transforms = <ui.RSTransform>[];
 
     for (int x = 12; x < grid - 12; x++) {
       for (int y = 0; y < grid; y++) {

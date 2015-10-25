@@ -36,7 +36,7 @@ class Label extends Node {
   void paint(PaintingCanvas canvas) {
     if (_painter == null) {
       PlainTextSpan textSpan = new PlainTextSpan(_text);
-      StyledTextSpan styledTextSpan = new StyledTextSpan(_textStyle, [textSpan]);
+      StyledTextSpan styledTextSpan = new StyledTextSpan(_textStyle, <TextSpan>[textSpan]);
       _painter = new TextPainter(styledTextSpan);
 
       _painter.maxWidth = double.INFINITY;

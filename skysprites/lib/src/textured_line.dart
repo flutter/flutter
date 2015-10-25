@@ -92,15 +92,15 @@ class TexturedLinePainter {
     _cachedPaint.transferMode = transferMode;
 
     // Calculate normals
-    List<Vector2> vectors = [];
+    List<Vector2> vectors = <Vector2>[];
     for (Point pt in _points) {
       vectors.add(new Vector2(pt.x, pt.y));
     }
     List<Vector2> miters = _computeMiterList(vectors, false);
 
-    List<Point> vertices = [];
-    List<int> indicies = [];
-    List<Color> verticeColors = [];
+    List<Point> vertices = <Point>[];
+    List<int> indicies = <int>[];
+    List<Color> verticeColors = <Color>[];
     List<Point> textureCoordinates;
     double textureTop;
     double textureBottom;
@@ -121,7 +121,7 @@ class TexturedLinePainter {
       // Setup for calculating texture coordinates
       textureTop = texture.frame.top;
       textureBottom = texture.frame.bottom;
-      textureCoordinates = [];
+      textureCoordinates = <Point>[];
 
       // Use correct stops
       if (textureStops != null) {
@@ -150,8 +150,8 @@ class TexturedLinePainter {
       int lastIndex1 = (i - 1) * 2 + 1;
       int currentIndex0 = i * 2;
       int currentIndex1 = i * 2 + 1;
-      indicies.addAll([lastIndex0, lastIndex1, currentIndex0]);
-      indicies.addAll([lastIndex1, currentIndex1, currentIndex0]);
+      indicies.addAll(<int>[lastIndex0, lastIndex1, currentIndex0]);
+      indicies.addAll(<int>[lastIndex1, currentIndex1, currentIndex0]);
 
       // Add colors
       verticeColors.add(colors[i]);
@@ -209,7 +209,7 @@ class TexturedLinePainter {
   }
 
   void _calculateTextureStops() {
-    List<double> stops = [];
+    List<double> stops = <double>[];
     double length = 0.0;
 
     // Add first stop
@@ -262,7 +262,7 @@ Vector2 _vectorDirection(Vector2 a, Vector2 b) {
 }
 
 List<Vector2> _computeMiterList(List<Vector2> points, bool closed) {
-  List<Vector2> out = [];
+  List<Vector2> out = <Vector2>[];
   Vector2 curNormal = null;
 
   if (closed) {

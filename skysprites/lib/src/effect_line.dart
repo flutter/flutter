@@ -30,14 +30,18 @@ class EffectLine extends Node {
     this.simplify: true,
     ColorSequence colorSequence
   }) {
-    if (points == null) this.points = [];
-    else this.points = points;
+    if (points == null)
+      this.points = <Point>[];
+    else
+      this.points = points;
 
     _colorSequence = colorSequence;
-    if (_colorSequence == null)
+    if (_colorSequence == null) {
       _colorSequence = new ColorSequence.fromStartAndEndColor(
         new Color(0xffffffff),
-        new Color(0xffffffff));
+        new Color(0xffffffff)
+      );
+    }
 
     _offset = scrollStart;
 
@@ -65,7 +69,7 @@ class EffectLine extends Node {
 
   set points(List<Point> points) {
     _points = points;
-    _pointAges = [];
+    _pointAges = <double>[];
     for (int i = 0; i < _points.length; i++) {
       _pointAges.add(0.0);
     }
@@ -125,7 +129,7 @@ class EffectLine extends Node {
     // Calculate colors
     List<double> stops = _painter.calculatedTextureStops;
 
-    List<Color> colors = [];
+    List<Color> colors = <Color>[];
     for (int i = 0; i < stops.length; i++) {
       double stop = stops[i];
       Color color = _colorSequence.colorAtPosition(stop);
@@ -143,7 +147,7 @@ class EffectLine extends Node {
     _painter.colors = colors;
 
     // Calculate widths
-    List<double> widths = [];
+    List<double> widths = <double>[];
     for (int i = 0; i < stops.length; i++) {
       double stop = stops[i];
       double growth = math.max(widthGrowthSpeed * _pointAges[i], 0.0);

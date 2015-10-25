@@ -25,7 +25,7 @@ final ThemeData _theme = new ThemeData(
 main() async {
   _images = new ImageMap(_bundle);
 
-  await _images.load([
+  await _images.load(<String>[
     'assets/sprites.png'
   ]);
 
@@ -35,7 +35,7 @@ main() async {
   runApp(new MaterialApp(
     title: 'Test drawAtlas',
     theme: _theme,
-    routes: {
+    routes: <String, RouteBuilder>{
       '/': (RouteArguments args) {
         return new SpriteWidget(
           new TestDrawAtlas(),
@@ -47,17 +47,16 @@ main() async {
 }
 
 class TestDrawAtlas extends NodeWithSize {
-  TestDrawAtlas() : super(new Size(1024.0, 1024.0)) {
-  }
+  TestDrawAtlas() : super(new Size(1024.0, 1024.0));
 
   void paint(PaintingCanvas canvas) {
-    List<RSTransform> transforms = [
+    List<RSTransform> transforms = <RSTransform>[
       new RSTransform(1.0, 0.0, 100.0, 100.0)
     ];
-    List<Rect> rects = [
+    List<Rect> rects = <Rect>[
       _spriteSheet["ship.png"].frame
     ];
-    List<Color> colors = [
+    List<Color> colors = <Color>[
       new Color(0xffffffff)
     ];
 

@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+typedef Widget TextTransformer(String name, String text);
+
 class StyledTextApp extends StatefulComponent {
   StyledTextAppState createState() => new StyledTextAppState();
 }
@@ -19,7 +21,7 @@ class StyledTextAppState extends State<StyledTextApp> {
       .toList();
   }
 
-  Function toText;
+  TextTransformer toText;
 
   // From https://en.wikiquote.org/wiki/2001:_A_Space_Odyssey_(film)
   final String dialogText = '''
@@ -74,10 +76,10 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 
   Widget build(BuildContext context) {
     List<Widget> lines = nameLines
-      .map((nameAndText) => Function.apply(toText, nameAndText))
+      .map((List<String> nameAndText) => Function.apply(toText, nameAndText))
       .toList();
 
-    List<Widget> children = [];
+    List<Widget> children = <Widget>[];
     for (Widget line in lines) {
       children.add(line);
       if (line != lines.last) {

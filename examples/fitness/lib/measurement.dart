@@ -6,7 +6,7 @@ part of fitness;
 
 class Measurement extends FitnessItem {
   Measurement({ DateTime when, this.weight }) : super(when: when);
-  Measurement.fromJson(Map json) : super.fromJson(json), weight = json['weight'];
+  Measurement.fromJson(Map json) : weight = json['weight'], super.fromJson(json);
 
   final double weight;
 
@@ -32,7 +32,7 @@ class MeasurementRow extends FitnessItemRow {
 
   Widget buildContent(BuildContext context) {
     Measurement measurement = item;
-    List<Widget> children = [
+    List<Widget> children = <Widget>[
       new Flexible(
         child: new Text(
           measurement.displayWeight,
@@ -85,7 +85,7 @@ class MeasurementDateDialogState extends State<MeasurementDateDialog> {
         onChanged: _handleDateChanged
       ),
       contentPadding: EdgeDims.zero,
-      actions: [
+      actions: <Widget>[
         new FlatButton(
           child: new Text('CANCEL'),
           onPressed: () {
@@ -140,7 +140,7 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
         icon: "navigation/close",
         onPressed: config.navigator.pop),
       center: new Text('New Measurement'),
-      right: [
+      right: <Widget>[
         // TODO(abarth): Should this be a FlatButton?
         new InkWell(
           onTap: _handleSave,
@@ -175,12 +175,12 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
     // TODO(jackson): Revisit the layout of this pane to be more maintainable
     return new Container(
       padding: const EdgeDims.all(20.0),
-      child: new Column([
+      child: new Column(<Widget>[
         new GestureDetector(
           onTap: _handleDatePressed,
           child: new Container(
             height: 50.0,
-            child: new Column([
+            child: new Column(<Widget>[
               new Text('Measurement Date'),
               new Text(measurement.displayDate, style: Theme.of(context).text.caption),
             ], alignItems: FlexAlignItems.start)

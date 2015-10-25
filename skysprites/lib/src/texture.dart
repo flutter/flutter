@@ -4,6 +4,23 @@ part of flutter_sprites;
 ///
 /// Normally you get a reference to a texture from a [SpriteSheet], but you can also create one from an [Image].
 class Texture {
+
+  /// Creates a new texture from an [Image] object.
+  ///
+  ///     var myTexture = new Texture(myImage);
+  Texture(ui.Image image) :
+    size = new Size(image.width.toDouble(), image.height.toDouble()),
+    image = image,
+    trimmed = false,
+    rotated = false,
+    frame = new Rect.fromLTRB(0.0, 0.0, image.width.toDouble(), image.height.toDouble()),
+    spriteSourceSize = new Rect.fromLTRB(0.0, 0.0, image.width.toDouble(), image.height.toDouble()),
+    pivot = new Point(0.5, 0.5);
+
+
+  Texture._fromSpriteFrame(this.image, this.name, this.size, this.rotated, this.trimmed, this.frame,
+                           this.spriteSourceSize, this.pivot);
+
   /// The image that this texture is a part of.
   ///
   ///     var textureImage = myTexture.image;
@@ -47,23 +64,6 @@ class Texture {
   ///
   ///     myTexture.pivot = new Point(0.5, 0.5);
   Point pivot;
-
-  /// Creates a new texture from an [Image] object.
-  ///
-  ///     var myTexture = new Texture(myImage);
-  Texture(ui.Image image) :
-    size = new Size(image.width.toDouble(), image.height.toDouble()),
-    image = image,
-    trimmed = false,
-    rotated = false,
-    frame = new Rect.fromLTRB(0.0, 0.0, image.width.toDouble(), image.height.toDouble()),
-    spriteSourceSize = new Rect.fromLTRB(0.0, 0.0, image.width.toDouble(), image.height.toDouble()),
-    pivot = new Point(0.5, 0.5);
-
-
-  Texture._fromSpriteFrame(this.image, this.name, this.size, this.rotated, this.trimmed, this.frame,
-                           this.spriteSourceSize, this.pivot) {
-  }
 
   Texture textureFromRect(Rect rect, [String name = null]) {
     assert(rect != null);

@@ -47,7 +47,7 @@ class ScaleAppState extends State<ScaleApp> {
     double radius = size.width / 2.0 * _zoom;
     Gradient gradient = new RadialGradient(
       center: center, radius: radius,
-      colors: [Colors.blue[200], Colors.blue[800]]
+      colors: <Color>[Colors.blue[200], Colors.blue[800]]
     );
     Paint paint = new Paint()
       ..shader = gradient.createShader();

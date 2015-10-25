@@ -35,7 +35,7 @@ class Checkbox extends StatelessComponent {
   const Checkbox({Key key, this.value, this.onChanged}) : super(key: key);
 
   final bool value;
-  final ValueChanged onChanged;
+  final ValueChanged<bool> onChanged;
 
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
@@ -67,7 +67,7 @@ class _CheckboxWrapper extends LeafRenderObjectWidget {
   }
 
   final bool value;
-  final ValueChanged onChanged;
+  final ValueChanged<bool> onChanged;
   final Color uncheckedColor;
   final Color accentColor;
 
@@ -91,7 +91,7 @@ class _RenderCheckbox extends RenderToggleable {
     bool value,
     Color uncheckedColor,
     Color accentColor,
-    ValueChanged onChanged
+    ValueChanged<bool> onChanged
   }): _uncheckedColor = uncheckedColor,
       _accentColor = accentColor,
       super(

@@ -7,8 +7,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 
 void main() {
-  var root = new RenderFlex(
-    children: [
+  RenderFlex root = new RenderFlex(
+    children: <RenderBox>[
       new RenderPadding(
         padding: new EdgeDims.all(10.0),
         child: new RenderConstrainedBox(

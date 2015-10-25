@@ -41,7 +41,7 @@ class PhysicsShapePolygon extends PhysicsShape {
   final List<Point> points;
 
   box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
-    List<Vector2> vectors = [];
+    List<Vector2> vectors = <Vector2>[];
     for (Point point in points) {
       Vector2 vec = new Vector2(
         scale * point.x / node.b2WorldToNodeConversionFactor,
@@ -91,7 +91,7 @@ class PhysicsShapeChain extends PhysicsShape {
   final bool loop;
 
   box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
-    List<Vector2> vectors = [];
+    List<Vector2> vectors = <Vector2>[];
     for (Point point in points) {
       Vector2 vec = new Vector2(
         scale * point.x / node.b2WorldToNodeConversionFactor,

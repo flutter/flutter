@@ -104,15 +104,15 @@ class LevelLabel extends GameObject {
 class Ship extends GameObject {
   Ship(GameObjectFactory f) : super(f) {
     // Add main ship sprite
-    _sprt = new Sprite(f.sheet["ship.png"]);
-    _sprt.scale = 0.3;
-    _sprt.rotation = -90.0;
-    addChild(_sprt);
+    _sprite = new Sprite(f.sheet["ship.png"]);
+    _sprite.scale = 0.3;
+    _sprite.rotation = -90.0;
+    addChild(_sprite);
 
-    _sprtShield = new Sprite(f.sheet["shield.png"]);
-    _sprtShield.scale = 0.35;
-    _sprtShield.transferMode = ui.TransferMode.plus;
-    addChild(_sprtShield);
+    _spriteShield = new Sprite(f.sheet["shield.png"]);
+    _spriteShield.scale = 0.35;
+    _spriteShield.transferMode = ui.TransferMode.plus;
+    addChild(_spriteShield);
 
     radius = 20.0;
     canBeDamaged = false;
@@ -122,8 +122,8 @@ class Ship extends GameObject {
     position = new Point(0.0, 50.0);
   }
 
-  Sprite _sprt;
-  Sprite _sprtShield;
+  Sprite _sprite;
+  Sprite _spriteShield;
 
   void applyThrust(Point joystickValue, double scroll) {
     Point oldPos = position;
@@ -136,19 +136,19 @@ class Ship extends GameObject {
   }
 
   void setupActions() {
-    ActionTween rotate = new ActionTween((a) => _sprtShield.rotation = a, 0.0, 360.0, 1.0);
-    _sprtShield.actions.run(new ActionRepeatForever(rotate));
+    ActionTween rotate = new ActionTween((double a) { _spriteShield.rotation = a; }, 0.0, 360.0, 1.0);
+    _spriteShield.actions.run(new ActionRepeatForever(rotate));
   }
 
   void update(double dt) {
     // Update shield
     if (f.playerState.shieldActive) {
       if (f.playerState.shieldDeactivating)
-        _sprtShield.visible = !_sprtShield.visible;
+        _spriteShield.visible = !_spriteShield.visible;
       else
-        _sprtShield.visible = true;
+        _spriteShield.visible = true;
     } else {
-      _sprtShield.visible = false;
+      _spriteShield.visible = false;
     }
   }
 }
@@ -156,7 +156,7 @@ class Ship extends GameObject {
 class Laser extends GameObject {
   double impact = 0.0;
 
-  final List<Color> laserColors = [
+  final List<Color> laserColors = <Color>[
     new Color(0xff95f4fb),
     new Color(0xff5bff35),
     new Color(0xffff886c),
@@ -183,14 +183,14 @@ class Laser extends GameObject {
     Color laserColor = laserColors[(level ~/ 3) % laserColors.length];
 
     // Add sprites
-    List<Sprite> sprites = [];
+    List<Sprite> sprites = <Sprite>[];
     for (int i = 0; i < numLasers; i++) {
-      Sprite sprt = new Sprite(f.sheet["explosion_particle.png"]);
-      sprt.scale = 0.5;
-      sprt.colorOverlay = laserColor;
-      sprt.transferMode = ui.TransferMode.plus;
-      addChild(sprt);
-      sprites.add(sprt);
+      Sprite sprite = new Sprite(f.sheet["explosion_particle.png"]);
+      sprite.scale = 0.5;
+      sprite.colorOverlay = laserColor;
+      sprite.transferMode = ui.TransferMode.plus;
+      addChild(sprite);
+      sprites.add(sprite);
     }
 
     // Position the individual sprites
@@ -237,21 +237,21 @@ abstract class Obstacle extends GameObject {
 abstract class Asteroid extends Obstacle {
   Asteroid(GameObjectFactory f) : super(f);
 
-  Sprite _sprt;
+  Sprite _sprite;
 
   void setupActions() {
     // Rotate obstacle
     int direction = 1;
     if (randomBool()) direction = -1;
     ActionTween rotate = new ActionTween(
-      (a) => _sprt.rotation = a,
+      (double a) { _sprite.rotation = a; },
       0.0, 360.0 * direction, 5.0 + 5.0 * randomDouble());
-    _sprt.actions.run(new ActionRepeatForever(rotate));
+    _sprite.actions.run(new ActionRepeatForever(rotate));
   }
 
   set damage(double d) {
     super.damage = d;
-    _sprt.colorOverlay = colorForDamage(d, maxDamage);
+    _sprite.colorOverlay = colorForDamage(d, maxDamage);
   }
 
   Collectable createPowerUp() {
@@ -261,21 +261,21 @@ abstract class Asteroid extends Obstacle {
 
 class AsteroidBig extends Asteroid {
   AsteroidBig(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["asteroid_big_${randomInt(3)}.png"]);
-    _sprt.scale = 0.3;
+    _sprite = new Sprite(f.sheet["asteroid_big_${randomInt(3)}.png"]);
+    _sprite.scale = 0.3;
     radius = 25.0;
     maxDamage = 5.0;
-    addChild(_sprt);
+    addChild(_sprite);
   }
 }
 
 class AsteroidSmall extends Asteroid {
   AsteroidSmall(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["asteroid_small_${randomInt(3)}.png"]);
-    _sprt.scale = 0.3;
+    _sprite = new Sprite(f.sheet["asteroid_small_${randomInt(3)}.png"]);
+    _sprite.scale = 0.3;
     radius = 12.0;
     maxDamage = 3.0;
-    addChild(_sprt);
+    addChild(_sprite);
   }
 }
 
@@ -289,13 +289,13 @@ class AsteroidPowerUp extends AsteroidBig {
 
 class EnemyScout extends Obstacle {
   EnemyScout(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["enemy_scout_0.png"]);
-    _sprt.scale = 0.32;
+    _sprite = new Sprite(f.sheet["enemy_scout_0.png"]);
+    _sprite.scale = 0.32;
     radius = 12.0;
     maxDamage = 1.0;
-    addChild(_sprt);
+    addChild(_sprite);
 
-    constraints = [new ConstraintRotationToMovement(dampening: 0.5)];
+    constraints = <Constraint>[new ConstraintRotationToMovement(dampening: 0.5)];
   }
 
   final double _swirlSpacing = 80.0;
@@ -305,7 +305,7 @@ class EnemyScout extends Obstacle {
     double yMove = (randomBool()) ? _swirlSpacing : -_swirlSpacing;
 
     if (randomBool()) {
-      offsets.addAll([
+      offsets.addAll(<Offset>[
         new Offset(x, y),
         new Offset(xMove + x, y),
         new Offset(xMove + x, yMove + y),
@@ -313,7 +313,7 @@ class EnemyScout extends Obstacle {
         new Offset(x, y)
       ]);
     } else {
-      offsets.addAll([
+      offsets.addAll(<Offset>[
         new Offset(x, y),
         new Offset(x, y + yMove),
         new Offset(xMove + x, yMove + y),
@@ -325,17 +325,17 @@ class EnemyScout extends Obstacle {
 
   void setupActions() {
 
-    List<Offset> offsets = [];
+    List<Offset> offsets = <Offset>[];
     _addRandomSquare(offsets, -_swirlSpacing, 0.0);
     _addRandomSquare(offsets, _swirlSpacing, 0.0);
     offsets.add(new Offset(-_swirlSpacing, 0.0));
 
-    List<Point> points = [];
+    List<Point> points = <Point>[];
     for (Offset offset in offsets) {
       points.add(position + offset);
     }
 
-    ActionSpline spline = new ActionSpline((a) => position = a, points, 6.0);
+    ActionSpline spline = new ActionSpline((Point a) => position = a, points, 6.0);
     spline.tension = 0.7;
     actions.run(new ActionRepeatForever(spline));
   }
@@ -344,25 +344,25 @@ class EnemyScout extends Obstacle {
     return new Coin(f);
   }
 
-  Sprite _sprt;
+  Sprite _sprite;
 }
 
 class EnemyDestroyer extends Obstacle {
   EnemyDestroyer(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["enemy_destroyer_1.png"]);
-    _sprt.scale = 0.32;
+    _sprite = new Sprite(f.sheet["enemy_destroyer_1.png"]);
+    _sprite.scale = 0.32;
     radius = 24.0;
     maxDamage = 4.0;
-    addChild(_sprt);
+    addChild(_sprite);
 
-    constraints = [new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
+    constraints = <Constraint>[new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
   }
 
   int _countDown = randomInt(120) + 240;
 
   void setupActions() {
     ActionCircularMove circle = new ActionCircularMove(
-      (a) => position = a,
+      (Point a) { position = a; },
       position, 40.0,
       360.0 * randomDouble(),
       randomBool(),
@@ -388,19 +388,19 @@ class EnemyDestroyer extends Obstacle {
 
   set damage(double d) {
     super.damage = d;
-    _sprt.colorOverlay = colorForDamage(d, maxDamage);
+    _sprite.colorOverlay = colorForDamage(d, maxDamage);
   }
 
-  Sprite _sprt;
+  Sprite _sprite;
 }
 
 class EnemyLaser extends Obstacle {
   EnemyLaser(GameObjectFactory f, double rotation, double speed, Color color) : super(f) {
-    _sprt = new Sprite(f.sheet["explosion_particle.png"]);
-    _sprt.scale = 0.5;
-    _sprt.rotation = rotation + 90;
-    _sprt.colorOverlay = color;
-    addChild(_sprt);
+    _sprite = new Sprite(f.sheet["explosion_particle.png"]);
+    _sprite.scale = 0.5;
+    _sprite.rotation = rotation + 90;
+    _sprite.colorOverlay = color;
+    addChild(_sprite);
 
     canDamageShip = true;
     canBeDamaged = false;
@@ -409,7 +409,7 @@ class EnemyLaser extends Obstacle {
     _movement = new Offset(math.cos(rad) * speed, math.sin(rad) * speed);
   }
 
-  Sprite _sprt;
+  Sprite _sprite;
   Offset _movement;
 
   void move() {
@@ -420,24 +420,24 @@ class EnemyLaser extends Obstacle {
 class EnemyBoss extends Obstacle {
   EnemyBoss(GameObjectFactory f) : super(f) {
     radius = 48.0;
-    _sprt = new Sprite(f.sheet["enemy_destroyer_1.png"]);
-    _sprt.scale = 0.64;
-    addChild(_sprt);
+    _sprite = new Sprite(f.sheet["enemy_destroyer_1.png"]);
+    _sprite.scale = 0.64;
+    addChild(_sprite);
     maxDamage = 40.0;
 
-    constraints = [new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
+    constraints = <Constraint>[new ConstraintRotationToNode(f.level.ship, dampening: 0.05)];
 
     _powerBar = new PowerBar(new Size(60.0, 10.0));
     _powerBar.pivot = new Point(0.5, 0.5);
     f.level.addChild(_powerBar);
-    _powerBar.constraints = [new ConstraintPositionToNode(
+    _powerBar.constraints = <Constraint>[new ConstraintPositionToNode(
       this,
       dampening: 0.5,
       offset: new Offset(0.0, -70.0)
     )];
   }
 
-  Sprite _sprt;
+  Sprite _sprite;
   PowerBar _powerBar;
 
   int _countDown = randomInt(120) + 240;
@@ -466,7 +466,7 @@ class EnemyBoss extends Obstacle {
   }
 
   void setupActions() {
-    ActionOscillate oscillate = new ActionOscillate((a) => position = a, position, 120.0, 3.0);
+    ActionOscillate oscillate = new ActionOscillate((Point a) { position = a; }, position, 120.0, 3.0);
     actions.run(new ActionRepeatForever(oscillate));
   }
 
@@ -497,9 +497,9 @@ class EnemyBoss extends Obstacle {
 
   set damage(double d) {
     super.damage = d;
-    _sprt.actions.stopAll();
-    _sprt.actions.run(new ActionTween(
-      (a) =>_sprt.colorOverlay = a,
+    _sprite.actions.stopAll();
+    _sprite.actions.run(new ActionTween(
+      (Color a) { _sprite.colorOverlay = a; },
       new Color.fromARGB(180, 255, 3, 86),
       new Color(0x00000000),
       0.3
@@ -521,24 +521,24 @@ class Collectable extends GameObject {
 
 class Coin extends Collectable {
   Coin(GameObjectFactory f) : super(f) {
-    _sprt = new Sprite(f.sheet["coin.png"]);
-    _sprt.scale = 0.7;
-    addChild(_sprt);
+    _sprite = new Sprite(f.sheet["coin.png"]);
+    _sprite.scale = 0.7;
+    addChild(_sprite);
 
     radius = 7.5;
   }
 
   void setupActions() {
     // Rotate
-    ActionTween rotate = new ActionTween((a) => _sprt.rotation = a, 0.0, 360.0, 1.0);
+    ActionTween rotate = new ActionTween((double a) { _sprite.rotation = a; }, 0.0, 360.0, 1.0);
     actions.run(new ActionRepeatForever(rotate));
 
     // Fade in
-    ActionTween fadeIn = new ActionTween((a) => _sprt.opacity = a, 0.0, 1.0, 0.6);
+    ActionTween fadeIn = new ActionTween((double a) { _sprite.opacity = a; }, 0.0, 1.0, 0.6);
     actions.run(fadeIn);
   }
 
-  Sprite _sprt;
+  Sprite _sprite;
 
   void collect() {
     f.playerState.addCoin(this);
@@ -553,7 +553,7 @@ enum PowerUpType {
   speedBoost,
 }
 
-List<PowerUpType> _powerUpTypes = new List.from(PowerUpType.values);
+List<PowerUpType> _powerUpTypes = new List<PowerUpType>.from(PowerUpType.values);
 int _lastPowerUp = _powerUpTypes.length;
 
 PowerUpType nextPowerUpType() {
@@ -570,22 +570,22 @@ PowerUpType nextPowerUpType() {
 
 class PowerUp extends Collectable {
   PowerUp(GameObjectFactory f, this.type) : super(f) {
-    _sprt = new Sprite(f.sheet["coin.png"]);
-    _sprt.scale = 1.2;
-    addChild(_sprt);
+    _sprite = new Sprite(f.sheet["coin.png"]);
+    _sprite.scale = 1.2;
+    addChild(_sprite);
 
     radius = 10.0;
   }
 
-  Sprite _sprt;
+  Sprite _sprite;
   PowerUpType type;
 
   void setupActions() {
-    ActionTween rotate = new ActionTween((a) => _sprt.rotation = a, 0.0, 360.0, 1.0);
+    ActionTween rotate = new ActionTween((double a) { _sprite.rotation = a; }, 0.0, 360.0, 1.0);
     actions.run(new ActionRepeatForever(rotate));
 
     // Fade in
-    ActionTween fadeIn = new ActionTween((a) => _sprt.opacity = a, 0.0, 1.0, 0.6);
+    ActionTween fadeIn = new ActionTween((double a) { _sprite.opacity = a; }, 0.0, 1.0, 0.6);
     actions.run(fadeIn);
   }
 

@@ -23,7 +23,7 @@ final AssetBundle _bundle = _initBundle();
 ImageMap _imageMap;
 SpriteSheet _spriteSheet;
 SpriteSheet _spriteSheetUI;
-Map<String,SoundEffect> _sounds = {};
+Map<String, SoundEffect> _sounds = <String, SoundEffect>{};
 
 main() async {
   _imageMap = new ImageMap(_bundle);
@@ -31,7 +31,7 @@ main() async {
   // Use a list to wait on all loads in parallel just before starting the app.
   List loads = [];
 
-  loads.add(_imageMap.load([
+  loads.add(_imageMap.load(<String>[
     'assets/nebula.png',
     'assets/sprites.png',
     'assets/starfield.png',
@@ -84,7 +84,7 @@ class GameDemoState extends State<GameDemo> {
     return new MaterialApp(
       title: 'Asteroids',
       theme: _theme,
-      routes: {
+      routes: <String, RouteBuilder>{
         '/': _buildMainScene,
         '/game': _buildGameScene
       }
@@ -96,9 +96,9 @@ class GameDemoState extends State<GameDemo> {
   }
 
   Widget _buildMainScene(RouteArguments args) {
-    return new Stack([
+    return new Stack(<Widget>[
       new SpriteWidget(new MainScreenBackground(), SpriteBoxTransformMode.fixedWidth),
-      new Column([
+      new Column(<Widget>[
           new TextureButton(
             onPressed: () {
               _game = new GameDemoNode(
@@ -106,8 +106,8 @@ class GameDemoState extends State<GameDemo> {
                 _spriteSheet,
                 _spriteSheetUI,
                 _sounds,
-                (lastScore) {
-                  setState(() {_lastScore = lastScore;});
+                (int lastScore) {
+                  setState(() { _lastScore = lastScore; });
                   args.navigator.pop();
                 }
               );
@@ -141,7 +141,7 @@ class TextureButton extends StatefulComponent {
     this.height: 128.0
   }) : super(key: key);
 
-  final Function onPressed;
+  final GestureTapCallback onPressed;
   final Texture texture;
   final Texture textureDown;
   final double width;

@@ -105,8 +105,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).text.body1.copyWith(textAlign: TextAlign.center),
-        child: new Column([
-          new Flexible(child: new Row([
+        child: new Column(<Widget>[
+          new Flexible(child: new Row(<Widget>[
               new ExampleDragSource(navigator: config.navigator, name: 'Orange', color: const Color(0xFFFF9000)),
               new ExampleDragSource(navigator: config.navigator, name: 'Teal', color: const Color(0xFF00FFFF)),
               new ExampleDragSource(navigator: config.navigator, name: 'Yellow', color: const Color(0xFFFFF000)),
@@ -114,7 +114,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
             alignItems: FlexAlignItems.center,
             justifyContent: FlexJustifyContent.spaceAround
           )),
-          new Flexible(child: new Row([
+          new Flexible(child: new Row(<Widget>[
             new Flexible(child: new ExampleDragTarget()),
             new Flexible(child: new ExampleDragTarget()),
             new Flexible(child: new ExampleDragTarget()),
@@ -129,7 +129,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
 void main() {
   runApp(new MaterialApp(
     title: 'Drag and Drop Flutter Demo',
-    routes: {
+    routes: <String, RouteBuilder>{
      '/': (RouteArguments args) => new DragAndDropApp(navigator: args.navigator)
     }
   ));

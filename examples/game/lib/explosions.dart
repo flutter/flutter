@@ -31,7 +31,7 @@ class ExplosionBig extends Explosion {
 
     ParticleSystem particlesFire = new ParticleSystem(
       sheet["fire_particle.png"],
-      colorSequence: new ColorSequence([new Color(0xffffff33), new Color(0xffff3333), new Color(0x00ff3333)], [0.0, 0.5, 1.0]),
+      colorSequence: new ColorSequence(<Color>[new Color(0xffffff33), new Color(0xffff3333), new Color(0x00ff3333)], <double>[0.0, 0.5, 1.0]),
       numParticlesToEmit: 25,
       emissionRate: 1000.0,
       startSize: 0.5,
@@ -48,32 +48,32 @@ class ExplosionBig extends Explosion {
     addChild(particlesFire);
 
     // Add ring
-    Sprite sprtRing = new Sprite(sheet["explosion_ring.png"]);
-    sprtRing.transferMode = ui.TransferMode.plus;
-    addChild(sprtRing);
+    Sprite spriteRing = new Sprite(sheet["explosion_ring.png"]);
+    spriteRing.transferMode = ui.TransferMode.plus;
+    addChild(spriteRing);
 
-    Action scale = new ActionTween( (a) => sprtRing.scale = a, 0.2, 1.0, 0.75);
-    Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveNode(sprtRing)]);
-    Action fade = new ActionTween( (a) => sprtRing.opacity = a, 1.0, 0.0, 0.75);
+    Action scale = new ActionTween((double a) { spriteRing.scale = a; }, 0.2, 1.0, 0.75);
+    Action scaleAndRemove = new ActionSequence(<Action>[scale, new ActionRemoveNode(spriteRing)]);
+    Action fade = new ActionTween((double a) { spriteRing.opacity = a; }, 1.0, 0.0, 0.75);
     actions.run(scaleAndRemove);
     actions.run(fade);
 
     // Add streaks
     for (int i = 0; i < 5; i++) {
-      Sprite sprtFlare = new Sprite(sheet["explosion_flare.png"]);
-      sprtFlare.pivot = new Point(0.3, 1.0);
-      sprtFlare.scaleX = 0.3;
-      sprtFlare.transferMode = ui.TransferMode.plus;
-      sprtFlare.rotation = randomDouble() * 360.0;
-      addChild(sprtFlare);
+      Sprite spriteFlare = new Sprite(sheet["explosion_flare.png"]);
+      spriteFlare.pivot = new Point(0.3, 1.0);
+      spriteFlare.scaleX = 0.3;
+      spriteFlare.transferMode = ui.TransferMode.plus;
+      spriteFlare.rotation = randomDouble() * 360.0;
+      addChild(spriteFlare);
 
       double multiplier = randomDouble() * 0.3 + 1.0;
 
-      Action scale = new ActionTween( (a) => sprtFlare.scaleY = a, 0.3 * multiplier, 0.8, 0.75 * multiplier);
-      Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveNode(sprtFlare)]);
-      Action fadeIn = new ActionTween( (a) => sprtFlare.opacity = a, 0.0, 1.0, 0.25 * multiplier);
-      Action fadeOut = new ActionTween( (a) => sprtFlare.opacity = a, 1.0, 0.0, 0.5 * multiplier);
-      Action fadeInOut = new ActionSequence([fadeIn, fadeOut]);
+      Action scale = new ActionTween((double a) { spriteFlare.scaleY = a; }, 0.3 * multiplier, 0.8, 0.75 * multiplier);
+      Action scaleAndRemove = new ActionSequence(<Action>[scale, new ActionRemoveNode(spriteFlare)]);
+      Action fadeIn = new ActionTween((double a) { spriteFlare.opacity = a; }, 0.0, 1.0, 0.25 * multiplier);
+      Action fadeOut = new ActionTween((double a) { spriteFlare.opacity = a; }, 1.0, 0.0, 0.5 * multiplier);
+      Action fadeInOut = new ActionSequence(<Action>[fadeIn, fadeOut]);
       actions.run(scaleAndRemove);
       actions.run(fadeInOut);
     }
@@ -96,14 +96,14 @@ class ExplosionMini extends Explosion {
         rotationEnd = -rotationEnd;
       }
 
-      ActionTween rotate = new ActionTween((a) => star.rotation = a, rotationStart, rotationEnd, 0.2);
+      ActionTween rotate = new ActionTween((double a) { star.rotation = a; }, rotationStart, rotationEnd, 0.2);
       actions.run(rotate);
 
-      ActionTween fade = new ActionTween((a) => star.opacity = a, 1.0, 0.0, 0.2);
+      ActionTween fade = new ActionTween((double a) { star.opacity = a; }, 1.0, 0.0, 0.2);
       actions.run(fade);
     }
 
-    ActionSequence seq = new ActionSequence([new ActionDelay(0.2), new ActionRemoveNode(this)]);
+    ActionSequence seq = new ActionSequence(<Action>[new ActionDelay(0.2), new ActionRemoveNode(this)]);
     actions.run(seq);
   }
 }

@@ -19,7 +19,7 @@ class TabbedNavigatorAppState extends State<TabbedNavigatorApp> {
       views: views,
       selectedIndex: selectedIndices[n],
       isScrollable: isScrollable,
-      onChanged: (tabIndex) {
+      onChanged: (int tabIndex) {
         setState(() { selectedIndices[n] = tabIndex; } );
       }
     );
@@ -46,7 +46,7 @@ class TabbedNavigatorAppState extends State<TabbedNavigatorApp> {
     Iterable<TabNavigatorView> views = ["event", "home", "android", "alarm", "face", "language"]
       .map((icon_name) {
         return new TabNavigatorView(
-          label: new TabLabel(icon: "action/${icon_name}"),
+          label: new TabLabel(icon: "action/$icon_name"),
           builder: (BuildContext context) => _buildContent(icon_name)
         );
       });

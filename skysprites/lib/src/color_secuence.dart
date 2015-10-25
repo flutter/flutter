@@ -21,8 +21,8 @@ class ColorSequence {
 
   /// Creates a new color sequence from a start and an end color.
   ColorSequence.fromStartAndEndColor(Color start, Color end) {
-    colors = [start, end];
-    colorStops = [0.0, 1.0];
+    colors = <Color>[start, end];
+    colorStops = <double>[0.0, 1.0];
   }
 
   /// Creates a new color sequence by copying an existing sequence.

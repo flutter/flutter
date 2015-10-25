@@ -21,7 +21,7 @@ SpriteSheet _spriteSheet;
 main() async {
   _images = new ImageMap(_bundle);
 
-  await _images.load([
+  await _images.load(<String>[
     'assets/sprites.png'
   ]);
 
@@ -34,7 +34,7 @@ main() async {
       brightness: ThemeBrightness.light,
       primarySwatch: Colors.purple
     ),
-    routes: {
+    routes: <String, RouteBuilder>{
       '/': (RouteArguments args) {
         return new SpriteWidget(
           new TestBed(),
@@ -73,9 +73,9 @@ class TestBed extends NodeWithSize {
     _world.addContactCallback(myCallback, "obstacle", "ship", PhysicsContactType.begin);
 
     // Animate group
-    ActionSequence seq = new ActionSequence([
-      new ActionTween((a) => _group.position = a, new Point(-256.0, 0.0), new Point(256.0, 0.0), 1.0, Curves.easeInOut),
-      new ActionTween((a) => _group.position = a, new Point(256.0, 0.0), new Point(-256.0, 0.0), 1.0, Curves.easeInOut)
+    ActionSequence seq = new ActionSequence(<Action>[
+      new ActionTween((Point a) { _group.position = a; }, new Point(-256.0, 0.0), new Point(256.0, 0.0), 1.0, Curves.easeInOut),
+      new ActionTween((Point a) { _group.position = a; }, new Point(256.0, 0.0), new Point(-256.0, 0.0), 1.0, Curves.easeInOut)
     ]);
     _group.actions.run(new ActionRepeatForever(seq));
 
@@ -115,7 +115,7 @@ class TestBed extends NodeWithSize {
       shipB.opacity = 0.3;
       shipB.position = new Point(40.0, 0.0);
       shipB.size = new Size(64.0, 64.0);
-      shipB.physicsBody = new PhysicsBody(new PhysicsShapePolygon([new Point(-25.0, -25.0), new Point(25.0, -25.0), new Point(25.0, 25.0), new Point(-25.0, 25.0)]),
+      shipB.physicsBody = new PhysicsBody(new PhysicsShapePolygon(<Point>[new Point(-25.0, -25.0), new Point(25.0, -25.0), new Point(25.0, 25.0), new Point(-25.0, 25.0)]),
         friction: 0.5,
         restitution: 0.5,
         tag: "ship"

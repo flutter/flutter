@@ -3,26 +3,26 @@ part of game;
 class PlayerState extends Node {
   PlayerState(this._sheetUI, this._sheetGame) {
     // Score display
-    _sprtBgScore = new Sprite(_sheetUI["scoreboard.png"]);
-    _sprtBgScore.pivot = new Point(1.0, 0.0);
-    _sprtBgScore.scale = 0.35;
-    _sprtBgScore.position = new Point(240.0, 10.0);
-    addChild(_sprtBgScore);
+    _spriteBackgroundScore = new Sprite(_sheetUI["scoreboard.png"]);
+    _spriteBackgroundScore.pivot = new Point(1.0, 0.0);
+    _spriteBackgroundScore.scale = 0.35;
+    _spriteBackgroundScore.position = new Point(240.0, 10.0);
+    addChild(_spriteBackgroundScore);
 
     _scoreDisplay = new ScoreDisplay(_sheetUI);
     _scoreDisplay.position = new Point(-13.0, 49.0);
-    _sprtBgScore.addChild(_scoreDisplay);
+    _spriteBackgroundScore.addChild(_scoreDisplay);
 
     // Coin display
-    _sprtBgCoins = new Sprite(_sheetUI["coinboard.png"]);
-    _sprtBgCoins.pivot = new Point(1.0, 0.0);
-    _sprtBgCoins.scale = 0.35;
-    _sprtBgCoins.position = new Point(105.0, 10.0);
-    addChild(_sprtBgCoins);
+    _spriteBackgroundCoins = new Sprite(_sheetUI["coinboard.png"]);
+    _spriteBackgroundCoins.pivot = new Point(1.0, 0.0);
+    _spriteBackgroundCoins.scale = 0.35;
+    _spriteBackgroundCoins.position = new Point(105.0, 10.0);
+    addChild(_spriteBackgroundCoins);
 
     _coinDisplay = new ScoreDisplay(_sheetUI);
     _coinDisplay.position = new Point(-13.0, 49.0);
-    _sprtBgCoins.addChild(_coinDisplay);
+    _spriteBackgroundCoins.addChild(_coinDisplay);
   }
 
   final SpriteSheet _sheetUI;
@@ -38,16 +38,16 @@ class PlayerState extends Node {
 
   EnemyBoss boss;
 
-  Sprite _sprtBgScore;
+  Sprite _spriteBackgroundScore;
   ScoreDisplay _scoreDisplay;
-  Sprite _sprtBgCoins;
+  Sprite _spriteBackgroundCoins;
   ScoreDisplay _coinDisplay;
 
   int get score => _scoreDisplay.score;
 
   set score(int score) {
     _scoreDisplay.score = score;
-    flashBgSprite(_sprtBgScore);
+    flashBackgroundSprite(_spriteBackgroundScore);
   }
 
   int get coins => _coinDisplay.score;
@@ -59,26 +59,26 @@ class PlayerState extends Node {
     Point middlePos = new Point((startPos.x + finalPos.x) / 2.0 + 50.0,
       (startPos.y + finalPos.y) / 2.0);
 
-    List<Point> path = [startPos, middlePos, finalPos];
+    List<Point> path = <Point>[startPos, middlePos, finalPos];
 
-    Sprite sprt = new Sprite(_sheetGame["coin.png"]);
-    sprt.scale = 0.7;
+    Sprite sprite = new Sprite(_sheetGame["coin.png"]);
+    sprite.scale = 0.7;
 
-    ActionSpline spline = new ActionSpline((a) => sprt.position = a, path, 0.5);
+    ActionSpline spline = new ActionSpline((Point a) { sprite.position = a; }, path, 0.5);
     spline.tension = 0.25;
-    ActionTween rotate = new ActionTween((a) => sprt.rotation = a, 0.0, 360.0, 0.5);
-    ActionTween scale = new ActionTween((a) => sprt.scale = a, 0.7, 1.2, 0.5);
-    ActionGroup group = new ActionGroup([spline, rotate, scale]);
-    sprt.actions.run(new ActionSequence([
+    ActionTween rotate = new ActionTween((double a) { sprite.rotation = a; }, 0.0, 360.0, 0.5);
+    ActionTween scale = new ActionTween((double a) { sprite.scale = a; }, 0.7, 1.2, 0.5);
+    ActionGroup group = new ActionGroup(<Action>[spline, rotate, scale]);
+    sprite.actions.run(new ActionSequence(<Action>[
       group,
-      new ActionRemoveNode(sprt),
+      new ActionRemoveNode(sprite),
       new ActionCallFunction(() {
         _coinDisplay.score += 1;
-        flashBgSprite(_sprtBgCoins);
+        flashBackgroundSprite(_spriteBackgroundCoins);
       })
     ]));
 
-    addChild(sprt);
+    addChild(sprite);
   }
 
   void activatePowerUp(PowerUpType type) {
@@ -107,21 +107,25 @@ class PlayerState extends Node {
   int _speedBoostFrames = 0;
   bool get speedBoostActive => _speedBoostFrames > 0;
 
-  void flashBgSprite(Sprite sprt) {
-    sprt.actions.stopAll();
+  void flashBackgroundSprite(Sprite sprite) {
+    sprite.actions.stopAll();
     ActionTween flash = new ActionTween(
-      (a) => sprt.colorOverlay = a,
+      (Color a) { sprite.colorOverlay = a; },
       new Color(0x66ccfff0),
       new Color(0x00ccfff0),
       0.3);
-    sprt.actions.run(flash);
+    sprite.actions.run(flash);
   }
 
   void update(double dt) {
-    if (_shieldFrames > 0) _shieldFrames--;
-    if (_sideLaserFrames > 0) _sideLaserFrames--;
-    if (_speedLaserFrames > 0) _speedLaserFrames--;
-    if (_speedBoostFrames > 0) _speedBoostFrames--;
+    if (_shieldFrames > 0)
+      _shieldFrames--;
+    if (_sideLaserFrames > 0)
+      _sideLaserFrames--;
+    if (_speedLaserFrames > 0)
+      _speedLaserFrames--;
+    if (_speedBoostFrames > 0)
+      _speedBoostFrames--;
 
     // Update speed
     if (boss != null) {
@@ -165,9 +169,9 @@ class ScoreDisplay extends Node {
       double xPos = -37.0;
       for (int i = scoreStr.length - 1; i >= 0; i--) {
         String numStr = scoreStr.substring(i, i + 1);
-        Sprite numSprt = new Sprite(_sheetUI["number_$numStr.png"]);
-        numSprt.position = new Point(xPos, 0.0);
-        addChild(numSprt);
+        Sprite numSprite = new Sprite(_sheetUI["number_$numStr.png"]);
+        numSprite.position = new Point(xPos, 0.0);
+        addChild(numSprite);
         xPos -= 37.0;
       }
       _dirtyScore = false;

@@ -12,7 +12,7 @@ RenderBox getBox(double lh) {
       new TextStyle(
         color: const Color(0xFF0000A0)
       ),
-      [
+      <TextSpan>[
         new PlainTextSpan('test'),
         new StyledTextSpan(
           new TextStyle(
@@ -20,7 +20,7 @@ RenderBox getBox(double lh) {
             fontSize: 50.0,
             height: lh
           ),
-          [new PlainTextSpan('مرحبا Hello')]
+          <TextSpan>[new PlainTextSpan('مرحبا Hello')]
         )
       ]
     )
@@ -62,7 +62,7 @@ RenderBox getBox(double lh) {
 }
 
 void main() {
-  RenderBox root = new RenderFlex(children: [
+  RenderBox root = new RenderFlex(children: <RenderBox>[
       new RenderConstrainedBox(
         additionalConstraints: new BoxConstraints.tightFor(height: 50.0)
       ),

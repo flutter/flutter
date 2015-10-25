@@ -26,13 +26,14 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.rotate(math.PI/4.0);
 
   ui.Gradient yellowBlue = new ui.Gradient.linear(
-      [new ui.Point(-radius, -radius), new ui.Point(0.0, 0.0)],
-      [const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)]);
+    <ui.Point>[new ui.Point(-radius, -radius), new ui.Point(0.0, 0.0)],
+    <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)]
+  );
   canvas.drawRect(new ui.Rect.fromLTRB(-radius, -radius, radius, radius),
-                   new ui.Paint()..shader = yellowBlue);
+                  new ui.Paint()..shader = yellowBlue);
 
   // Scale x and y by 0.5.
-  var scaleMatrix = new Float64List.fromList([
+  Float64List scaleMatrix = new Float64List.fromList(<double>[
       0.5, 0.0, 0.0, 0.0,
       0.0, 0.5, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
@@ -45,35 +46,47 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.restore();
 
   canvas.translate(0.0, 50.0);
-  var builder = new ui.LayerDrawLooperBuilder()
-      ..addLayerOnTop(
-          new ui.DrawLooperLayerInfo()
-            ..setOffset(const ui.Offset(150.0, 0.0))
-            ..setColorMode(ui.TransferMode.src)
-            ..setPaintBits(ui.PaintBits.all),
-          new ui.Paint()
-            ..color = const ui.Color.fromARGB(128, 255, 255, 0)
-            ..colorFilter = new ui.ColorFilter.mode(
-              const ui.Color.fromARGB(128, 0, 0, 255), ui.TransferMode.srcIn)
-            ..maskFilter = new ui.MaskFilter.blur(
-              ui.BlurStyle.normal, 3.0, highQuality: true))
-      ..addLayerOnTop(
-          new ui.DrawLooperLayerInfo()
-            ..setOffset(const ui.Offset(75.0, 75.0))
-            ..setColorMode(ui.TransferMode.src)
-            ..setPaintBits(ui.PaintBits.shader),
-          new ui.Paint()
-            ..shader = new ui.Gradient.radial(
-                new ui.Point(0.0, 0.0), radius/3.0,
-                [const ui.Color(0xFFFFFF00), const ui.Color(0xFFFF0000)],
-                null, ui.TileMode.mirror)
-            // Since we're don't set ui.PaintBits.maskFilter, this has no effect.
-            ..maskFilter = new ui.MaskFilter.blur(
-                ui.BlurStyle.normal, 50.0, highQuality: true))
-      ..addLayerOnTop(
-          new ui.DrawLooperLayerInfo()..setOffset(const ui.Offset(225.0, 75.0)),
-          // Since this layer uses a DST color mode, this has no effect.
-          new ui.Paint()..color = const ui.Color.fromARGB(128, 255, 0, 0));
+  ui.LayerDrawLooperBuilder builder = new ui.LayerDrawLooperBuilder()
+    ..addLayerOnTop(
+        new ui.DrawLooperLayerInfo()
+          ..setOffset(const ui.Offset(150.0, 0.0))
+          ..setColorMode(ui.TransferMode.src)
+          ..setPaintBits(ui.PaintBits.all),
+        new ui.Paint()
+          ..color = const ui.Color.fromARGB(128, 255, 255, 0)
+          ..colorFilter = new ui.ColorFilter.mode(
+              const ui.Color.fromARGB(128, 0, 0, 255),
+              ui.TransferMode.srcIn
+            )
+          ..maskFilter = new ui.MaskFilter.blur(
+              ui.BlurStyle.normal, 3.0, highQuality: true
+            )
+      )
+    ..addLayerOnTop(
+        new ui.DrawLooperLayerInfo()
+          ..setOffset(const ui.Offset(75.0, 75.0))
+          ..setColorMode(ui.TransferMode.src)
+          ..setPaintBits(ui.PaintBits.shader),
+        new ui.Paint()
+          ..shader = new ui.Gradient.radial(
+              new ui.Point(0.0, 0.0), radius/3.0,
+              <ui.Color>[
+                const ui.Color(0xFFFFFF00),
+                const ui.Color(0xFFFF0000)
+              ],
+              null,
+              ui.TileMode.mirror
+            )
+          // Since we're don't set ui.PaintBits.maskFilter, this has no effect.
+          ..maskFilter = new ui.MaskFilter.blur(
+              ui.BlurStyle.normal, 50.0, highQuality: true
+            )
+      )
+    ..addLayerOnTop(
+        new ui.DrawLooperLayerInfo()..setOffset(const ui.Offset(225.0, 75.0)),
+        // Since this layer uses a DST color mode, this has no effect.
+        new ui.Paint()..color = const ui.Color.fromARGB(128, 255, 0, 0)
+      );
   paint.drawLooper = builder.build();
   canvas.drawCircle(ui.Point.origin, radius, paint);
 

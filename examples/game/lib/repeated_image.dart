@@ -1,25 +1,25 @@
 part of game;
 
 class RepeatedImage extends Node {
-  Sprite _sprt0;
-  Sprite _sprt1;
+  Sprite _sprite0;
+  Sprite _sprite1;
 
   RepeatedImage(ui.Image image, [ui.TransferMode mode = null]) {
-    _sprt0 = new Sprite.fromImage(image);
-    _sprt0.size = new Size(1024.0, 1024.0);
-    _sprt0.pivot = Point.origin;
-    _sprt1 = new Sprite.fromImage(image);
-    _sprt1.size = new Size(1024.0, 1024.0);
-    _sprt1.pivot = Point.origin;
-    _sprt1.position = new Point(0.0, -1024.0);
+    _sprite0 = new Sprite.fromImage(image);
+    _sprite0.size = new Size(1024.0, 1024.0);
+    _sprite0.pivot = Point.origin;
+    _sprite1 = new Sprite.fromImage(image);
+    _sprite1.size = new Size(1024.0, 1024.0);
+    _sprite1.pivot = Point.origin;
+    _sprite1.position = new Point(0.0, -1024.0);
 
     if (mode != null) {
-      _sprt0.transferMode = mode;
-      _sprt1.transferMode = mode;
+      _sprite0.transferMode = mode;
+      _sprite1.transferMode = mode;
     }
 
-    addChild(_sprt0);
-    addChild(_sprt1);
+    addChild(_sprite0);
+    addChild(_sprite1);
   }
 
   void move(double dy) {
