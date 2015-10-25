@@ -14,9 +14,7 @@
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/public/c/system/core.h"
 #include "mojo/public/cpp/system/core.h"
-#include "sky/engine/bindings/builtin.h"
 #include "sky/engine/tonic/dart_converter.h"
-#include "sky/engine/tonic/dart_builtin.h"
 
 namespace blink {
 

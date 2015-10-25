@@ -13,8 +13,8 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/builtin.h"
-#include "sky/engine/bindings/dart_natives.h"
+#include "sky/engine/bindings/dart_mojo_internal.h"
+#include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/bindings/dart_ui.h"
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
@@ -25,6 +25,7 @@
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_gc_controller.h"
 #include "sky/engine/tonic/dart_invoke.h"
+#include "sky/engine/tonic/dart_io.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_library_loader.h"
 #include "sky/engine/tonic/dart_snapshot_loader.h"
@@ -46,8 +47,7 @@ void EnsureHandleWatcherStarted() {
 
   // TODO(dart): Call Dart_Cleanup (ensure the handle watcher isolate is closed)
   // during shutdown.
-  Dart_Handle mojo_core_lib =
-      Builtin::LoadAndCheckLibrary(Builtin::kMojoInternalLibrary);
+  Dart_Handle mojo_core_lib = Dart_LookupLibrary(ToDart("dart:mojo.internal"));
   CHECK(!LogIfError((mojo_core_lib)));
   Dart_Handle handle_watcher_type = Dart_GetType(
       mojo_core_lib,
@@ -141,11 +141,11 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     CHECK(Dart_IsServiceIsolate(isolate));
     CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
     {
-      DartApiScope apiScope;
-      Builtin::SetNativeResolver(Builtin::kUILibrary);
-      Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
-      Builtin::SetNativeResolver(Builtin::kIOLibrary);
-      DartNatives::Init(DartNatives::DartIOIsolate);
+      DartApiScope dart_api_scope;
+      DartIO::InitForIsolate();
+      DartUI::InitForIsolate();
+      DartMojoInternal::InitForIsolate();
+      DartRuntimeHooks::Install(DartRuntimeHooks::DartIOIsolate);
       // Start the handle watcher from the service isolate so it isn't available
       // for debugging or general Observatory interaction.
       EnsureHandleWatcherStarted();
@@ -175,10 +175,10 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
 
   {
-    DartApiScope apiScope;
-    Builtin::SetNativeResolver(Builtin::kUILibrary);
-    Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
-    Builtin::SetNativeResolver(Builtin::kIOLibrary);
+    DartApiScope dart_api_scope;
+    DartIO::InitForIsolate();
+    DartUI::InitForIsolate();
+    DartMojoInternal::InitForIsolate();
 
     if (!script_uri)
       CreateEmptyRootLibraryIfNeeded();

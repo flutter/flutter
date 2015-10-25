@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/bindings/dart_natives.h"
+#include "sky/engine/bindings/dart_runtime_hooks.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,15 +13,14 @@
 #include "base/macros.h"
 #include "base/time/time.h"
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/bindings/builtin.h"
 #include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_api_scope.h"
-#include "sky/engine/tonic/dart_builtin.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_timer_heap.h"
 #include "sky/engine/tonic/dart_value.h"
@@ -41,7 +40,7 @@ extern void syslog(int, const char *, ...);
 namespace blink {
 
 #define REGISTER_FUNCTION(name, count)                                         \
-  { "" #name, name, count },
+  { "" #name, name, count, true },
 #define DECLARE_FUNCTION(name, count)                                          \
   extern void name(Dart_NativeArguments args);
 
@@ -56,41 +55,10 @@ namespace blink {
 
 BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
 
-static struct NativeEntries {
-  const char* name;
-  Dart_NativeFunction function;
-  int argument_count;
-} BuiltinEntries[] = {BUILTIN_NATIVE_LIST(REGISTER_FUNCTION)};
-
-Dart_NativeFunction DartNatives::NativeLookup(Dart_Handle name,
-                                                 int argument_count,
-                                                 bool* auto_setup_scope) {
-  const char* function_name = nullptr;
-  Dart_Handle result = Dart_StringToCString(name, &function_name);
-  DART_CHECK_VALID(result);
-  DCHECK(function_name != nullptr);
-  DCHECK(auto_setup_scope != nullptr);
-  *auto_setup_scope = true;
-  size_t num_entries = arraysize(BuiltinEntries);
-  for (size_t i = 0; i < num_entries; i++) {
-    const struct NativeEntries& entry = BuiltinEntries[i];
-    if (!strcmp(function_name, entry.name) &&
-        (entry.argument_count == argument_count)) {
-      return entry.function;
-    }
-  }
-  return nullptr;
-}
-
-const uint8_t* DartNatives::NativeSymbol(Dart_NativeFunction native_function) {
-  size_t num_entries = arraysize(BuiltinEntries);
-  for (size_t i = 0; i < num_entries; i++) {
-    const struct NativeEntries& entry = BuiltinEntries[i];
-    if (entry.function == native_function) {
-      return reinterpret_cast<const uint8_t*>(entry.name);
-    }
-  }
-  return nullptr;
+void DartRuntimeHooks::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    BUILTIN_NATIVE_LIST(REGISTER_FUNCTION)
+  });
 }
 
 static Dart_Handle GetClosure(Dart_Handle builtin_library, const char* name) {
@@ -101,65 +69,64 @@ static Dart_Handle GetClosure(Dart_Handle builtin_library, const char* name) {
 }
 
 static void InitDartInternal(Dart_Handle builtin_library,
-                             DartNatives::IsolateType isolate_type) {
+                             DartRuntimeHooks::IsolateType isolate_type) {
   Dart_Handle print = GetClosure(builtin_library, "_getPrintClosure");
   Dart_Handle timer = GetClosure(builtin_library, "_getCreateTimerClosure");
 
-  Dart_Handle internal_library = DartBuiltin::LookupLibrary("dart:_internal");
+  Dart_Handle internal_library = Dart_LookupLibrary(ToDart("dart:_internal"));
 
   DART_CHECK_VALID(Dart_SetField(
       internal_library, ToDart("_printClosure"), print));
 
-  if (isolate_type == DartNatives::MainIsolate) {
+  if (isolate_type == DartRuntimeHooks::MainIsolate) {
     Dart_Handle vm_hooks_name = ToDart("VMLibraryHooks");
     Dart_Handle vm_hooks = Dart_GetClass(internal_library, vm_hooks_name);
     DART_CHECK_VALID(vm_hooks);
     Dart_Handle timer_name = ToDart("timerFactory");
     DART_CHECK_VALID(Dart_SetField(vm_hooks, timer_name, timer));
   } else {
-    CHECK(isolate_type == DartNatives::DartIOIsolate);
-    Dart_Handle io_lib = DartBuiltin::LookupLibrary("dart:io");
+    CHECK(isolate_type == DartRuntimeHooks::DartIOIsolate);
+    Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
     DART_CHECK_VALID(io_lib);
     Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
     DART_CHECK_VALID(Dart_Invoke(io_lib, setup_hooks, 0, NULL));
-    Dart_Handle isolate_lib = DartBuiltin::LookupLibrary("dart:isolate");
+    Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
     DART_CHECK_VALID(isolate_lib);
     DART_CHECK_VALID(Dart_Invoke(isolate_lib, setup_hooks, 0, NULL));
   }
 }
 
-static void InitDartCore(Dart_Handle builtin,
-                         DartNatives::IsolateType isolate_type) {
+static void InitDartCore(Dart_Handle builtin) {
   Dart_Handle get_base_url = GetClosure(builtin, "_getGetBaseURLClosure");
-  Dart_Handle core_library = DartBuiltin::LookupLibrary("dart:core");
+  Dart_Handle core_library = Dart_LookupLibrary(ToDart("dart:core"));
   DART_CHECK_VALID(Dart_SetField(core_library,
       ToDart("_uriBaseClosure"), get_base_url));
 }
 
 static void InitDartAsync(Dart_Handle builtin_library,
-                          DartNatives::IsolateType isolate_type) {
+                          DartRuntimeHooks::IsolateType isolate_type) {
   Dart_Handle schedule_microtask;
-  if (isolate_type == DartNatives::MainIsolate) {
+  if (isolate_type == DartRuntimeHooks::MainIsolate) {
     schedule_microtask =
         GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
   } else {
-    CHECK(isolate_type == DartNatives::DartIOIsolate);
-    Dart_Handle isolate_lib = DartBuiltin::LookupLibrary("dart:isolate");
+    CHECK(isolate_type == DartRuntimeHooks::DartIOIsolate);
+    Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
     Dart_Handle method_name =
         Dart_NewStringFromCString("_getIsolateScheduleImmediateClosure");
     schedule_microtask = Dart_Invoke(isolate_lib, method_name, 0, NULL);
   }
-  Dart_Handle async_library = DartBuiltin::LookupLibrary("dart:async");
+  Dart_Handle async_library = Dart_LookupLibrary(ToDart("dart:async"));
   Dart_Handle set_schedule_microtask = ToDart("_setScheduleImmediateClosure");
   DART_CHECK_VALID(Dart_Invoke(async_library, set_schedule_microtask, 1,
                                &schedule_microtask));
 }
 
-void DartNatives::Init(IsolateType isolate_type) {
-  Dart_Handle builtin = Builtin::LoadAndCheckLibrary(Builtin::kUILibrary);
+void DartRuntimeHooks::Install(IsolateType isolate_type) {
+  Dart_Handle builtin = Dart_LookupLibrary(ToDart("dart:ui"));
   DART_CHECK_VALID(builtin);
   InitDartInternal(builtin, isolate_type);
-  InitDartCore(builtin, isolate_type);
+  InitDartCore(builtin);
   InitDartAsync(builtin, isolate_type);
 }
 

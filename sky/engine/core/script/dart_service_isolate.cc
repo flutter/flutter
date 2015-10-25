@@ -7,6 +7,7 @@
 #include "base/logging.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_error.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 #include "sky/engine/tonic/dart_string.h"
 
 #define RETURN_ERROR_HANDLE(handle)                             \
@@ -38,6 +39,24 @@ namespace mojo {
 }
 
 namespace blink {
+namespace {
+
+static Dart_LibraryTagHandler g_embedder_tag_handler;
+static DartLibraryNatives* g_natives;
+
+Dart_NativeFunction GetNativeFunction(Dart_Handle name,
+                                      int argument_count,
+                                      bool* auto_setup_scope) {
+  CHECK(g_natives);
+  return g_natives->GetNativeFunction(name, argument_count, auto_setup_scope);
+}
+
+const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
+  CHECK(g_natives);
+  return g_natives->GetSymbol(native_function);
+}
+
+}  // namespace
 
 class Resources {
  public:
@@ -96,28 +115,6 @@ void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
   // NO-OP.
 }
 
-DartBuiltin::Natives DartServiceIsolate::native_entries_[] = {
-  {"ServiceIsolate_TriggerResourceLoad", TriggerResourceLoad, 0 },
-  {"ServiceIsolate_NotifyServerState", NotifyServerState, 2 },
-  {"ServiceIsolate_Shutdown", Shutdown, 0 },
-};
-
-Dart_NativeFunction DartServiceIsolate::NativeResolver(Dart_Handle name,
-                                                       int argument_count,
-                                                       bool* auto_setup_scope) {
-  CHECK(builtins_);
-  return builtins_->Resolver(name, argument_count, auto_setup_scope);
-}
-
-const uint8_t* DartServiceIsolate::NativeSymbolizer(
-    Dart_NativeFunction native_function) {
-  CHECK(builtins_);
-  return builtins_->Symbolizer(native_function);
-}
-
-Dart_LibraryTagHandler DartServiceIsolate::embedder_tag_handler_ = nullptr;
-DartBuiltin* DartServiceIsolate::builtins_ = nullptr;
-
 bool DartServiceIsolate::Startup(std::string server_ip,
                                  intptr_t server_port,
                                  Dart_LibraryTagHandler embedder_tag_handler,
@@ -126,13 +123,18 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   CHECK(isolate);
 
   // Remember the embedder's library tag handler.
-  embedder_tag_handler_ = embedder_tag_handler;
-  CHECK(embedder_tag_handler_);
+  g_embedder_tag_handler = embedder_tag_handler;
+  CHECK(g_embedder_tag_handler);
 
   // Setup native entries.
-  builtins_ =
-      new DartBuiltin(&DartServiceIsolate::native_entries_[0],
-                      arraysize(native_entries_));
+  if (!g_natives) {
+    g_natives = new DartLibraryNatives();
+    g_natives->Register({
+      {"ServiceIsolate_TriggerResourceLoad", TriggerResourceLoad, 0, true },
+      {"ServiceIsolate_NotifyServerState", NotifyServerState, 2, true },
+      {"ServiceIsolate_Shutdown", Shutdown, 0, true },
+    });
+  }
 
   Dart_Handle result;
 
@@ -143,7 +145,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   DCHECK(library != Dart_Null());
   SHUTDOWN_ON_ERROR(library);
   // Setup native entry resolution.
-  result = Dart_SetNativeResolver(library, NativeResolver, NativeSymbolizer);
+  result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
 
   SHUTDOWN_ON_ERROR(result);
   // Finalize loading.
@@ -285,7 +287,7 @@ Dart_Handle DartServiceIsolate::LibraryTagHandler(Dart_LibraryTag tag,
   }
   if (tag == Dart_kImportTag) {
     // Embedder handles all requests for external libraries.
-    return embedder_tag_handler_(tag, library, url);
+    return g_embedder_tag_handler(tag, library, url);
   }
   DCHECK((tag == Dart_kSourceTag) || (tag == Dart_kCanonicalizeUrl));
   if (tag == Dart_kCanonicalizeUrl) {

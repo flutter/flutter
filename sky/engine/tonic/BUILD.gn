@@ -5,8 +5,6 @@
 source_set("tonic") {
   sources = [
     "dart_api_scope.h",
-    "dart_builtin.cc",
-    "dart_builtin.h",
     "dart_class_library.cc",
     "dart_class_library.h",
     "dart_class_provider.cc",
@@ -27,10 +25,14 @@ source_set("tonic") {
     "dart_gc_visitor.h",
     "dart_invoke.cc",
     "dart_invoke.h",
+    "dart_io.cc",
+    "dart_io.h",
     "dart_isolate_scope.cc",
     "dart_isolate_scope.h",
     "dart_library_loader.cc",
     "dart_library_loader.h",
+    "dart_library_natives.cc",
+    "dart_library_natives.h",
     "dart_library_provider.cc",
     "dart_library_provider.h",
     "dart_persistent_value.cc",
@@ -63,6 +65,7 @@ source_set("tonic") {
 
   deps = [
     "//base",
+    "//dart/runtime/bin:embedded_dart_io",
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/system",
     "//sky/engine/wtf",

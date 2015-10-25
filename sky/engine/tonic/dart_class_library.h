@@ -5,7 +5,9 @@
 #ifndef SKY_ENGINE_TONIC_DART_CLASS_LIBRARY_H_
 #define SKY_ENGINE_TONIC_DART_CLASS_LIBRARY_H_
 
+#include <memory>
 #include <unordered_map>
+
 #include "base/macros.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_class_provider.h"
@@ -18,11 +20,14 @@ class DartClassLibrary {
   explicit DartClassLibrary();
   ~DartClassLibrary();
 
-  void set_provider(DartClassProvider* provider) { provider_ = provider; }
+  void set_provider(std::unique_ptr<DartClassProvider> provider) {
+    provider_ = std::move(provider);
+  }
+
   Dart_PersistentHandle GetClass(const DartWrapperInfo& info);
 
  private:
-  DartClassProvider* provider_;
+  std::unique_ptr<DartClassProvider> provider_;
   std::unordered_map<const DartWrapperInfo*, Dart_PersistentHandle> cache_;
 
   DISALLOW_COPY_AND_ASSIGN(DartClassLibrary);

@@ -4,7 +4,6 @@
 
 #include "sky/engine/core/script/dom_dart_state.h"
 
-#include "sky/engine/tonic/dart_builtin.h"
 #include "sky/engine/tonic/dart_converter.h"
 
 namespace blink {
@@ -32,8 +31,8 @@ void DOMDartState::DidSetIsolate() {
   dy_handle_.Set(this, ToDart("_dy"));
   value_handle_.Set(this, ToDart("_value"));
 
-  Dart_Handle sky_library = DartBuiltin::LookupLibrary("dart:ui");
-  color_class_.Set(this, Dart_GetType(sky_library, ToDart("Color"), 0, 0));
+  Dart_Handle library = Dart_LookupLibrary(ToDart("dart:ui"));
+  color_class_.Set(this, Dart_GetType(library, ToDart("Color"), 0, 0));
 }
 
 }  // namespace blink

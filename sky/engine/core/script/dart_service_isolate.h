@@ -8,7 +8,6 @@
 #include <string>
 
 #include "include/dart_api.h"
-#include "sky/engine/tonic/dart_builtin.h"
 
 namespace blink {
 
@@ -26,13 +25,6 @@ class DartServiceIsolate {
   static void TriggerResourceLoad(Dart_NativeArguments args);
   static void NotifyServerState(Dart_NativeArguments args);
   static void Shutdown(Dart_NativeArguments args);
-  // Native entry resolution.
-  static Dart_NativeFunction NativeResolver(Dart_Handle name,
-                                            int argument_count,
-                                            bool* auto_setup_scope);
-  static const uint8_t* NativeSymbolizer(Dart_NativeFunction native_function);
-  static DartBuiltin::Natives native_entries_[];
-  static DartBuiltin* builtins_;
 
   // Script loading.
   static Dart_Handle GetSource(const char* name);
@@ -44,10 +36,7 @@ class DartServiceIsolate {
   // Observatory resource loading.
   static Dart_Handle LoadResources(Dart_Handle library);
   static Dart_Handle LoadResource(Dart_Handle library, const char* name);
-
-  static Dart_LibraryTagHandler embedder_tag_handler_;
 };
-
 
 }  // namespace blink
 

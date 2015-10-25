@@ -7,20 +7,20 @@ import("//sky/engine/core/core.gni")
 
 source_set("bindings") {
   sources = [
-    "builtin.cc",
-    "builtin.h",
-    "dart_natives.cc",
-    "dart_natives.h",
-    "dart_ui.cc",
-    "dart_ui.h",
     "dart_callback.cc",
     "dart_callback.h",
+    "dart_mojo_internal.cc",
+    "dart_mojo_internal.h",
+    "dart_runtime_hooks.cc",
+    "dart_runtime_hooks.h",
+    "dart_ui.cc",
+    "dart_ui.h",
     "exception_messages.cc",
     "exception_messages.h",
-    "exception_state.cc",
-    "exception_state.h",
     "exception_state_placeholder.cc",
     "exception_state_placeholder.h",
+    "exception_state.cc",
+    "exception_state.h",
     "mojo_natives.cc",
     "mojo_natives.h",
     "nullable.h",
@@ -32,7 +32,6 @@ source_set("bindings") {
 
   deps = [
     "//base",
-    "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime:libdart",
     "//mojo/public/c/system",
     "//mojo/public/cpp/system",

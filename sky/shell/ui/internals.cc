@@ -8,9 +8,9 @@
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
 #include "services/asset_bundle/asset_unpacker_impl.h"
-#include "sky/engine/tonic/dart_builtin.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 #include "sky/engine/tonic/dart_state.h"
 
 using namespace blink;
@@ -48,44 +48,45 @@ void TakeServiceRegistry(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(args, 0);
 }
 
-const DartBuiltin::Natives kNativeFunctions[] = {
-    {"takeRootBundleHandle", TakeRootBundleHandle, 0},
-    {"takeServiceRegistry", TakeServiceRegistry, 0},
-    {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
-    {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
-    {"takeShellProxyHandle", TakeShellProxyHandle, 0},
-};
+static DartLibraryNatives* g_natives;
 
-const DartBuiltin& GetBuiltin() {
-  static DartBuiltin& builtin = *new DartBuiltin(kNativeFunctions,
-                                                 arraysize(kNativeFunctions));
-  return builtin;
+void EnsureNatives() {
+  if (g_natives)
+    return;
+  g_natives = new DartLibraryNatives();
+  g_natives->Register({
+    {"takeRootBundleHandle", TakeRootBundleHandle, 0, true},
+    {"takeServiceRegistry", TakeServiceRegistry, 0, true},
+    {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0, true},
+    {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0, true},
+    {"takeShellProxyHandle", TakeShellProxyHandle, 0, true},
+  });
 }
 
-Dart_NativeFunction Resolver(Dart_Handle name,
-                             int argument_count,
-                             bool* auto_setup_scope) {
-  return GetBuiltin().Resolver(name, argument_count, auto_setup_scope);
+Dart_NativeFunction GetNativeFunction(Dart_Handle name,
+                                      int argument_count,
+                                      bool* auto_setup_scope) {
+  return g_natives->GetNativeFunction(name, argument_count, auto_setup_scope);
 }
 
-const uint8_t* Symbolizer(Dart_NativeFunction native_function) {
-  return GetBuiltin().Symbolizer(native_function);
+const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
+  return g_natives->GetSymbol(native_function);
 }
-
-const char kLibraryName[] = "dart:ui_internals";
 
 }  // namespace
 
 void Internals::Create(Dart_Isolate isolate,
                        mojo::ServiceProviderPtr service_provider,
                        mojo::asset_bundle::AssetBundlePtr root_bundle) {
+  EnsureNatives();
+
   DartState* state = DartState::From(isolate);
   state->SetUserData(&kInternalsKey, new Internals(service_provider.Pass(),
                                                    root_bundle.Pass()));
-  Dart_Handle library =
-      Dart_LookupLibrary(Dart_NewStringFromCString(kLibraryName));
+  Dart_Handle library = Dart_LookupLibrary(ToDart("dart:ui_internals"));
   CHECK(!LogIfError(library));
-  CHECK(!LogIfError(Dart_SetNativeResolver(library, Resolver, Symbolizer)));
+  CHECK(!LogIfError(Dart_SetNativeResolver(
+      library, GetNativeFunction, GetSymbol)));
 }
 
 Internals::Internals(mojo::ServiceProviderPtr platform_service_provider,
