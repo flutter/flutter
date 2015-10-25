@@ -37,7 +37,6 @@
 namespace blink {
 
 class Image;
-class KURL;
 class RenderObject;
 
 class HitTestResult {

@@ -26,7 +26,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
 
-#include "sky/engine/core/editing/TextAffinity.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/RenderObjectChildList.h"
 #include "sky/engine/core/rendering/SubtreeLayoutScope.h"

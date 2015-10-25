@@ -18,7 +18,6 @@
 #include "sky/engine/core/painting/Size.h"
 #include "sky/engine/core/painting/RSTransform.h"
 #include "sky/engine/core/painting/VertexMode.h"
-#include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float64_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"

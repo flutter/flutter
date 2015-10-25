@@ -36,7 +36,6 @@
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/platform/text/BidiResolver.h"
 #include "sky/engine/platform/text/TextRunIterator.h"
-#include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/MathExtras.h"
 #include "third_party/skia/include/core/SkAnnotation.h"
@@ -1346,15 +1345,6 @@ void GraphicsContext::scale(float x, float y)
     realizeCanvasSave();
 
     m_canvas->scale(WebCoreFloatToSkScalar(x), WebCoreFloatToSkScalar(y));
-}
-
-void GraphicsContext::setURLForRect(const KURL& link, const IntRect& destRect)
-{
-    if (contextDisabled())
-        return;
-
-    SkAutoDataUnref url(SkData::NewWithCString(link.string().utf8().data()));
-    SkAnnotateRectWithURL(m_canvas, destRect, url.get());
 }
 
 void GraphicsContext::setURLFragmentForRect(const String& destName, const IntRect& rect)
