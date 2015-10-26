@@ -22,7 +22,9 @@ class PhysicsBody {
     bool fixedRotation: false,
     bool bullet: false,
     bool active: true,
-    this.gravityScale: 1.0
+    this.gravityScale: 1.0,
+    collisionCategory: "Default",
+    collisionMask: null
   }) {
     this.density = density;
     this.friction = friction;
@@ -38,6 +40,9 @@ class PhysicsBody {
     this.fixedRotation = fixedRotation;
     this.bullet = bullet;
     this.active = active;
+
+    this.collisionCategory = collisionCategory;
+    this.collisionMask = collisionMask;
   }
 
   Vector2 _lastPosition;
@@ -232,6 +237,46 @@ class PhysicsBody {
 
   double gravityScale;
 
+  Object _collisionCategory = null;
+
+  Object get collisionCategory {
+    return _collisionCategory;
+  }
+
+  set collisionCategory(Object collisionCategory) {
+    _collisionCategory = collisionCategory;
+    _updateFilter();
+  }
+
+  List<Object> _collisionMask = null;
+
+  List<Object> get collisionMask => _collisionMask;
+
+  set collisionMask(List<Object> collisionMask) {
+    _collisionMask = collisionMask;
+    _updateFilter();
+  }
+
+  box2d.Filter get _b2Filter {
+    print("_physicsNode: $_physicsNode groups: ${_physicsNode._collisionGroups}");
+    box2d.Filter f = new box2d.Filter();
+    f.categoryBits = _physicsNode._collisionGroups.getBitmaskForKeys([_collisionCategory]);
+    f.maskBits = _physicsNode._collisionGroups.getBitmaskForKeys(_collisionMask);
+
+    print("Filter: $f category: ${f.categoryBits} mask: ${f.maskBits}");
+
+    return f;
+  }
+
+  void _updateFilter() {
+    if (_body != null) {
+      box2d.Filter filter = _b2Filter;
+      for (box2d.Fixture fixture = _body.getFixtureList(); fixture != null; fixture = fixture.getNext()) {
+        fixture.setFilterData(filter);
+      }
+    }
+  }
+
   PhysicsWorld _physicsNode;
   Node _node;
 
@@ -296,6 +341,8 @@ class PhysicsBody {
   void _attach(PhysicsWorld physicsNode, Node node) {
     assert(_attached == false);
 
+    _physicsNode = physicsNode;
+
     // Account for physics groups
     Point positionWorld = node._positionToPhysics(node.position, node.parent);
     double rotationWorld = node._rotationToPhysics(node.rotation, node.parent);
@@ -333,7 +380,6 @@ class PhysicsBody {
 
     _body.userData = this;
 
-    _physicsNode = physicsNode;
     _node = node;
 
     _attached = true;
@@ -353,6 +399,7 @@ class PhysicsBody {
     fixtureDef.restitution = restitution;
     fixtureDef.density = density;
     fixtureDef.isSensor = isSensor;
+    fixtureDef.filter = _b2Filter;
 
     // Get shapes
     List<box2d.Shape> b2Shapes = <box2d.Shape>[];
