@@ -31,7 +31,6 @@
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/platform/text/TextStream.h"
 #include "sky/engine/wtf/Uint8ClampedArray.h"
-#include "third_party/skia/include/effects/SkBitmapSource.h"
 #include "third_party/skia/include/effects/SkXfermodeImageFilter.h"
 
 typedef unsigned char (*BlendType)(unsigned char colorA, unsigned char colorB, unsigned char alphaA, unsigned char alphaB);

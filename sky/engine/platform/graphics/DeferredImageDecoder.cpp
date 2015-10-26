@@ -274,7 +274,7 @@ SkBitmap DeferredImageDecoder::createBitmap(size_t index)
 
     SkBitmap bitmap;
     DecodingImageGenerator* generator = new DecodingImageGenerator(m_frameGenerator, info, index);
-    bool installed = SkInstallDiscardablePixelRef(generator, &bitmap);
+    bool installed = SkDEPRECATED_InstallDiscardablePixelRef(generator, &bitmap);
     ASSERT_UNUSED(installed, installed);
     bitmap.pixelRef()->setURI(labelDiscardable);
     generator->setGenerationId(bitmap.getGenerationID());
