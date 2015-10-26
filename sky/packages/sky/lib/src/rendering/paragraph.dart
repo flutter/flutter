@@ -59,22 +59,27 @@ class RenderParagraph extends RenderBox {
     textPainter.minHeight = constraints.minHeight;
     textPainter.maxHeight = constraints.maxHeight;
     textPainter.layout();
+    // By default, we shrinkwrap to the intrinsic width.
+    double width = constraints.constrainWidth(textPainter.maxIntrinsicWidth);
+    textPainter.minWidth = width;
+    textPainter.maxWidth = width;
+    textPainter.layout();
     _constraintsForCurrentLayout = constraints;
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     layoutText(constraints);
-    return constraints.constrainWidth(textPainter.minContentWidth);
+    return constraints.constrainWidth(textPainter.minIntrinsicWidth);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     layoutText(constraints);
-    return constraints.constrainWidth(textPainter.maxContentWidth);
+    return constraints.constrainWidth(textPainter.maxIntrinsicWidth);
   }
 
   double _getIntrinsicHeight(BoxConstraints constraints) {
     layoutText(constraints);
-    return constraints.constrainHeight(textPainter.height);
+    return constraints.constrainHeight(textPainter.size.height);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
@@ -93,12 +98,7 @@ class RenderParagraph extends RenderBox {
 
   void performLayout() {
     layoutText(constraints);
-
-    // We use textPainter.maxContentWidth here, rather that textPainter.width,
-    // because the latter is the width that it used to wrap the text, whereas
-    // the former is the actual width of the text.
-    size = constraints.constrain(new Size(textPainter.maxContentWidth,
-                                          textPainter.height));
+    size = constraints.constrain(textPainter.size);
   }
 
   void paint(PaintingContext context, Offset offset) {
