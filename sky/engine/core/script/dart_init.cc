@@ -217,7 +217,11 @@ void InitDartVM() {
       nullptr,  // Isolate interrupt callback.
       UnhandledExceptionCallback, IsolateShutdownCallback,
       // File IO callbacks.
-      nullptr, nullptr, nullptr, nullptr, nullptr) == nullptr);
+      nullptr, nullptr, nullptr, nullptr,
+      // Entroy source
+      nullptr,
+      // VM service assets archive
+      nullptr) == nullptr);
   // Wait for load port- ensures handle watcher and service isolates are
   // running.
   Dart_ServiceWaitForLoadPort();
