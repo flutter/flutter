@@ -91,11 +91,8 @@ class TestBed extends NodeWithSize {
     if (event.type == "pointerdown") {
       Point pos = convertPointToNodeSpace(event.boxPosition);
 
-      print("ADDING SHIPS");
       PhysicsGroup group = new PhysicsGroup();
       group.position = pos;
-      group.rotation = 10.0;
-      group.scale = 0.5;
       _world.addChild(group);
 
       Sprite shipA;
