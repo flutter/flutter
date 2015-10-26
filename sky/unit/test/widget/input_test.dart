@@ -105,7 +105,6 @@ void main() {
   test('Selection remains valid', () {
     testWidgets((WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
-      String inputValue;
 
       Widget builder() {
         return new Center(
