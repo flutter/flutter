@@ -384,7 +384,9 @@ class Block extends StatelessComponent {
     this.initialScrollOffset,
     this.scrollDirection: ScrollDirection.vertical,
     this.onScroll
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(!children.any((Widget child) => child == null));
+  }
 
   final List<Widget> children;
   final double initialScrollOffset;
