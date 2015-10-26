@@ -4,20 +4,23 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:asn1lib/asn1lib.dart';
 import 'package:bignum/bignum.dart';
 import 'package:cipher/cipher.dart';
+import 'package:cipher/impl/client.dart';
 
 // The ECDSA algorithm parameters we're using. These match the parameters used
 // by the Flutter updater package.
-final ECDomainParameters _ecDomain = new ECDomainParameters('prime256v1');
-final String kSignerAlgorithm = 'SHA-256/ECDSA';
-final String kHashAlgorithm = 'SHA-256';
-
-final SecureRandom _random = _initRandom();
+class CipherParameters {
+  final String signerAlgorithm = 'SHA-256/ECDSA';
+  final String hashAlgorithm = 'SHA-256';
+  final ECDomainParameters domain = new ECDomainParameters('prime256v1');
+  final SecureRandom random = _initRandom();
+}
 
 SecureRandom _initRandom() {
   // TODO(mpcomplete): Provide a better seed here. External entropy source?
@@ -28,6 +31,13 @@ SecureRandom _initRandom() {
       ..seed(params);
   return random;
 }
+
+CipherParameters _initParams() {
+  initCipher();
+  return new CipherParameters();
+}
+
+final CipherParameters _params = _initParams();
 
 // Returns a serialized manifest, with the public key and hash of the content
 // included.
@@ -48,7 +58,7 @@ Uint8List serializeManifest(Map manifestDescriptor, ECPublicKey publicKey, Uint8
   if (publicKey != null)
     outputManifest['key'] = BASE64.encode(publicKey.Q.getEncoded());
 
-  Uint8List zipHash = new Digest(kHashAlgorithm).process(zipBytes);
+  Uint8List zipHash = new Digest(_params.hashAlgorithm).process(zipBytes);
   BigInteger zipHashInt = new BigInteger.fromBytes(1, zipHash);
   outputManifest['content-hash'] = zipHashInt.intValue();
 
@@ -59,9 +69,9 @@ Uint8List serializeManifest(Map manifestDescriptor, ECPublicKey publicKey, Uint8
 List<int> signManifest(Uint8List manifestBytes, ECPrivateKey privateKey) {
   if (manifestBytes == null || privateKey == null)
     return [];
-  Signer signer = new Signer(kSignerAlgorithm);
+  Signer signer = new Signer(_params.signerAlgorithm);
   PrivateKeyParameter params = new PrivateKeyParameter(privateKey);
-  signer.init(true, new ParametersWithRandom(params, _random));
+  signer.init(true, new ParametersWithRandom(params, _params.random));
   ECSignature signature = signer.generateSignature(manifestBytes);
   ASN1Sequence asn1 = new ASN1Sequence()
     ..add(new ASN1Integer(signature.r))
@@ -69,6 +79,37 @@ List<int> signManifest(Uint8List manifestBytes, ECPrivateKey privateKey) {
   return asn1.encodedBytes;
 }
 
+bool verifyManifestSignature(Map<String, dynamic> manifest,
+                             Uint8List manifestBytes,
+                             Uint8List signatureBytes) {
+  ECSignature signature = _asn1ParseSignature(signatureBytes);
+  if (signature == null)
+    return false;
+
+  List<int> keyBytes = BASE64.decode(manifest['key']);
+  ECPoint q = _params.domain.curve.decodePoint(keyBytes);
+  ECPublicKey publicKey = new ECPublicKey(q, _params.domain);
+
+  Signer signer = new Signer(_params.signerAlgorithm);
+  signer.init(false, new PublicKeyParameter(publicKey));
+  return signer.verifySignature(manifestBytes, signature);
+}
+
+Future<bool> verifyContentHash(BigInteger expectedHash, Stream<List<int>> content) async {
+  // Hash the file incrementally.
+  Digest hasher = new Digest(_params.hashAlgorithm);
+  await content.forEach((List<int> chunk) {
+    hasher.update(chunk, 0, chunk.length);
+  });
+  Uint8List hashBytes = new Uint8List(hasher.digestSize);
+  int len = hasher.doFinal(hashBytes, 0);
+  hashBytes = hashBytes.sublist(0, len);
+  BigInteger actualHash = new BigInteger.fromBytes(1, hashBytes);
+
+  return expectedHash == actualHash;
+}
+
+// Parses a DER-encoded ASN.1 ECDSA private key block.
 ECPrivateKey _asn1ParsePrivateKey(ECDomainParameters ecDomain, Uint8List privateKey) {
   ASN1Parser parser = new ASN1Parser(privateKey);
   ASN1Sequence seq = parser.nextObject();
@@ -78,17 +119,47 @@ ECPrivateKey _asn1ParsePrivateKey(ECDomainParameters ecDomain, Uint8List private
   return new ECPrivateKey(d, ecDomain);
 }
 
-Future<ECPrivateKey> loadPrivateKey(String privateKeyPath) async {
+// Parses a DER-encoded ASN.1 ECDSA signature block.
+ECSignature _asn1ParseSignature(Uint8List signature) {
+  ASN1Parser parser = new ASN1Parser(signature);
+  ASN1Object object = parser.nextObject();
+  if (object is! ASN1Sequence)
+    return null;
+  ASN1Sequence sequence = object;
+  if (!(sequence.elements.length == 2 &&
+        sequence.elements[0] is ASN1Integer &&
+        sequence.elements[1] is ASN1Integer))
+    return null;
+  ASN1Integer r = sequence.elements[0];
+  ASN1Integer s = sequence.elements[1];
+  return new ECSignature(r.valueAsPositiveBigInteger, s.valueAsPositiveBigInteger);
+}
+
+ECPrivateKey _readPrivateKeySync(String privateKeyPath) {
   File file = new File(privateKeyPath);
   if (!file.existsSync())
     return null;
   List<int> bytes = file.readAsBytesSync();
-  return _asn1ParsePrivateKey(_ecDomain, new Uint8List.fromList(bytes));
+  return _asn1ParsePrivateKey(_params.domain, new Uint8List.fromList(bytes));
 }
 
-ECPublicKey publicKeyFromPrivateKey(ECPrivateKey privateKey) {
-  if (privateKey == null)
-    return null;
+ECPublicKey _publicKeyFromPrivateKey(ECPrivateKey privateKey) {
   ECPoint Q = privateKey.parameters.G * privateKey.d;
   return new ECPublicKey(Q, privateKey.parameters);
+}
+
+class KeyPair {
+  KeyPair(this.publicKey, this.privateKey);
+
+  ECPublicKey publicKey;
+  ECPrivateKey privateKey;
+
+  static KeyPair readFromPrivateKeySync(String path) {
+    ECPrivateKey privateKey = _readPrivateKeySync(path);
+    if (privateKey == null)
+      return null;
+
+    ECPublicKey publicKey = _publicKeyFromPrivateKey(privateKey);
+    return new KeyPair(publicKey, privateKey);
+  }
 }
