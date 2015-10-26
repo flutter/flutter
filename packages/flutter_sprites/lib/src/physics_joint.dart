@@ -82,8 +82,14 @@ class PhysicsJointRevolute extends PhysicsJoint {
       this.upperAngle: 0.0,
       this.enableLimit: false,
       PhysicsJointBreakCallback breakCallback,
-      double breakingForce
+      double breakingForce,
+      bool enableMotor: false,
+      double motorSpeed: 0.0,
+      double maxMotorTorque: 0.0
     }) : super(bodyA, bodyB, breakingForce, breakCallback) {
+    _enableMotor = enableMotor;
+    _motorSpeed = motorSpeed;
+    _maxMotorTorque = maxMotorTorque;
     _completeCreation();
   }
 
@@ -91,6 +97,42 @@ class PhysicsJointRevolute extends PhysicsJoint {
   final double lowerAngle;
   final double upperAngle;
   final bool enableLimit;
+
+  bool _enableMotor;
+
+  bool get enableMotor => _enableMotor;
+
+  set enableMotor(bool enableMotor) {
+    _enableMotor = enableMotor;
+    if (_joint != null) {
+      box2d.RevoluteJoint revoluteJoint = _joint;
+      revoluteJoint.enableMotor(enableMotor);
+    }
+  }
+
+  double _motorSpeed;
+
+  double get motorSpeed => _motorSpeed;
+
+  set motorSpeed(double motorSpeed) {
+    _motorSpeed = motorSpeed;
+    if (_joint != null) {
+      box2d.RevoluteJoint revoluteJoint = _joint;
+      revoluteJoint.setMotorSpeed(radians(motorSpeed));
+    }
+  }
+
+  double _maxMotorTorque;
+
+  double get maxMotorTorque => _maxMotorTorque;
+
+  set maxMotorTorque(double maxMotorTorque) {
+    _maxMotorTorque = maxMotorTorque;
+    if (_joint != null) {
+      box2d.RevoluteJoint revoluteJoint = _joint;
+      revoluteJoint.setMaxMotorTorque(maxMotorTorque);
+    }
+  }
 
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     // Create Joint Definition
@@ -105,6 +147,10 @@ class PhysicsJointRevolute extends PhysicsJoint {
     b2Def.lowerAngle = lowerAngle;
     b2Def.upperAngle = upperAngle;
 
+    b2Def.enableMotor = _enableMotor;
+    b2Def.motorSpeed = _motorSpeed;
+    b2Def.maxMotorTorque = _maxMotorTorque;
+
     // Create joint
     return physicsNode.b2World.createJoint(b2Def);
   }
@@ -116,17 +162,63 @@ class PhysicsJointPrismatic extends PhysicsJoint {
     PhysicsBody bodyB,
     this.axis, {
       double breakingForce,
-      PhysicsJointBreakCallback breakCallback
+      PhysicsJointBreakCallback breakCallback,
+      bool enableMotor: false,
+      double motorSpeed: 0.0,
+      double maxMotorForce: 0.0
     }
   ) : super(bodyA, bodyB, breakingForce, breakCallback) {
+    _enableMotor = enableMotor;
+    _motorSpeed = motorSpeed;
+    _maxMotorForce = maxMotorForce;
     _completeCreation();
   }
 
-  Offset axis;
+  final Offset axis;
+
+  bool _enableMotor;
+
+  bool get enableMotor => _enableMotor;
+
+  set enableMotor(bool enableMotor) {
+    _enableMotor = enableMotor;
+    if (_joint != null) {
+      box2d.PrismaticJoint prismaticJoint = _joint;
+      prismaticJoint.enableMotor(enableMotor);
+    }
+  }
+
+  double _motorSpeed;
+
+  double get motorSpeed => _motorSpeed;
+
+  set motorSpeed(double motorSpeed) {
+    _motorSpeed = motorSpeed;
+    if (_joint != null) {
+      box2d.PrismaticJoint prismaticJoint = _joint;
+      prismaticJoint.setMotorSpeed(motorSpeed / _physicsNode.b2WorldToNodeConversionFactor);
+    }
+  }
+
+  double _maxMotorForce;
+
+  double get maxMotorForce => _maxMotorForce;
+
+  set maxMotorForce(double maxMotorForce) {
+    _maxMotorForce = maxMotorForce;
+    if (_joint != null) {
+      box2d.PrismaticJoint prismaticJoint = _joint;
+      prismaticJoint.setMaxMotorForce(maxMotorForce / _physicsNode.b2WorldToNodeConversionFactor);
+    }
+  }
 
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.PrismaticJointDef b2Def = new box2d.PrismaticJointDef();
     b2Def.initialize(bodyA._body, bodyB._body, bodyA._body.position, new Vector2(axis.dx, axis.dy));
+    b2Def.enableMotor = _enableMotor;
+    b2Def.motorSpeed = _motorSpeed;
+    b2Def.maxMotorForce = _maxMotorForce;
+
     return physicsNode.b2World.createJoint(b2Def);
   }
 }
