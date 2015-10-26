@@ -77,7 +77,7 @@ class TapGesture extends TapTracker {
     entry = GestureArena.instance.add(event.pointer, gestureRecognizer);
     _wonArena = false;
     _didTap = false;
-    startTimer(() => cancel());
+    startTimer(cancel);
     startTrackingPointer(gestureRecognizer.router, handleEvent);
   }
 

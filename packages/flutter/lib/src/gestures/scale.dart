@@ -133,8 +133,4 @@ class ScaleGestureRecognizer extends GestureRecognizer {
     }
     _state = ScaleState.ready;
   }
-
-  void dispose() {
-    super.dispose();
-  }
 }
