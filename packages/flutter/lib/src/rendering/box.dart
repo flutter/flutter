@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -620,11 +621,28 @@ abstract class RenderBox extends RenderObject {
   /// The returned paint bounds are in the local coordinate system of this box.
   Rect get paintBounds => Point.origin & size;
 
+  int _debugActivePointers = 0;
+  void handleEvent(InputEvent event, HitTestEntry entry) {
+    super.handleEvent(event, entry);
+    assert(() {
+      if (debugPaintPointersEnabled) {
+        if (event.type == 'pointerdown')
+          _debugActivePointers += 1;
+        if (event.type == 'pointerup' || event.type == 'pointercancel')
+          _debugActivePointers -= 1;
+        markNeedsPaint();
+      }
+      return true;
+    });
+  }
+
   void debugPaint(PaintingContext context, Offset offset) {
     if (debugPaintSizeEnabled)
       debugPaintSize(context, offset);
     if (debugPaintBaselinesEnabled)
       debugPaintBaselines(context, offset);
+    if (debugPaintPointersEnabled)
+      debugPaintPointers(context, offset);
   }
   void debugPaintSize(PaintingContext context, Offset offset) {
     Paint paint = new Paint()
@@ -655,6 +673,13 @@ abstract class RenderBox extends RenderObject {
       path.moveTo(offset.dx, offset.dy + baselineA);
       path.lineTo(offset.dx + size.width, offset.dy + baselineA);
       context.canvas.drawPath(path, paint);
+    }
+  }
+  void debugPaintPointers(PaintingContext context, Offset offset) {
+    if (_debugActivePointers > 0) {
+      Paint paint = new Paint()
+       ..color = new Color(debugPaintPointersColorValue | ((0x04000000 * depth) & 0xFF000000));
+      context.canvas.drawRect(offset & size, paint);
     }
   }
 
