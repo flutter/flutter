@@ -9,8 +9,6 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-export 'package:flutter/rendering.dart' show ValueChanged;
-
 const double _kMidpoint = 0.5;
 const Color _kLightUncheckedColor = const Color(0x8A000000);
 const Color _kDarkUncheckedColor = const Color(0xB2FFFFFF);

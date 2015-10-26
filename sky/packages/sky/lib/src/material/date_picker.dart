@@ -4,17 +4,15 @@
 
 import 'dart:async';
 
-import 'package:intl/date_symbols.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/date_symbols.dart';
+import 'package:intl/intl.dart';
 
 import 'colors.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 import 'typography.dart';
-
-typedef void DatePickerValueChanged(DateTime dateTime);
 
 enum DatePickerMode { day, year }
 
@@ -33,7 +31,7 @@ class DatePicker extends StatefulComponent {
   }
 
   final DateTime selectedDate;
-  final DatePickerValueChanged onChanged;
+  final ValueChanged<DateTime> onChanged;
   final DateTime firstDate;
   final DateTime lastDate;
 
@@ -176,7 +174,7 @@ class DayPicker extends StatelessComponent {
 
   final DateTime selectedDate;
   final DateTime currentDate;
-  final DatePickerValueChanged onChanged;
+  final ValueChanged<DateTime> onChanged;
   final DateTime displayedMonth;
 
   Widget build(BuildContext context) {
@@ -282,7 +280,7 @@ class MonthPicker extends ScrollableWidgetList {
   }
 
   final DateTime selectedDate;
-  final DatePickerValueChanged onChanged;
+  final ValueChanged<DateTime> onChanged;
   final DateTime firstDate;
   final DateTime lastDate;
 
@@ -355,7 +353,7 @@ class YearPicker extends ScrollableWidgetList {
   }
 
   final DateTime selectedDate;
-  final DatePickerValueChanged onChanged;
+  final ValueChanged<DateTime> onChanged;
   final DateTime firstDate;
   final DateTime lastDate;
 
