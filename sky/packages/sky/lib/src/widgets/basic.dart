@@ -857,13 +857,9 @@ class Text extends StatelessComponent {
 
   Widget build(BuildContext context) {
     TextSpan text = new PlainTextSpan(data);
-    TextStyle defaultStyle = DefaultTextStyle.of(context);
     TextStyle combinedStyle;
-    if (defaultStyle != null) {
-      if (style != null)
-        combinedStyle = defaultStyle.merge(style);
-      else
-        combinedStyle = defaultStyle;
+    if (style == null || style.inherit) {
+      combinedStyle = DefaultTextStyle.of(context)?.merge(style) ?? style;
     } else {
       combinedStyle = style;
     }
