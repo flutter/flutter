@@ -29,7 +29,6 @@
 #include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
 #include "sky/engine/platform/text/TextStream.h"
 #include "sky/engine/wtf/Uint8ClampedArray.h"
-#include "third_party/skia/include/effects/SkBitmapSource.h"
 #include "third_party/skia/include/effects/SkDisplacementMapEffect.h"
 
 namespace blink {

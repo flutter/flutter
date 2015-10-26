@@ -863,7 +863,7 @@ void GraphicsContext::drawPicture(PassRefPtr<SkPicture> picture, const FloatRect
     ctm.mapRect(&deviceDest, dest);
     SkRect sourceBounds = WebCoreFloatRectToSKRect(src);
 
-    RefPtr<SkPictureImageFilter> pictureFilter = adoptRef(SkPictureImageFilter::Create(picture.get(), sourceBounds));
+    RefPtr<SkImageFilter> pictureFilter = adoptRef(SkPictureImageFilter::Create(picture.get(), sourceBounds));
     SkMatrix layerScale;
     layerScale.setScale(deviceDest.width() / src.width(), deviceDest.height() / src.height());
     RefPtr<SkImageFilter> matrixFilter = adoptRef(SkImageFilter::CreateMatrixFilter(layerScale, kLow_SkFilterQuality, pictureFilter.get()));

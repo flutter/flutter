@@ -394,8 +394,6 @@ source_set("platform") {
     "graphics/filters/SourceGraphic.h",
     "graphics/filters/SpotLightSource.cpp",
     "graphics/filters/SpotLightSource.h",
-    "graphics/skia/GaneshUtils.cpp",
-    "graphics/skia/GaneshUtils.h",
     "graphics/skia/NativeImageSkia.cpp",
     "graphics/skia/NativeImageSkia.h",
     "graphics/skia/SkSizeHash.h",
