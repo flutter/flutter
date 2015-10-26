@@ -92,10 +92,12 @@ class _UiEventConverter {
         break;
     }
 
+    int pointer = (state == null) ? event.pointer : state.pointer;
+
     return new PointerInputEvent(
        type: event.type,
        timeStamp: event.timeStamp,
-       pointer: state.pointer,
+       pointer: pointer,
        kind: event.kind,
        x: event.x,
        y: event.y,
