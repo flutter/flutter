@@ -357,10 +357,6 @@ component("skia") {
     "//third_party/skia/src/utils/SkSHA1.h",
     "//third_party/skia/src/utils/SkTFitsIn.h",
 
-    # We don't currently need to change thread affinity, so leave out this complexity for now.
-    "//third_party/skia/src/utils/SkThreadUtils_pthread_linux.cpp",
-    "//third_party/skia/src/utils/SkThreadUtils_pthread_mach.cpp",
-
     #testing
     "//third_party/skia/src/fonts/SkGScalerContext.cpp",
     "//third_party/skia/src/fonts/SkGScalerContext.h",
