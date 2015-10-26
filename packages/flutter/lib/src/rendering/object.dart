@@ -1014,7 +1014,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisPaint = true;
       debugLastActivePaint = _debugActivePaint;
       _debugActivePaint = this;
-      debugPaint(context, offset);
       if (debugPaintBoundsEnabled) {
         context.canvas.save();
         context.canvas.clipRect(paintBounds.shift(offset));
@@ -1031,6 +1030,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugReportException('paint', e, stack);
     }
     assert(() {
+      debugPaint(context, offset);
       if (debugPaintBoundsEnabled)
         context.canvas.restore();
       _debugActivePaint = debugLastActivePaint;
@@ -1082,8 +1082,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // EVENTS
 
   /// Override this function to handle events that hit this render object
-  void handleEvent(InputEvent event, HitTestEntry entry) {
-  }
+  void handleEvent(InputEvent event, HitTestEntry entry) { }
 
 
   // HIT TESTING
