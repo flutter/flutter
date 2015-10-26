@@ -272,8 +272,10 @@ abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
-  const MultiChildRenderObjectWidget({ Key key, this.children })
-    : super(key: key);
+  MultiChildRenderObjectWidget({ Key key, this.children })
+    : super(key: key) {
+    assert(!children.any((Widget child) => child == null));
+  }
 
   final List<Widget> children;
 
