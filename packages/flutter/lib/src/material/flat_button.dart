@@ -12,11 +12,9 @@ class FlatButton extends MaterialButton {
   FlatButton({
     Key key,
     Widget child,
-    bool enabled: true,
     GestureTapCallback onPressed
   }) : super(key: key,
              child: child,
-             enabled: enabled,
              onPressed: onPressed);
 
   _FlatButtonState createState() => new _FlatButtonState();

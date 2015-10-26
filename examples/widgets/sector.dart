@@ -73,7 +73,6 @@ class SectorAppState extends State<SectorApp> {
           padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
           child: new Row(<Widget>[
               new RaisedButton(
-                enabled: _enabledAdd,
                 child: new IntrinsicWidth(
                   child: new Row(<Widget>[
                     new Container(
@@ -84,10 +83,9 @@ class SectorAppState extends State<SectorApp> {
                     new Text('ADD SECTOR'),
                   ])
                 ),
-                onPressed: addSector
+                onPressed: _enabledAdd ? addSector : null
               ),
               new RaisedButton(
-                enabled: _enabledRemove,
                 child: new IntrinsicWidth(
                   child: new Row(<Widget>[
                     new Container(
@@ -98,7 +96,7 @@ class SectorAppState extends State<SectorApp> {
                     new Text('REMOVE SECTOR'),
                   ])
                 ),
-                onPressed: removeSector
+                onPressed: _enabledRemove ? removeSector : null
               )
             ],
             justifyContent: FlexJustifyContent.spaceAround
