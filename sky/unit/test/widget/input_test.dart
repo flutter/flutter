@@ -101,4 +101,38 @@ void main() {
       checkCursorToggle();
     });
   });
+
+  test('Selection remains valid', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey inputKey = new GlobalKey();
+      String inputValue;
+
+      Widget builder() {
+        return new Center(
+          child: new Input(
+            key: inputKey,
+            placeholder: 'Placeholder'
+          )
+        );
+      }
+
+      tester.pumpWidget(builder());
+
+      const String testValue = 'ABC';
+      mockKeyboard.client.commitText(testValue, testValue.length);
+      InputState input = tester.findStateOfType(InputState);
+
+      // Delete characters and verify that the selection follows the length
+      // of the text.
+      for (int i = 0; i < testValue.length; i++) {
+        mockKeyboard.client.deleteSurroundingText(1, 0);
+        expect(input.editableValue.selection.start, equals(testValue.length - i - 1));
+      }
+
+      // Delete a characters when the text is empty.  The selection should
+      // remain at zero.
+      mockKeyboard.client.deleteSurroundingText(1, 0);
+      expect(input.editableValue.selection.start, equals(0));
+    });
+  });
 }
