@@ -7,16 +7,16 @@ class _PhysicsCollisionGroups {
     getBitmaskForKeys(["Default"]);
   }
 
-  Map<Object,int> keyLookup = {};
+  Map<Object,int> keyLookup = <Object,int>{};
 
   List<Object> getKeysForBitmask(int bitmask) {
     List<Object> keys = [];
-    keyLookup.forEach((key, value) {
-      if (value & bitmask) {
+    keyLookup.forEach((Object key, int value) {
+      if (value & bitmask != null) {
         keys.add(key);
       }
     });
-    return key;
+    return keys;
   }
 
   int getBitmaskForKeys(List<Object> keys) {
