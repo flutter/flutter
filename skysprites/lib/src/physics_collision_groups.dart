@@ -16,7 +16,7 @@ class _PhysicsCollisionGroups {
         keys.add(key);
       }
     });
-    return key;
+    return keys;
   }
 
   int getBitmaskForKeys(List<Object> keys) {
