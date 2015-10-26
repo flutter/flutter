@@ -30,6 +30,12 @@ ui.Color debugPaintLayerBordersColor = const ui.Color(0xFFFF9800);
 /// Causes RenderObjects to paint warnings when painting outside their bounds.
 bool debugPaintBoundsEnabled = false;
 
+/// Causes RenderBox objects to flash while they are being tapped
+bool debugPaintPointersEnabled = false;
+
+/// The color to use when reporting pointers.
+int debugPaintPointersColorValue = 0x00BBBB;
+
 /// The color to use when painting RenderError boxes in checked mode.
 ui.Color debugErrorBoxColor = const ui.Color(0xFFFF0000);
 
