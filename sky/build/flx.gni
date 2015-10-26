@@ -48,9 +48,13 @@ template("flx") {
       ]
     }
 
-    deps = [
-      "//sky/tools/sky_snapshot($host_toolchain)",
-    ]
+    deps = []
+
+    if (!is_ios) {
+      # sky_snapshot is used to create a script snapshot. iOS builds use
+      # a precompiled snapshot. So this dependency is redundant.
+      deps += [ "//sky/tools/sky_snapshot($host_toolchain)" ]
+    }
 
     if (defined(invoker.deps)) {
       deps += invoker.deps
