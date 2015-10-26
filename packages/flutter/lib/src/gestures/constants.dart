@@ -6,7 +6,7 @@
 // https://github.com/android/platform_frameworks_base/blob/master/core/java/android/view/ViewConfiguration.java
 
 const Duration kLongPressTimeout = const Duration(milliseconds: 500);
-const Duration kTapTimeout = const Duration(milliseconds: 100);
+const Duration kPressTimeout = const Duration(milliseconds: 100);
 const Duration kJumpTapTimeout = const Duration(milliseconds: 500);
 const Duration kDoubleTapTimeout = const Duration(milliseconds: 300);
 const Duration kDoubleTapMinTime = const Duration(milliseconds: 40);

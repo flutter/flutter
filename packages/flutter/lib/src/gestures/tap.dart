@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'arena.dart';
@@ -13,9 +12,56 @@ import 'recognizer.dart';
 
 typedef void GestureTapCallback();
 
-enum TapResolution {
-  tap,
-  cancel
+/// TapGestureRecognizer is a tap recognizer that tracks only one primary
+/// pointer per gesture. That is, during tap recognition, extra pointer events
+/// are ignored: down-1, down-2, up-1, up-2 produces only one tap on up-1.
+class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
+  TapGestureRecognizer({ PointerRouter router, this.onTap })
+    : super(router: router);
+
+  GestureTapCallback onTap;
+  GestureTapCallback onTapDown;
+  GestureTapCallback onTapCancel;
+
+  bool _wonArena = false;
+  bool _didTap = false;
+
+  void handlePrimaryPointer(PointerInputEvent event) {
+    if (event.type == 'pointerdown') {
+      if (onTapDown != null)
+        onTapDown();
+    } else if (event.type == 'pointerup') {
+      _didTap = true;
+      _check();
+    }
+  }
+
+  void acceptGesture(int pointer) {
+    super.acceptGesture(pointer);
+    if (pointer == primaryPointer) {
+      _wonArena = true;
+      _check();
+    }
+  }
+
+  void rejectGesture(int pointer) {
+    super.rejectGesture(pointer);
+    if (pointer == primaryPointer) {
+      assert(state == GestureRecognizerState.defunct);
+      _wonArena = false;
+      _didTap = false;
+      if (onTapCancel != null)
+        onTapCancel();
+    }
+  }
+
+  void _check() {
+    if (_wonArena && _didTap) {
+      resolve(GestureDisposition.accepted);
+      if (onTap != null)
+        onTap();
+    }
+  }
 }
 
 /// TapTracker helps track individual tap sequences as part of a
@@ -33,18 +79,6 @@ class TapTracker {
   GestureArenaEntry entry;
   ui.Point _initialPosition;
   bool _isTrackingPointer;
-  Timer _timer;
-
-  void startTimer(void callback()) {
-    _timer ??= new Timer(kTapTimeout, callback);
-  }
-
-  void stopTimer() {
-    if (_timer != null) {
-      _timer.cancel();
-      _timer = null;
-    }
-  }
 
   void startTrackingPointer(PointerRouter router, PointerRoute route) {
     if (!_isTrackingPointer) {
@@ -67,6 +101,11 @@ class TapTracker {
 
 }
 
+enum TapResolution {
+  tap,
+  cancel
+}
+
 /// TapGesture represents a full gesture resulting from a single tap
 /// sequence. Tap gestures are passive, meaning that they will not
 /// pre-empt any other arena member in play.
@@ -77,11 +116,10 @@ class TapGesture extends TapTracker {
     entry = GestureArena.instance.add(event.pointer, gestureRecognizer);
     _wonArena = false;
     _didTap = false;
-    startTimer(cancel);
     startTrackingPointer(gestureRecognizer.router, handleEvent);
   }
 
-  TapGestureRecognizer gestureRecognizer;
+  MultiTapGestureRecognizer gestureRecognizer;
 
   bool _wonArena;
   bool _didTap;
@@ -93,7 +131,6 @@ class TapGesture extends TapTracker {
     } else if (event.type == 'pointercancel') {
       cancel();
     } else if (event.type == 'pointerup') {
-      stopTimer();
       stopTrackingPointer(gestureRecognizer.router, handleEvent);
       _didTap = true;
       _check();
@@ -106,7 +143,6 @@ class TapGesture extends TapTracker {
   }
 
   void reject() {
-    stopTimer();
     stopTrackingPointer(gestureRecognizer.router, handleEvent);
     gestureRecognizer._resolveTap(pointer, TapResolution.cancel);
   }
@@ -127,8 +163,12 @@ class TapGesture extends TapTracker {
 
 }
 
-class TapGestureRecognizer extends DisposableArenaMember {
-  TapGestureRecognizer({ this.router, this.onTap, this.onTapDown, this.onTapCancel });
+/// MultiTapGestureRecognizer is a tap recognizer that treats taps
+/// independently. That is, each pointer sequence that could resolve to a tap
+/// does so independently of others: down-1, down-2, up-1, up-2 produces two
+/// taps, on up-1 and up-2.
+class MultiTapGestureRecognizer extends DisposableArenaMember {
+  MultiTapGestureRecognizer({ this.router, this.onTap, this.onTapDown, this.onTapCancel });
 
   PointerRouter router;
   GestureTapCallback onTap;
