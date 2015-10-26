@@ -59,8 +59,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
   bool highlight = false;
 
   int get level;
-
-  Color getColor(BuildContext context);
+  Color getColor(BuildContext context, { bool highlight });
   ThemeBrightness getColorBrightness(BuildContext context);
 
   Color getTextColor(BuildContext context) {
@@ -106,11 +105,12 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
       child: new Material(
         type: MaterialType.button,
         level: level,
-        color: getColor(context),
         textStyle: Theme.of(context).text.button.copyWith(color: getTextColor(context)),
         child: new InkWell(
           onTap: config.enabled ? config.onPressed : null,
-          onHighlightChanged: config.enabled ? _handleHighlightChanged : null,
+          defaultColor: getColor(context, highlight: false),
+          highlightColor: getColor(context, highlight: true),
+          onHighlightChanged: _handleHighlightChanged,
           child: contents
         )
       )
