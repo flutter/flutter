@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 
 class CardModel {
   CardModel(this.value, this.height) {
@@ -36,6 +37,8 @@ class CardCollectionState extends State<CardCollection> {
   Map<int, Color> _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
+  TextStyle _textStyle = new TextStyle(textAlign: TextAlign.center);
+  bool _editable = true;
   bool _snapToCenter = false;
   bool _fixedSizeCards = false;
   bool _sunshine = false;
@@ -120,6 +123,7 @@ class CardCollectionState extends State<CardCollection> {
         data: const IconThemeData(color: IconThemeColor.black),
         child: new Block(<Widget>[
           new DrawerHeader(child: new Text('Options')),
+          buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
           buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
           buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
           buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
@@ -132,6 +136,16 @@ class CardCollectionState extends State<CardCollection> {
           buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: 'action/code'),
           buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.left, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_back'),
           buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.right, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_forward'),
+          new DrawerDivider(),
+          buildFontRadioItem("Left-align text", new TextStyle(textAlign: TextAlign.left), _textStyle, _changeTextStyle, icon: 'editor/format_align_left', enabled: !_editable),
+          buildFontRadioItem("Center-align text", new TextStyle(textAlign: TextAlign.center), _textStyle, _changeTextStyle, icon: 'editor/format_align_center', enabled: !_editable),
+          buildFontRadioItem("Right-align text", new TextStyle(textAlign: TextAlign.right), _textStyle, _changeTextStyle, icon: 'editor/format_align_right', enabled: !_editable),
+          new DrawerDivider(),
+          new DrawerItem(
+            icon: 'device/dvr',
+            onPressed: () { debugDumpApp(); debugDumpRenderTree(); },
+            child: new Text('Dump App to Console')
+          ),
         ])
       )
     );
@@ -140,6 +154,12 @@ class CardCollectionState extends State<CardCollection> {
   String _dismissDirectionText(DismissDirection direction) {
     String s = direction.toString();
     return "dismiss ${s.substring(s.indexOf('.') + 1)}";
+  }
+
+  void _toggleEditable() {
+    setState(() {
+      _editable = !_editable;
+    });
   }
 
   void _toggleFixedSizeCards() {
@@ -171,7 +191,12 @@ class CardCollectionState extends State<CardCollection> {
     setState(() {
       _dismissDirection = newDismissDirection;
     });
-    Navigator.of(context).pop();
+  }
+
+  void _changeTextStyle(TextStyle newTextStyle) {
+    setState(() {
+      _textStyle = newTextStyle;
+    });
   }
 
   Widget buildDrawerCheckbox(String label, bool value, void callback()) {
@@ -184,30 +209,48 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { String icon }) {
+  Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { String icon, bool enabled: true }) {
     return new DrawerItem(
       icon: icon,
-      onPressed: () { onChanged(itemValue); },
+      onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(<Widget>[
         new Flexible(child: new Text(label)),
         new Radio<Map<int, Color>>(
           value: itemValue,
           groupValue: currentValue,
+          enabled: enabled,
           onChanged: onChanged
         )
       ])
     );
   }
 
-  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { String icon }) {
+  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { String icon, bool enabled: true }) {
     return new DrawerItem(
       icon: icon,
-      onPressed: () { onChanged(itemValue); },
+      onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(<Widget>[
         new Flexible(child: new Text(label)),
         new Radio<DismissDirection>(
           value: itemValue,
           groupValue: currentValue,
+          enabled: enabled,
+          onChanged: onChanged
+        )
+      ])
+    );
+  }
+
+  Widget buildFontRadioItem(String label, TextStyle itemValue, TextStyle currentValue, ValueChanged<TextStyle> onChanged, { String icon, bool enabled: true }) {
+    return new DrawerItem(
+      icon: icon,
+      onPressed: enabled ? () { onChanged(itemValue); } : null,
+      child: new Row(<Widget>[
+        new Flexible(child: new Text(label)),
+        new Radio<TextStyle>(
+          value: itemValue,
+          groupValue: currentValue,
+          enabled: enabled,
           onChanged: onChanged
         )
       ])
@@ -238,9 +281,8 @@ class CardCollectionState extends State<CardCollection> {
         child: new Container(
           height: cardModel.height,
           padding: const EdgeDims.all(8.0),
-          child: new Center(
-            child: new DefaultTextStyle(
-              style: cardLabelStyle,
+          child: _editable ? 
+            new Center(
               child: new Input(
                 key: new GlobalObjectKey(cardModel),
                 initialValue: cardModel.label,
@@ -249,7 +291,15 @@ class CardCollectionState extends State<CardCollection> {
                 }
               )
             )
-          )
+          : new DefaultTextStyle(
+              style: DefaultTextStyle.of(context).merge(cardLabelStyle).merge(_textStyle),
+              child: new Column(<Widget>[
+                  new Text(cardModel.label)
+                ],
+                alignItems: FlexAlignItems.stretch,
+                justifyContent: FlexJustifyContent.center
+              )
+            )
         )
       )
     );

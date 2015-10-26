@@ -243,4 +243,27 @@ class _GestureDetectorState extends State<GestureDetector> {
       child: config.child
     );
   }
+
+  void debugFillDescription(List<String> description) {
+    List<String> gestures = <String>[];
+    if (_tap != null)
+      gestures.add('tap');
+    if (_doubleTap != null)
+      gestures.add('double tap');
+    if (_showPress != null)
+      gestures.add('show press');
+    if (_longPress != null)
+      gestures.add('long press');
+    if (_verticalDrag != null)
+      gestures.add('vertical drag');
+    if (_horizontalDrag != null)
+      gestures.add('horizontal drag');
+    if (_pan != null)
+      gestures.add('pan');
+    if (_scale != null)
+      gestures.add('scale');
+    if (gestures.isEmpty);
+      gestures.add('<none>');
+    description.add('gestures: ${gestures.join(", ")}');
+  }
 }

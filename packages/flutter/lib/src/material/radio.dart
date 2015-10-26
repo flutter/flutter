@@ -6,14 +6,13 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
-
-const Color _kLightOffColor = const Color(0x8A000000);
-const Color _kDarkOffColor = const Color(0xB2FFFFFF);
 
 class Radio<T> extends StatelessComponent {
   Radio({
     Key key,
+    this.enabled,
     this.value,
     this.groupValue,
     this.onChanged
@@ -21,15 +20,18 @@ class Radio<T> extends StatelessComponent {
     assert(onChanged != null);
   }
 
+  final bool enabled;
   final T value;
   final T groupValue;
   final ValueChanged<T> onChanged;
 
   Color _getColor(BuildContext context) {
     ThemeData themeData = Theme.of(context);
+    if (!enabled)
+      return themeData.brightness == ThemeBrightness.light ? Colors.black26 : Colors.white30;
     if (value == groupValue)
       return themeData.accentColor;
-    return themeData.brightness == ThemeBrightness.light ? _kLightOffColor : _kDarkOffColor;
+    return themeData.brightness == ThemeBrightness.light ? Colors.black54 : Colors.white70;
   }
 
   Widget build(BuildContext context) {
@@ -37,13 +39,15 @@ class Radio<T> extends StatelessComponent {
     const double kOuterRadius = kDiameter / 2;
     const double kInnerRadius = 5.0;
     return new GestureDetector(
-      onTap: () => onChanged(value),
+      onTap: enabled ? () => onChanged(value) : null,
       child: new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
         width: kDiameter,
         height: kDiameter,
         child: new CustomPaint(
           onPaint: (Canvas canvas, Size size) {
+
+            // TODO(ianh): ink radial reaction
 
             // Draw the outer circle
             Paint paint = new Paint()
