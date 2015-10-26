@@ -175,7 +175,8 @@ class StockHomeState extends State<StockHome> {
   int selectedTabIndex = 0;
 
   Iterable<Stock> _getStockList(Iterable<String> symbols) {
-    return symbols.map((String symbol) => config.stocks[symbol]);
+    return symbols.map((String symbol) => config.stocks[symbol])
+        .where((Stock stock) => stock != null);
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
