@@ -12,7 +12,7 @@ typedef void GestureLongPressCallback();
 
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   LongPressGestureRecognizer({ PointerRouter router, this.onLongPress })
-    : super(router: router, deadline: kTapTimeout + kLongPressTimeout);
+    : super(router: router, deadline: kLongPressTimeout);
 
   GestureLongPressCallback onLongPress;
 
