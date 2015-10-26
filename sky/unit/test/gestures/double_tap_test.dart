@@ -223,7 +223,7 @@ void main() {
     tap.dispose();
   });
 
-  test('Intra-tap delay cancels double tap', () {
+  test('Intra-tap delay does not cancel double tap', () {
     PointerRouter router = new PointerRouter();
     DoubleTapGestureRecognizer tap = new DoubleTapGestureRecognizer(router: router);
 
@@ -252,9 +252,9 @@ void main() {
       expect(doubleTapRecognized, isFalse);
 
       router.route(up2);
-      expect(doubleTapRecognized, isFalse);
+      expect(doubleTapRecognized, isTrue);
       GestureArena.instance.sweep(2);
-      expect(doubleTapRecognized, isFalse);
+      expect(doubleTapRecognized, isTrue);
     });
 
     tap.dispose();

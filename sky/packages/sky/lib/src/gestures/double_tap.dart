@@ -52,7 +52,6 @@ class DoubleTapGestureRecognizer extends DisposableArenaMember {
       entry: GestureArena.instance.add(event.pointer, this)
     );
     _trackers[event.pointer] = tracker;
-    tracker.startTimer(() => _reject(tracker));
     tracker.startTrackingPointer(router, handleEvent);
   }
 
@@ -145,7 +144,6 @@ class DoubleTapGestureRecognizer extends DisposableArenaMember {
   }
 
   void _freezeTracker(TapTracker tracker) {
-    tracker.stopTimer();
     tracker.stopTrackingPointer(router, handleEvent);
   }
 

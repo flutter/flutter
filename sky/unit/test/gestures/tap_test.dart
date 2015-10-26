@@ -84,7 +84,7 @@ void main() {
     tap.dispose();
   });
 
-  test('Should recognize two overlapping taps', () {
+  test('Should not recognize two overlapping taps', () {
     PointerRouter router = new PointerRouter();
     TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
 
@@ -112,9 +112,9 @@ void main() {
     expect(tapsRecognized, 1);
 
     router.route(up2);
-    expect(tapsRecognized, 2);
+    expect(tapsRecognized, 1);
     GestureArena.instance.sweep(2);
-    expect(tapsRecognized, 2);
+    expect(tapsRecognized, 1);
 
     tap.dispose();
   });
@@ -144,7 +144,7 @@ void main() {
     tap.dispose();
   });
 
-  test('Timeout cancels tap', () {
+  test('Timeout does not cancel tap', () {
     PointerRouter router = new PointerRouter();
     TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
 
@@ -163,9 +163,9 @@ void main() {
       async.elapse(new Duration(milliseconds: 500));
       expect(tapRecognized, isFalse);
       router.route(up1);
-      expect(tapRecognized, isFalse);
+      expect(tapRecognized, isTrue);
       GestureArena.instance.sweep(1);
-      expect(tapRecognized, isFalse);
+      expect(tapRecognized, isTrue);
     });
 
     tap.dispose();
