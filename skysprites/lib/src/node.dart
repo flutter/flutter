@@ -24,6 +24,7 @@ class Node {
   double _rotation = 0.0;
 
   Matrix4 _transformMatrix = new Matrix4.identity();
+  Matrix4 _transformMatrixInverse;
   Matrix4 _transformMatrixNodeToBox;
   Matrix4 _transformMatrixBoxToNode;
 
@@ -246,9 +247,7 @@ class Node {
       return position;
     } else if (physicsParent is PhysicsGroup) {
       // Transform the position
-      Matrix4 inverseTransform = new Matrix4.copy(physicsParent.transformMatrix);
-      inverseTransform.invert();
-      Vector4 parentPos = inverseTransform.transform(new Vector4(position.x, position.y, 0.0, 1.0));
+      Vector4 parentPos = physicsParent._inverseMatrix().transform(new Vector4(position.x, position.y, 0.0, 1.0));
       Point newPos = new Point(parentPos.x, parentPos.y);
       return _positionToPhysics(newPos, physicsParent.parent);
     } else {
@@ -531,6 +530,7 @@ class Node {
   /// changes that affects the matrix.
   void invalidateTransformMatrix() {
     _transformMatrix = null;
+    _transformMatrixInverse = null;
     _invalidateToBoxTransformMatrix();
   }
 
@@ -573,6 +573,14 @@ class Node {
     _transformMatrixBoxToNode.invert();
 
     return _transformMatrixBoxToNode;
+  }
+
+  Matrix4 _inverseMatrix() {
+    if (_transformMatrixInverse == null) {
+      _transformMatrixInverse = new Matrix4.copy(transformMatrix);
+      _transformMatrixInverse.invert();
+    }
+    return _transformMatrixInverse;
   }
 
   /// Converts a point from the coordinate system of the [SpriteBox] to the local coordinate system of the node.
