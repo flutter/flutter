@@ -11,7 +11,7 @@ typedef void GestureShowPressCallback();
 
 class ShowPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ShowPressGestureRecognizer({ PointerRouter router, this.onShowPress })
-    : super(router: router, deadline: kTapTimeout);
+    : super(router: router, deadline: kPressTimeout);
 
   GestureShowPressCallback onShowPress;
 

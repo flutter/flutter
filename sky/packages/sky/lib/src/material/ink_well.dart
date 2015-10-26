@@ -35,8 +35,8 @@ class _InkSplash {
       duration: new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
     )..addListener(_handleRadiusChange);
 
-    // Wait kTapTimeout to avoid creating tiny splashes during scrolls.
-    _startTimer = new Timer(kTapTimeout, _play);
+    // Wait kPressTimeout to avoid creating tiny splashes during scrolls.
+    _startTimer = new Timer(kPressTimeout, _play);
   }
 
   final Point position;
