@@ -28,7 +28,7 @@ class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
 
   int get level => config.enabled ? (highlight ? 2 : 1) : 0;
 
-  Color getColor(BuildContext context) {
+  Color getColor(BuildContext context, { bool highlight }) {
     if (config.enabled) {
       switch (Theme.of(context).brightness) {
         case ThemeBrightness.light:
