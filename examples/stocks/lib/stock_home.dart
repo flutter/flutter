@@ -39,13 +39,9 @@ class StockHomeState extends State<StockHome> {
   void _handleSearchEnd() {
     assert(() {
       final StateRoute currentRoute = config.navigator.currentRoute;
-      assert(currentRoute.owner == this);
+      return currentRoute.owner == this;
     });
     config.navigator.pop();
-    setState(() {
-      _isSearching = false;
-      _searchQuery = null;
-    });
   }
 
   void _handleSearchQueryChanged(String query) {
