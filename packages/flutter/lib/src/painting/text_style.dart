@@ -24,6 +24,7 @@ const lineThrough = const <TextDecoration>[TextDecoration.lineThrough];
 /// An immutable style in which paint text
 class TextStyle {
   const TextStyle({
+    this.inherit: true,
     this.color,
     this.fontFamily,
     this.fontSize,
@@ -36,6 +37,9 @@ class TextStyle {
     this.decorationColor,
     this.decorationStyle
   });
+
+  /// Whether null values are replaced with their value in an ancestor text style.
+  final bool inherit;
 
   /// The color to use when painting the text
   final Color color;
@@ -87,6 +91,7 @@ class TextStyle {
     TextDecorationStyle decorationStyle
   }) {
     return new TextStyle(
+      inherit: inherit,
       color: color != null ? color : this.color,
       fontFamily: fontFamily != null ? fontFamily : this.fontFamily,
       fontSize: fontSize != null ? fontSize : this.fontSize,
@@ -102,8 +107,12 @@ class TextStyle {
   }
 
   /// Returns a new text style that matches this text style but with some values
-  /// replaced by the non-null parameters of the given text style
+  /// replaced by the non-null parameters of the given text style. If the given
+  /// text style is null, simply returns this text style.
   TextStyle merge(TextStyle other) {
+    if (other == null)
+      return this;
+    assert(other.inherit);
     return copyWith(
       color: other.color,
       fontFamily: other.fontFamily,
@@ -146,7 +155,8 @@ class TextStyle {
     if (other is! TextStyle)
       return false;
     final TextStyle typedOther = other;
-    return color == typedOther.color &&
+    return inherit == typedOther.inherit &&
+           color == typedOther.color &&
            fontFamily == typedOther.fontFamily &&
            fontSize == typedOther.fontSize &&
            fontWeight == typedOther.fontWeight &&
@@ -161,6 +171,7 @@ class TextStyle {
   int get hashCode {
     // Use Quiver: https://github.com/domokit/mojo/issues/236
     int value = 373;
+    value = 37 * value + inherit.hashCode;
     value = 37 * value + color.hashCode;
     value = 37 * value + fontFamily.hashCode;
     value = 37 * value + fontSize.hashCode;
@@ -176,6 +187,7 @@ class TextStyle {
 
   String toString([String prefix = '']) {
     List<String> result = <String>[];
+    result.add('${prefix}inhert: $inherit');
     if (color != null)
       result.add('${prefix}color: $color');
     if (fontFamily != null)
