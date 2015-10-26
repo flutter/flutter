@@ -3,15 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+export 'package:flutter/rendering.dart' show ValueChanged;
 export 'package:flutter/services.dart' show KeyboardType;
-
-typedef void StringValueChanged(String value);
-typedef void StringValueSubmitted(String value);
 
 // TODO(eseidel): This isn't right, it's 16px on the bottom:
 // http://www.google.com/design/spec/components/text-fields.html#text-fields-single-line-text-field
@@ -34,8 +33,8 @@ class Input extends Scrollable {
   final String initialValue;
   final KeyboardType keyboardType;
   final String placeholder;
-  final StringValueChanged onChanged;
-  final StringValueSubmitted onSubmitted;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
 
   InputState createState() => new InputState();
 }

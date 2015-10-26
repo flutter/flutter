@@ -124,14 +124,14 @@ class CardCollectionState extends State<CardCollection> {
           buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
           buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
           new DrawerDivider(),
-          buildDrawerRadioItem("Deep Purple", Colors.deepPurple, _primaryColor, _selectColor),
-          buildDrawerRadioItem("Green", Colors.green, _primaryColor, _selectColor),
-          buildDrawerRadioItem("Amber", Colors.amber, _primaryColor, _selectColor),
-          buildDrawerRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
+          buildDrawerColorRadioItem("Deep Purple", Colors.deepPurple, _primaryColor, _selectColor),
+          buildDrawerColorRadioItem("Green", Colors.green, _primaryColor, _selectColor),
+          buildDrawerColorRadioItem("Amber", Colors.amber, _primaryColor, _selectColor),
+          buildDrawerColorRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
           new DrawerDivider(),
-          buildDrawerRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: 'action/code'),
-          buildDrawerRadioItem("Dismiss left", DismissDirection.left, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_back'),
-          buildDrawerRadioItem("Dismiss right", DismissDirection.right, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_forward'),
+          buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: 'action/code'),
+          buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.left, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_back'),
+          buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.right, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_forward'),
         ])
       )
     );
@@ -161,7 +161,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  void _selectColor(selection) {
+  void _selectColor(Map<int, Color> selection) {
     setState(() {
       _primaryColor = selection;
     });
@@ -184,13 +184,28 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerRadioItem(String label, itemValue, currentValue, RadioValueChanged onChanged, { String icon }) {
+  Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { String icon }) {
     return new DrawerItem(
       icon: icon,
       onPressed: () { onChanged(itemValue); },
       child: new Row(<Widget>[
         new Flexible(child: new Text(label)),
-        new Radio(
+        new Radio<Map<int, Color>>(
+          value: itemValue,
+          groupValue: currentValue,
+          onChanged: onChanged
+        )
+      ])
+    );
+  }
+
+  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { String icon }) {
+    return new DrawerItem(
+      icon: icon,
+      onPressed: () { onChanged(itemValue); },
+      child: new Row(<Widget>[
+        new Flexible(child: new Text(label)),
+        new Radio<DismissDirection>(
           value: itemValue,
           groupValue: currentValue,
           onChanged: onChanged

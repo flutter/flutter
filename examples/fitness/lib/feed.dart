@@ -243,7 +243,7 @@ class AddItemDialogState extends State<AddItemDialog> {
     for (String routeName in _labels.keys) {
       menuItems.add(new DialogMenuItem(<Widget>[
         new Flexible(child: new Text(_labels[routeName])),
-        new Radio(value: routeName, groupValue: _addItemRoute, onChanged: _handleAddItemRouteChanged),
+        new Radio<String>(value: routeName, groupValue: _addItemRoute, onChanged: _handleAddItemRouteChanged),
       ], onPressed: () => _handleAddItemRouteChanged(routeName)));
     }
     return new Dialog(
