@@ -11,9 +11,7 @@ import 'theme.dart';
 const Color _kLightOffColor = const Color(0x8A000000);
 const Color _kDarkOffColor = const Color(0xB2FFFFFF);
 
-typedef void RadioValueChanged(Object value);
-
-class Radio extends StatelessComponent {
+class Radio<T> extends StatelessComponent {
   Radio({
     Key key,
     this.value,
@@ -23,9 +21,9 @@ class Radio extends StatelessComponent {
     assert(onChanged != null);
   }
 
-  final Object value;
-  final Object groupValue;
-  final RadioValueChanged onChanged;
+  final T value;
+  final T groupValue;
+  final ValueChanged<T> onChanged;
 
   Color _getColor(BuildContext context) {
     ThemeData themeData = Theme.of(context);
@@ -59,6 +57,7 @@ class Radio extends StatelessComponent {
               paint.style = ui.PaintingStyle.fill;
               canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kInnerRadius, paint);
             }
+
           }
         )
       )

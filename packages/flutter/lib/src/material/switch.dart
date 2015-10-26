@@ -13,8 +13,6 @@ import 'radial_reaction.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-export 'package:flutter/rendering.dart' show ValueChanged;
-
 const Color _kThumbOffColor = const Color(0xFFFAFAFA);
 const Color _kTrackOffColor = const Color(0x42000000);
 const double _kSwitchWidth = 35.0;

@@ -123,7 +123,7 @@ class StockHomeState extends State<StockHome> {
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
           child: new Row(<Widget>[
             new Flexible(child: new Text('Optimistic')),
-            new Radio(value: StockMode.optimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
+            new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
           ])
         ),
         new DrawerItem(
@@ -131,7 +131,7 @@ class StockHomeState extends State<StockHome> {
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
           child: new Row(<Widget>[
             new Flexible(child: new Text('Pessimistic')),
-            new Radio(value: StockMode.pessimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
+            new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
           ])
         ),
         new DrawerDivider(),
