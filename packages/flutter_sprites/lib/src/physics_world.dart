@@ -39,6 +39,8 @@ class PhysicsWorld extends Node {
 
   _ContactHandler _contactHandler;
 
+  _PhysicsCollisionGroups _collisionGroups = new _PhysicsCollisionGroups();
+
   List<PhysicsJoint> _joints = <PhysicsJoint>[];
 
   List<box2d.Body> _bodiesScheduledForDestruction = <box2d.Body>[];
