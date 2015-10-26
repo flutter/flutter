@@ -166,21 +166,22 @@ class TextPainter {
   }
 
   /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds
-  double get minContentWidth {
+  double get minIntrinsicWidth {
     assert(!_needsLayout);
     return _applyFloatingPointHack(_paragraph.minIntrinsicWidth);
   }
 
   /// The width at which increasing the width of the text no longer decreases the height
-  double get maxContentWidth {
+  double get maxIntrinsicWidth {
     assert(!_needsLayout);
     return _applyFloatingPointHack(_paragraph.maxIntrinsicWidth);
   }
 
-  /// The height required to paint the text completely within its bounds
-  double get height {
+  Size get size {
     assert(!_needsLayout);
-    return _applyFloatingPointHack(_paragraph.height);
+    double height = _applyFloatingPointHack(_paragraph.height);
+    double width = _applyFloatingPointHack(_paragraph.width);
+    return new Size(width, height);
   }
 
   /// The distance from the top of the text to the first baseline of the given type

@@ -43,7 +43,7 @@ class Label extends Node {
       _painter.minWidth = 0.0;
       _painter.layout();
 
-      _width = _painter.maxContentWidth.ceil().toDouble();
+      _width = _painter.maxIntrinsicWidth.ceil().toDouble();
 
       _painter.maxWidth = _width;
       _painter.minWidth = _width;
