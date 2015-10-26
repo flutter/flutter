@@ -12,18 +12,16 @@ import 'theme.dart';
 class Radio<T> extends StatelessComponent {
   Radio({
     Key key,
-    this.enabled,
     this.value,
     this.groupValue,
     this.onChanged
-  }) : super(key: key) {
-    assert(onChanged != null);
-  }
+  }) : super(key: key);
 
-  final bool enabled;
   final T value;
   final T groupValue;
   final ValueChanged<T> onChanged;
+
+  bool get enabled => onChanged != null;
 
   Color _getColor(BuildContext context) {
     ThemeData themeData = Theme.of(context);
