@@ -7,11 +7,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:cipher/cipher.dart';
-import 'package:cipher/impl/client.dart';
 import 'package:yaml/yaml.dart';
 
-import '../signing.dart';
+import 'package:flx/bundle.dart';
+import 'package:flx/signing.dart';
 import '../toolchain.dart';
 import 'flutter_command.dart';
 
@@ -100,16 +99,6 @@ ArchiveFile _createFile(String key, String assetBase) {
   return new ArchiveFile.noCompress(key, content.length, content);
 }
 
-// Writes a 32-bit length followed by the content of [bytes].
-void _writeBytesWithLength(File outputFile, List<int> bytes) {
-  if (bytes == null)
-    bytes = new Uint8List(0);
-  assert(bytes.length < 0xffffffff);
-  ByteData length = new ByteData(4)..setUint32(0, bytes.length, Endianness.LITTLE_ENDIAN);
-  outputFile.writeAsBytesSync(length.buffer.asUint8List(), mode: FileMode.APPEND);
-  outputFile.writeAsBytesSync(bytes, mode: FileMode.APPEND);
-}
-
 ArchiveFile _createSnapshotFile(String snapshotPath) {
   File file = new File(snapshotPath);
   List<int> content = file.readAsBytesSync();
@@ -139,7 +128,6 @@ class BuildCommand extends FlutterCommand {
 
   @override
   Future<int> run() async {
-    initCipher();
     String compilerPath = argResults['compiler'];
 
     if (compilerPath == null)
@@ -193,16 +181,15 @@ class BuildCommand extends FlutterCommand {
         archive.addFile(file);
     }
 
-    ECPrivateKey privateKey = await loadPrivateKey(privateKeyPath);
-    ECPublicKey publicKey = publicKeyFromPrivateKey(privateKey);
-
-    File outputFile = new File(outputPath);
-    outputFile.writeAsStringSync('#!mojo mojo:sky_viewer\n');
+    KeyPair keyPair = KeyPair.readFromPrivateKeySync(privateKeyPath);
     Uint8List zipBytes = new Uint8List.fromList(new ZipEncoder().encode(archive));
-    Uint8List manifestBytes = serializeManifest(manifestDescriptor, publicKey, zipBytes);
-    _writeBytesWithLength(outputFile, signManifest(manifestBytes, privateKey));
-    _writeBytesWithLength(outputFile, manifestBytes);
-    outputFile.writeAsBytesSync(zipBytes, mode: FileMode.APPEND, flush: true);
+    Bundle bundle = new Bundle.fromContent(
+      path: outputPath,
+      manifest: manifestDescriptor,
+      contentBytes: zipBytes,
+      keyPair: keyPair
+    );
+    bundle.writeSync();
     return 0;
   }
 }
