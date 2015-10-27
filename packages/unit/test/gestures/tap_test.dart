@@ -84,6 +84,40 @@ void main() {
     tap.dispose();
   });
 
+  test('No duplicate tap events', () {
+    PointerRouter router = new PointerRouter();
+    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+
+    int tapsRecognized = 0;
+    tap.onTap = () {
+      tapsRecognized++;
+    };
+
+    tap.addPointer(down1);
+    GestureArena.instance.close(1);
+    expect(tapsRecognized, 0);
+    router.route(down1);
+    expect(tapsRecognized, 0);
+
+    router.route(up1);
+    expect(tapsRecognized, 1);
+    GestureArena.instance.sweep(1);
+    expect(tapsRecognized, 1);
+
+    tap.addPointer(down1);
+    GestureArena.instance.close(1);
+    expect(tapsRecognized, 1);
+    router.route(down1);
+    expect(tapsRecognized, 1);
+
+    router.route(up1);
+    expect(tapsRecognized, 2);
+    GestureArena.instance.sweep(1);
+    expect(tapsRecognized, 2);
+
+    tap.dispose();
+  });
+
   test('Should not recognize two overlapping taps', () {
     PointerRouter router = new PointerRouter();
     TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
