@@ -92,8 +92,8 @@ class StocksAppState extends State<StocksApp> {
       title: 'Stocks',
       theme: theme,
       routes: <String, RouteBuilder>{
-         '/':         (RouteArguments args) => new StockHome(args.navigator, _stocks, _symbols, _optimismSetting, modeUpdater),
-         '/settings': (RouteArguments args) => new StockSettings(args.navigator, _optimismSetting, _backupSetting, settingsUpdater)
+         '/':         (RouteArguments args) => new StockHome(_stocks, _symbols, _optimismSetting, modeUpdater),
+         '/settings': (RouteArguments args) => new StockSettings(_optimismSetting, _backupSetting, settingsUpdater)
       },
       onGenerateRoute: _getRoute
     );

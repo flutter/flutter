@@ -37,19 +37,16 @@ enum DragAnchor {
 class Draggable extends StatefulComponent {
   Draggable({
     Key key,
-    this.navigator,
     this.data,
     this.child,
     this.feedback,
     this.feedbackOffset: Offset.zero,
     this.dragAnchor: DragAnchor.child
   }) : super(key: key) {
-    assert(navigator != null);
     assert(child != null);
     assert(feedback != null);
   }
 
-  final NavigatorState navigator;
   final dynamic data;
   final Widget child;
   final Widget feedback;
@@ -91,12 +88,12 @@ class _DraggableState extends State<Draggable> {
       }
     );
     _route.update(point);
-    config.navigator.push(_route);
+    Navigator.of(context).push(_route);
   }
 
   void _updateDrag(PointerInputEvent event) {
     if (_route != null) {
-      config.navigator.setState(() {
+      Navigator.of(context).setState(() {
         _route.update(new Point(event.x, event.y));
       });
     }
@@ -104,7 +101,7 @@ class _DraggableState extends State<Draggable> {
 
   void _cancelDrag(PointerInputEvent event) {
     if (_route != null) {
-      config.navigator.popRoute(_route, DragEndKind.canceled);
+      Navigator.of(context).popRoute(_route, DragEndKind.canceled);
       assert(_route == null);
     }
   }
@@ -112,7 +109,7 @@ class _DraggableState extends State<Draggable> {
   void _drop(PointerInputEvent event) {
     if (_route != null) {
       _route.update(new Point(event.x, event.y));
-      config.navigator.popRoute(_route, DragEndKind.dropped);
+      Navigator.of(context).popRoute(_route, DragEndKind.dropped);
       assert(_route == null);
     }
   }

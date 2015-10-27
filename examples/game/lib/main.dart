@@ -108,10 +108,10 @@ class GameDemoState extends State<GameDemo> {
                 _sounds,
                 (int lastScore) {
                   setState(() { _lastScore = lastScore; });
-                  args.navigator.pop();
+                  Navigator.of(args.context).pop();
                 }
               );
-              args.navigator.pushNamed('/game');
+              Navigator.of(args.context).pushNamed('/game');
             },
             texture: _spriteSheetUI['btn_play_up.png'],
             textureDown: _spriteSheetUI['btn_play_down.png'],

@@ -10,9 +10,8 @@ typedef void SettingsUpdater({
 });
 
 class SettingsFragment extends StatefulComponent {
-  SettingsFragment({ this.navigator, this.userData, this.updater });
+  SettingsFragment({ this.userData, this.updater });
 
-  final NavigatorState navigator;
   final UserData userData;
   final SettingsUpdater updater;
 
@@ -29,7 +28,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/arrow_back",
-        onPressed: config.navigator.pop
+        onPressed: () => Navigator.of(context).pop()
       ),
       center: new Text('Settings')
     );
@@ -48,7 +47,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
   void _handleGoalWeightChanged(String goalWeight) {
     // TODO(jackson): Looking for null characters to detect enter key is a hack
     if (goalWeight.endsWith("\u{0}")) {
-      config.navigator.pop(double.parse(goalWeight.replaceAll("\u{0}", "")));
+      Navigator.of(context).pop(double.parse(goalWeight.replaceAll("\u{0}", "")));
     } else {
       setState(() {
         try {

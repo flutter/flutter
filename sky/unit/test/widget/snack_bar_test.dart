@@ -16,7 +16,7 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 showSnackBar(
-                  context: args.navigator.context,
+                  context: args.context,
                   placeholderKey: placeholderKey,
                   content: new Text(helloSnackBar)
                 );

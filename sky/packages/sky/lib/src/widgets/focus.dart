@@ -111,8 +111,9 @@ class Focus extends StatefulComponent {
     return true;
   }
 
-  // Don't call moveTo() from your build() function, it's intended to be called
-  // from event listeners, e.g. in response to a finger tap or tab key.
+  // Don't call moveTo() and moveScopeTo() from your build()
+  // functions, it's intended to be called from event listeners, e.g.
+  // in response to a finger tap or tab key.
 
   static void moveTo(BuildContext context, Widget widget) {
     assert(widget != null);
@@ -122,7 +123,7 @@ class Focus extends StatefulComponent {
       focusScope.focusState._setFocusedWidget(widget.key);
   }
 
-  static void _moveScopeTo(BuildContext context, Focus component) {
+  static void moveScopeTo(BuildContext context, Focus component) {
     assert(component != null);
     assert(component.key != null);
     _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
@@ -209,8 +210,6 @@ class FocusState extends State<Focus> {
 
   void initState() {
     super.initState();
-    if (config.autofocus)
-      Focus._moveScopeTo(context, config);
     _updateWidgetRemovalListener(_focusedWidget);
     _updateScopeRemovalListener(_focusedScope);
   }

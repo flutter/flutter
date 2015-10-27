@@ -104,9 +104,8 @@ class MeasurementDateDialogState extends State<MeasurementDateDialog> {
 }
 
 class MeasurementFragment extends StatefulComponent {
-  MeasurementFragment({ this.navigator, this.onCreated });
+  MeasurementFragment({ this.onCreated });
 
-  final NavigatorState navigator;
   final FitnessItemHandler onCreated;
 
   MeasurementFragmentState createState() => new MeasurementFragmentState();
@@ -131,14 +130,14 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
       );
     }
     config.onCreated(new Measurement(when: _when, weight: parsedWeight));
-    config.navigator.pop();
+    Navigator.of(context).pop();
   }
 
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/close",
-        onPressed: config.navigator.pop),
+        onPressed: Navigator.of(context).pop),
       center: new Text('New Measurement'),
       right: <Widget>[
         // TODO(abarth): Should this be a FlatButton?

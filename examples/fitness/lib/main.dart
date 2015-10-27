@@ -135,7 +135,6 @@ class FitnessAppState extends State<FitnessApp> {
       routes: <String, RouteBuilder>{
         '/': (RouteArguments args) {
           return new FeedFragment(
-            navigator: args.navigator,
             userData: _userData,
             onItemCreated: _handleItemCreated,
             onItemDeleted: _handleItemDeleted
@@ -143,19 +142,16 @@ class FitnessAppState extends State<FitnessApp> {
         },
         '/meals/new': (RouteArguments args) {
           return new MealFragment(
-            navigator: args.navigator,
             onCreated: _handleItemCreated
           );
         },
         '/measurements/new': (RouteArguments args) {
           return new MeasurementFragment(
-            navigator: args.navigator,
             onCreated: _handleItemCreated
           );
         },
         '/settings': (RouteArguments args) {
           return new SettingsFragment(
-            navigator: args.navigator,
             userData: _userData,
             updater: settingsUpdater
           );
