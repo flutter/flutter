@@ -12,7 +12,7 @@ class RaisedButton extends MaterialButton {
   RaisedButton({
     Key key,
     Widget child,
-    GestureTapCallback onPressed
+    VoidCallback onPressed
   }) : super(key: key,
              child: child,
              onPressed: onPressed);

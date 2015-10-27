@@ -28,9 +28,6 @@ enum DismissDirection {
   down
 }
 
-typedef void ResizedCallback();
-typedef void DismissedCallback();
-
 class Dismissable extends StatefulComponent {
   Dismissable({
     Key key,
@@ -41,8 +38,8 @@ class Dismissable extends StatefulComponent {
   }) : super(key: key);
 
   final Widget child;
-  final ResizedCallback onResized;
-  final DismissedCallback onDismissed;
+  final VoidCallback onResized;
+  final VoidCallback onDismissed;
   final DismissDirection direction;
 
   _DismissableState createState() => new _DismissableState();
