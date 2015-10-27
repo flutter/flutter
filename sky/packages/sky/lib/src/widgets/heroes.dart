@@ -287,12 +287,10 @@ class _HeroMatch {
   final Object tag;
 }
 
-typedef void QuestFinishedHandler();
-
 class HeroParty {
   HeroParty({ this.onQuestFinished });
 
-  final QuestFinishedHandler onQuestFinished;
+  final VoidCallback onQuestFinished;
 
   List<_HeroQuestState> _heroes = <_HeroQuestState>[];
   bool get isEmpty => _heroes.isEmpty;

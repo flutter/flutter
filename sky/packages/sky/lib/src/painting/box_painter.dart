@@ -640,8 +640,6 @@ void paintImage({
     canvas.drawImageNine(image, centerSlice, destinationRect, paint);
 }
 
-typedef void BackgroundImageChangeListener();
-
 /// A background image for a box.
 class BackgroundImage {
   BackgroundImage({
@@ -676,11 +674,11 @@ class BackgroundImage {
 
   final ImageResource _imageResource;
 
-  final List<BackgroundImageChangeListener> _listeners =
-    new List<BackgroundImageChangeListener>();
+  final List<VoidCallback> _listeners =
+    new List<VoidCallback>();
 
   /// Call listener when the background images changes (e.g., arrives from the network).
-  void addChangeListener(BackgroundImageChangeListener listener) {
+  void addChangeListener(VoidCallback listener) {
     // We add the listener to the _imageResource first so that the first change
     // listener doesn't get callback synchronously if the image resource is
     // already resolved.
@@ -690,7 +688,7 @@ class BackgroundImage {
   }
 
   /// No longer call listener when the background image changes.
-  void removeChangeListener(BackgroundImageChangeListener listener) {
+  void removeChangeListener(VoidCallback listener) {
     _listeners.remove(listener);
     // We need to remove ourselves as listeners from the _imageResource so that
     // we're not kept alive by the image_cache.
@@ -702,9 +700,9 @@ class BackgroundImage {
     if (resolvedImage == null)
       return;
     _image = resolvedImage;
-    final List<BackgroundImageChangeListener> localListeners =
-      new List<BackgroundImageChangeListener>.from(_listeners);
-    for (BackgroundImageChangeListener listener in localListeners)
+    final List<VoidCallback> localListeners =
+      new List<VoidCallback>.from(_listeners);
+    for (VoidCallback listener in localListeners)
       listener();
   }
 

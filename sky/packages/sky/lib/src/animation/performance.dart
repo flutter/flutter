@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show VoidCallback;
 
 import 'animated_value.dart';
 import 'forces.dart';
@@ -23,7 +24,6 @@ enum PerformanceStatus {
   completed,
 }
 
-typedef void PerformanceListener();
 typedef void PerformanceStatusListener(PerformanceStatus status);
 
 /// An interface that is implemented by [Performance] that exposes a
@@ -36,9 +36,9 @@ abstract class PerformanceView {
   /// Update the given variable according to the current progress of the performance
   void updateVariable(Animatable variable);
   /// Calls the listener every time the progress of the performance changes
-  void addListener(PerformanceListener listener);
+  void addListener(VoidCallback listener);
   /// Stop calling the listener every time the progress of the performance changes
-  void removeListener(PerformanceListener listener);
+  void removeListener(VoidCallback listener);
   /// Calls listener every time the status of the performance changes
   void addStatusListener(PerformanceStatusListener listener);
   /// Stops calling the listener every time the status of the performance changes
@@ -76,8 +76,8 @@ class AlwaysCompletePerformance extends PerformanceView {
   }
 
   // this performance never changes state
-  void addListener(PerformanceListener listener) { }
-  void removeListener(PerformanceListener listener) { }
+  void addListener(VoidCallback listener) { }
+  void removeListener(VoidCallback listener) { }
   void addStatusListener(PerformanceStatusListener listener) { }
   void removeStatusListener(PerformanceStatusListener listener) { }
   PerformanceStatus get status => PerformanceStatus.completed;
@@ -98,10 +98,10 @@ class ReversePerformance extends PerformanceView {
     variable.setProgress(progress, curveDirection);
   }
 
-  void addListener(PerformanceListener listener) {
+  void addListener(VoidCallback listener) {
     masterPerformance.addListener(listener);
   }
-  void removeListener(PerformanceListener listener) {
+  void removeListener(VoidCallback listener) {
     masterPerformance.removeListener(listener);
   }
 
@@ -249,21 +249,21 @@ class Performance extends PerformanceView {
     return _timeline.animateWith(force.release(progress, velocity));
   }
 
-  final List<PerformanceListener> _listeners = new List<PerformanceListener>();
+  final List<VoidCallback> _listeners = new List<VoidCallback>();
 
   /// Calls the listener every time the progress of this performance changes
-  void addListener(PerformanceListener listener) {
+  void addListener(VoidCallback listener) {
     _listeners.add(listener);
   }
 
   /// Stop calling the listener every time the progress of this performance changes
-  void removeListener(PerformanceListener listener) {
+  void removeListener(VoidCallback listener) {
     _listeners.remove(listener);
   }
 
   void _notifyListeners() {
-    List<PerformanceListener> localListeners = new List<PerformanceListener>.from(_listeners);
-    for (PerformanceListener listener in localListeners)
+    List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+    for (VoidCallback listener in localListeners)
       listener();
   }
 
