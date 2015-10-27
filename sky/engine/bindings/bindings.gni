@@ -55,6 +55,20 @@ template("dart_precompile") {
   assert(defined(invoker.dart_script),
          "The dart script must be specified")
 
+  dart_host_toolchain = host_toolchain
+  if (target_os == "ios") {
+    # During precompilation, a 64 bit Dart VM cannot generate code for a 32 bit
+    # architecture (and vice-versa). The snapshotter that is running on the host
+    # needs to know about the target architecture and built accordingly.
+    if (target_cpu == "arm") {
+      dart_host_toolchain = "//build/toolchain/mac:clang_i386"
+    } else if (target_cpu == "arm64") {
+      dart_host_toolchain = "//build/toolchain/mac:clang_x64"
+    } else {
+      assert(false, "Unknown active architecture on iOS")
+    }
+  }
+
   vm_isolate_snapshot_name = target_name + "_vm_isolate.bin"
   vm_isolate_snapshot = "$target_gen_dir/$vm_isolate_snapshot_name"
   isolate_snapshot_name = target_name + "_isolate.bin"
@@ -65,7 +79,7 @@ template("dart_precompile") {
   instructions_gen_target_name = target_name + "_instructions"
   action(instructions_gen_target_name) {
     deps = [
-      "//dart/runtime/bin:gen_snapshot($host_toolchain)",
+      "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
     ]
     embedder_entry_points_manifest =
         "//sky/engine/bindings/dart_vm_entry_points.txt"
@@ -92,7 +106,7 @@ template("dart_precompile") {
         rebase_path("$root_build_dir/clang_x64/gen/sky/bindings/dart_ui.dart")
 
     gen_snapshot_dir =
-        get_label_info("//dart/runtime/bin:gen_snapshot($host_toolchain)",
+        get_label_info("//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
                        "root_out_dir")
     script = "//dart/runtime/tools/create_snapshot_bin.py"
 
