@@ -49,18 +49,25 @@ void CanvasImageDecoder::initWithList(const Uint8List& list) {
 
 void CanvasImageDecoder::Decode(PassRefPtr<SharedBuffer> buffer) {
   TRACE_EVENT0("blink", "CanvasImageDecoder::Decode");
+
+  // Destroy the callback after this function completes.  The Dart closure
+  // associated with the callback may hold a reference to the ImageDecoder,
+  // resulting in a circular reference.
+  CHECK(callback_);
+  OwnPtr<ImageDecoderCallback> callback(callback_.release());
+
   OwnPtr<ImageDecoder> decoder =
       ImageDecoder::create(*buffer.get(), ImageSource::AlphaPremultiplied,
                            ImageSource::GammaAndColorProfileIgnored);
   // decoder can be null if the buffer we was empty and we couldn't even guess
   // what type of image to decode.
   if (!decoder) {
-    callback_->handleEvent(nullptr);
+    callback->handleEvent(nullptr);
     return;
   }
   decoder->setData(buffer.get(), true);
   if (decoder->failed() || decoder->frameCount() == 0) {
-    callback_->handleEvent(nullptr);
+    callback->handleEvent(nullptr);
     return;
   }
 
@@ -68,11 +75,13 @@ void CanvasImageDecoder::Decode(PassRefPtr<SharedBuffer> buffer) {
   ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
   RefPtr<SkImage> skImage = adoptRef(SkImage::NewFromBitmap(imageFrame->getSkBitmap()));
   resultImage->setImage(skImage.release());
-  callback_->handleEvent(resultImage.get());
+  callback->handleEvent(resultImage.get());
 }
 
 void CanvasImageDecoder::RejectCallback() {
-  callback_->handleEvent(nullptr);
+  CHECK(callback_);
+  OwnPtr<ImageDecoderCallback> callback(callback_.release());
+  callback->handleEvent(nullptr);
 }
 
 }  // namespace blink

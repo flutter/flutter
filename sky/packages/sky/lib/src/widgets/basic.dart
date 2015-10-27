@@ -347,7 +347,7 @@ class FractionallySizedBox extends OneChildRenderObjectWidget {
     heightFactor: height
   );
 
-  void updateRenderObject(RenderFractionallySizedBox renderObject, SizedBox oldWidget) {
+  void updateRenderObject(RenderFractionallySizedBox renderObject, FractionallySizedBox oldWidget) {
     renderObject.widthFactor = width;
     renderObject.heightFactor = height;
   }
