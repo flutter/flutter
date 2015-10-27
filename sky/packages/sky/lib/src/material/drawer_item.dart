@@ -9,7 +9,7 @@ import 'icon.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
-class DrawerItem extends StatefulComponent {
+class DrawerItem extends StatelessComponent {
   const DrawerItem({ Key key, this.icon, this.child, this.onPressed, this.selected: false })
     : super(key: key);
 
@@ -18,35 +18,23 @@ class DrawerItem extends StatefulComponent {
   final GestureTapCallback onPressed;
   final bool selected;
 
-  _DrawerItemState createState() => new _DrawerItemState();
-}
-
-class _DrawerItemState extends State<DrawerItem> {
-  bool _highlight = false;
-
-  void _handleHighlightChanged(bool value) {
-    setState(() {
-      _highlight = value;
-    });
-  }
-
   TextStyle _getTextStyle(ThemeData themeData) {
     TextStyle result = themeData.text.body2;
-    if (config.selected)
+    if (selected)
       result = result.copyWith(color: themeData.primaryColor);
     return result;
   }
 
-  Color _getBackgroundColor(ThemeData themeData) {
-    if (_highlight)
+  Color _getBackgroundColor(ThemeData themeData, { bool highlight }) {
+    if (highlight)
       return themeData.highlightColor;
-    if (config.selected)
+    if (selected)
       return themeData.selectedColor;
     return Colors.transparent;
   }
 
   ColorFilter _getColorFilter(ThemeData themeData) {
-    if (config.selected)
+    if (selected)
       return new ColorFilter.mode(themeData.primaryColor, TransferMode.srcATop);
     return new ColorFilter.mode(const Color(0x73000000), TransferMode.dstIn);
   }
@@ -55,14 +43,15 @@ class _DrawerItemState extends State<DrawerItem> {
     ThemeData themeData = Theme.of(context);
 
     List<Widget> flexChildren = new List<Widget>();
-    if (config.icon != null) {
+    if (icon != null) {
       flexChildren.add(
         new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(
-            type: config.icon,
+            type: icon,
             size: 24,
-            colorFilter: _getColorFilter(themeData))
+            colorFilter: _getColorFilter(themeData)
+          )
         )
       );
     }
@@ -72,7 +61,7 @@ class _DrawerItemState extends State<DrawerItem> {
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new DefaultTextStyle(
             style: _getTextStyle(themeData),
-            child: config.child
+            child: child
           )
         )
       )
@@ -80,12 +69,13 @@ class _DrawerItemState extends State<DrawerItem> {
 
     return new Container(
       height: 48.0,
-      decoration: new BoxDecoration(backgroundColor: _getBackgroundColor(themeData)),
       child: new InkWell(
-        onTap: config.onPressed,
-        onHighlightChanged: _handleHighlightChanged,
+        onTap: onPressed,
+        defaultColor: _getBackgroundColor(themeData, highlight: false),
+        highlightColor: _getBackgroundColor(themeData, highlight: true),
         child: new Row(flexChildren)
       )
     );
   }
+
 }

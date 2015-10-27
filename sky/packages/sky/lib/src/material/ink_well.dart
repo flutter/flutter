@@ -10,11 +10,65 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-const int _kSplashInitialOpacity = 0x30;
-const double _kSplashCanceledVelocity = 0.7;
-const double _kSplashConfirmedVelocity = 0.7;
-const double _kSplashInitialSize = 0.0;
-const double _kSplashUnconfirmedVelocity = 0.2;
+// This file has the following classes:
+//  InkWell - the widget for material-design-style inkly-reacting material, showing splashes and a highlight
+//  _InkWellState - InkWell's State class
+//  _InkSplash - tracks a single splash
+//  _RenderInkSplashes - a RenderBox that renders multiple _InkSplash objects and handles gesture recognition
+//  _InkSplashes - the RenderObjectWidget for _RenderInkSplashes used by InkWell to handle the splashes
+
+const int _kSplashInitialOpacity = 0x30; // 0..255
+const double _kSplashCanceledVelocity = 0.7; // logical pixels per millisecond
+const double _kSplashConfirmedVelocity = 0.7; // logical pixels per millisecond
+const double _kSplashInitialSize = 0.0; // logical pixels
+const double _kSplashUnconfirmedVelocity = 0.2; // logical pixels per millisecond
+const Duration _kInkWellHighlightFadeDuration = const Duration(milliseconds: 100);
+
+class InkWell extends StatefulComponent {
+  InkWell({
+    Key key,
+    this.child,
+    this.onTap,
+    this.onLongPress,
+    this.onHighlightChanged,
+    this.defaultColor,
+    this.highlightColor
+  }) : super(key: key);
+
+  final Widget child;
+  final GestureTapCallback onTap;
+  final GestureLongPressCallback onLongPress;
+  final _HighlightChangedCallback onHighlightChanged;
+  final Color defaultColor;
+  final Color highlightColor;
+  
+  _InkWellState createState() => new _InkWellState();
+}
+
+class _InkWellState extends State<InkWell> {
+  bool _highlight = false;
+  Widget build(BuildContext context) {
+    return new AnimatedContainer(
+      decoration: new BoxDecoration(
+        backgroundColor: _highlight ? config.highlightColor : config.defaultColor
+      ),
+      duration: _kInkWellHighlightFadeDuration,
+      child: new _InkSplashes(
+        onTap: config.onTap,
+        onLongPress: config.onLongPress,
+        onHighlightChanged: (bool value) {
+          setState(() {
+            _highlight = value;
+          });
+          if (config.onHighlightChanged != null)
+            config.onHighlightChanged(value);
+        },
+        child: config.child
+      )
+    );
+  }
+}
+
 
 double _getSplashTargetSize(Size bounds, Point position) {
   double d1 = (position - bounds.topLeft(Point.origin)).distance;
@@ -25,27 +79,30 @@ double _getSplashTargetSize(Size bounds, Point position) {
 }
 
 class _InkSplash {
-  _InkSplash(this.position, this.well) {
-    _targetRadius = _getSplashTargetSize(well.size, position);
-    _radius = new AnimatedValue<double>(
-        _kSplashInitialSize, end: _targetRadius, curve: Curves.easeOut);
-
-    _performance = new ValuePerformance<double>(
-      variable: _radius,
+  _InkSplash(this.position, this.renderer) {
+    _targetRadius = _getSplashTargetSize(renderer.size, position);
+    _radius = new ValuePerformance<double>(
+      variable: new AnimatedValue<double>(
+        _kSplashInitialSize,
+        end: _targetRadius,
+        curve: Curves.easeOut
+      ),
       duration: new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
     )..addListener(_handleRadiusChange);
 
     // Wait kPressTimeout to avoid creating tiny splashes during scrolls.
+    // TODO(ianh): Instead of a timer in _InkSplash, we should start splashes from the gesture recognisers' onTapDown.
+    // ...and onTapDown should use a timer _or_ fire as soon as the tap is committed.
+    // When we do this, make sure it works even if we're only listening to onLongPress.
     _startTimer = new Timer(kPressTimeout, _play);
   }
 
   final Point position;
-  final _RenderInkWell well;
+  final _RenderInkSplashes renderer;
 
   double _targetRadius;
   double _pinnedRadius;
-  AnimatedValue<double> _radius;
-  Performance _performance;
+  ValuePerformance<double> _radius;
   Timer _startTimer;
 
   bool _cancelStartTimer() {
@@ -59,12 +116,12 @@ class _InkSplash {
 
   void _play() {
     _cancelStartTimer();
-    _performance.play();
+    _radius.play();
   }
 
   void _updateVelocity(double velocity) {
     int duration = (_targetRadius / velocity).floor();
-    _performance.duration = new Duration(milliseconds: duration);
+    _radius.duration = new Duration(milliseconds: duration);
     _play();
   }
 
@@ -84,8 +141,8 @@ class _InkSplash {
 
   void _handleRadiusChange() {
     if (_radius.value == _targetRadius)
-      well._splashes.remove(this);
-    well.markNeedsPaint();
+      renderer._splashes.remove(this);
+    renderer.markNeedsPaint();
   }
 
   void paint(PaintingCanvas canvas) {
@@ -98,15 +155,14 @@ class _InkSplash {
 
 typedef _HighlightChangedCallback(bool value);
 
-class _RenderInkWell extends RenderProxyBox {
-  _RenderInkWell({
+class _RenderInkSplashes extends RenderProxyBox {
+  _RenderInkSplashes({
     RenderBox child,
     GestureTapCallback onTap,
     GestureLongPressCallback onLongPress,
-    _HighlightChangedCallback onHighlightChanged
+    this.onHighlightChanged
   }) : super(child) {
     this.onTap = onTap;
-    this.onHighlightChanged = onHighlightChanged;
     this.onLongPress = onLongPress;
   }
 
@@ -117,19 +173,14 @@ class _RenderInkWell extends RenderProxyBox {
     _syncTapRecognizer();
   }
 
-  _HighlightChangedCallback get onHighlightChanged => _onHighlightChanged;
-  _HighlightChangedCallback _onHighlightChanged;
-  void set onHighlightChanged (_HighlightChangedCallback value) {
-    _onHighlightChanged = value;
-    _syncTapRecognizer();
-  }
-
   GestureTapCallback get onLongPress => _onLongPress;
   GestureTapCallback _onLongPress;
   void set onLongPress (GestureTapCallback value) {
     _onLongPress = value;
     _syncLongPressRecognizer();
   }
+
+  _HighlightChangedCallback onHighlightChanged;
 
   final List<_InkSplash> _splashes = new List<_InkSplash>();
 
@@ -157,7 +208,7 @@ class _RenderInkWell extends RenderProxyBox {
   }
 
   void _syncTapRecognizer() {
-    if (onTap == null && onHighlightChanged == null) {
+    if (onTap == null) {
       _disposeTapRecognizer();
     } else {
       _tap ??= new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
@@ -227,24 +278,24 @@ class _RenderInkWell extends RenderProxyBox {
   }
 }
 
-class InkWell extends OneChildRenderObjectWidget {
-  InkWell({
+class _InkSplashes extends OneChildRenderObjectWidget {
+  _InkSplashes({
     Key key,
     Widget child,
     this.onTap,
-    this.onHighlightChanged,
-    this.onLongPress
+    this.onLongPress,
+    this.onHighlightChanged
   }) : super(key: key, child: child);
 
   final GestureTapCallback onTap;
-  final _HighlightChangedCallback onHighlightChanged;
   final GestureLongPressCallback onLongPress;
+  final _HighlightChangedCallback onHighlightChanged;
 
-  _RenderInkWell createRenderObject() => new _RenderInkWell(onTap: onTap, onHighlightChanged: onHighlightChanged, onLongPress: onLongPress);
+  _RenderInkSplashes createRenderObject() => new _RenderInkSplashes(onTap: onTap, onLongPress: onLongPress, onHighlightChanged: onHighlightChanged);
 
-  void updateRenderObject(_RenderInkWell renderObject, InkWell oldWidget) {
+  void updateRenderObject(_RenderInkSplashes renderObject, _InkSplashes oldWidget) {
     renderObject.onTap = onTap;
-    renderObject.onHighlightChanged = onHighlightChanged;
     renderObject.onLongPress = onLongPress;
+    renderObject.onHighlightChanged = onHighlightChanged;
   }
 }

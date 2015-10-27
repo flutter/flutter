@@ -26,7 +26,7 @@ class _FlatButtonState extends MaterialButtonState<FlatButton> {
 
   int get level => 0;
 
-  Color getColor(BuildContext context) {
+  Color getColor(BuildContext context, { bool highlight }) {
     if (!config.enabled || !highlight)
       return null;
     switch (Theme.of(context).brightness) {
