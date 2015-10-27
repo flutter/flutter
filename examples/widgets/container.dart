@@ -26,9 +26,7 @@ class ContainerApp extends StatelessComponent {
               onPressed: () => print("Hello World")
             ),
             new RaisedButton(
-              child: new Text('DISABLED'),
-              onPressed: () => print("Hello World"),
-              enabled: false
+              child: new Text('DISABLED')
             )
           ])
         ),

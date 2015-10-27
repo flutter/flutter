@@ -12,14 +12,10 @@ class RaisedButton extends MaterialButton {
   RaisedButton({
     Key key,
     Widget child,
-    bool enabled: true,
     GestureTapCallback onPressed
   }) : super(key: key,
              child: child,
-             enabled: enabled,
-             onPressed: onPressed) {
-    assert(enabled != null);
-  }
+             onPressed: onPressed);
 
   _RaisedButtonState createState() => new _RaisedButtonState();
 }

@@ -42,6 +42,7 @@ class CardCollectionState extends State<CardCollection> {
   bool _snapToCenter = false;
   bool _fixedSizeCards = false;
   bool _sunshine = false;
+  bool _varyFontSizes = false;
   InvalidatorCallback _invalidator;
   Size _cardCollectionSize = new Size(200.0, 200.0);
 
@@ -127,6 +128,7 @@ class CardCollectionState extends State<CardCollection> {
           buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
           buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
           buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
+          buildDrawerCheckbox("Vary font sizes", _varyFontSizes, _toggleVaryFontSizes, enabled: !_editable),
           new DrawerDivider(),
           buildDrawerColorRadioItem("Deep Purple", Colors.deepPurple, _primaryColor, _selectColor),
           buildDrawerColorRadioItem("Green", Colors.green, _primaryColor, _selectColor),
@@ -181,6 +183,12 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
+  void _toggleVaryFontSizes() {
+    setState(() {
+      _varyFontSizes = !_varyFontSizes;
+    });
+  }
+
   void _selectColor(Map<int, Color> selection) {
     setState(() {
       _primaryColor = selection;
@@ -199,12 +207,15 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  Widget buildDrawerCheckbox(String label, bool value, void callback()) {
+  Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled: true }) {
     return new DrawerItem(
-      onPressed: callback,
+      onPressed: enabled ? callback : null,
       child: new Row(<Widget>[
         new Flexible(child: new Text(label)),
-        new Checkbox(value: value, onChanged: (_) { callback(); })
+        new Checkbox(
+          value: value,
+          onChanged: enabled ? (_) { callback(); } : null
+        )
       ])
     );
   }
@@ -218,8 +229,7 @@ class CardCollectionState extends State<CardCollection> {
         new Radio<Map<int, Color>>(
           value: itemValue,
           groupValue: currentValue,
-          enabled: enabled,
-          onChanged: onChanged
+          onChanged: enabled ? onChanged : null
         )
       ])
     );
@@ -234,8 +244,7 @@ class CardCollectionState extends State<CardCollection> {
         new Radio<DismissDirection>(
           value: itemValue,
           groupValue: currentValue,
-          enabled: enabled,
-          onChanged: onChanged
+          onChanged: enabled ? onChanged : null
         )
       ])
     );
@@ -250,8 +259,7 @@ class CardCollectionState extends State<CardCollection> {
         new Radio<TextStyle>(
           value: itemValue,
           groupValue: currentValue,
-          enabled: enabled,
-          onChanged: onChanged
+          onChanged: enabled ? onChanged : null
         )
       ])
     );
@@ -292,7 +300,9 @@ class CardCollectionState extends State<CardCollection> {
               )
             )
           : new DefaultTextStyle(
-              style: DefaultTextStyle.of(context).merge(cardLabelStyle).merge(_textStyle),
+              style: DefaultTextStyle.of(context).merge(cardLabelStyle).merge(_textStyle).copyWith(
+                fontSize: _varyFontSizes ? 5.0 + _cardModels.length.toDouble() : null
+              ),
               child: new Column(<Widget>[
                   new Text(cardModel.label)
                 ],
