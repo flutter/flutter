@@ -13,6 +13,9 @@ import 'hit_test.dart';
 import 'object.dart';
 import 'view.dart';
 
+typedef void EventListener(InputEvent event);
+typedef void MetricListener(Size size);
+
 int _hammingWeight(int value) {
   if (value == 0)
     return 0;
@@ -23,8 +26,6 @@ int _hammingWeight(int value) {
   }
   return weight;
 }
-
-typedef void EventListener(InputEvent event);
 
 /// A hit test entry used by [FlutterBinding]
 class BindingHitTestEntry extends HitTestEntry {
@@ -137,7 +138,7 @@ class FlutterBinding extends HitTestTarget {
     if (renderViewOverride == null) {
       _renderView = new RenderView(child: root);
       _renderView.attach();
-      _renderView.rootConstraints = _createConstraints();
+      _handleMetricsChanged();
       _renderView.scheduleInitialFrame();
     } else {
       _renderView = renderViewOverride;
@@ -156,11 +157,19 @@ class FlutterBinding extends HitTestTarget {
   RenderView get renderView => _renderView;
   RenderView _renderView;
 
-  ViewConstraints _createConstraints() {
-    return new ViewConstraints(size: new Size(ui.view.width, ui.view.height));
-  }
+  final List<MetricListener> _metricListeners = new List<MetricListener>();
+
+  /// Calls listener for every event that isn't localized to a given view coordinate
+  void addMetricListener(MetricListener listener) => _metricListeners.add(listener);
+
+  /// Stops calling listener for every event that isn't localized to a given view coordinate
+  bool removeMetricListener(MetricListener listener) => _metricListeners.remove(listener);
+
   void _handleMetricsChanged() {
-    _renderView.rootConstraints = _createConstraints();
+    Size size = new Size(ui.view.width, ui.view.height);
+    _renderView.rootConstraints = new ViewConstraints(size: size);
+    for (MetricListener listener in _metricListeners)
+      listener(size);
   }
 
   /// Pump the rendering pipeline to generate a frame for the given time stamp
@@ -184,6 +193,7 @@ class FlutterBinding extends HitTestTarget {
     if (ourEvent is PointerInputEvent) {
       _handlePointerInputEvent(ourEvent);
     } else {
+      assert(event.type == 'back');
       for (EventListener listener in _eventListeners)
         listener(ourEvent);
     }
