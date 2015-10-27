@@ -15,6 +15,16 @@ final BoxDecoration kBoxDecorationC = new BoxDecoration(
   backgroundColor: const Color(0xFF0000FF)
 );
 
+class TestBuildCounter extends StatelessComponent {
+  static int buildCount = 0;
+
+  Widget build(BuildContext context) {
+    ++buildCount;
+    return new DecoratedBox(decoration: kBoxDecorationA);
+  }
+}
+
+
 class FlipComponent extends StatefulComponent {
   FlipComponent({ Key key, this.left, this.right }) : super(key: key);
 
@@ -35,15 +45,6 @@ class FlipComponentState extends State<FlipComponent> {
 
   Widget build(BuildContext context) {
     return _showLeft ? config.left : config.right;
-  }
-}
-
-class TestBuildCounter extends StatelessComponent {
-  static int buildCount = 0;
-
-  Widget build(BuildContext context) {
-    ++buildCount;
-    return new DecoratedBox(decoration: kBoxDecorationA);
   }
 }
 
