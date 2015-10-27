@@ -9,9 +9,10 @@ import 'basic.dart';
 import 'framework.dart';
 
 export 'package:flutter/gestures.dart' show
+  GestureTapDownCallback,
+  GestureTapUpCallback,
   GestureTapCallback,
-  GestureTapCallback,
-  GestureTapCallback,
+  GestureTapCancelCallback,
   GestureShowPressCallback,
   GestureLongPressCallback,
   GestureDragStartCallback,
@@ -31,10 +32,11 @@ class GestureDetector extends StatefulComponent {
   const GestureDetector({
     Key key,
     this.child,
-    this.onTap,
-    this.onDoubleTap,
     this.onTapDown,
+    this.onTapUp,
+    this.onTap,
     this.onTapCancel,
+    this.onDoubleTap,
     this.onShowPress,
     this.onLongPress,
     this.onVerticalDragStart,
@@ -53,9 +55,10 @@ class GestureDetector extends StatefulComponent {
 
   final Widget child;
 
+  final GestureTapDownCallback onTapDown;
+  final GestureTapDownCallback onTapUp;
   final GestureTapCallback onTap;
-  final GestureTapCallback onTapDown;
-  final GestureTapCallback onTapCancel;
+  final GestureTapCancelCallback onTapCancel;
   final GestureTapCallback onDoubleTap;
 
   final GestureShowPressCallback onShowPress;
@@ -125,13 +128,14 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 
   void _syncTap() {
-    if (config.onTap == null && config.onTapDown == null && config.onTapCancel == null) {
+    if (config.onTapDown == null && config.onTapUp == null && config.onTap == null && config.onTapCancel == null) {
       _tap = _ensureDisposed(_tap);
     } else {
       _tap ??= new TapGestureRecognizer(router: _router);
       _tap
-        ..onTap = config.onTap
         ..onTapDown = config.onTapDown
+        ..onTapUp = config.onTapUp
+        ..onTap = config.onTap
         ..onTapCancel = config.onTapCancel;
     }
   }

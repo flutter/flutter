@@ -43,7 +43,7 @@ _IGNORED_PATTERNS = [
 
   # Bogus hint - https://github.com/dart-lang/sdk/issues/24710
   re.compile(r'^\[hint\] \(toText == toPlainText\) \? toStyledText : toPlainText has inferred type \(String, String\) → Widget \(.+styled_text.dart,.+\)'),
-  re.compile(r'^\[hint\] .+ \? \([_, ]+\) {.+} : null has inferred type .+'), # 
+  re.compile(r'^\[hint\] .+ [?:] \([_, ]+\) .+ has inferred type .+'), #
 
   # Disable the lint checks that will be caught by code review
   re.compile(r'^\[lint\] Avoid defining a one-member abstract class when a simple function will do'),
