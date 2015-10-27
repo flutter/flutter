@@ -245,6 +245,7 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 
   void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
     List<String> gestures = <String>[];
     if (_tap != null)
       gestures.add('tap');
@@ -262,7 +263,7 @@ class _GestureDetectorState extends State<GestureDetector> {
       gestures.add('pan');
     if (_scale != null)
       gestures.add('scale');
-    if (gestures.isEmpty);
+    if (gestures.isEmpty)
       gestures.add('<none>');
     description.add('gestures: ${gestures.join(", ")}');
   }

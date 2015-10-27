@@ -44,9 +44,8 @@ class DialogMenuItem extends StatelessComponent {
 }
 
 class FeedFragment extends StatefulComponent {
-  FeedFragment({ this.navigator, this.userData, this.onItemCreated, this.onItemDeleted });
+  FeedFragment({ this.userData, this.onItemCreated, this.onItemDeleted });
 
-  final NavigatorState navigator;
   final UserData userData;
   final FitnessItemHandler onItemCreated;
   final FitnessItemHandler onItemDeleted;
@@ -62,7 +61,7 @@ class FeedFragmentState extends State<FeedFragment> {
     setState(() {
       _fitnessMode = value;
     });
-    config.navigator.pop();
+    Navigator.of(context).pop();
   }
 
   void _showDrawer() {
@@ -93,8 +92,8 @@ class FeedFragmentState extends State<FeedFragment> {
   }
 
   void _handleShowSettings() {
-    config.navigator.pop();
-    config.navigator.pushNamed('/settings');
+    Navigator.of(context)..pop()
+                         ..pushNamed('/settings');
   }
 
   // TODO(jackson): We should be localizing
@@ -122,7 +121,7 @@ class FeedFragmentState extends State<FeedFragment> {
       content: new Text("Item deleted."),
       actions: <SnackBarAction>[new SnackBarAction(label: "UNDO", onPressed: () {
         config.onItemCreated(item);
-        config.navigator.pop();
+        Navigator.of(context).pop();
       })]
     );
   }
@@ -193,7 +192,7 @@ class FeedFragmentState extends State<FeedFragment> {
   void _handleActionButtonPressed() {
     showDialog(context: context, child: new AddItemDialog()).then((routeName) {
       if (routeName != null)
-        config.navigator.pushNamed(routeName);
+        Navigator.of(context).pushNamed(routeName);
     });
   }
 

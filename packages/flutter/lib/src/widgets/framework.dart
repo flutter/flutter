@@ -1023,8 +1023,12 @@ abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
     super.mount(parent, newSlot);
     assert(_child == null);
     assert(_active);
-    rebuild();
+    _firstBuild();
     assert(_child != null);
+  }
+
+  void _firstBuild() {
+    rebuild();
   }
 
   /// Reinvokes the build() method of the StatelessComponent object (for
@@ -1098,6 +1102,13 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
     assert(_state._config == null);
     _state._config = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
+  }
+
+  U get state => _state;
+  U _state;
+
+  void _firstBuild() {
+    assert(_state._debugLifecycleState == _StateLifecycle.created);
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
       _state.initState();
@@ -1111,10 +1122,8 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
       return false;
     });
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
+    super._firstBuild();
   }
-
-  U get state => _state;
-  U _state;
 
   void update(T newWidget) {
     super.update(newWidget);

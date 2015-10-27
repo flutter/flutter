@@ -10,9 +10,8 @@ typedef void SettingsUpdater({
 });
 
 class StockSettings extends StatefulComponent {
-  const StockSettings(this.navigator, this.optimism, this.backup, this.updater);
+  const StockSettings(this.optimism, this.backup, this.updater);
 
-  final NavigatorState navigator;
   final StockMode optimism;
   final BackupMode backup;
   final SettingsUpdater updater;
@@ -41,19 +40,19 @@ class StockSettingsState extends State<StockSettings> {
             title: new Text("Change mode?"),
             content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
             onDismiss: () {
-              config.navigator.pop(false);
+              Navigator.of(context).pop(false);
             },
             actions: <Widget>[
               new FlatButton(
                 child: new Text('NO THANKS'),
                 onPressed: () {
-                  config.navigator.pop(false);
+                  Navigator.of(context).pop(false);
                 }
               ),
               new FlatButton(
                 child: new Text('AGREE'),
                 onPressed: () {
-                  config.navigator.pop(true);
+                  Navigator.of(context).pop(true);
                 }
               ),
             ]
@@ -75,7 +74,7 @@ class StockSettingsState extends State<StockSettings> {
     return new ToolBar(
       left: new IconButton(
         icon: 'navigation/arrow_back',
-        onPressed: config.navigator.pop
+        onPressed: () => Navigator.of(context).pop()
       ),
       center: new Text('Settings')
     );

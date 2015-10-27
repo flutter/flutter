@@ -21,8 +21,8 @@ Color debugGridColor = const Color(0x7F7F2020);
 const String kDefaultRouteName = '/';
 
 class RouteArguments {
-  const RouteArguments(this.navigator, { this.previousPerformance, this.nextPerformance });
-  final NavigatorState navigator;
+  const RouteArguments({ this.context, this.previousPerformance, this.nextPerformance });
+  final BuildContext context;
   final PerformanceView previousPerformance;
   final PerformanceView nextPerformance;
 }
@@ -49,17 +49,13 @@ class Navigator extends StatefulComponent {
 
   static NavigatorState of(BuildContext context) {
     NavigatorState result;
-    bool visitor(Element element) {
-      if (element is StatefulComponentElement) {
-        if (element.state is NavigatorState) {
-          result = element.state;
-          return false;
-        }
+    context.visitAncestorElements((Element element) {
+      if (element is StatefulComponentElement && element.state is NavigatorState) {
+        result = element.state;
+        return false;
       }
       return true;
-    }
-    if (visitor(context))
-      context.visitAncestorElements(visitor);
+    });
     return result;
   }
 
@@ -268,9 +264,9 @@ class NavigatorState extends State<Navigator> {
       if (_desiredHeroes.hasInstructions) {
         if ((_desiredHeroes.to == route || _desiredHeroes.from == route) && nextHeroPerformance == null)
           nextHeroPerformance = route.performance;
-        visibleRoutes.add(route._internalBuild(nextContentRoute, buildTargetHeroes: _desiredHeroes.to == route));
+        visibleRoutes.add(new _RouteWidget(route: route, nextRoute: nextContentRoute, buildTargetHeroes: _desiredHeroes.to == route));
       } else {
-        visibleRoutes.add(route._internalBuild(nextContentRoute));
+        visibleRoutes.add(new _RouteWidget(route: route, nextRoute: nextContentRoute));
       }
       if (route.isActuallyOpaque) {
         assert(!_desiredHeroes.hasInstructions ||
@@ -328,6 +324,82 @@ class NavigatorState extends State<Navigator> {
     return new Focus(child: new Stack(visibleRoutes.reversed.toList()));
   }
 
+}
+
+class _RouteWidget extends StatefulComponent {
+  _RouteWidget({
+    Route route,
+    this.nextRoute,
+    this.buildTargetHeroes: false
+  }) : route = route,
+       super(key: new ObjectKey(route)) {
+    assert(route != null);
+  }
+  final Route route;
+  final Route nextRoute;
+  final bool buildTargetHeroes;
+  _RouteWidgetState createState() => new _RouteWidgetState();
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (route.performance != null)
+      description.add('${route.performance}');
+    else
+      description.add('${route.debugLabel}');
+    if (buildTargetHeroes)
+      description.add('building target heroes this frame');
+  }
+}
+
+class _RouteWidgetState extends State<_RouteWidget> {
+  void initState() {
+    super.initState();
+    config.route._widgetState = this;
+  }
+  void dispose() {
+    config.route._widgetState = null;
+    super.dispose();
+  }
+  Widget build(BuildContext context) {
+    return config.route._internalBuild(context, config.nextRoute, buildTargetHeroes: config.buildTargetHeroes);
+  }
+}
+
+class _StorageEntryIdentifier {
+  Type clientType;
+  List<Key> keys;
+  void addKey(Key key) {
+    assert(key != null);
+    assert(key is! GlobalKey);
+    keys ??= <Key>[];
+    keys.add(key);
+  }
+  GlobalKey scopeKey;
+  bool operator ==(dynamic other) {
+    if (other is! _StorageEntryIdentifier)
+      return false;
+    final _StorageEntryIdentifier typedOther = other;
+    if (clientType != typedOther.clientType ||
+        scopeKey != typedOther.scopeKey ||
+        keys?.length != typedOther.keys?.length)
+      return false;
+    if (keys != null) {
+      for (int index = 0; index < keys.length; index += 1) {
+        if (keys[index] != typedOther.keys[index])
+          return false;
+      }
+    }
+    return true;
+  }
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + clientType.hashCode;
+    value = 37 * value + scopeKey.hashCode;
+    if (keys != null) {
+      for (Key key in keys)
+        value = 37 * value + key.hashCode;
+    }
+    return value;
+  }
 }
 
 abstract class Route {
@@ -390,10 +462,13 @@ abstract class Route {
 
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
+  _RouteWidgetState _widgetState;
 
   void setState(void fn()) {
-    assert(navigator != null);
-    navigator.setState(fn);
+    if (_widgetState != null)
+      _widgetState.setState(fn);
+    else
+      fn();
   }
 
   void didPush(NavigatorState navigator) {
@@ -419,18 +494,21 @@ abstract class Route {
     }
   }
 
-  /// Called by the navigator.build() function if hasContent is true, to get the
-  /// subtree for this route.
+  /// Called (indirectly, via a RouteWidget) by the navigator.build()
+  /// function if hasContent is true, to get the subtree for this
+  /// route.
   ///
   /// If buildTargetHeroes is true, then getHeroesToAnimate() will be called
   /// after this build, before the next build, and this build should render the
   /// route off-screen, at the end of its animation. Next frame, the argument
   /// will be false, and the tree should be built at the first frame of the
   /// transition animation, whatever that is.
-  Widget _internalBuild(Route nextRoute, { bool buildTargetHeroes: false }) {
+  Widget _internalBuild(BuildContext context, Route nextRoute, { bool buildTargetHeroes: false }) {
     assert(navigator != null);
+    assert(_widgetState != null);
+    assert(hasContent);
     return keySubtree(build(new RouteArguments(
-      navigator,
+      context: context,
       previousPerformance: performance,
       nextPerformance: nextRoute?.performance
     )));
@@ -446,12 +524,12 @@ abstract class Route {
   Map<Object, HeroHandle> getHeroesToAnimate([Set<Key> mostValuableKeys]) => const <Object, HeroHandle>{};
   bool _hasActiveHeroes = false;
 
+  GlobalKey _subtreeKey;
+
   /// Returns the BuildContext for the root of the subtree built for this route,
   /// assuming that internalBuild used keySubtree to build that subtree.
   /// This is only valid after a build phase.
-  BuildContext get context => _subtreeKey.currentContext;
-
-  GlobalKey _subtreeKey;
+  BuildContext get subtreeContext => _subtreeKey.currentContext;
 
   /// Wraps the given subtree in a route-specific GlobalKey.
   Widget keySubtree(Widget child) {
@@ -464,6 +542,52 @@ abstract class Route {
   /// Called by internalBuild. This is the method to override if you want to
   /// change what subtree is built for this route.
   Widget build(RouteArguments args);
+
+  static Route of(BuildContext context) {
+    Route result;
+    context.visitAncestorElements((Element element) {
+      if (element is StatefulComponentElement && element.state is _RouteWidgetState) {
+        result = element.widget.route;
+        return false;
+      }
+      return true;
+    });
+    return result;
+  }
+
+  _StorageEntryIdentifier _computeStorageIdentifier(BuildContext context) {
+    _StorageEntryIdentifier result = new _StorageEntryIdentifier();
+    result.clientType = context.widget.runtimeType;
+    Key lastKey = context.widget.key;
+    if (lastKey is! GlobalKey) {
+      context.visitAncestorElements((Element element) {
+        if (element.widget.key is GlobalKey) {
+          lastKey = element.widget.key;
+          return false;
+        } else if (element.widget is Navigator) {
+          // Not quite everyone who is in a Navigator actually is in a Route.
+          // For example, the modal barrier.
+          StatefulComponentElement statefulElement = element;
+          lastKey = new GlobalObjectKey(statefulElement.state);
+          return false;
+        } else if (element.widget.key != null) {
+          result.addKey(element.widget.key);
+        }
+        return true;
+      });
+      return result;
+    }
+    assert(lastKey is GlobalKey);
+    result.scopeKey = lastKey;
+    return result;
+  }
+
+  Map<_StorageEntryIdentifier, dynamic> _storage;
+  void writeState(BuildContext context, dynamic data) {
+    _storage ??= <_StorageEntryIdentifier, dynamic>{};
+    _storage[_computeStorageIdentifier(context)] = data;
+  }
+  dynamic readState(BuildContext context) => _storage != null ? _storage[_computeStorageIdentifier(context)] : null;
 
   String get debugLabel => '$runtimeType';
 
@@ -487,7 +611,7 @@ abstract class PerformanceRoute extends Route {
 
   Duration get transitionDuration;
 
-  Widget _internalBuild(Route nextRoute, { bool buildTargetHeroes: false }) {
+  Widget _internalBuild(BuildContext context, Route nextRoute, { bool buildTargetHeroes: false }) {
     assert(hasContent);
     assert(transitionDuration > Duration.ZERO);
     if (buildTargetHeroes && performance.progress != 1.0) {
@@ -496,11 +620,11 @@ abstract class PerformanceRoute extends Route {
       fakePerformance.progress = 1.0;
       return new OffStage(
         child: keySubtree(
-          build(new RouteArguments(navigator, previousPerformance: fakePerformance))
+          build(new RouteArguments(context: context, previousPerformance: fakePerformance))
         )
       );
     }
-    return super._internalBuild(nextRoute, buildTargetHeroes: buildTargetHeroes);
+    return super._internalBuild(context, nextRoute, buildTargetHeroes: buildTargetHeroes);
   }
 
   void didPush(NavigatorState navigator) {
@@ -539,7 +663,7 @@ class PageRoute extends PerformanceRoute {
   Duration get transitionDuration => _kTransitionDuration;
 
   Map<Object, HeroHandle> getHeroesToAnimate([Set<Key> mostValuableKeys]) {
-    return Hero.of(context, mostValuableKeys);
+    return Hero.of(subtreeContext, mostValuableKeys);
   }
 
   Widget build(RouteArguments args) {

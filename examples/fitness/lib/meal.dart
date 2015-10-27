@@ -43,9 +43,8 @@ class MealRow extends FitnessItemRow {
 }
 
 class MealFragment extends StatefulComponent {
-  MealFragment({ this.navigator, this.onCreated });
+  MealFragment({ this.onCreated });
 
-  NavigatorState navigator;
   FitnessItemHandler onCreated;
 
   MealFragmentState createState() => new MealFragmentState();
@@ -56,14 +55,14 @@ class MealFragmentState extends State<MealFragment> {
 
   void _handleSave() {
     config.onCreated(new Meal(when: new DateTime.now(), description: _description));
-    config.navigator.pop();
+    Navigator.of(context).pop();
   }
 
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/close",
-        onPressed: config.navigator.pop),
+        onPressed: Navigator.of(context).pop),
       center: new Text('New Meal'),
       right: <Widget>[
         // TODO(abarth): Should this be a FlatButton?
