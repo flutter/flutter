@@ -12,7 +12,7 @@ class _PhysicsCollisionGroups {
   List<Object> getKeysForBitmask(int bitmask) {
     List<Object> keys = [];
     keyLookup.forEach((Object key, int value) {
-      if (value & bitmask != null) {
+      if (value & bitmask != 0) {
         keys.add(key);
       }
     });
