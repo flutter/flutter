@@ -18,7 +18,6 @@
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/core/script/dom_dart_state.h"
-#include "sky/engine/core/view/View.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_class_library.h"
@@ -163,11 +162,6 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
     EnsureHandleWatcherStarted();
   }
   Dart_ExitIsolate();
-}
-
-void DartController::InstallView(View* view) {
-  Dart_Handle library = Dart_LookupLibrary(ToDart("dart:ui"));
-  CHECK(!LogIfError(Dart_SetField(library, ToDart("view"), ToDart(view))));
 }
 
 static void DartController_DartStreamConsumer(

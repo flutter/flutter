@@ -249,8 +249,6 @@ sky_core_files = [
   "view/FrameCallback.h",
   "view/Tracing.cpp",
   "view/Tracing.h",
-  "view/View.cpp",
-  "view/View.h",
   "view/VoidCallback.h",
   "window/window.cc",
   "window/window.h",
@@ -287,7 +285,6 @@ core_idl_files = get_path_info([
                                  "view/EventCallback.idl",
                                  "view/FrameCallback.idl",
                                  "view/Tracing.idl",
-                                 "view/View.idl",
                                  "view/VoidCallback.idl",
                                ],
                                "abspath")

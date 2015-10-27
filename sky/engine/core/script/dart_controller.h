@@ -40,7 +40,6 @@ class DartController {
 
   void CreateIsolateFor(std::unique_ptr<DOMDartState> dom_dart_state);
   void Shutdown();
-  void InstallView(View* view);
 
   DOMDartState* dart_state() const { return dom_dart_state_.get(); }
 
