@@ -68,7 +68,7 @@ class RenderEditableParagraph extends RenderParagraph {
     // because we only support single-line text.
     layoutText(constraints);
     return constraints.constrainWidth(
-      textPainter.maxContentWidth + _kCursorGap + _kCursorWidth
+      textPainter.size.width + _kCursorGap + _kCursorWidth
     );
   }
 
@@ -83,10 +83,8 @@ class RenderEditableParagraph extends RenderParagraph {
   void performLayout() {
     layoutText(constraints);
 
-    Size newContentSize = new Size(
-      textPainter.maxContentWidth + _kCursorGap + _kCursorWidth,
-      textPainter.height
-    );
+    Offset cursorPadding = const Offset(_kCursorGap + _kCursorWidth, 0.0);
+    Size newContentSize = textPainter.size + cursorPadding;
     size = constraints.constrain(newContentSize);
 
     if (_contentSize == null || _contentSize != newContentSize) {
@@ -109,7 +107,7 @@ class RenderEditableParagraph extends RenderParagraph {
 
     if (_showCursor) {
       Rect cursorRect =  new Rect.fromLTWH(
-        textPainter.maxContentWidth + _kCursorGap,
+        textPainter.size.width + _kCursorGap,
         _kCursorHeightOffset,
         _kCursorWidth,
         size.height - 2.0 * _kCursorHeightOffset
