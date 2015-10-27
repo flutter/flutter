@@ -55,8 +55,9 @@ export 'package:flutter/rendering.dart' show
     TextStyle,
     TransferMode,
     ValueChanged,
-    normal,
+    VoidCallback,
     bold,
+    normal,
     underline,
     overline,
     lineThrough;

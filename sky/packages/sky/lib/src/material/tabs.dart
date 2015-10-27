@@ -305,7 +305,7 @@ class Tab extends StatelessComponent {
     assert(label.text != null || label.icon != null);
   }
 
-  final GestureTapCallback onSelected;
+  final VoidCallback onSelected;
   final TabLabel label;
   final Color color;
   final bool selected;

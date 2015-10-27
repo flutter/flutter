@@ -48,7 +48,7 @@ class Dialog extends StatelessComponent {
   final List<Widget> actions;
 
   /// An (optional) callback that is called when the dialog is dismissed.
-  final GestureTapCallback onDismiss;
+  final VoidCallback onDismiss;
 
   Color _getColor(BuildContext context) {
     switch (Theme.of(context).brightness) {

@@ -141,7 +141,7 @@ class TextureButton extends StatefulComponent {
     this.height: 128.0
   }) : super(key: key);
 
-  final GestureTapCallback onPressed;
+  final VoidCallback onPressed;
   final Texture texture;
   final Texture textureDown;
   final double width;

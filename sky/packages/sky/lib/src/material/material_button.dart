@@ -42,7 +42,7 @@ abstract class MaterialButton extends StatefulComponent {
 
   final Widget child;
   final ButtonColor textColor;
-  final GestureTapCallback onPressed;
+  final VoidCallback onPressed;
 
   bool get enabled => onPressed != null;
 
