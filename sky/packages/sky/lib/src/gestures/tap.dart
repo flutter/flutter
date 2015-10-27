@@ -58,10 +58,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     super.rejectGesture(pointer);
     if (pointer == primaryPointer) {
       assert(state == GestureRecognizerState.defunct);
-      _wonArena = false;
-      _finalPosition = null;
       if (onTapCancel != null)
         onTapCancel();
+      _reset();
     }
   }
 
@@ -72,7 +71,13 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
         onTapUp(_finalPosition);
       if (onTap != null)
         onTap();
+      _reset();
     }
+  }
+
+  void _reset() {
+    _wonArena = false;
+    _finalPosition = null;
   }
 }
 
