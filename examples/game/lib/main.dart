@@ -169,7 +169,7 @@ class TextureButtonState extends State<TextureButton> {
           )
         )
       ),
-      onTapDown: () {
+      onTapDown: (_) {
         setState(() {
           _highlight = true;
         });
