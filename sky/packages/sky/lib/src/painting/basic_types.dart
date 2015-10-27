@@ -17,4 +17,5 @@ export 'dart:ui' show
   TextAlign,
   TextBaseline,
   TextDecoration,
-  TextDecorationStyle;
+  TextDecorationStyle,
+  VoidCallback;

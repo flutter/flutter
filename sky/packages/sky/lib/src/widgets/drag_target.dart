@@ -14,7 +14,6 @@ import 'navigator.dart';
 typedef bool DragTargetWillAccept<T>(T data);
 typedef void DragTargetAccept<T>(T data);
 typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
-typedef void DragFinishedNotification();
 
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
@@ -208,7 +207,7 @@ class DragRoute extends Route {
   final Point dragStartPoint;
   final Widget feedback;
   final Offset feedbackOffset;
-  final DragFinishedNotification onDragFinished;
+  final VoidCallback onDragFinished;
 
   DragTargetState _activeTarget;
   bool _activeTargetWillAcceptDrop = false;

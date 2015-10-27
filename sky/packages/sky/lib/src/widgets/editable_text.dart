@@ -14,9 +14,6 @@ import 'framework.dart';
 
 const _kCursorBlinkHalfPeriod = 500; // milliseconds
 
-typedef void StringUpdated();
-typedef void StringSubmitted();
-
 class TextRange {
   const TextRange({ this.start, this.end });
   const TextRange.collapsed(int position)
@@ -45,8 +42,8 @@ class EditableString implements KeyboardClient {
   TextRange composing = const TextRange.empty();
   TextRange selection;
 
-  final StringUpdated onUpdated;
-  final StringSubmitted onSubmitted;
+  final VoidCallback onUpdated;
+  final VoidCallback onSubmitted;
 
   KeyboardClientStub stub;
 
