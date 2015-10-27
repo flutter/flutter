@@ -258,8 +258,8 @@ const SparseBitSet* FontFamily::getCoverage() {
         }
         CmapCoverage::getCoverage(mCoverage, cmapData.get(), cmapSize);  // TODO: Error check?
 #ifdef VERBOSE_DEBUG
-        ALOGD("font coverage length=%d, first ch=%x\n", mCoverage->length(),
-                mCoverage->nextSetBit(0));
+        ALOGD("font coverage length=%d, first ch=%x\n", mCoverage.length(),
+                mCoverage.nextSetBit(0));
 #endif
         mCoverageValid = true;
     }

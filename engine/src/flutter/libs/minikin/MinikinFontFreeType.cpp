@@ -47,8 +47,8 @@ float MinikinFontFreeType::GetHorizontalAdvance(uint32_t glyph_id,
     return advance * (1.0 / 65536);
 }
 
-void MinikinFontFreeType::GetBounds(MinikinRect* bounds, uint32_t glyph_id,
-    const MinikinPaint& paint) const {
+void MinikinFontFreeType::GetBounds(MinikinRect* /* bounds */, uint32_t /* glyph_id*/,
+        const MinikinPaint& /* paint */) const {
     // TODO: NYI
 }
 
@@ -66,8 +66,8 @@ int32_t MinikinFontFreeType::GetUniqueId() const {
 	return mUniqueId;
 }
 
-bool MinikinFontFreeType::Render(uint32_t glyph_id,
-    const MinikinPaint &paint, GlyphBitmap *result) {
+bool MinikinFontFreeType::Render(uint32_t glyph_id, const MinikinPaint& /* paint */,
+        GlyphBitmap *result) {
     FT_Error error;
     FT_Int32 load_flags = FT_LOAD_DEFAULT;  // TODO: respect hinting settings
     error = FT_Load_Glyph(mTypeface, glyph_id, load_flags);

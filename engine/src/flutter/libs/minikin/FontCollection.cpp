@@ -43,7 +43,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
     vector<uint32_t> lastChar;
     size_t nTypefaces = typefaces.size();
 #ifdef VERBOSE_DEBUG
-    ALOGD("nTypefaces = %d\n", nTypefaces);
+    ALOGD("nTypefaces = %zd\n", nTypefaces);
 #endif
     const FontStyle defaultStyle;
     for (size_t i = 0; i < nTypefaces; i++) {
@@ -72,7 +72,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         mRanges.push_back(dummy);
         Range* range = &mRanges.back();
 #ifdef VERBOSE_DEBUG
-        ALOGD("i=%d: range start = %d\n", i, offset);
+        ALOGD("i=%zd: range start = %zd\n", i, offset);
 #endif
         range->start = offset;
         for (size_t j = 0; j < nTypefaces; j++) {
@@ -82,7 +82,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
                 offset++;
                 uint32_t nextChar = family->getCoverage()->nextSetBit((i + 1) << kLogCharsPerPage);
 #ifdef VERBOSE_DEBUG
-                ALOGD("nextChar = %d (j = %d)\n", nextChar, j);
+                ALOGD("nextChar = %d (j = %zd)\n", nextChar, j);
 #endif
                 lastChar[j] = nextChar;
             }
@@ -110,7 +110,7 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
     }
     const Range& range = mRanges[ch >> kLogCharsPerPage];
 #ifdef VERBOSE_DEBUG
-    ALOGD("querying range %d:%d\n", range.start, range.end);
+    ALOGD("querying range %zd:%zd\n", range.start, range.end);
 #endif
     FontFamily* bestFamily = nullptr;
     int bestScore = -1;

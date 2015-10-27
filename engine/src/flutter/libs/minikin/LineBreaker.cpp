@@ -249,7 +249,7 @@ void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth post
                 cand.penalty = SCORE_DESPERATE;
                 cand.hyphenEdit = 0;
 #if VERBOSE_DEBUG
-                ALOGD("desperate cand: %d %g:%g",
+                ALOGD("desperate cand: %zd %g:%g",
                         mCandidates.size(), cand.postBreak, cand.preBreak);
 #endif
                 addCandidate(cand);
@@ -264,7 +264,7 @@ void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth post
     cand.penalty = penalty;
     cand.hyphenEdit = hyph;
 #if VERBOSE_DEBUG
-    ALOGD("cand: %d %g:%g", mCandidates.size(), cand.postBreak, cand.preBreak);
+    ALOGD("cand: %zd %g:%g", mCandidates.size(), cand.postBreak, cand.preBreak);
 #endif
     addCandidate(cand);
 }
@@ -409,7 +409,7 @@ void LineBreaker::computeBreaksOptimal(bool isRectangle) {
         mCandidates[i].prev = bestPrev;
         mCandidates[i].lineNumber = mCandidates[bestPrev].lineNumber + 1;
 #if VERBOSE_DEBUG
-        ALOGD("break %d: score=%g, prev=%d", i, mCandidates[i].score, mCandidates[i].prev);
+        ALOGD("break %zd: score=%g, prev=%zd", i, mCandidates[i].score, mCandidates[i].prev);
 #endif
     }
     finishBreaksOptimal();
