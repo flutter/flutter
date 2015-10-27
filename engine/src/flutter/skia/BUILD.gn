@@ -5,7 +5,7 @@
 import("//build/config/features.gni")
 import("//build/config/ui.gni")
 import("//testing/test.gni")
-if (current_cpu == "arm") {
+if (current_cpu == "arm" || current_cpu == "arm64") {
   import("//build/config/arm.gni")
 }
 if (current_cpu == "mipsel" || current_cpu == "mips64el") {
@@ -583,6 +583,9 @@ source_set("skia_opts") {
     } else {
       sources = gypi_skia_opts.none_sources
     }
+  } else if (current_cpu == "arm64") {
+    # TODO(1841): NEON sources are not currently used on arm64.
+    sources = gypi_skia_opts.none_sources
   } else if (current_cpu == "mipsel") {
     cflags += [ "-fomit-frame-pointer" ]
 
