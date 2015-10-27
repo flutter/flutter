@@ -47,6 +47,10 @@ class PhysicsWorld extends Node {
 
   List<PhysicsBody> _bodiesScheduledForUpdate = <PhysicsBody>[];
 
+  bool drawDebug = false;
+
+  Matrix4 _debugDrawTransform ;
+
   _PhysicsDebugDraw _debugDraw;
 
   double b2WorldToNodeConversionFactor = 10.0;
@@ -228,8 +232,10 @@ class PhysicsWorld extends Node {
   }
 
   void paint(PaintingCanvas canvas) {
+    if (drawDebug) {
+      _debugDrawTransform = new Matrix4.fromFloat64List(canvas.getTotalMatrix());
+    }
     super.paint(canvas);
-    paintDebug(canvas);
   }
 
   void paintDebug(PaintingCanvas canvas) {

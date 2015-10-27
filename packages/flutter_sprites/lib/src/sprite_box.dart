@@ -347,6 +347,14 @@ class SpriteBox extends RenderBox {
     Matrix4 totalMatrix = new Matrix4.fromFloat64List(canvas.getTotalMatrix());
     _rootNode._visit(canvas, totalMatrix);
 
+    // Draw physics debug
+    for (PhysicsWorld world in _physicsNodes) {
+      if (world.drawDebug) {
+        canvas.setMatrix(world._debugDrawTransform.storage);
+        world.paintDebug(canvas);
+      }
+    }
+
     canvas.restore();
   }
 
