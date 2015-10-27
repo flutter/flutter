@@ -53,6 +53,7 @@ class TestBed extends NodeWithSize {
 
   TestBed() : super(new Size(1024.0, 1024.0)) {
     _world = new PhysicsWorld(new Offset(0.0, 100.0));
+    _world.drawDebug = true;
     _group = new PhysicsGroup();
     _group2 = new PhysicsGroup();
     _group2.position = new Point(50.0, 50.0);
