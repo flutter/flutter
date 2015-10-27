@@ -19,7 +19,7 @@ class IconButton extends StatelessComponent {
   final String icon;
   final IconThemeColor color;
   final ColorFilter colorFilter;
-  final GestureTapCallback onPressed;
+  final VoidCallback onPressed;
 
   Widget build(BuildContext context) {
     return new GestureDetector(
