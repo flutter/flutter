@@ -49,7 +49,7 @@ class _Drawer extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onHorizontalDragStart: () {
+      onHorizontalDragStart: (_) {
         if (interactive)
           route._takeControl();
       },

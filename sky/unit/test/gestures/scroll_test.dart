@@ -12,7 +12,7 @@ void main() {
     TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
 
     bool didStartPan = false;
-    pan.onStart = () {
+    pan.onStart = (_) {
       didStartPan = true;
     };
 
