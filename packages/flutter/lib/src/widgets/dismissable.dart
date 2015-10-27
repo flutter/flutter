@@ -115,7 +115,7 @@ class _DismissableState extends State<Dismissable> {
       _maybeCallOnResized();
   }
 
-  void _handleDragStart() {
+  void _handleDragStart(_) {
     if (_fadePerformance.isAnimating)
       return;
     setState(() {

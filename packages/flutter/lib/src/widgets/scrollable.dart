@@ -239,7 +239,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     _animation.stop();
   }
 
-  void _handleDragStart() {
+  void _handleDragStart(_) {
     scheduleMicrotask(dispatchOnScrollStart);
   }
 
