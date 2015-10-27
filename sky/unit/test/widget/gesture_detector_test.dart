@@ -14,7 +14,7 @@ void main() {
       bool didEndDrag = false;
 
       Widget widget = new GestureDetector(
-        onVerticalDragStart: () {
+        onVerticalDragStart: (_) {
           didStartDrag = true;
         },
         onVerticalDragUpdate: (double scrollDelta) {
@@ -97,7 +97,7 @@ void main() {
 
       tester.pumpWidget(
         new GestureDetector(
-          onPanStart: () {
+          onPanStart: (_) {
             didStartPan = true;
           },
           onPanUpdate: (Offset delta) {

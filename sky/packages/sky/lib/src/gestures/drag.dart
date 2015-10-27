@@ -15,11 +15,11 @@ enum DragState {
   accepted
 }
 
-typedef void GestureDragStartCallback();
+typedef void GestureDragStartCallback(ui.Point globalPosition);
 typedef void GestureDragUpdateCallback(double delta);
 typedef void GestureDragEndCallback(ui.Offset velocity);
 
-typedef void GesturePanStartCallback();
+typedef void GesturePanStartCallback(ui.Point globalPosition);
 typedef void GesturePanUpdateCallback(ui.Offset delta);
 typedef void GesturePanEndCallback(ui.Offset velocity);
 
@@ -43,6 +43,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
   GestureDragEndCallback onEnd;
 
   DragState _state = DragState.ready;
+  ui.Point _initialPosition;
   T _pendingDragDelta;
 
   T get _initialPendingDragDelta;
@@ -56,6 +57,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
     _velocityTrackers[event.pointer] = new ui.VelocityTracker();
     if (_state == DragState.ready) {
       _state = DragState.possible;
+      _initialPosition = event.position;
       _pendingDragDelta = _initialPendingDragDelta;
     }
   }
@@ -85,7 +87,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecogniz
       T delta = _pendingDragDelta;
       _pendingDragDelta = _initialPendingDragDelta;
       if (onStart != null)
-        onStart();
+        onStart(_initialPosition);
       if (delta != _initialPendingDragDelta && onUpdate != null)
         onUpdate(delta);
     }
