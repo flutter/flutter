@@ -80,6 +80,7 @@ template("dart_precompile") {
   action(instructions_gen_target_name) {
     deps = [
       "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
+      "//sky/engine/bindings:generate_dart_ui"
     ]
     embedder_entry_points_manifest =
         "//sky/engine/bindings/dart_vm_entry_points.txt"
@@ -103,7 +104,7 @@ template("dart_precompile") {
     dart_ui_internals_path =
         rebase_path("//sky/engine/bindings/internals.dart")
     dart_ui_path =
-        rebase_path("$root_build_dir/clang_x64/gen/sky/bindings/dart_ui.dart")
+        rebase_path("$root_build_dir/gen/sky/bindings/dart_ui.dart")
 
     gen_snapshot_dir =
         get_label_info("//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
