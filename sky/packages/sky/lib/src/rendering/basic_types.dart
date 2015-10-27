@@ -12,4 +12,5 @@ export 'dart:ui' show
   Point,
   Rect,
   Size,
-  TransferMode;
+  TransferMode,
+  VoidCallback;

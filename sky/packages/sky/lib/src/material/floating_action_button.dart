@@ -24,7 +24,7 @@ class FloatingActionButton extends StatefulComponent {
 
   final Widget child;
   final Color backgroundColor;
-  final GestureTapCallback onPressed;
+  final VoidCallback onPressed;
 
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
 }

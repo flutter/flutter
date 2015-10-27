@@ -15,7 +15,7 @@ class DrawerItem extends StatelessComponent {
 
   final String icon;
   final Widget child;
-  final GestureTapCallback onPressed;
+  final VoidCallback onPressed;
   final bool selected;
 
   TextStyle _getTextStyle(ThemeData themeData) {

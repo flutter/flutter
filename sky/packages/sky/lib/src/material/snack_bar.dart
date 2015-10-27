@@ -20,7 +20,7 @@ class SnackBarAction extends StatelessComponent {
   }
 
   final String label;
-  final GestureTapCallback onPressed;
+  final VoidCallback onPressed;
 
   Widget build(BuildContext context) {
     return new GestureDetector(
