@@ -12,11 +12,11 @@ final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
       new Text("You are at home"),
       new RaisedButton(
         child: new Text('GO SHOPPING'),
-        onPressed: () => args.navigator.pushNamed('/shopping')
+        onPressed: () => Navigator.of(args.context).pushNamed('/shopping')
       ),
       new RaisedButton(
         child: new Text('START ADVENTURE'),
-        onPressed: () => args.navigator.pushNamed('/adventure')
+        onPressed: () => Navigator.of(args.context).pushNamed('/adventure')
       )],
       justifyContent: FlexJustifyContent.center
     )
@@ -28,11 +28,11 @@ final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
       new Text("Village Shop"),
       new RaisedButton(
         child: new Text('RETURN HOME'),
-        onPressed: () => args.navigator.pop()
+        onPressed: () => Navigator.of(args.context).pop()
       ),
       new RaisedButton(
         child: new Text('GO TO DUNGEON'),
-        onPressed: () => args.navigator.pushNamed('/adventure')
+        onPressed: () => Navigator.of(args.context).pushNamed('/adventure')
       )],
       justifyContent: FlexJustifyContent.center
     )
@@ -44,7 +44,7 @@ final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
       new Text("Monster's Lair"),
       new RaisedButton(
         child: new Text('RUN!!!'),
-        onPressed: () => args.navigator.pop()
+        onPressed: () => Navigator.of(args.context).pop()
       )],
       justifyContent: FlexJustifyContent.center
     )

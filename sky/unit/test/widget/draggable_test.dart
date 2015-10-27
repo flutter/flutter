@@ -15,7 +15,6 @@ void main() {
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) { return new Column(<Widget>[
               new Draggable(
-                navigator: args.navigator,
                 data: 1,
                 child: new Text('Source'),
                 feedback: new Text('Dragging')

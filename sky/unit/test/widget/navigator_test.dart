@@ -4,14 +4,10 @@ import 'package:test/test.dart';
 import 'widget_tester.dart';
 
 class FirstComponent extends StatelessComponent {
-  FirstComponent(this.navigator);
-
-  final NavigatorState navigator;
-
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () {
-        navigator.pushNamed('/second');
+        Navigator.of(context).pushNamed('/second');
       },
       child: new Container(
         decoration: new BoxDecoration(
@@ -24,17 +20,13 @@ class FirstComponent extends StatelessComponent {
 }
 
 class SecondComponent extends StatefulComponent {
-  SecondComponent(this.navigator);
-
-  final NavigatorState navigator;
-
   SecondComponentState createState() => new SecondComponentState();
 }
 
 class SecondComponentState extends State<SecondComponent> {
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onTap: config.navigator.pop,
+      onTap: Navigator.of(context).pop,
       child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: new Color(0xFFFF00FF)
@@ -49,8 +41,8 @@ void main() {
   test('Can navigator navigate to and from a stateful component', () {
     testWidgets((WidgetTester tester) {
       final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-        '/': (RouteArguments args) => new FirstComponent(args.navigator),
-        '/second': (RouteArguments args) => new SecondComponent(args.navigator),
+        '/': (RouteArguments args) => new FirstComponent(),
+        '/second': (RouteArguments args) => new SecondComponent(),
       };
 
       tester.pumpWidget(new Navigator(routes: routes));

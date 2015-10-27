@@ -65,8 +65,7 @@ class Dot extends StatelessComponent {
 }
 
 class ExampleDragSource extends StatelessComponent {
-  ExampleDragSource({ Key key, this.navigator, this.name, this.color }) : super(key: key);
-  final NavigatorState navigator;
+  ExampleDragSource({ Key key, this.name, this.color }) : super(key: key);
   final String name;
   final Color color;
 
@@ -75,7 +74,6 @@ class ExampleDragSource extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Draggable(
-      navigator: navigator,
       data: new DragData(name),
       child: new Dot(color: color, size: kDotSize),
       feedback: new Transform(
@@ -91,13 +89,7 @@ class ExampleDragSource extends StatelessComponent {
   }
 }
 
-class DragAndDropApp extends StatefulComponent {
-  DragAndDropApp({ this.navigator });
-  final NavigatorState navigator;
-  DragAndDropAppState createState() => new DragAndDropAppState();
-}
-
-class DragAndDropAppState extends State<DragAndDropApp> {
+class DragAndDropApp extends StatelessComponent {
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
@@ -107,9 +99,9 @@ class DragAndDropAppState extends State<DragAndDropApp> {
         style: Theme.of(context).text.body1.copyWith(textAlign: TextAlign.center),
         child: new Column(<Widget>[
           new Flexible(child: new Row(<Widget>[
-              new ExampleDragSource(navigator: config.navigator, name: 'Orange', color: const Color(0xFFFF9000)),
-              new ExampleDragSource(navigator: config.navigator, name: 'Teal', color: const Color(0xFF00FFFF)),
-              new ExampleDragSource(navigator: config.navigator, name: 'Yellow', color: const Color(0xFFFFF000)),
+              new ExampleDragSource(name: 'Orange', color: const Color(0xFFFF9000)),
+              new ExampleDragSource(name: 'Teal', color: const Color(0xFF00FFFF)),
+              new ExampleDragSource(name: 'Yellow', color: const Color(0xFFFFF000)),
             ],
             alignItems: FlexAlignItems.center,
             justifyContent: FlexJustifyContent.spaceAround
@@ -130,7 +122,7 @@ void main() {
   runApp(new MaterialApp(
     title: 'Drag and Drop Flutter Demo',
     routes: <String, RouteBuilder>{
-     '/': (RouteArguments args) => new DragAndDropApp(navigator: args.navigator)
+     '/': (RouteArguments args) => new DragAndDropApp()
     }
   ));
 }
