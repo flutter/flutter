@@ -11,28 +11,37 @@ import 'events.dart';
 import 'pointer_router.dart';
 import 'recognizer.dart';
 
+typedef void GestureTapDownCallback(ui.Point globalPosition);
+typedef void GestureTapUpCallback(ui.Point globalPosition);
 typedef void GestureTapCallback();
+typedef void GestureTapCancelCallback();
 
 /// TapGestureRecognizer is a tap recognizer that tracks only one primary
 /// pointer per gesture. That is, during tap recognition, extra pointer events
 /// are ignored: down-1, down-2, up-1, up-2 produces only one tap on up-1.
 class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  TapGestureRecognizer({ PointerRouter router, this.onTap })
-    : super(router: router);
+  TapGestureRecognizer({
+    PointerRouter router,
+    this.onTapDown,
+    this.onTapUp,
+    this.onTap,
+    this.onTapCancel
+  }) : super(router: router);
 
+  GestureTapDownCallback onTapDown;
+  GestureTapDownCallback onTapUp;
   GestureTapCallback onTap;
-  GestureTapCallback onTapDown;
-  GestureTapCallback onTapCancel;
+  GestureTapCancelCallback onTapCancel;
 
   bool _wonArena = false;
-  bool _didTap = false;
+  Point _finalPosition;
 
   void handlePrimaryPointer(PointerInputEvent event) {
     if (event.type == 'pointerdown') {
       if (onTapDown != null)
-        onTapDown();
+        onTapDown(event.position);
     } else if (event.type == 'pointerup') {
-      _didTap = true;
+      _finalPosition = event.position;
       _check();
     }
   }
@@ -50,15 +59,17 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (pointer == primaryPointer) {
       assert(state == GestureRecognizerState.defunct);
       _wonArena = false;
-      _didTap = false;
+      _finalPosition = null;
       if (onTapCancel != null)
         onTapCancel();
     }
   }
 
   void _check() {
-    if (_wonArena && _didTap) {
+    if (_wonArena && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
+      if (onTapUp != null)
+        onTapUp(_finalPosition);
       if (onTap != null)
         onTap();
     }
@@ -76,7 +87,7 @@ class _TapTracker {
     assert(event.type == 'pointerdown');
   }
 
-  int pointer;
+  final int pointer;
   GestureArenaEntry entry;
   ui.Point _initialPosition;
   bool _isTrackingPointer;
@@ -102,7 +113,7 @@ class _TapTracker {
 
 }
 
-enum TapResolution {
+enum _TapResolution {
   tap,
   cancel
 }
@@ -113,17 +124,15 @@ enum TapResolution {
 class _TapGesture extends _TapTracker {
 
   _TapGesture({ this.gestureRecognizer, PointerInputEvent event })
-    : super(event: event) {
+      : super(event: event) {
     entry = GestureArena.instance.add(event.pointer, gestureRecognizer);
-    _wonArena = false;
-    _didTap = false;
     startTrackingPointer(gestureRecognizer.router, handleEvent);
   }
 
-  MultiTapGestureRecognizer gestureRecognizer;
+  final MultiTapGestureRecognizer gestureRecognizer;
 
-  bool _wonArena;
-  bool _didTap;
+  bool _wonArena = false;
+  ui.Point _finalPosition;
 
   void handleEvent(PointerInputEvent event) {
     assert(event.pointer == pointer);
@@ -133,7 +142,7 @@ class _TapGesture extends _TapTracker {
       cancel();
     } else if (event.type == 'pointerup') {
       stopTrackingPointer(gestureRecognizer.router, handleEvent);
-      _didTap = true;
+      _finalPosition = event.position;
       _check();
     }
   }
@@ -145,7 +154,7 @@ class _TapGesture extends _TapTracker {
 
   void reject() {
     stopTrackingPointer(gestureRecognizer.router, handleEvent);
-    gestureRecognizer._resolveTap(pointer, TapResolution.cancel);
+    gestureRecognizer._resolveTap(pointer, _TapResolution.cancel, null);
   }
 
   void cancel() {
@@ -158,8 +167,8 @@ class _TapGesture extends _TapTracker {
   }
 
   void _check() {
-    if (_wonArena && _didTap)
-      gestureRecognizer._resolveTap(pointer, TapResolution.tap);
+    if (_wonArena && _finalPosition != null)
+      gestureRecognizer._resolveTap(pointer, _TapResolution.tap, _finalPosition);
   }
 
 }
@@ -169,12 +178,19 @@ class _TapGesture extends _TapTracker {
 /// does so independently of others: down-1, down-2, up-1, up-2 produces two
 /// taps, on up-1 and up-2.
 class MultiTapGestureRecognizer extends DisposableArenaMember {
-  MultiTapGestureRecognizer({ this.router, this.onTap, this.onTapDown, this.onTapCancel });
+  MultiTapGestureRecognizer({
+    this.router,
+    this.onTapDown,
+    this.onTapUp,
+    this.onTap,
+    this.onTapCancel
+  });
 
   PointerRouter router;
+  GestureTapDownCallback onTapDown;
+  GestureTapDownCallback onTapUp;
   GestureTapCallback onTap;
-  GestureTapCallback onTapDown;
-  GestureTapCallback onTapCancel;
+  GestureTapCancelCallback onTapCancel;
 
   Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();
 
@@ -185,7 +201,7 @@ class MultiTapGestureRecognizer extends DisposableArenaMember {
       event: event
     );
     if (onTapDown != null)
-      onTapDown();
+      onTapDown(event.position);
   }
 
   void acceptGesture(int pointer) {
@@ -198,9 +214,11 @@ class MultiTapGestureRecognizer extends DisposableArenaMember {
     _gestureMap[pointer]?.reject();
   }
 
-  void _resolveTap(int pointer, TapResolution resolution) {
+  void _resolveTap(int pointer, _TapResolution resolution, ui.Point globalPosition) {
     _gestureMap.remove(pointer);
-    if (resolution == TapResolution.tap) {
+    if (resolution == _TapResolution.tap) {
+      if (onTapUp != null)
+        onTapUp(globalPosition);
       if (onTap != null)
         onTap();
     } else {

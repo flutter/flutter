@@ -41,7 +41,7 @@ class InkWell extends StatefulComponent {
   final _HighlightChangedCallback onHighlightChanged;
   final Color defaultColor;
   final Color highlightColor;
-  
+
   _InkWellState createState() => new _InkWellState();
 }
 
@@ -237,7 +237,7 @@ class _RenderInkSplashes extends RenderProxyBox {
     _longPress = null;
   }
 
-  void _handleTapDown() {
+  void _handleTapDown(_) {
     if (onHighlightChanged != null)
       onHighlightChanged(true);
   }
