@@ -36,17 +36,15 @@ abstract class MaterialButton extends StatefulComponent {
   MaterialButton({
     Key key,
     this.child,
-    this.enabled: true,
     this.textColor,
     this.onPressed
-  }) : super(key: key) {
-    assert(enabled != null);
-  }
+  }) : super(key: key);
 
   final Widget child;
-  final bool enabled;
   final ButtonColor textColor;
   final GestureTapCallback onPressed;
+
+  bool get enabled => onPressed != null;
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);

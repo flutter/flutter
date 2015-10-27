@@ -19,10 +19,12 @@ const Duration _kToggleDuration = const Duration(milliseconds: 200);
 // ValueChanged on a tap gesture and driving a changed animation. Subclasses are
 // responsible for painting.
 abstract class RenderToggleable extends RenderConstrainedBox {
-  RenderToggleable({bool value, Size size, ValueChanged<bool> onChanged})
-      : _value = value,
-        _onChanged = onChanged,
-        super(additionalConstraints: new BoxConstraints.tight(size)) {
+  RenderToggleable({
+    bool value,
+    Size size,
+    this.onChanged
+  }) : _value = value,
+       super(additionalConstraints: new BoxConstraints.tight(size)) {
     _performance = new ValuePerformance<double>(
       variable: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeIn, reverseCurve: Curves.easeOut),
       duration: _kToggleDuration,
@@ -30,15 +32,21 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     )..addListener(markNeedsPaint);
   }
 
+  bool get value => _value;
+  bool _value;
+  void set value(bool value) {
+    if (value == _value)
+      return;
+    _value = value;
+    performance.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
+  }
+
+  ValueChanged<bool> onChanged;
+
   ValuePerformance<double> get performance => _performance;
   ValuePerformance<double> _performance;
 
   double get position => _performance.value;
-
-  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown')
-      _tap.addPointer(event);
-  }
 
   TapGestureRecognizer _tap;
 
@@ -56,23 +64,13 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     super.detach();
   }
 
+  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
+    if (event.type == 'pointerdown' && onChanged != null)
+      _tap.addPointer(event);
+  }
+
   void _handleTap() {
-    if (_onChanged != null)
-      _onChanged(!_value);
-  }
-
-  bool get value => _value;
-  bool _value;
-  void set value(bool value) {
-    if (value == _value)
-      return;
-    _value = value;
-    performance.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
-  }
-
-  ValueChanged<bool> get onChanged => _onChanged;
-  ValueChanged<bool> _onChanged;
-  void set onChanged(ValueChanged<bool> onChanged) {
-    _onChanged = onChanged;
+    if (onChanged != null)
+      onChanged(!_value);
   }
 }

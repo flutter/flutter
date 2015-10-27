@@ -7,11 +7,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 
 const double _kMidpoint = 0.5;
-const Color _kLightUncheckedColor = const Color(0x8A000000);
-const Color _kDarkUncheckedColor = const Color(0xB2FFFFFF);
 const double _kEdgeSize = 18.0;
 const double _kEdgeRadius = 1.0;
 const double _kStrokeWidth = 2.0;
@@ -30,21 +29,37 @@ class Checkbox extends StatelessComponent {
   ///
   /// * `value` determines whether the checkbox is checked.
   /// * `onChanged` is called whenever the state of the checkbox should change.
-  const Checkbox({Key key, this.value, this.onChanged}) : super(key: key);
+  const Checkbox({
+    Key key,
+    this.value,
+    this.onChanged
+  }) : super(key: key);
 
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  bool get enabled => onChanged != null;
+
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
-    Color uncheckedColor = themeData.brightness == ThemeBrightness.light
-        ? _kLightUncheckedColor
-        : _kDarkUncheckedColor;
+    if (enabled) {
+      Color uncheckedColor = themeData.brightness == ThemeBrightness.light
+          ? Colors.black54
+          : Colors.white70;
+      return new _CheckboxWrapper(
+        value: value,
+        onChanged: onChanged,
+        uncheckedColor: uncheckedColor,
+        accentColor: themeData.accentColor
+      );
+    }
+    Color disabledColor = themeData.brightness == ThemeBrightness.light
+        ? Colors.black26
+        : Colors.white30;
     return new _CheckboxWrapper(
       value: value,
-      onChanged: onChanged,
-      uncheckedColor: uncheckedColor,
-      accentColor: themeData.accentColor
+      uncheckedColor: disabledColor,
+      accentColor: disabledColor
     );
   }
 }

@@ -91,7 +91,6 @@ class StockHomeState extends State<StockHome> {
                 actions: <Widget>[
                   new FlatButton(
                     child: new Text('USE IT'),
-                    enabled: false,
                     onPressed: () {
                       config.navigator.pop(false);
                     }
