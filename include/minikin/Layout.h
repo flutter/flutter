@@ -59,7 +59,7 @@ struct LayoutGlyph {
 };
 
 // Internal state used during layout operation
-class LayoutContext;
+struct LayoutContext;
 
 enum {
     kBidi_LTR = 0,
