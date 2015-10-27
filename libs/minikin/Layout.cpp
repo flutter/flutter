@@ -276,16 +276,17 @@ void Layout::setFontCollection(const FontCollection* collection) {
     mCollection = collection;
 }
 
-static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, void* userData)
-{
+static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* /* hbFont */, void* fontData,
+        hb_codepoint_t glyph, void* /* userData */) {
     MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
     MinikinFont* font = paint->font;
     float advance = font->GetHorizontalAdvance(glyph, *paint);
     return 256 * advance + 0.5;
 }
 
-static hb_bool_t harfbuzzGetGlyphHorizontalOrigin(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, hb_position_t* x, hb_position_t* y, void* userData)
-{
+static hb_bool_t harfbuzzGetGlyphHorizontalOrigin(hb_font_t* /* hbFont */, void* /* fontData */,
+        hb_codepoint_t /* glyph */, hb_position_t* /* x */, hb_position_t* /* y */,
+        void* /* userData */) {
     // Just return true, following the way that Harfbuzz-FreeType
     // implementation does.
     return true;
@@ -709,7 +710,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
         ctx->paint.fakery = mFaces[font_ix].fakery;
         hb_font_t* hbFont = ctx->hbFonts[font_ix];
 #ifdef VERBOSE_DEBUG
-        ALOGD("Run %u, font %d [%d:%d]", run_ix, font_ix, run.start, run.end);
+        ALOGD("Run %zu, font %d [%d:%d]", run_ix, font_ix, run.start, run.end);
 #endif
 
         hb_font_set_ppem(hbFont, size * scaleX, size);
@@ -804,7 +805,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 if (info[i].cluster - start < count) {
                     mAdvances[info[i].cluster - start] += xAdvance;
                 } else {
-                    ALOGE("cluster %d (start %d) out of bounds of count %d",
+                    ALOGE("cluster %zu (start %zu) out of bounds of count %zu",
                         info[i].cluster - start, start, count);
                 }
                 x += xAdvance;
