@@ -35,6 +35,7 @@ export 'package:flutter/rendering.dart' show
     LinearGradient,
     Matrix4,
     Offset,
+    OneChildLayoutDelegate,
     Paint,
     Path,
     PlainTextSpan,
@@ -139,13 +140,21 @@ class CustomPaint extends OneChildRenderObjectWidget {
     assert(onPaint != null);
   }
 
+  /// This widget repaints whenver you supply a new onPaint callback.
+  ///
+  /// If you use an anonymous closure for the onPaint callback, you'll trigger
+  /// a repaint every time you build this widget, which might not be what you
+  /// intend. Instead, consider passing a reference to a member function, which
+  /// has a more stable identity.
   final CustomPaintCallback onPaint;
-  final Object token; // set this to be repainted automatically when the token changes
+
+  /// This widget repaints whenever you supply a new token.
+  final Object token;
 
   RenderCustomPaint createRenderObject() => new RenderCustomPaint(onPaint: onPaint);
 
   void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
-    if (oldWidget != null && oldWidget.token != token)
+    if (oldWidget.token != token)
       renderObject.markNeedsPaint();
     renderObject.onPaint = onPaint;
   }
@@ -241,6 +250,35 @@ class Align extends OneChildRenderObjectWidget {
 class Center extends Align {
   Center({ Key key, ShrinkWrap shrinkWrap: ShrinkWrap.none, Widget child })
     : super(key: key, shrinkWrap: shrinkWrap, child: child);
+}
+
+class CustomOneChildLayout extends OneChildRenderObjectWidget {
+  CustomOneChildLayout({
+    Key key,
+    this.delegate,
+    this.token,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(delegate != null);
+  }
+
+  /// A long-lived delegate that controls the layout of this widget.
+  ///
+  /// Whenever the delegate changes, we need to recompute the layout of this
+  /// widget, which means you might not want to create a new delegate instance
+  /// every time you build this widget. Instead, consider using a long-lived
+  /// deletate (perhaps held in a component's state) that you re-use every time
+  /// you build this widget.
+  final OneChildLayoutDelegate delegate;
+  final Object token;
+
+  RenderCustomOneChildLayoutBox createRenderObject() => new RenderCustomOneChildLayoutBox(delegate: delegate);
+
+  void updateRenderObject(RenderCustomOneChildLayoutBox renderObject, CustomOneChildLayout oldWidget) {
+    if (oldWidget.token != token)
+      renderObject.markNeedsLayout();
+    renderObject.delegate = delegate;
+  }
 }
 
 class SizedBox extends OneChildRenderObjectWidget {

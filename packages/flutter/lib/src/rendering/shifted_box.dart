@@ -205,6 +205,71 @@ class RenderPositionedBox extends RenderShiftedBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}alignment: $alignment\n';
 }
 
+/// A delegate for computing the layout of a render object with a single child.
+class OneChildLayoutDelegate {
+  /// Returns the size of this object given the incomming constraints.
+  Size getSize(BoxConstraints constraints) => constraints.biggest;
+
+  /// Returns the box constraints for the child given the incomming constraints.
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints;
+
+  /// Returns the position where the child should be placed given the size of this object and the size of the child.
+  Point getPositionForChild(Size size, Size childSize) => Point.origin;
+}
+
+class RenderCustomOneChildLayoutBox extends RenderShiftedBox {
+  RenderCustomOneChildLayoutBox({
+    RenderBox child,
+    OneChildLayoutDelegate delegate
+  }) : _delegate = delegate, super(child) {
+    assert(delegate != null);
+  }
+
+  OneChildLayoutDelegate get delegate => _delegate;
+  OneChildLayoutDelegate _delegate;
+  void set delegate (OneChildLayoutDelegate newDelegate) {
+    assert(newDelegate != null);
+    if (_delegate == newDelegate)
+      return;
+    _delegate = newDelegate;
+    markNeedsLayout();
+  }
+
+  Size _getSize(BoxConstraints constraints) {
+    return constraints.constrain(_delegate.getSize(constraints));
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    return _getSize(constraints).width;
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    return _getSize(constraints).width;
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    return _getSize(constraints).height;
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    return _getSize(constraints).height;
+  }
+
+  bool get sizedByParent => true;
+
+  void performResize() {
+    size = _getSize(constraints);
+  }
+
+  void performLayout() {
+    if (child != null) {
+      child.layout(delegate.getConstraintsForChild(constraints), parentUsesSize: true);
+      final BoxParentData childParentData = child.parentData;
+      childParentData.position = delegate.getPositionForChild(size, child.size);
+    }
+  }
+}
+
 class RenderBaseline extends RenderShiftedBox {
 
   RenderBaseline({
