@@ -1,6 +1,7 @@
 name: sky_raw_examples
 dependencies:
-  flutter: ">=0.0.3 <0.1.0"
+  flutter: 
+    '0.0.14'
   sky_tools: any
 dependency_overrides:
   material_design_icons:
