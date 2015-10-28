@@ -6,12 +6,12 @@
 
 #include "base/bind.h"
 #include "base/trace_event/trace_event.h"
+#include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/events/PointerEvent.h"
 #include "sky/engine/core/events/WheelEvent.h"
 #include "sky/engine/core/script/dart_controller.h"
 #include "sky/engine/core/script/dom_dart_state.h"
-#include "sky/engine/core/view/View.h"
 #include "sky/engine/core/window/window.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/sky/sky_view_client.h"
@@ -34,15 +34,10 @@ SkyView::~SkyView() {
 void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
   display_metrics_ = metrics;
   GetWindow()->UpdateWindowMetrics(display_metrics_);
-  view_->setDisplayMetrics(display_metrics_);
 }
 
 void SkyView::CreateView(const String& name) {
-  DCHECK(!view_);
   DCHECK(!dart_controller_);
-
-  view_ = View::create(
-      base::Bind(&SkyView::ScheduleFrame, weak_factory_.GetWeakPtr()));
 
   dart_controller_ = WTF::MakeUnique<DartController>();
   dart_controller_->CreateIsolateFor(WTF::MakeUnique<DOMDartState>(
@@ -50,35 +45,30 @@ void SkyView::CreateView(const String& name) {
 
   DOMDartState* dart_state = dart_controller_->dart_state();
   DartState::Scope scope(dart_state);
-  dart_controller_->InstallView(view_.get());
   dart_state->window()->DidCreateIsolate();
   client_->DidCreateIsolate(dart_state->isolate());
 
   GetWindow()->UpdateWindowMetrics(display_metrics_);
-  view_->setDisplayMetrics(display_metrics_);
 }
 
 void SkyView::RunFromLibrary(const WebString& name,
                              DartLibraryProvider* library_provider) {
-  DCHECK(view_);
   dart_controller_->RunFromLibrary(name, library_provider);
 }
 
 void SkyView::RunFromPrecompiledSnapshot() {
-  DCHECK(view_);
   dart_controller_->RunFromPrecompiledSnapshot();
 }
 
 void SkyView::RunFromSnapshot(const WebString& name,
                               mojo::ScopedDataPipeConsumerHandle snapshot) {
-  DCHECK(view_);
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 
 std::unique_ptr<sky::compositor::LayerTree> SkyView::BeginFrame(
     base::TimeTicks frame_time) {
   GetWindow()->BeginFrame(frame_time);
-  return view_->beginFrame(frame_time);
+  return std::move(layer_tree_);
 }
 
 void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
@@ -99,10 +89,8 @@ void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
     event = Event::create("back");
   }
 
-  if (event) {
+  if (event)
     GetWindow()->DispatchEvent(event.get());
-    view_->handleInputEvent(event);
-  }
 }
 
 Window* SkyView::GetWindow() {
@@ -114,7 +102,7 @@ void SkyView::ScheduleFrame() {
 }
 
 void SkyView::Render(Scene* scene) {
-  client_->Render(scene->takeLayerTree());
+  layer_tree_ = scene->takeLayerTree();
 }
 
 void SkyView::StartDartTracing() {

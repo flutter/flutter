@@ -6,6 +6,41 @@ part of dart_ui;
 
 final Tracing tracing = new Tracing();
 
-View view;
+class View {
+  View._();
+
+  double get devicePixelRatio => window.devicePixelRatio;
+
+  double get paddingTop => window.padding.top;
+  double get paddingRight => window.padding.right;
+  double get paddingBottom => window.padding.bottom;
+  double get paddingLeft => window.padding.left;
+
+  double get width => window.size.width;
+  double get height => window.size.height;
+
+  Scene get scene => null;
+  void set scene(Scene value) {
+    window.render(value);
+  }
+
+  void setEventCallback(EventCallback callback) {
+    window.onEvent = callback;
+  }
+
+  void setMetricsChangedCallback(VoidCallback callback) {
+    window.onMetricsChanged = callback;
+  }
+
+  void setFrameCallback(FrameCallback callback) {
+    window.onBeginFrame = (Duration duration) {
+      callback(duration.inMicroseconds / Duration.MICROSECONDS_PER_MILLISECOND);
+    };
+  }
+
+  void scheduleFrame() => window.scheduleFrame();
+}
+
+final View view = new View._();
 
 typedef EventListener(Event event);
