@@ -1,9 +1,8 @@
 name: flutter_sprites
 description: A sprite toolkit built on top of Flutter
-version: 0.0.9
+version: 0.0.10
 author: Flutter Authors <flutter-dev@googlegroups.com>
 homepage: http://flutter.io
 dependencies:
-  flutter: ">=0.0.12 <0.1.0"
-  sky_tools: ">=0.0.20 <0.1.0"
+  flutter: ">=0.0.13 <0.1.0"
   box2d: ">=0.2.0 <0.3.0"
