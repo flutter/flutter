@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -44,7 +43,7 @@ final CipherParameters _params = _initParams();
 Uint8List serializeManifest(Map manifestDescriptor, ECPublicKey publicKey, Uint8List zipBytes) {
   if (manifestDescriptor == null)
     return null;
-  final List<String> kSavedKeys = [
+  final List<String> kSavedKeys = <String>[
     'name',
     'version',
     'update-url'
@@ -66,9 +65,9 @@ Uint8List serializeManifest(Map manifestDescriptor, ECPublicKey publicKey, Uint8
 }
 
 // Returns the ASN.1 encoded signature of the input manifestBytes.
-List<int> signManifest(Uint8List manifestBytes, ECPrivateKey privateKey) {
+Uint8List signManifest(Uint8List manifestBytes, ECPrivateKey privateKey) {
   if (manifestBytes == null || privateKey == null)
-    return [];
+    return new Uint8List(0);
   Signer signer = new Signer(_params.signerAlgorithm);
   PrivateKeyParameter params = new PrivateKeyParameter(privateKey);
   signer.init(true, new ParametersWithRandom(params, _params.random));
@@ -121,26 +120,22 @@ ECPrivateKey _asn1ParsePrivateKey(ECDomainParameters ecDomain, Uint8List private
 
 // Parses a DER-encoded ASN.1 ECDSA signature block.
 ECSignature _asn1ParseSignature(Uint8List signature) {
-  ASN1Parser parser = new ASN1Parser(signature);
-  ASN1Object object = parser.nextObject();
-  if (object is! ASN1Sequence)
+  try {
+    ASN1Parser parser = new ASN1Parser(signature);
+    ASN1Object object = parser.nextObject();
+    if (object is! ASN1Sequence)
+      return null;
+    ASN1Sequence sequence = object;
+    if (!(sequence.elements.length == 2 &&
+          sequence.elements[0] is ASN1Integer &&
+          sequence.elements[1] is ASN1Integer))
+      return null;
+    ASN1Integer r = sequence.elements[0];
+    ASN1Integer s = sequence.elements[1];
+    return new ECSignature(r.valueAsPositiveBigInteger, s.valueAsPositiveBigInteger);
+  } on ASN1Exception {
     return null;
-  ASN1Sequence sequence = object;
-  if (!(sequence.elements.length == 2 &&
-        sequence.elements[0] is ASN1Integer &&
-        sequence.elements[1] is ASN1Integer))
-    return null;
-  ASN1Integer r = sequence.elements[0];
-  ASN1Integer s = sequence.elements[1];
-  return new ECSignature(r.valueAsPositiveBigInteger, s.valueAsPositiveBigInteger);
-}
-
-ECPrivateKey _readPrivateKeySync(String privateKeyPath) {
-  File file = new File(privateKeyPath);
-  if (!file.existsSync())
-    return null;
-  List<int> bytes = file.readAsBytesSync();
-  return _asn1ParsePrivateKey(_params.domain, new Uint8List.fromList(bytes));
+  }
 }
 
 ECPublicKey _publicKeyFromPrivateKey(ECPrivateKey privateKey) {
@@ -154,8 +149,16 @@ class KeyPair {
   ECPublicKey publicKey;
   ECPrivateKey privateKey;
 
-  static KeyPair readFromPrivateKeySync(String path) {
-    ECPrivateKey privateKey = _readPrivateKeySync(path);
+  static KeyPair readFromPrivateKeySync(String privateKeyPath) {
+    File file = new File(privateKeyPath);
+    if (!file.existsSync())
+      return null;
+    return fromPrivateKeyBytes(file.readAsBytesSync());
+  }
+
+  static KeyPair fromPrivateKeyBytes(List<int> privateKeyBytes) {
+    ECPrivateKey privateKey = _asn1ParsePrivateKey(
+        _params.domain, new Uint8List.fromList(privateKeyBytes));
     if (privateKey == null)
       return null;
 
