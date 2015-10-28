@@ -4,14 +4,19 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A workspace to host pub packages
 homepage: https://github.com/flutter/engine/tree/master/sky/packages/workbench
 dependencies:
-  flutter: ">=0.0.3 <0.1.0"
+  flutter: 
+    '0.0.14'
   sky_tools: any
   cipher: any
   asn1lib: any
   flutter_rendering_examples: any
-  flutter_sprites: any
+  flutter_sprites: 
+    '0.0.11'
   playfair: any
-  flx: any
+  flx: 
+    '0.0.3'
+  sky_services:
+    '0.0.44'
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
