@@ -301,7 +301,7 @@ class CardCollectionState extends State<CardCollection> {
             )
           : new DefaultTextStyle(
               style: DefaultTextStyle.of(context).merge(cardLabelStyle).merge(_textStyle).copyWith(
-                fontSize: _varyFontSizes ? 5.0 + _cardModels.length.toDouble() : null
+                fontSize: _varyFontSizes ? _cardModels.length.toDouble() : null
               ),
               child: new Column(<Widget>[
                   new Text(cardModel.label)
