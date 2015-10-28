@@ -27,7 +27,7 @@ SchedulerExceptionHandler debugSchedulerExceptionHandler;
 class Scheduler {
   /// Requires clients to use the [scheduler] singleton
   Scheduler._() {
-    ui.view.setFrameCallback(beginFrame);
+    ui.window.onBeginFrame = beginFrame;
   }
 
   bool _haveScheduledVisualUpdate = false;
@@ -49,13 +49,11 @@ class Scheduler {
   /// [requestAnimationFrame], then calls all the callbacks registered by
   /// [addPersistentFrameCallback], which typically drive the rendering pipeline,
   /// and finally calls the callbacks registered by [requestPostFrameCallback].
-  void beginFrame(double rawTimeStamp) {
+  void beginFrame(Duration rawTimeStamp) {
     assert(!_inFrame);
     _inFrame = true;
-    rawTimeStamp /= timeDilation;
-    final Duration timeStamp = new Duration(
-      microseconds: (rawTimeStamp * Duration.MICROSECONDS_PER_MILLISECOND).round()
-    );
+    Duration timeStamp = new Duration(
+        microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
     _haveScheduledVisualUpdate = false;
     assert(_postFrameCallbacks.length == 0);
 
@@ -148,7 +146,7 @@ class Scheduler {
   void ensureVisualUpdate() {
     if (_haveScheduledVisualUpdate)
       return;
-    ui.view.scheduleFrame();
+    ui.window.scheduleFrame();
     _haveScheduledVisualUpdate = true;
   }
 }

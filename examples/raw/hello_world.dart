@@ -21,8 +21,8 @@ ui.Picture paint(ui.Rect paintBounds) {
 }
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
-  final double devicePixelRatio = ui.view.devicePixelRatio;
-  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
+  final double devicePixelRatio = ui.window.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.window.size.width * devicePixelRatio, ui.window.size.height * devicePixelRatio);
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
@@ -35,23 +35,23 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   return sceneBuilder.build();
 }
 
-void beginFrame(double timeStamp) {
-  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+void beginFrame(Duration timeStamp) {
+  ui.Rect paintBounds = ui.Point.origin & ui.window.size;
   ui.Picture picture = paint(paintBounds);
   ui.Scene scene = composite(picture, paintBounds);
-  ui.view.scene = scene;
+  ui.window.render(scene);
 }
 
 bool handleEvent(ui.Event event) {
   if (event.type == 'pointerdown') {
     color = new ui.Color.fromARGB(255, 0, 0, 255);
-    ui.view.scheduleFrame();
+    ui.window.scheduleFrame();
     return true;
   }
 
   if (event.type == 'pointerup') {
     color = new ui.Color.fromARGB(255, 0, 255, 0);
-    ui.view.scheduleFrame();
+    ui.window.scheduleFrame();
     return true;
   }
 
@@ -66,7 +66,7 @@ bool handleEvent(ui.Event event) {
 void main() {
   print('Hello, world');
   color = new ui.Color.fromARGB(255, 0, 255, 0);
-  ui.view.setFrameCallback(beginFrame);
-  ui.view.setEventCallback(handleEvent);
-  ui.view.scheduleFrame();
+  ui.window.onBeginFrame = beginFrame;
+  ui.window.onEvent = handleEvent;
+  ui.window.scheduleFrame();
 }

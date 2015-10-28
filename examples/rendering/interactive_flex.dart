@@ -101,5 +101,5 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
 
   updateTaskDescription('Interactive Flex', topColor);
   new FlutterBinding(root: root);
-  ui.view.setEventCallback(handleEvent);
+  ui.window.onEvent = handleEvent;
 }

@@ -136,7 +136,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   }
 
   Offset get _scrollOffsetRoundedToIntegerDevicePixels {
-    double devicePixelRatio = ui.view.devicePixelRatio;
+    double devicePixelRatio = ui.window.devicePixelRatio;
     int dxInDevicePixels = (scrollOffset.dx * devicePixelRatio).round();
     int dyInDevicePixels = (scrollOffset.dy * devicePixelRatio).round();
     return new Offset(dxInDevicePixels / devicePixelRatio,

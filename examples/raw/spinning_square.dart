@@ -6,16 +6,16 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
-double timeBase = null;
+Duration timeBase = null;
 
-void beginFrame(double timeStamp) {
+void beginFrame(Duration timeStamp) {
   ui.tracing.begin('beginFrame');
   if (timeBase == null)
     timeBase = timeStamp;
-  double delta = timeStamp - timeBase;
+  double delta = (timeStamp - timeBase).inMicroseconds / Duration.MICROSECONDS_PER_MILLISECOND;
 
   // paint
-  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+  ui.Rect paintBounds = ui.Point.origin & ui.window.size;
   ui.PictureRecorder recorder = new ui.PictureRecorder();
   ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
   canvas.translate(paintBounds.width / 2.0, paintBounds.height / 2.0);
@@ -25,8 +25,8 @@ void beginFrame(double timeStamp) {
   ui.Picture picture = recorder.endRecording();
 
   // composite
-  final double devicePixelRatio = ui.view.devicePixelRatio;
-  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
+  final double devicePixelRatio = ui.window.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.window.size.width * devicePixelRatio, ui.window.size.height * devicePixelRatio);
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
@@ -36,13 +36,13 @@ void beginFrame(double timeStamp) {
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture, paintBounds)
     ..pop();
-  ui.view.scene = sceneBuilder.build();
+  ui.window.render(sceneBuilder.build());
 
   ui.tracing.end('beginFrame');
-  ui.view.scheduleFrame();
+  ui.window.scheduleFrame();
 }
 
 void main() {
-  ui.view.setFrameCallback(beginFrame);
-  ui.view.scheduleFrame();
+  ui.window.onBeginFrame = beginFrame;
+  ui.window.scheduleFrame();
 }

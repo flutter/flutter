@@ -12,8 +12,8 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
   switch (await showMenu(
     context: context,
     position: new MenuPosition(
-      right: ui.view.paddingRight + _kMenuMargin,
-      top: ui.view.paddingTop + _kMenuMargin
+      right: ui.window.padding.right + _kMenuMargin,
+      top: ui.window.padding.top + _kMenuMargin
     ),
     items: <PopupMenuItem>[
       new PopupMenuItem(
