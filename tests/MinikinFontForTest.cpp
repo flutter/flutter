@@ -29,14 +29,14 @@ MinikinFontForTest::MinikinFontForTest(const std::string& font_path) : mFontPath
 MinikinFontForTest::~MinikinFontForTest() {
 }
 
-float MinikinFontForTest::GetHorizontalAdvance(uint32_t /* glyph_id */,
-        const android::MinikinPaint& /* paint */) const {
+float MinikinFontForTest::GetHorizontalAdvance(
+        uint32_t glyph_id, const android::MinikinPaint &paint) const {
     LOG_ALWAYS_FATAL("MinikinFontForTest::GetHorizontalAdvance is not yet implemented");
     return 0.0f;
 }
 
-void MinikinFontForTest::GetBounds(android::MinikinRect* /* bounds */, uint32_t /* glyph_id */,
-        const android::MinikinPaint& /* paint */) const {
+void MinikinFontForTest::GetBounds(android::MinikinRect* bounds, uint32_t glyph_id,
+        const android::MinikinPaint& paint) const {
     LOG_ALWAYS_FATAL("MinikinFontForTest::GetBounds is not yet implemented");
 }
 

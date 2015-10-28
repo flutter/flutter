@@ -54,6 +54,4 @@ LOCAL_C_INCLUDES := \
     external/libxml2/include \
     external/skia/src/core
 
-LOCAL_CPPFLAGS += -Werror -Wall -Wextra
-
 include $(BUILD_NATIVE_TEST)

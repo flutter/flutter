@@ -50,7 +50,6 @@ LOCAL_MODULE := libminikin
 LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
 LOCAL_SRC_FILES := $(minikin_src_files)
 LOCAL_C_INCLUDES := $(minikin_c_includes)
-LOCAL_CPPFLAGS += -Werror -Wall -Wextra
 LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
 
 include $(BUILD_SHARED_LIBRARY)
@@ -62,7 +61,6 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
 LOCAL_SRC_FILES := $(minikin_src_files)
 LOCAL_C_INCLUDES := $(minikin_c_includes)
-LOCAL_CPPFLAGS += -Werror -Wall -Wextra
 LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
 
 include $(BUILD_STATIC_LIBRARY)
@@ -75,7 +73,6 @@ LOCAL_MODULE := libminikin_host
 LOCAL_MODULE_TAGS := optional
 LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
 LOCAL_C_INCLUDES := $(minikin_c_includes)
-LOCAL_CPPFLAGS += -Werror -Wall -Wextra
 LOCAL_SHARED_LIBRARIES := liblog libicuuc-host
 
 LOCAL_SRC_FILES := Hyphenator.cpp

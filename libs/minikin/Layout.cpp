@@ -276,17 +276,16 @@ void Layout::setFontCollection(const FontCollection* collection) {
     mCollection = collection;
 }
 
-static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* /* hbFont */, void* fontData,
-        hb_codepoint_t glyph, void* /* userData */) {
+static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, void* userData)
+{
     MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
     MinikinFont* font = paint->font;
     float advance = font->GetHorizontalAdvance(glyph, *paint);
     return 256 * advance + 0.5;
 }
 
-static hb_bool_t harfbuzzGetGlyphHorizontalOrigin(hb_font_t* /* hbFont */, void* /* fontData */,
-        hb_codepoint_t /* glyph */, hb_position_t* /* x */, hb_position_t* /* y */,
-        void* /* userData */) {
+static hb_bool_t harfbuzzGetGlyphHorizontalOrigin(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, hb_position_t* x, hb_position_t* y, void* userData)
+{
     // Just return true, following the way that Harfbuzz-FreeType
     // implementation does.
     return true;

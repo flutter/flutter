@@ -35,18 +35,18 @@ public:
     MockMinikinFont(int32_t id) : mId(id) {
     }
 
-    virtual float GetHorizontalAdvance(uint32_t /* glyph_id */,
-            const MinikinPaint& /* paint */) const {
+    virtual float GetHorizontalAdvance(
+            uint32_t glyph_id, const MinikinPaint &paint) const {
         LOG_ALWAYS_FATAL("MockMinikinFont::GetHorizontalAdvance is not implemented.");
         return 0.0f;
     }
 
-    virtual void GetBounds(MinikinRect* /* bounds */, uint32_t /* glyph_id */,
-            const MinikinPaint& /* paint */) const {
+    virtual void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
+            const MinikinPaint &paint) const {
         LOG_ALWAYS_FATAL("MockMinikinFont::GetBounds is not implemented.");
     }
 
-    virtual bool GetTable(uint32_t /* tag */, uint8_t* /* buf */, size_t* /* size */) {
+    virtual bool GetTable(uint32_t tag, uint8_t *buf, size_t *size) {
         LOG_ALWAYS_FATAL("MockMinikinFont::GetTable is not implemented.");
         return false;
     }
