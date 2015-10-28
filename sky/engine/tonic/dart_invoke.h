@@ -19,6 +19,9 @@ bool DartInvokeAppClosure(Dart_Handle closure,
                           int number_of_arguments,
                           Dart_Handle* arguments);
 
+bool DartInvokeAppClosure(Dart_Handle closure,
+                          std::initializer_list<Dart_Handle> args);
+
 }  // namespace blink
 
 #endif  // SKY_ENGINE_TONIC_DART_INVOKE_H_
