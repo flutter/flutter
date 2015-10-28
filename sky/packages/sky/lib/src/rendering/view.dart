@@ -62,7 +62,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   Matrix4 get _logicalToDeviceTransform {
-    double devicePixelRatio = ui.view.devicePixelRatio;
+    double devicePixelRatio = ui.window.devicePixelRatio;
     return new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
 
@@ -119,10 +119,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     ui.tracing.begin('RenderView.compositeFrame');
     try {
       (layer as TransformLayer).transform = _logicalToDeviceTransform;
-      Rect bounds = Point.origin & (size * ui.view.devicePixelRatio);
+      Rect bounds = Point.origin & (size * ui.window.devicePixelRatio);
       ui.SceneBuilder builder = new ui.SceneBuilder(bounds);
       layer.addToScene(builder, Offset.zero);
-      ui.view.scene = builder.build();
+      ui.window.render(builder.build());
     } finally {
       ui.tracing.end('RenderView.compositeFrame');
     }
@@ -130,6 +130,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Rect get paintBounds => Point.origin & size;
 
-  String debugDescribeSettings(String prefix) => '${prefix}view width: ${ui.view.width} (in device pixels)\n${prefix}view height: ${ui.view.height} (in device pixels)\n${prefix}device pixel ratio: ${ui.view.devicePixelRatio} (device pixels per logical pixel)\n${prefix}root constraints: $rootConstraints (in logical pixels)\n';
+  String debugDescribeSettings(String prefix) => '${prefix}window size: ${ui.window.size} (in device pixels)\n${prefix}device pixel ratio: ${ui.window.devicePixelRatio} (device pixels per logical pixel)\n${prefix}root constraints: $rootConstraints (in logical pixels)\n';
   // call to ${super.debugDescribeSettings(prefix)} is omitted because the root superclasses don't include any interesting information for this class
 }
