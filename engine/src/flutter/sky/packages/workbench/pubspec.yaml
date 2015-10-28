@@ -5,7 +5,7 @@ description: A workspace to host pub packages
 homepage: https://github.com/flutter/engine/tree/master/sky/packages/workbench
 dependencies:
   flutter: ">=0.0.3 <0.1.0"
-  sky_tools: ">=0.0.26"
+  sky_tools: any
   cipher: any
   asn1lib: any
   flutter_rendering_examples: any
