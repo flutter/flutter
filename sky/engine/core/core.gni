@@ -252,6 +252,8 @@ sky_core_files = [
   "view/View.cpp",
   "view/View.h",
   "view/VoidCallback.h",
+  "window/window.cc",
+  "window/window.h",
 ]
 
 core_idl_files = get_path_info([

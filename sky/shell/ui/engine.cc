@@ -251,6 +251,9 @@ void Engine::ScheduleFrame() {
   animator_->RequestFrame();
 }
 
+void Engine::Render(std::unique_ptr<compositor::LayerTree> layer_tree) {
+}
+
 mojo::NavigatorHost* Engine::NavigatorHost() {
   return this;
 }

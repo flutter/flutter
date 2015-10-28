@@ -10,11 +10,13 @@
 
 namespace blink {
 
-bool DartInvokeAppField(Dart_Handle target, Dart_Handle name,
-                               int number_of_arguments,
-                               Dart_Handle* arguments) {
-  TRACE_EVENT0("sky", "DartInvoke::DartInvokeAppField");
-  return LogIfError(Dart_Invoke(target, name, number_of_arguments, arguments));
+bool DartInvokeField(Dart_Handle target,
+                     const char* name,
+                     std::initializer_list<Dart_Handle> args) {
+  TRACE_EVENT1("sky", "DartInvokeField", "name", name);
+  Dart_Handle field = Dart_NewStringFromCString(name);
+  return LogIfError(Dart_Invoke(
+      target, field, args.size(), const_cast<Dart_Handle*>(args.begin())));
 }
 
 bool DartInvokeAppClosure(Dart_Handle closure,

@@ -6,6 +6,7 @@
 
 #include "gen/sky/bindings/DartGlobal.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
+#include "sky/engine/core/window/window.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 
@@ -36,6 +37,7 @@ void DartUI::InitForIsolate() {
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     DartRuntimeHooks::RegisterNatives(g_natives);
+    Window::RegisterNatives(g_natives);
   }
 
   DART_CHECK_VALID(Dart_SetNativeResolver(

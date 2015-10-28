@@ -12,6 +12,7 @@
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/services/network/interfaces/url_loader.mojom.h"
 #include "sky/compositor/layer_tree.h"
+#include "sky/engine/core/window/window.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebString.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
@@ -23,11 +24,13 @@
 namespace blink {
 class DartController;
 class DartLibraryProvider;
+class Scene;
 class SkyViewClient;
 class View;
 class WebInputEvent;
+class Window;
 
-class SkyView {
+class SkyView : public WindowClient {
  public:
   static std::unique_ptr<SkyView> Create(SkyViewClient* client);
   ~SkyView();
@@ -54,12 +57,15 @@ class SkyView {
  private:
   explicit SkyView(SkyViewClient* client);
 
-  void ScheduleFrame();
+  Window* GetWindow();
+
+  void ScheduleFrame() override;
+  void Render(Scene* scene) override;
 
   SkyViewClient* client_;
   SkyDisplayMetrics display_metrics_;
   RefPtr<View> view_;
-  OwnPtr<DartController> dart_controller_;
+  std::unique_ptr<DartController> dart_controller_;
 
   base::WeakPtrFactory<SkyView> weak_factory_;
 

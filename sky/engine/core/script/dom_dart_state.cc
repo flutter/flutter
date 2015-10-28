@@ -5,11 +5,12 @@
 #include "sky/engine/core/script/dom_dart_state.h"
 
 #include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/core/window/window.h"
 
 namespace blink {
 
-DOMDartState::DOMDartState(const String& url)
-    : url_(url) {
+DOMDartState::DOMDartState(std::unique_ptr<Window> window, const String& url)
+    : window_(std::move(window)), url_(url) {
 }
 
 DOMDartState::~DOMDartState() {

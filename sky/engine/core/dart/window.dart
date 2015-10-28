@@ -5,11 +5,11 @@
 part of dart_ui;
 
 typedef void _VoidCallback();
-typedef Scene _FrameCallback(Duration duration);
+typedef void _FrameCallback(Duration duration);
 typedef void _EventCallback(Event event);
 
-class Padding {
-  const Padding({ this.top, this.right, this.bottom, this.left });
+class WindowPadding {
+  const WindowPadding._({ this.top, this.right, this.bottom, this.left });
 
   final double top;
   final double right;
@@ -26,14 +26,15 @@ class Window {
   Size get size => _size;
   Size _size;
 
-  Padding get padding => _padding;
-  Padding _padding;
+  WindowPadding get padding => _padding;
+  WindowPadding _padding;
 
   _FrameCallback onBeginFrame;
   _EventCallback onEvent;
   _VoidCallback onMetricsChanged;
 
   void scheduleFrame() native "Window_scheduleFrame";
+  void render(Scene scene) native "Window_render";
 }
 
 final Window window = new Window._();

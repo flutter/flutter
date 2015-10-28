@@ -72,7 +72,7 @@ DartController::~DartController() {
     Dart_EnterIsolate(dom_dart_state_->isolate());
     Dart_ShutdownIsolate();
     dom_dart_state_->SetIsolate(nullptr);
-    dom_dart_state_.clear();
+    dom_dart_state_ = nullptr;
   }
 }
 
@@ -85,7 +85,7 @@ void DartController::DidLoadMainLibrary(String name) {
   Dart_Handle library = Dart_LookupLibrary(StringToDart(dart_state(), name));
   if (LogIfError(library))
     exit(1);
-  if (DartInvokeAppField(library, ToDart("main"), 0, nullptr))
+  if (DartInvokeField(library, "main", {}))
     exit(1);
 }
 
@@ -99,7 +99,7 @@ void DartController::DidLoadSnapshot() {
 
   Dart_Handle library = Dart_RootLibrary();
   DART_CHECK_VALID(library);
-  DartInvokeAppField(library, ToDart("main"), 0, nullptr);
+  DartInvokeField(library, "main", {});
 }
 
 void DartController::RunFromPrecompiledSnapshot() {
@@ -108,7 +108,7 @@ void DartController::RunFromPrecompiledSnapshot() {
 
 void DartController::RunFromSnapshot(
     mojo::ScopedDataPipeConsumerHandle snapshot) {
-  snapshot_loader_ = adoptPtr(new DartSnapshotLoader(dart_state()));
+  snapshot_loader_ = WTF::MakeUnique<DartSnapshotLoader>(dart_state());
   snapshot_loader_->LoadSnapshot(
       snapshot.Pass(),
       base::Bind(&DartController::DidLoadSnapshot, weak_factory_.GetWeakPtr()));
@@ -120,7 +120,7 @@ void DartController::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
   Dart_Handle library = Dart_RootLibrary();
   if (LogIfError(library))
     return;
-  DartInvokeAppField(library, ToDart("main"), 0, nullptr);
+  DartInvokeField(library, "main", {});
 }
 
 void DartController::RunFromLibrary(const String& name,
@@ -138,10 +138,10 @@ void DartController::RunFromLibrary(const String& name,
                                         weak_factory_.GetWeakPtr(), name));
 }
 
-void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
+void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
   CHECK(kDartIsolateSnapshotBuffer);
   char* error = nullptr;
-  dom_dart_state_ = state;
+  dom_dart_state_ = std::move(state);
   Dart_Isolate isolate = Dart_CreateIsolate(
       dom_dart_state_->url().utf8().data(), "main", kDartIsolateSnapshotBuffer,
       nullptr, static_cast<DartState*>(dom_dart_state_.get()), &error);
@@ -166,9 +166,6 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
 }
 
 void DartController::InstallView(View* view) {
-  DartIsolateScope isolate_scope(dart_state()->isolate());
-  DartApiScope dart_api_scope;
-
   Dart_Handle library = Dart_LookupLibrary(ToDart("dart:ui"));
   CHECK(!LogIfError(Dart_SetField(library, ToDart("view"), ToDart(view))));
 }

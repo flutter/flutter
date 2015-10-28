@@ -291,4 +291,7 @@ void DocumentView::ScheduleFrame() {
   layer_host_->SetNeedsAnimate();
 }
 
+void DocumentView::Render(std::unique_ptr<compositor::LayerTree> layer_tree) {
+}
+
 }  // namespace sky
