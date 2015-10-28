@@ -63,7 +63,7 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
               child: new Row(<Widget>[
                 new Icon(
                   type: 'device/dvr',
-                  size: 18
+                  size: IconSize.s18
                 ),
                 new Container(
                   width: 8.0

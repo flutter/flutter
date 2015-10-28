@@ -289,7 +289,7 @@ class CardCollectionState extends State<CardCollection> {
         child: new Container(
           height: cardModel.height,
           padding: const EdgeDims.all(8.0),
-          child: _editable ? 
+          child: _editable ?
             new Center(
               child: new Input(
                 key: new GlobalObjectKey(cardModel),
@@ -329,11 +329,11 @@ class CardCollectionState extends State<CardCollection> {
         backgroundMessage = "Unsupported dismissDirection";
     }
 
-    Widget leftArrowIcon =  new Icon(type: 'navigation/arrow_back', size: 36);
+    Widget leftArrowIcon =  new Icon(type: 'navigation/arrow_back', size: IconSize.s36);
     if (_dismissDirection == DismissDirection.right)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
-    Widget rightArrowIcon =  new Icon(type: 'navigation/arrow_forward', size: 36);
+    Widget rightArrowIcon =  new Icon(type: 'navigation/arrow_forward', size: IconSize.s36);
     if (_dismissDirection == DismissDirection.left)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 
