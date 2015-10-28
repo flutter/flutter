@@ -601,6 +601,8 @@ class TabNavigator extends StatelessComponent {
         isScrollable: isScrollable
       ),
       new Flexible(child: views[selectedIndex].builder(context))
-    ]);
+    ],
+      alignItems: FlexAlignItems.stretch
+    );
   }
 }
