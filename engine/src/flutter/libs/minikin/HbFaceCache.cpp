@@ -26,7 +26,7 @@
 
 namespace android {
 
-static hb_blob_t* referenceTable(hb_face_t* /* face */, hb_tag_t tag, void* userData) {
+static hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData) {
     MinikinFont* font = reinterpret_cast<MinikinFont*>(userData);
     size_t length = 0;
     bool ok = font->GetTable(tag, NULL, &length);
@@ -50,6 +50,11 @@ static hb_blob_t* referenceTable(hb_face_t* /* face */, hb_tag_t tag, void* user
             HB_MEMORY_MODE_WRITABLE, buffer, free);
 }
 
+static unsigned int disabledDecomposeCompatibility(
+        hb_unicode_funcs_t*, hb_codepoint_t, hb_codepoint_t*, void*) {
+    return 0;
+}
+
 class HbFaceCache : private OnEntryRemoved<int32_t, hb_face_t*> {
 public:
     HbFaceCache() : mCache(kMaxEntries) {
@@ -57,7 +62,7 @@ public:
     }
 
     // callback for OnEntryRemoved
-    void operator()(int32_t& /* key */, hb_face_t*& value) {
+    void operator()(int32_t& key, hb_face_t*& value) {
         hb_face_destroy(value);
     }
 
