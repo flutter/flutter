@@ -28,7 +28,7 @@ class Scaffold extends StatelessComponent {
   Widget build(BuildContext context) {
     double toolBarHeight = 0.0;
     if (toolBar != null)
-      toolBarHeight = kToolBarHeight + ui.view.paddingTop;
+      toolBarHeight = kToolBarHeight + ui.window.padding.top;
 
     double statusBarHeight = 0.0;
     if (statusBar != null)

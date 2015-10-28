@@ -109,11 +109,11 @@ Simulation _createFlingScrollSimulation(double position, double velocity, double
   // scrolling less than one logical pixel per frame. We're essentially
   // normalizing by the devicePixelRatio so that the threshold has the
   // same effect independent of the device's pixel density.
-  double endVelocity = 15.0 * ui.view.devicePixelRatio;
+  double endVelocity = 15.0 * ui.window.devicePixelRatio;
 
   // Similar to endVelocity. Stop scrolling when we're this close to
   // destiniation scroll offset.
-  double endDistance = 0.5 * ui.view.devicePixelRatio;
+  double endDistance = 0.5 * ui.window.devicePixelRatio;
 
   SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
   ScrollSimulation simulation =
@@ -124,7 +124,7 @@ Simulation _createFlingScrollSimulation(double position, double velocity, double
 
 Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
   double startVelocity = velocity * _kSecondsPerMillisecond;
-  double endVelocity = 15.0 * ui.view.devicePixelRatio * velocity.sign;
+  double endVelocity = 15.0 * ui.window.devicePixelRatio * velocity.sign;
   return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
 }
 

@@ -132,9 +132,9 @@ class FlutterBinding extends HitTestTarget {
     assert(_instance == null);
     _instance = this;
 
-    ui.view.setEventCallback(_handleEvent);
+    ui.window.onEvent = _handleEvent;
+    ui.window.onMetricsChanged = _handleMetricsChanged;
 
-    ui.view.setMetricsChangedCallback(_handleMetricsChanged);
     if (renderViewOverride == null) {
       _renderView = new RenderView(child: root);
       _renderView.attach();
@@ -166,7 +166,7 @@ class FlutterBinding extends HitTestTarget {
   bool removeMetricListener(MetricListener listener) => _metricListeners.remove(listener);
 
   void _handleMetricsChanged() {
-    Size size = new Size(ui.view.width, ui.view.height);
+    Size size = ui.window.size;
     _renderView.rootConstraints = new ViewConstraints(size: size);
     for (MetricListener listener in _metricListeners)
       listener(size);

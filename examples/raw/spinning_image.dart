@@ -8,7 +8,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
-double timeBase = null;
+Duration timeBase = null;
 
 ui.Image image = null;
 String url1 = "https://raw.githubusercontent.com/dart-lang/logos/master/logos_and_wordmarks/dart-logo.png";
@@ -42,8 +42,8 @@ ui.Picture paint(ui.Rect paintBounds, double delta) {
 }
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
-  final double devicePixelRatio = ui.view.devicePixelRatio;
-  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width * devicePixelRatio, ui.view.height * devicePixelRatio);
+  final double devicePixelRatio = ui.window.devicePixelRatio;
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.window.size.width * devicePixelRatio, ui.window.size.height * devicePixelRatio);
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
@@ -56,15 +56,15 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   return sceneBuilder.build();
 }
 
-void beginFrame(double timeStamp) {
+void beginFrame(Duration timeStamp) {
   if (timeBase == null)
     timeBase = timeStamp;
-  double delta = timeStamp - timeBase;
-  ui.Rect paintBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.view.width, ui.view.height);
+  double delta = (timeStamp - timeBase).inMicroseconds / Duration.MICROSECONDS_PER_MILLISECOND;
+  ui.Rect paintBounds = ui.Point.origin & ui.window.size;
   ui.Picture picture = paint(paintBounds, delta);
   ui.Scene scene = composite(picture, paintBounds);
-  ui.view.scene = scene;
-  ui.view.scheduleFrame();
+  ui.window.render(scene);
+  ui.window.scheduleFrame();
 }
 
 
@@ -72,7 +72,7 @@ void handleImageLoad(result) {
   if (result != image) {
     print("${result.width}x${result.width} image loaded!");
     image = result;
-    ui.view.scheduleFrame();
+    ui.window.scheduleFrame();
   } else {
     print("Existing image was loaded again");
   }
@@ -93,6 +93,6 @@ bool handleEvent(ui.Event event) {
 
 void main() {
   imageCache.load(url1).first.then(handleImageLoad);
-  ui.view.setEventCallback(handleEvent);
-  ui.view.setFrameCallback(beginFrame);
+  ui.window.onEvent = handleEvent;
+  ui.window.onBeginFrame = beginFrame;
 }
