@@ -11,6 +11,7 @@ dependencies:
   flutter_rendering_examples: any
   flutter_sprites: any
   playfair: any
+  flx: any
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
@@ -20,5 +21,7 @@ dependency_overrides:
     path: ../../../examples/rendering
   flutter_sprites:
     path: ../../../skysprites
+  flx:
+    path: ../flx
 environment:
   sdk: '>=1.8.0 <2.0.0'
