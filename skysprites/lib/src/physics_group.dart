@@ -1,5 +1,12 @@
 part of flutter_sprites;
 
+/// A [Node] that acts as a middle layer between a [PhysicsWorld] and a node
+/// with an assigned [PhysicsBody]. The group's transformations are limited to
+/// [position], [rotation], and uniform [scale].
+///
+///     PhysicsGroup group = new PhysicsGroup();
+///     myWorld.addChild(group);
+///     group.addChild(myNode);
 class PhysicsGroup extends Node {
 
   set scaleX(double scaleX) {

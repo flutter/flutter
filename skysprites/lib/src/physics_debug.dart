@@ -3,7 +3,7 @@ part of flutter_sprites;
 class _PhysicsDebugDraw extends box2d.DebugDraw {
   _PhysicsDebugDraw(
     box2d.ViewportTransform transform,
-    this.physicsNode
+    this.physicsWorld
   ) : super(transform) {
     appendFlags(
       box2d.DebugDraw.JOINT_BIT |
@@ -12,7 +12,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
     );
   }
 
-  PhysicsWorld physicsNode;
+  PhysicsWorld physicsWorld;
 
   PaintingCanvas canvas;
 
@@ -93,12 +93,12 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
 
   Point _toPoint(Vector2 vec) {
     return new Point(
-      vec.x * physicsNode.b2WorldToNodeConversionFactor,
-      vec.y * physicsNode.b2WorldToNodeConversionFactor
+      vec.x * physicsWorld.b2WorldToNodeConversionFactor,
+      vec.y * physicsWorld.b2WorldToNodeConversionFactor
     );
   }
 
   double _scale(double value) {
-    return value * physicsNode.b2WorldToNodeConversionFactor;
+    return value * physicsWorld.b2WorldToNodeConversionFactor;
   }
 }
