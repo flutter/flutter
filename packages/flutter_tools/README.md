@@ -1,6 +1,7 @@
 # tools
 
 [![Build Status](https://travis-ci.org/flutter/tools.svg)](https://travis-ci.org/flutter/tools)
+[![Build status](https://ci.appveyor.com/api/projects/status/fpokp26jprqddfms/branch/master?svg=true)](https://ci.appveyor.com/project/devoncarew/tools/branch/master)
 [![pub package](https://img.shields.io/pub/v/sky_tools.svg)](https://pub.dartlang.org/packages/sky_tools)
 
 Tools for building Flutter applications.
