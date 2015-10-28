@@ -12,8 +12,8 @@ import 'flutter_command.dart';
 final Logger _logging = new Logger('sky_tools.logs');
 
 class LogsCommand extends FlutterCommand {
-  final name = 'logs';
-  final description = 'Show logs for running Sky apps.';
+  final String name = 'logs';
+  final String description = 'Show logs for running Sky apps.';
 
   LogsCommand() {
     argParser.addFlag('clear',

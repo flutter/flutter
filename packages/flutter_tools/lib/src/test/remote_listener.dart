@@ -69,7 +69,7 @@ class RemoteListener {
       return;
     }
 
-    var declarer = new Declarer();
+    Declarer declarer = new Declarer();
     try {
       await runZoned(() => new Future.sync(main), zoneValues: {
         #test.declarer: declarer

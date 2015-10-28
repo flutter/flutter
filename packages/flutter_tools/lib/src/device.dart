@@ -810,13 +810,15 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> startApp(AndroidApk apk) async {
+  Future<bool> startApp(ApplicationPackage app) async {
     // Android currently has to be started with startServer(...).
     assert(false);
     return false;
   }
 
-  Future<bool> stopApp(AndroidApk apk) async {
+  Future<bool> stopApp(ApplicationPackage app) async {
+    final AndroidApk apk = app;
+
     // Turn off reverse port forwarding
     runSync([adbPath, 'reverse', '--remove', 'tcp:$_serverPort']);
     // Stop the app
