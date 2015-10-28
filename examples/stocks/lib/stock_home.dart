@@ -254,7 +254,7 @@ class StockHomeState extends State<StockHome> {
 
   Widget buildFloatingActionButton() {
     return new FloatingActionButton(
-      child: new Icon(type: 'content/add', size: 24),
+      child: new Icon(type: 'content/add'),
       backgroundColor: Colors.redAccent[200],
       onPressed: _handleStockPurchased
     );

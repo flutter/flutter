@@ -28,7 +28,6 @@ class IconButton extends StatelessComponent {
         padding: const EdgeDims.all(8.0),
         child: new Icon(
           type: icon,
-          size: 24,
           color: color,
           colorFilter: colorFilter
         )
