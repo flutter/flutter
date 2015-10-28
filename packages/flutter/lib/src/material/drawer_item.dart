@@ -49,7 +49,6 @@ class DrawerItem extends StatelessComponent {
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(
             type: icon,
-            size: 24,
             colorFilter: _getColorFilter(themeData)
           )
         )

@@ -8,10 +8,24 @@ import 'theme.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 
+enum IconSize {
+  s18,
+  s24,
+  s36,
+  s48,
+}
+
+const Map<IconSize, int> _kIconSize = const <IconSize, int>{
+  IconSize.s18: 18,
+  IconSize.s24: 24,
+  IconSize.s36: 36,
+  IconSize.s48: 48,
+};
+
 class Icon extends StatelessComponent {
   Icon({
     Key key,
-    this.size,
+    this.size: IconSize.s24,
     this.type: '',
     this.color,
     this.colorFilter
@@ -20,7 +34,7 @@ class Icon extends StatelessComponent {
     assert(type != null);
   }
 
-  final int size;
+  final IconSize size;
   final String type;
   final IconThemeColor color;
   final ColorFilter colorFilter;
@@ -55,10 +69,11 @@ class Icon extends StatelessComponent {
     // Should we use the ios images on ios?
     String density = 'drawable-xxhdpi';
     String colorSuffix = _getColorSuffix(context);
+    int iconSize = _kIconSize[size];
     return new AssetImage(
-      name: '$category/$density/ic_${subtype}_${colorSuffix}_${size}dp.png',
-      width: size.toDouble(),
-      height: size.toDouble(),
+      name: '$category/$density/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
+      width: iconSize.toDouble(),
+      height: iconSize.toDouble(),
       colorFilter: colorFilter
     );
   }

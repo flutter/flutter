@@ -27,7 +27,6 @@ const double _kTabIndicatorHeight = 2.0;
 const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
 const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
-const int _kTabIconSize = 24;
 const double _kTabBarScrollDrag = 0.025;
 const Duration _kTabBarScroll = const Duration(milliseconds: 200);
 
@@ -321,7 +320,7 @@ class Tab extends StatelessComponent {
     assert(label.icon != null);
     Color iconColor = selected ? selectedColor : color;
     ColorFilter filter = new ColorFilter.mode(iconColor, TransferMode.srcATop);
-    return new Icon(type: label.icon, size: _kTabIconSize, colorFilter: filter);
+    return new Icon(type: label.icon, colorFilter: filter);
   }
 
   Widget build(BuildContext context) {
