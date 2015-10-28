@@ -140,7 +140,7 @@ class _HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewpor
       renderObject.minExtent = getTotalExtent(null);
       renderObject.startOffset = offset;
       renderObject.overlayPainter = widget.overlayPainter;
-    });
+    }, building: true);
   }
 
   void _updateChildren() {
