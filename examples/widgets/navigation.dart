@@ -4,51 +4,71 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter/src/widgets/navigator2.dart' as n2;
+
+class Home extends StatelessComponent {
+  Widget build(BuildContext context) {
+    return new Container(
+      padding: const EdgeDims.all(30.0),
+      decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
+      child: new Column(<Widget>[
+        new Text("You are at home"),
+        new RaisedButton(
+          child: new Text('GO SHOPPING'),
+          onPressed: () => n2.Navigator.of(context).pushNamed('/shopping')
+        ),
+        new RaisedButton(
+          child: new Text('START ADVENTURE'),
+          onPressed: () => n2.Navigator.of(context).pushNamed('/adventure')
+        )],
+        justifyContent: FlexJustifyContent.center
+      )
+    );
+  }
+}
+
+class Shopping extends StatelessComponent {
+  Widget build(BuildContext context) {
+    return new Container(
+      padding: const EdgeDims.all(20.0),
+      decoration: new BoxDecoration(backgroundColor: const Color(0xFFBF5FFF)),
+      child: new Column(<Widget>[
+        new Text("Village Shop"),
+        new RaisedButton(
+          child: new Text('RETURN HOME'),
+          onPressed: () => n2.Navigator.of(context).pop()
+        ),
+        new RaisedButton(
+          child: new Text('GO TO DUNGEON'),
+          onPressed: () => n2.Navigator.of(context).pushNamed('/adventure')
+        )],
+        justifyContent: FlexJustifyContent.center
+      )
+    );
+  }
+}
+
+class Adventure extends StatelessComponent {
+  Widget build(BuildContext context) {
+    return new Container(
+      padding: const EdgeDims.all(20.0),
+      decoration: new BoxDecoration(backgroundColor: const Color(0xFFDC143C)),
+      child: new Column(<Widget>[
+        new Text("Monster's Lair"),
+        new RaisedButton(
+          child: new Text('RUN!!!'),
+          onPressed: () => n2.Navigator.of(context).pop()
+        )],
+        justifyContent: FlexJustifyContent.center
+      )
+    );
+  }
+}
+
 final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-  '/': (RouteArguments args) => new Container(
-    padding: const EdgeDims.all(30.0),
-    decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
-    child: new Column(<Widget>[
-      new Text("You are at home"),
-      new RaisedButton(
-        child: new Text('GO SHOPPING'),
-        onPressed: () => Navigator.of(args.context).pushNamed('/shopping')
-      ),
-      new RaisedButton(
-        child: new Text('START ADVENTURE'),
-        onPressed: () => Navigator.of(args.context).pushNamed('/adventure')
-      )],
-      justifyContent: FlexJustifyContent.center
-    )
-  ),
-  '/shopping': (RouteArguments args) => new Container(
-    padding: const EdgeDims.all(20.0),
-    decoration: new BoxDecoration(backgroundColor: const Color(0xFFBF5FFF)),
-    child: new Column(<Widget>[
-      new Text("Village Shop"),
-      new RaisedButton(
-        child: new Text('RETURN HOME'),
-        onPressed: () => Navigator.of(args.context).pop()
-      ),
-      new RaisedButton(
-        child: new Text('GO TO DUNGEON'),
-        onPressed: () => Navigator.of(args.context).pushNamed('/adventure')
-      )],
-      justifyContent: FlexJustifyContent.center
-    )
-  ),
-  '/adventure': (RouteArguments args) => new Container(
-    padding: const EdgeDims.all(20.0),
-    decoration: new BoxDecoration(backgroundColor: const Color(0xFFDC143C)),
-    child: new Column(<Widget>[
-      new Text("Monster's Lair"),
-      new RaisedButton(
-        child: new Text('RUN!!!'),
-        onPressed: () => Navigator.of(args.context).pop()
-      )],
-      justifyContent: FlexJustifyContent.center
-    )
-  )
+  '/': (_) => new Home(),
+  '/shopping': (_) => new Shopping(),
+  '/adventure': (_) => new Adventure(),
 };
 
 final ThemeData theme = new ThemeData(

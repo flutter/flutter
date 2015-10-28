@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'package:flutter/src/widgets/navigator2.dart' as n2;
+
 import 'theme.dart';
 import 'title.dart';
 
@@ -30,6 +32,8 @@ AssetBundle _initDefaultBundle() {
 }
 
 final AssetBundle _defaultBundle = _initDefaultBundle();
+
+const bool _kUseNavigator2 = false;
 
 class MaterialApp extends StatefulComponent {
   MaterialApp({
@@ -83,6 +87,19 @@ class _MaterialAppState extends State<MaterialApp> {
   void _metricHandler(Size size) => setState(() { _size = size; });
 
   Widget build(BuildContext context) {
+    Widget navigator;
+    if (_kUseNavigator2) {
+      navigator = new n2.Navigator(
+        key: _navigator,
+        routes: config.routes
+      );
+    } else {
+      navigator = new Navigator(
+        key: _navigator,
+        routes: config.routes,
+        onGenerateRoute: config.onGenerateRoute
+      );
+    }
     return new MediaQuery(
       data: new MediaQueryData(size: _size),
       child: new Theme(
@@ -93,11 +110,7 @@ class _MaterialAppState extends State<MaterialApp> {
             bundle: _defaultBundle,
             child: new Title(
               title: config.title,
-              child: new Navigator(
-                key: _navigator,
-                routes: config.routes,
-                onGenerateRoute: config.onGenerateRoute
-              )
+              child: navigator
             )
           )
         )
