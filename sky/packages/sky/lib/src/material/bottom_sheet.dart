@@ -13,6 +13,8 @@ import 'colors.dart';
 import 'material.dart';
 
 const Duration _kBottomSheetDuration = const Duration(milliseconds: 200);
+const double _kMinFlingVelocity = 700.0;
+const double _kFlingVelocityScale = 1.0 / 300.0;
 
 class _BottomSheet extends StatefulComponent {
   _BottomSheet({
@@ -22,7 +24,7 @@ class _BottomSheet extends StatefulComponent {
   }) : super(key: key);
 
   final Widget child;
-  final PerformanceView performance;
+  final Performance performance;
 
   _BottomSheetState createState() => new _BottomSheetState();
 }
@@ -49,6 +51,26 @@ class _BottomSheetLayout extends OneChildLayoutDelegate {
 class _BottomSheetState extends State<_BottomSheet> {
 
   final _BottomSheetLayout _layout = new _BottomSheetLayout();
+  bool _dragEnabled = false;
+
+  void _handleDragStart(Point position) {
+    _dragEnabled = !config.performance.isAnimating;
+  }
+
+  void _handleDragUpdate(double delta) {
+    if (!_dragEnabled)
+      return;
+    config.performance.progress -= delta / _layout.childTop.end;
+  }
+
+  void _handleDragEnd(Offset velocity) {
+    if (!_dragEnabled)
+      return;
+    if (velocity.dy > _kMinFlingVelocity)
+      config.performance.fling(velocity: -velocity.dy * _kFlingVelocityScale);
+    else
+      config.performance.forward();
+  }
 
   Widget build(BuildContext context) {
     return new BuilderTransition(
@@ -59,7 +81,12 @@ class _BottomSheetState extends State<_BottomSheet> {
           child: new CustomOneChildLayout(
             delegate: _layout,
             token: _layout.childTop.value,
-            child: new Material(child: config.child)
+            child: new GestureDetector(
+              onVerticalDragStart: _handleDragStart,
+              onVerticalDragUpdate: _handleDragUpdate,
+              onVerticalDragEnd: _handleDragEnd,
+              child: new Material(child: config.child)
+            )
           )
         );
       }
@@ -67,11 +94,16 @@ class _BottomSheetState extends State<_BottomSheet> {
   }
 }
 
-class _ModalBottomSheetRoute extends PerformanceRoute {
-  _ModalBottomSheetRoute({ this.completer, this.child });
+class _ModalBottomSheetRoute extends Route {
+  _ModalBottomSheetRoute({ this.completer, this.child }) {
+    _performance = new Performance(duration: transitionDuration, debugLabel: 'ModalBottomSheet');
+  }
 
   final Completer completer;
   final Widget child;
+
+  PerformanceView get performance => _performance?.view;
+  Performance _performance;
 
   bool get ephemeral => true;
   bool get modal => true;
@@ -93,7 +125,7 @@ class _ModalBottomSheetRoute extends PerformanceRoute {
           ),
           // sheet
           new _BottomSheet(
-            performance: performance,
+            performance: _performance,
             child: child
           )
         ])
@@ -101,9 +133,16 @@ class _ModalBottomSheetRoute extends PerformanceRoute {
     );
   }
 
+  void didPush(NavigatorState navigator) {
+    super.didPush(navigator);
+    _performance?.forward();
+  }
+
   void didPop([dynamic result]) {
     completer.complete(result);
     super.didPop(result);
+    if (_performance.status != PerformanceStatus.dismissed)
+      _performance?.reverse();
   }
 }
 
