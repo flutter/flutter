@@ -4,7 +4,7 @@
 
 part of dart_ui;
 
-typedef void _VoidCallback();
+typedef void VoidCallback();
 typedef void _FrameCallback(Duration duration);
 typedef void _EventCallback(Event event);
 
@@ -31,10 +31,11 @@ class Window {
 
   _FrameCallback onBeginFrame;
   _EventCallback onEvent;
-  _VoidCallback onMetricsChanged;
+  VoidCallback onMetricsChanged;
 
   void scheduleFrame() native "Window_scheduleFrame";
   void render(Scene scene) native "Window_render";
 }
 
 final Window window = new Window._();
+final Tracing tracing = new Tracing();
