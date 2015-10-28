@@ -25,7 +25,7 @@ _IGNORED_PATTERNS = [
   re.compile(r'^$'),
   re.compile(r'^Analyzing \['),
   re.compile(r'^No issues found'),
-  re.compile(r'^[0-9]+ (error|warning|hint).*found\.'),
+  re.compile(r'^[0-9]+ (error|warning|hint|lint).*found\.'),
 
   # We still have some parts in our code, so silence the warnings that come from trying to analyze them directly.
   re.compile(r'^Only libraries can be analyzed\.$'),
