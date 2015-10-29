@@ -1,7 +1,7 @@
 name: sky_unit_tests
 dependencies:
   flutter: 
-    '0.0.14'
+    '0.0.15'
   sky_tools: any
   test: any
   quiver: any
