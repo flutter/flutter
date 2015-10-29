@@ -27,8 +27,7 @@ class RunMojoCommand extends Command {
     argParser.addFlag('mojo-release', negatable: false, help: 'Use Release build of mojo (default)');
 
     argParser.addOption('app', defaultsTo: 'app.flx');
-    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services. This is required for a Linux build.');
-    argParser.addOption('devtools-path', help: 'Path to the mojo_run script in mojo devtools. This is required for an Android build.');
+    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services for Linux and to mojo devtools from Android.');
   }
 
   // TODO(abarth): Why not use path.absolute?
@@ -80,15 +79,11 @@ class RunMojoCommand extends Command {
 
   @override
   Future<int> run() async {
-    if (argResults['mojo-path'] == null && !argResults['android']) {
-      _logging.severe('Must specify --mojo-path for Linux.');
+    if (argResults['mojo-path'] == null) {
+      _logging.severe('Must specify --mojo-path.');
       return 1;
     }
 
-    if (argResults['devtools-path'] == null && argResults['android']) {
-      _logging.severe('Must specify --devtools-path for Android.');
-      return 1;
-    }
     if (argResults['mojo-debug'] && argResults['mojo-release']) {
       _logging.severe('Cannot specify both --mojo-debug and --mojo-release');
       return 1;
@@ -103,7 +98,7 @@ class RunMojoCommand extends Command {
 
     args.addAll(argResults.rest);
     if (argResults['android']) {
-      return _runAndroid(argResults['devtools-path'], mojoConfig, appPath, args);
+      return _runAndroid(mojoPath, mojoConfig, appPath, args);
     } else {
       return _runLinux(mojoPath, mojoConfig, appPath, args);
     }
