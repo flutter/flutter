@@ -55,7 +55,7 @@ class SoundEffectPlayer {
 
   SoundEffectPlayer() {
     _mediaService = new MediaServiceProxy.unbound();
-    shell.requestService(null, _mediaService);
+    shell.connectToService(null, _mediaService);
   }
 
   MediaServiceProxy _mediaService;
@@ -165,7 +165,7 @@ class SoundTrackPlayer {
 
   SoundTrackPlayer() {
     _mediaService = new MediaServiceProxy.unbound();
-    shell.requestService(null, _mediaService);
+    shell.connectToService(null, _mediaService);
   }
 
   MediaServiceProxy _mediaService;
