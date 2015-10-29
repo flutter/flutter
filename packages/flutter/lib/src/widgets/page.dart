@@ -8,6 +8,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'navigator2.dart';
 import 'overlay.dart';
+import 'page_storage.dart';
 import 'transitions.dart';
 
 // TODO(abarth): Should we add a type for the result?
@@ -81,8 +82,9 @@ class _PageState extends State<_Page> {
   Widget build(BuildContext context) {
     if (config.route._offstage) {
       return new OffStage(
-        child: new KeyedSubtree(
+        child: new PageStorage(
           key: _subtreeKey,
+          bucket: config.route._storageBucket,
           child: _invokeBuilder()
         )
       );
@@ -93,8 +95,9 @@ class _PageState extends State<_Page> {
       child: new FadeTransition(
         performance: config.route.performance,
         opacity: _opacity,
-        child: new KeyedSubtree(
+        child: new PageStorage(
           key: _subtreeKey,
+          bucket: config.route._storageBucket,
           child: _invokeBuilder()
         )
       )
@@ -131,6 +134,8 @@ class PageRoute extends TransitionRoute {
 
   Duration get transitionDuration => const Duration(milliseconds: 150);
   List<Widget> createWidgets() => [ new _Page(key: pageKey, route: this) ];
+
+  final PageStorageBucket _storageBucket = new PageStorageBucket();
 
   bool get offstage => _offstage;
   bool _offstage = false;
