@@ -27,7 +27,7 @@ class RunMojoCommand extends Command {
     argParser.addFlag('mojo-release', negatable: false, help: 'Use Release build of mojo (default)');
 
     argParser.addOption('app', defaultsTo: 'app.flx');
-    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services');
+    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services for Linux and to mojo devtools from Android.');
   }
 
   // TODO(abarth): Why not use path.absolute?
@@ -39,9 +39,9 @@ class RunMojoCommand extends Command {
     return file.absolute.path;
   }
 
-  Future<int> _runAndroid(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) {
+  Future<int> _runAndroid(String devtoolsPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) {
     String skyViewerUrl = ArtifactStore.googleStorageUrl('viewer', 'android-arm');
-    String command = _makePathAbsolute(path.join(mojoPath, 'mojo', 'devtools', 'common', 'mojo_run'));
+    String command = _makePathAbsolute(devtoolsPath);
     String appName = path.basename(appPath);
     String appDir = path.dirname(appPath);
     String buildFlag = mojoConfig == _MojoConfig.Debug ? '--debug' : '--release';
@@ -80,9 +80,10 @@ class RunMojoCommand extends Command {
   @override
   Future<int> run() async {
     if (argResults['mojo-path'] == null) {
-      _logging.severe('Must specify --mojo-path to mojo_run');
+      _logging.severe('Must specify --mojo-path.');
       return 1;
     }
+
     if (argResults['mojo-debug'] && argResults['mojo-release']) {
       _logging.severe('Cannot specify both --mojo-debug and --mojo-release');
       return 1;
