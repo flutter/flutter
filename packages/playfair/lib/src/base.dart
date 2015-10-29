@@ -171,7 +171,7 @@ class ChartPainter {
         ..maxWidth = _rect.width
         ..layout();
       _horizontalGridlines.add(gridline);
-      yScaleWidth = math.max(yScaleWidth, gridline.labelPainter.maxContentWidth);
+      yScaleWidth = math.max(yScaleWidth, gridline.labelPainter.maxWidth);
     }
 
     yScaleWidth += kScaleMargin;
@@ -190,7 +190,7 @@ class ChartPainter {
       gridline.end = _convertPointToRectSpace(new Point(data.endX, gridline.value), markerRect);
       gridline.labelPosition = new Point(
         gridline.end.x + kScaleMargin,
-        gridline.end.y - gridline.labelPainter.height / 2.0
+        gridline.end.y - gridline.labelPainter.size.height / 2.0
       );
     }
 
@@ -218,8 +218,8 @@ class ChartPainter {
           ..maxWidth = markerRect.width
           ..layout();
         _indicator.labelPosition = new Point(
-          ((_indicator.start.x + _indicator.end.x) / 2.0) - _indicator.labelPainter.maxContentWidth / 2.0,
-          _indicator.start.y - _indicator.labelPainter.height - kIndicatorMargin
+          ((_indicator.start.x + _indicator.end.x) / 2.0) - _indicator.labelPainter.maxWidth / 2.0,
+          _indicator.start.y - _indicator.labelPainter.size.height - kIndicatorMargin
         );
       }
     } else {
@@ -256,7 +256,7 @@ class ChartPainter {
       canvas.drawCircle(marker, kMarkerRadius, paint);
       path.lineTo(marker.x, marker.y);
     }
-    paint.setStyle(ui.PaintingStyle.stroke);
+    paint.style = ui.PaintingStyle.stroke;
     canvas.drawPath(path, paint);
   }
 
