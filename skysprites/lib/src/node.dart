@@ -786,6 +786,13 @@ class Node {
 
   PhysicsBody _physicsBody;
 
+  /// The physics body associated with this node. If a physics body is assigned,
+  /// and the node is a child of a [PhysicsWorld] or a [PhysicsGroup] the
+  /// node's position and rotation will be controlled by the body.
+  ///
+  ///     myNode.physicsBody = new PhysicsBody(
+  ///       new PhysicsShapeCircle(Point.zero, 20.0)
+  ///     );
   PhysicsBody get physicsBody => _physicsBody;
 
   set physicsBody(PhysicsBody physicsBody) {

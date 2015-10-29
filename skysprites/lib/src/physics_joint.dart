@@ -2,6 +2,9 @@ part of flutter_sprites;
 
 typedef void PhysicsJointBreakCallback(PhysicsJoint joint);
 
+/// A joint connects two physics bodies and restricts their movements. Some
+/// types of joints also support motors that adds forces to the connected
+/// bodies.
 abstract class PhysicsJoint {
   PhysicsJoint(this._bodyA, this._bodyB, this.breakingForce, this.breakCallback) {
     bodyA._joints.add(this);
@@ -10,12 +13,20 @@ abstract class PhysicsJoint {
 
   PhysicsBody _bodyA;
 
+  /// The first body connected to the joint.
+  ///
+  ///     PhysicsBody body = myJoint.bodyA;
   PhysicsBody get bodyA => _bodyA;
 
   PhysicsBody _bodyB;
 
+  /// The second body connected to the joint.
+  ///
+  ///     PhysicsBody body = myJoint.bodyB;
   PhysicsBody get bodyB => _bodyB;
 
+  /// The maximum force the joint can handle before it breaks. If set to null,
+  /// the joint will never break.
   final double breakingForce;
 
   final PhysicsJointBreakCallback breakCallback;
@@ -23,33 +34,35 @@ abstract class PhysicsJoint {
   bool _active = true;
   box2d.Joint _joint;
 
-  PhysicsWorld _physicsNode;
+  PhysicsWorld _physicsWorld;
 
   void _completeCreation() {
     if (bodyA._attached && bodyB._attached) {
-      _attach(bodyA._physicsNode);
+      _attach(bodyA._physicsWorld);
     }
   }
 
   void _attach(PhysicsWorld physicsNode) {
     if (_joint == null) {
-      _physicsNode = physicsNode;
+      _physicsWorld = physicsNode;
       _joint = _createB2Joint(physicsNode);
-      _physicsNode._joints.add(this);
+      _physicsWorld._joints.add(this);
     }
   }
 
   void _detach() {
     if (_joint != null && _active) {
-      _physicsNode.b2World.destroyJoint(_joint);
+      _physicsWorld.b2World.destroyJoint(_joint);
       _joint = null;
-      _physicsNode._joints.remove(this);
+      _physicsWorld._joints.remove(this);
     }
     _active = false;
   }
 
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode);
 
+  /// If the joint is no longer needed, call the the [destroy] method to detach
+  /// if from its connected bodies.
   void destroy() {
     _detach();
   }
@@ -73,6 +86,26 @@ abstract class PhysicsJoint {
   }
 }
 
+/// The revolute joint can be thought of as a hinge, a pin, or an axle.
+/// An anchor point is defined in global space.
+///
+/// Revolute joints can be given limits so that the bodies can rotate only to a
+/// certain point using [lowerAngle], [upperAngle], and [enableLimit].
+/// They can also be given a motor using [enableMotore] together with
+/// [motorSpeed] and [maxMotorTorque] so that the bodies will try
+/// to rotate at a given speed, with a given torque.
+///
+/// Common uses for revolute joints include:
+/// - wheels or rollers
+/// - chains or swingbridges (using multiple revolute joints)
+/// - rag-doll joints
+/// - rotating doors, catapults, levers
+///
+///     new PhysicsJointRevolute(
+///       nodeA.physicsBody,
+///       nodeB.physicsBody,
+///       nodeB.position
+///     );
 class PhysicsJointRevolute extends PhysicsJoint {
   PhysicsJointRevolute(
     PhysicsBody bodyA,
@@ -94,12 +127,24 @@ class PhysicsJointRevolute extends PhysicsJoint {
   }
 
   final Point _worldAnchor;
+
+  /// The lower angle of the limits of this joint, only used if [enableLimit]
+  /// is set to true.
   final double lowerAngle;
+
+  /// The upper angle of the limits of this joint, only used if [enableLimit]
+  /// is set to true.
   final double upperAngle;
+
+  /// If set to true, the rotation will be limited to a value between
+  /// [lowerAngle] and [upperAngle].
   final bool enableLimit;
 
   bool _enableMotor;
 
+  /// By setting enableMotor to true, the joint will automatically rotate, e.g.
+  /// this can be used for creating an engine for a wheel. For this to be
+  /// useful you also need to set [motorSpeed] and [maxMotorTorque].
   bool get enableMotor => _enableMotor;
 
   set enableMotor(bool enableMotor) {
@@ -112,6 +157,8 @@ class PhysicsJointRevolute extends PhysicsJoint {
 
   double _motorSpeed;
 
+  /// Sets the motor speed of this joint, will only work if [enableMotor] is
+  /// set to true and [maxMotorTorque] is set to a non zero value.
   double get motorSpeed => _motorSpeed;
 
   set motorSpeed(double motorSpeed) {
@@ -126,6 +173,8 @@ class PhysicsJointRevolute extends PhysicsJoint {
 
   double get maxMotorTorque => _maxMotorTorque;
 
+  /// Sets the motor torque of this joint, will only work if [enableMotor] is
+  /// set to true and [motorSpeed] is set to a non zero value.
   set maxMotorTorque(double maxMotorTorque) {
     _maxMotorTorque = maxMotorTorque;
     if (_joint != null) {
@@ -156,6 +205,25 @@ class PhysicsJointRevolute extends PhysicsJoint {
   }
 }
 
+/// The prismatic joint is probably more commonly known as a slider joint.
+/// The two joined bodies have their rotation held fixed relative to each
+/// other, and they can only move along a specified axis.
+///
+/// Prismatic joints can be given limits so that the bodies can only move
+/// along the axis within a specific range. They can also be given a motor so
+/// that the bodies will try to move at a given speed, with a given force.
+///
+/// Common uses for prismatic joints include:
+/// - elevators
+/// - moving platforms
+/// - sliding doors
+/// - pistons
+///
+///     new PhysicsJointPrismatic(
+///       nodeA.physicsBody,
+///       nodeB.physicsBody,
+///       new Offset(0.0, 1.0)
+///     );
 class PhysicsJointPrismatic extends PhysicsJoint {
   PhysicsJointPrismatic(
     PhysicsBody bodyA,
@@ -174,10 +242,14 @@ class PhysicsJointPrismatic extends PhysicsJoint {
     _completeCreation();
   }
 
+  /// Axis that the movement is restricted to (in global space at the time of
+  /// creation)
   final Offset axis;
 
   bool _enableMotor;
 
+  /// For the motor to be effective you also need to set [motorSpeed] and
+  /// [maxMotorForce].
   bool get enableMotor => _enableMotor;
 
   set enableMotor(bool enableMotor) {
@@ -190,25 +262,29 @@ class PhysicsJointPrismatic extends PhysicsJoint {
 
   double _motorSpeed;
 
+  /// Sets the motor speed of this joint, will only work if [enableMotor] is
+  /// set to true and [maxMotorForce] is set to a non zero value.
   double get motorSpeed => _motorSpeed;
 
   set motorSpeed(double motorSpeed) {
     _motorSpeed = motorSpeed;
     if (_joint != null) {
       box2d.PrismaticJoint prismaticJoint = _joint;
-      prismaticJoint.setMotorSpeed(motorSpeed / _physicsNode.b2WorldToNodeConversionFactor);
+      prismaticJoint.setMotorSpeed(motorSpeed / _physicsWorld.b2WorldToNodeConversionFactor);
     }
   }
 
   double _maxMotorForce;
 
+  /// Sets the motor force of this joint, will only work if [enableMotor] is
+  /// set to true and [motorSpeed] is set to a non zero value.
   double get maxMotorForce => _maxMotorForce;
 
   set maxMotorForce(double maxMotorForce) {
     _maxMotorForce = maxMotorForce;
     if (_joint != null) {
       box2d.PrismaticJoint prismaticJoint = _joint;
-      prismaticJoint.setMaxMotorForce(maxMotorForce / _physicsNode.b2WorldToNodeConversionFactor);
+      prismaticJoint.setMaxMotorForce(maxMotorForce / _physicsWorld.b2WorldToNodeConversionFactor);
     }
   }
 
@@ -223,6 +299,9 @@ class PhysicsJointPrismatic extends PhysicsJoint {
   }
 }
 
+/// The weld joint attempts to constrain all relative motion between two bodies.
+///
+///     new PhysicsJointWeld(bodyA.physicsJoint, bodyB.physicsJoint)
 class PhysicsJointWeld extends PhysicsJoint {
   PhysicsJointWeld(
     PhysicsBody bodyA,
@@ -252,6 +331,22 @@ class PhysicsJointWeld extends PhysicsJoint {
   }
 }
 
+/// A pulley is used to create an idealized pulley. The pulley connects two
+/// bodies to ground and to each other. As one body goes up, the other goes
+/// down.
+///
+/// The total length of the pulley rope is conserved according to the initial
+/// configuration.
+///
+///     new PhysicsJointPulley(
+///       nodeA.physicsBody,
+///       nodeB.physicsBody,
+///       new Point(0.0, 100.0),
+///       new Point(100.0, 100.0),
+///       nodeA.position,
+///       nodeB.position,
+///       1.0
+///     );
 class PhysicsJointPulley extends PhysicsJoint {
   PhysicsJointPulley(
     PhysicsBody bodyA,
@@ -289,18 +384,27 @@ class PhysicsJointPulley extends PhysicsJoint {
   }
 }
 
+/// The gear joint can only connect revolute and/or prismatic joints.
+///
+/// Like the pulley ratio, you can specify a gear ratio. However, in this case
+/// the gear ratio can be negative. Also keep in mind that when one joint is a
+/// revolute joint (angular) and the other joint is prismatic (translation),
+/// and then the gear ratio will have units of length or one over length.
+///
+///     new PhysicsJointGear(nodeA.physicsBody, nodeB.physicsBody);
 class PhysicsJointGear extends PhysicsJoint {
   PhysicsJointGear(
     PhysicsBody bodyA,
     PhysicsBody bodyB, {
       double breakingForce,
       PhysicsJointBreakCallback breakCallback,
-      this.ratio: 0.0
+      this.ratio: 1.0
     }
   ) : super(bodyA, bodyB, breakingForce, breakCallback) {
     _completeCreation();
   }
 
+  /// The ratio of the rotation for bodyA relative bodyB.
   final double ratio;
 
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
@@ -313,6 +417,8 @@ class PhysicsJointGear extends PhysicsJoint {
   }
 }
 
+/// Keeps a fixed distance between two bodies, [anchorA] and [anchorB] are
+/// defined in world coordinates.
 class PhysicsJointDistance extends PhysicsJoint {
   PhysicsJointDistance(
     PhysicsBody bodyA,
@@ -329,10 +435,21 @@ class PhysicsJointDistance extends PhysicsJoint {
     _completeCreation();
   }
 
+  /// The anchor of bodyA in world coordinates at the time of creation.
   final Point anchorA;
+
+  /// The anchor of bodyB in world coordinates at the time of creation.
   final Point anchorB;
+
+  /// The desired distance between the joints, if not passed in at creation
+  /// it will be set automatically to the distance between the anchors at the
+  /// time of creation.
   final double length;
+
+  /// Dampening factor.
   final double dampening;
+
+  /// Dampening frequency.
   final double frequency;
 
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
@@ -352,6 +469,8 @@ class PhysicsJointDistance extends PhysicsJoint {
   }
 }
 
+/// The wheel joint restricts a point on bodyB to a line on bodyA. The wheel
+/// joint also optionally provides a suspension spring.
 class PhysicsJointWheel extends PhysicsJoint {
   PhysicsJointWheel(
     PhysicsBody bodyA,
@@ -367,9 +486,16 @@ class PhysicsJointWheel extends PhysicsJoint {
     _completeCreation();
   }
 
+  /// The rotational point in global space at the time of creation.
   final Point anchor;
+
+  /// The axis which to restrict the movement to.
   final Offset axis;
+
+  /// Dampening factor.
   final double dampening;
+
+  /// Dampening frequency.
   final double frequency;
 
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
@@ -387,6 +513,8 @@ class PhysicsJointWheel extends PhysicsJoint {
   }
 }
 
+/// The friction joint is used for top-down friction. The joint provides 2D
+/// translational friction and angular friction.
 class PhysicsJointFriction extends PhysicsJoint {
   PhysicsJointFriction(
     PhysicsBody bodyA,
