@@ -683,7 +683,10 @@ abstract class RenderBox extends RenderObject {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${ hasSize ? size : "MISSING" }\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('size: ${ hasSize ? size : "MISSING" }');
+  }
 }
 
 /// A mixin that provides useful default behaviors for boxes with children

@@ -829,6 +829,10 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(false);
   }
 
+  String toStringShort() {
+    return widget != null ? '${widget.toStringShort()}' : '[$runtimeType]';
+  }
+
   String toString() {
     final List<String> data = <String>[];
     debugFillDescription(data);
@@ -1240,7 +1244,9 @@ class InheritedElement extends ProxyElement<InheritedWidget> {
 /// Base class for instantiations of RenderObjectWidget subclasses
 abstract class RenderObjectElement<T extends RenderObjectWidget> extends BuildableElement<T> {
   RenderObjectElement(T widget)
-    : _renderObject = widget.createRenderObject(), super(widget);
+    : _renderObject = widget.createRenderObject(), super(widget) {
+    assert(() { debugUpdateRenderObjectOwner(); return true; });
+  }
 
   /// The underlying [RenderObject] for this element
   RenderObject get renderObject => _renderObject;
@@ -1279,8 +1285,21 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     T oldWidget = widget;
     super.update(newWidget);
     assert(widget == newWidget);
+    assert(() { debugUpdateRenderObjectOwner(); return true; });
     widget.updateRenderObject(renderObject, oldWidget);
     _dirty = false;
+  }
+
+  void debugUpdateRenderObjectOwner() {
+    List<String> chain = <String>[];
+    Element node = this;
+    while (chain.length < 4 && node != null) {
+      chain.add(node.toStringShort());
+      node = node._parent;
+    }
+    if (node != null)
+      chain.add('\u22EF');
+    _renderObject.debugOwner = chain.join(' \u2190 ');
   }
 
   void performRebuild() {

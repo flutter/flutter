@@ -475,7 +475,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Override in subclasses with children and call the visitor for each child
   void visitChildren(RenderObjectVisitor visitor) { }
 
-  dynamic debugExceptionContext = '';
+  dynamic debugOwner = '';
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     debugPrint('-- EXCEPTION --');
     debugPrint('The following exception was raised during $method():');
@@ -483,8 +483,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     debugPrint('Stack trace:');
     debugPrint('$stack');
     debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
-    if (debugExceptionContext != '')
-      debugPrint('That RenderObject had the following exception context:\n$debugExceptionContext');
+    if (debugOwner != '')
+      debugPrint('That RenderObject had the following owner:\n$debugOwner');
     if (debugRenderingExceptionHandler != null)
       debugRenderingExceptionHandler(this, method, exception, stack);
   }
@@ -1134,20 +1134,25 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     String result = '$prefixLineOne$this\n';
     final String childrenDescription = debugDescribeChildren(prefixOtherLines);
     final String settingsPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
-    result += debugDescribeSettings(settingsPrefix);
-    if (childrenDescription != '')
-      result += '$prefixOtherLines \u2502\n';
-    else
+    List<String> settings = <String>[];
+    debugDescribeSettings(settings);
+    result += settings.map((String setting) => "$settingsPrefix$setting\n").join();
+    if (childrenDescription == '')
       result += '$prefixOtherLines\n';
     result += childrenDescription;
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
   }
 
-  /// Returns a string describing the current node's fields, one field per line,
-  /// with each line prefixed by the prefix argument. Subclasses should override
-  /// this to have their information included in toStringDeep().
-  String debugDescribeSettings(String prefix) => '${prefix}parentData: $parentData\n${prefix}constraints: $constraints\n';
+  /// Returns a list of strings describing the current node's fields, one field
+  /// per string. Subclasses should override this to have their information
+  /// included in toStringDeep().
+  void debugDescribeSettings(List<String> settings) {
+    settings.add('parentData: $parentData');
+    settings.add('constraints: $constraints');
+    if (debugOwner != '')
+      settings.add('owner: $debugOwner');
+  }
 
   /// Returns a string describing the current node's descendants. Each line of
   /// the subtree in the output should be indented by the prefix argument.
@@ -1194,7 +1199,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
   }
   String debugDescribeChildren(String prefix) {
     if (child != null)
-      return '${child.toStringDeep("$prefix \u2514\u2500child: ", "$prefix  ")}';
+      return '$prefix \u2502\n${child.toStringDeep('$prefix \u2514\u2500child: ', '$prefix  ')}';
     return '';
   }
 }
@@ -1437,7 +1442,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   }
 
   String debugDescribeChildren(String prefix) {
-    String result = '';
+    String result = '$prefix \u2502\n';
     if (_firstChild != null) {
       ChildType child = _firstChild;
       int count = 1;
