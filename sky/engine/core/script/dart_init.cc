@@ -155,12 +155,12 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       // Start the handle watcher from the service isolate so it isn't available
       // for debugging or general Observatory interaction.
       EnsureHandleWatcherStarted();
-      if (!IsRunningPrecompiledCode() &&
-          RuntimeEnabledFeatures::observatoryEnabled()) {
+      if (RuntimeEnabledFeatures::observatoryEnabled()) {
         std::string ip = "127.0.0.1";
         const intptr_t port = 8181;
         const bool service_isolate_booted =
-            DartServiceIsolate::Startup(ip, port, DartLibraryTagHandler, error);
+            DartServiceIsolate::Startup(ip, port, DartLibraryTagHandler,
+                                        IsRunningPrecompiledCode(), error);
         CHECK(service_isolate_booted) << error;
       }
     }

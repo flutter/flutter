@@ -118,6 +118,7 @@ void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
 bool DartServiceIsolate::Startup(std::string server_ip,
                                  intptr_t server_port,
                                  Dart_LibraryTagHandler embedder_tag_handler,
+                                 bool running_precompiled,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
   CHECK(isolate);
@@ -138,19 +139,29 @@ bool DartServiceIsolate::Startup(std::string server_ip,
 
   Dart_Handle result;
 
-  // Use our own library tag handler when loading service isolate sources.
-  Dart_SetLibraryTagHandler(DartServiceIsolate::LibraryTagHandler);
-  // Load main script.
-  Dart_Handle library = LoadScript(kServiceIsolateScript);
-  DCHECK(library != Dart_Null());
-  SHUTDOWN_ON_ERROR(library);
-  // Setup native entry resolution.
-  result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
+  if (running_precompiled) {
+    Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_sky");
+    Dart_Handle library = Dart_LookupLibrary(uri);
+    SHUTDOWN_ON_ERROR(library);
+    result = Dart_SetRootLibrary(library);
+    SHUTDOWN_ON_ERROR(result);
+    result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
+    SHUTDOWN_ON_ERROR(result);
+  } else {
+    // Use our own library tag handler when loading service isolate sources.
+    Dart_SetLibraryTagHandler(DartServiceIsolate::LibraryTagHandler);
+    // Load main script.
+    Dart_Handle library = LoadScript(kServiceIsolateScript);
+    DCHECK(library != Dart_Null());
+    SHUTDOWN_ON_ERROR(library);
+    // Setup native entry resolution.
+    result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
 
-  SHUTDOWN_ON_ERROR(result);
-  // Finalize loading.
-  result = Dart_FinalizeLoading(false);
-  SHUTDOWN_ON_ERROR(result);
+    SHUTDOWN_ON_ERROR(result);
+    // Finalize loading.
+    result = Dart_FinalizeLoading(false);
+    SHUTDOWN_ON_ERROR(result);
+  }
 
   // Make runnable.
   Dart_ExitScope();
@@ -165,7 +176,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   Dart_EnterIsolate(isolate);
   Dart_EnterScope();
 
-  library = Dart_RootLibrary();
+  Dart_Handle library = Dart_RootLibrary();
   SHUTDOWN_ON_ERROR(library);
 
   // Set the HTTP server's ip.
@@ -266,8 +277,8 @@ Dart_Handle DartServiceIsolate::LoadResources(Dart_Handle library) {
 }
 
 Dart_Handle DartServiceIsolate::LibraryTagHandler(Dart_LibraryTag tag,
-                                         Dart_Handle library,
-                                         Dart_Handle url) {
+                                                  Dart_Handle library,
+                                                  Dart_Handle url) {
   if (!Dart_IsLibrary(library)) {
     return Dart_NewApiError("not a library");
   }

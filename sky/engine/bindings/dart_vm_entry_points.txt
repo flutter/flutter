@@ -40,3 +40,6 @@ dart:ui_internals,::,takeServiceRegistry
 dart:ui_internals,::,takeServicesProvidedByEmbedder
 dart:ui_internals,::,takeServicesProvidedToEmbedder
 dart:ui_internals,::,takeShellProxyHandle
+dart:vmservice_sky,::,_addResource
+dart:vmservice_sky,::,boot
+dart:vmservice_sky,::,main

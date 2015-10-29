@@ -105,6 +105,8 @@ template("dart_precompile") {
         rebase_path("//sky/engine/bindings/internals.dart")
     dart_ui_path =
         rebase_path("$root_build_dir/gen/sky/bindings/dart_ui.dart")
+    service_path =
+        rebase_path("//sky/engine/core/script/dart_service_isolate/main.dart")
 
     gen_snapshot_dir =
         get_label_info("//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
@@ -131,6 +133,7 @@ template("dart_precompile") {
       "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
       "--url_mapping=dart:ui,$dart_ui_path",
       "--url_mapping=dart:ui_internals,$dart_ui_internals_path",
+      "--url_mapping=dart:vmservice_sky,$service_path",
     ]
   }
 
