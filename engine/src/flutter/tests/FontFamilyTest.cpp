@@ -70,6 +70,19 @@ TEST(FontLanguagesTest, repeatedLanguageTests) {
     EXPECT_EQ(english, langs[0]);
 }
 
+TEST(FontLanguagesTest, undEmojiTests) {
+    FontLanguage emoji("und-Qaae", 8);
+    EXPECT_TRUE(emoji.hasEmojiFlag());
+
+    FontLanguage und("und", 3);
+    EXPECT_FALSE(und.hasEmojiFlag());
+    EXPECT_FALSE(emoji == und);
+
+    FontLanguage undExample("und-example", 10);
+    EXPECT_FALSE(undExample.hasEmojiFlag());
+    EXPECT_FALSE(emoji == undExample);
+}
+
 // The test font has following glyphs.
 // U+82A6
 // U+82A6 U+FE00 (VS1)

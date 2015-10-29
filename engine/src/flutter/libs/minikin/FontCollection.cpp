@@ -106,7 +106,15 @@ FontCollection::~FontCollection() {
 // 2. If a font matches both language and script, it gets a score of 4.
 // 3. If a font matches just language, it gets a score of 2.
 // 4. Matching the "compact" or "elegant" variant adds one to the score.
-// 5. Highest score wins, with ties resolved to the first font.
+// 5. If there is a variation selector and a font supports the complete variation sequence, we add
+//    12 to the score.
+// 6. If there is a color variation selector (U+FE0F), we add 6 to the score if the font is an emoji
+//    font. This additional score of 6 is only given if the base character is supported in the font,
+//    but not the whole variation sequence.
+// 7. If there is a text variation selector (U+FE0E), we add 6 to the score if the font is not an
+//    emoji font. This additional score of 6 is only given if the base character is supported in the
+//    font, but not the whole variation sequence.
+// 8. Highest score wins, with ties resolved to the first font.
 FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
             FontLanguage lang, int variant) const {
     if (ch >= mMaxChar) {
@@ -131,26 +139,28 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
     int bestScore = -1;
     for (size_t i = range.start; i < range.end; i++) {
         FontFamily* family = familyVec[i];
-        if (vs == 0 ? family->getCoverage()->get(ch) : family->hasVariationSelector(ch, vs)) {
-            // First font family in collection always matches
-            if (mFamilies[0] == family) {
+        const bool hasVSGlyph = (vs != 0) && family->hasVariationSelector(ch, vs);
+        if (hasVSGlyph || family->getCoverage()->get(ch)) {
+            if ((vs == 0 || hasVSGlyph) && mFamilies[0] == family) {
+                // If the first font family in collection supports the given character or sequence,
+                // always use it.
                 return family;
             }
             int score = lang.match(family->lang()) * 2;
             if (family->variant() == 0 || family->variant() == variant) {
                 score++;
             }
+            if (hasVSGlyph) {
+                score += 12;
+            } else if (((vs == 0xFE0F) && family->lang().hasEmojiFlag()) ||
+                    ((vs == 0xFE0E) && !family->lang().hasEmojiFlag())) {
+                score += 6;
+            }
             if (score > bestScore) {
                 bestScore = score;
                 bestFamily = family;
             }
         }
-    }
-    if (bestFamily == nullptr && vs != 0) {
-        // If no fonts support the codepoint and variation selector pair,
-        // fallback to select a font family that supports just the base
-        // character, ignoring the variation selector.
-        return getFamilyForChar(ch, 0, lang, variant);
     }
     if (bestFamily == nullptr && !mFamilyVec.empty()) {
         UErrorCode errorCode = U_ZERO_ERROR;
