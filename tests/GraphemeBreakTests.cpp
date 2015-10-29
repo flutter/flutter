@@ -119,6 +119,21 @@ TEST(GraphemeBreak, tailoring) {
     EXPECT_FALSE(IsBreak("U+0915 U+094D | U+0915"));  // Devanagari ka+virama+ka
     EXPECT_FALSE(IsBreak("U+0E01 | U+0E3A U+0E01"));  // thai phinthu = pure killer
     EXPECT_TRUE(IsBreak("U+0E01 U+0E3A | U+0E01"));  // thai phinthu = pure killer
+
+    // suppress grapheme breaks in zwj emoji sequences, see
+    // http://www.unicode.org/emoji/charts/emoji-zwj-sequences.html
+    EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+2764 U+FE0F U+200D U+1F48B U+200D U+1F468"));
+    EXPECT_FALSE(IsBreak("U+1F469 U+200D U+2764 U+FE0F U+200D | U+1F48B U+200D U+1F468"));
+    EXPECT_FALSE(IsBreak("U+1F469 U+200D U+2764 U+FE0F U+200D U+1F48B U+200D | U+1F468"));
+    EXPECT_FALSE(IsBreak("U+1F468 U+200D | U+1F469 U+200D U+1F466"));
+    EXPECT_FALSE(IsBreak("U+1F468 U+200D U+1F469 U+200D | U+1F466"));
+    EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+1F469 U+200D U+1F467 U+200D U+1F466"));
+    EXPECT_FALSE(IsBreak("U+1F469 U+200D U+1F469 U+200D | U+1F467 U+200D U+1F466"));
+    EXPECT_FALSE(IsBreak("U+1F469 U+200D U+1F469 U+200D U+1F467 U+200D | U+1F466"));
+    EXPECT_FALSE(IsBreak("U+1F441 U+200D | U+1F5E8"));
+
+    // ARABIC LETTER BEH + ZWJ + heart, not a zwj emoji sequence, so we preserve the break
+    EXPECT_TRUE(IsBreak("U+0628 U+200D | U+2764"));
 }
 
 TEST(GraphemeBreak, offsets) {
