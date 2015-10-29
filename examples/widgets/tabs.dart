@@ -136,5 +136,10 @@ class TabbedNavigatorAppState extends State<TabbedNavigatorApp> {
 }
 
 void main() {
-  runApp(new TabbedNavigatorApp());
+  runApp(new MaterialApp(
+    title: 'Tabs',
+    routes: <String, RouteBuilder>{
+      '/': (RouteArguments args) => new TabbedNavigatorApp(),
+    }
+  ));
 }

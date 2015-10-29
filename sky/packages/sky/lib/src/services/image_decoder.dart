@@ -3,30 +3,23 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show Image, ImageDecoder, ImageDecoderCallback;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:mojo/core.dart' show MojoDataPipeConsumer;
 
-final Set<ImageDecoder> _activeDecoders = new Set<ImageDecoder>();
-
-typedef ImageDecoder _DecoderFactory(ImageDecoderCallback callback);
-
-Future<Image> _decode(_DecoderFactory createDecoder) {
-  Completer<Image> completer = new Completer<Image>();
-  ImageDecoder decoder;
-  decoder = createDecoder((Image image) {
-    _activeDecoders.remove(decoder);
+Future<ui.Image> decodeImageFromDataPipe(MojoDataPipeConsumer consumerHandle) {
+  Completer<ui.Image> completer = new Completer<ui.Image>();
+  ui.decodeImageFromDataPipe(consumerHandle.handle.h, (ui.Image image) {
     completer.complete(image);
   });
-  _activeDecoders.add(decoder);
   return completer.future;
 }
 
-Future<Image> decodeImageFromDataPipe(MojoDataPipeConsumer consumerHandle) {
-  return _decode((ImageDecoderCallback callback) => new ImageDecoder.consume(consumerHandle.handle.h, callback));
-}
-
-Future<Image> decodeImageFromList(Uint8List list) {
-  return _decode((ImageDecoderCallback callback) => new ImageDecoder.fromList(list, callback));
+Future<ui.Image> decodeImageFromList(Uint8List list) {
+  Completer<ui.Image> completer = new Completer<ui.Image>();
+  ui.decodeImageFromList(list, (ui.Image image) {
+    completer.complete(image);
+  });
+  return completer.future;
 }

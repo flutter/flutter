@@ -255,8 +255,7 @@ hooks = [
                 'src/sky/tools/dart_pub_get.py',
                 '--repository-root', '../..',
                 '--dart-sdk-directory',
-                '../../third_party/dart-sdk/dart-sdk',
-                '--dirs-to-ignore', 'sky/packages/sky',
+                '../../third_party/dart-sdk/dart-sdk'
     ],
   },
   {

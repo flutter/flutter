@@ -17,7 +17,7 @@ enum _ChangeDescription { none, scrolled, resized }
 class MixedViewport extends RenderObjectWidget {
   MixedViewport({
     Key key,
-    this.startOffset,
+    this.startOffset: 0.0,
     this.direction: ScrollDirection.vertical,
     this.builder,
     this.token,
@@ -28,9 +28,9 @@ class MixedViewport extends RenderObjectWidget {
   final double startOffset;
   final ScrollDirection direction;
   final IndexedBuilder builder;
-  final Object token;
+  final Object token; // change this if the list changed (i.e. there are added, removed, or resorted items)
   final ExtentsUpdateCallback onExtentsUpdate;
-  final InvalidatorAvailableCallback onInvalidatorAvailable;
+  final InvalidatorAvailableCallback onInvalidatorAvailable; // call the callback this gives to invalidate sizes
 
   _MixedViewportElement createElement() => new _MixedViewportElement(this);
 
@@ -171,7 +171,16 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     if (changes != _ChangeDescription.none || !isValid) {
       renderObject.markNeedsLayout();
     } else {
-      reinvokeBuilders();
+      // We have to reinvoke our builders because they might return new data.
+      // Consider a stateful component that owns us. The builder it gives us
+      // includes some of the state from that component. The component calls
+      // setState() on itself. It rebuilds. Part of that involves rebuilding
+      // us, but now what? If we don't reinvoke the builders. then they will
+      // not be rebuilt, and so the new state won't be used.
+      // Note that if the builders are to change so much that the _sizes_ of
+      // the children would change, then the parent must change the 'token'.
+      if (!renderObject.needsLayout)
+        reinvokeBuilders();
     }
   }
 
@@ -207,7 +216,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     }
     BuildableElement.lockState(() {
       _doLayout(constraints);
-    });
+    }, building: true);
     if (widget.onExtentsUpdate != null) {
       final double newExtents = _didReachLastChild ? _childOffsets.last : null;
       if (newExtents != _lastReportedExtents) {
@@ -239,7 +248,10 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     if (widget.builder == null)
       return null;
     final Widget newWidget = widget.builder(this, index);
-    assert(newWidget == null || newWidget.key != null); // every widget in a list must have a list-unique key
+    assert(() {
+      'Every widget in a list must have a list-unique key.';
+      return newWidget == null || newWidget.key != null;
+    });
     return newWidget;
   }
 

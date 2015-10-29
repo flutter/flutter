@@ -5,6 +5,18 @@ enum PhysicsBodyType {
     dynamic
 }
 
+/// A physics body can be assigned to any node to make it simulated by physics.
+/// The body has a shape, and physical properties such as density, friction,
+/// and velocity.
+///
+/// Bodies can be either dynamic or static. Dynamic bodies will move and rotate
+/// the nodes that are associated with it. Static bodies can be moved by moving
+/// or animating the node associated with them.
+///
+/// For a body to be simulated it needs to be associated with a [Node], through
+/// the node's physicsBody property. The node also need to be a child of either
+/// a [PhysicsWorld] or a [PhysicsGroup] (which in turn is a child of a
+/// [PhysicsWorld] or a [Physics Group]).
 class PhysicsBody {
   PhysicsBody(this.shape, {
     this.tag: null,
@@ -52,14 +64,31 @@ class PhysicsBody {
 
   double _scale;
 
+  /// An object associated with this body, normally used for detecting
+  /// collisions.
+  ///
+  /// myBody.tag = "SpaceShip";
   Object tag;
 
+  /// The shape of this physics body. The shape cannot be modified once the
+  /// body is created. If the shape is required to change, create a new body.
+  ///
+  ///     myShape = myBody.shape;
   final PhysicsShape shape;
 
+  /// The type of the body. This is either [PhysicsBodyType.dynamic] or
+  /// [PhysicsBodyType.static]. Dynamic bodies are simulated by the physics,
+  /// static objects affect the physics but are not moved by the physics.
+  ///
+  ///     myBody.type = PhysicsBodyType.static;
   PhysicsBodyType type;
 
   double _density;
 
+  /// The density of the body, default value is 1.0. The density has no specific
+  /// unit, instead densities are relative to each other.
+  ///
+  ///     myBody.density = 0.5;
   double get density => _density;
 
   set density(double density) {
@@ -74,6 +103,10 @@ class PhysicsBody {
 
   double _friction;
 
+  /// The fricion of the body, the default is 0.0 and the value should be in
+  /// the range of 0.0 to 1.0.
+  ///
+  ///     myBody.friction = 0.4;
   double get friction => _friction;
 
   set friction(double friction) {
@@ -90,6 +123,10 @@ class PhysicsBody {
 
   double get restitution => _restitution;
 
+  /// The restitution of the body, the default is 0.0 and the value should be in
+  /// the range of 0.0 to 1.0.
+  ///
+  ///     myBody.restitution = 0.5;
   set restitution(double restitution) {
     _restitution = restitution;
 
@@ -102,6 +139,11 @@ class PhysicsBody {
 
   bool _isSensor;
 
+  /// True if the body is a sensor. Sensors doesn't collide with other bodies,
+  /// but will return collision callbacks. Use a sensor body to detect if two
+  /// bodies are overlapping.
+  ///
+  ///     myBody.isSensor = true;
   bool get isSensor => _isSensor;
 
   set isSensor(bool isSensor) {
@@ -116,12 +158,15 @@ class PhysicsBody {
 
   Offset _linearVelocity;
 
+  /// The current linear velocity of the body in points / second.
+  ///
+  ///     myBody.velocity = Offset.zero;
   Offset get linearVelocity {
     if (_body == null)
       return _linearVelocity;
     else {
-      double dx = _body.linearVelocity.x * _physicsNode.b2WorldToNodeConversionFactor;
-      double dy = _body.linearVelocity.y * _physicsNode.b2WorldToNodeConversionFactor;
+      double dx = _body.linearVelocity.x * _physicsWorld.b2WorldToNodeConversionFactor;
+      double dy = _body.linearVelocity.y * _physicsWorld.b2WorldToNodeConversionFactor;
       return new Offset(dx, dy);
     }
   }
@@ -131,8 +176,8 @@ class PhysicsBody {
 
     if (_body != null) {
       Vector2 vec = new Vector2(
-        linearVelocity.dx / _physicsNode.b2WorldToNodeConversionFactor,
-        linearVelocity.dy / _physicsNode.b2WorldToNodeConversionFactor
+        linearVelocity.dx / _physicsWorld.b2WorldToNodeConversionFactor,
+        linearVelocity.dy / _physicsWorld.b2WorldToNodeConversionFactor
       );
       _body.linearVelocity = vec;
     }
@@ -140,6 +185,9 @@ class PhysicsBody {
 
   double _angularVelocity;
 
+  /// The angular velocity of the body in degrees / second.
+  ///
+  ///     myBody.angularVelocity = 0.0;
   double get angularVelocity {
     if (_body == null)
       return _angularVelocity;
@@ -156,10 +204,17 @@ class PhysicsBody {
   }
 
   // TODO: Should this be editable in box2d.Body ?
+
+  /// Linear dampening, in the 0.0 to 1.0 range, default is 0.0.
+  ///
+  ///     double dampening = myBody.linearDampening;
   final double linearDampening;
 
   double _angularDampening;
 
+  /// Angular dampening, in the 0.0 to 1.0 range, default is 0.0.
+  ///
+  ///     myBody.angularDampening = 0.1;
   double get angularDampening => _angularDampening;
 
   set angularDampening(double angularDampening) {
@@ -171,6 +226,9 @@ class PhysicsBody {
 
   bool _allowSleep;
 
+  /// Allows the body to sleep if it hasn't moved.
+  ///
+  ///     myBody.allowSleep = false;
   bool get allowSleep => _allowSleep;
 
   set allowSleep(bool allowSleep) {
@@ -182,6 +240,9 @@ class PhysicsBody {
 
   bool _awake;
 
+  /// True if the body is currently awake.
+  ///
+  ///     bool isAwake = myBody.awake;
   bool get awake {
     if (_body != null)
       return _body.isAwake();
@@ -198,6 +259,9 @@ class PhysicsBody {
 
   bool _fixedRotation;
 
+  /// If true, the body cannot be rotated by the physics simulation.
+  ///
+  ///     myBody.fixedRotation = true;
   bool get fixedRotation => _fixedRotation;
 
   set fixedRotation(bool fixedRotation) {
@@ -211,6 +275,11 @@ class PhysicsBody {
 
   bool get bullet => _bullet;
 
+  /// If true, the body cannot pass through other objects when moved at high
+  /// speed. Bullet bodies are slower to simulate, so only use this option
+  /// if neccessary.
+  ///
+  ///     myBody.bullet = true;
   set bullet(bool bullet) {
     _bullet = bullet;
 
@@ -221,6 +290,10 @@ class PhysicsBody {
 
   bool _active;
 
+  /// An active body is used in the physics simulation. Set this to false if
+  /// you want to temporarily exclude a body from the simulation.
+  ///
+  ///     myBody.active = false;
   bool get active {
     if (_body != null)
       return _body.isActive();
@@ -239,6 +312,11 @@ class PhysicsBody {
 
   Object _collisionCategory = null;
 
+  /// The collision category assigned to this body. The default value is
+  /// "Default". The body will only collide with bodies that have the either
+  /// the [collisionMask] set to null or has the category in the mask.
+  ///
+  ///     myBody.collisionCategory = "Air";
   Object get collisionCategory {
     return _collisionCategory;
   }
@@ -250,6 +328,10 @@ class PhysicsBody {
 
   List<Object> _collisionMask = null;
 
+  /// A list of collision categories that this object will collide with. If set
+  /// to null (the default value) the body will collide with all other bodies.
+  ///
+  ///     myBody.collisionMask = ["Air", "Ground"];
   List<Object> get collisionMask => _collisionMask;
 
   set collisionMask(List<Object> collisionMask) {
@@ -258,10 +340,10 @@ class PhysicsBody {
   }
 
   box2d.Filter get _b2Filter {
-    print("_physicsNode: $_physicsNode groups: ${_physicsNode._collisionGroups}");
+    print("_physicsNode: $_physicsWorld groups: ${_physicsWorld._collisionGroups}");
     box2d.Filter f = new box2d.Filter();
-    f.categoryBits = _physicsNode._collisionGroups.getBitmaskForKeys([_collisionCategory]);
-    f.maskBits = _physicsNode._collisionGroups.getBitmaskForKeys(_collisionMask);
+    f.categoryBits = _physicsWorld._collisionGroups.getBitmaskForKeys([_collisionCategory]);
+    f.maskBits = _physicsWorld._collisionGroups.getBitmaskForKeys(_collisionMask);
 
     print("Filter: $f category: ${f.categoryBits} mask: ${f.maskBits}");
 
@@ -277,7 +359,7 @@ class PhysicsBody {
     }
   }
 
-  PhysicsWorld _physicsNode;
+  PhysicsWorld _physicsWorld;
   Node _node;
 
   box2d.Body _body;
@@ -286,62 +368,79 @@ class PhysicsBody {
 
   bool _attached = false;
 
+  /// Applies a force to the body at the [worldPoint] position in world
+  /// cordinates.
+  ///
+  ///     myBody.applyForce(new Offset(0.0, 100.0), myNode.position);
   void applyForce(Offset force, Point worldPoint) {
     assert(_body != null);
 
     Vector2 b2Force = new Vector2(
-      force.dx / _physicsNode.b2WorldToNodeConversionFactor,
-      force.dy / _physicsNode.b2WorldToNodeConversionFactor);
+      force.dx / _physicsWorld.b2WorldToNodeConversionFactor,
+      force.dy / _physicsWorld.b2WorldToNodeConversionFactor);
 
     Vector2 b2Point = new Vector2(
-      worldPoint.x / _physicsNode.b2WorldToNodeConversionFactor,
-      worldPoint.y / _physicsNode.b2WorldToNodeConversionFactor
+      worldPoint.x / _physicsWorld.b2WorldToNodeConversionFactor,
+      worldPoint.y / _physicsWorld.b2WorldToNodeConversionFactor
     );
 
     _body.applyForce(b2Force, b2Point);
   }
 
+  /// Applice a force to the body at the its center of gravity.
+  ///
+  ///     myBody.applyForce(new Offset(0.0, 100.0));
   void applyForceToCenter(Offset force) {
     assert(_body != null);
 
     Vector2 b2Force = new Vector2(
-      force.dx / _physicsNode.b2WorldToNodeConversionFactor,
-      force.dy / _physicsNode.b2WorldToNodeConversionFactor);
+      force.dx / _physicsWorld.b2WorldToNodeConversionFactor,
+      force.dy / _physicsWorld.b2WorldToNodeConversionFactor);
 
     _body.applyForceToCenter(b2Force);
   }
 
+  /// Applies a torque to the body.
+  ///
+  ///     myBody.applyTorque(10.0);
   void applyTorque(double torque) {
     assert(_body != null);
 
-    _body.applyTorque(torque / _physicsNode.b2WorldToNodeConversionFactor);
+    _body.applyTorque(torque / _physicsWorld.b2WorldToNodeConversionFactor);
   }
 
+  /// Applies a linear impulse to the body at the [worldPoint] position in world
+  /// cordinates.
+  ///
+  ///     myBody.applyLinearImpulse(new Offset(0.0, 100.0), myNode.position);
   void applyLinearImpulse(Offset impulse, Point worldPoint, [bool wake = true]) {
     assert(_body != null);
 
     Vector2 b2Impulse = new Vector2(
-      impulse.dx / _physicsNode.b2WorldToNodeConversionFactor,
-      impulse.dy / _physicsNode.b2WorldToNodeConversionFactor);
+      impulse.dx / _physicsWorld.b2WorldToNodeConversionFactor,
+      impulse.dy / _physicsWorld.b2WorldToNodeConversionFactor);
 
     Vector2 b2Point = new Vector2(
-      worldPoint.x / _physicsNode.b2WorldToNodeConversionFactor,
-      worldPoint.y / _physicsNode.b2WorldToNodeConversionFactor
+      worldPoint.x / _physicsWorld.b2WorldToNodeConversionFactor,
+      worldPoint.y / _physicsWorld.b2WorldToNodeConversionFactor
     );
 
     _body.applyLinearImpulse(b2Impulse, b2Point, wake);
   }
 
+  /// Applies an angular impulse to the body.
+  ///
+  ///     myBody.applyAngularImpulse(20.0);
   void applyAngularImpulse(double impulse) {
     assert(_body != null);
 
-    _body.applyAngularImpulse(impulse / _physicsNode.b2WorldToNodeConversionFactor);
+    _body.applyAngularImpulse(impulse / _physicsWorld.b2WorldToNodeConversionFactor);
   }
 
   void _attach(PhysicsWorld physicsNode, Node node) {
     assert(_attached == false);
 
-    _physicsNode = physicsNode;
+    _physicsWorld = physicsNode;
 
     // Account for physics groups
     Point positionWorld = node._positionToPhysics(node.position, node.parent);
@@ -419,7 +518,7 @@ class PhysicsBody {
 
   void _detach() {
     if (_attached) {
-      _physicsNode._bodiesScheduledForDestruction.add(_body);
+      _physicsWorld._bodiesScheduledForDestruction.add(_body);
       _attached = false;
     }
   }

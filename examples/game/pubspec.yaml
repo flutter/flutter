@@ -1,8 +1,10 @@
 name: asteroids
 dependencies:
-  flutter: ">=0.0.3 <0.1.0"
+  flutter: 
+    '0.0.15'
   sky_tools: any
-  flutter_sprites: any
+  flutter_sprites: 
+    '0.0.12'
   box2d: any
 dependency_overrides:
   material_design_icons:

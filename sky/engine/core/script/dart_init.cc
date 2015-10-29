@@ -23,7 +23,6 @@
 #include "sky/engine/tonic/dart_class_library.h"
 #include "sky/engine/tonic/dart_dependency_catcher.h"
 #include "sky/engine/tonic/dart_error.h"
-#include "sky/engine/tonic/dart_gc_controller.h"
 #include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_io.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
@@ -77,7 +76,14 @@ void CreateEmptyRootLibraryIfNeeded() {
 
 static const char* kDartArgs[] = {
     "--enable_mirrors=false",
-#if WTF_OS_IOS || WTF_OS_MACOSX
+    // Dart assumes ARM devices are insufficiently powerful and sets the
+    // default profile period to 100Hz. This number is suitable for older
+    // Raspberry Pi devices but quite low for current smartphones.
+    "--profile_period=1000",
+#if (WTF_OS_IOS || WTF_OS_MACOSX) && !defined(NDEBUG)
+    // On platforms where LLDB is the primary debugger, SIGPROF signals
+    // overwhelm LLDB. Since in debug builds, CPU profiling information is
+    // less useful anyway, vm profiling is disabled to enable a usable debugger.
     "--no-profile",
 #endif
 };

@@ -1,6 +1,7 @@
 name: fitness
 dependencies:
-  flutter: ">=0.0.3 <0.1.0"
+  flutter: 
+    '0.0.15'
   playfair: ^0.0.10
   path: ^1.3.6
   sky_tools: any

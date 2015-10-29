@@ -23,7 +23,6 @@
 #include "sky/engine/tonic/dart_class_library.h"
 #include "sky/engine/tonic/dart_dependency_catcher.h"
 #include "sky/engine/tonic/dart_error.h"
-#include "sky/engine/tonic/dart_gc_controller.h"
 #include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_io.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"

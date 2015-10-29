@@ -29,4 +29,10 @@ bool DartInvokeAppClosure(Dart_Handle closure,
   return result;
 }
 
+bool DartInvokeAppClosure(Dart_Handle closure,
+                          std::initializer_list<Dart_Handle> args) {
+  return DartInvokeAppClosure(closure, args.size(),
+                              const_cast<Dart_Handle*>(args.begin()));
+}
+
 }  // namespace blink

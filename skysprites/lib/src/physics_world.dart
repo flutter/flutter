@@ -9,6 +9,14 @@ enum PhysicsContactType {
 
 typedef void PhysicsContactCallback(PhysicsContactType type, PhysicsContact contact);
 
+/// A [Node] that performs a 2D physics simulation on any children with a
+/// [PhysicsBody] attached. To simulate grand children, they need to be placed
+/// in a [PhysicsGroup].
+///
+/// The PhysicsWorld uses Box2D.dart to perform the actual simulation, but
+/// wraps its behavior in a way that is more integrated with the sprite node
+/// tree. If needed, you can still access the Box2D world through the [b2World]
+/// property.
 class PhysicsWorld extends Node {
   PhysicsWorld(Offset gravity) {
     b2World = new box2d.World.withGravity(
@@ -35,6 +43,7 @@ class PhysicsWorld extends Node {
     b2World.debugDraw = _debugDraw;
   }
 
+  /// The Box2D world used to perform the physics simulations.
   box2d.World b2World;
 
   _ContactHandler _contactHandler;
@@ -47,14 +56,19 @@ class PhysicsWorld extends Node {
 
   List<PhysicsBody> _bodiesScheduledForUpdate = <PhysicsBody>[];
 
+  /// If set to true, a debug image of all physics shapes and joints will
+  /// be drawn on top of the [SpriteBox].
   bool drawDebug = false;
 
   Matrix4 _debugDrawTransform ;
 
   _PhysicsDebugDraw _debugDraw;
 
+  /// The conversion factor that is used to convert points in the physics world
+  /// node to points in the Box2D physics simulation.
   double b2WorldToNodeConversionFactor = 10.0;
 
+  /// The gravity vector used in the simulation.
   Offset get gravity {
     Vector2 g = b2World.getGravity();
     return new Offset(g.x, g.y);
@@ -66,12 +80,14 @@ class PhysicsWorld extends Node {
       gravity.dy / b2WorldToNodeConversionFactor));
   }
 
+  /// If set to true, objects can fall asleep if the haven't moved in a while.
   bool get allowSleep => b2World.isAllowSleep();
 
   set allowSleep(bool allowSleep) {
     b2World.setAllowSleep(allowSleep);
   }
 
+  /// True if sub stepping should be used in the simulation.
   bool get subStepping => b2World.isSubStepping();
 
   set subStepping(bool subStepping) {
@@ -227,6 +243,26 @@ class PhysicsWorld extends Node {
     }
   }
 
+  /// Adds a contact callback, the callback will be invoked when bodies collide
+  /// in the world.
+  ///
+  /// To match specific sets bodies, use the [tagA] and [tagB]
+  /// which will be matched to the tag property that is set on the
+  /// [PhysicsBody]. If [tagA] or [tagB] is set to null, it will match any
+  /// body.
+  ///
+  /// By default, callbacks are made at four different times during a
+  /// collision; preSolve, postSolve, begin, and end. If you are only interested
+  /// in one of these events you can pass in a [type].
+  ///
+  ///     myWorld.addContactCallback(
+  ///       (PhysicsContactType type, PhysicsContact contact) {
+  ///         print("Collision between ship and asteroid");
+  ///       },
+  ///       "Ship",
+  ///       "Asteroid",
+  ///       PhysicsContactType.begin
+  ///     );
   void addContactCallback(PhysicsContactCallback callback, Object tagA, Object tagB, [PhysicsContactType type]) {
     _contactHandler.addContactCallback(callback, tagA, tagB, type);
   }
@@ -238,12 +274,21 @@ class PhysicsWorld extends Node {
     super.paint(canvas);
   }
 
+  /// Draws the debug data of the physics world, normally this method isn't
+  /// invoked directly. Instead, set the [drawDebug] property to true.
   void paintDebug(PaintingCanvas canvas) {
     _debugDraw.canvas = canvas;
     b2World.drawDebugData();
   }
 }
 
+/// Contains information about a physics collision and is normally passed back
+/// in callbacks from the [PhysicsWorld].
+///
+///     void myCallback(PhysicsContactType type, PhysicsContact contact) {
+///       if (contact.isTouching)
+///         print("Bodies are touching");
+///     }
 class PhysicsContact {
   PhysicsContact(
     this.nodeA,
@@ -256,13 +301,29 @@ class PhysicsContact {
     this.touchingNormal
   );
 
+  /// The first node as matched in the rules set when adding the callback.
   final Node nodeA;
+
+  /// The second node as matched in the rules set when adding the callback.
   final Node nodeB;
+
+  /// The first shape as matched in the rules set when adding the callback.
   final PhysicsShape shapeA;
+
+  /// The second shape as matched in the rules set when adding the callback.
   final PhysicsShape shapeB;
+
+  /// True if the two nodes are touching.
   final isTouching;
+
+  /// To ignore the collision to take place, you can set isEnabled to false
+  /// during the preSolve phase.
   bool isEnabled;
+
+  /// List of points that are touching, in world coordinates.
   final List<Point> touchingPoints;
+
+  /// The normal from [shapeA] to [shapeB] at the touchingPoint.
   final Offset touchingNormal;
 }
 

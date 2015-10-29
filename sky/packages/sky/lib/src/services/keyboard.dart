@@ -14,7 +14,7 @@ class _KeyboardConnection {
 
   _KeyboardConnection() {
     proxy = new KeyboardServiceProxy.unbound();
-    shell.requestService("mojo:keyboard", proxy);
+    shell.connectToService("mojo:keyboard", proxy);
   }
 
   KeyboardServiceProxy proxy;

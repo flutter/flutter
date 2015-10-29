@@ -2,8 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
+import 'package:flutter/src/widgets/navigator2.dart' as n2;
+import 'package:flutter/src/widgets/hero_controller.dart' as n2;
 
 import 'theme.dart';
 import 'title.dart';
@@ -28,6 +34,8 @@ AssetBundle _initDefaultBundle() {
 
 final AssetBundle _defaultBundle = _initDefaultBundle();
 
+const bool _kUseNavigator2 = false;
+
 class MaterialApp extends StatefulComponent {
   MaterialApp({
     Key key,
@@ -49,14 +57,19 @@ class _MaterialAppState extends State<MaterialApp> {
 
   GlobalObjectKey _navigator;
 
+  Size _size;
+
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey(this);
     WidgetFlutterBinding.instance.addEventListener(_backHandler);
+    _size = ui.window.size;
+    FlutterBinding.instance.addMetricListener(_metricHandler);
   }
 
   void dispose() {
     WidgetFlutterBinding.instance.removeEventListener(_backHandler);
+    FlutterBinding.instance.removeMetricListener(_metricHandler);
     super.dispose();
   }
 
@@ -72,19 +85,46 @@ class _MaterialAppState extends State<MaterialApp> {
     }
   }
 
+  void _metricHandler(Size size) => setState(() { _size = size; });
+
+  final n2.HeroController _heroController = new n2.HeroController();
+
+  n2.Route _generateRoute(n2.NamedRouteSettings settings) {
+    return new n2.HeroPageRoute(
+      builder: (BuildContext context) {
+        RouteBuilder builder = config.routes[settings.name] ?? config.onGenerateRoute(settings.name);
+        return builder(new RouteArguments(context: context));
+      },
+      settings: settings,
+      heroController: _heroController
+    );
+  }
+
   Widget build(BuildContext context) {
-    return new Theme(
-      data: config.theme ?? new ThemeData.fallback(),
-      child: new DefaultTextStyle(
-        style: _errorTextStyle,
-        child: new DefaultAssetBundle(
-          bundle: _defaultBundle,
-          child: new Title(
-            title: config.title,
-            child: new Navigator(
-              key: _navigator,
-              routes: config.routes,
-              onGenerateRoute: config.onGenerateRoute
+    Widget navigator;
+    if (_kUseNavigator2) {
+      navigator = new n2.Navigator(
+        key: _navigator,
+        onGenerateRoute: _generateRoute
+      );
+    } else {
+      navigator = new Navigator(
+        key: _navigator,
+        routes: config.routes,
+        onGenerateRoute: config.onGenerateRoute
+      );
+    }
+    return new MediaQuery(
+      data: new MediaQueryData(size: _size),
+      child: new Theme(
+        data: config.theme ?? new ThemeData.fallback(),
+        child: new DefaultTextStyle(
+          style: _errorTextStyle,
+          child: new DefaultAssetBundle(
+            bundle: _defaultBundle,
+            child: new Title(
+              title: config.title,
+              child: navigator
             )
           )
         )

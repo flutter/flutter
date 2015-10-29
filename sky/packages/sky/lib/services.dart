@@ -13,10 +13,10 @@ library services;
 
 export 'src/services/activity.dart';
 export 'src/services/asset_bundle.dart';
-export 'src/services/embedder.dart';
 export 'src/services/fetch.dart';
 export 'src/services/image_cache.dart';
 export 'src/services/image_decoder.dart';
 export 'src/services/image_resource.dart';
 export 'src/services/keyboard.dart';
+export 'src/services/service_registry.dart';
 export 'src/services/shell.dart';
