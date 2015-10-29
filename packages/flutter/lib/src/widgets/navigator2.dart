@@ -13,7 +13,7 @@ abstract class Route {
 
   final List<OverlayEntry> _entries = new List<OverlayEntry>();
 
-  void add(OverlayState overlay, OverlayEntry insertionPoint) {
+  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
     List<Widget> widgets = createWidgets();
     for (Widget widget in widgets) {
       _entries.add(new OverlayEntry(child: widget));
@@ -22,20 +22,22 @@ abstract class Route {
     }
   }
 
-  void remove(dynamic result) {
+  void didMakeCurrent() { }
+
+  void didPop(dynamic result) {
     for (OverlayEntry entry in _entries)
       entry.remove();
   }
 }
 
-class RouteArguments {
-  const RouteArguments({ this.name: '<anonymous>', this.mostValuableKeys });
+class NamedRouteSettings {
+  const NamedRouteSettings({ this.name: '<anonymous>', this.mostValuableKeys });
 
   final String name;
   final Set<Key> mostValuableKeys;
 }
 
-typedef Route RouteFactory(RouteArguments args);
+typedef Route RouteFactory(NamedRouteSettings settings);
 
 class Navigator extends StatefulComponent {
   Navigator({
@@ -67,18 +69,19 @@ class Navigator extends StatefulComponent {
 }
 
 class NavigatorState extends State<Navigator> {
-  final GlobalKey<OverlayState> _overlay = new GlobalKey<OverlayState>();
+  final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
   final List<Route> _ephemeral = new List<Route>();
   final List<Route> _modal = new List<Route>();
 
   void initState() {
     super.initState();
-    push(config.onGenerateRoute(new RouteArguments(name: Navigator.defaultRouteName)));
+    push(config.onGenerateRoute(new NamedRouteSettings(name: Navigator.defaultRouteName)));
   }
 
   bool get hasPreviousRoute => _modal.length > 1;
+  OverlayState get overlay => _overlayKey.currentState;
 
-  OverlayEntry get _topRouteOverlay {
+  OverlayEntry get _currentOverlay {
     for (Route route in _ephemeral.reversed) {
       if (route.topEntry != null)
         return route.topEntry;
@@ -90,41 +93,49 @@ class NavigatorState extends State<Navigator> {
     return null;
   }
 
+  Route get _currentRoute => _ephemeral.isNotEmpty ? _ephemeral.last : _modal.last;
+
+  Route _removeCurrentRoute() {
+    return _ephemeral.isNotEmpty ? _ephemeral.removeLast() : _modal.removeLast();
+  }
+
   void pushNamed(String name, { Set<Key> mostValuableKeys }) {
-    RouteArguments args = new RouteArguments(name: name, mostValuableKeys: mostValuableKeys);
-    push(config.onGenerateRoute(args) ?? config.onUnknownRoute(args));
+    NamedRouteSettings settings = new NamedRouteSettings(
+      name: name,
+      mostValuableKeys: mostValuableKeys
+    );
+    push(config.onGenerateRoute(settings) ?? config.onUnknownRoute(settings));
   }
 
   void push(Route route) {
     _popAllEphemeralRoutes();
-    route.add(_overlay.currentState, _topRouteOverlay);
+    route.didPush(overlay, _currentOverlay);
     _modal.add(route);
+    route.didMakeCurrent();
   }
 
   void pushEphemeral(Route route) {
-    route.add(_overlay.currentState, _topRouteOverlay);
+    route.didPush(overlay, _currentOverlay);
     _ephemeral.add(route);
+    route.didMakeCurrent();
   }
 
   void _popAllEphemeralRoutes() {
     List<Route> localEphemeral = new List<Route>.from(_ephemeral);
     _ephemeral.clear();
     for (Route route in localEphemeral)
-      route.remove(null);
+      route.didPop(null);
     assert(_ephemeral.isEmpty);
   }
 
   void pop([dynamic result]) {
-    if (_ephemeral.isNotEmpty) {
-      _ephemeral.removeLast().remove(result);
-      return;
-    }
-    _modal.removeLast().remove(result);
+    _removeCurrentRoute().didPop(result);
+    _currentRoute.didMakeCurrent();
   }
 
   Widget build(BuildContext context) {
     return new Overlay(
-      key: _overlay,
+      key: _overlayKey,
       initialEntries: _modal.first._entries
     );
   }
