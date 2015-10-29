@@ -137,12 +137,12 @@ class RenderOverflowBox extends RenderBox with RenderObjectWithChildMixin<Render
       context.paintChild(child, offset.toPoint());
   }
 
-  String debugDescribeSettings(String prefix) {
-    return '${super.debugDescribeSettings(prefix)}' +
-           '${prefix}minWidth: ${minWidth ?? "use parent minWidth constraint"}\n' +
-           '${prefix}maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}\n' +
-           '${prefix}minHeight: ${minHeight ?? "use parent minHeight constraint"}\n' +
-           '${prefix}maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('minWidth: ${minWidth ?? "use parent minWidth constraint"}');
+    settings.add('maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}');
+    settings.add('minHeight: ${minHeight ?? "use parent minHeight constraint"}');
+    settings.add('maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}');
   }
 }
 

@@ -144,7 +144,10 @@ class RenderConstrainedBox extends RenderProxyBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: $additionalConstraints\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('additionalConstraints: $additionalConstraints');
+  }
 }
 
 /// A render object that, for both width and height, imposes a tight constraint
@@ -232,10 +235,10 @@ class RenderFractionallySizedBox extends RenderProxyBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) {
-    return '${super.debugDescribeSettings(prefix)}' +
-           '${prefix}widthFactor: ${_widthFactor ?? "pass-through"}\n' +
-           '${prefix}heightFactor: ${_heightFactor ?? "pass-through"}\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('widthFactor: ${_widthFactor ?? "pass-through"}');
+    settings.add('heightFactor: ${_heightFactor ?? "pass-through"}');
   }
 }
 
@@ -302,7 +305,10 @@ class RenderAspectRatio extends RenderProxyBox {
       child.layout(new BoxConstraints.tight(size));
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}aspectRatio: $aspectRatio\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('aspectRatio: $aspectRatio');
+  }
 }
 
 /// Sizes its child to the child's intrinsic width
@@ -397,8 +403,11 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}stepWidth: $stepWidth\n${prefix}stepHeight: $stepHeight\n';
-
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('stepWidth: $stepWidth');
+    settings.add('stepHeight: $stepHeight');
+  }
 }
 
 /// Sizes its child to the child's intrinsic height
@@ -499,6 +508,11 @@ class RenderOpacity extends RenderProxyBox {
       else
         context.paintChildWithOpacity(child, offset.toPoint(), null, a);
     }
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('opacity: ${opacity.toStringAsFixed(1)}');
   }
 }
 
@@ -702,7 +716,11 @@ class RenderDecoratedBox extends RenderProxyBox {
       _painter.paint(context.canvas, offset & size);
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('decoration:');
+    settings.addAll(_painter.decoration.toString("  ").split('\n'));
+  }
 }
 
 /// Applies a transformation before painting its child
@@ -833,10 +851,14 @@ class RenderTransform extends RenderProxyBox {
     transform.multiply(_effectiveTransform);
   }
 
-  String debugDescribeSettings(String prefix) {
-    List<String> result = _transform.toString().split('\n').map((String s) => '$prefix  $s\n').toList();
-    result.removeLast();
-    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}\n${prefix}origin: $origin\n${prefix}alignment: $alignment\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    List<String> matrix = _transform.toString().split('\n').map((String s) => '  $s').toList();
+    matrix.removeLast();
+    settings.add('transform matrix:');
+    settings.addAll(matrix);
+    settings.add('origin: $origin');
+    settings.add('alignment: $alignment');
   }
 }
 
@@ -952,6 +974,22 @@ class RenderPointerListener extends RenderProxyBox {
     if (onPointerCancel != null && event.type == 'pointercancel')
       return onPointerCancel(event);
   }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    List<String> listeners = <String>[];
+    if (onPointerDown != null)
+      listeners.add('down');
+    if (onPointerMove != null)
+      listeners.add('move');
+    if (onPointerUp != null)
+      listeners.add('up');
+    if (onPointerCancel != null)
+      listeners.add('cancel');
+    if (listeners.isEmpty)
+      listeners.add('<none>');
+    settings.add('listeners: ${listeners.join(", ")}');
+  }
 }
 
 /// Is invisible during hit testing.
@@ -967,6 +1005,11 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   bool hitTest(HitTestResult result, { Point position }) {
     return ignoring ? false : super.hitTest(result, position: position);
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('ignoring: $ignoring');
   }
 }
 
