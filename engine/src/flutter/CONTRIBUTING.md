@@ -87,7 +87,7 @@ The `flutter` tool also lets you run release builds, upload the binary without r
 
  * `gclient sync` to update your dependencies.
  * `./sky/tools/gn` to prepare your build files.
- * `ninja -C out/Debug` to build an Android Debug binary.
+ * `ninja -C out/Debug` to build a desktop Debug binary.
 
 To run the tests:
 
