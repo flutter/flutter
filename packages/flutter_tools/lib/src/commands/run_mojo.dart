@@ -27,7 +27,8 @@ class RunMojoCommand extends Command {
     argParser.addFlag('mojo-release', negatable: false, help: 'Use Release build of mojo (default)');
 
     argParser.addOption('app', defaultsTo: 'app.flx');
-    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services');
+    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services. This is required for a Linux build.');
+    argParser.addOption('devtools-path', help: 'Path to the mojo_run script in mojo devtools. This is required for an Android build.');
   }
 
   // TODO(abarth): Why not use path.absolute?
@@ -39,9 +40,9 @@ class RunMojoCommand extends Command {
     return file.absolute.path;
   }
 
-  Future<int> _runAndroid(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) {
+  Future<int> _runAndroid(String devtoolsPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) {
     String skyViewerUrl = ArtifactStore.googleStorageUrl('viewer', 'android-arm');
-    String command = _makePathAbsolute(path.join(mojoPath, 'mojo', 'devtools', 'common', 'mojo_run'));
+    String command = _makePathAbsolute(devtoolsPath);
     String appName = path.basename(appPath);
     String appDir = path.dirname(appPath);
     String buildFlag = mojoConfig == _MojoConfig.Debug ? '--debug' : '--release';
@@ -79,8 +80,13 @@ class RunMojoCommand extends Command {
 
   @override
   Future<int> run() async {
-    if (argResults['mojo-path'] == null) {
-      _logging.severe('Must specify --mojo-path to mojo_run');
+    if (argResults['mojo-path'] == null && !argResults['android']) {
+      _logging.severe('Must specify --mojo-path for Linux.');
+      return 1;
+    }
+
+    if (argResults['devtools-path'] == null && argResults['android']) {
+      _logging.severe('Must specify --devtools-path for Android.');
       return 1;
     }
     if (argResults['mojo-debug'] && argResults['mojo-release']) {
@@ -97,7 +103,7 @@ class RunMojoCommand extends Command {
 
     args.addAll(argResults.rest);
     if (argResults['android']) {
-      return _runAndroid(mojoPath, mojoConfig, appPath, args);
+      return _runAndroid(argResults['devtools-path'], mojoConfig, appPath, args);
     } else {
       return _runLinux(mojoPath, mojoConfig, appPath, args);
     }
