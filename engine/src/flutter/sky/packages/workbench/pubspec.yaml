@@ -5,18 +5,18 @@ description: A workspace to host pub packages
 homepage: https://github.com/flutter/engine/tree/master/sky/packages/workbench
 dependencies:
   flutter: 
-    '0.0.14'
+    '0.0.15'
   sky_tools: any
   cipher: any
   asn1lib: any
   flutter_rendering_examples: any
   flutter_sprites: 
-    '0.0.11'
+    '0.0.12'
   playfair: any
   flx: 
-    '0.0.3'
+    '0.0.4'
   sky_services:
-    '0.0.44'
+    '0.0.45'
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
