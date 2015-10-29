@@ -1,5 +1,6 @@
 part of flutter_sprites;
 
+/// Defines the shape of a  [PhysicsBody].
 abstract class PhysicsShape {
 
   box2d.Shape _b2Shape;
@@ -20,6 +21,9 @@ abstract class PhysicsShape {
   }
 }
 
+/// Defines a circle shape with a given center [point] and [radius].
+///
+///     var shape = PhysicsShapeCircle(Point.origin, 20.0);
 class PhysicsShapeCircle extends PhysicsShape {
   PhysicsShapeCircle(this.point, this.radius);
 
@@ -35,6 +39,14 @@ class PhysicsShapeCircle extends PhysicsShape {
   }
 }
 
+/// Defines a polygon shape from a list of [points];
+///
+///     var points = [
+///       new Point(-10.0, 0.0),
+///       new Point(0.0, 10.0),
+///       new Point(10.0, 0.0)
+///     ];
+///     var shape = new PhysicsShapePolygon(points);
 class PhysicsShapePolygon extends PhysicsShape {
   PhysicsShapePolygon(this.points);
 
@@ -56,6 +68,9 @@ class PhysicsShapePolygon extends PhysicsShape {
   }
 }
 
+/// Defines a box shape from a [width] and [height].
+///
+/// var shape = new PhysicsShapeBox(50.0, 100.0);
 class PhysicsShapeBox extends PhysicsShape {
   PhysicsShapeBox(
     this.width,
@@ -84,6 +99,15 @@ class PhysicsShapeBox extends PhysicsShape {
   }
 }
 
+/// Defines a chain shape from a set of [points]. This can be used to create
+/// a continuous chain of edges or, if [loop] is set to true, concave polygons.
+///
+///     var points = [
+///       new Point(-10.0, 0.0),
+///       new Point(0.0, 10.0),
+///       new Point(10.0, 0.0)
+///     ];
+///     var shape = new PhysicsShapeChain(points);
 class PhysicsShapeChain extends PhysicsShape {
   PhysicsShapeChain(this.points, [this.loop=false]);
 
@@ -109,6 +133,12 @@ class PhysicsShapeChain extends PhysicsShape {
   }
 }
 
+/// Defines a single edge line shape from [pointA] to [pointB].
+///
+///     var shape = new PhysicsShapeEdge(
+///       new Point(20.0, 20.0),
+///       new Point(50.0, 20.0)
+///     );
 class PhysicsShapeEdge extends PhysicsShape {
   PhysicsShapeEdge(this.pointA, this.pointB);
 
@@ -131,6 +161,11 @@ class PhysicsShapeEdge extends PhysicsShape {
   }
 }
 
+/// A group combines several [shapes] into a single shape.
+///
+///     var s0 = new PhysicsShapeCircle(new Point(-10.0, 0.0), 20.0);
+///     var s1 = new PhysicsShapeCircle(new Point(10.0, 0.0), 20.0);
+///     var shape = new PhysicsShapeGroup([s0, s1]);
 class PhysicsShapeGroup extends PhysicsShape {
 
   PhysicsShapeGroup(this.shapes);
