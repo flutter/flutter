@@ -67,7 +67,8 @@ abstract class Template {
   Template(this.name, this.description);
 
   void generateInto(Directory dir) {
-    String projectName = _normalizeProjectName(p.basename(dir.path));
+    String dirPath = p.normalize(dir.absolute.path);
+    String projectName = _normalizeProjectName(p.basename(dirPath));
     print('Creating ${p.basename(projectName)}...');
     dir.createSync(recursive: true);
 
