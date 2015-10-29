@@ -387,11 +387,11 @@ class HeroParty {
           hero.targetState._setChild(hero.key);
         for (HeroState source in hero.sourceStates)
           source._resetChild();
-        if (onQuestFinished != null)
-          onQuestFinished();
       }
       _heroes.clear();
       _currentPerformance = null;
+      if (onQuestFinished != null)
+        onQuestFinished();
     }
   }
 

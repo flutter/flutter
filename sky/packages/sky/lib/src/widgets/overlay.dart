@@ -16,6 +16,8 @@ class OverlayEntry {
   bool get opaque => _opaque;
   bool _opaque;
   void set opaque(bool value) {
+    if (_opaque = value)
+      return;
     _opaque = value;
     _state?.setState(() {});
   }
@@ -51,10 +53,6 @@ class OverlayState extends State<Overlay> {
 
   void insert(OverlayEntry entry, { OverlayEntry above }) {
     assert(entry._state == null);
-    if (above != null) {
-      print('above._state ${above._state} --- ${above._state == this}');
-      print('_entries.contains ${_entries.contains(above)}');
-    }
     assert(above == null || (above._state == this && _entries.contains(above)));
     entry._state = this;
     setState(() {

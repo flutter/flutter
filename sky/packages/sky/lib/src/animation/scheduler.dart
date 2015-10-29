@@ -31,7 +31,6 @@ class Scheduler {
   }
 
   bool _haveScheduledVisualUpdate = false;
-  int _nextPrivateCallbackId = 0; // negative
   int _nextCallbackId = 0; // positive
 
   final List<SchedulerCallback> _persistentCallbacks = new List<SchedulerCallback>();
@@ -55,7 +54,6 @@ class Scheduler {
     Duration timeStamp = new Duration(
         microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
     _haveScheduledVisualUpdate = false;
-    assert(_postFrameCallbacks.length == 0);
 
     Map<int, SchedulerCallback> callbacks = _transientCallbacks;
     _transientCallbacks = new Map<int, SchedulerCallback>();
@@ -68,9 +66,11 @@ class Scheduler {
     for (SchedulerCallback callback in _persistentCallbacks)
       invokeCallback(callback, timeStamp);
 
-    for (SchedulerCallback callback in _postFrameCallbacks)
-      invokeCallback(callback, timeStamp);
+    List<SchedulerCallback> localPostFrameCallbacks =
+        new List<SchedulerCallback>.from(_postFrameCallbacks);
     _postFrameCallbacks.clear();
+    for (SchedulerCallback callback in localPostFrameCallbacks)
+      invokeCallback(callback, timeStamp);
 
     _inFrame = false;
   }
@@ -133,13 +133,7 @@ class Scheduler {
   /// frame. In this case, the registration order is not preserved. Callbacks
   /// are called in an arbitrary order.
   void requestPostFrameCallback(SchedulerCallback callback) {
-    if (_inFrame) {
-      _postFrameCallbacks.add(callback);
-    } else {
-      _nextPrivateCallbackId -= 1;
-      _transientCallbacks[_nextPrivateCallbackId] = callback;
-      ensureVisualUpdate();
-    }
+    _postFrameCallbacks.add(callback);
   }
 
   /// Ensure that a frame will be produced after this function is called.

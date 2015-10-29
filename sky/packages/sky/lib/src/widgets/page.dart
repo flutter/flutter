@@ -10,6 +10,7 @@ import 'navigator2.dart';
 import 'overlay.dart';
 import 'transitions.dart';
 
+// TODO(abarth): Should we add a type for the result?
 abstract class TransitionRoute extends Route {
   bool get opaque => true;
 
@@ -27,21 +28,28 @@ abstract class TransitionRoute extends Route {
   dynamic _result;
 
   void _handleStatusChanged(PerformanceStatus status) {
-    if (status == PerformanceStatus.completed && opaque) {
-      bottomEntry.opaque = true;
-    } else if (status == PerformanceStatus.dismissed) {
-      super.remove(_result);
+    switch (status) {
+      case PerformanceStatus.completed:
+        bottomEntry.opaque = opaque;
+        break;
+      case PerformanceStatus.forward:
+      case PerformanceStatus.reverse:
+        bottomEntry.opaque = false;
+        break;
+      case PerformanceStatus.dismissed:
+        super.didPop(_result);
+        break;
     }
   }
 
-  void add(OverlayState overlayer, OverlayEntry insertionPoint) {
+  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
     _performance = createPerformance()
       ..addStatusListener(_handleStatusChanged)
       ..forward();
-    super.add(overlayer, insertionPoint);
+    super.didPush(overlay, insertionPoint);
   }
 
-  void remove(dynamic result) {
+  void didPop(dynamic result) {
     _result = result;
     _performance.reverse();
   }
@@ -52,8 +60,9 @@ abstract class TransitionRoute extends Route {
 
 class _Page extends StatefulComponent {
   _Page({
-    PageRoute route
-  }) : route = route, super(key: new GlobalObjectKey(route));
+    Key key,
+    this.route
+  }) : super(key: key);
 
   final PageRoute route;
 
@@ -67,14 +76,27 @@ class _PageState extends State<_Page> {
   final AnimatedValue<double> _opacity =
       new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut);
 
+  final GlobalKey _subtreeKey = new GlobalKey();
+
   Widget build(BuildContext context) {
+    if (config.route._offstage) {
+      return new OffStage(
+        child: new KeyedSubtree(
+          key: _subtreeKey,
+          child: _invokeBuilder()
+        )
+      );
+    }
     return new SlideTransition(
       performance: config.route.performance,
       position: _position,
       child: new FadeTransition(
         performance: config.route.performance,
         opacity: _opacity,
-        child: _invokeBuilder()
+        child: new KeyedSubtree(
+          key: _subtreeKey,
+          child: _invokeBuilder()
+        )
       )
     );
   }
@@ -94,19 +116,30 @@ class _PageState extends State<_Page> {
 class PageRoute extends TransitionRoute {
   PageRoute({
     this.builder,
-    this.args: const RouteArguments()
+    this.settings: const NamedRouteSettings()
   }) {
     assert(builder != null);
     assert(opaque);
   }
 
   final WidgetBuilder builder;
-  final RouteArguments args;
+  final NamedRouteSettings settings;
 
-  String get name => args.name;
+  final GlobalKey<_PageState> pageKey = new GlobalKey<_PageState>();
+
+  String get name => settings.name;
 
   Duration get transitionDuration => const Duration(milliseconds: 150);
-  List<Widget> createWidgets() => [ new _Page(route: this) ];
+  List<Widget> createWidgets() => [ new _Page(key: pageKey, route: this) ];
+
+  bool get offstage => _offstage;
+  bool _offstage = false;
+  void set offstage (bool value) {
+    if (_offstage == value)
+      return;
+    _offstage = value;
+    pageKey.currentState?.setState(() { });
+  }
 
   String get debugLabel => '${super.debugLabel}($name)';
 }

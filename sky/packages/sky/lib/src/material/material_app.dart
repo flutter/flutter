@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter/src/widgets/navigator2.dart' as n2;
-import 'package:flutter/src/widgets/page.dart' as n2;
+import 'package:flutter/src/widgets/hero_controller.dart' as n2;
 
 import 'theme.dart';
 import 'title.dart';
@@ -87,13 +87,16 @@ class _MaterialAppState extends State<MaterialApp> {
 
   void _metricHandler(Size size) => setState(() { _size = size; });
 
-  n2.Route _generateRoute(n2.RouteArguments args) {
-    return new n2.PageRoute(
+  final n2.HeroController _heroController = new n2.HeroController();
+
+  n2.Route _generateRoute(n2.NamedRouteSettings settings) {
+    return new n2.HeroPageRoute(
       builder: (BuildContext context) {
-        RouteArguments routeArgs = new RouteArguments(context: context);
-        return config.routes[args.name](routeArgs);
+        RouteBuilder builder = config.routes[settings.name] ?? config.onGenerateRoute(settings.name);
+        return builder(new RouteArguments(context: context));
       },
-      args: args
+      settings: settings,
+      heroController: _heroController
     );
   }
 
