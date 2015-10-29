@@ -5,6 +5,7 @@
 library sky_tools.device;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -512,6 +513,9 @@ class AndroidDevice extends Device {
   static const String className = 'AndroidDevice';
   static final String defaultDeviceID = 'default_android_device';
 
+  static const String _kFlutterServerStartMessage = 'Serving';
+  static const Duration _kFlutterServerTimeout = const Duration(seconds: 3);
+
   String productID;
   String modelID;
   String deviceCodeName;
@@ -773,8 +777,14 @@ class AndroidDevice extends Device {
           [adbPath, 'forward', observatoryPortString, observatoryPortString]);
 
       // Actually start the server.
-      await Process.start(sdkBinaryName('pub'), ['run', 'sky_tools:sky_server', _serverPort],
-          workingDirectory: serverRoot, mode: ProcessStartMode.DETACHED);
+      Process server = await Process.start(
+          sdkBinaryName('pub'), ['run', 'sky_tools:sky_server', _serverPort],
+          workingDirectory: serverRoot,
+          mode: ProcessStartMode.DETACHED_WITH_STDIO
+      );
+      await server.stdout.transform(UTF8.decoder)
+          .firstWhere((String value) => value.startsWith(_kFlutterServerStartMessage))
+          .timeout(_kFlutterServerTimeout);
 
       // Set up reverse port-forwarding so that the Android app can reach the
       // server running on localhost.
