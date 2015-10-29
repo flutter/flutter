@@ -17,7 +17,7 @@ class StopCommand extends FlutterCommand {
   final String description = 'Stop your Flutter app on all attached devices.';
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();
     return await stop() ? 0 : 2;
   }

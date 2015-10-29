@@ -22,7 +22,7 @@ class LogsCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     connectToDevices();
 
     bool clear = argResults['clear'];

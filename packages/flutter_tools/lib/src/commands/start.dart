@@ -36,7 +36,7 @@ class StartCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();
 
     bool poke = argResults['poke'];

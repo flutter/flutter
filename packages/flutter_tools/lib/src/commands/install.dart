@@ -18,7 +18,7 @@ class InstallCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();
     return install(boot: argResults['boot']) ? 0 : 2;
   }

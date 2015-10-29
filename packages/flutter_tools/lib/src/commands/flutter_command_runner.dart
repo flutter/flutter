@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
 import '../build_configuration.dart';
+import '../process.dart';
 
 final Logger _logging = new Logger('sky_tools.flutter_command_runner');
 
@@ -116,8 +117,8 @@ class FlutterCommandRunner extends CommandRunner {
         else
           message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
       }
-      _logging.severe(message);
-      exit(2);
+      stderr.writeln(message);
+      throw new ProcessExit(2);
     }
 
     String enginePath = globalResults['engine-src-path'];
@@ -129,9 +130,11 @@ class FlutterCommandRunner extends CommandRunner {
       String realFlutterPath = flutterDir.resolveSymbolicLinksSync();
 
       enginePath = path.dirname(path.dirname(path.dirname(path.dirname(realFlutterPath))));
-      if (enginePath == '/' || enginePath.isEmpty || !FileSystemEntity.isDirectorySync(path.join(enginePath, 'out'))) {
-        _logging.severe('Unable to detect local build in $enginePath.\nDo you have a dependency override for the flutter package?');
-        exit(2);
+      bool dirExists = FileSystemEntity.isDirectorySync(path.join(enginePath, 'out'));
+      if (enginePath == '/' || enginePath.isEmpty || !dirExists) {
+        stderr.writeln('Unable to detect local build in $enginePath.\n'
+            'Do you have a dependency override for the flutter package?');
+        throw new ProcessExit(2);
       }
     }
 

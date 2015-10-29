@@ -89,3 +89,10 @@ String _runWithLoggingSync(List<String> cmd, {bool checked: false}) {
   _logging.fine(results.stdout.trim());
   return results.stdout;
 }
+
+class ProcessExit implements Exception {
+  final int exitCode;
+  ProcessExit(this.exitCode);
+  String get message => 'ProcessExit: ${exitCode}';
+  String toString() => message;
+}

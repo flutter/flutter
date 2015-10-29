@@ -23,7 +23,7 @@ class ListCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     connectToDevices();
 
     bool details = argResults['details'];

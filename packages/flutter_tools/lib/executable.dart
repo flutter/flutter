@@ -20,6 +20,7 @@ import 'src/commands/run_mojo.dart';
 import 'src/commands/start.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/trace.dart';
+import 'src/process.dart';
 
 /// Main entry point for commands.
 ///
@@ -58,6 +59,16 @@ Future main(List<String> args) async {
       exit(result);
   } on UsageException catch (e) {
     stderr.writeln(e);
-    exit(4);
+    // Args error exit code.
+    exit(64);
+  } catch (e, stack) {
+    if (e is ProcessExit) {
+      // We've caught an exit code.
+      exit(e.exitCode);
+    }
+
+    stderr.writeln(e);
+    Logger.root.log(Level.SEVERE, '\nException:', null, stack);
+    exit(1);
   }
 }

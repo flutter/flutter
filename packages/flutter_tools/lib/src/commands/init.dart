@@ -160,8 +160,7 @@ class FlutterDemo extends StatelessComponent {
        ),
       floatingActionButton: new FloatingActionButton(
         child: new Icon(
-          type: 'content/add',
-          size: 24
+          type: 'content/add'
         )
       )
     );

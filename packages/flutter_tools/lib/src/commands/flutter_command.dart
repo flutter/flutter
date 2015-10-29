@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
@@ -13,6 +14,9 @@ import 'flutter_command_runner.dart';
 
 abstract class FlutterCommand extends Command {
   FlutterCommandRunner get runner => super.runner;
+
+  /// Whether this command needs to be run from the root of a project.
+  bool get requiresProjectRoot => true;
 
   Future downloadApplicationPackages() async {
     if (applicationPackages == null)
@@ -39,6 +43,20 @@ abstract class FlutterCommand extends Command {
     toolchain = other.toolchain;
     devices = other.devices;
   }
+
+  Future<int> run() async {
+    if (requiresProjectRoot) {
+      if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
+        stderr.writeln('No pubspec.yaml file found. '
+            'This command should be run from the root of a project.');
+        return 1;
+      }
+    }
+
+    return runInProject();
+  }
+
+  Future<int> runInProject();
 
   ApplicationPackageStore applicationPackages;
   Toolchain toolchain;

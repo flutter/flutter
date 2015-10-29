@@ -38,7 +38,7 @@ class ListenCommand extends FlutterCommand {
   static const String _remoteFlutterBundle = 'Documents/app.flx';
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();
     await downloadToolchain();
 

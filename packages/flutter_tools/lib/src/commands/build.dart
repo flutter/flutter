@@ -127,7 +127,7 @@ class BuildCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     String compilerPath = argResults['compiler'];
 
     if (compilerPath == null)
