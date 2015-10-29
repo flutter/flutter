@@ -34,7 +34,7 @@ Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
   DCHECK(!LogIfError(wrapper));
 
   info.ref_object(this);  // Balanced in FinalizeDartWrapper.
-  dart_wrapper_ = Dart_NewPrologueWeakPersistentHandle(
+  dart_wrapper_ = Dart_NewWeakPersistentHandle(
       wrapper, this, info.size_in_bytes, &FinalizeDartWrapper);
 
   return wrapper;
@@ -59,7 +59,7 @@ void DartWrappable::AssociateWithDartWrapper(Dart_NativeArguments args) {
       wrapper, kWrapperInfoIndex, reinterpret_cast<intptr_t>(&info))));
 
   info.ref_object(this);  // Balanced in FinalizeDartWrapper.
-  dart_wrapper_ = Dart_NewPrologueWeakPersistentHandle(
+  dart_wrapper_ = Dart_NewWeakPersistentHandle(
       wrapper, this, info.size_in_bytes, &FinalizeDartWrapper);
 }
 
