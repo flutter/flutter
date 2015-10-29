@@ -1,7 +1,7 @@
 name: flutter_rendering_examples
 dependencies:
   flutter: 
-    '0.0.14'
+    '0.0.15'
   sky_tools: any
 dependency_overrides:
   material_design_icons:
