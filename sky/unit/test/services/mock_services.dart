@@ -4,13 +4,13 @@ import 'package:flutter/src/services/shell.dart' as shell;
 // of Mojo services.
 class _ServiceMocker {
   _ServiceMocker() {
-    shell.overrideRequestService = _requestService;
+    shell.overrideConnectToService = _connectToService;
   }
 
   // Map of interface names to mock implementations.
   Map<String, Object> _interfaceMock = new Map<String, Object>();
 
-  bool _requestService(String url, dynamic proxy) {
+  bool _connectToService(String url, dynamic proxy) {
     Object mock = _interfaceMock[proxy.impl.name];
     if (mock != null) {
       // Replace the proxy's implementation of the service interface with the

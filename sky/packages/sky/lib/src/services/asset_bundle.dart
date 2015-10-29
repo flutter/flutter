@@ -44,7 +44,7 @@ class NetworkAssetBundle extends AssetBundle {
 Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
   core.MojoDataPipeConsumer bundleData = (await fetchUrl(relativeUrl)).body;
   AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
-  shell.requestService("mojo:asset_bundle", unpacker);
+  shell.connectToService("mojo:asset_bundle", unpacker);
   unpacker.ptr.unpackZipStream(bundleData, bundle);
   unpacker.close();
 }

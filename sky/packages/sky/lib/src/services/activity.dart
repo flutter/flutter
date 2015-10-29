@@ -22,7 +22,7 @@ const int MULTIPLE_TASK = 0x08000000;
 
 ActivityProxy _initActivityProxy() {
   ActivityProxy activity = new ActivityProxy.unbound();
-  shell.requestService('mojo:sky_viewer', activity);
+  shell.connectToService(null, activity);
   return activity;
 }
 
@@ -40,7 +40,7 @@ final UserFeedback userFeedback = _userFeedbackProxy.ptr;
 
 PathServiceProxy _initPathServiceProxy() {
   PathServiceProxy proxy = new PathServiceProxy.unbound();
-  shell.requestService(null, proxy);
+  shell.connectToService(null, proxy);
   return proxy;
 }
 

@@ -17,7 +17,7 @@ export 'package:mojo/mojo/url_response.mojom.dart' show UrlResponse;
 
 NetworkServiceProxy _initNetworkService() {
   NetworkServiceProxy networkService = new NetworkServiceProxy.unbound();
-  shell.requestService("mojo:authenticated_network_service", networkService);
+  shell.connectToService("mojo:authenticated_network_service", networkService);
   return networkService;
 }
 
