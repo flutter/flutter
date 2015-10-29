@@ -13,7 +13,6 @@ library services;
 
 export 'src/services/activity.dart';
 export 'src/services/asset_bundle.dart';
-export 'src/services/embedder.dart';
 export 'src/services/fetch.dart';
 export 'src/services/image_cache.dart';
 export 'src/services/image_decoder.dart';

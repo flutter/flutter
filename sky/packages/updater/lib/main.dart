@@ -23,7 +23,7 @@ const String kBundleFile = 'app.flx';
 
 UpdateServiceProxy _initUpdateService() {
   UpdateServiceProxy updateService = new UpdateServiceProxy.unbound();
-  shell.requestService(null, updateService);
+  shell.connectToService(null, updateService);
   return updateService;
 }
 
