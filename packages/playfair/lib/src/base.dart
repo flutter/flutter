@@ -171,7 +171,7 @@ class ChartPainter {
         ..maxWidth = _rect.width
         ..layout();
       _horizontalGridlines.add(gridline);
-      yScaleWidth = math.max(yScaleWidth, gridline.labelPainter.maxWidth);
+      yScaleWidth = math.max(yScaleWidth, gridline.labelPainter.maxIntrinsicWidth);
     }
 
     yScaleWidth += kScaleMargin;
@@ -218,7 +218,7 @@ class ChartPainter {
           ..maxWidth = markerRect.width
           ..layout();
         _indicator.labelPosition = new Point(
-          ((_indicator.start.x + _indicator.end.x) / 2.0) - _indicator.labelPainter.maxWidth / 2.0,
+          ((_indicator.start.x + _indicator.end.x) / 2.0) - _indicator.labelPainter.maxIntrinsicWidth / 2.0,
           _indicator.start.y - _indicator.labelPainter.size.height - kIndicatorMargin
         );
       }
