@@ -18,6 +18,7 @@ class DartServiceIsolate {
   static bool Startup(std::string server_ip,
                       intptr_t server_port,
                       Dart_LibraryTagHandler embedder_tag_handler,
+                      bool running_precompiled,
                       char** error);
 
  private:
