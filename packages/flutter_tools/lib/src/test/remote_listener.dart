@@ -41,7 +41,7 @@ class RemoteListener {
     Isolate.current.setErrorsFatal(false);
     Isolate.current.addErrorListener(errorPort.sendPort);
     errorPort.listen((message) {
-      // Masquerade as an IsoalteSpawnException because that's what this would
+      // Masquerade as an IsolateSpawnException because that's what this would
       // be if the error had been detected statically.
       var error = new IsolateSpawnException(message[0]);
       var stackTrace =
@@ -69,7 +69,7 @@ class RemoteListener {
       return;
     }
 
-    Declarer declarer = new Declarer();
+    Declarer declarer = new Declarer(metadata);
     try {
       await runZoned(() => new Future.sync(main), zoneValues: {
         #test.declarer: declarer
@@ -84,8 +84,8 @@ class RemoteListener {
       return;
     }
 
-    Suite suite = new Suite(declarer.tests,
-        platform: TestPlatform.vm, os: currentOS, metadata: metadata);
+    Suite suite = new Suite(declarer.build(),
+        platform: TestPlatform.vm, os: currentOS);
     new RemoteListener._(suite, socket)._listen();
   }
 
@@ -101,8 +101,10 @@ class RemoteListener {
 
   void _listen() {
     List tests = [];
-    for (var i = 0; i < _suite.tests.length; i++) {
-      Test test = _suite.tests[i];
+    for (var i = 0; i < _suite.group.entries.length; i++) {
+      // TODO(ianh): entries[] might return a Group instead of a Test. We don't
+      // currently support nested groups.
+      Test test = _suite.group.entries[i];
       tests.add({
         "name": test.name,
         "metadata": test.metadata.serialize(),
@@ -118,7 +120,9 @@ class RemoteListener {
     var message = JSON.decode(data);
     if (message['command'] == 'run') {
       assert(_liveTest == null);
-      Test test = _suite.tests[message['index']];
+      // TODO(ianh): entries[] might return a Group instead of a Test. We don't
+      // currently support nested groups.
+      Test test = _suite.group.entries[message['index']];
       _liveTest = test.load(_suite);
 
       _liveTest.onStateChange.listen((state) {
@@ -148,6 +152,8 @@ class RemoteListener {
     } else if (message['command'] == 'close') {
       _liveTest.close();
       _liveTest = null;
+    } else {
+      print('remote_listener.dart: ignoring command "${message["command"]}" from test harness');
     }
   }
 }

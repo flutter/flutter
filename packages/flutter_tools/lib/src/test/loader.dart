@@ -10,12 +10,14 @@ import 'package:path/path.dart' as p;
 import 'package:sky_tools/src/test/json_socket.dart';
 import 'package:sky_tools/src/test/remote_test.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:test/src/backend/group.dart';
+import 'package:test/src/backend/group_entry.dart';
 import 'package:test/src/backend/metadata.dart';
 import 'package:test/src/backend/test_platform.dart';
 import 'package:test/src/runner/configuration.dart';
+import 'package:test/src/runner/hack_load_vm_file_hook.dart' as hack;
 import 'package:test/src/runner/load_exception.dart';
 import 'package:test/src/runner/runner_suite.dart';
-import 'package:test/src/runner/hack_load_vm_file_hook.dart' as hack;
 import 'package:test/src/runner/vm/environment.dart';
 import 'package:test/src/util/io.dart';
 import 'package:test/src/util/remote_exception.dart';
@@ -82,7 +84,7 @@ void main() {
 }
 ''');
 
-  Completer completer = new Completer();
+  Completer<Iterable<GroupEntry>> completer = new Completer<Iterable<GroupEntry>>();
 
   Process process = await _startProcess(listenerFile.path,
       packageRoot: p.absolute(config.packageRoot));
@@ -105,44 +107,43 @@ void main() {
     }
   });
 
-  Future<JSONSocket> socket = (() async {
-    return new JSONSocket(await info.socket);
-  })();
+  JSONSocket socket = new JSONSocket(await info.socket);
 
-  socket.then((JSONSocket socket) async {
-    await cleanupTempDirectory();
+  await cleanupTempDirectory();
 
-    StreamSubscription subscription;
-    subscription = socket.stream.listen((response) {
-      if (response["type"] == "print") {
-        print(response["line"]);
-      } else if (response["type"] == "loadException") {
-        process.kill();
-        completer.completeError(
-            new LoadException(path, response["message"]),
-            new Trace.current());
-      } else if (response["type"] == "error") {
-        process.kill();
-        AsyncError asyncError = RemoteException.deserialize(response["error"]);
-        completer.completeError(
-            new LoadException(path, asyncError.error),
-            asyncError.stackTrace);
-      } else {
-        assert(response["type"] == "success");
-        subscription.cancel();
-        completer.complete(response["tests"]);
-      }
-    });
-  });
-
-  return new RunnerSuite(const VMEnvironment(),
-      (await completer.future).map((test) {
+  StreamSubscription subscription;
+  subscription = socket.stream.listen((response) {
+    if (response["type"] == "print") {
+      print(response["line"]);
+    } else if (response["type"] == "loadException") {
+      process.kill();
+      completer.completeError(
+          new LoadException(path, response["message"]),
+          new Trace.current());
+    } else if (response["type"] == "error") {
+      process.kill();
+      AsyncError asyncError = RemoteException.deserialize(response["error"]);
+      completer.completeError(
+          new LoadException(path, asyncError.error),
+          asyncError.stackTrace);
+    } else {
+      assert(response["type"] == "success");
+      subscription.cancel();
+      completer.complete(response["tests"].map((test) {
         var testMetadata = new Metadata.deserialize(test['metadata']);
         return new RemoteTest(test['name'], testMetadata, socket, test['index']);
-      }),
-      metadata: metadata,
-      path: path,
-      platform: TestPlatform.vm,
-      os: currentOS,
-      onClose: process.kill);
+      }));        
+    }
+  });
+
+  Iterable<GroupEntry> entries = await completer.future;
+
+  return new RunnerSuite(
+    const VMEnvironment(),
+    new Group.root(entries, metadata: metadata),
+    path: path,
+    platform: TestPlatform.vm,
+    os: currentOS,
+    onClose: process.kill
+  );
 }

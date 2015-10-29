@@ -7,6 +7,9 @@
 # Fast fail the script on failures.
 set -e
 
+# Fetch all our dependencies
+pub get
+
 # Verify that the libraries are error free.
 pub global activate tuneup
 pub global run tuneup check

@@ -7,18 +7,20 @@ import 'dart:async';
 import 'package:test/src/backend/live_test.dart';
 import 'package:test/src/backend/live_test_controller.dart';
 import 'package:test/src/backend/metadata.dart';
+import 'package:test/src/backend/operating_system.dart';
 import 'package:test/src/backend/state.dart';
 import 'package:test/src/backend/suite.dart';
 import 'package:test/src/backend/test.dart';
+import 'package:test/src/backend/test_platform.dart';
 import 'package:test/src/util/remote_exception.dart';
 
 import 'package:sky_tools/src/test/json_socket.dart';
 
-class RemoteTest implements Test {
+class RemoteTest extends Test {
   final String name;
   final Metadata metadata;
 
-  final Future<JSONSocket> _socket;
+  final JSONSocket _socket;
   final int _index;
 
   RemoteTest(this.name, this.metadata, this._socket, this._index);
@@ -30,10 +32,9 @@ class RemoteTest implements Test {
     controller = new LiveTestController(suite, this, () async {
       controller.setState(const State(Status.running, Result.success));
 
-      JSONSocket socket = await _socket;
-      socket.send({'command': 'run', 'index': _index});
+      _socket.send({'command': 'run', 'index': _index});
 
-      subscription = socket.stream.listen((message) {
+      subscription = _socket.stream.listen((message) {
         if (message['type'] == 'error') {
           AsyncError asyncError = RemoteException.deserialize(message['error']);
           controller.addError(asyncError.error, asyncError.stackTrace);
@@ -52,8 +53,7 @@ class RemoteTest implements Test {
         }
       });
     }, () async {
-      JSONSocket socket = await _socket;
-      socket.send({'command': 'close'});
+      _socket.send({'command': 'close'});
       if (subscription != null) {
         subscription.cancel();
         subscription = null;
@@ -68,4 +68,10 @@ class RemoteTest implements Test {
     if (metadata == null) metadata = this.metadata;
     return new RemoteTest(name, metadata, _socket, _index);
   }
+
+  // TODO(ianh): Implement this if we need it.
+  Test forPlatform(TestPlatform platform, {OperatingSystem os}) {
+    assert(false);
+    return this;
+  }  
 }
