@@ -167,6 +167,10 @@ static bool isStickyWhitelisted(uint32_t c) {
     return false;
 }
 
+static bool isVariationSelector(uint32_t c) {
+    return (0xFE00 <= c && c <= 0xFE0F) || (0xE0100 <= c && c <= 0xE01EF);
+}
+
 void FontCollection::itemize(const uint16_t *string, size_t string_size, FontStyle style,
         vector<Run>* result) const {
     FontLanguage lang = style.getLanguage();
@@ -184,9 +188,11 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 nShorts = 2;
             }
         }
-        // Continue using existing font as long as it has coverage and is whitelisted
+        // Continue using existing font as long as it has coverage and is whitelisted;
+        // also variation sequences continue existing run.
         if (lastFamily == NULL
-                || !(isStickyWhitelisted(ch) && lastFamily->getCoverage()->get(ch))) {
+                || !((isStickyWhitelisted(ch) && lastFamily->getCoverage()->get(ch))
+                      || isVariationSelector(ch))) {
             FontFamily* family = getFamilyForChar(ch, lang, variant);
             if (i == 0 || family != lastFamily) {
                 size_t start = i;
