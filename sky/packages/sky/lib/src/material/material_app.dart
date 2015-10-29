@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter/src/widgets/navigator2.dart' as n2;
+import 'package:flutter/src/widgets/page.dart' as n2;
 
 import 'theme.dart';
 import 'title.dart';
@@ -86,12 +87,22 @@ class _MaterialAppState extends State<MaterialApp> {
 
   void _metricHandler(Size size) => setState(() { _size = size; });
 
+  n2.Route _generateRoute(n2.RouteArguments args) {
+    return new n2.PageRoute(
+      builder: (BuildContext context) {
+        RouteArguments routeArgs = new RouteArguments(context: context);
+        return config.routes[args.name](routeArgs);
+      },
+      args: args
+    );
+  }
+
   Widget build(BuildContext context) {
     Widget navigator;
     if (_kUseNavigator2) {
       navigator = new n2.Navigator(
         key: _navigator,
-        routes: config.routes
+        onGenerateRoute: _generateRoute
       );
     } else {
       navigator = new Navigator(
