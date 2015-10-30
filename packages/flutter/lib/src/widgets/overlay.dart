@@ -7,19 +7,26 @@ import 'framework.dart';
 
 class OverlayEntry {
   OverlayEntry({
-    this.child,
+    Widget child,
     bool opaque: false
-  }) : _opaque = opaque;
+  }) : _child = child, _opaque = opaque;
 
-  final Widget child;
+  Widget get child => _child;
+  Widget _child;
+  void set child (Widget value) {
+    if (_child == value)
+      return;
+    _child = value;
+    _rebuild();
+  }
 
   bool get opaque => _opaque;
   bool _opaque;
-  void set opaque(bool value) {
+  void set opaque (bool value) {
     if (_opaque == value)
       return;
     _opaque = value;
-    _state?.setState(() {});
+    _rebuild();
   }
 
   OverlayState _state;
@@ -28,6 +35,10 @@ class OverlayEntry {
   void remove() {
     _state?._remove(this);
     _state = null;
+  }
+
+  void _rebuild() {
+    _state?.setState(() {});
   }
 }
 
