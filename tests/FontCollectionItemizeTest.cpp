@@ -24,15 +24,18 @@ using android::FontCollection;
 using android::FontLanguage;
 using android::FontStyle;
 
-const char kEmojiFont[] = "/system/fonts/NotoColorEmoji.ttf";
-const char kJAFont[] = "/system/fonts/NotoSansJP-Regular.otf";
-const char kKOFont[] = "/system/fonts/NotoSansKR-Regular.otf";
-const char kLatinBoldFont[] = "/system/fonts/Roboto-Bold.ttf";
-const char kLatinBoldItalicFont[] = "/system/fonts/Roboto-BoldItalic.ttf";
-const char kLatinFont[] = "/system/fonts/Roboto-Regular.ttf";
-const char kLatinItalicFont[] = "/system/fonts/Roboto-Italic.ttf";
-const char kZH_HansFont[] = "/system/fonts/NotoSansSC-Regular.otf";
-const char kZH_HantFont[] = "/system/fonts/NotoSansTC-Regular.otf";
+const char kItemizeFontXml[] = "/data/minikin/test/data/itemize.xml";
+#define kTestFontDir "/data/minikin/test/data/"
+
+const char kEmojiFont[] = kTestFontDir "Emoji.ttf";
+const char kJAFont[] = kTestFontDir "Ja.ttf";
+const char kKOFont[] = kTestFontDir "Ko.ttf";
+const char kLatinBoldFont[] = kTestFontDir "Bold.ttf";
+const char kLatinBoldItalicFont[] = kTestFontDir "BoldItalic.ttf";
+const char kLatinFont[] = kTestFontDir "Regular.ttf";
+const char kLatinItalicFont[] = kTestFontDir "Italic.ttf";
+const char kZH_HansFont[] = kTestFontDir "ZhHans.ttf";
+const char kZH_HantFont[] = kTestFontDir "ZhHant.ttf";
 
 // Utility function for calling itemize function.
 void itemize(FontCollection* collection, const char* str, FontStyle style,
@@ -52,7 +55,7 @@ const std::string& getFontPath(const FontCollection::Run& run) {
 }
 
 TEST(FontCollectionItemizeTest, itemize_latin) {
-    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
     const FontStyle kRegularStyle = FontStyle();
@@ -122,7 +125,7 @@ TEST(FontCollectionItemizeTest, itemize_latin) {
 }
 
 TEST(FontCollectionItemizeTest, itemize_emoji) {
-    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
     itemize(collection.get(), "U+1F469 U+1F467", FontStyle(), &runs);
@@ -143,6 +146,28 @@ TEST(FontCollectionItemizeTest, itemize_emoji) {
     EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeBold());
     EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeItalic());
 
+    itemize(collection.get(), "U+1F470 U+20E3", FontStyle(), &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(3, runs[0].end);
+    EXPECT_EQ(kEmojiFont, getFontPath(runs[0]));
+    EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeBold());
+    EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeItalic());
+
+    itemize(collection.get(), "U+242EE U+1F470 U+20E3", FontStyle(), &runs);
+    ASSERT_EQ(2U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+    EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeBold());
+    EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeItalic());
+
+    EXPECT_EQ(2, runs[1].start);
+    EXPECT_EQ(5, runs[1].end);
+    EXPECT_EQ(kEmojiFont, getFontPath(runs[1]));
+    EXPECT_FALSE(runs[1].fakedFont.fakery.isFakeBold());
+    EXPECT_FALSE(runs[1].fakedFont.fakery.isFakeItalic());
+
     // Currently there is no fonts which has a glyph for 'a' + U+20E3, so they
     // are splitted into two.
     itemize(collection.get(), "'a' U+20E3", FontStyle(), &runs);
@@ -161,7 +186,7 @@ TEST(FontCollectionItemizeTest, itemize_emoji) {
 }
 
 TEST(FontCollectionItemizeTest, itemize_non_latin) {
-    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
     FontStyle kJAStyle = FontStyle(FontLanguage("ja_JP", 5));
@@ -239,7 +264,7 @@ TEST(FontCollectionItemizeTest, itemize_non_latin) {
 }
 
 TEST(FontCollectionItemizeTest, itemize_mixed) {
-    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
     FontStyle kUSStyle = FontStyle(FontLanguage("en_US", 5));
@@ -278,7 +303,7 @@ TEST(FontCollectionItemizeTest, itemize_mixed) {
 }
 
 TEST(FontCollectionItemizeTest, itemize_variationSelector) {
-    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
     // A glyph for U+4FAE is provided by both Japanese font and Simplified
@@ -392,17 +417,17 @@ TEST(FontCollectionItemizeTest, itemize_variationSelector) {
     ASSERT_EQ(1U, runs.size());
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(1, runs[0].end);
-    EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
+    EXPECT_TRUE(runs[0].fakedFont.font == nullptr || kLatinFont == getFontPath(runs[0]));
 
     itemize(collection.get(), "U+FE00", kZH_HantStyle, &runs);
     ASSERT_EQ(1U, runs.size());
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(1, runs[0].end);
-    EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
+    EXPECT_TRUE(runs[0].fakedFont.font == nullptr || kLatinFont == getFontPath(runs[0]));
 }
 
 TEST(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
-    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
     // A glyph for U+845B is provided by both Japanese font and Simplified
@@ -517,17 +542,17 @@ TEST(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
     ASSERT_EQ(1U, runs.size());
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(2, runs[0].end);
-    EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
+    EXPECT_TRUE(runs[0].fakedFont.font == nullptr || kLatinFont == getFontPath(runs[0]));
 
     itemize(collection.get(), "U+E0100", kZH_HantStyle, &runs);
     ASSERT_EQ(1U, runs.size());
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(2, runs[0].end);
-    EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
+    EXPECT_TRUE(runs[0].fakedFont.font == nullptr || kLatinFont == getFontPath(runs[0]));
 }
 
 TEST(FontCollectionItemizeTest, itemize_no_crash) {
-    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
     // Broken Surrogate pairs. Check only not crashing.
@@ -551,7 +576,7 @@ TEST(FontCollectionItemizeTest, itemize_no_crash) {
 }
 
 TEST(FontCollectionItemizeTest, itemize_fakery) {
-    std::unique_ptr<FontCollection> collection = getFontCollection();
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
     FontStyle kJABoldStyle = FontStyle(FontLanguage("ja_JP", 5), 0, 7, false);

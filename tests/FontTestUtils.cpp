@@ -19,13 +19,12 @@
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 
+#include <cutils/log.h>
 #include "MinikinFontForTest.h"
 
-const char kFontDir[] = "/system/fonts/";
-const char kFontXml[] = "/system/etc/fonts.xml";
-
-std::unique_ptr<android::FontCollection> getFontCollection() {
-    xmlDoc* doc = xmlReadFile(kFontXml, NULL, 0);
+std::unique_ptr<android::FontCollection> getFontCollection(
+         const char* fontDir, const char* fontXml) {
+    xmlDoc* doc = xmlReadFile(fontXml, NULL, 0);
     xmlNode* familySet = xmlDocGetRootElement(doc);
 
     std::vector<android::FontFamily*> families;
@@ -59,13 +58,11 @@ std::unique_ptr<android::FontCollection> getFontCollection() {
                     xmlGetProp(fontNode, (const xmlChar*)"style"), (const xmlChar*)"italic") == 0;
 
             xmlChar* fontFileName = xmlNodeListGetString(doc, fontNode->xmlChildrenNode, 1);
-            std::string fontPath = kFontDir + std::string((const char*)fontFileName);
+            std::string fontPath = fontDir + std::string((const char*)fontFileName);
             xmlFree(fontFileName);
 
-            if (access(fontPath.c_str(), R_OK) != 0) {
-                // Skip not accessible fonts.
-                continue;
-            }
+            LOG_ALWAYS_FATAL_IF(access(fontPath.c_str(), R_OK) != 0,
+                    "%s is not found", fontPath.c_str());
 
             family->addFont(new MinikinFontForTest(fontPath), android::FontStyle(weight, italic));
         }
