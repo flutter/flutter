@@ -282,6 +282,29 @@ class CustomOneChildLayout extends OneChildRenderObjectWidget {
   }
 }
 
+class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
+  CustomMultiChildLayout(List<Widget> children, {
+    Key key,
+    this.delegate,
+    this.token
+  }) : super(key: key, children: children) {
+    assert(delegate != null);
+  }
+
+  final MultiChildLayoutDelegate delegate;
+  final Object token;
+
+  RenderCustomMultiChildLayoutBox createRenderObject() {
+    return new RenderCustomMultiChildLayoutBox(delegate: delegate);
+  }
+
+  void updateRenderObject(RenderCustomMultiChildLayoutBox renderObject, CustomMultiChildLayout oldWidget) {
+    if (oldWidget.token != token)
+      renderObject.markNeedsLayout();
+    renderObject.delegate = delegate;
+  }
+}
+
 class SizedBox extends OneChildRenderObjectWidget {
   SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
