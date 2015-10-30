@@ -17,13 +17,12 @@ import 'package:test/src/util/remote_exception.dart';
 import 'package:sky_tools/src/test/json_socket.dart';
 
 class RemoteTest extends Test {
+  RemoteTest(this.name, this.metadata, this._socket, this._index);
+
   final String name;
   final Metadata metadata;
-
   final JSONSocket _socket;
   final int _index;
-
-  RemoteTest(this.name, this.metadata, this._socket, this._index);
 
   LiveTest load(Suite suite) {
     LiveTestController controller;
@@ -71,7 +70,13 @@ class RemoteTest extends Test {
 
   // TODO(ianh): Implement this if we need it.
   Test forPlatform(TestPlatform platform, {OperatingSystem os}) {
-    assert(false);
-    return this;
-  }  
+    if (!metadata.testOn.evaluate(platform, os: os))
+      return null;
+    return new RemoteTest(
+      name,
+      metadata.forPlatform(platform, os: os),
+      _socket,
+      _index
+    );
+  }
 }

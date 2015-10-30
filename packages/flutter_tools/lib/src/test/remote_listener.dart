@@ -28,9 +28,11 @@ final OperatingSystem currentOS = (() {
 typedef AsyncFunction();
 
 class RemoteListener {
+  RemoteListener._(this._suite, this._socket);
+
   final Suite _suite;
   final WebSocket _socket;
-  LiveTest _liveTest;
+  final Set<LiveTest> _liveTests = new Set<LiveTest>();
 
   static Future start(String server, Metadata metadata, Function getMain()) async {
     WebSocket socket = await WebSocket.connect(server);
@@ -93,8 +95,6 @@ class RemoteListener {
     socket.add(JSON.encode({"type": "loadException", "message": message}));
   }
 
-  RemoteListener._(this._suite, this._socket);
-
   void _send(data) {
     _socket.add(JSON.encode(data));
   }
@@ -119,13 +119,13 @@ class RemoteListener {
   void _handleCommand(String data) {
     var message = JSON.decode(data);
     if (message['command'] == 'run') {
-      assert(_liveTest == null);
       // TODO(ianh): entries[] might return a Group instead of a Test. We don't
       // currently support nested groups.
       Test test = _suite.group.entries[message['index']];
-      _liveTest = test.load(_suite);
+      LiveTest liveTest = test.load(_suite);
+      _liveTests.add(liveTest);
 
-      _liveTest.onStateChange.listen((state) {
+      liveTest.onStateChange.listen((state) {
         _send({
           "type": "state-change",
           "status": state.status.name,
@@ -133,25 +133,30 @@ class RemoteListener {
         });
       });
 
-      _liveTest.onError.listen((asyncError) {
+      liveTest.onError.listen((asyncError) {
         _send({
           "type": "error",
           "error": RemoteException.serialize(
-              asyncError.error, asyncError.stackTrace)
+            asyncError.error,
+            asyncError.stackTrace
+          )
         });
       });
 
-      _liveTest.onPrint.listen((line) {
+      liveTest.onPrint.listen((line) {
         _send({"type": "print", "line": line});
       });
 
-      _liveTest.run().then((_) {
+      liveTest.run().then((_) {
         _send({"type": "complete"});
-        _liveTest = null;
+        _liveTests.remove(liveTest);
       });
     } else if (message['command'] == 'close') {
-      _liveTest.close();
-      _liveTest = null;
+      if (_liveTests.isNotEmpty)
+        print('closing with ${_liveTests.length} live tests');
+      for (LiveTest liveTest in _liveTests)
+        liveTest.close();
+      _liveTests.clear();
     } else {
       print('remote_listener.dart: ignoring command "${message["command"]}" from test harness');
     }
