@@ -44,6 +44,6 @@ defineTests() {
       expect(exec.exitCode, 0);
     },
     // This test can take a while due to network requests.
-    timeout: new Timeout(new Duration(minutes: 2)));
+    timeout: new Timeout(new Duration(minutes: 3)));
   });
 }
