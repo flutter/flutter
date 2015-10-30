@@ -15,22 +15,6 @@ copy("copy_sky_engine_license") {
   ]
 }
 
-if (is_android) {
-  copy("copy_sky_engine_apks") {
-    sources = [
-      "$root_build_dir/apks/SkyShell.apk",
-    ]
-
-    outputs = [
-      "$root_gen_dir/dart-pkg/sky_engine/apks/SkyShell.apk",
-    ]
-
-    deps = [
-      "//sky/shell",
-    ]
-  }
-}
-
 dart_pkg("sky_engine") {
   sources = [
     "README.md",
@@ -41,10 +25,6 @@ dart_pkg("sky_engine") {
     ":copy_sky_engine_license",
     "//sky/engine/bindings",
   ]
-
-  if (is_android) {
-    deps += [ ":copy_sky_engine_apks" ]
-  }
 
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
   sdk_ext_files = [
