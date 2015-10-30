@@ -9,7 +9,6 @@ group("sky") {
     "//sky/engine/platform:platform_unittests($host_toolchain)",
     "//sky/engine/wtf:unittests($host_toolchain)",
     "//examples",
-    "//sky/tools/imagediff($host_toolchain)",
     ":sky_dev",
   ]
 
