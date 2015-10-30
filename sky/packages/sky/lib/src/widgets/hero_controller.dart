@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'heroes.dart';
-import 'navigator2.dart';
+import 'navigator.dart';
 import 'overlay.dart';
 import 'page.dart';
 
@@ -69,10 +69,9 @@ class HeroController {
   }
 
   void _addHeroesToOverlay(Iterable<Widget> heroes, OverlayState overlay) {
-    OverlayEntry insertionPoint = _to.topEntry;
     for (Widget hero in heroes) {
       OverlayEntry entry = new OverlayEntry(child: hero);
-      overlay.insert(entry, above: insertionPoint);
+      overlay.insert(entry);
       _overlayEntries.add(entry);
     }
   }

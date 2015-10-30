@@ -16,7 +16,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'homogeneous_viewport.dart';
 import 'mixed_viewport.dart';
-import 'navigator.dart';
+import 'page_storage.dart';
 
 // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
 const double _kMillisecondsPerSecond = 1000.0;
@@ -56,7 +56,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   void initState() {
     super.initState();
     _animation = new SimulationStepper(_setScrollOffset);
-    _scrollOffset = Route.of(context)?.readState(context) ?? config.initialScrollOffset ?? 0.0;
+    _scrollOffset = PageStorage.of(context)?.readState(context) ?? config.initialScrollOffset ?? 0.0;
   }
 
   SimulationStepper _animation;
@@ -178,7 +178,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     setState(() {
       _scrollOffset = newScrollOffset;
     });
-    Route.of(context)?.writeState(context, _scrollOffset);
+    PageStorage.of(context)?.writeState(context, _scrollOffset);
     dispatchOnScroll();
   }
 

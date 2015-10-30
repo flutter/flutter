@@ -4,8 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter/src/widgets/navigator2.dart' as n2;
-
 class Home extends StatelessComponent {
   Widget build(BuildContext context) {
     return new Container(
@@ -15,11 +13,11 @@ class Home extends StatelessComponent {
         new Text("You are at home"),
         new RaisedButton(
           child: new Text('GO SHOPPING'),
-          onPressed: () => n2.Navigator.of(context).pushNamed('/shopping')
+          onPressed: () => Navigator.of(context).pushNamed('/shopping')
         ),
         new RaisedButton(
           child: new Text('START ADVENTURE'),
-          onPressed: () => n2.Navigator.of(context).pushNamed('/adventure')
+          onPressed: () => Navigator.of(context).pushNamed('/adventure')
         )],
         justifyContent: FlexJustifyContent.center
       )
@@ -36,11 +34,11 @@ class Shopping extends StatelessComponent {
         new Text("Village Shop"),
         new RaisedButton(
           child: new Text('RETURN HOME'),
-          onPressed: () => n2.Navigator.of(context).pop()
+          onPressed: () => Navigator.of(context).pop()
         ),
         new RaisedButton(
           child: new Text('GO TO DUNGEON'),
-          onPressed: () => n2.Navigator.of(context).pushNamed('/adventure')
+          onPressed: () => Navigator.of(context).pushNamed('/adventure')
         )],
         justifyContent: FlexJustifyContent.center
       )
@@ -57,7 +55,7 @@ class Adventure extends StatelessComponent {
         new Text("Monster's Lair"),
         new RaisedButton(
           child: new Text('RUN!!!'),
-          onPressed: () => n2.Navigator.of(context).pop()
+          onPressed: () => Navigator.of(context).pop()
         )],
         justifyContent: FlexJustifyContent.center
       )
