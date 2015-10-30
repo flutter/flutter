@@ -22,80 +22,84 @@ const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
-class PopupMenu extends StatelessComponent {
-  PopupMenu({
+class _PopupMenu extends StatelessComponent {
+  _PopupMenu({
     Key key,
-    this.items,
-    this.level: 4,
-    this.performance
-  }) : super(key: key) {
-    assert(items != null);
-    assert(performance != null);
-  }
+    this.route
+  }) : super(key: key);
 
-  final List<PopupMenuItem> items;
-  final int level;
-  final PerformanceView performance;
+  final _MenuRoute route;
 
   Widget build(BuildContext context) {
     final BoxPainter painter = new BoxPainter(new BoxDecoration(
       backgroundColor: Theme.of(context).canvasColor,
       borderRadius: 2.0,
-      boxShadow: shadows[level]
+      boxShadow: shadows[route.level]
     ));
 
-    double unit = 1.0 / (items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+    double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     List<Widget> children = <Widget>[];
 
-    for (int i = 0; i < items.length; ++i) {
+    for (int i = 0; i < route.items.length; ++i) {
       double start = (i + 1) * unit;
       double end = (start + 1.5 * unit).clamp(0.0, 1.0);
       children.add(new FadeTransition(
-        performance: performance,
+        performance: route.performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(start, end)),
         child: new InkWell(
-          onTap: () { Navigator.of(context).pop(items[i].value); },
-          child: items[i]
+          onTap: () { Navigator.of(context).pop(route.items[i].value); },
+          child: route.items[i]
         ))
       );
     }
 
     final AnimatedValue<double> width = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit));
-    final AnimatedValue<double> height = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit * items.length));
+    final AnimatedValue<double> height = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit * route.items.length));
 
-    return new FadeTransition(
-      performance: performance,
-      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, 1.0 / 3.0)),
-      child: new BuilderTransition(
-        performance: performance,
-        variables: <AnimatedValue<double>>[width, height],
-        builder: (BuildContext context) {
-          return new CustomPaint(
-            onPaint: (ui.Canvas canvas, Size size) {
-              double widthValue = width.value * size.width;
-              double heightValue = height.value * size.height;
-              painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
-            },
-            child: new ConstrainedBox(
-              constraints: new BoxConstraints(
-                minWidth: _kMenuMinWidth,
-                maxWidth: _kMenuMaxWidth
-              ),
-              child: new IntrinsicWidth(
-                stepWidth: _kMenuWidthStep,
-                child: new ScrollableViewport(
-                  child: new Container(
-                    padding: const EdgeDims.symmetric(
-                      horizontal: _kMenuHorizontalPadding,
-                      vertical: _kMenuVerticalPadding
-                    ),
-                    child: new BlockBody(children)
+    return new Positioned(
+      top: route.position?.top,
+      right: route.position?.right,
+      bottom: route.position?.bottom,
+      left: route.position?.left,
+      child: new Focus(
+        key: new GlobalObjectKey(route),
+        autofocus: true,
+        child: new FadeTransition(
+          performance: route.performance,
+          opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, 1.0 / 3.0)),
+          child: new BuilderTransition(
+            performance: route.performance,
+            variables: <AnimatedValue<double>>[width, height],
+            builder: (BuildContext context) {
+              return new CustomPaint(
+                onPaint: (ui.Canvas canvas, Size size) {
+                  double widthValue = width.value * size.width;
+                  double heightValue = height.value * size.height;
+                  painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
+                },
+                child: new ConstrainedBox(
+                  constraints: new BoxConstraints(
+                    minWidth: _kMenuMinWidth,
+                    maxWidth: _kMenuMaxWidth
+                  ),
+                  child: new IntrinsicWidth(
+                    stepWidth: _kMenuWidthStep,
+                    child: new ScrollableViewport(
+                      child: new Container(
+                        // TODO(abarth): Teach Block about padding.
+                        padding: const EdgeDims.symmetric(
+                          horizontal: _kMenuHorizontalPadding,
+                          vertical: _kMenuVerticalPadding
+                        ),
+                        child: new BlockBody(children)
+                      )
+                    )
                   )
                 )
-              )
-            )
-          );
-        }
+              );
+            }
+          )
+        )
       )
     );
   }
@@ -109,7 +113,7 @@ class MenuPosition {
   final double left;
 }
 
-class _MenuRoute extends PerformanceRoute {
+class _MenuRoute extends TransitionRoute {
   _MenuRoute({ this.completer, this.position, this.items, this.level });
 
   final Completer completer;
@@ -125,28 +129,13 @@ class _MenuRoute extends PerformanceRoute {
     return result;
   }
 
-  bool get ephemeral => true;
-  bool get modal => true;
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  Widget build(RouteArguments args) {
-    return new Positioned(
-      top: position?.top,
-      right: position?.right,
-      bottom: position?.bottom,
-      left: position?.left,
-      child: new Focus(
-        key: new GlobalObjectKey(this),
-        autofocus: true,
-        child: new PopupMenu(
-          items: items,
-          level: level,
-          performance: performance
-        )
-      )
-    );
-  }
+  List<Widget> createWidgets() => [
+    new ModalBarrier(),
+    new _PopupMenu(route: this),
+  ];
 
   void didPop([dynamic result]) {
     completer.complete(result);
@@ -156,7 +145,7 @@ class _MenuRoute extends PerformanceRoute {
 
 Future showMenu({ BuildContext context, MenuPosition position, List<PopupMenuItem> items, int level: 4 }) {
   Completer completer = new Completer();
-  Navigator.of(context).push(new _MenuRoute(
+  Navigator.of(context).pushEphemeral(new _MenuRoute(
     completer: completer,
     position: position,
     items: items,

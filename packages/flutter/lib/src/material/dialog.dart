@@ -100,6 +100,7 @@ class Dialog extends StatelessComponent {
       ));
     }
 
+    // TODO(abarth): We should return the backdrop as a separate entry from createWidgets.
     return new Stack(<Widget>[
       new GestureDetector(
         onTap: onDismiss,
@@ -130,21 +131,27 @@ class Dialog extends StatelessComponent {
   }
 }
 
-class _DialogRoute extends PerformanceRoute {
-  _DialogRoute({ this.completer, this.builder });
+class _DialogRoute extends TransitionRoute {
+  _DialogRoute({ this.completer, this.child });
 
   final Completer completer;
-  final RouteBuilder builder;
+  final Widget child;
 
   bool get opaque => false;
   Duration get transitionDuration => const Duration(milliseconds: 150);
 
-  Widget build(RouteArguments args) {
-    return new FadeTransition(
-      performance: args.previousPerformance,
-      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
-      child: builder(args)
-    );
+  List<Widget> createWidgets() {
+    return [
+      new Focus(
+        key: new GlobalObjectKey(this),
+        autofocus: true,
+        child:  new FadeTransition(
+          performance: performance,
+          opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
+          child: child
+        )
+      )
+    ];
   }
 
   void didPop([dynamic result]) {
@@ -155,15 +162,6 @@ class _DialogRoute extends PerformanceRoute {
 
 Future showDialog({ BuildContext context, Widget child }) {
   Completer completer = new Completer();
-  Navigator.of(context).push(new _DialogRoute(
-    completer: completer,
-    builder: (RouteArguments args) {
-      return new Focus(
-        key: new GlobalObjectKey(completer),
-        autofocus: true,
-        child: child
-      );
-    }
-  ));
+  Navigator.of(context).push(new _DialogRoute(completer: completer, child: child));
   return completer.future;
 }

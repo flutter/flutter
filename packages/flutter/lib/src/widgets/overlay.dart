@@ -16,7 +16,7 @@ class OverlayEntry {
   bool get opaque => _opaque;
   bool _opaque;
   void set opaque(bool value) {
-    if (_opaque = value)
+    if (_opaque == value)
       return;
     _opaque = value;
     _state?.setState(() {});

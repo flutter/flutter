@@ -8,9 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:flutter/src/widgets/navigator2.dart' as n2;
-import 'package:flutter/src/widgets/hero_controller.dart' as n2;
-
 import 'theme.dart';
 import 'title.dart';
 
@@ -33,8 +30,6 @@ AssetBundle _initDefaultBundle() {
 }
 
 final AssetBundle _defaultBundle = _initDefaultBundle();
-
-const bool _kUseNavigator2 = false;
 
 class MaterialApp extends StatefulComponent {
   MaterialApp({
@@ -87,10 +82,10 @@ class _MaterialAppState extends State<MaterialApp> {
 
   void _metricHandler(Size size) => setState(() { _size = size; });
 
-  final n2.HeroController _heroController = new n2.HeroController();
+  final HeroController _heroController = new HeroController();
 
-  n2.Route _generateRoute(n2.NamedRouteSettings settings) {
-    return new n2.HeroPageRoute(
+  Route _generateRoute(NamedRouteSettings settings) {
+    return new HeroPageRoute(
       builder: (BuildContext context) {
         RouteBuilder builder = config.routes[settings.name] ?? config.onGenerateRoute(settings.name);
         return builder(new RouteArguments(context: context));
@@ -101,19 +96,6 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   Widget build(BuildContext context) {
-    Widget navigator;
-    if (_kUseNavigator2) {
-      navigator = new n2.Navigator(
-        key: _navigator,
-        onGenerateRoute: _generateRoute
-      );
-    } else {
-      navigator = new Navigator(
-        key: _navigator,
-        routes: config.routes,
-        onGenerateRoute: config.onGenerateRoute
-      );
-    }
     return new MediaQuery(
       data: new MediaQueryData(size: _size),
       child: new Theme(
@@ -124,7 +106,10 @@ class _MaterialAppState extends State<MaterialApp> {
             bundle: _defaultBundle,
             child: new Title(
               title: config.title,
-              child: navigator
+              child: new Navigator(
+                key: _navigator,
+                onGenerateRoute: _generateRoute
+              )
             )
           )
         )

@@ -6,58 +6,10 @@ import 'package:flutter/animation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'navigator2.dart';
-import 'overlay.dart';
+import 'navigator.dart';
 import 'page_storage.dart';
+import 'routes.dart';
 import 'transitions.dart';
-
-// TODO(abarth): Should we add a type for the result?
-abstract class TransitionRoute extends Route {
-  bool get opaque => true;
-
-  PerformanceView get performance => _performance?.view;
-  Performance _performance;
-
-  Duration get transitionDuration;
-
-  Performance createPerformance() {
-    Duration duration = transitionDuration;
-    assert(duration != null && duration >= Duration.ZERO);
-    return new Performance(duration: duration, debugLabel: debugLabel);
-  }
-
-  dynamic _result;
-
-  void _handleStatusChanged(PerformanceStatus status) {
-    switch (status) {
-      case PerformanceStatus.completed:
-        bottomEntry.opaque = opaque;
-        break;
-      case PerformanceStatus.forward:
-      case PerformanceStatus.reverse:
-        bottomEntry.opaque = false;
-        break;
-      case PerformanceStatus.dismissed:
-        super.didPop(_result);
-        break;
-    }
-  }
-
-  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
-    _performance = createPerformance()
-      ..addStatusListener(_handleStatusChanged)
-      ..forward();
-    super.didPush(overlay, insertionPoint);
-  }
-
-  void didPop(dynamic result) {
-    _result = result;
-    _performance.reverse();
-  }
-
-  String get debugLabel => '$runtimeType';
-  String toString() => '$runtimeType(performance: $_performance)';
-}
 
 class _Page extends StatefulComponent {
   _Page({
@@ -129,6 +81,8 @@ class PageRoute extends TransitionRoute {
   final NamedRouteSettings settings;
 
   final GlobalKey<_PageState> pageKey = new GlobalKey<_PageState>();
+
+  bool get opaque => true;
 
   String get name => settings.name;
 
