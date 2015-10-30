@@ -17,6 +17,7 @@ PUB = os.path.join(DART_SDK, 'pub')
 
 UNIT_DIR = os.path.join(SRC_ROOT, 'sky', 'unit')
 PACKAGES_DIR = os.path.join(UNIT_DIR, 'packages')
+TESTS_DIR = os.path.join(UNIT_DIR, 'test')
 
 def main():
     parser = argparse.ArgumentParser(description='Runs Sky tests')
@@ -33,10 +34,18 @@ def main():
     elif sys.platform == 'darwin':
         sky_shell = os.path.join(build_dir, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell')
 
+    if not remaining:
+        for root, dirs, files in os.walk(TESTS_DIR):
+            remaining.extend(os.path.join(root, f)
+                             for f in files if f.endswith("_test.dart"))
+
     env = os.environ.copy()
     env['SKY_SHELL'] = sky_shell
+    if env['TERM'] == 'dumb':
+        remaining = [ '--no-color' ] + remaining
+
     return subprocess.call([
-        PUB, 'run', 'sky_tools:sky_test',
+        PUB, 'run', '--checked', 'sky_tools:sky_test',
     ] + remaining, cwd=UNIT_DIR, env=env)
 
 if __name__ == '__main__':
