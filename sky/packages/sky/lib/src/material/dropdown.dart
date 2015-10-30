@@ -22,23 +22,9 @@ const double _kBaselineOffsetFromBottom = 20.0;
 const Border _kDropdownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
 
 class _DropdownMenu extends StatelessComponent {
-  _DropdownMenu({
-    Key key,
-    this.items,
-    this.rect,
-    this.performance,
-    this.selectedIndex,
-    this.level: 4
-  }) : super(key: key) {
-    assert(items != null);
-    assert(performance != null);
-  }
+  _DropdownMenu({ Key key, this.route }) : super(key: key);
 
-  final List<DropdownMenuItem> items;
-  final Rect rect;
-  final PerformanceView performance;
-  final int selectedIndex;
-  final int level;
+  final _MenuRoute route;
 
   Widget build(BuildContext context) {
     // The menu is shown in three stages (unit timing in brackets):
@@ -50,11 +36,11 @@ class _DropdownMenu extends StatelessComponent {
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25.
 
-    final double unit = 0.5 / (items.length + 1.5);
+    final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
-    for (int itemIndex = 0; itemIndex < items.length; ++itemIndex) {
+    for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
       AnimatedValue<double> opacity;
-      if (itemIndex == selectedIndex) {
+      if (itemIndex == route.selectedIndex) {
         opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: const Interval(0.0, 0.001), reverseCurve: const Interval(0.75, 1.0));
       } else {
         final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
@@ -62,12 +48,12 @@ class _DropdownMenu extends StatelessComponent {
         opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(start, end), reverseCurve: const Interval(0.75, 1.0));
       }
       children.add(new FadeTransition(
-        performance: performance,
+        performance: route.performance,
         opacity: opacity,
         child: new InkWell(
-          child: items[itemIndex],
+          child: route.items[itemIndex],
           onTap: () {
-            Navigator.of(context).pop(items[itemIndex].value);
+            Navigator.of(context).pop(route.items[itemIndex].value);
           }
         )
       ));
@@ -79,13 +65,13 @@ class _DropdownMenu extends StatelessComponent {
       reverseCurve: new Interval(0.75, 1.0)
     );
 
-    final AnimatedValue<double> menuTop = new AnimatedValue<double>(rect.top,
-      end: rect.top - selectedIndex * rect.height,
+    final AnimatedValue<double> menuTop = new AnimatedValue<double>(route.rect.top,
+      end: route.rect.top - route.selectedIndex * route.rect.height,
       curve: new Interval(0.25, 0.5),
       reverseCurve: const Interval(0.0, 0.001)
     );
-    final AnimatedValue<double> menuBottom = new AnimatedValue<double>(rect.bottom,
-      end: menuTop.end + items.length * rect.height,
+    final AnimatedValue<double> menuBottom = new AnimatedValue<double>(route.rect.bottom,
+      end: menuTop.end + route.items.length * route.rect.height,
       curve: new Interval(0.25, 0.5),
       reverseCurve: const Interval(0.0, 0.001)
     );
@@ -93,32 +79,45 @@ class _DropdownMenu extends StatelessComponent {
     final BoxPainter menuPainter = new BoxPainter(new BoxDecoration(
       backgroundColor: Theme.of(context).canvasColor,
       borderRadius: 2.0,
-      boxShadow: shadows[level]
+      boxShadow: shadows[route.level]
     ));
 
-    return new FadeTransition(
-      performance: performance,
-      opacity: menuOpacity,
-      child: new BuilderTransition(
-        performance: performance,
-        variables: <AnimatedValue<double>>[menuTop, menuBottom],
-        builder: (BuildContext context) {
-          RenderBox renderBox = context.findRenderObject();
-          return new CustomPaint(
-            child: new ScrollableViewport(child: new Container(child: new Column(children))),
-            onPaint: (ui.Canvas canvas, Size size) {
-              double top = renderBox.globalToLocal(new Point(0.0, menuTop.value)).y;
-              double bottom = renderBox.globalToLocal(new Point(0.0, menuBottom.value)).y;
-              menuPainter.paint(canvas, new Rect.fromLTRB(0.0, top, size.width, bottom));
+    final RenderBox renderBox = Navigator.of(context).context.findRenderObject();
+    final Size navigatorSize = renderBox.size;
+    final RelativeRect menuRect = new RelativeRect.fromSize(route.rect, navigatorSize);
+
+    return new Positioned(
+      top: menuRect.top - (route.selectedIndex * route.rect.height),
+      right: menuRect.right - _kMenuHorizontalPadding,
+      left: menuRect.left - _kMenuHorizontalPadding,
+      child: new Focus(
+        key: new GlobalObjectKey(route),
+        autofocus: true,
+        child: new FadeTransition(
+          performance: route.performance,
+          opacity: menuOpacity,
+          child: new BuilderTransition(
+            performance: route.performance,
+            variables: <AnimatedValue<double>>[menuTop, menuBottom],
+            builder: (BuildContext context) {
+              RenderBox renderBox = context.findRenderObject();
+              return new CustomPaint(
+                child: new ScrollableViewport(child: new Container(child: new Column(children))),
+                onPaint: (ui.Canvas canvas, Size size) {
+                  double top = renderBox.globalToLocal(new Point(0.0, menuTop.value)).y;
+                  double bottom = renderBox.globalToLocal(new Point(0.0, menuBottom.value)).y;
+                  menuPainter.paint(canvas, new Rect.fromLTRB(0.0, top, size.width, bottom));
+                }
+              );
             }
-          );
-        }
+          )
+        )
       )
     );
   }
 }
 
-class _MenuRoute extends PerformanceRoute {
+class _MenuRoute extends TransitionRoute {
   _MenuRoute({
     this.completer,
     this.items,
@@ -133,33 +132,13 @@ class _MenuRoute extends PerformanceRoute {
   final int level;
   final int selectedIndex;
 
-  bool get ephemeral => true;
-  bool get modal => true;
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  Widget build(RouteArguments args) {
-    final RenderBox renderBox = navigator.context.findRenderObject();
-    final Size navigatorSize = renderBox.size;
-    final RelativeRect menuRect = new RelativeRect.fromSize(rect, navigatorSize);
-
-    return new Positioned(
-      top: menuRect.top - (selectedIndex * rect.height),
-      right: menuRect.right - _kMenuHorizontalPadding,
-      left: menuRect.left - _kMenuHorizontalPadding,
-      child: new Focus(
-        key: new GlobalObjectKey(this),
-        autofocus: true,
-        child: new _DropdownMenu(
-          items: items,
-          selectedIndex: selectedIndex,
-          rect: rect,
-          level: level,
-          performance: performance
-        )
-      )
-    );
-  }
+  List<Widget> createWidgets() => [
+    new ModalBarrier(),
+    new _DropdownMenu(route: this)
+  ];
 
   void didPop([dynamic result]) {
     completer.complete(result);
@@ -210,7 +189,7 @@ class DropdownButton<T> extends StatelessComponent {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
     final Rect rect = renderBox.localToGlobal(Point.origin) & renderBox.size;
     final Completer completer = new Completer();
-    Navigator.of(context).push(new _MenuRoute(
+    Navigator.of(context).pushEphemeral(new _MenuRoute(
       completer: completer,
       items: items,
       selectedIndex: selectedIndex,

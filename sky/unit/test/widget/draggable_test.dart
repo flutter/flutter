@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 import '../engine/mock_events.dart';
@@ -11,7 +11,7 @@ void main() {
 
       List accepted = [];
 
-      tester.pumpWidget(new Navigator(
+      tester.pumpWidget(new MaterialApp(
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) { return new Column(<Widget>[
               new Draggable(

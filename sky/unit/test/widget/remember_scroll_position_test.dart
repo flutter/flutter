@@ -34,9 +34,12 @@ void main() {
       GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
       tester.pumpWidget(new Navigator(
         key: navigatorKey,
-        routes: <String, RouteBuilder>{
-         '/': (RouteArguments args) => new Container(child: new ThePositiveNumbers()),
-         '/second': (RouteArguments args) => new Container(child: new ThePositiveNumbers()),
+        onGenerateRoute: (NamedRouteSettings settings) {
+          if (settings.name == '/')
+            return new PageRoute(builder: (_) => new Container(child: new ThePositiveNumbers()));
+          else if (settings.name == '/second')
+            return new PageRoute(builder: (_) => new Container(child: new ThePositiveNumbers()));
+          return null;
         }
       ));
 
@@ -105,7 +108,7 @@ void main() {
       expect(tester.findText('15'), isNotNull);
       expect(tester.findText('16'), isNull);
       expect(tester.findText('100'), isNull);
-      
+
     });
   });
 }

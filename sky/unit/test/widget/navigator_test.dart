@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';
@@ -45,7 +45,7 @@ void main() {
         '/second': (RouteArguments args) => new SecondComponent(),
       };
 
-      tester.pumpWidget(new Navigator(routes: routes));
+      tester.pumpWidget(new MaterialApp(routes: routes));
 
       expect(tester.findText('X'), isNotNull);
       expect(tester.findText('Y'), isNull);

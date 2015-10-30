@@ -24,22 +24,20 @@ class StockHomeState extends State<StockHome> {
   String _searchQuery;
 
   void _handleSearchBegin() {
-    Navigator.of(context).pushState(this, (_) {
-      setState(() {
-        _isSearching = false;
-        _searchQuery = null;
-      });
-    });
+    Navigator.of(context).push(new StateRoute(
+      onPop: () {
+        setState(() {
+          _isSearching = false;
+          _searchQuery = null;
+        });
+      }
+    ));
     setState(() {
       _isSearching = true;
     });
   }
 
   void _handleSearchEnd() {
-    assert(() {
-      final StateRoute currentRoute = Navigator.of(context).currentRoute;
-      return currentRoute.owner == this;
-    });
     Navigator.of(context).pop();
   }
 
