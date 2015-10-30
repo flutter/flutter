@@ -31,115 +31,90 @@ const Point _kOpenPosition = Point.origin;
 const Point _kClosedPosition = const Point(-_kWidth, 0.0);
 
 class _Drawer extends StatelessComponent {
+  _Drawer({ Key key, this.route }) : super(key: key);
 
-  _Drawer({
-    Key key,
-    this.child,
-    this.level: 3,
-    this.performance,
-    this.interactive,
-    this.route
-  }) : super(key: key);
-
-  final Widget child;
-  final int level;
-  final PerformanceView performance;
-  final bool interactive;
   final _DrawerRoute route;
 
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onHorizontalDragStart: (_) {
-        if (interactive)
-          route._takeControl();
-      },
-      onHorizontalDragUpdate: (double delta) {
-        if (interactive)
-          route._moveDrawer(delta);
-      },
-      onHorizontalDragEnd: (Offset velocity) {
-        if (interactive)
-          route._settle(velocity);
-      },
-      child: new Stack(<Widget>[
-        // mask
-        new GestureDetector(
-          onTap: () {
-            if (interactive)
-              route._close();
-          },
-          child: new ColorTransition(
-            performance: performance,
-            color: new AnimatedColorValue(Colors.transparent, end: Colors.black54),
-            child: new Container()
-          )
-        ),
-        // drawer
-        new Positioned(
-          top: 0.0,
-          left: 0.0,
-          bottom: 0.0,
-          child: new SlideTransition(
-            performance: performance,
-            position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
-            child: new AnimatedContainer(
-              curve: Curves.ease,
-              duration: _kThemeChangeDuration,
-              decoration: new BoxDecoration(
-                backgroundColor: Theme.of(context).canvasColor,
-                boxShadow: shadows[level]),
-              width: _kWidth,
-              child: child
+    return new Focus(
+      key: new GlobalObjectKey(route),
+      autofocus: true,
+      child: new GestureDetector(
+        onHorizontalDragStart: (_) {
+          if (route.interactive)
+            route._takeControl();
+        },
+        onHorizontalDragUpdate: (double delta) {
+          if (route.interactive)
+            route._moveDrawer(delta);
+        },
+        onHorizontalDragEnd: (Offset velocity) {
+          if (route.interactive)
+            route._settle(velocity);
+        },
+        child: new Stack(<Widget>[
+          // mask
+          new GestureDetector(
+            onTap: () {
+              if (route.interactive)
+                route._close();
+            },
+            child: new ColorTransition(
+              performance: route.performance,
+              color: new AnimatedColorValue(Colors.transparent, end: Colors.black54),
+              child: new Container()
+            )
+          ),
+          new Positioned(
+            top: 0.0,
+            left: 0.0,
+            bottom: 0.0,
+            child: new SlideTransition(
+              performance: route.performance,
+              position: new AnimatedValue<Point>(_kClosedPosition, end: _kOpenPosition),
+              child: new AnimatedContainer(
+                curve: Curves.ease,
+                duration: _kThemeChangeDuration,
+                decoration: new BoxDecoration(
+                  backgroundColor: Theme.of(context).canvasColor,
+                  boxShadow: shadows[route.level]),
+                width: _kWidth,
+                child: route.child
+              )
             )
           )
-        )
-      ])
+        ])
+      )
     );
   }
 
 }
 
-class _DrawerRoute extends Route {
+class _DrawerRoute extends TransitionRoute {
   _DrawerRoute({ this.child, this.level });
 
   final Widget child;
   final int level;
 
-  PerformanceView get performance => _performance?.view;
-  Performance _performance = new Performance(duration: _kBaseSettleDuration, debugLabel: 'Drawer');
-
+  Duration get transitionDuration => _kBaseSettleDuration;
   bool get opaque => false;
 
+  bool get interactive => _interactive;
   bool _interactive = true;
 
-  Widget build(RouteArguments args) {
-    return new Focus(
-      key: new GlobalObjectKey(this),
-      autofocus: true,
-      child: new _Drawer(
-        child: child,
-        level: level,
-        performance: performance,
-        interactive: _interactive,
-        route: this
-      )
-    );
+  Performance _performance;
+
+  Performance createPerformance() {
+    _performance = super.createPerformance();
+    return _performance;
   }
 
-  void didPush(NavigatorState navigator) {
-    super.didPush(navigator);
-    _performance.forward();
-  }
+  List<Widget> createWidgets() => [ new _Drawer(route: this) ];
 
   void didPop([dynamic result]) {
     assert(result == null); // because we don't do anything with it, so otherwise it'd be lost
     super.didPop(result);
-    if (_performance.status != PerformanceStatus.dismissed)
-      _performance.reverse();
-    setState(() {
-      _interactive = false;
-      // TODO(ianh): https://github.com/flutter/engine/issues/1539
-    });
+    _interactive = false;
   }
 
   void _takeControl() {

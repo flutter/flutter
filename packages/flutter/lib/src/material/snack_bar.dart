@@ -34,19 +34,19 @@ class SnackBarAction extends StatelessComponent {
   }
 }
 
-class SnackBar extends StatelessComponent {
-  SnackBar({
+class _SnackBar extends StatelessComponent {
+  _SnackBar({
     Key key,
     this.content,
     this.actions,
-    this.performance
+    this.route
   }) : super(key: key) {
     assert(content != null);
   }
 
   final Widget content;
   final List<SnackBarAction> actions;
-  final PerformanceView performance;
+  final _SnackBarRoute route;
 
   Widget build(BuildContext context) {
     List<Widget> children = <Widget>[
@@ -63,7 +63,7 @@ class SnackBar extends StatelessComponent {
     if (actions != null)
       children.addAll(actions);
     return new SquashTransition(
-      performance: performance,
+      performance: route.performance,
       height: new AnimatedValue<double>(
         0.0,
         end: kSnackBarHeight,
@@ -91,27 +91,18 @@ class SnackBar extends StatelessComponent {
   }
 }
 
-class _SnackBarRoute extends PerformanceRoute {
-  _SnackBarRoute({ this.content, this.actions });
-
-  final Widget content;
-  final List<SnackBarAction> actions;
-
-  bool get hasContent => false;
-  bool get ephemeral => true;
-  bool get modal => false;
+class _SnackBarRoute extends TransitionRoute {
+  bool get opaque => false;
   Duration get transitionDuration => const Duration(milliseconds: 200);
-
-  Widget build(RouteArguments args) => null;
 }
 
 void showSnackBar({ BuildContext context, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
-  Route route = new _SnackBarRoute();
-  SnackBar snackBar = new SnackBar(
+  _SnackBarRoute route = new _SnackBarRoute();
+  _SnackBar snackBar = new _SnackBar(
+    route: route,
     content: content,
-    actions: actions,
-    performance: route.performance
+    actions: actions
   );
   placeholderKey.currentState.child = snackBar;
-  Navigator.of(context).push(route);
+  Navigator.of(context).pushEphemeral(route);
 }

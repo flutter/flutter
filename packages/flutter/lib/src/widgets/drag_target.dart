@@ -10,6 +10,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'navigator.dart';
+import 'overlay.dart';
 
 typedef bool DragTargetWillAccept<T>(T data);
 typedef void DragTargetAccept<T>(T data);
@@ -61,11 +62,11 @@ class Draggable extends StatefulComponent {
 }
 
 class _DraggableState extends State<Draggable> {
-  DragRoute _route;
+  _DragAvatar _avatar;
 
   void _startDrag(PointerInputEvent event) {
-    if (_route != null)
-      return; // TODO(ianh): once we switch to using gestures, just hand the gesture to the route so it can do everything itself. then we can have multiple drags at the same time.
+    if (_avatar != null)
+      return; // TODO(ianh): once we switch to using gestures, just hand the gesture to the avatar so it can do everything itself. then we can have multiple drags at the same time.
     final Point point = new Point(event.x, event.y);
     Point dragStartPoint;
     switch (config.dragAnchor) {
@@ -78,39 +79,38 @@ class _DraggableState extends State<Draggable> {
         break;
     }
     assert(dragStartPoint != null);
-    _route = new DragRoute(
+    _avatar = new _DragAvatar(
       data: config.data,
       dragStartPoint: dragStartPoint,
       feedback: config.feedback,
       feedbackOffset: config.feedbackOffset,
       onDragFinished: () {
-        _route = null;
+        _avatar = null;
       }
     );
-    _route.update(point);
-    Navigator.of(context).push(_route);
+    _avatar.update(point);
+    _avatar.rebuild(context);
   }
 
   void _updateDrag(PointerInputEvent event) {
-    if (_route != null) {
-      Navigator.of(context).setState(() {
-        _route.update(new Point(event.x, event.y));
-      });
+    if (_avatar != null) {
+      _avatar.update(new Point(event.x, event.y));
+      _avatar.rebuild(context);
     }
   }
 
   void _cancelDrag(PointerInputEvent event) {
-    if (_route != null) {
-      Navigator.of(context).popRoute(_route, DragEndKind.canceled);
-      assert(_route == null);
+    if (_avatar != null) {
+      _avatar.finish(_DragEndKind.canceled);
+      assert(_avatar == null);
     }
   }
 
   void _drop(PointerInputEvent event) {
-    if (_route != null) {
-      _route.update(new Point(event.x, event.y));
-      Navigator.of(context).popRoute(_route, DragEndKind.dropped);
-      assert(_route == null);
+    if (_avatar != null) {
+      _avatar.update(new Point(event.x, event.y));
+      _avatar.finish(_DragEndKind.dropped);
+      assert(_avatar == null);
     }
   }
 
@@ -187,10 +187,10 @@ class DragTargetState<T> extends State<DragTarget<T>> {
 }
 
 
-enum DragEndKind { dropped, canceled }
+enum _DragEndKind { dropped, canceled }
 
-class DragRoute extends Route {
-  DragRoute({
+class _DragAvatar {
+  _DragAvatar({
     this.data,
     this.dragStartPoint: Point.origin,
     this.feedback,
@@ -209,6 +209,7 @@ class DragRoute extends Route {
   DragTargetState _activeTarget;
   bool _activeTargetWillAcceptDrop = false;
   Offset _lastOffset;
+  OverlayEntry _entry;
 
   void update(Point globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
@@ -220,6 +221,12 @@ class DragRoute extends Route {
       _activeTarget.didLeave(data);
     _activeTarget = target;
     _activeTargetWillAcceptDrop = _activeTarget != null && _activeTarget.didEnter(data);
+  }
+
+  void rebuild(BuildContext context) {
+    _entry?.remove();
+    _entry = new OverlayEntry(child: _build(context));
+    Navigator.of(context).overlay.insert(_entry);
   }
 
   DragTargetState _getDragTarget(List<HitTestEntry> path) {
@@ -234,25 +241,21 @@ class DragRoute extends Route {
     return null;
   }
 
-  void didPop([DragEndKind endKind]) {
+  void finish(_DragEndKind endKind) {
     if (_activeTarget != null) {
-      if (endKind == DragEndKind.dropped && _activeTargetWillAcceptDrop)
+      if (endKind == _DragEndKind.dropped && _activeTargetWillAcceptDrop)
         _activeTarget.didDrop(data);
       else
         _activeTarget.didLeave(data);
     }
     _activeTarget = null;
     _activeTargetWillAcceptDrop = false;
+    _entry.remove();
     if (onDragFinished != null)
       onDragFinished();
-    super.didPop(endKind);
   }
 
-  bool get ephemeral => true;
-  bool get modal => false;
-  bool get opaque => false;
-
-  Widget build(RouteArguments args) {
+  Widget _build(BuildContext context) {
     return new Positioned(
       left: _lastOffset.dx,
       top: _lastOffset.dy,
