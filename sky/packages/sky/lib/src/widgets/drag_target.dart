@@ -224,9 +224,12 @@ class _DragAvatar {
   }
 
   void rebuild(BuildContext context) {
-    _entry?.remove();
-    _entry = new OverlayEntry(child: _build(context));
-    Navigator.of(context).overlay.insert(_entry);
+    if (_entry == null) {
+      _entry = new OverlayEntry(child: _build(context));
+      Navigator.of(context).overlay.insert(_entry);
+    } else {
+      _entry.child = _build(context);
+    }
   }
 
   DragTargetState _getDragTarget(List<HitTestEntry> path) {
@@ -251,6 +254,7 @@ class _DragAvatar {
     _activeTarget = null;
     _activeTargetWillAcceptDrop = false;
     _entry.remove();
+    _entry = null;
     if (onDragFinished != null)
       onDragFinished();
   }
