@@ -225,14 +225,14 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 // Workaround for Emoji keycap until we implement per-cluster font
                 // selection: if keycap is found in a different font that also
                 // supports previous char, attach previous char to the new run.
-                // Only handles non-surrogate characters.
                 // Bug 7557244.
                 if (ch == KEYCAP && utf16Pos != 0 && family && family->getCoverage()->get(prevCh)) {
-                    run->end--;
+                    const size_t prevChLength = U16_LENGTH(prevCh);
+                    run->end -= prevChLength;
                     if (run->start == run->end) {
                         result->pop_back();
                     }
-                    start--;
+                    start -= prevChLength;
                 }
                 Run dummy;
                 result->push_back(dummy);

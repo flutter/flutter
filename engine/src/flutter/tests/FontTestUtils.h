@@ -25,6 +25,7 @@
  * This function reads /system/etc/fonts.xml and make font families and
  * collections of them. MinikinFontForTest is used for FontFamily creation.
  */
-std::unique_ptr<android::FontCollection> getFontCollection();
+std::unique_ptr<android::FontCollection> getFontCollection(
+        const char* fontDir, const char* fontXml);
 
 #endif  // MINIKIN_FONT_TEST_UTILS_H
