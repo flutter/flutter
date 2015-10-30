@@ -835,16 +835,23 @@ class AndroidDevice extends Device {
     runSync([adbPath, 'shell', 'am', 'force-stop', apk.id]);
     // Kill the server
     if (Platform.isMacOS) {
-      String pid = runSync(['lsof', '-i', ':$_serverPort', '-t']);
-      if (pid.isEmpty) {
+      String pids = runSync(['lsof', '-i', ':$_serverPort', '-t']).trim();
+      if (pids.isEmpty) {
         _logging.fine('No process to kill for port $_serverPort');
         return true;
       }
-      // Killing a pid with a shell command from within dart is hard,
-      // so use a library command, but it's still nice to give the
-      // equivalent command when doing verbose logging.
-      _logging.info('kill $pid');
-      Process.killPid(int.parse(pid));
+
+      // Handle multiple returned pids.
+      for (String pidString in pids.split('\n')) {
+        // Killing a pid with a shell command from within dart is hard, so use a
+        // library command, but it's still nice to give the equivalent command
+        // when doing verbose logging.
+        _logging.info('kill $pidString');
+
+        int pid = int.parse(pidString, onError: (_) => null);
+        if (pid != null)
+          Process.killPid(pid);
+      }
     } else if (Platform.isWindows) {
       //Get list of network processes and split on newline
       List<String> processes = runSync(['netstat.exe','-ano']).split("\r");
