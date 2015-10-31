@@ -66,16 +66,15 @@ class ApplicationPackageStore {
 
   ApplicationPackageStore({ this.android, this.iOS, this.iOSSimulator });
 
-  ApplicationPackage getPackageForPlatform(BuildPlatform platform) {
+  ApplicationPackage getPackageForPlatform(TargetPlatform platform) {
     switch (platform) {
-      case BuildPlatform.android:
+      case TargetPlatform.android:
         return android;
-      case BuildPlatform.iOS:
+      case TargetPlatform.iOS:
         return iOS;
-      case BuildPlatform.iOSSimulator:
+      case TargetPlatform.iOSSimulator:
         return iOSSimulator;
-      case BuildPlatform.mac:
-      case BuildPlatform.linux:
+      case TargetPlatform.linux:
         return null;
     }
   }
@@ -86,31 +85,32 @@ class ApplicationPackageStore {
     IOSApp iOSSimulator;
 
     for (BuildConfiguration config in configs) {
-      switch (config.platform) {
-        case BuildPlatform.android:
+      switch (config.targetPlatform) {
+        case TargetPlatform.android:
           assert(android == null);
-          String localPath = config.type == BuildType.prebuilt ?
-            await ArtifactStore.getPath(Artifact.flutterShell) :
-            path.join(config.buildDir, 'apks', AndroidApk._defaultName);
-          android = new AndroidApk(localPath: localPath);
+          if (config.type != BuildType.prebuilt) {
+            String localPath = path.join(config.buildDir, 'apks', AndroidApk._defaultName);
+            android = new AndroidApk(localPath: localPath);
+          } else {
+            Artifact artifact = ArtifactStore.getArtifact(
+              type: ArtifactType.shell, targetPlatform: TargetPlatform.android);
+            android = new AndroidApk(localPath: await ArtifactStore.getPath(artifact));
+          }
           break;
 
-        case BuildPlatform.iOS:
+        case TargetPlatform.iOS:
           assert(iOS == null);
           assert(config.type != BuildType.prebuilt);
           iOS = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
           break;
 
-        case BuildPlatform.iOSSimulator:
+        case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
           assert(config.type != BuildType.prebuilt);
           iOSSimulator = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
           break;
 
-        case BuildPlatform.mac:
-        case BuildPlatform.linux:
-          // TODO(abarth): Support mac and linux targets.
-          assert(false);
+        case TargetPlatform.linux:
           break;
       }
     }

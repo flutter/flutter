@@ -3,17 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../device.dart';
+import 'build.dart';
 import 'flutter_command.dart';
 import 'install.dart';
 import 'stop.dart';
 
 final Logger _logging = new Logger('sky_tools.start');
+const String _localBundlePath = 'app.flx';
+const bool _kUseServer = true;
 
 class StartCommand extends FlutterCommand {
   final String name = 'start';
@@ -31,13 +35,20 @@ class StartCommand extends FlutterCommand {
         defaultsTo: '.',
         abbr: 't',
         help: 'Target app path or filename to start.');
+    argParser.addFlag('http',
+        negatable: true,
+        defaultsTo: true,
+        help: 'Use a local HTTP server to serve your app to your device.');
     argParser.addFlag('boot',
         help: 'Boot the iOS Simulator if it isn\'t already running.');
   }
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackagesAndConnectToDevices();
+    await Future.wait([
+      downloadToolchain(),
+      downloadApplicationPackagesAndConnectToDevices(),
+    ]);
 
     bool poke = argResults['poke'];
     if (!poke) {
@@ -59,8 +70,19 @@ class StartCommand extends FlutterCommand {
         continue;
       if (device is AndroidDevice) {
         String target = path.absolute(argResults['target']);
-        if (await device.startServer(target, poke, argResults['checked'], package))
-          startedSomething = true;
+        if (argResults['http']) {
+          if (await device.startServer(target, poke, argResults['checked'], package))
+            startedSomething = true;
+        } else {
+          String mainPath = target;
+          if (FileSystemEntity.isDirectorySync(target))
+            mainPath = path.join(target, 'lib', 'main.dart');
+          BuildCommand builder = new BuildCommand();
+          builder.inheritFromParent(this);
+          await builder.build(outputPath: _localBundlePath, mainPath: mainPath);
+          if (device.startBundle(package, _localBundlePath, poke, argResults['checked']))
+            startedSomething = true;
+        }
       } else {
         if (await device.startApp(package))
           startedSomething = true;

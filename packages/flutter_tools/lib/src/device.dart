@@ -66,7 +66,7 @@ abstract class Device {
   /// Check if the current version of the given app is already installed
   bool isAppInstalled(ApplicationPackage app);
 
-  BuildPlatform get platform;
+  TargetPlatform get platform;
 
   Future<int> logs({bool clear: false});
 
@@ -271,7 +271,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  BuildPlatform get platform => BuildPlatform.iOS;
+  TargetPlatform get platform => TargetPlatform.iOS;
 
   /// Note that clear is not supported on iOS at this time.
   Future<int> logs({bool clear: false}) async {
@@ -487,7 +487,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  BuildPlatform get platform => BuildPlatform.iOSSimulator;
+  TargetPlatform get platform => TargetPlatform.iOSSimulator;
 
   Future<int> logs({bool clear: false}) async {
     if (!isConnected()) {
@@ -695,6 +695,10 @@ class AndroidDevice extends Device {
     return '${_getDeviceDataPath(app)}/${app.name}.sha1';
   }
 
+  String _getDeviceBundlePath(ApplicationPackage app) {
+    return '${_getDeviceDataPath(app)}/dev.flx';
+  }
+
   String _getDeviceApkSha1(ApplicationPackage app) {
     return runCheckedSync([adbPath, 'shell', 'cat', _getDeviceSha1Path(app)]);
   }
@@ -750,12 +754,45 @@ class AndroidDevice extends Device {
     return true;
   }
 
+  void _forwardObservatoryPort() {
+    // Set up port forwarding for observatory.
+    String observatoryPortString = 'tcp:$_observatoryPort';
+    runCheckedSync(
+        [adbPath, 'forward', observatoryPortString, observatoryPortString]);
+  }
+
+  bool startBundle(AndroidApk apk, String bundlePath, bool poke, bool checked) {
+    if (!FileSystemEntity.isFileSync(bundlePath)) {
+      _logging.severe('Cannot find $bundlePath');
+      return false;
+    }
+
+    if (!poke)
+      _forwardObservatoryPort();
+
+    String deviceTmpPath = '/data/local/tmp/dev.flx';
+    String deviceBundlePath = _getDeviceBundlePath(apk);
+    runCheckedSync([adbPath, 'push', bundlePath, deviceTmpPath]);
+    runCheckedSync([adbPath, 'shell', 'mv', deviceTmpPath, deviceBundlePath]);
+    List<String> cmd = [
+      adbPath,
+      'shell', 'am', 'start',
+      '-a', 'android.intent.action.RUN',
+      '-d', deviceBundlePath,
+    ];
+    if (checked)
+      cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
+    cmd.add(apk.launchActivity);
+    runCheckedSync(cmd);
+    return true;
+  }
+
   Future<bool> startServer(
       String target, bool poke, bool checked, AndroidApk apk) async {
     String serverRoot = '';
     String mainDart = '';
     String missingMessage = '';
-    if (await FileSystemEntity.isDirectory(target)) {
+    if (FileSystemEntity.isDirectorySync(target)) {
       serverRoot = target;
       mainDart = path.join(serverRoot, 'lib', 'main.dart');
       missingMessage = 'Missing lib/main.dart in project: $serverRoot';
@@ -765,16 +802,13 @@ class AndroidDevice extends Device {
       missingMessage = '$mainDart does not exist.';
     }
 
-    if (!await FileSystemEntity.isFile(mainDart)) {
+    if (!FileSystemEntity.isFileSync(mainDart)) {
       _logging.severe(missingMessage);
       return false;
     }
 
     if (!poke) {
-      // Set up port forwarding for observatory.
-      String observatoryPortString = 'tcp:$_observatoryPort';
-      runCheckedSync(
-          [adbPath, 'forward', observatoryPortString, observatoryPortString]);
+      _forwardObservatoryPort();
 
       // Actually start the server.
       Process server = await Process.start(
@@ -794,28 +828,20 @@ class AndroidDevice extends Device {
 
     String relativeDartMain = _convertToURL(path.relative(mainDart, from: serverRoot));
     String url = 'http://localhost:$_serverPort/$relativeDartMain';
-    if (poke) {
+    if (poke)
       url += '?rand=${new Random().nextDouble()}';
-    }
 
     // Actually launch the app on Android.
     List<String> cmd = [
       adbPath,
-      'shell',
-      'am',
-      'start',
-      '-a',
-      'android.intent.action.VIEW',
-      '-d',
-      url,
+      'shell', 'am', 'start',
+      '-a', 'android.intent.action.VIEW',
+      '-d', url,
     ];
-    if (checked) {
+    if (checked)
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
-    }
     cmd.add(apk.launchActivity);
-
     runCheckedSync(cmd);
-
     return true;
   }
 
@@ -880,7 +906,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  BuildPlatform get platform => BuildPlatform.android;
+  TargetPlatform get platform => TargetPlatform.android;
 
   void clearLogs() {
     runSync([adbPath, 'logcat', '-c']);
@@ -985,24 +1011,20 @@ class DeviceStore {
     IOSSimulator iOSSimulator;
 
     for (BuildConfiguration config in configs) {
-      switch (config.platform) {
-        case BuildPlatform.android:
+      switch (config.targetPlatform) {
+        case TargetPlatform.android:
           assert(android == null);
           android = new AndroidDevice();
           break;
-        case BuildPlatform.iOS:
+        case TargetPlatform.iOS:
           assert(iOS == null);
           iOS = new IOSDevice();
           break;
-        case BuildPlatform.iOSSimulator:
+        case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
           iOSSimulator = new IOSSimulator();
           break;
-
-        case BuildPlatform.mac:
-        case BuildPlatform.linux:
-          // TODO(abarth): Support mac and linux targets.
-          assert(false);
+        case TargetPlatform.linux:
           break;
       }
     }

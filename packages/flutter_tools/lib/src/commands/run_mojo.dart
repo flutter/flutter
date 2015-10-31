@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
+import '../build_configuration.dart';
 import '../artifacts.dart';
 import '../process.dart';
 
@@ -40,7 +41,7 @@ class RunMojoCommand extends Command {
   }
 
   Future<int> _runAndroid(String devtoolsPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) {
-    String skyViewerUrl = ArtifactStore.googleStorageUrl('viewer', 'android-arm');
+    String skyViewerUrl = ArtifactStore.getCloudStorageBaseUrl('viewer', 'android-arm');
     String command = _makePathAbsolute(devtoolsPath);
     String appName = path.basename(appPath);
     String appDir = path.dirname(appPath);
@@ -65,7 +66,8 @@ class RunMojoCommand extends Command {
   }
 
   Future<int> _runLinux(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) async {
-    String viewerPath = _makePathAbsolute(await ArtifactStore.getPath(Artifact.skyViewerMojo));
+    Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
+    String viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
     String mojoBuildType = mojoConfig == _MojoConfig.Debug ? 'Debug' : 'Release';
     String mojoShellPath = _makePathAbsolute(path.join(mojoPath, 'out', mojoBuildType, 'mojo_shell'));
     List<String> cmd = [

@@ -11,21 +11,29 @@ import 'build_configuration.dart';
 import 'process.dart';
 
 class Compiler {
-  Compiler(this._compilerPath);
+  Compiler(this._path);
 
-  String _compilerPath;
+  String _path;
 
   Future<int> compile({
     String mainPath,
     String snapshotPath
   }) {
     return runCommandAndStreamOutput([
-      _compilerPath,
+      _path,
       mainPath,
       '--package-root=${ArtifactStore.packageRoot}',
       '--snapshot=$snapshotPath'
     ]);
   }
+}
+
+Future<String> _getCompilerPath(BuildConfiguration config) async {
+  if (config.type != BuildType.prebuilt)
+    return path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
+  Artifact artifact = ArtifactStore.getArtifact(
+    type: ArtifactType.snapshot, hostPlatform: config.hostPlatform);
+  return await ArtifactStore.getPath(artifact);
 }
 
 class Toolchain {
@@ -34,12 +42,8 @@ class Toolchain {
   final Compiler compiler;
 
   static Future<Toolchain> forConfigs(List<BuildConfiguration> configs) async {
-    // TODO(abarth): Add a notion of "host platform" to the build configs.
-    BuildConfiguration config = configs.first;
-    String compilerPath = config.type == BuildType.prebuilt ?
-        await ArtifactStore.getPath(Artifact.flutterCompiler) :
-        path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
-
+    // TODO(abarth): Shouldn't we consider all the configs?
+    String compilerPath = await _getCompilerPath(configs.first);
     return new Toolchain(compiler: new Compiler(compilerPath));
   }
 }

@@ -27,8 +27,10 @@ class FlutterCommandRunner extends CommandRunner {
         negatable: false,
         help: 'Very noisy logging, including the output of all '
             'shell commands executed.');
+    argParser.addOption('package-root',
+        help: 'Path to your packages directory.', defaultsTo: 'packages');
 
-    argParser.addSeparator('Global build selection options:');
+    argParser.addSeparator('Local build selection options:');
     argParser.addFlag('debug',
         negatable: false,
         help:
@@ -48,42 +50,40 @@ class FlutterCommandRunner extends CommandRunner {
             'Automatically detect your engine src directory from an overridden Flutter package.'
             'Useful if you are building Flutter locally and are using a dependency_override for'
             'the Flutter package that points to your engine src directory.');
-    argParser.addOption('engine-src-path',
+    argParser.addOption('engine-src-path', hide: true,
         help:
             'Path to your engine src directory, if you are building Flutter locally. '
             'Ignored if neither debug nor release is set. Not normally required.');
-    argParser.addOption('android-debug-build-path',
+    argParser.addOption('android-debug-build-path', hide: true,
         help:
             'Path to your Android Debug out directory, if you are building Flutter locally. '
             'This path is relative to engine-src-path. Not normally required.',
         defaultsTo: 'out/android_Debug/');
-    argParser.addOption('android-release-build-path',
+    argParser.addOption('android-release-build-path', hide: true,
         help:
             'Path to your Android Release out directory, if you are building Flutter locally. '
             'This path is relative to engine-src-path. Not normally required.',
         defaultsTo: 'out/android_Release/');
-    argParser.addOption('ios-debug-build-path',
+    argParser.addOption('ios-debug-build-path', hide: true,
         help:
             'Path to your iOS Debug out directory, if you are building Flutter locally. '
             'This path is relative to engine-src-path. Not normally required.',
         defaultsTo: 'out/ios_Debug/');
-    argParser.addOption('ios-release-build-path',
+    argParser.addOption('ios-release-build-path', hide: true,
         help:
             'Path to your iOS Release out directory, if you are building Flutter locally. '
             'This path is relative to engine-src-path. Not normally required.',
         defaultsTo: 'out/ios_Release/');
-    argParser.addOption('ios-sim-debug-build-path',
+    argParser.addOption('ios-sim-debug-build-path', hide: true,
         help:
             'Path to your iOS Simulator Debug out directory, if you are building Sky locally. '
             'This path is relative to engine-src-path. Not normally required.',
         defaultsTo: 'out/ios_sim_Debug/');
-    argParser.addOption('ios-sim-release-build-path',
+    argParser.addOption('ios-sim-release-build-path', hide: true,
         help:
             'Path to your iOS Simulator Release out directory, if you are building Sky locally. '
             'This path is relative to engine-src-path. Not normally required.',
         defaultsTo: 'out/ios_sim_Release/');
-    argParser.addOption('package-root',
-        help: 'Path to your packages directory.', defaultsTo: 'packages');
   }
 
   List<BuildConfiguration> get buildConfigurations {
@@ -124,6 +124,7 @@ class FlutterCommandRunner extends CommandRunner {
     String enginePath = globalResults['engine-src-path'];
     bool isDebug = globalResults['debug'];
     bool isRelease = globalResults['release'];
+    HostPlatform hostPlatform = getCurrentHostPlatform();
 
     if (enginePath == null && globalResults['local-build']) {
       Directory flutterDir = new Directory(path.join(globalResults['package-root'], 'flutter'));
@@ -141,7 +142,8 @@ class FlutterCommandRunner extends CommandRunner {
     List<BuildConfiguration> configs = <BuildConfiguration>[];
 
     if (enginePath == null) {
-      configs.add(new BuildConfiguration.prebuilt(platform: BuildPlatform.android));
+      configs.add(new BuildConfiguration.prebuilt(
+          hostPlatform: hostPlatform, targetPlatform: TargetPlatform.android));
     } else {
       if (!FileSystemEntity.isDirectorySync(enginePath))
         _logging.warning('$enginePath is not a valid directory');
@@ -152,7 +154,8 @@ class FlutterCommandRunner extends CommandRunner {
       if (isDebug) {
         configs.add(new BuildConfiguration.local(
           type: BuildType.debug,
-          platform: BuildPlatform.android,
+          hostPlatform: hostPlatform,
+          targetPlatform: TargetPlatform.android,
           enginePath: enginePath,
           buildPath: globalResults['android-debug-build-path']
         ));
@@ -160,14 +163,16 @@ class FlutterCommandRunner extends CommandRunner {
         if (Platform.isMacOS) {
           configs.add(new BuildConfiguration.local(
             type: BuildType.debug,
-            platform: BuildPlatform.iOS,
+            hostPlatform: hostPlatform,
+            targetPlatform: TargetPlatform.iOS,
             enginePath: enginePath,
             buildPath: globalResults['ios-debug-build-path']
           ));
 
           configs.add(new BuildConfiguration.local(
             type: BuildType.debug,
-            platform: BuildPlatform.iOSSimulator,
+            hostPlatform: hostPlatform,
+            targetPlatform: TargetPlatform.iOSSimulator,
             enginePath: enginePath,
             buildPath: globalResults['ios-sim-debug-build-path']
           ));
@@ -177,7 +182,8 @@ class FlutterCommandRunner extends CommandRunner {
       if (isRelease) {
         configs.add(new BuildConfiguration.local(
           type: BuildType.release,
-          platform: BuildPlatform.android,
+          hostPlatform: hostPlatform,
+          targetPlatform: TargetPlatform.android,
           enginePath: enginePath,
           buildPath: globalResults['android-release-build-path']
         ));
@@ -185,14 +191,16 @@ class FlutterCommandRunner extends CommandRunner {
         if (Platform.isMacOS) {
           configs.add(new BuildConfiguration.local(
             type: BuildType.release,
-            platform: BuildPlatform.iOS,
+            hostPlatform: hostPlatform,
+            targetPlatform: TargetPlatform.iOS,
             enginePath: enginePath,
             buildPath: globalResults['ios-release-build-path']
           ));
 
           configs.add(new BuildConfiguration.local(
             type: BuildType.release,
-            platform: BuildPlatform.iOSSimulator,
+            hostPlatform: hostPlatform,
+            targetPlatform: TargetPlatform.iOSSimulator,
             enginePath: enginePath,
             buildPath: globalResults['ios-sim-release-build-path']
           ));

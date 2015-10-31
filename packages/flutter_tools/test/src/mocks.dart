@@ -26,21 +26,21 @@ class MockToolchain extends Toolchain {
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
-  BuildPlatform get platform => BuildPlatform.android;
+  TargetPlatform get platform => TargetPlatform.android;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class MockIOSDevice extends Mock implements IOSDevice {
-  BuildPlatform get platform => BuildPlatform.iOS;
+  TargetPlatform get platform => TargetPlatform.iOS;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
-  BuildPlatform get platform => BuildPlatform.iOSSimulator;
+  TargetPlatform get platform => TargetPlatform.iOSSimulator;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
