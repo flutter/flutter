@@ -45,8 +45,10 @@ class HeroController {
       return;
     }
     _to = current;
-    current.offstage = true;
-    scheduler.requestPostFrameCallback(_updateQuest);
+    if (_from != _to) {
+      current.offstage = current.performance.status != PerformanceStatus.completed;
+      scheduler.requestPostFrameCallback(_updateQuest);
+    }
   }
 
   void _handleQuestFinished() {
