@@ -10,8 +10,6 @@ environment:
 dependencies:
   archive: ^1.0.20
   args: ^0.13.0
-  asn1lib: ^0.4.1
-  cipher: ^0.7.1
   flx: ">=0.0.1 <0.1.0"
   crypto: ^0.9.1
   mustache4dart: ^1.0.0
