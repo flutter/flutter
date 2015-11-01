@@ -38,6 +38,12 @@ struct DartConverter<Paint> {
                                           Dart_Handle& exception);
 };
 
+class StrokeCap {};
+
+template <>
+struct DartConverter<StrokeCap>
+    : public DartConverterEnum<SkPaint::Cap> {};
+
 }  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_PAINTING_PAINT_H_

@@ -34,6 +34,7 @@ enum PaintFields {
   kShader,
   kStyle,
   kTransferMode,
+  kStrokeCap,
 
   // kNumberOfPaintFields must be last.
   kNumberOfPaintFields,
@@ -81,6 +82,8 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
     paint.setStyle(DartConverter<PaintingStyle>::FromDart(values[kStyle]));
   if (!Dart_IsNull(values[kTransferMode]))
     paint.setXfermodeMode(DartConverter<TransferMode>::FromDart(values[kTransferMode]));
+  if (!Dart_IsNull(values[kStrokeCap]))
+    paint.setStrokeCap(DartConverter<StrokeCap>::FromDart(values[kStrokeCap]));
 
   result.is_null = false;
   return result;
