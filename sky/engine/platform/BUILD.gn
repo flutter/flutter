@@ -52,34 +52,9 @@ action("runtime_enabled_features") {
   ]
 }
 
-action("color_data") {
-  script = "../build/scripts/gperf.py"
-
-  color_data_gperf = "ColorData.gperf"
-  inputs = [
-    color_data_gperf,
-  ]
-
-  output_file = "$sky_platform_output_dir/ColorData.cpp"
-  outputs = [
-    output_file,
-  ]
-
-  args = [
-    gperf_exe,
-    "--key-positions=*",
-    "-D",
-    "-s",
-    "2",
-    rebase_path(color_data_gperf, root_build_dir),
-    "--output-file=" + rebase_path(output_file, root_build_dir),
-  ]
-}
-
 group("make_platform_generated") {
   visibility += [ ":*" ]
   deps = [
-    ":color_data",
     ":font_family_names",
     ":runtime_enabled_features",
   ]
@@ -511,8 +486,7 @@ source_set("platform") {
 
   # Add in the generated files.
   sources += get_target_outputs(":font_family_names") +
-             get_target_outputs(":runtime_enabled_features") +
-             get_target_outputs(":color_data")
+             get_target_outputs(":runtime_enabled_features")
 
   configs += [
     "//sky/engine:config",

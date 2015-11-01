@@ -166,15 +166,6 @@ bool Color::parseHexColor(const String& name, RGBA32& rgb)
     return parseHexColor(name.characters16(), name.length(), rgb);
 }
 
-bool Color::setFromString(const String& name)
-{
-    if (name[0] != '#')
-        return setNamedColor(name);
-    if (name.is8Bit())
-        return parseHexColor(name.characters8() + 1, name.length() - 1, m_color);
-    return parseHexColor(name.characters16() + 1, name.length() - 1, m_color);
-}
-
 String Color::serializedAsCSSComponentValue() const
 {
     StringBuilder result;
@@ -242,29 +233,6 @@ String Color::nameForRenderTreeAsText() const
     if (alpha() < 0xFF)
         return String::format("#%02X%02X%02X%02X", red(), green(), blue(), alpha());
     return String::format("#%02X%02X%02X", red(), green(), blue());
-}
-
-static inline const NamedColor* findNamedColor(const String& name)
-{
-    char buffer[64]; // easily big enough for the longest color name
-    unsigned length = name.length();
-    if (length > sizeof(buffer) - 1)
-        return 0;
-    for (unsigned i = 0; i < length; ++i) {
-        UChar c = name[i];
-        if (!c || c > 0x7F)
-            return 0;
-        buffer[i] = toASCIILower(static_cast<char>(c));
-    }
-    buffer[length] = '\0';
-    return findColor(buffer, length);
-}
-
-bool Color::setNamedColor(const String& name)
-{
-    const NamedColor* foundColor = findNamedColor(name);
-    m_color = foundColor ? foundColor->ARGBValue : 0;
-    return foundColor;
 }
 
 Color Color::light() const

@@ -50,13 +50,6 @@ inline int greenChannel(RGBA32 color) { return (color >> 8) & 0xFF; }
 inline int blueChannel(RGBA32 color) { return color & 0xFF; }
 inline int alphaChannel(RGBA32 color) { return (color >> 24) & 0xFF; }
 
-struct NamedColor {
-    const char* name;
-    unsigned ARGBValue;
-};
-
-const NamedColor* findColor(register const char* str, register unsigned len);
-
 class PLATFORM_EXPORT Color {
     WTF_MAKE_FAST_ALLOCATED;
 public:
@@ -91,11 +84,6 @@ public:
     // Returns the color serialized as either #RRGGBB or #RRGGBBAA
     // The latter format is not a valid CSS color, and should only be seen in DRT dumps.
     String nameForRenderTreeAsText() const;
-
-    // Returns whether parsing succeeded. The resulting Color is arbitrary
-    // if parsing fails.
-    bool setFromString(const String&);
-    bool setNamedColor(const String&);
 
     bool hasAlpha() const { return alpha() < 255; }
 
