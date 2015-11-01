@@ -329,11 +329,11 @@ class CardCollectionState extends State<CardCollection> {
         backgroundMessage = "Unsupported dismissDirection";
     }
 
-    Widget leftArrowIcon =  new Icon(type: 'navigation/arrow_back', size: IconSize.s36);
+    Widget leftArrowIcon =  new Icon(icon: 'navigation/arrow_back', size: IconSize.s36);
     if (_dismissDirection == DismissDirection.right)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
-    Widget rightArrowIcon =  new Icon(type: 'navigation/arrow_forward', size: IconSize.s36);
+    Widget rightArrowIcon =  new Icon(icon: 'navigation/arrow_forward', size: IconSize.s36);
     if (_dismissDirection == DismissDirection.left)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 

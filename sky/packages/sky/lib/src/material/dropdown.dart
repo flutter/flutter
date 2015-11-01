@@ -223,7 +223,7 @@ class DropdownButton<T> extends StatelessComponent {
               alignment: const FractionalOffset(0.5, 0.0)
             ),
             new Container(
-              child: new Icon(type: 'navigation/arrow_drop_down', size: IconSize.s36),
+              child: new Icon(icon: 'navigation/arrow_drop_down', size: IconSize.s36),
               padding: const EdgeDims.only(top: 6.0)
             )
           ])

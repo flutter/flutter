@@ -26,16 +26,16 @@ class Icon extends StatelessComponent {
   Icon({
     Key key,
     this.size: IconSize.s24,
-    this.type: '',
+    this.icon: '',
     this.color,
     this.colorFilter
   }) : super(key: key) {
     assert(size != null);
-    assert(type != null);
+    assert(icon != null);
   }
 
   final IconSize size;
-  final String type;
+  final String icon;
   final IconThemeColor color;
   final ColorFilter colorFilter;
 
@@ -60,7 +60,7 @@ class Icon extends StatelessComponent {
   Widget build(BuildContext context) {
     String category = '';
     String subtype = '';
-    List<String> parts = type.split('/');
+    List<String> parts = icon.split('/');
     if (parts.length == 2) {
       category = parts[0];
       subtype = parts[1];
@@ -80,7 +80,7 @@ class Icon extends StatelessComponent {
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('$type');
+    description.add('$icon');
     description.add('size: $size');
   }
 }

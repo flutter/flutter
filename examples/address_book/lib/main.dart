@@ -20,7 +20,7 @@ class Field extends StatelessComponent {
     return new Row(<Widget>[
         new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
-          child: new Icon(type: icon)
+          child: new Icon(icon: icon)
         ),
         new Flexible(
           child: new Input(
@@ -43,7 +43,7 @@ class AddressBookHome extends StatelessComponent {
 
   Widget buildFloatingActionButton(BuildContext context) {
     return new FloatingActionButton(
-      child: new Icon(type: 'image/photo_camera'),
+      child: new Icon(icon: 'image/photo_camera'),
       backgroundColor: Theme.of(context).accentColor
     );
   }

@@ -200,7 +200,7 @@ class FeedFragmentState extends State<FeedFragment> {
     switch (_fitnessMode) {
       case FitnessMode.feed:
         return new FloatingActionButton(
-          child: new Icon(type: 'content/add'),
+          child: new Icon(icon: 'content/add'),
           onPressed: _handleActionButtonPressed
         );
       case FitnessMode.chart:
