@@ -13,7 +13,7 @@ dependencies:
     '0.0.45'
   sky_services: 
     '0.0.45'
-  sky_tools: '>=0.0.30 <0.1.0'
+  sky_tools: '>=0.0.32 <0.1.0'
   vector_math: '>=1.4.3 <2.0.0'
 environment:
   sdk: '>=1.12.0 <2.0.0'
