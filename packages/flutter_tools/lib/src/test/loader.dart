@@ -90,6 +90,7 @@ void main() {
 ''');
 
   Completer<Iterable<RemoteTest>> completer = new Completer<Iterable<RemoteTest>>();
+  Completer deathCompleter = new Completer();
 
   Process process = await _startProcess(
     listenerFile.path,
@@ -138,6 +139,7 @@ void main() {
         if (kExpectAllTestsToCloseCleanly && output != '')
           print('Unexpected failure after test claimed to pass:\n$output');
       }
+      deathCompleter.complete();
     } catch (e) {
       // Throwing inside this block causes all kinds of hard-to-debug issues
       // like stack overflows and hangs. So catch everything just in case.
@@ -145,7 +147,7 @@ void main() {
     }
   });
 
-  JSONSocket socket = new JSONSocket(await info.socket);
+  JSONSocket socket = new JSONSocket(await info.socket, deathCompleter.future);
 
   await cleanupTempDirectory();
 

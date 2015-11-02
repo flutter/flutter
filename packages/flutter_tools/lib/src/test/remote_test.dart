@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:stack_trace/stack_trace.dart';
 import 'package:test/src/backend/live_test.dart';
 import 'package:test/src/backend/live_test_controller.dart';
 import 'package:test/src/backend/metadata.dart';
@@ -29,8 +30,8 @@ class RemoteTest extends Test {
     StreamSubscription subscription;
 
     controller = new LiveTestController(suite, this, () async {
-      controller.setState(const State(Status.running, Result.success));
 
+      controller.setState(const State(Status.running, Result.success));
       _socket.send({'command': 'run', 'index': _index});
 
       subscription = _socket.stream.listen((message) {
@@ -51,6 +52,17 @@ class RemoteTest extends Test {
           controller.completer.complete();
         }
       });
+
+      _socket.unusualTermination.then((_) {
+        if (subscription != null) {
+          controller.addError(new Exception('Unexpected subprocess termination.'), new Trace.current());
+          controller.setState(new State(Status.complete, Result.error));
+          subscription.cancel();
+          subscription = null;
+          controller.completer.complete();
+        }
+      });
+
     }, () async {
       _socket.send({'command': 'close'});
       if (subscription != null) {
