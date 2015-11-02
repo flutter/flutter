@@ -4,6 +4,17 @@
 
 part of dart_ui;
 
+enum StrokeCap {
+  /// Begin/end contours with no extension.
+  butt,
+
+  /// Begin/end contours with a semi-circle extension.
+  round,
+
+  /// Begin/end contours with a half square extension.
+  square,
+}
+
 class Paint {
   double strokeWidth;
   bool isAntiAlias = true;
@@ -15,6 +26,7 @@ class Paint {
   Shader shader;
   PaintingStyle style;
   TransferMode transferMode;
+  StrokeCap strokeCap;
 
   // Must match PaintFields enum in Paint.cpp.
   List<dynamic> get _value {
@@ -29,6 +41,7 @@ class Paint {
       shader,
       style,
       transferMode,
+      strokeCap,
     ];
   }
 
