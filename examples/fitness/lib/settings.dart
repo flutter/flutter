@@ -70,9 +70,6 @@ class SettingsFragmentState extends State<SettingsFragment> {
           keyboardType: KeyboardType.NUMBER,
           onChanged: _handleGoalWeightChanged
         ),
-        onDismiss: () {
-          Navigator.of(context).pop();
-        },
         actions: <Widget>[
           new FlatButton(
             child: new Text('CANCEL'),

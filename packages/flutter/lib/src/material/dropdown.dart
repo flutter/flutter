@@ -21,8 +21,11 @@ const double _kMenuHorizontalPadding = 36.0;
 const double _kBaselineOffsetFromBottom = 20.0;
 const Border _kDropdownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
 
-class _DropdownMenu extends StatelessComponent {
-  _DropdownMenu({ Key key, this.route }) : super(key: key);
+class _DropdownMenu extends StatusTransitionComponent {
+  _DropdownMenu({
+    Key key,
+    _MenuRoute route
+  }) : route = route, super(key: key, performance: route.performance);
 
   final _MenuRoute route;
 
@@ -92,7 +95,6 @@ class _DropdownMenu extends StatelessComponent {
       left: menuRect.left - _kMenuHorizontalPadding,
       child: new Focus(
         key: new GlobalObjectKey(route),
-        autofocus: true,
         child: new FadeTransition(
           performance: route.performance,
           opacity: menuOpacity,
@@ -117,6 +119,7 @@ class _DropdownMenu extends StatelessComponent {
   }
 }
 
+// TODO(abarth): This should use ModalRoute.
 class _MenuRoute extends TransitionRoute {
   _MenuRoute({
     this.completer,
