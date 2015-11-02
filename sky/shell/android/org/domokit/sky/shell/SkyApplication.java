@@ -36,7 +36,7 @@ import org.domokit.vsync.VSyncProviderImpl;
 public class SkyApplication extends BaseChromiumApplication {
     static final String SNAPSHOT = "snapshot_blob.bin";
     static final String APP_BUNDLE = "app.flx";
-    static final String MANIFEST = "sky.yaml";
+    static final String MANIFEST = "flutter.yaml";
 
     private static final String TAG = "SkyApplication";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
