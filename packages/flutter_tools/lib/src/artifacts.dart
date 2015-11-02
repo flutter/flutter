@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.artifacts;
-
 import 'dart:async';
 import 'dart:io';
 
@@ -11,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'build_configuration.dart';
+import 'os_utils.dart';
 
 final Logger _logging = new Logger('sky_tools.artifacts');
 
@@ -83,7 +82,11 @@ class Artifact {
   }
 
   String getUrl(String revision) {
-    return _getCloudStorageBaseUrl(category: category, platform: platform, revision: revision) + fileName;
+    return _getCloudStorageBaseUrl(
+      category: category,
+      platform: platform,
+      revision: revision
+    ) + fileName;
   }
 
   // Whether the artifact needs to be marked as executable on disk.
@@ -164,7 +167,11 @@ class ArtifactStore {
   }
 
   static String getCloudStorageBaseUrl(String category, String platform) {
-    return _getCloudStorageBaseUrl(category: category, platform: platform, revision: engineRevision);
+    return _getCloudStorageBaseUrl(
+      category: category,
+      platform: platform,
+      revision: engineRevision
+    );
   }
 
   static Future _downloadFile(String url, File file) async {
@@ -208,9 +215,7 @@ class ArtifactStore {
       print('Downloading ${artifact.name} from the cloud, one moment please...');
       await _downloadFile(artifact.getUrl(engineRevision), cachedFile);
       if (artifact.executable) {
-        // TODO(abarth): We should factor this out into a separate function that
-        // can have a platform-specific implementation.
-        ProcessResult result = Process.runSync('chmod', ['u+x', cachedFile.path]);
+        ProcessResult result = osUtils.makeExecutable(cachedFile);
         if (result.exitCode != 0)
           throw new Exception(result.stderr);
       }

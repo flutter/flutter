@@ -8,6 +8,7 @@ import 'install_test.dart' as install_test;
 import 'listen_test.dart' as listen_test;
 import 'list_test.dart' as list_test;
 import 'logs_test.dart' as logs_test;
+import 'os_utils_test.dart' as os_utils_test;
 import 'start_test.dart' as start_test;
 import 'stop_test.dart' as stop_test;
 import 'trace_test.dart' as trace_test;
@@ -19,6 +20,7 @@ main() {
   listen_test.defineTests();
   list_test.defineTests();
   logs_test.defineTests();
+  os_utils_test.defineTests();
   start_test.defineTests();
   stop_test.defineTests();
   trace_test.defineTests();

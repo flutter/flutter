@@ -7,10 +7,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:yaml/yaml.dart';
-
 import 'package:flx/bundle.dart';
 import 'package:flx/signing.dart';
+import 'package:yaml/yaml.dart';
+
 import '../toolchain.dart';
 import 'flutter_command.dart';
 
