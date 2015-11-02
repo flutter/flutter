@@ -85,7 +85,7 @@ Iterable<_MaterialAsset> _parseMaterialAssets(Map manifestDescriptor) sync* {
 }
 
 dynamic _loadManifest(String manifestPath) {
-  if (manifestPath == null)
+  if (manifestPath == null || !FileSystemEntity.isFileSync(manifestPath))
     return null;
   String manifestDescriptor = new File(manifestPath).readAsStringSync();
   return loadYaml(manifestDescriptor);
@@ -107,6 +107,7 @@ ArchiveFile _createSnapshotFile(String snapshotPath) {
 
 const String _kDefaultAssetBase = 'packages/material_design_icons/icons';
 const String _kDefaultMainPath = 'lib/main.dart';
+const String _kDefaultManifestPath = 'flutter.yaml';
 const String _kDefaultOutputPath = 'app.flx';
 const String _kDefaultSnapshotPath = 'snapshot_blob.bin';
 const String _kDefaultPrivateKeyPath = 'privatekey.der';
@@ -120,7 +121,7 @@ class BuildCommand extends FlutterCommand {
     argParser.addOption('asset-base', defaultsTo: _kDefaultAssetBase);
     argParser.addOption('compiler');
     argParser.addOption('main', defaultsTo: _kDefaultMainPath);
-    argParser.addOption('manifest');
+    argParser.addOption('manifest', defaultsTo: _kDefaultManifestPath);
     argParser.addOption('private-key', defaultsTo: _kDefaultPrivateKeyPath);
     argParser.addOption('output-file', abbr: 'o', defaultsTo: _kDefaultOutputPath);
     argParser.addOption('snapshot', defaultsTo: _kDefaultSnapshotPath);
@@ -149,7 +150,7 @@ class BuildCommand extends FlutterCommand {
   Future<int> build({
     String assetBase: _kDefaultAssetBase,
     String mainPath: _kDefaultMainPath,
-    String manifestPath,
+    String manifestPath: _kDefaultManifestPath,
     String outputPath: _kDefaultOutputPath,
     String snapshotPath: _kDefaultSnapshotPath,
     String privateKeyPath: _kDefaultPrivateKeyPath,
