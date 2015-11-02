@@ -11,7 +11,7 @@ const double _kMenuMargin = 16.0; // 24.0 on tablet
 Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool> onAutorefreshChanged }) async {
   switch (await showMenu(
     context: context,
-    position: new MenuPosition(
+    position: new ModalPosition(
       right: ui.window.padding.right + _kMenuMargin,
       top: ui.window.padding.top + _kMenuMargin
     ),

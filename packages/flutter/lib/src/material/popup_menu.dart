@@ -53,71 +53,53 @@ class _PopupMenu extends StatelessComponent {
       );
     }
 
+    final AnimatedValue<double> opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, 1.0 / 3.0));
     final AnimatedValue<double> width = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit));
     final AnimatedValue<double> height = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit * route.items.length));
 
-    return new Positioned(
-      top: route.position?.top,
-      right: route.position?.right,
-      bottom: route.position?.bottom,
-      left: route.position?.left,
-      child: new Focus(
-        key: new GlobalObjectKey(route),
-        autofocus: true,
-        child: new FadeTransition(
-          performance: route.performance,
-          opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, 1.0 / 3.0)),
-          child: new BuilderTransition(
-            performance: route.performance,
-            variables: <AnimatedValue<double>>[width, height],
-            builder: (BuildContext context) {
-              return new CustomPaint(
-                onPaint: (ui.Canvas canvas, Size size) {
-                  double widthValue = width.value * size.width;
-                  double heightValue = height.value * size.height;
-                  painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
-                },
-                child: new ConstrainedBox(
-                  constraints: new BoxConstraints(
-                    minWidth: _kMenuMinWidth,
-                    maxWidth: _kMenuMaxWidth
-                  ),
-                  child: new IntrinsicWidth(
-                    stepWidth: _kMenuWidthStep,
-                    child: new ScrollableViewport(
-                      child: new Container(
-                        // TODO(abarth): Teach Block about padding.
-                        padding: const EdgeDims.symmetric(
-                          horizontal: _kMenuHorizontalPadding,
-                          vertical: _kMenuVerticalPadding
-                        ),
-                        child: new BlockBody(children)
-                      )
-                    )
+    return new BuilderTransition(
+      performance: route.performance,
+      variables: <AnimatedValue<double>>[opacity, width, height],
+      builder: (BuildContext context) {
+        return new Opacity(
+          opacity: opacity.value,
+          child: new CustomPaint(
+            onPaint: (ui.Canvas canvas, Size size) {
+              double widthValue = width.value * size.width;
+              double heightValue = height.value * size.height;
+              painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
+            },
+            child: new ConstrainedBox(
+              constraints: new BoxConstraints(
+                minWidth: _kMenuMinWidth,
+                maxWidth: _kMenuMaxWidth
+              ),
+              child: new IntrinsicWidth(
+                stepWidth: _kMenuWidthStep,
+                child: new ScrollableViewport(
+                  child: new Container(
+                    // TODO(abarth): Teach Block about padding.
+                    padding: const EdgeDims.symmetric(
+                      horizontal: _kMenuHorizontalPadding,
+                      vertical: _kMenuVerticalPadding
+                    ),
+                    child: new BlockBody(children)
                   )
                 )
-              );
-            }
+              )
+            )
           )
-        )
-      )
+        );
+      }
     );
   }
 }
 
-class MenuPosition {
-  const MenuPosition({ this.top, this.right, this.bottom, this.left });
-  final double top;
-  final double right;
-  final double bottom;
-  final double left;
-}
-
-class _MenuRoute extends TransitionRoute {
+class _MenuRoute extends ModalRoute {
   _MenuRoute({ this.completer, this.position, this.items, this.level });
 
   final Completer completer;
-  final MenuPosition position;
+  final ModalPosition position;
   final List<PopupMenuItem> items;
   final int level;
 
@@ -132,10 +114,7 @@ class _MenuRoute extends TransitionRoute {
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  List<Widget> createWidgets() => [
-    new ModalBarrier(),
-    new _PopupMenu(route: this),
-  ];
+  Widget createModalWidget() => new _PopupMenu(route: this);
 
   void didPop([dynamic result]) {
     completer.complete(result);
@@ -143,7 +122,7 @@ class _MenuRoute extends TransitionRoute {
   }
 }
 
-Future showMenu({ BuildContext context, MenuPosition position, List<PopupMenuItem> items, int level: 4 }) {
+Future showMenu({ BuildContext context, ModalPosition position, List<PopupMenuItem> items, int level: 4 }) {
   Completer completer = new Completer();
   Navigator.of(context).pushEphemeral(new _MenuRoute(
     completer: completer,

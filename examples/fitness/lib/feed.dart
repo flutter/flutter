@@ -248,9 +248,6 @@ class AddItemDialogState extends State<AddItemDialog> {
     return new Dialog(
       title: new Text("What are you doing?"),
       content: new Block(menuItems),
-      onDismiss: () {
-        Navigator.of(context).pop();
-      },
       actions: <Widget>[
         new FlatButton(
           child: new Text('CANCEL'),

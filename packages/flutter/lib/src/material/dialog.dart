@@ -24,8 +24,7 @@ class Dialog extends StatelessComponent {
     this.titlePadding,
     this.content,
     this.contentPadding,
-    this.actions,
-    this.onDismiss
+    this.actions
   }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -46,9 +45,6 @@ class Dialog extends StatelessComponent {
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
   final List<Widget> actions;
-
-  /// An (optional) callback that is called when the dialog is dismissed.
-  final VoidCallback onDismiss;
 
   Color _getColor(BuildContext context) {
     switch (Theme.of(context).brightness) {
@@ -100,38 +96,26 @@ class Dialog extends StatelessComponent {
       ));
     }
 
-    // TODO(abarth): We should return the backdrop as a separate entry from createWidgets.
-    return new Stack(<Widget>[
-      new GestureDetector(
-        onTap: onDismiss,
-        child: new Container(
-          decoration: const BoxDecoration(
-            backgroundColor: const Color(0x7F000000)
-          )
-        )
-      ),
-      new Center(
-        child: new Container(
-          margin: new EdgeDims.symmetric(horizontal: 40.0, vertical: 24.0),
-          child: new ConstrainedBox(
-            constraints: new BoxConstraints(minWidth: 280.0),
-            child: new Material(
-              level: 4,
-              color: _getColor(context),
-              type: MaterialType.card,
-              child: new IntrinsicWidth(
-                child: new Block(dialogBody)
-              )
+    return new Center(
+      child: new Container(
+        margin: new EdgeDims.symmetric(horizontal: 40.0, vertical: 24.0),
+        child: new ConstrainedBox(
+          constraints: new BoxConstraints(minWidth: 280.0),
+          child: new Material(
+            level: 4,
+            color: _getColor(context),
+            type: MaterialType.card,
+            child: new IntrinsicWidth(
+              child: new Block(dialogBody)
             )
           )
         )
       )
-    ]);
-
+    );
   }
 }
 
-class _DialogRoute extends TransitionRoute {
+class _DialogRoute extends ModalRoute {
   _DialogRoute({ this.completer, this.child });
 
   final Completer completer;
@@ -139,19 +123,14 @@ class _DialogRoute extends TransitionRoute {
 
   bool get opaque => false;
   Duration get transitionDuration => const Duration(milliseconds: 150);
+  Color get barrierColor => Colors.black54;
 
-  List<Widget> createWidgets() {
-    return [
-      new Focus(
-        key: new GlobalObjectKey(this),
-        autofocus: true,
-        child:  new FadeTransition(
-          performance: performance,
-          opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
-          child: child
-        )
-      )
-    ];
+  Widget createModalWidget() {
+    return new FadeTransition(
+      performance: performance,
+      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
+      child: child
+    );
   }
 
   void didPop([dynamic result]) {
