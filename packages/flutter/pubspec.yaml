@@ -1,5 +1,5 @@
 name: flutter
-version: 0.0.15
+version: 0.0.16
 author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A framework for writing Flutter applications
 homepage: http://flutter.io
@@ -10,9 +10,9 @@ dependencies:
   mojo_sdk: 0.1.0
   newton: '>=0.1.4 <0.2.0'
   sky_engine: 
-    '0.0.45'
+    '0.0.46'
   sky_services: 
-    '0.0.45'
+    '0.0.46'
   sky_tools: '>=0.0.32 <0.1.0'
   vector_math: '>=1.4.3 <2.0.0'
 environment:
