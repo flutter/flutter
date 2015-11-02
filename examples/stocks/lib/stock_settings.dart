@@ -21,6 +21,7 @@ class StockSettings extends StatefulComponent {
 
 class StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
+    value ??= false;
     sendUpdates(value ? StockMode.optimistic : StockMode.pessimistic, config.backup);
   }
 
@@ -39,9 +40,6 @@ class StockSettingsState extends State<StockSettings> {
           child: new Dialog(
             title: new Text("Change mode?"),
             content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
-            onDismiss: () {
-              Navigator.of(context).pop(false);
-            },
             actions: <Widget>[
               new FlatButton(
                 child: new Text('NO THANKS'),

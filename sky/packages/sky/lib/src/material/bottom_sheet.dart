@@ -68,43 +68,28 @@ class _BottomSheetState extends State<_BottomSheet> {
   }
 
   Widget build(BuildContext context) {
-    return new Focus(
-      key: new GlobalObjectKey(config.route),
-      autofocus: true,
-      child: new GestureDetector(
-        onTap: () { Navigator.of(context).pop(); },
-        child: new Stack(<Widget>[
-          // mask
-          new ColorTransition(
-            performance: config.route._performance,
-            color: new AnimatedColorValue(Colors.transparent, end: Colors.black54),
-            child: new Container()
-          ),
-          new BuilderTransition(
-            performance: config.route._performance,
-            variables: <AnimatedValue<double>>[_layout.childTop],
-            builder: (BuildContext context) {
-              return new ClipRect(
-                child: new CustomOneChildLayout(
-                  delegate: _layout,
-                  token: _layout.childTop.value,
-                  child: new GestureDetector(
-                    onVerticalDragStart: _handleDragStart,
-                    onVerticalDragUpdate: _handleDragUpdate,
-                    onVerticalDragEnd: _handleDragEnd,
-                    child: new Material(child: config.route.child)
-                  )
-                )
-              );
-            }
+    return new BuilderTransition(
+      performance: config.route._performance,
+      variables: <AnimatedValue<double>>[_layout.childTop],
+      builder: (BuildContext context) {
+        return new ClipRect(
+          child: new CustomOneChildLayout(
+            delegate: _layout,
+            token: _layout.childTop.value,
+            child: new GestureDetector(
+              onVerticalDragStart: _handleDragStart,
+              onVerticalDragUpdate: _handleDragUpdate,
+              onVerticalDragEnd: _handleDragEnd,
+              child: new Material(child: config.route.child)
+            )
           )
-        ])
-      )
+        );
+      }
     );
   }
 }
 
-class _ModalBottomSheetRoute extends TransitionRoute {
+class _ModalBottomSheetRoute extends ModalRoute {
   _ModalBottomSheetRoute({ this.completer, this.child }) {
     _performance = new Performance(duration: transitionDuration, debugLabel: 'ModalBottomSheet');
   }
@@ -122,7 +107,8 @@ class _ModalBottomSheetRoute extends TransitionRoute {
     return _performance;
   }
 
-  List<Widget> createWidgets() => [ new _BottomSheet(route: this) ];
+  Color get barrierColor => Colors.black54;
+  Widget createModalWidget() => new _BottomSheet(route: this);
 
   void didPop([dynamic result]) {
     completer.complete(result);
