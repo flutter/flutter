@@ -68,23 +68,26 @@ class _BottomSheetState extends State<_BottomSheet> {
   }
 
   Widget build(BuildContext context) {
-    return new BuilderTransition(
-      performance: config.route._performance,
-      variables: <AnimatedValue<double>>[_layout.childTop],
-      builder: (BuildContext context) {
-        return new ClipRect(
-          child: new CustomOneChildLayout(
-            delegate: _layout,
-            token: _layout.childTop.value,
-            child: new GestureDetector(
-              onVerticalDragStart: _handleDragStart,
-              onVerticalDragUpdate: _handleDragUpdate,
-              onVerticalDragEnd: _handleDragEnd,
-              child: new Material(child: config.route.child)
+    return new GestureDetector(
+      onTap: () { Navigator.of(context).pop(); },
+      child: new BuilderTransition(
+        performance: config.route._performance,
+        variables: <AnimatedValue<double>>[_layout.childTop],
+        builder: (BuildContext context) {
+          return new ClipRect(
+            child: new CustomOneChildLayout(
+              delegate: _layout,
+              token: _layout.childTop.value,
+              child: new GestureDetector(
+                onVerticalDragStart: _handleDragStart,
+                onVerticalDragUpdate: _handleDragUpdate,
+                onVerticalDragEnd: _handleDragEnd,
+                child: new Material(child: config.route.child)
+              )
             )
-          )
-        );
-      }
+          );
+        }
+      )
     );
   }
 }
