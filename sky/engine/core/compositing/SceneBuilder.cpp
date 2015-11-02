@@ -46,10 +46,10 @@ void SceneBuilder::pushClipRect(const Rect& rect)
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushClipRRect(const RRect* rrect, const Rect& bounds)
+void SceneBuilder::pushClipRRect(const RRect& rrect, const Rect& bounds)
 {
     std::unique_ptr<sky::compositor::ClipRRectLayer> layer(new sky::compositor::ClipRRectLayer());
-    layer->set_clip_rrect(rrect->rrect());
+    layer->set_clip_rrect(rrect.sk_rrect);
     addLayer(std::move(layer));
 }
 

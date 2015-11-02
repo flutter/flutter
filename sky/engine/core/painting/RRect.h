@@ -5,35 +5,24 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_RRECT_H_
 #define SKY_ENGINE_CORE_PAINTING_RRECT_H_
 
-#include "sky/engine/core/painting/Offset.h"
-#include "sky/engine/core/painting/Rect.h"
-#include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "dart/runtime/include/dart_api.h"
+#include "sky/engine/tonic/dart_converter.h"
 #include "third_party/skia/include/core/SkRRect.h"
 
 namespace blink {
 
-class RRect : public RefCounted<RRect>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
-public:
-    ~RRect() override;
-    static PassRefPtr<RRect> create()
-    {
-        return adoptRef(new RRect);
-    }
+class RRect {
+ public:
+  SkRRect sk_rrect;
+  bool is_null;
+};
 
-    void setRectXY(const Rect& rect, float xRad, float yRad);
-
-    const SkRRect& rrect() const { return m_rrect; }
-    void setRRect(const SkRRect& rrect) { m_rrect = rrect; }
-
-    PassRefPtr<RRect> shift(const Offset& offset);
-
-private:
-    RRect();
-
-    SkRRect m_rrect;
+template <>
+struct DartConverter<RRect> {
+  static RRect FromDart(Dart_Handle handle);
+  static RRect FromArgumentsWithNullCheck(Dart_NativeArguments args,
+                                          int index,
+                                          Dart_Handle& exception);
 };
 
 } // namespace blink

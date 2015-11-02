@@ -118,11 +118,11 @@ void Canvas::clipRect(const Rect& rect)
     m_canvas->clipRect(rect.sk_rect);
 }
 
-void Canvas::clipRRect(const RRect* rrect)
+void Canvas::clipRRect(const RRect& rrect)
 {
     if (!m_canvas)
         return;
-    m_canvas->clipRRect(rrect->rrect(), SkRegion::kIntersect_Op, true);
+    m_canvas->clipRRect(rrect.sk_rrect, SkRegion::kIntersect_Op, true);
 }
 
 void Canvas::clipPath(const CanvasPath* path)
@@ -160,21 +160,18 @@ void Canvas::drawRect(const Rect& rect, const Paint& paint)
     m_canvas->drawRect(rect.sk_rect, paint.sk_paint);
 }
 
-void Canvas::drawRRect(const RRect* rrect, const Paint& paint)
+void Canvas::drawRRect(const RRect& rrect, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(rrect);
-    m_canvas->drawRRect(rrect->rrect(), paint.sk_paint);
+    m_canvas->drawRRect(rrect.sk_rrect, paint.sk_paint);
 }
 
-void Canvas::drawDRRect(const RRect* outer, const RRect* inner, const Paint& paint)
+void Canvas::drawDRRect(const RRect& outer, const RRect& inner, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(outer);
-    ASSERT(inner);
-    m_canvas->drawDRRect(outer->rrect(), inner->rrect(), paint.sk_paint);
+    m_canvas->drawDRRect(outer.sk_rrect, inner.sk_rrect, paint.sk_paint);
 }
 
 void Canvas::drawOval(const Rect& rect, const Paint& paint)

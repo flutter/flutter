@@ -37,7 +37,7 @@ public:
 
     void pushTransform(const Float64List& matrix4, ExceptionState&);
     void pushClipRect(const Rect& rect);
-    void pushClipRRect(const RRect* rrect, const Rect& bounds);
+    void pushClipRRect(const RRect& rrect, const Rect& bounds);
     void pushClipPath(const CanvasPath* path, const Rect& bounds);
     void pushOpacity(int alpha, const Rect& bounds);
     void pushColorFilter(SkColor color, SkXfermode::Mode transferMode, const Rect& bounds);
