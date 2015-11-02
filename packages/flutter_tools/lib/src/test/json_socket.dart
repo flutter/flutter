@@ -12,7 +12,7 @@ class JSONSocket {
 
   final WebSocket _socket;
   final Stream stream;
-  final Future unusualTermination;
+  final Future<String> unusualTermination;
 
   void send(dynamic data) {
     _socket.add(JSON.encode(data));

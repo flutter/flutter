@@ -90,7 +90,7 @@ void main() {
 ''');
 
   Completer<Iterable<RemoteTest>> completer = new Completer<Iterable<RemoteTest>>();
-  Completer deathCompleter = new Completer();
+  Completer<String> deathCompleter = new Completer();
 
   Process process = await _startProcess(
     listenerFile.path,
@@ -139,7 +139,7 @@ void main() {
         if (kExpectAllTestsToCloseCleanly && output != '')
           print('Unexpected failure after test claimed to pass:\n$output');
       }
-      deathCompleter.complete();
+      deathCompleter.complete(output);
     } catch (e) {
       // Throwing inside this block causes all kinds of hard-to-debug issues
       // like stack overflows and hangs. So catch everything just in case.

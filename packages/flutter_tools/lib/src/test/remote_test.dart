@@ -53,8 +53,9 @@ class RemoteTest extends Test {
         }
       });
 
-      _socket.unusualTermination.then((_) {
+      _socket.unusualTermination.then((String message) {
         if (subscription != null) {
+          controller.print('Unexpected subprocess termination: $message');
           controller.addError(new Exception('Unexpected subprocess termination.'), new Trace.current());
           controller.setState(new State(Status.complete, Result.error));
           subscription.cancel();
