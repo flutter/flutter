@@ -289,11 +289,15 @@ struct DartConverter<Vector<T>> {
     intptr_t length = 0;
     Dart_ListLength(handle, &length);
     result.reserveCapacity(length);
+
+    Vector<Dart_Handle> items(length);
+    Dart_Handle items_result = Dart_ListGetRange(handle, 0, length,
+                                                 items.data());
+    DCHECK(!Dart_IsError(items_result));
+
     for (intptr_t i = 0; i < length; ++i) {
-      Dart_Handle item = Dart_ListGetAt(handle, i);
-      DCHECK(!Dart_IsError(item));
-      DCHECK(item);
-      result.append(DartConverter<ConverterType>::FromDart(item));
+      DCHECK(items[i]);
+      result.append(DartConverter<ConverterType>::FromDart(items[i]));
     }
     return result;
   }
