@@ -58,8 +58,11 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
 
   CHECK_EQ(length, kNumberOfPaintFields);
   Dart_Handle values[kNumberOfPaintFields];
-  for (int i = 0; i < kNumberOfPaintFields; ++i)
-    values[i] = Dart_ListGetAt(data, i);
+  Dart_Handle range_result = Dart_ListGetRange(data, 0, kNumberOfPaintFields,
+					       values);
+  if (Dart_IsError(range_result)) {
+    return result;
+  }
 
   SkPaint& paint = result.sk_paint;
   if (!Dart_IsNull(values[kStrokeWidth]))
