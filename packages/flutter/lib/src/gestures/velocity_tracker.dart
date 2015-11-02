@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui' as ui;
 
 import 'lsq_solver.dart';
@@ -10,62 +14,62 @@ class GestureVelocity {
   final double y;
 }
 
-class Estimator {
+class _Estimator {
   int degree;
   double time;
-  List<double> xcoeff;
-  List<double> ycoeff;
+  List<double> xCoefficients;
+  List<double> yCoefficients;
   double confidence;
 
   String toString() {
     String result = "Estimator(degree: " + degree.toString();
     result +=  ", time: " + time.toString();
     result +=  ", confidence: " + confidence.toString();
-    result +=  ", xcoeff: " + (new Vector.fromValues(xcoeff)).toString();
-    result +=  ", ycoeff: " + (new Vector.fromValues(ycoeff)).toString();
+    result +=  ", xCoefficients: " + xCoefficients.toString();
+    result +=  ", yCoefficients: " + yCoefficients.toString();
     return result;
   }
 }
 
-abstract class VelocityTrackerStrategy {
+abstract class _VelocityTrackerStrategy {
   void addMovement(double timeStamp, double x, double y);
-  bool getEstimator(Estimator estimator);
+  bool getEstimator(_Estimator estimator);
   void clear();
 }
 
-enum Weighting {
-  WEIGHTING_NONE,
-  WEIGHTING_DELTA,
-  WEIGHTING_CENTRAL,
-  WEIGHTING_RECENT
+enum _Weighting {
+  weightingNone,
+  weightingDelta,
+  weightingCentral,
+  weightingRecent
 }
 
-class Movement {
-  double event_time = 0.0;
+class _Movement {
+  double eventTime = 0.0;
   ui.Point position = ui.Point.origin;
 }
 
-class LeastSquaresVelocityTrackerStrategy extends VelocityTrackerStrategy {
+class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   static const int kHistorySize = 20;
-  static const int kHorizonMS = 100;
+  static const int kHorizonMilliseconds = 100;
 
-  LeastSquaresVelocityTrackerStrategy(this.degree, this.weighting)
-  : _index = 0, _movements = new List<Movement>(kHistorySize);
+  _LeastSquaresVelocityTrackerStrategy(this.degree, this.weighting)
+  : _index = 0, _movements = new List<_Movement>(kHistorySize);
 
   final int degree;
-  final Weighting weighting;
-  final List<Movement> _movements;
+  final _Weighting weighting;
+  final List<_Movement> _movements;
   int _index;
 
   void addMovement(double timeStamp, double x, double y) {
     if (++_index == kHistorySize)
       _index = 0;
-    Movement movement = _getMovement(_index);
-    movement.event_time = timeStamp;
+    _Movement movement = _getMovement(_index);
+    movement.eventTime = timeStamp;
     movement.position = new ui.Point(x, y);
   }
 
-  bool getEstimator(Estimator estimator) {
+  bool getEstimator(_Estimator estimator) {
     // Iterate over movement samples in reverse time order and collect samples.
     List<double> x = new List<double>();
     List<double> y = new List<double>();
@@ -73,12 +77,12 @@ class LeastSquaresVelocityTrackerStrategy extends VelocityTrackerStrategy {
     List<double> time = new List<double>();
     int m = 0;
     int index = _index;
-    Movement newest_movement = _getMovement(index);
+    _Movement newestMovement = _getMovement(index);
     do {
-      Movement movement = _getMovement(index);
+      _Movement movement = _getMovement(index);
 
-      double age = newest_movement.event_time - movement.event_time;
-      if (age > kHorizonMS)
+      double age = newestMovement.eventTime - movement.eventTime;
+      if (age > kHorizonMilliseconds)
         break;
 
       ui.Point position = movement.position;
@@ -104,9 +108,9 @@ class LeastSquaresVelocityTrackerStrategy extends VelocityTrackerStrategy {
         LeastSquaresSolver ySolver = new LeastSquaresSolver(time, y, w);
         PolynomialFit yFit = ySolver.solve(n);
         if (yFit != null) {
-          estimator.xcoeff = xFit.coefficients;
-          estimator.ycoeff = yFit.coefficients;
-          estimator.time = newest_movement.event_time;
+          estimator.xCoefficients = xFit.coefficients;
+          estimator.yCoefficients = yFit.coefficients;
+          estimator.time = newestMovement.eventTime;
           estimator.degree = n;
           estimator.confidence = xFit.confidence * yFit.confidence;
           return true;
@@ -116,9 +120,9 @@ class LeastSquaresVelocityTrackerStrategy extends VelocityTrackerStrategy {
 
     // No velocity data available for this pointer, but we do have its current
     // position.
-    estimator.xcoeff = [ x[0] ];
-    estimator.ycoeff = [ y[0] ];
-    estimator.time = newest_movement.event_time;
+    estimator.xCoefficients = [ x[0] ];
+    estimator.yCoefficients = [ y[0] ];
+    estimator.time = newestMovement.eventTime;
     estimator.degree = 0;
     estimator.confidence = 1.0;
     return true;
@@ -130,7 +134,7 @@ class LeastSquaresVelocityTrackerStrategy extends VelocityTrackerStrategy {
 
   double _chooseWeight(int index) {
     switch (weighting) {
-      case Weighting.WEIGHTING_DELTA:
+      case _Weighting.weightingDelta:
         // Weight points based on how much time elapsed between them and the next
         // point so that points that "cover" a shorter time span are weighed less.
         //   delta  0ms: 0.5
@@ -138,61 +142,61 @@ class LeastSquaresVelocityTrackerStrategy extends VelocityTrackerStrategy {
         if (index == _index) {
           return 1.0;
         }
-        int next_index = (index + 1) % kHistorySize;
-        double delta_millis = _movements[next_index].event_time -
-          _movements[index].event_time;
-        if (delta_millis < 0)
+        int nextIndex = (index + 1) % kHistorySize;
+        double deltaMilliseconds = _movements[nextIndex].eventTime -
+          _movements[index].eventTime;
+        if (deltaMilliseconds < 0)
           return 0.5;
-        if (delta_millis < 10)
-          return 0.5 + delta_millis * 0.05;
+        if (deltaMilliseconds < 10)
+          return 0.5 + deltaMilliseconds * 0.05;
 
         return 1.0;
 
-      case Weighting.WEIGHTING_CENTRAL:
+      case _Weighting.weightingCentral:
         // Weight points based on their age, weighing very recent and very old
         // points less.
         //   age  0ms: 0.5
         //   age 10ms: 1.0
         //   age 50ms: 1.0
         //   age 60ms: 0.5
-        double age_millis = _movements[_index].event_time -
-          _movements[index].event_time;
-        if (age_millis < 0)
+        double ageMilliseconds = _movements[_index].eventTime -
+          _movements[index].eventTime;
+        if (ageMilliseconds < 0)
           return 0.5;
-        if (age_millis < 10)
-          return 0.5 + age_millis * 0.05;
-        if (age_millis < 50)
+        if (ageMilliseconds < 10)
+          return 0.5 + ageMilliseconds * 0.05;
+        if (ageMilliseconds < 50)
           return 1.0;
-        if (age_millis < 60)
-          return 0.5 + (60 - age_millis) * 0.05;
+        if (ageMilliseconds < 60)
+          return 0.5 + (60 - ageMilliseconds) * 0.05;
 
         return 0.5;
 
-      case Weighting.WEIGHTING_RECENT:
+      case _Weighting.weightingRecent:
         // Weight points based on their age, weighing older points less.
         //   age   0ms: 1.0
         //   age  50ms: 1.0
         //   age 100ms: 0.5
-        double age_millis = _movements[_index].event_time -
-          _movements[index].event_time;
-        if (age_millis < 50) {
+        double ageMilliseconds = _movements[_index].eventTime -
+          _movements[index].eventTime;
+        if (ageMilliseconds < 50) {
           return 1.0;
         }
-        if (age_millis < 100) {
-          return 0.5 + (100 - age_millis) * 0.01;
+        if (ageMilliseconds < 100) {
+          return 0.5 + (100 - ageMilliseconds) * 0.01;
         }
         return 0.5;
 
-      case Weighting.WEIGHTING_NONE:
+      case _Weighting.weightingNone:
       default:
         return 1.0;
     }
   }
 
-  Movement _getMovement(int i) {
-      Movement result = _movements[i];
+  _Movement _getMovement(int i) {
+      _Movement result = _movements[i];
       if (result == null) {
-        result = new Movement();
+        result = new _Movement();
         _movements[i] = result;
       }
       return result;
@@ -206,7 +210,7 @@ class VelocityTracker {
   VelocityTracker() : _lastTimeStamp = 0.0, _strategy = _createStrategy();
 
   double _lastTimeStamp;
-  VelocityTrackerStrategy _strategy;
+  _VelocityTrackerStrategy _strategy;
 
   void addPosition(double timeStamp, double x, double y) {
     if ((timeStamp - _lastTimeStamp) >= kAssumePointerMoveStoppedTimeMs)
@@ -216,19 +220,19 @@ class VelocityTracker {
   }
 
   GestureVelocity getVelocity() {
-    Estimator estimator = new Estimator();
+    _Estimator estimator = new _Estimator();
     if (_strategy.getEstimator(estimator) && estimator.degree >= 1) {
       // convert from pixels/ms to pixels/s
       return new GestureVelocity(
         isValid: true,
-        x: estimator.xcoeff[1]*1000,
-        y: estimator.ycoeff[1]*1000
+        x: estimator.xCoefficients[1] * 1000,
+        y: estimator.yCoefficients[1] * 1000
       );
     }
     return new GestureVelocity(isValid: false, x: 0.0, y: 0.0);
   }
 
-  static VelocityTrackerStrategy _createStrategy() {
-    return new LeastSquaresVelocityTrackerStrategy(2, Weighting.WEIGHTING_NONE);
+  static _VelocityTrackerStrategy _createStrategy() {
+    return new _LeastSquaresVelocityTrackerStrategy(2, _Weighting.weightingNone);
   }
 }

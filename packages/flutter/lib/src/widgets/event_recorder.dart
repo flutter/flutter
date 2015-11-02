@@ -13,8 +13,14 @@ enum EventRecorderMode {
   record
 }
 
-typedef void EventsReady(List<PointerInputEvent> events);
+typedef void EventsReadyCallback(List<PointerInputEvent> events);
 
+/// EventRecorder is a utility widget that allows input events occurring
+/// on the child to be recorded. The widget is initially in the "stop" state
+/// by default. When in the "record" state, all pointer input events
+/// occurring on the child are recorded into a buffer. When the "stop" state
+/// is entered again, the onEventsReady callback is invoked with a list of
+/// the recorded events.
 class EventRecorder extends StatefulComponent {
   EventRecorder({
     Key key,
@@ -25,32 +31,29 @@ class EventRecorder extends StatefulComponent {
 
   final Widget child;
   final EventRecorderMode mode;
-  final EventsReady onEventsReady;
+  final EventsReadyCallback onEventsReady;
 
   _EventRecorderState createState() => new _EventRecorderState();
 }
 
 class _EventRecorderState extends State<EventRecorder> {
 
-  EventRecorderMode _mode;
   List<PointerInputEvent> _events = new List<PointerInputEvent>();
 
   void initState() {
     super.initState();
-    _mode = config.mode;
   }
 
   void didUpdateConfig(EventRecorder oldConfig) {
-    if (_mode == EventRecorderMode.record &&
+    if (oldConfig.mode == EventRecorderMode.record &&
         config.mode == EventRecorderMode.stop) {
       config.onEventsReady(_events);
       _events.clear();
     }
-    _mode = config.mode;
   }
 
   void _recordEvent(PointerInputEvent event) {
-    if (_mode == EventRecorderMode.record) {
+    if (config.mode == EventRecorderMode.record) {
       _events.add(event);
     }
   }
