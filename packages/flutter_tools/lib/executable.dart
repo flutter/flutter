@@ -11,6 +11,7 @@ import 'package:stack_trace/stack_trace.dart';
 
 import 'src/commands/build.dart';
 import 'src/commands/cache.dart';
+import 'src/commands/daemon.dart';
 import 'src/commands/flutter_command_runner.dart';
 import 'src/commands/init.dart';
 import 'src/commands/install.dart';
@@ -28,7 +29,7 @@ import 'src/process.dart';
 /// This function is intended to be used from the [flutter] command line tool.
 Future main(List<String> args) async {
   // This level can be adjusted by users through the `--verbose` option.
-  Logger.root.level = Level.SEVERE;
+  Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((LogRecord record) {
     if (record.level >= Level.WARNING) {
       stderr.writeln(record.message);
@@ -44,6 +45,7 @@ Future main(List<String> args) async {
   FlutterCommandRunner runner = new FlutterCommandRunner()
     ..addCommand(new BuildCommand())
     ..addCommand(new CacheCommand())
+    ..addCommand(new DaemonCommand())
     ..addCommand(new InitCommand())
     ..addCommand(new InstallCommand())
     ..addCommand(new ListCommand())
