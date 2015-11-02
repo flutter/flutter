@@ -6,10 +6,40 @@ import 'package:flutter/animation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'page_storage.dart';
-import 'routes.dart';
 import 'transitions.dart';
+
+class _PageTransition extends TransitionWithChild {
+  _PageTransition({
+    Key key,
+    PerformanceView performance,
+    Widget child
+  }) : super(key: key,
+             performance: performance,
+             child: child);
+
+  final AnimatedValue<Point> _position =
+     new AnimatedValue<Point>(const Point(0.0, 75.0), end: Point.origin, curve: Curves.easeOut);
+
+  final AnimatedValue<double> _opacity =
+     new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut);
+
+  Widget buildWithChild(BuildContext context, Widget child) {
+    performance.updateVariable(_position);
+    performance.updateVariable(_opacity);
+    Matrix4 transform = new Matrix4.identity()
+      ..translate(_position.value.x, _position.value.y);
+    return new Transform(
+      transform: transform,
+      child: new Opacity(
+        opacity: _opacity.value,
+        child: child
+      )
+    );
+  }
+}
 
 class _Page extends StatefulComponent {
   _Page({
@@ -23,12 +53,6 @@ class _Page extends StatefulComponent {
 }
 
 class _PageState extends State<_Page> {
-  final AnimatedValue<Point> _position =
-      new AnimatedValue<Point>(const Point(0.0, 75.0), end: Point.origin, curve: Curves.easeOut);
-
-  final AnimatedValue<double> _opacity =
-      new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut);
-
   final GlobalKey _subtreeKey = new GlobalKey();
 
   Widget build(BuildContext context) {
@@ -41,17 +65,12 @@ class _PageState extends State<_Page> {
         )
       );
     }
-    return new SlideTransition(
+    return new _PageTransition(
       performance: config.route.performance,
-      position: _position,
-      child: new FadeTransition(
-        performance: config.route.performance,
-        opacity: _opacity,
-        child: new PageStorage(
-          key: _subtreeKey,
-          bucket: config.route._storageBucket,
-          child: _invokeBuilder()
-        )
+      child: new PageStorage(
+        key: _subtreeKey,
+        bucket: config.route._storageBucket,
+        child: _invokeBuilder()
       )
     );
   }
@@ -68,7 +87,7 @@ class _PageState extends State<_Page> {
   }
 }
 
-class PageRoute extends TransitionRoute {
+class PageRoute extends ModalRoute {
   PageRoute({
     this.builder,
     this.settings: const NamedRouteSettings()
@@ -85,9 +104,8 @@ class PageRoute extends TransitionRoute {
   bool get opaque => true;
 
   String get name => settings.name;
-
   Duration get transitionDuration => const Duration(milliseconds: 150);
-  List<Widget> createWidgets() => [ new _Page(key: pageKey, route: this) ];
+  Widget createModalWidget() => new _Page(key: pageKey, route: this);
 
   final PageStorageBucket _storageBucket = new PageStorageBucket();
 
