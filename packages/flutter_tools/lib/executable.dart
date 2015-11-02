@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 import 'src/commands/build.dart';
 import 'src/commands/cache.dart';
@@ -53,22 +54,22 @@ Future main(List<String> args) async {
     ..addCommand(new StopCommand())
     ..addCommand(new TraceCommand());
 
-  try {
+  return Chain.capture(() async {
     dynamic result = await runner.run(args);
     if (result is int)
       exit(result);
-  } on UsageException catch (e) {
-    stderr.writeln(e);
-    // Args error exit code.
-    exit(64);
-  } catch (e, stack) {
-    if (e is ProcessExit) {
+  }, onError: (error, Chain chain) {
+    if (error is UsageException) {
+      stderr.writeln(error);
+      // Argument error exit code.
+      exit(64);
+    } else if (error is ProcessExit) {
       // We've caught an exit code.
-      exit(e.exitCode);
+      exit(error.exitCode);
+    } else {
+      stderr.writeln(error);
+      Logger.root.log(Level.SEVERE, '\nException:', null, chain.terse.toTrace());
+      exit(1);
     }
-
-    stderr.writeln(e);
-    Logger.root.log(Level.SEVERE, '\nException:', null, stack);
-    exit(1);
-  }
+  });
 }
