@@ -158,10 +158,10 @@ class FlutterDemo extends StatelessComponent {
         child: new Center(
           child: new Text("Hello world!")
         )
-       ),
+      ),
       floatingActionButton: new FloatingActionButton(
         child: new Icon(
-          type: 'content/add'
+          icon: 'content/add'
         )
       )
     );

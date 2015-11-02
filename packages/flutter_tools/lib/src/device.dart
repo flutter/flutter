@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library sky_tools.device;
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
-import 'package:crypto/crypto.dart';
 
 import 'application_package.dart';
 import 'build_configuration.dart';
+import 'os_utils.dart';
 import 'process.dart';
 
 final Logger _logging = new Logger('sky_tools.device');
@@ -507,8 +506,8 @@ class IOSSimulator extends Device {
 
 class AndroidDevice extends Device {
   static const String _ADB_PATH = 'adb';
-  static const String _observatoryPort = '8181';
-  static const String _serverPort = '9888';
+  static const int _observatoryPort = 8181;
+  static const int _serverPort = 9888;
 
   static const String className = 'AndroidDevice';
   static final String defaultDeviceID = 'default_android_device';
@@ -756,9 +755,8 @@ class AndroidDevice extends Device {
 
   void _forwardObservatoryPort() {
     // Set up port forwarding for observatory.
-    String observatoryPortString = 'tcp:$_observatoryPort';
-    runCheckedSync(
-        [adbPath, 'forward', observatoryPortString, observatoryPortString]);
+    String portString = 'tcp:$_observatoryPort';
+    runCheckedSync([adbPath, 'forward', portString, portString]);
   }
 
   bool startBundle(AndroidApk apk, String bundlePath, bool poke, bool checked) {
@@ -812,7 +810,7 @@ class AndroidDevice extends Device {
 
       // Actually start the server.
       Process server = await Process.start(
-          sdkBinaryName('pub'), ['run', 'sky_tools:sky_server', _serverPort],
+          sdkBinaryName('pub'), ['run', 'sky_tools:sky_server', _serverPort.toString()],
           workingDirectory: serverRoot,
           mode: ProcessStartMode.DETACHED_WITH_STDIO
       );
@@ -859,48 +857,9 @@ class AndroidDevice extends Device {
     runSync([adbPath, 'reverse', '--remove', 'tcp:$_serverPort']);
     // Stop the app
     runSync([adbPath, 'shell', 'am', 'force-stop', apk.id]);
+
     // Kill the server
-    if (Platform.isMacOS) {
-      String pids = runSync(['lsof', '-i', ':$_serverPort', '-t']).trim();
-      if (pids.isEmpty) {
-        _logging.fine('No process to kill for port $_serverPort');
-        return true;
-      }
-
-      // Handle multiple returned pids.
-      for (String pidString in pids.split('\n')) {
-        // Killing a pid with a shell command from within dart is hard, so use a
-        // library command, but it's still nice to give the equivalent command
-        // when doing verbose logging.
-        _logging.info('kill $pidString');
-
-        int pid = int.parse(pidString, onError: (_) => null);
-        if (pid != null)
-          Process.killPid(pid);
-      }
-    } else if (Platform.isWindows) {
-      //Get list of network processes and split on newline
-      List<String> processes = runSync(['netstat.exe','-ano']).split("\r");
-
-      //List entries from netstat is formatted like so
-      // TCP    192.168.2.11:50945     192.30.252.90:443      LISTENING     1304
-      //This regexp is to find process where the the port exactly matches
-      RegExp pattern = new RegExp(':$_serverPort[ ]+');
-
-      //Split the columns by 1 or more spaces
-      RegExp columnPattern = new RegExp('[ ]+');
-      processes.forEach((String process) {
-        if (process.contains(pattern)) {
-          //The last column is the Process ID
-          String processId = process.split(columnPattern).last;
-          //Force and Tree kill the process
-          _logging.info('kill $processId');
-          runSync(['TaskKill.exe', '/F', '/T', '/PID', processId]);
-        }
-      });
-    } else {
-      runSync(['fuser', '-k', '$_serverPort/tcp']);
-    }
+    osUtils.killTcpPortListeners(_serverPort);
 
     return true;
   }
