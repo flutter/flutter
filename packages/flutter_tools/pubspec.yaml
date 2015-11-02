@@ -17,6 +17,7 @@ dependencies:
   shelf_route: ^0.13.4
   shelf_static: ^0.2.3
   shelf: ^0.6.2
+  stack_trace: ^1.4.0
   test: ^0.12.5
   yaml: ^2.1.3
 
