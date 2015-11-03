@@ -46,6 +46,8 @@ enum FlexJustifyContent {
   spaceBetween,
   /// Place the free space evenly between the children as well as before and after the first and last child
   spaceAround,
+  /// Do not expand to fill the free space. None of the children may specify a flex factor.
+  collapse,
 }
 
 /// How the children should be placed along the cross axis in a flex layout
@@ -337,7 +339,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalChildren = 0;
     assert(constraints != null);
     final double mainSize = (_direction == FlexDirection.horizontal) ? constraints.constrainWidth() : constraints.constrainHeight();
-    final bool canFlex = mainSize < double.INFINITY;
+    final bool canFlex = mainSize < double.INFINITY && justifyContent != FlexJustifyContent.collapse;
     double crossSize = 0.0;  // This is determined as we lay out the children
     double freeSpace = canFlex ? mainSize : 0.0;
     RenderBox child = firstChild;
@@ -478,6 +480,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
     switch (_justifyContent) {
       case FlexJustifyContent.start:
+      case FlexJustifyContent.collapse:
         leadingSpace = 0.0;
         betweenSpace = 0.0;
         break;
