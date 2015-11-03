@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:ui' show Point, Offset;
 
 import 'arena.dart';
 import 'constants.dart';
@@ -11,8 +11,8 @@ import 'events.dart';
 import 'pointer_router.dart';
 import 'recognizer.dart';
 
-typedef void GestureTapDownCallback(ui.Point globalPosition);
-typedef void GestureTapUpCallback(ui.Point globalPosition);
+typedef void GestureTapDownCallback(Point globalPosition);
+typedef void GestureTapUpCallback(Point globalPosition);
 typedef void GestureTapCallback();
 typedef void GestureTapCancelCallback();
 
@@ -99,15 +99,15 @@ class _TapTracker {
 
   _TapTracker({ PointerInputEvent event, this.entry })
     : pointer = event.pointer,
-      _initialPosition = event.position,
-      _isTrackingPointer = false {
+      _initialPosition = event.position {
     assert(event.type == 'pointerdown');
   }
 
   final int pointer;
-  GestureArenaEntry entry;
-  ui.Point _initialPosition;
-  bool _isTrackingPointer;
+  final GestureArenaEntry entry;
+  final Point _initialPosition;
+
+  bool _isTrackingPointer = false;
 
   void startTrackingPointer(PointerRouter router, PointerRoute route) {
     if (!_isTrackingPointer) {
@@ -124,7 +124,7 @@ class _TapTracker {
   }
 
   bool isWithinTolerance(PointerInputEvent event, double tolerance) {
-    ui.Offset offset = event.position - _initialPosition;
+    Offset offset = event.position - _initialPosition;
     return offset.distance <= tolerance;
   }
 
@@ -135,21 +135,23 @@ enum _TapResolution {
   cancel
 }
 
-/// TapGesture represents a full gesture resulting from a single tap
-/// sequence. Tap gestures are passive, meaning that they will not
-/// pre-empt any other arena member in play.
+/// TapGesture represents a full gesture resulting from a single tap sequence,
+/// as part of a [MultiTapGestureRecognizer]. Tap gestures are passive, meaning
+/// that they will not preempt any other arena member in play.
 class _TapGesture extends _TapTracker {
 
-  _TapGesture({ this.gestureRecognizer, PointerInputEvent event })
-      : super(event: event) {
-    entry = GestureArena.instance.add(event.pointer, gestureRecognizer);
+  _TapGesture({
+    MultiTapGestureRecognizer gestureRecognizer,
+    PointerInputEvent event
+  }) : gestureRecognizer = gestureRecognizer,
+       super(event: event, entry: GestureArena.instance.add(event.pointer, gestureRecognizer)) {
     startTrackingPointer(gestureRecognizer.router, handleEvent);
   }
 
   final MultiTapGestureRecognizer gestureRecognizer;
 
   bool _wonArena = false;
-  ui.Point _finalPosition;
+  Point _finalPosition;
 
   void handleEvent(PointerInputEvent event) {
     assert(event.pointer == pointer);
@@ -231,7 +233,7 @@ class MultiTapGestureRecognizer extends GestureArenaMember {
     _gestureMap[pointer]?.reject();
   }
 
-  void _resolveTap(int pointer, _TapResolution resolution, ui.Point globalPosition) {
+  void _resolveTap(int pointer, _TapResolution resolution, Point globalPosition) {
     _gestureMap.remove(pointer);
     if (resolution == _TapResolution.tap) {
       if (onTapUp != null)
