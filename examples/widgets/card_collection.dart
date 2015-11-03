@@ -38,7 +38,7 @@ class CardCollectionState extends State<CardCollection> {
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   TextStyle _textStyle = new TextStyle(textAlign: TextAlign.center);
-  bool _editable = true;
+  bool _editable = false;
   bool _snapToCenter = false;
   bool _fixedSizeCards = false;
   bool _sunshine = false;
@@ -271,7 +271,14 @@ class CardCollectionState extends State<CardCollection> {
       center: new Text('Swipe Away'),
       right: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
-      ]
+      ],
+      bottom: new Padding(
+        padding: const EdgeDims.only(left: 32.0),
+        child: new Align(
+          alignment: const FractionalOffset(0.0, 0.5),
+          child: new Text("Remaining items ${_cardModels.length}")
+        )
+      )
     );
   }
 
