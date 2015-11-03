@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
@@ -88,13 +87,8 @@ class _InkSplash {
         curve: Curves.easeOut
       ),
       duration: new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
-    )..addListener(_handleRadiusChange);
-
-    // Wait kPressTimeout to avoid creating tiny splashes during scrolls.
-    // TODO(ianh): Instead of a timer in _InkSplash, we should start splashes from the gesture recognisers' onTapDown.
-    // ...and onTapDown should use a timer _or_ fire as soon as the tap is committed.
-    // When we do this, make sure it works even if we're only listening to onLongPress.
-    _startTimer = new Timer(kPressTimeout, _play);
+    )..addListener(_handleRadiusChange)
+     ..play();
   }
 
   final Point position;
@@ -103,45 +97,26 @@ class _InkSplash {
   double _targetRadius;
   double _pinnedRadius;
   ValuePerformance<double> _radius;
-  Timer _startTimer;
-
-  bool _cancelStartTimer() {
-    if (_startTimer != null) {
-      _startTimer.cancel();
-      _startTimer = null;
-      return true;
-    }
-    return false;
-  }
-
-  void _play() {
-    _cancelStartTimer();
-    _radius.play();
-  }
 
   void _updateVelocity(double velocity) {
     int duration = (_targetRadius / velocity).floor();
     _radius.duration = new Duration(milliseconds: duration);
-    _play();
+    _radius.play();
   }
 
   void confirm() {
-    if (_cancelStartTimer())
-      return;
     _updateVelocity(_kSplashConfirmedVelocity);
     _pinnedRadius = null;
   }
 
   void cancel() {
-    if (_cancelStartTimer())
-      return;
     _updateVelocity(_kSplashCanceledVelocity);
     _pinnedRadius = _radius.value;
   }
 
   void _handleRadiusChange() {
     if (_radius.value == _targetRadius)
-      renderer._splashes.remove(this);
+      renderer._removeSplash(this);
     renderer.markNeedsPaint();
   }
 
@@ -183,15 +158,21 @@ class _RenderInkSplashes extends RenderProxyBox {
   _HighlightChangedCallback onHighlightChanged;
 
   final List<_InkSplash> _splashes = new List<_InkSplash>();
+  _InkSplash _lastSplash;
 
   TapGestureRecognizer _tap;
   LongPressGestureRecognizer _longPress;
 
+  void _removeSplash(_InkSplash splash) {
+    _splashes.remove(splash);
+    if (_lastSplash == splash)
+      _lastSplash = null;
+  }
+
   void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown' && (_tap != null || _longPress != null)) {
+    if (event.type == 'pointerdown' && (onTap != null || onLongPress != null)) {
       _tap?.addPointer(event);
       _longPress?.addPointer(event);
-      _splashes.add(new _InkSplash(entry.localPosition, this));
     }
   }
 
@@ -208,7 +189,7 @@ class _RenderInkSplashes extends RenderProxyBox {
   }
 
   void _syncTapRecognizer() {
-    if (onTap == null) {
+    if (onTap == null && onLongPress == null) {
       _disposeTapRecognizer();
     } else {
       _tap ??= new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
@@ -237,31 +218,34 @@ class _RenderInkSplashes extends RenderProxyBox {
     _longPress = null;
   }
 
-  void _handleTapDown(_) {
+  void _handleTapDown(Point position) {
+    _lastSplash = new _InkSplash(globalToLocal(position), this);
+    _splashes.add(_lastSplash);
     if (onHighlightChanged != null)
       onHighlightChanged(true);
   }
 
   void _handleTap() {
-    if (_splashes.isNotEmpty)
-      _splashes.last.confirm();
-
+    _lastSplash?.confirm();
+    _lastSplash = null;
     if (onHighlightChanged != null)
       onHighlightChanged(false);
-
     if (onTap != null)
       onTap();
   }
 
   void _handleTapCancel() {
-    _splashes.last?.cancel();
+    _lastSplash?.cancel();
+    _lastSplash = null;
     if (onHighlightChanged != null)
       onHighlightChanged(false);
   }
 
   void _handleLongPress() {
-    _splashes.last?.confirm();
-    onLongPress();
+    _lastSplash?.confirm();
+    _lastSplash = null;
+    if (onLongPress != null)
+      onLongPress();
   }
 
   void paint(PaintingContext context, Offset offset) {
