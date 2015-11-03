@@ -56,7 +56,7 @@ template("dart_precompile") {
          "The dart script must be specified")
 
   dart_host_toolchain = host_toolchain
-  if (target_os == "ios") {
+  if (target_os == "ios" && !use_ios_simulator) {
     # During precompilation, a 64 bit Dart VM cannot generate code for a 32 bit
     # architecture (and vice-versa). The snapshotter that is running on the host
     # needs to know about the target architecture and built accordingly.
