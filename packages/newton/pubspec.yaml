@@ -1,0 +1,11 @@
+name: newton
+description: Simple Physics Simulations for Dart
+version: 0.1.5
+author: Flutter Authors <flutter-dev@googlegroups.com>
+homepage: https://github.com/flutter/flutter/tree/master/packages/newton
+environment:
+  sdk: '>=1.0.0 <2.0.0'
+dev_dependencies:
+  test: '>=0.12.0 <0.13.0'
+  test_runner: '<=0.2.16'
+  dart_coveralls: '<=0.3.0'

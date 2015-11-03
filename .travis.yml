@@ -1,0 +1,8 @@
+language: dart
+sudo: false
+dart:
+  - stable
+before_script:
+  - ./travis/setup.sh
+script:
+  - ./travis/test.sh
