@@ -15,8 +15,6 @@ dependencies:
   playfair: any
   flx: 
     '0.0.5'
-  sky_services:
-    '0.0.46'
 dependency_overrides:
   material_design_icons:
     path: ../material_design_icons
