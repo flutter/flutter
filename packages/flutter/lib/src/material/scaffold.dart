@@ -48,15 +48,15 @@ class Scaffold extends StatelessComponent {
   final Widget floatingActionButton;
 
   Widget build(BuildContext context) {
-    final offsetToolBar = toolBar?.withSizeOffsets(new EdgeDims.only(top: ui.window.padding.top));
+    final ToolBar paddedToolBar = toolBar?.withPadding(new EdgeDims.only(top: ui.window.padding.top));
     final Widget materialBody = body != null ? new Material(child: body) : null;
     Widget toolBarAndBody;
-    if (offsetToolBar != null && materialBody != null)
-      toolBarAndBody = new CustomMultiChildLayout(<Widget>[materialBody, offsetToolBar],
+    if (paddedToolBar != null && materialBody != null)
+      toolBarAndBody = new CustomMultiChildLayout(<Widget>[materialBody, paddedToolBar],
         delegate: _toolBarAndBodyLayout
       );
     else
-      toolBarAndBody = offsetToolBar ?? materialBody;
+      toolBarAndBody = paddedToolBar ?? materialBody;
 
     final List<Widget> bottomColumnChildren = <Widget>[];
 
