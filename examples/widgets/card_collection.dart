@@ -276,7 +276,7 @@ class CardCollectionState extends State<CardCollection> {
         padding: const EdgeDims.only(left: 32.0),
         child: new Align(
           alignment: const FractionalOffset(0.0, 0.5),
-          child: new Text("Remaining items ${_cardModels.length}")
+          child: new Text("Remaining items: ${_cardModels.length}")
         )
       )
     );
