@@ -109,7 +109,9 @@ class _DrawerRoute extends TransitionRoute {
     return _performance;
   }
 
-  List<Widget> createWidgets() => [ new _Drawer(route: this) ];
+  List<WidgetBuilder> get builders => <WidgetBuilder>[ _build ];
+
+  Widget _build(BuildContext context) => new _Drawer(route: this);
 
   void didPop([dynamic result]) {
     assert(result == null); // because we don't do anything with it, so otherwise it'd be lost

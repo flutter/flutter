@@ -4,7 +4,8 @@ import 'package:test/test.dart';
 import 'widget_tester.dart';
 
 class TestOverlayRoute extends OverlayRoute {
-  List<Widget> createWidgets() => <Widget>[ new Text('Overlay') ];
+  List<WidgetBuilder> get builders => <WidgetBuilder>[ _build ];
+  Widget _build(BuildContext context) => new Text('Overlay');
 }
 
 bool _isOnStage(Element element) {

@@ -25,15 +25,14 @@ class StateRoute extends Route {
 }
 
 class OverlayRoute extends Route {
-  List<Widget> createWidgets() => const <Widget>[];
+  List<WidgetBuilder> get builders => const <WidgetBuilder>[];
 
   List<OverlayEntry> get overlayEntries => _overlayEntries;
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
   void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
-    List<Widget> widgets = createWidgets();
-    for (Widget widget in widgets) {
-      _overlayEntries.add(new OverlayEntry(child: widget));
+    for (WidgetBuilder builder in builders) {
+      _overlayEntries.add(new OverlayEntry(builder: builder));
       overlay?.insert(_overlayEntries.last, above: insertionPoint);
       insertionPoint = _overlayEntries.last;
     }

@@ -111,7 +111,7 @@ class _ModalBottomSheetRoute extends ModalRoute {
   }
 
   Color get barrierColor => Colors.black54;
-  Widget createModalWidget() => new _BottomSheet(route: this);
+  Widget buildModalWidget(BuildContext context) => new _BottomSheet(route: this);
 
   void didPop([dynamic result]) {
     completer.complete(result);

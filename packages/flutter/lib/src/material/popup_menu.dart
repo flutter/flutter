@@ -114,7 +114,7 @@ class _MenuRoute extends ModalRoute {
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  Widget createModalWidget() => new _PopupMenu(route: this);
+  Widget buildModalWidget(BuildContext context) => new _PopupMenu(route: this);
 
   void didPop([dynamic result]) {
     completer.complete(result);
