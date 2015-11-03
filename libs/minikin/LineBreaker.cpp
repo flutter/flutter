@@ -17,6 +17,7 @@
 #define VERBOSE_DEBUG 0
 
 #include <limits>
+#include <unicode/utf16.h>
 
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
@@ -30,6 +31,7 @@ namespace android {
 
 const int CHAR_TAB = 0x0009;
 const uint16_t CHAR_SOFT_HYPHEN = 0x00AD;
+const uint16_t CHAR_ZWJ = 0x200D;
 
 // Large scores in a hierarchy; we prefer desperate breaks to an overfull line. All these
 // constants are larger than any reasonable actual width score.
@@ -123,6 +125,32 @@ static bool isLineBreakingHyphen(uint16_t c) {
             c == 0x2E40);  // DOUBLE HYPHEN
 }
 
+/**
+ * Determine whether a line break at position i within the buffer buf is valid. This
+ * represents customization beyond the ICU behavior, because plain ICU provides some
+ * line break opportunities that we don't want.
+ **/
+static bool isBreakValid(uint16_t codeUnit, const uint16_t* buf, size_t bufEnd, size_t i) {
+    if (codeUnit == CHAR_SOFT_HYPHEN) {
+        return false;
+    }
+    if (codeUnit == CHAR_ZWJ) {
+        // Possible emoji ZWJ sequence
+        uint32_t next_codepoint;
+        U16_NEXT(buf, i, bufEnd, next_codepoint);
+        if (next_codepoint == 0x2764 ||       // HEAVY BLACK HEART
+                next_codepoint == 0x1F466 ||  // BOY
+                next_codepoint == 0x1F467 ||  // GIRL
+                next_codepoint == 0x1F468 ||  // MAN
+                next_codepoint == 0x1F469 ||  // WOMAN
+                next_codepoint == 0x1F48B ||  // KISS MARK
+                next_codepoint == 0x1F5E8) {  // LEFT SPEECH BUBBLE
+            return false;
+        }
+    }
+    return true;
+}
+
 // Ordinarily, this method measures the text in the range given. However, when paint
 // is nullptr, it assumes the widths have already been calculated and stored in the
 // width buffer.
@@ -175,8 +203,9 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
         }
         if (i + 1 == current) {
             // Override ICU's treatment of soft hyphen as a break opportunity, because we want it
-            // to be a hyphen break, with penalty and drawing behavior.
-            if (c != CHAR_SOFT_HYPHEN) {
+            // to be a hyphen break, with penalty and drawing behavior. Also, suppress line
+            // breaks within emoji ZWJ sequences.
+            if (isBreakValid(c, mTextBuf.data(), end, i + 1)) {
                 // TODO: Add a new type of HyphenEdit for breaks whose hyphen already exists, so
                 // we can pass the whole word down to Hyphenator like the soft hyphen case.
                 bool wordEndsInHyphen = isLineBreakingHyphen(c);
