@@ -268,15 +268,14 @@ class CardCollectionState extends State<CardCollection> {
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(icon: "navigation/menu", onPressed: _showDrawer),
-      center: new Text('Swipe Away'),
       right: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
       ],
       bottom: new Padding(
-        padding: const EdgeDims.only(left: 32.0),
+        padding: const EdgeDims.only(left: 72.0),
         child: new Align(
           alignment: const FractionalOffset(0.0, 0.5),
-          child: new Text("Remaining items: ${_cardModels.length}")
+          child: new Text('Swipe Away: ${_cardModels.length}')
         )
       )
     );

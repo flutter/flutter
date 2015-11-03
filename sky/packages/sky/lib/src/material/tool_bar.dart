@@ -20,7 +20,8 @@ class ToolBar extends StatelessComponent {
     this.bottom,
     this.level: 2,
     this.backgroundColor,
-    this.textTheme
+    this.textTheme,
+    this.sizeOffsets: EdgeDims.zero
   }) : super(key: key);
 
   final Widget left;
@@ -30,6 +31,21 @@ class ToolBar extends StatelessComponent {
   final int level;
   final Color backgroundColor;
   final TextTheme textTheme;
+  final EdgeDims sizeOffsets;
+
+  ToolBar withSizeOffsets(EdgeDims offsets) {
+    return new ToolBar(
+      key: key,
+      left: left,
+      center: center,
+      right: right,
+      bottom: bottom,
+      level: level,
+      backgroundColor: backgroundColor,
+      textTheme: textTheme,
+      sizeOffsets: offsets
+    );
+  }
 
   Widget build(BuildContext context) {
     Color color = backgroundColor;
@@ -83,7 +99,7 @@ class ToolBar extends StatelessComponent {
       ),
       child: new DefaultTextStyle(
         style: sideStyle,
-        child: new IntrinsicHeight(child: new Column(columnChildren))
+        child: new Container(padding: sizeOffsets, child: new Column(columnChildren, justifyContent: FlexJustifyContent.collapse))
       )
     );
 
