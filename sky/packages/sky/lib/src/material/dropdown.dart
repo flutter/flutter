@@ -138,10 +138,10 @@ class _MenuRoute extends TransitionRoute {
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  List<Widget> createWidgets() => [
-    new ModalBarrier(),
-    new _DropdownMenu(route: this)
-  ];
+  Widget _buildModalBarrier(BuildContext context) => new ModalBarrier();
+  Widget _buildDropDownMenu(BuildContext context) => new _DropdownMenu(route: this);
+
+  List<WidgetBuilder> get builders => <WidgetBuilder>[ _buildModalBarrier, _buildDropDownMenu ];
 
   void didPop([dynamic result]) {
     completer.complete(result);

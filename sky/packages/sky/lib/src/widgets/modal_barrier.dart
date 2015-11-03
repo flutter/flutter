@@ -111,15 +111,18 @@ class ModalPosition {
 abstract class ModalRoute extends TransitionRoute {
   ModalPosition get position => null;
   Color get barrierColor => _kTransparent;
-  Widget createModalWidget();
+  Widget buildModalWidget(BuildContext context);
 
-  List<Widget> createWidgets() {
-    return [
-      new _AnimatedModalBarrier(
-        color: new AnimatedColorValue(_kTransparent, end: barrierColor, curve: Curves.ease),
-        performance: performance
-      ),
-      new _ModalScope(route: this, child: createModalWidget()),
-    ];
+  Widget _buildModalBarrier(BuildContext context) {
+    return new _AnimatedModalBarrier(
+      color: new AnimatedColorValue(_kTransparent, end: barrierColor, curve: Curves.ease),
+      performance: performance
+    );
   }
+
+  Widget _buildModalScope(BuildContext context) {
+    return new _ModalScope(route: this, child: buildModalWidget(context));
+  }
+
+  List<WidgetBuilder> get builders => <WidgetBuilder>[ _buildModalBarrier, _buildModalScope ];
 }
