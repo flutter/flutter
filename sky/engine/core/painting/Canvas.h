@@ -74,15 +74,15 @@ public:
     Float64List getTotalMatrix() const;
 
     void clipRect(const Rect& rect);
-    void clipRRect(const RRect* rrect);
+    void clipRRect(const RRect& rrect);
     void clipPath(const CanvasPath* path);
 
     void drawColor(SkColor color, SkXfermode::Mode transferMode);
     void drawLine(const Point& p1, const Point& p2, const Paint& paint);
     void drawPaint(const Paint& paint);
     void drawRect(const Rect& rect, const Paint& paint);
-    void drawRRect(const RRect* rrect, const Paint& paint);
-    void drawDRRect(const RRect* outer, const RRect* inner, const Paint& paint);
+    void drawRRect(const RRect& rrect, const Paint& paint);
+    void drawDRRect(const RRect& outer, const RRect& inner, const Paint& paint);
     void drawOval(const Rect& rect, const Paint& paint);
     void drawCircle(const Point& c, float radius, const Paint& paint);
     void drawPath(const CanvasPath* path, const Paint& paint);
