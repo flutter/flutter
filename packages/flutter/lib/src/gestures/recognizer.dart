@@ -12,11 +12,7 @@ import 'pointer_router.dart';
 
 export 'pointer_router.dart' show PointerRouter;
 
-abstract class DisposableArenaMember extends GestureArenaMember {
-    void dispose();
-}
-
-abstract class GestureRecognizer extends DisposableArenaMember {
+abstract class GestureRecognizer extends GestureArenaMember {
   GestureRecognizer({ PointerRouter router }) : _router = router {
     assert(_router != null);
   }
