@@ -18,6 +18,8 @@ const String kBundleMagic = '#!mojo mojo:sky_viewer\n';
 // more flexbile about what we accept.
 const String kBundleMagicPrefix = '#!mojo ';
 
+typedef Stream<List<int>> StreamOpener();
+
 Future<List<int>> _readBytesWithLength(RandomAccessFile file) async {
   ByteData buffer = new ByteData(4);
   await file.readInto(buffer.buffer.asUint8List());
@@ -39,13 +41,13 @@ Future<String> _readLine(RandomAccessFile file) async {
 }
 
 // Writes a 32-bit length followed by the content of [bytes].
-void _writeBytesWithLengthSync(File outputFile, List<int> bytes) {
+void _writeBytesWithLengthSync(RandomAccessFile outputFile, List<int> bytes) {
   if (bytes == null)
     bytes = new Uint8List(0);
   assert(bytes.length < 0xffffffff);
   ByteData length = new ByteData(4)..setUint32(0, bytes.length, Endianness.LITTLE_ENDIAN);
-  outputFile.writeAsBytesSync(length.buffer.asUint8List(), mode: FileMode.APPEND);
-  outputFile.writeAsBytesSync(bytes, mode: FileMode.APPEND);
+  outputFile.writeFromSync(length.buffer.asUint8List());
+  outputFile.writeFromSync(bytes);
 }
 
 // Represents a parsed .flx Bundle. Contains information from the bundle's
@@ -70,13 +72,14 @@ class Bundle {
     this.path,
     this.manifest,
     contentBytes,
-    KeyPair keyPair: null
+    AsymmetricKeyPair keyPair: null
   }) : _contentBytes = contentBytes {
     assert(path != null);
     assert(manifest != null);
     assert(_contentBytes != null);
     manifestBytes = serializeManifest(manifest, keyPair?.publicKey, _contentBytes);
     signatureBytes = signManifest(manifestBytes, keyPair?.privateKey);
+    _openContentStream = () => new Stream.fromIterable(<List<int>>[_contentBytes]);
   }
 
   final String path;
@@ -84,9 +87,8 @@ class Bundle {
   List<int> manifestBytes;
   Map<String, dynamic> manifest;
 
-  // File byte offset of the start of the zip content. Only valid when opened
-  // from a file.
-  int _contentOffset;
+  // Callback to open a Stream containing the bundle content data.
+  StreamOpener _openContentStream;
 
   // Zip content bytes. Only valid when created in memory.
   List<int> _contentBytes;
@@ -100,7 +102,8 @@ class Bundle {
     }
     signatureBytes = await _readBytesWithLength(file);
     manifestBytes = await _readBytesWithLength(file);
-    _contentOffset = await file.position();
+    int contentOffset = await file.position();
+    _openContentStream = () => new File(path).openRead(contentOffset);
     file.close();
 
     String manifestString = UTF8.decode(manifestBytes);
@@ -115,14 +118,12 @@ class Bundle {
     return bundle;
   }
 
-  // When opened from a file, verifies that the package has a valid signature
-  // and content.
+  // Verifies that the package has a valid signature and content.
   Future<bool> verifyContent() async {
-    assert(_contentOffset != null);
     if (!verifyManifestSignature(manifest, manifestBytes, signatureBytes))
       return false;
 
-    Stream<List<int>> content = await new File(path).openRead(_contentOffset);
+    Stream<List<int>> content = _openContentStream();
     BigInteger expectedHash = new BigInteger(manifest['content-hash'], 10);
     if (!await verifyContentHash(expectedHash, content))
       return false;
@@ -133,10 +134,11 @@ class Bundle {
   // Writes the in-memory representation to disk.
   void writeSync() {
     assert(_contentBytes != null);
-    File outputFile = new File(path);
-    outputFile.writeAsStringSync('#!mojo mojo:sky_viewer\n');
+    RandomAccessFile outputFile = new File(path).openSync(mode: FileMode.WRITE);
+    outputFile.writeStringSync('#!mojo mojo:sky_viewer\n');
     _writeBytesWithLengthSync(outputFile, signatureBytes);
     _writeBytesWithLengthSync(outputFile, manifestBytes);
-    outputFile.writeAsBytesSync(_contentBytes, mode: FileMode.APPEND, flush: true);
+    outputFile.writeFromSync(_contentBytes);
+    outputFile.close();
   }
 }
