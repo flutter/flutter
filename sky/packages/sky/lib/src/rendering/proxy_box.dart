@@ -587,7 +587,7 @@ class RenderClipRRect extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
-      ui.RRect rrect = new ui.RRect()..setRectXY(rect, xRadius, yRadius);
+      ui.RRect rrect = new ui.RRect.fromRectXY(rect, xRadius, yRadius);
       context.paintChildWithClipRRect(child, offset.toPoint(), rect, rrect);
     }
   }

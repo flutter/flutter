@@ -6,13 +6,6 @@ class RRect {
 
   /// Initialize with the same radii for all four corners.
   RRect.fromRectXY(Rect rect, double xRadius, double yRadius) {
-    setRectXY(rect, xRadius, yRadius);
-  }
-
-  final Float32List _value = new Float32List(6);
-
-  // TODO(jsimmons): remove this so this class will be immutable.
-  void setRectXY(Rect rect, double xRadius, double yRadius) {
     _value
       ..[0] = rect.left
       ..[1] = rect.top
@@ -21,6 +14,8 @@ class RRect {
       ..[4] = xRadius
       ..[5] = yRadius;
   }
+
+  final Float32List _value = new Float32List(6);
 
   /// Returns a new RRect translated by the given offset.
   RRect shift(Offset offset) {

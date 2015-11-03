@@ -151,8 +151,8 @@ class _RenderCheckbox extends RenderToggleable {
     // Create an inner rectangle to cover inside of rectangle. This is needed to avoid
     // painting artefacts caused by overlayed paintings.
     Rect innerRect = rect.deflate(1.0);
-    ui.RRect rrect = new ui.RRect()
-      ..setRectXY(rect, _kEdgeRadius, _kEdgeRadius);
+    ui.RRect rrect = new ui.RRect.fromRectXY(
+        rect, _kEdgeRadius, _kEdgeRadius);
 
     // Outline of the empty rrect
     paint.style = ui.PaintingStyle.stroke;
