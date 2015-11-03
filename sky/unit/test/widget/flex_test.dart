@@ -42,4 +42,66 @@ void main() {
       expect(didReceiveTap, isTrue);
     });
   });
+
+  test('Row, Column and FlexJustifyContent.collapse', () {
+    final Key flexKey = new Key('flexKey');
+
+    // Row without justifyContent: FlexJustifyContent.collapse
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Center(
+        child: new Row([
+          new Container(width: 10.0, height: 100.0),
+          new Container(width: 30.0, height: 100.0)
+        ],
+          key: flexKey
+        )
+      ));
+      Size flexSize = tester.findElementByKey(flexKey).renderObject.size;
+      expect(flexSize.width, equals(800.0));
+      expect(flexSize.height, equals(100.0));
+
+      // Row with justifyContent: FlexJustifyContent.collapse
+      tester.pumpWidget(new Center(
+        child: new Row([
+          new Container(width: 10.0, height: 100.0),
+          new Container(width: 30.0, height: 100.0)
+        ],
+          key: flexKey,
+          justifyContent: FlexJustifyContent.collapse
+        )
+      ));
+      flexSize = tester.findElementByKey(flexKey).renderObject.size;
+      expect(flexSize.width, equals(40.0));
+      expect(flexSize.height, equals(100.0));
+    });
+
+    // Column without justifyContent: FlexJustifyContent.collapse
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Center(
+        child: new Column([
+          new Container(width: 100.0, height: 100.0),
+          new Container(width: 100.0, height: 150.0)
+        ],
+          key: flexKey
+        )
+      ));
+      Size flexSize = tester.findElementByKey(flexKey).renderObject.size;
+      expect(flexSize.width, equals(100.0));
+      expect(flexSize.height, equals(600.0));
+
+      // Column with justifyContent: FlexJustifyContent.collapse
+      tester.pumpWidget(new Center(
+        child: new Column([
+          new Container(width: 100.0, height: 100.0),
+          new Container(width: 100.0, height: 150.0)
+        ],
+          key: flexKey,
+          justifyContent: FlexJustifyContent.collapse
+        )
+      ));
+      flexSize = tester.findElementByKey(flexKey).renderObject.size;
+      expect(flexSize.width, equals(100.0));
+      expect(flexSize.height, equals(250.0));
+    });
+  });
 }
