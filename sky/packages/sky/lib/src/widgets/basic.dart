@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 
 import 'framework.dart';
 
+export 'dart:typed_data' show Uint8List;
 export 'package:flutter/rendering.dart' show
     BackgroundImage,
     BlockDirection,
