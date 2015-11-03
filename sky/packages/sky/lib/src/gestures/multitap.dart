@@ -84,7 +84,7 @@ class DoubleTapGestureRecognizer extends GestureArenaMember {
   void addPointer(PointerInputEvent event) {
     // Ignore out-of-bounds second taps
     if (_firstTap != null &&
-        !_firstTap.isWithinTolerance(event, kDoubleTapTouchSlop))
+        !_firstTap.isWithinTolerance(event, kDoubleTapSlop))
       return;
     _stopDoubleTapTimer();
     _TapTracker tracker = new _TapTracker(
@@ -104,7 +104,7 @@ class DoubleTapGestureRecognizer extends GestureArenaMember {
       else
         _registerSecondTap(tracker);
     } else if (event.type == 'pointermove' &&
-        !tracker.isWithinTolerance(event, kTouchSlop)) {
+        !tracker.isWithinTolerance(event, kDoubleTapTouchSlop)) {
       _reject(tracker);
     } else if (event.type == 'pointercancel') {
       _reject(tracker);
