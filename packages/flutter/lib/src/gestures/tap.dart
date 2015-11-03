@@ -182,7 +182,7 @@ class _TapGesture extends _TapTracker {
 /// independently. That is, each pointer sequence that could resolve to a tap
 /// does so independently of others: down-1, down-2, up-1, up-2 produces two
 /// taps, on up-1 and up-2.
-class MultiTapGestureRecognizer extends DisposableArenaMember {
+class MultiTapGestureRecognizer extends GestureArenaMember {
   MultiTapGestureRecognizer({
     this.router,
     this.onTapDown,
@@ -243,7 +243,7 @@ class MultiTapGestureRecognizer extends DisposableArenaMember {
 
 }
 
-class DoubleTapGestureRecognizer extends DisposableArenaMember {
+class DoubleTapGestureRecognizer extends GestureArenaMember {
 
   DoubleTapGestureRecognizer({ this.router, this.onDoubleTap });
 
