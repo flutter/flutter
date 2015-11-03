@@ -122,14 +122,14 @@ void Canvas::clipRRect(const RRect& rrect)
 {
     if (!m_canvas)
         return;
-    m_canvas->clipRRect(rrect.sk_rrect, SkRegion::kIntersect_Op, true);
+    m_canvas->clipRRect(rrect.sk_rrect, SkRegion::kIntersect_Op);
 }
 
 void Canvas::clipPath(const CanvasPath* path)
 {
     if (!m_canvas)
         return;
-    m_canvas->clipPath(path->path(), SkRegion::kIntersect_Op, true);
+    m_canvas->clipPath(path->path(), SkRegion::kIntersect_Op);
 }
 
 void Canvas::drawColor(SkColor color, SkXfermode::Mode transferMode)
