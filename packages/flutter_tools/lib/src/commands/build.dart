@@ -182,7 +182,7 @@ class BuildCommand extends FlutterCommand {
         archive.addFile(file);
     }
 
-    KeyPair keyPair = KeyPair.readFromPrivateKeySync(privateKeyPath);
+    AsymmetricKeyPair keyPair = keyPairFromPrivateKeyFileSync(privateKeyPath);
     Uint8List zipBytes = new Uint8List.fromList(new ZipEncoder().encode(archive));
     Bundle bundle = new Bundle.fromContent(
       path: outputPath,
