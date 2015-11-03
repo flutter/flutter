@@ -13,5 +13,4 @@ export 'src/gestures/long_press.dart';
 export 'src/gestures/pointer_router.dart';
 export 'src/gestures/recognizer.dart';
 export 'src/gestures/scale.dart';
-export 'src/gestures/show_press.dart';
 export 'src/gestures/tap.dart';

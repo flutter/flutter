@@ -13,7 +13,6 @@ export 'package:flutter/gestures.dart' show
   GestureTapUpCallback,
   GestureTapCallback,
   GestureTapCancelCallback,
-  GestureShowPressCallback,
   GestureLongPressCallback,
   GestureDragStartCallback,
   GestureDragUpdateCallback,
@@ -37,7 +36,6 @@ class GestureDetector extends StatefulComponent {
     this.onTap,
     this.onTapCancel,
     this.onDoubleTap,
-    this.onShowPress,
     this.onLongPress,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -61,7 +59,6 @@ class GestureDetector extends StatefulComponent {
   final GestureTapCancelCallback onTapCancel;
   final GestureTapCallback onDoubleTap;
 
-  final GestureShowPressCallback onShowPress;
   final GestureLongPressCallback onLongPress;
 
   final GestureDragStartCallback onVerticalDragStart;
@@ -88,7 +85,6 @@ class _GestureDetectorState extends State<GestureDetector> {
 
   TapGestureRecognizer _tap;
   DoubleTapGestureRecognizer _doubleTap;
-  ShowPressGestureRecognizer _showPress;
   LongPressGestureRecognizer _longPress;
   VerticalDragGestureRecognizer _verticalDrag;
   HorizontalDragGestureRecognizer _horizontalDrag;
@@ -107,7 +103,6 @@ class _GestureDetectorState extends State<GestureDetector> {
   void dispose() {
     _tap = _ensureDisposed(_tap);
     _doubleTap = _ensureDisposed(_doubleTap);
-    _showPress = _ensureDisposed(_showPress);
     _longPress = _ensureDisposed(_longPress);
     _verticalDrag = _ensureDisposed(_verticalDrag);
     _horizontalDrag = _ensureDisposed(_horizontalDrag);
@@ -119,7 +114,6 @@ class _GestureDetectorState extends State<GestureDetector> {
   void _syncAll() {
     _syncTap();
     _syncDoubleTap();
-    _syncShowPress();
     _syncLongPress();
     _syncVerticalDrag();
     _syncHorizontalDrag();
@@ -146,15 +140,6 @@ class _GestureDetectorState extends State<GestureDetector> {
     } else {
       _doubleTap ??= new DoubleTapGestureRecognizer(router: _router);
       _doubleTap.onDoubleTap = config.onDoubleTap;
-    }
-  }
-
-  void _syncShowPress() {
-    if (config.onShowPress == null) {
-      _showPress = _ensureDisposed(_showPress);
-    } else {
-      _showPress ??= new ShowPressGestureRecognizer(router: _router);
-      _showPress.onShowPress = config.onShowPress;
     }
   }
 
@@ -227,8 +212,6 @@ class _GestureDetectorState extends State<GestureDetector> {
       _tap.addPointer(event);
     if (_doubleTap != null)
       _doubleTap.addPointer(event);
-    if (_showPress != null)
-      _showPress.addPointer(event);
     if (_longPress != null)
       _longPress.addPointer(event);
     if (_verticalDrag != null)
@@ -255,8 +238,6 @@ class _GestureDetectorState extends State<GestureDetector> {
       gestures.add('tap');
     if (_doubleTap != null)
       gestures.add('double tap');
-    if (_showPress != null)
-      gestures.add('show press');
     if (_longPress != null)
       gestures.add('long press');
     if (_verticalDrag != null)
