@@ -12,8 +12,6 @@ import sys
 import distutils.util
 
 
-CONFIRM_MESSAGE = """This tool is destructive and will revert your current branch to
-upstream/master among other things.  Are you sure you wish to continue?"""
 DRY_RUN = False
 
 
@@ -78,43 +76,40 @@ def upload_artifacts(dist_root, config, commit_hash):
 
 def main():
     parser = argparse.ArgumentParser(description='Deploy!')
-    parser.add_argument('sky_engine_root', help='Path to sky_engine/src')
     parser.add_argument('--dry-run', action='store_true', default=False,
         help='Just print commands w/o executing.')
-    parser.add_argument('--no-pub-publish', dest='publish',
-        action='store_false', default=True, help='Skip pub publish step.')
+    parser.add_argument('--revision', help='The git revision to publish.')
     args = parser.parse_args()
 
     global DRY_RUN
     DRY_RUN = args.dry_run
 
-    if not args.dry_run and not confirm(CONFIRM_MESSAGE):
-        print "Aborted."
+    engine_root = os.path.abspath('.')
+    if not os.path.exists(os.path.join(engine_root, 'sky')):
+        print "Cannot find //sky. Is %s the Flutter engine repository?" % engine_root
         return 1
 
-    sky_engine_root = os.path.abspath(os.path.expanduser(args.sky_engine_root))
+    commit_hash = git_revision(engine_root)
+
+    if commit_hash != args.revision:
+        print "Current revision %s does not match requested revision %s." % (commit_hash, args.revision)
+        print "Please update the current revision to %s." % args.revision
+        return 1
 
     # Derived paths:
-    dart_sdk_root = os.path.join(sky_engine_root, 'third_party/dart-sdk/dart-sdk')
+    dart_sdk_root = os.path.join(engine_root, 'third_party/dart-sdk/dart-sdk')
     pub_path = os.path.join(dart_sdk_root, 'bin/pub')
-    android_dist_root = os.path.join(sky_engine_root, 'out/android_Release/dist')
-    linux_dist_root = os.path.join(sky_engine_root, 'out/Release/dist')
-    sky_package_root = os.path.join(sky_engine_root, 'sky/packages/sky')
-    flutter_sprites_package_root = os.path.join(sky_engine_root, 'skysprites')
+    android_dist_root = os.path.join(engine_root, 'out/android_Release/dist')
+    linux_dist_root = os.path.join(engine_root, 'out/Release/dist')
     sky_engine_package_root = os.path.join(android_dist_root, 'packages/sky_engine/sky_engine')
     sky_services_package_root = os.path.join(android_dist_root, 'packages/sky_services/sky_services')
     sky_engine_revision_file = os.path.join(sky_engine_package_root, 'lib', 'REVISION')
 
-    run(sky_engine_root, ['git', 'fetch', 'upstream'])
-    run(sky_engine_root, ['git', 'reset', 'upstream/master', '--hard'])
+    run(engine_root, ['sky/tools/gn', '--android', '--release'])
+    run(engine_root, ['ninja', '-C', 'out/android_Release', ':dist'])
 
-    commit_hash = git_revision(sky_engine_root)
-
-    run(sky_engine_root, ['sky/tools/gn', '--android', '--release'])
-    run(sky_engine_root, ['ninja', '-C', 'out/android_Release', ':dist'])
-
-    run(sky_engine_root, ['sky/tools/gn', '--release'])
-    run(sky_engine_root, ['ninja', '-C', 'out/Release', ':dist'])
+    run(engine_root, ['sky/tools/gn', '--release'])
+    run(engine_root, ['ninja', '-C', 'out/Release', ':dist'])
 
     with open(sky_engine_revision_file, 'w') as stream:
         stream.write(commit_hash)
@@ -122,11 +117,8 @@ def main():
     upload_artifacts(android_dist_root, 'android-arm', commit_hash)
     upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
 
-    if args.publish:
-        run(sky_engine_package_root, [pub_path, 'publish', '--force'])
-        run(sky_services_package_root, [pub_path, 'publish', '--force'])
-        run(sky_package_root, [pub_path, 'publish', '--force'])
-        run(flutter_sprites_package_root, [pub_path, 'publish', '--force'])
+    run(sky_engine_package_root, [pub_path, 'publish', '--force'])
+    run(sky_services_package_root, [pub_path, 'publish', '--force'])
 
 
 if __name__ == '__main__':
