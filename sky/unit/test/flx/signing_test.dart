@@ -32,7 +32,7 @@ void main() {
   final int kTestHash = 0x039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81;
 
   test('can read openssl key pair', () {
-    KeyPair keyPair = KeyPair.fromPrivateKeyBytes(kPrivateKeyDER);
+    AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
     expect(keyPair != null, equals(true));
     expect(keyPair.privateKey.d.intValue(), equals(kPrivateKeyD));
     expect(keyPair.publicKey.Q.x.toBigInteger().intValue(), equals(kPublicKeyQx));
@@ -40,7 +40,7 @@ void main() {
   });
 
   test('serializeManifest adds key and content-hash', () {
-    KeyPair keyPair = KeyPair.fromPrivateKeyBytes(kPrivateKeyDER);
+    AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
     Uint8List manifestBytes = serializeManifest(kManifest, keyPair.publicKey, kTestBytes);
     Map<String, dynamic> decodedManifest = JSON.decode(UTF8.decode(manifestBytes));
     String expectedKey = BASE64.encode(keyPair.publicKey.Q.getEncoded());
@@ -52,7 +52,7 @@ void main() {
   });
 
   test('signManifest and verifyManifestSignature work', () {
-    KeyPair keyPair = KeyPair.fromPrivateKeyBytes(kPrivateKeyDER);
+    AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
     Map<String, dynamic> manifest = JSON.decode(UTF8.decode(
         serializeManifest(kManifest, keyPair.publicKey, kTestBytes)));
     Uint8List signatureBytes = signManifest(kTestBytes, keyPair.privateKey);
