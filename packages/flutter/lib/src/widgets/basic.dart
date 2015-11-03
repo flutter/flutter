@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -1093,6 +1094,39 @@ class DefaultAssetBundle extends InheritedWidget {
   }
 
   bool updateShouldNotify(DefaultAssetBundle old) => bundle != old.bundle;
+}
+
+class RawImage extends StatelessComponent {
+  RawImage(
+      {Key key,
+      this.bytes,
+      this.width,
+      this.height,
+      this.colorFilter,
+      this.fit,
+      this.repeat: ImageRepeat.noRepeat,
+      this.centerSlice})
+      : super(key: key);
+
+  final Uint8List bytes;
+  final double width;
+  final double height;
+  final ColorFilter colorFilter;
+  final ImageFit fit;
+  final ImageRepeat repeat;
+  final Rect centerSlice;
+
+  Widget build(BuildContext context) {
+    ImageResource image = new ImageResource(decodeImageFromList(bytes));
+    return new ImageListener(
+        image: image,
+        width: width,
+        height: height,
+        colorFilter: colorFilter,
+        fit: fit,
+        repeat: repeat,
+        centerSlice: centerSlice);
+  }
 }
 
 class AssetImage extends StatelessComponent {
