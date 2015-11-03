@@ -11,6 +11,7 @@ export 'src/gestures/drag.dart';
 export 'src/gestures/events.dart';
 export 'src/gestures/long_press.dart';
 export 'src/gestures/lsq_solver.dart';
+export 'src/gestures/multitap.dart';
 export 'src/gestures/pointer_router.dart';
 export 'src/gestures/recognizer.dart';
 export 'src/gestures/scale.dart';
