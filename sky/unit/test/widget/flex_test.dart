@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -56,9 +57,9 @@ void main() {
           key: flexKey
         )
       ));
-      Size flexSize = tester.findElementByKey(flexKey).renderObject.size;
-      expect(flexSize.width, equals(800.0));
-      expect(flexSize.height, equals(100.0));
+      RenderBox renderBox = tester.findElementByKey(flexKey).renderObject;
+      expect(renderBox.size.width, equals(800.0));
+      expect(renderBox.size.height, equals(100.0));
 
       // Row with justifyContent: FlexJustifyContent.collapse
       tester.pumpWidget(new Center(
@@ -70,9 +71,9 @@ void main() {
           justifyContent: FlexJustifyContent.collapse
         )
       ));
-      flexSize = tester.findElementByKey(flexKey).renderObject.size;
-      expect(flexSize.width, equals(40.0));
-      expect(flexSize.height, equals(100.0));
+      renderBox = tester.findElementByKey(flexKey).renderObject;
+      expect(renderBox.size.width, equals(40.0));
+      expect(renderBox.size.height, equals(100.0));
     });
 
     // Column without justifyContent: FlexJustifyContent.collapse
@@ -85,9 +86,9 @@ void main() {
           key: flexKey
         )
       ));
-      Size flexSize = tester.findElementByKey(flexKey).renderObject.size;
-      expect(flexSize.width, equals(100.0));
-      expect(flexSize.height, equals(600.0));
+      RenderBox renderBox = tester.findElementByKey(flexKey).renderObject;
+      expect(renderBox.size.width, equals(100.0));
+      expect(renderBox.size.height, equals(600.0));
 
       // Column with justifyContent: FlexJustifyContent.collapse
       tester.pumpWidget(new Center(
@@ -99,9 +100,9 @@ void main() {
           justifyContent: FlexJustifyContent.collapse
         )
       ));
-      flexSize = tester.findElementByKey(flexKey).renderObject.size;
-      expect(flexSize.width, equals(100.0));
-      expect(flexSize.height, equals(250.0));
+      renderBox = tester.findElementByKey(flexKey).renderObject;
+      expect(renderBox.size.width, equals(100.0));
+      expect(renderBox.size.height, equals(250.0));
     });
   });
 }
