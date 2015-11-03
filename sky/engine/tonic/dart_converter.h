@@ -288,6 +288,11 @@ struct DartConverter<Vector<T>> {
       return result;
     intptr_t length = 0;
     Dart_ListLength(handle, &length);
+
+    if (length == 0) {
+      return result;
+    }
+
     result.reserveCapacity(length);
 
     Vector<Dart_Handle> items(length);
