@@ -218,18 +218,18 @@ class DropdownButton<T> extends StatelessComponent {
     return new GestureDetector(
       child: new Container(
         decoration: new BoxDecoration(border: _kDropdownUnderline),
-        child: new IntrinsicWidth(
-          child: new Row(<Widget>[
-            new IndexedStack(items,
-              key: indexedStackKey,
-              index: selectedIndex,
-              alignment: const FractionalOffset(0.5, 0.0)
-            ),
-            new Container(
-              child: new Icon(icon: 'navigation/arrow_drop_down', size: IconSize.s36),
-              padding: const EdgeDims.only(top: 6.0)
-            )
-          ])
+        child: new Row(<Widget>[
+          new IndexedStack(items,
+            key: indexedStackKey,
+            index: selectedIndex,
+            alignment: const FractionalOffset(0.5, 0.0)
+          ),
+          new Container(
+            child: new Icon(icon: 'navigation/arrow_drop_down', size: IconSize.s36),
+            padding: const EdgeDims.only(top: 6.0)
+          )
+        ],
+          justifyContent: FlexJustifyContent.collapse
         )
       ),
       onTap: () {

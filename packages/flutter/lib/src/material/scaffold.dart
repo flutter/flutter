@@ -10,8 +10,8 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'material.dart';
 
-const int _kToolBarIndex = 1;
 const int _kBodyIndex = 0;
+const int _kToolBarIndex = 1;
 
 // This layout has the same effect as putting the toolbar and body in a column
 // and making the body flexible. What's different is that in this case the
@@ -22,18 +22,17 @@ class _ToolBarAndBodyLayout extends MultiChildLayoutDelegate {
     assert(childCount == 2);
     final BoxConstraints toolBarConstraints = constraints.loosen().tightenWidth(size.width);
     final Size toolBarSize = layoutChild(_kToolBarIndex, toolBarConstraints);
-    final double topPadding = ui.window.padding.top;
-    final double bodyHeight = size.height - toolBarSize.height - topPadding;
+    final double bodyHeight = size.height - toolBarSize.height;
     final BoxConstraints bodyConstraints = toolBarConstraints.tightenHeight(bodyHeight);
     layoutChild(_kBodyIndex, bodyConstraints);
-    positionChild(_kToolBarIndex, new Point(0.0, topPadding));
-    positionChild(_kBodyIndex, new Point(0.0, topPadding + toolBarSize.height));
+    positionChild(_kToolBarIndex, Point.origin);
+    positionChild(_kBodyIndex, new Point(0.0, toolBarSize.height));
   }
 }
 
-class Scaffold extends StatelessComponent {
-  final _ToolBarAndBodyLayout _toolBarAndBodyLayout = new _ToolBarAndBodyLayout();
+final _ToolBarAndBodyLayout _toolBarAndBodyLayout = new _ToolBarAndBodyLayout();
 
+class Scaffold extends StatelessComponent {
   Scaffold({
     Key key,
     this.body,
@@ -48,14 +47,15 @@ class Scaffold extends StatelessComponent {
   final Widget floatingActionButton;
 
   Widget build(BuildContext context) {
+    final offsetToolBar = toolBar?.withSizeOffsets(new EdgeDims.only(top: ui.window.padding.top));
     final Widget materialBody = body != null ? new Material(child: body) : null;
     Widget toolBarAndBody;
-    if (toolBar != null && materialBody != null)
-      toolBarAndBody = new CustomMultiChildLayout(<Widget>[materialBody, toolBar],
+    if (offsetToolBar != null && materialBody != null)
+      toolBarAndBody = new CustomMultiChildLayout(<Widget>[materialBody, offsetToolBar],
         delegate: _toolBarAndBodyLayout
       );
     else
-      toolBarAndBody = toolBar ?? materialBody;
+      toolBarAndBody = offsetToolBar ?? materialBody;
 
     final List<Widget> bottomColumnChildren = <Widget>[];
 
