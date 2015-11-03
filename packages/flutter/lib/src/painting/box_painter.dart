@@ -949,7 +949,7 @@ class BoxPainter {
             canvas.drawRect(rect, _backgroundPaint);
           } else {
             double radius = _getEffectiveBorderRadius(rect);
-            canvas.drawRRect(new ui.RRect()..setRectXY(rect, radius, radius), _backgroundPaint);
+            canvas.drawRRect(new ui.RRect.fromRectXY(rect, radius, radius), _backgroundPaint);
           }
           break;
       }
@@ -1043,8 +1043,8 @@ class BoxPainter {
     double width = _decoration.border.top.width;
     double radius = _getEffectiveBorderRadius(rect);
 
-    ui.RRect outer = new ui.RRect()..setRectXY(rect, radius, radius);
-    ui.RRect inner = new ui.RRect()..setRectXY(rect.deflate(width), radius - width, radius - width);
+    ui.RRect outer = new ui.RRect.fromRectXY(rect, radius, radius);
+    ui.RRect inner = new ui.RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
     canvas.drawDRRect(outer, inner, new Paint()..color = color);
   }
 

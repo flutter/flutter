@@ -124,8 +124,8 @@ class _RenderSwitch extends RenderToggleable {
     Rect rect = new Rect.fromLTWH(offset.dx,
         offset.dy + _kSwitchHeight / 2.0 - _kTrackHeight / 2.0, _kTrackWidth,
         _kTrackHeight);
-    ui.RRect rrect = new ui.RRect()
-      ..setRectXY(rect, _kTrackRadius, _kTrackRadius);
+    ui.RRect rrect = new ui.RRect.fromRectXY(
+        rect, _kTrackRadius, _kTrackRadius);
     canvas.drawRRect(rrect, paint);
 
     if (_radialReaction != null)
