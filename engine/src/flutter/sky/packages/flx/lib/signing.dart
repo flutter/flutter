@@ -12,6 +12,8 @@ import 'package:bignum/bignum.dart';
 import 'package:cipher/cipher.dart';
 import 'package:cipher/impl/client.dart';
 
+export 'package:cipher/cipher.dart' show AsymmetricKeyPair;
+
 // The ECDSA algorithm parameters we're using. These match the parameters used
 // by the Flutter updater package.
 class CipherParameters {
@@ -143,26 +145,32 @@ ECPublicKey _publicKeyFromPrivateKey(ECPrivateKey privateKey) {
   return new ECPublicKey(Q, privateKey.parameters);
 }
 
-class KeyPair {
-  KeyPair(this.publicKey, this.privateKey);
+AsymmetricKeyPair keyPairFromPrivateKeyFileSync(String privateKeyPath) {
+  File file = new File(privateKeyPath);
+  if (!file.existsSync())
+    return null;
+  return keyPairFromPrivateKeyBytes(file.readAsBytesSync());
+}
 
-  ECPublicKey publicKey;
-  ECPrivateKey privateKey;
+AsymmetricKeyPair keyPairFromPrivateKeyBytes(List<int> privateKeyBytes) {
+  ECPrivateKey privateKey = _asn1ParsePrivateKey(
+      _params.domain, new Uint8List.fromList(privateKeyBytes));
+  if (privateKey == null)
+    return null;
+
+  ECPublicKey publicKey = _publicKeyFromPrivateKey(privateKey);
+  return new AsymmetricKeyPair(publicKey, privateKey);
+}
+
+// TODO(mpcomplete): remove this class when flutter_tools is updated.
+class KeyPair extends AsymmetricKeyPair {
+  KeyPair(PublicKey publicKey, PrivateKey privateKey)
+      : super(publicKey, privateKey);
 
   static KeyPair readFromPrivateKeySync(String privateKeyPath) {
-    File file = new File(privateKeyPath);
-    if (!file.existsSync())
+    AsymmetricKeyPair pair = keyPairFromPrivateKeyFileSync(privateKeyPath);
+    if (pair == null)
       return null;
-    return fromPrivateKeyBytes(file.readAsBytesSync());
-  }
-
-  static KeyPair fromPrivateKeyBytes(List<int> privateKeyBytes) {
-    ECPrivateKey privateKey = _asn1ParsePrivateKey(
-        _params.domain, new Uint8List.fromList(privateKeyBytes));
-    if (privateKey == null)
-      return null;
-
-    ECPublicKey publicKey = _publicKeyFromPrivateKey(privateKey);
-    return new KeyPair(publicKey, privateKey);
+    return new KeyPair(pair.publicKey, pair.privateKey);
   }
 }
