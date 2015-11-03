@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'material.dart';
+import 'tool_bar.dart';
 
 const int _kBodyIndex = 0;
 const int _kToolBarIndex = 1;
@@ -42,7 +43,7 @@ class Scaffold extends StatelessComponent {
   }) : super(key: key);
 
   final Widget body;
-  final Widget toolBar;
+  final ToolBar toolBar;
   final Widget snackBar;
   final Widget floatingActionButton;
 
