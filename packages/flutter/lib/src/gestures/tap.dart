@@ -26,31 +26,34 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     this.onTapUp,
     this.onTap,
     this.onTapCancel
-  }) : super(router: router);
+  }) : super(router: router, deadline: kPressTimeout);
 
   GestureTapDownCallback onTapDown;
   GestureTapDownCallback onTapUp;
   GestureTapCallback onTap;
   GestureTapCancelCallback onTapCancel;
 
+  bool _sentTapDown = false;
   bool _wonArena = false;
   Point _finalPosition;
 
   void handlePrimaryPointer(PointerInputEvent event) {
-    if (event.type == 'pointerdown') {
-      if (onTapDown != null)
-        onTapDown(event.position);
-    } else if (event.type == 'pointerup') {
+    if (event.type == 'pointerup') {
       _finalPosition = event.position;
-      _check();
+      _checkUp();
     }
+  }
+
+  void didExceedDeadline() {
+    _checkDown();
   }
 
   void acceptGesture(int pointer) {
     super.acceptGesture(pointer);
     if (pointer == primaryPointer) {
+      _checkDown();
       _wonArena = true;
-      _check();
+      _checkUp();
     }
   }
 
@@ -64,7 +67,15 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
-  void _check() {
+  void _checkDown() {
+    if (!_sentTapDown) {
+      if (onTapDown != null)
+        onTapDown(initialPosition);
+      _sentTapDown = true;
+    }
+  }
+
+  void _checkUp() {
     if (_wonArena && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
       if (onTapUp != null)
@@ -76,6 +87,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _reset() {
+    _sentTapDown = false;
     _wonArena = false;
     _finalPosition = null;
   }

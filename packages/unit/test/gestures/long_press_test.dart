@@ -67,14 +67,14 @@ void main() {
     longPress.dispose();
   });
 
-  test('Should recognize both show press and long press', () {
+  test('Should recognize both tap down and long press', () {
     PointerRouter router = new PointerRouter();
-    ShowPressGestureRecognizer showPress = new ShowPressGestureRecognizer(router: router);
+    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
     LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(router: router);
 
-    bool showPressRecognized = false;
-    showPress.onShowPress = () {
-      showPressRecognized = true;
+    bool tapDownRecognized = false;
+    tap.onTapDown = (_) {
+      tapDownRecognized = true;
     };
 
     bool longPressRecognized = false;
@@ -83,23 +83,23 @@ void main() {
     };
 
     new FakeAsync().run((FakeAsync async) {
-      showPress.addPointer(down);
+      tap.addPointer(down);
       longPress.addPointer(down);
       GestureArena.instance.close(5);
-      expect(showPressRecognized, isFalse);
+      expect(tapDownRecognized, isFalse);
       expect(longPressRecognized, isFalse);
       router.route(down);
-      expect(showPressRecognized, isFalse);
+      expect(tapDownRecognized, isFalse);
       expect(longPressRecognized, isFalse);
       async.elapse(new Duration(milliseconds: 300));
-      expect(showPressRecognized, isTrue);
+      expect(tapDownRecognized, isTrue);
       expect(longPressRecognized, isFalse);
       async.elapse(new Duration(milliseconds: 700));
-      expect(showPressRecognized, isTrue);
+      expect(tapDownRecognized, isTrue);
       expect(longPressRecognized, isTrue);
     });
 
-    showPress.dispose();
+    tap.dispose();
     longPress.dispose();
   });
 }
