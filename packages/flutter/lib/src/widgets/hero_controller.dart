@@ -72,7 +72,7 @@ class HeroController {
 
   void _addHeroesToOverlay(Iterable<Widget> heroes, OverlayState overlay) {
     for (Widget hero in heroes) {
-      OverlayEntry entry = new OverlayEntry(child: hero);
+      OverlayEntry entry = new OverlayEntry(builder: (_) => hero);
       overlay.insert(entry);
       _overlayEntries.add(entry);
     }
