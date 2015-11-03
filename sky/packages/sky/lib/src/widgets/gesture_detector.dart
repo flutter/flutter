@@ -217,7 +217,7 @@ class _GestureDetectorState extends State<GestureDetector> {
     }
   }
 
-  DisposableArenaMember _ensureDisposed(DisposableArenaMember recognizer) {
+  GestureArenaMember _ensureDisposed(GestureArenaMember recognizer) {
     recognizer?.dispose();
     return null;
   }
