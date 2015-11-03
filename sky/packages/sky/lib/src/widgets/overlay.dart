@@ -7,18 +7,11 @@ import 'framework.dart';
 
 class OverlayEntry {
   OverlayEntry({
-    Widget child,
+    this.builder,
     bool opaque: false
-  }) : _child = child, _opaque = opaque;
+  }) : _opaque = opaque;
 
-  Widget get child => _child;
-  Widget _child;
-  void set child (Widget value) {
-    if (_child == value)
-      return;
-    _child = value;
-    _rebuild();
-  }
+  final WidgetBuilder builder;
 
   bool get opaque => _opaque;
   bool _opaque;
@@ -26,7 +19,7 @@ class OverlayEntry {
     if (_opaque == value)
       return;
     _opaque = value;
-    _rebuild();
+    markNeedsBuild();
   }
 
   OverlayState _state;
@@ -37,7 +30,8 @@ class OverlayEntry {
     _state = null;
   }
 
-  void _rebuild() {
+  void markNeedsBuild() {
+    // TODO(ianh): find a way to make this not rebuild the entire overlay
     _state?.setState(() {});
   }
 }
@@ -85,7 +79,7 @@ class OverlayState extends State<Overlay> {
       OverlayEntry entry = _entries[i];
       backwardsChildren.add(new KeyedSubtree(
         key: new ObjectKey(entry),
-        child: entry.child
+        child: entry.builder(context)
       ));
       if (entry.opaque)
         break;

@@ -105,7 +105,7 @@ class PageRoute extends ModalRoute {
 
   String get name => settings.name;
   Duration get transitionDuration => const Duration(milliseconds: 150);
-  Widget createModalWidget() => new _Page(key: pageKey, route: this);
+  Widget buildModalWidget(BuildContext context) => new _Page(key: pageKey, route: this);
 
   final PageStorageBucket _storageBucket = new PageStorageBucket();
 

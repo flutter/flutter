@@ -89,13 +89,13 @@ class _DraggableState extends State<Draggable> {
       }
     );
     _avatar.update(point);
-    _avatar.rebuild(context);
+    _avatar.markNeedsBuild(context);
   }
 
   void _updateDrag(PointerInputEvent event) {
     if (_avatar != null) {
       _avatar.update(new Point(event.x, event.y));
-      _avatar.rebuild(context);
+      _avatar.markNeedsBuild(context);
     }
   }
 
@@ -223,12 +223,12 @@ class _DragAvatar {
     _activeTargetWillAcceptDrop = _activeTarget != null && _activeTarget.didEnter(data);
   }
 
-  void rebuild(BuildContext context) {
+  void markNeedsBuild(BuildContext context) {
     if (_entry == null) {
-      _entry = new OverlayEntry(child: _build(context));
+      _entry = new OverlayEntry(builder: _build);
       Navigator.of(context).overlay.insert(_entry);
     } else {
-      _entry.child = _build(context);
+      _entry.markNeedsBuild();
     }
   }
 
