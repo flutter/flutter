@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:ui' show Point, Offset;
 
 import 'arena.dart';
 import 'constants.dart';
@@ -84,10 +84,6 @@ enum GestureRecognizerState {
   defunct
 }
 
-ui.Point _getPoint(PointerInputEvent event) {
-  return new ui.Point(event.x, event.y);
-}
-
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   PrimaryPointerGestureRecognizer({ PointerRouter router, this.deadline })
     : super(router: router);
@@ -96,7 +92,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   GestureRecognizerState state = GestureRecognizerState.ready;
   int primaryPointer;
-  ui.Point initialPosition;
+  Point initialPosition;
   Timer _timer;
 
   void addPointer(PointerInputEvent event) {
@@ -104,7 +100,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     if (state == GestureRecognizerState.ready) {
       state = GestureRecognizerState.possible;
       primaryPointer = event.pointer;
-      initialPosition = _getPoint(event);
+      initialPosition = event.position;
       if (deadline != null)
         _timer = new Timer(deadline, didExceedDeadline);
     }
@@ -159,7 +155,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   double _getDistance(PointerInputEvent event) {
-    ui.Offset offset = _getPoint(event) - initialPosition;
+    Offset offset = event.position - initialPosition;
     return offset.distance;
   }
 

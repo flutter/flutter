@@ -48,6 +48,12 @@ class _GestureArenaState {
   bool isHeld = false;
   bool hasPendingSweep = false;
 
+  /// If a gesture attempts to win while the arena is still open, it becomes the
+  /// "eager winnner". We look for an eager winner when closing the arena to new
+  /// participants, and if there is one, we resolve the arena it its favour at
+  /// that time.
+  GestureArenaMember eagerWinner;
+
   void add(GestureArenaMember member) {
     assert(isOpen);
     members.add(member);
@@ -122,6 +128,8 @@ class GestureArena {
       state.members.first.acceptGesture(key);
     } else if (state.members.isEmpty) {
       _arenas.remove(key);
+    } else if (state.eagerWinner != null) {
+      _resolveInFavorOf(key, state, state.eagerWinner);
     }
   }
 
@@ -129,20 +137,33 @@ class GestureArena {
     _GestureArenaState state = _arenas[key];
     if (state == null)
       return;  // This arena has already resolved.
-    assert(!state.isOpen);
     assert(state.members.contains(member));
     if (disposition == GestureDisposition.rejected) {
       state.members.remove(member);
       member.rejectGesture(key);
-      _tryToResolveArena(key, state);
+      if (!state.isOpen)
+        _tryToResolveArena(key, state);
     } else {
       assert(disposition == GestureDisposition.accepted);
-      _arenas.remove(key);
-      for (GestureArenaMember rejectedMember in state.members) {
-        if (rejectedMember != member)
-          rejectedMember.rejectGesture(key);
+      if (state.isOpen) {
+        if (state.eagerWinner == null)
+          state.eagerWinner = member;
+      } else {
+        _resolveInFavorOf(key, state, member);
       }
-      member.acceptGesture(key);
     }
+  }
+
+  void _resolveInFavorOf(Object key, _GestureArenaState state, GestureArenaMember member) {
+    assert(state == _arenas[key]);
+    assert(state != null);
+    assert(state.eagerWinner == null || state.eagerWinner == member);
+    assert(!state.isOpen);
+    _arenas.remove(key);
+    for (GestureArenaMember rejectedMember in state.members) {
+      if (rejectedMember != member)
+        rejectedMember.rejectGesture(key);
+    }
+    member.acceptGesture(key);
   }
 }
