@@ -40,6 +40,9 @@ _IGNORED_PATTERNS = [
   re.compile(r'^\[hint\] \(toText == toPlainText\) \? toStyledText : toPlainText has inferred type \(String, String\) → Widget \(.+styled_text.dart,.+\)'),
   re.compile(r'^\[hint\] .+ [?:] \([_, ]+\) .+ has inferred type .+'),
 
+  # analyzer doesn't support constructor tear-offs yet
+  re.compile(r'.+/examples/widgets/drag_and_drop.dart, line 8[03], col .+'),
+
   # Disable the lint checks that will be caught by code review
   re.compile(r'^\[lint\] Avoid defining a one-member abstract class when a simple function will do'),
   re.compile(r'^\[lint\] Prefer using lowerCamelCase for constant names\.'),
