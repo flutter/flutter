@@ -464,6 +464,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(child.parentData != null);
     child._cleanRelayoutSubtreeRoot();
     child.parentData.detach();
+    child.parentData = null;
     super.dropChild(child);
     markNeedsLayout();
     _markNeedsCompositingBitsUpdate();
