@@ -51,6 +51,10 @@ class EdgeDims {
   /// The size that this edge dims would occupy with an empty interior.
   Size get collapsedSize => new Size(left + right, top + bottom);
 
+  Rect inflateRect(Rect rect) {
+    return new Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
+  }
+
   EdgeDims operator -(EdgeDims other) {
     return new EdgeDims.TRBL(
       top - other.top,
