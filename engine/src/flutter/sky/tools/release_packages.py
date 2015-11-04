@@ -20,6 +20,7 @@ def main():
 
     if args.publish:
         subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'sky/packages/sky'))
+        subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'sky/packages/flx'))
         subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'skysprites'))
 
 
