@@ -20,7 +20,7 @@ typedef void GestureScaleStartCallback(ui.Point focalPoint);
 typedef void GestureScaleUpdateCallback(double scale, ui.Point focalPoint);
 typedef void GestureScaleEndCallback();
 
-class ScaleGestureRecognizer extends GestureRecognizer {
+class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ScaleGestureRecognizer({ PointerRouter router, this.onStart, this.onUpdate, this.onEnd })
     : super(router: router);
 

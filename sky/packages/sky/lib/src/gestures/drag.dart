@@ -33,7 +33,7 @@ bool _isFlingGesture(GestureVelocity velocity) {
     velocitySquared < kMaxFlingVelocity * kMaxFlingVelocity;
 }
 
-abstract class _DragGestureRecognizer<T extends dynamic> extends GestureRecognizer {
+abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGestureRecognizer {
   _DragGestureRecognizer({ PointerRouter router, this.onStart, this.onUpdate, this.onEnd })
     : super(router: router);
 

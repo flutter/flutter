@@ -13,7 +13,22 @@ import 'pointer_router.dart';
 export 'pointer_router.dart' show PointerRouter;
 
 abstract class GestureRecognizer extends GestureArenaMember {
-  GestureRecognizer({ PointerRouter router }) : _router = router {
+
+  /// Call this with the pointerdown event of each pointer that should be
+  /// considered for this gesture. (It's the GestureRecognizer's responsibility
+  /// to then add itself to the global pointer router to receive subsequent
+  /// events for this pointer.)
+  void addPointer(PointerInputEvent event);
+
+  /// Release any resources used by the object. Called when the object is no
+  /// longer needed (e.g. a gesture recogniser is being unregistered from a
+  /// [GestureDetector]).
+  void dispose() { }
+
+}
+
+abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
+  OneSequenceGestureRecognizer({ PointerRouter router }) : _router = router {
     assert(_router != null);
   }
 
@@ -21,9 +36,6 @@ abstract class GestureRecognizer extends GestureArenaMember {
 
   final List<GestureArenaEntry> _entries = new List<GestureArenaEntry>();
   final Set<int> _trackedPointers = new Set<int>();
-
-  /// The primary entry point for users of this class.
-  void addPointer(PointerInputEvent event);
 
   void handleEvent(PointerInputEvent event);
   void acceptGesture(int pointer) { }
@@ -76,7 +88,7 @@ ui.Point _getPoint(PointerInputEvent event) {
   return new ui.Point(event.x, event.y);
 }
 
-abstract class PrimaryPointerGestureRecognizer extends GestureRecognizer {
+abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   PrimaryPointerGestureRecognizer({ PointerRouter router, this.deadline })
     : super(router: router);
 

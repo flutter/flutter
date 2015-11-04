@@ -21,11 +21,6 @@ abstract class GestureArenaMember {
 
   /// Called when this member loses the arena for the given key.
   void rejectGesture(Object key);
-
-  /// Release any resources used by the object. Called when the object is no
-  /// longer needed (e.g. a gesture recogniser is being unregistered from a
-  /// [GestureDetector]).
-  void dispose() { }
 }
 
 /// An interface to information to an arena
