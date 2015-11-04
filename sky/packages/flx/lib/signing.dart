@@ -30,10 +30,16 @@ class CipherParameters {
   // Disclaimer: I don't really understand why we need 2 parameters for
   // cipher's API.
   Future seedRandom() async {
-    RandomAccessFile file = await new File("/dev/urandom").open();
-    Uint8List key = new Uint8List.fromList(await file.read(16));
-    Uint8List iv = new Uint8List.fromList(await file.read(16));
-    _initRandom(key, iv);
+    try {
+      RandomAccessFile file = await new File("/dev/urandom").open();
+      Uint8List key = new Uint8List.fromList(await file.read(16));
+      Uint8List iv = new Uint8List.fromList(await file.read(16));
+      _initRandom(key, iv);
+    } on FileSystemException {
+      // TODO(mpcomplete): need an entropy source on Windows. We might get this
+      // for free from Dart itself soon.
+      print("Warning: Failed to seed random number generator. No /dev/urandom.");
+    }
   }
 
   SecureRandom _random;
