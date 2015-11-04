@@ -96,6 +96,8 @@ class GameDemoState extends State<GameDemo> {
   }
 
   Widget _buildMainScene(RouteArguments args) {
+    NavigatorState navigatorState = Navigator.of(args.context);
+
     return new Stack(<Widget>[
       new SpriteWidget(new MainScreenBackground(), SpriteBoxTransformMode.fixedWidth),
       new Column(<Widget>[
@@ -108,10 +110,10 @@ class GameDemoState extends State<GameDemo> {
                 _sounds,
                 (int lastScore) {
                   setState(() { _lastScore = lastScore; });
-                  Navigator.of(args.context).pop();
+                  navigatorState.pop();
                 }
               );
-              Navigator.of(args.context).pushNamed('/game');
+              navigatorState.pushNamed('/game');
             },
             texture: _spriteSheetUI['btn_play_up.png'],
             textureDown: _spriteSheetUI['btn_play_down.png'],
