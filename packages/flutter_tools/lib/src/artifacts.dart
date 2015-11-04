@@ -38,15 +38,16 @@ String _getNameForTargetPlatform(TargetPlatform platform) {
   }
 }
 
-// Keep in sync with https://github.com/flutter/engine/blob/master/sky/tools/big_red_button.py#L50
+// Keep in sync with https://github.com/flutter/engine/blob/master/sky/tools/release_engine.py
+// and https://github.com/flutter/buildbot/blob/master/travis/build.sh
 String _getCloudStorageBaseUrl({String category, String platform, String revision}) {
-  if (platform == 'darwin-x64') {
+  if (platform == 'android-arm') {
     // In the fullness of time, we'll have a consistent URL pattern for all of
-    // our artifacts, but, for the time being, darwin artifacts are stored in a
+    // our artifacts, but, for the time being, Android artifacts are stored in a
     // different cloud storage bucket.
-    return 'https://storage.googleapis.com/mojo_infra/flutter/${platform}/${revision}/';
+    return 'https://storage.googleapis.com/mojo/sky/${category}/${platform}/${revision}/';
   }
-  return 'https://storage.googleapis.com/mojo/sky/${category}/${platform}/${revision}/';
+  return 'https://storage.googleapis.com/mojo_infra/flutter/${platform}/${revision}/';
 }
 
 enum ArtifactType {

@@ -21,7 +21,7 @@ defineTests() {
       when(mockDevices.android.isConnected()).thenReturn(true);
       when(mockDevices.android.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.android.installApp(any)).thenReturn(true);
-      when(mockDevices.android.startServer(any, any, any, any)).thenReturn(true);
+      when(mockDevices.android.startBundle(any, any, any, any)).thenReturn(true);
       when(mockDevices.android.stopApp(any)).thenReturn(true);
 
       when(mockDevices.iOS.isConnected()).thenReturn(false);
@@ -49,7 +49,7 @@ defineTests() {
       when(mockDevices.android.isConnected()).thenReturn(false);
       when(mockDevices.android.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.android.installApp(any)).thenReturn(false);
-      when(mockDevices.android.startServer(any, any, any, any)).thenReturn(false);
+      when(mockDevices.android.startBundle(any, any, any, any)).thenReturn(false);
       when(mockDevices.android.stopApp(any)).thenReturn(false);
 
       when(mockDevices.iOS.isConnected()).thenReturn(true);

@@ -16,8 +16,8 @@ import 'install.dart';
 import 'stop.dart';
 
 final Logger _logging = new Logger('sky_tools.start');
-const String _localBundlePath = 'app.flx';
-const bool _kUseServer = true;
+const String _localBundleName = 'app.flx';
+const String _localSnapshotName = 'snapshot_blob.bin';
 
 class StartCommand extends FlutterCommand {
   final String name = 'start';
@@ -37,7 +37,6 @@ class StartCommand extends FlutterCommand {
         help: 'Target app path or filename to start.');
     argParser.addFlag('http',
         negatable: true,
-        defaultsTo: true,
         help: 'Use a local HTTP server to serve your app to your device.');
     argParser.addFlag('boot',
         help: 'Boot the iOS Simulator if it isn\'t already running.');
@@ -79,9 +78,20 @@ class StartCommand extends FlutterCommand {
             mainPath = path.join(target, 'lib', 'main.dart');
           BuildCommand builder = new BuildCommand();
           builder.inheritFromParent(this);
-          await builder.build(outputPath: _localBundlePath, mainPath: mainPath);
-          if (device.startBundle(package, _localBundlePath, poke, argResults['checked']))
-            startedSomething = true;
+
+          Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
+          try {
+            String localBundlePath = path.join(tempDir.path, _localBundleName);
+            String localSnapshotPath = path.join(tempDir.path, _localSnapshotName);
+            await builder.build(
+              snapshotPath: localSnapshotPath,
+              outputPath: localBundlePath,
+              mainPath: mainPath);
+            if (device.startBundle(package, localBundlePath, poke, argResults['checked']))
+              startedSomething = true;
+          } finally {
+            tempDir.deleteSync(recursive: true);
+          }
         }
       } else {
         if (await device.startApp(package))
