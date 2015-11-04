@@ -29,7 +29,23 @@ class Paint {
   StrokeCap strokeCap;
 
   // Must match PaintFields enum in Paint.cpp.
-  List<dynamic> get _value {
+  dynamic get _value {
+    // The most common usage is a Paint with no options besides a color and
+    // anti-aliasing.  In this case, save time by just returning the color
+    // as an int.
+    if (strokeWidth == null &&
+        isAntiAlias &&
+        colorFilter == null &&
+        drawLooper == null &&
+        filterQuality == null &&
+        maskFilter == null &&
+        shader == null &&
+        style == null &&
+        transferMode == null &&
+        strokeCap == null) {
+      return color.value;
+    }
+
     return [
       strokeWidth,
       isAntiAlias,
