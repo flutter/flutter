@@ -6,7 +6,6 @@ import 'package:bignum/bignum.dart';
 import 'package:cipher/cipher.dart' hide CipherParameters;
 import 'package:crypto/crypto.dart';
 import 'package:flx/signing.dart';
-import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 
 main() async {
@@ -97,33 +96,19 @@ main() async {
     expect(verifies, equals(false), reason: failReason);
   });
 
-  test('verifyContentHash works', () {
-    new FakeAsync().run((FakeAsync async) {
-      bool verifies;
-      Stream contentStream = new Stream.fromIterable(kTestBytesList);
-      verifyContentHash(new BigInteger(kTestHash), contentStream).then((bool rv) {
-        verifies = rv;
-      });
-      async.elapse(Duration.ZERO);
-      expect(verifies, equals(true));
+  test('verifyContentHash works', () async {
+    Stream contentStream = new Stream.fromIterable(kTestBytesList);
+    bool verifies = await verifyContentHash(new BigInteger(kTestHash), contentStream);
+    expect(verifies, equals(true));
 
-      // Ensure it fails with invalid hash or content.
-      verifies = null;
-      contentStream = new Stream.fromIterable(kTestBytesList);
-      verifyContentHash(new BigInteger(0xdeadbeef), contentStream).then((bool rv) {
-        verifies = rv;
-      });
-      async.elapse(Duration.ZERO);
-      expect(verifies, equals(false));
+    // Ensure it fails with invalid hash or content.
+    contentStream = new Stream.fromIterable(kTestBytesList);
+    verifies = await verifyContentHash(new BigInteger(0xdeadbeef), contentStream);
+    expect(verifies, equals(false));
 
-      verifies = null;
-      Stream badContentStream =
-          new Stream.fromIterable([new Uint8List.fromList(<int>[42])]);
-      verifyContentHash(new BigInteger(kTestHash), badContentStream).then((bool rv) {
-        verifies = rv;
-      });
-      async.elapse(Duration.ZERO);
-      expect(verifies, equals(false));
-    });
+    Stream badContentStream =
+        new Stream.fromIterable([new Uint8List.fromList(<int>[42])]);
+    verifies = await verifyContentHash(new BigInteger(kTestHash), badContentStream);
+    expect(verifies, equals(false));
   });
 }
