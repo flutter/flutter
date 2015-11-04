@@ -84,7 +84,7 @@ class GestureDetector extends StatefulComponent {
 }
 
 class _GestureDetectorState extends State<GestureDetector> {
-  final PointerRouter _router = FlutterBinding.instance.pointerRouter;
+  PointerRouter get _router => FlutterBinding.instance.pointerRouter;
 
   TapGestureRecognizer _tap;
   DoubleTapGestureRecognizer _doubleTap;
