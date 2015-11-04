@@ -17,17 +17,35 @@ class ToolBar extends StatelessComponent {
     this.left,
     this.center,
     this.right,
+    this.bottom,
     this.level: 2,
     this.backgroundColor,
-    this.textTheme
+    this.textTheme,
+    this.padding: EdgeDims.zero
   }) : super(key: key);
 
   final Widget left;
   final Widget center;
   final List<Widget> right;
+  final Widget bottom;
   final int level;
   final Color backgroundColor;
   final TextTheme textTheme;
+  final EdgeDims padding;
+
+  ToolBar withPadding(EdgeDims newPadding) {
+    return new ToolBar(
+      key: key,
+      left: left,
+      center: center,
+      right: right,
+      bottom: bottom,
+      level: level,
+      backgroundColor: backgroundColor,
+      textTheme: textTheme,
+      padding: newPadding
+    );
+  }
 
   Widget build(BuildContext context) {
     Color color = backgroundColor;
@@ -62,6 +80,16 @@ class ToolBar extends StatelessComponent {
     if (right != null)
       children.addAll(right);
 
+    final List<Widget> columnChildren = <Widget>[
+      new Container(height: kToolBarHeight, child: new Row(children))
+    ];
+
+    if (bottom != null)
+      columnChildren.add(new DefaultTextStyle(
+        style: centerStyle,
+        child: new Container(height: kExtendedToolBarHeight - kToolBarHeight, child: bottom)
+      ));
+
     Widget content = new AnimatedContainer(
       duration: kThemeChangeDuration,
       padding: new EdgeDims.symmetric(horizontal: 8.0),
@@ -71,14 +99,7 @@ class ToolBar extends StatelessComponent {
       ),
       child: new DefaultTextStyle(
         style: sideStyle,
-        child: new Column(<Widget>[
-            new Container(
-              child: new Row(children),
-              height: kToolBarHeight
-            ),
-          ],
-          justifyContent: FlexJustifyContent.end
-        )
+        child: new Container(padding: padding, child: new Column(columnChildren, justifyContent: FlexJustifyContent.collapse))
       )
     );
 
