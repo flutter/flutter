@@ -11,6 +11,9 @@ abstract class MultiChildLayoutDelegate {
   final List<RenderBox> _indexToChild = <RenderBox>[];
 
   /// Returns the size of this object given the incomming constraints.
+  /// The size cannot reflect the instrinsic sizes of the children.
+  /// If this layout has a fixed width or height the returned size
+  /// can reflect that.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
   /// Ask the child to update its layout within the limits specified by
