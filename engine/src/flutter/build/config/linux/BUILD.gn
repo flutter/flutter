@@ -60,12 +60,6 @@ pkg_config("pangoft2") {
   packages = [ "pangoft2" ]
 }
 
-# Note: if your target also depends on //dbus, you don't need to add this
-# config (it will get added automatically if you depend on //dbus).
-pkg_config("dbus") {
-  packages = [ "dbus-1" ]
-}
-
 if (use_evdev_gestures) {
   pkg_config("libevdev-cros") {
     packages = [ "libevdev-cros" ]
