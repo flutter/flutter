@@ -674,9 +674,9 @@ class AndroidDevice extends Device {
         _logging.severe('Unexpected response from getprop: "$sdkVersion"');
         return false;
       }
-      if (sdkVersionParsed < 22) {
+      if (sdkVersionParsed < 19) {
         _logging.severe('Version "$sdkVersion" of the Android SDK is too old. '
-            'Please install Lollipop (version 22) or later.');
+            'Please install Jelly Bean (version 19) or later.');
         return false;
       }
       return true;
