@@ -17,7 +17,7 @@ import 'theme.dart';
 
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
-const double _kMenuHorizontalPadding = 36.0;
+const EdgeDims _kMenuHorizontalPadding = const EdgeDims.only(left: 36.0, right: 36.0);
 const double _kBaselineOffsetFromBottom = 20.0;
 const Border _kDropdownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
 
@@ -54,7 +54,10 @@ class _DropdownMenu extends StatusTransitionComponent {
         performance: route.performance,
         opacity: opacity,
         child: new InkWell(
-          child: route.items[itemIndex],
+          child: new Container(
+            padding: _kMenuHorizontalPadding,
+            child: route.items[itemIndex]
+          ),
           onTap: () {
             Navigator.of(context).pop(route.items[itemIndex].value);
           }
@@ -91,8 +94,8 @@ class _DropdownMenu extends StatusTransitionComponent {
 
     return new Positioned(
       top: menuRect.top - (route.selectedIndex * route.rect.height),
-      right: menuRect.right - _kMenuHorizontalPadding,
-      left: menuRect.left - _kMenuHorizontalPadding,
+      right: menuRect.right,
+      left: menuRect.left,
       child: new Focus(
         key: new GlobalObjectKey(route),
         child: new FadeTransition(
@@ -196,7 +199,7 @@ class DropdownButton<T> extends StatelessComponent {
       completer: completer,
       items: items,
       selectedIndex: selectedIndex,
-      rect: rect,
+      rect: _kMenuHorizontalPadding.inflateRect(rect),
       level: level
     ));
     completer.future.then((T newValue) {
