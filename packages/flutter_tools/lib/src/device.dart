@@ -886,8 +886,10 @@ class AndroidDevice extends Device {
       '-v',
       'tag', // Only log the tag and the message
       '-s',
-      'sky',
-      'chromium',
+      'sky:V',
+      'chromium:D',
+      'ActivityManager:W',
+      '*:F',
     ], prefix: 'android: ');
   }
 

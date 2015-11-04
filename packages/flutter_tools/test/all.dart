@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'android_device_test.dart' as android_device_test;
+import 'daemon_test.dart' as daemon_test;
 import 'init_test.dart' as init_test;
 import 'install_test.dart' as install_test;
 import 'listen_test.dart' as listen_test;
@@ -15,6 +16,7 @@ import 'trace_test.dart' as trace_test;
 
 main() {
   android_device_test.defineTests();
+  daemon_test.defineTests();
   init_test.defineTests();
   install_test.defineTests();
   listen_test.defineTests();

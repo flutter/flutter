@@ -13,7 +13,7 @@ import 'package:test/test.dart';
 main() => defineTests();
 
 defineTests() {
-  group('', () {
+  group('init', () {
     Directory temp;
 
     setUp(() {
@@ -28,7 +28,7 @@ defineTests() {
     // covered on the linux one.
     if (!Platform.isWindows) {
       // Verify that we create a project that is well-formed.
-      test('init flutter-simple', () async {
+      test('flutter-simple', () async {
         InitCommand command = new InitCommand();
         CommandRunner runner = new CommandRunner('test_flutter', '')
           ..addCommand(command);

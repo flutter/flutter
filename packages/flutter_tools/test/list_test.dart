@@ -36,7 +36,6 @@ defineTests() {
       // Instead, cause the test to run the echo command.
       when(mockDevices.iOSSimulator.xcrunPath).thenReturn(mockCommand);
 
-
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
       runner.run(['list']).then((int code) => expect(code, equals(0)));
