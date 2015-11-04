@@ -1,12 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert' hide BASE64;
 import 'dart:typed_data';
 
 import 'package:bignum/bignum.dart';
+import 'package:cipher/cipher.dart' hide CipherParameters;
+import 'package:crypto/crypto.dart';
 import 'package:flx/signing.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
-import 'package:cipher/cipher.dart' hide CipherParameters;
 
 main() async {
   // The following constant was generated via the openssl shell commands:
