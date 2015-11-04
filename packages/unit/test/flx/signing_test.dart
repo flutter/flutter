@@ -6,8 +6,9 @@ import 'package:bignum/bignum.dart';
 import 'package:flx/signing.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
+import 'package:cipher/cipher.dart' hide CipherParameters;
 
-void main() {
+main() async {
   // The following constant was generated via the openssl shell commands:
   // openssl ecparam -genkey -name prime256v1 -out privatekey.pem
   // openssl ec -in privatekey.pem -outform DER | base64
@@ -30,6 +31,15 @@ void main() {
   final List<Uint8List> kTestBytesList = <Uint8List>[
     new Uint8List.fromList(<int>[1, 2]), new Uint8List.fromList(<int>[3])];
   final int kTestHash = 0x039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81;
+
+  // Set up a key generator.
+  CipherParameters cipher = CipherParameters.get();
+  await cipher.seedRandom();
+  ECKeyGeneratorParameters ecParams = new ECKeyGeneratorParameters(cipher.domain);
+  ParametersWithRandom<ECKeyGeneratorParameters> keyGeneratorParams =
+    new ParametersWithRandom<ECKeyGeneratorParameters>(ecParams, cipher.random);
+  KeyGenerator keyGenerator = new KeyGenerator('EC');
+  keyGenerator.init(keyGeneratorParams);
 
   test('can read openssl key pair', () {
     AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
@@ -66,6 +76,24 @@ void main() {
     expect(verifies, equals(false));
     verifies = verifyManifestSignature(manifest, badBytes, signatureBytes);
     expect(verifies, equals(false));
+  });
+
+  test('signing works with arbitrary key', () {
+    AsymmetricKeyPair keyPair = keyGenerator.generateKeyPair();
+    String failReason = 'offending private key: ${keyPair.privateKey.d}';
+    Map<String, dynamic> manifest = JSON.decode(UTF8.decode(
+        serializeManifest(kManifest, keyPair.publicKey, kTestBytes)));
+    Uint8List signatureBytes = signManifest(kTestBytes, keyPair.privateKey);
+
+    bool verifies = verifyManifestSignature(manifest, kTestBytes, signatureBytes);
+    expect(verifies, equals(true), reason: failReason);
+
+    // Ensure it fails with invalid signature or content.
+    Uint8List badBytes = new Uint8List.fromList(<int>[42]);
+    verifies = verifyManifestSignature(manifest, kTestBytes, badBytes);
+    expect(verifies, equals(false), reason: failReason);
+    verifies = verifyManifestSignature(manifest, badBytes, signatureBytes);
+    expect(verifies, equals(false), reason: failReason);
   });
 
   test('verifyContentHash works', () {
