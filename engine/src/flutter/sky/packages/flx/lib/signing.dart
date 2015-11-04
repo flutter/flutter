@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert' hide BASE64;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -11,6 +11,7 @@ import 'package:asn1lib/asn1lib.dart';
 import 'package:bignum/bignum.dart';
 import 'package:cipher/cipher.dart';
 import 'package:cipher/impl/client.dart';
+import 'package:crypto/crypto.dart';
 
 export 'package:cipher/cipher.dart' show AsymmetricKeyPair;
 
