@@ -18,10 +18,9 @@ def main():
 
     pub_path = os.path.join(engine_root, 'third_party/dart-sdk/dart-sdk/bin/pub')
 
-    if args.publish:
-        subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'sky/packages/sky'))
-        subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'sky/packages/flx'))
-        subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'skysprites'))
+    subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'sky/packages/sky'))
+    subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'sky/packages/flx'))
+    subprocess.check_call([pub_path, 'publish', '--force'], cwd=os.path.join(engine_root, 'skysprites'))
 
 
 if __name__ == '__main__':
