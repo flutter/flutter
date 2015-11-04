@@ -73,4 +73,25 @@ void main() {
     expect(coloredBox.size.width, equals(780.0));
     expect(coloredBox.size.height, equals(580.0));
   });
+
+  test("reparenting should clear position", () {
+    RenderDecoratedBox coloredBox = new RenderDecoratedBox(
+      decoration: new BoxDecoration());
+    RenderPadding paddedBox = new RenderPadding(
+      child: coloredBox, padding: const EdgeDims.all(10.0));
+
+    layout(paddedBox);
+
+    BoxParentData parentData = coloredBox.parentData;
+    expect(parentData.position.x, isNot(equals(0.0)));
+
+    paddedBox.child = null;
+    RenderConstrainedBox constraintedBox = new RenderConstrainedBox(
+      child: coloredBox, additionalConstraints: const BoxConstraints());
+
+    layout(constraintedBox);
+
+    parentData = coloredBox.parentData;
+    expect(parentData.position.x, equals(0.0));
+  });
 }
