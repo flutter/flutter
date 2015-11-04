@@ -135,7 +135,10 @@ class RenderPadding extends RenderShiftedBox {
     ));
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}padding: $padding\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('padding: $padding');
+  }
 }
 
 enum ShrinkWrap {
@@ -202,7 +205,10 @@ class RenderPositionedBox extends RenderShiftedBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}alignment: $alignment\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('alignment: $alignment');
+  }
 }
 
 /// A delegate for computing the layout of a render object with a single child.
@@ -315,5 +321,9 @@ class RenderBaseline extends RenderShiftedBox {
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}baseline: $baseline\nbaselineType: $baselineType';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('baseline: $baseline');
+    settings.add('baselineType: $baselineType');
+  }
 }

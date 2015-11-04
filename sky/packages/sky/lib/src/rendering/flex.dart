@@ -597,6 +597,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return header;
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}direction: $_direction\n${prefix}justifyContent: $_justifyContent\n${prefix}alignItems: $_alignItems\n${prefix}textBaseline: $_textBaseline\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('direction: $_direction');
+    settings.add('justifyContent: $_justifyContent');
+    settings.add('alignItems: $_alignItems');
+    settings.add('textBaseline: $_textBaseline');
+  }
 
 }

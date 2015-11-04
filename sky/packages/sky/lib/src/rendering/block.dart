@@ -118,7 +118,10 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     assert(!size.isInfinite);
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}direction: $direction\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('direction: $direction');
+  }
 }
 
 /// A block layout with a concrete set of children
@@ -427,5 +430,8 @@ class RenderBlockViewport extends RenderBlockBase {
       defaultHitTestChildren(result, position: position + new Offset(-startOffset, 0.0));
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}startOffset: $startOffset\n';
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('startOffset: $startOffset');
+  }
 }
