@@ -1098,16 +1098,16 @@ class DefaultAssetBundle extends InheritedWidget {
 }
 
 class RawImage extends StatelessComponent {
-  RawImage(
-      {Key key,
-      this.bytes,
-      this.width,
-      this.height,
-      this.colorFilter,
-      this.fit,
-      this.repeat: ImageRepeat.noRepeat,
-      this.centerSlice})
-      : super(key: key);
+  RawImage({
+    Key key,
+    this.bytes,
+    this.width,
+    this.height,
+    this.colorFilter,
+    this.fit,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice
+  }) : super(key: key);
 
   final Uint8List bytes;
   final double width;
@@ -1120,13 +1120,14 @@ class RawImage extends StatelessComponent {
   Widget build(BuildContext context) {
     ImageResource image = new ImageResource(decodeImageFromList(bytes));
     return new ImageListener(
-        image: image,
-        width: width,
-        height: height,
-        colorFilter: colorFilter,
-        fit: fit,
-        repeat: repeat,
-        centerSlice: centerSlice);
+      image: image,
+      width: width,
+      height: height,
+      colorFilter: colorFilter,
+      fit: fit,
+      repeat: repeat,
+      centerSlice: centerSlice
+    );
   }
 }
 
