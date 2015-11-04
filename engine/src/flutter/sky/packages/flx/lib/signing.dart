@@ -161,16 +161,3 @@ AsymmetricKeyPair keyPairFromPrivateKeyBytes(List<int> privateKeyBytes) {
   ECPublicKey publicKey = _publicKeyFromPrivateKey(privateKey);
   return new AsymmetricKeyPair(publicKey, privateKey);
 }
-
-// TODO(mpcomplete): remove this class when flutter_tools is updated.
-class KeyPair extends AsymmetricKeyPair {
-  KeyPair(PublicKey publicKey, PrivateKey privateKey)
-      : super(publicKey, privateKey);
-
-  static KeyPair readFromPrivateKeySync(String privateKeyPath) {
-    AsymmetricKeyPair pair = keyPairFromPrivateKeyFileSync(privateKeyPath);
-    if (pair == null)
-      return null;
-    return new KeyPair(pair.publicKey, pair.privateKey);
-  }
-}
