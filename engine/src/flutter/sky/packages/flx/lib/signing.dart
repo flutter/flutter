@@ -20,25 +20,38 @@ class CipherParameters {
   final String signerAlgorithm = 'SHA-256/ECDSA';
   final String hashAlgorithm = 'SHA-256';
   final ECDomainParameters domain = new ECDomainParameters('prime256v1');
-  final SecureRandom random = _initRandom();
+  SecureRandom get random {
+    if (_random == null)
+      _initRandom(new Uint8List(16), new Uint8List(16));
+    return _random;
+  }
+
+  // Seeds our secure random number generator using data from /dev/urandom.
+  // Disclaimer: I don't really understand why we need 2 parameters for
+  // cipher's API.
+  Future seedRandom() async {
+    RandomAccessFile file = await new File("/dev/urandom").open();
+    Uint8List key = new Uint8List.fromList(await file.read(16));
+    Uint8List iv = new Uint8List.fromList(await file.read(16));
+    _initRandom(key, iv);
+  }
+
+  SecureRandom _random;
+  void _initRandom(Uint8List key, Uint8List iv) {
+    KeyParameter keyParam = new KeyParameter(key);
+    ParametersWithIV params = new ParametersWithIV(keyParam, iv);
+    _random = new SecureRandom('AES/CTR/AUTO-SEED-PRNG')
+        ..seed(params);
+  }
+
+  static CipherParameters get() => _params;
+  static CipherParameters _init() {
+    initCipher();
+    return new CipherParameters();
+  }
 }
 
-SecureRandom _initRandom() {
-  // TODO(mpcomplete): Provide a better seed here. External entropy source?
-  final Uint8List key = new Uint8List(16);
-  final KeyParameter keyParam = new KeyParameter(key);
-  final ParametersWithIV params = new ParametersWithIV(keyParam, new Uint8List(16));
-  SecureRandom random = new SecureRandom('AES/CTR/AUTO-SEED-PRNG')
-      ..seed(params);
-  return random;
-}
-
-CipherParameters _initParams() {
-  initCipher();
-  return new CipherParameters();
-}
-
-final CipherParameters _params = _initParams();
+final CipherParameters _params = CipherParameters._init();
 
 // Returns a serialized manifest, with the public key and hash of the content
 // included.
