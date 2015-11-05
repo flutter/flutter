@@ -70,10 +70,10 @@ def main():
         app_paths = []
         for root, dirs, files in os.walk(SKY_UNIT_TESTS):
             app_paths.extend(os.path.join(root, f)
-                             for f in files if f.endswith(".dart"))
+                             for f in files if f.endswith(".dart") and not '.#' in f)
         for root, dirs, files in os.walk(SKY_EXAMPLES):
             app_paths.extend(os.path.join(root, f)
-                             for f in files if f.endswith(".dart"))
+                             for f in files if f.endswith(".dart") and not '.#' in f)
             if '.pub' in dirs:
               dirs.remove('.pub')
 
