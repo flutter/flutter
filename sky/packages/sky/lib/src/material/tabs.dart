@@ -205,8 +205,8 @@ class _RenderTabBar extends RenderBox with
       reportLayoutChangedIfNeeded();
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    defaultHitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return defaultHitTestChildren(result, position: position);
   }
 
   void _paintIndicator(PaintingCanvas canvas, RenderBox selectedTab, Offset offset) {

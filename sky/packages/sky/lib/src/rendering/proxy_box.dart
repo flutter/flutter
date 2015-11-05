@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
@@ -70,11 +71,8 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     }
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    if (child != null)
-      child.hitTest(result, position: position);
-    else
-      super.hitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return child?.hitTest(result, position: position) ?? false;
   }
 
   void paint(PaintingContext context, Offset offset) {
@@ -625,6 +623,15 @@ class RenderClipOval extends RenderProxyBox {
     return _cachedPath;
   }
 
+  bool hitTest(HitTestResult result, { Point position }) {
+    Point center = size.center(Point.origin);
+    Offset offset = new Offset((position.x - center.x) / size.width,
+                               (position.y - center.y) / size.height);
+    if (offset.distance > 0.5)
+      return false;
+    return super.hitTest(result, position: position);
+  }
+
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
@@ -704,6 +711,19 @@ class RenderDecoratedBox extends RenderProxyBox {
   void detach() {
     _removeBackgroundImageListenerIfNeeded();
     super.detach();
+  }
+
+  bool hitTestSelf(Point position) {
+    switch (_painter.decoration.shape) {
+      case Shape.rectangle:
+        // TODO(abarth): We should check the border radius.
+        return true;
+      case Shape.circle:
+        // Circles are inscribed into our smallest dimension.
+        Point center = size.center(Point.origin);
+        double distance = (position - center).distance;
+        return distance <= math.min(size.width, size.height) / 2.0;
+    }
   }
 
   void paint(PaintingContext context, Offset offset) {
@@ -894,6 +914,7 @@ class RenderSizeObserver extends RenderProxyBox {
 
 /// Called when its time to paint into the given canvas
 typedef void CustomPaintCallback(PaintingCanvas canvas, Size size);
+typedef bool CustomHitTestCallback(Point position);
 
 /// Delegates its painting to [onPaint]
 ///
@@ -911,6 +932,7 @@ class RenderCustomPaint extends RenderProxyBox {
 
   RenderCustomPaint({
     CustomPaintCallback onPaint,
+    this.onHitTest,
     RenderBox child
   }) : super(child) {
     assert(onPaint != null);
@@ -931,9 +953,15 @@ class RenderCustomPaint extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  CustomHitTestCallback onHitTest;
+
   void attach() {
     assert(_onPaint != null);
     super.attach();
+  }
+
+  bool hitTestSelf(Point position) {
+    return onHitTest == null || onHitTest(position);
   }
 
   void paint(PaintingContext context, Offset offset) {

@@ -22,6 +22,8 @@ class IconButton extends StatelessComponent {
   final VoidCallback onPressed;
 
   Widget build(BuildContext context) {
+    // TODO(abarth): We should use a radial reaction here so you can hit the
+    // 8.0 pixel padding as well as the icon.
     return new GestureDetector(
       onTap: onPressed,
       child: new Padding(

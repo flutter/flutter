@@ -21,9 +21,14 @@ void main() {
                   content: new Text(helloSnackBar)
                 );
               },
-              child: new Center(
-                key: tapTarget,
-                child: new Placeholder(key: placeholderKey)
+              child: new Container(
+                decoration: const BoxDecoration(
+                  backgroundColor: const Color(0xFF00FF00)
+                ),
+                child: new Center(
+                  key: tapTarget,
+                  child: new Placeholder(key: placeholderKey)
+                )
               )
             );
           }

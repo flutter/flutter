@@ -179,6 +179,8 @@ class RenderImage extends RenderBox {
     return _sizeForConstraints(constraints).height;
   }
 
+  bool hitTestSelf(Point position) => true;
+
   void performLayout() {
     size = _sizeForConstraints(constraints);
   }

@@ -219,8 +219,8 @@ class RenderAutoLayout extends RenderBox
     // only indicates that the value has been flushed to the variable.
   }
 
-  void hitTestChildren(HitTestResult result, {Point position}) {
-    defaultHitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, {Point position}) {
+    return defaultHitTestChildren(result, position: position);
   }
 
   void paint(PaintingContext context, Offset offset) {

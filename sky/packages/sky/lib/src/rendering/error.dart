@@ -30,6 +30,8 @@ class RenderErrorBox extends RenderBox {
 
   bool get sizedByParent => true;
 
+  bool hitTestSelf(Point position) => true;
+
   void performResize() {
     size = constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
   }

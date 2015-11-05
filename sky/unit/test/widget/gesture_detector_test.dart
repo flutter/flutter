@@ -23,7 +23,11 @@ void main() {
         onVerticalDragEnd: (Offset velocity) {
           didEndDrag = true;
         },
-        child: new Container()
+        child: new Container(
+          decoration: const BoxDecoration(
+            backgroundColor: const Color(0xFF00FF00)
+          )
+        )
       );
 
       tester.pumpWidget(widget);
@@ -70,7 +74,11 @@ void main() {
         onVerticalDragEnd: (Offset velocity) { gestureCount += 1; },
         onHorizontalDragUpdate: (_) { fail("gesture should not match"); },
         onHorizontalDragEnd: (Offset velocity) { fail("gesture should not match"); },
-        child: new Container()
+        child: new Container(
+          decoration: const BoxDecoration(
+            backgroundColor: const Color(0xFF00FF00)
+          )
+        )
       );
       tester.pumpWidget(widget);
 
@@ -106,7 +114,11 @@ void main() {
           onPanEnd: (_) {
             didEndPan = true;
           },
-          child: new Container()
+          child: new Container(
+            decoration: const BoxDecoration(
+              backgroundColor: const Color(0xFF00FF00)
+            )
+          )
         )
       );
 

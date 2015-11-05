@@ -357,8 +357,8 @@ abstract class RenderStackBase extends RenderBox
     }
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    defaultHitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return defaultHitTestChildren(result, position: position);
   }
 
   void paintStack(PaintingContext context, Offset offset);
@@ -455,15 +455,15 @@ class RenderIndexedStack extends RenderStackBase {
     return child;
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Point position }) {
     if (firstChild == null)
-      return;
+      return false;
     assert(position != null);
     RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
     Point transformed = new Point(position.x - childParentData.position.x,
                                   position.y - childParentData.position.y);
-    child.hitTest(result, position: transformed);
+    return child.hitTest(result, position: transformed);
   }
 
   void paintStack(PaintingContext context, Offset offset) {

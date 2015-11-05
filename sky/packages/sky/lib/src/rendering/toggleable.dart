@@ -73,4 +73,6 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (onChanged != null)
       onChanged(!_value);
   }
+
+  bool hitTestSelf(Point position) => true;
 }
