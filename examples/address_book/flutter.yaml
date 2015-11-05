@@ -1,6 +1,5 @@
 name: address_book
 version: 0.0.2
-update-url: http://localhost:9888/examples/address_book/
 material-design-icons:
   - name: av/volume_up
   - name: communication/email
