@@ -19,11 +19,11 @@ fi
 REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
 
 if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != $REVISION ]; then
-  DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
+  $DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
   echo -n $REVISION > "$STAMP_PATH"
 fi
 
-DART "$SNAPSHOT_PATH" "$@"
+$DART "$SNAPSHOT_PATH" "$@"
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
 # If it is, we need to snapshot it again.
@@ -32,5 +32,5 @@ if [ $EXIT_CODE != 253 ]; then
   exit $EXIT_CODE
 fi
 
-DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
-DART "$SNAPSHOT_PATH" "$@"
+$DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
+$DART "$SNAPSHOT_PATH" "$@"
