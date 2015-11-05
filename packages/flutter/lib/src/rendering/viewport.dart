@@ -160,11 +160,12 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     transform.translate(-scrollOffset.dx, -scrollOffset.dy);
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
       Point transformed = position + _scrollOffsetRoundedToIntegerDevicePixels;
-      child.hitTest(result, position: transformed);
+      return child.hitTest(result, position: transformed);
     }
+    return false;
   }
 }

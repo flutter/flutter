@@ -33,7 +33,11 @@ void main() {
                   onTap: () {
                     didReceiveTap = true;
                   },
-                  child: new Container()
+                  child: new Container(
+                    decoration: new BoxDecoration(
+                      backgroundColor: new Color(0xFF00FFFF)
+                    )
+                  )
                 )
               )
             )
@@ -78,7 +82,11 @@ void main() {
                   onTap: () {
                     didReceiveTap = true;
                   },
-                  child: new Container()
+                  child: new Container(
+                    decoration: new BoxDecoration(
+                      backgroundColor: new Color(0xFF00FFFF)
+                    )
+                  )
                 )
               )
             )
@@ -124,7 +132,11 @@ void main() {
                   onTap: () {
                     didReceiveTap = true;
                   },
-                  child: new Container()
+                  child: new Container(
+                    decoration: new BoxDecoration(
+                      backgroundColor: new Color(0xFF00FFFF)
+                    )
+                  )
                 )
               )
             )

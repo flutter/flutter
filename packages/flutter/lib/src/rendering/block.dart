@@ -219,8 +219,8 @@ class RenderBlock extends RenderBlockBase {
     defaultPaint(context, offset);
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    defaultHitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return defaultHitTestChildren(result, position: position);
   }
 
 }
@@ -423,11 +423,11 @@ class RenderBlockViewport extends RenderBlockBase {
       transform.translate(startOffset, 0.0);
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Point position }) {
     if (isVertical)
-      defaultHitTestChildren(result, position: position + new Offset(0.0, -startOffset));
+      return defaultHitTestChildren(result, position: position + new Offset(0.0, -startOffset));
     else
-      defaultHitTestChildren(result, position: position + new Offset(-startOffset, 0.0));
+      return defaultHitTestChildren(result, position: position + new Offset(-startOffset, 0.0));
   }
 
   void debugDescribeSettings(List<String> settings) {

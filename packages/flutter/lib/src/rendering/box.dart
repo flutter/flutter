@@ -545,12 +545,17 @@ abstract class RenderBox extends RenderObject {
   bool hitTest(HitTestResult result, { Point position }) {
     if (position.x >= 0.0 && position.x < _size.width &&
         position.y >= 0.0 && position.y < _size.height) {
-      hitTestChildren(result, position: position);
-      result.add(new BoxHitTestEntry(this, position));
-      return true;
+      if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+        result.add(new BoxHitTestEntry(this, position));
+        return true;
+      }
     }
     return false;
   }
+
+  /// Override this function if this render object can be hit even if its
+  /// children were not hit
+  bool hitTestSelf(Point position) => false;
 
   /// Override this function to check whether any children are located at the
   /// given position
@@ -558,7 +563,7 @@ abstract class RenderBox extends RenderObject {
   /// Typically children should be hit tested in reverse paint order so that
   /// hit tests at locations where children overlap hit the child that is
   /// visually "on top" (i.e., paints later).
-  void hitTestChildren(HitTestResult result, { Point position }) { }
+  bool hitTestChildren(HitTestResult result, { Point position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform
