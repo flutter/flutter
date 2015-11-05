@@ -21,6 +21,7 @@ import 'src/commands/logs.dart';
 import 'src/commands/run_mojo.dart';
 import 'src/commands/start.dart';
 import 'src/commands/stop.dart';
+import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/process.dart';
 
@@ -54,6 +55,7 @@ Future main(List<String> args) async {
     ..addCommand(new RunMojoCommand())
     ..addCommand(new StartCommand())
     ..addCommand(new StopCommand())
+    ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand());
 
   return Chain.capture(() async {

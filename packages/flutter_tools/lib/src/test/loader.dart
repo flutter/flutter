@@ -29,8 +29,10 @@ final String _kSkyShell = Platform.environment['SKY_SHELL'];
 const String _kHost = '127.0.0.1';
 const String _kPath = '/runner';
 
+String shellPath;
+
 // Right now a bunch of our tests crash or assert after the tests have finished running.
-// Mostly this is just because the test puts the framework in an inconsistent state with 
+// Mostly this is just because the test puts the framework in an inconsistent state with
 // a scheduled microtask that verifies that state. Eventually we should fix all these
 // problems but for now we'll just paper over them.
 const bool kExpectAllTestsToCloseCleanly = false;
@@ -54,8 +56,8 @@ Future<_ServerInfo> _createServer() async {
 }
 
 Future<Process> _startProcess(String path, { String packageRoot }) {
-  assert(_kSkyShell != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
-  return Process.start(_kSkyShell, [
+  assert(shellPath != null || _kSkyShell != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
+  return Process.start(shellPath ?? _kSkyShell, [
     '--enable-checked-mode',
     '--non-interactive',
     '--package-root=$packageRoot',
@@ -172,7 +174,7 @@ void main() {
       completer.complete(response["tests"].map((test) {
         var testMetadata = new Metadata.deserialize(test['metadata']);
         return new RemoteTest(test['name'], testMetadata, socket, test['index']);
-      }));        
+      }));
     }
   });
 
