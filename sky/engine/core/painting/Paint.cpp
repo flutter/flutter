@@ -51,6 +51,16 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
   Dart_Handle value_handle = DOMDartState::Current()->value_handle();
   Dart_Handle data = Dart_GetField(dart_paint, value_handle);
 
+  if (Dart_IsInteger(data)) {
+    // This is a simple Paint object that just contains a color with
+    // anti-aliasing enabled. The data is the color, represented as an
+    // int in the same format as SkColor.
+    result.sk_paint.setColor(DartConverter<SkColor>::FromDart(data));
+    result.sk_paint.setAntiAlias(true);
+    result.is_null = false;
+    return result;
+  }
+
   DCHECK(Dart_IsList(data));
 
   intptr_t length;
