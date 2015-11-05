@@ -1,0 +1,86 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/bindings/bindings.gni")
+
+template("sky_precompilation_sdk") {
+  assert(is_ios, "The precompilation SDK is only supported for iOS targets")
+
+  assert(defined(invoker.sdk_name), "The SDK name must be defined")
+
+  sdk_name = invoker.sdk_name
+  sdk_dir = "$root_out_dir/$sdk_name"
+
+  snapshotter_copy_gen_target_name = target_name + "_copy_snapshotter"
+  copy(snapshotter_copy_gen_target_name) {
+    snapshotter_target = "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)"
+    snapshotter_directory = get_label_info(snapshotter_target, "root_out_dir")
+    snapshotter_name = get_label_info(snapshotter_target, "name")
+
+    sources = [  "$snapshotter_directory/$snapshotter_name"  ]
+    outputs = [  "$sdk_dir/Tools/Snapshotter"  ]
+
+    deps = [  snapshotter_target  ]
+  }
+
+  copy("embedder_entry_points") {
+    sources = [ "//sky/engine/bindings/dart_vm_entry_points.txt" ]
+    outputs = [  "$sdk_dir/Tools/EmbedderEntryPoints"  ]
+  }
+
+  copy("precompilation_xcode_scripts") {
+    sources = [
+      "//sky/build/SnapshotterInvoke",
+      "//sky/build/PackagerInvoke",
+    ]
+    outputs = [  "$sdk_dir/Tools/{{source_file_part}}"  ]
+  }
+
+  copy("copy_sdk_xcode_harness") {
+    sources = [
+      "//sky/build/sdk_xcode_harness/FlutterApplication",
+      "//sky/build/sdk_xcode_harness/FlutterApplication.xcodeproj",
+      "//sky/build/sdk_xcode_harness/Runner",
+    ]
+    outputs = [  "$sdk_dir/{{source_file_part}}"  ]
+  }
+
+  executable_gen_target_name = target_name + "_runner"
+  executable(executable_gen_target_name) {
+    libs = [
+      "UIKit.framework",
+      "AVFoundation.framework",
+      "QuartzCore.framework",
+      "OpenGLES.framework",
+    ]
+    deps = [  "//sky/shell:ios_scaffolding"  ]
+  }
+
+  copy_runner_gen_target_name = target_name + "_copy_runner"
+  copy(copy_runner_gen_target_name) {
+    sources = [  "$root_out_dir/$executable_gen_target_name"  ]
+    outputs = [  "$sdk_dir/RunnerResources/FlutterRunner"  ]
+
+    deps = [  ":$executable_gen_target_name"  ]
+  }
+
+  copy_data_gen_target_name = target_name + "_copy_data"
+  copy(copy_data_gen_target_name) {
+    set_sources_assignment_filter([])
+    sources = [  "//third_party/icu/android/icudtl.dat"  ]
+    outputs = [  "$sdk_dir/RunnerResources/{{source_file_part}}"  ]
+    set_sources_assignment_filter(sources_assignment_filter)
+  }
+
+  group(target_name) {
+    deps = [
+      ":$snapshotter_copy_gen_target_name",
+      ":embedder_entry_points",
+      ":$copy_runner_gen_target_name",
+      ":$copy_data_gen_target_name",
+      ":precompilation_xcode_scripts",
+      ":copy_sdk_xcode_harness",
+    ]
+  }
+}
