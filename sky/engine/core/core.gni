@@ -244,8 +244,8 @@ sky_core_files = [
   "text/Paragraph.h",
   "text/ParagraphBuilder.cpp",
   "text/ParagraphBuilder.h",
-  "view/Tracing.cpp",
-  "view/Tracing.h",
+  "tracing/tracing.cc",
+  "tracing/tracing.h",
   "window/window.cc",
   "window/window.h",
 ]
@@ -275,7 +275,6 @@ core_idl_files = get_path_info([
                                  "painting/Shader.idl",
                                  "text/Paragraph.idl",
                                  "text/ParagraphBuilder.idl",
-                                 "view/Tracing.idl",
                                ],
                                "abspath")
 
@@ -285,6 +284,7 @@ core_dart_files = get_path_info([
                                   "dart/lerp.dart",
                                   "dart/painting.dart",
                                   "dart/text.dart",
+                                  "dart/tracing.dart",
                                   "dart/window.dart",
                                   "painting/Color.dart",
                                   "painting/ColorFilter.dart",
