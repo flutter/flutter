@@ -1,0 +1,36 @@
+#!/bin/bash
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
+FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
+SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
+STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
+SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/sky_tools.dart"
+
+# TODO(abarth): We shouldn't require dart to be on the user's path.
+DART=dart
+
+if [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
+  (cd "$FLUTTER_TOOLS_DIR"; pub get)
+fi
+
+REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
+
+if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != $REVISION ]; then
+  DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
+  echo -n $REVISION > "$STAMP_PATH"
+fi
+
+DART "$SNAPSHOT_PATH" "$@"
+
+# The VM exits with code 253 if the snapshot version is out-of-date.
+# If it is, we need to snapshot it again.
+EXIT_CODE=$?
+if [ $EXIT_CODE != 253 ]; then
+  exit $EXIT_CODE
+fi
+
+DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
+DART "$SNAPSHOT_PATH" "$@"
