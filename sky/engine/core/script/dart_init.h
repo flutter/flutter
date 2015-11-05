@@ -9,8 +9,11 @@
 
 namespace blink {
 
-extern const uint8_t* kDartVmIsolateSnapshotBuffer;
-extern const uint8_t* kDartIsolateSnapshotBuffer;
+extern const char* kDartVmIsolateSnapshotBufferName;
+extern const char* kDartIsolateSnapshotBufferName;
+extern const char* kInstructionsSnapshotName;
+
+void* DartSymbolLookup(const char* symbol_name);
 
 void InitDartVM();
 Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
