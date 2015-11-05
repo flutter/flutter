@@ -49,25 +49,25 @@ idl_compiler_files = [
   "scripts/v8_utilities.py",
 ]
 
+dart_host_toolchain = host_toolchain
+if (target_os == "ios" && !use_ios_simulator) {
+  # During precompilation, a 64 bit Dart VM cannot generate code for a 32 bit
+  # architecture (and vice-versa). The snapshotter that is running on the host
+  # needs to know about the target architecture and built accordingly.
+  if (target_cpu == "arm") {
+    dart_host_toolchain = "//build/toolchain/mac:clang_i386"
+  } else if (target_cpu == "arm64") {
+    dart_host_toolchain = "//build/toolchain/mac:clang_x64"
+  } else {
+    assert(false, "Unknown active architecture on iOS")
+  }
+}
+
 template("dart_precompile") {
   assert(defined(invoker.dart_package_root),
          "The dart package root must be defined")
   assert(defined(invoker.dart_script),
          "The dart script must be specified")
-
-  dart_host_toolchain = host_toolchain
-  if (target_os == "ios" && !use_ios_simulator) {
-    # During precompilation, a 64 bit Dart VM cannot generate code for a 32 bit
-    # architecture (and vice-versa). The snapshotter that is running on the host
-    # needs to know about the target architecture and built accordingly.
-    if (target_cpu == "arm") {
-      dart_host_toolchain = "//build/toolchain/mac:clang_i386"
-    } else if (target_cpu == "arm64") {
-      dart_host_toolchain = "//build/toolchain/mac:clang_x64"
-    } else {
-      assert(false, "Unknown active architecture on iOS")
-    }
-  }
 
   vm_isolate_snapshot_name = target_name + "_vm_isolate.bin"
   vm_isolate_snapshot = "$target_gen_dir/$vm_isolate_snapshot_name"

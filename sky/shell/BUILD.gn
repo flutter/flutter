@@ -189,6 +189,7 @@ if (is_android) {
 } else if (is_ios) {
   import("//build/config/ios/rules.gni")
   import("//build/config/ios/ios_sdk.gni")
+  import("//sky/build/sky_precompilation_sdk.gni")
 
   source_set("ios_scaffolding") {
     sources = [
@@ -220,9 +221,8 @@ if (is_android) {
            ]
   }
 
-  group("shell") {
-    # iOS only supports application bundles with a precompiled instruction
-    # buffer. There is not Shell target for the same.
+  sky_precompilation_sdk("shell") {
+    sdk_name = "SkySDK"
   }
 } else if (is_linux) {
   executable("shell") {
@@ -268,9 +268,6 @@ if (is_android) {
   mac_app("shell") {
     app_name = "SkyShell"
     info_plist = "mac/Info.plist"
-
-    # entitlements_path = ""
-    # code_signing_identity = ""
 
     xibs = [ "mac/sky_mac.xib" ]
 
