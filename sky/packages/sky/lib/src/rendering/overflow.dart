@@ -125,11 +125,8 @@ class RenderOverflowBox extends RenderBox with RenderObjectWithChildMixin<Render
       child.layout(_getInnerConstraints(constraints));
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    if (child != null)
-      child.hitTest(result, position: position);
-    else
-      super.hitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return child?.hitTest(result, position: position) ?? false;
   }
 
   void paint(PaintingContext context, Offset offset) {
@@ -195,11 +192,8 @@ class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<R
       child.layout(constraints);
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    if (child != null)
-      child.hitTest(result, position: position);
-    else
-      super.hitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return child?.hitTest(result, position: position) ?? false;
   }
 
   void paint(PaintingContext context, Offset offset) {

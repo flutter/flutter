@@ -248,6 +248,8 @@ class _RenderInkSplashes extends RenderProxyBox {
       onLongPress();
   }
 
+  bool hitTestSelf(Point position) => true;
+
   void paint(PaintingContext context, Offset offset) {
     if (!_splashes.isEmpty) {
       final PaintingCanvas canvas = context.canvas;

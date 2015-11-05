@@ -108,7 +108,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
     defaultPaint(context, offset);
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    defaultHitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return defaultHitTestChildren(result, position: position);
   }
 }

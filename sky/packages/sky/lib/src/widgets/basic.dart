@@ -138,7 +138,7 @@ class DecoratedBox extends OneChildRenderObjectWidget {
 }
 
 class CustomPaint extends OneChildRenderObjectWidget {
-  CustomPaint({ Key key, this.onPaint, this.token, Widget child })
+  CustomPaint({ Key key, this.onPaint, this.onHitTest, this.token, Widget child })
     : super(key: key, child: child) {
     assert(onPaint != null);
   }
@@ -151,19 +151,23 @@ class CustomPaint extends OneChildRenderObjectWidget {
   /// has a more stable identity.
   final CustomPaintCallback onPaint;
 
+  final CustomHitTestCallback onHitTest;
+
   /// This widget repaints whenever you supply a new token.
   final Object token;
 
-  RenderCustomPaint createRenderObject() => new RenderCustomPaint(onPaint: onPaint);
+  RenderCustomPaint createRenderObject() => new RenderCustomPaint(onPaint: onPaint, onHitTest: onHitTest);
 
   void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
     if (oldWidget.token != token)
       renderObject.markNeedsPaint();
     renderObject.onPaint = onPaint;
+    renderObject.onHitTest = onHitTest;
   }
 
   void didUnmountRenderObject(RenderCustomPaint renderObject) {
     renderObject.onPaint = null;
+    renderObject.onHitTest = null;
   }
 }
 

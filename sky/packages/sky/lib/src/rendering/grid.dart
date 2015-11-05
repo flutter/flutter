@@ -134,8 +134,8 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
     }
   }
 
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    defaultHitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return defaultHitTestChildren(result, position: position);
   }
 
   void paint(PaintingContext context, Offset offset) {

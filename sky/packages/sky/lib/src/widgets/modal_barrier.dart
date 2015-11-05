@@ -17,29 +17,23 @@ const Color _kTransparent = const Color(0x00000000);
 class ModalBarrier extends StatelessComponent {
   ModalBarrier({
     Key key,
-    this.color
+    this.color: _kTransparent
   }) : super(key: key);
 
   final Color color;
 
   Widget build(BuildContext context) {
-    Widget child;
-
-    if (color != null) {
-      child = new DecoratedBox(
-        decoration: new BoxDecoration(
-          backgroundColor: color
-        )
-      );
-    }
-
     return new Listener(
       onPointerDown: (_) {
         Navigator.of(context).pop();
       },
       child: new ConstrainedBox(
         constraints: const BoxConstraints.expand(),
-        child: child
+        child: new DecoratedBox(
+          decoration: new BoxDecoration(
+            backgroundColor: color
+          )
+        )
       )
     );
   }

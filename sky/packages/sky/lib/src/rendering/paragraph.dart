@@ -96,6 +96,8 @@ class RenderParagraph extends RenderBox {
     return textPainter.computeDistanceToActualBaseline(baseline);
   }
 
+  bool hitTestSelf(Point position) => true;
+
   void performLayout() {
     layoutText(constraints);
     size = constraints.constrain(textPainter.size);
