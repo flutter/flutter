@@ -38,4 +38,3 @@ class Window {
 }
 
 final Window window = new Window._();
-final Tracing tracing = new Tracing();
