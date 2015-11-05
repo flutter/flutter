@@ -94,8 +94,7 @@ To run the tests:
  * `./sky/tools/run_tests --debug` runs the tests on the host machine using `out/Debug`.
 
 If you want to run the run a test directly:
- * Linux: `./out/Debug/sky_shell --package-root=sky/unit/packages sky/unit/test/harness/trivial_test.dart`
- * Mac: `./sky/tools/run_tests --debug test/harness/trivial_test.dart`
+ * `./sky/tools/run_tests --debug test/harness/trivial_test.dart`
 
 Note: The tests are headless, you won't see any UI. You can use `print` to generate console output or you can interact with the DartVM via observatory at [http://localhost:8181/](http://localhost:8181/).
 
