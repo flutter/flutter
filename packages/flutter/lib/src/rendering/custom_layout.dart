@@ -5,10 +5,12 @@
 import 'box.dart';
 import 'object.dart';
 
-class _MultiChildParentData extends ContainerBoxParentDataMixin<RenderBox> { }
+class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
+  Object id;
+}
 
 abstract class MultiChildLayoutDelegate {
-  final List<RenderBox> _indexToChild = <RenderBox>[];
+  final Map<Object, RenderBox> _idToChild = new Map<Object, RenderBox>();
 
   /// Returns the size of this object given the incomming constraints.
   /// The size cannot reflect the instrinsic sizes of the children.
@@ -16,41 +18,47 @@ abstract class MultiChildLayoutDelegate {
   /// can reflect that.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
+  /// True if a non-null LayoutChild was provided for the specified id.
+  bool isChild(Object childId) => _idToChild[childId] != null;
+
   /// Ask the child to update its layout within the limits specified by
   /// the constraints parameter. The child's size is returned.
-  Size layoutChild(int childIndex, BoxConstraints constraints) {
-    final RenderBox child = _indexToChild[childIndex];
+  Size layoutChild(Object childId, BoxConstraints constraints) {
+    final RenderBox child = _idToChild[childId];
+    assert(child != null);
     child.layout(constraints, parentUsesSize: true);
     return child.size;
   }
 
   /// Specify the child's origin relative to this origin.
-  void positionChild(int childIndex, Point position) {
-    final RenderBox child = _indexToChild[childIndex];
-    final _MultiChildParentData childParentData = child.parentData;
+  void positionChild(Object childId, Point position) {
+    final RenderBox child = _idToChild[childId];
+    assert(child != null);
+    final MultiChildLayoutParentData childParentData = child.parentData;
     childParentData.position = position;
   }
 
   void _callPerformLayout(Size size, BoxConstraints constraints, RenderBox firstChild) {
     RenderBox child = firstChild;
     while (child != null) {
-      _indexToChild.add(child);
-      final _MultiChildParentData childParentData = child.parentData;
+      final MultiChildLayoutParentData childParentData = child.parentData;
+      assert(childParentData.id != null);
+      _idToChild[childParentData.id] = child;
       child = childParentData.nextSibling;
     }
-    performLayout(size, constraints, _indexToChild.length);
-    _indexToChild.clear();
+    performLayout(size, constraints);
+    _idToChild.clear();
   }
 
   /// Layout and position all children given this widget's size and the specified
   /// constraints. This method must apply layoutChild() to each child. It should
   /// specify the final position of each child with positionChild().
-  void performLayout(Size size, BoxConstraints constraints, int childCount);
+  void performLayout(Size size, BoxConstraints constraints);
 }
 
 class RenderCustomMultiChildLayoutBox extends RenderBox
-  with ContainerRenderObjectMixin<RenderBox, _MultiChildParentData>,
-       RenderBoxContainerDefaultsMixin<RenderBox, _MultiChildParentData> {
+  with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
+       RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   RenderCustomMultiChildLayoutBox({
     List<RenderBox> children,
     MultiChildLayoutDelegate delegate
@@ -60,8 +68,8 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _MultiChildParentData)
-      child.parentData = new _MultiChildParentData();
+    if (child.parentData is! MultiChildLayoutParentData)
+      child.parentData = new MultiChildLayoutParentData();
   }
 
   MultiChildLayoutDelegate get delegate => _delegate;

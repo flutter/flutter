@@ -14,15 +14,10 @@ import 'tool_bar.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 
-const int _kBodyIndex = 0;
-const int _kToolBarIndex = 1;
-const int _kBottomSheetIndex = 2;
-const int _kSnackBarIndex = 3;
-const int _kFloatingActionButtonIndex = 4;
+enum _Child { body, toolBar, bottomSheet, snackBar, floatingActionButton }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
-  void performLayout(Size size, BoxConstraints constraints, int childCount) {
-    assert(childCount == 5);
+  void performLayout(Size size, BoxConstraints constraints) {
 
     // This part of the layout has the same effect as putting the toolbar and
     // body in a column and making the body flexible. What's different is that
@@ -30,12 +25,19 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the toolbar's shadow is drawn on top of the body.
 
     final BoxConstraints toolBarConstraints = constraints.loosen().tightenWidth(size.width);
-    final Size toolBarSize = layoutChild(_kToolBarIndex, toolBarConstraints);
-    final double bodyHeight = size.height - toolBarSize.height;
-    final BoxConstraints bodyConstraints = toolBarConstraints.tightenHeight(bodyHeight);
-    layoutChild(_kBodyIndex, bodyConstraints);
-    positionChild(_kToolBarIndex, Point.origin);
-    positionChild(_kBodyIndex, new Point(0.0, toolBarSize.height));
+    Size toolBarSize = Size.zero;
+
+    if (isChild(_Child.toolBar)) {
+      toolBarSize = layoutChild(_Child.toolBar, toolBarConstraints);
+      positionChild(_Child.toolBar, Point.origin);
+    }
+
+    if (isChild(_Child.body)) {
+      final double bodyHeight = size.height - toolBarSize.height;
+      final BoxConstraints bodyConstraints = toolBarConstraints.tightenHeight(bodyHeight);
+      layoutChild(_Child.body, bodyConstraints);
+      positionChild(_Child.body, new Point(0.0, toolBarSize.height));
+    }
 
     // The BottomSheet and the SnackBar are anchored to the bottom of the parent,
     // they're as wide as the parent and are given their intrinsic height.
@@ -47,23 +49,38 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // by _kFloatingActionButtonMargin.
 
     final BoxConstraints fullWidthConstraints = constraints.loosen().tightenWidth(size.width);
-    final Size bottomSheetSize = layoutChild(_kBottomSheetIndex, fullWidthConstraints);
-    final Size snackBarSize = layoutChild(_kSnackBarIndex, fullWidthConstraints);
-    final Size fabSize = layoutChild(_kFloatingActionButtonIndex, constraints.loosen());
-    positionChild(_kBottomSheetIndex, new Point(0.0, size.height - bottomSheetSize.height));
-    positionChild(_kSnackBarIndex, new Point(0.0, size.height - snackBarSize.height));
+    Size bottomSheetSize = Size.zero;
+    Size snackBarSize = Size.zero;
 
-    final double fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
-    double fabY = size.height - fabSize.height - _kFloatingActionButtonMargin;
-    if (snackBarSize.height > 0.0)
-      fabY = math.min(fabY, size.height - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
-    if (bottomSheetSize.height > 0.0)
-      fabY = math.min(fabY, size.height - bottomSheetSize.height - fabSize.height / 2.0);
-    positionChild(_kFloatingActionButtonIndex, new Point(fabX, fabY));
+    if (isChild(_Child.bottomSheet)) {
+      bottomSheetSize = layoutChild(_Child.bottomSheet, fullWidthConstraints);
+      positionChild(_Child.bottomSheet, new Point(0.0, size.height - bottomSheetSize.height));
+    }
+
+    if (isChild(_Child.snackBar)) {
+      snackBarSize = layoutChild(_Child.snackBar, fullWidthConstraints);
+      positionChild(_Child.snackBar, new Point(0.0, size.height - snackBarSize.height));
+    }
+
+    if (isChild(_Child.floatingActionButton)) {
+      final Size fabSize = layoutChild(_Child.floatingActionButton, constraints.loosen());
+      final double fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
+      double fabY = size.height - fabSize.height - _kFloatingActionButtonMargin;
+      if (snackBarSize.height > 0.0)
+        fabY = math.min(fabY, size.height - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
+      if (bottomSheetSize.height > 0.0)
+        fabY = math.min(fabY, size.height - bottomSheetSize.height - fabSize.height / 2.0);
+      positionChild(_Child.floatingActionButton, new Point(fabX, fabY));
+    }
   }
 }
 
 final _ScaffoldLayout _scaffoldLayout = new _ScaffoldLayout();
+
+void _addIfNonNull(List<LayoutId> children, Widget child, Object childId) {
+  if (child != null)
+    children.add(new LayoutId(child: child, id: childId));
+}
 
 class Scaffold extends StatelessComponent {
   Scaffold({
@@ -92,14 +109,14 @@ class Scaffold extends StatelessComponent {
         child: snackBar
       );
     }
-    return new CustomMultiChildLayout(<Widget>[
-      materialBody ?? new Container(height: 0.0),
-      paddedToolBar ?? new Container(height: 0.0),
-      bottomSheet ?? new Container(height: 0.0),
-      constrainedSnackBar ?? new Container(height: 0.0),
-      floatingActionButton ?? new Container(height: 0.0)
-    ],
-      delegate: _scaffoldLayout
-    );
+
+    final List<LayoutId>children = new List<LayoutId>();
+    _addIfNonNull(children, materialBody, _Child.body);
+    _addIfNonNull(children, paddedToolBar, _Child.toolBar);
+    _addIfNonNull(children, bottomSheet, _Child.bottomSheet);
+    _addIfNonNull(children, constrainedSnackBar, _Child.snackBar);
+    _addIfNonNull(children, floatingActionButton, _Child.floatingActionButton);
+
+    return new CustomMultiChildLayout(children, delegate: _scaffoldLayout);
   }
 }

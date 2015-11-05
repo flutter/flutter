@@ -14,16 +14,16 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
 
   Size performLayoutSize;
   BoxConstraints performLayoutConstraints;
-  int performLayoutChildCount;
   Size performLayoutSize0;
   Size performLayoutSize1;
+  bool performLayoutIsChild;
 
-  void performLayout(Size size, BoxConstraints constraints, int childCount) {
+  void performLayout(Size size, BoxConstraints constraints) {
     performLayoutSize = size;
     performLayoutConstraints = constraints;
-    performLayoutChildCount = childCount;
     performLayoutSize0 = layoutChild(0, constraints);
     performLayoutSize1 = layoutChild(1, constraints);
+    performLayoutIsChild = isChild('fred');
   }
 }
 
@@ -33,8 +33,8 @@ void main() {
       TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
       tester.pumpWidget(new Center(
         child: new CustomMultiChildLayout([
-          new Container(width: 150.0, height: 100.0),
-          new Container(width: 100.0, height: 200.0)
+          new LayoutId(id: 0, child: new Container(width: 150.0, height: 100.0)),
+          new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0))
         ],
           delegate: delegate
         )
@@ -51,11 +51,11 @@ void main() {
       expect(delegate.performLayoutConstraints.maxWidth, 800.0);
       expect(delegate.performLayoutConstraints.minHeight, 0.0);
       expect(delegate.performLayoutConstraints.maxHeight, 600.0);
-      expect(delegate.performLayoutChildCount, 2);
       expect(delegate.performLayoutSize0.width, 150.0);
       expect(delegate.performLayoutSize0.height, 100.0);
       expect(delegate.performLayoutSize1.width, 100.0);
       expect(delegate.performLayoutSize1.height, 200.0);
+      expect(delegate.performLayoutIsChild, false);
     });
   });
 }
