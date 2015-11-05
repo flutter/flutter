@@ -288,6 +288,39 @@ class CustomOneChildLayout extends OneChildRenderObjectWidget {
   }
 }
 
+class LayoutId extends ParentDataWidget {
+  LayoutId({
+    Key key,
+    Widget child,
+    this.id
+  }) : super(key: key, child: child);
+
+  final Object id;
+
+  void debugValidateAncestor(Widget ancestor) {
+    assert(() {
+      'LayoutId must placed inside a CustomMultiChildLayout';
+      return ancestor is CustomMultiChildLayout;
+    });
+  }
+
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is MultiChildLayoutParentData);
+    final MultiChildLayoutParentData parentData = renderObject.parentData;
+    if (parentData.id != id) {
+      parentData.id = id;
+      AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsLayout();
+    }
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('id: $id');
+  }
+}
+
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   CustomMultiChildLayout(List<Widget> children, {
     Key key,
