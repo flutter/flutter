@@ -587,6 +587,7 @@ class Container extends StatelessComponent {
   }) : super(key: key) {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
+    assert(decoration == null || decoration.shape != Shape.circle || decoration.borderRadius == null); // can't have a border radius if you're a circle
   }
 
   final Widget child;
