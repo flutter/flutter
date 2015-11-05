@@ -977,6 +977,12 @@ class RenderCustomPaint extends RenderProxyBox {
 
 typedef void PointerEventListener(PointerInputEvent e);
 
+enum HitTestBehavior {
+  deferToChild,
+  opaque,
+  translucent,
+}
+
 /// Invokes the callbacks in response to pointer events.
 class RenderPointerListener extends RenderProxyBox {
   RenderPointerListener({
@@ -984,6 +990,7 @@ class RenderPointerListener extends RenderProxyBox {
     this.onPointerMove,
     this.onPointerUp,
     this.onPointerCancel,
+    this.behavior: HitTestBehavior.deferToChild,
     RenderBox child
   }) : super(child);
 
@@ -991,6 +998,20 @@ class RenderPointerListener extends RenderProxyBox {
   PointerEventListener onPointerMove;
   PointerEventListener onPointerUp;
   PointerEventListener onPointerCancel;
+  HitTestBehavior behavior;
+
+  bool hitTest(HitTestResult result, { Point position }) {
+    bool hitTarget = false;
+    if (position.x >= 0.0 && position.x < size.width &&
+        position.y >= 0.0 && position.y < size.height) {
+      hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
+      if (hitTarget || behavior == HitTestBehavior.translucent)
+        result.add(new BoxHitTestEntry(this, position));
+    }
+    return hitTarget;
+  }
+
+  bool hitTestSelf(Point position) => behavior == HitTestBehavior.opaque;
 
   void handleEvent(InputEvent event, HitTestEntry entry) {
     if (onPointerDown != null && event.type == 'pointerdown')
@@ -1017,6 +1038,8 @@ class RenderPointerListener extends RenderProxyBox {
     if (listeners.isEmpty)
       listeners.add('<none>');
     settings.add('listeners: ${listeners.join(", ")}');
+    if (behavior != HitTestBehavior.deferToChild)
+      settings.add('behavior: $behavior');
   }
 }
 

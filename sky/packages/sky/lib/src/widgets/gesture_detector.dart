@@ -48,7 +48,8 @@ class GestureDetector extends StatefulComponent {
     this.onPanEnd,
     this.onScaleStart,
     this.onScaleUpdate,
-    this.onScaleEnd
+    this.onScaleEnd,
+    this.behavior
   }) : super(key: key);
 
   final Widget child;
@@ -76,6 +77,8 @@ class GestureDetector extends StatefulComponent {
   final GestureScaleStartCallback onScaleStart;
   final GestureScaleUpdateCallback onScaleUpdate;
   final GestureScaleEndCallback onScaleEnd;
+
+  final HitTestBehavior behavior;
 
   _GestureDetectorState createState() => new _GestureDetectorState();
 }
@@ -224,9 +227,14 @@ class _GestureDetectorState extends State<GestureDetector> {
       _scale.addPointer(event);
   }
 
+  HitTestBehavior get _defaultBehavior {
+    return config.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
+  }
+
   Widget build(BuildContext context) {
     return new Listener(
       onPointerDown: _handlePointerDown,
+      behavior: config.behavior ?? _defaultBehavior,
       child: config.child
     );
   }

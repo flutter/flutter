@@ -31,6 +31,7 @@ export 'package:flutter/rendering.dart' show
     FontWeight,
     FractionalOffset,
     Gradient,
+    HitTestBehavior,
     ImageFit,
     ImageRepeat,
     InputEvent,
@@ -1229,19 +1230,24 @@ class Listener extends OneChildRenderObjectWidget {
     this.onPointerDown,
     this.onPointerMove,
     this.onPointerUp,
-    this.onPointerCancel
-  }) : super(key: key, child: child);
+    this.onPointerCancel,
+    this.behavior: HitTestBehavior.deferToChild
+  }) : super(key: key, child: child) {
+    assert(behavior != null);
+  }
 
   final PointerEventListener onPointerDown;
   final PointerEventListener onPointerMove;
   final PointerEventListener onPointerUp;
   final PointerEventListener onPointerCancel;
+  final HitTestBehavior behavior;
 
   RenderPointerListener createRenderObject() => new RenderPointerListener(
     onPointerDown: onPointerDown,
     onPointerMove: onPointerMove,
     onPointerUp: onPointerUp,
-    onPointerCancel: onPointerCancel
+    onPointerCancel: onPointerCancel,
+    behavior: behavior
   );
 
   void updateRenderObject(RenderPointerListener renderObject, Listener oldWidget) {
@@ -1249,6 +1255,7 @@ class Listener extends OneChildRenderObjectWidget {
     renderObject.onPointerMove = onPointerMove;
     renderObject.onPointerUp = onPointerUp;
     renderObject.onPointerCancel = onPointerCancel;
+    renderObject.behavior = behavior;
   }
 }
 

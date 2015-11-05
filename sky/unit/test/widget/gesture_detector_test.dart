@@ -134,4 +134,69 @@ void main() {
       expect(didEndPan, isTrue);
     });
   });
+
+  test('Translucent', () {
+    testWidgets((WidgetTester tester) {
+      bool didReceivePointerDown;
+      bool didTap;
+
+      void pumpWidgetTree(HitTestBehavior behavior) {
+        tester.pumpWidget(
+          new Stack([
+            new Listener(
+              onPointerDown: (_) {
+                didReceivePointerDown = true;
+              },
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                decoration: const BoxDecoration(
+                  backgroundColor: const Color(0xFF00FF00)
+                )
+              )
+            ),
+            new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new GestureDetector(
+                onTap: () {
+                  didTap = true;
+                },
+                behavior: behavior
+              )
+            )
+          ])
+        );
+      }
+
+      didReceivePointerDown = false;
+      didTap = false;
+      pumpWidgetTree(null);
+      tester.tapAt(new Point(10.0, 10.0));
+      expect(didReceivePointerDown, isTrue);
+      expect(didTap, isTrue);
+
+      didReceivePointerDown = false;
+      didTap = false;
+      pumpWidgetTree(HitTestBehavior.deferToChild);
+      tester.tapAt(new Point(10.0, 10.0));
+      expect(didReceivePointerDown, isTrue);
+      expect(didTap, isFalse);
+
+      didReceivePointerDown = false;
+      didTap = false;
+      pumpWidgetTree(HitTestBehavior.opaque);
+      tester.tapAt(new Point(10.0, 10.0));
+      expect(didReceivePointerDown, isFalse);
+      expect(didTap, isTrue);
+
+      didReceivePointerDown = false;
+      didTap = false;
+      pumpWidgetTree(HitTestBehavior.translucent);
+      tester.tapAt(new Point(10.0, 10.0));
+      expect(didReceivePointerDown, isTrue);
+      expect(didTap, isTrue);
+
+    });
+  });
 }
