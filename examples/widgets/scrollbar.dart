@@ -33,7 +33,8 @@ class ScrollbarAppState extends State<ScrollbarApp> {
     Widget scrollable = new Container(
       margin: new EdgeDims.symmetric(horizontal: 6.0), // TODO(hansmuller) 6.0 should be based on _kScrollbarThumbWidth
       child: new Center(
-        shrinkWrap: ShrinkWrap.both,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
         child: new Container(
           width: 80.0,
           height: _itemExtent * 5.0,

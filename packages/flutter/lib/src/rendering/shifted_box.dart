@@ -143,13 +143,6 @@ class RenderPadding extends RenderShiftedBox {
   }
 }
 
-enum ShrinkWrap {
-  width,
-  height,
-  both,
-  none
-}
-
 class RenderPositionedBox extends RenderShiftedBox {
 
   // This box aligns a child box within itself. It's only useful for
@@ -161,12 +154,13 @@ class RenderPositionedBox extends RenderShiftedBox {
   RenderPositionedBox({
     RenderBox child,
     FractionalOffset alignment: const FractionalOffset(0.5, 0.5),
-    ShrinkWrap shrinkWrap: ShrinkWrap.none
+    double widthFactor,
+    double heightFactor
   }) : _alignment = alignment,
-       _shrinkWrap = shrinkWrap,
+       _widthFactor = widthFactor,
+       _heightFactor = heightFactor,
        super(child) {
     assert(alignment != null);
-    assert(shrinkWrap != null);
   }
 
   FractionalOffset get alignment => _alignment;
@@ -179,31 +173,40 @@ class RenderPositionedBox extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  ShrinkWrap _shrinkWrap;
-  ShrinkWrap get shrinkWrap => _shrinkWrap;
-  void set shrinkWrap (ShrinkWrap value) {
-    assert(value != null);
-    if (_shrinkWrap == value)
+  double _widthFactor;
+  double get widthFactor => _widthFactor;
+  void set widthFactor (double value) {
+    if (_widthFactor == value)
       return;
-    _shrinkWrap = value;
+    _widthFactor = value;
     markNeedsLayout();
   }
 
-  // These are only valid during performLayout() and paint(), since they rely on constraints which is only set after layout() is called.
-  bool get _shinkWrapWidth => _shrinkWrap == ShrinkWrap.width || _shrinkWrap == ShrinkWrap.both || constraints.maxWidth == double.INFINITY;
-  bool get _shinkWrapHeight => _shrinkWrap == ShrinkWrap.height || _shrinkWrap == ShrinkWrap.both || constraints.maxHeight == double.INFINITY;
+  double _heightFactor;
+  double get heightFactor => _heightFactor;
+  void set heightFactor (double value) {
+    if (_heightFactor == value)
+      return;
+    _heightFactor = value;
+    markNeedsLayout();
+  }
 
   void performLayout() {
+    final bool shrinkWrapWidth = widthFactor != null || constraints.maxWidth == double.INFINITY;
+    final bool shrinkWrapHeight = heightFactor != null || constraints.maxHeight == double.INFINITY;
+
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
-      size = constraints.constrain(new Size(_shinkWrapWidth ? child.size.width : double.INFINITY,
-                                            _shinkWrapHeight ? child.size.height : double.INFINITY));
-      Offset delta = size - child.size;
+      final Size desiredSize = new Size(child.size.width * (_widthFactor ?? 1.0),
+                                        child.size.height * (_heightFactor ?? 1.0));
+      size = constraints.constrain(new Size(shrinkWrapWidth ? desiredSize.width : double.INFINITY,
+                                            shrinkWrapHeight ? desiredSize.height : double.INFINITY));
+      final Offset delta = size - desiredSize;
       final BoxParentData childParentData = child.parentData;
-      childParentData.position = (delta.scale(_alignment.x, _alignment.y)).toPoint();
+      childParentData.position = delta.scale(_alignment.x, _alignment.y).toPoint();
     } else {
-      size = constraints.constrain(new Size(_shinkWrapWidth ? 0.0 : double.INFINITY,
-                                            _shinkWrapHeight ? 0.0 : double.INFINITY));
+      size = constraints.constrain(new Size(shrinkWrapWidth ? 0.0 : double.INFINITY,
+                                            shrinkWrapHeight ? 0.0 : double.INFINITY));
     }
   }
 

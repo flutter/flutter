@@ -48,7 +48,6 @@ export 'package:flutter/rendering.dart' show
     Rect,
     ScrollDirection,
     Shape,
-    ShrinkWrap,
     Size,
     StyledTextSpan,
     TextAlign,
@@ -238,26 +237,27 @@ class Align extends OneChildRenderObjectWidget {
   Align({
     Key key,
     this.alignment: const FractionalOffset(0.5, 0.5),
-    this.shrinkWrap: ShrinkWrap.none,
+    this.widthFactor,
+    this.heightFactor,
     Widget child
-  }) : super(key: key, child: child) {
-    assert(shrinkWrap != null);
-  }
+  }) : super(key: key, child: child);
 
   final FractionalOffset alignment;
-  final ShrinkWrap shrinkWrap;
+  final double widthFactor;
+  final double heightFactor;
 
-  RenderPositionedBox createRenderObject() => new RenderPositionedBox(alignment: alignment, shrinkWrap: shrinkWrap);
+  RenderPositionedBox createRenderObject() => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
 
   void updateRenderObject(RenderPositionedBox renderObject, Align oldWidget) {
     renderObject.alignment = alignment;
-    renderObject.shrinkWrap = shrinkWrap;
+    renderObject.widthFactor = widthFactor;
+    renderObject.heightFactor = heightFactor;
   }
 }
 
 class Center extends Align {
-  Center({ Key key, ShrinkWrap shrinkWrap: ShrinkWrap.none, Widget child })
-    : super(key: key, shrinkWrap: shrinkWrap, child: child);
+  Center({ Key key, widthFactor, heightFactor, Widget child })
+    : super(key: key, widthFactor: widthFactor, heightFactor: heightFactor, child: child);
 }
 
 class CustomOneChildLayout extends OneChildRenderObjectWidget {
