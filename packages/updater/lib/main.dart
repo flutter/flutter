@@ -18,8 +18,8 @@ import 'package:yaml/yaml.dart' as yaml;
 import 'pipe_to_file.dart';
 import 'version.dart';
 
-const String kManifestFile = 'sky.yaml';
-const String kBundleFile = 'flutter.flx';
+const String kManifestFile = 'flutter.yaml';
+const String kBundleFile = 'app.flx';
 
 UpdateServiceProxy _initUpdateService() {
   UpdateServiceProxy updateService = new UpdateServiceProxy.unbound();
