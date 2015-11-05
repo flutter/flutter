@@ -3,239 +3,161 @@ import 'package:test/test.dart';
 
 typedef void GestureArenaCallback(Object key);
 
+const int primaryKey = 4;
+
 class TestGestureArenaMember extends GestureArenaMember {
-  TestGestureArenaMember({ this.onAcceptGesture, this.onRejectGesture });
-
-  final GestureArenaCallback onAcceptGesture;
-  final GestureArenaCallback onRejectGesture;
-
+  bool acceptRan = false;
   void acceptGesture(Object key) {
-    onAcceptGesture(key);
+    expect(key, equals(primaryKey));
+    acceptRan = true;
+  }
+  bool rejectRan = false;
+  void rejectGesture(Object key) {
+    expect(key, equals(primaryKey));
+    rejectRan = true;
+  }
+}
+
+class GestureTester {
+  GestureArena arena = new GestureArena();
+  TestGestureArenaMember first = new TestGestureArenaMember();
+  TestGestureArenaMember second = new TestGestureArenaMember();
+
+  GestureArenaEntry firstEntry;
+  void addFirst() {
+    firstEntry = arena.add(primaryKey, first);
   }
 
-  void rejectGesture(Object key) {
-    onRejectGesture(key);
+  GestureArenaEntry secondEntry;
+  void addSecond() {
+    secondEntry = arena.add(primaryKey, second);
+  }
+
+  void expectNothing() {
+    expect(first.acceptRan, isFalse);
+    expect(first.rejectRan, isFalse);
+    expect(second.acceptRan, isFalse);
+    expect(second.rejectRan, isFalse);
+  }
+
+  void expectFirstWin() {
+    expect(first.acceptRan, isTrue);
+    expect(first.rejectRan, isFalse);
+    expect(second.acceptRan, isFalse);
+    expect(second.rejectRan, isTrue);
+  }
+
+  void expectSecondWin() {
+    expect(first.acceptRan, isFalse);
+    expect(first.rejectRan, isTrue);
+    expect(second.acceptRan, isTrue);
+    expect(second.rejectRan, isFalse);
   }
 }
 
 void main() {
   test('Should win by accepting', () {
-    GestureArena arena = new GestureArena();
-
-    int primaryKey = 4;
-    bool firstAcceptRan = false;
-    bool firstRejectRan = false;
-    bool secondAcceptRan = false;
-    bool secondRejectRan = false;
-
-    TestGestureArenaMember first = new TestGestureArenaMember(
-      onAcceptGesture: (int key) {
-        expect(key, equals(primaryKey));
-        firstAcceptRan = true;
-      },
-      onRejectGesture: (int key) {
-        expect(key, equals(primaryKey));
-        firstRejectRan = true;
-      }
-    );
-
-    TestGestureArenaMember second = new TestGestureArenaMember(
-      onAcceptGesture: (int key) {
-        expect(key, equals(primaryKey));
-        secondAcceptRan = true;
-      },
-      onRejectGesture: (int key) {
-        expect(key, equals(primaryKey));
-        secondRejectRan = true;
-      }
-    );
-
-    GestureArenaEntry firstEntry = arena.add(primaryKey, first);
-    arena.add(primaryKey, second);
-    arena.close(primaryKey);
-
-    expect(firstAcceptRan, isFalse);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isFalse);
-
-    firstEntry.resolve(GestureDisposition.accepted);
-
-    expect(firstAcceptRan, isTrue);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isTrue);
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.arena.close(primaryKey);
+    tester.expectNothing();
+    tester.firstEntry.resolve(GestureDisposition.accepted);
+    tester.expectFirstWin();
   });
 
   test('Should win by sweep', () {
-    GestureArena arena = new GestureArena();
-
-    int primaryKey = 4;
-    bool firstAcceptRan = false;
-    bool firstRejectRan = false;
-    bool secondAcceptRan = false;
-    bool secondRejectRan = false;
-
-    TestGestureArenaMember first = new TestGestureArenaMember(
-      onAcceptGesture: (int key) {
-        expect(key, equals(primaryKey));
-        firstAcceptRan = true;
-      },
-      onRejectGesture: (int key) {
-        expect(key, equals(primaryKey));
-        firstRejectRan = true;
-      }
-    );
-
-    TestGestureArenaMember second = new TestGestureArenaMember(
-      onAcceptGesture: (int key) {
-        expect(key, equals(primaryKey));
-        secondAcceptRan = true;
-      },
-      onRejectGesture: (int key) {
-        expect(key, equals(primaryKey));
-        secondRejectRan = true;
-      }
-    );
-
-    arena.add(primaryKey, first);
-    arena.add(primaryKey, second);
-    arena.close(primaryKey);
-
-    expect(firstAcceptRan, isFalse);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isFalse);
-
-    arena.sweep(primaryKey);
-
-    expect(firstAcceptRan, isTrue);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isTrue);
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.arena.close(primaryKey);
+    tester.expectNothing();
+    tester.arena.sweep(primaryKey);
+    tester.expectFirstWin();
   });
 
   test('Should win on release after hold sweep release', () {
-    GestureArena arena = new GestureArena();
-
-    int primaryKey = 4;
-    bool firstAcceptRan = false;
-    bool firstRejectRan = false;
-    bool secondAcceptRan = false;
-    bool secondRejectRan = false;
-
-    TestGestureArenaMember first = new TestGestureArenaMember(
-      onAcceptGesture: (int key) {
-        expect(key, equals(primaryKey));
-        firstAcceptRan = true;
-      },
-      onRejectGesture: (int key) {
-        expect(key, equals(primaryKey));
-        firstRejectRan = true;
-      }
-    );
-
-    TestGestureArenaMember second = new TestGestureArenaMember(
-      onAcceptGesture: (int key) {
-        expect(key, equals(primaryKey));
-        secondAcceptRan = true;
-      },
-      onRejectGesture: (int key) {
-        expect(key, equals(primaryKey));
-        secondRejectRan = true;
-      }
-    );
-
-    arena.add(primaryKey, first);
-    arena.add(primaryKey, second);
-    arena.close(primaryKey);
-
-    expect(firstAcceptRan, isFalse);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isFalse);
-
-    arena.hold(primaryKey);
-
-    expect(firstAcceptRan, isFalse);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isFalse);
-
-    arena.sweep(primaryKey);
-
-    expect(firstAcceptRan, isFalse);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isFalse);
-
-    arena.release(primaryKey);
-
-    expect(firstAcceptRan, isTrue);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isTrue);
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.arena.close(primaryKey);
+    tester.expectNothing();
+    tester.arena.hold(primaryKey);
+    tester.expectNothing();
+    tester.arena.sweep(primaryKey);
+    tester.expectNothing();
+    tester.arena.release(primaryKey);
+    tester.expectFirstWin();
   });
 
   test('Should win on sweep after hold release sweep', () {
-    GestureArena arena = new GestureArena();
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.arena.close(primaryKey);
+    tester.expectNothing();
+    tester.arena.hold(primaryKey);
+    tester.expectNothing();
+    tester.arena.release(primaryKey);
+    tester.expectNothing();
+    tester.arena.sweep(primaryKey);
+    tester.expectFirstWin();
+  });
 
-    int primaryKey = 4;
-    bool firstAcceptRan = false;
-    bool firstRejectRan = false;
-    bool secondAcceptRan = false;
-    bool secondRejectRan = false;
+  test('Only first winner should win', () {
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.arena.close(primaryKey);
+    tester.expectNothing();
+    tester.firstEntry.resolve(GestureDisposition.accepted);
+    tester.secondEntry.resolve(GestureDisposition.accepted);
+    tester.expectFirstWin();
+  });
 
-    TestGestureArenaMember first = new TestGestureArenaMember(
-      onAcceptGesture: (int key) {
-        expect(key, equals(primaryKey));
-        firstAcceptRan = true;
-      },
-      onRejectGesture: (int key) {
-        expect(key, equals(primaryKey));
-        firstRejectRan = true;
-      }
-    );
+  test('Only first winner should win, regardless of order', () {
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.arena.close(primaryKey);
+    tester.expectNothing();
+    tester.secondEntry.resolve(GestureDisposition.accepted);
+    tester.firstEntry.resolve(GestureDisposition.accepted);
+    tester.expectSecondWin();
+  });
 
-    TestGestureArenaMember second = new TestGestureArenaMember(
-      onAcceptGesture: (int key) {
-        expect(key, equals(primaryKey));
-        secondAcceptRan = true;
-      },
-      onRejectGesture: (int key) {
-        expect(key, equals(primaryKey));
-        secondRejectRan = true;
-      }
-    );
+  test('Win before close is delayed to close', () {
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.expectNothing();
+    tester.firstEntry.resolve(GestureDisposition.accepted);
+    tester.expectNothing();
+    tester.arena.close(primaryKey);
+    tester.expectFirstWin();
+  });
 
-    arena.add(primaryKey, first);
-    arena.add(primaryKey, second);
-    arena.close(primaryKey);
+  test('Win before close is delayed to close, and only first winner should win', () {
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.expectNothing();
+    tester.firstEntry.resolve(GestureDisposition.accepted);
+    tester.secondEntry.resolve(GestureDisposition.accepted);
+    tester.expectNothing();
+    tester.arena.close(primaryKey);
+    tester.expectFirstWin();
+  });
 
-    expect(firstAcceptRan, isFalse);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isFalse);
-
-    arena.hold(primaryKey);
-
-    expect(firstAcceptRan, isFalse);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isFalse);
-
-    arena.release(primaryKey);
-
-    expect(firstAcceptRan, isFalse);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isFalse);
-
-    arena.sweep(primaryKey);
-
-    expect(firstAcceptRan, isTrue);
-    expect(firstRejectRan, isFalse);
-    expect(secondAcceptRan, isFalse);
-    expect(secondRejectRan, isTrue);
+  test('Win before close is delayed to close, and only first winner should win, regardless of order', () {
+    GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.expectNothing();
+    tester.secondEntry.resolve(GestureDisposition.accepted);
+    tester.firstEntry.resolve(GestureDisposition.accepted);
+    tester.expectNothing();
+    tester.arena.close(primaryKey);
+    tester.expectSecondWin();
   });
 }
