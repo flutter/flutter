@@ -22,9 +22,9 @@ class WidgetFlutterBinding extends FlutterBinding {
 
   static WidgetFlutterBinding get instance => FlutterBinding.instance;
 
-  void beginFrame(Duration timeStamp) {
+  void beginFrame() {
     buildDirtyElements();
-    super.beginFrame(timeStamp);
+    super.beginFrame();
     Element.finalizeTree();
   }
 
@@ -74,6 +74,7 @@ class WidgetFlutterBinding extends FlutterBinding {
       container: renderView,
       child: app
     ).attachToRenderTree(_renderViewElement);
+    beginFrame();
   }
 }
 
