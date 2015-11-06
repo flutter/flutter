@@ -9,7 +9,6 @@ abstract class Route {
   List<OverlayEntry> get overlayEntries;
 
   void didPush(OverlayState overlay, OverlayEntry insertionPoint);
-  void didMakeCurrent();
   void didPop(dynamic result);
 }
 
@@ -95,13 +94,11 @@ class NavigatorState extends State<Navigator> {
     _popAllEphemeralRoutes();
     route.didPush(overlay, _currentOverlay);
     _modal.add(route);
-    route.didMakeCurrent();
   }
 
   void pushEphemeral(Route route) {
     route.didPush(overlay, _currentOverlay);
     _ephemeral.add(route);
-    route.didMakeCurrent();
   }
 
   void _popAllEphemeralRoutes() {
@@ -114,7 +111,6 @@ class NavigatorState extends State<Navigator> {
 
   void pop([dynamic result]) {
     _removeCurrentRoute().didPop(result);
-    currentRoute.didMakeCurrent();
   }
 
   Widget build(BuildContext context) {
