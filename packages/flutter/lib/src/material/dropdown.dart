@@ -107,7 +107,7 @@ class _DropdownMenu extends StatusTransitionComponent {
             builder: (BuildContext context) {
               RenderBox renderBox = context.findRenderObject();
               return new CustomPaint(
-                child: new ScrollableViewport(child: new Container(child: new Column(children))),
+                child: new Block(children),
                 onPaint: (ui.Canvas canvas, Size size) {
                   double top = renderBox.globalToLocal(new Point(0.0, menuTop.value)).y;
                   double bottom = renderBox.globalToLocal(new Point(0.0, menuBottom.value)).y;
