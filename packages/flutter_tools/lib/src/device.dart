@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
@@ -13,7 +11,6 @@ import 'package:path/path.dart' as path;
 
 import 'application_package.dart';
 import 'build_configuration.dart';
-import 'os_utils.dart';
 import 'process.dart';
 
 final Logger _logging = new Logger('sky_tools.device');
@@ -507,13 +504,9 @@ class IOSSimulator extends Device {
 class AndroidDevice extends Device {
   static const String _ADB_PATH = 'adb';
   static const int _observatoryPort = 8181;
-  static const int _serverPort = 9888;
 
   static const String className = 'AndroidDevice';
   static final String defaultDeviceID = 'default_android_device';
-
-  static const String _kFlutterServerStartMessage = 'Serving';
-  static const Duration _kFlutterServerTimeout = const Duration(seconds: 3);
 
   String productID;
   String modelID;
@@ -718,13 +711,6 @@ class AndroidDevice extends Device {
     return CryptoUtils.bytesToHex(sha1.close());
   }
 
-  /**
-   * Since Window's paths have backslashes, we need to convert those to forward slashes to make a valid URL
-   */
-  String _convertToURL(String path) {
-    return path.replaceAll('\\', '/');
-  }
-
   @override
   bool isAppInstalled(ApplicationPackage app) {
     if (!isConnected()) {
@@ -793,81 +779,16 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<bool> startServer(
-      String target, bool poke, bool checked, AndroidApk apk) async {
-    String serverRoot = '';
-    String mainDart = '';
-    String missingMessage = '';
-    if (FileSystemEntity.isDirectorySync(target)) {
-      serverRoot = target;
-      mainDart = path.join(serverRoot, 'lib', 'main.dart');
-      missingMessage = 'Missing lib/main.dart in project: $serverRoot';
-    } else {
-      serverRoot = Directory.current.path;
-      mainDart = target;
-      missingMessage = '$mainDart does not exist.';
-    }
-
-    if (!FileSystemEntity.isFileSync(mainDart)) {
-      _logging.severe(missingMessage);
-      return false;
-    }
-
-    if (!poke) {
-      _forwardObservatoryPort();
-
-      // Actually start the server.
-      Process server = await Process.start(
-          sdkBinaryName('pub'), ['run', 'sky_tools:sky_server', _serverPort.toString()],
-          workingDirectory: serverRoot,
-          mode: ProcessStartMode.DETACHED_WITH_STDIO
-      );
-      await server.stdout.transform(UTF8.decoder)
-          .firstWhere((String value) => value.startsWith(_kFlutterServerStartMessage))
-          .timeout(_kFlutterServerTimeout);
-
-      // Set up reverse port-forwarding so that the Android app can reach the
-      // server running on localhost.
-      String serverPortString = 'tcp:$_serverPort';
-      runCheckedSync(adbCommandForDevice(['reverse', serverPortString, serverPortString]));
-    }
-
-    String relativeDartMain = _convertToURL(path.relative(mainDart, from: serverRoot));
-    String url = 'http://localhost:$_serverPort/$relativeDartMain';
-    if (poke)
-      url += '?rand=${new Random().nextDouble()}';
-
-    // Actually launch the app on Android.
-    List<String> cmd = adbCommandForDevice([
-      'shell', 'am', 'start',
-      '-a', 'android.intent.action.VIEW',
-      '-d', url,
-    ]);
-    if (checked)
-      cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
-    cmd.add(apk.launchActivity);
-    runCheckedSync(cmd);
-    return true;
-  }
-
   @override
   Future<bool> startApp(ApplicationPackage app) async {
-    // Android currently has to be started with startServer(...).
+    // Android currently has to be started with startBundle(...).
     assert(false);
     return false;
   }
 
   Future<bool> stopApp(ApplicationPackage app) async {
     final AndroidApk apk = app;
-
-    // Turn off reverse port forwarding
-    runSync(adbCommandForDevice(['reverse', '--remove', 'tcp:$_serverPort']));
-    // Stop the app
     runSync(adbCommandForDevice(['shell', 'am', 'force-stop', apk.id]));
-
-    // Kill the server
-    osUtils.killTcpPortListeners(_serverPort);
-
     return true;
   }
 

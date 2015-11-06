@@ -14,6 +14,9 @@ DART=dart
 
 if [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
   (cd "$FLUTTER_TOOLS_DIR"; pub get)
+  if [ -f "$SNAPSHOT_PATH" ]; then
+    rm "$SNAPSHOT_PATH"
+  fi
 fi
 
 REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`

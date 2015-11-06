@@ -16,8 +16,6 @@ import 'install.dart';
 import 'stop.dart';
 
 final Logger _logging = new Logger('sky_tools.start');
-const String _localBundleName = 'app.flx';
-const String _localSnapshotName = 'snapshot_blob.bin';
 
 class StartCommand extends FlutterCommand {
   final String name = 'start';
@@ -35,9 +33,6 @@ class StartCommand extends FlutterCommand {
         defaultsTo: '.',
         abbr: 't',
         help: 'Target app path or filename to start.');
-    argParser.addFlag('http',
-        negatable: true,
-        help: 'Use a local HTTP server to serve your app to your device.');
     argParser.addFlag('boot',
         help: 'Boot the iOS Simulator if it isn\'t already running.');
   }
@@ -69,30 +64,18 @@ class StartCommand extends FlutterCommand {
         continue;
       if (device is AndroidDevice) {
         String target = path.absolute(argResults['target']);
-        if (argResults['http']) {
-          if (await device.startServer(target, poke, argResults['checked'], package))
-            startedSomething = true;
-        } else {
-          String mainPath = target;
-          if (FileSystemEntity.isDirectorySync(target))
-            mainPath = path.join(target, 'lib', 'main.dart');
-          BuildCommand builder = new BuildCommand();
-          builder.inheritFromParent(this);
-
-          Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
-          try {
-            String localBundlePath = path.join(tempDir.path, _localBundleName);
-            String localSnapshotPath = path.join(tempDir.path, _localSnapshotName);
-            await builder.build(
-              snapshotPath: localSnapshotPath,
-              outputPath: localBundlePath,
-              mainPath: mainPath);
+        String mainPath = target;
+        if (FileSystemEntity.isDirectorySync(target))
+          mainPath = path.join(target, 'lib', 'main.dart');
+        BuildCommand builder = new BuildCommand();
+        builder.inheritFromParent(this);
+        await builder.buildInTempDir(
+          mainPath: mainPath,
+          onBundleAvailable: (String localBundlePath) {
             if (device.startBundle(package, localBundlePath, poke, argResults['checked']))
               startedSomething = true;
-          } finally {
-            tempDir.deleteSync(recursive: true);
           }
-        }
+        );
       } else {
         if (await device.startApp(package))
           startedSomething = true;
