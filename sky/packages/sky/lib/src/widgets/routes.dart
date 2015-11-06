@@ -17,7 +17,6 @@ class StateRoute extends Route {
   List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
 
   void didPush(OverlayState overlay, OverlayEntry insertionPoint) { }
-  void didMakeCurrent() { }
   void didPop(dynamic result) {
     if (onPop != null)
       onPop();
@@ -37,8 +36,6 @@ class OverlayRoute extends Route {
       insertionPoint = _overlayEntries.last;
     }
   }
-
-  void didMakeCurrent() { }
 
   void didPop(dynamic result) {
     for (OverlayEntry entry in _overlayEntries)

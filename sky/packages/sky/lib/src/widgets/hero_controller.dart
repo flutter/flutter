@@ -20,9 +20,23 @@ class HeroPageRoute extends PageRoute {
   }) : super(builder: builder, settings: settings);
 
   final HeroController heroController;
+  NavigatorState _navigator;
 
-  void didMakeCurrent() {
-    heroController?.didMakeCurrent(this);
+  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
+    super.didPush(overlay, insertionPoint);
+    // TODO(abarth): Pass the NavigatorState explicitly.
+    if (overlay != null) {
+      _navigator = Navigator.of(overlay.context);
+      heroController?.didPush(_navigator, this);
+    }
+  }
+
+  void didPop(dynamic result) {
+    super.didPop(result);
+    if (_navigator != null) {
+      heroController?.didPop(_navigator, this);
+      _navigator = null;
+    }
   }
 }
 
@@ -32,29 +46,47 @@ class HeroController {
   }
 
   HeroParty _party;
+  PerformanceView _performance;
   HeroPageRoute _from;
   HeroPageRoute _to;
 
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
-  void didMakeCurrent(PageRoute current) {
-    assert(current != null);
-    assert(current.performance != null);
-    if (_from == null) {
-      _from = current;
-      return;
+  void didPush(NavigatorState navigator, HeroPageRoute route) {
+    assert(route != null);
+    assert(route.performance != null);
+    Route from = navigator.currentRoute;
+    if (from is HeroPageRoute)
+      _from = from;
+    _to = route;
+    _performance = route.performance;
+    _checkForHeroQuest();
+  }
+
+  void didPop(NavigatorState navigator, HeroPageRoute route) {
+    assert(route != null);
+    assert(route.performance != null);
+    Route to = navigator.currentRoute;
+    if (to is HeroPageRoute) {
+      _to = to;
+      _from = route;
+      _performance = route.performance;
+      _checkForHeroQuest();
     }
-    _to = current;
-    if (_from != _to) {
-      current.offstage = current.performance.status != PerformanceStatus.completed;
+  }
+
+  void _checkForHeroQuest() {
+    if (_from != null && _to != null && _from != _to) {
+      _to.offstage = _to.performance.status != PerformanceStatus.completed;
       scheduler.requestPostFrameCallback(_updateQuest);
     }
   }
 
   void _handleQuestFinished() {
     _removeHeroesFromOverlay();
-    _from = _to;
+    _from = null;
     _to = null;
+    _performance = null;
   }
 
   Rect _getAnimationArea(BuildContext context) {
@@ -97,7 +129,7 @@ class HeroController {
     Map<Object, HeroHandle> heroesTo = Hero.of(context, mostValuableKeys);
     _to.offstage = false;
 
-    PerformanceView performance = _to.performance;
+    PerformanceView performance = _performance;
     Curve curve = Curves.ease;
     if (performance.status == PerformanceStatus.reverse) {
       performance = new ReversePerformance(performance);
