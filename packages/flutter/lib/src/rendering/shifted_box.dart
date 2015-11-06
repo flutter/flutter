@@ -197,11 +197,9 @@ class RenderPositionedBox extends RenderShiftedBox {
 
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
-      final Size desiredSize = new Size(child.size.width * (_widthFactor ?? 1.0),
-                                        child.size.height * (_heightFactor ?? 1.0));
-      size = constraints.constrain(new Size(shrinkWrapWidth ? desiredSize.width : double.INFINITY,
-                                            shrinkWrapHeight ? desiredSize.height : double.INFINITY));
-      final Offset delta = size - desiredSize;
+      size = constraints.constrain(new Size(shrinkWrapWidth ? child.size.width * _widthFactor : double.INFINITY,
+                                            shrinkWrapHeight ? child.size.height * _heightFactor : double.INFINITY));
+      final Offset delta = size - child.size;
       final BoxParentData childParentData = child.parentData;
       childParentData.position = delta.scale(_alignment.x, _alignment.y).toPoint();
     } else {
