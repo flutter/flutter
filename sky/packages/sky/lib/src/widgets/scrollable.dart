@@ -382,6 +382,7 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 class Block extends StatelessComponent {
   Block(this.children, {
     Key key,
+    this.padding,
     this.initialScrollOffset,
     this.scrollDirection: ScrollDirection.vertical,
     this.onScroll
@@ -390,6 +391,7 @@ class Block extends StatelessComponent {
   }
 
   final List<Widget> children;
+  final EdgeDims padding;
   final double initialScrollOffset;
   final ScrollDirection scrollDirection;
   final ScrollListener onScroll;
@@ -401,11 +403,14 @@ class Block extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
+    Widget contents = new BlockBody(children, direction: _direction);
+    if (padding != null)
+      contents = new Padding(padding: padding, child: contents);
     return new ScrollableViewport(
       initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
       onScroll: onScroll,
-      child: new BlockBody(children, direction: _direction)
+      child: contents
     );
   }
 }
