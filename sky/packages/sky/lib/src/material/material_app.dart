@@ -36,9 +36,12 @@ class MaterialApp extends StatefulComponent {
     Key key,
     this.title,
     this.theme,
-    this.routes,
+    this.routes: const <String, RouteBuilder>{},
     this.onGenerateRoute
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(routes != null);
+    assert(routes.containsKey(Navigator.defaultRouteName) || onGenerateRoute != null);
+  }
 
   final String title;
   final ThemeData theme;
