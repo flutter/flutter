@@ -322,9 +322,15 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/Tools/SnapshotterInvoke",
+				"$(FLUTTER_APPLICATION_PATH)/lib/main.dart",
+				"$(FLUTTER_APPLICATION_PATH)/pubspec.lock",
 			);
 			name = "Generate Precompiled Snapshot";
 			outputPaths = (
+				"$(SRCROOT)/FlutterApplication/Generated/InstructionsSnapshot.S",
+				"$(SRCROOT)/FlutterApplication/Generated/kDartIsolateSnapshotBuffer.c",
+				"$(SRCROOT)/FlutterApplication/Generated/kDartVmIsolateSnapshotBuffer.c",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -337,9 +343,12 @@
 			files = (
 			);
 			inputPaths = (
+				"$(FLUTTER_APPLICATION_PATH)/flutter.yaml",
+				"$(SRCROOT)/Tools/PackagerInvoke",
 			);
 			name = "Run FLX Packager";
 			outputPaths = (
+				"${SRCROOT}/FlutterApplication/Generated/app.flx",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
