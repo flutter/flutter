@@ -7,7 +7,6 @@
 #include "base/message_loop/message_loop.h"
 #include "mojo/environment/default_async_waiter.h"
 #include "mojo/environment/default_logger.h"
-#include "mojo/environment/default_task_tracker.h"
 
 namespace mojo {
 
@@ -33,11 +32,6 @@ const MojoAsyncWaiter* Environment::GetDefaultAsyncWaiter() {
 // static
 const MojoLogger* Environment::GetDefaultLogger() {
   return &internal::kDefaultLogger;
-}
-
-// static
-const TaskTracker* Environment::GetDefaultTaskTracker() {
-  return &internal::kDefaultTaskTracker;
 }
 
 // static

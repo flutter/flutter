@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 // NOTE(vtl): Some of these tests are inherently flaky (e.g., if run on a
-// heavily-loaded system). Sorry. |test::EpsilonDeadline()| may be increased to
+// heavily-loaded system). Sorry. |test::EpsilonTimeout()| may be increased to
 // increase tolerance and reduce observed flakiness (though doing so reduces the
 // meaningfulness of the test).
 
 #include "mojo/edk/system/awakable_list.h"
 
 #include "mojo/edk/system/handle_signals_state.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/sleep.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/system/waiter_test_utils.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -53,7 +54,7 @@ TEST(AwakableListTest, BasicCancel) {
     test::SimpleWaiterThread thread(&result, &context);
     awakable_list.Add(thread.waiter(), MOJO_HANDLE_SIGNAL_READABLE, 3);
     thread.Start();
-    test::Sleep(2 * test::EpsilonDeadline());
+    test::Sleep(2 * test::EpsilonTimeout());
     awakable_list.CancelAll();
   }  // Join |thread|.
   EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
@@ -100,7 +101,7 @@ TEST(AwakableListTest, BasicAwakeSatisfied) {
     test::SimpleWaiterThread thread(&result, &context);
     awakable_list.Add(thread.waiter(), MOJO_HANDLE_SIGNAL_READABLE, 3);
     thread.Start();
-    test::Sleep(2 * test::EpsilonDeadline());
+    test::Sleep(2 * test::EpsilonTimeout());
     awakable_list.AwakeForStateChange(HandleSignalsState(
         MOJO_HANDLE_SIGNAL_READABLE,
         MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE));
@@ -146,7 +147,7 @@ TEST(AwakableListTest, BasicAwakeUnsatisfiable) {
     test::SimpleWaiterThread thread(&result, &context);
     awakable_list.Add(thread.waiter(), MOJO_HANDLE_SIGNAL_READABLE, 3);
     thread.Start();
-    test::Sleep(2 * test::EpsilonDeadline());
+    test::Sleep(2 * test::EpsilonTimeout());
     awakable_list.AwakeForStateChange(HandleSignalsState(
         MOJO_HANDLE_SIGNAL_NONE, MOJO_HANDLE_SIGNAL_WRITABLE));
     awakable_list.Remove(thread.waiter());
@@ -176,7 +177,7 @@ TEST(AwakableListTest, MultipleAwakables) {
     test::SimpleWaiterThread thread2(&result2, &context2);
     awakable_list.Add(thread2.waiter(), MOJO_HANDLE_SIGNAL_WRITABLE, 2);
     thread2.Start();
-    test::Sleep(2 * test::EpsilonDeadline());
+    test::Sleep(2 * test::EpsilonTimeout());
     awakable_list.CancelAll();
   }  // Join threads.
   EXPECT_EQ(MOJO_RESULT_CANCELLED, result1);
@@ -193,7 +194,7 @@ TEST(AwakableListTest, MultipleAwakables) {
     test::SimpleWaiterThread thread2(&result2, &context2);
     awakable_list.Add(thread2.waiter(), MOJO_HANDLE_SIGNAL_WRITABLE, 4);
     thread2.Start();
-    test::Sleep(2 * test::EpsilonDeadline());
+    test::Sleep(2 * test::EpsilonTimeout());
     awakable_list.AwakeForStateChange(HandleSignalsState(
         MOJO_HANDLE_SIGNAL_READABLE,
         MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE));
@@ -214,7 +215,7 @@ TEST(AwakableListTest, MultipleAwakables) {
     test::SimpleWaiterThread thread2(&result2, &context2);
     awakable_list.Add(thread2.waiter(), MOJO_HANDLE_SIGNAL_WRITABLE, 6);
     thread2.Start();
-    test::Sleep(2 * test::EpsilonDeadline());
+    test::Sleep(2 * test::EpsilonTimeout());
     awakable_list.AwakeForStateChange(HandleSignalsState(
         MOJO_HANDLE_SIGNAL_NONE, MOJO_HANDLE_SIGNAL_READABLE));
     awakable_list.Remove(thread2.waiter());
@@ -232,7 +233,7 @@ TEST(AwakableListTest, MultipleAwakables) {
     awakable_list.Add(thread1.waiter(), MOJO_HANDLE_SIGNAL_READABLE, 7);
     thread1.Start();
 
-    test::Sleep(1 * test::EpsilonDeadline());
+    test::Sleep(1 * test::EpsilonTimeout());
 
     // Should do nothing.
     awakable_list.AwakeForStateChange(HandleSignalsState(
@@ -243,7 +244,7 @@ TEST(AwakableListTest, MultipleAwakables) {
     awakable_list.Add(thread2.waiter(), MOJO_HANDLE_SIGNAL_WRITABLE, 8);
     thread2.Start();
 
-    test::Sleep(1 * test::EpsilonDeadline());
+    test::Sleep(1 * test::EpsilonTimeout());
 
     // Awake #1.
     awakable_list.AwakeForStateChange(HandleSignalsState(
@@ -251,7 +252,7 @@ TEST(AwakableListTest, MultipleAwakables) {
         MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE));
     awakable_list.Remove(thread1.waiter());
 
-    test::Sleep(1 * test::EpsilonDeadline());
+    test::Sleep(1 * test::EpsilonTimeout());
 
     test::SimpleWaiterThread thread3(&result3, &context3);
     awakable_list.Add(thread3.waiter(), MOJO_HANDLE_SIGNAL_WRITABLE, 9);
@@ -261,7 +262,7 @@ TEST(AwakableListTest, MultipleAwakables) {
     awakable_list.Add(thread4.waiter(), MOJO_HANDLE_SIGNAL_READABLE, 10);
     thread4.Start();
 
-    test::Sleep(1 * test::EpsilonDeadline());
+    test::Sleep(1 * test::EpsilonTimeout());
 
     // Awake #2 and #3 for unsatisfiability.
     awakable_list.AwakeForStateChange(HandleSignalsState(

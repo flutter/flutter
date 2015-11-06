@@ -7,7 +7,8 @@
 
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/memory.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -26,7 +27,7 @@ class MessagePipeDispatcher final : public Dispatcher {
   // this is exposed directly for testing convenience.)
   static const MojoCreateMessagePipeOptions kDefaultCreateOptions;
 
-  static RefPtr<MessagePipeDispatcher> Create(
+  static util::RefPtr<MessagePipeDispatcher> Create(
       const MojoCreateMessagePipeOptions& /*validated_options*/) {
     return AdoptRef(new MessagePipeDispatcher());
   }
@@ -41,7 +42,7 @@ class MessagePipeDispatcher final : public Dispatcher {
       MojoCreateMessagePipeOptions* out_options);
 
   // Must be called before any other methods. (This method is not thread-safe.)
-  void Init(RefPtr<MessagePipe>&& message_pipe,
+  void Init(util::RefPtr<MessagePipe>&& message_pipe,
             unsigned port) MOJO_NOT_THREAD_SAFE;
 
   // |Dispatcher| public methods:
@@ -52,14 +53,14 @@ class MessagePipeDispatcher final : public Dispatcher {
   // the message pipe, port 0).
   // TODO(vtl): This currently uses |kDefaultCreateOptions|, which is okay since
   // there aren't any options, but eventually options should be plumbed through.
-  static RefPtr<MessagePipeDispatcher> CreateRemoteMessagePipe(
-      RefPtr<ChannelEndpoint>* channel_endpoint);
+  static util::RefPtr<MessagePipeDispatcher> CreateRemoteMessagePipe(
+      util::RefPtr<ChannelEndpoint>* channel_endpoint);
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
-  static RefPtr<MessagePipeDispatcher> Deserialize(Channel* channel,
-                                                   const void* source,
-                                                   size_t size);
+  static util::RefPtr<MessagePipeDispatcher> Deserialize(Channel* channel,
+                                                         const void* source,
+                                                         size_t size);
 
  private:
   friend class MessagePipeDispatcherTransport;
@@ -78,7 +79,8 @@ class MessagePipeDispatcher final : public Dispatcher {
   // |Dispatcher| protected methods:
   void CancelAllAwakablesNoLock() override;
   void CloseImplNoLock() override;
-  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override;
+  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
+      override;
   MojoResult WriteMessageImplNoLock(
       UserPointer<const void> bytes,
       uint32_t num_bytes,
@@ -108,7 +110,7 @@ class MessagePipeDispatcher final : public Dispatcher {
       MOJO_NOT_THREAD_SAFE;
 
   // This will be null if closed.
-  RefPtr<MessagePipe> message_pipe_ MOJO_GUARDED_BY(mutex());
+  util::RefPtr<MessagePipe> message_pipe_ MOJO_GUARDED_BY(mutex());
   unsigned port_ MOJO_GUARDED_BY(mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MessagePipeDispatcher);

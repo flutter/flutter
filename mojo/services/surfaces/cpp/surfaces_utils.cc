@@ -16,7 +16,7 @@ TransformPtr GetIdentityTransform() {
   transform->matrix[5] = 1.f;
   transform->matrix[10] = 1.f;
   transform->matrix[15] = 1.f;
-  return transform.Pass();
+  return transform;
 }
 }
 
@@ -33,7 +33,7 @@ SharedQuadStatePtr CreateDefaultSQS(const Size& size) {
   sqs->opacity = 1.f;
   sqs->blend_mode = mojo::SkXfermode::kSrc_Mode;
   sqs->sorting_context_id = 0;
-  return sqs.Pass();
+  return sqs;
 }
 
 PassPtr CreateDefaultPass(int id, const Rect& rect) {
@@ -43,7 +43,7 @@ PassPtr CreateDefaultPass(int id, const Rect& rect) {
   pass->damage_rect = rect.Clone();
   pass->transform_to_root_target = GetIdentityTransform();
   pass->has_transparent_background = false;
-  return pass.Pass();
+  return pass;
 }
 
 }  // namespace mojo

@@ -9,10 +9,7 @@
 #include <vector>
 
 #include "base/bind.h"
-#include "base/command_line.h"
 #include "base/logging.h"
-#include "base/synchronization/waitable_event.h"
-#include "base/test/test_timeouts.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
@@ -23,18 +20,20 @@
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/process_identifier.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/test_command_line.h"
+#include "mojo/edk/system/test/test_io_thread.h"
+#include "mojo/edk/system/test/timeouts.h"
+#include "mojo/edk/system/waitable_event.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
-#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/edk/test/test_utils.h"
+#include "mojo/edk/util/command_line.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::util::RefPtr;
+
 namespace mojo {
-
-using test::TestIOThread;
-
 namespace system {
 namespace {
 
@@ -58,7 +57,7 @@ void TestWriteReadMessage(MessagePipeDispatcher* write_mp,
                                    MOJO_WRITE_MESSAGE_FLAG_NONE));
 
   // Wait for it to arrive.
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), nullptr));
+  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), nullptr));
   read_mp->RemoveAwakable(&waiter, nullptr);
 
   // Read the message from the read end.
@@ -102,7 +101,7 @@ RefPtr<MessagePipeDispatcher> SendMessagePipeDispatcher(
   mp_to_send = nullptr;
 
   // Wait for it to arrive.
-  CHECK_EQ(waiter.Wait(test::ActionDeadline(), nullptr), MOJO_RESULT_OK);
+  CHECK_EQ(waiter.Wait(test::ActionTimeout(), nullptr), MOJO_RESULT_OK);
   read_mp->RemoveAwakable(&waiter, nullptr);
 
   // Read the message from the read end.
@@ -121,14 +120,13 @@ RefPtr<MessagePipeDispatcher> SendMessagePipeDispatcher(
 
 class TestMasterProcessDelegate : public embedder::MasterProcessDelegate {
  public:
-  TestMasterProcessDelegate()
-      : on_slave_disconnect_event_(false, false) {}  // Auto reset.
+  TestMasterProcessDelegate() {}
   ~TestMasterProcessDelegate() override {}
 
   // Warning: There's only one slave disconnect event (which resets
   // automatically).
   bool TryWaitForOnSlaveDisconnect() {
-    return on_slave_disconnect_event_.TimedWait(TestTimeouts::action_timeout());
+    return !on_slave_disconnect_event_.WaitWithTimeout(test::ActionTimeout());
   }
 
  private:
@@ -139,7 +137,7 @@ class TestMasterProcessDelegate : public embedder::MasterProcessDelegate {
     on_slave_disconnect_event_.Signal();
   }
 
-  base::WaitableEvent on_slave_disconnect_event_;
+  AutoResetWaitableEvent on_slave_disconnect_event_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestMasterProcessDelegate);
 };
@@ -161,13 +159,12 @@ class TestSlaveProcessDelegate : public embedder::SlaveProcessDelegate {
 // Represents the master's side of its connection to a slave.
 class TestSlaveConnection {
  public:
-  TestSlaveConnection(TestIOThread* test_io_thread,
+  TestSlaveConnection(test::TestIOThread* test_io_thread,
                       IPCSupport* master_ipc_support)
       : test_io_thread_(test_io_thread),
         master_ipc_support_(master_ipc_support),
         connection_id_(master_ipc_support_->GenerateConnectionIdentifier()),
-        slave_id_(kInvalidProcessIdentifier),
-        event_(true, false) {}
+        slave_id_(kInvalidProcessIdentifier) {}
   ~TestSlaveConnection() {}
 
   // After this is called, |ShutdownChannelToSlave()| must be called (possibly
@@ -177,7 +174,8 @@ class TestSlaveConnection {
     // Note: |ChannelId|s and |ProcessIdentifier|s are interchangeable.
     RefPtr<MessagePipeDispatcher> mp = master_ipc_support_->ConnectToSlave(
         connection_id_, nullptr, channel_pair.PassServerHandle(),
-        base::Bind(&base::WaitableEvent::Signal, base::Unretained(&event_)),
+        base::Bind(&ManualResetWaitableEvent::Signal,
+                   base::Unretained(&event_)),
         nullptr, &slave_id_);
     EXPECT_TRUE(mp);
     EXPECT_NE(slave_id_, kInvalidProcessIdentifier);
@@ -187,7 +185,7 @@ class TestSlaveConnection {
   }
 
   void WaitForChannelToSlave() {
-    EXPECT_TRUE(event_.TimedWait(TestTimeouts::action_timeout()));
+    EXPECT_FALSE(event_.WaitWithTimeout(test::ActionTimeout()));
   }
 
   void ShutdownChannelToSlave() {
@@ -207,13 +205,13 @@ class TestSlaveConnection {
   const ConnectionIdentifier& connection_id() const { return connection_id_; }
 
  private:
-  TestIOThread* const test_io_thread_;
+  test::TestIOThread* const test_io_thread_;
   IPCSupport* const master_ipc_support_;
   const ConnectionIdentifier connection_id_;
   // The master's message pipe dispatcher.
   RefPtr<MessagePipeDispatcher> message_pipe_;
   ProcessIdentifier slave_id_;
-  base::WaitableEvent event_;
+  ManualResetWaitableEvent event_;
   embedder::ScopedPlatformHandle slave_platform_handle_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestSlaveConnection);
@@ -225,7 +223,7 @@ class TestSlave {
  public:
   // Note: Before destruction, |ShutdownIPCSupport()| must be called.
   TestSlave(embedder::PlatformSupport* platform_support,
-            TestIOThread* test_io_thread,
+            test::TestIOThread* test_io_thread,
             embedder::ScopedPlatformHandle platform_handle)
       : test_io_thread_(test_io_thread),
         slave_ipc_support_(platform_support,
@@ -233,8 +231,7 @@ class TestSlave {
                            test_io_thread->task_runner(),
                            &slave_process_delegate_,
                            test_io_thread->task_runner(),
-                           platform_handle.Pass()),
-        event_(true, false) {}
+                           platform_handle.Pass()) {}
   ~TestSlave() {}
 
   // After this is called, |ShutdownChannelToMaster()| must be called (possibly
@@ -243,8 +240,8 @@ class TestSlave {
       const ConnectionIdentifier& connection_id) {
     ProcessIdentifier master_id = kInvalidProcessIdentifier;
     RefPtr<MessagePipeDispatcher> mp = slave_ipc_support_.ConnectToMaster(
-        connection_id,
-        base::Bind(&base::WaitableEvent::Signal, base::Unretained(&event_)),
+        connection_id, base::Bind(&ManualResetWaitableEvent::Signal,
+                                  base::Unretained(&event_)),
         nullptr, &master_id);
     EXPECT_TRUE(mp);
     EXPECT_EQ(kMasterProcessIdentifier, master_id);
@@ -252,7 +249,7 @@ class TestSlave {
   }
 
   void WaitForChannelToMaster() {
-    EXPECT_TRUE(event_.TimedWait(TestTimeouts::action_timeout()));
+    EXPECT_FALSE(event_.WaitWithTimeout(test::ActionTimeout()));
   }
 
   void ShutdownChannelToMaster() {
@@ -273,10 +270,10 @@ class TestSlave {
   }
 
  private:
-  TestIOThread* const test_io_thread_;
+  test::TestIOThread* const test_io_thread_;
   TestSlaveProcessDelegate slave_process_delegate_;
   IPCSupport slave_ipc_support_;
-  base::WaitableEvent event_;
+  ManualResetWaitableEvent event_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestSlave);
 };
@@ -285,7 +282,7 @@ class TestSlave {
 class TestSlaveSetup {
  public:
   TestSlaveSetup(embedder::SimplePlatformSupport* platform_support,
-                 TestIOThread* test_io_thread,
+                 test::TestIOThread* test_io_thread,
                  TestMasterProcessDelegate* master_process_delegate,
                  IPCSupport* master_ipc_support)
       : platform_support_(platform_support),
@@ -351,7 +348,7 @@ class TestSlaveSetup {
 
  private:
   embedder::SimplePlatformSupport* const platform_support_;
-  TestIOThread* const test_io_thread_;
+  test::TestIOThread* const test_io_thread_;
   TestMasterProcessDelegate* const master_process_delegate_;
   IPCSupport* const master_ipc_support_;
 
@@ -368,7 +365,7 @@ class IPCSupportTest : public testing::Test {
  public:
   // Note: Run master process delegate methods on the I/O thread.
   IPCSupportTest()
-      : test_io_thread_(TestIOThread::StartMode::AUTO),
+      : test_io_thread_(test::TestIOThread::StartMode::AUTO),
         master_ipc_support_(&platform_support_,
                             embedder::ProcessType::MASTER,
                             test_io_thread_.task_runner(),
@@ -394,7 +391,7 @@ class IPCSupportTest : public testing::Test {
   embedder::SimplePlatformSupport& platform_support() {
     return platform_support_;
   }
-  TestIOThread& test_io_thread() { return test_io_thread_; }
+  test::TestIOThread& test_io_thread() { return test_io_thread_; }
   TestMasterProcessDelegate& master_process_delegate() {
     return master_process_delegate_;
   }
@@ -402,7 +399,7 @@ class IPCSupportTest : public testing::Test {
 
  private:
   embedder::SimplePlatformSupport platform_support_;
-  TestIOThread test_io_thread_;
+  test::TestIOThread test_io_thread_;
 
   // All tests require a master.
   TestMasterProcessDelegate master_process_delegate_;
@@ -436,7 +433,7 @@ TEST_F(IPCSupportTest, MasterSlave) {
 
   // A message was sent through the message pipe, |Channel|s must have been
   // established on both sides. The events have thus almost certainly been
-  // signalled, but we'll wait just to be sure.
+  // signaled, but we'll wait just to be sure.
   s->slave_connection()->WaitForChannelToSlave();
   s->slave()->WaitForChannelToMaster();
 
@@ -675,7 +672,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlaveInternal) {
   ASSERT_TRUE(client_platform_handle.is_valid());
 
   embedder::SimplePlatformSupport platform_support;
-  TestIOThread test_io_thread(TestIOThread::StartMode::AUTO);
+  test::TestIOThread test_io_thread(test::TestIOThread::StartMode::AUTO);
   TestSlaveProcessDelegate slave_process_delegate;
   // Note: Run process delegate methods on the I/O thread.
   IPCSupport ipc_support(&platform_support, embedder::ProcessType::SLAVE,
@@ -683,12 +680,12 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlaveInternal) {
                          test_io_thread.task_runner(),
                          client_platform_handle.Pass());
 
-  const base::CommandLine& command_line =
-      *base::CommandLine::ForCurrentProcess();
-  ASSERT_TRUE(command_line.HasSwitch(kConnectionIdFlag));
+  std::string connection_id_string;
+  ASSERT_TRUE(test::GetTestCommandLine()->GetOptionValue(
+      kConnectionIdFlag, &connection_id_string));
   bool ok = false;
-  ConnectionIdentifier connection_id = ConnectionIdentifier::FromString(
-      command_line.GetSwitchValueASCII(kConnectionIdFlag), &ok);
+  ConnectionIdentifier connection_id =
+      ConnectionIdentifier::FromString(connection_id_string, &ok);
   ASSERT_TRUE(ok);
 
   embedder::ScopedPlatformHandle second_platform_handle =

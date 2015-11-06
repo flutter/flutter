@@ -11,7 +11,6 @@
 #include <memory>
 #include <vector>
 
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/dispatcher.h"
@@ -19,8 +18,9 @@
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/message_pipe_endpoint.h"
-#include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/message_pipe.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -39,21 +39,21 @@ class MessageInTransitQueue;
 class MessagePipe final : public ChannelEndpointClient {
  public:
   // Creates a |MessagePipe| with two new |LocalMessagePipeEndpoint|s.
-  static RefPtr<MessagePipe> CreateLocalLocal();
+  static util::RefPtr<MessagePipe> CreateLocalLocal();
 
   // Creates a |MessagePipe| with a |LocalMessagePipeEndpoint| on port 0 and a
   // |ProxyMessagePipeEndpoint| on port 1. |*channel_endpoint| is set to the
   // (newly-created) |ChannelEndpoint| for the latter.
-  static RefPtr<MessagePipe> CreateLocalProxy(
-      RefPtr<ChannelEndpoint>* channel_endpoint);
+  static util::RefPtr<MessagePipe> CreateLocalProxy(
+      util::RefPtr<ChannelEndpoint>* channel_endpoint);
 
   // Similar to |CreateLocalProxy()|, except that it'll do so from an existing
   // |ChannelEndpoint| (whose |ReplaceClient()| it'll call) and take
   // |message_queue|'s contents as already-received incoming messages. If
   // |channel_endpoint| is null, this will create a "half-open" message pipe.
-  static RefPtr<MessagePipe> CreateLocalProxyFromExisting(
+  static util::RefPtr<MessagePipe> CreateLocalProxyFromExisting(
       MessageInTransitQueue* message_queue,
-      RefPtr<ChannelEndpoint>&& channel_endpoint);
+      util::RefPtr<ChannelEndpoint>&& channel_endpoint);
 
   // Creates a |MessagePipe| with a |ProxyMessagePipeEndpoint| on port 0 and a
   // |LocalMessagePipeEndpoint| on port 1. |*channel_endpoint| is set to the
@@ -61,8 +61,8 @@ class MessagePipe final : public ChannelEndpointClient {
   // Note: This is really only needed in tests (outside of tests, this
   // configuration arises from a local message pipe having its port 0
   // "converted" using |ConvertLocalToProxy()|).
-  static RefPtr<MessagePipe> CreateProxyLocal(
-      RefPtr<ChannelEndpoint>* channel_endpoint);
+  static util::RefPtr<MessagePipe> CreateProxyLocal(
+      util::RefPtr<ChannelEndpoint>* channel_endpoint);
 
   // Gets the other port number (i.e., 0 -> 1, 1 -> 0).
   static unsigned GetPeerPort(unsigned port);
@@ -73,7 +73,7 @@ class MessagePipe final : public ChannelEndpointClient {
   static bool Deserialize(Channel* channel,
                           const void* source,
                           size_t size,
-                          RefPtr<MessagePipe>* message_pipe,
+                          util::RefPtr<MessagePipe>* message_pipe,
                           unsigned* port);
 
   // Gets the type of the endpoint (used for assertions, etc.).
@@ -138,7 +138,7 @@ class MessagePipe final : public ChannelEndpointClient {
       std::vector<DispatcherTransport>* transports)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
-  mutable Mutex mutex_;
+  mutable util::Mutex mutex_;
   std::unique_ptr<MessagePipeEndpoint> endpoints_[2] MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MessagePipe);

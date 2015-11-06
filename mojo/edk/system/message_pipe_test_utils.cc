@@ -10,8 +10,12 @@
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/sleep.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
+
+using mojo::util::MakeRefCounted;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -37,7 +41,7 @@ MojoResult WaitIfNecessary(MessagePipe* mp,
 
 ChannelThread::ChannelThread(embedder::PlatformSupport* platform_support)
     : platform_support_(platform_support),
-      test_io_thread_(mojo::test::TestIOThread::StartMode::MANUAL) {}
+      test_io_thread_(TestIOThread::StartMode::MANUAL) {}
 
 ChannelThread::~ChannelThread() {
   Stop();
@@ -58,7 +62,7 @@ void ChannelThread::Stop() {
     // TODO(vtl): Remove this once |Channel| has a
     // |FlushWriteBufferAndShutdown()| (or whatever).
     while (!channel_->IsWriteBufferEmpty())
-      test::Sleep(test::DeadlineFromMilliseconds(20));
+      test::Sleep(test::EpsilonTimeout());
 
     test_io_thread_.PostTaskAndWait(base::Bind(
         &ChannelThread::ShutdownChannelOnIOThread, base::Unretained(this)));

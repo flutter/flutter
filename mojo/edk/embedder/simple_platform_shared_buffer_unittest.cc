@@ -6,7 +6,6 @@
 
 #include <limits>
 
-#include "base/memory/ref_counted.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -21,8 +20,7 @@ TEST(SimplePlatformSharedBufferTest, Basic) {
   const int kFudge = 1234567890;
 
   // Make some memory.
-  scoped_refptr<SimplePlatformSharedBuffer> buffer(
-      SimplePlatformSharedBuffer::Create(kNumBytes));
+  auto buffer = SimplePlatformSharedBuffer::Create(kNumBytes);
   ASSERT_TRUE(buffer);
 
   // Map it all, scribble some stuff, and then unmap it.
@@ -98,8 +96,7 @@ TEST(SimplePlatformSharedBufferTest, Basic) {
 // TODO(vtl): Bigger buffers.
 
 TEST(SimplePlatformSharedBufferTest, InvalidMappings) {
-  scoped_refptr<SimplePlatformSharedBuffer> buffer(
-      SimplePlatformSharedBuffer::Create(100));
+  auto buffer = SimplePlatformSharedBuffer::Create(100);
   ASSERT_TRUE(buffer);
 
   // Zero length not allowed.
@@ -129,8 +126,7 @@ TEST(SimplePlatformSharedBufferTest, TooBig) {
   // If |size_t| is 32-bit, it's quite possible/likely that |Create()| succeeds
   // (since it only involves creating a 4 GB file).
   const size_t kMaxSizeT = std::numeric_limits<size_t>::max();
-  scoped_refptr<SimplePlatformSharedBuffer> buffer(
-      SimplePlatformSharedBuffer::Create(kMaxSizeT));
+  auto buffer = SimplePlatformSharedBuffer::Create(kMaxSizeT);
   // But, assuming |sizeof(size_t) == sizeof(void*)|, mapping all of it should
   // always fail.
   if (buffer)
@@ -142,8 +138,7 @@ TEST(SimplePlatformSharedBufferTest, TooBig) {
 // and reuse the same address, in which case we'd have to be more careful about
 // using the address as the key for unmapping.
 TEST(SimplePlatformSharedBufferTest, MappingsDistinct) {
-  scoped_refptr<SimplePlatformSharedBuffer> buffer(
-      SimplePlatformSharedBuffer::Create(100));
+  auto buffer = SimplePlatformSharedBuffer::Create(100);
   std::unique_ptr<PlatformSharedBufferMapping> mapping1(buffer->Map(0, 100));
   std::unique_ptr<PlatformSharedBufferMapping> mapping2(buffer->Map(0, 100));
   EXPECT_NE(mapping1->GetBase(), mapping2->GetBase());
@@ -152,8 +147,7 @@ TEST(SimplePlatformSharedBufferTest, MappingsDistinct) {
 TEST(SimplePlatformSharedBufferTest, BufferZeroInitialized) {
   static const size_t kSizes[] = {10, 100, 1000, 10000, 100000};
   for (size_t i = 0; i < MOJO_ARRAYSIZE(kSizes); i++) {
-    scoped_refptr<SimplePlatformSharedBuffer> buffer(
-        SimplePlatformSharedBuffer::Create(kSizes[i]));
+    auto buffer = SimplePlatformSharedBuffer::Create(kSizes[i]);
     std::unique_ptr<PlatformSharedBufferMapping> mapping(
         buffer->Map(0, kSizes[i]));
     for (size_t j = 0; j < kSizes[i]; j++) {
@@ -170,8 +164,7 @@ TEST(SimplePlatformSharedBufferTest, MappingsOutliveBuffer) {
   std::unique_ptr<PlatformSharedBufferMapping> mapping2;
 
   {
-    scoped_refptr<SimplePlatformSharedBuffer> buffer(
-        SimplePlatformSharedBuffer::Create(100));
+    auto buffer = SimplePlatformSharedBuffer::Create(100);
     mapping1 = buffer->Map(0, 100);
     mapping2 = buffer->Map(50, 50);
     static_cast<char*>(mapping1->GetBase())[50] = 'x';

@@ -6,9 +6,12 @@
 
 #include <utility>
 
-#include "base/synchronization/waitable_event.h"
 #include "mojo/edk/system/message_in_transit.h"
+#include "mojo/edk/system/waitable_event.h"
 #include "testing/gtest/include/gtest/gtest.h"
+
+using mojo::util::MutexLocker;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -40,7 +43,8 @@ std::unique_ptr<MessageInTransit> TestChannelEndpointClient::PopMessage() {
   return messages_.GetMessage();
 }
 
-void TestChannelEndpointClient::SetReadEvent(base::WaitableEvent* read_event) {
+void TestChannelEndpointClient::SetReadEvent(
+    ManualResetWaitableEvent* read_event) {
   MutexLocker locker(&mutex_);
   read_event_ = read_event;
 }

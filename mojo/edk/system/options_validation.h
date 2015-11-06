@@ -14,7 +14,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <algorithm>
 #include <type_traits>
 
 #include "base/logging.h"
@@ -38,15 +37,15 @@ class UserOptionsReader {
   // Note: We initialize |options_reader_| without checking, since we do a check
   // in |GetSizeForReader()|.
   explicit UserOptionsReader(UserPointer<const Options> options)
-      : options_reader_(UserPointer<const char>::Reader::NoCheck(),
-                        options.template ReinterpretCast<const char>(),
-                        GetSizeForReader(options)) {}
+      : options_reader_(options, GetSizeForReader(options)) {}
 
-  bool is_valid() const { return !!options_reader_.GetPointer(); }
+  bool is_valid() const {
+    return options_reader_.GetPointer()->struct_size >= sizeof(uint32_t);
+  }
 
   const Options& options() const {
     DCHECK(is_valid());
-    return *reinterpret_cast<const Options*>(options_reader_.GetPointer());
+    return *options_reader_.GetPointer();
   }
 
   // Checks that the given (variable-size) |options| passed to the constructor
@@ -64,20 +63,17 @@ class UserOptionsReader {
   static inline size_t GetSizeForReader(UserPointer<const Options> options) {
     uint32_t struct_size =
         options.template ReinterpretCast<const uint32_t>().Get();
+    // Note: |PartialReader| will clear memory, so |is_valid()| will return
+    // false in this case.
     if (struct_size < sizeof(uint32_t))
       return 0;
 
-    // Check the full requested size.
-    // Note: Use |MOJO_ALIGNOF()| here to match the exact macro used in the
-    // declaration of Options structs.
-    internal::CheckUserPointerWithSize<MOJO_ALIGNOF(Options)>(options.pointer_,
-                                                              struct_size);
-    options.template ReinterpretCast<const char>().CheckArray(struct_size);
-    // But we'll never look at more than |sizeof(Options)| bytes.
-    return std::min(static_cast<size_t>(struct_size), sizeof(Options));
+    // |PartialReader|'s constructor will automatically limit the amount copied
+    // to |sizeof(Options)|.
+    return struct_size;
   }
 
-  UserPointer<const char>::Reader options_reader_;
+  typename UserPointer<const Options>::PartialReader options_reader_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(UserOptionsReader);
 };

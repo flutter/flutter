@@ -5,7 +5,7 @@
 #ifndef MOJO_EDK_SYSTEM_CHANNEL_ENDPOINT_CLIENT_H_
 #define MOJO_EDK_SYSTEM_CHANNEL_ENDPOINT_CLIENT_H_
 
-#include "mojo/edk/system/ref_counted.h"
+#include "mojo/edk/util/ref_counted.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -30,7 +30,7 @@ class MessageInTransit;
 // |ChannelEndpoint| has apparently relinquished its pointer to the
 // |ChannelEndpointClient|).
 class ChannelEndpointClient
-    : public RefCountedThreadSafe<ChannelEndpointClient> {
+    : public util::RefCountedThreadSafe<ChannelEndpointClient> {
  public:
   // Called by |ChannelEndpoint| in response to its |OnReadMessage()|, which is
   // called by |Channel| when it receives a message for the |ChannelEndpoint|.

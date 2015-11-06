@@ -5,6 +5,7 @@
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 
 #include <limits>
+#include <utility>
 
 #include "base/logging.h"
 #include "mojo/edk/embedder/platform_support.h"
@@ -13,6 +14,8 @@
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/options_validation.h"
 #include "mojo/public/c/system/macros.h"
+
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -75,15 +78,15 @@ RefPtr<SharedBufferDispatcher> SharedBufferDispatcher::Create(
     return nullptr;
   }
 
-  scoped_refptr<embedder::PlatformSharedBuffer> shared_buffer(
-      platform_support->CreateSharedBuffer(static_cast<size_t>(num_bytes)));
+  auto shared_buffer =
+      platform_support->CreateSharedBuffer(static_cast<size_t>(num_bytes));
   if (!shared_buffer) {
     *result = MOJO_RESULT_RESOURCE_EXHAUSTED;
     return nullptr;
   }
 
   *result = MOJO_RESULT_OK;
-  return CreateInternal(shared_buffer.Pass());
+  return CreateInternal(std::move(shared_buffer));
 }
 
 Dispatcher::Type SharedBufferDispatcher::GetType() const {
@@ -144,21 +147,21 @@ RefPtr<SharedBufferDispatcher> SharedBufferDispatcher::Deserialize(
 
   // Wrapping |platform_handle| in a |ScopedPlatformHandle| means that it'll be
   // closed even if creation fails.
-  scoped_refptr<embedder::PlatformSharedBuffer> shared_buffer(
+  auto shared_buffer =
       channel->platform_support()->CreateSharedBufferFromHandle(
-          num_bytes, embedder::ScopedPlatformHandle(platform_handle)));
+          num_bytes, embedder::ScopedPlatformHandle(platform_handle));
   if (!shared_buffer) {
     LOG(ERROR)
         << "Invalid serialized shared buffer dispatcher (invalid num_bytes?)";
     return nullptr;
   }
 
-  return CreateInternal(shared_buffer.Pass());
+  return CreateInternal(std::move(shared_buffer));
 }
 
 SharedBufferDispatcher::SharedBufferDispatcher(
-    scoped_refptr<embedder::PlatformSharedBuffer> shared_buffer)
-    : shared_buffer_(shared_buffer) {
+    RefPtr<embedder::PlatformSharedBuffer>&& shared_buffer)
+    : shared_buffer_(std::move(shared_buffer)) {
   DCHECK(shared_buffer_);
 }
 
@@ -207,7 +210,7 @@ RefPtr<Dispatcher>
 SharedBufferDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   mutex().AssertHeld();
   DCHECK(shared_buffer_);
-  return CreateInternal(shared_buffer_.Pass());
+  return CreateInternal(std::move(shared_buffer_));
 }
 
 MojoResult SharedBufferDispatcher::DuplicateBufferHandleImplNoLock(
@@ -221,7 +224,7 @@ MojoResult SharedBufferDispatcher::DuplicateBufferHandleImplNoLock(
     return result;
 
   // Note: Since this is "duplicate", we keep our ref to |shared_buffer_|.
-  *new_dispatcher = CreateInternal(shared_buffer_);
+  *new_dispatcher = CreateInternal(shared_buffer_.Clone());
   return MOJO_RESULT_OK;
 }
 

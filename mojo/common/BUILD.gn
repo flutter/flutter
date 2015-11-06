@@ -9,8 +9,7 @@ source_set("common") {
   sources = [
     "binding_set.h",
     "interface_ptr_set.h",
-    "task_tracker.cc",
-    "task_tracker.h",
+    "strong_binding_set.h",
   ]
 
   deps = [
@@ -19,34 +18,38 @@ source_set("common") {
   ]
 }
 
-test("mojo_common_unittests") {
+source_set("tests") {
+  testonly = true
+
   sources = [
     "binding_set_unittest.cc",
     "callback_binding_unittest.cc",
     "interface_ptr_set_unittest.cc",
-    "task_tracker_unittest.cc",
+    "strong_binding_set_unittest.cc",
   ]
 
   deps = [
     ":common",
     ":test_interfaces",
     "//base",
-    "//base/test:test_support",
+    "//mojo/message_pump",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/bindings:callback",
+    "//mojo/public/cpp/system",
+    "//testing/gtest",
+  ]
+}
+
+test("mojo_common_unittests") {
+  deps = [
+    ":tests",
     "//mojo/converters/array_string:tests",
     "//mojo/converters/base:tests",
     "//mojo/converters/url:tests",
     "//mojo/data_pipe_utils:tests",
     "//mojo/edk/test:run_all_unittests",
-    "//mojo/edk/test:test_support",
     "//mojo/environment:chromium",
-    "//mojo/message_pump",
     "//mojo/message_pump:tests",
-    "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/bindings:callback",
-    "//mojo/public/cpp/system",
-    "//mojo/public/cpp/test_support:test_utils",
-    "//testing/gtest",
-    "//url",
   ]
 }
 

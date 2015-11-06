@@ -6,6 +6,8 @@
 
 #include <utility>
 
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace system {
 namespace test {

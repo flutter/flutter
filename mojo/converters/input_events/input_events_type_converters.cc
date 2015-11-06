@@ -225,7 +225,7 @@ EventPtr TypeConverter<EventPtr, ui::Event>::Convert(const ui::Event& input) {
     }
     event->key_data = key_data.Pass();
   }
-  return event.Pass();
+  return event;
 }
 
 // static
@@ -283,6 +283,7 @@ scoped_ptr<ui::Event> TypeConverter<scoped_ptr<ui::Event>, EventPtr>::Convert(
         // TODO: last flags isn't right. Need to send changed_flags.
         scoped_ptr<ui::MouseEvent> event(new ui::MouseEvent(
             MojoMouseEventTypeToUIEvent(input), location, screen_location,
+            base::TimeDelta::FromMilliseconds(input->time_stamp),
             ui::EventFlags(input->flags), ui::EventFlags(input->flags)));
         if (event->IsMouseWheelEvent()) {
           // This conversion assumes we're using the mojo meaning of these

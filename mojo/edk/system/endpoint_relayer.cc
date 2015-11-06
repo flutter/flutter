@@ -10,6 +10,9 @@
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_in_transit.h"
 
+using mojo::util::MutexLocker;
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace system {
 

@@ -8,16 +8,12 @@ source_set("chromium") {
     "default_async_waiter.h",
     "default_logger.cc",
     "default_logger.h",
-    "default_task_tracker.cc",
-    "default_task_tracker.h",
     "environment.cc",
 
     # TODO(vtl): This is kind of ugly. (See TODO in logging.h.)
     "../public/cpp/environment/async_waiter.h",
     "../public/cpp/environment/lib/async_waiter.cc",
     "../public/cpp/environment/lib/logging.cc",
-    "../public/cpp/environment/lib/scoped_task_tracking.cc",
-    "../public/cpp/environment/lib/scoped_task_tracking.h",
     "../public/cpp/environment/logging.h",
   ]
 

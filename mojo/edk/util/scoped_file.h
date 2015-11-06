@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#include "base/memory/scoped_ptr.h"
+#include <memory>
 
 namespace mojo {
 namespace util {
@@ -24,7 +24,7 @@ struct ScopedFILECloser {
 }  // namespace internal
 
 // Automatically closes |FILE*|s.
-using ScopedFILE = scoped_ptr<FILE, internal::ScopedFILECloser>;
+using ScopedFILE = std::unique_ptr<FILE, internal::ScopedFILECloser>;
 
 }  // namespace util
 }  // namespace mojo

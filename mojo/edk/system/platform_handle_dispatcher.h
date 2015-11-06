@@ -6,8 +6,9 @@
 #define MOJO_EDK_SYSTEM_PLATFORM_HANDLE_DISPATCHER_H_
 
 #include "mojo/edk/embedder/scoped_platform_handle.h"
-#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/simple_dispatcher.h"
+#include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -17,7 +18,7 @@ namespace system {
 // the embedder).
 class PlatformHandleDispatcher final : public SimpleDispatcher {
  public:
-  static RefPtr<PlatformHandleDispatcher> Create(
+  static util::RefPtr<PlatformHandleDispatcher> Create(
       embedder::ScopedPlatformHandle platform_handle) {
     return AdoptRef(new PlatformHandleDispatcher(platform_handle.Pass()));
   }
@@ -29,7 +30,7 @@ class PlatformHandleDispatcher final : public SimpleDispatcher {
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
-  static RefPtr<PlatformHandleDispatcher> Deserialize(
+  static util::RefPtr<PlatformHandleDispatcher> Deserialize(
       Channel* channel,
       const void* source,
       size_t size,
@@ -42,7 +43,8 @@ class PlatformHandleDispatcher final : public SimpleDispatcher {
 
   // |Dispatcher| protected methods:
   void CloseImplNoLock() override;
-  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override;
+  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
+      override;
   void StartSerializeImplNoLock(Channel* channel,
                                 size_t* max_size,
                                 size_t* max_platform_handles) override

@@ -25,16 +25,20 @@
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/system/raw_channel.h"
-#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/scoped_test_dir.h"
+#include "mojo/edk/system/test/sleep.h"
+#include "mojo/edk/system/test/test_io_thread.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
-#include "mojo/edk/test/scoped_test_dir.h"
-#include "mojo/edk/test/test_io_thread.h"
 #include "mojo/edk/test/test_utils.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/scoped_file.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
+
+using mojo::util::MakeRefCounted;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -46,8 +50,7 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 
 class RemoteMessagePipeTest : public testing::Test {
  public:
-  RemoteMessagePipeTest()
-      : io_thread_(mojo::test::TestIOThread::StartMode::AUTO) {}
+  RemoteMessagePipeTest() : io_thread_(test::TestIOThread::StartMode::AUTO) {}
   ~RemoteMessagePipeTest() override {}
 
   void SetUp() override {
@@ -89,7 +92,7 @@ class RemoteMessagePipeTest : public testing::Test {
   }
 
   embedder::PlatformSupport* platform_support() { return &platform_support_; }
-  mojo::test::TestIOThread* io_thread() { return &io_thread_; }
+  test::TestIOThread* io_thread() { return &io_thread_; }
   // Warning: It's up to the caller to ensure that the returned channel
   // is/remains valid.
   Channel* channels(size_t i) { return channels_[i].get(); }
@@ -160,7 +163,7 @@ class RemoteMessagePipeTest : public testing::Test {
   }
 
   embedder::SimplePlatformSupport platform_support_;
-  mojo::test::TestIOThread io_thread_;
+  test::TestIOThread io_thread_;
   embedder::ScopedPlatformHandle platform_handles_[2];
   RefPtr<Channel> channels_[2];
 
@@ -643,7 +646,7 @@ TEST_F(RemoteMessagePipeTest, HandlePassing) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    dispatcher->AssertHasOneRef();
+    EXPECT_TRUE(dispatcher->HasOneRef());
     dispatcher = nullptr;
   }
 
@@ -671,7 +674,7 @@ TEST_F(RemoteMessagePipeTest, HandlePassing) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, read_dispatchers[0]->GetType());
   dispatcher = RefPtr<MessagePipeDispatcher>(
@@ -818,7 +821,7 @@ TEST_F(RemoteMessagePipeTest, HandlePassingHalfClosed) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    dispatcher->AssertHasOneRef();
+    EXPECT_TRUE(dispatcher->HasOneRef());
     dispatcher = nullptr;
   }
 
@@ -846,7 +849,7 @@ TEST_F(RemoteMessagePipeTest, HandlePassingHalfClosed) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, read_dispatchers[0]->GetType());
   dispatcher = RefPtr<MessagePipeDispatcher>(
@@ -947,7 +950,7 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    dispatcher->AssertHasOneRef();
+    EXPECT_TRUE(dispatcher->HasOneRef());
     dispatcher = nullptr;
   }
 
@@ -975,7 +978,7 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::SHARED_BUFFER, read_dispatchers[0]->GetType());
   dispatcher = RefPtr<SharedBufferDispatcher>(
@@ -1013,7 +1016,7 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
 }
 
 TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
-  mojo::test::ScopedTestDir test_dir;
+  test::ScopedTestDir test_dir;
 
   static const char kHello[] = "hello";
   static const char kWorld[] = "world";
@@ -1032,7 +1035,7 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
   // We'll try to pass this dispatcher, which will cause a |PlatformHandle| to
   // be passed.
   auto dispatcher = PlatformHandleDispatcher::Create(
-      mojo::test::PlatformHandleFromFILE(fp.Pass()));
+      mojo::test::PlatformHandleFromFILE(std::move(fp)));
 
   // Prepare to wait on MP 1, port 1. (Add the waiter now. Otherwise, if we do
   // it later, it might already be readable.)
@@ -1057,7 +1060,7 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    dispatcher->AssertHasOneRef();
+    EXPECT_TRUE(dispatcher->HasOneRef());
     dispatcher = nullptr;
   }
 
@@ -1085,16 +1088,16 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::PLATFORM_HANDLE, read_dispatchers[0]->GetType());
   dispatcher = RefPtr<PlatformHandleDispatcher>(
       static_cast<PlatformHandleDispatcher*>(read_dispatchers[0].get()));
 
-  embedder::ScopedPlatformHandle h = dispatcher->PassPlatformHandle().Pass();
+  embedder::ScopedPlatformHandle h = dispatcher->PassPlatformHandle();
   EXPECT_TRUE(h.is_valid());
 
-  fp = mojo::test::FILEFromPlatformHandle(h.Pass(), "rb").Pass();
+  fp = mojo::test::FILEFromPlatformHandle(h.Pass(), "rb");
   EXPECT_FALSE(h.is_valid());
   EXPECT_TRUE(fp);
 
@@ -1115,7 +1118,7 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
 // itself (not in the test). Also, any logged warnings/errors would also
 // probably be indicative of bugs.
 TEST_F(RemoteMessagePipeTest, RacingClosesStress) {
-  MojoDeadline delay = test::DeadlineFromMilliseconds(5);
+  MojoDeadline delay = test::DeadlineFromMilliseconds(5u);
 
   for (unsigned i = 0; i < 256; i++) {
     DVLOG(2) << "---------------------------------------- " << i;
@@ -1192,7 +1195,7 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    dispatcher->AssertHasOneRef();
+    EXPECT_TRUE(dispatcher->HasOneRef());
     dispatcher = nullptr;
   }
 
@@ -1220,7 +1223,7 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, read_dispatchers[0]->GetType());
   dispatcher = RefPtr<MessagePipeDispatcher>(
@@ -1252,7 +1255,7 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
 
     // |dispatcher| should have been closed. This is |DCHECK()|ed when the
     // |dispatcher| is destroyed.
-    dispatcher->AssertHasOneRef();
+    EXPECT_TRUE(dispatcher->HasOneRef());
     dispatcher = nullptr;
   }
 
@@ -1278,7 +1281,7 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE, read_dispatchers[0]->GetType());
   dispatcher = RefPtr<MessagePipeDispatcher>(

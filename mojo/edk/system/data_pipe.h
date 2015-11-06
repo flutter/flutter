@@ -14,9 +14,9 @@
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
-#include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/ref_ptr.h"
-#include "mojo/edk/system/thread_annotations.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -58,7 +58,7 @@ class DataPipe final : public ChannelEndpointClient {
   // |ValidateOptions()|. In particular: |struct_size| is ignored (so
   // |validated_options| must be the current version of the struct) and
   // |capacity_num_bytes| must be nonzero.
-  static RefPtr<DataPipe> CreateLocal(
+  static util::RefPtr<DataPipe> CreateLocal(
       const MojoCreateDataPipeOptions& validated_options);
 
   // Creates a data pipe with a remote producer and a local consumer, using an
@@ -67,10 +67,10 @@ class DataPipe final : public ChannelEndpointClient {
   // |channel_endpoint| is null, this will create a "half-open" data pipe (with
   // only the consumer open). Note that this may fail, in which case it returns
   // null.
-  static RefPtr<DataPipe> CreateRemoteProducerFromExisting(
+  static util::RefPtr<DataPipe> CreateRemoteProducerFromExisting(
       const MojoCreateDataPipeOptions& validated_options,
       MessageInTransitQueue* message_queue,
-      RefPtr<ChannelEndpoint>&& channel_endpoint);
+      util::RefPtr<ChannelEndpoint>&& channel_endpoint);
 
   // Creates a data pipe with a local producer and a remote consumer, using an
   // existing |ChannelEndpoint| (whose |ReplaceClient()| it'll call) and taking
@@ -78,11 +78,11 @@ class DataPipe final : public ChannelEndpointClient {
   // (|message_queue| may be null). If |channel_endpoint| is null, this will
   // create a "half-open" data pipe (with only the producer open). Note that
   // this may fail, in which case it returns null.
-  static RefPtr<DataPipe> CreateRemoteConsumerFromExisting(
+  static util::RefPtr<DataPipe> CreateRemoteConsumerFromExisting(
       const MojoCreateDataPipeOptions& validated_options,
       size_t consumer_num_bytes,
       MessageInTransitQueue* message_queue,
-      RefPtr<ChannelEndpoint>&& channel_endpoint);
+      util::RefPtr<ChannelEndpoint>&& channel_endpoint);
 
   // Used by |DataPipeProducerDispatcher::Deserialize()|. Returns true on
   // success (in which case, |*data_pipe| is set appropriately) and false on
@@ -90,7 +90,7 @@ class DataPipe final : public ChannelEndpointClient {
   static bool ProducerDeserialize(Channel* channel,
                                   const void* source,
                                   size_t size,
-                                  RefPtr<DataPipe>* data_pipe);
+                                  util::RefPtr<DataPipe>* data_pipe);
 
   // Used by |DataPipeConsumerDispatcher::Deserialize()|. Returns true on
   // success (in which case, |*data_pipe| is set appropriately) and false on
@@ -98,7 +98,7 @@ class DataPipe final : public ChannelEndpointClient {
   static bool ConsumerDeserialize(Channel* channel,
                                   const void* source,
                                   size_t size,
-                                  RefPtr<DataPipe>* data_pipe);
+                                  util::RefPtr<DataPipe>* data_pipe);
 
   // These are called by the producer dispatcher to implement its methods of
   // corresponding names.
@@ -265,7 +265,7 @@ class DataPipe final : public ChannelEndpointClient {
   MSVC_SUPPRESS_WARNING(4324)
   const MojoCreateDataPipeOptions validated_options_;
 
-  mutable Mutex mutex_;
+  mutable util::Mutex mutex_;
   // *Known* state of producer or consumer.
   bool producer_open_ MOJO_GUARDED_BY(mutex_);
   bool consumer_open_ MOJO_GUARDED_BY(mutex_);

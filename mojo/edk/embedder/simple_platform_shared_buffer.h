@@ -8,6 +8,7 @@
 #include <stddef.h>
 
 #include "mojo/edk/embedder/platform_shared_buffer.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -18,9 +19,9 @@ class SimplePlatformSharedBuffer final : public PlatformSharedBuffer {
  public:
   // Creates a shared buffer of size |num_bytes| bytes (initially zero-filled).
   // |num_bytes| must be nonzero. Returns null on failure.
-  static SimplePlatformSharedBuffer* Create(size_t num_bytes);
+  static util::RefPtr<SimplePlatformSharedBuffer> Create(size_t num_bytes);
 
-  static SimplePlatformSharedBuffer* CreateFromPlatformHandle(
+  static util::RefPtr<SimplePlatformSharedBuffer> CreateFromPlatformHandle(
       size_t num_bytes,
       ScopedPlatformHandle platform_handle);
 
@@ -39,8 +40,6 @@ class SimplePlatformSharedBuffer final : public PlatformSharedBuffer {
   explicit SimplePlatformSharedBuffer(size_t num_bytes);
   ~SimplePlatformSharedBuffer() override;
 
-  // Implemented in simple_platform_shared_buffer_{posix,win}.cc:
-
   // This is called by |Create()| before this object is given to anyone.
   bool Init();
 
@@ -48,10 +47,6 @@ class SimplePlatformSharedBuffer final : public PlatformSharedBuffer {
   // should verify that |platform_handle| is an appropriate handle for the
   // claimed |num_bytes_|.)
   bool InitFromPlatformHandle(ScopedPlatformHandle platform_handle);
-
-  // The platform-dependent part of |Map()|; doesn't check arguments.
-  std::unique_ptr<PlatformSharedBufferMapping> MapImpl(size_t offset,
-                                                       size_t length);
 
   const size_t num_bytes_;
 

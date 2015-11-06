@@ -7,14 +7,16 @@
 #include <memory>
 #include <utility>
 
-#include "base/synchronization/waitable_event.h"
-#include "base/test/test_timeouts.h"
 #include "mojo/edk/system/channel_test_base.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
 #include "mojo/edk/system/message_in_transit_test_utils.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/test_channel_endpoint_client.h"
+#include "mojo/edk/system/waitable_event.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
+
+using mojo::util::MakeRefCounted;
 
 namespace mojo {
 namespace system {
@@ -59,7 +61,7 @@ TEST_F(ChannelEndpointTest, Basic) {
   channel(1)->SetBootstrapEndpoint(endpoint1.Clone());
 
   // We'll receive a message on channel/client 0.
-  base::WaitableEvent read_event(true, false);
+  ManualResetWaitableEvent read_event;
   client0->SetReadEvent(&read_event);
 
   // Make a test message.
@@ -69,14 +71,14 @@ TEST_F(ChannelEndpointTest, Basic) {
   // Check that our test utility works (at least in one direction).
   test::VerifyTestMessage(send_message.get(), message_id);
 
-  // Event shouldn't be signalled yet.
-  EXPECT_FALSE(read_event.IsSignaled());
+  // Event shouldn't be signaled yet.
+  EXPECT_FALSE(read_event.IsSignaledForTest());
 
   // Send it through channel/endpoint 1.
   EXPECT_TRUE(endpoint1->EnqueueMessage(std::move(send_message)));
 
   // Wait to receive it.
-  EXPECT_TRUE(read_event.TimedWait(TestTimeouts::tiny_timeout()));
+  EXPECT_FALSE(read_event.WaitWithTimeout(test::TinyTimeout()));
   client0->SetReadEvent(nullptr);
 
   // Check the received message.
@@ -113,10 +115,10 @@ TEST_F(ChannelEndpointTest, Prequeued) {
   EXPECT_TRUE(endpoint1->EnqueueMessage(test::MakeTestMessage(6)));
 
   // Wait for the messages.
-  base::WaitableEvent read_event(true, false);
+  ManualResetWaitableEvent read_event;
   client0->SetReadEvent(&read_event);
   for (size_t i = 0; client0->NumMessages() < 6 && i < 6; i++) {
-    EXPECT_TRUE(read_event.TimedWait(TestTimeouts::tiny_timeout()));
+    EXPECT_FALSE(read_event.WaitWithTimeout(test::TinyTimeout()));
     read_event.Reset();
   }
   client0->SetReadEvent(nullptr);

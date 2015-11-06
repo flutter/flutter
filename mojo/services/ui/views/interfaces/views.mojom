@@ -1,0 +1,167 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.ui;
+
+import "mojo/public/interfaces/application/service_provider.mojom";
+import "mojo/services/ui/views/interfaces/layouts.mojom";
+
+// A view token is an opaque transferable reference to a view.
+//
+// The ViewManager provides each view with a unique view token when
+// it is registered.  The token can subsequently be passed to other
+// applications and may be used to add the view as a child of some
+// other view or to set it as the root of a view tree.
+//
+// View tokens should be kept secret and should only be shared with
+// the view's intended container.
+//
+// TODO(jeffbrown): This implementation is a temporary placeholder until
+// we extend Mojo to provide a way to create tokens which cannot be forged.
+struct ViewToken {
+  uint32 value;
+};
+
+// A view is a graphical user interface component which is responsible
+// for drawing and supporting user interactions in the area of the screen
+// that it occupies.
+//
+// A view may also act as a container for other views (known as the
+// view's children) which it may freely layout and position anywhere
+// within its bounds to form a composite user interface.  The hierarchy
+// of views thus formed is called a view tree.
+//
+// A view must registered with the view manager before it can be shown.
+interface View {
+  // Called when the view needs to update its layout and provide its size.
+  //
+  // This method may be called for one or more of the following reasons:
+  //
+  //   1. The view called RequestLayout() to mark itself as needing layout.
+  //   2. The view's parent called LayoutChild() for the first time to
+  //      provide layout parameters to this view.
+  //   3. The view's parent called LayoutChild() and provided a
+  //      set of layout parameters which differ from its prior call to
+  //      OnLayout().
+  //   4. One or more of the view's children were just added to the view
+  //      tree using AddChild() or removed from the tree using RemoveChild().
+  //   5. One or more of the view's children produced different layout
+  //      information during their last layout pass causing a recursive
+  //      layout to occur.
+  //
+  // The |children_needing_layout| array includes the keys of all children
+  // which require a layout.  The view is responsible for calling LayoutChild()
+  // at least once for each child in the array in addition to any other
+  // children which might also need to be updated.
+  //
+  // Layout requests are coalesced for efficiency.  Certain intermediate
+  // updates may be dropped if the view is unable to keep up with them
+  // in a timely manner.  Do nothing updates are always dropped.
+  //
+  // The implementation should invoke the callback once the event has
+  // been handled and the view is ready to be shown in its new aspect.
+  //
+  // The result of the layout may cause the parent's layout to be invalidated.
+  // When this happens, the parent's own OnLayout() method will be called
+  // and will be informed that this child needs layout.
+  //
+  // Recursive layout happens in any of the following circumstances:
+  //
+  //   1. If the resulting surface has changed since the last layout.
+  //   2. If the resulting size has changed since the last layout.
+  //
+  // It is an error to return a malformed |info| which does not satisfy
+  // the requested |layout_params|, such as by returning a size which
+  // exceeds the requested constraints; the view's connection will be closed.
+  OnLayout(mojo.ui.ViewLayoutParams layout_params,
+    array<uint32> children_needing_layout) => (mojo.ui.ViewLayoutInfo info);
+
+  // Called when a child view has become unavailable.
+  //
+  // A child may become unavailable for many reasons such being unregistered
+  // by its application, abnormal termination of its application, or
+  // cycles being introduced in the view tree.
+  //
+  // To complete removal of an unavailable child, this view component must
+  // call RemoveChild() on its view host with |child_key|.
+  //
+  // The implementation should invoke the callback once the event has
+  // been handled.
+  OnChildUnavailable(uint32 child_key) => ();
+};
+
+// The view host provides an interface for a view to configure itself and
+// interact with its local environment, such as adding and removing
+// children and specifying layout constraints.
+//
+// Each view obtains its own view host when registered with the ViewManager.
+// To unregister the view, close its view host message pipe.
+interface ViewHost {
+  // Gets a service provider to access services which are associated with
+  // the view such as input, accessibility and editing capabilities.
+  // The view service provider is private to the view and should not be
+  // shared with anyone else.
+  GetServiceProvider(mojo.ServiceProvider& service_provider);
+
+  // Requests that the view's OnLayout() method be called to compute a
+  // new layout due to a change in the view's layout information.
+  RequestLayout();
+
+  // Adds the view referenced by |child_view_token| as a child and assigns
+  // it the provided |child_key| to identify it among its children.
+  // The parent may remove the child later by passing the same |child_key|
+  // to RemoveChild().
+  //
+  // It is important for the parent to choose locally unique values for
+  // |child_key| to ensure that each child can be distinguished even as
+  // more children are added or removed.  We recommend using a simple
+  // counter which is incremented on each (re-)addition.
+  //
+  // If the child becomes unavailable at any time prior to being removed
+  // then an OnChildUnavailable() message will be sent.
+  //
+  // If |child_view_token| refers to a view which is already unavailable or
+  // if adding the view would create a cycle in the view tree then the
+  // call proceeds as if it succeeded but an OnChildUnavailable() message
+  // will be sent.
+  //
+  // If |child_view_token| refers to a view which already has a parent or is
+  // the root of a view tree then an OnChildUnavailable() or OnRootUnavailable()
+  // message will be sent to its old parent or root and the the view will be
+  // (re-)added to its new parent as usual.  This special case also applies
+  // when the specified view is already a child of this view, in which
+  // case the behavior is similar to the view having been transferred to
+  // some other parent and then back again.
+  //
+  // Note that an unavailable child will remain in its parent's list of
+  // children until its parent explicitly calls RemoveChild() to remove
+  // it.
+  //
+  // It is an error to add a view whose |child_key| already appears
+  // in the view's list of children; the connection will be closed.
+  AddChild(uint32 child_key, mojo.ui.ViewToken child_view_token);
+
+  // Removes the view referenced by |child_key| from the view's
+  // list of children.
+  //
+  // It is an error to remove a view whose |child_key| does not appear
+  // in the parent's list of children; the connection will be closed.
+  RemoveChild(uint32 child_key);
+
+  // Sets the layout parameters of the child view referenced by |child_key|
+  // and retrieves its layout information.
+  //
+  // The returned |info| is null if this layout request was canceled either
+  // because it has been superceded by a subsequently issued layout request
+  // or because the child has become unavailable.
+  //
+  // It is an error to specify a |child_key| that does not appear in
+  // the parent's list of children; the connection will be closed.
+  //
+  // It is an error to specify malformed |child_layout_params| such
+  // as invalid size constraints; the connection will be closed.
+  LayoutChild(uint32 child_key, mojo.ui.ViewLayoutParams child_layout_params)
+      => (mojo.ui.ViewLayoutInfo? info);
+};

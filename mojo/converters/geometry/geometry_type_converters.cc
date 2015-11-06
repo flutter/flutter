@@ -11,7 +11,7 @@ PointPtr TypeConverter<PointPtr, gfx::Point>::Convert(const gfx::Point& input) {
   PointPtr point(Point::New());
   point->x = input.x();
   point->y = input.y();
-  return point.Pass();
+  return point;
 }
 
 // static
@@ -27,7 +27,7 @@ PointFPtr TypeConverter<PointFPtr, gfx::PointF>::Convert(
   PointFPtr point(PointF::New());
   point->x = input.x();
   point->y = input.y();
-  return point.Pass();
+  return point;
 }
 
 // static
@@ -43,7 +43,7 @@ SizePtr TypeConverter<SizePtr, gfx::Size>::Convert(const gfx::Size& input) {
   SizePtr size(Size::New());
   size->width = input.width();
   size->height = input.height();
-  return size.Pass();
+  return size;
 }
 
 // static
@@ -60,7 +60,7 @@ RectPtr TypeConverter<RectPtr, gfx::Rect>::Convert(const gfx::Rect& input) {
   rect->y = input.y();
   rect->width = input.width();
   rect->height = input.height();
-  return rect.Pass();
+  return rect;
 }
 
 // static
@@ -77,7 +77,7 @@ RectFPtr TypeConverter<RectFPtr, gfx::RectF>::Convert(const gfx::RectF& input) {
   rect->y = input.y();
   rect->width = input.width();
   rect->height = input.height();
-  return rect.Pass();
+  return rect;
 }
 
 // static
@@ -96,7 +96,7 @@ TransformPtr TypeConverter<TransformPtr, gfx::Transform>::Convert(
   matrix.Swap(&storage);
   TransformPtr transform(Transform::New());
   transform->matrix = matrix.Pass();
-  return transform.Pass();
+  return transform;
 }
 
 // static

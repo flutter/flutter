@@ -14,6 +14,8 @@
 #include "mojo/edk/system/options_validation.h"
 #include "mojo/edk/system/proxy_message_pipe_endpoint.h"
 
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace system {
 

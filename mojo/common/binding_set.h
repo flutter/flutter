@@ -6,9 +6,11 @@
 #define MOJO_COMMON_BINDING_SET_H_
 
 #include <algorithm>
+#include <memory>
 #include <vector>
 
-#include "base/memory/weak_ptr.h"
+#include "base/logging.h"
+#include "base/macros.h"
 #include "mojo/public/cpp/bindings/binding.h"
 
 namespace mojo {
@@ -21,6 +23,9 @@ class BindingSet {
   BindingSet() {}
   ~BindingSet() { CloseAllBindings(); }
 
+  // Adds a binding to the list and arranges for it to be removed when
+  // a connection error occurs.  Does not take ownership of |impl|, which
+  // must outlive the binding set.
   void AddBinding(Interface* impl, InterfaceRequest<Interface> request) {
     bindings_.emplace_back(new Binding<Interface>(impl, request.Pass()));
     auto* binding = bindings_.back().get();

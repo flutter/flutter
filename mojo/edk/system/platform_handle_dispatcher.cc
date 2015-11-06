@@ -8,6 +8,9 @@
 
 #include "base/logging.h"
 
+using mojo::util::MutexLocker;
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace system {
 

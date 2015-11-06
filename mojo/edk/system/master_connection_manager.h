@@ -9,17 +9,16 @@
 
 #include <unordered_map>
 
-#include "base/memory/ref_counted.h"
 #include "base/threading/thread.h"
 #include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/connection_manager.h"
-#include "mojo/edk/system/mutex.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace base {
 class TaskRunner;
-class WaitableEvent;
 }
 
 namespace mojo {
@@ -30,6 +29,8 @@ using SlaveInfo = void*;
 }
 
 namespace system {
+
+class AutoResetWaitableEvent;
 
 // The |ConnectionManager| implementation for the master process.
 //
@@ -115,7 +116,7 @@ class MasterConnectionManager final : public ConnectionManager {
   void AddSlaveOnPrivateThread(embedder::SlaveInfo slave_info,
                                embedder::ScopedPlatformHandle platform_handle,
                                ProcessIdentifier slave_process_identifier,
-                               base::WaitableEvent* event);
+                               AutoResetWaitableEvent* event);
   // Called by |Helper::OnError()|.
   void OnError(ProcessIdentifier process_identifier);
   // Posts a call to |master_process_delegate_->OnSlaveDisconnect()|.
@@ -147,7 +148,7 @@ class MasterConnectionManager final : public ConnectionManager {
 
   // Note: |mutex_| is not needed in the constructor, |Init()|,
   // |Shutdown()|/|ShutdownOnPrivateThread()|, or the destructor
-  Mutex mutex_;
+  util::Mutex mutex_;
 
   ProcessIdentifier next_process_identifier_ MOJO_GUARDED_BY(mutex_);
 

@@ -14,6 +14,8 @@
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/slave_connection_manager.h"
 
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace system {
 

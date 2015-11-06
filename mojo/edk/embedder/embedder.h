@@ -9,7 +9,6 @@
 #include <string>
 
 #include "base/callback.h"
-#include "base/memory/ref_counted.h"
 #include "base/task_runner.h"
 #include "mojo/edk/embedder/channel_info_forward.h"
 #include "mojo/edk/embedder/platform_task_runner.h"
@@ -101,7 +100,7 @@ void InitIPCSupport(ProcessType process_type,
 void ShutdownIPCSupportOnIOThread();
 
 // Like |ShutdownIPCSupportOnIOThread()|, but may be called from any thread,
-// signalling shutdown completion via the process delegate's
+// signaling shutdown completion via the process delegate's
 // |OnShutdownComplete()|.
 void ShutdownIPCSupport();
 

@@ -13,22 +13,26 @@
 
 #include "base/bind.h"
 #include "base/logging.h"
-#include "base/synchronization/waitable_event.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/platform_handle.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/message_in_transit.h"
-#include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/random.h"
+#include "mojo/edk/system/test/scoped_test_dir.h"
+#include "mojo/edk/system/test/simple_test_thread.h"
+#include "mojo/edk/system/test/sleep.h"
+#include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/system/transport_data.h"
-#include "mojo/edk/test/scoped_test_dir.h"
-#include "mojo/edk/test/simple_test_thread.h"
-#include "mojo/edk/test/test_io_thread.h"
+#include "mojo/edk/system/waitable_event.h"
 #include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/make_unique.h"
+#include "mojo/edk/util/mutex.h"
 #include "mojo/edk/util/scoped_file.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
+
+using mojo::util::Mutex;
+using mojo::util::MutexLocker;
 
 namespace mojo {
 namespace system {
@@ -71,7 +75,7 @@ bool WriteTestMessageToHandle(const embedder::PlatformHandle& handle,
 
 class RawChannelTest : public testing::Test {
  public:
-  RawChannelTest() : io_thread_(mojo::test::TestIOThread::StartMode::MANUAL) {}
+  RawChannelTest() : io_thread_(test::TestIOThread::StartMode::MANUAL) {}
   ~RawChannelTest() override {}
 
   void SetUp() override {
@@ -88,12 +92,12 @@ class RawChannelTest : public testing::Test {
   }
 
  protected:
-  mojo::test::TestIOThread* io_thread() { return &io_thread_; }
+  test::TestIOThread* io_thread() { return &io_thread_; }
 
   embedder::ScopedPlatformHandle handles[2];
 
  private:
-  mojo::test::TestIOThread io_thread_;
+  test::TestIOThread io_thread_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RawChannelTest);
 };
@@ -170,7 +174,7 @@ class TestMessageReaderAndChecker {
 
       if (static_cast<size_t>(read_size) < sizeof(buffer)) {
         i++;
-        test::Sleep(test::DeadlineFromMilliseconds(kMessageReaderSleepMs));
+        test::SleepMilliseconds(kMessageReaderSleepMs);
       }
     }
 
@@ -215,7 +219,7 @@ TEST_F(RawChannelTest, WriteMessage) {
 
 class ReadCheckerRawChannelDelegate : public RawChannel::Delegate {
  public:
-  ReadCheckerRawChannelDelegate() : done_event_(false, false), position_(0) {}
+  ReadCheckerRawChannelDelegate() : position_(0) {}
   ~ReadCheckerRawChannelDelegate() override {}
 
   // |RawChannel::Delegate| implementation (called on the I/O thread):
@@ -263,7 +267,7 @@ class ReadCheckerRawChannelDelegate : public RawChannel::Delegate {
   }
 
  private:
-  base::WaitableEvent done_event_;
+  AutoResetWaitableEvent done_event_;
 
   Mutex mutex_;
   std::vector<uint32_t> expected_sizes_ MOJO_GUARDED_BY(mutex_);
@@ -304,7 +308,7 @@ TEST_F(RawChannelTest, OnReadMessage) {
 
 // RawChannelTest.WriteMessageAndOnReadMessage ---------------------------------
 
-class RawChannelWriterThread : public mojo::test::SimpleTestThread {
+class RawChannelWriterThread : public test::SimpleTestThread {
  public:
   RawChannelWriterThread(RawChannel* raw_channel, size_t write_count)
       : raw_channel_(raw_channel), left_to_write_(write_count) {}
@@ -330,7 +334,7 @@ class RawChannelWriterThread : public mojo::test::SimpleTestThread {
 class ReadCountdownRawChannelDelegate : public RawChannel::Delegate {
  public:
   explicit ReadCountdownRawChannelDelegate(size_t expected_count)
-      : done_event_(false, false), expected_count_(expected_count), count_(0) {}
+      : expected_count_(expected_count), count_(0) {}
   ~ReadCountdownRawChannelDelegate() override {}
 
   // |RawChannel::Delegate| implementation (called on the I/O thread):
@@ -357,7 +361,7 @@ class ReadCountdownRawChannelDelegate : public RawChannel::Delegate {
   void Wait() { done_event_.Wait(); }
 
  private:
-  base::WaitableEvent done_event_;
+  AutoResetWaitableEvent done_event_;
   size_t expected_count_;
   size_t count_;
 
@@ -391,7 +395,7 @@ TEST_F(RawChannelTest, WriteMessageAndOnReadMessage) {
 
   // Sleep a bit, to let any extraneous reads be processed. (There shouldn't be
   // any, but we want to know about them.)
-  test::Sleep(test::DeadlineFromMilliseconds(100));
+  test::SleepMilliseconds(100u);
 
   // Wait for reading to finish.
   reader_delegate.Wait();
@@ -412,8 +416,6 @@ class ErrorRecordingRawChannelDelegate
                                    bool expect_read_error,
                                    bool expect_write_error)
       : ReadCountdownRawChannelDelegate(expected_read_count),
-        got_read_error_event_(false, false),
-        got_write_error_event_(false, false),
         expecting_read_error_(expect_read_error),
         expecting_write_error_(expect_write_error) {}
 
@@ -450,8 +452,8 @@ class ErrorRecordingRawChannelDelegate
   void WaitForWriteError() { got_write_error_event_.Wait(); }
 
  private:
-  base::WaitableEvent got_read_error_event_;
-  base::WaitableEvent got_write_error_event_;
+  AutoResetWaitableEvent got_read_error_event_;
+  AutoResetWaitableEvent got_write_error_event_;
 
   bool expecting_read_error_;
   bool expecting_write_error_;
@@ -481,7 +483,7 @@ TEST_F(RawChannelTest, OnError) {
 
   // Sleep a bit, to make sure we don't get another |OnError()|
   // notification. (If we actually get another one, |OnError()| crashes.)
-  test::Sleep(test::DeadlineFromMilliseconds(20));
+  test::SleepMilliseconds(20u);
 
   io_thread()->PostTaskAndWait(
       base::Bind(&RawChannel::Shutdown, base::Unretained(rc.get())));
@@ -546,7 +548,6 @@ class ShutdownOnReadMessageRawChannelDelegate : public RawChannel::Delegate {
                                                    bool should_destroy)
       : raw_channel_(raw_channel),
         should_destroy_(should_destroy),
-        done_event_(false, false),
         did_shutdown_(false) {}
   ~ShutdownOnReadMessageRawChannelDelegate() override {}
 
@@ -577,7 +578,7 @@ class ShutdownOnReadMessageRawChannelDelegate : public RawChannel::Delegate {
  private:
   RawChannel* const raw_channel_;
   const bool should_destroy_;
-  base::WaitableEvent done_event_;
+  AutoResetWaitableEvent done_event_;
   bool did_shutdown_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ShutdownOnReadMessageRawChannelDelegate);
@@ -621,7 +622,6 @@ class ShutdownOnErrorRawChannelDelegate : public RawChannel::Delegate {
       : raw_channel_(raw_channel),
         should_destroy_(should_destroy),
         shutdown_on_error_type_(shutdown_on_error_type),
-        done_event_(false, false),
         did_shutdown_(false) {}
   ~ShutdownOnErrorRawChannelDelegate() override {}
 
@@ -652,7 +652,7 @@ class ShutdownOnErrorRawChannelDelegate : public RawChannel::Delegate {
   RawChannel* const raw_channel_;
   const bool should_destroy_;
   const Error shutdown_on_error_type_;
-  base::WaitableEvent done_event_;
+  AutoResetWaitableEvent done_event_;
   bool did_shutdown_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ShutdownOnErrorRawChannelDelegate);
@@ -723,7 +723,7 @@ TEST_F(RawChannelTest, ShutdownAndDestroyOnErrorWrite) {
 class ReadPlatformHandlesCheckerRawChannelDelegate
     : public RawChannel::Delegate {
  public:
-  ReadPlatformHandlesCheckerRawChannelDelegate() : done_event_(false, false) {}
+  ReadPlatformHandlesCheckerRawChannelDelegate() {}
   ~ReadPlatformHandlesCheckerRawChannelDelegate() override {}
 
   // |RawChannel::Delegate| implementation (called on the I/O thread):
@@ -772,13 +772,13 @@ class ReadPlatformHandlesCheckerRawChannelDelegate
   void Wait() { done_event_.Wait(); }
 
  private:
-  base::WaitableEvent done_event_;
+  AutoResetWaitableEvent done_event_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ReadPlatformHandlesCheckerRawChannelDelegate);
 };
 
 TEST_F(RawChannelTest, ReadWritePlatformHandles) {
-  mojo::test::ScopedTestDir test_dir;
+  test::ScopedTestDir test_dir;
 
   WriteOnlyRawChannelDelegate write_delegate;
   std::unique_ptr<RawChannel> rc_write(RawChannel::Create(handles[0].Pass()));
@@ -800,9 +800,9 @@ TEST_F(RawChannelTest, ReadWritePlatformHandles) {
     embedder::ScopedPlatformHandleVectorPtr platform_handles(
         new embedder::PlatformHandleVector());
     platform_handles->push_back(
-        mojo::test::PlatformHandleFromFILE(fp1.Pass()).release());
+        mojo::test::PlatformHandleFromFILE(std::move(fp1)).release());
     platform_handles->push_back(
-        mojo::test::PlatformHandleFromFILE(fp2.Pass()).release());
+        mojo::test::PlatformHandleFromFILE(std::move(fp2)).release());
 
     std::unique_ptr<MessageInTransit> message(
         new MessageInTransit(MessageInTransit::Type::ENDPOINT_CLIENT,

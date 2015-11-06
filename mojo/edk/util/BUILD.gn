@@ -6,15 +6,65 @@ import("../mojo_edk.gni")
 
 mojo_edk_source_set("util") {
   sources = [
+    "command_line.cc",
+    "command_line.h",
+    "cond_var.cc",
+    "cond_var.h",
+    "logging_internal.cc",
+    "logging_internal.h",
     "make_unique.h",
+    "mutex.cc",
+    "mutex.h",
+    "ref_counted.h",
+    "ref_counted_internal.h",
+    "ref_ptr.h",
+    "ref_ptr_internal.h",
     "scoped_file.h",
+    "thread_annotations.h",
   ]
-
-  defines = [ "MOJO_SYSTEM_IMPLEMENTATION" ]
 
   mojo_edk_configs = [ "mojo/edk/system:system_config" ]
 
+  mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
+}
+
+mojo_edk_source_set("unittests") {
+  testonly = true
+  mojo_edk_visibility = [ "mojo/edk/system:mojo_system_unittests" ]
+
+  sources = [
+    "command_line_unittest.cc",
+    "cond_var_unittest.cc",
+    "mutex_unittest.cc",
+    "ref_counted_unittest.cc",
+    "thread_annotations_unittest.cc",
+  ]
+
   deps = [
-    "//base",
+    ":util",
+    "//testing/gtest",
+  ]
+
+  mojo_sdk_deps = [ "mojo/public/cpp/system" ]
+
+  mojo_edk_deps = [ "mojo/edk/system/test" ]
+}
+
+mojo_edk_source_set("perftests") {
+  testonly = true
+  mojo_edk_visibility = [ "mojo/edk/system:mojo_system_perftests" ]
+
+  sources = [
+    "ref_counted_perftest.cc",
+  ]
+
+  deps = [
+    ":util",
+    "//testing/gtest",
+  ]
+
+  mojo_edk_deps = [
+    "mojo/edk/system/test",
+    "mojo/edk/system/test:perf",
   ]
 }

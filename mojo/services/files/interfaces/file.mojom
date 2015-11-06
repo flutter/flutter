@@ -38,7 +38,7 @@ interface File {
   // want it to be signed (this is consistent with |size| values, but
   // inconsistent with 32-bit |num_bytes_to_read| values)? Do we want to have
   // separate "read to end" versus "tail" (i.e., keep on reading as more data is
-  // appended) modes, and how would those be signalled?
+  // appended) modes, and how would those be signaled?
   ReadToStream(handle<data_pipe_producer> source,
                int64 offset,
                Whence whence,

@@ -9,8 +9,8 @@
 
 #include <memory>
 
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/util/ref_counted.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -34,7 +34,7 @@ class PlatformSharedBufferMapping;
 //
 // TODO(vtl): Rectify this with |base::SharedMemory|.
 class PlatformSharedBuffer
-    : public base::RefCountedThreadSafe<PlatformSharedBuffer> {
+    : public util::RefCountedThreadSafe<PlatformSharedBuffer> {
  public:
   // Gets the size of shared buffer (in number of bytes).
   virtual size_t GetNumBytes() const = 0;
@@ -65,7 +65,7 @@ class PlatformSharedBuffer
   virtual ScopedPlatformHandle PassPlatformHandle() = 0;
 
  protected:
-  friend class base::RefCountedThreadSafe<PlatformSharedBuffer>;
+  friend class util::RefCountedThreadSafe<PlatformSharedBuffer>;
 
   PlatformSharedBuffer() {}
   virtual ~PlatformSharedBuffer() {}

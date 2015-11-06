@@ -22,12 +22,15 @@
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/raw_channel.h"
-#include "mojo/edk/system/ref_ptr.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/test_io_thread.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
-#include "mojo/edk/test/test_io_thread.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
+
+using mojo::util::MakeRefCounted;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -39,8 +42,7 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 
 class RemoteDataPipeImplTest : public testing::Test {
  public:
-  RemoteDataPipeImplTest()
-      : io_thread_(mojo::test::TestIOThread::StartMode::AUTO) {}
+  RemoteDataPipeImplTest() : io_thread_(test::TestIOThread::StartMode::AUTO) {}
   ~RemoteDataPipeImplTest() override {}
 
   void SetUp() override {
@@ -114,7 +116,7 @@ class RemoteDataPipeImplTest : public testing::Test {
   }
 
   embedder::SimplePlatformSupport platform_support_;
-  mojo::test::TestIOThread io_thread_;
+  test::TestIOThread io_thread_;
   RefPtr<Channel> channels_[2];
   RefPtr<MessagePipe> message_pipes_[2];
 
@@ -145,7 +147,7 @@ TEST_F(RemoteDataPipeImplTest, Sanity) {
             message_pipe(0)->WriteMessage(0, UserPointer<const void>(kHello),
                                           sizeof(kHello), nullptr,
                                           MOJO_WRITE_MESSAGE_FLAG_NONE));
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
   EXPECT_EQ(123u, context);
   hss = HandleSignalsState();
   message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
@@ -204,10 +206,10 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
 
     // |consumer| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    consumer->AssertHasOneRef();
+    EXPECT_TRUE(consumer->HasOneRef());
     consumer = nullptr;
   }
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
   EXPECT_EQ(123u, context);
   hss = HandleSignalsState();
   message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
@@ -223,7 +225,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_dispatchers[0]->GetType());
@@ -237,7 +239,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
       consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 456, &hss);
   if (result == MOJO_RESULT_OK) {
     context = 0;
-    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
     EXPECT_EQ(456u, context);
     consumer->RemoveAwakable(&waiter, &hss);
   } else {
@@ -265,7 +267,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   if (result == MOJO_RESULT_OK) {
     context = 0;
     EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
-              waiter.Wait(test::ActionDeadline(), &context));
+              waiter.Wait(test::ActionTimeout(), &context));
     EXPECT_EQ(789u, context);
     consumer->RemoveAwakable(&waiter, &hss);
   } else {
@@ -319,10 +321,10 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
 
     // |consumer| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    consumer->AssertHasOneRef();
+    EXPECT_TRUE(consumer->HasOneRef());
     consumer = nullptr;
   }
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
   EXPECT_EQ(123u, context);
   hss = HandleSignalsState();
   message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
@@ -338,7 +340,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_dispatchers[0]->GetType());
@@ -360,7 +362,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
       consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 456, &hss);
   if (result == MOJO_RESULT_OK) {
     context = 0;
-    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
     EXPECT_EQ(456u, context);
     consumer->RemoveAwakable(&waiter, &hss);
   } else {
@@ -438,10 +440,10 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
 
     // |consumer| should have been closed. This is |DCHECK()|ed when it is
     // destroyed.
-    consumer->AssertHasOneRef();
+    EXPECT_TRUE(consumer->HasOneRef());
     consumer = nullptr;
   }
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
   EXPECT_EQ(123u, context);
   hss = HandleSignalsState();
   message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
@@ -457,7 +459,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   EXPECT_EQ(1u, read_dispatchers.size());
   EXPECT_EQ(1u, read_num_dispatchers);
   ASSERT_TRUE(read_dispatchers[0]);
-  read_dispatchers[0]->AssertHasOneRef();
+  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_dispatchers[0]->GetType());
@@ -479,7 +481,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
       consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_PEER_CLOSED, 456, &hss);
   if (result == MOJO_RESULT_OK) {
     context = 0;
-    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionDeadline(), &context));
+    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
     EXPECT_EQ(456u, context);
     consumer->RemoveAwakable(&waiter, &hss);
   } else {

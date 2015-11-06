@@ -22,13 +22,14 @@
 #include "mojo/edk/system/message_pipe_test_utils.h"
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/system/raw_channel.h"
-#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
-#include "mojo/edk/system/test_utils.h"
-#include "mojo/edk/test/scoped_test_dir.h"
+#include "mojo/edk/system/test/scoped_test_dir.h"
 #include "mojo/edk/test/test_utils.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/scoped_file.h"
 #include "testing/gtest/include/gtest/gtest.h"
+
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -338,7 +339,7 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
                              MOJO_WRITE_MESSAGE_FLAG_NONE));
   transport.End();
 
-  dispatcher->AssertHasOneRef();
+  EXPECT_TRUE(dispatcher->HasOneRef());
   dispatcher = nullptr;
 
   // Wait for a message from the child.
@@ -426,7 +427,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckPlatformHandleFile) {
 
     RefPtr<PlatformHandleDispatcher> dispatcher(
         static_cast<PlatformHandleDispatcher*>(dispatchers[i].get()));
-    embedder::ScopedPlatformHandle h = dispatcher->PassPlatformHandle().Pass();
+    embedder::ScopedPlatformHandle h = dispatcher->PassPlatformHandle();
     CHECK(h.is_valid());
     dispatcher->Close();
 
@@ -447,7 +448,7 @@ class MultiprocessMessagePipeTestWithPipeCount
       public testing::WithParamInterface<size_t> {};
 
 TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
-  mojo::test::ScopedTestDir test_dir;
+  test::ScopedTestDir test_dir;
 
   helper()->StartChild("CheckPlatformHandleFile");
 
@@ -468,7 +469,7 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
 
     auto dispatcher =
         PlatformHandleDispatcher::Create(embedder::ScopedPlatformHandle(
-            mojo::test::PlatformHandleFromFILE(fp.Pass())));
+            mojo::test::PlatformHandleFromFILE(std::move(fp))));
     dispatchers.push_back(dispatcher);
     DispatcherTransport transport(
         test::DispatcherTryStartTransport(dispatcher.get()));
@@ -485,7 +486,7 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
 
   for (size_t i = 0; i < pipe_count; ++i) {
     transports[i].End();
-    dispatchers[i]->AssertHasOneRef();
+    EXPECT_TRUE(dispatchers[i]->HasOneRef());
   }
 
   dispatchers.clear();

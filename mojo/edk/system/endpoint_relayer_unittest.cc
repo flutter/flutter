@@ -5,16 +5,19 @@
 #include "mojo/edk/system/endpoint_relayer.h"
 
 #include "base/logging.h"
-#include "base/synchronization/waitable_event.h"
-#include "base/test/test_timeouts.h"
 #include "mojo/edk/system/channel_endpoint_id.h"
 #include "mojo/edk/system/channel_test_base.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
 #include "mojo/edk/system/message_in_transit_test_utils.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/test_channel_endpoint_client.h"
+#include "mojo/edk/system/waitable_event.h"
 #include "mojo/edk/util/make_unique.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
+
+using mojo::util::MakeRefCounted;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -90,13 +93,13 @@ class EndpointRelayerTest : public test::ChannelTestBase {
 };
 
 TEST_F(EndpointRelayerTest, Basic) {
-  base::WaitableEvent read_event(true, false);
+  ManualResetWaitableEvent read_event;
   client1b()->SetReadEvent(&read_event);
   EXPECT_EQ(0u, client1b()->NumMessages());
 
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(12345)));
 
-  EXPECT_TRUE(read_event.TimedWait(TestTimeouts::tiny_timeout()));
+  EXPECT_FALSE(read_event.WaitWithTimeout(test::TinyTimeout()));
   client1b()->SetReadEvent(nullptr);
 
   ASSERT_EQ(1u, client1b()->NumMessages());
@@ -111,7 +114,7 @@ TEST_F(EndpointRelayerTest, Basic) {
 
   EXPECT_TRUE(endpoint1b()->EnqueueMessage(test::MakeTestMessage(67890)));
 
-  EXPECT_TRUE(read_event.TimedWait(TestTimeouts::tiny_timeout()));
+  EXPECT_FALSE(read_event.WaitWithTimeout(test::TinyTimeout()));
   client1a()->SetReadEvent(nullptr);
 
   ASSERT_EQ(1u, client1a()->NumMessages());
@@ -127,10 +130,10 @@ TEST_F(EndpointRelayerTest, MultipleMessages) {
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(4)));
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(5)));
 
-  base::WaitableEvent read_event(true, false);
+  ManualResetWaitableEvent read_event;
   client1b()->SetReadEvent(&read_event);
   for (size_t i = 0; client1b()->NumMessages() < 5 && i < 5; i++) {
-    EXPECT_TRUE(read_event.TimedWait(TestTimeouts::tiny_timeout()));
+    EXPECT_FALSE(read_event.WaitWithTimeout(test::TinyTimeout()));
     read_event.Reset();
   }
   client1b()->SetReadEvent(nullptr);
@@ -198,10 +201,10 @@ TEST_F(EndpointRelayerTest, Filter) {
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(1003)));
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(5)));
 
-  base::WaitableEvent read_event(true, false);
+  ManualResetWaitableEvent read_event;
   client1b()->SetReadEvent(&read_event);
   for (size_t i = 0; client1b()->NumMessages() < 5 && i < 5; i++) {
-    EXPECT_TRUE(read_event.TimedWait(TestTimeouts::tiny_timeout()));
+    EXPECT_FALSE(read_event.WaitWithTimeout(test::TinyTimeout()));
     read_event.Reset();
   }
   client1b()->SetReadEvent(nullptr);

@@ -5,10 +5,13 @@
 #ifndef MOJO_EDK_SYSTEM_SHARED_BUFFER_DISPATCHER_H_
 #define MOJO_EDK_SYSTEM_SHARED_BUFFER_DISPATCHER_H_
 
+#include <utility>
+
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/system/memory.h"
-#include "mojo/edk/system/ref_ptr.h"
 #include "mojo/edk/system/simple_dispatcher.h"
+#include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -41,7 +44,7 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
   // Static factory method: |validated_options| must be validated (obviously).
   // Returns null on error; |*result| will be set to an appropriate result
   // code).
-  static RefPtr<SharedBufferDispatcher> Create(
+  static util::RefPtr<SharedBufferDispatcher> Create(
       embedder::PlatformSupport* platform_support,
       const MojoCreateSharedBufferOptions& validated_options,
       uint64_t num_bytes,
@@ -52,20 +55,20 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
-  static RefPtr<SharedBufferDispatcher> Deserialize(
+  static util::RefPtr<SharedBufferDispatcher> Deserialize(
       Channel* channel,
       const void* source,
       size_t size,
       embedder::PlatformHandleVector* platform_handles);
 
  private:
-  static RefPtr<SharedBufferDispatcher> CreateInternal(
-      scoped_refptr<embedder::PlatformSharedBuffer> shared_buffer) {
-    return AdoptRef(new SharedBufferDispatcher(shared_buffer.Pass()));
+  static util::RefPtr<SharedBufferDispatcher> CreateInternal(
+      util::RefPtr<embedder::PlatformSharedBuffer>&& shared_buffer) {
+    return AdoptRef(new SharedBufferDispatcher(std::move(shared_buffer)));
   }
 
   explicit SharedBufferDispatcher(
-      scoped_refptr<embedder::PlatformSharedBuffer> shared_buffer);
+      util::RefPtr<embedder::PlatformSharedBuffer>&& shared_buffer);
   ~SharedBufferDispatcher() override;
 
   // Validates and/or sets default options for
@@ -79,10 +82,11 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
 
   // |Dispatcher| protected methods:
   void CloseImplNoLock() override;
-  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override;
+  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
+      override;
   MojoResult DuplicateBufferHandleImplNoLock(
       UserPointer<const MojoDuplicateBufferHandleOptions> options,
-      RefPtr<Dispatcher>* new_dispatcher) override;
+      util::RefPtr<Dispatcher>* new_dispatcher) override;
   MojoResult MapBufferImplNoLock(
       uint64_t offset,
       uint64_t num_bytes,
@@ -99,7 +103,7 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
       embedder::PlatformHandleVector* platform_handles) override
       MOJO_NOT_THREAD_SAFE;
 
-  scoped_refptr<embedder::PlatformSharedBuffer> shared_buffer_
+  util::RefPtr<embedder::PlatformSharedBuffer> shared_buffer_
       MOJO_GUARDED_BY(mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(SharedBufferDispatcher);

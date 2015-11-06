@@ -1,0 +1,49 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.ui;
+
+import "mojo/services/ui/views/interfaces/views.mojom";
+import "mojo/services/ui/views/interfaces/view_trees.mojom";
+
+// The view manager is a service which manages trees of views.
+//
+// Before a view can be added to the view tree, it must first be registered
+// with the view manager.  Once registered, the view receives a token as a
+// transferable reference to be provided to the view's intended container.
+interface ViewManager {
+  // Registers a view with the view manager.
+  //
+  // When a view is registered, it receives its own host and a token
+  // to identify it.
+  //
+  // The |view_host| is used to configure the view and interact with its
+  // local environment.  The view host is private to the view and should
+  // not be shared with anyone else.
+  //
+  // The |view_token| is used as a transferable reference which can
+  // be passed to the view's intended container as part of a request to
+  // add the view as a child.  The view manager itself does not describe
+  // how this interaction should take place, only that the token should
+  // eventually be passed back through the container's view host interface
+  // as an argument to AddChild().
+  //
+  // To unregister the view and cause it to be removed from the view tree,
+  // simply close the |view| and/or |view_host| message pipes.
+  RegisterView(mojo.ui.View view,
+               mojo.ui.ViewHost& view_host) =>
+                   (mojo.ui.ViewToken view_token);
+
+  // Registers a view tree with the view manager.
+  //
+  // The |view_tree_host| is used to configure the view tree and interact
+  // with the views it contains.  The view tree host is private to the view
+  // and should not be shared with anyone else.
+  //
+  // To unregister the view tree simply close the |view_tree| and/or
+  // |view_tree_host| message pipes.
+  RegisterViewTree(mojo.ui.ViewTree view_tree,
+                   mojo.ui.ViewTreeHost& view_tree_host) => ();
+};

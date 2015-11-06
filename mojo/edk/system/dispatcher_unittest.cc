@@ -7,15 +7,19 @@
 #include <memory>
 #include <vector>
 
-#include "base/synchronization/waitable_event.h"
+#include "base/logging.h"
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/system/memory.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/system/test/simple_test_thread.h"
+#include "mojo/edk/system/waitable_event.h"
 #include "mojo/edk/system/waiter.h"
-#include "mojo/edk/test/simple_test_thread.h"
 #include "mojo/edk/util/make_unique.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
+
+using mojo::util::MakeRefCounted;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -117,7 +121,7 @@ TEST(DispatcherTest, Basic) {
   EXPECT_EQ(0u, hss.satisfiable_signals);
 }
 
-class ThreadSafetyStressThread : public mojo::test::SimpleTestThread {
+class ThreadSafetyStressThread : public test::SimpleTestThread {
  public:
   enum DispatcherOp {
     CLOSE = 0,
@@ -136,7 +140,7 @@ class ThreadSafetyStressThread : public mojo::test::SimpleTestThread {
     DISPATCHER_OP_COUNT
   };
 
-  ThreadSafetyStressThread(base::WaitableEvent* event,
+  ThreadSafetyStressThread(ManualResetWaitableEvent* event,
                            RefPtr<Dispatcher> dispatcher,
                            DispatcherOp op)
       : event_(event), dispatcher_(dispatcher), op_(op) {
@@ -240,7 +244,7 @@ class ThreadSafetyStressThread : public mojo::test::SimpleTestThread {
     EXPECT_EQ(0u, hss.satisfiable_signals);
   }
 
-  base::WaitableEvent* const event_;
+  ManualResetWaitableEvent* const event_;
   const RefPtr<Dispatcher> dispatcher_;
   const DispatcherOp op_;
 
@@ -254,8 +258,8 @@ TEST(DispatcherTest, ThreadSafetyStress) {
   static const size_t kNumThreads = 100;
 
   for (size_t i = 0; i < kRepeatCount; i++) {
-    // Manual reset, not initially signalled.
-    base::WaitableEvent event(true, false);
+    // Manual reset, not initially signaled.
+    ManualResetWaitableEvent event;
     auto d = MakeRefCounted<TrivialDispatcher>();
 
     {
@@ -282,8 +286,8 @@ TEST(DispatcherTest, ThreadSafetyStressNoClose) {
   static const size_t kNumThreads = 100;
 
   for (size_t i = 0; i < kRepeatCount; i++) {
-    // Manual reset, not initially signalled.
-    base::WaitableEvent event(true, false);
+    // Manual reset, not initially signaled.
+    ManualResetWaitableEvent event;
     auto d = MakeRefCounted<TrivialDispatcher>();
 
     {

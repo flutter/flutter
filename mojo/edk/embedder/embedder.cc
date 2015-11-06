@@ -25,7 +25,9 @@
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/system/raw_channel.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/util/ref_ptr.h"
+
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace embedder {
@@ -134,8 +136,7 @@ MojoResult PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
 
   *platform_handle =
       static_cast<system::PlatformHandleDispatcher*>(dispatcher.get())
-          ->PassPlatformHandle()
-          .Pass();
+          ->PassPlatformHandle();
   return MOJO_RESULT_OK;
 }
 
@@ -185,7 +186,7 @@ ScopedMessagePipeHandle ConnectToSlave(
       internal::g_ipc_support->GenerateConnectionIdentifier();
   *platform_connection_id = connection_id.ToString();
   system::ChannelId channel_id = system::kInvalidChannelId;
-  system::RefPtr<system::MessagePipeDispatcher> dispatcher =
+  RefPtr<system::MessagePipeDispatcher> dispatcher =
       internal::g_ipc_support->ConnectToSlave(
           connection_id, slave_info, platform_handle.Pass(),
           did_connect_to_slave_callback, std::move(did_connect_to_slave_runner),
@@ -212,7 +213,7 @@ ScopedMessagePipeHandle ConnectToMaster(
   CHECK(ok);
 
   system::ChannelId channel_id = system::kInvalidChannelId;
-  system::RefPtr<system::MessagePipeDispatcher> dispatcher =
+  RefPtr<system::MessagePipeDispatcher> dispatcher =
       internal::g_ipc_support->ConnectToMaster(
           connection_id, did_connect_to_master_callback,
           std::move(did_connect_to_master_runner), &channel_id);
@@ -236,7 +237,7 @@ ScopedMessagePipeHandle CreateChannelOnIOThread(
       internal::g_ipc_support->channel_manager();
 
   *channel_info = new ChannelInfo(MakeChannelId());
-  system::RefPtr<system::MessagePipeDispatcher> dispatcher =
+  RefPtr<system::MessagePipeDispatcher> dispatcher =
       channel_manager->CreateChannelOnIOThread((*channel_info)->channel_id,
                                                platform_handle.Pass());
 
@@ -259,7 +260,7 @@ ScopedMessagePipeHandle CreateChannel(
 
   system::ChannelId channel_id = MakeChannelId();
   std::unique_ptr<ChannelInfo> channel_info(new ChannelInfo(channel_id));
-  system::RefPtr<system::MessagePipeDispatcher> dispatcher =
+  RefPtr<system::MessagePipeDispatcher> dispatcher =
       channel_manager->CreateChannel(
           channel_id, platform_handle.Pass(),
           base::Bind(did_create_channel_callback,

@@ -13,8 +13,8 @@
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
-#include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/thread_annotations.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace base {
@@ -211,7 +211,9 @@ class RawChannel {
                         size_t bytes_written) MOJO_LOCKS_EXCLUDED(write_mutex_);
 
   base::MessageLoopForIO* message_loop_for_io() { return message_loop_for_io_; }
-  Mutex& write_mutex() MOJO_LOCK_RETURNED(write_mutex_) { return write_mutex_; }
+  util::Mutex& write_mutex() MOJO_LOCK_RETURNED(write_mutex_) {
+    return write_mutex_;
+  }
 
   // Should only be called on the I/O thread.
   ReadBuffer* read_buffer() { return read_buffer_.get(); }
@@ -319,7 +321,7 @@ class RawChannel {
   bool* set_on_shutdown_;
   std::unique_ptr<ReadBuffer> read_buffer_;
 
-  Mutex write_mutex_;  // Protects the following members.
+  util::Mutex write_mutex_;  // Protects the following members.
   bool write_stopped_ MOJO_GUARDED_BY(write_mutex_);
   std::unique_ptr<WriteBuffer> write_buffer_ MOJO_GUARDED_BY(write_mutex_);
 
