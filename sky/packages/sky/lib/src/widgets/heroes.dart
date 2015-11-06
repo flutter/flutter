@@ -366,14 +366,17 @@ class HeroParty {
 
   PerformanceView _currentPerformance;
 
+  void _clearCurrentPerformance() {
+    _currentPerformance?.removeStatusListener(_handleUpdate);
+    _currentPerformance = null;
+  }
+
   Iterable<Widget> getWidgets(BuildContext context, PerformanceView performance) sync* {
     assert(performance != null || _heroes.length == 0);
     if (performance != _currentPerformance) {
-      if (_currentPerformance != null)
-        _currentPerformance.removeStatusListener(_handleUpdate);
+      _clearCurrentPerformance();
       _currentPerformance = performance;
-      if (_currentPerformance != null)
-        _currentPerformance.addStatusListener(_handleUpdate);
+      _currentPerformance?.addStatusListener(_handleUpdate);
     }
     for (_HeroQuestState hero in _heroes)
       yield hero.build(context, performance);
@@ -389,7 +392,7 @@ class HeroParty {
           source._resetChild();
       }
       _heroes.clear();
-      _currentPerformance = null;
+      _clearCurrentPerformance();
       if (onQuestFinished != null)
         onQuestFinished();
     }
