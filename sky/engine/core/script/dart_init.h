@@ -25,11 +25,11 @@ void* _DartSymbolLookup(const char* symbol_name);
 #else  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 extern "C" {
-extern uint8_t* kDartVmIsolateSnapshotBuffer;
-extern uint8_t* kDartIsolateSnapshotBuffer;
+extern void* kDartVmIsolateSnapshotBuffer;
+extern void* kDartIsolateSnapshotBuffer;
 }
 
-#define DART_SYMBOL(symbol) (symbol)
+#define DART_SYMBOL(symbol) (&symbol)
 
 #endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
