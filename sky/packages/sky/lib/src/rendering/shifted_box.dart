@@ -166,7 +166,7 @@ class RenderPositionedBox extends RenderShiftedBox {
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
   void set alignment (FractionalOffset newAlignment) {
-    assert(newAlignment == null || (newAlignment.x != null && newAlignment.y != null));
+    assert(newAlignment != null && newAlignment.x != null && newAlignment.y != null);
     if (_alignment == newAlignment)
       return;
     _alignment = newAlignment;

@@ -16,15 +16,15 @@ const Duration _kBottomSheetDuration = const Duration(milliseconds: 200);
 const double _kMinFlingVelocity = 700.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 
-class _BottomSheet extends StatefulComponent {
-  _BottomSheet({ Key key, this.route }) : super(key: key);
+class _ModalBottomSheet extends StatefulComponent {
+  _ModalBottomSheet({ Key key, this.route }) : super(key: key);
 
   final _ModalBottomSheetRoute route;
 
-  _BottomSheetState createState() => new _BottomSheetState();
+  _ModalBottomSheetState createState() => new _ModalBottomSheetState();
 }
 
-class _BottomSheetLayout extends OneChildLayoutDelegate {
+class _ModalBottomSheetLayout extends OneChildLayoutDelegate {
   // The distance from the bottom of the parent to the top of the BottomSheet child.
   AnimatedValue<double> childTop = new AnimatedValue<double>(0.0);
 
@@ -43,9 +43,9 @@ class _BottomSheetLayout extends OneChildLayoutDelegate {
   }
 }
 
-class _BottomSheetState extends State<_BottomSheet> {
+class _ModalBottomSheetState extends State<_ModalBottomSheet> {
 
-  final _BottomSheetLayout _layout = new _BottomSheetLayout();
+  final _ModalBottomSheetLayout _layout = new _ModalBottomSheetLayout();
   bool _dragEnabled = false;
 
   void _handleDragStart(Point position) {
@@ -111,7 +111,7 @@ class _ModalBottomSheetRoute extends ModalRoute {
   }
 
   Color get barrierColor => Colors.black54;
-  Widget buildModalWidget(BuildContext context) => new _BottomSheet(route: this);
+  Widget buildModalWidget(BuildContext context) => new _ModalBottomSheet(route: this);
 
   void didPop([dynamic result]) {
     completer.complete(result);
@@ -120,10 +120,44 @@ class _ModalBottomSheetRoute extends ModalRoute {
 }
 
 Future showModalBottomSheet({ BuildContext context, Widget child }) {
+  assert(child != null);
   final Completer completer = new Completer();
   Navigator.of(context).pushEphemeral(new _ModalBottomSheetRoute(
     completer: completer,
     child: child
   ));
   return completer.future;
+}
+
+class _PersistentBottomSheet extends StatelessComponent {
+  _PersistentBottomSheet({
+    Key key,
+    this.child,
+    this.route
+  }) : super(key: key);
+
+  final TransitionRoute route;
+  final Widget child;
+
+  Widget build(BuildContext context) {
+    return new AlignTransition(
+      performance: route.performance,
+      alignment: new AnimatedValue<FractionalOffset>(const FractionalOffset(0.0, 0.0)),
+      heightFactor: new AnimatedValue<double>(0.0, end: 1.0),
+      child: child
+    );
+  }
+}
+
+class _PersistentBottomSheetRoute extends TransitionRoute {
+  bool get opaque => false;
+  Duration get transitionDuration => _kBottomSheetDuration;
+}
+
+void showBottomSheet({ BuildContext context, GlobalKey<PlaceholderState> placeholderKey, Widget child }) {
+  assert(child != null);
+  assert(placeholderKey != null);
+  _PersistentBottomSheetRoute route = new _PersistentBottomSheetRoute();
+  placeholderKey.currentState.child = new _PersistentBottomSheet(route: route, child: child);
+  Navigator.of(context).pushEphemeral(route);
 }
