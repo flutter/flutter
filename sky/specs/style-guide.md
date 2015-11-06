@@ -170,7 +170,9 @@ returns.)
 If a flow control structure's statement is one line long, then don't
 use braces around it, unless it's part of an "if" chain and any of the
 other blocks have more than one line. (Keeping the code free of
-boilerplate or redundant punctuation keeps it concise and readable.)
+boilerplate or redundant punctuation keeps it concise and readable.
+The analyzer will catch "goto fail"-style errors with its dead-code
+detection.)
 
 > For example,
 > ```dart
