@@ -7,9 +7,10 @@
 
 #include <stdint.h>
 
-#include "base/synchronization/condition_variable.h"
-#include "base/synchronization/lock.h"
 #include "mojo/edk/system/awakable.h"
+#include "mojo/edk/util/cond_var.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -27,7 +28,7 @@ class Waiter final : public Awakable {
 
   // A |Waiter| can be used multiple times; |Init()| should be called before
   // each time it's used.
-  void Init();
+  void Init() MOJO_NOT_THREAD_SAFE;
 
   // Waits until a suitable |Awake()| is called. (|context| may be null, in
   // which case, obviously no context is ever returned.)
@@ -60,14 +61,14 @@ class Waiter final : public Awakable {
   bool Awake(MojoResult result, uintptr_t context) override;
 
  private:
-  base::ConditionVariable cv_;  // Associated to |lock_|.
-  base::Lock lock_;             // Protects the following members.
+  util::CondVar cv_;  // Associated to |mutex_|.
+  util::Mutex mutex_;
 #ifndef NDEBUG
-  bool initialized_;
+  bool initialized_ MOJO_GUARDED_BY(mutex_);
 #endif
-  bool awoken_;
-  MojoResult awake_result_;
-  uintptr_t awake_context_;
+  bool awoken_ MOJO_GUARDED_BY(mutex_);
+  MojoResult awake_result_ MOJO_GUARDED_BY(mutex_);
+  uintptr_t awake_context_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Waiter);
 };

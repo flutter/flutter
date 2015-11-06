@@ -13,6 +13,8 @@
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/util/make_unique.h"
 
+using mojo::util::MutexLocker;
+
 namespace mojo {
 namespace system {
 
@@ -27,9 +29,7 @@ SlaveConnectionManager::SlaveConnectionManager(
       ack_result_(nullptr),
       ack_peer_process_identifier_(nullptr),
       ack_is_first_(nullptr),
-      ack_platform_handle_(nullptr),
-      event_(false, false) {  // Auto-reset, not initially signalled.
-}
+      ack_platform_handle_(nullptr) {}
 
 SlaveConnectionManager::~SlaveConnectionManager() {
   DCHECK(!delegate_thread_task_runner_);

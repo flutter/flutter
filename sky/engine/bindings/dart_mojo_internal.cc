@@ -5,7 +5,7 @@
 #include "sky/engine/bindings/dart_mojo_internal.h"
 
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/bindings/mojo_natives.h"
+#include "mojo/public/platform/dart/mojo_natives.h"
 #include "sky/engine/tonic/dart_converter.h"
 
 namespace blink {
@@ -13,8 +13,8 @@ namespace blink {
 void DartMojoInternal::InitForIsolate() {
   DART_CHECK_VALID(Dart_SetNativeResolver(
       Dart_LookupLibrary(ToDart("dart:mojo.internal")),
-      MojoNativeLookup,
-      MojoNativeSymbol));
+      mojo::dart::MojoNativeLookup,
+      mojo::dart::MojoNativeSymbol));
 }
 
 }  // namespace blink

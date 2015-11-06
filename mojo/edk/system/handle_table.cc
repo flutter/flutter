@@ -11,6 +11,8 @@
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/dispatcher.h"
 
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace system {
 

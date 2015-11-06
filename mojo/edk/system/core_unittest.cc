@@ -11,7 +11,7 @@
 #include "base/bind.h"
 #include "mojo/edk/system/awakable.h"
 #include "mojo/edk/system/core_test_base.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/sleep.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -30,7 +30,7 @@ TEST_F(CoreTest, GetTimeTicksNow) {
   const MojoTimeTicks start = core()->GetTimeTicksNow();
   EXPECT_NE(static_cast<MojoTimeTicks>(0), start)
       << "GetTimeTicksNow should return nonzero value";
-  test::Sleep(test::DeadlineFromMilliseconds(15));
+  test::SleepMilliseconds(15u);
   const MojoTimeTicks finish = core()->GetTimeTicksNow();
   // Allow for some fuzz in sleep.
   EXPECT_GE((finish - start), static_cast<MojoTimeTicks>(8000))

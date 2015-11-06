@@ -13,6 +13,8 @@
 #include "mojo/edk/system/local_message_pipe_endpoint.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace system {
 

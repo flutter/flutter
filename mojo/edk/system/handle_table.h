@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -20,7 +20,7 @@ class Core;
 class Dispatcher;
 class DispatcherTransport;
 
-using DispatcherVector = std::vector<RefPtr<Dispatcher>>;
+using DispatcherVector = std::vector<util::RefPtr<Dispatcher>>;
 
 // Test-only function (defined/used in embedder/test_embedder.cc). Declared here
 // so it can be friended.
@@ -46,7 +46,7 @@ class HandleTable {
   // handle.
   // WARNING: For efficiency, this returns a dumb pointer. If you're going to
   // use the result outside |Core|'s lock, you MUST take a reference (e.g., by
-  // storing the result inside a |RefPtr|).
+  // storing the result inside a |util::RefPtr|).
   Dispatcher* GetDispatcher(MojoHandle handle);
 
   // On success, gets the dispatcher for a given handle (which should not be
@@ -55,7 +55,7 @@ class HandleTable {
   // |MOJO_RESULT_INVALID_ARGUMENT| if there's no dispatcher for the given
   // handle or |MOJO_RESULT_BUSY| if the handle is marked as busy.)
   MojoResult GetAndRemoveDispatcher(MojoHandle handle,
-                                    RefPtr<Dispatcher>* dispatcher);
+                                    util::RefPtr<Dispatcher>* dispatcher);
 
   // Adds a dispatcher (which must be valid), returning the handle for it.
   // Returns |MOJO_HANDLE_INVALID| on failure (if the handle table is full).
@@ -118,16 +118,16 @@ class HandleTable {
   // closed (or learning about this too late).
   struct Entry {
     Entry();
-    explicit Entry(RefPtr<Dispatcher>&& dispatcher);
+    explicit Entry(util::RefPtr<Dispatcher>&& dispatcher);
     ~Entry();
 
-    RefPtr<Dispatcher> dispatcher;
+    util::RefPtr<Dispatcher> dispatcher;
     bool busy;
   };
   using HandleToEntryMap = std::unordered_map<MojoHandle, Entry>;
 
   // Adds the given dispatcher to the handle table, not doing any size checks.
-  MojoHandle AddDispatcherNoSizeCheck(RefPtr<Dispatcher>&& dispatcher);
+  MojoHandle AddDispatcherNoSizeCheck(util::RefPtr<Dispatcher>&& dispatcher);
 
   HandleToEntryMap handle_to_entry_map_;
   MojoHandle next_handle_;  // Invariant: never |MOJO_HANDLE_INVALID|.

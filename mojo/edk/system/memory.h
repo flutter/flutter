@@ -58,8 +58,8 @@ template <typename Type>
 class UserPointerWriter;
 template <typename Type>
 class UserPointerReaderWriter;
-template <class Options>
-class UserOptionsReader;
+template <typename Type>
+class UserPointerPartialReader;
 
 // Provides a convenient way to implicitly get null |UserPointer<Type>|s.
 struct NullUserPointer {};
@@ -75,6 +75,8 @@ class UserPointer {
   using NonVoidType = typename internal::VoidToChar<Type>::type;
 
  public:
+  static_assert(!std::is_volatile<Type>::value, "Type must not be volatile");
+
   // Instead of explicitly using these constructors, you can often use
   // |MakeUserPointer()| (or |NullUserPointer()| for null pointers). (The common
   // exception is when you have, e.g., a |char*| and want to get a
@@ -235,13 +237,25 @@ class UserPointer {
   using Writer = UserPointerWriter<Type>;
   using ReaderWriter = UserPointerReaderWriter<Type>;
 
+  // This is like |Reader| above, but for partially reading the memory of a
+  // single object (usually a struct). The pointer it provides will be to a full
+  // |Type| (no more, no less), with unavailable bytes set to zero.
+  //
+  // Note: It isn't safe to just use |UserPointer<const char>::Reader| and
+  // reinterpret cast the pointer to a struct pointer. Even if before accessing
+  // a field you check that it's within the available size, the compiler may
+  // read beyond the extent of the field itself, so long as the read is still
+  // within the struct.
+  //
+  // TODO(vtl): Add writer and reader-writer versions of this if/when necessary.
+  using PartialReader = UserPointerPartialReader<Type>;
+
  private:
   friend class UserPointerReader<Type>;
   friend class UserPointerReader<const Type>;
   friend class UserPointerWriter<Type>;
   friend class UserPointerReaderWriter<Type>;
-  template <class Options>
-  friend class UserOptionsReader;
+  friend class UserPointerPartialReader<Type>;
 
   Type* pointer_;
   // Allow copy and assignment.
@@ -260,37 +274,29 @@ class UserPointerReader {
   using TypeNoConst = typename std::remove_const<Type>::type;
 
  public:
+  static_assert(!std::is_volatile<Type>::value, "Type must not be volatile");
+
   // Note: If |count| is zero, |GetPointer()| will always return null.
-  UserPointerReader(UserPointer<const Type> user_pointer, size_t count) {
-    Init(user_pointer.pointer_, count, true);
+  UserPointerReader(UserPointer<const TypeNoConst> user_pointer, size_t count) {
+    Init(user_pointer.pointer_, count);
   }
   UserPointerReader(UserPointer<TypeNoConst> user_pointer, size_t count) {
-    Init(user_pointer.pointer_, count, true);
+    Init(user_pointer.pointer_, count);
   }
 
-  const Type* GetPointer() const { return buffer_.get(); }
+  const TypeNoConst* GetPointer() const { return buffer_.get(); }
 
  private:
-  template <class Options>
-  friend class UserOptionsReader;
-
-  struct NoCheck {};
-  UserPointerReader(NoCheck,
-                    UserPointer<const Type> user_pointer,
-                    size_t count) {
-    Init(user_pointer.pointer_, count, false);
-  }
-
-  void Init(const Type* user_pointer, size_t count, bool check) {
+  void Init(const TypeNoConst* user_pointer, size_t count) {
     if (count == 0)
       return;
 
-    if (check) {
-      internal::CheckUserPointerWithCount<sizeof(Type), MOJO_ALIGNOF(Type)>(
-          user_pointer, count);
-    }
+    internal::CheckUserPointerWithCount<sizeof(TypeNoConst),
+                                        MOJO_ALIGNOF(TypeNoConst)>(user_pointer,
+                                                                   count);
+
     buffer_.reset(new TypeNoConst[count]);
-    memcpy(buffer_.get(), user_pointer, count * sizeof(Type));
+    memcpy(buffer_.get(), user_pointer, count * sizeof(TypeNoConst));
   }
 
   std::unique_ptr<TypeNoConst[]> buffer_;
@@ -302,6 +308,9 @@ class UserPointerReader {
 template <typename Type>
 class UserPointerWriter {
  public:
+  static_assert(!std::is_volatile<Type>::value, "Type must not be volatile");
+  static_assert(!std::is_const<Type>::value, "Type must not be const");
+
   // Note: If |count| is zero, |GetPointer()| will always return null.
   UserPointerWriter(UserPointer<Type> user_pointer, size_t count)
       : user_pointer_(user_pointer), count_(count) {
@@ -331,6 +340,9 @@ class UserPointerWriter {
 template <typename Type>
 class UserPointerReaderWriter {
  public:
+  static_assert(!std::is_volatile<Type>::value, "Type must not be volatile");
+  static_assert(!std::is_const<Type>::value, "Type must not be const");
+
   // Note: If |count| is zero, |GetPointer()| will always return null.
   UserPointerReaderWriter(UserPointer<Type> user_pointer, size_t count)
       : user_pointer_(user_pointer), count_(count) {
@@ -357,6 +369,47 @@ class UserPointerReaderWriter {
   std::unique_ptr<Type[]> buffer_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(UserPointerReaderWriter);
+};
+
+// Implementation of |UserPointer<Type>::PartialReader|.
+template <typename Type>
+class UserPointerPartialReader {
+ private:
+  using TypeNoConst = typename std::remove_cv<Type>::type;
+
+ public:
+  static_assert(!std::is_volatile<Type>::value, "Type must not be volatile");
+
+  // Note: If |count| is zero, |GetPointer()| will always return null.
+  UserPointerPartialReader(UserPointer<const TypeNoConst> user_pointer,
+                           size_t num_bytes) {
+    Init(user_pointer.pointer_, num_bytes);
+  }
+  UserPointerPartialReader(UserPointer<TypeNoConst> user_pointer,
+                           size_t num_bytes) {
+    Init(user_pointer.pointer_, num_bytes);
+  }
+
+  const TypeNoConst* GetPointer() const { return &storage_; }
+
+ private:
+  void Init(const TypeNoConst* user_pointer, size_t num_bytes) {
+    // Check that all |num_bytes| are valid.
+    internal::CheckUserPointerWithSize<MOJO_ALIGNOF(TypeNoConst)>(user_pointer,
+                                                                  num_bytes);
+
+    // But only copy up to |num_bytes|.
+    if (num_bytes >= sizeof(TypeNoConst))
+      num_bytes = sizeof(TypeNoConst);
+
+    memcpy(&storage_, user_pointer, num_bytes);
+    memset(reinterpret_cast<char*>(&storage_) + num_bytes, 0,
+           sizeof(TypeNoConst) - num_bytes);
+  }
+
+  TypeNoConst storage_;
+
+  MOJO_DISALLOW_COPY_AND_ASSIGN(UserPointerPartialReader);
 };
 
 }  // namespace system

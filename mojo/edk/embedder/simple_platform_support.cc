@@ -8,6 +8,8 @@
 #include "base/time/time.h"
 #include "mojo/edk/embedder/simple_platform_shared_buffer.h"
 
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace embedder {
 
@@ -20,12 +22,13 @@ void SimplePlatformSupport::GetCryptoRandomBytes(void* bytes,
   base::RandBytes(bytes, num_bytes);
 }
 
-PlatformSharedBuffer* SimplePlatformSupport::CreateSharedBuffer(
+RefPtr<PlatformSharedBuffer> SimplePlatformSupport::CreateSharedBuffer(
     size_t num_bytes) {
   return SimplePlatformSharedBuffer::Create(num_bytes);
 }
 
-PlatformSharedBuffer* SimplePlatformSupport::CreateSharedBufferFromHandle(
+RefPtr<PlatformSharedBuffer>
+SimplePlatformSupport::CreateSharedBufferFromHandle(
     size_t num_bytes,
     ScopedPlatformHandle platform_handle) {
   return SimplePlatformSharedBuffer::CreateFromPlatformHandle(

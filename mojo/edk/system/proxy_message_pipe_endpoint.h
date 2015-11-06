@@ -7,7 +7,7 @@
 
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/message_pipe_endpoint.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -28,7 +28,8 @@ class MessagePipe;
 // a |MessagePipeDispatcher|.
 class ProxyMessagePipeEndpoint final : public MessagePipeEndpoint {
  public:
-  explicit ProxyMessagePipeEndpoint(RefPtr<ChannelEndpoint>&& channel_endpoint);
+  explicit ProxyMessagePipeEndpoint(
+      util::RefPtr<ChannelEndpoint>&& channel_endpoint);
   ~ProxyMessagePipeEndpoint() override;
 
   // Returns |channel_endpoint_| and resets |channel_endpoint_| to null. This
@@ -37,7 +38,7 @@ class ProxyMessagePipeEndpoint final : public MessagePipeEndpoint {
   // Note: The returned |ChannelEndpoint| must have its client changed while
   // still under |MessagePipe|'s lock (which this must have also been called
   // under).
-  RefPtr<ChannelEndpoint> ReleaseChannelEndpoint();
+  util::RefPtr<ChannelEndpoint> ReleaseChannelEndpoint();
 
   // |MessagePipeEndpoint| implementation:
   Type GetType() const override;
@@ -48,7 +49,7 @@ class ProxyMessagePipeEndpoint final : public MessagePipeEndpoint {
  private:
   void DetachIfNecessary();
 
-  RefPtr<ChannelEndpoint> channel_endpoint_;
+  util::RefPtr<ChannelEndpoint> channel_endpoint_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ProxyMessagePipeEndpoint);
 };

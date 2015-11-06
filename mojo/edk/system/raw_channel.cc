@@ -16,6 +16,8 @@
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/transport_data.h"
 
+using mojo::util::MutexLocker;
+
 namespace mojo {
 namespace system {
 

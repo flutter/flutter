@@ -9,28 +9,30 @@
 #include <memory>
 
 #include "base/bind.h"
-#include "base/command_line.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
-#include "base/synchronization/waitable_event.h"
-#include "base/test/test_timeouts.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/test_embedder.h"
-#include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/test_command_line.h"
+#include "mojo/edk/system/test/test_io_thread.h"
+#include "mojo/edk/system/test/timeouts.h"
+#include "mojo/edk/system/waitable_event.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
 #include "mojo/edk/test/scoped_ipc_support.h"
-#include "mojo/edk/test/test_io_thread.h"
+#include "mojo/edk/util/command_line.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/core.h"
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "mojo/public/cpp/system/message_pipe.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::system::test::TestIOThread;
+using mojo::util::Mutex;
+using mojo::util::MutexLocker;
+
 namespace mojo {
-
-using test::TestIOThread;
-
 namespace embedder {
 namespace {
 
@@ -55,7 +57,6 @@ class ScopedTestChannel {
   // object is alive).
   explicit ScopedTestChannel(ScopedPlatformHandle platform_handle)
       : bootstrap_message_pipe_(MOJO_HANDLE_INVALID),
-        event_(true, false),  // Manual reset.
         channel_info_(nullptr),
         wait_on_shutdown_(true) {
     bootstrap_message_pipe_ =
@@ -72,7 +73,7 @@ class ScopedTestChannel {
   // the I/O thread must be alive and pumping messages.)
   ~ScopedTestChannel() {
     // |WaitForChannelCreationCompletion()| must be called before destruction.
-    CHECK(event_.IsSignaled());
+    CHECK(event_.IsSignaledForTest());
     event_.Reset();
     if (wait_on_shutdown_) {
       DestroyChannel(channel_info_,
@@ -117,7 +118,7 @@ class ScopedTestChannel {
   // Set after channel creation has been completed (i.e., the callback to
   // |CreateChannel()| has been called). Also used in the destructor to wait for
   // |DestroyChannel()| completion.
-  base::WaitableEvent event_;
+  mojo::system::ManualResetWaitableEvent event_;
 
   // Valid after channel creation completion until destruction.
   ChannelInfo* channel_info_;
@@ -196,25 +197,27 @@ TEST_F(EmbedderTest, ChannelsBasic) {
 
 class TestAsyncWaiter {
  public:
-  TestAsyncWaiter() : event_(true, false), wait_result_(MOJO_RESULT_UNKNOWN) {}
+  TestAsyncWaiter() : wait_result_(MOJO_RESULT_UNKNOWN) {}
 
   void Awake(MojoResult result) {
-    system::MutexLocker l(&wait_result_mutex_);
+    MutexLocker l(&wait_result_mutex_);
     wait_result_ = result;
     event_.Signal();
   }
 
-  bool TryWait() { return event_.TimedWait(TestTimeouts::action_timeout()); }
+  bool TryWait() {
+    return !event_.WaitWithTimeout(mojo::system::test::ActionTimeout());
+  }
 
   MojoResult wait_result() const {
-    system::MutexLocker l(&wait_result_mutex_);
+    MutexLocker l(&wait_result_mutex_);
     return wait_result_;
   }
 
  private:
-  base::WaitableEvent event_;
+  mojo::system::ManualResetWaitableEvent event_;
 
-  mutable system::Mutex wait_result_mutex_;
+  mutable Mutex wait_result_mutex_;
   MojoResult wait_result_ MOJO_GUARDED_BY(wait_result_mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestAsyncWaiter);
@@ -406,11 +409,12 @@ TEST_F(EmbedderTest, MAYBE_MultiprocessMasterSlave) {
 
   mojo::test::MultiprocessTestHelper multiprocess_test_helper;
   std::string connection_id;
-  base::WaitableEvent event(true, false);
+  mojo::system::ManualResetWaitableEvent event;
   ChannelInfo* channel_info = nullptr;
   ScopedMessagePipeHandle mp = ConnectToSlave(
       nullptr, multiprocess_test_helper.server_platform_handle.Pass(),
-      base::Bind(&base::WaitableEvent::Signal, base::Unretained(&event)),
+      base::Bind(&mojo::system::ManualResetWaitableEvent::Signal,
+                 base::Unretained(&event)),
       nullptr, &connection_id, &channel_info);
   ASSERT_TRUE(mp.is_valid());
   EXPECT_TRUE(channel_info);
@@ -424,9 +428,8 @@ TEST_F(EmbedderTest, MAYBE_MultiprocessMasterSlave) {
                                             MOJO_WRITE_MESSAGE_FLAG_NONE));
 
   // Wait for a response.
-  EXPECT_EQ(MOJO_RESULT_OK,
-            Wait(mp.get(), MOJO_HANDLE_SIGNAL_READABLE,
-                 mojo::system::test::ActionDeadline(), nullptr));
+  EXPECT_EQ(MOJO_RESULT_OK, Wait(mp.get(), MOJO_HANDLE_SIGNAL_READABLE,
+                                 mojo::system::test::ActionTimeout(), nullptr));
 
   // The response message should say "world".
   char buffer[100];
@@ -441,7 +444,7 @@ TEST_F(EmbedderTest, MAYBE_MultiprocessMasterSlave) {
 
   EXPECT_TRUE(multiprocess_test_helper.WaitForChildTestShutdown());
 
-  EXPECT_TRUE(event.TimedWait(TestTimeouts::action_timeout()));
+  EXPECT_FALSE(event.WaitWithTimeout(mojo::system::test::ActionTimeout()));
   test_io_thread().PostTaskAndWait(
       base::Bind(&DestroyChannelOnIOThread, base::Unretained(channel_info)));
 }
@@ -480,17 +483,16 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
     mojo::test::ScopedSlaveIPCSupport ipc_support(
         test_io_thread.task_runner(), client_platform_handle.Pass());
 
-    const base::CommandLine& command_line =
-        *base::CommandLine::ForCurrentProcess();
-    ASSERT_TRUE(command_line.HasSwitch(kConnectionIdFlag));
-    std::string connection_id =
-        command_line.GetSwitchValueASCII(kConnectionIdFlag);
+    std::string connection_id;
+    ASSERT_TRUE(mojo::system::test::GetTestCommandLine()->GetOptionValue(
+        kConnectionIdFlag, &connection_id));
     ASSERT_FALSE(connection_id.empty());
-    base::WaitableEvent event(true, false);
+    mojo::system::ManualResetWaitableEvent event;
     ChannelInfo* channel_info = nullptr;
     ScopedMessagePipeHandle mp = ConnectToMaster(
         connection_id,
-        base::Bind(&base::WaitableEvent::Signal, base::Unretained(&event)),
+        base::Bind(&mojo::system::ManualResetWaitableEvent::Signal,
+                   base::Unretained(&event)),
         nullptr, &channel_info);
     ASSERT_TRUE(mp.is_valid());
     EXPECT_TRUE(channel_info);
@@ -498,7 +500,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
     // Wait for the master to send us a message.
     EXPECT_EQ(MOJO_RESULT_OK,
               Wait(mp.get(), MOJO_HANDLE_SIGNAL_READABLE,
-                   mojo::system::test::ActionDeadline(), nullptr));
+                   mojo::system::test::ActionTimeout(), nullptr));
 
     // It should say "hello".
     char buffer[100];
@@ -515,7 +517,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
 
     mp.reset();
 
-    EXPECT_TRUE(event.TimedWait(TestTimeouts::action_timeout()));
+    EXPECT_FALSE(event.WaitWithTimeout(mojo::system::test::ActionTimeout()));
     test_io_thread.PostTaskAndWait(
         base::Bind(&DestroyChannelOnIOThread, base::Unretained(channel_info)));
   }

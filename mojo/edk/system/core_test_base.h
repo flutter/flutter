@@ -6,7 +6,8 @@
 #define MOJO_EDK_SYSTEM_CORE_TEST_BASE_H_
 
 #include "mojo/edk/embedder/simple_platform_support.h"
-#include "mojo/edk/system/mutex.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -88,7 +89,7 @@ class CoreTestBase_MockHandleInfo {
   void AwakableWasAdded(Awakable*);
 
  private:
-  mutable Mutex mutex_;
+  mutable util::Mutex mutex_;
   unsigned ctor_call_count_ MOJO_GUARDED_BY(mutex_);
   unsigned dtor_call_count_ MOJO_GUARDED_BY(mutex_);
   unsigned close_call_count_ MOJO_GUARDED_BY(mutex_);

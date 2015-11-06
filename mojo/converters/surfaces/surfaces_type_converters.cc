@@ -198,7 +198,7 @@ SurfaceIdPtr TypeConverter<SurfaceIdPtr, cc::SurfaceId>::Convert(
   SurfaceIdPtr id(SurfaceId::New());
   id->local = static_cast<uint32_t>(input.id);
   id->id_namespace = cc::SurfaceIdAllocator::NamespaceForId(input);
-  return id.Pass();
+  return id;
 }
 
 // static
@@ -214,7 +214,7 @@ cc::SurfaceId TypeConverter<cc::SurfaceId, SurfaceIdPtr>::Convert(
 ColorPtr TypeConverter<ColorPtr, SkColor>::Convert(const SkColor& input) {
   ColorPtr color(Color::New());
   color->rgba = input;
-  return color.Pass();
+  return color;
 }
 
 // static
@@ -228,7 +228,7 @@ RenderPassIdPtr TypeConverter<RenderPassIdPtr, cc::RenderPassId>::Convert(
   RenderPassIdPtr pass_id(RenderPassId::New());
   pass_id->layer_id = input.layer_id;
   pass_id->index = input.index;
-  return pass_id.Pass();
+  return pass_id;
 }
 
 // static
@@ -337,7 +337,7 @@ QuadPtr TypeConverter<QuadPtr, cc::DrawQuad>::Convert(
     default:
       NOTREACHED() << "Unsupported material " << input.material;
   }
-  return quad.Pass();
+  return quad;
 }
 
 // static
@@ -354,7 +354,7 @@ TypeConverter<SharedQuadStatePtr, cc::SharedQuadState>::Convert(
   state->opacity = input.opacity;
   state->blend_mode = static_cast<SkXfermode>(input.blend_mode);
   state->sorting_context_id = input.sorting_context_id;
-  return state.Pass();
+  return state;
 }
 
 // static
@@ -391,7 +391,7 @@ PassPtr TypeConverter<PassPtr, cc::RenderPass>::Convert(
   DCHECK_EQ(next_sqs_iter.index(), shared_quad_state.size());
   pass->quads = quads.Pass();
   pass->shared_quad_states = shared_quad_state.Pass();
-  return pass.Pass();
+  return pass;
 }
 
 // static
@@ -416,9 +416,9 @@ TypeConverter<scoped_ptr<cc::RenderPass>, PassPtr>::Convert(
       ++sqs_iter;
     }
     if (!ConvertDrawQuad(quad, *sqs_iter, pass.get()))
-      return scoped_ptr<cc::RenderPass>();
+      return nullptr;
   }
-  return pass.Pass();
+  return pass;
 }
 
 // static
@@ -430,7 +430,7 @@ MailboxPtr TypeConverter<MailboxPtr, gpu::Mailbox>::Convert(
   }
   MailboxPtr mailbox(Mailbox::New());
   mailbox->name = name.Pass();
-  return mailbox.Pass();
+  return mailbox;
 }
 
 // static
@@ -449,7 +449,7 @@ MailboxHolderPtr TypeConverter<MailboxHolderPtr, gpu::MailboxHolder>::Convert(
   holder->mailbox = Mailbox::From<gpu::Mailbox>(input.mailbox);
   holder->texture_target = input.texture_target;
   holder->sync_point = input.sync_point;
-  return holder.Pass();
+  return holder;
 }
 
 // static
@@ -474,7 +474,7 @@ TypeConverter<TransferableResourcePtr, cc::TransferableResource>::Convert(
   transferable->mailbox_holder = MailboxHolder::From(input.mailbox_holder);
   transferable->is_repeated = input.is_repeated;
   transferable->is_software = input.is_software;
-  return transferable.Pass();
+  return transferable;
 }
 
 // static
@@ -501,7 +501,7 @@ Array<TransferableResourcePtr> TypeConverter<
   for (size_t i = 0; i < input.size(); ++i) {
     resources[i] = TransferableResource::From(input[i]);
   }
-  return resources.Pass();
+  return resources;
 }
 
 // static
@@ -524,7 +524,7 @@ TypeConverter<ReturnedResourcePtr, cc::ReturnedResource>::Convert(
   returned->sync_point = input.sync_point;
   returned->count = input.count;
   returned->lost = input.lost;
-  return returned.Pass();
+  return returned;
 }
 
 // static
@@ -547,7 +547,7 @@ TypeConverter<Array<ReturnedResourcePtr>, cc::ReturnedResourceArray>::Convert(
   for (size_t i = 0; i < input.size(); ++i) {
     resources[i] = ReturnedResource::From(input[i]);
   }
-  return resources.Pass();
+  return resources;
 }
 
 // static
@@ -563,7 +563,7 @@ FramePtr TypeConverter<FramePtr, cc::CompositorFrame>::Convert(
   for (size_t i = 0; i < pass_list.size(); ++i) {
     frame->passes[i] = Pass::From(*pass_list[i]);
   }
-  return frame.Pass();
+  return frame;
 }
 
 // static
@@ -584,7 +584,7 @@ TypeConverter<scoped_ptr<cc::CompositorFrame>, FramePtr>::Convert(
   }
   scoped_ptr<cc::CompositorFrame> frame(new cc::CompositorFrame);
   frame->delegated_frame_data = frame_data.Pass();
-  return frame.Pass();
+  return frame;
 }
 
 }  // namespace mojo

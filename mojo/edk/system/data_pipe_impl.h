@@ -13,7 +13,7 @@
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
-#include "mojo/edk/system/thread_annotations.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/macros.h"
 #include "mojo/public/c/system/types.h"

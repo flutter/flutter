@@ -7,10 +7,9 @@
 
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
-#include "mojo/edk/system/ref_ptr.h"
-#include "mojo/edk/system/test_utils.h"
+#include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
-#include "mojo/edk/test/test_io_thread.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -32,19 +31,19 @@ class ChannelThread {
   ~ChannelThread();
 
   void Start(embedder::ScopedPlatformHandle platform_handle,
-             RefPtr<ChannelEndpoint>&& channel_endpoint);
+             util::RefPtr<ChannelEndpoint>&& channel_endpoint);
   void Stop();
 
  private:
   // TODO(vtl): |channel_endpoint| should be an rvalue reference, but that
   // doesn't currently work correctly with base::Bind.
   void InitChannelOnIOThread(embedder::ScopedPlatformHandle platform_handle,
-                             RefPtr<ChannelEndpoint> channel_endpoint);
+                             util::RefPtr<ChannelEndpoint> channel_endpoint);
   void ShutdownChannelOnIOThread();
 
   embedder::PlatformSupport* const platform_support_;
-  mojo::test::TestIOThread test_io_thread_;
-  RefPtr<Channel> channel_;
+  TestIOThread test_io_thread_;
+  util::RefPtr<Channel> channel_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ChannelThread);
 };
@@ -56,7 +55,7 @@ class MultiprocessMessagePipeTestBase : public testing::Test {
   ~MultiprocessMessagePipeTestBase() override;
 
  protected:
-  void Init(RefPtr<ChannelEndpoint>&& ep);
+  void Init(util::RefPtr<ChannelEndpoint>&& ep);
 
   embedder::PlatformSupport* platform_support() { return &platform_support_; }
   mojo::test::MultiprocessTestHelper* helper() { return &helper_; }

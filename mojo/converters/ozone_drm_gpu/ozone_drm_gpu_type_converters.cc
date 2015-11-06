@@ -26,7 +26,7 @@ DisplayModePtr TypeConverter<DisplayModePtr, ui::DisplayMode_Params>::Convert(
   out->size = Size::From<gfx::Size>(in.size);
   out->is_interlaced = in.is_interlaced;
   out->refresh_rate = in.refresh_rate;
-  return out.Pass();
+  return out;
 }
 
 static_assert(static_cast<int>(ui::DISPLAY_CONNECTION_TYPE_NONE) ==
@@ -102,7 +102,7 @@ TypeConverter<DisplaySnapshotPtr, ui::DisplaySnapshot_Params>::Convert(
   out->native_mode = DisplayMode::From<ui::DisplayMode_Params>(in.native_mode);
   out->product_id = in.product_id;
   out->string_representation = in.string_representation;
-  return out.Pass();
+  return out;
 }
 
 }  // namespace mojo

@@ -40,7 +40,7 @@ mojo::files::FilePtr OpenFileAt(mojo::files::DirectoryPtr* root,
   if (error != mojo::files::Error::OK)
     return nullptr;
 
-  return file.Pass();
+  return file;
 }
 
 void CreateTestFileAt(mojo::files::DirectoryPtr* root,

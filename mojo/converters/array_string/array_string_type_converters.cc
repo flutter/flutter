@@ -23,7 +23,7 @@ Array<uint8_t> TypeConverter<Array<uint8_t>, std::string>::Convert(
     const std::string& input) {
   auto result = Array<uint8_t>::New(input.size());
   memcpy(&result.front(), input.c_str(), input.size());
-  return result.Pass();
+  return result;
 }
 
 }  // namespace mojo

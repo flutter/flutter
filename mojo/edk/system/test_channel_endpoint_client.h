@@ -10,24 +10,24 @@
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
-#include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
-
-namespace base {
-class WaitableEvent;
-}
 
 namespace mojo {
 namespace system {
+
+class ManualResetWaitableEvent;
+
 namespace test {
 
 class TestChannelEndpointClient final : public ChannelEndpointClient {
  public:
-  // Note: Use |MakeRefCounted<TestChannelEndpointClient>()|.
+  // Note: Use |util::MakeRefCounted<TestChannelEndpointClient>()|.
 
   // Initializes with the given port and endpoint.
-  void Init(unsigned port, RefPtr<ChannelEndpoint>&& endpoint);
+  void Init(unsigned port, util::RefPtr<ChannelEndpoint>&& endpoint);
 
   // Returns true if we're detached from the |ChannelEndpoint|.
   bool IsDetached() const;
@@ -41,7 +41,7 @@ class TestChannelEndpointClient final : public ChannelEndpointClient {
 
   // Sets an event to signal when we receive a message. (|read_event| must live
   // until this object is destroyed or the read event is reset to null.)
-  void SetReadEvent(base::WaitableEvent* read_event);
+  void SetReadEvent(ManualResetWaitableEvent* read_event);
 
   // |ChannelEndpointClient| implementation:
   bool OnReadMessage(unsigned port, MessageInTransit* message) override;
@@ -53,15 +53,15 @@ class TestChannelEndpointClient final : public ChannelEndpointClient {
   TestChannelEndpointClient();
   ~TestChannelEndpointClient() override;
 
-  mutable Mutex mutex_;
+  mutable util::Mutex mutex_;
 
   unsigned port_ MOJO_GUARDED_BY(mutex_);
-  RefPtr<ChannelEndpoint> endpoint_ MOJO_GUARDED_BY(mutex_);
+  util::RefPtr<ChannelEndpoint> endpoint_ MOJO_GUARDED_BY(mutex_);
 
   MessageInTransitQueue messages_ MOJO_GUARDED_BY(mutex_);
 
   // Event to trigger if we read a message (may be null).
-  base::WaitableEvent* read_event_ MOJO_GUARDED_BY(mutex_);
+  ManualResetWaitableEvent* read_event_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestChannelEndpointClient);
 };

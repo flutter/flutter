@@ -8,6 +8,7 @@
 #include <stddef.h>
 
 #include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -42,8 +43,9 @@ class PlatformSupport {
   // Gets cryptographically-secure (pseudo)random bytes.
   virtual void GetCryptoRandomBytes(void* bytes, size_t num_bytes) = 0;
 
-  virtual PlatformSharedBuffer* CreateSharedBuffer(size_t num_bytes) = 0;
-  virtual PlatformSharedBuffer* CreateSharedBufferFromHandle(
+  virtual util::RefPtr<PlatformSharedBuffer> CreateSharedBuffer(
+      size_t num_bytes) = 0;
+  virtual util::RefPtr<PlatformSharedBuffer> CreateSharedBufferFromHandle(
       size_t num_bytes,
       ScopedPlatformHandle platform_handle) = 0;
 

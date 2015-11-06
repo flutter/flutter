@@ -23,8 +23,9 @@ class SimplePlatformSupport final : public PlatformSupport {
 
   MojoTimeTicks GetTimeTicksNow() override;
   void GetCryptoRandomBytes(void* bytes, size_t num_bytes) override;
-  PlatformSharedBuffer* CreateSharedBuffer(size_t num_bytes) override;
-  PlatformSharedBuffer* CreateSharedBufferFromHandle(
+  util::RefPtr<PlatformSharedBuffer> CreateSharedBuffer(
+      size_t num_bytes) override;
+  util::RefPtr<PlatformSharedBuffer> CreateSharedBufferFromHandle(
       size_t num_bytes,
       ScopedPlatformHandle platform_handle) override;
 

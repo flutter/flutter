@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("../public/mojo_sdk.gni")
+import("//testing/test.gni")
 
 # A mojo_edk_source_set is a mojo_sdk_source_set that does not restrict
 # external dependencies and understands the following additional variables, all
@@ -92,6 +93,78 @@ template("mojo_edk_source_set") {
     }
     if (defined(invoker.mojo_sdk_deps)) {
       mojo_sdk_deps += invoker.mojo_sdk_deps
+    }
+  }
+}
+
+template("mojo_edk_unittests") {
+  test(target_name) {
+    deps = [
+      rebase_path("mojo/edk/system/test:run_all_unittests", ".", mojo_root),
+    ]
+    if (defined(invoker.sources)) {
+      sources = invoker.sources
+    }
+    if (defined(invoker.deps)) {
+      foreach(dep, invoker.deps) {
+        # The only deps that are not specified relative to the location of the
+        # Mojo EDK should be on targets within the same file or on a whitelisted
+        # set of external dependencies.
+        # TODO(vtl): Get rid of //base dependencies (and stop allowing it).
+        assert(get_path_info(dep, "dir") == "." || dep == "//testing/gtest" ||
+               dep == "//base")
+        deps += [ dep ]
+      }
+    }
+    if (defined(invoker.mojo_sdk_deps)) {
+      foreach(sdk_dep, invoker.mojo_sdk_deps) {
+        # Check that the SDK dep was not mistakenly given as an absolute path.
+        assert(get_path_info(sdk_dep, "abspath") != sdk_dep)
+        deps += [ rebase_path(sdk_dep, ".", mojo_root) ]
+      }
+    }
+    if (defined(invoker.mojo_edk_deps)) {
+      foreach(edk_dep, invoker.mojo_edk_deps) {
+        # Check that the EDK dep was not mistakenly given as an absolute path.
+        assert(get_path_info(edk_dep, "abspath") != edk_dep)
+        deps += [ rebase_path(edk_dep, ".", mojo_root) ]
+      }
+    }
+  }
+}
+
+template("mojo_edk_perftests") {
+  test(target_name) {
+    deps = [
+      rebase_path("mojo/edk/system/test:run_all_perftests", ".", mojo_root),
+    ]
+    if (defined(invoker.sources)) {
+      sources = invoker.sources
+    }
+    if (defined(invoker.deps)) {
+      foreach(dep, invoker.deps) {
+        # The only deps that are not specified relative to the location of the
+        # Mojo EDK should be on targets within the same file or on a whitelisted
+        # set of external dependencies.
+        # TODO(vtl): Get rid of //base dependencies (and stop allowing it).
+        assert(get_path_info(dep, "dir") == "." || dep == "//testing/gtest" ||
+               dep == "//base")
+        deps += [ dep ]
+      }
+    }
+    if (defined(invoker.mojo_sdk_deps)) {
+      foreach(sdk_dep, invoker.mojo_sdk_deps) {
+        # Check that the SDK dep was not mistakenly given as an absolute path.
+        assert(get_path_info(sdk_dep, "abspath") != sdk_dep)
+        deps += [ rebase_path(sdk_dep, ".", mojo_root) ]
+      }
+    }
+    if (defined(invoker.mojo_edk_deps)) {
+      foreach(edk_dep, invoker.mojo_edk_deps) {
+        # Check that the EDK dep was not mistakenly given as an absolute path.
+        assert(get_path_info(edk_dep, "abspath") != edk_dep)
+        deps += [ rebase_path(edk_dep, ".", mojo_root) ]
+      }
     }
   }
 }

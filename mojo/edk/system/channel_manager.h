@@ -10,12 +10,12 @@
 #include <unordered_map>
 
 #include "base/callback_forward.h"
-#include "base/memory/ref_counted.h"
 #include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/channel_id.h"
-#include "mojo/edk/system/mutex.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace base {
@@ -71,7 +71,7 @@ class ChannelManager {
   // constructor). |channel_id| should be a valid |ChannelId| (i.e., nonzero)
   // not "assigned" to any other |Channel| being managed by this
   // |ChannelManager|.
-  RefPtr<MessagePipeDispatcher> CreateChannelOnIOThread(
+  util::RefPtr<MessagePipeDispatcher> CreateChannelOnIOThread(
       ChannelId channel_id,
       embedder::ScopedPlatformHandle platform_handle);
 
@@ -79,7 +79,7 @@ class ChannelManager {
   // pipe. Returns the newly-created |Channel|.
   // TODO(vtl): Maybe get rid of the others (and bootstrap message pipes in
   // general).
-  RefPtr<Channel> CreateChannelWithoutBootstrapOnIOThread(
+  util::RefPtr<Channel> CreateChannelWithoutBootstrapOnIOThread(
       ChannelId channel_id,
       embedder::ScopedPlatformHandle platform_handle);
 
@@ -87,14 +87,14 @@ class ChannelManager {
   // completion, will call |callback| (using |callback_thread_task_runner| if it
   // is non-null, else on the I/O thread). Note: This will always post a task to
   // the I/O thread, even if called from that thread.
-  RefPtr<MessagePipeDispatcher> CreateChannel(
+  util::RefPtr<MessagePipeDispatcher> CreateChannel(
       ChannelId channel_id,
       embedder::ScopedPlatformHandle platform_handle,
       const base::Closure& callback,
       embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner);
 
   // Gets the |Channel| with the given ID (which must exist).
-  RefPtr<Channel> GetChannel(ChannelId channel_id) const;
+  util::RefPtr<Channel> GetChannel(ChannelId channel_id) const;
 
   // Informs the channel manager (and thus channel) that it will be shutdown
   // soon (by calling |ShutdownChannel()|). Calling this is optional (and may in
@@ -129,10 +129,10 @@ class ChannelManager {
   // Used by |CreateChannelOnIOThread()| and |CreateChannelHelper()|. Called on
   // the I/O thread. |bootstrap_channel_endpoint| is optional and may be null.
   // Returns the newly-created |Channel|.
-  RefPtr<Channel> CreateChannelOnIOThreadHelper(
+  util::RefPtr<Channel> CreateChannelOnIOThreadHelper(
       ChannelId channel_id,
       embedder::ScopedPlatformHandle platform_handle,
-      RefPtr<ChannelEndpoint>&& bootstrap_channel_endpoint);
+      util::RefPtr<ChannelEndpoint>&& bootstrap_channel_endpoint);
 
   // Used by |CreateChannel()|. Called on the I/O thread.
   // TODO(vtl): |bootstrap_channel_endpoint| should be an rvalue reference, but
@@ -140,7 +140,7 @@ class ChannelManager {
   void CreateChannelHelper(
       ChannelId channel_id,
       embedder::ScopedPlatformHandle platform_handle,
-      RefPtr<ChannelEndpoint> bootstrap_channel_endpoint,
+      util::RefPtr<ChannelEndpoint> bootstrap_channel_endpoint,
       const base::Closure& callback,
       embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner);
 
@@ -153,9 +153,10 @@ class ChannelManager {
   // TODO(vtl): Annotate the above rule using |MOJO_ACQUIRED_{BEFORE,AFTER}()|,
   // once clang actually checks such annotations.
   // https://github.com/domokit/mojo/issues/313
-  mutable Mutex mutex_;
+  mutable util::Mutex mutex_;
 
-  using ChannelIdToChannelMap = std::unordered_map<ChannelId, RefPtr<Channel>>;
+  using ChannelIdToChannelMap =
+      std::unordered_map<ChannelId, util::RefPtr<Channel>>;
   ChannelIdToChannelMap channels_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ChannelManager);

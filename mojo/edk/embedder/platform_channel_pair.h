@@ -37,9 +37,9 @@ using HandlePassingInformation = base::FileHandleMappingVector;
 // implementations.
 //
 // Note: On POSIX platforms, to write to the "pipe", use
-// |PlatformChannel{Write,Writev}()| (from platform_channel_utils_posix.h)
-// instead of |write()|, |writev()|, etc. Otherwise, you have to worry about
-// platform differences in suppressing |SIGPIPE|.
+// |PlatformChannel{Write,Writev}()| (from platform_channel_utils.h) instead of
+// |write()|, |writev()|, etc. Otherwise, you have to worry about platform
+// differences in suppressing |SIGPIPE|.
 class PlatformChannelPair {
  public:
   PlatformChannelPair();

@@ -27,7 +27,7 @@ HttpResponsePtr CreateHttpResponse(uint32_t status_code,
   MOJO_DCHECK(MOJO_RESULT_OK == result);
   response->status_code = status_code;
   response->content_length = num_bytes;
-  return response.Pass();
+  return response;
 }
 
 }  // namespace http_server

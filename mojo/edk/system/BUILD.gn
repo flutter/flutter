@@ -10,11 +10,8 @@ if (is_android) {
   import("//build/config/android/rules.gni")
 }
 
+# TODO(vtl): Should we get rid of this?
 config("system_config") {
-  defines = [
-    # Ensures that dependent projects import the core functions on Windows.
-    "MOJO_USE_SYSTEM_IMPL",
-  ]
 }
 
 component("system") {
@@ -83,8 +80,6 @@ component("system") {
     "message_pipe_dispatcher.h",
     "message_pipe_endpoint.cc",
     "message_pipe_endpoint.h",
-    "mutex.cc",
-    "mutex.h",
     "options_validation.h",
     "platform_handle_dispatcher.cc",
     "platform_handle_dispatcher.h",
@@ -94,10 +89,6 @@ component("system") {
     "raw_channel.cc",
     "raw_channel.h",
     "raw_channel_posix.cc",
-    "ref_counted.h",
-    "ref_counted_internal.h",
-    "ref_ptr.h",
-    "ref_ptr_internal.h",
     "remote_consumer_data_pipe_impl.cc",
     "remote_consumer_data_pipe_impl.h",
     "remote_data_pipe_ack.h",
@@ -109,16 +100,15 @@ component("system") {
     "simple_dispatcher.h",
     "slave_connection_manager.cc",
     "slave_connection_manager.h",
-    "thread_annotations.h",
     "transport_data.cc",
     "transport_data.h",
     "unique_identifier.cc",
     "unique_identifier.h",
+    "waitable_event.cc",
+    "waitable_event.h",
     "waiter.cc",
     "waiter.h",
   ]
-
-  defines = [ "MOJO_SYSTEM_IMPLEMENTATION" ]
 
   all_dependent_configs = [ ":system_config" ]
 
@@ -147,29 +137,9 @@ group("tests") {
   ]
 }
 
-mojo_edk_source_set("test_utils") {
-  testonly = true
-
+mojo_edk_unittests("mojo_system_unittests") {
   sources = [
-    "test_utils.cc",
-    "test_utils.h",
-  ]
-
-  mojo_sdk_public_deps = [
-    "mojo/public/c/system",
-    "mojo/public/cpp/system",
-  ]
-
-  deps = [
-    "//base",
-    "//base/test:test_support",
-  ]
-
-  mojo_edk_deps = [ "mojo/edk/embedder:platform" ]
-}
-
-test("mojo_system_unittests") {
-  sources = [
+    # TODO(vtl): This should be in its own mojo_edk_unittests target.
     "../test/multiprocess_test_helper_unittest.cc",
     "awakable_list_unittest.cc",
     "channel_endpoint_id_unittest.cc",
@@ -196,21 +166,17 @@ test("mojo_system_unittests") {
     "message_pipe_test_utils.h",
     "message_pipe_unittest.cc",
     "multiprocess_message_pipe_unittest.cc",
-    "mutex_unittest.cc",
     "options_validation_unittest.cc",
     "platform_handle_dispatcher_unittest.cc",
     "raw_channel_unittest.cc",
-    "ref_counted_unittest.cc",
     "remote_data_pipe_impl_unittest.cc",
     "remote_message_pipe_unittest.cc",
-    "run_all_unittests.cc",
     "shared_buffer_dispatcher_unittest.cc",
     "simple_dispatcher_unittest.cc",
     "test_channel_endpoint_client.cc",
     "test_channel_endpoint_client.h",
-    "test_utils_unittest.cc",
-    "thread_annotations_unittest.cc",
     "unique_identifier_unittest.cc",
+    "waitable_event_unittest.cc",
     "waiter_test_utils.cc",
     "waiter_test_utils.h",
     "waiter_unittest.cc",
@@ -218,33 +184,41 @@ test("mojo_system_unittests") {
 
   deps = [
     ":system",
-    ":test_utils",
-    "../embedder:embedder_unittests",
-    "../test:test_support",
-    "../util",
     "//base",
-    "//base/test:test_support",
     "//testing/gtest",
   ]
 
-  allow_circular_includes_from = [ "../embedder:embedder_unittests" ]
+  mojo_edk_deps = [
+    # TODO(vtl): Add separate mojo_edk_unittests targets for these.
+    "mojo/edk/embedder:unittests",
+    "mojo/edk/system/test:unittests",
+    "mojo/edk/util:unittests",
+
+    "mojo/edk/system/test",
+    "mojo/edk/test:test_support",
+    "mojo/edk/util",
+  ]
 }
 
-test("mojo_system_perftests") {
+mojo_edk_perftests("mojo_system_perftests") {
   sources = [
     "message_pipe_perftest.cc",
     "message_pipe_test_utils.cc",
     "message_pipe_test_utils.h",
-    "ref_counted_perftest.cc",
   ]
 
   deps = [
     ":system",
-    ":test_utils",
-    "../test:test_support",
     "//base",
-    "//base/test:test_support",
-    "//base/test:test_support_perf",
     "//testing/gtest",
+  ]
+
+  mojo_edk_deps = [
+    # TODO(vtl): Add separate test targets for this.
+    "mojo/edk/util:perftests",
+
+    "mojo/edk/system/test",
+    "mojo/edk/system/test:perf",
+    "mojo/edk/test:test_support",
   ]
 }

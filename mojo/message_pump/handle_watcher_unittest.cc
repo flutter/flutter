@@ -54,7 +54,7 @@ scoped_ptr<base::MessageLoop> CreateMessageLoop(MessageLoopConfig config) {
     loop.reset(new base::MessageLoop());
   else
     loop.reset(new base::MessageLoop(MessagePumpMojo::Create()));
-  return loop.Pass();
+  return loop;
 }
 
 // Helper class to manage the callback and running the message loop waiting for

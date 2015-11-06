@@ -25,6 +25,8 @@
 #include "mojo/edk/system/remote_producer_data_pipe_impl.h"
 #include "mojo/edk/util/make_unique.h"
 
+using mojo::util::RefPtr;
+
 namespace mojo {
 namespace system {
 

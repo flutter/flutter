@@ -10,7 +10,7 @@
 #include "base/memory/aligned_memory.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/data_pipe_impl.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -25,7 +25,7 @@ class RemoteConsumerDataPipeImpl final : public DataPipeImpl {
   // is nonzero (i.e., if we're in the middle of a two-phase write when the
   // consumer handle is transferred); |start_index| is ignored if it is zero.
   RemoteConsumerDataPipeImpl(
-      RefPtr<ChannelEndpoint>&& channel_endpoint,
+      util::RefPtr<ChannelEndpoint>&& channel_endpoint,
       size_t consumer_num_bytes,
       std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
       size_t start_index);
@@ -95,7 +95,7 @@ class RemoteConsumerDataPipeImpl final : public DataPipeImpl {
   void Disconnect();
 
   // Should be valid if and only if |consumer_open()| returns true.
-  RefPtr<ChannelEndpoint> channel_endpoint_;
+  util::RefPtr<ChannelEndpoint> channel_endpoint_;
 
   // The number of bytes we've sent the consumer, but don't *know* have been
   // consumed.

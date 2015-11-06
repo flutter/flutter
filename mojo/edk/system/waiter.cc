@@ -4,16 +4,16 @@
 
 #include "mojo/edk/system/waiter.h"
 
-#include <limits>
-
 #include "base/logging.h"
 #include "base/time/time.h"
+
+using mojo::util::MutexLocker;
 
 namespace mojo {
 namespace system {
 
 Waiter::Waiter()
-    : cv_(&lock_),
+    :
 #ifndef NDEBUG
       initialized_(false),
 #endif
@@ -37,7 +37,7 @@ void Waiter::Init() {
 
 // TODO(vtl): Fast-path the |deadline == 0| case?
 MojoResult Waiter::Wait(MojoDeadline deadline, uint32_t* context) {
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
 
 #ifndef NDEBUG
   DCHECK(initialized_);
@@ -53,27 +53,36 @@ MojoResult Waiter::Wait(MojoDeadline deadline, uint32_t* context) {
     return awake_result_;
   }
 
-  // |MojoDeadline| is actually a |uint64_t|, but we need a signed quantity.
-  // Treat any out-of-range deadline as "forever" (which is wrong, but okay
-  // since 2^63 microseconds is ~300000 years). Note that this also takes care
-  // of the |MOJO_DEADLINE_INDEFINITE| (= 2^64 - 1) case.
-  if (deadline > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) {
+  if (deadline == MOJO_DEADLINE_INDEFINITE) {
     do {
-      cv_.Wait();
+      cv_.Wait(&mutex_);
     } while (!awoken_);
   } else {
-    // NOTE(vtl): This is very inefficient on POSIX, since pthreads condition
-    // variables take an absolute deadline.
-    const base::TimeTicks end_time =
-        base::TimeTicks::Now() +
-        base::TimeDelta::FromMicroseconds(static_cast<int64_t>(deadline));
-    do {
-      base::TimeTicks now_time = base::TimeTicks::Now();
-      if (now_time >= end_time)
+    // We may get spurious wakeups, so record the start time and track the
+    // remaining timeout.
+    uint64_t wait_remaining = deadline;
+    auto start = base::TimeTicks::Now();
+    while (true) {
+      // NOTE(vtl): Possibly, we should add a version of |WaitWithTimeout()|
+      // that takes an absolute deadline, since that's what pthreads takes.
+      if (cv_.WaitWithTimeout(&mutex_, wait_remaining))
+        return MOJO_RESULT_DEADLINE_EXCEEDED;  // Definitely timed out.
+
+      // Otherwise, we may have been awoken.
+      if (awoken_)
+        break;
+
+      // Or the wakeup may have been spurious.
+      auto now = base::TimeTicks::Now();
+      DCHECK_GE(now, start);
+      uint64_t elapsed = static_cast<uint64_t>((now - start).InMicroseconds());
+      // It's possible that the deadline has passed anyway.
+      if (elapsed >= deadline)
         return MOJO_RESULT_DEADLINE_EXCEEDED;
 
-      cv_.TimedWait(end_time - now_time);
-    } while (!awoken_);
+      // Otherwise, recalculate the amount that we have left to wait.
+      wait_remaining = deadline - elapsed;
+    }
   }
 
   DCHECK_NE(awake_result_, MOJO_RESULT_INTERNAL);
@@ -83,7 +92,7 @@ MojoResult Waiter::Wait(MojoDeadline deadline, uint32_t* context) {
 }
 
 bool Waiter::Awake(MojoResult result, uintptr_t context) {
-  base::AutoLock locker(lock_);
+  MutexLocker locker(&mutex_);
 
   if (awoken_)
     return true;
@@ -92,7 +101,8 @@ bool Waiter::Awake(MojoResult result, uintptr_t context) {
   awake_result_ = result;
   awake_context_ = context;
   cv_.Signal();
-  // |cv_.Wait()|/|cv_.TimedWait()| will return after |lock_| is released.
+  // |cv_.Wait()|/|cv_.WaitWithTimeout()| will return after |mutex_| is
+  // released.
   return true;
 }
 

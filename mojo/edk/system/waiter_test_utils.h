@@ -9,9 +9,9 @@
 
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/handle_signals_state.h"
-#include "mojo/edk/system/ref_ptr.h"
+#include "mojo/edk/system/test/simple_test_thread.h"
 #include "mojo/edk/system/waiter.h"
-#include "mojo/edk/test/simple_test_thread.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -43,7 +43,7 @@ namespace test {
 // code). (We accept this unrealism for simplicity, since |AwakableList| is
 // thread-unsafe so making it more realistic would require adding nontrivial
 // synchronization machinery.)
-class SimpleWaiterThread : public mojo::test::SimpleTestThread {
+class SimpleWaiterThread : public test::SimpleTestThread {
  public:
   // For the duration of the lifetime of this object, |*result| belongs to it
   // (in the sense that it will write to it whenever it wants).
@@ -65,12 +65,12 @@ class SimpleWaiterThread : public mojo::test::SimpleTestThread {
 // This is a more complex and realistic thread that has a |Waiter|, on which it
 // waits for the given deadline (with the given flags). Unlike
 // |SimpleWaiterThread|, it requires the machinery of |Dispatcher|.
-class WaiterThread : public mojo::test::SimpleTestThread {
+class WaiterThread : public test::SimpleTestThread {
  public:
   // Note: |*did_wait_out|, |*result_out|, |*context_out| and
   // |*signals_state_out| "belong" to this object (i.e., may be modified by, on
   // some other thread) while it's alive.
-  WaiterThread(RefPtr<Dispatcher>&& dispatcher,
+  WaiterThread(util::RefPtr<Dispatcher>&& dispatcher,
                MojoHandleSignals handle_signals,
                MojoDeadline deadline,
                uint32_t context,
@@ -83,7 +83,7 @@ class WaiterThread : public mojo::test::SimpleTestThread {
  private:
   void Run() override;
 
-  const RefPtr<Dispatcher> dispatcher_;
+  const util::RefPtr<Dispatcher> dispatcher_;
   const MojoHandleSignals handle_signals_;
   const MojoDeadline deadline_;
   const uint32_t context_;

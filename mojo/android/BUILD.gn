@@ -129,7 +129,6 @@ shared_library("mojo_java_unittests") {
     "//mojo/message_pump",
     "//mojo/public/cpp/bindings/tests:mojo_public_bindings_test_utils",
     "//mojo/public/cpp/environment",
-    "//mojo/public/cpp/test_support:test_utils",
   ]
   defines = [ "UNIT_TEST" ]
 }

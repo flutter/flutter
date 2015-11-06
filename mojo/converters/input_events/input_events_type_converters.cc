@@ -225,7 +225,7 @@ EventPtr TypeConverter<EventPtr, ui::Event>::Convert(const ui::Event& input) {
     }
     event->key_data = key_data.Pass();
   }
-  return event.Pass();
+  return event;
 }
 
 // static
