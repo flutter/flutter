@@ -92,7 +92,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
     Widget contents = new Container(
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       child: new Center(
-        shrinkWrap: ShrinkWrap.width,
+        widthFactor: 1.0,
         child: config.child
       )
     );
