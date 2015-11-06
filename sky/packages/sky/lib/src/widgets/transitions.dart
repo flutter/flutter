@@ -177,6 +177,37 @@ class SquashTransition extends TransitionWithChild {
   }
 }
 
+class AlignTransition extends TransitionWithChild {
+  AlignTransition({
+    Key key,
+    this.alignment,
+    this.widthFactor,
+    this.heightFactor,
+    PerformanceView performance,
+    Widget child
+  }) : super(key: key,
+             performance: performance,
+             child: child);
+
+  final AnimatedValue<FractionalOffset> alignment;
+  final AnimatedValue<double> widthFactor;
+  final AnimatedValue<double> heightFactor;
+
+  Widget buildWithChild(BuildContext context, Widget child) {
+    if (alignment != null)
+      performance.updateVariable(alignment);
+    if (widthFactor != null)
+      performance.updateVariable(widthFactor);
+    if (heightFactor != null)
+      performance.updateVariable(heightFactor);
+    return new Align(
+      alignment: alignment?.value,
+      widthFactor: widthFactor?.value,
+      heightFactor: heightFactor?.value,
+      child: child);
+  }
+}
+
 /// An animated variable containing a RelativeRectangle
 ///
 /// This class specializes the interpolation of AnimatedValue<RelativeRect> to

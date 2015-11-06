@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -792,5 +793,21 @@ class FractionalOffset {
     value = 37 * value + y.hashCode;
     return value;
   }
+  static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return new FractionalOffset(b.x * t, b.y * t);
+    if (b == null)
+      return new FractionalOffset(b.x * (1.0 - t), b.y * (1.0 - t));
+    return new FractionalOffset(ui.lerpDouble(a.x, b.x, t), ui.lerpDouble(a.y, b.y, t));
+  }
   String toString() => '$runtimeType($x, $y)';
+}
+
+class AnimatedFractionalOffsetValue extends AnimatedValue<FractionalOffset> {
+  AnimatedFractionalOffsetValue(FractionalOffset begin, { FractionalOffset end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+
+  FractionalOffset lerp(double t) => FractionalOffset.lerp(begin, end, t);
 }
