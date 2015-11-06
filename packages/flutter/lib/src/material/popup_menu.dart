@@ -76,14 +76,11 @@ class _PopupMenu extends StatelessComponent {
               ),
               child: new IntrinsicWidth(
                 stepWidth: _kMenuWidthStep,
-                child: new ScrollableViewport(
-                  child: new Container(
-                    // TODO(abarth): Teach Block about padding.
-                    padding: const EdgeDims.symmetric(
-                      horizontal: _kMenuHorizontalPadding,
-                      vertical: _kMenuVerticalPadding
-                    ),
-                    child: new BlockBody(children)
+                child: new Block(
+                  children,
+                  padding: const EdgeDims.symmetric(
+                    horizontal: _kMenuHorizontalPadding,
+                    vertical: _kMenuVerticalPadding
                   )
                 )
               )
