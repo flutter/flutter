@@ -544,6 +544,7 @@ abstract class RenderBox extends RenderObject {
   /// coordinate space of the callee.  The callee is responsible for checking
   /// whether the given position is within its bounds.
   bool hitTest(HitTestResult result, { Point position }) {
+    assert(!needsLayout);
     if (position.x >= 0.0 && position.x < _size.width &&
         position.y >= 0.0 && position.y < _size.height) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {

@@ -144,7 +144,7 @@ class FlutterBinding extends HitTestTarget {
       _renderView = renderViewOverride;
     }
     assert(_renderView != null);
-    scheduler.addPersistentFrameCallback(beginFrame);
+    scheduler.addPersistentFrameCallback(_handlePersistentFrameCallback);
 
     assert(_instance == this);
   }
@@ -172,8 +172,12 @@ class FlutterBinding extends HitTestTarget {
       listener(size);
   }
 
+  void _handlePersistentFrameCallback(Duration timeStamp) {
+    beginFrame();
+  }
+
   /// Pump the rendering pipeline to generate a frame for the given time stamp
-  void beginFrame(Duration timeStamp) {
+  void beginFrame() {
     RenderObject.flushLayout();
     _renderView.updateCompositingBits();
     RenderObject.flushPaint();
