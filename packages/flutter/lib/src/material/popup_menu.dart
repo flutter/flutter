@@ -110,7 +110,7 @@ class _MenuRoute extends ModalRoute {
   bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
 
-  Widget buildModalWidget(BuildContext context) => new _PopupMenu(route: this);
+  Widget buildPage(BuildContext context) => new _PopupMenu(route: this);
 }
 
 Future showMenu({ BuildContext context, ModalPosition position, List<PopupMenuItem> items, int level: 4 }) {

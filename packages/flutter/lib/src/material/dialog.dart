@@ -124,7 +124,9 @@ class _DialogRoute extends ModalRoute {
   Duration get transitionDuration => const Duration(milliseconds: 150);
   Color get barrierColor => Colors.black54;
 
-  Widget buildModalWidget(BuildContext context) {
+  Widget buildPage(BuildContext context) => child;
+
+  Widget buildTransition(BuildContext context, PerformanceView performance, Widget child) {
     return new FadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),

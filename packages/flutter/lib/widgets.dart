@@ -27,7 +27,6 @@ export 'src/widgets/modal_barrier.dart';
 export 'src/widgets/navigator.dart';
 export 'src/widgets/overlay.dart';
 export 'src/widgets/page_storage.dart';
-export 'src/widgets/page.dart';
 export 'src/widgets/placeholder.dart';
 export 'src/widgets/routes.dart';
 export 'src/widgets/scrollable.dart';

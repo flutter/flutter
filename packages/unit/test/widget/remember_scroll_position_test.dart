@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';
@@ -36,9 +36,9 @@ void main() {
         key: navigatorKey,
         onGenerateRoute: (NamedRouteSettings settings) {
           if (settings.name == '/')
-            return new PageRoute(builder: (_) => new Container(child: new ThePositiveNumbers()));
+            return new MaterialPageRoute(builder: (_) => new Container(child: new ThePositiveNumbers()));
           else if (settings.name == '/second')
-            return new PageRoute(builder: (_) => new Container(child: new ThePositiveNumbers()));
+            return new MaterialPageRoute(builder: (_) => new Container(child: new ThePositiveNumbers()));
           return null;
         }
       ));

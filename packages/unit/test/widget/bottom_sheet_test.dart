@@ -37,8 +37,8 @@ void main() {
       // Tap on the the bottom sheet itself to dismiss it
       tester.tap(tester.findText('BottomSheet'));
       tester.pump(); // bottom sheet dismiss animation starts
-      tester.pump(new Duration(seconds: 1)); // animation done
-      tester.pump(new Duration(seconds: 1)); // rebuild frame
+      tester.pump(new Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
+      tester.pump(new Duration(seconds: 1)); // frame after the animation (sheet has been removed)
       expect(showBottomSheetThenCalled, isTrue);
       expect(tester.findText('BottomSheet'), isNull);
 
