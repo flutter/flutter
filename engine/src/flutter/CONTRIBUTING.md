@@ -68,7 +68,7 @@ Run the following steps, from the 'src' directory created in the steps above:
  * `./sky/tools/gn --android` to prepare your build files.
  * `ninja -C out/android_Debug` to build an Android Debug binary.
 
-To run an example with your locally built minary, switch to that example's directory, run `pub get` to make sure its dependencies have been downloaded, and use `flutter start` with an explicit `--engine-src-path` pointing at the `src` directory. Make sure you have a device connected over USB and debugging enabled on that device.
+To run an example with your locally built binary, switch to that example's directory, run `pub get` to make sure its dependencies have been downloaded, and use `flutter start` with an explicit `--engine-src-path` pointing at the `src` directory. Make sure you have a device connected over USB and debugging enabled on that device.
 
  * `cd examples/hello_world/; flutter start --engine-src-path ../../`
 
