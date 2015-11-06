@@ -91,9 +91,9 @@ SnapshotProject() {
   local ui_path="$(readlink ${packages}/sky_engine)/../sdk_ext/dart_ui.dart"
   AssertExists $ui_path
 
-  # FIXME: Publish vmservice_sky
-  # local vm_service_path="needs/to/be/published"
-  # AssertExists $vm_service_path
+  # For dart:vmservice_sky
+  local vm_service_path="$(readlink ${packages}/sky_engine)/../sdk_ext/main.dart"
+  AssertExists $vm_service_path
 
   local main_path="${project_path}/lib/main.dart"
   AssertExists $main_path
