@@ -603,6 +603,15 @@ class AndroidDevice extends Device {
     }
   }
 
+  List<String> adbCommandForDevice(List<String> args) {
+    List<String> result = <String>[adbPath];
+    if (id != defaultDeviceID) {
+      result.addAll(['-s', id]);
+    }
+    result.addAll(args);
+    return result;
+  }
+
   bool _isValidAdbVersion(String adbVersion) {
     // Sample output: 'Android Debug Bridge version 1.0.31'
     Match versionFields =
@@ -655,9 +664,9 @@ class AndroidDevice extends Device {
       // output lines like this, which we want to ignore:
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
-      runCheckedSync([adbPath, 'start-server']);
+      runCheckedSync(adbCommandForDevice(['start-server']));
 
-      String ready = runSync([adbPath, 'shell', 'echo', 'ready']);
+      String ready = runSync(adbCommandForDevice(['shell', 'echo', 'ready']));
       if (ready.trim() != 'ready') {
         _logging.info('Android device not found.');
         return false;
@@ -665,7 +674,7 @@ class AndroidDevice extends Device {
 
       // Sample output: '22'
       String sdkVersion =
-          runCheckedSync([adbPath, 'shell', 'getprop', 'ro.build.version.sdk'])
+          runCheckedSync(adbCommandForDevice(['shell', 'getprop', 'ro.build.version.sdk']))
               .trimRight();
 
       int sdkVersionParsed =
@@ -699,7 +708,7 @@ class AndroidDevice extends Device {
   }
 
   String _getDeviceApkSha1(ApplicationPackage app) {
-    return runCheckedSync([adbPath, 'shell', 'cat', _getDeviceSha1Path(app)]);
+    return runCheckedSync(adbCommandForDevice(['shell', 'cat', _getDeviceSha1Path(app)]));
   }
 
   String _getSourceSha1(ApplicationPackage app) {
@@ -721,7 +730,7 @@ class AndroidDevice extends Device {
     if (!isConnected()) {
       return false;
     }
-    if (runCheckedSync([adbPath, 'shell', 'pm', 'path', app.id]) ==
+    if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])) ==
         '') {
       _logging.info(
           'TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
@@ -747,16 +756,16 @@ class AndroidDevice extends Device {
     }
 
     print('Installing ${app.name} on device.');
-    runCheckedSync([adbPath, 'install', '-r', app.localPath]);
-    runCheckedSync([adbPath, 'shell', 'run-as', app.id, 'chmod', '777', _getDeviceDataPath(app)]);
-    runCheckedSync([adbPath, 'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]);
+    runCheckedSync(adbCommandForDevice(['install', '-r', app.localPath]));
+    runCheckedSync(adbCommandForDevice(['shell', 'run-as', app.id, 'chmod', '777', _getDeviceDataPath(app)]));
+    runCheckedSync(adbCommandForDevice(['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
     return true;
   }
 
   void _forwardObservatoryPort() {
     // Set up port forwarding for observatory.
     String portString = 'tcp:$_observatoryPort';
-    runCheckedSync([adbPath, 'forward', portString, portString]);
+    runCheckedSync(adbCommandForDevice(['forward', portString, portString]));
   }
 
   bool startBundle(AndroidApk apk, String bundlePath, bool poke, bool checked) {
@@ -770,14 +779,13 @@ class AndroidDevice extends Device {
 
     String deviceTmpPath = '/data/local/tmp/dev.flx';
     String deviceBundlePath = _getDeviceBundlePath(apk);
-    runCheckedSync([adbPath, 'push', bundlePath, deviceTmpPath]);
-    runCheckedSync([adbPath, 'shell', 'mv', deviceTmpPath, deviceBundlePath]);
-    List<String> cmd = [
-      adbPath,
+    runCheckedSync(adbCommandForDevice(['push', bundlePath, deviceTmpPath]));
+    runCheckedSync(adbCommandForDevice(['shell', 'mv', deviceTmpPath, deviceBundlePath]));
+    List<String> cmd = adbCommandForDevice([
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
       '-d', deviceBundlePath,
-    ];
+    ]);
     if (checked)
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
     cmd.add(apk.launchActivity);
@@ -821,7 +829,7 @@ class AndroidDevice extends Device {
       // Set up reverse port-forwarding so that the Android app can reach the
       // server running on localhost.
       String serverPortString = 'tcp:$_serverPort';
-      runCheckedSync([adbPath, 'reverse', serverPortString, serverPortString]);
+      runCheckedSync(adbCommandForDevice(['reverse', serverPortString, serverPortString]));
     }
 
     String relativeDartMain = _convertToURL(path.relative(mainDart, from: serverRoot));
@@ -830,12 +838,11 @@ class AndroidDevice extends Device {
       url += '?rand=${new Random().nextDouble()}';
 
     // Actually launch the app on Android.
-    List<String> cmd = [
-      adbPath,
+    List<String> cmd = adbCommandForDevice([
       'shell', 'am', 'start',
       '-a', 'android.intent.action.VIEW',
       '-d', url,
-    ];
+    ]);
     if (checked)
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
     cmd.add(apk.launchActivity);
@@ -854,9 +861,9 @@ class AndroidDevice extends Device {
     final AndroidApk apk = app;
 
     // Turn off reverse port forwarding
-    runSync([adbPath, 'reverse', '--remove', 'tcp:$_serverPort']);
+    runSync(adbCommandForDevice(['reverse', '--remove', 'tcp:$_serverPort']));
     // Stop the app
-    runSync([adbPath, 'shell', 'am', 'force-stop', apk.id]);
+    runSync(adbCommandForDevice(['shell', 'am', 'force-stop', apk.id]));
 
     // Kill the server
     osUtils.killTcpPortListeners(_serverPort);
@@ -868,7 +875,7 @@ class AndroidDevice extends Device {
   TargetPlatform get platform => TargetPlatform.android;
 
   void clearLogs() {
-    runSync([adbPath, 'logcat', '-c']);
+    runSync(adbCommandForDevice(['logcat', '-c']));
   }
 
   Future<int> logs({bool clear: false}) async {
@@ -880,8 +887,7 @@ class AndroidDevice extends Device {
       clearLogs();
     }
 
-    return runCommandAndStreamOutput([
-      adbPath,
+    return runCommandAndStreamOutput(adbCommandForDevice([
       'logcat',
       '-v',
       'tag', // Only log the tag and the message
@@ -890,30 +896,28 @@ class AndroidDevice extends Device {
       'chromium:D',
       'ActivityManager:W',
       '*:F',
-    ], prefix: 'android: ');
+    ]), prefix: 'android: ');
   }
 
   void startTracing(AndroidApk apk) {
-    runCheckedSync([
-      adbPath,
+    runCheckedSync(adbCommandForDevice([
       'shell',
       'am',
       'broadcast',
       '-a',
       '${apk.id}.TRACING_START'
-    ]);
+    ]));
   }
 
   String stopTracing(AndroidApk apk) {
     clearLogs();
-    runCheckedSync([
-      adbPath,
+    runCheckedSync(adbCommandForDevice([
       'shell',
       'am',
       'broadcast',
       '-a',
       '${apk.id}.TRACING_STOP'
-    ]);
+    ]));
 
     RegExp traceRegExp = new RegExp(r'Saving trace to (\S+)', multiLine: true);
     RegExp completeRegExp = new RegExp(r'Trace complete', multiLine: true);
@@ -921,7 +925,7 @@ class AndroidDevice extends Device {
     String tracePath = null;
     bool isComplete = false;
     while (!isComplete) {
-      String logs = runSync([adbPath, 'logcat', '-d']);
+      String logs = runSync(adbCommandForDevice(['logcat', '-d']));
       Match fileMatch = traceRegExp.firstMatch(logs);
       if (fileMatch[1] != null) {
         tracePath = fileMatch[1];
@@ -930,9 +934,9 @@ class AndroidDevice extends Device {
     }
 
     if (tracePath != null) {
-      runSync([adbPath, 'shell', 'run-as', apk.id, 'chmod', '777', tracePath]);
-      runSync([adbPath, 'pull', tracePath]);
-      runSync([adbPath, 'shell', 'rm', tracePath]);
+      runSync(adbCommandForDevice(['shell', 'run-as', apk.id, 'chmod', '777', tracePath]));
+      runSync(adbCommandForDevice(['pull', tracePath]));
+      runSync(adbCommandForDevice(['shell', 'rm', tracePath]));
       return path.basename(tracePath);
     }
     _logging.warning('No trace file detected. '
@@ -975,7 +979,19 @@ class DeviceStore {
       switch (config.targetPlatform) {
         case TargetPlatform.android:
           assert(android == null);
-          android = new AndroidDevice();
+          List<AndroidDevice> androidDevices = AndroidDevice.getAttachedDevices();
+          if (config.deviceId != null) {
+            android = androidDevices.firstWhere(
+                (AndroidDevice dev) => (dev.id == config.deviceId),
+                orElse: () => null);
+            if (android == null) {
+              print('Warning: Device ID ${config.deviceId} not found');
+            }
+          } else if (androidDevices.length == 1) {
+            android = androidDevices[0];
+          } else if (androidDevices.length > 1) {
+            print('Warning: Multiple Android devices are connected, but no device ID was specified.');
+          }
           break;
         case TargetPlatform.iOS:
           assert(iOS == null);

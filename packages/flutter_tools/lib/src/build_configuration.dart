@@ -37,15 +37,19 @@ HostPlatform getCurrentHostPlatform() {
 }
 
 class BuildConfiguration {
-  BuildConfiguration.prebuilt({ this.hostPlatform, this.targetPlatform })
-    : type = BuildType.prebuilt, buildDir = null;
+  BuildConfiguration.prebuilt({
+    this.hostPlatform,
+    this.targetPlatform,
+    this.deviceId
+  }) : type = BuildType.prebuilt, buildDir = null;
 
   BuildConfiguration.local({
     this.type,
     this.hostPlatform,
     this.targetPlatform,
     String enginePath,
-    String buildPath
+    String buildPath,
+    this.deviceId
   }) : buildDir = path.normalize(path.join(enginePath, buildPath)) {
     assert(type == BuildType.debug || type == BuildType.release);
   }
@@ -54,4 +58,5 @@ class BuildConfiguration {
   final HostPlatform hostPlatform;
   final TargetPlatform targetPlatform;
   final String buildDir;
+  final String deviceId;
 }

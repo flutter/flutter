@@ -29,6 +29,8 @@ class FlutterCommandRunner extends CommandRunner {
             'shell commands executed.');
     argParser.addOption('package-root',
         help: 'Path to your packages directory.', defaultsTo: 'packages');
+    argParser.addOption('android-device-id',
+        help: 'Serial number of the target Android device.');
 
     argParser.addSeparator('Local build selection options:');
     argParser.addFlag('debug',
@@ -143,7 +145,10 @@ class FlutterCommandRunner extends CommandRunner {
 
     if (enginePath == null) {
       configs.add(new BuildConfiguration.prebuilt(
-          hostPlatform: hostPlatform, targetPlatform: TargetPlatform.android));
+        hostPlatform: hostPlatform,
+        targetPlatform: TargetPlatform.android,
+        deviceId: globalResults['android-device-id']
+      ));
     } else {
       if (!FileSystemEntity.isDirectorySync(enginePath))
         _logging.warning('$enginePath is not a valid directory');
@@ -157,7 +162,8 @@ class FlutterCommandRunner extends CommandRunner {
           hostPlatform: hostPlatform,
           targetPlatform: TargetPlatform.android,
           enginePath: enginePath,
-          buildPath: globalResults['android-debug-build-path']
+          buildPath: globalResults['android-debug-build-path'],
+          deviceId: globalResults['android-device-id']
         ));
 
         if (Platform.isMacOS) {
@@ -185,7 +191,8 @@ class FlutterCommandRunner extends CommandRunner {
           hostPlatform: hostPlatform,
           targetPlatform: TargetPlatform.android,
           enginePath: enginePath,
-          buildPath: globalResults['android-release-build-path']
+          buildPath: globalResults['android-release-build-path'],
+          deviceId: globalResults['android-device-id']
         ));
 
         if (Platform.isMacOS) {
