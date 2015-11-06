@@ -90,29 +90,25 @@ class SettingsFragmentState extends State<SettingsFragment> {
   }
 
   Widget buildSettingsPane(BuildContext context) {
-    // TODO(ianh): Make Block capable of doing this
-    return new ScrollableViewport(
-      child: new Container(
-        padding: const EdgeDims.symmetric(vertical: 20.0),
-        child: new BlockBody(<Widget>[
-          new DrawerItem(
-            onPressed: () { _handleBackupChanged(!(config.userData.backupMode == BackupMode.enabled)); },
-            child: new Row(<Widget>[
-              new Flexible(child: new Text('Back up data to the cloud')),
-              new Switch(value: config.userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
-            ])
-          ),
-          new DrawerItem(
-            onPressed: () => _handleGoalWeightPressed(),
-            child: new Column(<Widget>[
-                new Text('Goal Weight'),
-                new Text(goalWeightText, style: Theme.of(context).text.caption),
-              ],
-              alignItems: FlexAlignItems.start
-            )
-          ),
-        ])
-      )
+    return new Block(<Widget>[
+        new DrawerItem(
+          onPressed: () { _handleBackupChanged(!(config.userData.backupMode == BackupMode.enabled)); },
+          child: new Row(<Widget>[
+            new Flexible(child: new Text('Back up data to the cloud')),
+            new Switch(value: config.userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
+          ])
+        ),
+        new DrawerItem(
+          onPressed: () => _handleGoalWeightPressed(),
+          child: new Column(<Widget>[
+              new Text('Goal Weight'),
+              new Text(goalWeightText, style: Theme.of(context).text.caption),
+            ],
+            alignItems: FlexAlignItems.start
+          )
+        ),
+      ],
+      padding: const EdgeDims.symmetric(vertical: 20.0)
     );
   }
 

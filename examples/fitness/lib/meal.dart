@@ -84,19 +84,15 @@ class MealFragmentState extends State<MealFragment> {
 
   Widget buildBody() {
     Meal meal = new Meal(when: new DateTime.now());
-    // TODO(ianh): Fix Block such that we could use that here instead of rolling our own
-    return new ScrollableViewport(
-      child: new Container(
-        padding: const EdgeDims.all(20.0),
-        child: new BlockBody(<Widget>[
-          new Text(meal.displayDate),
-          new Input(
-            key: descriptionKey,
-            placeholder: 'Describe meal',
-            onChanged: _handleDescriptionChanged
-          ),
-        ])
-      )
+    return new Block(<Widget>[
+        new Text(meal.displayDate),
+        new Input(
+          key: descriptionKey,
+          placeholder: 'Describe meal',
+          onChanged: _handleDescriptionChanged
+        ),
+      ],
+      padding: const EdgeDims.all(20.0)
     );
   }
 
