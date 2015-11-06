@@ -177,7 +177,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
 }  // namespace
 
-#if DART_ALLOW_DYNAMIC_LOADING
+#if DART_ALLOW_DYNAMIC_RESOLUTION
 
 const char* kDartVmIsolateSnapshotBufferName = "kDartVmIsolateSnapshotBuffer";
 const char* kDartIsolateSnapshotBufferName = "kDartIsolateSnapshotBuffer";
@@ -227,7 +227,7 @@ bool IsRunningPrecompiledCode() {
   return PrecompiledInstructionsSymbolIfPresent() != nullptr;
 }
 
-#else  // DART_ALLOW_DYNAMIC_LOADING
+#else  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
   return nullptr;
@@ -237,7 +237,7 @@ bool IsRunningPrecompiledCode() {
   return false;
 }
 
-#endif  // DART_ALLOW_DYNAMIC_LOADING
+#endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 void InitDartVM() {
   dart::bin::BootstrapDartIo();

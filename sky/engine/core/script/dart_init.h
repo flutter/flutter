@@ -10,9 +10,9 @@
 
 namespace blink {
 
-#define DART_ALLOW_DYNAMIC_LOADING (WTF_OS_IOS || WTF_OS_MACOSX)
+#define DART_ALLOW_DYNAMIC_RESOLUTION (WTF_OS_IOS || WTF_OS_MACOSX)
 
-#if DART_ALLOW_DYNAMIC_LOADING
+#if DART_ALLOW_DYNAMIC_RESOLUTION
 
 extern const char* kDartVmIsolateSnapshotBufferName;
 extern const char* kDartIsolateSnapshotBufferName;
@@ -22,7 +22,7 @@ void* _DartSymbolLookup(const char* symbol_name);
 
 #define DART_SYMBOL(symbol) _DartSymbolLookup(symbol##Name)
 
-#else  // DART_ALLOW_DYNAMIC_LOADING
+#else  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 extern "C" {
 extern uint8_t* kDartVmIsolateSnapshotBuffer;
@@ -31,7 +31,7 @@ extern uint8_t* kDartIsolateSnapshotBuffer;
 
 #define DART_SYMBOL(symbol) (symbol)
 
-#endif  // DART_ALLOW_DYNAMIC_LOADING
+#endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 bool IsRunningPrecompiledCode();
 
