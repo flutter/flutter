@@ -106,15 +106,6 @@ bool IsServiceIsolateURL(const char* url_name) {
          String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
 }
 
-static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
-  return reinterpret_cast<uint8_t*>(
-      DartSymbolLookup(kInstructionsSnapshotName));
-}
-
-static bool IsRunningPrecompiledCode() {
-  return PrecompiledInstructionsSymbolIfPresent() != nullptr;
-}
-
 // TODO(rafaelw): Right now this only supports the creation of the handle
 // watcher isolate and the service isolate. Presumably, we'll want application
 // isolates to spawn their own isolates.
@@ -128,8 +119,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   if (IsServiceIsolateURL(script_uri)) {
     DartState* dart_state = new DartState();
     Dart_Isolate isolate = Dart_CreateIsolate(
-        script_uri, "main", reinterpret_cast<const uint8_t*>(DartSymbolLookup(
-                                kDartIsolateSnapshotBufferName)),
+        script_uri, "main", reinterpret_cast<const uint8_t*>(
+                                DART_SYMBOL(kDartIsolateSnapshotBuffer)),
         nullptr, nullptr, error);
     CHECK(isolate) << error;
     dart_state->SetIsolate(isolate);
@@ -160,8 +151,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   // TODO(abarth): Who deletes this DartState instance?
   DartState* dart_state = new DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
-      "sky:handle_watcher", "", reinterpret_cast<uint8_t*>(DartSymbolLookup(
-                                    kDartIsolateSnapshotBufferName)),
+      "sky:handle_watcher", "",
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, dart_state, error);
   CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
@@ -186,6 +177,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
 }  // namespace
 
+#if DART_ALLOW_DYNAMIC_LOADING
+
 const char* kDartVmIsolateSnapshotBufferName = "kDartVmIsolateSnapshotBuffer";
 const char* kDartIsolateSnapshotBufferName = "kDartIsolateSnapshotBuffer";
 const char* kInstructionsSnapshotName = "kInstructionsSnapshot";
@@ -207,7 +200,7 @@ static void* DartLookupSymbolInLibrary(const char* symbol_name,
   return dlerror() != nullptr ? nullptr : sym;
 }
 
-void* DartSymbolLookup(const char* symbol_name) {
+void* _DartSymbolLookup(const char* symbol_name) {
   if (symbol_name == nullptr) {
     return nullptr;
   }
@@ -225,6 +218,26 @@ void* DartSymbolLookup(const char* symbol_name) {
   // Check inside the default library
   return DartLookupSymbolInLibrary(symbol_name, nullptr);
 }
+
+static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
+  return reinterpret_cast<uint8_t*>(DART_SYMBOL(kInstructionsSnapshot));
+}
+
+bool IsRunningPrecompiledCode() {
+  return PrecompiledInstructionsSymbolIfPresent() != nullptr;
+}
+
+#else  // DART_ALLOW_DYNAMIC_LOADING
+
+static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
+  return nullptr;
+}
+
+bool IsRunningPrecompiledCode() {
+  return false;
+}
+
+#endif  // DART_ALLOW_DYNAMIC_LOADING
 
 void InitDartVM() {
   dart::bin::BootstrapDartIo();
@@ -246,18 +259,18 @@ void InitDartVM() {
   CHECK(Dart_SetVMFlags(args.size(), args.data()));
   // This should be called before calling Dart_Initialize.
   DartDebugger::InitDebugger();
-  CHECK(Dart_Initialize(reinterpret_cast<uint8_t*>(
-                            DartSymbolLookup(kDartVmIsolateSnapshotBufferName)),
-                        PrecompiledInstructionsSymbolIfPresent(),
-                        IsolateCreateCallback,
-                        nullptr,  // Isolate interrupt callback.
-                        UnhandledExceptionCallback, IsolateShutdownCallback,
-                        // File IO callbacks.
-                        nullptr, nullptr, nullptr, nullptr,
-                        // Entroy source
-                        nullptr,
-                        // VM service assets archive
-                        nullptr) == nullptr);
+  CHECK(
+      Dart_Initialize(
+          reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmIsolateSnapshotBuffer)),
+          PrecompiledInstructionsSymbolIfPresent(), IsolateCreateCallback,
+          nullptr,  // Isolate interrupt callback.
+          UnhandledExceptionCallback, IsolateShutdownCallback,
+          // File IO callbacks.
+          nullptr, nullptr, nullptr, nullptr,
+          // Entroy source
+          nullptr,
+          // VM service assets archive
+          nullptr) == nullptr);
   // Wait for load port- ensures handle watcher and service isolates are
   // running.
   Dart_ServiceWaitForLoadPort();

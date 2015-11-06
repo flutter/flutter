@@ -141,8 +141,7 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
   dom_dart_state_ = std::move(state);
   Dart_Isolate isolate = Dart_CreateIsolate(
       dom_dart_state_->url().utf8().data(), "main",
-      reinterpret_cast<uint8_t*>(
-          DartSymbolLookup(kDartIsolateSnapshotBufferName)),
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, static_cast<DartState*>(dom_dart_state_.get()), &error);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;
