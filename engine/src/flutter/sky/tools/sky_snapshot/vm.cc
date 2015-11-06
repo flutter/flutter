@@ -8,9 +8,9 @@
 #include "sky/tools/sky_snapshot/loader.h"
 #include "sky/tools/sky_snapshot/logging.h"
 
-namespace blink {
-extern const uint8_t* kDartVmIsolateSnapshotBuffer;
-extern const uint8_t* kDartIsolateSnapshotBuffer;
+extern "C" {
+extern void* kDartVmIsolateSnapshotBuffer;
+extern void* kDartIsolateSnapshotBuffer;
 }
 
 static const char* kDartArgs[] = {
@@ -19,17 +19,19 @@ static const char* kDartArgs[] = {
 
 void InitDartVM() {
   CHECK(Dart_SetVMFlags(arraysize(kDartArgs), kDartArgs));
-  CHECK(Dart_Initialize(blink::kDartVmIsolateSnapshotBuffer, nullptr, nullptr,
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                        nullptr, nullptr, nullptr) == nullptr);
+  CHECK(
+      Dart_Initialize(reinterpret_cast<uint8_t*>(&kDartVmIsolateSnapshotBuffer),
+                      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                      nullptr, nullptr, nullptr, nullptr, nullptr) == nullptr);
 }
 
 Dart_Isolate CreateDartIsolate() {
-  CHECK(blink::kDartIsolateSnapshotBuffer);
+  CHECK(kDartIsolateSnapshotBuffer);
   char* error = nullptr;
-  Dart_Isolate isolate = Dart_CreateIsolate("dart:snapshot", "main",
-                                            blink::kDartIsolateSnapshotBuffer,
-                                            nullptr, nullptr, &error);
+  Dart_Isolate isolate = Dart_CreateIsolate(
+      "dart:snapshot", "main",
+      reinterpret_cast<uint8_t*>(&kDartIsolateSnapshotBuffer), nullptr, nullptr,
+      &error);
 
   CHECK(isolate) << error;
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(HandleLibraryTag)));
