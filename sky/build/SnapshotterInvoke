@@ -148,6 +148,8 @@ SnapshotProject() {
   RunCommand rm -f ${derived_dir}/kDartVmIsolateSnapshotBuffer
   RunCommand rm -f ${derived_dir}/kDartIsolateSnapshotBuffer
 
+  echo "Precompilation snapshot successfully created for ${project_path} ..."
+
   return $?
 }
 
