@@ -48,17 +48,12 @@ void EnsureHandleWatcherStarted() {
   // during shutdown.
   Dart_Handle mojo_core_lib = Dart_LookupLibrary(ToDart("dart:mojo.internal"));
   CHECK(!LogIfError((mojo_core_lib)));
-  Dart_Handle handle_watcher_type = Dart_GetType(
-      mojo_core_lib,
-      Dart_NewStringFromCString("MojoHandleWatcher"),
-      0,
-      nullptr);
+  Dart_Handle handle_watcher_type =
+      Dart_GetType(mojo_core_lib,
+                   Dart_NewStringFromCString("MojoHandleWatcher"), 0, nullptr);
   CHECK(!LogIfError(handle_watcher_type));
   CHECK(!LogIfError(Dart_Invoke(
-      handle_watcher_type,
-      Dart_NewStringFromCString("_start"),
-      0,
-      nullptr)));
+      handle_watcher_type, Dart_NewStringFromCString("_start"), 0, nullptr)));
 
   // RunLoop until the handle watcher isolate is spun-up.
   CHECK(!LogIfError(Dart_RunLoop()));
@@ -87,15 +82,15 @@ static const char* kDartArgs[] = {
 #endif
 };
 
-static const char* kDartPrecompilationArgs[] {
-  "--precompilation",
+static const char* kDartPrecompilationArgs[]{
+    "--precompilation",
 };
 
 static const char* kDartCheckedModeArgs[] = {
-  "--enable_asserts",
-  "--enable_type_checks",
-  "--error_on_bad_type",
-  "--error_on_bad_override",
+    "--enable_asserts",
+    "--enable_type_checks",
+    "--error_on_bad_type",
+    "--error_on_bad_override",
 };
 
 void UnhandledExceptionCallback(Dart_Handle error) {
@@ -108,21 +103,7 @@ void IsolateShutdownCallback(void* callback_data) {
 
 bool IsServiceIsolateURL(const char* url_name) {
   return url_name != nullptr &&
-      String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
-}
-
-static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
-  dlerror();  // clear previous errors on thread
-  void* sym = nullptr;
-#ifdef RTLD_SELF
-  static const char kInstructionsSnapshotSymbolName[] = "kInstructionsSnapshot";
-  sym = dlsym(RTLD_SELF, kInstructionsSnapshotSymbolName);
-#endif
-  return (dlerror() != nullptr) ? nullptr : reinterpret_cast<uint8_t * >(sym);
-}
-
-static bool IsRunningPrecompiledCode() {
-  return PrecompiledInstructionsSymbolIfPresent() != nullptr;
+         String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
 }
 
 // TODO(rafaelw): Right now this only supports the creation of the handle
@@ -136,11 +117,11 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    void* callback_data,
                                    char** error) {
   if (IsServiceIsolateURL(script_uri)) {
-    CHECK(kDartIsolateSnapshotBuffer);
     DartState* dart_state = new DartState();
-    Dart_Isolate isolate =
-        Dart_CreateIsolate(script_uri, "main", kDartIsolateSnapshotBuffer,
-                           nullptr, nullptr, error);
+    Dart_Isolate isolate = Dart_CreateIsolate(
+        script_uri, "main", reinterpret_cast<const uint8_t*>(
+                                DART_SYMBOL(kDartIsolateSnapshotBuffer)),
+        nullptr, nullptr, error);
     CHECK(isolate) << error;
     dart_state->SetIsolate(isolate);
     CHECK(Dart_IsServiceIsolate(isolate));
@@ -157,9 +138,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       if (RuntimeEnabledFeatures::observatoryEnabled()) {
         std::string ip = "127.0.0.1";
         const intptr_t port = 8181;
-        const bool service_isolate_booted =
-            DartServiceIsolate::Startup(ip, port, DartLibraryTagHandler,
-                                        IsRunningPrecompiledCode(), error);
+        const bool service_isolate_booted = DartServiceIsolate::Startup(
+            ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(), error);
         CHECK(service_isolate_booted) << error;
       }
     }
@@ -168,12 +148,12 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   }
 
   // Create & start the handle watcher isolate
-  CHECK(kDartIsolateSnapshotBuffer);
   // TODO(abarth): Who deletes this DartState instance?
   DartState* dart_state = new DartState();
-  Dart_Isolate isolate =
-      Dart_CreateIsolate("sky:handle_watcher", "", kDartIsolateSnapshotBuffer,
-                         nullptr, dart_state, error);
+  Dart_Isolate isolate = Dart_CreateIsolate(
+      "sky:handle_watcher", "",
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
+      nullptr, dart_state, error);
   CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
 
@@ -195,7 +175,69 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   return isolate;
 }
 
-} // namespace
+}  // namespace
+
+#if DART_ALLOW_DYNAMIC_RESOLUTION
+
+const char* kDartVmIsolateSnapshotBufferName = "kDartVmIsolateSnapshotBuffer";
+const char* kDartIsolateSnapshotBufferName = "kDartIsolateSnapshotBuffer";
+const char* kInstructionsSnapshotName = "kInstructionsSnapshot";
+
+const char* kDartApplicationLibraryPath =
+    "FlutterApplication.framework/FlutterApplication";
+
+static void* DartLookupSymbolInLibrary(const char* symbol_name,
+                                       const char* library) {
+  if (symbol_name == nullptr) {
+    return nullptr;
+  }
+  dlerror();  // clear previous errors on thread
+  void* library_handle = dlopen(library, RTLD_NOW);
+  if (dlerror() != nullptr) {
+    return nullptr;
+  }
+  void* sym = dlsym(library_handle, symbol_name);
+  return dlerror() != nullptr ? nullptr : sym;
+}
+
+void* _DartSymbolLookup(const char* symbol_name) {
+  if (symbol_name == nullptr) {
+    return nullptr;
+  }
+
+  // First the application library is checked for the valid symbols. This
+  // library may not necessarily exist. If it does exist, it is loaded and the
+  // symbols resolved. Once the application library is loaded, there is
+  // currently no provision to unload the same.
+  void* symbol =
+      DartLookupSymbolInLibrary(symbol_name, kDartApplicationLibraryPath);
+  if (symbol != nullptr) {
+    return symbol;
+  }
+
+  // Check inside the default library
+  return DartLookupSymbolInLibrary(symbol_name, nullptr);
+}
+
+static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
+  return reinterpret_cast<uint8_t*>(DART_SYMBOL(kInstructionsSnapshot));
+}
+
+bool IsRunningPrecompiledCode() {
+  return PrecompiledInstructionsSymbolIfPresent() != nullptr;
+}
+
+#else  // DART_ALLOW_DYNAMIC_RESOLUTION
+
+static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
+  return nullptr;
+}
+
+bool IsRunningPrecompiledCode() {
+  return false;
+}
+
+#endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 void InitDartVM() {
   dart::bin::BootstrapDartIo();
@@ -217,21 +259,21 @@ void InitDartVM() {
   CHECK(Dart_SetVMFlags(args.size(), args.data()));
   // This should be called before calling Dart_Initialize.
   DartDebugger::InitDebugger();
-  CHECK(Dart_Initialize(
-      kDartVmIsolateSnapshotBuffer,
-      PrecompiledInstructionsSymbolIfPresent(),
-      IsolateCreateCallback,
-      nullptr,  // Isolate interrupt callback.
-      UnhandledExceptionCallback, IsolateShutdownCallback,
-      // File IO callbacks.
-      nullptr, nullptr, nullptr, nullptr,
-      // Entroy source
-      nullptr,
-      // VM service assets archive
-      nullptr) == nullptr);
+  CHECK(
+      Dart_Initialize(
+          reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmIsolateSnapshotBuffer)),
+          PrecompiledInstructionsSymbolIfPresent(), IsolateCreateCallback,
+          nullptr,  // Isolate interrupt callback.
+          UnhandledExceptionCallback, IsolateShutdownCallback,
+          // File IO callbacks.
+          nullptr, nullptr, nullptr, nullptr,
+          // Entroy source
+          nullptr,
+          // VM service assets archive
+          nullptr) == nullptr);
   // Wait for load port- ensures handle watcher and service isolates are
   // running.
   Dart_ServiceWaitForLoadPort();
 }
 
-} // namespace blink
+}  // namespace blink

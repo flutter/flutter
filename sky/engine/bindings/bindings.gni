@@ -137,14 +137,14 @@ template("dart_precompile") {
     ]
   }
 
-  snapshot_cc = "$target_gen_dir/" + target_name + "_precompiled_snapshot.cc"
-  snapshot_cc_gen_target_name = target_name + "_snapshot_cc"
-  action(snapshot_cc_gen_target_name) {
+  snapshot_c = "$target_gen_dir/" + target_name + "_precompiled_snapshot.c"
+  snapshot_c_gen_target_name = target_name + "_snapshot_c"
+  action(snapshot_c_gen_target_name) {
     deps = [
       ":$instructions_gen_target_name",
     ]
 
-    template_file = "//sky/engine/bindings/snapshot.cc.tmpl"
+    template_file = "//sky/engine/bindings/snapshot.c.tmpl"
 
     inputs = [
       template_file,
@@ -153,7 +153,7 @@ template("dart_precompile") {
     ]
 
     outputs = [
-      snapshot_cc,
+      snapshot_c,
     ]
 
     script = "//dart/runtime/tools/create_snapshot_file.py"
@@ -165,19 +165,19 @@ template("dart_precompile") {
       "--input_cc",
       rebase_path(template_file, root_build_dir),
       "--output",
-      rebase_path(snapshot_cc),
+      rebase_path(snapshot_c),
     ]
   }
 
   source_set(target_name) {
     sources = [
       assembly_path,
-      snapshot_cc,
+      snapshot_c,
     ]
 
     deps = [
       ":$instructions_gen_target_name",
-      ":$snapshot_cc_gen_target_name",
+      ":$snapshot_c_gen_target_name",
     ]
   }
 }

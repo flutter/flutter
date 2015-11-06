@@ -6,18 +6,40 @@
 #define SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_
 
 #include "dart/runtime/include/dart_api.h"
+#include "sky/engine/wtf/OperatingSystem.h"
 
 namespace blink {
 
-extern const uint8_t* kDartVmIsolateSnapshotBuffer;
-extern const uint8_t* kDartIsolateSnapshotBuffer;
+#define DART_ALLOW_DYNAMIC_RESOLUTION (WTF_OS_IOS || WTF_OS_MACOSX)
+
+#if DART_ALLOW_DYNAMIC_RESOLUTION
+
+extern const char* kDartVmIsolateSnapshotBufferName;
+extern const char* kDartIsolateSnapshotBufferName;
+extern const char* kInstructionsSnapshotName;
+
+void* _DartSymbolLookup(const char* symbol_name);
+
+#define DART_SYMBOL(symbol) _DartSymbolLookup(symbol##Name)
+
+#else  // DART_ALLOW_DYNAMIC_RESOLUTION
+
+extern "C" {
+extern uint8_t* kDartVmIsolateSnapshotBuffer;
+extern uint8_t* kDartIsolateSnapshotBuffer;
+}
+
+#define DART_SYMBOL(symbol) (symbol)
+
+#endif  // DART_ALLOW_DYNAMIC_RESOLUTION
+
+bool IsRunningPrecompiledCode();
 
 void InitDartVM();
 Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
                                   Dart_Handle library,
                                   Dart_Handle url);
 void EnsureHandleWatcherStarted();
+}  // namespace blink
 
-}
-
-#endif // SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_
+#endif  // SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_
