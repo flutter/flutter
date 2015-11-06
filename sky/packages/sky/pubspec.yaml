@@ -7,7 +7,6 @@ dependencies:
   cassowary: '>=0.1.7 <0.2.0'
   intl: '>=0.12.4+2 <0.13.0'
   material_design_icons: '>=0.0.3 <0.1.0'
-  mojo_sdk: 0.1.0
   newton: '>=0.1.4 <0.2.0'
   sky_engine: 
     '0.0.48'
