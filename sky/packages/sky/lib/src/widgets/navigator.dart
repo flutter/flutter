@@ -5,15 +5,6 @@
 import 'framework.dart';
 import 'overlay.dart';
 
-// ---------------- Begin scaffolding for Navigator1 to Navigator2 transition
-class RouteArguments {
-  const RouteArguments({ this.context });
-  final BuildContext context;
-}
-typedef Widget RouteBuilder(RouteArguments args);
-typedef RouteBuilder RouteGenerator(String name);
-// ---------------- End scaffolding for Navigator1 to Navigator2 transition
-
 abstract class Route {
   List<OverlayEntry> get overlayEntries;
 
