@@ -31,6 +31,13 @@ AssetBundle _initDefaultBundle() {
 
 final AssetBundle _defaultBundle = _initDefaultBundle();
 
+class RouteArguments {
+  const RouteArguments({ this.context });
+  final BuildContext context;
+}
+typedef Widget RouteBuilder(RouteArguments args);
+typedef RouteBuilder RouteGenerator(String name);
+
 class MaterialApp extends StatefulComponent {
   MaterialApp({
     Key key,
