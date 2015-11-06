@@ -166,11 +166,25 @@ static std::string SkPictureTracingPath() {
   self.platformView->SurfaceCreated(self.acceleratedWidget);
 }
 
+-(const char *) flxBundlePath {
+  // In case this runner is part of the precompilation SDK, the FLX bundle is
+  // present in the application bundle instead of the runner bundle. Attempt
+  // to resolve the path there first.
+  // TODO: Allow specification of the application bundle identifier
+  NSBundle* applicationBundle = [NSBundle
+      bundleWithIdentifier:@"io.flutter.aplication.FlutterApplication"];
+  NSString* path = [applicationBundle pathForResource:@"app" ofType:@"flx"];
+  if (path.length != 0) {
+    return path.UTF8String;
+  }
+  return
+      [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"].UTF8String;
+}
+
 - (void)connectToEngineAndLoad {
   auto interface_request = mojo::GetProxy(&_sky_engine);
   self.platformView->ConnectToEngine(interface_request.Pass());
-  mojo::String bundle_path(
-      [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"].UTF8String);
+  mojo::String bundle_path([self flxBundlePath]);
   _sky_engine->RunFromPrecompiledSnapshot(bundle_path);
 }
 
