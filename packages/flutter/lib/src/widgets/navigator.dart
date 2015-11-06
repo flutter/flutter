@@ -23,7 +23,7 @@ abstract class Route {
 }
 
 class NamedRouteSettings {
-  const NamedRouteSettings({ this.name: '<anonymous>', this.mostValuableKeys });
+  const NamedRouteSettings({ this.name, this.mostValuableKeys });
 
   final String name;
   final Set<Key> mostValuableKeys;
@@ -92,6 +92,7 @@ class NavigatorState extends State<Navigator> {
   }
 
   void pushNamed(String name, { Set<Key> mostValuableKeys }) {
+    assert(name != null);
     NamedRouteSettings settings = new NamedRouteSettings(
       name: name,
       mostValuableKeys: mostValuableKeys
