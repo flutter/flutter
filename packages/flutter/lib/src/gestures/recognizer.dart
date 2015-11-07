@@ -112,7 +112,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       // TODO(abarth): Maybe factor the slop handling out into a separate class?
       if (event.type == 'pointermove' && _getDistance(event) > kTouchSlop) {
         resolve(GestureDisposition.rejected);
-        stopTrackingPointer(event.pointer);
+        stopTrackingPointer(primaryPointer);
       } else {
         handlePrimaryPointer(event);
       }
