@@ -92,7 +92,7 @@ SnapshotProject() {
   AssertExists $ui_path
 
   # For dart:vmservice_sky
-  local vm_service_path="$(readlink ${packages}/sky_engine)/../sdk_ext/main.dart"
+  local vm_service_path="$(readlink ${packages}/sky_engine)/../sdk_ext/core/script/dart_service_isolate/main.dart"
   AssertExists $vm_service_path
 
   local main_path="${project_path}/lib/main.dart"
