@@ -6,3 +6,5 @@ dependencies:
     path: ../flx
   flutter:
     path: ../flutter
+  sky_tools:
+    path: ../flutter_tools

@@ -6,6 +6,8 @@
 import os
 import subprocess
 
+FLUTTER_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 def update(directory):
     packages = sorted(os.listdir(directory))
     for package in packages:
@@ -14,6 +16,5 @@ def update(directory):
             print 'Updating', package, '...'
             subprocess.check_call(['pub', 'get'], cwd=package_dir)
 
-FLUTTER_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 update(os.path.join(FLUTTER_ROOT, 'packages'))
 update(os.path.join(FLUTTER_ROOT, 'examples'))
