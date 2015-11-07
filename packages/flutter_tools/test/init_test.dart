@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
+import 'package:sky_tools/src/artifacts.dart';
 import 'package:sky_tools/src/commands/init.dart';
 import 'package:sky_tools/src/process.dart';
 import 'package:test/test.dart';
@@ -29,6 +30,7 @@ defineTests() {
     if (!Platform.isWindows) {
       // Verify that we create a project that is well-formed.
       test('flutter-simple', () async {
+        ArtifactStore.flutterRoot = '../..';
         InitCommand command = new InitCommand();
         CommandRunner runner = new CommandRunner('test_flutter', '')
           ..addCommand(command);
