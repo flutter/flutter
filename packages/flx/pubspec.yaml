@@ -4,12 +4,13 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Library for dealing with Flutter bundle (.flx) files
 homepage: https://github.com/flutter/flutter/tree/master/packages/flx
 dependencies:
+  bignum: ^0.0.7
   asn1lib: ^0.4.1
   cipher: ^0.7.1
   crypto: ^0.9.1
-  path: ^1.3.0
-  sky_services: 0.0.50
-  yaml: ^2.1.3
 
 environment:
   sdk: '>=1.12.0 <2.0.0'
+
+dev_dependencies:
+  test: ^0.12.5

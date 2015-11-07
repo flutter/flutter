@@ -1,11 +1,10 @@
 import 'dart:convert' hide BASE64;
-import 'dart:typed_data';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:flx/signing.dart';
 import 'package:flx/bundle.dart';
-import 'package:path/path.dart' as path;
+import 'package:flx/signing.dart';
 import 'package:test/test.dart';
 
 main() async {
@@ -26,7 +25,7 @@ main() async {
 
   // Create a temp dir and file for the bundle.
   Directory tempDir = await Directory.systemTemp.createTempSync('bundle_test');
-  String bundlePath = path.join(tempDir.path, 'bundle.flx');
+  String bundlePath = tempDir.path + '/bundle.flx';
 
   AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
   Map<String, dynamic> manifest = JSON.decode(UTF8.decode(
