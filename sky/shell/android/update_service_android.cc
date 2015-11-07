@@ -7,7 +7,6 @@
 #include "base/logging.h"
 #include "base/task_runner_util.h"
 #include "jni/UpdateService_jni.h"
-#include "sky/engine/bindings/updater_snapshot.h"
 #include "sky/engine/public/sky/sky_headless.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui/internals.h"
@@ -47,8 +46,7 @@ void UpdateTaskAndroid::DidCreateIsolate(Dart_Isolate isolate) {
 
 void UpdateTaskAndroid::RunDartOnUIThread() {
   headless_->Init("sky:updater");
-  headless_->RunFromSnapshotBuffer(kUpdaterSnapshotBuffer,
-                                   kUpdaterSnapshotBufferSize);
+  // TODO(abarth): Run updater from FLX.
 }
 
 void UpdateTaskAndroid::Destroy(JNIEnv* env, jobject jcaller) {
