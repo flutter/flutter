@@ -34,7 +34,6 @@ class ListenCommand extends FlutterCommand {
         help: 'Target app path or filename to start.');
   }
 
-  static const String _localFlutterBundle = 'app.flx';
   static const String _remoteFlutterBundle = 'Documents/app.flx';
 
   @override
@@ -53,25 +52,26 @@ class ListenCommand extends FlutterCommand {
 
       BuildCommand builder = new BuildCommand();
       builder.inheritFromParent(this);
-      builder.build(outputPath: _localFlutterBundle);
-
-      for (Device device in devices.all) {
-        ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-        if (package == null || !device.isConnected())
-          continue;
-        if (device is AndroidDevice) {
-          await devices.android.startServer(
-              argResults['target'], true, argResults['checked'], package);
-        } else if (device is IOSDevice) {
-          device.pushFile(package, _localFlutterBundle, _remoteFlutterBundle);
-        } else if (device is IOSSimulator) {
-          // TODO(abarth): Move pushFile up to Device once Android supports
-          // pushing new bundles.
-          device.pushFile(package, _localFlutterBundle, _remoteFlutterBundle);
-        } else {
-          assert(false);
+      await builder.buildInTempDir(
+        onBundleAvailable: (String localBundlePath) {
+          for (Device device in devices.all) {
+            ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+            if (package == null || !device.isConnected())
+              continue;
+            if (device is AndroidDevice) {
+              device.startBundle(package, localBundlePath, true, argResults['checked']);
+            } else if (device is IOSDevice) {
+              device.pushFile(package, localBundlePath, _remoteFlutterBundle);
+            } else if (device is IOSSimulator) {
+              // TODO(abarth): Move pushFile up to Device once Android supports
+              // pushing new bundles.
+              device.pushFile(package, localBundlePath, _remoteFlutterBundle);
+            } else {
+              assert(false);
+            }
+          }
         }
-      }
+      );
 
       if (singleRun || !watchDirectory())
         break;

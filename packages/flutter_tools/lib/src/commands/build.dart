@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flx/bundle.dart';
 import 'package:flx/signing.dart';
+import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import '../toolchain.dart';
@@ -145,6 +146,27 @@ class BuildCommand extends FlutterCommand {
       privateKeyPath: argResults['private-key'],
       precompiledSnapshot: argResults['precompiled']
     );
+  }
+
+  Future<int> buildInTempDir({
+    String mainPath: _kDefaultMainPath,
+    void onBundleAvailable(String bundlePath)
+  }) async {
+    int result;
+    Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
+    try {
+      String localBundlePath = path.join(tempDir.path, 'app.flx');
+      String localSnapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
+      result = await build(
+        snapshotPath: localSnapshotPath,
+        outputPath: localBundlePath,
+        mainPath: mainPath
+      );
+      onBundleAvailable(localBundlePath);
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+    return result;
   }
 
   Future<int> build({
