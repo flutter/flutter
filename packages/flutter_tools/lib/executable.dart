@@ -32,10 +32,11 @@ Future main(List<String> args) async {
   // This level can be adjusted by users through the `--verbose` option.
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((LogRecord record) {
+    String level = record.level.name.toLowerCase();
     if (record.level >= Level.WARNING) {
-      stderr.writeln(record.message);
+      stderr.writeln('$level: ${record.message}');
     } else {
-      print(record.message);
+      print('$level: ${record.message}');
     }
     if (record.error != null)
       stderr.writeln(record.error);

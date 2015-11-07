@@ -28,7 +28,7 @@ dependencies:
 # See also https://github.com/dart-lang/pub/issues/1356
 
 dev_dependencies:
-  mockito: "^0.10.1"
+  mockito: ^0.10.1
 
 # Add the bin/sky_tools.dart script to the scripts pub installs.
 executables:
