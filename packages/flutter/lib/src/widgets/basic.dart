@@ -1258,6 +1258,33 @@ class Listener extends OneChildRenderObjectWidget {
     renderObject.onPointerCancel = onPointerCancel;
     renderObject.behavior = behavior;
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    List<String> listeners = <String>[];
+    if (onPointerDown != null)
+      listeners.add('down');
+    if (onPointerMove != null)
+      listeners.add('move');
+    if (onPointerUp != null)
+      listeners.add('up');
+    if (onPointerCancel != null)
+      listeners.add('cancel');
+    if (listeners.isEmpty)
+      listeners.add('<none>');
+    description.add('listeners: ${listeners.join(", ")}');
+    switch (behavior) {
+      case HitTestBehavior.translucent:
+        description.add('behavior: translucent');
+        break;
+      case HitTestBehavior.opaque:
+        description.add('behavior: opaque');
+        break;
+      case HitTestBehavior.deferToChild:
+        description.add('behavior: defer-to-child');
+        break;
+    }
+  }
 }
 
 class IgnorePointer extends OneChildRenderObjectWidget {

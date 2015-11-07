@@ -1038,8 +1038,17 @@ class RenderPointerListener extends RenderProxyBox {
     if (listeners.isEmpty)
       listeners.add('<none>');
     settings.add('listeners: ${listeners.join(", ")}');
-    if (behavior != HitTestBehavior.deferToChild)
-      settings.add('behavior: $behavior');
+    switch (behavior) {
+      case HitTestBehavior.translucent:
+        settings.add('behavior: translucent');
+        break;
+      case HitTestBehavior.opaque:
+        settings.add('behavior: opaque');
+        break;
+      case HitTestBehavior.deferToChild:
+        settings.add('behavior: defer-to-child');
+        break;
+    }
   }
 }
 
