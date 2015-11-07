@@ -89,6 +89,7 @@ abstract class Template {
 class FlutterSimpleTemplate extends Template {
   FlutterSimpleTemplate() : super('flutter-simple', 'A minimal Flutter project.') {
     files['.gitignore'] = _gitignore;
+    files['flutter.yaml'] = _flutterYaml;
     files['pubspec.yaml'] = _pubspec;
     files['README.md'] = _readme;
     files['lib/main.dart'] = _libMain;
@@ -98,9 +99,8 @@ class FlutterSimpleTemplate extends Template {
 String _normalizeProjectName(String name) {
   name = name.replaceAll('-', '_').replaceAll(' ', '_');
   // Strip any extension (like .dart).
-  if (name.contains('.')) {
+  if (name.contains('.'))
     name = name.substring(0, name.indexOf('.'));
-  }
   return name;
 }
 
@@ -132,6 +132,12 @@ dependencies:
   flutter: ">=0.0.2 <0.1.0"
 dev_dependencies:
   sky_tools: any
+''';
+
+const String _flutterYaml = r'''
+name: {{projectName}}
+material-design-icons:
+  - name: content/add
 ''';
 
 const String _libMain = r'''

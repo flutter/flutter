@@ -49,7 +49,7 @@ class FlutterCommandRunner extends CommandRunner {
     argParser.addFlag('local-build',
         negatable: false,
         help:
-            'Automatically detect your engine src directory from an overridden Flutter package.'
+            'Automatically detect your engine src directory from an overridden Flutter package. '
             'Useful if you are building Flutter locally and are using a dependency_override for'
             'the Flutter package that points to your engine src directory.');
     argParser.addOption('engine-src-path', hide: true,
