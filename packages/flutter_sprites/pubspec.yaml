@@ -4,6 +4,6 @@ version: 0.0.15
 author: Flutter Authors <flutter-dev@googlegroups.com>
 homepage: http://flutter.io
 dependencies:
-  flutter: 
-    '0.0.18'
-  box2d: ">=0.2.0 <0.3.0"
+  box2d: '>=0.2.0 <0.3.0'
+  flutter:
+    path: ../flutter
