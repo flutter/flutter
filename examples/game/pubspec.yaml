@@ -1,15 +1,6 @@
 name: asteroids
 dependencies:
-  flutter: 
-    '0.0.16'
-  sky_tools: any
-  flutter_sprites: 
-    '0.0.13'
-  box2d: any
-dependency_overrides:
-  material_design_icons:
-    path: ../../sky/packages/material_design_icons
   flutter:
-    path: ../../sky/packages/sky
+    path: ../../packages/flutter
   flutter_sprites:
-    path: ../../skysprites
+    path: ../../packages/flutter_sprites

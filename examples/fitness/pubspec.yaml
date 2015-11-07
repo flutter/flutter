@@ -1,12 +1,8 @@
 name: fitness
 dependencies:
-  flutter: 
-    '0.0.16'
-  playfair: ^0.0.10
+  # TODO(abarth): Move playfair into flutter.git
+  # playfair: ^0.0.10
   path: ^1.3.6
-  sky_tools: any
-dependency_overrides:
-  material_design_icons:
-    path: ../../sky/packages/material_design_icons
+
   flutter:
-    path: ../../sky/packages/sky
+    path: ../../packages/flutter

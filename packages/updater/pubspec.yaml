@@ -1,16 +1,16 @@
 name: updater
 author: Flutter Authors <flutter-dev@googlegroups.com>
-description: The autoupdater for flutter
+description: An autoupdater for Flutter
 homepage: http://flutter.io
 dependencies:
-  flutter: '0.0.18'
-  yaml: ^2.1.3
   path: ^1.3.0
-  flx: 0.0.1
-dependency_overrides:
+  yaml: ^2.1.3
+
+  # TODO(abarth): Updater should not depend on flutter
   flutter:
-    path: ../sky
+    path: ../flutter
   flx:
     path: ../flx
+
 environment:
   sdk: '>=1.12.0 <2.0.0'

@@ -19,7 +19,7 @@ class TestCommand extends FlutterCommand {
   final String description = 'Runs Flutter unit tests for the current project (requires a local build of the engine).';
 
   TestCommand() {
-    argParser.addOption('build-dir', defaultsTo: '../../../engine/src/out/Debug');
+    argParser.addOption('build-dir', help: 'The directory in which to find a prebuilt engine');
   }
 
   String get _shellPath {

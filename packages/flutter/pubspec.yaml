@@ -4,18 +4,16 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A framework for writing Flutter applications
 homepage: http://flutter.io
 dependencies:
-  cassowary: '>=0.1.7 <0.2.0'
   intl: '>=0.12.4+2 <0.13.0'
   material_design_icons: '>=0.0.3 <0.1.0'
-  newton: '>=0.1.4 <0.2.0'
-  sky_engine: 
-    '0.0.49'
-  sky_services: 
-    '0.0.50'
-  sky_tools: '>=0.0.37 <0.1.0'
+  sky_engine: 0.0.49
+  sky_services: 0.0.50
   vector_math: '>=1.4.3 <2.0.0'
+
+  cassowary:
+    path: ../cassowary
+  newton:
+    path: ../newton
+
 environment:
   sdk: '>=1.12.0 <2.0.0'
-
-executables:
-  flutter:
