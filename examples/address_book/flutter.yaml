@@ -1,0 +1,12 @@
+name: address_book
+version: 0.0.2
+material-design-icons:
+  - name: av/volume_up
+  - name: communication/email
+  - name: communication/phone
+  - name: content/add
+  - name: image/photo_camera
+  - name: maps/place
+  - name: navigation/check
+  - name: navigation/arrow_back
+  - name: social/person
