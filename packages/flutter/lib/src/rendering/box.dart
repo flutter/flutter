@@ -275,10 +275,14 @@ class BoxConstraints extends Constraints {
 
 /// A hit test entry used by [RenderBox]
 class BoxHitTestEntry extends HitTestEntry {
-  const BoxHitTestEntry(HitTestTarget target, this.localPosition) : super(target);
+  const BoxHitTestEntry(RenderBox target, this.localPosition) : super(target);
+
+  RenderBox get target => super.target;
 
   /// The position of the hit test in the local coordinates of [target]
   final Point localPosition;
+
+  String toString() => '${target.runtimeType}@$localPosition';
 }
 
 /// Parent data used by [RenderBox] and its subclasses

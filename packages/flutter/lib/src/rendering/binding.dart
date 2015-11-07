@@ -31,14 +31,6 @@ int _hammingWeight(int value) {
   return weight;
 }
 
-/// A hit test entry used by [FlutterBinding]
-class BindingHitTestEntry extends HitTestEntry {
-  const BindingHitTestEntry(HitTestTarget target, this.result) : super(target);
-
-  /// The result of the hit test
-  final HitTestResult result;
-}
-
 /// State used in converting PointerPackets to PointerInputEvents
 class _PointerState {
   _PointerState({ this.pointer, this.lastPosition });
@@ -269,7 +261,7 @@ class FlutterBinding extends HitTestTarget {
   HitTestResult hitTest(Point position) {
     HitTestResult result = new HitTestResult();
     _renderView.hitTest(result, position: position);
-    result.add(new BindingHitTestEntry(this, result));
+    result.add(new HitTestEntry(this));
     return result;
   }
 
@@ -280,7 +272,7 @@ class FlutterBinding extends HitTestTarget {
       entry.target.handleEvent(event, entry);
   }
 
-  void handleEvent(InputEvent e, BindingHitTestEntry entry) {
+  void handleEvent(InputEvent e, HitTestEntry entry) {
     if (e is PointerInputEvent) {
       PointerInputEvent event = e;
       pointerRouter.route(event);
