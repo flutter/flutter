@@ -592,7 +592,7 @@ abstract class RenderBox extends RenderObject {
     assert(attached);
     Matrix4 transform = new Matrix4.identity();
     RenderObject renderer = this;
-    while(renderer != null) {
+    while (renderer != null) {
       renderer.applyPaintTransform(transform);
       renderer = renderer.parent;
     }
@@ -604,7 +604,7 @@ abstract class RenderBox extends RenderObject {
   /// Convert the given point from the local coordiante system for this box to
   /// the global coordinate sytem
   Point localToGlobal(Point point) {
-    List <RenderObject> renderers = <RenderObject>[];
+    List<RenderObject> renderers = <RenderObject>[];
     for (RenderObject renderer = this; renderer != null; renderer = renderer.parent)
       renderers.add(renderer);
     Matrix4 transform = new Matrix4.identity();
