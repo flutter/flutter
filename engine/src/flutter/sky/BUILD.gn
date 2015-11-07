@@ -8,24 +8,15 @@ group("sky") {
   deps = [
     "//sky/engine/platform:platform_unittests($host_toolchain)",
     "//sky/engine/wtf:unittests($host_toolchain)",
-    "//examples",
-    ":sky_dev",
-  ]
-
-  if (!is_android) {
-    deps += [ "//third_party/mesa:osmesa" ]
-  }
-}
-
-group("sky_dev") {
-  testonly = true
-
-  deps = [
     "//sky/packages",
     "//sky/shell",
   ]
 
   if (is_android) {
     deps += [ "//sky/services/activity" ]
+  }
+
+  if (!is_android) {
+    deps += [ "//third_party/mesa:osmesa" ]
   }
 }
