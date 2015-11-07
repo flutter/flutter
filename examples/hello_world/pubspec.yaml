@@ -1,0 +1,10 @@
+name: hello_world
+dependencies:
+  flutter: 
+    '0.0.16'
+  sky_tools: any
+dependency_overrides:
+  material_design_icons:
+    path: ../../sky/packages/material_design_icons
+  flutter:
+    path: ../../sky/packages/sky

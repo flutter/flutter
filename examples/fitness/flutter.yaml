@@ -1,0 +1,15 @@
+name: fitness
+version: 0.0.1
+update-url: http://localhost:9888/
+material-design-icons:
+  - name: action/assessment
+  - name: action/help
+  - name: action/settings
+  - name: action/view_list
+  - name: av/stop
+  - name: content/add
+  - name: maps/directions_run
+  - name: navigation/arrow_back
+  - name: navigation/close
+  - name: navigation/menu
+  - name: navigation/more_vert

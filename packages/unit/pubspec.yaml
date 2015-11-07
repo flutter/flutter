@@ -1,0 +1,15 @@
+name: sky_unit_tests
+dependencies:
+  flutter: 
+    '0.0.16'
+  sky_tools: any
+  test: any
+  quiver: any
+  flx: ^0.0.2
+dependency_overrides:
+  material_design_icons:
+    path: ../packages/material_design_icons
+  flutter:
+    path: ../packages/sky
+  flx:
+    path: ../packages/flx

@@ -1,0 +1,9 @@
+name: flutter_sprites
+description: A sprite toolkit built on top of Flutter
+version: 0.0.15
+author: Flutter Authors <flutter-dev@googlegroups.com>
+homepage: http://flutter.io
+dependencies:
+  flutter: 
+    '0.0.18'
+  box2d: ">=0.2.0 <0.3.0"

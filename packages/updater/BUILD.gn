@@ -1,0 +1,32 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+action("updater") {
+  snapshot = "$target_gen_dir/updater_snapshot.bin"
+  main_dart = "lib/main.dart"
+
+  inputs = [
+    main_dart,
+  ]
+  outputs = [
+    snapshot,
+  ]
+
+  sky_snapshot_dir =
+      get_label_info("//sky/tools/sky_snapshot($host_toolchain)", "root_out_dir")
+  script = "//sky/tools/run_sky_snapshot.py"
+
+  args = [
+    "--compiler", rebase_path("$sky_snapshot_dir/sky_snapshot", root_build_dir),
+    "--package-root", rebase_path("packages", root_build_dir),
+    "--snapshot", rebase_path(snapshot, root_build_dir),
+    "--main", rebase_path(main_dart, root_build_dir),
+  ]
+
+  deps = [
+    "//sky/services/activity:interfaces",
+    "//sky/services/updater:interfaces",
+    "//sky/tools/sky_snapshot($host_toolchain)",
+  ]
+}
