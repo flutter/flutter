@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
+export FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
 SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
 STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"

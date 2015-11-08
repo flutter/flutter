@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as p;
 
+import '../artifacts.dart';
 import '../process.dart';
 
 class InitCommand extends Command {
@@ -30,17 +31,30 @@ class InitCommand extends Command {
       return 2;
     }
 
+    if (ArtifactStore.flutterRoot == null) {
+      stderr.writeln('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment');
+      stderr.writeln('variable was specified. Unable to find package:flutter.');
+      return 2;
+    }
+    String flutterRoot = p.absolute(ArtifactStore.flutterRoot);
+
+    String flutterPackagePath = p.join(flutterRoot, 'packages', 'flutter');
+    if (!FileSystemEntity.isFileSync(p.join(flutterPackagePath, 'pubspec.yaml'))) {
+      print('Unable to find package:flutter in ${flutterPackagePath}');
+      return 2;
+    }
+
     // TODO: Confirm overwrite of an existing directory with the user.
     Directory out = new Directory(argResults['out']);
 
-    new FlutterSimpleTemplate().generateInto(out);
+    new FlutterSimpleTemplate().generateInto(out, flutterPackagePath);
 
     print('');
 
     String message = '''All done! To run your application:
 
   \$ cd ${out.path}
-  \$ flutter start --checked
+  \$ flutter start
 ''';
 
     if (argResults['pub']) {
@@ -66,14 +80,16 @@ abstract class Template {
 
   Template(this.name, this.description);
 
-  void generateInto(Directory dir) {
+  void generateInto(Directory dir, String flutterPackagePath) {
     String dirPath = p.normalize(dir.absolute.path);
     String projectName = _normalizeProjectName(p.basename(dirPath));
     print('Creating ${p.basename(projectName)}...');
     dir.createSync(recursive: true);
 
+    String relativeFlutterPackagePath = p.relative(flutterPackagePath, from: dirPath);
+
     files.forEach((String path, String contents) {
-      Map m = {'projectName': projectName, 'description': description};
+      Map m = {'projectName': projectName, 'description': description, 'flutterPackagePath': relativeFlutterPackagePath};
       contents = mustache.render(contents, m);
       path = path.replaceAll('/', Platform.pathSeparator);
       File file = new File(p.join(dir.path, path));
@@ -129,9 +145,8 @@ const String _pubspec = r'''
 name: {{projectName}}
 description: {{description}}
 dependencies:
-  flutter: ">=0.0.2 <0.1.0"
-dev_dependencies:
-  sky_tools: any
+  flutter:
+    path: {{flutterPackagePath}}
 ''';
 
 const String _flutterYaml = r'''

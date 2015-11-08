@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'build_configuration.dart';
 import 'os_utils.dart';
+import 'process.dart';
 
 final Logger _logging = new Logger('sky_tools.artifacts');
 
@@ -155,7 +156,10 @@ class ArtifactStore {
     return null;
   }
 
+  // These values are initialized by FlutterCommandRunner on startup.
+  static String flutterRoot;
   static String packageRoot;
+
   static String _engineRevision;
 
   static String get engineRevision {
@@ -190,7 +194,11 @@ class ArtifactStore {
   }
 
   static Directory _getBaseCacheDir() {
-    Directory cacheDir = new Directory(path.join(packageRoot, 'sky_tools', 'cache'));
+    if (flutterRoot == null) {
+      _logging.severe('FLUTTER_ROOT not specified. Cannot find artifact cache.');
+      throw new ProcessExit(2);
+    }
+    Directory cacheDir = new Directory(path.join(flutterRoot, 'bin', 'cache', 'artifacts'));
     if (!cacheDir.existsSync())
       cacheDir.createSync(recursive: true);
     return cacheDir;
@@ -198,8 +206,6 @@ class ArtifactStore {
 
   static Directory _getCacheDirForArtifact(Artifact artifact) {
     Directory baseDir = _getBaseCacheDir();
-    // For now, all downloaded artifacts are release mode host binaries so use
-    // a path that mirrors a local release build.
     // TODO(jamesr): Add support for more configurations.
     String config = 'Release';
     Directory artifactSpecificDir = new Directory(path.join(

@@ -29,6 +29,8 @@ class FlutterCommandRunner extends CommandRunner {
             'shell commands executed.');
     argParser.addOption('package-root',
         help: 'Path to your packages directory.', defaultsTo: 'packages');
+    argParser.addOption('flutter-root',
+        help: 'The root directory of the Flutter repository.');
     argParser.addOption('android-device-id',
         help: 'Serial number of the target Android device.');
 
@@ -105,6 +107,7 @@ class FlutterCommandRunner extends CommandRunner {
       Logger.root.level = Level.FINE;
 
     _globalResults = globalResults;
+    ArtifactStore.flutterRoot = globalResults['flutter-root'] ?? Platform.environment['FLUTTER_ROOT'];
     ArtifactStore.packageRoot = globalResults['package-root'];
 
     return super.runCommand(globalResults);
