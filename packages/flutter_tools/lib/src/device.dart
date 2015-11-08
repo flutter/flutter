@@ -533,16 +533,20 @@ class AndroidDevice extends Device {
   /// we don't have to rely on the test setup having adb available to it.
   static List<AndroidDevice> getAttachedDevices([AndroidDevice mockAndroid]) {
     List<AndroidDevice> devices = [];
-    String adbPath =
-        (mockAndroid != null) ? mockAndroid.adbPath : _getAdbPath();
-    List<String> output =
-        runSync([adbPath, 'devices', '-l']).trim().split('\n');
-    RegExp deviceInfo = new RegExp(
+    String adbPath = (mockAndroid != null) ? mockAndroid.adbPath : _getAdbPath();
+    List<String> output = runSync([adbPath, 'devices', '-l']).trim().split('\n');
+
+    // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
+    RegExp deviceRegex1 = new RegExp(
         r'^(\S+)\s+device\s+\S+\s+product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
+
+    // 0149947A0D01500C       device usb:340787200X
+    RegExp deviceRegex2 = new RegExp(r'^(\S+)\s+device\s+\S+$');
+
     // Skip first line, which is always 'List of devices attached'.
     for (String line in output.skip(1)) {
-      Match match = deviceInfo.firstMatch(line);
-      if (match != null) {
+      if (deviceRegex1.hasMatch(line)) {
+        Match match = deviceRegex1.firstMatch(line);
         String deviceID = match[1];
         String productID = match[2];
         String modelID = match[3];
@@ -552,7 +556,12 @@ class AndroidDevice extends Device {
             id: deviceID,
             productID: productID,
             modelID: modelID,
-            deviceCodeName: deviceCodeName));
+            deviceCodeName: deviceCodeName
+        ));
+      } else if (deviceRegex2.hasMatch(line)) {
+        Match match = deviceRegex2.firstMatch(line);
+        String deviceID = match[1];
+        devices.add(new AndroidDevice(id: deviceID));
       } else {
         _logging.warning('Unexpected failure parsing device information '
             'from adb output:\n$line\n'
@@ -676,9 +685,9 @@ class AndroidDevice extends Device {
         _logging.severe('Unexpected response from getprop: "$sdkVersion"');
         return false;
       }
-      if (sdkVersionParsed < 19) {
-        _logging.severe('Version "$sdkVersion" of the Android SDK is too old. '
-            'Please install Jelly Bean (version 19) or later.');
+      if (sdkVersionParsed < 16) {
+        _logging.severe('The Android version ($sdkVersion) on the target device '
+            'is too old. Please use a Jelly Bean (version 16 / 4.1.x) device or later.');
         return false;
       }
       return true;
