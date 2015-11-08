@@ -58,7 +58,7 @@ class MojoClient {
   }
 
   Future<Uint8List> readBytes(url, {Map<String, String> headers}) {
-    return get(url, headers: headers).then((response) {
+    return get(url, headers: headers).then((Response response) {
       _checkResponseSuccess(url, response);
       return response.bodyBytes;
     });
