@@ -17,13 +17,13 @@ DEFAULT_ENGINE_DIR = os.path.abspath(os.path.join(FLUTTER_ROOT, '..', 'engine', 
 
 def main():
     parser = argparse.ArgumentParser(description='Runs Flutter unit tests')
-    parser.add_argument('--engine-dir', default=DEFAULT_ENGINE_DIR)
+    parser.add_argument('--engine-src-path', default=DEFAULT_ENGINE_DIR)
     parser.add_argument('--config', default='Debug')
     parser.add_argument('--debug', dest='config', action='store_const', const='Debug')
     parser.add_argument('--release', dest='config', action='store_const', const='Release')
     args, remaining = parser.parse_known_args()
 
-    build_dir = os.path.join(os.path.abspath(args.engine_dir), 'out', args.config)
+    build_dir = os.path.join(os.path.abspath(args.engine_src_path), 'out', args.config)
 
     if not remaining:
         for root, dirs, files in os.walk(TESTS_DIR):
