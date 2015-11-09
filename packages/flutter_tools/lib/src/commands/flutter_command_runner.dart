@@ -195,19 +195,19 @@ class FlutterCommandRunner extends CommandRunner {
         configs.add(new BuildConfiguration.local(
           type: BuildType.debug,
           hostPlatform: hostPlatform,
-          targetPlatform: hostPlatformAsTarget,
+          targetPlatform: TargetPlatform.android,
           enginePath: enginePath,
-          buildPath: globalResults['host-debug-build-path'],
-          testable: true
+          buildPath: globalResults['android-debug-build-path'],
+          deviceId: globalResults['android-device-id']
         ));
 
         configs.add(new BuildConfiguration.local(
           type: BuildType.debug,
           hostPlatform: hostPlatform,
-          targetPlatform: TargetPlatform.android,
+          targetPlatform: hostPlatformAsTarget,
           enginePath: enginePath,
-          buildPath: globalResults['android-debug-build-path'],
-          deviceId: globalResults['android-device-id']
+          buildPath: globalResults['host-debug-build-path'],
+          testable: true
         ));
 
         if (Platform.isMacOS) {
@@ -233,19 +233,19 @@ class FlutterCommandRunner extends CommandRunner {
         configs.add(new BuildConfiguration.local(
           type: BuildType.release,
           hostPlatform: hostPlatform,
-          targetPlatform: hostPlatformAsTarget,
+          targetPlatform: TargetPlatform.android,
           enginePath: enginePath,
-          buildPath: globalResults['host-release-build-path'],
-          testable: true
+          buildPath: globalResults['android-release-build-path'],
+          deviceId: globalResults['android-device-id']
         ));
 
         configs.add(new BuildConfiguration.local(
           type: BuildType.release,
           hostPlatform: hostPlatform,
-          targetPlatform: TargetPlatform.android,
+          targetPlatform: hostPlatformAsTarget,
           enginePath: enginePath,
-          buildPath: globalResults['android-release-build-path'],
-          deviceId: globalResults['android-device-id']
+          buildPath: globalResults['host-release-build-path'],
+          testable: true
         ));
 
         if (Platform.isMacOS) {
