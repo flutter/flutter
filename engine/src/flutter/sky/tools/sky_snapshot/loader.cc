@@ -18,7 +18,10 @@ namespace {
 std::string Fetch(const std::string& url) {
   base::FilePath path(url);
   std::string source;
-  CHECK(base::ReadFileToString(path, &source)) << url;
+  if (!base::ReadFileToString(path, &source)) {
+    fprintf(stderr, "error: Unable to find Dart library '%s'.\n", url.c_str());
+    exit(1);
+  }
   return source;
 }
 
