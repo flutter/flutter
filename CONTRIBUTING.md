@@ -12,10 +12,15 @@ Things you will need
  * An ssh client (used to authenticate with GitHub).
  * Python (used by some of our tools).
  * The Dart SDK (see [Issue #54](https://github.com/flutter/flutter/issues/54)
-   about downloading the Dart SDK automatically).
+   about downloading the Dart SDK automatically). Note: If you're also
+   working on the Flutter engine, you can use the copy of the Dart SDK
+   in `.../engine/src/third_party/dart-sdk/dart-sdk`.
    - [https://www.dartlang.org/downloads/archive/](https://www.dartlang.org/downloads/archive/)
  * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
-   about downloading the Android platform tools automatically):
+   about downloading the Android platform tools automatically).
+   Note: If you're also working on the Flutter engine, you can use the
+   copy of the Android platform tools in
+   `.../engine/src/third_party/android_tools/sdk/platform-tools`.
    - Mac: `brew install android-platform-tools`
    - Linux: `sudo apt-get install android-tools-adb`
 
