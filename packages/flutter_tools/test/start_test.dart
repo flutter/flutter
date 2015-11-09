@@ -38,7 +38,7 @@ defineTests() {
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
-      runner.run(['start']).then((int code) => expect(code, equals(0)));
+      runner.run(['start', '-t', 'test/start_test.dart']).then((int code) => expect(code, equals(0)));
     });
 
     test('returns 0 when iOS is connected and ready to be started', () {
