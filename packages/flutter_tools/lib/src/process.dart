@@ -12,11 +12,17 @@ final Logger _logging = new Logger('sky_tools.process');
 
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr.
-Future<int> runCommandAndStreamOutput(List<String> cmd,
-    {String prefix: '', RegExp filter}) async {
+Future<int> runCommandAndStreamOutput(List<String> cmd, {
+  String prefix: '',
+  RegExp filter,
+  String workingDirectory
+}) async {
   _logging.info(cmd.join(' '));
-  Process proc =
-      await Process.start(cmd[0], cmd.getRange(1, cmd.length).toList());
+  Process proc = await Process.start(
+    cmd[0],
+    cmd.getRange(1, cmd.length).toList(),
+    workingDirectory: workingDirectory
+  );
   proc.stdout.transform(UTF8.decoder).listen((String data) {
     List<String> dataLines = data.trimRight().split('\n');
     if (filter != null) {
@@ -65,7 +71,7 @@ String runSync(List<String> cmd) => _runWithLoggingSync(cmd);
 /// Return the platform specific name for the given Dart SDK binary. So, `pub`
 /// ==> `pub.bat`.
 String sdkBinaryName(String name) {
-  return Platform.isWindows ? '${name}.bat' : name;
+  return Platform.isWindows ? '$name.bat' : name;
 }
 
 String _runWithLoggingSync(List<String> cmd, {bool checked: false}) {

@@ -59,12 +59,12 @@ class InitCommand extends Command {
 
     if (argResults['pub']) {
       print("Running pub get...");
-      Process process = await Process.start(
-          sdkBinaryName('pub'), ['get'], workingDirectory: out.path);
-      stdout.addStream(process.stdout);
-      stderr.addStream(process.stderr);
-      int code = await process.exitCode;
-      if (code != 0) return code;
+      int code = await runCommandAndStreamOutput(
+        [sdkBinaryName('pub'), 'get'],
+        workingDirectory: out.path
+      );
+      if (code != 0)
+        return code;
     }
 
     print(message);
