@@ -46,7 +46,9 @@ Getting the code and configuring your environment
    Flutter depends on. You can replicate what this script does by running
    `pub get` in each directory that contains a `pubspec.yaml` file.
  * Add this repository's `bin` directory to your path. That will let you use the
-   `flutter` command in this directory more easily.
+   `flutter` command in this directory more easily. (If you have previously
+   activated the `flutter` package using `pub`, you should deactivate it and use
+   the script in `bin` instead: `pub global deactivate flutter`.)
 
 Running the examples
 --------------------
