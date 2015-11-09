@@ -39,16 +39,17 @@ class _BottomSheetDragController extends StatelessComponent {
   void _handleDragEnd(Offset velocity, BuildContext context) {
     if (_dismissUnderway)
       return;
-    if (velocity.dy > _kMinFlingVelocity)
-      performance.fling(velocity: -velocity.dy / childHeight).then((dynamic value) {
-        Navigator.of(context).pop(value);
+    if (velocity.dy > _kMinFlingVelocity) {
+      performance.fling(velocity: -velocity.dy / childHeight).then((_) {
+        Navigator.of(context).pop();
       });
-    else if (performance.progress < _kCloseProgressThreshold)
-      performance.fling(velocity: -1.0).then((dynamic value) {
-        Navigator.of(context).pop(value);
+    } else if (performance.progress < _kCloseProgressThreshold) {
+      performance.fling(velocity: -1.0).then((_) {
+        Navigator.of(context).pop();
       });
-    else
+    } else {
       performance.forward();
+    }
   }
 
   Widget build(BuildContext context) {
