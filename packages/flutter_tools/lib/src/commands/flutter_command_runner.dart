@@ -29,7 +29,7 @@ class FlutterCommandRunner extends CommandRunner {
             'shell commands executed.');
     argParser.addOption('package-root',
         help: 'Path to your packages directory.', defaultsTo: 'packages');
-    argParser.addOption('flutter-root',
+    argParser.addOption('flutter-root', hide: true,
         help: 'The root directory of the Flutter repository.');
     argParser.addOption('android-device-id',
         help: 'Serial number of the target Android device.');
@@ -50,11 +50,12 @@ class FlutterCommandRunner extends CommandRunner {
             'on iOS devices and simulators. Not normally required.');
     argParser.addFlag('local-build',
         negatable: false,
+        hide: true,
         help:
             'Automatically detect your engine src directory from an overridden Flutter package. '
             'Useful if you are building Flutter locally and are using a dependency_override for'
             'the Flutter package that points to your engine src directory.');
-    argParser.addOption('engine-src-path', hide: true,
+    argParser.addOption('engine-src-path',
         help:
             'Path to your engine src directory, if you are building Flutter locally. '
             'Ignored if neither debug nor release is set. Not normally required.');
