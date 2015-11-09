@@ -10,6 +10,7 @@ group("sky") {
     "//sky/engine/wtf:unittests($host_toolchain)",
     "//sky/packages",
     "//sky/shell",
+    "//sky/tools/sky_snapshot",
   ]
 
   if (is_android) {

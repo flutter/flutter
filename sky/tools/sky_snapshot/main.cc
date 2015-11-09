@@ -19,9 +19,9 @@
 #include "sky/tools/sky_snapshot/vm.h"
 
 void Usage() {
-  std::cerr << "Usage: sky_packager"
+  std::cerr << "Usage: sky_snapshot"
             << " --" << switches::kPackageRoot << " --" << switches::kSnapshot
-            << " <sky-app>" << std::endl;
+            << " <lib/main.dart>" << std::endl;
 }
 
 void WriteSnapshot(base::FilePath path) {
