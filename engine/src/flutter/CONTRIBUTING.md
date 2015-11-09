@@ -1,5 +1,5 @@
-Contributing to Flutter
-=======================
+Contributing to the Flutter engine
+==================================
 
 [![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
 
@@ -24,8 +24,8 @@ Getting the code and configuring your environment
  * If you haven't configured your machine with an SSH key that's known to github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
  * Create an empty directory for your copy of the repository. Call it what you like. For
-   the sake of the instructions that follow, we'll call it `flutter`.
- * Create a `.gclient` file in the `flutter` directory with the following contents, replacing
+   the sake of the instructions that follow, we'll call it `engine`.
+ * Create a `.gclient` file in the `engine` directory with the following contents, replacing
    `<your_name_here>` with your GitHub account name:
 
 ```
@@ -41,47 +41,52 @@ solutions = [
 ]
 target_os = ["android"]
 ```
- * `cd flutter` (Change to the directory in which you put the `.gclient` file.)
+
+ * `cd engine` (Change to the directory in which you put the `.gclient` file.)
  * `gclient sync` This will fetch all the source code that Flutter depends on. Avoid interrupting this script, it can leave your repository in an inconsistent state that is tedious to clean up.
- * `cd src` (Change to the directory that `gclient sync` created in your `flutter` directory.)
+ * `cd src` (Change to the directory that `gclient sync` created in your `engine` directory.)
  * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master repository, not your clone, when running `git fetch` et al.)
  * Run `./tools/android/download_android_tools.py` .
- * Add `.../flutter/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
- * Add `.../flutter/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
- * Add `$HOME/.pub-cache/bin` to your path if it's not already there. (It will already be there if you've ever set up Dart's `pub` tool before.)
- * Make sure you are still in the 'src' directory that the `gclient sync` step created earlier.
+ * Add `.../engine/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
+ * Add `.../engine/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
+ * Make sure you are still in the `src` directory that the `gclient sync` step created earlier.
  * If you're on Linux, run `sudo ./build/install-build-deps-android.sh` .
  * If you're on Linux, run `sudo ./build/install-build-deps.sh` .
  * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
- * If you're on Mac, install "ant": `brew install ant` .
- * Run `pub global activate flutter` . This installs the 'flutter' tool.
-
+ * If you're on Mac, install `ant`: `brew install ant` .
 
 Building and running the code
 -----------------------------
 
 ### Android (cross-compiling from Mac or Linux)
 
-Run the following steps, from the 'src' directory created in the steps above:
+Run the following steps, from the `src` directory created in the steps above:
 
  * `gclient sync` to update your dependencies.
  * `./sky/tools/gn --android` to prepare your build files.
  * `ninja -C out/android_Debug` to build an Android Debug binary.
 
-To run an example with your locally built binary, switch to that example's directory, run `pub get` to make sure its dependencies have been downloaded, and use `flutter start` with an explicit `--engine-src-path` pointing at the `src` directory. Make sure you have a device connected over USB and debugging enabled on that device.
+To run an example with your locally built binary, you'll also need to clone
+[the main Flutter repository](https://github.com/flutter/flutter). See
+[the instructions for contributing](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md)
+to the main Flutter repository for detailed instructions.
 
- * `cd examples/hello_world/; flutter start --engine-src-path ../../`
+Once you've got everything set up, you can run an example using your locally
+built engine by switching to that example's directory, running `pub get` to make
+sure its dependencies have been downloaded, and using `flutter start` with an
+explicit `--engine-src-path` pointing at the `src` directory. Make sure you have
+a device connected over USB and debugging enabled on that device:
 
-You can also specify a particular Dart file to run if you want to run an example that doesn't have a `lib/main.dart` file using the `-t` command-line option. For example, to run the `tabs.dart` example in the `examples/widgets` directory on a connected Android device, from that directory you would run:
+ * `cd /path/to/flutter/examples/hello_world`
+ * `pub get`
+ * `../../bin/flutter start --engine-src-path /path/to/engine/src`
 
- * `flutter start --engine-src-path ../../ -t tabs.dart`
+You can also specify a particular Dart file to run if you want to run an example
+that doesn't have a `lib/main.dart` file using the `-t` command-line option. For
+example, to run the `tabs.dart` example in the `examples/widgets` directory on a
+connected Android device, from that directory you would run:
 
-When running code from the `src/examples` directory, any changes you make to the example code, as well as any changes to Dart code in the `src/sky/packages/sky` directory and subdirectories, will automatically be picked when you relaunch the app.  You can do the same for your own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
-
-You can also use `flutter listen` in the various example directories (or your own Flutter apps) to listen for changes you are making to the app and automatically update the running SkyShell instance on your Android device.  iOS device and simulator support for this are coming soon.
-
-The `flutter` tool also lets you run release builds, upload the binary without running it, and various other things. Run `flutter -h` for further information.
-
+ * `flutter start --engine-src-path /path/to/engine/src -t tabs.dart`
 
 ### Desktop (Mac and Linux), for tests
 
@@ -89,19 +94,14 @@ The `flutter` tool also lets you run release builds, upload the binary without r
  * `./sky/tools/gn` to prepare your build files.
  * `ninja -C out/Debug` to build a desktop Debug binary.
 
-To run the tests:
-
- * `./sky/tools/run_tests --debug` runs the tests on the host machine using `out/Debug`.
-
-If you want to run the run a test directly:
- * `./sky/tools/run_tests --debug test/harness/trivial_test.dart`
-
-Note: The tests are headless, you won't see any UI. You can use `print` to generate console output or you can interact with the DartVM via observatory at [http://localhost:8181/](http://localhost:8181/).
+To run the tests, you'll also need to clone [the main Flutter repository](https://github.com/flutter/flutter).
+See [the instructions for contributing](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md)
+to the main Flutter repository for detailed instructions.
 
 Contributing code
 -----------------
 
-The Flutter engine repository gladly accepts contributions via GitHub pull requests.
+We gladly accept contributions via GitHub pull requests.
 
 To start working on a patch:
 
@@ -115,7 +115,8 @@ To start working on a patch:
 
 To send us a pull request:
 
- * `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or go to `https://github.com/<your_name_here>/sky_engine` and click the
+ * `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or
+   go to `https://github.com/flutter/engine` and click the
    "Compare & pull request" button
 
 Please make sure all your checkins have detailed commit messages explaining the patch.
@@ -128,9 +129,3 @@ You must complete the
 You can do this online, and it only takes a minute.
 If you've never submitted code before, you must add your (or your
 organization's) name and contact info to the [AUTHORS](AUTHORS) file.
-
-Adding a test
--------------
-
-To add a test, simply create a file whose name ends with `_test.dart` in the `sky/unit/test` directory.
-The test should have a `main` function and use `package:test`.

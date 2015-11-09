@@ -1,5 +1,5 @@
-Flutter
-=======
+Flutter Engine
+==============
 [![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
 
 Flutter is a new way to build high-performance, cross-platform mobile apps.
@@ -14,7 +14,10 @@ us [feedback](mailto:flutter-dev@googlegroups.com).
  - For information about using Flutter to build apps, please see
    the [getting started guide](http://flutter.io/getting-started/).
 
- - For information about contributing code to Flutter itself, please see
+ - For information about contributing to the Flutter framework, please see
+   [the main Flutter repository](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md).
+
+ - For information about contributing code to the engine itself, please see
    [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Community
