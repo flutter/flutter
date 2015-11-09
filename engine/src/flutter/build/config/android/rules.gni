@@ -417,59 +417,6 @@ template("java_cpp_enum") {
   }
 }
 
-# Declare a target for processing a Jinja template.
-#
-# Variables
-#   input: The template file to be processed.
-#   output: Where to save the result.
-#   variables: (Optional) A list of variables to make available to the template
-#     processing environment, e.g. ["name=foo", "color=red"].
-#
-# Example
-#   jinja_template("chrome_shell_manifest") {
-#     input = "shell/java/AndroidManifest.xml"
-#     output = "$target_gen_dir/AndroidManifest.xml"
-#   }
-template("jinja_template") {
-  set_sources_assignment_filter([])
-  if (defined(invoker.testonly)) {
-    testonly = invoker.testonly
-  }
-
-  assert(defined(invoker.input))
-  assert(defined(invoker.output))
-
-  action(target_name) {
-    if (defined(invoker.visibility)) {
-      visibility = invoker.visibility
-    }
-
-    sources = [
-      invoker.input,
-    ]
-    script = "//build/android/gyp/jinja_template.py"
-    depfile = "$target_gen_dir/$target_name.d"
-
-    outputs = [
-      depfile,
-      invoker.output,
-    ]
-
-    args = [
-      "--inputs",
-      rebase_path(invoker.input, root_build_dir),
-      "--output",
-      rebase_path(invoker.output, root_build_dir),
-      "--depfile",
-      rebase_path(depfile, root_build_dir),
-    ]
-    if (defined(invoker.variables)) {
-      variables = invoker.variables
-      args += [ "--variables=${variables}" ]
-    }
-  }
-}
-
 # Declare a target for processing Android resources as Jinja templates.
 #
 # This takes an Android resource directory where each resource is a Jinja
