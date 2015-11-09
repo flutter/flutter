@@ -74,6 +74,7 @@ class ApplicationPackageStore {
         return iOS;
       case TargetPlatform.iOSSimulator:
         return iOSSimulator;
+      case TargetPlatform.mac:
       case TargetPlatform.linux:
         return null;
     }
@@ -110,6 +111,7 @@ class ApplicationPackageStore {
           iOSSimulator = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
           break;
 
+        case TargetPlatform.mac:
         case TargetPlatform.linux:
           break;
       }

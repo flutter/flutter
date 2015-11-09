@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
+import '../build_configuration.dart';
 import '../device.dart';
 import '../toolchain.dart';
 import 'flutter_command_runner.dart';
@@ -18,19 +19,21 @@ abstract class FlutterCommand extends Command {
   /// Whether this command needs to be run from the root of a project.
   bool get requiresProjectRoot => true;
 
+  List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
+
   Future downloadApplicationPackages() async {
     if (applicationPackages == null)
-      applicationPackages = await ApplicationPackageStore.forConfigs(runner.buildConfigurations);
+      applicationPackages = await ApplicationPackageStore.forConfigs(buildConfigurations);
   }
 
   Future downloadToolchain() async {
     if (toolchain == null)
-      toolchain = await Toolchain.forConfigs(runner.buildConfigurations);
+      toolchain = await Toolchain.forConfigs(buildConfigurations);
   }
 
   void connectToDevices() {
     if (devices == null)
-      devices = new DeviceStore.forConfigs(runner.buildConfigurations);
+      devices = new DeviceStore.forConfigs(buildConfigurations);
   }
 
   Future downloadApplicationPackagesAndConnectToDevices() async {

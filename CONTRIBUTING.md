@@ -87,25 +87,27 @@ Testing the `flutter` package is currently a bit harder because we don't yet
 support testing the `flutter` package with pre-built binaries. To test the
 package, you'll need to follow the [instructions below](#working-on-the-engine-and-the-framework-at-the-same-time)
 for working with this repository and the Flutter engine repository
-simultaneously and then run the following command:
+simultaneously and then run the following command (assuming the `flutter/bin`
+directory is in your path):
 
- * `./dev/run_tests --debug`
+ * `flutter test --debug`
 
 Creating a workflow for running the test with a prebuilt binary is
-[Issue #56](https://github.com/flutter/flutter/issues/56). If you want to run
-a single test individually:
+[Issue #56](https://github.com/flutter/flutter/issues/56). If you want
+to run a single test individually:
 
- * `./dev/run_tests --debug test/harness/trivial_test.dart`
+ * `flutter test --debug trivial_test.dart`
 
-Note: The tests are headless, you won't see any UI. You can use `print` to
-generate console output or you can interact with the DartVM via observatory at [http://localhost:8181/](http://localhost:8181/).
+Note: The tests are headless, you won't see any UI. You can use
+`print` to generate console output or you can interact with the DartVM
+via observatory at [http://localhost:8181/](http://localhost:8181/).
 
 Adding a test
 -------------
 
-To add a test, simply create a file whose name ends with `_test.dart` in the
-`packags/unit/test` directory. The test should have a `main` function and use
-the `test` package.
+To add a test, simply create a file whose name ends with `_test.dart`
+in the `packages/unit/test` directory. The test should have a `main`
+function and use the `test` package.
 
 Contributing code
 -----------------
@@ -120,7 +122,7 @@ To start working on a patch:
  and [design principles](https://github.com/flutter/engine/blob/master/sky/specs/design.md)
  before working on anything non-trivial. These guidelines are intended to keep
  the code consistent and avoid common pitfalls.
- * `git commit -a -m "<your brief but informative commit message>"`
+ * `git commit -a -m "<your informative commit message>"`
  * `git push origin name_of_your_branch`
 
 To send us a pull request:
@@ -163,15 +165,15 @@ the following steps.
    (e.g., `out/Debug`). To run examples on Android, build one of the Android
    configurations (e.g., `out/android_Debug`).
 
-You should now be able to run the tests against your locally built engine using
-the `./dev/run_tests` script. To run one of the examples on your device using
-your locally built engine, use the `--engine-src-path` option to the `flutter`
-tool:
+You should now be able to run the tests against your locally built
+engine using the `flutter test --debug` command. To run one of the
+examples on your device using your locally built engine, use the
+`--debug` option to the `flutter` tool:
 
- * `flutter start --engine-src-path /foo/bar/engine/src`
+ * `flutter start --debug`
 
-Eventually, the `--local-build` flag for the `flutter` command will
-automatically set the correct engine src path (see [Issue #57](https://github.com/flutter/flutter/issues/57)).
+If you want to test the release version instead of the debug version,
+use `--release` instead of `--debug`.
 
 Making a breaking change to the engine
 --------------------------------------
