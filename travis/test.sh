@@ -6,4 +6,4 @@ set -ex
 (cd packages/flx; pub global run tuneup check; pub run test -j1)
 (cd packages/newton; pub global run tuneup check; pub run test -j1)
 
-./dev/run_tests --engine-src-path bin/cache/travis
+./bin/flutter test --engine-src-path bin/cache/travis

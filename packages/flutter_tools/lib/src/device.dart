@@ -920,6 +920,7 @@ class DeviceStore {
           assert(iOSSimulator == null);
           iOSSimulator = new IOSSimulator();
           break;
+        case TargetPlatform.mac:
         case TargetPlatform.linux:
           break;
       }

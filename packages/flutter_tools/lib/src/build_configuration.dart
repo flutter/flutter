@@ -24,6 +24,7 @@ enum TargetPlatform {
   android,
   iOS,
   iOSSimulator,
+  mac,
   linux,
 }
 
@@ -36,12 +37,21 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux;
 }
 
+TargetPlatform getCurrentHostPlatformAsTarget() {
+  if (Platform.isMacOS)
+    return TargetPlatform.mac;
+  if (Platform.isLinux)
+    return TargetPlatform.linux;
+  _logging.warning('Unsupported host platform, defaulting to Linux');
+  return TargetPlatform.linux;
+}
+
 class BuildConfiguration {
   BuildConfiguration.prebuilt({
     this.hostPlatform,
     this.targetPlatform,
     this.deviceId
-  }) : type = BuildType.prebuilt, buildDir = null;
+  }) : type = BuildType.prebuilt, buildDir = null, testable = false;
 
   BuildConfiguration.local({
     this.type,
@@ -49,7 +59,8 @@ class BuildConfiguration {
     this.targetPlatform,
     String enginePath,
     String buildPath,
-    this.deviceId
+    this.deviceId,
+    this.testable: false
   }) : buildDir = path.normalize(path.join(enginePath, buildPath)) {
     assert(type == BuildType.debug || type == BuildType.release);
   }
@@ -59,4 +70,5 @@ class BuildConfiguration {
   final TargetPlatform targetPlatform;
   final String buildDir;
   final String deviceId;
+  final bool testable;
 }

@@ -9,36 +9,66 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable;
 
-import 'flutter_command.dart';
+import '../artifacts.dart';
+import '../build_configuration.dart';
 import '../test/loader.dart' as loader;
+import 'flutter_command.dart';
 
 final Logger _logging = new Logger('sky_tools.test');
 
 class TestCommand extends FlutterCommand {
-  final String name = 'test';
-  final String description = 'Runs Flutter unit tests for the current project (requires a local build of the engine).';
+  String get name => 'test';
+  String get description => 'Runs Flutter unit tests for the current project. At least one of --debug and --release must be set.';
 
-  TestCommand() {
-    argParser.addOption('build-dir', help: 'The directory in which to find a prebuilt engine');
-  }
+  bool get requiresProjectRoot => false;
 
-  String get _shellPath {
-    if (Platform.isLinux)
-      return path.join(argResults['build-dir'], 'sky_shell');
-    if (Platform.isMacOS)
-      return path.join(argResults['build-dir'], 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
-    throw new Exception('Unsupported platform.');
+  String getShellPath(TargetPlatform platform, String buildPath) {
+    switch (platform) {
+      case TargetPlatform.linux:
+        return path.join(buildPath, 'sky_shell');
+      case TargetPlatform.mac:
+        return path.join(buildPath, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
+      default:
+        throw new Exception('Unsupported platform.');
+    }
   }
 
   @override
   Future<int> runInProject() async {
-    loader.shellPath = _shellPath;
-    if (!FileSystemEntity.isFileSync(loader.shellPath)) {
-      _logging.severe('Cannot find Flutter Shell at ${loader.shellPath}');
+    List<String> testArgs = argResults.rest.toList();
+    Directory testDir = new Directory(path.join(ArtifactStore.flutterRoot, 'packages/unit/test'));
+    if (testArgs.isEmpty) {
+      testArgs.addAll(testDir.listSync(recursive: true, followLinks: false)
+                             .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') && FileSystemEntity.isFileSync(entity.path))
+                             .map((FileSystemEntity entity) => path.absolute(entity.path)));
+    }
+    testArgs.insert(0, '--');
+    if (Platform.environment['TERM'] == 'dumb')
+      testArgs.insert(0, '--no-color');
+    List<BuildConfiguration> configs = buildConfigurations;
+    bool foundOne = false;
+    String currentDirectory = Directory.current.path;
+    Directory.current = testDir.path;
+    // TODO(ianh): Verify that this directory has had 'pub get' run in it at least once.
+    loader.installHook();
+    for (BuildConfiguration config in configs) {
+      if (!config.testable)
+        continue;
+      foundOne = true;
+      loader.shellPath = path.join(currentDirectory, getShellPath(config.targetPlatform, config.buildDir));
+      if (!FileSystemEntity.isFileSync(loader.shellPath)) {
+          _logging.severe('Cannot find Flutter shell at ${loader.shellPath}');
+        return 1;
+      }
+      await executable.main(testArgs);
+      if (exitCode != 0)
+        return exitCode;
+    }
+    if (!foundOne) {
+      stderr.writeln('At least one of --debug or --release must be set, to specify the local build products to test.');
       return 1;
     }
-    loader.installHook();
-    await executable.main(argResults.rest);
-    return exitCode;
+
+    return 0;
   }
 }

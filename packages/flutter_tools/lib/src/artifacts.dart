@@ -34,6 +34,8 @@ String _getNameForTargetPlatform(TargetPlatform platform) {
       return 'ios-arm';
     case TargetPlatform.iOSSimulator:
       return 'ios-x64';
+    case TargetPlatform.mac:
+      return 'darwin-x64';
     case TargetPlatform.linux:
       return 'linux-x64';
   }
@@ -158,12 +160,31 @@ class ArtifactStore {
 
   // These values are initialized by FlutterCommandRunner on startup.
   static String flutterRoot;
-  static String packageRoot;
+  static String packageRoot = 'packages';
+
+  static bool get isPackageRootValid {
+    return FileSystemEntity.isDirectorySync(packageRoot);
+  }
+
+  static void ensurePackageRootIsValid() {
+    if (!isPackageRootValid) {
+      String message = '$packageRoot is not a valid directory.';
+      if (packageRoot == 'packages') {
+        if (FileSystemEntity.isFileSync('pubspec.yaml'))
+          message += '\nDid you run `pub get` in this directory?';
+        else
+          message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
+      }
+      stderr.writeln(message);
+      throw new ProcessExit(2);
+    }
+  }
 
   static String _engineRevision;
 
   static String get engineRevision {
     if (_engineRevision == null) {
+      ensurePackageRootIsValid();
       File revisionFile = new File(path.join(packageRoot, 'sky_engine', 'REVISION'));
       if (revisionFile.existsSync())
         _engineRevision = revisionFile.readAsStringSync();
