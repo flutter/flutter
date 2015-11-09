@@ -23,8 +23,7 @@ Getting the code and configuring your environment
  * Fork `https://github.com/flutter/engine` into your own GitHub account. If you already have a fork, and are now installing a development environment on a new machine, make sure you've updated your fork so that you don't use stale configuration options from long ago.
  * If you haven't configured your machine with an SSH key that's known to github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
- * Create an empty directory for your copy of the repository. Call it what you like. For
-   the sake of the instructions that follow, we'll call it `engine`.
+ * Create an empty directory for your copy of the repository. For best results, call it `engine`: some of the tools assume this name when working across repositories. (They can be configured to use other names too, so this isn't a strict requirement.)
  * Create a `.gclient` file in the `engine` directory with the following contents, replacing
    `<your_name_here>` with your GitHub account name:
 
