@@ -12,6 +12,7 @@ import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.ResponseBody;
 
@@ -28,10 +29,13 @@ import org.chromium.mojom.mojo.UrlLoaderStatus;
 import org.chromium.mojom.mojo.UrlRequest;
 import org.chromium.mojom.mojo.UrlResponse;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.util.concurrent.Executor;
 
@@ -139,8 +143,37 @@ public class UrlLoaderImpl implements UrlLoader {
             return;
         }
 
+        RequestBody body = null;
+        if (request.body != null && request.body[0] != null) {
+          DataPipe.ConsumerHandle consumer = request.body[0];
+          ByteArrayOutputStream bodyStream = new ByteArrayOutputStream();
+          WritableByteChannel dest = Channels.newChannel(bodyStream);
+          do {
+              try {
+                  ByteBuffer buffer = consumer.beginReadData(0, DataPipe.ReadFlags.NONE);
+                  if (buffer.capacity() == 0) break;
+                  dest.write(buffer);
+                  consumer.endReadData(buffer.capacity());
+              } catch (IOException e) {
+                  throw new MojoException(e);
+              } catch (MojoException e) {
+                  // No one read the pipe, they just closed it.
+                  if (e.getMojoResult() == MojoResult.FAILED_PRECONDITION) {
+                      break;
+                  } else if (e.getMojoResult() == MojoResult.SHOULD_WAIT) {
+                      mCore.wait(consumer, Core.HandleSignals.READABLE, -1);
+                  } else {
+                      throw e;
+                  }
+              }
+          } while (true);
+          String contentType = "application/x-www-form-urlencoded; charset=utf8";
+          MediaType mediaType = MediaType.parse(contentType);
+          body = RequestBody.create(mediaType, bodyStream.toByteArray());
+        }
+
         Request.Builder builder =
-                new Request.Builder().url(url).method(request.method, null);
+                new Request.Builder().url(url).method(request.method, body);
 
         if (request.headers != null) {
             for (HttpHeader header : request.headers) {
