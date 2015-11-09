@@ -30,7 +30,7 @@ class StartCommand extends FlutterCommand {
         defaultsTo: true,
         help: 'Toggle Dart\'s checked mode.');
     argParser.addOption('target',
-        defaultsTo: '.',
+        defaultsTo: '',
         abbr: 't',
         help: 'Target app path or filename to start.');
     argParser.addFlag('boot',
@@ -67,6 +67,14 @@ class StartCommand extends FlutterCommand {
         String mainPath = target;
         if (FileSystemEntity.isDirectorySync(target))
           mainPath = path.join(target, 'lib', 'main.dart');
+        if (!FileSystemEntity.isFileSync(mainPath)) {
+          String message = 'Tried to run ${mainPath}, but that file does not exist.';
+          if (!argResults.wasParsed('target'))
+            message += '\nConsider using the -t option to specify that Dart file to start.';
+          stderr.writeln(message);
+          continue;
+        }
+
         BuildCommand builder = new BuildCommand();
         builder.inheritFromParent(this);
         await builder.buildInTempDir(
