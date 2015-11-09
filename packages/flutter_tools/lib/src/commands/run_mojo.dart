@@ -15,8 +15,6 @@ import '../process.dart';
 
 final Logger _logging = new Logger('sky_tools.run_mojo');
 
-enum _MojoConfig { Debug, Release }
-
 class RunMojoCommand extends Command {
   final String name = 'run_mojo';
   final String description = 'Run a Flutter app in mojo.';
@@ -28,7 +26,8 @@ class RunMojoCommand extends Command {
     argParser.addFlag('mojo-release', negatable: false, help: 'Use Release build of mojo (default)');
 
     argParser.addOption('app', defaultsTo: 'app.flx');
-    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services for Linux and to mojo devtools from Android.');
+    argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services.');
+    argParser.addOption('devtools-path', help: 'Path to mojo devtools\' mojo_run command.');
   }
 
   // TODO(abarth): Why not use path.absolute?
@@ -40,49 +39,74 @@ class RunMojoCommand extends Command {
     return file.absolute.path;
   }
 
-  Future<int> _runAndroid(String devtoolsPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) {
-    String skyViewerUrl = ArtifactStore.getCloudStorageBaseUrl('viewer', 'android-arm');
-    String command = _makePathAbsolute(devtoolsPath);
-    String appName = path.basename(appPath);
-    String appDir = path.dirname(appPath);
-    String buildFlag = mojoConfig == _MojoConfig.Debug ? '--debug' : '--release';
-    List<String> cmd = [
-      command,
-      '--android',
-      buildFlag,
-      'http://app/$appName',
-      '--map-origin=http://app/=$appDir',
-      '--map-origin=http://sky_viewer/=$skyViewerUrl',
-      '--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo',
-    ];
-    if (_logging.level <= Level.INFO) {
-      cmd.add('--verbose');
-      if (_logging.level <= Level.FINE) {
-        cmd.add('--verbose');
-      }
+  bool _useDevtools() {
+    if (argResults['android'] || argResults['devtools-path'] != null) {
+      return true;
     }
-    cmd.addAll(additionalArgs);
-    return runCommandAndStreamOutput(cmd);
+    return false;
   }
 
-  Future<int> _runLinux(String mojoPath, _MojoConfig mojoConfig, String appPath, List<String> additionalArgs) async {
-    Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
-    String viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
-    String mojoBuildType = mojoConfig == _MojoConfig.Debug ? 'Debug' : 'Release';
-    String mojoShellPath = _makePathAbsolute(path.join(mojoPath, 'out', mojoBuildType, 'mojo_shell'));
-    List<String> cmd = [
-      mojoShellPath,
-      'file://${appPath}',
-      '--url-mappings=mojo:sky_viewer=file://${viewerPath}'
-    ];
-    cmd.addAll(additionalArgs);
-    return runCommandAndStreamOutput(cmd);
+  String _getDevtoolsPath() {
+    if (argResults['devtools-path'] != null) {
+      return _makePathAbsolute(argResults['devtools-path']);
+    }
+    return _makePathAbsolute(path.join(argResults['mojo-path'], 'mojo', 'devtools', 'common', 'mojo_run'));
+  }
+
+  String _getMojoShellPath() {
+    final mojoBuildType = argResults['mojo-debug']  ? 'Debug' : 'Release';
+    return _makePathAbsolute(path.join(argResults['mojo-path'], 'out', mojoBuildType, 'mojo_shell'));
+  }
+
+  Future<List<String>> _getShellConfig() async {
+    List<String> args = [];
+
+    final useDevtools = _useDevtools();
+    final command = useDevtools ? _getDevtoolsPath() : _getMojoShellPath();
+    args.add(command);
+
+    if (argResults['android']) {
+      args.add('--android');
+      final skyViewerUrl = ArtifactStore.getCloudStorageBaseUrl('viewer', 'android-arm');
+      final appPath = _makePathAbsolute(argResults['app']);
+      final appName = path.basename(appPath);
+      final appDir = path.dirname(appPath);
+      args.add('http://app/$appName');
+      args.add('--map-origin=http://app/=$appDir');
+      args.add('--map-origin=http://sky_viewer/=$skyViewerUrl');
+      args.add('--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo');
+    } else {
+      final appPath = _makePathAbsolute(argResults['app']);
+      Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
+      final viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      args.add('file://${appPath}');
+      args.add('--url-mappings=mojo:sky_viewer=file://${viewerPath}');
+    }
+
+    if (useDevtools) {
+      final buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
+      args.add(buildFlag);
+      if (_logging.level <= Level.INFO) {
+        args.add('--verbose');
+        if (_logging.level <= Level.FINE) {
+          args.add('--verbose');
+        }
+      }
+    }
+
+    if (argResults['checked']) {
+      args.add('--args-for=mojo:sky_viewer --enable-checked-mode');
+    }
+
+    args.addAll(argResults.rest);
+    print(args);
+    return args;
   }
 
   @override
   Future<int> run() async {
-    if (argResults['mojo-path'] == null) {
-      _logging.severe('Must specify --mojo-path.');
+    if ((argResults['mojo-path'] == null && argResults['devtools-path'] == null) || (argResults['mojo-path'] != null && argResults['devtools-path'] != null)) {
+      _logging.severe('Must specify either --mojo-path or --devtools-path.');
       return 1;
     }
 
@@ -90,19 +114,7 @@ class RunMojoCommand extends Command {
       _logging.severe('Cannot specify both --mojo-debug and --mojo-release');
       return 1;
     }
-    List<String> args = [];
-    if (argResults['checked']) {
-      args.add('--args-for=mojo:sky_viewer --enable-checked-mode');
-    }
-    String mojoPath = argResults['mojo-path'];
-    _MojoConfig mojoConfig = argResults['mojo-debug'] ? _MojoConfig.Debug : _MojoConfig.Release;
-    String appPath = _makePathAbsolute(argResults['app']);
 
-    args.addAll(argResults.rest);
-    if (argResults['android']) {
-      return _runAndroid(mojoPath, mojoConfig, appPath, args);
-    } else {
-      return _runLinux(mojoPath, mojoConfig, appPath, args);
-    }
+    return runCommandAndStreamOutput(await _getShellConfig());
   }
 }
