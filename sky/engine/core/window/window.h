@@ -7,9 +7,10 @@
 
 #include "base/time/time.h"
 #include "sky/engine/tonic/dart_persistent_value.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/services/pointer/pointer.mojom.h"
 
 namespace blink {
-class Event;
 class Scene;
 struct SkyDisplayMetrics;
 class DartLibraryNatives;
@@ -32,7 +33,8 @@ class Window {
 
   void DidCreateIsolate();
   void UpdateWindowMetrics(const SkyDisplayMetrics& metrics);
-  void DispatchEvent(Event* event);
+  void DispatchEvent(const String& event_type, double time_stamp);
+  void DispatchPointerPacket(const pointer::PointerPacketPtr& packet);
   void BeginFrame(base::TimeTicks frameTime);
 
   static void RegisterNatives(DartLibraryNatives* natives);

@@ -20,9 +20,14 @@ void _updateWindowMetrics(double devicePixelRatio,
     window.onMetricsChanged();
 }
 
-void _dispatchEvent(Event event) {
+void _dispatchEvent(String eventType, double timeStamp) {
   if (window.onEvent != null)
-    window.onEvent(event);
+    window.onEvent(eventType, timeStamp);
+}
+
+void _dispatchPointerPacket(ByteData serializedPacket) {
+  if (window.onPointerPacket != null)
+    window.onPointerPacket(serializedPacket);
 }
 
 void _beginFrame(int microseconds) {

@@ -30,8 +30,6 @@
 
 #include "sky/engine/core/Init.h"
 
-#include "gen/sky/core/EventNames.h"
-#include "gen/sky/core/EventTypeNames.h"
 #include "gen/sky/platform/FontFamilyNames.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/PlatformThreadData.h"
@@ -44,8 +42,6 @@ void CoreInitializer::init()
     ASSERT(!m_isInited);
     m_isInited = true;
 
-    EventNames::init();
-    EventTypeNames::init();
     FontFamilyNames::init();
 
     // It would make logical sense to do this in WTF::initialize() but there are

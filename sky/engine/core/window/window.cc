@@ -5,7 +5,6 @@
 #include "sky/engine/core/window/window.h"
 
 #include "sky/engine/core/compositing/Scene.h"
-#include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -67,15 +66,40 @@ void Window::UpdateWindowMetrics(const SkyDisplayMetrics& metrics) {
   });
 }
 
-void Window::DispatchEvent(Event* event) {
+void Window::DispatchEvent(const String& event_type, double time_stamp) {
   DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
   DartState::Scope scope(dart_state);
 
   DartInvokeField(library_.value(), "_dispatchEvent", {
-    ToDart(event),
+    DartConverter<String>::ToDart(dart_state, event_type),
+    ToDart(time_stamp)
   });
+}
+
+void Window::DispatchPointerPacket(const pointer::PointerPacketPtr& packet) {
+  DartState* dart_state = library_.dart_state().get();
+  if (!dart_state)
+    return;
+  DartState::Scope scope(dart_state);
+
+  Dart_Handle data_handle = Dart_NewTypedData(Dart_TypedData_kByteData,
+                                              packet->GetSerializedSize());
+  if (Dart_IsError(data_handle))
+    return;
+
+  Dart_TypedData_Type type;
+  void* data;
+  intptr_t len;
+  if (Dart_IsError(Dart_TypedDataAcquireData(data_handle, &type, &data, &len)))
+    return;
+
+  packet->Serialize(data, len);
+
+  Dart_TypedDataReleaseData(data_handle);
+
+  DartInvokeField(library_.value(), "_dispatchPointerPacket", {data_handle});
 }
 
 void Window::BeginFrame(base::TimeTicks frameTime) {

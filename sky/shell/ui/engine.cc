@@ -23,7 +23,6 @@
 #include "sky/shell/service_provider.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/ui/animator.h"
-#include "sky/shell/ui/input_event_converter.h"
 #include "sky/shell/ui/internals.h"
 #include "sky/shell/ui/platform_impl.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -152,16 +151,28 @@ void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
 
 void Engine::OnInputEvent(InputEventPtr event) {
   TRACE_EVENT0("sky", "Engine::OnInputEvent");
-  scoped_ptr<blink::WebInputEvent> web_event =
-      ConvertEvent(event, display_metrics_.device_pixel_ratio);
-  if (!web_event)
+
+  if (event->type != EventType::BACK)
     return;
+
+  scoped_ptr<blink::WebInputEvent> web_event(blink::WebInputEvent::create());
+  web_event->type = blink::WebInputEvent::Back;
+  web_event->timeStampMS = currentTimeMS();
   if (sky_view_)
     sky_view_->HandleInputEvent(*web_event);
 }
 
 void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
-  // TODO(abarth): Process pointer events in packets.
+  TRACE_EVENT0("sky", "Engine::OnPointerPacket");
+
+  // Convert the pointers' x and y coordinates to logical pixels.
+  for (auto it = packet->pointers.begin(); it != packet->pointers.end(); ++it) {
+    (*it)->x /= display_metrics_.device_pixel_ratio;
+    (*it)->y /= display_metrics_.device_pixel_ratio;
+  }
+
+  if (sky_view_)
+    sky_view_->HandlePointerPacket(packet);
 }
 
 void Engine::RunFromLibrary(const std::string& name) {

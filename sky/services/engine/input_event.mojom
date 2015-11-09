@@ -7,35 +7,7 @@ module sky;
 
 enum EventType {
   UNKNOWN,
-  POINTER_CANCEL,
-  POINTER_DOWN,
-  POINTER_MOVE,
-  POINTER_UP,
   BACK,
-};
-
-enum PointerKind {
-  TOUCH,
-};
-
-struct PointerData {
-  int32 pointer;
-  PointerKind kind;
-  float x;
-  float y;
-  int32 buttons;
-  float pressure;
-  float pressure_min;
-  float pressure_max;
-  float distance;
-  float distance_min;
-  float distance_max;
-  float radius_major;
-  float radius_minor;
-  float radius_min;
-  float radius_max;
-  float orientation;
-  float tilt;
 };
 
 // TODO(abarth): Should we have a malloc-free way of creating an input event
@@ -43,5 +15,4 @@ struct PointerData {
 struct InputEvent {
   EventType type;
   int64 time_stamp;
-  PointerData? pointer_data;
 };

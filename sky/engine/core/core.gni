@@ -27,19 +27,6 @@ sky_core_files = [
   "editing/CompositionUnderline.h",
   "editing/CompositionUnderlineRangeFilter.cpp",
   "editing/CompositionUnderlineRangeFilter.h",
-  "events/Event.cpp",
-  "events/Event.h",
-  "events/EventSender.h",
-  "events/GestureVelocity.cpp",
-  "events/GestureVelocity.h",
-  "events/KeyboardEvent.cpp",
-  "events/KeyboardEvent.h",
-  "events/PointerEvent.cpp",
-  "events/PointerEvent.h",
-  "events/VelocityTracker.cpp",
-  "events/VelocityTracker.h",
-  "events/WheelEvent.cpp",
-  "events/WheelEvent.h",
   "painting/Canvas.cpp",
   "painting/Canvas.h",
   "painting/CanvasColor.cpp",
@@ -253,12 +240,6 @@ sky_core_files = [
 core_idl_files = get_path_info([
                                  "compositing/Scene.idl",
                                  "compositing/SceneBuilder.idl",
-                                 "events/Event.idl",
-                                 "events/GestureVelocity.idl",
-                                 "events/KeyboardEvent.idl",
-                                 "events/PointerEvent.idl",
-                                 "events/VelocityTracker.idl",
-                                 "events/WheelEvent.idl",
                                  "painting/Canvas.idl",
                                  "painting/ColorFilter.idl",
                                  "painting/Drawable.idl",
@@ -306,12 +287,3 @@ core_dart_files = get_path_info([
                                   "painting/VertexMode.dart",
                                 ],
                                 "abspath")
-
-# interfaces that inherit from Event, including Event itself
-core_event_idl_files = get_path_info([
-                                       "events/Event.idl",
-                                       "events/KeyboardEvent.idl",
-                                       "events/PointerEvent.idl",
-                                       "events/WheelEvent.idl",
-                                     ],
-                                     "abspath")

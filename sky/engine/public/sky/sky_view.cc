@@ -7,9 +7,6 @@
 #include "base/bind.h"
 #include "base/trace_event/trace_event.h"
 #include "sky/engine/core/compositing/Scene.h"
-#include "sky/engine/core/events/KeyboardEvent.h"
-#include "sky/engine/core/events/PointerEvent.h"
-#include "sky/engine/core/events/WheelEvent.h"
 #include "sky/engine/core/script/dart_controller.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/core/window/window.h"
@@ -74,23 +71,14 @@ std::unique_ptr<sky::compositor::LayerTree> SkyView::BeginFrame(
 void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
   TRACE_EVENT0("input", "SkyView::HandleInputEvent");
 
-  RefPtr<Event> event;
-
-  if (WebInputEvent::isPointerEventType(inputEvent.type)) {
-    const WebPointerEvent& webEvent = static_cast<const WebPointerEvent&>(inputEvent);
-    event = PointerEvent::create(webEvent);
-  } else if (WebInputEvent::isKeyboardEventType(inputEvent.type)) {
-    const WebKeyboardEvent& webEvent = static_cast<const WebKeyboardEvent&>(inputEvent);
-    event = KeyboardEvent::create(webEvent);
-  } else if (WebInputEvent::isWheelEventType(inputEvent.type)) {
-    const WebWheelEvent& webEvent = static_cast<const WebWheelEvent&>(inputEvent);
-    event = WheelEvent::create(webEvent);
-  } else if (inputEvent.type == WebInputEvent::Back) {
-    event = Event::create("back");
+  if (inputEvent.type == WebInputEvent::Back) {
+    GetWindow()->DispatchEvent("back", inputEvent.timeStampMS);
   }
+}
 
-  if (event)
-    GetWindow()->DispatchEvent(event.get());
+void SkyView::HandlePointerPacket(const pointer::PointerPacketPtr& packet) {
+  TRACE_EVENT0("input", "SkyView::HandlePointerPacket");
+  GetWindow()->DispatchPointerPacket(packet);
 }
 
 Window* SkyView::GetWindow() {

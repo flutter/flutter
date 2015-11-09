@@ -2,6 +2,7 @@ dart:io,::,_setupHooks
 dart:mojo.internal,MojoHandleWatcher,_start
 dart:ui,::,_beginFrame
 dart:ui,::,_dispatchEvent
+dart:ui,::,_dispatchPointerPacket
 dart:ui,::,_getCreateTimerClosure
 dart:ui,::,_getGetBaseURLClosure
 dart:ui,::,_getMainClosure

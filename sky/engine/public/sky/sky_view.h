@@ -19,6 +19,7 @@
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
+#include "sky/services/pointer/pointer.mojom.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
@@ -50,6 +51,7 @@ class SkyView : public WindowClient {
                        mojo::ScopedDataPipeConsumerHandle snapshot);
 
   void HandleInputEvent(const WebInputEvent& event);
+  void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
 
   void StartDartTracing();
   void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);

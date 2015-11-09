@@ -7,13 +7,19 @@
 
 #include "base/memory/scoped_ptr.h"
 #include "mojo/services/input_events/interfaces/input_events.mojom.h"
+#include "sky/services/pointer/pointer.mojom.h"
 
 namespace blink {
 class WebInputEvent;
 }
 
 namespace sky {
+bool IsPointerEvent(const mojo::EventPtr& event);
+
 scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
+                                              float device_pixel_ratio);
+
+pointer::PointerPacketPtr ConvertPointerEvent(const mojo::EventPtr& event,
                                               float device_pixel_ratio);
 }
 
