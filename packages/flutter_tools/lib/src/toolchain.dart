@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
@@ -29,8 +30,12 @@ class Compiler {
 }
 
 Future<String> _getCompilerPath(BuildConfiguration config) async {
-  if (config.type != BuildType.prebuilt)
-    return path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
+  if (config.type != BuildType.prebuilt) {
+    String compilerPath = path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
+    if (FileSystemEntity.isFileSync(compilerPath))
+      return compilerPath;
+    return null;
+  }
   Artifact artifact = ArtifactStore.getArtifact(
     type: ArtifactType.snapshot, hostPlatform: config.hostPlatform);
   return await ArtifactStore.getPath(artifact);
@@ -42,8 +47,11 @@ class Toolchain {
   final Compiler compiler;
 
   static Future<Toolchain> forConfigs(List<BuildConfiguration> configs) async {
-    // TODO(abarth): Shouldn't we consider all the configs?
-    String compilerPath = await _getCompilerPath(configs.first);
-    return new Toolchain(compiler: new Compiler(compilerPath));
+    for (BuildConfiguration config in configs) {
+      String compilerPath = await _getCompilerPath(config);
+      if (compilerPath != null)
+        return new Toolchain(compiler: new Compiler(compilerPath));
+    }
+    return null;
   }
 }
