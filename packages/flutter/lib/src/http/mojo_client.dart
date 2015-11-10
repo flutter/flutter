@@ -2,19 +2,16 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-library base_client;
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/src/services/shell.dart';
+import 'package:mojo_services/mojo/network_service.mojom.dart' as mojo;
+import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojo;
 import 'package:mojo/core.dart' as mojo;
 import 'package:mojo/mojo/url_request.mojom.dart' as mojo;
 import 'package:mojo/mojo/url_response.mojom.dart' as mojo;
-import 'package:mojo_services/mojo/network_service.mojom.dart' as mojo;
-import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojo;
-
-import 'package:flutter/src/services/shell.dart';
 
 import 'response.dart';
 
@@ -74,32 +71,29 @@ class MojoClient {
     if (body != null) {
       mojo.MojoDataPipe pipe = new mojo.MojoDataPipe();
       request.body = <mojo.MojoDataPipeConsumer>[pipe.consumer];
-      ByteData data = new ByteData.view(UTF8.encode(body).buffer);
+      Uint8List encodedBody = UTF8.encode(body);
+      ByteData data = new ByteData.view(encodedBody.buffer);
       mojo.DataPipeFiller.fillHandle(pipe.producer, data);
     }
     try {
       _networkService.ptr.createUrlLoader(loader);
       mojo.UrlResponse response = (await loader.ptr.start(request)).response;
       ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
-      Uint8List bodyAsList = new Uint8List.view(data.buffer);
-      String bodyAsString = new String.fromCharCodes(bodyAsList);
-      return new Response(bodyAsString, response.statusCode);
+      Uint8List bodyBytes = new Uint8List.view(data.buffer);
+      String body = new String.fromCharCodes(bodyBytes);
+      return new Response(body: body, bodyBytes: bodyBytes, statusCode: response.statusCode);
     } catch (e) {
       print("NetworkService unavailable $e");
-      return new Response(null, 500);
+      return new Response(statusCode: 500);
     } finally {
       loader.close();
     }
   }
 
   void _checkResponseSuccess(url, Response response) {
-    if (response.statusCode < 400) return;
-    var message = "Request to $url failed with status ${response.statusCode}";
-    if (response.reasonPhrase != null) {
-      message = "$message: ${response.reasonPhrase}";
-    }
-    if (url is String) url = Uri.parse(url);
-    throw new ClientException("$message.", url);
+    if (response.statusCode < 400)
+      return;
+    throw new Exception("Request to $url failed with status ${response.statusCode}.");
   }
 
   void close() {}
