@@ -42,7 +42,7 @@ Getting the code and configuring your environment
  * `git remote add upstream git@github.com:flutter/flutter.git` (So that you
    fetch from the master repository, not your clone, when running `git fetch`
    et al.)
- * Run `./dev/update_packages.py` This will fetch all the Dart packages that
+ * Run `dart ./dev/update_packages.dart` This will fetch all the Dart packages that
    Flutter depends on. You can replicate what this script does by running
    `pub get` in each directory that contains a `pubspec.yaml` file.
  * Add this repository's `bin` directory to your path. That will let you use the
