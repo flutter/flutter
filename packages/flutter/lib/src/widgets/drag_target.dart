@@ -19,15 +19,6 @@ typedef void DragTargetAccept<T>(T data);
 typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 typedef void DragStartCallback(Point position, int pointer);
 
-typedef DraggableBase<T> DraggableConstructor<T>({
-  Key key,
-  T data,
-  Widget child,
-  Widget feedback,
-  Offset feedbackOffset,
-  DragAnchor dragAnchor
-});
-
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
   /// feedback is identical to the child, then this means the feedback will

@@ -77,11 +77,8 @@ class ExampleDragSource extends StatelessComponent {
 
   Widget build(BuildContext context) {
     double size = kDotSize;
-    DraggableConstructor<Color> constructor = new Draggable<Color>#;
-    if (heavy) {
+    if (heavy)
       size *= kHeavyMultiplier;
-      constructor = new LongPressDraggable<Color>#;
-    }
 
     Widget contents = new DefaultTextStyle(
       style: Theme.of(context).text.body1.copyWith(textAlign: TextAlign.center),
@@ -112,13 +109,23 @@ class ExampleDragSource extends StatelessComponent {
       anchor = DragAnchor.child;
     }
 
-    return constructor(
-      data: color,
-      child: contents,
-      feedback: feedback,
-      feedbackOffset: feedbackOffset,
-      dragAnchor: anchor
-    );
+    if (heavy) {
+      return new Draggable<Color>(
+        data: color,
+        child: contents,
+        feedback: feedback,
+        feedbackOffset: feedbackOffset,
+        dragAnchor: anchor
+      );
+    } else {
+      return new LongPressDraggable<Color>(
+        data: color,
+        child: contents,
+        feedback: feedback,
+        feedbackOffset: feedbackOffset,
+        dragAnchor: anchor
+      );
+    }
   }
 }
 
