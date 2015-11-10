@@ -124,122 +124,141 @@ public class UrlLoaderImpl implements UrlLoader {
 
     @Override
     public void start(UrlRequest request, StartResponse callback) {
-        TraceEvent.startAsync("UrlLoaderImpl", mTracingId);
-        mIsLoading = true;
-        mError = null;
+        mExecutor.execute(new StartRequestJob(request, callback));
+    }
 
-        URL url = null;
-        try {
-            url = new URL(request.url);
-        } catch (MalformedURLException e) {
-            Log.w(TAG, "Failed to parse url " + request.url);
-            mError = new NetworkError();
-            // TODO(abarth): Which mError.code should we set?
-            mError.description = e.toString();
-            UrlResponse urlResponse = new UrlResponse();
-            urlResponse.url = request.url;
-            urlResponse.error = mError;
-            callback.call(urlResponse);
-            return;
+    class StartRequestJob implements Runnable {
+        private final UrlRequest mRequest;
+        private final StartResponse mCallback;
+
+        public StartRequestJob(UrlRequest request, StartResponse callback) {
+            mRequest = request;
+            mCallback = callback;
         }
 
-        RequestBody body = null;
-        if (request.body != null && request.body[0] != null) {
-          DataPipe.ConsumerHandle consumer = request.body[0];
-          ByteArrayOutputStream bodyStream = new ByteArrayOutputStream();
-          WritableByteChannel dest = Channels.newChannel(bodyStream);
-          do {
-              try {
-                  ByteBuffer buffer = consumer.beginReadData(0, DataPipe.ReadFlags.NONE);
-                  if (buffer.capacity() == 0) break;
-                  dest.write(buffer);
-                  consumer.endReadData(buffer.capacity());
-              } catch (IOException e) {
-                  throw new MojoException(e);
-              } catch (MojoException e) {
-                  // No one read the pipe, they just closed it.
-                  if (e.getMojoResult() == MojoResult.FAILED_PRECONDITION) {
-                      break;
-                  } else if (e.getMojoResult() == MojoResult.SHOULD_WAIT) {
-                      mCore.wait(consumer, Core.HandleSignals.READABLE, -1);
-                  } else {
-                      throw e;
-                  }
-              }
-          } while (true);
-          String contentType = "application/x-www-form-urlencoded; charset=utf8";
-          MediaType mediaType = MediaType.parse(contentType);
-          body = RequestBody.create(mediaType, bodyStream.toByteArray());
-        }
+        @Override
+        public void run() {
 
-        Request.Builder builder =
-                new Request.Builder().url(url).method(request.method, body);
+            TraceEvent.startAsync("UrlLoaderImpl", mTracingId);
+            mIsLoading = true;
+            mError = null;
 
-        if (request.headers != null) {
-            for (HttpHeader header : request.headers) {
-                builder.addHeader(header.name, header.value);
-            }
-        }
-
-        // TODO(abarth): body, responseBodyBufferSize, autoFollowRedirects, bypassCache.
-        final StartResponse responseCallback = callback;
-        Call call = mClient.newCall(builder.build());
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                Log.w(TAG, "Network failure loading " + request.urlString());
+            URL url = null;
+            try {
+                url = new URL(mRequest.url);
+            } catch (MalformedURLException e) {
+                Log.w(TAG, "Failed to parse url " + mRequest.url);
                 mError = new NetworkError();
                 // TODO(abarth): Which mError.code should we set?
                 mError.description = e.toString();
                 UrlResponse urlResponse = new UrlResponse();
-                urlResponse.url = request.urlString();
+                urlResponse.url = mRequest.url;
                 urlResponse.error = mError;
-                responseCallback.call(urlResponse);
-
-                mIsLoading = false;
-                TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
+                mCallback.call(urlResponse);
+                return;
             }
 
-            @Override
-            public void onResponse(Response response) {
-                UrlResponse urlResponse = new UrlResponse();
-                urlResponse.url = response.request().urlString();
-                urlResponse.statusCode = response.code();
-                urlResponse.statusLine = response.message();
-
-                if (urlResponse.statusCode >= 400) {
-                    Log.w(TAG, "Failed to load: " + urlResponse.url + " ("
-                            + urlResponse.statusCode + ")");
+            RequestBody body = null;
+            if (mRequest.body != null && mRequest.body[0] != null) {
+                if (mRequest.body.length > 1) {
+                    Log.w(TAG, "POST requests with multiple bodies are not supported");
                 }
 
-                Headers headers = response.headers();
-                urlResponse.headers = new HttpHeader[headers.size()];
-                for (int i = 0; i < headers.size(); ++i) {
-                    HttpHeader header = new HttpHeader();
-                    header.name = headers.name(i);
-                    header.value = headers.value(i);
-                    urlResponse.headers[i] = header;
-                }
-
-                ResponseBody body = response.body();
-                MediaType mediaType = body.contentType();
-                if (mediaType != null) {
-                    urlResponse.mimeType = mediaType.type() + "/" + mediaType.subtype();
-                    Charset charset = mediaType.charset();
-                    if (charset != null) {
-                        urlResponse.charset = charset.displayName();
+                DataPipe.ConsumerHandle consumer = mRequest.body[0];
+                ByteArrayOutputStream bodyStream = new ByteArrayOutputStream();
+                WritableByteChannel dest = Channels.newChannel(bodyStream);
+                do {
+                    try {
+                        ByteBuffer buffer = consumer.beginReadData(0, DataPipe.ReadFlags.NONE);
+                        if (buffer.capacity() == 0) break;
+                        dest.write(buffer);
+                        consumer.endReadData(buffer.capacity());
+                    } catch (IOException e) {
+                        throw new MojoException(e);
+                    } catch (MojoException e) {
+                        // No one read the pipe, they just closed it.
+                        if (e.getMojoResult() == MojoResult.FAILED_PRECONDITION) {
+                            break;
+                        } else if (e.getMojoResult() == MojoResult.SHOULD_WAIT) {
+                            mCore.wait(consumer, Core.HandleSignals.READABLE, -1);
+                        } else {
+                            throw e;
+                        }
                     }
+                } while (true);
+                String contentType = "application/x-www-form-urlencoded; charset=utf8";
+                MediaType mediaType = MediaType.parse(contentType);
+                body = RequestBody.create(mediaType, bodyStream.toByteArray());
+            }
+
+            Request.Builder builder =
+                    new Request.Builder().url(url).method(mRequest.method, body);
+
+            if (mRequest.headers != null) {
+                for (HttpHeader header : mRequest.headers) {
+                    builder.addHeader(header.name, header.value);
+                }
+            }
+
+            // TODO(abarth): responseBodyBufferSize, autoFollowRedirects, bypassCache.
+            Call call = mClient.newCall(builder.build());
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    Log.w(TAG, "Network failure loading " + mRequest.url);
+                    mError = new NetworkError();
+                    // TODO(abarth): Which mError.code should we set?
+                    mError.description = e.toString();
+                    UrlResponse urlResponse = new UrlResponse();
+                    urlResponse.url = mRequest.url;
+                    urlResponse.error = mError;
+                    mCallback.call(urlResponse);
+
+                    mIsLoading = false;
+                    TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
                 }
 
-                Pair<DataPipe.ProducerHandle, DataPipe.ConsumerHandle> handles =
-                        mCore.createDataPipe(null);
-                DataPipe.ProducerHandle producerHandle = handles.first;
-                DataPipe.ConsumerHandle consumerHandle = handles.second;
-                urlResponse.body = consumerHandle;
-                responseCallback.call(urlResponse);
-                mExecutor.execute(new CopyToPipeJob(body, producerHandle));
-            }
-        });
+                @Override
+                public void onResponse(Response response) {
+                    UrlResponse urlResponse = new UrlResponse();
+                    urlResponse.url = response.request().urlString();
+                    urlResponse.statusCode = response.code();
+                    urlResponse.statusLine = response.message();
+
+                    if (urlResponse.statusCode >= 400) {
+                        Log.w(TAG, "Failed to load: " + urlResponse.url + " ("
+                                + urlResponse.statusCode + ")");
+                    }
+
+                    Headers headers = response.headers();
+                    urlResponse.headers = new HttpHeader[headers.size()];
+                    for (int i = 0; i < headers.size(); ++i) {
+                        HttpHeader header = new HttpHeader();
+                        header.name = headers.name(i);
+                        header.value = headers.value(i);
+                        urlResponse.headers[i] = header;
+                    }
+
+                    ResponseBody body = response.body();
+                    MediaType mediaType = body.contentType();
+                    if (mediaType != null) {
+                        urlResponse.mimeType = mediaType.type() + "/" + mediaType.subtype();
+                        Charset charset = mediaType.charset();
+                        if (charset != null) {
+                            urlResponse.charset = charset.displayName();
+                        }
+                    }
+
+                    Pair<DataPipe.ProducerHandle, DataPipe.ConsumerHandle> handles =
+                            mCore.createDataPipe(null);
+                    DataPipe.ProducerHandle producerHandle = handles.first;
+                    DataPipe.ConsumerHandle consumerHandle = handles.second;
+                    urlResponse.body = consumerHandle;
+                    mCallback.call(urlResponse);
+                    mExecutor.execute(new CopyToPipeJob(body, producerHandle));
+                }
+            });
+        }
     }
 
     @Override
