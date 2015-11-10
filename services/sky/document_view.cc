@@ -268,13 +268,20 @@ void DocumentView::HandleInputEvent(mojo::EventPtr event) {
   if (!viewport_metrics_)
     return;
   float device_pixel_ratio = viewport_metrics_->device_pixel_ratio;
-  scoped_ptr<blink::WebInputEvent> web_event =
-      ConvertEvent(event, device_pixel_ratio);
-  if (!web_event)
-    return;
 
-  if (sky_view_)
-    sky_view_->HandleInputEvent(*web_event);
+  if (IsPointerEvent(event)) {
+    pointer::PointerPacketPtr packet =
+        ConvertPointerEvent(event, device_pixel_ratio);
+    sky_view_->HandlePointerPacket(packet);
+  } else {
+    scoped_ptr<blink::WebInputEvent> web_event =
+        ConvertEvent(event, device_pixel_ratio);
+    if (!web_event)
+      return;
+
+    if (sky_view_)
+      sky_view_->HandleInputEvent(*web_event);
+  }
 }
 
 void DocumentView::StartDebuggerInspectorBackend() {

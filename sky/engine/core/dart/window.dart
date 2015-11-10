@@ -6,7 +6,8 @@ part of dart_ui;
 
 typedef void VoidCallback();
 typedef void _FrameCallback(Duration duration);
-typedef void _EventCallback(Event event);
+typedef void _EventCallback(String eventType, double timeStamp);
+typedef void _PointerPacketCallback(ByteData serializedPacket);
 
 class WindowPadding {
   const WindowPadding._({ this.top, this.right, this.bottom, this.left });
@@ -31,6 +32,7 @@ class Window {
 
   _FrameCallback onBeginFrame;
   _EventCallback onEvent;
+  _PointerPacketCallback onPointerPacket;
   VoidCallback onMetricsChanged;
 
   void scheduleFrame() native "Window_scheduleFrame";

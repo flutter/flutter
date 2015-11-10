@@ -34,7 +34,6 @@ source_set("libraries") {
 source_set("prerequisites") {
   deps = [
     ":libraries",
-    ":make_core_generated",
     "//sky/engine/platform",
   ]
 
@@ -67,12 +66,12 @@ static_library("core") {
   output_name = "sky_core"
 
   deps = [
-    ":core_generated",
     ":generate_sky_embedder_service_isolate_resources_cc",
     ":libraries",
     ":prerequisites",
     "//sky/engine/platform",
     "//sky/engine/bindings",
+    "//sky/services/pointer:interfaces",
     "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
@@ -92,125 +91,6 @@ static_library("core") {
 
   # core and core_generated are really the same thing.
   allow_circular_includes_from = [
-    ":core_generated",
     "//sky/engine/bindings",
-  ]
-}
-
-source_set("core_generated") {
-  configs += [ "..:inside_blink" ]
-
-  deps = [
-    ":make_core_generated",
-    ":prerequisites",
-    "//skia",
-    "//sky/engine/platform",
-    "//sky/engine/wtf",
-    "//third_party/iccjpeg",
-    "//third_party/libpng",
-    "//third_party/qcms",
-    "//url",
-  ]
-
-  include_dirs = [ "$root_build_dir" ]
-}
-
-# core_event_interfaces --------------------------------------------------------
-
-# Calls generate_event_interfaces
-#
-# Parameters:
-#   sources = A list of IDL files to process.
-#   output_file = The .in file to write, relative to the sky_gen_dir.
-#   suffix = (Optional) String to be passed to script via --suffix
-template("generate_event_interfaces") {
-  action(target_name) {
-    # Write the file list to a unique temp file to avoid blowing out the
-    # command line length limit.
-    idl_files_list = "$target_gen_dir/${target_name}_file_list.tmp"
-    write_file(idl_files_list, rebase_path(invoker.sources, root_build_dir))
-
-    inputs = [
-               "//sky/engine/bindings/scripts/utilities.py",
-               idl_files_list,
-             ] + invoker.sources
-
-    output_file = "$root_gen_dir/sky/" + invoker.output_file
-    outputs = [
-      output_file,
-    ]
-
-    script = "//sky/engine/bindings/scripts/generate_event_interfaces.py"
-    args = [
-      "--event-idl-files-list",
-      rebase_path(idl_files_list, root_build_dir),
-      "--event-interfaces-file",
-      rebase_path(output_file, root_build_dir),
-      "--write-file-only-if-changed=1",  # Always true for Ninja.
-    ]
-
-    if (defined(invoker.suffix)) {
-      args += [
-        "--suffix",
-        invoker.suffix,
-      ]
-    }
-  }
-}
-
-generate_event_interfaces("core_event_interfaces") {
-  sources = core_event_idl_files
-  output_file = "core/EventInterfaces.in"
-}
-
-# make_core_generated ----------------------------------------------------------
-
-group("core_names") {
-  deps = [
-    ":make_core_generated_event_names",
-    ":make_core_generated_event_type_names",
-  ]
-}
-
-group("make_core_generated") {
-  deps = [
-    ":core_names",
-    ":make_core_generated_event_factory",
-  ]
-}
-
-process_in_files("make_core_generated_event_factory") {
-  script = "../build/scripts/make_event_factory.py"
-
-  in_files = [
-    "$sky_core_output_dir/EventInterfaces.in",
-    "events/EventAliases.in",
-  ]
-  other_inputs = make_event_factory_files
-  outputs = [
-    "$sky_core_output_dir/EventHeaders.h",
-    "$sky_core_output_dir/EventInterfaces.h",
-  ]
-  deps = [
-    ":core_names",
-    ":libraries",
-  ]
-}
-
-# make_names -------------------------------------------------------------------
-
-make_names("make_core_generated_event_names") {
-  in_files = [ "$sky_core_output_dir/EventInterfaces.in" ]
-  outputs = [
-    "$sky_core_output_dir/EventNames.cpp",
-    "$sky_core_output_dir/EventNames.h",
-  ]
-}
-
-make_names("make_core_generated_event_type_names") {
-  in_files = [ "events/EventTypeNames.in" ]
-  outputs = [
-    "$sky_core_output_dir/EventTypeNames.cpp",
-    "$sky_core_output_dir/EventTypeNames.h",
   ]
 }

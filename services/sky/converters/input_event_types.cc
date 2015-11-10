@@ -31,58 +31,6 @@ int EventFlagsToWebInputEventModifiers(mojo::EventFlags event_flags) {
        blink::WebInputEvent::RightButtonDown : 0);
 }
 
-scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
-    const mojo::EventPtr& event, float device_pixel_ratio) {
-  scoped_ptr<blink::WebPointerEvent> web_event(new blink::WebPointerEvent);
-
-  web_event->modifiers = EventFlagsToWebInputEventModifiers(event->flags);
-  web_event->timeStampMS =
-      base::TimeDelta::FromInternalValue(event->time_stamp).InMillisecondsF();
-
-  switch (event->action) {
-    case mojo::EventType::POINTER_DOWN:
-      web_event->type = blink::WebInputEvent::PointerDown;
-      break;
-    case mojo::EventType::POINTER_MOVE:
-      web_event->type = blink::WebInputEvent::PointerMove;
-      break;
-    case mojo::EventType::POINTER_UP:
-      web_event->type = blink::WebInputEvent::PointerUp;
-      break;
-    case mojo::EventType::POINTER_CANCEL:
-      // FIXME: What mouse event should we listen to in order to learn when the
-      // mouse moves out of the mojo::View?
-      web_event->type = blink::WebInputEvent::PointerCancel;
-      break;
-    default:
-      NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
-      break;
-  }
-
-  if (event->pointer_data->kind == mojo::PointerKind::TOUCH) {
-    web_event->kind = blink::WebPointerEvent::Touch;
-    web_event->pointer = event->pointer_data->pointer_id;
-  } else {
-    web_event->kind = blink::WebPointerEvent::Mouse;
-    // Set the buttons according to http://www.w3.org/TR/pointerevents/
-    int buttons = 0;
-    int modifiers = web_event->modifiers;
-    buttons |= modifiers & blink::WebInputEvent::LeftButtonDown ? 1 << 0 : 0;
-    buttons |= modifiers & blink::WebInputEvent::RightButtonDown ? 1 << 1 : 0;
-    buttons |= modifiers & blink::WebInputEvent::MiddleButtonDown ? 1 << 2 : 0;
-    web_event->buttons = buttons;
-  }
-
-  web_event->x = event->pointer_data->x / device_pixel_ratio;
-  web_event->y = event->pointer_data->y / device_pixel_ratio;
-  web_event->pressure = event->pointer_data->pressure;
-  web_event->radiusMajor = event->pointer_data->radius_major;
-  web_event->radiusMinor = event->pointer_data->radius_minor;
-  web_event->orientation = event->pointer_data->orientation;
-
-  return web_event.Pass();
-}
-
 scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
     const mojo::EventPtr& event,
     float device_pixel_ratio) {
@@ -135,6 +83,15 @@ scoped_ptr<blink::WebInputEvent> BuildWebWheelEvent(
 
 }  // namespace
 
+bool IsPointerEvent(const mojo::EventPtr& event) {
+  return ((event->action == mojo::EventType::POINTER_DOWN ||
+           event->action == mojo::EventType::POINTER_UP ||
+           event->action == mojo::EventType::POINTER_CANCEL ||
+           event->action == mojo::EventType::POINTER_MOVE) &&
+          event->pointer_data->horizontal_wheel == 0 &&
+          event->pointer_data->vertical_wheel == 0);
+}
+
 scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
                                               float device_pixel_ratio) {
   if (event->action == mojo::EventType::POINTER_DOWN ||
@@ -145,7 +102,6 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
         event->pointer_data->vertical_wheel != 0) {
       return BuildWebWheelEvent(event, device_pixel_ratio);
     }
-    return BuildWebPointerEvent(event, device_pixel_ratio);
   } else if ((event->action == mojo::EventType::KEY_PRESSED ||
               event->action == mojo::EventType::KEY_RELEASED) &&
              event->key_data) {
@@ -153,6 +109,63 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
   }
 
   return nullptr;
+}
+
+pointer::PointerPacketPtr ConvertPointerEvent(const mojo::EventPtr& event,
+                                              float device_pixel_ratio) {
+  pointer::PointerPacketPtr packet = pointer::PointerPacket::New();
+
+  pointer::PointerPtr pointer = pointer::Pointer::New();
+  pointer->time_stamp =
+      base::TimeDelta::FromInternalValue(event->time_stamp).InMillisecondsF();
+
+  switch (event->action) {
+    case mojo::EventType::POINTER_DOWN:
+      pointer->type = pointer::PointerType::DOWN;
+      break;
+    case mojo::EventType::POINTER_MOVE:
+      pointer->type = pointer::PointerType::MOVE;
+      break;
+    case mojo::EventType::POINTER_UP:
+      pointer->type = pointer::PointerType::UP;
+      break;
+    case mojo::EventType::POINTER_CANCEL:
+      // FIXME: What mouse event should we listen to in order to learn when the
+      // mouse moves out of the mojo::View?
+      pointer->type = pointer::PointerType::CANCEL;
+      break;
+    default:
+      NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
+      break;
+  }
+
+  if (event->pointer_data->kind == mojo::PointerKind::TOUCH) {
+    pointer->kind = pointer::PointerKind::TOUCH;
+    pointer->pointer = event->pointer_data->pointer_id;
+  } else {
+    pointer->kind = pointer::PointerKind::MOUSE;
+    // Set the buttons according to http://www.w3.org/TR/pointerevents/
+    int buttons = 0;
+    int flags = static_cast<int>(event->flags);
+    if (flags & static_cast<int>(mojo::EventFlags::LEFT_MOUSE_BUTTON))
+      buttons |= (1 << 0);
+    if (flags & static_cast<int>(mojo::EventFlags::RIGHT_MOUSE_BUTTON))
+      buttons |= (1 << 1);
+    if (flags & static_cast<int>(mojo::EventFlags::MIDDLE_MOUSE_BUTTON))
+      buttons |= (1 << 2);
+    pointer->buttons = buttons;
+  }
+
+  pointer->x = event->pointer_data->x / device_pixel_ratio;
+  pointer->y = event->pointer_data->y / device_pixel_ratio;
+  pointer->pressure = event->pointer_data->pressure;
+  pointer->radius_major = event->pointer_data->radius_major;
+  pointer->radius_minor = event->pointer_data->radius_minor;
+  pointer->orientation = event->pointer_data->orientation;
+
+  packet->pointers.push_back(pointer.Pass());
+
+  return packet;
 }
 
 }  // namespace mojo

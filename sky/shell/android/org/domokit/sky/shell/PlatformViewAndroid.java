@@ -21,12 +21,15 @@ import org.chromium.mojo.keyboard.KeyboardServiceState;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
-import org.chromium.mojom.sky.EventType;
-import org.chromium.mojom.sky.InputEvent;
-import org.chromium.mojom.sky.PointerData;
-import org.chromium.mojom.sky.PointerKind;
+import org.chromium.mojom.pointer.Pointer;
+import org.chromium.mojom.pointer.PointerKind;
+import org.chromium.mojom.pointer.PointerPacket;
+import org.chromium.mojom.pointer.PointerType;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A view containing Sky
@@ -124,50 +127,71 @@ public class PlatformViewAndroid extends SurfaceView {
         return mKeyboardState.createInputConnection(outAttrs);
     }
 
-    private int getTypeForAction(int maskedAction) {
+    private Integer getPointerTypeForAction(int maskedAction) {
         // Primary pointer:
         if (maskedAction == MotionEvent.ACTION_DOWN) {
-            return EventType.POINTER_DOWN;
+            return PointerType.DOWN;
         }
         if (maskedAction == MotionEvent.ACTION_UP) {
-            return EventType.POINTER_UP;
+            return PointerType.UP;
         }
         // Secondary pointer:
         if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
-            return EventType.POINTER_DOWN;
+            return PointerType.DOWN;
         }
         if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
-            return EventType.POINTER_UP;
+            return PointerType.UP;
         }
         // All pointers:
         if (maskedAction == MotionEvent.ACTION_MOVE) {
-            return EventType.POINTER_MOVE;
+            return PointerType.MOVE;
         }
         if (maskedAction == MotionEvent.ACTION_CANCEL) {
-            return EventType.POINTER_CANCEL;
+            return PointerType.CANCEL;
         }
-        return EventType.UNKNOWN;
+        return null;
     }
 
-    private void sendInputEventForIndex(MotionEvent event, int pointerIndex) {
-        PointerData pointerData = new PointerData();
-        pointerData.pointer = event.getPointerId(pointerIndex);
-        pointerData.kind = PointerKind.TOUCH;
-        pointerData.x = event.getX(pointerIndex);
-        pointerData.y = event.getY(pointerIndex);
+    private void addPointerForIndex(MotionEvent event, int pointerIndex,
+                                    List<Pointer> result) {
+        Integer pointerType = getPointerTypeForAction(event.getActionMasked());
+        if (pointerType == null) {
+            return;
+        }
 
-        pointerData.pressure = event.getPressure(pointerIndex);
+        Pointer pointer = new Pointer();
+
+        pointer.timeStamp = event.getEventTime();
+        pointer.pointer = event.getPointerId(pointerIndex);
+        pointer.type = pointerType;
+        pointer.kind = PointerKind.TOUCH;
+        pointer.x = event.getX(pointerIndex);
+        pointer.y = event.getY(pointerIndex);
+
+        pointer.buttons = 0;
+        pointer.down = false;
+        pointer.primary = false;
+        pointer.obscured = false;
+
         // TODO(eseidel): Could get the calibrated range if necessary:
         // event.getDevice().getMotionRange(MotionEvent.AXIS_PRESSURE)
-        pointerData.pressureMin = 0.0f;
-        pointerData.pressureMax = 1.0f;
+        pointer.pressure = event.getPressure(pointerIndex);
+        pointer.pressureMin = 0.0f;
+        pointer.pressureMax = 1.0f;
 
-        InputEvent inputEvent = new InputEvent();
-        inputEvent.type = getTypeForAction(event.getActionMasked());
-        inputEvent.timeStamp = event.getEventTime();
-        inputEvent.pointerData = pointerData;
+        pointer.distance = 0.0f;
+        pointer.distanceMin = 0.0f;
+        pointer.distanceMax = 0.0f;
 
-        mSkyEngine.onInputEvent(inputEvent);
+        pointer.radiusMajor = 0.0f;
+        pointer.radiusMinor = 0.0f;
+        pointer.radiusMin = 0.0f;
+        pointer.radiusMax = 0.0f;
+
+        pointer.orientation = 0.0f;
+        pointer.tilt = 0.0f;
+
+        result.add(pointer);
     }
 
     @Override
@@ -181,6 +205,8 @@ public class PlatformViewAndroid extends SurfaceView {
             requestUnbufferedDispatch(event);
         }
 
+        ArrayList<Pointer> pointers = new ArrayList<Pointer>();
+
         // TODO(abarth): Rather than unpacking these events here, we should
         // probably send them in one packet to the engine.
         int maskedAction = event.getActionMasked();
@@ -190,15 +216,20 @@ public class PlatformViewAndroid extends SurfaceView {
                 || maskedAction == MotionEvent.ACTION_POINTER_UP
                 || maskedAction == MotionEvent.ACTION_DOWN
                 || maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
-            sendInputEventForIndex(event, event.getActionIndex());
+            addPointerForIndex(event, event.getActionIndex(), pointers);
         } else {
             // ACTION_MOVE may not actually mean all pointers have moved
             // but it's the responsibility of a later part of the system to
             // ignore 0-deltas if desired.
             for (int p = 0; p < event.getPointerCount(); p++) {
-                sendInputEventForIndex(event, p);
+                addPointerForIndex(event, p, pointers);
             }
         }
+
+        PointerPacket packet = new PointerPacket();
+        packet.pointers = pointers.toArray(new Pointer[0]);
+        mSkyEngine.onPointerPacket(packet);
+
         return true;
     }
 
