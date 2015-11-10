@@ -575,10 +575,10 @@ class AndroidDevice extends Device {
     _adbPath = _getAdbPath();
     _hasAdb = _checkForAdb();
 
-    // Checking for lollipop only needs to be done if we are starting an
+    // Checking for Jelly Bean only needs to be done if we are starting an
     // app, but it has an important side effect, which is to discard any
     // progress messages if the adb server is restarted.
-    _hasValidAndroid = _checkForLollipopOrLater();
+    _hasValidAndroid = _checkForSupportedAndroidVersion();
 
     if (!_hasAdb || !_hasValidAndroid) {
       _logging.warning('Unable to run on Android.');
@@ -660,7 +660,7 @@ class AndroidDevice extends Device {
     return false;
   }
 
-  bool _checkForLollipopOrLater() {
+  bool _checkForSupportedAndroidVersion() {
     try {
       // If the server is automatically restarted, then we get irrelevant
       // output lines like this, which we want to ignore:

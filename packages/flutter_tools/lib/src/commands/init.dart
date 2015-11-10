@@ -170,7 +170,7 @@ void main() {
 }
 
 class FlutterDemo extends StatelessComponent {
-  Widget build(BuildContext context)  {
+  Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
         center: new Text("Flutter Demo")
