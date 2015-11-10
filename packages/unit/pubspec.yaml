@@ -6,5 +6,7 @@ dependencies:
     path: ../flx
   flutter:
     path: ../flutter
+  stocks:
+    path: ../../examples/stocks
   sky_tools:
     path: ../flutter_tools
