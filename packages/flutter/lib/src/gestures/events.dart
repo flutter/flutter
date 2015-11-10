@@ -72,4 +72,32 @@ class PointerInputEvent extends InputEvent {
   final double tilt;
 
   ui.Point get position => new ui.Point(x, y);
+
+  String toString() => 'PointerInputEvent(x: $x, y:$y)';
+
+  String toStringFull() {
+    return "PointerInputEvent(" +
+        "pointer: $pointer, " +
+        "kind: $kind, " +
+        "x: $x, " +
+        "y: $y, " +
+        "dx: $dx, " +
+        "dy: $dy, " +
+        "buttons: $buttons, " +
+        "down: $down, " +
+        "primary: $primary, " +
+        "obscured: $obscured, " +
+        "pressure: $pressure, " +
+        "pressureMin: $pressureMin, " +
+        "pressureMax: $pressureMax, " +
+        "distance: $distance, " +
+        "distanceMin: $distanceMin, " +
+        "distanceMax: $distanceMax, " +
+        "radiusMajor: $radiusMajor, " +
+        "radiusMinor: $radiusMinor, " +
+        "radiusMin: $radiusMin, " +
+        "radiusMax: $radiusMax, " +
+        "orientation: $orientation, " +
+        "tilt: $tilt)";
+  }
 }
