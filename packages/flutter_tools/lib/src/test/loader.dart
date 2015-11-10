@@ -120,6 +120,9 @@ void main() {
           case -0x0b: // ProcessSignal.SIGSEGV
             output += 'Segmentation fault in subprocess for: $path\n';
             break;
+          case -0x06: // ProcessSignal.SIGABRT
+            output += 'Aborted while running: $path\n';
+            break;
           default:
             output += 'Unexpected exit code $exitCode from subprocess for: $path\n';
         }

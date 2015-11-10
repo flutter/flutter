@@ -11,6 +11,7 @@ import 'package:test/src/executable.dart' as executable;
 
 import '../artifacts.dart';
 import '../build_configuration.dart';
+import '../process.dart';
 import '../test/loader.dart' as loader;
 import 'flutter_command.dart';
 
@@ -36,7 +37,8 @@ class TestCommand extends FlutterCommand {
   @override
   Future<int> runInProject() async {
     List<String> testArgs = argResults.rest.toList();
-    Directory testDir = new Directory(path.join(ArtifactStore.flutterRoot, 'packages/unit/test'));
+    Directory flutterDir = new Directory(path.join(ArtifactStore.flutterRoot, 'packages/unit')); // see https://github.com/flutter/flutter/issues/50
+    Directory testDir = new Directory(path.join(flutterDir.path, 'test'));
     if (testArgs.isEmpty) {
       testArgs.addAll(testDir.listSync(recursive: true, followLinks: false)
                              .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') && FileSystemEntity.isFileSync(entity.path))
@@ -47,9 +49,27 @@ class TestCommand extends FlutterCommand {
       testArgs.insert(0, '--no-color');
     List<BuildConfiguration> configs = buildConfigurations;
     bool foundOne = false;
+
+    File pubSpecYaml = new File(path.join(flutterDir.path, 'pubspec.yaml'));
+    File pubSpecLock = new File(path.join(flutterDir.path, 'pubspec.lock'));
+
+    if (!pubSpecYaml.existsSync()) {
+      print('${flutterDir.path} has no pubspec.yaml');
+      return 1;
+    }
+
+    if (!pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
+      print("Running pub get...");
+      int code = await runCommandAndStreamOutput(
+        [sdkBinaryName('pub'), 'get'],
+        workingDirectory: flutterDir.path
+      );
+      if (code != 0)
+        return code;
+    }
+
     String currentDirectory = Directory.current.path;
-    Directory.current = testDir.path;
-    // TODO(ianh): Verify that this directory has had 'pub get' run in it at least once.
+    Directory.current = flutterDir.path;
     loader.installHook();
     for (BuildConfiguration config in configs) {
       if (!config.testable)
