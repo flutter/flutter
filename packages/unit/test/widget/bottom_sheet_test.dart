@@ -29,6 +29,7 @@ void main() {
       tester.tap(tester.findText('BottomSheet'));
       tester.pump(); // bottom sheet dismiss animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
+      tester.pump(new Duration(seconds: 2)); // rebuild frame
       expect(tester.findText('BottomSheet'), isNull);
 
       showModalBottomSheet(context: context, child: new Text('BottomSheet'));
@@ -40,6 +41,7 @@ void main() {
       tester.tapAt(new Point(20.0, 20.0));
       tester.pump(); // bottom sheet dismiss animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
+      tester.pump(new Duration(seconds: 2)); // rebuild frame
       expect(tester.findText('BottomSheet'), isNull);
     });
   });

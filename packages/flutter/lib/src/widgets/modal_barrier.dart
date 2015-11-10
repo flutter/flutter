@@ -39,8 +39,8 @@ class ModalBarrier extends StatelessComponent {
   }
 }
 
-class _AnimatedModalBarrier extends StatelessComponent {
-  _AnimatedModalBarrier({
+class AnimatedModalBarrier extends StatelessComponent {
+  AnimatedModalBarrier({
     Key key,
     this.color,
     this.performance
@@ -108,7 +108,7 @@ abstract class ModalRoute extends TransitionRoute {
   Widget buildModalWidget(BuildContext context);
 
   Widget _buildModalBarrier(BuildContext context) {
-    return new _AnimatedModalBarrier(
+    return new AnimatedModalBarrier(
       color: new AnimatedColorValue(_kTransparent, end: barrierColor, curve: Curves.ease),
       performance: performance
     );
