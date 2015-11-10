@@ -1,8 +1,7 @@
 name: fitness
 dependencies:
-  # TODO(abarth): Move playfair into flutter.git
-  # playfair: ^0.0.10
   path: ^1.3.6
-
   flutter:
     path: ../../packages/flutter
+  playfair:
+    path: ../../packages/playfair
