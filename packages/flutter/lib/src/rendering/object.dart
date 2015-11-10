@@ -419,8 +419,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// relevant to itself and to any other nodes who happen to know exactly what
   /// the data means. The parent data is opaque to the child.
   ///
-  /// - The parent data object must inherit from [ParentData] (despite being
-  ///   typed as `dynamic`).
   /// - The parent data field must not be directly set, except by calling
   ///   [setupParentData] on the parent node.
   /// - The parent data can be set before the child is added to the parent, by
@@ -441,7 +439,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       child.parentData = new ParentData();
   }
 
-  /// Called by subclases when they decide a render object is a child
+  /// Called by subclasses when they decide a render object is a child
   ///
   /// Only for use by subclasses when changing their child lists. Calling this
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
@@ -454,7 +452,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _markNeedsCompositingBitsUpdate();
   }
 
-  /// Called by subclases when they decide a render object is no longer a child
+  /// Called by subclasses when they decide a render object is no longer a child
   ///
   /// Only for use by subclasses when changing their child lists. Calling this
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
