@@ -926,13 +926,15 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// writes are coalesced, removing redundant computation.
   void markNeedsPaint() {
     assert(!debugDoingPaint);
-    if (!attached) return; // Don't try painting things that aren't in the hierarchy
-    if (_needsPaint) return;
+    if (!attached)
+      return; // Don't try painting things that aren't in the hierarchy
+    if (_needsPaint)
+      return;
+    _needsPaint = true;
     if (hasLayer) {
       // If we always have our own layer, then we can just repaint
       // ourselves without involving any other nodes.
       assert(_layer != null);
-      _needsPaint = true;
       _nodesNeedingPaint.add(this);
       scheduler.ensureVisualUpdate();
     } else if (parent is RenderObject) {
@@ -948,7 +950,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // then we have to paint ourselves, since nobody else can paint
       // us. We don't add ourselves to _nodesNeedingPaint in this
       // case, because the root is always told to paint regardless.
-      _needsPaint = true;
       scheduler.ensureVisualUpdate();
     }
   }
