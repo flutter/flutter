@@ -15,7 +15,7 @@ import '../process.dart';
 import '../test/loader.dart' as loader;
 import 'flutter_command.dart';
 
-final Logger _logging = new Logger('sky_tools.test');
+final Logger _logging = new Logger('flutter_tools.test');
 
 class TestCommand extends FlutterCommand {
   String get name => 'test';

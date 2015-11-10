@@ -15,7 +15,7 @@ import 'flutter_command.dart';
 import 'install.dart';
 import 'stop.dart';
 
-final Logger _logging = new Logger('sky_tools.start');
+final Logger _logging = new Logger('flutter_tools.start');
 
 class StartCommand extends FlutterCommand {
   final String name = 'start';

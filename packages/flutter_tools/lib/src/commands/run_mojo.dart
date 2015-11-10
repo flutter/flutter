@@ -13,7 +13,7 @@ import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../process.dart';
 
-final Logger _logging = new Logger('sky_tools.run_mojo');
+final Logger _logging = new Logger('flutter_tools.run_mojo');
 
 class RunMojoCommand extends Command {
   final String name = 'run_mojo';

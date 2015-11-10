@@ -6,9 +6,9 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
-import 'package:sky_tools/src/artifacts.dart';
-import 'package:sky_tools/src/commands/init.dart';
-import 'package:sky_tools/src/process.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/commands/init.dart';
+import 'package:flutter_tools/src/process.dart';
 import 'package:test/test.dart';
 
 main() => defineTests();
@@ -18,7 +18,7 @@ defineTests() {
     Directory temp;
 
     setUp(() {
-      temp = Directory.systemTemp.createTempSync('sky_tools');
+      temp = Directory.systemTemp.createTempSync('flutter_tools');
     });
 
     tearDown(() {

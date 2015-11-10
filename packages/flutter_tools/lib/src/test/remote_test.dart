@@ -15,7 +15,7 @@ import 'package:test/src/backend/test.dart';
 import 'package:test/src/backend/test_platform.dart';
 import 'package:test/src/util/remote_exception.dart';
 
-import 'package:sky_tools/src/test/json_socket.dart';
+import 'package:flutter_tools/src/test/json_socket.dart';
 
 class RemoteTest extends Test {
   RemoteTest(this.name, this.metadata, this._socket, this._index);

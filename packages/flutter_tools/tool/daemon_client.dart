@@ -8,7 +8,7 @@ import 'dart:io';
 Process daemon;
 
 main() async {
-  daemon = await Process.start('dart', ['bin/sky_tools.dart', 'daemon']);
+  daemon = await Process.start('dart', ['bin/flutter_tools.dart', 'daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout

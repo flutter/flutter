@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
-import 'package:sky_tools/src/test/json_socket.dart';
-import 'package:sky_tools/src/test/remote_test.dart';
+import 'package:flutter_tools/src/test/json_socket.dart';
+import 'package:flutter_tools/src/test/remote_test.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:test/src/backend/group.dart';
 import 'package:test/src/backend/metadata.dart';
@@ -79,7 +79,7 @@ Future<RunnerSuite> _loadVMFile(String path,
 import 'dart:convert';
 
 import 'package:test/src/backend/metadata.dart';
-import 'package:sky_tools/src/test/remote_listener.dart';
+import 'package:flutter_tools/src/test/remote_listener.dart';
 
 import '${p.toUri(p.absolute(path))}' as test;
 

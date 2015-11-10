@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 
-final Logger _logging = new Logger('sky_tools.process');
+final Logger _logging = new Logger('flutter_tools.process');
 
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr.

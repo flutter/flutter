@@ -4,7 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/commands/install.dart';
+import 'package:flutter_tools/src/commands/install.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';

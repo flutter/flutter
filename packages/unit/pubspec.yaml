@@ -8,5 +8,6 @@ dependencies:
     path: ../flutter
   stocks:
     path: ../../examples/stocks
-  sky_tools:
+  # To ensure the version of test doesn't get out of sync.
+  flutter_tools:
     path: ../flutter_tools

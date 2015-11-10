@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
-final Logger _logging = new Logger('sky_tools.build_configuration');
+final Logger _logging = new Logger('flutter_tools.build_configuration');
 
 enum BuildType {
   prebuilt,

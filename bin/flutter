@@ -7,7 +7,7 @@ export FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
 SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
 STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
-SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/sky_tools.dart"
+SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
 
 # TODO(abarth): We shouldn't require dart to be on the user's path.
 DART=dart

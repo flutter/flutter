@@ -14,12 +14,12 @@ import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../process.dart';
 
-final Logger _logging = new Logger('sky_tools.flutter_command_runner');
+final Logger _logging = new Logger('flutter_tools.flutter_command_runner');
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
 const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
-const String kFlutterToolsScriptFileName = 'sky_tools.dart'; // in //flutter/packages/flutter_tools/bin/
+const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const String kFlutterEnginePackageName = 'sky_engine';
 
 class FlutterCommandRunner extends CommandRunner {

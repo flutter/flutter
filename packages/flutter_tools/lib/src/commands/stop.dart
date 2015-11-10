@@ -10,7 +10,7 @@ import '../application_package.dart';
 import '../device.dart';
 import 'flutter_command.dart';
 
-final Logger _logging = new Logger('sky_tools.stop');
+final Logger _logging = new Logger('flutter_tools.stop');
 
 class StopCommand extends FlutterCommand {
   final String name = 'stop';
