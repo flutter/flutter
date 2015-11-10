@@ -70,8 +70,13 @@ class MojoClient {
     mojo.UrlLoaderProxy loader = new mojo.UrlLoaderProxy.unbound();
     mojo.UrlRequest request = new mojo.UrlRequest()
       ..url = url.toString()
-      ..method = method
-      ..body = body;
+      ..method = method;
+    if (body != null) {
+      mojo.MojoDataPipe pipe = new mojo.MojoDataPipe();
+      request.body = <mojo.MojoDataPipeConsumer>[pipe.consumer];
+      ByteData data = new ByteData.view(UTF8.encode(body).buffer);
+      mojo.DataPipeFiller.fillHandle(pipe.producer, data);
+    }
     try {
       _networkService.ptr.createUrlLoader(loader);
       mojo.UrlResponse response = (await loader.ptr.start(request)).response;
