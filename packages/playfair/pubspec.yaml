@@ -1,0 +1,12 @@
+name: playfair
+description: A simple charting library for Flutter
+version: 0.0.10
+author: Flutter Authors <flutter-dev@googlegroups.com>
+homepage: https://github.com/flutter/playfair
+dependencies:
+  flutter: ">=0.0.3 <0.1.0"
+dev_dependencies:
+  sky_tools: any
+  test: ^0.12.0
+environment:
+  sdk: '>=1.8.0 <2.0.0'
