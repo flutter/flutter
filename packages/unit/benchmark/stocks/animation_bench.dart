@@ -7,7 +7,7 @@ import 'package:stocks/stock_data.dart' as stock_data;
 import '../../test/widget/widget_tester.dart';
 
 const int _kNumberOfIterations = 50000;
-const bool _kRunForever = true;
+const bool _kRunForever = false;
 
 void main() {
   assert(false); // Don't run in checked mode
