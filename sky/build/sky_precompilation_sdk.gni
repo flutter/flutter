@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//sky/engine/bindings/bindings.gni")
+import("//build/config/templates/templates.gni")
 
 template("sky_precompilation_sdk") {
   assert(is_ios, "The precompilation SDK is only supported for iOS targets")
@@ -73,6 +74,13 @@ template("sky_precompilation_sdk") {
     set_sources_assignment_filter(sources_assignment_filter)
   }
 
+  copy_config_gen_target_name = target_name + "_sdk_config"
+  file_template(copy_config_gen_target_name) {
+    input = "//sky/build/Runner.xcconfig.template"
+    output = "$sdk_dir/Tools/Runner.xcconfig"
+    variables = "target_arch=$target_cpu"
+  }
+
   group(target_name) {
     deps = [
       ":$snapshotter_copy_gen_target_name",
@@ -81,6 +89,7 @@ template("sky_precompilation_sdk") {
       ":$copy_data_gen_target_name",
       ":precompilation_xcode_scripts",
       ":copy_sdk_xcode_harness",
+      ":$copy_config_gen_target_name",
     ]
   }
 }
