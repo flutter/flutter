@@ -13,7 +13,7 @@ import 'application_package.dart';
 import 'build_configuration.dart';
 import 'process.dart';
 
-final Logger _logging = new Logger('sky_tools.device');
+final Logger _logging = new Logger('flutter_tools.device');
 
 abstract class Device {
   final String id;

@@ -12,7 +12,7 @@ import 'build_configuration.dart';
 import 'os_utils.dart';
 import 'process.dart';
 
-final Logger _logging = new Logger('sky_tools.artifacts');
+final Logger _logging = new Logger('flutter_tools.artifacts');
 
 const String _kShellCategory = 'shell';
 const String _kViewerCategory = 'viewer';

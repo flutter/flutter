@@ -2,6 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky_tools/executable.dart' as executable;
+import 'package:flutter_tools/executable.dart' as executable;
 
 main(List<String> args) => executable.main(args);

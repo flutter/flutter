@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:sky_tools/src/os_utils.dart';
+import 'package:flutter_tools/src/os_utils.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as p;
 
@@ -15,7 +15,7 @@ defineTests() {
     Directory temp;
 
     setUp(() {
-      temp = Directory.systemTemp.createTempSync('sky_tools');
+      temp = Directory.systemTemp.createTempSync('flutter_tools');
     });
 
     tearDown(() {

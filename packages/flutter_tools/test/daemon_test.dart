@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:mockito/mockito.dart';
-import 'package:sky_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';

@@ -13,7 +13,7 @@ import '../process.dart';
 import 'build.dart';
 import 'flutter_command.dart';
 
-final Logger _logging = new Logger('sky_tools.listen');
+final Logger _logging = new Logger('flutter_tools.listen');
 
 class ListenCommand extends FlutterCommand {
   final String name = 'listen';

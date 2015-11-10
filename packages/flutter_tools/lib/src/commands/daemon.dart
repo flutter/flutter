@@ -20,7 +20,7 @@ const String domain = 'domain';
 /// A domain @command annotation.
 const String command = 'command';
 
-final Logger _logging = new Logger('sky_tools.daemon');
+final Logger _logging = new Logger('flutter_tools.daemon');
 
 // TODO: Create a `device` domain in order to list devices and fire events when
 // devices are added or removed.

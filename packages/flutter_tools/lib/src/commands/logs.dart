@@ -9,7 +9,7 @@ import 'package:logging/logging.dart';
 import '../device.dart';
 import 'flutter_command.dart';
 
-final Logger _logging = new Logger('sky_tools.logs');
+final Logger _logging = new Logger('flutter_tools.logs');
 
 class LogsCommand extends FlutterCommand {
   final String name = 'logs';

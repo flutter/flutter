@@ -10,7 +10,7 @@ import '../application_package.dart';
 import '../device.dart';
 import 'flutter_command.dart';
 
-final Logger _logging = new Logger('sky_tools.trace');
+final Logger _logging = new Logger('flutter_tools.trace');
 
 class TraceCommand extends FlutterCommand {
   final String name = 'trace';

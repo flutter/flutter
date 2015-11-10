@@ -94,7 +94,7 @@ main(List<String> argv) async {
   ArgResults args = parser.parse(argv);
 
   if (args['help']) {
-    print('usage: pub run sky_tools:build_sky_apk <options>');
+    print('usage: build_sky_apk <options>');
     print('');
     print(parser.usage);
     return;
