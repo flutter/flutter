@@ -78,6 +78,7 @@
 		9E07CFED1BEAA44D00BCD8DE /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = icudtl.dat; sourceTree = "<group>"; };
 		9E07CFF01BEAB1BA00BCD8DE /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
 		9E07CFF31BEAB58200BCD8DE /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Generated/app.flx; sourceTree = "<group>"; };
+		9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Runner.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +177,7 @@
 				9E07CFE21BEAA0F900BCD8DE /* PackagerInvoke */,
 				9E07CFF01BEAB1BA00BCD8DE /* Snapshotter */,
 				9E07CFE41BEAA0F900BCD8DE /* SnapshotterInvoke */,
+				9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -400,8 +402,10 @@
 /* Begin XCBuildConfiguration section */
 		9E07CF8C1BE7F4D200BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(FLUTTER_TARGET_ARCH)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -415,7 +419,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -435,11 +439,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "$(FLUTTER_TARGET_ARCH)";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -447,8 +451,10 @@
 		};
 		9E07CF8D1BE7F4D200BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(FLUTTER_TARGET_ARCH)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -462,7 +468,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -476,11 +482,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "$(FLUTTER_TARGET_ARCH)";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -488,6 +495,7 @@
 		};
 		9E07CF8F1BE7F4D200BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -506,6 +514,7 @@
 		};
 		9E07CF901BE7F4D200BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -524,6 +533,7 @@
 		};
 		9E07CFAE1BE8280A00BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Runner/Info.plist;
@@ -536,6 +546,7 @@
 		};
 		9E07CFAF1BE8280A00BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Runner/Info.plist;
