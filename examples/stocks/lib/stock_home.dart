@@ -186,6 +186,10 @@ class StockHomeState extends State<StockHome> {
           stock.percentChange = 100.0 * (1.0 / stock.lastSale);
           stock.lastSale += 1.0;
         });
+        showModalBottomSheet(
+          context: context,
+          child: new StockSymbolViewer(stock: stock, showToolBar: false)
+        );
       },
       onOpen: (Stock stock, Key arrowKey) {
         Set<Key> mostValuableKeys = new Set<Key>();

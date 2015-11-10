@@ -15,6 +15,8 @@ import 'material.dart';
 const Duration _kBottomSheetDuration = const Duration(milliseconds: 200);
 const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
+const Color _kTransparent = const Color(0x00000000);
+const Color _kBarrierColor = Colors.black54;
 
 class _BottomSheetDragController extends StatelessComponent {
   _BottomSheetDragController({
@@ -61,6 +63,29 @@ class _BottomSheetDragController extends StatelessComponent {
   }
 }
 
+class _BottomSheetRoute extends OverlayRoute {
+  _BottomSheetRoute({ this.completer, this.child });
+
+  final Completer completer;
+  final Widget child;
+  Performance performance;
+
+  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
+    performance = new Performance(duration: _kBottomSheetDuration, debugLabel: debugLabel)
+      ..forward();
+    super.didPush(overlay, insertionPoint);
+  }
+
+  void didPop(dynamic result) {
+    completer.complete(result);
+    performance.reverse().then((_) {
+      super.didPop(result); // clear the overlay entries
+    });
+  }
+
+  String get debugLabel => '$runtimeType';
+  String toString() => '$runtimeType(performance: $performance)';
+}
 
 class _ModalBottomSheet extends StatefulComponent {
   _ModalBottomSheet({ Key key, this.route }) : super(key: key);
@@ -97,7 +122,7 @@ class _ModalBottomSheetState extends State<_ModalBottomSheet> {
     return new GestureDetector(
       onTap: () { Navigator.of(context).pop(); },
       child: new BuilderTransition(
-        performance: config.route._performance,
+        performance: config.route.performance,
         variables: <AnimatedValue<double>>[_layout.childTop],
         builder: (BuildContext context) {
           return new ClipRect(
@@ -105,7 +130,7 @@ class _ModalBottomSheetState extends State<_ModalBottomSheet> {
               delegate: _layout,
               token: _layout.childTop.value,
               child: new _BottomSheetDragController(
-                performance: config.route._performance,
+                performance: config.route.performance,
                 child: new Material(child: config.route.child),
                 childHeight: _layout.childTop.end
               )
@@ -117,29 +142,28 @@ class _ModalBottomSheetState extends State<_ModalBottomSheet> {
   }
 }
 
-class _ModalBottomSheetRoute extends ModalRoute {
-  _ModalBottomSheetRoute({ this.completer, this.child });
+class _ModalBottomSheetRoute extends _BottomSheetRoute {
+  _ModalBottomSheetRoute({ Completer completer, Widget child })
+    : super(completer: completer, child: child);
 
-  final Completer completer;
-  final Widget child;
-
-  bool get opaque => false;
-  Duration get transitionDuration => _kBottomSheetDuration;
-
-  Performance _performance;
-
-  Performance createPerformance() {
-    _performance = super.createPerformance();
-    return _performance;
+  Widget _buildModalBarrier(BuildContext context) {
+    return new AnimatedModalBarrier(
+      color: new AnimatedColorValue(_kTransparent, end: _kBarrierColor, curve: Curves.ease),
+      performance: performance
+    );
   }
 
-  Color get barrierColor => Colors.black54;
-  Widget buildModalWidget(BuildContext context) => new _ModalBottomSheet(route: this);
-
-  void didPop([dynamic result]) {
-    completer.complete(result);
-    super.didPop(result);
+  Widget _buildBottomSheet(BuildContext context) {
+    return new Focus(
+      key: new GlobalObjectKey(this),
+      child: new _ModalBottomSheet(route: this)
+    );
   }
+
+  List<WidgetBuilder> get builders => <WidgetBuilder>[
+    _buildModalBarrier,
+    _buildBottomSheet,
+  ];
 }
 
 Future showModalBottomSheet({ BuildContext context, Widget child }) {
@@ -155,7 +179,7 @@ Future showModalBottomSheet({ BuildContext context, Widget child }) {
 class _PersistentBottomSheet extends StatefulComponent {
   _PersistentBottomSheet({ Key key, this.route }) : super(key: key);
 
-  final _PersistentBottomSheetRoute route;
+  final _BottomSheetRoute route;
 
   _PersistentBottomSheetState createState() => new _PersistentBottomSheetState();
 }
@@ -175,7 +199,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       alignment: new AnimatedValue<FractionalOffset>(const FractionalOffset(0.0, 0.0)),
       heightFactor: new AnimatedValue<double>(0.0, end: 1.0),
       child: new _BottomSheetDragController(
-        performance: config.route._performance,
+        performance: config.route.performance,
         childHeight: _childHeight,
         child: new Material(
           child: new SizeObserver(child: config.route.child, onSizeChanged: _updateChildHeight)
@@ -185,32 +209,11 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
   }
 }
 
-class _PersistentBottomSheetRoute extends TransitionRoute {
-  _PersistentBottomSheetRoute({ this.completer, this.child });
-
-  final Widget child;
-  final Completer completer;
-
-  bool get opaque => false;
-  Duration get transitionDuration => _kBottomSheetDuration;
-
-  Performance _performance;
-  Performance createPerformance() {
-    _performance = super.createPerformance();
-    return _performance;
-  }
-
-  void didPop([dynamic result]) {
-    completer.complete(result);
-    super.didPop(result);
-  }
-}
-
 Future showBottomSheet({ BuildContext context, GlobalKey<PlaceholderState> placeholderKey, Widget child }) {
   assert(child != null);
   assert(placeholderKey != null);
   final Completer completer = new Completer();
-  _PersistentBottomSheetRoute route = new _PersistentBottomSheetRoute(child: child, completer: completer);
+  _BottomSheetRoute route = new _BottomSheetRoute(child: child, completer: completer);
   placeholderKey.currentState.child = new _PersistentBottomSheet(route: route);
   Navigator.of(context).pushEphemeral(route);
   return completer.future;
