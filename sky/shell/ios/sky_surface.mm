@@ -11,6 +11,7 @@
 #include "base/time/time.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
+#include "sky/services/pointer/pointer.mojom.h"
 #include "sky/shell/mac/platform_view_mac.h"
 #include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
@@ -23,28 +24,29 @@ enum MapperPhase {
   Removed,
 };
 
-using EventTypeMapperPhase = std::pair<sky::EventType, MapperPhase>;
-static inline EventTypeMapperPhase EventTypePhaseFromUITouchPhase(
+using PointerTypeMapperPhase = std::pair<pointer::PointerType, MapperPhase>;
+static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
     UITouchPhase phase) {
   switch (phase) {
     case UITouchPhaseBegan:
-      return EventTypeMapperPhase(sky::EventType::POINTER_DOWN,
-                                  MapperPhase::Added);
+      return PointerTypeMapperPhase(pointer::PointerType::DOWN,
+                                    MapperPhase::Added);
     case UITouchPhaseMoved:
     case UITouchPhaseStationary:
       // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
       // with the same coordinates
-      return EventTypeMapperPhase(sky::EventType::POINTER_MOVE,
-                                  MapperPhase::Accessed);
+      return PointerTypeMapperPhase(pointer::PointerType::MOVE,
+                                    MapperPhase::Accessed);
     case UITouchPhaseEnded:
-      return EventTypeMapperPhase(sky::EventType::POINTER_UP,
-                                  MapperPhase::Removed);
+      return PointerTypeMapperPhase(pointer::PointerType::UP,
+                                    MapperPhase::Removed);
     case UITouchPhaseCancelled:
-      return EventTypeMapperPhase(sky::EventType::POINTER_CANCEL,
-                                  MapperPhase::Removed);
+      return PointerTypeMapperPhase(pointer::PointerType::CANCEL,
+                                    MapperPhase::Removed);
   }
 
-  return EventTypeMapperPhase(sky::EventType::UNKNOWN, MapperPhase::Accessed);
+  return PointerTypeMapperPhase(pointer::PointerType::CANCEL,
+                                MapperPhase::Accessed);
 }
 
 static inline int64 InputEventTimestampFromNSTimeInterval(
@@ -195,17 +197,11 @@ static std::string SkPictureTracingPath() {
 #pragma mark - UIResponder overrides for raw touches
 
 - (void)dispatchTouches:(NSSet*)touches phase:(UITouchPhase)phase {
-  auto eventTypePhase = EventTypePhaseFromUITouchPhase(phase);
+  auto eventTypePhase = PointerTypePhaseFromUITouchPhase(phase);
   const CGFloat scale = [UIScreen mainScreen].scale;
+  auto pointer_packet = pointer::PointerPacket::New();
 
   for (UITouch* touch in touches) {
-    auto input = sky::InputEvent::New();
-    input->type = eventTypePhase.first;
-    input->time_stamp = InputEventTimestampFromNSTimeInterval(touch.timestamp);
-
-    input->pointer_data = sky::PointerData::New();
-    input->pointer_data->kind = sky::PointerKind::TOUCH;
-
     int touch_identifier = 0;
     uintptr_t touch_ptr = reinterpret_cast<uintptr_t>(touch);
 
@@ -220,17 +216,39 @@ static std::string SkPictureTracingPath() {
         touch_identifier = _touch_mapper.unregisterTouch(touch_ptr);
         break;
     }
-
     DCHECK(touch_identifier != 0);
-    input->pointer_data->pointer = touch_identifier;
-
     CGPoint windowCoordinates = [touch locationInView:nil];
+    auto pointer_time = InputEventTimestampFromNSTimeInterval(touch.timestamp);
 
-    input->pointer_data->x = windowCoordinates.x * scale;
-    input->pointer_data->y = windowCoordinates.y * scale;
+    auto pointer_data = pointer::Pointer::New();
 
-    _sky_engine->OnInputEvent(input.Pass());
+    pointer_data->time_stamp = pointer_time;
+    pointer_data->type = eventTypePhase.first;
+    pointer_data->kind = pointer::PointerKind::TOUCH;
+    pointer_data->pointer = touch_identifier;
+    pointer_data->x = windowCoordinates.x * scale;
+    pointer_data->y = windowCoordinates.y * scale;
+    pointer_data->buttons = 0;
+    pointer_data->down = false;
+    pointer_data->primary = false;
+    pointer_data->obscured = false;
+    pointer_data->pressure = 1.0;
+    pointer_data->pressure_min = 0.0;
+    pointer_data->pressure_max = 1.0;
+    pointer_data->distance = 0.0;
+    pointer_data->distance_min = 0.0;
+    pointer_data->distance_max = 0.0;
+    pointer_data->radius_major = 0.0;
+    pointer_data->radius_minor = 0.0;
+    pointer_data->radius_min = 0.0;
+    pointer_data->radius_max = 0.0;
+    pointer_data->orientation = 0.0;
+    pointer_data->tilt = 0.0;
+
+    pointer_packet->pointers.push_back(pointer_data.Pass());
   }
+
+  _sky_engine->OnPointerPacket(pointer_packet.Pass());
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {

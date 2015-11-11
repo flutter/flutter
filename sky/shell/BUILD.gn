@@ -23,6 +23,7 @@ common_deps = [
   "//sky/engine/tonic",
   "//sky/engine/wtf",
   "//sky/services/engine:interfaces",
+  "//sky/services/pointer:interfaces",
   "//sky/services/vsync:interfaces",
   "//sky/shell/dart",
   "//ui/gfx/geometry",
