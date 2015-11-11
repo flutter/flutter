@@ -84,7 +84,7 @@ SnapshotProject() {
   AssertExists $mojo_internal_path
 
   # For dart:ui_internals
-  local ui_internals_path="$(readlink ${packages}/sky_engine)/../sdk_ext/internals.dart"
+  local ui_internals_path="$(readlink ${packages}/sky_engine)/../sdk_ext/bindings/internals.dart"
   AssertExists $ui_internals_path
 
   # For dart:ui
