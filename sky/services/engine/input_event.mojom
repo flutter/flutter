@@ -8,6 +8,15 @@ module sky;
 enum EventType {
   UNKNOWN,
   BACK,
+  KEY_PRESSED,
+  KEY_RELEASED,
+};
+
+struct KeyData {
+  int32 key_code;
+  int32 flags;
+  int32 scan_code;
+  int32 meta_state;
 };
 
 // TODO(abarth): Should we have a malloc-free way of creating an input event
@@ -15,4 +24,5 @@ enum EventType {
 struct InputEvent {
   EventType type;
   int64 time_stamp;
+  KeyData? key_data;
 };

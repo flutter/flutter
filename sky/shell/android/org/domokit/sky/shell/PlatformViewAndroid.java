@@ -6,6 +6,7 @@ package org.domokit.sky.shell;
 
 import android.content.Context;
 import android.os.Build;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -31,6 +32,9 @@ import org.chromium.mojom.sky.ViewportMetrics;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.domokit.raw_keyboard.RawKeyboardServiceImpl;
+import org.domokit.raw_keyboard.RawKeyboardServiceState;
+
 /**
  * A view containing Sky
  */
@@ -43,6 +47,7 @@ public class PlatformViewAndroid extends SurfaceView {
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final EdgeDims mPadding;
     private final KeyboardServiceState mKeyboardState;
+    private final RawKeyboardServiceState mRawKeyboardState;
 
     /**
      * Dimensions in each of the four cardinal directions.
@@ -100,6 +105,23 @@ public class PlatformViewAndroid extends SurfaceView {
         // TODO(eseidel): We need per-view services!
         mKeyboardState = new KeyboardServiceState(this);
         KeyboardServiceImpl.setViewState(mKeyboardState);
+
+        mRawKeyboardState = new RawKeyboardServiceState();
+        RawKeyboardServiceImpl.setViewState(mRawKeyboardState);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mRawKeyboardState.onKey(this, keyCode, event))
+            return true;
+        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mRawKeyboardState.onKey(this, keyCode, event))
+            return true;
+        return super.onKeyDown(keyCode, event);
     }
 
     SkyEngine getEngine() {
