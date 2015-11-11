@@ -12,7 +12,7 @@
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
-#include "sky/shell/mac/platform_view_mac.h"
+#include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui_delegate.h"

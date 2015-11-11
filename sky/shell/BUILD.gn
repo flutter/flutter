@@ -85,27 +85,27 @@ if (is_android) {
 
   generate_jni("jni_headers") {
     sources = [
-      "android/org/domokit/sky/shell/PlatformServiceProvider.java",
-      "android/org/domokit/sky/shell/PlatformViewAndroid.java",
-      "android/org/domokit/sky/shell/SkyMain.java",
-      "android/org/domokit/sky/shell/TracingController.java",
-      "android/org/domokit/sky/shell/UpdateService.java",
+      "platform/android/org/domokit/sky/shell/PlatformServiceProvider.java",
+      "platform/android/org/domokit/sky/shell/PlatformViewAndroid.java",
+      "platform/android/org/domokit/sky/shell/SkyMain.java",
+      "platform/android/org/domokit/sky/shell/TracingController.java",
+      "platform/android/org/domokit/sky/shell/UpdateService.java",
     ]
     jni_package = "sky/shell"
   }
 
   shared_library("sky_shell") {
     sources = [
-      "android/library_loader.cc",
-      "android/platform_service_provider_android.cc",
-      "android/platform_service_provider_android.h",
-      "android/platform_view_android.cc",
-      "android/platform_view_android.h",
-      "android/sky_main.cc",
-      "android/sky_main.h",
-      "android/tracing_controller.cc",
-      "android/tracing_controller.h",
-      "android/update_service_android.cc",
+      "platform/android/library_loader.cc",
+      "platform/android/platform_service_provider_android.cc",
+      "platform/android/platform_service_provider_android.h",
+      "platform/android/platform_view_android.cc",
+      "platform/android/platform_view_android.h",
+      "platform/android/sky_main.cc",
+      "platform/android/sky_main.h",
+      "platform/android/tracing_controller.cc",
+      "platform/android/tracing_controller.h",
+      "platform/android/update_service_android.cc",
     ]
 
     deps = common_deps + [
@@ -121,17 +121,17 @@ if (is_android) {
 
   android_library("java") {
     java_files = [
-      "android/org/domokit/sky/shell/PlatformServiceProvider.java",
-      "android/org/domokit/sky/shell/PlatformViewAndroid.java",
-      "android/org/domokit/sky/shell/ResourceCleaner.java",
-      "android/org/domokit/sky/shell/ResourceExtractor.java",
-      "android/org/domokit/sky/shell/ServiceFactory.java",
-      "android/org/domokit/sky/shell/ServiceRegistry.java",
-      "android/org/domokit/sky/shell/SkyActivity.java",
-      "android/org/domokit/sky/shell/SkyApplication.java",
-      "android/org/domokit/sky/shell/SkyMain.java",
-      "android/org/domokit/sky/shell/TracingController.java",
-      "android/org/domokit/sky/shell/UpdateService.java",
+      "platform/android/org/domokit/sky/shell/PlatformServiceProvider.java",
+      "platform/android/org/domokit/sky/shell/PlatformViewAndroid.java",
+      "platform/android/org/domokit/sky/shell/ResourceCleaner.java",
+      "platform/android/org/domokit/sky/shell/ResourceExtractor.java",
+      "platform/android/org/domokit/sky/shell/ServiceFactory.java",
+      "platform/android/org/domokit/sky/shell/ServiceRegistry.java",
+      "platform/android/org/domokit/sky/shell/SkyActivity.java",
+      "platform/android/org/domokit/sky/shell/SkyApplication.java",
+      "platform/android/org/domokit/sky/shell/SkyMain.java",
+      "platform/android/org/domokit/sky/shell/TracingController.java",
+      "platform/android/org/domokit/sky/shell/UpdateService.java",
     ]
 
     deps = [
@@ -173,7 +173,7 @@ if (is_android) {
 
   android_apk("shell") {
     apk_name = "SkyShell"
-    android_manifest = "android/AndroidManifest.xml"
+    android_manifest = "platform/android/AndroidManifest.xml"
 
     native_libs = [ "libsky_shell.so" ]
     asset_location = "$root_build_dir/sky_shell/assets"
@@ -195,22 +195,22 @@ if (is_android) {
 
   source_set("ios_scaffolding") {
     sources = [
-      "ios/main_ios.mm",
-      "ios/sky_app_delegate.h",
-      "ios/sky_app_delegate.mm",
-      "ios/sky_surface.h",
-      "ios/sky_surface.mm",
-      "ios/sky_view_controller.h",
-      "ios/sky_view_controller.mm",
+      "platform/ios/main_ios.mm",
+      "platform/ios/sky_app_delegate.h",
+      "platform/ios/sky_app_delegate.mm",
+      "platform/ios/sky_surface.h",
+      "platform/ios/sky_surface.mm",
+      "platform/ios/sky_view_controller.h",
+      "platform/ios/sky_view_controller.mm",
     ]
 
     set_sources_assignment_filter([])
     sources += [
-      "mac/platform_mac.h",
-      "mac/platform_mac.mm",
-      "mac/platform_service_provider_mac.cc",
-      "mac/platform_view_mac.h",
-      "mac/platform_view_mac.mm",
+      "platform/mac/platform_mac.h",
+      "platform/mac/platform_mac.mm",
+      "platform/mac/platform_service_provider_mac.cc",
+      "platform/mac/platform_view_mac.h",
+      "platform/mac/platform_view_mac.mm",
     ]
     set_sources_assignment_filter(sources_assignment_filter)
 
@@ -231,9 +231,9 @@ if (is_android) {
     output_name = "sky_shell"
 
     sources = [
-      "linux/main_linux.cc",
-      "linux/platform_service_provider_linux.cc",
-      "linux/platform_view_linux.cc",
+      "platform/linux/main_linux.cc",
+      "platform/linux/platform_service_provider_linux.cc",
+      "platform/linux/platform_view_linux.cc",
     ] + testing_sources
 
     deps = common_deps + [
@@ -246,18 +246,18 @@ if (is_android) {
 
   source_set("mac_scaffolding") {
     sources = [
-      "mac/main_mac.mm",
-      "mac/platform_mac.h",
-      "mac/platform_mac.mm",
-      "mac/platform_service_provider_mac.cc",
-      "mac/platform_view_mac.h",
-      "mac/platform_view_mac.mm",
-      "mac/sky_app_delegate.h",
-      "mac/sky_app_delegate.m",
-      "mac/sky_application.h",
-      "mac/sky_application.mm",
-      "mac/sky_window.h",
-      "mac/sky_window.mm",
+      "platform/mac/main_mac.mm",
+      "platform/mac/platform_mac.h",
+      "platform/mac/platform_mac.mm",
+      "platform/mac/platform_service_provider_mac.cc",
+      "platform/mac/platform_view_mac.h",
+      "platform/mac/platform_view_mac.mm",
+      "platform/mac/sky_app_delegate.h",
+      "platform/mac/sky_app_delegate.m",
+      "platform/mac/sky_application.h",
+      "platform/mac/sky_application.mm",
+      "platform/mac/sky_window.h",
+      "platform/mac/sky_window.mm",
     ] + testing_sources
 
     deps = common_deps + [
@@ -269,14 +269,14 @@ if (is_android) {
 
   mac_app("shell") {
     app_name = "SkyShell"
-    info_plist = "mac/Info.plist"
+    info_plist = "platform/mac/Info.plist"
 
-    xibs = [ "mac/sky_mac.xib" ]
+    xibs = [ "platform/mac/sky_mac.xib" ]
 
     resource_copy_mac("sky_resources") {
       resources = [
         "//third_party/icu/android/icudtl.dat",
-        "ios/LaunchScreen.storyboardc"
+        "platform/ios/LaunchScreen.storyboardc"
       ]
       bundle_directory = "."
     }

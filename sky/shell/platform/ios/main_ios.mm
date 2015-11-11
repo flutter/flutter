@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 #import <UIKit/UIKit.h>
-#import "sky/shell/ios/sky_app_delegate.h"
+#import "sky/shell/platform/ios/sky_app_delegate.h"
 
-#include "sky/shell/mac/platform_mac.h"
+#include "sky/shell/platform/mac/platform_mac.h"
 
 extern "C" {
 // TODO(csg): HACK! boringssl accesses this on Android using a weak symbol

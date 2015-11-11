@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/android/platform_service_provider_android.h"
+#include "sky/shell/platform/android/platform_service_provider_android.h"
 
 #include "base/android/jni_android.h"
 #include "base/bind.h"

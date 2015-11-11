@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/android/platform_view_android.h"
+#include "sky/shell/platform/android/platform_view_android.h"
 
 #include <android/input.h>
 #include <android/native_window_jni.h>
