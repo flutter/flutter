@@ -81,7 +81,7 @@ class StocksAppState extends State<StocksApp> {
       if (path.length != 3)
         return null;
       if (_stocks.containsKey(path[2]))
-        return (RouteArguments args) => new StockSymbolViewer(stock: _stocks[path[2]]);
+        return (RouteArguments args) => new StockSymbolPage(stock: _stocks[path[2]]);
       return null;
     }
     return null;

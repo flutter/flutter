@@ -28,6 +28,7 @@ class InkWell extends StatefulComponent {
     Key key,
     this.child,
     this.onTap,
+    this.onDoubleTap,
     this.onLongPress,
     this.onHighlightChanged,
     this.defaultColor,
@@ -36,6 +37,7 @@ class InkWell extends StatefulComponent {
 
   final Widget child;
   final GestureTapCallback onTap;
+  final GestureTapCallback onDoubleTap;
   final GestureLongPressCallback onLongPress;
   final _HighlightChangedCallback onHighlightChanged;
   final Color defaultColor;
@@ -54,6 +56,7 @@ class _InkWellState extends State<InkWell> {
       duration: _kInkWellHighlightFadeDuration,
       child: new _InkSplashes(
         onTap: config.onTap,
+        onDoubleTap: config.onDoubleTap,
         onLongPress: config.onLongPress,
         onHighlightChanged: (bool value) {
           setState(() {
@@ -134,10 +137,12 @@ class _RenderInkSplashes extends RenderProxyBox {
   _RenderInkSplashes({
     RenderBox child,
     GestureTapCallback onTap,
+    GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
     this.onHighlightChanged
   }) : super(child) {
     this.onTap = onTap;
+    this.onDoubleTap = onDoubleTap;
     this.onLongPress = onLongPress;
   }
 
@@ -146,6 +151,13 @@ class _RenderInkSplashes extends RenderProxyBox {
   void set onTap (GestureTapCallback value) {
     _onTap = value;
     _syncTapRecognizer();
+  }
+
+  GestureTapCallback get onDoubleTap => _onDoubleTap;
+  GestureTapCallback _onDoubleTap;
+  void set onDoubleTap (GestureTapCallback value) {
+    _onDoubleTap = value;
+    _syncDoubleTapRecognizer();
   }
 
   GestureTapCallback get onLongPress => _onLongPress;
@@ -161,6 +173,7 @@ class _RenderInkSplashes extends RenderProxyBox {
   _InkSplash _lastSplash;
 
   TapGestureRecognizer _tap;
+  DoubleTapGestureRecognizer _doubleTap;
   LongPressGestureRecognizer _longPress;
 
   void _removeSplash(_InkSplash splash) {
@@ -170,8 +183,9 @@ class _RenderInkSplashes extends RenderProxyBox {
   }
 
   void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown' && (onTap != null || onLongPress != null)) {
+    if (event.type == 'pointerdown' && (onTap != null || onDoubleTap != null || onLongPress != null)) {
       _tap?.addPointer(event);
+      _doubleTap?.addPointer(event);
       _longPress?.addPointer(event);
     }
   }
@@ -179,17 +193,19 @@ class _RenderInkSplashes extends RenderProxyBox {
   void attach() {
     super.attach();
     _syncTapRecognizer();
+    _syncDoubleTapRecognizer();
     _syncLongPressRecognizer();
   }
 
   void detach() {
     _disposeTapRecognizer();
+    _disposeDoubleTapRecognizer();
     _disposeLongPressRecognizer();
     super.detach();
   }
 
   void _syncTapRecognizer() {
-    if (onTap == null && onLongPress == null) {
+    if (onTap == null && doubleTap == null && onLongPress == null) {
       _disposeTapRecognizer();
     } else {
       _tap ??= new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
@@ -202,6 +218,20 @@ class _RenderInkSplashes extends RenderProxyBox {
   void _disposeTapRecognizer() {
     _tap?.dispose();
     _tap = null;
+  }
+
+  void _syncDoubleTapRecognizer() {
+    if (onDoubleTap == null) {
+      _disposeDoubleTapRecognizer();
+    } else {
+      _doubleTap ??= new DoubleTapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
+        ..onDoubleTap = _handleDoubleTap;
+    }
+  }
+
+  void _disposeDoubleTapRecognizer() {
+    _doubleTap?.dispose();
+    _doubleTap = null;
   }
 
   void _syncLongPressRecognizer() {
@@ -241,6 +271,13 @@ class _RenderInkSplashes extends RenderProxyBox {
       onHighlightChanged(false);
   }
 
+  void _handleDoubleTap() {
+    _lastSplash?.confirm();
+    _lastSplash = null;
+    if (onDoubleTap != null)
+      onDoubleTap();
+  }
+
   void _handleLongPress() {
     _lastSplash?.confirm();
     _lastSplash = null;
@@ -269,18 +306,26 @@ class _InkSplashes extends OneChildRenderObjectWidget {
     Key key,
     Widget child,
     this.onTap,
+    this.onDoubleTap,
     this.onLongPress,
     this.onHighlightChanged
   }) : super(key: key, child: child);
 
   final GestureTapCallback onTap;
+  final GestureTapCallback onDoubleTap;
   final GestureLongPressCallback onLongPress;
   final _HighlightChangedCallback onHighlightChanged;
 
-  _RenderInkSplashes createRenderObject() => new _RenderInkSplashes(onTap: onTap, onLongPress: onLongPress, onHighlightChanged: onHighlightChanged);
+  _RenderInkSplashes createRenderObject() => new _RenderInkSplashes(
+    onTap: onTap,
+    onDoubleTap: onDoubleTap,
+    onLongPress: onLongPress,
+    onHighlightChanged: onHighlightChanged
+  );
 
   void updateRenderObject(_RenderInkSplashes renderObject, _InkSplashes oldWidget) {
     renderObject.onTap = onTap;
+    renderObject.onDoubleTap = onDoubleTap;
     renderObject.onLongPress = onLongPress;
     renderObject.onHighlightChanged = onHighlightChanged;
   }

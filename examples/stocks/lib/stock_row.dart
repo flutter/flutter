@@ -27,6 +27,7 @@ class StockRow extends StatelessComponent {
   StockRow({
     Stock stock,
     this.onPressed,
+    this.onDoubleTap,
     this.onLongPressed
   }) : this.stock = stock,
        _arrowKey = new StockRowPartKey(stock, StockRowPartKind.arrow),
@@ -34,22 +35,15 @@ class StockRow extends StatelessComponent {
 
   final Stock stock;
   final StockRowActionCallback onPressed;
+  final StockRowActionCallback onDoubleTap;
   final StockRowActionCallback onLongPressed;
 
   final Key _arrowKey;
 
   static const double kHeight = 79.0;
 
-  GestureTapCallback _getTapHandler(StockRowActionCallback callback) {
-    if (callback == null)
-      return null;
-    return () => callback(stock, _arrowKey);
-  }
-
-  GestureLongPressCallback _getLongPressHandler(StockRowActionCallback callback) {
-    if (callback == null)
-      return null;
-    return () => callback(stock, _arrowKey);
+  GestureTapCallback _getHandler(StockRowActionCallback callback) {
+    return callback == null ? null : () => callback(stock, _arrowKey);
   }
 
   Widget build(BuildContext context) {
@@ -58,8 +52,9 @@ class StockRow extends StatelessComponent {
     if (stock.percentChange > 0)
       changeInPrice = "+" + changeInPrice;
     return new InkWell(
-      onTap: _getTapHandler(onPressed),
-      onLongPress: _getLongPressHandler(onLongPressed),
+      onTap: _getHandler(onPressed),
+      onDoubleTap: _getHandler(onDoubleTap),
+      onLongPress: _getHandler(onLongPressed),
       child: new Container(
         padding: const EdgeDims.TRBL(16.0, 16.0, 20.0, 16.0),
         decoration: new BoxDecoration(
