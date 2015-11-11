@@ -1,0 +1,49 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/mojo_application.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+
+mojo_native_application("mojo") {
+  output_name = "sky_shell"
+
+  sources = [
+    "main_mojo.cc",
+    "platform_service_provider_mojo.cc",
+    "platform_view_mojo.cc",
+    "platform_view_mojo.h",
+  ]
+
+  deps = [
+    "//mojo/application",
+    "//mojo/common",
+    "//mojo/common:tracing_impl",
+    "//mojo/converters/geometry",
+    "//mojo/converters/input_events",
+    "//mojo/icu",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/content_handler/interfaces",
+    "//mojo/services/gpu/interfaces",
+    "//mojo/services/input_events/interfaces",
+    "//mojo/services/navigation/interfaces",
+    "//mojo/services/network/interfaces",
+    "//mojo/services/service_registry/interfaces",
+    "//mojo/services/surfaces/interfaces",
+    "//mojo/services/view_manager/cpp",
+    "//mojo/services/view_manager/interfaces",
+    "//services/asset_bundle:lib",
+    "//services/sky/compositor",
+    "//skia",
+    "//sky/engine/public/sky",
+    "//sky/engine/tonic",
+    "//sky/engine/web",
+    "//sky/shell:common",
+    "//third_party/icu",
+    "//ui/events",
+    "//url",
+  ]
+}

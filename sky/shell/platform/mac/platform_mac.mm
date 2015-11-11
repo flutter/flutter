@@ -6,16 +6,18 @@
 
 #include <asl.h>
 #include "base/at_exit.h"
-#include "base/logging.h"
-#include "base/i18n/icu_util.h"
 #include "base/command_line.h"
-#include "base/mac/scoped_nsautorelease_pool.h"
-#include "ui/gl/gl_surface.h"
-#include "sky/shell/shell.h"
-#include "sky/shell/service_provider.h"
-#include "sky/shell/ui_delegate.h"
+#include "base/i18n/icu_util.h"
 #include "base/lazy_instance.h"
+#include "base/logging.h"
+#include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/message_loop/message_loop.h"
+#include "mojo/edk/embedder/embedder.h"
+#include "mojo/edk/embedder/simple_platform_support.h"
+#include "sky/shell/service_provider.h"
+#include "sky/shell/shell.h"
+#include "sky/shell/ui_delegate.h"
+#include "ui/gl/gl_surface.h"
 
 static void InitializeLogging() {
   logging::LoggingSettings settings;
@@ -59,6 +61,9 @@ int PlatformMacMain(int argc,
   // we attach to the CFRunLoop
   message_loop->Attach();
 #endif
+
+  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
+      new mojo::embedder::SimplePlatformSupport()));
 
   sky::shell::Shell::Init(make_scoped_ptr(
       new sky::shell::ServiceProviderContext(message_loop->task_runner())));

@@ -19,6 +19,8 @@
 #include "base/run_loop.h"
 #include "base/threading/simple_thread.h"
 #include "jni/SkyMain_jni.h"
+#include "mojo/edk/embedder/embedder.h"
+#include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/service_provider.h"
 #include "sky/shell/shell.h"
 
@@ -72,6 +74,9 @@ static void Init(JNIEnv* env,
 
   g_java_message_loop.Get().reset(new base::MessageLoopForUI);
   base::MessageLoopForUI::current()->Start();
+
+  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
+      new mojo::embedder::SimplePlatformSupport()));
 
   Shell::Init(make_scoped_ptr(new ServiceProviderContext(
       g_java_message_loop.Get()->task_runner())));

@@ -8,7 +8,6 @@ common_deps = [
   "//build/config/sanitizers:deps",
   "//dart/runtime:libdart",
   "//mojo/data_pipe_utils",
-  "//mojo/edk/system",
   "//mojo/message_pump",
   "//mojo/public/cpp/application",
   "//mojo/public/interfaces/application",
@@ -110,6 +109,7 @@ if (is_android) {
 
     deps = common_deps + [
              "//mojo/android:libsystem_java",
+             "//mojo/edk/system",
              ":jni_headers",
              ":common",
            ]
@@ -216,6 +216,7 @@ if (is_android) {
 
     deps = common_deps + [
              ":common",
+             "//mojo/edk/system",
              "//sky/services/keyboard",
              "//sky/services/media",
              "//sky/services/ns_net",
@@ -238,6 +239,7 @@ if (is_android) {
 
     deps = common_deps + [
              ":common",
+             "//mojo/edk/system",
              "//mojo/common",
            ]
   }
@@ -263,6 +265,7 @@ if (is_android) {
     deps = common_deps + [
              ":common",
              "//mojo/common",
+             "//mojo/edk/system",
              "//sky/services/ns_net",
            ]
   }

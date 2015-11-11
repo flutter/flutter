@@ -13,6 +13,10 @@ group("sky") {
     "//sky/tools/sky_snapshot($host_toolchain)",
   ]
 
+  if (is_linux || is_android) {
+    deps += [ "//sky/shell/platform/mojo" ]
+  }
+
   if (is_android) {
     deps += [ "//sky/services/activity" ]
   }
