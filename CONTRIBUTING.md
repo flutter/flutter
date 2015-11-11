@@ -193,7 +193,7 @@ few steps:
    `sky_services` packages to point to the new version of the engine that you
    just published. These dependencies are defined by [packages/flutter/pubspec.yaml](packages/flutter/pubspec.yaml).
    After changing the `pubspec.yaml` file, you'll need to run
-   `./dev/update_packages.py` to update all the packages in this repository to
+   `./dev/update_packages.dart` to update all the packages in this repository to
    see the new dependency. As part of landing this change, you should make
    whatever other changes are needed in this repository to account for your
    breaking change.
