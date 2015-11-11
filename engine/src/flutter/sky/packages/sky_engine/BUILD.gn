@@ -32,7 +32,6 @@ dart_pkg("sky_engine") {
     "//sky/engine/bindings/internals.dart",
     "$service_isolate_dir/main.dart",
     "$service_isolate_dir/loader.dart",
-    "$service_isolate_dir/resources.dart",
     "$service_isolate_dir/server.dart",
   ]
   sdk_ext_mappings = [
