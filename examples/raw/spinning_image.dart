@@ -7,6 +7,9 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:mojo/bindings.dart' as bindings;
+import 'package:mojo/core.dart' as core;
+import 'package:sky_services/pointer/pointer.mojom.dart';
 
 Duration timeBase = null;
 
@@ -78,21 +81,20 @@ void handleImageLoad(result) {
   }
 }
 
-bool handleEvent(ui.Event event) {
-  if (event.type == "pointerdown") {
-    return true;
-  }
+void handlePointerPacket(ByteData serializedPacket) {
+  bindings.Message message = new bindings.Message(
+      serializedPacket, <core.MojoHandle>[]);
+  PointerPacket packet = PointerPacket.deserialize(message);
 
-  if (event.type == "pointerup") {
-    imageCache.load(url2).first.then(handleImageLoad);
-    return true;
+  for (Pointer pointer in packet.pointers) {
+    if (pointer.type == PointerType.UP) {
+      imageCache.load(url2).first.then(handleImageLoad);
+    }
   }
-
-  return false;
 }
 
 void main() {
   imageCache.load(url1).first.then(handleImageLoad);
-  ui.window.onEvent = handleEvent;
+  ui.window.onPointerPacket = handlePointerPacket;
   ui.window.onBeginFrame = beginFrame;
 }

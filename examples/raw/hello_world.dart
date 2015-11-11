@@ -5,6 +5,10 @@
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
+import 'package:mojo/bindings.dart' as bindings;
+import 'package:mojo/core.dart' as core;
+import 'package:sky_services/pointer/pointer.mojom.dart';
+
 ui.Color color;
 
 ui.Picture paint(ui.Rect paintBounds) {
@@ -42,25 +46,26 @@ void beginFrame(Duration timeStamp) {
   ui.window.render(scene);
 }
 
-bool handleEvent(ui.Event event) {
-  if (event.type == 'pointerdown') {
-    color = new ui.Color.fromARGB(255, 0, 0, 255);
-    ui.window.scheduleFrame();
-    return true;
-  }
-
-  if (event.type == 'pointerup') {
-    color = new ui.Color.fromARGB(255, 0, 255, 0);
-    ui.window.scheduleFrame();
-    return true;
-  }
-
-  if (event.type == 'back') {
+void handleEvent(String eventType, double timeStamp) {
+  if (eventType == 'back') {
     print('Pressed back button.');
-    return true;
   }
+}
 
-  return false;
+void handlePointerPacket(ByteData serializedPacket) {
+  bindings.Message message = new bindings.Message(
+      serializedPacket, <core.MojoHandle>[]);
+  PointerPacket packet = PointerPacket.deserialize(message);
+
+  for (Pointer pointer in packet.pointers) {
+    if (pointer.type == PointerType.DOWN) {
+      color = new ui.Color.fromARGB(255, 0, 0, 255);
+      ui.window.scheduleFrame();
+    } else if (pointer.type == PointerType.UP) {
+      color = new ui.Color.fromARGB(255, 0, 255, 0);
+      ui.window.scheduleFrame();
+    }
+  }
 }
 
 void main() {
@@ -68,5 +73,6 @@ void main() {
   color = new ui.Color.fromARGB(255, 0, 255, 0);
   ui.window.onBeginFrame = beginFrame;
   ui.window.onEvent = handleEvent;
+  ui.window.onPointerPacket = handlePointerPacket;
   ui.window.scheduleFrame();
 }
