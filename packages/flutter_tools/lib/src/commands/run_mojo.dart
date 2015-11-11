@@ -34,7 +34,7 @@ class RunMojoCommand extends Command {
   String _makePathAbsolute(String relativePath) {
     File file = new File(relativePath);
     if (!file.existsSync()) {
-      throw new Exception("Path \"${relativePath}\" does not exist");
+      throw new Exception('Path "$relativePath" does not exist');
     }
     return file.absolute.path;
   }
@@ -79,8 +79,8 @@ class RunMojoCommand extends Command {
       final appPath = _makePathAbsolute(argResults['app']);
       Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
       final viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
-      args.add('file://${appPath}');
-      args.add('--url-mappings=mojo:sky_viewer=file://${viewerPath}');
+      args.add('file://$appPath');
+      args.add('--url-mappings=mojo:sky_viewer=file://$viewerPath');
     }
 
     if (useDevtools) {
@@ -115,6 +115,6 @@ class RunMojoCommand extends Command {
       return 1;
     }
 
-    return runCommandAndStreamOutput(await _getShellConfig());
+    return await runCommandAndStreamOutput(await _getShellConfig());
   }
 }

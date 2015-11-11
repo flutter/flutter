@@ -68,7 +68,7 @@ class StartCommand extends FlutterCommand {
         if (FileSystemEntity.isDirectorySync(target))
           mainPath = path.join(target, 'lib', 'main.dart');
         if (!FileSystemEntity.isFileSync(mainPath)) {
-          String message = 'Tried to run ${mainPath}, but that file does not exist.';
+          String message = 'Tried to run $mainPath, but that file does not exist.';
           if (!argResults.wasParsed('target'))
             message += '\nConsider using the -t option to specify that Dart file to start.';
           stderr.writeln(message);

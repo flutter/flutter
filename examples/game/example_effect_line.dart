@@ -38,7 +38,7 @@ final ThemeData _theme = new ThemeData(
 );
 
 class TestAppState extends State<TestApp> {
-  TestApp() {
+  TestAppState() {
     _testBed = new TestBed(_labelTexts[_selectedLine]);
   }
 

@@ -50,8 +50,9 @@ class BoundedFrictionSimulation extends FrictionSimulation {
     double drag,
     double position,
     double velocity,
-    double this._minX,
-    double this._maxX) : super(drag, position, velocity);
+    this._minX,
+    this._maxX
+  ) : super(drag, position, velocity);
 
   final double _minX;
   final double _maxX;

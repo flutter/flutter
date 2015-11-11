@@ -3,7 +3,7 @@ part of flutter_sprites;
 // TODO: The sound effects should probably use Android's SoundPool instead of
 // MediaPlayer as it is more efficient and flexible for playing back sound effects
 
-typedef void SoundEffectStreamCallback(SoundEffectStream);
+typedef void SoundEffectStreamCallback(SoundEffectStream stream);
 
 class SoundEffect {
   SoundEffect(this._pipeFuture);
@@ -137,8 +137,8 @@ class SoundEffectPlayer {
   }
 }
 
-typedef void SoundTrackCallback(SoundTrack);
-typedef void SoundTrackBufferingCallback(SoundTrack, int);
+typedef void SoundTrackCallback(SoundTrack soundTrack);
+typedef void SoundTrackBufferingCallback(SoundTrack soundTrack, int index);
 
 class SoundTrack {
   MediaPlayerProxy _player;

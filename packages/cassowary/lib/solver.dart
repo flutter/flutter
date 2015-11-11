@@ -410,10 +410,10 @@ class Solver {
         double temp = row.coefficientForSymbol(entering);
 
         if (temp < 0.0) {
-          double temp_ratio = -row.constant / temp;
+          double tempRatio = -row.constant / temp;
 
-          if (temp_ratio < ratio) {
-            ratio = temp_ratio;
+          if (tempRatio < ratio) {
+            ratio = tempRatio;
             result.first = symbol;
             result.second = row;
           }

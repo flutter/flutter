@@ -114,7 +114,7 @@ Future<String> read(url) =>
 Future<Uint8List> readBytes(url) =>
   _withClient((client) => client.readBytes(url));
 
-Future _withClient(Future fn(MojoClient)) {
+Future _withClient(Future fn(MojoClient client)) {
   var client = new MojoClient();
   var future = fn(client);
   return future.whenComplete(client.close);

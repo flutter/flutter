@@ -132,7 +132,11 @@ class _PointerEventConverter {
         return 'mouse';
       case PointerKind.STYLUS:
         return 'stylus';
+      case PointerKind.INVERTED_STYLUS:
+        return 'invertedStylus';
     }
+    assert(false);
+    return '';
   }
 }
 

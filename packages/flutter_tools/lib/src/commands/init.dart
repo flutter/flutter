@@ -6,11 +6,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:logging/logging.dart';
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as p;
 
 import '../artifacts.dart';
 import '../process.dart';
+
+final Logger _logging = new Logger('sky_tools.init');
 
 class InitCommand extends Command {
   final String name = 'init';
@@ -20,7 +23,7 @@ class InitCommand extends Command {
     argParser.addOption('out', abbr: 'o', help: 'The output directory.');
     argParser.addFlag('pub',
         defaultsTo: true,
-        help: 'Whether to run pub after the project has been created.');
+        help: 'Whether to run "pub get" after the project has been created.');
   }
 
   @override
@@ -40,7 +43,7 @@ class InitCommand extends Command {
 
     String flutterPackagePath = p.join(flutterRoot, 'packages', 'flutter');
     if (!FileSystemEntity.isFileSync(p.join(flutterPackagePath, 'pubspec.yaml'))) {
-      print('Unable to find package:flutter in ${flutterPackagePath}');
+      print('Unable to find package:flutter in $flutterPackagePath');
       return 2;
     }
 
@@ -58,17 +61,48 @@ class InitCommand extends Command {
 ''';
 
     if (argResults['pub']) {
-      print("Running pub get...");
-      int code = await runCommandAndStreamOutput(
-        [sdkBinaryName('pub'), 'get'],
-        workingDirectory: out.path
-      );
+      int code = await pubGet(directory: out.path);
       if (code != 0)
         return code;
     }
 
     print(message);
     return 0;
+  }
+
+  Future<int> pubGet({
+    String directory: '',
+    bool skipIfAbsent: false,
+    bool verbose: true
+  }) async {
+    File pubSpecYaml = new File(p.join(directory, 'pubspec.yaml'));
+    File pubSpecLock = new File(p.join(directory, 'pubspec.lock'));
+    File dotPackages = new File(p.join(directory, '.packages'));
+
+    if (!pubSpecYaml.existsSync()) {
+      if (skipIfAbsent)
+        return 0;
+      _logging.severe('$directory: no pubspec.yaml found');
+      return 1;
+    }
+
+    if (!pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
+      if (verbose)
+        print("Running pub get in $directory...");
+      int code = await runCommandAndStreamOutput(
+        [sdkBinaryName('pub'), 'get'],
+        workingDirectory: directory
+      );
+      if (code != 0)
+        return code;
+    }
+
+    if ((pubSpecLock.existsSync() && pubSpecLock.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())) &&
+        (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())))
+      return 0;
+
+    _logging.severe('$directory: pubspec.yaml, pubspec.lock, and .packages are in an inconsistent state');
+    return 1;
   }
 }
 

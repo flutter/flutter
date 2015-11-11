@@ -8,16 +8,19 @@ import 'rendering_tester.dart';
 class SquareImage implements ui.Image {
   int get width => 10;
   int get height => 10;
+  void dispose() { }
 }
 
 class WideImage implements ui.Image {
   int get width => 20;
   int get height => 10;
+  void dispose() { }
 }
 
 class TallImage implements ui.Image {
   int get width => 10;
   int get height => 20;
+  void dispose() { }
 }
 
 void main() {

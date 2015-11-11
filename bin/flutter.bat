@@ -29,6 +29,7 @@ GOTO :after_snapshot
 
 :do_snapshot
 CD "%flutter_tools_dir%"
+ECHO Updating flutter tool...
 CALL pub.bat get
 CD "%flutter_root%"
 CALL %dart% --snapshot="%snapshot_path%" --package-root="%flutter_tools_dir%\packages" "%script_path%"

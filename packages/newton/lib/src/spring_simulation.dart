@@ -17,7 +17,8 @@ class SpringDescription {
   final double damping;
 
   SpringDescription(
-      {double this.mass, double this.springConstant, double this.damping}) {
+      { this.mass, this.springConstant, this.damping }
+  ) {
     assert(mass != null);
     assert(springConstant != null);
     assert(damping != null);

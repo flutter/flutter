@@ -58,7 +58,7 @@ class Expression extends _EquationMember {
       _createConstraint(value, Relation.lessThanOrEqualTo);
 
   operator ==(_EquationMember value) =>
-      _createConstraint(value, Relation.equalTo);
+    _createConstraint(value, Relation.equalTo); // analyzer says "Type check failed" // analyzer says "The return type 'Constraint' is not a 'bool', as defined by the method '=='"
 
   Expression operator +(_EquationMember m) {
     if (m is ConstantMember) {
@@ -140,7 +140,7 @@ class Expression extends _EquationMember {
 
     if (args == null) {
       throw new ParserException(
-          "Could not find constant multiplicand or multiplier", [this, m]);
+          'Could not find constant multiplicand or multiplier', [this, m]);
       return null;
     }
 
@@ -150,7 +150,7 @@ class Expression extends _EquationMember {
   _EquationMember operator /(_EquationMember m) {
     if (!m.isConstant) {
       throw new ParserException(
-          "The divisor was not a constant expression", [this, m]);
+          'The divisor was not a constant expression', [this, m]);
       return null;
     }
 
@@ -160,10 +160,10 @@ class Expression extends _EquationMember {
   String toString() {
     StringBuffer buffer = new StringBuffer();
 
-    terms.forEach((t) => buffer.write("${t}"));
+    terms.forEach((t) => buffer.write('$t'));
 
     if (constant != 0.0) {
-      buffer.write(constant.sign > 0.0 ? "+" : "-");
+      buffer.write(constant.sign > 0.0 ? '+' : '-');
       buffer.write(constant.abs());
     }
 

@@ -18,33 +18,35 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   String workingDirectory
 }) async {
   _logging.info(cmd.join(' '));
-  Process proc = await Process.start(
+  Process process = await Process.start(
     cmd[0],
-    cmd.getRange(1, cmd.length).toList(),
+    cmd.sublist(1),
     workingDirectory: workingDirectory
   );
-  proc.stdout.transform(UTF8.decoder).listen((String data) {
+  process.stdout.transform(UTF8.decoder).listen((String data) {
     List<String> dataLines = data.trimRight().split('\n');
     if (filter != null) {
+      // TODO(ianh): This doesn't handle IO buffering (where the data might be split half-way through a line)
       dataLines = dataLines.where((String s) => filter.hasMatch(s)).toList();
     }
     if (dataLines.length > 0) {
       stdout.write('$prefix${dataLines.join('\n$prefix')}\n');
     }
   });
-  proc.stderr.transform(UTF8.decoder).listen((String data) {
+  process.stderr.transform(UTF8.decoder).listen((String data) {
     List<String> dataLines = data.trimRight().split('\n');
     if (filter != null) {
+      // TODO(ianh): This doesn't handle IO buffering (where the data might be split half-way through a line)
       dataLines = dataLines.where((String s) => filter.hasMatch(s));
     }
     if (dataLines.length > 0) {
       stderr.write('$prefix${dataLines.join('\n$prefix')}\n');
     }
   });
-  return proc.exitCode;
+  return await process.exitCode;
 }
 
-Future runAndKill(List<String> cmd, Duration timeout) async {
+Future runAndKill(List<String> cmd, Duration timeout) {
   Future<Process> proc = runDetached(cmd);
   return new Future.delayed(timeout, () async {
     _logging.info('Intentionally killing ${cmd[0]}');
@@ -52,7 +54,7 @@ Future runAndKill(List<String> cmd, Duration timeout) async {
   });
 }
 
-Future<Process> runDetached(List<String> cmd) async {
+Future<Process> runDetached(List<String> cmd) {
   _logging.info(cmd.join(' '));
   Future<Process> proc = Process.start(
       cmd[0], cmd.getRange(1, cmd.length).toList(),
@@ -97,6 +99,6 @@ String _runWithLoggingSync(List<String> cmd, {bool checked: false}) {
 class ProcessExit implements Exception {
   final int exitCode;
   ProcessExit(this.exitCode);
-  String get message => 'ProcessExit: ${exitCode}';
+  String get message => 'ProcessExit: $exitCode';
   String toString() => message;
 }
