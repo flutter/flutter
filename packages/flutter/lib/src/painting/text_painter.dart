@@ -177,10 +177,18 @@ class TextPainter {
     return _applyFloatingPointHack(_paragraph.maxIntrinsicWidth);
   }
 
+  double get width {
+    assert(!_needsLayout);
+    return _applyFloatingPointHack(_paragraph.width);
+  }
+
+  double get height {
+    assert(!_needsLayout);
+    return _applyFloatingPointHack(_paragraph.height);
+  }
+
   Size get size {
     assert(!_needsLayout);
-    double height = _applyFloatingPointHack(_paragraph.height);
-    double width = _applyFloatingPointHack(_paragraph.width);
     return new Size(width, height);
   }
 

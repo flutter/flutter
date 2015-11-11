@@ -60,15 +60,21 @@ class RenderEditableParagraph extends RenderParagraph {
     markNeedsPaint();
   }
 
-  // Editable text does not support line wrap.
-  bool get allowLineWrap => false;
+  BoxConstraints _getTextContraints(BoxConstraints constraints) {
+    return new BoxConstraints(
+      minWidth: 0.0,
+      maxWidth: double.INFINITY,
+      minHeight: constraints.minHeight,
+      maxHeight: constraints.maxHeight
+    );
+  }
 
   double _getIntrinsicWidth(BoxConstraints constraints) {
     // There should be no difference between the minimum and maximum width
     // because we only support single-line text.
-    layoutText(constraints);
+    layoutText(_getTextContraints(constraints));
     return constraints.constrainWidth(
-      textPainter.size.width + _kCursorGap + _kCursorWidth
+      textPainter.width + _kCursorGap + _kCursorWidth
     );
   }
 
@@ -81,23 +87,21 @@ class RenderEditableParagraph extends RenderParagraph {
   }
 
   void performLayout() {
-    layoutText(constraints);
+    layoutText(_getTextContraints(constraints));
+    Size contentSize = new Size(textPainter.width + _kCursorGap + _kCursorWidth, textPainter.height);
+    size = constraints.constrain(contentSize);
 
-    Offset cursorPadding = const Offset(_kCursorGap + _kCursorWidth, 0.0);
-    Size newContentSize = textPainter.size + cursorPadding;
-    size = constraints.constrain(newContentSize);
-
-    if (_contentSize == null || _contentSize != newContentSize) {
-      _contentSize = newContentSize;
+    if (_contentSize == null || _contentSize != contentSize) {
+      _contentSize = contentSize;
       if (onContentSizeChanged != null)
-        onContentSizeChanged(newContentSize);
+        onContentSizeChanged(_contentSize);
     }
   }
 
   void paint(PaintingContext context, Offset offset) {
-    layoutText(constraints);
+    layoutText(_getTextContraints(constraints));
 
-    bool needsClipping = (_contentSize.width > size.width);
+    final bool needsClipping = (_contentSize.width > size.width);
     if (needsClipping) {
       context.canvas.save();
       context.canvas.clipRect(offset & size);
@@ -107,15 +111,12 @@ class RenderEditableParagraph extends RenderParagraph {
 
     if (_showCursor) {
       Rect cursorRect =  new Rect.fromLTWH(
-        textPainter.size.width + _kCursorGap,
-        _kCursorHeightOffset,
+        offset.dx + _contentSize.width - _kCursorWidth - _scrollOffset.dx,
+        offset.dy + _kCursorHeightOffset - _scrollOffset.dy,
         _kCursorWidth,
         size.height - 2.0 * _kCursorHeightOffset
       );
-      context.canvas.drawRect(
-        cursorRect.shift(offset - _scrollOffset),
-        new Paint()..color = _cursorColor
-      );
+      context.canvas.drawRect(cursorRect, new Paint()..color = _cursorColor);
     }
 
     if (needsClipping)

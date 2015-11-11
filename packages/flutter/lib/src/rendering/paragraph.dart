@@ -47,14 +47,11 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  // Whether the text should be allowed to wrap to multiple lines.
-  bool get allowLineWrap => true;
-
   void layoutText(BoxConstraints constraints) {
     assert(constraints != null);
     if (_constraintsForCurrentLayout == constraints)
       return; // already cached this layout
-    textPainter.maxWidth = allowLineWrap ? constraints.maxWidth : double.INFINITY;
+    textPainter.maxWidth = constraints.maxWidth;
     textPainter.minWidth = constraints.minWidth;
     textPainter.minHeight = constraints.minHeight;
     textPainter.maxHeight = constraints.maxHeight;
