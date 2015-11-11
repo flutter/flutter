@@ -11,11 +11,11 @@
 #include "base/logging.h"
 #include "mojo/android/system/base_run_loop.h"
 #include "mojo/android/system/core_impl.h"
-#include "sky/shell/android/platform_service_provider_android.h"
-#include "sky/shell/android/platform_view_android.h"
-#include "sky/shell/android/sky_main.h"
-#include "sky/shell/android/tracing_controller.h"
-#include "sky/shell/android/update_service_android.h"
+#include "sky/shell/platform/android/platform_service_provider_android.h"
+#include "sky/shell/platform/android/platform_view_android.h"
+#include "sky/shell/platform/android/sky_main.h"
+#include "sky/shell/platform/android/tracing_controller.h"
+#include "sky/shell/platform/android/update_service_android.h"
 
 namespace {
 
