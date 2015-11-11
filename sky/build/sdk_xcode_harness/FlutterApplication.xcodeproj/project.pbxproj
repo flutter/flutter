@@ -502,7 +502,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FLUTTER_APPLICATION_PATH = path/to/application;
-				FLUTTER_PATH = path/to/flutter/repo;
+				FLUTTER_ROOT = path/to/flutter/repo;
 				INFOPLIST_FILE = FlutterApplication/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -522,7 +522,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FLUTTER_APPLICATION_PATH = path/to/application;
-				FLUTTER_PATH = path/to/flutter/repo;
+				FLUTTER_ROOT = path/to/flutter/repo;
 				INFOPLIST_FILE = FlutterApplication/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
