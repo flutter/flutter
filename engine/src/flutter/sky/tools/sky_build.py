@@ -10,7 +10,6 @@ import sys
 
 SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_ROOT = os.path.dirname(os.path.dirname(SKY_TOOLS_DIR))
-WORKBENCH = os.path.join(SRC_ROOT, 'sky', 'packages', 'workbench')
 DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
 
 def main():
@@ -28,8 +27,8 @@ def main():
     args = parser.parse_args()
 
     command = [
-        os.path.join(DART_SDK, 'pub'),
-        'run', 'sky_tools', 'build',
+        'flutter',
+        'build',
         '--asset-base', os.path.abspath(args.asset_base),
         '--compiler', os.path.abspath(args.compiler),
         '--main', os.path.abspath(args.main),
@@ -47,7 +46,7 @@ def main():
     if args.manifest:
         command += ['--manifest', os.path.abspath(args.manifest)]
 
-    subprocess.check_call(command, cwd=WORKBENCH)
+    subprocess.check_call(command, cwd=os.path.join(args.package_root, '..'))
 
 if __name__ == '__main__':
     sys.exit(main())
