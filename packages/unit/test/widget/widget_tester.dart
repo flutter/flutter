@@ -144,6 +144,27 @@ class WidgetTester {
     _dispatchEvent(p.up(), result);
   }
 
+  void fling(Element element, Offset offset, velocity, { int pointer: 1 }) {
+    flingFrom(getCenter(element), offset, velocity, pointer: pointer);
+  }
+
+  void flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1 }) {
+    assert(offset.distance > 0.0);
+    assert(velocity != 0.0);   // velocity is pixels/second
+    final TestPointer p = new TestPointer(pointer);
+    final HitTestResult result = _hitTest(startLocation);
+    final kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
+    final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
+    double timeStamp = 0.0;
+    _dispatchEvent(p.down(startLocation, timeStamp), result);
+    for(int i = 0; i < kMoveCount; i++) {
+      final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
+      _dispatchEvent(p.move(location, timeStamp), result);
+      timeStamp += timeStampDelta;
+    }
+    _dispatchEvent(p.up(timeStamp), result);
+  }
+
   void scroll(Element element, Offset offset, { int pointer: 1 }) {
     scrollAt(getCenter(element), offset, pointer: pointer);
   }
