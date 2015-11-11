@@ -28,4 +28,9 @@ void Picture::playback(Canvas* canvas)
     m_picture->playback(canvas->skCanvas());
 }
 
+void Picture::dispose()
+{
+    ClearDartWrapper();
+}
+
 } // namespace blink

@@ -34,7 +34,9 @@ PassRefPtr<Picture> PictureRecorder::endRecording()
     RefPtr<Picture> picture = Picture::create(
         adoptRef(m_pictureRecorder.endRecording()));
     m_canvas->clearSkCanvas();
+    m_canvas->ClearDartWrapper();
     m_canvas = nullptr;
+    ClearDartWrapper();
     return picture.release();
 }
 
@@ -45,7 +47,9 @@ PassRefPtr<Drawable> PictureRecorder::endRecordingAsDrawable()
     RefPtr<Drawable> drawable = Drawable::create(
         adoptRef(m_pictureRecorder.endRecordingAsDrawable()));
     m_canvas->clearSkCanvas();
+    m_canvas->ClearDartWrapper();
     m_canvas = nullptr;
+    ClearDartWrapper();
     return drawable.release();
 }
 

@@ -28,6 +28,8 @@ class Scene : public RefCounted<Scene>, public DartWrappable {
 
   std::unique_ptr<sky::compositor::LayerTree> takeLayerTree();
 
+  void dispose();
+
  private:
   explicit Scene(std::unique_ptr<sky::compositor::Layer> rootLayer,
                  uint32_t rasterizerTracingThreshold);

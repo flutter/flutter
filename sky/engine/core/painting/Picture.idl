@@ -7,4 +7,6 @@ interface Picture {
   // canvas. Using the Canvas drawPicture entry point gives the destination
   // canvas the option of just taking a ref.
   void playback(Canvas canvas);
+
+  void dispose();
 };

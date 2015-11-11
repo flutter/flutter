@@ -20,4 +20,8 @@ int CanvasImage::height() const {
   return image_->height();
 }
 
+void CanvasImage::dispose() {
+  ClearDartWrapper();
+}
+
 }  // namespace blink
