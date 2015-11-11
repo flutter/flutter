@@ -216,5 +216,7 @@ Future showBottomSheet({ BuildContext context, GlobalKey<PlaceholderState> place
   _BottomSheetRoute route = new _BottomSheetRoute(child: child, completer: completer);
   placeholderKey.currentState.child = new _PersistentBottomSheet(route: route);
   Navigator.of(context).pushEphemeral(route);
-  return completer.future;
+  return completer.future.then((_) {
+    placeholderKey.currentState.child = null;
+  });
 }
