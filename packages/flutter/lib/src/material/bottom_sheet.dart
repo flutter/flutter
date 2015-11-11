@@ -77,10 +77,14 @@ class _BottomSheetRoute extends OverlayRoute {
   }
 
   void didPop(dynamic result) {
-    completer.complete(result);
-    performance.reverse().then((_) {
+    void finish() {
       super.didPop(result); // clear the overlay entries
-    });
+      completer.complete(result);
+    }
+    if (performance.isDismissed)
+      finish();
+    else
+      performance.reverse().then((_) { finish(); });
   }
 
   String get debugLabel => '$runtimeType';

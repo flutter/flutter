@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -92,12 +94,15 @@ class _SnackBar extends StatelessComponent {
 }
 
 class _SnackBarRoute extends TransitionRoute {
+  _SnackBarRoute({ Completer completer }) : super(completer: completer);
+
   bool get opaque => false;
   Duration get transitionDuration => const Duration(milliseconds: 200);
 }
 
-void showSnackBar({ BuildContext context, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
-  _SnackBarRoute route = new _SnackBarRoute();
+Future showSnackBar({ BuildContext context, GlobalKey<PlaceholderState> placeholderKey, Widget content, List<SnackBarAction> actions }) {
+  final Completer completer = new Completer();
+  _SnackBarRoute route = new _SnackBarRoute(completer: completer);
   _SnackBar snackBar = new _SnackBar(
     route: route,
     content: content,
@@ -105,4 +110,7 @@ void showSnackBar({ BuildContext context, GlobalKey<PlaceholderState> placeholde
   );
   placeholderKey.currentState.child = snackBar;
   Navigator.of(context).pushEphemeral(route);
+  return completer.future.then((_) {
+    placeholderKey.currentState.child = null;
+  });
 }
