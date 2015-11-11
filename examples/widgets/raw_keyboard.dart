@@ -55,11 +55,11 @@ class HardwareKeyDemoState extends State<HardwareKeyDemo> implements mojo.RawKey
     }
     return new Column([
         new Text(
-          '${_event?.type}',
+          '${_event.type}',
           style: Typography.black.body2
         ),
         new Text(
-          '${_event?.keyData?.keyCode}',
+          '${_event.keyData.keyCode}',
           style: Typography.black.display4
         )
     ], justifyContent: FlexJustifyContent.center);
