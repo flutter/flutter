@@ -36,8 +36,6 @@ PackageProject() {
     exit -1
   fi
 
-  local pub_path="$(which pub)"
-
   AssertExists $1
   local project_path=$1
 
@@ -61,7 +59,7 @@ PackageProject() {
   # containing the pubspec
   RunCommand pushd ${project_path}
 
-  RunCommand ${pub_path} run sky_tools build                                   \
+  RunCommand ${FLUTTER_ROOT}/bin/flutter build                                 \
       --asset-base ${icons_path}                                               \
       --main ${dart_main}                                                      \
       --output-file ${derived_dir}/app.flx                                     \
