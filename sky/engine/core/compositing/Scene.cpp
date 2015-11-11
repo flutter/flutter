@@ -25,6 +25,10 @@ Scene::Scene(std::unique_ptr<sky::compositor::Layer> rootLayer,
 
 Scene::~Scene() {}
 
+void Scene::dispose() {
+  ClearDartWrapper();
+}
+
 std::unique_ptr<sky::compositor::LayerTree> Scene::takeLayerTree() {
   return std::move(m_layerTree);
 }

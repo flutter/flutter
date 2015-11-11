@@ -23,6 +23,7 @@ public:
     SkPicture* toSkia() const { return m_picture.get(); }
 
     void playback(Canvas* canvas);
+    void dispose();
 
 private:
     explicit Picture(PassRefPtr<SkPicture> skPicture);

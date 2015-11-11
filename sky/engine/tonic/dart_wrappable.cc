@@ -63,6 +63,16 @@ void DartWrappable::AssociateWithDartWrapper(Dart_NativeArguments args) {
       wrapper, this, info.size_in_bytes, &FinalizeDartWrapper);
 }
 
+void DartWrappable::ClearDartWrapper() {
+  DCHECK(dart_wrapper_);
+  Dart_Handle wrapper = Dart_HandleFromWeakPersistent(dart_wrapper_);
+  CHECK(!LogIfError(Dart_SetNativeInstanceField(wrapper, kPeerIndex, 0)));
+  CHECK(!LogIfError(Dart_SetNativeInstanceField(wrapper, kWrapperInfoIndex, 0)));
+  Dart_DeleteWeakPersistentHandle(Dart_CurrentIsolate(), dart_wrapper_);
+  dart_wrapper_ = nullptr;
+  GetDartWrapperInfo().deref_object(this);
+}
+
 void DartWrappable::FinalizeDartWrapper(void* isolate_callback_data,
                                         Dart_WeakPersistentHandle wrapper,
                                         void* peer) {

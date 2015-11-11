@@ -20,6 +20,7 @@ class CanvasImage final : public RefCounted<CanvasImage>,
 
   int width() const;
   int height() const;
+  void dispose();
 
   SkImage* image() const { return image_.get(); }
   void setImage(PassRefPtr<SkImage> image) { image_ = image; }

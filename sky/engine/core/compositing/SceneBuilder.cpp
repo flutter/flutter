@@ -131,7 +131,9 @@ PassRefPtr<Scene> SceneBuilder::build()
     m_currentLayer = nullptr;
     int32_t threshold = m_currentRasterizerTracingThreshold;
     m_currentRasterizerTracingThreshold = 0;
-    return Scene::create(std::move(m_rootLayer), threshold);
+    RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold);
+    ClearDartWrapper();
+    return scene.release();
 }
 
 } // namespace blink

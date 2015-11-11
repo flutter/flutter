@@ -41,6 +41,7 @@ class DartWrappable {
 
   Dart_Handle CreateDartWrapper(DartState* dart_state);
   void AssociateWithDartWrapper(Dart_NativeArguments args);
+  void ClearDartWrapper(); // Warning: Might delete this.
   Dart_WeakPersistentHandle dart_wrapper() const { return dart_wrapper_; }
 
  protected:
