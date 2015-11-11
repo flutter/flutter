@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mojo/bindings.dart' as bindings;
+import 'package:mojo/core.dart' as core;
+import 'package:sky_services/pointer/pointer.mojom.dart';
 
 import 'box.dart';
 import 'hit_test.dart';
@@ -35,46 +39,42 @@ class BindingHitTestEntry extends HitTestEntry {
   final HitTestResult result;
 }
 
-/// State used in converting ui.Event to InputEvent
+/// State used in converting PointerPackets to PointerInputEvents
 class _PointerState {
   _PointerState({ this.pointer, this.lastPosition });
   int pointer;
   Point lastPosition;
 }
 
-class _UiEventConverter {
-  static InputEvent convert(ui.Event event) {
-    if (event is ui.PointerEvent)
-      return convertPointerEvent(event);
-
-    // Default event
-    return new InputEvent(
-      type: event.type,
-      timeStamp: event.timeStamp
-    );
-  }
-
+class _PointerEventConverter {
   // Map actual input pointer value to a unique value
   // Since events are serialized we can just use a counter
   static Map<int, _PointerState> _stateForPointer = new Map<int, _PointerState>();
   static int _pointerCount = 0;
 
-  static PointerInputEvent convertPointerEvent(ui.PointerEvent event) {
-    Point position = new Point(event.x, event.y);
+  static List<PointerInputEvent> convertPointerPacket(PointerPacket packet) {
+    return packet.pointers.map(_convertPointer).toList();
+  }
 
-    _PointerState state = _stateForPointer[event.pointer];
+  static PointerInputEvent _convertPointer(Pointer pointer) {
+    Point position = new Point(pointer.x, pointer.y);
+
+    _PointerState state = _stateForPointer[pointer.pointer];
     double dx = 0.0;
     double dy = 0.0;
-    switch (event.type) {
-      case 'pointerdown':
+    String eventType;
+    switch (pointer.type) {
+      case PointerType.DOWN:
+        eventType = 'pointerdown';
         if (state == null) {
           state = new _PointerState(lastPosition: position);
-          _stateForPointer[event.pointer] = state;
+          _stateForPointer[pointer.pointer] = state;
         }
         state.pointer = _pointerCount;
         _pointerCount++;
         break;
-      case 'pointermove':
+      case PointerType.MOVE:
+        eventType = 'pointermove';
         // state == null means the pointer is hovering
         if (state != null) {
           dx = position.x - state.lastPosition.x;
@@ -82,47 +82,58 @@ class _UiEventConverter {
           state.lastPosition = position;
         }
         break;
-      case 'pointerup':
-      case 'pointercancel':
+      case PointerType.UP:
+      case PointerType.CANCEL:
+        eventType = (pointer.type == PointerType.UP) ? 'pointerup' : 'pointercancel';
         // state == null indicates spurious events
         if (state != null) {
           // Only remove the pointer state when the last button has been released.
-          if (_hammingWeight(event.buttons) <= 1)
-            _stateForPointer.remove(event.pointer);
+          if (_hammingWeight(pointer.buttons) <= 1)
+            _stateForPointer.remove(pointer.pointer);
         }
         break;
     }
 
-    int pointer = (state == null) ? event.pointer : state.pointer;
+    int pointerIndex = (state == null) ? pointer.pointer : state.pointer;
 
     return new PointerInputEvent(
-       type: event.type,
-       timeStamp: event.timeStamp,
-       pointer: pointer,
-       kind: event.kind,
-       x: event.x,
-       y: event.y,
+       type: eventType,
+       timeStamp: pointer.timeStamp.toDouble(),
+       pointer: pointerIndex,
+       kind: _mapPointerKindToString(pointer.kind),
+       x: pointer.x,
+       y: pointer.y,
        dx: dx,
        dy: dy,
-       buttons: event.buttons,
-       down: event.down,
-       primary: event.primary,
-       obscured: event.obscured,
-       pressure: event.pressure,
-       pressureMin: event.pressureMin,
-       pressureMax: event.pressureMax,
-       distance: event.distance,
-       distanceMin: event.distanceMin,
-       distanceMax: event.distanceMax,
-       radiusMajor: event.radiusMajor,
-       radiusMinor: event.radiusMinor,
-       radiusMin: event.radiusMin,
-       radiusMax: event.radiusMax,
-       orientation: event.orientation,
-       tilt: event.tilt
+       buttons: pointer.buttons,
+       down: pointer.down,
+       primary: pointer.primary,
+       obscured: pointer.obscured,
+       pressure: pointer.pressure,
+       pressureMin: pointer.pressureMin,
+       pressureMax: pointer.pressureMax,
+       distance: pointer.distance,
+       distanceMin: pointer.distanceMin,
+       distanceMax: pointer.distanceMax,
+       radiusMajor: pointer.radiusMajor,
+       radiusMinor: pointer.radiusMinor,
+       radiusMin: pointer.radiusMin,
+       radiusMax: pointer.radiusMax,
+       orientation: pointer.orientation,
+       tilt: pointer.tilt
      );
   }
 
+  static String _mapPointerKindToString(PointerKind kind) {
+    switch (kind) {
+      case PointerKind.TOUCH:
+        return 'touch';
+      case PointerKind.MOUSE:
+        return 'mouse';
+      case PointerKind.STYLUS:
+        return 'stylus';
+    }
+  }
 }
 
 /// The glue between the render tree and the Flutter engine
@@ -133,6 +144,7 @@ class FlutterBinding extends HitTestTarget {
     _instance = this;
 
     ui.window.onEvent = _handleEvent;
+    ui.window.onPointerPacket = _handlePointerPacket;
     ui.window.onMetricsChanged = _handleMetricsChanged;
 
     if (renderViewOverride == null) {
@@ -192,14 +204,22 @@ class FlutterBinding extends HitTestTarget {
   /// Stops calling listener for every event that isn't localized to a given view coordinate
   bool removeEventListener(EventListener listener) => _eventListeners.remove(listener);
 
-  void _handleEvent(ui.Event event) {
-    InputEvent ourEvent = _UiEventConverter.convert(event);
-    if (ourEvent is PointerInputEvent) {
-      _handlePointerInputEvent(ourEvent);
-    } else {
-      assert(event.type == 'back');
-      for (EventListener listener in _eventListeners)
-        listener(ourEvent);
+  void _handleEvent(String eventType, double timeStamp) {
+    assert(eventType == 'back');
+    InputEvent ourEvent = new InputEvent(
+      type: eventType,
+      timeStamp: timeStamp
+    );
+    for (EventListener listener in _eventListeners)
+      listener(ourEvent);
+  }
+
+  void _handlePointerPacket(ByteData serializedPacket) {
+    bindings.Message message = new bindings.Message(
+        serializedPacket, <core.MojoHandle>[]);
+    PointerPacket packet = PointerPacket.deserialize(message);
+    for (PointerInputEvent event in _PointerEventConverter.convertPointerPacket(packet)) {
+      _handlePointerInputEvent(event);
     }
   }
 
