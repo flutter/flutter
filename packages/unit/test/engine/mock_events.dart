@@ -11,7 +11,7 @@ class TestPointer {
   bool isDown = false;
   ui.Point location;
 
-  PointerInputEvent down([ui.Point newLocation = ui.Point.origin, double timeStamp = 0.0 ]) {
+  PointerInputEvent down(ui.Point newLocation, { double timeStamp: 0.0 }) {
     assert(!isDown);
     isDown = true;
     location = newLocation;
@@ -24,7 +24,7 @@ class TestPointer {
     );
   }
 
-  PointerInputEvent move([ui.Point newLocation = ui.Point.origin, double timeStamp = 0.0]) {
+  PointerInputEvent move(ui.Point newLocation, { double timeStamp: 0.0 }) {
     assert(isDown);
     ui.Offset delta = newLocation - location;
     location = newLocation;
@@ -39,7 +39,7 @@ class TestPointer {
     );
   }
 
-  PointerInputEvent up([ double timeStamp = 0.0 ]) {
+  PointerInputEvent up({ double timeStamp: 0.0 }) {
     assert(isDown);
     isDown = false;
     return new PointerInputEvent(
@@ -51,7 +51,7 @@ class TestPointer {
     );
   }
 
-  PointerInputEvent cancel([ double timeStamp = 0.0 ]) {
+  PointerInputEvent cancel({ double timeStamp: 0.0 }) {
     assert(isDown);
     isDown = false;
     return new PointerInputEvent(

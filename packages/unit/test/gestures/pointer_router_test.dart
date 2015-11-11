@@ -15,9 +15,9 @@ void main() {
 
     PointerRouter router = new PointerRouter();
     router.addRoute(3, callback);
-    router.route(pointer2.down());
+    router.route(pointer2.down(Point.origin));
     expect(callbackRan, isFalse);
-    router.route(pointer3.down());
+    router.route(pointer3.down(Point.origin));
     expect(callbackRan, isTrue);
     callbackRan = false;
     router.removeRoute(3, callback);
