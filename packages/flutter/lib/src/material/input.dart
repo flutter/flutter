@@ -167,7 +167,7 @@ class InputState extends ScrollableState<Input> {
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: _contentWidth,
       containerExtent: _containerWidth,
-      scrollOffset: _contentWidth)
-    );
+      scrollOffset: _contentWidth
+    ));
   }
 }
