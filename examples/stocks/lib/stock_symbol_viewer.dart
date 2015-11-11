@@ -4,11 +4,10 @@
 
 part of stocks;
 
-class StockSymbolViewer extends StatelessComponent {
-  StockSymbolViewer({ this.stock, this.showToolBar: true });
+class StockSymbolView extends StatelessComponent {
+  StockSymbolView({ this.stock});
 
   final Stock stock;
-  final bool showToolBar;
 
   Widget build(BuildContext context) {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
@@ -17,42 +16,42 @@ class StockSymbolViewer extends StatelessComponent {
       changeInPrice = "+" + changeInPrice;
 
     TextStyle headings = Theme.of(context).text.body2;
-    Widget body = new Block(<Widget>[
-      new Container(
-        margin: new EdgeDims.all(20.0),
-        child: new Card(
-          child: new Container(
-            padding: new EdgeDims.all(20.0),
-            child: new Column(<Widget>[
-                new Row(<Widget>[
-                  new Text(
-                    '${stock.symbol}',
-                    style: Theme.of(context).text.display2
-                  ),
-                  new Hero(
-                    tag: StockRowPartKind.arrow,
-                    turns: 2,
-                    child: new StockArrow(percentChange: stock.percentChange)
-                  ),
-                ],
-                justifyContent: FlexJustifyContent.spaceBetween
-              ),
-              new Text('Last Sale', style: headings),
-              new Text('$lastSale ($changeInPrice)'),
-              new Container(
-                height: 8.0
-              ),
-              new Text('Market Cap', style: headings),
-              new Text('${stock.marketCap}'),
-            ])
-          )
-        )
+    return new Container(
+      padding: new EdgeDims.all(20.0),
+      child: new Column(<Widget>[
+          new Row(<Widget>[
+            new Text(
+              '${stock.symbol}',
+              style: Theme.of(context).text.display2
+            ),
+            new Hero(
+              tag: StockRowPartKind.arrow,
+              turns: 2,
+              child: new StockArrow(percentChange: stock.percentChange)
+            ),
+          ],
+          justifyContent: FlexJustifyContent.spaceBetween
+        ),
+        new Text('Last Sale', style: headings),
+        new Text('$lastSale ($changeInPrice)'),
+        new Container(
+          height: 8.0
+        ),
+        new Text('Market Cap', style: headings),
+        new Text('${stock.marketCap}'),
+      ],
+         justifyContent: FlexJustifyContent.collapse
       )
-    ]);
+    );
+  }
+}
 
-    if (!showToolBar)
-      return body;
+class StockSymbolPage extends StatelessComponent {
+  StockSymbolPage({ this.stock });
 
+  final Stock stock;
+
+  Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
         left: new IconButton(
@@ -63,8 +62,28 @@ class StockSymbolViewer extends StatelessComponent {
         ),
         center: new Text(stock.name)
       ),
-      body: body
+      body: new Block(<Widget>[
+        new Container(
+          margin: new EdgeDims.all(20.0),
+          child: new Card(child: new StockSymbolView(stock: stock))
+        )
+      ])
     );
   }
+}
 
+class StockSymbolBottomSheet extends StatelessComponent {
+  StockSymbolBottomSheet({ this.stock });
+
+  final Stock stock;
+
+  Widget build(BuildContext context) {
+    return new Container(
+      child: new StockSymbolView(stock: stock),
+      padding: new EdgeDims.all(10.0),
+      decoration: new BoxDecoration(
+        border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
+      )
+   );
+  }
 }

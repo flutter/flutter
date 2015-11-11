@@ -5,10 +5,11 @@
 part of stocks;
 
 class StockList extends StatelessComponent {
-  StockList({ Key key, this.stocks, this.onOpen, this.onAction }) : super(key: key);
+  StockList({ Key key, this.stocks, this.onOpen, this.onShow, this.onAction }) : super(key: key);
 
   final List<Stock> stocks;
   final StockRowActionCallback onOpen;
+  final StockRowActionCallback onShow;
   final StockRowActionCallback onAction;
 
   Widget build(BuildContext context) {
@@ -19,6 +20,7 @@ class StockList extends StatelessComponent {
         return new StockRow(
           stock: stock,
           onPressed: onOpen,
+          onDoubleTap: onShow,
           onLongPressed: onAction
         );
       }
