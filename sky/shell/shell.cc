@@ -13,8 +13,6 @@
 #include "base/memory/discardable_memory_allocator.h"
 #include "base/single_thread_task_runner.h"
 #include "mojo/message_pump/message_pump_mojo.h"
-#include "mojo/edk/embedder/embedder.h"
-#include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/ui/engine.h"
 #include "ui/gl/gl_surface.h"
 
@@ -54,8 +52,6 @@ base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 Shell::Shell(scoped_ptr<ServiceProviderContext> service_provider_context)
     : service_provider_context_(service_provider_context.Pass()) {
   DCHECK(!g_shell);
-  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
-      new mojo::embedder::SimplePlatformSupport()));
 
   base::Thread::Options options;
   options.message_pump_factory = base::Bind(&CreateMessagePumpMojo);
