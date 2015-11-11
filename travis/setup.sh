@@ -8,6 +8,7 @@ pub global activate tuneup
 (cd packages/flutter_tools; pub get)
 (cd packages/flx; pub get)
 (cd packages/newton; pub get)
+(cd packages/playfair; pub get)
 (cd packages/unit; pub get)
 (cd packages/updater; pub get)
 
