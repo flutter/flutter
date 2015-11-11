@@ -138,16 +138,16 @@ class Server {
       return;
     }
 
-    var resource = Resource.resources[path];
-    if (resource == null && _shouldServeObservatory(request)) {
-      resource = Resource.resources[ROOT_REDIRECT_PATH];
-      assert(resource != null);
+    Asset asset = assets[path];
+    if (asset == null && _shouldServeObservatory(request)) {
+      asset = assets[ROOT_REDIRECT_PATH];
+      assert(asset != null);
     }
-    if (resource != null) {
+    if (asset != null) {
       // Serving up a static resource (e.g. .css, .html, .png).
       request.response.headers.contentType =
-          ContentType.parse(resource.mimeType);
-      request.response.add(resource.data);
+          ContentType.parse(asset.mimeType);
+      request.response.add(asset.data);
       request.response.close();
       return;
     }

@@ -11,7 +11,6 @@ import 'dart:isolate';
 import 'dart:_vmservice';
 
 part 'loader.dart';
-part 'resources.dart';
 part 'server.dart';
 
 // The TCP ip/port that the HTTP server listens on.
@@ -22,6 +21,7 @@ bool _autoStart;
 
 // HTTP server.
 Server server;
+Map<String, Asset> assets;
 
 _onShutdown() {
   if (server != null) {
@@ -34,8 +34,11 @@ _onShutdown() {
 }
 
 void _bootServer() {
-  // Load resources.
-  _triggerResourceLoad();
+  try {
+    assets = Asset.request();
+  } catch (e) {
+    print('Could not load Observatory assets: $e');
+  }
   // Lazily create service.
   var service = new VMService();
   service.onShutdown = _onShutdown;

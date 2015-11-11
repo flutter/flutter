@@ -47,17 +47,12 @@ source_set("prerequisites") {
 }
 
 dart_embedder_resources("generate_sky_embedder_service_isolate_resources_cc") {
-  deps = [
-    "//mojo/dart/observatory:deploy_observatory",
-  ]
   inputs = [
     "//sky/engine/core/script/dart_service_isolate/loader.dart",
     "//sky/engine/core/script/dart_service_isolate/main.dart",
-    "//sky/engine/core/script/dart_service_isolate/resources.dart",
     "//sky/engine/core/script/dart_service_isolate/server.dart",
   ]
   root_prefix = "//sky/engine/core/script/"
-  input_directory = "$root_out_dir/observatory/deployed/web/"
   output = "$target_gen_dir/sky_embedder_service_isolate_resources.cc"
   table_name = "sky_embedder_service_isolate"
 }
@@ -74,6 +69,7 @@ static_library("core") {
     "//sky/services/pointer:interfaces",
     "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime:libdart",
+    "//dart/runtime/observatory:embedded_observatory_archive",
     "//dart/runtime/vm:libdart_platform",
     "//mojo/services/navigation/interfaces",
   ]

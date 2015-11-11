@@ -54,6 +54,8 @@ struct DartConverter<Uint8List> {
   static Uint8List FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                               int index,
                                               Dart_Handle& exception);
+
+  static Dart_Handle ToDart(const uint8_t* buffer, unsigned int length);
 };
 
 } // namespace blink

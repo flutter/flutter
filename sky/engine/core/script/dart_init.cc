@@ -30,6 +30,19 @@
 #include "sky/engine/tonic/dart_snapshot_loader.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrappable.h"
+#include "sky/engine/tonic/uint8_list.h"
+
+namespace dart {
+namespace observatory {
+
+// These two symbols are defined in |observatory_archive.cc| which is generated
+// by the |//dart/runtime/observatory:archive_observatory| rule. Both of these
+// symbols will be part of the data segment and therefore are read only.
+extern unsigned int observatory_assets_archive_len;
+extern const uint8_t* observatory_assets_archive;
+
+}  // namespace observatory
+}  // namespace dart
 
 namespace blink {
 
@@ -175,6 +188,12 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   return isolate;
 }
 
+Dart_Handle GetVMServiceAssetsArchiveCallback() {
+  return DartConverter<Uint8List>::ToDart(
+      ::dart::observatory::observatory_assets_archive,
+      ::dart::observatory::observatory_assets_archive_len);
+}
+
 }  // namespace
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
@@ -270,7 +289,7 @@ void InitDartVM() {
           // Entroy source
           nullptr,
           // VM service assets archive
-          nullptr) == nullptr);
+          GetVMServiceAssetsArchiveCallback) == nullptr);
   // Wait for load port- ensures handle watcher and service isolates are
   // running.
   Dart_ServiceWaitForLoadPort();
