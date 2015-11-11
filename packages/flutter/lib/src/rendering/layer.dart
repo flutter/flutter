@@ -59,6 +59,10 @@ abstract class Layer {
     _nextSibling = null;
     _previousSibling = null;
     _parent = null;
+    _dispose();
+  }
+
+  void _dispose() {
   }
 
   /// Override this function to upload this layer to the engine
@@ -83,6 +87,11 @@ class PictureLayer extends Layer {
   ///
   /// The picture's coodinate system matches this layer's coodinate system
   ui.Picture picture;
+
+  void _dispose() {
+    super._dispose();
+    picture.dispose();
+  }
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.addPicture(offset + layerOffset, picture, paintBounds);
@@ -181,6 +190,7 @@ class ContainerLayer extends Layer {
     child._previousSibling = null;
     child._nextSibling = null;
     child._parent = null;
+    child._dispose();
   }
 
   /// Removes all of this layer's children from its child list
@@ -191,10 +201,21 @@ class ContainerLayer extends Layer {
       child._previousSibling = null;
       child._nextSibling = null;
       child._parent = null;
+      child._dispose();
       child = next;
     }
     _firstChild = null;
     _lastChild = null;
+  }
+
+  void _dispose() {
+    super._dispose();
+    Layer child = _firstChild;
+    while (child != null) {
+      Layer next = child.nextSibling;
+      child._dispose();
+      child = next;
+    }
   }
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
