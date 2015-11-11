@@ -7,6 +7,7 @@
 #include "base/time/time.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
+#include "sky/services/pointer/pointer.mojom.h"
 #include "sky/shell/mac/platform_view_mac.h"
 #include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
@@ -20,25 +21,25 @@
 
 @end
 
-static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
+static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase) {
   switch (phase) {
     case NSEventPhaseNone:
-      return sky::EventType::UNKNOWN;
+      return pointer::PointerType::CANCEL;
     case NSEventPhaseBegan:
-      return sky::EventType::POINTER_DOWN;
+      return pointer::PointerType::DOWN;
     case NSEventPhaseStationary:
     // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
     // with the same coordinates
     case NSEventPhaseChanged:
-      return sky::EventType::POINTER_MOVE;
+      return pointer::PointerType::MOVE;
     case NSEventPhaseEnded:
-      return sky::EventType::POINTER_UP;
+      return pointer::PointerType::UP;
     case NSEventPhaseCancelled:
-      return sky::EventType::POINTER_CANCEL;
+      return pointer::PointerType::CANCEL;
     case NSEventPhaseMayBegin:
-      return sky::EventType::UNKNOWN;
+      return pointer::PointerType::CANCEL;
   }
-  return sky::EventType::UNKNOWN;
+  return pointer::PointerType::CANCEL;
 }
 
 @implementation SkyWindow {
@@ -151,21 +152,37 @@ static inline sky::EventType EventTypeFromNSEventPhase(NSEventPhase phase) {
 - (void)dispatchEvent:(NSEvent*)event phase:(NSEventPhase)phase {
   NSPoint location =
       [_renderSurface convertPoint:event.locationInWindow fromView:nil];
-
   location.y = _renderSurface.frame.size.height - location.y;
 
-  auto input = sky::InputEvent::New();
-  input->type = EventTypeFromNSEventPhase(phase);
-  input->time_stamp =
+  auto pointer_data = pointer::Pointer::New();
+
+  pointer_data->time_stamp =
       base::TimeDelta::FromSecondsD(event.timestamp).InMilliseconds();
+  pointer_data->type = EventTypeFromNSEventPhase(phase);
+  pointer_data->kind = pointer::PointerKind::TOUCH;
+  pointer_data->pointer = 0;
+  pointer_data->x = location.x;
+  pointer_data->y = location.y;
+  pointer_data->buttons = 0;
+  pointer_data->down = false;
+  pointer_data->primary = false;
+  pointer_data->obscured = false;
+  pointer_data->pressure = 1.0;
+  pointer_data->pressure_min = 0.0;
+  pointer_data->pressure_max = 1.0;
+  pointer_data->distance = 0.0;
+  pointer_data->distance_min = 0.0;
+  pointer_data->distance_max = 0.0;
+  pointer_data->radius_major = 0.0;
+  pointer_data->radius_minor = 0.0;
+  pointer_data->radius_min = 0.0;
+  pointer_data->radius_max = 0.0;
+  pointer_data->orientation = 0.0;
+  pointer_data->tilt = 0.0;
 
-  input->pointer_data = sky::PointerData::New();
-  input->pointer_data->kind = sky::PointerKind::TOUCH;
-
-  input->pointer_data->x = location.x;
-  input->pointer_data->y = location.y;
-
-  _sky_engine->OnInputEvent(input.Pass());
+  auto pointer_packet = pointer::PointerPacket::New();
+  pointer_packet->pointers.push_back(pointer_data.Pass());
+  _sky_engine->OnPointerPacket(pointer_packet.Pass());
 }
 
 - (void)mouseDown:(NSEvent*)event {
