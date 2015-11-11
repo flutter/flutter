@@ -545,6 +545,12 @@ class AndroidDevice extends Device {
 
     // Skip first line, which is always 'List of devices attached'.
     for (String line in output.skip(1)) {
+      // Skip lines like:
+      // * daemon not running. starting it now on port 5037 *
+      // * daemon started successfully *
+      if (line.startsWith('* daemon '))
+        continue;
+
       if (deviceRegex1.hasMatch(line)) {
         Match match = deviceRegex1.firstMatch(line);
         String deviceID = match[1];
@@ -563,9 +569,10 @@ class AndroidDevice extends Device {
         String deviceID = match[1];
         devices.add(new AndroidDevice(id: deviceID));
       } else {
-        _logging.warning('Unexpected failure parsing device information '
-            'from adb output:\n$line\n'
-            'Please report a bug at http://flutter.io/');
+        _logging.warning(
+          'Unexpected failure parsing device information from adb output:\n'
+          '$line\n'
+          'Please report a bug at http://flutter.io/');
       }
     }
     return devices;
