@@ -35,7 +35,7 @@ class DrainJob : public mojo::common::DataPipeDrainer::Client {
   void OnDataComplete() override {
     Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
       base::Bind(callback_, buffer_.release()));
-    delete this;
+    base::MessageLoop::current()->DeleteSoon(FROM_HERE, this);
   }
 
   base::Callback<void(PassRefPtr<SharedBuffer>)> callback_;
