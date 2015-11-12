@@ -29,10 +29,10 @@ ShellProxy _initShellProxy() {
 ApplicationConnection _initEmbedderConnection() {
   core.MojoHandle servicesHandle = new core.MojoHandle(internals.takeServicesProvidedByEmbedder());
   core.MojoHandle exposedServicesHandle = new core.MojoHandle(internals.takeServicesProvidedToEmbedder());
-  ServiceProviderProxy services = servicesHandle.isValid ?
-      new ServiceProviderProxy.fromHandle(servicesHandle) : null;
-  ServiceProviderStub exposedServices = exposedServicesHandle.isValid ?
-      new ServiceProviderStub.fromHandle(exposedServicesHandle) : null;
+  if (!servicesHandle.isValid || !exposedServicesHandle.isValid)
+    return null;
+  ServiceProviderProxy services = new ServiceProviderProxy.fromHandle(servicesHandle);
+  ServiceProviderStub exposedServices = new ServiceProviderStub.fromHandle(exposedServicesHandle);
   return new ApplicationConnection(exposedServices, services);
 }
 
@@ -56,7 +56,7 @@ class _Shell {
     if (_shell == null || url == null) {
       // If we don't have a shell or a url, we try to get the services from the
       // embedder directly instead of using the shell to connect.
-      _embedderConnection.requestService(proxy);
+      _embedderConnection?.requestService(proxy);
       return;
     }
 
