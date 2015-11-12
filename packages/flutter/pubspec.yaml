@@ -1,13 +1,13 @@
 name: flutter
-version: 0.0.18
+version: 0.0.20
 author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A framework for writing Flutter applications
 homepage: http://flutter.io
 dependencies:
   intl: '>=0.12.4+2 <0.13.0'
   material_design_icons: '>=0.0.3 <0.1.0'
-  sky_engine: 0.0.50
-  sky_services: 0.0.51
+  sky_engine: 0.0.52
+  sky_services: 0.0.52
   vector_math: '>=1.4.3 <2.0.0'
 
   cassowary:
