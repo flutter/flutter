@@ -8,7 +8,7 @@ const List<int> pages = const <int>[0, 1, 2, 3, 4, 5];
 int currentPage = null;
 bool itemsWrap = false;
 
-Widget buildPage(BuildContext context, int page) {
+Widget buildPage(BuildContext context, int page, int index) {
   return new Container(
     key: new ValueKey<int>(page),
     width: pageSize.width,

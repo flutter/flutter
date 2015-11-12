@@ -13,7 +13,7 @@ const double itemExtent = 200.0;
 ScrollDirection scrollDirection = ScrollDirection.vertical;
 GlobalKey scrollableListKey;
 
-Widget buildItem(BuildContext context, int item) {
+Widget buildItem(BuildContext context, int item, int index) {
   return new Container(
     key: new ValueKey<int>(item),
     width: itemExtent,

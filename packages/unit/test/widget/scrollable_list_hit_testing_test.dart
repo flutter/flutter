@@ -17,7 +17,7 @@ void main() {
           child: new ScrollableList<int>(
             key: new GlobalKey(),
             items: items,
-            itemBuilder: (BuildContext context, int item) {
+            itemBuilder: (BuildContext context, int item, int index) {
               return new Container(
                 key: new ValueKey<int>(item),
                 child: new GestureDetector(
@@ -59,7 +59,7 @@ void main() {
           child: new ScrollableList<int>(
             key: new GlobalKey(),
             items: items,
-            itemBuilder: (BuildContext context, int item) {
+            itemBuilder: (BuildContext context, int item, int index) {
               return new Container(
                 key: new ValueKey<int>(item),
                 child: new GestureDetector(

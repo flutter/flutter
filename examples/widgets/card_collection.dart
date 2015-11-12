@@ -400,7 +400,7 @@ class CardCollectionState extends State<CardCollection> {
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
         snapAlignmentOffset: _cardCollectionSize.height / 2.0,
         items: _cardModels,
-        itemBuilder: (BuildContext context, CardModel card) => buildCard(context, card.value),
+        itemBuilder: (BuildContext context, CardModel card, int index) => buildCard(context, card.value),
         itemExtent: _cardModels[0].height
       );
     } else {

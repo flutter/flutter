@@ -19,9 +19,9 @@ class ScrollbarAppState extends State<ScrollbarApp> {
     return new ScrollableList<int>(
       items: new List<int>.generate(_itemCount, (int i) => i),
       itemExtent: _itemExtent,
-      itemBuilder: (_, int i) {
-        return new Text('Item ${dd.format(i)}',
-          key: new ValueKey<int>(i),
+      itemBuilder: (_, __, int index) {
+        return new Text('Item ${dd.format(index)}',
+          key: new ValueKey<int>(index),
           style: Theme.of(context).text.title
         );
       },
