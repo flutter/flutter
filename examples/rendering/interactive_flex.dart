@@ -4,9 +4,13 @@
 
 import 'dart:ui' as ui;
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mojo/bindings.dart' as bindings;
+import 'package:mojo/core.dart' as core;
+import 'package:sky_services/pointer/pointer.mojom.dart';
 
 import 'lib/solid_color_box.dart';
 
@@ -33,15 +37,24 @@ class RenderImageGrow extends RenderImage {
 
 RenderImageGrow image;
 
-final Map<int, Touch> touches = <int, Touch>{};
-void handleEvent(event) {
-  if (event is ui.PointerEvent) {
-    if (event.type == 'pointermove')
-      image.growth = math.max(0.0, image.growth + event.x - touches[event.pointer].x);
-    touches[event.pointer] = new Touch(event.x, event.y);
-  }
-  if (event.type == "back") {
+void handleEvent(String eventType, double timeStamp) {
+  if (eventType == "back")
     activity.finishCurrentActivity();
+}
+
+final Map<int, Touch> touches = <int, Touch>{};
+
+void handlePointerPacket(ByteData serializedPacket) {
+  bindings.Message message = new bindings.Message(
+    serializedPacket,
+    <core.MojoHandle>[]
+  );
+  PointerPacket packet = PointerPacket.deserialize(message);
+
+  for (Pointer pointer in packet.pointers) {
+    if (pointer.type == PointerType.MOVE)
+      image.growth = math.max(0.0, image.growth + pointer.x - touches[pointer.pointer].x);
+    touches[pointer.pointer] = new Touch(pointer.x, pointer.y);
   }
 }
 
@@ -102,4 +115,5 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
   updateTaskDescription('Interactive Flex', topColor);
   new FlutterBinding(root: root);
   ui.window.onEvent = handleEvent;
+  ui.window.onPointerPacket = handlePointerPacket;
 }
