@@ -205,7 +205,7 @@ class _RenderInkSplashes extends RenderProxyBox {
   }
 
   void _syncTapRecognizer() {
-    if (onTap == null && doubleTap == null && onLongPress == null) {
+    if (onTap == null && onDoubleTap == null && onLongPress == null) {
       _disposeTapRecognizer();
     } else {
       _tap ??= new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
