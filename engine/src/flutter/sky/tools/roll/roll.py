@@ -73,7 +73,7 @@ dirs_from_mojo = [
     'mojo/android',
     'mojo/application',
     'mojo/common',
-    'mojo/converters',
+    'mojo/converters/geometry',
     ('mojo/dart/embedder', ['embedder.gni']),
     'mojo/data_pipe_utils',
     'mojo/edk',
