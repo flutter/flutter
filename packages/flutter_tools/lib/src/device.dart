@@ -818,7 +818,9 @@ class AndroidDevice extends Device {
       '-v',
       'tag', // Only log the tag and the message
       '-s',
+      // TODO: Remove 'sky' once the flutter engine change lands.
       'sky:V',
+      'flutter:V',
       'chromium:D',
       'ActivityManager:W',
       '*:F',
