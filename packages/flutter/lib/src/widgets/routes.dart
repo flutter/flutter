@@ -78,7 +78,8 @@ abstract class TransitionRoute extends OverlayRoute {
           overlayEntries.first.opaque = false;
         break;
       case PerformanceStatus.dismissed:
-        super.didPop(_result);
+        super.didPop(_result); // clear the overlays
+        completer?.complete(_result);
         break;
     }
   }
@@ -92,10 +93,7 @@ abstract class TransitionRoute extends OverlayRoute {
 
   void didPop(dynamic result) {
     _result = result;
-    if (completer != null)
-      _performance.reverse().then((_) { completer.complete(_result); });
-    else
-      _performance.reverse();
+    _performance.reverse();
   }
 
   String get debugLabel => '$runtimeType';
