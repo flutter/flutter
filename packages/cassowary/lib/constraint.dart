@@ -21,20 +21,20 @@ class Constraint {
 
     switch (relation) {
       case Relation.equalTo:
-        buffer.write(" == 0 ");
+        buffer.write(' == 0 ');
         break;
       case Relation.greaterThanOrEqualTo:
-        buffer.write(" >= 0 ");
+        buffer.write(' >= 0 ');
         break;
       case Relation.lessThanOrEqualTo:
-        buffer.write(" <= 0 ");
+        buffer.write(' <= 0 ');
         break;
     }
 
-    buffer.write(" | priority = ${priority}");
+    buffer.write(' | priority = $priority');
 
     if (priority == Priority.required) {
-      buffer.write(" (required)");
+      buffer.write(' (required)');
     }
 
     return buffer.toString();

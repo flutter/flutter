@@ -44,10 +44,10 @@ class TabbedNavigatorAppState extends State<TabbedNavigatorApp> {
 
   TabNavigator _buildIconLabelsTabNavigator(int n) {
     Iterable<TabNavigatorView> views = ["event", "home", "android", "alarm", "face", "language"]
-      .map((icon_name) {
+      .map((String iconName) {
         return new TabNavigatorView(
-          label: new TabLabel(icon: "action/$icon_name"),
-          builder: (BuildContext context) => _buildContent(icon_name)
+          label: new TabLabel(icon: "action/$iconName"),
+          builder: (BuildContext context) => _buildContent(iconName)
         );
       });
     return _buildTabNavigator(n, views.toList(), const ValueKey<String>('iconLabelsTabNavigator'));

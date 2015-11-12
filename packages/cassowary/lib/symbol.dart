@@ -13,24 +13,24 @@ class _Symbol {
   _Symbol(this.type, this.tick);
 
   String toString() {
-    String typeString = "unknown";
+    String typeString = 'unknown';
     switch (type) {
       case _SymbolType.invalid:
-        typeString = "i";
+        typeString = 'i';
         break;
       case _SymbolType.external:
-        typeString = "v";
+        typeString = 'v';
         break;
       case _SymbolType.slack:
-        typeString = "s";
+        typeString = 's';
         break;
       case _SymbolType.error:
-        typeString = "e";
+        typeString = 'e';
         break;
       case _SymbolType.dummy:
-        typeString = "d";
+        typeString = 'd';
         break;
     }
-    return "${typeString}${tick}";
+    return '$typeString$tick';
   }
 }

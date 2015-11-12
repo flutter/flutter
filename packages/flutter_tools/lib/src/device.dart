@@ -19,36 +19,8 @@ abstract class Device {
   final String id;
   static Map<String, Device> _deviceCache = {};
 
-  factory Device._unique(String className, [String id = null]) {
-    if (id == null) {
-      if (className == AndroidDevice.className) {
-        id = AndroidDevice.defaultDeviceID;
-      } else if (className == IOSDevice.className) {
-        id = IOSDevice.defaultDeviceID;
-      } else if (className == IOSSimulator.className) {
-        id = IOSSimulator.defaultDeviceID;
-      } else {
-        throw 'Attempted to create a Device of unknown type $className';
-      }
-    }
-
-    return _deviceCache.putIfAbsent(id, () {
-      if (className == AndroidDevice.className) {
-        final device = new AndroidDevice._(id);
-        _deviceCache[id] = device;
-        return device;
-      } else if (className == IOSDevice.className) {
-        final device = new IOSDevice._(id);
-        _deviceCache[id] = device;
-        return device;
-      } else if (className == IOSSimulator.className) {
-        final device = new IOSSimulator._(id);
-        _deviceCache[id] = device;
-        return device;
-      } else {
-        throw 'Attempted to create a Device of unknown type $className';
-      }
-    });
+  static Device _unique(String id, Device constructor(String id)) {
+    return _deviceCache.putIfAbsent(id, () => constructor(id));
   }
 
   Device._(this.id);
@@ -74,7 +46,6 @@ abstract class Device {
 }
 
 class IOSDevice extends Device {
-  static const String className = 'IOSDevice';
   static final String defaultDeviceID = 'default_ios_id';
 
   static const String _macInstructions =
@@ -108,7 +79,7 @@ class IOSDevice extends Device {
   String get name => _name;
 
   factory IOSDevice({String id, String name}) {
-    IOSDevice device = new Device._unique(className, id);
+    IOSDevice device = Device._unique(id ?? defaultDeviceID, new IOSDevice#_); // analyzer doesn't like constructor tear-offs
     device._name = name;
     return device;
   }
@@ -224,14 +195,17 @@ class IOSDevice extends Device {
     }
     // idevicedebug hangs forever after launching the app, so kill it after
     // giving it plenty of time to send the launch command.
-    return runAndKill(
-        [debuggerPath, 'run', app.id], new Duration(seconds: 3)).then(
-        (_) {
-      return true;
-    }, onError: (e) {
-      _logging.info('Failure running $debuggerPath: ', e);
-      return false;
-    });
+    return await runAndKill(
+      [debuggerPath, 'run', app.id],
+      new Duration(seconds: 3)
+    ).then(
+      (_) {
+        return true;
+      }, onError: (e) {
+        _logging.info('Failure running $debuggerPath: ', e);
+        return false;
+      }
+    );
   }
 
   @override
@@ -274,13 +248,12 @@ class IOSDevice extends Device {
     if (!isConnected()) {
       return 2;
     }
-    return runCommandAndStreamOutput([loggerPath],
+    return await runCommandAndStreamOutput([loggerPath],
         prefix: 'iOS dev: ', filter: new RegExp(r'.*SkyShell.*'));
   }
 }
 
 class IOSSimulator extends Device {
-  static const String className = 'IOSSimulator';
   static final String defaultDeviceID = 'default_ios_sim_id';
 
   static const String _macInstructions =
@@ -299,7 +272,7 @@ class IOSSimulator extends Device {
   String get name => _name;
 
   factory IOSSimulator({String id, String name, String iOSSimulatorPath}) {
-    IOSSimulator device = new Device._unique(className, id);
+    IOSSimulator device = Device._unique(id ?? defaultDeviceID, new IOSSimulator#_); // analyzer doesn't like constructor tear-offs
     device._name = name;
     if (iOSSimulatorPath == null) {
       iOSSimulatorPath = path.join('/Applications', 'iOS Simulator.app',
@@ -309,7 +282,7 @@ class IOSSimulator extends Device {
     return device;
   }
 
-  IOSSimulator._(String id) : super._(id) {}
+  IOSSimulator._(String id) : super._(id);
 
   static String _getRunningSimulatorID([IOSSimulator mockIOS]) {
     String xcrunPath = mockIOS != null ? mockIOS.xcrunPath : _xcrunPath;
@@ -380,7 +353,6 @@ class IOSSimulator extends Device {
     }
     if (id == defaultDeviceID) {
       runDetached([iOSSimPath]);
-
       Future<bool> checkConnection([int attempts = 20]) async {
         if (attempts == 0) {
           _logging.info('Timed out waiting for iOS Simulator $id to boot.');
@@ -388,12 +360,12 @@ class IOSSimulator extends Device {
         }
         if (!isConnected()) {
           _logging.info('Waiting for iOS Simulator $id to boot...');
-          return new Future.delayed(new Duration(milliseconds: 500),
+          return await new Future.delayed(new Duration(milliseconds: 500),
               () => checkConnection(attempts - 1));
         }
         return true;
       }
-      return checkConnection();
+      return await checkConnection();
     } else {
       try {
         runCheckedSync([xcrunPath, 'simctl', 'boot', id]);
@@ -496,7 +468,7 @@ class IOSSimulator extends Device {
     if (clear) {
       runSync(['rm', logFilePath]);
     }
-    return runCommandAndStreamOutput(['tail', '-f', logFilePath],
+    return await runCommandAndStreamOutput(['tail', '-f', logFilePath],
         prefix: 'iOS sim: ', filter: new RegExp(r'.*SkyShell.*'));
   }
 }
@@ -505,7 +477,6 @@ class AndroidDevice extends Device {
   static const String _ADB_PATH = 'adb';
   static const int _observatoryPort = 8181;
 
-  static const String className = 'AndroidDevice';
   static final String defaultDeviceID = 'default_android_device';
 
   String productID;
@@ -522,7 +493,7 @@ class AndroidDevice extends Device {
       String productID: null,
       String modelID: null,
       String deviceCodeName: null}) {
-    AndroidDevice device = new Device._unique(className, id);
+    AndroidDevice device = Device._unique(id ?? defaultDeviceID, new AndroidDevice#_); // analyzer doesn't like constructor tear-offs
     device.productID = productID;
     device.modelID = modelID;
     device.deviceCodeName = deviceCodeName;
@@ -813,7 +784,7 @@ class AndroidDevice extends Device {
       clearLogs();
     }
 
-    return runCommandAndStreamOutput(adbCommandForDevice([
+    return await runCommandAndStreamOutput(adbCommandForDevice([
       'logcat',
       '-v',
       'tag', // Only log the tag and the message

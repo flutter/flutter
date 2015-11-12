@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 import 'velocity_tracker_data.dart';
@@ -44,21 +42,5 @@ void main() {
     }
     watch.stop();
     print("Dart tracker: " + watch.elapsed.toString());
-  });
-
-  test('Native velocity tracker performance', () {
-    ui.VelocityTracker tracker = new ui.VelocityTracker();
-    Stopwatch watch = new Stopwatch();
-    watch.start();
-    for (int i = 0; i < kNumIters; i++) {
-      for (PointerInputEvent event in events) {
-        if (event.type == 'pointerdown' || event.type == 'pointermove')
-          tracker.addPosition((event.timeStamp*1000.0).toInt(), event.x, event.y);
-        if (event.type == 'pointerup')
-          tracker.getVelocity();
-      }
-    }
-    watch.stop();
-    print("Native tracker: " + watch.elapsed.toString());
   });
 }

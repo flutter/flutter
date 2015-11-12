@@ -48,9 +48,9 @@ String _getCloudStorageBaseUrl({String category, String platform, String revisio
     // In the fullness of time, we'll have a consistent URL pattern for all of
     // our artifacts, but, for the time being, Mac OS X artifacts are stored in a
     // different cloud storage bucket.
-    return 'https://storage.googleapis.com/mojo_infra/flutter/${platform}/${revision}/';
+    return 'https://storage.googleapis.com/mojo_infra/flutter/$platform/$revision/';
   }
-  return 'https://storage.googleapis.com/mojo/sky/${category}/${platform}/${revision}/';
+  return 'https://storage.googleapis.com/mojo/sky/$category/$platform/$revision/';
 }
 
 enum ArtifactType {

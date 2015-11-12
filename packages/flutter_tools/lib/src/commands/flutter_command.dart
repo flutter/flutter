@@ -56,7 +56,7 @@ abstract class FlutterCommand extends Command {
       }
     }
 
-    return runInProject();
+    return await runInProject();
   }
 
   Future<int> runInProject();

@@ -93,7 +93,7 @@ dynamic _loadManifest(String manifestPath) {
 }
 
 ArchiveFile _createFile(String key, String assetBase) {
-  File file = new File('${assetBase}/${key}');
+  File file = new File('$assetBase/$key');
   if (!file.existsSync())
     return null;
   List<int> content = file.readAsBytesSync();

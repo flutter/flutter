@@ -124,7 +124,7 @@ class FitnessAppState extends State<FitnessApp> {
     });
   }
 
-  Widget build(BuildContext) {
+  Widget build(BuildContext context) {
     return new MaterialApp(
       theme: new ThemeData(
         brightness: ThemeBrightness.light,

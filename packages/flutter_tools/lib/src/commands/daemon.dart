@@ -60,7 +60,7 @@ class DaemonCommand extends FlutterCommand {
       stdout.writeln('[${JSON.encode(command)}]');
     }, daemonCommand: this);
 
-    return daemon.onExit;
+    return await daemon.onExit;
   }
 }
 
@@ -98,19 +98,19 @@ class Daemon {
     var id = command['id'];
 
     if (id == null) {
-      _logging.severe('no id for command: ${command}');
+      _logging.severe('no id for command: $command');
       return;
     }
 
     try {
       String event = command['event'];
       if (event.indexOf('.') == -1)
-        throw 'command not understood: ${event}';
+        throw 'command not understood: $event';
 
       String prefix = event.substring(0, event.indexOf('.'));
       String name = event.substring(event.indexOf('.') + 1);
       if (_domains[prefix] == null)
-        throw 'no domain for command: ${command}';
+        throw 'no domain for command: $command';
 
       _domains[prefix].handleEvent(name, id, command['params']);
     } catch (error, trace) {
@@ -144,7 +144,7 @@ abstract class Domain {
     new Future.sync(() {
       if (_handlers.containsKey(name))
         return _handlers[name](args);
-      throw 'command not understood: ${name}';
+      throw 'command not understood: $name';
     }).then((result) {
       if (result == null) {
         _send({'id': id});
@@ -153,7 +153,7 @@ abstract class Domain {
       }
     }).catchError((error, trace) {
       _send({'id': id, 'error': _toJsonable(error)});
-      _logging.warning('error handling ${name}', error, trace);
+      _logging.warning('error handling $name', error, trace);
     });
   }
 
@@ -210,5 +210,5 @@ class AppDomain extends Domain {
 dynamic _toJsonable(dynamic obj) {
   if (obj is String || obj is int || obj is bool || obj is Map || obj is List || obj == null)
     return obj;
-  return '${obj}';
+  return '$obj';
 }
