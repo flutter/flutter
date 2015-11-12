@@ -1,0 +1,14 @@
+diff --git a/mojo/common/BUILD.gn b/mojo/common/BUILD.gn
+index adac158..25ef0ca 100644
+--- a/mojo/common/BUILD.gn
++++ b/mojo/common/BUILD.gn
+@@ -43,9 +43,6 @@ source_set("tests") {
+ test("mojo_common_unittests") {
+   deps = [
+     ":tests",
+-    "//mojo/converters/array_string:tests",
+-    "//mojo/converters/base:tests",
+-    "//mojo/converters/url:tests",
+     "//mojo/data_pipe_utils:tests",
+     "//mojo/edk/test:run_all_unittests",
+     "//mojo/environment:chromium",

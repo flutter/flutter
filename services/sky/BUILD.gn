@@ -32,7 +32,6 @@ mojo_native_application("sky") {
     "//mojo/application",
     "//mojo/common:tracing_impl",
     "//mojo/converters/geometry",
-    "//mojo/converters/input_events",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
@@ -54,7 +53,6 @@ mojo_native_application("sky") {
     "//sky/engine/web",
     "//sky/shell/dart",
     "//third_party/icu",
-    "//ui/events",
     "//url",
   ]
 

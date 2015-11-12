@@ -46,7 +46,6 @@ source_set("gl") {
   public_deps = [
     "//base",
     "//third_party/mesa:mesa_headers",
-    "//ui/events/platform",
     "//ui/gfx",
     "//ui/gfx/geometry",
   ]

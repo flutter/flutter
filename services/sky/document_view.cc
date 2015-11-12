@@ -11,7 +11,6 @@
 #include "base/strings/string_util.h"
 #include "base/thread_task_runner_handle.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
-#include "mojo/converters/input_events/input_events_type_converters.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
