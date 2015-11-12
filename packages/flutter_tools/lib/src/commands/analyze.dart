@@ -229,9 +229,9 @@ class AnalyzeCommand extends FlutterCommand {
       print(data);
     });
 
-    // host.deleteSync();
-
     int exitCode = await process.exitCode;
+
+    host.deleteSync(recursive: true);
 
     List<Pattern> patternsToSkip = <Pattern>[
       'Analyzing [${mainFile.path}]...',
