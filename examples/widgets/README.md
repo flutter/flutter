@@ -1,11 +1,9 @@
 Small examples of the Flutter widget framework
 ==============================================
 
-To run these, open a terminal in this directory and use the following
-command:
+To run these, open a terminal in this directory and use the following command:
 
 ```bash
-pub global activate flutter
 flutter start --checked -t foo.dart
 ```
 
