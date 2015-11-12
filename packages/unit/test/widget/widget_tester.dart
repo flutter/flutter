@@ -144,7 +144,7 @@ class WidgetTester {
     _dispatchEvent(p.up(), result);
   }
 
-  void fling(Element element, Offset offset, velocity, { int pointer: 1 }) {
+  void fling(Element element, Offset offset, double velocity, { int pointer: 1 }) {
     flingFrom(getCenter(element), offset, velocity, pointer: pointer);
   }
 
