@@ -47,7 +47,7 @@ class PageableListAppState extends State<PageableListApp> {
     });
   }
 
-  Widget buildCard(BuildContext context, CardModel cardModel) {
+  Widget buildCard(BuildContext context, CardModel cardModel, int index) {
     Widget card = new Card(
       color: cardModel.color,
       child: new Container(

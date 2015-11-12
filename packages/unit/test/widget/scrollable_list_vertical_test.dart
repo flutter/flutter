@@ -8,7 +8,7 @@ const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 Widget buildFrame() {
   return new ScrollableList<int>(
     items: items,
-    itemBuilder: (BuildContext context, int item) {
+    itemBuilder: (BuildContext context, int item, int index) {
       return new Container(
         key: new ValueKey<int>(item),
         child: new Text('$item')

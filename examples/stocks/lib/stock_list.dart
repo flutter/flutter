@@ -16,7 +16,7 @@ class StockList extends StatelessComponent {
     return new ScrollableList<Stock>(
       items: stocks,
       itemExtent: StockRow.kHeight,
-      itemBuilder: (BuildContext context, Stock stock) {
+      itemBuilder: (BuildContext context, Stock stock, int index) {
         return new StockRow(
           stock: stock,
           onPressed: onOpen,

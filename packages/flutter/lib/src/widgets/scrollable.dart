@@ -632,7 +632,7 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
 
 }
 
-typedef Widget ItemBuilder<T>(BuildContext context, T item);
+typedef Widget ItemBuilder<T>(BuildContext context, T item, int index);
 
 /// A wrapper around [ScrollableWidgetList] that helps you translate a list of
 /// model objects into a scrollable list of widgets. Assumes all the widgets
@@ -682,7 +682,7 @@ class ScrollableListState<T, Config extends ScrollableList<T>> extends Scrollabl
     int begin = config.itemsWrap ? start : math.max(0, start);
     int end = config.itemsWrap ? begin + count : math.min(begin + count, config.items.length);
     for (int i = begin; i < end; ++i)
-      result.add(config.itemBuilder(context, config.items[i % itemCount]));
+      result.add(config.itemBuilder(context, config.items[i % itemCount], i));
     return result;
   }
 }

@@ -12,7 +12,7 @@ Widget buildFrame() {
       height: 50.0,
       child: new ScrollableList<int>(
         items: items,
-        itemBuilder: (BuildContext context, int item) {
+        itemBuilder: (BuildContext context, int item, int index) {
           return new Container(
             key: new ValueKey<int>(item),
             child: new Text('$item')

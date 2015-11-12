@@ -19,7 +19,7 @@ void handleOnDismissed(item) {
   dismissedItems.add(item);
 }
 
-Widget buildDismissableItem(BuildContext context, int item) {
+Widget buildDismissableItem(BuildContext context, int item, int index) {
   return new Dismissable(
     key: new ValueKey<int>(item),
     direction: dismissDirection,

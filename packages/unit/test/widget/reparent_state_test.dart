@@ -103,7 +103,7 @@ void main() {
       tester.pumpWidget(new ScrollableList<int>(
         items: <int>[0],
         itemExtent: 100.0,
-        itemBuilder: (BuildContext context, int item) {
+        itemBuilder: (BuildContext context, int item, int index) {
           return new Container(
             key: new Key('container'),
             height: 100.0,

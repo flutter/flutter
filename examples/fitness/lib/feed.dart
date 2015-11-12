@@ -18,7 +18,7 @@ class FitnessItemList extends StatelessComponent {
       padding: const EdgeDims.all(4.0),
       items: items,
       itemExtent: kFitnessItemHeight,
-      itemBuilder: (BuildContext context, FitnessItem item) => item.toRow(onDismissed: onDismissed)
+      itemBuilder: (BuildContext context, FitnessItem item, int index) => item.toRow(onDismissed: onDismissed)
     );
   }
 }
