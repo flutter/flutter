@@ -43,9 +43,6 @@ source_set("tests") {
 test("mojo_common_unittests") {
   deps = [
     ":tests",
-    "//mojo/converters/array_string:tests",
-    "//mojo/converters/base:tests",
-    "//mojo/converters/url:tests",
     "//mojo/data_pipe_utils:tests",
     "//mojo/edk/test:run_all_unittests",
     "//mojo/environment:chromium",
