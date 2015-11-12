@@ -23,6 +23,7 @@ import 'src/commands/start.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
+import 'src/commands/upgrade.dart';
 import 'src/process.dart';
 
 /// Main entry point for commands.
@@ -57,7 +58,8 @@ Future main(List<String> args) async {
     ..addCommand(new StartCommand())
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
-    ..addCommand(new TraceCommand());
+    ..addCommand(new TraceCommand())
+    ..addCommand(new UpgradeCommand());
 
   return Chain.capture(() async {
     dynamic result = await runner.run(args);
