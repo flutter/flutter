@@ -79,7 +79,7 @@ class IOSDevice extends Device {
   String get name => _name;
 
   factory IOSDevice({String id, String name}) {
-    IOSDevice device = Device._unique(id ?? defaultDeviceID, new IOSDevice#_); // analyzer doesn't like constructor tear-offs
+    IOSDevice device = Device._unique(id ?? defaultDeviceID, (String id) => new IOSDevice._(id));
     device._name = name;
     return device;
   }
@@ -272,7 +272,7 @@ class IOSSimulator extends Device {
   String get name => _name;
 
   factory IOSSimulator({String id, String name, String iOSSimulatorPath}) {
-    IOSSimulator device = Device._unique(id ?? defaultDeviceID, new IOSSimulator#_); // analyzer doesn't like constructor tear-offs
+    IOSSimulator device = Device._unique(id ?? defaultDeviceID, (String id) => new IOSSimulator._(id));
     device._name = name;
     if (iOSSimulatorPath == null) {
       iOSSimulatorPath = path.join('/Applications', 'iOS Simulator.app',
@@ -493,7 +493,7 @@ class AndroidDevice extends Device {
       String productID: null,
       String modelID: null,
       String deviceCodeName: null}) {
-    AndroidDevice device = Device._unique(id ?? defaultDeviceID, new AndroidDevice#_); // analyzer doesn't like constructor tear-offs
+    AndroidDevice device = Device._unique(id ?? defaultDeviceID, (String id) => new AndroidDevice._(id));
     device.productID = productID;
     device.modelID = modelID;
     device.deviceCodeName = deviceCodeName;
