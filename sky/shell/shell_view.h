@@ -14,7 +14,7 @@ namespace sky {
 namespace shell {
 class Engine;
 class PlatformView;
-class Rasterizer;
+class RasterizerDirect;
 class Shell;
 
 class ShellView {
@@ -33,7 +33,7 @@ class ShellView {
 
   Shell& shell_;
   scoped_ptr<PlatformView> view_;
-  scoped_ptr<Rasterizer> rasterizer_;
+  scoped_ptr<RasterizerDirect> rasterizer_;
   scoped_ptr<Engine> engine_;
 
   DISALLOW_COPY_AND_ASSIGN(ShellView);

@@ -2,48 +2,47 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/gpu/direct/rasterizer.h"
+#include "sky/shell/gpu/direct/rasterizer_direct.h"
 
 #include "base/trace_event/trace_event.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/compositor/container_layer.h"
 #include "sky/compositor/layer.h"
 #include "sky/compositor/paint_context.h"
 #include "sky/compositor/picture_layer.h"
-#include "sky/shell/gpu/direct/ganesh_context.h"
-#include "sky/shell/gpu/direct/ganesh_surface.h"
 #include "sky/shell/shell.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gl/gl_bindings.h"
+#include "ui/gl/gl_bindings_skia_in_process.h"
 #include "ui/gl/gl_context.h"
 #include "ui/gl/gl_share_group.h"
 #include "ui/gl/gl_surface.h"
-#include "mojo/public/cpp/system/data_pipe.h"
 
 namespace sky {
 namespace shell {
 
 static const double kOneFrameDuration = 1e3 / 60.0;
 
-Rasterizer::Rasterizer()
+RasterizerDirect::RasterizerDirect()
     : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
 }
 
-Rasterizer::~Rasterizer() {
+RasterizerDirect::~RasterizerDirect() {
 }
 
-base::WeakPtr<Rasterizer> Rasterizer::GetWeakPtr() {
+base::WeakPtr<RasterizerDirect> RasterizerDirect::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
+void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   surface_ =
       gfx::GLSurface::CreateViewGLSurface(widget, gfx::SurfaceConfiguration());
   CHECK(surface_) << "GLSurface required.";
 }
 
-void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
-  TRACE_EVENT0("sky", "Rasterizer::Draw");
+void RasterizerDirect::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
+  TRACE_EVENT0("sky", "RasterizerDirect::Draw");
 
   if (!surface_)
     return;
@@ -59,12 +58,11 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   // for instrumentation.
   paint_context_.engine_time().setLapTime(layer_tree->construction_time());
 
-  // Use the canvas from the Ganesh Surface to render the current frame into
   {
     EnsureGLContext();
     CHECK(context_->MakeCurrent(surface_.get()));
-    EnsureGaneshSurface(surface_->GetBackingFrameBufferObject(), size);
-    SkCanvas* canvas = ganesh_surface_->canvas();
+    SkCanvas* canvas = ganesh_canvas_.GetCanvas(
+      surface_->GetBackingFrameBufferObject(), layer_tree->frame_size());
     sky::compositor::PaintContext::ScopedFrame frame =
         paint_context_.AcquireFrame(*canvas);
     canvas->clear(SK_ColorBLACK);
@@ -94,34 +92,26 @@ void Rasterizer::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   }
 }
 
-void Rasterizer::OnOutputSurfaceDestroyed() {
+void RasterizerDirect::OnOutputSurfaceDestroyed() {
   if (context_) {
     CHECK(context_->MakeCurrent(surface_.get()));
-    ganesh_surface_.reset();
-    ganesh_context_.reset();
+    ganesh_canvas_.SetGrGLInterface(nullptr);
     context_ = nullptr;
   }
-  CHECK(!ganesh_surface_);
-  CHECK(!ganesh_context_);
+  CHECK(!ganesh_canvas_.IsValid());
   CHECK(!context_);
   surface_ = nullptr;
 }
 
-void Rasterizer::EnsureGLContext() {
+void RasterizerDirect::EnsureGLContext() {
   if (context_)
     return;
   context_ = gfx::GLContext::CreateGLContext(share_group_.get(), surface_.get(),
                                              gfx::PreferIntegratedGpu);
   CHECK(context_) << "GLContext required.";
   CHECK(context_->MakeCurrent(surface_.get()));
-  ganesh_context_.reset(new GaneshContext(context_.get()));
-}
-
-void Rasterizer::EnsureGaneshSurface(intptr_t window_fbo,
-                                     const gfx::Size& size) {
-  if (!ganesh_surface_ || ganesh_surface_->size() != size)
-    ganesh_surface_.reset(
-        new GaneshSurface(window_fbo, ganesh_context_.get(), size));
+  gr_gl_interface_ = skia::AdoptRef(gfx::CreateInProcessSkiaGLBinding());
+  ganesh_canvas_.SetGrGLInterface(gr_gl_interface_.get());
 }
 
 }  // namespace shell

@@ -77,6 +77,8 @@ class Engine : public UIDelegate,
   void RunFromPrecompiledSnapshot(const mojo::String& bundle_path) override;
   void RunFromSnapshot(const mojo::String& path) override;
   void RunFromBundle(const mojo::String& path) override;
+  void RunFromAssetBundle(const mojo::String& url,
+                          mojo::asset_bundle::AssetBundlePtr bundle) override;
 
   void OnActivityPaused() override;
   void OnActivityResumed() override;

@@ -1,4 +1,4 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,6 +16,7 @@
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/service_provider.h"
+#include "sky/shell/platform/mojo/content_handler_impl.h"
 
 namespace sky {
 namespace shell {
@@ -45,6 +46,7 @@ class MojoApp : public mojo::ApplicationDelegate,
   // Overridden from InterfaceFactory<ContentHandler>
   void Create(mojo::ApplicationConnection* connection,
               mojo::InterfaceRequest<mojo::ContentHandler> request) override {
+    new ContentHandlerImpl(request.Pass());
   }
 
   mojo::TracingImpl tracing_;

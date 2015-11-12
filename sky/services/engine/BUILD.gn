@@ -11,6 +11,7 @@ mojom("interfaces") {
   ]
 
   deps = [
-    "//sky/services/pointer:interfaces"
+    "//mojo/services/asset_bundle/interfaces",
+    "//sky/services/pointer:interfaces",
   ]
 }

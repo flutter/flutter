@@ -21,8 +21,13 @@ class Shell {
  public:
   ~Shell();
 
+  // Init the shell to stand alone from MojoShell.
+  static void InitStandalone(
+      scoped_ptr<ServiceProviderContext> service_provider_context);
+  // Init the shell to run inside MojoShell.
   static void Init(
       scoped_ptr<ServiceProviderContext> service_provider_context);
+
   static Shell& Shared();
 
   base::SingleThreadTaskRunner* gpu_task_runner() const {

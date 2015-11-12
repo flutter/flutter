@@ -8,12 +8,11 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "skia/ext/refptr.h"
+#include "sky/compositor/paint_context.h"
+#include "sky/shell/gpu/ganesh_canvas.h"
 #include "sky/shell/gpu_delegate.h"
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/native_widget_types.h"
-#include "sky/compositor/paint_context.h"
-
-class SkPicture;
 
 namespace gfx {
 class GLContext;
@@ -26,12 +25,12 @@ namespace shell {
 class GaneshContext;
 class GaneshSurface;
 
-class Rasterizer : public GPUDelegate {
+class RasterizerDirect : public GPUDelegate {
  public:
-  explicit Rasterizer();
-  ~Rasterizer() override;
+  explicit RasterizerDirect();
+  ~RasterizerDirect() override;
 
-  base::WeakPtr<Rasterizer> GetWeakPtr();
+  base::WeakPtr<RasterizerDirect> GetWeakPtr();
 
   void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
   void OnOutputSurfaceDestroyed() override;
@@ -45,14 +44,14 @@ class Rasterizer : public GPUDelegate {
   scoped_refptr<gfx::GLSurface> surface_;
   scoped_refptr<gfx::GLContext> context_;
 
-  scoped_ptr<GaneshContext> ganesh_context_;
-  scoped_ptr<GaneshSurface> ganesh_surface_;
+  skia::RefPtr<const GrGLInterface> gr_gl_interface_;
+  GaneshCanvas ganesh_canvas_;
 
   compositor::PaintContext paint_context_;
 
-  base::WeakPtrFactory<Rasterizer> weak_factory_;
+  base::WeakPtrFactory<RasterizerDirect> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(Rasterizer);
+  DISALLOW_COPY_AND_ASSIGN(RasterizerDirect);
 };
 
 }  // namespace shell

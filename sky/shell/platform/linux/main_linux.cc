@@ -31,7 +31,7 @@ int main(int argc, const char* argv[]) {
   mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
       new mojo::embedder::SimplePlatformSupport()));
 
-  sky::shell::Shell::Init(make_scoped_ptr(
+  sky::shell::Shell::InitStandalone(make_scoped_ptr(
       new sky::shell::ServiceProviderContext(message_loop.task_runner())));
 
   if (!sky::shell::InitForTesting()) {
