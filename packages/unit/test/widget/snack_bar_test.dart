@@ -9,17 +9,22 @@ void main() {
       String helloSnackBar = 'Hello SnackBar';
       GlobalKey<PlaceholderState> placeholderKey = new GlobalKey<PlaceholderState>();
       Key tapTarget = new Key('tap-target');
+      BuildContext context;
+      bool showSnackBarThenCalled = false;
 
       tester.pumpWidget(new MaterialApp(
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) {
+            context = args.context;
             return new GestureDetector(
               onTap: () {
                 showSnackBar(
                   context: args.context,
                   placeholderKey: placeholderKey,
                   content: new Text(helloSnackBar)
-                );
+                ).then((_) {
+                  showSnackBarThenCalled = true;
+                });
               },
               child: new Container(
                 decoration: const BoxDecoration(
@@ -36,10 +41,16 @@ void main() {
       ));
 
       tester.tap(tester.findElementByKey(tapTarget));
-
       expect(tester.findText(helloSnackBar), isNull);
       tester.pump();
       expect(tester.findText(helloSnackBar), isNotNull);
+
+      Navigator.of(context).pop();
+      expect(tester.findText(helloSnackBar), isNotNull);
+      tester.pump(new Duration(seconds: 1));
+      expect(showSnackBarThenCalled, isTrue);
+      expect(tester.findText(helloSnackBar), isNull);
+      expect(placeholderKey.currentState.child, isNull);
     });
   });
 }

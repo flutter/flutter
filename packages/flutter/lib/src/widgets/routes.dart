@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/animation.dart';
 
 import 'basic.dart';
@@ -46,6 +48,10 @@ class OverlayRoute extends Route {
 
 // TODO(abarth): Should we add a type for the result?
 abstract class TransitionRoute extends OverlayRoute {
+  TransitionRoute({ this.completer });
+
+  final Completer completer;
+
   Duration get transitionDuration;
   bool get opaque;
 
@@ -86,7 +92,10 @@ abstract class TransitionRoute extends OverlayRoute {
 
   void didPop(dynamic result) {
     _result = result;
-    _performance.reverse();
+    if (completer != null)
+      _performance.reverse().then((_) { completer.complete(_result); });
+    else
+      _performance.reverse();
   }
 
   String get debugLabel => '$runtimeType';
