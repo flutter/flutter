@@ -40,13 +40,19 @@ void main() {
         }
       ));
 
+      // TODO(hansmuller): find a way to avoid calling pump over and over.
+      // https://github.com/flutter/flutter/issues/348
+
       tester.tap(tester.findElementByKey(tapTarget));
       expect(tester.findText(helloSnackBar), isNull);
-      tester.pump();
+      tester.pump(new Duration(seconds: 1));
+      tester.pump(new Duration(seconds: 1));
       expect(tester.findText(helloSnackBar), isNotNull);
 
       Navigator.of(context).pop();
       expect(tester.findText(helloSnackBar), isNotNull);
+      tester.pump(new Duration(seconds: 1));
+      tester.pump(new Duration(seconds: 1));
       tester.pump(new Duration(seconds: 1));
       expect(showSnackBarThenCalled, isTrue);
       expect(tester.findText(helloSnackBar), isNull);

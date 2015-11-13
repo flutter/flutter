@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/animation.dart';
 
 import 'basic.dart';
@@ -103,6 +105,8 @@ class ModalPosition {
 }
 
 abstract class ModalRoute extends TransitionRoute {
+  ModalRoute({ Completer completer }) : super(completer: completer);
+
   ModalPosition get position => null;
   Color get barrierColor => _kTransparent;
   Widget buildModalWidget(BuildContext context);

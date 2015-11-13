@@ -93,9 +93,8 @@ class _PopupMenu extends StatelessComponent {
 }
 
 class _MenuRoute extends ModalRoute {
-  _MenuRoute({ this.completer, this.position, this.items, this.level });
+  _MenuRoute({ Completer completer, this.position, this.items, this.level }) : super(completer: completer);
 
-  final Completer completer;
   final ModalPosition position;
   final List<PopupMenuItem> items;
   final int level;
@@ -112,11 +111,6 @@ class _MenuRoute extends ModalRoute {
   Duration get transitionDuration => _kMenuDuration;
 
   Widget buildModalWidget(BuildContext context) => new _PopupMenu(route: this);
-
-  void didPop([dynamic result]) {
-    completer.complete(result);
-    super.didPop(result);
-  }
 }
 
 Future showMenu({ BuildContext context, ModalPosition position, List<PopupMenuItem> items, int level: 4 }) {

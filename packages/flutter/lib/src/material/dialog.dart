@@ -116,9 +116,8 @@ class Dialog extends StatelessComponent {
 }
 
 class _DialogRoute extends ModalRoute {
-  _DialogRoute({ this.completer, this.child });
+  _DialogRoute({ Completer completer, this.child }) : super(completer: completer);
 
-  final Completer completer;
   final Widget child;
 
   bool get opaque => false;
@@ -131,11 +130,6 @@ class _DialogRoute extends ModalRoute {
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
       child: child
     );
-  }
-
-  void didPop([dynamic result]) {
-    completer.complete(result);
-    super.didPop(result);
   }
 }
 
