@@ -209,6 +209,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9E07CF8E1BE7F4D200BCD8DE /* Build configuration list for PBXNativeTarget "FlutterApplication" */;
 			buildPhases = (
+				9EBB2F351BF675C200177634 /* Ensure `pub get` */,
 				9E07CFF21BEAB2E800BCD8DE /* Run FLX Packager */,
 				9E07CFCD1BE98FCD00BCD8DE /* Generate Precompiled Snapshot */,
 				9E07CF811BE7F4D200BCD8DE /* Sources */,
@@ -326,7 +327,6 @@
 			inputPaths = (
 				"$(SRCROOT)/Tools/SnapshotterInvoke",
 				"$(FLUTTER_APPLICATION_PATH)/lib/main.dart",
-				"$(FLUTTER_APPLICATION_PATH)/pubspec.lock",
 			);
 			name = "Generate Precompiled Snapshot";
 			outputPaths = (
@@ -355,6 +355,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "${SOURCE_ROOT}/Tools/PackagerInvoke ${FLUTTER_APPLICATION_PATH}";
+			showEnvVarsInLog = 0;
+		};
+		9EBB2F351BF675C200177634 /* Ensure `pub get` */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Ensure `pub get`";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\npushd ${FLUTTER_APPLICATION_PATH}\npub get\npopd\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
