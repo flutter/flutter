@@ -29,7 +29,7 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
   }
 
   Widget build(BuildContext context) {
-    List <PopupMenuItem> items = _buildMenu();
+    List<PopupMenuItem> items = _buildMenu();
     IndexedStack indexedStack = new IndexedStack(items, index: _itemIndex, alignment: const FractionalOffset(0.5, 0.0));
 
     return new Scaffold(

@@ -147,7 +147,7 @@ class TestParticleSystem {
       _emitCounter += dt;
     }
 
-    while(_particles.length < maxParticles
+    while (_particles.length < maxParticles
        && _emitCounter > rate
        && (numParticlesToEmit == 0 || _numEmittedParticles < numParticlesToEmit)) {
       // Add a new particle

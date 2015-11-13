@@ -614,7 +614,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _debugDoingLayout = true;
     try {
       // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
-      while(_nodesNeedingLayout.isNotEmpty) {
+      while (_nodesNeedingLayout.isNotEmpty) {
         List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = new List<RenderObject>();
         dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)..forEach((RenderObject node) {

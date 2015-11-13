@@ -51,7 +51,7 @@ class WidgetTester {
     if (layer is ContainerLayer) {
       ContainerLayer root = layer;
       Layer child = root.firstChild;
-      while(child != null) {
+      while (child != null) {
         result.addAll(_layers(child));
         child = child.nextSibling;
       }
