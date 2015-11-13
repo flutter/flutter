@@ -1,0 +1,22 @@
+name: widgets
+material-design-icons:
+  - name: action/account_circle
+  - name: action/alarm
+  - name: action/android
+  - name: action/assessment
+  - name: action/code
+  - name: action/event
+  - name: action/face
+  - name: action/home
+  - name: action/language
+  - name: action/list
+  - name: device/dvr
+  - name: editor/format_align_center
+  - name: editor/format_align_left
+  - name: editor/format_align_right
+  - name: navigation/arrow_back
+  - name: navigation/arrow_forward
+  - name: navigation/menu
+  - name: navigation/more_horiz
+  - name: navigation/more_vert
+  - name: navigation/refresh
