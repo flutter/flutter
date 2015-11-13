@@ -31,6 +31,7 @@ class Internals
 
   mojo::Handle TakeServicesProvidedByEmbedder();
   mojo::Handle TakeRootBundleHandle();
+  mojo::Handle TakeServicesProvidedToEmbedder();
 
  private:
   explicit Internals(mojo::ServiceProviderPtr platform_service_provider,
@@ -45,6 +46,11 @@ class Internals
   mojo::ServiceProviderPtr service_provider_;
   mojo::ServiceProviderImpl service_provider_impl_;
   mojo::ServiceProviderPtr platform_service_provider_;
+
+  // A ServiceProvider supplied by the application that exposes services to
+  // the embedder.
+  mojo::InterfaceRequest<mojo::ServiceProvider>
+      services_provided_to_embedder_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Internals);
 };

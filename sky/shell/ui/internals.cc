@@ -41,7 +41,8 @@ void TakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
 }
 
 void TakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, 0);
+  Dart_SetIntegerReturnValue(
+      args, GetInternals()->TakeServicesProvidedToEmbedder().value());
 }
 
 void TakeServiceRegistry(Dart_NativeArguments args) {
@@ -93,10 +94,16 @@ Internals::Internals(mojo::ServiceProviderPtr platform_service_provider,
                      mojo::asset_bundle::AssetBundlePtr root_bundle)
   : root_bundle_(root_bundle.Pass()),
     service_provider_impl_(GetProxy(&service_provider_)),
+
     platform_service_provider_(platform_service_provider.Pass()) {
   service_provider_impl_.set_fallback_service_provider(
       platform_service_provider_.get());
   service_provider_impl_.AddService<mojo::asset_bundle::AssetUnpacker>(this);
+
+  // Currently we don't consume any services provided by the application.
+  // So there's no need to hold the proxy to the application's ServiceProvider.
+  mojo::ServiceProviderPtr application_service_provider;
+  services_provided_to_embedder_ = GetProxy(&application_service_provider);
 }
 
 Internals::~Internals() {
@@ -115,6 +122,10 @@ mojo::Handle Internals::TakeServicesProvidedByEmbedder() {
 
 mojo::Handle Internals::TakeRootBundleHandle() {
   return root_bundle_.PassInterface().PassHandle().release();
+}
+
+mojo::Handle Internals::TakeServicesProvidedToEmbedder() {
+  return services_provided_to_embedder_.PassMessagePipe().release();
 }
 
 }  // namespace shell
