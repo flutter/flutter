@@ -122,7 +122,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       Rect bounds = Point.origin & (size * ui.window.devicePixelRatio);
       ui.SceneBuilder builder = new ui.SceneBuilder(bounds);
       layer.addToScene(builder, Offset.zero);
-      ui.window.render(builder.build());
+      ui.Scene scene = builder.build();
+      ui.window.render(scene);
+      scene.dispose();
     } finally {
       ui.tracing.end('RenderView.compositeFrame');
     }
