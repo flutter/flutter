@@ -161,19 +161,28 @@ void main() {
     tap.onTap = () {
       tapRecognized = true;
     };
+    bool tapCanceled = false;
+    tap.onTapCancel = () {
+      tapCanceled = true;
+    };
 
     tap.addPointer(down3);
     GestureArena.instance.close(3);
     expect(tapRecognized, isFalse);
+    expect(tapCanceled, isFalse);
     router.route(down3);
     expect(tapRecognized, isFalse);
+    expect(tapCanceled, isFalse);
 
     router.route(move3);
     expect(tapRecognized, isFalse);
+    expect(tapCanceled, isTrue);
     router.route(up3);
     expect(tapRecognized, isFalse);
+    expect(tapCanceled, isTrue);
     GestureArena.instance.sweep(3);
     expect(tapRecognized, isFalse);
+    expect(tapCanceled, isTrue);
 
     tap.dispose();
   });

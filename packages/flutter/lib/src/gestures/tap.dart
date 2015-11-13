@@ -43,6 +43,15 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
+  void resolve(GestureDisposition disposition) {
+    if (_wonArena && disposition == GestureDisposition.rejected) {
+      if (onTapCancel != null)
+        onTapCancel();
+      _reset();
+    }      
+    super.resolve(disposition);
+  }
+
   void didExceedDeadline() {
     _checkDown();
   }

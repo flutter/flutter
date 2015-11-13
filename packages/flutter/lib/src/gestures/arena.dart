@@ -146,8 +146,7 @@ class GestureArena {
     } else {
       assert(disposition == GestureDisposition.accepted);
       if (state.isOpen) {
-        if (state.eagerWinner == null)
-          state.eagerWinner = member;
+        state.eagerWinner ??= member;
       } else {
         _resolveInFavorOf(key, state, member);
       }
