@@ -10,7 +10,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
 }
 
 abstract class MultiChildLayoutDelegate {
-  final Map<Object, RenderBox> _idToChild = new Map<Object, RenderBox>();
+  Map<Object, RenderBox> _idToChild;
 
   /// Returns the size of this object given the incomming constraints.
   /// The size cannot reflect the instrinsic sizes of the children.
@@ -39,15 +39,20 @@ abstract class MultiChildLayoutDelegate {
   }
 
   void _callPerformLayout(Size size, BoxConstraints constraints, RenderBox firstChild) {
-    RenderBox child = firstChild;
-    while (child != null) {
-      final MultiChildLayoutParentData childParentData = child.parentData;
-      assert(childParentData.id != null);
-      _idToChild[childParentData.id] = child;
-      child = childParentData.nextSibling;
+    final Map<Object, RenderBox> previousIdToChild = _idToChild;
+    try {
+      _idToChild = new Map<Object, RenderBox>();
+      RenderBox child = firstChild;
+      while (child != null) {
+        final MultiChildLayoutParentData childParentData = child.parentData;
+        assert(childParentData.id != null);
+        _idToChild[childParentData.id] = child;
+        child = childParentData.nextSibling;
+      }
+      performLayout(size, constraints);
+    } finally {
+      _idToChild = previousIdToChild;
     }
-    performLayout(size, constraints);
-    _idToChild.clear();
   }
 
   /// Layout and position all children given this widget's size and the specified

@@ -19,11 +19,13 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   bool performLayoutIsChild;
 
   void performLayout(Size size, BoxConstraints constraints) {
-    performLayoutSize = size;
-    performLayoutConstraints = constraints;
-    performLayoutSize0 = layoutChild(0, constraints);
-    performLayoutSize1 = layoutChild(1, constraints);
-    performLayoutIsChild = isChild('fred');
+    expect(() {
+      performLayoutSize = size;
+      performLayoutConstraints = constraints;
+      performLayoutSize0 = layoutChild(0, constraints);
+      performLayoutSize1 = layoutChild(1, constraints);
+      performLayoutIsChild = isChild('fred');
+    }, returnsNormally);
   }
 }
 
@@ -34,7 +36,7 @@ void main() {
       tester.pumpWidget(new Center(
         child: new CustomMultiChildLayout([
           new LayoutId(id: 0, child: new Container(width: 150.0, height: 100.0)),
-          new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0))
+          new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
         ],
           delegate: delegate
         )
@@ -56,6 +58,25 @@ void main() {
       expect(delegate.performLayoutSize1.width, 100.0);
       expect(delegate.performLayoutSize1.height, 200.0);
       expect(delegate.performLayoutIsChild, false);
+    });
+  });
+
+  test('Nested CustomMultiChildLayouts', () {
+    testWidgets((WidgetTester tester) {
+      TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
+      tester.pumpWidget(new Center(
+        child: new CustomMultiChildLayout([
+          new LayoutId(
+            id: 0,
+            child: new CustomMultiChildLayout([
+              new LayoutId(id: 0, child: new Container(width: 150.0, height: 100.0)),
+              new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
+            ], delegate: delegate)
+          ),
+          new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
+        ], delegate: delegate)
+      ));
+
     });
   });
 }
