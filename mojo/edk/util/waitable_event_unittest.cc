@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/edk/system/waitable_event.h"
+#include "mojo/edk/util/waitable_event.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -18,13 +18,21 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::system::test::ActionTimeout;
+using mojo::system::test::DeadlineFromMilliseconds;
+using mojo::system::test::EpsilonTimeout;
+using mojo::system::test::Sleep;
+using mojo::system::test::SleepMilliseconds;
+using mojo::system::test::Stopwatch;
+using mojo::system::test::TinyTimeout;
+
 namespace mojo {
-namespace system {
+namespace util {
 namespace {
 
 // Sleeps for a "very small" amount of time.
 void EpsilonRandomSleep() {
-  test::SleepMilliseconds(static_cast<unsigned>(rand()) % 20u);
+  SleepMilliseconds(static_cast<unsigned>(rand()) % 20u);
 }
 
 // We'll use |MojoDeadline| with |uint64_t| (for |WaitWithTimeout()|'s timeout
@@ -50,16 +58,16 @@ TEST(AutoResetWaitableEventTest, Basic) {
   EXPECT_FALSE(ev.IsSignaledForTest());
   EXPECT_TRUE(ev.WaitWithTimeout(0));
   EXPECT_FALSE(ev.IsSignaledForTest());
-  EXPECT_TRUE(ev.WaitWithTimeout(test::DeadlineFromMilliseconds(1)));
+  EXPECT_TRUE(ev.WaitWithTimeout(DeadlineFromMilliseconds(1)));
   EXPECT_FALSE(ev.IsSignaledForTest());
   ev.Signal();
   EXPECT_TRUE(ev.IsSignaledForTest());
   EXPECT_FALSE(ev.WaitWithTimeout(0));
   EXPECT_FALSE(ev.IsSignaledForTest());
-  EXPECT_TRUE(ev.WaitWithTimeout(test::DeadlineFromMilliseconds(1)));
+  EXPECT_TRUE(ev.WaitWithTimeout(DeadlineFromMilliseconds(1)));
   EXPECT_FALSE(ev.IsSignaledForTest());
   ev.Signal();
-  EXPECT_FALSE(ev.WaitWithTimeout(test::DeadlineFromMilliseconds(1)));
+  EXPECT_FALSE(ev.WaitWithTimeout(DeadlineFromMilliseconds(1)));
   EXPECT_FALSE(ev.IsSignaledForTest());
 }
 
@@ -74,7 +82,7 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
         if (rand() % 2 == 0)
           ev.Wait();
         else
-          EXPECT_FALSE(ev.WaitWithTimeout(test::ActionTimeout()));
+          EXPECT_FALSE(ev.WaitWithTimeout(ActionTimeout()));
         wake_count.fetch_add(1u);
         // Note: We can't say anything about the signaled state of |ev| here,
         // since the main thread may have already signaled it again.
@@ -84,7 +92,7 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
     // Unfortunately, we can't really wait for the threads to be waiting, so we
     // just sleep for a bit, and count on them having started and advanced to
     // waiting.
-    test::Sleep(2 * test::TinyTimeout());
+    Sleep(2 * TinyTimeout());
 
     for (size_t j = 0u; j < threads.size(); j++) {
       unsigned old_wake_count = wake_count.load();
@@ -95,13 +103,13 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
 
       // Poll for |wake_count| to change.
       while (wake_count.load() == old_wake_count)
-        test::Sleep(test::EpsilonTimeout());
+        Sleep(EpsilonTimeout());
 
       EXPECT_FALSE(ev.IsSignaledForTest());
 
       // And once it's changed, wait a little longer, to see if any other
       // threads are awoken (they shouldn't be).
-      test::Sleep(test::EpsilonTimeout());
+      Sleep(EpsilonTimeout());
 
       EXPECT_EQ(old_wake_count + 1u, wake_count.load());
 
@@ -110,7 +118,7 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
 
     // Having done that, if we signal |ev| now, it should stay signaled.
     ev.Signal();
-    test::Sleep(test::EpsilonTimeout());
+    Sleep(EpsilonTimeout());
     EXPECT_TRUE(ev.IsSignaledForTest());
 
     for (auto& thread : threads)
@@ -123,12 +131,12 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
 TEST(AutoResetWaitableEventTest, Timeouts) {
   static const unsigned kTestTimeoutsMs[] = {0, 10, 20, 40, 80};
 
-  test::Stopwatch stopwatch;
+  Stopwatch stopwatch;
 
   AutoResetWaitableEvent ev;
 
   for (size_t i = 0u; i < MOJO_ARRAYSIZE(kTestTimeoutsMs); i++) {
-    uint64_t timeout = test::DeadlineFromMilliseconds(kTestTimeoutsMs[i]);
+    uint64_t timeout = DeadlineFromMilliseconds(kTestTimeoutsMs[i]);
 
     stopwatch.Start();
     EXPECT_TRUE(ev.WaitWithTimeout(timeout));
@@ -137,7 +145,7 @@ TEST(AutoResetWaitableEventTest, Timeouts) {
     // It should time out after *at least* the specified amount of time.
     EXPECT_GE(elapsed, timeout);
     // But we expect that it should time out soon after that amount of time.
-    EXPECT_LT(elapsed, timeout + test::EpsilonTimeout());
+    EXPECT_LT(elapsed, timeout + EpsilonTimeout());
   }
 }
 
@@ -154,13 +162,13 @@ TEST(ManualResetWaitableEventTest, Basic) {
   EXPECT_FALSE(ev.IsSignaledForTest());
   EXPECT_TRUE(ev.WaitWithTimeout(0));
   EXPECT_FALSE(ev.IsSignaledForTest());
-  EXPECT_TRUE(ev.WaitWithTimeout(test::DeadlineFromMilliseconds(1)));
+  EXPECT_TRUE(ev.WaitWithTimeout(DeadlineFromMilliseconds(1)));
   EXPECT_FALSE(ev.IsSignaledForTest());
   ev.Signal();
   EXPECT_TRUE(ev.IsSignaledForTest());
   EXPECT_FALSE(ev.WaitWithTimeout(0));
   EXPECT_TRUE(ev.IsSignaledForTest());
-  EXPECT_FALSE(ev.WaitWithTimeout(test::DeadlineFromMilliseconds(1)));
+  EXPECT_FALSE(ev.WaitWithTimeout(DeadlineFromMilliseconds(1)));
   EXPECT_TRUE(ev.IsSignaledForTest());
 }
 
@@ -177,7 +185,7 @@ TEST(ManualResetWaitableEventTest, SignalMultiple) {
           if (rand() % 2 == 0)
             ev.Wait();
           else
-            EXPECT_FALSE(ev.WaitWithTimeout(test::ActionTimeout()));
+            EXPECT_FALSE(ev.WaitWithTimeout(ActionTimeout()));
         }));
       }
 
@@ -207,7 +215,7 @@ TEST(ManualResetWaitableEventTest, SignalMultipleWaitReset) {
         if (rand() % 2 == 0)
           ev.Wait();
         else
-          EXPECT_FALSE(ev.WaitWithTimeout(test::ActionTimeout()));
+          EXPECT_FALSE(ev.WaitWithTimeout(ActionTimeout()));
         ev.Reset();
       }));
     }
@@ -215,7 +223,7 @@ TEST(ManualResetWaitableEventTest, SignalMultipleWaitReset) {
     // Unfortunately, we can't really wait for the threads to be waiting, so we
     // just sleep for a bit, and count on them having started and advanced to
     // waiting.
-    test::Sleep(2 * test::TinyTimeout());
+    Sleep(2 * TinyTimeout());
 
     ev.Signal();
 
@@ -234,12 +242,12 @@ TEST(ManualResetWaitableEventTest, SignalMultipleWaitReset) {
 TEST(ManualResetWaitableEventTest, Timeouts) {
   static const unsigned kTestTimeoutsMs[] = {0, 10, 20, 40, 80};
 
-  test::Stopwatch stopwatch;
+  Stopwatch stopwatch;
 
   ManualResetWaitableEvent ev;
 
   for (size_t i = 0u; i < MOJO_ARRAYSIZE(kTestTimeoutsMs); i++) {
-    uint64_t timeout = test::DeadlineFromMilliseconds(kTestTimeoutsMs[i]);
+    uint64_t timeout = DeadlineFromMilliseconds(kTestTimeoutsMs[i]);
 
     stopwatch.Start();
     EXPECT_TRUE(ev.WaitWithTimeout(timeout));
@@ -248,10 +256,10 @@ TEST(ManualResetWaitableEventTest, Timeouts) {
     // It should time out after *at least* the specified amount of time.
     EXPECT_GE(elapsed, timeout);
     // But we expect that it should time out soon after that amount of time.
-    EXPECT_LT(elapsed, timeout + test::EpsilonTimeout());
+    EXPECT_LT(elapsed, timeout + EpsilonTimeout());
   }
 }
 
 }  // namespace
-}  // namespace system
+}  // namespace util
 }  // namespace mojo

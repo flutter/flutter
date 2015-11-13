@@ -112,7 +112,7 @@ MojoResult Core::GetAndRemoveDispatcher(MojoHandle handle,
 
 MojoResult Core::AsyncWait(MojoHandle handle,
                            MojoHandleSignals signals,
-                           const base::Callback<void(MojoResult)>& callback) {
+                           const std::function<void(MojoResult)>& callback) {
   RefPtr<Dispatcher> dispatcher(GetDispatcher(handle));
   DCHECK(dispatcher);
 

@@ -21,7 +21,7 @@ namespace util {
 
 class CondVar;
 
-class MOJO_LOCKABLE Mutex {
+class MOJO_LOCKABLE Mutex final {
  public:
 #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
   Mutex() { pthread_mutex_init(&impl_, nullptr); }
@@ -63,7 +63,7 @@ class MOJO_LOCKABLE Mutex {
 
 // MutexLocker -----------------------------------------------------------------
 
-class MOJO_SCOPED_LOCKABLE MutexLocker {
+class MOJO_SCOPED_LOCKABLE MutexLocker final {
  public:
   explicit MutexLocker(Mutex* mutex) MOJO_EXCLUSIVE_LOCK_FUNCTION(mutex)
       : mutex_(mutex) {

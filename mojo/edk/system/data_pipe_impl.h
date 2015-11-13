@@ -132,7 +132,7 @@ class DataPipeImpl {
 
   ChannelEndpointClient* channel_endpoint_client() const { return owner_; }
 
-  const MojoCreateDataPipeOptions& validated_options() const {
+  MojoCreateDataPipeOptions validated_options() const {
     return owner_->validated_options();
   }
   size_t element_num_bytes() const { return owner_->element_num_bytes(); }

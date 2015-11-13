@@ -9,7 +9,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "base/command_line.h"
 #include "base/logging.h"
 #include "base/posix/global_descriptors.h"
 #include "base/strings/string_number_conversions.h"
@@ -74,13 +73,9 @@ ScopedPlatformHandle PlatformChannelPair::PassClientHandle() {
 
 // static
 ScopedPlatformHandle PlatformChannelPair::PassClientHandleFromParentProcess(
-    const base::CommandLine& command_line) {
-  std::string client_fd_string =
-      command_line.GetSwitchValueASCII(kMojoPlatformChannelHandleSwitch);
+    const std::string& string_from_parent) {
   int client_fd = -1;
-  if (client_fd_string.empty() ||
-      !base::StringToInt(client_fd_string, &client_fd) ||
-      client_fd < base::GlobalDescriptors::kBaseDescriptor) {
+  if (!base::StringToInt(string_from_parent, &client_fd)) {
     LOG(ERROR) << "Missing or invalid --" << kMojoPlatformChannelHandleSwitch;
     return ScopedPlatformHandle();
   }
@@ -89,9 +84,9 @@ ScopedPlatformHandle PlatformChannelPair::PassClientHandleFromParentProcess(
 }
 
 void PlatformChannelPair::PrepareToPassClientHandleToChildProcess(
-    base::CommandLine* command_line,
-    base::FileHandleMappingVector* handle_passing_info) const {
-  DCHECK(command_line);
+    std::string* string_for_child,
+    HandlePassingInformation* handle_passing_info) const {
+  DCHECK(string_for_child);
   DCHECK(handle_passing_info);
   // This is an arbitrary sanity check. (Note that this guarantees that the loop
   // below will terminate sanely.)
@@ -108,17 +103,7 @@ void PlatformChannelPair::PrepareToPassClientHandleToChildProcess(
 
   handle_passing_info->push_back(
       std::pair<int, int>(client_handle_.get().fd, target_fd));
-  // Log a warning if the command line already has the switch, but "clobber" it
-  // anyway, since it's reasonably likely that all the switches were just copied
-  // from the parent.
-  LOG_IF(WARNING, command_line->HasSwitch(kMojoPlatformChannelHandleSwitch))
-      << "Child command line already has switch --"
-      << kMojoPlatformChannelHandleSwitch << "="
-      << command_line->GetSwitchValueASCII(kMojoPlatformChannelHandleSwitch);
-  // (Any existing switch won't actually be removed from the command line, but
-  // the last one appended takes precedence.)
-  command_line->AppendSwitchASCII(kMojoPlatformChannelHandleSwitch,
-                                  base::IntToString(target_fd));
+  *string_for_child = base::IntToString(target_fd);
 }
 
 void PlatformChannelPair::ChildProcessLaunched() {

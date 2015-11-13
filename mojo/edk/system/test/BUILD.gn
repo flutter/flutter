@@ -91,12 +91,10 @@ mojo_edk_source_set("run_all_perftests") {
   ]
 }
 
-mojo_edk_source_set("unittests") {
-  testonly = true
-  mojo_edk_visibility = [ "mojo/edk/system:mojo_system_unittests" ]
-
+mojo_edk_unittests("mojo_edk_system_test_unittests") {
   sources = [
     "random_unittest.cc",
+    "sleep_unittest.cc",
   ]
 
   deps = [

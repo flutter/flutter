@@ -8,7 +8,6 @@
 
 #include <limits>
 
-#include "base/bind.h"
 #include "mojo/edk/system/awakable.h"
 #include "mojo/edk/system/core_test_base.h"
 #include "mojo/edk/system/test/sleep.h"
@@ -1292,16 +1291,16 @@ TEST_F(CoreTest, AsyncWait) {
   MojoHandle h = CreateMockHandle(&info);
 
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
-            core()->AsyncWait(h, MOJO_HANDLE_SIGNAL_READABLE,
-                              base::Bind(&TestAsyncWaiter::Awake,
-                                         base::Unretained(&waiter))));
+            core()->AsyncWait(
+                h, MOJO_HANDLE_SIGNAL_READABLE,
+                [&waiter](MojoResult result) { waiter.Awake(result); }));
   EXPECT_EQ(0u, info.GetAddedAwakableSize());
 
   info.AllowAddAwakable(true);
-  EXPECT_EQ(MOJO_RESULT_OK,
-            core()->AsyncWait(h, MOJO_HANDLE_SIGNAL_READABLE,
-                              base::Bind(&TestAsyncWaiter::Awake,
-                                         base::Unretained(&waiter))));
+  EXPECT_EQ(MOJO_RESULT_OK, core()->AsyncWait(h, MOJO_HANDLE_SIGNAL_READABLE,
+                                              [&waiter](MojoResult result) {
+                                                waiter.Awake(result);
+                                              }));
   EXPECT_EQ(1u, info.GetAddedAwakableSize());
 
   EXPECT_FALSE(info.GetAddedAwakableAt(0)->Awake(MOJO_RESULT_BUSY, 0));

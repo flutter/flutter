@@ -11,31 +11,12 @@
 #include <functional>
 #include <string>
 
-#include "base/containers/hash_tables.h"  // For |base::HashInts64()|.
 #include "mojo/public/cpp/system/macros.h"
-
-namespace mojo {
-namespace system {
-
-class UniqueIdentifier;
-
-}  // namespace system
-}  // namespace mojo
-
-namespace std {
-
-// Declare this before |UniqueIdentifier|, so that it can be friended.
-template <>
-struct hash<mojo::system::UniqueIdentifier>;
-
-}  // namespace std
 
 namespace mojo {
 
 namespace embedder {
-
 class PlatformSupport;
-
 }  // namespace embedder
 
 namespace system {
@@ -69,6 +50,8 @@ class UniqueIdentifier {
     return memcmp(data_, other.data_, sizeof(data_)) < 0;
   }
 
+  size_t GetHashValue() const;
+
  private:
   friend std::hash<mojo::system::UniqueIdentifier>;
 
@@ -94,10 +77,7 @@ namespace std {
 template <>
 struct hash<mojo::system::UniqueIdentifier> {
   size_t operator()(mojo::system::UniqueIdentifier unique_identifier) const {
-    return base::HashInts64(
-        *reinterpret_cast<uint64_t*>(unique_identifier.data_),
-        *reinterpret_cast<uint64_t*>(unique_identifier.data_ +
-                                     sizeof(uint64_t)));
+    return unique_identifier.GetHashValue();
   }
 };
 

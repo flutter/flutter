@@ -7,15 +7,14 @@
 
 #include <memory>
 
-#include "base/memory/ref_counted.h"
 #include "base/threading/thread.h"
 #include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/embedder/slave_process_delegate.h"
 #include "mojo/edk/system/connection_manager.h"
 #include "mojo/edk/system/raw_channel.h"
-#include "mojo/edk/system/waitable_event.h"
 #include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/waitable_event.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace base {
@@ -97,7 +96,7 @@ class SlaveConnectionManager final : public ConnectionManager,
   // in |Shutdown()| after |private_thread_| is dead. Thus it's safe to "use" on
   // |private_thread_|. (Note that |slave_process_delegate_| may only be called
   // from the delegate thread.)
-  scoped_refptr<base::TaskRunner> delegate_thread_task_runner_;
+  embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner_;
   embedder::SlaveProcessDelegate* slave_process_delegate_;
 
   // This is a private I/O thread on which this class does the bulk of its work.
@@ -147,7 +146,7 @@ class SlaveConnectionManager final : public ConnectionManager,
   // TODO(vtl): This is all a hack. It'd really suffice to have a version of
   // |RawChannel| with fully synchronous reading and writing.
   util::Mutex mutex_;
-  AutoResetWaitableEvent event_;
+  util::AutoResetWaitableEvent event_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(SlaveConnectionManager);
 };

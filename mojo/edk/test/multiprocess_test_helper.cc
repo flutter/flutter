@@ -12,6 +12,8 @@
 namespace mojo {
 namespace test {
 
+const char kPlatformChannelHandleInfoSwitch[] = "platform-channel-handle-info";
+
 MultiprocessTestHelper::MultiprocessTestHelper()
     : platform_channel_pair_(new embedder::PlatformChannelPair()) {
   server_platform_handle = platform_channel_pair_->PassServerHandle();
@@ -37,11 +39,15 @@ void MultiprocessTestHelper::StartChildWithExtraSwitch(
 
   std::string test_child_main = test_child_name + "TestChildMain";
 
-  base::CommandLine command_line(
-      base::GetMultiProcessTestChildBaseCommandLine());
+  std::string string_for_child;
   embedder::HandlePassingInformation handle_passing_info;
   platform_channel_pair_->PrepareToPassClientHandleToChildProcess(
-      &command_line, &handle_passing_info);
+      &string_for_child, &handle_passing_info);
+
+  base::CommandLine command_line(
+      base::GetMultiProcessTestChildBaseCommandLine());
+  command_line.AppendSwitchASCII(kPlatformChannelHandleInfoSwitch,
+                                 string_for_child);
 
   if (!switch_string.empty()) {
     CHECK(!command_line.HasSwitch(switch_string));
@@ -78,9 +84,12 @@ bool MultiprocessTestHelper::WaitForChildTestShutdown() {
 // static
 void MultiprocessTestHelper::ChildSetup() {
   CHECK(base::CommandLine::InitializedForCurrentProcess());
+  const base::CommandLine& command_line =
+      *base::CommandLine::ForCurrentProcess();
   client_platform_handle =
       embedder::PlatformChannelPair::PassClientHandleFromParentProcess(
-          *base::CommandLine::ForCurrentProcess());
+          command_line.GetSwitchValueASCII(kPlatformChannelHandleInfoSwitch));
+  CHECK(client_platform_handle.is_valid());
 }
 
 // static

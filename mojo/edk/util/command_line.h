@@ -52,7 +52,7 @@ namespace util {
 // Class that stores processed command lines ("argv[0]", options, and positional
 // arguments) and provides access to them. For more details, see the file-level
 // comment above. This class is thread-safe.
-class CommandLine {
+class CommandLine final {
  private:
   class ConstructionHelper;
 
@@ -139,7 +139,7 @@ namespace internal {
 
 // Helper class for building command lines (finding options, etc.) from raw
 // arguments.
-class CommandLineBuilder {
+class CommandLineBuilder final {
  public:
   CommandLineBuilder();
   ~CommandLineBuilder();

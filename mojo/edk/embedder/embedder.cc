@@ -9,9 +9,7 @@
 #include "base/atomicops.h"
 #include "base/bind.h"
 #include "base/bind_helpers.h"
-#include "base/location.h"
 #include "base/logging.h"
-#include "base/task_runner.h"
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_support.h"
@@ -97,7 +95,7 @@ void Init(std::unique_ptr<PlatformSupport> platform_support) {
 
 MojoResult AsyncWait(MojoHandle handle,
                      MojoHandleSignals signals,
-                     const base::Callback<void(MojoResult)>& callback) {
+                     const std::function<void(MojoResult)>& callback) {
   return internal::g_core->AsyncWait(handle, signals, callback);
 }
 

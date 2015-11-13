@@ -23,14 +23,15 @@
 #include "mojo/edk/system/test/sleep.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/system/transport_data.h"
-#include "mojo/edk/system/waitable_event.h"
 #include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/make_unique.h"
 #include "mojo/edk/util/mutex.h"
 #include "mojo/edk/util/scoped_file.h"
+#include "mojo/edk/util/waitable_event.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::util::AutoResetWaitableEvent;
 using mojo::util::Mutex;
 using mojo::util::MutexLocker;
 

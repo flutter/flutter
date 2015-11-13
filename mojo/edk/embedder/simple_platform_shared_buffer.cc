@@ -18,7 +18,6 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
-#include "base/sys_info.h"
 #include "base/threading/thread_restrictions.h"
 #include "build/build_config.h"
 #include "mojo/edk/embedder/platform_handle_utils.h"
@@ -91,7 +90,11 @@ std::unique_ptr<PlatformSharedBufferMapping>
 SimplePlatformSharedBuffer::MapNoCheck(size_t offset, size_t length) {
   DCHECK(IsValidMap(offset, length));
 
-  size_t offset_rounding = offset % base::SysInfo::VMAllocationGranularity();
+  long page_size = sysconf(_SC_PAGESIZE);
+  // This is a Debug-only check, since (according to POSIX), the only possible
+  // error is EINVAL (if the argument is unrecognized).
+  DPCHECK(page_size != -1);
+  size_t offset_rounding = offset % static_cast<size_t>(page_size);
   size_t real_offset = offset - offset_rounding;
   size_t real_length = length + offset_rounding;
 

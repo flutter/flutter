@@ -15,7 +15,7 @@ namespace test {
 
 // Creates/destroyes a temporary directory for test purposes. (Unlike
 // |base::ScopedTempDir|, this automatically creates the temporary directory.)
-class ScopedTestDir {
+class ScopedTestDir final {
  public:
   ScopedTestDir();
   ~ScopedTestDir();

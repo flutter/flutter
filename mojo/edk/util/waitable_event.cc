@@ -2,19 +2,70 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/edk/system/waitable_event.h"
+#include "mojo/edk/util/waitable_event.h"
 
-#include "base/logging.h"
-#include "base/time/time.h"
+#include "build/build_config.h"
+#include "mojo/edk/util/logging_internal.h"
 
-using mojo::util::CondVar;
-using mojo::util::Mutex;
-using mojo::util::MutexLocker;
+#if defined(OS_MACOSX) || defined(OS_IOS)
+#include <mach/kern_return.h>
+#include <mach/mach_time.h>
+#else
+#include <errno.h>
+#include <time.h>
+#endif  // defined(OS_MACOSX) || defined(OS_IOS)
 
 namespace mojo {
-namespace system {
+namespace util {
 
 namespace {
+
+// Mac OS X/iOS don't have a (useful) |clock_gettime()|.
+// Note: Chromium's |base::TimeTicks::Now()| uses boot time (obtained via
+// |sysctl()| with |CTL_KERN|/|KERN_BOOTTIME|). For our current purposes,
+// monotonic time (which pauses during sleeps) is sufficient. TODO(vtl): If/when
+// we use this for other purposes, maybe we should use boot time (maybe also on
+// POSIX).
+#if defined(OS_MACOSX) || defined(OS_IOS)
+mach_timebase_info_data_t GetMachTimebaseInfo() {
+  mach_timebase_info_data_t timebase_info = {};
+  kern_return_t error = mach_timebase_info(&timebase_info);
+  INTERNAL_DCHECK(error == KERN_SUCCESS);
+  return timebase_info;
+}
+
+// Returns the number of microseconds elapsed since epoch start (according to a
+// monotonic clock).
+uint64_t Now() {
+  const uint64_t kNanosecondsPerMicrosecond = 1000ULL;
+
+  // TODO(vtl): Without magic statics, this is not thread-safe, at least the
+  // first time around (neither is Mac Chromium's |base::TimeTicks::Now()|)!
+  static mach_timebase_info_data_t timebase_info = GetMachTimebaseInfo();
+
+  // |timebase_info| converts absolute time tick units into nanoseconds. By
+  // dividing by 1000 first, we reduce the risk of overflowing (at the cost of a
+  // risk of a slight loss in precision).
+  return mach_absolute_time() / kNanosecondsPerMicrosecond *
+         timebase_info.numer / timebase_info.denom;
+}
+#else
+// Returns the number of microseconds elapsed since epoch start (according to a
+// monotonic clock).
+uint64_t Now() {
+  const uint64_t kMicrosecondsPerSecond = 1000000ULL;
+  const uint64_t kNanosecondsPerMicrosecond = 1000ULL;
+
+  struct timespec now;
+  int error = clock_gettime(CLOCK_MONOTONIC, &now);
+  INTERNAL_DCHECK_WITH_ERRNO(!error, "clock_gettime", errno);
+  INTERNAL_DCHECK(now.tv_sec >= 0);
+  INTERNAL_DCHECK(now.tv_nsec >= 0);
+
+  return static_cast<uint64_t>(now.tv_sec) * kMicrosecondsPerSecond +
+         static_cast<uint64_t>(now.tv_nsec) / kNanosecondsPerMicrosecond;
+}
+#endif  // defined(OS_MACOSX) || defined(OS_IOS)
 
 // Waits with a timeout on |condition()|. Returns true on timeout, or false if
 // |condition()| ever returns true. |condition()| should have no side effects
@@ -32,7 +83,7 @@ bool WaitWithTimeoutImpl(Mutex* mutex,
 
   // We may get spurious wakeups.
   uint64_t wait_remaining = timeout_microseconds;
-  auto start = base::TimeTicks::Now();
+  uint64_t start = Now();
   while (true) {
     if (cv->WaitWithTimeout(mutex, wait_remaining))
       return true;  // Definitely timed out.
@@ -42,9 +93,9 @@ bool WaitWithTimeoutImpl(Mutex* mutex,
       return false;
 
     // Or the wakeup may have been spurious.
-    auto now = base::TimeTicks::Now();
-    DCHECK_GE(now, start);
-    uint64_t elapsed = static_cast<uint64_t>((now - start).InMicroseconds());
+    uint64_t now = Now();
+    INTERNAL_DCHECK(now >= start);
+    uint64_t elapsed = now - start;
     // It's possible that we may have timed out anyway.
     if (elapsed >= timeout_microseconds)
       return true;
@@ -86,7 +137,7 @@ bool AutoResetWaitableEvent::WaitWithTimeout(uint64_t timeout_microseconds) {
 
   // We may get spurious wakeups.
   uint64_t wait_remaining = timeout_microseconds;
-  auto start = base::TimeTicks::Now();
+  uint64_t start = Now();
   while (true) {
     if (cv_.WaitWithTimeout(&mutex_, wait_remaining))
       return true;  // Definitely timed out.
@@ -96,9 +147,9 @@ bool AutoResetWaitableEvent::WaitWithTimeout(uint64_t timeout_microseconds) {
       break;
 
     // Or the wakeup may have been spurious.
-    auto now = base::TimeTicks::Now();
-    DCHECK_GE(now, start);
-    uint64_t elapsed = static_cast<uint64_t>((now - start).InMicroseconds());
+    uint64_t now = Now();
+    INTERNAL_DCHECK(now >= start);
+    uint64_t elapsed = now - start;
     // It's possible that we may have timed out anyway.
     if (elapsed >= timeout_microseconds)
       return true;
@@ -155,7 +206,7 @@ bool ManualResetWaitableEvent::WaitWithTimeout(uint64_t timeout_microseconds) {
         // Also check |signaled_| in case we're already signaled.
         return signaled_ || signal_id_ != last_signal_id;
       }, timeout_microseconds);
-  DCHECK(rv || signaled_ || signal_id_ != last_signal_id);
+  INTERNAL_DCHECK(rv || signaled_ || signal_id_ != last_signal_id);
   return rv;
 }
 
@@ -164,5 +215,5 @@ bool ManualResetWaitableEvent::IsSignaledForTest() {
   return signaled_;
 }
 
-}  // namespace system
+}  // namespace util
 }  // namespace mojo

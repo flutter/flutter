@@ -63,7 +63,7 @@ namespace util {
 // constructor/operator= to be deleted, but for clarity we include explicit
 // non-templated versions of everything.)
 template <typename T>
-class RefPtr {
+class RefPtr final {
  public:
   RefPtr() : ptr_(nullptr) {}
   RefPtr(std::nullptr_t) : ptr_(nullptr) {}

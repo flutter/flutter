@@ -18,13 +18,19 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::system::test::DeadlineFromMilliseconds;
+using mojo::system::test::EpsilonTimeout;
+using mojo::system::test::SleepMilliseconds;
+using mojo::system::test::Stopwatch;
+using mojo::system::test::TinyTimeout;
+
 namespace mojo {
 namespace util {
 namespace {
 
 // Sleeps for a "very small" amount of time.
 void EpsilonRandomSleep() {
-  system::test::SleepMilliseconds(static_cast<unsigned>(rand()) % 20u);
+  SleepMilliseconds(static_cast<unsigned>(rand()) % 20u);
 }
 
 // We'll use |MojoDeadline| with |uint64_t| (for |CondVar::WaitWithTimeout()|'s
@@ -56,8 +62,7 @@ TEST(CondVarTest, Basic) {
     // happen if we're interrupted, e.g., by ^Z.)
     EXPECT_TRUE(cv.WaitWithTimeout(&mu, 0));
     mu.AssertHeld();
-    EXPECT_TRUE(
-        cv.WaitWithTimeout(&mu, system::test::DeadlineFromMilliseconds(1)));
+    EXPECT_TRUE(cv.WaitWithTimeout(&mu, DeadlineFromMilliseconds(1)));
     mu.AssertHeld();
   }
 
@@ -89,7 +94,7 @@ TEST(CondVarTest, Basic) {
       }
     } else {
       while (!condition) {
-        EXPECT_FALSE(cv.WaitWithTimeout(&mu, system::test::TinyTimeout()));
+        EXPECT_FALSE(cv.WaitWithTimeout(&mu, TinyTimeout()));
         mu.AssertHeld();
       }
     }
@@ -118,8 +123,7 @@ TEST(CondVarTest, SignalAll) {
             }
           } else {
             while (!condition) {
-              EXPECT_FALSE(
-                  cv.WaitWithTimeout(&mu, system::test::TinyTimeout()));
+              EXPECT_FALSE(cv.WaitWithTimeout(&mu, TinyTimeout()));
               mu.AssertHeld();
             }
           }
@@ -143,7 +147,7 @@ TEST(CondVarTest, SignalAll) {
 TEST(CondVarTest, Timeouts) {
   static const unsigned kTestTimeoutsMs[] = {0, 10, 20, 40, 80, 160};
 
-  system::test::Stopwatch stopwatch;
+  Stopwatch stopwatch;
 
   Mutex mu;
   CondVar cv;
@@ -151,8 +155,7 @@ TEST(CondVarTest, Timeouts) {
   MutexLocker locker(&mu);
 
   for (size_t i = 0; i < MOJO_ARRAYSIZE(kTestTimeoutsMs); i++) {
-    uint64_t timeout =
-        system::test::DeadlineFromMilliseconds(kTestTimeoutsMs[i]);
+    uint64_t timeout = DeadlineFromMilliseconds(kTestTimeoutsMs[i]);
 
     stopwatch.Start();
     // See note in CondVarTest.Basic about spurious wakeups.
@@ -162,7 +165,7 @@ TEST(CondVarTest, Timeouts) {
     // It should time out after *at least* the specified amount of time.
     EXPECT_GE(elapsed, timeout);
     // But we expect that it should time out soon after that amount of time.
-    EXPECT_LT(elapsed, timeout + system::test::EpsilonTimeout());
+    EXPECT_LT(elapsed, timeout + EpsilonTimeout());
   }
 }
 

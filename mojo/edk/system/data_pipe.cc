@@ -656,7 +656,8 @@ DataPipe::DataPipe(bool has_local_producer,
                    bool has_local_consumer,
                    const MojoCreateDataPipeOptions& validated_options,
                    std::unique_ptr<DataPipeImpl> impl)
-    : validated_options_(validated_options),
+    : element_num_bytes_(validated_options.element_num_bytes),
+      capacity_num_bytes_(validated_options.capacity_num_bytes),
       producer_open_(true),
       consumer_open_(true),
       producer_awakable_list_(has_local_producer ? new AwakableList()

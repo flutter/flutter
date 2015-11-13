@@ -5,7 +5,8 @@
 #ifndef MOJO_EDK_SYSTEM_ASYNC_WAITER_H_
 #define MOJO_EDK_SYSTEM_ASYNC_WAITER_H_
 
-#include "base/callback.h"
+#include <functional>
+
 #include "mojo/edk/system/awakable.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -16,7 +17,7 @@ namespace system {
 // An |Awakable| implementation that just calls a given callback object.
 class AsyncWaiter final : public Awakable {
  public:
-  using AwakeCallback = base::Callback<void(MojoResult)>;
+  using AwakeCallback = std::function<void(MojoResult)>;
 
   // |callback| must satisfy the same contract as |Awakable::Awake()|.
   explicit AsyncWaiter(const AwakeCallback& callback);

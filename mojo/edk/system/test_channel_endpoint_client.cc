@@ -7,9 +7,10 @@
 #include <utility>
 
 #include "mojo/edk/system/message_in_transit.h"
-#include "mojo/edk/system/waitable_event.h"
+#include "mojo/edk/util/waitable_event.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::util::ManualResetWaitableEvent;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 

@@ -23,14 +23,16 @@
 #include "mojo/edk/system/test/test_command_line.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/system/test/timeouts.h"
-#include "mojo/edk/system/waitable_event.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
 #include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/command_line.h"
+#include "mojo/edk/util/waitable_event.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::util::AutoResetWaitableEvent;
+using mojo::util::ManualResetWaitableEvent;
 using mojo::util::RefPtr;
 
 namespace mojo {
