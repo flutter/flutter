@@ -212,7 +212,10 @@ class FlutterBinding extends HitTestTarget {
 
   void _handlePointerPacket(ByteData serializedPacket) {
     bindings.Message message = new bindings.Message(
-        serializedPacket, <core.MojoHandle>[]);
+        serializedPacket,
+        <core.MojoHandle>[],
+        serializedPacket.lengthInBytes,
+        0);
     PointerPacket packet = PointerPacket.deserialize(message);
     for (PointerInputEvent event in _PointerEventConverter.convertPointerPacket(packet)) {
       _handlePointerInputEvent(event);
