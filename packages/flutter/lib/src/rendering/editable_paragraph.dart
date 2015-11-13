@@ -29,14 +29,11 @@ class RenderEditableParagraph extends RenderParagraph {
        _scrollOffset = scrollOffset,
        super(text);
 
-  Color _cursorColor;
-  bool _showCursor;
   SizeChangedCallback onContentSizeChanged;
-  Offset _scrollOffset;
-
   Size _contentSize;
 
   Color get cursorColor => _cursorColor;
+  Color _cursorColor;
   void set cursorColor(Color value) {
     if (_cursorColor == value)
       return;
@@ -45,6 +42,7 @@ class RenderEditableParagraph extends RenderParagraph {
   }
 
   bool get showCursor => _showCursor;
+  bool _showCursor;
   void set showCursor(bool value) {
     if (_showCursor == value)
       return;
@@ -53,6 +51,7 @@ class RenderEditableParagraph extends RenderParagraph {
   }
 
   Offset get scrollOffset => _scrollOffset;
+  Offset _scrollOffset;
   void set scrollOffset(Offset value) {
     if (_scrollOffset == value)
       return;

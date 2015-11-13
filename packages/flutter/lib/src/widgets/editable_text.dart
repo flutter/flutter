@@ -222,6 +222,8 @@ class EditableTextState extends State<EditableText> {
   }
 }
 
+final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
+
 class _EditableTextWidget extends LeafRenderObjectWidget {
   _EditableTextWidget({
     Key key,
@@ -275,8 +277,9 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
       ]);
     }
 
+    String text = value.text;
     return new StyledTextSpan(style, <TextSpan>[
-      new PlainTextSpan(value.text)
+      new PlainTextSpan(text.isEmpty ? _kZeroWidthSpace : text)
     ]);
   }
 }
