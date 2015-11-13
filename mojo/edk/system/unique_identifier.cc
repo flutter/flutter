@@ -69,5 +69,19 @@ std::string UniqueIdentifier::ToString() const {
   return rv;
 }
 
+size_t UniqueIdentifier::GetHashValue() const {
+  // We can just XOR, since |data_| consists (or is supposed to consist) of
+  // random bytes.
+  size_t rv = 0u;
+  const unsigned char* p = data_;
+  for (size_t i = 0u; i < sizeof(data_) / sizeof(size_t);
+       i++, p += sizeof(size_t)) {
+    size_t v;
+    memcpy(&v, p, sizeof(size_t));
+    rv ^= v;
+  }
+  return rv;
+}
+
 }  // namespace system
 }  // namespace mojo

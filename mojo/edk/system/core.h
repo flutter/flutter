@@ -7,7 +7,8 @@
 
 #include <stdint.h>
 
-#include "base/callback.h"
+#include <functional>
+
 #include "mojo/edk/system/handle_table.h"
 #include "mojo/edk/system/mapping_table.h"
 #include "mojo/edk/system/memory.h"
@@ -66,7 +67,7 @@ class Core {
   // awakable.h. In particular, it must not call any Mojo system functions.
   MojoResult AsyncWait(MojoHandle handle,
                        MojoHandleSignals signals,
-                       const base::Callback<void(MojoResult)>& callback);
+                       const std::function<void(MojoResult)>& callback);
 
   embedder::PlatformSupport* platform_support() const {
     return platform_support_;

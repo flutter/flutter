@@ -21,23 +21,21 @@ mojo_edk_source_set("util") {
     "ref_ptr_internal.h",
     "scoped_file.h",
     "thread_annotations.h",
+    "waitable_event.cc",
+    "waitable_event.h",
   ]
-
-  mojo_edk_configs = [ "mojo/edk/system:system_config" ]
 
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
 }
 
-mojo_edk_source_set("unittests") {
-  testonly = true
-  mojo_edk_visibility = [ "mojo/edk/system:mojo_system_unittests" ]
-
+mojo_edk_unittests("mojo_edk_util_unittests") {
   sources = [
     "command_line_unittest.cc",
     "cond_var_unittest.cc",
     "mutex_unittest.cc",
     "ref_counted_unittest.cc",
     "thread_annotations_unittest.cc",
+    "waitable_event_unittest.cc",
   ]
 
   deps = [
@@ -52,7 +50,7 @@ mojo_edk_source_set("unittests") {
 
 mojo_edk_source_set("perftests") {
   testonly = true
-  mojo_edk_visibility = [ "mojo/edk/system:mojo_system_perftests" ]
+  mojo_edk_visibility = [ "mojo/edk/system:mojo_edk_system_perftests" ]
 
   sources = [
     "ref_counted_perftest.cc",

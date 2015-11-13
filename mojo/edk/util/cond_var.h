@@ -18,7 +18,7 @@ namespace util {
 
 class Mutex;
 
-class CondVar {
+class CondVar final {
  public:
   CondVar();
   ~CondVar();

@@ -1,0 +1,33 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/mojo_sdk.gni")
+
+package_mojo_entrypoints = [
+  "lib/application.dart",
+  "lib/bindings.dart",
+  "lib/core.dart",
+]
+
+package_mojo_sources = [
+                         "lib/src/application_connection.dart",
+                         "lib/src/application.dart",
+                         "lib/src/buffer.dart",
+                         "lib/src/codec.dart",
+                         "lib/src/control_message.dart",
+                         "lib/src/data_pipe.dart",
+                         "lib/src/drain_data.dart",
+                         "lib/src/enum.dart",
+                         "lib/src/event_stream.dart",
+                         "lib/src/fill_data.dart",
+                         "lib/src/handle.dart",
+                         "lib/src/message.dart",
+                         "lib/src/message_pipe.dart",
+                         "lib/src/proxy.dart",
+                         "lib/src/struct.dart",
+                         "lib/src/stub.dart",
+                         "lib/src/types.dart",
+                         "lib/src/union.dart",
+                         "lib/src/utils.dart",
+                       ] + package_mojo_entrypoints

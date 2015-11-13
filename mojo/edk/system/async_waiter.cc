@@ -14,7 +14,7 @@ AsyncWaiter::~AsyncWaiter() {
 }
 
 bool AsyncWaiter::Awake(MojoResult result, uintptr_t context) {
-  callback_.Run(result);
+  callback_(result);
   delete this;
   return false;
 }

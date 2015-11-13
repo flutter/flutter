@@ -1,0 +1,60 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo.media;
+
+enum LpcmSampleFormat {
+  UNSIGNED_8,
+  SIGNED_16,
+  SIGNED_24_IN_32,  // TODO(johngro): describe the packing for this
+};
+
+struct LpcmMediaTypeDetails {
+  LpcmSampleFormat sample_format;
+  uint8 samples_per_frame;
+  uint32 frames_per_second;
+};
+
+struct LpcmMediaTypeSetDetails {
+  LpcmSampleFormat sample_format;
+  uint8 min_samples_per_frame;
+  uint8 max_samples_per_frame;
+  uint32 min_frames_per_second;
+  uint32 max_frames_per_second;
+};
+
+enum MediaTypeScheme {
+  LPCM,
+  // There will be more.
+};
+
+union MediaTypeDetails {
+  LpcmMediaTypeDetails lpcm;
+  // There will be more.
+};
+
+struct MediaType {
+  // Broadly identifies the media type and indicates how the details
+  // field is to be interpreted.
+  MediaTypeScheme scheme;
+
+  // Scheme-dependent details.
+  MediaTypeDetails details;
+};
+
+// A union of all media type set details.
+union MediaTypeSetDetails {
+  // Each field name should correspond to a value in MediaTypeScheme.
+  LpcmMediaTypeSetDetails lpcm;
+};
+
+// Specifies a set of types of media.
+struct MediaTypeSet {
+  // Broadly identifies the media types and indicates how the details
+  // field is to be interpreted.
+  MediaTypeScheme scheme;
+
+  // Scheme-dependent details.
+  MediaTypeSetDetails details;
+};

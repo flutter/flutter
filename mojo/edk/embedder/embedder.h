@@ -5,11 +5,11 @@
 #ifndef MOJO_EDK_EMBEDDER_EMBEDDER_H_
 #define MOJO_EDK_EMBEDDER_EMBEDDER_H_
 
+#include <functional>
 #include <memory>
 #include <string>
 
 #include "base/callback.h"
-#include "base/task_runner.h"
 #include "mojo/edk/embedder/channel_info_forward.h"
 #include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/process_type.h"
@@ -48,7 +48,7 @@ void Init(std::unique_ptr<PlatformSupport> platform_support);
 // arbitrary thread, so it must not call any Mojo system or embedder functions.
 MojoResult AsyncWait(MojoHandle handle,
                      MojoHandleSignals signals,
-                     const base::Callback<void(MojoResult)>& callback);
+                     const std::function<void(MojoResult)>& callback);
 
 // Creates a |MojoHandle| that wraps the given |PlatformHandle| (taking
 // ownership of it). This |MojoHandle| can then, e.g., be passed through message

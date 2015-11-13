@@ -16,7 +16,7 @@ namespace system {
 namespace test {
 
 // A simple "stopwatch" for measuring time elapsed from a given starting point.
-class Stopwatch {
+class Stopwatch final {
  public:
   Stopwatch();
   ~Stopwatch();

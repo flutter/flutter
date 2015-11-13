@@ -25,7 +25,7 @@ namespace internal {
 // (below). (You can't friend partial specializations.) See |MakeRefCounted()|
 // and |FRIEND_MAKE_REF_COUNTED()|.
 template <typename T>
-class MakeRefCountedHelper {
+class MakeRefCountedHelper final {
  public:
   template <typename... Args>
   static RefPtr<T> MakeRefCounted(Args&&... args) {

@@ -5,9 +5,9 @@
 #include "mojo/edk/system/test/test_io_thread.h"
 
 #include "base/bind.h"
-#include "base/callback.h"
-#include "base/location.h"
-#include "base/synchronization/waitable_event.h"
+#include "mojo/edk/util/waitable_event.h"
+
+using mojo::util::AutoResetWaitableEvent;
 
 namespace mojo {
 namespace system {
@@ -15,7 +15,7 @@ namespace test {
 
 namespace {
 
-void PostTaskAndWaitHelper(base::WaitableEvent* event,
+void PostTaskAndWaitHelper(AutoResetWaitableEvent* event,
                            const base::Closure& task) {
   task.Run();
   event->Signal();
@@ -53,13 +53,13 @@ void TestIOThread::Stop() {
 }
 
 void TestIOThread::PostTask(const base::Closure& task) {
-  task_runner()->PostTask(tracked_objects::Location(), task);
+  embedder::PlatformPostTask(task_runner().get(), task);
 }
 
 void TestIOThread::PostTaskAndWait(const base::Closure& task) {
-  base::WaitableEvent event(false, false);
-  task_runner()->PostTask(tracked_objects::Location(),
-                          base::Bind(&PostTaskAndWaitHelper, &event, task));
+  AutoResetWaitableEvent event;
+  embedder::PlatformPostTask(task_runner().get(),
+                             base::Bind(&PostTaskAndWaitHelper, &event, task));
   event.Wait();
 }
 

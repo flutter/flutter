@@ -5,13 +5,11 @@
 #ifndef MOJO_EDK_EMBEDDER_PLATFORM_CHANNEL_PAIR_H_
 #define MOJO_EDK_EMBEDDER_PLATFORM_CHANNEL_PAIR_H_
 
+#include <string>
+
 #include "base/process/launch.h"
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/public/cpp/system/macros.h"
-
-namespace base {
-class CommandLine;
-}
 
 namespace mojo {
 namespace embedder {
@@ -53,15 +51,19 @@ class PlatformChannelPair {
   // To be called in the child process, after the parent process called
   // |PrepareToPassClientHandleToChildProcess()| and launched the child (using
   // the provided data), to create a client handle connected to the server
-  // handle (in the parent process).
+  // handle (in the parent process). |string_from_parent| should be the string
+  // that was produced (in the parent process) by
+  // |PrepareToPassClientHandleToChildProcess()|.
   static ScopedPlatformHandle PassClientHandleFromParentProcess(
-      const base::CommandLine& command_line);
+      const std::string& string_from_parent);
 
   // Prepares to pass the client channel to a new child process, to be launched
-  // using |LaunchProcess()| (from base/launch.h). Modifies |*command_line| and
-  // |*handle_passing_info| as needed.
+  // using |LaunchProcess()| (from base/launch.h). |*string_for_child| will be
+  // set to a string that should be passed to the child process and which should
+  // be given (in the child ) to |PassClientHandleFromParentProcess()|. Also
+  // modifies |*handle_passing_info| as needed.
   void PrepareToPassClientHandleToChildProcess(
-      base::CommandLine* command_line,
+      std::string* string_for_child,
       HandlePassingInformation* handle_passing_info) const;
 
   // To be called once the child process has been successfully launched, to do

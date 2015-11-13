@@ -6,9 +6,8 @@
 #define MOJO_EDK_SYSTEM_TEST_TEST_IO_THREAD_H_
 
 #include "base/callback_forward.h"
-#include "base/memory/ref_counted.h"
-#include "base/task_runner.h"
 #include "base/threading/thread.h"
+#include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -16,7 +15,7 @@ namespace system {
 namespace test {
 
 // Class to help create/run threads with I/O |MessageLoop|s in tests.
-class TestIOThread {
+class TestIOThread final {
  public:
   enum class StartMode { AUTO, MANUAL };
   explicit TestIOThread(StartMode start_mode);
@@ -29,17 +28,18 @@ class TestIOThread {
   void Start();
   void Stop();
 
-  // Post |task| to the IO thread.
+  // Posts |task| to the I/O thread.
   void PostTask(const base::Closure& task);
-  // Posts |task| to the IO-thread with an WaitableEvent associated blocks on
-  // it until the posted |task| is executed, then returns.
+  // Posts |task| to the I/O thread, blocking the calling thread until the
+  // posted task is executed (note the deadlock risk!).
   void PostTaskAndWait(const base::Closure& task);
 
   base::MessageLoopForIO* message_loop() {
     return static_cast<base::MessageLoopForIO*>(io_thread_.message_loop());
   }
 
-  scoped_refptr<base::SingleThreadTaskRunner> task_runner() {
+  // TODO(vtl): Possibly, this should return a |PlatformTaskRunner*| instead.
+  embedder::PlatformTaskRunnerRefPtr task_runner() {
     return message_loop()->task_runner();
   }
 

@@ -9,7 +9,6 @@
 
 #include <memory>
 
-#include "base/compiler_specific.h"
 #include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/handle_signals_state.h"
@@ -174,15 +173,14 @@ class DataPipe final : public ChannelEndpointClient {
   void ConsumerCloseNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   // Thread-safe and fast (they don't take |mutex_|):
-  const MojoCreateDataPipeOptions& validated_options() const {
-    return validated_options_;
+  MojoCreateDataPipeOptions validated_options() const {
+    MojoCreateDataPipeOptions rv = {sizeof(MojoCreateDataPipeOptions),
+                                    MOJO_CREATE_DATA_PIPE_OPTIONS_FLAG_NONE,
+                                    element_num_bytes_, capacity_num_bytes_};
+    return rv;
   }
-  size_t element_num_bytes() const {
-    return validated_options_.element_num_bytes;
-  }
-  size_t capacity_num_bytes() const {
-    return validated_options_.capacity_num_bytes;
-  }
+  size_t element_num_bytes() const { return element_num_bytes_; }
+  size_t capacity_num_bytes() const { return capacity_num_bytes_; }
 
   // Must be called under |mutex_|.
   bool producer_open_no_lock() const MOJO_SHARED_LOCKS_REQUIRED(mutex_) {
@@ -262,8 +260,8 @@ class DataPipe final : public ChannelEndpointClient {
     return !!consumer_awakable_list_;
   }
 
-  MSVC_SUPPRESS_WARNING(4324)
-  const MojoCreateDataPipeOptions validated_options_;
+  const uint32_t element_num_bytes_;
+  const uint32_t capacity_num_bytes_;
 
   mutable util::Mutex mutex_;
   // *Known* state of producer or consumer.

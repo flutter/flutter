@@ -18,7 +18,9 @@
 // |mojo::embedder| namespace that is:
 //   * default constructible;
 //   * copy and move constructible and assignable;
-//   * constructible and assignable from |nullptr|;
+//   * implicitly constructible and assignable from |nullptr|;
+//   * explicitly (possibly implicitly) constructible from a
+//     |PlatformTaskRunner*|;
 //   * testable (with the obvious semantics; testing must also be |const| and
 //     thread-safe); and
 //   * comparable with suitable |operator==|, |operator!=| and |operator<|

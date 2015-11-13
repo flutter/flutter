@@ -22,7 +22,7 @@ class PlatformChannelPair;
 
 namespace test {
 
-class MultiprocessTestHelper {
+class MultiprocessTestHelper final {
  public:
   MultiprocessTestHelper();
   ~MultiprocessTestHelper();

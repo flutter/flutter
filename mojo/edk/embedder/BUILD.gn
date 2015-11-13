@@ -26,8 +26,6 @@ mojo_edk_source_set("embedder") {
     "test_embedder.h",
   ]
 
-  mojo_edk_configs = [ "mojo/edk/system:system_config" ]
-
   public_deps = [
     ":delegates",
     ":platform",
@@ -73,8 +71,6 @@ mojo_edk_source_set("platform") {
     "simple_platform_support.h",
   ]
 
-  mojo_edk_configs = [ "mojo/edk/system:system_config" ]
-
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
 
   deps = [
@@ -103,15 +99,10 @@ mojo_edk_source_set("delegates") {
     "slave_process_delegate.h",
   ]
 
-  mojo_edk_configs = [ "mojo/edk/system:system_config" ]
-
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
 }
 
-mojo_edk_source_set("unittests") {
-  testonly = true
-  mojo_edk_visibility = [ "mojo/edk/system:mojo_system_unittests" ]
-
+mojo_edk_unittests("mojo_edk_embedder_unittests") {
   sources = [
     "embedder_unittest.cc",
     "platform_channel_pair_unittest.cc",

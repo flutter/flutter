@@ -10,13 +10,7 @@ if (is_android) {
   import("//build/config/android/rules.gni")
 }
 
-# TODO(vtl): Should we get rid of this?
-config("system_config") {
-}
-
-component("system") {
-  output_name = "mojo_system_impl"
-
+mojo_edk_source_set("system") {
   sources = [
     "async_waiter.cc",
     "async_waiter.h",
@@ -104,21 +98,20 @@ component("system") {
     "transport_data.h",
     "unique_identifier.cc",
     "unique_identifier.h",
-    "waitable_event.cc",
-    "waitable_event.h",
     "waiter.cc",
     "waiter.h",
   ]
 
-  all_dependent_configs = [ ":system_config" ]
+  mojo_edk_public_deps = [
+    "mojo/edk/embedder",
+    "mojo/edk/embedder:delegates",
+    "mojo/edk/embedder:platform",
+    "mojo/edk/util",
+  ]
 
-  public_deps = [
-    "../embedder",
-    "../embedder:delegates",
-    "../embedder:platform",
-    "../util",
-    "../../public/c/system",
-    "../../public/cpp/system",
+  mojo_sdk_public_deps = [
+    "mojo/public/c/system",
+    "mojo/public/cpp/system",
   ]
 
   deps = [
@@ -129,15 +122,7 @@ component("system") {
   allow_circular_includes_from = [ "../embedder" ]
 }
 
-group("tests") {
-  testonly = true
-  deps = [
-    ":mojo_system_perftests",
-    ":mojo_system_unittests",
-  ]
-}
-
-mojo_edk_unittests("mojo_system_unittests") {
+mojo_edk_unittests("mojo_edk_system_unittests") {
   sources = [
     # TODO(vtl): This should be in its own mojo_edk_unittests target.
     "../test/multiprocess_test_helper_unittest.cc",
@@ -176,7 +161,6 @@ mojo_edk_unittests("mojo_system_unittests") {
     "test_channel_endpoint_client.cc",
     "test_channel_endpoint_client.h",
     "unique_identifier_unittest.cc",
-    "waitable_event_unittest.cc",
     "waiter_test_utils.cc",
     "waiter_test_utils.h",
     "waiter_unittest.cc",
@@ -189,18 +173,13 @@ mojo_edk_unittests("mojo_system_unittests") {
   ]
 
   mojo_edk_deps = [
-    # TODO(vtl): Add separate mojo_edk_unittests targets for these.
-    "mojo/edk/embedder:unittests",
-    "mojo/edk/system/test:unittests",
-    "mojo/edk/util:unittests",
-
     "mojo/edk/system/test",
     "mojo/edk/test:test_support",
     "mojo/edk/util",
   ]
 }
 
-mojo_edk_perftests("mojo_system_perftests") {
+mojo_edk_perftests("mojo_edk_system_perftests") {
   sources = [
     "message_pipe_perftest.cc",
     "message_pipe_test_utils.cc",
