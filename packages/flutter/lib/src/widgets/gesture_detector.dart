@@ -259,5 +259,16 @@ class _GestureDetectorState extends State<GestureDetector> {
     if (gestures.isEmpty)
       gestures.add('<none>');
     description.add('gestures: ${gestures.join(", ")}');
+    switch (config.behavior) {
+      case HitTestBehavior.translucent:
+        description.add('behavior: translucent');
+        break;
+      case HitTestBehavior.opaque:
+        description.add('behavior: opaque');
+        break;
+      case HitTestBehavior.deferToChild:
+        description.add('behavior: defer-to-child');
+        break;
+    }
   }
 }
