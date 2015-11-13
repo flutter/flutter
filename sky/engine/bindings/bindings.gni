@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
+
 bindings_scripts_dir = "//sky/engine/bindings/scripts"
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 
@@ -73,7 +75,7 @@ template("dart_precompile") {
   vm_isolate_snapshot = "$target_gen_dir/$vm_isolate_snapshot_name"
   isolate_snapshot_name = target_name + "_isolate.bin"
   isolate_snapshot = "$target_gen_dir/$isolate_snapshot_name"
-  
+
   assembly_path =
       "$target_gen_dir/" + target_name + "_instructions.S"
   instructions_gen_target_name = target_name + "_instructions"
@@ -86,13 +88,11 @@ template("dart_precompile") {
         "//sky/engine/bindings/dart_vm_entry_points.txt"
     inputs = [
       "//dart/runtime/tools/create_snapshot_bin.py",
-      "//mojo/public/dart/mojo/sdk_ext/internal.dart",
-      "//mojo/public/dart/mojo/sdk_ext/src/handle_watcher.dart",
-      "//mojo/public/dart/mojo/sdk_ext/src/natives.dart",
-      "//mojo/public/dart/mojo/sdk_ext/src/timer_queue.dart",
       "//sky/engine/bindings/internals.dart",
       embedder_entry_points_manifest,
-    ]
+    ] + rebase_path(dart_mojo_internal_sdk_sources,
+                    "",
+                    "//mojo/dart/packages/mojo")
     outputs = [
       vm_isolate_snapshot,
       isolate_snapshot,
@@ -100,7 +100,7 @@ template("dart_precompile") {
     ]
 
     dart_mojo_internal_path =
-        rebase_path("//mojo/public/dart/mojo/sdk_ext/internal.dart")
+        rebase_path("//mojo/dart/packages/mojo/sdk_ext/internal.dart")
     dart_ui_internals_path =
         rebase_path("//sky/engine/bindings/internals.dart")
     dart_ui_path =
