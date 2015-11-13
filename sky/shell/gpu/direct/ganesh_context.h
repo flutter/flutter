@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_GPU_GANESH_CONTEXT_H_
-#define SKY_SHELL_GPU_GANESH_CONTEXT_H_
+#ifndef SKY_SHELL_GPU_DIRECT_GANESH_CONTEXT_H_
+#define SKY_SHELL_GPU_DIRECT_GANESH_CONTEXT_H_
 
 #include "base/basictypes.h"
 #include "base/memory/ref_counted.h"
@@ -34,4 +34,4 @@ class GaneshContext {
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_GPU_GANESH_CONTEXT_H_
+#endif  // SKY_SHELL_GPU_DIRECT_GANESH_CONTEXT_H_

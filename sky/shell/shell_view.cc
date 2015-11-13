@@ -6,7 +6,7 @@
 
 #include "base/bind.h"
 #include "base/single_thread_task_runner.h"
-#include "sky/shell/gpu/rasterizer.h"
+#include "sky/shell/gpu/direct/rasterizer.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui/engine.h"

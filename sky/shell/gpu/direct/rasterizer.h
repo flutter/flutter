@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_GPU_RASTERIZER_H_
-#define SKY_SHELL_GPU_RASTERIZER_H_
+#ifndef SKY_SHELL_GPU_DIRECT_RASTERIZER_H_
+#define SKY_SHELL_GPU_DIRECT_RASTERIZER_H_
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
@@ -58,4 +58,4 @@ class Rasterizer : public GPUDelegate {
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_GPU_RASTERIZER_H_
+#endif  // SKY_SHELL_GPU_DIRECT_RASTERIZER_H_
