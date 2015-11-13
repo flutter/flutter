@@ -19,12 +19,14 @@ class HitTestEntry {
 
   /// The [HitTestTarget] encountered during the hit test.
   final HitTestTarget target;
+
+  String toString() => '$target';
 }
 
 /// The result of performing a hit test.
 class HitTestResult {
   HitTestResult({ List<HitTestEntry> path })
-    : path = path != null ? path : new List<HitTestEntry>();
+    : path = path ?? <HitTestEntry>[];
 
   /// The list of [HitTestEntry] objects recorded during the hit test.
   ///
@@ -36,9 +38,11 @@ class HitTestResult {
   /// Add a [HitTestEntry] to the path.
   ///
   /// The new entry is added at the end of the path, which means entries should
-  /// be added in order from most specific to least specific, typically during a
-  /// upward walk in the tree being hit tested.
+  /// be added in order from most specific to least specific, typically during an
+  /// upward walk of the tree being hit tested.
   void add(HitTestEntry entry) {
     path.add(entry);
   }
+
+  String toString() => 'HitTestResult(${path.isEmpty ? "<empty path>" : path.join(", ")})';
 }
