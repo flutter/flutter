@@ -43,12 +43,12 @@ if (is_linux || is_mac) {
 
 source_set("common") {
   sources = [
-    "gpu/ganesh_context.cc",
-    "gpu/ganesh_context.h",
-    "gpu/ganesh_surface.cc",
-    "gpu/ganesh_surface.h",
-    "gpu/rasterizer.cc",
-    "gpu/rasterizer.h",
+    "gpu/direct/ganesh_context.cc",
+    "gpu/direct/ganesh_context.h",
+    "gpu/direct/ganesh_surface.cc",
+    "gpu/direct/ganesh_surface.h",
+    "gpu/direct/rasterizer.cc",
+    "gpu/direct/rasterizer.h",
     "gpu_delegate.cc",
     "gpu_delegate.h",
     "platform_view.cc",

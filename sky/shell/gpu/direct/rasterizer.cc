@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/gpu/rasterizer.h"
+#include "sky/shell/gpu/direct/rasterizer.h"
 
 #include "base/trace_event/trace_event.h"
 #include "sky/compositor/container_layer.h"
 #include "sky/compositor/layer.h"
 #include "sky/compositor/paint_context.h"
 #include "sky/compositor/picture_layer.h"
-#include "sky/shell/gpu/ganesh_context.h"
-#include "sky/shell/gpu/ganesh_surface.h"
+#include "sky/shell/gpu/direct/ganesh_context.h"
+#include "sky/shell/gpu/direct/ganesh_surface.h"
 #include "sky/shell/shell.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
