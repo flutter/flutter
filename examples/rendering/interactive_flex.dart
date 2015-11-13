@@ -47,7 +47,9 @@ final Map<int, Touch> touches = <int, Touch>{};
 void handlePointerPacket(ByteData serializedPacket) {
   bindings.Message message = new bindings.Message(
     serializedPacket,
-    <core.MojoHandle>[]
+    <core.MojoHandle>[],
+    serializedPacket.lengthInBytes,
+    0
   );
   PointerPacket packet = PointerPacket.deserialize(message);
 

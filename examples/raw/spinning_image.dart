@@ -83,7 +83,8 @@ void handleImageLoad(result) {
 
 void handlePointerPacket(ByteData serializedPacket) {
   bindings.Message message = new bindings.Message(
-      serializedPacket, <core.MojoHandle>[]);
+      serializedPacket, <core.MojoHandle>[],
+      serializedPacket.lengthInBytes, 0);
   PointerPacket packet = PointerPacket.deserialize(message);
 
   for (Pointer pointer in packet.pointers) {
