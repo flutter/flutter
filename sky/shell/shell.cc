@@ -74,11 +74,16 @@ Shell::Shell(scoped_ptr<ServiceProviderContext> service_provider_context)
 Shell::~Shell() {
 }
 
-void Shell::Init(scoped_ptr<ServiceProviderContext> service_provider_context) {
+void Shell::InitStandalone(
+    scoped_ptr<ServiceProviderContext> service_provider_context) {
   CHECK(base::i18n::InitializeICU());
 #if !defined(OS_LINUX)
   CHECK(gfx::GLSurface::InitializeOneOff());
 #endif
+  Init(service_provider_context.Pass());
+}
+
+void Shell::Init(scoped_ptr<ServiceProviderContext> service_provider_context) {
   base::DiscardableMemoryAllocator::SetInstance(&g_discardable.Get());
 
   g_shell = new Shell(service_provider_context.Pass());

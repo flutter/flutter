@@ -5,17 +5,39 @@
 #ifndef SKY_SHELL_PLATFORM_MOJO_PLATFORM_VIEW_MOJO_H_
 #define SKY_SHELL_PLATFORM_MOJO_PLATFORM_VIEW_MOJO_H_
 
+#include "mojo/public/cpp/application/application_impl.h"
+#include "mojo/public/interfaces/application/service_provider.mojom.h"
+#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
+#include "mojo/services/native_viewport/interfaces/native_viewport.mojom.h"
 #include "sky/shell/platform_view.h"
 
 namespace sky {
 namespace shell {
 
-class PlatformViewMojo : public PlatformView {
+class PlatformViewMojo : public PlatformView,
+                         public mojo::NativeViewportEventDispatcher {
  public:
   explicit PlatformViewMojo(const Config& config);
   ~PlatformViewMojo() override;
 
+  void Init(mojo::ApplicationImpl* app);
+
+  void Run(const mojo::String& url,
+           mojo::asset_bundle::AssetBundlePtr bundle);
+
  private:
+  void OnMetricsChanged(mojo::ViewportMetricsPtr metrics);
+
+  // mojo::NativeViewportEventDispatcher
+  void OnEvent(mojo::EventPtr event,
+               const mojo::Callback<void()>& callback) override;
+
+  mojo::NativeViewportPtr viewport_;
+  mojo::ContextProviderPtr context_provider_;
+  mojo::Binding<NativeViewportEventDispatcher> dispatcher_binding_;
+
+  sky::SkyEnginePtr sky_engine_;
+
   DISALLOW_COPY_AND_ASSIGN(PlatformViewMojo);
 };
 

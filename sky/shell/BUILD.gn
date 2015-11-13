@@ -28,6 +28,11 @@ common_deps = [
   "//ui/gfx/geometry",
   "//ui/gl",
   "//url:url",
+  "//mojo/public/c/gpu",
+  "//mojo/public/c/gpu:gpu_onscreen",
+  "//mojo/services/gpu/interfaces",
+  "//mojo/services/native_viewport/interfaces",
+  "//mojo/skia:skia_bindings",
 ]
 
 if (is_linux || is_mac) {
@@ -43,12 +48,12 @@ if (is_linux || is_mac) {
 
 source_set("common") {
   sources = [
-    "gpu/direct/ganesh_context.cc",
-    "gpu/direct/ganesh_context.h",
-    "gpu/direct/ganesh_surface.cc",
-    "gpu/direct/ganesh_surface.h",
-    "gpu/direct/rasterizer.cc",
-    "gpu/direct/rasterizer.h",
+    "gpu/direct/rasterizer_direct.cc",
+    "gpu/direct/rasterizer_direct.h",
+    "gpu/mojo/rasterizer_mojo.cc",
+    "gpu/mojo/rasterizer_mojo.h",
+    "gpu/ganesh_canvas.cc",
+    "gpu/ganesh_canvas.h",
     "gpu_delegate.cc",
     "gpu_delegate.h",
     "platform_view.cc",

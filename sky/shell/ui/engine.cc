@@ -233,6 +233,15 @@ void Engine::RunFromBundle(const mojo::String& path) {
                                        weak_factory_.GetWeakPtr(), path_str));
 }
 
+void Engine::RunFromAssetBundle(const mojo::String& url,
+                                mojo::asset_bundle::AssetBundlePtr bundle) {
+  std::string url_str = url;
+  root_bundle_ = bundle.Pass();
+  root_bundle_->GetAsStream(kSnapshotKey,
+                            base::Bind(&Engine::RunFromSnapshotStream,
+                                       weak_factory_.GetWeakPtr(), url_str));
+}
+
 void Engine::OnActivityPaused() {
   activity_running_ = false;
   StopAnimator();

@@ -6,7 +6,7 @@
 
 #include "base/bind.h"
 #include "base/single_thread_task_runner.h"
-#include "sky/shell/gpu/direct/rasterizer.h"
+#include "sky/shell/gpu/direct/rasterizer_direct.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui/engine.h"
@@ -23,7 +23,7 @@ void Drop(scoped_ptr<T> ptr) { }
 ShellView::ShellView(Shell& shell)
     : shell_(shell) {
   shell_.tracing_controller().RegisterShellView(this);
-  rasterizer_.reset(new Rasterizer());
+  rasterizer_.reset(new RasterizerDirect());
   CreateEngine();
   CreatePlatformView();
 }
@@ -31,7 +31,7 @@ ShellView::ShellView(Shell& shell)
 ShellView::~ShellView() {
   shell_.tracing_controller().UnregisterShellView(this);
   shell_.gpu_task_runner()->PostTask(FROM_HERE,
-      base::Bind(&Drop<Rasterizer>, base::Passed(&rasterizer_)));
+      base::Bind(&Drop<RasterizerDirect>, base::Passed(&rasterizer_)));
   shell_.ui_task_runner()->PostTask(FROM_HERE,
       base::Bind(&Drop<Engine>, base::Passed(&engine_)));
 }

@@ -78,7 +78,7 @@ static void Init(JNIEnv* env,
   mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
       new mojo::embedder::SimplePlatformSupport()));
 
-  Shell::Init(make_scoped_ptr(new ServiceProviderContext(
+  Shell::InitStandalone(make_scoped_ptr(new ServiceProviderContext(
       g_java_message_loop.Get()->task_runner())));
 
   InitializeTracing();

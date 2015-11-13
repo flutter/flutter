@@ -4,6 +4,7 @@
 
 module sky;
 
+import "mojo/services/asset_bundle/interfaces/asset_bundle.mojom";
 import "sky/services/engine/input_event.mojom";
 import "sky/services/pointer/pointer.mojom";
 
@@ -30,4 +31,6 @@ interface SkyEngine {
   RunFromPrecompiledSnapshot(string path);
   RunFromSnapshot(string path);
   RunFromBundle(string path);
+
+  RunFromAssetBundle(string url, mojo.asset_bundle.AssetBundle bundle);
 };
