@@ -284,4 +284,55 @@ void main() {
       checkTree(tester, <TestParentData>[]);
     });
   });
+
+  test('ParentDataWidget interacts with global keys', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey key = new GlobalKey();
+
+      tester.pumpWidget(
+        new Stack(<Widget>[
+          new Positioned(
+            top: 10.0,
+            left: 10.0,
+            child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
+          )
+        ])
+      );
+
+      checkTree(tester, <TestParentData>[
+        new TestParentData(top: 10.0, left: 10.0),
+      ]);
+
+      tester.pumpWidget(
+        new Stack(<Widget>[
+          new Positioned(
+            top: 10.0,
+            left: 10.0,
+            child: new DecoratedBox(
+              decoration: kBoxDecorationB,
+              child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
+            )
+          )
+        ])
+      );
+
+      checkTree(tester, <TestParentData>[
+        new TestParentData(top: 10.0, left: 10.0),
+      ]);
+
+      tester.pumpWidget(
+        new Stack(<Widget>[
+          new Positioned(
+            top: 10.0,
+            left: 10.0,
+            child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
+          )
+        ])
+      );
+
+      checkTree(tester, <TestParentData>[
+        new TestParentData(top: 10.0, left: 10.0),
+      ]);
+    });
+  });
 }
