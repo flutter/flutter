@@ -1275,9 +1275,6 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     super.mount(parent, newSlot);
     assert(_slot == newSlot);
     attachRenderObject(newSlot);
-    ParentDataElement parentDataElement = _findAncestorParentDataElement();
-    if (parentDataElement != null)
-      updateParentData(parentDataElement.widget);
     _dirty = false;
   }
 
@@ -1491,6 +1488,9 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
     _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, newSlot);
+    ParentDataElement parentDataElement = _findAncestorParentDataElement();
+    if (parentDataElement != null)
+      updateParentData(parentDataElement.widget);
   }
 
   void detachRenderObject() {
