@@ -10,6 +10,8 @@ import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/service_provider.mojom.dart';
 import 'package:mojo/mojo/shell.mojom.dart';
 
+import 'lifecycle.dart';
+
 // A replacement for shell.connectToService.  Implementations should return true
 // if they handled the request, or false if the request should fall through
 // to the default requestService.
@@ -33,6 +35,7 @@ ApplicationConnection _initEmbedderConnection() {
     return null;
   ServiceProviderProxy services = new ServiceProviderProxy.fromHandle(servicesHandle);
   ServiceProviderStub exposedServices = new ServiceProviderStub.fromHandle(exposedServicesHandle);
+  lifecycle.addShutdownListener(() => services.close());
   return new ApplicationConnection(exposedServices, services);
 }
 

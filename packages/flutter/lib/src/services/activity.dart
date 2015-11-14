@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:sky_services/activity/activity.mojom.dart';
 
+import 'lifecycle.dart';
 import 'shell.dart';
 
 export 'package:sky_services/activity/activity.mojom.dart';
@@ -23,6 +24,7 @@ const int MULTIPLE_TASK = 0x08000000;
 ActivityProxy _initActivityProxy() {
   ActivityProxy activity = new ActivityProxy.unbound();
   shell.connectToService(null, activity);
+  lifecycle.addShutdownListener(() => activity.close());
   return activity;
 }
 
