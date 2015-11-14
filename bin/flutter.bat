@@ -12,6 +12,8 @@ SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 REM TODO: Don't require dart to be on the user's path
 SET dart=dart
 
+REM Set current working directory to the flutter directory
+PUSHD %flutter_root%
 REM IF doesn't have an "or". Instead, just use GOTO
 FOR /f %%r IN ('git rev-parse HEAD') DO SET revision=%%r
 IF NOT EXIST %snapshot_path% GOTO do_snapshot
@@ -34,10 +36,11 @@ CALL pub.bat get
 CD "%flutter_root%"
 CALL %dart% --snapshot="%snapshot_path%" --package-root="%flutter_tools_dir%\packages" "%script_path%"
 <nul SET /p=%revision%> "%stamp_path%"
-goto :eof
 
 :after_snapshot
 
+REM Go back to last working directory
+POPD
 CALL %dart% "%snapshot_path%" %*
 
 IF /I "%ERRORLEVEL%" EQU "253" (
