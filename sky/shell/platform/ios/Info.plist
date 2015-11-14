@@ -39,12 +39,6 @@
 	<false />
 
 	<!--
-		Sky Load URL
-	-->
-	<key>org.domokit.sky.load_url</key>
-	<string>https://domokit.github.io/home.dart</string>
-
-	<!--
 		FIXME(csg): Xcode, as part of its build process, adds the following
 		items to the Info.plist. It is not immediately clear if there is a
 		command line utility that generates these. For now, just add the same

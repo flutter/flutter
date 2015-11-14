@@ -15,10 +15,7 @@
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
-#include "mojo/services/navigation/interfaces/navigation.mojom.h"
-#include "mojo/services/network/interfaces/network_service.mojom.h"
 #include "skia/ext/refptr.h"
-#include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
 #include "sky/shell/gpu_delegate.h"
@@ -34,8 +31,6 @@ class Animator;
 
 class Engine : public UIDelegate,
                public SkyEngine,
-               public blink::ServiceProvider,
-               public mojo::NavigatorHost,
                public blink::SkyViewClient {
  public:
   struct Config {
@@ -71,7 +66,6 @@ class Engine : public UIDelegate,
   void OnInputEvent(InputEventPtr event) override;
   void OnPointerPacket(pointer::PointerPacketPtr packet) override;
 
-  void RunFromNetwork(const mojo::String& url) override;
   void RunFromFile(const mojo::String& main,
                    const mojo::String& package_root) override;
   void RunFromPrecompiledSnapshot(const mojo::String& bundle_path) override;
@@ -88,15 +82,6 @@ class Engine : public UIDelegate,
   void Render(std::unique_ptr<compositor::LayerTree> layer_tree) override;
   void DidCreateIsolate(Dart_Isolate isolate) override;
 
-  // Services methods:
-  mojo::NavigatorHost* NavigatorHost() override;
-
-  // NavigatorHost methods:
-  void RequestNavigate(mojo::Target target,
-                       mojo::URLRequestPtr request) override;
-  void DidNavigateLocally(const mojo::String& url) override;
-  void RequestNavigateHistory(int32_t delta) override;
-
   void RunFromLibrary(const std::string& name);
   void RunFromSnapshotStream(const std::string& name,
                              mojo::ScopedDataPipeConsumerHandle snapshot);
@@ -107,7 +92,6 @@ class Engine : public UIDelegate,
   Config config_;
   scoped_ptr<Animator> animator_;
 
-  mojo::NetworkServicePtr network_service_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
   scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;

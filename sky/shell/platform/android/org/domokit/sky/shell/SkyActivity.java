@@ -138,21 +138,12 @@ public class SkyActivity extends Activity {
     public boolean loadIntent(Intent intent) {
         String action = intent.getAction();
 
-        if (Intent.ACTION_VIEW.equals(action)) {
-            loadUrl(intent.getDataString());
-            return true;
-        }
-
         if (Intent.ACTION_RUN.equals(action)) {
             mView.getEngine().runFromBundle(intent.getDataString());
             return true;
         }
 
         return false;
-    }
-
-    public void loadUrl(String url) {
-        mView.getEngine().runFromNetwork(url);
     }
 
     public boolean loadBundleByName(String name) {

@@ -26,7 +26,6 @@ interface SkyEngine {
   OnInputEvent(InputEvent event);
   OnPointerPacket(pointer.PointerPacket packet);
 
-  RunFromNetwork(string url);
   RunFromFile(string main, string package_root);
   RunFromPrecompiledSnapshot(string path);
   RunFromSnapshot(string path);
