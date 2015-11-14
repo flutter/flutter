@@ -509,7 +509,7 @@ class AndroidDevice extends Device {
 
     // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
     RegExp deviceRegex1 = new RegExp(
-        r'^(\S+)\s+device\s+\S+\s+product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
+        r'^(\S+)\s+device\s+.*product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
 
     // 0149947A0D01500C       device usb:340787200X
     RegExp deviceRegex2 = new RegExp(r'^(\S+)\s+device\s+\S+$');
