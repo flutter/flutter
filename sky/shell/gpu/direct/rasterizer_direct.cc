@@ -24,6 +24,10 @@ namespace shell {
 
 static const double kOneFrameDuration = 1e3 / 60.0;
 
+scoped_ptr<Rasterizer> Rasterizer::Create() {
+  return make_scoped_ptr(new RasterizerDirect());
+}
+
 RasterizerDirect::RasterizerDirect()
     : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
 }
@@ -33,6 +37,10 @@ RasterizerDirect::~RasterizerDirect() {
 
 base::WeakPtr<RasterizerDirect> RasterizerDirect::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
+}
+
+RasterCallback RasterizerDirect::GetRasterCallback() {
+  return base::Bind(&RasterizerDirect::Draw, weak_factory_.GetWeakPtr());
 }
 
 void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {

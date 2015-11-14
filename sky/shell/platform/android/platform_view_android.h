@@ -35,6 +35,7 @@ class PlatformViewAndroid : public PlatformView {
   // ownership and have the shell_view owned by Java. We reset this pointer in
   // |Detach|, which will eventually cause |~PlatformViewAndroid|.
   scoped_ptr<ShellView> shell_view_;
+  gfx::AcceleratedWidget window_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

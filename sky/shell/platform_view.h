@@ -8,6 +8,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "sky/shell/ui_delegate.h"
+#include "sky/shell/rasterizer.h"
 
 namespace sky {
 namespace shell {
@@ -19,9 +20,11 @@ class PlatformView {
     ~Config();
 
     base::WeakPtr<UIDelegate> ui_delegate;
+    Rasterizer* rasterizer;
     scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner;
   };
 
+  // Implemented by each platform.
   static PlatformView* Create(const Config& config);
 
   virtual ~PlatformView();
@@ -31,11 +34,7 @@ class PlatformView {
  protected:
   explicit PlatformView(const Config& config);
 
-  void SurfaceWasCreated();
-  void SurfaceWasDestroyed();
-
   Config config_;
-  gfx::AcceleratedWidget window_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(PlatformView);

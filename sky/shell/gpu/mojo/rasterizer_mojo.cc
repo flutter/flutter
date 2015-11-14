@@ -20,16 +20,22 @@ void ContextLostThunk(void* closure) {
 
 }  // namespace
 
-RasterizerMojo::RasterizerMojo() {
+scoped_ptr<Rasterizer> Rasterizer::Create() {
+  return make_scoped_ptr(new RasterizerMojo());
+}
+
+RasterizerMojo::RasterizerMojo() : weak_factory_(this) {
 }
 
 RasterizerMojo::~RasterizerMojo() {
 }
 
-void RasterizerMojo::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
+base::WeakPtr<RasterizerMojo> RasterizerMojo::GetWeakPtr() {
+  return weak_factory_.GetWeakPtr();
 }
 
-void RasterizerMojo::OnOutputSurfaceDestroyed() {
+RasterCallback RasterizerMojo::GetRasterCallback() {
+  return base::Bind(&RasterizerMojo::Draw, weak_factory_.GetWeakPtr());
 }
 
 void RasterizerMojo::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
@@ -37,7 +43,10 @@ void RasterizerMojo::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   MGLResizeSurface(layer_tree->frame_size().width(),
                    layer_tree->frame_size().height());
   SkCanvas* canvas = ganesh_canvas_.GetCanvas(0, layer_tree->frame_size());
-  canvas->clear(SK_ColorGREEN);
+  sky::compositor::PaintContext::ScopedFrame frame =
+      paint_context_.AcquireFrame(*canvas);
+  canvas->clear(SK_ColorBLACK);
+  layer_tree->root_layer()->Paint(frame);
   canvas->flush();
   MGLSwapBuffers();
 }
@@ -47,7 +56,6 @@ void RasterizerMojo::OnContextProviderAvailable(
   context_provider_ = mojo::MakeProxy(context_provider.Pass());
   context_provider_->Create(nullptr,
     base::Bind(&RasterizerMojo::OnContextCreated, base::Unretained(this)));
-  gr_gl_interface_ = skia::AdoptRef(skia_bindings::CreateMojoSkiaGLBinding());
 }
 
 void RasterizerMojo::OnContextCreated(mojo::CommandBufferPtr command_buffer) {
@@ -57,6 +65,8 @@ void RasterizerMojo::OnContextCreated(mojo::CommandBufferPtr command_buffer) {
       MGL_NO_CONTEXT, &ContextLostThunk, this,
       mojo::Environment::GetDefaultAsyncWaiter());
   MGLMakeCurrent(context_);
+  if (!gr_gl_interface_)
+    gr_gl_interface_ = skia::AdoptRef(skia_bindings::CreateMojoSkiaGLBinding());
   ganesh_canvas_.SetGrGLInterface(gr_gl_interface_.get());
 }
 

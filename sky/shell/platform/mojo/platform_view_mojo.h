@@ -33,7 +33,6 @@ class PlatformViewMojo : public PlatformView,
                const mojo::Callback<void()>& callback) override;
 
   mojo::NativeViewportPtr viewport_;
-  mojo::ContextProviderPtr context_provider_;
   mojo::Binding<NativeViewportEventDispatcher> dispatcher_binding_;
 
   sky::SkyEnginePtr sky_engine_;

@@ -21,7 +21,7 @@
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
-#include "sky/shell/gpu_delegate.h"
+#include "sky/shell/rasterizer.h"
 #include "sky/shell/service_provider.h"
 #include "sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkPicture.h"
@@ -44,7 +44,7 @@ class Engine : public UIDelegate,
 
     ServiceProviderContext* service_provider_context;
 
-    base::WeakPtr<GPUDelegate> gpu_delegate;
+    RasterCallback raster_callback;
     scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner;
   };
 
@@ -63,8 +63,8 @@ class Engine : public UIDelegate,
  private:
   // UIDelegate implementation:
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) override;
-  void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
-  void OnOutputSurfaceDestroyed() override;
+  void OnOutputSurfaceCreated(const base::Closure& gpu_continuation) override;
+  void OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) override;
 
   // SkyEngine implementation:
   void OnViewportMetricsChanged(ViewportMetricsPtr metrics) override;

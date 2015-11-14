@@ -117,22 +117,18 @@ void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
   binding_.Bind(request.Pass());
 }
 
-void Engine::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
-  config_.gpu_task_runner->PostTask(
-      FROM_HERE, base::Bind(&GPUDelegate::OnAcceleratedWidgetAvailable,
-                            config_.gpu_delegate, widget));
+void Engine::OnOutputSurfaceCreated(const base::Closure& gpu_continuation) {
+  config_.gpu_task_runner->PostTask(FROM_HERE, gpu_continuation);
   have_surface_ = true;
   StartAnimatorIfPossible();
   if (sky_view_)
     ScheduleFrame();
 }
 
-void Engine::OnOutputSurfaceDestroyed() {
+void Engine::OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) {
   have_surface_ = false;
   StopAnimator();
-  config_.gpu_task_runner->PostTask(
-      FROM_HERE,
-      base::Bind(&GPUDelegate::OnOutputSurfaceDestroyed, config_.gpu_delegate));
+  config_.gpu_task_runner->PostTask(FROM_HERE, gpu_continuation);
 }
 
 void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {

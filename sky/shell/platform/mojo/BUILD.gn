@@ -1,4 +1,4 @@
-# Copyright 2014 The Chromium Authors. All rights reserved.
+# Copyright 2015 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -32,13 +32,8 @@ mojo_native_application("mojo") {
     "//mojo/services/asset_bundle/interfaces",
     "//mojo/services/content_handler/interfaces",
     "//mojo/services/gpu/interfaces",
-    "//mojo/services/input_events/interfaces",
-    "//mojo/services/navigation/interfaces",
-    "//mojo/services/network/interfaces",
     "//mojo/services/native_viewport/interfaces",
     "//mojo/services/service_registry/interfaces",
-    "//mojo/services/surfaces/interfaces",
-    "//mojo/services/ui/views/interfaces",
     "//services/asset_bundle:lib",
     "//services/sky/compositor",
     "//skia",
@@ -46,14 +41,8 @@ mojo_native_application("mojo") {
     "//sky/engine/tonic",
     "//sky/engine/web",
     "//sky/shell:common",
+    "//sky/shell:gpu_mojo",
     "//third_party/icu",
     "//url",
   ]
-
-  if (is_android) {
-    ldflags = [
-      "-lGLESv2",
-      "-lEGL",
-    ]
-  }
 }
