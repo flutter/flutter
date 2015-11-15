@@ -42,11 +42,4 @@ if (use_ios_simulator) {
                                   [], "list lines")
     ios_code_signing_identity = _ios_identities[0]
   }
-
-  if (ios_code_signing_identity == "") {
-    print("Tried to prepare a device build without specifying a code signing")
-    print("identity and could not detect one automatically either.")
-    print("TIP: Simulator builds dont require code signing...")
-    assert(false)
-  }
 }
