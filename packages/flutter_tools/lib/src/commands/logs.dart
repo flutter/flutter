@@ -18,6 +18,7 @@ class LogsCommand extends FlutterCommand {
   LogsCommand() {
     argParser.addFlag('clear',
         negatable: false,
+        abbr: 'c',
         help: 'Clear log history before reading from logs (Android only).');
   }
 
