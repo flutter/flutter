@@ -57,7 +57,7 @@ void LayerHost::BeginFrameSoon() {
 }
 
 void LayerHost::BeginFrame() {
-  TRACE_EVENT0("sky", "LayerHost::BeginFrame");
+  TRACE_EVENT0("flutter", "LayerHost::BeginFrame");
 
   DCHECK(frame_requested_);
   frame_requested_ = false;
@@ -99,7 +99,7 @@ void LayerHost::BeginFrame() {
 }
 
 void LayerHost::Upload(TextureLayer* layer) {
-  TRACE_EVENT0("sky", "LayerHost::Upload");
+  TRACE_EVENT0("flutter", "LayerHost::Upload");
 
   gfx::Size size = layer->size();
   surface_holder_.SetSize(size);

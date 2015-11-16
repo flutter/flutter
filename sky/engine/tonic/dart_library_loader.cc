@@ -75,14 +75,14 @@ class DartLibraryLoader::Job : public DartDependency,
 class DartLibraryLoader::ImportJob : public Job {
  public:
   ImportJob(DartLibraryLoader* loader, const std::string& name) : Job(loader, name) {
-    TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLibraryLoader::ImportJob", this, "url",
+    TRACE_EVENT_ASYNC_BEGIN1("flutter", "DartLibraryLoader::ImportJob", this, "url",
                              name);
   }
 
  private:
   // DataPipeDrainer::Client
   void OnDataComplete() override {
-    TRACE_EVENT_ASYNC_END0("sky", "DartLibraryLoader::ImportJob", this);
+    TRACE_EVENT_ASYNC_END0("flutter", "DartLibraryLoader::ImportJob", this);
     loader_->DidCompleteImportJob(this, buffer_);
   }
 };
@@ -91,7 +91,7 @@ class DartLibraryLoader::SourceJob : public Job {
  public:
   SourceJob(DartLibraryLoader* loader, const std::string& name, Dart_Handle library)
       : Job(loader, name), library_(loader->dart_state(), library) {
-    TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLibraryLoader::SourceJob", this, "url",
+    TRACE_EVENT_ASYNC_BEGIN1("flutter", "DartLibraryLoader::SourceJob", this, "url",
                              name);
   }
 
@@ -100,7 +100,7 @@ class DartLibraryLoader::SourceJob : public Job {
  private:
   // DataPipeDrainer::Client
   void OnDataComplete() override {
-    TRACE_EVENT_ASYNC_END0("sky", "DartLibraryLoader::SourceJob", this);
+    TRACE_EVENT_ASYNC_END0("flutter", "DartLibraryLoader::SourceJob", this);
     loader_->DidCompleteSourceJob(this, buffer_);
   }
 

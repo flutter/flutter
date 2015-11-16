@@ -20,7 +20,7 @@ RasterizerGanesh::~RasterizerGanesh() {
 }
 
 scoped_ptr<mojo::GLTexture> RasterizerGanesh::Rasterize(SkPicture* picture) {
-  TRACE_EVENT0("sky", "RasterizerGanesh::Rasterize");
+  TRACE_EVENT0("flutter", "RasterizerGanesh::Rasterize");
 
   SkRect cull_rect = picture->cullRect();
   gfx::Size size(cull_rect.width(), cull_rect.height());

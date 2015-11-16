@@ -24,7 +24,7 @@ DartSnapshotLoader::~DartSnapshotLoader() {
 
 void DartSnapshotLoader::LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
                                       const base::Closure& callback) {
-  TRACE_EVENT_ASYNC_BEGIN0("sky", "DartSnapshotLoader::LoadSnapshot", this);
+  TRACE_EVENT_ASYNC_BEGIN0("flutter", "DartSnapshotLoader::LoadSnapshot", this);
 
   callback_ = callback;
   drainer_.reset(new DataPipeDrainer(this, pipe.Pass()));
@@ -36,7 +36,7 @@ void DartSnapshotLoader::OnDataAvailable(const void* data, size_t num_bytes) {
 }
 
 void DartSnapshotLoader::OnDataComplete() {
-  TRACE_EVENT_ASYNC_END0("sky", "DartSnapshotLoader::LoadSnapshot", this);
+  TRACE_EVENT_ASYNC_END0("flutter", "DartSnapshotLoader::LoadSnapshot", this);
 
   {
     DartIsolateScope scope(dart_state_->isolate());

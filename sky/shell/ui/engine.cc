@@ -73,7 +73,7 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
 }
 
 void Engine::Init() {
-  TRACE_EVENT0("sky", "Engine::Init");
+  TRACE_EVENT0("flutter", "Engine::Init");
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   blink::WebRuntimeFeatures::enableDartCheckedMode(
@@ -86,7 +86,7 @@ void Engine::Init() {
 
 std::unique_ptr<compositor::LayerTree> Engine::BeginFrame(
     base::TimeTicks frame_time) {
-  TRACE_EVENT0("sky", "Engine::BeginFrame");
+  TRACE_EVENT0("flutter", "Engine::BeginFrame");
 
   if (!sky_view_)
     return nullptr;
@@ -146,7 +146,7 @@ void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
 }
 
 void Engine::OnInputEvent(InputEventPtr event) {
-  TRACE_EVENT0("sky", "Engine::OnInputEvent");
+  TRACE_EVENT0("flutter", "Engine::OnInputEvent");
 
   if (event->type != EventType::BACK)
     return;
@@ -159,7 +159,7 @@ void Engine::OnInputEvent(InputEventPtr event) {
 }
 
 void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
-  TRACE_EVENT0("sky", "Engine::OnPointerPacket");
+  TRACE_EVENT0("flutter", "Engine::OnPointerPacket");
 
   // Convert the pointers' x and y coordinates to logical pixels.
   for (auto it = packet->pointers.begin(); it != packet->pointers.end(); ++it) {

@@ -43,7 +43,7 @@ void CreateEmptyRootLibraryIfNeeded() {
 }
 
 void CallHandleMessage(base::WeakPtr<DartState> dart_state) {
-  TRACE_EVENT0("sky", "CallHandleMessage");
+  TRACE_EVENT0("flutter", "CallHandleMessage");
 
   if (!dart_state)
     return;
