@@ -5,8 +5,9 @@
 #ifndef SKY_SHELL_PLATFORM_MOJO_PLATFORM_VIEW_MOJO_H_
 #define SKY_SHELL_PLATFORM_MOJO_PLATFORM_VIEW_MOJO_H_
 
-#include "mojo/public/cpp/application/application_impl.h"
+#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
+#include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/native_viewport/interfaces/native_viewport.mojom.h"
 #include "sky/shell/platform_view.h"
@@ -20,7 +21,7 @@ class PlatformViewMojo : public PlatformView,
   explicit PlatformViewMojo(const Config& config);
   ~PlatformViewMojo() override;
 
-  void Init(mojo::ApplicationImpl* app);
+  void Init(mojo::ShellPtr shell);
 
   void Run(const mojo::String& url,
            mojo::asset_bundle::AssetBundlePtr bundle);

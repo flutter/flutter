@@ -32,7 +32,8 @@ void TakeRootBundleHandle(Dart_NativeArguments args) {
 }
 
 void TakeShellProxyHandle(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, 0);
+  Dart_SetIntegerReturnValue(
+      args, GetInternals()->TakeShellProxy().value());
 }
 
 void TakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
@@ -115,6 +116,10 @@ void Internals::Create(
     mojo::InterfaceRequest<mojo::asset_bundle::AssetUnpacker> request) {
   new mojo::asset_bundle::AssetUnpackerImpl(
       request.Pass(), base::WorkerPool::GetTaskRunner(true));
+}
+
+mojo::Handle Internals::TakeShellProxy() {
+  return services_ ? services_->shell.PassInterface().PassHandle().release() : mojo::Handle();
 }
 
 mojo::Handle Internals::TakeServicesProvidedByEmbedder() {

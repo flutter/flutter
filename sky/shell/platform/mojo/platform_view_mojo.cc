@@ -7,6 +7,7 @@
 #include "base/bind.h"
 #include "base/location.h"
 #include "base/single_thread_task_runner.h"
+#include "mojo/public/cpp/application/connect.h"
 #include "sky/shell/gpu/mojo/rasterizer_mojo.h"
 
 namespace sky {
@@ -23,8 +24,9 @@ PlatformViewMojo::PlatformViewMojo(const Config& config)
 PlatformViewMojo::~PlatformViewMojo() {
 }
 
-void PlatformViewMojo::Init(mojo::ApplicationImpl* app) {
-  app->ConnectToService("mojo:native_viewport_service", &viewport_);
+void PlatformViewMojo::Init(mojo::ShellPtr shell) {
+  mojo::ConnectToService(
+      shell.get(), "mojo:native_viewport_service", &viewport_);
 
   mojo::NativeViewportEventDispatcherPtr ptr;
   dispatcher_binding_.Bind(GetProxy(&ptr));
@@ -53,11 +55,16 @@ void PlatformViewMojo::Init(mojo::ApplicationImpl* app) {
                             config_.ui_delegate,
                             base::Bind(&RasterizerMojo::OnContextProviderAvailable,
                                        rasterizer->GetWeakPtr(), base::Passed(&context_provider_info))));
+
+  ConnectToEngine(mojo::GetProxy(&sky_engine_));
+
+  ServicesDataPtr services = ServicesData::New();
+  services->shell = shell.Pass();
+  sky_engine_->SetServices(services.Pass());
 }
 
 void PlatformViewMojo::Run(const mojo::String& url,
                            mojo::asset_bundle::AssetBundlePtr bundle) {
-  ConnectToEngine(mojo::GetProxy(&sky_engine_));
   sky_engine_->RunFromAssetBundle(url, bundle.Pass());
 }
 
