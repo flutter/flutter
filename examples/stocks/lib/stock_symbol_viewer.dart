@@ -25,6 +25,7 @@ class StockSymbolView extends StatelessComponent {
               style: Theme.of(context).text.display2
             ),
             new Hero(
+              key: new ObjectKey(stock),
               tag: StockRowPartKind.arrow,
               turns: 2,
               child: new StockArrow(percentChange: stock.percentChange)
