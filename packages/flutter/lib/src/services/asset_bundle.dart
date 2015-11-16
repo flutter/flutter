@@ -14,6 +14,7 @@ import 'fetch.dart';
 import 'image_cache.dart';
 import 'image_decoder.dart';
 import 'image_resource.dart';
+import 'lifecycle.dart';
 import 'shell.dart';
 
 abstract class AssetBundle {
@@ -95,9 +96,11 @@ class MojoAssetBundle extends AssetBundle {
 
 AssetBundle _initRootBundle() {
   try {
-    AssetBundleProxy bundle = new AssetBundleProxy.fromHandle(
+    AssetBundleProxy proxy = new AssetBundleProxy.fromHandle(
         new core.MojoHandle(internals.takeRootBundleHandle()));
-    return new MojoAssetBundle(bundle);
+    AssetBundle bundle = new MojoAssetBundle(proxy);
+    lifecycle.addShutdownListener(() => bundle.close());
+    return bundle;
   } catch (e) {
     return null;
   }
