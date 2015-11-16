@@ -67,12 +67,6 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
   self.platformView->SurfaceCreated(widget);
 }
 
-- (NSString*)skyInitialLoadURL {
-  // TODO(csg): There should be a way to specify this in the UI
-  return [[NSBundle mainBundle]
-              .infoDictionary objectForKey:@"org.domokit.sky.load_url"];
-}
-
 - (NSString*)skyInitialBundleURL {
   return [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"];
 }
@@ -104,13 +98,6 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
   if (endpoint.length > 0) {
     mojo::String string(endpoint.UTF8String);
     _sky_engine->RunFromBundle(string);
-    return;
-  }
-
-  endpoint = self.skyInitialLoadURL;
-  if (endpoint.length > 0) {
-    mojo::String string(endpoint.UTF8String);
-    _sky_engine->RunFromNetwork(string);
     return;
   }
 }

@@ -66,7 +66,6 @@ Engine::Engine(const Config& config)
       weak_factory_(this) {
   mojo::ServiceProviderPtr service_provider =
       CreateServiceProvider(config.service_provider_context);
-  mojo::ConnectToService(service_provider.get(), &network_service_);
 
 #if defined(OS_ANDROID) || defined(OS_IOS)
   // TODO(abarth): Implement VSyncProvider on other platforms.
@@ -200,12 +199,6 @@ void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   sky_view_->SetDisplayMetrics(display_metrics_);
 }
 
-void Engine::RunFromNetwork(const mojo::String& url) {
-  dart_library_provider_.reset(
-      new DartLibraryProviderNetwork(network_service_.get()));
-  RunFromLibrary(url);
-}
-
 void Engine::RunFromFile(const mojo::String& main,
                          const mojo::String& package_root) {
   std::string package_root_str = package_root;
@@ -268,25 +261,6 @@ void Engine::ScheduleFrame() {
 }
 
 void Engine::Render(std::unique_ptr<compositor::LayerTree> layer_tree) {
-}
-
-mojo::NavigatorHost* Engine::NavigatorHost() {
-  return this;
-}
-
-void Engine::RequestNavigate(mojo::Target target,
-                             mojo::URLRequestPtr request) {
-  // Ignoring target for now.
-  base::MessageLoop::current()->PostTask(
-      FROM_HERE,
-      base::Bind(&Engine::RunFromNetwork, GetWeakPtr(), request->url));
-}
-
-void Engine::DidNavigateLocally(const mojo::String& url) {
-}
-
-void Engine::RequestNavigateHistory(int32_t delta) {
-  NOTIMPLEMENTED();
 }
 
 void Engine::StartDartTracing() {
