@@ -18,6 +18,8 @@ class PlatformViewMac : public PlatformView {
   void SurfaceDestroyed(void);
 
  private:
+  gfx::AcceleratedWidget window_;
+
   DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
 };
 

@@ -6,8 +6,8 @@
 
 #include "base/bind.h"
 #include "base/single_thread_task_runner.h"
-#include "sky/shell/gpu/direct/rasterizer_direct.h"
 #include "sky/shell/platform_view.h"
+#include "sky/shell/rasterizer.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui/engine.h"
 
@@ -23,15 +23,16 @@ void Drop(scoped_ptr<T> ptr) { }
 ShellView::ShellView(Shell& shell)
     : shell_(shell) {
   shell_.tracing_controller().RegisterShellView(this);
-  rasterizer_.reset(new RasterizerDirect());
+  rasterizer_ = Rasterizer::Create();
   CreateEngine();
   CreatePlatformView();
 }
 
 ShellView::~ShellView() {
   shell_.tracing_controller().UnregisterShellView(this);
+  view_ = nullptr;
   shell_.gpu_task_runner()->PostTask(FROM_HERE,
-      base::Bind(&Drop<RasterizerDirect>, base::Passed(&rasterizer_)));
+      base::Bind(&Drop<Rasterizer>, base::Passed(&rasterizer_)));
   shell_.ui_task_runner()->PostTask(FROM_HERE,
       base::Bind(&Drop<Engine>, base::Passed(&engine_)));
 }
@@ -40,7 +41,7 @@ void ShellView::CreateEngine() {
   Engine::Config config;
   config.service_provider_context = shell_.service_provider_context();
   config.gpu_task_runner = shell_.gpu_task_runner();
-  config.gpu_delegate = rasterizer_->GetWeakPtr();
+  config.raster_callback = rasterizer_->GetRasterCallback();
   engine_.reset(new Engine(config));
 }
 
@@ -48,6 +49,7 @@ void ShellView::CreatePlatformView() {
   PlatformView::Config config;
   config.ui_task_runner = shell_.ui_task_runner();
   config.ui_delegate = engine_->GetWeakPtr();
+  config.rasterizer = rasterizer_.get();
   view_.reset(PlatformView::Create(config));
 }
 

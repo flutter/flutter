@@ -2,60 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-common_deps = [
-  "//base",
-  "//base:i18n",
-  "//build/config/sanitizers:deps",
-  "//dart/runtime:libdart",
-  "//mojo/data_pipe_utils",
-  "//mojo/message_pump",
-  "//mojo/public/cpp/application",
-  "//mojo/public/interfaces/application",
-  "//mojo/services/asset_bundle/interfaces",
-  "//mojo/services/keyboard/interfaces",
-  "//mojo/services/navigation/interfaces",
-  "//mojo/services/network/interfaces",
-  "//services/asset_bundle:lib",
-  "//skia",
-  "//sky/compositor",
-  "//sky/engine",
-  "//sky/engine/tonic",
-  "//sky/engine/wtf",
-  "//sky/services/engine:interfaces",
-  "//sky/services/pointer:interfaces",
-  "//sky/services/vsync:interfaces",
-  "//sky/shell/dart",
-  "//ui/gfx/geometry",
-  "//ui/gl",
-  "//url:url",
-  "//mojo/public/c/gpu",
-  "//mojo/public/c/gpu:gpu_onscreen",
-  "//mojo/services/gpu/interfaces",
-  "//mojo/services/native_viewport/interfaces",
-  "//mojo/skia:skia_bindings",
-]
-
-if (is_linux || is_mac) {
-
-  testing_sources = [
-    "testing/test_runner.cc",
-    "testing/test_runner.h",
-    "testing/testing.cc",
-    "testing/testing.h",
-  ]
-
-}
-
 source_set("common") {
   sources = [
-    "gpu/direct/rasterizer_direct.cc",
-    "gpu/direct/rasterizer_direct.h",
-    "gpu/mojo/rasterizer_mojo.cc",
-    "gpu/mojo/rasterizer_mojo.h",
     "gpu/ganesh_canvas.cc",
     "gpu/ganesh_canvas.h",
-    "gpu_delegate.cc",
-    "gpu_delegate.h",
+    "rasterizer.cc",
+    "rasterizer.h",
     "platform_view.cc",
     "platform_view.h",
     "service_provider.cc",
@@ -80,7 +32,80 @@ source_set("common") {
     "ui_delegate.h",
   ]
 
-  deps = common_deps
+  public_deps = [
+    "//base",
+    "//base:i18n",
+    "//build/config/sanitizers:deps",
+    "//dart/runtime:libdart",
+    "//mojo/common",
+    "//mojo/data_pipe_utils",
+    "//mojo/message_pump",
+    "//mojo/public/cpp/application",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/asset_bundle/interfaces",
+    "//mojo/services/keyboard/interfaces",
+    "//mojo/services/navigation/interfaces",
+    "//mojo/services/network/interfaces",
+    "//services/asset_bundle:lib",
+    "//skia",
+    "//sky/compositor",
+    "//sky/engine",
+    "//sky/engine/tonic",
+    "//sky/engine/wtf",
+    "//sky/services/engine:interfaces",
+    "//sky/services/pointer:interfaces",
+    "//sky/services/vsync:interfaces",
+    "//sky/shell/dart",
+    "//ui/gfx/geometry",
+    "//url",
+    "//ui/gl",
+  ]
+}
+
+source_set("gpu_direct") {
+  sources = [
+    "gpu/direct/surface_notifications_direct.cc",
+    "gpu/direct/surface_notifications_direct.h",
+    "gpu/direct/rasterizer_direct.cc",
+    "gpu/direct/rasterizer_direct.h",
+  ]
+
+  deps = [
+    ":common",
+  ]
+}
+
+source_set("gpu_mojo") {
+  sources = [
+    "gpu/mojo/rasterizer_mojo.cc",
+    "gpu/mojo/rasterizer_mojo.h",
+  ]
+
+  deps = [
+    ":common",
+    "//mojo/public/c/gpu",
+    "//mojo/public/c/gpu:gpu_onscreen",
+    "//mojo/services/gpu/interfaces",
+    "//mojo/services/native_viewport/interfaces",
+    "//mojo/skia:skia_bindings",
+  ]
+}
+
+if (is_linux || is_mac) {
+
+  source_set("testing") {
+    sources = [
+      "testing/test_runner.cc",
+      "testing/test_runner.h",
+      "testing/testing.cc",
+      "testing/testing.h",
+    ]
+
+    deps = [
+      ":common",
+    ]
+  }
+
 }
 
 if (is_android) {
@@ -112,12 +137,14 @@ if (is_android) {
       "platform/android/update_service_android.cc",
     ]
 
-    deps = common_deps + [
-             "//mojo/android:libsystem_java",
-             "//mojo/edk/system",
-             ":jni_headers",
-             ":common",
-           ]
+    deps = [
+      "//mojo/android:libsystem_java",
+      "//mojo/edk/system",
+      ":common",
+      ":gpu_direct",
+      ":jni_headers",
+    ]
+
     ldflags = [
       "-lGLESv2",
       "-lEGL",
@@ -187,7 +214,6 @@ if (is_android) {
 
     deps = [
       ":assets",
-      ":assets",
       ":java",
       ":sky_shell",
       "//base:base_java",
@@ -219,14 +245,15 @@ if (is_android) {
     ]
     set_sources_assignment_filter(sources_assignment_filter)
 
-    deps = common_deps + [
-             ":common",
-             "//mojo/edk/system",
-             "//sky/services/keyboard",
-             "//sky/services/media",
-             "//sky/services/ns_net",
-             "//sky/services/vsync",
-           ]
+    deps = [
+      ":common",
+      ":gpu_direct",
+      "//mojo/edk/system",
+      "//sky/services/keyboard",
+      "//sky/services/media",
+      "//sky/services/ns_net",
+      "//sky/services/vsync",
+    ]
   }
 
   sky_precompilation_sdk("shell") {
@@ -240,13 +267,15 @@ if (is_android) {
       "platform/linux/main_linux.cc",
       "platform/linux/platform_service_provider_linux.cc",
       "platform/linux/platform_view_linux.cc",
-    ] + testing_sources
+    ]
 
-    deps = common_deps + [
-             ":common",
-             "//mojo/edk/system",
-             "//mojo/common",
-           ]
+    deps = [
+      "//mojo/common",
+      "//mojo/edk/system",
+      ":common",
+      ":gpu_direct",
+      ":testing",
+    ]
   }
 } else if (is_mac) {
   import("//build/config/mac/rules.gni")
@@ -265,14 +294,16 @@ if (is_android) {
       "platform/mac/sky_application.mm",
       "platform/mac/sky_window.h",
       "platform/mac/sky_window.mm",
-    ] + testing_sources
+    ]
 
-    deps = common_deps + [
-             ":common",
-             "//mojo/common",
-             "//mojo/edk/system",
-             "//sky/services/ns_net",
-           ]
+    deps = [
+      "//mojo/common",
+      "//mojo/edk/system",
+      "//sky/services/ns_net",
+      ":common",
+      ":gpu_direct",
+      ":testing",
+    ]
   }
 
   mac_app("shell") {

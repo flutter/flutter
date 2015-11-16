@@ -5,25 +5,25 @@
 #ifndef SKY_SHELL_GPU_MOJO_RASTERIZER_MOJO_H_
 #define SKY_SHELL_GPU_MOJO_RASTERIZER_MOJO_H_
 
+#include "base/memory/weak_ptr.h"
 #include "mojo/public/c/gpu/MGL/mgl.h"
 #include "mojo/services/native_viewport/interfaces/native_viewport.mojom.h"
 #include "skia/ext/refptr.h"
 #include "sky/compositor/paint_context.h"
 #include "sky/shell/gpu/ganesh_canvas.h"
-#include "sky/shell/gpu_delegate.h"
-#include "ui/gfx/native_widget_types.h"
+#include "sky/shell/rasterizer.h"
 
 namespace sky {
 namespace shell {
 
-class RasterizerMojo : public GPUDelegate {
+class RasterizerMojo : public Rasterizer {
  public:
   explicit RasterizerMojo();
   ~RasterizerMojo() override;
 
-  void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
-  void OnOutputSurfaceDestroyed() override;
-  void Draw(scoped_ptr<compositor::LayerTree> layer_tree) override;
+  base::WeakPtr<RasterizerMojo> GetWeakPtr();
+
+  RasterCallback GetRasterCallback() override;
 
   void OnContextProviderAvailable(
       mojo::InterfacePtrInfo<mojo::ContextProvider> context_provder);
@@ -31,13 +31,17 @@ class RasterizerMojo : public GPUDelegate {
   void OnContextLost();
 
  private:
-  SkCanvas* GetCanvas(const SkISize& size);
   void OnContextCreated(mojo::CommandBufferPtr command_buffer);
+  void Draw(scoped_ptr<compositor::LayerTree> layer_tree);
 
   mojo::ContextProviderPtr context_provider_;
   skia::RefPtr<GrGLInterface> gr_gl_interface_;
   MGLContext context_;
   GaneshCanvas ganesh_canvas_;
+
+  compositor::PaintContext paint_context_;
+
+  base::WeakPtrFactory<RasterizerMojo> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(RasterizerMojo);
 };

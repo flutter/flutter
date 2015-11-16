@@ -11,6 +11,7 @@
 #include "base/bind.h"
 #include "base/location.h"
 #include "jni/PlatformViewAndroid_jni.h"
+#include "sky/shell/gpu/direct/surface_notifications_direct.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
 
@@ -37,7 +38,7 @@ PlatformView* PlatformView::Create(const Config& config) {
 }
 
 PlatformViewAndroid::PlatformViewAndroid(const Config& config)
-  : PlatformView(config) {
+  : PlatformView(config), window_(nullptr) {
 }
 
 PlatformViewAndroid::~PlatformViewAndroid() {
@@ -60,12 +61,12 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurf
     base::android::ScopedJavaLocalFrame scoped_local_reference_frame(env);
     window_ = ANativeWindow_fromSurface(env, jsurface);
   }
-  SurfaceWasCreated();
+  SurfaceNotificationsDirect::NotifyCreated(config_, window_);
 }
 
 void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   DCHECK(window_);
-  SurfaceWasDestroyed();
+  SurfaceNotificationsDirect::NotifyDestroyed(config_);
   ReleaseWindow();
 }
 

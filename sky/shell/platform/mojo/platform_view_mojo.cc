@@ -4,6 +4,11 @@
 
 #include "sky/shell/platform/mojo/platform_view_mojo.h"
 
+#include "base/bind.h"
+#include "base/location.h"
+#include "base/single_thread_task_runner.h"
+#include "sky/shell/gpu/mojo/rasterizer_mojo.h"
+
 namespace sky {
 namespace shell {
 
@@ -37,10 +42,17 @@ void PlatformViewMojo::Init(mojo::ApplicationImpl* app) {
       });
   viewport_->Show();
 
-  viewport_->GetContextProvider(GetProxy(&context_provider_));
+  mojo::ContextProviderPtr context_provider;
+  viewport_->GetContextProvider(GetProxy(&context_provider));
 
-  // TODO(abarth): Move the to GPU thread.
-  context_provider_.PassInterface();
+  mojo::InterfacePtrInfo<mojo::ContextProvider> context_provider_info = context_provider.PassInterface();
+
+  RasterizerMojo* rasterizer = static_cast<RasterizerMojo*>(config_.rasterizer);
+  config_.ui_task_runner->PostTask(
+      FROM_HERE, base::Bind(&UIDelegate::OnOutputSurfaceCreated,
+                            config_.ui_delegate,
+                            base::Bind(&RasterizerMojo::OnContextProviderAvailable,
+                                       rasterizer->GetWeakPtr(), base::Passed(&context_provider_info))));
 }
 
 void PlatformViewMojo::Run(const mojo::String& url,
