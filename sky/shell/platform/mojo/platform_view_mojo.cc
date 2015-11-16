@@ -12,6 +12,34 @@
 
 namespace sky {
 namespace shell {
+namespace {
+
+pointer::PointerType GetTypeFromAction(mojo::EventType type) {
+  switch (type) {
+    case mojo::EventType::POINTER_CANCEL:
+      return pointer::PointerType::CANCEL;
+    case mojo::EventType::POINTER_DOWN:
+      return pointer::PointerType::DOWN;
+    case mojo::EventType::POINTER_MOVE:
+      return pointer::PointerType::MOVE;
+    case mojo::EventType::POINTER_UP:
+      return pointer::PointerType::UP;
+    default:
+      DCHECK(false);
+      return pointer::PointerType::CANCEL;
+  }
+}
+
+pointer::PointerKind GetKindFromKind(mojo::PointerKind kind) {
+  switch (kind) {
+    case mojo::PointerKind::TOUCH:
+      return pointer::PointerKind::TOUCH;
+    case mojo::PointerKind::MOUSE:
+      return pointer::PointerKind::MOUSE;
+  }
+}
+
+}  // namespace
 
 PlatformView* PlatformView::Create(const Config& config) {
   return new PlatformViewMojo(config);
@@ -85,6 +113,37 @@ void PlatformViewMojo::OnMetricsChanged(mojo::ViewportMetricsPtr metrics) {
 void PlatformViewMojo::OnEvent(mojo::EventPtr event,
                                const mojo::Callback<void()>& callback) {
   DCHECK(event);
+  switch (event->action) {
+    case mojo::EventType::POINTER_CANCEL:
+    case mojo::EventType::POINTER_DOWN:
+    case mojo::EventType::POINTER_MOVE:
+    case mojo::EventType::POINTER_UP: {
+      mojo::PointerDataPtr data = event->pointer_data.Pass();
+      if (!data)
+        break;
+      pointer::PointerPtr pointer = pointer::Pointer::New();
+      pointer->time_stamp = event->time_stamp;
+      pointer->pointer = data->pointer_id;
+      pointer->type = GetTypeFromAction(event->action);
+      pointer->kind = GetKindFromKind(data->kind);
+      pointer->x = data->x;
+      pointer->y = data->y;
+      pointer->buttons = static_cast<int32_t>(event->flags);
+      pointer->pressure = data->pressure;
+      pointer->radius_major = data->radius_major;
+      pointer->radius_minor = data->radius_minor;
+      pointer->orientation = data->orientation;
+
+      pointer::PointerPacketPtr packet = pointer::PointerPacket::New();
+      packet->pointers = mojo::Array<pointer::PointerPtr>::New(1);
+      packet->pointers[0] = pointer.Pass();
+      sky_engine_->OnPointerPacket(packet.Pass());
+      break;
+    }
+    default:
+      break;
+  }
+
   callback.Run();
 }
 
