@@ -110,7 +110,7 @@ class ExampleDragSource extends StatelessComponent {
     }
 
     if (heavy) {
-      return new Draggable<Color>(
+      return new LongPressDraggable<Color>(
         data: color,
         child: contents,
         feedback: feedback,
@@ -118,7 +118,7 @@ class ExampleDragSource extends StatelessComponent {
         dragAnchor: anchor
       );
     } else {
-      return new LongPressDraggable<Color>(
+      return new Draggable<Color>(
         data: color,
         child: contents,
         feedback: feedback,
