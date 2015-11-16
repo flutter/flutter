@@ -29,15 +29,16 @@ Future<Response> head(url) =>
 /// This automatically initializes a new [Client] and closes that client once
 /// the request is complete. If you're planning on making multiple requests to
 /// the same server, you should use a single [Client] for all of those requests.
-Future<Response> get(url) =>
-  _withClient((client) => client.get(url));
+Future<Response> get(url, {Map<String, String> headers}) =>
+  _withClient((client) => client.get(url, headers: headers));
 
 /// Sends an HTTP POST request with the given headers and body to the given URL,
 /// which can be a [Uri] or a [String].
 ///
 /// [body] sets the body of the request.
-Future<Response> post(url, {body}) =>
-  _withClient((client) => client.post(url, body: body));
+Future<Response> post(url, {Map<String, String> headers, body}) =>
+  _withClient((client) => client.post(url,
+      headers: headers, body: body));
 
 /// Sends an HTTP PUT request with the given headers and body to the given URL,
 /// which can be a [Uri] or a [String].
@@ -46,8 +47,9 @@ Future<Response> post(url, {body}) =>
 /// a [Map<String, String>]. If it's a String, it's encoded using [encoding] and
 /// used as the body of the request. The content-type of the request will
 /// default to "text/plain".
-Future<Response> put(url, {String body}) =>
-  _withClient((client) => client.put(url, body: body));
+Future<Response> put(url, {Map<String, String> headers, body}) =>
+  _withClient((client) => client.put(url,
+      headers: headers, body: body));
 
 /// Sends an HTTP PATCH request with the given headers and body to the given
 /// URL, which can be a [Uri] or a [String].
@@ -68,8 +70,9 @@ Future<Response> put(url, {String body}) =>
 ///
 /// For more fine-grained control over the request, use [Request] or
 /// [StreamedRequest] instead.
-Future<Response> patch(url, { body }) =>
-  _withClient((client) => client.patch(url, body: body));
+Future<Response> patch(url, {Map<String, String> headers, body}) =>
+  _withClient((client) => client.patch(url,
+      headers: headers, body: body));
 
 /// Sends an HTTP DELETE request with the given headers to the given URL, which
 /// can be a [Uri] or a [String].
@@ -79,8 +82,8 @@ Future<Response> patch(url, { body }) =>
 /// the same server, you should use a single [Client] for all of those requests.
 ///
 /// For more fine-grained control over the request, use [Request] instead.
-Future<Response> delete(url) =>
-  _withClient((client) => client.delete(url));
+Future<Response> delete(url, {Map<String, String> headers}) =>
+  _withClient((client) => client.delete(url, headers: headers));
 
 /// Sends an HTTP GET request with the given headers to the given URL, which can
 /// be a [Uri] or a [String], and returns a Future that completes to the body of
@@ -95,8 +98,8 @@ Future<Response> delete(url) =>
 ///
 /// For more fine-grained control over the request and response, use [Request]
 /// instead.
-Future<String> read(url) =>
-  _withClient((client) => client.read(url));
+Future<String> read(url, {Map<String, String> headers}) =>
+  _withClient((client) => client.read(url, headers: headers));
 
 /// Sends an HTTP GET request with the given headers to the given URL, which can
 /// be a [Uri] or a [String], and returns a Future that completes to the body of
@@ -111,8 +114,8 @@ Future<String> read(url) =>
 ///
 /// For more fine-grained control over the request and response, use [Request]
 /// instead.
-Future<Uint8List> readBytes(url) =>
-  _withClient((client) => client.readBytes(url));
+Future<Uint8List> readBytes(url, {Map<String, String> headers}) =>
+  _withClient((client) => client.readBytes(url, headers: headers));
 
 Future _withClient(Future fn(MojoClient client)) {
   var client = new MojoClient();
