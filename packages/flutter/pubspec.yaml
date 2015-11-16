@@ -6,8 +6,8 @@ homepage: http://flutter.io
 dependencies:
   intl: '>=0.12.4+2 <0.13.0'
   material_design_icons: '>=0.0.3 <0.1.0'
-  sky_engine: 0.0.55
-  sky_services: 0.0.55
+  sky_engine: 0.0.56
+  sky_services: 0.0.56
   vector_math: '>=1.4.3 <2.0.0'
 
   cassowary:
