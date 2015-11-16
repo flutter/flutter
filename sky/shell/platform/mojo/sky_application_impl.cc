@@ -14,32 +14,39 @@ namespace shell {
 SkyApplicationImpl::SkyApplicationImpl(
   mojo::InterfaceRequest<mojo::Application> application,
   mojo::URLResponsePtr response)
-  : app_(this, application.Pass()),
+  : binding_(this, application.Pass()),
     initial_response_(response.Pass()) {
 }
 
 SkyApplicationImpl::~SkyApplicationImpl() {
 }
 
-void SkyApplicationImpl::Initialize(mojo::ApplicationImpl* app) {
+void SkyApplicationImpl::Initialize(mojo::ShellPtr shell,
+                                    mojo::Array<mojo::String> args,
+                                    const mojo::String& url) {
   DCHECK(initial_response_);
-  UnpackInitialResponse();
+  UnpackInitialResponse(shell.get());
   shell_view_.reset(new ShellView(Shell::Shared()));
   PlatformViewMojo* view = platform_view();
-  view->Init(app);
-  view->Run(app_.url(), bundle_.Pass());
+  view->Init(shell.Pass());
+  view->Run(url, bundle_.Pass());
 }
 
-bool SkyApplicationImpl::ConfigureIncomingConnection(
-    mojo::ApplicationConnection* connection) {
-  return true;
+void SkyApplicationImpl::AcceptConnection(
+    const mojo::String& requestor_url,
+    mojo::InterfaceRequest<mojo::ServiceProvider> services,
+    mojo::ServiceProviderPtr exposed_services,
+    const mojo::String& resolved_url) {
 }
 
-void SkyApplicationImpl::UnpackInitialResponse() {
+void SkyApplicationImpl::RequestQuit() {
+}
+
+void SkyApplicationImpl::UnpackInitialResponse(mojo::Shell* shell) {
   DCHECK(initial_response_);
   DCHECK(!bundle_);
   mojo::asset_bundle::AssetUnpackerPtr unpacker;
-  app_.ConnectToService("mojo:asset_bundle", &unpacker);
+  mojo::ConnectToService(shell, "mojo:asset_bundle", &unpacker);
   unpacker->UnpackZipStream(initial_response_->body.Pass(),
                             mojo::GetProxy(&bundle_));
   initial_response_ = nullptr;

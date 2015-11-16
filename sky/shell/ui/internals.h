@@ -30,6 +30,7 @@ class Internals
                      ServicesDataPtr services,
                      mojo::asset_bundle::AssetBundlePtr root_bundle);
 
+  mojo::Handle TakeShellProxy();
   mojo::Handle TakeServicesProvidedByEmbedder();
   mojo::Handle TakeRootBundleHandle();
   mojo::Handle TakeServicesProvidedToEmbedder();
