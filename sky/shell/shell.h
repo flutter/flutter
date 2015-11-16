@@ -10,23 +10,19 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread.h"
-#include "sky/shell/service_provider.h"
 #include "sky/shell/tracing_controller.h"
 
 namespace sky {
 namespace shell {
-class ServiceProviderContext;
 
 class Shell {
  public:
   ~Shell();
 
   // Init the shell to stand alone from MojoShell.
-  static void InitStandalone(
-      scoped_ptr<ServiceProviderContext> service_provider_context);
+  static void InitStandalone();
   // Init the shell to run inside MojoShell.
-  static void Init(
-      scoped_ptr<ServiceProviderContext> service_provider_context);
+  static void Init();
 
   static Shell& Shared();
 
@@ -42,14 +38,10 @@ class Shell {
     return io_task_runner_.get();
   }
 
-  ServiceProviderContext* service_provider_context() const {
-    return service_provider_context_.get();
-  }
-
   TracingController& tracing_controller();
 
  private:
-  explicit Shell(scoped_ptr<ServiceProviderContext> service_provider_context);
+  explicit Shell();
 
   void InitGPU(const base::Thread::Options& options);
   void InitUI(const base::Thread::Options& options);
@@ -62,7 +54,6 @@ class Shell {
   scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner_;
   scoped_refptr<base::SingleThreadTaskRunner> io_task_runner_;
 
-  scoped_ptr<ServiceProviderContext> service_provider_context_;
   TracingController tracing_controller_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);

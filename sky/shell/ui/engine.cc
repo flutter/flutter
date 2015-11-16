@@ -19,7 +19,6 @@
 #include "sky/engine/public/web/WebRuntimeFeatures.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
 #include "sky/shell/dart/dart_library_provider_network.h"
-#include "sky/shell/service_provider.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/ui/animator.h"
@@ -64,15 +63,6 @@ Engine::Engine(const Config& config)
       activity_running_(false),
       have_surface_(false),
       weak_factory_(this) {
-  mojo::ServiceProviderPtr service_provider =
-      CreateServiceProvider(config.service_provider_context);
-
-#if defined(OS_ANDROID) || defined(OS_IOS)
-  // TODO(abarth): Implement VSyncProvider on other platforms.
-  vsync::VSyncProviderPtr vsync_provider;
-  mojo::ConnectToService(service_provider.get(), &vsync_provider);
-  animator_->set_vsync_provider(vsync_provider.Pass());
-#endif
 }
 
 Engine::~Engine() {
@@ -128,6 +118,17 @@ void Engine::OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) {
   have_surface_ = false;
   StopAnimator();
   config_.gpu_task_runner->PostTask(FROM_HERE, gpu_continuation);
+}
+
+void Engine::SetServices(ServicesDataPtr services) {
+  services_ = services.Pass();
+
+#if defined(OS_ANDROID) || defined(OS_IOS)
+  // TODO(abarth): Implement VSyncProvider on other platforms.
+  vsync::VSyncProviderPtr vsync_provider;
+  mojo::ConnectToService(services_->services_provided_by_embedder.get(), &vsync_provider);
+  animator_->set_vsync_provider(vsync_provider.Pass());
+#endif
 }
 
 void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
@@ -242,9 +243,7 @@ void Engine::OnActivityResumed() {
 }
 
 void Engine::DidCreateIsolate(Dart_Isolate isolate) {
-  Internals::Create(isolate,
-                    CreateServiceProvider(config_.service_provider_context),
-                    root_bundle_.Pass());
+  Internals::Create(isolate, services_.Pass(), root_bundle_.Pass());
 }
 
 void Engine::StopAnimator() {

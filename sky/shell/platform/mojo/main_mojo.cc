@@ -15,7 +15,6 @@
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "sky/shell/shell.h"
-#include "sky/shell/service_provider.h"
 #include "sky/shell/platform/mojo/content_handler_impl.h"
 
 namespace sky {
@@ -32,9 +31,7 @@ class MojoApp : public mojo::ApplicationDelegate,
   void Initialize(mojo::ApplicationImpl* app) override {
     mojo::icu::Initialize(app);
     tracing_.Initialize(app);
-
-    Shell::Init(make_scoped_ptr(
-        new ServiceProviderContext(base::MessageLoop::current()->task_runner())));
+    Shell::Init();
   }
 
   bool ConfigureIncomingConnection(

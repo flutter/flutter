@@ -49,8 +49,7 @@ base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 
 }  // namespace
 
-Shell::Shell(scoped_ptr<ServiceProviderContext> service_provider_context)
-    : service_provider_context_(service_provider_context.Pass()) {
+Shell::Shell() {
   DCHECK(!g_shell);
 
   base::Thread::Options options;
@@ -74,19 +73,17 @@ Shell::Shell(scoped_ptr<ServiceProviderContext> service_provider_context)
 Shell::~Shell() {
 }
 
-void Shell::InitStandalone(
-    scoped_ptr<ServiceProviderContext> service_provider_context) {
+void Shell::InitStandalone() {
   CHECK(base::i18n::InitializeICU());
 #if !defined(OS_LINUX)
   CHECK(gfx::GLSurface::InitializeOneOff());
 #endif
-  Init(service_provider_context.Pass());
+  Init();
 }
 
-void Shell::Init(scoped_ptr<ServiceProviderContext> service_provider_context) {
+void Shell::Init() {
   base::DiscardableMemoryAllocator::SetInstance(&g_discardable.Get());
-
-  g_shell = new Shell(service_provider_context.Pass());
+  g_shell = new Shell();
 }
 
 Shell& Shell::Shared() {

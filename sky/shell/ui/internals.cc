@@ -77,12 +77,12 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 }  // namespace
 
 void Internals::Create(Dart_Isolate isolate,
-                       mojo::ServiceProviderPtr service_provider,
+                       ServicesDataPtr services,
                        mojo::asset_bundle::AssetBundlePtr root_bundle) {
   EnsureNatives();
 
   DartState* state = DartState::From(isolate);
-  state->SetUserData(&kInternalsKey, new Internals(service_provider.Pass(),
+  state->SetUserData(&kInternalsKey, new Internals(services.Pass(),
                                                    root_bundle.Pass()));
   Dart_Handle library = Dart_LookupLibrary(ToDart("dart:ui_internals"));
   CHECK(!LogIfError(library));
@@ -90,14 +90,15 @@ void Internals::Create(Dart_Isolate isolate,
       library, GetNativeFunction, GetSymbol)));
 }
 
-Internals::Internals(mojo::ServiceProviderPtr platform_service_provider,
+Internals::Internals(ServicesDataPtr services,
                      mojo::asset_bundle::AssetBundlePtr root_bundle)
-  : root_bundle_(root_bundle.Pass()),
-    service_provider_impl_(GetProxy(&service_provider_)),
-
-    platform_service_provider_(platform_service_provider.Pass()) {
-  service_provider_impl_.set_fallback_service_provider(
-      platform_service_provider_.get());
+  : services_(services.Pass()),
+    root_bundle_(root_bundle.Pass()),
+    service_provider_impl_(GetProxy(&service_provider_)) {
+  if (services_ && services_->services_provided_by_embedder) {
+    service_provider_impl_.set_fallback_service_provider(
+        services_->services_provided_by_embedder.get());
+  }
   service_provider_impl_.AddService<mojo::asset_bundle::AssetUnpacker>(this);
 
   // Currently we don't consume any services provided by the application.

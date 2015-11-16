@@ -12,9 +12,10 @@
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
+#include "sky/shell/platform/mac/platform_service_provider.h"
 #include "sky/shell/platform/mac/platform_view_mac.h"
-#include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
+#include "sky/shell/shell_view.h"
 #include "sky/shell/ui_delegate.h"
 #include <strings.h>
 
@@ -184,8 +185,14 @@ static std::string SkPictureTracingPath() {
 }
 
 - (void)connectToEngineAndLoad {
-  auto interface_request = mojo::GetProxy(&_sky_engine);
-  self.platformView->ConnectToEngine(interface_request.Pass());
+  self.platformView->ConnectToEngine(mojo::GetProxy(&_sky_engine));
+
+  mojo::ServiceProviderPtr service_provider;
+  new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider));
+  sky::ServicesDataPtr services = sky::ServicesData::New();
+  services->services_provided_by_embedder = service_provider.Pass();
+  _sky_engine->SetServices(services.Pass());
+
   mojo::String bundle_path([self flxBundlePath]);
   _sky_engine->RunFromPrecompiledSnapshot(bundle_path);
 }
