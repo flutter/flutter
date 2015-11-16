@@ -124,10 +124,12 @@ void Engine::SetServices(ServicesDataPtr services) {
   services_ = services.Pass();
 
 #if defined(OS_ANDROID) || defined(OS_IOS)
-  // TODO(abarth): Implement VSyncProvider on other platforms.
-  vsync::VSyncProviderPtr vsync_provider;
-  mojo::ConnectToService(services_->services_provided_by_embedder.get(), &vsync_provider);
-  animator_->set_vsync_provider(vsync_provider.Pass());
+  if (services_->services_provided_by_embedder) {
+    // TODO(abarth): Implement VSyncProvider on other platforms.
+    vsync::VSyncProviderPtr vsync_provider;
+    mojo::ConnectToService(services_->services_provided_by_embedder.get(), &vsync_provider);
+    animator_->set_vsync_provider(vsync_provider.Pass());
+  }
 #endif
 }
 
