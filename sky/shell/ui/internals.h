@@ -50,6 +50,10 @@ class Internals
   mojo::ServiceProviderPtr service_provider_;
   mojo::ServiceProviderImpl service_provider_impl_;
 
+  // We need to hold this object to work around
+  // https://github.com/domokit/mojo/issues/536
+  mojo::ServiceProviderPtr services_provided_to_embedder;
+
   // A ServiceProvider supplied by the application that exposes services to
   // the embedder.
   mojo::InterfaceRequest<mojo::ServiceProvider>
