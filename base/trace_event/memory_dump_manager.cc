@@ -116,7 +116,7 @@ void MemoryDumpManager::Initialize() {
   RegisterDumpProvider(ProcessMemoryTotalsDumpProvider::GetInstance());
 #endif
 
-#if defined(OS_LINUX) || defined(OS_ANDROID)
+#if (defined(OS_LINUX) && !defined(FNL_MUSL)) || defined(OS_ANDROID)
   g_mmaps_dump_provider = ProcessMemoryMapsDumpProvider::GetInstance();
   RegisterDumpProvider(g_mmaps_dump_provider);
   RegisterDumpProvider(MallocDumpProvider::GetInstance());

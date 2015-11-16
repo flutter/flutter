@@ -16,7 +16,6 @@
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "sky/shell/ui/engine.h"
 #include "sky/shell/switches.h"
-#include "ui/gl/gl_surface.h"
 
 namespace sky {
 namespace shell {
@@ -75,9 +74,6 @@ Shell::~Shell() {
 
 void Shell::InitStandalone() {
   CHECK(base::i18n::InitializeICU());
-#if !defined(OS_LINUX)
-  CHECK(gfx::GLSurface::InitializeOneOff());
-#endif
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 

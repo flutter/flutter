@@ -54,9 +54,9 @@ source_set("common") {
     "//sky/services/pointer:interfaces",
     "//sky/services/vsync:interfaces",
     "//sky/shell/dart",
+    "//ui/gfx",
     "//ui/gfx/geometry",
     "//url",
-    "//ui/gl",
   ]
 }
 
@@ -70,6 +70,7 @@ source_set("gpu_direct") {
 
   deps = [
     ":common",
+    "//ui/gl",
   ]
 }
 
@@ -255,7 +256,7 @@ if (is_android) {
   sky_precompilation_sdk("shell") {
     sdk_name = "SkySDK"
   }
-} else if (is_linux) {
+} else if (is_linux && !is_fnl) {
   executable("shell") {
     output_name = "sky_shell"
 
@@ -321,6 +322,8 @@ if (is_android) {
       ":sky_resources",
     ]
   }
+} else if (is_fnl) {
+  # Nothing fnl specific.
 } else {
   assert(false, "Unsupported platform")
 }

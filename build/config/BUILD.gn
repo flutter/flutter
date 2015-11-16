@@ -272,6 +272,9 @@ config("feature_flags") {
   if (enable_webvr) {
     defines += [ "ENABLE_WEBVR" ]
   }
+  if (is_fnl) {
+    defines += [ "HAVE_SYS_QUEUE_H_=0" ]
+  }
 }
 
 # Debug/release ----------------------------------------------------------------
