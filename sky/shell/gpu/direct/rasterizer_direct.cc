@@ -50,7 +50,7 @@ void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widge
 }
 
 void RasterizerDirect::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
-  TRACE_EVENT0("sky", "RasterizerDirect::Draw");
+  TRACE_EVENT0("flutter", "RasterizerDirect::Draw");
 
   if (!surface_)
     return;

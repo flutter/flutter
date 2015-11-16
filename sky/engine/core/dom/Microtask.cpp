@@ -70,7 +70,7 @@ void Microtask::performCheckpoint()
 {
     MicrotaskQueue& queue = microtaskQueue();
     while(!queue.isEmpty()) {
-        TRACE_EVENT0("sky", "Microtask::performCheckpoint");
+        TRACE_EVENT0("flutter", "Microtask::performCheckpoint");
 
         MicrotaskQueue local;
         swap(queue, local);

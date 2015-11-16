@@ -29,7 +29,7 @@ Animator::~Animator() {
 void Animator::RequestFrame() {
   if (engine_requested_frame_)
     return;
-  TRACE_EVENT_ASYNC_BEGIN0("sky", "Frame request pending", this);
+  TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame request pending", this);
   engine_requested_frame_ = true;
 
   DCHECK(!did_defer_frame_request_);
@@ -56,7 +56,7 @@ void Animator::Start() {
 }
 
 void Animator::BeginFrame(int64_t time_stamp) {
-  TRACE_EVENT_ASYNC_END0("sky", "Frame request pending", this);
+  TRACE_EVENT_ASYNC_END0("flutter", "Frame request pending", this);
   DCHECK(engine_requested_frame_);
   DCHECK(outstanding_requests_ > 0);
   DCHECK(outstanding_requests_ <= kPipelineDepth) << outstanding_requests_;

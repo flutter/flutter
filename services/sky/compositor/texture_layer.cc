@@ -25,14 +25,14 @@ void TextureLayer::SetSize(const gfx::Size& size) {
 }
 
 void TextureLayer::Display() {
-  TRACE_EVENT0("sky", "Layer::Display");
+  TRACE_EVENT0("flutter", "Layer::Display");
   DCHECK(rasterizer_);
   RefPtr<SkPicture> picture = RecordPicture();
   texture_ = rasterizer_->Rasterize(picture.get());
 }
 
 PassRefPtr<SkPicture> TextureLayer::RecordPicture() {
-  TRACE_EVENT0("sky", "Layer::RecordPicture");
+  TRACE_EVENT0("flutter", "Layer::RecordPicture");
 
   SkRTreeFactory factory;
   SkPictureRecorder recorder;

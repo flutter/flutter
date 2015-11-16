@@ -39,7 +39,7 @@ RasterCallback RasterizerMojo::GetRasterCallback() {
 }
 
 void RasterizerMojo::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
-  TRACE_EVENT0("sky", "RasterizerMojo::Draw");
+  TRACE_EVENT0("flutter", "RasterizerMojo::Draw");
   MGLResizeSurface(layer_tree->frame_size().width(),
                    layer_tree->frame_size().height());
   SkCanvas* canvas = ganesh_canvas_.GetCanvas(0, layer_tree->frame_size());
