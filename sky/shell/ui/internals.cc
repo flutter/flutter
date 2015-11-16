@@ -102,10 +102,7 @@ Internals::Internals(ServicesDataPtr services,
   }
   service_provider_impl_.AddService<mojo::asset_bundle::AssetUnpacker>(this);
 
-  // Currently we don't consume any services provided by the application.
-  // So there's no need to hold the proxy to the application's ServiceProvider.
-  mojo::ServiceProviderPtr application_service_provider;
-  services_provided_to_embedder_ = GetProxy(&application_service_provider);
+  services_provided_to_embedder_ = GetProxy(&services_provided_to_embedder);
 }
 
 Internals::~Internals() {
