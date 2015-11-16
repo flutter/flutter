@@ -37,6 +37,8 @@ pointer::PointerKind GetKindFromKind(mojo::PointerKind kind) {
     case mojo::PointerKind::MOUSE:
       return pointer::PointerKind::MOUSE;
   }
+  DCHECK(false);
+  return pointer::PointerKind::TOUCH;
 }
 
 }  // namespace

@@ -52,7 +52,7 @@ class Internals
 
   // We need to hold this object to work around
   // https://github.com/domokit/mojo/issues/536
-  mojo::ServiceProviderPtr services_provided_to_embedder;
+  mojo::ServiceProviderPtr services_from_dart_;
 
   // A ServiceProvider supplied by the application that exposes services to
   // the embedder.
