@@ -1,3 +1,9 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ui' as ui;
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -29,7 +35,10 @@ typedef Point SizeToPointFunction(Size size);
 class WidgetTester {
   WidgetTester._(FakeAsync async)
     : async = async,
-      clock = async.getClock(new DateTime.utc(2015, 1, 1));
+      clock = async.getClock(new DateTime.utc(2015, 1, 1)) {
+    timeDilation = 1.0;
+    ui.window.onBeginFrame = null;
+  }
 
   final FakeAsync async;
   final Clock clock;
