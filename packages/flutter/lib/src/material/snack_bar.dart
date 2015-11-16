@@ -108,9 +108,16 @@ Future showSnackBar({ BuildContext context, GlobalKey<PlaceholderState> placehol
     content: content,
     actions: actions
   );
+
+  // TODO(hansmuller): https://github.com/flutter/flutter/issues/374
+  assert(placeholderKey.currentState.child == null);
+
   placeholderKey.currentState.child = snackBar;
   Navigator.of(context).pushEphemeral(route);
   return completer.future.then((_) {
-    placeholderKey.currentState.child = null;
+    // If our overlay has been obscured by an opaque OverlayEntry currentState
+    // will have been cleared already.
+    if (placeholderKey.currentState != null)
+      placeholderKey.currentState.child = null;
   });
 }

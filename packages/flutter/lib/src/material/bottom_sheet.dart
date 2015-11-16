@@ -221,6 +221,9 @@ Future showBottomSheet({ BuildContext context, GlobalKey<PlaceholderState> place
   placeholderKey.currentState.child = new _PersistentBottomSheet(route: route);
   Navigator.of(context).pushEphemeral(route);
   return completer.future.then((_) {
-    placeholderKey.currentState.child = null;
+    // If our overlay has been obscured by an opaque OverlayEntry then currentState
+    // will have been cleared already.
+    if (placeholderKey.currentState != null)
+      placeholderKey.currentState.child = null;
   });
 }
