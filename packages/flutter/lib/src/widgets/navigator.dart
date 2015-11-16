@@ -21,17 +21,26 @@ class NamedRouteSettings {
 
 typedef Route RouteFactory(NamedRouteSettings settings);
 
+class NavigatorObserver {
+  NavigatorState _navigator;
+  NavigatorState get navigator => _navigator;
+  void didPopModal(Route route) { }
+  void didPushModal(Route route) { }
+}
+
 class Navigator extends StatefulComponent {
   Navigator({
     Key key,
     this.onGenerateRoute,
-    this.onUnknownRoute
+    this.onUnknownRoute,
+    this.observer
   }) : super(key: key) {
     assert(onGenerateRoute != null);
   }
 
   final RouteFactory onGenerateRoute;
   final RouteFactory onUnknownRoute;
+  final NavigatorObserver observer;
 
   static const String defaultRouteName = '/';
 
@@ -57,7 +66,22 @@ class NavigatorState extends State<Navigator> {
 
   void initState() {
     super.initState();
+    assert(config.observer == null || config.observer.navigator == null);
+    config.observer?._navigator = this;
     push(config.onGenerateRoute(new NamedRouteSettings(name: Navigator.defaultRouteName)));
+  }
+
+  void didUpdateConfig(Navigator oldConfig) {
+    if (oldConfig.observer != config.observer) {
+      oldConfig.observer?._navigator = null;
+      assert(config.observer == null || config.observer.navigator == null);
+      config.observer?._navigator = this;
+    }
+  }
+
+  void dispose() {
+    config.observer?._navigator = null;
+    super.dispose();
   }
 
   bool get hasPreviousRoute => _modal.length > 1;
@@ -75,11 +99,7 @@ class NavigatorState extends State<Navigator> {
     return null;
   }
 
-  Route get currentRoute => _ephemeral.isNotEmpty ? _ephemeral.last : _modal.last;
-
-  Route _removeCurrentRoute() {
-    return _ephemeral.isNotEmpty ? _ephemeral.removeLast() : _modal.removeLast();
-  }
+  Route get currentRoute => _ephemeral.isNotEmpty ? _ephemeral.last : _modal.isNotEmpty ? _modal.last : null;
 
   void pushNamed(String name, { Set<Key> mostValuableKeys }) {
     assert(name != null);
@@ -90,9 +110,10 @@ class NavigatorState extends State<Navigator> {
     push(config.onGenerateRoute(settings) ?? config.onUnknownRoute(settings));
   }
 
-  void push(Route route) {
+  void push(Route route, { Set<Key> mostValuableKeys }) {
     _popAllEphemeralRoutes();
     route.didPush(overlay, _currentOverlay);
+    config.observer?.didPushModal(route);
     _modal.add(route);
   }
 
@@ -110,7 +131,13 @@ class NavigatorState extends State<Navigator> {
   }
 
   void pop([dynamic result]) {
-    _removeCurrentRoute().didPop(result);
+    if (_ephemeral.isNotEmpty) {
+      _ephemeral.removeLast().didPop(result);
+    } else {
+      Route route = _modal.removeLast();
+      route.didPop(result);
+      config.observer?.didPopModal(route);
+    }
   }
 
   Widget build(BuildContext context) {

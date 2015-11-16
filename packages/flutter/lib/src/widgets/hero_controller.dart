@@ -10,68 +10,46 @@ import 'framework.dart';
 import 'heroes.dart';
 import 'navigator.dart';
 import 'overlay.dart';
-import 'page.dart';
+import 'routes.dart';
 
-class HeroPageRoute extends PageRoute {
-  HeroPageRoute({
-    WidgetBuilder builder,
-    NamedRouteSettings settings: const NamedRouteSettings(),
-    this.heroController
-  }) : super(builder: builder, settings: settings);
-
-  final HeroController heroController;
-  NavigatorState _navigator;
-
-  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
-    super.didPush(overlay, insertionPoint);
-    // TODO(abarth): Pass the NavigatorState explicitly.
-    if (overlay != null) {
-      _navigator = Navigator.of(overlay.context);
-      heroController?.didPush(_navigator, this);
-    }
-  }
-
-  void didPop(dynamic result) {
-    super.didPop(result);
-    if (_navigator != null) {
-      heroController?.didPop(_navigator, this);
-      _navigator = null;
-    }
-  }
-}
-
-class HeroController {
+class HeroController extends NavigatorObserver {
   HeroController() {
     _party = new HeroParty(onQuestFinished: _handleQuestFinished);
   }
 
   HeroParty _party;
   PerformanceView _performance;
-  HeroPageRoute _from;
-  HeroPageRoute _to;
+  ModalRoute _from;
+  ModalRoute _to;
 
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
-  void didPush(NavigatorState navigator, HeroPageRoute route) {
+  void didPushModal(Route route) {
+    assert(navigator != null);
     assert(route != null);
-    assert(route.performance != null);
-    Route from = navigator.currentRoute;
-    if (from is HeroPageRoute)
-      _from = from;
-    _to = route;
-    _performance = route.performance;
-    _checkForHeroQuest();
-  }
-
-  void didPop(NavigatorState navigator, HeroPageRoute route) {
-    assert(route != null);
-    assert(route.performance != null);
-    Route to = navigator.currentRoute;
-    if (to is HeroPageRoute) {
-      _to = to;
-      _from = route;
+    if (route is ModalRoute) { // as opposed to StateRoute, say
+      assert(route.performance != null);
+      Route from = navigator.currentRoute;
+      if (from is ModalRoute) // as opposed to the many other types of routes, or null
+        _from = from;
+      _to = route;
       _performance = route.performance;
       _checkForHeroQuest();
+    }
+  }
+
+  void didPopModal(Route route) {
+    assert(navigator != null);
+    assert(route != null);
+    if (route is ModalRoute) { // as opposed to StateRoute, say
+      assert(route.performance != null);
+      Route to = navigator.currentRoute;
+      if (to is ModalRoute) { // as opposed to the many other types of routes
+        _to = to;
+        _from = route;
+        _performance = route.performance;
+        _checkForHeroQuest();
+      }
     }
   }
 
@@ -123,10 +101,9 @@ class HeroController {
     Set<Key> mostValuableKeys = _getMostValuableKeys();
 
     Map<Object, HeroHandle> heroesFrom = _party.isEmpty ?
-        Hero.of(_from.pageKey.currentContext, mostValuableKeys) : _party.getHeroesToAnimate();
+        Hero.of(_from.subtreeContext, mostValuableKeys) : _party.getHeroesToAnimate();
 
-    BuildContext context = _to.pageKey.currentContext;
-    Map<Object, HeroHandle> heroesTo = Hero.of(context, mostValuableKeys);
+    Map<Object, HeroHandle> heroesTo = Hero.of(_to.subtreeContext, mostValuableKeys);
     _to.offstage = false;
 
     PerformanceView performance = _performance;
@@ -136,7 +113,6 @@ class HeroController {
       curve = new Interval(performance.progress, 1.0, curve: curve);
     }
 
-    NavigatorState navigator = Navigator.of(context);
     _party.animate(heroesFrom, heroesTo, _getAnimationArea(navigator.context), curve);
     _removeHeroesFromOverlay();
     Iterable<Widget> heroes = _party.getWidgets(navigator.context, performance);

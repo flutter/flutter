@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'page.dart';
 import 'theme.dart';
 import 'title.dart';
 
@@ -95,13 +96,12 @@ class _MaterialAppState extends State<MaterialApp> {
   final HeroController _heroController = new HeroController();
 
   Route _generateRoute(NamedRouteSettings settings) {
-    return new HeroPageRoute(
+    return new MaterialPageRoute(
       builder: (BuildContext context) {
         RouteBuilder builder = config.routes[settings.name] ?? config.onGenerateRoute(settings.name);
         return builder(new RouteArguments(context: context));
       },
-      settings: settings,
-      heroController: _heroController
+      settings: settings
     );
   }
 
@@ -118,7 +118,8 @@ class _MaterialAppState extends State<MaterialApp> {
               title: config.title,
               child: new Navigator(
                 key: _navigator,
-                onGenerateRoute: _generateRoute
+                onGenerateRoute: _generateRoute,
+                observer: _heroController
               )
             )
           )

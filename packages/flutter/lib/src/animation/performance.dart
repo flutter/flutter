@@ -168,7 +168,7 @@ class Performance extends PerformanceView {
 
   /// Returns a [PerformanceView] for this performance,
   /// so that a pointer to this object can be passed around without
-  /// allowing users of that pointer to mutate the AnimationPerformance state.
+  /// allowing users of that pointer to mutate the Performance state.
   PerformanceView get view => this;
 
   /// The length of time this performance should last
