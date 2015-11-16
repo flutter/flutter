@@ -12,6 +12,7 @@ import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojo;
 import 'package:mojo/core.dart' as mojo;
 import 'package:mojo/mojo/url_request.mojom.dart' as mojo;
 import 'package:mojo/mojo/url_response.mojom.dart' as mojo;
+import 'package:mojo/mojo/http_header.mojom.dart' as mojo;
 
 import 'response.dart';
 
@@ -63,10 +64,17 @@ class MojoClient {
 
   Future<Response> _send(String method, url,
       Map<String, String> headers, [body, Encoding encoding]) async {
-
     mojo.UrlLoaderProxy loader = new mojo.UrlLoaderProxy.unbound();
+    List<mojo.HttpHeader> mojoHeaders = <mojo.HttpHeader>[];
+    headers.forEach((String name, String value) {
+      mojo.HttpHeader header = new mojo.HttpHeader()
+        ..name = name
+        ..value = value;
+      mojoHeaders.add(header);
+    });
     mojo.UrlRequest request = new mojo.UrlRequest()
       ..url = url.toString()
+      ..headers = mojoHeaders
       ..method = method;
     if (body != null) {
       mojo.MojoDataPipe pipe = new mojo.MojoDataPipe();

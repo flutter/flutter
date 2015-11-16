@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/http.dart' as http;
 import 'package:flutter/material.dart';
 
@@ -30,14 +32,17 @@ class PostDemoState extends State<PostDemo> {
     super.initState();
   }
 
-  void _refresh() {
+  Future _refresh() async {
     setState(() {
       _response = null;
     });
-    http.post("http://httpbin.org/post", body: "asdf=42").then((http.Response response) {
-      setState(() {
-        _response = response.body;
-      });
+    http.Response response = await http.post(
+      "http://httpbin.org/post",
+      body: "asdf=42",
+      headers: { "foo": "bar" }
+    );
+    setState(() {
+      _response = response.body;
     });
   }
 
