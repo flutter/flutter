@@ -9,6 +9,7 @@
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
 #include "sky/shell/platform/mac/platform_view_mac.h"
+#include "sky/shell/platform/mac/platform_service_provider.h"
 #include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/switches.h"
@@ -76,8 +77,13 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
 // We also want a separate setup for normal apps vs SkyShell
 // normal apps only use a flx vs. SkyShell which always pulls from network.
 - (void)setupAndLoadDart {
-  auto interface_request = mojo::GetProxy(&_sky_engine);
-  self.platformView->ConnectToEngine(interface_request.Pass());
+  self.platformView->ConnectToEngine(mojo::GetProxy(&_sky_engine));
+
+  mojo::ServiceProviderPtr service_provider;
+  new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider));
+  sky::ServicesDataPtr services = sky::ServicesData::New();
+  services->services_provided_by_embedder = service_provider.Pass();
+  _sky_engine->SetServices(services.Pass());
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 

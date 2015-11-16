@@ -19,7 +19,6 @@
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
 #include "sky/shell/rasterizer.h"
-#include "sky/shell/service_provider.h"
 #include "sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gfx/geometry/size.h"
@@ -36,8 +35,6 @@ class Engine : public UIDelegate,
   struct Config {
     Config();
     ~Config();
-
-    ServiceProviderContext* service_provider_context;
 
     RasterCallback raster_callback;
     scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner;
@@ -62,6 +59,7 @@ class Engine : public UIDelegate,
   void OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) override;
 
   // SkyEngine implementation:
+  void SetServices(ServicesDataPtr services) override;
   void OnViewportMetricsChanged(ViewportMetricsPtr metrics) override;
   void OnInputEvent(InputEventPtr event) override;
   void OnPointerPacket(pointer::PointerPacketPtr packet) override;
@@ -92,6 +90,7 @@ class Engine : public UIDelegate,
   Config config_;
   scoped_ptr<Animator> animator_;
 
+  ServicesDataPtr services_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
   scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;

@@ -10,8 +10,6 @@ source_set("common") {
     "rasterizer.h",
     "platform_view.cc",
     "platform_view.h",
-    "service_provider.cc",
-    "service_provider.h",
     "shell.cc",
     "shell.h",
     "shell_view.cc",
@@ -114,7 +112,6 @@ if (is_android) {
 
   generate_jni("jni_headers") {
     sources = [
-      "platform/android/org/domokit/sky/shell/PlatformServiceProvider.java",
       "platform/android/org/domokit/sky/shell/PlatformViewAndroid.java",
       "platform/android/org/domokit/sky/shell/SkyMain.java",
       "platform/android/org/domokit/sky/shell/TracingController.java",
@@ -126,8 +123,6 @@ if (is_android) {
   shared_library("sky_shell") {
     sources = [
       "platform/android/library_loader.cc",
-      "platform/android/platform_service_provider_android.cc",
-      "platform/android/platform_service_provider_android.h",
       "platform/android/platform_view_android.cc",
       "platform/android/platform_view_android.h",
       "platform/android/sky_main.cc",
@@ -239,7 +234,8 @@ if (is_android) {
     sources += [
       "platform/mac/platform_mac.h",
       "platform/mac/platform_mac.mm",
-      "platform/mac/platform_service_provider_mac.cc",
+      "platform/mac/platform_service_provider.cc",
+      "platform/mac/platform_service_provider.h",
       "platform/mac/platform_view_mac.h",
       "platform/mac/platform_view_mac.mm",
     ]
@@ -265,7 +261,6 @@ if (is_android) {
 
     sources = [
       "platform/linux/main_linux.cc",
-      "platform/linux/platform_service_provider_linux.cc",
       "platform/linux/platform_view_linux.cc",
     ]
 
@@ -285,7 +280,8 @@ if (is_android) {
       "platform/mac/main_mac.mm",
       "platform/mac/platform_mac.h",
       "platform/mac/platform_mac.mm",
-      "platform/mac/platform_service_provider_mac.cc",
+      "platform/mac/platform_service_provider.cc",
+      "platform/mac/platform_service_provider.h",
       "platform/mac/platform_view_mac.h",
       "platform/mac/platform_view_mac.mm",
       "platform/mac/sky_app_delegate.h",

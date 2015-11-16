@@ -11,6 +11,7 @@
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
+#include "sky/services/engine/sky_engine.mojom.h"
 
 namespace mojo {
 class ApplicationConnection;
@@ -26,7 +27,7 @@ class Internals
   ~Internals() override;
 
   static void Create(Dart_Isolate isolate,
-                     mojo::ServiceProviderPtr platform_service_provider,
+                     ServicesDataPtr services,
                      mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   mojo::Handle TakeServicesProvidedByEmbedder();
@@ -34,7 +35,7 @@ class Internals
   mojo::Handle TakeServicesProvidedToEmbedder();
 
  private:
-  explicit Internals(mojo::ServiceProviderPtr platform_service_provider,
+  explicit Internals(ServicesDataPtr services,
                      mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   // |mojo::InterfaceFactory<mojo::asset_bundle::AssetUnpacker>| implementation:
@@ -42,10 +43,11 @@ class Internals
       mojo::ApplicationConnection* connection,
       mojo::InterfaceRequest<mojo::asset_bundle::AssetUnpacker>) override;
 
+  ServicesDataPtr services_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
+
   mojo::ServiceProviderPtr service_provider_;
   mojo::ServiceProviderImpl service_provider_impl_;
-  mojo::ServiceProviderPtr platform_service_provider_;
 
   // A ServiceProvider supplied by the application that exposes services to
   // the embedder.

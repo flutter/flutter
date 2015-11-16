@@ -39,9 +39,7 @@ void UpdateTaskAndroid::Start() {
 }
 
 void UpdateTaskAndroid::DidCreateIsolate(Dart_Isolate isolate) {
-  Internals::Create(isolate, CreateServiceProvider(
-                                 Shell::Shared().service_provider_context()),
-                    nullptr);
+  Internals::Create(isolate, nullptr, nullptr);
 }
 
 void UpdateTaskAndroid::RunDartOnUIThread() {

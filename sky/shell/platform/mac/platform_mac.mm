@@ -14,7 +14,6 @@
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
-#include "sky/shell/service_provider.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui_delegate.h"
 #include "ui/gl/gl_surface.h"
@@ -65,8 +64,7 @@ int PlatformMacMain(int argc,
   mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
       new mojo::embedder::SimplePlatformSupport()));
 
-  sky::shell::Shell::InitStandalone(make_scoped_ptr(
-      new sky::shell::ServiceProviderContext(message_loop->task_runner())));
+  sky::shell::Shell::InitStandalone();
 
   result = callback();
 

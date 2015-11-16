@@ -39,7 +39,6 @@ ShellView::~ShellView() {
 
 void ShellView::CreateEngine() {
   Engine::Config config;
-  config.service_provider_context = shell_.service_provider_context();
   config.gpu_task_runner = shell_.gpu_task_runner();
   config.raster_callback = rasterizer_->GetRasterCallback();
   engine_.reset(new Engine(config));

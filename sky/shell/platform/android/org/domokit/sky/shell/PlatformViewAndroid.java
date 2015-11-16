@@ -28,6 +28,8 @@ import org.chromium.mojom.pointer.PointerPacket;
 import org.chromium.mojom.pointer.PointerType;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
+import org.chromium.mojom.sky.ServicesData;
+import org.chromium.mojom.mojo.ServiceProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,7 @@ public class PlatformViewAndroid extends SurfaceView {
 
     private long mNativePlatformView;
     private SkyEngine.Proxy mSkyEngine;
+    private PlatformServiceProvider mServiceProvider;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final EdgeDims mPadding;
     private final KeyboardServiceState mKeyboardState;
@@ -257,10 +260,19 @@ public class PlatformViewAndroid extends SurfaceView {
 
     private void attach() {
         Core core = CoreImpl.getInstance();
-        Pair<SkyEngine.Proxy, InterfaceRequest<SkyEngine>> result =
+        Pair<SkyEngine.Proxy, InterfaceRequest<SkyEngine>> engine =
                 SkyEngine.MANAGER.getInterfaceRequest(core);
-        mSkyEngine = result.first;
-        mNativePlatformView = nativeAttach(result.second.passHandle().releaseNativeHandle());
+        mSkyEngine = engine.first;
+        mNativePlatformView = nativeAttach(engine.second.passHandle().releaseNativeHandle());
+
+        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> serviceProvider =
+                ServiceProvider.MANAGER.getInterfaceRequest(core);
+        mServiceProvider = new PlatformServiceProvider(core, getContext());
+        ServiceProvider.MANAGER.bind(mServiceProvider, serviceProvider.second);
+
+        ServicesData services = new ServicesData();
+        services.servicesProvidedByEmbedder = serviceProvider.first;
+        mSkyEngine.setServices(services);
     }
 
     private static native long nativeAttach(int inputObserverHandle);
