@@ -5,17 +5,17 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../process.dart';
+import 'flutter_command.dart';
 
 final Logger _logging = new Logger('flutter_tools.run_mojo');
 
-class RunMojoCommand extends Command {
+class RunMojoCommand extends FlutterCommand {
   final String name = 'run_mojo';
   final String description = 'Run a Flutter app in mojo.';
 
@@ -29,6 +29,8 @@ class RunMojoCommand extends Command {
     argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services.');
     argParser.addOption('devtools-path', help: 'Path to mojo devtools\' mojo_run command.');
   }
+
+  bool get requiresProjectRoot => false;
 
   // TODO(abarth): Why not use path.absolute?
   String _makePathAbsolute(String relativePath) {
@@ -58,6 +60,18 @@ class RunMojoCommand extends Command {
     return _makePathAbsolute(path.join(argResults['mojo-path'], 'out', mojoBuildType, 'mojo_shell'));
   }
 
+  BuildConfiguration _getCurrentHostConfig() {
+    BuildConfiguration result;
+    TargetPlatform target = getCurrentHostPlatformAsTarget();
+    for (BuildConfiguration config in buildConfigurations) {
+      if (config.targetPlatform == target) {
+        result = config;
+        break;
+      }
+    }
+    return result;
+  }
+
   Future<List<String>> _getShellConfig() async {
     List<String> args = [];
 
@@ -77,8 +91,15 @@ class RunMojoCommand extends Command {
       args.add('--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo');
     } else {
       final appPath = _makePathAbsolute(argResults['app']);
-      Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
-      final viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      String viewerPath;
+      BuildConfiguration config = _getCurrentHostConfig();
+      if (config.type == BuildType.prebuilt) {
+        Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
+        viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      } else {
+        String localPath = path.join(config.buildDir, 'sky_viewer.mojo');
+        viewerPath = _makePathAbsolute(localPath);
+      }
       args.add('file://$appPath');
       args.add('--url-mappings=mojo:sky_viewer=file://$viewerPath');
     }
@@ -104,7 +125,7 @@ class RunMojoCommand extends Command {
   }
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     if ((argResults['mojo-path'] == null && argResults['devtools-path'] == null) || (argResults['mojo-path'] != null && argResults['devtools-path'] != null)) {
       _logging.severe('Must specify either --mojo-path or --devtools-path.');
       return 1;
@@ -117,4 +138,5 @@ class RunMojoCommand extends Command {
 
     return await runCommandAndStreamOutput(await _getShellConfig());
   }
+
 }
