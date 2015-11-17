@@ -150,7 +150,7 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
   auto pointer_data = pointer::Pointer::New();
 
   pointer_data->time_stamp =
-      base::TimeDelta::FromSecondsD(event.timestamp).InMilliseconds();
+      base::TimeDelta::FromSecondsD(event.timestamp).InMicroseconds();
   pointer_data->type = EventTypeFromNSEventPhase(phase);
   pointer_data->kind = pointer::PointerKind::TOUCH;
   pointer_data->pointer = 0;

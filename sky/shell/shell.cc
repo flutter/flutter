@@ -68,8 +68,6 @@ Shell::Shell(const Settings& settings) : settings_(settings) {
   io_thread_.reset(new base::Thread("io_thread"));
   io_thread_->StartWithOptions(options);
   io_task_runner_ = io_thread_->message_loop()->task_runner();
-
-  ui_task_runner()->PostTask(FROM_HERE, base::Bind(&Engine::Init));
 }
 
 Shell::~Shell() {
@@ -91,7 +89,9 @@ void Shell::InitStandalone() {
 
 void Shell::Init(const Settings& settings) {
   base::DiscardableMemoryAllocator::SetInstance(&g_discardable.Get());
+  DCHECK(!g_shell);
   g_shell = new Shell(settings);
+  g_shell->ui_task_runner()->PostTask(FROM_HERE, base::Bind(&Engine::Init));
 }
 
 Shell& Shell::Shared() {
