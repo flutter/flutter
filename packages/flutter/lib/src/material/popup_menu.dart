@@ -53,13 +53,13 @@ class _PopupMenuPainter extends CustomPainter {
   }
 }
 
-class _PopupMenu extends StatelessComponent {
+class _PopupMenu<T> extends StatelessComponent {
   _PopupMenu({
     Key key,
     this.route
   }) : super(key: key);
 
-  final _MenuRoute route;
+  final _PopupMenuRoute<T> route;
 
   Widget build(BuildContext context) {
     double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
@@ -118,11 +118,16 @@ class _PopupMenu extends StatelessComponent {
   }
 }
 
-class _MenuRoute extends ModalRoute {
-  _MenuRoute({ Completer completer, this.position, this.items, this.elevation }) : super(completer: completer);
+class _PopupMenuRoute<T> extends PopupRoute<T> {
+  _PopupMenuRoute({
+    Completer<T> completer,
+    this.position,
+    this.items,
+    this.elevation
+  }) : super(completer: completer);
 
   final ModalPosition position;
-  final List<PopupMenuItem> items;
+  final List<PopupMenuItem<T>> items;
   final int elevation;
 
   Performance createPerformance() {
@@ -133,15 +138,16 @@ class _MenuRoute extends ModalRoute {
     return result;
   }
 
-  bool get opaque => false;
   Duration get transitionDuration => _kMenuDuration;
+  bool get barrierDismissable => true;
+  Color get barrierColor => null;
 
   Widget buildPage(BuildContext context) => new _PopupMenu(route: this);
 }
 
 Future showMenu({ BuildContext context, ModalPosition position, List<PopupMenuItem> items, int elevation: 8 }) {
   Completer completer = new Completer();
-  Navigator.of(context).pushEphemeral(new _MenuRoute(
+  Navigator.of(context).push(new _PopupMenuRoute(
     completer: completer,
     position: position,
     items: items,
