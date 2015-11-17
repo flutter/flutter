@@ -704,7 +704,6 @@ BidiRun* RenderParagraph::computeInlineDirectionPositionsForSegment(RootInlineBo
     unsigned expansionOpportunityCount = 0;
     bool isAfterExpansion = true;
     Vector<unsigned, 16> expansionOpportunities;
-    RenderObject* previousObject = 0;
     TextJustify textJustify = style()->textJustify();
 
     BidiRun* r = firstRun;
@@ -744,7 +743,6 @@ BidiRun* RenderParagraph::computeInlineDirectionPositionsForSegment(RootInlineBo
         }
 
         totalLogicalWidth += r->m_box->logicalWidth();
-        previousObject = r->m_object;
     }
 
     if (isAfterExpansion && !expansionOpportunities.isEmpty()) {

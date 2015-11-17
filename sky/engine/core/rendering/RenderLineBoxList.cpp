@@ -144,11 +144,6 @@ void RenderLineBoxList::dirtyLineBoxes()
 
 bool RenderLineBoxList::rangeIntersectsRect(RenderBoxModelObject* renderer, LayoutUnit logicalTop, LayoutUnit logicalBottom, const LayoutRect& rect, const LayoutPoint& offset) const
 {
-    RenderBox* block;
-    if (renderer->isBox())
-        block = toRenderBox(renderer);
-    else
-        block = renderer->containingBlock();
     LayoutUnit physicalStart = logicalTop;
     LayoutUnit physicalEnd = logicalBottom;
     LayoutUnit physicalExtent = absoluteValue(physicalEnd - physicalStart);
