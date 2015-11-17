@@ -165,13 +165,13 @@ class WidgetTester {
     final kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
     final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
     double timeStamp = 0.0;
-    _dispatchEvent(p.down(startLocation, timeStamp: timeStamp), result);
+    _dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
     for(int i = 0; i < kMoveCount; i++) {
       final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-      _dispatchEvent(p.move(location, timeStamp: timeStamp), result);
+      _dispatchEvent(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       timeStamp += timeStampDelta;
     }
-    _dispatchEvent(p.up(timeStamp: timeStamp), result);
+    _dispatchEvent(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
   }
 
   void scroll(Element element, Offset offset, { int pointer: 1 }) {
