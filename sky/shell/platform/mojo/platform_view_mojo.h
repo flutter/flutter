@@ -21,9 +21,10 @@ class PlatformViewMojo : public PlatformView,
   explicit PlatformViewMojo(const Config& config);
   ~PlatformViewMojo() override;
 
-  void Init(mojo::ShellPtr shell);
+  void Init(mojo::Shell* shell);
 
   void Run(const mojo::String& url,
+           ServicesDataPtr services,
            mojo::asset_bundle::AssetBundlePtr bundle);
 
  private:

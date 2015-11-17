@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "base/bind.h"
+#include "base/command_line.h"
 #include "base/i18n/icu_util.h"
 #include "base/lazy_instance.h"
 #include "base/memory/discardable_memory.h"
@@ -14,6 +15,7 @@
 #include "base/single_thread_task_runner.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "sky/shell/ui/engine.h"
+#include "sky/shell/switches.h"
 #include "ui/gl/gl_surface.h"
 
 namespace sky {
@@ -49,7 +51,7 @@ base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 
 }  // namespace
 
-Shell::Shell() {
+Shell::Shell(const Settings& settings) : settings_(settings) {
   DCHECK(!g_shell);
 
   base::Thread::Options options;
@@ -78,12 +80,18 @@ void Shell::InitStandalone() {
 #if !defined(OS_LINUX)
   CHECK(gfx::GLSurface::InitializeOneOff());
 #endif
-  Init();
+
+  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+
+  Settings settings;
+  settings.enable_dart_checked_mode =
+      command_line.HasSwitch(switches::kEnableCheckedMode);
+  Init(settings);
 }
 
-void Shell::Init() {
+void Shell::Init(const Settings& settings) {
   base::DiscardableMemoryAllocator::SetInstance(&g_discardable.Get());
-  g_shell = new Shell();
+  g_shell = new Shell(settings);
 }
 
 Shell& Shell::Shared() {

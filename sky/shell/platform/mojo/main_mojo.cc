@@ -19,6 +19,12 @@
 
 namespace sky {
 namespace shell {
+namespace {
+
+// Instruct the DartVM to report type errors.
+const char kEnableCheckedMode[] = "--enable-checked-mode";
+
+}  // namespace
 
 class MojoApp : public mojo::ApplicationDelegate,
                 public mojo::InterfaceFactory<mojo::ContentHandler> {
@@ -31,7 +37,11 @@ class MojoApp : public mojo::ApplicationDelegate,
   void Initialize(mojo::ApplicationImpl* app) override {
     mojo::icu::Initialize(app);
     tracing_.Initialize(app);
-    Shell::Init();
+
+    Shell::Settings settings;
+    settings.enable_dart_checked_mode = app->HasArg(kEnableCheckedMode);
+
+    Shell::Init(settings);
   }
 
   bool ConfigureIncomingConnection(

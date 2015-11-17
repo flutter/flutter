@@ -31,9 +31,10 @@ class Internals
                      mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   mojo::Handle TakeShellProxy();
+  mojo::Handle TakeServiceRegistry();
   mojo::Handle TakeServicesProvidedByEmbedder();
-  mojo::Handle TakeRootBundleHandle();
   mojo::Handle TakeServicesProvidedToEmbedder();
+  mojo::Handle TakeRootBundleHandle();
 
  private:
   explicit Internals(ServicesDataPtr services,

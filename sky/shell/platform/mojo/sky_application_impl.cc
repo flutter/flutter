@@ -27,16 +27,29 @@ void SkyApplicationImpl::Initialize(mojo::ShellPtr shell,
   DCHECK(initial_response_);
   UnpackInitialResponse(shell.get());
   shell_view_.reset(new ShellView(Shell::Shared()));
-  PlatformViewMojo* view = platform_view();
-  view->Init(shell.Pass());
-  view->Run(url, bundle_.Pass());
+  platform_view()->Init(shell.get());
+  shell_ = shell.Pass();
 }
 
 void SkyApplicationImpl::AcceptConnection(
     const mojo::String& requestor_url,
-    mojo::InterfaceRequest<mojo::ServiceProvider> services,
-    mojo::ServiceProviderPtr exposed_services,
+    mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
+    mojo::ServiceProviderPtr incoming_services,
     const mojo::String& resolved_url) {
+  if (!bundle_) {
+    LOG(INFO) << "Cannot handle multiple connections yet.";
+    return;
+  }
+
+  mojo::ServiceRegistryPtr service_registry;
+
+  if (incoming_services)
+    mojo::ConnectToService(incoming_services.get(), &service_registry);
+
+  ServicesDataPtr services = ServicesData::New();
+  services->shell = shell_.Pass();
+  services->service_registry = service_registry.Pass();
+  platform_view()->Run(resolved_url, services.Pass(), bundle_.Pass());
 }
 
 void SkyApplicationImpl::RequestQuit() {

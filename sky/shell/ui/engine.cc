@@ -5,7 +5,6 @@
 #include "sky/shell/ui/engine.h"
 
 #include "base/bind.h"
-#include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/threading/worker_pool.h"
 #include "base/time/time.h"
@@ -19,8 +18,7 @@
 #include "sky/engine/public/web/WebRuntimeFeatures.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
 #include "sky/shell/dart/dart_library_provider_network.h"
-#include "sky/shell/switches.h"
-#include "sky/shell/switches.h"
+#include "sky/shell/shell.h"
 #include "sky/shell/ui/animator.h"
 #include "sky/shell/ui/internals.h"
 #include "sky/shell/ui/platform_impl.h"
@@ -75,9 +73,8 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
 void Engine::Init() {
   TRACE_EVENT0("flutter", "Engine::Init");
 
-  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   blink::WebRuntimeFeatures::enableDartCheckedMode(
-      command_line.HasSwitch(switches::kEnableCheckedMode));
+    Shell::Shared().settings().enable_dart_checked_mode);
 
   DCHECK(!g_platform_impl);
   g_platform_impl = new PlatformImpl();

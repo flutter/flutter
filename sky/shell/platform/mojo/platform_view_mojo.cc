@@ -54,17 +54,16 @@ PlatformViewMojo::PlatformViewMojo(const Config& config)
 PlatformViewMojo::~PlatformViewMojo() {
 }
 
-void PlatformViewMojo::Init(mojo::ShellPtr shell) {
-  mojo::ConnectToService(
-      shell.get(), "mojo:native_viewport_service", &viewport_);
+void PlatformViewMojo::Init(mojo::Shell* shell) {
+  mojo::ConnectToService(shell, "mojo:native_viewport_service", &viewport_);
 
   mojo::NativeViewportEventDispatcherPtr ptr;
   dispatcher_binding_.Bind(GetProxy(&ptr));
   viewport_->SetEventDispatcher(ptr.Pass());
 
   mojo::SizePtr size = mojo::Size::New();
-  size->width = 800;
-  size->height = 600;
+  size->width = 320;
+  size->height = 640;
 
   viewport_->Create(
       size.Clone(),
@@ -88,13 +87,12 @@ void PlatformViewMojo::Init(mojo::ShellPtr shell) {
 
   ConnectToEngine(mojo::GetProxy(&sky_engine_));
 
-  ServicesDataPtr services = ServicesData::New();
-  services->shell = shell.Pass();
-  sky_engine_->SetServices(services.Pass());
 }
 
 void PlatformViewMojo::Run(const mojo::String& url,
+                           ServicesDataPtr services,
                            mojo::asset_bundle::AssetBundlePtr bundle) {
+  sky_engine_->SetServices(services.Pass());
   sky_engine_->RunFromAssetBundle(url, bundle.Pass());
 }
 
