@@ -13,19 +13,20 @@ PlatformView* PlatformView::Create(const Config& config) {
   return new PlatformViewMac(config);
 }
 
-PlatformViewMac::PlatformViewMac(const Config& config) : PlatformView(config) {}
+PlatformViewMac::PlatformViewMac(const Config& config)
+    : PlatformView(config), window_(gfx::kNullAcceleratedWidget) {}
 
 PlatformViewMac::~PlatformViewMac() {}
 
 void PlatformViewMac::SurfaceCreated(gfx::AcceleratedWidget widget) {
-  DCHECK(window_ == 0);
+  DCHECK(window_ == gfx::kNullAcceleratedWidget);
   window_ = widget;
   SurfaceNotificationsDirect::NotifyCreated(config_, window_);
 }
 
 void PlatformViewMac::SurfaceDestroyed() {
-  DCHECK(window_);
-  window_ = 0;
+  DCHECK(window_ != gfx::kNullAcceleratedWidget);
+  window_ = gfx::kNullAcceleratedWidget;
   SurfaceNotificationsDirect::NotifyDestroyed(config_);
 }
 
