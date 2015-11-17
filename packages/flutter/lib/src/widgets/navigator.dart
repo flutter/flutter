@@ -40,16 +40,15 @@ abstract class Route<T> {
   /// Whether calling didPop() would return false.
   bool get willHandlePopInternally => false;
 
-  /// The given route has been pushed onto the navigator after this route.
-  void didPushNext(Route nextRoute) { }
-
   /// The given route, which came after this one, has been popped off the
   /// navigator.
   void didPopNext(Route nextRoute) { }
 
-  /// The given old route, which was the route that came after this one, has
-  /// been replaced with the given new route.
-  void didReplaceNext(Route oldNextRoute, Route newNextRoute) { }
+  /// This route's next route has changed to the given new route. This is called
+  /// on a route whenever the next route changes for any reason, except for
+  /// cases when didPopNext() would be called, so long as it is in the history.
+  /// nextRoute will be null if there's no next route.
+  void didChangeNext(Route nextRoute) { }
 
   /// The route should remove its overlays and free any other resources.
   ///
@@ -238,8 +237,9 @@ class NavigatorState extends State<Navigator> {
       route.install(_currentOverlayEntry);
       _history.add(route);
       route.didPush();
+      route.didChangeNext(null);
       if (oldRoute != null)
-        oldRoute.didPushNext(route);
+        oldRoute.didChangeNext(route);
       config.observer?.didPush(route, oldRoute);
     });
     assert(() { _debugLocked = false; return true; });
@@ -264,8 +264,12 @@ class NavigatorState extends State<Navigator> {
       newRoute.install(oldRoute.overlayEntries.last);
       _history[index] = newRoute;
       newRoute.didReplace(oldRoute);
+      if (index + 1 < _history.length)
+        newRoute.didChangeNext(_history[index + 1]);
+      else
+        newRoute.didChangeNext(null);
       if (index > 0)
-        _history[index - 1].didReplaceNext(oldRoute, newRoute);
+        _history[index - 1].didChangeNext(newRoute);
       oldRoute.dispose();
       oldRoute._navigator = null;
     });
@@ -290,6 +294,9 @@ class NavigatorState extends State<Navigator> {
     assert(targetRoute.overlayEntries.isEmpty || !overlay.debugIsVisible(targetRoute.overlayEntries.last));
     setState(() {
       _history.removeAt(index);
+      Route newRoute = index < _history.length ? _history[index] : null;
+      if (index > 0)
+        _history[index - 1].didChangeNext(newRoute);
       targetRoute.dispose();
       targetRoute._navigator = null;
     });
@@ -378,17 +385,16 @@ class NavigatorTransaction {
   }
 
   /// Adds the given route to the Navigator's history, and transitions to it.
-  /// The route will have didPush() called on it; the previous route, if any,
-  /// will have didPushNext() called on it; and the Navigator observer, if any,
-  /// will have didPush() called on it.
+  /// The route will have didPush() and didChangeNext() called on it; the
+  /// previous route, if any, will have didChangeNext() called on it; and the
+  /// Navigator observer, if any, will have didPush() called on it.
   void push(Route route, { Set<Key> mostValuableKeys }) {
     assert(_debugOpen);
     _navigator._push(route, mostValuableKeys: mostValuableKeys);
   }
 
-  /// Replaces one given route with another, but does not call didPush/didPop.
-  /// Instead, this calls install() on the new route, then didReplace() on the
-  /// new route passing the old route, then dispose() on the old route. The
+  /// Replaces one given route with another. Calls install(), didReplace(), and
+  /// didChangeNext() on the new route, then dispose() on the old route. The
   /// navigator is not informed of the replacement.
   ///
   /// The old route must have overlay entries, otherwise we won't know where to
@@ -416,8 +422,8 @@ class NavigatorTransaction {
     _navigator._replaceRouteBefore(anchorRoute: anchorRoute, newRoute: newRoute);
   }
 
-  /// Removes the route prior to the given anchorRoute without notifying
-  /// neighbouring routes or the navigator observer, if any.
+  /// Removes the route prior to the given anchorRoute, and calls didChangeNext
+  /// on the route prior to that one, if any. The observer is not notified.
   void removeRouteBefore(Route anchorRoute) {
     assert(_debugOpen);
     _navigator._removeRouteBefore(anchorRoute);
@@ -426,7 +432,7 @@ class NavigatorTransaction {
   /// Tries to removes the current route, calling its didPop() method. If that
   /// method returns false, then nothing else happens. Otherwise, the observer
   /// (if any) is notified using its didPop() method, and the previous route is
-  /// notified using [Route.didPopNext].
+  /// notified using [Route.didChangeNext].
   ///
   /// The type of the result argument, if provided, must match the type argument
   /// of the class of the current route. (In practice, this is usually
