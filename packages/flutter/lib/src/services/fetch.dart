@@ -3,30 +3,19 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
-import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/url_request.mojom.dart';
 import 'package:mojo/mojo/url_response.mojom.dart';
-import 'package:mojo_services/mojo/network_service.mojom.dart';
 import 'package:mojo_services/mojo/url_loader.mojom.dart';
 
-import 'shell.dart';
+import '../http/mojo_client.dart';
 
 export 'package:mojo/mojo/url_response.mojom.dart' show UrlResponse;
-
-NetworkServiceProxy _initNetworkService() {
-  NetworkServiceProxy networkService = new NetworkServiceProxy.unbound();
-  shell.connectToService("mojo:authenticated_network_service", networkService);
-  return networkService;
-}
-
-final NetworkServiceProxy _networkService = _initNetworkService();
 
 Future<UrlResponse> fetch(UrlRequest request) async {
   UrlLoaderProxy loader = new UrlLoaderProxy.unbound();
   try {
-    _networkService.ptr.createUrlLoader(loader);
+    MojoClient.networkService.ptr.createUrlLoader(loader);
     UrlResponse response = (await loader.ptr.start(request)).response;
     return response;
   } catch (e) {

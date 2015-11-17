@@ -40,7 +40,9 @@ class NetworkAssetBundle extends AssetBundle {
 
   ImageResource loadImage(String key) => imageCache.load(_urlFromKey(key));
 
-  Future<String> loadString(String key) => http.get(_urlFromKey(key));
+  Future<String> loadString(String key) async {
+    return (await http.get(_urlFromKey(key))).body;
+  }
 }
 
 Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
