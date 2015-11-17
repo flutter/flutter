@@ -749,6 +749,8 @@ class Positioned extends ParentDataWidget {
        top = rect.top,
        width = rect.width,
        height = rect.height,
+       right = null,
+       bottom = null,
        super(key: key, child: child);
 
   final double top;
