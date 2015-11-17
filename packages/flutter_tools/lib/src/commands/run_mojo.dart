@@ -73,39 +73,39 @@ class RunMojoCommand extends FlutterCommand {
   }
 
   Future<List<String>> _getShellConfig() async {
-    List<String> args = [];
+    List<String> args = <String>[];
 
-    final useDevtools = _useDevtools();
-    final command = useDevtools ? _getDevtoolsPath() : _getMojoShellPath();
+    final bool useDevtools = _useDevtools();
+    final String command = useDevtools ? _getDevtoolsPath() : _getMojoShellPath();
     args.add(command);
 
     if (argResults['android']) {
       args.add('--android');
-      final skyViewerUrl = ArtifactStore.getCloudStorageBaseUrl('viewer', 'android-arm');
-      final appPath = _makePathAbsolute(argResults['app']);
-      final appName = path.basename(appPath);
-      final appDir = path.dirname(appPath);
+      final String cloudStorageBaseUrl = ArtifactStore.getCloudStorageBaseUrl('shell', 'android-arm');
+      final String appPath = _makePathAbsolute(argResults['app']);
+      final String appName = path.basename(appPath);
+      final String appDir = path.dirname(appPath);
       args.add('http://app/$appName');
       args.add('--map-origin=http://app/=$appDir');
-      args.add('--map-origin=http://sky_viewer/=$skyViewerUrl');
-      args.add('--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo');
+      args.add('--map-origin=http://flutter/=$cloudStorageBaseUrl');
+      args.add('--url-mappings=mojo:flutter=http://flutter/flutter.mojo');
     } else {
-      final appPath = _makePathAbsolute(argResults['app']);
-      String viewerPath;
+      final String appPath = _makePathAbsolute(argResults['app']);
+      String flutterPath;
       BuildConfiguration config = _getCurrentHostConfig();
-      if (config.type == BuildType.prebuilt) {
-        Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
-        viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      if (config == null || config.type == BuildType.prebuilt) {
+        Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: TargetPlatform.linux);
+        flutterPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
       } else {
-        String localPath = path.join(config.buildDir, 'sky_viewer.mojo');
-        viewerPath = _makePathAbsolute(localPath);
+        String localPath = path.join(config.buildDir, 'flutter.mojo');
+        flutterPath = _makePathAbsolute(localPath);
       }
       args.add('file://$appPath');
-      args.add('--url-mappings=mojo:sky_viewer=file://$viewerPath');
+      args.add('--url-mappings=mojo:flutter=file://$flutterPath');
     }
 
     if (useDevtools) {
-      final buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
+      final String buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
       args.add(buildFlag);
       if (_logging.level <= Level.INFO) {
         args.add('--verbose');
@@ -116,7 +116,7 @@ class RunMojoCommand extends FlutterCommand {
     }
 
     if (argResults['checked']) {
-      args.add('--args-for=mojo:sky_viewer --enable-checked-mode');
+      args.add('--args-for=mojo:flutter --enable-checked-mode');
     }
 
     args.addAll(argResults.rest);
