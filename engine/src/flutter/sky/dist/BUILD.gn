@@ -22,10 +22,13 @@ copy("sky_shell") {
   if (is_android) {
     sources = [
       "$root_build_dir/apks/SkyShell.apk",
+      "$root_build_dir/flutter.mojo",
+      "$root_build_dir/symbols/libflutter_library.so",
     ]
 
     deps = [
       "//sky/shell",
+      "//sky/shell/platform/mojo",
     ]
   } else if (is_mac) {
     sources = [
@@ -37,12 +40,16 @@ copy("sky_shell") {
     ]
   } else if(!is_ios) {
     sources = [
-      "$root_build_dir/sky_shell",
+      "$root_build_dir/flutter.mojo",
       "$root_build_dir/icudtl.dat",
+      "$root_build_dir/sky_shell",
+      "$root_build_dir/symbols/libflutter_library.so",
     ]
 
     deps = [
       "//sky/shell",
+      "//sky/shell/platform/mojo",
+      "//sky/shell/platform/mojo",
       "//third_party/icu:icudata",
     ]
   } else {
