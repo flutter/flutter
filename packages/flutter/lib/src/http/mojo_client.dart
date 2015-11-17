@@ -66,7 +66,7 @@ class MojoClient {
       Map<String, String> headers, [body, Encoding encoding]) async {
     mojo.UrlLoaderProxy loader = new mojo.UrlLoaderProxy.unbound();
     List<mojo.HttpHeader> mojoHeaders = <mojo.HttpHeader>[];
-    headers.forEach((String name, String value) {
+    headers?.forEach((String name, String value) {
       mojo.HttpHeader header = new mojo.HttpHeader()
         ..name = name
         ..value = value;

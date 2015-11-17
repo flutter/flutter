@@ -23,18 +23,6 @@ NetworkServiceProxy _initNetworkService() {
 
 final NetworkServiceProxy _networkService = _initNetworkService();
 
-class Response {
-  ByteData body;
-
-  Response(this.body);
-
-  String bodyAsString() {
-    if (body == null)
-      return null;
-    return new String.fromCharCodes(new Uint8List.view(body.buffer));
-  }
-}
-
 Future<UrlResponse> fetch(UrlRequest request) async {
   UrlLoaderProxy loader = new UrlLoaderProxy.unbound();
   try {
@@ -55,17 +43,4 @@ Future<UrlResponse> fetchUrl(String relativeUrl) {
     ..url = url
     ..autoFollowRedirects = true;
   return fetch(request);
-}
-
-Future<Response> fetchBody(String relativeUrl) async {
-  UrlResponse response = await fetchUrl(relativeUrl);
-  if (response.body == null) return new Response(null);
-
-  ByteData data = await core.DataPipeDrainer.drainHandle(response.body);
-  return new Response(data);
-}
-
-Future<String> fetchString(String relativeUrl) async {
-  Response response = await fetchBody(relativeUrl);
-  return response.bodyAsString();
 }
