@@ -107,7 +107,7 @@ template("sky_app") {
       if (defined(invoker.entitlements_path)) {
         entitlements_path = invoker.entitlements_path
       } else {
-        entitlements_path = "//sky/shell/ios/Entitlements.xcent"
+        entitlements_path = "//sky/shell/platform/ios/Entitlements.xcent"
       }
 
       resources_gen_target_name = target_name + "_res"
