@@ -34,7 +34,7 @@ class _PopupMenu extends StatelessComponent {
     final BoxPainter painter = new BoxPainter(new BoxDecoration(
       backgroundColor: Theme.of(context).canvasColor,
       borderRadius: 2.0,
-      boxShadow: shadows[route.level]
+      boxShadow: elevationToShadow[route.elevation]
     ));
 
     double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
@@ -93,11 +93,11 @@ class _PopupMenu extends StatelessComponent {
 }
 
 class _MenuRoute extends ModalRoute {
-  _MenuRoute({ Completer completer, this.position, this.items, this.level }) : super(completer: completer);
+  _MenuRoute({ Completer completer, this.position, this.items, this.elevation }) : super(completer: completer);
 
   final ModalPosition position;
   final List<PopupMenuItem> items;
-  final int level;
+  final int elevation;
 
   Performance createPerformance() {
     Performance result = super.createPerformance();
@@ -113,13 +113,13 @@ class _MenuRoute extends ModalRoute {
   Widget buildPage(BuildContext context) => new _PopupMenu(route: this);
 }
 
-Future showMenu({ BuildContext context, ModalPosition position, List<PopupMenuItem> items, int level: 4 }) {
+Future showMenu({ BuildContext context, ModalPosition position, List<PopupMenuItem> items, int elevation: 8 }) {
   Completer completer = new Completer();
   Navigator.of(context).pushEphemeral(new _MenuRoute(
     completer: completer,
     position: position,
     items: items,
-    level: level
+    elevation: elevation
   ));
   return completer.future;
 }

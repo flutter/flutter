@@ -146,7 +146,7 @@ class StockHomeState extends State<StockHome> {
 
   Widget buildToolBar() {
     return new ToolBar(
-      level: 0,
+      elevation: 0,
       left: new IconButton(
         icon: "navigation/menu",
         onPressed: _showDrawer

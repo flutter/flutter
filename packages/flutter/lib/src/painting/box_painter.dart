@@ -8,7 +8,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'shadows.dart';
 
 /// An immutable set of offsets in each of the four cardinal directions.
 ///
@@ -253,11 +252,13 @@ class Border {
 ///
 /// Note: BoxShadow can cast non-rectangular shadows if the box is
 /// non-rectangular (e.g., has a border radius or a circular shape).
+/// This class is similar to CSS box-shadow.
 class BoxShadow {
   const BoxShadow({
     this.color,
     this.offset,
-    this.blur
+    this.blurRadius,
+    this.spreadRadius: 0.0
   });
 
   /// The color of the shadow
@@ -267,14 +268,20 @@ class BoxShadow {
   final Offset offset;
 
   /// The standard deviation of the Gaussian to convolve with the box's shape
-  final double blur;
+  final double blurRadius;
 
-  /// Returns a new box shadow with its offset and blur scaled by the given factor
+  final double spreadRadius;
+
+  // See SkBlurMask::ConvertRadiusToSigma()
+  double get _blurSigma => blurRadius * 0.57735 + 0.5;
+
+  /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor
   BoxShadow scale(double factor) {
     return new BoxShadow(
       color: color,
       offset: offset * factor,
-      blur: blur * factor
+      blurRadius: blurRadius * factor,
+      spreadRadius: spreadRadius * factor
     );
   }
 
@@ -282,7 +289,7 @@ class BoxShadow {
   ///
   /// If either box shadow is null, this function linearly interpolates from a
   /// a box shadow that matches the other box shadow in color but has a zero
-  /// offset and a zero blur.
+  /// offset and a zero blurRadius.
   static BoxShadow lerp(BoxShadow a, BoxShadow b, double t) {
     if (a == null && b == null)
       return null;
@@ -293,7 +300,8 @@ class BoxShadow {
     return new BoxShadow(
       color: Color.lerp(a.color, b.color, t),
       offset: Offset.lerp(a.offset, b.offset, t),
-      blur: ui.lerpDouble(a.blur, b.blur, t)
+      blurRadius: ui.lerpDouble(a.blurRadius, b.blurRadius, t),
+      spreadRadius: ui.lerpDouble(a.spreadRadius, b.spreadRadius, t)
     );
   }
 
@@ -326,18 +334,20 @@ class BoxShadow {
     final BoxShadow typedOther = other;
     return color == typedOther.color &&
            offset == typedOther.offset &&
-           blur == typedOther.blur;
+           blurRadius == typedOther.blurRadius &&
+           spreadRadius == typedOther.spreadRadius;
   }
 
   int get hashCode {
     int value = 373;
     value = 37 * value + color.hashCode;
     value = 37 * value + offset.hashCode;
-    value = 37 * value + blur.hashCode;
+    value = 37 * value + blurRadius.hashCode;
+    value = 37 * value + spreadRadius.hashCode;
     return value;
   }
 
-  String toString() => 'BoxShadow($color, $offset, $blur)';
+  String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
 }
 
 /// A 2D gradient
@@ -894,13 +904,6 @@ class BoxPainter {
       if (_decoration.backgroundColor != null)
         paint.color = _decoration.backgroundColor;
 
-      if (_decoration.boxShadow != null) {
-        var builder = new ShadowDrawLooperBuilder();
-        for (BoxShadow boxShadow in _decoration.boxShadow)
-          builder.addShadow(boxShadow.offset, boxShadow.color, boxShadow.blur);
-        paint.drawLooper = builder.build();
-      }
-
       if (_decoration.gradient != null)
         paint.shader = _decoration.gradient.createShader();
 
@@ -937,27 +940,40 @@ class BoxPainter {
     return _decoration.borderRadius > shortestSide ? shortestSide : _decoration.borderRadius;
   }
 
-  void _paintBackgroundColor(ui.Canvas canvas, Rect rect) {
-    if (_decoration.backgroundColor != null ||
-        _decoration.boxShadow != null ||
-        _decoration.gradient != null) {
-      switch (_decoration.shape) {
-        case Shape.circle:
-          assert(_decoration.borderRadius == null);
-          Point center = rect.center;
-          double radius = rect.shortestSide / 2.0;
-          canvas.drawCircle(center, radius, _backgroundPaint);
-          break;
-        case Shape.rectangle:
-          if (_decoration.borderRadius == null) {
-            canvas.drawRect(rect, _backgroundPaint);
-          } else {
-            double radius = _getEffectiveBorderRadius(rect);
-            canvas.drawRRect(new ui.RRect.fromRectXY(rect, radius, radius), _backgroundPaint);
-          }
-          break;
-      }
+  void _paintBox(ui.Canvas canvas, Rect rect, Paint paint) {
+    switch (_decoration.shape) {
+      case Shape.circle:
+        assert(_decoration.borderRadius == null);
+        Point center = rect.center;
+        double radius = rect.shortestSide / 2.0;
+        canvas.drawCircle(center, radius, paint);
+        break;
+      case Shape.rectangle:
+        if (_decoration.borderRadius == null) {
+          canvas.drawRect(rect, paint);
+        } else {
+          double radius = _getEffectiveBorderRadius(rect);
+          canvas.drawRRect(new ui.RRect.fromRectXY(rect, radius, radius), paint);
+        }
+        break;
     }
+  }
+
+  void _paintShadows(ui.Canvas canvas, Rect rect) {
+    if (_decoration.boxShadow == null)
+      return;
+    for (BoxShadow boxShadow in _decoration.boxShadow) {
+      final Paint paint = new Paint()
+        ..color = boxShadow.color
+        ..maskFilter = new ui.MaskFilter.blur(ui.BlurStyle.normal, boxShadow._blurSigma);
+      final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+      _paintBox(canvas, bounds, paint);
+    }
+  }
+
+  void _paintBackgroundColor(ui.Canvas canvas, Rect rect) {
+    if (_decoration.backgroundColor != null || _decoration.gradient != null)
+      _paintBox(canvas, rect, _backgroundPaint);
   }
 
   void _paintBackgroundImage(ui.Canvas canvas, Rect rect) {
@@ -1071,6 +1087,7 @@ class BoxPainter {
 
   /// Paint the box decoration into the given location on the given canvas
   void paint(ui.Canvas canvas, Rect rect) {
+    _paintShadows(canvas, rect);
     _paintBackgroundColor(canvas, rect);
     _paintBackgroundImage(canvas, rect);
     _paintBorder(canvas, rect);

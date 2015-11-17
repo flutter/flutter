@@ -85,7 +85,7 @@ class _DropdownMenu extends StatusTransitionComponent {
     final BoxPainter menuPainter = new BoxPainter(new BoxDecoration(
       backgroundColor: Theme.of(context).canvasColor,
       borderRadius: 2.0,
-      boxShadow: shadows[route.level]
+      boxShadow: elevationToShadow[route.elevation]
     ));
 
     final RenderBox renderBox = Navigator.of(context).context.findRenderObject();
@@ -129,13 +129,13 @@ class _MenuRoute extends TransitionRoute {
     this.items,
     this.selectedIndex,
     this.rect,
-    this.level: 4
+    this.elevation: 8
   });
 
   final Completer completer;
   final Rect rect;
   final List<DropdownMenuItem> items;
-  final int level;
+  final int elevation;
   final int selectedIndex;
 
   bool get opaque => false;
@@ -183,13 +183,13 @@ class DropdownButton<T> extends StatelessComponent {
     this.items,
     this.value,
     this.onChanged,
-    this.level: 4
+    this.elevation: 8
   }) : super(key: key);
 
   final List<DropdownMenuItem<T>> items;
   final T value;
   final ValueChanged<T> onChanged;
-  final int level;
+  final int elevation;
 
   void _showDropdown(BuildContext context, int selectedIndex, GlobalKey indexedStackKey) {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
@@ -200,7 +200,7 @@ class DropdownButton<T> extends StatelessComponent {
       items: items,
       selectedIndex: selectedIndex,
       rect: _kMenuHorizontalPadding.inflateRect(rect),
-      level: level
+      elevation: elevation
     ));
     completer.future.then((T newValue) {
       if (onChanged != null)

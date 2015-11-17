@@ -13,7 +13,7 @@ void main() {
       gradient: new RadialGradient(
         center: Point.origin, radius: 500.0,
         colors: <Color>[Colors.yellow[500], Colors.blue[500]]),
-      boxShadow: shadows[3])
+      boxShadow: elevationToShadow[8])
   );
   var paddedBox = new RenderPadding(
     padding: const EdgeDims.all(50.0),

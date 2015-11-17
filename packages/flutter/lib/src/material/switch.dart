@@ -134,8 +134,8 @@ class _RenderSwitch extends RenderToggleable {
     // Draw the raised thumb with a shadow
     paint.color = thumbColor;
     ShadowDrawLooperBuilder builder = new ShadowDrawLooperBuilder();
-    for (BoxShadow boxShadow in shadows[1])
-      builder.addShadow(boxShadow.offset, boxShadow.color, boxShadow.blur);
+    for (BoxShadow boxShadow in elevationToShadow[1])
+      builder.addShadow(boxShadow.offset, boxShadow.color, boxShadow.blurRadius);
     paint.drawLooper = builder.build();
 
     // The thumb contracts slightly during the animation

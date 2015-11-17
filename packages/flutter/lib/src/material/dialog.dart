@@ -102,7 +102,7 @@ class Dialog extends StatelessComponent {
         child: new ConstrainedBox(
           constraints: new BoxConstraints(minWidth: 280.0),
           child: new Material(
-            level: 4,
+            elevation: 24,
             color: _getColor(context),
             type: MaterialType.card,
             child: new IntrinsicWidth(

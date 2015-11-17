@@ -22,7 +22,7 @@ class FlatButton extends MaterialButton {
 
 class _FlatButtonState extends MaterialButtonState<FlatButton> {
 
-  int get level => 0;
+  int get elevation => 0;
 
   Color getColor(BuildContext context, { bool highlight }) {
     if (!config.enabled || !highlight)

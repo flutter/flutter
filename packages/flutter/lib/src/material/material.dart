@@ -23,16 +23,16 @@ class Material extends StatelessComponent {
     Key key,
     this.child,
     this.type: MaterialType.canvas,
-    this.level: 0,
+    this.elevation: 0,
     this.color,
     this.textStyle
   }) : super(key: key) {
-    assert(level != null);
+    assert(elevation != null);
   }
 
   final Widget child;
   final MaterialType type;
-  final int level;
+  final int elevation;
   final Color color;
   final TextStyle textStyle;
 
@@ -72,7 +72,7 @@ class Material extends StatelessComponent {
         decoration: new BoxDecoration(
           backgroundColor: _getBackgroundColor(context),
           borderRadius: _kEdges[type],
-          boxShadow: level == 0 ? null : shadows[level],
+          boxShadow: elevation == 0 ? null : elevationToShadow[elevation],
           shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
         ),
         child: contents
