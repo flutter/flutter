@@ -21,7 +21,7 @@ void main() {
     List executedTasks = [];
 
     void scheduleAddingTask(int x) {
-      tasks.schedule(() { executedTasks.add(x); }, Priority.kIdle + x);
+      tasks.schedule(() { executedTasks.add(x); }, Priority.idle + x);
     }
 
     for (int x in input) {

@@ -3,26 +3,25 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show VoidCallback;
 
 import 'package:collection/priority_queue.dart';
 import 'package:flutter/animation.dart' as animation show scheduler;
-
-typedef Task();
 
 /// An entry in the scheduler's priority queue.
 ///
 /// Combines the task and its priority.
 class _SchedulerEntry {
-  final Task task;
+  final VoidCallback task;
   final int priority;
 
-  _SchedulerEntry(this.task, this.priority);
+  const _SchedulerEntry(this.task, this.priority);
 }
 
 class Priority {
-  static const kIdle = const Priority._(0);
-  static const kAnimation = const Priority._(100000);
-  static const kTouch = const Priority._(200000);
+  static const Priority idle = const Priority._(0);
+  static const Priority animation = const Priority._(100000);
+  static const Priority touch = const Priority._(200000);
 
   /// Relative priorities are clamped by this offset.
   ///
@@ -31,11 +30,10 @@ class Priority {
   /// discouraged.
   static const kMaxOffset = 10000;
 
-  final int _value;
+  const Priority._(this._value);
 
   int get value => _value;
-
-  const Priority._(this._value);
+  final int _value;
 
   /// Returns a priority relative to this priority.
   ///
@@ -65,27 +63,26 @@ class Priority {
 ///
 /// Tasks always run in the idle time after a frame has been committed.
 class TaskScheduler {
+  TaskScheduler._();
+
+  SchedulingStrategy schedulingStrategy = new DefaultSchedulingStrategy();
+
   final PriorityQueue _queue = new HeapPriorityQueue<_SchedulerEntry>(
     (_SchedulerEntry e1, _SchedulerEntry e2) {
       // Note that we inverse the priority.
       return -e1.priority.compareTo(e2.priority);
-    });
-
-  SchedulingStrategy schedulingStrategy = new SchedulingStrategy();
+    }
+  );
 
   /// Wether this scheduler already requested to be woken up as soon as
   /// possible.
   bool _wakingNow = false;
+
   /// Wether this scheduler already requested to be woken up in the next frame.
   bool _wakingNextFrame = false;
 
-  TaskScheduler._();
-
   /// Schedules the given [task] with the given [priority].
-  // TODO(floitsch): provide some means to indicate how long things are going
-  // to take?
-  // TODO(floitsch): guidance on how to increase priority over time?
-  void schedule(Task task, Priority priority) {
+  void schedule(VoidCallback task, Priority priority) {
     bool isFirstTask = _queue.isEmpty;
     _queue.add(new _SchedulerEntry(task, priority._value));
     if (isFirstTask) _wakeNow();
@@ -93,15 +90,15 @@ class TaskScheduler {
 
   /// Invoked by the system when there is time to run tasks.
   void tick() {
-    if (_queue.isEmpty) return;
+    if (_queue.isEmpty)
+      return;
     _SchedulerEntry entry = _queue.first;
     if (schedulingStrategy.shouldRunTaskWithPriority(entry.priority)) {
       try {
         (_queue.removeFirst().task)();
       } finally {
-        if (_queue.isNotEmpty) {
+        if (_queue.isNotEmpty)
           _wakeNow();
-        }
       }
     } else {
       _wakeNextFrame();
@@ -111,7 +108,8 @@ class TaskScheduler {
   /// Tells the system that the scheduler is awake and should be called as
   /// soon a there is time.
   void _wakeNow() {
-    if (_wakingNow) return;
+    if (_wakingNow)
+      return;
     _wakingNow = true;
     Timer.run(() {
       _wakingNow = false;
@@ -122,7 +120,8 @@ class TaskScheduler {
   /// Tells the system that the scheduler needs to run again (ideally next
   /// frame).
   void _wakeNextFrame() {
-    if (_wakingNextFrame) return;
+    if (_wakingNextFrame)
+      return;
     _wakingNextFrame = true;
     animation.scheduler.requestAnimationFrame((_) {
       _wakingNextFrame = false;
@@ -136,14 +135,17 @@ class TaskScheduler {
 
 final TaskScheduler tasks = new TaskScheduler._();
 
-class SchedulingStrategy {
+abstract class SchedulingStrategy {
+  bool shouldRunTaskWithPriority(int priority);
+}
+
+class DefaultSchedulingStrategy implements SchedulingStrategy {
   // TODO(floitsch): for now we only expose the priority. It might be
   // interesting to provide more info (like, how long the task ran the last
   // time).
   bool shouldRunTaskWithPriority(int priority) {
-    if (animation.scheduler.transientCallbackCount > 0) {
-      return priority >= Priority.kAnimation._value;
-    }
+    if (animation.scheduler.transientCallbackCount > 0)
+      return priority >= Priority.animation._value;
     return true;
   }
 }
