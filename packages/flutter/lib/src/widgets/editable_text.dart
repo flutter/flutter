@@ -52,7 +52,7 @@ class EditableString implements KeyboardClient {
   }
 
   String textAfter(TextRange range) {
-    return text.substring(range.end, text.length);
+    return text.substring(range.end);
   }
 
   String textInside(TextRange range) {
