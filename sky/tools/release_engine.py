@@ -50,8 +50,6 @@ ARTIFACTS = {
         Artifact('shell', 'SkyShell.apk'),
         Artifact('shell', 'flutter.mojo'),
         Artifact('shell', 'libflutter_library.so'),
-        Artifact('viewer', 'sky_viewer.mojo'),
-        Artifact('viewer', 'libsky_viewer_library.so'),
     ],
     'linux-x64': [
         Artifact('shell', 'icudtl.dat'),
@@ -59,8 +57,6 @@ ARTIFACTS = {
         Artifact('shell', 'sky_snapshot'),
         Artifact('shell', 'flutter.mojo'),
         Artifact('shell', 'libflutter_library.so'),
-        Artifact('viewer', 'sky_viewer.mojo'),
-        Artifact('viewer', 'libsky_viewer_library.so'),
     ]
 }
 

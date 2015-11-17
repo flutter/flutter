@@ -17,7 +17,6 @@
 #include "sky/engine/public/web/Sky.h"
 #include "sky/engine/public/web/WebRuntimeFeatures.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
-#include "sky/shell/dart/dart_library_provider_network.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui/animator.h"
 #include "sky/shell/ui/internals.h"

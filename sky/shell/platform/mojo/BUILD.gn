@@ -34,7 +34,6 @@ mojo_native_application("mojo") {
     "//mojo/services/native_viewport/interfaces",
     "//mojo/services/service_registry/interfaces",
     "//services/asset_bundle:lib",
-    "//services/sky/compositor",
     "//skia",
     "//sky/engine/public/sky",
     "//sky/engine/tonic",
