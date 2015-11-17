@@ -52,7 +52,7 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 
 static inline int64 InputEventTimestampFromNSTimeInterval(
     NSTimeInterval interval) {
-  return base::TimeDelta::FromSecondsD(interval).InMilliseconds();
+  return base::TimeDelta::FromSecondsD(interval).InMicroseconds();
 }
 
 // UITouch pointers cannot be used as touch ids (even though they remain

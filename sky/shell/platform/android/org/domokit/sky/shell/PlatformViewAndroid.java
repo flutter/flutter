@@ -186,7 +186,7 @@ public class PlatformViewAndroid extends SurfaceView {
 
         Pointer pointer = new Pointer();
 
-        pointer.timeStamp = event.getEventTime();
+        pointer.timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
         pointer.pointer = event.getPointerId(pointerIndex);
         pointer.type = pointerType;
         pointer.kind = PointerKind.TOUCH;
