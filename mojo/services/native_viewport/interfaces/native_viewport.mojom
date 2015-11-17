@@ -34,6 +34,7 @@ interface NativeViewport {
   Close();
   SetSize(Size size);
   SetEventDispatcher(NativeViewportEventDispatcher dispatcher);
+  SetKeyEventDispatcher(NativeViewportEventDispatcher dispatcher);
 
   // Requests a ContextProvider capable of producing contexts that draw to
   // this native viewport.
