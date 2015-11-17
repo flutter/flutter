@@ -41,13 +41,8 @@ declare_args() {
 #
 # These variables depend on other variables and can't be set externally.
 
-if (is_linux && use_glib) {
-  use_cairo = true
-  use_pango = true
-} else {
-  use_cairo = false
-  use_pango = false
-}
+use_cairo = false
+use_pango = false
 
 # Use GPU accelerated cross process image transport by default on linux builds
 # with the Aura window manager.
