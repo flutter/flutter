@@ -116,6 +116,16 @@ class FlutterCommandRunner extends CommandRunner {
   }
   List<BuildConfiguration> _buildConfigurations;
 
+  String get enginePath {
+    if (!_enginePathSet) {
+      _enginePath = _findEnginePath(_globalResults);
+      _enginePathSet = true;
+    }
+    return _enginePath;
+  }
+  String _enginePath;
+  bool _enginePathSet = false;
+
   ArgResults _globalResults;
 
   String get defaultFlutterRoot {
@@ -152,33 +162,31 @@ class FlutterCommandRunner extends CommandRunner {
     return super.runCommand(globalResults);
   }
 
-  List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {
-    String enginePath = globalResults['engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
+  String _findEnginePath(ArgResults globalResults) {
+    String engineSourcePath = globalResults['engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
     bool isDebug = globalResults['debug'];
     bool isRelease = globalResults['release'];
-    HostPlatform hostPlatform = getCurrentHostPlatform();
-    TargetPlatform hostPlatformAsTarget = getCurrentHostPlatformAsTarget();
 
-    if (enginePath == null && (isDebug || isRelease)) {
+    if (engineSourcePath == null && (isDebug || isRelease)) {
       if (ArtifactStore.isPackageRootValid) {
         Directory engineDir = new Directory(path.join(ArtifactStore.packageRoot, kFlutterEnginePackageName));
         try {
           String realEnginePath = engineDir.resolveSymbolicLinksSync();
-          enginePath = path.dirname(path.dirname(path.dirname(path.dirname(realEnginePath))));
-          bool dirExists = FileSystemEntity.isDirectorySync(path.join(enginePath, 'out'));
-          if (enginePath == '/' || enginePath.isEmpty || !dirExists)
-            enginePath = null;
+          engineSourcePath = path.dirname(path.dirname(path.dirname(path.dirname(realEnginePath))));
+          bool dirExists = FileSystemEntity.isDirectorySync(path.join(engineSourcePath, 'out'));
+          if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
+            engineSourcePath = null;
         } on FileSystemException { }
       }
-      if (enginePath == null) {
+      if (engineSourcePath == null) {
         String tryEnginePath(String enginePath) {
           if (FileSystemEntity.isDirectorySync(path.join(enginePath, 'out')))
             return enginePath;
           return null;
         }
-        enginePath = tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
+        engineSourcePath = tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
       }
-      if (enginePath == null) {
+      if (engineSourcePath == null) {
         stderr.writeln('Unable to detect local Flutter engine build directory.\n'
             'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and\n'
             'ensure --package-root is set if necessary, or set the \$$kFlutterEngineEnvironmentVariableName environment variable, or\n'
@@ -186,6 +194,15 @@ class FlutterCommandRunner extends CommandRunner {
         throw new ProcessExit(2);
       }
     }
+
+    return engineSourcePath;
+  }
+
+  List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {
+    bool isDebug = globalResults['debug'];
+    bool isRelease = globalResults['release'];
+    HostPlatform hostPlatform = getCurrentHostPlatform();
+    TargetPlatform hostPlatformAsTarget = getCurrentHostPlatformAsTarget();
 
     List<BuildConfiguration> configs = <BuildConfiguration>[];
 

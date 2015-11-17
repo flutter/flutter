@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'src/commands/analyze.dart';
+import 'src/commands/apk.dart';
 import 'src/commands/build.dart';
 import 'src/commands/cache.dart';
 import 'src/commands/daemon.dart';
@@ -48,6 +49,7 @@ Future main(List<String> args) async {
 
   FlutterCommandRunner runner = new FlutterCommandRunner()
     ..addCommand(new AnalyzeCommand())
+    ..addCommand(new ApkCommand())
     ..addCommand(new BuildCommand())
     ..addCommand(new CacheCommand())
     ..addCommand(new DaemonCommand())
