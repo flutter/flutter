@@ -133,6 +133,12 @@ void URLLoaderImpl::Start(URLRequestPtr request,
 
   req.HTTPMethod = @(request->method.data());
 
+  for (auto header : request->headers) {
+    NSString *name = @(header->name.data());
+    NSString *value = @(header->value.data());
+    [req addValue:value forHTTPHeaderField:name];
+  };
+
   URLLoaderConnectionDelegate* delegate =
       (URLLoaderConnectionDelegate*)connection_delegate_;
 
