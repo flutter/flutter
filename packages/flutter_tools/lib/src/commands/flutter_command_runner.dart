@@ -33,6 +33,9 @@ class FlutterCommandRunner extends CommandRunner {
         negatable: false,
         help: 'Very noisy logging, including the output of all '
             'shell commands executed.');
+    argParser.addFlag('version',
+        negatable: false,
+        help: 'Reports the version of this tool.');
     String packagesHelp;
     if (ArtifactStore.isPackageRootValid)
       packagesHelp = '\n(defaults to "${ArtifactStore.packageRoot}")';
@@ -137,6 +140,14 @@ class FlutterCommandRunner extends CommandRunner {
     ArtifactStore.flutterRoot = globalResults['flutter-root'];
     if (globalResults.wasParsed('package-root'))
       ArtifactStore.packageRoot = globalResults['package-root'];
+
+    if (globalResults['version']) {
+      String revision = runSync([
+        'git', 'rev-parse', 'HEAD'
+      ], workingDirectory: ArtifactStore.flutterRoot).trim();
+      print('flutter version $revision');
+      return new Future<int>.value(0);
+    }
 
     return super.runCommand(globalResults);
   }
