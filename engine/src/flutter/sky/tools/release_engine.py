@@ -48,6 +48,8 @@ GS_URL = 'gs://mojo/sky/%(category)s/%(config)s/%(commit_hash)s/%(name)s'
 ARTIFACTS = {
     'android-arm': [
         Artifact('shell', 'SkyShell.apk'),
+        Artifact('shell', 'flutter.mojo'),
+        Artifact('shell', 'libflutter_library.so'),
         Artifact('viewer', 'sky_viewer.mojo'),
         Artifact('viewer', 'libsky_viewer_library.so'),
     ],
@@ -55,6 +57,8 @@ ARTIFACTS = {
         Artifact('shell', 'icudtl.dat'),
         Artifact('shell', 'sky_shell'),
         Artifact('shell', 'sky_snapshot'),
+        Artifact('shell', 'flutter.mojo'),
+        Artifact('shell', 'libflutter_library.so'),
         Artifact('viewer', 'sky_viewer.mojo'),
         Artifact('viewer', 'libsky_viewer_library.so'),
     ]
