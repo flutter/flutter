@@ -61,11 +61,7 @@ class PianoApp extends StatelessComponent {
     new PianoKey(Colors.purple[500], iLoveYou),
   ];
 
-  Future connect() {
-    return _loadSounds();
-  }
-
-  Future _loadSounds() async {
+  Future loadSounds() async {
     MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
     try {
       shell.connectToService(null, mediaService);
@@ -82,14 +78,16 @@ class PianoApp extends StatelessComponent {
     List<Widget> children = <Widget>[];
     for (PianoKey key in keys) {
       children.add(new Flexible(
-          child: new Listener(
-              child: new Container(
-                  decoration: new BoxDecoration(backgroundColor: key.color)),
-              onPointerCancel: (_) => key.up(),
-              onPointerDown: (_) => key.down(),
-              onPointerUp: (_) => key.up())));
+        child: new Listener(
+          child: new Container(
+            decoration: new BoxDecoration(backgroundColor: key.color)
+          ),
+          onPointerCancel: (_) => key.up(),
+          onPointerDown: (_) => key.down(),
+          onPointerUp: (_) => key.up()
+        )
+      ));
     }
-
     return new Column(children);
   }
 }
@@ -98,20 +96,29 @@ Widget statusBox(Widget child) {
   const mediumGray = const Color(0xff555555);
   const darkGray = const Color(0xff222222);
   return new Center(
-      child: new Container(
-          decoration: const BoxDecoration(boxShadow: const <BoxShadow>[
-            const BoxShadow(
-                color: mediumGray, offset: const Offset(6.0, 6.0), blur: 5.0)
-          ], backgroundColor: darkGray),
-          height: 90.0,
-          padding: const EdgeDims.all(8.0),
-          margin: const EdgeDims.symmetric(horizontal: 50.0),
-          child: new Center(child: child)));
+    child: new Container(
+      decoration: const BoxDecoration(
+        boxShadow: const <BoxShadow>[
+          const BoxShadow(
+            color: mediumGray, offset: const Offset(6.0, 6.0), blur: 5.0)
+        ],
+        backgroundColor: darkGray
+      ),
+      height: 90.0,
+      padding: const EdgeDims.all(8.0),
+      margin: const EdgeDims.symmetric(horizontal: 50.0),
+      child: new Center(child: child)
+    )
+  );
 }
 
 Widget splashScreen() {
   return statusBox(
-      new Text('Loading sound files!', style: new TextStyle(fontSize: 18.0)));
+    new Text(
+      'Loading sound files!',
+      style: new TextStyle(fontSize: 18.0)
+    )
+  );
 }
 
 main() async {
@@ -119,7 +126,7 @@ main() async {
 
   PianoApp app = new PianoApp();
   // use "await" to make sure the sound files are loaded before we show the ui.
-  await app.connect();
+  await app.loadSounds();
   runApp(app);
   // runApp() returns immediately so you can't put application cleanup code
   // here.  Android apps can be killed at any time, so there's also no way to

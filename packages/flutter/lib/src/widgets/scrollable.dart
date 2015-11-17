@@ -104,6 +104,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       onHorizontalDragStart: _getDragStartHandler(ScrollDirection.horizontal),
       onHorizontalDragUpdate: _getDragUpdateHandler(ScrollDirection.horizontal),
       onHorizontalDragEnd: _getDragEndHandler(ScrollDirection.horizontal),
+      behavior: HitTestBehavior.opaque,
       child: new Listener(
         child: buildContent(context),
         onPointerDown: _handlePointerDown
