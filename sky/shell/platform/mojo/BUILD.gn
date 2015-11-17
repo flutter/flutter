@@ -6,7 +6,7 @@ import("//mojo/public/mojo_application.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 
 mojo_native_application("mojo") {
-  output_name = "sky_shell"
+  output_name = "flutter"
 
   sources = [
     "content_handler_impl.cc",
