@@ -8,10 +8,6 @@ group("default") {
   deps = [
     "//sky",
   ]
-  if (!is_ios && !is_mac) {
-    # Mojo shell does not exist on iOS or Mac
-    deps += [ "//services/sky" ]
-  }
 }
 
 group("dist") {

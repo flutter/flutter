@@ -4,20 +4,6 @@
 
 root_dist_dir = "$root_build_dir/dist"
 
-copy("sky_viewer") {
-  sources = [
-    "$root_build_dir/sky_viewer.mojo",
-  ]
-  if (is_linux || is_android) {
-    sources += [ "$root_build_dir/symbols/libsky_viewer_library.so" ]
-  }
-  outputs = [ "$root_dist_dir/viewer/{{source_file_part}}" ]
-
-  deps = [
-    "//services/sky",
-  ]
-}
-
 copy("sky_shell") {
   if (is_android) {
     sources = [
@@ -99,9 +85,7 @@ if (is_android) {
 }
 
 group("dist") {
-  deps = [
-    ":sky_viewer",
-  ]
+  deps = []
 
   if (!is_ios && !is_mac) {
     deps += [ ":sky_shell" ]
