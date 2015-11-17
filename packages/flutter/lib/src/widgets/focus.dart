@@ -192,6 +192,7 @@ class FocusState extends State<Focus> {
 
   void _scopeRemoved(GlobalKey key) {
     assert(_focusedScope == key);
+    GlobalKey.unregisterRemoveListener(_currentlyRegisteredScopeRemovalListenerKey, _scopeRemoved);
     _currentlyRegisteredScopeRemovalListenerKey = null;
     setState(() {
       _focusedScope = null;
