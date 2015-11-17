@@ -15,7 +15,7 @@
 namespace gfx {
 
 static const char* OpenGLESFrameworkPath =
-    "/System/Library/Framework/OpenGLES.framework/OpenGLES";
+    "/System/Library/Frameworks/OpenGLES.framework/OpenGLES";
 
 static void* OpenGLESLibraryHandle(void) {
   static void* library_handle = NULL;
