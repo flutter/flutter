@@ -56,7 +56,7 @@ String _getCloudStorageBaseUrl({String category, String platform, String revisio
 enum ArtifactType {
   snapshot,
   shell,
-  viewer,
+  mojo,
 }
 
 class Artifact {
@@ -121,17 +121,17 @@ class ArtifactStore {
       hostPlatform: HostPlatform.mac
     ),
     const Artifact._(
-      name: 'Sky Viewer',
-      fileName: 'sky_viewer.mojo',
-      category: _kViewerCategory,
-      type: ArtifactType.viewer,
+      name: 'Flutter for Mojo',
+      fileName: 'flutter.mojo',
+      category: _kShellCategory,
+      type: ArtifactType.mojo,
       targetPlatform: TargetPlatform.android
     ),
     const Artifact._(
-      name: 'Sky Viewer',
-      fileName: 'sky_viewer.mojo',
-      category: _kViewerCategory,
-      type: ArtifactType.viewer,
+      name: 'Flutter for Mojo',
+      fileName: 'flutter.mojo',
+      category: _kShellCategory,
+      type: ArtifactType.mojo,
       targetPlatform: TargetPlatform.linux
     ),
   ];
