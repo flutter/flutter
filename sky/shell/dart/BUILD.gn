@@ -6,8 +6,6 @@ source_set("dart") {
   sources = [
     "dart_library_provider_files.cc",
     "dart_library_provider_files.h",
-    "dart_library_provider_network.cc",
-    "dart_library_provider_network.h",
   ]
 
   deps = [
@@ -16,7 +14,6 @@ source_set("dart") {
     "//dart/runtime:libdart",
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/application",
-    "//mojo/services/network/interfaces",
     "//sky/engine/tonic",
     "//sky/engine/wtf",
     "//url",
