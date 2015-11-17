@@ -16,7 +16,7 @@ class GestureVelocity {
 
 class _Estimator {
   int degree;
-  double time;
+  Duration time;
   List<double> xCoefficients;
   List<double> yCoefficients;
   double confidence;
@@ -32,7 +32,7 @@ class _Estimator {
 }
 
 abstract class _VelocityTrackerStrategy {
-  void addMovement(double timeStamp, double x, double y);
+  void addMovement(Duration timeStamp, double x, double y);
   bool getEstimator(_Estimator estimator);
   void clear();
 }
@@ -45,7 +45,7 @@ enum _Weighting {
 }
 
 class _Movement {
-  double eventTime = 0.0;
+  Duration eventTime = const Duration();
   ui.Point position = ui.Point.origin;
 }
 
@@ -61,7 +61,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   final List<_Movement> _movements;
   int _index;
 
-  void addMovement(double timeStamp, double x, double y) {
+  void addMovement(Duration timeStamp, double x, double y) {
     if (++_index == kHistorySize)
       _index = 0;
     _Movement movement = _getMovement(_index);
@@ -81,7 +81,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
     do {
       _Movement movement = _getMovement(index);
 
-      double age = newestMovement.eventTime - movement.eventTime;
+      double age = (newestMovement.eventTime - movement.eventTime).inMilliseconds.toDouble();
       if (age > kHorizonMilliseconds)
         break;
 
@@ -143,8 +143,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
           return 1.0;
         }
         int nextIndex = (index + 1) % kHistorySize;
-        double deltaMilliseconds = _movements[nextIndex].eventTime -
-          _movements[index].eventTime;
+        int deltaMilliseconds = (_movements[nextIndex].eventTime - _movements[index].eventTime).inMilliseconds;
         if (deltaMilliseconds < 0)
           return 0.5;
         if (deltaMilliseconds < 10)
@@ -159,8 +158,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
         //   age 10ms: 1.0
         //   age 50ms: 1.0
         //   age 60ms: 0.5
-        double ageMilliseconds = _movements[_index].eventTime -
-          _movements[index].eventTime;
+        int ageMilliseconds = (_movements[_index].eventTime - _movements[index].eventTime).inMilliseconds;
         if (ageMilliseconds < 0)
           return 0.5;
         if (ageMilliseconds < 10)
@@ -177,8 +175,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
         //   age   0ms: 1.0
         //   age  50ms: 1.0
         //   age 100ms: 0.5
-        double ageMilliseconds = _movements[_index].eventTime -
-          _movements[index].eventTime;
+        int ageMilliseconds = (_movements[_index].eventTime - _movements[index].eventTime).inMilliseconds;
         if (ageMilliseconds < 50) {
           return 1.0;
         }
@@ -207,13 +204,13 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
 class VelocityTracker {
   static const int kAssumePointerMoveStoppedTimeMs = 40;
 
-  VelocityTracker() : _lastTimeStamp = 0.0, _strategy = _createStrategy();
+  VelocityTracker() : _strategy = _createStrategy();
 
-  double _lastTimeStamp;
+  Duration _lastTimeStamp = const Duration();
   _VelocityTrackerStrategy _strategy;
 
-  void addPosition(double timeStamp, double x, double y) {
-    if ((timeStamp - _lastTimeStamp) >= kAssumePointerMoveStoppedTimeMs)
+  void addPosition(Duration timeStamp, double x, double y) {
+    if ((timeStamp - _lastTimeStamp).inMilliseconds >= kAssumePointerMoveStoppedTimeMs)
       _strategy.clear();
     _lastTimeStamp = timeStamp;
     _strategy.addMovement(timeStamp, x, y);

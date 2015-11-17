@@ -24,7 +24,7 @@ List<PointerInputEvent> _eventFromMap(List<Map> intermediate) {
 PointerInputEvent _eventFor(Map entry) {
   PointerInputEvent result = new PointerInputEvent(
     type: entry['type'],
-    timeStamp: entry['timeStamp'],
+    timeStamp: new Duration(milliseconds: entry['timeStamp'].round()),
     pointer: entry['pointer'],
     x: entry['x'],
     y: entry['y']

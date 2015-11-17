@@ -90,7 +90,7 @@ class _PointerEventConverter {
 
     return new PointerInputEvent(
        type: eventType,
-       timeStamp: pointer.timeStamp.toDouble(),
+       timeStamp: new Duration(microseconds: pointer.timeStamp),
        pointer: pointerIndex,
        kind: _mapPointerKindToString(pointer.kind),
        x: pointer.x,
@@ -200,11 +200,12 @@ class FlutterBinding extends HitTestTarget {
   /// Stops calling listener for every event that isn't localized to a given view coordinate
   bool removeEventListener(EventListener listener) => _eventListeners.remove(listener);
 
+  // TODO(abarth): The engine should give us the timeStamp in Durations.
   void _handleEvent(String eventType, double timeStamp) {
     assert(eventType == 'back');
     InputEvent ourEvent = new InputEvent(
       type: eventType,
-      timeStamp: timeStamp
+      timeStamp: new Duration(microseconds: timeStamp.round())
     );
     for (EventListener listener in _eventListeners)
       listener(ourEvent);
