@@ -733,13 +733,31 @@ class Positioned extends ParentDataWidget {
     this.top,
     this.right,
     this.bottom,
-    this.left
-  }) : super(key: key, child: child);
+    this.left,
+    this.width,
+    this.height
+  }) : super(key: key, child: child) {
+    assert(top == null || bottom == null || height == null);
+    assert(left == null || right == null || width == null);
+  }
+
+  Positioned.fromRect({
+    Key key,
+    Widget child,
+    Rect rect
+  }) : left = rect.left,
+       top = rect.top,
+       width = rect.width,
+       height = rect.height,
+       super(key: key, child: child);
 
   final double top;
   final double right;
   final double bottom;
   final double left;
+
+  final double width;
+  final double height;
 
   void debugValidateAncestor(Widget ancestor) {
     assert(() {
@@ -773,6 +791,16 @@ class Positioned extends ParentDataWidget {
       needsLayout = true;
     }
 
+    if (parentData.width != width) {
+      parentData.width = width;
+      needsLayout = true;
+    }
+
+    if (parentData.height != height) {
+      parentData.height = height;
+      needsLayout = true;
+    }
+
     if (needsLayout) {
       AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
@@ -790,6 +818,10 @@ class Positioned extends ParentDataWidget {
       description.add('right: $right');
     if (bottom != null)
       description.add('bottom: $bottom');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
   }
 }
 
