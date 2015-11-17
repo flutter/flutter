@@ -12,10 +12,11 @@ import 'package:path/path.dart' as path;
 import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../process.dart';
+import 'flutter_command.dart';
 
 final Logger _logging = new Logger('flutter_tools.run_mojo');
 
-class RunMojoCommand extends Command {
+class RunMojoCommand extends FlutterCommand {
   final String name = 'run_mojo';
   final String description = 'Run a Flutter app in mojo.';
 
@@ -58,6 +59,18 @@ class RunMojoCommand extends Command {
     return _makePathAbsolute(path.join(argResults['mojo-path'], 'out', mojoBuildType, 'mojo_shell'));
   }
 
+  BuildConfig _getCurrentHostConfig() {
+    BuildConfiguration result;
+    TargetPlatform target = getCurrentHostPlatformAsTarget();
+    for (BuildConfiguration config in buildConfigurations) {
+      if (config.targetPlatform == target) {
+        result = config;
+        break;
+      }
+    }
+    return result;
+  }
+
   Future<List<String>> _getShellConfig() async {
     List<String> args = [];
 
@@ -77,8 +90,15 @@ class RunMojoCommand extends Command {
       args.add('--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo');
     } else {
       final appPath = _makePathAbsolute(argResults['app']);
-      Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
-      final viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      String viewerPath;
+      BuildConfig config = _getCurrentHostConfig();
+      if (config.type == BuildType.prebuilt) {
+        Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
+        viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      } else {
+        String localPath = path.join(config.buildDir, 'sky_viewer.mojo');
+        viewerPath = _makePathAbsolute(localPath);
+      }
       args.add('file://$appPath');
       args.add('--url-mappings=mojo:sky_viewer=file://$viewerPath');
     }
