@@ -995,7 +995,6 @@ void RenderBox::paintFillLayers(const PaintInfo& paintInfo, const Color& c, cons
     Vector<const FillLayer*, 8> layers;
     const FillLayer* curLayer = &fillLayer;
     bool shouldDrawBackgroundInSeparateBuffer = false;
-    bool isBottomLayerOccluded = false;
     while (curLayer) {
         layers.append(curLayer);
         // Stop traversal when an opaque layer is encountered.
@@ -1014,9 +1013,6 @@ void RenderBox::paintFillLayers(const PaintInfo& paintInfo, const Color& c, cons
             break;
         curLayer = curLayer->next();
     }
-
-    if (layers.size() > 0  && (**layers.rbegin()).next())
-        isBottomLayerOccluded = true;
 
     GraphicsContext* context = paintInfo.context;
     if (!context)
