@@ -36,6 +36,11 @@ void TakeShellProxyHandle(Dart_NativeArguments args) {
       args, GetInternals()->TakeShellProxy().value());
 }
 
+void TakeServiceRegistry(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(
+      args, GetInternals()->TakeServiceRegistry().value());
+}
+
 void TakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(
       args, GetInternals()->TakeServicesProvidedByEmbedder().value());
@@ -44,10 +49,6 @@ void TakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
 void TakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(
       args, GetInternals()->TakeServicesProvidedToEmbedder().value());
-}
-
-void TakeServiceRegistry(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, 0);
 }
 
 static DartLibraryNatives* g_natives;
@@ -117,6 +118,10 @@ void Internals::Create(
 
 mojo::Handle Internals::TakeShellProxy() {
   return services_ ? services_->shell.PassInterface().PassHandle().release() : mojo::Handle();
+}
+
+mojo::Handle Internals::TakeServiceRegistry() {
+  return services_ ? services_->service_registry.PassInterface().PassHandle().release() : mojo::Handle();
 }
 
 mojo::Handle Internals::TakeServicesProvidedByEmbedder() {

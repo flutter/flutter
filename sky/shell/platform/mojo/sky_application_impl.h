@@ -28,10 +28,11 @@ class SkyApplicationImpl : public mojo::Application {
   void Initialize(mojo::ShellPtr shell,
                   mojo::Array<mojo::String> args,
                   const mojo::String& url) override;
-  void AcceptConnection(const mojo::String& requestor_url,
-                        mojo::InterfaceRequest<mojo::ServiceProvider> services,
-                        mojo::ServiceProviderPtr exposed_services,
-                        const mojo::String& resolved_url) override;
+  void AcceptConnection(
+      const mojo::String& requestor_url,
+      mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
+      mojo::ServiceProviderPtr incoming_services,
+      const mojo::String& resolved_url) override;
   void RequestQuit() override;
 
   PlatformViewMojo* platform_view() {
@@ -42,6 +43,7 @@ class SkyApplicationImpl : public mojo::Application {
 
   mojo::StrongBinding<mojo::Application> binding_;
   mojo::URLResponsePtr initial_response_;
+  mojo::ShellPtr shell_;
   mojo::asset_bundle::AssetBundlePtr bundle_;
   scoped_ptr<ShellView> shell_view_;
 };
