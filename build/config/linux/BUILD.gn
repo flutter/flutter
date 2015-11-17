@@ -43,15 +43,6 @@ pkg_config("freetype2") {
   packages = [ "freetype2" ]
 }
 
-pkg_config("glib") {
-  packages = [
-    "glib-2.0",
-    "gmodule-2.0",
-    "gobject-2.0",
-    "gthread-2.0",
-  ]
-}
-
 pkg_config("pangocairo") {
   packages = [ "pangocairo" ]
 }
