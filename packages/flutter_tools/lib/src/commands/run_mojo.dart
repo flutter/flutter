@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -30,6 +29,8 @@ class RunMojoCommand extends FlutterCommand {
     argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services.');
     argParser.addOption('devtools-path', help: 'Path to mojo devtools\' mojo_run command.');
   }
+
+  bool get requiresProjectRoot => false;
 
   // TODO(abarth): Why not use path.absolute?
   String _makePathAbsolute(String relativePath) {
@@ -59,7 +60,7 @@ class RunMojoCommand extends FlutterCommand {
     return _makePathAbsolute(path.join(argResults['mojo-path'], 'out', mojoBuildType, 'mojo_shell'));
   }
 
-  BuildConfig _getCurrentHostConfig() {
+  BuildConfiguration _getCurrentHostConfig() {
     BuildConfiguration result;
     TargetPlatform target = getCurrentHostPlatformAsTarget();
     for (BuildConfiguration config in buildConfigurations) {
@@ -91,7 +92,7 @@ class RunMojoCommand extends FlutterCommand {
     } else {
       final appPath = _makePathAbsolute(argResults['app']);
       String viewerPath;
-      BuildConfig config = _getCurrentHostConfig();
+      BuildConfiguration config = _getCurrentHostConfig();
       if (config.type == BuildType.prebuilt) {
         Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
         viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
@@ -124,7 +125,7 @@ class RunMojoCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     if ((argResults['mojo-path'] == null && argResults['devtools-path'] == null) || (argResults['mojo-path'] != null && argResults['devtools-path'] != null)) {
       _logging.severe('Must specify either --mojo-path or --devtools-path.');
       return 1;
@@ -137,4 +138,5 @@ class RunMojoCommand extends FlutterCommand {
 
     return await runCommandAndStreamOutput(await _getShellConfig());
   }
+
 }
