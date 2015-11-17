@@ -37,6 +37,17 @@ class StartCommand extends FlutterCommand {
         help: 'Boot the iOS Simulator if it isn\'t already running.');
   }
 
+  /// Given the value of the --target option, return the path of the Dart file
+  /// where the app's main function should be.
+  static String findMainDartFile(String target) {
+    String targetPath = path.absolute(target);
+    if (FileSystemEntity.isDirectorySync(targetPath)) {
+      return path.join(targetPath, 'lib', 'main.dart');
+    } else {
+      return targetPath;
+    }
+  }
+
   @override
   Future<int> runInProject() async {
     await Future.wait([
@@ -63,10 +74,7 @@ class StartCommand extends FlutterCommand {
       if (package == null || !device.isConnected())
         continue;
       if (device is AndroidDevice) {
-        String target = path.absolute(argResults['target']);
-        String mainPath = target;
-        if (FileSystemEntity.isDirectorySync(target))
-          mainPath = path.join(target, 'lib', 'main.dart');
+        String mainPath = findMainDartFile(argResults['target']);
         if (!FileSystemEntity.isFileSync(mainPath)) {
           String message = 'Tried to run $mainPath, but that file does not exist.';
           if (!argResults.wasParsed('target'))
