@@ -122,7 +122,9 @@ void PlatformViewMojo::OnEvent(mojo::EventPtr event,
       if (!data)
         break;
       pointer::PointerPtr pointer = pointer::Pointer::New();
-      pointer->time_stamp = event->time_stamp;
+      // TODO(abarth): Sort out the units for time_stamp.
+      // See https://github.com/domokit/mojo/issues/541
+      pointer->time_stamp = event->time_stamp / 1000;
       pointer->pointer = data->pointer_id;
       pointer->type = GetTypeFromAction(event->action);
       pointer->kind = GetKindFromKind(data->kind);
