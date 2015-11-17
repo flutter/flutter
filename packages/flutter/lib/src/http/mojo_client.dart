@@ -16,14 +16,6 @@ import 'package:mojo/mojo/http_header.mojom.dart' as mojo;
 
 import 'response.dart';
 
-mojo.NetworkServiceProxy _initNetworkService() {
-  mojo.NetworkServiceProxy networkService = new mojo.NetworkServiceProxy.unbound();
-  shell.connectToService("mojo:authenticated_network_service", networkService);
-  return networkService;
-}
-
-final mojo.NetworkServiceProxy _networkService = _initNetworkService();
-
 /// A `mojo`-based HTTP client
 class MojoClient {
 
@@ -66,7 +58,7 @@ class MojoClient {
       Map<String, String> headers, [body, Encoding encoding]) async {
     mojo.UrlLoaderProxy loader = new mojo.UrlLoaderProxy.unbound();
     List<mojo.HttpHeader> mojoHeaders = <mojo.HttpHeader>[];
-    headers.forEach((String name, String value) {
+    headers?.forEach((String name, String value) {
       mojo.HttpHeader header = new mojo.HttpHeader()
         ..name = name
         ..value = value;
@@ -84,12 +76,12 @@ class MojoClient {
       mojo.DataPipeFiller.fillHandle(pipe.producer, data);
     }
     try {
-      _networkService.ptr.createUrlLoader(loader);
+      networkService.ptr.createUrlLoader(loader);
       mojo.UrlResponse response = (await loader.ptr.start(request)).response;
       ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
       Uint8List bodyBytes = new Uint8List.view(data.buffer);
-      String body = new String.fromCharCodes(bodyBytes);
-      return new Response(body: body, bodyBytes: bodyBytes, statusCode: response.statusCode);
+      String bodyString = new String.fromCharCodes(bodyBytes);
+      return new Response(body: bodyString, bodyBytes: bodyBytes, statusCode: response.statusCode);
     } catch (e) {
       print("NetworkService unavailable $e");
       return new Response(statusCode: 500);
@@ -105,4 +97,12 @@ class MojoClient {
   }
 
   void close() {}
+
+  static mojo.NetworkServiceProxy _initNetworkService() {
+    mojo.NetworkServiceProxy proxy = new mojo.NetworkServiceProxy.unbound();
+    shell.connectToService("mojo:authenticated_network_service", proxy);
+    return proxy;
+  }
+
+  static final mojo.NetworkServiceProxy networkService = _initNetworkService();
 }
