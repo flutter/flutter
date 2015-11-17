@@ -223,7 +223,6 @@ Future showBottomSheet({ BuildContext context, GlobalKey<PlaceholderState> place
   return completer.future.then((_) {
     // If our overlay has been obscured by an opaque OverlayEntry then currentState
     // will have been cleared already.
-    if (placeholderKey.currentState != null)
-      placeholderKey.currentState.child = null;
+    placeholderKey.currentState?.child = null;
   });
 }

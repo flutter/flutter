@@ -7,14 +7,24 @@ import 'overlay.dart';
 
 abstract class Route {
   List<OverlayEntry> get overlayEntries;
+  void didPush(OverlayState overlay, OverlayEntry insertionPoint) { }
+  void didPop(dynamic result) { }
 
-  void didPush(OverlayState overlay, OverlayEntry insertionPoint);
-  void didPop(dynamic result);
+  /// The given route has been pushed onto the navigator after this route.
+  /// Return true if the route before this one should be notified also. The
+  /// first route to return false will be the one passed to the
+  /// NavigatorObserver's didPushModal() as the previousRoute.
+  bool willPushNext(Route nextRoute) => false;
+
+  /// The given route, which came after this one, has been popped off the
+  /// navigator. Return true if the route before this one should be notified
+  /// also. The first route to return false will be the one passed to the
+  /// NavigatorObserver's didPushModal() as the previousRoute.
+  bool didPopNext(Route nextRoute) => false;
 }
 
 class NamedRouteSettings {
   const NamedRouteSettings({ this.name, this.mostValuableKeys });
-
   final String name;
   final Set<Key> mostValuableKeys;
 }
@@ -24,8 +34,8 @@ typedef Route RouteFactory(NamedRouteSettings settings);
 class NavigatorObserver {
   NavigatorState _navigator;
   NavigatorState get navigator => _navigator;
-  void didPopModal(Route route) { }
-  void didPushModal(Route route) { }
+  void didPushModal(Route route, Route previousRoute) { }
+  void didPopModal(Route route, Route previousRoute) { }
 }
 
 class Navigator extends StatefulComponent {
@@ -99,8 +109,6 @@ class NavigatorState extends State<Navigator> {
     return null;
   }
 
-  Route get currentRoute => _ephemeral.isNotEmpty ? _ephemeral.last : _modal.isNotEmpty ? _modal.last : null;
-
   void pushNamed(String name, { Set<Key> mostValuableKeys }) {
     assert(name != null);
     NamedRouteSettings settings = new NamedRouteSettings(
@@ -112,8 +120,11 @@ class NavigatorState extends State<Navigator> {
 
   void push(Route route, { Set<Key> mostValuableKeys }) {
     _popAllEphemeralRoutes();
+    int index = _modal.length-1;
+    while (index >= 0 && _modal[index].willPushNext(route))
+      index -= 1;
     route.didPush(overlay, _currentOverlay);
-    config.observer?.didPushModal(route);
+    config.observer?.didPushModal(route, index >= 0 ? _modal[index] : null);
     _modal.add(route);
   }
 
@@ -134,9 +145,13 @@ class NavigatorState extends State<Navigator> {
     if (_ephemeral.isNotEmpty) {
       _ephemeral.removeLast().didPop(result);
     } else {
+      assert(_modal.length > 1);
       Route route = _modal.removeLast();
       route.didPop(result);
-      config.observer?.didPopModal(route);
+      int index = _modal.length-1;
+      while (index >= 0 && _modal[index].didPopNext(route))
+        index -= 1;
+      config.observer?.didPopModal(route, index >= 0 ? _modal[index] : null);
     }
   }
 
