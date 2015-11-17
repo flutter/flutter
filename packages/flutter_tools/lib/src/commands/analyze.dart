@@ -289,10 +289,10 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
-    if (exitCode < 0 || exitCode > 3) // 1 = hints, 2 = warnings, 3 = errors
+    if (exitCode < 0 || exitCode > 3) // 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
       return exitCode;
 
-    if (errorCount > 1)
+    if (errorCount > 0)
       return 1;
     if (argResults['congratulate'])
       print('No analyzer warnings!');
