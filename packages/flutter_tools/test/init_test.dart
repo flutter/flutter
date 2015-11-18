@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/commands/init.dart';
 import 'package:flutter_tools/src/process.dart';
@@ -37,10 +37,10 @@ defineTests() {
         await runner.run(['init', '--out', temp.path])
             .then((int code) => expect(code, equals(0)));
 
-        String path = p.join(temp.path, 'lib', 'main.dart');
-        expect(new File(path).existsSync(), true);
+        String mainPath = path.join(temp.path, 'lib', 'main.dart');
+        expect(new File(mainPath).existsSync(), true);
         ProcessResult exec = Process.runSync(
-            sdkBinaryName('dartanalyzer'), ['--fatal-warnings', path],
+            sdkBinaryName('dartanalyzer'), ['--fatal-warnings', mainPath],
             workingDirectory: temp.path);
         if (exec.exitCode != 0) {
           print(exec.stdout);
