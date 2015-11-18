@@ -534,7 +534,9 @@ typedef void ElementVisitor(Element element);
 abstract class BuildContext {
   Widget get widget;
   RenderObject findRenderObject();
-  InheritedWidget inheritedWidgetOfType(Type targetType);
+  InheritedWidget inheritFromWidgetOfType(Type targetType);
+  Widget ancestorWidgetOfType(Type targetType);
+  State ancestorStateOfType(Type targetType);
   void visitAncestorElements(bool visitor(Element element));
   void visitChildElements(void visitor(Element element));
 }
@@ -806,18 +808,33 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; });
   }
 
+  RenderObject findRenderObject() => renderObject;
+
   Set<Type> _dependencies;
-  InheritedWidget inheritedWidgetOfType(Type targetType) {
+  InheritedWidget inheritFromWidgetOfType(Type targetType) {
     if (_dependencies == null)
       _dependencies = new Set<Type>();
     _dependencies.add(targetType);
+    return ancestorWidgetOfType(targetType);
+  }
+
+  Widget ancestorWidgetOfType(Type targetType) {
     Element ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != targetType)
       ancestor = ancestor._parent;
     return ancestor?.widget;
   }
 
-  RenderObject findRenderObject() => renderObject;
+  State ancestorStateOfType(Type targetType) {
+    Element ancestor = _parent;
+    while (ancestor != null) {
+      if (ancestor is StatefulComponentElement && ancestor.state.runtimeType == targetType)
+        break;
+      ancestor = ancestor._parent;
+    }
+    StatefulComponentElement statefulAncestor = ancestor;
+    return statefulAncestor?.state;
+  }
 
   void visitAncestorElements(bool visitor(Element element)) {
     Element ancestor = _parent;

@@ -86,16 +86,8 @@ class PageStorage extends StatelessComponent {
 
   /// Might return null if there is no PageStorage in this context.
   static PageStorageBucket of(BuildContext context) {
-    PageStorageBucket result;
-    context.visitAncestorElements((Element element) {
-      Widget widget = element.widget;
-      if (widget is PageStorage) {
-        result = widget.bucket;
-        return false;
-      }
-      return true;
-    });
-    return result;
+    PageStorage widget = context.ancestorWidgetOfType(PageStorage);
+    return widget?.bucket;
   }
 
   Widget build(BuildContext context) => child;

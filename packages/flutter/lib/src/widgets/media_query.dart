@@ -42,7 +42,7 @@ class MediaQuery extends InheritedWidget {
   final MediaQueryData data;
 
   static MediaQueryData of(BuildContext context) {
-    MediaQuery query = context.inheritedWidgetOfType(MediaQuery);
+    MediaQuery query = context.inheritFromWidgetOfType(MediaQuery);
     return query == null ? null : query.data;
   }
 
