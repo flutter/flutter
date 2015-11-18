@@ -33,6 +33,10 @@ source_set("libevent") {
     include_dirs = [ "android" ]
   }
 
+  if (is_fnl) {
+    include_dirs += [ "compat" ]
+  }
+
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
 }

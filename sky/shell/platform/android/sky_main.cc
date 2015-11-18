@@ -22,6 +22,7 @@
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/shell.h"
+#include "ui/gl/gl_surface.h"
 
 using base::LazyInstance;
 
@@ -77,6 +78,7 @@ static void Init(JNIEnv* env,
   mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
       new mojo::embedder::SimplePlatformSupport()));
 
+  CHECK(gfx::GLSurface::InitializeOneOff());
   Shell::InitStandalone();
 
   InitializeTracing();

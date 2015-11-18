@@ -46,7 +46,7 @@
 #include <signal.h>
 #endif
 
-#if (OS(LINUX) && !defined(__UCLIBC__))
+#if (OS(LINUX) && !defined(__UCLIBC__) && !defined(FNL_MUSL))
 #include <cxxabi.h>
 #include <dlfcn.h>
 #include <execinfo.h>

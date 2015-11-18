@@ -22,7 +22,7 @@
 #if defined(__GLIBCXX__)
 #include <cxxabi.h>
 #endif
-#if !defined(__UCLIBC__)
+#if !defined(__UCLIBC__) && !defined(FNL_MUSL)
 #include <execinfo.h>
 #endif
 
@@ -738,7 +738,7 @@ StackTrace::StackTrace() {
   // NOTE: This code MUST be async-signal safe (it's used by in-process
   // stack dumping signal handler). NO malloc or stdio is allowed here.
 
-#if !defined(__UCLIBC__)
+#if !defined(__UCLIBC__) && !defined(FNL_MUSL)
   // Though the backtrace API man page does not list any possible negative
   // return values, we take no chance.
   count_ = base::saturated_cast<size_t>(backtrace(trace_, arraysize(trace_)));
