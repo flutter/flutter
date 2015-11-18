@@ -3,6 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+set -e
+
 export FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
 SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
@@ -20,6 +22,8 @@ if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` 
   echo -n $REVISION > "$STAMP_PATH"
 fi
 
+set +e
+
 $DART "$SNAPSHOT_PATH" "$@"
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
@@ -28,6 +32,8 @@ EXIT_CODE=$?
 if [ $EXIT_CODE != 253 ]; then
   exit $EXIT_CODE
 fi
+
+set -e
 
 $DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
 $DART "$SNAPSHOT_PATH" "$@"
