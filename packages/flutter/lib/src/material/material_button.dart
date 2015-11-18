@@ -56,7 +56,7 @@ abstract class MaterialButton extends StatefulComponent {
 abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
   bool highlight = false;
 
-  int get level;
+  int get elevation;
   Color getColor(BuildContext context, { bool highlight });
   ThemeBrightness getColorBrightness(BuildContext context);
 
@@ -102,7 +102,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
       margin: new EdgeDims.all(8.0),
       child: new Material(
         type: MaterialType.button,
-        level: level,
+        elevation: elevation,
         textStyle: Theme.of(context).text.button.copyWith(color: getTextColor(context)),
         child: new InkWell(
           onTap: config.enabled ? config.onPressed : null,

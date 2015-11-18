@@ -23,7 +23,7 @@ class Card extends StatelessComponent {
       child: new Material(
         color: color,
         type: MaterialType.card,
-        level: 2,
+        elevation: 8,
         child: child
       )
     );

@@ -12,7 +12,7 @@ void main() {
         gradient: new RadialGradient(
           center: Point.origin, radius: 500.0,
           colors: <Color>[Colors.yellow[500], Colors.blue[500]]),
-        boxShadow: shadows[3])
+        boxShadow: elevationToShadow[3])
     );
     layout(root);
     expect(root.size.width, equals(800.0));

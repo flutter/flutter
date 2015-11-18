@@ -50,7 +50,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     return new Material(
       color: materialColor,
       type: MaterialType.circle,
-      level: _highlight ? 3 : 2,
+      elevation: _highlight ? 12 : 6,
       child: new ClipOval(
         child: new Container(
           width: _kSize,

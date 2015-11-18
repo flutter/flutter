@@ -77,7 +77,7 @@ class _SnackBar extends StatelessComponent {
           minHeight: kSnackBarHeight,
           maxHeight: kSnackBarHeight,
           child: new Material(
-            level: 2,
+            elevation: 6,
             color: _kSnackBackground,
             child: new Container(
               margin: const EdgeDims.symmetric(horizontal: _kSideMargins),

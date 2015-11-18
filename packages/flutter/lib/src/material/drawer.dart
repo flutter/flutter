@@ -36,7 +36,7 @@ class _Drawer extends StatelessComponent {
       child: new ConstrainedBox(
         constraints: const BoxConstraints.expand(width: _kWidth),
         child: new Material(
-          level: route.level,
+          elevation: route.elevation,
           child: route.child
         )
       )
@@ -51,10 +51,10 @@ enum _DrawerState {
 }
 
 class _DrawerRoute extends OverlayRoute {
-  _DrawerRoute({ this.child, this.level });
+  _DrawerRoute({ this.child, this.elevation });
 
   final Widget child;
-  final int level;
+  final int elevation;
 
   List<WidgetBuilder> get builders => <WidgetBuilder>[ _build ];
 
@@ -212,6 +212,6 @@ class _DrawerControllerState extends State<_DrawerController> {
   }
 }
 
-void showDrawer({ BuildContext context, Widget child, int level: 3 }) {
-  Navigator.of(context).push(new _DrawerRoute(child: child, level: level));
+void showDrawer({ BuildContext context, Widget child, int elevation: 16 }) {
+  Navigator.of(context).push(new _DrawerRoute(child: child, elevation: elevation));
 }

@@ -18,7 +18,7 @@ class ToolBar extends StatelessComponent {
     this.center,
     this.right,
     this.bottom,
-    this.level: 2,
+    this.elevation: 4,
     this.backgroundColor,
     this.textTheme,
     this.padding: EdgeDims.zero
@@ -28,7 +28,7 @@ class ToolBar extends StatelessComponent {
   final Widget center;
   final List<Widget> right;
   final Widget bottom;
-  final int level;
+  final int elevation;
   final Color backgroundColor;
   final TextTheme textTheme;
   final EdgeDims padding;
@@ -40,7 +40,7 @@ class ToolBar extends StatelessComponent {
       center: center,
       right: right,
       bottom: bottom,
-      level: level,
+      elevation: elevation,
       backgroundColor: backgroundColor,
       textTheme: textTheme,
       padding: newPadding
@@ -95,7 +95,7 @@ class ToolBar extends StatelessComponent {
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       decoration: new BoxDecoration(
         backgroundColor: color,
-        boxShadow: level == 0 ? null : shadows[2]
+        boxShadow: elevationToShadow[elevation]
       ),
       child: new DefaultTextStyle(
         style: sideStyle,

@@ -100,7 +100,7 @@ Widget statusBox(Widget child) {
       decoration: const BoxDecoration(
         boxShadow: const <BoxShadow>[
           const BoxShadow(
-            color: mediumGray, offset: const Offset(6.0, 6.0), blur: 5.0)
+            color: mediumGray, offset: const Offset(6.0, 6.0), blurRadius: 5.0)
         ],
         backgroundColor: darkGray
       ),
