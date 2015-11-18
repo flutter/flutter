@@ -125,7 +125,8 @@ class TabbedNavigatorAppState extends State<TabbedNavigatorApp> {
     assert(selectedIndices.length == 5);
 
     ToolBar toolbar = new ToolBar(
-      center: new Text('Tabbed Navigator', style: Typography.white.title)
+      center: new Text('Tabbed Navigator', style: Typography.white.title),
+      elevation: 0
     );
 
     return new Scaffold(
