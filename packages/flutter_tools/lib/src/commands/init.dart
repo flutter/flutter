@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
 import '../process.dart';
@@ -39,10 +39,10 @@ class InitCommand extends Command {
       stderr.writeln('variable was specified. Unable to find package:flutter.');
       return 2;
     }
-    String flutterRoot = p.absolute(ArtifactStore.flutterRoot);
+    String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
 
-    String flutterPackagePath = p.join(flutterRoot, 'packages', 'flutter');
-    if (!FileSystemEntity.isFileSync(p.join(flutterPackagePath, 'pubspec.yaml'))) {
+    String flutterPackagePath = path.join(flutterRoot, 'packages', 'flutter');
+    if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml'))) {
       print('Unable to find package:flutter in $flutterPackagePath');
       return 2;
     }
@@ -75,9 +75,9 @@ class InitCommand extends Command {
     bool skipIfAbsent: false,
     bool verbose: true
   }) async {
-    File pubSpecYaml = new File(p.join(directory, 'pubspec.yaml'));
-    File pubSpecLock = new File(p.join(directory, 'pubspec.lock'));
-    File dotPackages = new File(p.join(directory, '.packages'));
+    File pubSpecYaml = new File(path.join(directory, 'pubspec.yaml'));
+    File pubSpecLock = new File(path.join(directory, 'pubspec.lock'));
+    File dotPackages = new File(path.join(directory, '.packages'));
 
     if (!pubSpecYaml.existsSync()) {
       if (skipIfAbsent)
@@ -115,18 +115,18 @@ abstract class Template {
   Template(this.name, this.description);
 
   void generateInto(Directory dir, String flutterPackagePath) {
-    String dirPath = p.normalize(dir.absolute.path);
-    String projectName = _normalizeProjectName(p.basename(dirPath));
-    print('Creating ${p.basename(projectName)}...');
+    String dirPath = path.normalize(dir.absolute.path);
+    String projectName = _normalizeProjectName(path.basename(dirPath));
+    print('Creating ${path.basename(projectName)}...');
     dir.createSync(recursive: true);
 
-    String relativeFlutterPackagePath = p.relative(flutterPackagePath, from: dirPath);
+    String relativeFlutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
 
-    files.forEach((String path, String contents) {
+    files.forEach((String filePath, String contents) {
       Map m = {'projectName': projectName, 'description': description, 'flutterPackagePath': relativeFlutterPackagePath};
       contents = mustache.render(contents, m);
-      path = path.replaceAll('/', Platform.pathSeparator);
-      File file = new File(p.join(dir.path, path));
+      filePath = filePath.replaceAll('/', Platform.pathSeparator);
+      File file = new File(path.join(dir.path, filePath));
       file.parent.createSync();
       file.writeAsStringSync(contents);
       print(file.path);

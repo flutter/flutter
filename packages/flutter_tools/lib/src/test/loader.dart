@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 import 'package:flutter_tools/src/test/json_socket.dart';
 import 'package:flutter_tools/src/test/remote_test.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -55,17 +55,17 @@ Future<_ServerInfo> _createServer() async {
   return new _ServerInfo(server, 'ws://$_kHost:${server.port}$_kPath', socket.future);
 }
 
-Future<Process> _startProcess(String path, { String packageRoot }) {
+Future<Process> _startProcess(String mainPath, { String packageRoot }) {
   assert(shellPath != null || _kSkyShell != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
   return Process.start(shellPath ?? _kSkyShell, [
     '--enable-checked-mode',
     '--non-interactive',
     '--package-root=$packageRoot',
-    path,
+    mainPath,
   ]);
 }
 
-Future<RunnerSuite> _loadVMFile(String path,
+Future<RunnerSuite> _loadVMFile(String mainPath,
                                 Metadata metadata,
                                 Configuration config) async {
   String encodedMetadata = Uri.encodeComponent(JSON.encode(
@@ -81,7 +81,7 @@ import 'dart:convert';
 import 'package:test/src/backend/metadata.dart';
 import 'package:flutter_tools/src/test/remote_listener.dart';
 
-import '${p.toUri(p.absolute(path))}' as test;
+import '${path.toUri(path.absolute(mainPath))}' as test;
 
 void main() {
   String server = Uri.decodeComponent('${Uri.encodeComponent(info.url)}');
@@ -96,7 +96,7 @@ void main() {
 
   Process process = await _startProcess(
     listenerFile.path,
-    packageRoot: p.absolute(config.packageRoot)
+    packageRoot: path.absolute(config.packageRoot)
   );
 
   Future cleanupTempDirectory() async {
@@ -118,13 +118,13 @@ void main() {
           case -0x0f: // ProcessSignal.SIGTERM
             break; // we probably killed it ourselves
           case -0x0b: // ProcessSignal.SIGSEGV
-            output += 'Segmentation fault in subprocess for: $path\n';
+            output += 'Segmentation fault in subprocess for: $mainPath\n';
             break;
           case -0x06: // ProcessSignal.SIGABRT
-            output += 'Aborted while running: $path\n';
+            output += 'Aborted while running: $mainPath\n';
             break;
           default:
-            output += 'Unexpected exit code $exitCode from subprocess for: $path\n';
+            output += 'Unexpected exit code $exitCode from subprocess for: $mainPath\n';
         }
       }
       String stdout = await process.stdout.transform(UTF8.decoder).join('\n');
@@ -137,7 +137,7 @@ void main() {
         if (output == '')
           output = 'No output.';
         completer.completeError(
-          new LoadException(path, output),
+          new LoadException(mainPath, output),
           new Trace.current()
         );
       } else {
@@ -163,13 +163,13 @@ void main() {
     } else if (response["type"] == "loadException") {
       process.kill(ProcessSignal.SIGTERM);
       completer.completeError(
-          new LoadException(path, response["message"]),
+          new LoadException(mainPath, response["message"]),
           new Trace.current());
     } else if (response["type"] == "error") {
       process.kill(ProcessSignal.SIGTERM);
       AsyncError asyncError = RemoteException.deserialize(response["error"]);
       completer.completeError(
-          new LoadException(path, asyncError.error),
+          new LoadException(mainPath, asyncError.error),
           asyncError.stackTrace);
     } else {
       assert(response["type"] == "success");
@@ -186,7 +186,7 @@ void main() {
   return new RunnerSuite(
     const VMEnvironment(),
     new Group.root(entries, metadata: metadata),
-    path: path,
+    path: mainPath,
     platform: TestPlatform.vm,
     os: currentOS,
     onClose: () { process.kill(ProcessSignal.SIGTERM); }
