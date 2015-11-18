@@ -31,7 +31,7 @@ class _Asset {
 Iterable<_Asset> _parseAssets(Map manifestDescriptor, String manifestPath) sync* {
   if (manifestDescriptor == null || !manifestDescriptor.containsKey('assets'))
     return;
-  String basePath = new File(manifestPath).parent.path;
+  String basePath = path.dirname(path.absolute(manifestPath));
   for (String asset in manifestDescriptor['assets'])
     yield new _Asset(base: basePath, key: asset);
 }
@@ -198,8 +198,14 @@ class BuildCommand extends FlutterCommand {
       archive.addFile(_createSnapshotFile(snapshotPath));
     }
 
-    for (_Asset asset in assets)
-      archive.addFile(_createFile(asset.key, asset.base));
+    for (_Asset asset in assets) {
+      ArchiveFile file = _createFile(asset.key, asset.base);
+      if (file == null) {
+        stderr.writeln('Cannot find asset "${asset.key}" in directory "${path.absolute(asset.base)}".');
+        return 1;
+      }
+      archive.addFile(file);
+    }
 
     for (_MaterialAsset asset in materialAssets) {
       ArchiveFile file = _createFile(asset.key, assetBase);
