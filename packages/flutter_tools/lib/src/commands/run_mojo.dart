@@ -11,7 +11,11 @@ import 'package:path/path.dart' as path;
 import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../process.dart';
+import 'build.dart';
 import 'flutter_command.dart';
+import 'start.dart';
+
+const String _kDefaultBundlePath = 'build/app.flx';
 
 final Logger _logging = new Logger('flutter_tools.run_mojo');
 
@@ -25,7 +29,11 @@ class RunMojoCommand extends FlutterCommand {
     argParser.addFlag('mojo-debug', negatable: false, help: 'Use Debug build of mojo');
     argParser.addFlag('mojo-release', negatable: false, help: 'Use Release build of mojo (default)');
 
-    argParser.addOption('app', defaultsTo: 'app.flx');
+    argParser.addOption('target',
+        defaultsTo: '',
+        abbr: 't',
+        help: 'Target app path or filename to start.');
+    argParser.addOption('app', help: 'Run this Flutter app instead of building the target.');
     argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services.');
     argParser.addOption('devtools-path', help: 'Path to mojo devtools\' mojo_run command.');
   }
@@ -72,7 +80,7 @@ class RunMojoCommand extends FlutterCommand {
     return result;
   }
 
-  Future<List<String>> _getShellConfig() async {
+  Future<List<String>> _getShellConfig(String bundlePath) async {
     List<String> args = <String>[];
 
     final bool useDevtools = _useDevtools();
@@ -82,7 +90,7 @@ class RunMojoCommand extends FlutterCommand {
     if (argResults['android']) {
       args.add('--android');
       final String cloudStorageBaseUrl = ArtifactStore.getCloudStorageBaseUrl('shell', 'android-arm');
-      final String appPath = _makePathAbsolute(argResults['app']);
+      final String appPath = _makePathAbsolute(bundlePath);
       final String appName = path.basename(appPath);
       final String appDir = path.dirname(appPath);
       args.add('http://app/$appName');
@@ -90,7 +98,7 @@ class RunMojoCommand extends FlutterCommand {
       args.add('--map-origin=http://flutter/=$cloudStorageBaseUrl');
       args.add('--url-mappings=mojo:flutter=http://flutter/flutter.mojo');
     } else {
-      final String appPath = _makePathAbsolute(argResults['app']);
+      final String appPath = _makePathAbsolute(bundlePath);
       String flutterPath;
       BuildConfiguration config = _getCurrentHostConfig();
       if (config == null || config.type == BuildType.prebuilt) {
@@ -136,7 +144,21 @@ class RunMojoCommand extends FlutterCommand {
       return 1;
     }
 
-    return await runCommandAndStreamOutput(await _getShellConfig());
-  }
+    await downloadToolchain();
 
+    String bundlePath = argResults['app'];
+    if (bundlePath == null) {
+      bundlePath = _kDefaultBundlePath;
+
+      String mainPath = StartCommand.findMainDartFile(argResults['target']);
+
+      BuildCommand builder = new BuildCommand();
+      builder.inheritFromParent(this);
+      int result = await builder.build(mainPath: mainPath, outputPath: bundlePath);
+      if (result != 0)
+        return result;
+    }
+
+    return await runCommandAndStreamOutput(await _getShellConfig(bundlePath));
+  }
 }
