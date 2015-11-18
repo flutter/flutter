@@ -6,7 +6,8 @@ import 'dart:async';
 import 'dart:ui' show VoidCallback;
 
 import 'package:collection/priority_queue.dart';
-import 'package:flutter/animation.dart' as animation show scheduler;
+
+import 'animation_scheduler.dart' as animation show scheduler;
 
 /// An entry in the scheduler's priority queue.
 ///
