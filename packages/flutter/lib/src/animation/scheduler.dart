@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:developer';
 import 'dart:ui' as ui;
 
 /// Slows down animations by this factor to help in development.
@@ -42,19 +43,9 @@ class Scheduler {
 
   int get transientCallbackCount => _transientCallbacks.length;
 
-  /// Called by the engine to produce a new frame.
-  ///
-  /// This function first calls all the callbacks registered by
-  /// [requestAnimationFrame], then calls all the callbacks registered by
-  /// [addPersistentFrameCallback], which typically drive the rendering pipeline,
-  /// and finally calls the callbacks registered by [requestPostFrameCallback].
-  void beginFrame(Duration rawTimeStamp) {
-    assert(!_inFrame);
-    _inFrame = true;
-    Duration timeStamp = new Duration(
-        microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
-    _haveScheduledVisualUpdate = false;
-
+  void _invokeAnimationCallbacks(Duration timeStamp) {
+    Timeline.startSync('Animate');
+    assert(_inFrame);
     Map<int, SchedulerCallback> callbacks = _transientCallbacks;
     _transientCallbacks = new Map<int, SchedulerCallback>();
     callbacks.forEach((int id, SchedulerCallback callback) {
@@ -62,6 +53,23 @@ class Scheduler {
         invokeCallback(callback, timeStamp);
     });
     _removedIds.clear();
+    Timeline.finishSync();
+  }
+
+  /// Called by the engine to produce a new frame.
+  ///
+  /// This function first calls all the callbacks registered by
+  /// [requestAnimationFrame], then calls all the callbacks registered by
+  /// [addPersistentFrameCallback], which typically drive the rendering pipeline,
+  /// and finally calls the callbacks registered by [requestPostFrameCallback].
+  void beginFrame(Duration rawTimeStamp) {
+    Timeline.startSync('Begin frame');
+    assert(!_inFrame);
+    _inFrame = true;
+    Duration timeStamp = new Duration(
+        microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
+    _haveScheduledVisualUpdate = false;
+    _invokeAnimationCallbacks(timeStamp);
 
     for (SchedulerCallback callback in _persistentCallbacks)
       invokeCallback(callback, timeStamp);
@@ -73,6 +81,7 @@ class Scheduler {
       invokeCallback(callback, timeStamp);
 
     _inFrame = false;
+    Timeline.finishSync();
   }
 
   void invokeCallback(SchedulerCallback callback, Duration timeStamp) {

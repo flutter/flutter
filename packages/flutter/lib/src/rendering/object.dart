@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -610,7 +611,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// See [FlutterBinding] for an example of how this function is used.
   static void flushLayout() {
-    ui.tracing.begin('RenderObject.flushLayout');
+    Timeline.startSync('Layout');
     _debugDoingLayout = true;
     try {
       // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
@@ -624,7 +625,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
     } finally {
       _debugDoingLayout = false;
-      ui.tracing.end('RenderObject.flushLayout');
+      Timeline.finishSync();
     }
   }
   void _layoutWithoutResize() {
@@ -962,7 +963,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// See [FlutterBinding] for an example of how this function is used.
   static void flushPaint() {
-    ui.tracing.begin('RenderObject.flushPaint');
+    Timeline.startSync('Paint');
     _debugDoingPaint = true;
     try {
       List<RenderObject> dirtyNodes = _nodesNeedingPaint;
@@ -976,7 +977,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(_nodesNeedingPaint.length == 0);
     } finally {
       _debugDoingPaint = false;
-      ui.tracing.end('RenderObject.flushPaint');
+      Timeline.finishSync();
     }
   }
 

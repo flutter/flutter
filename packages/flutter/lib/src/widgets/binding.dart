@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -47,6 +49,7 @@ class WidgetFlutterBinding extends FlutterBinding {
   void buildDirtyElements() {
     if (_dirtyElements.isEmpty)
       return;
+    Timeline.startSync('Build');
     BuildableElement.lockState(() {
       _dirtyElements.sort((BuildableElement a, BuildableElement b) => a.depth - b.depth);
       int dirtyCount = _dirtyElements.length;
@@ -63,6 +66,7 @@ class WidgetFlutterBinding extends FlutterBinding {
       _dirtyElements.clear();
     }, building: true);
     assert(_dirtyElements.isEmpty);
+    Timeline.finishSync();
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the

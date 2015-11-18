@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
@@ -116,7 +117,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
-    ui.tracing.begin('RenderView.compositeFrame');
+    Timeline.startSync('Composite');
     try {
       (layer as TransformLayer).transform = _logicalToDeviceTransform;
       Rect bounds = Point.origin & (size * ui.window.devicePixelRatio);
@@ -126,7 +127,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       ui.window.render(scene);
       scene.dispose();
     } finally {
-      ui.tracing.end('RenderView.compositeFrame');
+      Timeline.finishSync();
     }
   }
 
