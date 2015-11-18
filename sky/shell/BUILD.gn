@@ -69,8 +69,8 @@ source_set("gpu_direct") {
   ]
 
   deps = [
-    ":common",
     "//ui/gl",
+    ":common",
   ]
 }
 
@@ -136,6 +136,7 @@ if (is_android) {
     deps = [
       "//mojo/android:libsystem_java",
       "//mojo/edk/system",
+      "//ui/gl",
       ":common",
       ":gpu_direct",
       ":jni_headers",
@@ -180,8 +181,8 @@ if (is_android) {
       "//sky/services/media:media_lib",
       "//sky/services/oknet",
       "//sky/services/pointer:interfaces_java",
-      "//sky/services/raw_keyboard:raw_keyboard_lib",
       "//sky/services/raw_keyboard:interfaces_java",
+      "//sky/services/raw_keyboard:raw_keyboard_lib",
       "//sky/services/updater:interfaces_java",
       "//sky/services/vsync:interfaces_java",
       "//sky/services/vsync:vsync_lib",
@@ -209,10 +210,10 @@ if (is_android) {
     extensions_to_not_compress = ".flx"
 
     deps = [
+      "//base:base_java",
       ":assets",
       ":java",
       ":sky_shell",
-      "//base:base_java",
     ]
   }
 } else if (is_ios) {
@@ -243,13 +244,13 @@ if (is_android) {
     set_sources_assignment_filter(sources_assignment_filter)
 
     deps = [
-      ":common",
-      ":gpu_direct",
       "//mojo/edk/system",
       "//sky/services/keyboard",
       "//sky/services/media",
       "//sky/services/ns_net",
       "//sky/services/vsync",
+      ":common",
+      ":gpu_direct",
     ]
   }
 
