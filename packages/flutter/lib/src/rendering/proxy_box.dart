@@ -1052,6 +1052,19 @@ class RenderPointerListener extends RenderProxyBox {
   }
 }
 
+/// Force this subtree to have a layer
+///
+/// This render object creates a separate display list for its child, which
+/// can improve performance if the subtree repaints at different times than
+/// the surrounding parts of the tree. Specifically, when the child does not
+/// repaint but its parent does, we can re-use the display list we recorded
+/// previously. Similarly, when the child repaints but the surround tree does
+/// not, we can re-record its display list without re-recording the display list
+/// for the surround tree.
+class RenderForcedLayer extends RenderProxyBox {
+  bool get hasLayer => true;
+}
+
 /// Is invisible during hit testing.
 ///
 /// When [ignoring] is true, this render object (and its subtree) is invisible
