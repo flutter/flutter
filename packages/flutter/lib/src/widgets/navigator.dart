@@ -54,17 +54,7 @@ class Navigator extends StatefulComponent {
 
   static const String defaultRouteName = '/';
 
-  static NavigatorState of(BuildContext context) {
-    NavigatorState result;
-    context.visitAncestorElements((Element element) {
-      if (element is StatefulComponentElement && element.state is NavigatorState) {
-        result = element.state;
-        return false;
-      }
-      return true;
-    });
-    return result;
-  }
+  static NavigatorState of(BuildContext context) => context.ancestorStateOfType(NavigatorState);
 
   NavigatorState createState() => new NavigatorState();
 }

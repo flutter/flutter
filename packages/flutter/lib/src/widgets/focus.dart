@@ -87,7 +87,7 @@ class Focus extends StatefulComponent {
   static bool at(BuildContext context, Widget widget, { bool autofocus: true }) {
     assert(widget != null);
     assert(widget.key is GlobalKey);
-    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
     if (focusScope != null) {
       if (autofocus)
         focusScope._setFocusedWidgetIfUnset(widget.key);
@@ -100,7 +100,7 @@ class Focus extends StatefulComponent {
 
   static bool _atScope(BuildContext context, Widget widget, { bool autofocus: true }) {
     assert(widget != null);
-    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
     if (focusScope != null) {
       if (autofocus)
         focusScope._setFocusedScopeIfUnset(widget.key);
@@ -118,7 +118,7 @@ class Focus extends StatefulComponent {
   static void moveTo(BuildContext context, Widget widget) {
     assert(widget != null);
     assert(widget.key is GlobalKey);
-    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
     if (focusScope != null)
       focusScope.focusState._setFocusedWidget(widget.key);
   }
@@ -126,7 +126,7 @@ class Focus extends StatefulComponent {
   static void moveScopeTo(BuildContext context, Focus component) {
     assert(component != null);
     assert(component.key != null);
-    _FocusScope focusScope = context.inheritedWidgetOfType(_FocusScope);
+    _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
     if (focusScope != null)
       focusScope.focusState._setFocusedScope(component.key);
   }

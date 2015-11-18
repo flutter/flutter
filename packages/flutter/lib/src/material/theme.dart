@@ -23,7 +23,7 @@ class Theme extends InheritedWidget {
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
   static ThemeData of(BuildContext context) {
-    Theme theme = context.inheritedWidgetOfType(Theme);
+    Theme theme = context.inheritFromWidgetOfType(Theme);
     return theme == null ? _kFallbackTheme : theme.data;
   }
 

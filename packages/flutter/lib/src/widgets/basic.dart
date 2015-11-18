@@ -972,7 +972,7 @@ class DefaultTextStyle extends InheritedWidget {
   final TextStyle style;
 
   static TextStyle of(BuildContext context) {
-    DefaultTextStyle result = context.inheritedWidgetOfType(DefaultTextStyle);
+    DefaultTextStyle result = context.inheritFromWidgetOfType(DefaultTextStyle);
     return result?.style;
   }
 
@@ -1163,7 +1163,7 @@ class DefaultAssetBundle extends InheritedWidget {
   final AssetBundle bundle;
 
   static AssetBundle of(BuildContext context) {
-    DefaultAssetBundle result = context.inheritedWidgetOfType(DefaultAssetBundle);
+    DefaultAssetBundle result = context.inheritFromWidgetOfType(DefaultAssetBundle);
     return result?.bundle;
   }
 

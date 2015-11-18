@@ -19,7 +19,7 @@ class IconTheme extends InheritedWidget {
   final IconThemeData data;
 
   static IconThemeData of(BuildContext context) {
-    IconTheme result = context.inheritedWidgetOfType(IconTheme);
+    IconTheme result = context.inheritFromWidgetOfType(IconTheme);
     return result?.data;
   }
 
