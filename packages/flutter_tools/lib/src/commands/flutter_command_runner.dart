@@ -151,15 +151,31 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults.wasParsed('package-root'))
       ArtifactStore.packageRoot = globalResults['package-root'];
 
-    if (globalResults['version']) {
-      String revision = runSync([
-        'git', 'rev-parse', 'HEAD'
-      ], workingDirectory: ArtifactStore.flutterRoot).trim();
-      print('flutter version $revision');
-      return new Future<int>.value(0);
-    }
+    if (globalResults['version'])
+      return _printVersion();
 
     return super.runCommand(globalResults);
+  }
+
+  Future<int> _printVersion() async {
+    String upstream = runSync([
+      'git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'
+    ], workingDirectory: ArtifactStore.flutterRoot).trim();
+    String repository = '<unknown>';
+    int slash = upstream.indexOf('/');
+    if (slash != -1) {
+      String remote = upstream.substring(0, slash);
+      repository = runSync([
+        'git', 'ls-remote', '--get-url', remote
+      ], workingDirectory: ArtifactStore.flutterRoot).trim();
+      upstream = upstream.substring(slash + 1);
+    }
+    String revision = runSync([
+      'git', 'log', '-n', '1', '--pretty=format:%H (%ar)'
+    ], workingDirectory: ArtifactStore.flutterRoot).trim();
+
+    print('Flutter\nRepository: $repository\nBranch: $upstream\nRevision: $revision');
+    return 0;
   }
 
   String _findEnginePath(ArgResults globalResults) {
