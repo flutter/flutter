@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../build_configuration.dart';
+import '../file_system.dart';
 import 'build.dart';
 import 'flutter_command.dart';
 import 'start.dart';
@@ -19,13 +20,6 @@ const String _kKeystoreKeyName = "chromiumdebugkey";
 const String _kKeystorePassword = "chromium";
 
 final Logger _logging = new Logger('flutter_tools.apk');
-
-/// Create the ancestor directories of a file path if they do not already exist.
-void _ensureDirectoryExists(String filePath) {
-  Directory dir = new Directory(path.dirname(filePath));
-  if (!dir.existsSync())
-    dir.createSync(recursive: true);
-}
 
 /// Copies files into a new directory structure.
 class _AssetBuilder {
@@ -40,7 +34,7 @@ class _AssetBuilder {
 
   void add(File asset, String relativePath) {
     String destPath = path.join(_assetDir.path, relativePath);
-    _ensureDirectoryExists(destPath);
+    ensureDirectoryExists(destPath);
     asset.copySync(destPath);
   }
 
@@ -147,7 +141,7 @@ class ApkCommand extends FlutterCommand {
     }
 
     Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
-    try {      
+    try {
       _AssetBuilder assetBuilder = new _AssetBuilder(tempDir, 'assets');
       assetBuilder.add(icuData, 'icudtl.dat');
       assetBuilder.add(new File(flxPath), 'app.flx');
@@ -163,7 +157,7 @@ class ApkCommand extends FlutterCommand {
       builder.sign(keystore, _kKeystorePassword, _kKeystoreKeyName, unalignedApk);
 
       File finalApk = new File(argResults['output-file']);
-      _ensureDirectoryExists(finalApk.path);
+      ensureDirectoryExists(finalApk.path);
       builder.align(unalignedApk, finalApk);
 
       return 0;
@@ -203,10 +197,10 @@ class ApkCommand extends FlutterCommand {
       builder.inheritFromParent(this);
       int result;
       await builder.buildInTempDir(
-          mainPath: mainPath,
-          onBundleAvailable: (String localBundlePath) {
-        result = _buildApk(config, localBundlePath);
-      }
+        mainPath: mainPath,
+        onBundleAvailable: (String localBundlePath) {
+          result = _buildApk(config, localBundlePath);
+        }
       );
 
       return result;

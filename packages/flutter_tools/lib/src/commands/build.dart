@@ -12,6 +12,7 @@ import 'package:flx/signing.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import '../file_system.dart';
 import '../toolchain.dart';
 import 'flutter_command.dart';
 
@@ -109,8 +110,8 @@ ArchiveFile _createSnapshotFile(String snapshotPath) {
 const String _kDefaultAssetBase = 'packages/material_design_icons/icons';
 const String _kDefaultMainPath = 'lib/main.dart';
 const String _kDefaultManifestPath = 'flutter.yaml';
-const String _kDefaultOutputPath = 'app.flx';
-const String _kDefaultSnapshotPath = 'snapshot_blob.bin';
+const String _kDefaultOutputPath = 'build/app.flx';
+const String _kDefaultSnapshotPath = 'build/snapshot_blob.bin';
 const String _kDefaultPrivateKeyPath = 'privatekey.der';
 
 class BuildCommand extends FlutterCommand {
@@ -186,6 +187,8 @@ class BuildCommand extends FlutterCommand {
     Archive archive = new Archive();
 
     if (!precompiledSnapshot) {
+      ensureDirectoryExists(snapshotPath);
+
       // In a precompiled snapshot, the instruction buffer contains script
       // content equivalents
       int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath);
@@ -208,6 +211,7 @@ class BuildCommand extends FlutterCommand {
 
     AsymmetricKeyPair keyPair = keyPairFromPrivateKeyFileSync(privateKeyPath);
     Uint8List zipBytes = new Uint8List.fromList(new ZipEncoder().encode(archive));
+    ensureDirectoryExists(outputPath);
     Bundle bundle = new Bundle.fromContent(
       path: outputPath,
       manifest: manifestDescriptor,
