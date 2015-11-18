@@ -83,12 +83,12 @@ class StatisticsOverlay extends LeafRenderObjectWidget {
   /// how many frame intervals).
   final int rasterizerThreshold;
 
-  StatisticsBox createRenderObject() => new StatisticsBox(
+  RenderStatisticsBox createRenderObject() => new RenderStatisticsBox(
     optionsMask: optionsMask,
     rasterizerThreshold: rasterizerThreshold
   );
 
-  void updateRenderObject(StatisticsBox renderObject, RenderObjectWidget oldWidget) {
+  void updateRenderObject(RenderStatisticsBox renderObject, RenderObjectWidget oldWidget) {
     renderObject.optionsMask = optionsMask;
     renderObject.rasterizerThreshold = rasterizerThreshold;
   }
