@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show VoidCallback;
+import 'dart:ui' show VoidCallback, lerpDouble;
+
+import 'package:newton/newton.dart';
 
 import 'animated_value.dart';
 import 'forces.dart';
@@ -146,6 +148,27 @@ class ReversePerformance extends PerformanceView {
   }
 }
 
+class _RepeatingSimulation extends Simulation {
+  _RepeatingSimulation(this.min, this.max, Duration period)
+    : _periodInSeconds = period.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND {
+    assert(_periodInSeconds > 0.0);
+  }
+
+  final double min;
+  final double max;
+
+  final double _periodInSeconds;
+
+  double x(double timeInSeconds) {
+    assert(timeInSeconds >= 0.0);
+    final double t = (timeInSeconds / _periodInSeconds) % 1.0;
+    return lerpDouble(min, max, t);
+  }
+
+  double dx(double timeInSeconds) => 1.0;
+
+  bool isDone(double timeInSeconds) => false;
+}
 
 /// A timeline that can be reversed and used to update [Animatable]s.
 ///
@@ -247,6 +270,12 @@ class Performance extends PerformanceView {
       force = kDefaultSpringForce;
     _direction = velocity < 0.0 ? AnimationDirection.reverse : AnimationDirection.forward;
     return _timeline.animateWith(force.release(progress, velocity));
+  }
+
+  Future repeat({ double min: 0.0, double max: 1.0, Duration period }) {
+    if (period == null)
+      period = duration;
+    return _timeline.animateWith(new _RepeatingSimulation(min, max, period));
   }
 
   final List<VoidCallback> _listeners = new List<VoidCallback>();
