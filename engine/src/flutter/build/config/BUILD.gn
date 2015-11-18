@@ -115,9 +115,6 @@ config("feature_flags") {
   if (use_default_render_theme) {
     defines += [ "USE_DEFAULT_RENDER_THEME=1" ]
   }
-  if (use_glib) {
-    defines += [ "USE_GLIB=1" ]
-  }
   if (use_openssl) {
     defines += [ "USE_OPENSSL=1" ]
   }
