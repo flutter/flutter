@@ -1321,6 +1321,11 @@ class Listener extends OneChildRenderObjectWidget {
   }
 }
 
+class ForcedLayer extends OneChildRenderObjectWidget {
+  ForcedLayer({ Key key, Widget child }) : super(key: key, child: child);
+  RenderForcedLayer createRenderObject() => new RenderForcedLayer();
+}
+
 class IgnorePointer extends OneChildRenderObjectWidget {
   IgnorePointer({ Key key, Widget child, this.ignoring: true })
     : super(key: key, child: child);

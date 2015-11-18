@@ -39,7 +39,9 @@ class OverlayRoute extends Route {
 
   void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
     for (WidgetBuilder builder in builders) {
-      _overlayEntries.add(new OverlayEntry(builder: builder));
+      _overlayEntries.add(new OverlayEntry(builder: (BuildContext context) {
+        return new ForcedLayer(child: builder(context));
+      }));
       overlay?.insert(_overlayEntries.last, above: insertionPoint);
       insertionPoint = _overlayEntries.last;
     }
