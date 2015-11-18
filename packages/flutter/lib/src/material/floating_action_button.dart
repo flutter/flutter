@@ -19,12 +19,16 @@ class FloatingActionButton extends StatefulComponent {
     Key key,
     this.child,
     this.backgroundColor,
+    this.elevation: 6,
+    this.highlightElevation: 12,
     this.onPressed
   }) : super(key: key);
 
   final Widget child;
   final Color backgroundColor;
   final VoidCallback onPressed;
+  final int elevation;
+  final int highlightElevation;
 
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
 }
@@ -50,19 +54,17 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     return new Material(
       color: materialColor,
       type: MaterialType.circle,
-      elevation: _highlight ? 12 : 6,
-      child: new ClipOval(
-        child: new Container(
-          width: _kSize,
-          height: _kSize,
-          child: new InkWell(
-            onTap: config.onPressed,
-            onHighlightChanged: _handleHighlightChanged,
-            child: new Center(
-              child: new IconTheme(
-                data: new IconThemeData(color: iconThemeColor),
-                child: config.child
-              )
+      elevation: _highlight ? config.highlightElevation : config.elevation,
+      child: new Container(
+        width: _kSize,
+        height: _kSize,
+        child: new InkWell(
+          onTap: config.onPressed,
+          onHighlightChanged: _handleHighlightChanged,
+          child: new Center(
+            child: new IconTheme(
+              data: new IconThemeData(color: iconThemeColor),
+              child: config.child
             )
           )
         )

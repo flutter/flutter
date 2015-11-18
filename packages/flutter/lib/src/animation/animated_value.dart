@@ -58,26 +58,27 @@ class AnimationTiming {
   }
 }
 
-/// An animated variable with a concrete type
+/// An animated variable with a concrete type.
 class AnimatedValue<T extends dynamic> extends AnimationTiming implements Animatable {
   AnimatedValue(this.begin, { this.end, Curve curve, Curve reverseCurve })
     : super(curve: curve, reverseCurve: reverseCurve) {
     value = begin;
   }
 
-  /// The current value of this variable
+  /// The current value of this variable.
   T value;
 
-  /// The value this variable has at the beginning of the animation
+  /// The value this variable has at the beginning of the animation.
   T begin;
 
-  /// The value this variable has at the end of the animation
+  /// The value this variable has at the end of the animation.
   T end;
 
-  /// Returns the value this variable has at the given animation clock value
+  /// Returns the value this variable has at the given animation clock value.
   T lerp(double t) => begin + (end - begin) * t;
 
-  /// Updates the value of this variable according to the given animation clock value and direction
+  /// Updates the value of this variable according to the given animation clock
+  /// value and direction.
   void setProgress(double t, AnimationDirection direction) {
     if (end != null) {
       t = transform(t, direction);
@@ -93,7 +94,7 @@ class AnimatedValue<T extends dynamic> extends AnimationTiming implements Animat
   String toString() => 'AnimatedValue(begin=$begin, end=$end, value=$value)';
 }
 
-/// An animated variable containing a color
+/// An animated variable containing a color.
 ///
 /// This class specializes the interpolation of AnimatedValue<Color> to be
 /// appropriate for colors.
@@ -104,9 +105,9 @@ class AnimatedColorValue extends AnimatedValue<Color> {
   Color lerp(double t) => Color.lerp(begin, end, t);
 }
 
-/// An animated variable containing a rectangle
+/// An animated variable containing a size.
 ///
-/// This class specializes the interpolation of AnimatedValue<Rect> to be
+/// This class specializes the interpolation of AnimatedValue<Size> to be
 /// appropriate for rectangles.
 class AnimatedSizeValue extends AnimatedValue<Size> {
   AnimatedSizeValue(Size begin, { Size end, Curve curve, Curve reverseCurve })
@@ -115,7 +116,7 @@ class AnimatedSizeValue extends AnimatedValue<Size> {
   Size lerp(double t) => Size.lerp(begin, end, t);
 }
 
-/// An animated variable containing a rectangle
+/// An animated variable containing a rectangle.
 ///
 /// This class specializes the interpolation of AnimatedValue<Rect> to be
 /// appropriate for rectangles.
@@ -124,4 +125,16 @@ class AnimatedRectValue extends AnimatedValue<Rect> {
     : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
 
   Rect lerp(double t) => Rect.lerp(begin, end, t);
+}
+
+/// An animated variable containing a int.
+///
+/// The inherited lerp() function doesn't work with ints because it multiplies
+/// the begin and end types by a double, and int * double returns a double.
+/// This class overrides the lerp() function to round off the result to an int.
+class AnimatedIntValue extends AnimatedValue<int> {
+  AnimatedIntValue(int begin, { int end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+
+  int lerp(double t) => (begin + (end - begin) * t).round();
 }

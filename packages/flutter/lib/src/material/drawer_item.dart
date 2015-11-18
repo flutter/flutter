@@ -10,33 +10,37 @@ import 'ink_well.dart';
 import 'theme.dart';
 
 class DrawerItem extends StatelessComponent {
-  const DrawerItem({ Key key, this.icon, this.child, this.onPressed, this.selected: false })
-    : super(key: key);
+  const DrawerItem({
+    Key key,
+    this.icon,
+    this.child,
+    this.onPressed,
+    this.selected: false
+  }) : super(key: key);
 
   final String icon;
   final Widget child;
   final VoidCallback onPressed;
   final bool selected;
 
+  ColorFilter _getIconColorFilter(ThemeData themeData) {
+    if (selected) {
+      if (themeData.brightness == ThemeBrightness.dark)
+        return new ColorFilter.mode(themeData.accentColor, TransferMode.srcATop);
+      return new ColorFilter.mode(themeData.primaryColor, TransferMode.srcATop);
+    }
+    return new ColorFilter.mode(Colors.black45, TransferMode.dstIn);
+  }
+
   TextStyle _getTextStyle(ThemeData themeData) {
     TextStyle result = themeData.text.body2;
-    if (selected)
-      result = result.copyWith(color: themeData.primaryColor);
+    if (selected) {
+      if (themeData.brightness == ThemeBrightness.dark)
+        result = result.copyWith(color: themeData.accentColor);
+      else
+        result = result.copyWith(color: themeData.primaryColor);
+    }
     return result;
-  }
-
-  Color _getBackgroundColor(ThemeData themeData, { bool highlight }) {
-    if (highlight)
-      return themeData.highlightColor;
-    if (selected)
-      return themeData.selectedColor;
-    return Colors.transparent;
-  }
-
-  ColorFilter _getColorFilter(ThemeData themeData) {
-    if (selected)
-      return new ColorFilter.mode(themeData.primaryColor, TransferMode.srcATop);
-    return new ColorFilter.mode(const Color(0x73000000), TransferMode.dstIn);
   }
 
   Widget build(BuildContext context) {
@@ -49,7 +53,7 @@ class DrawerItem extends StatelessComponent {
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(
             icon: icon,
-            colorFilter: _getColorFilter(themeData)
+            colorFilter: _getIconColorFilter(themeData)
           )
         )
       );
@@ -70,8 +74,6 @@ class DrawerItem extends StatelessComponent {
       height: 48.0,
       child: new InkWell(
         onTap: onPressed,
-        defaultColor: _getBackgroundColor(themeData, highlight: false),
-        highlightColor: _getBackgroundColor(themeData, highlight: true),
         child: new Row(flexChildren)
       )
     );

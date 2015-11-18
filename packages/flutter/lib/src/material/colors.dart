@@ -14,11 +14,13 @@ class Colors {
   static const black   = const Color(0xFF000000);
   static const black87 = const Color(0xDD000000);
   static const black54 = const Color(0x8A000000);
-  static const black26 = const Color(0x42000000); // disabled radio buttons and text of disabled flat buttons in light theme (26% black)
+  static const black45 = const Color(0x73000000); // mask color
+  static const black26 = const Color(0x42000000); // disabled radio buttons and text of disabled flat buttons in light theme
   static const black12 = const Color(0x1F000000); // background of disabled raised buttons in light theme
+
   static const white   = const Color(0xFFFFFFFF);
   static const white70 = const Color(0xB3FFFFFF);
-  static const white30 = const Color(0x4DFFFFFF); // disabled radio buttons and text of disabled flat buttons in dark theme (30% white)
+  static const white30 = const Color(0x4DFFFFFF); // disabled radio buttons and text of disabled flat buttons in dark theme
   static const white12 = const Color(0x1FFFFFFF); // background of disabled raised buttons in dark theme
   static const white10 = const Color(0x1AFFFFFF);
 

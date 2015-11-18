@@ -386,8 +386,17 @@ abstract class State<T extends StatefulComponent> {
     _element.markNeedsBuild();
   }
 
-  /// Called when this object is removed from the tree. Override this to clean
-  /// up any resources allocated by this object.
+  /// Called when this object is removed from the tree.
+  /// The object might momentarily be reattached to the tree elsewhere.
+  ///
+  /// Use this to clean up any links between this state and other
+  /// elements in the tree (e.g. if you have provided an ancestor with
+  /// a pointer to a descendant's renderObject).
+  void deactivate() { }
+
+  /// Called when this object is removed from the tree permanently.
+  /// Override this to clean up any resources allocated by this
+  /// object.
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
@@ -404,6 +413,11 @@ abstract class State<T extends StatefulComponent> {
   /// the tree at which this component is being built. For example, the context
   /// provides the set of inherited widgets for this location in the tree.
   Widget build(BuildContext context);
+
+  /// Called when an Inherited widget in the ancestor chain has changed. Usually
+  /// there is nothing to do here; whenever this is called, build() is also
+  /// called. 
+  void dependenciesChanged(Type affectedWidgetType) { }
 
   String toString() {
     final List<String> data = <String>[];
@@ -540,6 +554,7 @@ abstract class BuildContext {
   InheritedWidget inheritFromWidgetOfType(Type targetType);
   Widget ancestorWidgetOfType(Type targetType);
   State ancestorStateOfType(Type targetType);
+  RenderObject ancestorRenderObjectOfType(Type targetType);
   void visitAncestorElements(bool visitor(Element element));
   void visitChildElements(void visitor(Element element));
 }
@@ -777,7 +792,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(child._parent == this);
     child._parent = null;
     child.detachRenderObject();
-    _inactiveElements.add(child);
+    _inactiveElements.add(child); // this eventually calls child.deactivate()
   }
 
   void deactivate() {
@@ -839,13 +854,24 @@ abstract class Element<T extends Widget> implements BuildContext {
     return statefulAncestor?.state;
   }
 
+  RenderObject ancestorRenderObjectOfType(Type targetType) {
+    Element ancestor = _parent;
+    while (ancestor != null) {
+      if (ancestor is RenderObjectElement && ancestor.renderObject.runtimeType == targetType)
+        break;
+      ancestor = ancestor._parent;
+    }
+    RenderObjectElement renderObjectAncestor = ancestor;
+    return renderObjectAncestor?.renderObject;
+  }
+
   void visitAncestorElements(bool visitor(Element element)) {
     Element ancestor = _parent;
     while (ancestor != null && visitor(ancestor))
       ancestor = ancestor._parent;
   }
 
-  void dependenciesChanged() {
+  void dependenciesChanged(Type affectedWidgetType) {
     assert(false);
   }
 
@@ -1024,7 +1050,7 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
   /// Called by rebuild() after the appropriate checks have been made.
   void performRebuild();
 
-  void dependenciesChanged() {
+  void dependenciesChanged(Type affectedWidgetType) {
     markNeedsBuild();
   }
 
@@ -1169,6 +1195,11 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
     rebuild();
   }
 
+  void deactivate() {
+    _state.deactivate();
+    super.deactivate();
+  }
+
   void unmount() {
     super.unmount();
     _state.dispose();
@@ -1181,6 +1212,11 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
     assert(!dirty); // See BuildableElement.unmount for why this is important.
     _state._element = null;
     _state = null;
+  }
+
+  void dependenciesChanged(Type affectedWidgetType) {
+    super.dependenciesChanged(affectedWidgetType);
+    _state.dependenciesChanged(affectedWidgetType);
   }
 
   void debugFillDescription(List<String> description) {
@@ -1252,7 +1288,7 @@ class InheritedElement extends ProxyElement<InheritedWidget> {
     void notifyChildren(Element child) {
       if (child._dependencies != null &&
           child._dependencies.contains(ourRuntimeType)) {
-        child.dependenciesChanged();
+        child.dependenciesChanged(ourRuntimeType);
       }
       if (child.runtimeType != ourRuntimeType)
         child.visitChildren(notifyChildren);

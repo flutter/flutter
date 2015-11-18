@@ -10,11 +10,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'constants.dart';
 import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
+import 'material.dart';
 import 'theme.dart';
 
 typedef void TabSelectedIndexChanged(int selectedIndex);
@@ -403,6 +403,10 @@ class TabBarSelection {
   int _previousIndex = 0;
 }
 
+/// A tab strip, consisting of several TabLabels and a TabBarSelection.
+/// The TabBarSelection can be used to link this to a TabBarView.
+///
+/// Tabs must always have an ancestor Material object.
 class TabBar extends Scrollable {
   TabBar({
     Key key,
@@ -551,13 +555,13 @@ class _TabBarState extends ScrollableState<TabBar> {
 
   Widget buildContent(BuildContext context) {
     assert(config.labels != null && config.labels.isNotEmpty);
+    assert(Material.of(context) != null);
 
     ThemeData themeData = Theme.of(context);
-    Color backgroundColor = themeData.primaryColor;
+    Color backgroundColor = Material.of(context).color;
     Color indicatorColor = themeData.accentColor;
-    if (indicatorColor == backgroundColor) {
+    if (indicatorColor == backgroundColor)
       indicatorColor = Colors.white;
-    }
 
     TextStyle textStyle = themeData.primaryTextTheme.body1;
     IconThemeData iconTheme = themeData.primaryIconTheme;
@@ -571,7 +575,7 @@ class _TabBarState extends ScrollableState<TabBar> {
         textAndIcons = true;
     }
 
-    Widget content = new IconTheme(
+    Widget contents = new IconTheme(
       data: iconTheme,
       child: new DefaultTextStyle(
         style: textStyle,
@@ -594,23 +598,17 @@ class _TabBarState extends ScrollableState<TabBar> {
     );
 
     if (config.isScrollable) {
-      content = new SizeObserver(
+      contents = new SizeObserver(
         onSizeChanged: _handleViewportSizeChanged,
         child: new Viewport(
           scrollDirection: ScrollDirection.horizontal,
           scrollOffset: new Offset(scrollOffset, 0.0),
-          child: content
+          child: contents
         )
       );
     }
 
-    return new AnimatedContainer(
-      decoration: new BoxDecoration(
-        backgroundColor: backgroundColor
-      ),
-      duration: kThemeChangeDuration,
-      child: content
-    );
+    return contents;
   }
 }
 

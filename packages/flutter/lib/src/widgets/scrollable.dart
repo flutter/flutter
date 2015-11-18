@@ -16,6 +16,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'homogeneous_viewport.dart';
 import 'mixed_viewport.dart';
+import 'notification_listener.dart';
 import 'page_storage.dart';
 
 // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
@@ -50,6 +51,8 @@ abstract class Scrollable extends StatefulComponent {
   final ScrollListener onScrollEnd;
   final SnapOffsetCallback snapOffsetCallback;
   final double snapAlignmentOffset;
+
+  ScrollableState createState();
 }
 
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
@@ -180,6 +183,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       _scrollOffset = newScrollOffset;
     });
     PageStorage.of(context)?.writeState(context, _scrollOffset);
+    new ScrollNotification(this, _scrollOffset).dispatch(context);
     dispatchOnScroll();
   }
 
@@ -269,6 +273,12 @@ ScrollableState findScrollableAncestor(BuildContext context) {
     return true;
   });
   return result;
+}
+
+class ScrollNotification extends Notification {
+  ScrollNotification(this.scrollable, this.position);
+  final ScrollableState scrollable;
+  final double position;
 }
 
 Future ensureWidgetIsVisible(BuildContext context, { Duration duration, Curve curve }) {

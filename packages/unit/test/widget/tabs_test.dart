@@ -10,10 +10,12 @@ import 'package:test/test.dart';
 TabBarSelection selection;
 
 Widget buildFrame({ List<String> tabs, bool isScrollable: false }) {
-  return new TabBar(
-    labels: tabs.map((String tab) => new TabLabel(text: tab)).toList(),
-    selection: selection,
-    isScrollable: isScrollable
+  return new Material(
+    child: new TabBar(
+      labels: tabs.map((String tab) => new TabLabel(text: tab)).toList(),
+      selection: selection,
+      isScrollable: isScrollable
+    )
   );
 }
 

@@ -27,15 +27,7 @@ class ThemeData {
       // Some users want the pre-multiplied color, others just want the opacity.
       hintColor = brightness == ThemeBrightness.dark ? const Color(0x42FFFFFF) : const Color(0x4C000000),
       hintOpacity = brightness == ThemeBrightness.dark ? 0.26 : 0.30,
-      // TODO(eseidel): Where are highlight and selected colors documented?
-      // I flipped highlight/selected to match the News app (which is clearly not quite Material)
-      // Gmail has an interesting behavior of showing selected darker until
-      // you click on a different drawer item when the first one loses its
-      // selected color and becomes lighter, the ink then fills to make the new
-      // click dark to match the previous (resting) selected state.  States
-      // revert when you cancel the tap.
-      highlightColor = const Color(0x33999999),
-      selectedColor = const Color(0x66999999),
+      highlightColor = brightness == ThemeBrightness.dark ? const Color(0x42FFFFFF) : const Color(0x1F000000),
       text = brightness == ThemeBrightness.dark ? Typography.white : Typography.black {
     assert(brightness != null);
 
@@ -63,6 +55,13 @@ class ThemeData {
   /// The brightness of the overall theme of the application. Used by widgets
   /// like buttons to determine what color to pick when not using the primary or
   /// accent color.
+  ///
+  /// When the ThemeBrightness is dark, the canvas, card, and primary colors are
+  /// all dark. When the ThemeBrightness is light, the canvas and card colors
+  /// are bright, and the primary color's darkness varies as described by
+  /// primaryColorBrightness. The primaryColor does not contrast well with the
+  /// card and canvas colors when the brightness is dask; when the birghtness is
+  /// dark, use Colors.white or the accentColor for a contrasting color.
   final ThemeBrightness brightness;
 
   final Map<int, Color> primarySwatch;
@@ -71,8 +70,9 @@ class ThemeData {
   final Color dividerColor;
   final Color hintColor;
   final Color highlightColor;
-  final Color selectedColor;
   final double hintOpacity;
+
+  /// Text with a color that contrasts with the card and canvas colors.
   final TextTheme text;
 
   /// The background colour for major parts of the app (toolbars, tab bars, etc)
@@ -128,7 +128,6 @@ class ThemeData {
            (otherData.dividerColor == dividerColor) &&
            (otherData.hintColor == hintColor) &&
            (otherData.highlightColor == highlightColor) &&
-           (otherData.selectedColor == selectedColor) &&
            (otherData.hintOpacity == hintOpacity) &&
            (otherData.text == text) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&
@@ -143,7 +142,6 @@ class ThemeData {
     value = 37 * value + dividerColor.hashCode;
     value = 37 * value + hintColor.hashCode;
     value = 37 * value + highlightColor.hashCode;
-    value = 37 * value + selectedColor.hashCode;
     value = 37 * value + hintOpacity.hashCode;
     value = 37 * value + text.hashCode;
     value = 37 * value + primaryColorBrightness.hashCode;
