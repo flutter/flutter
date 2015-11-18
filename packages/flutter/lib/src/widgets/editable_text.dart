@@ -105,8 +105,9 @@ class EditableString implements KeyboardClient {
   void deleteSurroundingText(int beforeLength, int afterLength) {
     TextRange beforeRange = new TextRange(
         start: selection.start - beforeLength, end: selection.start);
+    int afterRangeEnd = math.min(selection.end + afterLength, text.length);
     TextRange afterRange =
-        new TextRange(start: selection.end, end: selection.end + afterLength);
+        new TextRange(start: selection.end, end: afterRangeEnd);
     _delete(afterRange);
     _delete(beforeRange);
     selection = new TextRange(

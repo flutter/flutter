@@ -47,6 +47,8 @@ void main() {
       expect(parentData.right, isNull);
       expect(parentData.bottom, isNull);
       expect(parentData.left, equals(10.0));
+      expect(parentData.width, isNull);
+      expect(parentData.height, isNull);
 
       tester.pumpWidget(
         new Stack(<Widget>[
@@ -67,6 +69,8 @@ void main() {
       expect(parentData.right, equals(10.0));
       expect(parentData.bottom, isNull);
       expect(parentData.left, isNull);
+      expect(parentData.width, isNull);
+      expect(parentData.height, isNull);
     });
   });
 
@@ -84,6 +88,8 @@ void main() {
       expect(parentData.right, isNull);
       expect(parentData.bottom, isNull);
       expect(parentData.left, equals(10.0));
+      expect(parentData.width, isNull);
+      expect(parentData.height, isNull);
 
       tester.pumpWidget(new Stack(<Widget>[ container ]));
       containerElement = tester.findElementByKey(key);
@@ -93,6 +99,8 @@ void main() {
       expect(parentData.right, isNull);
       expect(parentData.bottom, isNull);
       expect(parentData.left, isNull);
+      expect(parentData.width, isNull);
+      expect(parentData.height, isNull);
     });
   });
 
@@ -184,6 +192,70 @@ void main() {
       expect(itemsTapped, isEmpty);
       tester.tap(tester.findElementByKey(key));
       expect(itemsTapped, [2]);
+    });
+  });
+
+  test('Can set width and height', () {
+    testWidgets((WidgetTester tester) {
+      Key key = new Key('container');
+
+      BoxDecoration kBoxDecoration = new BoxDecoration(
+        backgroundColor: new Color(0xFF00FF00)
+      );
+
+      tester.pumpWidget(
+        new Stack(<Widget>[
+          new Positioned(
+            left: 10.0,
+            width: 11.0,
+            height: 12.0,
+            child: new DecoratedBox(key: key, decoration: kBoxDecoration)
+          )
+        ])
+      );
+
+      Element box;
+      RenderBox renderBox;
+      StackParentData parentData;
+
+      box = tester.findElementByKey(key);
+      renderBox = box.renderObject;
+      parentData = renderBox.parentData;
+      expect(parentData.top, isNull);
+      expect(parentData.right, isNull);
+      expect(parentData.bottom, isNull);
+      expect(parentData.left, equals(10.0));
+      expect(parentData.width, equals(11.0));
+      expect(parentData.height, equals(12.0));
+      expect(parentData.position.x, equals(10.0));
+      expect(parentData.position.y, equals(0.0));
+      expect(renderBox.size.width, equals(11.0));
+      expect(renderBox.size.height, equals(12.0));
+
+      tester.pumpWidget(
+        new Stack(<Widget>[
+          new Positioned(
+            right: 10.0,
+            width: 11.0,
+            height: 12.0,
+            child: new DecoratedBox(key: key, decoration: kBoxDecoration)
+          )
+        ])
+      );
+
+      box = tester.findElementByKey(key);
+      renderBox = box.renderObject;
+      parentData = renderBox.parentData;
+      expect(parentData.top, isNull);
+      expect(parentData.right, equals(10.0));
+      expect(parentData.bottom, isNull);
+      expect(parentData.left, isNull);
+      expect(parentData.width, equals(11.0));
+      expect(parentData.height, equals(12.0));
+      expect(parentData.position.x, equals(779.0));
+      expect(parentData.position.y, equals(0.0));
+      expect(renderBox.size.width, equals(11.0));
+      expect(renderBox.size.height, equals(12.0));
     });
   });
 

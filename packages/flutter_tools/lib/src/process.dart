@@ -64,11 +64,12 @@ Future<Process> runDetached(List<String> cmd) {
 
 /// Run cmd and return stdout.
 /// Throws an error if cmd exits with a non-zero value.
-String runCheckedSync(List<String> cmd) =>
-    _runWithLoggingSync(cmd, checked: true);
+String runCheckedSync(List<String> cmd, { String workingDirectory }) =>
+    _runWithLoggingSync(cmd, workingDirectory: workingDirectory, checked: true);
 
 /// Run cmd and return stdout.
-String runSync(List<String> cmd) => _runWithLoggingSync(cmd);
+String runSync(List<String> cmd, { String workingDirectory }) =>
+    _runWithLoggingSync(cmd, workingDirectory: workingDirectory);
 
 /// Return the platform specific name for the given Dart SDK binary. So, `pub`
 /// ==> `pub.bat`.
@@ -76,10 +77,13 @@ String sdkBinaryName(String name) {
   return Platform.isWindows ? '$name.bat' : name;
 }
 
-String _runWithLoggingSync(List<String> cmd, {bool checked: false}) {
+String _runWithLoggingSync(List<String> cmd, {
+  bool checked: false,
+  String workingDirectory
+}) {
   _logging.info(cmd.join(' '));
   ProcessResult results =
-      Process.runSync(cmd[0], cmd.getRange(1, cmd.length).toList());
+      Process.runSync(cmd[0], cmd.getRange(1, cmd.length).toList(), workingDirectory: workingDirectory);
   if (results.exitCode != 0) {
     String errorDescription = 'Error code ${results.exitCode} '
         'returned when attempting to run command: ${cmd.join(' ')}';

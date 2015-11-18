@@ -247,6 +247,7 @@ class _DismissableState extends State<Dismissable> {
       onVerticalDragStart: _directionIsYAxis ? _handleDragStart : null,
       onVerticalDragUpdate: _directionIsYAxis ? _handleDragUpdate : null,
       onVerticalDragEnd: _directionIsYAxis ? _handleDragEnd : null,
+      behavior: HitTestBehavior.opaque,
       child: new SizeObserver(
         onSizeChanged: _handleSizeChanged,
         child: new FadeTransition(

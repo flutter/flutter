@@ -10,7 +10,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:flutter/services.dart';
+import 'package:flutter/http.dart' as http;
 
 final math.Random _rng = new math.Random();
 
@@ -83,8 +83,8 @@ class StockDataFetcher {
     if (!actuallyFetchData)
       return;
 
-    fetchBody(_urlToFetch(_nextChunk++)).then((Response response) {
-      String json = response.bodyAsString();
+    http.get(_urlToFetch(_nextChunk++)).then((http.Response response) {
+      String json = response.body;
       if (json == null) {
         print("Failed to load stock data chunk ${_nextChunk - 1}");
         return;

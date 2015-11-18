@@ -8,14 +8,9 @@ export 'dart:ui' show Point;
 
 /// Base class for input events.
 class InputEvent {
-
-  const InputEvent({ this.type, this.timeStamp: 0.0 });
-
+  const InputEvent({ this.type, this.timeStamp: const Duration() });
   final String type;
-  // TODO: Should timeStamp be a DateTime object instead of double?
-  // Some client code (e.g. drag.dart) does math on the time stamp.
-  final double timeStamp;
-
+  final Duration timeStamp;
 }
 
 /// Input event representing a touch or button.
@@ -23,7 +18,7 @@ class PointerInputEvent extends InputEvent {
 
   const PointerInputEvent({
     String type,
-    double timeStamp: 0.0,
+    Duration timeStamp: const Duration(),
     this.pointer: 0,
     this.kind,
     this.x: 0.0,

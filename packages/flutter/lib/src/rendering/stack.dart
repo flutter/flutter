@@ -137,17 +137,27 @@ class RelativeRect {
 
 /// Parent data for use with [RenderStack]
 class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
-  /// The offset of the child's top edge from the top of the stack
+  /// The offset of the child's top edge from the top of the stack.
   double top;
 
-  /// The offset of the child's right edge from the right of the stack
+  /// The offset of the child's right edge from the right of the stack.
   double right;
 
-  /// The offset of the child's bottom edge from the bottom of the stack
+  /// The offset of the child's bottom edge from the bottom of the stack.
   double bottom;
 
-  /// The offset of the child's left edge from the left of the stack
+  /// The offset of the child's left edge from the left of the stack.
   double left;
+
+  /// The child's width.
+  ///
+  /// Ignored if both left and right are non-null.
+  double width;
+
+  /// The child's height.
+  ///
+  /// Ignored if both top and bottom are non-null.
+  double height;
 
   /// Get or set the current values in terms of a RelativeRect object.
   RelativeRect get rect => new RelativeRect.fromLTRB(left, top, right, bottom);
@@ -167,6 +177,10 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
       bottom = other.bottom;
     if (other.left != null)
       left = other.left;
+    if (other.width != null)
+      width = other.width;
+    if (other.height != null)
+      height = other.height;
     super.merge(other);
   }
 
@@ -176,7 +190,7 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// are non-null. Positioned children do not factor into determining the size
   /// of the stack but are instead placed relative to the non-positioned
   /// children in the stack.
-  bool get isPositioned => top != null || right != null || bottom != null || left != null;
+  bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
 
   String toString() => '${super.toString()}; top=$top; right=$right; bottom=$bottom, left=$left';
 }
@@ -325,9 +339,13 @@ abstract class RenderStackBase extends RenderBox
 
         if (childParentData.left != null && childParentData.right != null)
           childConstraints = childConstraints.tightenWidth(size.width - childParentData.right - childParentData.left);
+        else if (childParentData.width != null)
+          childConstraints = childConstraints.tightenWidth(childParentData.width);
 
         if (childParentData.top != null && childParentData.bottom != null)
           childConstraints = childConstraints.tightenHeight(size.height - childParentData.bottom - childParentData.top);
+        else if (childParentData.height != null)
+          childConstraints = childConstraints.tightenHeight(childParentData.height);
 
         child.layout(childConstraints, parentUsesSize: true);
 

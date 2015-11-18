@@ -54,12 +54,10 @@ class Marker extends StatelessComponent {
     return new Positioned(
       left: position.x - size / 2.0,
       top: position.y - size / 2.0,
+      width: size,
+      height: size,
       child: new IgnorePointer(
-        child: new Container(
-          width: size,
-          height: size,
-          child: new CustomPaint(onPaint: paintMarker)
-        )
+        child: new CustomPaint(onPaint: paintMarker)
       )
     );
   }

@@ -7,6 +7,8 @@ import 'dart:ui' as ui;
 import 'dart:ui_internals' as internals;
 import 'dart:typed_data';
 
+import 'package:flutter/http.dart' as http;
+
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
 
@@ -38,7 +40,9 @@ class NetworkAssetBundle extends AssetBundle {
 
   ImageResource loadImage(String key) => imageCache.load(_urlFromKey(key));
 
-  Future<String> loadString(String key) => fetchString(_urlFromKey(key));
+  Future<String> loadString(String key) async {
+    return (await http.get(_urlFromKey(key))).body;
+  }
 }
 
 Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {

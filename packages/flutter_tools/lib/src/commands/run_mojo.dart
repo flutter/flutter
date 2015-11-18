@@ -5,17 +5,17 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../process.dart';
+import 'flutter_command.dart';
 
 final Logger _logging = new Logger('flutter_tools.run_mojo');
 
-class RunMojoCommand extends Command {
+class RunMojoCommand extends FlutterCommand {
   final String name = 'run_mojo';
   final String description = 'Run a Flutter app in mojo.';
 
@@ -29,6 +29,8 @@ class RunMojoCommand extends Command {
     argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services.');
     argParser.addOption('devtools-path', help: 'Path to mojo devtools\' mojo_run command.');
   }
+
+  bool get requiresProjectRoot => false;
 
   // TODO(abarth): Why not use path.absolute?
   String _makePathAbsolute(String relativePath) {
@@ -58,33 +60,52 @@ class RunMojoCommand extends Command {
     return _makePathAbsolute(path.join(argResults['mojo-path'], 'out', mojoBuildType, 'mojo_shell'));
   }
 
-  Future<List<String>> _getShellConfig() async {
-    List<String> args = [];
+  BuildConfiguration _getCurrentHostConfig() {
+    BuildConfiguration result;
+    TargetPlatform target = getCurrentHostPlatformAsTarget();
+    for (BuildConfiguration config in buildConfigurations) {
+      if (config.targetPlatform == target) {
+        result = config;
+        break;
+      }
+    }
+    return result;
+  }
 
-    final useDevtools = _useDevtools();
-    final command = useDevtools ? _getDevtoolsPath() : _getMojoShellPath();
+  Future<List<String>> _getShellConfig() async {
+    List<String> args = <String>[];
+
+    final bool useDevtools = _useDevtools();
+    final String command = useDevtools ? _getDevtoolsPath() : _getMojoShellPath();
     args.add(command);
 
     if (argResults['android']) {
       args.add('--android');
-      final skyViewerUrl = ArtifactStore.getCloudStorageBaseUrl('viewer', 'android-arm');
-      final appPath = _makePathAbsolute(argResults['app']);
-      final appName = path.basename(appPath);
-      final appDir = path.dirname(appPath);
+      final String cloudStorageBaseUrl = ArtifactStore.getCloudStorageBaseUrl('shell', 'android-arm');
+      final String appPath = _makePathAbsolute(argResults['app']);
+      final String appName = path.basename(appPath);
+      final String appDir = path.dirname(appPath);
       args.add('http://app/$appName');
       args.add('--map-origin=http://app/=$appDir');
-      args.add('--map-origin=http://sky_viewer/=$skyViewerUrl');
-      args.add('--url-mappings=mojo:sky_viewer=http://sky_viewer/sky_viewer.mojo');
+      args.add('--map-origin=http://flutter/=$cloudStorageBaseUrl');
+      args.add('--url-mappings=mojo:flutter=http://flutter/flutter.mojo');
     } else {
-      final appPath = _makePathAbsolute(argResults['app']);
-      Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.viewer, targetPlatform: TargetPlatform.linux);
-      final viewerPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      final String appPath = _makePathAbsolute(argResults['app']);
+      String flutterPath;
+      BuildConfiguration config = _getCurrentHostConfig();
+      if (config == null || config.type == BuildType.prebuilt) {
+        Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: TargetPlatform.linux);
+        flutterPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      } else {
+        String localPath = path.join(config.buildDir, 'flutter.mojo');
+        flutterPath = _makePathAbsolute(localPath);
+      }
       args.add('file://$appPath');
-      args.add('--url-mappings=mojo:sky_viewer=file://$viewerPath');
+      args.add('--url-mappings=mojo:flutter=file://$flutterPath');
     }
 
     if (useDevtools) {
-      final buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
+      final String buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
       args.add(buildFlag);
       if (_logging.level <= Level.INFO) {
         args.add('--verbose');
@@ -95,7 +116,7 @@ class RunMojoCommand extends Command {
     }
 
     if (argResults['checked']) {
-      args.add('--args-for=mojo:sky_viewer --enable-checked-mode');
+      args.add('--args-for=mojo:flutter --enable-checked-mode');
     }
 
     args.addAll(argResults.rest);
@@ -104,7 +125,7 @@ class RunMojoCommand extends Command {
   }
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     if ((argResults['mojo-path'] == null && argResults['devtools-path'] == null) || (argResults['mojo-path'] != null && argResults['devtools-path'] != null)) {
       _logging.severe('Must specify either --mojo-path or --devtools-path.');
       return 1;
@@ -117,4 +138,5 @@ class RunMojoCommand extends Command {
 
     return await runCommandAndStreamOutput(await _getShellConfig());
   }
+
 }

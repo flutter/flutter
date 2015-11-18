@@ -33,6 +33,9 @@ class FlutterCommandRunner extends CommandRunner {
         negatable: false,
         help: 'Very noisy logging, including the output of all '
             'shell commands executed.');
+    argParser.addFlag('version',
+        negatable: false,
+        help: 'Reports the version of this tool.');
     String packagesHelp;
     if (ArtifactStore.isPackageRootValid)
       packagesHelp = '\n(defaults to "${ArtifactStore.packageRoot}")';
@@ -113,6 +116,16 @@ class FlutterCommandRunner extends CommandRunner {
   }
   List<BuildConfiguration> _buildConfigurations;
 
+  String get enginePath {
+    if (!_enginePathSet) {
+      _enginePath = _findEnginePath(_globalResults);
+      _enginePathSet = true;
+    }
+    return _enginePath;
+  }
+  String _enginePath;
+  bool _enginePathSet = false;
+
   ArgResults _globalResults;
 
   String get defaultFlutterRoot {
@@ -138,36 +151,58 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults.wasParsed('package-root'))
       ArtifactStore.packageRoot = globalResults['package-root'];
 
+    if (globalResults['version'])
+      return _printVersion();
+
     return super.runCommand(globalResults);
   }
 
-  List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {
-    String enginePath = globalResults['engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
+  Future<int> _printVersion() async {
+    String upstream = runSync([
+      'git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'
+    ], workingDirectory: ArtifactStore.flutterRoot).trim();
+    String repository = '<unknown>';
+    int slash = upstream.indexOf('/');
+    if (slash != -1) {
+      String remote = upstream.substring(0, slash);
+      repository = runSync([
+        'git', 'ls-remote', '--get-url', remote
+      ], workingDirectory: ArtifactStore.flutterRoot).trim();
+      upstream = upstream.substring(slash + 1);
+    }
+    String revision = runSync([
+      'git', 'log', '-n', '1', '--pretty=format:%H (%ar)'
+    ], workingDirectory: ArtifactStore.flutterRoot).trim();
+
+    print('Flutter\nRepository: $repository\nBranch: $upstream\nRevision: $revision');
+    return 0;
+  }
+
+  String _findEnginePath(ArgResults globalResults) {
+    String engineSourcePath = globalResults['engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
     bool isDebug = globalResults['debug'];
     bool isRelease = globalResults['release'];
-    HostPlatform hostPlatform = getCurrentHostPlatform();
-    TargetPlatform hostPlatformAsTarget = getCurrentHostPlatformAsTarget();
 
-    if (enginePath == null && (isDebug || isRelease)) {
+    if (engineSourcePath == null && (isDebug || isRelease)) {
       if (ArtifactStore.isPackageRootValid) {
         Directory engineDir = new Directory(path.join(ArtifactStore.packageRoot, kFlutterEnginePackageName));
         try {
           String realEnginePath = engineDir.resolveSymbolicLinksSync();
-          enginePath = path.dirname(path.dirname(path.dirname(path.dirname(realEnginePath))));
-          bool dirExists = FileSystemEntity.isDirectorySync(path.join(enginePath, 'out'));
-          if (enginePath == '/' || enginePath.isEmpty || !dirExists)
-            enginePath = null;
+          engineSourcePath = path.dirname(path.dirname(path.dirname(path.dirname(realEnginePath))));
+          bool dirExists = FileSystemEntity.isDirectorySync(path.join(engineSourcePath, 'out'));
+          if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
+            engineSourcePath = null;
         } on FileSystemException { }
       }
-      if (enginePath == null) {
+      if (engineSourcePath == null) {
         String tryEnginePath(String enginePath) {
           if (FileSystemEntity.isDirectorySync(path.join(enginePath, 'out')))
             return enginePath;
           return null;
         }
-        enginePath = tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
+        engineSourcePath = tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
       }
-      if (enginePath == null) {
+      if (engineSourcePath == null) {
         stderr.writeln('Unable to detect local Flutter engine build directory.\n'
             'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and\n'
             'ensure --package-root is set if necessary, or set the \$$kFlutterEngineEnvironmentVariableName environment variable, or\n'
@@ -175,6 +210,15 @@ class FlutterCommandRunner extends CommandRunner {
         throw new ProcessExit(2);
       }
     }
+
+    return engineSourcePath;
+  }
+
+  List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {
+    bool isDebug = globalResults['debug'];
+    bool isRelease = globalResults['release'];
+    HostPlatform hostPlatform = getCurrentHostPlatform();
+    TargetPlatform hostPlatformAsTarget = getCurrentHostPlatformAsTarget();
 
     List<BuildConfiguration> configs = <BuildConfiguration>[];
 

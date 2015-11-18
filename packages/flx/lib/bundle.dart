@@ -12,7 +12,7 @@ import 'package:bignum/bignum.dart';
 import 'signing.dart';
 
 // Magic string we put at the top of all bundle files.
-const String kBundleMagic = '#!mojo mojo:sky_viewer\n';
+const String kBundleMagic = '#!mojo mojo:flutter\n';
 
 // Prefix of the above, used when reading bundle files. This allows us to be
 // more flexbile about what we accept.
@@ -135,7 +135,7 @@ class Bundle {
   void writeSync() {
     assert(_contentBytes != null);
     RandomAccessFile outputFile = new File(path).openSync(mode: FileMode.WRITE);
-    outputFile.writeStringSync('#!mojo mojo:sky_viewer\n');
+    outputFile.writeStringSync(kBundleMagic);
     _writeBytesWithLengthSync(outputFile, signatureBytes);
     _writeBytesWithLengthSync(outputFile, manifestBytes);
     outputFile.writeFromSync(_contentBytes);

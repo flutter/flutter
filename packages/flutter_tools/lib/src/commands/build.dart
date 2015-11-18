@@ -18,7 +18,7 @@ import 'flutter_command.dart';
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const List<String> _kDensities = const ['drawable-xxhdpi'];
 const List<String> _kThemes = const ['white', 'black'];
-const List<int> _kSizes = const [24];
+const List<int> _kSizes = const [18, 24, 36, 48];
 
 class _Asset {
   final String base;

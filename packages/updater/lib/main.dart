@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:mojo/core.dart';
+import 'package:flutter/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:flx/bundle.dart';
 import 'package:sky_services/updater/update_service.mojom.dart';
@@ -82,7 +83,7 @@ class UpdateTask {
 
   Future<yaml.YamlMap> _fetchManifest() async {
     String manifestUrl = _currentManifest['update-url'] + '/' + kManifestFile;
-    String manifestData = await fetchString(manifestUrl);
+    String manifestData = await http.get(manifestUrl);
     return yaml.loadYaml(manifestData, sourceUrl: manifestUrl);
   }
 

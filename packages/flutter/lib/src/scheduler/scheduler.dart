@@ -29,7 +29,7 @@ class Priority {
   /// It is still possible to have priorities that are offset by more than this
   /// amount by repeatedly taking relative offsets, but that's generally
   /// discouraged.
-  static const kMaxOffset = 10000;
+  static const int kMaxOffset = 10000;
 
   const Priority._(this._value);
 
@@ -86,7 +86,8 @@ class TaskScheduler {
   void schedule(VoidCallback task, Priority priority) {
     bool isFirstTask = _queue.isEmpty;
     _queue.add(new _SchedulerEntry(task, priority._value));
-    if (isFirstTask) _wakeNow();
+    if (isFirstTask)
+      _wakeNow();
   }
 
   /// Invoked by the system when there is time to run tasks.

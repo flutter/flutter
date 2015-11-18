@@ -22,11 +22,13 @@ class StateRoute extends Route {
 
   List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
 
-  void didPush(OverlayState overlay, OverlayEntry insertionPoint) { }
   void didPop(dynamic result) {
     if (onPop != null)
       onPop();
   }
+
+  bool willPushNext(Route nextRoute) => true;
+  bool didPopNext(Route nextRoute) => true;
 }
 
 class OverlayRoute extends Route {

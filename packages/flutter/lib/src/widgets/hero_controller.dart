@@ -24,28 +24,26 @@ class HeroController extends NavigatorObserver {
 
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
-  void didPushModal(Route route) {
+  void didPushModal(Route route, Route previousRoute) {
     assert(navigator != null);
     assert(route != null);
     if (route is ModalRoute) { // as opposed to StateRoute, say
       assert(route.performance != null);
-      Route from = navigator.currentRoute;
-      if (from is ModalRoute) // as opposed to the many other types of routes, or null
-        _from = from;
+      if (previousRoute is ModalRoute) // as opposed to the many other types of routes, or null
+        _from = previousRoute;
       _to = route;
       _performance = route.performance;
       _checkForHeroQuest();
     }
   }
 
-  void didPopModal(Route route) {
+  void didPopModal(Route route, Route previousRoute) {
     assert(navigator != null);
     assert(route != null);
     if (route is ModalRoute) { // as opposed to StateRoute, say
       assert(route.performance != null);
-      Route to = navigator.currentRoute;
-      if (to is ModalRoute) { // as opposed to the many other types of routes
-        _to = to;
+      if (previousRoute is ModalRoute) { // as opposed to the many other types of routes
+        _to = previousRoute;
         _from = route;
         _performance = route.performance;
         _checkForHeroQuest();
