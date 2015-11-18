@@ -15,7 +15,6 @@ const double kStatusBarHeight = 50.0;
 // Tablet/Desktop: 64dp
 const double kToolBarHeight = 56.0;
 const double kExtendedToolBarHeight = 128.0;
-const double kSnackBarHeight = 52.0;
 
 // https://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double kListTitleHeight = 72.0;
