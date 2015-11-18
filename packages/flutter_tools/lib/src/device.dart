@@ -505,6 +505,14 @@ class AndroidDevice extends Device {
   static List<AndroidDevice> getAttachedDevices([AndroidDevice mockAndroid]) {
     List<AndroidDevice> devices = [];
     String adbPath = (mockAndroid != null) ? mockAndroid.adbPath : _getAdbPath();
+
+    try {
+      runCheckedSync([adbPath, 'version']);
+    } catch (e) {
+      _logging.severe('Unable to find adb. Is "adb" in your path?');
+      return devices;
+    }
+
     List<String> output = runSync([adbPath, 'devices', '-l']).trim().split('\n');
 
     // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
@@ -513,6 +521,8 @@ class AndroidDevice extends Device {
 
     // 0149947A0D01500C       device usb:340787200X
     RegExp deviceRegex2 = new RegExp(r'^(\S+)\s+device\s+\S+$');
+
+    RegExp unauthorizedRegex = new RegExp(r'^(\S+)\s+unauthorized$');
 
     // Skip first line, which is always 'List of devices attached'.
     for (String line in output.skip(1)) {
@@ -539,6 +549,13 @@ class AndroidDevice extends Device {
         Match match = deviceRegex2.firstMatch(line);
         String deviceID = match[1];
         devices.add(new AndroidDevice(id: deviceID));
+      } else if (unauthorizedRegex.hasMatch(line)) {
+        Match match = unauthorizedRegex.firstMatch(line);
+        String deviceID = match[1];
+        _logging.warning(
+          'Device $deviceID is not authorized.\n'
+          'You might need to check your device for an authorization dialog.'
+        );
       } else {
         _logging.warning(
           'Unexpected failure parsing device information from adb output:\n'
