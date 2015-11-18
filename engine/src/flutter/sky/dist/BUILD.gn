@@ -103,6 +103,7 @@ group("dist") {
     deps += [
       ":sky_engine",
       ":sky_services",
+      "//build/android/ant:keystore",
     ]
   }
 }

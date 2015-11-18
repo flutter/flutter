@@ -10,6 +10,8 @@ import os
 import subprocess
 import sys
 import distutils.util
+import tempfile
+import zipfile
 
 
 DRY_RUN = False
@@ -36,42 +38,87 @@ def git_revision(cwd):
     ], cwd=cwd).strip()
 
 
-class Artifact(object):
-    def __init__(self, category, name):
-        self.category = category
-        self.name = name
+GS_URL = 'gs://mojo/flutter/%(commit_hash)s/%(config)s/%(name)s'
 
 
-GS_URL = 'gs://mojo/sky/%(category)s/%(config)s/%(commit_hash)s/%(name)s'
-
-
-ARTIFACTS = {
+# Paths of the artifacts that will be packaged into a zip file.
+ZIP_ARTIFACTS = {
     'android-arm': [
-        Artifact('shell', 'SkyShell.apk'),
-        Artifact('shell', 'flutter.mojo'),
-        Artifact('shell', 'libflutter_library.so'),
+        'chromium-debug.keystore',
+        'icudtl.dat',
+        'dist/shell/SkyShell.apk',
+        'dist/shell/flutter.mojo',
+        'gen/sky/shell/shell/classes.dex',
+        'gen/sky/shell/shell/shell/libs/armeabi-v7a/libsky_shell.so',
     ],
     'linux-x64': [
-        Artifact('shell', 'icudtl.dat'),
-        Artifact('shell', 'sky_shell'),
-        Artifact('shell', 'sky_snapshot'),
-        Artifact('shell', 'flutter.mojo'),
-        Artifact('shell', 'libflutter_library.so'),
-    ]
+        'dist/shell/icudtl.dat',
+        'dist/shell/sky_shell',
+        'dist/shell/sky_snapshot',
+        'dist/shell/flutter.mojo',
+    ],
+}
+
+
+# Paths of the artifacts that will be uploaded to GCS as individual files.
+FILE_ARTIFACTS = {
+    'android-arm': [
+        'dist/shell/flutter.mojo',
+        'dist/shell/libflutter_library.so',
+    ],
+    'linux-x64': [
+        'dist/shell/flutter.mojo',
+        'dist/shell/libflutter_library.so',
+    ],
+}
+
+
+def find_missing_artifacts(config, config_root):
+    result = []
+    for artifact_map in [ZIP_ARTIFACTS, FILE_ARTIFACTS]:
+        for artifact_path in artifact_map[config]:
+            full_path = os.path.join(config_root, artifact_path)
+            if not os.path.exists(full_path):
+                result.append(full_path)
+    return result
+
+
+# Do not try to compress file types that are already compressed.
+FILE_TYPE_COMPRESSION = {
+    '.apk': zipfile.ZIP_STORED,
 }
 
 
 def upload_artifacts(dist_root, config, commit_hash):
-    for artifact in ARTIFACTS[config]:
-        src = os.path.join(artifact.category, artifact.name)
+    # Build and upload a zip file of artifacts
+    zip_fd, zip_filename = tempfile.mkstemp('.zip', 'artifacts_')
+    try:
+        os.close(zip_fd)
+        artifact_zip = zipfile.ZipFile(zip_filename, 'w')
+        for artifact_path in ZIP_ARTIFACTS[config]:
+            _, extension = os.path.splitext(artifact_path)
+            artifact_zip.write(os.path.join(dist_root, artifact_path),
+                               os.path.basename(artifact_path),
+                               FILE_TYPE_COMPRESSION.get(extension, zipfile.ZIP_DEFLATED))
+        artifact_zip.close()
         dst = GS_URL % {
-            'category': artifact.category,
             'config': config,
             'commit_hash': commit_hash,
-            'name': artifact.name,
+            'name': 'artifacts.zip',
         }
-        z = ','.join([ 'mojo', 'dat' ])
-        run(dist_root, ['gsutil', 'cp', '-z', z, src, dst])
+        run(dist_root, ['gsutil', 'cp', zip_filename, dst])
+    finally:
+        os.remove(zip_filename)
+
+    # Upload individual file artifacts
+    for artifact_path in FILE_ARTIFACTS[config]:
+        dst = GS_URL % {
+            'config': config,
+            'commit_hash': commit_hash,
+            'name': os.path.basename(artifact_path),
+        }
+        z = ','.join([ 'mojo', 'so' ])
+        run(dist_root, ['gsutil', 'cp', '-z', z, artifact_path, dst])
 
 
 def main():
@@ -99,10 +146,10 @@ def main():
     # Derived paths:
     dart_sdk_root = os.path.join(engine_root, 'third_party/dart-sdk/dart-sdk')
     pub_path = os.path.join(dart_sdk_root, 'bin/pub')
-    android_dist_root = os.path.join(engine_root, 'out/android_Release/dist')
-    linux_dist_root = os.path.join(engine_root, 'out/Release/dist')
-    sky_engine_package_root = os.path.join(android_dist_root, 'packages/sky_engine/sky_engine')
-    sky_services_package_root = os.path.join(android_dist_root, 'packages/sky_services/sky_services')
+    android_out_root = os.path.join(engine_root, 'out/android_Release')
+    linux_out_root = os.path.join(engine_root, 'out/Release')
+    sky_engine_package_root = os.path.join(android_out_root, 'dist/packages/sky_engine/sky_engine')
+    sky_services_package_root = os.path.join(android_out_root, 'dist/packages/sky_services/sky_services')
     sky_engine_revision_file = os.path.join(sky_engine_package_root, 'lib', 'REVISION')
 
     run(engine_root, ['sky/tools/gn', '--android', '--release'])
@@ -114,8 +161,21 @@ def main():
     with open(sky_engine_revision_file, 'w') as stream:
         stream.write(commit_hash)
 
-    upload_artifacts(android_dist_root, 'android-arm', commit_hash)
-    upload_artifacts(linux_dist_root, 'linux-x64', commit_hash)
+    configs = [('android-arm', android_out_root),
+               ('linux-x64', linux_out_root)]
+
+    # Check for missing artifact files
+    missing_artifacts = []
+    for config, config_root in configs:
+        missing_artifacts.extend(find_missing_artifacts(config, config_root))
+    if missing_artifacts:
+        print ('Build is missing files:\n%s' %
+               '\n'.join('\t%s' % path for path in missing_artifacts))
+        return 1
+
+    # Upload artifacts
+    for config, config_root in configs:
+        upload_artifacts(config_root, config, commit_hash)
 
     run(sky_engine_package_root, [pub_path, 'publish', '--force'])
     run(sky_services_package_root, [pub_path, 'publish', '--force'])
