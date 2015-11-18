@@ -335,8 +335,6 @@ component("base") {
     "message_loop/message_pump_android.h",
     "message_loop/message_pump_default.cc",
     "message_loop/message_pump_default.h",
-    "message_loop/message_pump_glib.cc",
-    "message_loop/message_pump_glib.h",
     "message_loop/message_pump_io_ios.cc",
     "message_loop/message_pump_io_ios.h",
     "message_loop/message_pump_libevent.cc",
@@ -827,14 +825,7 @@ component("base") {
       data += [ "//third_party/llvm-build/Release+Asserts/lib/libstdc++.so.6" ]
     }
 
-    # TODO(brettw) this will need to be parameterized at some point.
-    linux_configs = []
-    if (use_glib) {
-      linux_configs += [ "//build/config/linux:glib" ]
-    }
-
-    configs += linux_configs
-    all_dependent_configs = linux_configs
+    all_dependent_configs = []
 
     # These dependencies are not required on Android, and in the case
     # of xdg_mime must be excluded due to licensing restrictions.
@@ -899,13 +890,6 @@ component("base") {
     ]
 
     set_sources_assignment_filter(sources_assignment_filter)
-  }
-
-  if (!use_glib) {
-    sources -= [
-      "message_loop/message_pump_glib.cc",
-      "message_loop/message_pump_glib.h",
-    ]
   }
 
   if (is_asan || is_lsan || is_msan || is_tsan) {
@@ -1280,7 +1264,6 @@ test("base_unittests") {
     "memory/weak_ptr_unittest.nc",
     "message_loop/message_loop_task_runner_unittest.cc",
     "message_loop/message_loop_unittest.cc",
-    "message_loop/message_pump_glib_unittest.cc",
     "message_loop/message_pump_io_ios_unittest.cc",
     "metrics/bucket_ranges_unittest.cc",
     "metrics/field_trial_unittest.cc",
@@ -1471,14 +1454,6 @@ test("base_unittests") {
     sources -= [ "file_version_info_unittest.cc" ]
     sources += [ "nix/xdg_util_unittest.cc" ]
     deps += [ "//base/test:malloc_wrapper" ]
-
-    if (use_glib) {
-      configs += [ "//build/config/linux:glib" ]
-    }
-  }
-
-  if (!is_linux || use_ozone) {
-    sources -= [ "message_loop/message_pump_glib_unittest.cc" ]
   }
 
   if (is_posix || is_ios) {

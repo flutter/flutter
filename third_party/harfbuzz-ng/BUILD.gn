@@ -172,10 +172,7 @@ if (use_system_harfbuzz) {
     if (is_linux && use_pango && !is_chromeos && !is_official_build &&
         current_cpu != "arm") {
       configs -= [ "//build/config/gcc:symbol_visibility_hidden" ]
-      configs += [
-        "//build/config/linux:freetype2",
-        "//build/config/linux:glib",
-      ]
+      configs += [ "//build/config/linux:freetype2" ]
       sources += [
         "src/hb-ft.cc",
         "src/hb-ft.h",
