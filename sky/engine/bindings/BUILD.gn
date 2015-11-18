@@ -60,7 +60,7 @@ source_set("bindings") {
 
 action("generate_snapshot_bin") {
   deps = [
-    "//dart/runtime/bin:gen_snapshot($host_toolchain)",
+    "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
     ":generate_dart_ui",
   ]
   inputs = [

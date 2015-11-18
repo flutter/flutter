@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//sky/engine/bindings/bindings.gni")
+
 template("flx") {
   bundle_prefix = target_name
   bundle = "$target_gen_dir/${bundle_prefix}.flx"
@@ -48,13 +50,7 @@ template("flx") {
       ]
     }
 
-    deps = []
-
-    if (!is_ios) {
-      # sky_snapshot is used to create a script snapshot. iOS builds use
-      # a precompiled snapshot. So this dependency is redundant.
-      deps += [ "//sky/tools/sky_snapshot($host_toolchain)" ]
-    }
+    deps = [ "//sky/tools/sky_snapshot($dart_host_toolchain)" ]
 
     if (defined(invoker.deps)) {
       deps += invoker.deps
