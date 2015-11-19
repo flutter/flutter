@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'dart:typed_data' show Uint8List;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
 
