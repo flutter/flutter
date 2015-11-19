@@ -9,4 +9,10 @@ mojom("interfaces") {
   sources = [
     "keyboard.mojom",
   ]
+
+  import_dirs = [ get_path_info("../../", "abspath") ]
+
+  deps = [
+    "../../native_viewport/interfaces",
+  ]
 }

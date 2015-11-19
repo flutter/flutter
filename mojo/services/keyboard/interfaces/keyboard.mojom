@@ -5,6 +5,8 @@
 [DartPackage="mojo_services"]
 module keyboard;
 
+import "native_viewport/interfaces/native_viewport.mojom";
+
 struct CompletionData {
   int64 id;
   int32 position;
@@ -48,4 +50,10 @@ interface KeyboardService {
   Hide();
   SetText(string text);
   SetSelection(int32 start, int32 end);
+};
+
+interface KeyboardServiceFactory {
+  CreateKeyboardService(
+      mojo.NativeViewportEventDispatcher& keyEventDispatcher,
+      KeyboardService& serviceRequest);
 };

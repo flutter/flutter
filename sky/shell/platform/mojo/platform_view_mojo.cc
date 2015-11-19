@@ -57,6 +57,9 @@ PlatformViewMojo::~PlatformViewMojo() {
 void PlatformViewMojo::Init(mojo::Shell* shell) {
   mojo::ConnectToService(shell, "mojo:native_viewport_service", &viewport_);
 
+  // Grab the application connector so that we can connect to services later
+  shell->CreateApplicationConnector(GetProxy(&connector_));
+
   mojo::NativeViewportEventDispatcherPtr ptr;
   dispatcher_binding_.Bind(GetProxy(&ptr));
   viewport_->SetEventDispatcher(ptr.Pass());
@@ -85,13 +88,19 @@ void PlatformViewMojo::Init(mojo::Shell* shell) {
                             base::Bind(&RasterizerMojo::OnContextProviderAvailable,
                                        rasterizer->GetWeakPtr(), base::Passed(&context_provider_info))));
 
-  ConnectToEngine(mojo::GetProxy(&sky_engine_));
+  ConnectToEngine(GetProxy(&sky_engine_));
 
 }
 
 void PlatformViewMojo::Run(const mojo::String& url,
                            ServicesDataPtr services,
                            mojo::asset_bundle::AssetBundlePtr bundle) {
+
+  mojo::ServiceProviderPtr services_provided_by_embedder;
+  service_provider_.Bind(GetProxy(&services_provided_by_embedder));
+  service_provider_.AddService<keyboard::KeyboardService>(this);
+  services->services_provided_by_embedder = services_provided_by_embedder.Pass();
+
   sky_engine_->SetServices(services.Pass());
   sky_engine_->RunFromAssetBundle(url, bundle.Pass());
 }
@@ -140,11 +149,38 @@ void PlatformViewMojo::OnEvent(mojo::EventPtr event,
       sky_engine_->OnPointerPacket(packet.Pass());
       break;
     }
+    case mojo::EventType::KEY_PRESSED:
+    case mojo::EventType::KEY_RELEASED:
+      if (key_event_dispatcher_) {
+        key_event_dispatcher_->OnEvent(event.Pass(), callback);
+        return; // key_event_dispatcher_ will invoke callback
+      }
     default:
       break;
   }
 
   callback.Run();
+}
+
+void PlatformViewMojo::Create(
+    mojo::ApplicationConnection* connection,
+    mojo::InterfaceRequest<keyboard::KeyboardService> request) {
+
+  mojo::ServiceProviderPtr keyboard_service_provider;
+  connector_->ConnectToApplication(
+    "mojo:keyboard",
+    GetProxy(&keyboard_service_provider),
+    nullptr);
+
+#if defined(OS_LINUX)
+  keyboard::KeyboardServiceFactoryPtr factory;
+  mojo::ConnectToService(keyboard_service_provider.get(), &factory);
+  factory->CreateKeyboardService(GetProxy(&key_event_dispatcher_), request.Pass());
+#else
+  keyboard_service_provider->ConnectToService(
+    keyboard::KeyboardService::Name_,
+    request.PassMessagePipe());
+#endif
 }
 
 }  // namespace shell
