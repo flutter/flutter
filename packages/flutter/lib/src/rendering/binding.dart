@@ -292,3 +292,8 @@ class FlutterBinding extends HitTestTarget {
 void debugDumpRenderTree() {
   debugPrint(FlutterBinding.instance.renderView.toStringDeep());
 }
+
+/// Prints a textual representation of the entire layer tree
+void debugDumpLayerTree() {
+  debugPrint(FlutterBinding.instance.renderView.layer.toStringDeep());
+}

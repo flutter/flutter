@@ -6,6 +6,8 @@ import 'dart:ui' as ui;
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:vector_math/vector_math_64.dart';
+
 /// Causes each RenderBox to paint a box around its bounds.
 bool debugPaintSizeEnabled = false;
 
@@ -35,6 +37,12 @@ int debugPaintPointersColorValue = 0x00BBBB;
 
 /// The color to use when painting RenderError boxes in checked mode.
 ui.Color debugErrorBoxColor = const ui.Color(0xFFFF0000);
+
+List<String> debugDescribeTransform(Matrix4 transform) {
+  List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
+  matrix.removeLast();
+  return matrix;
+}
 
 /// Prints a message to the console, which you can access using the "flutter"
 /// tool's "logs" command ("flutter logs").

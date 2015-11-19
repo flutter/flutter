@@ -74,6 +74,10 @@ class PaintingContext {
     assert(child.needsPaint);
     child._layer ??= new ContainerLayer();
     child._layer.removeAllChildren();
+    assert(() {
+      child._layer.debugOwner = child.debugOwner ?? child.runtimeType;
+      return true;
+    });
     PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
     childContext._stopRecordingIfNeeded();
@@ -104,6 +108,10 @@ class PaintingContext {
     } else {
       assert(child._layer != null);
       child._layer.detach();
+      assert(() {
+        child._layer.debugOwner = child.debugOwner ?? child.runtimeType;
+        return true;
+      });
     }
     _appendLayer(child._layer, offset);
   }
@@ -445,7 +453,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Override in subclasses with children and call the visitor for each child
   void visitChildren(RenderObjectVisitor visitor) { }
 
-  dynamic debugOwner = '';
+  dynamic debugOwner;
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     debugPrint('-- EXCEPTION --');
     debugPrint('The following exception was raised during $method():');
@@ -453,7 +461,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     debugPrint('Stack trace:');
     debugPrint('$stack');
     debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
-    if (debugOwner != '')
+    if (debugOwner != null)
       debugPrint('That RenderObject had the following owner:\n$debugOwner');
     if (debugRenderingExceptionHandler != null)
       debugRenderingExceptionHandler(this, method, exception, stack);
@@ -1104,10 +1112,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// per string. Subclasses should override this to have their information
   /// included in toStringDeep().
   void debugDescribeSettings(List<String> settings) {
+    if (debugOwner != null)
+      settings.add('owner: $debugOwner');
     settings.add('parentData: $parentData');
     settings.add('constraints: $constraints');
-    if (debugOwner != '')
-      settings.add('owner: $debugOwner');
   }
 
   /// Returns a string describing the current node's descendants. Each line of
