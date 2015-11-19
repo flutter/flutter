@@ -89,7 +89,7 @@ class RunMojoCommand extends FlutterCommand {
 
     if (argResults['android']) {
       args.add('--android');
-      final String cloudStorageBaseUrl = ArtifactStore.getCloudStorageBaseUrl('shell', 'android-arm');
+      final String cloudStorageBaseUrl = ArtifactStore.getCloudStorageBaseUrl('android-arm');
       final String appPath = _makePathAbsolute(bundlePath);
       final String appName = path.basename(appPath);
       final String appDir = path.dirname(appPath);
