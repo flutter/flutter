@@ -32,18 +32,8 @@ class _UrlFetcher implements ImageProvider {
     return await decodeImageFromDataPipe(response.body);
   }
 
-  bool operator ==(o) => o is _UrlFetcher && _url == o._url;
+  bool operator ==(other) => other is _UrlFetcher && _url == other._url;
   int get hashCode => _url.hashCode;
-}
-
-class RawImageProvider implements ImageProvider {
-  final Uint8List bytes;
-
-  RawImageProvider(this.bytes);
-
-  Future<ui.Image> loadImage() async {
-    return await decodeImageFromList(bytes);
-  }
 }
 
 class _ImageCache {
