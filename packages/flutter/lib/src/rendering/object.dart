@@ -44,7 +44,9 @@ class PaintingCanvas extends Canvas {
   // TODO(ianh): Just use ui.Canvas everywhere instead
 }
 
-/// A place to paint
+typedef void PaintingContextCallback(PaintingContext context, Offset offset);
+
+/// A place to paint.
 ///
 /// Rather than holding a canvas directly, render objects paint using a painting
 /// context. The painting context has a canvas, which receives the
@@ -57,190 +59,211 @@ class PaintingCanvas extends Canvas {
 /// not hold a reference to the canvas across operations that might paint
 /// child render objects.
 class PaintingContext {
-  /// Construct a painting context at a given offset with the given bounds
-  PaintingContext.withOffset(Offset offset, Rect paintBounds) {
-    _containerLayer = new ContainerLayer(offset: offset);
-    _startRecording(paintBounds);
+  PaintingContext._(this._containerLayer, this._paintBounds);
+
+  final ContainerLayer _containerLayer;
+  final Rect _paintBounds;
+
+  /// Repaint the given render object.
+  ///
+  /// The render object must have a composited layer and must be in need of
+  /// painting. The render object's layer is re-used, along with any layers in
+  /// the subtree that don't need to be repainted.
+  static void repaintCompositedChild(RenderObject child) {
+    assert(child.hasLayer);
+    assert(child.needsPaint);
+    child._layer ??= new ContainerLayer();
+    child._layer.removeAllChildren();
+    PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
+    child._paintWithContext(childContext, Offset.zero);
+    childContext._stopRecordingIfNeeded();
   }
 
-  /// Construct a painting context for painting into the given layer with the given bounds
-  PaintingContext.withLayer(ContainerLayer containerLayer, Rect paintBounds) {
-    _containerLayer = containerLayer;
-    _startRecording(paintBounds);
+  /// Paint a child render object.
+  ///
+  /// If the child has its own composited layer, the child will be composited
+  /// into the layer subtree associated with this painting context. Otherwise,
+  /// the child will be painted into the current PictureLayer for this context.
+  void paintChild(RenderObject child, Offset offset) {
+    if (child.hasLayer) {
+      _stopRecordingIfNeeded();
+      _compositeChild(child, offset);
+    } else {
+      child._paintWithContext(this, offset);
+    }
   }
 
-  /// A backdoor for testing that lets the test set a specific canvas
-  PaintingContext.forTesting(this._canvas);
+  void _compositeChild(RenderObject child, Offset offset) {
+    assert(!_isRecording);
+    assert(child.hasLayer);
 
-  ContainerLayer _containerLayer;
-  /// The layer contain all the composting layers that will be used for this context
-  ContainerLayer get containerLayer => _containerLayer;
+    // Create a layer for our child, and paint the child into it.
+    if (child.needsPaint) {
+      repaintCompositedChild(child);
+    } else {
+      assert(child._layer != null);
+      child._layer.detach();
+    }
+    _appendLayer(child._layer, offset);
+  }
 
+  void _appendLayer(Layer layer, Offset offset) {
+    assert(!_isRecording);
+    layer.offset = offset;
+    _containerLayer.append(layer);
+  }
+
+  bool get _isRecording {
+    final bool hasCanvas = (_canvas != null);
+    assert(() {
+      if (hasCanvas) {
+        assert(_currentLayer != null);
+        assert(_recorder != null);
+        assert(_canvas != null);
+      } else {
+        assert(_currentLayer == null);
+        assert(_recorder == null);
+        assert(_canvas == null);
+      }
+      return true;
+    });
+    return hasCanvas;
+  }
+
+  // Recording state
   PictureLayer _currentLayer;
   ui.PictureRecorder _recorder;
   PaintingCanvas _canvas;
-  /// The canvas on which to paint
-  ///
-  /// This getter can return a different canvas object after painting child
-  /// render objects using this canvas because draw operations before and after
-  /// a child might need to be recorded in separate compositing layers.
-  PaintingCanvas get canvas => _canvas;
 
-  void _startRecording(Rect paintBounds) {
-    assert(_currentLayer == null);
-    assert(_recorder == null);
-    assert(_canvas == null);
-    _currentLayer = new PictureLayer(paintBounds: paintBounds);
+  /// The canvas on which to paint.
+  ///
+  /// The current canvas can change whenever you paint a child using this
+  /// context, which means it's fragile to hold a reference to the canvas
+  /// returned by this getter.
+  PaintingCanvas get canvas {
+    if (_canvas == null)
+      _startRecording();
+    return _canvas;
+  }
+
+  void _startRecording() {
+    assert(!_isRecording);
+    _currentLayer = new PictureLayer(paintBounds: _paintBounds);
     _recorder = new ui.PictureRecorder();
-    _canvas = new PaintingCanvas(_recorder, paintBounds);
+    _canvas = new PaintingCanvas(_recorder, _paintBounds);
     _containerLayer.append(_currentLayer);
   }
 
-  /// Stop recording draw operations into the current compositing layer
-  void endRecording() {
-    assert(_currentLayer != null);
-    assert(_recorder != null);
-    assert(_canvas != null);
+  void _stopRecordingIfNeeded() {
+    if (!_isRecording)
+      return;
     _currentLayer.picture = _recorder.endRecording();
     _currentLayer = null;
     _recorder = null;
     _canvas = null;
   }
 
-  /// Whether the canvas is in a state that permits drawing the given child
-  bool debugCanPaintChild(RenderObject child) {
-    // You need to use layers if you are applying transforms, clips,
-    // or similar, to a child. To do so, use the paintChildWith*()
-    // methods below.
-    // (commented out for now because we haven't ported everything yet)
-    assert(canvas.getSaveCount() == 1 || !child.needsCompositing);
-    return true;
-  }
-
-  /// Paint a child render object at the given position
-  ///
-  /// If the child needs compositing, a new composited layer will be created
-  /// and inserted into the containerLayer. If the child does not require
-  /// compositing, the child will be painted into the current canvas.
-  ///
-  /// Note: After calling this function, the current canvas might change.
-  void paintChild(RenderObject child, Point childPosition) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.hasLayer) {
-      insertChild(child, childOffset);
-    } else {
-      compositeChild(child, childOffset: childOffset, parentLayer: _containerLayer);
-    }
-  }
-
-  void paintStatistics(int optionsMask, int rasterizerThreshold, Offset offset, Size size) {
-    StatisticsLayer statsLayer = new StatisticsLayer(
-      offset: offset,
-      paintBounds: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
-      optionsMask : optionsMask,
-      rasterizerThreshold : rasterizerThreshold
-    );
-    _containerLayer.append(statsLayer);
-  }
-
-  // Below we have various variants of the paintChild() method, which
-  // do additional work, such as clipping or transforming, at the same
-  // time as painting the children.
-
-  // If none of the descendants require compositing, then these don't
-  // need to use a new layer, because at no point will any of the
-  // children introduce a new layer of their own. In that case, we
-  // just use regular canvas commands to do the work.
-
-  // If at least one of the descendants requires compositing, though,
-  // we introduce a new layer to do the work, so that when the
-  // children are split into a new layer, the work (e.g. clip) is not
-  // lost, as it would if we didn't introduce a new layer.
-
   static final Paint _disableAntialias = new Paint()..isAntiAlias = false;
 
-  /// Paint a child with a rectangular clip
+  /// Push a statistics overlay.
   ///
-  /// If the child needs compositing, the clip will be applied by a
-  /// compositing layer. Otherwise, the clip will be applied by the canvas.
+  /// Statistics overlays are always composited because they're drawn by the
+  /// compositor.
+  void pushStatistics(Offset offset, int optionsMask, int rasterizerThreshold, Size size) {
+    _stopRecordingIfNeeded();
+    StatisticsLayer statisticsLayer = new StatisticsLayer(
+      paintBounds: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
+      optionsMask: optionsMask,
+      rasterizerThreshold: rasterizerThreshold
+    );
+    _appendLayer(statisticsLayer, offset);
+  }
+
+  /// Push a rectangular clip rect.
   ///
-  /// Note: clipRect is in the parent's coordinate space
-  void paintChildWithClipRect(RenderObject child, Point childPosition, Rect clipRect) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.needsCompositing) {
-      canvas.save();
-      canvas.clipRect(clipRect);
-      insertChild(child, childOffset);
-      canvas.restore();
+  /// This function will call painter synchronously with a painting context that
+  /// is clipped by the given clip. The given clip should not incorporate the
+  /// painting offset.
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
+    if (needsCompositing) {
+      _stopRecordingIfNeeded();
+      ClipRectLayer clipLayer = new ClipRectLayer(clipRect: clipRect);
+      _appendLayer(clipLayer, offset);
+      PaintingContext childContext = new PaintingContext._(clipLayer, clipRect);
+      painter(childContext, Offset.zero);
+      childContext._stopRecordingIfNeeded();
     } else {
-      ClipRectLayer clipLayer = new ClipRectLayer(offset: childOffset, clipRect: clipRect);
-      _containerLayer.append(clipLayer);
-      compositeChild(child, parentLayer: clipLayer);
+      canvas.save();
+      canvas.clipRect(clipRect.shift(offset));
+      painter(this, offset);
+      canvas.restore();
     }
   }
 
-  /// Paint a child with a rounded-rectangular clip
+  /// Push a rounded-rect clip rect.
   ///
-  /// If the child needs compositing, the clip will be applied by a
-  /// compositing layer. Otherwise, the clip will be applied by the canvas.
-  ///
-  /// Note: clipRRect is in the parent's coordinate space
-  void paintChildWithClipRRect(RenderObject child, Point childPosition, Rect bounds, ui.RRect clipRRect) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, _disableAntialias);
+  /// This function will call painter synchronously with a painting context that
+  /// is clipped by the given clip. The given clip should not incorporate the
+  /// painting offset.
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, ui.RRect clipRRect, PaintingContextCallback painter) {
+    if (needsCompositing) {
+      _stopRecordingIfNeeded();
+      ClipRRectLayer clipLayer = new ClipRRectLayer(bounds: bounds, clipRRect: clipRRect);
+      _appendLayer(clipLayer, offset);
+      PaintingContext childContext = new PaintingContext._(clipLayer, bounds);
+      painter(childContext, Offset.zero);
+      childContext._stopRecordingIfNeeded();
+    } else {
+      canvas.saveLayer(bounds.shift(offset), _disableAntialias);
+      // TODO(abarth): Remove this translation once RRect.shift works again.
+      canvas.translate(offset.dx, offset.dy);
       canvas.clipRRect(clipRRect);
-      insertChild(child, childOffset);
+      painter(this, Offset.zero);
       canvas.restore();
-    } else {
-      ClipRRectLayer clipLayer = new ClipRRectLayer(offset: childOffset, bounds: bounds, clipRRect: clipRRect);
-      _containerLayer.append(clipLayer);
-      compositeChild(child, parentLayer: clipLayer);
     }
   }
 
-  /// Paint a child with a clip path
+  /// Push a path clip.
   ///
-  /// If the child needs compositing, the clip will be applied by a
-  /// compositing layer. Otherwise, the clip will be applied by the canvas.
-  ///
-  /// Note: bounds and clipPath are in the parent's coordinate space
-  void paintChildWithClipPath(RenderObject child, Point childPosition, Rect bounds, Path clipPath) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, _disableAntialias);
-      canvas.clipPath(clipPath);
-      canvas.translate(childOffset.dx, childOffset.dy);
-      insertChild(child, Offset.zero);
-      canvas.restore();
+  /// This function will call painter synchronously with a painting context that
+  /// is clipped by the given clip. The given clip should not incorporate the
+  /// painting offset.
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+    if (needsCompositing) {
+      _stopRecordingIfNeeded();
+      ClipPathLayer clipLayer = new ClipPathLayer(bounds: bounds, clipPath: clipPath);
+      _appendLayer(clipLayer, offset);
+      PaintingContext childContext = new PaintingContext._(clipLayer, bounds);
+      painter(childContext, Offset.zero);
+      childContext._stopRecordingIfNeeded();
     } else {
-      ClipPathLayer clipLayer = new ClipPathLayer(offset: childOffset, bounds: bounds, clipPath: clipPath);
-      _containerLayer.append(clipLayer);
-      compositeChild(child, parentLayer: clipLayer);
+      canvas.saveLayer(bounds.shift(offset), _disableAntialias);
+      canvas.clipPath(clipPath.shift(offset));
+      painter(this, offset);
+      canvas.restore();
     }
   }
 
-  /// Paint a child with a transform
+  /// Push a transform.
   ///
-  /// If the child needs compositing, the transform will be applied by a
-  /// compositing layer. Otherwise, the transform will be applied by the canvas.
-  void paintChildWithTransform(RenderObject child, Point childPosition, Matrix4 transform) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.needsCompositing) {
+  /// This function will call painter synchronously with a painting context that
+  /// is transformed by the given transform. The given transform should not
+  /// incorporate the painting offset.
+  void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+    if (needsCompositing) {
+      _stopRecordingIfNeeded();
+      TransformLayer transformLayer = new TransformLayer(transform: transform);
+      _appendLayer(transformLayer, offset);
+      PaintingContext childContext = new PaintingContext._(transformLayer, _paintBounds);
+      painter(childContext, Offset.zero);
+      childContext._stopRecordingIfNeeded();
+    } else {
+      Matrix4 offsetMatrix = new Matrix4.translationValues(offset.dx, offset.dy, 0.0);
+      Matrix4 trasnformWithOffset = offsetMatrix * transform;
       canvas.save();
-      canvas.translate(childOffset.dx, childOffset.dy);
-      canvas.concat(transform.storage);
-      insertChild(child, Offset.zero);
+      canvas.concat(trasnformWithOffset.storage);
+      painter(this, Offset.zero);
       canvas.restore();
-    } else {
-      TransformLayer transformLayer = new TransformLayer(offset: childOffset, transform: transform);
-      _containerLayer.append(transformLayer);
-      compositeChild(child, parentLayer: transformLayer);
     }
   }
 
@@ -251,29 +274,23 @@ class PaintingContext {
       ..isAntiAlias = false;
   }
 
-  /// Paint a child with an opacity
+  /// Push an opacity layer.
   ///
-  /// If the child needs compositing, the blending operation will be applied by
-  /// a compositing layer. Otherwise, the blending operation will be applied by
-  /// the canvas.
-  void paintChildWithOpacity(RenderObject child,
-                             Point childPosition,
-                             Rect bounds,
-                             int alpha) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, _getPaintForAlpha(alpha));
-      canvas.translate(childOffset.dx, childOffset.dy);
-      insertChild(child, Offset.zero);
-      canvas.restore();
+  /// This function will call painter synchronously with a painting context that
+  /// will be blended with the given alpha value.
+  void pushOpacity(bool needsCompositing, Offset offset, Rect bounds, int alpha, PaintingContextCallback painter) {
+    if (needsCompositing) {
+      _stopRecordingIfNeeded();
+      OpacityLayer opacityLayer = new OpacityLayer(bounds: bounds, alpha: alpha);
+      _appendLayer(opacityLayer, offset);
+      PaintingContext childContext = new PaintingContext._(opacityLayer, bounds);
+      painter(childContext, Offset.zero);
+      childContext._stopRecordingIfNeeded();
     } else {
-      OpacityLayer paintLayer = new OpacityLayer(
-          offset: childOffset,
-          bounds: bounds,
-          alpha: alpha);
-      _containerLayer.append(paintLayer);
-      compositeChild(child, parentLayer: paintLayer);
+      // TODO(abarth): pushOpacity should require bounds.
+      canvas.saveLayer(bounds?.shift(offset), _getPaintForAlpha(alpha));
+      painter(this, offset);
+      canvas.restore();
     }
   }
 
@@ -285,77 +302,20 @@ class PaintingContext {
      ..shader = shaderCallback(bounds);
   }
 
-  void paintChildWithShaderMask(RenderObject child,
-                                Point childPosition,
-                                Rect bounds,
-                                ShaderCallback shaderCallback,
-                                TransferMode transferMode) {
-    assert(debugCanPaintChild(child));
-    final Offset childOffset = childPosition.toOffset();
-    if (!child.needsCompositing) {
-      canvas.saveLayer(bounds, new Paint());
-      canvas.translate(childOffset.dx, childOffset.dy);
-      insertChild(child, Offset.zero);
-      Paint shaderPaint = _getPaintForShaderMask(bounds, shaderCallback, transferMode);
-      canvas.drawRect(Offset.zero & new Size(bounds.width, bounds.height), shaderPaint);
-      canvas.restore();
-    } else {
-      // TODO(hansmuller) support compositing ShaderMasks
-      assert('Support for compositing ShaderMasks is TBD' is String);
-    }
-  }
-
-  /// Instructs the child to draw itself onto this context at the given offset
+  /// Push a shader mask.
   ///
-  /// Do not call directly. This function is visible so that it can be
-  /// overridden in tests.
-  void insertChild(RenderObject child, Offset offset) {
-    child._paintWithContext(this, offset);
-  }
-
-  /// Instructs the child to paint itself into a new composited layer using this context
+  /// This function will call painter synchronously with a painting context that
+  /// will be masked with the given shader.
   ///
-  /// Do not call directly. This function is visible so that it can be
-  /// overridden in tests.
-  void compositeChild(RenderObject child, { Offset childOffset: Offset.zero, ContainerLayer parentLayer }) {
-    // This ends the current layer and starts a new layer for the
-    // remainder of our rendering. It also creates a new layer for the
-    // child, and inserts that layer into the given parentLayer, which
-    // must either be our current layer's parent layer, or at least
-    // must have our current layer's parent layer as an ancestor.
-    final PictureLayer originalLayer = _currentLayer;
-    assert(() {
-      assert(parentLayer != null);
-      assert(originalLayer != null);
-      assert(originalLayer.parent != null);
-      ContainerLayer ancestor = parentLayer;
-      while (ancestor != null && ancestor != originalLayer.parent)
-        ancestor = ancestor.parent;
-      assert(ancestor == originalLayer.parent);
-      assert(originalLayer.parent == _containerLayer);
-      return true;
-    });
-
-    // End our current layer.
-    endRecording();
-
-    // Create a layer for our child, and paint the child into it.
-    if (child.needsPaint || !child.hasLayer) {
-      PaintingContext newContext = new PaintingContext.withOffset(childOffset, child.paintBounds);
-      child._layer = newContext.containerLayer;
-      child._paintWithContext(newContext, Offset.zero);
-      newContext.endRecording();
-    } else {
-      assert(child._layer != null);
-      child._layer.detach();
-      child._layer.offset = childOffset;
-    }
-    parentLayer.append(child._layer);
-
-    // Start a new layer for anything that remains of our own paint.
-    _startRecording(originalLayer.paintBounds);
+  /// WARNING: This function does not yet support compositing.
+  void pushShaderMask(bool needsCompositing, Offset offset, Rect bounds, ShaderCallback shaderCallback, TransferMode transferMode, PaintingContextCallback painter) {
+    assert(!needsCompositing); // TODO(abarth): Implement compositing for shader masks.
+    canvas.saveLayer(bounds.shift(offset), _disableAntialias);
+    painter(this, offset);
+    Paint shaderPaint = _getPaintForShaderMask(bounds, shaderCallback, transferMode);
+    canvas.drawRect(bounds, shaderPaint);
+    canvas.restore();
   }
-
 }
 
 /// An encapsulation of a renderer and a paint() method.
@@ -972,7 +932,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._needsPaint);
         if (node.attached)
-          node._repaint();
+          PaintingContext.repaintCompositedChild(node);
       };
       assert(_nodesNeedingPaint.length == 0);
     } finally {
@@ -996,15 +956,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _layer = rootLayer;
     assert(_needsPaint);
     _nodesNeedingPaint.add(this);
-  }
-  void _repaint() {
-    assert(hasLayer);
-    assert(_layer != null);
-    _layer.removeAllChildren();
-    PaintingContext context = new PaintingContext.withLayer(_layer, paintBounds);
-    _layer = context._containerLayer;
-    _paintWithContext(context, Offset.zero);
-    context.endRecording();
   }
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(!_debugDoingThisPaint);

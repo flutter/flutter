@@ -582,8 +582,8 @@ void paintImage({
   ImageFit fit,
   repeat: ImageRepeat.noRepeat,
   Rect centerSlice,
-  double positionX: 0.5,
-  double positionY: 0.5
+  double alignX,
+  double alignY
 }) {
   Size outputSize = rect.size;
   Size inputSize = new Size(image.width.toDouble(), image.height.toDouble());
@@ -644,8 +644,8 @@ void paintImage({
   Paint paint = new Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
-  double dx = (outputSize.width - destinationSize.width) * positionX;
-  double dy = (outputSize.height - destinationSize.height) * positionY;
+  double dx = (outputSize.width - destinationSize.width) * (alignX ?? 0.5);
+  double dy = (outputSize.height - destinationSize.height) * (alignY ?? 0.5);
   Point destinationPosition = rect.topLeft + new Offset(dx, dy);
   Rect destinationRect = destinationPosition & destinationSize;
   if (centerSlice == null)

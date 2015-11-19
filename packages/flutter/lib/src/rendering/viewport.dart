@@ -146,12 +146,15 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Offset roundedScrollOffset = _scrollOffsetRoundedToIntegerDevicePixels;
-      bool _needsClip = offset < Offset.zero ||
-                        !(offset & size).contains(((offset - roundedScrollOffset) & child.size).bottomRight);
-      if (_needsClip)
-        context.paintChildWithClipRect(child, (offset - roundedScrollOffset).toPoint(), offset & size);
-      else
-        context.paintChild(child, (offset - roundedScrollOffset).toPoint());
+      bool _needsClip = offset < Offset.zero
+          || !(offset & size).contains(((offset - roundedScrollOffset) & child.size).bottomRight);
+      if (_needsClip) {
+        context.pushClipRect(needsCompositing, offset, Point.origin & size, (PaintingContext context, Offset offset) {
+          context.paintChild(child, offset - roundedScrollOffset);
+        });
+      } else {
+        context.paintChild(child, offset - roundedScrollOffset);
+      }
     }
   }
 

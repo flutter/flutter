@@ -560,7 +560,7 @@ class AndroidDevice extends Device {
         _logging.warning(
           'Unexpected failure parsing device information from adb output:\n'
           '$line\n'
-          'Please report a bug at http://flutter.io/');
+          'Please report a bug at https://github.com/flutter/flutter/issues/new');
       }
     }
     return devices;

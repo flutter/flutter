@@ -54,6 +54,6 @@ class RenderStatisticsBox extends RenderBox {
   }
 
   void paint(PaintingContext context, Offset offset) {
-    context.paintStatistics(optionsMask, rasterizerThreshold, offset, size);
+    context.pushStatistics(offset, optionsMask, rasterizerThreshold, size);
   }
 }

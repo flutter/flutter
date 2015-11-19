@@ -282,7 +282,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
     super.paint(context, offset);
     RenderSector child = firstChild;
     while (child != null) {
-      context.paintChild(child, offset.toPoint());
+      context.paintChild(child, offset);
       final SectorChildListParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
     }
@@ -388,7 +388,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     RenderSector child = firstChild;
     while (child != null) {
       assert(child.parentData is SectorChildListParentData);
-      context.paintChild(child, offset.toPoint());
+      context.paintChild(child, offset);
       final SectorChildListParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
     }
@@ -470,7 +470,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     if (child != null) {
       Rect bounds = offset & size;
       // we move the offset to the center of the circle for the RenderSectors
-      context.paintChild(child, bounds.center);
+      context.paintChild(child, bounds.center.toOffset());
     }
   }
 
