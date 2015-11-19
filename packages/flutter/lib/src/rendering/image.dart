@@ -24,6 +24,7 @@ class RenderImage extends RenderBox {
     double height,
     ColorFilter colorFilter,
     ImageFit fit,
+    FractionalOffset alignment,
     repeat: ImageRepeat.noRepeat,
     Rect centerSlice
   }) : _image = image,
@@ -31,6 +32,7 @@ class RenderImage extends RenderBox {
       _height = height,
       _colorFilter = colorFilter,
       _fit = fit,
+      _alignment = alignment,
       _repeat = repeat,
       _centerSlice = centerSlice;
 
@@ -83,6 +85,16 @@ class RenderImage extends RenderBox {
     if (value == _fit)
       return;
     _fit = value;
+    markNeedsPaint();
+  }
+
+  /// How to align the image within its bounds.
+  FractionalOffset get alignment => _alignment;
+  FractionalOffset _alignment;
+  void set alignment (FractionalOffset value) {
+    if (value == _alignment)
+      return;
+    _alignment = value;
     markNeedsPaint();
   }
 
@@ -194,6 +206,8 @@ class RenderImage extends RenderBox {
       image: _image,
       colorFilter: _colorFilter,
       fit: _fit,
+      alignX: _alignment?.x,
+      alignY: _alignment?.y,
       centerSlice: _centerSlice,
       repeat: _repeat
     );
