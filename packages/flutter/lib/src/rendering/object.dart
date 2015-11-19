@@ -158,6 +158,16 @@ class PaintingContext {
   void _stopRecordingIfNeeded() {
     if (!_isRecording)
       return;
+    assert(() {
+      if (debugPaintLayerBordersEnabled) {
+        Paint paint = new Paint()
+          ..style = ui.PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = debugPaintLayerBordersColor;
+        canvas.drawRect(_paintBounds, paint);
+      }
+      return true;
+    });
     _currentLayer.picture = _recorder.endRecording();
     _currentLayer = null;
     _recorder = null;
