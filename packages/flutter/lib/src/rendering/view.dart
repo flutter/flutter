@@ -6,9 +6,11 @@ import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
 
@@ -126,6 +128,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       ui.Scene scene = builder.build();
       ui.window.render(scene);
       scene.dispose();
+      assert(() {
+        if (debugEnableRepaintRainbox)
+          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(debugCurrentRepaintColor.h + debugRepaintRainboxHueIncrement);
+        return true;
+      });
     } finally {
       Timeline.finishSync();
     }

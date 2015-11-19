@@ -14,6 +14,7 @@ library painting;
 
 export 'src/painting/basic_types.dart';
 export 'src/painting/box_painter.dart';
+export 'src/painting/colors.dart';
 export 'src/painting/shadows.dart';
 export 'src/painting/text_painter.dart';
 export 'src/painting/text_style.dart';
