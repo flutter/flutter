@@ -202,7 +202,9 @@ class _DrawerControllerState extends State<_DrawerController> {
               widthFactor: _performance.progress,
               child: new SizeObserver(
                 onSizeChanged: _handleSizeChanged,
-                child: config.child
+                child: new ForcedLayer(
+                  child: config.child
+                )
               )
             )
           )
