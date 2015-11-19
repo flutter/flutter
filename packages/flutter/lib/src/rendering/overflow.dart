@@ -131,7 +131,7 @@ class RenderOverflowBox extends RenderBox with RenderObjectWithChildMixin<Render
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChild(child, offset.toPoint());
+      context.paintChild(child, offset);
   }
 
   void debugDescribeSettings(List<String> settings) {
@@ -198,7 +198,7 @@ class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<R
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChild(child, offset.toPoint());
+      context.paintChild(child, offset);
   }
 }
 

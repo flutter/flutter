@@ -287,6 +287,8 @@ class BoxHitTestEntry extends HitTestEntry {
 
 /// Parent data used by [RenderBox] and its subclasses
 class BoxParentData extends ParentData {
+  // TODO(abarth): Switch to using an Offset rather than a Point here. This
+  //               value is really the offset from the parent.
   Point _position = Point.origin;
   /// The point at which to paint the child in the parent's coordinate system
   Point get position => _position;
@@ -294,6 +296,7 @@ class BoxParentData extends ParentData {
     assert(RenderObject.debugDoingLayout);
     _position = value;
   }
+  Offset get offset => _position.toOffset();
   String toString() => 'position=$position';
 }
 
@@ -771,7 +774,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     RenderBox child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      context.paintChild(child, childParentData.position + offset);
+      context.paintChild(child, childParentData.offset + offset);
       child = childParentData.nextSibling;
     }
   }

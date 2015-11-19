@@ -489,6 +489,6 @@ class RenderIndexedStack extends RenderStackBase {
       return;
     RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
-    context.paintChild(child, childParentData.position + offset);
+    context.paintChild(child, childParentData.offset + offset);
   }
 }

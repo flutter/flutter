@@ -56,7 +56,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       final BoxParentData childParentData = child.parentData;
-      context.paintChild(child, childParentData.position + offset);
+      context.paintChild(child, childParentData.offset + offset);
     }
   }
 
