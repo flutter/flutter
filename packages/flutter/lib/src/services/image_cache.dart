@@ -19,21 +19,21 @@ abstract class ImageProvider {
 }
 
 class _UrlFetcher implements ImageProvider {
-  final String url;
+  final String _url;
 
-  _UrlFetcher(this.url);
+  _UrlFetcher(this._url);
 
   Future<ui.Image> loadImage() async {
-    UrlResponse response = await fetchUrl(url);
+    UrlResponse response = await fetchUrl(_url);
     if (response.statusCode >= 400) {
-      print("Failed (${response.statusCode}) to load image $url");
+      print("Failed (${response.statusCode}) to load image $_url");
       return null;
     }
     return await decodeImageFromDataPipe(response.body);
   }
 
-  bool operator ==(o) => o is _UrlFetcher && url == o.url;
-  int get hashCode => url.hashCode;
+  bool operator ==(o) => o is _UrlFetcher && _url == o._url;
+  int get hashCode => _url.hashCode;
 }
 
 class RawImageProvider implements ImageProvider {
