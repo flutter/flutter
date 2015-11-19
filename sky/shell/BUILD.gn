@@ -299,6 +299,7 @@ if (is_android) {
       "//mojo/common",
       "//mojo/edk/system",
       "//sky/services/ns_net",
+      "//ui/gl",
       ":common",
       ":gpu_direct",
       ":testing",
