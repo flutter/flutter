@@ -39,9 +39,7 @@ abstract class OverlayRoute extends Route {
 
   void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
     for (WidgetBuilder builder in builders) {
-      _overlayEntries.add(new OverlayEntry(builder: (BuildContext context) {
-        return new ForcedLayer(child: builder(context));
-      }));
+      _overlayEntries.add(new OverlayEntry(builder: builder));
       overlay?.insert(_overlayEntries.last, above: insertionPoint);
       insertionPoint = _overlayEntries.last;
     }
@@ -170,6 +168,7 @@ class _ModalScope extends StatusTransitionComponent {
         )
       );
     }
+    contents = new RepaintBoundary(child: contents);
     ModalPosition position = route.position;
     if (position == null)
       return contents;
